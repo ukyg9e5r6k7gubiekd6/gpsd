@@ -398,13 +398,11 @@ static void decode_sirf(struct gps_session_t *session,
 	else if (session->gNMEAdata.status)
 	    session->gNMEAdata.mode = MODE_2D;
 	REFRESH(session->gNMEAdata.mode_stamp);
-	gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
-		    navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
+	gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+		    navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
-	gpsd_report(5, "MID 2 GPS Week: %d  TOW: %d\n", getw(22), getl(24));
 	extract_time(session, getw(22), getl(24)/100.0);
-	gpsd_report(5, "MID 2 UTC: %s\n", session->gNMEAdata.utc);
 	gpsd_binary_fix_dump(session, buf2);
 	/* fix quality data */
 	session->gNMEAdata.hdop = getb(20)/5.0;
@@ -447,20 +445,22 @@ static void decode_sirf(struct gps_session_t *session,
 	session->gNMEAdata.satellites = st;
 	REFRESH(session->gNMEAdata.satellite_stamp);
 	gpsd_binary_satellite_dump(session, buf2);
+	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
 	break;
 
     case 0x09:		/* CPU Throughput */
 #ifdef __UNUSED__
 	gpsd_report(4, 
-		    "SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
+		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
 		    (float)getw(1)/186, (float)getw(3)/186, 
 		    (float)getw(5)/186, getw(7));
 #endif /* UNUSED */
     	break;
 
     case 0x06:		/* Software Version String */
-	gpsd_report(4, "Firmware version: %s\n", session->outbuffer+5);
+	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
+		    session->outbuffer+5);
 	fv = atof(session->outbuffer+5);
 	if (fv < 231) {
 	    session->driverstate |= SIRF_LT_231;
@@ -474,15 +474,15 @@ static void decode_sirf(struct gps_session_t *session,
 	break;
 
     case 0x0a:		/* Error ID Data */
-	gpsd_report(4, "Error ID type %d\n", getw(1));
+	gpsd_report(4, "EID 0x0a: Error ID type %d\n", getw(1));
 	break;
 
     case 0x0b:		/* Command Acknowledgement */
-	gpsd_report(4, "ACK %02x\n",getb(1));
+	gpsd_report(4, "ACK 0x0b: %02x\n",getb(1));
     	break;
 
     case 0x0c:		/* Command NAcknowledgement */
-	gpsd_report(4, "NAK %02x\n",getb(1));
+	gpsd_report(4, "NAK 0x0c: %02x\n",getb(1));
     	break;
 
     case 0x0d:		/* Visible List */
@@ -522,7 +522,7 @@ static void decode_sirf(struct gps_session_t *session,
 	    else if (session->gNMEAdata.status)
 		session->gNMEAdata.mode = MODE_2D;
 	    REFRESH(session->gNMEAdata.mode_stamp);
-	    gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
+	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
 	    /*
 	     * Compute UTC from extended GPS time.  The protocol reference
@@ -604,16 +604,16 @@ static void sirfbin_initializer(struct gps_session_t *session)
     }
     /* do this every time*/
     {
-	//u_int8_t ratecontrol[] = {0xa0, 0xa2, 0x00, 0x08,
-	//			 0xa6, 0x00, 0x04, 0x05,
-	//			 0x00, 0x00, 0x00, 0x00,
-	//			 0x00, 0x00, 0xb0, 0xb3};
+	u_int8_t ratecontrol[] = {0xa0, 0xa2, 0x00, 0x08,
+				 0xa6, 0x00, 0x04, 0x05,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0xb0, 0xb3};
 	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-	//gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
-	//crc_sirf(ratecontrol);
-	//write(session->gNMEAdata.gps_fd, ratecontrol, 16);
+	gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
+	crc_sirf(ratecontrol);
+	write(session->gNMEAdata.gps_fd, ratecontrol, 16);
 	gpsd_report(4, "Probing for firmware version...\n");
 	crc_sirf(versionprobe);
 	write(session->gNMEAdata.gps_fd, versionprobe, 10);
