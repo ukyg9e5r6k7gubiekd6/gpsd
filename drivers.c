@@ -116,7 +116,7 @@ struct gps_type_t nmea =
 
 /**************************************************************************
  *
- * FV18 -- doesn't send GPGSAs, uses 7N2
+ * FV18 -- doesn't send GPGSAs, uses 2 stop bits
  *
  **************************************************************************/
 
@@ -159,7 +159,7 @@ struct gps_type_t fv18 =
  *
  * The TripMate was discontinued sometime before November 1998
  * and was replaced by the Zodiac EarthMate.  In 2003, the Zodiac
- * chipset in the EarthMate was replaced with the SiRF 2.
+ * chipset in the EarthMate was replaced with the SiRF II.
  */
 
 static void tripmate_initializer(struct gps_session_t *session)

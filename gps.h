@@ -28,7 +28,7 @@ struct gps_data_t {
     struct life_t online_stamp;
     char utc[28];		/* UTC date/time as "yyy-mm-ddThh:mm:ss.sssZ".
 				 *
-				 * Updated on every fix (GGA, GLL or
+				 * Updated on every valid fix (GGA, GLL or
 				 * GPRMC). The hhmmss.ss part is reliable to
 				 * within one GPS send cycle time (normally one
 				 * second).  Altitude could be one send cycle
@@ -46,7 +46,11 @@ struct gps_data_t {
 				 * the International Date Line and it's close
 				 * to midnight of a new century. 
 				 */
-    /* location */
+    /*
+     * General information about location fields.  They're only valid 
+     * when the last_refresh field of the associated timestamp is nonzero,
+     * in which case it tells when the data was collected.
+     */
     double latitude;		/* Latitude in degrees */
     double longitude;		/* Longitude in degrees */
     struct life_t latlon_stamp;

@@ -172,7 +172,7 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 {
     /*
         RMC - Recommended minimum specific GPS/Transit data
-        RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
+        RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
            225446.33    Time of fix 22:54:46 UTC
            A            Navigation receiver warning A = OK, V = warning
            4916.45,N    Latitude 49 deg. 16.45 min North
@@ -181,8 +181,10 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
            054.7        Course Made Good, True
            191194       Date of fix  19 November 1994
            020.3,E      Magnetic variation 20.3 deg East
+	   A            FAA mode indicator (NMEA 2.3 and later)
            *68          mandatory nmea_checksum
 
+     * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
     if (!strcmp(field(sentence, 2), "A"))
     {
@@ -223,19 +225,20 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
      * indicating that the Garmin 65 does not return time and status.
      * This code copes gracefully.
+     *
+     * SiRF chipsets don't return the Mode Indicator.
      */
-    if (!strcmp(field(sentence, 6), "A"))
+    char *status = field(sentence, 7);
+
+    if (!strcmp(field(sentence, 6), "A") && status[0] != 'N')
     {
-	char *status = field(sentence, 7);
 	int newstatus = out->status;
 
 	do_lat_lon(sentence, 1, out);
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field(sentence, 5), out);
-	if (status[0] == 'N')
-	    newstatus = STATUS_NO_FIX;
-	else if (status[0] == 'D')
+	if (status[0] == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
@@ -338,14 +341,39 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    fake_mmddyyyy(out);
-    merge_hhmmss(field(sentence, 1), out);
-    do_lat_lon(sentence, 2, out);
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
     gpscli_report(3, "GPGGA sets status %d\n", out->status);
-    out->altitude_stamp.changed = update_field_f(sentence, 9, &out->altitude);
-    REFRESH(out->altitude_stamp);
+    if (out->status > STATUS_NO_FIX)
+    {
+	char	*altitude;
+
+	fake_mmddyyyy(out);
+	merge_hhmmss(field(sentence, 1), out);
+	do_lat_lon(sentence, 2, out);
+	altitude = field(sentence, 9);
+	/*
+	 * SiRF chipsets up to version 2.2 report a null altitude field.
+	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
+	 * If we see this, force mode to 2D at most.
+	 */
+	if (!altitude[0])
+	{
+	    if (out->mode == MODE_3D)
+	    {
+		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
+		out->mode_stamp.changed = 1;
+		REFRESH(out->mode_stamp);
+	    }
+	}
+	else
+	{
+	    double newaltitude = atof(altitude);
+
+	    out->altitude_stamp.changed = (newaltitude != out->altitude);
+	    REFRESH(out->altitude_stamp);
+	}
+    }
 }
 
 /* ----------------------------------------------------------------------- */
