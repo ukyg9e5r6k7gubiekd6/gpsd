@@ -1,28 +1,7 @@
-
-/* include files */
 #include "config.h"
-#include <stdio.h>
 
+#include <stdio.h>
 #include <Xm/Xm.h>
-#include <Xm/ScrolledW.h>
-#include <Xm/ScrollBar.h>
-#include <Xm/PushB.h>
-#include <Xm/ToggleB.h>
-#include <Xm/ArrowB.h>
-#include <Xm/CascadeB.h>
-#include <Xm/Separator.h>
-#include <Xm/DrawnB.h>
-#include <Xm/Scale.h>
-#include <Xm/Frame.h>
-#include <Xm/Form.h>
-#include <Xm/RowColumn.h>
-#include <Xm/Label.h>
-#include <Xm/TextF.h>
-#include <Xm/Text.h>
-#include <Xm/List.h>
-#include <Xm/DrawingA.h>
-#include <Xm/MenuShell.h>
-#include <X11/Shell.h>
 #include <math.h>
 
 #include "gps.h"
