@@ -104,8 +104,8 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
-{_libdir}/X11/app-defaults/gps
-{_libdir}/X11/app-defaults/xgpsspeed
+%{_libdir}/X11/app-defaults/gps
+%{_libdir}/X11/app-defaults/xgpsspeed
 
 %files -n gpsd-devel
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
