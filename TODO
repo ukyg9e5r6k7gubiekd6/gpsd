@@ -1,4 +1,6 @@
-* Do the research to figure out just what the heck is going on with status bits
+* Things to do:
+
+** Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *three* kinds of validity bits.  Mode, status, and the
 Active/Void bit (some sources interpret 'V' as 'Navigation receiver warning').
@@ -29,13 +31,39 @@ Which of these override which other bits?  I don't think status is ever
 nonzero when mode is zero. So status overrides mode.  What other such
 relationships are there?
 
-* Mine the contrib directory for good ideas
+** Mine the contrib directory for good ideas
 
 There is code in there that can do some interesting tricks with
 SiRF-II chipsets.  Lonnie Mendez is working on this.
 
-* gpsd.py is unsatisfactory
+** gpsd.py is unsatisfactory
 
 It only handles straight NMEA devices.  It should be replaced by a
 Python extension built around libgps.a.
 
+* Things not to do:
+
+** Crank the update rate up past 1 per second
+
+At 50km/h (31mi/h) that's only 13.8 meters change in position between updates.
+Faster refresh might make sense for aviation applications, but not on foot
+or in a car.
+
+** Try to autodetect USB devices
+
+Sigh.  USB scanning won't work.
+
+The fundamental problem is that there is no GPS device class in the
+USB standard.  When you get device information about a GPS from the 
+USB subsystem, all you get is info on the USB-to-serial chipset it's
+using.
+
+This means that GPSes are not distinguishable from other USB-to-serial
+devices, in particular USB-to-RS232C adaptors.  This is a crash
+landing.  We could live with the scanning code failing to detect a
+GPS that's there, but we can't live with having it mis-identify
+another USB device as a GPS.  The least bad result from that would 
+be that the daemon opens and locks up the other device.
+
+This cannot be fixed, short of USB 1.1 growing a USB device type
+and vendor firmare advertising it.
