@@ -71,7 +71,15 @@ struct gps_type_t {
 #endif
 #endif
 
-#define MAX_PACKET_LENGTH	256
+/*
+ * The packet buffers need to be as long than the longest packet we
+ * expect to see in any protocol, because we have to be able to hold
+ * an entire packet for checksumming.  Thus, in particular, they need
+ * to be as long as a SiRF MID 4 packet, 188 bytes payload plus eight bytes 
+ * of header/length/checksum/trailer.  But making this longer also 
+ * slows down the autobauding.
+ */
+#define MAX_PACKET_LENGTH	193	/* 188 + 8 + 1 */
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
@@ -95,11 +103,11 @@ struct gps_session_t {
     unsigned short outbuflen;
     jmp_buf packet_error;
     double poll_times[__FD_SETSIZE];	/* last daemon poll time */
-#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)	/* public; set by -i option */
-    char *latitude, *longitude;
-    char latd, lond;
-#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
 #ifdef BINARY_ENABLE
+#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
+    unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */
+    long GarminBufferLen;                  /* current GarminBuffer Length */
+#endif /* GARMIN_ENABLE */
     double separation;		/* Geoidal separation */
 #define NO_SEPARATION	-99999	/* must be out of band */
     int year, month, day;
@@ -107,11 +115,6 @@ struct gps_session_t {
     double seconds;
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
-#endif /* BINARY_ENABLE */
-#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    unsigned char GarminBuffer[4096 + 12]; /* packet buffer */
-    long GarminBufferLen;                  /* current GarminBuffer Length */
-#endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
@@ -122,6 +125,7 @@ struct gps_session_t {
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
 #endif /* ZODIAC_ENABLE */
+#endif /* BINARY_ENABLE */
 };
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
