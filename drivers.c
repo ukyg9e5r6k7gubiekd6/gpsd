@@ -14,7 +14,12 @@
 
 static int nmea_handle_input(struct gps_session_t *session, int waiting)
 {
-    if (packet_get(session, waiting)) {
+    int packet_type = packet_get(session, waiting);
+
+    if (packet_type == SIRF_PACKET) {
+	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
+	return 0;
+    } else if (packet_type == NMEA_PACKET) {
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
 	    if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
