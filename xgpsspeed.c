@@ -32,7 +32,6 @@ extern double rint();
 #endif
 
 struct gpsd_t session;
-static char *device_name = NULL;
 
 static Widget toplevel, base;
 static Widget tacho, label;
@@ -98,21 +97,19 @@ int main(int argc, char **argv)
     extern char *optarg;
     char devtype = 'n';
     int option;
+    char *device_name = "/dev/gps";
 
     while ((option = getopt(argc, argv, "D:T:hp:")) != -1) {
 	switch (option) {
-        case 'T':
-	    devtype = *optarg;
-            break;
+	case 'p':
+	    device_name = strdup(optarg);
+	    break;
 	case 'D':
 	    session.debug = (int) strtol(optarg, 0, 0);
 	    break;
-	case 'p':
-	    if (device_name)
-		free(device_name);
-	    device_name = malloc(strlen(optarg) + 1);
-	    strcpy(device_name, optarg);
-	    break;
+        case 'T':
+	    devtype = *optarg;
+            break;
 	case 'h':
 	case '?':
 	default:
@@ -120,7 +117,6 @@ int main(int argc, char **argv)
   options include: \n\
   -p string    = set GPS device name \n\
   -T {e|t}     = set GPS device type \n\
-  -s baud_rate = set baud rate on GPS device \n\
   -D integer   = set debug level \n\
   -h           = help message \n\
 ", stderr);
