@@ -11,7 +11,6 @@
  **************************************************************************/
 
 static void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
-/* visible so the direct-connect clients can use it */
 {
     gpsd_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$') {
