@@ -139,6 +139,9 @@ struct gps_session_t {
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
 #endif /* ZODIAC_ENABLE */
 #endif /* BINARY_ENABLE */
+#ifdef NTPSHM_ENABLE
+    struct shmTime *shmTime;
+#endif /* defined(SHM_H) && defined(IPC_H) */
 };
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
@@ -171,6 +174,9 @@ extern void gpsd_binary_satellite_dump(struct gps_session_t *, char *);
 extern void gpsd_binary_quality_dump(struct gps_session_t *, char *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
+
+extern int ntpshm_init(struct gps_session_t *);
+extern int ntpshm_put(struct gps_session_t *, double);
 
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);

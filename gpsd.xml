@@ -474,6 +474,35 @@ attempt to reconnect to the GPS and resume listening for client
 connections.  This may be useful if your GPS enters a wedged or
 confused state but can be soft-reset by pulling down DTR.</para>
 
+<para>When <application>gpsd</application> receives a sentence with a
+timestamp, it packages the received timestamp with current local time
+and sends it to a shared-memory segment with an ID known to
+<application>ntpd</application>, the network time synchronization
+daemon.  If <application>ntpd</application> has been properly
+configured to receive this message, it will be used to correct the
+system clock.  Note that because GPS clocks only return 0.01sec
+resolution, <application>ntpd</application> is unlikely to use this
+cue unless your system is off-net.  Furthermore, note that this
+feature is experimental and currently operates with SiRF GPSes only;
+making it work with other GPSes that report subsecond time resolution
+may come later.</para>
+
+<para>Here is a sample <filename>ntp.conf</filename> configuration
+stanza telling <application>ntpd</application> how to read the GPS notfications:</para>
+
+<programlisting>
+server 127.127.28.0 minpoll 4 maxpoll 4
+fudge 127.127.28.0 refid GPS
+</programlisting>
+
+<para>The magic pseudo-IP address 127.127.28.0 identifies unit 0 of
+the <application>ntpd</application> shared-memory driver, which is
+what <application>gpsd</application> writes to.  With this
+configuration, <application>ntpd</application> will read the timestamp
+posted by <application>gpsd</application> every 16 seconds;
+<command>ntpq -p</command> should show the time difference when it is
+not very large.</para>
+
 </refsect2>
 <refsect2><title>xgps</title>
 

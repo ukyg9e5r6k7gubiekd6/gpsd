@@ -155,6 +155,9 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
     sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
 	    "%02.3f", session->seconds);
     session->gNMEAdata.gps_time = fixtime;
+#ifdef NTPSHM_ENABLE
+    ntpshm_put(session, fixtime);
+#endif /* defined(SHM_H) && defined(IPC_H) */
 }
 
 static void decode_ecef(struct gps_data_t *ud, 

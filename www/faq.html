@@ -34,14 +34,20 @@ GPSD Frequently Asked Questions
 
 <div id="Content">
 
-<h1 id='bug-reporting'>How do I report bugs?</h1>
+<h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 
 <p>First, make sure it is a real gpsd bug and not a problem with
 your client software.  A good way to do this is to run your client and
 the gpsd test client (xgps) side by side.  If xgps seems to report
 good numbers but your client does not, you have a client problem.
 If xgps reports the same sort of bad numbers as your client, you
-have a read gpsd bug.</p>
+have a real gpsd bug.</p>
+
+<p>You may get a better handle on your problem by running gpsd in
+foreground (-N option) with the -D option set to a high level (-D 4 is
+often good).  If the transcript has anything that looks like a clue
+in it, send it along with your bug report.  When in doubt about
+whether it holds a clue, send it.</p>
 
 <p>If we can reproduce your gpsd problem, we can usually fix it very
 rapidly.  If we can't reproduce it, you might get lucky or you might

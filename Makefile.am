@@ -54,6 +54,7 @@ libgps_la_SOURCES = \
 	zodiac.c \
 	garmin.c \
 	libgpsd_core.c \
+	ntpshm.c \
 	libgps.c \
 	packet.c \
 	sirf.c \

@@ -70,6 +70,10 @@ struct gps_session_t *gpsd_init(char *dgpsserver)
     session->mag_var = NO_MAG_VAR;
     session->separation = NO_SEPARATION;
 
+#ifdef NTPSHM_ENABLE
+    ntpshm_init(session);
+#endif /* defined(SHM_H) && defined(IPC_H) */
+
     return session;
 }
 

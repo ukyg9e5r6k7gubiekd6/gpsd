@@ -158,7 +158,7 @@ fi
 dnl check for Garmin support
 AC_ARG_ENABLE(garmin,
   AC_HELP_STRING([--disable-garmin],
-                 [disable DeLorme Garmin Garmin support]),
+                 [disable Garmin kernel driver support]),
   [ac_garmin=$enableval], [ac_garmin=yes])
 AC_MSG_CHECKING([for Garmin support])
 if test x"$ac_garmin" = "xyes"; then
@@ -181,6 +181,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for NTP time hinting support
+AC_ARG_ENABLE(ntpshm,
+  AC_HELP_STRING([--disable-ntpshm],
+                 [disable NTP time hinting support]),
+  [ac_ntpshm=$enableval], [ac_ntpshm=yes])
+AC_MSG_CHECKING([for NTP time hinting support])
+if test x"$ac_ntpshm" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([NTPSHM_ENABLE], 1, [NTP time hinting support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
@@ -192,7 +205,7 @@ echo "SiRF-II                 : $ac_sirfII"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
 echo "Garmin                  : $ac_garmin"
-echo "Logfile                 : $ac_logfile"
+echo "NTP SHM                 : $ac_ntpshm"
 echo "Enable shared libraries : $enable_shared"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."
