@@ -124,7 +124,7 @@ if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
   seen; this change also fixes a bug where gpsd claimed it was confused
   if GPGSA had not been seen and status was set.  RPM will now install 
   a udevd rule if the host system uses it.  Don't set the online flag
-  on activate.
+  on activate.  HP port changes and -Wall cleanup.
 
 * Mon Oct 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.3-1
 - Documentation and comment fixes.  Last two globals removed from 

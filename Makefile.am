@@ -7,6 +7,8 @@ if HAVE_MOTIF
 BUILD_PROGS = gps xgpsspeed
 endif
 
+XMLTO = xmlto
+
 bin_PROGRAMS = $(BUILD_PROGS)
 bin_SCRIPTS = gpsprobe
 
@@ -15,7 +17,7 @@ bin_SCRIPTS = gpsprobe
 #
 gps_SOURCES = display.c gps.c
 gps_CFLAGS = $(X_CFLAGS)
-gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
+gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Build xgpsspeed
@@ -27,7 +29,7 @@ xgpsspeed_SOURCES = \
 	Tachometer.h \
 	xgpsspeed.icon
 xgpsspeed_CFLAGS = $(X_CFLAGS)
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 
 #
@@ -35,7 +37,7 @@ xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) 
 #
 sbin_PROGRAMS = gpsd
 gpsd_SOURCES = gpsd.c
-gpsd_LDADD = $(LIBM) libgps.la
+gpsd_LDADD = $(LIBM) libgps.la -lm
 
 
 #
@@ -66,16 +68,16 @@ man_MANS = \
 	gpsprobe.1
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
-	xmlto man gpsd.xml
+	$(XMLTO) man gpsd.xml
 
 libgps.3: libgps.xml
-	xmlto man libgps.xml
+	$(XMLTO) man libgps.xml
 
 libgpsd.3: libgpsd.xml
-	xmlto man libgpsd.xml
+	$(XMLTO) man libgpsd.xml
 
 gpsprobe.1: gpsprobe.xml
-	xmlto man gpsprobe.xml
+	$(XMLTO) man gpsprobe.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -99,6 +101,7 @@ EXTRA_DIST = \
 	COPYING \
 	HACKING \
 	TODO \
+	AUTHORS \
 	gpsd.xml \
 	libgpsd.xml \
 	libgps.xml \

@@ -2,6 +2,17 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#if defined(HAVE_SYS_MODEM_H)
+#include <sys/modem.h>
+#endif /* HAVE_SYS_MODEM_H */
+/* Workaround for HP-UX 11.23, which is missing CRTSCTS */
+#ifndef CRTSCTS
+#  ifdef CNEW_RTSCTS
+#    define CRTSCTS CNEW_RTSCTS
+#  else
+#    define CRTSCTS 0
+#  endif /* CNEW_RTSCTS */
+#endif /* !CRTSCTS */
 
 #include "gpsd.h"
 

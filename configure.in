@@ -10,9 +10,11 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_C_BIGENDIAN
 
-CFLAGS="$CFLAGS -Wall -Werror"
+if eval "test x$GCC = xyes"; then
+	CFLAGS="$CFLAGS -Wall -Werror"
+fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h)
 
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
 AC_SUBST(LIBNSL)

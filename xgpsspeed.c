@@ -2,9 +2,13 @@
  * - Derrick J Brashear <shadow@dementia.org>
  * Tachometer widget from Kerberometer (xklife)
  */
+#include "config.h"
+
 #include <unistd.h>
 #include <stdlib.h>
+#if defined(HAVE_GETOPT_H)
 #include <getopt.h>
+#endif /* HAVE_GETOPT_H */
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
@@ -17,7 +21,6 @@
 #include <X11/Xaw/Paned.h>
 #include <Tachometer.h>
 
-#include "config.h"
 #include "xgpsspeed.icon"
 #include "gps.h"
 
@@ -51,7 +54,6 @@ int main(int argc, char **argv)
 {
     Arg             args[10];
     XtAppContext app;
-    Cardinal        i;
     int option;
     char *colon, *server = NULL;
     char *port = DEFAULT_GPSD_PORT;
@@ -81,18 +83,18 @@ int main(int argc, char **argv)
     XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
 				   XtScreen(toplevel)->root, xgps_bits,
-				   xgps_width, xgps_height)); i++;
+				   xgps_width, xgps_height));
     XtSetValues(toplevel, args, 1);
     
     /**** Form widget ****/
     base = XtCreateManagedWidget("pane", panedWidgetClass, toplevel, NULL, 0);
 
     /**** Label widget (Title) ****/
-    XtSetArg(args[0], XtNlabel, "GPS Speedometer"); i++;
+    XtSetArg(args[0], XtNlabel, "GPS Speedometer");
     label = XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
-    XtSetArg(args[0], XtNlabel, "Miles per Hour"); i++;
+    XtSetArg(args[0], XtNlabel, "Miles per Hour");
     label = XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
