@@ -55,6 +55,15 @@ Currently the following plot types are defined:</para>
 
 <variablelist>
 <varlistentry>
+<term>space</term>
+<listitem>
+<para>Generate a scattergram of fixes and plot a probable-error
+circle.  This data is only meaningful if the GPS is held stationary
+while <application>gpsprof</application> is running.</para>
+<para></para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>raw</term>
 <listitem>
 <para>Plot raw data.</para>

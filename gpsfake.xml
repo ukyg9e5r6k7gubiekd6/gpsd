@@ -33,6 +33,9 @@ thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of a test logfile through the master side to the
 GPS.</para>
 
+<para>Because of the baud-rate hunting logic, the first sentence in
+the file will not be the first presented to the sentence parser.</para>
+
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 

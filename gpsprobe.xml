@@ -36,20 +36,6 @@ information, including:</para>
 <listitem><para>its send cycle (frequency of updates)</para></listitem>
 </itemizedlist>
 
-<para>In addition, if the GPS is getting position fixes,
-<application>gpsprobe</application> generates a scattergram from them
-and plots a probable-error circle.  This data is only meaningful if
-the GPS is held stationary while <application>gpsprobe</application>
-is running.  Use it in combination with
-<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-to get a feel for the accuracy of your GPS.</para>
-
-<para>The report and scattergram is generated as a
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-script to standard output.  View it with <command>gnuplot -persist
-&lt;foo&gt;</command> where &lt;foo&gt; should be replaced with
-the name of the plot script.</para>
-
 <para>Note: <application>gpsprobe</application> needs access to the raw
 GPS device. Therefore <application>gpsd</application> must not be running
 when you call <application>gpsprobe</application>.  You will probably

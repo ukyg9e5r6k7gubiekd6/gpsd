@@ -293,6 +293,8 @@ class gps(gpsdata):
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
         data = self.sockfile.readline()
+        if not data:
+            return None
         if self.verbose:
             sys.stderr.write("GPS DATA %s\n" % repr(data))
         if self.profiling:

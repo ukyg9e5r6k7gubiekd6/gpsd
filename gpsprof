@@ -3,7 +3,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, gps, tempfile, time, socket
+import sys, os, time, getopt, gps, tempfile, time, socket, math
 
 class Baton:
     "Ship progress indication to stderr."
@@ -35,13 +35,70 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-#
-# Latency profiling.
-#
+class spaceplot:
+    "Total times without instrumentation."
+    name = "space"
+    def __init__(self, fp):
+        self.fixes = []
+        self.fp = fp
+    def header(self, session):
+        self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
+                 (title, session.gps_id, session.cycle))
+    def formatter(self, session):
+        self.fixes.append((session.latitude, session.longitude))
+        return True
+    def plot(self, file, title, session):
+        if len(self.fixes) == 0:
+            sys.stderr.write("No fixes collected, can't estimate accuracy.")
+            sys.exit(1)
+        else:
+            centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
+            # Sort fixes by distance from centroid
+            def d(a, b): return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+            self.fixes.sort(lambda x, y: cmp(d(centroid, x), d(centroid, y)))
+            # Compute CEP(50%)
+            cep_meters = gps.EarthDistance(centroid, self.fixes[len(self.fixes)/2])
+            # Convert fixes to offsets from centroid in meters
+            recentered = map(lambda fix: gps.MeterOffset(centroid, fix), self.fixes)
+            for (lat, lon) in recentered:
+                self.fp.write("%f	%f\n" % (lat, lon))
+            self.fp.flush()
+            if centroid[0] < 0:
+                latstring = "%fS" % -centroid[0]
+            elif centroid[0] == 0:
+                latstring = "0"
+            else:
+                latstring = "%fN" % centroid[0]
+            if centroid[1] < 0:
+                lonstring = "%fW" % -centroid[1]
+            elif centroid[1] == 0:
+                lonstring = "0"
+            else:
+                lonstring = "%fE" % centroid[1]
+            fmt = ""
+            fmt += "set autoscale\n"
+            fmt += 'set key below\n'
+            fmt += 'set key title "%s"\n' % time.asctime()
+            fmt += 'set size -1\n'
+            fmt += 'set style line 3 pt 2 # Looks good on X11\n'
+            fmt += 'set xlabel "Meters east from %s"\n' % lonstring
+            fmt += 'set ylabel "Meters north from %s"\n' % latstring
+            fmt += 'cep=%f\n' % d((0,0), recentered[len(self.fixes)/2])
+            fmt += 'set parametric\n'
+            fmt += 'set trange [0:2*pi]\n'
+            fmt += 'cx(t, r) = sin(t)*r\n'
+            fmt += 'cy(t, r) = cos(t)*r\n'
+            fmt += 'chlen = cep/20\n'
+            fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
+            fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
+            fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters", "%s" using 1:2 with points ls 3 title "%d GPS fixes"\n' % (cep_meters, file, len(self.fixes))
+            return fmt
 
 class uninstrumented:
     "Total times without instrumentation."
     name = "uninstrumented"
+    def __init__(self, fp):
+        self.fp = fp
     def header(self, session, fp):
         fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
@@ -65,21 +122,23 @@ plot "%s" using 0:1 title "Total time" with impulses
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
-    def header(self, session, fp):
-        fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
+    def __init__(self, fp):
+        self.fp = fp
+    def header(self, session):
+        self.fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
-        fp.write("#\t")
+        self.fp.write("#\t")
         for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
-            fp.write("%8s\t" % hn)
-        fp.write("tag\n#-\t")
+            self.fp.write("%8s\t" % hn)
+        self.fp.write("tag\n#-\t")
         for i in range(0, 7):
-            fp.write("--------\t")
-        fp.write("--------\n")
+            self.fp.write("--------\t")
+        self.fp.write("--------\n")
 
-    def formatter(self, session, fp):
-        fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
+    def formatter(self, session):
+        self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
               % (session.length,
                  session.d_xmit_time, 
                  session.d_recv_time,
@@ -113,30 +172,31 @@ class splitplot:
     "Discard base time, use color to indicate different tags."
     name = "split"
     sentences = ("GPGGA", "GPRMC", "GPGLL")
-    def __init__(self):
+    def __init__(self, fp):
         self.found = {}
-    def header(self, session, fp):
-        fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
+        self.fp = fp
+    def header(self, session):
+        self.fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
-        fp.write("#")
+        self.fp.write("#")
         for s in splitplot.sentences:
-            fp.write("%8s\t" % s)
+            self.fp.write("%8s\t" % s)
         for hn in ("T1", "D1", "W", "E2", "T2", "D2", "length"):
-            fp.write("%8s\t" % hn)
-        fp.write("tag\n# ")
+            self.fp.write("%8s\t" % hn)
+        self.fp.write("tag\n# ")
         for s in splitplot.sentences + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
-            fp.write("---------\t")
-        fp.write("--------\n")
-    def formatter(self, session, fp):
+            self.fp.write("---------\t")
+        self.fp.write("--------\n")
+    def formatter(self, session):
         for s in splitplot.sentences:
             if s == session.tag:
-                fp.write("%2.6f\t"% session.d_xmit_time)
+                self.fp.write("%2.6f\t"% session.d_xmit_time)
                 self.found[s] = True
             else:
-                fp.write("-       \t")
-        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
+                self.fp.write("-       \t")
+        self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
                  % (session.d_recv_time,
                     session.d_decode_time,
                     session.poll_time,
@@ -175,25 +235,24 @@ plot \\
                        (file, i+1, splitplot.sentences[i])
         return fmt[:-4] + "\n"
 
-formatters = (rawplot, splitplot, uninstrumented)
+formatters = (spaceplot, rawplot, splitplot, uninstrumented)
 
 def timeplot(await, fname, file, speed, threshold, title):
     "Return a string containing a GNUplot script "
+    if file:
+        out = open(file, "w")
+    elif fname == None:
+        out = sys.stdout
+    else:
+        out = tempfile.NamedTemporaryFile()
     if fname:
         for formatter in formatters:
             if formatter.name == fname:
-                plotter = formatter()
+                plotter = formatter(out)
                 break
         else:
             sys.stderr.write("gpsprof: no such formatter.\n")
             sys.exit(1)
-    if file:
-        out = open(file, "w")
-    elif formatter == None:
-        out = sys.stdout
-    else:
-        out = tempfile.NamedTemporaryFile()
-
     try:
         session = gps.gps()
     except socket.error:
@@ -205,26 +264,27 @@ def timeplot(await, fname, file, speed, threshold, title):
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("w+bci")
-        if formatter != uninstrumented:
+        if formatter not in (spaceplot, uninstrumented):
             session.query("z+")
-        #session.set_raw_hook(lambda x: sys.stdout.write(x))
-        plotter.header(session, out)
+        #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
+        plotter.header(session)
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
         while countdown > 0:
-            session.poll()
+            if session.poll() == None:
+                sys.stderr.write("gpsprof: gpsd has vanished.\n")
+                sys.exit(1)
             baton.twirl()
-            # If timestamp is no good, skip it.
-            if session.utc == "?":
+            if session.status == gps.STATUS_NO_FIX:
                 continue
-            if session.status and countdown == await:
+            if countdown == await:
                 sys.stderr.write("gathering samples...")
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.
             if threshold and session.c_decode_time > session.cycle * threshold:
                 continue
-            if plotter.formatter(session, out):
+            if plotter.formatter(session):
                 countdown -= 1
         baton.end()
     finally:
