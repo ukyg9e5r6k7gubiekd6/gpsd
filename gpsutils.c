@@ -63,8 +63,8 @@ char *unix_to_iso8601(double fixtime, char *isotime)
     int slen;
 
     fractional = modf(fixtime, &integral);
-    intfixtime = (time_t)integral + tzoffset();
-    localtime_r(&intfixtime, &when);
+    intfixtime = (time_t)integral;
+    gmtime_r(&intfixtime, &when);
 
     strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
     slen = strlen(isotime);
