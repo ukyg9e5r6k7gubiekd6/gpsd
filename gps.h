@@ -3,8 +3,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define MAXCHANNELS	12
-#define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
+#define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 
 struct life_t
 /* lifetime structure to be associated with some piece of data */
@@ -28,7 +27,6 @@ struct gps_data {
     double latitude;		/* Latitude/longitude in format "d.ddddd" */
     double longitude;
     struct life_t latlon_stamp;
-
     double altitude;		/* Altitude in meters */
     struct life_t altitude_stamp;
 
