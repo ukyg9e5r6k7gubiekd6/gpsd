@@ -165,6 +165,8 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
            191194       Date of fix  19 November 1994
            020.3,E      Magnetic variation 20.3 deg East
 	   A            FAA mode indicator (NMEA 2.3 and later)
+                        A=autonomous, D=differential, E=Estimated,
+                        N=not valid, S=Simulator
            *68          mandatory nmea_checksum
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
@@ -459,6 +461,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	char *name;
 	nmea_decoder decoder;
     } nmea_phrase[] = {
+	{"GPRMB", NULL},
 	{"GPRMC", processGPRMC},
 	{"GPGGA", processGPGGA},
 	{"GPGLL", processGPGLL},
