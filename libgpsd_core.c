@@ -180,8 +180,10 @@ void gpsd_wrap(struct gps_session_t *session)
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 
- * members are in a valid state, and (b) the private members hours, minutes, 
- * and seconds have also been filled in.
+ * members are in a valid state, (b) that the private members hours, minutes, 
+ * and seconds have also been filled in, and (c) that if the private member
+ * mag_var is nonzero it is a magnetic variation in degrees that should be
+ * passed on.
  */
 
 static double degtodm(double a)
@@ -194,15 +196,14 @@ static double degtodm(double a)
 
 void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 {
-    char hdop_str[128] = "";
+    char hdop_str[NMEA_MAX] = "";
 
-    if ( SEEN(session->gNMEAdata.fix_quality_stamp) ) {
+    if (SEEN(session->gNMEAdata.fix_quality_stamp))
 	sprintf(hdop_str, "%.2f", session->gNMEAdata.hdop);
-    }
 
     if (session->gNMEAdata.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c,%s,%s*",
+		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c",
 		session->hours,
 		session->minutes,
 		session->seconds,
@@ -215,9 +216,13 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		hdop_str,
                 // altitude is MSL
 		session->gNMEAdata.altitude, 'M',
-		session->separation, 'M',
-                // next two items shoud be mag_var
-                "", "");
+		session->separation, 'M');
+	if (session->mag_var == 0) 
+	    strcat(bufp, ",");
+	else {
+	    sprintf(bufp+strlen(bufp), "%lf,", fabs(session->mag_var));
+	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
+	}
 	nmea_add_checksum(bufp);
 	if (session->gNMEAdata.raw_hook) {
 	    session->gNMEAdata.raw_hook(bufp);
@@ -225,7 +230,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,*",
+	    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,",
 	    session->hours, session->minutes, session->seconds,
 	    session->gNMEAdata.status ? 'A' : 'V',
 	    degtodm(fabs(session->gNMEAdata.latitude)),
@@ -245,29 +250,30 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
 void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 {
-    int i, j;
+    int i, nparts;
     char *bufp2 = bufp;
     bufp[0] = '\0';
 
-    j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
+    nparts = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
 
-    // FIXME!  only dump chanels that have data
     for( i = 0 ; i < MAXCHANNELS; i++ ) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
             bufp2 = bufp;
-	    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1,
+	    sprintf(bufp, "$GPGSV,%d,%d,%02d", nparts, (i / 4) + 1,
             	session->gNMEAdata.satellites);
 	}
 	bufp += strlen(bufp);
 	if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
-	    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
-		    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
+	    sprintf(bufp, ",%02d,%02d,%03d,%02d", 
+		    session->gNMEAdata.PRN[i],
+		    session->gNMEAdata.elevation[i], 
+		    session->gNMEAdata.azimuth[i], 
+		    session->gNMEAdata.ss[i]);
 	else
 	    sprintf(bufp, ",%02d,00,000,%02d", session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.ss[i]);
 	if (i % 4 == 3) {
-	    strcat( bufp2, "*");
 	    nmea_add_checksum(bufp2);
 	    if (session->gNMEAdata.raw_hook) {
 		session->gNMEAdata.raw_hook(bufp2);
