@@ -27,7 +27,7 @@ int tzoffset(void)
 #ifdef HAVE_TIMEZONE
     res = timezone;
 #else
-    res = localtime_r(now, &tm)->tm.tm_gmtoff;
+    res = localtime_r(&now, &tm)->tm.tm_gmtoff;
 #endif
 #ifdef HAVE_DAYLIGHT
     if (daylight && localtime_r(&now, &tm)->tm_isdst)
