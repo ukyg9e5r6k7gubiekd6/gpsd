@@ -38,9 +38,8 @@ class Baton:
 class spaceplot:
     "Total times without instrumentation."
     name = "space"
-    def __init__(self, fp):
+    def __init__(self):
         self.fixes = []
-        self.fp = fp
     def d(self, a, b):
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
     def gather(self, session):
@@ -49,8 +48,8 @@ class spaceplot:
         self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
         return True
     def header(self, session):
-        self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
-                 (title, session.gps_id, session.cycle))
+        res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
+                 (title, session.gps_id, session.cycle)
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -60,11 +59,14 @@ class spaceplot:
             self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
             self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+        return res
     def data(self, session):
+        res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
-            self.fp.write("%f	%f	%f	%f	%f\n" % (lat, lon, raw1, raw2, alt))
+            res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
+        return res
     def plot(self, file, title, session):
         # Compute CEP(50%)
         cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
@@ -123,14 +125,12 @@ class spaceplot:
             fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
         else:
             fmt += "\n"
-        self.fp.flush()
         return fmt
 
 class uninstrumented:
     "Total times without instrumentation."
     name = "uninstrumented"
-    def __init__(self, fp):
-        self.fp = fp
+    def __init__(self):
         self.stats = []
     def gather(self, session):
         if session.fix.time:
@@ -140,13 +140,15 @@ class uninstrumented:
         else:
             return False
     def header(self, session):
-        self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
+        return "# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
-                  session.stopbits, session.cycle))
+                  session.stopbits, session.cycle)
     def data(self, session):
+        res = ""
         for seconds in self.stats:
-            self.fp.write("%2.6lf\n" % seconds)
+            res += "%2.6lf\n" % seconds
+        return res
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -162,32 +164,31 @@ plot "%s" using 0:1 title "Total time" with impulses
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
-    def __init__(self, fp):
-        self.fp = fp
+    def __init__(self):
         self.stats = []
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
         return True
     def header(self, session):
-        self.fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
+        res = "# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
-                  session.stopbits, session.cycle))
-        self.fp.write("#")
+                  session.stopbits, session.cycle)
+        res += "#"
         for hn in ("tag", "T1", "E1", "D1", "W", "E2", "T2", "D2"):
-            self.fp.write("%8s\t" % hn)
-        self.fp.write("\n#")
+            res += "%8s\t" % hn
+        res += "\n#"
         for i in range(0, 7):
-            self.fp.write("--------\t")
-        self.fp.write("--------\n")
+            res += "--------\t"
+        return res + "--------\n"
     def data(self, session):
+        res = ""
         for timings in self.stats:
             if timings.sentence_time:
                 e1 = timings.d_xmit_time
             else:
                 e1 = 0
-            self.fp.write(
-                "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+            res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
                 % (timings.tag,
                    timings.sentence_length,
                    e1, 
@@ -196,7 +197,8 @@ class rawplot:
                    timings.poll_time,
                    timings.emit_time,
                    timings.c_recv_time,
-                   timings.c_decode_time))
+                   timings.c_decode_time)
+        return res
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -220,9 +222,8 @@ class splitplot:
     "Discard base time, use color to indicate different tags."
     name = "split"
     sentences = []
-    def __init__(self, fp):
+    def __init__(self):
         self.found = {}
-        self.fp = fp
         self.stats = []
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
@@ -230,20 +231,20 @@ class splitplot:
             self.sentences.append(session.timings.tag)
         return True
     def header(self, session):
-        self.fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
+        res = "# Split latency data, %s, %s, %dN%d, cycle %ds\n#" % \
                  (title,
                   session.gps_id, session.baudrate,
-                  session.stopbits, session.cycle))
-        self.fp.write("#")
+                  session.stopbits, session.cycle)
         for s in splitplot.sentences:
-            self.fp.write("%8s\t" % s)
+            res += "%8s\t" % s
         for hn in ("T1", "D1", "W", "E2", "T2", "D2", "length"):
-            self.fp.write("%8s\t" % hn)
-        self.fp.write("tag\n# ")
+            res += "%8s\t" % hn
+        res += "tag\n# "
         for s in tuple(splitplot.sentences) + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
-            self.fp.write("---------\t")
-        self.fp.write("--------\n")
+            res += "---------\t"
+        return res + "--------\n"
     def data(self, session):
+        res = ""
         for timings in self.stats:
             if timings.sentence_time:
                 e1 = timings.d_xmit_time
@@ -251,11 +252,11 @@ class splitplot:
                 e1 = 0
             for s in splitplot.sentences:
                 if s == timings.tag:
-                    self.fp.write("%2.6f\t" % e1)
+                    res += "%2.6f\t" % e1
                     self.found[s] = True
                 else:
-                    self.fp.write("-       \t")
-            self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
+                    res += "-       \t"
+            res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
                      % (timings.d_recv_time,
                         timings.d_decode_time,
                         timings.poll_time,
@@ -263,7 +264,8 @@ class splitplot:
                         timings.c_recv_time,
                         timings.c_decode_time,
                         timings.sentence_length,
-                        timings.tag))
+                        timings.tag)
+        return res
     def plot(self, file, title, session):
         fixed = '''
 set autoscale
@@ -306,7 +308,7 @@ def plotframe(await, fname, file, speed, threshold, title):
     if fname:
         for formatter in formatters:
             if formatter.name == fname:
-                plotter = formatter(out)
+                plotter = formatter()
                 break
         else:
             sys.stderr.write("gpsprof: no such formatter.\n")
@@ -346,8 +348,8 @@ def plotframe(await, fname, file, speed, threshold, title):
         baton.end()
     finally:
         session.query("w-z-")
-    plotter.header(session)
-    plotter.data(session)
+    out.write(plotter.header(session))
+    out.write(plotter.data(session))
     out.flush()
     command = plotter.plot(out.name, title, session)
     del session
