@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 
 #include "config.h"
