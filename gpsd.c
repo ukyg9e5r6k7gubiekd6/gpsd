@@ -171,15 +171,10 @@ static void print_settings(char *service, char *dgpsserver)
  */
 #define VALIDATION_COMPLAINT(level, legend) do {	\
 	char buf[BUFSIZE]; \
-	int len; \
 	strcpy(buf, "# "); \
         snprintf(buf+2, BUFSIZE, \
-		legend " (status=%d, mode=%d).\n", \
+		legend " (status=%d, mode=%d).\r\n", \
 		session.gNMEAdata.status, session.gNMEAdata.mode); \
-	len = strlen(buf); \
-	strcpy(buf+len, "\n"); \
-	gpscli_report(level, buf+2); \
-	strcpy(buf+len, "\r\n"); \
 	write(fd, buf, strlen(buf) + 1); \
 	} while (0)
 
@@ -255,7 +250,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'L':
 	case 'l':
 	    sprintf(reply + strlen(reply),
-		    ",l=1 " VERSION " acdmpqrsvxy"
+		    ",l=1 " VERSION " acdmpqrstvwxy"
 #ifdef PROCESS_PRWIZCH
 		    "z"
 #endif
@@ -369,16 +364,20 @@ static int handle_request(int fd, char *buf, int buflen)
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
-	    sprintf(reply + strlen(reply),
-		    ",Y=%d:", sc);
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.PRN[i])
-			sprintf(reply + strlen(reply),"%d %d %d %d:", 
-				session.gNMEAdata.PRN[i], 
-				session.gNMEAdata.elevation[i],
-				session.gNMEAdata.azimuth[i],
-				session.gNMEAdata.ss[i]);
+	    if (!sc)
+		strcat(reply, ",Y=?");
+	    else {
+		sprintf(reply + strlen(reply),
+			",Y=%d:", sc);
+		if (SEEN(session.gNMEAdata.satellite_stamp))
+		    for (i = 0; i < MAXCHANNELS; i++)
+			if (session.gNMEAdata.PRN[i])
+			    sprintf(reply + strlen(reply),"%d %d %d %d:", 
+				    session.gNMEAdata.PRN[i], 
+				    session.gNMEAdata.elevation[i],
+				    session.gNMEAdata.azimuth[i],
+				    session.gNMEAdata.ss[i]);
+		}
 	    break;
 #ifdef PROCESS_PRWIZCH
 	case 'Z':
@@ -387,7 +386,9 @@ static int handle_request(int fd, char *buf, int buflen)
 	    for (i = 0; i < MAXCHANNELS; i++)
 		if (session.gNMEAdata.Zs[i])
 		    sc++;
-	    if (sc)
+	    if (!sc)
+		strcat(reply, ",Z=?");
+	    else
 	    {
 		sprintf(reply + strlen(reply),
 			",Z=%d ", sc);
