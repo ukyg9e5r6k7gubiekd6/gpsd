@@ -1,11 +1,10 @@
 /* GPS speedometer as a wrapper around an Athena widget Tachometer
  * - Derrick J Brashear <shadow@dementia.org>
- * Tachometer widget from Kerberometer (xklife)
  */
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <getopt.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
@@ -23,7 +22,6 @@ static XrmOptionDescRec options[] = {
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
 };
-
 String fallback_resources[] = {NULL};
 
 static struct gps_data_t *gpsdata;
@@ -31,12 +29,11 @@ static Widget tacho;
 
 static void update_display(char *buf UNUSED)
 {
-  TachometerSetValue(tacho, rint(gpsdata->speed * KNOTS_TO_MPH));
+    TachometerSetValue(tacho, rint(gpsdata->speed * KNOTS_TO_MPH));
 }
 
 static void handle_input(XtPointer client_data UNUSED,
-			 int *source UNUSED,
-			 XtInputId * id UNUSED)
+			 int *source UNUSED, XtInputId * id UNUSED)
 {
     gps_poll(gpsdata);
 }
@@ -46,8 +43,7 @@ int main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *colon, *server = NULL;
-    char *port = DEFAULT_GPSD_PORT;
+    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
     Widget toplevel, base;
 
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
@@ -91,8 +87,7 @@ int main(int argc, char **argv)
     XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
-    tacho = XtCreateManagedWidget("meter",
-				  tachometerWidgetClass, base, NULL, 0);    
+    tacho = XtCreateManagedWidget("meter", tachometerWidgetClass,base,NULL,0);
     XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {

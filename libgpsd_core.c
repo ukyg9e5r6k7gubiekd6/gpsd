@@ -1,7 +1,4 @@
-/*
- * This provides the interface to the library that supports direct access to
- * GPSes on serial or USB devices.
- */
+/* libgpsd_core.c -- irect access to GPSes on serial or USB devices. */
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +6,7 @@
 #include <netdb.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include "config.h"
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>	/* for FIONREAD on BSD systems */
 #endif
