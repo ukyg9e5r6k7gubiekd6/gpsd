@@ -86,7 +86,9 @@ His new features include:
    * RPMs which include installation of gpsd to start up at boot time 
      are available.
    * New gpsprobe program probes the capabilities of GPSes and generates
-     error scattergrams from fixes.
-   * All this in fewer lines of C than the 1.10 version.
+     error scattergrams from fixes.  (Later this moved to gpsprof.)
+   * Autobauding and self-configuration -- gpsd now figures out which baud 
+     rate to use and what the GPS's device type is.
+   * Support for SiRF binary mode.
 
 Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.

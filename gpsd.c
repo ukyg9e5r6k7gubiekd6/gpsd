@@ -38,7 +38,7 @@ struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
 static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
-static int debuglevel, nfds, go_background = 1, in_background = 0;
+static int debuglevel, nfds, go_background = 1, in_background = 0, need_gps;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -186,7 +186,7 @@ static int validate(void)
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
-    char reply[BUFSIZ], phrase[BUFSIZ], *p;
+    char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
     int icd = 0;
@@ -238,11 +238,40 @@ static int handle_request(int fd, char *buf, int buflen)
 			ud->hdop * UERE(session), 
 			ud->vdop * UERE(session));
 	    break;
+	case 'F':
+	    if (*p == '=') {
+		char	*bufcopy;
+		for (q = ++p; isgraph(*p); p++)
+		    continue;
+		bufcopy = (char *)malloc(p-q+1); 
+		memcpy(bufcopy, q, p-q);
+		bufcopy[p-q] = '\0';
+		gpsd_report(1, "Switch to %s requested\n", bufcopy);
+
+		if (need_gps <= 1 && !access(bufcopy, R_OK)) {
+		    gpsd_deactivate(session);
+		    char *stash_device = session->gpsd_device;
+		    session->gpsd_device = strdup(bufcopy);
+		    session->gNMEAdata.baudrate = 0;	/* so it'll hunt */
+		    session->driverstate = 0;
+		    if (gpsd_activate(session) >= 0) {
+			free(stash_device);
+		    } else {
+			free(session->gpsd_device);
+			session->gpsd_device = stash_device;
+			session->gNMEAdata.baudrate = 0;
+			session->driverstate = 0;
+		    }
+		}
+		gpsd_report(1, "GPS is %s\n", session->gpsd_device);
+	    }
+	    sprintf(phrase, ",F=%s", session->gpsd_device);
+	    break;
 	case 'I':
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;
 	case 'L':
-	    sprintf(phrase, ",l=1 " VERSION " abcdeimpqrstuvwxy");
+	    sprintf(phrase, ",l=1 " VERSION " abcdefimpqrstuvwxy");
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
@@ -515,7 +544,7 @@ int main(int argc, char *argv[])
     char *service = NULL; 
     struct sockaddr_in fsin;
     fd_set rfds;
-    int option, msock, fd, need_gps; 
+    int option, msock, fd; 
     extern char *optarg;
 
     debuglevel = 0;
@@ -626,7 +655,7 @@ int main(int argc, char *argv[])
     session = gpsd_init(gpstype, dgpsserver);
     if (gpsd_speed)
 	session->gNMEAdata.baudrate = gpsd_speed;
-    session->gpsd_device = device_name;
+    session->gpsd_device = strdup(device_name);
     session->gNMEAdata.raw_hook = raw_hook;
     if (session->dsock >= 0)
 	FD_SET(session->dsock, &all_fds);

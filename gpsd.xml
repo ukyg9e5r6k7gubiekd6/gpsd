@@ -224,6 +224,21 @@ and DGPS range errors in meters.  See also the 'q' command.</para>
 </varlistentry>
 
 <varlistentry>
+<term>f</term> 
+<listitem><para>Gets or sets the active GPS device name. The bare command 'f'
+requests a response containing 'f=' followed by the name of the active
+GPS device.  The command may be followed by an '=', in which case all
+following printable (non-whitespace) characters up to the next
+whitespace are interpreted as the name of a trial GPS device.  If
+there are no other clients active, the trial device is opened and read
+to see if a GPS can be found there.  If it can, the trial device
+becomes the active device and the trial device name is stored to be
+opened at the time of the next client request, replacing the old one.
+The response to this form of the command is to list the name of the
+active device.</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>i</term>
 <listitem><para>Returns a text string identifying the GPS.  The string
 may contain spaces and is terminated by CR-LF.</para></listitem>
