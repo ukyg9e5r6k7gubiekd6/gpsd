@@ -428,7 +428,7 @@ static void raw_hook(char *sentence)
     }
 }
 
-static void gpscli_errexit(char *s)
+static void errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
     gps_wrap(&session);
@@ -550,7 +550,7 @@ int main(int argc, char *argv[])
 	FD_SET(session.dsock, &afds);
 
     if (nowait && (gps_activate(&session) < 0))
-	gpscli_errexit("exiting - GPS device nonexistent or can't be read");
+	errexit("exiting - GPS device nonexistent or can't be read");
 
     while (1) {
 	struct timeval tv;
@@ -563,7 +563,7 @@ int main(int argc, char *argv[])
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    gpscli_errexit("select");
+	    errexit("select");
 	}
 
 	if (FD_ISSET(msock, &rfds)) {
@@ -585,7 +585,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(session.fdin, &afds);
 	    gps_deactivate(&session);
 	    if (gps_activate(&session) < 0)
-		gpscli_errexit("exiting - reopen of GPS failed");
+		errexit("exiting - reopen of GPS failed");
 	    FD_SET(session.fdin, &afds);
 	}
 
@@ -605,7 +605,7 @@ int main(int argc, char *argv[])
 
 		if (session.fdin == -1) {
 		    if (gps_activate(&session) < 0)
-			gpscli_errexit("exiting - open of GPS failed");
+			errexit("exiting - open of GPS failed");
 		    FD_SET(session.fdin, &afds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
