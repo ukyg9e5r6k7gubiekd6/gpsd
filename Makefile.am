@@ -42,7 +42,7 @@ libgps_la_SOURCES = \
 	nmea_parse.c \
 	serial.c \
 	drivers.c \
-	earthmate.c \
+	zodiac.c \
 	libgpsd_core.c \
 	libgps.c
 

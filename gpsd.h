@@ -40,7 +40,7 @@ struct gps_session_t
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
 
-#ifdef EARTHMATE_ENABLE
+#ifdef ZODIAC_ENABLE
     /* private housekeeping stuff for the Earthmate driver */
     double mag_var;		/* Magnetic variation in degrees */  
     int year;
@@ -59,7 +59,7 @@ struct gps_session_t
      */
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
-#endif /* EARTHMATE_ENABLE */
+#endif /* ZODIAC_ENABLE */
 };
 
 /* some multipliers for interpreting GPS output */

@@ -235,7 +235,7 @@ fi
 AC_C_BIGENDIAN
 
 AC_DEFINE(TRIPMATE_ENABLE,  1, [DeLorme TripMate support])
-AC_DEFINE(EARTHMATE_ENABLE, 1, [DeLorme EarthMate support])
+AC_DEFINE(ZODIAC_ENABLE, 1, [Zodiac chipset support])
  
 AC_OUTPUT(Makefile gpsd.spec)
 

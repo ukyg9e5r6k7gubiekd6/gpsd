@@ -1,5 +1,5 @@
 /*
- * Drivers for generic NMEA device, TripMate and EarthMate in text mode.
+ * Drivers for generic NMEA device, TripMate and Zodiac EarthMate in text mode.
  */
 #include "config.h"
 #include <stdio.h>
@@ -56,7 +56,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 
 	    if (trigger && !strncmp(trigger, sentence, strlen(trigger)) && isatty(session->fdout)) {
 		gpscli_report(1, "found %s.", (*dp)->typename);
-		session->device_type = &earthmate_b;
+		session->device_type = &zodiac_b;
 		session->device_type->initializer(session);
 		return;
 	    }
@@ -157,7 +157,8 @@ struct gps_type_t fv18 =
  * will switch the TripMate into Rockwell binary mode at 4800.
  *
  * The TripMate was discontinued sometime before November 1998
- * and has been replaced by the EarthMate.
+ * and was replaced by the Zodiac EarthMate.  In 2003, the Zodiac
+ * chipset in the EarthMate was replaced with the SiRF 2.
  */
 
 void tripmate_initializer(struct gps_session_t *session)
@@ -206,25 +207,25 @@ struct gps_type_t tripmate =
 #endif /* ENABLE_TRIPMATE */
 
 
-#ifdef EARTHMATE_ENABLE
+#ifdef ZODIAC_ENABLE
 /**************************************************************************
  *
- * EarthMate textual mode
+ * Zodiac EarthMate textual mode
  *
  **************************************************************************/
 
 /*
  * Treat this as a straight NMEA device unless we get the exception
  * code back that says to go binary.  In that case process_exception() 
- * will flip us over to the earthmate_b driver.  But, connect at 9600
+ * will flip us over to the zodiac_b driver.  But, connect at 9600
  * rather than 4800.  The Rockwell chipset does not accept DGPS in text 
  * mode.
  */
 
-struct gps_type_t earthmate_a =
+struct gps_type_t zodiac_a =
 {
     'e',			/* select explicitly with -T e */
-    "Delorme EarthMate",	/* full name of type */
+    "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate-B */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
@@ -233,7 +234,7 @@ struct gps_type_t earthmate_a =
     9600,			/* connecting at 4800 will fail */
     1,				/* updates every second */
 };
-#endif /* EARTHMATE_ENABLE */
+#endif /* ZODIAC_ENABLE */
 
 /**************************************************************************
  *
@@ -261,10 +262,10 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ENABLE_TRIPMATE
     &tripmate,
 #endif /* ENABLE_TRIPMATE */
-#ifdef EARTHMATE_ENABLE
-    &earthmate_a, 
-    &earthmate_b,
-#endif /* EARTHMATE_ENABLE */
+#ifdef ZODIAC_ENABLE
+    &zodiac_a, 
+    &zodiac_b,
+#endif /* ZODIAC_ENABLE */
     &logfile,
     NULL,
 };
