@@ -20,6 +20,8 @@ char *alloca ();
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#define __USE_XOPEN
+#include <time.h>
 
 #include "gpsd.h"
 
@@ -145,6 +147,27 @@ static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
     strcat(out->utc, "Z");
 }
 
+#ifdef PROFILING
+static double iso8661_to_unix(char *isotime)
+{
+    char *dp = NULL;
+    struct tm tm;
+    double usec, res;
+    time_t now;
+
+    dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    if (*dp == '.')
+	usec = strtod(dp, NULL);
+    else
+	usec = 0;
+    res = mktime(&tm) - timezone + usec;
+    now = time(NULL);
+    if (daylight && localtime(&now)->tm_isdst)
+	res -= 3600;
+    return res;
+}
+#endif /* PROFILING */
+
 /**************************************************************************
  *
  * NMEA sentence handling begins here
@@ -174,6 +197,9 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
     if (count > 9) {
 	merge_ddmmyy(field[9], out);
 	merge_hhmmss(field[1], out);
+#ifdef PROFILING
+	out->gps_time = iso8661_to_unix(out->utc);
+#endif /* PROFILING */
     }
     if (!strcmp(field[2], "A")) {
 	do_lat_lon(&field[3], out);
@@ -234,6 +260,9 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 
     fake_mmddyyyy(out);
     merge_hhmmss(field[5], out);
+#ifdef PROFILING
+    out->gps_time = iso8661_to_unix(out->utc);
+#endif /* PROFILING */
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
@@ -303,6 +332,9 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     */
     fake_mmddyyyy(out);
     merge_hhmmss(field[1], out);
+#ifdef PROFILING
+    out->gps_time = iso8661_to_unix(out->utc);
+#endif /* PROFILING */
     out->status_stamp.changed = update_field_i(field[6], &out->status);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);

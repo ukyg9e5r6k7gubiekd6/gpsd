@@ -41,7 +41,7 @@ class uninstrumented:
     def header(self, fp):
         pass
     def formatter(self, session, fp):
-        fp.write("%2.6lf\n" % (time.time() - session.gps_time,))
+        fp.write("%2.6lf\n" % (time.time() - gps.isotime(session.utc),))
         return True
     def plot(self, file, title, session):
         fmt = '''

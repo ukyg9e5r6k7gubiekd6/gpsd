@@ -98,6 +98,9 @@ struct gps_data_t {
     int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
+#ifdef PROFILING
+    double gps_time;		/* GPS time (equivalent of utc field) */
+#endif /* PROFILING */
     double d_recv_time;		/* daemon receipt time (-> E+T1) */
 #ifdef PROFILING
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */

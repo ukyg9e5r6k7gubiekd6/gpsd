@@ -265,9 +265,10 @@ class gps(gpsdata):
 	    elif cmd in ('Z', 'z'):
               self.profiling = (data[0] == '1')
             elif cmd == '$':
-                  (self.tag, length, recv_time, decode_time, poll_time, emit_time) = data.split()
+                  (self.tag, length, gps_time, recv_time, decode_time, poll_time, emit_time) = data.split()
                   self.tag += " " + length
                   self.length = int(length)
+                  self.gps_time = float(gps_time)
                   self.d_recv_time = float(recv_time)
                   self.d_decode_time = float(decode_time)
                   self.poll_time = float(poll_time)
@@ -294,16 +295,8 @@ class gps(gpsdata):
             self.c_recv_time = time.time()
 	res = self.__unpack(data)
         if self.utc != "?":
-            self.gps_time = isotime(self.utc)
             if self.profiling:
                 self.c_decode_time = time.time()
-                line_latency = (self.d_recv_time - self.gps_time)
-                #if line_latency < 0:
-                #    print "FOO!", self.utc, "|", isotime(self.d_recv_time), "|", isotime(self.gps_time)
-                self.d_recv_time = line_latency
-                self.d_decode_time += line_latency
-                self.emit_time += line_latency
-                self.poll_time += line_latency
                 self.c_recv_time -= self.gps_time
                 self.c_decode_time -= self.gps_time
         return res
