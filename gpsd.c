@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
 
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
-    nfds = getdtablesize();
+    nfds = FD_SETSIZE;
 
     session = gpsd_init(gpstype, dgpsserver);
     if (gpsd_speed)
@@ -634,5 +634,5 @@ int main(int argc, char *argv[])
     }
 
     gpsd_wrap(session);
-    exit(0);
+    return 0;
 }
