@@ -8,19 +8,22 @@
 #include <gps.h>
 #include <gpsd.h>
 
-int gps_open(struct gps_data_t *gpsdata, char *host, char *port)
+struct gps_data_t *gps_open(char *host, char *port)
 /* open a connection to a gpsd daemon */
 {
-    int fd;
     time_t now;
+    struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
+
+    if (!gpsdata)
+	return NULL;
 
     if (!host)
 	host = "localhost";
     if (!port)
 	port = "2947";
 
-    if ((fd = netlib_connectsock(host, port, "tcp")) < 0)
-	return fd;
+    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0)
+	return NULL;
 
     now = time(NULL);
     INIT(gpsdata->online_stamp, now);
@@ -37,13 +40,13 @@ int gps_open(struct gps_data_t *gpsdata, char *host, char *port)
 #endif /* PROCESS_PRWIZCH */
     gpsdata->mode = MODE_NO_FIX;
 
-    return fd;
+    return gpsdata;
 }
 
-int gps_close(int fd)
+int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    return close(fd);
+    return close(gpsdata->gps_fd);
 }
 
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
@@ -205,26 +208,26 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	;
 }
 
-int gps_poll(int fd, struct gps_data_t *gpsdata)
+int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
     int		n;
 
     /* the daemon makes sure that every read is NUL-terminated */
-    if ((n = read(fd, buf, sizeof(buf)-1)) <= 0)
+    if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
     buf[n] = '\0';
 
     return gps_unpack(buf, gpsdata);
 }
 
-int gps_query(int fd, struct gps_data_t *gpsdata, char *requests)
+int gps_query(struct gps_data_t *gpsdata, char *requests)
 /* query a gpsd instance for new data */
 {
-    if (write(fd, requests, strlen(requests)) <= 0)
+    if (write(gpsdata->gps_fd, requests, strlen(requests)) <= 0)
 	return -1;
-    return gps_poll(fd, gpsdata);
+    return gps_poll(gpsdata);
 }
 
 #ifdef TESTMAIN

@@ -30,8 +30,7 @@
 extern double rint();
 #endif
 
-struct gps_data_t gpsdata;
-static int gpsd_fd;
+struct gps_data_t *gpsdata;
 
 static Widget toplevel, base;
 static Widget tacho, label;
@@ -53,9 +52,9 @@ String fallback_resources[] =
 
 static void update_display(char *buf)
 {
-  int new = rint(gpsdata.speed * 6076.12 / 5280);
+  int new = rint(gpsdata->speed * 6076.12 / 5280);
 #if 0
-  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gpsdata.speed, rint(gpsdata.speed * 5208/6706.12), (int)rint(gpsdata.speed * 5208/6706.12));
+  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gpsdata->speed, rint(gpsdata->speed * 5208/6706.12), (int)rint(gpsdata->speed * 5208/6706.12));
 #endif
   if (new > 100)
     new = 100;
@@ -65,7 +64,7 @@ static void update_display(char *buf)
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gps_poll(gpsd_fd, &gpsdata);
+    gps_poll(gpsdata);
 }
 
 int main(int argc, char **argv)
@@ -138,22 +137,22 @@ int main(int argc, char **argv)
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gpsd_fd = gps_open(&gpsdata, NULL, NULL);
-    if (gpsd_fd < 0)
+    gpsdata = gps_open(NULL, NULL);
+    if (!gpsdata)
     {
 	fprintf(stderr, "xgpsspeed: no gpsd running.\n");
 	exit(2);
     }
 
-    XtAppAddInput(app, gpsd_fd, (XtPointer) XtInputReadMask,
+    XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
     
-    gps_set_raw_hook(&gpsdata, update_display);
-    gps_query(gpsd_fd, &gpsdata, "w+x\n");
+    gps_set_raw_hook(gpsdata, update_display);
+    gps_query(gpsdata, "w+x\n");
 
     XtAppMainLoop(app);
 
-    gps_close(gpsd_fd);
+    gps_close(gpsdata);
     return 0;
 }
 

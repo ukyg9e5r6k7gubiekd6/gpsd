@@ -23,14 +23,12 @@ C:
 
 </funcsynopsisinfo>
 <funcprototype>
-<funcdef>int <function>gps_open</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+<funcdef>struct gps_data_t *<function>gps_open</function></funcdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
     <paramdef>char * <parameter>port</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_query</function></funcdef>
-    <paramdef>int <parameter>fd</parameter></paramdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>char *<parameter>requests</parameter></paramdef>
 </funcprototype>
@@ -41,15 +39,13 @@ C:
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_poll</function></funcdef>
-    <paramdef>int <parameter>fd</parameter></paramdef>
     <paramdef>struct gps_data_t * <parameter>gpsdata</parameter></paramdef>
     <paramdef>void *<parameter>raw_hook</parameter>(char *buf)</paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_close</function></funcdef>
-    <paramdef>int <parameter>fd</parameter></paramdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
-</funcsynopsis>
 <funcsynopsisinfo>
 
 Python:
@@ -67,6 +63,7 @@ session.poll()
 session.close()
 
 </funcsynopsisinfo>
+</funcsynopsis>
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>

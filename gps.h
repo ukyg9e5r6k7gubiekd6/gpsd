@@ -100,13 +100,15 @@ struct gps_data_t {
     struct life_t signal_quality_stamp;
 #endif /* PROCESS_PRWIZCH */
 
+    /* these members are private */
+    int gps_fd;				/* socket or file descriptor to GPS */
     void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
 };
 
-int gps_open(struct gps_data_t *gpsdata, char *host, char *port);
-int gps_close(int fd);
-int gps_query(int fd, struct gps_data_t *gpsdata, char *requests);
-int gps_poll(int fd, struct gps_data_t *gpsdata);
+struct gps_data_t *gps_open(char *host, char *port);
+int gps_close(struct gps_data_t *);
+int gps_query(struct gps_data_t *gpsdata, char *requests);
+int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 
 /* gps_open() error return values */

@@ -101,7 +101,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 - Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
   are now in ISO8601 format, with sub-second precision if the GPS
-  delivers that.  First cuts at Python interfaces included.
+  delivers that.  First cuts at Python interfaces included.  libgps.a
+  interface now bundles session fd into an allocated session block.
 
 * Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 

@@ -332,12 +332,11 @@ void init_list()
  * No dependencies on the session structure above this point.
  */
 
-static struct gps_data_t gpsdata;
-static int gpsd_fd;
+static struct gps_data_t *gpsdata;
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gps_poll(gpsd_fd, &gpsdata);
+    gps_poll(gpsdata);
 }
 
 void update_display(char *message)
@@ -351,15 +350,15 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (SEEN(gpsdata.satellite_stamp)) {
+    if (SEEN(gpsdata->satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    if (i < gpsdata.satellites) {
+	    if (i < gpsdata->satellites) {
 		sprintf(s, "%2d %02d %03d %02d %c", 
-			gpsdata.PRN[i],
-			gpsdata.elevation[i],
-			gpsdata.azimuth[i], 
-			gpsdata.ss[i],
-			gpsdata.used[i] ? 'Y' : 'N'
+			gpsdata->PRN[i],
+			gpsdata->elevation[i],
+			gpsdata->azimuth[i], 
+			gpsdata->ss[i],
+			gpsdata->used[i] ? 'Y' : 'N'
 		    );
 	    } else
 		sprintf(s, "                  ");
@@ -370,9 +369,9 @@ void update_display(char *message)
 	    XmStringFree(string[i]);
     }
 #ifdef PROCESS_PRWIZCH
-    if (SEEN(gpsdata.signal_quality_stamp)) {
+    if (SEEN(gpsdata->signal_quality_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(s, "%2d %02x", gpsdata.Zs[i], gpsdata.Zv[i]);
+	    sprintf(s, "%2d %02x", gpsdata->Zs[i], gpsdata->Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(list_8, string, sizeof(string), 1);
@@ -381,27 +380,27 @@ void update_display(char *message)
     }
 #endif /* PROCESS_PRWIZCH */
     /* here are the value fields */
-    XmTextFieldSetString(text_1, gpsdata.utc);
-    sprintf(s, "%f", gpsdata.latitude);
+    XmTextFieldSetString(text_1, gpsdata->utc);
+    sprintf(s, "%f", gpsdata->latitude);
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f", gpsdata.longitude);
+    sprintf(s, "%f", gpsdata->longitude);
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f", gpsdata.altitude);
+    sprintf(s, "%f", gpsdata->altitude);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f", gpsdata.speed);
+    sprintf(s, "%f", gpsdata->speed);
     XmTextFieldSetString(text_5, s);
-    sprintf(s, "%f", gpsdata.track);
+    sprintf(s, "%f", gpsdata->track);
     XmTextFieldSetString(text_6, s);
 
-    if (!gpsdata.online)
+    if (!gpsdata->online)
 	sprintf(s, "OFFLINE");
     else
-	switch (gpsdata.mode) {
+	switch (gpsdata->mode) {
 	case 2:
-	    sprintf(s, "2D %sFIX",(gpsdata.status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	case 3:
-	    sprintf(s, "3D %sFIX",(gpsdata.status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    sprintf(s, "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	default:
 	    sprintf(s, "NO FIX");
@@ -409,7 +408,7 @@ void update_display(char *message)
 	}
     XmTextFieldSetString(text_7, s);
 
-    draw_graphics(&gpsdata);
+    draw_graphics(gpsdata);
 }
 
 int main(int argc, char *argv[])
@@ -442,8 +441,8 @@ int main(int argc, char *argv[])
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gpsd_fd = gps_open(&gpsdata, NULL, NULL);
-    if (gpsd_fd < 0)
+    gpsdata = gps_open(NULL, NULL);
+    if (!gpsdata)
     {
 	fprintf(stderr, "gps: no gpsd running.\n");
 	exit(2);
@@ -454,14 +453,14 @@ int main(int argc, char *argv[])
     build_gui(lxbApp);
     init_list();
 
-    gps_set_raw_hook(&gpsdata, update_display);
-    gps_query(gpsd_fd, &gpsdata, "w+x\n");
+    gps_set_raw_hook(gpsdata, update_display);
+    gps_query(gpsdata, "w+x\n");
 
-    XtAppAddInput(app, gpsd_fd, (XtPointer) XtInputReadMask,
+    XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 
     XtAppMainLoop(app);
 
-    gps_close(gpsd_fd);
+    gps_close(gpsdata);
     return 0;
 }
