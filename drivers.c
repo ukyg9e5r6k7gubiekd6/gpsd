@@ -51,11 +51,11 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	struct gps_type_t **dp;
 
 	/* maybe this is a trigger string for a driver we know about? */
-	for (dp = gpsd_drivers; dp < gpsd_drivers + sizeof(gpsd_drivers)/sizeof(gpsd_drivers[0]); dp++)
+	for (dp = gpsd_drivers; *dp; dp++)
 	{
 	    char	*trigger = (*dp)->trigger;
 
-	    if (trigger && !strncmp(sentence, trigger, strlen(sentence)) && isatty(session->fdout)) {
+	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->fdout)) {
 		gpsd_report(1, "found %s.", (*dp)->typename);
 		session->device_type = *dp;
 		session->device_type->initializer(session);
