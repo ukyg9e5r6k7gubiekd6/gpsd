@@ -64,50 +64,6 @@ def looks_like_SiRF(data):
         return False
     return True
 
-def SiRF_switcher(baudrate):
-    "Generate a SiRF binary protocol command to switch back to NMEA."
-    switcher = [
-        '\x81',	# Byte  0 = 0x81: Switch to NMEA command
-    	'\x02',	# Byte  1 = 0x02: Leave debug-message switch as it is.
-        '\x01',	# Byte  2 = 0x01: Enable GPGGA at 1-second interval
-        '\x01',	# Byte  3 = 0x01: GPGGA checksum enable
-        '\x01',	# Byte  4 = 0x01: Enable GPGLL at 1-second interval
-        '\x01',	# Byte  5 = 0x01: GPGLL checksum enable
-        '\x01',	# Byte  6 = 0x05: Enable GPGSA at 5-second interval
-        '\x01',	# Byte  7 = 0x01: GPGSA checksum enable
-        '\x05',	# Byte  8 = 0x05: Enable GPGSV at 5-second interval
-        '\x01',	# Byte  9 = 0x01: GPGSV checksum enable
-        '\x00',	# Byte 10 = 0x05: Disable GPMSS
-        '\x00',	# Byte 11 = 0x01: GPMSS checksum disable
-        '\x01',	# Byte 12 = 0x01: Enable GPRMC at 1-second interval
-        '\x01',	# Byte 13 = 0x01: GPRMC checksum enable
-        '\x01',	# Byte 14 = 0x01: Enable GPVTG at 1-second interval
-        '\x01',	# Byte 15 = 0x01: GPVTG checksum enable
-        '\x00',	# Byte 16 = 0x00: Unused
-        '\x00',	# Byte 17 = 0x00: Unused
-        '\x00',	# Byte 18 = 0x00: Unused
-        '\x00',	# Byte 19 = 0x00: Unused
-        '\x00',	# Byte 20 = 0x00: Unused
-        '\x00',	# Byte 21 = 0x00: Unused
-        ]
-    switcher += [chr(baudrate & 0xff00), chr(baudrate & 0x00ff)]
-
-    msg = '\xa0'
-    msg += '\xa2'
-    msg += chr(0)
-    msg += chr(24)	# It's a fixed-size payload
-    msg += switcher
-
-    checksum = 0
-    for ch in switcher:
-      checksum += (ch & 0xff);
-
-    msg += chr((checksum >> 8) & 0xff)
-    msg += chr(checksum & 0xff)
-    msg += '\xb0'
-    msg += '\xb3'
-    return msg
-
 triggers = {
     "PRWIZCH": "# This GPS has a Rockwell Zodiac chipset.\n"
     }
@@ -218,7 +174,7 @@ if __name__ == '__main__':
                 break
             elif data and looks_like_SiRF(data):
                 sys.stderr.write("found SiRF data header...switching...")
-                dev.rawwrite(SiRF_switcher(baudrate))
+                dev.rawwrite(SiRF().to_NMEA(baudrate))
                 time.sleep(2)
                 data = dev.rawread()
                 sys.stderr.write("%d more chars seen" % len(data))
