@@ -337,7 +337,8 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
     gps_poll(gpsdata);
 }
 
-void update_display(char *message)
+static void update_panel(char *message)
+/* gets done both on alarm ticks and on each sentence */
 {
     int i, newstate;
     XmString string[12];
@@ -420,6 +421,24 @@ void update_display(char *message)
     XmTextFieldSetString(text_7, s);
 
     draw_graphics(gpsdata);
+}
+
+static void update_display(char *message)
+/* only gets done on sentence receipt, not alarm ticks */
+{
+    sigset_t	allsigs;
+
+    /*
+     * The Motif canvas widget seems to react badly to incoming alarm signals.
+     * The symptom is that the satellite-display background will sometimes 
+     * flash odd colors when SIGALRM comes in.  Prevent this.  We'll get the
+     * alarm when the redraw is done.
+     */
+    sigfillset(&allsigs);
+    sigprocmask(SIG_BLOCK, &allsigs, NULL);
+    update_panel(message);
+    draw_graphics(gpsdata);
+    sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
 }
 
 static void handle_alarm(int sig)
