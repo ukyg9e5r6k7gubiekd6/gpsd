@@ -55,8 +55,9 @@ learning curve for application developers.  Applications that
 presently use <code>gpsd</code> include <a
 href="http://www.pygps.org">pyGPS</a>, <a
 href="http://www.kismetwireless.net/">Kismet</a>, <a
-href="http://www.gpsdrive.cc/">GPSdrive</a>, and <a
-href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
+href="http://www.gpsdrive.cc/">GPSdrive</a>, <a
+href="http://qpegps.sourceforge.net/">gpeGPS</a>, and
+<a href="http://roadmap.digitalomaha.net/index.html">roadmap</a>.</p>
 
 <p>Under Linux, gpsd normally runs with zero configration.  The RPM
 installs an init script to start <code>gpsd</code> at boot time, and
