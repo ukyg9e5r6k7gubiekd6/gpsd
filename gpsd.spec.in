@@ -53,9 +53,7 @@ make %{?_smp_mflags}
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
-mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/
-cp gpsd.init "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/gpsd
-mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug.d/usb
+mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb
 cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
@@ -85,8 +83,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_mandir}/man1/gpsd.1*
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
-%{_sysconfdir}/hotplug.d/usb/gpsd.hotplug
-%{_sysconfdir}/hotplug.d/usb/gpsd.usermap
+%{_sysconfdir}/hotplug/usb/gpsd.hotplug
+%{_sysconfdir}/hotplug/usb/gpsd.usermap
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
