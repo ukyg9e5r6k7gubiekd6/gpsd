@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "gps.h"
+#include "config.h"
 #include "display.h"
 
 #define DEG2RAD         (PI/180.0)

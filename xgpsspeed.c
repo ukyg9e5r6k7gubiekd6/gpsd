@@ -20,7 +20,6 @@
 
 #include "xgpsspeed.icon"
 #include "gps.h"
-#include "display.h"
 
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},

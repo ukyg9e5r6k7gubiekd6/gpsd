@@ -26,6 +26,14 @@ AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
 
+AH_VERBATIM([_GNU_SOURCE],
+          [/* Macro for declaring function arguments unused. */
+#if defined(__GNUC__)
+#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
+#else /* not __GNUC__ */
+#  define UNUSED
+#endif])
+
 dnl Check for X libraries
 AC_PATH_XTRA
 LIBS="$LIBS $X_EXTRA_LIBS"

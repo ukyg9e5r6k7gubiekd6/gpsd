@@ -17,7 +17,7 @@
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
-#include "display.h"
+#include "config.h"
 
 /****************************************************************
  *
