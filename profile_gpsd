@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 #
-# Collect latency-profiling data from a running gpsd.
-import sys, time, getopt, gps
+# Collect and plot latency-profiling data from a running gpsd.
+import sys, os, time, getopt, gps, tempfile, time
 
 class rawplot:
     "Print basic data, ignoring timezone skew."
     def header(self, fp):
-        fp.write("#GPS time        	Received	Transmitted 	Read")
-        fp.write("#----------------	---------	----------- 	----------")
+        fp.write("#GPS time        	Received	Transmitted 	Read\n")
+        fp.write("#----------------	---------	----------- 	----------\n")
     def formatter(self, baud, gps, recv, emit, tag, fp):
         fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s" \
               % (gps,
@@ -15,40 +15,42 @@ class rawplot:
                  (emit - gps) % 3600,
                  (time.time() - gps) % 3600,
                  tag))
-    def plot(self):
-        return '''
+    def plot(self, file, title):
+        fmt = '''
 set autoscale
 set key below
-set style fill
+set key title "Raw latency data, %s"
 plot "%s" using 0:2 title "Line latency" with impulses,\
      "%s" using 0:3 title "Decode time" with points,\
      "%s" using 0:4 title "TCP/IP latency" with points
 '''
+        return fmt % (title, file, file, file)
 
 class stripplot:
     "Discard base time, throw out latencies >1 sec."
     def header(self, fp):
-        print "#Received	Transmitted 	Read"
-        print "#---------	----------- 	----------"
+        fp.write("#Received	Transmitted 	Read\n")
+        fp.write("#---------	----------- 	----------\n")
     def formatter(self, baud, gps, recv, emit, tag, fp):
         # Throw out latencies above 1 second, these are
         # serial-buffering artifacts at the start of the session
         if (recv - gps) % 3600 > 1:
             return
-        print "%2.6f	%2.6f	%2.6f	# %s" \
+        fp.write("%2.6f	%2.6f	%2.6f	# %s\n" \
               % ((recv - gps) % 3600,
                  (emit - gps) % 3600,
                  (time.time() - gps) % 3600,
-                 tag)
-    def plot(self):
-        return '''
+                 tag))
+    def plot(self, file, title):
+        fmt = '''
 set autoscale
 set key below
-set style fill
+set key title "Filtered latency data, %s"
 plot "%s" using 0:1 title "Line latency" with impulses,\
      "%s" using 0:2 title "Decode time" with points,\
      "%s" using 0:3 title "TCP/IP latency" with points
 '''
+        return fmt % (title, file, file, file)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "hn:r")
@@ -63,10 +65,15 @@ if __name__ == '__main__':
         elif (switch == '-h'):
             sys.stderr.write("usage: profile_gpsd [-h] [-r] [-n samplecount] \n")
     plotter = formatter()
-    session = gps.gps(host="localhost", port="2947")
+    if raw:
+        out = sys.stdout
+    else:
+        out = tempfile.NamedTemporaryFile()
+
+    session = gps.gps()
     try:
         session.query("wZ+")
-        plotter.header(sys.stdout)
+        plotter.header(out)
         while await > 0:
             session.poll()
             gps_time = gps.isotime(session.utc)
@@ -75,9 +82,17 @@ if __name__ == '__main__':
             plotter.formatter(session.baudrate,
                               gps_time, recv_time, emit_time,
                               session.tag,
-                              sys.stdout)
+                              out)
             await -= 1
     finally:
         session.query("wZ-")
-        del session
+        
+    out.flush()
+    del session
+    if not raw:
+        command = plotter.plot(out.name, time.ctime())
+        pfp = os.popen("gnuplot -persist", "w")
+        pfp.write(command)
+        pfp.close()
+    out.close()
 
