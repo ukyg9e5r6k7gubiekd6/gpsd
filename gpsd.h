@@ -157,6 +157,7 @@ void gps_init(struct session_t *session,
 int gps_activate(struct session_t *session);
 void gps_deactivate(struct session_t *session);
 void gps_poll(struct session_t *session);
+void gps_wrap(struct session_t *session);
 
 /* caller must supply these */
 void gpscli_errexit(char *s);

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
+#include <sys/ioctl.h>
 
 #include "gpsd.h"
 #include "version.h"
@@ -56,6 +57,7 @@ void gps_init(struct session_t *session,
 }
 
 void gps_deactivate(struct session_t *session)
+/* temporarily release the GPS device */
 {
     session->fdin = -1;
     session->fdout = -1;
@@ -69,6 +71,7 @@ void gps_deactivate(struct session_t *session)
 }
 
 int gps_activate(struct session_t *session)
+/* acquire a connection to the GPS device */
 {
     int input;
 
@@ -83,8 +86,6 @@ int gps_activate(struct session_t *session)
     }
 }
 
-#include <sys/ioctl.h>
-
 static int is_input_waiting(int fd)
 {
     int	count;
@@ -94,6 +95,7 @@ static int is_input_waiting(int fd)
 }
 
 void gps_poll(struct session_t *session)
+/* update the stuff in the scoreboard structure */
 {
     /* accept a DGPS correction if one is pending */
     if (is_input_waiting(session->dsock))
@@ -139,4 +141,9 @@ void gps_poll(struct session_t *session)
     }
 }
 
-
+void gps_wrap(struct session_t *session)
+/* end-of-session wrapup */
+{
+    gps_deactivate(session);
+    close(session->dsock);
+}

@@ -63,7 +63,7 @@ static int reopen;
 
 static void onsig(int sig)
 {
-    gps_deactivate(&session);
+    gps_wrap(&session);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
@@ -580,12 +580,14 @@ int main(int argc, char *argv[])
 	    gps_deactivate(&session);
 	}
     }
+
+    gps_wrap(&session);
 }
 
 void gpscli_errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
-    gps_deactivate(&session);
+    gps_wrap(&session);
     exit(2);
 }
 
