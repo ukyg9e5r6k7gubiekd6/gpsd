@@ -302,6 +302,9 @@ class gpsd(gps.gpsdata):
         self.raw = termios.tcgetattr(self.ttyfp.fileno())
         self.raw[0] = 0						# iflag
         self.raw[1] = termios.ONLCR				# oflag
+	# Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
+	# 200 (and possibly other USB GPSes) gets completely hosed
+	# in the presence of flow control.  Thus, turn off CRTSCTS.
         self.raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
         if self.devtype.stopbits == 2:
             self.raw[2] |= (termios.CSIZE & termios.CS7)	# cflag

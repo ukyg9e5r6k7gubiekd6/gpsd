@@ -69,6 +69,11 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 
 	memcpy(&session->ttyset, &session->ttyset_old, sizeof(session->ttyset));
 	gpsd_set_speed(&session->ttyset, device_speed);
+	/*
+	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
+	 * 200 (and possibly other USB GPSes) gets completely hosed
+	 * in the presence of flow control.  Thus, turn off CRTSCTS.
+	 */
 	session->ttyset.c_cflag &= ~(PARENB | CRTSCTS);
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
