@@ -119,6 +119,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
+* Sat Jan  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- More compiler-warning cleanups.
+
 * Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
 - Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
   in udev scriptlets.  Clean up after GCC warning messages.  Drop use of 
