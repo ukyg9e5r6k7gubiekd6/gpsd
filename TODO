@@ -219,37 +219,7 @@ a second, and a SiRF one maybe 18 times a second.
 Is this worth doing?  Maybe.  It would reduce fix latency, possibly
 to good effect if your GPS is in motion.  Opinions?  Calculations?
 
-** Does the GPSD protocol need to be redesigned?
-
-With all the commands currently implemented, only the following 
-letters are left: ghjkno.  Multi-session, if implemented, will
-eat a few of those.  
-
-These are symptoms.  The underlying problem is that gpsd does a lot
-more and has a more complex interface than it used to.  The protocol
-design is getting visibly strained, especially by the new control
-commands F and B.
-
-It's going to get worse.  There isn't enough namespace left to report
-all the kinds of kinematic uncertainty we want to, at least not
-without gracelessly dumping a bunch of unrelated information via a
-single response.
-
-Another reason to think about a protocol redesign is that the existing
-protocol reflects the quirks of NMEA all too faithfully.  This is more
-obvious now that we support SiRF and Garmin binary.  Indeed, fidelity
-to the NMEA model now limits our ability to report things like 
-course drift.
-
-It has a more subtle bad effect as well. The chunk size of what gpsd
-passes up is wrong.  You can easily end up, for example, with an
-altitude that has a different timestamp than your latitude/longitude,
-even though they were actually derived from the same fix, simply
-because the responses were shipped at different times.
-
-Maybe it's time to think about a redesign.  Matters would be helped
-by the existence of libgps; applications can link to that rather
-than supplying their own parser.
+** Can the o command replace most of the protocol?
 
 Considered abstractly, what we really want a GPS to report is a
 13-element vector describing an uncertainty volume in kinematic space:
@@ -261,9 +231,31 @@ speed, speederr  = groundspeed and groundspeed error
 track, trackerr  = course over ground and course error
 climb, climberr  = climb/sink and climb/sink error
 
-Perhaps the protocol should be redesigned to ship these tuples,
-assembling them where needed from sentences shipped in the same GPS
-cycle (e.g. reporting the same fix).
+The experimental 'o' command approximates this. The 'o' and 'y' commands
+together span all the information that gpsd can get (minor exception;
+'o' doesn't report total spherical uncertainty of position, just the
+horizontal and vertical uncertainties).
+
+There are two issues connected with 'o'.  One is how to fill in the
+currently missing fields: timerr, speederr, trackerr, and climberr.
+The other is trickier and has to do with what timestamp the o return
+should have.
+
+Internally, a GPS typically takes a fix once in its basic cycle time 
+(typically once per second).  It then generates a report.  A SiRF chip
+reporting in binary mode ships almost everything we want in a single
+packet with a single timestamp.  When reporting in NMEA mode, the
+report consists of several sentences, all normally with the same 
+timestamp.
+
+There are exceptions, however.  The Garmin 48 is one -- it seems to
+have two 1-second half-cycles, one that ships GPMRC/GGA and another
+that ships GLL, with a different timestamp and possibly a different
+latitude/longitude.
+
+Un-exceptional GPSes could have the information from the entire cycle
+bundled into one 'o' report with a single timestamp, that of the
+start of cycle.
 
 ** Explicitly turn on WAAS/EGNOS on SiRF chips
 
