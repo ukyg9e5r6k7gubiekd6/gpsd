@@ -74,7 +74,6 @@ class spaceplot:
 		if lon > lon_max :
 			lon_max = lon
                 self.fp.write("%f	%f	%f	%f	%f\n" % (lat, lon, raw1, raw2, alt))
-            self.fp.flush()
             if alt_num == 0:
                 alt_avg = gps.ALTITUDE_NOT_VALID
             else:
@@ -119,6 +118,13 @@ class spaceplot:
                 fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
 	    else:
 		fmt += "\n"
+
+	    #  document the plot file for later use
+            self.fp.write("#\n# This plot function was used:\n#\n")
+	    for s in fmt.split( "\n"):
+                self.fp.write("# %s\n" % s)
+
+	    self.fp.flush()
             return fmt
 
 class uninstrumented:
