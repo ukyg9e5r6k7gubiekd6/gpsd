@@ -129,6 +129,7 @@ EXTRA_DIST = \
 	gpsprobe \
 	gpsprof \
 	gpsfake \
+	sirfmon.c \
 	gpsd.hotplug \
 	gpsd.usermap \
 	logextract
