@@ -180,7 +180,7 @@ tended to have elaborate facilities for accepting lists of waypoints
 and sending back course information to help you navigate to them.
 Modern high-end units still do, but the GPSes designed for connecting
 to computers are increasingly designed on the assumption that the host
-computer will do all the waypoint geometry itself and the GPS's only
+computer will do all the waypoint geometry itself and the GPSes only
 job is to deliver periodic position and velocity readings.  Thus, they
 tend to have no control codes at all.  This makes them laudably
 stupid.</p>
@@ -190,10 +190,14 @@ rate.  This is understandable; 4800 is very slow by today's standards,
 and by boosting bits per second they can deliver information that's
 fresher by a few milliseconds (which might make a difference if, say,
 you're using a GPS-enabled autopilot to land an aircraft).  Some GPSes
-feature data rates upwards of 38400bps.  Unfortunately, the fact that
-GPSes don't have a single data rate graven in stone brings back all the
-well-known baud-mismatch configuration problems we thought we'd left
-behind in the 1980s.</p>
+feature data rates upwards of 38400bps. However, this actually does
+little good unless the application polls the GPS at a rate faster than
+1Hz rather than waitiung for it, as most GPS sensors cannot be told to
+ship updates faster than once per second &mdash; and the polling
+commands (when they exist at all) are proprietary. And the fact that
+GPSes don't have a single data rate graven in stone brings back all
+the well-known baud-mismatch configuration problems we thought we'd
+left behind in the 1980s.</p>
 
 <p>The third problem with NMEA is that it's not universal.  A
 decreasing but still significant percentage of GPSes use proprietary
@@ -280,11 +284,19 @@ client connects to the daemon.</p>
 <h1 id='migrating'>Programming With <code>gpsd</code>-2</h1>
 
 <p>The easiest way to make your program GPS-aware is to link it with
-the libgps.a library (and ensure that your host system starts <code>gpsd</code>
-at boot time).</p>
+the libgps.a or libgps.so library (and ensure that your host system
+starts <code>gpsd</code> at boot time).</p>
 
-<p>If you have written a <code>gpsd</code>-aware application, here are some good
-functional reasons to migrate to 2.0:</p>
+<p>There is a limitation in the accuracy of <code>gpsd</code> that
+stems from the fact that it waits passively for updates from the
+sensor rather than actively polling for them (which can't be done in a
+device-independent way).  Most GPSes ship updates just once per
+second.  At 50km/h (31mi/h) that's only 13.8 meters change in position
+between updates.  This is good enough if you're on foot or in a car
+but not good enough for aviation applications,</p>
+
+<p>If you have written a <code>gpsd</code>-aware application, here are
+some good functional reasons to migrate to 2.0:</p>
 
 <ol>
 <li>Your application can now query whether or not the GPS is online
@@ -311,10 +323,10 @@ and automatically starts getting data again a second after the reconnect.</p>
 
 <p>The <code>gpsd</code> package provides two ways for you to get data
 from a GPS.  The low-level library, <a
-href="libgps.html">libgps.a</a>, talks directly to the GPS.  The
-higher-level interface, <a href="libgpsd.html">libgpsd.a</a>,
+href="libgpsd.html">libgpsd.a</a>, talks directly to the GPS.  The
+higher-level interface, <a href="libgps.html">libgps.a</a>,
 communicates with an instance of <code>gpsd</code>, which uses its own
-copy of libgps.a to talk to the device,</p>
+copy of libgpsd.a to talk to the device,</p>
 
 <p>A third way would be to open a socket to <code>gpsd</code> and
 interpret <code>gpsd</code> protocol or raw NMEA in your application.

@@ -317,6 +317,18 @@ been removed.</para>
 
 </refsect2>
 </refsect1>
+<refsect1 id='limitations'><title>LIMITATIONS</title> 
+
+<para>There is a limitation in the accuracy of
+<application>gpsd</application>-using applications that stems from the
+fact that <application>gpsd</application> waits passively for updates
+from the sensor rather than actively polling for them (which can't be
+done in a device-independent way).  Most GPSes ship updates just once
+per second.  At 50km/h (31mi/h) that's 13.8 meters change in position
+between updates.  This is good enough if you're on foot or in a car
+but not good enough for aviation applications,</para>
+
+</refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
 
 <para>The official NMEA protocol standard is available on paper from
