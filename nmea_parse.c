@@ -598,7 +598,8 @@ int nmea_send(int fd, const char *fmt, ... )
 int nmea_validate_buffer(char *buf, size_t n)
 /* dos this buffer look like it contains valid NMEA? */
 {
-    char	*sp;
+    char	*sp, csum[3];
+    unsigned int sum;
 
     /*
      * It's OK to have leading garbage, but not trailing garbage.
@@ -615,16 +616,28 @@ int nmea_validate_buffer(char *buf, size_t n)
     }
 
     /*
-     * Trailing garbage means that the data accidentally looked like
-     * NMEA or that old data that really was NMEA happened to be sitting
-     * in the TTY buffer unread, but the new data we read is not
-     * sentences.  Second case shouldn't happen, because we flush the
-     * buffer after each speed change, but welcome to serial-programming hell.
+     * Check to see if we actually have a valid NMEA packet here.
+     * Trailing garbage means that the data accidentally looked
+     * like NMEA or that old data that really was NMEA happened to
+     * be sitting in the TTY buffer unread, but the new data we
+     * read is not sentences.  Second case shouldn't happen,
+     * because we flush the buffer after each speed change, but
+     * welcome to serial-programming hell.
      */
-    for (sp += 3; sp < buf + n; sp++)
+    sum = 0;
+    for (++sp; *sp != '*' && *sp != '\0'; sp++) {
 	if (!isascii(*sp)) {
 	    gpsd_report(4, "trailing garbage in the buffer\n");
 	    return 0;
 	}
+	sum ^= *sp;
+    }
+    sprintf(csum, "%02X", sum);
+    if (*sp == '\0' 
+	    || toupper(csum[0])!=toupper(sp[1])
+	    || toupper(csum[1])!=toupper(sp[2])) {
+	gpsd_report(4, "checksum incorrect\n");
+	return 0;
+    }
     return 1;
 }
