@@ -90,6 +90,8 @@ void gpscli_report(int errlevel, const char *fmt, ... )
     fputs(buf, stderr);
 }
 
+static void update_display(char *);
+
 int
 main(int argc, char **argv)
 {
@@ -169,7 +171,7 @@ main(int argc, char **argv)
 				  base, NULL, 0);
     
     XtRealizeWidget(toplevel);
-    gps_init(&session,device_name, 5, devtype, NULL, NULL);
+    gps_init(&session,device_name, 5, devtype, NULL, update_display);
     open_input(app);
     
     XtAppMainLoop(app);
@@ -193,7 +195,7 @@ void Usage()
 #endif	
 #endif
 
-void update_display(void)
+void update_display(char *buf)
 {
   int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
 #if 0
