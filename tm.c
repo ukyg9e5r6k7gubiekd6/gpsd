@@ -36,7 +36,7 @@ static void process_exception(struct gpsd_t *session, char *sentence)
 	session->device_type = &earthmate_b;
 	earthmate_b.initializer(session);
     } else if (session->debug > 1) {
-	gpscli_report(1, "unknown exception: \"%s\"", sentence);
+	gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
     }
 }
 

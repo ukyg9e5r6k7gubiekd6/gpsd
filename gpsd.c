@@ -489,6 +489,9 @@ int main(int argc, char *argv[])
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
+    if (gps_activate(&session) < 0)
+	gpscli_errexit("exiting - GPS device nonexistent or can't be read");
+
     while (1) {
 	struct timeval tv;
 
@@ -522,7 +525,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(session.fdin, &afds);
 	    gps_deactivate(&session);
 	    if (gps_activate(&session) < 0)
-		gpscli_errexit("Exiting - serial open\n");
+		gpscli_errexit("exiting - reopen of GPS failed");
 	    FD_SET(session.fdin, &afds);
 	}
 
@@ -539,7 +542,7 @@ int main(int argc, char *argv[])
 	    if (FD_ISSET(fd, &rfds)) {
 		if (session.fdin == -1) {
 		    if (gps_activate(&session) < 0)
-			gpscli_errexit("Exiting - serial open\n");
+			gpscli_errexit("exiting - open of GPS failed");
 		    FD_SET(session.fdin, &afds);
 		}
 		if (handle_request(fd) == 0) {

@@ -1,5 +1,3 @@
-fix formatting in (gpsd.c)handle_request(). the sprintfs...
-
 Bug complaints from the Kismet author:
  * No error output to the user if /dev/gps doesn't exist or if theres an
    IO error
