@@ -3,9 +3,6 @@ fix formatting in (gpsd.c)handle_request(). the sprintfs...
 Bug complaints from the Kismet author:
  * No error output to the user if /dev/gps doesn't exist or if theres an
    IO error
- * No satellite positional info.  Everything that needs to know
-   individual sat map stuff uses debug mode and parses NMEA itself, this
-   is redundant
  * Corruption - I haven't seen this too often, but it has a tendency to
    blat out illegal coordinates when it gets confused
 
