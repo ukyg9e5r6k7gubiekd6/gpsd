@@ -8,7 +8,7 @@
    <title>GPSd &mdash; Put your GPS on the net!</title>
    <link rel="stylesheet" href="main.css" type="text/css"/>
 </head>
-<body background="paper.gif">
+<body>
 
 <div id="Header">
 <code>gpsd</code> &mdash; a GPS service daemon
@@ -128,7 +128,6 @@ list of NMEA sentences</a>.</p>
 <dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
 it.</dd>
 </dl>
-
 
 <h1 id='recipes'>Recipes and related resources</h1>
 
