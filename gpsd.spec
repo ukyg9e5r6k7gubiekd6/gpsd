@@ -28,7 +28,6 @@ configure --prefix=/usr
 make %{?_smp_mflags} gpsd gpsd.1 libgps.a libgps.3
 
 %install
-rm -rf $RPM_BUILD_ROOT
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
