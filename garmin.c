@@ -501,6 +501,7 @@ static int GetPacket (struct gps_session_t *session )
 {
     struct timespec delay, rem;
     int cnt = 0;
+    int x = 0; // for debug dump
 
     memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
     session->GarminBufferLen = 0;
@@ -532,10 +533,6 @@ static int GetPacket (struct gps_session_t *session )
 	    // zero length, or short, read is a flag for got the whole packet
             break;
 	}
-	// dump the individual bytes
-        //    for ( x = 0; x < session->GarminBufferLen; x++ ) {
-	//        gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
-	//    }
 		
 	if ( 256 <=  session->GarminBufferLen ) {
 	    // really bad read error...
@@ -549,6 +546,10 @@ static int GetPacket (struct gps_session_t *session )
 	while (nanosleep(&delay, &rem) < 0)
 	    continue;
 
+    }
+    // dump the individual bytes
+    for ( x = 0; x < session->GarminBufferLen; x++ ) {
+        gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
     }
     if ( 10 <= cnt ) {
 	    gpsd_report(3, "GetPacket() packet too long or too slow!\n");
@@ -600,6 +601,22 @@ static int garmin_probe(struct gps_session_t *session)
 	return 0;
     }
 
+    /* Save original terminal parameters */
+    if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
+	gpsd_report(0, "garmin_probe: error getting port attributes: %s\n",
+             strerror(errno));
+	return 0;
+    }
+    memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
+
+    cfmakeraw(&session->ttyset);
+
+    if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
+	gpsd_report(0, "garmin_probe: error changing port attributes: %s\n",
+             strerror(errno));
+	return 0;
+    }
+
     // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
     set_int(buffer+4, PRIV_PKTID_SET_MODE);
@@ -638,6 +655,8 @@ static int garmin_probe(struct gps_session_t *session)
 	    return(0);
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout\n");
+	    // restore old terminal settings
+            tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
@@ -653,6 +672,8 @@ static int garmin_probe(struct gps_session_t *session)
 
     if ( ! ok ) {
 	gpsd_report(2, "Garmin driver never answered to INFO_REQ.\n");
+	// restore old terminal settings
+        tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	return 0;
     }
     // Tell the device that we are starting a session.
@@ -679,6 +700,8 @@ static int garmin_probe(struct gps_session_t *session)
 	    return(0);
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout\n");
+	    // restore old terminal settings
+            tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
@@ -694,6 +717,8 @@ static int garmin_probe(struct gps_session_t *session)
     }
     if ( ! ok ) {
 	gpsd_report(2, "Garmin driver never answered to START_SESSION.\n");
+	// restore old terminal settings
+        tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	return 0;
     }
 
@@ -721,6 +746,8 @@ static int garmin_probe(struct gps_session_t *session)
 	    return(0);
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout\n");
+	    // restore old terminal settings
+            tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
@@ -736,6 +763,8 @@ static int garmin_probe(struct gps_session_t *session)
 
     if ( ! ok ) {
 	gpsd_report(2, "Garmin driver never answered to PRODUCT_DATA.\n");
+	// restore old terminal settings
+        tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset_old);
 	return 0;
     }
     return(1);

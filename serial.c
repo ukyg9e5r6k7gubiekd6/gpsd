@@ -95,12 +95,14 @@ int gpsd_open(struct gps_session_t *session)
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
-	for (dp = gpsd_drivers; *dp; dp++)
+	for (dp = gpsd_drivers; *dp; dp++) {
+           tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe && (*dp)->probe(session)) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
 		return session->gpsdata.gps_fd;
 	    }
+ 	}
 	gpsd_report(3, "no probe matched...\n");
 #endif /* NON_NMEA_ENABLE */
 
