@@ -1,18 +1,3 @@
-/* AIX requires this to be the first thing in the file.  */
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
- #pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-char *alloca ();
-#   endif
-#  endif
-# endif
-#endif
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -20,7 +5,6 @@ char *alloca ();
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
-#define __USE_XOPEN
 #include <time.h>
 
 #include "gpsd.h"
@@ -474,40 +458,36 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	int mask;
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"RMC", GPRMC,	processGPRMC},
-	{"GGA", GPGGA,	processGPGGA},
-	{"GLL", GPGLL,	processGPGLL},
-	{"GSA", GPGSA,	processGPGSA},
-	{"GSV", GPGSV,	processGPGSV},
-	{"DA",  GPZDA,	processGPZDA},
-	{"PGRME", PGRME,	processPGRME},
+	{"RMC", 	GPRMC,	processGPRMC},
+	{"GGA", 	GPGGA,	processGPGGA},
+	{"GLL", 	GPGLL,	processGPGLL},
+	{"GSA", 	GPGSA,	processGPGSA},
+	{"GSV", 	GPGSV,	processGPGSV},
+	{"ZDA", 	GPZDA,	processGPZDA},
+	{"PGRME",	PGRME,	processPGRME},
     };
+    unsigned char buf[NMEA_MAX+1];
 
     int retval = 0;
     unsigned int i;
     int count;
     unsigned char sum;
-    char *p, *s;
+    char *p;
     char *field[80];
 
-    if ( ! nmea_checksum(sentence+1, &sum)) {
+    if (!nmea_checksum(sentence+1, &sum)) {
         gpsd_report(1, "Bad NMEA checksum: '%s' should be %02X\n",
                    sentence, sum);
         return 0;
     }
 
     /* make an editable copy of the sentence */
-#ifdef AC_FUNC_ALLOCA
-    s = alloca(strlen(sentence)+1);
-    strcpy(s, sentence);
-#else
-    s = strdup(sentence);
-#endif
+    strncpy(buf, sentence, NMEA_MAX);
     /* discard the checksum part */
-    for (p = s; (*p != '*') && (*p >= ' '); ) ++p;
+    for (p = buf; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
     /* split sentence copy on commas, filling the field array */
-    for (count = 0, p = s; p != NULL && *p != 0; ++count, p = strchr(p, ',')) {
+    for (count = 0, p = buf; p != NULL && *p; ++count, p = strchr(p, ',')) {
 	*p = 0;
 	field[count] = ++p;
     }
@@ -526,9 +506,6 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    break;
 	}
     }
-#ifndef AC_FUNC_ALLOCA
-    free(s);
-#endif
     return retval;
 }
 
