@@ -384,10 +384,6 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
 
 int nmea_sane_satellites(struct gps_data_t *out)
 {
-    /* not valid data until we've seen a complete set of parts */
-    if (out->part != out->await)
-	return 0;
-
     /*
      * This sanity check catches an odd behavior of the BU-303, and thus
      * possibly of other SiRF-II based GPSes.  When they can't see any
@@ -444,13 +440,24 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	lower++;
     }
 
-    if (nmea_sane_satellites(out)) {
-	gpscli_report(3, "Satellite data OK.\n");
-	out->satellite_stamp.changed = changed;
-	REFRESH(out->satellite_stamp);
+    /* not valid data until we've seen a complete set of parts */
+    if (out->part == out->await)
+    {
+	/* trim off PRNs with spurious data attached */
+	while (out->satellites
+		    && !out->elevation[out->satellites-1]
+		    && !out->azimuth[out->satellites-1]
+		    && !out->ss[out->satellites-1])
+	    out->satellites--;
+
+	if (nmea_sane_satellites(out)) {
+	    gpscli_report(3, "Satellite data OK.\n");
+	    out->satellite_stamp.changed = changed;
+	    REFRESH(out->satellite_stamp);
+	}
+	else
+	    gpscli_report(3, "Satellite data no good.\n");
     }
-    else
-	gpscli_report(3, "Satellite data no good.\n");
 }
 
 /* ----------------------------------------------------------------------- */
