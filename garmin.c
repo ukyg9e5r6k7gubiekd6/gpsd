@@ -547,23 +547,6 @@ Packet_t* GetPacket (struct gps_session_t *session )
 }
 
 /*
- * garmin_init()
- *
- * init a garmin_usb device,
- * session->gNMEAdata.gps_fd is assumed to already be open.
- *
- * the garmin_usb driver ignores all termios, baud rates, etc. so
- * any twiddling of that previously done is harmless.
- *
- * gps_fd was opened in NDELAY mode so be careful about reads.
- */
-static void garmin_init(struct gps_session_t *session)
-{
-
-	garmin_probe( session );
-}
-
-/*
  * garmin_probe()
  *
  * return 0 if garmin_usb device found
@@ -720,6 +703,23 @@ int garmin_probe(struct gps_session_t *session)
 
     //SendPacket(session,  (Packet_t*) buffer);
     return(0);
+}
+
+/*
+ * garmin_init()
+ *
+ * init a garmin_usb device,
+ * session->gNMEAdata.gps_fd is assumed to already be open.
+ *
+ * the garmin_usb driver ignores all termios, baud rates, etc. so
+ * any twiddling of that previously done is harmless.
+ *
+ * gps_fd was opened in NDELAY mode so be careful about reads.
+ */
+static void garmin_init(struct gps_session_t *session)
+{
+
+	garmin_probe( session );
 }
 
 static void garmin_handle_input(struct gps_session_t *session)
