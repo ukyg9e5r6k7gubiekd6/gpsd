@@ -197,6 +197,8 @@ static void attach_client_to_device(int cfd, int dfd)
     channels[dfd].nsubscribers++;
     subscribers[cfd].active = 1;
 }
+
+#define is_client(cfd)	subscribers[cfd].active 
 #endif /* MULTISESSION */
 
 static void detach_client(int cfd)
@@ -245,6 +247,7 @@ static void notify_watchers(char *sentence)
 /* restrict the scope of the command-state globals as much as possible */
 static struct gps_device_t *device;
 static int need_gps;
+#define is_client(cfd)	(cfd != msock && cfd != device->gpsdata.gps_fd) 
 #endif /* MULTISESSION */
 
 static int handle_request(int cfd, char *buf, int buflen)
@@ -777,19 +780,26 @@ int main(int argc, char *argv[])
 	    FD_CLR(msock, &rfds);
 	}
 
-	/* we may need to force the GPS open */
-	if (nowait && device->gpsdata.gps_fd == -1) {
-	    gpsd_deactivate(device);
-	    if (gpsd_activate(device) >= 0) {
-		FD_SET(device->gpsdata.gps_fd, &all_fds);
-		notify_watchers("GPSD,X=1\r\n");
-	    }
-	}
+#ifdef MULTISESSION
+	/* poll all active devices */
+	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
+	    struct gps_device_t *device = channel->device;
 
-	if (device->gpsdata.gps_fd >= 0) {
+	    if (!device)
+		continue;
+#endif /* MULTISESSION */
+	    /* we may need to force the GPS open */
+	    if (nowait && device->gpsdata.gps_fd == -1) {
+		gpsd_deactivate(device);
+		if (gpsd_activate(device) >= 0) {
+		    FD_SET(device->gpsdata.gps_fd, &all_fds);
+		    notify_watchers("GPSD,X=1\r\n");
+		}
+	    }
+
 	    /* get data from the device */
 	    changed = 0;
-	    if (!((changed=gpsd_poll(device)) | ONLINE_SET)) {
+	    if (device->gpsdata.gps_fd >= 0 && !((changed=gpsd_poll(device)) | ONLINE_SET)) {
 		gpsd_report(3, "GPS is offline\n");
 		FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		gpsd_deactivate(device);
@@ -807,19 +817,20 @@ int main(int argc, char *argv[])
 			    handle_request(cfd, "y", 1);
 		    }
 		}
-	    }
-	}
 
-	/* this simplifies a later test */
-	if (device->dsock > -1)
-	    FD_CLR(device->dsock, &rfds);
+	    /* this simplifies a later test */
+	    if (device->dsock > -1)
+		FD_CLR(device->dsock, &rfds);
+#ifndef MULTISESSION
+	}
+#endif /* MULTISESSION */
 
 	/* accept and execute commands for all clients */
 #ifndef MULTISESSION
 	need_gps = 0;
 #endif /* MULTISESSION */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (cfd == msock || cfd == device->gpsdata.gps_fd)
+	    if (!is_client(cfd))
 		continue;
 
 #ifdef MULTISESSION
