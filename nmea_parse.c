@@ -130,14 +130,14 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
            *68          mandatory nmea_checksum
 
      */
-    char utc[20], ddmmyy[10], hhmmss[10];
+    char ddmmyy[10], hhmmss[10];
     time_t now;
     struct tm *tm;
 
     strcpy(ddmmyy, field(sentence, 9));	/* Date: ddmmyy */
 
-    strncpy(utc, ddmmyy + 2, 2);	/* copy month */
-    strncpy(utc + 3, ddmmyy, 2);	/* copy date */
+    strncpy(out->utc, ddmmyy + 2, 2);	/* copy month */
+    strncpy(out->utc + 3, ddmmyy, 2);	/* copy date */
 
     /*
      * Uh oh, the NMEA designers screwed the pooch and returned a 2-digit year.
@@ -148,20 +148,19 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
      */
     now = time(NULL);
     tm = localtime(&now);
-    strftime(utc + 6, 3, "%C", tm);
-    strncpy(utc + 8, ddmmyy + 4, 2);	/* copy year */
+    strftime(out->utc + 6, 3, "%C", tm);
+    strncpy(out->utc + 8, ddmmyy + 4, 2);	/* copy year */
 
     strcpy(hhmmss, field(sentence, 1));	/* Time: hhmmss */
-    strncpy(utc + 11, hhmmss, 2);	/* copy hours */
-    strncpy(utc + 14, hhmmss + 2, 2);	/* copy minutes */
-    strncpy(utc + 17, hhmmss + 4, 2);	/* copy seconds */
+    strncpy(out->utc + 11, hhmmss, 2);	/* copy hours */
+    strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
+    strncpy(out->utc + 17, hhmmss + 4, 2);	/* copy seconds */
 
-    utc[2] = utc[5] = '/';	/* add '/'s, ':'s, ' ' and string terminator */
-    utc[10] = ' ';
-    utc[13] = utc[16] = ':';
-    utc[19] = '\0';
-
-    strcpy(out->utc, utc);
+    /* add '/'s, ':'s, ' ' and string terminator */
+    out->utc[2] = out->utc[5] = '/';
+    out->utc[10] = ' ';
+    out->utc[13] = out->utc[16] = ':';
+    out->utc[19] = '\0';
 
     do_lat_lon(sentence, 3, out);
 
