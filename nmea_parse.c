@@ -77,6 +77,14 @@ void processGPRMC(char *sentence)
 
 /* ----------------------------------------------------------------------- */
 
+void processGPVTG(char *sentence)
+{
+    sscanf(field(sentence, 3), "%lf", &gNMEAdata.speed);
+    sscanf(field(sentence, 1), "%lf", &gNMEAdata.track);
+}
+
+/* ----------------------------------------------------------------------- */
+
 void processGPGGA(char *sentence)
 {
     do_lat_lon(sentence, 2);

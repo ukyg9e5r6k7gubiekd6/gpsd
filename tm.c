@@ -26,6 +26,8 @@ void process_message(char *sentence)
 	    processGPRMC(sentence);
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
 	    processGPGGA(sentence);
+	} else if (strncmp(GPVTG, sentence, 5) == 0) {
+	    processGPVTG(sentence);
 	} else if (strncmp(GPGSA, sentence, 5) == 0) {
 	    processGPGSA(sentence);
 	} else if (strncmp(GPGSV, sentence, 5) == 0) {

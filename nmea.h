@@ -1,4 +1,5 @@
 
+#define GPVTG "GPVTG"
 #define GPGGA "GPGGA"
 #define GPGSA "GPGSA"
 #define GPGSV "GPGSV"
@@ -81,6 +82,7 @@ struct OUTDATA {
 
 /* prototypes */
 extern void doNMEA(short refNum);
+extern void processGPVTG(char *sentence);
 extern void processGPRMC(char *sentence);
 extern void processGPGGA(char *sentence);
 extern void processGPGSV(char *sentence);
