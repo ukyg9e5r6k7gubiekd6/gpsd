@@ -1,0 +1,85 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Remco Treffkorn">
+   <meta name="Description" content="GPSd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <title>Bluetooth and GPSd</title>
+</head>
+<body background="paper.gif">
+
+<p>Jean-Michel.Bouffard, who is at CRC in Canada says that he's using
+the Socket Bluetooth GPS receiver with gpsd.  Here are his notes.  The
+Bluetooth protocol is including a serial profile that makes the use of
+the Bluetooth GPS almost like a serial GPS.</p>
+
+<ul>
+
+<li>First, the Bluez protcol stack must be installed and all the 
+documentation can be found on http://bluez.sourceforge.net/
+In my case, I installed it on a Linux PC with a BT USB dongle but I'm 
+still trying to install it on my 3850 iPaq with
+a BT Sleeve. But once BT is installed, the rest is the same.
+
+<li>Install bluetooth for your device with the "rfcomm" module which is 
+the Serial profile (http://bluez.sourceforge.net/).
+
+<li>Next, load the modules :
+<pre>
+     # modprobe hci_xxx (xxx depend on your type of device)
+     # modprobe bluez
+     # modprobe l2cap
+     # modprobe rfcomm
+</pre>
+<li>Note : you must be the root user for the next part...
+<li>If the modules have loaded successfully, type "hciconfig" and you 
+should see your BT device listed under the "hci0" name.
+<li>Create the BT serial device (To do once, it will still be there after 
+a reboot):
+<pre>
+     # mknod /dev/rfcomm0 c 216 0
+</pre>
+<li>Start your device and scan for remote BT device:
+<pre>
+     # hciconfig hci0 up
+     # hcitool scan
+</pre>
+
+<li>Write down the adress of the newly found BT GPS receiver (looks like 
+xx:xx:xx:xx:xx:xx)
+
+<li>Connect to the device:
+<pre>
+     # hcitool cc xx:xx:xx:xx:xx:xx
+</pre>
+<li>You can chack if the connection is done by doing :
+<pre>
+     # hcitool con
+</pre>
+<li>Start the serial protocol over BT :
+<pre>
+     # rfcomm /dev/rfcomm0 xx:xx:xx:xx:xx:xx
+</pre>
+
+<li>After that, your BT GPS should be connected to /dev/rfcomm0 and you can 
+check by doing :
+<pre>
+     # cat /dev/rfcomm0
+</pre>
+to see the NMEA GPS output
+
+<li>You can then start gpsd like this:
+<pre>
+     # gpsd -p /dev/rfcomm0
+</pre>
+to specify the path of the GPS and it will work exactly like a serial GPS
+
+</ul>
+
+<p>If something is unclear, write me back and I will try to help you...</p>
+
+<p>Jean-Michel Bouffard</p>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Remco Treffkorn">
+   <meta name="Description" content="GPSd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <title>GPSD project history</title>
+</head>
+<body background="paper.gif">
+
+<h1 align='center'>A Brief History of GPSD</h1>
+
+<p>There is at least one fork of gpsd wandering around.  This page
+will explain matters.</p>
+
+<p>The gpsd project was started in 1995 by Remco Treffkorn, back when
+GPS technology was a shiny new thing.  Remco laid out a sound basic
+framework for a utility that functioned without much fuss for nearly
+a decade.</p>
+
+<p>Remco's design may, in a sense, have been too good.  Because gpsd
+didn't cause problems or attract attention, the maintainers (including
+Remco himself and Derrick Brashear) turned to other more pressing
+problems. The code was neglected for years at a stretch, and became
+rather dusty.  The original architecture started to show signs of
+strain when Remco, Derrick, and Russ Nelson bolted on support for the odd
+proprietary format of the EarthMate GPS between early 1999 and late
+2002.</p>
+
+<p>Therafter, Russ Nelson hosted the project on <a
+href='http://pygps.org/'>pypgs.org</a> for several years and became
+one of its three maintainers.  He continued the gpsd tradition by
+largely ignoring the code once he had gotten it working rell enough to
+support <a href="http://www.pygps.org">pyGPS</a>.</p>
+
+<p>Sometime during this period Fritz Ganter, author of the <a
+href="http://www.gpsdrive.cc/">GPSdrive</a> project. forked gpsd.
+There are a couple of different stories about why the fork happened
+and some clashing memories.  However, the gpsdrive version did not
+diverge from the parent gpsd in any significant way.  The protocol
+it speaks is a proper subset of gpsd-2's.</p>
+
+<p>There is another fork of gpsd written by Thomas Hargrove and called
+<a href="http://thomashargrove.com/tgpsd/">tgpsd</a>.  It's written in
+C++.  The protocol it speaks is almost a proper subset of that of
+gpsd; it has the same PDAVMSQ commands and an 'I' command that can query
+the azimuth/elevation/signal-strength of an individual satellite.</p>
+
+<p>In August 2004, Eric Raymond (yes, <em>that</em> Eric Raymond)
+tripped over a minor problem with gpsd while playing with his new toy,
+a BU-303 USB GPS.  He looked at the code, muttered imprecations about
+the thick layer of dust on it, and began hacking.</p>
+
+<p>About a week of frenzied coding later, Eric had (a) completely
+refactored and cleaned up the code, (b) added every feature then on
+the developers' wishlists, (c) documented it all, and (d) added
+substantial new features of his own, including the libgpsd service
+library that allows C developers to manage a gpsd session in a
+remote-procedure-call-like way (e.g., without having to worry about
+gpsd's protocol or how to unpack its data into a C structure).</p>
+
+<p>Eric's work became the prototype for gpsd-2.0.  In mid-August of
+2004, Eric moved the project to berlios.de with the approval and
+cooperation of all three of the 1.x maintainers.  (The main reason
+for that choice of hosting site was that it offered Subversion, which
+Eric and the 1.x developers were all interested in experimenting with.)</p>
+
+<p>Fritz Ganter has agreed to unfork the gpsdrive version of gpsd.  So
+once the 2.0 version is out and tested. perhaps we will all be able
+to ignore it for another N years.</p>
+
+</body>
+</html>

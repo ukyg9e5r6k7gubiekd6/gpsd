@@ -1,0 +1,59 @@
+19970421 released version 0.7 ...
+19970425 version 0.8, some bug fixes. New MODE member, STATUS member changed.
+19970513 some cleanups in the ini code. version 0.9 ...
+19980127 combined gpsd + gpsclient. No more init files, command line only.
+19980127 using GNU autoconf now. version 0.93 ...
+19990124 Y2K compliant ;-)  (... is NOT. Look for "FIXME:" in nmea_parse.c)
+19990206 (0.95)
+	 Added suport for EarthMate receivers. Since I do not
+	 have one, this is untested.
+	 If it works, it does the following:
+	  You start gpsd with a baudrate of 9600 and give
+	  it the -Te option. If gpsd gets the EartMate id it
+	  will enable the receiver and then attempt to switch
+	  it into NMEA mode.
+	  If the EarthMate id is not received, but a binary
+	  data header is received, then we will try to switch
+	  NMEA too.
+19990304 (0.96)
+	 Changed EarthMate support. Rockwell binary is now almost properly
+	 supported. Only the minimum required information is extracted.
+19990717 (0.99)
+	 Rockwell binary is now translated to NMEA format, so that
+	 clients like gps will work with an EarthMate.
+	 Added speedometer application. Thanks to Derrick J Brashear
+	 for his work (see README for contact info).
+19991213 (0.99-dgps)
+	 Added minimal DGPS support by Derrick J Brashear
+20000102 (1.0)
+	 Added DGPS fixes from Curt Mills. (See README for contact info.)
+20000305 (1.01)
+	 Updated to IANA port.
+	 Fixes to DGPS support.
+20000317 (1.02) (even though version.h says 1.01)
+20000512 (1.05) (even though version.h says 1.04)
+	 Added some includes to xgpsspeed.c for portability.
+	 Fix problem with flags being overwritten, and using the wrong port
+	 variable also in xgpsspeed.c
+	 Add a note about Y2K compatibility fix.
+	 Pass latitude and longitude into em_init().
+20000711 (1.06)
+	 Change from C++ (/) to C comments (/* */)for compatibility.
+	 Added -n (need init) flag.
+	 Don't init unless lat/lon specified.
+	 Remove gps.mayko.com as the default hostname.
+20020926 (1.07)
+	 Remco: What happened to 1.03?
+	  em.c uses <time.h> (as it should). Removed some <sys/time.h>
+	  where they were not needed.
+	 Russ Nelson: Improved Earthmate support: added state machine for
+	  EARTHA recognizer, removed alignment problems seen on ARM
+	  architecture.  Added setsockopt to add SO_REUSEADDR, so that
+	  gpsd can stop and immediately restart.  Added support for bitrates
+	  higher than 38400, needed for the SIRF chipset.
+	 Derrick: my patch causes longitude when under 100 degrees to be printed 
+	  zero-padded as needed, the latitude same deal under 10, fixes the GGA
+	  sentence to not erroneously print fix type (2/3) instead of fix quality,
+	  and calculates fix type correctly.
+
+

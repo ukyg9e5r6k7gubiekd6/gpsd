@@ -1,0 +1,67 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Eric Raymond">
+   <meta name="Description" content="Hardware known to work with GPSD.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <title>Compatible GPSes</title>
+</head>
+
+<body background="paper.gif">
+
+<h1 align='center'>Compatible GPSses</h1>
+
+<p>gpsd should work with any GPS using an RS232C or USB interface that
+advertises NMEA-0183 compliance.  Here are the some notes on hardware
+we have tested:</p>
+
+<table border='1'>
+
+<tr>
+<th>Name</th>
+<th>Chipset</th>
+<th>Interface</th>
+<th>Sold as</th>
+<th>gpsd type</th>
+<th>Tested</th>
+<th>Sentences</th>
+<th width="50%">Notes</th>
+</tr>
+<tr>
+<td>BU-303</td>
+<td>SiRF-II</td>
+<td>USB</td>
+<td>NavMan, Hyperdata, Deluo</td>
+<td align='center'>n</td>
+<td>1.91</td>
+<td>GSA, GGL, GSV, RMC, VTG</td>
+<td>Very generic SiRF II device. Requires pl2303 support 
+which is broken in late 2.4 Linux kernels but good in 2.6.8.</td>
+</tr>
+<tr>
+<td>EarthMate</td>
+<td>Zodiac</td>
+<td>RS-232</td>
+<td>Delorme</td>
+<td align='center'>e</td>
+<td>1.10</td>
+<td>Unknown</td>
+<td>Speaks Rockwell binary protocol.</td>
+</tr>
+<tr>
+<td><a href='http://vancouver-webpages.com/peter/tripmate.faq'>TripMate</a></td>
+<td>Zodiac</td>
+<td>RS-232</td>
+<td>Delorme</td>
+<td align='center'>t</td>
+<td>1.10</td>
+<td>GPRMC, GPGSA, GPGGA, GPGSV, PRWIRID, PRWIZCH</td>
+<td>
+Discontinued sometime before November 1998. 
+Takes optional latitude/longitude initialization.</td>
+</tr>
+</table>
+
+</body>
+</html>

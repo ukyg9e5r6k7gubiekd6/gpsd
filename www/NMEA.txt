@@ -1,0 +1,1014 @@
+ AAM - Waypoint Arrival Alarm
+
+        1 2 3   4 5    6
+        | | |   | |    |
+ $--AAM,A,A,x.x,N,c--c*hh<CR><LF>
+
+ Field Number: 
+ 1) Status, BOOLEAN, A = Arrival circle entered
+ 2) Status, BOOLEAN, A = perpendicular passed at waypoint
+ 3) Arrival circle radius
+ 4) Units of radius, nautical miles
+ 5) Waypoint ID
+ 6) Checksum
+
+ ALM - GPS Almanac Data
+
+        1   2   3  4   5  6    7  8    9    10     11     12     13     14  15   16
+        |   |   |  |   |  |    |  |    |    |      |      |      |      |   |    |
+ $--ALM,x.x,x.x,xx,x.x,hh,hhhh,hh,hhhh,hhhh,hhhhhh,hhhhhh,hhhhhh,hhhhhh,hhh,hhh,*hh<CR><LF>
+
+ Field Number: 
+  1) Total number of messages
+  2) Message Number
+  3) Satellite PRN number (01 to 32)
+  4) GPS Week Number :
+	Date and time in GPS is computed as number of weeks from 6 January 1980 plus
+     	number of seconds into the week.
+  5) SV health, bits 17-24 of each almanac page
+  6) Eccentricity
+  7) Almanac Reference Time
+  8) Inclination Angle
+  9) Rate of Right Ascension
+ 10) Root of semi-major axis
+ 11) Argument of perigee
+ 12) Longitude of ascension node
+ 13) Mean anomaly
+ 14) F0 Clock Parameter
+ 15) F1 Clock Parameter
+ 16) Checksum
+
+ APA - Autopilot Sentence "A"
+
+        1 2  3   4 5 6 7  8  9 10    11
+        | |  |   | | | |  |  | |     |
+ $--APA,A,A,x.xx,L,N,A,A,xxx,M,c---c*hh<CR><LF>
+
+ Field Number: 
+  1) Status
+     V = LORAN-C Blink or SNR warning
+     V = general warning flag or other navigation systems when a reliable
+         fix is not available
+  2) Status
+     V = Loran-C Cycle Lock warning flag
+     A = OK or not used
+
+  3) Cross Track Error Magnitude
+  4) Direction to steer, L or R
+  5) Cross Track Units (Nautic miles or kilometers)
+  6) Status
+     A = Arrival Circle Entered
+  7) Status
+     A = Perpendicular passed at waypoint
+  8) Bearing origin to destination
+  9) M = Magnetic, T = True
+ 10) Destination Waypoint ID
+ 11) checksum
+
+ APB - Autopilot Sentence "B"
+                                         13    15
+        1 2 3   4 5 6 7 8   9 10   11  12|   14|
+        | | |   | | | | |   | |    |   | |   | |
+ $--APB,A,A,x.x,a,N,A,A,x.x,a,c--c,x.x,a,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) Status
+     V = LORAN-C Blink or SNR warning
+     V = general warning flag or other navigation systems when a reliable
+         fix is not available
+  2) Status
+     V = Loran-C Cycle Lock warning flag
+     A = OK or not used
+  3) Cross Track Error Magnitude
+  4) Direction to steer, L or R
+  5) Cross Track Units, N = Nautical Miles
+  6) Status
+     A = Arrival Circle Entered
+  7) Status
+     A = Perpendicular passed at waypoint
+  8) Bearing origin to destination
+  9) M = Magnetic, T = True
+ 10) Destination Waypoint ID
+ 11) Bearing, present position to Destination
+ 12) M = Magnetic, T = True
+ 13) Heading to steer to destination waypoint
+ 14) M = Magnetic, T = True
+ 15) Checksum
+
+ ASD - Autopilot System Data
+ FORMAT UNKOWN
+
+ BEC - Bearing & Distance to Waypoint - Dead Reckoning
+                                                         12
+        1         2       3 4        5 6   7 8   9 10  11|    13
+        |         |       | |        | |   | |   | |   | |    |
+ $--BEC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) UTCTime
+  2) Waypoint Latitude
+  3) N = North, S = South
+  4) Waypoint Longitude
+  5) E = East, W = West
+  6) Bearing, True
+  7) T = True
+  8) Bearing, Magnetic
+  9) M = Magnetic
+ 10) Nautical Miles
+ 11) N = Nautical Miles
+ 12) Waypoint ID
+ 13) Checksum
+
+
+ BOD - Bearing - Waypoint to Waypoint
+
+        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--BOD,x.x,T,x.x,M,c--c,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Bearing Degrees, TRUE
+  2) T = True
+  3) Bearing Degrees, Magnetic
+  4) M = Magnetic
+  5) TO Waypoint
+  6) FROM Waypoint
+  7) Checksum
+
+ BWC - Bearing and Distance to Waypoint
+ Latitude, N/S, Longitude, E/W, UTC, Status
+                                                       11
+        1         2       3 4        5 6   7 8   9 10  | 12   13
+        |         |       | |        | |   | |   | |   | |    |
+ $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) UTCTime
+  2) Waypoint Latitude
+  3) N = North, S = South
+  4) Waypoint Longitude
+  5) E = East, W = West
+  6) Bearing, True
+  7) T = True
+  8) Bearing, Magnetic
+  9) M = Magnetic
+ 10) Nautical Miles
+ 11) N = Nautical Miles
+ 12) Waypoint ID
+ 13) Checksum
+
+ BWR - Bearing and Distance to Waypoint - Rhumb Line
+ Latitude, N/S, Longitude, E/W, UTC, Status
+                                                       11
+        1         2       3 4        5 6   7 8   9 10  | 12   13
+        |         |       | |        | |   | |   | |   | |    |
+ $--BWR,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) UTCTime
+  2) Waypoint Latitude
+  3) N = North, S = South
+  4) Waypoint Longitude
+  5) E = East, W = West
+  6) Bearing, True
+  7) T = True
+  8) Bearing, Magnetic
+  9) M = Magnetic
+ 10) Nautical Miles
+ 11) N = Nautical Miles
+ 12) Waypoint ID
+ 13) Checksum
+
+ BWW - Bearing - Waypoint to Waypoint
+
+        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--BWW,x.x,T,x.x,M,c--c,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Bearing Degrees, TRUE
+  2) T = True
+  3) Bearing Degrees, Magnetic
+  4) M = Magnetic
+  5) TO Waypoint
+  6) FROM Waypoint
+  7) Checksum
+
+ DBK - Depth Below Keel
+
+        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBK,x.x,f,x.x,M,x.x,F*hh<CR><LF>
+
+ Field Number: 
+  1) Depth, feet
+  2) f = feet
+  3) Depth, meters
+  4) M = meters
+  5) Depth, Fathoms
+  6) F = Fathoms
+  7) Checksum
+
+ DBS - Depth Below Surface
+
+        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBS,x.x,f,x.x,M,x.x,F*hh<CR><LF>
+
+ Field Number: 
+  1) Depth, feet
+  2) f = feet
+  3) Depth, meters
+  4) M = meters
+  5) Depth, Fathoms
+  6) F = Fathoms
+  7) Checksum
+
+ DBT - Depth below transducer
+
+        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--DBT,x.x,f,x.x,M,x.x,F*hh<CR><LF>
+
+ Field Number: 
+  1) Depth, feet
+  2) f = feet
+  3) Depth, meters
+  4) M = meters
+  5) Depth, Fathoms
+  6) F = Fathoms
+  7) Checksum
+
+ DCN - Decca Position
+                                      11  13      16
+        1  2  3   4 5  6   7 8  9   10| 12| 14  15| 17
+        |  |  |   | |  |   | |  |   | | | | |   | | |
+ $--DCN,xx,cc,x.x,A,cc,x.x,A,cc,x.x,A,A,A,A,x.x,N,x*hh<CR><LF>
+
+ Field Number: 
+  1) Decca chain identifier
+  2) Red Zone Identifier
+  3) Red Line Of Position
+  4) Red Master Line Status
+  5) Green Zone Identifier
+  6) Green Line Of Position
+  7) Green Master Line Status
+  8) Purple Zone Identifier
+  9) Purple Line Of Position
+ 10) Purple Master Line Status
+ 11) Red Line Navigation Use
+ 12) Green Line Navigation Use
+ 13) Purple Line Navigation Use
+ 14) Position Uncertainity
+ 15) N = Nautical Miles
+ 16) Fix Data Basis
+     1 = Normal Pattern
+     2 = Lane Identification Pattern
+     3 = Lane Identification Transmissions
+ 17) Checksum
+
+ DPT - Heading - Deviation & Variation
+
+        1   2   3
+        |   |   |
+ $--DPT,x.x,x.x*hh<CR><LF>
+
+ Field Number: 
+  1) Depth, meters
+  2) Offset from transducer, 
+     positive means distance from tansducer to water line
+     negative means distance from transducer to keel
+  3) Checksum
+
+ FSI - Frequency Set Information
+
+        1      2      3 4 5
+        |      |      | | |
+ $--FSI,xxxxxx,xxxxxx,c,x*hh<CR><LF>
+
+ Field Number: 
+  1) Transmitting Frequency
+  2) Receiving Frequency
+  3) Communications Mode (NMEA Syntax 2)
+  4) Power Level
+  5) Checksum
+
+ GGA - Global Positioning System Fix Data
+ Time, Position and fix related data fora GPS receiver.
+
+                                                      11
+        1         2       3 4        5 6 7  8   9  10 |  12 13  14   15
+        |         |       | |        | | |  |   |   | |   | |   |    |
+ $--GGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh<CR><LF>
+
+ Field Number: 
+  1) Universal Time Coordinated (UTC)
+  2) Latitude
+  3) N or S (North or South)
+  4) Longitude
+  5) E or W (East or West)
+  6) GPS Quality Indicator,
+     0 - fix not available,
+     1 - GPS fix,
+     2 - Differential GPS fix
+  7) Number of satellites in view, 00 - 12
+  8) Horizontal Dilution of precision
+  9) Antenna Altitude above/below mean-sea-level (geoid) 
+ 10) Units of antenna altitude, meters
+ 11) Geoidal separation, the difference between the WGS-84 earth
+     ellipsoid and mean-sea-level (geoid), "-" means mean-sea-level
+     below ellipsoid
+ 12) Units of geoidal separation, meters
+ 13) Age of differential GPS data, time in seconds since last SC104
+     type 1 or 9 update, null field when DGPS is not used
+ 14) Differential reference station ID, 0000-1023
+ 15) Checksum
+
+ GLC - Geographic Position, Loran-C
+                                           12    14
+        1    2   3 4   5 6   7 8   9 10  11|   13|
+        |    |   | |   | |   | |   | |   | |   | |
+ $--GLC,xxxx,x.x,a,x.x,a,x.x,a.x,x,a,x.x,a,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) GRI Microseconds/10
+  2) Master TOA Microseconds
+  3) Master TOA Signal Status
+  4) Time Difference 1 Microseconds
+  5) Time Difference 1 Signal Status
+  6) Time Difference 2 Microseconds
+  7) Time Difference 2 Signal Status
+  8) Time Difference 3 Microseconds
+  9) Time Difference 3 Signal Status
+ 10) Time Difference 4 Microseconds
+ 11) Time Difference 4 Signal Status
+ 12) Time Difference 5 Microseconds
+ 13) Time Difference 5 Signal Status
+ 14) Checksum
+
+ GLL - Geographic Position - Latitude/Longitude
+
+	1       2 3        4 5         6 7
+	|       | |        | |         | |
+ $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,A*hh<CR><LF>
+
+ Field Number: 
+  1) Latitude
+  2) N or S (North or South)
+  3) Longitude
+  4) E or W (East or West)
+  5) Universal Time Coordinated (UTC)
+  6) Status A - Data Valid, V - Data Invalid
+  7) Checksum
+
+ GSA - GPS DOP and active satellites
+
+	1 2 3                        14 15  16  17  18
+	| | |                         |  |   |   |   |
+ $--GSA,a,a,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x.x,x.x,x.x*hh<CR><LF>
+
+ Field Number: 
+  1) Selection mode
+  2) Mode
+  3) ID of 1st satellite used for fix
+  4) ID of 2nd satellite used for fix
+  ...
+  14) ID of 12th satellite used for fix
+  15) PDOP in meters
+  16) HDOP in meters
+  17) VDOP in meters
+  18) checksum
+
+ GSV - Satellites in view
+
+	1 2 3 4 5 6 7     n
+	| | | | | | |     |
+ $--GSV,x,x,x,x,x,x,x,...*hh<CR><LF>
+
+ Field Number: 
+  1) total number of messages
+  2) message number
+  3) satellites in view
+  4) satellite number
+  5) elevation in degrees
+  6) azimuth in degrees to true
+  7) SNR in dB
+  more satellite infos like 4)-7)
+  n) checksum
+
+ GTD - Geographic Location in Time Differences
+
+ 	 1   2   3   4   5  6
+	 |   |   |   |   |  |
+ $--GTD,x.x,x.x,x.x,x.x,x.x*hh<CR><LF>
+
+ Field Number: 
+  1) time difference
+  2) time difference
+  3) time difference
+  4) time difference
+  5) time difference
+  n) checksum
+
+ GXA - TRANSIT Position - Latitude/Longitude
+ Location and time of TRANSIT fix at waypoint
+
+        1         2       3 4        5 6    7 8
+        |         |       | |        | |    | |
+ $--GXA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,c--c,X*hh<CR><LF>
+
+ Field Number: 
+ 1) UTC of position fix
+ 2) Latitude
+ 3) East or West
+ 4) Longitude
+ 5) North or South
+ 6) Waypoint ID
+ 7) Satelite number
+ 8) Checksum
+
+ HDG - Heading - Deviation & Variation
+
+        1   2   3 4   5 6
+        |   |   | |   | |
+ $--HDG,x.x,x.x,a,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) Magnetic Sensor heading in degrees
+  2) Magnetic Deviation, degrees
+  3) Magnetic Deviation direction, E = Easterly, W = Westerly
+  4) Magnetic Variation degrees
+  5) Magnetic Variation direction, E = Easterly, W = Westerly
+  6) Checksum
+
+ HDM - Heading - Magnetic
+
+        1   2 3
+        |   | |
+ $--HDM,x.x,M*hh<CR><LF>
+
+ Field Number: 
+  1) Heading Degrees, magnetic
+  2) M = magnetic
+  3) Checksum
+
+ HDT - Heading - True
+
+        1   2 3
+        |   | |
+ $--HDT,x.x,T*hh<CR><LF>
+
+ Field Number: 
+  1) Heading Degrees, true
+  2) T = True
+  3) Checksum
+
+ HSC - Heading Steering Command
+
+        1   2 3   4  5
+        |   | |   |  |
+ $--HSC,x.x,T,x.x,M,*hh<CR><LF>
+
+ Field Number: 
+  1) Heading Degrees, True
+  2) T = True
+  3) Heading Degrees, Magnetic
+  4) M = Magnetic
+  5) Checksum
+
+ LCD - Loran-C Signal Data
+
+        1    2   3   4   5   6   7   8   9   10  11  12  13  14
+        |    |   |   |   |   |   |   |   |   |   |   |   |   |
+ $--LCD,xxxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx*hh<CR><LF>
+
+ Field Number: 
+  1) GRI Microseconds/10
+  2) Master Relative SNR
+  3) Master Relative ECD
+  4) Time Difference 1 Microseconds
+  5) Time Difference 1 Signal Status
+  6) Time Difference 2 Microseconds
+  7) Time Difference 2 Signal Status
+  8) Time Difference 3 Microseconds
+  9) Time Difference 3 Signal Status
+ 10) Time Difference 4 Microseconds
+ 11) Time Difference 4 Signal Status
+ 12) Time Difference 5 Microseconds
+ 13) Time Difference 5 Signal Status
+ 14) Checksum
+
+ MTW - Water Temperature
+
+        1   2 3
+        |   | | 
+ $--MTW,x.x,C*hh<CR><LF>
+
+ Field Number: 
+  1) Degrees
+  2) Unit of Measurement, Celcius
+  3) Checksum
+
+ MWV - Wind Speed and Angle
+
+        1   2 3   4 5
+        |   | |   | |
+ $--MWV,x.x,a,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) Wind Angle, 0 to 360 degrees
+  2) Reference, R = Relative, T = True
+  3) Wind Speed
+  4) Wind Speed Units, K/M/N
+  5) Status, A = Data Valid
+  6) Checksum
+
+ OLN - Omega Lane Numbers
+
+        1          2          3          4
+        |--------+ |--------+ |--------+ |
+ $--OLN,aa,xxx,xxx,aa,xxx,xxx,aa,xxx,xxx*hh<CR><LF>
+
+ Field Number: 
+  1) Omega Pair 1
+  2) Omega Pair 1
+  3) Omega Pair 1
+  4) Checksum
+
+ OSD - Own Ship Data
+
+        1   2 3   4 5   6 7   8   9 10
+        |   | |   | |   | |   |   | |
+ $--OSD,x.x,A,x.x,a,x.x,a,x.x,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) Heading, degrees true
+  2) Status, A = Data Valid
+  3) Vessel Course, degrees True
+  4) Course Reference
+  5) Vessel Speed
+  6) Speed Reference
+  7) Vessel Set, degrees True
+  8) Vessel drift (speed)
+  9) Speed Units
+ 10) Checksum
+
+ R00 - Waypoints in active route
+
+        1                n
+        |                | 
+ $--R00,c---c,c---c,....*hh<CR><LF>
+
+ Field Number: 
+  1) waypoint ID
+  ...
+  n) checksum
+
+ RMA - Recommended Minimum Navigation Information
+                                                    12
+        1 2       3 4        5 6   7   8   9   10  11|
+        | |       | |        | |   |   |   |   |   | |
+ $--RMA,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) Blink Warning
+  2) Latitude
+  3) N or S
+  4) Longitude
+  5) E or W
+  6) Time Difference A, uS
+  7) Time Difference B, uS
+  8) Speed Over Ground, Knots
+  9) Track Made Good, degrees true
+ 10) Magnetic Variation, degrees
+ 11) E or W
+ 12) Checksum
+
+ RMB - Recommended Minimum Navigation Information
+                                                             14
+        1 2   3 4    5    6       7 8        9 10  11  12  13|
+        | |   | |    |    |       | |        | |   |   |   | |
+ $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A*hh<CR><LF>
+
+ Field Number: 
+  1) Status, V = Navigation receiver warning
+  2) Cross Track error - nautical miles
+  3) Direction to Steer, Left or Right
+  4) TO Waypoint ID
+  5) FROM Waypoint ID
+  6) Destination Waypoint Latitude
+  7) N or S
+  8) Destination Waypoint Longitude
+  9) E or W
+ 10) Range to destination in nautical miles
+ 11) Bearing to destination in degrees True
+ 12) Destination closing velocity in knots
+ 13) Arrival Status, A = Arrival Circle Entered
+ 14) Checksum
+
+ RMC - Recommended Minimum Navigation Information
+                                                            12
+        1         2 3       4 5        6 7   8   9    10  11|
+        |         | |       | |        | |   |   |    |   | |
+ $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a*hh<CR><LF>
+
+ Field Number: 
+  1) UTC Time
+  2) Status, V = Navigation receiver warning
+  3) Latitude
+  4) N or S
+  5) Longitude
+  6) E or W
+  7) Speed over ground, knots
+  8) Track made good, degrees true
+  9) Date, ddmmyy
+ 10) Magnetic Variation, degrees
+ 11) E or W
+ 12) Checksum
+
+ ROT - Rate Of Turn
+
+        1   2 3
+        |   | |
+ $--ROT,x.x,A*hh<CR><LF>
+
+ Field Number: 
+  1) Rate Of Turn, degrees per minute, "-" means bow turns to port
+  2) Status, A means data is valid
+  3) Checksum
+
+ RPM - Revolutions
+
+        1 2 3   4   5 6
+        | | |   |   | |
+ $--RPM,a,x,x.x,x.x,A*hh<CR><LF>
+
+ Field Number: 
+  1) Sourse, S = Shaft, E = Engine
+  2) Engine or shaft number
+  3) Speed, Revolutions per minute
+  4) Propeller pitch, % of maximum, "-" means astern
+  5) Status, A means data is valid
+  6) Checksum
+
+ RSA - Rudder Sensor Angle
+
+        1   2 3   4 5
+        |   | |   | |
+ $--RSA,x.x,A,x.x,A*hh<CR><LF>
+
+ Field Number: 
+  1) Starboard (or single) rudder sensor, "-" means Turn To Port
+  2) Status, A means data is valid
+  3) Port rudder sensor
+  4) Status, A means data is valid
+  5) Checksum
+
+ RSD - RADAR System Data
+                                                        14
+        1   2   3   4   5   6   7   8   9   10  11 12 13|
+        |   |   |   |   |   |   |   |   |   |   |   | | |
+ $--RSD,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,a,a*hh<CR><LF>
+
+ Field Number: 
+  9) Cursor Range From Own Ship
+ 10) Cursor Bearing Degrees Clockwise From Zero
+ 11) Range Scale
+ 12) Range Units
+ 14) Checksum
+
+ RTE - Routes
+
+        1   2   3 4	 5		       x    n
+        |   |   | |    |           |    |
+ $--RTE,x.x,x.x,a,c--c,c--c, ..... c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Total number of messages being transmitted
+  2) Message Number
+  3) Message mode
+     c = complete route, all waypoints
+     w = working route, the waypoint you just left, the waypoint you're heading to then all the rest
+  4) Waypoint ID
+  x) More Waypoints
+  n) Checksum
+
+ SFI - Scanning Frequency Information
+
+        1   2   3      4                     x
+        |   |   |      |                     |
+ $--SFI,x.x,x.x,xxxxxx,c .......... xxxxxx,c*hh<CR><LF>
+
+ Field Number: 
+  1) Total Number Of Messages
+  2) Message Number
+  3) Frequency 1
+  4) Mode 1
+  x) Checksum
+
+ STN - Multiple Data ID
+
+        1   2
+        |   |
+ $--STN,x.x,*hh<CR><LF>
+
+ Field Number: 
+  1) Talker ID Number
+  2) Checksum
+
+ TRF - TRANSIT Fix Data
+                                                                    13
+        1         2      3       4 5        6 7   8   9   10  11  12|
+        |         |      |       | |        | |   |   |   |   |   | |
+ $--TRF,hhmmss.ss,xxxxxx,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,xxx,A*hh<CR><LF>
+
+ Field Number: 
+  1) UTC Time
+  2) Date, ddmmyy
+  3) Latitude
+  4) N or S
+  5) Longitude
+  6) E or W
+  7) Elevation Angle
+  8) Number of iterations
+  9) Number of Doppler intervals
+ 10) Update distance, nautical miles
+ 11) Satellite ID
+ 12) Data Validity
+ 13) Checksum
+
+ TTM - Tracked Target Message
+
+                                         11     13
+        1  2   3   4 5   6   7 8   9   10|    12| 14
+        |  |   |   | |   |   | |   |   | |    | | |
+ $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a*hh<CR><LF>
+
+ Field Number: 
+  1) Target Number
+  2) Target Distance
+  3) Bearing from own ship
+  4) Bearing Units
+  5) Target speed
+  6) Target Course
+  7) Course Units
+  8) Distance of closest-point-of-approach
+  9) Time until closest-point-of-approach "-" means increasing
+ 10) "-" means increasing
+ 11) Target name
+ 12) Target Status
+ 13) Reference Target
+ 14) Checksum
+
+ VBW - Dual Ground/Water Speed
+
+        1   2   3 4   5   6 7
+        |   |   | |   |   | |
+ $--VBW,x.x,x.x,A,x.x,x.x,A*hh<CR><LF>
+
+ Field Number: 
+  1) Longitudinal water speed, "-" means astern
+  2) Transverse water speed, "-" means port
+  3) Status, A = Data Valid
+  4) Longitudinal ground speed, "-" means astern
+  5) Transverse ground speed, "-" means port
+  6) Status, A = Data Valid
+  7) Checksum
+
+ VDR - Set and Drift
+
+        1   2 3   4 5   6 7
+        |   | |   | |   | |
+ $--VDR,x.x,T,x.x,M,x.x,N*hh<CR><LF>
+
+ Field Number: 
+  1) Degress True
+  2) T = True
+  3) Degrees Magnetic
+  4) M = Magnetic
+  5) Knots (speed of current)
+  6) N = Knots
+  7) Checksum
+
+ VHW - Water speed and heading
+
+        1   2 3   4 5   6 7   8 9
+        |   | |   | |   | |   | |
+ $--VHW,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
+
+ Field Number: 
+  1) Degress True
+  2) T = True
+  3) Degrees Magnetic
+  4) M = Magnetic
+  5) Knots (speed of vessel relative to the water)
+  6) N = Knots
+  7) Kilometers (speed of vessel relative to the water)
+  8) K = Kilometers
+  9) Checksum
+
+ VLW - Distance Traveled through Water
+
+        1   2 3   4 5
+        |   | |   | |
+ $--VLW,x.x,N,x.x,N*hh<CR><LF>
+
+ Field Number: 
+  1) Total cumulative distance
+  2) N = Nautical Miles
+  3) Distance since Reset
+  4) N = Nautical Miles
+  5) Checksum
+
+ VPW - Speed - Measured Parallel to Wind
+
+        1   2 3   4 5
+        |   | |   | |
+ $--VPW,x.x,N,x.x,M*hh<CR><LF>
+
+ Field Number: 
+  1) Speed, "-" means downwind
+  2) N = Knots
+  3) Speed, "-" means downwind
+  4) M = Meters per second
+  5) Checksum
+
+ VTG - Track made good and Ground speed
+
+        1   2 3   4 5	 6 7   8 9
+        |   | |   | |	 | |   | |
+ $--VTG,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
+
+ Field Number: 
+  1) Track Degrees
+  2) T = True
+  3) Track Degrees
+  4) M = Magnetic
+  5) Speed Knots
+  6) N = Knots
+  7) Speed Kilometers Per Hour
+  8) K = Kilometers Per Hour
+  9) Checksum
+
+ VWR - Relative Wind Speed and Angle
+
+         1  2  3  4  5  6  7  8 9
+         |  |  |  |  |  |  |  | |
+ $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh<CR><LF>
+
+ Field Number: 
+  1) Wind direction magnitude in degrees
+  2) Wind direction Left/Right of bow
+  3) Speed
+  4) N = Knots
+  5) Speed
+  6) M = Meters Per Second
+  7) Speed
+  8) K = Kilometers Per Hour
+  9) Checksum
+
+ WCV - Waypoint Closure Velocity
+
+        1   2 3    4
+        |   | |    |
+ $--WCV,x.x,N,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Velocity
+  2) N = knots
+  3) Waypoint ID
+  4) Checksum
+
+ WNC - Distance - Waypoint to Waypoint
+
+        1   2 3   4 5    6    7
+        |   | |   | |    |    |
+ $--WNC,x.x,N,x.x,K,c--c,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Distance, Nautical Miles
+  2) N = Nautical Miles
+  3) Distance, Kilometers
+  4) K = Kilometers
+  5) TO Waypoint
+  6) FROM Waypoint
+  7) Checksum
+
+ WPL - Waypoint Location
+
+	1       2 3        4 5    6
+        |       | |        | |    |
+ $--WPL,llll.ll,a,yyyyy.yy,a,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Latitude
+  2) N or S (North or South)
+  3) Longitude
+  4) E or W (East or West)
+  5) Waypoint name
+  6) Checksum     
+
+ XDR - Cross Track Error - Dead Reckoning
+
+        1 2   3 4			    n
+        | |   | |            |
+ $--XDR,a,x.x,a,c--c, ..... *hh<CR><LF>
+
+ Field Number: 
+  1) Transducer Type
+  2) Measurement Data
+  3) Units of measurement
+  4) Name of transducer
+  x) More of the same
+  n) Checksum
+
+ XTE - Cross-Track Error, Measured
+
+        1 2 3   4 5  6
+        | | |   | |  |
+ $--XTE,A,A,x.x,a,N,*hh<CR><LF>
+
+ Field Number: 
+  1) Status
+     V = LORAN-C Blink or SNR warning
+     V = general warning flag or other navigation systems when a reliable
+         fix is not available
+  2) Status
+     V = Loran-C Cycle Lock warning flag
+     A = OK or not used
+  3) Cross Track Error Magnitude
+  4) Direction to steer, L or R
+  5) Cross Track Units, N = Nautical Miles
+  6) Checksum
+
+ XTR - Cross Track Error - Dead Reckoning
+
+        1   2 3 4
+        |   | | |
+ $--XTR,x.x,a,N*hh<CR><LF>
+
+ Field Number: 
+  1) Magnitude of cross track error
+  2) Direction to steer, L or R
+  3) Units, N = Nautical Miles
+  4) Checksum
+
+ ZDA - Time & Date
+ UTC, day, month, year and local time zone
+
+	1         2  3  4    5  6  7
+        |         |  |  |    |  |  |
+ $--ZDA,hhmmss.ss,xx,xx,xxxx,xx,xx*hh<CR><LF>
+
+ Field Number: 
+  1) Local zone minutes description, same sign as local hours
+  2) Local zone description, 00 to +- 13 hours
+  3) Year
+  4) Month, 01 to 12
+  5) Day, 01 to 31
+  6) Universal Time Coordinated (UTC)
+  7) Checksum
+
+ ZFO - UTC & Time from origin Waypoint
+
+        1         2         3    4
+        |         |         |    |
+ $--ZFO,hhmmss.ss,hhmmss.ss,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Universal Time Coordinated (UTC)
+  2) Elapsed Time
+  3) Origin Waypoint ID
+  4) Checksum
+
+ ZTG - UTC & Time to Destination Waypoint
+
+        1         2         3    4
+        |         |         |    |
+ $--ZTG,hhmmss.ss,hhmmss.ss,c--c*hh<CR><LF>
+
+ Field Number: 
+  1) Universal Time Coordinated (UTC)
+  2) Time Remaining
+  3) Destination Waypoint ID
+  4) Checksum
+
+****************************************************************
+
+New found in web: (data fields unknown)
+
+DSC - Digital Selective Calling Information
+DSE - Extended DSC
+DSI - DSC Transponder Initiate
+DSR - DSC Transponder Response
+DTM - Datum Reference
+GBS - GPS Satellite Fault Detection
+GRS - GPS Range Residuals
+GST - GPS Pseudorange Noise Statistics
+MSK - MSK Receiver Interface 
+MSS - MSK Receiver Signal Status 
+MWD - Wind Direction & Speed
+TLL - Target Latitude and Longitude
+WDC - Distance to Waypoint - Great Circle
+WDR - Distance to Waypoint - Rhumb Line
+ZDL - Time and Distance to Variable Point

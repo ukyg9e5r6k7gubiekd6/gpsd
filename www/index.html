@@ -1,0 +1,125 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Remco Treffkorn">
+   <meta name="Description" content="GPSd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <title>GPSd &mdash; Put your GPS on the net!</title>
+</head>
+<body background="paper.gif">
+
+<h1 align='center'>GPSD &mdash; a GPS service daemon</h1>
+
+<p>This is the new home page of gpsd, moved from www.pygps.org in
+August 2004.  gpsd has just undergone a major rewrite at the hands of
+Eric S. Raymond; the upcoming 2.0 version will add many new features,
+including a linkable C service library that developers of gpsd-aware
+applications can use to encapsulate all communication with gpsd.</p>
+
+<p>The goal of the gpsd project is to create a solid layer of
+infrastructure for open-source programs that want to be
+location-sensitive. We aim for simple, robust interfaces, unfussy
+operation, and an easy learning curve for application developers.</p>
+
+<p>If you are new to GPS technology and don't quite understand what
+gpsd is about, you might find <a href="gps-hacking.html">ESR's Guide
+to Hacking With GPS</a> interesting</p>
+
+<p>There is at least one fork of gpsd in the wild, but there are plans
+to unfork it soon.  You can read a brief <a
+href="history.html">history</a> of the gpsd project if you are
+curious.</p>
+
+<h1>Code and community</h1>
+
+<p>Look in the <a href="ftp://ftp.berlios.de/pub/gpsd/">download</a>
+directory for tarballs of all released versions. We've now done our
+first release through berlios (1.9.0), and access to the bleeding-edge
+developer version is supported
+<a href="http://developer.berlios.de/svn/?group_id=2116">via Subversion</a>.</p>
+
+<p>There are three project mailing lists:</p>
+
+<ul>
+<li><a
+href="https://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
+is for release announcements and project news.</p></li>
+<li><a
+href="https://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
+is for questions and technical support on gpsd, including support
+for application builders using gpsd as a component.</p></li>
+
+<li><a
+href="https://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
+is for gpsd developers.</p></li>
+</ul>
+
+<h1>Introduction to gpsd</h1>
+
+<p>gpsd is a translator. It takes input from a device capable of
+generating positional data (like a GPS or a Loran receiver) and
+translates it into another, very simple format.  A client that feels
+lucky can also request raw NMEA data from the originating GPS.  This
+makes sense for debugging, but probably not much else. Gpsd
+re-publishes the data on a networking port via TCP/IP.  Multiple
+clients can connect to this port and get data from the GPS; the
+daemon will multiplex all requests from them and prevent contention.</p>
+
+<p>gpsd was meant to make programs like <a
+href="http://www.pygps.org">pyGPS</a> hardware independent. With gpsd,
+pyGPS allows you to show the position of the GPS on an electronic
+map. Since the computer running gpsd and the one running pyGPS do not
+have to be the same machine, you can remotely display the position of
+one computer on the other.  Other applications that use gpsd include
+<a href="http://www.kismetwireless.net/">Kismet</a> and 
+<a href="http://www.gpsdrive.cc/">GPSdrive</a>.</p>
+
+<p>There are three manual pages describing the code:</p>
+
+<dl>
+<dt><a href="gpsd.html">gpsd.1</a></dt>
+<dd>The gpsd daemon.</dd>
+
+<dt><a href="libgpsd.html">libgpsd.3</a></dt>
+<dd>An interface library that manages communication with the daemon.</dt>
+
+<dt><a href="libgps.html">libgps.3</a></dt>
+<dd>The low-level library used by gpsd to talk to a GPS.</dd>
+</dl>
+
+<p>Note that these describe gpsd-2, not the 1.x versions you may have
+seen before.</p>
+
+<h1>The gps client</h1>
+
+<p>Included in the package is a sample/simple client called 'gps'. It connects
+to a gpsd at any host you tell it to, and requests raw data, so that it can
+display the current location of all visible GPS satellites your receiver
+'sees'.</p>
+
+<p><img SRC="gpsd1.gif" ALT="[image] The GPS receiver has no 'fix' yet." height=462 width=628></p>
+
+<p>The GPS receiver has not yet acquired a fix. It only 'sees' satellites
+06 and 17. The receiver has not received the grey satellites, but knows
+where they 'should' be.</p>
+
+<p>The next image shows a good 'fix'. A 3d fix provides latitude, longitude
+as well as altitude data, and requires at least four good satellites. A
+2d fix does not give altitude, but only requires 3 satellites.</p>
+
+<p><img SRC="gpsd2.gif" ALT="[image] The GPS receiver has a good '3d' fix." height=462 width=628></p>
+
+<p>Depending on your GPS receiver, the additional satellites may be used
+to determine location with better accuracy.</p>
+
+<h1>Recipes and related resources</h1>
+
+<p>gpsd also works with <a href="bt.html">bluetooth GPS</a> receivers.</p>
+
+<p>Robin Cull has a Gentoo Linux <a
+href="http://www.digitalevacuation.org/ebuilds/gpsd-1.07.ebuild">ebuild
+script</a>.</p>
+
+</body>
+</html>
