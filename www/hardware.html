@@ -38,7 +38,7 @@ this GPS is known to have been successfully tested.</p>
 <td>USB</td>
 <td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
 <td align='center'>n</td>
-<td>2.1</td>
+<td>2.5</td>
 <td>2.2</td>
 <td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG</td>
 <td>Haicom provided a test unit. Manual states incorrectly that VTG
@@ -52,7 +52,7 @@ is off by default.</td>
 <td><a href='http://www.globalsat.com.tw/english/products_detail.php?main_id=5&p_id=9'>Globalsat</a>; OEMed as 
 NaviLock, Hyperdata</td>
 <td align='center'>n</td>
-<td>2.1</td>
+<td>2.5</td>
 <td>2.2</td>
 <td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
 <td>
@@ -174,6 +174,28 @@ Garmin 12XL and 45 are nearly identical and should work as well.<BR>
 NMEA mode must be set to 183 v2.0.<BR>
 Details on Garmin's proprietary protocol can be found
 <a href="http://www.garmin.com/support/commProtocol.html">here</a>.
+</td>
+</tr>
+<tr>
+<td>
+<a href='http://www.garmin.com/manuals/GPS18_TechnicalSpecification.pdf'>
+Garmin GPS-18</a></td>
+<td>Good</td>
+<td>Garmin</td>
+<td>USB</td>
+<td><a href='http://www.techwayinc.com.tw/'>Garmin</a></td>
+<td align='center'>n</td>
+<td>2.5</td>
+<td>?</td>
+<td>
+GPGSV, GPRMC, GPGGA, GPGSA, GPGLL
+</td>
+<td>
+DOP (Dilution of Precision) information not available (Garmin protocol 
+includes EPE only). DGPS information in GPGGA sentence is not returned.
+Speed and course over ground are calculated from the north/east
+velocity  and may not be accurate.  Magnetic variation information 
+is not available. Garmin uses a nonstandard 16-bit SNR scale.
 </td>
 </tr>
 <tr>
