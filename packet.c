@@ -30,178 +30,178 @@ distinguish them from baud barf.
 #include <string.h>
 #include "gpsd.h"
 
-static int getch(struct gps_session_t *pstate)
+static int getch(struct gps_session_t *session)
 {
-    if (pstate->inbufptr >= pstate->inbuffer + pstate->inbuflen)
+    if (session->inbufptr >= session->inbuffer + session->inbuflen)
     {
 	int st;
 
 #ifndef TESTMAIN
-	st = read(pstate->gNMEAdata.gps_fd, 
-		  pstate->inbuffer + pstate->inbuflen, 
-		  MAX_PACKET_LENGTH - pstate->inbuflen);
+	st = read(session->gNMEAdata.gps_fd, 
+		  session->inbuffer + session->inbuflen, 
+		  MAX_PACKET_LENGTH - session->inbuflen);
 	if (st < 0)
 #endif /* !TESTMAIN */
-	    longjmp(pstate->packet_error, 1);
-	pstate->inbuflen += st;
+	    longjmp(session->packet_error, 1);
+	session->inbuflen += st;
     }
-    return pstate->outbuffer[pstate->outbuflen++] = *pstate->inbufptr++;
+    return session->outbuffer[session->outbuflen++] = *session->inbufptr++;
 }
 
-static int packet_reread(struct gps_session_t *pstate)
+static int packet_reread(struct gps_session_t *session)
 /* packet type grab failed, set us up for reread */
 {
-    pstate->inbufptr = pstate->inbuffer;
-    pstate->outbuflen = 0;
+    session->inbufptr = session->inbuffer;
+    session->outbuflen = 0;
     return 0;
 }
 
-static void packet_discard(struct gps_session_t *pstate)
+void packet_discard(struct gps_session_t *session)
 /* discard data in the packet-out buffer */
 {
-    memset(pstate->outbuffer, '\0', sizeof(pstate->outbuffer)); 
-    pstate->outbuflen = 0;
+    memset(session->outbuffer, '\0', sizeof(session->outbuffer)); 
+    session->outbuflen = 0;
 }
 
-static void packet_shift(struct gps_session_t *pstate)
+static void packet_shift(struct gps_session_t *session)
 /* packet grab failed, shift the input buffer to discard a character */ 
 {
-    pstate->inbufptr = memmove(pstate->inbuffer, 
-			       pstate->inbuffer+1, 
-			       --pstate->inbuflen);
-    pstate->inbuffer[pstate->inbuflen] = '\0';
-    packet_discard(pstate);	/* clear out copied garbage */
+    session->inbufptr = memmove(session->inbuffer, 
+			       session->inbuffer+1, 
+			       --session->inbuflen);
+    session->inbuffer[session->inbuflen] = '\0';
+    packet_discard(session);	/* clear out copied garbage */
 }
 
-static int get_nmea(struct gps_session_t *pstate)
+static int get_nmea(struct gps_session_t *session)
 {
     unsigned short crc, n;
     unsigned char c, csum[3], *trailer;
 
-    if (getch(pstate) !='$')
-	return packet_reread(pstate);
-    c = getch(pstate);
-    if (c == 'G' && getch(pstate) == 'P')	/* NMEA sentence */
+    if (getch(session) !='$')
+	return packet_reread(session);
+    c = getch(session);
+    if (c == 'G' && getch(session) == 'P')	/* NMEA sentence */
 	/* OK */;
     else if (c == 'P')				/* vendor private extension */
 	/* OK */;
     else
-	return packet_reread(pstate);
+	return packet_reread(session);
     for (;;) {
-	c = getch(pstate);
+	c = getch(session);
 	if (c == '\r')
 	    break;
 	if (!isprint(c))
-	    return packet_reread(pstate);
-	if (pstate->outbuflen > NMEA_MAX)
-	    return packet_reread(pstate);
+	    return packet_reread(session);
+	if (session->outbuflen > NMEA_MAX)
+	    return packet_reread(session);
     }
-    if (getch(pstate) != '\n')
-	return packet_reread(pstate);
-    if (*(trailer = &pstate->outbuffer[pstate->outbuflen-5]) == '*') {
+    if (getch(session) != '\n')
+	return packet_reread(session);
+    if (*(trailer = &session->outbuffer[session->outbuflen-5]) == '*') {
 	crc = 0;
-	for (n = 1; n < pstate->outbuflen-5; n++)
-	    crc ^= pstate->outbuffer[n];
+	for (n = 1; n < session->outbuflen-5; n++)
+	    crc ^= session->outbuffer[n];
 	sprintf(csum, "%02X", crc);
 	if (toupper(csum[0])!=toupper(trailer[1])
 	    || toupper(csum[1])!=toupper(trailer[2]))
-	    return packet_reread(pstate);
+	    return packet_reread(session);
     }
-    pstate->outbuffer[pstate->outbuflen] = '\0';
-    packet_flush(pstate);
+    session->outbuffer[session->outbuflen] = '\0';
+    packet_flush(session);
     return 1;
 }
 
-static int get_sirf(struct gps_session_t *pstate)
+static int get_sirf(struct gps_session_t *session)
 {
     unsigned short length, n, checksum, crc;
 
-    if (getch(pstate) != 0xa0 || getch(pstate) != 0xa2)
-	return packet_reread(pstate);
-    length = (getch(pstate) << 8) | getch(pstate);
+    if (getch(session) != 0xa0 || getch(session) != 0xa2)
+	return packet_reread(session);
+    length = (getch(session) << 8) | getch(session);
     if (length > MAX_PACKET_LENGTH-6)
-	return packet_reread(pstate);
+	return packet_reread(session);
     for (n = 0; n < length; n++)
-	getch(pstate);
-    checksum = (getch(pstate) << 8) | getch(pstate);
+	getch(session);
+    checksum = (getch(session) << 8) | getch(session);
     crc = 0;
     for (n = 0; n < length; n++)
-	crc += pstate->outbuffer[4+n];
+	crc += session->outbuffer[4+n];
     crc &= 0x7fff;
     if (crc != checksum)
-	return packet_reread(pstate);
-    if (getch(pstate) != 0xb0 || getch(pstate) != 0xb3)
-	return packet_reread(pstate);
-    packet_flush(pstate);
+	return packet_reread(session);
+    if (getch(session) != 0xb0 || getch(session) != 0xb3)
+	return packet_reread(session);
+    packet_flush(session);
     return 1;
 }
 
-static int get_zodiac(struct gps_session_t *pstate)
+static int get_zodiac(struct gps_session_t *session)
 {
     unsigned short length, n, checksum, crc;
 
-    if (getch(pstate) != 0x81 || getch(pstate) != 0x00)
-	return packet_reread(pstate);
-    getch(pstate); getch(pstate);	/* skip the ID */
-    length = (getch(pstate) << 8) | getch(pstate);
+    if (getch(session) != 0x81 || getch(session) != 0x00)
+	return packet_reread(session);
+    getch(session); getch(session);	/* skip the ID */
+    length = (getch(session) << 8) | getch(session);
     if (length > MAX_PACKET_LENGTH-10)
-	return packet_reread(pstate);
-    checksum = (getch(pstate) << 8) | getch(pstate);
+	return packet_reread(session);
+    checksum = (getch(session) << 8) | getch(session);
     for (n = 0; n < length; n++)
-	getch(pstate);
+	getch(session);
     crc = 0;
     for (n = 0; n < length; n++)
-	crc += pstate->outbuffer[10+n];
+	crc += session->outbuffer[10+n];
     if (-crc != checksum)
-	return packet_reread(pstate);
-    packet_flush(pstate);
+	return packet_reread(session);
+    packet_flush(session);
     return 1;
 }
 
 /* entry points begin here */
 
-void packet_flush(struct gps_session_t *pstate)
+void packet_flush(struct gps_session_t *session)
 /* discard data in the buffer and prepare to receive a packet */
 {
-    memset(pstate->inbuffer, '\0', sizeof(pstate->inbuffer)); 
-    pstate->inbuflen = 0;
-    pstate->inbufptr = pstate->inbuffer;
+    memset(session->inbuffer, '\0', sizeof(session->inbuffer)); 
+    session->inbuflen = 0;
+    session->inbufptr = session->inbuffer;
 }
 
-int packet_sniff(struct gps_session_t *pstate)
+int packet_sniff(struct gps_session_t *session)
 /* grab a packet, return its type */
 {
-    if (setjmp(pstate->packet_error))
+    if (setjmp(session->packet_error))
 	return BAD_PACKET;
     else {
 	int n;
-	packet_discard(pstate);
-	packet_flush(pstate);
+	packet_discard(session);
+	packet_flush(session);
 	for (n = MAX_PACKET_LENGTH * 3; n; n--) {
-	    if (get_nmea(pstate)) {
-		pstate->outbuffer[pstate->outbuflen] = '\0';
+	    if (get_nmea(session)) {
+		session->outbuffer[session->outbuflen] = '\0';
 		return NMEA_PACKET;
-	    } else if (get_sirf(pstate))
+	    } else if (get_sirf(session))
 		return SIRF_PACKET;
-	    else if (get_zodiac(pstate))
+	    else if (get_zodiac(session))
 		return ZODIAC_PACKET;
 	    else
-		packet_shift(pstate);
+		packet_shift(session);
 	}
 	return BAD_PACKET;
     }
 }
 
 #define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
-	outname(struct gps_session_t *pstate) \
+	outname(struct gps_session_t *session) \
 	{ \
 	    int maxgarbage = maxlength; \
-	    packet_discard(pstate); \
+	    packet_discard(session); \
 	    while (maxgarbage--) { \
-		if (inname(pstate)) { \
+		if (inname(session)) { \
 		    return 1; \
 		} else \
-		    packet_shift(pstate); \
+		    packet_shift(session); \
 	    } \
 	    return 0; \
 	}

@@ -106,6 +106,7 @@ extern void nmea_add_checksum(char *sentence);
 extern void packet_flush(struct gps_session_t *pstate);
 extern int packet_sniff(struct gps_session_t *pstate);
 extern int packet_get_nmea(struct gps_session_t *pstate);
+extern void packet_discard(struct gps_session_t *pstate);
 extern int gpsd_open(struct gps_session_t *context);
 extern int gpsd_set_speed(struct gps_session_t *session, unsigned int speed);
 extern int gpsd_get_speed(struct termios *);
