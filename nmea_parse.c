@@ -153,12 +153,7 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-
-    if (count <= 9) {
-        return;
-    }
-
-    if (!strcmp(field[2], "A")) {
+    if (count > 9 && !strcmp(field[2], "A")) {
 	merge_ddmmyy(field[9], out);
 	merge_hhmmss(field[1], out);
 	do_lat_lon(&field[3], out);
@@ -367,10 +362,8 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
                 There my be up to three GSV sentences in a data packet
      */
     int changed, fldnum;
-    if (count <= 3) {
+    if (count <= 3)
         return;
-    }
-
     out->await = atoi(field[1]);
     if (sscanf(field[2], "%d", &out->part) < 1)
         return;
@@ -441,24 +434,23 @@ void nmea_add_checksum(char *sentence)
     sprintf(p, "%02X\r\n", sum);
 }
 
-typedef void (*nmea_decoder) (int count, char *f[], struct gps_data_t *out);
-#define NMEA_PHRASE( s, d ) { s, d }
-static struct {
-    char *name;
-    nmea_decoder decoder;
-} nmea_phrase[] = {
-    NMEA_PHRASE("GPRMC", processGPRMC),
-    NMEA_PHRASE("GPGGA", processGPGGA),
-    NMEA_PHRASE("GPGLL", processGPGLL), /* Not supported by roadmap */
-    NMEA_PHRASE("GPVTG", processGPVTG), /* Not supported by roadmap */
-    NMEA_PHRASE("GPGSA", processGPGSA),
-    NMEA_PHRASE("GPGSV", processGPGSV),
-    NMEA_PHRASE("PRWIZCH", processIgnored),
-};
-
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
+    typedef void (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
+    static struct {
+	char *name;
+	nmea_decoder decoder;
+    } nmea_phrase[] = {
+	{"GPRMC", processGPRMC},
+	{"GPGGA", processGPGGA},
+	{"GPGLL", processGPGLL},
+	{"GPVTG", processGPVTG},
+	{"GPGSA", processGPGSA},
+	{"GPGSV", processGPGSV},
+	{"PRWIZCH", processIgnored},
+    };
+
     int retval = -1;
     unsigned int i;
     int count;
@@ -474,7 +466,12 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
      * Split the sentence on every comma, making a list of arguments to pass
      * to the phrase parsers.
      */
+#if defined(__GNUC__)
+    s = alloca(strlen(sentence)+1);
+    strcpy(s, sentence);
+#else
     s = strdup(sentence); /* make a copy before we edit it. */
+#endif
     for (i = 0, p = s; p != NULL && *p != 0; ++i, p = strchr (p, ',')) {
 	*p = 0;
 	field[i] = ++p;
@@ -482,14 +479,15 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     count = i;
 
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
-        if (0 == strcmp(nmea_phrase[i].name, field[0]) &&
-	    nmea_phrase[i].decoder) {
+        if (!strcmp(nmea_phrase[i].name, field[0]) && nmea_phrase[i].decoder) {
 	    (nmea_phrase[i].decoder)(count, field, outdata);
 	    retval = 0;
 	    break;
 	}
     }
+#if !defined(__GNUC__)
     free(s);
+#endif
     return retval;
 }
 
@@ -500,11 +498,7 @@ void nmea_send(int fd, const char *fmt, ... )
     va_list ap;
 
     va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
     vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf + 1);
