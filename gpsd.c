@@ -166,18 +166,6 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
-#define MULTISESSION
-#ifndef MULTISESSION
-#define ZERO_WATCHERS()		FD_ZERO(&watcher_fds);
-#define IS_WATCHER(cfd) 	FD_ISSET(cfd, &watcher_fds)
-#define SET_WATCHER(cfd)	FD_SET(cfd, &watcher_fds)
-#define CLR_WATCHER(cfd)	FD_CLR(cfd, &watcher_fds)
-#define ZERO_RAW()		FD_ZERO(&nmea_fds);
-#define IS_RAW(cfd)     	FD_ISSET(cfd, &nmea_fds)
-#define SET_RAW(cfd)    	FD_SET(cfd, &nmea_fds)
-#define CLR_RAW(cfd)    	FD_CLR(cfd, &nmea_fds)
-static fd_set nmea_fds, watcher_fds;
-#else
 #define ZERO_WATCHERS()		/* static storage doesn't need to be zeroed */
 #define IS_WATCHER(cfd) 	subscribers[cfd].watcher
 #define SET_WATCHER(cfd)	subscribers[cfd].watcher = 1
@@ -226,7 +214,6 @@ static void attach_client_to_device(int cfd, int dfd)
 }
 
 #define is_client(cfd)	subscribers[cfd].active 
-#endif /* MULTISESSION */
 
 static void detach_client(int cfd)
 {
@@ -234,12 +221,10 @@ static void detach_client(int cfd)
     FD_CLR(cfd, &all_fds);
     CLR_RAW(cfd);
     CLR_WATCHER(cfd);
-#ifdef MULTISESSION
     subscribers[cfd].active = 0;
     if (subscribers[cfd].channel)
 	subscribers[cfd].channel->nsubscribers--;
     subscribers[cfd].channel = NULL;
-#endif /* MULTISESSION */
 }
 
 static int throttled_write(int cfd, char *buf, int len)
@@ -270,13 +255,6 @@ static void notify_watchers(char *sentence)
 	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
-#ifndef MULTISESSION
-/* restrict the scope of the command-state globals as much as possible */
-static struct gps_device_t *device;
-static int need_gps;
-#define is_client(cfd)	(cfd != msock && cfd != device->gpsdata.gps_fd) 
-#endif /* MULTISESSION */
-
 static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 /* hook to be executed on each incoming packet */
 {
@@ -289,10 +267,10 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
     }
 }
 
-static struct gps_device_t *open_device(char *device_name, int nowait)
+static struct channel_t *open_device(char *device_name, int nowait)
+/* open and initialize a new channel block */
 {
     struct gps_device_t *device = gpsd_init(device_name);
-#ifdef MULTISESSION
     struct channel_t *chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
@@ -303,19 +281,16 @@ static struct gps_device_t *open_device(char *device_name, int nowait)
 	}
     return NULL;
 found:
-#endif /* MULTISESSION */
     device->gpsdata.raw_hook = raw_hook;
     if (nowait) {
 	if (gpsd_activate(device) < 0) {
 	    return NULL;
 	}
 	FD_SET(device->gpsdata.gps_fd, &all_fds);
-#ifdef MULTISESSION
 	chp->when = time(NULL);
-#endif /* MULTISESSION */
     }
 
-    return device;
+    return chp;
 }
 
 static int handle_request(int cfd, char *buf, int buflen)
@@ -323,11 +298,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
-#ifdef MULTISESSION
     struct subscriber_t *whoami = subscribers + cfd;
     struct channel_t *chp, *channel = whoami->channel;
     struct gps_device_t *device = channel->device;
-#endif /* MULTISESSION */
     struct gps_data_t *ud = &device->gpsdata;
 
     strcpy(reply, "GPSD");
@@ -396,67 +369,36 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'F':
 	    if (*p == '=') {
-#ifdef MULTISESSION
-		struct gps_device_t *newdev;
-#endif /* MULTISESSION */ 
-		char	*bufcopy;
+		struct channel_t *newdev;
+		char	*stash;
 		for (q = ++p; isgraph(*p); p++)
 		    continue;
-		bufcopy = (char *)malloc(p-q+1); 
-		memcpy(bufcopy, q, p-q);
-		bufcopy[p-q] = '\0';
-		gpsd_report(1, "Switch to %s requested\n", bufcopy);
-#ifndef MULTISESSION
-		if (need_gps > 1)
-		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, need_gps);
-		else {
-		    char *stash_device;
-		    gpsd_deactivate(device);
-		    stash_device = device->gpsd_device;
-		    device->gpsd_device = strdup(bufcopy);
-		    device->gpsdata.baudrate = 0;	/* so it'll hunt */
-		    device->driverstate = 0;
-		    if (gpsd_activate(device) >= 0) {
-			gpsd_report(1, "Switch to %s succeeded\n", bufcopy);
-			free(stash_device);
-		    } else {
-			gpsd_report(1, "Switch to %s failed\n", bufcopy);
-			free(device->gpsd_device);
-			device->gpsd_device = stash_device;
-			device->gpsdata.baudrate = 0;
-			device->driverstate = 0;
-		    }
-		}
-#else
+		stash = (char *)malloc(p-q+1); 
+		memcpy(stash, q, p-q);
+		stash[p-q] = '\0';
+		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
 		/* search for the device among active channels */
 		for (chp = channels; chp < channels + MAXDEVICES; chp++)
-		    if (chp->device&&!strcmp(chp->device->gpsd_device,bufcopy)) {
+		    if (chp->device&&!strcmp(chp->device->gpsd_device,stash)) {
 			whoami->channel = channel = chp;
 			device = channel->device;
 			whoami->tied = 1;
 			goto foundit;
 		    }
 		/* search failed, must attempt to initialize a new channel */
-		newdev = open_device(bufcopy, 1);
+		newdev = open_device(stash, 1);
 		if (newdev) {
-		    for (chp = channels; chp < channels + MAXDEVICES; chp++)
-			if (chp->device && device == newdev) {
-			    whoami->channel = channel = chp;
-			    device = channel->device;
-			    whoami->tied = 1;
-			    goto foundit;
-			}
+		    whoami->tied = 1;
+		    whoami->channel = newdev;
+		    device = newdev->device;
 		}
-	    foundit:
-#endif /* MULTISESSION */ 
-		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
+	    foundit:;
 	    }
 	    snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
 	    break;
 	case 'I':
 	    snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
 	    break;
-#ifdef MULTISESSION
 	case 'K':
 	    /* FIXME: K= form not yet supported */
 	    strcpy(phrase, ",K=");
@@ -467,9 +409,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 		}
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
-#endif /* MULTISESSION */
 	case 'L':
-	    sprintf(phrase, ",L=2 " VERSION " abcdefilmnpqrstuvwxy");	//ghjk
+	    sprintf(phrase, ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
 	    break;
 	case 'M':
 	    if (ud->fix.mode == MODE_NOT_SEEN)
@@ -705,11 +646,9 @@ int main(int argc, char *argv[])
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *device_name = DEFAULT_DEVICE_NAME;
-#ifdef MULTISESSION
     static struct channel_t *channel;
     struct gps_device_t *device;
     int dfd;
-#endif /* MULTISESSION */
     struct sockaddr_in fsin;
     fd_set rfds;
     int option, msock, cfd, go_background = 1;
@@ -769,14 +708,10 @@ int main(int argc, char *argv[])
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
-#ifdef MULTISESSION
 	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
 	    if (channels[dfd].device)
 		gpsd_wrap(channels[dfd].device);
 	}
-#else
-	gpsd_wrap(device);
-#endif /* MULTISESSION */
 	if (st == SIGHUP+1)
 	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
 	else if (st > 0) {
@@ -811,12 +746,12 @@ int main(int argc, char *argv[])
     FD_ZERO(&all_fds); ZERO_RAW(); ZERO_WATCHERS();
     FD_SET(msock, &all_fds);
 
-    device = open_device(device_name, nowait);
-    if (!device) {
+    channel = open_device(device_name, nowait);
+    if (!channel) {
 	gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	exit(2);
     }
-    device->gpsdata.raw_hook = raw_hook;
+    device = channel->device;
     if (dsock >= 0)
 	device->dsock = dsock;
 
@@ -842,10 +777,8 @@ int main(int argc, char *argv[])
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
-#ifdef MULTISESSION
 	    time_t most_recent = 0;
 	    int mychannel = -1;
-#endif /* MULTISESSION */
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
@@ -856,7 +789,6 @@ int main(int argc, char *argv[])
 		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
-#ifdef MULTISESSION
 		/* pick the most recently opened device */
 		for (channel=channels; channel<channels+MAXDEVICES; channel++)
 		    if (channel->device && channel->when >= most_recent)
@@ -866,19 +798,16 @@ int main(int argc, char *argv[])
 		    }
 		if (mychannel > -1)
 		    attach_client_to_device(ssock, mychannel);
-#endif /* MULTISESSION */
 	    }
 	    FD_CLR(msock, &rfds);
 	}
 
-#ifdef MULTISESSION
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
 	    struct gps_device_t *device = channel->device;
 
 	    if (!device)
 		continue;
-#endif /* MULTISESSION */
 	    /* we may need to force the GPS open */
 	    if (nowait && device->gpsdata.gps_fd == -1) {
 		gpsd_deactivate(device);
@@ -918,21 +847,13 @@ int main(int argc, char *argv[])
 	    /* this simplifies a later test */
 	    if (device->dsock > -1)
 		FD_CLR(device->dsock, &rfds);
-#ifdef MULTISESSION
 	}
-#endif /* MULTISESSION */
 
 	/* accept and execute commands for all clients */
-#ifndef MULTISESSION
-	need_gps = 0;
-#endif /* MULTISESSION */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	    if (!is_client(cfd))
 		continue;
-
-#ifdef MULTISESSION
 	    device = subscribers[cfd].channel->device;
-#endif /* MULTISESSION */
 
 	    /*
 	     * GPS must be opened if commands are waiting or any client is
@@ -963,13 +884,8 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-#ifndef MULTISESSION
-	    if (cfd != device->gpsdata.gps_fd && cfd != msock && FD_ISSET(cfd, &all_fds))
-		need_gps++;
-#endif /* MULTISESSION */
 	}
 
-#ifdef MULTISESSION
 	/* close devices with no remaining subscribers */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
 	    if (channel->device) {
@@ -987,14 +903,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	}
-#else
-	if (!nowait && !need_gps && device->gpsdata.gps_fd != -1) {
-	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-	    gpsd_deactivate(device);
-	}
-#endif /* MULTISESSION */
     }
-    gpsd_wrap(device);
 
     return 0;
 }
