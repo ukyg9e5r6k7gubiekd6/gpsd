@@ -394,15 +394,11 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 
     changed = 0;
-    for (fldnum = 4; fldnum < 20; ) {
+    for (fldnum = 4; fldnum < count; out->satellites++) {
 	changed |= update_field_i(field[fldnum++], &out->PRN[out->satellites]);
 	changed |= update_field_i(field[fldnum++], &out->elevation[out->satellites]);
 	changed |= update_field_i(field[fldnum++], &out->azimuth[out->satellites]);
 	changed |= update_field_i(field[fldnum++], &out->ss[out->satellites]);
-	if (!out->PRN[out->satellites])
-	    break;
-	else
-	    out->satellites++;
     }
 
     /* not valid data until we've seen a complete set of parts */
