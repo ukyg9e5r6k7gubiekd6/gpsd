@@ -38,10 +38,12 @@ static XrmOptionDescRec options[] = {
  * Definition of the Application resources structure.
  */
 
+#if 0
 typedef struct _XGpsResources {
 } XGpsResources;
 
 XGpsResources resources;
+#endif
 
 #define Offset(field) (XtOffset(XGpsResources *, field))
 
@@ -73,9 +75,11 @@ main(int argc, char **argv)
     toplevel = XtVaAppInitialize(&app, "XGpsSpeed", options, XtNumber(options),
 			    &argc, argv, fallback_resources, NULL);
 
+#if 0
     XtGetApplicationResources( toplevel, (caddr_t) &resources, 
 			      my_resources, XtNumber(my_resources),
 			      NULL, (Cardinal) 0);
+#endif
 
    /**** Shell Widget ****/
     i = 0;
