@@ -67,19 +67,6 @@ static void draw_arc(int x, int y, int diam)
 	     0, 360 * 64);	/* angle1, angle2 */
 }
 
-static int get_status(struct gps_data_t *gpsdata, int satellite)
-{
-    int i;
-
-    for (i = 0; i < MAXCHANNELS; i++)
-	if (satellite == gpsdata->PRN[i]) {
-	    if (gpsdata->ss[i]<20) return 1;
-	    if (gpsdata->ss[i]<40) return 2;
-	    return 7;
-	}
-    return 0;
-}
-
 void draw_graphics(struct gps_data_t *gpsdata)
 {
     int i;
@@ -123,20 +110,12 @@ void draw_graphics(struct gps_data_t *gpsdata)
 	for (i = 0; i < gpsdata->satellites; i++) {
 	    pol2cart(gpsdata->azimuth[i], gpsdata->elevation[i], &x, &y);
 
-	    switch (get_status(gpsdata, gpsdata->PRN[i]) & 7) {
-	    case 0: case 1:
+	    if (gpsdata->ss[i] < 20) 
 		set_color("Grey");
-		break;
-	    case 2: case 3:
+	    else if (gpsdata->ss[i] < 40)
 		set_color("Yellow");
-		break;
-	    case 4: case 5: case 6:
-		set_color("Red");
-		break;
-	    case 7:
+	    else
 		set_color("Green");
-		break;
-	    }
 	    XFillArc(XtDisplay(draww), pixmap, drawGC,
 		     (int) x - 5, (int) y - 5,	/* x,y */
 		     11, 11,	/* width, height */
