@@ -94,32 +94,7 @@ static int connect_at_speed(int ttyfd, struct termios *ttyctl, int speed)
 	    return 0;
     }
 
-    /*
-     * It's OK to have leading garbage, but not trailing garbage.
-     * Leading garbage may just mean the device hasn't settled yet; ignore it.
-     */
-    for (sp = buf; sp < buf + n && !isprint(*sp); sp++)
-	continue;
-
-    /* If no valid NMEA in the read buffer, crap out */
-    if (!(sp = strstr(sp, "$GP"))) {
-	gpsd_report(4, "no NMEA in the buffer\n");
-	return 0;
-    }
-
-    /*
-     * Trailing garbage means that the data accidentally looked like
-     * NMEA or that old data that really was NMEA happened to be sitting
-     * in the TTY buffer unread, but the new data we read is not
-     * sentences.  Second case shouldn't happen, because we flushed
-     * the buffer above, but welcome to serial-programming hell.
-     */
-    for (sp += 3; sp < buf + n; sp++)
-	if (!isascii(*sp)) {
-	    gpsd_report(4, "trailing garbage in the buffer\n");
-	    return 0;	/* found garbage after $GP */
-	}
-    return 1;
+    return nmea_validate_buffer(buf, n);
 }
 
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)

@@ -19,6 +19,7 @@ char *alloca ();
 #include <math.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "gpsd.h"
 
@@ -524,4 +525,38 @@ int nmea_send(int fd, const char *fmt, ... )
 	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
+}
+
+int nmea_validate_buffer(char *buf, size_t n)
+/* dos this buffer look like it contains valid NMEA? */
+{
+    char	*sp;
+
+    /*
+     * It's OK to have leading garbage, but not trailing garbage.
+     * Leading garbage may just mean the port hasn't settled yet
+     * after a baud rate change; ignore it.
+     */
+    for (sp = buf; sp < buf + n && !isprint(*sp); sp++)
+	continue;
+
+    /* If no valid NMEA in the read buffer, crap out */
+    if (!(sp = strstr(sp, "$GP"))) {
+	gpsd_report(4, "no NMEA in the buffer\n");
+	return 0;
+    }
+
+    /*
+     * Trailing garbage means that the data accidentally looked like
+     * NMEA or that old data that really was NMEA happened to be sitting
+     * in the TTY buffer unread, but the new data we read is not
+     * sentences.  Second case shouldn't happen, because we flush the
+     * buffer after each speed change, but welcome to serial-programming hell.
+     */
+    for (sp += 3; sp < buf + n; sp++)
+	if (!isascii(*sp)) {
+	    gpsd_report(4, "trailing garbage in the buffer\n");
+	    return 0;
+	}
+    return 1;
 }
