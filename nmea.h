@@ -17,6 +17,8 @@ struct OUTDATA {
 
     double longitude;
 
+    char grid[7];
+
     double altitude;		/* Altitude in meters */
 
     double speed;		/* Speed over ground, knots */

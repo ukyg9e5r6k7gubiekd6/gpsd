@@ -63,6 +63,9 @@ for the Earthmate.
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
+Tom Mayo <tmayo1@rochester.rr.com> N1MU contributed the G/g command,
+which returns a 6 digit Maidenhead grid square.
+
 Be advised: any bugs in this code are mine, and mine only ;-)
 
 Thanks for Russ Nelson for providing a home for gpsd!

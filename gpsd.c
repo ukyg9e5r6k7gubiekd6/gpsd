@@ -505,6 +505,12 @@ static int handle_request(int fd, fd_set * fds)
 		    ",V=%f",
 		    gNMEAdata.speed);
 	    break;
+	case 'G':
+	case 'g':
+	    sprintf(reply + strlen(reply),
+		    ",G=%6.6s",
+		    gNMEAdata.grid);
+	    break;
 	case 'R':
 	case 'r':
 	    if (FD_ISSET(fd, fds)) {
