@@ -127,6 +127,9 @@ struct gps_type_t nmea =
  * According to file://localhost/home/esr/svn/gpsd/trunk/hardware.html,
  * sending "$PRWIIPRO,0,RBIN\r\n" snd waiting 1.5 seconds 
  * will switch the TripMate into Rockwell binary mode at 4800.
+ *
+ * The TripMate was discontinued sometime before November 1998
+ * and has been replaced by the EarthMate.
  */
 
 void tripmate_initializer(struct gps_session_t *session)
