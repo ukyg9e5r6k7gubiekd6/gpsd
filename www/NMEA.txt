@@ -59,14 +59,29 @@ common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
 The physical-level protocol is RS232C-compatible (actually RS422),
-4800bps, 8 bits, no parity, one *or two* stop bits.  The data is all
+4800bps, 8N1 or 7N2 (the latter is rare bu does occur; the FV18 from
+San Jose Navigation uses it, for example).  The data is all
 ASCII, the high bit is not used.
 
 It appears there is an international standard, IEC 61162-1, published
 in 2000, that is essentially NMEA 0183.  [IEC] says "is closely
 aligned with NMEA 0183 version 2.30".
 
-Here are the NMEA-standard sentences:
+Here are the NMEA-standard sentences.  The names are listed without the
+"talker ID", a two-character prefix that identifies the type of the 
+transmitting unit.  By far the most common talker ID is "GP",
+identifying a generic GPS, but all of the following (according to [NMEAFAQ])
+are well known:
+
+                GP      Global Positioning System receiver
+                LC      Loran-C receiver
+                II      Integrated Instrumentation
+
+II is emitted by the NMEA interface of a widely-used line of
+marine-navigation electronics called the AutoHelm Seatalk system; see
+also [SEATALK]. Until the U.S. Coast Guard terminated the Omega
+Navigation System in 1997, another common talker prefix was "OM" for
+an Omega Navigation System receiver.
 
 ------------------------------------------------------------------------------
 
@@ -1559,3 +1574,7 @@ Sources:
 [IEC]
     "International Standard IEC 61162-1" (preview)
     http://domino.iec.ch/preview/info_iec61162-1%7Bed2.0%7Den.pdf
+
+[SEATALK]
+    "SeaTalk Technical Reference"
+    http://www.thomasknauf.de/seatalk.htm
