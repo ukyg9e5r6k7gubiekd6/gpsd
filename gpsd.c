@@ -1,4 +1,5 @@
 
+#include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -363,7 +364,7 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 		for (fd = 0; fd < nfds; fd++) {
 		    if (FD_ISSET(fd, nmea_fds)) {
 			if (write(fd, buf, strlen(buf)) < 0) {
-			    syslog(LOG_NOTICE, "Raw write: %s", sys_errlist[errno]);
+			    syslog(LOG_NOTICE, "Raw write: %s", strerror(errno));
 			    FD_CLR(fd, afds);
 			    FD_CLR(fd, nmea_fds);
 			}

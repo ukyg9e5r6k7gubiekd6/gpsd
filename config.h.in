@@ -1,0 +1,32 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
+/* Define if the X Window System is missing or not being used.  */
+#undef X_DISPLAY_MISSING
+
+#undef HAVE_MOTIF
+#undef HAVE_XP
+#undef HAVE_XPM
+
+/* Define if you have the <X11/xpm.h> header file.  */
+#undef HAVE_X11_XPM_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/select.h> header file.  */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/termios.h> header file.  */
+#undef HAVE_SYS_TERMIOS_H
+
+/* Define if you have the <termio.h> header file.  */
+#undef HAVE_TERMIO_H
+
+/* Define if you have the <termios.h> header file.  */
+#undef HAVE_TERMIOS_H
+
+/* Define if you have the <xpm.h> header file.  */
+#undef HAVE_XPM_H
