@@ -19,7 +19,7 @@ permission).
 
 Check the Makefile.
 
-Run make:  libgps.a, gpsd, gps, and xgpsspeed will be built.
+Run make:  libgps.so, gpsd, gps, and xgpsspeed will be built.
 Copy the applications wherever you want them to live.
 
 Copy the app-defaults files gps.ad and xgpsspeed.ad to your home

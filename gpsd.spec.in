@@ -118,7 +118,8 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
 * Mon Sep 20 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
-- Enable conditioning out of Zodiac and Tripmate support.
+- Various internal cleanups, including fossil removal in the 
+  configuration machinery.
 
 * Thu Sep 16 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.0-1
 - Packaging fixes for 2.0 release.
