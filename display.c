@@ -170,7 +170,7 @@ void draw_graphics()
 	pol2cart(90, 0, &x, &y);
 	set_color("Black");
 	XDrawString(XtDisplay(draww), pixmap, drawGC,
-			(int) x+5, (int) y, "W", 1);
+			(int) x+2, (int) y, "W", 1);
 	pol2cart(180, 0, &x, &y);
 	set_color("Black");
 	XDrawString(XtDisplay(draww), pixmap, drawGC,

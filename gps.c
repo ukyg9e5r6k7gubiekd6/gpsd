@@ -408,17 +408,6 @@ void update_display(char *message)
 }
 
 /**************************************************
-* Function: open_input
-**************************************************/
-static void open_input(XtAppContext app)
-{
-    XtInputId input_id;
-
-    input_id = XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
-			     handle_input, NULL);
-}
-
-/**************************************************
 * Function: init_list
 **************************************************/
 void init_list()
@@ -520,7 +509,8 @@ int main(int argc, char *argv[])
     if (gps_activate(&session) == -1)
 	exit(1);
 
-    open_input(app);
+    XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
+			     handle_input, NULL);
 
     init_list();
 
