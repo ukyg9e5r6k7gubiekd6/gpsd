@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "config.h"
 #include "gpsd.h"
 
 /**************************************************************************

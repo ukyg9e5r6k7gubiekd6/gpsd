@@ -2,7 +2,6 @@
  * This provides the interface to the library that supports direct access to
  * GPSes on serial or USB devices.
  */
-#include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

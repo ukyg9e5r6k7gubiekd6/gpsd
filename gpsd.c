@@ -13,7 +13,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "config.h"
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else

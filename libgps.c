@@ -5,7 +5,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include "config.h"
 #include "gpsd.h"
 
 struct gps_data_t *gps_open(char *host, char *port)
