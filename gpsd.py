@@ -246,18 +246,17 @@ class gpsd(gps.gpsdata):
     class gps_driver:
         def __init__(self, name,
                      parser=NMEA,
-                     cycle=1, bps=4800, stopbits=1,
+                     cycle=1, stopbits=1,
                      trigger=None, initializer=None, rtcm=None, wrapup=None):
             self.name = name
             self.parser = parser
             self.cycle = cycle
-            self.bps = bps
             self.stopbits = stopbits
             self.trigger = trigger
             self.initializer = initializer
             self.rtcm = rtcm
             self.wrap = wrapup
-    def __init__(self, device="/dev/gps", bps=4800,
+    def __init__(self, device="/dev/gps", bps=0,
                  devtype='n', dgps=None, logger=None):
         self.ttyfd = -1
         self.device = device
@@ -302,12 +301,11 @@ class gpsd(gps.gpsdata):
         return buf
 
     def set_speed(self, speed):
-        if self.bps != speed:
-            self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
-            termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
-            termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
-            termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
-            time.sleep(3)
+        self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
+        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+        termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
+        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+        time.sleep(3)
         if self.readline().find("$GP") > -1:
             self.bps = speed
             return 1
@@ -332,14 +330,13 @@ class gpsd(gps.gpsdata):
             self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
         self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
         self.raw[3] = 0						# lflag
-        if self.bps and not self.set_speed(self.bps):
-            for speed in (4800, 9600, 19200, 38400, 57600):
-                if speed != self.bps:
-                    if self.set_speed(speed):
-                        break
-            else:
-                self.ttyfd = -1
-                return self.ttyfd
+        for speed in (4800, 9600, 19200, 38400, 57600):
+            if speed != self.bps:
+                if self.set_speed(speed):
+                    break
+        else:
+            self.ttyfd = -1
+            return self.ttyfd
         if self.devtype.initializer:
             self.devtype.initializer(self)
 	self.online = True;

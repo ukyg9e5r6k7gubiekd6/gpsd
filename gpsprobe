@@ -76,17 +76,14 @@ if __name__ == '__main__':
     fixes = []
 
     # Process options
-    (options, arguments) = getopt.getopt(sys.argv[1:], "b:hn:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "hn:")
     await = 100;
     device="/dev/gps"
-    baudrate = 0
     for (switch, val) in options:
-	if (switch == '-b'):
-	    baudrate = (int(val),)
-	elif (switch == '-n'):
+	if (switch == '-n'):
 	    await = int(val)
         elif (switch == '-h'):
-            sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [-b bps] [device]\n")
+            sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [device]\n")
     if arguments:
         device = arguments[0]
 
@@ -146,7 +143,7 @@ if __name__ == '__main__':
             sys.exit(0)
 
         # Step two: Open and sync up with the device
-        dev = gpsd.gpsd(device=device, bps=baudrate)
+        dev = gpsd.gpsd(device=device)
         if dev.activate() > -1:
             sys.stderr.write("Found device at %dbps.\n" % dev.bps)
         else:
@@ -156,15 +153,13 @@ if __name__ == '__main__':
         # Step three: Gather data
         starttime = time.time()
         dev.set_raw_hook(count)
-        sys.stderr.write("Gathering %d sentences will probably take about %d seconds.\n"%(await, await/3,))
-        baton = Baton("Looking for first fix", "done")
+        sys.stderr.write("Gathering %d sentences will probably take about %d seconds.\n"%(await, (await*4800)/(3*dev.bps),))
         countdown = await
+        baton = Baton("Gathering sentences", "done")
         while countdown > 0:
             if dev.poll() > 0 and dev.latlon_stamp.seen():
                 if not fixes:
                     fixtime = (time.time()-starttime,)
-                    baton.end("got it")
-                    baton = Baton("Gathering fixes", "done")
                 fixes.append((dev.latitude, dev.longitude))
                 baton.twirl()
                 countdown -= 1
