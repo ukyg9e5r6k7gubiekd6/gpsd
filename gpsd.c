@@ -275,6 +275,44 @@ static int need_gps;
 #define is_client(cfd)	(cfd != msock && cfd != device->gpsdata.gps_fd) 
 #endif /* MULTISESSION */
 
+static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
+/* hook to be executed on each incoming packet */
+{
+    int cfd;
+
+    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+	/* copy raw NMEA sentences from GPS to clients in raw mode */
+	if (IS_RAW(cfd))
+	    throttled_write(cfd, sentence, strlen(sentence));
+    }
+}
+
+static struct gps_device_t *open_device(char *device_name, int nowait)
+{
+    struct gps_device_t *device = gpsd_init(device_name);
+#ifdef MULTISESSION
+    struct channel_t *chp;
+
+    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	if (chp->state == CHANNEL_AVAILABLE) {
+	    chp->state = CHANNEL_INUSE;
+	    chp->device = device;
+	    goto found;
+	}
+    return NULL;
+found:
+#endif /* MULTISESSION */
+    device->gpsdata.raw_hook = raw_hook;
+    if (nowait) {
+	if (gpsd_activate(device) < 0) {
+	    return NULL;
+	}
+	FD_SET(device->gpsdata.gps_fd, &all_fds);
+    }
+
+    return device;
+}
+
 static int handle_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
@@ -353,6 +391,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'F':
 	    if (*p == '=') {
+#ifdef MULTISESSION
+		struct gps_device_t *newdev;
+#endif /* MULTISESSION */ 
 		char	*bufcopy;
 		for (q = ++p; isgraph(*p); p++)
 		    continue;
@@ -382,6 +423,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    }
 		}
 #else
+		/* search for the device among active channels */
 		for (chp = channels; chp < channels + MAXDEVICES; chp++)
 		    if (chp->device&&!strcmp(chp->device->gpsd_device,bufcopy)) {
 			whoami->channel = channel = chp;
@@ -389,7 +431,17 @@ static int handle_request(int cfd, char *buf, int buflen)
 			whoami->tied = 1;
 			goto foundit;
 		    }
-
+		/* search failed, must attempt to initialize a new channel */
+		newdev = open_device(bufcopy, 1);
+		if (newdev) {
+		    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+			if (chp->device && device == newdev) {
+			    whoami->channel = channel = chp;
+			    device = channel->device;
+			    whoami->tied = 1;
+			    goto foundit;
+			}
+		}
 	    foundit:
 #endif /* MULTISESSION */ 
 		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
@@ -634,44 +686,6 @@ static int handle_request(int cfd, char *buf, int buflen)
     strcat(reply, "\r\n");
 
     return throttled_write(cfd, reply, strlen(reply));
-}
-
-static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
-/* hook to be executed on each incoming packet */
-{
-    int cfd;
-
-    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (IS_RAW(cfd))
-	    throttled_write(cfd, sentence, strlen(sentence));
-    }
-}
-
-static struct gps_device_t *open_device(char *device_name, int nowait)
-{
-    struct gps_device_t *device = gpsd_init(device_name);
-#ifdef MULTISESSION
-    struct channel_t *chp;
-
-    for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (chp->state == CHANNEL_AVAILABLE) {
-	    chp->state = CHANNEL_INUSE;
-	    chp->device = device;
-	    goto found;
-	}
-    return NULL;
-found:
-#endif /* MULTISESSION */
-    device->gpsdata.raw_hook = raw_hook;
-    if (nowait) {
-	if (gpsd_activate(device) < 0) {
-	    return NULL;
-	}
-	FD_SET(device->gpsdata.gps_fd, &all_fds);
-    }
-
-    return device;
 }
 
 int main(int argc, char *argv[])
