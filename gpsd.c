@@ -190,6 +190,15 @@ static int handle_request(int fd, char *buf, int buflen)
     char reply[BUFSIZE], phrase[BUFSIZE], *p;
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
+#ifdef PROFILING
+    int icd = 0;
+#endif /* PROFILING */
+
+#ifdef PROFILING
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    session->poll_times[fd] = DTIME(tv);
+#endif /* PROFILING */
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -220,17 +229,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'D':
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
-#ifdef PROFILING
-		if (ud->profiling) {
-		    struct timeval tv;
-		    gettimeofday(&tv, NULL);
-		    sprintf(phrase+strlen(phrase), ",$=%s:%lf:%d:%ld.%ld",
-			    ud->tag,
-			    ud->recv_time,
-			    ud->sentence_length,
-			    tv.tv_sec, tv.tv_usec); 
-		}
-#endif /* PROFILING */
+		icd = 1;
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
@@ -365,9 +364,9 @@ static int handle_request(int fd, char *buf, int buflen)
 		gpsd_report(3, "%d turned off profiling mode\n", fd);
 		sprintf(phrase, ",Z=0");
 	    } else {
-		ud->profiling=1;
-		gpsd_report(3, "%d turned on profiling mode\n", fd);
-		sprintf(phrase, ",Z=1");
+		ud->profiling = !ud->profiling;
+		gpsd_report(3, "%d toggled profiling mode\n", fd);
+		sprintf(phrase, ",Z=%d", ud->profiling);
 	    }
 	    break;
 #endif /* PROFILING */
@@ -381,6 +380,21 @@ static int handle_request(int fd, char *buf, int buflen)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
+#ifdef PROFILING
+    if (ud->profiling && icd) {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	sprintf(phrase, ",$=%s %d %f %f %f %lf",
+		ud->tag,
+		ud->sentence_length,
+		ud->d_recv_time,
+		ud->d_decode_time - ud->d_recv_time,
+		session->poll_times[fd] - ud->d_recv_time,
+		DTIME(tv) - ud->d_recv_time); 
+	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
+	    strcat(reply, phrase);
+    }
+#endif /* PROFILING */
     strcat(reply, "\r\n");
 
     return throttled_write(fd, reply, strlen(reply));
@@ -666,15 +680,6 @@ int main(int argc, char *argv[])
 	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
 	}
-
-#ifdef PROFILING
-	{
-	    struct timeval tv;
-	    gettimeofday(&tv, NULL);
-	    session->gNMEAdata.recv_time = tv.tv_sec + tv.tv_usec / 1e6;
-	}
-#endif /* PROFILING */
-
 
 	/* this simplifies a later test */
 	if (session->dsock > -1)

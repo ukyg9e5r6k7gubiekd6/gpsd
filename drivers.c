@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "gpsd.h"
 
@@ -10,32 +11,6 @@
  *
  **************************************************************************/
 
-static void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
-{
-    gpsd_report(2, "<= GPS: %s\n", sentence);
-    if (*sentence == '$') {
-	if (nmea_parse(sentence, &session->gNMEAdata) < 0)
-	    gpsd_report(2, "unknown sentence: \"%s\"\n", sentence);
-    } else {
-#ifdef NON_NMEA_ENABLE
-	struct gps_type_t **dp;
-
-	/* maybe this is a trigger string for a driver we know about? */
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    char	*trigger = (*dp)->trigger;
-
-	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
-		gpsd_report(1, "found %s.\n", (*dp)->typename);
-		session->device_type = *dp;
-		session->device_type->initializer(session);
-		return;
-	    }
-	}
-#endif /* NON_NMEA_ENABLE */
-	gpsd_report(1, "unknown exception: \"%s\"\n", sentence);
-    }
-}
-
 static void nmea_handle_input(struct gps_session_t *session)
 {
     static char buf[BUFSIZE];	/* that is more then a sentence */
@@ -44,11 +19,46 @@ static void nmea_handle_input(struct gps_session_t *session)
     while (offset < BUFSIZE) {
 	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
 	    return;
-
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
+#ifdef PROFILING
+	    if (buf[offset] == '\n') {
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		session->gNMEAdata.d_recv_time = DTIME(tv);
+	    }
+#endif /* PROFILING */
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
-	        gpsd_NMEA_handle_message(session, buf);
+		gpsd_report(2, "<= GPS: %s\n", buf);
+		if (*buf == '$') {
+		    if (nmea_parse(buf, &session->gNMEAdata) < 0)
+			gpsd_report(2, "unknown sentence: \"%s\"\n", buf);
+#ifdef PROFILING
+		    else {
+			struct timeval tv;
+			gettimeofday(&tv, NULL);
+			session->gNMEAdata.d_decode_time = DTIME(tv);
+		    }
+#endif /* PROFILING */
+		} else {
+#ifdef NON_NMEA_ENABLE
+		    struct gps_type_t **dp;
+
+		    /* maybe this is a trigger string for a driver we know about? */
+		    for (dp = gpsd_drivers; *dp; dp++) {
+			char	*trigger = (*dp)->trigger;
+
+			if (trigger && !strncmp(buf, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
+			    gpsd_report(1, "found %s.\n", (*dp)->typename);
+			    session->device_type = *dp;
+			    session->device_type->initializer(session);
+			    return;
+			}
+		    }
+#endif /* NON_NMEA_ENABLE */
+		    gpsd_report(1, "unknown exception: \"%s\"\n", buf);
+		}
+
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
 		if (session->gNMEAdata.raw_hook)

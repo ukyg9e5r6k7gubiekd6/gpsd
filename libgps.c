@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/time.h>
 
 #include "config.h"	/* in case PROFILING is defined */
 #include "gpsd.h"
@@ -184,10 +185,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		sscanf(sp, "Z=%d", &gpsdata->profiling);
 		break;
 	    case '$':
-		sscanf(sp, "$=%s:%lf:%d:%lf", 
+		sscanf(sp, "$=%s %d %lf %lf %lf %lf", 
 		       gpsdata->tag,
-		       &gpsdata->recv_time, 
 		       &gpsdata->sentence_length,
+		       &gpsdata->d_recv_time, 
+		       &gpsdata->d_decode_time, 
+		       &gpsdata->poll_time, 
 		       &gpsdata->emit_time);
 #endif /* PROFILING */
 		break;
@@ -216,12 +219,29 @@ int gps_poll(struct gps_data_t *gpsdata)
 {
     char	buf[BUFSIZE];
     int		n;
+#ifdef PROFILING
+    struct timeval received;
+#endif /* PROFILING */
 
     /* the daemon makes sure that every read is NUL-terminated */
     if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
     buf[n] = '\0';
-    return gps_unpack(buf, gpsdata);
+#ifdef PROFILING
+    if (gpsdata->profiling)
+	gettimeofday(&received, NULL);
+#endif /* PROFILING */
+    n = gps_unpack(buf, gpsdata);
+#ifdef PROFILING
+    if (gpsdata->profiling)
+    {
+	struct timeval decoded;
+	gettimeofday(&decoded, NULL);
+	gpsdata->c_decode_time = DTIME(received) - gpsdata->d_recv_time;
+	gpsdata->c_recv_time = DTIME(decoded) - gpsdata->d_recv_time;
+    }
+#endif /* PROFILING */
+    return n;
 }
 
 int gps_query(struct gps_data_t *gpsdata, const char *requests)

@@ -94,11 +94,20 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
     struct life_t satellite_stamp;
 
-    /* profiling data */
+    /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
-    double recv_time,emit_time;	/* profile times */
+    double d_recv_time;		/* daemon receipt time (-> E+T1) */
+#ifdef PROFILING
+    double d_decode_time;	/* daemon end-of-decode time (-> D1) */
+    double poll_time;		/* daemon poll time (-> W) */
+#endif /* PROFILING */
+    double emit_time;		/* emission time (-> E2) */
+#ifdef PROFILING
+    double c_recv_time;		/* client receipt time (-> T2) */
+    double c_decode_time;	/* client end-of-decode time (-> D2) */
+#endif /* PROFILING */
     int baudrate, stopbits;	/* RS232 link paramters */
     int cycle;			/* refresh cycle time in seconds */
 

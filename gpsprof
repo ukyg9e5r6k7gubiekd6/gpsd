@@ -59,14 +59,23 @@ class rawplot:
     "Print basic data, ignoring timezone skew."
     name = "raw"
     def header(self, fp):
-        fp.write("#GPS time        	Received	Transmitted 	Read\n")
-        fp.write("#----------------	---------	----------- 	----------\n")
+        fp.write("# ")
+        for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
+            fp.write("%8s\t" % hn)
+        fp.write("tag\n# ")
+        for i in range(0, 7):
+            fp.write("--------\t")
+        fp.write("--------\n")
+
     def formatter(self, session, fp):
-        fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
               % (session.rs232,
-                 (session.recv_time - session.gps_time) % 3600,
-                 (session.emit_time - session.gps_time) % 3600,
-                 (time.time() - session.gps_time) % 3600,
+                 session.d_recv_time - session.rs232,
+                 session.d_recv_time + session.d_decode_time,
+                 session.d_recv_time + session.poll_time,
+                 session.d_recv_time + session.emit_time,
+                 session.d_recv_time + session.c_recv_time,
+                 session.d_recv_time + session.c_decode_time,
                  session.tag))
         return True
     def plot(self, file, title, session):
@@ -75,14 +84,17 @@ set autoscale
 set key below
 set key title "Raw latency data, %s, %dN%d, cycle %ds"
 plot \
-     "%s" using 0:4 title "TCP/IP latency" with impulses, \
-     "%s" using 0:3 title "Decode time" with impulses, \
-     "%s" using 0:2 title "Other latency" with impulses, \
-     "%s" using 0:1 title "RS232 time" with impulses
+     "%s" using 0:7 title "D2 = Client decode time" with impulses, \
+     "%s" using 0:6 title "T2 = TCP/IP latency" with impulses, \
+     "%s" using 0:5 title "E2 = Daemon encode time" with impulses, \
+     "%s" using 0:4 title "W  = Poll wait time" with impulses, \
+     "%s" using 0:3 title "D1 = Daemon decode time" with impulses, \
+     "%s" using 0:2 title "E1 = GPS encode time" with impulses, \
+     "%s" using 0:1 title "T1 = RS232 time" with impulses
 '''
         return fmt % (title,
                       session.baudrate, session.stopbits, session.cycle,
-                      file, file, file, file)
+                      file, file, file, file, file, file, file)
 
 class splitplot:
     "Discard base time, use color to indicate different tags."
@@ -93,29 +105,28 @@ class splitplot:
     def header(self, fp):
         fp.write("#")
         for s in splitplot.sentences:
-            fp.write(s + "    \t")
-        fp.write("Received	Transmitted 	Read\n")
-        fp.write("#")
-        for s in splitplot.sentences:
+            fp.write("%7s\t" % s)
+        for hn in ("E1", "D1", "W", "E2", "T2", "D2"):
+            fp.write("%7s\t" % hn)
+        fp.write("tag\n# ")
+        for s in splitplot.sentences + ("E1", "D1", "W", "E2", "T2", "D2"):
             fp.write("---------\t")
-        fp.write("---------	----------- 	----------\n")
+        fp.write("--------\n")
     def formatter(self, session, fp):
-        # Throw out total line latencies above 1 second, these are
-        # serial-buffering artifacts at the start of the session
-        line_latency = (session.recv_time - session.gps_time) % 3600
-        #if line_latency > session.cycle:
-        #    return False
         for s in splitplot.sentences:
             if s == session.tag:
                 fp.write("%2.6f\t"% session.rs232)
                 self.found[s] = True
             else:
                 fp.write("-       \t")
-        fp.write("%2.6f\t%2.6f\t%2.6f\t# %s\n" \
-              % (line_latency,
-                 (session.emit_time - session.gps_time) % 3600,
-                 (time.time() - session.gps_time) % 3600,
-                 session.tag))
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+                 % (session.d_recv_time - session.rs232,
+                    session.d_recv_time + session.d_decode_time,
+                    session.d_recv_time + session.poll_time,
+                    session.d_recv_time + session.emit_time,
+                    session.d_recv_time + session.c_recv_time,
+                    session.d_recv_time + session.c_decode_time,
+                    session.tag))
         return True
     def plot(self, file, title, session):
         fixed = '''
@@ -123,14 +134,22 @@ set autoscale
 set key below
 set key title "Filtered latency data, %s, %dN%d, cycle %ds"
 plot \\
-     "%s" using 0:%d title "TCP/IP latency" with impulses, \\
-     "%s" using 0:%d title "Decode time" with impulses, \\
-     "%s" using 0:%d title "Other latency" with impulses, \\
+     "%s" using 0:%d title "D2 = Client decode time" with impulses, \
+     "%s" using 0:%d title "T2 = TCP/IP latency" with impulses, \
+     "%s" using 0:%d title "E2 = Daemon encode time" with impulses, \
+     "%s" using 0:%d title "W  = Poll wait time" with impulses, \
+     "%s" using 0:%d title "D1 = Daemon decode time" with impulses, \
+     "%s" using 0:%d title "E1 = GPS encode time" with impulses, \
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
                        session.baudrate, session.stopbits, session.cycle,
-                       file, sc+3, file, sc+2, file, sc+1)
+                       file, sc+6,
+                       file, sc+5,
+                       file, sc+4,
+                       file, sc+3,
+                       file, sc+2,
+                       file, sc+1)
         for i in range(sc):
             if splitplot.sentences[i] in self.found:
                 fmt += '     "%s" using 0:%d title "%s" with impulses, \\\n' % \
@@ -200,9 +219,8 @@ if __name__ == '__main__':
             session.poll()
             baton.twirl()
             # If timestamp is no good, skip it.
-            if not session.utc or session.utc == "?":
+            if not session.isotime or session.isotime == "?":
                 continue
-            session.gps_time = gps.isotime(session.utc)
             session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
             if plotter.formatter(session, out):
                 await -= 1

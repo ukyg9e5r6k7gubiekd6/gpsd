@@ -46,6 +46,9 @@ struct gps_session_t {
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
+#ifdef PROFILING
+    double poll_times[__FD_SETSIZE];	/* last daemon poll time */
+#endif /* PROFILING */
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)	/* public; set by -i option */
     char *latitude, *longitude;
     char latd, lond;
@@ -68,6 +71,7 @@ struct gps_session_t {
 };
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
+#define DTIME(tv)	(tv.tv_sec + tv.tv_usec/1e6)
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;

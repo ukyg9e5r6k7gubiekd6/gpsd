@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include "config.h"
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>	/* for FIONREAD on BSD systems */
@@ -276,7 +277,7 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 	if (i % 4 == 3) {
 	    nmea_add_checksum(bufp);
 	    if (session->gNMEAdata.raw_hook) {
-		session->gNMEAdata.raw_hook(bufp);
+		session->gNMEAdata.raw_hook(bufp2);
 	    }
 	}
     }

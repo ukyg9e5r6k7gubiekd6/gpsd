@@ -44,7 +44,8 @@ class gpsdata:
 	self.online = False			# True if GPS on, False if not
 	self.online_stamp = gps.timestamp(now)
 
-	self.utc = ""
+        self.isotime = ""
+        self.localtime = 0
 
 	self.latitude = self.longitude = 0.0
 	self.latlon_stamp = gps.timestamp(now)
@@ -74,10 +75,12 @@ class gpsdata:
 
         self.profiling = False
         self.tag = ""
-        self.recv_time = 0
         self.length = 0
+        self.d_recv_time = 0
+        self.d_decode_time = 0
         self.emit_time = 0
-        self.read_time = 0
+        self.c_recv_time = 0
+        self.c_decode_time = 0
         self.baudrate = 0
         self.stopbits = 0
         self.cycle = 0
@@ -207,7 +210,12 @@ class gps(gpsdata):
 	    elif cmd in ('C', 'c'):
 	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
-	      self.utc = data
+	      self.isotime = data
+              if self.profiling:
+                  if data:
+                      self.localtime = isotime(data)
+                  else:
+                      self.localtime = 0
 	    elif cmd in ('M', 'm'):
 	      i1 = int(data)
 	      self.mode_stamp.changed = (self.mode != i1)
@@ -261,11 +269,12 @@ class gps(gpsdata):
 	    elif cmd in ('Z', 'z'):
               self.profiling = (data[0] == '1')
             elif cmd == '$':
-                  (self.tag, recv_time, length, emit_time) = data.split(":")
-                  self.recv_time = float(recv_time)
+                  (self.tag, length, recv_time, decode_time, poll_time, emit_time) = data.split()
                   self.length = int(length)
+                  self.d_recv_time = float(recv_time)
+                  self.d_decode_time = float(decode_time)
+                  self.poll_time = float(poll_time)
                   self.emit_time = float(emit_time)
-                  self.read_time = time.time()
 	if self.raw_hook:
 	    self.raw_hook(buf);
 	return self.online_stamp.changed \
@@ -284,7 +293,13 @@ class gps(gpsdata):
         data = self.sockfile.readline()
         if self.verbose:
             sys.stderr.write("GPS DATA %s\n" % repr(data))
-	return self.__unpack(data)
+        if self.profiling:
+            self.c_recv_time = (time.time() - self.d_recv_time)
+	res = self.__unpack(data)
+        if self.profiling:
+            self.c_decode_time = (time.time() - self.d_recv_time)
+        #print "d=%lf %s r=%lf %s" % (self.localtime, time.ctime(self.localtime), self.d_recv_time, time.ctime(self.d_recv_time))
+        return res
 
     def query(self, commands):
 	"Send a command, get back a response."

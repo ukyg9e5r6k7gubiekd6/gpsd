@@ -15,18 +15,29 @@ Next, profiling...
 
 If you build with --enable-profiling, an undocumented Z command in the daemon 
 will cause it to emit a $ clause on every D request.  The $ clause contains
-two colon-separated fields: a millisecond-precision timestamp telling when
-gpsd shipped the data, and the character length of the sentence containing the 
-timestamp data (a GPRMC, GPLL, or GPGGA sentence).
+four space-separated fields: 
 
-The spread between D and Z timestamps measures the latency between the
-GPS's fix measurement and when it became available to the client. For
-it to be meaningful, the GPS has to ship timestamps with sub-second
-precision. SiRF-II and Evermore chipsets ship times with millisecond
-resolution.  Your machine's time reference must also be accurate to
-subsecond precision; I recommend using ntpd, which will normally give
-you about 15 microseconds precision (two orders of magnitude better than 
-GPSes normally report).
+(1) The character length of the sentence containing the timestamp data
+    (a GPRMC, GPLL, or GPGGA sentence)
+
+(2) A timestamp telling when gpsd received the data.
+
+(3) An offset from the received timestamp telling when gpsd decoded the data.
+
+(4) An offset from the received timestamp taken just before encoding the
+    response -- effectively, when gpsd was polled to transmit the data.
+
+(5) An offset from the received timestamp telling when gpsd transmitted 
+    the data.
+
+The spread between D and the Z timestamps measures components of the
+latency between the GPS's fix measurement and when it became available
+to the client. For it to be meaningful, the GPS has to ship timestamps
+with sub-second precision. SiRF-II and Evermore chipsets ship times
+with millisecond resolution.  Your machine's time reference must also
+be accurate to subsecond precision; I recommend using ntpd, which will
+normally give you about 15 microseconds precision (two orders of
+magnitude better than GPSes normally report).
 
 Another helpful command is B.  Without arguments, it triggers a response
 of the form <baudrate> <bits> N <stopbits>, e.g. "4800 8 N 1" describing
