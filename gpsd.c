@@ -165,21 +165,41 @@ static void print_settings(char *service, char *dgpsserver)
     }
 }
 
-static int validate(void)
+/*
+ * This piece of moderately disgusting old-school C macrology 
+ * is brought to you by the following constraint; I didn't want 
+ * to make fd or buf a global. I use do {} while (0) around the
+ * macro to make sure that a trailing semi after an invocation 
+ * won't be interpreted in surprising way.
+ */
+#define VALIDATION_COMPLAINT(level, legend) do {	\
+	char buf[BUFSIZE]; \
+	strcpy(buf, "# "); \
+        snprintf(buf+2, BUFSIZE, \
+		legend " (status=%d, mode=%d).\n", \
+		session.gNMEAdata.status, session.gNMEAdata.mode); \
+	gpscli_report(level, buf+2); \
+	write(fd, buf, strlen(buf)); \
+	} while (0)
+
+static int validate(int fd)
 {
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
-	 gpscli_report(3, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
-	 return 0;
+	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
+	return 0;
     }
     else if (session.gNMEAdata.status > STATUS_NO_FIX && session.gNMEAdata.mode > MODE_NO_FIX) {
-	 gpscli_report(3, "GPS is has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	VALIDATION_COMPLAINT(3, "GPS has a fix");
 	return session.gNMEAdata.mode;
     }
+    VALIDATION_COMPLAINT(3, "GPS hads no fix");
     return 0;
 }
+#undef VALIDATION_CONSTRAINT
 
 static int handle_request(int fd, char *buf, int buflen)
+/* interpret a client requst; fd is the socket back to the client */
 {
     char reply[BUFSIZE];
     char *p;
@@ -188,8 +208,21 @@ static int handle_request(int fd, char *buf, int buflen)
 
     cur_time = time(NULL);
 
-#define STALE_COMPLAINT(l, f) gpscli_report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
-
+    /* 
+     * See above...there's actually better reason for this one, as 
+     * field needs to be spliced into the structure references
+     * at compile time.
+     */
+#define STALE_COMPLAINT(label, field) do {	\
+	char buf[BUFSIZE]; \
+	strcpy(buf, "# "); \
+        snprintf(buf+2, BUFSIZE, \
+		label " data is stale: %ld + %d >= %ld\n", \
+		session.gNMEAdata.field.last_refresh, \
+		session.gNMEAdata.field.time_to_live, cur_time); \
+	gpscli_report(3, buf+2); \
+	write(fd, buf, strlen(buf)); \
+	} while (0)
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -198,7 +231,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	{
 	case 'A':
 	case 'a':
-	    if (!validate())
+	    if (!validate(fd))
 		break;
 	    else if (FRESH(session.gNMEAdata.altitude_stamp,cur_time)) {
 		sprintf(reply + strlen(reply),
@@ -236,7 +269,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'P':
 	case 'p':
-	    if (!validate())
+	    if (!validate(fd))
 		break;
 	    else if (FRESH(session.gNMEAdata.latlon_stamp,cur_time)) {
 		sprintf(reply + strlen(reply),
@@ -288,7 +321,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'T':
 	case 't':
-	    if (!validate())
+	    if (!validate(fd))
 		break;
 	    if (FRESH(session.gNMEAdata.track_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
@@ -300,7 +333,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'V':
 	case 'v':
-	    if (!validate())
+	    if (!validate(fd))
 		break;
 	    else if (FRESH(session.gNMEAdata.speed_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
@@ -391,6 +424,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	gpscli_report(1, "=> client: %s", reply);
     return write(fd, reply, strlen(reply) + 1);
 }
+#undef STALE_COMPLAINT
 
 static void notify_watchers(char *sentence)
 /* notify all watching clients of an event */

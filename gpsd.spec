@@ -77,7 +77,8 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
   the GPS goes online or offline.  Major name changes -- old libgps
   is new libgpsd and vice-versa (so the high-level interface is more
   prominent.  Specfile now includes code to install gpsd so it will
-  be started at boot time.
+  be started at boot time.  -D2 now causes command error messages
+  to be echoed to the client.
 
 * Sat Aug 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.91-1
 - Second pre-2.0 release.  Features a linkable C library that hides the 
