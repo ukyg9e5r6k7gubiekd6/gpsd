@@ -125,7 +125,7 @@ class gps(gpsdata):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
 	self.connect(host, port)
-        self.verbose = verbose:
+        self.verbose = verbose
 	self.raw_hook = None
 
     def connect(self, host, port):
