@@ -215,6 +215,17 @@ static int handle_dgps()
     return rtcmbytes;
 }
 
+void deactivate()
+{
+    gNMEAdata.fdin = -1;
+    gNMEAdata.fdout = -1;
+    serial_close();
+    if (device_type == DEVICE_EARTHMATEb)
+	device_type = DEVICE_EARTHMATE;
+    syslog(LOG_NOTICE, "Closed gps");
+    gNMEAdata.mode = 1;
+    gNMEAdata.status = 0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -407,15 +418,11 @@ int main(int argc, char *argv[])
 	if (reopen) {
 	    FD_CLR(input, &afds);
 	    input = -1;
-	    gNMEAdata.fdin = input;
-	    gNMEAdata.fdout = input;
-	    serial_close();
-	    if (device_type == DEVICE_EARTHMATEb)
-		device_type = DEVICE_EARTHMATE;
-	    syslog(LOG_NOTICE, "Closed gps");
-	    gNMEAdata.mode = 1;
-	    gNMEAdata.status = 0;
+	    deactivate();
+/*
+ * no need to do that!
 	    need_gps++;
+*/
 	}
 
 	for (fd = 0; fd < nfds; fd++) {
@@ -443,14 +450,7 @@ int main(int argc, char *argv[])
 	if (!need_gps && input != -1) {
 	    FD_CLR(input, &afds);
 	    input = -1;
-	    gNMEAdata.fdin = input;
-	    gNMEAdata.fdout = input;
-	    serial_close();
-	    if (device_type == DEVICE_EARTHMATEb)
-		device_type = DEVICE_EARTHMATE;
-	    syslog(LOG_NOTICE, "Closed gps");
-	    gNMEAdata.mode = 1;
-	    gNMEAdata.status = 0;
+	    deactivate();
 	}
     }
 }
