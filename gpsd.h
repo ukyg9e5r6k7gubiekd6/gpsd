@@ -121,8 +121,6 @@ struct gps_device_t {
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
-#define SIRF_SEEN_41    0x08            /* Seen Geodetic Navigation Data? */
-#define FULL_PACKET	0x10		/* Full packet has been seen */
     double separation;		/* Geoidal separation */
 #define NO_SEPARATION	-99999	/* must be out of band */
     double mag_var;		/* Magnetic variation in degrees */  
