@@ -31,9 +31,8 @@
  *	magnetic variation
  *
  * known bugs:
- *      won't work on a little-endian machine
- *	xgps says "NO FIX" and refuses to show the speed and track.
  *      hangs in the fread loop instead of keeping state and returning.
+ *      won't work on a little-endian machine
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -786,8 +785,6 @@ static int garmin_parse_input(struct gps_session_t *session)
     PrintPacket(session, (Packet_t*)session->GarminBuffer);
     return 1;
 }
-
-/* caller needs to specify a wrapup function */
 
 /* this is everything we export */
 struct gps_type_t garmin_binary =

@@ -331,17 +331,20 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	case 'O':
 	    /*
 	     * Presently we don't know how to derive time error, track
-	     * error, speed error, or climb error.  Field reports
-	     * match the theoretical prediction that expected time
-	     * error should be half the resolution of the GPS clock,
-	     * so we put the 1-sigma point of the normal distribution
-	     * over [0.0,0.01] with mean of 0.05 in as a constant pending
-	     * getting it from each driver.
+	     * error, speed error, or climb error.  
+	     *
+	     * Field reports match the theoretical prediction that
+	     * expected time error should be half the resolution of
+	     * the GPS clock, so we put the 1-sigma point of the
+	     * normal distribution over [0.0,0.01] with mean of 0.05
+	     * in as a constant pending getting it from each driver.
+	     *
+	     * Only the Zodiacs report speed error.
 	     */
 	    if (!have_fix(session))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f 0.06 %.4f %.4f",
+		sprintf(phrase, ",O=%.2f 0.006 %.4f %.4f",
 			ud->fix.time, ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %.2f",
@@ -366,7 +369,13 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		    sprintf(phrase+strlen(phrase), " %.3f", ud->fix.climb);
 		else
 		    strcat(phrase, "?");
-		strcpy(phrase, " ? ? ?");
+		strcat(phrase, " ?");	/* can't yet derive track error */ 
+		if (session->gpsdata.valid & SPEEDERR_SET)
+		    sprintf(phrase+strlen(phrase), " %.2f",
+			    session->gpsdata.fix.eps);		    
+		else
+		    strcat(phrase, "?");
+		strcat(phrase, " ?");	/* can't yet derive climb error */ 
 	    }
 	    break;
 	case 'P':

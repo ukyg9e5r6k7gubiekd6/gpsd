@@ -142,9 +142,6 @@ struct gps_session_t {
 #endif /* defined(SHM_H) && defined(IPC_H) */
 };
 
-#define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
-#define TIME2DOUBLE(tv)	(tv.tv_sec + tv.tv_usec/1e6)
-
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
 
@@ -176,6 +173,7 @@ extern int ntpshm_init(struct gps_session_t *);
 extern int ntpshm_put(struct gps_session_t *, double);
 
 extern double iso8661_to_unix(char *);
+extern double gpstime_to_unix(int, double);
 
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);

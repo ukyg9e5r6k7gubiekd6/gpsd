@@ -133,14 +133,10 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-    char buf[28];
 
-    sprintf(buf, "%04d/%02d/%dT%02d:%02d:%02dZ",
-	    getw(19), getw(20), getw(21), getw(22), getw(23), getw(24));
-    session->gpsdata.fix.time = iso8661_to_unix(buf);
 
 #if 0
-    gpsd_report(1, "date: %s\n", session->gpsdata.utc);
+    gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
     gpsd_report(1, "  solution invalid:\n");
     gpsd_report(1, "    ->fix.altitude: %d\n", (getw(10) & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (getw(10) & 2) ? 1 : 0);
@@ -149,7 +145,7 @@ static int handle1000(struct gps_session_t *session)
     gpsd_report(1, "    exceed max EVPE: %d\n", (getw(10) & 16) ? 1 : 0);
     gpsd_report(1, "  solution type:\n");
     gpsd_report(1, "    propagated: %d\n", (getw(11) & 1) ? 1 : 0);
-    gpsd_report(1, "    ->fix.altitude: %d\n", (getw(11) & 2) ? 1 : 0);
+    gpsd_report(1, "    altitude: %d\n", (getw(11) & 2) ? 1 : 0);
     gpsd_report(1, "    differential: %d\n", (getw(11) & 4) ? 1 : 0);
     gpsd_report(1, "Number of measurements in solution: %d\n", getw(12));
     gpsd_report(1, "Lat: %f\n", getl(27) * RAD_2_DEG * 1e-8);
@@ -162,13 +158,16 @@ static int handle1000(struct gps_session_t *session)
     gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2);
 #endif
 
+    session->gpsdata.fix.time      = gpstime_to_unix(getw(14), 
+						     getl(15)+getl(17)*1e-9);
     session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
     session->gpsdata.fix.altitude  = getl(31) * 1e-2;
     session->gpsdata.fix.climb     = getl(38) * 1e-2;
-    session->gpsdata.status    = (getw(10) & 0x1c) ? 0 : 1;
-    session->mag_var             = getw(37) * RAD_2_DEG * 1e-4;
+    session->gpsdata.fix.eps       = getl(46) * 1e-2;
+    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
+    session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
     session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
     session->gpsdata.satellites_used = getw(12);
 
@@ -180,7 +179,7 @@ static int handle1000(struct gps_session_t *session)
 
     session->gpsdata.sentence_length = 55;
     strcpy(session->gpsdata.tag, "1000");
-    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
+    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|SPEEDERR_SET;
 }
 
 static int handle1002(struct gps_session_t *session)

@@ -57,3 +57,35 @@ char *unix_to_iso8661(double fixtime, char *isotime)
     memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
     return isotime;
 }
+
+/*
+ * The 'week' part of GPS dates are specified in weeks since 0000 on 06 
+ * January 1980, with a rollover at 1024.  At time of writing the last 
+ * rollover happened at 0000 22 August 1999.  Time-of-week is in seconds.
+ *
+ * This code copes with both conventional GPS weeks and the "extended"
+ * 15-or-16-bit version with no wraparound that apperas in Zodiac
+ * chips and is supposed to appear in the Geodetic Navigation
+ * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
+ * (notably 231) actually ship the wrapped 10-bit week, despite what
+ * the protocol reference claims.
+ */
+#define GPS_EPOCH	315982800		/* GPS epoch in Unix time */
+#define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
+#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
+
+double gpstime_to_unix(int week, double tow)
+{
+    double fixtime;
+
+    if (week >= GPS_ROLLOVER)
+	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
+    else {
+	time_t now, last_rollover;
+	time(&now);
+	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
+	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+    }
+    return fixtime;
+}
+

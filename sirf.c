@@ -112,39 +112,6 @@ static int sirf_to_nmea(int ttyfd, int speed)
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
-/*
- * The 'week' part of GPS dates are specified in weeks since 0000 on 06 
- * January 1980, with a rollover at 1024.  At time of writing the last 
- * rollover happened at 0000 22 August 1999.  Time-of-week is in seconds.
- *
- * This code copes with both conventional GPS weeks and the "extended" 
- * 15-or-16-bit version with no wraparound that is supposed to appear in
- * the Geodetic Navigation Information (0x29) packet.  Some firmware 
- * versions (notably 231) actually ship the wrapped 10-bit week, despite
- * what the protocol reference says.
- */
-#define GPS_EPOCH	315982800		/* GPS epoch in Unix time */
-#define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
-#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
-
-static void extract_time(struct gps_session_t *session, int week, double tow)
-{
-    double fixtime;
-
-    if (week >= GPS_ROLLOVER)
-	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
-    else {
-	time_t now, last_rollover;
-	time(&now);
-	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
-	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
-    }
-    session->gpsdata.fix.time = fixtime;
-#ifdef NTPSHM_ENABLE
-    ntpshm_put(session, fixtime);
-#endif /* defined(SHM_H) && defined(IPC_H) */
-}
-
 static void sirfbin_mode(struct gps_session_t *session, int mode)
 {
     if (mode == 0) {
@@ -231,7 +198,11 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
-	    extract_time(session, getw(22), getl(24)*1e-2);
+	    session->gpsdata.fix.time=gpstime_to_unix(getw(22), getl(24)*1e-2);
+#ifdef NTPSHM_ENABLE
+	    ntpshm_put(session, session->gpsdata.fix.time);
+#endif /* defined(SHM_H) && defined(IPC_H) */
+
 	    gpsd_binary_fix_dump(session, buf2);
 	    /* fix quality data */
 	    session->gpsdata.hdop = getb(20)/5.0;
@@ -383,7 +354,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * seeing a quantity that has undergone 10-bit wraparound.
 	     */
 	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
-	    extract_time(session, getw(5), getl(7)*1e-4);
+	    session->gpsdata.fix.time = gpstime_to_unix(getw(5), getl(7)*1e-4);
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /*
 	     * Skip UTC, left all zeros in 231 and older firmware versions, 
