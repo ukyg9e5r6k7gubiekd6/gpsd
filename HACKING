@@ -1,5 +1,18 @@
 			Hacker's Guide to gpsd
 
+First, debugging...
+
+For debugging purposes, it may be helpful to configure with --disable-shared.
+This turns off all the shared-library crud, making it somewhat easier to
+use gdb.
+
+There is a script called logextract in the distribution that you can use
+to strip clean NMEA out of the log files produced by gpsd.  This can be
+useful if someone ships you a log that they allege caused gpsd to 
+misbehave.
+
+Then, architecture and how to hack it...
+
 This is not a complicated piece of code.  Essentially, it spins in a loop 
 polling for input from one of three sources:
 
@@ -65,11 +78,3 @@ Then, there is some C code in the contrib/ directory that has some
 potentially useful techniques in it.  Picking a good one to integrate
 into gpsd might be a useful thing.
 
-For debugging purposes, it may be helpful to configure with --disable-shared.
-This turns off all the shared-library crud, making it somewhat easier to
-use gdb.
-
-There is a script called logextract in the distribution that you can use
-to strip clean NMEA out of the log files produced by gpsd.  This can be
-useful if someone ships you a log that they allege caused gpsd to 
-misbehave.
