@@ -358,10 +358,6 @@ DTM - Datum Reference
   4) Power Level
   5) Checksum
 
- GGA - Global Positioning System Fix Data
- Time, Position and fix related data for a GPS receiver.
-
-
 GBS - GPS Satellite Fault Detection
 
             1      2   3   4   5   6   7   8   9
@@ -382,6 +378,9 @@ GBS - GPS Satellite Fault Detection
 Note: Source [MX521] describes a proprietary extension of GBS with
 a 9th data field.
                                                       11
+GGA - Global Positioning System Fix Data
+Time, Position and fix related data for a GPS receiver.
+
         1         2       3 4        5 6 7  8   9  10 |  12 13  14   15
         |         |       | |        | | |  |   |   | |   | |   |    |
  $--GGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh<CR><LF>
@@ -396,10 +395,11 @@ a 9th data field.
      0 - fix not available,
      1 - GPS fix,
      2 - Differential GPS fix
+     (values above 2 are 2.3 features)
      3 = PPS fix
      4 = Real Time Kinematic
      5 = Float RTK
-     6 = estimated (dead reckoning) (2.3 feature)
+     6 = estimated (dead reckoning)
      7 = Manual input mode
      8 = Simulation mode
   7) Number of satellites in view, 00 - 12
