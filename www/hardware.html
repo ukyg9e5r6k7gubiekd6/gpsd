@@ -13,8 +13,9 @@
 <h1 align='center'>Compatible GPSses</h1>
 
 <p>gpsd should work with any GPS using an RS232C or USB interface that
-advertises NMEA-0183 compliance.  Here are the some notes on hardware
-we have tested.  Hyperlinks lead to technical information.</p>
+advertises NMEA-0183 compliance.  Here are some notes on hardware we
+have tested (all under Linux 2.6.8).  Hyperlinks lead to technical
+information.</p>
 
 <table border='1'>
 
@@ -24,7 +25,7 @@ we have tested.  Hyperlinks lead to technical information.</p>
 <th>Interface</th>
 <th>Sold as</th>
 <th>gpsd type</th>
-<th>Tested</th>
+<th>Works with</th>
 <th>Sentences</th>
 <th width="50%">Notes</th>
 </tr>
@@ -46,34 +47,36 @@ manual</a> from Globalsat's U.S. reseller.</td>
 <td>EarthMate</td>
 <td>Zodiac</td>
 <td>RS-232</td>
-<td>Delorme</td>
+<td>DeLorme</td>
 <td align='center'>e</td>
 <td>1.10</td>
 <td>Unknown</td>
-<td>The Zodiac version speaks Rockwell binary protocol. In 2003
-the EarthMate switched to a SiRF-II chipset.</td>
+<td>The old Zodiac version spoke Rockwell binary protocol. These 
+models have been discontinued but are still common.</td>
 </tr>
 <tr>
-<td><a href='http://vancouver-webpages.com/peter/tripmate.faq'>TripMate</a></td>
-<td>Zodiac</td>
-<td>RS-232</td>
-<td>Delorme</td>
-<td align='center'>t</td>
-<td>1.97</td>
-<td>GPRMC, GPGSA, GPGGA, GPGSV, PRWIRID, PRWIZCH</td>
-<td>
-Discontinued sometime before November 1998. 
-Takes optional latitude/longitude initialization.</td>
+<td>EarthMate</td>
+<td>SiRF-II</td>
+<td>USB</td>
+<td>DeLorme</td>
+<td align='center'>-</td>
+<td>None</td>
+<td>Unknown</td>
+<td>In 2003 the EarthMate switched to a SiRF-II chipset. The USB 
+version doesn't work with gpsd under Linux, because support for the
+Cypress M8 serial-to-USB chipset is lacking.  This is
+<a href='http://trans.civil.northwestern.edu/~jay/gpsd.html'>being
+worked on</a>.</td>
 </tr>
 <tr>
 <td>FV18</a></td>
-<td>&nbsp;</td>
+<td>Unknown</td>
 <td>RS232</td>
 <td>FV18</td>
 <td align='center'>f</td>
 <td>1.96</td>
 <td>GGA, GSV, RMC, GLL, VTG (optionally GSA)</td>
-<td>Uses 8N2.</td>
+<td>Uses 8N2. Information on this unit is scant.</td>
 </tr>
 <tr>
 <td><a
@@ -86,6 +89,18 @@ Sapphire USB</a></a></td>
 <td>1.97</td>
 <td>GGA, GSV, RMC, GLL, VTG, GSA</td>
 <td>There's an RS232 variant as well, not yet tested.</td>
+</tr>
+<tr>
+<td><a href='http://vancouver-webpages.com/peter/tripmate.faq'>TripMate</a></td>
+<td>Zodiac</td>
+<td>RS-232</td>
+<td>Delorme</td>
+<td align='center'>t</td>
+<td>1.97</td>
+<td>GPRMC, GPGSA, GPGGA, GPGSV, PRWIRID, PRWIZCH</td>
+<td>
+Discontinued sometime before November 1998. 
+Takes optional latitude/longitude initialization.</td>
 </tr>
 </table>
 
