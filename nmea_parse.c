@@ -354,7 +354,7 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
     changed |= update_field_f(sentence, 16, &out->hdop);
     changed |= update_field_f(sentence, 17, &out->vdop);
     out->signal_quality_stamp.changed = changed;
-    REFRESH(out->signal_quality_stamp);
+    REFRESH(out->fix_quality_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
