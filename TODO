@@ -32,10 +32,6 @@ possible to set the receive FIFO size from a user program, only the
 transmit FIFO.  However it appears that setting it to 1 will also disable
 the receive FIFO.  You'll have to experiment.
 
-** Supply geoidal separation for SiRF packet 2
-
-It's there for testing now.
-
 ** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which

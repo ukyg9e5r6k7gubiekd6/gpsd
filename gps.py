@@ -314,6 +314,7 @@ class gps(gpsdata):
               self.valid |= ONLINE_SET
 	    elif cmd in ('Y', 'y'):
 	      satellites = data.split(":")
+	      self.timings.sentence_time = float(satellites.pop(0))
 	      d1 = int(satellites.pop(0))
 	      newsats = []
 	      for i in range(d1):
