@@ -113,20 +113,25 @@ int daemonize()
 int main(int argc, char *argv[])
 {
     char *default_service = "5678";
+    char *default_dgpsserver = "dgps.wsrcc.com";
+    char *default_dgpsport = "rtcm-sc104";
     char *service = 0;
+    char *dgpsport = 0;
+    char *dgpsserver = 0;
     struct sockaddr_in fsin;
-    int msock;
+    int msock, dsock;
     fd_set rfds;
     fd_set afds;
     fd_set nmea_fds;
     int alen;
     int fd, input;
-    int need_gps;
+    int need_gps, need_dgps = 0;
     extern char *optarg;
     int option;
     double baud;
+    char buf[BUFSIZE];
 
-    while ((option = getopt(argc, argv, "D:L:S:T:hl:p:s:")) != -1) {
+    while ((option = getopt(argc, argv, "D:L:S:T:hcl:p:s:d:r:")) != -1) {
 	switch (option) {
 	case 'T':
 	    switch (*optarg) {
@@ -145,6 +150,9 @@ int main(int argc, char *argv[])
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
 	    break;
+	case 'd':
+	    dgpsserver = optarg;
+	    break;
 	case 'L':
 	    if (optarg[strlen(optarg) - 1] == 'W' || optarg[strlen(optarg) - 1] == 'w'
 		|| optarg[strlen(optarg) - 1] == 'E' || optarg[strlen(optarg) - 1] == 'e') {
@@ -156,6 +164,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'S':
 	    service = optarg;
+	    break;
+	case 'r':
+	    dgpsport = optarg;
 	    break;
 	case 'l':
 	    if (optarg[strlen(optarg) - 1] == 'N' || optarg[strlen(optarg) - 1] == 'n'
@@ -186,6 +197,9 @@ int main(int argc, char *argv[])
 	    else
 		device_speed = B38400;
 	    break;
+	case 'c':
+	  need_dgps = 1;
+	  break;
 	case 'h':
 	case '?':
 	default:
@@ -194,11 +208,14 @@ int main(int argc, char *argv[])
   -D integer   [ set debug level ] \n\
   -L longitude [ set longitude ] \n\
   -S integer   [ set port for daemon ] \n\
-  -T e         [ erthmate flag ] \n\
+  -T e         [ earthmate flag ] \n\
   -h           [ help message ] \n\
   -l latitude  [ set latitude ] \n\
   -p string    [ set gps device name ] \n\
   -s baud_rate [ set baud rate on gps device ] \n\
+  -c           [ use dgps service for corrections ] \n\
+  -d host      [ set dgps server ] \n\
+  -r port      [ set dgps rtcm-sc104 port ] \n\
 ", stderr);
 	    exit(0);
 	}
@@ -211,12 +228,20 @@ int main(int argc, char *argv[])
 	longitude = default_longitude;
     if (!service)
 	service = default_service;
+    if (need_dgps && !dgpsserver)
+	dgpsserver = default_dgpsserver;
+    if (need_dgps && !dgpsport)
+	dgpsport = default_dgpsport;
     if (debug > 0) {
 	fprintf(stderr, "command line options:\n");
 	fprintf(stderr, "  debug level:        %d\n", debug);
 	fprintf(stderr, "  gps device name:    %s\n", device_name);
 	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
 	fprintf(stderr, "  gpsd port:          %s\n", service);
+	if (need_dgps) {
+	  fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
+	  fprintf(stderr, "  dgps port:        %s\n", dgpsport);
+	}
 	fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
 	fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
     }
@@ -234,24 +259,43 @@ int main(int argc, char *argv[])
     syslog(LOG_NOTICE, "Gpsd listening on port %s", service);
 
     msock = passiveTCP(service, QLEN);
+    if (need_dgps) {
+      if (!getservbyname(dgpsport, "tcp"))
+	dgpsport = "2101";
+      dsock = connectsock(dgpsserver, dgpsport, "tcp");
+    }
 
     nfds = getdtablesize();
 
     FD_ZERO(&afds);
     FD_ZERO(&nmea_fds);
     FD_SET(msock, &afds);
+    if (need_dgps) {
+      char hn[256];
+      gethostname(hn, sizeof(hn));
+
+      sprintf(buf, "HELO %s gpsd %s+dgps-shadow@dementia.org", hn, VERSION);
+      write(dsock, buf, strlen(buf));
+      FD_SET(dsock, &afds);
+    }
 
     input = -1;
 
-
     while (1) {
-	bcopy((char *) &afds, (char *) &rfds, sizeof(rfds));
+        memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
 
 	if (select(nfds, &rfds, (fd_set *) 0, (fd_set *) 0,
 		   (struct timeval *) 0) < 0) {
 	    if (errno == EINTR)
 		continue;
 	    errexit("select");
+	}
+	if (FD_ISSET(dsock, &rfds)) {
+	  int rtcmbytes;
+	  rtcmbytes = read(dsock, buf, BUFSIZE);
+	  fprintf(stderr, "read %d from DGPS service\n", rtcmbytes);
+	  if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
+	    em_send_rtcm(buf, rtcmbytes);
 	}
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;

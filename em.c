@@ -119,6 +119,23 @@ static void em_init()
     em_spew(1200, &data, 22);
 }
 
+void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
+{
+    unsigned short data[34];
+    int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
+
+    if (sn++ > 32767)
+	sn = 0;
+
+    memset(data, 0, sizeof(data));
+
+    data[0] = sn;		// sequence number
+    memcpy(&data[1], rtcmbuf, rtcmbytes*(sizeof(char)));
+    data[n] = em_checksum(data, n);
+
+    em_spew(1351, &data, n+1);
+}
+
 void do_eminit()
 {
     /* Make sure these are zero before 1002 handler called */
