@@ -55,6 +55,6 @@ original document, if in doubt, read the source...
 
 7. Queries are case insensitive. "P" or "p" will do the same thing.
    The first occurence of either '\r' or '\n' will execute the query.
-   So "va\n", "vA\r", and "VA\r\n" are equvalent.
+   So "va\n", "vA\r", and "VA\r\n" are equivalent.
 
 
