@@ -45,10 +45,10 @@ def wake_up_gpsd(devpath):
         if not connect:
             return
 
-        # We've got a live connection to gpsd. Ship it the right F command.
-        # No need to look at the response; gpsd will lock on to the device
+        # We've got a live connection to the gpsd control socket. 
+        # No response, because gpsd will lock on to the device
         # if it's really a GPS and ignore it if it's not.
-        connect.write("F=%s\r\n" % tty)
+        connect.write("+%s\r\n" % tty)
         connect.close()
         return
 

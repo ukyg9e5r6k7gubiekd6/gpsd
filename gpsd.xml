@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
-   "docbook/docbookx.dtd">
+   "docbook/docbookx.dtd" [
+<!ENTITY gpsdsock         "/var/run/gpsd.sock">
+]>
 <refentry id='gpsd.8'>
 <refmeta>
 <refentrytitle>gpsd</refentrytitle>
@@ -119,16 +121,23 @@ to standard error.</para>
 </variablelist>
 
 <para>At any given time, each client will be listening to only one of
-the GPSes devices known to the daemon.  By default, a client's device
-is the one most recently on-line at the time the client connects.  A
-client may use the 'F' command to specify a device to listen to.</para>
+the GPSes known to the daemon.  By default, a client's device is the
+one most recently on-line at the time the client connects.  A client
+may use the 'F' command to specify a device to listen to.</para>
 
-<para>The request protocol for gpsd clients is very simple.  Each
-request normally consists of a single ASCII character followed by a newline.
-Case of the request character is ignored,  Each request returns a line
-of response text ended by a CR/LF.  Requests and responses are as 
-follows, with %f standing for a decimal float numeral and %d for
-decimal integer numeral:</para>
+<para>The 'F' command fails if the specified device name is not on the
+daemon's internal search list.  This search list is initialized with
+<filename>/dev/gps</filename> or the path given in the -f command-line
+option if that was specified.  For security reasons, ordinary clients
+cannot change this search list; instead, this must be done via the
+daemon's local control socket.</para>
+
+<para>The request protocol for <application>gpsd</application> clients
+is very simple.  Each request normally consists of a single ASCII
+character followed by a newline.  Case of the request character is
+ignored, Each request returns a line of response text ended by a
+CR/LF.  Requests and responses are as follows, with %f standing for a
+decimal float numeral and %d for decimal integer numeral:</para>
 
 <variablelist>
 <varlistentry>
@@ -182,11 +191,12 @@ See also the 'q' command.</para>
 command 'f' requests a response containing 'f=' followed by the name
 of the active GPS device.  The command may be followed by an '=', in
 which case all following printable characters up to but not including
-the next CR/LF are interpreted as the name of a trial GPS device. The
-trial device is opened and read to see if a GPS can be found there.
-If it can, the trial device becomes the active device for this client.
-The response to this form of the command is to list the name of the
-active device.</para>
+the next CR/LF are interpreted as the name of a trial GPS device. If
+the trial device is in <application>gpsd</application>'s device list,
+it is opened and read to see if a GPS can be found there.  If it can,
+the trial device becomes the active device for this client.  The
+response to this form of the command is to list the name of the active
+device.</para>
 
 <para>(At protocol level 1, the F command failed if more than one
 client was attached, and multiple devices were not supported.)</para>
@@ -209,8 +219,7 @@ successfully recognized as GPSes).  Note that the fact that a
 devicename appears in this list does not guarantee that a GPS is
 connected to it and active.</para>
 
-<para>(At protocol level 1, there was no K command.  Note that this 
-command is experimental and its semantics may change.)</para> 
+<para>(At protocol level 1, there was no K command.)</para> 
 </listitem>
 </varlistentry>
 
@@ -457,8 +466,23 @@ string "GPSD" followed by the replies. Examples:</para>
 device once per second.  Thus, it can be left running in background
 and survive having a GPS repeatedly unplugged and plugged back
 in.  When it is properly installed along with hotplug notifier
-scripts feeding it F commands, <application>gpsd</application> 
+scripts feeding it device-add commands, <application>gpsd</application> 
 should require no configuration or user action to find devices.</para>
+
+<para>The commands to add and remove GPS device paths from the
+daemon's internal search list cannot be sent over the socket from a
+client.  Instead, they must be written to a local Unix-domain socket
+which will be accessible only to programs running as root.  This
+control socket will be located at <filename>&gpsdsock;</filename>.</para>
+
+<para>To point <application>gpsd</application> at a device that may be
+a GPS, write to the control socket a plus sign ('+') followed by the
+device name followed by LF or CR-LF.  Thus, to point the daemon at
+<filename>/dev/foo</filename>. send "+/dev/foo\n".  To tell the daemon
+that a device has been disconnected and is no longer available, send a
+minus sign ('-') followed by the device name followed by LF or
+CR-LF. Thus, to remove <filename>/dev/foo</filename> from the search
+list. send "-/dev/foo\n".</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
 mode <application>gpsd</application> ships a line of data to the
@@ -589,6 +613,24 @@ to the same serial device (possible with an RS422 adapter hooked up to
 some marine-navigation systems), an 'O' response may mix an altitude
 from one device's GGA with latitude/longitude from another's RMC/GLL
 after the second sentence has arrived.</para>
+
+</refsect1>
+<refsect1 id='files'><title>FILES</title>
+
+<variablelist>
+<varlistentry>
+<term><filename>/dev/gps</filename></term>
+<listitem>
+<para>Default path to a GPS device.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>&gpsdsock;</filename></term>
+<listitem>
+<para>Location of the control socket for device add/remove commands.</para>
+</listitem>
+</varlistentry>
+</variablelist>
 
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 

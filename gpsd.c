@@ -406,11 +406,11 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (*p == '=') {
 		p = getline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
-		if ((chp = find_device(stash)) 
-					|| (chp = open_device(stash, 1))) {
+		if ((chp = find_device(stash))) {
 		    whoami->tied = 1;
 		    device = chp->device;
 		}
+		free(stash);
 	    }
 	    snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
 	    break;
@@ -418,12 +418,6 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
 	    break;
 	case 'K':
-	    if (*p == '=') {
-		p = getline(++p, &stash);
-		gpsd_report(1,"<= client(%d): kill-marking %s\n", cfd, stash);
-		if ((chp = find_device(stash))) 
-		    chp->state = CHANNEL_KILLED;
-	    }
 	    strcpy(phrase, ",K=");
 	    for (i = 0; i < MAXDEVICES; i++) 
 		if (channels[i].device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
@@ -662,6 +656,30 @@ static int handle_request(int cfd, char *buf, int buflen)
     return throttled_write(cfd, reply, strlen(reply));
 }
 
+static void handle_control(int sfd, char *buf)
+/* handle privileged commands coming through the control socket */
+{
+    char	*p, *stash;
+    struct channel_t	*chp;
+
+    if (buf[0] == '-') {
+	p = getline(buf+1, &stash);
+	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
+	if ((chp = find_device(stash))) 
+	    chp->state = CHANNEL_KILLED;
+	free(stash);
+    } else if (buf[0] == '+') {
+	p = getline(buf+1, &stash);
+	if (!find_device(stash))
+	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
+	else {
+	    gpsd_report(1,"<= control(%d): adding %s \n", sfd, stash);
+	    open_device(stash, 1);
+	}
+	free(stash);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
@@ -858,6 +876,7 @@ int main(int argc, char *argv[])
 
 		if (read(cfd, buf, sizeof(buf)-1) > 0) {
 		    gpsd_report(1, "<= (control %d): %s\n", cfd, buf);
+		    handle_control(cfd, buf);
 		}
 	    }
 
