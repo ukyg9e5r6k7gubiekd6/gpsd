@@ -220,8 +220,6 @@ static void attach_client_to_device(int cfd, int dfd)
     }
     subscribers[cfd].channel = &channels[dfd];
     channels[dfd].nsubscribers++;
-    subscribers[cfd].active = 1;
-    subscribers[cfd].tied = 0;
 }
 
 static void detach_client(int cfd)
@@ -708,6 +706,43 @@ static void handle_control(int sfd, char *buf)
     }
 }
 
+static int assign_channel(struct subscriber_t *user)
+{
+    struct gps_device_t *device;
+
+    /* if subscriber has no device... */
+    if (!user->channel) {
+	time_t most_recent = 0;
+	int mychannel = -1;
+	struct channel_t *channel;
+
+	/* ...connect him to the most recently active device */
+	for(channel=channels;channel<channels+MAXDEVICES;channel++)
+	    if (channel->device && channel->when >= most_recent) {
+		most_recent = channel->when;
+		mychannel = channel - channels;
+	    }
+	if (mychannel <= -1)
+	    return 0;
+	else
+	    attach_client_to_device(user - subscribers, mychannel);
+    }
+    device = user->channel->device;
+
+    /* and open that device */
+    if (device->gpsdata.gps_fd == -1) {
+	gpsd_deactivate(device);
+	if (gpsd_activate(device) < 0) 
+	    return 0;
+	else {
+	    FD_SET(device->gpsdata.gps_fd, &all_fds);
+	    notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
+	}
+    }
+
+    return 1;
+}
+
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
@@ -872,6 +907,8 @@ int main(int argc, char *argv[])
 		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
+		subscribers[ssock].active = 1;
+		subscribers[ssock].tied = 0;
 		/* pick the most recently opened device */
 		for (channel=channels; channel<channels+MAXDEVICES; channel++)
 		    if (channel->device && channel->when >= most_recent)
@@ -960,37 +997,23 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (!subscribers[cfd].active)
-		continue;
-	    device = subscribers[cfd].channel->device;
+	    if (subscribers[cfd].active && FD_ISSET(cfd, &rfds)) {
+		char buf[BUFSIZ];
+		int buflen;
 
-	    /*
-	     * GPS must be opened if commands are waiting or any client is
-	     * streaming (raw or watcher mode).
-	     */
-	    if (FD_ISSET(cfd, &rfds) || subscribers[cfd].raw || subscribers[cfd].watcher) {
-		if (device->gpsdata.gps_fd == -1) {
-		    gpsd_deactivate(device);
-		    if (gpsd_activate(device) >= 0) {
-			FD_SET(device->gpsdata.gps_fd, &all_fds);
-			notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
-		    }
-		}
+		assign_channel(subscribers+cfd);
+		device = subscribers[cfd].channel->device;
 
-		if (FD_ISSET(cfd, &rfds)) {
-		    char buf[BUFSIZ];
-		    int buflen;
-		    gpsd_report(3, "checking %d \n", cfd);
-		    if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
+		gpsd_report(3, "checking %d \n", cfd);
+		if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
+		    detach_client(cfd);
+		} else {
+		    buf[buflen] = '\0';
+		    gpsd_report(1, "<= client: %s", buf);
+
+		    device->poll_times[cfd] = timestamp();
+		    if (handle_request(cfd, buf, buflen) < 0)
 			detach_client(cfd);
-		    } else {
-		        buf[buflen] = '\0';
-			gpsd_report(1, "<= client: %s", buf);
-
-			device->poll_times[cfd] = timestamp();
-			if (handle_request(cfd, buf, buflen) < 0)
-			    detach_client(cfd);
-		    }
 		}
 	    }
 	}
