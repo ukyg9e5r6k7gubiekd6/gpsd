@@ -1,5 +1,5 @@
 Name: gpsd
-%define SO3VERSION	4.0.0
+%define SO3VERSION	5.0.0
 %define SO1VERSION	2
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
@@ -128,7 +128,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 - Correct a bug in binary-protocol dumping (applies to Zodiac and
   Garmin only).  Gary Miller's patch to deal gracefully with GPSes
   like the Magellan EC10X that send only GPRMC and never GPGGA or GPGSA,
-  and this never set mode or status fields.
+  and thus never set mode or status fields.  Fixed buggy handling of
+  units options in xgps and xgpsspeed.  Bumped library major version,
+  since seen_sentences is now exposed.
 
 * Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.12-1
 - Fixed core-dump bug in processing of the GLL variant that does not
