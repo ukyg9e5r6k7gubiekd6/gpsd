@@ -186,7 +186,9 @@ if __name__ == '__main__':
             # Sort fixes by distance from centroid
             def d(a, b): return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
             fixes.sort(lambda x, y: cmp(d(centroid, x), d(centroid, y)))
+            # Compute CEP(50%)
             cep_meters = gps.EarthDistance(centroid, fixes[len(fixes)/2])
+            # Convert fixes to offsets from centroid in meters
             recentered = map(lambda fix: gps.MeterOffset(centroid, fix), fixes)
             if centroid[0] < 0:
                 latstring = "%fS" % -centroid[0]
