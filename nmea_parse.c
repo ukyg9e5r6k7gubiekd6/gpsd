@@ -164,6 +164,8 @@ static double iso8661_to_unix(char *isotime)
     now = time(NULL);
     if (daylight && localtime(&now)->tm_isdst)
 	res -= 3600;
+    if (now != (int)res)
+	gpsd_report(4, "clock skew is %lf seconds\n", now-(int)res);
     return res;
 }
 #endif /* PROFILING */
