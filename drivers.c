@@ -161,7 +161,7 @@ struct gps_type_t fv18 =
  * chipset in the EarthMate was replaced with the SiRF 2.
  */
 
-void tripmate_initializer(struct gps_session_t *session)
+static void tripmate_initializer(struct gps_session_t *session)
 {
     char buf[82];
     time_t t;
@@ -220,14 +220,21 @@ struct gps_type_t tripmate =
  * will flip us over to the zodiac_b driver.  But, connect at 9600
  * rather than 4800.  The Rockwell chipset does not accept DGPS in text 
  * mode.
+ *
+ * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
  */
+
+static void earthmate_initializer(struct gps_session_t *session)
+{
+    write(session->fdout, "EARTHA\r\n", 8);
+}
 
 struct gps_type_t zodiac_a =
 {
     'e',			/* select explicitly with -T e */
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
-    "EARTHA",			/* tells us to switch to Earthmate-B */
-    NULL,			/* no initializer */
+    "EARTHA",			/* tells us to switch to Earthmate */
+    earthmate_initializer,	/* switch us to Zodiac mode */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */

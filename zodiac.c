@@ -1,6 +1,8 @@
 /*
  * Handle the Rockwell binary packet format supported by the older
- * Zodiac-chipset versions of the Delorme EarthMate GPS. 
+ * Zodiac-chipset versions of the Delorme EarthMate GPS.  Actually this
+ * code ought to work for any Zodiac-chipset GPS; the vendor-specific 
+ * trigger string isn't in here.
  *
  * Everything exported from here lives in the structure zodiac-b at the end.
  */
@@ -31,7 +33,6 @@ enum {
 #define O(x) (x-6)
 
 static unsigned short sn = 0;
-static int eminit;
 
 struct header {
     unsigned short sync;
@@ -41,9 +42,7 @@ struct header {
     unsigned short csum;
 };
 
-static void analyze(struct gps_session_t *session, struct header *, unsigned short *);
-
-static unsigned short zodiac_nmea_checksum(unsigned short *w, int n)
+static unsigned short zodiac_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
@@ -91,7 +90,7 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
-    h.csum = zodiac_nmea_checksum((unsigned short *) &h, 4);
+    h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
     if (session->fdout != -1) {
 	end_write(session->fdout, &h, sizeof(h));
@@ -120,8 +119,6 @@ static void zodiac_init(struct gps_session_t *session)
     time_t t;
     struct tm *tm;
 
-    eminit = 0;
-
     if (session->initpos.latitude && session->initpos.longitude) {
       t = time(NULL);
       tm = gmtime(&t);
@@ -145,7 +142,7 @@ static void zodiac_init(struct gps_session_t *session)
       *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
-      data[21] = zodiac_nmea_checksum(data, 21);
+      data[21] = zodiac_checksum(data, 21);
 
       zodiac_spew(session, 1200, data, 22);
     }
@@ -164,7 +161,7 @@ static void send_rtcm(struct gps_session_t *session,
 
     data[0] = sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
-    data[n] = zodiac_nmea_checksum(data, n);
+    data[n] = zodiac_checksum(data, n);
 
     zodiac_spew(session, 1351, data, n+1);
 }
@@ -183,14 +180,6 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
     return 1;
 }
 
-
-static void do_eminit(struct gps_session_t *session)
-{
-    write(session->fdout, "EARTHA\r\n", 8);
-    /* Make sure these are zero before 1002 handler called */
-    session->gNMEAdata.pdop = session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0;
-    eminit = 1;
-}
 
 static long getlong(void *p)
 {
@@ -310,8 +299,6 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	}
     }
     REFRESH(session->gNMEAdata.satellite_stamp);
-    /* this is slightly wrong, we're not updating hdop/pdop/vdop here */
-    REFRESH(session->gNMEAdata.fix_quality_stamp);
 }
 
 static void handle1003(struct gps_session_t *session, unsigned short *p)
@@ -341,6 +328,8 @@ static void handle1003(struct gps_session_t *session, unsigned short *p)
 	    session->gNMEAdata.elevation[j] = 0.0;
 	}
     }
+    REFRESH(session->gNMEAdata.fix_quality_stamp);
+    REFRESH(session->gNMEAdata.satellite_stamp);
 }
 
 static void handle1005(struct gps_session_t *session, unsigned short *p)
@@ -375,7 +364,7 @@ static void analyze(struct gps_session_t *session,
     char *bufp2;
     int i = 0, j = 0, nmea = 0;
 
-    if (p[h->ndata] == zodiac_nmea_checksum(p, h->ndata)) {
+    if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
 	gpscli_report(5, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
@@ -475,8 +464,6 @@ static void analyze(struct gps_session_t *session,
 	if (session->gNMEAdata.raw_hook)
 	    session->gNMEAdata.raw_hook(buf);
     }
-    if (eminit)
-	zodiac_init(session);
 }
 
 
@@ -540,7 +527,7 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
     case ZODIAC_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
 
-	    if (h.csum == zodiac_nmea_checksum((unsigned short *) &h, 4)) {
+	    if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
 		state = ZODIAC_HUNT_DATA;
 		data = (unsigned short *) malloc((h.ndata + 1) * 2);
 		words = 0;
@@ -582,7 +569,7 @@ struct gps_type_t zodiac_b =
     '\0',		/* cannot be explicitly selected */
     "Zodiac binary",	/* full name of type */
     NULL,		/* only switched to by zodiac_a driver */
-    do_eminit,		/* initialize the device */
+    zodiac_init,	/* initialize the device */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_close,	/* wrapup function to be called on close */
