@@ -210,6 +210,10 @@ struct gps_type_t tripmate =
  *
  * Zodiac EarthMate textual mode
  *
+ * Note: This is the pre-2003 version using Zodiac binary protocol.
+ * It has been replaced with a design that uses a SiRF-II chipset.
+ * Use the NMEA driver for that one.
+ *
  **************************************************************************/
 
 /*
