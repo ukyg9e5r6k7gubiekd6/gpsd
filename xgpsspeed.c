@@ -82,7 +82,7 @@ void report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug+1)
+    if (errlevel > session.debug)
 	return;
 
     fputs(buf, stderr);
@@ -95,6 +95,7 @@ main(int argc, char **argv)
     XtAppContext app;
     Cardinal        i;
 
+    session.debug = 1;
 
     toplevel = XtVaAppInitialize(&app, "XGpsSpeed", options, XtNumber(options),
 			    &argc, argv, fallback_resources, NULL);

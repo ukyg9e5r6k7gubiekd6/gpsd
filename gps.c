@@ -113,7 +113,7 @@ void report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug+1)
+    if (errlevel > session.debug)
 	return;
 
     fputs(buf, stderr);
@@ -436,6 +436,7 @@ int main(int argc, char *argv[])
     int option;
     double baud;
 
+    session.debug = 1;
     while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
 	switch (option) {
         case 'T':

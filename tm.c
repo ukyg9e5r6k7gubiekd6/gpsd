@@ -30,16 +30,16 @@ static void process_exception(char *sentence)
 {
     if (!strncmp("ASTRAL", sentence, 6) && isatty(session.fdout)) {
 	write(session.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-	report(1, "Found a TripMate, initializing...");
+	report(1, "found a TripMate, initializing...");
 	session.device_type = &tripmate;
 	tripmate.initializer();
     } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session.fdout))) {
 	write(session.fdout, "EARTHA\r\n", 8);
-	report(1, "Found an EarthMate (id).");
+	report(1, "found an EarthMate (id).");
 	session.device_type = &earthmate_b;
 	earthmate_b.initializer();
     } else if (session.debug > 1) {
-	report(1, "Unknown exception: \"%s\"", sentence);
+	report(1, "unknown exception: \"%s\"", sentence);
     }
 }
 
@@ -53,7 +53,7 @@ static void process_exception(char *sentence)
 void nmea_handle_message(char *sentence)
 /* visible so the direct-connect clients can use it */
 {
-    report(6, "%s\n", sentence);
+    report(2, "<= %s\n", sentence);
     if (*sentence == '$')
     {
 	if (process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
@@ -62,7 +62,7 @@ void nmea_handle_message(char *sentence)
     else
 	process_exception(sentence);
 
-    report(2,
+    report(3,
 	   "Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
 	   session.gNMEAdata.latitude,
 	   session.gNMEAdata.longitude,
@@ -150,7 +150,7 @@ void tripmate_initializer()
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
 	if (session.fdout != -1) {
 	    write(session.fdout, buf, strlen(buf));
-	    report(1, "Sending: %s", buf);
+	    report(1, "=> %s", buf);
 	}
     }
 }

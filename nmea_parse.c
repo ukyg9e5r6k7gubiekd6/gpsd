@@ -61,7 +61,10 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
+    {
+	report(0, "Invalid GPRMC zeroes status.\n");
 	out->status = 0;
+    }
 
     sscanf(field(sentence, 7), "%lf", &out->speed);
 
@@ -112,6 +115,7 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	out->cmask |= C_STATUS;
 	REFRESH(out->mode_stamp);
 	out->cmask |= C_MODE;
+	report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
 }
 
@@ -139,6 +143,7 @@ static void processGPGLL(char *sentence, struct OUTDATA *out)
 	    out->status = 1;	/* autonomous */
 	if (status[0] == 'D')
 	    out->status = 2;	/* differential */
+	report(2, "GPGLL sets status %d\n", out->status);
 	/* unclear what the right thing to do with other status values is */
     }
 
@@ -218,6 +223,7 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &out->status);
     REFRESH(out->status_stamp);
+    report(2, "GPGGA sets status %d\n", out->status);
     out->cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &out->satellites);
     sscanf(field(sentence, 9), "%lf", &out->altitude);
@@ -230,10 +236,11 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
 /* GPS DOP and Active Satellites */
 {
 
-  /* 1 = none, 2 = 2d, 3 = 3d */
+    /* 1 = none, 2 = 2d, 3 = 3d */
     sscanf(field(sentence, 2), "%d", &out->mode);
     REFRESH(out->mode_stamp);
     out->cmask |= C_MODE;
+    report(2, "GPGSA sets mode %d\n", out->mode);
     sscanf(field(sentence, 15), "%lf", &out->pdop);
     sscanf(field(sentence, 16), "%lf", &out->hdop);
     sscanf(field(sentence, 17), "%lf", &out->vdop);

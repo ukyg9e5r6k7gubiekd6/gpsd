@@ -124,7 +124,7 @@ void report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug+1)
+    if (errlevel > session.debug)
 	return;
 
     if (in_background)
@@ -224,7 +224,7 @@ static void deactivate()
     serial_close();
     if (session.device_type->wrapup)
 	session.device_type->wrapup();
-    report(1, "Closed GPS\n");
+    report(1, "closed GPS\n");
     session.gNMEAdata.mode = 1;
     session.gNMEAdata.status = 0;
 }
@@ -236,7 +236,7 @@ static int activate()
     if ((input = serial_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
 	errexit("Exiting - serial open\n");
  
-    report(1, "Opened GPS\n");
+    report(1, "opened GPS\n");
     session.fdin = input;
     session.fdout = input;
 
@@ -262,6 +262,7 @@ int main(int argc, char *argv[])
     char buf[BUFSIZE], *colon;
     int sentdgps = 0, fixcnt = 0;
 
+    session.debug = 1;
     while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
 	switch (option) {
 	case 'T':
@@ -656,13 +657,15 @@ static int handle_request(int fd, fd_set * fds)
 }
 
 void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
+/* write to whatever client might be listening */
 {
     int fd;
 
     for (fd = 0; fd < nfds; fd++) {
 	if (FD_ISSET(fd, nmea_fds)) {
+	    report(1, "--> %s", buf);
 	    if (write(fd, buf, strlen(buf)) < 0) {
-		report(1, "Raw write: %s", strerror(errno));
+		report(1, "Raw write %s", strerror(errno));
 		FD_CLR(fd, afds);
 		FD_CLR(fd, nmea_fds);
 	    }
