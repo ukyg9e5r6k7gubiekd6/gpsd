@@ -5,7 +5,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include "gps.h"
 #include "gpsd.h"
 
 struct gps_data_t *gps_open(char *host, char *port)
@@ -21,8 +20,7 @@ struct gps_data_t *gps_open(char *host, char *port)
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 
-    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0)
-    {
+    if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
 	return NULL;
     }
@@ -124,14 +122,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		REFRESH(gpsdata->speed_stamp);
 		break;
 	    case 'X':
-		if (!strncmp(sp, "X=1", 3))
-		{
+		if (!strncmp(sp, "X=1", 3)) {
 		    gpsdata->online_stamp.changed = gpsdata->online != 1;
 		    gpsdata->online = 1;
 		    REFRESH(gpsdata->online_stamp);
 		}
-		else if (!strncmp(sp, "X=0", 3))
-		{
+		else if (!strncmp(sp, "X=0", 3)) {
 		    gpsdata->online_stamp.changed = gpsdata->online != 0;
 		    gpsdata->online = 0;
 		    REFRESH(gpsdata->online_stamp);
@@ -141,8 +137,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		i1 = atoi(sp+2);
 		gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);
 		gpsdata->satellites = i1;
-		if (gpsdata->satellites)
-		{
+		if (gpsdata->satellites) {
 		    int j, i3, i4, i5;
 		    int PRN[MAXCHANNELS];
 		    int elevation[MAXCHANNELS];
@@ -234,52 +229,45 @@ void data_dump(struct gps_data_t *collect, time_t now)
 
     if (collect->online_stamp.changed)
 	printf("online: %d\n", collect->online);
-    if (collect->latlon_stamp.changed)
-    {
+    if (collect->latlon_stamp.changed) {
 	printf("P: lat/lon: %lf %lf", 
 	       collect->latitude, collect->longitude);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->latlon_stamp.last_refresh,
 	       collect->latlon_stamp.changed);
     }
-    if (collect->altitude_stamp.changed)
-    {
+    if (collect->altitude_stamp.changed) {
 	printf("A: altitude: %lf ", collect->altitude);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->altitude_stamp.last_refresh,
 	       collect->altitude_stamp.changed);
     }
-    if (collect->speed_stamp.changed)
-    {
+    if (collect->speed_stamp.changed) {
 	printf("V: speed: %lf ", collect->speed);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->speed_stamp.last_refresh,
 	       collect->speed_stamp.changed);
     }
-    if (collect->track_stamp.changed)
-    {
+    if (collect->track_stamp.changed) {
 	printf("T: track: %lf ", collect->track);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->track_stamp.last_refresh,
 	       collect->track_stamp.changed);
     }
-    if (collect->status_stamp.changed)
-    {
+    if (collect->status_stamp.changed) {
 	printf("S: status: %d (%s) ", 
 	       collect->status,status_values[collect->status]);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->status_stamp.last_refresh,
 	       collect->status_stamp.changed);
     }
-    if (collect->mode_stamp.changed)
-    {
+    if (collect->mode_stamp.changed) {
 	printf("M: mode: %d (%s) ", collect->mode, mode_values[collect->mode]);
 	printf("(lr=%ld, changed=%d)",
 	       collect->mode_stamp.last_refresh,
 	       collect->mode_stamp.changed);
     }
-    if (collect->fix_quality_stamp.changed)
-    {
+    if (collect->fix_quality_stamp.changed) {
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
 	      collect->satellites_used, 
 	      collect->pdop, collect->hdop, collect->vdop);
@@ -287,8 +275,7 @@ void data_dump(struct gps_data_t *collect, time_t now)
 	       collect->fix_quality_stamp.last_refresh,
 	       collect->fix_quality_stamp.changed);
     }
-    if (collect->satellite_stamp.changed)
-    {
+    if (collect->satellite_stamp.changed) {
 	int i;
 
 	printf("Y: satellites in view: %d\n", collect->satellites);
@@ -329,12 +316,10 @@ main(int argc, char *argv[])
 
 	if (tty)
 	    fputs("This is the gpsd exerciser.\n", stdout);
-	for (;;)
-	{
+	for (;;) {
 	    if (tty)
 		fputs("> ", stdout);
-	    if (fgets(buf, sizeof(buf), stdin) == NULL)
-	    {
+	    if (fgets(buf, sizeof(buf), stdin) == NULL) {
 		if (tty)
 		    putchar('\n');
 		break;

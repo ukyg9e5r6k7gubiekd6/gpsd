@@ -1,21 +1,9 @@
-
-/* include files */
-#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
-
-#if defined (HAVE_SYS_TERMIOS_H)
-#include <sys/termios.h>
-#else
-#if defined (HAVE_TERMIOS_H)
-#include <termios.h>
-#endif
-#endif
-
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/ScrolledW.h>
@@ -38,9 +26,6 @@
 #include <Xm/MenuShell.h>
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
-#ifdef HAVE_SYS_FILIO_H
-#include <sys/filio.h>
-#endif
 
 #include "gps.h"
 
@@ -55,8 +40,7 @@ static Widget rowColumn_18, pushButton_11;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 
-String fallback_resources[] =
-{
+String fallback_resources[] = {
     "*gpsdata.time.label.labelString: Time  ",
     "*gpsdata.latitude.label.labelString: Lat.  ",
     "*gpsdata.longitude.label.labelString: Long. ",
@@ -329,13 +313,10 @@ static void update_panel(char *message)
     sprintf(s, "%f", gpsdata->track);
     XmTextFieldSetString(text_6, s);
 
-    if (!gpsdata->online)
-    {
+    if (!gpsdata->online) {
 	newstate = 0;
 	sprintf(s, "OFFLINE");
-    }
-    else
-    {
+    } else {
 	newstate = gpsdata->mode;
 	switch (gpsdata->mode) {
 	case 2:
@@ -349,8 +330,7 @@ static void update_panel(char *message)
 	    break;
 	}
     }
-    if (newstate != state)
-    {
+    if (newstate != state) {
 	timer = 0;
 	state = newstate;
     }
@@ -397,14 +377,10 @@ int main(int argc, char *argv[])
 	case 'h':
 	case '?':
 	default:
-	    fputs("usage:  gps [-h] [server[:port]] \n\
-  options include: \n\
-  -h           = help message \n\
-", stderr);
+	    fputs("usage:  gps [-h] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
-
     if (optind < argc) {
 	server = strdup(argv[optind]);
 	colon = strchr(server, ':');
@@ -413,9 +389,7 @@ int main(int argc, char *argv[])
 	    port = colon + 1;
 	}
     }
-    /*
-     * Essentially all the interface to libgps happens below here
-     */
+
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
 	fprintf(stderr, "gps: no gpsd running or network error (%d).\n", errno);

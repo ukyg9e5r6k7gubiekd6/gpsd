@@ -11,7 +11,6 @@
 #endif
 #endif
 
-#include "gps.h"
 #include "gpsd.h"
 
 /* FIXME: these shouldn't be globals */
@@ -19,24 +18,20 @@ static struct termios ttyset, ttyset_old;
 
 static int set_baud(long baud)
 {
-    int speed;
-
     if (baud < 200)
       baud *= 1000;
     if (baud < 2400)
-      speed = B1200;
+      return B1200;
     else if (baud < 4800)
-      speed = B2400;
+      return B2400;
     else if (baud < 9600)
-      speed = B4800;
+      return B4800;
     else if (baud < 19200)
-      speed = B9600;
+      return B9600;
     else if (baud < 38400)
-      speed = B19200;
+      return B19200;
     else
-      speed = B38400;
-
-    return speed;
+      return B38400;
 }
 
 int gpsd_open(char *device_name, int device_speed, int stopbits)

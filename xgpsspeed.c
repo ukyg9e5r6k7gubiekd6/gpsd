@@ -34,8 +34,7 @@ static XrmOptionDescRec options[] = {
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
 };
 
-String fallback_resources[] =
-{
+String fallback_resources[] = {
   NULL
 };
 
@@ -75,7 +74,6 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
-
     if (optind < argc) {
 	server = strdup(argv[optind]);
 	colon = strchr(server, ':');
@@ -109,9 +107,6 @@ int main(int argc, char **argv)
 				  base, NULL, 0);    
     XtRealizeWidget(toplevel);
 
-    /*
-     * Essentially all the interface to libgps happens below here
-     */
     gpsdata = gps_open(server, DEFAULT_GPSD_PORT);
     if (!gpsdata) {
 	fprintf(stderr, "xgpsspeed: no gpsd running or network error (%d).\n", errno);

@@ -2,14 +2,16 @@
  * This provides the interface to the library that supports direct access to
  * GPSes on serial or USB devices.
  */
+#include "config.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>	/* for FIONREAD on BSD systems */
+#endif
 
-#include "config.h"
-#include "gps.h"
 #include "gpsd.h"
 
 #ifdef NON_NMEA_ENABLE
@@ -32,7 +34,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
-
     struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
 
     if (!session)
@@ -61,7 +62,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	    dgpsport = colon+1;
 	    *colon = '\0';
 	}
-
 	if (!getservbyname(dgpsport, "tcp"))
 	    dgpsport = "2101";
 
@@ -145,8 +145,7 @@ int gpsd_poll(struct gps_session_t *session)
 	char buf[BUFSIZE];
 	int rtcmbytes;
 
-	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->gNMEAdata.gps_fd !=-1))
-	{
+	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->gNMEAdata.gps_fd !=-1)) {
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else

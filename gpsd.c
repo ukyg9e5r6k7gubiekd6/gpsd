@@ -27,7 +27,6 @@
 #include <sys/time.h>
 #endif
 
-#include "gps.h"
 #include "gpsd.h"
 
 #define QLEN			5
@@ -219,33 +218,28 @@ static int handle_request(int fd, char *buf, int buflen)
 		strcat(reply, ",A=?");
 	    else
 		sprintf(reply + strlen(reply),
-			",A=%f",
-			session->gNMEAdata.altitude);
+			",A=%f", session->gNMEAdata.altitude);
 	    break;
 	case 'D':
 	    if (session->gNMEAdata.utc[0])
 		sprintf(reply + strlen(reply),
-			",D=%s",
-			session->gNMEAdata.utc);
+			",D=%s", session->gNMEAdata.utc);
 	    else
 		strcat(reply, ",D=?");
 	    break;
 	case 'L':
-	    sprintf(reply + strlen(reply),
-		    ",l=1 " VERSION " admpqrstvwxy");
+	    sprintf(reply + strlen(reply), ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
 		sprintf(reply + strlen(reply),
-			",M=%d",
-			session->gNMEAdata.mode);
+			",M=%d", session->gNMEAdata.mode);
 	    break;
 	case 'P':
 	    if (!validate(fd))
 		strcat(reply, ",P=?");
 	    else
 		sprintf(reply + strlen(reply),
-			",P=%f %f",
-			session->gNMEAdata.latitude,
+			",P=%f %f", session->gNMEAdata.latitude,
 			session->gNMEAdata.longitude);
 	    break;
 	case 'Q':
@@ -261,71 +255,59 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
-		sprintf(reply + strlen(reply),
-			",R=1");
+		sprintf(reply + strlen(reply), ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &nmea_fds);
 		gpsd_report(3, "%d turned off raw mode\n", fd);
-		sprintf(reply + strlen(reply),
-			",R=0");
+		sprintf(reply + strlen(reply), ",R=0");
 		p++;
 	    } else if (FD_ISSET(fd, &nmea_fds)) {
 		FD_CLR(fd, &nmea_fds);
 		gpsd_report(3, "%d turned off raw mode\n", fd);
-		sprintf(reply + strlen(reply),
-			",R=0");
+		sprintf(reply + strlen(reply), ",R=0");
 	    } else {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
-		sprintf(reply + strlen(reply),
-			",R=1");
+		sprintf(reply + strlen(reply), ",R=1");
 	    }
 	    break;
 	case 'S':
-	    sprintf(reply + strlen(reply),
-		    ",S=%d",
-		    session->gNMEAdata.status);
+	    sprintf(reply + strlen(reply), ",S=%d", session->gNMEAdata.status);
 	    break;
 	case 'T':
 	    if (!validate(fd))
 		strcat(reply, ",T=?");
 	    else
 		sprintf(reply + strlen(reply),
-			",T=%f",
-			session->gNMEAdata.track);
+			",T=%f", session->gNMEAdata.track);
 	    break;
 	case 'V':
 	    if (!validate(fd))
 		strcat(reply, ",V=?");
 	    else
 		sprintf(reply + strlen(reply),
-			",V=%f",
-			session->gNMEAdata.speed);
+			",V=%f", session->gNMEAdata.speed);
 	    break;
 	case 'W':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
-		sprintf(reply + strlen(reply),
-			",W=1");
+		sprintf(reply + strlen(reply), ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &watcher_fds);
 		gpsd_report(3, "%d turned off watching\n", fd);
-		sprintf(reply + strlen(reply),
-			",W=0");
+		sprintf(reply + strlen(reply), ",W=0");
 		p++;
 	    } else if (FD_ISSET(fd, &watcher_fds)) {
 		FD_CLR(fd, &watcher_fds);
 		gpsd_report(3, "%d turned off watching\n", fd);
-		sprintf(reply + strlen(reply),
-			",W=0");
+		sprintf(reply + strlen(reply), ",W=0");
 	    } else {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
-		sprintf(reply + strlen(reply),
-			",W=1");
+		sprintf(reply + strlen(reply), ",W=1");
 	    }
 	    break;
         case 'X':
@@ -345,8 +327,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		    for (i = 0; i < session->gNMEAdata.satellites; i++) {
 			used = 0;
 			for (j = 0; j < session->gNMEAdata.satellites_used; j++)
-			    if (session->gNMEAdata.used[j] == session->gNMEAdata.PRN[i])
-			    {
+			    if (session->gNMEAdata.used[j] == session->gNMEAdata.PRN[i]) {
 				used = 1;
 				break;
 			    }
@@ -422,8 +403,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     struct servent *pse;
     struct protoent *ppe;
     struct sockaddr_in sin;
-    int s, type;
-    int one = 1;
+    int s, type, one = 1;
 
     memset((char *) &sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
@@ -594,9 +574,7 @@ int main(int argc, char *argv[])
 	gpsd_report(1, "gpsd restarted by SIGHUP\n");
     }
 
-    FD_ZERO(&all_fds);
-    FD_ZERO(&nmea_fds);
-    FD_ZERO(&watcher_fds);
+    FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
     nfds = getdtablesize();
 
@@ -627,8 +605,7 @@ int main(int argc, char *argv[])
 	 * update once a second.  Nyquist's theorem tells us that it
 	 * is optimal to sample at twice this frequency.
 	 */
-	tv.tv_sec = 0;
-	tv.tv_usec = 500000;
+	tv.tv_sec = 0; tv.tv_usec = 500000;
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
@@ -657,8 +634,7 @@ int main(int argc, char *argv[])
 	/* we may need to force the GPS open */
 	if (nowait && session->gNMEAdata.gps_fd == -1) {
 	    gpsd_deactivate(session);
-	    if (gpsd_activate(session) >= 0)
-	    {
+	    if (gpsd_activate(session) >= 0) {
 		notify_watchers("GPSD,X=1\r\n");
 		FD_SET(session->gNMEAdata.gps_fd, &all_fds);
 	    }

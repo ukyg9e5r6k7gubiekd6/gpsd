@@ -1,5 +1,6 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
+#include "gps.h"
 /*
  * Some internal capabilities depend on which drivers we're compiling.
  */

@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "gps.h"
 #include "gpsd.h"
 
 /**************************************************************************
@@ -223,8 +222,7 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      */
     char *status = field(sentence, 7);
 
-    if (!strcmp(field(sentence, 6), "A") && status[0] != 'N')
-    {
+    if (!strcmp(field(sentence, 6), "A") && status[0] != 'N') {
 	int newstatus = out->status;
 
 	do_lat_lon(sentence, 1, out);
@@ -300,8 +298,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
-    if (out->status > STATUS_NO_FIX)
-    {
+    if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
 
 	fake_mmddyyyy(out);
@@ -428,8 +425,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await)
 	gpsd_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
-    else
-    {
+    else {
 	/* trim off PRNs with spurious data attached */
 	while (out->satellites
 		    && !out->elevation[out->satellites-1]

@@ -118,7 +118,7 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
 * Thu Sep 30 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-  Documentation improvements.
+  Documentation improvements.  BSD port fixes.  Cosmetic tweaks.
 
 * Thu Sep 30 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
 - Various internal cleanups, including fossil removal in the

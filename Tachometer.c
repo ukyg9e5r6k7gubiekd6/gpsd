@@ -528,11 +528,8 @@ static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
     (*superclass->core_class.realize) (w, valueMask, attributes);
 } /* Realize */
 
-/*
- * Repaint the widget window
- */
-
 static void Redisplay(Widget w, XEvent *event, Region region)
+/* Repaint the widget window */
 {
      TachometerWidget ta = (TachometerWidget) w;
 
@@ -596,7 +593,6 @@ static Boolean SetValues(Widget current, Widget request, Widget new)
 	  GetbackgroundGC(newta);
 	  changed = True;
      }
-
      if (curta->tachometer.value != newta->tachometer.value) {
 	  MoveNeedle(newta, newta->tachometer.value);
 	  changed = True;

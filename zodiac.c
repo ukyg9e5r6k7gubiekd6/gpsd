@@ -9,7 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "gps.h"
 #include "gpsd.h"
 
 #ifdef ZODIAC_ENABLE
@@ -157,18 +156,15 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
     return 1;
 }
 
-
 static long getlong(void *p)
 {
     return *(long *) p;
 }
 
-
 static unsigned long getulong(void *p)
 {
     return *(unsigned long *) p;
 }
-
 
 static double degtodm(double a)
 {
@@ -433,13 +429,11 @@ static void analyze(struct gps_session_t *session,
     }
 }
 
-
 static int putword(unsigned short *p, unsigned char c, unsigned int n)
 {
     *(((unsigned char *) p) + n) = c;
     return (n == 0);
 }
-
 
 static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 {
@@ -488,7 +482,6 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 
     case ZODIAC_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
-
 	    if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
 		state = ZODIAC_HUNT_DATA;
 		data = (unsigned short *) malloc((h.ndata + 1) * 2);

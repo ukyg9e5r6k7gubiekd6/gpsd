@@ -4,9 +4,6 @@
 
 #include "gps.h"
 
-extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics(struct gps_data_t *gpsdata);
-
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)
 #define SCALE           (double)(diameter/2)
@@ -85,7 +82,7 @@ static int get_status(struct gps_data_t *gpsdata, int satellite)
 {
     int i, s;
 
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < MAXCHANNELS; i++)
 	if (satellite == gpsdata->PRN[i]) {
 	    s = gpsdata->ss[i];
 
@@ -104,7 +101,6 @@ void draw_graphics(struct gps_data_t *gpsdata)
     char buf[20];
 
     if (SEEN(gpsdata->satellite_stamp)) {
-
 	i = min(width, height);
 
 	set_color("White");
@@ -126,37 +122,29 @@ void draw_graphics(struct gps_data_t *gpsdata)
 
 	pol2cart(0, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww), pixmap, drawGC,
-			(int) x, (int) y, "N", 1);
+	XDrawString(XtDisplay(draww),pixmap, drawGC, (int)x, (int)y, "N", 1);
 	pol2cart(90, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww), pixmap, drawGC,
-			(int) x+2, (int) y, "E", 1);
+	XDrawString(XtDisplay(draww),pixmap, drawGC, (int)x+2, (int)y, "E", 1);
 	pol2cart(180, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww), pixmap, drawGC,
-			(int) x, (int) y+10, "S", 1);
+	XDrawString(XtDisplay(draww),pixmap, drawGC, (int)x, (int)y+10, "S", 1);
 	pol2cart(270, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww), pixmap, drawGC,
-			(int) x-5, (int) y, "W", 1);
+	XDrawString(XtDisplay(draww),pixmap, drawGC, (int) x-5,(int)y, "W", 1);
 
 	/* Now draw the satellites... */
 	for (i = 0; i < gpsdata->satellites; i++) {
 	    pol2cart(gpsdata->azimuth[i], gpsdata->elevation[i], &x, &y);
 
 	    switch (get_status(gpsdata, gpsdata->PRN[i]) & 7) {
-	    case 0:
-	    case 1:
+	    case 0: case 1:
 		set_color("Grey");
 		break;
-	    case 2:
-	    case 3:
+	    case 2: case 3:
 		set_color("Yellow");
 		break;
-	    case 4:
-	    case 5:
-	    case 6:
+	    case 4: case 5: case 6:
 		set_color("Red");
 		break;
 	    case 7:
