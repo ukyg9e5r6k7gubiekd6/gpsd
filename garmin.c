@@ -289,10 +289,13 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    session->gNMEAdata.epv = pvt->epv;
 	    REFRESH(session->gNMEAdata.fix_quality_stamp);
 
-	    // convert lat/lon in meters/sec to speed in knots
+	    // convert lat/lon, climb in meters/sec to speed in knots
 	    session->gNMEAdata.speed
 		= hypot(pvt->lon_vel, pvt->lat_vel) * 1.9438445;
 	    REFRESH(session->gNMEAdata.speed_stamp);
+
+	    session->gNMEAdata.climb = pvt->alt_vel * 1.9438445;
+	    REFRESH(session->gNMEAdata.climb_stamp);
 
 	    track = atan2(pvt->lon_vel, pvt->lat_vel);
 	    if (track < 0) {
