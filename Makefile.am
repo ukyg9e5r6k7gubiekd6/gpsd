@@ -65,7 +65,8 @@ man_MANS = \
 	gpsd.1 \
 	libgps.3 \
 	libgpsd.3 \
-	gpsprobe.1
+	gpsprobe.1 \
+	gpsprof.1
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	$(XMLTO) man gpsd.xml
@@ -78,6 +79,9 @@ libgpsd.3: libgpsd.xml
 
 gpsprobe.1: gpsprobe.xml
 	$(XMLTO) man gpsprobe.xml
+
+gpsprof.1: gpsprof.xml
+	$(XMLTO) man gpsprof.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -106,6 +110,7 @@ EXTRA_DIST = \
 	libgpsd.xml \
 	libgps.xml \
 	gpsprobe.xml \
+	gpsprof.xml \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
@@ -115,7 +120,7 @@ EXTRA_DIST = \
 	gpsd.py \
 	gpsprobe \
 	logextract \
-	profile_gpsd
+	gpsdprof
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
