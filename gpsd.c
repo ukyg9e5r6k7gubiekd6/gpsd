@@ -664,9 +664,13 @@ int main(int argc, char *argv[])
 
         memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 
-	/* poll for input, waiting at most a second */
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
+	/* 
+	 * Poll for user commands or GPS data.  GPS sensors typically
+	 * update once a second.  Nyquist's theorem tells us that it
+	 * is optimal to sample at twice this frequency.
+	 */
+	tv.tv_sec = 0;
+	tv.tv_usec = 500000;
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
