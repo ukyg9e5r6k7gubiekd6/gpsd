@@ -10,12 +10,12 @@ struct life_t
 {
     time_t	last_refresh;
     int		time_to_live;
+    int		refreshes;
 };
 #define INIT(stamp, now, tl)	stamp.time_to_live=tl; stamp.last_refresh=now
-#define REFRESH(stamp)	stamp.last_refresh = time(NULL)
+#define REFRESH(stamp)	stamp.last_refresh = time(NULL); stamp.refreshes++
 #define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live >= t
-#define CHANGED(stamp, now) stamp.last_refresh == now
-#define SEEN(stamp) stamp.last_refresh != 0
+#define SEEN(stamp) stamp.refreshes
 
 struct OUTDATA {
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
