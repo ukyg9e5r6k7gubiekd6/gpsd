@@ -97,10 +97,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			free(gpsdata->gps_id);
 		    gpsdata->gps_id = strdup(sp+2);
 		case 'M':
-		    i1 = atoi(sp+2);
-		    gpsdata->mode_stamp.changed = (gpsdata->mode != i1);
-		    gpsdata->mode = i1;
-		    REFRESH(gpsdata->mode_stamp);
+		    gpsdata->mode = atoi(sp+2);
 		    break;
 		case 'N':
 		    u1 = atoi(sp+2);
@@ -126,10 +123,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    REFRESH(gpsdata->fix_quality_stamp);
 		    break;
 		case 'S':
-		    i1 = atoi(sp+2);
-		    gpsdata->status_stamp.changed = (gpsdata->status != i1);
-		    gpsdata->status = i1;
-		    REFRESH(gpsdata->status_stamp);
+		    gpsdata->status = atoi(sp+2);
 		    break;
 		case 'T':
 		    sscanf(sp, "T=%lf", &d1);
@@ -215,8 +209,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
 	|| gpsdata->track_stamp.changed 
-	|| gpsdata->status_stamp.changed 
-	|| gpsdata->mode_stamp.changed 
 	|| gpsdata->fix_quality_stamp.changed 
 	|| gpsdata->epe_quality_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 

@@ -240,13 +240,11 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gNMEAdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gNMEAdata.status = STATUS_FIX;
-	    REFRESH(session->gNMEAdata.status_stamp);
 	    session->gNMEAdata.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gNMEAdata.mode = MODE_3D;
 	    else if (session->gNMEAdata.status)
 		session->gNMEAdata.mode = MODE_2D;
-	    REFRESH(session->gNMEAdata.mode_stamp);
 	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
 	    /* byte 20 is HDOP, see below */
@@ -388,13 +386,11 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gNMEAdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gNMEAdata.status = STATUS_FIX;
-	    REFRESH(session->gNMEAdata.status_stamp);
 	    session->gNMEAdata.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gNMEAdata.mode = MODE_3D;
 	    else if (session->gNMEAdata.status)
 		session->gNMEAdata.mode = MODE_2D;
-	    REFRESH(session->gNMEAdata.mode_stamp);
 	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
 	    /*

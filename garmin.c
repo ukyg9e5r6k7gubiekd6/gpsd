@@ -346,9 +346,6 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    gpsd_report(4, "mode %d, status %d\n"
 			, session->gNMEAdata.mode
 			, session->gNMEAdata.status);
-	    REFRESH(session->gNMEAdata.status_stamp);
-	    REFRESH(session->gNMEAdata.mode_stamp);
-
 
 	    gpsd_report(3, "UTC Time: %s\n", session->gNMEAdata.utc);
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"

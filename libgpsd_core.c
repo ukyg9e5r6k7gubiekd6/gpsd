@@ -179,8 +179,6 @@ int gpsd_poll(struct gps_session_t *session)
 	    (session->gNMEAdata.longitude!=old.longitude || session->gNMEAdata.latitude!=old.latitude);
 	CHANGECHECK(altitude, altitude_stamp);
 	CHANGECHECK(track, track_stamp);
-	CHANGECHECK(status, status_stamp);
-	CHANGECHECK(mode, mode_stamp);
 	session->gNMEAdata.fix_quality_stamp.changed = \
 	    (session->gNMEAdata.pdop!=old.pdop||session->gNMEAdata.hdop!=old.hdop||session->gNMEAdata.vdop!=old.vdop);
 	session->gNMEAdata.epe_quality_stamp.changed = \

@@ -211,7 +211,6 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     * STATUS_DGPS_FIX, cannot tell apart here
 	     */
 	    out->status = STATUS_FIX;
-	    REFRESH(out->status_stamp);
 	    mask |= STATUS_SET;
 	}
 	if (!(out->seen_sentences & GPGSA && out->mode <= MODE_NO_FIX)) {
@@ -220,7 +219,6 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     * MODE_3D, cannot tell apart here
 	     */
 	    out->mode = MODE_2D;
-	    REFRESH(out->mode_stamp);
 	    mask |= MODE_SET;
 	}
     }
@@ -272,7 +270,6 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 	else
 	    newstatus = STATUS_FIX;
 	out->status = newstatus;
-	REFRESH(out->status_stamp);
 	mask |= STATUS_SET;
 	gpsd_report(3, "GPGLL sets status %d\n", out->status);
     }
@@ -342,7 +339,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     int mask = 0;
 
     out->status = atoi(field[6]);
-    REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
     mask |= STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
@@ -366,7 +362,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	if (!altitude[0]) {
 	    if (out->mode == MODE_3D) {
 		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
-		REFRESH(out->mode_stamp);
 		mask |= MODE_SET;
 	    }
 	} else {
@@ -412,7 +407,6 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
     int i, mask = 0;
     
     out->mode = atoi(field[2]);
-    REFRESH(out->mode_stamp);
     mask |= MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
     out->pdop = atof(field[15]);
