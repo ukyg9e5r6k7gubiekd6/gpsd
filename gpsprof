@@ -362,6 +362,7 @@ class cycle:
                   session.stopbits, session.cycle)
         msg += "The sentence set emitted by this GPS is: %s\n" % " ".join(intervals.keys())
         for key in cycles:
+            sys.stderr.write("gem")
             if len(frequencies[key].values()) == 1:
                 if cycles[key] == 1:
                     msg += "%s: is emitted once a second.\n" % key

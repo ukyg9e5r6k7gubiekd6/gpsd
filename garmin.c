@@ -391,7 +391,11 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    }
 	    mask |= SATELLITE_SET;
 	    bufp += strlen(bufp);
+	    // dump NMEA GPGSA, PGRME
 	    gpsd_binary_quality_dump(session, bufp+strlen(bufp));
+	    bufp += strlen(bufp);
+	    // dump NMEA GPGSV
+	    gpsd_binary_satellite_dump(session, bufp+strlen(bufp));
 	    bufp += strlen(bufp);
 	    break;
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
