@@ -168,7 +168,7 @@ static inline int get_int(const unsigned char *buf)
 
 // convert radians to degrees
 static inline double  radtodeg( double rad) {
-	return ( rad * 180.0 *  (1.0/PI));
+	return ( rad * 180.0 / PI );
 }
 
 static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );

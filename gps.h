@@ -136,7 +136,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 #define METERS_TO_MILES	0.00062137119	/* International miles */
 #define KNOTS_TO_MPH	1.1507794	/* International miles and knots */
 #define KNOTS_TO_KPH	1.852		/* International knots */
-#define PI 3.14159265358979323846	/* for radians-to-degrees and vv. */
+#define PI 3.1415926535897932384626433832795029L	/* for radians-to-degrees and vv. */
 
 /* gps_open() error return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
