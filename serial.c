@@ -68,6 +68,7 @@ int gpsd_set_speed(struct gps_session_t *session,
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
     }
 
+    session->packet_type = BAD_PACKET;
     if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
 	return 0;
 
