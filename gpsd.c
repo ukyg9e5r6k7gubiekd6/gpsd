@@ -548,7 +548,7 @@ int main(int argc, char *argv[])
     extern char *optarg;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "D:S:d:hNnp:P:s:v"
+    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:s:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
@@ -603,6 +603,7 @@ int main(int argc, char *argv[])
 	case 'n':
 	    nowait = 1;
 	    break;
+	case 'f':
 	case 'p':
 	    device_name = optarg;
 	    break;

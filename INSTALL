@@ -12,7 +12,9 @@ a short initial burst of binary garbage).  If you don't see this, you
 may have OS-level problems with your serial support, but more likely
 have the wrong device.  Look again.
 
-2. Make a symlink named /dev/gps to your GPS port; the command will be
+2. If your system supports Linux hotplug and you're using a USB GPS,
+go to step 3.  Otherwise, make a symlink named /dev/gps to your GPS
+port; the command will be
 
      ln -s /dev/ttyXXX /dev/gps
 
@@ -32,8 +34,9 @@ gpsd, xgps, and xgpsspeed will be built. Copy the app-defaults files
 xgps.ad and xgpsspeed.ad to your home directory or to the system-wide X
 app-defaults directory.
 
-4. Determine whether you need a non-NMEA driver.  Usually you will not,
-but there are unusual exceptions.  Consult the hardware page at
+4. Determine whether you need to specify a driver type. driver.
+Usually you will not, but there are unusual exceptions.  Consult the
+hardware page at
 
     http://gpsd.berlios.de/hardware.html
 
@@ -41,15 +44,17 @@ to find out if your hardware is one of them.  If so, you may need to
 specify a driver type option at gpsd startup time; if you installed 
 a binary RPM, this will mean editing the gpsd init script.
 
-5. Start gpsd on a serial or USB port that has the GPS connected to it.
-If you made a /dev/gps symlink, just invoking "gpsd" as root should do it.
-If you installed from an RPM, gpsd will be started for you automatically 
-at boot time.
+5. Start gpsd.  It will not need any options except in the rare case
+that you have to specify a driver.  If you installed from an RPM, gpsd
+will be started for you automatically at boot time.
 
-6. Once gpsd is running, telnet to port 2947.  Type "r" to start raw
-and watcher modes.  You should see NMEA data (text lines beginning
-with $) spewing out.  You will also see lines with a GPSD prefix;
-these are sentence translations in GPSD protocol.
+6. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
+device it will query.  If you need to change the device, use 'f='
+to do so (see the manual page for details). Now plug in your GPS.
+
+7. Type "wr" to start raw and watcher modes.  You should see NMEA data
+(text lines beginning with $) spewing out.  You will also see lines
+with a GPSD prefix; these are sentence translations in GPSD protocol.
 
 Note that until your GPS has acquired a fix, typing "p" to get position
 will only return this:
@@ -61,33 +66,17 @@ sending data, merely that gpsd has not yet seen any *valid* position data.
 You will have to wait for the GPS to acquire satellite lock.  If you have 
 raw or watcher mode on it should be obvious when you get a lock.
 
-7. Start the xgps client.  Calling it with no arguments should do the right 
+8. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-8. Check out the list of supported hardware at 
+9. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
 If your GPS isn't on the list, please send us information to add a new
-line to the table.  Here's what we need:
-
-1. Name (preferably with a URL to the vendor's product page or spec sheet).
-2. Chipset.  Ideally we'd like to know both the GPS engine chip and
-   the USB-to-serial chip the device uses.  80% of the time this will be
-   SiRF-II + PL2303, but it's the exceptions that are interesting.
-3. Interface type -- RS232, USB, CF, etc.
-4. Vendor (preferably with a URL to the vendor's website).
-5. gpsd type -- usually this will be 'n'.  If you had to specify a
-   non-NMEA driver type to make gpsd work, give it.
-6. Version of gpsd you tested with.
-7. NMEA protocol version.
-8. List of NMEA sentences the GPS emits.
-9. Notes -- anything interesting or unusual about this GPS.
-
-You may get some help on fields 2, 7, and 8 by running gpsprobe.  Note that
-you will have to stop gpsd to do this.
+line to the table.  Directions are included on that page.
 
 We can also use updates of the latest version number known to work with
 hardware already supported.

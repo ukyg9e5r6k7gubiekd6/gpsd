@@ -20,7 +20,7 @@ and speedometer</refpurpose>
 <cmdsynopsis>
   <command>gpsd</command>  
       <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-s <replaceable>baudrate</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
@@ -29,6 +29,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-v </arg>
 </cmdsynopsis>
@@ -61,14 +62,18 @@ and speedometer</refpurpose>
 a TCP/IP port (2947 by default), waiting for applications to request
 location information from a GPS.  The GPS is expected to be
 direct-connected to the machine running
-<application>gpsd</application> via a USB or RS232C serial port which
-is specified to gpsd at startup.</para>
+<application>gpsd</application> via a USB or RS232C serial port.  The
+port may be specified to gpsd at startup, or it may be set via a
+command shipped down the client socket (e.g. by a USB hotplug
+script). Given a GPS device, <application>gpsd</application> discovers 
+the correct port speed and protocol for it.</para>
 
 <para><application>gpsd</application> should be able to query any GPS
 that speaks either the standard textual NMEA 0183 protocol, or the
-binary Rockwell protocol used by EarthMate and some other
-GPSes, or the Garmin binary protocol used by the USB version of the
-Garmin 18 and other Garmin USB GPSes. <application>gpsd</application>
+binary Rockwell protocol used by EarthMate and some other GPSes, or
+the binary SiRF protocol used by SiRf-II and SiRF-Star chipsets, or
+the Garmin binary protocol used by the USB version of the Garmin 18
+and other Garmin USB GPSes. <application>gpsd</application>
 effectively hides the differences among these.</para>
 
 <para>Optionally, <application>gpsd</application> may get
@@ -81,7 +86,7 @@ factor dependent on current satellite position.)</para>
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
 <varlistentry>
-<term>-p</term>
+<term>-f</term>
 <listitem>
 <para>Set GPS device name (default is <filename>/dev/gps</filename>).</para>
 </listitem>
@@ -89,11 +94,9 @@ factor dependent on current satellite position.)</para>
 <varlistentry>
 <term>-T <replaceable>device-type</replaceable></term>
 <listitem>
-<para>Set GPS type, usually not necessary because most GPSes now speak
-the standard NMEA 0183 protocol. For a list of driver types,
-look at what <command>gpsd -?</command> writes to standard output.
-This option may be unavailable if the daemon was compiled without
-support for the non-NMEA drivers.</para>
+<para>Set GPS type, usually not necessary because GPS can figure it
+out by looking at the GPS data stream.  The only exception is the
+driver for USB Garmin GPSes, which requires -T g.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -102,11 +105,9 @@ support for the non-NMEA drivers.</para>
 </varlistentry>
 <varlistentry>
 <term>-s</term>
-<listitem><para>Set GPS communication speed in bits per second.
-It is generally not necessary 
-to set this, because (a) for NMEA devices the daemon will
-autoconfigure to the correct baud rate, and (b) for non-NMEA devices
-default that should be good is wired in.</para></listitem>
+<listitem><para>Set GPS communication speed in bits per second.  It is
+generally not necessary to set this, because the daemon will
+autoconfigure itself to the correct baud rate.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-d</term>
@@ -159,11 +160,17 @@ for debugging.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
+<term>-p</term>
+<listitem>
+<para>Obsolete synonym for -f. May be removed in a future release.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>-D</term>
 <listitem>
 <para>Set debug level. At debug levels 2 and above,
-<application>gpsd</application> stays in foreground and reports
-incoming sentence and actions to standard error.</para>
+<application>gpsd</application> reports incoming sentence and actions
+to standard error.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -175,7 +182,7 @@ incoming sentence and actions to standard error.</para>
 </variablelist>
 
 <para>The request protocol for gpsd clients is very simple.  Each
-request consists of a single ASCII character followed by a newline.
+request normally consists of a single ASCII character followed by a newline.
 Case of the request character is ignored,  Each request returns a line
 of response text ended by a CR/LF.  Requests and responses are as 
 follows, with %f standing for a decimal float numeral and %d for
@@ -195,7 +202,9 @@ giving the parameters of the serial link to the GPS as "B=%d %d %c
 %d"; baud rate, byte size, parity, (currently always N) and stop bits
 (1 or 2).  The command "B=%d" sets the baud rate, not changing parity
 or stop bits; watch the response, because it is possible for this to
-fail if the GPS does not support a speed-switching command.</para></listitem>
+fail if the GPS does not support a speed-switching command.  In case
+of failure, the daemon and GPS will continue to communicate at the
+old speed.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -216,10 +225,12 @@ part will vary and may be zero.</para></listitem>
 <listitem>
 <para>Returns "E=%f %f %f": three estimated position errors in meters
 &mdash; total, horizontal, and vertical (2-sigma or 95% confidence
-level).  Note: many GPSses do not supply these numbers.  When the
+level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
 them from satellite DOP using fixed figures for expected non-DGPS 
-and DGPS range errors in meters.  See also the 'q' command.</para>
+and DGPS range errors in meters.  A value of zero for any of these
+numbers should be taken to mean that component of DOP is not available.
+See also the 'q' command.</para>
 </listitem>
 </varlistentry>
 
@@ -228,8 +239,8 @@ and DGPS range errors in meters.  See also the 'q' command.</para>
 <listitem><para>Gets or sets the active GPS device name. The bare command 'f'
 requests a response containing 'f=' followed by the name of the active
 GPS device.  The command may be followed by an '=', in which case all
-following printable (non-whitespace) characters up to the next
-whitespace are interpreted as the name of a trial GPS device.  If
+following printable characters up to the next
+CR/LF are interpreted as the name of a trial GPS device.  If
 there are no other clients active, the trial device is opened and read
 to see if a GPS can be found there.  If it can, the trial device
 becomes the active device and the trial device name is stored to be
@@ -273,7 +284,7 @@ estimated UERE (user error in meters at specified confidence level due
 to ionospheric delay, multipath reception, etc.) to get actual
 circular error ranges in meters at the same confidence level. See also
 the 'e' command.  Note: Some GPSes may fail to report these, or report
-only one of them (often HDOP or PDOP); a value of 0.0 should be taken
+only one of them (often HDOP); a value of 0.0 should be taken
 as an indication that the data is not available.</para>
 </listitem>
 </varlistentry>
@@ -304,7 +315,7 @@ raw mode.</para></listitem>
 
 <varlistentry>
 <term>u</term>
-<listitem><para>Current rate of climb as "V=%f" in meters per second.
+<listitem><para>Current rate of climb as "U=%f" in meters per second.
 Some GPses (non-Sirf-II based) do not report this.</para></listitem>
 </varlistentry>
 
@@ -325,7 +336,7 @@ mode.</para></listitem>
 
 <varlistentry>
 <term>x</term>
-<listitem><para>Returns "X=1" if the GPS is online, "X=0" if
+<listitem><para>Returns "X=1" if the GPS is online, "X=0" if 
 not.</para></listitem>
 </varlistentry>
 

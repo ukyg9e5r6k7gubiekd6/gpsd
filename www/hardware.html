@@ -25,7 +25,6 @@ which this GPS is known to have been successfully tested.</p>
 <th>Chipset</th>
 <th>Interface</th>
 <th>Vendor</th>
-<th>gpsd type</th>
 <th>Works with</th>
 <th>NMEA version</th>
 <th width="10%">Sentences</th>
@@ -37,8 +36,7 @@ which this GPS is known to have been successfully tested.</p>
 <td>SiRF-II + PL2303</td>
 <td>USB</td>
 <td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
-<td align='center'>n</td>
-<td>2.10</td>
+<td>2.16</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
 <td>Haicom provided a test unit. Manual states incorrectly that VTG
@@ -47,10 +45,9 @@ is off by default.</td>
 <tr>
 <td><a href='http://www.haicom.com.tw/products.htm'>HI-204E</a></td>
 <td>Excellent</td>
-<td>Evermore BBP1202 + PL2303</td>
+<td>Evermore BBP1202</td>
 <td>USB</td>
 <td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
-<td align='center'>n</td>
 <td>2.6</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
@@ -63,8 +60,7 @@ is off by default.</td>
 <td>USB</td>
 <td><a href='http://www.globalsat.com.tw/english/products_detail.php?main_id=5&p_id=9'>Globalsat</a>; OEMed as 
 NaviLock, Hyperdata</td>
-<td align='center'>n</td>
-<td>2.6</td>
+<td>2.16</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
@@ -78,12 +74,11 @@ works but no test hardware.
 </tr>
 <tr>
 <td>TripNav 200</td>
-<td>Unknown</d>
+<td>Excellent</d>
 <td>SiRF-II + FTDI</td>
 <td>USB</td>
 <td><a href='http://www.rayming.com/'>Rayming</a></td>
-<td>-</td>
-<td>-</td>
+<td>2.16</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
@@ -103,7 +98,6 @@ of moving this product to the PL2303.
 <td>Zodiac</td>
 <td>RS-232</td>
 <td>DeLorme</td>
-<td align='center'>e</td>
 <td>2.0</td>
 <td>2.2?</td>
 <td>PRWIZCH,<br />GPGSA,<br />GPRMC</td>
@@ -116,7 +110,6 @@ models have been discontinued but are still common.</td>
 <td>SiRFII (GPS2e/LP-7451) + Cypress M8 (CY7C64013)</td>
 <td>USB</td>
 <td>DeLorme</td>
-<td align='center'>n</td>
 <td>2.5</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
@@ -130,7 +123,6 @@ Requires a 2.6.10 or better kernel for the Cypress support.</td>
 <td>FV-18</td>
 <td>RS-232 (5V TTL)</td>
 <td><a href='http://www.sanav.com/'>San Jose Navigation</a></td>
-<td align='center'>f</td>
 <td>2.0</td>
 <td>2.3</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG,<br />GPZDA,<br />GPDTM,<br />GPGLL</td>
@@ -145,7 +137,6 @@ Sapphire USB</a></a></td>
 <td>SiRF-II</td>
 <td>USB</td>
 <td>RoyalTek</td>
-<td align='center'>n</td>
 <td>1.97</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG,<br />GPGSA</td>
@@ -157,7 +148,6 @@ Sapphire USB</a></a></td>
 <td>Zodiac</td>
 <td>RS-232</td>
 <td>DeLorme</td>
-<td align='center'>t</td>
 <td>1.97</td>
 <td>?</td>
 <td>GPRMC,<br />GPGSA,<br />GPGGA,<br />GPGSV, PRWIRID, PRWIZCH</td>
@@ -172,7 +162,6 @@ Takes optional latitude/longitude initialization.
 <td>Garmin</td>
 <td>RS-232</td>
 <td><a href="http://www.garmin.com">Garmin</a></td>
-<td align='center'>n</td>
 <td>2.3</td>
 <td>2.0</td>
 <td>
@@ -181,7 +170,6 @@ GPRMC,<br />GPRMB,<br />GPGGA,<br />GPGSA,<br />GPGSV
 </td>
 <td>
 Garmin 12XL and 45 are nearly identical and should work as well.<BR>
-NMEA mode must be set to 183 v2.0.<BR>
 Details on Garmin's proprietary protocol can be found
 <a href="http://www.garmin.com/support/commProtocol.html">here</a>.
 </td>
@@ -194,7 +182,6 @@ Garmin GPS-16</a></td>
 <td>Garmin</td>
 <td>RS-232</td>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
-<td align='center'>n</td>
 <td>2.7</td>
 <td>2.0</td>
 <td>
@@ -207,7 +194,7 @@ includes EPE only). DGPS information in GPGGA sentence is not returned.
 Speed and course over ground are calculated from the north/east
 velocity  and may not be accurate.  Magnetic variation information 
 is not available. Garmin uses a nonstandard 16-bit SNR scale.
-Reported by Ron Marosko, Jr. &gt;rmarosko&#x40;wirelessfrontier.net&gt;.
+Reported by Ron Marosko, Jr. &lt;rmarosko&#x40;wirelessfrontier.net&gt;.
 </td>
 <td>
 </tr>
@@ -217,9 +204,8 @@ Reported by Ron Marosko, Jr. &gt;rmarosko&#x40;wirelessfrontier.net&gt;.
 Garmin GPS-18</a></td>
 <td>Good</td>
 <td>Garmin</td>
-<td>USB</td>
+<td>USB & RS-232</td>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
-<td align='center'>n,g</td>
 <td>2.5</td>
 <td>?</td>
 <td>
@@ -227,10 +213,10 @@ GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA,<br />GPGLL
 </td>
 <td>
 The USB version rquires -T g and the Linux kernel garmin_usb driver;
-the RS232 version emits NMEA and uses the default -T n driver.
+the RS232 version emits NMEA and is found by normal autoconfiguration.
 DOP (Dilution of Precision) information is not available (Garmin protocol 
-includes EPE only); thus -T g can plug in EPE information, bit -T n 
-version omits the DOP fields entirely.
+includes EPE only); thus the USB version can plug in EPE information,
+but the RS232 version omits the DOP fields entirely.
 DGPS information in GPGGA sentence is not returned.
 Speed and course over ground are calculated from the north/east
 velocity  and may not be accurate.  Magnetic variation information 
@@ -243,7 +229,6 @@ is not available. Garmin uses a nonstandard 16-bit SNR scale.
 <td>Garmin</td>
 <td>RS-232</td>
 <td><a href="http://www.garmin.com">Garmin</a></td>
-<td align='center'>n</td>
 <td>2.5</td>
 <td>?</td>
 <td>
@@ -260,15 +245,13 @@ The online copy of the owner's manual seems to be badly garbled.
 <td>SiRF-II? + PL2303</td>
 <td>USB</td>
 <td><a href='http://www.techwayinc.com.tw/'>Techway</a></td>
-<td align='center'>n</td>
 <td>2.3</td>
 <td>?</td>
 <td>
 GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA
 </td>
 <td>
-This waterproof GPS receiver connects to a USB port on a laptop or
-computer
+Advertises that it's waterproof.
 </td>
 </tr>
 </table>
@@ -281,10 +264,10 @@ tell us the following:</p>
 <li>Whether or not it works</li>
 <li>If possible, an URL to a technical reference on it</li>
 <li>The GPS and (if applicable) USB-to-serial chip it uses.  (Look at
-the output of lsusb(1), it may identify the USB-to-serial chip.)</li>
+the output of lsusb(1), it may identify the USB-to-serial chip.  If it
+gives a vendor and product ID, send us those numbers.)</li>
 <li>The interface type (RS232, USB, CF)</li>
 <li>The vendor</li>
-<li>The gpsd driver type (almost always 'n')</li>
 <li>Version of gpsd you tested with</li>
 <li>NMEA version it emits, or '?' if the documentation doesn't say</li>
 <li>A list of NMEA sentences it emits</li>
@@ -300,7 +283,7 @@ gpsprobe against the device and looking at the output.</p>
 href='http://www.rayming.com/download/NEMA_commands.pdf'>technical
 manual</a> describing NMEA extensions supported by this chipset is
 available from Globalsat's U.S. reseller.  For SiRF binary
-protocol itself, look <a href='sirf_protocol.pdf'>here</a>.</p>
+protocol, look <a href='sirf_binary.pdf'>here</a>.</p>
 
 <p>A technical spec for the Evermore chipset <a
 href='http://www.twintrading.co.kr/pdf/himark/bbp120brief.pdf'>is
@@ -342,14 +325,14 @@ will probably work fine.</p>
 </tr>
 <tr>
 <td><a href='http://www.deluoelectronics.com/'>Deluo</a></td>
-<td>billing&x40;deluo.com</td>
+<td>billing&#x40;deluo.com</td>
 <td>Deluo GPS Pro</td>
 <td>Looks like another SiRF-II unit.  Advertises Linux 2.4 support.
 USB and RS232-DB9 adaptors sold separately.</td>
 </tr>
 <tr>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
-<td>sales&x40;garmin.com</td>
+<td>sales&#x40;garmin.com</td>
 <td>eTrex, foreTrex, GPS12, GPS72, GPS76</td>
 <td>All handhelds with consoles.  These guys are focused on the
 aviation market.</td>
