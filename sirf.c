@@ -161,44 +161,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     {
     case 0x02:		/* Measure Navigation Data Out */
 	if (!(session->driverstate & SIRF_GE_232)) {
-	    /* WGS 84 geodesy parameters */
-	    double x, y, z, vx, vy, vz;
-	    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
-	    const double a = 6378137;			/* equatorial radius */
-	    const double f = 1 / 298.257223563;		/* flattening */
-	    const double b = a * (1 - f);		/* polar radius */
-	    const double e2 = (a*a - b*b) / (a*a);
-	    const double e_2 = (a*a - b*b) / (b*b);
 	    int mask = 0;
-
 	    /* position/velocity is bytes 1-18 */
-	    x = getl(1);
-	    y = getl(5);
-	    z = getl(9);
-	    vx = getw(13)/8.0;
-	    vy = getw(15)/8.0;
-	    vz = getw(17)/8.0;
-
-	    /* geodetic location */
-	    lambda = atan2(y,x);
-	    p = sqrt(pow(x,2) + pow(y,2));
-	    theta = atan2(z*a,p*b);
-	    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
-	    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
-	    h = p / cos(phi) - n;
-	    session->gpsdata.fix.latitude = phi * RAD_2_DEG;
-	    session->gpsdata.fix.longitude = lambda * RAD_2_DEG;
-	    session->gpsdata.fix.altitude =
-			h+wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-	    /* velocity computation */
-	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
-	    veast = -vx*sin(lambda)+vy*cos(lambda);
-	    session->gpsdata.fix.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-	    session->gpsdata.fix.speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
-	    heading = atan2(veast,vnorth);
-	    if (heading < 0)
-		heading += 2 * PI;
-	    session->gpsdata.fix.track = heading * RAD_2_DEG;
+	    ecef_to_wgs84fix(&session->gpsdata.fix, 
+			getl(1), getl(5), getl(9),
+			getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
+	    /* WGS 84 geodesy parameters */
 	    /* fix status is byte 19 */
 	    navtype = getb(19);
 	    session->gpsdata.status = STATUS_NO_FIX;

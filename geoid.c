@@ -1,7 +1,8 @@
 /* 
- * geoid.c -- approximate WGS84 geoid sepations by bilinear interpolation.
+ * geoid.c -- ECEF to WGS84 conversions, including ellipsoid-to-MSL height
  *
- * Code by Oleg Gusev, from data by Peter Dana.
+ * Geoid separation code by Oleg Gusev, from data by Peter Dana.
+ * ECEF conversion by Rob Janssen.
  */
 
 #include <math.h>
@@ -20,7 +21,7 @@ static double bilinear(double x1, double y1, double x2, double y2, double x, dou
  return (z22*(y-y1)*(x-x1)+z12*(y2-y)*(x-x1)+z21*(y-y1)*(x2-x)+z11*(y2-y)*(x2-x))/delta;
 }
 
-double wgs84_separation(double lat, double lon)
+static double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
 #define GEOID_COL	37
@@ -63,7 +64,41 @@ double wgs84_separation(double lat, double lon)
 	geoid_delta[ilon1+ilat2*GEOID_COL], geoid_delta[ilon2+ilat2*GEOID_COL]
 	);
 }
-	 
+
+
+void ecef_to_wgs84fix(struct gps_fix_t *fix,
+			double x, double y, double z, 
+			double vx, double vy, double vz)
+/* fill in WGS84 position/velocity fields from ECEF coordinates */
+{
+    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
+    const double a = 6378137;			/* equatorial radius */
+    const double f = 1 / 298.257223563;		/* flattening */
+    const double b = a * (1 - f);		/* polar radius */
+    const double e2 = (a*a - b*b) / (a*a);
+    const double e_2 = (a*a - b*b) / (b*b);
+
+    /* geodetic location */
+    lambda = atan2(y,x);
+    p = sqrt(pow(x,2) + pow(y,2));
+    theta = atan2(z*a,p*b);
+    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
+    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
+    h = p / cos(phi) - n;
+    fix->latitude = phi * RAD_2_DEG;
+    fix->longitude = lambda * RAD_2_DEG;
+    fix->altitude = h + wgs84_separation(fix->latitude, fix->longitude);
+    /* velocity computation */
+    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
+    veast = -vx*sin(lambda)+vy*cos(lambda);
+    fix->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
+    fix->speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
+    heading = atan2(veast,vnorth);
+    if (heading < 0)
+	heading += 2 * PI;
+    fix->track = heading * RAD_2_DEG;
+}
+
 #ifdef TESTMAIN
 #include <stdio.h>
 #include <stdlib.h>

@@ -186,7 +186,9 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 extern int ntpshm_init(struct gps_device_t *);
 extern int ntpshm_put(struct gps_device_t *, double);
 
-extern double wgs84_separation(double lat, double lon);
+extern void ecef_to_wgs84fix(struct gps_fix_t *,
+			     double, double, double, 
+			     double, double, double);
 
 /* External interface */
 extern int gpsd_open_dgps(char *);
