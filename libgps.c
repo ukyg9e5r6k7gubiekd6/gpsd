@@ -150,10 +150,8 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			sp = strchr(sp, ':') + 1;
 			sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
 			PRN[j] = i1;
-			elevation[j] = i2;
-			azimuth[j] = i3;
-			ss[j] = i4;
-			used[j] = i5;
+			elevation[j] = i2; azimuth[j] = i3;
+			ss[j] = i4; used[j] = i5;
 		    }
 		    /*
 		     * This won't catch the case where all values are identical
@@ -219,7 +217,6 @@ int gps_query(struct gps_data_t *gpsdata, char *requests)
  * A simple command-line exerciser for the library.
  * Not really useful for anything but debugging.
  */
-
 void data_dump(struct gps_data_t *collect, time_t now)
 {
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
@@ -228,8 +225,7 @@ void data_dump(struct gps_data_t *collect, time_t now)
     if (collect->online_stamp.changed)
 	printf("online: %d\n", collect->online);
     if (collect->latlon_stamp.changed) {
-	printf("P: lat/lon: %lf %lf", 
-	       collect->latitude, collect->longitude);
+	printf("P: lat/lon: %lf %lf", collect->latitude, collect->longitude);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->latlon_stamp.last_refresh,
 	       collect->latlon_stamp.changed);
@@ -297,7 +293,6 @@ main(int argc, char *argv[])
     struct gps_data_t *collect;
     char buf[BUFSIZE];
 
-    memset(&collect, '\0', sizeof(collect));
     collect = gps_open(NULL, 0);
 
     gps_set_raw_hook(collect, dumpline);

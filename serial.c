@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
 #else
@@ -13,7 +12,7 @@
 
 #include "gpsd.h"
 
-/* FIXME: these shouldn't be globals */
+/* FIXME: ttyset_old can be global, but ttyset  */
 static struct termios ttyset, ttyset_old;
 
 static int set_baud(long baud)
@@ -49,11 +48,9 @@ int gpsd_open(char *device_name, int device_speed, int stopbits)
 	  return -1;
 
 	memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
-
 	device_speed = set_baud(device_speed);
 	cfsetispeed(&ttyset, (speed_t)device_speed);
 	cfsetospeed(&ttyset, (speed_t)device_speed);
-
 	ttyset.c_cflag &= ~(PARENB | CRTSCTS);
 	ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
@@ -69,12 +66,8 @@ void gpsd_close(int ttyfd)
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {
-#if defined (USE_TERMIO)
-	    ttyset.c_cflag = CBAUD & B0;
-#else
-	    ttyset.c_ispeed = B0;
-	    ttyset.c_ospeed = B0;
-#endif
+	    cfsetispeed(&ttyset, (speed_t)B0);
+	    cfsetospeed(&ttyset, (speed_t)B0);
             tcsetattr(ttyfd, TCSANOW, &ttyset);
 	    ttyset_old.c_cflag |= HUPCL;
 	    tcsetattr(ttyfd,TCSANOW,&ttyset_old);

@@ -216,9 +216,8 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      *
      * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
      * indicating that the Garmin 65 does not return time and status.
-     * This code copes gracefully.
-     *
      * SiRF chipsets don't return the Mode Indicator.
+     * This code copes gracefully with both quirks.
      */
     char *status = field(sentence, 7);
 
@@ -250,9 +249,8 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 	(3) Speed over ground (knots) 00.0 to 99.9
 	(4) Speed over ground (kilometers) 00.0 to 99.9
 
-     * Up to and including 1.10, gpsd assumed this and extracted field
-     * 3 for ground speed.  But the NMEA spec, version 3.01, dated 1/1/2002, 
-     * gives this:
+     * Up to and including 1.10, gpsd assumed this and extracted field 3.
+     * But the NMEA spec, version 3.01, dated 1/1/2002, gives this:
 
 	1    = Track made good
 	2    = Fixed text 'T' indicates that track made good is relative to 
@@ -489,9 +487,8 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    processGPGSV(sentence, outdata);
 	} else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
 	    /* do nothing */;
-	} else {
+	} else
 	    return -1;
-	}
     }
     return 0;
 }

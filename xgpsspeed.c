@@ -21,10 +21,6 @@
 #include "xgpsspeed.icon"
 #include "gps.h"
 
-#if defined(ultrix) || defined(SOLARIS) 
-extern double rint();
-#endif
-
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
@@ -65,11 +61,9 @@ int main(int argc, char **argv)
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
-
     while ((option = getopt(argc, argv, "h")) != -1) {
 	switch (option) {
-	case 'h':
-	case '?':
+	case 'h': case '?':
 	default:
 	    fputs("usage: gps [-h] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);
 	    exit(1);
@@ -123,7 +117,3 @@ int main(int argc, char **argv)
     gps_close(gpsdata);
     return 0;
 }
-
-
-
-

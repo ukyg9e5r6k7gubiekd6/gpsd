@@ -49,12 +49,8 @@ struct gps_session_t {
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
     double separation;		/* Geoidal separation */
-    int year;
-    int month;
-    int day;
-    int hours;
-    int minutes;
-    int seconds;
+    int year, month, day;
+    int hours, minutes, seconds;
     /*
      * Zodiac chipset channel status from PRWIZCH.
      * We stash it here is so that raw-mode translation of Zodiac binary 
