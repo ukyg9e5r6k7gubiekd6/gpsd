@@ -76,7 +76,7 @@ interface that goes through
 and is intended for concurrent use by several applications, and one
 low-level interface that speaks directly with the serial or USB device
 to which the GPS is attached. This page describes the high-level
-interface is safe for multiple applications to use simultaneously; it
+interface that is safe for multiple applications to use simultaneously; it
 is probably the one you want.  The low-level interface is documented
 at
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
