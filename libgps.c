@@ -46,6 +46,10 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
     gpsdata->raw_hook = hook;
 }
 
+/*
+ * return: 0, no changes
+ *         1, something changed
+ */
 static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
@@ -222,6 +226,11 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	;
 }
 
+/*
+ * return: 0, no changes or no read
+ *         1, something changed
+ *        -1, read error
+ */
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
@@ -230,8 +239,14 @@ int gps_poll(struct gps_data_t *gpsdata)
     double received = 0;
 
     /* the daemon makes sure that every read is NUL-terminated */
-    if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
+    n = read(gpsdata->gps_fd, buf, sizeof(buf)-1);
+    if (n < 0) {
+        /* error */
 	return -1;
+    } else if ( n == 0 ) {
+        /* nothing read */
+	return 0;
+    }
     buf[n] = '\0';
     if (gpsdata->profiling)
 	received = timestamp();

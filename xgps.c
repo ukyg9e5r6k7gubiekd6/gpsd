@@ -232,7 +232,11 @@ XtIntervalId timeout;
 static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
 {
-    gps_poll(gpsdata);
+    int ret;
+
+    ret = gps_poll(gpsdata);
+    if ( 0 > ret ) {
+    }
 }
 
 static void update_panel(char *message)

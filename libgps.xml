@@ -105,7 +105,9 @@ return value is as for a query).  It is meant to be used after the
 user has issued an 'R' or 'W' command with
 <function>gpsd_query()</function>, telling the daemon to stream updates
 to the client.  If the third argument is non-NULL, it is used as a
-hook function to be called on each line of streamed data. </para>
+hook function to be called on each line of streamed data.
+<function>gpsd_poll()</function> returns -1 if there was an error, 0 
+if no data was read or no changes or 1 if gpsdata has changes.<para>
 
 <para>Several member groups within the GPS-data structure have
 last-modified timestamps and change-flag members associated with them;
