@@ -2,7 +2,7 @@ Name: gpsd
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
-License: GPL
+License: BSD
 Group: System Environment/Daemons
 Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
@@ -105,8 +105,9 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Sun Mar 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Rob Janssen's patches to fix timezone issues.
+* Mon Mar 28 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Rob Janssen's patches to fix timezone issues.  License changed to
+  BSD so linking to libgps won't make people nervous.
 
 * Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use

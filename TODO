@@ -1,6 +1,10 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Make the talker ID a parameter.
+
+** Hack gpsprof to use the GNUPLOT 'e' feature.
+
 ** In the SiRF driver, get leap seconds from almanac data
 
 Currently we're using a fixed 13-leap-second offset to convert GPS
@@ -136,18 +140,13 @@ Here is what I am presently doing in the new E command:
    comment near the definition of UERE.
 
 What non-Garmin GPSes will return in the E command is UERE multiplied
-by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP, the
+by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP,
 one respect in which it is functionally inferior to SiRF NMEA.
 
 I don't know, because my sources didn't give, the confidence level
 associated with the range uncertainties in gpsd.h.  My educated guess
 is that they are 1-sigma (66%), and that's what the gpsd documentation
 now says, but it needs to be confirmed.
-
-I don't currently pass back uncertainty of speed or track at all,
-though SiRF chips make those available.  To do so would require yet
-another protocol extension, which gets into "Does the GPSD protocol
-need to be redesigned?".
 
 This area needs some attention from somebody who cares a lot about
 GPS accuracy and is willing to do research on error budgets to pin

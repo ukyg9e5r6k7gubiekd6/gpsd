@@ -1,13 +1,8 @@
 COPYRIGHT
 =========
 
-This software (gpsd) is Copyrighted 1997, 1998, 1999, 2000, 2001, 2002 by
-Remco Treffkorn. Portions of it are also Copyright (c) 2005 by Eric S. 
-Raymond. It is released under the terms and conditions of the 
-
-	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
-
-or later. a copy of which is included in the file COPYING.
+This software (gpsd) released under the terms and conditions of the BSD
+License, a copy of which is included in the file COPYING.
 
 GENERAL
 =======
@@ -20,7 +15,7 @@ NMEA-0183 sentences, SiRF binary, Rockwell binary, or Garmin binary
 format.  gpsd takes this information from the GPS and translates it
 into something uniform and easier to understand for clients.  The
 distribution includes sample clients, application interface libraries,
-and test/profiling tools
+and test/profiling tools.
 
 There is a project site for gpsd at <http://gpsd.berlios.de/>.
 Look there for updates, news, and project mailing lists.  See that
@@ -29,12 +24,12 @@ website for a list of GPS units known to be compatible.
 See the file INSTALL for installation instructions and some tips on
 how to troubleshoot your installation.
 
-Distro integrators: An RPM spec file is included in the gpsd distribution.
-It wants to set up an init script to start gpsd at runtime, and hotplug
-scripts to notify it when a potential GPS device goes active and should 
-be polled.  The goal is zero configuration; users should never have to
-tell gpsd how to configure itself.  If you can't use RPM, use what you
-see in the specfile as a model.
+Distro integrators: An RPM spec file is included in the gpsd
+distribution.  It wants to set up a hotplug script to notify gpsd
+when a potential GPS device goes active and should be polled.  The
+goal is zero configuration; users should never have to tell gpsd how
+to configure itself.  If you can't use RPM, use what you see in the
+specfile as a model.
 
 CREDITS
 =======
