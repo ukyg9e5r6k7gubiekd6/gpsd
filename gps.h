@@ -1,5 +1,15 @@
 /* gps.h -- interface of the libgps library */
 
+#ifndef gps_h
+#  define gps_h 1
+
+/*
+ * Make sure we can call this stuff from C++.
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <time.h>
 
@@ -115,4 +125,10 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 
 #define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
 
+#ifdef __cplusplus
+}  /* End of the 'extern "C"' block */
+#endif
+
+#endif /* gps_h */
 /* gps.h ends here */
+
