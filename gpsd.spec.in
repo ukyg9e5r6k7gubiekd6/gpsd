@@ -124,8 +124,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 - gpsprobe now hunts through plausible baud rates when looking for NMEA
   data from a GPS. The -b (baudrate) option fixes a speed, disabling
   the baud-matching logic.  Also, gpsprobe can now recognize SiRF 
-  protocol, though not speak it.  Fixed a masth domain error in 
-  EarthDistance due to numeric blowup on points very close together.
+  protocol, though not speak it.  Fixed a math domain error in 
+  gps.EarthDistance due to numeric blowup on points very close together,
+  and another in gps.MeterOffset() that was screwing up gpsprobe plots.
 
 * Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.10
 - Add -N option to explicitly foreground the daemon.  Fixed a bug

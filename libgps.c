@@ -177,7 +177,8 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #ifdef PROFILING
 		if (!strcmp(sp, "Z+") || !strcmp(sp, "Z-"))
 		    break;
-		sscanf(sp, "Z=%lf:%d:%lf", 
+		sscanf(sp, "Z=%s:%lf:%d:%lf", 
+		       gpsdata->tag,
 		       &gpsdata->recv_time, 
 		       &gpsdata->sentence_length,
 		       &gpsdata->emit_time);

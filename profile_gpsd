@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Collect latency-profiling data from a running gpsd.
-# By default, turn it into a stacked-bar graph.
+# By default, turn it into a GNUPLOT graph.
 import sys, time, getopt, gps
 
 if __name__ == '__main__':
@@ -23,21 +23,28 @@ if __name__ == '__main__':
         sys.stdout.write('set key below\n')
         sys.stdout.write('set style fill\n')
         sys.stdout.write('set key title "%s"\n' % time.asctime())
-        sys.stdout.write('plot "-" using 2 with boxes title "GPS latency"\n')
+        sys.stdout.write('plot "-" using 0:2 title "Line latency", using 0:3 title "Decode time", using 0:4 title "TCP/IP latency"\n')
         sys.stdout.write("#\n")
 
-    print "#   GPS time     	Received	Transmitted 	Read"
+    print "#GPS time        	Received	Transmitted 	Read"
     print "#----------------	---------	----------- 	----------"
+    n = 1
     while await:
-        await -= 1
         session.poll()
         gps_time = gps.isotime(session.utc)
         recv_time = session.recv_time
         emit_time = session.emit_time
-        print "%.6f	%2.6f	%2.6f	%2.6f" \
+        # Throw out latencies above 1 second, these are
+        # serial-buffering artifacts at the start of the session
+        if (recv_time - gps_time) % 3600 > 1:
+            continue
+        print "%.6f	%2.6f	%2.6f	%2.6f	# %s" \
               % (gps_time,
                  (recv_time - gps_time) % 3600,
-                 emit_time - recv_time, time.time() - recv_time)
+                 (emit_time - gps_time) % 3600,
+                 (time.time() - gps_time) % 3600,
+                 session.tag)
+        await -= 1
     if graph:
         sys.stdout.write("end\n")
 

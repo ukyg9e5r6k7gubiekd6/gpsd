@@ -11,6 +11,7 @@ extern "C" {
 #include <time.h>
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
+#define MAXNAMELEN	6	/* maximum length of NMEA tag name */
 
 struct life_t {
 /* lifetime structure to be associated with some piece of data */
@@ -95,6 +96,7 @@ struct gps_data_t {
 
 #ifdef PROFILING
     /* profiling data */
+    char tag[MAXNAMELEN+1];
     double recv_time, emit_time;
     int sentence_length;	/* character count of associated sentence */
 #endif /* PROFILING */

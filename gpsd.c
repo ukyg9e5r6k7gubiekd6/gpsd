@@ -41,6 +41,7 @@ static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, nfds, go_background = 1, in_background = 0;
 #ifdef PROFILING
 static int sentence_length, profiling;
+static char namebuf[MAXNAMELEN+1];
 #endif /* PROFILING */
 
 static jmp_buf	restartbuf;
@@ -210,7 +211,8 @@ static int handle_request(int fd, char *buf, int buflen)
 		if (profiling) {
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
-		    sprintf(phrase+strlen(phrase), ",Z=%lf:%d:%ld.%ld",
+		    sprintf(phrase+strlen(phrase), ",Z=%s:%lf:%d:%ld.%ld",
+			    namebuf,
 			    ud->recv_time,
 			    sentence_length,
 			    tv.tv_sec, tv.tv_usec); 
@@ -383,6 +385,14 @@ static void raw_hook(char *sentence)
     int fd;
 
 #ifdef PROFILING
+    char *sp, *tp;
+    if (sentence[0] != '$')
+	namebuf[0] = '\0';
+    else {
+	for (tp = namebuf, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
+	    *tp = *sp;
+	*tp = '\0';
+    }
     sentence_length = strlen(sentence);	/* used when profiling */
 #endif /* PROFILING */
 
