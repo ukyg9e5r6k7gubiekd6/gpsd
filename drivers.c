@@ -177,6 +177,7 @@ struct gps_type_t tripmate =
 };
 
 
+#ifdef EARTHMATE_ENABLE
 /**************************************************************************
  *
  * EarthMate textual mode
@@ -203,6 +204,7 @@ struct gps_type_t earthmate_a =
     9600,			/* connecting at 4800 will fail */
     1,				/* updates every second */
 };
+#endif /* EARTHMATE_ENABLE */
 
 /**************************************************************************
  *
@@ -225,8 +227,10 @@ struct gps_type_t logfile =
 
 struct gps_type_t *gpsd_drivers[5] = {&nmea, 
 				   &tripmate,
+#ifdef EARTHMATE_ENABLE
 				   &earthmate_a, 
 				   &earthmate_b,
+#endif /* EARTHMATE_ENABLE */
 				   &logfile};
 
 

@@ -19,6 +19,7 @@
 #include "gps.h"
 #include "gpsd.h"
 
+#ifdef EARTHMATE_ENABLE
 #define PI 3.14159265358979323846
 
 enum {
@@ -597,3 +598,4 @@ struct gps_type_t earthmate_b =
     1,			/* updates every second */
 };
 
+#endif /* EARTHMATE_ENABLE */
