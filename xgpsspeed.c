@@ -4,11 +4,7 @@
  */
 #include "config.h"
 #include <unistd.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <getopt.h>
 #include <errno.h>
 
@@ -31,20 +27,15 @@
 extern double rint();
 #endif
 
-struct gps_data_t *gpsdata;
+static struct gps_data_t *gpsdata;
 
-static Widget toplevel, base;
-static Widget tacho, label;
+static Widget toplevel, base, tacho, label;
 
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
 };
-
-/*
- * Definition of the Application resources structure.
- */
 
 String fallback_resources[] =
 {
