@@ -266,6 +266,9 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
 	    session->gpsdata.fix.time = time_l;
+#ifdef NTPSHM_ENABLE
+	    ntpshm_put(session, session->gpsdata.fix.time);
+#endif 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
