@@ -1,0 +1,8 @@
+#!/bin/sh 
+#
+# Upload gpsd docs
+#
+xmlto xhtml-nochunks ../gpsd.xml
+xmlto xhtml-nochunks ../libgps.xml
+xmlto xhtml-nochunks ../libgpsd.xml
+scp * esr@shell.berlios.de:/home/groups/gpsd/htdocs

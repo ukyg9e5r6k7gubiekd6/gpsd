@@ -1,0 +1,3 @@
+This subdirectory contains the web pages for the berlios.de repository.
+
+To upload them after modifying , run "./upload'.  You must have xmlto installed.

@@ -1,3 +1,34 @@
+This is a list of NMEA 0183 sentences emitted by GPSes.
+It is originally from the gpsdrive distribution, but adds more
+information on the following topics:
+
+* Old and new forms of VTG
+* Units used in GGA
+* Vendor extensions PRWIZCH and PMGNST
+* FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
+
+Many of these are only emitted by high-end maritime navigation systems.
+Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.
+
+The best other resource on this topic seems to be 
+<http://www.gpsinformation.org/dale/nmea.htm>
+
+In NMEA 2.3, several sentencea (RMC, RMB, VTG, GLL; optionally, BWC, XTE)
+got a new last field carrying the signal integrity information needed by the
+FAA.  Here are the values:
+
+FAA Mode Indicator
+     *   A = Autonomous mode
+     *   D = Differential Mode
+     *   E = Estimated (dead-reckoning) mode
+     *   M = Manual Input Mode
+     *   S = Simulated Mode
+     *   N = Data Not Valid
+
+This field may be empty.  In pre-2.3 versions it is omitted.
+
+Here are the NMEA-standard sentences:
+
  AAM - Waypoint Arrival Alarm
 
         1 2 3   4 5    6
@@ -138,9 +169,9 @@
  BWC - Bearing and Distance to Waypoint
  Latitude, N/S, Longitude, E/W, UTC, Status
                                                        11
-        1         2       3 4        5 6   7 8   9 10  | 12   13
-        |         |       | |        | |   | |   | |   | |    |
- $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+        1         2       3 4        5 6   7 8   9 10  | 12   13 14
+        |         |       | |        | |   | |   | |   | |    |   |
+ $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c,m,*hh<CR><LF>
 
  Field Number: 
   1) UTCTime
@@ -155,7 +186,8 @@
  10) Nautical Miles
  11) N = Nautical Miles
  12) Waypoint ID
- 13) Checksum
+ 13) FAA mode indicator (NMEA 2.3 and later)
+ 14) Checksum
 
  BWR - Bearing and Distance to Waypoint - Rhumb Line
  Latitude, N/S, Longitude, E/W, UTC, Status
@@ -312,8 +344,8 @@
      1 - GPS fix,
      2 - Differential GPS fix
   7) Number of satellites in view, 00 - 12
-  8) Horizontal Dilution of precision
-  9) Antenna Altitude above/below mean-sea-level (geoid) 
+  8) Horizontal Dilution of precision (meters)
+  9) Antenna Altitude above/below mean-sea-level (geoid) (in meters)
  10) Units of antenna altitude, meters
  11) Geoidal separation, the difference between the WGS-84 earth
      ellipsoid and mean-sea-level (geoid), "-" means mean-sea-level
@@ -348,9 +380,9 @@
 
  GLL - Geographic Position - Latitude/Longitude
 
-	1       2 3        4 5         6 7
-	|       | |        | |         | |
- $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,A*hh<CR><LF>
+	1       2 3        4 5         6 7   8
+	|       | |        | |         | |   |
+ $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,a,m,*hh<CR><LF>
 
  Field Number: 
   1) Latitude
@@ -359,7 +391,8 @@
   4) E or W (East or West)
   5) Universal Time Coordinated (UTC)
   6) Status A - Data Valid, V - Data Invalid
-  7) Checksum
+  7) FAA mode indicator (NMEA 2.3 and later)
+  8) Checksum
 
  GSA - GPS DOP and active satellites
 
@@ -369,7 +402,7 @@
 
  Field Number: 
   1) Selection mode
-  2) Mode
+  2) Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
   3) ID of 1st satellite used for fix
   4) ID of 2nd satellite used for fix
   ...
@@ -391,7 +424,7 @@
   3) satellites in view
   4) satellite number
   5) elevation in degrees
-  6) azimuth in degrees to true
+  6) azimuth in degrees to true north
   7) SNR in dB
   more satellite infos like 4)-7)
   n) checksum
@@ -586,9 +619,9 @@
 
  RMB - Recommended Minimum Navigation Information
                                                              14
-        1 2   3 4    5    6       7 8        9 10  11  12  13|
-        | |   | |    |    |       | |        | |   |   |   | |
- $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A*hh<CR><LF>
+        1 2   3 4    5    6       7 8        9 10  11  12  13|  15
+        | |   | |    |    |       | |        | |   |   |   | |   |
+ $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A,m,*hh<CR><LF>
 
  Field Number: 
   1) Status, V = Navigation receiver warning
@@ -604,13 +637,15 @@
  11) Bearing to destination in degrees True
  12) Destination closing velocity in knots
  13) Arrival Status, A = Arrival Circle Entered
- 14) Checksum
+ 14) FAA mode indicator (NMEA 2.3 and later)
+ 15) Checksum
+
 
  RMC - Recommended Minimum Navigation Information
                                                             12
-        1         2 3       4 5        6 7   8   9    10  11|
-        |         | |       | |        | |   |   |    |   | |
- $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a*hh<CR><LF>
+        1         2 3       4 5        6 7   8   9    10  11|  13
+        |         | |       | |        | |   |   |    |   | |   |
+ $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a*,m,hh<CR><LF>
 
  Field Number: 
   1) UTC Time
@@ -624,7 +659,8 @@
   9) Date, ddmmyy
  10) Magnetic Variation, degrees
  11) E or W
- 12) Checksum
+ 12) FAA mode indicator (NMEA 2.3 and later)
+ 13) Checksum
 
  ROT - Rate Of Turn
 
@@ -835,9 +871,9 @@
 
  VTG - Track made good and Ground speed
 
-        1   2 3   4 5	 6 7   8 9
-        |   | |   | |	 | |   | |
- $--VTG,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
+        1   2 3   4 5	6 7   8 9   10
+        |   | |   | |	| |   | |   |
+ $--VTG,x.x,T,x.x,M,x.x,N,x.x,K,m,*hh<CR><LF>
 
  Field Number: 
   1) Track Degrees
@@ -848,7 +884,25 @@
   6) N = Knots
   7) Speed Kilometers Per Hour
   8) K = Kilometers Per Hour
-  9) Checksum
+  9) FAA mode indicator (NMEA 2.3 and later)
+  10) Checksum
+
+Note: in some older versions of NMEA 0183, the sentence looks like this:
+
+        1   2 3 4  5
+        |   | | |  |
+ $--VTG,x.x,x,x.x,*hh<CR><LF>
+
+ Field Number: 
+  1) True course over ground (degrees) 000 to 359
+  2) Magnetic course over ground 000 to 359
+  3) Speed over ground (knots) 00.0 to 99.9
+  4) Speed over ground (kilometers) 00.0 to 99.9
+  5) Checksum
+
+The two forms can be distinguished by field 2, which will be
+the fixed text 'T' in the newer form.  The new form appears
+to have been introduced with NMEA 3.01 in 2002.
 
  VWR - Relative Wind Speed and Angle
 
@@ -924,9 +978,9 @@
 
  XTE - Cross-Track Error, Measured
 
-        1 2 3   4 5  6
-        | | |   | |  |
- $--XTE,A,A,x.x,a,N,*hh<CR><LF>
+        1 2 3   4 5 6   7
+        | | |   | | |   |
+ $--XTE,A,A,x.x,a,N,m,*hh<CR><LF>
 
  Field Number: 
   1) Status
@@ -939,7 +993,8 @@
   3) Cross Track Error Magnitude
   4) Direction to steer, L or R
   5) Cross Track Units, N = Nautical Miles
-  6) Checksum
+  6) FAA mode indicator (NMEA 2.3 and later)
+  7) Checksum
 
  XTR - Cross Track Error - Dead Reckoning
 
@@ -995,7 +1050,7 @@
 
 ****************************************************************
 
-New found in web: (data fields unknown)
+Found on the web: (data fields unknown)
 
 DSC - Digital Selective Calling Information
 DSE - Extended DSC
@@ -1012,3 +1067,30 @@ TLL - Target Latitude and Longitude
 WDC - Distance to Waypoint - Great Circle
 WDR - Distance to Waypoint - Rhumb Line
 ZDL - Time and Distance to Variable Point
+
+****************************************************************
+
+Vendor extensions:
+
+          1   2 3  4    5    6  7    8
+          |   | |  |    |    |  |    |
+$PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c*hh<CR><LF>
+
+ Field Number: 
+  1) Firmware version number?
+  2) Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
+  3) T if we have a fix
+  4) numbers change - unknown
+  5) time left on the GPS battery in hours
+  6) numbers change (freq. compensation?)
+  7) PRN number receiving current focus
+  8) nmea_checksum
+
+ Only supported on Magellan GPSes.
+
+ $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
+
+ Fields consist of 12 pairs of a satellite PRN followed by a 
+ signal quality number in the range 0-7.
+
+ Only emitted by the Zodiac (Rockwell) chipset.
