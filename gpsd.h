@@ -137,6 +137,7 @@ extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
 extern int packet_sniff(struct gps_session_t *pstate);
 extern int packet_get_nmea(struct gps_session_t *pstate);
+extern int packet_get_sirf(struct gps_session_t *pstate);
 extern void packet_accept(struct gps_session_t *pstate);
 extern int gpsd_open(struct gps_session_t *context);
 extern int gpsd_switch_driver(struct gps_session_t *session, char type);
@@ -144,6 +145,7 @@ extern int gpsd_set_speed(struct gps_session_t *session,
 			  unsigned int speed, unsigned int stopbits);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_session_t *context);
+extern void gpsd_zero_satellites(struct gps_data_t *out);
 extern void gpsd_binary_fix_dump(struct gps_session_t *session, char *buf);
 extern void gpsd_binary_satellite_dump(struct gps_session_t *session, char *buf);
 extern void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp);

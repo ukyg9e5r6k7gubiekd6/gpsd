@@ -65,6 +65,8 @@ struct gps_data_t {
     struct life_t speed_stamp;
     double track;		/* Course made good (relative to true north) */
     struct life_t track_stamp;
+    double climb;
+    struct life_t climb_stamp;
 
     /* status of fix */
     int    status;		/* Do we have a fix? */

@@ -126,6 +126,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		gpsdata->track = d1;
 		REFRESH(gpsdata->track_stamp);
 		break;
+	    case 'U':
+		sscanf(sp, "F=%lf", &gpsdata->climb);
+		gpsdata->climb_stamp.changed = (gpsdata->climb != d1);
+		gpsdata->climb = d1;
+		REFRESH(gpsdata->climb_stamp);
+		break;
 	    case 'V':
 		sscanf(sp, "V=%lf", &d1);
 		gpsdata->speed_stamp.changed = (gpsdata->speed != d1);
@@ -208,6 +214,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     return gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
+	|| gpsdata->climb_stamp.changed 
 	|| gpsdata->speed_stamp.changed 
 	|| gpsdata->track_stamp.changed 
 	|| gpsdata->status_stamp.changed 

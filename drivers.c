@@ -123,7 +123,7 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
 }
 
 struct gps_type_t sirfII = {
-    's', 		/* select explicitly with -T s */
+    '\0', 		/* selected implicitly */
     "SiRF-II NMEA",	/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirf_initializer,		/* no initialization */
@@ -250,7 +250,7 @@ struct gps_type_t logfile = {
 };
 #endif /* LOGFILE_ENABLE */
 
-extern struct gps_type_t garmin_binary;
+extern struct gps_type_t garmin_binary, sirf_binary;
 
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
@@ -270,6 +270,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ZODIAC_ENABLE
     &garmin_binary,
 #endif /* ZODIAC_ENABLE */
+    &sirf_binary,
 #ifdef LOGFILE_ENABLE
     &logfile,
 #endif /* LOGFILE_ENABLE */

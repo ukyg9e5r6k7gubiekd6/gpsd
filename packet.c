@@ -235,7 +235,7 @@ int packet_sniff(struct gps_session_t *session)
 	}
 
 MAKE_PACKET_GRABBER(packet_get_nmea, get_nmea, NMEA_MAX * 3)
-// MAKE_PACKET_GRABBER(packet_get_sirf, get_sirf, MAX_PACKET_LENGTH)
+MAKE_PACKET_GRABBER(packet_get_sirf, get_sirf, MAX_PACKET_LENGTH)
 // MAKE_PACKET_GRABBER(packet_get_zodiac, get_zodiac, MAX_PACKET_LENGTH)
 
 #ifdef TESTMAIN

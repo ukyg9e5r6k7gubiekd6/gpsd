@@ -92,11 +92,6 @@ int gpsd_activate(struct gps_session_t *session)
     if (gpsd_open(session) < 0)
 	return -1;
     else {
-	if (session->packet_type == SIRF_PACKET) {
-	    packet_accept(session);
-	    gpsd_report(1, "switching to NMEA mode\n");
-	    sirf_to_nmea(session->gNMEAdata.gps_fd, session->gNMEAdata.baudrate);
-	}
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
@@ -213,6 +208,15 @@ void gpsd_wrap(struct gps_session_t *session)
 	close(session->dsock);
 }
 
+void gpsd_zero_satellites(struct gps_data_t *out)
+{
+    memset(out->PRN,       '\0', sizeof(out->PRN));
+    memset(out->elevation, '\0', sizeof(out->elevation));
+    memset(out->azimuth,   '\0', sizeof(out->azimuth));
+    memset(out->ss,        '\0', sizeof(out->ss));
+    out->satellites = 0;
+}
+
 #ifdef BINARY_ENABLE
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
@@ -301,16 +305,13 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 		    session->gNMEAdata.satellites);
 	}
 	bufp += strlen(bufp);
-	if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
+	if (i < session->gNMEAdata.satellites)
 	    sprintf(bufp, ",%02d,%02d,%03d,%02d", 
 		    session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.elevation[i], 
 		    session->gNMEAdata.azimuth[i], 
 		    session->gNMEAdata.ss[i]);
-	else
-	    sprintf(bufp, ",%02d,00,000,%02d", session->gNMEAdata.PRN[i],
-		    session->gNMEAdata.ss[i]);
-	if (i % 4 == 3) {
+	if (i % 4 == 3 || i == session->gNMEAdata.satellites-1) {
 	    nmea_add_checksum(bufp2);
 	    if (session->gNMEAdata.raw_hook) {
 		session->gNMEAdata.raw_hook(bufp2);

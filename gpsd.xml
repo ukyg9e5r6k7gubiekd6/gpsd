@@ -283,8 +283,14 @@ raw mode.</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>u</term>
+<listitem><para>Current rate of climb as "V=%f" in meters per second.
+Some GPses (non-Sirf-II based) do not report this.</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>v</term>
-<listitem><para>The current speed as "V=%f" in knots.</para></listitem>
+<listitem><para>The current speed over ground as "V=%f" in knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>

@@ -415,13 +415,7 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     if (sscanf(field[2], "%d", &out->part) < 1)
         return;
     else if (out->part == 1)
-    {
-	memset(out->PRN,       '\0', sizeof(out->PRN));
-	memset(out->elevation, '\0', sizeof(out->elevation));
-	memset(out->azimuth,   '\0', sizeof(out->azimuth));
-	memset(out->ss,        '\0', sizeof(out->ss));
-	out->satellites = 0;
-    }
+	gpsd_zero_satellites(out);
 
     for (fldnum = 4; fldnum < count; out->satellites++) {
 	out->PRN[out->satellites] = atoi(field[fldnum++]);

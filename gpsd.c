@@ -303,6 +303,12 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(phrase, ",T=%f", ud->track);
 	    break;
+	case 'U':
+	    if (!validate())
+		strcpy(phrase, ",F=?");
+	    else
+		sprintf(phrase, ",F=%f", ud->climb);
+	    break;
 	case 'V':
 	    if (!validate())
 		strcpy(phrase, ",V=?");

@@ -6,6 +6,7 @@
 #define DGPS_SOURCE_WAAS     3
 
 int sirf_to_nmea(int, int);
+int sirf_speed(int, int);
 int sirf_reset(int);
 int sirf_dgps_source(int, int);
 int sirf_nav_lib(int, int);
