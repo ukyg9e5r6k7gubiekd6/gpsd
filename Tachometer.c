@@ -4,6 +4,7 @@
  * Author: Kazuhiko Shutoh, 1989.
  * Revised by Shinji Sumimoto, 1989/9 (xtachos)
  * Modifications : ilham@mit.edu   (July 10 '90)
+ * Cleaned up and simplified by Eric S. Raymond, December 2004.
  *
  * Permission to use, copy, modify and distribute without charge this software,
  * documentation, images, etc. is granted, provided that this comment and the

@@ -123,7 +123,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 - Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
   in udev scriptlets.  Clean up after GCC warning messages.  Drop use of 
   vsprintf, so we get a link-time error on systems that might produce 
-  buffer overruns.
+  buffer overruns (all modern Unixes support vsnsprintf which is safe).
 
 * Thu Dec 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.5.1
 - Use gmtime instead of localtime when guessing the day or year of a date;
