@@ -34,7 +34,7 @@ gpsd_LDADD = $(LIBM) libgps.la
 
 
 #
-# Build shared libgps
+# Build shared library
 #
 libgps_la_LDFLAGS = -version-number 1:0:0
 lib_LTLIBRARIES = libgps.la
@@ -106,3 +106,6 @@ EXTRA_DIST = \
 	gpsd.py \
 	gpsprobe
 
+# This is not distributed
+libgps: libgps.c .libs/libgps.a
+	$(CC) -o libgps -DTESTMAIN libgps.c .libs/libgps.a

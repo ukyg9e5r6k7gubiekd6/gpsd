@@ -3,10 +3,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
-#include <gps.h>
-#include <gpsd.h>
+#include "gps.h"
+#include "gpsd.h"
 
 struct gps_data_t *gps_open(char *host, char *port)
 /* open a connection to a gpsd daemon */
@@ -20,7 +19,7 @@ struct gps_data_t *gps_open(char *host, char *port)
     if (!host)
 	host = "localhost";
     if (!port)
-	port = "2947";
+	port = DEFAULT_GPSD_PORT;
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0)
 	return NULL;
@@ -224,27 +223,13 @@ int gps_query(struct gps_data_t *gpsdata, char *requests)
     return gps_poll(gpsdata);
 }
 
-void gpscli_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-
-    fputs(buf, stderr);
-}
-
 #ifdef TESTMAIN
 /*
  * A simple command-line exerciser for the library.
+ * Not meant to be installed in system directories,
+ * as it isn't really useful for anything but debugging.
+ * Build with:
+ *    cc -o libgps -DTESTMAIN libgps.c .libs/libgps.a
  */
 
 void data_dump(struct gps_data_t *collect, time_t now)
@@ -329,20 +314,19 @@ static void dumpline(char *buf)
 
 main(int argc, char *argv[])
 {
-    struct gps_data_t collect;
-    int fd;
+    struct gps_data_t *collect;
     char buf[BUFSIZE];
 
     memset(&collect, '\0', sizeof(collect));
-    fd = gps_open(&collect, NULL, 0);
+    collect = gps_open(NULL, 0);
 
-    gps_set_raw_hook(&collect, dumpline);
+    gps_set_raw_hook(collect, dumpline);
     if (argc > 1)
     {
 	strcpy(buf, argv[1]);
 	strcat(buf,"\n");
-	gps_query(fd, &collect, buf);
-	data_dump(&collect, time(NULL));
+	gps_query(collect, buf);
+	data_dump(collect, time(NULL));
     }
     else
     {
@@ -360,13 +344,13 @@ main(int argc, char *argv[])
 		    putchar('\n');
 		break;
 	    }
-	    if (!gps_query(fd, &collect, buf))
+	    if (!gps_query(collect, buf))
 		fputs("No changes.\n", stdout);
-	    data_dump(&collect, time(NULL));
+	    data_dump(collect, time(NULL));
 	}
     }
 
-    gps_close(fd);
+    gps_close(collect);
 }
 
 #endif /* TESTMAIN */
