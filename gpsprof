@@ -35,6 +35,26 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+class uninstrumented:
+    "Total times wihout instrumentation, ignoring timezone skew."
+    name = "uninstrumented"
+    def header(self, fp):
+        fp.write("#Read\n")
+        fp.write("----------\n")
+    def formatter(self, session, fp):
+        fp.write("%2.6f\n" % ((time.time() - session.gps_time) % 3600,))
+        return True
+    def plot(self, file, title, session):
+        fmt = '''
+set autoscale
+set key below
+set key title "Uninstrumented total latency, %s, %dN%d, cycle %ds"
+plot "%s" using 0:1 title "Total time" with impulses
+'''
+        return fmt % (title,
+                      session.baudrate, session.stopbits, session.cycle,
+                      file)
+
 class rawplot:
     "Print basic data, ignoring timezone skew."
     name = "raw"
@@ -117,7 +137,7 @@ plot \\
                        (file, i+1, splitplot.sentences[i])
         return fmt[:-4] + "\n"
 
-formatters = (rawplot, splitplot)
+formatters = (rawplot, splitplot, uninstrumented)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rs:t:T:")
@@ -170,7 +190,9 @@ if __name__ == '__main__':
             session.query("b=%d" % speed)
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
-        session.query("w+z+bc")
+        session.query("w+bc")
+        if formatter != uninstrumented:
+            session.query("z+")
         #session.set_raw_hook(lambda x: sys.stdout.write(x))
         plotter.header(out)
         baton = Baton("gpsprof: gathering samples")

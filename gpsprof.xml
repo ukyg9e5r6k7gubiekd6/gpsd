@@ -67,6 +67,13 @@ than 1 second are discarded.  Each sentence has its RS232 latency
 time colored differently.  This is the default.</para>
 </listitem>
 </varlistentry>
+<varlistentry>
+<term>uninstrumented</term>
+<listitem>
+<para>Plot total latency without instrumentation.  Useful mainly as a
+check that the instrumentation is not producing significant distortion.</para>
+</listitem>
+</varlistentry>
 </variablelist>
 
 <para>Each plot conveys the following information:</para>
