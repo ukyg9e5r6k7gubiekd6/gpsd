@@ -569,7 +569,7 @@ static int garmin_probe(struct gps_session_t *session)
     FILE *fp;
     int i;
 
-    gpsd_report(1, "garmin_init\n");
+    gpsd_report(1, "garmin_probe\n");
 
     // check for USB serial drivers
     // very Linux specific
@@ -580,7 +580,9 @@ static int garmin_probe(struct gps_session_t *session)
     } else {
         // try to find garmin_gps driver
 	while ( fgets( buffer, sizeof(buffer), fp) ) {
-		if ( strstr( buffer, "garmin_gps") ) {
+		// early garmin driver: garmin_gps
+	        // later garmin driver: Garmin USB/TTY
+		if ( strcasestr( buffer, "garmin") ) {
 			// yes, the garmin_gps driver is active
 			ok = 1;
 			break;
