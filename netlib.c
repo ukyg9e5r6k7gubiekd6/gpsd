@@ -57,20 +57,20 @@ int passivesock(char *service, char *protocol, int qlen)
     s = socket(PF_INET, type, ppe->p_proto);
     if (s < 0)
     {
-	gpscli_report(0, "Can't create socket:");
+	gpscli_report(0, "Can't create socket\n");
 	return -1;
     }
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
-	gpscli_report(0, mbuf, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
+	gpscli_report(0, mbuf, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	gpscli_report(1, "Can't bind to port %s", service);
+	gpscli_report(1, "Can't bind to port %s\n", service);
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	gpscli_report(0, "Can't listen on %s port:", service);
+	gpscli_report(0, "Can't listen on %s port%s\n", service);
 	return -1;
     }
     return s;
