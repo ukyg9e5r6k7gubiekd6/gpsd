@@ -366,8 +366,20 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'I':
 	    sprintf(phrase, ",I=%s", device->device_type->typename);
 	    break;
+#ifdef MULTISESSION
+	case 'K':
+	    /* FIXME: K= form not yet supported */
+	    strcpy(phrase, ",K=");
+	    for (i = 0; i < MAXDEVICES; i++) 
+		if (channels[i].device) {
+		    strcat(phrase, device->gpsd_device);
+		    strcat(phrase, " ");
+		}
+	    phrase[strlen(phrase)-1] = '\0';
+	    break
+#endif /* MULTISESSION */
 	case 'L':
-	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjko
+	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjk
 	    break;
 	case 'M':
 	    if (ud->fix.mode == MODE_NOT_SEEN)
