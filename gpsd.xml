@@ -446,21 +446,28 @@ confused state but can be soft-reset by pulling down DTR.</para>
 </refsect1>
 <refsect1 id='ntp'><title>USE WITH NTP</title> 
 
+<para>gpsd can provide reference clock information to ntpd, to keep the system
+clock synchronized to the time provided by the GPS receiver.  This is an
+experimental feature, currently only working with SiRF-II binary mode.
+making it work with other GPSes that report subsecond time resolution
+may come later.</para>
+
+<para>To use the time information, you first need to install and
+configure xntp as usual.  The package manager and system
+administration tools of the distribution you use may provide some
+assistance with this.</para>
+
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
 and sends it to a shared-memory segment with an ID known to
 <application>ntpd</application>, the network time synchronization
 daemon.  If <application>ntpd</application> has been properly
 configured to receive this message, it will be used to correct the
-system clock.  Note that because GPS clocks only return 0.01sec
-resolution, <application>ntpd</application> is unlikely to use this
-cue unless your system is off-net.  Furthermore, note that this
-feature is experimental and currently operates with SiRF GPSes only;
-making it work with other GPSes that report subsecond time resolution
-may come later.</para>
+system clock.</para>
 
 <para>Here is a sample <filename>ntp.conf</filename> configuration
-stanza telling <application>ntpd</application> how to read the GPS notfications:</para>
+stanza telling <application>ntpd</application> how to read the GPS
+notfications:</para>
 
 <programlisting>
 server 127.127.28.0 minpoll 4 maxpoll 4
@@ -471,9 +478,35 @@ fudge 127.127.28.0 refid GPS
 the <application>ntpd</application> shared-memory driver, which is
 what <application>gpsd</application> writes to.  With this
 configuration, <application>ntpd</application> will read the timestamp
-posted by <application>gpsd</application> every 16 seconds;
-<command>ntpq -p</command> should show the time difference when it is
-not very large.</para>
+posted by <application>gpsd</application> every 16 seconds.</para>
+
+<para>After restarting ntpd, a line similar to the one below should
+appear in the output of the command "ntpq -p" (after allowing a couple
+of minutes):</para>
+
+<screen> 
+remote           refid      st t when poll reach  delay    offset  jitter
+=========================================================================
++SHM(0)          .GPS.      0 l   13   16  377    0.000    0.885   0.882
+</screen>
+
+<para>When the value under "reach" remains zero, check that gpsd is running and
+some application is connected to it.  Make sure the receiver is locked on
+to at least one satellite, and the receiver is in SiRF-II binary mode.
+When the SHM(0) line does not appear at all, check the system logs for error
+messages from ntpd.</para>
+ 
+<para>When no other reference clocks appear in the NTP configuration,
+the system clock will lock onto the GPS clock.  Because GPS clocks
+only return 0.01sec resolution, <application>ntpd</application> is
+unlikely to use this cue unless your system is off-net. When you have
+previously used <application>ntpd</application>, and other reference
+clocks appear in your configuration, there may be a fixed offset
+between the GPS clock and other clocks.  The
+<application>gpsd</application> developers would like to receive
+information about the offsets observed by users for each type of
+receiver.  Please send us the output of the "ntpq -p" command and the
+make and type of receiver.</para>
 
 </refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 

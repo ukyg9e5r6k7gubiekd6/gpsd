@@ -40,6 +40,7 @@ struct shmTime {
     int    precision;
     int    nsamples;
     int    valid;
+    int    pad[10];
 };
 
 static struct shmTime *getShmTime(int unit)
