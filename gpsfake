@@ -53,29 +53,43 @@ else:
 
 try:
     logfp = open(logfile, "r")
-    lines = logfp.readlines()
-    logfp.close()
+    firstchar = logfp.read(1)
+    if firstchar == '$':
+        print "gpsfake: interpreting as NMEA"
+        lines = logfp.readlines()
+        logfp.close()
+        lines[0] = "$" + lines[0]
+        legend = "gpsfake: line %d"
+    elif firstchar == 0xa0:
+        print "gpsfake: interpreting as SiRF-II binary packets"
+        lines = map(lambda x: "\xa0"+x, logfp.read().split("\xa0"))
+        lines[0] = "\xa0" + lines[0]
+        legend = "gpsfake: packet %d"
+    else:
+        print "gpsfake: unknown log type, can't handle it!"
+        lines = None
 
-    ttyfp = open(slave, "rw")
-    raw = termios.tcgetattr(ttyfp.fileno())
-    raw[0] = 0					# iflag
-    raw[1] = termios.ONLCR				# oflag
-    raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-    raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
-    raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
-    raw[3] = 0					# lflag
-    raw[4] = raw[5] = eval("termios.B" + `speed`)
-    termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+    if lines:
+        ttyfp = open(slave, "rw")
+        raw = termios.tcgetattr(ttyfp.fileno())
+        raw[0] = 0					# iflag
+        raw[1] = termios.ONLCR				# oflag
+        raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
+        raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+        raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+        raw[3] = 0					# lflag
+        raw[4] = raw[5] = eval("termios.B" + `speed`)
+        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 
-    i = 0;
-    while True:
-        if i % len(lines) == 0:
-            print "gpsfake: log cycle begins"
-        time.sleep(cycle)
-        if linedump:
-            print "gpsfake: line %d" % (i % len(lines) + 1)
-        os.write(master_fd, lines[i % len(lines)])
-        i += 1
+        i = 0;
+        while True:
+            if i % len(lines) == 0:
+                print "gpsfake: log cycle begins"
+            time.sleep(cycle)
+            if linedump:
+                print legend % (i % len(lines) + 1)
+            os.write(master_fd, lines[i % len(lines)])
+            i += 1
 finally:
     if spawn:
         os.kill(pid, signal.SIGTERM)

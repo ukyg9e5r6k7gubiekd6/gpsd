@@ -33,15 +33,11 @@
 (pseudo-TTY), launches a <application>gpsd</application> instance that
 thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of a test logfile through the master side to the
-GPS.</para>
+GPS.  The logfile may be of either NMEA sentences or SiRF-II packets.</para>
 
 <para>The <application>gpsd</application> instance is run in
 background, but with logging to standard error attached so you 
 will see the messages.</para>
-
-<para>Because of the baud-rate hunting logic, the first sentence in
-the file will not necessarily be the first presented to the sentence 
-parser.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -49,8 +45,8 @@ parser.</para>
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>
 
-<para>The -l option maes the program dump a line number just before
-each sentence is fed to the daemon.</para>
+<para>The -l option maes the program dump a line or packet number just
+before each sentence is fed to the daemon.</para>
 
 <para>The -n option suppresses launch of the daemon.  Instead,
 <application>gpsfake</application> will tell you the name of the slave
@@ -65,8 +61,9 @@ default is 4800.</para>
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>
 
-<para>The argument must be the name of a file containing the text of
-NMEA sentences to be cycled at the device.</para>
+<para>The argument must be the name of a file containing the 
+data to be cycled at the device. <application>gpsfake</application> 
+will print a notification each time it cycles.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

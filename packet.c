@@ -321,7 +321,7 @@ static void packet_copy(struct gps_session_t *session)
 }
 
 static void packet_discard(struct gps_session_t *session)
-/* packet grab failed, shift the input buffer to discard old data */ 
+/* shift the input buffer to discard old data */ 
 {
     int remaining = session->inbuffer + session->inbuflen - session->inbufptr;
 #ifndef TESTMAIN
@@ -443,6 +443,17 @@ int packet_sniff(struct gps_session_t *session)
 	if (ioctl(session->gNMEAdata.gps_fd, FIONREAD, &count) < 0)
 	    return BAD_PACKET;
 	if (count && packet_get(session, count)) {
+	    /* push back the last packet grabbed */
+	    if (session->outbuflen + session->inbuflen < MAX_PACKET_LENGTH) {
+		memmove(session->inbuffer+session->outbuflen,
+			session->inbuffer,
+			session->inbuflen);
+		memmove(session->inbuffer,
+			session->outbuffer,
+			session->outbuflen);
+		session->inbuflen += session->outbuflen;
+		session->outbuflen = 0;
+	    }
 	    gpsd_report(5, "packet_sniff ends\n");
 	    return session->packet_type;
 	}
