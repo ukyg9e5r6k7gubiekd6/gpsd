@@ -10,6 +10,11 @@
 #include <paths.h>
 #include <string.h>
 
+#if defined (HAVE_STRINGS_H)
+#include <strings.h>
+#endif
+
+
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
 #else
