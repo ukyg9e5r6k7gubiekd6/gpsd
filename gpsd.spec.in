@@ -106,7 +106,10 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Tue Aug 31 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
+* Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-2
+  Removed PRWIZCH support (it still passes through in raw mode).
+
+* Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
   are now in ISO8601 format, with sub-second precision if the GPS
@@ -115,22 +118,22 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
   Automake-based build machinery from Jens Oberender; RPM now
   installs shared libraries.  FV18 driver added. Offline timer in GPS.
 
-* Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
+* Wed Aug 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 
   are in there now.
 
-* Tue Aug 24 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.94-1
+* Tue Aug 24 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.94-1
 - Fix embarrassing bug -- watcher mode did not work for more than one
   client at a time.  Y command now carries information about which 
   satellites were used in the last fix.  New timeout mechanism, no
   longer dependent on FIONREAD.
 
-* Mon Aug 23 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.93-1
+* Mon Aug 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.93-1
 - Fourth prerelease. Daemon-side timeouts are gone, they complicated
   the interface without adding anything.  Command responses now 
   contain ? to tag invalid data. -D2 feature of 1.92 backed out.
 
-* Sun Aug 22 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.92-1
+* Sun Aug 22 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.92-1
 - Third prerelease.  Clients in watcher mode now get notified when
   the GPS goes online or offline.  Major name changes -- old libgps
   is new libgpsd and vice-versa (so the high-level interface is more
