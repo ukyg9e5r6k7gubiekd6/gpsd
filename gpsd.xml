@@ -220,17 +220,23 @@ their communication format translated to NMEA on the fly.)</para></listitem>
 watcher mode gpsd ships a line of data to the client each time the the GPS
 sends a sentence, but rather than being raw NMEA the line is a gpsd
 response as if the user had just sent some set of gpsd commands.  That set of
-commands is the minimum for which the incoming sentence is relevant &mdash;
-e.g., a GPRMC sentence ships a "pvs" response because it contains
-position, velocity and GPS status data.
+commands is the minimum for which the incoming sentence is relevant,
+plus 'x' &mdash; e.g., a GPRMC sentence ships a "xpvs" response
+because it contains position, velocity and GPS status data.
 </para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>x</term>
+<listitem><para>Returns "X=1" if the GPS is online, "X=0" if
+not.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>y</term> 
 <listitem>
 <para>Returns Y= followed by a count not more than 12, followed by
-that many quadrples of satellite PRNs, elevation/azimuth pairs
+that many quadruples of satellite PRNs, elevation/azimuth pairs
 (elevation an integer formatted as %d in range 0-90, azimuth an
 integer formatted as %d in range 0-359), and signal strengths in
 decibels. Each number is followed by one space.</para>

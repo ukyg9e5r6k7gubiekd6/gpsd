@@ -109,6 +109,12 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 	    gpsdata->speed = d1;
 	    REFRESH(gpsdata->speed_stamp);
 	    break;
+	case 'X':
+	    if (!strncmp(sp, "X=1", 3))
+		gpsdata->online = 1;
+	    else if (!strncmp(sp, "X=0", 3))
+		gpsdata->online = 0;
+	    break;
 	case 'Y':
 	    i1 = atoi(sp+2);
 	    gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);

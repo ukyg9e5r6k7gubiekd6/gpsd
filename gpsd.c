@@ -203,15 +203,6 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Altitude", altitude_stamp);
 	    break;
-#if 0	/* we're trying to discourage raw mode */
-        case 'C':
-        case 'c':
-            if (FD_ISSET(fd, fds))
-                FD_CLR(fd, fds);
-            sprintf(reply + strlen(reply),
-                         " ,R=0");
-            break;
-#endif
 	case 'D':
 	case 'd':
 	    sprintf(reply + strlen(reply),
@@ -309,15 +300,13 @@ static int handle_request(int fd, char *buf, int buflen)
 			",W=1");
 	    }
 	    break;
-#if 0	/* we're trying to discourage raw mode */
         case 'X':
         case 'x':
-            if (!FD_ISSET(fd, fds))
-                FD_SET(fd, fds);
-             sprintf(reply + strlen(reply),
-                         " ,R=1");
-            break;
-#endif
+	    if (session.fdin == -1)
+		strcat(reply, ",X=0");
+	    else
+		strcat(reply, ",X=1");
+	    break;
 	case 'Y':
 	case 'y':
 	    sc = 0;
@@ -396,22 +385,22 @@ static void raw_hook(char *sentence)
 	    ++sentence;
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "ptvs");
+		ok = PUBLISH(fd, "xptvs");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "sa");	
+		ok = PUBLISH(fd, "xsa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "p");
+		ok = PUBLISH(fd, "xp");
 	    } else if (strncmp(PMGNST, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "sm");
+		ok = PUBLISH(fd, "xsm");
 	    } else if (strncmp(GPVTG, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "tv");
+		ok = PUBLISH(fd, "xtv");
 	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "qm");
+		ok = PUBLISH(fd, "xqm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "y");
+		ok = PUBLISH(fd, "xy");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
-		ok = PUBLISH(fd, "z");
+		ok = PUBLISH(fd, "xz");
 #endif /* PROCESS_PRWIZCH */
 	    }
 #undef PUBLISH

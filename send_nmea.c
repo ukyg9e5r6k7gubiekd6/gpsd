@@ -84,14 +84,15 @@ void gps_init(struct gpsd_t *session, int timeout, char devicetype, char *dgpsse
 void gps_deactivate(struct gpsd_t *session)
 /* temporarily release the GPS device */
 {
+    session->gNMEAdata.online = 0;
+    session->gNMEAdata.mode = MODE_NO_FIX;
+    session->gNMEAdata.status = STATUS_NO_FIX;
     session->fdin = -1;
     session->fdout = -1;
     gps_close();
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
     gpscli_report(1, "closed GPS\n");
-    session->gNMEAdata.mode = MODE_NO_FIX;
-    session->gNMEAdata.status = STATUS_NO_FIX;
 }
 
 int gps_activate(struct gpsd_t *session)
@@ -103,9 +104,10 @@ int gps_activate(struct gpsd_t *session)
 	return -1;
     else
     {
-	gpscli_report(1, "gps_activate: opened GPS (%d)\n", input);
+	session->gNMEAdata.online = 1;
 	session->fdin = input;
 	session->fdout = input;
+	gpscli_report(1, "gps_activate: opened GPS (%d)\n", input);
 	return input;
     }
 }
@@ -144,8 +146,13 @@ int gps_poll(struct gpsd_t *session)
     waiting = is_input_waiting(session->fdin);
     gpscli_report(4, "GPS has %d chars waiting\n", waiting);
     if (waiting <= 0)
+    {
+	session->gNMEAdata.online = 0;
 	return waiting;
+    }
     else if (waiting) {
+	session->gNMEAdata.online = 1;
+
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
 
