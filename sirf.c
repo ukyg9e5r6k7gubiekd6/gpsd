@@ -15,9 +15,6 @@
 #include "gpsd.h"
 #include "sirf.h"
 
-#ifdef __UNUSED__
-/* These require binary mode */
-
 #define HI(n)	((n) >> 8)
 #define LO(n)	((n) & 0xff)
 
@@ -38,20 +35,6 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
    msg[len + 5] = (u_int8_t)( crc & 0x00ff);
 
    return(crc);
-}
-
-int sirf_waas_ctrl(int ttyfd, int enable) 
-/* enable or disable WAAS */
-{
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x07,
-                     0x85, 0x00,
-                     0x00, 0x00, 0x00, 0x00,
-                     0x00,
-                     0x00, 0x00, 0xb0, 0xb3};
-
-   msg[5] = (u_int8_t)enable;
-   crc_sirf(msg);
-   return (write(ttyfd, msg, 15) != 15);
 }
 
 
@@ -75,6 +58,22 @@ int sirf_to_nmea(int ttyfd, int speed)
    msg[27] = LO(speed);
    crc_sirf(msg);
    return (write(ttyfd, msg, 0x18+8) != 0x18+8);
+}
+
+
+#ifdef __UNUSED__
+int sirf_waas_ctrl(int ttyfd, int enable) 
+/* enable or disable WAAS */
+{
+   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x07,
+                     0x85, 0x00,
+                     0x00, 0x00, 0x00, 0x00,
+                     0x00,
+                     0x00, 0x00, 0xb0, 0xb3};
+
+   msg[5] = (u_int8_t)enable;
+   crc_sirf(msg);
+   return (write(ttyfd, msg, 15) != 15);
 }
 
 

@@ -8,6 +8,7 @@
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
 #include "gpsd.h"
+#include "sirf.h"
 /* Workaround for HP-UX 11.23, which is missing CRTSCTS */
 #ifndef CRTSCTS
 #  ifdef CNEW_RTSCTS
@@ -38,7 +39,7 @@ static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
 int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 {
-    unsigned int	rate, ok;
+    unsigned int	rate;
 
     if (speed < 300)
 	rate = 0;
@@ -68,9 +69,19 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
     }
 
-    if ((ok = (packet_sniff(session) == NMEA_PACKET)))
+    switch(packet_sniff(session)) {
+    case NMEA_PACKET:
 	session->gNMEAdata.baudrate = speed;
-    return ok;
+	return 1;
+    case SIRF_PACKET:
+	packet_discard(session);
+	gpsd_report(1, "switching to NMEA mode\n");
+	sirf_to_nmea(session->gNMEAdata.gps_fd, speed);
+	session->gNMEAdata.baudrate = speed;
+	return 1;
+    }
+
+    return 0;
 }
 
 int gpsd_open(struct gps_session_t *session)
