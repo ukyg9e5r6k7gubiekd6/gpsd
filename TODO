@@ -1,7 +1,3 @@
-* Integrate M8 support to whatever extent needed.
-
-See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
-
 * Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *three* kinds of validity bits.  Mode, status, and the
@@ -35,8 +31,8 @@ relationships are there?
 
 * Mine the contrib directory for good ideas
 
-This is a post-2.0 item.  There is code in there that can do some interesting
-tricks with SiRF-II chipsets.  Lonnie Mendez is working on this.
+There is code in there that can do some interesting tricks with
+SiRF-II chipsets.  Lonnie Mendez is working on this.
 
 * gpsd.py is unsatisfactory
 
@@ -45,8 +41,12 @@ Python extension built around libgps.a.
 
 * Autodetect USB GPS by scanning the USB bus, if no device is specified.
 
-This is a long-term wishlist item.  It's going to be difficult, since there
-is no GPS device class yet.  Here are some IDs:
+Integrate Lonnie Mendez's USB-discovery code to do this. Here are some IDs:
 
 BU-303          	0x067b:0x2303	This IDs itself as a serial port
 DeLorme Earthmate	0x1163:0x0100	This IDs itself as a HIDDEV.
+
+* Integrate M8 support to whatever extent needed.
+
+See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
+

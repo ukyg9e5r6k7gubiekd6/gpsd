@@ -43,7 +43,7 @@ for it to work.
 %setup -q
 
 %build
-configure --prefix=/usr
+%configure
 make %{?_smp_mflags}
 
 %install
@@ -71,6 +71,9 @@ cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 PYVERS=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
+mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
+cp gps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/gps
+cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -78,14 +81,12 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %post -n gpsd
 /sbin/chkconfig --add gpsd
 /sbin/chkconfig gpsd on
+/sbin/ldconfig
 
 %preun -n gpsd
 /sbin/chkconfig --del gpsd
 
-%post -n gpsd-devel
-/sbin/ldconfig
-
-%postun -n gpsd-devel
+%postun -n gpsd
 /sbin/ldconfig
 
 %files
@@ -96,25 +97,30 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %attr(755, root, root) %{_bindir}/gps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprobe
+%{_libdir}/libgps.so.%{SO3VERSION}
+%{_libdir}/libgps.so.%{SO1VERSION}
 %{_mandir}/man1/gpsd.1*
 %{_mandir}/man1/gpsprobe.1*
+%{_mandir}/man3/libgps.3*
+%{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
+{_libdir}/X11/app-defaults/gps
+{_libdir}/X11/app-defaults/xgpsspeed
 
 %files -n gpsd-devel
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
 %{_libdir}/libgps.la
-%{_libdir}/libgps.so.%{SO3VERSION}
-%{_libdir}/libgps.so.%{SO1VERSION}
 %{_libdir}/libgps.so
-%{_mandir}/man3/libgps.3*
-%{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
 %{_libdir}/python*/site-packages/gps.py
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1,98-1
+* Thu Sep 16 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Packaging fixes for 2.0 release
+
+* Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.98-1
 - Only do one getdtablesize() call, otherwise we do several
   getrlimits() each poll cycle.  TripMate is working.  gpsprobe now
   deduces NMEA version.  Zodiac Earthmate seems to work.
