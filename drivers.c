@@ -30,7 +30,7 @@ static void nmea_handle_input(struct gps_session_t *session)
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
 		gpsd_report(2, "<= GPS: %s\n", buf);
-		if (*buf == '$') {
+		if (buf[0] == '$' && buf[1] == 'G') {
 #ifdef PROFILING
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
@@ -56,7 +56,9 @@ static void nmea_handle_input(struct gps_session_t *session)
 			if (trigger && !strncmp(buf, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
 			    gpsd_report(1, "found %s.\n", (*dp)->typename);
 			    session->device_type = *dp;
-			    session->device_type->initializer(session);
+			    if (session->device_type->initializer)
+				session->device_type->initializer(session);
+			    buf[offset=0] = '\0';
 			    return;
 			}
 		    }
@@ -85,10 +87,42 @@ static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbyt
     return write(session->gNMEAdata.gps_fd, buf, rtcmbytes);
 }
 
+/**************************************************************************
+ *
+ * Generic NMEA
+ *
+ **************************************************************************/
+
+static void nmea_initializer(struct gps_session_t *session)
+{
+    /* probe for SiRF-II */
+    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,1");
+}
+
 struct gps_type_t nmea = {
     'n', 		/* select explicitly with -T n */
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
+    nmea_initializer,		/* probe for SiRF II */
+    nmea_validate_buffer,	/* how to check that we have good data */
+    nmea_handle_input,	/* read text sentence */
+    nmea_write_rtcm,	/* write RTCM data straight */
+    NULL,		/* no wrapup */
+    0,			/* perform baud-rate hunting */
+    1,			/* 1 stop bit */
+    1,			/* updates every second */
+};
+
+/**************************************************************************
+ *
+ * SiRF-II
+ *
+ **************************************************************************/
+
+struct gps_type_t sirfII = {
+    's', 		/* select explicitly with -T s */
+    "SiRF-II",		/* full name of type */
+    "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     NULL,		/* no initialization */
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
@@ -253,6 +287,7 @@ extern struct gps_type_t garmin_binary;
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
+    &sirfII, 
 #if FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
