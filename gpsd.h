@@ -119,9 +119,13 @@ struct session_t
     struct gps_type_t *device_type;
     struct longlat_t initpos;
     struct OUTDATA gNMEAdata;
-    int fdin;
-    int fdout;
-    int debug;
+    int fdin;		/* input fd from GPS */
+    int fdout;		/* output fd to GPS */
+    int reopen;		/* does GPS connection need to be reopened? */
+    int dsock;		/* socket to DGPS server */
+    int sentdgps;	/* have we sent a DGPs correction? */
+    int fixcnt;		/* count of good fixes seen */
+    int debug;		/* debug verbosity level */
 };
 
 /* here are the available GPS drivers */

@@ -47,7 +47,7 @@
 #include "version.h"
 
 // Temporary forward declarations
-int gps_init(char *dgpsserver, char *dgpsport);
+void gps_init(char *dgpsserver, char *dgpsport);
 void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
 	      int (*handle_request)(int fd, fd_set * fds));
 void gps_force_repoll(void);
@@ -516,11 +516,9 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
-    {
-    int dsock = gps_init(dgpsserver, dgpsport);
-    if (dsock >= 0)
-	FD_SET(dsock, &afds);
-    }
+    gps_init(dgpsserver, dgpsport);
+    if (session.dsock >= 0)
+	FD_SET(session.dsock, &afds);
 
     while (1) {
 	struct timeval tv;
@@ -563,46 +561,38 @@ void gpscli_errexit(char *s)
 
 /* LIBRARY STUFF STARTS HERE */ 
 
-static int input;
-static int sentdgps = 0, fixcnt = 0;
-static int nfds;
-static int dsock;
-static int reopen = 0;
 
 static void onexit(void)
 {
-    close(dsock);
+    close(session.dsock);
 }
 
-int gps_init(char *dgpsserver, char *dgpsport)
+void gps_init(char *dgpsserver, char *dgpsport)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
 
-    nfds = getdtablesize();
-
-    dsock = -1;
+    session.dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZE];
 
 	if (!getservbyname(dgpsport, "tcp"))
 	    dgpsport = "2101";
 
-	dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
-	if (dsock < 0)
+	session.dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
+	if (session.dsock < 0)
 	    gpscli_errexit("Can't connect to dgps server");
 
 	gethostname(hn, sizeof(hn));
 
 	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-	write(dsock, buf, strlen(buf));
+	write(session.dsock, buf, strlen(buf));
 	atexit(onexit);
     }
 
     /* mark fds closed */
-    input = -1;
-    session.fdin = input;
-    session.fdout = input;
+    session.fdin = -1;
+    session.fdout = -1;
 
     INIT(session.gNMEAdata.latlon_stamp, now, gps_timeout);
     INIT(session.gNMEAdata.altitude_stamp, now, gps_timeout);
@@ -610,8 +600,6 @@ int gps_init(char *dgpsserver, char *dgpsport)
     INIT(session.gNMEAdata.status_stamp, now, gps_timeout);
     INIT(session.gNMEAdata.mode_stamp, now, gps_timeout);
     session.gNMEAdata.mode = MODE_NO_FIX;
-
-    return dsock;
 }
 
 static void send_dgps()
@@ -620,7 +608,7 @@ static void send_dgps()
 
   sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", session.gNMEAdata.latitude,
 	  session.gNMEAdata.longitude, session.gNMEAdata.altitude);
-  write(dsock, buf, strlen(buf));
+  write(session.dsock, buf, strlen(buf));
 }
 
 static void deactivate()
@@ -635,7 +623,7 @@ static void deactivate()
     session.gNMEAdata.status = 0;
 }
 
-static int activate()
+static void activate()
 {
     int input;
 
@@ -649,7 +637,6 @@ static int activate()
 	session.fdin = input;
 	session.fdout = input;
     }
-    return input;
 }
 
 void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
@@ -659,20 +646,20 @@ void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
     int need_gps;
 
     /* open or reopen the GPS if it's needed */
-    if (reopen && input == -1) {
-	FD_CLR(input, afds);
+    if (session.reopen && session.fdin == -1) {
+	FD_CLR(session.fdin, afds);
 	deactivate();
-	input = activate();
-	FD_SET(input, afds);
+	activate();
+	FD_SET(session.fdin, afds);
     }
 
     /* accept a DGPS correction if one is pending */
-    if (dsock > -1 && FD_ISSET(dsock, rfds))
+    if (session.dsock > -1 && FD_ISSET(session.dsock, rfds))
     {
 	char buf[BUFSIZE];
 	int rtcmbytes;
 
-	if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
+	if ((rtcmbytes=read(session.dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
 	{
 	    if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
 		gpscli_report(1, "Write to rtcm sink failed\n");
@@ -681,35 +668,35 @@ void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
 	{
 	    gpscli_report(1, "Read from rtcm source failed\n");
 	}
-	FD_CLR(dsock, rfds);
+	FD_CLR(session.dsock, rfds);
     }
 
     /* update the scoreboard structure from the GPS */
-    if (input >= 0 && FD_ISSET(input, rfds)) {
-	session.device_type->handle_input(input, rfds, nmea_fds);
-	FD_CLR(input, rfds);
+    if (session.fdin >= 0 && FD_ISSET(session.fdin, rfds)) {
+	session.device_type->handle_input(session.fdin, rfds, nmea_fds);
+	FD_CLR(session.fdin, rfds);
     }
 
     /* count the good fixes */
     if (session.gNMEAdata.status > 0) 
-	fixcnt++;
+	session.fixcnt++;
 
     /* may be time to ship a DGPS correction to the GPS */
-    if (fixcnt > 10) {
-	if (!sentdgps) {
-	    sentdgps++;
-	    if (dsock > -1)
+    if (session.fixcnt > 10) {
+	if (!session.sentdgps) {
+	    session.sentdgps++;
+	    if (session.dsock > -1)
 		send_dgps();
 	}
     }
 
     /* accept and execute commands for all clients */
     need_gps = 0;
-    for (fd = 0; fd < nfds; fd++) {
+    for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, rfds)) {
-	    if (input == -1) {
-		input = activate();
-		FD_SET(input, afds);
+	    if (session.fdin == -1) {
+		activate();
+		FD_SET(session.fdin, afds);
 	    }
 	    if ((*handle_request)(fd, nmea_fds) == 0) {
 		(void) close(fd);
@@ -717,21 +704,21 @@ void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
 		FD_CLR(fd, nmea_fds);
 	    }
 	}
-	if (fd != input && FD_ISSET(fd, afds)) {
+	if (fd != session.fdin && FD_ISSET(fd, afds)) {
 	    need_gps++;
 	}
     }
 
-    if (!need_gps && input != -1) {
-	FD_CLR(input, afds);
-	input = -1;
+    if (!need_gps && session.fdin != -1) {
+	FD_CLR(session.fdin, afds);
+	session.fdin = -1;
 	deactivate();
     }
 }
 
 void gps_force_repoll(void)
 {
-    reopen = 1;
+    session.reopen = 1;
 }
 
 /* LIBRARY STUFF HERE ENDS */
