@@ -119,7 +119,7 @@ if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Thu Dec  9 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Thu Dec  9 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.4-1
 - Minor bugs in gpsd.py fixed.  M now returns 0 status if GPGSA not yet
   seen; this change also fixes a bug where gpsd claimed it was confused
   if GPGSA had not been seen and status was set.  RPM will now install 
