@@ -1,8 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Make the talker ID a parameter.
-
 ** Hack gpsprof to use the GNUPLOT 'e' feature.
 
 ** In the SiRF driver, get leap seconds from almanac data

@@ -474,12 +474,12 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	int mask;
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"GPRMC", GPRMC,	processGPRMC},
-	{"GPGGA", GPGGA,	processGPGGA},
-	{"GPGLL", GPGLL,	processGPGLL},
-	{"GPGSA", GPGSA,	processGPGSA},
-	{"GPGSV", GPGSV,	processGPGSV},
-	{"GZDA",  GPZDA,	processGPZDA},
+	{"RMC", GPRMC,	processGPRMC},
+	{"GGA", GPGGA,	processGPGGA},
+	{"GLL", GPGLL,	processGPGLL},
+	{"GSA", GPGSA,	processGPGSA},
+	{"GSV", GPGSV,	processGPGSV},
+	{"DA",  GPZDA,	processGPZDA},
 	{"PGRME", PGRME,	processPGRME},
     };
 
@@ -511,6 +511,8 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	*p = 0;
 	field[count] = ++p;
     }
+    if (field[0][0] == TALKERID1 && field[0][1] == TALKERID2)
+	field[0] += 2;
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
         if (!strcmp(nmea_phrase[i].name, field[0])) {

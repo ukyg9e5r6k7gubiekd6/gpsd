@@ -18,6 +18,14 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
+/* 
+ * If your NMEA talker emits a 2-character talker ID other than $GP,
+ * you can patch these to make its NMEA sentences recognizable.  Setting
+ * these will clue in both the NMEA interpreter and the packet grabber.
+ */
+#define TALKERID1	'G'
+#define TALKERID2	'P'
+
 /*
  * User Equivalent Range Error
  * UERE is the square root of the sum of the squares of individual

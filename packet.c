@@ -129,7 +129,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #endif /* EARTHMATE_ENABLE */
 	break;
     case NMEA_DOLLAR:
-	if (c == 'G')
+	if (c == TALKERID1)
 	    session->packet_state = NMEA_PUB_LEAD;
 	else if (c == 'P')	/* vendor sentence */
 	    session->packet_state = NMEA_LEADER_END;
@@ -139,7 +139,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case NMEA_PUB_LEAD:
-	if (c == 'P')
+	if (c == TALKERID2)
 	    session->packet_state = NMEA_LEADER_END;
 	else
 	    session->packet_state = GROUND_STATE;
