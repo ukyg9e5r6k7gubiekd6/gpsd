@@ -33,6 +33,9 @@ Applications that presently use <code>gpsd</code> include
 <a href="http://www.gpsdrive.cc/">GPSdrive</a>, and 
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
 
+<p>The most recent release was @VERSION@. 
+This web page was last updated on @DATE@.</p>
+
 <p>Note: As of mid-October 2004, Kismet is currently not working well
 with <code>gpsd</code>.  The symptom is a "Lost GPS signal" shortly
 after kismet startup.  There is a workaround, which is to run 
