@@ -58,7 +58,7 @@ char *default_device_name = "/dev/gps";
 char *default_latitude = "3600.000";
 char *default_longitude = "-12300.000";
 
-int nfds;
+int nfds, dsock;
 int verbose = 1;
 int bincount;
 
@@ -71,6 +71,7 @@ static int handle_request(int fd, fd_set * fds);
 static void onsig(int sig)
 {
     serial_close();
+    close(dsock);
     syslog(LOG_NOTICE, "Received signal %d. Exiting...", sig);
     exit(10 + sig);
 }
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
     char *dgpsport = 0;
     char *dgpsserver = 0;
     struct sockaddr_in fsin;
-    int msock, dsock;
+    int msock;
     fd_set rfds;
     fd_set afds;
     fd_set nmea_fds;
@@ -142,7 +143,7 @@ int main(int argc, char *argv[])
 		device_type = DEVICE_EARTHMATE;
 		break;
 	    default:
-		fprintf(stderr, "Invalide device type \"%s\"\n"
+		fprintf(stderr, "Invalid device type \"%s\"\n"
 			"Using GENERIC instead\n", optarg);
 		break;
 	    }
@@ -253,16 +254,22 @@ int main(int argc, char *argv[])
     signal(SIGINT, onsig);
     signal(SIGHUP, onsig);
     signal(SIGTERM, onsig);
+    signal(SIGQUIT, onsig);
 
     openlog("gpsd", LOG_PID, LOG_USER);
     syslog(LOG_NOTICE, "Gpsd started (Version %s)", VERSION);
     syslog(LOG_NOTICE, "Gpsd listening on port %s", service);
 
     msock = passiveTCP(service, QLEN);
+
     if (need_dgps) {
       if (!getservbyname(dgpsport, "tcp"))
 	dgpsport = "2101";
       dsock = connectsock(dgpsserver, dgpsport, "tcp");
+      if (dsock < 0) {
+        fprintf(stderr, "Can't connect to dgps server\n");
+        exit(0);
+      }
     }
 
     nfds = getdtablesize();
@@ -274,7 +281,7 @@ int main(int argc, char *argv[])
       char hn[256];
       gethostname(hn, sizeof(hn));
 
-      sprintf(buf, "HELO %s gpsd 0.99", hn, VERSION);
+      sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
       write(dsock, buf, strlen(buf));
       FD_SET(dsock, &afds);
     }
@@ -303,6 +310,32 @@ int main(int argc, char *argv[])
 	      rtcmbytes -= cnt;
 	      ptr += cnt;
 	    }	    
+	  } else {
+	    /*
+	     * device must need generic RTCM-104 serial data.
+	     * We can send these one character at a time. 
+	     */
+            if (rtcmbytes > 0) {
+#if 0
+              fprintf(stderr, "\n\nSending %d rtcm bytes out\n",rtcmbytes);
+              for (cnt=0;cnt < rtcmbytes;cnt++)
+		fprintf(stderr, "%x", (unsigned char)buf[cnt]);
+              fprintf(stderr, "\n");
+#endif
+              ptr = buf;
+              while (rtcmbytes > 0) {
+		cnt = write(gNMEAdata.fdout, ptr, rtcmbytes);
+                if (cnt == rtcmbytes) 
+                  rtcmbytes = 0; /* stops the loop */
+
+                if (cnt > 0) {
+                  /* Set up for next iteration */
+		  rtcmbytes -= cnt;
+                  ptr += cnt;
+		}
+	      }
+	      rtcmbytes = 0;
+	    }
 	  }
 	}
 	if (FD_ISSET(msock, &rfds)) {
@@ -510,5 +543,6 @@ int errexit(char *s)
 {
     syslog(LOG_ERR, "%s: %s\n", s, strerror(errno));
     serial_close();
+    close(dsock);
     exit(2);
 }
