@@ -29,7 +29,7 @@ satellites in their current position in the sky.
 The gpsprobe program queries GPSes for their capabilities and generates
 a gnuplot recipe for an error scattergram to standard outout.
 
-There is a project site for gpsd at <http://www.berlios/gpsd/>.
+There is a project site for gpsd at <http://gpsd.berlios.de/>.
 Look there for updates, news, and project mailing lists.  See that
 website for a list of GPS units known to be compatible.
 
