@@ -59,17 +59,18 @@ static char *default_device_name = "/dev/gps";
 static int in_background = 0;
 static fd_set afds;
 static fd_set nmea_fds;
+static int reopen;
 
 static void onsig(int sig)
 {
-    gps_deactivate();
+    gps_deactivate(&session);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
 
 static void sigusr1(int sig)
 {
-    gps_force_repoll();
+    reopen = 1;
 }
 
 static int daemonize()
@@ -167,7 +168,7 @@ static struct gps_type_t *set_device_type(char what)
     return *dp;
 }
 
-static void print_settings(char *service, char *dgpsserver, char *dgpsport)
+static void print_settings(char *service, char *dgpsserver)
 {
     fprintf(stderr, "command line options:\n");
     fprintf(stderr, "  debug level:        %d\n", session.debug);
@@ -175,7 +176,6 @@ static void print_settings(char *service, char *dgpsserver, char *dgpsport)
     fprintf(stderr, "  gpsd port:          %s\n", service);
     if (dgpsserver) {
       fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
-      fprintf(stderr, "  dgps port:          %s\n", dgpsport);
     }
     if (session.initpos.latitude && session.initpos.longitude) {
       fprintf(stderr, "  latitude:           %s%c\n", session.initpos.latitude, session.initpos.latd);
@@ -415,7 +415,6 @@ int main(int argc, char *argv[])
 {
     char *default_service = "gpsd";
     char *service = NULL;
-    char *dgpsport = "rtcm-sc104";
     char *dgpsserver = NULL;
     struct sockaddr_in fsin;
     fd_set rfds;
@@ -441,10 +440,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'd':
 	    dgpsserver = optarg;
-	    if ((colon = strchr(optarg, ':'))) {
-		dgpsport = colon+1;
-		*colon = '\0';
-	    }
 	    break;
 	case 'i':
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
@@ -489,7 +484,7 @@ int main(int argc, char *argv[])
     }
 
     if (session.debug > 1) 
-	print_settings(service, dgpsserver, dgpsport);
+	print_settings(service, dgpsserver);
     
     if (session.debug < 2)
 	daemonize();
@@ -512,7 +507,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
-    gps_init(device_name, gps_timeout, dgpsserver, dgpsport);
+    gps_init(&session, device_name, gps_timeout, dgpsserver, raw_hook);
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
@@ -545,14 +540,15 @@ int main(int argc, char *argv[])
 	}
 
 	/* open or reopen the GPS if it's needed */
-	if (session.reopen && session.fdin == -1) {
+	if (reopen && session.fdin == -1) {
 	    FD_CLR(session.fdin, &afds);
-	    gps_deactivate();
-	    gps_activate();
+	    gps_deactivate(&session);
+	    if (gps_activate(&session) < 0)
+		gpscli_errexit("Exiting - serial open\n");
 	    FD_SET(session.fdin, &afds);
 	}
 
-	gps_poll(raw_hook);
+	gps_poll(&session);
 
 	if (session.dsock > -1)
 	    FD_CLR(session.dsock, &rfds);
@@ -564,7 +560,8 @@ int main(int argc, char *argv[])
 	for (fd = 0; fd < getdtablesize(); fd++) {
 	    if (FD_ISSET(fd, &rfds)) {
 		if (session.fdin == -1) {
-		    gps_activate();
+		    if (gps_activate(&session) < 0)
+			gpscli_errexit("Exiting - serial open\n");
 		    FD_SET(session.fdin, &afds);
 		}
 		if (handle_request(fd) == 0) {
@@ -580,7 +577,7 @@ int main(int argc, char *argv[])
 	if (!need_gps && session.fdin != -1) {
 	    FD_CLR(session.fdin, &afds);
 	    session.fdin = -1;
-	    gps_deactivate();
+	    gps_deactivate(&session);
 	}
     }
 }
@@ -588,7 +585,7 @@ int main(int argc, char *argv[])
 void gpscli_errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
-    gps_deactivate();
+    gps_deactivate(&session);
     exit(2);
 }
 

@@ -122,10 +122,10 @@ struct session_t
     char *gps_device;	/* where to find the GPS */
     int fdin;		/* input fd from GPS */
     int fdout;		/* output fd to GPS */
-    int reopen;		/* does GPS connection need to be reopened? */
     int dsock;		/* socket to DGPS server */
-    int sentdgps;	/* have we sent a DGPs correction? */
+    int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
+    void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
     int debug;		/* debug verbosity level */
 };
 
@@ -150,10 +150,13 @@ int netlib_connectTCP(char *host, char *service);
 int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* High-level interface */
-void gps_init(char *device, int timeout, char *dgpsserver, char *dgpsport);
-void gps_activate(void), gps_deactivate(void);
-void gps_poll(void (*raw_hook)(char *buf));
-void gps_force_repoll(void);
+void gps_init(struct session_t *session, 
+	      char *device, int timeout, 
+	      char *dgpsserver,
+	      void (*raw_hook)(char *buf));
+int gps_activate(struct session_t *session);
+void gps_deactivate(struct session_t *session);
+void gps_poll(struct session_t *session);
 
 /* caller must supply these */
 void gpscli_errexit(char *s);
