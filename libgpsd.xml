@@ -22,25 +22,25 @@ C:
 </funcsynopsisinfo>
 <funcprototype>
 <funcdef>void <function>gpsd_init</function></funcdef>
-    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_activate</function></funcdef>
-    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gpsd_deactivate</function></funcdef>
-    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_poll</function></funcdef>
-    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gpsd_wrap</function></funcdef>
-    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 
 <funcprototype>
@@ -80,7 +80,7 @@ goes through
 and is intended for concurrent use by several applications, and one
 low-level interface that speaks directly with the serial or USB device
 to which the GPS is attached.  This page describes the low-level
-interface, whic
+interface, which
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 itself uses.  See 
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
@@ -115,7 +115,9 @@ of its members.</para>
 <term><structfield>baudrate</structfield></term>
 <listitem>
 <para>Communication speed in bits per second.  The default is set by
-the driver type.</para>
+the driver type.  For NMEA devices, the library automatically 
+hunts through all plausible baud rates, stoppong on the one where
+it sees valid NMEA </para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -148,16 +150,17 @@ ends the session, implicitly performing a
 
 <para>The calling application must define one additional function:
 <function>gpsd_report()</function>.
-The library will use this to ordinary status messages.  Use 
+The library will use this to issue ordinary status messages.  Use 
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
 
 <para>The Python implementation supports the same facilities as the C
 library, but only for straight NMEA devices with a 1-second send cycle
-(no Zodiac binary-protocol support).  <function>gps_init()</function>
-is replaced by the initialization of a gpsd session object; the other
-calls are methods of that object.  Resources within the session object
-will be properly released when it is garbage-collected.</para>
+(no Zodiac or Garmin binary-protocol support).
+<function>gps_init()</function> is replaced by the initialization of a
+gpsd session object; the other calls are methods of that object.
+Resources within the session object will be properly released when it
+is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
