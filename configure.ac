@@ -9,6 +9,7 @@ AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_C_BIGENDIAN
+AC_FUNC_ALLOCA
 
 if eval "test x$GCC = xyes"; then
 	CFLAGS="$CFLAGS -Wall -W -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type"
