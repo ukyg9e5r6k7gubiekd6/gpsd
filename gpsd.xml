@@ -269,10 +269,6 @@ the replies. Examples:</para>
       reply:       "GPSD,V=0.000000,A=37.900000\r\n"
 </screen>
 
-<para>If the GPS stops sending updates to gpsd, gpsd will continue
-presenting the last data it got for 5 seconds (or, if it has been set,
-the value of the -t option).</para>
-
 <para>When clients are active but the GPS is not responding, gpsd will spin 
 trying to open the GPS device once per second.  Thus, it can be left
 running in background and survive having the GPS repeatedly unplugged
