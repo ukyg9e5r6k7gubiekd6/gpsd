@@ -54,7 +54,7 @@ cp .libs/gpsd "$RPM_BUILD_ROOT"%{_sbindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
 cp .libs/xgps .libs/xgpsspeed gpsprobe "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
-cp gpsd.1 gpsprobe.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
+cp gpsd.1 gpsprobe.1 gpsprof.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 # gpsd-devel files
