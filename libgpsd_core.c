@@ -48,7 +48,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	session->device_type = devtype;
 	session->baudrate = devtype->baudrate;
     }
-	
 
     session->dsock = -1;
     if (dgpsserver) {
@@ -125,6 +124,10 @@ int gpsd_activate(struct gps_session_t *session)
 	session->fdin = input;
 	session->fdout = input;
 	gpscli_report(1, "gpsd_activate: opened GPS (%d)\n", input);
+
+	/* if there is an initializer and no trigger string, invoke it */
+	if (session->device_type->initializer && !session->device_type->trigger)
+	    session->device_type->initializer(session);
 	return input;
     }
 }

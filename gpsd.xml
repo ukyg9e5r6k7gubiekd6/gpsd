@@ -73,7 +73,7 @@ station.</para>
 <listitem>
 <para>Set GPS type, usually not necessary because most GPSes now speak
 the standard NMEA 0183 protocol: possible values are n=NMEA generic,
-t=TripMate, e=EarthMate, l=logfile.</para>
+t=TripMate, e=EarthMate, f=FV18, l=logfile.</para>
 </listitem>
 </varlistentry>
 <varlistentry>

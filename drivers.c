@@ -114,6 +114,34 @@ struct gps_type_t nmea =
 
 /**************************************************************************
  *
+ * FV18 -- doesn't send GPGSAs, uses 7N2
+ *
+ **************************************************************************/
+
+void fv18_initializer(struct gps_session_t *session)
+{
+    /* FV18 sends 1 start bit, 8 bits, 1 stop bit, looking like 7N2 */ 
+    gpsd_set_7N2();
+    /* tell it to send GSAs so we'll know if 3D is accurate */
+    write(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01*39", 18);
+}
+
+struct gps_type_t fv18 =
+{
+    'f', 		/* select explicitly with -T f */
+    "FV18",		/* full name of type */
+    NULL,		/* no recognition string */
+    fv18_initializer,	/* to be sent unconditionally */
+    nmea_handle_input,	/* read text sentence */
+    nmea_write_rtcm,	/* write RTCM data straight */
+    NULL,		/* no wrapup */
+    4800,		/* default speed to connect at */
+    1,			/* updates every second */
+};
+
+
+/**************************************************************************
+ *
  * TripMate -- extended NMEA, gets faster fix when primed with lat/long/time
  *
  **************************************************************************/

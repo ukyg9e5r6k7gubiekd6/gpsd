@@ -51,13 +51,13 @@ int gpsd_open(char *device_name, int device_speed)
     ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
 
     if (ttyfd < 0)
-	return (-1);
+	return -1;
 
     if (isatty(ttyfd)) {
 	gpscli_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
 	/* Save original terminal parameters */
 	if (tcgetattr(ttyfd,&ttyset_old) != 0)
-	  return (-1);
+	  return -1;
 
 	memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
 
@@ -70,9 +70,18 @@ int gpsd_open(char *device_name, int device_speed)
 	ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
 	ttyset.c_oflag = (ONLCR);
 	if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
-	    return (-1);
+	    return -1;
     }
     return ttyfd;
+}
+
+int gpsd_set_7N2(void)
+{
+    ttyset.c_cflag &=~ CSIZE & CS8;
+    ttyset.c_cflag |= CSIZE & CS7;
+    if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
+	return -1;
+    return 0;
 }
 
 void gpsd_close()

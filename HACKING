@@ -24,6 +24,9 @@ watches for.  When that string is recognized at the start of a
 line, the interpreter switches to its driver.  The new driver 
 initializer method is called immediately.
 
+(The initializer method is called unconditionally each time the device
+is opened, if there is no trigger string.)
+
 The trickiest part of the code is the handling of input sources in gpsd.c 
 itself.  It had to tolerate clients connecting and disconnecting at random
 times, and the GPS being unplugged and replugged, without leaking file 
