@@ -314,6 +314,8 @@ class gpsd(gps.gpsdata):
         self.raw[3] = 0						# lflag
         self.raw[4] = self.raw[5] = eval("termios.B" + `self.bps`)
         termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.raw)
+        termios.tcflush(self.ttyfp.fileno(), termios.TCIOFLUSH)
+        time.sleep(1.25)
         if self.devtype.initializer:
             self.devtype.initializer(self)
 	self.online = True;
