@@ -186,12 +186,12 @@ static inline double  radtodeg( double rad) {
 	return ( rad * RAD_2_DEG );
 }
 
-static int PrintPacket(struct gps_session_t *session, Packet_t *pkt );
-static void SendPacket (struct gps_session_t *session, Packet_t *aPacket );
-static int GetPacket (struct gps_session_t *session );
+static int PrintPacket(struct gps_device_t *session, Packet_t *pkt );
+static void SendPacket (struct gps_device_t *session, Packet_t *aPacket );
+static int GetPacket (struct gps_device_t *session );
 
 // For debugging, decodes and prints some known packets.
-static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
+static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 {
     int mask = 0;
     int maj_ver;
@@ -452,7 +452,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 
 //-----------------------------------------------------------------------------
 // send a packet in GarminUSB format
-static void SendPacket (struct gps_session_t *session, Packet_t *aPacket ) 
+static void SendPacket (struct gps_device_t *session, Packet_t *aPacket ) 
 {
 	long theBytesToWrite = 12 + aPacket->mDataSize;
 	long theBytesReturned = 0;
@@ -496,7 +496,7 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 // Return: 0 = got a good packet
 //         -1 = error
 //         1 = got partial packet
-static int GetPacket (struct gps_session_t *session ) 
+static int GetPacket (struct gps_device_t *session ) 
 {
     struct timespec delay, rem;
     int cnt = 0;
@@ -565,7 +565,7 @@ static int GetPacket (struct gps_session_t *session )
  * return 1 if garmin_gps device found
  * return 0 if not
  */
-static int garmin_probe(struct gps_session_t *session)
+static int garmin_probe(struct gps_device_t *session)
 {
 
     Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
@@ -779,7 +779,7 @@ static int garmin_probe(struct gps_session_t *session)
  * any twiddling of that previously done is harmless.
  *
  */
-static void garmin_init(struct gps_session_t *session)
+static void garmin_init(struct gps_device_t *session)
 {
 	int ret;
 	char buffer[256];
@@ -807,12 +807,12 @@ static void garmin_init(struct gps_session_t *session)
 	//SendPacket(session,  (Packet_t*) buffer);
 }
 
-static int garmin_get_packet(struct gps_session_t *session, int waiting UNUSED)
+static int garmin_get_packet(struct gps_device_t *session, int waiting UNUSED)
 {
     return !GetPacket( session );
 }
 
-static int garmin_parse_input(struct gps_session_t *session)
+static int garmin_parse_input(struct gps_device_t *session)
 {
     return PrintPacket(session, (Packet_t*)session->GarminBuffer);
 }

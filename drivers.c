@@ -12,7 +12,7 @@
  *
  **************************************************************************/
 
-static int nmea_parse_input(struct gps_session_t *session)
+static int nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
@@ -47,12 +47,12 @@ static int nmea_parse_input(struct gps_session_t *session)
 	return 0;
 }
 
-static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
+static int nmea_write_rtcm(struct gps_device_t *session, char *buf, int rtcmbytes)
 {
     return write(session->gpsdata.gps_fd, buf, rtcmbytes);
 }
 
-static void nmea_initializer(struct gps_session_t *session)
+static void nmea_initializer(struct gps_device_t *session)
 {
     /* tell an FV18 to send GSAs so we'll know if 3D is accurate */
     nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01,GSV05");
@@ -85,7 +85,7 @@ struct gps_type_t nmea = {
  **************************************************************************/
 
 #ifndef BINARY_ENABLE
-static void sirf_initializer(struct gps_session_t *session)
+static void sirf_initializer(struct gps_device_t *session)
 {
     /* nmea_send(session->gpsdata.gps_fd, "$PSRF105,0"); */
     nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
@@ -93,7 +93,7 @@ static void sirf_initializer(struct gps_session_t *session)
 }
 #endif /* BINARY_ENABLE */
 
-static int sirf_switcher(struct gps_session_t *session, int nmea, int speed) 
+static int sirf_switcher(struct gps_device_t *session, int nmea, int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
     if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
@@ -101,13 +101,13 @@ static int sirf_switcher(struct gps_session_t *session, int nmea, int speed)
     return 1;
 }
 
-static int sirf_speed(struct gps_session_t *session, int speed)
+static int sirf_speed(struct gps_device_t *session, int speed)
 /* change the baud rate, remaining in SiRF NMWA mode */
 {
     return sirf_switcher(session, 1, speed);
 }
 
-static void sirf_mode(struct gps_session_t *session, int mode)
+static void sirf_mode(struct gps_device_t *session, int mode)
 /* change mode to SiRF binary, speed unchanged */
 {
     if (mode == 1) {
@@ -153,7 +153,7 @@ struct gps_type_t sirfII = {
  * and was replaced by the Zodiac EarthMate.
  */
 
-static void tripmate_initializer(struct gps_session_t *session)
+static void tripmate_initializer(struct gps_device_t *session)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
@@ -192,12 +192,12 @@ extern struct gps_type_t zodiac_binary, earthmate;
  * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
  */
 
-static void earthmate_close(struct gps_session_t *session)
+static void earthmate_close(struct gps_device_t *session)
 {
     session->device_type = &earthmate;
 }
 
-static void earthmate_initializer(struct gps_session_t *session)
+static void earthmate_initializer(struct gps_device_t *session)
 {
     write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
     sleep(30);

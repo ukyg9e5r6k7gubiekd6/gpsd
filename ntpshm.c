@@ -59,7 +59,7 @@ static struct shmTime *getShmTime(int unit)
     }
 }
 
-int ntpshm_init(struct gps_session_t *session)
+int ntpshm_init(struct gps_device_t *session)
 {
     if ((session->shmTime = getShmTime(SHM_UNIT)) == NULL)
 	return 0;
@@ -70,7 +70,7 @@ int ntpshm_init(struct gps_session_t *session)
     return 1;
 }
 
-int ntpshm_put(struct gps_session_t *session, double fixtime)
+int ntpshm_put(struct gps_device_t *session, double fixtime)
 {
     struct timeval tv;
     double seconds,microseconds;

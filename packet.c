@@ -108,7 +108,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 #define ZODIAC_PAYLOAD	31	/* we're in a Zodiac payload */
 #define ZODIAC_RECOGNIZED 32	/* found end of the Zodiac packet */
 
-static void nexstate(struct gps_session_t *session, unsigned char c)
+static void nexstate(struct gps_device_t *session, unsigned char c)
 {
     switch(session->packet_state)
     {
@@ -328,7 +328,7 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
     }
 }
 
-static void packet_copy(struct gps_session_t *session)
+static void packet_copy(struct gps_device_t *session)
 /* packet grab succeeded, move to output buffer */
 {
     int packetlen = session->inbufptr-session->inbuffer;
@@ -337,7 +337,7 @@ static void packet_copy(struct gps_session_t *session)
     session->outbuffer[session->outbuflen = packetlen] = '\0';
 }
 
-static void packet_discard(struct gps_session_t *session)
+static void packet_discard(struct gps_device_t *session)
 /* shift the input buffer to discard old data */ 
 {
     int remaining = session->inbuffer + session->inbuflen - session->inbufptr;
@@ -353,7 +353,7 @@ static void packet_discard(struct gps_session_t *session)
 
 /* entry points begin here */
 
-int packet_get(struct gps_session_t *session, int waiting)
+int packet_get(struct gps_device_t *session, int waiting)
 {
     int newdata;
 #ifndef TESTMAIN
@@ -473,7 +473,7 @@ int packet_get(struct gps_session_t *session, int waiting)
  */
 #define SNIFF_RETRIES	600
 
-int packet_sniff(struct gps_session_t *session)
+int packet_sniff(struct gps_device_t *session)
 /* try to sync up with the packet stream */
 {
     unsigned int n, count = 0;
@@ -640,7 +640,7 @@ int main(int argc, char *argv[])
     };
 
     struct map *mp;
-    struct gps_session_t state;
+    struct gps_device_t state;
     int st;
     unsigned char *cp;
 

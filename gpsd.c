@@ -120,7 +120,7 @@ static int throttled_write(int fd, char *buf, int len)
     return status;
 }
 
-static int have_fix(struct gps_session_t *session)
+static int have_fix(struct gps_device_t *session)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
@@ -193,7 +193,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 }
 
 /* restrict the scope of the command-state globals as much as possible */
-static struct gps_session_t *session;
+static struct gps_device_t *session;
 static int need_gps;
 
 static int handle_request(int fd, char *buf, int buflen)

@@ -21,24 +21,24 @@ C:
 
 </funcsynopsisinfo>
 <funcprototype>
-<funcdef>struct gps_session_t * <function>gpsd_init</function></funcdef>
+<funcdef>struct gps_device_t * <function>gpsd_init</function></funcdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_activate</function></funcdef>
-    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gpsd_deactivate</function></funcdef>
-    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_poll</function></funcdef>
-    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gpsd_wrap</function></funcdef>
-    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 
 <funcprototype>

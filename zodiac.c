@@ -51,7 +51,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static void zodiac_spew(struct gps_session_t *session, int type, unsigned short *dat, int dlen)
+static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
 
@@ -67,7 +67,7 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     }
 }
 
-static int zodiac_speed_switch(struct gps_session_t *session, int speed)
+static int zodiac_speed_switch(struct gps_device_t *session, int speed)
 {
     unsigned short data[21];
 
@@ -90,7 +90,7 @@ static int zodiac_speed_switch(struct gps_session_t *session, int speed)
     return speed;	/* it would be nice to error-check this */
 }
 
-static void send_rtcm(struct gps_session_t *session, 
+static void send_rtcm(struct gps_device_t *session, 
 		      char *rtcmbuf, int rtcmbytes)
 {
     unsigned short data[34];
@@ -107,7 +107,7 @@ static void send_rtcm(struct gps_session_t *session,
     zodiac_spew(session, 1351, data, n+1);
 }
 
-static int zodiac_send_rtcm(struct gps_session_t *session,
+static int zodiac_send_rtcm(struct gps_device_t *session,
 			char *rtcmbuf, int rtcmbytes)
 {
     int len;
@@ -129,7 +129,7 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 		| (session->outbuffer[2*(n)+0] << 16) \
 		| (session->outbuffer[2*(n)+1] << 24))
 
-static int handle1000(struct gps_session_t *session)
+static int handle1000(struct gps_device_t *session)
 {
     session->gpsdata.nmea_date.tm_mday = getw(19);
     session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
@@ -187,7 +187,7 @@ static int handle1000(struct gps_session_t *session)
     return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
 }
 
-static int handle1002(struct gps_session_t *session)
+static int handle1002(struct gps_device_t *session)
 {
     int i, j;
 
@@ -218,7 +218,7 @@ static int handle1002(struct gps_session_t *session)
     return SATELLITE_SET;
 }
 
-static int handle1003(struct gps_session_t *session)
+static int handle1003(struct gps_device_t *session)
 {
     int i;
 
@@ -245,7 +245,7 @@ static int handle1003(struct gps_session_t *session)
     return SATELLITE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
 }
 
-static void handle1005(struct gps_session_t *session)
+static void handle1005(struct gps_device_t *session)
 {
     int i, numcorrections = getw(12);
 
@@ -267,7 +267,7 @@ static void handle1005(struct gps_session_t *session)
     }
 }
 
-static int zodiac_analyze(struct gps_session_t *session)
+static int zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
     int i, mask = 0;

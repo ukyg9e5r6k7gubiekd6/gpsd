@@ -33,7 +33,7 @@ int gpsd_get_speed(struct termios* ttyctl)
     }
 }
 
-int gpsd_set_speed(struct gps_session_t *session, 
+int gpsd_set_speed(struct gps_device_t *session, 
 		   unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate;
@@ -77,7 +77,7 @@ int gpsd_set_speed(struct gps_session_t *session,
     return 1;
 }
 
-int gpsd_open(struct gps_session_t *session)
+int gpsd_open(struct gps_device_t *session)
 {
     unsigned int *ip;
     unsigned int stopbits;
@@ -142,7 +142,7 @@ int gpsd_open(struct gps_session_t *session)
     return session->gpsdata.gps_fd;
 }
 
-void gpsd_close(struct gps_session_t *session)
+void gpsd_close(struct gps_device_t *session)
 {
     if (session->gpsdata.gps_fd != -1) {
 	if (isatty(session->gpsdata.gps_fd)) {

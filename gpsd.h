@@ -58,19 +58,19 @@
 #define UERE_WITH_DGPS	1.9444
 #define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
-struct gps_session_t;
+struct gps_device_t;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     char *typename, *trigger;
-    int (*probe)(struct gps_session_t *session);
-    void (*initializer)(struct gps_session_t *session);
-    int (*get_packet)(struct gps_session_t *session, int waiting);
-    int (*parse_packet)(struct gps_session_t *session);
-    int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
-    int (*speed_switcher)(struct gps_session_t *session, int speed);
-    void (*mode_switcher)(struct gps_session_t *session, int mode);
-    void (*wrapup)(struct gps_session_t *session);
+    int (*probe)(struct gps_device_t *session);
+    void (*initializer)(struct gps_device_t *session);
+    int (*get_packet)(struct gps_device_t *session, int waiting);
+    int (*parse_packet)(struct gps_device_t *session);
+    int (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, int rtcmbytes);
+    int (*speed_switcher)(struct gps_device_t *session, int speed);
+    void (*mode_switcher)(struct gps_device_t *session, int mode);
+    void (*wrapup)(struct gps_device_t *session);
     int cycle;
 };
 
@@ -91,7 +91,7 @@ struct gps_type_t {
  */
 #define MAX_PACKET_LENGTH	196	/* 188 + 8 */
 
-struct gps_session_t {
+struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     struct gps_type_t *device_type;
@@ -153,34 +153,34 @@ extern int nmea_parse(char *, struct gps_data_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
-extern int sirf_parse(struct gps_session_t *, unsigned char *, int);
+extern int sirf_parse(struct gps_device_t *, unsigned char *, int);
 
-extern int packet_get(struct gps_session_t *, int);
-extern int packet_sniff(struct gps_session_t *);
+extern int packet_get(struct gps_device_t *, int);
+extern int packet_sniff(struct gps_device_t *);
 
-extern int gpsd_open(struct gps_session_t *);
-extern int gpsd_switch_driver(struct gps_session_t *, char *);
-extern int gpsd_set_speed(struct gps_session_t *, unsigned int, unsigned int);
+extern int gpsd_open(struct gps_device_t *);
+extern int gpsd_switch_driver(struct gps_device_t *, char *);
+extern int gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int);
 extern int gpsd_get_speed(struct termios *);
-extern void gpsd_close(struct gps_session_t *);
+extern void gpsd_close(struct gps_device_t *);
 
-extern void gpsd_raw_hook(struct gps_session_t *, char *);
+extern void gpsd_raw_hook(struct gps_device_t *, char *);
 extern void gpsd_zero_satellites(struct gps_data_t *);
-extern void gpsd_binary_fix_dump(struct gps_session_t *, char *);
-extern void gpsd_binary_satellite_dump(struct gps_session_t *, char *);
-extern void gpsd_binary_quality_dump(struct gps_session_t *, char *);
+extern void gpsd_binary_fix_dump(struct gps_device_t *, char *);
+extern void gpsd_binary_satellite_dump(struct gps_device_t *, char *);
+extern void gpsd_binary_quality_dump(struct gps_device_t *, char *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
-extern int ntpshm_init(struct gps_session_t *);
-extern int ntpshm_put(struct gps_session_t *, double);
+extern int ntpshm_init(struct gps_device_t *);
+extern int ntpshm_put(struct gps_device_t *, double);
 
 /* External interface */
-extern struct gps_session_t * gpsd_init(char *);
-extern int gpsd_activate(struct gps_session_t *);
-extern void gpsd_deactivate(struct gps_session_t *);
-extern int gpsd_poll(struct gps_session_t *);
-extern void gpsd_wrap(struct gps_session_t *);
+extern struct gps_device_t * gpsd_init(char *);
+extern int gpsd_activate(struct gps_device_t *);
+extern void gpsd_deactivate(struct gps_device_t *);
+extern int gpsd_poll(struct gps_device_t *);
+extern void gpsd_wrap(struct gps_device_t *);
 
 /* caller should supply this */
 void gpsd_report(int, const char *, ...);

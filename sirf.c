@@ -116,7 +116,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
-static void sirfbin_mode(struct gps_session_t *session, int mode)
+static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
 	gpsd_switch_driver(session, "SiRF-II NMEA");
@@ -125,7 +125,7 @@ static void sirfbin_mode(struct gps_session_t *session, int mode)
     }
 }
 
-int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
+int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3] = "";
@@ -474,7 +474,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
     return 0;
 }
 
-static int sirfbin_parse_input(struct gps_session_t *session)
+static int sirfbin_parse_input(struct gps_device_t *session)
 {
     int st;
 
@@ -490,7 +490,7 @@ static int sirfbin_parse_input(struct gps_session_t *session)
 	return 0;
 }
 
-static void sirfbin_initializer(struct gps_session_t *session)
+static void sirfbin_initializer(struct gps_device_t *session)
 /* poll for software version in order to check for old firmware */
 {
     if (session->packet_type == NMEA_PACKET) {
@@ -527,7 +527,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
     }
 }
 
-static int sirfbin_speed(struct gps_session_t *session, int speed)
+static int sirfbin_speed(struct gps_device_t *session, int speed)
 {
     return sirf_speed(session->gpsdata.gps_fd, speed);
 }

@@ -17,7 +17,7 @@
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
-int gpsd_switch_driver(struct gps_session_t *session, char* typename)
+int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
     for (dp = gpsd_drivers; *dp; dp++)
@@ -32,10 +32,10 @@ int gpsd_switch_driver(struct gps_session_t *session, char* typename)
     return 0;
 }
 
-struct gps_session_t *gpsd_init(char *dgpsserver)
+struct gps_device_t *gpsd_init(char *dgpsserver)
 /* initialize GPS polling */
 {
-    struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
+    struct gps_device_t *session = (struct gps_device_t *)calloc(sizeof(struct gps_device_t), 1);
     if (!session)
 	return NULL;
 
@@ -73,7 +73,7 @@ struct gps_session_t *gpsd_init(char *dgpsserver)
     return session;
 }
 
-void gpsd_deactivate(struct gps_session_t *session)
+void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
     gpsd_close(session);
@@ -83,7 +83,7 @@ void gpsd_deactivate(struct gps_session_t *session)
     gpsd_report(1, "closed GPS\n");
 }
 
-int gpsd_activate(struct gps_session_t *session)
+int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
     if (gpsd_open(session) < 0)
@@ -120,7 +120,7 @@ static int is_input_waiting(int fd)
     return count;
 }
 
-int gpsd_poll(struct gps_session_t *session)
+int gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
     int waiting;
@@ -255,7 +255,7 @@ int gpsd_poll(struct gps_session_t *session)
     }
 }
 
-void gpsd_wrap(struct gps_session_t *session)
+void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
     gpsd_deactivate(session);
@@ -272,7 +272,7 @@ void gpsd_zero_satellites(struct gps_data_t *out)
     out->satellites = 0;
 }
 
-void gpsd_raw_hook(struct gps_session_t *session, char *sentence)
+void gpsd_raw_hook(struct gps_device_t *session, char *sentence)
 {
     if (session->gpsdata.raw_hook) {
 	session->gpsdata.raw_hook(&session->gpsdata, sentence);
@@ -299,7 +299,7 @@ static double degtodm(double a)
     return t;
 }
 
-void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
+void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 {
     char hdop_str[NMEA_MAX] = "";
     struct tm tm;
@@ -357,7 +357,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	gpsd_raw_hook(session, bufp);
 }
 
-void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
+void gpsd_binary_satellite_dump(struct gps_device_t *session, char *bufp)
 {
     int i;
     char *bufp2 = bufp;
@@ -386,7 +386,7 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
     }
 }
 
-void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
+void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 {
     int	i, j;
     char *bufp2 = bufp;
