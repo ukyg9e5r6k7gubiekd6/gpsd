@@ -116,7 +116,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %changelog
 * Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Only do one getdtablesize() call, otherwise we do several
-  getrlimits() each poll cycle.
+  getrlimits() each poll cycle.  TripMate is working.  gpsprobe now
+  deduces NMEA version.
 
 * Wed Sep 08 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.97-1
   Removed PRWIZCH support (it still passes through in raw mode).
