@@ -3,7 +3,6 @@
 
 #include <X11/Intrinsic.h>
 #include <Xm/Xm.h>
-#include "gps.h"
 
 void register_canvas(Widget w, GC gc);
 void draw_graphics(struct gps_data_t *gpsdata);
