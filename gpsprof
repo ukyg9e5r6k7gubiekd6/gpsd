@@ -167,6 +167,8 @@ if __name__ == '__main__':
         plotter.header(out)
         while await > 0:
             session.poll()
+            if session.utc == "?":	# Timestamp no good, skip it.
+                continue
             session.gps_time = gps.isotime(session.utc)
             session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
             if plotter.formatter(session, out):
