@@ -133,6 +133,7 @@ void processGPGGA(char *sentence)
     gNMEAdata.cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
     sscanf(field(sentence, 9), "%lf", &gNMEAdata.altitude);
+    gNMEAdata.ts_alt = gNMEAdata.last_update;
 }
 
 /* ----------------------------------------------------------------------- */
