@@ -819,6 +819,7 @@ static int garmin_get_packet(struct gps_device_t *session, int waiting UNUSED)
 
 static int garmin_parse_input(struct gps_device_t *session)
 {
+    sprintf(session->gpsdata.tag, "%d", 3);    
     return PrintPacket(session, (Packet_t*)session->GarminBuffer);
 }
 
