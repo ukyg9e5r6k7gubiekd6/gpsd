@@ -296,7 +296,9 @@ raw mode.</para></listitem>
 <varlistentry>
 <term>u</term>
 <listitem><para>Current rate of climb as "U=%f" in meters per second.
-Some GPSes (non-Sirf-II based) do not report this.</para></listitem>
+Some GPSes (non-Sirf-II based) do not report this, in that case 
+<application>gpsd</application> computes it using the altitude from
+the last fix (if available).</para></listitem>
 </varlistentry>
 
 <varlistentry>
