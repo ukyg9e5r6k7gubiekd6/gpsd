@@ -40,7 +40,7 @@ information.</p>
 <td align='center'>n</td>
 <td>1.98</td>
 <td>2.2</td>
-<td>GGA, GSA, GSV, RMC, VTG</td>
+<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG</td>
 <td>Haicom provided a test unit. Manual states incorrectly that VTG
 is off by default.</td>
 </tr>
@@ -54,7 +54,7 @@ NaviLock, Hyperdata, TripNav</td>
 <td align='center'>n</td>
 <td>1.97</td>
 <td>2.2</td>
-<td>GGA, GSA, GSV, RMC, GLL, VTG</td>
+<td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
 <td>
 The BU-303 has a <a href='bu_303.html'>design defect</a> that makes it
 likely to fail if subjected to vibration or mechanical shock.
@@ -69,7 +69,7 @@ likely to fail if subjected to vibration or mechanical shock.
 <td align='center'>e</td>
 <td>1.98</td>
 <td>2.2?</td>
-<td>PRWIZCH, GSA, RMC</td>
+<td>PRWIZCH, GPGSA, GPRMC</td>
 <td>The old Zodiac version spoke Rockwell binary protocol. These 
 models have been discontinued but are still common.</td>
 </tr>
@@ -82,7 +82,7 @@ models have been discontinued but are still common.</td>
 <td align='center'>-</td>
 <td>None</td>
 <td>2.2</td>
-<td>GGA, GSA, GSV, RMC, GLL, VTG</td>
+<td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
 <td>In 2003 the EarthMate switched to a SiRF-II chipset. The USB 
 version doesn't work with gpsd under Linux, because support for the
 Cypress M8 serial-to-USB chipset is lacking.  This is
@@ -98,7 +98,7 @@ worked on</a>.</td>
 <td align='center'>f</td>
 <td>1.98</td>
 <td>2.3</td>
-<td>GGA, GSA, GSV, RMC, VTG, ZDA, DTM, GLL</td>
+<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG, GPZDA, GPDTM, GPGLL</td>
 <td>Special gpsd support uses 8N2 and requests sentences that gpsd
 requires.  OEM module only, not a retail version.</td>
 </tr>
@@ -113,7 +113,7 @@ Sapphire USB</a></a></td>
 <td align='center'>n</td>
 <td>1.97</td>
 <td>2.2</td>
-<td>GGA, GSV, RMC, GLL, VTG, GSA</td>
+<td>GPGGA, GPGSV, GPRMC, GPGLL, GPVTG, GPGSA</td>
 <td>There's an RS232 variant as well, not yet tested.</td>
 </tr>
 <tr>
