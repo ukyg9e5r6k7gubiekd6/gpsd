@@ -193,28 +193,11 @@ static int nmea_send(int fd, const char *fmt, ... )
     }
 }
 
-int main (int argc, char **argv)
+static unsigned int *ip, rates[] = {4800, 9600, 19200, 38400, 57600};
+
+static int hunt_open(void)
 {
-    int len,i,stopbits,bps,speed,v,st;
-    char *p;
-    fd_set select_set;
-    unsigned char buf[BUFLEN];
-    char line[80];
-    static unsigned int *ip, rates[] = {4800, 9600, 19200, 38400, 57600};
-
-    if (argc < 2) {
-	fprintf(stderr,"Usage: %s <tty-device>.\n",argv[0]);
-	exit(1);
-    }
-
-    if ((LineFd = open(argv[1],O_RDWR)) < 0) {
-	perror(argv[1]);
-	return 1;
-    }
-    
-    /* Save original terminal parameters */
-    if (tcgetattr(LineFd, &ttyset) != 0)
-      goto bailout;
+    int stopbits, st;
     /*
      * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -231,18 +214,39 @@ int main (int argc, char **argv)
 	    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
 		    *ip, 9-stopbits, stopbits);
 	    if ((st = set_speed(*ip, stopbits)) == SIRF_PACKET)
-		goto rate_ok;
+		return *ip;
 	    else if (st == NMEA_PACKET) {
 		fprintf(stderr, "Switching to SiRF mode...\n");
 		nmea_send(LineFd,"$PSRF100,0,%d,8,1,0", *ip);
-		goto rate_ok;
+		return *ip;
 	    }
 	}
- bailout:
-    fputs("Can't sync up with device!\n", stderr);
-    exit(1);
- rate_ok:;
-    bps = *ip;
+    return 0;
+}
+
+int main (int argc, char **argv)
+{
+    int len,i,stopbits,bps,speed,v,st;
+    char *p;
+    fd_set select_set;
+    unsigned char buf[BUFLEN];
+    char line[80];
+
+    if (argc < 2) {
+	fprintf(stderr,"Usage: %s <tty-device>.\n",argv[0]);
+	exit(1);
+    }
+
+    if ((LineFd = open(argv[1],O_RDWR)) < 0) {
+	perror(argv[1]);
+	return 1;
+    }
+    
+    /* Save original terminal parameters */
+    if (tcgetattr(LineFd, &ttyset) != 0 || !(bps = hunt_open())) {
+	fputs("Can't sync up with device!\n", stderr);
+	exit(1);
+    }
 
     initscr();
     cbreak();
