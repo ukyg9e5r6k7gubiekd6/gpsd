@@ -34,10 +34,11 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-static u_int16_t crc_sirf(u_int8_t *msg) {
+static u_int16_t sirf_write(int fd, u_int8_t *msg) {
    int       pos = 0;
    u_int16_t crc = 0;
-   int       len;
+   int       i, len, ok;
+   char	     buf[MAX_PACKET_LENGTH*2];
 
    len = (msg[2] << 8) | msg[3];
 
@@ -50,7 +51,12 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
    msg[len + 4] = (u_int8_t)((crc & 0xff00) >> 8);
    msg[len + 5] = (u_int8_t)( crc & 0x00ff);
 
-   return(crc);
+   buf[0] = '\0';
+   for (i = 0; i < len+8; i++)
+       sprintf(buf+strlen(buf), "%02x", msg[i]);
+   gpsd_report(4, "Writing SiRF control type %02x: %s\n", msg[4], buf);
+   ok = write(fd, msg, len+8) == len+8;
+   return(ok);
 }
 
 static int sirf_speed(int ttyfd, int speed) 
@@ -67,8 +73,7 @@ static int sirf_speed(int ttyfd, int speed)
 
    msg[8] = HI(speed);
    msg[9] = LO(speed);
-   crc_sirf(msg);
-   return (write(ttyfd, msg, 9+8) != 9+8);
+   return (sirf_write(ttyfd, msg));
 }
 
 static int sirf_to_nmea(int ttyfd, int speed) 
@@ -89,8 +94,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
 
    msg[26] = HI(speed);
    msg[27] = LO(speed);
-   crc_sirf(msg);
-   return (write(ttyfd, msg, 0x18+8) != 0x18+8);
+   return (sirf_write(ttyfd, msg));
 }
 
 /*
@@ -475,11 +479,9 @@ static void sirfbin_initializer(struct gps_session_t *session)
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
 	//gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
-	//crc_sirf(ratecontrol);
-	//write(session->gNMEAdata.gps_fd, ratecontrol, 16);
+	//sirf_write(session->gNMEAdata.gps_fd, ratecontrol);
 	gpsd_report(4, "Probing for firmware version...\n");
-	crc_sirf(versionprobe);
-	write(session->gNMEAdata.gps_fd, versionprobe, 10);
+	sirf_write(session->gNMEAdata.gps_fd, versionprobe);
     }
 }
 
