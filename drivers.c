@@ -52,8 +52,12 @@ static int nmea_write_rtcm(struct gps_device_t *session, char *buf, int rtcmbyte
 
 static void nmea_initializer(struct gps_device_t *session)
 {
-    /* tell an FV18 to send GSAs so we'll know if 3D is accurate */
-    nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01,GSV05");
+    /*
+     * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
+     * Suppress GLL.  Enable ZDA so dates will se accurate for replay.
+     */
+#define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,GSV05"
+    nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
     /* probe for SiRF-II */
     nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
 }
@@ -71,6 +75,27 @@ struct gps_type_t nmea = {
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
+
+#if FV18_ENABLE
+/**************************************************************************
+ *
+ * FV18 -- uses 2 stop bits, needs to be told to send GSAs
+ *
+ **************************************************************************/
+
+struct gps_type_t fv18 = {
+    "San Jose Navigation FV18",		/* full name of type */
+    FV18_PROBE,		/* this device should echo the probe string */
+    NULL,		/* no probe */
+    NULL,		/* to be sent unconditionally */
+    packet_get,		/* how to get a packet */
+    nmea_parse_input,	/* how to interpret a packet */
+    nmea_write_rtcm,	/* write RTCM data straight */
+    NULL,		/* no speed switcher */
+    NULL,		/* no wrapup */
+    1,			/* updates every second */
+};
+#endif /* FV18_ENABLE */
 
 #ifdef SIRFII_ENABLE
 /**************************************************************************
@@ -198,7 +223,7 @@ static void earthmate_close(struct gps_device_t *session)
 static void earthmate_initializer(struct gps_device_t *session)
 {
     write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
-    sleep(30);
+    usleep(10000);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
     if (zodiac_binary.initializer) zodiac_binary.initializer(session);
@@ -224,6 +249,9 @@ extern struct gps_type_t garmin_binary, sirf_binary;
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
+#if FV18_ENABLE
+    &fv18,
+#endif /* FV18_ENABLE */
 #ifdef SIRFII_ENABLE
     &sirfII, 
 #endif /* SIRFII_ENABLE */
