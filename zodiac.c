@@ -81,7 +81,7 @@ static long putlong(char *dm, int sign)
     long rad;
 
     tmpl = fabs(atof(dm));
-    rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*PI/180;
+    rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*DEG_2_RAD;
     if (sign)
 	rad = -rad;
     return rad;
