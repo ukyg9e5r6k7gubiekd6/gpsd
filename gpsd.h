@@ -38,13 +38,16 @@ extern struct gps_type_t earthmate_a;
 extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
 
-void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf);
-int serial_open(char *device_name, int device_speed);
-void serial_close();
-void errexit(char *s);
-void errlog(char *s);
-int passiveTCP(char *service, int qlen);
-int connectTCP(char *host, char *service);
-int connectsock(char *host, char *service, char *protocol);
+/* GPS library supplies these */
+void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf);
+int gps_open(char *device_name, int device_speed);
+void gps_close();
+int netlib_passiveTCP(char *service, int qlen);
+int netlib_connectTCP(char *host, char *service);
+int netlib_connectsock(char *host, char *service, char *protocol);
+
+/* caller must supply this */
+void gps_gpscli_errexit(char *s);
+
 
 /* gpsd.h ends here */

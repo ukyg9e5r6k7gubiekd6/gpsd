@@ -48,7 +48,7 @@ static int set_baud(long baud)
 }
 
 
-int serial_open(char *device_name, int device_speed)
+int gps_open(char *device_name, int device_speed)
 {
     char *temp;
     char *p;
@@ -57,27 +57,27 @@ int serial_open(char *device_name, int device_speed)
 
     if ( (p = strchr(temp, ':')) ) {
 	char *port = DEFAULTPORT;
-	report(1, "opening slave daemon at %s\n", device_name);
+	gpscli_report(1, "opening slave daemon at %s\n", device_name);
 
 	if (*(p + 1))
 	    port = p + 1;
 	*p = '\0';
 
 	/* temp now holds the HOSTNAME portion and port the port number. */
-	ttyfd = connectTCP(temp, port);
+	ttyfd = netlib_connectTCP(temp, port);
 	port = 0;
 
 	if (write(ttyfd, "r\n", 2) != 2)
-	    errexit("Can't write to socket");
+	    gps_gpscli_errexit("Can't write to socket");
     } else {
-	report(1, "opening GPS data source at %s\n", device_name);
+	gpscli_report(1, "opening GPS data source at %s\n", device_name);
 	ttyfd = open(temp, O_RDWR | O_NONBLOCK);
 
 	if (ttyfd < 0)
 	    return (-1);
 
 	if (isatty(ttyfd)) {
-	    report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
+	    gpscli_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
             /* Save original terminal parameters */
             if (tcgetattr(ttyfd,&ttyset_old) != 0)
               return (-1);
@@ -100,7 +100,7 @@ int serial_open(char *device_name, int device_speed)
     return ttyfd;
 }
 
-void serial_close()
+void gps_close()
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {

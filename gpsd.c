@@ -67,9 +67,9 @@ static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
 {
-    serial_close();
+    gps_close();
     close(dsock);
-    report(1, "Received signal %d. Exiting...\n", sig);
+    gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
 
@@ -109,7 +109,7 @@ static int daemonize()
     return 0;
 }
 
-void report(int errlevel, const char *fmt, ... )
+void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     char buf[BUFSIZ];
@@ -207,11 +207,11 @@ static int handle_dgps()
     if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
     {
 	if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
-	    report(1, "Write to rtcm sink failed\n");
+	    gpscli_report(1, "Write to rtcm sink failed\n");
     }
     else 
     {
-	report(1, "Read from rtcm source failed\n");
+	gpscli_report(1, "Read from rtcm source failed\n");
     }
 
     return rtcmbytes;
@@ -221,10 +221,10 @@ static void deactivate()
 {
     session.fdin = -1;
     session.fdout = -1;
-    serial_close();
+    gps_close();
     if (session.device_type->wrapup)
 	session.device_type->wrapup();
-    report(1, "closed GPS\n");
+    gpscli_report(1, "closed GPS\n");
     session.gNMEAdata.mode = 1;
     session.gNMEAdata.status = 0;
 }
@@ -233,10 +233,10 @@ static int activate()
 {
     int input;
 
-    if ((input = serial_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
-	errexit("Exiting - serial open\n");
+    if ((input = gps_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
+	gps_gpscli_errexit("Exiting - serial open\n");
  
-    report(1, "opened GPS\n");
+    gpscli_report(1, "opened GPS\n");
     session.fdin = input;
     session.fdout = input;
 
@@ -342,9 +342,9 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    report(1, "gpsd started (Version %s)\n", VERSION);
-    msock = passiveTCP(service, QLEN);
-    report(1, "gpsd listening on port %s\n", service);
+    gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
+    msock = netlib_passiveTCP(service, QLEN);
+    gpscli_report(1, "gpsd listening on port %s\n", service);
 
     nfds = getdtablesize();
 
@@ -358,9 +358,9 @@ int main(int argc, char *argv[])
 	if (!getservbyname(dgpsport, "tcp"))
 	    dgpsport = "2101";
 
-	dsock = connectsock(dgpsserver, dgpsport, "tcp");
+	dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (dsock < 0) 
-	    errexit("Can't connect to dgps server");
+	    gps_gpscli_errexit("Can't connect to dgps server");
 
 	gethostname(hn, sizeof(hn));
 
@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    errexit("select");
+	    gps_gpscli_errexit("select");
 	}
 
 	need_gps = 0;
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
 	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
-		errlog("accept");
+		gpscli_report(0, "accept: %s\n", strerror(errno));
 
 	    else FD_SET(ssock, &afds);
 	}
@@ -465,7 +465,7 @@ static int validate(void)
 {
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
-	 report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	 gpscli_report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
 	 return 0;
     }
     return 1;
@@ -486,10 +486,10 @@ static int handle_request(int fd, fd_set * fds)
     buf[cc] = '\0';
 
     if (session.debug >= 2)
-	report(1, "<= client: %s", buf);
+	gpscli_report(1, "<= client: %s", buf);
     cur_time = time(NULL);
 
-#define STALE_COMPLAINT(l, f) report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
+#define STALE_COMPLAINT(l, f) gpscli_report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -660,23 +660,23 @@ static int handle_request(int fd, fd_set * fds)
     strcat(reply, "\r\n");
 
     if (session.debug >= 2)
-	report(1, "=> client: %s", reply);
+	gpscli_report(1, "=> client: %s", reply);
     if (cc && write(fd, reply, strlen(reply) + 1) < 0)
 	return 0;
 
     return cc;
 }
 
-void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
+void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
 /* write to GPS */
 {
     int fd;
 
     for (fd = 0; fd < nfds; fd++) {
 	if (FD_ISSET(fd, nmea_fds)) {
-	    report(1, "=> GPS: %s", buf);
+	    gpscli_report(1, "=> GPS: %s", buf);
 	    if (write(fd, buf, strlen(buf)) < 0) {
-		report(1, "Raw write %s", strerror(errno));
+		gpscli_report(1, "Raw write %s", strerror(errno));
 		FD_CLR(fd, afds);
 		FD_CLR(fd, nmea_fds);
 	    }
@@ -684,15 +684,10 @@ void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
     }
 }
 
-void errlog(char *s)
+void  gps_gpscli_errexit(char *s)
 {
-    report(0, "%s: %s\n", s, strerror(errno));
-}
-
-void  errexit(char *s)
-{
-    report(0, "%s: %s\n", s, strerror(errno));
-    serial_close();
+    gpscli_report(0, "%s: %s\n", s, strerror(errno));
+    gps_close();
     close(dsock);
     exit(2);
 }

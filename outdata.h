@@ -81,4 +81,4 @@ struct OUTDATA {
     int valid[12];		/* signal valid */
 };
 
-void report(int d, const char *fmt, ...);
+void gpscli_report(int d, const char *fmt, ...);

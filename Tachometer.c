@@ -9,7 +9,7 @@
  * author's name is retained.  The author assumes no responsibility for lost
  * sleep as a consequence of use of this software.
  *
- * Send any comments, bug reports, etc. to shutoh@isl.yamaha.JUNET
+ * Send any comments, bug gpscli_reports, etc. to shutoh@isl.yamaha.JUNET
  *
  *
  * Modifications : ilham@mit.edu   (July 10 '90)

@@ -33,11 +33,15 @@ I have a boat connected to the internet (Ricochet modem) running
 gpsd, the maping program runs here at home (no, I will not give
 you the boats IP address :-)
 
-There is a sample client included. It is called "gps". It simply connects
-to a gpsd and displays satellites in their current position in the sky.
-This only works for some GPS receivers!
+There is a GPS tester included. It is called "gps". It simply connects
+to a GPS and displays your latitude, longitude, altitude, and the signal
+quality from visible satellites.  When querying NMEA-compliant GPSes, it
+will show a diagram of satellites in their current position in the sky.
+It uses the same library code as gpsd.
 
 gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
+Also with the BU-303 USB GPS sold as the NaviLock, Deluo, and Hyperdata.
+
 
 
 CREDITS

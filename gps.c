@@ -94,11 +94,11 @@ extern void redraw();
 
 void quit_cb()
 {
-    serial_close();
+    gps_close();
     exit(0);
 }
 
-void report(int errlevel, const char *fmt, ... )
+void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     char buf[BUFSIZ];
@@ -320,7 +320,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 	if (buf[offset] == '\n') {
 	    if (buf[offset - 1] == '\r')
 		buf[offset - 1] = '\0';
-	    nmea_handle_message(buf);
+	    gps_NMEA_handle_message(buf);
 	    update_display(buf);
 	    offset = 0;
 	    return;
@@ -399,7 +399,7 @@ static void open_input(XtAppContext app)
     int input = 0;
     XtInputId input_id;
 
-    input = serial_open(device_name, device_speed);
+    input = gps_open(device_name, device_speed);
 
     session.fdin = input;
     session.fdout = input;
@@ -537,9 +537,9 @@ int main(int argc, char *argv[])
 }
 
 
-void errexit(char *s)
+void gps_gpscli_errexit(char *s)
 {
     perror(s);
-    serial_close();
+    gps_close();
     exit(1);
 }

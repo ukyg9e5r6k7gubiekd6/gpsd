@@ -1,0 +1,25 @@
+			Hacker's Guide to gpsd
+
+This is not a complicated piece of code.  Essentially, it spins in a loop 
+polling for input from one of three sources:
+
+1) The GPS, connected via serial or USB device.
+
+2) A client making requests over a TCP/IP port.
+
+4) A DGPS server issuing periodic differential-GPS updates.
+
+GPS input updates an internal data structure called gNMEAdata, which has
+slots in it for all the data you can get from a GPS.  Client commands mine
+that structure and ship reports up the socket to the client.  DGPS data is
+passed through, raw, to the GPS 
+
+The program supports multiple GPS types.  All are represented by
+driver method tables; the main loop knows nothing about the driver
+methods except when to call them.  At any given time one driver is
+active; by default it's the NMEA one.  A driver may change the active
+type, in which case the new driver's initializer method should be
+called before processing goes any forther.
+
+That's about all there is to it.
+

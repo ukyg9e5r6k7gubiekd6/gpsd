@@ -45,7 +45,7 @@ struct header {
 
 static void analyze(struct header *, unsigned short *, fd_set *, fd_set *);
 
-static unsigned short em_checksum(unsigned short *w, int n)
+static unsigned short em_gps_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
@@ -56,8 +56,8 @@ static unsigned short em_checksum(unsigned short *w, int n)
 }
 
 /* em_spew - Takes a message type, an array of data words, and a length
-   for the array, and prepends a 5 word header (including checksum).
-   The data words are expected to be checksummed */
+   for the array, and prepends a 5 word header (including gps_checksum).
+   The data words are expected to be gps_checksummed */
 
 #if defined (WORDS_BIGENDIAN)
 
@@ -93,7 +93,7 @@ static void em_spew(int type, unsigned short *dat, int dlen)
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
-    h.csum = em_checksum((unsigned short *) &h, 4);
+    h.csum = em_gps_checksum((unsigned short *) &h, 4);
 
     if (session.fdout != -1) {
 	end_write(session.fdout, &h, sizeof(h));
@@ -147,7 +147,7 @@ static void em_init()
       *(long *) (data + 13) = putlong(session.initpos.longitude, (session.initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
-      data[21] = em_checksum(data, 21);
+      data[21] = em_gps_checksum(data, 21);
 
       em_spew(1200, data, 22);
     }
@@ -165,7 +165,7 @@ static void send_rtcm(char *rtcmbuf, int rtcmbytes)
 
     data[0] = sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
-    data[n] = em_checksum(data, n);
+    data[n] = em_gps_checksum(data, n);
 
     em_spew(1351, data, n+1);
 }
@@ -216,28 +216,28 @@ static double degtodm(double a)
 static void handle1000(unsigned short *p)
 {
 #if 0
-    report(1, "date: %d %d %d  %d:%d:%d\n",
+    gpscli_report(1, "date: %d %d %d  %d:%d:%d\n",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    report(1, "  solution invalid:\n");
-    report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
-    report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
-    report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
-    report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
-    report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
-    report(1, "  solution type:\n");
-    report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
-    report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
-    report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
-    report(1, "Number of measurements in solution: %d\n", p[O(12)]);
-    report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
-    report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
-    report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
-    report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
-    report(1, "Map datum: %d\n", p[O(39)]);
-    report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
-    report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
-    report(1, "Separation: %f\n", (p[O(33)] / 100));
+    gpscli_report(1, "  solution invalid:\n");
+    gpscli_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
+    gpscli_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
+    gpscli_report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
+    gpscli_report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
+    gpscli_report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
+    gpscli_report(1, "  solution type:\n");
+    gpscli_report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
+    gpscli_report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
+    gpscli_report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
+    gpscli_report(1, "Number of measurements in solution: %d\n", p[O(12)]);
+    gpscli_report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
+    gpscli_report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
+    gpscli_report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
+    gpscli_report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
+    gpscli_report(1, "Map datum: %d\n", p[O(39)]);
+    gpscli_report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
+    gpscli_report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
+    gpscli_report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
     sprintf(session.gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
@@ -292,13 +292,13 @@ static void handle1002(unsigned short *p)
 	session.gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
 	session.gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
 #if 0
-	report(1, "Sat%02d:", i);
-	report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
-	report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
-	report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
-	report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
-	report(1, " PRN:%d", p[O(16 + (3 * i))]);
-	report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
+	gpscli_report(1, "Sat%02d:", i);
+	gpscli_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
+	gpscli_report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
+	gpscli_report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
+	gpscli_report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
+	gpscli_report(1, " PRN:%d", p[O(16 + (3 * i))]);
+	gpscli_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
 	for (j = 0; j < 12; j++) {
 	    if (session.gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
@@ -326,11 +326,11 @@ static void handle1003(unsigned short *p)
 	    session.gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
 	    session.gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
 #if 0
-	    report(1, "Sat%02d:", i);
-	    report(1, " PRN:%d", p[O(15 + (3 * i))]);
-	    report(1, " az:%d", p[O(16 + (3 * i))]);
-	    report(1, " el:%d", p[O(17 + (3 * i))]);
-	    report(1, "\n");
+	    gpscli_report(1, "Sat%02d:", i);
+	    gpscli_report(1, " PRN:%d", p[O(15 + (3 * i))]);
+	    gpscli_report(1, " az:%d", p[O(16 + (3 * i))]);
+	    gpscli_report(1, " el:%d", p[O(17 + (3 * i))]);
+	    gpscli_report(1, "\n");
 #endif
 	} else {
 	    session.gNMEAdata.PRN[j] = 0;
@@ -346,20 +346,20 @@ static void handle1005(unsigned short *p)
   int numcorrections = p[O(12)];
 
 #if 1
-  report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
-  report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
-  report(1, "Station ID: %d\n", p[O(10)]);
-  report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
-  report(1, "Number of corrections: %d\n", p[O(12)]);
+  gpscli_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
+  gpscli_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
+  gpscli_report(1, "Station ID: %d\n", p[O(10)]);
+  gpscli_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
+  gpscli_report(1, "Number of corrections: %d\n", p[O(12)]);
   for (i = 0; i < numcorrections; i++) {
-    report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
-    report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
-    report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
-    report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
-    report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
-    report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
-    report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
-    report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+    gpscli_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
+    gpscli_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
+    gpscli_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
+    gpscli_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
+    gpscli_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
+    gpscli_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
+    gpscli_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
+    gpscli_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
   }
 #endif
 }
@@ -371,9 +371,9 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
     char *bufp2;
     int i = 0, j = 0, nmea = 0;
 
-    if (p[h->ndata] == em_checksum(p, h->ndata)) {
+    if (p[h->ndata] == em_gps_checksum(p, h->ndata)) {
 	if (session.debug > 5)
-	    report(1, "id %d\n", h->id);
+	    gpscli_report(1, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
 	    handle1000(p);
@@ -388,7 +388,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 			((session.gNMEAdata.longitude > 0) ? 'E' : 'W'),
 		    session.gNMEAdata.mode, session.gNMEAdata.satellites, session.gNMEAdata.hdop,
 			session.gNMEAdata.altitude, 'M', session.gNMEAdata.separation, 'M', "", "");
-		add_checksum(bufp + 1);
+		gps_add_checksum(bufp + 1);
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp,
@@ -401,7 +401,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 		    session.gNMEAdata.course, session.gNMEAdata.day, session.gNMEAdata.month,
 		    (session.gNMEAdata.year % 100), session.gNMEAdata.mag_var,
 		    (session.gNMEAdata.mag_var > 0) ? 'E' : 'W');
-	    add_checksum(bufp + 1);
+	    gps_add_checksum(bufp + 1);
 	    nmea = 1000;
 	    break;
 	case 1002:
@@ -423,7 +423,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 	    bufp = bufp + strlen(bufp);
 	    sprintf(bufp, "%.2f,%.2f,%.2f*", session.gNMEAdata.pdop, session.gNMEAdata.hdop,
 		    session.gNMEAdata.vdop);
-	    add_checksum(bufp2 + 1);
+	    gps_add_checksum(bufp2 + 1);
 	    bufp2 = bufp = bufp + strlen(bufp);
 	    sprintf(bufp, "$PRWIZCH");
 	    bufp = bufp + strlen(bufp);
@@ -433,7 +433,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 	    }
 	    sprintf(bufp, "*");
 	    bufp = bufp + strlen(bufp);
-	    add_checksum(bufp2 + 1);
+	    gps_add_checksum(bufp2 + 1);
 	    nmea = 1002;
 	    break;
 	case 1003:
@@ -453,7 +453,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 		bufp += strlen(bufp);
 		if (i % 4 == 3) {
 		    sprintf(bufp, "*");
-		    add_checksum(bufp2 + 1);
+		    gps_add_checksum(bufp2 + 1);
 		    bufp += strlen(bufp);
 		    bufp2 = bufp;
 		}
@@ -468,9 +468,9 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
     }
     if (nmea > 0) {
 	if (session.debug > 4)
-	    report(1, "%s", buf);
+	    gpscli_report(1, "%s", buf);
 
-	send_nmea(afds, nmea_fds, buf);
+	gps_send_NMEA(afds, nmea_fds, buf);
 
     }
     if (eminit)
@@ -538,7 +538,7 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
     case EM_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
 
-	    if (h.csum == em_checksum((unsigned short *) &h, 4)) {
+	    if (h.csum == em_gps_checksum((unsigned short *) &h, 4)) {
 		state = EM_HUNT_DATA;
 		data = (unsigned short *) malloc((h.ndata + 1) * 2);
 		words = 0;

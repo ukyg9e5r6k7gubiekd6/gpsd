@@ -61,13 +61,13 @@ static void open_input(XtAppContext app);
 
 #undef Offset
 
-void errexit(char *s)
+void gps_gpscli_errexit(char *s)
 {
     perror(s);
     exit(1);
 }
 
-void report(int errlevel, const char *fmt, ... )
+void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     char buf[BUFSIZ];
@@ -190,7 +190,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
     if (buf[offset] == '\n') {
       if (buf[offset - 1] == '\r')
 	buf[offset - 1] = '\0';
-      nmea_handle_message(buf);
+      gps_NMEA_handle_message(buf);
       update_display();
       offset = 0;
       return;
@@ -199,7 +199,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
   }
 }
 
-int my_serial_open()
+int my_gps_open()
 {
     char *temp;
     char *port = DEFAULTPORT;
@@ -210,12 +210,12 @@ int my_serial_open()
     strcpy(temp, device_name);
 
     /* temp now holds the HOSTNAME portion and port the port number. */
-    ttyfd = connectTCP(temp, port);
+    ttyfd = netlib_connectTCP(temp, port);
     free(temp);
     port = 0;
 
     if (write(ttyfd, "r\n", 2) != 2)
-      errexit("Can't write to socket");
+      gps_gpscli_errexit("Can't write to socket");
     return ttyfd;
 }
 
@@ -224,7 +224,7 @@ static void open_input(XtAppContext app)
     int input = 0;
     XtInputId input_id;
 
-    input = my_serial_open();
+    input = my_gps_open();
 
     input_id = XtAppAddInput(app, input, (XtPointer) XtInputReadMask,
                              handle_input, NULL);

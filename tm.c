@@ -30,16 +30,16 @@ static void process_exception(char *sentence)
 {
     if (!strncmp("ASTRAL", sentence, 6) && isatty(session.fdout)) {
 	write(session.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-	report(1, "found a TripMate, initializing...");
+	gpscli_report(1, "found a TripMate, initializing...");
 	session.device_type = &tripmate;
 	tripmate.initializer();
     } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session.fdout))) {
 	write(session.fdout, "EARTHA\r\n", 8);
-	report(1, "found an EarthMate (id).");
+	gpscli_report(1, "found an EarthMate (id).");
 	session.device_type = &earthmate_b;
 	earthmate_b.initializer();
     } else if (session.debug > 1) {
-	report(1, "unknown exception: \"%s\"", sentence);
+	gpscli_report(1, "unknown exception: \"%s\"", sentence);
     }
 }
 
@@ -50,19 +50,19 @@ static void process_exception(char *sentence)
  *
  **************************************************************************/
 
-void nmea_handle_message(char *sentence)
+void gps_NMEA_handle_message(char *sentence)
 /* visible so the direct-connect clients can use it */
 {
-    report(2, "<= GPS: %s\n", sentence);
+    gpscli_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
-	if (process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
-	    report(2, "Unknown sentence: \"%s\"\n", sentence);
+	if (gps_process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
+	    gpscli_report(2, "Unknown sentence: \"%s\"\n", sentence);
     }
     else
 	process_exception(sentence);
 
-    report(3,
+    gpscli_report(3,
 	   "Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
 	   session.gNMEAdata.latitude,
 	   session.gNMEAdata.longitude,
@@ -84,9 +84,9 @@ static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
-	        nmea_handle_message(buf);
+	        gps_NMEA_handle_message(buf);
 		strcat(buf, "\r\n");
-		send_nmea(afds, nmea_fds, buf);
+		gps_send_NMEA(afds, nmea_fds, buf);
 	    }
 	    offset = 0;
 	    return 1;
@@ -147,10 +147,10 @@ void tripmate_initializer()
 		session.initpos.longitude, session.initpos.lond,
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
-	add_checksum(buf + 1);	/* add c-sum + cr/lf */
+	gps_add_checksum(buf + 1);	/* add c-sum + cr/lf */
 	if (session.fdout != -1) {
 	    write(session.fdout, buf, strlen(buf));
-	    report(1, "=> GPS: %s", buf);
+	    gpscli_report(1, "=> GPS: %s", buf);
 	}
     }
 }
