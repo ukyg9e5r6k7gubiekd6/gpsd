@@ -198,7 +198,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    struct tm *tm = NULL;
+    struct tm tm;
     char buf[BUFSIZ], *bufp = buf;
     int i = 0, j = 0;
     double track;
@@ -255,22 +255,22 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    time_l += (time_t) rint(pvt->gps_tow);
 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
-	    tm = gmtime(&time_l);
-	    session->hours   = tm->tm_hour;
-	    session->minutes = tm->tm_min;
-	    session->seconds = tm->tm_sec;
-	    session->day     = tm->tm_mday;
-	    session->month   = tm->tm_mon + 1;
-	    session->year    = tm->tm_year + 1900;
+	    gmtime_r(&time_l, &tm);
+	    session->hours   = tm.tm_hour;
+	    session->minutes = tm.tm_min;
+	    session->seconds = tm.tm_sec;
+	    session->day     = tm.tm_mday;
+	    session->month   = tm.tm_mon + 1;
+	    session->year    = tm.tm_year + 1900;
 
 	    sprintf(session->gNMEAdata.utc
 		    , "%04d/%02d/%dT%02d:%02d:%02dZ"
-		    , tm->tm_year + 1900
-		    , tm->tm_mon + 1
-		    , tm->tm_mday
-		    , tm->tm_hour
-		    , tm->tm_min
-		    , tm->tm_sec);
+		    , tm.tm_year + 1900
+		    , tm.tm_mon + 1
+		    , tm.tm_mday
+		    , tm.tm_hour
+		    , tm.tm_min
+		    , tm.tm_sec);
 
 	    session->gNMEAdata.latitude = radtodeg(pvt->lat);
 	    session->gNMEAdata.longitude = radtodeg(pvt->lon);

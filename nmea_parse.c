@@ -91,9 +91,10 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
     time_t now = time(NULL);
-    struct tm *tm = gmtime(&now);
+    struct tm tm;
 
-    strftime(out->utc, 3, "%C", tm);
+    gmtime_r(&now, &tm);
+    strftime(out->utc, 3, "%C", &tm);
     strncpy(out->utc+2, ddmmyy + 4, 2);	/* copy year */
     out->utc[4] = '-';
     strncpy(out->utc+5, ddmmyy + 2, 2);	/* copy month */
@@ -106,9 +107,10 @@ static void fake_mmddyyyy(struct gps_data_t *out)
 /* sentence didn't supply mm/dd/yyy, so we have to fake it */
 {
     time_t now = time(NULL);
-    struct tm *tm = gmtime(&now);
+    struct tm tm;
 
-    strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", tm);
+    gmtime_r(&now, &tm);
+    strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", &tm);
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
@@ -136,7 +138,7 @@ static double iso8661_to_unix(char *isotime)
 	usec = 0;
     res = mktime(&tm) - timezone + usec;
     now = time(NULL);
-    if (daylight && localtime(&now)->tm_isdst)
+    if (daylight && localtime_r(&now, &tm)->tm_isdst)
 	res -= 3600;
     if (now != (int)res)
 	gpsd_report(4, "clock skew is %lf seconds\n", now-(int)res);

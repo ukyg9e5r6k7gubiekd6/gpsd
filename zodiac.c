@@ -91,11 +91,11 @@ static void zodiac_init(struct gps_session_t *session)
 {
     unsigned short data[22];
     time_t t;
-    struct tm *tm;
+    struct tm tm;
 
     if (session->latitude && session->longitude) {
       t = time(NULL);
-      tm = gmtime(&t);
+      gmtime_r(&t, &tm);
 
       if (session->sn++ > 32767)
 	  session->sn = 0;
@@ -104,8 +104,8 @@ static void zodiac_init(struct gps_session_t *session)
       data[0] = session->sn;		/* sequence number */
       data[1] = (1 << 2) | (1 << 3);
       data[2] = data[3] = data[4] = 0;
-      data[5] = tm->tm_mday; data[6] = tm->tm_mon+1; data[7]= tm->tm_year+1900; 
-      data[8] = tm->tm_hour; data[9] = tm->tm_min; data[10] = tm->tm_sec;
+      data[5] = tm.tm_mday; data[6] = tm.tm_mon+1; data[7]= tm.tm_year+1900; 
+      data[8] = tm.tm_hour; data[9] = tm.tm_min; data[10] = tm.tm_sec;
       *(long *) (data + 11) = putlong(session->latitude, (session->latd == 'S') ? 1 : 0);
       *(long *) (data + 13) = putlong(session->longitude, (session->lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;

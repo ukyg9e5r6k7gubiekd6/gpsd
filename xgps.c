@@ -24,7 +24,7 @@ static Widget toplevel, form, left, right, quitbutton;
 static Widget satellite_list, satellite_diagram, status;
 static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
 static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
-static Widget rowColumn_19, rowColumn_20, rowColumn_21, rowColumn_22;
+static Widget rowColumn_19, rowColumn_20, rowColumn_21;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget text_8, text_9, text_10, text_11;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
