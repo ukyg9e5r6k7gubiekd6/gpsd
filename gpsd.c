@@ -60,7 +60,6 @@ void gps_force_repoll(void);
 struct session_t session = {&nmea};
 
 static int gps_timeout = GPS_TIMEOUT;
-static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int in_background = 0;
@@ -179,7 +178,6 @@ static void print_settings(char *service, char *dgpsserver, char *dgpsport)
     fprintf(stderr, "command line options:\n");
     fprintf(stderr, "  debug level:        %d\n", session.debug);
     fprintf(stderr, "  gps device name:    %s\n", device_name);
-    fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     fprintf(stderr, "  gpsd port:          %s\n", service);
     if (dgpsserver) {
       fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
@@ -436,7 +434,7 @@ int main(int argc, char *argv[])
     int need_gps;
 
     session.debug = 1;
-    while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:hi:p:d:t:")) != -1) {
 	switch (option) {
 	case 'T':
 	    session.device_type = set_device_type(*optarg);
@@ -476,9 +474,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'p':
 	    device_name = optarg;
-	    break;
-	case 's':
-	    device_speed = strtol(optarg, NULL, 0);
 	    break;
 	case 't':
 	    gps_timeout = strtol(optarg, NULL, 0);
@@ -670,7 +665,7 @@ void gps_activate(void)
 {
     int input;
 
-    if ((input = gps_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
+    if ((input = gps_open(device_name, session.device_type->baudrate)) < 0)
     {
 	gpscli_errexit("Exiting - serial open\n");
     }

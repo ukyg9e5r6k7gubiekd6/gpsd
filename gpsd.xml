@@ -21,7 +21,6 @@ and speedometer</refpurpose>
   <command>gpsd</command>  
       <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
-      <arg choice='opt'>-s <replaceable>baud rate</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
@@ -75,12 +74,6 @@ station.</para>
 the standard NMEA 0183 protocol: possible values are n=NMEA generic,
 t=TripMate, e=EarthMate, l=logfile.</para>
 </listitem>
-</varlistentry>
-<varlistentry>
-<term>-s</term>
-<listitem><para>Set baud rate (serial GPS devices only). Default is
-4800, except for EarthMate (-T e) devices which default to 9600.
-</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-S</term>
