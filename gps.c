@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
@@ -294,8 +295,8 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
     ioctl(*source, FIONREAD, &count);
 
    /* Make the port NON-BLOCKING so reads will not wait if no data */
-   if ((flags = fcntl(port, F_GETFL)) < 0) return;
-   if (fcntl(port, F_SETFL, flags | O_NDELAY) < 0) return;
+   if ((flags = fcntl(*source, F_GETFL)) < 0) return;
+   if (fcntl(*source, F_SETFL, flags | O_NDELAY) < 0) return;
 
     while (offset < BUFSIZE && count--) {
 	if (read(*source, buf + offset, 1) != 1)
