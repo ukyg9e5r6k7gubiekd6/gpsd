@@ -41,7 +41,7 @@ class stripplot:
             return
         # Compute the amount of time required for RS232 transmission.
         # Subtract that out of the total line latency  
-        rs232 = (session.length * 8.0) / session.baudrate
+        rs232 = (session.length * (8.0 + session.stopbits)) / session.baudrate
         fp.write("%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
               % (rs232, line_latency,
                  (session.emit_time - session.gps_time) % 3600,

@@ -353,7 +353,8 @@ static int handle_request(int fd, char *buf, int buflen)
 		gpsd_report(3, "%d turned on profiling mode\n", fd);
 		sprintf(phrase, ",Z=1");
 	    }
-	    sprintf(phrase + strlen(phrase), ":%d", session->baudrate);
+	    sprintf(phrase + strlen(phrase), ":%d:%d", 
+		    session->baudrate, session->device_type->stopbits);
 	    break;
 #endif /* PROFILING */
 	case '\r': case '\n':

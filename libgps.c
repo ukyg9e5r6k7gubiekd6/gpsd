@@ -175,7 +175,8 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		break;
 #ifdef PROFILING
 	    case 'Z':
-		sscanf(sp, "Z=%*c:%d", &gpsdata->baudrate);
+		sscanf(sp, "Z=%*c:%d:%d", 
+		       &gpsdata->baudrate, &gpsdata->stopbits);
 		break;
 	    case '$':
 		sscanf(sp, "$=%s:%lf:%d:%lf", 
