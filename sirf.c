@@ -17,7 +17,6 @@
 #include <stdio.h>
 
 #include "gpsd.h"
-#include "sirf.h"
 
 #define HI(n)	((n) >> 8)
 #define LO(n)	((n) & 0xff)
@@ -41,8 +40,26 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
    return(crc);
 }
 
+static int sirf_speed(int ttyfd, int speed) 
+/* change speed in binary mode */
+{
+   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x09,
+                     0x86, 
+                     0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
+		     0x08,			/* 8 data bits */
+		     0x01,			/* 1 stop bit */
+		     0x00,			/* no parity */
+		     0x01,			/* reserved */
+                     0x00, 0x00, 0xb0, 0xb3};
 
-int sirf_to_nmea(int ttyfd, int speed) 
+   msg[8] = HI(speed);
+   msg[9] = LO(speed);
+   crc_sirf(msg);
+   return (write(ttyfd, msg, 9+8) != 9+8);
+}
+
+#ifdef __UNUSED__
+static int sirf_to_nmea(int ttyfd, int speed) 
 /* switch from binary to NMEA at specified baud */
 {
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x18,
@@ -64,27 +81,7 @@ int sirf_to_nmea(int ttyfd, int speed)
    return (write(ttyfd, msg, 0x18+8) != 0x18+8);
 }
 
-
-int sirf_speed(int ttyfd, int speed) 
-/* change speed in binary mode */
-{
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x09,
-                     0x86, 
-                     0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
-		     0x08,			/* 8 data bits */
-		     0x01,			/* 1 stop bit */
-		     0x00,			/* no parity */
-		     0x01,			/* reserved */
-                     0x00, 0x00, 0xb0, 0xb3};
-
-   msg[8] = HI(speed);
-   msg[9] = LO(speed);
-   crc_sirf(msg);
-   return (write(ttyfd, msg, 9+8) != 9+8);
-}
-
-#ifdef __UNUSED__
-int sirf_waas_ctrl(int ttyfd, int enable) 
+static int sirf_waas_ctrl(int ttyfd, int enable) 
 /* enable or disable WAAS */
 {
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x07,
@@ -99,7 +96,7 @@ int sirf_waas_ctrl(int ttyfd, int enable)
 }
 
 
-int sirf_reset(int ttyfd) 
+static int sirf_reset(int ttyfd) 
 /* reset GPS parameters */
 {
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x19,
@@ -119,7 +116,7 @@ int sirf_reset(int ttyfd)
 }
 
 
-int sirf_dgps_source(int ttyfd, int source) 
+static int sirf_dgps_source(int ttyfd, int source) 
 /* set source for DGPS corrections */
 {
    int i;
@@ -191,7 +188,7 @@ int sirf_dgps_source(int ttyfd, int source)
 }
 
 
-int sirf_nav_lib (int ttyfd, int enable)
+static int sirf_nav_lib (int ttyfd, int enable)
 /* set single-channel mode */
 {
    u_int8_t msg_1[] = {0xa0, 0xa2, 0x00, 0x19,
@@ -213,7 +210,7 @@ int sirf_nav_lib (int ttyfd, int enable)
    return (write(ttyfd, msg_1, 0x19+8) != 0x19+8);
 }
 
-int sirf_power_mask(int ttyfd, int low)
+static int sirf_power_mask(int ttyfd, int low)
 /* set dB cutoff level below which satellite info will be ignored */
 {
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x03,
@@ -228,7 +225,7 @@ int sirf_power_mask(int ttyfd, int low)
 }
 
 
-int sirf_power_save(int ttyfd, int enable)
+static int sirf_power_save(int ttyfd, int enable)
 /* enable/disable SiRF trickle-power mode */ 
 {
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x09,

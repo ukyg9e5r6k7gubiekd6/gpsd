@@ -14,7 +14,6 @@
 #endif
 
 #include "gpsd.h"
-#include "sirf.h"
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
