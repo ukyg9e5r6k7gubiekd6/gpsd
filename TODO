@@ -1,5 +1,23 @@
 * Things to do:
 
+** Add an access(2) check to gpsprobe so it can exit with a useful message
+   when it doesn't have permissions to read the device.
+
+** Use this backtrace to figure out why the EarthDistance code in gpsprobe
+   occasionally craps out.
+
+EarthDistance: {'y2': -4716456.4853506498, 'lat1': 40.034998983333381, 'lat2': 40.034998333333341, 'lon2': -75.520034316666639, '.0': (40.034998983333381, -75.520034316666639), 'y1': -4716456.4409187995, 'lon1': -75.520034316666639, 'x2': 1217999.2611072753, '.2': (40.034998333333341, -75.520034316666639), 'x1': 1217999.2496329912, 'z1': 4092486.208437725, 'z2': 4092486.1527236192}
+Traceback (most recent call last):
+  File "./gpsprobe", line 215, in ?
+    recentered = map(lambda fix: gps.MeterOffset(centroid, fix), fixes)
+  File "./gpsprobe", line 215, in <lambda>
+    recentered = map(lambda fix: gps.MeterOffset(centroid, fix), fixes)
+  File "/home/esr/svn/gpsd/trunk/gps.py", line 325, in MeterOffset
+    return ( \
+  File "/home/esr/svn/gpsd/trunk/gps.py", line 320, in EarthDistance
+    raise ValueError
+ValueError
+
 ** On some systems gpsd doesn't pull DTR low when closing the GPS.
 
 Reported by Robert E. Anderson <rea@q.sr.unh.edu>.  He tells us this seems

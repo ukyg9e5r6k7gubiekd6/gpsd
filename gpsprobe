@@ -55,14 +55,17 @@ if __name__ == '__main__':
     fixes = []
 
     # Process options
-    (options, arguments) = getopt.getopt(sys.argv[1:], "n:h")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:")
     await = 100;
     device="/dev/gps"
+    bps = 4800
     for (switch, val) in options:
-	if (switch == '-n'):
+	if (switch == '-b'):
+	    bps = int(val)
+	elif (switch == '-n'):
 	    await = int(val)
         elif (switch == '-h'):
-            sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [device]\n")
+            sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [-s bps] [device]\n")
     if arguments:
         device = arguments[0]
 
@@ -117,7 +120,7 @@ if __name__ == '__main__':
 
     try:
         # Step one: Gather data
-        dev = gpsd.gpsd(device=device)
+        dev = gpsd.gpsd(device=device, bps=bps)
         baton = Baton("Waiting for %s" % device)
         while True:
             baton.twirl()
