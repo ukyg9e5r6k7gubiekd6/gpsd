@@ -15,7 +15,7 @@
 #include "gpsd.h"
 #include "sirf.h"
 
-/* These we can do from NMEA mode */
+/* This we can do from NMEA mode */
 
 int sirf_mode(struct gps_session_t *session, int binary, int speed) 
 /* switch GPS to specified mode at 8N1, optionarry to binary */
@@ -28,12 +28,6 @@ int sirf_mode(struct gps_session_t *session, int binary, int speed)
        return -1;
    else
        return status;
-}
-
-int sirf_nmea_waas(int ttyfd, int enable) 
-/* enable WAAS from NMEA mode */
-{
-    return nmea_send(ttyfd, "$PSRF108,0%d", enable);
 }
 
 /* These require binary mode */

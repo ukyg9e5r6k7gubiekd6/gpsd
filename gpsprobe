@@ -68,7 +68,7 @@ def SiRF_switcher(baudrate):
     "Generate a SiRF binary protocol command to switch back to NMEA."
     switcher = [
         '\x81',	# Byte  0 = 0x81: Switch to NMEA command
-    	'\x02',	# Byte  1 = 0x02: Mode - 2 in every example I fond, undocumnted
+    	'\x02',	# Byte  1 = 0x02: Leave debug-message switch as it is.
         '\x01',	# Byte  2 = 0x01: Enable GPGGA at 1-second interval
         '\x01',	# Byte  3 = 0x01: GPGGA checksum enable
         '\x01',	# Byte  4 = 0x01: Enable GPGLL at 1-second interval
