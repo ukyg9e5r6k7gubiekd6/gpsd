@@ -15,20 +15,6 @@
 #endif
 #endif
 
-#if defined (HAVE_TERMIO_H)
-#include <termio.h>
-#define USE_TERMIO 1
-#define TIOCGETA	TCGETA
-#define TIOCSETAF	TCSETAF
-
-#ifndef ONLCR
-#define ONLCR		ONLRET
-#endif
-
-#define termios		termio
-#define tcflag_t	ushort
-#endif
-
 #include "gpsd.h"
 
 #define DEFAULTPORT "2947"
@@ -74,13 +60,11 @@ int serial_open()
 	    return (-1);
 
 	if (isatty(ttyfd)) {
-
             /* Save original terminal parameters */
             if (tcgetattr(ttyfd,(void *)&ttyset_old) != 0)
               return (-1);
 
-	    if (ioctl(ttyfd, TIOCGETA, &ttyset) < 0)
-		return (-1);
+	    memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
 
 #if defined (USE_TERMIO)
 	    ttyset.c_cflag = CBAUD & device_speed;
@@ -92,7 +76,7 @@ int serial_open()
 	    ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
 	    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
 	    ttyset.c_oflag = (ONLCR);
-	    if (ioctl(ttyfd, TIOCSETAF, &ttyset) < 0)
+            if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
 		return (-1);
 	}
     }
@@ -109,7 +93,7 @@ void serial_close()
 	    ttyset.c_ispeed = B0;
 	    ttyset.c_ospeed = B0;
 #endif
-	    ioctl(ttyfd, TIOCSETAF, &ttyset);
+            tcsetattr(ttyfd, TCSANOW, &ttyset);
 	}
 	/* Restore original terminal parameters */
         tcsetattr(ttyfd,TCSANOW,(void *)&ttyset_old);
