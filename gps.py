@@ -301,7 +301,7 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     try:
         a = acos((x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2));
     except ValueError:
-        sys.stderr.write("EarthDistance: ", locals())
+        sys.stderr.write("EarthDistance: %s\n" % (locals(),))
         raise ValueError
     return CalcRad((lat1+lat2) / 2) * a
 
