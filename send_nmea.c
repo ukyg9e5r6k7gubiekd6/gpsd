@@ -90,8 +90,8 @@ void gps_deactivate(struct gpsd_t *session)
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
     gpscli_report(1, "closed GPS\n");
-    session->gNMEAdata.mode = 1;
-    session->gNMEAdata.status = 0;
+    session->gNMEAdata.mode = MODE_NO_FIX;
+    session->gNMEAdata.status = STATUS_NO_FIX;
 }
 
 int gps_activate(struct gpsd_t *session)
@@ -103,7 +103,7 @@ int gps_activate(struct gpsd_t *session)
 	return -1;
     else
     {
-	gpscli_report(1, "opened GPS\n");
+	gpscli_report(1, "gps_activate: opened GPS (%d)\n", input);
 	session->fdin = input;
 	session->fdout = input;
 	return input;
@@ -114,15 +114,17 @@ static int is_input_waiting(int fd)
 {
     int	count;
     if (fd < 0 || ioctl(fd, FIONREAD, &count) < 0)
-	return 0;
+	return -1;
     return count;
 }
 
-void gps_poll(struct gpsd_t *session)
+int gps_poll(struct gpsd_t *session)
 /* update the stuff in the scoreboard structure */
 {
+    int waiting;
+
     /* accept a DGPS correction if one is pending */
-    if (is_input_waiting(session->dsock))
+    if (is_input_waiting(session->dsock) > 0)
     {
 	char buf[BUFSIZE];
 	int rtcmbytes;
@@ -139,30 +141,35 @@ void gps_poll(struct gpsd_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    if (is_input_waiting(session->fdin)) {
+    waiting = is_input_waiting(session->fdin);
+    if (waiting == -1)
+	return -1;
+    else if (waiting) {
+	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
-    }
 
-    /* count the good fixes */
-    if (session->gNMEAdata.status > 0) 
-	session->fixcnt++;
+	/* count the good fixes */
+	if (session->gNMEAdata.status > STATUS_NO_FIX) 
+	    session->fixcnt++;
 
-    /* may be time to ship a DGPS correction to the GPS */
-    if (session->fixcnt > 10) {
-	if (!session->sentdgps) {
-	    session->sentdgps++;
-	    if (session->dsock > -1)
-	    {
-	      char buf[BUFSIZE];
+	/* may be time to ship a DGPS correction to the GPS */
+	if (session->fixcnt > 10) {
+	    if (!session->sentdgps) {
+		session->sentdgps++;
+		if (session->dsock > -1)
+		{
+		  char buf[BUFSIZE];
 
-	      sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
-		      session->gNMEAdata.latitude,
-		      session->gNMEAdata.longitude, 
-		      session->gNMEAdata.altitude);
-	      write(session->dsock, buf, strlen(buf));
+		  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
+			  session->gNMEAdata.latitude,
+			  session->gNMEAdata.longitude, 
+			  session->gNMEAdata.altitude);
+		  write(session->dsock, buf, strlen(buf));
+		}
 	    }
 	}
     }
+    return waiting;
 }
 
 void gps_wrap(struct gpsd_t *session)
