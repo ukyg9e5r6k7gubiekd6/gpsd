@@ -31,8 +31,8 @@
 #include "gpsd.h"
 #if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
-#define HI(n)	((n) >> 8)
-#define LO(n)	((n) & 0xff)
+#define HI(n)		((n) >> 8)
+#define LO(n)		((n) & 0xff)
 
 static u_int16_t crc_sirf(u_int8_t *msg) {
    int       pos = 0;
@@ -291,7 +291,7 @@ static int sirf_power_save(int ttyfd, int enable)
 
 static void extract_time(struct gps_session_t *session, int week, double tow)
 {
-    struct tm *when;
+    struct tm when;
     time_t intfixtime;
     double fixtime;
 
@@ -305,15 +305,15 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
     }
 
     intfixtime = (int)fixtime;
-    when = localtime(&intfixtime);
-    session->year = when->tm_year;
-    session->month = when->tm_mon + 1;
-    session->day = when->tm_mday;
-    session->hours = when->tm_hour;
-    session->minutes = when->tm_min;
+    gmtime_r(&intfixtime, &when);
+    session->year = when.tm_year + 1900;
+    session->month = when.tm_mon + 1;
+    session->day = when.tm_mday;
+    session->hours = when.tm_hour;
+    session->minutes = when.tm_min;
     session->seconds = fixtime - (intfixtime / 60) * 60;
     strftime(session->gNMEAdata.utc, sizeof(session->gNMEAdata.utc),
-	     "%Y-%m-%dT%H:%M:", when);
+	     "%Y-%m-%dT%H:%M:", &when);
     sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
 	    "%02.3f", session->seconds);
     session->gNMEAdata.gps_time = fixtime;
