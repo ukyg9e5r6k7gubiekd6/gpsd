@@ -20,7 +20,7 @@ static int nmea_parse_input(struct gps_session_t *session)
     } else if (session->packet_type == NMEA_PACKET) {
 	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
-	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
+	if (session->outbuffer[0]=='$' && strchr("GP",session->outbuffer[1])) {
 	    st = nmea_parse(session->outbuffer, &session->gpsdata);
 	} else {
 #ifdef NON_NMEA_ENABLE
@@ -37,7 +37,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 		}
 	    }
 #endif /* NON_NMEA_ENABLE */
-	    gpsd_report(1, "unknown exception: \"%s\"\n", session->outbuffer);
+	    gpsd_report(1, "unknown sentence: \"%s\"\n", session->outbuffer);
 	}
 
 	/* also copy the sentence up to clients in raw mode */
