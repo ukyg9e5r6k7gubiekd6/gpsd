@@ -208,7 +208,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
-    char	buf[BUFSIZE];
+    char	buf[BUFSIZ];
     int		n;
 #ifdef PROFILING
     struct timeval received;
@@ -321,7 +321,7 @@ static void dumpline(char *buf)
 main(int argc, char *argv[])
 {
     struct gps_data_t *collect;
-    char buf[BUFSIZE];
+    char buf[BUFSIZ];
 
     collect = gps_open(NULL, 0);
     gps_set_raw_hook(collect, dumpline);

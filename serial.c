@@ -72,17 +72,16 @@ int gpsd_get_speed(struct termios* ttyctl)
 
 /* every rate we're likely to see on a GPS */
 static int rates[] = {4800, 9600, 19200, 38400};
-#define NRATES	sizeof(rates)/sizeof(rates[0])
 
 static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
 {
-    char	buf[BUFSIZE];
+    char	buf[NMEA_BIG_BUF];
     int		n;
     size_t	maxreads;
 
     gpsd_set_speed(ttyfd, &session->ttyset, speed);
     buf[0] = '\0';
-    for (maxreads = 0; maxreads < NRATES; maxreads++) {
+    for (maxreads = 0; maxreads < 10; maxreads++) {
 	n = read(ttyfd, buf, sizeof(buf)-1);
 	if (n > 0) {
 	    buf[n] = '\0';

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/time.h>
 
 #include "gpsd.h"
@@ -13,10 +14,10 @@
 
 static void nmea_handle_input(struct gps_session_t *session)
 {
-    static char buf[BUFSIZE];	/* that is more then a sentence */
-    static int offset = 0;
+    static char buf[NMEA_BIG_BUF];
+    static unsigned int offset = 0;
 
-    while (offset < BUFSIZE) {
+    while (offset < sizeof(buf)) {
 	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
 	    return;
 #ifdef PROFILING
@@ -129,21 +130,42 @@ static void sirf_initializer(struct gps_session_t *session)
 static int sirf_switcher(struct gps_session_t *session, int speed) 
 /* switch GPS to specified mode at 8N1, optionarry to binary */
 {
-   int status = nmea_send(session->gNMEAdata.gps_fd, 
-		    "$PSRF100,1,%d,8,1,0", speed);
-   gpsd_report(1, "Send returned %d.\n", status);
-   tcdrain(session->gNMEAdata.gps_fd);
-   /* 
-    * This definitely fails below 40 milliseconds on a BU-303b.
-    * 50ms is also verified by Chris Kuethe on 
-    *        Pharos iGPS360 + GSW 2.3.1ES + prolific
-    *        Rayming TN-200 + GSW 2.3.1 + ftdi
-    *        Rayming TN-200 + GSW 2.3.2 + ftdi
-    * so it looks pretty solid.
-    */
-   usleep(50000);
-   return status && 
-	gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)speed);
+    if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,1,%d,8,1,0", speed) < 0)
+	return 0;
+
+    tcdrain(session->gNMEAdata.gps_fd);
+    /* 
+     * This definitely fails below 40 milliseconds on a BU-303b.
+     * 50ms is also verified by Chris Kuethe on 
+     *        Pharos iGPS360 + GSW 2.3.1ES + prolific
+     *        Rayming TN-200 + GSW 2.3.1 + ftdi
+     *        Rayming TN-200 + GSW 2.3.2 + ftdi
+     * so it looks pretty solid.
+     */
+    usleep(50000);
+    return 1;
+}
+
+static int sirf_validate_buffer(char *buf, size_t n)
+/* does this buffer look like it contains a valid SiRF-II response? */
+{
+    static char *prefixes[] = {
+	"$Version",
+	"$TOW: ",
+	"$WK:  ",
+	"$POS: ",
+	"$CLK: ",
+	"$CHNL:",
+	"$Baud rate: ",
+	"$HW Type: ",
+	"$Asic Version: ",
+	"$Clock Source: ",
+	"$Internal Beacon: ",
+    }, **ip;
+    for  (ip = prefixes; ip<prefixes+sizeof(prefixes)/sizeof(prefixes[0]); ip++)
+	if (!strncmp(*ip, buf, strlen(*ip)))
+	    return 1;
+    return nmea_validate_buffer(buf, n);
 }
 
 struct gps_type_t sirfII = {
@@ -151,7 +173,7 @@ struct gps_type_t sirfII = {
     "SiRF-II",		/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirf_initializer,		/* no initialization */
-    nmea_validate_buffer,	/* how to check that we have good data */
+    sirf_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_switcher,	/* we can change speeds */

@@ -40,7 +40,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->gNMEAdata.baudrate = session->device_type->baudrate;
     session->dsock = -1;
     if (dgpsserver) {
-	char hn[256], buf[BUFSIZE];
+	char hn[256], buf[BUFSIZ];
 	char *colon, *dgpsport = "rtcm-sc104";
 
 	if ((colon = strchr(dgpsserver, ':'))) {
@@ -115,10 +115,10 @@ int gpsd_poll(struct gps_session_t *session)
 
     /* accept a DGPS correction if one is pending */
     if (is_input_waiting(session->dsock) > 0) {
-	char buf[BUFSIZE];
+	char buf[BUFSIZ];
 	int rtcmbytes;
 
-	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->gNMEAdata.gps_fd !=-1)) {
+	if ((rtcmbytes=read(session->dsock,buf,sizeof(buf)))>0 && (session->gNMEAdata.gps_fd !=-1)) {
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
@@ -155,7 +155,7 @@ int gpsd_poll(struct gps_session_t *session)
 	if (session->fixcnt > 10 && !session->sentdgps) {
 	    session->sentdgps++;
 	    if (session->dsock > -1) {
-		char buf[BUFSIZE];
+		char buf[BUFSIZ];
 		sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
 			session->gNMEAdata.latitude,
 			session->gNMEAdata.longitude, 

@@ -596,7 +596,7 @@ int nmea_send(int fd, const char *fmt, ... )
 }
 
 int nmea_validate_buffer(char *buf, size_t n)
-/* dos this buffer look like it contains valid NMEA? */
+/* does this buffer look like it contains valid NMEA? */
 {
     char	*sp, csum[3];
     unsigned int sum;

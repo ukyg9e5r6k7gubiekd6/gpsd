@@ -14,7 +14,8 @@
 #define BINARY_ENABLE
 #endif /* defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE) */
 
-#define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
+#define NMEA_MAX	82		/* max length of NMEA sentence */
+#define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
 struct gps_session_t;
 

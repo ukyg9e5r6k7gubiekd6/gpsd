@@ -45,7 +45,7 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
  */
 static int end_write(int fd, void *d, int len)
 {
-    char buf[BUFSIZE];
+    char buf[BUFSIZ];
     char *p = buf;
     char *data = (char *)d;
 
@@ -154,6 +154,11 @@ static void send_rtcm(struct gps_session_t *session,
     data[n] = zodiac_checksum(data, n);
 
     zodiac_spew(session, 1351, data, n+1);
+    tcdrain(session->gNMEAdata.gps_fd);
+    /*
+     * This is a guess at the required settle time.
+     */
+    usleep(50000);
 }
 
 static int zodiac_send_rtcm(struct gps_session_t *session,
@@ -318,7 +323,7 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
 static void analyze(struct gps_session_t *session, 
 		    struct header *h, unsigned short *p)
 {
-    char buf[BUFSIZE];
+    char buf[BUFSIZ];
     int i = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
@@ -432,7 +437,7 @@ struct gps_type_t zodiac_binary =
     "Zodiac binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
     zodiac_init,	/* initialize the device */
-    NULL,		/* binary protocol */
+    NULL,		/* binary protocol, no buffer validation */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */

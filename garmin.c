@@ -190,7 +190,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
     struct tm *tm = NULL;
-    char buf[BUFSIZE], *bufp = buf;
+    char buf[BUFSIZ], *bufp = buf;
     int i = 0, j = 0;
     double track;
 

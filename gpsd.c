@@ -186,7 +186,7 @@ static int validate(void)
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
-    char reply[BUFSIZE], phrase[BUFSIZE], *p;
+    char reply[BUFSIZ], phrase[BUFSIZ], *p;
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
 #ifdef PROFILING
@@ -211,11 +211,41 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
 #ifdef PROFILING
+#define RETRIES	10
+
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
-		if (session->device_type->speed_switcher)
-		    session->device_type->speed_switcher(session, i);
+		if (session->device_type->speed_switcher) {
+		    if (session->device_type->speed_switcher(session, i)) {
+			int oldspeed = gpsd_get_speed(&session->ttyset);
+			gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)i);
+
+			if (session->device_type->validate_buffer) {
+			    char buf[NMEA_MAX*2+1];
+			    int n, retries;
+
+			    /*
+			     * We put this here in order to cope with SiRF-II
+			     * devices that can't actually switch speeds.  Some
+			     * versions of the TripNav 200 with FTDI chipset 
+			     * seem to have this problem.
+			     */
+			    for (retries = 0; retries < RETRIES; retries++) {
+				n = read(session->gNMEAdata.gps_fd, buf, sizeof(buf)-1);
+				if (n > 0) {
+				    buf[n] = '\0';
+				    break;
+				}
+				else if (n == -1 && errno != EAGAIN)
+				    break;
+			    }
+			    
+			    if (!session->device_type->validate_buffer(buf, n))
+				gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)oldspeed);
+			}
+		    }
+		}
 	    }
 #endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
@@ -707,7 +737,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (FD_ISSET(fd, &rfds)) {
-		    char buf[BUFSIZE];
+		    char buf[BUFSIZ];
 		    int buflen;
 		    gpsd_report(3, "checking %d \n", fd);
 		    if ((buflen = read(fd, buf, sizeof(buf) - 1)) <= 0) {
