@@ -118,7 +118,6 @@ class splitplot:
             return False
         for s in splitplot.sentences:
             if s == session.tag:
-                print "Saved", session.tag
                 fp.write("%2.6f\t"% session.rs232)
                 self.found[s] = True
             else:
