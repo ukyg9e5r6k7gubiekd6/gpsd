@@ -109,7 +109,7 @@ static void em_spew(int type, void *dat, int dlen)
     write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
 }
 
-static void em_init()
+static void em_init(char *latitude, char *longitude, char latd, char lond)
 {
     unsigned short data[22];
     time_t t;
