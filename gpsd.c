@@ -211,7 +211,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	switch (toupper(*p++)) {
 	case 'A':
 	    if (have_fix(session) && SEEN(ud->altitude_stamp))
-		sprintf(phrase, ",A=%f", ud->altitude);
+		sprintf(phrase, ",A=%.3f", ud->altitude);
 	    else if (explicit)
 		strcpy(phrase, ",A=?");
 	    break;
@@ -321,8 +321,8 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			&& SEEN(ud->latlon_stamp)
 			&& SEEN(ud->track_stamp)
 		        && SEEN(ud->speed_stamp)) {
-		sprintf(phrase, ",O=%s ? %f %f",
-			ud->utc, ud->latitude, ud->longitude);
+		sprintf(phrase, ",O=%.2f ? %.4f %.4f",
+			ud->gps_time, ud->latitude, ud->longitude);
 		if (SEEN(session->gNMEAdata.altitude_stamp))
 		    sprintf(phrase+strlen(phrase), " %.2f",
 			    session->gNMEAdata.altitude);
@@ -338,14 +338,14 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		else
 		    strcat(phrase, "? ?");
 		sprintf(phrase+strlen(phrase),
-			"%f %f %f ? ? ?",
+			"%.4f %.3f %.3f ? ? ?",
 			ud->track, ud->speed, ud->climb);
 	    } else
 		strcpy(phrase, ",O=?");
 	    break;
 	case 'P':
 	    if (have_fix(session) && SEEN(ud->latlon_stamp))
-		sprintf(phrase, ",P=%f %f", 
+		sprintf(phrase, ",P=%.4f %.4f", 
 			ud->latitude, ud->longitude);
 	    else if (explicit)
 		strcpy(phrase, ",P=?");
@@ -384,19 +384,19 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    break;
 	case 'T':
 	    if (have_fix(session) && SEEN(ud->track_stamp))
-		sprintf(phrase, ",T=%f", ud->track);
+		sprintf(phrase, ",T=%.4f", ud->track);
 	    else if (explicit)
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
 	    if (have_fix(session) && SEEN(ud->climb_stamp))
-		sprintf(phrase, ",U=%f", ud->climb);
+		sprintf(phrase, ",U=%.3f", ud->climb);
 	    else if (explicit)
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
 	    if (have_fix(session) && SEEN(ud->speed_stamp))
-		sprintf(phrase, ",V=%f", ud->speed);
+		sprintf(phrase, ",V=%.3f", ud->speed);
 	    else if (explicit)
 		strcpy(phrase, ",V=?");
 	    break;
@@ -404,17 +404,14 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
-		gpsd_report(3, "%d turned on watching\n", fd);
 		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &watcher_fds);
-		gpsd_report(3, "%d turned off watching\n", fd);
 		sprintf(phrase, ",W=0");
 		p++;
 	    } else if (FD_ISSET(fd, &watcher_fds)) {
 		FD_CLR(fd, &watcher_fds);
-		gpsd_report(3, "%d turned off watching\n", fd);
 		sprintf(phrase, ",W=0");
 	    } else {
 		FD_SET(fd, &watcher_fds);
@@ -539,7 +536,7 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 	strcat(cmds, "q");
     if (mask & GPGSV)
 	strcat(cmds, "y");
-    if (mask & (GPGSA | PGRME))
+    if (mask & PGRME || ((mask & GPGSA) && !(ud->seen_sentences & PGRME)))
 	strcat(cmds, "e");
 
     if (cmds[0])

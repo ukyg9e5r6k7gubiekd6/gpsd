@@ -258,7 +258,8 @@ timestamp is always reported.  Fields are as follows, in order:</para>
 <variablelist>
 <varlistentry>
 <term>timestamp</term>
-<listitem><para>An ISO8601 timestamp as in the D report.</para></listitem>
+<listitem><para>Seconds since the Unix epoch, GMT. May have a
+fractional part of up to .01sec precision.</para></listitem>
 </varlistentry>
 
 <varlistentry>
