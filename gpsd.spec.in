@@ -120,7 +120,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.9-1
 - Python files restored to RPM.
 
 * Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.8-1
