@@ -107,7 +107,7 @@ user has issued an 'R' or 'W' command with
 to the client.  If the third argument is non-NULL, it is used as a
 hook function to be called on each line of streamed data.
 <function>gpsd_poll()</function> returns -1 if there was an error, 0 
-if no data was read or no changes or 1 if gpsdata has changes.<para>
+if no data was read or no changes or 1 if gpsdata has changes.</para>
 
 <para>Several member groups within the GPS-data structure have
 last-modified timestamps and change-flag members associated with them;
