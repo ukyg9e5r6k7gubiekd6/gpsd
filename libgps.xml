@@ -84,8 +84,9 @@ at
 <para>Calling <function>gpsd_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
 attached to
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. Negative
-return values indicate errors at the socket layer; see
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. 
+<function>gpsd_open()</function> returns NULL on errors.  errno is
+set depending on the error returned from the the socket layer; see
 <filename>gps.h</filename> for values and explanations.</para>
 
 <para><function>gpsd_close()</function> ends the session.</para>

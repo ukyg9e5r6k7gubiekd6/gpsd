@@ -158,7 +158,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 #define RAD_2_DEG  57.2957795130823208767981548141051703L /* degrees = 180/pi */
 #define DEG_2_RAD  0.0174532925199432957692369076848861271L /* radians = pi/180 */
 
-/* gps_open() error return values */
+/* gps_open() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
 #define NL_NOHOST	-2	/* can't get host entry */
 #define NL_NOPROTO	-3	/* can't get protocol entry */
