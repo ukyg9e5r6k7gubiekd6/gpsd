@@ -3,6 +3,7 @@
  *
  * Author: Kazuhiko Shutoh, 1989.
  * Revised by Shinji Sumimoto, 1989/9 (xtachos)
+ * Modifications : ilham@mit.edu   (July 10 '90)
  *
  * Permission to use, copy, modify and distribute without charge this software,
  * documentation, images, etc. is granted, provided that this comment and the
@@ -10,14 +11,12 @@
  * sleep as a consequence of use of this software.
  *
  * Send any comments, bug reports, etc. to shutoh@isl.yamaha.JUNET
- *
- * Modifications : ilham@mit.edu   (July 10 '90)
  */
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
-#include "config.h"
+#include "config.h"	/* must define UNUSED */
 
 /****************************************************************
  *
@@ -38,8 +37,7 @@ typedef struct {
 		XPoint	point_list[5];
 		} StringRec;
 
-/*	Number character database - like an "LED" */
-
+/*	Number character database - like an LED */
 static DigitRec num_segment[] = {
     {{1,1,1,1,1,1,0}},
     {{0,1,1,0,0,0,0}},
@@ -60,7 +58,6 @@ static XSegment	offset[] = {
 		{-10, 10,-10,  0},
 		{-10,  0,-10,-10},
 		{-10,  0, 10,  0}};
-
 
 /*	" X 10 %" character database	*/
 static StringRec	char_data[] = {
