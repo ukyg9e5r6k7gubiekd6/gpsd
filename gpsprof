@@ -79,7 +79,7 @@ class spaceplot:
             fmt += "set autoscale\n"
             fmt += 'set key below\n'
             fmt += 'set key title "%s"\n' % time.asctime()
-            fmt += 'set size -1\n'
+            fmt += 'set size ratio -1\n'
             fmt += 'set style line 3 pt 2 # Looks good on X11\n'
             fmt += 'set xlabel "Meters east from %s"\n' % lonstring
             fmt += 'set ylabel "Meters north from %s"\n' % latstring
