@@ -17,7 +17,7 @@
      tm.c        -> nmea_drivers.c
      em.c        -> earthmate.c
 
-   Yes, I could do these destructively, but I'd prefer to to lose the
+   Yes, I could do these destructively, but I'd prefer not to lose the
    project history.  Unfortunately, CVS being what it is, I can't do
    this without write access to the project repository.
 
