@@ -21,8 +21,7 @@ C:
 
 </funcsynopsisinfo>
 <funcprototype>
-<funcdef>void <function>gpsd_init</function></funcdef>
-    <paramdef>struct gps_session_t * <parameter>session</parameter></paramdef>
+<funcdef>struct gps_session_t * <function>gpsd_init</function></funcdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
@@ -55,8 +54,7 @@ Python:
 
 import gpsd
 
-session = gpsd.gpsd(device="/dev/gps", bps=4800,
-                 devtype='n', dgps=None, logger=None)
+session = gpsd.gpsd(device="/dev/gps", devtype='n', dgps=None, logger=None)
 session.activate()
 
 session.deactivate()

@@ -324,22 +324,21 @@ class gpsd(gps.gpsdata):
 	# 200 (and possibly other USB GPSes) gets completely hosed
 	# in the presence of flow control.  Thus, turn off CRTSCTS.
         self.raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-        if self.devtype.stopbits == 2:
-            self.raw[2] |= (termios.CSIZE & termios.CS7)	# cflag
-        else:
-            self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
-        self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
-        self.raw[3] = 0						# lflag
-        for speed in (4800, 9600, 19200, 38400, 57600):
-            if speed != self.bps:
+        for stopbits in range(1, 3):
+            self.raw[2] &= ~termios.CSIZE			# cflag
+            if stopbits == 2:
+                self.raw[2] |= (termios.CSIZE & termios.CS7)	# cflag
+            else:
+                self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
+            self.raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+            self.raw[3] = 0					# lflag
+            for speed in (4800, 9600, 19200, 38400, 57600):
                 if self.set_speed(speed):
-                    break
-        else:
-            self.ttyfd = -1
-            return self.ttyfd
-        if self.devtype.initializer:
-            self.devtype.initializer(self)
-	self.online = True;
+                    if self.devtype.initializer:
+                        self.devtype.initializer(self)
+                    self.online = True;
+                    return self.ttyfd
+        self.ttyfd = -1
         return self.ttyfd
 
     def deactivate(self):
