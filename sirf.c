@@ -1,5 +1,6 @@
 /*
  * This is the gpsd driver for SiRF-II GPSes operating in binary mode.
+ * It also handles uBlox, a SiRF derivative.
  *
  * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
  * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.
@@ -133,7 +134,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
-    gpsd_report(5, "Raw SiRF packet type %d length %d: %s\n", buf[0], len, buf2);
+    gpsd_report(5, "Raw SiRF packet type %d length %d: %s\n", buf[0],len,buf2);
+    session->gpsdata.sentence_length = len;
 
     switch (buf[0])
     {
@@ -183,7 +185,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gpsdata.fix.mode = MODE_3D;
 	    else if (session->gpsdata.status)
@@ -209,7 +210,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
-	    session->gpsdata.sentence_length = 41;
 	    strcpy(session->gpsdata.tag, "MND");
 	    return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 	}
@@ -254,7 +254,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
-	session->gpsdata.sentence_length = 188;
 	strcpy(session->gpsdata.tag, "MTD");
 	return SATELLITE_SET;
 
@@ -262,13 +261,15 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
 		    session->outbuffer+5);
 	fv = atof(session->outbuffer+5);
-	if (fv < 231) {
-	    session->driverstate |= SIRF_LT_231;
-	    sirfbin_mode(session, 0);
-	} else if (fv < 232) 
-	    session->driverstate |= SIRF_EQ_231;
-	else
-	    session->driverstate |= SIRF_GE_232;
+	if (fv > 100) {
+	    if (fv < 231) {
+		session->driverstate |= SIRF_LT_231;
+		sirfbin_mode(session, 0);
+	    } else if (fv < 232) 
+		session->driverstate |= SIRF_EQ_231;
+	    else
+		session->driverstate |= SIRF_GE_232;
+	}
 	if (strstr(session->outbuffer+5, "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
@@ -355,7 +356,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gpsdata.fix.mode = MODE_3D;
 	    else if (session->gpsdata.status)
@@ -401,7 +401,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
-	    session->gpsdata.sentence_length = 91;
 	    strcpy(session->gpsdata.tag, "GND");
 	}
 	session->driverstate |= SIRF_SEEN_41;
@@ -409,6 +408,50 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 
     case 0x32:		/* SBAS corrections */
 	return 0;
+
+    case 0x62:		/* uBlox Extended Measured Navigation Data */
+	/* this packet is only sent by uBlox firmware from version 1.32 */
+	mask =	LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
+		STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
+	session->gpsdata.fix.latitude = getl(1) * RAD_2_DEG * 1e-8; 
+	session->gpsdata.fix.longitude = getl(5) * RAD_2_DEG * 1e-8;
+	session->gpsdata.fix.altitude = getl(9) * 1e-3;
+	session->gpsdata.fix.speed = getl(13) * 1e-3;
+	session->gpsdata.fix.climb = getl(17) * 1e-3;
+	session->gpsdata.fix.track = getl(21) * RAD_2_DEG * 1e-8;
+
+	navtype = getb(25);
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+	if (navtype & 0x80)
+	    session->gpsdata.status = STATUS_DGPS_FIX;
+	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	    session->gpsdata.status = STATUS_FIX;
+	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	    session->gpsdata.fix.mode = MODE_3D;
+	else if (session->gpsdata.status)
+	    session->gpsdata.fix.mode = MODE_2D;
+	gpsd_report(4, "EMND 0x62: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+		    navtype, session->gpsdata.status, session->gpsdata.fix.mode);
+
+	if (navtype & 0x40) {		/* UTC corrected timestamp? */
+	    mask |= TIME_SET;
+	    session->gpsdata.nmea_date.tm_year = getw(26) - 1900;
+	    session->gpsdata.nmea_date.tm_mon = getb(28) - 1;
+	    session->gpsdata.nmea_date.tm_mday = getb(29);
+	    session->gpsdata.nmea_date.tm_hour = getb(30);
+	    session->gpsdata.nmea_date.tm_min = getb(31);
+	    session->gpsdata.nmea_date.tm_sec = 0;
+	    session->gpsdata.subseconds = getw(32)*1e-3;
+	}
+
+	/* session->gpsdata.gdop = getb(34) / 5.0; */
+	session->gpsdata.pdop = getb(35) / 5.0;
+	session->gpsdata.hdop = getb(36) / 5.0;
+	session->gpsdata.vdop = getb(37) / 5.0;
+	/* session->gpsdata.tdop = getb(38) / 5.0; */
+	strcpy(session->gpsdata.tag, "EMND");
+	return mask;
 
     case 0xff:		/* Debug messages */
 	buf2[0] = '\0';
