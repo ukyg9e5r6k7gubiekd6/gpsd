@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# gpsprobe -- collect send-cycle and performance wstatistics on a GPS
+# gpsprobe -- collect send-cycle and performance statistics on a GPS
 
 from math import *
 import time, os
@@ -68,17 +68,21 @@ if __name__ == '__main__':
     last_seen = {}
     notifications = []
     last_command = None
-    SIRFII = "This GPS probably has a SiRF-II chipset.\n"
 
     def roundoff(n):
         # Round a time to hundredths of a second
         return round(n*100) / 100.0
 
+    def register(trait):
+        if trait not in notifications:
+            notifications.append(trait)
+
     def count(sentence):
          global intervals, last_seen, last_command
          baton.twirl()
          # Toss out everything that doesn't look like well-formed NMEA
-         leader = sentence.split(",")[0]
+         fields = sentence.split(",")
+         leader = fields[0]
          if leader and leader[0] == '$':
              leader = leader[1:]
          else:
@@ -97,8 +101,17 @@ if __name__ == '__main__':
          # Watch for trigger strings
          for string in triggers.keys():
              if sentence.find(string) > -1:
-                 notifications.append(triggers[string])
-
+                 retister(triggers[string])
+         if leader == "GPVTG":
+             if fields[2] == 'T':
+                 register("GPVTG format indicates NMEA version >= 3.01.\n")
+             else:
+                 register("GPVTG format indicates NMEA version < 3.01.\n")
+         if leader == "GPRMC":
+             if len(fields) > 12 and fields[12] in "ADEMSN":
+                 register("GPRMC format indicates NMEA version >= 2.3.\n")
+             else:
+                 register("GPRMC format indicates NMEA version < 2.3.\n")
     try:
         # Step one: Gather data
         dev = gpsd.gpsd(device=device)
@@ -117,12 +130,10 @@ if __name__ == '__main__':
                 countdown -= 1
                 if dev.status > gps.STATUS_NO_FIX and dev.mode > gps.MODE_NO_FIX:
                     fixes.append((dev.latitude, dev.longitude))
-                    if SIRFII not in notifications and '.' in dev.utc:
-                        notifications.append(SIRFII)
+                    if '.' in dev.utc:
+                        register("This GPS probably has a SiRF-II chipset.\n")
         baton.end()
         del last_seen
-
-        sys.stdout.write("".join(notifications))
 
         # Step two: get command frequencies and the basic send cycle time
         frequencies = {}
@@ -166,7 +177,10 @@ if __name__ == '__main__':
         else:
             print "Send cycle is once per %d seconds." % sendcycle
 
-        # Step three: run an empirical check on uncertainty of position.
+        # Step three: print out registered traits
+        sys.stdout.write("".join(notifications))
+
+        # Step four: run an empirical check on uncertainty of position.
         if len(fixes) == 0:
             print "No fixes collected, can't estimate accuracy."
         else:
