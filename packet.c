@@ -400,9 +400,9 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    packet_discard(session);
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
-	    int checksum = (trailer[0] << 8) | trailer[1];
+	    unsigned int checksum = (trailer[0] << 8) | trailer[1];
 	    unsigned int n, crc = 0;
-	    for (n = 4; n < trailer - session->inbuffer; n++)
+	    for (n = 4; n < (size_t)(trailer - session->inbuffer); n++)
 		crc += session->inbuffer[n];
 	    crc &= 0x7fff;
 	    if (checksum == crc) {
