@@ -1,5 +1,5 @@
 Name: gpsd
-%define SO3VERSION	2.0.0
+%define SO3VERSION	3.0.0
 %define SO1VERSION	2
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
@@ -193,6 +193,39 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 * Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
 - Creation of specfile.
+
+* Sun Mar 21 2004 Remco Treffkorn <remco@rvt.com> - 1.10
+- Without PRWIZCH sentence: sat. colors in gps according to ss, grey==lt20, 
+  yellow==lt40 else green. 
+- Added L Q and I to the protocol. Removed G and T.
+  Changed the timeout mechanism. Try to not return Lat/Lon/Alt if
+  validity is in doubt.
+
+* Thu Jan 29 2004 Remco Treffkorn <remco@rvt.com> - ?
+- Make applications null-terminate their resource lists.
+
+* Sat Dec 20 2003 Remco Treffkorn <remco@rvt.com> - ?
+- Removed <varargs.h> from netlib. Not needed, and new gcc does not support
+  it any more.
+
+* Wed Aug 20 2003 Remco Treffkorn <remco@rvt.com> - 1.10
+- Add install target. Fix clean target. Make GPS timeout configurable.
+- Make xgpsspeed build with Apple's X11.
+- Make sure that we don't segfault if the NMEA is badly formed.
+
+* Mon Aug 18 2003 Remco Treffkorn <remco@rvt.com> - ?
+- Use cfset[io]speed() to set speed in serial.h. Glibc is quite insane
+  and I am tired to chase it, so I give up. Hope this works for BSD.
+  Set status and mode 0 after GPS timeout (5 sec) - Cougar <cougar@random.ee>
+
+* Sun Feb 16 2003 Remco Treffkorn <remco@rvt.com> - 1.09
+- Include sys/time.h in gpsd.c for struct timeval.
+
+* Sun Nov 03 2002 Remco Treffkorn <remco@rvt.com> - ?
+- G or g command returns six-digit Maidenhead grid square (like FN12fx)
+
+* Thu Oct 03 2002 Remco Treffkorn <remco@rvt.com> - 1.08
+- Added sockopt SO_REUSEADDR to netlib.c passive_sock.
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
