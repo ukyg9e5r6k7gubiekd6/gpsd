@@ -18,8 +18,6 @@
 #include "gps.h"
 #include "gpsd.h"
 
-#define DEFAULTPORT "2947"
-
 /* define global variables */
 static int ttyfd = -1;
 static struct termios ttyset, ttyset_old;
@@ -50,55 +48,33 @@ static int set_baud(long baud)
 int gps_open(char *device_name, int device_speed)
 {
     char *temp;
-    char *p;
 
     temp = strdup(device_name);
 
-    if ( (p = strchr(temp, ':')) ) {
-	char *port = DEFAULTPORT;
-	gpscli_report(1, "opening slave daemon at %s\n", device_name);
+    gpscli_report(1, "opening GPS data source at %s\n", device_name);
+    ttyfd = open(temp, O_RDWR | O_NONBLOCK);
 
-	if (*(p + 1))
-	    port = p + 1;
-	*p = '\0';
+    if (ttyfd < 0)
+	return (-1);
 
-	/* temp now holds the HOSTNAME portion and port the port number. */
-	if ((ttyfd = netlib_connectTCP(temp, port)) == -1)
+    if (isatty(ttyfd)) {
+	gpscli_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
+	/* Save original terminal parameters */
+	if (tcgetattr(ttyfd,&ttyset_old) != 0)
+	  return (-1);
+
+	memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
+
+	device_speed = set_baud(device_speed);
+	cfsetispeed(&ttyset, (speed_t)device_speed);
+	cfsetospeed(&ttyset, (speed_t)device_speed);
+
+	ttyset.c_cflag &= ~(PARENB | CRTSCTS);
+	ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
+	ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
+	ttyset.c_oflag = (ONLCR);
+	if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
 	    return (-1);
-
-	port = 0;
-
-	if (write(ttyfd, "r1\n", 2) != 2)
-	{
-	    gpscli_report(0, "Can't write to socket\n");
-	    return (-1);
-	}
-    } else {
-	gpscli_report(1, "opening GPS data source at %s\n", device_name);
-	ttyfd = open(temp, O_RDWR | O_NONBLOCK);
-
-	if (ttyfd < 0)
-	    return (-1);
-
-	if (isatty(ttyfd)) {
-	    gpscli_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
-            /* Save original terminal parameters */
-            if (tcgetattr(ttyfd,&ttyset_old) != 0)
-              return (-1);
-
-	    memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
-
-	    device_speed = set_baud(device_speed);
-	    cfsetispeed(&ttyset, (speed_t)device_speed);
-	    cfsetospeed(&ttyset, (speed_t)device_speed);
-
-	    ttyset.c_cflag &= ~(PARENB | CRTSCTS);
-	    ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
-	    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
-	    ttyset.c_oflag = (ONLCR);
-            if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
-		return (-1);
-	}
     }
     free(temp);
     return ttyfd;
