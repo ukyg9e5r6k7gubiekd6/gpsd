@@ -33,7 +33,6 @@ struct gps_data_t *gps_open(char *host, char *port)
     INIT(gpsdata->latlon_stamp, now);
     INIT(gpsdata->altitude_stamp, now);
     INIT(gpsdata->track_stamp, now);
-    INIT(gpsdata->speed_stamp, now);
     INIT(gpsdata->status_stamp, now);
     INIT(gpsdata->mode_stamp, now);
     INIT(gpsdata->fix_quality_stamp, now);

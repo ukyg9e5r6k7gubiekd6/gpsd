@@ -35,10 +35,9 @@ struct gps_data_t {
 				 * older than the timestamp if the last
 				 * sentence was GPRMC.
 				 * 
-				 * Within one GPS send cycle after any
-				 * midnight, if the last sentence was GGA or
-				 * GLL and not GPRMC, the date could be off by
-				 * one.
+				 * Within one GPS send cycle after midnight,
+				 * if the last sentence was GGA or GLL and not
+				 * GPRMC, the date could be off by one.
 				 *
 				 * The century part of the year is spliced in
 				 * from host-machine time and could be wrong if
@@ -47,9 +46,9 @@ struct gps_data_t {
 				 * to midnight of a new century. 
 				 */
     /*
-     * General information about location fields.  They're only valid 
-     * when the last_refresh field of the associated timestamp is nonzero,
-     * in which case it tells when the data was collected.
+     * Position/velocity fields are only valid when the last_refresh
+     * field of the associated timestamp is nonzero, in which case it
+     * tells when the data was collected.
      */
     double latitude;		/* Latitude in degrees */
     double longitude;		/* Longitude in degrees */
@@ -78,9 +77,7 @@ struct gps_data_t {
     /* precision of fix */
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* Used in last fix? */
-    double pdop;		/* Position dilution of precision */
-    double hdop;		/* Horizontal dilution of precision */
-    double vdop;		/* Vertical dilution of precision */
+    double pdop, hdop, vdop;	/* Dilution of precision */
     struct life_t fix_quality_stamp;
 
     /* satellite status */

@@ -103,11 +103,10 @@ static int update_field_f(char *sentence, int fld, double *dest)
  **************************************************************************/
 
 /*
-   Three sentences, GGA and GGL and RMC, contain timestamps.
-   Timestamps always look like hhmmss.ss, with the trailing .ss part optional.
-   RMC alone has a date field, in the format ddmmyy.  
-
-   We want the output to be in ISO 8601 format:
+   Three sentences, GGA and GGL and RMC, contain timestamps. Timestamps 
+   always look like hhmmss.ss, with the trailing .ss part optional.
+   RMC alone has a date field, in the format ddmmyy.  But we want the 
+   output to be in ISO 8601 format:
 
    yyyy-mm-ddThh:mm:ss.sssZ
    012345678901234567890123
@@ -116,12 +115,11 @@ static int update_field_f(char *sentence, int fld, double *dest)
    This means that for GPRMC we must supply a century and for GGA and
    GGL we must supply a century, year, and day.
 
-   We get the missing data from the host machine's clock time.  That
-   is, the machine where this *daemon* is running -- which is probably
-   connected to the GPS by a link short enough that it doesn't cross
-   the International Date Line.  Even if it does, this hack could only
-   screw the year number up for two hours around the first midnight of
-   a new century.
+   We get the missing data from the host machine's clock time.  That is, 
+   the machine where this *daemon* is running -- which is probably hooked
+   to the GPS by a link short enough that it doesn't cross the International
+   Date Line.  Even if it does, this hack could only screw the year number 
+   up for two hours around the first midnight of a new century.
  */
 
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
@@ -170,7 +168,6 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
-        RMC - Recommended minimum specific GPS/Transit data
         RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
            225446.33    Time of fix 22:54:46 UTC
            A            Navigation receiver warning A = OK, V = warning
@@ -249,8 +246,7 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
 static void processGPVTG(char *sentence, struct gps_data_t *out)
 /* Track Made Good and Ground Speed */
 {
-    /* There are two variants of GPVTG
-     * One, described at <http://www.sintrade.ch/nmea.htm>, looks like this:
+    /* There are two variants of GPVTG.  One looks like this:
 
 	GPVTG Track Made Good and Ground Speed with GPS Talker ID
 	(1) True course over ground (degrees) 000 to 359
@@ -259,9 +255,8 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 	(4) Speed over ground (kilometers) 00.0 to 99.9
 
      * Up to and including 1.10, gpsd assumed this and extracted field
-     * 3 for ground speed.
-     *
-     * The NMEA spec, version 3.01, dated 1/1/2002, gives this:
+     * 3 for ground speed.  But NMEA spec, version 3.01, dated 1/1/2002, 
+     * gives this:
 
 	1    = Track made good
 	2    = Fixed text 'T' indicates that track made good is relative to 
@@ -296,7 +291,6 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
 /* Global Positioning System Fix Data */
 {
     /*
-       GGA - Global Positioning System Fix Data
         GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
            123519       Fix taken at 12:35:19 UTC
            4807.038,N   Latitude 48 deg 07.038' N
