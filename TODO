@@ -1,5 +1,53 @@
 * Things to do:
 
+** On some systems gpsd doesn't pull DTR low when closing the GPS.
+
+Reported by Robert E. Anderson <rea@q.sr.unh.edu>.  He tells us this seems
+to have been introduced since 1.98.  The 1.98 code looked like this:
+
+void serial_close()
+{
+    if (ttyfd != -1) {
+	if (isatty(ttyfd)) {
+#if defined (USE_TERMIO)
+	    ttyset.c_cflag = CBAUD & B0;
+#else
+	    ttyset.c_ispeed = B0;
+	    ttyset.c_ospeed = B0;
+#endif
+            tcsetattr(ttyfd, TCSANOW, &ttyset);
+	}
+	/* Restore original terminal parameters */
+	/* but make sure DTR goes down */
+	ttyset_old.c_cflag |= HUPCL;
+	tcsetattr(ttyfd,TCSANOW,&ttyset_old);
+
+	close(ttyfd);
+	ttyfd = -1;
+    }
+}
+
+The new code looks like this:
+
+void gpsd_close(struct gps_session_t *session)
+{
+    if (session->gNMEAdata.gps_fd != -1) {
+	if (isatty(session->gNMEAdata.gps_fd)) {
+	    /* force hangup on close on systems that don't do HUPCL properly */
+	    cfsetispeed(&session->ttyset, (speed_t)B0);
+	    cfsetospeed(&session->ttyset, (speed_t)B0);
+	    tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset);
+	}
+	/* this is the clean way to do it */
+	session->ttyset_old.c_cflag |= HUPCL;
+	tcsetattr(session->gNMEAdata.gps_fd,TCSANOW,&session->ttyset_old);
+	close(session->gNMEAdata.gps_fd);
+    }
+}
+
+It looks as though there may be something wrong with cfsetispeed() and/or 
+cfsetospeed() in rea's environment.
+
 ** Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *three* kinds of validity bits.  Mode, status, and the

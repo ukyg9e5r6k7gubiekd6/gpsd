@@ -55,10 +55,10 @@ void gpsd_close(struct gps_session_t *session)
 	    cfsetispeed(&session->ttyset, (speed_t)B0);
 	    cfsetospeed(&session->ttyset, (speed_t)B0);
 	    tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset);
-	    /* this is the clean way to do it */
-	    session->ttyset_old.c_cflag |= HUPCL;
-	    tcsetattr(session->gNMEAdata.gps_fd,TCSANOW,&session->ttyset_old);
 	}
+	/* this is the clean way to do it */
+	session->ttyset_old.c_cflag |= HUPCL;
+	tcsetattr(session->gNMEAdata.gps_fd,TCSANOW,&session->ttyset_old);
 	close(session->gNMEAdata.gps_fd);
     }
 }
