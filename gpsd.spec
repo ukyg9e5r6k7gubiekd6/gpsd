@@ -1,6 +1,6 @@
 Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.91
+Version: 1.92
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -41,29 +41,42 @@ cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
+mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
+cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 
 %post
 /sbin/ldconfig
+/sbin/chkconfig --add gpsd
+/sbin/chkconfig --levels 35 gpsd on
 
 %postun
 /sbin/ldconfig
+/sbin/chkconfig --del gpsd
 
 %files
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING gpsd.xml libgps.xml libgpsd.xml HACKING TODO
 %defattr(-,root,root,-)
-%{_bindir}/gpsd
+%attr(755, root, root) %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
 %{_libdir}/libgps.a
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
+%attr(755, root, root) /etc/init.d/gpsd
 
 %changelog
+* Sun Aug 22 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.92-1
+- Third prerelease.  Clients in watcher mode now get notified when
+  the GPS goes online or offline.  Major name changes -- old libgps
+  is new libgpsd and vice-versa (so the high-level interface is more
+  prominent.  Specfile now includes code to install gpsd so it will
+  be started at boot time.
+
 * Sat Aug 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.91-1
 - Second pre-2.0 release.  Features a linkable C library that hides the 
   details of communicating with the daemon.  The daemon now recovers

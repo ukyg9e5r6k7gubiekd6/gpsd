@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# gpsd	This shell script starts and stops gpsd.
+#
+# chkconfig: 2345 90 40
+# description: Gpsd manages access to a serial- or USB-connected GPS
+# processname: gpsd
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog="gpsd"
+
+start() {
+	# Start daemons.
+	echo -n "Starting $prog: "
+	daemon gpsd
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd
+	return $RETVAL
+}
+
+stop() {
+	# Stop daemons.
+	echo -n "Shutting down $prog: "
+        killproc gpsd
+	RETVAL=$?
+	echo
+	if [ $RETVAL -eq 0 ]
+	then
+	    rm -f /var/lock/subsys/gpsd;
+	fi
+	return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	start
+	RETVAL=$?
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/gpsd ]; then
+	    stop
+	    start
+	    RETVAL=$?
+	fi
+	;;
+  status)
+	status gpsd
+	RETVAL=$?
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $RETVAL

@@ -10,7 +10,7 @@
 <refmiscinfo class='source'>Linux</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>libgpsd</refname>
+<refname>libgps</refname>
 <refpurpose>service library for communicationg with the GPS daemon</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>

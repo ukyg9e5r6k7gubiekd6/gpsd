@@ -183,8 +183,9 @@ DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml libgps
 MANPAGES = gpsd.1 libgps.3 libgpsd.3
 XRESOURCES = gps.ad xgpsspeed.ad
 CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
+SCRIPTS = gpsd.init
 META = gpsd.spec gpsd.lsm
-ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(META) $(MANPAGES) 
+ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(SCRIPTS) $(META) $(MANPAGES) 
 
 # This assumes we're bundling up the trunk of a Subversion repo.
 gpsd-$(VERS).tar.gz: $(ALL)
@@ -201,11 +202,8 @@ install:
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
 	$(mkinstalldirs) $(DESTDIR)${libdir}
 	$(mkinstalldirs) $(DESTDIR)${includedir}
-	for app in ${PROGRAMS}; do \
+	for app in ${PROGRAMS} ${MOTIF_PROGRAMS}; do \
 		$(INSTALL) -m 755 $$app ${DESTDIR}${sbindir} ; \
-	done
-	for app in ${MOTIF_PROGRAMS}; do \
-		$(INSTALL) -m 755 $$app ${DESTDIR}${bindir} ; \
 	done
 	for lib in ${LIBRARIES}; do \
 		$(INSTALL) $$lib ${DESTDIR}${libdir} ; \
@@ -217,6 +215,21 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgps.3
 	$(INSTALL) -m 755 -o 0 -g 0 gps.h $(INCLUDEDIR)/gps.h
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.h $(INCLUDEDIR)/gpsd.h
+	cp gpsd.init /etc/init.d/gpsd
+	/sbin/chkconfig --add gpsd
+	chkconfig --levels 35 gpsd on
+
+uninstall:
+	rm -f /etc/init.d/gpsd
+	/sbin/chkconfig --del gpsd
+	rm $(MANDIR)/man1/gpsd.1 $(MANDIR)/man3/{libgps.3,libgpsd.3} 
+	rm $(INCLUDEDIR)/gpsd.h $(INCLUDEDIR)/gps.h
+	for app in ${PROGRAMS}; ${MOTIF_PROGRAMS}; do \
+		${DESTDIR}${sbindir}/$$app ; \
+	done
+	for lib in ${LIBRARIES}; do \
+		${DESTDIR}${libdir}/$$ap ; \
+	done
 
 clean:
 	rm -f *.o *.a gpsd gps xgpsspeed libgps *~ config.status
