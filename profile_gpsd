@@ -12,23 +12,26 @@ class rawplot:
         fp.write("#GPS time        	Received	Transmitted 	Read\n")
         fp.write("#----------------	---------	----------- 	----------\n")
     def formatter(self, session, fp):
-        fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s" \
-              % (gps,
+        fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+              % (session.rs232,
                  (session.recv_time - session.gps_time) % 3600,
                  (session.emit_time - session.gps_time) % 3600,
                  (time.time() - session.gps_time) % 3600,
                  session.tag))
         return True
-    def plot(self, file, title):
+    def plot(self, file, title, session):
         fmt = '''
 set autoscale
 set key below
-set key title "Raw latency data, %s"
-plot "%s" using 0:2 title "Line latency" with impulses,\
-     "%s" using 0:3 title "Decode time" with points,\
-     "%s" using 0:4 title "TCP/IP latency" with points
+set key title "Raw latency data, %dN%d, %s"
+plot \
+     "%s" using 0:4 title "TCP/IP latency" with impulses, \
+     "%s" using 0:3 title "Decode time" with impulses, \
+     "%s" using 0:2 title "Other latency" with impulses, \
+     "%s" using 0:1 title "RS232 time" with impulses
 '''
-        return fmt % (title, file, file, file)
+        return fmt % (session.baudrate, session.stopbits, title,
+                      file, file, file, file)
 
 class stripplot:
     "Discard base time, throw out latencies >1 sec."
@@ -48,30 +51,33 @@ class stripplot:
                  (time.time() - session.gps_time) % 3600,
                  session.tag))
         return True
-    def plot(self, file, title):
+    def plot(self, file, title, session):
         fmt = '''
 set autoscale
 set key below
-set key title "Filtered latency data, %s"
-plot "%s" using 0:1 title "RS232 time" with impulses,\
-     "%s" using 0:2 title "Other line latency" with points,\
-     "%s" using 0:3 title "Decode time" with points,\
-     "%s" using 0:4 title "TCP/IP latency" with points
+set key title "Filtered latency data, %dN%d, %s"
+plot \
+     "%s" using 0:4 title "TCP/IP latency" with impulses, \
+     "%s" using 0:3 title "Decode time" with impulses, \
+     "%s" using 0:2 title "Other latency" with impulses, \
+     "%s" using 0:1 title "RS232 time" with impulses
 '''
-        return fmt % (title, file, file, file, file)
+        return fmt % (session.baudrate, session.stopbits, title,
+                      file, file, file, file)
 
 formatters = (rawplot, stripplot)
 
 if __name__ == '__main__':
-    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:r")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:")
     formatter = stripplot
     raw = False
     file = None
+    title = time.ctime()
     await = 100
     for (switch, val) in options:
 	if (switch == '-f'):
             for formatter in formatters:
-                if candidate.name == val:
+                if formatter.name == val:
                     break
             else:
                 sys.stderr.write("gpsprof: no such formatter.\n")
@@ -82,9 +88,11 @@ if __name__ == '__main__':
 	    file = val
 	elif (switch == '-r'):
 	    raw = True
+	elif (switch == '-t'):
+	    title = val
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
-                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-o file]\n")
+                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-t title] [-o file]\n")
             sys.exit(0)
     plotter = formatter()
     if file:
@@ -112,11 +120,11 @@ if __name__ == '__main__':
         session.query("wZ-")
         
     out.flush()
-    del session
     if not raw:
-        command = plotter.plot(out.name, time.ctime())
+        command = plotter.plot(out.name, title, session)
         pfp = os.popen("gnuplot -persist", "w")
         pfp.write(command)
         pfp.close()
+    del session
     out.close()
 
