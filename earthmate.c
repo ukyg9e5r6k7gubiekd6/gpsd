@@ -1,7 +1,10 @@
 /*
- * Handle the Rockwell binary packet format supported by the EarthMate GPS.
+ * Handle the Rockwell binary packet format supported by the older
+ * Zodiac-chipset versions of the Delorme EarthMate GPS.  Actually this
+ * code ought to work for any Zodiac-chipset modem; the vendor-specific 
+ * trigger string isn't in here.
  *
- * Everything exported from here lives in the structure earthmate at the end.
+ * Everything exported from here lives in the structure zodiac-b at the end.
  */
 #include "config.h"
 #include <stdio.h>
@@ -572,15 +575,15 @@ static int handle_EMinput(struct gps_session_t *session)
 
 static void em_close(struct gps_session_t *session)
 {
-    session->device_type = &earthmate_a;
+    session->device_type = &zodiac_a;
 }
 
 /* this is everything we export */
-struct gps_type_t earthmate_b =
+struct gps_type_t zodiac_b =
 {
     '\0',		/* cannot be explicitly selected */
-    "EarthMate binary",	/* full name of type */
-    NULL,		/* only switched to by earthmate_a driver */
+    "Zodiac binary",	/* full name of type */
+    NULL,		/* only switched to by zodiac_a driver */
     do_eminit,		/* initialize the device */
     handle_EMinput,	/* read and parse message packets */
     em_send_rtcm,	/* send DGPS correction */

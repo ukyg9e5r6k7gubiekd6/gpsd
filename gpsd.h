@@ -79,8 +79,8 @@ struct gps_session_t
 /* here are the available GPS drivers */
 extern struct gps_type_t nmea;
 extern struct gps_type_t tripmate;
-extern struct gps_type_t earthmate_a;
-extern struct gps_type_t earthmate_b;
+extern struct gps_type_t zodiac_a;
+extern struct gps_type_t zodiac_b;
 extern struct gps_type_t logfile;
 extern struct gps_type_t **gpsd_drivers;
 
