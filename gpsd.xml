@@ -176,6 +176,24 @@ you read the unfiltered data stream from the GPS</para></listitem>
 count of satellites used in the last fix, and three estimated position
 errors in meters &mdash; position, horizontal, and vertical.</para>
 </listitem>
+<varlistentry>
+<term>y</term> 
+<listitem>
+<para>Returns Y= followed by a count not more than 12, followed by
+that many triples of satellite PRNs and elevation/azimuth pairs
+(elevation an integer formatted as %d in range 0-90, azimuth an
+integer formatted as %d in range
+0-359). Each number is followed by one space.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>z</term>
+<listitem>
+<para>Returns Z= followed by a count not more than 12, followed by that many
+pairs of satellite PRNs and signal-to-noise percentages (each
+percentage is in the range 0-99). Each number an integer formatted as
+%d followed by one space.</para>
+</listitem>
 </varlistentry>
 </variablelist>
 

@@ -482,7 +482,7 @@ static int handle_request(int fd, fd_set * fds)
     char buf[BUFSIZE];
     char reply[BUFSIZE];
     char *p;
-    int cc, status;
+    int cc, status, sc, i;
     time_t cur_time;
 
     cc = read(fd, buf, sizeof(buf) - 1);
@@ -592,24 +592,55 @@ static int handle_request(int fd, fd_set * fds)
 		    session.gNMEAdata.in_view, session.gNMEAdata.satellites,
 		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
 	    break;
-	case 'I':
-	case 'i':
+	case 'Y':
+	case 'y':
+	    sc = 0;
+	    if (session.gNMEAdata.cmask & C_SAT)
+		for (i = 0; i < MAXSATS; i++)
+		    if (session.gNMEAdata.PRN[i])
+			sc++;
+	    sprintf(reply + strlen(reply),
+		    ",Y=%d ", sc);
+	    for (i = 0; i < MAXSATS; i++)
+		if (session.gNMEAdata.cmask & C_SAT)
+		    if (session.gNMEAdata.PRN[i])
+			sprintf(reply + strlen(reply),"%d %2d %2d ", 
+				session.gNMEAdata.PRN[i], 
+				session.gNMEAdata.elevation[i],
+				session.gNMEAdata.azimuth[i]);
+	    break;
+	case 'Z':
+	case 'z':
+	    sc = 0;
+	    if (session.gNMEAdata.cmask & C_SAT)
 	    {
-	    	int i;
-		char *q;
-		
-		q = p;
-		i = (int)strtol(p+1, &q, 10);
-		if (i>=0 && i<session.gNMEAdata.in_view) {
-		    fprintf(stderr, "i=%d in view=%d\n", i, session.gNMEAdata.in_view);
-		    sprintf(reply + strlen(reply),
-			    ",I=%d %d %d %d",
-			    session.gNMEAdata.PRN[i], session.gNMEAdata.azimuth[i],
-			    session.gNMEAdata.elevation[i], session.gNMEAdata.ss[i]);
-		}
-		else sprintf(reply + strlen(reply), ",I=-1 -1 -1 -1");
-		if (q!=p) p = q-1;
+		for (i = 0; i < MAXSATS; i++)
+		    if (session.gNMEAdata.PRN[i])
+			sc++;
 	    }
+	    else if (session.gNMEAdata.cmask & C_ZCH)
+	    {
+		for (i = 0; i < MAXSATS; i++)
+		    if (session.gNMEAdata.Zs[i])
+			sc++;
+	    }
+	    sprintf(reply + strlen(reply),
+		    ",Z=%d ", sc);
+	    for (i = 0; i < MAXSATS; i++)
+		if (session.gNMEAdata.cmask & C_SAT)
+		{
+		    if (session.gNMEAdata.PRN[i])
+			sprintf(reply + strlen(reply),"%d %02d ", 
+				session.gNMEAdata.PRN[i], 
+				session.gNMEAdata.ss[i]);
+		}
+	    	else
+		{
+		    if (session.gNMEAdata.Zs[i])
+			sprintf(reply + strlen(reply),"%d %02d ", 
+				session.gNMEAdata.Zs[i], 
+				session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
+		}
 	    break;
 	}
 	p++;
