@@ -47,15 +47,21 @@ distribution includes a linkable C service library and a Python
 module that developers of <code>gpsd</code>-aware applications can use
 to encapsulate all communication with <code>gpsd</code>.</para>
 
-<p>The goal of the <code>gpsd</code> project is to create a solid layer of
-open-source infrastructure for programs that want to be
-location-sensitive. We aim for simple, robust interfaces, unfussy
-operation, and an easy learning curve for application developers.
-Applications that presently use <code>gpsd</code> include
-<a href="http://www.pygps.org">pyGPS</a>,
-<a href="http://www.kismetwireless.net/">Kismet</a>, 
-<a href="http://www.gpsdrive.cc/">GPSdrive</a>, and 
-<a href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
+<p>The goal of the <code>gpsd</code> project is to create a solid
+layer of open-source infrastructure for programs running under Linux
+and other open-source Unixes that want to be location-sensitive. We
+aim for simple, robust interfaces, unfussy operation, and an easy
+learning curve for application developers.  Applications that
+presently use <code>gpsd</code> include <a
+href="http://www.pygps.org">pyGPS</a>, <a
+href="http://www.kismetwireless.net/">Kismet</a>, <a
+href="http://www.gpsdrive.cc/">GPSdrive</a>, and <a
+href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
+
+<p>No, we don't support Windows &mdash; get a better operating system.
+Our main focus is open-source Unixes &mdash; Linux, and the *BSD
+family.  We'll support proprietary Unixes and hybrids like Mac OS X if
+it's not too much work (and it usually isn't).</p>
 
 <h1 id='news'>News</h1>
 
