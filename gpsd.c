@@ -60,6 +60,7 @@ static fd_set all_fds;
 static fd_set nmea_fds;
 static fd_set watcher_fds;
 static int debuglevel;
+static int nfds;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -404,7 +405,7 @@ static void notify_watchers(char *sentence)
 {
     int fd;
 
-    for (fd = 0; fd < getdtablesize(); fd++) {
+    for (fd = 0; fd < nfds; fd++) {
 	if (FD_ISSET(fd, &watcher_fds)) {
 	    throttled_write(fd, sentence, strlen(sentence));
 	}
@@ -416,7 +417,7 @@ static void raw_hook(char *sentence)
 {
     int fd;
 
-    for (fd = 0; fd < getdtablesize(); fd++) 
+    for (fd = 0; fd < nfds; fd++) 
     {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
 	if (FD_ISSET(fd, &nmea_fds))
@@ -520,7 +521,7 @@ int main(int argc, char *argv[])
     char *dgpsserver = NULL;
     struct sockaddr_in fsin;
     fd_set rfds;
-    int msock, nfds;
+    int msock;
     int alen;
     extern char *optarg;
     int option, gpsd_speed = 0;
