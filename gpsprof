@@ -126,8 +126,8 @@ class uninstrumented:
         self.fp = fp
         self.stats = []
     def gather(self, session):
-        if session.gps_time:
-            seconds = time.time() - session.gps_time + gps.tzoffset()
+        if session.timings.sentence_time:
+            seconds = time.time() - session.timings.sentence_time + gps.tzoffset()
             self.stats.append(seconds)
             return True
         else:
