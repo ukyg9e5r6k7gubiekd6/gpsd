@@ -349,7 +349,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 		    degtodm(fabs(gNMEAdata.longitude)),
 		((gNMEAdata.longitude > 0) ? 'E' : 'W'), gNMEAdata.speed,
 		    gNMEAdata.course, gNMEAdata.day, gNMEAdata.month,
-		    (gNMEAdata.year - 1900), gNMEAdata.mag_var,
+		    ((gNMEAdata.year % 100) + 1900), gNMEAdata.mag_var,
 		    (gNMEAdata.mag_var > 0) ? 'E' : 'W');
 	    add_checksum(bufp + 1);
 	    nmea = 1000;
