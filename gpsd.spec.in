@@ -119,7 +119,9 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 %changelog
 * Thu Sep 30 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
   Documentation improvements.  BSD port fixes.  Bug fix: speed timestamp
-  wasn't initialized properly in libgps.
+  wasn't initialized properly in libgps. Device is now an optional 
+  command-line argument of gpsprobe, in line with the clients.  gpsd.py
+  now should handle fvwm devices correctly.
 
 * Thu Sep 30 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
 - Various internal cleanups, including fossil removal in the

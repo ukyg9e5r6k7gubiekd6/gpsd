@@ -55,14 +55,16 @@ if __name__ == '__main__':
     fixes = []
 
     # Process options
-    (options, arguments) = getopt.getopt(sys.argv[1:], "n:p:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "n:h")
     await = 100;
     device="/dev/gps"
     for (switch, val) in options:
 	if (switch == '-n'):
 	    await = int(val)
-	elif (switch == '-p'):
-	    device = val
+        else (switch == '-h'):
+            sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [device]\n")
+    if arguments:
+        device = arguments[0]
 
     intervals = {}
     last_seen = {}

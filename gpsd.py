@@ -2,10 +2,7 @@
 #
 # gpsd.py -- low-level interface to an NMEA GPS
 #
-# Like libgpsd in C, but handles only straight NMEA devices
-# with a send cycle of one second.
-#
-# TODO: Dispatch between drivers like the C version.
+# Like libgpsd in C, but handles only straight NMEA devices (not Zodiac).
 
 import termios, os, fcntl, copy, time, math, struct
 import gps
@@ -209,12 +206,13 @@ class gpsd(gps.gpsdata):
     class gps_driver:
         def __init__(self, name,
                      parser=NMEA,
-                     cycle=1, bps=4800,
+                     cycle=1, bps=4800, stopbits=1,
                      trigger=None, initializer=None, rtcm=None, wrapup=None):
             self.name = name
             self.parser = parser
             self.cycle = cycle
             self.bps = bps
+            self.stopbits = stopbits
             self.trigger = trigger
             self.initializer = initializer
             self.rtcm = rtcm
@@ -226,6 +224,8 @@ class gpsd(gps.gpsdata):
         self.bps = bps
         self.drivers = {
             'n' : gpsd.gps_driver("NMEA"),
+            'f' : gpsd.gps_driver("NMEA", stopbits=2,
+                                  initializer = lambda gps: gps.send("$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01")),
             # Someday, other drivers go here
             }
         self.devtype = self.drivers[devtype]
@@ -250,6 +250,9 @@ class gpsd(gps.gpsdata):
             os.close(self.dsock);
     close = __del__
 
+    def send(self, buf):
+        self.ttyfp.write(self.parser.add_checksum(buf))
+
     def activate(self):
         self.ttyfp = open(self.device, "rw")
         if self.ttyfp == None:
@@ -259,11 +262,16 @@ class gpsd(gps.gpsdata):
         self.raw[0] = 0						# iflag
         self.raw[1] = termios.ONLCR				# oflag
         self.raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-        self.raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+        if self.devtype.stopbits == 2:
+            self.raw[2] |= (termios.CSIZE & termios.CS7)	# cflag
+        else:
+            self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
         self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
         self.raw[3] = 0						# lflag
         self.raw[4] = self.raw[5] = eval("termios.B" + `self.bps`)
         termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.raw)
+        if self.devtype.initializer:
+            self.devtype.initializer(self)
 	self.online = True;
         return self.ttyfp
 
