@@ -1,6 +1,9 @@
-			Hacker's Guide to gpsd
+This is the Hacker's Guide to gpsd.  If you're viewing it with Emacs, try
+doing Ctl-C Ctl-t and browsing through the outline headers.
 
-First, debugging...
+If you're looking for things to hack on, first see the TODO file.
+
+** Debugging
 
 For debugging purposes, it may be helpful to configure with --disable-shared.
 This turns off all the shared-library crud, making it somewhat easier to
@@ -11,7 +14,11 @@ to strip clean NMEA out of the log files produced by gpsd.  This can be
 useful if someone ships you a log that they allege caused gpsd to 
 misbehave.
 
-Next, profiling...
+gpsfake enables you to repeatedly feed a packet sequence to a gpsd
+instance running as non-root.  Watching such a session with gdb should
+smoke out ant repeatable bug pretty quickly.
+
+** Profiling
 
 There is a barely-documented Z command in the daemon will cause it to emit
 a $ clause on every D request.  The $ clause contains four
@@ -46,7 +53,7 @@ daemon to client library -- and to estimate the portion of the latency
 induced by serial transmit time.  The gpsprof script creates latency
 plots using gnuplot(1).  It can also report the raw data.
 
-Then, architecture and how to hack it...
+** Architecture and how to hack it
 
 This is not a complicated piece of code.  Essentially, it spins in a loop 
 polling for input from one of three sources:
@@ -94,7 +101,7 @@ of the file-descriptor set representing the GPS would tell us if there
 were input waiting.  The explicit test is there for other programs
 that might call gps_poll() without such a guarantee.
 
-Next, autoconfiguration...
+** Autoconfiguration
 
 One of the design goals for gpsd is to be as near zero-configuration
 as possible.  Under most circumstances, it doesn't require either
@@ -133,7 +140,7 @@ specified.  Presently, here's how the autoconfig works.
 The outcome is that we know exactly what we're looking at, without any
 driver or baud rate options.
 
-Adding new GPS types...
+** Adding new GPS types
 
 Almost all GPSes speak NMEA 0183.  However, it may occasionally be necessary
 to add support for some odd binary format.  We're told that the hex dump
@@ -163,7 +170,7 @@ These are strings which should elicit an identifying response from
 the GPS that you can use as a trigger string for a driver.  This is
 how we detect SiRF chips (see step 5 under autoconfiguration above).
 
-And more...
-
-If you're looking for things to hack on, first see the TODO file.
-
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:
