@@ -34,3 +34,5 @@
 	 What happend with 1.02 to 1.06?
 	 em.c uses <time.h> (as it should). Removed some <sys/time.h>
 	 where they were not needed.
+20021003 (1.08)
+	 Added sockopt SO_REUSEADDR to netlib.c passive_sock.
