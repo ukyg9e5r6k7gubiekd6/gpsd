@@ -77,6 +77,7 @@ class gpsdata:
         self.length = 0
         self.emit_time = 0
         self.read_time = 0
+        self.baudrate = 0
 
         __setattr__ = setattr
 
@@ -249,7 +250,8 @@ class gps(gpsdata):
 	      self.satellites = newsats
 	      self.satellite_stamp.refresh() 
 	    elif cmd in ('Z', 'z'):
-              if data[1:] not in ("=1", "=0"):
+              (dummy, self.baudrate) = map(int, data.split(":"))
+            elif cmd == '$':
                   (self.tag, recv_time, length, emit_time) = data.split(":")
                   self.recv_time = float(recv_time)
                   self.length = int(length)
