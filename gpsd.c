@@ -198,7 +198,10 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(reply + strlen(reply), ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
-	    sprintf(reply + strlen(reply), ",M=%d", ud->mode);
+	    if (ud->mode == MODE_NOT_SEEN)
+		strcat(reply, ",M=?");
+	    else
+		sprintf(reply + strlen(reply), ",M=%d", ud->mode);
 	    break;
 	case 'P':
 	    if (!validate(fd))
