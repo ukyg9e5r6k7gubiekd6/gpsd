@@ -1,4 +1,4 @@
-This is a list of NMEA 0183 sentences emitted by GPSes.
+This is a list of NMEA 0183 sentences with field descriptions.
 
 It may originally have been redacted from the document cited as
 [NMEA200]; see the list of sources at the end of this document.
@@ -544,6 +544,8 @@ Time, Position and fix related data for a GPS receiver.
   6) Status A - Data Valid, V - Data Invalid
   7) FAA mode indicator (NMEA 2.3 and later)
   8) Checksum
+
+Introduced in NMEA 3.0.
 
 ------------------------------------------------------------------------------
 

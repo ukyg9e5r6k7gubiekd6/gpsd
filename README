@@ -77,7 +77,7 @@ His new features include:
    * The GPS-bashing code the daemon uses can now be directly linked as a
      library, libgpsd(3). 
    * C and Python libraries are available to encapsulate the client side of
-     querying gpsd.
+     querying gpsd, see libgps(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
@@ -86,3 +86,4 @@ His new features include:
      are available.
    * New gpsprobe program probes the capabilities of GPSes and generates
      error scattergrams from fixes.
+   * All this in fewer lines of code than the 1.10 version.
