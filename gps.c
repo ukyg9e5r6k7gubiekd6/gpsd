@@ -69,7 +69,7 @@ static Widget text_1, text_2, text_3, text_4, text_5;
 static Widget label_1, label_2, label_3, label_4, label_5;
 static Widget status;
 
-static int device_speed = B4800;
+static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "localhost:2947";
 
