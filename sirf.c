@@ -253,6 +253,9 @@ static int sirf_power_save(int ttyfd, int enable)
  * Handle the SiRF-II binary packet format.
  */
 
+/* driver state flags */
+#define GNI_NAVTYPE_VALID	0x01	/* NAVtype in packet type 41 is good */
+
 #define getb(off)	(buf[off])
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
@@ -261,21 +264,48 @@ static int sirf_power_save(int ttyfd, int enable)
  * The 'week' part of GPS dates are specified in weeks since 0000 on 06 
  * January 1980, with a rollover at 1024.  At time of writing the last 
  * rollover happened at 0000 22 August 1999.  Time-of-week is in seconds.
+ *
+ * This code copes with both conventional GPS weeks and the "extended" 
+ * 15-or-16-bit version with no wraparound that is supposed to appear in
+ * the Geodetic Navigation Information (0x29) packet.  Some firmware 
+ * versions (notably 231) actually ship the wrapped 10-bit week, despite
+ * what the protocol reference says.
  */
 #define GPS_EPOCH	315982800		/* GPS epoch in Unix time */
 #define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-static double decode_time(int week, double tow)
+static void extract_time(struct gps_session_t *session, int week, double tow)
 {
-    time_t now, last_rollover;
+    struct tm *when;
+    time_t intfixtime;
+    double fixtime;
 
-    time(&now);
+    if (week >= GPS_ROLLOVER)
+	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
+    else {
+	time_t now, last_rollover;
+	time(&now);
+	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
+	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+    }
 
-    last_rollover = GPS_EPOCH + ((now-GPS_EPOCH)/GPS_ROLLOVER) * GPS_ROLLOVER;
-    return last_rollover + (week * SECS_PER_WEEK) + tow;
+    intfixtime = (int)fixtime;
+    when = localtime(&intfixtime);
+    session->year = when->tm_year;
+    session->month = when->tm_mon + 1;
+    session->day = when->tm_mday;
+    session->hours = when->tm_hour;
+    session->minutes = when->tm_min;
+    session->seconds = fixtime - (intfixtime / 60) * 60;
+    strftime(session->gNMEAdata.utc, sizeof(session->gNMEAdata.utc),
+	     "%Y-%m-%dT%H:%M:", when);
+    sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
+	    "%02.3f", session->seconds);
+    session->gNMEAdata.gps_time = fixtime;
 }
 
+#ifdef GEODETIC_NO_GOOD
 static void decode_ecef(struct gps_data_t *ud, 
 			double x, double y, double z, 
 			double vx, double vy, double vz)
@@ -314,19 +344,18 @@ static void decode_ecef(struct gps_data_t *ud,
     REFRESH(ud->track_stamp);
     REFRESH(ud->climb_stamp);
 }
+#endif /* GEODETIC_NO_GOOD */
 
 static void decode_sirf(struct gps_session_t *session,
 			unsigned char *buf, int len)
 {
     int	st, i, j, cn;
-    struct tm *when;
-    time_t intfixtime;
-    double fixtime;
-    char buf2[MAX_PACKET_LENGTH*3];
+    char buf2[MAX_PACKET_LENGTH*3] = "";
 
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
+#ifdef GEODETIC_NO_GOOD
 	/* position/velocity is bytes 1-18 */
 	decode_ecef(&session->gNMEAdata,
 		    (double)getl(1),
@@ -335,44 +364,42 @@ static void decode_sirf(struct gps_session_t *session,
 		    (double)getw(13)/8.0,
 		    (double)getw(15)/8.0,
 		    (double)getw(17)/8.0);
+#endif /* GEODETIC_NO_GOOD */
 	/* fix status is byte 19 */
-	st = getb(19);
-	session->gNMEAdata.status = STATUS_NO_FIX;
-	if (st & 0x80)
-	    session->gNMEAdata.status = STATUS_DGPS_FIX;
-	else if (st & 0x02)
-	    session->gNMEAdata.status = STATUS_FIX;
-	REFRESH(session->gNMEAdata.status_stamp);
-	session->gNMEAdata.mode = MODE_NO_FIX;
-	if (st & 0x03)
-	    session->gNMEAdata.mode = MODE_3D;
-	else if (st & 0x02)
-	    session->gNMEAdata.mode = MODE_2D;
-	REFRESH(session->gNMEAdata.mode_stamp);
+	if (!(session->driverstate & GNI_NAVTYPE_VALID)) {
+	    int navtype = getb(19);
+	    session->gNMEAdata.status = STATUS_NO_FIX;
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if (navtype & 0x80)
+		session->gNMEAdata.status = STATUS_DGPS_FIX;
+	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+		session->gNMEAdata.status = STATUS_FIX;
+	    REFRESH(session->gNMEAdata.status_stamp);
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+		session->gNMEAdata.mode = MODE_3D;
+	    else if (session->gNMEAdata.status)
+		session->gNMEAdata.mode = MODE_2D;
+	    REFRESH(session->gNMEAdata.mode_stamp);
+	    gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
+			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
+	}
+#ifdef GEODETIC_NO_GOOD
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
-	fixtime = decode_time(getw(22), getl(24)/100.00);
-	intfixtime = (int)fixtime;
-	when = localtime(&intfixtime);
-	session->year = when->tm_year;
-	session->month = when->tm_mon + 1;
-	session->day = when->tm_mday;
-	session->hours = when->tm_hour;
-	session->minutes = when->tm_min;
-	session->seconds = fixtime - (intfixtime / 60) * 60;
-	strftime(session->gNMEAdata.utc, sizeof(session->gNMEAdata.utc),
-		 "%Y-%m-%dT%H:%M:", when);
-	sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
-		"%02.3f", session->seconds);
+	gpsd_report(5, "MID 2 GPS Week: %d  TOW: %d\n", getw(22), getl(24));
+	extract_time(session, getw(22), getl(24)/100.0);
+	gpsd_report(5, "MID 2 UTC: %s\n", session->gNMEAdata.utc);
+	gpsd_binary_fix_dump(session, buf2);
+#endif /* GEODETIC_NO_GOOD */
 	/* fix quality data */
 	session->gNMEAdata.satellites_used = getb(28);
 	for (i = 0; i < MAXCHANNELS; i++)
 	    session->gNMEAdata.used[i] = getb(29+i);
-	session->gNMEAdata.pdop = getb(21)/5.0;
+	session->gNMEAdata.hdop = getb(21)/5.0;
 	/* KNOWN BUG: we don't get PDOP or VDOP from this sentence */
-	session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0.0;
+	session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
-	gpsd_binary_fix_dump(session, buf2);
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
 	break;
@@ -421,6 +448,9 @@ static void decode_sirf(struct gps_session_t *session,
 
     case 0x06:		/* Software Version String */
 	gpsd_report(1, "Firmware version: %s\n", session->outbuffer+5);
+	if (atof(session->outbuffer+5) >= 232)
+	    session->driverstate |= GNI_NAVTYPE_VALID;
+	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	break;
 
     case 0x0a:		/* Error ID Data */
@@ -442,30 +472,93 @@ static void decode_sirf(struct gps_session_t *session,
 	break;
 
     case 0x29:		/* Geodetic Navigation Information */
+#ifndef GEODETIC_NO_GOOD
 	/*
 	 * Many versions of the SiRF protocol manual don't document 
 	 * this sentence at all.  Those that do may incorrectly
-	 * descibe UTC Day, Hour, Minute, Second as 1-byte quantities,
-	 * not 2-byte. Chris Kuethe, our SiRF expert, tells us:
+	 * describe UTC Day, Hour, and Minute as 2-byte quantities,
+	 * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
 	 *
-	 * The Geodetic Navigation packet (0x29) was not fully
+	 * "The Geodetic Navigation packet (0x29) was not fully
 	 * implemented in firmware prior to version 2.3.2. So for
 	 * anyone running 231.000.000 or earlier (including ES,
 	 * SiRFDRive, XTrac trains) you won't get UTC time. I don't
-	 * know what's broken in firmwares before 2.3.1...
+	 * know what's broken in firmwares before 2.3.1..."
 	 *
-	 * I don't see any indication in any of my material that PDOP,
+	 * "I don't see any indication in any of my material that PDOP,
 	 * GDOP or VDOP are output. There are quantities called
 	 * Estimated {Horizontal Position, Vertical Position, Time,
 	 * Horizonal Velocity} Error, but those are apparently only
-	 * valid when SiRFDRive is active.
+	 * valid when SiRFDRive is active."
 	 *
-	 * (SiRFdrive is their Dead Reckoning augmented firmware. It
+	 * "(SiRFdrive is their Dead Reckoning augmented firmware. It
 	 * allows you to feed odometer ticks, gyro and possibly 
 	 * accelerometer inputs to the chip to allow it to continue 
 	 * to navigate in the absence of satellite information, and 
-	 * to improve fixes when you do have satellites.)
+	 * to improve fixes when you do have satellites.)"
+	 *
+	 * To work around the incomplete implementation of this
+	 * packet in 231, we use the status byte in sentence 0x02.
 	 */
+	if (session->driverstate & GNI_NAVTYPE_VALID) {
+	    int navtype = getw(3);
+	    session->gNMEAdata.status = STATUS_NO_FIX;
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if (navtype & 0x80)
+		session->gNMEAdata.status = STATUS_DGPS_FIX;
+	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+		session->gNMEAdata.status = STATUS_FIX;
+	    REFRESH(session->gNMEAdata.status_stamp);
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+		session->gNMEAdata.mode = MODE_3D;
+	    else if (session->gNMEAdata.status)
+		session->gNMEAdata.mode = MODE_2D;
+	    REFRESH(session->gNMEAdata.mode_stamp);
+	    gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
+			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
+	}
+	/*
+	 * Compute UTC from extended GPS time.  The protocol reference
+	 * claims this 16-bit field is "extended" GPS weeks, but I'm
+	 * seeing a quantity that has undergone 10-bit wraparound.
+	 */
+	gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
+	extract_time(session, getw(5), getl(7)/1000.00);
+	gpsd_report(5, "MID 41 UTC: %s\n", session->gNMEAdata.utc);
+	/*
+	 * Skip UTC, left all zeros in 231 and older firmware versions, 
+	 * and misdocumented in the Protocol Reference (version 1.4).
+	 *            Documented:        Real:
+	 * UTC year       2               2
+	 * UTC month      1               1
+	 * UTC day        2               1
+	 * UTC hour       2               1
+	 * UTC minute     2               1
+	 * UTC second     2               2
+         *                11              8
+	 */
+	/* skip 4 bytes of satellite map */
+	session->gNMEAdata.latitude = getl(23)/1e+7;
+	session->gNMEAdata.longitude = getl(27)/1e+7;
+	REFRESH(session->gNMEAdata.latlon_stamp);
+	/* skip 4 bytes of altitude from ellipsoid */
+	session->gNMEAdata.altitude = getl(31)/100;
+	/* skip 1 byte of map datum */
+	session->gNMEAdata.speed = getw(36)/100;
+	REFRESH(session->gNMEAdata.speed_stamp);
+	session->gNMEAdata.track = getw(38)/100;
+	REFRESH(session->gNMEAdata.track_stamp);
+	/* skip 2 bytes of magnetic variation */
+	session->gNMEAdata.climb = getw(42)/100;
+	REFRESH(session->gNMEAdata.climb_stamp);
+	/*
+	 * In theory HDOP should be available at byte 90,
+	 * but I see it as zero.  Pick it up from message 2.
+	 */
+	gpsd_binary_fix_dump(session, buf2);
+	gpsd_report(3, "<= GPS: %s", buf2);
+#endif /* !GEODETIC_NO_GOOD */
 	break;
 
     case 0x32:		/* SBAS corrections */
