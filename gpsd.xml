@@ -170,8 +170,12 @@ numbers are in degrees, latitude first.</para></listitem>
 you read the unfiltered data stream from the GPS</para></listitem>
 </varlistentry>
 <varlistentry>
-<term>g</term>
-<listitem><para>Returns six-digit Maidenhead grid square (example: "FN12fx").</para></listitem>
+<term>q</term>
+<listitem>
+<para>Returns "Q=%d %d %f %f %f": a count of satellites in view, a
+count of satellites used in the last fix, and three estimated position
+errors in meters &mdash; position, horizontal, and vertical.</para>
+</listitem>
 </varlistentry>
 </variablelist>
 
