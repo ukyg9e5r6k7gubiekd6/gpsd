@@ -175,13 +175,19 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->valid |= ONLINE_SET;
 		    break;
 		case 'Y':
-		    gpsdata->satellites = atoi(sp+2);
-		    if (gpsdata->satellites) {
+		    if (sp[2] != '?') {
 			int j, i1, i2, i3, i4, i5;
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
+			char timestamp[20];
 
+			sscanf(sp, "Y=%20s %d ", 
+			       timestamp, &gpsdata->satellites);
+			if (timestamp[0] != '?') {
+			    gpsdata->sentence_time = atof(timestamp);
+			    gpsdata->valid |= TIME_SET;
+			}
 			for (j = 0; j < gpsdata->satellites; j++) {
 			    PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
 			}

@@ -260,7 +260,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
-	return SATELLITE_SET;
+	return TIME_SET | SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 

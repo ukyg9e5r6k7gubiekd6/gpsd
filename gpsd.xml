@@ -232,7 +232,7 @@ produced by different NMEA talkers in the same wire.</para></listitem>
 
 <varlistentry>
 <term>timestamp</term>
-<listitem><para>Seconds since the Unix epoch, GMT. May have a
+<listitem><para>Seconds since the Unix epoch, UTC. May have a
 fractional part of up to .01sec precision.</para></listitem>
 </varlistentry>
 
@@ -379,26 +379,32 @@ mode.</para></listitem>
 <term>x</term>
 <listitem><para>Returns "X=0" if the GPS is offline, "X=%f" if 
 online; in the latter case, %f is a timestamp from when the 
-last sentence was received.</para></listitem>
+last sentence was received.</para>
+
+<para>(At protocol level 1, the nonzero response was always 1.)</para> 
+</listitem>
 </varlistentry>
 
 <varlistentry>
 <term>y</term> 
 <listitem>
-<para>Returns Y= followed by a count not more than 12, followed by
-that many quintuples of satellite PRNs, elevation/azimuth pairs
-(elevation an integer formatted as %d in range 0-90, azimuth an
-integer formatted as %d in range 0-359), signal strengths in
-decibels, and 1 or 0 according as the satellite was or was
-not used in the last fix. Each number is followed by one space.</para>
+<para>Returns Y= followed by a timestamp (seconds since the Unix
+epoch, UTC) and a count not more than 12, followed by that many
+quintuples of satellite PRNs, elevation/azimuth pairs (elevation an
+integer formatted as %d in range 0-90, azimuth an integer formatted as
+%d in range 0-359), signal strengths in decibels, and 1 or 0 according
+as the satellite was or was not used in the last fix. Each number is
+followed by one space.</para>
+
+<para>(At protocol level 1, this response had no timestamp.)</para> 
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term>z</term>
-<listitem><para>The Z command returns daemon profiling information of
-interest to <application>gpsd</application> developers. The format of
-this string is subject to change without notice.</para></listitem>
+<term>z</term> <listitem><para>The Z command returns daemon profiling
+information of interest to <application>gpsd</application>
+developers. The format of this string is subject to change without
+notice.</para></listitem>
 </varlistentry>
 
 </variablelist>
@@ -555,7 +561,6 @@ make and type of receiver.</para>
 
 </refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 
-
 
 <para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
 to the same serial device (possible with an RS422 adapter hooked up to

@@ -464,7 +464,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 #endif /* MULTISESSION */
 	case 'L':
-	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjk
+	    sprintf(phrase, ",L=2 " VERSION " abcdefilmnpqrstuvwxy");	//ghjk
 	    break;
 	case 'M':
 	    if (ud->fix.mode == MODE_NOT_SEEN)
@@ -612,7 +612,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'Y':
 	    if (ud->satellites) {
 		int used, reported = 0;
-		sprintf(phrase, ",Y=%d:", ud->satellites);
+		strcpy(phrase, ",Y=");
+		if (ud->valid & TIME_SET)
+		    sprintf(phrase+strlen(phrase), "%f ", ud->sentence_time);
+		else
+		    strcat(phrase, "? ");
+		sprintf(phrase+strlen(phrase), "%d:", ud->satellites);
 		for (i = 0; i < ud->satellites; i++) {
 		    used = 0;
 		    for (j = 0; j < ud->satellites_used; j++)
