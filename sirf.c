@@ -393,10 +393,10 @@ static void decode_sirf(struct gps_session_t *session,
 	gpsd_binary_fix_dump(session, buf2);
 #endif /* GEODETIC_NO_GOOD */
 	/* fix quality data */
+	session->gNMEAdata.hdop = getb(20)/5.0;
 	session->gNMEAdata.satellites_used = getb(28);
 	for (i = 0; i < MAXCHANNELS; i++)
 	    session->gNMEAdata.used[i] = getb(29+i);
-	session->gNMEAdata.hdop = getb(21)/5.0;
 	/* KNOWN BUG: we don't get PDOP or VDOP from this sentence */
 	session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
