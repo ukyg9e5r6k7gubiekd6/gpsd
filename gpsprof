@@ -1,0 +1,135 @@
+#!/usr/bin/env python
+#
+# Collect and plot latency-profiling data from a running gpsd.
+# Requires gnuplot.
+#
+import sys, os, time, getopt, gps, tempfile, time, socket
+
+class rawplot:
+    "Print basic data, ignoring timezone skew."
+    name = "raw"
+    def header(self, fp):
+        fp.write("#GPS time        	Received	Transmitted 	Read\n")
+        fp.write("#----------------	---------	----------- 	----------\n")
+    def formatter(self, session, fp):
+        fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+              % (session.rs232,
+                 (session.recv_time - session.gps_time) % 3600,
+                 (session.emit_time - session.gps_time) % 3600,
+                 (time.time() - session.gps_time) % 3600,
+                 session.tag))
+        return True
+    def plot(self, file, title, session):
+        fmt = '''
+set autoscale
+set key below
+set key title "Raw latency data, %dN%d, %s"
+plot \
+     "%s" using 0:4 title "TCP/IP latency" with impulses, \
+     "%s" using 0:3 title "Decode time" with impulses, \
+     "%s" using 0:2 title "Other latency" with impulses, \
+     "%s" using 0:1 title "RS232 time" with impulses
+'''
+        return fmt % (session.baudrate, session.stopbits, title,
+                      file, file, file, file)
+
+class stripplot:
+    "Discard base time, throw out latencies >1 sec."
+    name = "strip"
+    def header(self, fp):
+        fp.write("#RS-232   	Received	Transmitted 	Read\n")
+        fp.write("#---------	---------	----------- 	----------\n")
+    def formatter(self, session, fp):
+        # Throw out total line latencies above 1 second, these are
+        # serial-buffering artifacts at the start of the session
+        line_latency = (session.recv_time - session.gps_time) % 3600
+        if line_latency > 1:
+            return False
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+              % (session.rs232, line_latency,
+                 (session.emit_time - session.gps_time) % 3600,
+                 (time.time() - session.gps_time) % 3600,
+                 session.tag))
+        return True
+    def plot(self, file, title, session):
+        fmt = '''
+set autoscale
+set key below
+set key title "Filtered latency data, %dN%d, %s"
+plot \
+     "%s" using 0:4 title "TCP/IP latency" with impulses, \
+     "%s" using 0:3 title "Decode time" with impulses, \
+     "%s" using 0:2 title "Other latency" with impulses, \
+     "%s" using 0:1 title "RS232 time" with impulses
+'''
+        return fmt % (session.baudrate, session.stopbits, title,
+                      file, file, file, file)
+
+formatters = (rawplot, stripplot)
+
+if __name__ == '__main__':
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:T:")
+    formatter = stripplot
+    raw = False
+    file = None
+    terminal = None
+    title = time.ctime()
+    await = 100
+    for (switch, val) in options:
+	if (switch == '-f'):
+            for formatter in formatters:
+                if formatter.name == val:
+                    break
+            else:
+                sys.stderr.write("gpsprof: no such formatter.\n")
+                sys.exit(1)
+	elif (switch == '-n'):
+	    await = int(val)
+	elif (switch == '-o'):
+	    file = val
+	elif (switch == '-r'):
+	    raw = True
+	elif (switch == '-t'):
+	    title = val
+	elif (switch == '-T'):
+	    terminal = val
+        elif (switch == '-h'):
+            sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
+                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-t title] [-o file]\n")
+            sys.exit(0)
+    plotter = formatter()
+    if file:
+        out = open(file, "w")
+    elif raw:
+        out = sys.stdout
+    else:
+        out = tempfile.NamedTemporaryFile()
+
+    try:
+        session = gps.gps()
+    except socket.error:
+        sys.stderr.write("gpsprof: gpsd unreachable.\n")
+        sys.exit(0)
+    try:
+        session.query("wZ+")
+        plotter.header(out)
+        while await > 0:
+            session.poll()
+            session.gps_time = gps.isotime(session.utc)
+            session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
+            if plotter.formatter(session, out):
+                await -= 1
+    finally:
+        session.query("wZ-")
+        
+    out.flush()
+    if not raw:
+        command = plotter.plot(out.name, title, session)
+        if terminal:
+            command = "set terminal " + terminal + "\n" + command
+        pfp = os.popen("gnuplot -persist", "w")
+        pfp.write(command)
+        pfp.close()
+    del session
+    out.close()
+
