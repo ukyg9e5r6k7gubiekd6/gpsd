@@ -507,16 +507,17 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
     int fd, mask = 0;
     char cmds[16], *sp;
 
+    /* 
+     * Never send watcher notifications on GPVTG or GPGLL, as those
+     * only duplicate information made available at other points
+     * in the same cycle.
+     */
     for (sp = sentence; *sp; sp++) {
 	if (*sp == '$') {
 	    if (PREFIX("$GPRMC", sp)) {
 		mask |= GPRMC;
 	    } else if (PREFIX("$GPGGA", sp)) {
 		mask |= GPGGA;
-	    } else if (PREFIX("$GPGLL", sp)) {
-		mask |= GPGLL;
-	    } else if (PREFIX("$GPVTG", sp)) {
-		mask |= GPVTG;
 	    } else if (PREFIX("$GPGSA", sp)) {
 		mask |= GPGSA;
 	    } else if (PREFIX("$GPGSV", sp)) {
@@ -528,33 +529,30 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 	}
     }
     cmds[0] = '\0';
-    if (mask & (GPRMC | GPGGA | GPGLL))
-	strcat(cmds, "dp");
-    if (mask & (GPGGA))
-	strcat(cmds, "a");
-    if (mask & (GPRMC | GPVTG))
-	strcat(cmds, "tuv");
-    if (mask & (GPRMC | GPGGA))
-	strcat(cmds, "s");
-    if (mask & (GPGSA | GPGGA))
-	strcat(cmds, "m");
-    if (mask & (GPGGA))
+    if (mask & GPRMC)
+	strcat(cmds, "dptv");
+    if ((mask & GPGGA) || ((mask & GPRMC) && !(ud->seen_sentences & GPGGA)))
+	strcat(cmds, "sm");
+    if (mask & GPGGA)
+	strcat(cmds, "au");
+    if (mask & GPGSA)
 	strcat(cmds, "q");
-    if (mask & (GPGSV))
+    if (mask & GPGSV)
 	strcat(cmds, "y");
     if (mask & (GPGSA | PGRME))
 	strcat(cmds, "e");
 
-    for (fd = 0; fd < FD_SETSIZE; fd++) {
-	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (FD_ISSET(fd, &nmea_fds))
-	    throttled_write(fd, sentence, strlen(sentence));
+    if (cmds[0])
+	for (fd = 0; fd < FD_SETSIZE; fd++) {
+	    /* copy raw NMEA sentences from GPS to clients in raw mode */
+	    if (FD_ISSET(fd, &nmea_fds))
+		throttled_write(fd, sentence, strlen(sentence));
 
-	/* some listeners may be in watcher mode */
-	if (FD_ISSET(fd, &watcher_fds)) {
-	    handle_request(fd, cmds, strlen(cmds), 0);
+	    /* some listeners may be in watcher mode */
+	    if (FD_ISSET(fd, &watcher_fds)) {
+		handle_request(fd, cmds, strlen(cmds), 0);
+	    }
 	}
-    }
 }
 
 int main(int argc, char *argv[])
