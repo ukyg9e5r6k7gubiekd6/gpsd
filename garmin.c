@@ -365,17 +365,10 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
 	    sats = (cpo_sat_data*)pkt->mData;
 
-	    session->gNMEAdata.satellites = 0;
 	    session->gNMEAdata.satellites_used = 0;
-
-	    // clear satellite tables
-	    for ( i = 0 ; i < MAXCHANNELS ; i++ ) {
-		session->gNMEAdata.used[i] = 0;
-		session->gNMEAdata.PRN[i] = 0;
-		session->gNMEAdata.azimuth[i] = 0;
-		session->gNMEAdata.elevation[i] = 0;
-		session->gNMEAdata.ss[i] = 0;
-	    }
+	    gpsd_zero_satellites(&session->gNMEAdata);
+	    for ( i = 0 ; i < MAXCHANNELS ; i++ )
+                session->gNMEAdata.used[i] = 0;
 	    for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
 		gpsd_report(4,
 			    "  Sat %d, snr: %d, elev: %d, Azmth: %d, Stat: %x\n"
