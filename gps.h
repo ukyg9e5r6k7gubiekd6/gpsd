@@ -104,8 +104,8 @@ struct gps_data_t {
 
     /* what type gpsd thinks the device is */
     char	*gps_id;	/* only valid if non-null. */
+    unsigned int baudrate, stopbits;	/* RS232 link paramters */
 
-#ifdef PROFILING
     /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
@@ -118,8 +118,6 @@ struct gps_data_t {
     double emit_time;		/* emission time (-> E2) */
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
-#endif /* PROFILING */
-    unsigned int baudrate, stopbits;	/* RS232 link paramters */
     unsigned int cycle;			/* refresh cycle time in seconds */
 
     /* these members are private */

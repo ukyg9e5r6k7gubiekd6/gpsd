@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <sys/time.h>
 
-#include "config.h"	/* in case PROFILING is defined */
 #include "gpsd.h"
 
 struct gps_data_t *gps_open(const char *host, const char *port)
@@ -188,7 +187,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		}
 		REFRESH(gpsdata->satellite_stamp);
 		break;
-#ifdef PROFILING
 	    case 'Z':
 		sscanf(sp, "Z=%d", &gpsdata->profiling);
 		break;
@@ -202,7 +200,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		       &gpsdata->d_decode_time, 
 		       &gpsdata->poll_time, 
 		       &gpsdata->emit_time);
-#endif /* PROFILING */
 		break;
 	    }
 	}
@@ -230,20 +227,15 @@ int gps_poll(struct gps_data_t *gpsdata)
 {
     char	buf[BUFSIZ];
     int		n;
-#ifdef PROFILING
     struct timeval received;
-#endif /* PROFILING */
 
     /* the daemon makes sure that every read is NUL-terminated */
     if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
     buf[n] = '\0';
-#ifdef PROFILING
     if (gpsdata->profiling)
 	gettimeofday(&received, NULL);
-#endif /* PROFILING */
     n = gps_unpack(buf, gpsdata);
-#ifdef PROFILING
     if (gpsdata->profiling)
     {
 	struct timeval decoded;
@@ -251,7 +243,6 @@ int gps_poll(struct gps_data_t *gpsdata)
 	gpsdata->c_decode_time = TIME2DOUBLE(received) - gpsdata->gps_time;
 	gpsdata->c_recv_time = TIME2DOUBLE(decoded) - gpsdata->gps_time;
     }
-#endif /* PROFILING */
     return n;
 }
 

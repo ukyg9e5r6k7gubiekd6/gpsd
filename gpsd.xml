@@ -189,10 +189,13 @@ decimal integer numeral:</para>
 
 <varlistentry>
 <term>b</term>
-<listitem><para>Returns four fields giving the parameters of the
-serial link to the GPS as "B=%d %d %c %d"; baud rate, byte size,
-parity, (currently always N) and stop bits (1 or 2).  Useful mainly 
-for developers profiling the daemon.</para></listitem>
+
+<listitem><para>The B command with no argument returns four fields
+giving the parameters of the serial link to the GPS as "B=%d %d %c
+%d"; baud rate, byte size, parity, (currently always N) and stop bits
+(1 or 2).  The command "B=%d" sets the baud rate, not changing parity
+or stop bits; watch the response, because it is possible for this to
+fail if the GPS does not support a speed-switching command.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -321,6 +324,13 @@ integer formatted as %d in range 0-359), signal strengths in
 decibels, and 1 or 0 according as the satellite was or was
 not used in the last fix. Each number is followed by one space.</para>
 </listitem>
+</varlistentry>
+
+<varlistentry>
+<term>z</term>
+<listitem><para>The Z command returns daemon profiling
+information of interest to GPSD developers. The format of this string
+is subject to change without notice.</para></listitem>
 </varlistentry>
 </variablelist>
 

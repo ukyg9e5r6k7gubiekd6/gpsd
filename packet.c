@@ -221,7 +221,6 @@ int packet_sniff(struct gps_session_t *session)
     }
 }
 
-#ifdef PROFILING
 #define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
 	outname(struct gps_session_t *session) \
 	{ \
@@ -240,21 +239,6 @@ int packet_sniff(struct gps_session_t *session)
 	session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv); \
 	    return 0; \
 	}
-#else
-#define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
-	outname(struct gps_session_t *session) \
-	{ \
-	    int maxgarbage = maxlength; \
-	    packet_accept(session); \
-	    while (maxgarbage--) { \
-		if (inname(session)) { \
-		    return 1; \
-		} else \
-		    packet_shift(session); \
-	    } \
-	    return 0; \
-	}
-#endif /* PROFILING */
 
 MAKE_PACKET_GRABBER(packet_get_nmea, get_nmea, NMEA_MAX * 3)
 MAKE_PACKET_GRABBER(packet_get_sirf, get_sirf, MAX_PACKET_LENGTH)

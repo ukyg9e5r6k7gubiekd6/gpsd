@@ -189,15 +189,11 @@ static int handle_request(int fd, char *buf, int buflen)
     char reply[BUFSIZ], phrase[BUFSIZ], *p;
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
-#ifdef PROFILING
     int icd = 0;
-#endif /* PROFILING */
-
-#ifdef PROFILING
     struct timeval tv;
+
     gettimeofday(&tv, NULL);
     session->poll_times[fd] = TIME2DOUBLE(tv);
-#endif /* PROFILING */
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -210,7 +206,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",A=%f", ud->altitude);
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
-#ifdef PROFILING
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
@@ -218,7 +213,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		    if (session->device_type->speed_switcher(session, i))
 			gpsd_set_speed(session, (speed_t)i, 1);
 	    }
-#endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),
 		    9 - ud->stopbits, ud->stopbits);
@@ -229,9 +223,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'D':
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
-#ifdef PROFILING
 		icd = 1;
-#endif /* PROFILING */
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
@@ -365,7 +357,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		assert(reported == ud->satellites);
 	    }
 	    break;
-#ifdef PROFILING
 	case 'Z':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
@@ -388,7 +379,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",Z=%d", ud->profiling);
 	    }
 	    break;
-#endif /* PROFILING */
 
 	case '\r': case '\n':
 	    goto breakout;
@@ -399,7 +389,6 @@ static int handle_request(int fd, char *buf, int buflen)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-#ifdef PROFILING
     if (ud->profiling && icd) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -415,7 +404,6 @@ static int handle_request(int fd, char *buf, int buflen)
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }
-#endif /* PROFILING */
     strcat(reply, "\r\n");
 
     return throttled_write(fd, reply, strlen(reply));
@@ -437,7 +425,6 @@ static void raw_hook(char *sentence)
 {
     int fd;
 
-#ifdef PROFILING
     char *sp, *tp;
     if (sentence[0] != '$')
 	session->gNMEAdata.tag[0] = '\0';
@@ -447,7 +434,6 @@ static void raw_hook(char *sentence)
 	*tp = '\0';
     }
     session->gNMEAdata.sentence_length = strlen(sentence);
-#endif /* PROFILING */
 
     for (fd = 0; fd < nfds; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */

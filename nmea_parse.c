@@ -122,7 +122,6 @@ static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
     strcat(out->utc, "Z");
 }
 
-#ifdef PROFILING
 static double iso8661_to_unix(char *isotime)
 {
     char *dp = NULL;
@@ -143,7 +142,6 @@ static double iso8661_to_unix(char *isotime)
 	gpsd_report(4, "clock skew is %lf seconds\n", now-(int)res);
     return res;
 }
-#endif /* PROFILING */
 
 /**************************************************************************
  *
@@ -175,9 +173,7 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
-    #ifdef PROFILING
 	    out->gps_time = iso8661_to_unix(out->utc);
-    #endif /* PROFILING */
 	}
 	do_lat_lon(&field[3], out);
 	out->speed = atof(field[7]);
@@ -238,9 +234,7 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
-#ifdef PROFILING
 	out->gps_time = iso8661_to_unix(out->utc);
-#endif /* PROFILING */
 	do_lat_lon(&field[1], out);
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
@@ -312,9 +306,7 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[1], out);
-#ifdef PROFILING
 	out->gps_time = iso8661_to_unix(out->utc);
-#endif /* PROFILING */
 	do_lat_lon(&field[2], out);
         out->satellites_used = atoi(field[7]);
 	altitude = field[9];
