@@ -44,8 +44,7 @@ class gpsdata:
 	self.online = False			# True if GPS on, False if not
 	self.online_stamp = gps.timestamp(now)
 
-        self.isotime = ""
-        self.localtime = 0
+        self.utc = ""
 
 	self.latitude = self.longitude = 0.0
 	self.latlon_stamp = gps.timestamp(now)
@@ -79,6 +78,7 @@ class gpsdata:
         self.d_recv_time = 0
         self.d_decode_time = 0
         self.emit_time = 0
+        self.poll_time = 0
         self.c_recv_time = 0
         self.c_decode_time = 0
         self.baudrate = 0
@@ -189,6 +189,7 @@ class gps(gpsdata):
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
+        self.utc = "?"
 	fields = buf.strip().split(",")
 	if fields[0] == "GPSD":
 	  for field in fields[1:]:
@@ -210,12 +211,7 @@ class gps(gpsdata):
 	    elif cmd in ('C', 'c'):
 	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
-	      self.isotime = data
-              if self.profiling:
-                  if data:
-                      self.localtime = isotime(data)
-                  else:
-                      self.localtime = 0
+	      self.utc = data
 	    elif cmd in ('M', 'm'):
 	      i1 = int(data)
 	      self.mode_stamp.changed = (self.mode != i1)
@@ -294,11 +290,19 @@ class gps(gpsdata):
         if self.verbose:
             sys.stderr.write("GPS DATA %s\n" % repr(data))
         if self.profiling:
-            self.c_recv_time = (time.time() - self.d_recv_time)
+            self.c_recv_time = time.time()
 	res = self.__unpack(data)
-        if self.profiling:
-            self.c_decode_time = (time.time() - self.d_recv_time)
-        #print "d=%lf %s r=%lf %s" % (self.localtime, time.ctime(self.localtime), self.d_recv_time, time.ctime(self.d_recv_time))
+        if self.profiling and self.utc != "?":
+            self.c_decode_time = time.time()
+            # Awful kluge that nukes all timezone problems
+            line_latency = (self.d_recv_time - isotime(self.utc)) % self.cycle
+            gpstime = self.d_recv_time - line_latency
+            self.d_recv_time = line_latency
+            self.d_decode_time += line_latency
+            self.emit_time += line_latency
+            self.poll_time += line_latency
+            self.c_recv_time -= gpstime
+            self.c_decode_time -= gpstime
         return res
 
     def query(self, commands):
@@ -427,13 +431,13 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     return (dx, dy)
 
 def isotime(s):
-    "Convert gpsd timestamps in ISO8661 format to local Unix time, and back."
+    "Convert timestamps in ISO8661 format to and from secs since epoch in GMT."
     if type(s) == type(1):
-        return time.strftime(time.localtime(s), "%Y-%m-%dT%H:%M:%S")
+        return time.strftime(time.gmtime(s), "%Y-%m-%dT%H:%M:%SZ")
     elif type(s) == type(1.0):
         date = int(s)
         msec = s - date
-        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
+        date = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(s))
         return date + "." + `msec`[2:]
     elif type(s) == type(""):
         gmt = s[-1] == "Z"
@@ -446,11 +450,7 @@ def isotime(s):
             msec = "0"
         unpacked = time.strptime(date, "%Y-%m-%dT%H:%M:%S")
         seconds = time.mktime(unpacked)
-        uncorrected = seconds + float("0." + msec)
-        if not time.daylight:
-            return uncorrected - time.timezone
-        else:
-            return uncorrected - time.altzone
+        return seconds + float("0." + msec)
     else:
         raise TypeError
 
