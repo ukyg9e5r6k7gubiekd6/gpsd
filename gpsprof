@@ -3,7 +3,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, gps, tempfile, time, socket, math
+import sys, os, time, getopt, gps, tempfile, time, socket, math, copy
 
 class Baton:
     "Ship progress indication to stderr."
@@ -41,12 +41,12 @@ class spaceplot:
     def __init__(self, fp):
         self.fixes = []
         self.fp = fp
-    def header(self, session):
-        self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
-                 (title, session.gps_id, session.cycle))
-    def formatter(self, session):
+    def gather(self, session):
         self.fixes.append((session.latitude, session.longitude))
         return True
+    def data(self, session):
+        self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
+                 (title, session.gps_id, session.cycle))
     def plot(self, file, title, session):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
@@ -101,18 +101,21 @@ class uninstrumented:
     name = "uninstrumented"
     def __init__(self, fp):
         self.fp = fp
-    def header(self, session):
+        self.stats = []
+    def gather(self, session):
+        if session.gps_time:
+            seconds = time.time() - session.gps_time + gps.tzoffset()
+            self.stats.append(seconds)
+            return True
+        else:
+            return False
+    def data(self, session):
         self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
-    def formatter(self, session):
-        if session.gps_time:
-            seconds = time.time() - session.gps_time + gps.tzoffset()
+        for seconds in self.stats:
             self.fp.write("%2.6lf\n" % seconds)
-            return True
-        else:
-            return False
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -130,7 +133,14 @@ class rawplot:
     name = "raw"
     def __init__(self, fp):
         self.fp = fp
-    def header(self, session):
+        self.stats = []
+    def gather(self, session):
+        if session.gps_time:
+            self.stats.append(copy.copy(session.timings))
+            return True
+        else:
+            return False
+    def data(self, session):
         self.fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -142,22 +152,17 @@ class rawplot:
         for i in range(0, 7):
             self.fp.write("--------\t")
         self.fp.write("--------\n")
-
-    def formatter(self, session):
-        if session.gps_time:
+        for timings in self.stats:
             self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
-              % (session.timings.length,
-                 session.timings.d_xmit_time, 
-                 session.timings.d_recv_time,
-                 session.timings.d_decode_time,
-                 session.timings.poll_time,
-                 session.timings.emit_time,
-                 session.timings.c_recv_time,
-                 session.timings.c_decode_time,
-                 session.timings.tag))
-            return True
-        else:
-            return False
+              % (timings.length,
+                 timings.d_xmit_time, 
+                 timings.d_recv_time,
+                 timings.d_decode_time,
+                 timings.poll_time,
+                 timings.emit_time,
+                 timings.c_recv_time,
+                 timings.c_decode_time,
+                 timings.tag))
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -180,11 +185,20 @@ plot \
 class splitplot:
     "Discard base time, use color to indicate different tags."
     name = "split"
-    sentences = ("GPGGA", "GPRMC", "GPGLL")
+    sentences = []
     def __init__(self, fp):
         self.found = {}
         self.fp = fp
-    def header(self, session):
+        self.stats = []
+    def gather(self, session):
+        if session.gps_time:
+            self.stats.append(copy.copy(session.timings))
+            if session.timings.tag not in splitplot.sentences:
+                splitplot.sentences.append(session.timings.tag)
+            return True
+        else:
+            return False
+    def data(self, session):
         self.fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -195,29 +209,25 @@ class splitplot:
         for hn in ("T1", "D1", "W", "E2", "T2", "D2", "length"):
             self.fp.write("%8s\t" % hn)
         self.fp.write("tag\n# ")
-        for s in splitplot.sentences + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
+        for s in tuple(splitplot.sentences) + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
             self.fp.write("---------\t")
         self.fp.write("--------\n")
-    def formatter(self, session):
-        if session.timings.gps_time:
+        for timings in self.stats:
             for s in splitplot.sentences:
-                if s == session.timings.tag:
-                    self.fp.write("%2.6f\t"% session.timings.d_xmit_time)
+                if s == timings.tag:
+                    self.fp.write("%2.6f\t"% timings.d_xmit_time)
                     self.found[s] = True
                 else:
                     self.fp.write("-       \t")
             self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
-                     % (session.timings.d_recv_time,
-                        session.timings.d_decode_time,
-                        session.timings.poll_time,
-                        session.timings.emit_time,
-                        session.timings.c_recv_time,
-                        session.timings.c_decode_time,
-                        session.timings.length,
-                        session.timings.tag))
-            return True
-        else:
-            return False
+                     % (timings.d_recv_time,
+                        timings.d_decode_time,
+                        timings.poll_time,
+                        timings.emit_time,
+                        timings.c_recv_time,
+                        timings.c_decode_time,
+                        timings.length,
+                        timings.tag))
     def plot(self, file, title, session):
         fixed = '''
 set autoscale
@@ -279,7 +289,6 @@ def plotframe(await, fname, file, speed, threshold, title):
         if formatter not in (spaceplot, uninstrumented):
             session.query("z+")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
-        plotter.header(session)
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
         while countdown > 0:
@@ -296,11 +305,12 @@ def plotframe(await, fname, file, speed, threshold, title):
             # them.
             if threshold and session.timings.c_decode_time > session.cycle * threshold:
                 continue
-            if plotter.formatter(session):
+            if plotter.gather(session):
                 countdown -= 1
         baton.end()
     finally:
         session.query("w-z-")
+    plotter.data(session)
     out.flush()
     command = plotter.plot(out.name, title, session)
     del session
