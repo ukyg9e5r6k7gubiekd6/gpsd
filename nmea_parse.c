@@ -325,6 +325,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
 	    double newaltitude = atof(altitude);
 
 	    out->altitude_stamp.changed = (newaltitude != out->altitude);
+	    out->altitude = newaltitude;
 	    REFRESH(out->altitude_stamp);
 	}
     }
