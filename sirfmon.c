@@ -75,6 +75,7 @@ int sendpkt (unsigned char *buf,int len);
 int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
+static WINDOW *sat_win;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -189,7 +190,6 @@ static int nmea_send(int fd, const char *fmt, ... )
     }
 }
 
-
 int main (int argc, char **argv)
 {
     int len,i,stopbits,bps,speed,v,st,quit = 0;
@@ -249,6 +249,8 @@ int main (int argc, char **argv)
     scrollok(stdscr,TRUE);
     setscrreg(DEBUGWIN,LINES - 1);
 
+    sat_win = subwin(stdscr, 13, 30, 9, 0);
+
     attrset(A_BOLD);
     move(1,1);
     printw("            X        Y        Z            North      East         Alt");
@@ -266,13 +268,14 @@ int main (int argc, char **argv)
     printw("RS232:");
     move(18, 40);
     printw("Version:");
-    move(CHANWIN-1,0);
-    printw("Ch SV  Az El Stat  C/N");
-    for (i = 0; i < 12; i++) {
-	move(CHANWIN+i,0);
-	printw("%2d",i);
-    }
     attrset(A_NORMAL);
+
+    wattrset(sat_win, A_BOLD);
+    wprintw(sat_win, "Ch SV  Az El Stat  C/N");
+    for (i = 0; i < 12; i++) {
+	mvwprintw(sat_win, i+1, 0, "%2d",i);
+    }
+    wattrset(sat_win, A_NORMAL);
     mvprintw(17, 50, "%4d N %d", bps, stopbits);
 
     move(DEBUGWIN,0);
@@ -291,6 +294,7 @@ int main (int argc, char **argv)
 	printw("cmd> ");
 	clrtoeol();
 	refresh();
+	wrefresh(sat_win);
 
 	FD_SET(0,&select_set);
 	FD_SET(LineFd,&select_set);
@@ -307,6 +311,7 @@ int main (int argc, char **argv)
 	    move(0,0);
 	    clrtoeol();
 	    refresh();
+	    wrefresh(sat_win);
 
 	    if ((p = strchr(line,'\r')) != NULL)
 		*p = '\0';
@@ -458,11 +463,11 @@ int len;
 	    int sv,st;
 	    
 	    off = 8 + 15 * i;
-	    move(CHANWIN+i,2);
+	    wmove(sat_win, i+1, 2);
 	    sv = getb(off);
-	    printw("%3d",sv);
+	    wprintw(sat_win, "%3d",sv);
 
-	    printw(" %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
+	    wprintw(sat_win, " %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
 
 	    st = ' ';
 	    if (getw(off+3) == 0xbf)
@@ -478,10 +483,10 @@ int len;
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
 
-	    printw("%5.1f %c",(float)cn/10,st);
+	    wprintw(sat_win, "%5.1f %c",(float)cn/10,st);
 
 	    if (sv == 0)			/* not tracking? */
-		clrtoeol();			/* clear other info */
+		wclrtoeol(sat_win);			/* clear other info */
 	}
 	putb(0,0x90);				/* poll clock status */
 	putb(1,0);
