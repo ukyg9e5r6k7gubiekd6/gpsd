@@ -258,14 +258,14 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
      */
     char *status = field[7];
 
-#ifdef PROFILING
-    out->gps_time = iso8661_to_unix(out->utc);
-#endif /* PROFILING */
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
+#ifdef PROFILING
+	out->gps_time = iso8661_to_unix(out->utc);
+#endif /* PROFILING */
 	do_lat_lon(&field[1], out);
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
@@ -330,9 +330,6 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-#ifdef PROFILING
-    out->gps_time = iso8661_to_unix(out->utc);
-#endif /* PROFILING */
     out->status_stamp.changed = update_field_i(field[6], &out->status);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
@@ -341,6 +338,9 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[1], out);
+#ifdef PROFILING
+	out->gps_time = iso8661_to_unix(out->utc);
+#endif /* PROFILING */
 	do_lat_lon(&field[2], out);
         out->satellites_used = atoi(field[7]);
 	altitude = field[9];
