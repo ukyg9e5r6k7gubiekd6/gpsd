@@ -27,8 +27,14 @@ start() {
 	# 2. We don't need all the logging crud that daemon/initlog sets
 	# up -- gpsd does its own syslog calls.
 	#
-	gpsd
-	success
+	if [ -f "/dev/gps" ]
+	then
+	    gpsd -p /dev/gps
+	    success
+	else
+	    # User needs to symlink /dev/gps to the right thing
+	    failure "No /dev/gps device, aborting gpsd startup."
+	fi
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd
