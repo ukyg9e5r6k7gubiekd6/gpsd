@@ -110,7 +110,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	va_end(ap);
 
 	if (in_background)
-	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, buf);
+	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf);
 	else
 	    fputs(buf, stderr);
     }
