@@ -231,7 +231,9 @@ static int handle_request(int fd, char *buf, int buflen)
 		bufcopy[p-q] = '\0';
 		gpsd_report(1, "Switch to %s requested\n", bufcopy);
 
-		if (need_gps <= 1 && !access(bufcopy, R_OK)) {
+		if (need_gps > 1) 
+		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, need_gps);
+		else {
 		    char *stash_device;
 		    gpsd_deactivate(session);
 		    stash_device = session->gpsd_device;
@@ -239,8 +241,10 @@ static int handle_request(int fd, char *buf, int buflen)
 		    session->gNMEAdata.baudrate = 0;	/* so it'll hunt */
 		    session->driverstate = 0;
 		    if (gpsd_activate(session) >= 0) {
+			gpsd_report(1, "Switch to %s succeeded\n", bufcopy);
 			free(stash_device);
 		    } else {
+			gpsd_report(1, "Switch to %s failed\n", bufcopy);
 			free(session->gpsd_device);
 			session->gpsd_device = stash_device;
 			session->gNMEAdata.baudrate = 0;
@@ -536,8 +540,6 @@ int main(int argc, char *argv[])
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
-	    if (debuglevel >= 2)
-		go_background = 0;
 	    break;
 	case 'N':
 	    go_background = 0;
