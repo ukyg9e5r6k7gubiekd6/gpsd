@@ -108,7 +108,6 @@ EXTRA_DIST = \
 	xgpsspeed.ad \
 	gpsd.init \
 	gpsd.spec \
-	gpsd.lsm \
 	gps.py \
 	gpsd.py \
 	gpsprobe
