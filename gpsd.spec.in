@@ -123,7 +123,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %changelog
 * Sat Jan 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-  Embarrassing typo fix in gps.py.
+  Embarrassing typo fix in gps.py. Avoid buffer overrun in xgps.c.
 
 * Fri Jan  14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.7-1
 - More compiler-warning cleanups.  gps client name changed to xgps.

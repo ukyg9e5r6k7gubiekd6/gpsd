@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT, *speedunits;
     Widget base;
 
-    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
+    toplevel = XtVaAppInitialize(&app, "xgpsspeed", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
