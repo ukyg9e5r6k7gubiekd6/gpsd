@@ -40,18 +40,22 @@ distinguish them from baud barf.
 #ifdef TESTMAIN
 #include <stdarg.h>
 
+static int verbose = 0;
+
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
-    char buf[BUFSIZ];
-    va_list ap;
+    if (errlevel <= verbose) {
+	char buf[BUFSIZ];
+	va_list ap;
 
-    buf[0] = '\0';
-    va_start(ap, fmt) ;
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-    va_end(ap);
+	buf[0] = '\0';
+	va_start(ap, fmt) ;
+	vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
 
-    fputs(buf, stderr);
+	fputs(buf, stderr);
+    }
 }
 #endif /* TESTMAIN */
 
@@ -61,8 +65,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  * that looks like the head of a SiRF packet followed by a NMEA
  * packet; in that case it won't reset until it notices that the SiRF
  * trailer is not where it should be, and the NMEA packet will be
- * lost.  The reverse scenario is not possible because the SiRF leader
- * characters can't occur in an NMEA packet.  Caller should consume a
+ * lost.  The reverse scenario is not possible because the SiRF leader * characters can't occur in an NMEA packet.  Caller should consume a
  * packet when it sees one of the *_RECOGNIZED states.
  */
 
@@ -434,30 +437,27 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    packet_discard(session);
 #if ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
-	    unsigned long hdrcheck = session->inbuffer[8] | (session->inbuffer[9] << 8);
-	    unsigned long datacheck = session->inbufptr[-2] | (session->inbufptr[-1] << 8);
-	    unsigned long len, n, crc1, crc2;
-	    for (n = crc1 = 0; n < 4; n++) {
-		crc1 += session->inbuffer[2*n];
-		crc1 += session->inbuffer[2*n+1] << 8;
-	    }
-	    crc1 &= 0xffff;
-	    crc1 ^= 0xffff;
-	    // printf("Header checksum 0x%lx, expecting 0x%lx\n", crc1, hdrcheck);
-	    len = session->inbuffer[4] | (session->inbuffer[5] << 8);
-	    for (n = crc2 = 0; n < len; n++) {
-		crc2 += session->inbuffer[12+2*n];
-		crc2 += session->inbuffer[12+2*n+1] << 8;
-	    }
-	    crc2 &= 0xffff;
-	    crc2 ^= 0xffff;
-	    // printf("Data checksum 0x%lx, expecting 0x%lx\n", crc2, datacheck);
-	    if (datacheck == crc2 && hdrcheck == crc1) {
+ #define getw(i) (session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+	    short len, n, crc1, crc2;
+	    for (n = crc1 = 0; n < 4; n++)
+		crc1 += (short)getw(n);
+	    crc1 *= -1;
+	    gpsd_report(6, "Header checksum 0x%hx expecting 0x%hx\n", 
+		   crc1, (short)getw(4));
+	    len = getw(2);
+	    for (n = crc2 = 0; n < len; n++)
+		crc2 += (short)getw(5+n);
+	    crc2 *= -1;
+	    gpsd_report(6,
+		"Data checksum 0x%hx over length %d, expecting 0x%hx\n", 
+			crc2, len, getw(5 + len));
+	    if (crc2 == (short)getw(5 + len) && crc1 == (short)getw(4)) {
 		session->packet_type = ZODIAC_PACKET;
 		packet_copy(session);
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
+#undef getw
 #endif /* ZODIAC_ENABLE */
 	}
     }
@@ -619,29 +619,40 @@ int main(int argc, char *argv[])
 	},
 	/* Zodiac tests */
 	{
-	    "Zodiac binary switch to NMEA",
+	    "Zodiac binary 1000 Geodetic Status Output Message",
 	    {
-		0xFF, 0x81, 0x33, 0x05, 0x03, 0x00, 0x00, 0x00, 0x49, 0xFB, 
-		0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xFF, 0xFF},
-	    18,
+		0xff, 0x81, 0xe8, 0x03, 0x31, 0x00, 0x00, 0x00, 0xe8, 0x79, 
+		0x74, 0x0e, 0x00, 0x00, 0x24, 0x00, 0x24, 0x00, 0x04, 0x00, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x03, 0x23, 0x00, 
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x06, 0x00, 
+		0xcd, 0x07, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x7b, 0x0d, 
+		0x00, 0x00, 0x12, 0x6b, 0xa7, 0x04, 0x41, 0x75, 0x32, 0xf8, 
+		0x03, 0x1f, 0x00, 0x00, 0xe6, 0xf2, 0x00, 0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x11, 0xf6, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x40, 
+		0xd9, 0x12, 0x90, 0xd0, 0x03, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
+		0x10, 0x27, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
+		0x00, 0x00, 0x00, 0x00, 0xe0, 0x93, 0x04, 0x00, 0x04, 0xaa},
+	    110,
 	    0,
 	    ZODIAC_PACKET,
 	    ZODIAC_EXPECTED,
 	},
     };
 
-
     struct map *mp;
     struct gps_session_t state;
     int st;
     unsigned char *cp;
+
+    if (argc > 1)
+	verbose = atoi(argv[1]); 
 
     for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) {
 	state.packet_type = BAD_PACKET;
 	state.packet_state = mp->initstate;
 	state.inbuflen = 0;
 	memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
-	printf("%s starts with state %d\n", mp->legend, mp->initstate);
+	gpsd_report(2, "%s starts with state %d\n", mp->legend, mp->initstate);
 	st = packet_get(&state, mp->testlen);
 	if (state.packet_type != mp->type)
 	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, st);
