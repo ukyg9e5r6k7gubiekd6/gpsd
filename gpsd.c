@@ -38,7 +38,7 @@ struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
 static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
-static int debuglevel, nfds, in_background = 0;
+static int debuglevel, nfds, go_background = 1, in_background = 0;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
     extern char *optarg;
 
     debuglevel = 1;
-    while ((option = getopt(argc, argv, "D:S:d:hnp:P:s:v"
+    while ((option = getopt(argc, argv, "D:S:d:hNnp:P:s:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
@@ -444,6 +444,11 @@ int main(int argc, char *argv[])
 #endif /* NON_NMEA_ENABLE */
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
+	    if (debuglevel >= 2)
+		go_background = 0;
+	    break;
+	case 'N':
+	    go_background = 0;
 	    break;
 	case 'S':
 	    service = optarg;
@@ -499,7 +504,7 @@ int main(int argc, char *argv[])
 
     if (!service)
 	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
-    if (debuglevel < 2)
+    if (go_background)
 	daemonize();
 
     /* Handle some signals */

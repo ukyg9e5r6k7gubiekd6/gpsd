@@ -120,6 +120,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
+* Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.9-1
+- Add -N option to explicitly foreground the daemon.
+
 * Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.9-1
 - Python files restored to RPM.
 

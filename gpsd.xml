@@ -26,6 +26,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
       <arg choice='opt'>-n </arg>      
+      <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
@@ -128,6 +129,12 @@ mode (not drawing power) before the host machine asserts DTR, so
 waiting for the first actual request can save valuable battery power
 on portable equipment.  This option combines well with -D2 to enable
 monitoring of the GPS data stream.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-N</term>
+<listitem><para>Don't daemonize; run in foreground. Mainly useful
+for debugging.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
