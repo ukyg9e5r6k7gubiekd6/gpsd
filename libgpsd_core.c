@@ -13,6 +13,7 @@
 #include "gps.h"
 #include "gpsd.h"
 
+#ifdef NON_NMEA_ENABLE
 static struct gps_type_t *set_device_type(char what)
 /* select a device driver by key letter */
 {
@@ -26,6 +27,7 @@ static struct gps_type_t *set_device_type(char what)
  foundit:;
     return *dp;
 }
+#endif /* NON_NMEA_ENABLE */
 
 struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
@@ -40,15 +42,15 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
     session->gpsd_device = "/dev/gps";
     session->device_type = gpsd_drivers[0];
+#ifdef NON_NMEA_ENABLE
     devtype = set_device_type(devicetype);
     if (!devtype)
 	gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
     else
-    {
 	session->device_type = devtype;
-	session->baudrate = devtype->baudrate;
-    }
+#endif /* NON_NMEA_ENABLE */
 
+    session->baudrate = session->device_type->baudrate;
     session->dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZE];
