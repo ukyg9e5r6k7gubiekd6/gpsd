@@ -121,7 +121,9 @@ fractional parts to the right of a decimal point.</para>
 <varlistentry>
 <term>-D</term>
 <listitem>
-<para>set debug level</para>
+<para>Set debug level. At debug levels 2 and above, gpsd stays in
+foreground and reports incoming sentence and actions to standard
+error.</para>
 </listitem>
 </varlistentry>
 </variablelist>
