@@ -62,13 +62,6 @@ Applications that presently use <code>gpsd</code> include
 <p>The most recent release was @VERSION@. 
 This web page was last updated on @DATE@.</p>
 
-<p>Note: As of mid-October 2004, Kismet is currently not working well
-with <code>gpsd</code>.  The symptom is a "Lost GPS signal" shortly
-after kismet startup.  There is a workaround, which is to run 
-<code>gpsd</code> with the -n option.  GPS interface code that works
-with both old and new <code>gpsd</code> is already in the development branch of
-Kismet and is intended to go into a future mainline release.</p>
-
 <h1 id='downloads'>Downloads</h1>
 
 <p>Look in the <a
