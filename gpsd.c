@@ -349,6 +349,7 @@ int main(int argc, char *argv[])
     signal(SIGHUP, onsig);
     signal(SIGTERM, onsig);
     signal(SIGQUIT, onsig);
+    signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
     syslog(LOG_NOTICE, "Gpsd started (Version %s)", VERSION);
