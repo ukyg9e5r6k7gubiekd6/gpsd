@@ -4,7 +4,7 @@
  * called sirf_ctrl.  Contributed to gpsd by the author.
  *
  * Modified to not use stderr and so each function returns 0 on success,
- * nonzero on failure.
+ * nonzero on failure.  Alsso to use gpsd's own checksum and send code.
  */
 
 #include <unistd.h>
@@ -12,8 +12,28 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "sirf.h"
 #include "gpsd.h"
+#include "sirf.h"
+
+/* These we can do from NMEA mode */
+
+int sirf_mode(struct gps_session_t *session, int binary, int speed) 
+/* switch GPS to specified mode at 8N1, optionarry to binary */
+{
+   return nmea_send(session->gNMEAdata.gps_fd, 
+		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
+   cfsetispeed(&session->ttyset, (speed_t)speed);
+   cfsetospeed(&session->ttyset, (speed_t)speed);
+   tcsetattr(session->gNMEAdata.gps_fd, TCSADRAIN, &session->ttyset);
+}
+
+int sirf_nmea_waas(int ttyfd, int enable) 
+/* enable WAAS from NMEA mode */
+{
+    return nmea_send(ttyfd, "$PSRF108,0%d", enable);
+}
+
+/* These require binary mode */
 
 #define HI(n)	((n) >> 8)
 #define LO(n)	((n) & 0xff)
@@ -36,13 +56,6 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
 
    return(crc);
 }
-
-int sirf_mode(int ttyfd, int binary, int speed) 
-/* switch GPS to specified mode at 8N1, optionarry to binary */
-{
-   return nmea_send(ttyfd, "$PSRF100,%d,%d,8,1,0*##\r\n", !binary, speed);
-}
-
 
 int sirf_waas_ctrl(int ttyfd, int enable) 
 /* enable or disable WAAS */
@@ -193,14 +206,6 @@ int sirf_nav_lib (int ttyfd, int enable) {
    crc_sirf(msg_1);
    return (write(ttyfd, msg_1, 0x19+8) != 0x19+8);
 }
-
-
-int sirf_nmea_waas(int ttyfd, int enable) 
-/* enable WAAS from NMEA mode */
-{
-    return nmea_send(ttyfd, "$PSRF108,0%d", enable);
-}
-
 
 int sirf_power_mask(int ttyfd, int low)
 /* set dB cutoff level below which satellite info will be ignored */
