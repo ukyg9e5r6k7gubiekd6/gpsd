@@ -19,7 +19,6 @@
       <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
       <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
-      <arg choice='opt'>-o <replaceable>outfile</replaceable></arg>
       <arg choice='opt'>-r </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
@@ -31,13 +30,13 @@
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><application>gpsprof</application> measures the various
-latencies between a GPS and its client. It draws an illustrative
-graph. It can also be told to save the raw profile data.  The 
-information it provides can be useful for establishing an upper bound
-on latency, and thus on position accuracy of a GPS in motion,
-especially in combination with the static-precision reports from
-<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-</para>  
+latencies between a GPS and its client. It emits to standard output a
+GNUPLOT program that draws an illustrative graph. It can also be told
+to emit the raw profile data.  The information it provides can be
+useful for establishing an upper bound on latency, and thus on
+position accuracy of a GPS in motion, especially in combination with
+the static-precision reports from
+<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>.  </para>
 
 <para><application>gpsprof</application> uses instrumentation built
 into <application>gpsd</application> that will only be present if
@@ -50,7 +49,7 @@ it was configured to support profiling.</para>
 <refsect1 id='options'><title>OPTIONS</title>
 
 <para>The -f option sets the plot type. The X axis is samples
-(sentences with timestamps).  The Y axis is latency in seconds.
+(sentences with timestamps).  The Y axis is normally latency in seconds.
 Currently the following plot types are defined:</para>
 
 <variablelist>
@@ -88,7 +87,7 @@ from sentences without fixes is lumped in.</para>
 </varlistentry>
 </variablelist>
 
-<para>Each plot conveys the following information:</para>
+<para>Each of the time plots conveys the following information:</para>
 
 <variablelist>
 <varlistentry>
@@ -136,24 +135,12 @@ multiples of the cycle time, above which reports are discarded.</para>
 <para>The -n option sets the number of packets to sample.  The default
 is 100.</para>
 
-<para>The -o option specifies the name of a file in which to dump the
-profiling data;
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-will read out from there.  If this option is not specified, the data
-will be written to a tempfile and discarded after the plot id made</para>
-
 <para>The -s option sets the baud rate.  Note, this will only work if
 the chipset accepts a speed-change command (SiRF-II supports this
 feature).</para>
 
 <para>The -t option sets a text string to be included in the plot
-title.  Specifying the GPS make and model is a good use for it.</para>
-
-<para>The -T option sets a terminal type for
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-.  It will normally default to "x11" at produce a display immediately,
-but (for example) specifying "-T png" will instead cause a PNG image
-of the graphic to be shipped to standard output.</para>
+title..</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>

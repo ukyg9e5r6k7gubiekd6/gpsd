@@ -50,6 +50,15 @@ class spaceplot:
     def header(self, session):
         res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
                  (title, session.gps_id, session.cycle)
+        return res
+    def data(self, session):
+        res = ""
+        for i in range(len(self.recentered)):
+            (lat, lon) = self.recentered[i][:2]
+            (raw1, raw2, alt) = self.fixes[i]
+            res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
+        return res
+    def plot(self, title, session):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -59,15 +68,6 @@ class spaceplot:
             self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
             self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
-        return res
-    def data(self, session):
-        res = ""
-        for i in range(len(self.recentered)):
-            (lat, lon) = self.recentered[i][:2]
-            (raw1, raw2, alt) = self.fixes[i]
-            res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
-        return res
-    def plot(self, file, title, session):
         # Compute CEP(50%)
         cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
         alt_sum = 0
@@ -97,8 +97,7 @@ class spaceplot:
             lonstring = "0"
         else:
             lonstring = "%fE" % self.centroid[1]
-        fmt = ""
-        fmt += "set autoscale\n"
+        fmt = "set autoscale\n"
         fmt += 'set key below\n'
         fmt += 'set key title "%s"\n' % time.asctime()
         fmt += 'set size ratio -1\n'
@@ -120,11 +119,15 @@ class spaceplot:
         fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
         fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
         fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
-        fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" ' % (file, len(self.fixes))
+        fmt += ' "-" using 1:2 with points ls 3 title "%d GPS fixes" ' % (len(self.fixes))
         if alt_avg != gps.ALTITUDE_NOT_VALID:
-            fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
+            fmt += ', "-" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % (lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
         else:
             fmt += "\n"
+        fmt += self.header(session)
+        fmt += self.data(session)
+        if alt_avg != gps.ALTITUDE_NOT_VALID:
+            fmt += "e\n" + self.data(session)
         return fmt
 
 class uninstrumented:
@@ -149,17 +152,18 @@ class uninstrumented:
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
         return res
-    def plot(self, file, title, session):
+    def plot(self, title, session):
         fmt = '''
 set autoscale
 set key below
 set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
-plot "%s" using 0:1 title "Total time" with impulses
+plot "-" using 0:1 title "Total time" with impulses
 '''
-        return fmt % (title,
+        res = fmt % (title,
                       session.gps_id, session.baudrate,
-                      session.stopbits, session.cycle,
-                      file)
+                      session.stopbits, session.cycle)
+        res += self.header(session)
+        return res + self.data(session)
 
 class rawplot:
     "All measurement, no deductions."
@@ -199,31 +203,33 @@ class rawplot:
                    timings.c_recv_time,
                    timings.c_decode_time)
         return res
-    def plot(self, file, title, session):
+    def plot(self, file, session):
         fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \
-     "%s" using 0:9 title "D2 = Client decode time" with impulses, \
-     "%s" using 0:8 title "T2 =     TCP/IP latency" with impulses, \
-     "%s" using 0:7 title "E2 = Daemon encode time" with impulses, \
-     "%s" using 0:6 title "W  =     Poll wait time" with impulses, \
-     "%s" using 0:5 title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:4 title "T1 =         RS232 time" with impulses, \
-     "%s" using 0:3 title "E1 =        GPS latency" with impulses
+     "-" using 0:9 title "D2 = Client decode time" with impulses, \
+     "-" using 0:8 title "T2 =     TCP/IP latency" with impulses, \
+     "-" using 0:7 title "E2 = Daemon encode time" with impulses, \
+     "-" using 0:6 title "W  =     Poll wait time" with impulses, \
+     "-" using 0:5 title "D1 = Daemon decode time" with impulses, \
+     "-" using 0:4 title "T1 =         RS232 time" with impulses, \
+     "-" using 0:3 title "E1 =        GPS latency" with impulses
 '''
-        return fmt % (title,
+        res = fmt % (title,
                       session.gps_id, session.baudrate,
-                      session.stopbits, session.cycle,
-                      file, file, file, file, file, file, file)
+                      session.stopbits, session.cycle)
+        res += self.header(session)
+        for dummy in range(0, 7):
+            res += self.data(session) + "e\n"
+        return res
 
 class splitplot:
     "Discard base time, use color to indicate different tags."
     name = "split"
     sentences = []
     def __init__(self):
-        self.found = {}
         self.stats = []
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
@@ -253,7 +259,6 @@ class splitplot:
             for s in splitplot.sentences:
                 if s == timings.tag:
                     res += "%2.6f\t" % e1
-                    self.found[s] = True
                 else:
                     res += "-       \t"
             res += "%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%8d\t# %s\n" \
@@ -266,45 +271,42 @@ class splitplot:
                         timings.sentence_length,
                         timings.tag)
         return res
-    def plot(self, file, title, session):
+    def plot(self, title, session):
         fixed = '''
 set autoscale
 set key below
 set key title "Filtered latency data, %s, %s, %dN%d, cycle %ds"
 plot \\
-     "%s" using 0:%d title "D2 = Client decode time" with impulses, \
-     "%s" using 0:%d title "T2 = TCP/IP latency" with impulses, \
-     "%s" using 0:%d title "E2 = Daemon encode time" with impulses, \
-     "%s" using 0:%d title "W  = Poll wait time" with impulses, \
-     "%s" using 0:%d title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:%d title "T1 = RS3232 time" with impulses, \
+     "-" using 0:%d title "D2 = Client decode time" with impulses, \\
+     "-" using 0:%d title "T2 = TCP/IP latency" with impulses, \\
+     "-" using 0:%d title "E2 = Daemon encode time" with impulses, \\
+     "-" using 0:%d title "W  = Poll wait time" with impulses, \\
+     "-" using 0:%d title "D1 = Daemon decode time" with impulses, \\
+     "-" using 0:%d title "T1 = RS3232 time" with impulses, \\
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
                        session.gps_id, session.baudrate,
                        session.stopbits, session.cycle,
-                       file, sc+6,
-                       file, sc+5,
-                       file, sc+4,
-                       file, sc+3,
-                       file, sc+2,
-                       file, sc+1)
+                       sc+6,
+                       sc+5,
+                       sc+4,
+                       sc+3,
+                       sc+2,
+                       sc+1)
         for i in range(sc):
-            if splitplot.sentences[i] in self.found:
-                fmt += '     "%s" using 0:%d title "%s" with impulses, \\\n' % \
-                       (file, i+1, splitplot.sentences[i])
-        return fmt[:-4] + "\n"
+            fmt += '     "-" using 0:%d title "%s" with impulses, \\\n' % \
+                   (i+1, self.sentences[i])
+        res = fmt[:-4] + "\n"
+        res += self.header(session)
+        for dummy in range(sc+7):
+            res += self.data(session) + "e\n"
+        return res
 
 formatters = (spaceplot, uninstrumented, rawplot, splitplot)
 
-def plotframe(await, fname, file, speed, threshold, title):
+def plotframe(await, fname, speed, threshold, title):
     "Return a string containing a GNUplot script "
-    if file:
-        out = open(file, "w")
-    elif fname == None:
-        out = sys.stdout
-    else:
-        out = tempfile.NamedTemporaryFile()
     if fname:
         for formatter in formatters:
             if formatter.name == fname:
@@ -348,21 +350,16 @@ def plotframe(await, fname, file, speed, threshold, title):
         baton.end()
     finally:
         session.query("w-z-")
-    out.write(plotter.header(session))
-    out.write(plotter.data(session))
-    out.flush()
-    command = plotter.plot(out.name, title, session)
+    command = plotter.plot(title, session)
     del session
-    return (out, command)
+    return command
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:o:rs:t:T:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:rs:t:")
         formatter = "space"
         raw = False
-        file = None
         speed = 0
-        terminal = None
         title = time.ctime()
         threshold = 0
         await = 100
@@ -373,29 +370,18 @@ if __name__ == '__main__':
                 threshold = int(val)
             elif (switch == '-n'):
                 await = int(val)
-            elif (switch == '-o'):
-                file = val
             elif (switch == '-r'):
                 raw = True
             elif (switch == '-s'):
                 speed = int(val)
             elif (switch == '-t'):
                 title = val
-            elif (switch == '-T'):
-                terminal = val
             elif (switch == '-h'):
                 sys.stderr.write(\
                     "usage: gpsprof [-h] [-r] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-o file]\n")
                 sys.exit(0)
-        (out, gnuplot) = plotframe(await,formatter,file,speed,threshold,title)
-        if not raw:
-            if terminal:
-                gnuplot = "set terminal " + terminal + "\n" + gnuplot
-            pfp = os.popen("gnuplot -persist", "w")
-            pfp.write(gnuplot)
-            pfp.close()
-        out.close()
+        sys.stdout.write(plotframe(await,formatter,speed,threshold,title))
     except KeyboardInterrupt:
         pass
 
