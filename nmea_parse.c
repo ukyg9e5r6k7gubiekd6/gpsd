@@ -275,46 +275,6 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
     return mask;
 }
-
-static int processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
-/* Track Made Good and Ground Speed */
-{
-    /* There are two variants of GPVTG.  One looks like this:
-
-	(1) True course over ground (degrees) 000 to 359
-	(2) Magnetic course over ground 000 to 359
-	(3) Speed over ground (knots) 00.0 to 99.9
-	(4) Speed over ground (kilometers) 00.0 to 99.9
-
-     * Up to and including 1.10, gpsd assumed this and extracted field 3.
-     * But I'm told the NMEA spec, version 3.01, dated 1/1/2002, gives this:
-
-	1    = Track made good
-	2    = Fixed text 'T' indicates that track made good is relative to 
-	       true north
-	3    = Magnetic course over ground
-	4    = Fixed text 'M' indicates course is relative to magnetic north.
-	5    = Speed over ground in knots
-	6    = Fixed text 'N' indicates that speed over ground in in knots
-	7    = Speed over ground in kilometers/hour
-	8    = Fixed text 'K' indicates that speed over ground is in km/h.
-	9    = Checksum
-
-     * which means we want to extract field 5.  We cope with both.
-     */
-    out->track = atof(field[1]);;
-    if (field[2][0] == 'T')
-	out->speed = atof(field[5]);
-    else
-	out->speed = atof(field[3]);
-    /* 
-     * Never send watcher notifications on GPVTG, as those
-     * only duplicate information made available at other points
-     * in the same cycle.  This is almost true of GPGLL, except 
-     * for the Garmin 48.
-     */
-    return 0;
-}
 #endif /* WHOLE_CYCLE */
 
 static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
@@ -551,19 +511,19 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	int mask;
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"GPRMB", 0,    	NULL},
 	{"GPRMC", GPRMC,	processGPRMC},
 	{"GPGGA", GPGGA,	processGPGGA},
+	{"GPGLL", GPGLL,
 #ifdef WHOLE_CYCLE
-	{"GPGLL", GPGLL,	NULL},
-	{"GPVTG", GPVTG,	NULL},
+				NULL},
 #else
-	{"GPGLL", GPGLL,	processGPGLL},
-	{"GPVTG", GPVTG,	processGPVTG},
+				processGPGLL},
 #endif
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
 	{"PGRME", PGRME,	processPGRME},
+	{"GPVTG", 0,		NULL},	/* duplicates info in GPRMC */
+	{"GPRMB", 0,    	NULL},
 	{"PRWIZCH", 0,  	NULL},
     };
 
