@@ -15,6 +15,8 @@
  *	l -- start logging packets to specified file.
  *	s -- send hex bytes to device.
  *	q -- quit, leaving device in binary mode.
+ *      Ctrl-S -- freeze display.
+ *      Ctrl-Q -- unfreese display.
  */
 #include <stdio.h>
 #include <curses.h>
@@ -75,7 +77,7 @@ int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
-static WINDOW *dumpwin, *cmdwin, *debugwin;
+static WINDOW *cmdwin, *debugwin;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -246,8 +248,6 @@ int main (int argc, char **argv)
     noecho();
     intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
-    scrollok(debugwin,TRUE);
-    //wsetscrreg(debugwin, DEBUGWIN, 0);
 
     mid2win   = subwin(stdscr,  6, 80,  0, 0);
     mid4win   = subwin(stdscr, 15, 30,  6, 0);
@@ -256,8 +256,9 @@ int main (int argc, char **argv)
     mid9win   = subwin(stdscr, 3,  48, 13, 32);
     mid13win  = subwin(stdscr, 3,  48, 16, 32);
     cmdwin    = subwin(stdscr, 1,  48, 19, 32);
-    dumpwin   = subwin(stdscr, 1,   0, 21, 0);
-    debugwin  = subwin(stdscr, 0,   0, 20, 0);
+    debugwin  = subwin(stdscr, 0,   0, 21, 0);
+    scrollok(debugwin,TRUE);
+    wsetscrreg(debugwin, 0, LINES-21);
 
     wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid2win, A_BOLD);
@@ -346,7 +347,6 @@ int main (int argc, char **argv)
 	wrefresh(mid7win);
 	wrefresh(mid9win);
 	wrefresh(mid13win);
-	wrefresh(dumpwin);
 	wrefresh(debugwin);
 	wrefresh(cmdwin);
 
@@ -371,7 +371,6 @@ int main (int argc, char **argv)
 	    wrefresh(mid7win);
 	    wrefresh(mid9win);
 	    wrefresh(mid13win);
-	    wrefresh(dumpwin);
 	    wrefresh(debugwin);
 	    wrefresh(cmdwin);
 
@@ -518,6 +517,7 @@ int len;
 	    else
 		wprintw(mid2win, "   ");
 	}
+	wprintw(debugwin, "MND 0x02=");
 	break;
 
     case 0x04:		/* Measured Tracking Data */
@@ -552,9 +552,7 @@ int len;
 	    if (sv == 0)			/* not tracking? */
 		wprintw(mid4win, "   ");	/* clear other info */
 	}
-	putb(0,0x90);				/* poll clock status */
-	putb(1,0);
-	sendpkt(buf,2);
+	wprintw(debugwin, "MTD 0x04=");
     	break;
 
 #ifdef __UNUSED__
@@ -573,11 +571,13 @@ int len;
 	    printw("%8.5f %10.5f",
 	    	(float)getl(off+16)/65536,(float)getl(off+20)/1024);
 	}
+	wprintw(debugwin, "RTD 0x05=");
     	break;
 #endif /* __UNUSED */
 
     case 0x06:		/* firmware version */
 	mvwprintw(mid6win, 1, 10, "%s",buf + 1);
+	wprintw(debugwin, "FV  0x06=");
     	break;
 
     case 0x07:		/* Response - Clock Status Data */
@@ -586,6 +586,7 @@ int len;
 	mvwprintw(mid7win, 1, 16, "%lu", getl(8));	/* Clock drift */
 	mvwprintw(mid7win, 1, 29, "%lu", getl(12));	/* Clock Bias */
 	mvwprintw(mid7win, 2, 21, "%lu", getl(16));	/* Estimated Time */
+	wprintw(debugwin, "CSD 0x07=");
 	break;
 
 #ifdef UNUSED
@@ -599,6 +600,7 @@ int len;
 		wprintw(debugwin, " %d",getl(off));
 	    wprintw(debugwin, "\n");
 	}
+	wprintw(debugwin, "50B 0x08=");
     	break;
 #endif /* __UNUSED */
 
@@ -607,14 +609,15 @@ int len;
 	mvwprintw(mid9win, 1, 18, "%.3f",(float)getw(3)/186);	/*SegStatLat*/
 	mvwprintw(mid9win, 1, 31, "%.3f",(float)getw(5)/186);	/*SegStatTime*/
 	mvwprintw(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
+	wprintw(debugwin, "THR 0x09=");
     	break;
 
     case 0x0b:		/* Command Acknowledgement */
-	mvwprintw(dumpwin, 0, 0, "ACK %02x",getb(1));
+	wprintw(debugwin, "ACK 0x0b=");
     	break;
 
     case 0x0c:		/* Command NAcknowledgement */
-	mvwprintw(dumpwin, 0, 0, "NAK %02x",getb(1));
+	wprintw(debugwin, "NAK 0x0c=");
     	break;
 
     case 0x0d:		/* Visible List */
@@ -627,7 +630,8 @@ int len;
 		wprintw(mid13win, "   ");
 
 	}
-	wprintw(debugwin, "\n");
+	wprintw(mid13win, "\n");
+	wprintw(debugwin, "VL  0x0d=");
     	break;
 
     case 0x1b:
@@ -671,6 +675,7 @@ int len;
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
+	wprintw(debugwin, "DST 0x1b=");
 	break;
 
 #ifdef __UNUSED__
@@ -730,6 +735,7 @@ int len;
 	    			     clk.tv_sec % 3600,clk.tv_usec);
 #endif
 	}
+		wprintw(debugwin, "??? 0x62=");
     	break;
 #endif /* __UNUSED__ */
 
@@ -747,18 +753,20 @@ int len;
 		    break;
 		}
 	}
+		wprintw(debugwin, "DD  0xff=");
 	if (j)
 	    wprintw(debugwin, "%s\n",buf+1);
 	break;
+
+    default:
+	wprintw(debugwin, "    0x%02x=", buf[0]);
+	break;
     }
 
-    wmove(dumpwin, 0,0);
-    wprintw(dumpwin, " %02x: ",buf[0]);
-
+    wprintw(debugwin, "(%d) ", len);
     for (i = 1; i < len; i++)
-	wprintw(dumpwin, "%02x",buf[i]);
-
-    wclrtoeol(dumpwin);
+	wprintw(debugwin, "%02x",buf[i]);
+    wprintw(debugwin, "\n");
 }
 
 void decode_time(int week, int tow)
