@@ -139,17 +139,17 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 
 static void usage()
 {
-	    fputs("usage:  gpsd [options] \n\
+    printf("usage:  gpsd [options] \n\
   options include: \n\
-  -p string          = set GPS device name \n\
-  -T {e|t}           = set GPS device type \n\
-  -S integer         = set port for daemon \n\
-  -i %f[NS]:%f[EW]   = set initial latitude/longitude \n\
-  -s baud_rate       = set baud rate on gps device \n\
-  -d host[:port]     = set DGPS server \n\
-  -D integer         = set debug level \n\
-  -h                 = help message \n\
-", stderr);
+  -p string (default %s)         = set GPS device name \n\
+  -T {e|t}  (defult 'n')         = set GPS device type \n\
+  -S integer (default %s)      = set port for daemon \n\
+  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n\
+  -s baud_rate                   = set baud rate on gps device \n\
+  -d host[:port]                 = set DGPS server \n\
+  -D integer (default 0)         = set debug level \n\
+  -h                             = help message \n\
+", default_device_name, DEFAULT_GPSD_PORT);
 }
 
 static void print_settings(char *service, char *dgpsserver)
@@ -627,7 +627,7 @@ int main(int argc, char *argv[])
 
     if (!service) {
 	if (!getservbyname(default_service, "tcp"))
-	    service = "2947";
+	    service = DEFAULT_GPSD_PORT;
 	else service = default_service;
     }
 
