@@ -1,7 +1,5 @@
 /*
- * Handle the proprietary extensions to NMEA 0183 supported by the
- * TripMATE GPS.  Also, if requested, intialize it with longitude,
- * latitude, and local time.  This will speed up its first fix.
+ * Drivers for generic NMEA device, TripMate and EarthMate in text mode.
  */
 #include "config.h"
 #include <stdio.h>
@@ -14,9 +12,131 @@
 #include "nmea.h"
 #include "gpsd.h"
 
+#define BUFSIZE 4096
+
 extern struct session_t session;
 
-void send_init()
+/**************************************************************************
+ *
+ * process_exception() -- handle returned sentences in non-NMEA form
+ *
+ **************************************************************************/
+
+/*
+ * This code is shared by all the NMEA variants. It's where we handle
+ * the funky non-NMEA sentences that tell us about extensions.
+ */
+
+static void process_exception(char *sentence)
+{
+    if (!strncmp("ASTRAL", sentence, 6) && isatty(session.fdout)) {
+	write(session.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+	syslog(LOG_NOTICE, "Found a TripMate, initializing...");
+	session.device_type = &tripmate;
+	tripmate.initializer();
+    } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session.fdout))) {
+	write(session.fdout, "EARTHA\r\n", 8);
+	syslog(LOG_NOTICE, "Found an EarthMate (id).");
+	session.device_type = &earthmate_b;
+	earthmate_b.initializer();
+    } else if (session.debug > 1) {
+	fprintf(stderr, "Unknown exception: \"%s\"",
+		sentence);
+    }
+}
+
+
+/**************************************************************************
+ *
+ * Generic driver -- straight NMEA 0183
+ *
+ **************************************************************************/
+
+void nmea_handle_message(char *sentence)
+/* visible so the direct-connect clients can use it */
+{
+    if (session.debug > 5)
+	fprintf(stderr, "%s\n", sentence);
+    if (*sentence == '$')
+    {
+	if (process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
+	    if (session.debug > 1) {
+		fprintf(stderr, "Unknown sentence: \"%s\"\n",
+			sentence);
+	    }
+    }
+    else
+	process_exception(sentence);
+
+    if (session.debug > 2) {
+	fprintf(stderr,
+		"Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
+		session.gNMEAdata.latitude,
+		session.gNMEAdata.longitude,
+		session.gNMEAdata.altitude,
+		session.gNMEAdata.satellites,
+		session.gNMEAdata.mode,
+		session.gNMEAdata.utc);
+    }
+}
+
+static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
+{
+    static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
+    static int offset = 0;
+
+    while (offset < BUFSIZE) {
+	if (read(input, buf + offset, 1) != 1)
+	    return 1;
+
+	if (buf[offset] == '\n' || buf[offset] == '\r') {
+	    buf[offset] = '\0';
+	    if (strlen(buf)) {
+	        nmea_handle_message(buf);
+		strcat(buf, "\r\n");
+		send_nmea(afds, nmea_fds, buf);
+	    }
+	    offset = 0;
+	    return 1;
+	}
+
+	offset++;
+	buf[offset] = '\0';
+    }
+    offset = 0;			/* discard input ! */
+    return 1;
+}
+
+static int nmea_write_rctm(char *buf, int rtcmbytes)
+{
+    return write(session.fdout, buf, rtcmbytes);
+}
+
+struct gps_type_t nmea =
+{
+    'n', 		/* select explicitly with -T n */
+    "NMEA",		/* full name of type */
+    NULL,		/* no initialization */
+    nmea_handle_input,	/* read text sentence */
+    nmea_write_rctm,	/* write RCTM data straight */
+    NULL,		/* no wrapup */
+    4800,		/* default speed to connect at */
+};
+
+/**************************************************************************
+ *
+ * TripMate -- extended NMEA, gets faster fix when primed with lat/long/time
+ *
+ **************************************************************************/
+
+/*
+ * Some technical FAQs on the TripMate:
+ * http://vancouver-webpages.com/pub/peter/tripmate.faq
+ * http://www.asahi-net.or.jp/~KN6Y-GTU/tripmate/trmfaqe.html
+ * Maybe we could use the logging-interval command?
+ */
+
+void tripmate_initializer()
 {
     char buf[82];
     time_t t;
@@ -36,62 +156,68 @@ void send_init()
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	if (session.gNMEAdata.fdout != -1)
-	    write(session.gNMEAdata.fdout, buf, strlen(buf));
+	if (session.fdout != -1)
+	    write(session.fdout, buf, strlen(buf));
 	if (session.debug > 1) {
 	    fprintf(stderr, "Sending: %s", buf);
 	}
     }
 }
 
-void do_init()
+struct gps_type_t tripmate =
 {
-    static int count = 0;
+    't', 			/* select explicitly with -T t */
+    "TripMate",			/* full name of type */
+    tripmate_initializer,	/* wants to see lat/long for faster fix */
+    nmea_handle_input,		/* read text sentence */
+    nmea_write_rctm,		/* send RCTM data straight */
+    NULL,			/* no wrapup */
+    4800,			/* default speed to connect at */
+};
 
-    count++;
 
-    if (count == 2) {
-	count = 0;
-	send_init();
-    }
-}
+/**************************************************************************
+ *
+ * EarthMate textual mode
+ *
+ **************************************************************************/
 
-void process_exception(char *sentence)
+/*
+ * Treat this as a straight NMEA device unless we get the exception
+ * code back that says to go binary.  In that case process_exception() 
+ * will flip us over to the earthmate_b driver.  But, connect at 9600
+ * rather than 4800.
+ */
+
+struct gps_type_t earthmate_a =
 {
-    if (strncmp("ASTRAL", sentence, 6) == 0 && isatty(session.gNMEAdata.fdout)) {
-	write(session.gNMEAdata.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-	syslog(LOG_NOTICE, "Found a TripMate, initializing...");
-	do_init();
-    } else if ((strncmp("EARTHA", sentence, 6) == 0 
-		&& isatty(session.gNMEAdata.fdout))) {
-	write(session.gNMEAdata.fdout, "EARTHA\r\n", 8);
-	session.device_type = DEVICE_EARTHMATEb;
-	syslog(LOG_NOTICE, "Found an EarthMate (id).");
-	do_eminit();
-    } else if (session.debug > 1) {
-	fprintf(stderr, "Unknown exception: \"%s\"",
-		sentence);
-    }
-}
+    'e',			/* select explicitly with -T e */
+    "EarthMate (a)",		/* full name of type */
+    NULL,			/* no initializer */
+    nmea_handle_input,		/* read text sentence */
+    NULL,			/* don't send RCTM data */
+    NULL,			/* no wrapup code */
+    9600,			/* connecting at 4800 will fail */
+};
 
-void handle_message(char *sentence)
+/**************************************************************************
+ *
+ * Logfile playback driver
+ *
+ **************************************************************************/
+
+struct gps_type_t logfile =
 {
-    if (session.debug > 5)
-	fprintf(stderr, "%s\n", sentence);
+    'l',			/* select explicitly with -T l */
+    "Logfile",			/* full name of type */
+    NULL,			/* no initializer */
+    nmea_handle_input,		/* read text sentence */
+    NULL,			/* don't send RCTM data */
+    NULL,			/* no wrapup code */
+    0,				/* don't set a speed */
+};
 
-    if (*sentence == '$')
-	process_NMEA_message(sentence + 1, &session.gNMEAdata);
-    else
-	process_exception(sentence);
 
-    if (session.debug > 2) {
-	fprintf(stderr,
-		"Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
-		session.gNMEAdata.latitude,
-		session.gNMEAdata.longitude,
-		session.gNMEAdata.altitude,
-		session.gNMEAdata.satellites,
-		session.gNMEAdata.mode,
-		session.gNMEAdata.utc);
-    }
-}
+
+
+

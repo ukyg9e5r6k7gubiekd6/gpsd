@@ -25,11 +25,35 @@
 static int ttyfd = -1;
 static struct termios ttyset, ttyset_old;
 
+static int set_baud(long baud)
+{
+    int speed;
+
+    if (baud < 200)
+      baud *= 1000;
+    if (baud < 2400)
+      speed = B1200;
+    else if (baud < 4800)
+      speed = B2400;
+    else if (baud < 9600)
+      speed = B4800;
+    else if (baud < 19200)
+      speed = B9600;
+    else if (baud < 38400)
+      speed = B19200;
+    else
+      speed = B38400;
+
+    return speed;
+}
+
+
 int serial_open(char *device_name, int device_speed)
 {
     char *temp;
     char *p;
 
+    device_speed = set_baud(device_speed);
     temp = strdup(device_name);
 
     if ( (p = strchr(temp, ':')) ) {

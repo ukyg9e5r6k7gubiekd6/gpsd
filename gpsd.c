@@ -51,7 +51,8 @@
 #define BUFSIZE		4096
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
-struct session_t session;
+/* the default driver is NMEA */
+struct session_t session = {&nmea};
 
 static int gps_timeout = GPS_TIMEOUT;
 static int device_speed = B4800;
@@ -60,7 +61,6 @@ static char *default_device_name = "/dev/gps";
 static int nfds, dsock;
 static int reopen = 0;
 
-static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
 static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
@@ -131,45 +131,25 @@ static void usage()
 ", stderr);
 }
 
-static int set_baud(long baud)
+static struct gps_type_t *set_device_type(char what)
+/* select a device driver by key letter */
 {
-    int speed;
-    
-    if (baud < 200)
-	baud *= 1000;
-    if (baud < 2400)
-	speed = B1200;
-    else if (baud < 4800)
-	speed = B2400;
-    else if (baud < 9600)
-	speed = B4800;
-    else if (baud < 19200)
-	speed = B9600;
-    else if (baud < 38400)
-	speed = B19200;
-    else
-	speed = B38400;
-
-    return speed;
+    struct gps_type_t **dp, *drivers[] = {&nmea, 
+					  &tripmate,
+					  &earthmate_a, 
+					  &earthmate_b,
+    					  &logfile};
+    for (dp = drivers; dp < drivers + sizeof(drivers)/sizeof(drivers[0]); dp++)
+	if ((*dp)->typekey == what) {
+	    if (session.debug > 1)
+		fprintf(stderr, "Selecting %s driver...\n", (*dp)->typename);
+	    goto foundit;
+	}
+    fprintf(stderr, "Invalid device type \"%s\"\n"
+	    "Using GENERIC instead\n", optarg);
+ foundit:;
+    return *dp;
 }
-
-static int set_device_type(char what)
-{
-    int type;
-
-    if (what=='t')
-	type = DEVICE_TRIPMATE;
-    else if (what=='e') {
-	type = DEVICE_EARTHMATE;
-	device_speed = B9600;	/* normal 4800 speed fails */
-    } else {
-	fprintf(stderr, "Invalid device type \"%s\"\n"
-		"Using GENERIC instead\n", optarg);
-	type = 0;
-    }
-    return type;
-}
-
 
 static void print_settings(char *service, char *dgpsserver, char *dgpsport)
 {
@@ -191,19 +171,15 @@ static void print_settings(char *service, char *dgpsserver, char *dgpsport)
 static int handle_dgps()
 {
     char buf[BUFSIZE];
-    int rtcmbytes, cnt;
+    int rtcmbytes;
 
-    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0 && (session.gNMEAdata.fdout!=-1)) {
-
-	if (session.device_type == DEVICE_EARTHMATEb)
-	    cnt = em_send_rtcm(buf, rtcmbytes);
-	else
-	    cnt = write(session.gNMEAdata.fdout, buf, rtcmbytes);
-	
-	if (cnt<=0)
+    if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
+    {
+	if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
 	    syslog(LOG_WARNING, "Write to rtcm sink failed");
     }
-    else {
+    else 
+    {
 	syslog(LOG_WARNING, "Read from rtcm source failed");
     }
 
@@ -212,11 +188,11 @@ static int handle_dgps()
 
 static void deactivate()
 {
-    session.gNMEAdata.fdin = -1;
-    session.gNMEAdata.fdout = -1;
+    session.fdin = -1;
+    session.fdout = -1;
     serial_close();
-    if (session.device_type == DEVICE_EARTHMATEb)
-	session.device_type = DEVICE_EARTHMATE;
+    if (session.device_type->wrapup)
+	session.device_type->wrapup();
     syslog(LOG_NOTICE, "Closed gps");
     session.gNMEAdata.mode = 1;
     session.gNMEAdata.status = 0;
@@ -226,12 +202,12 @@ static int activate()
 {
     int input;
 
-    if ((input = serial_open(device_name, device_speed)) < 0)
+    if ((input = serial_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
 	errexit("Exiting - serial open");
  
     syslog(LOG_NOTICE, "Opened gps");
-    session.gNMEAdata.fdin = input;
-    session.gNMEAdata.fdout = input;
+    session.fdin = input;
+    session.fdout = input;
 
     return input;
 }
@@ -297,7 +273,7 @@ int main(int argc, char *argv[])
 	    device_name = optarg;
 	    break;
 	case 's':
-	    device_speed = set_baud(strtol(optarg, NULL, 0));
+	    device_speed = strtol(optarg, NULL, 0);
 	    break;
 	case 't':
 	    gps_timeout = strtol(optarg, NULL, 0);
@@ -334,9 +310,8 @@ int main(int argc, char *argv[])
 
     openlog("gpsd", LOG_PID, LOG_USER);
     syslog(LOG_NOTICE, "gpsd started (Version %s)", VERSION);
-    syslog(LOG_NOTICE, "gpsd listening on port %s", service);
-
     msock = passiveTCP(service, QLEN);
+    syslog(LOG_NOTICE, "gpsd listening on port %s", service);
 
     nfds = getdtablesize();
 
@@ -363,8 +338,8 @@ int main(int argc, char *argv[])
 
     /* mark fds closed */
     input = -1;
-    session.gNMEAdata.fdin = input;
-    session.gNMEAdata.fdout = input;
+    session.fdin = input;
+    session.fdout = input;
 
     session.gNMEAdata.v_latlon = gps_timeout;
     session.gNMEAdata.v_alt = gps_timeout;
@@ -412,10 +387,7 @@ int main(int argc, char *argv[])
 
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
 	    session.gNMEAdata.last_update = time(NULL);
-	    if (session.device_type == DEVICE_EARTHMATEb) 
-		handle_EMinput(input, &afds, &nmea_fds);
-	    else
-		handle_input(input, &afds, &nmea_fds);
+	    session.device_type->handle_input(input, &afds, &nmea_fds);
 	}
 
 	if (session.gNMEAdata.status > 0) 
@@ -663,33 +635,6 @@ void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
 	    }
 	}
     }
-}
-
-static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
-{
-    static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
-    static int offset = 0;
-
-    while (offset < BUFSIZE) {
-	if (read(input, buf + offset, 1) != 1)
-	    return 1;
-
-	if (buf[offset] == '\n' || buf[offset] == '\r') {
-	    buf[offset] = '\0';
-	    if (strlen(buf)) {
-	        handle_message(buf);
-		strcat(buf, "\r\n");
-		send_nmea(afds, nmea_fds, buf);
-	    }
-	    offset = 0;
-	    return 1;
-	}
-
-	offset++;
-	buf[offset] = '\0';
-    }
-    offset = 0;			/* discard input ! */
-    return 1;
 }
 
 void errlog(char *s)

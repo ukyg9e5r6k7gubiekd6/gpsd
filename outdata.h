@@ -9,9 +9,6 @@
 #define MAXSATS       12
 
 struct OUTDATA {
-    int fdin;
-    int fdout;
-
     time_t last_update;		/* When we got last data from GPS receiver */
 				/* This will be copied to the ts_* members */
 
@@ -57,9 +54,9 @@ struct OUTDATA {
     int ss[12];			/* signal strength */
     int used[12];		/* used in solution */
 
-    int ZCHseen;		/* flag */
-    int Zs[12];			/* for the rockwell PRWIZCH */
-    int Zv[12];			/*                  value */
+    /* Zodiac chipset channel status from PRWIZCH */
+    int Zs[12];			/* satellite PRNs */
+    int Zv[12];			/* signal values (0-7) */
 
     int year;
     int month;

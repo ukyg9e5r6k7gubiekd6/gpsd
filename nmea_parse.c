@@ -184,7 +184,6 @@ static void processPRWIZCH(char *sentence, struct OUTDATA *out)
 	update_field_i(sentence, 2 * i + 1, &out->Zs[i], C_ZCH, out);
 	update_field_i(sentence, 2 * i + 2, &out->Zv[i], C_ZCH, out);
     }
-    out->ZCHseen = 1;
 }
 
 /* ----------------------------------------------------------------------- */
