@@ -184,7 +184,9 @@ int sirf_dgps_source(int ttyfd, int source)
 }
 
 
-int sirf_nav_lib (int ttyfd, int enable) {
+int sirf_nav_lib (int ttyfd, int enable)
+/* set single-channel mode */
+{
    u_int8_t msg_1[] = {0xa0, 0xa2, 0x00, 0x19,
                        0x80,
                        0x00, 0x00, 0x00, 0x00, /* ECEF X       */
