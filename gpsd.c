@@ -374,9 +374,14 @@ int main(int argc, char *argv[])
     input = -1;
 
     while (1) {
+	struct timeval tv;
+
+	tv.tv_sec = 10;
+	tv.tv_usec = 0;
+
         memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
 
-	if (select(nfds, &rfds, NULL, NULL, NULL) < 0) {
+	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
 	    errexit("select");
