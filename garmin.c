@@ -39,12 +39,17 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define __USE_GNU
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
 
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
+#endif
+
+#if defined(HAVE_STRINGS_H)
+#include <strings.h>
 #endif
 
 #include "config.h"
