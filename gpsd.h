@@ -10,6 +10,9 @@
 #if EARTHMATE_ENABLE
 #define ZODIAC_ENABLE
 #endif /* EARTHMATE_ENABLE */
+#if defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE)
+#define BINARY_ENABLE
+#endif /* defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE) */
 
 #define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
 
@@ -47,11 +50,11 @@ struct gps_session_t {
     char *latitude, *longitude;
     char latd, lond;
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
-#if defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE)
+#ifdef BINARY_ENABLE
     double separation;		/* Geoidal separation */
     int year, month, day;
     int hours, minutes, seconds;
-#endif /* defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE) */
+#endif /* BINARY_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
@@ -79,6 +82,10 @@ extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *conte
 extern int gpsd_set_speed(int, struct termios *, int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_session_t *context);
+extern void gpsd_binary_fix_dump(struct gps_session_t *session, char *buf);
+extern void gpsd_binary_satellite_dump(struct gps_session_t *session, char *buf);
+extern void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp);
+
 extern int netlib_connectsock(const char *host, const char *service, const char *protocol);
 
 /* External interface */

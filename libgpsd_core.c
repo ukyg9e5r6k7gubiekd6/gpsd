@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -182,3 +183,98 @@ void gpsd_wrap(struct gps_session_t *session)
     if (session->dsock >= 0)
 	close(session->dsock);
 }
+
+#ifdef BINARY_ENABLE
+static double degtodm(double a)
+{
+    double m, t;
+    m = modf(a, &t);
+    t = floor(a) * 100 + m * 60;
+    return t;
+}
+
+void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
+{
+    if (session->gNMEAdata.mode > 1) {
+	sprintf(bufp,
+		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
+		session->hours,
+		session->minutes,
+		session->seconds,
+		degtodm(fabs(session->gNMEAdata.latitude)),
+		((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
+		degtodm(fabs(session->gNMEAdata.longitude)),
+		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
+		session->gNMEAdata.mode,
+		session->gNMEAdata.satellites_used,
+		session->gNMEAdata.hdop,
+		session->gNMEAdata.altitude, 'M',
+		session->separation, 'M', "", "");
+	nmea_add_checksum(bufp + 1);
+	bufp = bufp + strlen(bufp);
+    }
+    sprintf(bufp,
+	    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,*",
+	    session->hours, session->minutes, session->seconds,
+	    session->gNMEAdata.status ? 'A' : 'V',
+	    degtodm(fabs(session->gNMEAdata.latitude)),
+	    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
+	    degtodm(fabs(session->gNMEAdata.longitude)),
+	    ((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
+	    session->gNMEAdata.speed,
+	    session->gNMEAdata.track,
+	    session->day,
+	    session->month,
+	    (session->year % 100));
+	nmea_add_checksum(bufp + 1);
+}
+
+void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
+{
+    int i, j;
+
+    j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
+
+    for( i = 0 ; i < MAXCHANNELS; i++ ) {
+	if (i % 4 == 0)
+	    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites);
+	bufp += strlen(bufp);
+	if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
+	    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
+		    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
+	else
+	    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
+		    session->gNMEAdata.ss[i]);
+	bufp += strlen(bufp);
+	if (i % 4 == 3) {
+	    sprintf(bufp, "*");
+	    nmea_add_checksum(bufp + 1);
+	    bufp += strlen(bufp);
+	}
+    }
+}
+
+void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
+{
+    int	i, j;
+
+    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
+    j = 0;
+    for (i = 0; i < MAXCHANNELS; i++) {
+	if (session->gNMEAdata.used[i]) {
+	    bufp = bufp + strlen(bufp);
+	    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
+	    j++;
+	}
+    }
+    for (i = j; i < MAXCHANNELS; i++) {
+	bufp = bufp + strlen(bufp);
+	sprintf(bufp, ",");
+    }
+    bufp = bufp + strlen(bufp);
+    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
+	    session->gNMEAdata.vdop);
+    nmea_add_checksum(bufp + 1);
+}
+
+#endif /* BINARY_ENABLE */

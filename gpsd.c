@@ -129,7 +129,7 @@ static void usage(void)
 #ifdef TRIPMATE_ENABLE
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
 #endif /* TRIPMATE_ENABLE */
-"  -s baud_rate                   = set baud rate on gps device \n\
+"  -s baud_rate                   = set baud rate on GPS device \n\
   -d host[:port]                 = set DGPS server \n\
   -P pidfile                     = set file to record process ID \n\
   -D integer (default 0)         = set debug level \n\

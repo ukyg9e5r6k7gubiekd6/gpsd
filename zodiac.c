@@ -156,14 +156,6 @@ static unsigned long getulong(void *p)
     return *(unsigned long *) p;
 }
 
-static double degtodm(double a)
-{
-    double m, t;
-    m = modf(a, &t);
-    t = floor(a) * 100 + m * 60;
-    return t;
-}
-
 static void handle1000(struct gps_session_t *session, unsigned short *p)
 {
     sprintf(session->gNMEAdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
@@ -302,97 +294,31 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
 static void analyze(struct gps_session_t *session, 
 		    struct header *h, unsigned short *p)
 {
-    char buf[BUFSIZE], *bufp, *bufp2;
-    int i = 0, j = 0, nmea = 0;
+    char buf[BUFSIZE];
+    int i = 0, nmea = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
 	gpsd_report(5, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
 	    handle1000(session, p);
-	    bufp = buf;
-	    if (session->gNMEAdata.mode > 1) {
-		sprintf(bufp,
-			"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
-		   session->hours, session->minutes, session->seconds,
-			degtodm(fabs(session->gNMEAdata.latitude)),
-			((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
-			degtodm(fabs(session->gNMEAdata.longitude)),
-			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
-		    session->gNMEAdata.mode, session->gNMEAdata.satellites_used, session->gNMEAdata.hdop,
-			session->gNMEAdata.altitude, 'M', session->separation, 'M', "", "");
-		nmea_add_checksum(bufp + 1);
-		bufp = bufp + strlen(bufp);
-	    }
-	    sprintf(bufp,
-		    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,%02f,%c*",
-		    session->hours, session->minutes, session->seconds,
-		    session->gNMEAdata.status ? 'A' : 'V', degtodm(fabs(session->gNMEAdata.latitude)),
-		    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
-		    degtodm(fabs(session->gNMEAdata.longitude)),
-		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'), session->gNMEAdata.speed,
-		    session->gNMEAdata.track, session->day, session->month,
-		    (session->year % 100), session->mag_var,
-		    (session->mag_var > 0) ? 'E' : 'W');
-	    nmea_add_checksum(bufp + 1);
+	    gpsd_binary_fix_dump(session, buf);
 	    nmea = 1000;
 	    break;
 	case 1002:
 	    handle1002(session, p);
-	    bufp2 = bufp = buf;
-	    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
-	    j = 0;
+	    gpsd_binary_quality_dump(session, buf);
+	    sprintf(buf+strlen(buf), "$PRWIZCH");
 	    for (i = 0; i < MAXCHANNELS; i++) {
-		if (session->gNMEAdata.used[i]) {
-		    bufp = bufp + strlen(bufp);
-		    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
-		    j++;
-		}
+		sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
 	    }
-	    for (i = j; i < MAXCHANNELS; i++) {
-		bufp = bufp + strlen(bufp);
-		sprintf(bufp, ",");
-	    }
-	    bufp = bufp + strlen(bufp);
-	    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
-		    session->gNMEAdata.vdop);
-	    nmea_add_checksum(bufp2 + 1);
-	    bufp2 = bufp = bufp + strlen(bufp);
-	    sprintf(bufp, "$PRWIZCH");
-	    bufp = bufp + strlen(bufp);
-	    for (i = 0; i < 12; i++) {
-		sprintf(bufp, ",%02d,%X", session->Zs[i], session->Zv[i]);
-		bufp = bufp + strlen(bufp);
-	    }
-	    sprintf(bufp, "*");
-	    bufp = bufp + strlen(bufp);
-	    nmea_add_checksum(bufp2 + 1);
+	    strcat(buf, "*");
+	    nmea_add_checksum(buf);
 	    nmea = 1002;
 	    break;
 	case 1003:
 	    handle1003(session, p);
-	    bufp2 = bufp = buf;
-	    j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
-	    while (i < 12) {
-		if (i % 4 == 0)
-		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites);
-		bufp += strlen(bufp);
-		if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
-		    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
-			    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
-		else
-		    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
-			    session->gNMEAdata.ss[i]);
-		bufp += strlen(bufp);
-		if (i % 4 == 3) {
-		    sprintf(bufp, "*");
-		    nmea_add_checksum(bufp2 + 1);
-		    bufp += strlen(bufp);
-		    bufp2 = bufp;
-		}
-		i++;
-	    }
-	    nmea = 1003;
+	    gpsd_binary_satellite_dump(session, buf);
 	    break;	
 	case 1005:
 	    handle1005(session, p);

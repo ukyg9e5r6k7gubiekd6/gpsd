@@ -75,7 +75,6 @@
 #define GARMIN_PKTID_L001_WPT_DATA       35
 
 #define MAX_BUFFER_SIZE 4096
-#define GARMIN_MAXCHANNELS 12
 
 // something magic about 64, garmin driver will not return more than
 // 64 at a time.  If you read less than 64 bytes the next read will
@@ -141,7 +140,7 @@ typedef struct {
 typedef struct {
 	double rcvr_tow;
 	short	rcvr_wn;
-	cpo_rcv_sv_data sv[GARMIN_MAXCHANNELS];
+	cpo_rcv_sv_data sv[MAXCHANNELS];
 } cpo_rcv_data;
 
 
@@ -164,15 +163,6 @@ static inline double  radtodeg( double rad) {
 	return ( rad * 180.0 *  M_1_PIl);
 }
 
-
-static double degtodm(double a)
-{
-    double m, t;
-    m = modf(a, &t);
-    t = floor(a) * 100 + m * 60;
-    return t;
-}
-
 static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );
 void SendPacket (struct gps_session_t *session, Packet_t *aPacket );
 Packet_t* GetPacket (struct gps_session_t *session );
@@ -189,7 +179,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
     struct tm *tm = NULL;
-    char buf[BUFSIZE], *bufp = buf, *bufp2 = buf;
+    char buf[BUFSIZE], *bufp = buf;
     int i = 0, j = 0;
     double track;
 
@@ -343,40 +333,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 		    , pvt->leap_sec
 		    , pvt->grmn_days);
 
-            // stolen verbatim from zodiac.c
-	    if (session->gNMEAdata.mode > 1) {
-		sprintf(bufp,
-			"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
-		   session->hours,
-                   session->minutes,
-                   session->seconds,
-			degtodm(fabs(session->gNMEAdata.latitude)),
-			((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
-			degtodm(fabs(session->gNMEAdata.longitude)),
-			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
-		    session->gNMEAdata.mode,
-                    session->gNMEAdata.satellites_used,
-                    session->gNMEAdata.hdop,
-		    session->gNMEAdata.altitude, 'M',
-                    session->separation, 'M', "", "");
-		nmea_add_checksum(bufp + 1);
-		bufp = bufp + strlen(bufp);
-	    }
-	    sprintf(bufp,
-		    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,*",
-		    session->hours, session->minutes, session->seconds,
-		    session->gNMEAdata.status ? 'A' : 'V',
-                    degtodm(fabs(session->gNMEAdata.latitude)),
-		    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
-		    degtodm(fabs(session->gNMEAdata.longitude)),
-		    ((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
-                    session->gNMEAdata.speed,
-		    session->gNMEAdata.track,
-                    session->day,
-                    session->month,
-		    (session->year % 100));
-		nmea_add_checksum(bufp + 1);
-                // end stolen verbatim from zodiac.c
+		gpsd_binary_fix_dump(session, bufp);
 		break;
             case GARMIN_PKTID_SAT_DATA:
 		gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
@@ -389,7 +346,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 		for ( i = 0 ; i < MAXCHANNELS ; i++ ) {
 			session->gNMEAdata.used[i] = 0;
 		}
-		for ( i = 0, j = 0 ; i < GARMIN_MAXCHANNELS ; i++, sats++ ) {
+		for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
 			gpsd_report(4,
 			  "  Sat %d, snr: %d, elev: %d, Azmth: %d, Stat: %x\n"
 				, sats->svid
@@ -419,48 +376,8 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 			}
 		}
 		REFRESH(session->gNMEAdata.satellite_stamp);
-
-		// stolen verbatim from zodiac.c
-	    j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
-
-	    for( i = 0 ; i < GARMIN_MAXCHANNELS; i++ ) {
-		if (i % 4 == 0)
-		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites);
-		bufp += strlen(bufp);
-		if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
-		    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
-			    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
-		else
-		    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
-			    session->gNMEAdata.ss[i]);
-		bufp += strlen(bufp);
-		if (i % 4 == 3) {
-		    sprintf(bufp, "*");
-		    nmea_add_checksum(bufp2 + 1);
-		    bufp += strlen(bufp);
-		    bufp2 = bufp;
-		}
-	    }
-	    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
-	    j = 0;
-	    for (i = 0; i < MAXCHANNELS; i++) {
-		if (session->gNMEAdata.used[i]) {
-		    bufp = bufp + strlen(bufp);
-		    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
-		    j++;
-		}
-	    }
-	    for (i = j; i < MAXCHANNELS; i++) {
-		bufp = bufp + strlen(bufp);
-		sprintf(bufp, ",");
-	    }
-	    bufp = bufp + strlen(bufp);
-	    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
-		    session->gNMEAdata.vdop);
-	    nmea_add_checksum(bufp2 + 1);
-	    bufp2 = bufp = bufp + strlen(bufp);
-
-                // end stolen verbatim from zodiac.c
+		gpsd_binary_satellite_dump(session, bufp);
+		gpsd_binary_quality_dump(session, bufp+strlen(bufp));
 		break;
             default:
 		gpsd_report(3, "ID: %d, Sz: %d\n"
