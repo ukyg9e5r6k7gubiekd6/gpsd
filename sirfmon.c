@@ -47,6 +47,7 @@ static int nfix,fix[20];
 static FILE *logfile;
 static int gmt_offset;
 static int dispmode = 0;
+static int subframe_enabled = 0;
 
 static char *verbpat[] =
 {
@@ -480,6 +481,13 @@ int main (int argc, char **argv)
 
 	    switch (line[0])
 	    {
+	    case 'a':		/* toggle 50bps subframe data */
+		memset(buf, '\0', sizeof(buf));
+		putb(0, 0x80);
+		putb(24, subframe_enabled ? 0x00 : 0x04);
+		sendpkt(buf,25);
+		break;
+
 	    case 'b':
 		v = atoi(line+1);
 		for (ip=rates; ip < rates+sizeof(rates)/sizeof(rates[0]); ip++)
@@ -535,14 +543,7 @@ int main (int argc, char **argv)
 	    case 'l':				/* open logfile */
 		if (logfile != NULL)
 		    fclose(logfile);
-
 		logfile = fopen(p,"a");
-		break;
-
-	    case 'p':				/* poll for almanac data */
-		putb(0,0x92);
-		putb(1,0x00);
-		sendpkt(buf,2);
 		break;
 
 	    case 't':				/* poll navigation params */
@@ -692,11 +693,8 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x08:		/* 50 BPS data */
 	ch = getb(1);
 	mvwprintw(mid4win, ch, 27, "Y");
-	wprintw(debugwin, "ALM %d (%d):",getb(2),ch);
-	for (off = 3; off < len; off += 4)
-	    wprintw(debugwin, " %d",getl(off));
-	wprintw(debugwin, "\n");
 	wprintw(debugwin, "50B 0x08=");
+	subframe_enabled = 1;
     	break;
 
     case 0x09:		/* Throughput */
