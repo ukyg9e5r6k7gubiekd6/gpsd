@@ -486,7 +486,9 @@ int main(int argc, char *argv[])
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
 
-    gps_init(&session,device_name, 5, devtype, NULL, update_display);
+    gps_init(&session, GPS_TIMEOUT, devtype, NULL);
+    session.gps_device = device_name;
+    session.raw_hook = update_display;
     open_input(app);
 
     init_list();

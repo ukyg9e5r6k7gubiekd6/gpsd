@@ -4,6 +4,7 @@
 #include <time.h>
 
 #define MAXCHANNELS	12
+#define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 struct life_t
 /* lifetime structure to be associated with some piece of data */
@@ -118,6 +119,7 @@ struct gpsd_t
     struct longlat_t initpos;
     struct OUTDATA gNMEAdata;
     char *gps_device;	/* where to find the GPS */
+    int baudrate;		/* baud rate of session */
     int fdin;		/* input fd from GPS */
     int fdout;		/* output fd to GPS */
     int dsock;		/* socket to DGPS server */
@@ -149,9 +151,7 @@ int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* High-level interface */
 void gps_init(struct gpsd_t *session, 
-	      char *device, int timeout, char devtype,
-	      char *dgpsserver,
-	      void (*raw_hook)(char *buf));
+	      int timeout, char devtype, char *dgpsserver);
 int gps_activate(struct gpsd_t *session);
 void gps_deactivate(struct gpsd_t *session);
 void gps_poll(struct gpsd_t *session);

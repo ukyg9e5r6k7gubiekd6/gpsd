@@ -26,22 +26,23 @@ static struct gps_type_t *set_device_type(char what)
     return *dp;
 }
 
-void gps_init(struct gpsd_t *session, 
-	      char *device, int timeout,
- 	      char devicetype,
-	      char *dgpsserver,
-	      void (*raw_hook)(char *buf))
+void gps_init(struct gpsd_t *session, int timeout, char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
     struct gps_type_t *devtype;
-    
+
+    session->gps_device = "/dev/gps";
     session->device_type = &nmea;
     devtype = set_device_type(devicetype);
     if (!devtype)
 	gpscli_report(1, "invalid GPS type \"%s\", using NMEA instead\n", optarg);
     else
+    {
 	session->device_type = devtype;
+	session->baudrate = devtype->baudrate;
+    }
+	
 
     session->dsock = -1;
     if (dgpsserver) {
@@ -67,7 +68,6 @@ void gps_init(struct gpsd_t *session,
     }
 
     /* mark fds closed */
-    session->gps_device = strdup(device);
     session->fdin = -1;
     session->fdout = -1;
 
@@ -77,8 +77,6 @@ void gps_init(struct gpsd_t *session,
     INIT(session->gNMEAdata.status_stamp, now, timeout);
     INIT(session->gNMEAdata.mode_stamp, now, timeout);
     session->gNMEAdata.mode = MODE_NO_FIX;
-
-    session->raw_hook = raw_hook;
 }
 
 void gps_deactivate(struct gpsd_t *session)
@@ -100,7 +98,7 @@ int gps_activate(struct gpsd_t *session)
 {
     int input;
 
-    if ((input = gps_open(session->gps_device, session->device_type->baudrate)) < 0)
+    if ((input = gps_open(session->gps_device, session->baudrate)) < 0)
 	return -1;
     else
     {

@@ -25,11 +25,9 @@ struct gpsd_t session;
 <funcprototype>
 <funcdef>void <function>gps_init</function></funcdef>
     <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
-    <paramdef>char * <parameter>device</parameter></paramdef>
     <paramdef>int <parameter>timeout</parameter></paramdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
-    <paramdef>void ( * <parameter>raw_hook</parameter>) ( char *buf )</paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_activate</function></funcdef>
@@ -63,15 +61,14 @@ struct gpsd_t session;
 <para><emphasis remap='B'>libgpsd</emphasis>
 is a service library which supports querying GPS devices. The GPS daemon
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-uses it, and is appropriate for situations is which more than one
+uses it, and is appropriate for situations in which more than one
 program may need access to the GPS data stream.  This library may be
 useful for applications that have the exclusive use of a GPS.</para>
 
 <para>Calling
 <function>gps_init()</function>
 initializes a session structure to hold the data collected by the GPS.
-You must specify the device path to which the GPS is attached.  You
-must also specify a timeout in seconds after which data will be
+You must specify a timeout in seconds after which data will be
 considered stale.  You must specify one of the following device types:</para>
 <itemizedlist>
   <listitem><para>Generic NMEA 0183 GPS</para></listitem>
@@ -88,10 +85,34 @@ containing a server name or a string containining server name followed
 by a colon and a port name or number.  To specify no DGPS, pass the 
 null pointer.</para>
 
-<para>You may optionally specify a hook function to be executed on each NMEA
+<para>After the session structure has been set up, you may modify some
+of its members.</para>
+
+<variablelist>
+<varlistentry>
+<term><structfield>gps_device</structfield></term>
+<listitem>
+<para>This member should hold the path name of the device; it defaults to
+<filename>/dev/gps</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><structfield>baudrate</structfield></term>
+<listitem>
+<para>Communication speed in bits per second.  The default is set by
+the driver type.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><structfield>raw_hook</structfield></term>
+<listitem>
+<para>A hook function to be executed on each NMEA
 sentence as it is read from the GPS.  The data from non-NMEA GPSes like
 the EarthMate will be translated to an NMEA sentence before being
 passed to the hook.</para>
+</listitem>
+</varlistentry>
+</variablelist>
 
 <para><function>gps_activate()</function>
 initializes the connection to the GPS.  

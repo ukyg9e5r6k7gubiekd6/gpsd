@@ -530,7 +530,9 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
-    gps_init(&session, device_name, gps_timeout, gpstype, dgpsserver, raw_hook);
+    gps_init(&session, gps_timeout, gpstype, dgpsserver);
+    session.gps_device = device_name;
+    session.raw_hook = raw_hook;
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
