@@ -178,7 +178,7 @@ void draw_graphics()
 			(int) x-5, (int) y, "E", 1);
 
 	/* Now draw the satellites... */
-	for (i = 0; i < session.gNMEAdata.in_view; i++) {
+	for (i = 0; i < session.gNMEAdata.satellites_in_view; i++) {
 	    pol2cart(session.gNMEAdata.azimuth[i], session.gNMEAdata.elevation[i], &x, &y);
 
 	    switch (get_status(session.gNMEAdata.PRN[i]) & 7) {

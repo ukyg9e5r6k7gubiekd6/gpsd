@@ -84,11 +84,11 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	case 'Q':
 	    sscanf(sp, "Q=%d %lf %lf %lf", &i1, &d1, &d2, &d3);
 	    gpsdata->fix_quality_stamp.changed = \
-		(gpsdata->satellites != i1)
+		(gpsdata->satellites_used != i1)
 		|| (gpsdata->pdop != d1)
 		|| (gpsdata->hdop != d2)
 		|| (gpsdata->vdop != d3);
-	    gpsdata->satellites = i1;
+	    gpsdata->satellites_used = i1;
 	    gpsdata->pdop = d1;
 	    gpsdata->hdop = d2;
 	    gpsdata->vdop = d3;
@@ -101,11 +101,15 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	    REFRESH(gpsdata->status_stamp);
 	    break;
 	case 'T':
-	    sscanf(sp, "T=%lf", &gpsdata->track);
+	    sscanf(sp, "T=%lf", &d1);
+	    gpsdata->track_stamp.changed = (gpsdata->track != d1);
+	    gpsdata->track = d1;
 	    REFRESH(gpsdata->track_stamp);
 	    break;
 	case 'V':
-	    sscanf(sp, "V=%lf", &gpsdata->speed);
+	    sscanf(sp, "V=%lf", &d1);
+	    gpsdata->speed_stamp.changed = (gpsdata->speed != d1);
+	    gpsdata->speed = d1;
 	    REFRESH(gpsdata->speed_stamp);
 	    break;
 	}
@@ -198,7 +202,8 @@ void data_dump(struct gps_data *collect)
     if (collect->fix_quality_stamp.refreshes)
     {
 	printf("satellites: %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
-	      collect->satellites, collect->pdop, collect->hdop, collect->vdop);
+	      collect->satellites_used, 
+	      collect->pdop, collect->hdop, collect->vdop);
 	printf("fix_quality_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
 	       collect->fix_quality_stamp.last_refresh,
 	       collect->fix_quality_stamp.time_to_live,

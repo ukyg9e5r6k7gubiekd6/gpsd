@@ -328,7 +328,7 @@ static void processGPGGA(char *sentence, struct gps_data *out)
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
     gpscli_report(3, "GPGGA sets status %d\n", out->status);
-    update_field_i(sentence, 7, &out->satellites);
+    update_field_i(sentence, 7, &out->satellites_used);
     out->altitude_stamp.changed = update_field_f(sentence, 9, &out->altitude);
     REFRESH(out->altitude_stamp);
 }
@@ -390,12 +390,12 @@ static void processGPGSV(char *sentence, struct gps_data *out)
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
-    changed = update_field_i(sentence, 3, &out->in_view);
+    changed = update_field_i(sentence, 3, &out->satellites_in_view);
 
     n = (n - 1) * 4;
     m = n + 4;
 
-    while (n < out->in_view && n < m) {
+    while (n < out->satellites_in_view && n < m) {
 	changed |= update_field_i(sentence, f++, &out->PRN[n]);
 	changed |= update_field_i(sentence, f++, &out->elevation[n]);
 	changed |= update_field_i(sentence, f++, &out->azimuth[n]);

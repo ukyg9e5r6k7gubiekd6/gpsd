@@ -245,7 +245,7 @@ static void handle1000(struct gpsd_t *session, unsigned short *p)
 
     session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
-    session->gNMEAdata.satellites = p[O(12)];
+    session->gNMEAdata.satellites_used = p[O(12)];
 
     session->gNMEAdata.hours = p[O(22)];
 
@@ -314,10 +314,10 @@ static void handle1003(struct gpsd_t *session, unsigned short *p)
     session->gNMEAdata.pdop = p[O(10)];
     session->gNMEAdata.hdop = p[O(11)];
     session->gNMEAdata.vdop = p[O(12)];
-    session->gNMEAdata.in_view = p[O(14)];
+    session->gNMEAdata.satellites_in_view = p[O(14)];
 
     for (j = 0; j < 12; j++) {
-	if (j < session->gNMEAdata.in_view) {
+	if (j < session->gNMEAdata.satellites_in_view) {
 	    session->gNMEAdata.PRN[j] = p[O(15 + (3 * j))];
 	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
 	    session->gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
@@ -383,7 +383,7 @@ static void analyze(struct gpsd_t *session,
 			((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
 			degtodm(fabs(session->gNMEAdata.longitude)),
 			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
-		    session->gNMEAdata.mode, session->gNMEAdata.satellites, session->gNMEAdata.hdop,
+		    session->gNMEAdata.mode, session->gNMEAdata.satellites_used, session->gNMEAdata.hdop,
 			session->gNMEAdata.altitude, 'M', session->gNMEAdata.separation, 'M', "", "");
 		gps_add_checksum(bufp + 1);
 		bufp = bufp + strlen(bufp);
@@ -436,12 +436,12 @@ static void analyze(struct gpsd_t *session,
 	case 1003:
 	    handle1003(session, p);
 	    bufp2 = bufp = buf;
-	    j = (session->gNMEAdata.in_view / 4) + (((session->gNMEAdata.in_view % 4) > 0) ? 1 : 0);
+	    j = (session->gNMEAdata.in_view / 4) + (((session->gNMEAdata.satellites_in_view % 4) > 0) ? 1 : 0);
 	    while (i < 12) {
 		if (i % 4 == 0)
-		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.in_view);
+		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites_in_view);
 		bufp += strlen(bufp);
-		if (i <= session->gNMEAdata.in_view && session->gNMEAdata.elevation[i])
+		if (i <= session->gNMEAdata.satellites_in_view && session->gNMEAdata.elevation[i])
 		    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
 			    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
 		else

@@ -39,7 +39,7 @@ struct gps_data {
     struct life_t track_stamp;
     double mag_var;		/* Magnetic variation in degrees */
 
-    /* status and precision of fix */
+    /* status of fix */
     int    status;
 #define STATUS_NO_FIX	0
 #define STATUS_FIX	1
@@ -50,6 +50,9 @@ struct gps_data {
 #define MODE_2D  	2
 #define MODE_3D  	3
     struct life_t mode_stamp;
+
+    /* precision of fix */
+    int satellites_used;	/* Number of satellites used in solution */
     double pdop;		/* Position dilution of precision, meters */
     double hdop;		/* Horizontal dilution of precision, meters */
     double vdop;		/* Vertical dilution of precision, meters */
@@ -57,13 +60,11 @@ struct gps_data {
     struct life_t fix_quality_stamp;
 
     /* satellite status */
-    int in_view;		/* # of satellites in view */
-    int satellites;		/* Number of satellites used in solution */
-    int PRN[MAXCHANNELS];	/* PRN of satellite */
+    int satellites_in_view;	/* # of satellites in view */
+    int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
-    int used[MAXCHANNELS];	/* used in solution */
     struct life_t satellite_stamp;
 
     /* Zodiac chipset channel status from PRWIZCH */

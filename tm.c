@@ -63,7 +63,7 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
 	   session->gNMEAdata.latitude,
 	   session->gNMEAdata.longitude,
 	   session->gNMEAdata.altitude,
-	   session->gNMEAdata.satellites,
+	   session->gNMEAdata.satellites_used,
 	   session->gNMEAdata.mode,
 	   session->gNMEAdata.utc);
 }
