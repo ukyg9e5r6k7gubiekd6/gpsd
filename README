@@ -4,7 +4,7 @@
 COPYRIGHT
 =========
 
-This software (gpsd) is Copyrighted 1997, 1998, 1999 by Remco Treffkorn,
+This software (gpsd) is Copyrighted 1997, 1998, 1999, 2000 by Remco Treffkorn,
 I am releasing it under the terms and conditions of the 
 
 	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
@@ -18,7 +18,7 @@ GENERAL
 =======
 
 Gpsd is a user land daemon acting as a liason between a gps or
-Loran-C receiver and clients. The reiceiver is expected to generate
+Loran-C receiver and clients. The receiver is expected to generate
 position information as NMEA-0183 sentences, or Rockwell binary format,
 although that can be changed.
 
@@ -33,12 +33,11 @@ I have a boat connected to the internet (Ricochet modem) runing
 gpsd, the maping program runs here at home (no, I will not give
 you the boats IP address :-)
 
-
 There is a sample client included. It is called "gps". It simply connects
 to a gpsd and displays satellites in their current position in the sky.
 This only works for some GPS receivers!
 
-Gpsd is tested with DeLormes TripMate, EarthMate and Garmin units.
+Gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
 
 
 CREDITS
@@ -55,13 +54,19 @@ He also changed the configuration method from Imake to GNU
 autoconf. This made it easy to port the code to YOUR particular
 platform.
 
-Derrick J Brashear <shadow@dementia.org> added code for the
+Derrick J Brashear <shadow@dementia.org> (KB3EGH) added code for the
 EarthMate DeLame. He also added "incredibly gross code to output
-NMEA sentences" (his own words :-)
-                                                                            
-Be advised: any bugs in this code are mine, and mine only ;-)
+NMEA sentences" (his own words :-) He also did the first cut at
+DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html).
 
+Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support.
+
+Be advised: any bugs in this code are mine, and mine only ;-)
 
 This is as it stands today, July 17 1999.
 
 remco@emc.rvt.com
+
+Actually, some bugs may be mine too now. Sorry.
+
+Derrick J. Brashear, 2 January 2000
