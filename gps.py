@@ -121,11 +121,11 @@ class gpsdata:
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="localhost", port="2947"):
+    def __init__(self, host="localhost", port="2947", verbose=0):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
 	self.connect(host, port)
-
+        self.verbose = verbose:
 	self.raw_hook = None
 
     def connect(self, host, port):
@@ -252,7 +252,10 @@ class gps(gpsdata):
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-	return self.__unpack(self.sock.recv(1024))
+        data = self.sock.recv(1024)
+        if self.verbose:
+            sys.stderr("GPS DATA %s\n", repr(data))
+	return self.__unpack(data)
 
     def query(self, commands):
 	"Send a command, get back a response."
