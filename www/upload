@@ -13,5 +13,6 @@ xmlto xhtml-nochunks ../gpsprobe.xml
 xmlto xhtml-nochunks ../gpsprof.xml
 xmlto xhtml-nochunks ../gpsfake.xml
 xmlto xhtml-nochunks replacing-nmea.xml
+(cd performance; xmlto xhtml-nochunks performance.xml)
 # Doesn't upload PDFs or GIFs -- they aren't expected to change frequently
-scp *.html *.css *.js *.txt $webdir
+scp *.html performance/{*.html,*.txt,*.png} *.css *.js *.txt $webdir
