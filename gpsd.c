@@ -467,7 +467,8 @@ static int handle_request(int fd, char *buf, int buflen)
 			reported++;
 		    }
 		}
-		assert(reported == ud->satellites);
+		gpsd_report(1,"Satellite count %d != PRN count %d\n",
+			    ud->satellites, reported);
 	    } else
 		strcpy(phrase, ",Y=?");
 	    break;
