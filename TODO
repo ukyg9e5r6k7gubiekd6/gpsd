@@ -14,8 +14,38 @@ It generates a gnuplot scattergram of fixes you can use to empirically
 check accuracy against the reported HDOP.
 
 However, something is awry in my calculation of the actual uncertainty 
-of position, going from degrees of uncertainty to meters.  I posted about 
-this earlier today.  Help!
+of position, going from degrees of uncertainty to meters.
+
+* Do the research to figure out just what the heck is going on with status bits
+
+NMEA actually has *three* kinds of validity bits.  Mode, status, and the
+Active/Void bit (some sources interpret 'V' as 'Navigation receiver warning').
+Sentences that have an Active/Void send V when there is no fix, so the 
+position data is no good.
+
+Let's look at which sentences send what:
+
+                GPRMC     GPGLL     GPGGA     GPGSA
+Returns fix      Yes       Yes       Yes        No
+Returns status   No        Yes       Yes        No
+Returns mode     No        No        No         Yes
+Returns A/V      Yes       Yes       No         No
+
+In addition, some sentences use empty fields to signify invalid data.
+
+My first conclusion from looking at this table is that the designers
+of NMEA 0183 should be hung for galloping incompetence.  But never mind that.
+What are we to make of this mess?
+
+The fact that the FV18 sends GPMRC/GPGLL/GPGGA but not GPGSA
+argues that GPGSA is optional.  I don't see how it can be, since it
+seems to be the only status bit that applies to altitude.  Just how are
+we supposed to know when altitude is valid if it doesn't ship GSA?  
+Can a receiver ever ship a non-empty but invalid altitude?
+
+Which of these override which other bits?  I don't think status is ever
+nonzero when mode is zero. So status overrides mode.  What other such
+relationships are there?
 
 * Mine the contrib directory for good ideas
 
