@@ -36,9 +36,10 @@ static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL)
  * GPRMC, GPGGA, and GPGLL; for these, all info is guaranteed correctly
  * synced to the time member, but you'll get different stages of the same 
  * update depending on where in the cycle you poll.  A very few GPSes, 
- * like the Garmin 48, take a new fix before each of GPRMC/GPGGA/GPGLL;
- * thus, they may have different timestamps and some data in this structure
- * can be up to 1 cycle (usually 1 second) older than the fix time.
+ * like the Garmin 48, take a new fix before more than one of of 
+ * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different 
+ * timestamps and some data in this structure can be up to 1 cycle (usually
+ * 1 second) older than the fix time.
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
@@ -63,6 +64,8 @@ struct gps_fix_t {
     // double epc;	/* Vertical velocity uncertainty (1 sigma) */
 };
 
+struct gps_data_t {
+    unsigned long valid;	/* validity mask */
 #define ONLINE_SET	0x0001
 #define TIME_SET	0x0002
 #define TIMERR_SET	0x0004
@@ -79,8 +82,6 @@ struct gps_fix_t {
 #define SPEEDERR_SET	0x2000
 #define TRACKERR_SET	0x4000
 #define CLIMBERR_SET	0x8000
-
-struct gps_data_t {
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences

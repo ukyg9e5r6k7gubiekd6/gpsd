@@ -153,10 +153,6 @@ int gpsd_poll(struct gps_session_t *session)
 	} else
 	    return ONLINE_SET;
     } else {
-	struct gps_data_t old;
-	int mask = 0;
-
-	memcpy(&old, &session->gpsdata, sizeof(struct gps_data_t));
 
 	session->gpsdata.online = timestamp();
 
@@ -166,7 +162,7 @@ int gpsd_poll(struct gps_session_t *session)
 
 	session->gpsdata.d_xmit_time = timestamp();
 
-	mask = ONLINE_SET | session->device_type->parse_packet(session);
+	session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);
 
 	session->counter++;
 	session->gpsdata.d_decode_time = timestamp();
@@ -188,7 +184,7 @@ int gpsd_poll(struct gps_session_t *session)
 		gpsd_report(2, "=> dgps %s", buf);
 	    }
 	}
-	return mask;
+	return session->gpsdata.valid;
     }
 }
 
