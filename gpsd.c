@@ -518,6 +518,9 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	// The following tries to recognise if the EarthMate is
 	// in binary mode. If so, it will switch to EarthMate mode.
 
+	// Tf.20000105: this block does not serve any purpose.
+	// Please look it over, and delete it if you agree.
+	
 	if (device_type == DEVICE_EARTHMATE) {
 	    if (offset) {
 		if (buf[offset - 1] == (unsigned char) 0xff) {
