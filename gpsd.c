@@ -341,12 +341,12 @@ static int assign_channel(struct subscriber_t *user)
 	    return 0;
 	else {
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
-	    if (user->watcher) {
+	    if (user->watcher && !user->tied) {
 		write(user-subscribers, "F=", 2);
 		write(user-subscribers, 
 		      user->device->gpsdata.gps_device,
 		      strlen(user->device->gpsdata.gps_device));
-		write(user-subscribers, "\r\n\0", 3);
+		write(user-subscribers, "\r\n", 2);
 	    }
 	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
 	}
