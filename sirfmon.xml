@@ -67,6 +67,19 @@ GPS.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
+<term>c</term>
+<listitem>
+<para>Set (c1) or clear (c0) static navigation. The SiRF documentation
+says <quote>Static navigation is a position filter designed to be used
+with motor vehicles.  When the vehicle's velocity falls below a
+threshold, the position and heading are frozen, and velocity is set to
+zero. This condition will continue until the computed velocity rises
+above 1.2 times the threshold or until the computed position is at
+least a set distance from the frozen place. The threshold velocity and
+set distance may vary with software versions.</quote></para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>l</term>
 <listitem>
 <para>Start logging of packets to specified file. If logging is

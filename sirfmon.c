@@ -9,6 +9,7 @@
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
  *	b -- change baud rate.
+ *	c -- set or clear static navigation mode
  *	l -- start logging packets to specified file.
  *	s -- send hex bytes to device.
  *	q -- quit, leaving device in binary mode.
@@ -43,6 +44,8 @@ extern double timestamp(void);
 #define END2		0xb3
 
 #define MAXCHANNELS	12
+
+#define SNIFF_RETRIES	1200
 
 static int LineFd;					/* fd for RS232 line */
 static int nfix,fix[20];
@@ -131,7 +134,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 
     /* sniff for NMEA or SiRF packet */
     state = 0;
-    for (count = 0; count < 1200; count++) {
+    for (count = 0; count < SNIFF_RETRIES; count++) {
 	if ((st = read(LineFd, &c, 1)) < 0)
 	    return 0;
 	else
@@ -438,6 +441,12 @@ int main (int argc, char **argv)
 		usleep(50000);
 		set_speed(bps = v, stopbits);
 		mvwprintw(cmdwin, 1, 15, "%4d N %d", bps, stopbits);
+		break;
+
+	    case 'c':				/* static navigation */
+		putb(0,0x8f);			/* id */
+		putb(1, atoi(line+1));
+		sendpkt(buf,2);
 		break;
 
 	    case 'n':				/* switch to NMEA */

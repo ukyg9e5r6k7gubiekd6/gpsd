@@ -36,7 +36,10 @@ GPSD Frequently Asked Questions
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 
-<p>First, make sure it is a real gpsd bug and not a problem with
+<p>First, read this whole FAQ before reporting apparent misbehavior as a
+bug.  You may find a solution here.</p>
+
+<p>Second, make sure it is a real gpsd bug and not a problem with
 your client software.  A good way to do this is to run your client and
 the gpsd test client (xgps) side by side.  If xgps seems to report
 good numbers but your client does not, you have a client problem.
@@ -53,7 +56,7 @@ whether it holds a clue, send it.</p>
 rapidly.  If we can't reproduce it, you might get lucky or you might
 not &mdash; and we try hard, but all too often the result is 'not'.</p>
 
-<p>Therefore your second step should always be to try to capture a log
+<p>Therefore your third step should always be to try to capture a log
 of some GPS output that reproduces the bug, and your second step
 should be to feed it to a gpsd instance through gpsfake to verify that
 the log does in fact reproduce the bug.</p>
@@ -70,7 +73,8 @@ NMEA or packet of SiRF that produces the bug and tell us that.</p>
 
 <p>If you're using a SiRF-based GPS (which you can tell from the -D 4
 output), switch back to NMEA mode using the N command and see if the
-bug still reproduces.</p>
+bug still reproduces.  Also try switching on <a
+href="#crazy_speed">static navigation mode</a>.</p>
 
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
@@ -81,6 +85,15 @@ that.</p>
 <p>Always include with your bug report the GPS vendor and model.  If
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
+
+<h1 id='crazy_speed'><code>gpsd</code> reports crazy high speeds</h1>
+
+<p>You are probably using a SiRF-II GPS.  Some of these come up in
+XTrac mode, which makes them more sensitive but also more sensitive
+to multipath interference and prone to report spurious large velocities.  
+Try bringing up <code>sirfmon</code> and using the 'c1' command to 
+set Static Navigation Mode.  This setting should persist between
+GPS uses.</p>
 
 <h1 id='why_migrate'>Why this version of <code>gpsd</code>?</h1>
 

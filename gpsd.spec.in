@@ -93,7 +93,6 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %files -n gpsd-devel
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
-%attr(755, root, root) %{_bindir}/sirfmon
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
 %{_includedir}/gpsutils.h
