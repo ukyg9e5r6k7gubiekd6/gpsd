@@ -41,7 +41,7 @@ struct header {
 
 static void analyze(struct gpsd_t *session, struct header *, unsigned short *);
 
-static unsigned short em_gps_checksum(unsigned short *w, int n)
+static unsigned short em_nmea_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
@@ -52,8 +52,8 @@ static unsigned short em_gps_checksum(unsigned short *w, int n)
 }
 
 /* em_spew - Takes a message type, an array of data words, and a length
-   for the array, and prepends a 5 word header (including gps_checksum).
-   The data words are expected to be gps_checksummed */
+   for the array, and prepends a 5 word header (including nmea_checksum).
+   The data words are expected to be nmea_checksummed */
 
 #if defined (WORDS_BIGENDIAN)
 
@@ -89,7 +89,7 @@ static void em_spew(struct gpsd_t *session, int type, unsigned short *dat, int d
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
-    h.csum = em_gps_checksum((unsigned short *) &h, 4);
+    h.csum = em_nmea_checksum((unsigned short *) &h, 4);
 
     if (session->fdout != -1) {
 	end_write(session->fdout, &h, sizeof(h));
@@ -143,7 +143,7 @@ static void em_init(struct gpsd_t *session)
       *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
-      data[21] = em_gps_checksum(data, 21);
+      data[21] = em_nmea_checksum(data, 21);
 
       em_spew(session, 1200, data, 22);
     }
@@ -162,7 +162,7 @@ static void send_rtcm(struct gpsd_t *session,
 
     data[0] = sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
-    data[n] = em_gps_checksum(data, n);
+    data[n] = em_nmea_checksum(data, n);
 
     em_spew(session, 1351, data, n+1);
 }
@@ -377,7 +377,7 @@ static void analyze(struct gpsd_t *session,
     char *bufp2;
     int i = 0, j = 0, nmea = 0;
 
-    if (p[h->ndata] == em_gps_checksum(p, h->ndata)) {
+    if (p[h->ndata] == em_nmea_checksum(p, h->ndata)) {
 	if (session->debug > 5)
 	    gpscli_report(1, "id %d\n", h->id);
 	switch (h->id) {
@@ -394,7 +394,7 @@ static void analyze(struct gpsd_t *session,
 			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
 		    session->gNMEAdata.mode, session->gNMEAdata.satellites_used, session->gNMEAdata.hdop,
 			session->gNMEAdata.altitude, 'M', session->gNMEAdata.separation, 'M', "", "");
-		gps_add_checksum(bufp + 1);
+		nmea_add_checksum(bufp + 1);
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp,
@@ -407,7 +407,7 @@ static void analyze(struct gpsd_t *session,
 		    session->gNMEAdata.track, session->gNMEAdata.day, session->gNMEAdata.month,
 		    (session->gNMEAdata.year % 100), session->gNMEAdata.mag_var,
 		    (session->gNMEAdata.mag_var > 0) ? 'E' : 'W');
-	    gps_add_checksum(bufp + 1);
+	    nmea_add_checksum(bufp + 1);
 	    nmea = 1000;
 	    break;
 	case 1002:
@@ -429,7 +429,7 @@ static void analyze(struct gpsd_t *session,
 	    bufp = bufp + strlen(bufp);
 	    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
 		    session->gNMEAdata.vdop);
-	    gps_add_checksum(bufp2 + 1);
+	    nmea_add_checksum(bufp2 + 1);
 	    bufp2 = bufp = bufp + strlen(bufp);
 #ifdef PROCESS_PRWIZCH
 	    sprintf(bufp, "$PRWIZCH");
@@ -440,7 +440,7 @@ static void analyze(struct gpsd_t *session,
 	    }
 	    sprintf(bufp, "*");
 	    bufp = bufp + strlen(bufp);
-	    gps_add_checksum(bufp2 + 1);
+	    nmea_add_checksum(bufp2 + 1);
 	    nmea = 1002;
 #endif /* PROCESS_PRWIZCH */
 	    break;
@@ -461,7 +461,7 @@ static void analyze(struct gpsd_t *session,
 		bufp += strlen(bufp);
 		if (i % 4 == 3) {
 		    sprintf(bufp, "*");
-		    gps_add_checksum(bufp2 + 1);
+		    nmea_add_checksum(bufp2 + 1);
 		    bufp += strlen(bufp);
 		    bufp2 = bufp;
 		}
@@ -546,7 +546,7 @@ static void em_eat(struct gpsd_t *session, unsigned char c)
     case EM_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
 
-	    if (h.csum == em_gps_checksum((unsigned short *) &h, 4)) {
+	    if (h.csum == em_nmea_checksum((unsigned short *) &h, 4)) {
 		state = EM_HUNT_DATA;
 		data = (unsigned short *) malloc((h.ndata + 1) * 2);
 		words = 0;

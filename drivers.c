@@ -52,7 +52,7 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
     gpscli_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
-	if (gps_process_NMEA_message(sentence + 1, &session->gNMEAdata) < 0)
+	if (nmea_parse(sentence + 1, &session->gNMEAdata) < 0)
 	    gpscli_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
@@ -145,7 +145,7 @@ void tripmate_initializer(struct gpsd_t *session)
 		session->initpos.longitude, session->initpos.lond,
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
-	gps_add_checksum(buf + 1);	/* add c-sum + cr/lf */
+	nmea_add_checksum(buf + 1);	/* add c-sum + cr/lf */
 	if (session->fdout != -1) {
 	    write(session->fdout, buf, strlen(buf));
 	    gpscli_report(1, "=> GPS: %s", buf);

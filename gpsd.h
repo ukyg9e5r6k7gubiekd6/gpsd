@@ -64,10 +64,10 @@ extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
 
 /* GPS library internal prototypes */
-extern int gps_process_NMEA_message(char *sentence, struct gps_data *outdata);
+extern int nmea_parse(char *sentence, struct gps_data *outdata);
 extern void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence);
-extern void gps_add_checksum(char *sentence);
-extern short gps_checksum(char *sentence);
+extern void nmea_add_checksum(char *sentence);
+extern short nmea_checksum(char *sentence);
 extern int gps_open(char *device_name, int device_speed);
 extern void gps_close();
 extern int netlib_passiveTCP(char *service, int qlen);

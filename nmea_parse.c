@@ -7,7 +7,11 @@
 #include "gps.h"
 #include "gpsd.h"
 
-/* ----------------------------------------------------------------------- */
+/**************************************************************************
+ *
+ * Parser helpers begin here
+ *
+ **************************************************************************/
 
 /* field() returns a string containing the nth comma delimited
    field from sentence string
@@ -38,7 +42,6 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data *out)
     double lat, lon, d, m;
     char str[20], *p;
     int updated = 0;
-
 
     if (*(p = field(sentence, begin + 0)) != '\0') {
 	strncpy(str, p, 20);
@@ -103,7 +106,11 @@ static int update_field_f(char *sentence, int fld, double *dest)
     return changed;
 }
 
-/* ----------------------------------------------------------------------- */
+/**************************************************************************
+ *
+ * NMEA sentence handling begin here
+ *
+ **************************************************************************/
 
 /*
    The time field in the GPRMC sentence is in the format hhmmss;
@@ -128,7 +135,7 @@ static void processGPRMC(char *sentence, struct gps_data *out)
            054.7        Course Made Good, True
            191194       Date of fix  19 November 1994
            020.3,E      Magnetic variation 20.3 deg East
-           *68          mandatory gps_checksum
+           *68          mandatory nmea_checksum
 
      */
     char utc[20], ddmmyy[10], hhmmss[10];
@@ -447,7 +454,7 @@ static void processPMGNST(char *sentence, struct gps_data *out)
 	  05.0    time left on the gps battery in hours
 	  +03327  numbers change (freq. compensation?)
 	  00      PRN number receiving current focus
-	  *40    gps_checksum
+	  *40    nmea_checksum
      */
 
    int tmp1, newstatus, newmode;
@@ -500,9 +507,13 @@ static void processPRWIZCH(char *sentence, struct gps_data *out)
 }
 #endif /* PROCESS_PRWIZCH */
 
-/* ----------------------------------------------------------------------- */
+/**************************************************************************
+ *
+ * Entry points begin here
+ *
+ **************************************************************************/
 
-short gps_checksum(char *sentence)
+short nmea_checksum(char *sentence)
 {
     unsigned char sum = '\0';
     char c, *p = sentence, csum[3];
@@ -514,7 +525,7 @@ short gps_checksum(char *sentence)
     return (strncmp(csum, p, 2) == 0);
 }
 
-void gps_add_checksum(char *sentence)
+void nmea_add_checksum(char *sentence)
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
@@ -525,9 +536,9 @@ void gps_add_checksum(char *sentence)
     sprintf(p, "%02X\r\n", sum);
 }
 
-int gps_process_NMEA_message(char *sentence, struct gps_data *outdata)
+int nmea_parse(char *sentence, struct gps_data *outdata)
 {
-    if (gps_checksum(sentence)) {
+    if (nmea_checksum(sentence)) {
 	if (strncmp(GPRMC, sentence, 5) == 0) {
 	    processGPRMC(sentence, outdata);
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
