@@ -341,6 +341,11 @@ class SiRF:
         return SiRF.transport("".join(switcher))
     to_NMEA = staticmethod(to_NMEA)
 
+    def reset():
+        "Generate a GPS reset command."
+        return SiRF.transport("\x85\x00\x00\x00\x00\x00\x00\x00\x00")
+    reset = staticmethod(reset)
+
 # EarthDistance code swiped from Kismet and corrected
 # (As yet, this stuff is not in the libgps C library.)
 

@@ -158,7 +158,7 @@ Python interpreter's decode time. A C client would be faster.</para>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
-project page <ulink
+project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 
 </refsect1>

@@ -92,6 +92,7 @@ seconds, kill the program and restart.</para>
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 </para>
 </refsect1>
@@ -99,7 +100,7 @@ seconds, kill the program and restart.</para>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
-project page <ulink
+project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 
 </refsect1>

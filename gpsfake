@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+#
+# gpsfake -- test harness for gpsd
+#
+# Simulates a GPS, playing back an NMEA logfile
+
+import sys, os, time, signal, pty, getopt, tempfile, termios
+
+(options, arguments) = getopt.getopt(sys.argv[1:], "i:hn")
+interval = 1
+spawn = True
+for (switch, val) in options:
+    if (switch == '-i'):
+        interval = int(val)
+    elif (switch == '-n'):
+        spawn = False
+    elif (switch == '-h'):
+        sys.stderr.write("usage: gpsfake [-h] [-n] [-i interval]\n")
+logfile = arguments[0]
+
+try:
+    (master_fd, slave_fd) = pty.openpty()
+except:
+    sys.stderr.write("gpsfake: can't open pty.\n")
+    sys.exit(1)
+slave = os.ttyname(slave_fd)
+
+if not spawn:
+    sys.stderr.write("gpsfake: slave tty is %s\n" % slave)
+elif os.system("gpsd -P /tmp/gpsfake%d -p %s" % (os.getpid(), slave)):
+    sys.stderr.write("gpsfake: gpsd launch failed.\n")
+else:
+    sys.stderr.write("gpsfake: gpsd launch OK.\n")
+    fp = open("/tmp/gpsfake%s" % os.getpid())
+    pid = int(fp.read())
+    fp.close()
+    os.remove("/tmp/gpsfake%s" % os.getpid())
+
+try:
+    logfp = open(logfile, "r")
+    lines = logfp.readlines()
+    logfp.close()
+
+    ttyfp = open(slave, "rw")
+    raw = termios.tcgetattr(ttyfp.fileno())
+    raw[0] = 0					# iflag
+    raw[1] = termios.ONLCR				# oflag
+    raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
+    raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+    raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+    raw[3] = 0					# lflag
+    raw[4] = raw[5] = termios.B4800
+    termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+
+    i = 0;
+    while True:
+        time.sleep(interval)
+        os.write(master_fd, lines[i % len(lines)])
+        i += 1
+finally:
+    os.kill(pid, signal.SIGTERM)

@@ -64,14 +64,15 @@ cp .libs/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO1VERSION}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
-cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
-cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
+cp libgps.3 libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
+cp gpsfake.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
+cp gpsfake "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
@@ -117,13 +118,15 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/libgps.so
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
+%{_mandir}/man1/gpsfake.1*
+%attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gps.py*
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
 * Fri Feb 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Fixed core-dump bug in processing of the GLL variant that does not 
-  include an FAA Mode Indicator.
+  include an FAA Mode Indicator.  Added gpsfake test harness.
 
 * Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.11-1
 - Added gpsprof and the capability to generate GPS latency profiles.

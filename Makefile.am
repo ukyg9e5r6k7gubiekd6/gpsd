@@ -10,7 +10,7 @@ endif
 XMLTO = xmlto
 
 bin_PROGRAMS = $(BUILD_PROGS)
-bin_SCRIPTS = gpsprobe gpsprof
+bin_SCRIPTS = gpsprobe gpsprof gpsfake
 
 #
 # Build xgps
@@ -67,7 +67,8 @@ man_MANS = \
 	libgps.3 \
 	libgpsd.3 \
 	gpsprobe.1 \
-	gpsprof.1
+	gpsprof.1 \
+	gpsfake.1
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	$(XMLTO) man gpsd.xml
@@ -83,6 +84,9 @@ gpsprobe.1: gpsprobe.xml
 
 gpsprof.1: gpsprof.xml
 	$(XMLTO) man gpsprof.xml
+
+gpsfake.1: gpsfake.xml
+	$(XMLTO) man gpsfake.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -112,6 +116,7 @@ EXTRA_DIST = \
 	libgps.xml \
 	gpsprobe.xml \
 	gpsprof.xml \
+	gpsfake.xml \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
@@ -121,6 +126,7 @@ EXTRA_DIST = \
 	gpsd.py \
 	gpsprobe \
 	gpsprof \
+	gpsfake \
 	logextract
 
 # This is not distributed
