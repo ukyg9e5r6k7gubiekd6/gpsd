@@ -597,6 +597,7 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return(1);
 	} else if ( sel_ret == 0 ) {
+	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
 	thePacket = GetPacket( session );
@@ -632,6 +633,7 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return(1);
 	} else if ( sel_ret == 0 ) {
+	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
 	thePacket = GetPacket( session );
@@ -668,6 +670,7 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return(1);
 	} else if ( sel_ret == 0 ) {
+	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
 	thePacket = GetPacket( session);
@@ -715,8 +718,11 @@ int garmin_probe(struct gps_session_t *session)
  */
 static void garmin_init(struct gps_session_t *session)
 {
+	int ret;
 
-	garmin_probe( session );
+	gpsd_report(5, "to garmin_probe()\n");
+	ret = garmin_probe( session );
+	gpsd_report(3, "from garmin_probe() = %d\n", ret);
 }
 
 static void garmin_handle_input(struct gps_session_t *session)
