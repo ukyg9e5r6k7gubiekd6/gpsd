@@ -102,6 +102,8 @@ New features include:
    * New 'w' command toggles 'watcher' mode. In watcher mode gpsd ships
      a gpsd-style response for each incoming sentence as if the client
      had just sent all commands that asked for data contained in the sentence.
+   * New 'x' command allows the client to query whether or not the GPS
+     is on-line.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code this program uses can now be directly linked as a
@@ -110,7 +112,7 @@ New features include:
      but send all error and status messages to the tty instead.
    * Removed the -s option -- the right speed is fixed for each type, -s was
      just an invitation to lossage.
-   * Added -n option.
+   * Added -n option to do batch monitoring of GPSes.
    * xgpsspeed is working again.
 
 Eric S. Raymond, 11 Aug 2004
