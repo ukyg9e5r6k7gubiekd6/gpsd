@@ -343,6 +343,10 @@ scenarios, perhaps on embedded systems or PDAs. On those it may be
 appropriate to use the low-level interface directly, probably with a
 build from source that conditions out all but one of the drivers.</p>
 
+<p>For Python programmers, there are gps.py and gpsd.py modules
+implementing respectively the high-level and low-level interfaces.
+Each exports a class that encapsulates a GPS session.</p>
+
 <p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>
 
 <p>First, <code>gpsd</code>-2's command-line options have been changed
@@ -355,7 +359,9 @@ swapped out, unless there are clients trying to query the GPS.</p>
 
 <p>Second, <code>gpsd</code> now returns "?" as the contents for a 
 field when it doesn't have valid data for that field (e.g. latitude 
-or longitude before the first fix).</p>
+or longitude before the first fix).  This is only an issue if you are
+interpreting GPSD responses yourself rather than using libgps.a or the
+gps.py Python module.</p>
 
 <p>Third, the format of the timestamp returned by the D command has
 changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
