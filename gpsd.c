@@ -34,9 +34,8 @@
 
 struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
-static int in_background = 0;
 static fd_set all_fds, nmea_fds, watcher_fds;
-static int debuglevel, nfds;
+static int debuglevel, nfds, in_background = 0;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -53,14 +52,12 @@ static void onsig(int sig)
     exit(10 + sig);
 }
 
-static int daemonize()
+static int daemonize(void)
 {
     int fd;
     pid_t pid;
 
-    pid = fork();
-
-    switch (pid) {
+    switch (pid = fork()) {
     case -1:
 	return -1;
     case 0:
@@ -72,8 +69,7 @@ static int daemonize()
     if (setsid() == -1)
 	return -1;
     chdir("/");
-    fd = open(_PATH_DEVNULL, O_RDWR, 0);
-    if (fd != -1) {
+    if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
 	dup2(fd, STDIN_FILENO);
 	dup2(fd, STDOUT_FILENO);
 	dup2(fd, STDERR_FILENO);
@@ -102,17 +98,13 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     if (errlevel > debuglevel)
 	return;
 
-    if (in_background) {
-	if (errlevel == 0)
-	    syslog(LOG_ERR, buf);
-	else
-	    syslog(LOG_NOTICE, buf);
-    }
+    if (in_background)
+	syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, buf);
     else
 	fputs(buf, stderr);
 }
 
-static void usage()
+static void usage(void)
 {
     printf("usage:  gpsd [options] \n\
   Options include: \n\
@@ -147,20 +139,6 @@ static int throttled_write(int fd, char *buf, int len)
 {
     int status;
 
-    /*
-     * All writes to client sockets go through this function.
-     *
-     * This code addresses two cases.  First, client has dropped the connection.
-     * Second, client is connected but not picking up data and our buffers are
-     * backing up.  If we let this continue, the write buffers will fill and 
-     * the effect will be denial-of-service to clients that are better behaved.
-     *
-     * Our strategy is brutally simple and takes advantage of the fact that
-     * GPS data has a short shelf life.  If the client doesn't pick it up 
-     * within a few minutes, it's probably not useful to that client.  So if
-     * data is backing up to a client, drop that client.  That's why we set
-     * the client socket to nonblocking.
-     */
     gpsd_report(3, "=> client(%d): %s", fd, buf);
     if ((status = write(fd, buf, len)) > -1)
 	return status;
@@ -293,10 +271,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
         case 'X':
-	    if (ud->gps_fd == -1)
-		strcat(reply, ",X=0");
-	    else
-		strcat(reply, ",X=1");
+	    sprintf(reply + strlen(reply), ",X=%d", ud->gps_fd != -1);
 	    break;
 	case 'Y':
 	    if (!ud->satellites)
@@ -402,7 +377,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	gpsd_report(0, "Can't create socket\n");
 	return -1;
     }
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
+    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,sizeof(one)) == -1) {
 	gpsd_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
@@ -417,41 +392,20 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
-static int setnonblocking(int sock)
-/* set socket to return EWOULDBLOCK if the write would block */
-{
-    int opts;
-                                                                                
-    opts = fcntl(sock, F_GETFL);
-    if (opts < 0) {
-        perror("fcntl(F_GETFL)");
-        return -1;
-    }
-    opts = (opts | O_NONBLOCK);
-    if (fcntl(sock, F_SETFL, opts) < 0) {
-        perror("fcntl(F_SETFL)");
-        return -1;
-    }
-    return 0;
-}
-
 int main(int argc, char *argv[])
 {
-    char *service = NULL;
-    char *dgpsserver = NULL;
+    char *service = NULL, *dgpsserver = NULL;
     struct sockaddr_in fsin;
     fd_set rfds;
-    int msock, alen, fd, need_gps;
+    int option, msock, fd, need_gps, nowait = 0, gpsd_speed = 0;
     extern char *optarg;
-    int option, gpsd_speed = 0;
     char gpstype = 'n';
-    int nowait = 0;
 
     debuglevel = 1;
     while ((option = getopt(argc, argv, "D:S:d:hnp:s:"
-#if TRIPMATE_ENABLE
+#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
-#endif /* TRIPMATE_ENABLE */
+#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
 #ifdef NON_NMEA_ENABLE
 			    "T:"
 #endif /* NON_NMEA_ENABLE */
@@ -577,17 +531,18 @@ int main(int argc, char *argv[])
 
 	/* always be open to new connections */
 	if (FD_ISSET(msock, &rfds)) {
-	    int ssock;
-
-	    alen = sizeof(fsin);
-	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
+	    int alen = sizeof(fsin);
+	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
 	    else {
+		int opts = fcntl(ssock, F_GETFL);
+
+		if (opts >= 0)
+		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
-		setnonblocking(ssock);
 	    }
 	    FD_CLR(msock, &rfds);
 	}

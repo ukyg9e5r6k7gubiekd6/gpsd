@@ -16,6 +16,18 @@ better functional design than starting the daemon from a hotplug
 script would be; that would lose the old data, leaving no fix at all
 available if the GPS were momentarily unplugged.
 
+All writes to client sockets go through throttled_write().
+This code addresses two cases.  First, client has dropped the connection.
+Second, client is connected but not picking up data and our buffers are
+backing up.  If we let this continue, the write buffers will fill and 
+the effect will be denial-of-service to clients that are better behaved.
+
+Our strategy is brutally simple and takes advantage of the fact that
+GPS data has a short shelf life.  If the client doesn't pick it up 
+within a few minutes, it's probably not useful to that client.  So if
+data is backing up to a client, drop that client.  That's why we set
+the client socket to nonblocking.
+
 GPS input updates an internal data structure which has slots in it for
 all the data you can get from a GPS.  Client commands mine that
 structure and ship reports up the socket to the client.  DGPS data is
