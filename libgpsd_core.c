@@ -254,7 +254,6 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		session->gNMEAdata.mode,
 		session->gNMEAdata.satellites_used,
 		hdop_str,
-                // altitude is MSL
 		session->gNMEAdata.altitude, 'M',
 		session->separation, 'M');
 	if (session->mag_var == NO_MAG_VAR) 
@@ -338,7 +337,9 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
 	sprintf(bufp, ",");
     }
     bufp += strlen(bufp);
-    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
+    sprintf(bufp, "%.2f,%.2f,%.2f*", 
+	    session->gNMEAdata.pdop, 
+	    session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
     nmea_add_checksum(bufp2);
     if (session->gNMEAdata.raw_hook) {
