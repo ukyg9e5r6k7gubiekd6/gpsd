@@ -76,8 +76,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 /*
    Three sentences, GGA and GLL and RMC, contain timestamps. Timestamps 
    always look like hhmmss.ss, with the trailing .ss part optional.
-   RMC alone has a date field, in the format ddmmyy.  But we want the 
-   output to be in ISO 8601 format:
+   RMC alone has a date field, in the format ddmmyy.  These functions
+   generate a canonical form in ISO 8601 format:
 
    yyyy-mm-ddThh:mm:ss.sssZ
    012345678901234567890123
@@ -86,6 +86,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
    This means that for GPRMC we must supply a century and for GGA and
    GGL we must supply a century, year, and day.  We get the missing data 
    from the host machine's clock time.
+
+   Sigh. This is only necessary because the design of NMEA 0183 is a crock.
  */
 
 static void merge_ddmmyy(char *ddmmyy, char *buf)
@@ -117,7 +119,7 @@ static void fake_mmddyyyy(char *buf)
 #endif /* WHOLE_CYCLE */
 
 static void merge_hhmmss(char *hhmmss, char *buf)
-/* update last-fix field from a UTC time */
+/* update from a UTC time */
 {
     strncpy(buf+11, hhmmss, 2);	/* copy hours */
     buf[13] = ':';
