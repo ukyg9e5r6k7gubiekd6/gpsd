@@ -542,9 +542,11 @@ int gps_process_NMEA_message(char *sentence, struct gps_data *outdata)
 	    processGPGSA(sentence, outdata);
 	} else if (strncmp(GPGSV, sentence, 5) == 0) {
 	    processGPGSV(sentence, outdata);
-#ifdef PROCESS_PRWIZCH
 	} else if (strncmp(PRWIZCH, sentence, 7) == 0) {
+#ifdef PROCESS_PRWIZCH
 	    processPRWIZCH(sentence, outdata);
+#else
+	    /* do nothing */;
 #endif /* PROCESS_PRWIZCH */
 	} else {
 	    return -1;

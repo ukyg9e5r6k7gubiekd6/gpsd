@@ -59,7 +59,9 @@ void update_display(char *message);
 static Widget lxbApp;
 static Widget form_6;
 static Widget list_7;
+#ifdef PROCESS_PRWIZCH
 static Widget list_8;
+#endif /* PROCESS_PRWIZCH */
 static Widget drawingArea_8;
 static Widget rowColumn_10;
 static Widget rowColumn_11;
@@ -165,6 +167,7 @@ static void build_gui(Widget lxbApp)
     form_6 = XtCreateManagedWidget("gps_data", xmFormWidgetClass, lxbApp, args, n);
 
 #define FRAMEHEIGHT	220
+    /* satellite location and SNR display */
     XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNtopOffset, 10);
@@ -172,12 +175,18 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
+#ifdef PROCESS_PRWIZCH
     XtSetArg(args[7], XmNwidth, 100);
+#else
+    XtSetArg(args[7], XmNwidth, 180);
+#endif /* PROCESS_PRWIZCH */
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
     list_7 = XtCreateManagedWidget("list_7", xmListWidgetClass, form_6, args, 11);
 
+#ifdef PROCESS_PRWIZCH
+    /* signal quality display */
     XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNtopOffset, 10);
@@ -191,7 +200,9 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[10], XmNlistSpacing, 4);
     XtSetArg(args[11], XmNleftWidget, list_7);
     list_8 = XtCreateManagedWidget("list_8", xmListWidgetClass, form_6, args, 12);
+#endif /* PROCESS_PRWIZCH */
 
+    /* the satellite diagram */
     XtSetArg(args[0], XmNbottomAttachment, XmATTACH_NONE);
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNrightOffset, 10);
@@ -199,7 +210,11 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNy, 10);
     XtSetArg(args[5], XmNx, 80);
     XtSetArg(args[6], XmNrightAttachment, XmATTACH_NONE);
+#ifdef PROCESS_PRWIZCH
     XtSetArg(args[7], XmNleftWidget, list_8);
+#else
+    XtSetArg(args[7], XmNleftWidget, list_7);
+#endif /* PROCESS_PRWIZCH */
     XtSetArg(args[8], XmNtopOffset, 10);
     XtSetArg(args[9], XmNleftAttachment, XmATTACH_WIDGET);
     XtSetArg(args[10], XmNtopAttachment, XmATTACH_FORM);
@@ -339,7 +354,7 @@ void update_display(char *message)
 
     /* This is for the satellite status display */
     if (SEEN(session.gNMEAdata.satellite_stamp)) {
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < session.gNMEAdata.satellites) {
 		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],
 			session.gNMEAdata.elevation[i],
@@ -348,22 +363,22 @@ void update_display(char *message)
 		sprintf(s, " ");
 	    string[i] = XmStringCreateSimple(s);
 	}
-	XmListReplaceItemsPos(list_7, string, 12, 1);
-	for (i = 0; i < 12; i++)
+	XmListReplaceItemsPos(list_7, string, sizeof(string), 1);
+	for (i = 0; i < MAXCHANNELS; i++)
 	    XmStringFree(string[i]);
     }
 #ifdef PROCESS_PRWIZCH
     if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < MAXCHANNELS; i++) {
 	    sprintf(s, "%2d %02x", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
 	}
-	XmListReplaceItemsPos(list_8, string, 12, 1);
-	for (i = 0; i < 12; i++)
+	XmListReplaceItemsPos(list_8, string, sizeof(string), 1);
+	for (i = 0; i < MAXCHANNELS; i++)
 	    XmStringFree(string[i]);
     }
 #endif /* PROCESS_PRWIZCH */
-    /* here now the value fields */
+    /* here are the value fields */
     XmTextFieldSetString(text_1, session.gNMEAdata.utc);
     sprintf(s, "%f", session.gNMEAdata.latitude);
     XmTextFieldSetString(text_2, s);
@@ -376,20 +391,17 @@ void update_display(char *message)
     sprintf(s, "%f", session.gNMEAdata.track);
     XmTextFieldSetString(text_6, s);
 
-    if (!session.gNMEAdata.online)
-	strcpy(s, "OFFLINE");
-    else
-	switch (session.gNMEAdata.mode) {
-	case 2:
-	    sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
-	    break;
-	case 3:
-	    sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
-	    break;
-	default:
-	    strcpy(s, "NO FIX");
-	    break;
-	}
+    switch (session.gNMEAdata.mode) {
+    case 2:
+	sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	break;
+    case 3:
+	sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	break;
+    default:
+	sprintf(s, "NO FIX");
+	break;
+    }
     XmTextFieldSetString(text_7, s);
 
     draw_graphics();
@@ -417,7 +429,9 @@ void init_list()
     for (i = 1; i < 13; i++) {
 	string = XmStringCreateSimple(" ");
 	XmListAddItem(list_7, string, i);
+#ifdef PROCESS_PRWIZCH
 	XmListAddItem(list_8, string, i);
+#endif /* PROCESS_PRWIZCH */
 	XmStringFree(string);
     }
 }
