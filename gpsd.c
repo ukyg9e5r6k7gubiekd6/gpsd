@@ -170,7 +170,7 @@ static void print_settings(char *service, char *dgpsserver)
 static int throttled_write(int fd, char *buf, int len)
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
-    int status, waiting;
+    int status;
 
     /*
      * All writes to client sockets go through this function.
@@ -184,33 +184,21 @@ static int throttled_write(int fd, char *buf, int len)
      * Our strategy is brutally simple and takes advantage of the fact that
      * GPS data has a short shelf life.  If the client doesn't pick it up 
      * within a few minutes, it's probably not useful to that client.  So if
-     * data is backing up to a client, drop that client. 
+     * data is backing up to a client, drop that client.  That's why we set
+     * the client socket to nonblocking.
      */
-#define HEADROOM 1024
-    if (ioctl(fd, TIOCOUTQ, &waiting) < 0) {
+    gpscli_report(3, "=> client(%d): %s", fd, buf);
+    if ((status = write(fd, buf, len)) > -1)
+	return status;
+    if (errno == EBADF)
 	gpscli_report(3, "Client on %d has vanished.\n", fd);
-	status = -1;	
-    } else {
-	int limit, limlen, st;
-	st = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, 
-			    (void *)&limit, (void *)&limlen);
-
-	if (waiting  + len > limit) {
-	    gpscli_report(3, "Dropped client on %d to avoid overrun.\n", fd);
-	    status = -1;
-	} else {
-	    gpscli_report(3, "=> client(%d): %s", fd, buf);
-	    status = write(fd, buf, len);
-	    if (status < 0)
-		gpscli_report(3, "Client write to %d: %s\n", fd, strerror(errno));
-	}
-    }
-    if (status == -1) {
-	FD_CLR(fd, &all_fds);
-	FD_CLR(fd, &nmea_fds);
-	FD_CLR(fd, &watcher_fds);
-    }
-
+    else if (errno == EWOULDBLOCK)
+	gpscli_report(3, "Dropped client on %d to avoid overrun.\n", fd);
+    else
+	gpscli_report(3, "Client write to %d: %s\n", fd, strerror(errno));
+    FD_CLR(fd, &all_fds);
+    FD_CLR(fd, &nmea_fds);
+    FD_CLR(fd, &watcher_fds);
     return status;
 }
 
@@ -236,7 +224,7 @@ static int validate(int fd)
 #undef VALIDATION_CONSTRAINT
 
 static int handle_request(int fd, char *buf, int buflen)
-/* interpret a client requst; fd is the socket back to the client */
+/* interpret a client request; fd is the socket back to the client */
 {
     char reply[BUFSIZE];
     char *p;
@@ -271,7 +259,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'L':
 	case 'l':
 	    sprintf(reply + strlen(reply),
-		    ",l=1 " VERSION " acdmpqrstvwxy"
+		    ",l=1 " VERSION " admpqrstvwxy"
 #ifdef PROCESS_PRWIZCH
 		    "z"
 #endif
@@ -391,12 +379,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (!session.gNMEAdata.satellites)
 		strcat(reply, ",Y=?");
 	    else {
-		int used = 0;
+		int used;
 		sprintf(reply + strlen(reply),
 			",Y=%d:", session.gNMEAdata.satellites);
 		if (SEEN(session.gNMEAdata.satellite_stamp))
 		    for (i = 0; i < session.gNMEAdata.satellites; i++) {
-			for (j = 0; j < session.gNMEAdata.satellites; j++)
+			used = 0;
+			for (j = 0; j < session.gNMEAdata.satellites_used; j++)
 			    if (session.gNMEAdata.used[j] == session.gNMEAdata.PRN[i])
 			    {
 				used = 1;
@@ -546,6 +535,24 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     return s;
+}
+
+static int setnonblocking(int sock)
+/* set socket to return EWOULDBLOCK if the write would block */
+{
+    int opts;
+                                                                                
+    opts = fcntl(sock, F_GETFL);
+    if (opts < 0) {
+        perror("fcntl(F_GETFL)");
+        return -1;
+    }
+    opts = (opts | O_NONBLOCK);
+    if (fcntl(sock, F_SETFL, opts) < 0) {
+        perror("fcntl(F_SETFL)");
+        return -1;
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -699,11 +706,11 @@ int main(int argc, char *argv[])
 
 	    if (ssock < 0)
 		gpscli_report(0, "accept: %s\n", strerror(errno));
-
 	    else 
 	    {
 		gpscli_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
+		setnonblocking(ssock);
 	    }
 	    FD_CLR(msock, &rfds);
 	}
