@@ -123,7 +123,7 @@ static void merge_hhmmss(char *hhmmss, char *buf)
     buf[13] = ':';
     strncpy(buf+14, hhmmss+2, 2);	/* copy minutes */
     buf[16] = ':';
-    strncpy(buf+17 , hhmmss+4, sizeof(buf)-17);	/* copy seconds */
+    strncpy(buf+17 , hhmmss+4, 6);	/* copy seconds, at most "ss.sss" */
     strcat(buf, "Z");
 }
 
