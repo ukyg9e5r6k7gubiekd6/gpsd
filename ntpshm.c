@@ -46,14 +46,13 @@ struct shmTime {
 static struct shmTime *getShmTime(int unit)
 {
     int shmid=shmget (NTPD_BASE+unit, sizeof (struct shmTime), IPC_CREAT|0700);
-    if (shmid==-1) {
-	perror ("shmget");
-	exit (1);
-    }
-    else {
+    if (shmid == -1) {
+	gpsd_report(1, "shmget failed\n");
+	return NULL;
+    } else {
 	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
-	if ((int)(long)p==-1) {
-	    perror ("shmat");
+	if ((int)(long)p == -1) {
+	    gpsd_report(1, "shmat failed\n");
 	    p=0;
 	}
 	return p;
