@@ -35,20 +35,6 @@
 #define END1		0xb0
 #define END2		0xb3
 
-/*
-cmd> [command area]                                                        row 0
-             X        Y        Z            North      East         Alt        1
- Pos: -1234567 -1234567 -1234567 m       xx.xxxxx  xx.xxxxx deg xxxxxxx m      2
- Vel:      0.0      0.0      0.0 m/s          0.0       0.0         0.0 m/s    3
- Time: xxxx xxxxxx.xx x xx:xx:xx.xx         Heading:  xxx.x deg xxxxx.x m/s    4
-                                                                               5
- DOP: xx.x M1: xx M2: xx Fix: x                                                6
- Max: x.xxx Lat: x.xxx Avg: x.xxx MS: xx                                       7
-                                                                               8
-Ch SV  Az El Stat  C/N                                                         9
-xx xx xxx xx xxxx xx.x                                                        10
-*/
-
 #define CHANWIN		10
 #define DEBUGWIN	23
 
@@ -233,6 +219,10 @@ int main (int argc, char **argv)
     printw("DOP:      M1:    M2:    Fix:  ");
     move(7,1);
     printw("Max:       Lat:       Avg:       MS:");
+    move(17, 40);
+    printw("RS232:");
+    move(18, 40);
+    printw("Version:");
     move(CHANWIN-1,0);
     printw("Ch SV  Az El Stat  C/N");
     for (i = 0; i < 12; i++) {
@@ -240,16 +230,22 @@ int main (int argc, char **argv)
 	printw("%2d",i);
     }
     attrset(A_NORMAL);
+    mvprintw(17, 50, "%4d N %d", *ip, stopbits);
 
     move(DEBUGWIN,0);
     getyx(stdscr,debugy,debugx);
 
     FD_ZERO(&select_set);
 
+    /* probe for version */
+    putb(0, 0x84);
+    putb(1, 0x0);
+    sendpkt(buf, 2);
+
     while (!quit)
     {
 	move(0,0);
-	printw("cmd> ");
+	printw("cmd> ", *ip, stopbits);
 	clrtoeol();
 	refresh();
 
@@ -369,7 +365,7 @@ int len;
 
     switch (buf[0])
     {
-    case 0x02:
+    case 0x02:		/* Measured Navigation Data */
 	move(2,6);
 	printw("%8d %8d %8d",getl(1),getl(5),getl(9));
 	move(3,6);
@@ -393,7 +389,7 @@ int len;
 	clrtoeol();
 	break;
 
-    case 0x04:
+    case 0x04:		/* Measured Tracking Data */
 	decode_time(getw(1),getl(3));
 	ch = getb(7);
 	for (i = 0; i < ch; i++) {
@@ -430,7 +426,7 @@ int len;
 	sendpkt(buf,2);
     	break;
 
-    case 0x05:
+    case 0x05:		/* raw track data */
 	for (off = 1; off < len; off += 51) {
 	    ch = getl(off);
 	    move(CHANWIN+ch,19);
@@ -447,9 +443,9 @@ int len;
 	}
     	break;
 
-    case 0x06:
-	move(8,0);
-	printw("06 %s",buf + 1);
+    case 0x06:		/* firmware version */
+	move(18,50);
+	printw("%s",buf + 1);
     	break;
 
     case 0x07:
