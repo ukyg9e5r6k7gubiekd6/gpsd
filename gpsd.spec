@@ -68,7 +68,7 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
-%attr(755, root, root) /etc/init.d/gpsd
+%attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 
 %changelog
 - Implemented non-blocking writes to clients, so a stalled client
