@@ -309,7 +309,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
     time_t intfixtime = (int)session->gpsdata.fix.time;
 
-    localtime_r(&intfixtime, &tm);
+    gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	sprintf(bufp,
 		"$GPGGA,%02d%02d%02d,%.4f,%c,%.4f,%c,%d,%02d,%s,%.1f,%c,",
