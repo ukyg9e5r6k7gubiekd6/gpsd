@@ -23,7 +23,7 @@ Command line options:
   -s baud_rate [ set baud rate on gps device ] 
 
 Gps device names may be either device files (e.g., /dev/gps) or ports
-served by gpsd (e.g., localhost:5678).  The deamon port option
+served by gpsd (e.g., localhost:2947).  The deamon port option
 determines which port the daemon will monitor for connections from
 either clients or cascaded daemons.  Note that the baud rate is only
 important when connected directly to the gps device through a serial
@@ -41,8 +41,8 @@ The "right" thing to do is, to start gpsd on a serial port that has the gps
 connected to it.
 
 Then start gps and have it connect to gpsd via a socket. Give it a device
-name like "localhost:5678", which means: connect to the host localhost using
-port 5678.
+name like "localhost:2947", which means: connect to the host localhost using
+port 2947.
 
 You can also telnet to this port for testing. When doing that, type an 'R'
 followed by <cr>. This should display the RAW nmea sentences the deamon

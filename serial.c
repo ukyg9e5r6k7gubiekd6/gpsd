@@ -31,7 +31,7 @@
 
 #include "gpsd.h"
 
-#define DEFAULTPORT "5678"
+#define DEFAULTPORT "2947"
 
 extern int debug;
 extern char *device_name;

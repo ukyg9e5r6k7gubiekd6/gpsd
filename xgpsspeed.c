@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #define BUFSIZE          4096
-#define DEFAULTPORT "5678"
+#define DEFAULTPORT "2947"
 char latd, lond;
 double latitude, longitude;
 int device_type;
