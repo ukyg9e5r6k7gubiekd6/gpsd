@@ -71,15 +71,7 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
 	updated++;
     }
     if (updated == 2)
-    {
 	out->latlon_stamp.changed = 1;
-	/* this appeases the consistency checking we'll do later */
-	if (out->mode < MODE_2D)
-	{
-	    out->mode = MODE_2D;
-	    gpscli_report(3, "Latitude/longitude implies mode is 2 or 3\n");
-	}
-    }
     REFRESH(out->latlon_stamp);
 }
 
@@ -139,7 +131,6 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 
      */
     char utc[20], ddmmyy[10], hhmmss[10];
-    int newstatus;
     time_t now;
     struct tm *tm;
 
@@ -173,18 +164,6 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
     strcpy(out->utc, utc);
 
     do_lat_lon(sentence, 3, out);
-
-    /* A = valid, V = invalid */
-    if (strcmp(field(sentence, 2), "A") == 0)
-	newstatus = STATUS_FIX;
-    else
-    {
-	gpscli_report(3, "Invalid GPRMC zeroes status.\n");
-	newstatus = STATUS_NO_FIX;
-    }
-    out->status_stamp.changed = (newstatus != out->status);
-    out->status = newstatus;
-    REFRESH(out->status_stamp);
 
     out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
     REFRESH(out->speed_stamp);

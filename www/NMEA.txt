@@ -781,7 +781,7 @@ The order of satellites the same as those in the last GSA.
 
  Field Number: 
   1) UTC Time
-  2) Status, V = Navigation receiver warning
+  2) Status, V = Navigation receiver warning A=Valid
   3) Latitude
   4) N or S
   5) Longitude

@@ -454,7 +454,7 @@ static void raw_hook(char *sentence)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "ptvds");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "sa");	
+		ok = PUBLISH(fd, "spa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "p");
 	    } else if (strncmp(PMGNST, sentence, 5) == 0) {
@@ -464,7 +464,7 @@ static void raw_hook(char *sentence)
 	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
-		if (nmea_sane_satellites(&session.gNMEAdata))
+		if ((session.gNMEAdata.part == session.gNMEAdata.await) && nmea_sane_satellites(&session.gNMEAdata))
 		    ok = PUBLISH(fd, "y");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
