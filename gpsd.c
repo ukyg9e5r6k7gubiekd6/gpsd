@@ -166,6 +166,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
+#define MULTISESSION
 #ifndef MULTISESSION
 #define ZERO_WATCHERS()		FD_ZERO(&watcher_fds);
 #define IS_WATCHER(cfd) 	FD_ISSET(cfd, &watcher_fds)
@@ -202,6 +203,7 @@ static struct channel_t {
 #define CHANNEL_AVAILABLE	0
 #define CHANNEL_INUSE		1
 #define CHANNEL_KILLED		-1
+    time_t when;
 } channels[MAXDEVICES];
 
 static struct subscriber_t {
@@ -308,6 +310,9 @@ found:
 	    return NULL;
 	}
 	FD_SET(device->gpsdata.gps_fd, &all_fds);
+#ifdef MULTISESSION
+	chp->when = time(NULL);
+#endif /* MULTISESSION */
     }
 
     return device;
@@ -837,6 +842,10 @@ int main(int argc, char *argv[])
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
+#ifdef MULTISESSION
+	    time_t most_recent = 0;
+	    int mychannel = -1;
+#endif /* MULTISESSION */
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
@@ -848,12 +857,15 @@ int main(int argc, char *argv[])
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 #ifdef MULTISESSION
-		/* FIXME: find most recently connected device */
-		for (dfd = 0; dfd < FD_SETSIZE; dfd++)
-		    if (channels[dfd].device) {
-			attach_client_to_device(ssock, dfd);
-			break;
+		/* pick the most recently opened device */
+		for (channel=channels; channel<channels+MAXDEVICES; channel++)
+		    if (channel->device && channel->when >= most_recent)
+		    {
+		       most_recent = channel->when;
+		       mychannel = channel - channels;
 		    }
+		if (mychannel > -1)
+		    attach_client_to_device(ssock, mychannel);
 #endif /* MULTISESSION */
 	    }
 	    FD_CLR(msock, &rfds);
