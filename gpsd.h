@@ -70,7 +70,7 @@ extern struct gps_type_t tripmate;
 extern struct gps_type_t earthmate_a;
 extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
-extern struct gps_type_t *gpsd_drivers[5];
+extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
 extern int nmea_parse(char *sentence, struct gps_data_t *outdata);

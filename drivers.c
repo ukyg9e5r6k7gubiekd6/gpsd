@@ -253,14 +253,16 @@ struct gps_type_t logfile =
     -1,				/* should never time out */
 };
 
-struct gps_type_t *gpsd_drivers[5] = {&nmea, 
-				   &tripmate,
+/* the point of this rigamarole is to not have to export a table size */
+static struct gps_type_t *gpsd_driver_array[] = {
+    &nmea, 
+    &fv18,
+    &tripmate,
 #ifdef EARTHMATE_ENABLE
-				   &earthmate_a, 
-				   &earthmate_b,
+    &earthmate_a, 
+    &earthmate_b,
 #endif /* EARTHMATE_ENABLE */
-				   &logfile};
-
-
-
-
+    &logfile,
+    NULL,
+};
+struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

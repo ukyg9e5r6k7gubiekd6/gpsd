@@ -17,7 +17,7 @@ static struct gps_type_t *set_device_type(char what)
 /* select a device driver by key letter */
 {
     struct gps_type_t **dp;
-    for (dp = gpsd_drivers; dp < gpsd_drivers + sizeof(gpsd_drivers)/sizeof(gpsd_drivers[0]); dp++)
+    for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey == what) {
 	    gpscli_report(3, "Selecting %s driver...\n", (*dp)->typename);
 	    goto foundit;
