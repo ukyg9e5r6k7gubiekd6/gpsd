@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!-- lifted from troff+man by doclifter -->
+<refentry>
+<refentryinfo><date>14 Aug 2004</date></refentryinfo>
+<refmeta>
+<refentrytitle>3</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class='source'>Linux</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>libgpsd</refname>
+<refpurpose>service library for communicationg with the GPS daemon</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+<funcsynopsis>
+<funcsynopsisinfo>
+
+#include &lt;gps.h&gt;
+
+</funcsynopsisinfo>
+<funcprototype>
+<funcdef>int <function>gpsd_open</function></funcdef>
+    <paramdef>struct gps_data * <parameter>gpsdata</parameter></paramdef>
+    <paramdef>char *<parameter>server</parameter></paramdef>
+    <paramdef>char * <parameter>port</parameter></paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>void <function>gpsd_read</function></funcdef>
+    <paramdef>struct gps_data * <parameter>gpsdata</parameter></paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>void <function>gpsd_close</function></funcdef>
+    <paramdef>int <parameter>fd</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+<para><emphasis remap='B'>libgpsd</emphasis> is a service library
+which supports querying the GPS daemon,
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+for the state of a GPS attached to the host machine.  It is safe for
+multiple applications to use this library simultaneously.</para>
+
+<para>Calling <function>gps_open()</function> initializes a GPS-data
+structure to hold the data collected by the GPS, and returns a socket
+attached to
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+
+<para><function>gps_close()</function> ends the session.</para>
+
+<para><function>gps_read()</function>
+queries the daemon and updates parts of the GPS-data structure that correspond
+to data changed since the last call.  Several member groups within the
+GPS-data structure have timestamp, time-to-live, update_count, and change-flag
+members associated with them; these get updated.</para>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+</para>
+</refsect1>
+
+<refsect1 id='author'><title>AUTHOR</title>
+<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;.</para>
+</refsect1>
+</refentry>
+
