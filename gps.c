@@ -388,33 +388,32 @@ static void handle_alarm(int sig)
 int main(int argc, char *argv[])
 {
     XtAppContext app;
-    extern char *optarg;
     int option;
     char *colon, *server = NULL;
     char *port = DEFAULT_GPSD_PORT;
 
-    while ((option = getopt(argc, argv, "hp:")) != -1) {
+    while ((option = getopt(argc, argv, "h")) != -1) {
 	switch (option) {
-	case 'p':
-	    server = strdup(optarg);
-	    colon = strchr(server, ':');
-	    if (colon != NULL) {
-		server[colon - server] = '\0';
-		port = colon + 1;
-	    }
-	    break;
 	case 'h':
 	case '?':
 	default:
-	    fputs("usage:  gps [options] \n\
+	    fputs("usage:  gps [-h] [server[:port]] \n\
   options include: \n\
-  -p string    = set server:port to query \n\
   -h           = help message \n\
 ", stderr);
 	    exit(1);
 	}
     }
 
+    if (optind < argc)
+    {
+	server = strdup(argv[optind]);
+	colon = strchr(server, ':');
+	if (colon != NULL) {
+	    server[colon - server] = '\0';
+	    port = colon + 1;
+	}
+    }
     /*
      * Essentially all the interface to libgps happens below here
      */

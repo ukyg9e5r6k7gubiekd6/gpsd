@@ -32,14 +32,14 @@ and speedometer</refpurpose>
 <cmdsynopsis>
   <command>gps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>server:port</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>server:port</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
 </refsynopsisdiv>
@@ -240,18 +240,6 @@ decibels, and 1 or 0 according as the satellite was or was
 not used in the last fix. Each number is followed by one space.</para>
 </listitem>
 </varlistentry>
-
-<!--
-<varlistentry>
-<term>z</term>
-<listitem>
-<para>Returns Z= followed by a count not more than 12, followed by that many
-pairs of satellite PRNs and signal-to-noise percentages (each
-percentage is in the range 0-99). Each number is an integer formatted as
-%d followed by one space.</para>
-</listitem>
-</varlistentry>
--->
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
@@ -302,18 +290,18 @@ pulling down DTR.</para>
 displays current GPS animation and (for GPSes that support the
 feature) the locations of accessible satellites.</para>
 
-<para>gps accepts an -h option as for gpsd. With the -p option you
-may specify an alternate server:port to get data from.  The misfeature of
-previous version that allowed it to direct-connect to the serial device has
-been removed.</para>
+<para>gps accepts an -h option as for gpsd. An optional argument may
+specify an server to get data from; a colon-separated suffix is taken
+as a port number.  The misfeature of previous versions that allowed it
+to direct-connect to the serial device has been removed.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
 <para>xgpsspeed is a speedometer that uses position information from
-the GPS. It accepts -ph options as for xgps. The misfeature of
-previous version that allowed it to direct-connect to the serial device has
-been removed.</para>
+the GPS. It accepts an -h option and optional argument as for gps. The
+misfeature of previous version that allowed it to direct-connect to
+the serial device has been removed.</para>
 
 </refsect2>
 </refsect1>
