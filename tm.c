@@ -84,6 +84,7 @@ static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
 	        gps_NMEA_handle_message(buf);
+		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
 		gps_send_NMEA(afds, nmea_fds, buf);
 	    }
