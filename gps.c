@@ -38,7 +38,6 @@ static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
 static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
-
 static GC gc;
 
 static void quit_cb(void)
@@ -121,8 +120,7 @@ static void build_gui(Widget lxbApp)
       XtVaCreateManagedWidget("satellite_diagram",
 			      xmDrawingAreaWidgetClass, right, 
 			      XmNbackground, get_pixel(lxbApp, "snow"),
-			      XmNheight, SATDIAG_SIZE,
-			      XmNwidth, SATDIAG_SIZE,
+			      XmNheight, SATDIAG_SIZE, XmNwidth, SATDIAG_SIZE,
 			      NULL);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
     gc = XCreateGC(XtDisplay(satellite_diagram),
@@ -286,13 +284,13 @@ int main(int argc, char *argv[])
     int option;
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
 
-    while ((option = getopt(argc, argv, "hv")) != -1) {
+    while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
 	case 'v':
 	    printf("gps %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage:  gps [-h] [server[:port]]\n", stderr);
+	    fputs("usage:  gps [-?hv] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }

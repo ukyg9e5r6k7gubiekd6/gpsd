@@ -6,9 +6,6 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#if defined(HAVE_GETOPT_H)
-#include <getopt.h>
-#endif /* HAVE_GETOPT_H */
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
@@ -63,14 +60,13 @@ int main(int argc, char **argv)
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
-    while ((option = getopt(argc, argv, "hv")) != -1) {
+    while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
 	case 'v':
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
-	case 'h': case '?':
-	default:
-	    fputs("usage: gps [-h] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);
+	case 'h': case '?': default:
+	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
