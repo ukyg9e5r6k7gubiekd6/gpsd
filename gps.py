@@ -2,7 +2,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, socket
+import time, socket, sys
 from math import *
 
 STATUS_NO_FIX = 0
@@ -298,7 +298,11 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     y2 = CalcRad(lat2) * sin(Deg2Rad(lon2)) * sin(Deg2Rad(90-lat2))
     z1 = CalcRad(lat1) * cos(Deg2Rad(90-lat1))
     z2 = CalcRad(lat2) * cos(Deg2Rad(90-lat2))
-    a = acos((x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2));
+    try:
+        a = acos((x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2));
+    except ValueError:
+        sys.stderr.write("EarthDistance: ", locals())
+        raise ValueError
     return CalcRad((lat1+lat2) / 2) * a
 
 def MeterOffset((lat1, lon1), (lat2, lon2)):

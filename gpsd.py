@@ -184,7 +184,7 @@ class NMEA:
                 self.logger(3, "Satellite data no good.\n");
 
     def handle_line(self, line):
-        if line[0] == '$':
+        if line and line[0] == '$':
             line = line[1:].split('*')
             if len(line) != 2: return
             if not self.checksum(line[0], line[1]):
