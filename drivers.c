@@ -201,7 +201,7 @@ static void earthmate_initializer(struct gps_device_t *session)
     sleep(30);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
-    zodiac_binary.initializer(session);
+    if (zodiac_binary.initializer) zodiac_binary.initializer(session);
 }
 
 struct gps_type_t earthmate = {
