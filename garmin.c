@@ -560,12 +560,24 @@ Packet_t* GetPacket (struct gps_session_t *session )
 static void garmin_init(struct gps_session_t *session)
 {
 
+	garmin_probe( session );
+}
+
+/*
+ * garmin_probe()
+ *
+ * return 0 if garmin_usb device found
+ * return 1 is not
+ */
+int garmin_probe(struct gps_session_t *session)
+{
+
 
     Packet_t* thePacket = 0;
     char buffer[256];
     fd_set fds, rfds;
     struct timeval tv;
-    int nfds = FD_SETSIZE;
+    int sel_ret = 0;
 
     gpsd_report(1, "garmin_init\n");
 
@@ -598,12 +610,15 @@ static void garmin_init(struct gps_session_t *session)
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	sel_ret = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+	if (sel_ret < 0) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
-	    exit(2);
-	}
+	    return(1);
+	} else if ( sel_ret == 0 ) {
+	    return(1);
+        }
 	thePacket = GetPacket( session );
 	PrintPacket(session,  thePacket);
 
@@ -630,12 +645,15 @@ static void garmin_init(struct gps_session_t *session)
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	sel_ret = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+	if (sel_ret < 0) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
-	    exit(2);
-	}
+	    return(1);
+	} else if ( sel_ret == 0 ) {
+	    return(1);
+        }
 	thePacket = GetPacket( session );
 	PrintPacket(session,  thePacket);
 
@@ -663,12 +681,15 @@ static void garmin_init(struct gps_session_t *session)
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	sel_ret = select(FD_SETSIZE, &rfds, NULL, NULL, &tv);
+	if (sel_ret < 0) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
-	    exit(2);
-	}
+	    return(1);
+	} else if ( sel_ret == 0 ) {
+	    return(1);
+        }
 	thePacket = GetPacket( session);
 	PrintPacket( session, thePacket);
 
@@ -698,6 +719,7 @@ static void garmin_init(struct gps_session_t *session)
     //set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
 
     //SendPacket(session,  (Packet_t*) buffer);
+    return(0);
 }
 
 static void garmin_handle_input(struct gps_session_t *session)
