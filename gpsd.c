@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
 	else service = default_service;
     }
 
-    if (session.debug > 0) 
+    if (session.debug > 1) 
 	print_settings(service, dgpsserver, dgpsport);
     
     if (session.debug < 2)
