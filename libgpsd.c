@@ -226,8 +226,8 @@ void data_dump(struct gps_data *collect, time_t now)
 	printf("online: %d\n", collect->online);
     if (collect->latlon_stamp.refreshes)
     {
-	printf("P: lat/lon: %lf %lf utc=%s", 
-	       collect->latitude, collect->longitude, collect->utc);
+	printf("P: lat/lon: %lf %lf", 
+	       collect->latitude, collect->longitude);
 	printf("(lr=%ld, ttl=%d, refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->latlon_stamp.last_refresh,
 	       collect->latlon_stamp.time_to_live,
@@ -333,9 +333,22 @@ main(int argc, char *argv[])
     }
     else
     {
-	while (fgets(buf, sizeof(buf), stdin))
+	int	tty = isatty(0);
+
+	if (tty)
+	    fputs("This is the gpsd exerciser.\n", stdout);
+	for (;;)
 	{
-	    gpsd_query(fd, buf, &collect);
+	    if (tty)
+		fputs("> ", stdout);
+	    if (fgets(buf, sizeof(buf), stdin) == NULL)
+	    {
+		if (tty)
+		    putchar('\n');
+		break;
+	    }
+	    if (!gpsd_query(fd, buf, &collect))
+		fputs("No changes.\n");
 	    data_dump(&collect, time(NULL));
 	}
     }
