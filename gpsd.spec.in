@@ -120,7 +120,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %changelog
 * Sat Jan  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- More compiler-warning cleanups.  Add -k option to xgps.
+- More compiler-warning cleanups.  Add -k option to xgps.  Improved
+  GPGSV parsing so it copes gracefully if we start in the middle of 
+  a sequence.
 
 * Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
 - Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors

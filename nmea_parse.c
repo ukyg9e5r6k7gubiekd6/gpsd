@@ -393,9 +393,8 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	changed |= update_field_i(sentence, fldnum++, &out->PRN[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->elevation[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->azimuth[out->satellites]);
-	if (*(field(sentence, fldnum)))
-	    changed |= update_field_i(sentence, fldnum, &out->ss[out->satellites]);
-	fldnum++; out->satellites++;
+	changed |= update_field_i(sentence, fldnum++, &out->ss[out->satellites]);
+	out->satellites++;
     }
 
     /* not valid data until we've seen a complete set of parts */
