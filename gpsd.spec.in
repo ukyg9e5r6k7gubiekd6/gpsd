@@ -126,7 +126,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %changelog
 * Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Correct a bug in binary-protocol dumping (applies to Zodiac and
-  Garmin only).
+  Garmin only).  Gary Miller's patch to deal gracefully with GPSes
+  like the Magellan EC10X that send only GPRMC and never GPGGA or GPGSA,
+  and this never set mode or status fields.
 
 * Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.12-1
 - Fixed core-dump bug in processing of the GLL variant that does not

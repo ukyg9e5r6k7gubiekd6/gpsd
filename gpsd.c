@@ -437,7 +437,7 @@ static void raw_hook(char *sentence)
 	if (FD_ISSET(fd, &watcher_fds)) {
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (PREFIX("$GPRMC", sentence)) {
-		PUBLISH(fd, "pdtvs");
+		PUBLISH(fd, "pdtvsm");
 	    } else if (PREFIX("$GPGGA", sentence)) {
 		PUBLISH(fd, "pdasm");	
 	    } else if (PREFIX("$GPGLL", sentence)) {

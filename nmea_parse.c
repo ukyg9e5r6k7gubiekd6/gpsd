@@ -181,6 +181,30 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	REFRESH(out->speed_stamp);
 	out->track_stamp.changed = update_field_f(field[8], &out->track);
 	REFRESH(out->track_stamp);
+	/*
+	 * This copes with GPSes like the Magellan EC-10X that *only* emit
+	 * GPRMC. In this case we set mode and status here so the client
+	 * code that relies on them won't mistakenly believe it has never
+	 * received a fix.
+	 */
+	if (!(out->seen_sentences & GPGGA) && out->status == STATUS_NO_FIX) {
+	    /* Upgrade to STATUS_FIX
+	     * Do not touch otherwise, may be STATUS_FIX or
+	     * STATUS_DGPS_FIX, cannot tell apart here
+	     */
+	    out->status_stamp.changed = 1;
+	    out->status = STATUS_FIX;
+	    REFRESH(out->status_stamp);
+	}
+	if (!(out->seen_sentences & GPGSA && out->mode <= MODE_NO_FIX)) {
+	    /* Upgrade to MODE_2D
+	     * Do not touch otherwise, may be MODE_3D or
+	     * MODE_3D, cannot tell apart here
+	     */
+	    out->mode_stamp.changed = 1;
+	    out->mode = MODE_2D;
+	    REFRESH(out->mode_stamp);
+	}
     }
 }
 
