@@ -90,6 +90,10 @@ void processGPGGA(char *sentence)
     do_lat_lon(sentence, 2);
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
+    if ((gNMEAdata.status > 0) && (gNMEAdata.mode < 2))
+	gNMEAdata.mode = 2;
+    if ((gNMEAdata.status < 1) && (gNMEAdata.mode > 1))
+	gNMEAdata.mode = 1;
     sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
     sscanf(field(sentence, 9), "%lf", &gNMEAdata.altitude);
 }
@@ -101,6 +105,10 @@ void processGPGSA(char *sentence)
 
   /* 1 = none, 2 = 2d, 3 = 3d */
     sscanf(field(sentence, 2), "%d", &gNMEAdata.mode);
+    if ((gNMEAdata.mode > 1) && (gNMEAdata.status < 1))
+	gNMEAdata.status = 1;
+    if ((gNMEAdata.mode < 2) && (gNMEAdata.status > 0))
+	gNMEAdata.status = 0;
     sscanf(field(sentence, 15), "%lf", &gNMEAdata.pdop);
     sscanf(field(sentence, 16), "%lf", &gNMEAdata.hdop);
     sscanf(field(sentence, 17), "%lf", &gNMEAdata.vdop);
