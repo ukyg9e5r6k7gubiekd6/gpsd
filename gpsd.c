@@ -139,7 +139,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage()
 {
-    struct gps_type_t **dp;
     printf("usage:  gpsd [options] \n\
   Options include: \n\
   -p string (default %s)   = set GPS device name \n"
@@ -156,10 +155,13 @@ static void usage()
   -h                             = help message \n",
 	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
 #ifdef NON_NMEA_ENABLE
+    {
+    struct gps_type_t **dp;
     printf("Here are the available driver types:\n"); 
     for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey)
 	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
+    }
 #else
     printf("This gpsd was compiled with support for NMEA only.\n");
 #endif /* NON_NMEA_ENABLE */
