@@ -251,7 +251,9 @@ class gpsd(gps.gpsdata):
     close = __del__
 
     def activate(self):
-        self.ttyfp = open(self.device, "rw");  
+        self.ttyfp = open(self.device, "rw")
+        if self.ttyfp = None:
+            return None
 	self.normal = termios.tcgetattr(self.ttyfp.fileno())
         self.raw = termios.tcgetattr(self.ttyfp.fileno())
         self.raw[0] = 0						# iflag
@@ -263,6 +265,7 @@ class gpsd(gps.gpsdata):
         self.raw[4] = self.raw[5] = eval("termios.B" + `self.bps`)
         termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.raw)
 	self.online = True;
+        return self.ttyfp
 
     def deactivate(self):
         if hasattr(self, 'normal'):
