@@ -5,6 +5,36 @@
 #
 import sys, os, time, getopt, gps, tempfile, time, socket
 
+class Baton:
+    "Ship progress indication to stderr."
+    def __init__(self, prompt, endmsg=None):
+        self.stream = sys.stderr
+        self.stream.write(prompt + "... \010")
+        self.stream.flush()
+        self.count = 0
+        self.endmsg = endmsg
+        self.time = time.time()
+        return
+
+    def twirl(self, ch=None):
+        if self.stream is None:
+            return
+        if ch:
+            self.stream.write(ch)
+        else:
+            self.stream.write("-/|\\"[self.count % 4])
+            self.stream.write("\010")
+        self.count = self.count + 1
+        self.stream.flush()
+        return
+
+    def end(self, msg=None):
+        if msg == None:
+            msg = self.endmsg
+        if self.stream:
+            self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
+        return
+
 class rawplot:
     "Print basic data, ignoring timezone skew."
     name = "raw"
@@ -172,15 +202,23 @@ if __name__ == '__main__':
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("wz+b")
+        #session.set_raw_hook(lambda x: sys.stdout.write(x))
         plotter.header(out)
+        baton = Baton("gpsprof: gathering samples")
         while await > 0:
             session.poll()
-            if session.utc == "?":	# Timestamp no good, skip it.
+            baton.twirl()
+            # If timestamp is no good, skip it.
+            if not session.utc or session.utc == "?":
                 continue
             session.gps_time = gps.isotime(session.utc)
             session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
-            if plotter.formatter(session, out):
+            if not plotter.formatter(session, out):
+                sys.stderr.write("%s latency %d seconds\n" %
+                            (session.tag, (session.recv_time - session.gps_time) % 3600))
+            else:
                 await -= 1
+        baton.end()
     finally:
         session.query("wz-")
         
