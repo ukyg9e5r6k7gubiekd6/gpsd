@@ -85,7 +85,7 @@ class NMEA:
         if not ddmmyy:
             yyyymmdd = time.strftime("%Y-%m-%d")
         else:
-            yyyymmdd = time.strftime("%C") + "%s-%s-%sT" % (ddmmyy[4:6], ddmmyy[2:4], ddmmyy[8:10])
+            yyyymmdd = time.strftime("%C") + "%s-%s-%s" % (ddmmyy[4:6], ddmmyy[2:4], ddmmyy[0:2])
         if not hhmmss:
             hhmmss = time.strftime("%H:%M:%S")
         else:

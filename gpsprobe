@@ -43,7 +43,7 @@ class Baton:
         return
 
 triggers = {
-    "PRWIZCH": "This GPS has a Rockweell Zodiac chipset.\n"
+    "PRWIZCH": "This GPS has a Rockwell Zodiac chipset.\n"
     }
 
 if __name__ == '__main__':
@@ -68,6 +68,7 @@ if __name__ == '__main__':
     last_seen = {}
     notifications = []
     last_command = None
+    SIRFII = "This GPS probably has a SiRF-II chipset.\n"
 
     def roundoff(n):
         # Round a time to hundredths of a second
@@ -116,8 +117,12 @@ if __name__ == '__main__':
                 countdown -= 1
                 if dev.status > gps.STATUS_NO_FIX and dev.mode > gps.MODE_NO_FIX:
                     fixes.append((dev.latitude, dev.longitude))
+                    if SIRFII not in notifications and '.' in dev.utc:
+                        notifications.append(SIRFII)
         baton.end()
         del last_seen
+
+        sys.stdout.write("".join(notifications))
 
         # Step two: get command frequencies and the basic send cycle time
         frequencies = {}
