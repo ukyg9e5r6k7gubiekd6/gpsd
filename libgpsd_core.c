@@ -345,6 +345,19 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
     if (session->gNMEAdata.raw_hook) {
         session->gNMEAdata.raw_hook(bufp2);
     }
+    bufp += strlen(bufp);
+    if (SEEN(session->gNMEAdata.epe_quality_stamp)) {
+        // output PGRME
+        sprintf(bufp, "$PGRME,%.2f,%.2f,%.2f",
+	    session->gNMEAdata.eph, 
+	    session->gNMEAdata.epv, 
+	    session->gNMEAdata.epe);
+        nmea_add_checksum(bufp);
+        if (session->gNMEAdata.raw_hook) {
+	    session->gNMEAdata.raw_hook(bufp);
+	}
+	session->gNMEAdata.seen_sentences |= PGRME;
+     }
 }
 
 #endif /* BINARY_ENABLE */

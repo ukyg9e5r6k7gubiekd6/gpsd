@@ -287,7 +287,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    session->gNMEAdata.epe = pvt->epe;
 	    session->gNMEAdata.eph = pvt->eph;
 	    session->gNMEAdata.epv = pvt->epv;
-	    REFRESH(session->gNMEAdata.fix_quality_stamp);
+	    REFRESH(session->gNMEAdata.epe_quality_stamp);
 
 	    // convert lat/lon, climb in meters/sec to speed in knots
 	    session->gNMEAdata.speed
