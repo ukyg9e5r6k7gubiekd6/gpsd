@@ -2,9 +2,7 @@
 
 #include "gps.h"
 
-/*
- * Some internal capabilities depend on which drivers we're compiling.
- */
+/* Some internal capabilities depend on which drivers we're compiling. */
 #if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE
 #define NON_NMEA_ENABLE
 #endif /* FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE */
@@ -23,8 +21,7 @@ struct gps_type_t {
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
-    int baudrate, stopbits;
-    int interval;
+    int baudrate, stopbits, interval;
 };
 
 #if defined (HAVE_SYS_TERMIOS_H)
@@ -45,35 +42,26 @@ struct gps_session_t {
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
-#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
-    /* public; set by -i option */
+#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)	/* public; set by -i option */
     char *latitude, *longitude;
     char latd, lond;
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
-#ifdef ZODIAC_ENABLE
-    /* private housekeeping stuff for the Zodiac driver */
+#ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
     double separation;		/* Geoidal separation */
     int year, month, day;
     int hours, minutes, seconds;
     /*
-     * Zodiac chipset channel status from PRWIZCH.
-     * We stash it here is so that raw-mode translation of Zodiac binary 
-     * protocol will send it up to the client.
+     * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
+     * translation of Zodiac binary protocol can send it up to the client.
      */
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
 #endif /* ZODIAC_ENABLE */
 };
 
-#define GPGLL "$GPGLL"
-#define GPVTG "$GPVTG"
-#define GPGGA "$GPGGA"
-#define GPGSA "$GPGSA"
-#define GPGSV "$GPGSV"
-#define GPRMC "$GPRMC"
-#define PRWIZCH "$PRWIZCH"
+#define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;

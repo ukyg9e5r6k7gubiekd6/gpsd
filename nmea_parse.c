@@ -459,19 +459,19 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
     if (nmea_checksum(sentence+1)) {
-	if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
+	if (PREFIX("$GPRMC", sentence)) {
 	    processGPRMC(sentence, outdata);
-	} else if (strncmp(GPGGA, sentence, sizeof(GPGGA)-1) == 0) {
+	} else if (PREFIX("$GPGGA", sentence)) {
 	    processGPGGA(sentence, outdata);
-	} else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
+	} else if (PREFIX("$GPGLL", sentence)) {
 	    processGPGLL(sentence, outdata);
-	} else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
+	} else if (PREFIX("$GPVTG", sentence)) {
 	    processGPVTG(sentence, outdata);
-	} else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
+	} else if (PREFIX("$GPGSA", sentence)) {
 	    processGPGSA(sentence, outdata);
-	} else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
+	} else if (PREFIX("$GPGSV", sentence)) {
 	    processGPGSV(sentence, outdata);
-	} else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
+	} else if (PREFIX("$PRWIZCH", sentence)) {
 	    /* do nothing */;
 	} else
 	    return -1;

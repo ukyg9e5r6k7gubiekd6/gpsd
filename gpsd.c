@@ -354,17 +354,17 @@ static void raw_hook(char *sentence)
 	/* some listeners may be in watcher mode */
 	if (FD_ISSET(fd, &watcher_fds)) {
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
-	    if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
+	    if (PREFIX("$GPRMC", sentence)) {
 		PUBLISH(fd, "pdtvs");
-	    } else if (strncmp(GPGGA, sentence, sizeof(GPGGA)-1) == 0) {
+	    } else if (PREFIX("$GPGGA", sentence)) {
 		PUBLISH(fd, "pdas");	
-	    } else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
+	    } else if (PREFIX("$GPGLL", sentence)) {
 		PUBLISH(fd, "pd");
-	    } else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
+	    } else if (PREFIX("$GPVTG", sentence)) {
 		PUBLISH(fd, "tv");
-	    } else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
+	    } else if (PREFIX("$GPGSA", sentence)) {
 		PUBLISH(fd, "qm");
-	    } else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
+	    } else if (PREFIX("$GPGSV", sentence)) {
 		if (nmea_sane_satellites(&session->gNMEAdata))
 		    PUBLISH(fd, "y");
 	    }
