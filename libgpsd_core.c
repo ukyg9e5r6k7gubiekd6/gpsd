@@ -33,7 +33,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
-    struct gps_type_t *devtype;
 
     struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
 
@@ -43,11 +42,14 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->gpsd_device = "/dev/gps";
     session->device_type = gpsd_drivers[0];
 #ifdef NON_NMEA_ENABLE
+    {
+    struct gps_type_t *devtype;
     devtype = set_device_type(devicetype);
     if (!devtype)
 	gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
     else
 	session->device_type = devtype;
+    }
 #endif /* NON_NMEA_ENABLE */
 
     session->baudrate = session->device_type->baudrate;

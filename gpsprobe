@@ -46,6 +46,8 @@ triggers = {
     "PRWIZCH": "This GPS has a Rockwell Zodiac chipset.\n"
     }
 
+SIRF = "This GPS probably has a SiRF-II chipset.\n"
+
 if __name__ == '__main__':
     import sys, getopt
 
@@ -100,7 +102,8 @@ if __name__ == '__main__':
              if sentence.find(string) > -1:
                  register(triggers[string])
          if leader == "GPVTG":
-             if fields[2] == 'T':
+             # SiRF-II speaks 2.2, but with the 3.01 VTG format
+             if fields[2] == 'T' and not SIRF in notifications:
                  register("GPVTG format indicates NMEA version >= 3.01.\n")
              else:
                  register("GPVTG format indicates NMEA version < 3.01.\n")
@@ -138,7 +141,7 @@ if __name__ == '__main__':
                     fixes.append((dev.latitude, dev.longitude))
                     countdown -= 1
                     if '.' in dev.utc:
-                        register("This GPS probably has a SiRF-II chipset.\n")
+                        register(SIRF)
         baton.end()
         del last_seen
  

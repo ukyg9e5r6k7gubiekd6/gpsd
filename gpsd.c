@@ -534,7 +534,7 @@ int main(int argc, char *argv[])
     int alen;
     extern char *optarg;
     int option, gpsd_speed = 0;
-    char gpstype = 'n', *colon;
+    char gpstype = 'n';
     int fd;
     int need_gps;
     int nowait = 0;
@@ -565,6 +565,8 @@ int main(int argc, char *argv[])
 	    break;
 #if TRIPMATE_ENABLE
 	case 'i':
+	{
+	    char *colon;
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
 		fprintf(stderr, 
 			"gpsd: required format is latitude:longitude.\n");
@@ -584,6 +586,7 @@ int main(int argc, char *argv[])
 		session->initpos.longitude[strlen(session->initpos.longitude)-1] = '\0';
 	    }
 	    break;
+	}
 #endif /* TRIPMATE_ENABLE */
 	case 'n':
 	    nowait = 1;
