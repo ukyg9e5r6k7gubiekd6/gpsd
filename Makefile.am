@@ -9,8 +9,8 @@ endif
 
 XMLTO = xmlto
 
-bin_PROGRAMS = $(BUILD_PROGS)
-bin_SCRIPTS = gpsprobe gpsprof gpsfake
+bin_PROGRAMS = $(BUILD_PROGS) sirfmon
+bin_SCRIPTS = gpsprobe gpsprof gpsfake 
 
 #
 # Build xgps
@@ -39,6 +39,12 @@ sbin_PROGRAMS = gpsd
 gpsd_SOURCES = gpsd.c
 gpsd_LDADD = $(LIBM) libgps.la -lm
 
+
+#
+# Build sirfmon
+#
+sirfmon_SOURCES = sirfmon.c
+sirfmon_LDADD = -lm -lncurses
 
 #
 # Build shared library
@@ -73,7 +79,8 @@ man_MANS = \
 	libgpsd.3 \
 	gpsprobe.1 \
 	gpsprof.1 \
-	gpsfake.1
+	gpsfake.1 \
+	sirfmon.1
 
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
@@ -95,6 +102,9 @@ gpsprof.1: gpsprof.xml
 
 gpsfake.1: gpsfake.xml
 	-$(XMLTO) man gpsfake.xml
+
+sirfmon.1: sirfmon.xml
+	-$(XMLTO) man sirfmon.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -125,23 +135,21 @@ EXTRA_DIST = \
 	gpsprobe.xml \
 	gpsprof.xml \
 	gpsfake.xml \
+	sirfmon.xml \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
-	gpsd.init \
+	gpsd.spec.in \
 	gpsd.spec \
 	gps.py \
 	gpsd.py \
 	gpsprobe \
 	gpsprof \
 	gpsfake \
-	sirfmon.c \
 	gpsd.hotplug \
 	gpsd.usermap \
 	logextract
 
-# These are not distributed
+# This is not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
-sirfmon: sirfmon.c
-	$(CC) -g -O sirfmon.c -lm -lncurses -o sirfmon

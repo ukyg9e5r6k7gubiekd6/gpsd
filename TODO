@@ -87,17 +87,6 @@ to do device scanning, but this would create a complex dependency that
 gpsd doesn't now gave, and bring more complexity on board than is
 probably desirable.
 
-** Should sirfmon be part of the release?
-
-SiRF GPSes have a lot of tuning knobs on them that are accessible
-through the binary protocol but not the NMEA one.  Considering how
-ubiquitous SiRF GPSes are today (over 80% market share) maybe sirfmon
-should turn into a tool for twiddling those knobs and actually be
-installed in /usr/bin along with gpsd/xgps/xgpsspeed.
-
-Before that can happen, it needs documentation and more interface
-tweaks.
-
 ** The mess near error modeling
 
 One of my goals has been to report an uncertainty along with every

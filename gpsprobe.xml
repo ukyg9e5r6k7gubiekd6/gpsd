@@ -66,7 +66,7 @@ This program won't handle the Garmin or Rockwell binary protocols at
 all.</para>
 
 <para>The logic for hunting the GPS's baud rate is vulnerable to
-various sorts of RS323 flakiness. If it hangs for longer than a few
+various sorts of RS232 flakiness. If it hangs for longer than a few
 seconds, kill the program and restart.</para>
 
 </refsect1>
@@ -77,6 +77,7 @@ seconds, kill the program and restart.</para>
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>sirfmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>

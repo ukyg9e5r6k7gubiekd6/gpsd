@@ -141,6 +141,9 @@ repository.</p></li>
 
 <dt><a href="gpsfake.html">gpsfake.1</a></dt>
 <dd>The <code>gpsfake</code> test harness simulating a GPS.</dd>
+
+<dt><a href="sirfmon.html">sirfmon.1</a></dt>
+<dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
 </dl>
 
 <p>We have a <a href='hardware.html'>list of compatible GPSses</a>

@@ -6,9 +6,6 @@
  * The autobauding code is fairly primitive and can sometimes fail to
  * sync properly.  If that happens, just kill and restart sirfmon.
  *
- * Not shipped with gpsd, but we keep it around as a diagnostic tool
- * to double-check gpsd's SiRF decoder.
- *
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
  *	b -- change baud rate.
@@ -43,9 +40,7 @@
 #define MAXCHANNELS	12
 
 static int LineFd;					/* fd for RS232 line */
-static int verbose;
 static int nfix,fix[20];
-static int rate;
 static FILE *logfile;
 
 static char *verbpat[] =
@@ -83,7 +78,6 @@ static void decode_sirf(unsigned char buf[],int len);
 static void decode_time(int week, int tow);
 static void decode_ecef(double x, double y, double z, 
 			double vx, double vy, double vz);
-static int openline (char *name,int baud);
 static int sendpkt (unsigned char *buf,int len);
 static int readpkt (unsigned char *buf);
 
@@ -97,7 +91,8 @@ static WINDOW *mid27win, *cmdwin, *debugwin;
 
 static int set_speed(unsigned int speed, unsigned int stopbits)
 {
-    unsigned int	rate, count, st, state;
+    unsigned int	rate, count, state;
+    int st;
     unsigned char	c;
 
     if (speed < 300)
@@ -239,7 +234,7 @@ static int hunt_open(int *pstopbits)
 
 int main (int argc, char **argv)
 {
-    int len,i,stopbits,bps,speed,v,st;
+    int len,i,stopbits,bps,v;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
@@ -419,7 +414,7 @@ int main (int argc, char **argv)
 	    case 'b':
 		v = atoi(line+1);
 		for (ip=rates; ip < rates+sizeof(rates)/sizeof(rates[0]); ip++)
-		    if (v == *ip)
+		    if (v == bps)
 			goto goodspeed;
 		break;
 	    goodspeed:
@@ -949,9 +944,3 @@ static int sendpkt(unsigned char *buf, int len)
 
     return (write(LineFd,buf,len) == len);
 }
-
-/*
-Local Variables:
-compile-command: "cc -g -O sirfmon.c -lm -lncurses -o sirfmon"
-End:
-*/
