@@ -21,6 +21,11 @@
 
 #include "gpsd.h"
 
+
+#if !defined (INADDR_NONE)
+#define INADDR_NONE   ((in_addr_t)-1)
+#endif
+
 static char mbuf[128];
 
 int passivesock(char *service, char *protocol, int qlen)
