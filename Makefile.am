@@ -129,8 +129,7 @@ EXTRA_DIST = \
 	gpsprobe \
 	gpsprof \
 	gpsfake \
-	gpsd.usermap \
-	gpsdplug \
+	gpsd.hotplug \
 	logextract
 
 # These are not distributed
