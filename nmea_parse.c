@@ -32,9 +32,9 @@ void processGPRMC(char *sentence)
 
     strncpy(s + 3, d, 2);	// copy date
 
-    /*FIXME: This is NOT Y2K compliant, and will break soon! */
-    sscanf((d+4), "%2d", tmp);
+    sscanf((d+4), "%2d", &tmp);
 
+    //Tf.: Window the year from 1970 to 2069. This buys us some time.
     if (tmp < 70) 
       strncpy(s + 6, "20", 2);	// 21th century
     else
