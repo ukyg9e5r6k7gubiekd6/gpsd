@@ -258,9 +258,9 @@ class gps(gpsdata):
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-        data = self.sock.recv(1024)
+        data = self.sockfile.readline()
         if self.verbose:
-            sys.stderr.write("GPS DATA %s\n", repr(data))
+            sys.stderr.write("GPS DATA %s\n" % repr(data))
 	return self.__unpack(data)
 
     def query(self, commands):
