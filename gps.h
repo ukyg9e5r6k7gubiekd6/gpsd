@@ -40,6 +40,9 @@ static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL)
  * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different 
  * timestamps and some data in this structure can be up to 1 cycle (usually
  * 1 second) older than the fix time.
+ *
+ * Time uncertainty is expected value (mean).
+ * Position and velocity uncertainties are 1-sigma values with a mean of zero.
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
@@ -51,17 +54,17 @@ struct gps_fix_t {
     double ept;		/* Expected time uncertainty */
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
-    double eph;  	/* Est. horizontal position error, 1 sigma (meters) */
+    double eph;  	/* Horizontal position uncertainty, meters */
     double altitude;	/* Altitude in meters (valid if mode == 3) */
 #define ALTITUDE_NOT_VALID	-999
-    double epv;  	/* Est. vertical position error, 1 sigma (meters) */
+    double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
 #define TRACK_NOT_VALID	-1	/* No course/speed data yet */
-    double epd;		/* Course uncertainty (1 sigma) */
-    double speed;	/* Speed over ground, knots */
-    double eps;		/* Expected speed uncertainty */
-    double climb;       /* Vertical velocity, meters/sec */
-    double epc;		/* Expected vertical velocity uncertainty */
+    double epd;		/* Track uncertainty, degrees */
+    double speed;	/* Speed over ground */
+    double eps;		/* Speed uncertainty, meters/sec */
+    double climb;       /* Vertical speed, meters/sec */
+    double epc;		/* Vertical speed uncertainty */
 };
 
 struct gps_data_t {
