@@ -81,7 +81,7 @@ static void sigusr1(int sig)
   reopen = 1;
 }
 
-int daemonize()
+static int daemonize()
 {
     int fd;
     pid_t pid;
@@ -111,12 +111,129 @@ int daemonize()
     return 0;
 }
 
-void send_dgps() {
+static void send_dgps()
+{
   char buf[BUFSIZE];
 
-  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude, gNMEAdata.longitude, gNMEAdata.altitude);
+  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude,
+	  gNMEAdata.longitude, gNMEAdata.altitude);
   write(dsock, buf, strlen(buf));
 }
+
+static void usage()
+{
+	    fputs("usage:  gpsd [options] \n\
+  options include: \n\
+  -D integer   [ set debug level ] \n\
+  -L longitude [ set longitude ] \n\
+  -S integer   [ set port for daemon ] \n\
+  -T e         [ earthmate flag ] \n\
+  -h           [ help message ] \n\
+  -l latitude  [ set latitude ] \n\
+  -p string    [ set gps device name ] \n\
+  -s baud_rate [ set baud rate on gps device ] \n\
+  -c           [ use dgps service for corrections ] \n\
+  -d host      [ set dgps server ] \n\
+  -r port      [ set dgps rtcm-sc104 port ] \n\
+", stderr);
+}
+
+static int set_baud(long baud)
+{
+
+    if (baud < 200)
+	baud *= 1000;
+    if (baud < 2400)
+	device_speed = B1200;
+    else if (baud < 4800)
+	device_speed = B2400;
+    else if (baud < 9600)
+	device_speed = B4800;
+    else if (baud < 19200)
+	device_speed = B9600;
+    else if (baud < 38400)
+	device_speed = B19200;
+    else
+	device_speed = B38400;
+}
+
+static int set_device_type(char what)
+{
+    int type;
+
+    if (what=='t')
+	type = DEVICE_TRIPMATE;
+    else if (what=='e')
+	type = DEVICE_EARTHMATE;
+    else {
+	fprintf(stderr, "Invalid device type \"%s\"\n"
+		"Using GENERIC instead\n", optarg);
+	type = 0;
+    }
+    return type;
+}
+
+
+static void print_settings(char *service, char *dgpsserver,
+	char *dgpsport, int need_dgps)
+{
+    fprintf(stderr, "command line options:\n");
+    fprintf(stderr, "  debug level:        %d\n", debug);
+    fprintf(stderr, "  gps device name:    %s\n", device_name);
+    fprintf(stderr, "  gps device speed:   %d\n", device_speed);
+    fprintf(stderr, "  gpsd port:          %s\n", service);
+    if (need_dgps) {
+      fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
+      fprintf(stderr, "  dgps port:        %s\n", dgpsport);
+    }
+    fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
+    fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
+}
+
+static void handle_dgps()
+{
+    char buf[BUFSIZE];
+    int rtcmbytes, cnt;
+    char *ptr;
+    rtcmbytes = read(dsock, buf, BUFSIZE);
+
+    if (device_type == DEVICE_EARTHMATEb) {
+	ptr = buf;
+	while (rtcmbytes > 0) {
+	    cnt = (rtcmbytes < 65) ? rtcmbytes : 64;
+	    em_send_rtcm(buf, cnt);
+	    rtcmbytes -= cnt;
+	    ptr += cnt;
+	}
+    } else {
+	/*
+	 * device must need generic RTCM-104 serial data.
+	 * We can send these one character at a time. 
+	 */
+	if (rtcmbytes > 0) {
+#if 0
+	    fprintf(stderr, "\n\nSending %d rtcm bytes out\n", rtcmbytes);
+	    for (cnt = 0; cnt < rtcmbytes; cnt++)
+		fprintf(stderr, "%x", (unsigned char) buf[cnt]);
+	    fprintf(stderr, "\n");
+#endif
+	    ptr = buf;
+	    while (rtcmbytes > 0) {
+		cnt = write(gNMEAdata.fdout, ptr, rtcmbytes);
+		if (cnt == rtcmbytes)
+		    rtcmbytes = 0;	/* stops the loop */
+
+		if (cnt > 0) {
+		    /* Set up for next iteration */
+		    rtcmbytes -= cnt;
+		    ptr += cnt;
+		}
+	    }
+	    rtcmbytes = 0;
+	}
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -136,25 +253,13 @@ int main(int argc, char *argv[])
     int need_gps, need_dgps = 0, need_init = 1;
     extern char *optarg;
     int option;
-    double baud;
     char buf[BUFSIZE];
     int sentdgps = 0, fixcnt = 0;
 
     while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:")) != -1) {
 	switch (option) {
 	case 'T':
-	    switch (*optarg) {
-	    case 't':
-		device_type = DEVICE_TRIPMATE;
-		break;
-	    case 'e':
-		device_type = DEVICE_EARTHMATE;
-		break;
-	    default:
-		fprintf(stderr, "Invalid device type \"%s\"\n"
-			"Using GENERIC instead\n", optarg);
-		break;
-	    }
+	    device_type = set_device_type(*optarg);
 	    break;
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
@@ -163,13 +268,15 @@ int main(int argc, char *argv[])
 	    dgpsserver = optarg;
 	    break;
 	case 'L':
-	    if (optarg[strlen(optarg) - 1] == 'W' || optarg[strlen(optarg) - 1] == 'w'
-		|| optarg[strlen(optarg) - 1] == 'E' || optarg[strlen(optarg) - 1] == 'e') {
-		lond = toupper(optarg[strlen(optarg) - 1]);
+	    if (optarg[strlen(optarg)-1] == 'W' || optarg[strlen(optarg)-1] == 'w'
+		|| optarg[strlen(optarg)-1] == 'E' || optarg[strlen(optarg)-1] == 'e') {
+		lond = toupper(optarg[strlen(optarg)-1]);
 		longitude = optarg;
-		longitude[strlen(optarg) - 1] = '\0';
+		longitude[strlen(optarg)-1] = '\0';
 	    } else
-		fprintf(stderr, "skipping invalid longitude (-L) option;  %s must end in W or E\n", optarg);
+		fprintf(stderr,
+		  "skipping invalid longitude (-L) option; "
+		  "%s must end in W or E\n", optarg);
 	    break;
 	case 'S':
 	    service = optarg;
@@ -178,89 +285,53 @@ int main(int argc, char *argv[])
 	    dgpsport = optarg;
 	    break;
 	case 'l':
-	    if (optarg[strlen(optarg) - 1] == 'N' || optarg[strlen(optarg) - 1] == 'n'
-		|| optarg[strlen(optarg) - 1] == 'S' || optarg[strlen(optarg) - 1] == 's') {
+	    if (optarg[strlen(optarg)-1] == 'N' || optarg[strlen(optarg)-1] == 'n'
+		|| optarg[strlen(optarg)-1] == 'S' || optarg[strlen(optarg)-1] == 's') {
 		latd = toupper(optarg[strlen(optarg) - 1]);
 		latitude = optarg;
 		latitude[strlen(optarg) - 1] = '\0';
 	    } else
-		fprintf(stderr, "skipping invalid latitude (-l) option;  %s must end in N or S\n", optarg);
+		fprintf(stderr,
+			"skipping invalid latitude (-l) option;  "
+		       	"%s must end in N or S\n", optarg);
 	    break;
 	case 'p':
 	    device_name = optarg;
 	    break;
 	case 's':
-	    baud = strtod(optarg, 0);
-	    if (baud < 200)
-		baud *= 1000;
-	    if (baud < 2400)
-		device_speed = B1200;
-	    else if (baud < 4800)
-		device_speed = B2400;
-	    else if (baud < 9600)
-		device_speed = B4800;
-	    else if (baud < 19200)
-		device_speed = B9600;
-	    else if (baud < 38400)
-		device_speed = B19200;
-	    else
-		device_speed = B38400;
+	    device_speed = set_baud(strtol(optarg, NULL, 0));
 	    break;
 	case 'c':
-	  need_dgps = 1;
-	  break;
+	    need_dgps = 1;
+	    break;
 	case 'n':
-	  need_init = 0;
-	  break;
+	    need_init = 0;
+	    break;
 	case 'h':
 	case '?':
 	default:
-	    fputs("usage:  gpsd [options] \n\
-  options include: \n\
-  -D integer   [ set debug level ] \n\
-  -L longitude [ set longitude ] \n\
-  -S integer   [ set port for daemon ] \n\
-  -T e         [ earthmate flag ] \n\
-  -h           [ help message ] \n\
-  -l latitude  [ set latitude ] \n\
-  -p string    [ set gps device name ] \n\
-  -s baud_rate [ set baud rate on gps device ] \n\
-  -c           [ use dgps service for corrections ] \n\
-  -d host      [ set dgps server ] \n\
-  -r port      [ set dgps rtcm-sc104 port ] \n\
-", stderr);
+	    usage();
 	    exit(0);
 	}
     }
-    if (!device_name)
-	device_name = default_device_name;
-    if (need_init && !latitude)
-	latitude = default_latitude;
-    if (need_init && !longitude)
-	longitude = default_longitude;
-    if (!service)
-      if (!getservbyname(default_service, "tcp")) {
-	service = "2947";
-      } else {
-	service = default_service;
-      }
-    if (need_dgps && !dgpsserver)
-	dgpsserver = default_dgpsserver;
-    if (need_dgps && !dgpsport)
-	dgpsport = default_dgpsport;
-    if (debug > 0) {
-	fprintf(stderr, "command line options:\n");
-	fprintf(stderr, "  debug level:        %d\n", debug);
-	fprintf(stderr, "  gps device name:    %s\n", device_name);
-	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
-	fprintf(stderr, "  gpsd port:          %s\n", service);
-	if (need_dgps) {
-	  fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
-	  fprintf(stderr, "  dgps port:        %s\n", dgpsport);
-	}
-	fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
-	fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
+
+    if (!device_name) device_name = default_device_name;
+
+    if (need_init && !latitude) latitude = default_latitude;
+    if (need_init && !longitude) longitude = default_longitude;
+    
+    if (!service) {
+	if (!getservbyname(default_service, "tcp"))
+	    service = "2947";
+	else service = default_service;
     }
+
+    if (need_dgps && !dgpsserver) dgpsserver = default_dgpsserver;
+    if (need_dgps && !dgpsport) dgpsport = default_dgpsport;
+    
+    if (debug > 0) 
+	print_settings(service, dgpsserver, dgpsport, need_dgps);
+    
     if (debug < 2)
 	daemonize();
 
@@ -277,28 +348,27 @@ int main(int argc, char *argv[])
 
     msock = passiveTCP(service, QLEN);
 
-    if (need_dgps) {
-      if (!getservbyname(dgpsport, "tcp"))
-	dgpsport = "2101";
-      dsock = connectsock(dgpsserver, dgpsport, "tcp");
-      if (dsock < 0) {
-        fprintf(stderr, "Can't connect to dgps server\n");
-        exit(0);
-      }
-    }
-
     nfds = getdtablesize();
 
     FD_ZERO(&afds);
     FD_ZERO(&nmea_fds);
     FD_SET(msock, &afds);
-    if (need_dgps) {
-      char hn[256];
-      gethostname(hn, sizeof(hn));
 
-      sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-      write(dsock, buf, strlen(buf));
-      FD_SET(dsock, &afds);
+    if (need_dgps) {
+	char hn[256];
+
+	if (!getservbyname(dgpsport, "tcp"))
+	    dgpsport = "2101";
+
+	dsock = connectsock(dgpsserver, dgpsport, "tcp");
+	if (dsock < 0) 
+	    errexit("Can't connect to dgps server");
+
+	gethostname(hn, sizeof(hn));
+
+	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
+	write(dsock, buf, strlen(buf));
+	FD_SET(dsock, &afds);
     }
 
     input = -1;
@@ -306,53 +376,15 @@ int main(int argc, char *argv[])
     while (1) {
         memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
 
-	if (select(nfds, &rfds, (fd_set *) 0, (fd_set *) 0,
-		   (struct timeval *) 0) < 0) {
+	if (select(nfds, &rfds, NULL, NULL, NULL) < 0) {
 	    if (errno == EINTR)
 		continue;
 	    errexit("select");
 	}
-	if (FD_ISSET(dsock, &rfds)) {
-	  int rtcmbytes, cnt;
-	  char *ptr;
-	  rtcmbytes = read(dsock, buf, BUFSIZE);
 
-	  if (device_type == DEVICE_EARTHMATEb) {
-	    ptr = buf;
-	    while (rtcmbytes > 0) {
-	      cnt = (rtcmbytes < 65) ? rtcmbytes : 64;
-	      em_send_rtcm(buf, cnt);
-	      rtcmbytes -= cnt;
-	      ptr += cnt;
-	    }	    
-	  } else {
-	    /*
-	     * device must need generic RTCM-104 serial data.
-	     * We can send these one character at a time. 
-	     */
-            if (rtcmbytes > 0) {
-#if 0
-              fprintf(stderr, "\n\nSending %d rtcm bytes out\n",rtcmbytes);
-              for (cnt=0;cnt < rtcmbytes;cnt++)
-		fprintf(stderr, "%x", (unsigned char)buf[cnt]);
-              fprintf(stderr, "\n");
-#endif
-              ptr = buf;
-              while (rtcmbytes > 0) {
-		cnt = write(gNMEAdata.fdout, ptr, rtcmbytes);
-                if (cnt == rtcmbytes) 
-                  rtcmbytes = 0; /* stops the loop */
+	if (FD_ISSET(dsock, &rfds))
+	    handle_dgps();
 
-                if (cnt > 0) {
-                  /* Set up for next iteration */
-		  rtcmbytes -= cnt;
-                  ptr += cnt;
-		}
-	      }
-	      rtcmbytes = 0;
-	    }
-	  }
-	}
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;
 
@@ -372,27 +404,31 @@ int main(int argc, char *argv[])
 		handle_input(input, &afds, &nmea_fds);
 	}
 	if (gNMEAdata.status > 0) 
-	  fixcnt++;
-	if (fixcnt > 10) 
-	  if (!sentdgps) {
-	    sentdgps++;
-	    if (need_dgps)
-	      send_dgps();
-	  }
+	    fixcnt++;
+	
+	if (fixcnt > 10) {
+	    if (!sentdgps) {
+		sentdgps++;
+		if (need_dgps)
+		    send_dgps();
+	    }
+	}
+
 	need_gps = 0;
 	if (reopen) {
-	  FD_CLR(input, &afds);
-	  input = -1;
-	  gNMEAdata.fdin = input;
-	  gNMEAdata.fdout = input;
-	  serial_close();
-	  if (device_type == DEVICE_EARTHMATEb)
-	    device_type = DEVICE_EARTHMATE;
-	  syslog(LOG_NOTICE, "Closed gps");
-	  gNMEAdata.mode = 1;
-	  gNMEAdata.status = 0;
-	  need_gps++;
+	    FD_CLR(input, &afds);
+	    input = -1;
+	    gNMEAdata.fdin = input;
+	    gNMEAdata.fdout = input;
+	    serial_close();
+	    if (device_type == DEVICE_EARTHMATEb)
+		device_type = DEVICE_EARTHMATE;
+	    syslog(LOG_NOTICE, "Closed gps");
+	    gNMEAdata.mode = 1;
+	    gNMEAdata.status = 0;
+	    need_gps++;
 	}
+
 	for (fd = 0; fd < nfds; fd++) {
 	    if (fd != msock && fd != input && fd != dsock && 
 		FD_ISSET(fd, &rfds)) {
@@ -512,7 +548,22 @@ static int handle_request(int fd, fd_set * fds)
     return cc;
 }
 
-static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
+void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
+{
+    int fd;
+
+    for (fd = 0; fd < nfds; fd++) {
+	if (FD_ISSET(fd, nmea_fds)) {
+	    if (write(fd, buf, strlen(buf)) < 0) {
+		syslog(LOG_NOTICE, "Raw write: %s", strerror(errno));
+		FD_CLR(fd, afds);
+		FD_CLR(fd, nmea_fds);
+	    }
+	}
+    }
+}
+
+static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
@@ -527,19 +578,13 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	    if (strlen(buf)) {
 	        handle_message(buf);
 		strcat(buf, "\r\n");
-		for (fd = 0; fd < nfds; fd++) {
-		    if (FD_ISSET(fd, nmea_fds)) {
-			if (write(fd, buf, strlen(buf)) < 0) {
-			    syslog(LOG_NOTICE, "Raw write: %s", strerror(errno));
-			    FD_CLR(fd, afds);
-			    FD_CLR(fd, nmea_fds);
-			}
-		    }
-		}
+		send_nmea(afds, nmea_fds, buf);
 	    }
 	    offset = 0;
 	    return 1;
 	}
+
+#if 0
 	/*
 	  The following tries to recognise if the EarthMate is
 	  in binary mode. If so, it will switch to EarthMate mode.
@@ -562,6 +607,7 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 		}
 	    }
 	}
+#endif
 	offset++;
 	buf[offset] = '\0';
     }
