@@ -5,4 +5,5 @@
 xmlto xhtml-nochunks ../gpsd.xml
 xmlto xhtml-nochunks ../libgps.xml
 xmlto xhtml-nochunks ../libgpsd.xml
+xmlto xhtml-nochunks ../gpsprobe.xml
 scp * esr@shell.berlios.de:/home/groups/gpsd/htdocs
