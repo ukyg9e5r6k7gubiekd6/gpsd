@@ -132,7 +132,7 @@ void fv18_initializer(struct gps_session_t *session)
 struct gps_type_t fv18 =
 {
     'f', 		/* select explicitly with -T f */
-    "FV18",		/* full name of type */
+    "San Jose Navigation FV18",		/* full name of type */
     NULL,		/* no recognition string */
     fv18_initializer,	/* to be sent unconditionally */
     nmea_handle_input,	/* read text sentence */

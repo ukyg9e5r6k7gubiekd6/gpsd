@@ -89,17 +89,11 @@ certainly what you want.</para>
 
 <para>Calling
 <function>gpsd_init()</function>
-initializes a session structure to hold the data collected by the GPS.
-You must specify one of the following device types:</para>
-<itemizedlist>
-  <listitem><para>Generic NMEA 0183 GPS</para></listitem>
-  <listitem><para>TripMate GPS</para></listitem>
-  <listitem><para>EarthMate GPS</para></listitem>
-  <listitem><para>Log file to be played back.</para></listitem>
-</itemizedlist>
+initializes a session structure to hold the data collected by the GPS.</para>
 
-<para>It is generally safe to specify 'n', as most modern GPSes speak
-NMEA.</para>
+<para>You must specify a device type by key letter; to list key
+letters, run <command>gpsd -h</command>.  It is generally safe to
+specify 'n', as most modern GPSes speak NMEA.</para>
 
 <para>You may optionally specify a DGPS server, either as a string
 containing a server name or a string containining server name followed

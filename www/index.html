@@ -3,8 +3,8 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="Author" content="Remco Treffkorn">
-   <meta name="Description" content="GPSd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
-   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <meta name="Description" content="gpsd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
+   <meta name="Keywords" content="GPS, translator, GIS">
    <title>GPSd &mdash; Put your GPS on the net!</title>
 </head>
 <body background="paper.gif">
@@ -22,15 +22,20 @@ TCP port 2947 of the host computer.  With <code>gpsd</code>, multiple
 GPS client applications (such as navigational and wardriving software)
 can share access to a GPS without contention or loss of data. Also,
 gpsd responds to queries with a format that is substantially easier to
-parse than NMEA 0183.  The <code>gpsd</code> distribution includes a
-linkable C service library and/or a Python module that developers of
-<code>gpsd</code>-aware applications can use to encapsulate all
-communication with <code>gpsd</code>.</para>
+parse than the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
+distribution includes a linkable C service library and/or a Python
+module that developers of <code>gpsd</code>-aware applications can use
+to encapsulate all communication with <code>gpsd</code>.</para>
 
 <p>The goal of the <code>gpsd</code> project is to create a solid layer of
 open-source infrastructure for programs that want to be
 location-sensitive. We aim for simple, robust interfaces, unfussy
-operation, and an easy learning curve for application developers.</p>
+operation, and an easy learning curve for application developers.
+Applications that presently use <code>gpsd</code> include
+<a href="http://www.pygps.org">pyGPS</a>
+<a href="http://www.kismetwireless.net/">Kismet</a>, 
+<a href="http://www.gpsdrive.cc/">GPSdrive</a>, and 
+<a href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
 
 <p>We have a <a href='hardware.html'>list of compatible GPSses</a>
 with some technical information.  We also have <a href='NMEA.txt'>a
@@ -67,26 +72,7 @@ href="https://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
 is for <code>gpsd</code> developers.</p></li>
 </ul>
 
-<h1>Introduction to gpsd</h1>
-
-<p><code>gpsd</code> takes input from a device capable of generating
-positional data (like a GPS or a Loran receiver) and republishes it on
-a well-known TCP/IP port in a simpler format.  Multiple clients can
-connect to this port and get data from the GPS; the daemon multiplexes
-all requests and prevents contention.  A client can also request raw
-NMEA 0183 data from the originating GPS (this makes sense for debugging,
-but probably not much else).</p>
-
-<p><code>gpsd</code> was meant to make programs like <a
-href="http://www.pygps.org">pyGPS</a> hardware independent. With
-<code>gpsd</code>, pyGPS allows you to show the position of the GPS on
-an electronic map. Since the computer running <code>gpsd</code> and
-the one running pyGPS do not have to be the same machine, you can
-remotely display the position of one computer on the other.  Other
-applications that use <code>gpsd</code> include <a
-href="http://www.kismetwireless.net/">Kismet</a>, <a
-href="http://www.gpsdrive.cc/">GPSdrive</a>, and <a
-href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
+<h1>Documentation</h1>
 
 <p>The following manual pages describe the code:</p>
 
