@@ -1,4 +1,8 @@
 This is a list of NMEA 0183 sentences emitted by GPSes.
+
+It may originally have been redacted from the document cited as
+[NMEA200]; see the list of sources at the end of this document.
+
 It is originally from the gpsdrive distribution, but adds more
 information on the following topics:
 
@@ -6,14 +10,11 @@ information on the following topics:
 * Units used in GGA
 * Vendor extensions PRWIZCH and PMGNST
 * FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
-* New documentation on GRS, GST, MSK, and MSS sentences.
+* New documentation on DTM, GBS, GRS, GST, MSK, and MSS sentences.
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
 form of VTG is variable with NMEA version.
-
-The best other resource on this topic seems to be 
-<http://www.gpsinformation.org/dale/nmea.htm>
 
 In NMEA 2.3, several sentences (RMC, RMB, VTG, GLL; optionally, BWC, XTE)
 got a new last field carrying the signal integrity information needed by the
@@ -29,6 +30,17 @@ FAA Mode Indicator
      N = Data Not Valid
 
 This field may be empty.  In pre-2.3 versions it is omitted.
+
+Where a numeric latitude or longitude is given, the two digits
+immediately to the left of the decimal point are whole minutes, to the
+right are decimals of minutes, and the remaining digits to the left of
+the whole minutes are whole degrees.
+
+Eg. 4533.35 is 45 degrees and 33.35 minutes. ".35" of a minute is
+exactly 21 seconds.
+
+Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
+about 2 seconds.
 
 Here are the NMEA-standard sentences:
 
@@ -300,6 +312,8 @@ Here are the NMEA-standard sentences:
      3 = Lane Identification Transmissions
  17) Checksum
 
+(The DCN sentence is obsolete as of 3.01)
+
  DPT - Heading - Deviation & Variation
 
         1   2   3
@@ -312,6 +326,24 @@ Here are the NMEA-standard sentences:
      positive means distance from tansducer to water line
      negative means distance from transducer to keel
   3) Checksum
+
+DTM - Datum Reference
+
+          1  2  3   4  5   6  7  8    9
+          |  |  |   |  |   |  |  |    |
+ $ --DTM,ref,x,llll,c,llll,c,aaa,ref*hh<CR><LF>
+
+ Field Number: 
+  1) Local datum code.  
+  2) Local datum subcode.  May be blank.
+  3) Latitude offset (minutes)
+  4) N or S 
+  5) Longitude offset (minutes)
+  6) E or W
+  7) Altitude offset in meters
+  8) Datum name. What's usually seen here is "W84", the standard
+     WGS84 datum used by GPS.
+  9) Checksum.
 
  FSI - Frequency Set Information
 
@@ -329,6 +361,26 @@ Here are the NMEA-standard sentences:
  GGA - Global Positioning System Fix Data
  Time, Position and fix related data for a GPS receiver.
 
+
+GBS - GPS Satellite Fault Detection
+
+            1      2   3   4   5   6   7   8   9
+            |      |   |   |   |   |   |   |   |
+ $--GBS,hhmmss.ss,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh<CR><LF>
+
+ Field Number: 
+  1) UTC time of theb GGA or GNS fix associated with this sentence
+  2) Expected error in latitude (meters)
+  3) Expected error in longitude (meters)
+  4) Expected error in altitude (meters)
+  5) PRN of most likely failed satellite
+  6) Probability of misse detection for most likely failed satellite
+  7) Estimate of bias in meters on most likely failed satellite
+  8) Standard deviation of bias estimate
+  9) Checksum
+
+Note: Source [MX521] describes a proprietary extension of GBS with
+a 9th data field.
                                                       11
         1         2       3 4        5 6 7  8   9  10 |  12 13  14   15
         |         |       | |        | | |  |   |   | |   | |   |    |
@@ -423,6 +475,8 @@ Here are the NMEA-standard sentences:
   14) Satellite 12 residual in meters (blank if unused)
   15) Checksum
 
+The order of satellites the same as those in the last GSA.
+
  GST - GPS Pseudorange Noise Statistics
 
               1    2 3 4 5 6 7 8   9
@@ -505,6 +559,8 @@ Here are the NMEA-standard sentences:
  6) Waypoint ID
  7) Satelite number
  8) Checksum
+
+(The GXA sentence is obsolete as of 3.01.)
 
  HDG - Heading - Deviation & Variation
 
@@ -641,6 +697,8 @@ Here are the NMEA-standard sentences:
   2) Omega Pair 1
   3) Omega Pair 1
   4) Checksum
+
+(The OLN sentence is obsolete as of 3.01)
 
  OSD - Own Ship Data
 
@@ -846,6 +904,8 @@ Here are the NMEA-standard sentences:
  11) Satellite ID
  12) Data Validity
  13) Checksum
+
+(The OLN sentence is obsolete as of 3.01)
 
  TTM - Tracked Target Message
 
@@ -1131,8 +1191,6 @@ DSC - Digital Selective Calling Information
 DSE - Extended DSC
 DSI - DSC Transponder Initiate
 DSR - DSC Transponder Response
-DTM - Datum Reference
-GBS - GPS Satellite Fault Detection
 MWD - Wind Direction & Speed
 TLL - Target Latitude and Longitude
 WDC - Distance to Waypoint - Great Circle
@@ -1162,6 +1220,38 @@ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c*hh<CR><LF>
  $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
 
  Fields consist of 12 pairs of a satellite PRN followed by a 
- signal quality number in the range 0-7.
+ signal quality number in the range 0-7.  
 
  Only emitted by the Zodiac (Rockwell) chipset.
+
+Sources:
+
+[NMEA2000]
+    The NMEA 0183 protocol
+    http://nmeatool.nmea2000.de/download/0183.pdf
+    Probably the origin of this document.
+
+[DEPRIEST]
+    "NMEA data"
+    http://www.gpsinformation.org/dale/nmea.htm
+    Used for PMGNST and the FAA mode code.
+
+[MX521]
+    "MX521 GPS/DGPS Sensor Installation Manual"
+    http://www.mx-marine.com/downloads/MX521_Install_manual_051804.pdf
+    Used for GBS, GRS.
+
+[ZODIAC]
+    "Zodiac Serial Data Interface Specification"
+    http://users.rcn.com/mardor/serial.pdf
+    Used for PRWIZCH.
+
+[GH79L4N]
+    "Specifications for GPS Receiver GH-79L4-N"
+    http://www.tecsys.de/db/gps/gh79l1an_intant.pdf
+    Used for GPDTM.
+
+[GIDS]:
+    "GPS - NMEA sentence information"
+    http://aprs.gids.nl/nmea/
+    Used for MSK, MSS.
