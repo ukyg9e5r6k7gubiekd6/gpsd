@@ -28,7 +28,7 @@ which this GPS is known to have been successfully tested.</p>
 <th>gpsd type</th>
 <th>Works with</th>
 <th>NMEA version</th>
-<th>Sentences</th>
+<th width="10%">Sentences</th>
 <th width="50%">Notes</th>
 </tr>
 <tr>
@@ -40,7 +40,7 @@ which this GPS is known to have been successfully tested.</p>
 <td align='center'>n</td>
 <td>2.5</td>
 <td>2.2</td>
-<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
 <td>Haicom provided a test unit. Manual states incorrectly that VTG
 is off by default.</td>
 </tr>
@@ -53,7 +53,7 @@ is off by default.</td>
 <td align='center'>n</td>
 <td>2.6</td>
 <td>2.2</td>
-<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
 <td>Probably uses PL2303 but we have not verified this.</td>
 </tr>
 <tr>
@@ -66,7 +66,7 @@ NaviLock, Hyperdata</td>
 <td align='center'>n</td>
 <td>2.6</td>
 <td>2.2</td>
-<td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
 GlobalSat provided three test units.
 Older versions of the BU-303 had a <a href='bu_303.html'>design
@@ -85,7 +85,7 @@ works but no test hardware.
 <td>-</td>
 <td>-</td>
 <td>2.2</td>
-<td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
 Older versions of the GlobalSat PCB the TripNav is based on 
 had a <a href='bu_303.html'>design
@@ -106,7 +106,7 @@ of moving this product to the PL2303.
 <td align='center'>e</td>
 <td>2.0</td>
 <td>2.2?</td>
-<td>PRWIZCH, GPGSA, GPRMC</td>
+<td>PRWIZCH,<br />GPGSA,<br />GPRMC</td>
 <td>The old Zodiac version spoke Rockwell binary protocol. These 
 models have been discontinued but are still common.</td>
 </tr>
@@ -119,7 +119,7 @@ models have been discontinued but are still common.</td>
 <td align='center'>n</td>
 <td>2.5</td>
 <td>2.2</td>
-<td>GPGGA,GPGSA,GPGSV,GPRMC,GPGLL,GPVTG</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>This is the replacement for the old Zodiac version that spoke
 Rockwell binary protocol. Some other sentences can be enabled.
 Requires a 2.6.10 or better kernel for the Cypress support.</td>
@@ -133,7 +133,7 @@ Requires a 2.6.10 or better kernel for the Cypress support.</td>
 <td align='center'>f</td>
 <td>2.0</td>
 <td>2.3</td>
-<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG, GPZDA, GPDTM, GPGLL</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG,<br />GPZDA,<br />GPDTM,<br />GPGLL</td>
 <td>Special gpsd support uses 8N2 and requests sentences that gpsd
 requires.  OEM module only, not a retail version.</td>
 </tr>
@@ -148,7 +148,7 @@ Sapphire USB</a></a></td>
 <td align='center'>n</td>
 <td>1.97</td>
 <td>2.2</td>
-<td>GPGGA, GPGSV, GPRMC, GPGLL, GPVTG, GPGSA</td>
+<td>GPGGA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG,<br />GPGSA</td>
 <td>There's an RS232 variant as well, not yet tested.</td>
 </tr>
 <tr>
@@ -160,7 +160,7 @@ Sapphire USB</a></a></td>
 <td align='center'>t</td>
 <td>1.97</td>
 <td>?</td>
-<td>GPRMC, GPGSA, GPGGA, GPGSV, PRWIRID, PRWIZCH</td>
+<td>GPRMC,<br />GPGSA,<br />GPGGA,<br />GPGSV, PRWIRID, PRWIZCH</td>
 <td>
 Discontinued sometime before November 1998. 
 Takes optional latitude/longitude initialization.
@@ -176,8 +176,8 @@ Takes optional latitude/longitude initialization.
 <td>2.3</td>
 <td>2.0</td>
 <td>
-PGRME, GPGLL, PGRMZ, PGRMM, GPBOD, GPRTE, GPWPL, 
-GPRMC, GPRMB, GPGGA, GPGSA, GPGSV
+PGRME,<br />GPGLL, PGRMZ, PGRMM,<br />GPBOD,<br />GPRTE,<br />GPWPL, 
+GPRMC,<br />GPRMB,<br />GPGGA,<br />GPGSA,<br />GPGSV
 </td>
 <td>
 Garmin 12XL and 45 are nearly identical and should work as well.<BR>
@@ -198,7 +198,7 @@ Garmin GPS-18</a></td>
 <td>2.5</td>
 <td>?</td>
 <td>
-GPGSV, GPRMC, GPGGA, GPGSA, GPGLL
+GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA,<br />GPGLL
 </td>
 <td>
 DOP (Dilution of Precision) information not available (Garmin protocol 
@@ -218,8 +218,8 @@ is not available. Garmin uses a nonstandard 16-bit SNR scale.
 <td>2.5</td>
 <td>?</td>
 <td>
-PGRME, GPGLL, PGRMZ, GPBOD, GPRTE, 
-GPRMC, GPRMB, GPGGA, GPGSA, GPGSV
+PGRME,<br />GPGLL, PGRMZ,<br />GPBOD,<br />GPRTE, 
+GPRMC,<br />GPRMB,<br />GPGGA,<br />GPGSA,<br />GPGSV
 </td>
 <td>
 The online copy of the owner's manual seems to be badly garbled.
@@ -235,7 +235,7 @@ The online copy of the owner's manual seems to be badly garbled.
 <td>2.3</td>
 <td>?</td>
 <td>
-GPGSV, GPRMC, GPGGA, GPGSA
+GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA
 </td>
 <td>
 This waterproof GPS receiver connects to a USB port on a laptop or
