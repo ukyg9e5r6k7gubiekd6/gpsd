@@ -34,9 +34,8 @@ static char *field(char *sentence, short n)
     return result;
 }
 
-/* ----------------------------------------------------------------------- */
-
 static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
+/* process a pair of latitude/longitude fields starting at field index BEGIN */
 {
     double lat, lon, d, m;
     char str[20], *p;
@@ -74,9 +73,8 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
     REFRESH(out->latlon_stamp);
 }
 
-/* ----------------------------------------------------------------------- */
-
 static int update_field_i(char *sentence, int fld, int *dest)
+/* update an integer-valued field */
 {
     int tmp, changed;
 
@@ -87,6 +85,7 @@ static int update_field_i(char *sentence, int fld, int *dest)
 }
 
 static int update_field_f(char *sentence, int fld, double *dest)
+/* update a float-valued field */
 {
     int changed;
     double tmp;
@@ -200,8 +199,6 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
     }
 }
 
-/* ----------------------------------------------------------------------- */
-
 static void processGPGLL(char *sentence, struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
@@ -249,12 +246,10 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
     }
 }
 
-/* ----------------------------------------------------------------------- */
-
 static void processGPVTG(char *sentence, struct gps_data_t *out)
 /* Track Made Good and Ground Speed */
 {
-    /* OK, there seem to be two variants of GPVTG
+    /* There are two variants of GPVTG
      * One, described at <http://www.sintrade.ch/nmea.htm>, looks like this:
 
 	GPVTG Track Made Good and Ground Speed with GPS Talker ID
@@ -264,30 +259,9 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 	(4) Speed over ground (kilometers) 00.0 to 99.9
 
      * Up to and including 1.10, gpsd assumed this and extracted field
-     * 3 for ground speed.  There's a GPS manual at 
-     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf>
-     * tha suggests this information was good for NMEA 3.0 at least.
+     * 3 for ground speed.
      *
-     * But, if you look in <http://www.kh-gps.de/nmea-faq.htm>. it says:
-
-	$GPVTG,t,T,,,s.ss,N,s.ss,K*hh
-
-	VTG  = Actual track made good and speed over ground
-
-	1    = Track made good
-	2    = Fixed text 'T' indicates that track made good is relative to 
-	       true north
-	3    = not used
-	4    = not used
-	5    = Speed over ground in knots
-	6    = Fixed text 'N' indicates that speed over ground in in knots
-	7    = Speed over ground in kilometers/hour
-	8    = Fixed text 'K' indicates that speed over ground is in 
-               kilometers/hour
-	9    = Checksum
-
-     * The actual NMEA spec, version 3.01, dated 1/1/2002, agrees with the
-     * second source:
+     * The NMEA spec, version 3.01, dated 1/1/2002, gives this:
 
 	1    = Track made good
 	2    = Fixed text 'T' indicates that track made good is relative to 
@@ -302,8 +276,7 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
                kilometers/hour
 	9    = Checksum
 
-     * which means we want to extract field 5.  We'll deal with both
-     * possibilities here.
+     * which means we want to extract field 5.  We cope with both.
      */
     int changed;
 
@@ -318,8 +291,6 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
     out->speed_stamp.changed = changed;
     REFRESH(out->speed_stamp);
 }
-
-/* ----------------------------------------------------------------------- */
 
 static void processGPGGA(char *sentence, struct gps_data_t *out)
 /* Global Positioning System Fix Data */
@@ -376,8 +347,6 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
     }
 }
 
-/* ----------------------------------------------------------------------- */
-
 static void processGPGSA(char *sentence, struct gps_data_t *out)
 /* GPS DOP and Active Satellites */
 {
@@ -415,8 +384,6 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
     REFRESH(out->fix_quality_stamp);
 }
 
-/* ----------------------------------------------------------------------- */
-
 int nmea_sane_satellites(struct gps_data_t *out)
 {
     /* data may be incomplete */
@@ -428,7 +395,7 @@ int nmea_sane_satellites(struct gps_data_t *out)
      * possibly of other SiRF-II based GPSes.  When they can't see any
      * satellites at all (like, inside a building) they sometimes cough
      * up a hairball in the form of a GSV packet with all the azimuth 
-     * and entries 0 (but nonzero elevations).  This
+     * and entries 0 (but nonzero elevations).  This behavior
      * was observed under SiRF firmware revision 231.000.000_A2.
      */
     int n;
@@ -502,8 +469,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     }
 }
 
-/* ----------------------------------------------------------------------- */
-
 static void processPMGNST(char *sentence, struct gps_data_t *out)
 /* Proprietary MaGellan STatus */
 {
@@ -550,6 +515,7 @@ static void processPMGNST(char *sentence, struct gps_data_t *out)
 }
 
 static short nmea_checksum(char *sentence)
+/* is the checksum on the specified sentence good? */
 {
     unsigned char sum = '\0';
     char c, *p = sentence, csum[3];
