@@ -131,20 +131,18 @@ static void processGPRMC(char *sentence, struct gps_data *out)
            *68          mandatory gps_checksum
 
      */
-    char s[20], d[10];
-    int tmp, newstatus;
+    char utc[20], ddmmyy[10], hhmmss[10];
+    int newstatus;
     time_t now;
     struct tm *tm;
 
-    sscanf(field(sentence, 9), "%s", d);	/* Date: ddmmyy */
+    strcpy(ddmmyy, field(sentence, 9));	/* Date: ddmmyy */
 
-    strncpy(s, d + 2, 2);	/* copy month */
+    strncpy(utc, ddmmyy + 2, 2);	/* copy month */
+    strncpy(utc + 3, ddmmyy, 2);	/* copy date */
 
-    strncpy(s + 3, d, 2);	/* copy date */
-
-    sscanf((d+4), "%2d", &tmp);
     /*
-     * Uh oh, the NMEA designers screwed the pooch on this one.
+     * Uh oh, the NMEA designers screwed the pooch and returned a 2-digit year.
      * Get the high two digits of the year from the host machine's clock time.
      * That is, the machine where this *daemon* is running -- which is probably
      * connected to the GPS by a cable short enough that it doesn't cross a
@@ -152,21 +150,20 @@ static void processGPRMC(char *sentence, struct gps_data *out)
      */
     now = time(NULL);
     tm = localtime(&now);
-    strftime(s + 6, 2, "%C", tm);
-    strncpy(s + 8, d + 4, 2);	/* copy year */
+    strftime(utc + 6, 3, "%C", tm);
+    strncpy(utc + 8, ddmmyy + 4, 2);	/* copy year */
 
-    sscanf(field(sentence, 1), "%s", d);	/* Time: hhmmss */
-    strncpy(s + 11, d, 2);	/* copy hours */
-    strncpy(s + 14, d + 2, 2);	/* copy minutes */
-    strncpy(s + 17, d + 4, 2);	/* copy seconds */
+    strcpy(hhmmss, field(sentence, 1));	/* Time: hhmmss */
+    strncpy(utc + 11, hhmmss, 2);	/* copy hours */
+    strncpy(utc + 14, hhmmss + 2, 2);	/* copy minutes */
+    strncpy(utc + 17, hhmmss + 4, 2);	/* copy seconds */
 
-    s[2] = s[5] = '/';		/* add the '/'s, ':'s, ' ' and string terminator */
+    utc[2] = utc[5] = '/';	/* add '/'s, ':'s, ' ' and string terminator */
+    utc[10] = ' ';
+    utc[13] = utc[16] = ':';
+    utc[19] = '\0';
 
-    s[10] = ' ';
-    s[13] = s[16] = ':';
-    s[19] = '\0';
-
-    strcpy(out->utc, s);
+    strcpy(out->utc, utc);
 
     do_lat_lon(sentence, 3, out);
 
