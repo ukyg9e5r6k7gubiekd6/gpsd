@@ -174,9 +174,9 @@ static int validate(void)
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return 0;
     }
-    else if (session->gNMEAdata.status > STATUS_NO_FIX && session->gNMEAdata.mode > MODE_NO_FIX) {
+    else if (session->gNMEAdata.status > STATUS_NO_FIX && session->gNMEAdata.mode != MODE_NO_FIX) {
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
-	return session->gNMEAdata.mode;
+	return 1;
     }
     VALIDATION_COMPLAINT(3, "GPS has no fix");
     return 0;

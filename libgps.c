@@ -27,7 +27,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	return NULL;
     }
 
-    gpsdata->mode = MODE_NO_FIX;
+    gpsdata->mode = MODE_NOT_SEEN;
     gpsdata->status = STATUS_NO_FIX;
     return gpsdata;
 }

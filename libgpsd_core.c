@@ -64,7 +64,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
     /* mark GPS fd closed */
     session->gNMEAdata.gps_fd = -1;
-    session->gNMEAdata.mode = MODE_NO_FIX;
+    session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
     session->mag_var = NO_MAG_VAR;
 
@@ -76,7 +76,7 @@ void gpsd_deactivate(struct gps_session_t *session)
 {
     session->gNMEAdata.online = 0;
     REFRESH(session->gNMEAdata.online_stamp);
-    session->gNMEAdata.mode = MODE_NO_FIX;
+    session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
     gpsd_close(session);
     session->gNMEAdata.gps_fd = -1;
