@@ -79,7 +79,7 @@ struct gps_type_t {
  * of header/length/checksum/trailer.  But making this longer also 
  * slows down the autobauding.
  */
-#define MAX_PACKET_LENGTH	193	/* 188 + 8 + 1 */
+#define MAX_PACKET_LENGTH	197	/* 188 + 8 + 1 */
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
