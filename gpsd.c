@@ -221,8 +221,7 @@ static int handle_request(int fd, char *buf, int buflen)
 #endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),
-		    9-session->device_type->stopbits,
-		    session->device_type->stopbits);
+		    9 - ud->stopbits, ud->stopbits);
 	    break;
 	case 'C':
 	    sprintf(phrase, ",C=%d", session->device_type->cycle);
