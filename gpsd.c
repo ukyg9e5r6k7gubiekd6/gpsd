@@ -394,7 +394,7 @@ static void raw_hook(char *sentence)
 
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "");
+		ok = PUBLISH(fd, "pvs");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "sa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
@@ -434,9 +434,10 @@ int main(int argc, char *argv[])
     char gpstype = 'n', *colon;
     int fd;
     int need_gps;
+    int nowait = 0;
 
     session.debug = 1;
-    while ((option = getopt(argc, argv, "D:S:T:hi:p:d:t:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:hi:np:d:t:")) != -1) {
 	switch (option) {
 	case 'T':
 	    gpstype = *optarg;
@@ -469,6 +470,9 @@ int main(int argc, char *argv[])
 		session.initpos.lond = toupper(session.initpos.longitude[strlen(session.initpos.longitude)-1]);
 		session.initpos.longitude[strlen(session.initpos.longitude)-1] = '\0';
 	    }
+	    break;
+	case 'n':
+	    nowait = 1;
 	    break;
 	case 'p':
 	    device_name = optarg;
@@ -523,7 +527,7 @@ int main(int argc, char *argv[])
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
-    if (gps_activate(&session) < 0)
+    if (nowait && (gps_activate(&session) < 0))
 	gpscli_errexit("exiting - GPS device nonexistent or can't be read");
 
     while (1) {
