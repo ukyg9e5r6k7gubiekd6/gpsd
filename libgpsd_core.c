@@ -141,7 +141,7 @@ int gpsd_poll(struct gps_session_t *session)
     if (waiting < 0)
 	return waiting;
     else if (!waiting) {
-	if (time(NULL) <= session->gNMEAdata.online_stamp.last_refresh + session->device_type->interval+1) {
+	if (time(NULL) <= session->gNMEAdata.online_stamp.last_refresh + session->device_type->cycle+1) {
 	    return 0;
 	} else {
 	    session->gNMEAdata.online = 0;
