@@ -24,6 +24,25 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
     if (*sentence == '$')
     {
 	if (nmea_parse(sentence + 1, &session->gNMEAdata) < 0)
+	    /*
+	     * Some of the stuff that comes out of supposedly NMEA-compliant
+	     * GPses is a doozy.  For example, my BU-303 occasionally and
+	     * randomly issues an ID message like this:
+	     *
+	     *  $Version 231.000.000_A2
+	     *  $TOW: 506058
+	     *  $WK:  1284
+	     *  $POS: 1222777  -4734973 4081037
+	     *  $CLK: 95872
+	     *  $CHNL:12
+	     *  $Baud rate: 4800  System clock: 12.277MHz
+	     *  $HW Type: S2AM
+	     *  $Asic Version: 0x23
+	     *  $Clock Source: GPSCLK
+	     *  $Internal Beacon: None
+	     *
+	     * Other SiRF-II-based GPSses probably do the same.
+	     */
 	    gpscli_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
