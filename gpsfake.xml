@@ -18,7 +18,9 @@
   <command>gpsfake</command>  
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
+      <arg choice='opt'>-l</arg>
       <arg choice='opt'>-n</arg>
+      <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
@@ -33,6 +35,10 @@ thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of a test logfile through the master side to the
 GPS.</para>
 
+<para>The <application>gpsd</application> instance is run in
+background, but with logging to standard error attached so you 
+will see the messages.</para>
+
 <para>Because of the baud-rate hunting logic, the first sentence in
 the file will not necessarily be the first presented to the sentence 
 parser.</para>
@@ -43,9 +49,15 @@ parser.</para>
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>
 
+<para>The -l option maes the program dump a line number just before
+each sentence is fed to the daemon.</para>
+
 <para>The -n option suppresses launch of the daemon.  Instead,
 <application>gpsfake</application> will tell you the name of the slave
 pty so you can launch in instance that reads it.</para>
+
+<para>The -o option specifies options to pass to the daemon.
+Passing "-n -D 4" is iften useful.</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>

@@ -6,19 +6,25 @@
 
 import sys, os, time, signal, pty, getopt, tempfile, termios
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:hns:")
+(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:s:")
 cycle = 1
 speed = 4800
 spawn = True
+linedump = False
+doptions = ""
 for (switch, val) in options:
     if (switch == '-c'):
         cycle = float(val)
+    elif (switch == '-l'):
+        linedump = True
     elif (switch == '-n'):
         spawn = False
+    elif (switch == '-o'):
+        doptions = val
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-n] [-s speed] [-c cycle] logfile\n")
+        sys.stderr.write("usage: gpsfake [-h] [-l] [-n] [-o options] [-s speed] [-c cycle] logfile\n")
         sys.exit(0)
 logfile = arguments[0]
 
@@ -29,15 +35,17 @@ except:
     sys.exit(1)
 slave = os.ttyname(slave_fd)
 
-spawncmd = "gpsd -P /tmp/gpsfake%d -p %s" % (os.getpid(), slave)
+spawncmd = "gpsd -N -P /tmp/gpsfake%d -p %s %s" % (os.getpid(),slave,doptions)
+print spawncmd
 
 if not spawn:
     sys.stderr.write("gpsfake: slave tty is %s\n" % slave)
-elif os.system(spawncmd):
+elif os.system(spawncmd + " &"):
     sys.stderr.write("gpsfake: gpsd launch failed.\n")
     sys.exit(1)
 else:
     sys.stderr.write("gpsfake: gpsd launch OK.\n")
+
     fp = open("/tmp/gpsfake%s" % os.getpid())
     pid = int(fp.read())
     fp.close()
@@ -61,7 +69,11 @@ try:
 
     i = 0;
     while True:
+        if i % len(lines) == 0:
+            print "gpsfake: log cycle begins"
         time.sleep(cycle)
+        if linedump:
+            print "gpsfake: line %d" % (i % len(lines) + 1)
         os.write(master_fd, lines[i % len(lines)])
         i += 1
 finally:

@@ -42,7 +42,7 @@ static void onsig(int sig)
     longjmp(restartbuf, sig+1);
 }
 
-static int daemonize(char *pid_file)
+static int daemonize(void)
 {
     int fd;
     pid_t pid;
@@ -53,16 +53,6 @@ static int daemonize(char *pid_file)
     case 0:	/* child side */
 	break;
     default:	/* parent side */
-	if (pid_file) {
-	    FILE *fp;
-
-	    if ((fp = fopen(pid_file, "w")) != NULL) {
-		fprintf(fp, "%u\n", pid);
-		(void) fclose(fp);
-	    } else {
-		gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
-	    }
-	}
 	exit(0);
     }
 
@@ -570,7 +560,18 @@ int main(int argc, char *argv[])
 	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
 
     if (go_background)
-	daemonize(pid_file);
+	daemonize();
+
+    if (pid_file) {
+	FILE *fp;
+
+	if ((fp = fopen(pid_file, "w")) != NULL) {
+	    fprintf(fp, "%u\n", getpid());
+	    (void) fclose(fp);
+	} else {
+	    gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
+	}
+    }
 
     /* user may want to re-initialize the session */
     if ((st = setjmp(restartbuf)) == SIGHUP+1) {

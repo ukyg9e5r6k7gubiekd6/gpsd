@@ -237,6 +237,9 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
     case NMEA_LEADER_END:
 	if (c == '\r')
 	    session->packet_state = NMEA_CR;
+	else if (c == '\n')
+	    /* not strictly correct, but helps for interpreting logfiles */
+	    session->packet_state = NMEA_RECOGNIZED;
 	else if (isprint(c))
 	    /* continue gathering body packets */;
 	else if (session->packet_type == NMEA_PACKET)
@@ -312,7 +315,7 @@ static void packet_copy(struct gps_session_t *session)
 /* packet grab succeeded, move to output buffer */
 {
     int packetlen = session->inbufptr-session->inbuffer;
-    gpsd_report(6, "Packet copy\n");
+    gpsd_report(6, "Packet copy, type %d\n", session->packet_type);
     memcpy(session->outbuffer, session->inbuffer, packetlen);
     session->outbuffer[session->outbuflen = packetlen] = '\0';
 }
@@ -434,14 +437,18 @@ int packet_sniff(struct gps_session_t *session)
     session->inbuflen = 0;
     session->inbufptr = session->inbuffer;
 
+    gpsd_report(5, "packet_sniff begins\n");
     for (n = 0; n < MAX_PACKET_LENGTH; n += count) {
 	count = 0;
 	if (ioctl(session->gNMEAdata.gps_fd, FIONREAD, &count) < 0)
 	    return BAD_PACKET;
-	if (count && packet_get(session, count))
+	if (count && packet_get(session, count)) {
+	    gpsd_report(5, "packet_sniff ends\n");
 	    return session->packet_type;
+	}
     }
 
+    gpsd_report(5, "packet_sniff found no packet\n");
     return BAD_PACKET;
 }
 
