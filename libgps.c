@@ -165,7 +165,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->valid |= SPEED_SET;
 		    break;
 		case 'X':
-		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+		    sscanf(sp, "X=%lf", &gpsdata->online);
 		    gpsdata->valid |= ONLINE_SET;
 		    break;
 		case 'Y':
@@ -281,55 +281,50 @@ void data_dump(struct gps_data_t *collect, time_t now)
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
     printf("online: %lf\n", collect->online);
-    if (collect->status)
-	printf("P: lat/lon: %lf %lf", collect->fix.latitude, collect->fix.longitude);
-    if (collect->fix.altitude_stamp.changed) {
-	printf("A: ->fix.altitude: %lf  U: climb: %lf", 
-	       collect->fix.altitude, collect->climb);
-    }
-    if (collect->track_stamp.changed) {
-	printf("T: track: %lf  V: speed: %lf ", 
-	       collect->track, collect->speed);
-    }
-    if (collect->status_stamp.changed) {
-	printf("S: status: %d (%s) ", 
-	       collect->status,status_values[collect->status]);
-    }
-    if (collect->fix.mode_stamp.changed) {
-	printf("M: mode: %d (%s) ", collect->fix.mode, mode_values[collect->fix.mode]);
-    }
-    if (collect->fix_quality_stamp.changed) {
-	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
-	      collect->satellites_used, 
-	      collect->pdop, collect->hdop, collect->vdop);
-    }
-    if (collect->satellite_stamp.changed) {
+    printf("P: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
+    if (collect->valid | ALTITUDE_SET)
+	printf("A: altitude: %lf  U: climb: %lf\n", 
+	       collect->fix.altitude, collect->fix.climb);
+    if (collect->fix.track != TRACK_NOT_VALID)
+	printf("T: track: %lf  V: speed: %lf\n", 
+	       collect->fix.track, collect->fix.speed);
+    if (collect->valid | STATUS_SET)
+	printf("S: status: %d (%s)\n", 
+	       collect->status, status_values[collect->status]);
+    if (collect->fix.mode | MODE_SET)
+	printf("M: mode: %d (%s)\n", 
+	   collect->fix.mode, mode_values[collect->fix.mode]);
+    printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+	   collect->satellites_used, 
+	   collect->pdop, collect->hdop, collect->vdop);
+
+    if (collect->valid & SATELLITE_SET) {
 	int i;
 
 	printf("Y: satellites in view: %d\n", collect->satellites);
 	for (i = 0; i < collect->satellites; i++) {
 	    printf("    %2.2d: %2.2d %3.3d %3.3d %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->satellite_stamp.last_refresh,
-	       collect->satellite_stamp.changed);
     }
 }
 
-static void dumpline(char *buf)
+static void dumpline(struct gps_data_t *ud UNUSED, char *buf)
 {
     puts(buf);
 }
 
+#include <getopt.h>
+
 main(int argc, char *argv[])
 {
     struct gps_data_t *collect;
-    char buf[BUFSIZ];
+    char buf[BUFSIZ], *device = NULL;
+    int option;
 
     collect = gps_open(NULL, 0);
     gps_set_raw_hook(collect, dumpline);
-    if (argc > 1) {
-	strcpy(buf, argv[1]);
+    if (optind < argc) {
+	strcpy(buf, argv[optind]);
 	strcat(buf,"\n");
 	gps_query(collect, buf);
 	data_dump(collect, time(NULL));
