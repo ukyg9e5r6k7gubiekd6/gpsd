@@ -161,7 +161,7 @@ static void usage()
 	if ((*dp)->typekey)
 	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
 #else
-    printf("This gpsd was compiled with support for NMEA only.");
+    printf("This gpsd was compiled with support for NMEA only.\n");
 #endif /* NON_NMEA_ENABLE */
 }
 
