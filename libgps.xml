@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<!-- lifted from troff+man by doclifter -->
 <refentry>
 <refentryinfo><date>14 Aug 2004</date></refentryinfo>
 <refmeta>
@@ -17,7 +16,7 @@
 <funcsynopsis>
 <funcsynopsisinfo>
 
-#include &lt;gps.h&gt;
+#include &lt;gpsd.h&gt;
 
 struct gpsd_t session;
 
@@ -56,19 +55,22 @@ struct gpsd_t session;
 </funcsynopsis>
 </refsynopsisdiv>
 
-
 <refsect1 id='description'><title>DESCRIPTION</title>
 <para><emphasis remap='B'>libgps</emphasis>
-is a service library which supports querying GPS devices. The GPS daemon
+is a service library which supports querying GPS devices; link it with
+the linker option -lgps. There are
+two interfaces supported in it; one high-level interface that
+goes through
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-uses it, and is appropriate for situations in which more than one
-program may need access to the GPS data stream.  This library may be
-useful for applications that have the exclusive use of a GPS;
-otherwise, you probably want to use
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-which manages access to ann instance of
+and is intended for concurrent use by several applications, and one
+low-level interface that speaks directly with the serial or USB device
+to which the GPS is attached.  This page describes the low-level
+interface, whic
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-monitoring a shared GPS.</para>
+itself uses.  See 
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+for a description of the high-level interface, which is almost
+certainly what you want.</para>
 
 <para>Calling
 <function>gps_init()</function>
@@ -151,7 +153,7 @@ It defaults to 1, but can be altered by the calling program.</para>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>lgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 </para>
 </refsect1>
 

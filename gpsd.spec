@@ -55,8 +55,8 @@ cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
 %{_libdir}/libgps.a
-%{_libdir}/libgpsd.a
 %{_mandir}/man3/libgps.3*
+%{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 
 %changelog

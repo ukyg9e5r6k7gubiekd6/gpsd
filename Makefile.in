@@ -119,7 +119,7 @@ COMMON_OBJECTS  = netlib.o
 ## Programs
 PROGRAMS = gpsd gps
 ## Libraries
-LIBRARIES = libgps.a libgpsd.a
+LIBRARIES = libgps.a
 ## Manual pages
 PAGES = gpsd.1 libgps.3 libgpsd.3
 
@@ -140,13 +140,9 @@ gps: gps.o display.o libgps.a
 xgpsspeed: $(XGPSOBJS)
 	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgps $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
-libgps.a:  $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
-	ar -r libgps.a $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
+libgps.a:  $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
+	ar -r libgps.a $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
 	ranlib libgps.a
-
-libgpsd.a:  $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
-	ar -r libgpsd.a $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
-	ranlib libgpsd.a
 
 # This is a test instrument, it doesn't ship.
 libgpsd: libgpsd.c gps.h
@@ -159,6 +155,7 @@ serial.o: serial.c gps.h gpsd.h
 drivers.o: drivers.c gps.h gpsd.h
 earthmate.o: earthmate.c gps.h gpsd.h
 gpscore.o: gpscore.c gps.h gpsd.h
+libgpsd.o: libgpsd.c gps.h
 
 # And the main sequences of the applications
 display.o: display.c gps.h gpsd.h
