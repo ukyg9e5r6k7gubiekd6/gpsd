@@ -1,0 +1,59 @@
+
+							20021115
+
+This is a translation of the protocol spec used between gpsd and
+its clients. The spec was originally written in "C", but for popular
+demand translated to english. Keep in mind that this is not the
+original document, if in doubt, read the source...
+
+1. The gpsd protocol is very simple. The idea was to have gpsd do all
+   the nasty nmea parsing (or whatever original format) and translate
+   the information into bits a program can easily digest.
+
+2. Gpsd listens for clients. When a client connects, gpsd waits for
+   the client to send requests. Gpsd requests are single letters.
+   A request gets executed when gpsd sees a '\n' (0x0a) from the
+   client.
+
+3. The following requests are implemented:
+
+	p  Returns the current position in the form "P=%f %f".
+	d  Returns the date in the form "D=%s".
+	a  The current altitude as "A=%f".
+	v  The current speed (velocity) as "V=%f".
+	s  The gps status as "S=%d".
+	m  The gps mode as "M=%d".
+	r  Toggles 'raw' mode. Return "R=0" or "R=1"
+
+   If a client wants information that is contained in the gps data,
+   but there is no gpsd request for it, kindly add the request.
+   Requesting raw mode, and parsing nmea yourself is not a good
+   solution.
+
+4. Requests can be concatenated and sent as a string. Gpsd will then
+   reply with a comma seperated list of replies.
+
+5. Every gpsd reply will start with the string "GPSD" followed by
+   the replies.
+
+   Examples:
+      query:       "p\n"
+      reply:       "GPSD,P=36.000000 123.000000\r\n"
+
+      query:       "d\n"
+      reply:       "GPSD,D=11/16/2002 02:45:05\r\n"
+
+      query:       "va\n"
+      reply:       "GPSD,V=0.000000,A=37.900000\r\n"
+
+6. Use telnet to connect to a gpsd.
+   "telnet localhost 2947"
+
+   Type p and hit enter. You should get a reply like
+   in the above example.
+
+7. Queries are case insensitive. "P" or "p" will do the same thing.
+   The first occurence of either '\r' or '\n' will execute the query.
+   So "va\n", "vA\r", and "VA\r\n" are equvalent.
+
+
