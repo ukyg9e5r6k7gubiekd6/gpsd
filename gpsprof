@@ -42,7 +42,7 @@ class uninstrumented:
         fp.write("#Read\n")
         fp.write("----------\n")
     def formatter(self, session, fp):
-        fp.write("%2.6f\n" % ((time.time()-session.gps_time) % session.cycle,))
+        fp.write("%2.6f %2.6\n" % (time.time(), session.gps_time,))
         return True
     def plot(self, file, title, session):
         fmt = '''

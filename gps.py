@@ -295,6 +295,7 @@ class gps(gpsdata):
 	res = self.__unpack(data)
         if self.utc != "?":
             self.gps_time = isotime(self.utc)
+            #self.gps_time -= 3600
             if self.profiling:
                 self.c_decode_time = time.time()
                 # Awful kluge that nukes all timezone problems
@@ -434,13 +435,13 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     return (dx, dy)
 
 def isotime(s):
-    "Convert timestamps in ISO8661 format to and from secs since epoch in GMT."
+    "Convert timestamps in ISO8661 format to and from Unix local time."
     if type(s) == type(1):
-        return time.strftime(time.gmtime(s), "%Y-%m-%dT%H:%M:%SZ")
+        return time.strftime(time.localtime(s), "%Y-%m-%dT%H:%M:%SZ")
     elif type(s) == type(1.0):
         date = int(s)
         msec = s - date
-        date = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(s))
+        date = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.localtime(s))
         return date + "." + `msec`[2:]
     elif type(s) == type(""):
         gmt = s[-1] == "Z"
@@ -453,6 +454,11 @@ def isotime(s):
             msec = "0"
         unpacked = time.strptime(date, "%Y-%m-%dT%H:%M:%S")
         seconds = time.mktime(unpacked)
+        if gmt:
+            if time.daylight and time.localtime().tm_isdst:
+                seconds -= time.altzone
+            else:
+                seconds -= time.timezone
         return seconds + float("0." + msec)
     else:
         raise TypeError
