@@ -814,7 +814,7 @@ static void decode_time(int week, int tow)
     wmove(mid2win, 3, 29);
     wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
     wmove(mid2win, 4, 8);
-    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100,0)+gmt_offset);
+    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100,0));
     wmove(mid2win, 4, 29);
     wprintw(mid2win, "%d", gmt_offset);
 }

@@ -31,10 +31,10 @@ int tzoffset(void)
 #endif
 #ifdef HAVE_DAYLIGHT
     if (daylight && localtime_r(&now, &tm)->tm_isdst)
-	res += 3600;
+	res -= 3600;
 #else
     if (localtime_r(&now, &tm)->tm_isdst)
-	res += 3600;
+	res -= 3600;
 #endif
     return res;
 }
@@ -51,7 +51,7 @@ double iso8601_to_unix(char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-    return mktime(&tm) + usec;
+    return mktime(&tm) - tzoffset() + usec;
 }
 
 char *unix_to_iso8601(double fixtime, char *isotime)
@@ -63,7 +63,7 @@ char *unix_to_iso8601(double fixtime, char *isotime)
     int slen;
 
     fractional = modf(fixtime, &integral);
-    intfixtime = (time_t)integral;
+    intfixtime = (time_t)integral + tzoffset();
     localtime_r(&intfixtime, &when);
 
     strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
@@ -89,7 +89,7 @@ char *unix_to_iso8601(double fixtime, char *isotime)
  * Note: This time will need to be corrected for leap seconds.
  * That's what the offset argument is for.
  */
-#define GPS_EPOCH	315982800		/* GPS epoch in Unix time */
+#define GPS_EPOCH	315964800		/* GPS epoch in Unix time */
 #define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
