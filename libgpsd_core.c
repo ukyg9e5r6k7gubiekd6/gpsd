@@ -332,7 +332,7 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
     char *bufp2 = bufp;
     bufp[0] = '\0';
 
-    for( i = 0 ; i < MAXCHANNELS; i++ ) {
+    for( i = 0 ; i < session->gNMEAdata.satellites; i++ ) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
             bufp2 = bufp;
