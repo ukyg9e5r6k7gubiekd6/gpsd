@@ -335,6 +335,34 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
         EarthDistance((lat1, lon1), (lat2, lon1))
         )
 
+def isotime(s):
+    "Convert gpsd timestamps in ISO8661 format to local Unix time, and back."
+    if type(s) == type(1):
+        return time.strftime(time.localtime(s), "%Y-%m-%dT%H:%M:%S")
+    elif type(s) == type(1.0):
+        date = int(s)
+        msec = s - date
+        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
+        return date + "." + `msec`[2:]
+    elif type(s) == type(""):
+        gmt = s[-1] == "Z"
+        if gmt:
+            s = s[:-1]
+        if "." in s:
+            (date, msec) = s.split(".")
+        else:
+            date = s
+            msec = "0"
+        unpacked = time.strptime(date, "%Y-%m-%dT%H:%M:%S")
+        seconds = time.mktime(unpacked)
+        uncorrected = seconds + float("0." + msec)
+        if not time.daylight:
+            return uncorrected - time.timezone
+        else:
+            return uncorrected - time.altzone
+    else:
+        raise TypeError
+
 if __name__ == '__main__':
     import sys,readline
     print "This is the exerciser for the Python gps interface."
