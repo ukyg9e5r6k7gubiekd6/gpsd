@@ -39,7 +39,6 @@ struct gps_session_t {
     struct gps_data_t gNMEAdata;
     struct gps_type_t *device_type;
     char *gpsd_device;	/* where to find the GPS */
-    int baudrate;	/* baud rate of session */
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */

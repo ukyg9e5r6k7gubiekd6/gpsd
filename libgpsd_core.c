@@ -36,7 +36,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     foundit:;
     }
 #endif /* NON_NMEA_ENABLE */
-    session->baudrate = session->device_type->baudrate;
+    session->gNMEAdata.baudrate = session->device_type->baudrate;
     session->dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZE];
@@ -93,7 +93,7 @@ void gpsd_deactivate(struct gps_session_t *session)
 int gpsd_activate(struct gps_session_t *session)
 /* acquire a connection to the GPS device */
 {
-    if ((session->gNMEAdata.gps_fd = gpsd_open(session->baudrate, session->device_type->stopbits, session)) < 0)
+    if ((session->gNMEAdata.gps_fd = gpsd_open(session->gNMEAdata.baudrate, session->device_type->stopbits, session)) < 0)
 	return -1;
     else {
 	session->gNMEAdata.online = 1;

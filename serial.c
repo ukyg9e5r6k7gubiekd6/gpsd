@@ -127,7 +127,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
 			device_speed, stopbits);
 	    if (connect_at_speed(ttyfd, session, device_speed)) {
-		session->baudrate = device_speed;
+		session->gNMEAdata.baudrate = device_speed;
 		return ttyfd;
 	    }
 	} else
@@ -135,7 +135,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n", 
 			    *ip, stopbits);
 		if (connect_at_speed(ttyfd, session, *ip)) {
-		    session->baudrate = *ip;
+		    session->gNMEAdata.baudrate = *ip;
 		    return ttyfd;
 		}
 	    }

@@ -94,13 +94,11 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
     struct life_t satellite_stamp;
 
-#ifdef PROFILING
     /* profiling data */
-    char tag[MAXNAMELEN+1];
-    double recv_time, emit_time;
-    int sentence_length;	/* character count of associated sentence */
-    int baudrate, stopbits;
-#endif /* PROFILING */
+    char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
+    int sentence_length;	/* character count of last sentence */
+    double recv_time,emit_time;	/* profile times */
+    int baudrate, stopbits;	/* RS232 link paramters */
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */

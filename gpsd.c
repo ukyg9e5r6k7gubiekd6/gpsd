@@ -355,7 +355,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",Z=1");
 	    }
 	    sprintf(phrase + strlen(phrase), ":%d:%d", 
-		    session->baudrate, session->device_type->stopbits);
+		    session->gNMEAdata.baudrate, session->device_type->stopbits);
 	    break;
 
 	case 'B':		/* change baud rate (SiRF only) */
@@ -596,7 +596,7 @@ int main(int argc, char *argv[])
 
     session = gpsd_init(gpstype, dgpsserver);
     if (gpsd_speed)
-	session->baudrate = gpsd_speed;
+	session->gNMEAdata.baudrate = gpsd_speed;
     session->gpsd_device = device_name;
     session->gNMEAdata.raw_hook = raw_hook;
     if (session->dsock >= 0)
