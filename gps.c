@@ -140,7 +140,7 @@ static void build_gui(Widget lxbApp)
     gc = XCreateGC(XtDisplay(satellite_diagram),
 	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
     register_canvas(satellite_diagram, gc);
-    XtAddCallback(satellite_diagram, XmNexposeCallback, redraw, NULL);
+    XtAddCallback(satellite_diagram, XmNexposeCallback, (XtPointer)redraw, NULL);
 
     /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
@@ -185,7 +185,7 @@ static void build_gui(Widget lxbApp)
 
     quitbutton = XtCreateManagedWidget("Quit",
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
-    XtAddCallback(quitbutton, XmNactivateCallback, quit_cb, NULL);
+    XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
 
     XtRealizeWidget(lxbApp);
     delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
