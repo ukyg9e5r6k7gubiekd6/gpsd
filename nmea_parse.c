@@ -469,7 +469,8 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    /* do nothing */;
 	} else
 	    return -1;
-    }
+    } else
+        gpsd_report(1, "Bad NMEA checksum: '%s'\n", sentence);
     return 0;
 }
 
