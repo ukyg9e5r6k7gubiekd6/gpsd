@@ -322,12 +322,14 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     y2 = CalcRad(lat2) * sin(Deg2Rad(lon2)) * sin(Deg2Rad(90-lat2))
     z1 = CalcRad(lat1) * cos(Deg2Rad(90-lat1))
     z2 = CalcRad(lat2) * cos(Deg2Rad(90-lat2))
-    try:
-        a = acos((x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2));
-    except ValueError:
-        sys.stderr.write("EarthDistance: %s\n" % (locals(),))
-        raise ValueError
-    return CalcRad((lat1+lat2) / 2) * a
+    a = (x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2)
+    # a should be in [1, -1] but can sometimes fall outside it by
+    # a very small amount due to rounding errors in the preceding
+    # calculations (this is prone to happen when the argument points
+    # are very close together).  Thus we constrain it here.
+    if abs(a) > 1: a = 1
+    elif a < -1: a = -1
+    return CalcRad((lat1+lat2) / 2) * acos(a)
 
 def MeterOffset((lat1, lon1), (lat2, lon2)):
     "Return offset in meters of second arg from first."
