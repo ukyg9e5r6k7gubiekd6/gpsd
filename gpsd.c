@@ -31,6 +31,7 @@
 #endif
 
 #include "gpsd.h"
+#include "sirf.h"
 
 #define QLEN			5
 
@@ -355,6 +356,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    sprintf(phrase + strlen(phrase), ":%d:%d", 
 		    session->baudrate, session->device_type->stopbits);
+	    break;
+
+	case 'B':		/* change baud rate (SiRF only) */
+	    i = atoi(p++);
+	    while (isdigit(*p)) p++;
+	    sirf_mode(session, 0, i);
+	    sprintf(phrase, ",B=%d", i); 
 	    break;
 #endif /* PROFILING */
 	case '\r': case '\n':

@@ -24,7 +24,7 @@ int sirf_mode(struct gps_session_t *session, int binary, int speed)
 		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
    cfsetispeed(&session->ttyset, (speed_t)speed);
    cfsetospeed(&session->ttyset, (speed_t)speed);
-   tcsetattr(session->gNMEAdata.gps_fd, TCSADRAIN, &session->ttyset);
+   tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset);
 }
 
 int sirf_nmea_waas(int ttyfd, int enable) 
