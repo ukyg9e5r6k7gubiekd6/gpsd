@@ -104,7 +104,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 * Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Fix bonehead error in interpretation of PGRME.  We don't use O_SYNC
   (it turned out not to be reliable) so remove it to make life easier
-  under Mac OS X.  Allow gpsfake to accept subsecond cycle times.
+  under Mac OS X.  Allow gpsfake to accept subsecond cycle times.  Fix
+  packet-engine problem that made disconnect/reconnect unreliable.
 
 * Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.16-1
 - New F command allows changing the GPS device after startup time.

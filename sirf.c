@@ -576,12 +576,13 @@ static void decode_sirf(struct gps_session_t *session,
     }
 }
 
-static void sirfbin_handle_input(struct gps_session_t *session)
+static int sirfbin_handle_input(struct gps_session_t *session, int waiting)
 {
-    while (!session->outbuflen)
-	packet_get_sirf(session);
-    decode_sirf(session, session->outbuffer+4, session->outbuflen-8);
-    packet_accept(session);
+    if (packet_get(session, waiting)) {
+	decode_sirf(session, session->outbuffer+4, session->outbuflen-8);
+	return 1;
+    } else
+	return 0;
 }
 
 static void sirfbin_initializer(struct gps_session_t *session)
@@ -629,7 +630,7 @@ struct gps_type_t sirf_binary =
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     NULL,		/* no probe */
     sirfbin_initializer,	/* initialize the device */
-    sirfbin_handle_input,/* read and parse message packets */
+    sirfbin_handle_input,	/* read and parse message packets */
     NULL,		/* send DGPS correction */
     sirfbin_switch,	/* we can change baud rate */
     NULL,		/* caller needs to supply a close hook */

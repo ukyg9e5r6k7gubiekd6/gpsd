@@ -778,11 +778,13 @@ static void garmin_init(struct gps_session_t *session)
 	gpsd_report(3, "from garmin_probe() = %d\n", ret);
 }
 
-static void garmin_handle_input(struct gps_session_t *session)
+static int garmin_handle_input(struct gps_session_t *session, int waiting UNUSED)
 {
 	if ( !GetPacket( session ) ) {
 		PrintPacket(session, (Packet_t*)session->GarminBuffer);
-	}
+		return 1;
+	} else
+	    return 0;
 }
 
 /* caller needs to specify a wrapup function */

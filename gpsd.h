@@ -2,7 +2,6 @@
 
 #include "config.h"
 #include "gps.h"
-#include <setjmp.h>
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #define ZODIAC_ENABLE	EARTHMATE_ENABLE
@@ -56,7 +55,7 @@ struct gps_type_t {
     char *typename, *trigger;
     int (*probe)(struct gps_session_t *session);
     void (*initializer)(struct gps_session_t *session);
-    void (*handle_input)(struct gps_session_t *session);
+    int (*handle_input)(struct gps_session_t *session, int waiting);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_session_t *session, int speed);
     void (*wrapup)(struct gps_session_t *session);
@@ -76,10 +75,9 @@ struct gps_type_t {
  * expect to see in any protocol, because we have to be able to hold
  * an entire packet for checksumming.  Thus, in particular, they need
  * to be as long as a SiRF MID 4 packet, 188 bytes payload plus eight bytes 
- * of header/length/checksum/trailer.  But making this longer also 
- * slows down the autobauding.
+ * of header/length/checksum/trailer. 
  */
-#define MAX_PACKET_LENGTH	197	/* 188 + 8 + 1 */
+#define MAX_PACKET_LENGTH	196	/* 188 + 8 */
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
@@ -96,12 +94,13 @@ struct gps_session_t {
 #define NMEA_PACKET	0
 #define SIRF_PACKET	1
 #define ZODIAC_PACKET	2
-    unsigned char inbuffer[MAX_PACKET_LENGTH+1];
+    int packet_state;
+    int packet_length;
+    unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
     unsigned short inbuflen;
     unsigned char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
-    jmp_buf packet_error;
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef BINARY_ENABLE
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
@@ -142,10 +141,8 @@ extern int nmea_send(int, const char *, ... );
 extern int nmea_sane_satellites(struct gps_data_t *);
 extern void nmea_add_checksum(char *);
 
+extern int packet_get(struct gps_session_t *, int);
 extern int packet_sniff(struct gps_session_t *);
-extern int packet_get_nmea(struct gps_session_t *);
-extern int packet_get_sirf(struct gps_session_t *);
-extern void packet_accept(struct gps_session_t *);
 
 extern int gpsd_open(struct gps_session_t *);
 extern int gpsd_switch_driver(struct gps_session_t *, char *);

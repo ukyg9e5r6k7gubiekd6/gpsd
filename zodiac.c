@@ -317,12 +317,13 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
     return (n == 0);
 }
 
-static void zodiac_handle_input(struct gps_session_t *session)
+static int zodiac_handle_input(struct gps_session_t *session, int waiting UNUSED)
 {
     unsigned char c;
 
-    if (read(session->gNMEAdata.gps_fd, &c, 1) == 1)
-    {
+    if (read(session->gNMEAdata.gps_fd, &c, 1) != 1)
+	return 0;
+    else {
 	static int state = ZODIAC_HUNT_FF;
 	static struct header h;
 	static unsigned int byte, words;
@@ -379,6 +380,7 @@ static void zodiac_handle_input(struct gps_session_t *session)
 	    }
 	    break;
 	}
+	return 1;
     }
 }
 

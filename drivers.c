@@ -12,37 +12,36 @@
  *
  **************************************************************************/
 
-static void nmea_handle_input(struct gps_session_t *session)
+static int nmea_handle_input(struct gps_session_t *session, int waiting)
 {
-    while (!session->outbuflen)
-	packet_get_nmea(session);
-
-    gpsd_report(2, "<= GPS: %s", session->outbuffer);
-    if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
-	if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
-	    gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
-    } else {
+    if (packet_get(session, waiting)) {
+	gpsd_report(2, "<= GPS: %s", session->outbuffer);
+	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
+	    if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
+		gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
+	} else {
 #if NON_NMEA_ENABLE
-	struct gps_type_t **dp;
+	    struct gps_type_t **dp;
 
-	/* maybe this is a trigger string for a driver we know about? */
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    char	*trigger = (*dp)->trigger;
+	    /* maybe this is a trigger string for a driver we know about? */
+	    for (dp = gpsd_drivers; *dp; dp++) {
+		char	*trigger = (*dp)->trigger;
 
-	    if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
-		gpsd_report(1, "found %s.\n", trigger);
-		gpsd_switch_driver(session, (*dp)->typename);
-		packet_accept(session);
-		return;
+		if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
+		    gpsd_report(1, "found %s.\n", trigger);
+		    gpsd_switch_driver(session, (*dp)->typename);
+		    return 1;
+		}
 	    }
-	}
 #endif /* NON_NMEA_ENABLE */
-	gpsd_report(1, "unknown exception: \"%s\"\n", session->outbuffer);
-    }
+	    gpsd_report(1, "unknown exception: \"%s\"\n", session->outbuffer);
+	}
 
-    /* also copy the sentence up to clients in raw mode */
-    gpsd_raw_hook(session, session->outbuffer);
-    packet_accept(session);
+	/* also copy the sentence up to clients in raw mode */
+	gpsd_raw_hook(session, session->outbuffer);
+	return 1;
+    } else
+	return 0;
 }
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)

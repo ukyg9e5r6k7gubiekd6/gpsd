@@ -133,7 +133,7 @@ int gpsd_poll(struct gps_session_t *session)
 
     /* update the scoreboard structure from the GPS */
     waiting = is_input_waiting(session->gNMEAdata.gps_fd);
-    gpsd_report(5, "GPS has %d chars waiting\n", waiting);
+    gpsd_report(7, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
 	return waiting;
     else if (!waiting) {
@@ -152,8 +152,9 @@ int gpsd_poll(struct gps_session_t *session)
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 
-	/* call the input routine from the device-specific driver */
-	session->device_type->handle_input(session);
+	/* can we get a full packet from the device? */
+	if (!session->device_type->handle_input(session, waiting))
+	    return waiting;
 
 	session->gNMEAdata.d_decode_time = timestamp();
 
