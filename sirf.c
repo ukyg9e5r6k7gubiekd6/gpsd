@@ -246,18 +246,70 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x08:
+#ifdef SUBFRAME
 	/*
+	 * Heavy black mgic begins here!
+	 *
+	 * We're after subframe 4 page 18 word 9, the leap year correction.
+	 *
 	 * Chris Kuethe says:
 	 * "Message 8 is generated as the data is received. It is not
 	 * buffered on the chip. So when you enable message 8, you'll
-	 * get on subframe every 6 seconds.  Of the data received, the
+	 * get one subframe every 6 seconds.  Of the data received, the
 	 * almanac and ephemeris are buffered and stored, so you can
 	 * query them at will. Alas, the time parameters are not
 	 * stored, which is really lame, as the UTC-GPS correction
 	 * changes 1 second every few years. Maybe."
 	 */
-	break;
+        {
+	    unsigned int svid = getb(1);
+	    unsigned int chan = getb(2);
+	    unsigned int i, words[10];
+	    /* mask off the high 2 bits and shift out the 6 parity bit */
+	    words[0] = (getl(3)  & 0x3fffffff) >> 6;
+	    words[1] = (getl(7)  & 0x3fffffff) >> 6;
+	    words[2] = (getl(11) & 0x3fffffff) >> 6;
+	    words[3] = (getl(15) & 0x3fffffff) >> 6;
+	    words[4] = (getl(19) & 0x3fffffff) >> 6;
+	    words[5] = (getl(23) & 0x3fffffff) >> 6;
+	    words[6] = (getl(27) & 0x3fffffff) >> 6;
+	    words[7] = (getl(31) & 0x3fffffff) >> 6;
+	    words[8] = (getl(35) & 0x3fffffff) >> 6;
+	    words[9] = (getl(39) & 0x3fffffff) >> 6;
+	    /*
+	     * "First, throw away everything that doesn't start with 8b or
+	     * 74. more correctly the first byte should be 10001011. If
+	     * it's 01110100, then you have a subframe with inverted
+	     * polarity and each byte needs to be xored against 0xff to
+	     * remove the inversion."
+	     */
+	    words[0] &= 0xff0000;
+	    if (words[0] != 0x8b0000 && words[0] != 0x740000)
+	    	break;
+	    if (words[0] == 0x740000)
+		for (i = 1; i < 10; i++)
+		    words[i] ^= 0xffffff;
+	    /*
+	     * The subframe ID is in the Hand Over Word (page 80) 
+	     */
+	    /* once we've filtered, we can ignore the TEL and HOW words */
+	    gpsd_report(2, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
+			chan, svid, ((words[1] >> 2) & 0x07),
+			    words[2], words[3], words[4], words[5], 
+			    words[6], words[7], words[8], words[9]);
 
+
+	    /*
+	     * How do I get the subframe and page numbers associated with each
+	     * of these 10-byte segments?
+	     *
+	     * "Pages 105 of ICD-GPS-200. Pages 66-76a,80 of ICD-GPS-200
+	     * are the actual subframe structures."
+	     */
+	    //gpsd_report(2, "50B ID field: \n", 
+	}
+#endif /* SUBFRAME */
+	break;
     case 0x09:		/* CPU Throughput */
 	gpsd_report(4, 
 		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
@@ -370,7 +422,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
 	    sprintf(buf2+strlen(buf2), "%02x", buf[i]);
-	gpsd_report(1, "Unknown SiRF packet length %d: %s\n", len, buf2);
+	gpsd_report(3, "Unknown SiRF packet id %d length %d: %s\n", buf[0], len, buf2);
 	return 0;
     }
 
@@ -415,12 +467,29 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
+#ifdef SUBFRAME
+	u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+				 0x80, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x1C,
+				 0x10,
+				 0x00, 0x00, 0xb0, 0xb3};
+#endif /* SUBFRAME */
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
 	sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");
 	sirf_write(session->gpsdata.gps_fd, sbasparams);
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
+#ifdef SUBFRAME
+	if (!session->counter) {
+	    gpsd_report(4, "Enabling subframe transmission...\n");
+	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	}
+#endif /* SUBFRAME */
     }
 }
 
