@@ -47,13 +47,13 @@ static void nmea_handle_input(struct gps_session_t *session)
 	    return;
 
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
-	    buf[offset] = '\0';
+	    /* copy the sentence up to clients in raw mode */
+	    if (session->gNMEAdata.raw_hook)
+		if (session->gNMEAdata.raw_hook(buf))
+		    continue;
 	    if (strlen(buf)) {
+		buf[offset] = '\0';
 	        gpsd_NMEA_handle_message(session, buf);
-		/* also copy the sentence up to clients in raw mode */
-		strcat(buf, "\r\n");
-		if (session->gNMEAdata.raw_hook)
-		    session->gNMEAdata.raw_hook(buf);
 	    }
 	    offset = 0;
 	    return;

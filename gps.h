@@ -94,15 +94,19 @@ struct gps_data_t {
     struct life_t satellite_stamp;
 
     /* these members are private */
-    int gps_fd;				/* socket or file descriptor to GPS */
-    void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
+    int gps_fd;			/* socket or file descriptor to GPS */
+    int (*raw_hook)(char *buf);	/* Raw-mode hook for GPS data.
+				 * This is invoked before public-member update.
+				 * If it returns a nonzero value, public-member
+				 * update is suppressed.
+				 */
 };
 
 struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *requests);
 int gps_poll(struct gps_data_t *gpsdata);
-void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
+void gps_set_raw_hook(struct gps_data_t *gpsdata, int (*hook)(char *buf));
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Imperial (U.S./British) feet */

@@ -314,7 +314,7 @@ static void notify_watchers(char *sentence)
 	    throttled_write(fd, sentence, strlen(sentence));
 }
 
-static void raw_hook(char *sentence)
+static int raw_hook(char *sentence)
 /* hook to be executed on each incoming sentence */
 {
     int fd;
@@ -344,6 +344,8 @@ static void raw_hook(char *sentence)
 #undef PUBLISH
 	}
     }
+
+    return 0;	/* hand off to normal interpretation */
 }
 
 static int passivesock(char *service, char *protocol, int qlen)
