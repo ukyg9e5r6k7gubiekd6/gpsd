@@ -130,7 +130,7 @@ static int throttled_write(int fd, char *buf, int len)
     return status;
 }
 
-static int validate(struct gps_session_t *session)
+static int have_fix(struct gps_session_t *session)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
@@ -206,7 +206,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 static struct gps_session_t *session;
 static int need_gps;
 
-static int handle_request(int fd, char *buf, int buflen)
+static int handle_request(int fd, char *buf, int buflen, int explicit)
 /* interpret a client request; fd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
@@ -217,12 +217,13 @@ static int handle_request(int fd, char *buf, int buflen)
     sprintf(reply, "GPSD");
     p = buf;
     while (*p && p - buf < buflen) {
+	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (!validate(session))
-		strcpy(phrase, ",A=?");
-	    else
+	    if (have_fix(session) && SEEN(ud->altitude_stamp))
 		sprintf(phrase, ",A=%f", ud->altitude);
+	    else if (explicit)
+		strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
 	    if (*p == '=') {
@@ -243,19 +244,20 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
 		icd = 1;
-	    } else
+	    } else if (explicit)
 		strcpy(phrase, ",D=?");
 	    break;
 	case 'E':
-	    if (!validate(session))
+	    if (have_fix(session)) {
+		if (ud->seen_sentences & PGRME)
+		    sprintf(phrase, ",E=%.2f %.2f %.2f", ud->epe, ud->eph, ud->epv);
+		else if (SEEN(ud->fix_quality_stamp))
+		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
+			    ud->pdop * UERE(session), 
+			    ud->hdop * UERE(session), 
+			    ud->vdop * UERE(session));
+	    } else if (explicit)
 		strcpy(phrase, ",E=?");
-	    else if (ud->seen_sentences & PGRME)
-		sprintf(phrase, ",E=%.2f %.2f %.2f", ud->epe, ud->eph, ud->epv);
-	    else if (SEEN(ud->fix_quality_stamp))
-		sprintf(phrase, ",E=%.2f %.2f %.2f", 
-			ud->pdop * UERE(session), 
-			ud->hdop * UERE(session), 
-			ud->vdop * UERE(session));
 	    break;
 	case 'F':
 	    if (*p == '=') {
@@ -304,18 +306,18 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",M=%d", ud->mode);
 	    break;
 	case 'P':
-	    if (!validate(session))
-		strcpy(phrase, ",P=?");
-	    else
+	    if (have_fix(session) && SEEN(ud->latlon_stamp))
 		sprintf(phrase, ",P=%f %f", 
 			ud->latitude, ud->longitude);
+	    else if (explicit)
+		strcpy(phrase, ",P=?");
 	    break;
 	case 'Q':
-	    if (!validate(session) || !SEEN(ud->fix_quality_stamp))
-		strcpy(phrase, ",Q=?");
-	    else
+	    if (SEEN(ud->fix_quality_stamp))
 		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
 			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
+	    else if (explicit)
+		strcpy(phrase, ",Q=?");
 	    break;
 	case 'R':
 	    if (*p == '=') ++p;
@@ -343,22 +345,22 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (!validate(session) || !SEEN(ud->track_stamp))
-		strcpy(phrase, ",T=?");
-	    else
+	    if (have_fix(session) && SEEN(ud->track_stamp))
 		sprintf(phrase, ",T=%f", ud->track);
+	    else if (explicit)
+		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (!validate(session) || !SEEN(ud->climb_stamp))
-		strcpy(phrase, ",U=?");
-	    else
+	    if (have_fix(session) && SEEN(ud->climb_stamp))
 		sprintf(phrase, ",U=%f", ud->climb);
+	    else if (explicit)
+		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (!validate(session) || !SEEN(ud->speed_stamp))
-		strcpy(phrase, ",V=?");
-	    else
+	    if (have_fix(session) && SEEN(ud->speed_stamp))
 		sprintf(phrase, ",V=%f", ud->speed);
+	    else if (explicit)
+		strcpy(phrase, ",V=?");
 	    break;
 	case 'W':
 	    if (*p == '=') ++p;
@@ -386,9 +388,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",X=%d", ud->online);
 	    break;
 	case 'Y':
-	    if (!ud->satellites || !SEEN(ud->satellite_stamp))
-		strcpy(phrase, ",Y=?");
-	    else {
+	    if (SEEN(ud->satellite_stamp)) {
 		int used, reported = 0;
 		sprintf(phrase, ",Y=%d:", ud->satellites);
 		for (i = 0; i < ud->satellites; i++) {
@@ -408,7 +408,8 @@ static int handle_request(int fd, char *buf, int buflen)
 		    }
 		}
 		assert(reported == ud->satellites);
-	    }
+	    } else if (explicit)
+		strcpy(phrase, ",Y=?");
 	    break;
 	case 'Z':
 	    if (*p == '=') ++p;
@@ -465,8 +466,46 @@ static int handle_request(int fd, char *buf, int buflen)
 static void raw_hook(struct gps_data_t *ud, char *sentence)
 /* hook to be executed on each incoming sentence group */
 {
-    int fd;
-    char *sp;
+    int fd, mask = 0;
+    char cmds[16], *sp;
+
+    for (sp = sentence; *sp; sp++) {
+	if (*sp == '$') {
+	    if (PREFIX("$GPRMC", sp)) {
+		mask |= GPRMC;
+	    } else if (PREFIX("$GPGGA", sp)) {
+		mask |= GPGGA;
+	    } else if (PREFIX("$GPGLL", sp)) {
+		mask |= GPGLL;
+	    } else if (PREFIX("$GPVTG", sp)) {
+		mask |= GPVTG;
+	    } else if (PREFIX("$GPGSA", sp)) {
+		mask |= GPGSA;
+	    } else if (PREFIX("$GPGSV", sp)) {
+		if (nmea_sane_satellites(ud))
+		    mask |= GPGSA;
+	    } else if (PREFIX("$PGRME", sp)) {
+		mask |= PGRME;
+	    }
+	}
+    }
+    cmds[0] = '\0';
+    if (mask & (GPRMC | GPGGA | GPGLL))
+	strcat(cmds, "dp");
+    if (mask & (GPGGA))
+	strcat(cmds, "a");
+    if (mask & (GPRMC | GPVTG))
+	strcat(cmds, "tuv");
+    if (mask & (GPRMC | GPGGA))
+	strcat(cmds, "s");
+    if (mask & (GPGSA | GPGGA))
+	strcat(cmds, "m");
+    if (mask & (GPGGA))
+	strcat(cmds, "q");
+    if (mask & (GPGSV))
+	strcat(cmds, "y");
+    if (mask & (GPGSA | PGRME))
+	strcat(cmds, "e");
 
     for (fd = 0; fd < FD_SETSIZE; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
@@ -475,46 +514,7 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 
 	/* some listeners may be in watcher mode */
 	if (FD_ISSET(fd, &watcher_fds)) {
-	    char cmds[10];
-	    int mask = 0;
-	    for (sp = sentence; *sp; sp++) {
-		if (*sp == '$') {
-		    if (PREFIX("$GPRMC", sp)) {
-			mask |= GPRMC;
-		    } else if (PREFIX("$GPGGA", sp)) {
-			mask |= GPGGA;
-		    } else if (PREFIX("$GPGLL", sp)) {
-			mask |= GPGLL;
-		    } else if (PREFIX("$GPVTG", sp)) {
-			mask |= GPVTG;
-		    } else if (PREFIX("$GPGSA", sp)) {
-			mask |= GPGSA;
-		    } else if (PREFIX("$GPGSV", sp)) {
-			if (nmea_sane_satellites(ud))
-			    mask |= GPGSA;
-		    } else if (PREFIX("$PGRME", sp)) {
-			mask |= PGRME;
-		    }
-		}
-	    }
-	    cmds[0] = '\0';
-	    if (mask & (GPRMC | GPGGA | GPGLL))
-		strcat(cmds, "dp");
-	    if (mask & (GPGGA))
-		strcat(cmds, "a");
-	    if (mask & (GPRMC | GPVTG))
-		strcat(cmds, "tuv");
-	    if (mask & (GPRMC | GPGGA))
-		strcat(cmds, "s");
-	    if (mask & (GPGSA | GPGGA))
-		strcat(cmds, "m");
-	    if (mask & (GPGGA))
-		strcat(cmds, "q");
-	    if (mask & (GPGSV))
-		strcat(cmds, "y");
-	    if (mask & (GPGSA | PGRME))
-		strcat(cmds, "e");
-	    handle_request(fd, cmds, sizeof(cmds)-1);
+	    handle_request(fd, cmds, strlen(cmds), 0);
 	}
     }
 }
@@ -704,7 +704,7 @@ int main(int argc, char *argv[])
 			gpsd_report(1, "<= client: %s", buf);
 
 			session->poll_times[fd] = timestamp();
-			if (handle_request(fd, buf, buflen) < 0) {
+			if (handle_request(fd, buf, buflen, 1) < 0) {
 			    (void) close(fd);
 			    FD_CLR(fd, &all_fds);
 			    FD_CLR(fd, &nmea_fds);
