@@ -12,11 +12,11 @@
 
 <h1 align='center'>GPSD-Compatible GPSes</h1>
 
-<p>gpsd should work with any GPS using an RS232C or USB interface that
-advertises NMEA-0183 compliance.  Here are some notes on hardware we
-have tested (all under Linux 2.6.8).  Hyperlinks lead to technical
-information.  The "Works with" column is the last version with which
-this GPS is known to have been successfully tested.</p>
+<p><code>gpsd</code> should work with any GPS using an RS232C or USB
+interface that advertises NMEA-0183 compliance.  Here are some notes
+on hardware we have tested.  Hyperlinks lead to technical information.
+The "Works with" column is the last <code>gpsd</code> version with
+which this GPS is known to have been successfully tested.</p>
 
 <table border='1'>
 <tr>
@@ -167,7 +167,7 @@ Takes optional latitude/longitude initialization.
 <td>2.0</td>
 <td>
 PGRME, GPGLL, PGRMZ, PGRMM, GPBOD, GPRTE, GPWPL, 
-GPRMC, GPRMB, GPGGA, GPGSA, GPGSV, GPGSV, GPGSV
+GPRMC, GPRMB, GPGGA, GPGSA, GPGSV
 </td>
 <td>
 Garmin 12XL and 45 are nearly identical and should work as well.<BR>
@@ -196,6 +196,23 @@ includes EPE only). DGPS information in GPGGA sentence is not returned.
 Speed and course over ground are calculated from the north/east
 velocity  and may not be accurate.  Magnetic variation information 
 is not available. Garmin uses a nonstandard 16-bit SNR scale.
+</td>
+</tr>
+<tr>
+<td><a href='http://www.garmin.com/manuals/Geko201_OwnersManual.pdf'>Garmin Geko 201</a></td>
+<td>Good</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td><a href="http://www.garmin.com">Garmin</a></td>
+<td align='center'>n</td>
+<td>2.5</td>
+<td>?</td>
+<td>
+PGRME, GPGLL, PGRMZ, GPBOD, GPRTE, 
+GPRMC, GPRMB, GPGGA, GPGSA, GPGSV
+</td>
+<td>
+The online copy of the owner's manual seems to be badly garbled.
 </td>
 </tr>
 <tr>
@@ -241,7 +258,7 @@ gpsprobe against the device and looking at the output.</p>
 
 <p>SiRF-II: A <a
 href='http://www.rayming.com/download/NEMA_commands.pdf'>technical
-manual</a> describing NMEA extensions supported by chipset is
+manual</a> describing NMEA extensions supported by this chipset is
 available from Globalsat's U.S. reseller.  For SiRF binary '
 protocol itself, look <a href='sirf_protocol.pdf'>here</a>.</p>
 
@@ -249,7 +266,7 @@ protocol itself, look <a href='sirf_protocol.pdf'>here</a>.</p>
 Interface Specification</a></p>
 
 <p>PL2303: support is broken in late 2.4 Linux kernels (it broke after
-2.4.18) but good in 2.6.8.</p>
+2.4.18) but good in 2.6.8 and later.</p>
 
 <h2>RS232 levels:</h2>
 
@@ -289,7 +306,7 @@ USB and RS232-DB9 adaptors sold separately.</td>
 <tr>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
 <td>sales@garmin.com</td>
-<td>eTrex, foreTrex, GPS12, GPS72, GPS76, Geko</td>
+<td>eTrex, foreTrex, GPS12, GPS72, GPS76</td>
 <td>All handhelds with consoles.  These guys are focused on the
 aviation market.</td>
 </tr>
