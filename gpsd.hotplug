@@ -31,6 +31,7 @@ def gpsd_connect():
         syslog.syslog("gpsd is not running or is unreachable")
         return None
     else:
+        syslog.syslog("found gpsd.")
         return sockfile
 
 def wake_up_gpsd(devpath):
@@ -47,6 +48,13 @@ def wake_up_gpsd(devpath):
     else:
         tty = "/dev/" + subnodes[0]
         syslog.syslog(tty + " has gone active")
+        # Cope with a race condition
+        i = 0
+        while not os.path.exists(tty):
+            syslog.syslog("but " + tty + " does not actually exist (" + `i` +")")
+            time.sleep(1)
+            i += 1
+        syslog.syslog(tty + "created")
 
         # Next get a connection to gpsd; start one if not already running
         connect = gpsd_connect()
@@ -54,7 +62,7 @@ def wake_up_gpsd(devpath):
             syslog.syslog("reached a running gpsd")
         else:
             syslog.syslog("attempting to launch gpsd")
-            os.system("/etc/init.d/gpsd start")
+            os.system("gpsd")
             connect = gpsd_connect()
         if not connect:
             return
