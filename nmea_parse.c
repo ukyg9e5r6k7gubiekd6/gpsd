@@ -160,6 +160,7 @@ static void do_lat_lon(char *sentence, int begin)
 {
     double lat, lon, d, m;
     char str[20], *p;
+    int updated = 0;
 
 
     if (*(p = field(sentence, begin + 0)) != '\0') {
@@ -174,6 +175,7 @@ static void do_lat_lon(char *sentence, int begin)
 	    gNMEAdata.latitude = lat;
 	    gNMEAdata.cmask |= C_LATLON;
 	}
+	updated++;
     }
     if (*(p = field(sentence, begin + 2)) != '\0') {
 	strncpy(str, p, 20);
@@ -188,7 +190,10 @@ static void do_lat_lon(char *sentence, int begin)
 	    gNMEAdata.longitude = lon;
 	    gNMEAdata.cmask |= C_LATLON;
 	}
+	updated++;
     }
+    if (updated == 2)
+	gNMEAdata.last_update = time(NULL);
 }
 
 /* ----------------------------------------------------------------------- */

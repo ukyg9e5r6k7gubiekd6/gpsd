@@ -275,6 +275,7 @@ static void handle1000(unsigned short *p)
 
     gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 
+    gNMEAdata.last_update = time(NULL);
 }
 
 static void handle1002(unsigned short *p)

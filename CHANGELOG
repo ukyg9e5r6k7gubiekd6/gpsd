@@ -43,3 +43,4 @@
 20030818 (1.10)
 	 Use cfset[io]speed() to set speed in serial.h. Glibc is quite insane
 	 and I am tired to chase it, so I give up. Hope this works for BSD.
+	 Set status and mode 0 after GPS timeout (5 sec) - Cougar <cougar@random.ee>

@@ -1,3 +1,4 @@
+#include <time.h>
 
 #define GPVTG "GPVTG"
 #define GPGGA "GPGGA"
@@ -9,6 +10,8 @@
 struct OUTDATA {
     int fdin;
     int fdout;
+
+    time_t last_update;		/* When we got last data from GPS receiver */
 
     long cmask;
     char utc[20];		/* UTC date / time in format "mm/dd/yy hh:mm:ss" */

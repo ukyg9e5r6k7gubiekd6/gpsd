@@ -48,6 +48,7 @@
 
 #define QLEN		5
 #define BUFSIZE		4096
+#define GPS_TIMEOUT	5		/* Consider GPS connection loss after 5 sec */
 
 int debug = 0;
 int device_speed = B4800;
@@ -263,6 +264,7 @@ int main(int argc, char *argv[])
     int option;
     char buf[BUFSIZE];
     int sentdgps = 0, fixcnt = 0;
+    time_t curtime;
 
     while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:")) != -1) {
 	switch (option) {
@@ -398,6 +400,13 @@ int main(int argc, char *argv[])
 		continue;
 	    errexit("select");
 	}
+
+	/* invalidate status if gps went quiet */
+ 	curtime = time(NULL);
+ 	if (curtime > gNMEAdata.last_update + GPS_TIMEOUT) {
+ 	  gNMEAdata.mode = 0;
+ 	  gNMEAdata.status = 0;
+ 	}
 
 	need_gps = 0;
 
