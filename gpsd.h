@@ -37,6 +37,9 @@
  * Taking the square root of the sum of aa squares...
  * UERE=sqrt(7.0^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2 + 0.03^2 + 0.005^2)
  *
+ * Note: we're assume these are 1-sigma error ranges. This needs to
+ * be checked in the sources.
+ *
  * See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
  * for discussion.
  *

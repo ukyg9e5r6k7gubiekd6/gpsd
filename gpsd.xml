@@ -194,7 +194,7 @@ part will vary and may be zero.</para></listitem>
 <term>e</term>
 <listitem>
 <para>Returns "E=%f %f %f": three estimated position errors in meters
-&mdash; total, horizontal, and vertical (2-sigma or 95% confidence
+&mdash; total, horizontal, and vertical (1-sigma or 66% confidence
 level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
 them from satellite DOP using fixed figures for expected non-DGPS 

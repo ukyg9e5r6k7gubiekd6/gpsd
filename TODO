@@ -65,7 +65,9 @@ tweaks.
 One of my goals has been to report an uncertainty along with every
 dimension of PVT, so that the return from the GPS actually (and
 realistically) describes the volume of kinematic state space within
-which it is located at 95% confidence.
+which it is located at 1-sigma or 66% confidence. (Because the errors
+are taken to be normally distributed, we can square the error to get
+2-sigma or 95% confidence.)
 
 There are several problems with this. 
 
@@ -74,12 +76,12 @@ general case.  There are clock drift and bias fields in the SiRF
 binary protocol, but I don't know how to interpret these.  Does
 anyone?
 
-B. Only the Garmin reports estimated position error in meters, and I
-don't know whether its confidence level is 50% or 95%.  Does anyone?
-Gary?
-
-C. SiRF binary reports HDOP, SiRF and other NMEA devices report
+B. SiRF binary reports HDOP, SiRF and other NMEA devices report
 HDOP/VDOP/PDOP.
+
+C. Only Garmin devices report estimated position errord in meters.
+They won't say what the confidence interval is, but it is generally
+believed to be 1-sigma.  See <http://gpsinformation.net/main/epenew.txt>.
 
 Here is what I am presently doing in the new E command:
 
@@ -93,12 +95,12 @@ What non-Garmin GPSes will return in the E command is UERE multiplied
 by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP, the
 one respect in which it is functionally inferior to SiRF NMEA.
 
-I don't know, because my sources didn't say, whether the range
-uncertainties in gpsd.h are for a 50%-confidence or 95%-confidence
-error budget.  My educated guess is the latter, and that's what the
-gpsd documentation now says, but it needs to be confirmed.
+I don't know, because my sources didn't give, the confidence level
+associated with the range uncertainties in gpsd.h.  My educated guess
+is that they are 1-sigma (66%), and that's what the gpsd documentation
+now says, but it needs to be confirmed.
 
-3. I don't currently pass back uncertainty of speed or track at all,
+I don't currently pass back uncertainty of speed or track at all,
 though SiRF chips make those available.  To do so would require yet
 another protocol extension, which gets into "Does the GPSD protocol
 need to be redesigned?".
@@ -316,8 +318,7 @@ wants to centralize all device probing into itself so that devices see
 as few probes as possible and the probes don't step on each other
 
 Playing nice in the HAL world may require that we replace our hotplug
-script with launcher code that lives in the HAL daemon.  Does anyone else
-here care enough about HAL to own this issue?
+script with launcher code that lives in the HAL daemon.
 
 ** Do the research to figure out just what is going on with status bits
 
