@@ -20,7 +20,7 @@ struct life_t
 #define SEEN(stamp) stamp.refreshes
 #define CHANGED(stamp) stamp.changed
 
-struct OUTDATA {
+struct gps_data {
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
     time_t ts_utc;		/* UTC last updated time stamp */
 
@@ -106,7 +106,7 @@ struct gpsd_t
 {
     struct gps_type_t *device_type;
     struct longlat_t initpos;
-    struct OUTDATA gNMEAdata;
+    struct gps_data gNMEAdata;
     char *gps_device;	/* where to find the GPS */
     int baudrate;		/* baud rate of session */
     int fdin;		/* input fd from GPS */

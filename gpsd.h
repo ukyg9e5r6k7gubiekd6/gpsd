@@ -19,7 +19,7 @@ extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
 
 /* GPS library internal prototypes */
-extern int gps_process_NMEA_message(char *sentence, struct OUTDATA *outdata);
+extern int gps_process_NMEA_message(char *sentence, struct gps_data *outdata);
 extern void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence);
 extern void gps_add_checksum(char *sentence);
 extern short gps_checksum(char *sentence);

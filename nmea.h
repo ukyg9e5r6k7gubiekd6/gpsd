@@ -10,7 +10,7 @@
 #define PMGNST "PMGNST"
 
 /* prototypes */
-extern int gps_process_NMEA_message(char *sentence, struct OUTDATA *outdata);
+extern int gps_process_NMEA_message(char *sentence, struct gps_data *outdata);
 extern void gps_NMEA_handle_message(char *sentence);
 extern void gps_add_checksum(char *sentence);
 extern short gps_checksum(char *sentence);
