@@ -476,6 +476,27 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 }
 
+static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
+/* Garmin Estimated Position Error */
+{
+    /*
+       $PGRME,15.0,M,45.0,M,25.0,M*22
+	1    = HDOP
+        2    = units
+	3    = VDOP
+        4    = units
+	5    = PDOP
+        6    = units
+     */
+    int changed = 0;
+    
+    changed |= update_field_f(field[1], &out->hdop);
+    changed |= update_field_f(field[3], &out->vdop);
+    changed |= update_field_f(field[5], &out->pdop);
+    out->epe_quality_stamp.changed = changed;
+    REFRESH(out->epe_quality_stamp);
+}
+
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
 {
@@ -531,6 +552,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"GPVTG", GPVTG,	processGPVTG},
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
+	{"PGRME", PGRME,	processPGRME},
 	{"PRWIZCH", 0,  	NULL},
     };
 

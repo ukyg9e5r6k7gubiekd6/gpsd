@@ -1457,11 +1457,30 @@ ZDL - Time and Distance to Variable Point
 
 Vendor extensions (this list is very incomplete):
 
+Garmin Estimated Error
+
+        1  2  3  4  5  6  7
+        |  |  |  |  |  |  |
+$PGRME,hhh,M,vvv,M,ttt,M*hh<CR><LF>
+
+ Field Number: 
+   1) Estimated horizontal position error (HPE), 
+   2) M=meters
+   3) Estimated vertical position error (VPE)
+   4) M=meters
+   5) Overall spherical equivalent position error
+   6) M=meters
+   7) Checksum
+
+Example: $PGRME,15.0,M,45.0,M,25.0,M*22
+
 ------------------------------------------------------------------------------
+
+Magellan Status
 
           1   2 3  4    5    6  7    8
           |   | |  |    |    |  |    |
-$PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c*hh<CR><LF>
+$PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
 
  Field Number: 
   1) Firmware version number?

@@ -283,6 +283,12 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    session->separation = pvt->msl_hght;
 	    REFRESH(session->gNMEAdata.altitude_stamp);
 
+	    // esrtimated position error in meters (two sigmas)
+	    session->gNMEAdata.epe = pvt->epe;
+	    session->gNMEAdata.eph = pvt->eph;
+	    session->gNMEAdata.epv = pvt->epv;
+	    REFRESH(session->gNMEAdata.fix_quality_stamp);
+
 	    // convert lat/lon in meters/sec to speed in knots
 	    session->gNMEAdata.speed
 		= hypot(pvt->lon_vel, pvt->lat_vel) * 1.9438445;

@@ -80,6 +80,13 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    case 'D':
 		strcpy(gpsdata->utc, sp+2);
 		break;
+	    case 'E':
+		sscanf(sp, "E=%lf %lf %lf", &d1, &d2, &d3);
+		gpsdata->fix_quality_stamp.changed = \
+		    (gpsdata->epe != d1) || (gpsdata->eph != d2) || (gpsdata->epv != d3);
+		gpsdata->epe = d1; gpsdata->eph = d2; gpsdata->epv = d3;
+		REFRESH(gpsdata->epe_quality_stamp);
+		break;
 	    case 'I':
 		if (gpsdata->gps_id)
 		    free(gpsdata->gps_id);

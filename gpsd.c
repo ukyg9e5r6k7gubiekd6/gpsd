@@ -236,6 +236,12 @@ static int handle_request(int fd, char *buf, int buflen)
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
+	case 'E':
+	    if (!validate())
+		strcpy(phrase, ",E=?");
+	    else
+		sprintf(phrase, ",E=%f %f %f", ud->epe, ud->eph, ud->epv);
+	    break;
 	case 'I':
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;

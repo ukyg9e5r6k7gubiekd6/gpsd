@@ -85,6 +85,12 @@ struct gps_data_t {
     double pdop, hdop, vdop;	/* Dilution of precision */
     struct life_t fix_quality_stamp;
 
+    /* precision of fix in real units */
+    double epe;  /* estimated position error, 2 sigma (meters)  */
+    double eph;  /* epe, but horizontal only (meters) */
+    double epv;  /* epe but vertical only (meters) */
+    struct life_t epe_quality_stamp;
+
     /* satellite status */
     int satellites;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
@@ -124,6 +130,7 @@ struct gps_data_t {
 #define GPVTG	0x08
 #define GPGSA	0x10
 #define GPGSV	0x20
+#define PGRME	0x40
 };
 
 struct map_t {

@@ -208,6 +208,15 @@ part will vary and may be zero.</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>e</term>
+<listitem>
+<para>Returns "E=%f %f %f": three estimated position errors in meters 
+&mdash; total, horizontal, and vertical.  Note: many GPSses do not
+supply these numbers.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>i</term>
 <listitem><para>Returns a text string identifying the GPS.  The string
 may contain spaces and is terminated by CR-LF.</para></listitem>
@@ -235,7 +244,7 @@ numbers are in degrees, latitude first.</para></listitem>
 <term>q</term>
 <listitem>
 <para>Returns "Q=%d %f %f %f": a count of satellites used in the last
-fix, and three estimated position errors in meters &mdash; position, 
+fix, and three dimensionless dilution-of-precision (DOP) &mdash; total, 
 horizontal, and vertical.</para>
 </listitem>
 </varlistentry>

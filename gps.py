@@ -68,6 +68,9 @@ class gpsdata:
 	self.pdop = self.hdop = self.vdop = 0.0
 	self.fix_quality_stamp = gps.timestamp(0)
 
+	self.epe = self.eph = self.epv = 0.0
+	self.epe_quality_stamp = gps.timestamp(0)
+
 	self.satellites = []			# satellite objects in view
 	self.satellite_stamp = gps.timestamp(0)
         self.await = self.parts = 0
@@ -214,6 +217,14 @@ class gps(gpsdata):
 	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
+	    elif cmd in ('E', 'e'):
+	      parts = data.split()
+	      (f1, f2, f3) = map(float, parts)
+	      self.epe_quality_stamp.changed = (self.epe != f1 or self.eph != f2 or self.epv != f3)
+	      self.epe = f1
+	      self.eph = f2
+	      self.epv = f3
+	      self.epe_quality_stamp.refresh()
 	    elif cmd in ('I', 'i'):
 	      self.gps_id = data
 	    elif cmd in ('M', 'm'):
