@@ -50,7 +50,7 @@ and speedometer</refpurpose>
 
 <para>gpsd is a monitor daemon that watches a TCP/IP port (2947 by
 default), waiting for an application to request location information
-from a GPS.  The GPS is expoected to be direct-connected to the
+from a GPS.  The GPS is expected to be direct-connected to the
 machine running gpsd via a USB or RS232C serial port which is
 specified to gpsd at startup.</para>
 
@@ -283,8 +283,8 @@ response as if the user had just sent some set of gpsd commands.  That
 set of commands is the minimum for which the incoming sentence is
 relevant &mdash; e.g., a GPRMC sentence ships a "pvs" response because
 it contains position, velocity and GPS status data.  Additionally,
-watching clients get X notifications when the online/offline status of
-the GPS changes.</para>
+watching clients get notifications in the form X=0 or X=1 when the 
+online/offline status of the GPS changes.</para>
 
 <para>Sending SIGHUP to a running gpsd forces it to close the GPS and
 all client connections.  It will then attempt to reconnect to the GPS
