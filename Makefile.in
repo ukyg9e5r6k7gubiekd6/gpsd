@@ -135,7 +135,7 @@ libgpsd.a:  $(LIB_OBJECTS)
 	ranlib libgpsd.a
 
 clean:
-	rm -f *.o *.a gpsd gps gpsplay *~ config.status
+	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log
