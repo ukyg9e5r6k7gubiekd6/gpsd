@@ -95,7 +95,7 @@ static void pol2cart(double azimuth, double elevation, double *xout, double *you
 }
 
 
-void draw_arc(int x, int y, int diam)
+static void draw_arc(int x, int y, int diam)
 {
     XDrawArc(XtDisplay(draww), pixmap, drawGC,
 	     x - diam / 2, y - diam / 2,	/* x,y */
@@ -105,7 +105,7 @@ void draw_arc(int x, int y, int diam)
 }
 
 
-int get_status(struct gps_data *gpsdata, int satellite)
+static int get_status(struct gps_data *gpsdata, int satellite)
 {
     int i;
     int s;
