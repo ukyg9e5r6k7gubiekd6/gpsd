@@ -364,10 +364,11 @@ mode <application>gpsd</application> ships a line of data to the
 client each time the the GPS sends a sentence, but rather than being
 raw NMEA the line is a gpsd response as if the user had just sent some
 set of gpsd commands.  That set of commands is the minimum for which
-the incoming sentence is relevant &mdash; e.g., a GPRMC sentence ships
-a "pvs" response because it contains position, velocity and GPS status
-data.  Additionally, watching clients get notifications in the form
-X=0 or X=1 when the online/offline status of the GPS changes.</para>
+the incoming sentence is relevant &mdash; e.g., a GGA sentence ships a
+"pdasm" response because it contains position, date, altitude, and GPS
+mode data.  Additionally, watching clients get notifications in
+the form X=0 or X=1 when the online/offline status of the GPS
+changes.</para>
 
 <para>Sending SIGHUP to a running <application>gpsd</application>
 forces it to close the GPS and all client connections.  It will then
