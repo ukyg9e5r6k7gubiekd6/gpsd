@@ -18,8 +18,6 @@
 
 #include "gpsd.h"
 
-#define BUFSIZE 4096
-
 #define PI 3.14159265358979323846
 
 enum {

@@ -10,8 +10,6 @@
 
 #include "gpsd.h"
 
-#define BUFSIZE 4096
-
 /**************************************************************************
  *
  * process_exception() -- handle returned sentences in non-NMEA form

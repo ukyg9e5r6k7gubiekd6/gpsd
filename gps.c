@@ -90,8 +90,6 @@ String fallback_resources[] =
 GC gc;
 static Atom delw;
 
-#define BUFSIZE 4096
-
 extern void redraw();
 
 void quit_cb()

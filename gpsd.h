@@ -9,7 +9,7 @@
 #define C_STATUS	8
 #define C_MODE		16
 
-#define MAXSATS       12
+#define MAXCHANNELS	12
 
 struct life_t
 /* lifetime structure to be associated with some piece of data */
@@ -39,6 +39,8 @@ struct OUTDATA {
     /* velocity */
     double speed;		/* Speed over ground, knots */
     struct life_t speed_stamp;
+    double mag_var;		/* magnetic variation in degrees */
+    double course;		/* course made good */
 
     /* status and precision of fix */
     int    status;
@@ -51,23 +53,23 @@ struct OUTDATA {
 #define MODE_3D  	3
     struct life_t mode_stamp;
     struct life_t status_stamp;
-
-    double pdop;		/* Position dilution of precision */
-    double hdop;		/* Horizontal dilution of precision */
-    double vdop;		/* Vertical dilution of precision */
+    double pdop;		/* Position dilution of precision, meters */
+    double hdop;		/* Horizontal dilution of precision, meters */
+    double vdop;		/* Vertical dilution of precision, meters */
+    double separation;		/* geoidal separation */
 
     /* satellite status */
     int in_view;		/* # of satellites in view */
     int satellites;		/* Number of satellites used in solution */
-    int PRN[12];		/* PRN of satellite */
-    int elevation[12];		/* elevation of satellite */
-    int azimuth[12];		/* azimuth */
-    int ss[12];			/* signal strength */
-    int used[12];		/* used in solution */
+    int PRN[MAXCHANNELS];	/* PRN of satellite */
+    int elevation[MAXCHANNELS];	/* elevation of satellite */
+    int azimuth[MAXCHANNELS];	/* azimuth */
+    int ss[MAXCHANNELS];	/* signal strength */
+    int used[MAXCHANNELS];	/* used in solution */
 
     /* Zodiac chipset channel status from PRWIZCH */
-    int Zs[12];			/* satellite PRNs */
-    int Zv[12];			/* signal values (0-7) */
+    int Zs[MAXCHANNELS];	/* satellite PRNs */
+    int Zv[MAXCHANNELS];	/* signal values (0-7) */
 
     int year;
     int month;
@@ -75,14 +77,9 @@ struct OUTDATA {
     int hours;
     int minutes;
     int seconds;
-
-    double separation;
-    double mag_var;
-    double course;
-
-    int seen[12];
-    int valid[12];		/* signal valid */
 };
+
+#define BUFSIZE	4096	/* longer than max-length NMEA sentence */
 
 #define GPGLL "GPGLL"
 #define GPVTG "GPVTG"
@@ -164,5 +161,10 @@ void gps_wrap(struct gpsd_t *session);
 /* caller must supply these */
 void gpscli_errexit(char *s);
 void gpscli_report(int d, const char *fmt, ...);
+
+/* some multipliers for interpreting GPS output */
+#define METERS_TO_FEET	3.2808399
+#define METERS_TO_MILES	0.00062137119
+#define KNOTS_TO_MPH	1.1507794
 
 /* gpsd.h ends here */

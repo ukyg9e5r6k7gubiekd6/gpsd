@@ -26,9 +26,6 @@
 
 #include "gpsd.h"
 
-#define BUFSIZE          4096
-#define DEFAULTPORT "2947"
-
 #if defined(ultrix) || defined(SOLARIS) 
 extern double rint();
 #endif

@@ -47,7 +47,6 @@
 #include "version.h"
 
 #define QLEN		5
-#define BUFSIZE		4096
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 /* the default driver is NMEA */
@@ -308,12 +307,12 @@ static int handle_request(int fd)
 	case 'y':
 	    sc = 0;
 	    if (session.gNMEAdata.cmask & C_SAT)
-		for (i = 0; i < MAXSATS; i++)
+		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    sprintf(reply + strlen(reply),
 		    ",Y=%d ", sc);
-	    for (i = 0; i < MAXSATS; i++)
+	    for (i = 0; i < MAXCHANNELS; i++)
 		if (session.gNMEAdata.cmask & C_SAT)
 		    if (session.gNMEAdata.PRN[i])
 			sprintf(reply + strlen(reply),"%d %2d %2d ", 

@@ -177,10 +177,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
     sscanf(field(sentence, 7), "%lf", &out->speed);
 
-#if GPRMC_TRACK
-    sscanf(field(sentence, 8), "%lf", &out->track);
-#endif
-
+    sscanf(field(sentence, 8), "%lf", &out->course);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -282,9 +279,7 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
      * which means we want to extract field 5.  We'll deal with both
      * possibilities here.
      */
-#if GPMRC_TRACK
-    sscanf(field(sentence, 1), "%lf", &out->track);
-#endif
+    sscanf(field(sentence, 1), "%lf", &out->course);
     if (field(sentence, 2)[0] == 'T')
 	sscanf(field(sentence, 5), "%lf", &out->speed);
     else
