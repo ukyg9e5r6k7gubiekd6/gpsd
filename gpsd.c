@@ -143,11 +143,11 @@ static int have_fix(struct gps_device_t *device)
 static void notify_watchers(char *sentence)
 /* notify all watching clients of an event */
 {
-    int fd;
+    int cfd;
 
-    for (fd = 0; fd < FD_SETSIZE; fd++)
-	if (FD_ISSET(fd, &watcher_fds))
-	    throttled_write(fd, sentence, strlen(sentence));
+    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+	if (FD_ISSET(cfd, &watcher_fds))
+	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
 static int passivesock(char *service, char *protocol, int qlen)
@@ -198,8 +198,8 @@ static int passivesock(char *service, char *protocol, int qlen)
 static struct gps_device_t *device;
 static int need_gps;
 
-static int handle_request(int fd, char *buf, int buflen)
-/* interpret a client request; fd is the socket back to the client */
+static int handle_request(int cfd, char *buf, int buflen)
+/* interpret a client request; cfd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
@@ -389,22 +389,22 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'R':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		FD_SET(fd, &nmea_fds);
-		gpsd_report(3, "%d turned on raw mode\n", fd);
+		FD_SET(cfd, &nmea_fds);
+		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		FD_CLR(fd, &nmea_fds);
-		gpsd_report(3, "%d turned off raw mode\n", fd);
+		FD_CLR(cfd, &nmea_fds);
+		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 		p++;
-	    } else if (FD_ISSET(fd, &nmea_fds)) {
-		FD_CLR(fd, &nmea_fds);
-		gpsd_report(3, "%d turned off raw mode\n", fd);
+	    } else if (FD_ISSET(cfd, &nmea_fds)) {
+		FD_CLR(cfd, &nmea_fds);
+		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 	    } else {
-		FD_SET(fd, &nmea_fds);
-		gpsd_report(3, "%d turned on raw mode\n", fd);
+		FD_SET(cfd, &nmea_fds);
+		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 	    }
 	    break;
@@ -432,19 +432,19 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		FD_SET(fd, &watcher_fds);
+		FD_SET(cfd, &watcher_fds);
 		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		FD_CLR(fd, &watcher_fds);
+		FD_CLR(cfd, &watcher_fds);
 		sprintf(phrase, ",W=0");
 		p++;
-	    } else if (FD_ISSET(fd, &watcher_fds)) {
-		FD_CLR(fd, &watcher_fds);
+	    } else if (FD_ISSET(cfd, &watcher_fds)) {
+		FD_CLR(cfd, &watcher_fds);
 		sprintf(phrase, ",W=0");
 	    } else {
-		FD_SET(fd, &watcher_fds);
-		gpsd_report(3, "%d turned on watching\n", fd);
+		FD_SET(cfd, &watcher_fds);
+		gpsd_report(3, "%d turned on watching\n", cfd);
 		sprintf(phrase, ",W=1");
 	    }
 	    break;
@@ -480,21 +480,21 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		ud->profiling = 1;
-		gpsd_report(3, "%d turned on profiling mode\n", fd);
+		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		sprintf(phrase, ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		ud->profiling = 0;
-		gpsd_report(3, "%d turned off profiling mode\n", fd);
+		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		sprintf(phrase, ",Z=0");
 		p++;
-	    } else if (FD_ISSET(fd, &nmea_fds)) {
+	    } else if (FD_ISSET(cfd, &nmea_fds)) {
 		ud->profiling = 0;
-		gpsd_report(3, "%d turned off profiling mode\n", fd);
+		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		sprintf(phrase, ",Z=0");
 	    } else {
 		ud->profiling = !ud->profiling;
-		gpsd_report(3, "%d toggled profiling mode\n", fd);
+		gpsd_report(3, "%d toggled profiling mode\n", cfd);
 		sprintf(phrase, ",Z=%d", ud->profiling);
 	    }
 	    break;
@@ -517,25 +517,25 @@ static int handle_request(int fd, char *buf, int buflen)
 		ud->d_xmit_time - fixtime,
 		ud->d_recv_time - fixtime,
 		ud->d_decode_time - fixtime,
-		device->poll_times[fd] - fixtime,
+		device->poll_times[cfd] - fixtime,
 		timestamp() - fixtime); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }
     strcat(reply, "\r\n");
 
-    return throttled_write(fd, reply, strlen(reply));
+    return throttled_write(cfd, reply, strlen(reply));
 }
 
 static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 /* hook to be executed on each incoming sentence group */
 {
-    int fd;
+    int cfd;
 
-    for (fd = 0; fd < FD_SETSIZE; fd++) {
+    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (FD_ISSET(fd, &nmea_fds))
-	    throttled_write(fd, sentence, strlen(sentence));
+	if (FD_ISSET(cfd, &nmea_fds))
+	    throttled_write(cfd, sentence, strlen(sentence));
     }
 }
 
@@ -548,7 +548,7 @@ int main(int argc, char *argv[])
     static char *device_name = DEFAULT_DEVICE_NAME;
     struct sockaddr_in fsin;
     fd_set rfds;
-    int option, msock, fd, go_background = 1;
+    int option, msock, cfd, go_background = 1;
     extern char *optarg;
 
     debuglevel = 0;
@@ -706,14 +706,14 @@ int main(int argc, char *argv[])
 	}
 
 	if (changed &~ ONLINE_SET) {
-	    for (fd = 0; fd < FD_SETSIZE; fd++) {
+	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 		/* some listeners may be in watcher mode */
-		if (FD_ISSET(fd, &watcher_fds)) {
-		    device->poll_times[fd] = timestamp();
+		if (FD_ISSET(cfd, &watcher_fds)) {
+		    device->poll_times[cfd] = timestamp();
 		    if (changed & LATLON_SET)
-			handle_request(fd, "o", 1);
+			handle_request(cfd, "o", 1);
 		    if (changed & SATELLITE_SET)
-			handle_request(fd, "y", 1);
+			handle_request(cfd, "y", 1);
 		}
 	    }
 	}
@@ -724,14 +724,14 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
-	for (fd = 0; fd < FD_SETSIZE; fd++) {
-	    if (fd == msock || fd == device->gpsdata.gps_fd)
+	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+	    if (cfd == msock || cfd == device->gpsdata.gps_fd)
 		continue;
 	    /*
 	     * GPS must be opened if commands are waiting or any client is
 	     * streaming (raw or watcher mode).
 	     */
-	    if (FD_ISSET(fd, &rfds) || FD_ISSET(fd, &nmea_fds) || FD_ISSET(fd, &watcher_fds)) {
+	    if (FD_ISSET(cfd, &rfds) || FD_ISSET(cfd, &nmea_fds) || FD_ISSET(cfd, &watcher_fds)) {
 		if (device->gpsdata.gps_fd == -1) {
 		    gpsd_deactivate(device);
 		    if (gpsd_activate(device) >= 0) {
@@ -740,36 +740,35 @@ int main(int argc, char *argv[])
 		    }
 		}
 
-		if (FD_ISSET(fd, &rfds)) {
+		if (FD_ISSET(cfd, &rfds)) {
 		    char buf[BUFSIZ];
 		    int buflen;
-		    gpsd_report(3, "checking %d \n", fd);
-		    if ((buflen = read(fd, buf, sizeof(buf) - 1)) <= 0) {
-			(void) close(fd);
-			FD_CLR(fd, &all_fds);
-			FD_CLR(fd, &nmea_fds);
-			FD_CLR(fd, &watcher_fds);
+		    gpsd_report(3, "checking %d \n", cfd);
+		    if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
+			(void) close(cfd);
+			FD_CLR(cfd, &all_fds);
+			FD_CLR(cfd, &nmea_fds);
+			FD_CLR(cfd, &watcher_fds);
 		    } else {
 		        buf[buflen] = '\0';
 			gpsd_report(1, "<= client: %s", buf);
 
-			device->poll_times[fd] = timestamp();
-			if (handle_request(fd, buf, buflen) < 0) {
-			    (void) close(fd);
-			    FD_CLR(fd, &all_fds);
-			    FD_CLR(fd, &nmea_fds);
-			    FD_CLR(fd, &watcher_fds);
+			device->poll_times[cfd] = timestamp();
+			if (handle_request(cfd, buf, buflen) < 0) {
+			    (void) close(cfd);
+			    FD_CLR(cfd, &all_fds);
+			    FD_CLR(cfd, &nmea_fds);
+			    FD_CLR(cfd, &watcher_fds);
 			}
 		    }
 		}
 	    }
-	    if (fd != device->gpsdata.gps_fd && fd != msock && FD_ISSET(fd, &all_fds))
+	    if (cfd != device->gpsdata.gps_fd && cfd != msock && FD_ISSET(cfd, &all_fds))
 		need_gps++;
 	}
 
 	if (!nowait && !need_gps && device->gpsdata.gps_fd != -1) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-	    device->gpsdata.gps_fd = -1;
 	    gpsd_deactivate(device);
 	}
     }
