@@ -12,12 +12,6 @@
 #include "gpsd.h"
 
 #if ZODIAC_ENABLE
-enum {
-    ZODIAC_HUNT_FF, ZODIAC_HUNT_81, ZODIAC_HUNT_ID, ZODIAC_HUNT_WC,
-    ZODIAC_HUNT_FLAGS, ZODIAC_HUNT_CS, ZODIAC_HUNT_DATA, ZODIAC_HUNT_A
-};
-
-#define O(x) (x-6)
 
 struct header {
     unsigned short sync;
@@ -37,8 +31,8 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
 }
 
 /* zodiac_spew - Takes a message type, an array of data words, and a length
-   for the array, and prepends a 5 word header (including nmea_checksum).
-   The data words are expected to be nmea_checksummed */
+   for the array, and prepends a 5 word header (including checksum).
+   The data words are expected to be checksummed */
 #if defined (WORDS_BIGENDIAN)
 /* data is assumed to contain len/2 unsigned short words
  * we change the endianness to little, when needed.
@@ -113,9 +107,6 @@ static void send_rtcm(struct gps_session_t *session,
     data[n] = zodiac_checksum(data, n);
 
     zodiac_spew(session, 1351, data, n+1);
-#ifdef UNRELIABLE_SYNC
-    gpsd_drain(session->gNMEAdata.gps_fd);
-#endif /* UNRELIABLE_SYNC */
 }
 
 static int zodiac_send_rtcm(struct gps_session_t *session,
@@ -132,71 +123,69 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
     return 1;
 }
 
-static long getlong(void *p)
-{
-    return *(long *) p;
-}
+/* Zodiac protocol description uses 1-origin indexing by little-endian word */
+#define getw(n)	( (session->outbuffer[2*(n)-2]) \
+		| (session->outbuffer[2*(n)-1] << 8))
+#define getl(n)	( (session->outbuffer[2*(n)-2]) \
+		| (session->outbuffer[2*(n)-1] << 8) \
+		| (session->outbuffer[2*(n)+0] << 16) \
+		| (session->outbuffer[2*(n)+1] << 24))
 
-static unsigned long getulong(void *p)
-{
-    return *(unsigned long *) p;
-}
-
-static void handle1000(struct gps_session_t *session, unsigned short *p)
+static void handle1000(struct gps_session_t *session)
 {
     sprintf(session->gNMEAdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
-	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
+	    getw(19), getw(20), getw(21), getw(22), getw(23), getw(24));
 
 #if 0
     gpsd_report(1, "date: %s\n", session->gNMEAdata.utc);
     gpsd_report(1, "  solution invalid:\n");
-    gpsd_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
-    gpsd_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
-    gpsd_report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
-    gpsd_report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
-    gpsd_report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
+    gpsd_report(1, "    altitude: %d\n", (getw(10) & 1) ? 1 : 0);
+    gpsd_report(1, "    no diff gps: %d\n", (getw(10) & 2) ? 1 : 0);
+    gpsd_report(1, "    not enough satellites: %d\n", (getw(10) & 4) ? 1 : 0);
+    gpsd_report(1, "    exceed max EHPE: %d\n", (getw(10) & 8) ? 1 : 0);
+    gpsd_report(1, "    exceed max EVPE: %d\n", (getw(10) & 16) ? 1 : 0);
     gpsd_report(1, "  solution type:\n");
-    gpsd_report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
-    gpsd_report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
-    gpsd_report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
-    gpsd_report(1, "Number of measurements in solution: %d\n", p[O(12)]);
-    gpsd_report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
-    gpsd_report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
-    gpsd_report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
-    gpsd_report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
-    gpsd_report(1, "Map datum: %d\n", p[O(39)]);
-    gpsd_report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
-    gpsd_report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
-    gpsd_report(1, "Separation: %f\n", (p[O(33)] / 100));
+    gpsd_report(1, "    propagated: %d\n", (getw(11) & 1) ? 1 : 0);
+    gpsd_report(1, "    altitude: %d\n", (getw(11) & 2) ? 1 : 0);
+    gpsd_report(1, "    differential: %d\n", (getw(11) & 4) ? 1 : 0);
+    gpsd_report(1, "Number of measurements in solution: %d\n", getw(12));
+    gpsd_report(1, "Lat: %f\n", getl(27) * RAD_2_DEG * 1e-8);
+    gpsd_report(1, "Lon: %f\n", getl(29) * RAD_2_DEG * 1e-8);
+    gpsd_report(1, "Alt: %f\n", (double) getl(31) * 1e-2;
+    gpsd_report(1, "Speed: %f\n", (double) getl(34) * 1e-2 * MPS_TO_KNOTS;
+    gpsd_report(1, "Map datum: %d\n", getw(39));
+    gpsd_report(1, "Magnetic variation: %f\n", getw(37) * RAD_2_DEG * 1e-4;
+    gpsd_report(1, "Course: %f\n", getw(36) * RAD_2_DEG * 1e-4;
+    gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2;
 #endif
 
-    session->hours = p[O(22)]; 
-    session->minutes = p[O(23)]; 
-    session->seconds = p[O(24)];
-    session->year = p[O(21)];
-    session->month = p[O(20)];
-    session->day = p[O(19)];
+    session->hours = getw(22); 
+    session->minutes = getw(23); 
+    session->seconds = getw(24);
+    session->year = getw(21);
+    session->month = getw(20);
+    session->day = getw(19);
 
-    session->gNMEAdata.latitude = 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000));
-    session->gNMEAdata.longitude = 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000));
-    session->gNMEAdata.speed = ((double) getulong(p + O(34)) / 100.0) * 1.94387;
-    session->gNMEAdata.altitude = (double) getlong(p + O(31)) / 100.0;
-    session->gNMEAdata.status = (p[O(10)] & 0x1c) ? 0 : 1;
-    session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
-    session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
-    session->gNMEAdata.satellites_used = p[O(12)];
+    session->gNMEAdata.latitude  = getl(27) * RAD_2_DEG * 1e-8;
+    session->gNMEAdata.longitude = getl(29) * RAD_2_DEG * 1e-8;
+    session->gNMEAdata.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
+    session->gNMEAdata.altitude  = getl(31) * 1e-2;
+    session->gNMEAdata.status    = (getw(10) & 0x1c) ? 0 : 1;
+    session->mag_var             = getw(37) * RAD_2_DEG * 1e-4;
+    session->gNMEAdata.track     = getw(36) * RAD_2_DEG * 1e-4;
+    session->gNMEAdata.satellites_used = getw(12);
 
     if (session->gNMEAdata.status)
-	session->gNMEAdata.mode = (p[O(10)] & 1) ? 2 : 3;
+	session->gNMEAdata.mode = (getw(10) & 1) ? 2 : 3;
     else
 	session->gNMEAdata.mode = 1;
     REFRESH(session->gNMEAdata.status_stamp);
     REFRESH(session->gNMEAdata.mode_stamp);
 
-    session->separation = p[O(33)] / 100;	/* meters */
+    session->separation = getw(33) * 1e-2;	/* meters */
 }
 
-static void handle1002(struct gps_session_t *session, unsigned short *p)
+static void handle1002(struct gps_session_t *session)
 {
     int i, j;
 
@@ -204,184 +193,111 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	session->gNMEAdata.used[j] = 0;
     session->gNMEAdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
-	session->Zs[i] = p[O(16 + (3 * i))];
-	session->Zv[i] = (p[O(15 + (3 * i))] & 0xf);
+	session->Zs[i] = getw(16 + (3 * i));
+	session->Zv[i] = (getw(15 + (3 * i)) & 0xf);
 #if 0
 	gpsd_report(1, "Sat%02d:", i);
-	gpsd_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
-	gpsd_report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
-	gpsd_report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
-	gpsd_report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
-	gpsd_report(1, " PRN:%d", p[O(16 + (3 * i))]);
-	gpsd_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
+	gpsd_report(1, " used:%d", (getw(15 + (3 * i)) & 1) ? 1 : 0);
+	gpsd_report(1, " eph:%d", (getw(15 + (3 * i)) & 2) ? 1 : 0);
+	gpsd_report(1, " val:%d", (getw(15 + (3 * i)) & 4) ? 1 : 0);
+	gpsd_report(1, " dgps:%d", (getw(15 + (3 * i)) & 8) ? 1 : 0);
+	gpsd_report(1, " PRN:%d", getw(16 + (3 * i)));
+	gpsd_report(1, " C/No:%d\n", getw(17 + (3 * i)));
 #endif
-	if (p[O(15 + (3 * i))] & 1)
+	if (getw(15 + (3 * i)) & 1)
 	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++] = i;
 	for (j = 0; j < MAXCHANNELS; j++) {
-	    if (session->gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
+	    if (session->gNMEAdata.PRN[j] != getw(16 + (3 * i)))
 		continue;
-	    session->gNMEAdata.ss[j] = p[O(17 + (3 * i))];
+	    session->gNMEAdata.ss[j] = getw(17 + (3 * i));
 	    break;
 	}
     }
     REFRESH(session->gNMEAdata.satellite_stamp);
 }
 
-static void handle1003(struct gps_session_t *session, unsigned short *p)
+static void handle1003(struct gps_session_t *session)
 {
-    int j;
+    int i;
 
-    session->gNMEAdata.pdop = p[O(10)];
-    session->gNMEAdata.hdop = p[O(11)];
-    session->gNMEAdata.vdop = p[O(12)];
-    session->gNMEAdata.satellites = p[O(14)];
+    session->gNMEAdata.pdop = getw(10);
+    session->gNMEAdata.hdop = getw(11);
+    session->gNMEAdata.vdop = getw(12);
+    session->gNMEAdata.satellites = getw(14);
 
-    for (j = 0; j < MAXCHANNELS; j++) {
-	if (j < session->gNMEAdata.satellites) {
-	    session->gNMEAdata.PRN[j] = p[O(15 + (3 * j))];
-	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
-	    session->gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
+    for (i = 0; i < MAXCHANNELS; i++) {
+	if (i < session->gNMEAdata.satellites) {
+	    session->gNMEAdata.PRN[i] = getw(15 + (3 * i));
+	    session->gNMEAdata.azimuth[i] = getw(16 + (3 * i)) * RAD_2_DEG * 1e-4;
+	    session->gNMEAdata.elevation[i] = getw(17 + (3 * i)) * RAD_2_DEG * 1e-4;
 #if 0
 	    gpsd_report(1, "Sat%02d:  PRN:%d az:%d el:%d\n", 
-			i, p[O(15+(3*i))], p[O(16+(3*i))], p[O(17+(3*i))]);
+			i, getw(15+(3 * i)),getw(16+(3 * i)),getw(17+(3 * i)));
 #endif
 	} else {
-	    session->gNMEAdata.PRN[j] = 0;
-	    session->gNMEAdata.azimuth[j] = 0.0;
-	    session->gNMEAdata.elevation[j] = 0.0;
+	    session->gNMEAdata.PRN[i] = 0;
+	    session->gNMEAdata.azimuth[i] = 0.0;
+	    session->gNMEAdata.elevation[i] = 0.0;
 	}
     }
     REFRESH(session->gNMEAdata.fix_quality_stamp);
     REFRESH(session->gNMEAdata.satellite_stamp);
 }
 
-static void handle1005(struct gps_session_t *session, unsigned short *p)
+static void handle1005(struct gps_session_t *session)
 {
-    int i, numcorrections = p[O(12)];
+    int i, numcorrections = getw(12);
 
     gpsd_report(1, "Packet: %d\n", session->sn);
-    gpsd_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
-    gpsd_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
-    gpsd_report(1, "Station ID: %d\n", p[O(10)]);
-    gpsd_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
-    gpsd_report(1, "Number of corrections: %d\n", p[O(12)]);
+    gpsd_report(1, "Station bad: %d\n", (getw(9) & 1) ? 1 : 0);
+    gpsd_report(1, "User disabled: %d\n", (getw(9) & 2) ? 1 : 0);
+    gpsd_report(1, "Station ID: %d\n", getw(10));
+    gpsd_report(1, "Age of last correction in seconds: %d\n", getw(11));
+    gpsd_report(1, "Number of corrections: %d\n", getw(12));
     for (i = 0; i < numcorrections; i++) {
-	gpsd_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
-	gpsd_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
-	gpsd_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
-	gpsd_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
-	gpsd_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
-	gpsd_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
-	gpsd_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
-	gpsd_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+	gpsd_report(1, "Sat%02d:", getw(13+i) & 0x3f);
+	gpsd_report(1, "ephemeris:%d", (getw(13+i) & 64) ? 1 : 0);
+	gpsd_report(1, "rtcm corrections:%d", (getw(13+i) & 128) ? 1 : 0);
+	gpsd_report(1, "rtcm udre:%d", (getw(13+i) & 256) ? 1 : 0);
+	gpsd_report(1, "sat health:%d", (getw(13+i) & 512) ? 1 : 0);
+	gpsd_report(1, "rtcm sat health:%d", (getw(13+i) & 1024) ? 1 : 0);
+	gpsd_report(1, "corrections state:%d", (getw(13+i) & 2048) ? 1 : 0);
+	gpsd_report(1, "iode mismatch:%d", (getw(13+i) & 4096) ? 1 : 0);
     }
 }
 
-static void analyze(struct gps_session_t *session, 
-		    struct header *h, unsigned short *p)
+static int zodiac_analyze(struct gps_session_t *session)
 {
     char buf[BUFSIZ];
-    int i = 0;
+    int i;
+    unsigned int id = (session->outbuffer[2] << 8) | session->outbuffer[3];
 
-    if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
-	gpsd_report(5, "id %d\n", h->id);
-	switch (h->id) {
-	case 1000:
-	    handle1000(session, p);
-	    gpsd_binary_fix_dump(session, buf);
-	    break;
-	case 1002:
-	    handle1002(session, p);
-	    sprintf(buf, "$PRWIZCH");
-	    for (i = 0; i < MAXCHANNELS; i++) {
-		sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
-	    }
-	    strcat(buf, "*");
-	    nmea_add_checksum(buf);
-	    gpsd_binary_quality_dump(session, buf+strlen(buf));
-	    break;
-	case 1003:
-	    handle1003(session, p);
-	    gpsd_binary_satellite_dump(session, buf);
-	    break;	
-	case 1005:
-	    handle1005(session, p);
-	    return;	
+    gpsd_report(5, "ID %d\n", id);
+    switch (id) {
+    case 1000:
+	handle1000(session);
+	gpsd_binary_fix_dump(session, buf);
+	break;
+    case 1002:
+	handle1002(session);
+	sprintf(buf, "$PRWIZCH");
+	for (i = 0; i < MAXCHANNELS; i++) {
+	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
 	}
+	strcat(buf, "*");
+	nmea_add_checksum(buf);
+	gpsd_binary_quality_dump(session, buf+strlen(buf));
+	break;
+    case 1003:
+	handle1003(session);
+	gpsd_binary_satellite_dump(session, buf);
+	break;	
+    case 1005:
+	handle1005(session);
+	break;	
     }
-}
 
-static int putword(unsigned short *p, unsigned char c, unsigned int n)
-{
-    *(((unsigned char *) p) + n) = c;
-    return (n == 0);
-}
-
-static int zodiac_handle_input(struct gps_session_t *session, int waiting UNUSED)
-{
-    unsigned char c;
-
-    if (read(session->gNMEAdata.gps_fd, &c, 1) != 1)
-	return 0;
-    else {
-	static int state = ZODIAC_HUNT_FF;
-	static struct header h;
-	static unsigned int byte, words;
-	static unsigned short *data;
-
-	switch (state) {
-	case ZODIAC_HUNT_FF:
-	    if (c == 0xff)
-		state = ZODIAC_HUNT_81;
-	    if (c == 'E')
-		state = ZODIAC_HUNT_A;
-	    break;
-	case ZODIAC_HUNT_A:
-	    /* A better be right after E */
-	    if ((c == 'A') && (session->gNMEAdata.gps_fd != -1))
-		write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
-	    state = ZODIAC_HUNT_FF;
-	    break;
-	case ZODIAC_HUNT_81:
-	    if (c == 0x81)
-		state = ZODIAC_HUNT_ID;
-	    h.sync = 0x81ff;
-	    byte = 0;
-	    break;
-	case ZODIAC_HUNT_ID:
-	    if (!(byte = putword(&(h.id), c, byte)))
-		state = ZODIAC_HUNT_WC;
-	    break;
-	case ZODIAC_HUNT_WC:
-	    if (!(byte = putword(&(h.ndata), c, byte)))
-		state = ZODIAC_HUNT_FLAGS;
-	    break;
-	case ZODIAC_HUNT_FLAGS:
-	    if (!(byte = putword(&(h.flags), c, byte)))
-		state = ZODIAC_HUNT_CS;
-	    break;
-	case ZODIAC_HUNT_CS:
-	    if (!(byte = putword(&(h.csum), c, byte))) {
-		if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
-		    state = ZODIAC_HUNT_DATA;
-		    data = (unsigned short *) malloc((h.ndata + 1) * 2);
-		    words = 0;
-		} else
-		    state = ZODIAC_HUNT_FF;
-	    }
-	    break;
-	case ZODIAC_HUNT_DATA:
-	    if (!(byte = putword(data + words, c, byte)))
-		words++;
-	    if (words == (unsigned int)h.ndata + 1) {
-		analyze(session, &h, data);
-		free(data);
-		state = ZODIAC_HUNT_FF;
-	    }
-	    break;
-	}
-	return 1;
-    }
+    return 0;
 }
 
 /* caller needs to specify a wrapup function */
@@ -393,7 +309,8 @@ struct gps_type_t zodiac_binary =
     NULL,		/* no probe */
     NULL,		/* only switched to by some other driver */
     NULL,		/* no initialization */
-    zodiac_handle_input,/* read and parse message packets */
+    packet_get,		/* how to get a packet */
+    zodiac_analyze,	/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */
     NULL,		/* no mode switcher */

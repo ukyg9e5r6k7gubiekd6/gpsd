@@ -444,11 +444,8 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
     }
 }
 
-static int sirfbin_handle_input(struct gps_session_t *session, int waiting)
+static int sirfbin_parse_input(struct gps_session_t *session)
 {
-    if (!packet_get(session, waiting)) 
-	return 0;
-
     if (session->packet_type == SIRF_PACKET){
 	sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
 	session->gNMEAdata.driver_mode = 1;
@@ -501,14 +498,15 @@ static int sirfbin_speed(struct gps_session_t *session, int speed)
 struct gps_type_t sirf_binary =
 {
     "SiRF-II binary",		/* full name of type */
-    "$Ack Input105.",	/* expected response to SiRF PSRF105 */
-    NULL,		/* no probe */
+    "$Ack Input105.",		/* expected response to SiRF PSRF105 */
+    NULL,			/* no probe */
     sirfbin_initializer,	/* initialize the device */
-    sirfbin_handle_input,	/* read and parse message packets */
-    NULL,		/* send DGPS correction */
-    sirfbin_speed,	/* we can change baud rate */
-    sirfbin_mode,	/* there's a mode switcher */
-    NULL,		/* caller needs to supply a close hook */
-    1,			/* updates every second */
+    packet_get,			/* how to grab a packet */
+    sirfbin_parse_input,	/* read and parse message packets */
+    NULL,			/* send DGPS correction */
+    sirfbin_speed,		/* we can change baud rate */
+    sirfbin_mode,		/* there's a mode switcher */
+    NULL,			/* caller needs to supply a close hook */
+    1,				/* updates every second */
 };
 #endif /* defined(SIRFII_ENABLE) && defined(BINARY_ENABLE) */

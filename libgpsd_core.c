@@ -157,8 +157,12 @@ int gpsd_poll(struct gps_session_t *session)
 	REFRESH(session->gNMEAdata.online_stamp);
 
 	/* can we get a full packet from the device? */
-	if (!session->device_type->handle_input(session, waiting))
+	if (!session->device_type->get_packet(session, waiting))
 	    return waiting;
+
+	session->gNMEAdata.d_xmit_time = timestamp();
+
+	session->device_type->parse_packet(session);
 
 	session->counter++;
 	session->gNMEAdata.d_decode_time = timestamp();

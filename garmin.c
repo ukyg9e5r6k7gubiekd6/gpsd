@@ -799,13 +799,15 @@ static void garmin_init(struct gps_session_t *session)
 	//SendPacket(session,  (Packet_t*) buffer);
 }
 
-static int garmin_handle_input(struct gps_session_t *session, int waiting UNUSED)
+static int garmin_get_packet(struct gps_session_t *session, int waiting UNUSED)
 {
-	if ( !GetPacket( session ) ) {
-		PrintPacket(session, (Packet_t*)session->GarminBuffer);
-		return 1;
-	} else
-	    return 0;
+    return !GetPacket( session );
+}
+
+static int garmin_parse_input(struct gps_session_t *session)
+{
+    PrintPacket(session, (Packet_t*)session->GarminBuffer);
+    return 1;
 }
 
 /* caller needs to specify a wrapup function */
@@ -817,7 +819,8 @@ struct gps_type_t garmin_binary =
     NULL,		/* only switched to by some other driver */
     garmin_probe,	/* how to detect this at startup time */
     garmin_init,	/* initialize the device */
-    garmin_handle_input,/* read and parse message packets */
+    garmin_get_packet,	/* how to grab a packet */
+    garmin_parse_input,	/* read and parse message packets */
     NULL,		/* send DGPS correction */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */

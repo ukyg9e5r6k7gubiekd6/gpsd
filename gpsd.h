@@ -58,7 +58,8 @@ struct gps_type_t {
     char *typename, *trigger;
     int (*probe)(struct gps_session_t *session);
     void (*initializer)(struct gps_session_t *session);
-    int (*handle_input)(struct gps_session_t *session, int waiting);
+    int (*get_packet)(struct gps_session_t *session, int waiting);
+    int (*parse_packet)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_session_t *session, int speed);
     void (*mode_switcher)(struct gps_session_t *session, int mode);
@@ -98,8 +99,8 @@ struct gps_session_t {
 #define NMEA_PACKET	0
 #define SIRF_PACKET	1
 #define ZODIAC_PACKET	2
-    int packet_state;
-    int packet_length;
+    unsigned int packet_state;
+    unsigned int packet_length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
     unsigned short inbuflen;
     unsigned char *inbufptr;

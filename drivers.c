@@ -12,11 +12,8 @@
  *
  **************************************************************************/
 
-static int nmea_handle_input(struct gps_session_t *session, int waiting)
+static int nmea_parse_input(struct gps_session_t *session)
 {
-    if (!packet_get(session, waiting))
-	return 0;
-
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
 	sirf_parse(session, session->outbuffer, session->outbuflen);
@@ -69,7 +66,8 @@ struct gps_type_t nmea = {
     NULL,		/* no recognition string, it's the default */
     NULL,		/* no probe */
     nmea_initializer,		/* probe for SiRF II */
-    nmea_handle_input,	/* read text sentence */
+    packet_get,		/* how to get a packet */
+    nmea_parse_input,	/* how to interpret a packet */
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
@@ -131,7 +129,8 @@ struct gps_type_t sirfII = {
     NULL,		/* no probe */
     sirf_initializer,	/* turn off debugging messages */
 #endif /* BINARY_ENABLE */
-    nmea_handle_input,	/* read text sentence */
+    packet_get,		/* how to get a packet */
+    nmea_parse_input,	/* how to interpret a packet */
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_speed,		/* we can change speeds */
     sirf_mode,		/* there's a mode switch */
@@ -168,7 +167,8 @@ struct gps_type_t tripmate = {
     "ASTRAL",			/* tells us to switch */
     NULL,			/* no probe */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
-    nmea_handle_input,		/* read text sentence */
+    packet_get,			/* how to get a packet */
+    nmea_parse_input,		/* how to interpret a packet */
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
@@ -184,7 +184,6 @@ struct gps_type_t tripmate = {
  *
  * Note: This is the pre-2003 version using Zodiac binary protocol.
  * It has been replaced with a design that uses a SiRF-II chipset.
- * Use the NMEA driver for that one.
  *
  **************************************************************************/
 
@@ -213,7 +212,8 @@ struct gps_type_t earthmate = {
     "EARTHA",			/* tells us to switch to Earthmate */
     NULL,			/* no probe */
     earthmate_initializer,	/* switch us to Zodiac mode */
-    nmea_handle_input,		/* read text sentence */
+    packet_get,			/* how to get a packet */
+    nmea_parse_input,		/* how to interpret a packet */
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
@@ -242,10 +242,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #if GARMIN_ENABLE
     &garmin_binary,
 #endif /* GARMIN_ENABLE */
-    &sirf_binary,
-#ifdef LOGFILE_ENABLE
-    &logfile,
-#endif /* LOGFILE_ENABLE */
+#ifdef SIRFII_ENABLE
+    &sirf_binary, 
+#endif /* SIRFII_ENABLE */
     NULL,
 };
 struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

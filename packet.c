@@ -67,30 +67,43 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  */
 
 #define GROUND_STATE	0	/* we don't know what packet type to expect */
-#define NMEA_DOLLAR	1	/* we've seen first charcter of NMEA leader */
-#define SIRF_LEADER_1	2	/* we've seen first charcter of SiRF leader */
+#define NMEA_DOLLAR	1	/* we've seen first character of NMEA leader */
+#define SIRF_LEADER_1	2	/* we've seen first character of SiRF leader */
+
 #define NMEA_PUB_LEAD	3	/* seen second character of NMEA G leader */
-#define SIRF_LEADER_2	4	/* seen second character of SiRF leader */
-#define ASTRAL_1	5	/* ASTRAL leader A */
-#define ASTRAL_2	6	/* ASTRAL leader S */
-#define ASTRAL_3	7	/* ASTRAL leader T */
-#define ASTRAL_4	8	/* ASTRAL leader R */
-#define ASTRAL_5	9	/* ASTRAL leader A */
-#define EARTHA_1	10	/* EARTHA leader E */
-#define EARTHA_2	11	/* EARTHA leader A */
-#define EARTHA_3	12	/* EARTHA leader R */
-#define EARTHA_4	13	/* EARTHA leader T */
-#define EARTHA_5	14	/* EARTHA leader H */
-#define NMEA_LEADER_END	15	/* seen end character of NMEA leader, in body */
-#define SIRF_ACK_LEAD_1	16	/* seen A of possible SiRF Ack */
-#define SIRF_ACK_LEAD_2	17	/* seen c of possible SiRF Ack */
-#define SIRF_LENGTH_1	18	/* seen first byte of SiRF length */
-#define NMEA_CR		19	/* seen terminating \r of NMEA packet */
-#define SIRF_PAYLOAD	20	/* we're in a SiRF payload part */
-#define NMEA_RECOGNIZED	21	/* saw trailing \n of NMEA packet */
+#define NMEA_LEADER_END	4	/* seen end char of NMEA leader, in body */
+#define NMEA_CR		5	/* seen terminating \r of NMEA packet */
+#define NMEA_RECOGNIZED	6	/* saw trailing \n of NMEA packet */
+
+#define ASTRAL_1	7	/* ASTRAL leader A */
+#define ASTRAL_2	8	/* ASTRAL leader S */
+#define ASTRAL_3	9	/* ASTRAL leader T */
+#define ASTRAL_4	10	/* ASTRAL leader R */
+#define ASTRAL_5	11	/* ASTRAL leader A */
+
+#define EARTHA_1	12	/* EARTHA leader E */
+#define EARTHA_2	13	/* EARTHA leader A */
+#define EARTHA_3	14	/* EARTHA leader R */
+#define EARTHA_4	15	/* EARTHA leader T */
+#define EARTHA_5	16	/* EARTHA leader H */
+
+#define SIRF_LEADER_2	17	/* seen second character of SiRF leader */
+#define SIRF_ACK_LEAD_1	18	/* seen A of possible SiRF Ack */
+#define SIRF_ACK_LEAD_2	19	/* seen c of possible SiRF Ack */
+#define SIRF_LENGTH_1	20	/* seen first byte of SiRF length */
+#define SIRF_PAYLOAD	21	/* we're in a SiRF payload part */
 #define SIRF_DELIVERED	22	/* saw last byte of SiRF payload/checksum */
 #define SIRF_TRAILER_1	23	/* saw first byte of SiRF trailer */ 
 #define SIRF_RECOGNIZED	24	/* saw second byte of SiRF trailer */
+
+#define ZODIAC_EXPECTED	25	/* expecting Zodiac packet */
+#define ZODIAC_LEADER_1	26	/* saw leading 0xff */
+#define ZODIAC_LEADER_2	27	/* saw leaing 0x81 */
+#define ZODIAC_ID_1	28	/* saw first byte of ID */
+#define ZODIAC_ID_2	29	/* saw second byte of ID */
+#define ZODIAC_LENGTH_1	30	/* saw first byte of Zodiac packet length */
+#define ZODIAC_PAYLOAD	31	/* we're in a Zodiac payload */
+#define ZODIAC_RECOGNIZED 32	/* found end of the Zodiac packet */
 
 static void nexstate(struct gps_session_t *session, unsigned char c)
 {
@@ -99,13 +112,15 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
     case GROUND_STATE:
 	if (c == '$')
 	    session->packet_state = NMEA_DOLLAR;
+#ifdef SIRFII_ENABLE
         else if (c == 0xa0)
 	    session->packet_state = SIRF_LEADER_1;
-#if TRIPMATE_ENABLE
+#endif /* SIRFII_ENABLE */
+#ifdef TRIPMATE_ENABLE
         else if (c == 'A')
 	    session->packet_state = ASTRAL_1;
 #endif /* TRIPMATE_ENABLE */
-#if EARTHMATE_ENABLE
+#ifdef EARTHMATE_ENABLE
         else if (c == 'E')
 	    session->packet_state = EARTHA_1;
 #endif /* EARTHMATE_ENABLE */
@@ -120,13 +135,36 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
-    case SIRF_LEADER_1:
-	if (c == 0xa2)
-	    session->packet_state = SIRF_LEADER_2;
+    case NMEA_PUB_LEAD:
+	if (c == 'P')
+	    session->packet_state = NMEA_LEADER_END;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
-#if TRIPMATE_ENABLE
+    case NMEA_LEADER_END:
+	if (c == '\r')
+	    session->packet_state = NMEA_CR;
+	else if (c == '\n')
+	    /* not strictly correct, but helps for interpreting logfiles */
+	    session->packet_state = NMEA_RECOGNIZED;
+	else if (isprint(c))
+	    /* continue gathering body packets */;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case NMEA_CR:
+	if (c == '\n')
+	    session->packet_state = NMEA_RECOGNIZED;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case NMEA_RECOGNIZED:
+	if (c == '$')
+	    session->packet_state = NMEA_DOLLAR;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+#ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
 	if (c == 'S')
 	    session->packet_state = ASTRAL_2;
@@ -158,7 +196,7 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break; 
 #endif /* TRIPMATE_ENABLE */
-#if EARTHMATE_ENABLE
+#ifdef EARTHMATE_ENABLE
     case EARTHA_1:
 	if (c == 'A')
 	    session->packet_state = EARTHA_2;
@@ -190,7 +228,14 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break; 
 #endif /* EARTHMATE_ENABLE */
-   case SIRF_ACK_LEAD_1:
+#ifdef SIRFII_ENABLE
+    case SIRF_LEADER_1:
+	if (c == 0xa2)
+	    session->packet_state = SIRF_LEADER_2;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case SIRF_ACK_LEAD_1:
 	if (c == 'c')
 	    session->packet_state = SIRF_ACK_LEAD_2;
 	else
@@ -202,26 +247,9 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
-   case NMEA_PUB_LEAD:
-	if (c == 'P')
-	    session->packet_state = NMEA_LEADER_END;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
     case SIRF_LEADER_2:
 	session->packet_length = c << 8;
 	session->packet_state = SIRF_LENGTH_1;
-	break;
-    case NMEA_LEADER_END:
-	if (c == '\r')
-	    session->packet_state = NMEA_CR;
-	else if (c == '\n')
-	    /* not strictly correct, but helps for interpreting logfiles */
-	    session->packet_state = NMEA_RECOGNIZED;
-	else if (isprint(c))
-	    /* continue gathering body packets */;
-	else
-	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_LENGTH_1:
 	session->packet_length += c + 2;
@@ -230,21 +258,9 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
-    case NMEA_CR:
-	if (c == '\n')
-	    session->packet_state = NMEA_RECOGNIZED;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
     case SIRF_PAYLOAD:
 	if (--session->packet_length == 0)
 	    session->packet_state = SIRF_DELIVERED;
-	break;
-    case NMEA_RECOGNIZED:
-	if (c == '$')
-	    session->packet_state = NMEA_DOLLAR;
-	else
-	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_DELIVERED:
 	if (c == 0xb0)
@@ -264,6 +280,48 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
+#endif /* SIRFII_ENABLE */
+#ifdef ZODIAC_ENABLE
+    case ZODIAC_EXPECTED:
+	if (c == 0xff)
+	    session->packet_state = ZODIAC_LEADER_1;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ZODIAC_LEADER_1:
+	if (c == 0x81)
+	    session->packet_state = ZODIAC_LEADER_2;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ZODIAC_LEADER_2:
+	session->packet_state = ZODIAC_ID_1;
+	break;
+    case ZODIAC_ID_1:
+	session->packet_state = ZODIAC_ID_2;
+	break;
+    case ZODIAC_ID_2:
+	session->packet_length = c;
+	session->packet_state = ZODIAC_LENGTH_1;
+	break;
+    case ZODIAC_LENGTH_1:
+	/* extra three words are flags, header checkum, and data checksum */
+	session->packet_length += (c << 8);	/* word count! */
+	session->packet_length *= 2;		/* to byte count */
+	if (session->packet_length == 0)
+	    session->packet_length += 4;	/* hdrcheck, flags */
+	else
+	    session->packet_length += 6;	/* hdrcheck, flags, datachk */
+	if (session->packet_length <= MAX_PACKET_LENGTH)
+	    session->packet_state = ZODIAC_PAYLOAD;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ZODIAC_PAYLOAD:
+	if (--session->packet_length == 0)
+	    session->packet_state = ZODIAC_RECOGNIZED;
+	break;
+#endif /* ZODIAC_ENABLE */
     }
 }
 
@@ -295,12 +353,12 @@ static void packet_discard(struct gps_session_t *session)
 int packet_get(struct gps_session_t *session, int waiting)
 {
     int newdata;
+#ifndef TESTMAIN
     int room = sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer);
 
     if (waiting > room)
 	waiting = room;
 
-#ifndef TESTMAIN
     newdata = read(session->gNMEAdata.gps_fd, session->inbufptr, waiting);
 #else
     newdata = waiting;
@@ -328,14 +386,14 @@ int packet_get(struct gps_session_t *session, int waiting)
     while (session->inbufptr < session->inbuffer + session->inbuflen) {
 	unsigned char c = *session->inbufptr++;
 	nexstate(session, c);
-#ifdef TESTMAIN_OLD
+#ifdef TESTMAINOLD
 	if (isprint(c))
-	    printf("Character %c, new state: %d\n",c,session->packet_state);
+	    printf("Character '%c', new state: %d\n",c,session->packet_state);
 	else
-	    printf("Character %02x, new state: %d\n",c,session->packet_state);
+	    printf("Character 0x%02x, new state: %d\n",c,session->packet_state);
 #endif /* TESTMAIN */
 	if (session->packet_state == GROUND_STATE) {
-#ifdef TESTMAIN
+#ifdef TESTMAINOLD
 	    gpsd_report(6, "Character discarded\n", session->inbufptr[-1]);
 #endif /* TESTMAIN */
 	    session->inbufptr = memmove(session->inbufptr-1, 
@@ -374,6 +432,33 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
+#if ZODIAC_ENABLE
+	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
+	    unsigned long hdrcheck = session->inbuffer[8] | (session->inbuffer[9] << 8);
+	    unsigned long datacheck = session->inbufptr[-2] | (session->inbufptr[-1] << 8);
+	    unsigned long len, n, crc1, crc2;
+	    for (n = crc1 = 0; n < 4; n++) {
+		crc1 += session->inbuffer[2*n];
+		crc1 += session->inbuffer[2*n+1] << 8;
+	    }
+	    crc1 &= 0xffff;
+	    crc1 ^= 0xffff;
+	    // printf("Header checksum 0x%lx, expecting 0x%lx\n", crc1, hdrcheck);
+	    len = session->inbuffer[4] | (session->inbuffer[5] << 8);
+	    for (n = crc2 = 0; n < len; n++) {
+		crc2 += session->inbuffer[12+2*n];
+		crc2 += session->inbuffer[12+2*n+1] << 8;
+	    }
+	    crc2 &= 0xffff;
+	    crc2 ^= 0xffff;
+	    // printf("Data checksum 0x%lx, expecting 0x%lx\n", crc2, datacheck);
+	    if (datacheck == crc2 && hdrcheck == crc1) {
+		session->packet_type = ZODIAC_PACKET;
+		packet_copy(session);
+	    } else
+		session->packet_state = GROUND_STATE;
+	    packet_discard(session);
+#endif /* ZODIAC_ENABLE */
 	}
     }
 
@@ -424,6 +509,8 @@ int packet_sniff(struct gps_session_t *session)
 }
 
 #ifdef TESTMAIN
+/* To build a test main, compile with cc -DTESTMAIN -g packet.c -o packet */
+
 int main(int argc, char *argv[])
 {
     struct map {
@@ -432,6 +519,7 @@ int main(int argc, char *argv[])
 	int		testlen;
 	int		garbage_offset;
 	int		type;
+	int		initstate;
     };
     struct map tests[] = {
 	/* NMEA tests */
@@ -441,6 +529,7 @@ int main(int argc, char *argv[])
 	    36,
 	    0,
 	    NMEA_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "NMEA packet with checksum (2)",
@@ -448,6 +537,7 @@ int main(int argc, char *argv[])
 	    82,
 	    0,
 	    NMEA_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "NMEA packet with checksum and 4 chars of leading garbage",
@@ -455,6 +545,7 @@ int main(int argc, char *argv[])
 	    40,
 	    4,
 	    NMEA_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "NMEA packet without checksum",
@@ -462,6 +553,7 @@ int main(int argc, char *argv[])
 	    12,
 	    0,
 	    NMEA_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "NMEA packet with wrong checksum",
@@ -469,6 +561,7 @@ int main(int argc, char *argv[])
 	    36,
 	    0,
 	    BAD_PACKET,
+	    GROUND_STATE,
 	},
 	/* SiRF tests */
 	{
@@ -482,6 +575,7 @@ int main(int argc, char *argv[])
 	    29,
 	    0,
 	    SIRF_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "SiRF WAAS version ID with 3 chars of leading garbage",
@@ -495,6 +589,7 @@ int main(int argc, char *argv[])
 	    32,
 	    3,
 	    SIRF_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "SiRF WAAS version ID with wrong checksum",
@@ -507,6 +602,7 @@ int main(int argc, char *argv[])
 	    29,
 	    0,
 	    BAD_PACKET,
+	    GROUND_STATE,
 	},
 	{
 	    "SiRF WAAS version ID with bad length",
@@ -519,19 +615,33 @@ int main(int argc, char *argv[])
 	    29,
 	    0,
 	    BAD_PACKET,
+	    GROUND_STATE,
+	},
+	/* Zodiac tests */
+	{
+	    "Zodiac binary switch to NMEA",
+	    {
+		0xFF, 0x81, 0x33, 0x05, 0x03, 0x00, 0x00, 0x00, 0x49, 0xFB, 
+		0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0xFF, 0xFF},
+	    18,
+	    0,
+	    ZODIAC_PACKET,
+	    ZODIAC_EXPECTED,
 	},
     };
+
+
     struct map *mp;
     struct gps_session_t state;
     int st;
     unsigned char *cp;
 
     for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) {
-	printf("%s starts\n", mp->legend);
 	state.packet_type = BAD_PACKET;
-	state.packet_state = GROUND_STATE;
-	memcpy(state.inbuffer, mp->test, mp->testlen);
-	packet_reset(session);
+	state.packet_state = mp->initstate;
+	state.inbuflen = 0;
+	memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
+	printf("%s starts with state %d\n", mp->legend, mp->initstate);
 	st = packet_get(&state, mp->testlen);
 	if (state.packet_type != mp->type)
 	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, st);
