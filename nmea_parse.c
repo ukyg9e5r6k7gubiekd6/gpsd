@@ -136,10 +136,19 @@ static double iso8661_to_unix(char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
+#ifdef HAVE_TIMEZONE
     res = mktime(&tm) - timezone + usec;
+#else
+    res = mktime(&tm) - tm.tm_gmtoff + usec;
+#endif
     now = time(NULL);
+#ifdef HAVE_DAYLIGHT
     if (daylight && localtime_r(&now, &tm)->tm_isdst)
 	res -= 3600;
+#else
+    if (localtime_r(&now, &tm)->tm_isdst)
+	res -= 3600;
+#endif
     if (now != (int)res)
 	gpsd_report(4, "clock skew is %lf seconds\n", now-(int)res);
     return res;
@@ -434,19 +443,16 @@ static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
 {
     /*
        $PGRME,15.0,M,45.0,M,25.0,M*22
-	1    = horizontal position error
+	1    = HDOP
         2    = units
-	3    = vertical position error
+	3    = VDOP
         4    = units
-	5    = spherical equivalent position error
+	5    = PDOP
         6    = units
-     *
-     * Garmin won't say, but the general belief is that these are 1-sigma.
-     * See <http://gpsinformation.net/main/epenew.txt>.
      */
-    out->eph = atof(field[1]);
-    out->epv = atof(field[3]);
-    out->epe = atof(field[5]);
+    out->hdop = atof(field[1]);
+    out->vdop = atof(field[3]);
+    out->pdop = atof(field[5]);
     REFRESH(out->epe_quality_stamp);
 }
 

@@ -16,7 +16,43 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -Wextra
 fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h sys/aio.h)
+
+AC_HEADER_TIME
+AC_STRUCT_TIMEZONE
+
+AC_CACHE_CHECK(for timezone variable, ac_cv_var_timezone,
+        AC_TRY_COMPILE([
+#include <time.h>
+        ], [
+                timezone = 1;
+        ], ac_cv_var_timezone=yes, ac_cv_var_timezone=no))
+if test $ac_cv_var_timezone = yes; then
+        AC_DEFINE(HAVE_TIMEZONE, [], [Have timezone variable])
+else
+        AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_struct_tm_gmtoff,
+                AC_TRY_COMPILE([
+#include <time.h>
+                        ], [
+                        struct tm tm;
+                        tm.tm_gmtoff = 1;
+                        ], ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no
+))
+        if test $ac_cv_struct_tm_gmtoff = yes; then
+                AC_DEFINE(HAVE_TM_GMTOFF, [], [struct tm has tm_gmtoff])
+        else
+                AC_ERROR(unable to find a way to determine timezone)
+        fi
+fi            
+AC_CACHE_CHECK(for daylight external, mb_cv_var_daylight,
+[  AC_TRY_LINK([#include <time.h>], [return (int)daylight;],
+      mb_cv_var_daylight=yes,
+      mb_cv_var_daylight=no)
+])
+if test $mb_cv_var_daylight = yes; then
+   AC_DEFINE([HAVE_DAYLIGHT], 1,
+           [Define if you have the external `daylight' variable.])
+fi
 
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
 AC_SUBST(LIBNSL)
