@@ -53,7 +53,6 @@ String fallback_resources[] = {
 };
 
 static GC gc;
-static Atom delw;
 
 static void quit_cb()
 {
@@ -80,9 +79,9 @@ static Pixel get_pixel(Widget w, char *resource_value)
 
 static void build_gui(Widget lxbApp)
 {
-    int n;
     Arg args[100];
     XGCValues gcv;
+    Atom delw;
 
     /* the root application window */
     XtSetArg(args[0], XmNgeometry, "630x460");
@@ -183,42 +182,34 @@ static void build_gui(Widget lxbApp)
     rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, data_panel, args, 7);
 
 
-    n = 0;
-    label_1 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_11, args, n);
-    label_2 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_12, args, n);
-    label_3 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_13, args, n);
-    label_4 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_14, args, n);
-    label_5 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_15, args, n);
-    label_6 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_16, args, n);
-    label_7 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_17, args, n);
+    label_1 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_11, args, 0);
+    label_2 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_12, args, 0);
+    label_3 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_13, args, 0);
+    label_4 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_14, args, 0);
+    label_5 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_15, args, 0);
+    label_6 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_16, args, 0);
+    label_7 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_17, args, 0);
 
-    n = 0;
-    XtSetArg(args[n], XmNcursorPositionVisible, False);
-    n++;
-    XtSetArg(args[n], XmNeditable, False);
-    n++;
-    XtSetArg(args[n], XmNmarginHeight, 2);
-    n++;
-    XtSetArg(args[n], XmNhighlightThickness, 0);
-    n++;
-    XtSetArg(args[n], XmNshadowThickness, 1);
-    n++;
-    XtSetArg(args[n], XmNcolumns, 23);
-    n++;
+    XtSetArg(args[0], XmNcursorPositionVisible, False);
+    XtSetArg(args[1], XmNeditable, False);
+    XtSetArg(args[2], XmNmarginHeight, 2);
+    XtSetArg(args[3], XmNhighlightThickness, 0);
+    XtSetArg(args[4], XmNshadowThickness, 1);
+    XtSetArg(args[5], XmNcolumns, 23);
     text_1 = XtCreateManagedWidget("text_1", xmTextFieldWidgetClass,
-				   rowColumn_11, args, n);
+				   rowColumn_11, args, 6);
     text_2 = XtCreateManagedWidget("text_2", xmTextFieldWidgetClass,
-				   rowColumn_12, args, n);
+				   rowColumn_12, args, 6);
     text_3 = XtCreateManagedWidget("text_3", xmTextFieldWidgetClass,
-				   rowColumn_13, args, n);
+				   rowColumn_13, args, 6);
     text_4 = XtCreateManagedWidget("text_4", xmTextFieldWidgetClass,
-				   rowColumn_14, args, n);
+				   rowColumn_14, args, 6);
     text_5 = XtCreateManagedWidget("text_5", xmTextFieldWidgetClass,
-				   rowColumn_15, args, n);
+				   rowColumn_15, args, 6);
     text_6 = XtCreateManagedWidget("text_6", xmTextFieldWidgetClass,
-				   rowColumn_16, args, n);
+				   rowColumn_16, args, 6);
     text_7 = XtCreateManagedWidget("text_7", xmTextFieldWidgetClass,
-				   rowColumn_17, args, n);
+				   rowColumn_17, args, 6);
 
 
     pushButton_11 = XtCreateManagedWidget("label",
@@ -336,7 +327,6 @@ static void update_panel(char *message)
     }
     sprintf(s + strlen(s), " (%d secs)", timer);
     XmTextFieldSetString(text_7, s);
-
     draw_graphics(gpsdata);
 }
 
