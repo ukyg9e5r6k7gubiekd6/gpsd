@@ -33,7 +33,4 @@ You can also telnet to this port for testing. When doing that, type an 'R'
 followed by <cr>. This should display the RAW nmea sentences the deamon
 receives from the gps.
 
-You can (but please don't) connect the gps program directly to a serial
-port and a GPS (the device).   This mode won't do DGPS nor handle timeouts.
-
 

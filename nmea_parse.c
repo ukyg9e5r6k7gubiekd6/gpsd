@@ -382,6 +382,29 @@ static void processGPGSA(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
+int nmea_sane_satellites(struct gps_data *out)
+{
+    /* not valid data until we've seen a complete set of parts */
+    if (out->part != out->await)
+	return 0;
+
+    /*
+     * This sanity check catches an odd behavior of the BU-303, and thus
+     * possibly of other SiRF-II based GPSes.  When they can't see any
+     * satellites at all (like, inside a building) they sometimes cough
+     * up a hairball in the form of a GSV packet with all the azimuth 
+     * and entries 0 (but nonzero elevations).  This
+     * was observed under SiRF firmware revision 231.000.000_A2.
+     */
+    int n;
+
+    for (n = 0; n < out->satellites; n++)
+	if (out->azimuth[n]) {
+	    return 1;
+	}
+    return 0;
+}
+
 static void processGPGSV(char *sentence, struct gps_data *out)
 /* GPS Satellites in View */
 {
@@ -399,40 +422,35 @@ static void processGPGSV(char *sentence, struct gps_data *out)
                 There my be up to three GSV sentences in a data packet
      */
 
-    int changed, n, m, f = 4;
-    int sirf2_sane = 0;
+    int changed, lower, upper, fldnum = 4;
 
-    if (sscanf(field(sentence, 2), "%d", &n) < 1)
+    out->await = atoi(field(sentence, 1));
+    if (sscanf(field(sentence, 2), "%d", &out->part) < 1)
         return;
+
     changed = update_field_i(sentence, 3, &out->satellites);
 
-    n = (n - 1) * 4;
-    m = n + 4;
+    lower = (out->part - 1) * 4;
+    upper = lower + 4;
 
-    while (n < out->satellites && n < m) {
-	changed |= update_field_i(sentence, f++, &out->PRN[n]);
-	changed |= update_field_i(sentence, f++, &out->elevation[n]);
-	changed |= update_field_i(sentence, f++, &out->azimuth[n]);
-	sirf2_sane |= (out->azimuth[n] != 0);
-	if (*(field(sentence, f))) {
-	    changed |= update_field_i(sentence, f, &out->ss[n]);
-	    sirf2_sane |= (out->ss[n] != 0);
+    while (lower < out->satellites && lower < upper) {
+	changed |= update_field_i(sentence, fldnum++, &out->PRN[lower]);
+	changed |= update_field_i(sentence, fldnum++, &out->elevation[lower]);
+	changed |= update_field_i(sentence, fldnum++, &out->azimuth[lower]);
+	if (*(field(sentence, fldnum))) {
+	    changed |= update_field_i(sentence, fldnum, &out->ss[lower]);
 	}
-	f++;
-	n++;
+	fldnum++;
+	lower++;
     }
 
-    /*
-     * The sanity check catches an odd behavior of the BU-303, and thus
-     * possibly of other SiRF-II based GPSes.  When they can't see any
-     * satellites at all (like, inside a building) they sometimes cough
-     * up a hairball in the form of a GSV packet with all the azimuth 
-     * and signal-strength 0 (but nonzero elevations).
-     */
-    if (sirf2_sane) {
+    if (nmea_sane_satellites(out)) {
+	gpscli_report(3, "Satellite data OK.\n");
 	out->satellite_stamp.changed = changed;
 	REFRESH(out->satellite_stamp);
     }
+    else
+	gpscli_report(3, "Satellite data no good.\n");
 }
 
 /* ----------------------------------------------------------------------- */

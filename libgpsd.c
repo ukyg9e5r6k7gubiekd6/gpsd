@@ -52,7 +52,7 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
     double d1, d2, d3;
     int i1, i2;
 
-    if (buf[1] == '=')
+    if (!strncmp(buf, "GPSD", 4))
     {
 	for (sp = buf + 5; ; sp = tp+1)
 	{
@@ -136,7 +136,6 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 		gpsdata->satellites = i1;
 		if (gpsdata->satellites)
 		{
-		    char *sp;
 		    int j, i3, i4;
 		    int PRN[MAXCHANNELS];
 		    int elevation[MAXCHANNELS];
@@ -146,7 +145,7 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 		    for (j = 0; j < gpsdata->satellites; j++) {
 			PRN[j]=elevation[j]=azimuth[j]=ss[j]=0;
 		    }
-		    sp = buf;
+		    sp = strchr(sp, ' ')+1;
 		    for (j = 0; j < gpsdata->satellites; j++) {
 			sp = strchr(sp, ':') + 1;
 			sscanf(sp, "%d %d %d %d", &i1, &i2, &i3, &i4);
@@ -174,9 +173,9 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 	    }
 	}
     }
-    else
-	if (gpsdata->raw_hook)
-	    gpsdata->raw_hook(buf);
+
+    if (gpsdata->raw_hook)
+	gpsdata->raw_hook(buf);
 
     return gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
@@ -198,10 +197,12 @@ int gpsd_poll(int fd, struct gps_data *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
+    int		buflen;
 
-    if (read(fd, buf, sizeof(buf)-1) <= 0)
+    if ((buflen = read(fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
 
+    buf[buflen] = '\0';
     return gpsd_unpack(buf, gpsdata);
 }
 
@@ -345,12 +346,12 @@ main(int argc, char *argv[])
     memset(&collect, '\0', sizeof(collect));
     fd = gpsd_open(&collect, GPS_TIMEOUT, NULL, 0);
 
-    gpsd_set_raw_hook(dumpline);
+    gpsd_set_raw_hook(&collect, dumpline);
     if (argc > 1)
     {
 	strcpy(buf, argv[1]);
 	strcat(buf,"\n");
-	gpsd_query(fd, buf, &collect);
+	gpsd_query(fd, &collect, buf);
 	data_dump(&collect, time(NULL));
     }
     else
@@ -370,7 +371,7 @@ main(int argc, char *argv[])
 		break;
 	    }
 	    if (!gpsd_query(fd, &collect, buf))
-		fputs("No changes.\n");
+		fputs("No changes.\n", stdout);
 	    data_dump(&collect, time(NULL));
 	}
     }

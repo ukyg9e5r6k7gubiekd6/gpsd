@@ -32,9 +32,7 @@ and speedometer</refpurpose>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>gps</command>  
-      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
-      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>server:port</replaceable></arg>
       <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 <cmdsynopsis>
@@ -281,8 +279,8 @@ the replies. Examples:</para>
 </screen>
 
 <para>If the GPS stops sending updates to gpsd, gpsd will continue
-presenting the last data it got for 5 seconds, then begin
-sending back empty responses consisting only of the GPSD prefix.</para>
+presenting the last data it got for 5 seconds (or, if it has been set,
+the value of the -t option).</para>
 
 <para>When clients are active but the GPS is not responding, gpsd will spin 
 trying to open the GPS device once per second.  Thus, it can be left
@@ -298,13 +296,18 @@ restart a timed-out connection and cannot use differential-GPS
 corrections).  It displays current GPS animation and (for GPSes that
 support the feature) the locations of accessible satellites.</para>
 
-<para>gps accepts -TDph options as for gpsd.</para>
+<para>gps accepts an -h options as for gpsd. With the -p option you
+may specify an alternate server:port to get data from.  The feature of
+previous version that allowed direct connect to the serial device has
+been removed.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
 <para>xgpsspeed is a speedometer that uses position information from
-the GPS. It accepts -TDph options as for gpsd.</para>
+the GPS. It accepts -TDph options as for gpsd. The feature of
+previous version that allowed direct connect to the serial device has
+been removed.</para>
 
 </refsect2>
 </refsect1>

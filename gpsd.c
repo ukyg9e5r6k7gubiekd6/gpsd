@@ -418,7 +418,7 @@ static void raw_hook(char *sentence)
 	    ++sentence;
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xptvs");
+		ok = PUBLISH(fd, "xptvds");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "xsa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
@@ -430,7 +430,8 @@ static void raw_hook(char *sentence)
 	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "xqm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xy");
+		if (nmea_sane_satellites(&session.gNMEAdata))
+		    ok = PUBLISH(fd, "xy");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
 		ok = PUBLISH(fd, "xz");

@@ -72,9 +72,6 @@ for the Earthmate.
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
-Tom Mayo <tmayo1@rochester.rr.com> N1MU contributed the G/g command,
-which returns a 6 digit Maidenhead grid square.
-
 Be advised: any bugs in this code are mine, and mine only ;-)
 
 Thanks for Russ Nelson for providing a home for gpsd!
@@ -87,8 +84,7 @@ Actually, some bugs may be mine too now. Sorry.
 
 Derrick J. Brashear, 2 January 2000
 
-Or mine.  I drastically rewrote this code to clean it up and extend it
-
+Or mine.  I drastically rewrote this code to clean it up and extend it.
 New features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
@@ -96,9 +92,9 @@ New features include:
      sentence from NMEA 3.0. 
    * It now parses both the NMEA 3.0 and pre-3.0 variants of the VTG sentence 
      correctly.
-   * New y and z commands support signal-status reporting and satellite
-     location -- it should no longer ever be necessary for clients to go to
-     raw mode unless they want to monitor and log the GPS stream.
+   * New y command supports satellite location -- it should no longer ever be 
+     necessary for clients to go to raw mode unless they want to monitor and 
+     log the GPS stream.
    * New 'w' command toggles 'watcher' mode. In watcher mode gpsd ships
      a gpsd-style response for each incoming sentence as if the client
      had just sent all commands that asked for data contained in the sentence.
@@ -107,7 +103,7 @@ New features include:
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code this program uses can now be directly linked as a
-     library, libgpsd(3).
+     library, libgps(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Removed the -s option -- the right speed is fixed for each type, -s was

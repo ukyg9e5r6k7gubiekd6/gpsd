@@ -334,9 +334,8 @@ void init_list()
  * No dependencies on the session structure above this point.
  */
 
-#include "gpsd.h"
-
-struct gpsd_t session;
+static struct gps_data gpsdata;
+static int gps_fd;
 
 void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -353,15 +352,12 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug)
-	return;
-
     fputs(buf, stderr);
 }
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gps_poll(&session);
+    gpsd_poll(gps_fd, &gpsdata);
 }
 
 void update_display(char *message)
@@ -375,12 +371,12 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (SEEN(session.gNMEAdata.satellite_stamp)) {
+    if (SEEN(gpsdata.satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    if (i < session.gNMEAdata.satellites) {
-		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],
-			session.gNMEAdata.elevation[i],
-			session.gNMEAdata.azimuth[i], session.gNMEAdata.ss[i]);
+	    if (i < gpsdata.satellites) {
+		sprintf(s, "%2d %02d %03d %02d", gpsdata.PRN[i],
+			gpsdata.elevation[i],
+			gpsdata.azimuth[i], gpsdata.ss[i]);
 	    } else
 		sprintf(s, " ");
 	    string[i] = XmStringCreateSimple(s);
@@ -390,9 +386,9 @@ void update_display(char *message)
 	    XmStringFree(string[i]);
     }
 #ifdef PROCESS_PRWIZCH
-    if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
+    if (SEEN(gpsdata.signal_quality_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(s, "%2d %02x", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
+	    sprintf(s, "%2d %02x", gpsdata.Zs[i], gpsdata.Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(list_8, string, sizeof(string), 1);
@@ -401,24 +397,24 @@ void update_display(char *message)
     }
 #endif /* PROCESS_PRWIZCH */
     /* here are the value fields */
-    XmTextFieldSetString(text_1, session.gNMEAdata.utc);
-    sprintf(s, "%f", session.gNMEAdata.latitude);
+    XmTextFieldSetString(text_1, gpsdata.utc);
+    sprintf(s, "%f", gpsdata.latitude);
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f", session.gNMEAdata.longitude);
+    sprintf(s, "%f", gpsdata.longitude);
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f", session.gNMEAdata.altitude);
+    sprintf(s, "%f", gpsdata.altitude);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f", session.gNMEAdata.speed);
+    sprintf(s, "%f", gpsdata.speed);
     XmTextFieldSetString(text_5, s);
-    sprintf(s, "%f", session.gNMEAdata.track);
+    sprintf(s, "%f", gpsdata.track);
     XmTextFieldSetString(text_6, s);
 
-    switch (session.gNMEAdata.mode) {
+    switch (gpsdata.mode) {
     case 2:
-	sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	sprintf(s, "2D %sFIX", (gpsdata.status==2) ? "DIFF ": "");
 	break;
     case 3:
-	sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	sprintf(s, "3D %sFIX", (gpsdata.status==2) ? "DIFF ": "");
 	break;
     default:
 	sprintf(s, "NO FIX");
@@ -426,7 +422,7 @@ void update_display(char *message)
     }
     XmTextFieldSetString(text_7, s);
 
-    draw_graphics(&session.gNMEAdata);
+    draw_graphics(&gpsdata);
 }
 
 int main(int argc, char *argv[])
@@ -434,61 +430,48 @@ int main(int argc, char *argv[])
     XtAppContext app;
     extern char *optarg;
     int option;
-    double baud;
-    char devtype = 'n';
     char *device_name = "localhost:2947";
 
-    while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
+    while ((option = getopt(argc, argv, "hp:")) != -1) {
 	switch (option) {
-        case 'T':
-	    devtype = *optarg;
-            break;
-	case 'D':
-	    session.debug = (int) strtol(optarg, 0, 0);
-	    break;
 	case 'p':
 	    if (device_name)
 		free(device_name);
 	    device_name = malloc(strlen(optarg) + 1);
 	    strcpy(device_name, optarg);
 	    break;
-	case 's':
-	    baud = strtod(optarg, 0);
-	    break;
 	case 'h':
 	case '?':
 	default:
 	    fputs("usage:  gps [options] \n\
   options include: \n\
-  -p string    = set GPS device name \n\
-  -T {e|t}     = set GPS device type \n\
-  -s baud_rate = set baud rate on GPS device \n\
-  -D integer   = set debug level \n\
+  -p string    = set server:port to query \n\
   -h           = help message \n\
 ", stderr);
 	    exit(1);
 	}
     }
 
+    /*
+     * Essentially all the interface to libgps happens below here
+     */
+    gps_fd = gpsd_open(&gpsdata, 5, NULL, NULL);
+    if (gps_fd < 0)
+	exit(2);
+
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
 
     build_gui(lxbApp);
     init_list();
 
-    /*
-     * Essentially all the interface to libgps happens below here
-     */
-    gps_init(&session, GPS_TIMEOUT, devtype, NULL);
-    session.gps_device = device_name;
-    session.gNMEAdata.raw_hook = update_display;
-    if (gps_activate(&session) == -1)
-	exit(1);
+    gpsd_set_raw_hook(&gpsdata, update_display);
+    gpsd_query(gps_fd, &gpsdata, "w+r+\n");
 
-    XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
+    XtAppAddInput(app, gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 
     XtAppMainLoop(app);
 
-    gps_wrap(&session);
+    gpsd_close(gps_fd);
     return 0;
 }
