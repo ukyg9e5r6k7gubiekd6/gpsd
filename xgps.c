@@ -143,15 +143,15 @@ static void build_gui(Widget toplevel)
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
 
-    rowColumn_12 = XtCreateManagedWidget("->fix.latitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_13 = XtCreateManagedWidget("->fix.longitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_14 = XtCreateManagedWidget("->fix.altitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_17 = XtCreateManagedWidget("eph", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_18 = XtCreateManagedWidget("epv", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_19 = XtCreateManagedWidget("climb", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_20 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_20 = XtCreateManagedWidget("status", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_21 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, left, args, 1);
 
     label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
@@ -268,23 +268,50 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
-    unix_to_iso8661(gpsdata->fix.time, s);
+    if (gpsdata->valid & TIME_SET)
+	unix_to_iso8661(gpsdata->fix.time, s);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);
-    sprintf(s, "%f %c", fabsf(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    if (gpsdata->fix.mode >= MODE_2D)
+	sprintf(s, "%f %c", fabsf(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f %c", fabsf(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    if (gpsdata->fix.mode >= MODE_2D)
+	sprintf(s, "%f %c", fabsf(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
+    if (gpsdata->fix.mode == MODE_3D)
+	sprintf(s, "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
+    if (gpsdata->fix.track != TRACK_NOT_VALID)
+	sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_5, s);
-    sprintf(s, "%f degrees", gpsdata->fix.track);
+    if (gpsdata->fix.track != TRACK_NOT_VALID)
+	sprintf(s, "%f degrees", gpsdata->fix.track);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
-    sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
+    if (gpsdata->fix.eph)
+	sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
-    sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
+    if (gpsdata->fix.epv)
+	sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_8, s);
-    sprintf(s, "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
+    if (gpsdata->fix.mode == MODE_3D)
+	sprintf(s, "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
+    else
+	strcpy(s, "n/a");
     XmTextFieldSetString(text_9, s);
 
     if (!gpsdata->online) {

@@ -8,7 +8,7 @@
 *eph*labelString:        EPH   
 *epv*labelString:        EPV
 *climb*labelString:      Climb
-*fix_status*labelString: Status   
+*status*labelString: Status   
 *quit*labelString:       Quit     
 *speedunits:             mph
 *altunits:               feet
