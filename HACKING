@@ -16,7 +16,7 @@ misbehave.
 
 gpsfake enables you to repeatedly feed a packet sequence to a gpsd
 instance running as non-root.  Watching such a session with gdb should
-smoke out ant repeatable bug pretty quickly.
+smoke out any repeatable bug pretty quickly.
 
 ** Profiling
 
@@ -24,27 +24,40 @@ There is a barely-documented Z command in the daemon will cause it to emit
 a $ clause on every D request.  The $ clause contains four
 space-separated fields:
 
-(1) The character length of the sentence containing the timestamp data
-    (a GPRMC, GPLL, or GPGGA sentence)
+(1) An identifing sentence tag.
 
-(2) An offset from the D time telling when gpsd received the data.
+(2) The character length of the sentence containing the timestamp data.
 
-(3) An offset from the D time telling when gpsd decoded the data.
+(3) The timestamp associated with the sentence, in seconds since
+    the Unix epoch (this time *is* leap-second corrected, like UTC).
 
-(4) An offset from the D time taken just before encoding the
+(4) An offset from the timestamp telling when gpsd believes the
+    transmission of the current packet started (this is actually 
+    recorded just before the first read od the new packet).
+
+(5) An offset from the timestamp telling when gpsd received the last
+    bytes of the packet.
+
+(6) An offset from the timestamp telling when gpsd decoded the data.
+
+(7) An offset from the timestamp taken just before encoding the
     response -- effectively, when gpsd was polled to transmit the data.
 
-(5) An offset from the D time telling when gpsd transmitted 
+(8) An offset from the timestamp telling when gpsd transmitted 
     the data.
 
-The Z figures measure components of the latency between the GPS's fix
-measurement and when it became available to the client. For it to be
-meaningful, the GPS has to ship timestamps with sub-second
-precision. SiRF-II and Evermore chipsets ship times with millisecond
-resolution.  Your machine's time reference must also be accurate to
-subsecond precision; I recommend using ntpd, which will normally give
-you about 15 microseconds precision (two orders of magnitude better
-than GPSes report).
+The Z figures measure components of the latency between the GPS's time
+measurement and when the sentence data became available to the
+client. For it to be meaningful, the GPS has to ship timestamps with
+sub-second precision. SiRF-II and Evermore chipsets ship times with
+millisecond resolution.  Your machine's time reference must also be
+accurate to subsecond precision; I recommend using ntpd, which will
+normally give you about 15 microseconds precision (two orders of
+magnitude better than GPSes report).
+
+Note, some inaccuracy is introduced into the start- and end-of-packet
+timestamps by the fact that the last read of a packet may grab a few
+bytes of the next one.
 
 The distribution lincludes a Python script, gpsprof, that uses the 
 Z command to collect profiling information from a running GPS instance.
@@ -179,8 +192,9 @@ The watcher-mode logic relies on these as its way of knowing what to
 publish.
 
 Note, also, that all the timestamps your driver puts in the session
-structure should be UTC.  The report-generator function for D and 
-O does *not* apply a timezone offset.
+structure should be UTC (with leap-second corrections) not just Unix
+seconds since the epoch.  The report-generator function for D
+does *not* apply a timezone offset.
 
 Local variables:
 mode: outline
