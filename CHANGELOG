@@ -40,7 +40,10 @@
 	 G or g command returns six-digit Maidenhead grid square (like FN12fx)
 20030216 (1.09)
 	 Include sys/time.h in gpsd.c for struct timeval.
-20030818 (1.10)
+20030818 
 	 Use cfset[io]speed() to set speed in serial.h. Glibc is quite insane
 	 and I am tired to chase it, so I give up. Hope this works for BSD.
 	 Set status and mode 0 after GPS timeout (5 sec) - Cougar <cougar@random.ee>
+20030820 (1.10)
+	 Add install target. Fix clean target. Make GPS timeout configurable.
+	 Make xgpsspeed build with Apple's X11.
