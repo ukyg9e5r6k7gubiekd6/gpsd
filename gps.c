@@ -297,20 +297,6 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 	if (read(*source, buf + offset, 1) != 1)
 	    return;
 
-        // The following tries to recognise if the EarthMate
-        // is in binary mode. If so, it will attempt to
-        // switch to NMEA mode.
- 
-        if (device_type == DEVICE_EARTHMATE) {
-            if (offset) {
-                if (buf[offset-1] == (unsigned char)0xff) {
-                    if (buf[offset] == (unsigned char)0x81) {
-                        em_tonmea();
-                    }
-                }
-            }
-        }
-
 	if (buf[offset] == '\n') {
 	    if (buf[offset - 1] == '\r')
 		buf[offset - 1] = '\0';

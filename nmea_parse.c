@@ -31,6 +31,7 @@ void processGPRMC(char *sentence)
 
     strncpy(s + 3, d, 2);	// copy date
 
+    /*FIXME: This is NOT Y2K comliant, and will btrak soon! */
     strncpy(s + 6, "19", 2);	// 20th century
 
     strncpy(s + 8, d + 4, 2);	// copy year

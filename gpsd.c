@@ -61,8 +61,10 @@ char *default_longitude = "-12300.000";
 
 int nfds;
 int verbose = 1;
+int bincount;
 
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
+extern int handle_EMinput(int input);
 static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
@@ -122,16 +124,16 @@ int main(int argc, char *argv[])
 	switch (option) {
 	case 'T':
 	    switch (*optarg) {
-		case 't':
-		    device_type = DEVICE_TRIPMATE;
-		    break;
-		case 'e':
-		    device_type = DEVICE_EARTHMATE;
-		    break;
-		default:
-		    fprintf(stderr,"Invalide device type \"%s\"\n"
-				   "Using GENERIC instead\n", device_type);
-		    break;
+	    case 't':
+		device_type = DEVICE_TRIPMATE;
+		break;
+	    case 'e':
+		device_type = DEVICE_EARTHMATE;
+		break;
+	    default:
+		fprintf(stderr, "Invalide device type \"%s\"\n"
+			"Using GENERIC instead\n", optarg);
+		break;
 	    }
 	    break;
 	case 'D':
@@ -257,7 +259,10 @@ int main(int argc, char *argv[])
 	    FD_SET(ssock, &afds);
 	}
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
-	    handle_input(input, &afds, &nmea_fds);
+	    if (device_type == DEVICE_EARTHMATEb)
+		handle_EMinput(input);
+	    else
+		handle_input(input, &afds, &nmea_fds);
 	}
 	need_gps = 0;
 	for (fd = 0; fd < nfds; fd++) {
@@ -287,6 +292,8 @@ int main(int argc, char *argv[])
 	    gNMEAdata.fdin = input;
 	    gNMEAdata.fdout = input;
 	    serial_close();
+	    if (device_type == DEVICE_EARTHMATEb)
+		device_type = DEVICE_EARTHMATE;
 	    syslog(LOG_NOTICE, "Closed gps");
 	    gNMEAdata.mode = 1;
 	    gNMEAdata.status = 0;
@@ -405,25 +412,23 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	    offset = 0;
 	    return 1;
 	}
-
-
-	// The following tries to recognise if the EarthMate
-	// is in binary mode. If so, it will attempt to
-	// switch to NMEA mode.
+	// The following tries to recognise if the EarthMate is
+	// in binary mode. If so, it will switch to EarthMate mode.
 
 	if (device_type == DEVICE_EARTHMATE) {
 	    if (offset) {
-		if (buf[offset-1] == (unsigned char)0xff) {
-		    if (buf[offset] == (unsigned char)0x81) {
-			syslog(LOG_NOTICE,
-			  "Found an EarthMate (syn), switching to NMEA...");
-			em_tonmea();
+		if (buf[offset - 1] == (unsigned char) 0xff) {
+		    if (buf[offset] == (unsigned char) 0x81) {
+			if (bincount++ == 5) {
+			    syslog(LOG_NOTICE,
+				   "Found an EarthMate (syn).");
+			    device_type = DEVICE_EARTHMATEb;
+			    return 0;
+			}
 		    }
 		}
 	    }
 	}
-
-
 	offset++;
 	buf[offset] = '\0';
     }

@@ -4,7 +4,7 @@
 COPYRIGHT
 =========
 
-This software (gpsd) is Copyrighted 1997 by Remco Treffkorn,
+This software (gpsd) is Copyrighted 1997, 1998, 1999 by Remco Treffkorn,
 I am releasing it under the terms and conditions of the 
 
 	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
@@ -19,7 +19,8 @@ GENERAL
 
 Gpsd is a user land daemon acting as a liason between a gps or
 Loran-C receiver and clients. The reiceiver is expected to generate
-position information as NMEA-0183 sentences, although that can be changed.
+position information as NMEA-0183 sentences, or Rockwell binary format,
+although that can be changed.
 
 Gpsd listens on port 5678 for clients requesting position, time,
 velocity or altitude information.
@@ -35,8 +36,9 @@ you the boats IP address :-)
 
 There is a sample client included. It is called "gps". It simply connects
 to a gpsd and displays satellites in their current position in the sky.
+This only works for some GPS receivers!
 
-Gpsd is tested with DeLormes TripMate und Garmin 38 units.
+Gpsd is tested with DeLormes TripMate, EarthMate and Garmin units.
 
 
 CREDITS
@@ -56,6 +58,6 @@ platform.
 Be advised: any bugs in this code are mine, and mine only ;-)
 
 
-This is as it stands today, January 24 1999.
+This is as it stands today, March 4 1999.
 
 remco@emc.rvt.com

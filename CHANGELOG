@@ -3,7 +3,7 @@
 19970513 some cleanups in the ini code. version 0.9 ...
 19980127 combined gpsd + gpsclient. No more init files, command line only.
 19980127 using GNU autoconf now. version 0.93 ...
-19990124 Y2K compliant ;-)
+19990124 Y2K compliant ;-)  (... is NOT. Look for "FIXME:" in nmea_parse.c)
 19990206 (0.95)
 	 Added suport for EarthMate receivers. Since I do not
 	 have one, this is untested.
@@ -15,3 +15,6 @@
 	  If the EarthMate id is not received, but a binary
 	  data header is received, then we will try to switch
 	  NMEA too.
+19990304 (0.96)
+	 Changed EarthMate support. Rockwell binary is now almost properly
+	 supported. Only the minimum required information is extracted.

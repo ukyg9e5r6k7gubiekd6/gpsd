@@ -87,16 +87,9 @@ void process_exception(char *sentence)
     } else if ((strncmp("EARTHA", sentence, 6) == 0 
 		&& isatty(gNMEAdata.fdout))) {
 	write(gNMEAdata.fdout, "EARTHA\r\n", 8);
-	device_type = DEVICE_EARTHMATE;
-	syslog(LOG_NOTICE, "Found an EarthMate (id), switching to NMEA...");
-
-
-	// Here we are! We need to switch
-	// the darn thing into nmea mode.
-	em_tonmea();
-
-	// Maybe we wait a bit and initialize in NMEA mode?
-
+	device_type = DEVICE_EARTHMATEb;
+	syslog(LOG_NOTICE, "Found an EarthMate (id).");
+	/*FIXME: should init the darn thing*/
     } else if (debug > 1) {
 	fprintf(stderr, "Unknown exception: \"%s\"",
 		sentence);
