@@ -112,8 +112,8 @@ INCLUDE = -I. $(X_INCLUDE)
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
 
 ## Libraries and object files
-GPSLIB_OBJECTS  = nmea_parse.o serial.o drivers.o earthmate.o gpscore.o
-GPSDLIB_OBJECTS = libgpsd.o
+GPSLIB_OBJECTS  = nmea_parse.o serial.o drivers.o earthmate.o libgpsd_core.o
+GPSDLIB_OBJECTS = libgps.o
 COMMON_OBJECTS  = netlib.o
 
 ## Programs
@@ -145,8 +145,8 @@ libgps.a:  $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
 	ranlib libgps.a
 
 # This is a test instrument, it doesn't ship.
-libgpsd: libgpsd.c gps.h
-	cc -g -DTESTMAIN -I. libgpsd.c netlib.o -o libgpsd
+libgps: libgps.c gps.h
+	cc -g -DTESTMAIN -I. libgps.c netlib.o -o libgps
 
 # How to build the library parts
 netlib.o: netlib.c gps.h gpsd.h
@@ -154,8 +154,8 @@ nmea_parse.o: nmea_parse.c
 serial.o: serial.c gps.h gpsd.h
 drivers.o: drivers.c gps.h gpsd.h
 earthmate.o: earthmate.c gps.h gpsd.h
-gpscore.o: gpscore.c gps.h gpsd.h
-libgpsd.o: libgpsd.c gps.h
+libgpsd_core.o: libgpsd_core.c gps.h gpsd.h
+libgps.o: libgps.c gps.h
 
 # And the main sequences of the applications
 display.o: display.c gps.h gpsd.h
@@ -219,7 +219,7 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.h $(INCLUDEDIR)/gpsd.h
 
 clean:
-	rm -f *.o *.a gpsd gps xgpsspeed libgpsd *~ config.status
+	rm -f *.o *.a gpsd gps xgpsspeed libgps *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log
