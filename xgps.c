@@ -16,12 +16,6 @@
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 
-#include <X11/Intrinsic.h>
-#include <X11/Shell.h>
-#include <X11/Xaw/Label.h>
-#include <X11/Xaw/Paned.h>
-#include <Xm/XmStrDefs.h>
-
 #include "config.h"
 #include "gps.h"
 #include "display.h"
@@ -45,13 +39,13 @@ struct unit_t {
     float factor;
 };
 static struct unit_t speedtable[] = {
-    {"%f knots",	1},
-    {"%f mph",		KNOTS_TO_MPH},
-    {"%f kph",		KNOTS_TO_KPH},
+    {"knots",	1},
+    {"mph",		KNOTS_TO_MPH},
+    {"kph",		KNOTS_TO_KPH},
 }, *speedunits = speedtable;
 static struct unit_t  alttable[] = {
-    {"%f feet",		METERS_TO_FEET},
-    {"%f meters",	1},
+    {"feet",		METERS_TO_FEET},
+    {"meters",		1},
 }, *altunits = alttable;
 
 static void quit_cb(void)
@@ -257,9 +251,11 @@ static void update_panel(char *message)
     XmTextFieldSetString(text_2, s);
     sprintf(s, "%f %c", fabsf(gpsdata->longitude), (gpsdata->longitude < 0) ? 'W' : 'E');
     XmTextFieldSetString(text_3, s);
-    sprintf(s, altunits->legend, gpsdata->altitude * altunits->factor);
+    sprintf(s, "%f ", gpsdata->altitude * altunits->factor);
+    strcat(s, altunits->legend);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, speedunits->legend, gpsdata->speed * speedunits->factor);
+    sprintf(s, "%f ", gpsdata->speed * speedunits->factor);
+    strcat(s, speedunits->legend);
     XmTextFieldSetString(text_5, s);
     sprintf(s, "%f degrees", gpsdata->track);
     XmTextFieldSetString(text_6, s);
@@ -293,11 +289,28 @@ static void update_panel(char *message)
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
 }
 
+static char *get_resource(char *name, char *default_value)
+{
+  XtResource xtr;
+  char *value = NULL;
+
+  xtr.resource_name = name;
+  xtr.resource_class = "AnyClass";
+  xtr.resource_type = XmRString;
+  xtr.resource_size = sizeof(String);
+  xtr.resource_offset = 0;
+  xtr.default_type = XmRImmediate;
+  xtr.default_addr = default_value;
+  XtGetApplicationResources(lxbApp, &value, &xtr, 1, NULL, 0);
+  if (value) return value;
+  return default_value;
+}
+
 int main(int argc, char *argv[])
 {
     int option;
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
-    // char *su, *au;
+    char *su, *au;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
@@ -327,8 +340,19 @@ int main(int argc, char *argv[])
     lxbApp = XtVaAppInitialize(&app, "gps.ad", 
 			       options, XtNumber(options), 
 			       &argc,argv, fallback_resources,NULL);
-    // su = get_resource("speedunits", "mph");
-    // au = get_resource("altunits",   "feet");
+
+    su = get_resource("speedunits", "mph");
+    for (speedunits = speedtable; 
+	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
+	 speedunits++)
+	if (strcmp(speedunits->legend, su) == 0)
+	    break;
+    au = get_resource("altunits",   "feet");
+    for (altunits = alttable; 
+	 altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
+	 altunits++)
+	if (strcmp(altunits->legend, au) == 0)
+	    break;
 
     build_gui(lxbApp);
 
