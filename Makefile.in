@@ -2,7 +2,11 @@
 # $Modified: Thu Jan 22 11:55:32 1998 by brook $
 
 INSTALL = @INSTALL@
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = mkinstalldirs
+exec_prefix = @exec_prefix@
+prefix = @prefix@
+bindir = @bindir@
+sbindir = @sbindir@
 
 ## The C compiler
 
@@ -139,12 +143,12 @@ libgpsd.a:  $(LIB_OBJECTS)
 install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
-	for app in $PROGRAMS; do \
-		$(INSTALL) -m 755 $$app $(DESTDIR}${sbindir}; \
-        done
-	for app in $MOTIF_PROGRAMS; do \
-		$(INSTALL) -m 755 $$app $(DESTDIR}${bindir}; \
-        done
+	for app in ${PROGRAMS}; do \
+		$(INSTALL) -m 755 $$app ${DESTDIR}${sbindir} ; \
+	done
+	for app in ${MOTIF_PROGRAMS}; do \
+		$(INSTALL) -m 755 $$app ${DESTDIR}${bindir} ; \
+	done
 
 clean:
 	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *~ config.status
