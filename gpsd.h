@@ -174,6 +174,7 @@ extern int ntpshm_init(struct gps_session_t *);
 extern int ntpshm_put(struct gps_session_t *, double);
 
 extern double iso8661_to_unix(char *);
+extern int tzoffset(void);
 extern double gpstime_to_unix(int, double);
 extern double earth_distance(double, double, double, double);
 
