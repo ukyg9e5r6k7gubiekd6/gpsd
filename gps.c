@@ -338,7 +338,7 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (SEEN(session.gNMEAdata.satellite_stamp)) {
+    if (SEEN(session.gNMEAdata.satellite_view_stamp)) {
 	for (i = 0; i < 12; i++) {
 	    if (i < session.gNMEAdata.satellites_in_view) {
 		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],
@@ -352,6 +352,7 @@ void update_display(char *message)
 	for (i = 0; i < 12; i++)
 	    XmStringFree(string[i]);
     }
+#ifdef PROCESS_PRWIZCH
     if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
 	for (i = 0; i < 12; i++) {
 	    sprintf(s, "%2d %02x", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
@@ -361,8 +362,8 @@ void update_display(char *message)
 	for (i = 0; i < 12; i++)
 	    XmStringFree(string[i]);
     }
+#endif /* PROCESS_PRWIZCH */
     /* here now the value fields */
-
     XmTextFieldSetString(text_1, session.gNMEAdata.utc);
     sprintf(s, "%f", session.gNMEAdata.latitude);
     XmTextFieldSetString(text_2, s);

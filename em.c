@@ -281,12 +281,16 @@ static void handle1002(struct gpsd_t *session, unsigned short *p)
 {
     int i, j;
 
-    for (j = 0; j < 12; j++) {
+#ifdef PROCESS_PRWIZCH
+    for (j = 0; j < MAXCHANNELS; j++) {
 	session->gNMEAdata.used[j] = 0;
     }
-    for (i = 0; i < 12; i++) {
+#endif /* PROCESS_PRWIZCH */
+    for (i = 0; i < MAXCHANNELS; i++) {
+#ifdef PROCESS_PRWIZCH
 	session->gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
 	session->gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
+#endif /* PROCESS_PRWIZCH */
 #if 0
 	gpscli_report(1, "Sat%02d:", i);
 	gpscli_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
@@ -296,7 +300,7 @@ static void handle1002(struct gpsd_t *session, unsigned short *p)
 	gpscli_report(1, " PRN:%d", p[O(16 + (3 * i))]);
 	gpscli_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
-	for (j = 0; j < 12; j++) {
+	for (j = 0; j < MAXCHANNELS; j++) {
 	    if (session->gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
 		continue;
 	    session->gNMEAdata.used[j] = (p[O(15 + (3 * i))] & 1);
@@ -304,7 +308,12 @@ static void handle1002(struct gpsd_t *session, unsigned short *p)
 	    break;
 	}
     }
+#ifdef PROCESS_PRWIZCH
     REFRESH(session->gNMEAdata.signal_quality_stamp);
+#endif /* PROCESS_PRWIZCH */
+    REFRESH(session->gNMEAdata.satellite_view_stamp);
+    /* this is slightly wrong, we're not updating hdop/pdop/vdop here */
+    REFRESH(session->gNMEAdata.fix_quality_stamp);
 }
 
 static void handle1003(struct gpsd_t *session, unsigned short *p)
@@ -406,14 +415,14 @@ static void analyze(struct gpsd_t *session,
 	    bufp2 = bufp = buf;
 	    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
 	    j = 0;
-	    for (i = 0; i < 12; i++) {
+	    for (i = 0; i < MAXCHANNELS; i++) {
 		if (session->gNMEAdata.used[i]) {
 		    bufp = bufp + strlen(bufp);
 		    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
 		    j++;
 		}
 	    }
-	    for (i = j; i < 12; i++) {
+	    for (i = j; i < MAXCHANNELS; i++) {
 		bufp = bufp + strlen(bufp);
 		sprintf(bufp, ",");
 	    }
@@ -422,6 +431,7 @@ static void analyze(struct gpsd_t *session,
 		    session->gNMEAdata.vdop);
 	    gps_add_checksum(bufp2 + 1);
 	    bufp2 = bufp = bufp + strlen(bufp);
+#ifdef PROCESS_PRWIZCH
 	    sprintf(bufp, "$PRWIZCH");
 	    bufp = bufp + strlen(bufp);
 	    for (i = 0; i < 12; i++) {
@@ -432,11 +442,12 @@ static void analyze(struct gpsd_t *session,
 	    bufp = bufp + strlen(bufp);
 	    gps_add_checksum(bufp2 + 1);
 	    nmea = 1002;
+#endif /* PROCESS_PRWIZCH */
 	    break;
 	case 1003:
 	    handle1003(session, p);
 	    bufp2 = bufp = buf;
-	    j = (session->gNMEAdata.in_view / 4) + (((session->gNMEAdata.satellites_in_view % 4) > 0) ? 1 : 0);
+	    j = (session->gNMEAdata.satellites_in_view / 4) + (((session->gNMEAdata.satellites_in_view % 4) > 0) ? 1 : 0);
 	    while (i < 12) {
 		if (i % 4 == 0)
 		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites_in_view);

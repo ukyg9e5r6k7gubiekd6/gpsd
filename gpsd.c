@@ -244,7 +244,11 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'L':
 	case 'l':
 	    sprintf(reply + strlen(reply),
-		    ",l=1," VERSION ",acdmpqrsvxyz");
+		    ",l=1 " VERSION " acdmpqrsvxy"
+#ifdef PROCESS_PRWIZCH
+		    "z"
+#endif
+);
 	    break;
 	case 'M':
 	case 'm':
@@ -340,30 +344,26 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'Y':
 	case 'y':
 	    sc = 0;
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
+	    if (SEEN(session.gNMEAdata.satellite_view_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    sprintf(reply + strlen(reply),
 		    ",Y=%d ", sc);
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
+	    if (SEEN(session.gNMEAdata.satellite_view_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
-			sprintf(reply + strlen(reply),"%d %2d %2d ", 
+			sprintf(reply + strlen(reply),"%d %d %d %d", 
 				session.gNMEAdata.PRN[i], 
 				session.gNMEAdata.elevation[i],
-				session.gNMEAdata.azimuth[i]);
+				session.gNMEAdata.azimuth[i],
+			        session.gNMEAdata.ss[i]);
 	    break;
+#ifdef PROCESS_PRWIZCH
 	case 'Z':
 	case 'z':
 	    sc = 0;
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
-	    {
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.PRN[i])
-			sc++;
-	    }
-	    else if (SEEN(session.gNMEAdata.signal_quality_stamp))
+	    if (SEEN(session.gNMEAdata.signal_quality_stamp))
 	    {
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.Zs[i])
@@ -372,20 +372,14 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(reply + strlen(reply),
 		    ",Z=%d ", sc);
 	    for (i = 0; i < MAXCHANNELS; i++)
-		if (SEEN(session.gNMEAdata.satellite_stamp))
-		{
-		    if (session.gNMEAdata.PRN[i])
-			sprintf(reply + strlen(reply),"%d %02d ", 
-				session.gNMEAdata.PRN[i], 
-				session.gNMEAdata.ss[i]);
-		}
-	    	else if (SEEN(session.gNMEAdata.signal_quality_stamp))
+	    	if (SEEN(session.gNMEAdata.signal_quality_stamp))
 		{
 		    if (session.gNMEAdata.Zs[i])
 			sprintf(reply + strlen(reply),"%d %02d ", 
 				session.gNMEAdata.Zs[i], 
 				session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
 		}
+#endif /* PROCESS_PRWIZCH */
 	    break;
 	case '\r':
 	case '\n':
@@ -438,8 +432,10 @@ static void raw_hook(char *sentence)
 		ok = PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "y");
+#ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
 		ok = PUBLISH(fd, "z");
+#endif /* PROCESS_PRWIZCH */
 	    }
 #undef PUBLISH
 	    if (!ok) {

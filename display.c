@@ -113,12 +113,15 @@ int get_status(int satellite)
     int i;
     int s;
 
+#ifdef PROCESS_PRWIZCH
     if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
 	for (i = 0; i < 12; i++)
 	    if (satellite == session.gNMEAdata.Zs[i])
 		return session.gNMEAdata.Zv[i];
 	return 0;
-    } else {
+    } else
+#endif /* PROCESS_PRWIZCH */
+    {
 	for (i = 0; i < 12; i++)
 	    if (satellite == session.gNMEAdata.PRN[i]) {
 		s = session.gNMEAdata.ss[i];
@@ -139,7 +142,7 @@ void draw_graphics()
     double x, y;
     char buf[20];
 
-    if (SEEN(session.gNMEAdata.satellite_stamp) || SEEN(session.gNMEAdata.signal_quality_stamp)) {
+    if (SEEN(session.gNMEAdata.satellite_view_stamp)) {
 
 	i = min(width, height);
 

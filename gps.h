@@ -53,6 +53,7 @@ struct gps_data {
 
     /* precision of fix */
     int satellites_used;	/* Number of satellites used in solution */
+    int used[MAXCHANNELS];	/* used in last fix? */
     double pdop;		/* Position dilution of precision, meters */
     double hdop;		/* Horizontal dilution of precision, meters */
     double vdop;		/* Vertical dilution of precision, meters */
@@ -65,12 +66,18 @@ struct gps_data {
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
-    struct life_t satellite_stamp;
+    struct life_t satellite_view_stamp;
 
-    /* Zodiac chipset channel status from PRWIZCH */
+#ifdef PROCESS_PRWIZCH
+    /*
+     * Zodiac chipset channel status from PRWIZCH.
+     * This is actually redundant with the SNRs in GPGSV,
+     * and all known variants of the Zodiac chipsets issue GPGSV.
+     */
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
     struct life_t signal_quality_stamp;
+#endif /* PROCESS_PRWIZCH */
 
     int year;
     int month;

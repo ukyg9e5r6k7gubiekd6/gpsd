@@ -354,7 +354,7 @@ static void processGPGSA(char *sentence, struct gps_data *out)
 	16   = HDOP
 	17   = VDOP
      */
-    int changed = 0;
+    int i, changed = 0;
     
     out->mode_stamp.changed = update_field_i(sentence, 2, &out->mode);
     REFRESH(out->mode_stamp);
@@ -362,7 +362,14 @@ static void processGPGSA(char *sentence, struct gps_data *out)
     changed |= update_field_f(sentence, 15, &out->pdop);
     changed |= update_field_f(sentence, 16, &out->hdop);
     changed |= update_field_f(sentence, 17, &out->vdop);
-    out->signal_quality_stamp.changed = changed;
+    for (i = 0; i < MAXCHANNELS; i++)
+	out->used[i] = 0;
+    out->satellites_used = 0;
+    for (i = 0; i < MAXCHANNELS; i++) {
+	out->used[atoi(field(sentence, i))] = 1;
+	out->satellites_used++;
+    }
+    out->fix_quality_stamp.changed = changed;
     REFRESH(out->fix_quality_stamp);
 }
 
@@ -380,7 +387,7 @@ static void processGPGSV(char *sentence, struct gps_data *out)
            01           Satellite PRN number
            40           Elevation, degrees
            083          Azimuth, degrees
-           46           Signal strength - higher is better
+           46           Signal-to-noise ratio in decibels
            <repeat for up to 4 satellites per sentence>
                 There my be up to three GSV sentences in a data packet
      */
@@ -416,8 +423,8 @@ static void processGPGSV(char *sentence, struct gps_data *out)
      * and signal-strength 0 (but nonzero elevations).
      */
     if (sirf2_sane) {
-	out->satellite_stamp.changed = changed;
-	REFRESH(out->satellite_stamp);
+	out->satellite_view_stamp.changed = changed;
+	REFRESH(out->satellite_view_stamp);
     }
 }
 
@@ -470,6 +477,7 @@ static void processPMGNST(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
+#ifdef PROCESS_PRWIZCH
 static void processPRWIZCH(char *sentence, struct gps_data *out)
 /*
  * Supported by the Zodiac/Rockwell chipset.
@@ -490,6 +498,7 @@ static void processPRWIZCH(char *sentence, struct gps_data *out)
     out->signal_quality_stamp.changed = changed;
     REFRESH(out->signal_quality_stamp);
 }
+#endif /* PROCESS_PRWIZCH */
 
 /* ----------------------------------------------------------------------- */
 
@@ -533,8 +542,10 @@ int gps_process_NMEA_message(char *sentence, struct gps_data *outdata)
 	    processGPGSA(sentence, outdata);
 	} else if (strncmp(GPGSV, sentence, 5) == 0) {
 	    processGPGSV(sentence, outdata);
+#ifdef PROCESS_PRWIZCH
 	} else if (strncmp(PRWIZCH, sentence, 7) == 0) {
 	    processPRWIZCH(sentence, outdata);
+#endif /* PROCESS_PRWIZCH */
 	} else {
 	    return -1;
 	}

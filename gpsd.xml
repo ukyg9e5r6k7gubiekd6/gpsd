@@ -230,13 +230,14 @@ position, velocity and GPS status data.
 <term>y</term> 
 <listitem>
 <para>Returns Y= followed by a count not more than 12, followed by
-that many triples of satellite PRNs and elevation/azimuth pairs
+that many quadrples of satellite PRNs, elevation/azimuth pairs
 (elevation an integer formatted as %d in range 0-90, azimuth an
-integer formatted as %d in range
-0-359). Each number is followed by one space.</para>
+integer formatted as %d in range 0-359), and signal strengths in
+decibels. Each number is followed by one space.</para>
 </listitem>
 </varlistentry>
 
+<!--
 <varlistentry>
 <term>z</term>
 <listitem>
@@ -246,6 +247,7 @@ percentage is in the range 0-99). Each number is an integer formatted as
 %d followed by one space.</para>
 </listitem>
 </varlistentry>
+-->
 </variablelist>
 
 <para>Requests can be concatenated and sent as a string; gpsd will then
