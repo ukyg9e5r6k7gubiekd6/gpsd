@@ -3,16 +3,23 @@
 This is not a complicated piece of code.  Essentially, it spins in a loop 
 polling for input from one of three sources:
 
-1) The GPS, connected via serial or USB device.
+1) A client making requests over a TCP/IP port.
 
-2) A client making requests over a TCP/IP port.
+2) The GPS, connected via serial or USB device.
 
-4) A DGPS server issuing periodic differential-GPS updates.
+3) A DGPS server issuing periodic differential-GPS updates.
 
-GPS input updates an internal data structure called gNMEAdata, which has
-slots in it for all the data you can get from a GPS.  Client commands mine
-that structure and ship reports up the socket to the client.  DGPS data is
-passed through, raw, to the GPS 
+The daemon only connects to the GPS when clients are connected to it.
+Otherwise the GPS device is closed and the daemon is quiescent, but
+retains fix and timestamp data from the last active period.  This is
+better functional design than starting the daemon from a hotplug
+script would be; that would lose the old data, leaving no fix at all
+available if the GPS were momentarily unplugged.
+
+GPS input updates an internal data structure which has slots in it for
+all the data you can get from a GPS.  Client commands mine that
+structure and ship reports up the socket to the client.  DGPS data is
+passed through, raw, to the GPS.
 
 The program supports multiple GPS types.  All are represented by
 driver method tables; the main loop knows nothing about the driver
@@ -22,10 +29,9 @@ active; by default it's the NMEA one.
 Each driver may have a trigger string that the NMEA interpreter
 watches for.  When that string is recognized at the start of a 
 line, the interpreter switches to its driver.  The new driver 
-initializer method is called immediately.
-
-(The initializer method is called unconditionally each time the device
-is opened, if there is no trigger string.)
+initializer method is called immediately.  If there is no trigger string
+the initializer method is called unconditionally each time the device
+is opened.
 
 The trickiest part of the code is the handling of input sources in gpsd.c 
 itself.  It had to tolerate clients connecting and disconnecting at random
