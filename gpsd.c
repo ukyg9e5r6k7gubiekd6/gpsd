@@ -332,7 +332,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    if (!have_fix(session))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f %.3f %.4f %.4f",
+		sprintf(phrase, ",O=%.2f %.3f %.6f %.6f",
 			ud->fix.time, ud->fix.ept, 
 			ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
