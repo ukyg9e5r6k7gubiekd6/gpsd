@@ -387,7 +387,10 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
         return;
     else if (out->part == 1)
     {
-	memset(out->PRN, '\0', sizeof(out->PRN));
+	memset(out->PRN,       '\0', sizeof(out->PRN));
+	memset(out->elevation, '\0', sizeof(out->elevation));
+	memset(out->azimuth,   '\0', sizeof(out->azimuth));
+	memset(out->ss,        '\0', sizeof(out->ss));
 	out->satellites = 0;
     }
 
