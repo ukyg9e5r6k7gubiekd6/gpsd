@@ -394,26 +394,19 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	changed |= update_field_i(sentence, fldnum++, &out->elevation[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->azimuth[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->ss[out->satellites]);
-	out->satellites++;
+	if (out->PRN[out->satellites])
+	    out->satellites++;
     }
 
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await)
 	gpsd_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
+    else if (!nmea_sane_satellites(out))
+	gpsd_report(3, "Satellite data no good.\n");
     else {
-	/* trim off PRNs with spurious data attached */
-	while (out->satellites
-		    && !out->elevation[out->satellites-1]
-		    && !out->azimuth[out->satellites-1]
-		    && !out->ss[out->satellites-1])
-	    out->satellites--;
-	if (nmea_sane_satellites(out)) {
-	    gpsd_report(3, "Satellite data OK.\n");
-	    out->satellite_stamp.changed = changed;
-	    REFRESH(out->satellite_stamp);
-	}
-	else
-	    gpsd_report(3, "Satellite data no good.\n");
+	gpsd_report(3, "Satellite data OK.\n");
+	out->satellite_stamp.changed = changed;
+	REFRESH(out->satellite_stamp);
     }
 }
 
