@@ -12,6 +12,7 @@
  *	c -- set or clear static navigation mode
  *	l -- start logging packets to specified file.
  *	s -- send hex bytes to device.
+ *	t -- toggle navigation-parameter display mode
  *	q -- quit, leaving device in binary mode.
  *      Ctrl-S -- freeze display.
  *      Ctrl-Q -- unfreeze display.
@@ -45,6 +46,7 @@ static int LineFd;					/* fd for RS232 line */
 static int nfix,fix[20];
 static FILE *logfile;
 static int gmt_offset;
+static int dispmode = 0;
 
 static char *verbpat[] =
 {
@@ -86,7 +88,7 @@ static int readpkt(unsigned char *buf);
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
-static WINDOW *mid27win, *cmdwin, *debugwin;
+static WINDOW *mid19win, *mid27win, *cmdwin, *debugwin;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -257,6 +259,20 @@ static int tzoffset(void)
     return res;
 }
 
+static void refresh_rightpanel1(void)
+{
+    touchwin(mid6win);
+    touchwin(mid7win);
+    touchwin(mid9win);
+    touchwin(mid13win);
+    touchwin(mid27win);
+    wrefresh(mid6win);
+    wrefresh(mid7win);
+    wrefresh(mid9win);
+    wrefresh(mid13win);
+    wrefresh(mid27win);
+}
+
 int main (int argc, char **argv)
 {
     int len,i,stopbits,bps,v;
@@ -289,15 +305,16 @@ int main (int argc, char **argv)
     intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
 
-    mid2win   = subwin(stdscr, 7,  80,  0, 0);
-    mid4win   = subwin(stdscr, 15, 30,  7, 0);
-    mid6win   = subwin(stdscr, 3,  48,  7, 32);
-    mid7win   = subwin(stdscr, 4,  48, 10, 32);
-    mid9win   = subwin(stdscr, 3,  48, 14, 32);
-    mid13win  = subwin(stdscr, 3,  48, 17, 32);
-    mid27win  = subwin(stdscr, 4,  48, 20, 32);
-    cmdwin    = subwin(stdscr, 2,  30, 22, 0);
-    debugwin  = subwin(stdscr, 0,   0, 24, 0);
+    mid2win   = newwin(7,  80,  0, 0);
+    mid4win   = newwin(15, 30,  7, 0);
+    mid6win   = newwin(3,  48,  7, 32);
+    mid7win   = newwin(4,  48, 10, 32);
+    mid9win   = newwin(3,  48, 14, 32);
+    mid13win  = newwin(3,  48, 17, 32);
+    mid19win  = newwin(17, 48,  7, 32);
+    mid27win  = newwin(4,  48, 20, 32);
+    cmdwin    = newwin(2,  30, 22, 0);
+    debugwin  = newwin(0,   0, 24, 0);
     scrollok(debugwin,TRUE);
     wsetscrreg(debugwin, 0, LINES-21);
 
@@ -324,12 +341,6 @@ int main (int argc, char **argv)
     mvwprintw(mid2win, 6, 24, " Packet type 2 (0x02) ");
     wattrset(mid2win, A_NORMAL);
 
-    wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid6win, A_BOLD);
-    mvwprintw(mid6win, 1, 1, "Version:");
-    mvwprintw(mid6win, 2, 4, " Packet Type 6 (0x06) ");
-    wattrset(mid6win, A_NORMAL);
-
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
     mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
@@ -338,6 +349,32 @@ int main (int argc, char **argv)
     }
     mvwprintw(mid4win, 14, 4, " Packet Type 4 (0x04) ");
     wattrset(mid4win, A_NORMAL);
+
+    wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid19win, A_BOLD);
+    mvwprintw(mid19win, 1, 1, "Altitude hold mode:");
+    mvwprintw(mid19win, 2, 1, "Altitude hold source:");
+    mvwprintw(mid19win, 3, 1, "Altitude source input:");
+    mvwprintw(mid19win, 4, 1, "Degraded mode:");
+    mvwprintw(mid19win, 5, 1, "Degraded timeout:");
+    mvwprintw(mid19win, 6, 1, "DR timeout:");
+    mvwprintw(mid19win, 7, 1, "Track smooth mode:");
+    mvwprintw(mid19win, 8, 1, "Static Navigation:");
+    mvwprintw(mid19win, 9, 1, "3SV Least Squares:");
+    mvwprintw(mid19win, 10,1, "DOP Mask mode:");
+    mvwprintw(mid19win, 11,1, "Navigation Elevation mask:");
+    mvwprintw(mid19win, 12,1, "Navigation Power mask:");
+    mvwprintw(mid19win, 13,1, "DGPS Source:");
+    mvwprintw(mid19win, 14,1, "DGPS Mode:");
+    mvwprintw(mid19win, 15,1, "DGPS Timeout:");
+    mvwprintw(mid19win, 16, 8, " Packet type 19 (0x13) ");
+    wattrset(mid19win, A_NORMAL);
+
+    wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid6win, A_BOLD);
+    mvwprintw(mid6win, 1, 1, "Version:");
+    mvwprintw(mid6win, 2, 4, " Packet Type 6 (0x06) ");
+    wattrset(mid6win, A_NORMAL);
 
     wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid7win, A_BOLD);
@@ -361,7 +398,7 @@ int main (int argc, char **argv)
     wattrset(mid13win, A_BOLD);
     mvwprintw(mid13win, 1, 1, "SVs: ");
     mvwprintw(mid13win, 1, 9, "=");
-    mvwprintw(mid13win, 2, 8, " Packet type 13 (0x1D) ");
+    mvwprintw(mid13win, 2, 8, " Packet type 13 (0x0D) ");
     wattrset(mid13win, A_NORMAL);
 
     wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -392,11 +429,12 @@ int main (int argc, char **argv)
 	refresh();
 	wrefresh(mid2win);
 	wrefresh(mid4win);
-	wrefresh(mid6win);
-	wrefresh(mid7win);
-	wrefresh(mid9win);
-	wrefresh(mid13win);
-	wrefresh(mid27win);
+	if (dispmode == 0) {
+	    refresh_rightpanel1();
+	} else {
+	    touchwin(mid19win);
+	    wrefresh(mid19win);
+	}
 	wrefresh(debugwin);
 	wrefresh(cmdwin);
 
@@ -417,11 +455,13 @@ int main (int argc, char **argv)
 	    //refresh();
 	    wrefresh(mid2win);
 	    wrefresh(mid4win);
-	    wrefresh(mid6win);
-	    wrefresh(mid7win);
-	    wrefresh(mid9win);
-	    wrefresh(mid13win);
-	    wrefresh(mid27win);
+	    if (dispmode == 0) {
+		refresh_rightpanel1();
+	    } else {
+		touchwin(mid19win);
+		wrefresh(mid19win);
+	    }
+	    wrefresh(mid19win);
 	    wrefresh(debugwin);
 	    wrefresh(cmdwin);
 
@@ -501,6 +541,12 @@ int main (int argc, char **argv)
 
 	    case 'p':				/* poll for almanac data */
 		putb(0,0x92);
+		putb(1,0x00);
+		sendpkt(buf,2);
+		break;
+
+	    case 't':				/* poll navigation params */
+		putb(0,0x98);
 		putb(1,0x00);
 		sendpkt(buf,2);
 		break;
@@ -682,6 +728,26 @@ static void decode_sirf(unsigned char buf[], int len)
 	wprintw(mid13win, "\n");
 	wprintw(debugwin, "VL  0x0d=");
     	break;
+
+    case 0x13:
+	mvwprintw(mid19win, 1, 28, "%d", getb(5));	/* Alt. hold mode */
+	mvwprintw(mid19win, 2, 28, "%s", 		/* Alt hold source*/
+		  getb(6) ? "User Input" : "Last Computed");
+	mvwprintw(mid19win, 3, 28, "%dm", getw(7));	/* Alt. source input */
+	mvwprintw(mid19win, 4, 28, "%d", getb(9));	/* Degraded mode*/
+	mvwprintw(mid19win, 5, 28, "%dsec", getb(10));	/* Degraded timeout*/
+	mvwprintw(mid19win, 6, 28, "%dsec",getb(11));	/* DR timeout*/
+	mvwprintw(mid19win, 7, 28, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
+	mvwprintw(mid19win, 8, 28, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
+	mvwprintw(mid19win, 9, 28, "0x%x", getb(14));	/* 3SV Least Squares*/
+	mvwprintw(mid19win, 10,28, "0x%x", getb(19));	/* DOP Mask mode*/
+	mvwprintw(mid19win, 11,28, "0x%x", getw(20));	/* Nav. Elev. mask*/
+	mvwprintw(mid19win, 12,28, "0x%x", getb(22));	/* Nav. Power mask*/
+	mvwprintw(mid19win, 13,28, "0x%x", getb(27));	/* DGPS Source*/
+	mvwprintw(mid19win, 14,28, "0x%x", getb(28));	/* DGPS Mode*/
+	mvwprintw(mid19win, 15,28, "%dsec",getb(29));	/* DGPS Timeout*/
+	dispmode = !dispmode;
+	break;
 
     case 0x1b:
 	/******************************************************************
