@@ -25,8 +25,6 @@ char *alloca ();
 
 #include "gpsd.h"
 
-#undef WHOLE_CYCLE	/* assume we'll see sentences in whole-cycle groups */
-
 /**************************************************************************
  *
  * Parser helpers begin here
@@ -106,7 +104,6 @@ static void merge_ddmmyy(char *ddmmyy, char *buf)
     buf[10] = 'T';
 }
 
-#ifndef WHOLE_CYCLE
 static void fake_mmddyyyy(char *buf)
 /* sentence didn't supply mm/dd/yyy, so we have to fake it */
 {
@@ -116,7 +113,6 @@ static void fake_mmddyyyy(char *buf)
     gmtime_r(&now, &tm);
     strftime(buf, 13, "%Y-%m-%dT", &tm);
 }
-#endif /* WHOLE_CYCLE */
 
 static void merge_hhmmss(char *hhmmss, char *buf)
 /* update from a UTC time */
@@ -189,7 +185,6 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
     return mask;
 }
 
-#ifndef WHOLE_CYCLE
 static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
@@ -240,7 +235,6 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
     return mask;
 }
-#endif /* WHOLE_CYCLE */
 
 static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Global Positioning System Fix Data */
@@ -269,7 +263,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	double oldfixtime = out->fix.time;
 	char buf[28];
 
-#ifndef WHOLE_CYCLE
 	fake_mmddyyyy(buf);
 	merge_hhmmss(field[1], buf);
 	out->fix.time = iso8601_to_unix(buf);
@@ -277,7 +270,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;
         out->satellites_used = atoi(field[7]);
-#endif /* WHOLE_CYCLE */
 	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
@@ -481,12 +473,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     } nmea_phrase[] = {
 	{"GPRMC", GPRMC,	processGPRMC},
 	{"GPGGA", GPGGA,	processGPGGA},
-	{"GPGLL", GPGLL,
-#ifdef WHOLE_CYCLE
-				NULL},
-#else
-				processGPGLL},
-#endif
+	{"GPGLL", GPGLL,	processGPGLL},
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
 	{"PGRME", PGRME,	processPGRME},
