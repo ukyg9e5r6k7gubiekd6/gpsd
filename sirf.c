@@ -37,6 +37,7 @@ int sirf_mode(struct gps_session_t *session, int binary, int speed)
 	gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)speed);
 }
 
+#ifdef __UNUSED__
 /* These require binary mode */
 
 #define HI(n)	((n) >> 8)
@@ -247,3 +248,5 @@ int sirf_power_save(int ttyfd, int enable)
    crc_sirf(msg);
    return (write(ttyfd, msg, 0x09+8) != 0x09+8);
 }
+
+#endif /* __UNUSED __ */
