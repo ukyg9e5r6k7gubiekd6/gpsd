@@ -12,7 +12,6 @@
 struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
 {
-    time_t now;
     struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
 
     if (!gpsdata)
@@ -28,18 +27,8 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	return NULL;
     }
 
-    now = time(NULL);
-    INIT(gpsdata->online_stamp, now);
-    INIT(gpsdata->latlon_stamp, now);
-    INIT(gpsdata->altitude_stamp, now);
-    INIT(gpsdata->track_stamp, now);
-    INIT(gpsdata->speed_stamp, now);
-    INIT(gpsdata->status_stamp, now);
-    INIT(gpsdata->mode_stamp, now);
-    INIT(gpsdata->fix_quality_stamp, now);
-    INIT(gpsdata->satellite_stamp, now);
-    /* gpsdata->mode = MODE_NOT_SEEN ; */
-
+    gpsdata->mode = MODE_NO_FIX;
+    gpsdata->status = STATUS_NO_FIX;
     return gpsdata;
 }
 

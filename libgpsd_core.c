@@ -18,7 +18,6 @@
 struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
-    time_t now = time(NULL);
     struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
     if (!session)
 	return NULL;
@@ -63,17 +62,8 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
     /* mark GPS fd closed */
     session->gNMEAdata.gps_fd = -1;
-
-    INIT(session->gNMEAdata.online_stamp, now);
-    INIT(session->gNMEAdata.latlon_stamp, now);
-    INIT(session->gNMEAdata.altitude_stamp, now);
-    INIT(session->gNMEAdata.track_stamp, now);
-    INIT(session->gNMEAdata.speed_stamp, now);
-    INIT(session->gNMEAdata.status_stamp, now);
-    INIT(session->gNMEAdata.mode_stamp, now);
-    INIT(session->gNMEAdata.fix_quality_stamp, now);
-    INIT(session->gNMEAdata.satellite_stamp, now);
     session->gNMEAdata.mode = MODE_NO_FIX;
+    session->gNMEAdata.status = STATUS_NO_FIX;
 
     return session;
 }
