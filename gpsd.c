@@ -166,12 +166,51 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
+#ifdef MULTISESSION
+/*
+ * Multi-session support requires us to have two arrays, one of GPS 
+ * devices currently available and one of client sessions.  The number
+ * of slots in each array is limited by the maximum number of client
+ * sessions we can have open.
+ *
+ * We restrict the scope of these command-state globals as much as possible.
+ */
+#define MAXDEVICES	FD_SETSIZE
+
+static struct channel_t {
+    int nsubscribers;			/* how many subscribers? */
+    struct gps_device_t *device;	/* the device data */
+    int killed;				/* marked for deletion */
+} channels[MAXDEVICES];
+
+static struct subscriber_t {
+    int active;				/* is this a subscriber? */
+    struct channel_t *channel;		/* device subscriber listens to */
+} subscribers[FD_SETSIZE];
+
+static void attach_client_to_device(int cfd, int dfd)
+{
+    if (subscribers[cfd].channel) {
+	subscribers[cfd].channel->nsubscribers--;
+    }
+    subscribers[cfd].channel = &channels[dfd];
+    channels[dfd].nsubscribers++;
+    subscribers[cfd].active = 1;
+}
+#endif /* MULTISESSION */
+
 static void detach_client(int cfd)
 {
     close(cfd);
     FD_CLR(cfd, &all_fds);
     FD_CLR(cfd, &nmea_fds);
     FD_CLR(cfd, &watcher_fds);
+#ifdef MULTISESSION
+    subscribers[cfd].active = 0;
+    if (subscribers[cfd].channel)
+	subscribers[cfd].channel->nsubscribers--;
+    subscribers[cfd].channel = NULL;
+#endif /* MULTISESSION */
 }
 
 static int throttled_write(int cfd, char *buf, int len)
@@ -202,9 +241,11 @@ static void notify_watchers(char *sentence)
 	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
+#ifndef MULTISESSION
 /* restrict the scope of the command-state globals as much as possible */
 static struct gps_device_t *device;
 static int need_gps;
+#endif /* MULTISESSION */
 
 static int handle_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
@@ -537,7 +578,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 }
 
 static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
-/* hook to be executed on each incoming sentence group */
+/* hook to be executed on each incoming packet */
 {
     int cfd;
 
@@ -546,6 +587,24 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 	if (FD_ISSET(cfd, &nmea_fds))
 	    throttled_write(cfd, sentence, strlen(sentence));
     }
+}
+
+static struct gps_device_t *open_device(char *device_name, int nowait)
+{
+    struct gps_device_t *device = gpsd_init(device_name);
+
+    device->gpsdata.raw_hook = raw_hook;
+    if (nowait) {
+	if (gpsd_activate(device) < 0) {
+	    return NULL;
+	}
+	FD_SET(device->gpsdata.gps_fd, &all_fds);
+    }
+#ifdef MULTISESSION
+    channels[device->gpsdata.gps_fd].device = device;
+#endif /* MULTISESSION */
+
+    return device;
 }
 
 int main(int argc, char *argv[])
@@ -648,7 +707,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
 
-    device = gpsd_init(device_name);
+    device = open_device(device_name, nowait);
     device->gpsdata.raw_hook = raw_hook;
     if (dsock >= 0)
 	device->dsock = dsock;
@@ -692,6 +751,11 @@ int main(int argc, char *argv[])
 		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
+#ifdef MULTISESSION
+		for (dfd = 0; dfd < FD_SETSIZE; dfd++)
+		    if (channels[dfd].device)
+			attach_client_to_device(ssock, dfd);
+#endif /* MULTISESSION */
 	    }
 	    FD_CLR(msock, &rfds);
 	}
@@ -705,24 +769,26 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-	/* get data from it */
-	changed = 0;
-	if (device->gpsdata.gps_fd >= 0 && !((changed=gpsd_poll(device)) | ONLINE_SET)) {
-	    gpsd_report(3, "GPS is offline\n");
-	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-	    gpsd_deactivate(device);
-	    notify_watchers("GPSD,X=0\r\n");
-	}
+	if (device->gpsdata.gps_fd >= 0) {
+	    /* get data from the device */
+	    changed = 0;
+	    if (!((changed=gpsd_poll(device)) | ONLINE_SET)) {
+		gpsd_report(3, "GPS is offline\n");
+		FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		gpsd_deactivate(device);
+		notify_watchers("GPSD,X=0\r\n");
+	    }
 
-	if (changed &~ ONLINE_SET) {
-	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-		/* some listeners may be in watcher mode */
-		if (FD_ISSET(cfd, &watcher_fds)) {
-		    device->poll_times[cfd] = timestamp();
-		    if (changed & LATLON_SET)
-			handle_request(cfd, "o", 1);
-		    if (changed & SATELLITE_SET)
-			handle_request(cfd, "y", 1);
+	    if (changed &~ ONLINE_SET) {
+		for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+		    /* some listeners may be in watcher mode */
+		    if (FD_ISSET(cfd, &watcher_fds)) {
+			device->poll_times[cfd] = timestamp();
+			if (changed & LATLON_SET)
+			    handle_request(cfd, "o", 1);
+			if (changed & SATELLITE_SET)
+			    handle_request(cfd, "y", 1);
+		    }
 		}
 	    }
 	}
@@ -769,10 +835,30 @@ int main(int argc, char *argv[])
 		need_gps++;
 	}
 
+#ifdef MULTISESSION
+	/* close devices with no remaining subscribers */
+	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
+	    if (channel->device) {
+		int need_gps = 0;
+
+		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+		    if (subscribers[cfd].active&&subscribers[cfd].channel==channel)
+			need_gps++;
+
+		if (!nowait && !need_gps && channel->device->gpsdata.gps_fd > -1) {
+		    FD_CLR(channel->device->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(channel->device);
+		    if (channel->killed)
+			channel->device = NULL;
+		}
+	    }
+	}
+#else
 	if (!nowait && !need_gps && device->gpsdata.gps_fd != -1) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	    gpsd_deactivate(device);
 	}
+#endif /* MULTISESSION */
     }
     gpsd_wrap(device);
 
