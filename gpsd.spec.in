@@ -66,12 +66,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 
 %post -n gpsd
-/sbin/chkconfig --add gpsd
-/sbin/chkconfig gpsd on
 /sbin/ldconfig
-
-%preun -n gpsd
-/sbin/chkconfig --del gpsd
 
 %postun -n gpsd
 /sbin/ldconfig
@@ -90,7 +85,6 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_mandir}/man1/gpsd.1*
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
-%attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 %{_sysconfdir}/hotplug.d/usb/gpsd.hotplug
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
