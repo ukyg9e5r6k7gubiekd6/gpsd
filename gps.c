@@ -43,8 +43,6 @@
 #include <sys/filio.h>
 #endif
 
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
 
 extern void register_canvas(Widget w, GC gc);
@@ -540,7 +538,7 @@ int main(int argc, char *argv[])
 }
 
 
-void gps_gpscli_errexit(char *s)
+void gpscli_errexit(char *s)
 {
     perror(s);
     gps_close();

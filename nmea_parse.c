@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "outdata.h"
-#include "nmea.h"
+#include <gpsd.h>
 
 /* ----------------------------------------------------------------------- */
 
@@ -74,7 +73,7 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 	if (out->mode < MODE_2D)
 	{
 	    out->mode = MODE_2D;
-	    report(2, "Latitude/longitude implies mode is 2 or 3\n");
+	    gpscli_report(2, "Latitude/longitude implies mode is 2 or 3\n");
 	}
     }
 }
@@ -132,7 +131,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
            054.7        Course Made Good, True
            191194       Date of fix  19 November 1994
            020.3,E      Magnetic variation 20.3 deg East
-           *68          mandatory checksum
+           *68          mandatory gps_checksum
 
      */
     char s[20], d[10];
@@ -172,7 +171,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
     {
-	report(0, "Invalid GPRMC zeroes status.\n");
+	gpscli_report(0, "Invalid GPRMC zeroes status.\n");
 	out->status = 0;
     }
 
@@ -222,7 +221,7 @@ static void processGPGLL(char *sentence, struct OUTDATA *out)
 	    out->status = 1;	/* autonomous */
 	if (status[0] == 'D')
 	    out->status = 2;	/* differential */
-	report(2, "GPGLL sets status %d\n", out->status);
+	gpscli_report(2, "GPGLL sets status %d\n", out->status);
 	/* unclear what the right thing to do with other status values is */
     }
 }
@@ -319,7 +318,7 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &out->status);
     REFRESH(out->status_stamp);
-    report(2, "GPGGA sets status %d\n", out->status);
+    gpscli_report(2, "GPGGA sets status %d\n", out->status);
     out->cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &out->satellites);
     sscanf(field(sentence, 9), "%lf", &out->altitude);
@@ -351,7 +350,7 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
     sscanf(field(sentence, 2), "%d", &out->mode);
     REFRESH(out->mode_stamp);
     out->cmask |= C_MODE;
-    report(2, "GPGSA sets mode %d\n", out->mode);
+    gpscli_report(2, "GPGSA sets mode %d\n", out->mode);
     sscanf(field(sentence, 15), "%lf", &out->pdop);
     sscanf(field(sentence, 16), "%lf", &out->hdop);
     sscanf(field(sentence, 17), "%lf", &out->vdop);
@@ -415,7 +414,7 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	  05.0    time left on the gps battery in hours
 	  +03327  numbers change (freq. compensation?)
 	  00      PRN number receiving current focus
-	  *40    checksum
+	  *40    gps_checksum
      */
 
     int tmp1;
@@ -439,7 +438,7 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	out->cmask |= C_STATUS;
 	REFRESH(out->mode_stamp);
 	out->cmask |= C_MODE;
-	report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
+	gpscli_report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
 }
 
@@ -466,7 +465,7 @@ static void processPRWIZCH(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-short checksum(char *sentence)
+short gps_checksum(char *sentence)
 {
     unsigned char sum = '\0';
     char c, *p = sentence, csum[3];
@@ -478,7 +477,7 @@ short checksum(char *sentence)
     return (strncmp(csum, p, 2) == 0);
 }
 
-void add_checksum(char *sentence)
+void gps_add_checksum(char *sentence)
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
@@ -489,9 +488,9 @@ void add_checksum(char *sentence)
     sprintf(p, "%02X\r\n", sum);
 }
 
-int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
+int gps_process_NMEA_message(char *sentence, struct OUTDATA *outdata)
 {
-    if (checksum(sentence)) {
+    if (gps_checksum(sentence)) {
 	if (strncmp(GPRMC, sentence, 5) == 0) {
 	    processGPRMC(sentence, outdata);
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {

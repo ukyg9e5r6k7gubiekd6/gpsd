@@ -25,12 +25,10 @@
 #include <X11/Shell.h>
 #include <math.h>
 
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
+
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics();
-
 
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)

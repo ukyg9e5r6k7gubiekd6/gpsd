@@ -7,8 +7,7 @@
 #include <time.h>
 #include <fcntl.h>
 #include <string.h>
-#include "outdata.h"
-#include "nmea.h"
+
 #include "gpsd.h"
 
 #define BUFSIZE 4096

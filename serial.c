@@ -15,8 +15,6 @@
 #endif
 #endif
 
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
 
 #define DEFAULTPORT "2947"
@@ -68,7 +66,7 @@ int gps_open(char *device_name, int device_speed)
 	port = 0;
 
 	if (write(ttyfd, "r\n", 2) != 2)
-	    gps_gpscli_errexit("Can't write to socket");
+	    gpscli_errexit("Can't write to socket");
     } else {
 	gpscli_report(1, "opening GPS data source at %s\n", device_name);
 	ttyfd = open(temp, O_RDWR | O_NONBLOCK);

@@ -22,8 +22,7 @@
 #include <Tachometer.h>
 
 #include "xgpsspeed.icon"
-#include "outdata.h"
-#include "nmea.h"
+
 #include "gpsd.h"
 
 #define BUFSIZE          4096
@@ -71,7 +70,7 @@ static void open_input(XtAppContext app);
 
 #undef Offset
 
-void gps_gpscli_errexit(char *s)
+void gpscli_errexit(char *s)
 {
     perror(s);
     exit(1);
@@ -225,7 +224,7 @@ int my_gps_open()
     port = 0;
 
     if (write(ttyfd, "r\n", 2) != 2)
-      gps_gpscli_errexit("Can't write to socket");
+      gpscli_errexit("Can't write to socket");
     return ttyfd;
 }
 

@@ -16,11 +16,9 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
-#define BUFSIZE 4096
 
+#define BUFSIZE 4096
 extern struct session_t session;
 
 #define PI 3.14159265358979323846

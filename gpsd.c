@@ -43,8 +43,6 @@
 #include <sys/time.h>
 #endif
 
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
 #include "version.h"
 
@@ -234,7 +232,7 @@ static int activate()
     int input;
 
     if ((input = gps_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
-	gps_gpscli_errexit("Exiting - serial open\n");
+	gpscli_errexit("Exiting - serial open\n");
  
     gpscli_report(1, "opened GPS\n");
     session.fdin = input;
@@ -360,7 +358,7 @@ int main(int argc, char *argv[])
 
 	dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (dsock < 0) 
-	    gps_gpscli_errexit("Can't connect to dgps server");
+	    gpscli_errexit("Can't connect to dgps server");
 
 	gethostname(hn, sizeof(hn));
 
@@ -393,7 +391,7 @@ int main(int argc, char *argv[])
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    gps_gpscli_errexit("select");
+	    gpscli_errexit("select");
 	}
 
 	need_gps = 0;
@@ -684,7 +682,7 @@ void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
     }
 }
 
-void  gps_gpscli_errexit(char *s)
+void  gpscli_errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
     gps_close();

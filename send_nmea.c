@@ -1,6 +1,4 @@
 #include <sys/types.h>
-#include "outdata.h"
-#include "nmea.h"
 #include "gpsd.h"
 
 
