@@ -359,10 +359,12 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 
 	case 'B':		/* change baud rate (SiRF only) */
-	    i = atoi(p++);
-	    while (isdigit(*p)) p++;
-	    sirf_mode(session, 0, i);
-	    sprintf(phrase, ",B=%d", i); 
+	    if (!isspace(*p)) {
+		i = atoi(p++);
+		while (isdigit(*p)) p++;
+		sirf_mode(session, 0, i);
+	    }
+	    sprintf(phrase, ",B=%d", gpsd_get_speed(&session->ttyset));
 	    break;
 #endif /* PROFILING */
 	case '\r': case '\n':

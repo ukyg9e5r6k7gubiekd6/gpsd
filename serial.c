@@ -36,6 +36,20 @@ void gpsd_set_speed(struct termios *ttyctl, int device_speed)
     cfsetospeed(ttyctl, (speed_t)device_speed);
 }
 
+int gpsd_get_speed(struct termios* ttyctl)
+{
+    int code = cfgetospeed(ttyctl);
+    if (code < 2000)
+	return(code/1000);
+    switch (code) {
+    case B2400:  return(2400);
+    case B4800:  return(4800);
+    case B9600:  return(9600);
+    case B19200: return(19200);
+    default: return(38400);
+    }
+}
+
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 {
     int ttyfd;
