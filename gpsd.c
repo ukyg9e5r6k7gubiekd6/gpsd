@@ -437,14 +437,14 @@ int main(int argc, char *argv[])
     int msock, nfds;
     int alen;
     extern char *optarg;
-    int option;
+    int option, gps_speed = 0;
     char gpstype = 'n', *colon;
     int fd;
     int need_gps;
     int nowait = 0;
 
     session.debug = 1;
-    while ((option = getopt(argc, argv, "D:S:T:hi:np:d:t:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:t:")) != -1) {
 	switch (option) {
 	case 'T':
 	    gpstype = *optarg;
@@ -486,6 +486,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 't':
 	    gps_timeout = strtol(optarg, NULL, 0);
+	    break;
+	case 's':
+	    gps_speed = atoi(optarg);
 	    break;
 	case 'h':
 	case '?':
@@ -531,6 +534,8 @@ int main(int argc, char *argv[])
     nfds = getdtablesize();
 
     gps_init(&session, gps_timeout, gpstype, dgpsserver);
+    if (gps_speed)
+	session.baudrate = gps_speed;
     session.gps_device = device_name;
     session.raw_hook = raw_hook;
     if (session.dsock >= 0)

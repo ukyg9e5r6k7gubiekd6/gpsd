@@ -22,6 +22,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
+      <arg choice='opt'>-s <replaceable>baudrate</replaceable></arg>
       <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
@@ -82,6 +83,11 @@ t=TripMate, e=EarthMate, l=logfile.</para>
 <varlistentry>
 <term>-S</term>
 <listitem><para>Set TCP/IP port (default is 2947).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-s</term>
+<listitem><para>Set GPS communication speed in bits per second 
+(default is set by device type).</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-t</term>
