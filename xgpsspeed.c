@@ -25,13 +25,13 @@
 #include "xgpsspeed.icon"
 
 #include "gps.h"
-#include "gpsd.h"
 
 #if defined(ultrix) || defined(SOLARIS) 
 extern double rint();
 #endif
 
-struct gpsd_t session;
+struct gps_data gpsdata;
+static int gps_fd;
 
 static Widget toplevel, base;
 static Widget tacho, label;
@@ -66,17 +66,14 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug)
-	return;
-
     fputs(buf, stderr);
 }
 
 static void update_display(char *buf)
 {
-  int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
+  int new = rint(gpsdata.speed * 6076.12 / 5280);
 #if 0
-  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", session.gNMEAdata.speed, rint(session.gNMEAdata.speed * 5208/6706.12), (int)rint(session.gNMEAdata.speed * 5208/6706.12));
+  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gpsdata.speed, rint(gpsdata.speed * 5208/6706.12), (int)rint(gpsdata.speed * 5208/6706.12));
 #endif
   if (new > 100)
     new = 100;
@@ -86,7 +83,7 @@ static void update_display(char *buf)
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gps_poll(&session);
+    gpsd_poll(gps_fd, &gpsdata);
 }
 
 int main(int argc, char **argv)
@@ -95,29 +92,20 @@ int main(int argc, char **argv)
     XtAppContext app;
     Cardinal        i;
     extern char *optarg;
-    char devtype = 'n';
     int option;
     char *device_name = "/dev/gps";
 
-    while ((option = getopt(argc, argv, "D:T:hp:")) != -1) {
+    while ((option = getopt(argc, argv, "hp:")) != -1) {
 	switch (option) {
 	case 'p':
 	    device_name = strdup(optarg);
 	    break;
-	case 'D':
-	    session.debug = (int) strtol(optarg, 0, 0);
-	    break;
-        case 'T':
-	    devtype = *optarg;
-            break;
 	case 'h':
 	case '?':
 	default:
 	    fputs("usage:  gps [options] \n\
   options include: \n\
   -p string    = set GPS device name \n\
-  -T {e|t}     = set GPS device type \n\
-  -D integer   = set debug level \n\
   -h           = help message \n\
 ", stderr);
 	    exit(1);
@@ -163,20 +151,24 @@ int main(int argc, char **argv)
 				  base, NULL, 0);
     
     XtRealizeWidget(toplevel);
-    gps_init(&session, GPS_TIMEOUT, devtype, NULL);
-    session.gps_device = device_name;
-    session.gNMEAdata.raw_hook = update_display;
-    if (gps_activate(&session) == -1)
-    {
-	perror("xgpsspeed: opening GPS");
-	exit(2);
-    }
 
-    XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
+
+    /*
+     * Essentially all the interface to libgps happens below here
+     */
+    gps_fd = gpsd_open(&gpsdata, 5, NULL, NULL);
+    if (gps_fd < 0)
+	exit(2);
+
+    XtAppAddInput(app, gps_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
     
+    gpsd_set_raw_hook(&gpsdata, update_display);
+    gpsd_query(gps_fd, &gpsdata, "w+\n");
+
     XtAppMainLoop(app);
 
+    gpsd_close(gps_fd);
     return 0;
 }
 
