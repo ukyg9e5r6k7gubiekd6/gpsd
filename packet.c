@@ -380,6 +380,14 @@ int packet_get(struct gps_session_t *session, int waiting)
     return session->outbuflen;
 }
 
+/*
+ * This constant controls how long the packet sniffer will spend looking
+ * for a packet leader before it gives up.  It *must* be larger than
+ * MAX_PACKET_LENGTH or we risk never syncing up at all.  Large values
+ * will produce annoying startup lag.
+ */
+#define SNIFF_RETRIES	600
+
 int packet_sniff(struct gps_session_t *session)
 /* try to sync up with the packet stream */
 {
@@ -390,7 +398,7 @@ int packet_sniff(struct gps_session_t *session)
     session->inbufptr = session->inbuffer;
 
     gpsd_report(5, "packet_sniff begins\n");
-    for (n = 0; n < MAX_PACKET_LENGTH; n += count) {
+    for (n = 0; n < SNIFF_RETRIES; n += count) {
 	count = 0;
 	if (ioctl(session->gNMEAdata.gps_fd, FIONREAD, &count) < 0)
 	    return BAD_PACKET;
