@@ -140,10 +140,8 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		if (gpsdata->satellites) {
 		    int j, i3, i4, i5;
 		    int PRN[MAXCHANNELS];
-		    int elevation[MAXCHANNELS];
-		    int azimuth[MAXCHANNELS];
-		    int ss[MAXCHANNELS];
-		    int used[MAXCHANNELS];
+		    int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
+		    int ss[MAXCHANNELS], used[MAXCHANNELS];
 
 		    for (j = 0; j < gpsdata->satellites; j++) {
 			PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;

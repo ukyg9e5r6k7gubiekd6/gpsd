@@ -1,4 +1,3 @@
-#include "config.h"
 #include <Xm/Xm.h>
 #include <math.h>
 
@@ -49,8 +48,6 @@ void register_canvas(Widget w, GC gc)
     diameter = min(width, height) - RM;
 }
 
-/* #define PCORRECT */
-
 static void pol2cart(double azimuth, double elevation, double *xout, double *yout)
 {
     double sinelev;
@@ -74,21 +71,17 @@ static void draw_arc(int x, int y, int diam)
     XDrawArc(XtDisplay(draww), pixmap, drawGC,
 	     x - diam / 2, y - diam / 2,	/* x,y */
 	     diam, diam,	/* width, height */
-	     0, 360 * 64	/* angle1, angle2 */
-	);
+	     0, 360 * 64);	/* angle1, angle2 */
 }
 
 static int get_status(struct gps_data_t *gpsdata, int satellite)
 {
-    int i, s;
+    int i;
 
     for (i = 0; i < MAXCHANNELS; i++)
 	if (satellite == gpsdata->PRN[i]) {
-	    s = gpsdata->ss[i];
-
-	    if (s<20) return 1;
-	    if (s<40) return 2;
-
+	    if (gpsdata->ss[i]<20) return 1;
+	    if (gpsdata->ss[i]<40) return 2;
 	    return 7;
 	}
     return 0;

@@ -25,9 +25,6 @@
 extern double rint();
 #endif
 
-static struct gps_data_t *gpsdata;
-static Widget toplevel, base, tacho, label;
-
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
@@ -37,6 +34,9 @@ static XrmOptionDescRec options[] = {
 String fallback_resources[] = {
   NULL
 };
+
+static struct gps_data_t *gpsdata;
+static Widget tacho;
 
 static void update_display(char *buf)
 {
@@ -60,6 +60,7 @@ int main(int argc, char **argv)
     int option;
     char *colon, *server = NULL;
     char *port = DEFAULT_GPSD_PORT;
+    Widget toplevel, base, label;
 
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
@@ -103,12 +104,10 @@ int main(int argc, char **argv)
     
     /**** Tachometer widget ****/
     tacho = XtCreateManagedWidget("meter",
-				  tachometerWidgetClass,
-				  base, NULL, 0);    
+				  tachometerWidgetClass, base, NULL, 0);    
     XtRealizeWidget(toplevel);
 
-    gpsdata = gps_open(server, DEFAULT_GPSD_PORT);
-    if (!gpsdata) {
+    if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
 	fprintf(stderr, "xgpsspeed: no gpsd running or network error (%d).\n", errno);
 	exit(2);
     }

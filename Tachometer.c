@@ -170,17 +170,9 @@ WidgetClass tachometerWidgetClass = (WidgetClass)&tachometerClassRec;
  *
  ****************************************************************/
 
-static void DrawTachometer();
-static void FastFillCircle();
-static void GetneedleGC();
-static void GetscaleGC();
-static void GetbackgroundGC();
-static void DrawGauge();
-static void DrawNeedle();
-static void DrawNumbers();
-static void DrawSingleNumber();
-static void DrawLabelString();
-static void MoveNeedle();
+static void DrawTachometer(), FastFillCircle(), GetneedleGC();
+static void GetscaleGC(), GetbackgroundGC(), DrawGauge(), DrawNeedle();
+static void DrawNumbers(), DrawSingleNumber(), DrawLabelString(), MoveNeedle();
 
 static void DrawTachometer(TachometerWidget w)
 {
@@ -356,14 +348,12 @@ static void DrawNumbers(
 static void DrawSingleNumber(TachometerWidget w, int which, Cardinal x, Cardinal y)
 {
      XSegment        segments[7];
-     Cardinal        nsegments;
+     Cardinal        nsegments, width, height;
      unsigned char   count;
-     Cardinal	     width, height;
      GC 	gc;
      
      width = (w->core.width / 2) - w->tachometer.internal_border;
      height = (w->core.height / 2) - w->tachometer.internal_border;
-
      if ((width <= 0) || (height <= 0))
 	  return;
 

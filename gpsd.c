@@ -561,8 +561,7 @@ int main(int argc, char *argv[])
 
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(1, "launching (Version %s)\n", VERSION);
-    msock = passivesock(service, "tcp", QLEN);
-    if (msock < 0) {
+    if ((msock = passivesock(service, "tcp", QLEN)) < 0) {
 	gpsd_report(0, "startup failed, netlib error %d\n", msock);
 	exit(2);
     }
