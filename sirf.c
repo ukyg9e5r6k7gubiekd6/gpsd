@@ -17,26 +17,6 @@
 
 /* This we can do from NMEA mode */
 
-int sirf_mode(struct gps_session_t *session, int binary, int speed) 
-/* switch GPS to specified mode at 8N1, optionarry to binary */
-{
-   int status = nmea_send(session->gNMEAdata.gps_fd, 
-		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
-   gpsd_report(1, "Send returned %d.\n", status);
-   tcdrain(session->gNMEAdata.gps_fd);
-   /* 
-    * This definitely fails below 40 milliseconds on a BU-303b.
-    * 50ms is also verified by Chris Kuethe on 
-    *        Pharos iGPS360 + GSW 2.3.1ES + prolific
-    *        Rayming TN-200 + GSW 2.3.1 + ftdi
-    *        Rayming TN-200 + GSW 2.3.2 + ftdi
-    * so it looks pretty solid.
-    */
-   usleep(50000);
-   return status && 
-	gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)speed);
-}
-
 #ifdef __UNUSED__
 /* These require binary mode */
 

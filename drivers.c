@@ -107,6 +107,7 @@ struct gps_type_t nmea = {
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
+    NULL,		/* no speed switcher */
     NULL,		/* no wrapup */
     0,			/* perform baud-rate hunting */
     1,			/* 1 stop bit */
@@ -125,6 +126,26 @@ static void sirf_initializer(struct gps_session_t *session)
 	nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
 }
 
+static int sirf_switcher(struct gps_session_t *session, int speed) 
+/* switch GPS to specified mode at 8N1, optionarry to binary */
+{
+   int status = nmea_send(session->gNMEAdata.gps_fd, 
+		    "$PSRF100,1,%d,8,1,0", speed);
+   gpsd_report(1, "Send returned %d.\n", status);
+   tcdrain(session->gNMEAdata.gps_fd);
+   /* 
+    * This definitely fails below 40 milliseconds on a BU-303b.
+    * 50ms is also verified by Chris Kuethe on 
+    *        Pharos iGPS360 + GSW 2.3.1ES + prolific
+    *        Rayming TN-200 + GSW 2.3.1 + ftdi
+    *        Rayming TN-200 + GSW 2.3.2 + ftdi
+    * so it looks pretty solid.
+    */
+   usleep(50000);
+   return status && 
+	gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)speed);
+}
+
 struct gps_type_t sirfII = {
     's', 		/* select explicitly with -T s */
     "SiRF-II",		/* full name of type */
@@ -133,6 +154,7 @@ struct gps_type_t sirfII = {
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
+    sirf_switcher,	/* we can change speeds */
     NULL,		/* no wrapup */
     0,			/* perform baud-rate hunting */
     1,			/* 1 stop bit */
@@ -160,6 +182,7 @@ struct gps_type_t fv18 = {
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
+    NULL,		/* no speed switcher */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
     2,			/* 2 stop bits */
@@ -213,6 +236,7 @@ struct gps_type_t tripmate = {
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,		/* read text sentence */
     nmea_write_rtcm,		/* send RTCM data straight */
+    NULL,			/* no speed switcher */
     NULL,			/* no wrapup */
     4800,			/* default speed to connect at */
     1,				/* 1 stop bit */
@@ -259,6 +283,7 @@ struct gps_type_t earthmate = {
     NULL,			/* binary protocol */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
+    NULL,			/* no speed switcher */
     NULL,			/* no wrapup code */
     9600,			/* connecting at 4800 will fail */
     1,				/* 1 stop bit */
@@ -281,6 +306,7 @@ struct gps_type_t logfile = {
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
+    NULL,			/* no speed switcher */
     NULL,			/* no wrapup code */
     0,				/* don't set a speed */
     1,				/* 1 stop bit (not used) */

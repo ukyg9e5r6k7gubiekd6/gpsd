@@ -215,7 +215,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
-		sirf_mode(session, 0, i);
+		if (session->device_type->speed_switcher)
+		    session->device_type->speed_switcher(session, i);
 	    }
 #endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 

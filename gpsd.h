@@ -25,6 +25,7 @@ struct gps_type_t {
     int (*validate_buffer)(char *buf, size_t n);
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
+    int (*speed_switcher)(struct gps_session_t *session, int speed);
     void (*wrapup)(struct gps_session_t *session);
     int baudrate, stopbits, cycle;
 };

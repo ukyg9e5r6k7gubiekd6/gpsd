@@ -411,6 +411,7 @@ struct gps_type_t zodiac_binary =
     NULL,		/* binary protocol */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
+    NULL,		/* no speed switcher */
     NULL,		/* caller needs to supply a close hook */
     9600,		/* 4800 won't work */
     1,			/* 1 stop bit */
