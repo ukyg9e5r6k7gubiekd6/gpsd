@@ -49,13 +49,12 @@
 #include "gps.h"
 #include "gpsd.h"
 
-#define QLEN		5
+#define QLEN			5
+#define DEFAULT_DEVICE_NAME	"/dev/gps"
 
 /* the default driver is NMEA */
 struct gps_session_t *session;
-
-static char *device_name = 0;
-static char *default_device_name = "/dev/gps";
+static char *device_name = DEFAULT_DEVICE_NAME;
 static int in_background = 0;
 static fd_set all_fds;
 static fd_set nmea_fds;
@@ -142,16 +141,16 @@ static void usage()
     struct gps_type_t **dp;
     printf("usage:  gpsd [options] \n\
   Options include: \n\
-  -p string (default %s)         = set GPS device name \n\
+  -p string (default %s)   = set GPS device name \n\
   -T devtype (default 'n')       = set GPS device type \n\
-  -S integer (default %s)        = set port for daemon \n\
-  -i %%f[NS]:%%f[EW]             = set initial latitude/longitude \n\
+  -S integer (default %4s)      = set port for daemon \n\
+  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n\
   -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n\
   Here are the available driver types:\n\
-", default_device_name, DEFAULT_GPSD_PORT);
+", DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
 
     for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey)
@@ -613,8 +612,6 @@ int main(int argc, char *argv[])
 	    exit(0);
 	}
     }
-
-    if (!device_name) device_name = default_device_name;
 
     if (!service) {
 	if (!getservbyname(default_service, "tcp"))
