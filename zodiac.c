@@ -1,8 +1,6 @@
 /*
  * Handle the Rockwell binary packet format supported by the older
- * Zodiac-chipset versions of the Delorme EarthMate GPS.  Actually this
- * code ought to work for any Zodiac-chipset modem; the vendor-specific 
- * trigger string isn't in here.
+ * Zodiac-chipset versions of the Delorme EarthMate GPS. 
  *
  * Everything exported from here lives in the structure zodiac-b at the end.
  */
@@ -26,8 +24,8 @@
 #define PI 3.14159265358979323846
 
 enum {
-    EM_HUNT_FF, EM_HUNT_81, EM_HUNT_ID, EM_HUNT_WC,
-    EM_HUNT_FLAGS, EM_HUNT_CS, EM_HUNT_DATA, EM_HUNT_A
+    ZODIAC_HUNT_FF, ZODIAC_HUNT_81, ZODIAC_HUNT_ID, ZODIAC_HUNT_WC,
+    ZODIAC_HUNT_FLAGS, ZODIAC_HUNT_CS, ZODIAC_HUNT_DATA, ZODIAC_HUNT_A
 };
 
 #define O(x) (x-6)
@@ -45,7 +43,7 @@ struct header {
 
 static void analyze(struct gps_session_t *session, struct header *, unsigned short *);
 
-static unsigned short em_nmea_checksum(unsigned short *w, int n)
+static unsigned short zodiac_nmea_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
@@ -55,7 +53,7 @@ static unsigned short em_nmea_checksum(unsigned short *w, int n)
     return csum;
 }
 
-/* em_spew - Takes a message type, an array of data words, and a length
+/* zodiac_spew - Takes a message type, an array of data words, and a length
    for the array, and prepends a 5 word header (including nmea_checksum).
    The data words are expected to be nmea_checksummed */
 
@@ -84,7 +82,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static void em_spew(struct gps_session_t *session, int type, unsigned short *dat, int dlen)
+static void zodiac_spew(struct gps_session_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
 
@@ -93,7 +91,7 @@ static void em_spew(struct gps_session_t *session, int type, unsigned short *dat
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
-    h.csum = em_nmea_checksum((unsigned short *) &h, 4);
+    h.csum = zodiac_nmea_checksum((unsigned short *) &h, 4);
 
     if (session->fdout != -1) {
 	end_write(session->fdout, &h, sizeof(h));
@@ -116,7 +114,7 @@ static long putlong(char *dm, int sign)
     return rad;
 }
 
-static void em_init(struct gps_session_t *session)
+static void zodiac_init(struct gps_session_t *session)
 {
     unsigned short data[22];
     time_t t;
@@ -147,9 +145,9 @@ static void em_init(struct gps_session_t *session)
       *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
-      data[21] = em_nmea_checksum(data, 21);
+      data[21] = zodiac_nmea_checksum(data, 21);
 
-      em_spew(session, 1200, data, 22);
+      zodiac_spew(session, 1200, data, 22);
     }
 }
 
@@ -166,12 +164,12 @@ static void send_rtcm(struct gps_session_t *session,
 
     data[0] = sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
-    data[n] = em_nmea_checksum(data, n);
+    data[n] = zodiac_nmea_checksum(data, n);
 
-    em_spew(session, 1351, data, n+1);
+    zodiac_spew(session, 1351, data, n+1);
 }
 
-static int em_send_rtcm(struct gps_session_t *session,
+static int zodiac_send_rtcm(struct gps_session_t *session,
 			char *rtcmbuf, int rtcmbytes)
 {
     int len;
@@ -377,7 +375,7 @@ static void analyze(struct gps_session_t *session,
     char *bufp2;
     int i = 0, j = 0, nmea = 0;
 
-    if (p[h->ndata] == em_nmea_checksum(p, h->ndata)) {
+    if (p[h->ndata] == zodiac_nmea_checksum(p, h->ndata)) {
 	gpscli_report(5, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
@@ -478,7 +476,7 @@ static void analyze(struct gps_session_t *session,
 	    session->gNMEAdata.raw_hook(buf);
     }
     if (eminit)
-	em_init(session);
+	zodiac_init(session);
 }
 
 
@@ -492,9 +490,9 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
 }
 
 
-static void em_eat(struct gps_session_t *session, unsigned char c)
+static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 {
-    static int state = EM_HUNT_FF;
+    static int state = ZODIAC_HUNT_FF;
     static struct header h;
 
     static unsigned int byte;
@@ -503,77 +501,77 @@ static void em_eat(struct gps_session_t *session, unsigned char c)
 
     switch (state) {
 
-    case EM_HUNT_FF:
+    case ZODIAC_HUNT_FF:
 	if (c == 0xff)
-	    state = EM_HUNT_81;
+	    state = ZODIAC_HUNT_81;
 	if (c == 'E')
-	    state = EM_HUNT_A;
+	    state = ZODIAC_HUNT_A;
 	break;
 
-    case EM_HUNT_A:
+    case ZODIAC_HUNT_A:
 	/* A better be right after E */
         if ((c == 'A') && (session->fdout != -1))
 	    write(session->fdout, "EARTHA\r\n", 8);
-	state = EM_HUNT_FF;
+	state = ZODIAC_HUNT_FF;
 	break;
 
-    case EM_HUNT_81:
+    case ZODIAC_HUNT_81:
 	if (c == 0x81)
-	    state = EM_HUNT_ID;
+	    state = ZODIAC_HUNT_ID;
 	h.sync = 0x81ff;
 	byte = 0;
 	break;
 
-    case EM_HUNT_ID:
+    case ZODIAC_HUNT_ID:
 	if (!(byte = putword(&(h.id), c, byte)))
-	    state = EM_HUNT_WC;
+	    state = ZODIAC_HUNT_WC;
 	break;
 
-    case EM_HUNT_WC:
+    case ZODIAC_HUNT_WC:
 	if (!(byte = putword(&(h.ndata), c, byte)))
-	    state = EM_HUNT_FLAGS;
+	    state = ZODIAC_HUNT_FLAGS;
 	break;
 
-    case EM_HUNT_FLAGS:
+    case ZODIAC_HUNT_FLAGS:
 	if (!(byte = putword(&(h.flags), c, byte)))
-	    state = EM_HUNT_CS;
+	    state = ZODIAC_HUNT_CS;
 	break;
 
-    case EM_HUNT_CS:
+    case ZODIAC_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
 
-	    if (h.csum == em_nmea_checksum((unsigned short *) &h, 4)) {
-		state = EM_HUNT_DATA;
+	    if (h.csum == zodiac_nmea_checksum((unsigned short *) &h, 4)) {
+		state = ZODIAC_HUNT_DATA;
 		data = (unsigned short *) malloc((h.ndata + 1) * 2);
 		words = 0;
 	    } else
-		state = EM_HUNT_FF;
+		state = ZODIAC_HUNT_FF;
 	}
 	break;
 
-    case EM_HUNT_DATA:
+    case ZODIAC_HUNT_DATA:
 	if (!(byte = putword(data + words, c, byte)))
 	    words++;
 	if (words == h.ndata + 1) {
 	    analyze(session, &h, data);
 	    free(data);
-	    state = EM_HUNT_FF;
+	    state = ZODIAC_HUNT_FF;
 	}
 	break;
     }
 }
 
-static int handle_EMinput(struct gps_session_t *session)
+static int zodiac_handle_input(struct gps_session_t *session)
 {
     unsigned char c;
 
     if (read(session->fdin, &c, 1) != 1)
 	return 1;
-    em_eat(session, c);
+    zodiac_eat(session, c);
     return 0;
 }
 
-static void em_close(struct gps_session_t *session)
+static void zodiac_close(struct gps_session_t *session)
 {
     session->device_type = &zodiac_a;
 }
@@ -585,9 +583,9 @@ struct gps_type_t zodiac_b =
     "Zodiac binary",	/* full name of type */
     NULL,		/* only switched to by zodiac_a driver */
     do_eminit,		/* initialize the device */
-    handle_EMinput,	/* read and parse message packets */
-    em_send_rtcm,	/* send DGPS correction */
-    em_close,		/* wrapup function to be called on close */
+    zodiac_handle_input,/* read and parse message packets */
+    zodiac_send_rtcm,	/* send DGPS correction */
+    zodiac_close,	/* wrapup function to be called on close */
     9600,		/* 4800 won't work */
     1,			/* updates every second */
 };
