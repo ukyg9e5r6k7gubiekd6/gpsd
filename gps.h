@@ -100,14 +100,10 @@ struct gps_data_t {
     int sentence_length;	/* character count of last sentence */
 #ifdef PROFILING
     double gps_time;		/* GPS time (equivalent of utc field) */
-#endif /* PROFILING */
-    double d_recv_time;		/* daemon receipt time (-> E+T1) */
-#ifdef PROFILING
+    double d_recv_time;		/* daemon receipt time (-> E1+T1) */
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */
     double poll_time;		/* daemon poll time (-> W) */
-#endif /* PROFILING */
     double emit_time;		/* emission time (-> E2) */
-#ifdef PROFILING
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
 #endif /* PROFILING */

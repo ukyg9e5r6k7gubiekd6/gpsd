@@ -226,8 +226,8 @@ int gps_poll(struct gps_data_t *gpsdata)
     {
 	struct timeval decoded;
 	gettimeofday(&decoded, NULL);
-	gpsdata->c_decode_time = DTIME(received) - gpsdata->d_recv_time;
-	gpsdata->c_recv_time = DTIME(decoded) - gpsdata->d_recv_time;
+	gpsdata->c_decode_time = TIME2DOUBLE(received) - gpsdata->d_recv_time;
+	gpsdata->c_recv_time = TIME2DOUBLE(decoded) - gpsdata->d_recv_time;
     }
 #endif /* PROFILING */
     return n;

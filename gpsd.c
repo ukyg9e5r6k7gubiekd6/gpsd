@@ -197,7 +197,7 @@ static int handle_request(int fd, char *buf, int buflen)
 #ifdef PROFILING
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    session->poll_times[fd] = DTIME(tv);
+    session->poll_times[fd] = TIME2DOUBLE(tv);
 #endif /* PROFILING */
 
     sprintf(reply, "GPSD");
@@ -391,7 +391,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		ud->d_recv_time - ud->gps_time,
 		ud->d_decode_time - ud->gps_time,
 		session->poll_times[fd] - ud->gps_time,
-		DTIME(tv) - ud->gps_time); 
+		TIME2DOUBLE(tv) - ud->gps_time); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }

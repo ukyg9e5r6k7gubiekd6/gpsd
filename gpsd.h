@@ -71,7 +71,7 @@ struct gps_session_t {
 };
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
-#define DTIME(tv)	(tv.tv_sec + tv.tv_usec/1e6)
+#define TIME2DOUBLE(tv)	(tv.tv_sec + tv.tv_usec/1e6)
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;

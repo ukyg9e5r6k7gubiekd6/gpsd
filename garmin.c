@@ -41,8 +41,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 // Linux math.h need the next two defines to get hypot() and _PI constants
-#define __USE_ISOC99
-#define __USE_GNU
+#define __USE_ISOC99	1
+#define __USE_GNU	1
 #include <math.h>
 
 #include <string.h>

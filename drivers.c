@@ -27,7 +27,7 @@ static void nmea_handle_input(struct gps_session_t *session)
 #ifdef PROFILING
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
-		    session->gNMEAdata.d_recv_time = DTIME(tv);
+		    session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv);
 #endif /* PROFILING */
 		    if (nmea_parse(buf, &session->gNMEAdata) < 0)
 			gpsd_report(2, "unknown sentence: \"%s\"\n", buf);
@@ -35,7 +35,7 @@ static void nmea_handle_input(struct gps_session_t *session)
 		    else {
 			struct timeval tv;
 			gettimeofday(&tv, NULL);
-			session->gNMEAdata.d_decode_time = DTIME(tv);
+			session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
 		    }
 #endif /* PROFILING */
 		} else {
