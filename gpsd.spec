@@ -25,7 +25,7 @@ your GPS will plug in to.  Normally this will be /dev/ttyUSB0 or
 /dev/ttyS0.
 
 %package -n gpsd-devel
-Summary: client library for talking to a running gpsd
+Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
 Group: Development/Libraries
 
 %description -n gpsd-devel
@@ -103,6 +103,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
   are now in ISO8601 format, with sub-second precision if the GPS
   delivers that.  First cuts at Python interfaces included.  libgps.a
   interface now bundles session fd into an allocated session block.
+  Automake-based build machinery from Jens Oberender.
 
 * Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 
