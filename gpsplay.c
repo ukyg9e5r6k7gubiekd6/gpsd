@@ -43,6 +43,7 @@
 #endif
 
 #include "nmea.h"
+#include "outdata.h"
 #include "gpsd.h"
 #include "version.h"
 
@@ -360,12 +361,6 @@ static int handle_request(int fd, fd_set * fds)
 	    sprintf(reply + strlen(reply),
 		    ",V=%f",
 		    gNMEAdata.speed);
-	    break;
-	case 'G':
-	case 'g':
-	    sprintf(reply + strlen(reply),
-		    ",G=%6.6s",
-		    gNMEAdata.grid);
 	    break;
 	case 'R':
 	case 'r':

@@ -3,10 +3,10 @@
 #include <math.h>
 #include <string.h>
 #include "nmea.h"
+#include "outdata.h"
 
 extern struct OUTDATA gNMEAdata;
 static void do_lat_lon(char *sentence, int begin);
-static void do_grid(void);
 static char *field(char *sentence, short n);
 
 static void update_field_i(char *sentence, int fld, int *dest, int mask);
@@ -46,11 +46,8 @@ void processGPRMC(char *sentence)
     strncpy(s + 8, d + 4, 2);	/* copy year */
 
     sscanf(field(sentence, 1), "%s", d);	/* Time: hhmmss */
-
     strncpy(s + 11, d, 2);	/* copy hours */
-
     strncpy(s + 14, d + 2, 2);	/* copy minutes */
-
     strncpy(s + 17, d + 4, 2);	/* copy seconds */
 
     s[2] = s[5] = '/';		/* add the '/'s, ':'s, ' ' and string terminator */
@@ -70,11 +67,12 @@ void processGPRMC(char *sentence)
 #endif
 
     sscanf(field(sentence, 7), "%lf", &gNMEAdata.speed);
+
+#if GPRMC_TRACK
     sscanf(field(sentence, 8), "%lf", &gNMEAdata.track);
+#endif
 
     do_lat_lon(sentence, 3);
-    do_grid();
-
 }
 
 /*
@@ -114,7 +112,9 @@ void processPMGNST(char *sentence)
 void processGPVTG(char *sentence)
 {
     sscanf(field(sentence, 3), "%lf", &gNMEAdata.speed);
+#if GPRMC_TRACK
     sscanf(field(sentence, 1), "%lf", &gNMEAdata.track);
+#endif
 }
 
 /* ----------------------------------------------------------------------- */
@@ -122,7 +122,6 @@ void processGPVTG(char *sentence)
 void processGPGGA(char *sentence)
 {
     do_lat_lon(sentence, 2);
-    do_grid();
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
     if ((gNMEAdata.status > 0) && (gNMEAdata.mode < 2))
@@ -226,24 +225,7 @@ static void do_lat_lon(char *sentence, int begin)
 	updated++;
     }
     if (updated == 2)
-	gNMEAdata.last_update = time(NULL);
-}
-
-/* ----------------------------------------------------------------------- */
-
-static void do_grid() {
-  double lat, lon;
-
-  lat = gNMEAdata.latitude;
-  lon = gNMEAdata.longitude;
-
-  gNMEAdata.grid[0] = 65 + (int)((180.0 + lon) / 20.0);
-  gNMEAdata.grid[1] = 65 + (int)((90.0 + lat) / 10.0);
-  gNMEAdata.grid[2] = 48 + (int)((180.0 + lon) / 2) % 10;
-  gNMEAdata.grid[3] = 48 + (int)(90.0 + lat) % 10;
-  gNMEAdata.grid[4] = 97 + ((int)(180.0 + lon) % 2) * 12 + (int)(((180.0 + lon) - (int)(180.0 + lon)) * 12);
-  gNMEAdata.grid[5] = 97 + (int)(((90.0 + lat) - (int)(90.0 + lat)) * 24);
-  gNMEAdata.grid[6] = '\0';
+	gNMEAdata.ts_latlon = time(NULL);
 }
 
 /* ----------------------------------------------------------------------- */

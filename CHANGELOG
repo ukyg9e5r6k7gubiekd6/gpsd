@@ -53,3 +53,6 @@
 	 it any more.
 20040129 
 	 Make applications null-terminate their resource lists.
+20040321
+	 Without PRWIZCH sentence:
+	 sat. colors in gps according to ss, grey==lt10, yellow==lt50 else green.

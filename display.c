@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include "nmea.h"
+#include "outdata.h"
 #include "gps.h"
 
 #define XCENTER         (double)(width/2)
@@ -116,8 +117,12 @@ int get_status(int satellite)
     } else {
 	for (i = 0; i < 12; i++)
 	    if (satellite == gNMEAdata.PRN[i]) {
-		s = gNMEAdata.ss[i] / 6;
-		return s > 7 ? 7 : s;
+		s = gNMEAdata.ss[i];
+
+		if (s<20) return 1;
+		if (s<50) return 2;
+
+		return 7;
 	    }
 	return 0;
     }

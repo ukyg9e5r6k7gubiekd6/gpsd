@@ -7,6 +7,7 @@
 #include <syslog.h>
 #include "gpsd.h"
 #include "nmea.h"
+#include "outdata.h"
 
 
 struct OUTDATA gNMEAdata;
@@ -106,6 +107,7 @@ void handle_message(char *sentence)
 {
     if (debug > 5)
 	fprintf(stderr, "%s\n", sentence);
+
     if (*sentence == '$')
 	process_message(sentence + 1);
     else

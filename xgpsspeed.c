@@ -3,15 +3,16 @@
  * Tachometer widget from Kerberometer (xklife)
  */
 #include "config.h"
-#include "xgpsspeed.h"
-#include "xgpsspeed.icon"
-#include "nmea.h"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
+#include "xgpsspeed.h"
+#include "xgpsspeed.icon"
+#include "nmea.h"
+#include "outdata.h"
 #include "gpsd.h"
 
 #define BUFSIZE          4096

@@ -43,6 +43,7 @@
 #endif
 
 #include "nmea.h"
+#include "outdata.h"
 #include "gps.h"
 
 void update_display(char *message);

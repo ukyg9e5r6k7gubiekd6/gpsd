@@ -44,6 +44,7 @@
 
 #include "nmea.h"
 #include "gpsd.h"
+#include "outdata.h"
 #include "version.h"
 
 #define QLEN		5
@@ -238,7 +239,8 @@ static int activate()
     int input;
 
     if ((input = serial_open()) < 0)
-	errexit("serial open: ");
+	errexit("Exiting - serial open");
+ 
     syslog(LOG_NOTICE, "Opened gps");
     gNMEAdata.fdin = input;
     gNMEAdata.fdout = input;
@@ -266,7 +268,6 @@ int main(int argc, char *argv[])
     int option;
     char buf[BUFSIZE];
     int sentdgps = 0, fixcnt = 0;
-    time_t curtime;
 
     while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:t:")) != -1) {
 	switch (option) {
@@ -406,13 +407,6 @@ int main(int argc, char *argv[])
 	    errexit("select");
 	}
 
-	/* invalidate status if gps went quiet */
- 	curtime = time(NULL);
- 	if (curtime > gNMEAdata.last_update + gps_timeout) {
- 	  gNMEAdata.mode = 0;
- 	  gNMEAdata.status = 0;
- 	}
-
 	need_gps = 0;
 
 	if (reopen && input != -1) {
@@ -438,6 +432,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
+	    gNMEAdata.last_update = time(NULL);
 	    if (device_type == DEVICE_EARTHMATEb) 
 		handle_EMinput(input, &afds, &nmea_fds);
 	    else
@@ -523,18 +518,14 @@ static int handle_request(int fd, fd_set * fds)
 		    ",V=%f",
 		    gNMEAdata.speed);
 	    break;
+#if GPRMC_TRACK
 	case 'T':
 	case 't':
            sprintf(reply + strlen(reply),
                    ",T=%f",
                    gNMEAdata.track);
            break;
-	case 'G':
-	case 'g':
-	    sprintf(reply + strlen(reply),
-		    ",G=%6.6s",
-		    gNMEAdata.grid);
-	    break;
+#endif
         case 'X':
         case 'x':
             if (!FD_ISSET(fd, fds))
