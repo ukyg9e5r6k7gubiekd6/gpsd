@@ -142,8 +142,9 @@ int gps_poll(struct gpsd_t *session)
 
     /* update the scoreboard structure from the GPS */
     waiting = is_input_waiting(session->fdin);
-    if (waiting == -1)
-	return -1;
+    gpscli_report(4, "GPS has %d chars waiting\n", waiting);
+    if (waiting <= 0)
+	return waiting;
     else if (waiting) {
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
