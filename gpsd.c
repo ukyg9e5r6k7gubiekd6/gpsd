@@ -581,17 +581,26 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-    if (ud->profiling && ud->sentence_time) {
-	double fixtime = ud->sentence_time;
-	sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
-		ud->tag,
-		ud->sentence_length,
-		fixtime,
-		ud->d_xmit_time - fixtime,
-		ud->d_recv_time - fixtime,
-		ud->d_decode_time - fixtime,
-		device->poll_times[cfd] - fixtime,
-		timestamp() - fixtime); 
+    if (ud->profiling) {
+	if (ud->sentence_time)
+	    sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
+		    ud->tag,
+		    ud->sentence_length,
+		    ud->sentence_time,
+		    ud->d_xmit_time - ud->sentence_time,
+		    ud->d_recv_time - ud->sentence_time,
+		    ud->d_decode_time - ud->sentence_time,
+		    device->poll_times[cfd] - ud->sentence_time,
+		    timestamp() - ud->sentence_time);
+	else
+	    sprintf(phrase, ",$=%s %d 0 %f %f %f %f %f",
+		    ud->tag,
+		    ud->sentence_length,
+		    ud->d_xmit_time,
+		    ud->d_recv_time - ud->d_xmit_time,
+		    ud->d_decode_time - ud->d_xmit_time,
+		    device->poll_times[cfd] - ud->d_xmit_time,
+		    timestamp() - ud->d_xmit_time);
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }

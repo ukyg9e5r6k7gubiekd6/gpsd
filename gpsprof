@@ -127,38 +127,6 @@ class spaceplot:
 	    self.fp.flush()
             return fmt
 
-class uninstrumented:
-    "Total times without instrumentation."
-    name = "uninstrumented"
-    def __init__(self, fp):
-        self.fp = fp
-        self.stats = []
-    def gather(self, session):
-        if session.timings.sentence_time:
-            seconds = time.time() - session.timings.sentence_time + gps.tzoffset()
-            self.stats.append(seconds)
-            return True
-        else:
-            return False
-    def data(self, session):
-        self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
-                 (title,
-                  session.gps_id, session.baudrate,
-                  session.stopbits, session.cycle))
-        for seconds in self.stats:
-            self.fp.write("%2.6lf\n" % seconds)
-    def plot(self, file, title, session):
-        fmt = '''
-set autoscale
-set key below
-set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
-plot "%s" using 0:1 title "Total time" with impulses
-'''
-        return fmt % (title,
-                      session.gps_id, session.baudrate,
-                      session.stopbits, session.cycle,
-                      file)
-
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
@@ -166,47 +134,49 @@ class rawplot:
         self.fp = fp
         self.stats = []
     def gather(self, session):
-        if session.gps_time:
-            self.stats.append(copy.copy(session.timings))
-            return True
-        else:
-            return False
+        self.stats.append(copy.copy(session.timings))
+        return True
     def data(self, session):
         self.fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
-        self.fp.write("#\t")
-        for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
+        self.fp.write("#")
+        for hn in ("tag", "T1", "E1", "D1", "W", "E2", "T2", "D2"):
             self.fp.write("%8s\t" % hn)
-        self.fp.write("tag\n#-\t")
+        self.fp.write("\n#")
         for i in range(0, 7):
             self.fp.write("--------\t")
         self.fp.write("--------\n")
         for timings in self.stats:
-            self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
-              % (timings.length,
-                 timings.d_xmit_time, 
-                 timings.d_recv_time,
-                 timings.d_decode_time,
-                 timings.poll_time,
-                 timings.emit_time,
-                 timings.c_recv_time,
-                 timings.c_decode_time,
-                 timings.tag))
+            if timings.sentence_time:
+                e1 = timings.d_xmit_time
+            else:
+                e1 = 0
+            self.fp.write(
+                "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+                % (timings.tag,
+                   timings.sentence_length,
+                   e1, 
+                   timings.d_recv_time,
+                   timings.d_decode_time,
+                   timings.poll_time,
+                   timings.emit_time,
+                   timings.c_recv_time,
+                   timings.c_decode_time))
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \
-     "%s" using 0:8 title "D2 = Client decode time" with impulses, \
-     "%s" using 0:7 title "T2 =     TCP/IP latency" with impulses, \
-     "%s" using 0:6 title "E2 = Daemon encode time" with impulses, \
-     "%s" using 0:5 title "W  =     Poll wait time" with impulses, \
-     "%s" using 0:4 title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:3 title "T1 =         RS232 time" with impulses, \
-     "%s" using 0:2 title "E1 =        GPS latency" with impulses
+     "%s" using 0:9 title "D2 = Client decode time" with impulses, \
+     "%s" using 0:8 title "T2 =     TCP/IP latency" with impulses, \
+     "%s" using 0:7 title "E2 = Daemon encode time" with impulses, \
+     "%s" using 0:6 title "W  =     Poll wait time" with impulses, \
+     "%s" using 0:5 title "D1 = Daemon decode time" with impulses, \
+     "%s" using 0:4 title "T1 =         RS232 time" with impulses, \
+     "%s" using 0:3 title "E1 =        GPS latency" with impulses
 '''
         return fmt % (title,
                       session.gps_id, session.baudrate,
@@ -222,13 +192,10 @@ class splitplot:
         self.fp = fp
         self.stats = []
     def gather(self, session):
-        if session.gps_time:
-            self.stats.append(copy.copy(session.timings))
-            if session.timings.tag not in splitplot.sentences:
-                splitplot.sentences.append(session.timings.tag)
-            return True
-        else:
-            return False
+        self.stats.append(copy.copy(session.timings))
+        if session.timings.tag not in self.sentences:
+            self.sentences.append(session.timings.tag)
+        return True
     def data(self, session):
         self.fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
@@ -244,9 +211,13 @@ class splitplot:
             self.fp.write("---------\t")
         self.fp.write("--------\n")
         for timings in self.stats:
+            if timings.sentence_time:
+                e1 = timings.d_xmit_time
+            else:
+                e1 = 0
             for s in splitplot.sentences:
                 if s == timings.tag:
-                    self.fp.write("%2.6f\t"% timings.d_xmit_time)
+                    self.fp.write("%2.6f\t" % e1)
                     self.found[s] = True
                 else:
                     self.fp.write("-       \t")
@@ -257,7 +228,7 @@ class splitplot:
                         timings.emit_time,
                         timings.c_recv_time,
                         timings.c_decode_time,
-                        timings.length,
+                        timings.sentence_length,
                         timings.tag))
     def plot(self, file, title, session):
         fixed = '''
@@ -288,7 +259,7 @@ plot \\
                        (file, i+1, splitplot.sentences[i])
         return fmt[:-4] + "\n"
 
-formatters = (spaceplot, rawplot, splitplot, uninstrumented)
+formatters = (spaceplot, rawplot, splitplot)
 
 def plotframe(await, fname, file, speed, threshold, title):
     "Return a string containing a GNUplot script "
@@ -317,7 +288,7 @@ def plotframe(await, fname, file, speed, threshold, title):
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("w+bci")
-        if formatter not in (spaceplot, uninstrumented):
+        if formatter != spaceplot:
             session.query("z+")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")

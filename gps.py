@@ -44,23 +44,37 @@ GPSD_PORT = 2947
 class gpstimings:
     def __init__(self):
         self.tag = ""
-        self.length = 0
+        self.sentence_length = 0
         self.sentence_time = 0.0
-        self.d_recv_time = 0
-        self.d_decode_time = 0
-        self.emit_time = 0
-        self.poll_time = 0
-        self.c_recv_time = 0
-        self.c_decode_time = 0
+        self.d_xmit_time = 0.0
+        self.d_recv_time = 0.0
+        self.d_decode_time = 0.0
+        self.emit_time = 0.0
+        self.poll_time = 0.0
+        self.c_recv_time = 0.0
+        self.c_decode_time = 0.0
     def collect(self, tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
         self.tag = tag
-        self.length = int(length)
+        self.sentence_length = int(length)
         self.sentence_time = float(sentence_time)
         self.d_xmit_time = float(xmit_time)
         self.d_recv_time = float(recv_time)
         self.d_decode_time = float(decode_time)
         self.poll_time = float(poll_time)
         self.emit_time = float(emit_time)
+    def __str__(self):
+            return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+              % (timings.tag,
+                 timings.sentence_length,
+                 timings.sentence_time,
+                 timings.d_xmit_time, 
+                 timings.d_recv_time,
+                 timings.d_decode_time,
+                 timings.poll_time,
+                 timings.emit_time,
+                 timings.c_recv_time,
+                 timings.c_decode_time)
+        
 
 class gpsfix:
     def __init__(self):
@@ -318,9 +332,11 @@ class gps(gpsdata):
         self.timings.c_recv_time = time.time()
 	self.__unpack(data)
         if self.timings.sentence_time:
-            basetime = self.sentence_time - tzoffset()
-            self.timings.c_decode_time = time.time() - basetime
-            self.timings.c_recv_time -= basetime
+            basetime = self.timings.sentence_time
+        else:
+            basetime = self.timings.d_xmit_time
+        self.timings.c_decode_time = time.time() - basetime
+        self.timings.c_recv_time -= basetime
         return 0
 
     def query(self, commands):
@@ -391,35 +407,40 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     if lon1 < lon2: dx *= -1
     return (dx, dy)
 
-def tzoffset():
-    if time.daylight and time.localtime().tm_isdst:
-        return time.altzone
-    else:
-        return time.timezone
+def mkgmtime(tm):
+    cumdays[12] = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334);
+    year = 1900 + tm.tm_year + tm.tm_mon / 12;
+    result = (year - 1970) * 365 + cumdays[tm.tm_mon % 12];
+    result += (year - 1968) / 4;
+    result -= (year - 1900) / 100;
+    result += (year - 1600) / 400;
+    result += tm.tm_mday - 1;
+    result *= 24;
+    result += tm.tm_hour;
+    result *= 60;
+    result += tm.tm_min;
+    result *= 60;
+    result += tm.tm_sec;
+    return result
 
 def isotime(s):
-    "Convert timestamps in ISO8661 format to and from Unix local time."
+    "Convert timestamps in ISO8661 format to and from Unix time."
     if type(s) == type(1):
-        return time.strftime(time.localtime(s), "%Y-%m-%dT%H:%M:%S")
+        return time.strftime(time.gmtime(s), "%Y-%m-%dT%H:%M:%S")
     elif type(s) == type(1.0):
         date = int(s)
         msec = s - date
-        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(s))
+        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gtime(s))
         return date + "." + `msec`[2:]
     elif type(s) == type(""):
-        gmt = s[-1] == "Z"
-        if gmt:
+        if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
             (date, msec) = s.split(".")
         else:
             date = s
             msec = "0"
-        unpacked = time.strptime(date, "%Y-%m-%dT%H:%M:%S")
-        seconds = time.mktime(unpacked)
-        if gmt:
-            seconds -= tzoffset()
-        return seconds + float("0." + msec)
+        return mkgmtime(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
     else:
         raise TypeError
 

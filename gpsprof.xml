@@ -73,16 +73,7 @@ This is the default.</para>
 <varlistentry>
 <term>split</term>
 <listitem>
-<para>Plot filtered data.  Sentences with an apparent latency larger
-than 1 second are discarded.  Each sentence has its RS232 latency
-time colored differently.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>uninstrumented</term>
-<listitem>
-<para>Plot total latency without instrumentation.  Useful mainly as a
-check that the instrumentation is not producing significant distortion.</para>
+<para>Each sentence has its RS232 latency time colored differently.</para>
 </listitem>
 </varlistentry>
 </variablelist>
