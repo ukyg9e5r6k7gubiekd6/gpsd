@@ -25,8 +25,6 @@
 #define INADDR_NONE   ((in_addr_t)-1)
 #endif
 
-static char mbuf[128];
-
 int passivesock(char *service, char *protocol, int qlen)
 {
     struct servent *pse;
@@ -62,7 +60,7 @@ int passivesock(char *service, char *protocol, int qlen)
     }
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
-	gpscli_report(0, mbuf, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	gpscli_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
