@@ -114,7 +114,8 @@ struct gps_session_t {
 #ifdef BINARY_ENABLE
     double separation;		/* Geoidal separation */
     int year, month, day;
-    int hours, minutes, seconds;
+    int hours, minutes; 
+    double seconds;
 #endif /* BINARY_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */

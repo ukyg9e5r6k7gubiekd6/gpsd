@@ -239,7 +239,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
     if (session->gNMEAdata.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c",
+		"$GPGGA,%02d%02d%02.3f,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c",
 		session->hours,
 		session->minutes,
 		session->seconds,
@@ -266,7 +266,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,",
+	    "$GPRMC,%02d%02d%02.3f,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,",
 	    session->hours, session->minutes, session->seconds,
 	    session->gNMEAdata.status ? 'A' : 'V',
 	    degtodm(fabs(session->gNMEAdata.latitude)),
