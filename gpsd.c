@@ -218,7 +218,9 @@ static int handle_request(int fd, char *buf, int buflen)
 		while (isdigit(*p)) p++;
 		if (session->device_type->speed_switcher) {
 		    if (session->device_type->speed_switcher(session, i)) {
+#ifdef __UNUSED__
 			int oldspeed = gpsd_get_speed(&session->ttyset);
+#endif /* UNUSED */
 			gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)i);
 
 #ifdef __UNUSED__
