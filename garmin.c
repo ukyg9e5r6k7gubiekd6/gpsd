@@ -265,7 +265,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
-	    session->gpsdata.fix.time -= time_l;
+	    session->gpsdata.fix.time = time_l;
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
@@ -815,8 +815,7 @@ static int garmin_get_packet(struct gps_session_t *session, int waiting UNUSED)
 
 static int garmin_parse_input(struct gps_session_t *session)
 {
-    PrintPacket(session, (Packet_t*)session->GarminBuffer);
-    return 1;
+    return PrintPacket(session, (Packet_t*)session->GarminBuffer);
 }
 
 /* this is everything we export */
