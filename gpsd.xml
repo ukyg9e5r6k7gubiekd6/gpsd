@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsd</refname>
-<refname>gps</refname>
+<refname>xgps</refname>
 <refname>xgpsspeed</refname>
 <refpurpose>interface daemon for GPS receivers, test client,
 and speedometer</refpurpose>
@@ -31,7 +31,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-v </arg>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>gps</command>  
+  <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
@@ -298,14 +298,14 @@ connections.  This may be useful if your GPS enters a wedged or
 confused state but can be soft-reset by pulling down DTR.</para>
 
 </refsect2>
-<refsect2><title>gps</title>
+<refsect2><title>xgps</title>
 
-<para><application>gps</application> is a simple test client for
+<para><application>xgps</application> is a simple test client for
 <application>gpsd</application> with an X interface. It displays
 current GPS animation and (for GPSes that support the feature) the
 locations of accessible satellites.</para>
 
-<para><application>gps</application> accepts an -h option as for
+<para><application>xgps</application> accepts an -h option as for
 <application>gpsd</application>, or a -v option to dump the package
 version and exit. An optional argument may specify an
 server to get data from; a colon-separated suffix is taken as a port
@@ -365,7 +365,7 @@ NMEA</ulink>.</para>
 
 <para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
 This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
-There is a project page, with <application>gps</application>
+There is a project page, with <application>xgps</application>
 screenshots, <ulink
 url="http://www.berlios.de/gpsd/">here</ulink>.</para>
 

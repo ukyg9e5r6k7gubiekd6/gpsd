@@ -20,7 +20,7 @@ gpsd listens on port 2947 for clients requesting position, time,
 velocity or altitude information.  gpsd can take information from the
 GPS and translate it into something easier to understand for clients.
 
-There is a test client included. It is called "gps". It simply
+There is a test client included. It is called "xgps". It simply
 connects to the daemon and displays your latitude, longitude,
 altitude, speed, track, and the signal quality from visible
 satellites.  When the GPS emits GSV, it will show a diagram of
@@ -82,7 +82,7 @@ His new features include:
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
-   * xgpsspeed is working again.  gps has been seriously reworked and improved.
+   * xgpsspeed is working again.  xgps has been seriously reworked and improved.
    * RPMs which include installation of gpsd to start up at boot time 
      are available.
    * New gpsprobe program probes the capabilities of GPSes and generates

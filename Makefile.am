@@ -1,11 +1,10 @@
 # Automake descrotion for gpsd
-# Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
 #
 # Build stuff depending on Motif
 #
 if HAVE_MOTIF
-BUILD_PROGS = gps xgpsspeed
+BUILD_PROGS = xgps xgpsspeed
 endif
 
 XMLTO = xmlto
@@ -14,11 +13,11 @@ bin_PROGRAMS = $(BUILD_PROGS)
 bin_SCRIPTS = gpsprobe
 
 #
-# Build gps
+# Build xgps
 #
-gps_SOURCES = display.c display.h gps.c
-gps_CFLAGS = $(X_CFLAGS)
-gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
+xgps_SOURCES = display.c display.h xgps.c
+xgps_CFLAGS = $(X_CFLAGS)
+xgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Build xgpsspeed

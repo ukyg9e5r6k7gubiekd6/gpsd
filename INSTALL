@@ -22,14 +22,14 @@ where ttyXXX is as in step 1.
 binary package).
 
 You will need to have either Motif or LessTif installed in order for
-gps and xgpsspeed to build.  If you're on a Linux system, you probably
+xgps and xgpsspeed to build.  If you're on a Linux system, you probably
 already have LessTif.  Source code is available from
 <http://www.lesstif.org/>.
 
 To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Then run make: libgps.so,
-gpsd, gps, and xgpsspeed will be built. Copy the app-defaults files
-gps.ad and xgpsspeed.ad to your home directory or to the system-wide X
+gpsd, xgps, and xgpsspeed will be built. Copy the app-defaults files
+xgps.ad and xgpsspeed.ad to your home directory or to the system-wide X
 app-defaults directory.
 
 4. Determine whether you need a non-NMEA driver.  Usually you will not,
@@ -61,7 +61,7 @@ sending data, merely that gpsd has not yet seen any *valid* position data.
 You will have to wait for the GPS to acquire satellite lock.  If you have 
 raw or watcher mode on it should be obvious when you get a lock.
 
-7. Start the gps client.  Calling it with no arguments should do the right 
+7. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
