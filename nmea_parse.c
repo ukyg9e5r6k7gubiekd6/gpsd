@@ -404,6 +404,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
         return;
 
     changed = update_field_i(sentence, 3, &out->satellites);
+    if (out->satellites > MAXCHANNELS) out->satellites = MAXCHANNELS;
 
     lower = (out->part - 1) * 4;
     upper = lower + 4;

@@ -359,20 +359,15 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'Y':
 	case 'y':
-	    sc = 0;
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.PRN[i])
-			sc++;
-	    if (!sc)
+	    if (!session.gNMEAdata.satellites)
 		strcat(reply, ",Y=?");
 	    else {
 		int used = 0;
 		sprintf(reply + strlen(reply),
-			",Y=%d:", sc);
+			",Y=%d:", session.gNMEAdata.satellites);
 		if (SEEN(session.gNMEAdata.satellite_stamp))
-		    for (i = 0; i < MAXCHANNELS; i++) {
-			for (j = 0; j < MAXCHANNELS; j++)
+		    for (i = 0; i < session.gNMEAdata.satellites; i++) {
+			for (j = 0; j < session.gNMEAdata.satellites; j++)
 			    if (session.gNMEAdata.used[j] == session.gNMEAdata.PRN[i])
 			    {
 				used = 1;
