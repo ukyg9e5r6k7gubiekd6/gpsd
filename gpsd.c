@@ -891,7 +891,7 @@ int main(int argc, char *argv[])
 			if (changed & SATELLITE_SET)
 			    strcat(cmds, "y");
 		    }
-		    if ((device->gpsdata.profiling) && (device->driverstate & FULL_PACKET))
+		    if (device->gpsdata.profiling && device->packet_full)
 			strcat(cmds, "$");
 		    if (cmds[0])
 			handle_request(cfd, cmds, strlen(cmds));

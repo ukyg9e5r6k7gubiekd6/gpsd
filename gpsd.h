@@ -101,6 +101,7 @@ struct gps_device_t {
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
+    int packet_full;	/* do we presently see a full packet? */
     int	packet_type;
 #define BAD_PACKET	-1
 #define NMEA_PACKET	0
@@ -113,7 +114,6 @@ struct gps_device_t {
     unsigned char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
-    double poll_times[FD_SETSIZE];	/* last daemon poll time */
     unsigned long counter;
 #ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
@@ -149,6 +149,7 @@ struct gps_device_t {
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 1? */
 #define TIME_SEEN_PPS	0x10	/* Seen PPS signal? */
 #endif /* NTPSHM_ENABLE */
+    double poll_times[FD_SETSIZE];	/* last daemon poll time */
 };
 
 #define IS_HIGHEST_BIT(v,m)	!(v & ~((m<<1)-1))

@@ -156,16 +156,16 @@ int gpsd_poll(struct gps_device_t *session)
 
 	session->gpsdata.online = timestamp();
 
-	if (!session->inbuflen || (session->driverstate & FULL_PACKET)) {
+	if (!session->inbuflen || session->packet_full) {
 	    session->gpsdata.d_xmit_time = timestamp();
-	    session->driverstate &=~ FULL_PACKET;
+	    session->packet_full = 0;
 	}
 
 	/* can we get a full packet from the device? */
 	if (!session->device_type->get_packet(session, waiting))
 	    return ONLINE_SET;
 
-	session->driverstate |= FULL_PACKET;
+	session->packet_full = 0;
 	session->gpsdata.sentence_time = 0;
 	session->gpsdata.sentence_length = session->outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
