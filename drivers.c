@@ -73,6 +73,8 @@ static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbyt
 
 static void nmea_initializer(struct gps_session_t *session)
 {
+    /* tell an FV18 to send GSAs so we'll know if 3D is accurate */
+    nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01,GSV05");
     /* probe for SiRF-II */
     nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,1");
 }
@@ -129,34 +131,6 @@ struct gps_type_t sirfII = {
     1,			/* updates every second */
 };
 #endif /* SIRFII_ENABLE */
-
-#if FV18_ENABLE
-/**************************************************************************
- *
- * FV18 -- uses 2 stop bits, needs to be told to send GSAs
- *
- **************************************************************************/
-
-static void fv18_initializer(struct gps_session_t *session)
-{
-    /* tell it to send GSAs so we'll know if 3D is accurate */
-    nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
-}
-
-struct gps_type_t fv18 = {
-    'f', 		/* select explicitly with -T f */
-    "San Jose Navigation FV18",		/* full name of type */
-    NULL,		/* no recognition string */
-    fv18_initializer,	/* to be sent unconditionally */
-    nmea_handle_input,	/* read text sentence */
-    nmea_write_rtcm,	/* write RTCM data straight */
-    NULL,		/* no speed switcher */
-    NULL,		/* no wrapup */
-    4800,		/* default speed to connect at */
-    2,			/* 2 stop bits */
-    1,			/* updates every second */
-};
-#endif /* FV18_ENABLE */
 
 #if TRIPMATE_ENABLE
 /**************************************************************************
@@ -287,9 +261,6 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef SIRFII_ENABLE
     &sirfII, 
 #endif /* SIRFII_ENABLE */
-#if FV18_ENABLE
-    &fv18,
-#endif /* FV18_ENABLE */
 #if TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */

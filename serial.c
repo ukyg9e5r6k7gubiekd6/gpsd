@@ -88,7 +88,7 @@ int gpsd_open(struct gps_session_t *session)
     unsigned int *ip;
     unsigned int stopbits;
     /* every rate we're likely to see on a GPS */
-    static int rates[] = {4800, 9600, 19200, 38400, 57600};
+    static unsigned int rates[] = {4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
     if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY|O_SYNC)) < 0)
