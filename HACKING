@@ -45,3 +45,7 @@ If you're looking for things to hack on, first see the TODO file.
 Then, there is some C code in the contrib/ directory that has some
 potentially useful techniques in it.  Picking a good one to integrate
 into gpsd might be a useful thing.
+
+For debugging purposes, it may be helpful to configure with --disable-shared.
+This turns off all the shared-library crud, making it somewhat easier to
+use gdb.
