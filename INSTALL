@@ -14,27 +14,25 @@ You will need to have either Motif or LessTif installed.  If you're on a
 Linux system, you probably already have LessTif.  Source code is 
 available from <http://www.lesstif.org/>.
 
-Run ./configure (or sh configure if the script does not have execute
+Run ./autogen.sh (or sh autogen.sh if the script does not have execute
 permission).  
 
 Check the Makefile.
 
-run make:  libgpsd.a, gpsd, gps, xgpsspeed, and gpsplay are built.
-
+Run make:  libgps.a, gpsd, gps, and xgpsspeed will be built.
 Copy the applications wherever you want them to live.
 
-Copy the app-defaults file gps.ad and xgpsspeed.ad to your home
+Copy the app-defaults files gps.ad and xgpsspeed.ad to your home
 directory or to the system-wide X app-defaults directory.
 
-The "right" thing to do is to start gpsd on a serial or USB port that
+The right thing to do is to start gpsd on a serial or USB port that
 has the GPS connected to it.
 
-Then start gps and have it connect to gpsd via a socket.  Calling it with
-no arguments will do the right thing if you have gpsd running on the
-default port.
+Then start gps.  Calling it with no arguments will do the right thing
+if you have gpsd running on the default port (2947).
 
-You can also telnet to this port for testing. When doing that, type an 'R'
-followed by <cr>. This should display the RAW nmea sentences the deamon
-receives from the gps.
+You can also telnet to port 2947 for testing. When doing that, type a 'WR'
+followed by <cr>. This should display both the raw NMEA sentences the daemon
+receives from the GPS and their translations in GPSD protocol.
 
 
