@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 		  handle_input, NULL);
     
     gps_set_raw_hook(&gpsdata, update_display);
-    gps_query(gpsd_fd, &gpsdata, "w+\n");
+    gps_query(gpsd_fd, &gpsdata, "w+x\n");
 
     XtAppMainLoop(app);
 
