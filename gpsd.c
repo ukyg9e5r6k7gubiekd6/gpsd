@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     char buf[BUFSIZE], *colon;
     int sentdgps = 0, fixcnt = 0;
 
-    while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:t:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
 	switch (option) {
 	case 'T':
 	    session.device_type = set_device_type(*optarg);
