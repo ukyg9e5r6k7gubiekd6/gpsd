@@ -130,9 +130,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 * Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.8-1
 - Embarrassing typo fix in gps.py. Avoid buffer overrun in xgps.c.
-  Plug Debian security bug 292347.  This version issued on an emergency
-  basis without Python libraries, which have packaging problems due 
-  to the 2.3/2.4 transition.
+  Plug Debian security bug 292347, CVE number CAN-2005-0228.  
+  This version issued on an emergency basis without Python libraries, 
+  which have packaging problems due to the 2.3/2.4 transition.
 
 * Fri Jan  14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.7-1
 - More compiler-warning cleanups.  gps client name changed to xgps.
