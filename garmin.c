@@ -504,7 +504,6 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 //         1 = got partial packet
 static int GetPacket (struct gps_session_t *session ) 
 {
-    Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
     struct timespec delay, rem;
 
     memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));

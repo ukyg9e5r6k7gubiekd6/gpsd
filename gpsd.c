@@ -122,9 +122,9 @@ static void usage(void)
   Options include: \n\
   -f string (default %s)   = set GPS device name \n"
 "  -S integer (default %4s)      = set port for daemon \n"
-#if defined(TRIPMATE_ENABLE)  || defined(ZODIAC_ENABLE)
+#if TRIPMATE_ENABLE || ZODIAC_ENABLE
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
-#endif /* defined(TRIPMATE_ENABLE) || defined(ZODIAC_ENABLE) */
+#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
   "-d host[:port]                 = set DGPS server \n\
   -P pidfile                     = set file to record process ID \n\
   -D integer (default 0)         = set debug level \n\
@@ -532,9 +532,9 @@ int main(int argc, char *argv[])
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:v"
-#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
+#if TRIPMATE_ENABLE || ZODIAC_ENABLE
 			    "i:"
-#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
+#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
 		)) != -1) {
 	switch (option) {
 	case 'D':
@@ -551,7 +551,7 @@ int main(int argc, char *argv[])
 	case 'd':
 	    dgpsserver = optarg;
 	    break;
-#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
+#if TRIPMATE_ENABLE || ZODIAC_ENABLE
 	case 'i': {
 	    char *colon;
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
@@ -574,7 +574,7 @@ int main(int argc, char *argv[])
 	    }
 	    break;
 	}
-#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
+#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
 	case 'n':
 	    nowait = 1;
 	    break;

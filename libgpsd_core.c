@@ -219,7 +219,7 @@ void gpsd_zero_satellites(struct gps_data_t *out)
     out->satellites = 0;
 }
 
-#ifdef BINARY_ENABLE
+#if BINARY_ENABLE
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 

@@ -92,7 +92,7 @@ int gpsd_open(struct gps_session_t *session)
 	return -1;
 
     if (isatty(session->gNMEAdata.gps_fd)) {
-#ifdef NON_NMEA_ENABLE
+#if NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++)

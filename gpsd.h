@@ -5,15 +5,9 @@
 #include <setjmp.h>
 
 /* Some internal capabilities depend on which drivers we're compiling. */
-#if  TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE
-#define NON_NMEA_ENABLE
-#endif /* TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE */
-#if EARTHMATE_ENABLE
-#define ZODIAC_ENABLE
-#endif /* EARTHMATE_ENABLE */
-#if defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE)
-#define BINARY_ENABLE
-#endif /* defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE) */
+#define ZODIAC_ENABLE	EARTHMATE_ENABLE
+#define BINARY_ENABLE	(ZODIAC_ENABLE || SIRF_ENABLE || GARMIN_ENABLE)
+#define NON_NMEA_ENABLE	(TRIPMATE_ENABLE || BINARY_ENABLE)
 
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
