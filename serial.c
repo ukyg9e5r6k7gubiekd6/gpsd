@@ -4,9 +4,6 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
-#if defined(HAVE_SYS_AIO_H)
-#include <sys/aio.h>
-#endif
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
@@ -91,7 +88,7 @@ int gpsd_open(struct gps_session_t *session)
     static unsigned int rates[] = {4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
-    if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY|O_SYNC)) < 0) {
+    if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY)) < 0) {
 	gpsd_report(1, "device open failed: %s\n", strerror(errno));
 	return -1;
     }

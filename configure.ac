@@ -16,7 +16,7 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -Wextra
 fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h sys/aio.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h)
 
 AC_HEADER_TIME
 AC_STRUCT_TIMEZONE
