@@ -79,7 +79,7 @@ extern void gps_init(struct gpsd_t *session,
 	      int timeout, char devtype, char *dgpsserver);
 extern int gps_activate(struct gpsd_t *session);
 extern void gps_deactivate(struct gpsd_t *session);
-extern void gps_poll(struct gpsd_t *session);
+extern int gps_poll(struct gpsd_t *session);
 extern void gps_wrap(struct gpsd_t *session);
 
 /* caller must supply this */

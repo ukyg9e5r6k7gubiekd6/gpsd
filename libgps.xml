@@ -38,7 +38,7 @@ struct gpsd_t session;
     <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_poll</function></funcdef>
+<funcdef>int <function>gps_poll</function></funcdef>
     <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
@@ -129,8 +129,10 @@ activity requiring the GPS, and re-acquire it later.</para>
 <para><function>gps_poll()</function>
 queries the GPS and updates the part of the session structure that
 holds position, speed, GPS signal quality, and other data returned
-by the GPS.
-<function>gps_wrap()</function>
+by the GPS. It returns the number of characters waiting (-1 if the
+GPS is inaccessible)</para>
+
+<para><function>gps_wrap()</function>
 ends the session, implicitly performing a 
 <function>gps_deactivate()</function>.</para>
 
