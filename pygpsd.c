@@ -4,6 +4,7 @@
 typedef struct {
     PyObject_HEAD
     int online;		/* this should really be onstrained to be a boolean */
+    PyObject *online_timestamp;
     PyObject *first;
     PyObject *last;
     int number;
@@ -12,6 +13,8 @@ typedef struct {
 static int
 gpsd_traverse(gpsd *self, visitproc visit, void *arg)
 {
+    if (self->first && visit(self->online_timestamp, arg) < 0)
+        return -1;
     if (self->first && visit(self->first, arg) < 0)
         return -1;
     if (self->last && visit(self->last, arg) < 0)
@@ -23,6 +26,8 @@ gpsd_traverse(gpsd *self, visitproc visit, void *arg)
 static int 
 gpsd_clear(gpsd *self)
 {
+    Py_XDECREF(self->online_timestamp);
+    self->online_timestamp = NULL;
     Py_XDECREF(self->first);
     self->first = NULL;
     Py_XDECREF(self->last);
@@ -46,6 +51,7 @@ gpsd_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     self = (gpsd *)type->tp_alloc(type, 0);
     if (self != NULL) {
         self->online = 0;
+	// FIXME: must instantiate a new timestamp object here 
 
         self->first = PyString_FromString("");
         if (self->first == NULL)
