@@ -111,7 +111,7 @@ typedef struct {
 /* Garmin D800_Pvt_Date_Type */
 // This is the data format of the position data from the garmin USB
 typedef struct {
-	float alt;  /* ->fix.altitude above WGS 84 */
+	float alt;  /* ->fix.altitude above WGS 84 (meters) */
 	float epe;  /* estimated position error, 2 sigma (meters)  */
 	float eph;  /* epe, but horizontal only (meters) */
 	float epv;  /* epe but vertical only (meters ) */
@@ -128,7 +128,7 @@ typedef struct {
 	float	lon_vel; /* velocity east (meters/second) */
 	float	lat_vel; /* velocity north (meters/second) */
 	float	alt_vel; /* velocity up (meters/sec) */
-	float	msl_hght; /* height of WGS 84 above MSL */
+	float	msl_hght; /* height of WGS 84 above MSL (meters) */
 	short	leap_sec; /* diff between GPS and UTC (seconds) */
 	long	grmn_days;
 } cpo_pvt_data;
@@ -279,7 +279,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
 
 	    // geoid separation from WGS 84
-	    session->separation = pvt->msl_hght;
+            // gpsd sign is opposite of garmin sign
+	    session->separation = -pvt->msl_hght;
 
 	    // estimated position error in meters
 	    session->gpsdata.epe = pvt->epe;
@@ -334,8 +335,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, session->gpsdata.status);
 
 	    gpsd_report(3, "UTC Time: %lf\n", session->gpsdata.fix.time);
-	    gpsd_report(3, "Geoid: from garmin %lf, calculated %lf\n"
-		, pvt->msl_hght
+	    gpsd_report(3, "Geoid Separation (MSL - WGS84): from garmin %lf, calculated %lf\n"
+		, -pvt->msl_hght
 		, wgs84_separation(session->gpsdata.fix.latitude
 			, session->gpsdata.fix.longitude));
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"

@@ -118,7 +118,7 @@ struct gps_device_t {
 #ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
     unsigned int driverstate;	/* for private use */
-    double separation;		/* Geoidal separation */
+    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 #define NO_SEPARATION	-99999	/* must be out of band */
     double mag_var;		/* Magnetic variation in degrees */  
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */

@@ -7,5 +7,5 @@ extern char *unix_to_iso8601(double t, char *);
 extern double gpstime_to_unix(int, double, int);
 extern double earth_distance(double, double, double, double);
 
-/* return wgs84 to MSL geoid separtion in meters, given a lat/lot */
+/* return geoid separtion (MSL - WGS84) in meters, given a lat/lot in degrees */
 extern double wgs84_separation(double lat, double lon);

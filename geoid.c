@@ -22,7 +22,7 @@ static double bilinear(double x1, double y1, double x2, double y2, double x, dou
 }
 
 
-/* return wgs84 to MSL geoid separtion in meters, given a lat/lot */
+/* return geoid separtion (MSL - WGS84) in meters, given a lat/lot in degrees */
 double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
