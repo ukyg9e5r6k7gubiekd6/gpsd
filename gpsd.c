@@ -214,31 +214,9 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
-		if (session->device_type->speed_switcher) {
-		    if (session->device_type->speed_switcher(session, i)) {
-#ifdef __UNUSED__
-			int oldspeed = gpsd_get_speed(&session->ttyset);
-#endif /* UNUSED */
-			gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)i);
-
-#ifdef __UNUSED__
-			/*
-			 * We put this here in order to cope with SiRF-II
-			 * devices that can't actually switch speeds.  Some
-			 * versions of the TripNav 200 with FTDI chipset 
-			 * seem to have this problem.
-			 */
-			if (session->device_type->validate_buffer) {
-			    char buf[NMEA_MAX*3+1];
-			    int n;
-
-			    n=read(session->gNMEAdata.gps_fd,buf,sizeof(buf)-1);
-			    if (n == -1 || !session->device_type->validate_buffer(buf, n))
-				gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)oldspeed);
-			}
-#endif /* UNUSED */
-		    }
-		}
+		if (session->device_type->speed_switcher)
+		    if (session->device_type->speed_switcher(session, i))
+			gpsd_set_speed(session, (speed_t)i);
 	    }
 #endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 

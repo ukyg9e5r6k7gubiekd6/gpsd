@@ -142,7 +142,7 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
      *        Rayming TN-200 + GSW 2.3.2 + ftdi
      * so it looks pretty solid.
      */
-    usleep(50000);
+    usleep(100000);
     return 1;
 }
 
@@ -152,7 +152,7 @@ static int sirf_validate_buffer(char *buf, size_t n)
     static char *prefixes[] = {
 	"$Version",
 	"$TOW: ",
-	"$WK:  ",
+	"$WK: ",
 	"$POS: ",
 	"$CLK: ",
 	"$CHNL:",

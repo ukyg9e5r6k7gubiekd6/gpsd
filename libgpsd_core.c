@@ -85,7 +85,7 @@ void gpsd_deactivate(struct gps_session_t *session)
 int gpsd_activate(struct gps_session_t *session)
 /* acquire a connection to the GPS device */
 {
-    if ((session->gNMEAdata.gps_fd = gpsd_open(session->gNMEAdata.baudrate, session->device_type->stopbits, session)) < 0)
+    if (gpsd_open(session->gNMEAdata.baudrate, session->device_type->stopbits, session) < 0)
 	return -1;
     else {
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* ignore old sentences */
