@@ -268,7 +268,7 @@ the replies. Examples:</para>
       reply:       "GPSD,P=36.000000 123.000000\r\n"
 
       query:       "d\n"
-      reply:       "GPSD,D=11/16/2002 02:45:05\r\n"
+      reply:       "GPSD,D=2002-11-16T02:45:05.12Z\r\n"
 
       query:       "va\n"
       reply:       "GPSD,V=0.000000,A=37.900000\r\n"
