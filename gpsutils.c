@@ -85,12 +85,15 @@ char *unix_to_iso8601(double fixtime, char *isotime)
  * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
  * (notably 231) actually ship the wrapped 10-bit week, despite what
  * the protocol reference claims.
+ *
+ * Note: This time will need to be corrected for leap seconds.
+ * That's what the offset argument is for.
  */
 #define GPS_EPOCH	315982800		/* GPS epoch in Unix time */
 #define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-double gpstime_to_unix(int week, double tow)
+double gpstime_to_unix(int week, double tow, int offset)
 {
     double fixtime;
 
@@ -102,7 +105,7 @@ double gpstime_to_unix(int week, double tow)
 	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
 	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
     }
-    return fixtime;
+    return fixtime + offset;
 }
 
 #define Deg2Rad(n)	((n) * DEG_2_RAD)

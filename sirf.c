@@ -32,7 +32,7 @@
 #if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
 /* FIX ME -- get actual leap seconds from subframe data */
-#define LEAP_SECONDS	13
+#define LEAP_SECONDS	-13
 
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
@@ -194,8 +194,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
-	    session->gpsdata.fix.time=gpstime_to_unix(getw(22), getl(24)*1e-2);
-	    session->gpsdata.fix.time -= LEAP_SECONDS;
+	    session->gpsdata.fix.time
+		= gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
 	    ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* defined(SHM_H) && defined(IPC_H) */
