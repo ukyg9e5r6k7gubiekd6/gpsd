@@ -25,6 +25,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
+      <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
 </cmdsynopsis>
@@ -33,12 +34,15 @@ and speedometer</refpurpose>
       <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
-      <arg choice='opt'>-s <replaceable>baud rate</replaceable></arg>
       <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
+      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 
 </refsynopsisdiv>
@@ -54,7 +58,7 @@ running gpsd via a USB port or serial port, but may be attached to
 another slave daemon reporting to this one.</para>
 
 <para>Optionally, gpsd may get differential-GPS corrections from a
-ground station running a RTCM-S104 server; this will improve
+ground station running a RCTM-S104 server; this will improve
 position-fix accuracy from roughly 10 meters to roughly 2 meters,
 provided you are within 1000 kilometers or so of the ground
 station.</para>
@@ -88,7 +92,7 @@ seconds).</para></listitem>
 <term>-d</term>
 <listitem>
 <para>Query a differential-GPS (DGPS) server.  If a suffix of the
-server name begins with : it is interpreted as a port number,
+server name begins with ":" it is interpreted as a port number,
 overriding the default IANA-assigned port of 2101.
 For DGPS servers available for use with this option, see
 <ulink url='http://www.wsrcc.com/wolfgang/gps/dgps-ip.html'>
@@ -98,13 +102,22 @@ DGPS corrections over the Internet</ulink>.</para>
 <varlistentry>
 <term>-i</term>
 <listitem>
-<para>Set initial longitude/latitude in degrees (not required for most
-newer GPS devices, but helps some older ones develop a first
-positional fix more quickly).  Required format is %f[NS]:%f[EW]; that
+<para>Set initial longitude/latitude in degrees (TripMate only; helps
+it develop a first fix more quickly).  Required format is %f[NS]:%f[EW]; that
 is a decimal number of degrees latitude, followed by the suffix N or
 S, followed by a colon, followed by a decimal number of degrees
 longitude, followed by the suffix E or W.  The numbers may have
 fractional parts to the right of a decimal point.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-n</term>
+<listitem><para>Don't wait for a client to connect before polling
+the GPS.  The wait is a feature; many serial GPSes go to a standby
+node (not drawing power) before the host machine asserts DTR, so
+waiting for the first actual request can save valuable battery power
+on portable equipment.  This option combines well with -D2 to enable
+monitoring of the GPS data stream.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
