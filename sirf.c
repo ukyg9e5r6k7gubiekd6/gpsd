@@ -23,6 +23,7 @@ int sirf_mode(struct gps_session_t *session, int binary, int speed)
    int status = nmea_send(session->gNMEAdata.gps_fd, 
 		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
    gpsd_report(1, "Send returned %d.\n", status);
+   tcdrain(session->gNMEAdata.gps_fd);
    /* 
     * This definitely fails below 40 milliseconds on a BU-303b.
     * 50ms is also verified by Chris Kuethe on 
