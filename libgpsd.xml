@@ -53,22 +53,6 @@ C:
     <paramdef>const char * <parameter>fmt</parameter></paramdef>
     <paramdef><parameter>...</parameter></paramdef>
 </funcprototype>
-
-<funcsynopsisinfo>
-Python:
-
-import gpsd
-
-session = gpsd.gpsd(device="/dev/gps", logger=None)
-session.activate()
-
-session.deactivate()
-
-session.poll()
-
-del session
-</funcsynopsisinfo>
-</funcsynopsis>
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
@@ -91,12 +75,6 @@ certainly what you want.</para>
 <para>Calling
 <function>gpsd_init()</function>
 initializes a session structure to hold the data collected by the GPS.</para>
-
-<para>You must specify a device type by key letter; to list key
-letters, run <command>gpsd -h</command>.  It is generally safe to
-specify 'n', as most modern GPSes speak NMEA.  (The Python binding
-no longer requires setting a device type; this is a future direction
-for the C binding)</para>
 
 <para>You may optionally specify a DGPS server, either as a string
 containing a server name or a string containining server name followed
@@ -155,14 +133,6 @@ ends the session, implicitly performing a
 The library will use this to issue ordinary status messages.  Use 
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
-
-<para>The Python implementation supports the same facilities as the C
-library, but only for straight NMEA devices with a 1-second send cycle
-(no SiRF, Zodiac or Garmin binary-protocol support).  Support for DGPS
-is also omitted.  <function>gps_init()</function> is replaced by the
-initialization of a gpsd session object; the other calls are methods
-of that object.  Resources within the session object will be properly
-released when it is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

@@ -1,4 +1,4 @@
-# Automake descrotion for gpsd
+# Automake description for gpsd
 
 #
 # Build stuff depending on Motif
@@ -135,7 +135,6 @@ EXTRA_DIST = \
 	gpsd.spec.in \
 	gpsd.spec \
 	gps.py \
-	gpsd.py \
 	gpsprof \
 	gpsfake \
 	gpsd.hotplug \

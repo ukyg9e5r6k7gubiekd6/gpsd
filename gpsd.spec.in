@@ -58,7 +58,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
-cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
+cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -100,14 +100,14 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gps.py*
-%{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
 * Mon Mar 28 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Rob Janssen's patches to fix timezone issues and improve cooperation
   with NTP.  License changed to BSD so linking to libgps won't make people 
-  nervous.  gpsprobe is obsolete and has been removed, the autoprobe and
-  profiling capabilities in the daemon more than replace it.
+  nervous.  gpsprobe and gpsd.py are obsolete and has been removed, the 
+  autoprobe and profiling capabilities in the daemon more than replace 
+  them.
 
 * Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use
