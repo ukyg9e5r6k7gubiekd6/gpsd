@@ -6,6 +6,9 @@
 # description: Gpsd manages access to a serial- or USB-connected GPS
 # processname: gpsd
 
+# If you must specify a non-NMEA driver, uncomment and modify the next line
+#GPSD_OPTS=
+
 # Source function library.
 . /etc/rc.d/init.d/functions
 
@@ -29,7 +32,7 @@ start() {
 	#
 	if [ -e "/dev/gps" ]
 	then
-	    gpsd -p /dev/gps
+	    gpsd ${GPSD_OPTS} -p /dev/gps
 	    success
 	else
 	    # User needs to symlink /dev/gps to the right thing

@@ -32,12 +32,21 @@ gpsd, gps, and xgpsspeed will be built. Copy the app-defaults files
 gps.ad and xgpsspeed.ad to your home directory or to the system-wide X
 app-defaults directory.
 
-4. Start gpsd on a serial or USB port that has the GPS connected to it.
+4. Determine whether you need a non-NMEA driver.  Usually you will not,
+but there are unusual exceptions.  Consult the hardware page at
+
+    http://gpsd.berlios.de/hardware.html
+
+to find out if your hardware is one of them.  If so, you may need to
+specify a driver type option at gpsd startup time; if you installed 
+a binary RPM, this will mean editing the gpsd init script.
+
+5. Start gpsd on a serial or USB port that has the GPS connected to it.
 If you made a /dev/gps symlink, just invoking "gpsd" as root should do it.
 If you installed from an RPM, gpsd will be started for you automatically 
 at boot time.
 
-5. Once gpsd is running, telnet to port 2947.  Type "r" to start raw
+6. Once gpsd is running, telnet to port 2947.  Type "r" to start raw
 and watcher modes.  You should see NMEA data (text lines beginning
 with $) spewing out.  You will also see lines with a GPSD prefix;
 these are sentence translations in GPSD protocol.
@@ -52,12 +61,12 @@ sending data, merely that gpsd has not yet seen any *valid* position data.
 You will have to wait for the GPS to acquire satellite lock.  If you have 
 raw or watcher mode on it should be obvious when you get a lock.
 
-6. Start the gps client.  Calling it with no arguments should do the right 
+7. Start the gps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-7. Check out the list of supported hardware at 
+8. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
