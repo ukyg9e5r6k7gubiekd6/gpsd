@@ -53,23 +53,26 @@ else:
 
 try:
     logfp = open(logfile, "r")
-    firstchar = logfp.read(1)
-    if firstchar == '$':
+    logdata = logfp.read()
+    logfp.close()
+    while logdata[0] == "#":
+        logdata = logdata[logdata.find('\n')+1:]
+    if logdata[0] == '$':
         print "gpsfake: interpreting as NMEA"
-        lines = logfp.readlines()
-        logfp.close()
-        lines[0] = "$" + lines[0]
+        leader = '$';
         legend = "gpsfake: line %d"
-    elif firstchar == 0xa0:
+    elif logdata[0] == 0xa0:
         print "gpsfake: interpreting as SiRF-II binary packets"
-        lines = map(lambda x: "\xa0"+x, logfp.read().split("\xa0"))
-        lines[0] = "\xa0" + lines[0]
+        leader = 0xa0
         legend = "gpsfake: packet %d"
     else:
         print "gpsfake: unknown log type, can't handle it!"
-        lines = None
+        logdata = None
 
-    if lines:
+    if logdata:
+        lines = map(lambda x: leader+x, logdata.split(leader)[1:])
+        print lines
+
         ttyfp = open(slave, "rw")
         raw = termios.tcgetattr(ttyfp.fileno())
         raw[0] = 0					# iflag

@@ -33,7 +33,11 @@
 (pseudo-TTY), launches a <application>gpsd</application> instance that
 thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of a test logfile through the master side to the
-GPS.  The logfile may be of either NMEA sentences or SiRF-II packets.</para>
+GPS.</para>
+
+<para>The logfile may be of either NMEA sentences or SiRF-II packets.
+Leading lines beginning with # will be treated as comments and
+ignored.</para>
 
 <para>The <application>gpsd</application> instance is run in
 background, but with logging to standard error attached so you 
