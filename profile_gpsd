@@ -68,10 +68,11 @@ plot \
 formatters = (rawplot, stripplot)
 
 if __name__ == '__main__':
-    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:T:")
     formatter = stripplot
     raw = False
     file = None
+    terminal = None
     title = time.ctime()
     await = 100
     for (switch, val) in options:
@@ -90,6 +91,8 @@ if __name__ == '__main__':
 	    raw = True
 	elif (switch == '-t'):
 	    title = val
+	elif (switch == '-T'):
+	    terminal = val
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
                              + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-t title] [-o file]\n")
@@ -122,6 +125,8 @@ if __name__ == '__main__':
     out.flush()
     if not raw:
         command = plotter.plot(out.name, title, session)
+        if terminal:
+            command = "set terminal " + terminal + "\n" + command
         pfp = os.popen("gnuplot -persist", "w")
         pfp.write(command)
         pfp.close()
