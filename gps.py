@@ -53,6 +53,11 @@ class gpstimings:
         self.poll_time = 0.0
         self.c_recv_time = 0.0
         self.c_decode_time = 0.0
+    def d_received(self):
+        if self.sentence_time:
+            return self.d_recv_time + self.sentence_time
+        else:
+            return self.d_recv_time + self.d_xmit_time
     def collect(self, tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
         self.tag = tag
         self.sentence_length = int(length)

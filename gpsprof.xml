@@ -83,6 +83,14 @@ from sentences without fixes is lumped in.</para>
 <para>Each sentence has its RS232 latency time colored differently.</para>
 </listitem>
 </varlistentry>
+<varlistentry>
+<term>cycle</term>
+<listitem>
+<para>Report on the set of sentences or packets emitted by the GPS,
+their send intervals, and the basic cycle time. (This report is 
+plain text rather than a gnuplot script.)</para>
+</listitem>
+</varlistentry>
 </variablelist>
 
 <para>The instrumented time plots conveys the following information:</para>

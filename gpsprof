@@ -303,7 +303,83 @@ plot \\
             res += self.data(session) + "e\n"
         return res
 
-formatters = (spaceplot, uninstrumented, rawplot, splitplot)
+class cycle:
+    "Send-cycle analysis."
+    name = "cycle"
+    def __init__(self):
+        self.stats = []
+    def gather(self, session):
+        self.stats.append(copy.copy(session.timings))
+        return True
+    def plot(self, title, session):
+        msg = ""
+        def roundoff(n):
+            # Round a time to hundredths of a second
+            return round(n*100) / 100.0
+        intervals = {}
+        last_seen = {}
+        for timing in self.stats:
+            # Throw out everything but the leader in each GSV group
+            if timing.tag[-3:] == "GSV" and last_command[-3:] == "GSV":
+                continue
+            last_command = timing.tag
+            # Record timings
+            received = timing.d_received()
+            if not timing.tag in intervals:
+                intervals[timing.tag] = []
+            if timing.tag in last_seen:
+                intervals[timing.tag].append(roundoff(received - last_seen[timing.tag])) 
+            last_seen[timing.tag] = received
+
+        # Step three: get command frequencies and the basic send cycle time
+        frequencies = {}
+        for (key, interval_list) in intervals.items():
+            frequencies[key] = {}
+            for interval in interval_list:
+                frequencies[key][interval] = frequencies[key].get(interval, 0) + 1
+        # filter out noise
+        for key in frequencies:
+            distribution = frequencies[key]
+            for interval in distribution.keys():
+                if distribution[interval] < 2:
+                    del distribution[interval]
+        cycles = {}
+        for key in frequencies:
+            distribution = frequencies[key]
+            if len(frequencies[key].values()) == 1:
+                # The value is uniqe after filtering
+                cycles[key] = distribution.keys()[0]
+            else:
+                # Compute the mode
+                maxfreq = 0
+                for (interval, frequency) in distribution.items():
+                    if distribution[interval] > maxfreq:
+                        cycles[key] = interval
+                        maxfreq = distribution[interval]
+        msg += "Cycle report %s, %s, %dN%d, cycle %ds" % \
+                 (title,
+                  session.gps_id, session.baudrate,
+                  session.stopbits, session.cycle)
+        msg += "The sentence set emitted by this GPS is: %s\n" % " ".join(intervals.keys())
+        for key in cycles:
+            if len(frequencies[key].values()) == 1:
+                if cycles[key] == 1:
+                    msg += "%s: is emitted once a second.\n" % key
+                else:
+                    msg += "%s: is emitted once every %d seconds.\n" % (key, cycles[key])
+            else:
+                if cycles[key] == 1:
+                    msg += "%s: is probably emitted once a second.\n" % key
+                else:
+                    msg += "%s: is probably emitted once every %d seconds.\n" % (key, cycles[key])
+        sendcycle = min(*cycles.values())
+        if sendcycle == 1:
+            msg += "Send cycle is once per second.\n"
+        else:
+            msg += "Send cycle is once per %d seconds.\n" % sendcycle
+        return msg
+
+formatters = (spaceplot, uninstrumented, rawplot, splitplot, cycle)
 
 def plotframe(await, fname, speed, threshold, title):
     "Return a string containing a GNUplot script "
@@ -331,6 +407,7 @@ def plotframe(await, fname, speed, threshold, title):
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
+        basetime = time.time()
         while countdown > 0:
             if session.poll() == None:
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
@@ -339,7 +416,7 @@ def plotframe(await, fname, speed, threshold, title):
             if session.fix.mode <= gps.MODE_NO_FIX:
                 continue
             if countdown == await:
-                sys.stderr.write("gathering samples...")
+                sys.stderr.write("first fix in %.2fsec, gathering samples..." % (time.time()-basetime,))
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.
