@@ -15,10 +15,9 @@
 <refsynopsisdiv id='synopsis'>
 <funcsynopsis>
 <funcsynopsisinfo>
+C:
 
 #include &lt;gpsd.h&gt;
-
-struct gps_session_t session;
 
 </funcsynopsisinfo>
 <funcprototype>
@@ -51,6 +50,23 @@ struct gps_session_t session;
     <paramdef><parameter>...</parameter></paramdef>
 </funcprototype>
 
+<funcsynopsisinfo>
+Python:
+
+import gpsd
+
+session = gpsd.gpsd(device="/dev/gps", bps=4800,
+                 devtype='n', dgps=None, logger=None)
+session.activate()
+
+session.deactivate()
+
+session.set_raw_hook(hook=None)
+
+session.poll()
+
+session.close()
+</funcsynopsisinfo>
 </funcsynopsis>
 </refsynopsisdiv>
 
@@ -142,10 +158,13 @@ The library will use this to ordinary status messages.  Use
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
 
-<para>The
-.B debug
-member of the session structure controls which messages are displayed.
-It defaults to 1, but can be altered by the calling program.</para>
+<para>The Python implementation supports the same facilities as the C
+library, but only for straight NMEA devices with a 1-second send cycle
+(no Zodiac binary-protocol support).  <function>gps_init()</function>
+is replaced by the initialization of a gpsd session object; the other
+calls are methods of that object.  The <function>wrap()</function>
+call is optional, resources within the session object will be properly
+released when it is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

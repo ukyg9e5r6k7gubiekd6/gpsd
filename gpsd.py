@@ -277,7 +277,7 @@ class gpsd(gps.gpsdata):
         self.mode = gps.MODE_NO_FIX;
         self.status = gps.STATUS_NO_FIX;
 
-    def set_raw_hook(self, hook):
+    def set_raw_hook(self, hook=None):
         self.raw_hook = hook
 
     def is_input_waiting(self):
