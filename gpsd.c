@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
-	for (fd = 0; fd < getdtablesize(); fd++) {
+	for (fd = 0; fd < nfds; fd++) {
 	    if (fd == msock || fd == session->gNMEAdata.gps_fd)
 		continue;
 	    /*
