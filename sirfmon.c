@@ -8,9 +8,10 @@
  *
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
- *	l -- start logging packets to specified file
- *	s -- send hex bytes to device
- *	q -- quit, leaving device in binary mode
+ *	b -- change baud rate.
+ *	l -- start logging packets to specified file.
+ *	s -- send hex bytes to device.
+ *	q -- quit, leaving device in binary mode.
  */
 #include <stdio.h>
 #include <curses.h>
@@ -73,7 +74,7 @@ int openline (char *name,int baud);
 int sendpkt (unsigned char *buf,int len);
 int readpkt (unsigned char *buf);
 
-static struct termios ttyset, ttyset_old;
+static struct termios ttyset;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -109,7 +110,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
     if (tcsetattr(LineFd, TCSANOW, &ttyset) != 0)
-	return 0;
+	return NO_PACKET;
     tcflush(LineFd, TCIOFLUSH);
 
     /* sniff for NMEA or SiRF packet */
@@ -191,7 +192,7 @@ static int nmea_send(int fd, const char *fmt, ... )
 
 int main (int argc, char **argv)
 {
-    int len,i,stopbits,speed,v,st,quit = 0;
+    int len,i,stopbits,bps,speed,v,st,quit = 0;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
@@ -209,9 +210,8 @@ int main (int argc, char **argv)
     }
     
     /* Save original terminal parameters */
-    if (tcgetattr(LineFd, &ttyset_old) != 0)
+    if (tcgetattr(LineFd, &ttyset) != 0)
       goto bailout;
-    memcpy(&ttyset, &ttyset_old,sizeof(ttyset));
     /*
      * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -239,6 +239,7 @@ int main (int argc, char **argv)
     fputs("Can't sync up with device!\n", stderr);
     exit(1);
  rate_ok:;
+    bps = *ip;
 
     initscr();
     cbreak();
@@ -272,7 +273,7 @@ int main (int argc, char **argv)
 	printw("%2d",i);
     }
     attrset(A_NORMAL);
-    mvprintw(17, 50, "%4d N %d", *ip, stopbits);
+    mvprintw(17, 50, "%4d N %d", bps, stopbits);
 
     move(DEBUGWIN,0);
     getyx(stdscr,debugy,debugx);
@@ -287,7 +288,7 @@ int main (int argc, char **argv)
     while (!quit)
     {
 	move(0,0);
-	printw("cmd> ", *ip, stopbits);
+	printw("cmd> ");
 	clrtoeol();
 	refresh();
 
@@ -322,6 +323,25 @@ int main (int argc, char **argv)
 
 	    switch (line[0])
 	    {
+	    case 'b':
+		v = atoi(line+1);
+		for (ip=rates; ip < rates+sizeof(rates)/sizeof(rates[0]); ip++)
+		    if (v == *ip)
+			goto goodspeed;
+		break;
+	    goodspeed:
+		putb(0, 0x86);
+		putl(1, v);		/* new baud rate */
+		putb(5, 8);		/* 8 data bits */
+		putb(6, stopbits);	/* 1 stop bit */
+		putb(7, 0);		/* no parity */
+		putb(8, 0);		/* reserved */
+		sendpkt(buf, 9);
+		usleep(50000);
+		set_speed(bps = v, stopbits);
+		mvprintw(17, 50, "%4d N %d", bps, stopbits);
+		break;
+
 	    case 'n':				/* switch to NMEA */
 		putb(0,0x81);			/* id */
 		putb(1,0x02);			/* mode */
@@ -345,7 +365,7 @@ int main (int argc, char **argv)
 		putb(19,0x01);
 		putb(20,0x00);
 		putb(21,0x01);
-		putw(22,*ip);
+		putw(22,bps);
 		sendpkt(buf,24);
 		quit++;
 		break;
@@ -820,25 +840,6 @@ int sendpkt (unsigned char *buf, int len)
     }
 
     return (write(LineFd,buf,len) == len);
-}
-
-/* general-purpose routines */
-
-int kbhit(void)
-/* check if kb input present */
-{
-    fd_set select_set;
-    struct timeval tv;
-
-    FD_ZERO(&select_set);
-    memset(&tv,0,sizeof(tv));
-
-    FD_SET(0,&select_set);
-
-    if (select(1,&select_set,NULL,NULL,&tv) > 0 && FD_ISSET(0,&select_set))
-	return 1;
-
-    return 0;
 }
 
 /*
