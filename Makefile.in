@@ -7,6 +7,8 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 mandir = @mandir@
+libdir = @libdir@
+includedir = @includedir@
 
 INSTALL = @INSTALL@
 mkinstalldirs = ${srcdir}/mkinstalldirs
@@ -225,10 +227,10 @@ uninstall:
 	rm $(MANDIR)/man1/gpsd.1 $(MANDIR)/man3/{libgps.3,libgpsd.3} 
 	rm $(INCLUDEDIR)/gpsd.h $(INCLUDEDIR)/gps.h
 	for app in ${PROGRAMS}; ${MOTIF_PROGRAMS}; do \
-		${DESTDIR}${sbindir}/$$app ; \
+		rm -f ${DESTDIR}${sbindir}/$$app ; \
 	done
 	for lib in ${LIBRARIES}; do \
-		${DESTDIR}${libdir}/$$ap ; \
+		rm -f ${DESTDIR}${libdir}/$$app ; \
 	done
 
 clean:
