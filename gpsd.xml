@@ -33,7 +33,6 @@ and speedometer</refpurpose>
 <cmdsynopsis>
   <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-k </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
@@ -44,6 +43,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
+      <arg choice='opt'>--units <replaceable>kph</replaceable></arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
@@ -306,11 +306,6 @@ confused state but can be soft-reset by pulling down DTR.</para>
 current GPS animation and (for GPSes that support the feature) the
 locations of accessible satellites.</para>
 
-<para><application>xgps</application> accepts a -k option to change
-speed reporting to use km/h as a unit, rather than mp/h.  This option
-is experimental and may be dropped or replaced by an X resource
-un a future release.</para>
-
 <para><application>xgps</application> accepts an -h option as for
 <application>gpsd</application>, or a -v option to dump the package
 version and exit. An optional argument may specify an
@@ -325,9 +320,11 @@ direct-connect to the serial device has been removed.</para>
 position information from the GPS. It accepts an -h option and
 optional argument as for <application>gps</application>, or a -v
 option to dump the package version and exit.  Additionally, it accepts
--rv (reverse video) and -nc (needle color) options. The misfeature of
-previous versions that allowed it to direct-connect to the serial
-device has been removed.</para>
+-rv (reverse video) and -nc (needle color) options.</para>
+
+<para>The --units option can be used to set the units for display;
+follow the keyword with either kph for kilometres per hour, or mph for
+miles per hour.  The default is miles per hour.</para>
 
 </refsect2>
 </refsect1>

@@ -9,6 +9,7 @@
 #include <X11/Shell.h>
 #include <X11/Xaw/Label.h>
 #include <X11/Xaw/Paned.h>
+#include <Xm/XmStrDefs.h>
 #include <Tachometer.h>
 
 #include "xgpsspeed.icon"
@@ -19,12 +20,14 @@ static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
+{"--units",     "*units",               XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
 
 static struct gps_data_t *gpsdata;
 static Widget tacho;
-static double speedfactor = KNOTS_TO_MPH;
+static double speedfactor;
+static Widget toplevel;
 
 static void update_display(char *buf UNUSED)
 {
@@ -37,27 +40,49 @@ static void handle_input(XtPointer client_data UNUSED,
     gps_poll(gpsdata);
 }
 
+static char *get_resource(char *name, char *default_value)
+{
+  XtResource xtr;
+  char *value = NULL;
+
+  xtr.resource_name = name;
+  xtr.resource_class = "AnyClass";
+  xtr.resource_type = XmRString;
+  xtr.resource_size = sizeof(String);
+  xtr.resource_offset = 0;
+  xtr.default_type = XmRImmediate;
+  xtr.default_addr = default_value;
+  XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
+  if (value) return value;
+  return default_value;
+}
+
 int main(int argc, char **argv)
 {
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
-    Widget toplevel, base;
+    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT, *units;
+    Widget base;
 
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
+
+    speedfactor = KNOTS_TO_MPH;
+    units = get_resource("units", "mph");
+    if (!strcmp(units, "kph")) speedfactor = KNOTS_TO_KPH;
+
     while ((option = getopt(argc, argv, "?hkv")) != -1) {
 	switch (option) {
 	case 'k':
-	    speedfactor = KNOTS_TO_KMPH;
+	    speedfactor = KNOTS_TO_KPH;
 	    break;
 	case 'v':
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);
+	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--units {kph,mph}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
