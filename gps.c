@@ -278,6 +278,8 @@ static void build_gui(Widget lxbApp)
     n++;
     XtSetArg(args[n], XmNshadowThickness, 1);
     n++;
+    XtSetArg(args[n], XmNcolumns, 23);
+    n++;
     text_1 = XtCreateManagedWidget("text_1", xmTextFieldWidgetClass,
 				   rowColumn_11, args, n);
     text_2 = XtCreateManagedWidget("text_2", xmTextFieldWidgetClass,

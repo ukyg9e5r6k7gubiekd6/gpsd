@@ -234,7 +234,7 @@ fi
 
 AC_C_BIGENDIAN
 
-AC_DEFINE(ENABLE_EARTHMATE, 1, [Earthmate support])
+AC_DEFINE(EARTHMATE_ENABLE, 1, [Earthmate support])
  
 AC_OUTPUT(Makefile gpsd.spec)
 

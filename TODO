@@ -12,24 +12,12 @@ this crap that will
 the *current* directory, where they're visible, instead of hiding them 
 in that evil .libs thing...
 
-2. gps interface needs a tweak
-
-Changing the timestamps to ISO8601 format with optional trailing fractional
-seconds made them a bit longer.  The text fields on the data panel in gps need
-to be widened a few charcters to accommodate this.  Despite having successfully
-added two fields to that panel, I have been unable to figure out where the size
-of these text widgets is set.
-
-Is the person who wrote gps still around?  Would somebody other than me please
-take a look at the Motif code in gps in case I've missed something stupid and
-obvious?
-
-3. Testing on EarthMate and TripMate
+2. Testing on EarthMate and TripMate
 
 Would somebody please test the device types that aren't straight NMEA?
 (This translates as: Hey, you, Russ!  Get off your tuchis! :-))
 
-4. The strange math problem in gpsprobe 
+3. The strange math problem in gpsprobe 
 
 I have a Python script I'd like to ship with 2.0, called gsprobe.  It
 watches the NMEA from a GPS and tries to deduce things about the GPS.
@@ -40,7 +28,7 @@ However, something is awry in my calculation of the actual uncertainty
 of position, going from degrees of uncertainty to meters.  I posted about 
 this earlier today.  Help!
 
-5. Should PRWIZCH support drop out entirely?
+4. Should PRWIZCH support drop out entirely?
 
 I asked this question before and nobody answered.  At the moment I have the
 PRWIZCH handling conditioned out.  I'd like to drop it entirely -- the 
