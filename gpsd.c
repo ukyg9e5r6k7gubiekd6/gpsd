@@ -162,21 +162,10 @@ static void print_settings(char *service, char *dgpsserver)
     }
 }
 
-/*
- * This piece of moderately disgusting old-school C macrology 
- * is brought to you by the following constraint; I didn't want 
- * to make fd or buf a global. I use do {} while (0) around the
- * macro to make sure that a trailing semi after an invocation 
- * won't be interpreted in surprising way.
- */
-#define VALIDATION_COMPLAINT(level, legend) do {	\
-	char buf[BUFSIZE]; \
-	strcpy(buf, "# "); \
-        snprintf(buf+2, BUFSIZE, \
-		legend " (status=%d, mode=%d).\r\n", \
-		session.gNMEAdata.status, session.gNMEAdata.mode); \
-	write(fd, buf, strlen(buf) + 1); \
-	} while (0)
+#define VALIDATION_COMPLAINT(level, legend) \
+        gpscli_report(level, \
+		       legend " (status=%d, mode=%d).\r\n", \
+		       session.gNMEAdata.status, session.gNMEAdata.mode)
 
 static int validate(int fd)
 {
