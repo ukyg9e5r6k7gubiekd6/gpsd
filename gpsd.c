@@ -560,7 +560,6 @@ int main(int argc, char *argv[])
     int fd;
     int need_gps;
     int nowait = 0;
-    int reopen = 0;
 
     session.debug = 1;
     while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:")) != -1) {
@@ -707,7 +706,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* we may need to force the GPS open */
-	if ((nowait || reopen) && session.fdin == -1) {
+	if (nowait && session.fdin == -1) {
 	    gpsd_deactivate(&session);
 	    if (gpsd_activate(&session) >= 0)
 	    {
@@ -722,8 +721,6 @@ int main(int argc, char *argv[])
 	    FD_CLR(session.fdin, &all_fds);
 	    gpsd_deactivate(&session);
 	    notify_watchers("GPSD,X=0\r\n");
-	    if (nowait)
-		reopen = 1;
 	}
 
 	/* this simplifies a later test */
