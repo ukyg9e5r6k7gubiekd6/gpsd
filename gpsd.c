@@ -180,13 +180,17 @@ static int passivesock(char *service, char *protocol, int qlen)
 static struct channel_t {
     int nsubscribers;			/* how many subscribers? */
     struct gps_device_t *device;	/* the device data */
-    int killed;				/* marked for deletion */
+    int state;				/* marked for deletion */
+#define CHANNEL_AVAILABLE	0
+#define CHANNEL_INUSE		1
+#define CHANNEL_KILLED		-1
 } channels[MAXDEVICES];
 
 static struct subscriber_t {
     int active;				/* is this a subscriber? */
+    int tied;				/* is client tied to device */
     struct channel_t *channel;		/* device subscriber listens to */
-} subscribers[FD_SETSIZE];
+} subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
 static void attach_client_to_device(int cfd, int dfd)
 {
@@ -196,6 +200,7 @@ static void attach_client_to_device(int cfd, int dfd)
     subscribers[cfd].channel = &channels[dfd];
     channels[dfd].nsubscribers++;
     subscribers[cfd].active = 1;
+    subscribers[cfd].tied = 0;
 }
 
 #define is_client(cfd)	subscribers[cfd].active 
@@ -256,7 +261,9 @@ static int handle_request(int cfd, char *buf, int buflen)
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
 #ifdef MULTISESSION
-    struct gps_device_t *device = channels[cfd].device;
+    struct subscriber_t *whoami = subscribers + cfd;
+    struct channel_t *chp, *channel = whoami->channel;
+    struct gps_device_t *device = channel->device;
 #endif /* MULTISESSION */
     struct gps_data_t *ud = &device->gpsdata;
 
@@ -333,7 +340,6 @@ static int handle_request(int cfd, char *buf, int buflen)
 		memcpy(bufcopy, q, p-q);
 		bufcopy[p-q] = '\0';
 		gpsd_report(1, "Switch to %s requested\n", bufcopy);
-
 #ifndef MULTISESSION
 		if (need_gps > 1)
 		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, need_gps);
@@ -354,11 +360,18 @@ static int handle_request(int cfd, char *buf, int buflen)
 			device->gpsdata.baudrate = 0;
 			device->driverstate = 0;
 		    }
-#else
-		if (channels[cfd].nsubscribers > 1)
-		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, channels[cfd].nsubscribers);
-#endif /* MULTISESSION */ 
 		}
+#else
+		for (chp = channels; chp < channels + MAXDEVICES; chp++)
+		    if (chp->device&&!strcmp(chp->device->gpsd_device,bufcopy)) {
+			whoami->channel = channel = chp;
+			device = channel->device;
+			whoami->tied = 1;
+			goto foundit;
+		    }
+
+	    foundit:
+#endif /* MULTISESSION */ 
 		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
 	    }
 	    sprintf(phrase, ",F=%s", device->gpsd_device);
@@ -376,7 +389,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    strcat(phrase, " ");
 		}
 	    phrase[strlen(phrase)-1] = '\0';
-	    break
+	    break;
 #endif /* MULTISESSION */
 	case 'L':
 	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjk
@@ -624,14 +637,23 @@ static struct gps_device_t *open_device(char *device_name, int nowait)
 
     device->gpsdata.raw_hook = raw_hook;
     if (nowait) {
+#ifdef MULTISESSION
+	struct channel_t *chp;
+
+	for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	    if (chp->state == CHANNEL_AVAILABLE) {
+		chp->state = CHANNEL_INUSE;
+		chp->device = device;
+		goto found;
+	    }
+	return NULL;
+    found:
+#endif /* MULTISESSION */
 	if (gpsd_activate(device) < 0) {
 	    return NULL;
 	}
 	FD_SET(device->gpsdata.gps_fd, &all_fds);
     }
-#ifdef MULTISESSION
-    channels[device->gpsdata.gps_fd].device = device;
-#endif /* MULTISESSION */
 
     return device;
 }
@@ -646,6 +668,7 @@ int main(int argc, char *argv[])
 #ifdef MULTISESSION
     static struct channel_t *channel;
     struct gps_device_t *device;
+    int dfd;
 #endif /* MULTISESSION */
     struct sockaddr_in fsin;
     fd_set rfds;
@@ -909,7 +932,7 @@ int main(int argc, char *argv[])
 		if (!nowait && !need_gps && channel->device->gpsdata.gps_fd > -1) {
 		    FD_CLR(channel->device->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel->device);
-		    if (channel->killed)
+		    if (channel->state == CHANNEL_KILLED)
 			channel->device = NULL;
 		}
 	    }
