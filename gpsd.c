@@ -962,7 +962,7 @@ int main(int argc, char *argv[])
 		gpsd_deactivate(device);
 		if (gpsd_activate(device) >= 0) {
 		    FD_SET(device->gpsdata.gps_fd, &all_fds);
-		    notify_watchers(channel->device, "GPSD,X=%f\r\n", timestamp());
+		    notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
 
@@ -972,7 +972,7 @@ int main(int argc, char *argv[])
 		gpsd_report(3, "GPS is offline\n");
 		FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		gpsd_deactivate(device);
-		notify_watchers(channel->device, "GPSD,X=0\r\n");
+		notify_watchers(device, "GPSD,X=0\r\n");
 	    }
 	    channel->when = device->gpsdata.sentence_time;
 
@@ -1001,9 +1001,6 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		int buflen;
 
-		assign_channel(subscribers+cfd);
-		device = subscribers[cfd].channel->device;
-
 		gpsd_report(3, "checking %d \n", cfd);
 		if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
@@ -1011,7 +1008,8 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client: %s", buf);
 
-		    device->poll_times[cfd] = timestamp();
+		    assign_channel(subscribers+cfd);
+		    subscribers[cfd].channel->device->poll_times[cfd] = timestamp();
 		    if (handle_request(cfd, buf, buflen) < 0)
 			detach_client(cfd);
 		}
