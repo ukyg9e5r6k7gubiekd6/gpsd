@@ -1,18 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Rate-limiting SiRF sentence 4.
-
-The SiRF binary driver works nicely now, but it's a bit annoying that
-it ships a satellite picture (Message ID 4, Measured Tracker Data Out) 
-every second.  
-
-I spent about a day and a half trying to use SiRF sentence a6 (Set
-Message Rate) to reduce the frequency to once every 5 seconds.  It
-was frustrating.  If you run the daemon at -D 4, you'll see that the
-message gets shipped and the GPS returns ACK a6, but the frequency
-of MID 4 does not change.
-
 ** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which

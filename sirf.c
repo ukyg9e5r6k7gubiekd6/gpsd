@@ -263,6 +263,13 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	break;
 
     case 0x04:		/* Measured tracker data out */
+	/*
+	 * The freaking brain-dead SiRF chip doesn't obey its own
+	 * rate-control command for 04, at least at firmware rev. 231, 
+	 * so we have to do our own rate-limiting here...
+	 */
+	if (session->counter % 5)
+	    break;
 	gpsd_zero_satellites(&session->gNMEAdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
@@ -471,15 +478,15 @@ static void sirfbin_initializer(struct gps_session_t *session)
     }
     /* do this every time*/
     {
-	u_int8_t ratecontrol[] = {0xa0, 0xa2, 0x00, 0x08,
-				 0xa6, 0x00, 0x04, 0x05,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0xb0, 0xb3};
+	//u_int8_t ratecontrol[] = {0xa0, 0xa2, 0x00, 0x08,
+	//			 0xa6, 0x00, 0x04, 0x05,
+	//			 0x00, 0x00, 0x00, 0x00,
+	//			 0x00, 0x00, 0xb0, 0xb3};
 	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-	gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
-	sirf_write(session->gNMEAdata.gps_fd, ratecontrol);
+	//gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
+	//sirf_write(session->gNMEAdata.gps_fd, ratecontrol);
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gNMEAdata.gps_fd, versionprobe);
     }

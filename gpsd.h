@@ -103,6 +103,7 @@ struct gps_session_t {
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
+    unsigned long counter;
 #ifdef BINARY_ENABLE
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */

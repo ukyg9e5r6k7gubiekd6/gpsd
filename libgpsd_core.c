@@ -94,6 +94,7 @@ int gpsd_activate(struct gps_session_t *session)
 	return -1;
     else {
 	session->gNMEAdata.online = 1;
+	session->counter = 0;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
 	if (session->packet_type == SIRF_PACKET)
@@ -157,6 +158,7 @@ int gpsd_poll(struct gps_session_t *session)
 	if (!session->device_type->handle_input(session, waiting))
 	    return waiting;
 
+	session->counter++;
 	session->gNMEAdata.d_decode_time = timestamp();
 
 	/* set all the changed bits */

@@ -101,7 +101,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Wed Mar 16 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.17
 - Fix packet-engine problem that made disconnect/reconnect unreliable
   (important!).  Fix bonehead error in interpretation of PGRME.  We 
   don't use O_SYNC (it turned out not to be reliable) so remove it to make 
