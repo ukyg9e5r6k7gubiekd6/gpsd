@@ -296,13 +296,13 @@ class gps(gpsdata):
             self.c_decode_time = time.time()
             # Awful kluge that nukes all timezone problems
             line_latency = (self.d_recv_time - isotime(self.utc)) % self.cycle
-            gpstime = self.d_recv_time - line_latency
+            self.gps_time = self.d_recv_time - line_latency
             self.d_recv_time = line_latency
             self.d_decode_time += line_latency
             self.emit_time += line_latency
             self.poll_time += line_latency
-            self.c_recv_time -= gpstime
-            self.c_decode_time -= gpstime
+            self.c_recv_time -= self.gps_time
+            self.c_decode_time -= self.gps_time
         return res
 
     def query(self, commands):

@@ -42,7 +42,7 @@ class uninstrumented:
         fp.write("#Read\n")
         fp.write("----------\n")
     def formatter(self, session, fp):
-        fp.write("%2.6f\n" % ((time.time() - session.gps_time) % 3600,))
+        fp.write("%2.6f\n" % ((time.time(0) - session.d_recv_time) % 3600,))
         return True
     def plot(self, file, title, session):
         fmt = '''
@@ -68,14 +68,14 @@ class rawplot:
         fp.write("--------\n")
 
     def formatter(self, session, fp):
-        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
               % (session.rs232,
                  session.d_recv_time - session.rs232,
-                 session.d_recv_time + session.d_decode_time,
-                 session.d_recv_time + session.poll_time,
-                 session.d_recv_time + session.emit_time,
-                 session.d_recv_time + session.c_recv_time,
-                 session.d_recv_time + session.c_decode_time,
+                 session.d_decode_time,
+                 session.poll_time,
+                 session.emit_time,
+                 session.c_recv_time,
+                 session.c_decode_time,
                  session.tag))
         return True
     def plot(self, file, title, session):
@@ -121,11 +121,11 @@ class splitplot:
                 fp.write("-       \t")
         fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
                  % (session.d_recv_time - session.rs232,
-                    session.d_recv_time + session.d_decode_time,
-                    session.d_recv_time + session.poll_time,
-                    session.d_recv_time + session.emit_time,
-                    session.d_recv_time + session.c_recv_time,
-                    session.d_recv_time + session.c_decode_time,
+                    session.d_decode_time,
+                    session.poll_time,
+                    session.emit_time,
+                    session.c_recv_time,
+                    session.c_decode_time,
                     session.tag))
         return True
     def plot(self, file, title, session):
@@ -185,7 +185,7 @@ if __name__ == '__main__':
             speed = int(val)
 	elif (switch == '-t'):
 	    title = val
-	elif (switch == '-T'):
+        elif (switch == '-T'):
 	    terminal = val
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
@@ -219,8 +219,13 @@ if __name__ == '__main__':
             session.poll()
             baton.twirl()
             # If timestamp is no good, skip it.
-            if not session.isotime or session.isotime == "?":
+            if session.utc == "?":
                 continue
+            # We can get some funky artifacts at start of session apparrently
+            # due to RS232 buffering effects. Ignore them.
+            if session.c_decode_time > 3:
+                continue
+            # Compute RS232 time
             session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
             if plotter.formatter(session, out):
                 await -= 1
