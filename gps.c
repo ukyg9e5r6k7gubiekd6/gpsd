@@ -37,6 +37,9 @@
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>
+#endif
 
 #include "nmea.h"
 #include "gps.h"
