@@ -15,4 +15,5 @@
 *meter*width:		120
 *meter*height:		120
 *needleColor:		salmon1
-*units:			mph
+*speedunits:		mph
+*altunits:		ft

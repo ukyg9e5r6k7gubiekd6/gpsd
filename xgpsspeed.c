@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT, *units;
+    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT, *speedunits;
     Widget base;
 
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
@@ -70,10 +70,10 @@ int main(int argc, char **argv)
 				 &argc, argv, fallback_resources, NULL);
 
     speedfactor = KNOTS_TO_MPH;		/* Software maintained in US */
-    units = get_resource("units", "mph");
-    if (!strcmp(units, "kph")) 
+    speedunits = get_resource("speedunits", "mph");
+    if (!strcmp(speedunits, "kph")) 
 	speedfactor = KNOTS_TO_KPH;
-    else if (!strcmp(units, "knots"))
+    else if (!strcmp(speedunits, "knots"))
 	speedfactor = 1;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--units {kph,mph}] [server[:port]]\n", stderr);
+	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--speedunits {kph,mph}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }

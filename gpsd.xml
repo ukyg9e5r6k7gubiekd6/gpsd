@@ -322,10 +322,10 @@ optional argument as for <application>gps</application>, or a -v
 option to dump the package version and exit.  Additionally, it accepts
 -rv (reverse video) and -nc (needle color) options.</para>
 
-<para>The --units option can be used to set the units for display;
-follow the keyword with either knots for nautical miles per hour, kph
-for kilometres per hour, or mph for miles per hour.  The default is
-miles per hour.</para>
+<para>The --speedunits option can be used to set the speed units for
+display; follow the keyword with knots for nautical miles per hour,
+kph for kilometres per hour, or mph for miles per hour.  The default
+is miles per hour.</para>
 
 </refsect2>
 </refsect1>
