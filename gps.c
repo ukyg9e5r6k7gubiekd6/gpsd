@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <errno.h>
-#include <signal.h>
 #include <math.h>
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
@@ -35,24 +34,13 @@ extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data_t *gpsdata);
 extern void redraw();
 
-static Widget lxbApp, data_panel, satellite_list, satellite_diagram, status;
-static Widget rowColumn_10, rowColumn_11, rowColumn_12, rowColumn_13;
+static Widget lxbApp, form, left, right;
+static Widget satellite_list, satellite_diagram, status;
+static Widget rowColumn_11, rowColumn_12, rowColumn_13;
 static Widget rowColumn_14, rowColumn_15, rowColumn_16, rowColumn_17;
 static Widget rowColumn_18, quitbutton;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
-
-String fallback_resources[] = {
-    "*gpsdata.time.label.labelString: Time     ",
-    "*gpsdata.latitude.label.labelString: Latitude ",
-    "*gpsdata.longitude.label.labelString: Longitude",
-    "*gpsdata.altitude.label.labelString: Altitude ",
-    "*gpsdata.speed.label.labelString: Speed    ",
-    "*gpsdata.track.label.labelString: Course   ",
-    "*gpsdata.fix_status.label.labelString: Status   ",
-    "*gpsdata.quit.label.labelString: Quit",
-    NULL
-};
 
 static GC gc;
 
@@ -85,7 +73,7 @@ static void build_gui(Widget lxbApp)
     XmString string;
 
     /* the root application window */
-    XtSetArg(args[0], XmNgeometry, "630x460");
+    XtSetArg(args[0], XmNgeometry, "620x470");
     XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[2], XmNallowShellResize, False);
     XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
@@ -93,45 +81,58 @@ static void build_gui(Widget lxbApp)
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
     XtSetValues(lxbApp, args, 5);
 
-#define LEFTSIDE_WIDTH	205
-    /* the data panel */
-    XtSetArg(args[0], XmNrubberPositioning, False);
-    XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
-    XtSetArg(args[2], XmNwidth, LEFTSIDE_WIDTH);
-    data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, 3);
+    /* a form to assist with geometry negotiation */
+    form = XtVaCreateManagedWidget("form", xmFormWidgetClass, lxbApp,
+					 NULL);
+
+    /* the left half of the screen */
+    left = XtVaCreateManagedWidget("left", xmRowColumnWidgetClass, form,
+				   XmNleftAttachment, XmATTACH_FORM,
+				   XmNtopAttachment, XmATTACH_FORM,
+				   NULL);
+    
+    /* the right half of the screen */
+    right = XtVaCreateManagedWidget("right", xmRowColumnWidgetClass, form,
+				    XmNleftAttachment, XmATTACH_WIDGET,
+				    XmNleftWidget, left,
+				    XmNtopAttachment, XmATTACH_FORM,
+				    NULL);
+
+    /* the application status bar */
+    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form,
+				     XmNcursorPositionVisible, False,
+				     XmNeditable, False,
+				     XmNmarginHeight, 1,
+				     XmNhighlightThickness, 0,
+				     XmNshadowThickness, 1,
+				     XmNleftAttachment, XmATTACH_FORM,
+				     XmNrightAttachment, XmATTACH_FORM,
+				     XmNtopAttachment, XmATTACH_WIDGET,
+				     XmNtopWidget, left,
+				     NULL);
 
     /* satellite location and SNR data panel */
 #define FRAMEHEIGHT	220
-    XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
-    XtSetArg(args[1], XmNleftOffset, 10);
-    XtSetArg(args[2], XmNtopOffset, 10);
-    XtSetArg(args[3], XmNbottomAttachment, XmATTACH_NONE);
-    XtSetArg(args[4], XmNleftAttachment, XmATTACH_FORM);
-    XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
-    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH);
-    XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
-    XtSetArg(args[9], XmNhighlightThickness, 0);
-    XtSetArg(args[10], XmNlistSpacing, 4);
-    satellite_list = XtCreateManagedWidget("satellite_list", xmListWidgetClass, data_panel, args, 11);
+#define LEFTSIDE_WIDTH	205
+    satellite_list =
+      XtVaCreateManagedWidget("satellite_list", xmListWidgetClass, left,
+			      XmNbackground, get_pixel(lxbApp, "snow"),
+			      XmNheight, FRAMEHEIGHT,
+			      XmNwidth, LEFTSIDE_WIDTH,
+			      XmNlistSizePolicy, XmCONSTANT,
+			      XmNhighlightThickness, 0,
+			      XmNlistSpacing, 4,
+			      NULL);
 
     /* the satellite diagram */
 #define SATDIAG_SIZE	400
-    XtSetArg(args[0], XmNbottomAttachment, XmATTACH_NONE);
-    XtSetArg(args[1], XmNleftOffset, 10);
-    XtSetArg(args[2], XmNrightOffset, 10);
-    XtSetArg(args[3], XmNbackground, get_pixel(lxbApp, "snow"));
-    XtSetArg(args[4], XmNy, 10);
-    XtSetArg(args[5], XmNx, 80);
-    XtSetArg(args[6], XmNrightAttachment, XmATTACH_NONE);
-    XtSetArg(args[7], XmNtopOffset, 10);
-    XtSetArg(args[8], XmNrightAttachment, XmATTACH_FORM);
-    XtSetArg(args[9], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[10], XmNresizePolicy, XmRESIZE_NONE);
-    XtSetArg(args[11], XmNheight, SATDIAG_SIZE);
-    XtSetArg(args[12], XmNwidth, SATDIAG_SIZE);
-    satellite_diagram = XtCreateManagedWidget("satellite_diagram",
-			     xmDrawingAreaWidgetClass, data_panel, args, 13);
+    satellite_diagram = 
+      XtVaCreateManagedWidget("satellite_diagram",
+			      xmDrawingAreaWidgetClass, right, 
+			      XmNbackground, get_pixel(lxbApp, "snow"),
+			      XmNheight, SATDIAG_SIZE,
+			      XmNwidth, SATDIAG_SIZE,
+			      NULL);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
     gc = XCreateGC(XtDisplay(satellite_diagram),
 	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
@@ -139,51 +140,24 @@ static void build_gui(Widget lxbApp)
     XtAddCallback(satellite_diagram, XmNexposeCallback, redraw, NULL);
 
     /* the data display */
-    XtSetArg(args[0], XmNtopOffset, 10);
-    XtSetArg(args[1], XmNbottomOffset, 10);
-    XtSetArg(args[2], XmNrightOffset, 10);
-    XtSetArg(args[3], XmNleftOffset, 10);
-    XtSetArg(args[4], XmNorientation, XmVERTICAL);
-    XtSetArg(args[5], XmNrightAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[6], XmNrightWidget, satellite_diagram);
-    XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
-    XtSetArg(args[8], XmNleftAttachment, XmATTACH_FORM);
-    XtSetArg(args[9], XmNtopAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[10], XmNtopWidget, satellite_list);
-    XtSetArg(args[11], XmNheight, 12);
-    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, data_panel, args, 12);
-
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
-    XtSetArg(args[1], XmNleftAttachment, XmATTACH_FORM);
-    XtSetArg(args[2], XmNrightAttachment, XmATTACH_NONE);
-    XtSetArg(args[3], XmNtopAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[4], XmNbottomAttachment, XmATTACH_NONE);
-    XtSetArg(args[5], XmNrightWidget, satellite_diagram);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_10);
-    rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, data_panel, args, 7);
+    rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
 
-    XtSetArg(args[6], XmNtopWidget, rowColumn_11);
-    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_12);
-    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_13);
-    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_14);
-    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_15);
-    rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_16);
-    rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, data_panel, args, 7);
-    XtSetArg(args[6], XmNtopWidget, rowColumn_17);
-    rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, data_panel, args, 7);
+    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, left, args, 1);
 
-    label_1 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_11, args, 0);
-    label_2 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_12, args, 0);
-    label_3 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_13, args, 0);
-    label_4 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_14, args, 0);
-    label_5 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_15, args, 0);
-    label_6 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_16, args, 0);
-    label_7 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_17, args, 0);
+    label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
+    label_2 = XtCreateManagedWidget("Latitide ", xmLabelWidgetClass, rowColumn_12, args, 0);
+    label_3 = XtCreateManagedWidget("Longitude", xmLabelWidgetClass, rowColumn_13, args, 0);
+    label_4 = XtCreateManagedWidget("Altitude ", xmLabelWidgetClass, rowColumn_14, args, 0);
+    label_5 = XtCreateManagedWidget("Speed    ", xmLabelWidgetClass, rowColumn_15, args, 0);
+    label_6 = XtCreateManagedWidget("Course   ", xmLabelWidgetClass, rowColumn_16, args, 0);
+    label_7 = XtCreateManagedWidget("Status   ", xmLabelWidgetClass, rowColumn_17, args, 0);
 
     XtSetArg(args[0], XmNcursorPositionVisible, False);
     XtSetArg(args[1], XmNeditable, False);
@@ -206,26 +180,16 @@ static void build_gui(Widget lxbApp)
     text_7 = XtCreateManagedWidget("text_7", xmTextFieldWidgetClass,
 				   rowColumn_17, args, 6);
 
-    quitbutton = XtCreateManagedWidget("label",
+    quitbutton = XtCreateManagedWidget("Quit",
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
     XtAddCallback(quitbutton, XmNactivateCallback, quit_cb, NULL);
-
-    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, data_panel,
-				     XmNcursorPositionVisible, False,
-				     XmNeditable, False,
-				     XmNmarginHeight, 1,
-				     XmNhighlightThickness, 0,
-				     XmNshadowThickness, 1,
-				     XmNleftAttachment, XmATTACH_FORM,
-				     XmNrightAttachment, XmATTACH_FORM,
-				     XmNbottomAttachment, XmATTACH_FORM,
-				     NULL);
 
     XtRealizeWidget(lxbApp);
     delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
 
+    /* create empty list items to be replaced on update */
     string = XmStringCreateSimple(" ");
     for (i = 0; i < MAXCHANNELS; i++)
 	XmListAddItem(satellite_list, string, i+1);
@@ -237,16 +201,25 @@ static void build_gui(Widget lxbApp)
  */
 
 static struct gps_data_t *gpsdata;
-static int timer;	/* time since last state change in seconds*/
+static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
+XtAppContext app;
+XtIntervalId timeout;
 
-static void handle_input(XtPointer client_data, int *source, XtInputId * id)
+static void handle_input(XtPointer client_data, int *source, XtInputId *id)
 {
     gps_poll(gpsdata);
 }
 
+static void handle_time_out(XtPointer client_data, XtIntervalId *ignored)
+/* runs when there is no data for a while */
+{
+    XmTextFieldSetString(status, "no data arriving");
+    XmTextFieldSetString(text_7, "UNKNOWN");
+}
+
 static void update_panel(char *message)
-/* gets done both on alarm ticks and on each sentence */
+/* runs on each sentence */
 {
     int i, newstate;
     XmString string[12];
@@ -306,42 +279,19 @@ static void update_panel(char *message)
 	}
     }
     if (newstate != state) {
-	timer = 0;
+	timer = time(NULL);
 	state = newstate;
     }
-    sprintf(s + strlen(s), " (%d secs)", timer);
+    sprintf(s + strlen(s), " (%d secs)", (int) (time(NULL) - timer));
     XmTextFieldSetString(text_7, s);
     draw_graphics(gpsdata);
-}
 
-static void update_display(char *message)
-/* only gets done on sentence receipt, not alarm ticks */
-{
-    sigset_t	allsigs;
-
-    /*
-     * The Motif canvas widget seems to react badly to incoming alarm signals.
-     * The symptom is that the satellite-display background will sometimes 
-     * flash odd colors when SIGALRM comes in.  Prevent this.  We'll get the
-     * alarm when the redraw is done.
-     */
-    sigfillset(&allsigs);
-    sigprocmask(SIG_BLOCK, &allsigs, NULL);
-    update_panel(message);
-    draw_graphics(gpsdata);
-    sigprocmask(SIG_UNBLOCK, &allsigs, NULL);
-}
-
-static void handle_alarm(int sig)
-{
-    timer++;
-    update_display("");
-    alarm(1);
+    XtRemoveTimeOut(timeout);
+    timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
 }
 
 int main(int argc, char *argv[])
 {
-    XtAppContext app;
     int option;
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
 
@@ -369,16 +319,16 @@ int main(int argc, char *argv[])
 	exit(2);
     }
 
-    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
+    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, NULL, NULL);
     build_gui(lxbApp);
 
-    gps_set_raw_hook(gpsdata, update_display);
+    timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);
+
+    gps_set_raw_hook(gpsdata, update_panel);
     gps_query(gpsdata, "w+x\n");
 
     XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
-    signal(SIGALRM, handle_alarm);
-    alarm(1);
     XtAppMainLoop(app);
 
     gps_close(gpsdata);

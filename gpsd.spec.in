@@ -22,12 +22,12 @@ can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier
 to parse than NMEA 0183.
 
-After installing this RPM, gpsd will try to start up at boot time.
-You must make a symlink named /dev/gps to the serial or USB port that
-your GPS will plug in to.  Normally this will be /dev/ttyUSB0 or
-/dev/ttyS0.  The daemon will be quiescent when there are no clients
-asking for location information, and copes gracefully when the GPS is
-unplugged.
+After installing this RPM, gpsd will try to start up at boot time.  If
+your distribution does not use udevd, you must manually create a
+symlink named /dev/gps to the serial or USB port that your GPS will
+plug in to (normally this will be /dev/ttyUSB0 or /dev/ttyS0).  The
+daemon will be quiescent when there are no clients asking for location
+information, and copes gracefully when the GPS is unplugged.
 
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
@@ -119,12 +119,13 @@ if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Wed Nov 17 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Thu Dec  9 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Minor bugs in gpsd.py fixed.  M now returns 0 status if GPGSA not yet
   seen; this change also fixes a bug where gpsd claimed it was confused
   if GPGSA had not been seen and status was set.  RPM will now install 
   a udevd rule if the host system uses it.  Don't set the online flag
-  on activate.  HP port changes and -Wall cleanup.
+  on activate.  HP port changes and -Wall cleanup.  James Cameron's 
+  fixes to clean up gps.c and use X timeouts rather than alarms.
 
 * Mon Oct 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.3-1
 - Documentation and comment fixes.  Last two globals removed from 
