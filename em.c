@@ -19,7 +19,6 @@
 #include "gpsd.h"
 
 #define BUFSIZE 4096
-extern struct session_t session;
 
 #define PI 3.14159265358979323846
 
@@ -41,7 +40,7 @@ struct header {
     unsigned short csum;
 };
 
-static void analyze(struct header *, unsigned short *, void (*raw_hook)(char *buf));
+static void analyze(struct session_t *session, struct header *, unsigned short *);
 
 static unsigned short em_gps_checksum(unsigned short *w, int n)
 {
@@ -82,7 +81,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static void em_spew(int type, unsigned short *dat, int dlen)
+static void em_spew(struct session_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
 
@@ -93,9 +92,9 @@ static void em_spew(int type, unsigned short *dat, int dlen)
     h.ndata = dlen - 1;
     h.csum = em_gps_checksum((unsigned short *) &h, 4);
 
-    if (session.fdout != -1) {
-	end_write(session.fdout, &h, sizeof(h));
-	end_write(session.fdout, dat, sizeof(unsigned short) * dlen);
+    if (session->fdout != -1) {
+	end_write(session->fdout, &h, sizeof(h));
+	end_write(session->fdout, dat, sizeof(unsigned short) * dlen);
     }
 }
 
@@ -114,7 +113,7 @@ static long putlong(char *dm, int sign)
     return rad;
 }
 
-static void em_init()
+static void em_init(struct session_t *session)
 {
     unsigned short data[22];
     time_t t;
@@ -122,7 +121,7 @@ static void em_init()
 
     eminit = 0;
 
-    if (session.initpos.latitude && session.initpos.longitude) {
+    if (session->initpos.latitude && session->initpos.longitude) {
       t = time(NULL);
       tm = gmtime(&t);
 
@@ -141,17 +140,18 @@ static void em_init()
       data[8] = tm->tm_hour;
       data[9] = tm->tm_min;
       data[10] = tm->tm_sec;
-      *(long *) (data + 11) = putlong(session.initpos.latitude, (session.initpos.latd == 'S') ? 1 : 0);
-      *(long *) (data + 13) = putlong(session.initpos.longitude, (session.initpos.lond == 'W') ? 1 : 0);
+      *(long *) (data + 11) = putlong(session->initpos.latitude, (session->initpos.latd == 'S') ? 1 : 0);
+      *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
       data[21] = em_gps_checksum(data, 21);
 
-      em_spew(1200, data, 22);
+      em_spew(session, 1200, data, 22);
     }
 }
 
-static void send_rtcm(char *rtcmbuf, int rtcmbytes)
+static void send_rtcm(struct session_t *session, 
+		      char *rtcmbuf, int rtcmbytes)
 {
     unsigned short data[34];
     int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
@@ -165,16 +165,17 @@ static void send_rtcm(char *rtcmbuf, int rtcmbytes)
     memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = em_gps_checksum(data, n);
 
-    em_spew(1351, data, n+1);
+    em_spew(session, 1351, data, n+1);
 }
 
-static int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
+static int em_send_rtcm(struct session_t *session,
+			char *rtcmbuf, int rtcmbytes)
 {
     int len;
 
     while (rtcmbytes) {
 	len = rtcmbytes>64?64:rtcmbytes;
-	send_rtcm(rtcmbuf, len);
+	send_rtcm(session, rtcmbuf, len);
 	rtcmbytes -= len;
 	rtcmbuf += len;
     }
@@ -182,10 +183,10 @@ static int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
 }
 
 
-static void do_eminit()
+static void do_eminit(struct session_t *session)
 {
     /* Make sure these are zero before 1002 handler called */
-    session.gNMEAdata.pdop = session.gNMEAdata.hdop = session.gNMEAdata.vdop = 0;
+    session->gNMEAdata.pdop = session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0;
     eminit = 1;
 }
 
@@ -211,7 +212,7 @@ static double degtodm(double a)
     return t;
 }
 
-static void handle1000(unsigned short *p)
+static void handle1000(struct session_t *session, unsigned short *p)
 {
 #if 0
     gpscli_report(1, "date: %d %d %d  %d:%d:%d\n",
@@ -238,57 +239,57 @@ static void handle1000(unsigned short *p)
     gpscli_report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
-    sprintf(session.gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
+    sprintf(session->gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    session.gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
+    session->gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
 
-    session.gNMEAdata.course = p[O(36)] * 180 / (PI * 1000);	/* degrees */
+    session->gNMEAdata.course = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
-    session.gNMEAdata.satellites = p[O(12)];
+    session->gNMEAdata.satellites = p[O(12)];
 
-    session.gNMEAdata.hours = p[O(22)];
+    session->gNMEAdata.hours = p[O(22)];
 
-    session.gNMEAdata.minutes = p[O(23)];
+    session->gNMEAdata.minutes = p[O(23)];
 
-    session.gNMEAdata.seconds = p[O(24)];
+    session->gNMEAdata.seconds = p[O(24)];
 
-    session.gNMEAdata.year = p[O(21)];
+    session->gNMEAdata.year = p[O(21)];
 
-    session.gNMEAdata.month = p[O(20)];
+    session->gNMEAdata.month = p[O(20)];
 
-    session.gNMEAdata.day = p[O(19)];
+    session->gNMEAdata.day = p[O(19)];
 
-    session.gNMEAdata.latitude = 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000));
-    session.gNMEAdata.longitude = 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000));
-    session.gNMEAdata.speed = ((double) getulong(p + O(34)) / 100.0) * 1.94387;
-    session.gNMEAdata.altitude = (double) getlong(p + O(31)) / 100.0;
+    session->gNMEAdata.latitude = 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000));
+    session->gNMEAdata.longitude = 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000));
+    session->gNMEAdata.speed = ((double) getulong(p + O(34)) / 100.0) * 1.94387;
+    session->gNMEAdata.altitude = (double) getlong(p + O(31)) / 100.0;
 
-    session.gNMEAdata.status = (p[O(10)] & 0x1c) ? 0 : 1;
+    session->gNMEAdata.status = (p[O(10)] & 0x1c) ? 0 : 1;
 
-    if (session.gNMEAdata.status) {
-	session.gNMEAdata.mode = (p[O(10)] & 1) ? 2 : 3;
+    if (session->gNMEAdata.status) {
+	session->gNMEAdata.mode = (p[O(10)] & 1) ? 2 : 3;
     } else {
-	session.gNMEAdata.mode = 1;
+	session->gNMEAdata.mode = 1;
     }
-    REFRESH(session.gNMEAdata.status_stamp);
-    session.gNMEAdata.cmask |= C_STATUS;
-    REFRESH(session.gNMEAdata.mode_stamp);
-    session.gNMEAdata.cmask |= C_MODE;
+    REFRESH(session->gNMEAdata.status_stamp);
+    session->gNMEAdata.cmask |= C_STATUS;
+    REFRESH(session->gNMEAdata.mode_stamp);
+    session->gNMEAdata.cmask |= C_MODE;
 
-    session.gNMEAdata.separation = p[O(33)] / 100;	/* meters */
+    session->gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 }
 
-static void handle1002(unsigned short *p)
+static void handle1002(struct session_t *session, unsigned short *p)
 {
     int i, j;
 
     for (j = 0; j < 12; j++) {
-	session.gNMEAdata.used[j] = 0;
+	session->gNMEAdata.used[j] = 0;
     }
     for (i = 0; i < 12; i++) {
-	session.gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
-	session.gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
+	session->gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
+	session->gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
 #if 0
 	gpscli_report(1, "Sat%02d:", i);
 	gpscli_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
@@ -299,30 +300,30 @@ static void handle1002(unsigned short *p)
 	gpscli_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
 	for (j = 0; j < 12; j++) {
-	    if (session.gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
+	    if (session->gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
 		continue;
-	    session.gNMEAdata.used[j] = (p[O(15 + (3 * i))] & 1);
-	    session.gNMEAdata.ss[j] = p[O(17 + (3 * i))];
+	    session->gNMEAdata.used[j] = (p[O(15 + (3 * i))] & 1);
+	    session->gNMEAdata.ss[j] = p[O(17 + (3 * i))];
 	    break;
 	}
     }
-    session.gNMEAdata.cmask |= C_ZCH;
+    session->gNMEAdata.cmask |= C_ZCH;
 }
 
-static void handle1003(unsigned short *p)
+static void handle1003(struct session_t *session, unsigned short *p)
 {
     int j;
 
-    session.gNMEAdata.pdop = p[O(10)];
-    session.gNMEAdata.hdop = p[O(11)];
-    session.gNMEAdata.vdop = p[O(12)];
-    session.gNMEAdata.in_view = p[O(14)];
+    session->gNMEAdata.pdop = p[O(10)];
+    session->gNMEAdata.hdop = p[O(11)];
+    session->gNMEAdata.vdop = p[O(12)];
+    session->gNMEAdata.in_view = p[O(14)];
 
     for (j = 0; j < 12; j++) {
-	if (j < session.gNMEAdata.in_view) {
-	    session.gNMEAdata.PRN[j] = p[O(15 + (3 * j))];
-	    session.gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
-	    session.gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
+	if (j < session->gNMEAdata.in_view) {
+	    session->gNMEAdata.PRN[j] = p[O(15 + (3 * j))];
+	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
+	    session->gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
 #if 0
 	    gpscli_report(1, "Sat%02d:", i);
 	    gpscli_report(1, " PRN:%d", p[O(15 + (3 * i))]);
@@ -331,14 +332,14 @@ static void handle1003(unsigned short *p)
 	    gpscli_report(1, "\n");
 #endif
 	} else {
-	    session.gNMEAdata.PRN[j] = 0;
-	    session.gNMEAdata.azimuth[j] = 0.0;
-	    session.gNMEAdata.elevation[j] = 0.0;
+	    session->gNMEAdata.PRN[j] = 0;
+	    session->gNMEAdata.azimuth[j] = 0.0;
+	    session->gNMEAdata.elevation[j] = 0.0;
 	}
     }
 }
 
-static void handle1005(unsigned short *p)
+static void handle1005(struct session_t *session, unsigned short *p)
 {
   int i;
   int numcorrections = p[O(12)];
@@ -362,7 +363,8 @@ static void handle1005(unsigned short *p)
 #endif
 }
 
-static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *buf))
+static void analyze(struct session_t *session, 
+		    struct header *h, unsigned short *p)
 {
     unsigned char buf[BUFSIZE];
     char *bufp;
@@ -370,47 +372,47 @@ static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *
     int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == em_gps_checksum(p, h->ndata)) {
-	if (session.debug > 5)
+	if (session->debug > 5)
 	    gpscli_report(1, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
-	    handle1000(p);
+	    handle1000(session, p);
 	    bufp = buf;
-	    if (session.gNMEAdata.mode > 1) {
+	    if (session->gNMEAdata.mode > 1) {
 		sprintf(bufp,
 			"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
-		   session.gNMEAdata.hours, session.gNMEAdata.minutes, session.gNMEAdata.seconds,
-			degtodm(fabs(session.gNMEAdata.latitude)),
-			((session.gNMEAdata.latitude > 0) ? 'N' : 'S'),
-			degtodm(fabs(session.gNMEAdata.longitude)),
-			((session.gNMEAdata.longitude > 0) ? 'E' : 'W'),
-		    session.gNMEAdata.mode, session.gNMEAdata.satellites, session.gNMEAdata.hdop,
-			session.gNMEAdata.altitude, 'M', session.gNMEAdata.separation, 'M', "", "");
+		   session->gNMEAdata.hours, session->gNMEAdata.minutes, session->gNMEAdata.seconds,
+			degtodm(fabs(session->gNMEAdata.latitude)),
+			((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
+			degtodm(fabs(session->gNMEAdata.longitude)),
+			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
+		    session->gNMEAdata.mode, session->gNMEAdata.satellites, session->gNMEAdata.hdop,
+			session->gNMEAdata.altitude, 'M', session->gNMEAdata.separation, 'M', "", "");
 		gps_add_checksum(bufp + 1);
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp,
 		    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,%02f,%c*",
-		    session.gNMEAdata.hours, session.gNMEAdata.minutes, session.gNMEAdata.seconds,
-		    session.gNMEAdata.status ? 'A' : 'V', degtodm(fabs(session.gNMEAdata.latitude)),
-		    ((session.gNMEAdata.latitude > 0) ? 'N' : 'S'),
-		    degtodm(fabs(session.gNMEAdata.longitude)),
-		((session.gNMEAdata.longitude > 0) ? 'E' : 'W'), session.gNMEAdata.speed,
-		    session.gNMEAdata.course, session.gNMEAdata.day, session.gNMEAdata.month,
-		    (session.gNMEAdata.year % 100), session.gNMEAdata.mag_var,
-		    (session.gNMEAdata.mag_var > 0) ? 'E' : 'W');
+		    session->gNMEAdata.hours, session->gNMEAdata.minutes, session->gNMEAdata.seconds,
+		    session->gNMEAdata.status ? 'A' : 'V', degtodm(fabs(session->gNMEAdata.latitude)),
+		    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
+		    degtodm(fabs(session->gNMEAdata.longitude)),
+		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'), session->gNMEAdata.speed,
+		    session->gNMEAdata.course, session->gNMEAdata.day, session->gNMEAdata.month,
+		    (session->gNMEAdata.year % 100), session->gNMEAdata.mag_var,
+		    (session->gNMEAdata.mag_var > 0) ? 'E' : 'W');
 	    gps_add_checksum(bufp + 1);
 	    nmea = 1000;
 	    break;
 	case 1002:
-	    handle1002(p);
+	    handle1002(session, p);
 	    bufp2 = bufp = buf;
-	    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session.gNMEAdata.mode);
+	    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
 	    j = 0;
 	    for (i = 0; i < 12; i++) {
-		if (session.gNMEAdata.used[i]) {
+		if (session->gNMEAdata.used[i]) {
 		    bufp = bufp + strlen(bufp);
-		    sprintf(bufp, "%02d,", session.gNMEAdata.PRN[i]);
+		    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
 		    j++;
 		}
 	    }
@@ -419,14 +421,14 @@ static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *
 		sprintf(bufp, ",");
 	    }
 	    bufp = bufp + strlen(bufp);
-	    sprintf(bufp, "%.2f,%.2f,%.2f*", session.gNMEAdata.pdop, session.gNMEAdata.hdop,
-		    session.gNMEAdata.vdop);
+	    sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
+		    session->gNMEAdata.vdop);
 	    gps_add_checksum(bufp2 + 1);
 	    bufp2 = bufp = bufp + strlen(bufp);
 	    sprintf(bufp, "$PRWIZCH");
 	    bufp = bufp + strlen(bufp);
 	    for (i = 0; i < 12; i++) {
-		sprintf(bufp, ",%02d,%X", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
+		sprintf(bufp, ",%02d,%X", session->gNMEAdata.Zs[i], session->gNMEAdata.Zv[i]);
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp, "*");
@@ -435,19 +437,19 @@ static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *
 	    nmea = 1002;
 	    break;
 	case 1003:
-	    handle1003(p);
+	    handle1003(session, p);
 	    bufp2 = bufp = buf;
-	    j = (session.gNMEAdata.in_view / 4) + (((session.gNMEAdata.in_view % 4) > 0) ? 1 : 0);
+	    j = (session->gNMEAdata.in_view / 4) + (((session->gNMEAdata.in_view % 4) > 0) ? 1 : 0);
 	    while (i < 12) {
 		if (i % 4 == 0)
-		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session.gNMEAdata.in_view);
+		    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.in_view);
 		bufp += strlen(bufp);
-		if (i <= session.gNMEAdata.in_view && session.gNMEAdata.elevation[i])
-		    sprintf(bufp, ",%02d,%02d,%03d,%02d", session.gNMEAdata.PRN[i],
-			    session.gNMEAdata.elevation[i], session.gNMEAdata.azimuth[i], session.gNMEAdata.ss[i]);
+		if (i <= session->gNMEAdata.in_view && session->gNMEAdata.elevation[i])
+		    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
+			    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
 		else
-		    sprintf(bufp, ",%02d,00,000,%02d,", session.gNMEAdata.PRN[i],
-			    session.gNMEAdata.ss[i]);
+		    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
+			    session->gNMEAdata.ss[i]);
 		bufp += strlen(bufp);
 		if (i % 4 == 3) {
 		    sprintf(bufp, "*");
@@ -460,19 +462,19 @@ static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *
 	    nmea = 1003;
 	    break;	
 	case 1005:
-	    handle1005(p);
+	    handle1005(session, p);
 	    break;	
 	}
     }
     if (nmea > 0) {
-	if (session.debug > 4)
+	if (session->debug > 4)
 	    gpscli_report(1, "%s", buf);
 
-	if (raw_hook)
-	    raw_hook(buf);
+	if (session->raw_hook)
+	    session->raw_hook(buf);
     }
     if (eminit)
-	em_init();
+	em_init(session);
 }
 
 
@@ -486,7 +488,7 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
 }
 
 
-static void em_eat(unsigned char c, void (*raw_hook)(char *buf))
+static void em_eat(struct session_t *session, unsigned char c)
 {
     static int state = EM_HUNT_FF;
     static struct header h;
@@ -506,8 +508,8 @@ static void em_eat(unsigned char c, void (*raw_hook)(char *buf))
 
     case EM_HUNT_A:
 	/* A better be right after E */
-        if ((c == 'A') && (session.fdout != -1))
-	    write(session.fdout, "EARTHA\r\n", 8);
+        if ((c == 'A') && (session->fdout != -1))
+	    write(session->fdout, "EARTHA\r\n", 8);
 	state = EM_HUNT_FF;
 	break;
 
@@ -549,7 +551,7 @@ static void em_eat(unsigned char c, void (*raw_hook)(char *buf))
 	if (!(byte = putword(data + words, c, byte)))
 	    words++;
 	if (words == h.ndata + 1) {
-	    analyze(&h, data, raw_hook);
+	    analyze(session, &h, data);
 	    free(data);
 	    state = EM_HUNT_FF;
 	}
@@ -557,19 +559,19 @@ static void em_eat(unsigned char c, void (*raw_hook)(char *buf))
     }
 }
 
-static int handle_EMinput(int input, void (*raw_hook)(char *buf))
+static int handle_EMinput(struct session_t *session)
 {
     unsigned char c;
 
-    if (read(input, &c, 1) != 1)
+    if (read(session->fdin, &c, 1) != 1)
 	return 1;
-    em_eat(c, raw_hook);
+    em_eat(session, c);
     return 0;
 }
 
-static void em_close(void)
+static void em_close(struct session_t *session)
 {
-    session.device_type = &earthmate_a;
+    session->device_type = &earthmate_a;
 }
 
 /* this is everything we export */

@@ -91,7 +91,7 @@ void gps_deactivate(struct session_t *session)
     gps_close();
     free(session->gps_device);
     if (session->device_type->wrapup)
-	session->device_type->wrapup();
+	session->device_type->wrapup(session);
     gpscli_report(1, "closed GPS\n");
     session->gNMEAdata.mode = 1;
     session->gNMEAdata.status = 0;
@@ -132,7 +132,7 @@ void gps_poll(struct session_t *session)
 
 	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->fdout!=-1))
 	{
-	    if (session->device_type->rctm_writer(buf, rtcmbytes) <= 0)
+	    if (session->device_type->rctm_writer(session, buf, rtcmbytes) <= 0)
 		gpscli_report(1, "Write to rtcm sink failed\n");
 	}
 	else 
@@ -143,7 +143,7 @@ void gps_poll(struct session_t *session)
 
     /* update the scoreboard structure from the GPS */
     if (is_input_waiting(session->fdin)) {
-	session->device_type->handle_input(session->fdin, session->raw_hook);
+	session->device_type->handle_input(session);
     }
 
     /* count the good fixes */

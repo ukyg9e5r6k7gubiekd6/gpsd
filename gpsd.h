@@ -102,14 +102,16 @@ struct longlat_t
     char lond;
 };
 
+struct session_t;
+
 struct gps_type_t
 /* GPS method table, describes how to talk to a particular GPS type */
 {
     char typekey, *typename;
-    void (*initializer)(void);
-    int (*handle_input)(int input, void (*raw_hook)(char *buf));
-    int (*rctm_writer)(char *rtcmbuf, int rtcmbytes);
-    void (*wrapup)(void);
+    void (*initializer)(struct session_t *session);
+    int (*handle_input)(struct session_t *session);
+    int (*rctm_writer)(struct session_t *session, char *rtcmbuf, int rtcmbytes);
+    void (*wrapup)(struct session_t *session);
     int baudrate;
 };
 
@@ -138,7 +140,7 @@ extern struct gps_type_t logfile;
 
 /* GPS library internal prototypes */
 extern int gps_process_NMEA_message(char *sentence, struct OUTDATA *outdata);
-extern void gps_NMEA_handle_message(char *sentence);
+extern void gps_NMEA_handle_message(struct session_t *session, char *sentence);
 extern void gps_add_checksum(char *sentence);
 extern short gps_checksum(char *sentence);
 

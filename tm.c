@@ -12,8 +12,6 @@
 
 #define BUFSIZE 4096
 
-extern struct session_t session;
-
 /**************************************************************************
  *
  * process_exception() -- handle returned sentences in non-NMEA form
@@ -25,19 +23,19 @@ extern struct session_t session;
  * the funky non-NMEA sentences that tell us about extensions.
  */
 
-static void process_exception(char *sentence)
+static void process_exception(struct session_t *session, char *sentence)
 {
-    if (!strncmp("ASTRAL", sentence, 6) && isatty(session.fdout)) {
-	write(session.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+    if (!strncmp("ASTRAL", sentence, 6) && isatty(session->fdout)) {
+	write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
 	gpscli_report(1, "found a TripMate, initializing...");
-	session.device_type = &tripmate;
-	tripmate.initializer();
-    } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session.fdout))) {
-	write(session.fdout, "EARTHA\r\n", 8);
+	session->device_type = &tripmate;
+	tripmate.initializer(session);
+    } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session->fdout))) {
+	write(session->fdout, "EARTHA\r\n", 8);
 	gpscli_report(1, "found an EarthMate (id).");
-	session.device_type = &earthmate_b;
-	earthmate_b.initializer();
-    } else if (session.debug > 1) {
+	session->device_type = &earthmate_b;
+	earthmate_b.initializer(session);
+    } else if (session->debug > 1) {
 	gpscli_report(1, "unknown exception: \"%s\"", sentence);
     }
 }
@@ -49,45 +47,45 @@ static void process_exception(char *sentence)
  *
  **************************************************************************/
 
-void gps_NMEA_handle_message(char *sentence)
+void gps_NMEA_handle_message(struct session_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
     gpscli_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
-	if (gps_process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
+	if (gps_process_NMEA_message(sentence + 1, &session->gNMEAdata) < 0)
 	    gpscli_report(2, "Unknown sentence: \"%s\"\n", sentence);
     }
     else
-	process_exception(sentence);
+	process_exception(session, sentence);
 
     gpscli_report(3,
 	   "Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
-	   session.gNMEAdata.latitude,
-	   session.gNMEAdata.longitude,
-	   session.gNMEAdata.altitude,
-	   session.gNMEAdata.satellites,
-	   session.gNMEAdata.mode,
-	   session.gNMEAdata.utc);
+	   session->gNMEAdata.latitude,
+	   session->gNMEAdata.longitude,
+	   session->gNMEAdata.altitude,
+	   session->gNMEAdata.satellites,
+	   session->gNMEAdata.mode,
+	   session->gNMEAdata.utc);
 }
 
-static int nmea_handle_input(int input, void (*raw_hook)(char *buf))
+static int nmea_handle_input(struct session_t *session)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
 
     while (offset < BUFSIZE) {
-	if (read(input, buf + offset, 1) != 1)
+	if (read(session->fdin, buf + offset, 1) != 1)
 	    return 1;
 
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
-	        gps_NMEA_handle_message(buf);
+	        gps_NMEA_handle_message(session, buf);
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
-		if (raw_hook)
-		    raw_hook(buf);
+		if (session->raw_hook)
+		    session->raw_hook(buf);
 	    }
 	    offset = 0;
 	    return 1;
@@ -100,9 +98,9 @@ static int nmea_handle_input(int input, void (*raw_hook)(char *buf))
     return 1;
 }
 
-static int nmea_write_rctm(char *buf, int rtcmbytes)
+static int nmea_write_rctm(struct session_t *session, char *buf, int rtcmbytes)
 {
-    return write(session.fdout, buf, rtcmbytes);
+    return write(session->fdout, buf, rtcmbytes);
 }
 
 struct gps_type_t nmea =
@@ -129,13 +127,13 @@ struct gps_type_t nmea =
  * Maybe we could use the logging-interval command?
  */
 
-void tripmate_initializer()
+void tripmate_initializer(struct session_t *session)
 {
     char buf[82];
     time_t t;
     struct tm *tm;
 
-    if (session.initpos.latitude && session.initpos.longitude) {
+    if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
 
@@ -144,13 +142,13 @@ void tripmate_initializer()
 
 	sprintf(buf,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
-		session.initpos.latitude, session.initpos.latd, 
-		session.initpos.longitude, session.initpos.lond,
+		session->initpos.latitude, session->initpos.latd, 
+		session->initpos.longitude, session->initpos.lond,
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
 	gps_add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	if (session.fdout != -1) {
-	    write(session.fdout, buf, strlen(buf));
+	if (session->fdout != -1) {
+	    write(session->fdout, buf, strlen(buf));
 	    gpscli_report(1, "=> GPS: %s", buf);
 	}
     }
