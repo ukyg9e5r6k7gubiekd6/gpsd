@@ -23,7 +23,7 @@ class gpsdata:
 	def refresh(self):
 	    self.last_refresh = time.time()
 	def seen(self):
-	    return self.refreshes
+	    return self.last_refresh
 	def __repr__(self):
 	    return "{lr=%d, changed=%s}" % (self.last_refresh, self.changed)
     class satellite:

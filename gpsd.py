@@ -274,7 +274,8 @@ class gpsd(gps.gpsdata):
     def set_raw_hook(self, hook=None):
         self.raw_hook = hook
 
-    def is_input_waiting(self):
+    def waiting(self):
+        "How much input is waiting?"
         if self.ttyfp == None:
             return -1
         st = fcntl.ioctl(self.ttyfp.fileno(), termios.FIONREAD, " "*struct.calcsize('i'))
@@ -286,7 +287,7 @@ class gpsd(gps.gpsdata):
     def poll(self):
         if self.dsock > -1:
             self.ttyfp.write(session.dsock.recv(1024))
-        waiting = self.is_input_waiting()
+        waiting = self.waiting()
         if waiting < 0:
             return waiting
         elif waiting == 0:
@@ -294,7 +295,7 @@ class gpsd(gps.gpsdata):
                 return 0
             else:
                 self.online = False
-                session.online_stamp.refresh()
+                self.online_stamp.refresh()
                 return -1
         else:
             self.online = True
