@@ -39,7 +39,3 @@ SiRF-II chipsets.  Lonnie Mendez is working on this.
 It only handles straight NMEA devices.  It should be replaced by a
 Python extension built around libgps.a.
 
-* Integrate M8 support to whatever extent needed.
-
-See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
-
