@@ -168,29 +168,46 @@ int gpsd_poll(struct gps_session_t *session)
 	    session->fixcnt++;
 
 	/*
-	 * Compute derived uncertainties.  
+	 * Compute derived quantities.  
 	 */
-	if (!(session->gpsdata.valid & SPEEDERR_SET)) {
-	    session->gpsdata.fix.eps = 0.0;
-	    if (session->lastfix.mode > MODE_NO_FIX 
-			&& session->gpsdata.fix.mode > MODE_NO_FIX) {
-		double t = session->gpsdata.fix.time - session->lastfix.time;
-		double e = session->lastfix.eph + session->gpsdata.fix.eph;
-		session->gpsdata.fix.eps = e/t;
-		if (session->gpsdata.fix.eps)
-		    session->gpsdata.valid |= SPEEDERR_SET;
+	if (session->gpsdata.valid & LATLON_SET) {
+	    if (!(session->gpsdata.valid & HERR_SET) 
+	    	&& (session->gpsdata.valid & HDOP_SET)) {
+		session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
+		session->gpsdata.valid |= HERR_SET;
 	    }
-	}
-	if (!(session->gpsdata.valid & CLIMBERR_SET)) {
-	    session->gpsdata.fix.epc = 0.0;
-	    if (session->lastfix.mode > MODE_3D 
-			&& session->gpsdata.fix.mode > MODE_3D) {
-		double t = session->gpsdata.fix.time - session->lastfix.time;
-		double e = session->lastfix.epv + session->gpsdata.fix.epv;
-		/* if the vertical uncertainties are zero this will be too */
-		session->gpsdata.fix.epc = e/t;
-		if (session->gpsdata.fix.epc)
-		    session->gpsdata.valid |= CLIMBERR_SET;
+	    if (!(session->gpsdata.valid & VERR_SET) 
+	    	&& (session->gpsdata.valid & VDOP_SET)) {
+		session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
+		session->gpsdata.valid |= VERR_SET;
+	    }
+	    if (!(session->gpsdata.valid & PERR_SET) 
+	    	&& (session->gpsdata.valid & PDOP_SET)) {
+		session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
+		session->gpsdata.valid |= PERR_SET;
+	    }
+	    if (!(session->gpsdata.valid & SPEEDERR_SET)) {
+		session->gpsdata.fix.eps = 0.0;
+		if (session->lastfix.mode > MODE_NO_FIX 
+		    && session->gpsdata.fix.mode > MODE_NO_FIX) {
+		    double t = session->gpsdata.fix.time-session->lastfix.time;
+		    double e = session->lastfix.eph + session->gpsdata.fix.eph;
+		    session->gpsdata.fix.eps = e/t;
+		    if (session->gpsdata.fix.eps)
+			session->gpsdata.valid |= SPEEDERR_SET;
+		}
+	    }
+	    if (!(session->gpsdata.valid & CLIMBERR_SET)) {
+		session->gpsdata.fix.epc = 0.0;
+		if (session->lastfix.mode > MODE_3D 
+		    && session->gpsdata.fix.mode > MODE_3D) {
+		    double t = session->gpsdata.fix.time-session->lastfix.time;
+		    double e = session->lastfix.epv + session->gpsdata.fix.epv;
+		    /* if vertical uncertainties are zero this will be too */
+		    session->gpsdata.fix.epc = e/t;
+		    if (session->gpsdata.fix.epc)
+			session->gpsdata.valid |= CLIMBERR_SET;
+		}
 	    }
 	}
 

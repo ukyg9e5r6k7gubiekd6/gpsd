@@ -351,16 +351,10 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		    strcat(phrase, "       ?");
 		if (ud->fix.eph)
 		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.eph);
-		else if (ud->hdop)
-		    sprintf(phrase+strlen(phrase), " %5.2f", 
-			    ud->hdop * UERE(session)); 
 		else
 		    strcat(phrase, "        ?");
 		if (ud->fix.epv)
 		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.epv);
-		else if (ud->vdop)
-		    sprintf(phrase+strlen(phrase), " %5.2f", 
-			    ud->vdop * UERE(session)); 
 		else
 		    strcat(phrase, "        ?");
 		if (ud->fix.track != TRACK_NOT_VALID)
@@ -371,7 +365,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		if (session->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %6.3f", ud->fix.climb);
 		else
-		    strcat(phrase, "       ?");
+		    strcat(phrase, "      ?");
 		strcat(phrase, " ?");	/* can't yet derive track error */ 
 		if (session->gpsdata.valid & SPEEDERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
