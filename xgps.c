@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
 
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
-	perror("xgps: no gpsd running or network error");
+	fputs("xgps: no gpsd running or network error\n", stderr);
 	exit(2);
     }
 
