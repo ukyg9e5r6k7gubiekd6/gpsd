@@ -400,7 +400,9 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	changed |= update_field_i(sentence, fldnum++, &out->elevation[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->azimuth[out->satellites]);
 	changed |= update_field_i(sentence, fldnum++, &out->ss[out->satellites]);
-	if (out->PRN[out->satellites])
+	if (!out->PRN[out->satellites])
+	    break;
+	else
 	    out->satellites++;
     }
 
