@@ -3,25 +3,34 @@
 # Collect latency-profiling data from a running gpsd.
 import sys, time, getopt, gps
 
-def rawplot(baud=None, gps=None, recv=None,emit=None, tag=None):
+class rawplot:
     "Print basic data, ignoring timezone skew."
-    if not baud:
-        print "#GPS time        	Received	Transmitted 	Read"
-        print "#----------------	---------	----------- 	----------"
-    else:
-        print "%.6f	%2.6f	%2.6f	%2.6f	# %s" \
+    def header(self, fp):
+        fp.write("#GPS time        	Received	Transmitted 	Read")
+        fp.write("#----------------	---------	----------- 	----------")
+    def formatter(self, baud, gps, recv, emit, tag, fp):
+        fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s" \
               % (gps,
                  (recv - gps) % 3600,
                  (emit - gps) % 3600,
                  (time.time() - gps) % 3600,
-                 tag)
+                 tag))
+    def plot(self):
+        return '''
+set autoscale
+set key below
+set style fill
+plot "%s" using 0:2 title "Line latency" with impulses,\
+     "%s" using 0:3 title "Decode time" with points,\
+     "%s" using 0:4 title "TCP/IP latency" with points
+'''
 
-def stripplot(baud=None, gps=None, recv=None,emit=None, tag=None):
+class stripplot:
     "Discard base time, throw out latencies >1 sec."
-    if not baud:
+    def header(self, fp):
         print "#Received	Transmitted 	Read"
         print "#---------	----------- 	----------"
-    else:
+    def formatter(self, baud, gps, recv, emit, tag, fp):
         # Throw out latencies above 1 second, these are
         # serial-buffering artifacts at the start of the session
         if (recv - gps) % 3600 > 1:
@@ -31,28 +40,43 @@ def stripplot(baud=None, gps=None, recv=None,emit=None, tag=None):
                  (emit - gps) % 3600,
                  (time.time() - gps) % 3600,
                  tag)
+    def plot(self):
+        return '''
+set autoscale
+set key below
+set style fill
+plot "%s" using 0:1 title "Line latency" with impulses,\
+     "%s" using 0:2 title "Decode time" with points,\
+     "%s" using 0:3 title "TCP/IP latency" with points
+'''
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "hn:r")
-    await = 100;
     formatter = stripplot
+    raw = False
+    await = 100
     for (switch, val) in options:
 	if (switch == '-n'):
 	    await = int(val)
 	elif (switch == '-r'):
-	    formatter = rawplot
+	    raw = True
         elif (switch == '-h'):
             sys.stderr.write("usage: profile_gpsd [-h] [-r] [-n samplecount] \n")
+    plotter = formatter()
     session = gps.gps(host="localhost", port="2947")
     try:
         session.query("wZ+")
-        formatter()
-        while True:
+        plotter.header(sys.stdout)
+        while await > 0:
             session.poll()
             gps_time = gps.isotime(session.utc)
             recv_time = session.recv_time
             emit_time = session.emit_time
-            formatter(session.baudrate, gps_time, recv_time, emit_time, session.tag)
+            plotter.formatter(session.baudrate,
+                              gps_time, recv_time, emit_time,
+                              session.tag,
+                              sys.stdout)
+            await -= 1
     finally:
         session.query("wZ-")
         del session
