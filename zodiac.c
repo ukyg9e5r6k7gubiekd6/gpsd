@@ -242,7 +242,7 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	gpsd_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
 	if (p[O(15 + (3 * i))] & 1)
-	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++];
+	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++] = i;
 	for (j = 0; j < MAXCHANNELS; j++) {
 	    if (session->gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
 		continue;
