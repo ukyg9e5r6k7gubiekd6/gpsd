@@ -47,3 +47,4 @@
 20030820 (1.10)
 	 Add install target. Fix clean target. Make GPS timeout configurable.
 	 Make xgpsspeed build with Apple's X11.
+	 Make sure that we don't segfault if the NMEA is badly formed.
