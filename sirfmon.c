@@ -40,6 +40,8 @@
 #define END1		0xb0
 #define END2		0xb3
 
+#define MAXCHANNELS	12
+
 static int LineFd;					/* fd for RS232 line */
 static int verbose;
 static int nfix,fix[20];
@@ -56,6 +58,15 @@ static char *verbpat[] =
     "numOfSVs = 0",
     "rtcaj tow ",
     NULL
+};
+
+static char *sbasvec[] =
+{
+    "None",
+    "SBAS",
+    "Serial",
+    "Beacon",
+    "Software",
 };
 
 #define getb(off)	(buf[off])
@@ -78,7 +89,7 @@ static int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
-static WINDOW *cmdwin, *debugwin;
+static WINDOW *mid27win, *cmdwin, *debugwin;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -195,11 +206,11 @@ static int nmea_send(int fd, const char *fmt, ... )
 
 static unsigned int *ip, rates[] = {4800, 9600, 19200, 38400, 57600};
 
-static int hunt_open(void)
+static int hunt_open(int *pstopbits)
 {
     int stopbits, st;
     /*
-     * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
+     * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
      * in the presence of flow control.  Thus, turn off CRTSCTS.
      */
@@ -208,7 +219,8 @@ static int hunt_open(void)
     ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
     ttyset.c_oflag = (ONLCR);
 
-    for (stopbits = 1; stopbits <= 2; stopbits++)
+    for (stopbits = 1; stopbits <= 2; stopbits++) {
+	*pstopbits = stopbits;
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
 	{
 	    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
@@ -221,6 +233,7 @@ static int hunt_open(void)
 		return *ip;
 	    }
 	}
+    }
     return 0;
 }
 
@@ -243,7 +256,7 @@ int main (int argc, char **argv)
     }
     
     /* Save original terminal parameters */
-    if (tcgetattr(LineFd, &ttyset) != 0 || !(bps = hunt_open())) {
+    if (tcgetattr(LineFd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
 	fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
@@ -260,8 +273,9 @@ int main (int argc, char **argv)
     mid7win   = subwin(stdscr, 4,  48,  9, 32);
     mid9win   = subwin(stdscr, 3,  48, 13, 32);
     mid13win  = subwin(stdscr, 3,  48, 16, 32);
-    cmdwin    = subwin(stdscr, 1,  48, 19, 32);
-    debugwin  = subwin(stdscr, 0,   0, 21, 0);
+    mid27win  = subwin(stdscr, 4,  48, 19, 32);
+    cmdwin    = subwin(stdscr, 2,  30, 21, 0);
+    debugwin  = subwin(stdscr, 0,   0, 23, 0);
     scrollok(debugwin,TRUE);
     wsetscrreg(debugwin, 0, LINES-21);
 
@@ -295,7 +309,7 @@ int main (int argc, char **argv)
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
     mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < MAXCHANNELS; i++) {
 	mvwprintw(mid4win, i+2, 1, "%2d",i);
     }
     mvwprintw(mid4win, 14, 4, " Packet Type 4 (0x04) ");
@@ -326,10 +340,16 @@ int main (int argc, char **argv)
     mvwprintw(mid13win, 2, 8, " Packet type 13 (0x1D) ");
     wattrset(mid13win, A_NORMAL);
 
-    wattrset(stdscr, A_BOLD);
-    mvwprintw(stdscr, 20, 40, "RS232: ");
-    wattrset(stdscr, A_NORMAL);
-    mvwprintw(stdscr, 20, 47, "%4d N %d", bps, stopbits);
+    wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid27win, A_BOLD);
+    mvwprintw(mid27win, 1, 1, "SBAS source: ");
+    mvwprintw(mid27win, 3, 8, " Packet type 27 (0x1B) ");
+    wattrset(mid27win, A_NORMAL);
+
+    wattrset(cmdwin, A_BOLD);
+    mvwprintw(cmdwin, 1, 5, "RS232: ");
+    wattrset(cmdwin, A_NORMAL);
+    mvwprintw(cmdwin, 1, 15, "%4d N %d", bps, stopbits);
 
     wmove(debugwin,0, 0);
 
@@ -351,6 +371,7 @@ int main (int argc, char **argv)
 	wrefresh(mid7win);
 	wrefresh(mid9win);
 	wrefresh(mid13win);
+	wrefresh(mid27win);
 	wrefresh(debugwin);
 	wrefresh(cmdwin);
 
@@ -375,6 +396,7 @@ int main (int argc, char **argv)
 	    wrefresh(mid7win);
 	    wrefresh(mid9win);
 	    wrefresh(mid13win);
+	    wrefresh(mid27win);
 	    wrefresh(debugwin);
 	    wrefresh(cmdwin);
 
@@ -409,7 +431,7 @@ int main (int argc, char **argv)
 		sendpkt(buf, 9);
 		usleep(50000);
 		set_speed(bps = v, stopbits);
-		mvwprintw(stdscr, 20, 47, "%4d N %d", bps, stopbits);
+		mvwprintw(cmdwin, 1, 15, "%4d N %d", bps, stopbits);
 		break;
 
 	    case 'n':				/* switch to NMEA */
@@ -505,7 +527,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	wmove(mid2win, 4,30);
 	nfix = getb(28);
 	wprintw(mid2win, "%d",nfix);			/* SVs in fix */
-	for (i = 0; i < 12; i++) {	/* SV list */
+	for (i = 0; i < MAXCHANNELS; i++) {	/* SV list */
 	    if (i < nfix)
 		wprintw(mid2win, "%3d",fix[i] = getb(29+i));
 	    else
@@ -612,7 +634,7 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x0d:		/* Visible List */
 	mvwprintw(mid13win, 1, 6, "%d",getb(1));
 	wmove(mid13win, 1, 10);
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < getb(1))
 		wprintw(mid13win, " %2d",getb(2 + 5 * i));
 	    else
@@ -664,6 +686,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
+	mvwprintw(mid27win, 1, 14, "%d (%s)", getb(2), sbasvec[getb(2)]);
 	wprintw(debugwin, "DST 0x1b=");
 	break;
 
