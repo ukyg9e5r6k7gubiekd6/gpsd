@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "gps.h"
 #include "gpsd.h"
@@ -22,7 +23,10 @@ struct gps_data_t *gps_open(char *host, char *port)
 	port = DEFAULT_GPSD_PORT;
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0)
+    {
+	errno = gpsdata->gps_fd;
 	return NULL;
+    }
 
     now = time(NULL);
     INIT(gpsdata->online_stamp, now);

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <getopt.h>
+#include <errno.h>
 
 #include <stdio.h>
 #include <math.h>
@@ -74,12 +75,12 @@ int main(int argc, char **argv)
     Cardinal        i;
     extern char *optarg;
     int option;
-    char *device_name = "/dev/gps";
+    char *server = NULL;
 
     while ((option = getopt(argc, argv, "hp:")) != -1) {
 	switch (option) {
 	case 'p':
-	    device_name = strdup(optarg);
+	    server = strdup(optarg);
 	    break;
 	case 'h':
 	case '?':
@@ -137,10 +138,10 @@ int main(int argc, char **argv)
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gpsdata = gps_open(NULL, NULL);
+    gpsdata = gps_open(server, DEFAULT_GPSD_PORT);
     if (!gpsdata)
     {
-	fprintf(stderr, "xgpsspeed: no gpsd running.\n");
+	fprintf(stderr, "xgpsspeed: no gpsd running or network error (%d).\n", errno);
 	exit(2);
     }
 
