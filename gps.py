@@ -301,6 +301,13 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     a = acos((x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2));
     return CalcRad((lat1+lat2) / 2) * a
 
+def MeterOffset((lat1, lon1), (lat2, lon2)):
+    "Return offset in meters of second arg from first."
+    return ( \
+        EarthDistance((lat1, lon1), (lat1, lon2)), 
+        EarthDistance((lat1, lon1), (lat2, lon1))
+        )
+
 if __name__ == '__main__':
     import sys,readline
     print "This is the exerciser for the Python gps interface."
