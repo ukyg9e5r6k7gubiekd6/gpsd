@@ -31,11 +31,6 @@ Which of these override which other bits?  I don't think status is ever
 nonzero when mode is zero. So status overrides mode.  What other such
 relationships are there?
 
-** gpsd.py is unsatisfactory
-
-It only handles straight NMEA devices.  It should be replaced by a
-Python extension built around libgps.a.
-
 * Things not to do:
 
 Here are several things that look like good ideas, but that turn out
