@@ -343,7 +343,7 @@ should thus be accessible as generic GPS devices.</para>
 
 <refsect1 id='maintainer'><title>AUTHORS</title> 
 
-<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric Raymond.
+<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
 This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
 There is a project page, with gps screenshots, <ulink
 url="http://www.berlios.de/gpsd/">here</ulink>.</para>
