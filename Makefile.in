@@ -1,6 +1,8 @@
 # Makefile.in
 # $Modified: Thu Jan 22 11:55:32 1998 by brook $
 
+INSTALL = @INSTALL@
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 
 ## The C compiler
 
@@ -111,7 +113,7 @@ LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJEC
 PROGRAMS=gpsd gpsplay
 
 ## Motif dependent programs and object files
-@MISSING_MOTIF@MOTIF_PROGRAMS=gps xgpsspeed
+MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
 @MISSING_MOTIF@MOTIF_OBJECTS = display.o
 
 XGPSOBJS=xgpsspeed.o Tachometer.o
@@ -133,6 +135,16 @@ xgpsspeed: $(XGPSOBJS)
 libgpsd.a:  $(LIB_OBJECTS)
 	ar -r libgpsd.a $(LIB_OBJECTS)
 	ranlib libgpsd.a
+
+install:
+	$(mkinstalldirs) $(DESTDIR)${bindir}
+	$(mkinstalldirs) $(DESTDIR)${sbindir}
+	for app in $PROGRAMS; do \
+		$(INSTALL) -m 755 $$app $(DESTDIR}${sbindir}; \
+        done
+	for app in $MOTIF_PROGRAMS; do \
+		$(INSTALL) -m 755 $$app $(DESTDIR}${bindir}; \
+        done
 
 clean:
 	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *~ config.status

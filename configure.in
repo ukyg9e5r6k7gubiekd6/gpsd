@@ -3,6 +3,8 @@ dnl
 AC_INIT(gpsd.c)
 AC_CONFIG_HEADER(config.h)
 
+AC_PROG_INSTALL
+
 dnl Find and check C compiler
 dnl
 ICE_PROG_CC
