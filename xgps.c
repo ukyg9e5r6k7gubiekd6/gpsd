@@ -278,13 +278,13 @@ static void update_panel(char *message)
     XmTextFieldSetString(text_5, s);
     sprintf(s, "%f degrees", gpsdata->track);
     XmTextFieldSetString(text_6, s);
-    sprintf(s, "%f", gpsdata->epe);
+    sprintf(s, "%f %s", gpsdata->epe * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_7, s);
-    sprintf(s, "%f", gpsdata->eph);
+    sprintf(s, "%f %s", gpsdata->eph * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_8, s);
-    sprintf(s, "%f", gpsdata->epv);
+    sprintf(s, "%f %s", gpsdata->epv * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_9, s);
-    sprintf(s, "%f", gpsdata->climb);
+    sprintf(s, "%f %s/sec", gpsdata->climb * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_10, s);
 
     if (!gpsdata->online) {
