@@ -6,6 +6,7 @@ information on the following topics:
 * Units used in GGA
 * Vendor extensions PRWIZCH and PMGNST
 * FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
+* New documentation on GRS, GST, MSK, and MSS sentences.
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -128,14 +129,11 @@ Here are the NMEA-standard sentences:
  14) M = Magnetic, T = True
  15) Checksum
 
- ASD - Autopilot System Data
- FORMAT UNKOWN
-
- BEC - Bearing & Distance to Waypoint - Dead Reckoning
+ BWC - Bearing & Distance to Waypoint - Geat Circle
                                                          12
-        1         2       3 4        5 6   7 8   9 10  11|    13
-        |         |       | |        | |   | |   | |   | |    |
- $--BEC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+        1         2       3 4        5 6   7 8   9 10  11|    13 14
+        |         |       | |        | |   | |   | |   | |    |   |
+ $--BEC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c,m,*hh<CR><LF>
 
  Field Number: 
   1) UTCTime
@@ -150,7 +148,8 @@ Here are the NMEA-standard sentences:
  10) Nautical Miles
  11) N = Nautical Miles
  12) Waypoint ID
- 13) Checksum
+ 13) FAA mode indicator (NMEA 2.3 and later, optional)
+ 14) Checksum
 
 
  BOD - Bearing - Waypoint to Waypoint
@@ -402,6 +401,45 @@ Here are the NMEA-standard sentences:
   7) FAA mode indicator (NMEA 2.3 and later)
   8) Checksum
 
+ GRS - GPS Range Residuals
+              1    2  3  4  5  6  7  8  9 10 11 12 13 14  15
+              |    |  |  |  |  |  |  |  |  |  |  |  |  |   |
+ $ --GST,hhmmss.ss,m,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,*hh<CR><LF>
+
+ Field Number: 
+  1) TC time of associated GGA fix
+  2) 0 = Residuals used in GGA, 1 = residuals calculated after GGA
+  3) Satellite 1 residual in meters
+  4) Satellite 2 residual in meters
+  5) Satellite 3 residual in meters
+  6) Satellite 4 residual in meters (blank if unused)
+  7) Satellite 5 residual in meters (blank if unused)
+  8) Satellite 6 residual in meters (blank if unused)
+  9) Satellite 7 residual in meters (blank if unused)
+  10) Satellite 8 residual in meters (blank if unused)
+  11) Satellite 9 residual in meters (blank if unused)
+  12) Satellite 10 residual in meters (blank if unused)
+  13) Satellite 11 residual in meters (blank if unused)
+  14) Satellite 12 residual in meters (blank if unused)
+  15) Checksum
+
+ GST - GPS Pseudorange Noise Statistics
+
+              1    2 3 4 5 6 7 8   9
+              |    | | | | | | |   |
+ $ --GST,hhmmss.ss,x,x,x,x,x,x,x,*hh<CR><LF>
+
+ Field Number: 
+  1) TC time of associated GGA fix
+  2) Total RMS standard deviation of ranges inputs to the navigation solution
+  3) Standard deviation (meters) of semi-major axis of error ellipse
+  4) Standard deviation (meters) of semi-minor axis of error ellipse
+  5) Orientation of semi-major axis of error ellipse (true north degrees)
+  6) Standard deviation (meters) of latitude error
+  7) Standard deviation (meters) of longitude error
+  8) Standard deviation (meters) of altitude error
+  9) Checksum
+
  GSA - GPS DOP and active satellites
 
 	1 2 3                        14 15  16  17  18
@@ -538,6 +576,34 @@ Here are the NMEA-standard sentences:
  12) Time Difference 5 Microseconds
  13) Time Difference 5 Signal Status
  14) Checksum
+
+ MSK - Control for a Beacon Receiver
+
+         1  2  3  4  5   6
+         |  |  |  |  |   |
+ $--MSK,nnn,m,nnn,m,nnn*hh<CR><LF>
+
+ Field Number:
+  1) Frequency to use
+  2) Frequency mode, A=auto, M=manual
+  3) Beacon bit rate
+  4) Bitrate, A=auto, M=manual
+  5) Frequency for MSS message status (null for no status)
+  6) Checksum
+
+ MSS - Beacon Receiver Status
+
+         1  2  3  4    5   6
+         |  |  |  |    |   |
+ $--MSS,nn,nn,fff,bbb,xxx*hh<CR><LF>
+
+ Field Number:
+  1) Signal strength (dB 1uV)
+  2) Signal to noise ratio (dB)
+  3) Beacon frequency (kHz)
+  4) Beacon data rate (BPS)
+  5) Unknown integer value
+  6) Checksum
 
  MTW - Water Temperature
 
@@ -1001,7 +1067,7 @@ to have been introduced with NMEA 3.01 in 2002.
   3) Cross Track Error Magnitude
   4) Direction to steer, L or R
   5) Cross Track Units, N = Nautical Miles
-  6) FAA mode indicator (NMEA 2.3 and later)
+  6) FAA mode indicator (NMEA 2.3 and later, optional)
   7) Checksum
 
  XTR - Cross Track Error - Dead Reckoning
@@ -1060,16 +1126,13 @@ to have been introduced with NMEA 3.01 in 2002.
 
 Found on the web: (data fields unknown)
 
+ASD - Autopilot System Data
 DSC - Digital Selective Calling Information
 DSE - Extended DSC
 DSI - DSC Transponder Initiate
 DSR - DSC Transponder Response
 DTM - Datum Reference
 GBS - GPS Satellite Fault Detection
-GRS - GPS Range Residuals
-GST - GPS Pseudorange Noise Statistics
-MSK - MSK Receiver Interface 
-MSS - MSK Receiver Signal Status 
 MWD - Wind Direction & Speed
 TLL - Target Latitude and Longitude
 WDC - Distance to Waypoint - Great Circle
