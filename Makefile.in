@@ -105,7 +105,7 @@ INCLUDE = -I. $(X_INCLUDE)
 
 
 ## Libraries and object files
-LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o $(MOTIF_OBJECTS)
+LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
 
 ## Programs
 PROGRAMS=gpsd
