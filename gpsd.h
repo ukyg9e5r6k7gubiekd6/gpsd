@@ -18,6 +18,43 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
+/*
+ * User Equivalent Range Error
+ * UERE is the square root of the sum of the squares of individual
+ * errors.  We compute based on the following error budget for
+ * satellite range measurements.  Note: this is only used if the
+ * GPS doesn't report estimated position error itself.
+ *
+ * From R.B Langley's 1997 "The GPS error budget". 
+ * GPS World , Vol. 8, No. 3, pp. 51-56
+ *
+ * Atmospheric error -- ionosphere                 7.0m
+ * Atmospheric error -- troposphere                0.7m
+ * Clock and ephemeris error                       3.6m
+ * Receiver noise                                  1.5m
+ * Multipath effect                                1.2m
+ *
+ * From Hoffmann-Wellenhof et al. (1997), "GPS: Theory and Practice", 4th
+ * Ed., Springer.
+ *
+ * Code range noise (C/A)                          0.3m
+ * Code range noise (P-code)                       0.03m
+ * Phase range                                     0.005m
+ *
+ * Taking the square root of the sum of aa squares...
+ * UERE=sqrt(7.0^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2 + 0.03^2 + 0.005^2)
+ *
+ * See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
+ * for discussion.
+ *
+ * DGPS corrects for atmospheric distortion, ephemeris error, and satellite/
+ * receiver clock error.  Thus:
+ * UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2 + 0.03^2 + 0.005^2)
+ */
+#define UERE_NO_DGPS	8.1382
+#define UERE_WITH_DGPS	1.9444
+#define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
+
 struct gps_session_t;
 
 struct gps_type_t {

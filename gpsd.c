@@ -239,8 +239,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'E':
 	    if (!validate())
 		strcpy(phrase, ",E=?");
-	    else
+	    else if (ud->seen_sentences & PGRME)
 		sprintf(phrase, ",E=%f %f %f", ud->epe, ud->eph, ud->epv);
+	    else if (SEEN(ud->fix_quality_stamp))
+		sprintf(phrase, ",E=%f %f %f", 
+			ud->pdop * UERE(session), 
+			ud->hdop * UERE(session), 
+			ud->vdop * UERE(session));
 	    break;
 	case 'I':
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
@@ -459,10 +464,12 @@ static void raw_hook(char *sentence)
 	    } else if (PREFIX("$GPVTG", sentence)) {
 		PUBLISH(fd, "tv");
 	    } else if (PREFIX("$GPGSA", sentence)) {
-		PUBLISH(fd, "qm");
+		PUBLISH(fd, "qme");
 	    } else if (PREFIX("$GPGSV", sentence)) {
 		if (nmea_sane_satellites(&session->gNMEAdata))
 		    PUBLISH(fd, "y");
+	    } else if (PREFIX("$PGRME", sentence)) {
+		PUBLISH(fd, "e");
 	    }
 #undef PUBLISH
 	}

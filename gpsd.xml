@@ -210,9 +210,12 @@ part will vary and may be zero.</para></listitem>
 <varlistentry>
 <term>e</term>
 <listitem>
-<para>Returns "E=%f %f %f": three estimated position errors in meters 
-&mdash; total, horizontal, and vertical.  Note: many GPSses do not
-supply these numbers.</para>
+<para>Returns "E=%f %f %f": three estimated position errors in meters
+&mdash; total, horizontal, and vertical (2-sigma or 95% confidence
+level).  Note: many GPSses do not supply these numbers.  When the
+GPS does not supply them, <application>gpsd</application> computes
+them using fixed figures for expected non-DGPS and DGPS range errors
+in meters.  See also the 'q' command.</para>
 </listitem>
 </varlistentry>
 
@@ -244,8 +247,13 @@ numbers are in degrees, latitude first.</para></listitem>
 <term>q</term>
 <listitem>
 <para>Returns "Q=%d %f %f %f": a count of satellites used in the last
-fix, and three dimensionless dilution-of-precision (DOP) &mdash; total, 
-horizontal, and vertical.</para>
+fix, and three dimensionless dilution-of-precision (DOP) numbers
+&mdash; total, horizontal, and vertical.  These are computed from the
+satellite geometry; they are factors by which to multiply the
+estimated UERE (user error in meters at specified confidence level due
+to ionospheric delay, multipath reception, etc.) to get actual
+circular error ranges in meters at the same confidence level. See also
+the 'e' command.  </para>
 </listitem>
 </varlistentry>
 

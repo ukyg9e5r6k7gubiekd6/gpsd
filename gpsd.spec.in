@@ -130,8 +130,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
   binary mode and switches them to NMEA.  Explicit support for FV18 
   (the -T f option) is gone; instead, gpsd syncs with any 7N2 device
   and always ships a suitable init string.  New E command, supporting the
-  Garmin position-error sentence -- next step is to compute this from 
-  SiRF-II data.
+  Garmin position-error sentence or computing these numbers from DOP 
+  and an error model -- next step is to compute this from SiRF-II data.
 
 * Fri Feb 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.14-1
 - Pass zero magnetic variation in generated NMEA from binary GPSes
