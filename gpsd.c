@@ -531,11 +531,7 @@ int main(int argc, char *argv[])
     extern char *optarg;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:v"
-#if TRIPMATE_ENABLE || ZODIAC_ENABLE
-			    "i:"
-#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
-		)) != -1) {
+    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:v")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
@@ -551,30 +547,6 @@ int main(int argc, char *argv[])
 	case 'd':
 	    dgpsserver = optarg;
 	    break;
-#if TRIPMATE_ENABLE || ZODIAC_ENABLE
-	case 'i': {
-	    char *colon;
-	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
-		fprintf(stderr, 
-			"gpsd: required format is latitude:longitude.\n");
-	    else if (!strchr("NSns", colon[-1]))
-		fprintf(stderr,
-			"gpsd: latitude field is invalid; must end in N or S.\n");
-	    else if (!strchr("EWew", optarg[strlen(optarg)-1]))
-		fprintf(stderr,
-			"gpsd: longitude field is invalid; must end in E or W.\n");
-	   else {
-		*colon = '\0';
-		session->latitude = optarg;
- 		session->latd = toupper(optarg[strlen(session->latitude) - 1]);
-		session->latitude[strlen(session->latitude) - 1] = '\0';
-		session->longitude = colon+1;
-		session->lond = toupper(session->longitude[strlen(session->longitude)-1]);
-		session->longitude[strlen(session->longitude)-1] = '\0';
-	    }
-	    break;
-	}
-#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
 	case 'n':
 	    nowait = 1;
 	    break;

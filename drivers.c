@@ -146,25 +146,10 @@ struct gps_type_t sirfII = {
 
 static void tripmate_initializer(struct gps_session_t *session)
 {
-    time_t t;
-    struct tm tm;
-
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     nmea_send(session->gNMEAdata.gps_fd, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
     nmea_send(session->gNMEAdata.gps_fd, "$PRWIILOG,ZCH,V,,");
-    if (session->latitude && session->longitude) {
-	t = time(NULL);
-	gmtime_r(&t, &tm);
-	if (tm.tm_year > 100)
-	    tm.tm_year = tm.tm_year - 100;
-	nmea_send(session->gNMEAdata.gps_fd,
-		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d",
-		session->latitude, session->latd, 
-		session->longitude, session->lond,
-		tm.tm_hour, tm.tm_min, tm.tm_sec,
-		tm.tm_mday, tm.tm_mon + 1, tm.tm_year);
-    }
 }
 
 struct gps_type_t tripmate = {
