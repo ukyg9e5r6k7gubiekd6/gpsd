@@ -32,16 +32,10 @@
 #include "gps.h"
 #include "display.h"
 
-extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics(struct gps_data_t *gpsdata);
-extern void redraw(Widget w, XtPointer client_data,
-		   XmDrawingAreaCallbackStruct * cbs);
-
-static Widget lxbApp, form, left, right;
+static Widget lxbApp, form, left, right, quitbutton;
 static Widget satellite_list, satellite_diagram, status;
-static Widget rowColumn_11, rowColumn_12, rowColumn_13;
-static Widget rowColumn_14, rowColumn_15, rowColumn_16, rowColumn_17;
-static Widget rowColumn_18, quitbutton;
+static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
+static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 
@@ -85,22 +79,18 @@ static void build_gui(Widget lxbApp)
     XtSetValues(lxbApp, args, 5);
 
     /* a form to assist with geometry negotiation */
-    form = XtVaCreateManagedWidget("form", xmFormWidgetClass, lxbApp,
-					 NULL);
-
+    form = XtVaCreateManagedWidget("form", xmFormWidgetClass, lxbApp, NULL);
     /* the left half of the screen */
     left = XtVaCreateManagedWidget("left", xmRowColumnWidgetClass, form,
 				   XmNleftAttachment, XmATTACH_FORM,
 				   XmNtopAttachment, XmATTACH_FORM,
 				   NULL);
-    
     /* the right half of the screen */
     right = XtVaCreateManagedWidget("right", xmRowColumnWidgetClass, form,
 				    XmNleftAttachment, XmATTACH_WIDGET,
 				    XmNleftWidget, left,
 				    XmNtopAttachment, XmATTACH_FORM,
 				    NULL);
-
     /* the application status bar */
     status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form,
 				     XmNcursorPositionVisible, False,
@@ -113,7 +103,6 @@ static void build_gui(Widget lxbApp)
 				     XmNtopAttachment, XmATTACH_WIDGET,
 				     XmNtopWidget, left,
 				     NULL);
-
     /* satellite location and SNR data panel */
 #define FRAMEHEIGHT	220
 #define LEFTSIDE_WIDTH	205
@@ -126,7 +115,6 @@ static void build_gui(Widget lxbApp)
 			      XmNhighlightThickness, 0,
 			      XmNlistSpacing, 4,
 			      NULL);
-
     /* the satellite diagram */
 #define SATDIAG_SIZE	400
     satellite_diagram = 
@@ -141,7 +129,6 @@ static void build_gui(Widget lxbApp)
 	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
     register_canvas(satellite_diagram, gc);
     XtAddCallback(satellite_diagram, XmNexposeCallback, (XtPointer)redraw, NULL);
-
     /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
@@ -199,6 +186,14 @@ static void build_gui(Widget lxbApp)
     XmStringFree(string);
 }
 
+static void handle_time_out(XtPointer client_data UNUSED,
+			    XtIntervalId *ignored UNUSED)
+/* runs when there is no data for a while */
+{
+    XmTextFieldSetString(status, "no data arriving");
+    XmTextFieldSetString(text_7, "UNKNOWN");
+}
+
 /*
  * No dependencies on the session structure above this point.
  */
@@ -215,14 +210,6 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
     gps_poll(gpsdata);
 }
 
-static void handle_time_out(XtPointer client_data UNUSED,
-			    XtIntervalId *ignored UNUSED)
-/* runs when there is no data for a while */
-{
-    XmTextFieldSetString(status, "no data arriving");
-    XmTextFieldSetString(text_7, "UNKNOWN");
-}
-
 static void update_panel(char *message)
 /* runs on each sentence */
 {
@@ -234,7 +221,6 @@ static void update_panel(char *message)
 	while (isspace(*(sp = message + strlen(message) - 1)))
 	    *sp = '\0';
     XmTextFieldSetString(status, message);
-
     string[0] = XmStringCreateSimple("PRN:  Elev:  Azim:  SNR:  Used:");
     /* This is for the satellite status display */
     if (SEEN(gpsdata->satellite_stamp)) {
@@ -305,9 +291,7 @@ int main(int argc, char *argv[])
 	case 'v':
 	    printf("gps %s\n", VERSION);
 	    exit(0);
-	case 'h':
-	case '?':
-	default:
+	case 'h': case '?': default:
 	    fputs("usage:  gps [-h] [server[:port]]\n", stderr);
 	    exit(1);
 	}
@@ -323,11 +307,11 @@ int main(int argc, char *argv[])
 
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
-	fprintf(stderr, "gps: no gpsd running or network error (%d).\n", errno);
+	fprintf(stderr,"gps: no gpsd running or network error (%d).\n", errno);
 	exit(2);
     }
 
-    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, NULL, NULL);
+    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc,argv, NULL,NULL);
     build_gui(lxbApp);
 
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);
