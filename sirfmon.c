@@ -375,6 +375,21 @@ int main (int argc, char **argv)
     mvwprintw(mid19win, 13,1, "DGPS Source:");
     mvwprintw(mid19win, 14,1, "DGPS Mode:");
     mvwprintw(mid19win, 15,1, "DGPS Timeout:");
+    mvwprintw(mid19win, 1, 26,"LP Push-to-Fix:");
+    mvwprintw(mid19win, 2, 26,"LP On Time:");
+    mvwprintw(mid19win, 3, 26,"LP Interval:");
+    mvwprintw(mid19win, 4, 26,"U. Tasks Enab.:");
+    mvwprintw(mid19win, 5, 26,"U. Task Inter.:");
+    mvwprintw(mid19win, 6, 26,"LP Pwr Cyc En:");
+    mvwprintw(mid19win, 7, 26,"LP Max Acq Srch:");
+    mvwprintw(mid19win, 8, 26,"LP Max Off Time:");
+    mvwprintw(mid19win, 9, 26,"APM enabled:");
+    mvwprintw(mid19win,10, 26,"# of Fixes:");
+    mvwprintw(mid19win,11, 26,"Time btw Fixes:");
+    mvwprintw(mid19win,12, 26,"H/V Error Max:");
+    mvwprintw(mid19win,13, 26,"Rsp Time Max:");
+    mvwprintw(mid19win,14, 26,"Time/Accu:");
+
     mvwprintw(mid19win, 16, 8, " Packet type 19 (0x13) ");
     wattrset(mid19win, A_NORMAL);
 
@@ -737,8 +752,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
     case 0x13:
 	mvwprintw(mid19win, 1, 20, "%d", getb(5));	/* Alt. hold mode */
-	mvwprintw(mid19win, 2, 20, "%s", 		/* Alt hold source*/
-		  getb(6) ? "User Input" : "Last Computed");
+	mvwprintw(mid19win, 2, 20, "%d", getb(6));	/* Alt. hold source*/
 	mvwprintw(mid19win, 3, 20, "%dm", getw(7));	/* Alt. source input */
 	mvwprintw(mid19win, 4, 20, "%d", getb(9));	/* Degraded mode*/
 	mvwprintw(mid19win, 5, 20, "%dsec", getb(10));	/* Degraded timeout*/
@@ -752,6 +766,20 @@ static void decode_sirf(unsigned char buf[], int len)
 	mvwprintw(mid19win, 13,20, "0x%x", getb(27));	/* DGPS Source*/
 	mvwprintw(mid19win, 14,20, "0x%x", getb(28));	/* DGPS Mode*/
 	mvwprintw(mid19win, 15,20, "%dsec",getb(29));	/* DGPS Timeout*/
+	mvwprintw(mid19win, 1, 42, "%c", getb(34)?'Y':'N');/* LP Push-to-Fix */
+	mvwprintw(mid19win, 2, 42, "%dms", getl(35));	/* LP On Time */
+	mvwprintw(mid19win, 3, 42, "%d", getl(39));	/* LP Interval */
+	mvwprintw(mid19win, 4, 42, "%c", getb(43)?'Y':'N');/* User Tasks enabled */
+	mvwprintw(mid19win, 5, 42, "%d", getl(44));	/* User Task Interval */
+	mvwprintw(mid19win, 6, 42, "%c", getb(48)?'Y':'N');/* LP Power Cycling Enabled */
+	mvwprintw(mid19win, 7, 42, "%d", getl(49));/* LP Max Acq Search Time */
+	mvwprintw(mid19win, 8, 42, "%d", getl(53));/* LP Max Off Time */
+	mvwprintw(mid19win, 9, 42, "%c", getb(57)?'Y':'N');/* APM Enabled */
+	mvwprintw(mid19win,10, 42, "%d", getw(58));/* # of fixes */
+	mvwprintw(mid19win,11, 42, "%d", getw(60));/* Time Between fixes */
+	mvwprintw(mid19win,12, 42, "%d", getb(62));/* H/V Error Max */
+	mvwprintw(mid19win,13, 42, "%d", getb(63));/* Response Time Max */
+	mvwprintw(mid19win,14, 42, "%d", getb(64));/* Time/Accu & Duty Cycle Priority */
 	dispmode = !dispmode;
 	break;
 
