@@ -71,11 +71,17 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->valid |= ALTITUDE_SET;
 		    break;
 		case 'B':
-		    sscanf(sp, "B=%d %*d %*s %d", 
-			   &gpsdata->baudrate, &gpsdata->stopbits);
+		    if (sp[2] == '?') {
+			gpsdata->baudrate = gpsdata->stopbits = 0;
+		    } else
+			sscanf(sp, "B=%d %*d %*s %d", 
+			       &gpsdata->baudrate, &gpsdata->stopbits);
 		    break;
 		case 'C':
-		    sscanf(sp, "C=%d", &gpsdata->cycle);
+		    if (sp[2] == '?')
+			gpsdata->cycle = 0;
+		    else
+			sscanf(sp, "C=%d", &gpsdata->cycle);
 		    break;
 		case 'D':
 		    if (sp[2] != '?') {
@@ -89,15 +95,22 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->valid |= HERR_SET| VERR_SET | PERR_SET;
 		    break;
 		case 'I':
-		    if (gpsdata->gps_id)
+		    if (sp[2] == '?') 
+			gpsdata->gps_id = NULL;
+		    else {
+			if (gpsdata->gps_id)
 			free(gpsdata->gps_id);
-		    gpsdata->gps_id = strdup(sp+2);
+			gpsdata->gps_id = strdup(sp+2);
+		    }
 		case 'M':
 		    gpsdata->fix.mode = atoi(sp+2);
 		    gpsdata->valid |= MODE_SET;
 		    break;
 		case 'N':
-		    gpsdata->driver_mode = atoi(sp+2);
+		    if (sp[2] == '?') 
+			gpsdata->driver_mode = -1;
+		    else
+			gpsdata->driver_mode = atoi(sp+2);
 		    break;
 		case 'O':
 		    if (sp[2] != '?') {
@@ -171,8 +184,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->valid |= SPEED_SET;
 		    break;
 		case 'X':
-		    sscanf(sp, "X=%lf", &gpsdata->online);
-		    gpsdata->valid |= ONLINE_SET;
+		    if (sp[2] == '?') 
+			gpsdata->online = -1;
+		    else {
+			sscanf(sp, "X=%lf", &gpsdata->online);
+			gpsdata->valid |= ONLINE_SET;
+		    }
 		    break;
 		case 'Y':
 		    if (sp[2] != '?') {

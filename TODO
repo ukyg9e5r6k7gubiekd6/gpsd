@@ -5,6 +5,7 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 1) gpsfake needs to set the socket location to something reasonable.
 2) gpsd.hotplug needs to send remove messages
+3) libgps/gps.py need to read F and K responses
 
 ** In the SiRF driver, get leap seconds from almanac data
 

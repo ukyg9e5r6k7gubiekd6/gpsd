@@ -108,6 +108,10 @@ static void usage(void)
 
 static int have_fix(struct gps_device_t *device)
 {
+    if (!device) {
+	gpsd_report(4, "Client has no device");
+	return 0;
+    }
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
 		    device->gpsdata.status, device->gpsdata.fix.mode)
@@ -200,10 +204,6 @@ static struct channel_t {
     int nsubscribers;			/* how many subscribers? */
     struct gps_device_t *device;	/* the device data */
     double when;			/* receipt time of last sentence */
-    int state;				/* marked for deletion */
-#define CHANNEL_AVAILABLE	0
-#define CHANNEL_INUSE		1
-#define CHANNEL_KILLED		-1
 } channels[MAXDEVICES];
 
 static struct subscriber_t {
@@ -300,9 +300,7 @@ static struct channel_t *open_device(char *device_name, int nowait)
     struct gps_device_t *device = gpsd_init(device_name);
     struct channel_t *chp;
 
-    for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (chp->state == CHANNEL_AVAILABLE) {
-	    chp->state = CHANNEL_INUSE;
+    for (chp = channels; chp < channels + MAXDEVICES; chp++) {
 	    chp->device = device;
 	    goto found;
 	}
@@ -356,7 +354,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
-	    if (*p == '=') {
+	    if (device && *p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		if (device->device_type->speed_switcher)
@@ -381,19 +379,25 @@ static int handle_request(int cfd, char *buf, int buflen)
 			gpsd_set_speed(device, (speed_t)i, 1);
 		    }
 	    }
-	    sprintf(phrase, ",B=%d %d N %d", 
+	    if (device)
+		sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&device->ttyset),
 		    9 - ud->stopbits, ud->stopbits);
+	    else
+		strcpy(phrase, ".B=?");
 	    break;
 	case 'C':
-	    sprintf(phrase, ",C=%d", device->device_type->cycle);
+	    if (device)
+		sprintf(phrase, ",C=%d", device->device_type->cycle);
+	    else
+		strcpy(phrase, ".C=?");
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
 	    if (ud->fix.time)
 		unix_to_iso8601(ud->fix.time, phrase+3);
 	    else
-		strcat(phrase, "?");
+		strcpy(phrase, "?");
 	    break;
 	case 'E':
 	    if (have_fix(device)) {
@@ -418,10 +422,16 @@ static int handle_request(int cfd, char *buf, int buflen)
 		}
 		free(stash);
 	    }
-	    snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
+	    if (device)
+		snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
+	    else
+		strcpy(phrase, ".F=?");
 	    break;
 	case 'I':
-	    snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
+	    if (device)
+		snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
+	    else
+		strcpy(phrase, ".B=?");
 	    break;
 	case 'K':
 	    strcpy(phrase, ",K=");
@@ -444,7 +454,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 		sprintf(phrase, ",M=%d", ud->fix.mode);
 	    break;
 	case 'N':
-	    if (!device->device_type->mode_switcher)
+	    if (!device)
+		strcpy(phrase, ".N=?");
+	    else if (!device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
 	    else {
 		if (*p == '=') ++p;
@@ -578,7 +590,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    }
 	    break;
         case 'X':
-	    sprintf(phrase, ",X=%f", ud->online);
+	    if (device)
+		sprintf(phrase, ",X=%f", ud->online);
+	    else
+		strcpy(phrase, ".X=?");
 	    break;
 	case 'Y':
 	    if (ud->satellites) {
@@ -673,8 +688,11 @@ static void handle_control(int sfd, char *buf)
     if (buf[0] == '-') {
 	p = getline(buf+1, &stash);
 	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
-	if ((chp = find_device(stash))) 
-	    chp->state = CHANNEL_KILLED;
+	if ((chp = find_device(stash))) {
+	    gpsd_deactivate(chp->device);
+	    notify_watchers(chp->device, "X=0\r\n");
+	    chp->device = NULL;
+	}
 	free(stash);
     } else if (buf[0] == '+') {
 	p = getline(buf+1, &stash);
@@ -985,8 +1003,6 @@ int main(int argc, char *argv[])
 		if (!nowait && !need_gps && channel->device->gpsdata.gps_fd > -1) {
 		    FD_CLR(channel->device->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel->device);
-		    if (channel->state == CHANNEL_KILLED)
-			channel->device = NULL;
 		}
 	    }
 	}

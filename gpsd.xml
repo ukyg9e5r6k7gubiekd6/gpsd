@@ -449,7 +449,9 @@ notice.</para></listitem>
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
-means that there is no valid data available.</para>
+means that there is no valid data available.  This may mean either
+that the device being queried is offline, or (for
+position/velocity/time queries) that it is online but has no fix.</para>
 
 <para>Requests can be concatenated and sent as a string;
 <application>gpsd</application> will then respond with a
