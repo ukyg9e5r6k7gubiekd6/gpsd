@@ -4,7 +4,7 @@
 
 from math import *
 import time, os
-import gps, curses.ascii
+import gps, gpsd, curses.ascii
 
 class Baton:
     "Ship progress indication to stderr."
