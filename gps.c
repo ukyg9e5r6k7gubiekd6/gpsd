@@ -299,7 +299,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 	if (buf[offset] == '\n') {
 	    if (buf[offset - 1] == '\r')
 		buf[offset - 1] = '\0';
-	    handle_message(buf);
+	    nmea_handle_message(buf);
 	    update_display(buf);
 	    offset = 0;
 	    return;
@@ -380,8 +380,8 @@ static void open_input(XtAppContext app)
 
     input = serial_open(device_name, device_speed);
 
-    session.gNMEAdata.fdin = input;
-    session.gNMEAdata.fdout = input;
+    session.fdin = input;
+    session.fdout = input;
 
     input_id = XtAppAddInput(app, input, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
@@ -420,10 +420,10 @@ int main(int argc, char *argv[])
         case 'T':
             switch (*optarg) {
                 case 't':
-                    session.device_type = DEVICE_TRIPMATE;
+                    session.device_type = &tripmate;
                     break;
                 case 'e':
-                    session.device_type = DEVICE_EARTHMATE;
+                    session.device_type = &earthmate_a;
                     break;
                 default:
                     fprintf(stderr,"Invalide device type \"%c\"\n"

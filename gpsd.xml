@@ -12,9 +12,8 @@
 <refname>gpsd</refname>
 <refname>gps</refname>
 <refname>xgpsspeed</refname>
-<refname>gpsplay</refname>
 <refpurpose>interface daemon for GPS receivers, test client,
-speedometer, and log-playback program</refpurpose>
+and speedometer</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -41,13 +40,6 @@ speedometer, and log-playback program</refpurpose>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-</cmdsynopsis>
-<cmdsynopsis>
-  <command>gpsplay</command>  
-      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
-      <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 
 </refsynopsisdiv>
@@ -79,8 +71,8 @@ are within 1000 kilometers or so of the ground station.</para>
 <term>-T <replaceable>device-type</replaceable></term>
 <listitem>
 <para>Set GPS type, usually not necessary because most GPSes now speak
-the standard NMEA 0183 protocol: possible values are t=TripMate, 
-e=EarthMate.</para>
+the standard NMEA 0183 protocol: possible values are n=NMEA generic,
+t=TripMate, e=EarthMate, l=logfile.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -223,15 +215,6 @@ directly connected to a GPS,</para>
 the GPS. It has no options.</para>
 
 </refsect2>
-<refsect2><title>gpsplay</title>
-
-<para>gpsplay is a fake gps daemon that plays back GPS log files to
-clients.  It is mainly useful for client debugging.  By default,
-it reads from a log dump at <filename>/tmp/gpslog</filename>; this can
-be changed with the -p option.  gpsplay also accepts -DSph options as
-for gpsd.</para>
-
-</refsect2>
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
 
@@ -242,7 +225,7 @@ Electronics Association</ulink>. A description of the protocol is
 Web</ulink>.</para>
 
 <para>The Rockwell protocol is described as an addendum on <ulink
-url='http://www.gpsinformation.org/dale/nmea.htm'>this page about
+url='http://www.gpsinformation.net/dale/nmea.htm'>this page about
 NMEA</ulink>.</para>
 
 <para>gpsd does not yet speak the SiRF-II binary protocol, but SiRF-II

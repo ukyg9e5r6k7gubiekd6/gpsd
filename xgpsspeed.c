@@ -167,7 +167,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
     if (buf[offset] == '\n') {
       if (buf[offset - 1] == '\r')
 	buf[offset - 1] = '\0';
-      handle_message(buf);
+      nmea_handle_message(buf);
       update_display();
       offset = 0;
       return;

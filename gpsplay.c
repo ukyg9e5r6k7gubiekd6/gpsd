@@ -151,8 +151,8 @@ static void print_settings(char *service)
 
 static void deactivate()
 {
-    session.gNMEAdata.fdin = -1;
-    session.gNMEAdata.fdout = -1;
+    session.fdin = -1;
+    session.fdout = -1;
     gpslog_close();
     syslog(LOG_NOTICE, "Closed gps");
     session.gNMEAdata.mode = 1;
@@ -166,8 +166,8 @@ static int activate()
     if ((input = gpslog_open()) < 0)
 	errexit("gpslog open: ");
     syslog(LOG_NOTICE, "Opened gps");
-    session.gNMEAdata.fdin = input;
-    session.gNMEAdata.fdout = -1;
+    session.fdin = input;
+    session.fdout = -1;
 
     return input;
 }
@@ -243,8 +243,8 @@ int main(int argc, char *argv[])
 
     /* mark fds closed */
     input = -1;
-    session.gNMEAdata.fdin = input;
-    session.gNMEAdata.fdout = -1;
+    session.fdin = input;
+    session.fdout = -1;
 
     while (1) {
 	struct timeval tv;
@@ -423,7 +423,7 @@ static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
     if (p) *p = '\0';
 	
     if (strlen(buf)) {
-	handle_message(buf);
+	nmea_handle_message(buf);
 	strcat(buf, "\r\n");
 	send_nmea(afds, nmea_fds, buf);
     }

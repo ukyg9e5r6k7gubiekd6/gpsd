@@ -8,3 +8,6 @@ Bug complaints from the Kismet author:
    is redundant
  * Corruption - I haven't seen this too often, but it has a tendency to
    blat out illegal coordinates when it gets confused
+
+Autodetect USB GPS by scanning the USB bus, if no device is specified.
+ 

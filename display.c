@@ -112,7 +112,7 @@ int get_status(int satellite)
     int i;
     int s;
 
-    if (session.gNMEAdata.ZCHseen) {
+    if (session.gNMEAdata.cmask & C_ZCH) {
 	for (i = 0; i < 12; i++)
 	    if (satellite == session.gNMEAdata.Zs[i])
 		return session.gNMEAdata.Zv[i];

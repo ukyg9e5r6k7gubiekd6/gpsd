@@ -111,12 +111,12 @@ INCLUDE = -I. $(X_INCLUDE)
 .c.o:
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
 
-
 ## Libraries and object files
 LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
 
+
 ## Programs
-PROGRAMS=gpsd gpsplay
+PROGRAMS=gpsd
 
 ## Motif dependent programs and object files
 MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
@@ -129,9 +129,6 @@ all: $(PROGRAMS) $(MOTIF_PROGRAMS)
 gpsd: gpsd.o libgpsd.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
 
-gpsplay: gpsplay.o libgpsd.a
-	$(LINK.c) -o $@ gpsplay.o -L. -lgpsd $(NETLIBS) $(LIBS)
-
 gps: gps.o libgpsd.a
 	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
 
@@ -142,7 +139,19 @@ libgpsd.a:  $(LIB_OBJECTS)
 	ar -r libgpsd.a $(LIB_OBJECTS)
 	ranlib libgpsd.a
 
-gpsd.1 gps.1 xgpsspeed.1 gpsplay.1: gpsd.xml
+netlib.o: netlib.c nmea.h gpsd.h
+nmea_parse.o: nmea_parse.c nmea.h
+serial.o: serial.c nmea.h gpsd.h
+serial.o: serial.c nmea.h gpsd.h
+tm.o: tm.c nmea.h gpsd.h
+em.o: em.c nmea.h gpsd.h
+send_nmea.o: send_nmea.c nmea.h gpsd.h
+display.o: display.c nmea.h gps.h
+xgpsspeed.o: xgpsspeed.c gpsd.h
+gps.o: gps.c nmea.h gps.h version.h
+gpsd.o: gpsd.c nmea.h gps.h version.h
+
+gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
 
 install:
@@ -158,7 +167,7 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd,1
 
 clean:
-	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *.1 *~ config.status
+	rm -f *.o *.a gpsd gps xgpsspeed *.1 *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log

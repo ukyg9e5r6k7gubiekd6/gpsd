@@ -1,7 +1,7 @@
 /*
  * Handle the Rockwell binary packet format supported by the EarthMate GPS.
- * Also, if requested, intialize it with longitude, latitude, and local time.
- * This will speed up its first fix.
+ *
+ * Everything exported from here lives in the structure earthmate at the end.
  */
 #include "config.h"
 #include <stdio.h>
@@ -46,7 +46,7 @@ struct header {
 
 static void analyze(struct header *, unsigned short *, fd_set *, fd_set *);
 
-unsigned short em_checksum(unsigned short *w, int n)
+static unsigned short em_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
@@ -96,9 +96,9 @@ static void em_spew(int type, unsigned short *dat, int dlen)
     h.ndata = dlen - 1;
     h.csum = em_checksum((unsigned short *) &h, 4);
 
-    if (session.gNMEAdata.fdout != -1) {
-	end_write(session.gNMEAdata.fdout, &h, sizeof(h));
-	end_write(session.gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
+    if (session.fdout != -1) {
+	end_write(session.fdout, &h, sizeof(h));
+	end_write(session.fdout, dat, sizeof(unsigned short) * dlen);
     }
 }
 
@@ -171,7 +171,7 @@ static void send_rtcm(char *rtcmbuf, int rtcmbytes)
     em_spew(1351, data, n+1);
 }
 
-int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
+static int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
 {
     int len;
 
@@ -185,7 +185,7 @@ int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
 }
 
 
-void do_eminit()
+static void do_eminit()
 {
     /* Make sure these are zero before 1002 handler called */
     session.gNMEAdata.pdop = session.gNMEAdata.hdop = session.gNMEAdata.vdop = 0;
@@ -286,7 +286,6 @@ static void handle1002(unsigned short *p)
 {
     int i, j;
 
-    session.gNMEAdata.ZCHseen = 1;
     for (j = 0; j < 12; j++) {
 	session.gNMEAdata.used[j] = 0;
     }
@@ -310,6 +309,7 @@ static void handle1002(unsigned short *p)
 	    break;
 	}
     }
+    session.gNMEAdata.cmask |= C_ZCH;
 }
 
 static void handle1003(unsigned short *p)
@@ -509,8 +509,8 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 
     case EM_HUNT_A:
 	/* A better be right after E */
-        if ((c == 'A') && (session.gNMEAdata.fdout != -1))
-	    write(session.gNMEAdata.fdout, "EARTHA\r\n", 8);
+        if ((c == 'A') && (session.fdout != -1))
+	    write(session.fdout, "EARTHA\r\n", 8);
 	state = EM_HUNT_FF;
 	break;
 
@@ -560,7 +560,7 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
     }
 }
 
-int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds)
+static int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds)
 {
     unsigned char c;
 
@@ -569,3 +569,21 @@ int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds)
     em_eat(c, afds, nmea_fds);
     return 0;
 }
+
+static void em_close(void)
+{
+    session.device_type = &earthmate_a;
+}
+
+/* this is everything we export */
+struct gps_type_t earthmate_b =
+{
+    '\0',		/* cannot be explicitly selected */
+    "EarthMate (b)",	/* full name of type */
+    do_eminit,		/* initialize the device */
+    handle_EMinput,	/* read and parse message packets */
+    em_send_rtcm,	/* send DGPS correction */
+    em_close,		/* wrapup function to be called on close */
+    9600,		/* 4800 won't work */
+};
+
