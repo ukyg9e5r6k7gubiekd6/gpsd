@@ -21,16 +21,12 @@ speedometer, and log-playback program</refpurpose>
 <cmdsynopsis>
   <command>gpsd</command>  
       <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
-      <arg choice='opt'>-L <replaceable>initial-longitude</replaceable></arg>
-      <arg choice='opt'>-l <replaceable>initial-latitude</replaceable></arg>
-      <arg choice='opt'>-n </arg>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-s <replaceable>baud rate</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
-      <arg choice='opt'>-r <replaceable>DGPS-port</replaceable></arg>
-      <arg choice='opt'>-c </arg>
+      <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
 </cmdsynopsis>
@@ -51,7 +47,6 @@ speedometer, and log-playback program</refpurpose>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
-      <arg choice='opt'>-n </arg>
       <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 
@@ -89,21 +84,10 @@ e=EarthMate.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>-L, -l</term>
-<listitem>
-<para>set initial longitude/latitude in degrees (not required for most devices)</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>-n</term>
-<listitem>
-<para>require longitude/latitude initialization</para>
-</listitem>
-</varlistentry>
-<varlistentry>
 <term>-s</term>
 <listitem><para>Set baud rate (serial GPS devices only). Default is
-4800, except for EarthMate (-T e) devices which default to 9600.</para></listitem>
+4800, except for EarthMate (-T e) devices which default to 9600.
+</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-S</term>
@@ -111,19 +95,31 @@ e=EarthMate.</para>
 </varlistentry>
 <varlistentry>
 <term>-t</term>
-<listitem><para>Set GPS session timeout (default is 5 seconds).</para></listitem>
+<listitem><para>Set GPS session timeout (default is 5 
+seconds).</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-d</term>
-<listitem><para>set differential-GPS server (default is dgps.wsrcc.com)</para></listitem>
+<listitem>
+<para>Query a differential-GPS (DGPS) server.  If a suffix of the
+server name begins with : it is interpreted as a port number,
+overriding the default IANA port of 2101.
+For DGPS servers available for use with this option, see
+<ulink url='http://www.wsrcc.com/wolfgang/gps/dgps-ip.html'>
+DGPS corrections over the Internet</ulink>.</para>
+</listitem>
 </varlistentry>
 <varlistentry>
-<term>-r</term>
-<listitem><para>set differential-GPS port (default is rtcm-sc104)</para></listitem>
-</varlistentry>
-<varlistentry>
-<term>-c</term>
-<listitem><para>Use differential GPS.</para></listitem>
+<term>-i</term>
+<listitem>
+<para>Set initial longitude/latitude in degrees (not required for most
+newer GPS devices, but helps some older ones develop a first
+positional fix more quickly).  Required format is %f[NS]:%f[EW]; that
+is a decimal number of degrees latitude, followed by the suffix N or
+S, followed by a colon, followed by a decimal number of degrees
+longitude, followed by the suffix E or W.  The numbers may have
+fractional parts to the right of a decimal point.</para>
+</listitem>
 </varlistentry>
 <varlistentry>
 <term>-h</term>

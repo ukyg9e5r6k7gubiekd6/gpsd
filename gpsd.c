@@ -60,10 +60,7 @@ char *latitude = 0;
 char *longitude = 0;
 char latd = 'N';
 char lond = 'W';
-				/* command line option defaults */
 char *default_device_name = "/dev/gps";
-char *default_latitude = "3600.000";
-char *default_longitude = "12300.000";
 
 int nfds, dsock;
 int verbose = 1;
@@ -130,18 +127,15 @@ static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
   options include: \n\
-  -p string    = set gps device name \n\
-  -T {e|t}     = set GPS device type \n\
-  -S integer   = set port for daemon \n\
-  -L longitude = set longitude \n\
-  -l latitude  = set latitude \n\
-  -s baud_rate = set baud rate on gps device \n\
-  -t timeout   = set timeout in seconds on fix/mode validity \n\
-  -c           = use dgps service for corrections \n\
-  -d host      = set dgps server \n\
-  -r port      = set dgps rtcm-sc104 port \n\
-  -D integer   = set debug level \n\
-  -h           = help message \n\
+  -p string          = set GPS device name \n\
+  -T {e|t}           = set GPS device type \n\
+  -S integer         = set port for daemon \n\
+  -i %f[NS]:%f[EW]   = set initial latitude/longitude \n\
+  -s baud_rate       = set baud rate on gps device \n\
+  -t timeout         = set timeout in seconds on fix/mode validity \n\
+  -d host[:port]     = set DGPS server \n\
+  -D integer         = set debug level \n\
+  -h                 = help message \n\
 ", stderr);
 }
 
@@ -185,20 +179,21 @@ static int set_device_type(char what)
 }
 
 
-static void print_settings(char *service, char *dgpsserver,
-	char *dgpsport, int need_dgps)
+static void print_settings(char *service, char *dgpsserver, char *dgpsport)
 {
     fprintf(stderr, "command line options:\n");
     fprintf(stderr, "  debug level:        %d\n", debug);
     fprintf(stderr, "  gps device name:    %s\n", device_name);
     fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     fprintf(stderr, "  gpsd port:          %s\n", service);
-    if (need_dgps) {
+    if (dgpsserver) {
       fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
-      fprintf(stderr, "  dgps port:        %s\n", dgpsport);
+      fprintf(stderr, "  dgps port:          %s\n", dgpsport);
     }
-    fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
-    fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
+    if (latitude && longitude) {
+      fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
+      fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
+    }
 }
 
 static int handle_dgps()
@@ -252,11 +247,9 @@ static int activate()
 int main(int argc, char *argv[])
 {
     char *default_service = "gpsd";
-    char *default_dgpsserver = "dgps.wsrcc.com";
-    char *default_dgpsport = "rtcm-sc104";
-    char *service = 0;
-    char *dgpsport = 0;
-    char *dgpsserver = 0;
+    char *service = NULL;
+    char *dgpsport = "rtcm-sc104";
+    char *dgpsserver = NULL;
     struct sockaddr_in fsin;
     int msock;
     fd_set rfds;
@@ -264,10 +257,10 @@ int main(int argc, char *argv[])
     fd_set nmea_fds;
     int alen;
     int fd, input;
-    int need_gps, need_dgps = 0, need_init = 1;
+    int need_gps;
     extern char *optarg;
     int option;
-    char buf[BUFSIZE];
+    char buf[BUFSIZE], *colon;
     int sentdgps = 0, fixcnt = 0;
 
     while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:t:")) != -1) {
@@ -278,48 +271,41 @@ int main(int argc, char *argv[])
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
 	    break;
-	case 'd':
-	    dgpsserver = optarg;
-	    break;
-	case 'L':
-	    if (optarg[strlen(optarg)-1] == 'W' || optarg[strlen(optarg)-1] == 'w'
-		|| optarg[strlen(optarg)-1] == 'E' || optarg[strlen(optarg)-1] == 'e') {
-		lond = toupper(optarg[strlen(optarg)-1]);
-		longitude = optarg;
-		longitude[strlen(optarg)-1] = '\0';
-	    } else
-		fprintf(stderr,
-		  "skipping invalid longitude (-L) option; "
-		  "%s must end in W or E\n", optarg);
-	    break;
 	case 'S':
 	    service = optarg;
 	    break;
-	case 'r':
-	    dgpsport = optarg;
+	case 'd':
+	    dgpsserver = optarg;
+	    if ((colon = strchr(optarg, ':'))) {
+		dgpsport = colon+1;
+		*colon = '\0';
+	    }
 	    break;
-	case 'l':
-	    if (optarg[strlen(optarg)-1] == 'N' || optarg[strlen(optarg)-1] == 'n'
-		|| optarg[strlen(optarg)-1] == 'S' || optarg[strlen(optarg)-1] == 's') {
-		latd = toupper(optarg[strlen(optarg) - 1]);
-		latitude = optarg;
-		latitude[strlen(optarg) - 1] = '\0';
-	    } else
+	case 'i':
+	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
+		fprintf(stderr, 
+			"gpsd: required format is latitude:longitude.\n");
+	    else if (!strchr("NSns", colon[-1]))
 		fprintf(stderr,
-			"skipping invalid latitude (-l) option;  "
-		       	"%s must end in N or S\n", optarg);
+			"gpsd: latitude field is invalid; must end in N or S.\n");
+	    else if (!strchr("EWew", optarg[strlen(optarg)-1]))
+		fprintf(stderr,
+			"gpsd: longitude field is invalid; must end in E or W.\n");
+	   else {
+		*colon = '\0';
+		latitude = optarg;
+ 		latd = toupper(optarg[strlen(latitude) - 1]);
+		latitude[strlen(latitude) - 1] = '\0';
+		longitude = colon+1;
+		lond = toupper(longitude[strlen(longitude)-1]);
+		longitude[strlen(longitude)-1] = '\0';
+	    }
 	    break;
 	case 'p':
 	    device_name = optarg;
 	    break;
 	case 's':
 	    device_speed = set_baud(strtol(optarg, NULL, 0));
-	    break;
-	case 'c':
-	    need_dgps = 1;
-	    break;
-	case 'n':
-	    need_init = 0;
 	    break;
 	case 't':
 	    gps_timeout = strtol(optarg, NULL, 0);
@@ -334,20 +320,14 @@ int main(int argc, char *argv[])
 
     if (!device_name) device_name = default_device_name;
 
-    if (need_init && !latitude) latitude = default_latitude;
-    if (need_init && !longitude) longitude = default_longitude;
-    
     if (!service) {
 	if (!getservbyname(default_service, "tcp"))
 	    service = "2947";
 	else service = default_service;
     }
 
-    if (need_dgps && !dgpsserver) dgpsserver = default_dgpsserver;
-    if (need_dgps && !dgpsport) dgpsport = default_dgpsport;
-    
     if (debug > 0) 
-	print_settings(service, dgpsserver, dgpsport, need_dgps);
+	print_settings(service, dgpsserver, dgpsport);
     
     if (debug < 2)
 	daemonize();
@@ -372,7 +352,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&nmea_fds);
     FD_SET(msock, &afds);
 
-    if (need_dgps) {
+    if (dgpsserver) {
 	char hn[256];
 
 	if (!getservbyname(dgpsport, "tcp"))
@@ -452,7 +432,7 @@ int main(int argc, char *argv[])
 	if (fixcnt > 10) {
 	    if (!sentdgps) {
 		sentdgps++;
-		if (need_dgps)
+		if (dgpsserver)
 		    send_dgps();
 	    }
 	}
