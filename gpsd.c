@@ -122,11 +122,10 @@ static void usage(void)
   Options include: \n\
   -f string (default %s)   = set GPS device name \n"
 "  -S integer (default %4s)      = set port for daemon \n"
-#ifdef TRIPMATE_ENABLE
+#if defined(TRIPMATE_ENABLE)  || defined(ZODIAC_ENABLE)
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
-#endif /* TRIPMATE_ENABLE */
-"  -s baud_rate                   = set baud rate on GPS device \n\
-  -d host[:port]                 = set DGPS server \n\
+#endif /* defined(TRIPMATE_ENABLE) || defined(ZODIAC_ENABLE) */
+  "-d host[:port]                 = set DGPS server \n\
   -P pidfile                     = set file to record process ID \n\
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n",
@@ -534,7 +533,7 @@ int main(int argc, char *argv[])
     extern char *optarg;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:s:v"
+    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
@@ -587,9 +586,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'P':
 	    pid_file = optarg;
-	    break;
-	case 's':
-	    gpsd_speed = atoi(optarg);
 	    break;
 	case 'v':
 	    printf("gpsd %s\n", VERSION);

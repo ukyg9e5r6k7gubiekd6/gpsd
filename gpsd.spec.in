@@ -112,8 +112,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 * Fri Mar  4 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.16-1
 - New F command allows changing the GPS device after startup time.
   Hotplug scripts to go with it are now installed by the RPM.  The
-  Garmin probe is working.  The -T option is gone.  We have zero
-  configuration!
+  Garmin probe is working.  The -T and -s options are gone.  We have 
+  achieved zero configuration!
 
 * Wed Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.15-1
 - A new packet engine autobauds much more quickly, and now iterates

@@ -21,7 +21,6 @@ and speedometer</refpurpose>
   <command>gpsd</command>  
       <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
-      <arg choice='opt'>-s <replaceable>baudrate</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
       <arg choice='opt'>-n </arg>      
@@ -93,12 +92,6 @@ factor dependent on current satellite position.)</para>
 <varlistentry>
 <term>-S</term>
 <listitem><para>Set TCP/IP port (default is 2947).</para></listitem>
-</varlistentry>
-<varlistentry>
-<term>-s</term>
-<listitem><para>Set GPS communication speed in bits per second.  It is
-generally not necessary to set this, because the daemon will
-autoconfigure itself to the correct baud rate.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-d</term>
