@@ -121,8 +121,9 @@ static void build_gui(Widget lxbApp)
     Arg args[100];
     XGCValues gcv;
 
+    /* the root application window */
     n = 0;
-    XtSetArg(args[n], XmNgeometry, "610x460");	/* size of application window */
+    XtSetArg(args[n], XmNgeometry, "610x460");
     n++;
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
@@ -135,16 +136,16 @@ static void build_gui(Widget lxbApp)
     n++;
     XtSetValues(lxbApp, args, n);
 
+    /* the data panel */
     n = 0;
     XtSetArg(args[n], XmNrubberPositioning, False);
     n++;
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
-
     data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
 
-#define FRAMEHEIGHT	220
     /* satellite location and SNR display */
+#define FRAMEHEIGHT	220
     XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNtopOffset, 10);
