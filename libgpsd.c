@@ -111,9 +111,17 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 	    break;
 	case 'X':
 	    if (!strncmp(sp, "X=1", 3))
+	    {
+		gpsdata->online_stamp.changed = gpsdata->online != 1;
 		gpsdata->online = 1;
+		REFRESH(gpsdata->online_stamp);
+	    }
 	    else if (!strncmp(sp, "X=0", 3))
+	    {
+		gpsdata->online_stamp.changed = gpsdata->online != 0;
 		gpsdata->online = 0;
+		REFRESH(gpsdata->online_stamp);
+	    }
 	    break;
 	case 'Y':
 	    i1 = atoi(sp+2);
@@ -159,7 +167,8 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 	}
     }
 
-    return gpsdata->latlon_stamp.changed 
+    return gpsdata->online_stamp.changed
+	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
 	|| gpsdata->speed_stamp.changed 
 	|| gpsdata->track_stamp.changed 
@@ -213,10 +222,12 @@ void data_dump(struct gps_data *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    printf("utc: %s\n", collect->utc);
+    if (collect->online_stamp.refreshes)
+	printf("online: %d\n", collect->online);
     if (collect->latlon_stamp.refreshes)
     {
-	printf("P: lat/lon: %lf %lf ", collect->latitude, collect->longitude);
+	printf("P: lat/lon: %lf %lf utc=%s", 
+	       collect->latitude, collect->longitude, collect->utc);
 	printf("(lr=%ld, ttl=%d, refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->latlon_stamp.last_refresh,
 	       collect->latlon_stamp.time_to_live,
@@ -313,11 +324,22 @@ main(int argc, char *argv[])
     memset(&collect, '\0', sizeof(collect));
     fd = gpsd_open(&collect, GPS_TIMEOUT, NULL, 0);
 
-    strcpy(buf, argv[1]);
-    strcat(buf,"\n");
-    gpsd_query(fd, buf, &collect);
+    if (argc > 1)
+    {
+	strcpy(buf, argv[1]);
+	strcat(buf,"\n");
+	gpsd_query(fd, buf, &collect);
+	data_dump(&collect, time(NULL));
+    }
+    else
+    {
+	while (fgets(buf, sizeof(buf), stdin))
+	{
+	    gpsd_query(fd, buf, &collect);
+	    data_dump(&collect, time(NULL));
+	}
+    }
 
-    data_dump(&collect, time(NULL));
 
     gpsd_close(fd);
 }

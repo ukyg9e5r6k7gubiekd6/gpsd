@@ -85,6 +85,7 @@ void gps_deactivate(struct gpsd_t *session)
 /* temporarily release the GPS device */
 {
     session->gNMEAdata.online = 0;
+    REFRESH(session->gNMEAdata.online_stamp);
     session->gNMEAdata.mode = MODE_NO_FIX;
     session->gNMEAdata.status = STATUS_NO_FIX;
     session->fdin = -1;
@@ -105,6 +106,7 @@ int gps_activate(struct gpsd_t *session)
     else
     {
 	session->gNMEAdata.online = 1;
+	REFRESH(session->gNMEAdata.online_stamp);
 	session->fdin = input;
 	session->fdout = input;
 	gpscli_report(1, "gps_activate: opened GPS (%d)\n", input);
@@ -148,10 +150,12 @@ int gps_poll(struct gpsd_t *session)
     if (waiting <= 0)
     {
 	session->gNMEAdata.online = 0;
+	REFRESH(session->gNMEAdata.online_stamp);
 	return waiting;
     }
     else if (waiting) {
 	session->gNMEAdata.online = 1;
+	REFRESH(session->gNMEAdata.online_stamp);
 
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);

@@ -376,17 +376,20 @@ void update_display(char *message)
     sprintf(s, "%f", session.gNMEAdata.track);
     XmTextFieldSetString(text_6, s);
 
-    switch (session.gNMEAdata.mode) {
-    case 2:
-	sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
-	break;
-    case 3:
-	sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
-	break;
-    default:
-	sprintf(s, "NO FIX");
-	break;
-    }
+    if (!session.gNMEAdata.online)
+	strcpy(s, "OFFLINE");
+    else
+	switch (session.gNMEAdata.mode) {
+	case 2:
+	    sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	    break;
+	case 3:
+	    sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
+	    break;
+	default:
+	    strcpy(s, "NO FIX");
+	    break;
+	}
     XmTextFieldSetString(text_7, s);
 
     draw_graphics();
