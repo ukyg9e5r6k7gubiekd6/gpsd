@@ -17,7 +17,7 @@ bin_SCRIPTS = gpsprobe
 #
 gps_SOURCES = display.c display.h gps.c
 gps_CFLAGS = $(X_CFLAGS)
-gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
+gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Build xgpsspeed

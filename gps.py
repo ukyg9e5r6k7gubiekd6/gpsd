@@ -124,6 +124,7 @@ class gps(gpsdata):
     def __init__(self, host="localhost", port="2947", verbose=0):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
+	self.sockfile = None
 	self.connect(host, port)
         self.verbose = verbose
 	self.raw_hook = None
@@ -146,17 +147,20 @@ class gps(gpsdata):
         #if self.debuglevel > 0: print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
+        self.sockfile = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
                 #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
+                self.sockfile = self.sock.makefile()
             except socket.error, msg:
                 #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 if self.sock:
                     self.sock.close()
                 self.sock = None
+                self.sockfile = None
                 continue
             break
         if not self.sock:
@@ -168,6 +172,8 @@ class gps(gpsdata):
     def __del__(self):
 	if self.sock:
 	    self.sock.close()
+        self.sock = None
+        self.sockfile = None
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
@@ -254,12 +260,13 @@ class gps(gpsdata):
 	"Wait for and read data being streamed from gpsd."
         data = self.sock.recv(1024)
         if self.verbose:
-            sys.stderr("GPS DATA %s\n", repr(data))
+            sys.stderr.write("GPS DATA %s\n", repr(data))
 	return self.__unpack(data)
 
     def query(self, commands):
 	"Send a command, get back a response."
-	self.sock.send(commands)
+ 	self.sockfile.write(commands)
+ 	self.sockfile.flush()
 	return self.poll()
 
 # some multipliers for interpreting GPS output
