@@ -200,11 +200,11 @@ if __name__ == '__main__':
             fp.write('centroidx=%f\n' % centroid[0])
             fp.write('centroidy=%f\n' % centroid[1])
             fp.write('cep=%f\n' % d(centroid, fixes[len(fixes)/2]))
-            fp.write('plot "-" using 1:2 notitle\n')
+            fp.write('plot "-" using 1:2 title "%d GPS fixes"\n' % len(fixes))
             fp.write("#\n")
             fp.write("# Lat	Lon\n")
             for (lat, lon) in fixes:
-                fp.write("  %f	%f	1\n" % (lat, lon))
+                fp.write("  %f	%f\n" % (lat, lon))
             fp.write("end\n")
             fp.write("pause -1\n")
             fp.close()
