@@ -150,7 +150,9 @@ decimal integer numeral:</para>
 
 <varlistentry>
 <term>d</term>
-<listitem><para>Returns the UTC time in the form "D=dd/mm/yyyy hh:nmm:ss".</para></listitem>
+<listitem><para>Returns the UTC time in the ISO 8601 format,
+"D=yyyy-mm-ddThh:nmm:ss.ssZ". Digits of precision in the fractional-seconds
+part will vary and may be zero.</para></listitem>
 </varlistentry>
 
 <varlistentry>
