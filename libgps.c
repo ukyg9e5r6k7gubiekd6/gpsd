@@ -71,7 +71,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (!strncmp(ns, "GPSD", 4)) {
 	    for (sp = ns + 5; ; sp = tp) {
-		tp = sp + strcspn(sp, ".\r\n");
+		tp = sp + strcspn(sp, ",\r\n");
 		if (!*tp) break;
 		*tp = '\0';
 
@@ -242,11 +242,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
-			char timestamp[20];
+			char tag[20], timestamp[20];
 
-			sscanf(sp, "Y=%20s %d ", 
-			       timestamp, &gpsdata->satellites);
-			if (timestamp[0] != '?') {
+			sscanf(sp, "Y=%20s %20s %d ", 
+			       tag, timestamp, &gpsdata->satellites);
+			if (tag[0] != '?') {
+			    strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			    gpsdata->sentence_time = atof(timestamp);
 			    gpsdata->valid |= TIME_SET;
 			}

@@ -634,10 +634,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 		int used, reported = 0;
 		strcpy(phrase, ",Y=");
 		if (whoami->device->gpsdata.valid & TIME_SET)
-		    sprintf(phrase+strlen(phrase), "%f ", whoami->device->gpsdata.sentence_time);
+		    sprintf(phrase+strlen(phrase), "%s %f ", 
+			    whoami->device->gpsdata.tag[0] ? whoami->device->gpsdata.tag : "-",
+			    whoami->device->gpsdata.sentence_time);
 		else
 		    strcat(phrase, "? ");
-		sprintf(phrase+strlen(phrase), "%d:", whoami->device->gpsdata.satellites);
+		sprintf(phrase+strlen(phrase), "%d:", 
+			whoami->device->gpsdata.satellites);
 		for (i = 0; i < whoami->device->gpsdata.satellites; i++) {
 		    used = 0;
 		    for (j = 0; j < whoami->device->gpsdata.satellites_used; j++)
