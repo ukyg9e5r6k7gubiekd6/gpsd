@@ -50,8 +50,6 @@
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data_t *gpsdata);
 
-void update_display(char *message);
-
 /* global variables */
 static Widget lxbApp;
 static Widget form_6;
@@ -360,7 +358,7 @@ void update_display(char *message)
 			gpsdata.elevation[i],
 			gpsdata.azimuth[i], gpsdata.ss[i]);
 	    } else
-		sprintf(s, " ");
+		sprintf(s, "                  ");
 	    string[i] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(list_7, string, sizeof(string), 1);
