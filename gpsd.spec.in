@@ -117,8 +117,11 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
+* Mon Sep 20 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
+- Enable conditioning out of Zodiac and Tripmate support.
+
 * Thu Sep 16 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.0-1
-- Packaging fixes for 2.0 release
+- Packaging fixes for 2.0 release.
 
 * Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.98-1
 - Only do one getdtablesize() call, otherwise we do several

@@ -48,6 +48,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
     }
     else
     {
+#ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
 	/* maybe this is a trigger string for a driver we know about? */
@@ -62,6 +63,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 		return;
 	    }
 	}
+#endif /* NON_NMEA_ENABLE */
 	gpsd_report(1, "unknown exception: \"%s\"\n", sentence);
     }
 }
@@ -114,6 +116,7 @@ struct gps_type_t nmea =
     1,			/* updates every second */
 };
 
+#ifdef NON_NMEA_ENABLE
 /**************************************************************************
  *
  * FV18 -- doesn't send GPGSAs, uses 2 stop bits
@@ -246,6 +249,7 @@ struct gps_type_t earthmate =
     1,				/* updates every second */
 };
 #endif /* ZODIAC_ENABLE */
+#endif /* NON_NMEA_ENABLE */
 
 /**************************************************************************
  *
@@ -270,6 +274,7 @@ struct gps_type_t logfile =
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
+#ifdef NON_NMEA_ENABLE
     &fv18,
 #ifdef TRIPMATE_ENABLE
     &tripmate,
@@ -278,6 +283,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &earthmate, 
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
+#endif /* NON_NMEA_ENABLE */
     &logfile,
     NULL,
 };

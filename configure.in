@@ -233,6 +233,7 @@ fi
 
 AC_C_BIGENDIAN
 
+AC_DEFINE(NON_NMEA_ENABLE,  1, [Support for devices other than straight NMEA])
 AC_DEFINE(TRIPMATE_ENABLE,  1, [DeLorme TripMate support])
 AC_DEFINE(ZODIAC_ENABLE, 1, [Zodiac chipset support])
  
