@@ -71,7 +71,6 @@ try:
 
     if logdata:
         lines = map(lambda x: leader+x, logdata.split(leader)[1:])
-        print lines
 
         ttyfp = open(slave, "rw")
         raw = termios.tcgetattr(ttyfp.fileno())
