@@ -573,7 +573,7 @@ int main(int argc, char *argv[])
 	daemonize(pid_file);
 
     /* user may want to re-initialize the session */
-    if ((st == setjmp(restartbuf)) == SIGHUP+1) {
+    if ((st = setjmp(restartbuf)) == SIGHUP+1) {
 	gpsd_wrap(session);
 	gpsd_report(1, "gpsd restarted by SIGHUP\n");
     } else if (st > 0) {
