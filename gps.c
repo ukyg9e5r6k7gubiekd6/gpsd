@@ -74,14 +74,14 @@ static Widget status;
 
 String fallback_resources[] =
 {
-    "*gps_data_t.time.label.labelString: Time  ",
-    "*gps_data_t.latitude.label.labelString: Lat.  ",
-    "*gps_data_t.longitude.label.labelString: Long. ",
-    "*gps_data_t.altitude.label.labelString: Alt.  ",
-    "*gps_data_t.speed.label.labelString: Speed ",
-    "*gps_data_t.track.label.labelString: Track ",
-    "*gps_data_t.fix_status.label.labelString: Status",
-    "*gps_data_t.quit.label.labelString: Quit",
+    "*gpsdata.time.label.labelString: Time  ",
+    "*gpsdata.latitude.label.labelString: Lat.  ",
+    "*gpsdata.longitude.label.labelString: Long. ",
+    "*gpsdata.altitude.label.labelString: Alt.  ",
+    "*gpsdata.speed.label.labelString: Speed ",
+    "*gpsdata.track.label.labelString: Track ",
+    "*gpsdata.fix_status.label.labelString: Status",
+    "*gpsdata.quit.label.labelString: Quit",
     NULL
 };
 
@@ -141,7 +141,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
 
-    form_6 = XtCreateManagedWidget("gps_data_t", xmFormWidgetClass, lxbApp, args, n);
+    form_6 = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
 
 #define FRAMEHEIGHT	220
     /* satellite location and SNR display */
