@@ -72,6 +72,9 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %attr(755, root, root) /etc/init.d/gpsd
 
 %changelog
+- Implemented non-blocking writes to clients, so a stalled client
+  cannot stall gpsd.  Fixed a nasty array-overrun bug.
+
 * Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 
   are in there now.

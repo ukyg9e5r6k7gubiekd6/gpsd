@@ -294,6 +294,9 @@ GPS streams updates at you, but the updates are in GPSD format.</li>
 
 <li>The daemon now automatically tries to reconnect to the GPS once
 a second when it is offline but clients are connected.</li>
+
+<li>Writes to clients are nonblocking, so new gpsd cannot be stalled
+by a wedged client.</p>
 </ol>
 
 <p>These changes mean that even if users casually unplug and reconnect a
@@ -312,7 +315,7 @@ had to do this because libgpsd.a didn't exist.  Now that it does, the
 exercise is rather pointless.  Using libgpsd.a will probably simplify 
 your code a lot.</p>
 
-<p>You will almost always want to use libgpsd.a and go through the
+<p>You will almost always want to use libgps.a and go through the
 daemon; among other things, this means more than one application 
 will be able to query the GPS without causing confusion.  The only
 exception will be in very space-constrained single-user scenarios,
@@ -320,14 +323,22 @@ perhaps on embedded systems or PDAs.</p>
 
 <p>Note that gpsd-2's command-line options have been changed and
 simplified.  If your gpsd-1.x-using application is starting up gpsd
-directly you may find you have to modify the invocation.</p>
+directly you may find you have to modify the invocation.  However,
+we don't recommend this.  New gpsd is designed to be started at
+boot time and run continuously just like any normal daemon.</p>
 
 <h1>Where to learn more</h1>
 
 <dl>
-<dt><a href="http://34n118w.net/htmldir/GPS.html">GPS Resources</dt>
+<dt><a href="http://34n118w.net/htmldir/GPS.html">GPS Resources</a></dt>
 <dd>This is where the orbital simulation came from.</dd>
+
+<dt><a href='http://www.topology.org/soft/gps.html'>GPS interfaces and 
+software</dt>
+<dd>Linux and open-source resources for working with GPSes.</dd>
 </dl>
 
+<dt><a href="http://www.gpsinformation.org/dale/nmea.htm">NMEA data</a></dt>
+<dd>Excellent document on the NMEA protocol.</dd>
 </body>
 </html>
