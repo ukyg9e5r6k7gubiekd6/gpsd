@@ -217,11 +217,10 @@ AC_MSG_WARN([The Motif library '-lXm' could not be found.
                     Please use the configure options '--with-motif-includes=DIR'
                     and '--with-motif-libraries=DIR' to specify the Xm location.
                     See the file 'config.log' for further diagnostics.])
-MISSING_MOTIF="# "
-AC_SUBST(MISSING_MOTIF)
 fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
+AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
 dnl
 dnl
 dnl

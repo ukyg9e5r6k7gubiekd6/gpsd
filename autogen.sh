@@ -95,6 +95,7 @@ fi
 echo Configuring build environment for gpsd
 aclocal \
   && libtoolize --force --copy \
+  && autoheader --force \
   && automake --add-missing --foreign --copy \
   && autoconf --force \
   && echo Now running configure to configure gpsd \

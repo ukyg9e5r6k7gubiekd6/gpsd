@@ -1,7 +1,13 @@
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
-EXTRA_PROGRAMS = gps xgpsspeed
-bin_PROGRAMS = $(MISSING_MOTIF) gps xgpsspeed 
+#
+# Build stuff depending on Motif
+#
+if HAVE_MOTIF
+BUILD_PROGS = gps xgpsspeed
+endif
+
+bin_PROGRAMS = $(BUILD_PROGS)
 bin_SCRIPTS = gpsprobe
 
 #
@@ -10,7 +16,6 @@ bin_SCRIPTS = gpsprobe
 gps_SOURCES = display.c gps.c
 gps_CFLAGS = $(X_CFLAGS)
 gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
-
 
 #
 # Build xgpsspeed

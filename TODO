@@ -1,8 +1,4 @@
-* Debug Zodiac EarthMate support
-
-Russ reports it isn't working.
-
-* Integrate M8 support
+* Integrate M8 support to whatever extent needed.
 
 See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
 
@@ -40,7 +36,7 @@ relationships are there?
 * Mine the contrib directory for good ideas
 
 This is a post-2.0 item.  There is code in there that can do some interesting
-tricks with SiRF-II chipsets.
+tricks with SiRF-II chipsets.  Lonnie Mendez is working on this.
 
 * gpsd.py is unsatisfactory
 
