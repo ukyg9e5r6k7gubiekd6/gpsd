@@ -10,7 +10,7 @@ endif
 XMLTO = xmlto
 
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon
-bin_SCRIPTS = gpsprobe gpsprof gpsfake 
+bin_SCRIPTS = gpsprof gpsfake 
 
 #
 # Build xgps
@@ -75,7 +75,6 @@ man_MANS = \
 	xgps.1 \
 	libgps.3 \
 	libgpsd.3 \
-	gpsprobe.1 \
 	gpsprof.1 \
 	gpsfake.1 \
 	sirfmon.1
@@ -91,9 +90,6 @@ libgps.3: libgps.xml
 
 libgpsd.3: libgpsd.xml
 	-$(XMLTO) man libgpsd.xml
-
-gpsprobe.1: gpsprobe.xml
-	-$(XMLTO) man gpsprobe.xml
 
 gpsprof.1: gpsprof.xml
 	-$(XMLTO) man gpsprof.xml
@@ -130,7 +126,6 @@ EXTRA_DIST = \
 	gpsd.xml \
 	libgpsd.xml \
 	libgps.xml \
-	gpsprobe.xml \
 	gpsprof.xml \
 	gpsfake.xml \
 	sirfmon.xml \
@@ -141,7 +136,6 @@ EXTRA_DIST = \
 	gpsd.spec \
 	gps.py \
 	gpsd.py \
-	gpsprobe \
 	gpsprof \
 	gpsfake \
 	gpsd.hotplug \

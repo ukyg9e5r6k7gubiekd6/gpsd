@@ -76,14 +76,12 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %attr(755, root, root) %{_sbindir}/gpsd
 %attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
-%attr(755, root, root) %{_bindir}/gpsprobe
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
 %{_libdir}/libgps.so*
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/xgps.1*
-%{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/sirfmon.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
@@ -108,7 +106,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 * Mon Mar 28 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Rob Janssen's patches to fix timezone issues and improve cooperation
   with NTP.  License changed to BSD so linking to libgps won't make people 
-  nervous.
+  nervous.  gpsprobe is obsolete and has been removed, the autoprobe and
+  profiling capabilities in the daemon more than replace it.
 
 * Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use

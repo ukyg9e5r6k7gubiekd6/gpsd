@@ -133,9 +133,6 @@ repository.</p></li>
 <dt><a href="libgpsd.html">libgpsd.3</a></dt>
 <dd>The low-level library used by <code>gpsd</code> to talk to a GPS.</dd>
 
-<dt><a href="gpsprobe.html">gpsprobe.1</a></dt>
-<dd>The <code>gpsprobe</code> program for querying GPS capabilities.</dd>
-
 <dt><a href="gpsprof.html">gpsprof.1</a></dt>
 <dd>The <code>gpsprof</code> program for measuring GPS latency.</dd>
 
