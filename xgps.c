@@ -229,12 +229,7 @@ XtIntervalId timeout;
 static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
 {
-    int ret;
-
-    ret = gps_poll(gpsdata);
-    if ( 0 > ret ) {
-	fprintf(stderr, "xgps: gps_poll(): %d, %s\n", errno, strerror(errno));
-    }
+    gps_poll(gpsdata);
 }
 
 static void update_panel(struct gps_data_t *gpsdata, char *message)
