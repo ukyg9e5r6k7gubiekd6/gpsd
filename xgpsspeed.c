@@ -53,10 +53,7 @@ String fallback_resources[] =
 
 static void update_display(char *buf)
 {
-  int new = rint(gpsdata->speed * 6076.12 / 5280);
-#if 0
-  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gpsdata->speed, rint(gpsdata->speed * 5208/6706.12), (int)rint(gpsdata->speed * 5208/6706.12));
-#endif
+  int new = rint(gpsdata->speed * KNOTS_TO_MPH);
   if (new > 100)
     new = 100;
 
@@ -94,15 +91,9 @@ int main(int argc, char **argv)
 	}
     }
 
-
-    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", options, XtNumber(options),
-			    &argc, argv, fallback_resources, NULL);
-
-#if 0
-    XtGetApplicationResources( toplevel, (caddr_t) &resources, 
-			      my_resources, XtNumber(my_resources),
-			      NULL, (Cardinal) 0);
-#endif
+    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
+				 options, XtNumber(options),
+				 &argc, argv, fallback_resources, NULL);
 
    /**** Shell Widget ****/
     i = 0;
