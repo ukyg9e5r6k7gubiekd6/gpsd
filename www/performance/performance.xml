@@ -247,8 +247,9 @@ moderately fast machine in early 2005, but average processor
 utilization remained low throughout the tests.</para>
 
 <para>The version of the GPSD software I used for the test was
-released as 2.13.  It was configured with --enable-profiling.  All
-graphs and figures were generated with
+released as 2.13.  It was configured with
+&mdash;&mdash;enable-profiling.  All graphs and figures were generated
+with
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 a tool built for this purpose and included in the distribution.</para>
 
@@ -299,10 +300,11 @@ that the profiling reports are not introducing any measurable latency.
 But what is more interesting is to notice that D1 + W + E2 + T2 + D2
 vanishes &mdash; at this timescale, all we can see is E1 and T1.</para>
 
-<para>The <ulink url='profile2.txt'>raw data</ulink> bears this out.  All
-times besides E1 and T1 are so small that they are comparable to the
-noise level of the measurements.  This may be a bit surprising unless
-one remembers that W=0 is expected in this setup, and that a modern
+<para>The <ulink url='profile2.txt'>raw data</ulink> bears this out.
+All times besides E1 and T1 are so small that they are comparable to
+the noise level of the measurements.  This may be a bit surprising
+unless one knows that a W near 0 is expected in this setup;
+<application>gpsprof</application> sets watcher mode.  Also, a modern
 zero-copy TCP/IP stack like Linux's implements local sockets with very
 low overhead. It is also a little surprising that E1 is so large
 relative to E1+T1. Recall, however, that this may be measurement

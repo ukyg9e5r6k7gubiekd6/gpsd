@@ -49,7 +49,7 @@ Brook Milligan <brook@trillium.NMSU.Edu> combined gpsd and gpsclient
 into one package and autoconfiscated it.
 
 Derrick J. Brashear <shadow@dementia.org> (KB3EGH) added code for the
-EarthMate DeLame. He also added "incredibly gross code to output
+EarthMate DeLorme. He also added "incredibly gross code to output
 NMEA sentences" (his own words :-) He also did the first cut at
 DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html), 
 for the Earthmate.
