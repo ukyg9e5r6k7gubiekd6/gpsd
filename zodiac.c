@@ -75,18 +75,6 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     }
 }
 
-static long putlong(char *dm, int sign)
-{
-    double tmpl;
-    long rad;
-
-    tmpl = fabs(atof(dm));
-    rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*DEG_2_RAD;
-    if (sign)
-	rad = -rad;
-    return rad;
-}
-
 static int zodiac_speed_switch(struct gps_session_t *session, int speed)
 {
     unsigned short data[21];
