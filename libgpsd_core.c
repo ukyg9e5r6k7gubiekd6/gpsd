@@ -98,7 +98,7 @@ int gpsd_activate(struct gps_session_t *session)
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
 	if (session->packet_type == SIRF_PACKET)
 	    gpsd_switch_driver(session, "SiRF-II binary");
-	else
+	else if (session->packet_type == NMEA_PACKET)
 	    gpsd_switch_driver(session, "Generic NMEA");
 
 	return session->gNMEAdata.gps_fd;
