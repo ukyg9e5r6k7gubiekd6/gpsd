@@ -276,7 +276,8 @@ static void refresh_rightpanel1(void)
 
 int main (int argc, char **argv)
 {
-    int len,i,stopbits,bps,v;
+    unsigned int i,stopbits,bps,v;
+    int len;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
@@ -484,6 +485,7 @@ int main (int argc, char **argv)
 	    case 'a':		/* toggle 50bps subframe data */
 		memset(buf, '\0', sizeof(buf));
 		putb(0, 0x80);
+		putb(23, 12);
 		putb(24, subframe_enabled ? 0x00 : 0x04);
 		sendpkt(buf,25);
 		break;
@@ -491,7 +493,7 @@ int main (int argc, char **argv)
 	    case 'b':
 		v = atoi(line+1);
 		for (ip=rates; ip < rates+sizeof(rates)/sizeof(rates[0]); ip++)
-		    if (v == bps)
+		    if (v == *ip)
 			goto goodspeed;
 		break;
 	    goodspeed:
