@@ -124,7 +124,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Tue Feb 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.14-1
+* Fri Feb 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.14-1
 - Pass zero magnetic variation in generated NMEA from binary GPSes
   correctly.  Use O_SYNC rather than timeouts to guarantee that 
   baud-rate change strings get to the GPS before changing the line
