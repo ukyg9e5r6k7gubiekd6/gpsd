@@ -693,6 +693,7 @@ int main(int argc, char *argv[])
 	    gpsd_deactivate(session);
 	    if (gpsd_activate(session) >= 0) {
 		FD_SET(session->gNMEAdata.gps_fd, &all_fds);
+		notify_watchers("GPSD,X=1\r\n");
 	    }
 	}
 
@@ -722,6 +723,7 @@ int main(int argc, char *argv[])
 		    gpsd_deactivate(session);
 		    if (gpsd_activate(session) >= 0) {
 			FD_SET(session->gNMEAdata.gps_fd, &all_fds);
+			notify_watchers("GPSD,X=1\r\n");
 		    }
 		}
 
