@@ -31,6 +31,9 @@
 #include "gpsd.h"
 #if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
+/* FIX ME -- get actual leap seconds from subframe data */
+#define LEAP_SECONDS	13
+
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
@@ -196,6 +199,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
 	    session->gpsdata.fix.time=gpstime_to_unix(getw(22), getl(24)*1e-2);
+	    session->gpsdata.fix.time -= LEAP_SECONDS;
 #ifdef NTPSHM_ENABLE
 	    ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* defined(SHM_H) && defined(IPC_H) */
@@ -222,6 +226,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	 */
 	if (session->counter % 5)
 	    break;
+	session->gpsdata.fix.time=gpstime_to_unix(getw(1), getl(3)*1e-2);
+	session->gpsdata.fix.time -= LEAP_SECONDS;
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
@@ -254,7 +260,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_report(3, "<= GPS: %s", buf2);
 	session->gpsdata.sentence_length = 188;
 	strcpy(session->gpsdata.tag, "MTD");
-	return SATELLITE_SET;
+	return TIME_SET | SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
@@ -271,6 +277,19 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	return 0;
+
+    case 0x08:
+	/*
+	 * Chris Kuethe says:
+	 * "Message 8 is generated as the data is received. It is not
+	 * buffered on the chip. So when you enable message 8, you'll
+	 * get on subframe every 6 seconds.  Of the data received, the
+	 * almanac and ephemeris are buffered and stored, so you can
+	 * query them at will. Alas, the time parameters are not
+	 * stored, which is really lame, as the UTC-GPS correction
+	 * changes 1 second every few years. Maybe."
+	 */
+	break;
 
     case 0x09:		/* CPU Throughput */
 	gpsd_report(4, 
@@ -354,6 +373,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     */
 	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
 	    session->gpsdata.fix.time = gpstime_to_unix(getw(5), getl(7)*1e-4);
+	    session->gpsdata.fix.time -= LEAP_SECONDS;
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /*
 	     * Skip UTC, left all zeros in 231 and older firmware versions, 

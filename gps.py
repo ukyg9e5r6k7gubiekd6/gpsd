@@ -59,7 +59,6 @@ class gpsdata:
 	self.online = 0			# NZ if GPS on, zero if not
 
 	self.mode = MODE_NO_FIX
-        self.fixtime = 0.0
 	self.latitude = self.longitude = 0.0
         self.eph = 0.0
 	self.altitude = ALTITUDE_NOT_VALID	# Meters
@@ -85,6 +84,7 @@ class gpsdata:
         self.profiling = False
         self.tag = ""
         self.length = 0
+        self.gps_time = 0.0
         self.d_recv_time = 0
         self.d_decode_time = 0
         self.emit_time = 0
@@ -174,7 +174,7 @@ class gps(gpsdata):
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
-        self.utc = "?"
+        self.gps_time = 0.0
 	fields = buf.strip().split(",")
 	if fields[0] == "GPSD":
 	  for field in fields[1:]:
@@ -195,6 +195,7 @@ class gps(gpsdata):
 	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
+              self.gps_time = isotime(self.utc)
               self.valid |= TIME_SET
 	    elif cmd in ('E', 'e'):
 	      parts = data.split()
@@ -212,7 +213,7 @@ class gps(gpsdata):
                 if fields[0] == '?':
                     self.mode = MODE_NO_FIX
                 else:
-                    self.time = float(fields[0])
+                    self.gps_time = float(fields[0])
                     self.ept = float(fields[1])
                     self.latitude = float(fields[2])
                     self.longitude = float(fields[3])
@@ -299,14 +300,12 @@ class gps(gpsdata):
             return -1
         if self.verbose:
             sys.stderr.write("GPS DATA %s\n" % repr(data))
-        if self.profiling:
-            self.c_recv_time = time.time()
+        self.c_recv_time = time.time()
 	self.__unpack(data)
-        if self.utc != "?":
-            if self.profiling:
-                self.c_decode_time = time.time()
-                self.c_recv_time -= self.gps_time
-                self.c_decode_time -= self.gps_time
+        if self.gps_time:
+            self.c_decode_time = time.time()
+            self.c_recv_time -= self.gps_time
+            self.c_decode_time -= self.gps_time
         return 0
 
     def query(self, commands):

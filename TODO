@@ -1,6 +1,10 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** 'o' command sometimes returns 'inf' for speed uncertainty
+
+libgps will return this as '0'.  Fix it...
+
 ** Can anything be done to smooth reporting from NMEA GPSes?
 
 Wojciech Kazubski <wk@ire.pw.edu.pl>:
@@ -19,7 +23,7 @@ The fundamental problem here is that watcher mode is producing an 'o'
 command for each sentence with a fix in it (GPGGA, GPGLL, GPRMC).  Your
 height is flickering because only GPGGA supplies it.  I'm not sure
 why the date is flickering, but it's probaly related to a minor bug
-that Daniele Gingara is reporting.
+that Daniele Giangrazi is reporting.
 
 The way to solve this in general is to add logic to gpsd that notices
 the timing of the NMEA update cycle and only ships an 'o', with
@@ -27,9 +31,33 @@ cumulated results, on the last sentence of the cycle.  I have not tried
 this because someone on the list objected to introducing extra latency
 into the update path.
 
-** Fix latency profiling
+But we can at least permit altitude to persist until mode goes to 1 or 2.
 
-Something in the big library change broke latency profiling.
+** In the SiRF driver, get leap seconds from almanac data
+
+Currently we're using a fixed 13-leap-second offset to convert GPS
+time to UTC.  This is wrong for the long term.  We should compute
+it from message 8 subframe data.
+
+** Set FIFO threshold to 1 to reduce jitter in serial-message times
+
+This can matter if you're using gpsd as a time reference
+
+Rob Janssen <gpsd@xs4all.nl>:
+>> Setting the FIFO threshold to 1 can improve things.
+>
+> How does one do this?
+
+#include <linux/serial.h>
+
+use ioctl TIOCGSERIAL to get a struct serial_struct filled with the
+settings of the UART, modify what you want, and write it back using ioctl
+TIOCSSERIAL.
+
+Hmmm, now that I check this in the kernel source it does not seem to be
+possible to set the receive FIFO size from a user program, only the
+transmit FIFO.  However it appears that setting it to 1 will also disable
+the receive FIFO.  You'll have to experiment.
 
 ** Supply geoidal separation for SiRF packet 2
 
