@@ -28,7 +28,8 @@ int gpsd_get_speed(struct termios* ttyctl)
     case B4800:  return(4800);
     case B9600:  return(9600);
     case B19200: return(19200);
-    default: return(38400);
+    case B38400: return(38400);
+    default: return(57600);
     }
 }
 
@@ -54,8 +55,10 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
       speed =  B9600;
     else if (speed < 38400)
       speed =  B19200;
+    else if (speed < 57600)
+      speed =  38400;
     else
-      speed =  B38400;
+      speed =  57600;
 
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
     cfsetispeed(&session->ttyset, (speed_t)speed);
