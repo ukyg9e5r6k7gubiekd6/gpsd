@@ -1,6 +1,10 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Fix latency profiling
+
+Something in the big library change broke latency profiling.
+
 ** Support SiRF XTRAC mode
 
 Jose Bernardo Silva <jbs@bandos.homelinux.com>

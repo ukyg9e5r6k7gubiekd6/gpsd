@@ -299,7 +299,7 @@ def plotframe(await, fname, file, speed, threshold, title):
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:o:rs:t:T:")
-        formatter = "split"
+        formatter = "space"
         raw = False
         file = None
         speed = 0

@@ -59,7 +59,8 @@ Currently the following plot types are defined:</para>
 <listitem>
 <para>Generate a scattergram of fixes and plot a probable-error
 circle.  This data is only meaningful if the GPS is held stationary
-while <application>gpsprof</application> is running.</para>
+while <application>gpsprof</application> is running. 
+This is the default.</para>
 <para></para>
 </listitem>
 </varlistentry>
@@ -74,7 +75,7 @@ while <application>gpsprof</application> is running.</para>
 <listitem>
 <para>Plot filtered data.  Sentences with an apparent latency larger
 than 1 second are discarded.  Each sentence has its RS232 latency
-time colored differently.  This is the default.</para>
+time colored differently.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
