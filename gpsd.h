@@ -71,11 +71,6 @@ struct gps_type_t {
 #endif
 #endif
 
-/* Who thought __FD_SETSIZE was portable? */
-#ifndef __FD_SETSIZE
-#define __FD_SETSIZE FD_SETSIZE
-#endif
-
 /*
  * The packet buffers need to be as long than the longest packet we
  * expect to see in any protocol, because we have to be able to hold
@@ -84,7 +79,7 @@ struct gps_type_t {
  * of header/length/checksum/trailer.  But making this longer also 
  * slows down the autobauding.
  */
-#define MAX_PACKET_LENGTH	193	/* 188 + 8 + 1 */
+#define MAX_PACKET_LENGTH	197	/* 188 + 8 + 1 */
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
@@ -107,7 +102,7 @@ struct gps_session_t {
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
     jmp_buf packet_error;
-    double poll_times[__FD_SETSIZE];	/* last daemon poll time */
+    double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef BINARY_ENABLE
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */
@@ -120,6 +115,8 @@ struct gps_session_t {
     double seconds;
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
+#define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
+#define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
