@@ -100,26 +100,84 @@ static int update_field_f(char *sentence, int fld, double *dest)
 
 /**************************************************************************
  *
- * NMEA sentence handling begin here
+ * Scary timestamp fudging begins here
  *
  **************************************************************************/
 
 /*
-   The time field in the GPRMC sentence is in the format hhmmss;
-   the date field is in the format ddmmyy. The output will
-   be in the format:
+   Three sentences, GGA and GGL and RMC, contain timestamps.
+   Timestamps always look like hhmmss.ss, with the trailing .ss part optional.
+   RMC alone has a date field, in the format ddmmyy.  
 
-   mm/dd/yyyy hh:mm:ss
-   01234567890123456789
+   We want the output to be in the format:
+
+   mm/dd/yyyy hh:mm:ss.sss
+   01234567890123456789012
+
+   with a 4-digit year (where part or all of the decimal second suffix may 
+   be omitted).  This means that for GPRMC we must supply a century and for
+   GGA and GGL we must supply a century, year, and day.
+
+   We get the missing data from the host machine's clock time.  That
+   is, the machine where this *daemon* is running -- which is probably
+   connected to the GPS by a link short enough that it doesn't cross
+   the International Date Line.  Even if it does, this hack could only
+   screw the year number up for two hours around the first midnight of
+   a new century.
  */
+
+static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
+/* sentence supplied ddmmyy, but no century part */
+{
+    time_t now;
+    struct tm *tm;
+
+    strncpy(out->utc, ddmmyy + 2, 2);	/* copy month */
+    strncpy(out->utc + 3, ddmmyy, 2);	/* copy date */
+    out->utc[2] = out->utc[5] = '/';
+
+    now = time(NULL);
+    tm = localtime(&now);
+    strftime(out->utc + 6, 3, "%C", tm);
+    strncpy(out->utc + 8, ddmmyy + 4, 2);	/* copy year */
+    out->utc[10] = ' ';
+}
+
+static void fake_mmddyyyy(struct gps_data_t *out)
+/* sentence didn't sypply mm/dd/yyy, so we have to fake it */
+{
+    time_t now;
+    struct tm *tm;
+
+    now = time(NULL);
+    tm = localtime(&now);
+    strftime(out->utc, sizeof(out->utc), "%m/%d/%Y ", tm);
+}
+
+static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
+/* update last-fix field from a UTC time */
+{
+    strncpy(out->utc + 11, hhmmss, 2);	/* copy hours */
+    out->utc[13] = ':';
+    strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
+    out->utc[16] = ':';
+    strncpy(out->utc + 17 , hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
+
+}
+
+/**************************************************************************
+ *
+ * NMEA sentence handling begin here
+ *
+ **************************************************************************/
 
 static void processGPRMC(char *sentence, struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
         RMC - Recommended minimum specific GPS/Transit data
-        RMC,225446,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
-           225446       Time of fix 22:54:46 UTC
+        RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
+           225446.33    Time of fix 22:54:46 UTC
            A            Navigation receiver warning A = OK, V = warning
            4916.45,N    Latitude 49 deg. 16.45 min North
            12311.12,W   Longitude 123 deg. 11.12 min West
@@ -130,36 +188,8 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
            *68          mandatory nmea_checksum
 
      */
-    char ddmmyy[10], hhmmss[10];
-    time_t now;
-    struct tm *tm;
-
-    strcpy(ddmmyy, field(sentence, 9));	/* Date: ddmmyy */
-
-    strncpy(out->utc, ddmmyy + 2, 2);	/* copy month */
-    strncpy(out->utc + 3, ddmmyy, 2);	/* copy date */
-
-    /*
-     * Uh oh, the NMEA designers screwed the pooch and returned a 2-digit year.
-     * Get the high two digits of the year from the host machine's clock time.
-     * That is, the machine where this *daemon* is running -- which is probably
-     * connected to the GPS by a cable short enough that it doesn't cross a
-     * timezone boundary.
-     */
-    now = time(NULL);
-    tm = localtime(&now);
-    strftime(out->utc + 6, 3, "%C", tm);
-    strncpy(out->utc + 8, ddmmyy + 4, 2);	/* copy year */
-
-    strcpy(hhmmss, field(sentence, 1));		/* Time: hhmmss */
-    strncpy(out->utc + 11, hhmmss, 2);		/* copy hours */
-    strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
-    strncpy(out->utc + 17, hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
-
-    /* add '/'s, ':'s, ' ' and string terminator */
-    out->utc[2] = out->utc[5] = '/';
-    out->utc[10] = ' ';
-    out->utc[13] = out->utc[16] = ':';
+    merge_ddmmyy(field(sentence, 9), out);
+    merge_hhmmss(field(sentence, 1), out);
 
     do_lat_lon(sentence, 3, out);
 
@@ -198,18 +228,23 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
     char *status = field(sentence, 7);
     int newstatus = out->status;
 
-    /* we could extract the time, but the gpsd timestamp will be good enough */
-    do_lat_lon(sentence, 1, out);
-    if (status[0] == 'N')
-	newstatus = STATUS_NO_FIX;
-    else if (status[0] == 'D')
-	newstatus = STATUS_DGPS_FIX;	/* differential */
-    else
-	newstatus = STATUS_FIX;
-    out->status_stamp.changed = (out->status != newstatus);
-    out->status = newstatus;
-    REFRESH(out->status_stamp);
-    gpscli_report(3, "GPGLL sets status %d\n", out->status);
+    if (strcmp(field(sentence, 6), "V"))
+    {
+	do_lat_lon(sentence, 1, out);
+
+	fake_mmddyyyy(out);
+	merge_hhmmss(field(sentence, 5), out);
+	if (status[0] == 'N')
+	    newstatus = STATUS_NO_FIX;
+	else if (status[0] == 'D')
+	    newstatus = STATUS_DGPS_FIX;	/* differential */
+	else
+	    newstatus = STATUS_FIX;
+	out->status_stamp.changed = (out->status != newstatus);
+	out->status = newstatus;
+	REFRESH(out->status_stamp);
+	gpscli_report(3, "GPGLL sets status %d\n", out->status);
+    }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -304,6 +339,8 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
+    fake_mmddyyyy(out);
+    merge_hhmmss(field(sentence, 1), out);
     do_lat_lon(sentence, 2, out);
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
