@@ -261,6 +261,7 @@ int main(int argc, char *argv[])
     int option;
     char buf[BUFSIZE], *colon;
     int sentdgps = 0, fixcnt = 0;
+    time_t now;
 
     session.debug = 1;
     while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
@@ -373,11 +374,12 @@ int main(int argc, char *argv[])
     session.fdin = input;
     session.fdout = input;
 
-    session.gNMEAdata.latlon_stamp.time_to_live = gps_timeout;
-    session.gNMEAdata.altitude_stamp.time_to_live = gps_timeout;
-    session.gNMEAdata.speed_stamp.time_to_live = gps_timeout;
-    session.gNMEAdata.status_stamp.time_to_live = gps_timeout;
-    session.gNMEAdata.mode_stamp.time_to_live = gps_timeout;
+    now = time(NULL);
+    INIT(session.gNMEAdata.latlon_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.altitude_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.speed_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.status_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.mode_stamp, now, gps_timeout);
     session.gNMEAdata.mode = MODE_NO_FIX;
 
     while (1) {
@@ -464,6 +466,7 @@ static int validate(void)
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
 	 report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	 return 0;
     }
     return 1;
 }

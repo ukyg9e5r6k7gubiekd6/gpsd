@@ -14,9 +14,9 @@ struct life_t
     time_t	last_refresh;
     int		time_to_live;
 };
+#define INIT(stamp, now, tl)	stamp.time_to_live=tl; stamp.last_refresh=now
 #define REFRESH(stamp)	stamp.last_refresh = time(NULL)
 #define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live >= t
-#define REVOKE(stamp)	stamp.last_refresh = 0
 
 struct OUTDATA {
     long cmask;			/* Change flag, set by backend. Reset by app. */

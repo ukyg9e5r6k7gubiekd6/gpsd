@@ -5,12 +5,106 @@
 #include "outdata.h"
 #include "nmea.h"
 
-static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out);
-static char *field(char *sentence, short n);
+/* ----------------------------------------------------------------------- */
 
-static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out);
+/* field() returns a string containing the nth comma delimited
+   field from sentence string
+ */
+
+static char *field(char *sentence, short n)
+{
+    static char result[100];
+    char c, *p = sentence;
+    int i;
+
+    while (n-- > 0)
+        while ((c = *p++) != ',' && c != '\0');
+    strncpy(result, p, 100);
+    p = result;
+    i = 0;
+    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i<100)
+	p++;
+
+    *p = '\0';
+    return result;
+}
+
+/* ----------------------------------------------------------------------- */
+
+static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
+{
+    double lat, lon, d, m;
+    char str[20], *p;
+    int updated = 0;
+
+
+    if (*(p = field(sentence, begin + 0)) != '\0') {
+	strncpy(str, p, 20);
+	sscanf(p, "%lf", &lat);
+	m = 100.0 * modf(lat / 100.0, &d);
+	lat = d + m / 60.0;
+	p = field(sentence, begin + 1);
+	if (*p == 'S')
+	    lat = -lat;
+	if (out->latitude != lat) {
+	    out->latitude = lat;
+	    out->cmask |= C_LATLON;
+	}
+	updated++;
+    }
+    if (*(p = field(sentence, begin + 2)) != '\0') {
+	strncpy(str, p, 20);
+	sscanf(p, "%lf", &lon);
+	m = 100.0 * modf(lon / 100.0, &d);
+	lon = d + m / 60.0;
+
+	p = field(sentence, begin + 3);
+	if (*p == 'W')
+	    lon = -lon;
+	if (out->longitude != lon) {
+	    out->longitude = lon;
+	    out->cmask |= C_LATLON;
+	}
+	updated++;
+    }
+    if (updated == 2)
+    {
+	REFRESH(out->latlon_stamp);
+	/* this appeases the consistency checking we'll do later */
+	if (out->mode < MODE_2D)
+	{
+	    out->mode = MODE_2D;
+	    report(2, "Latitude/longitude implies mode is 2 or 3\n");
+	}
+    }
+}
+
+/* ----------------------------------------------------------------------- */
+
+static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out)
+{
+    int tmp;
+
+    sscanf(field(sentence, fld), "%d", &tmp);
+
+    if (tmp != *dest) {
+	*dest = tmp;
+	out->cmask |= mask;
+    }
+}
+
 #if 0
-static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out);
+static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out)
+{
+    double tmp;
+
+    scanf(field(sentence, fld), "%lf", &tmp);
+
+    if (tmp != *dest) {
+	*dest = tmp;
+	out->cmask |= mask;
+    }
+}
 #endif
 
 /* ----------------------------------------------------------------------- */
@@ -59,6 +153,8 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
     strcpy(out->utc, s);
 
+    do_lat_lon(sentence, 3, out);
+
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
     {
@@ -72,7 +168,6 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     sscanf(field(sentence, 8), "%lf", &out->track);
 #endif
 
-    do_lat_lon(sentence, 3, out);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -294,76 +389,6 @@ static void processPRWIZCH(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
-{
-    double lat, lon, d, m;
-    char str[20], *p;
-    int updated = 0;
-
-
-    if (*(p = field(sentence, begin + 0)) != '\0') {
-	strncpy(str, p, 20);
-	sscanf(p, "%lf", &lat);
-	m = 100.0 * modf(lat / 100.0, &d);
-	lat = d + m / 60.0;
-	p = field(sentence, begin + 1);
-	if (*p == 'S')
-	    lat = -lat;
-	if (out->latitude != lat) {
-	    out->latitude = lat;
-	    out->cmask |= C_LATLON;
-	}
-	updated++;
-    }
-    if (*(p = field(sentence, begin + 2)) != '\0') {
-	strncpy(str, p, 20);
-	sscanf(p, "%lf", &lon);
-	m = 100.0 * modf(lon / 100.0, &d);
-	lon = d + m / 60.0;
-
-	p = field(sentence, begin + 3);
-	if (*p == 'W')
-	    lon = -lon;
-	if (out->longitude != lon) {
-	    out->longitude = lon;
-	    out->cmask |= C_LATLON;
-	}
-	updated++;
-    }
-    if (updated == 2)
-	REFRESH(out->latlon_stamp);
-}
-
-/* ----------------------------------------------------------------------- */
-
-static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out)
-{
-    int tmp;
-
-    sscanf(field(sentence, fld), "%d", &tmp);
-
-    if (tmp != *dest) {
-	*dest = tmp;
-	out->cmask |= mask;
-    }
-}
-
-#if 0
-static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out)
-{
-    double tmp;
-
-    scanf(field(sentence, fld), "%lf", &tmp);
-
-    if (tmp != *dest) {
-	*dest = tmp;
-	out->cmask |= mask;
-    }
-}
-#endif
-
-/* ----------------------------------------------------------------------- */
-
 short checksum(char *sentence)
 {
     unsigned char sum = '\0';
@@ -385,30 +410,6 @@ void add_checksum(char *sentence)
 	sum ^= c;
 
     sprintf(p, "%02X\r\n", sum);
-}
-
-/* ----------------------------------------------------------------------- */
-
-/* field() returns a string containing the nth comma delimited
-   field from sentence string
- */
-
-static char *field(char *sentence, short n)
-{
-    static char result[100];
-    char c, *p = sentence;
-    int i;
-
-    while (n-- > 0)
-        while ((c = *p++) != ',' && c != '\0');
-    strncpy(result, p, 100);
-    p = result;
-    i = 0;
-    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i<100)
-	p++;
-
-    *p = '\0';
-    return result;
 }
 
 int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
