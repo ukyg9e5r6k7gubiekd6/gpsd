@@ -50,10 +50,11 @@ cfsetospeed() in rea's environment.
 
 ** Do the research to figure out just what the heck is going on with status bits
 
-NMEA actually has *three* kinds of validity bits.  Mode, status, and the
-Active/Void bit (some sources interpret 'V' as 'Navigation receiver warning').
-Sentences that have an Active/Void send V when there is no fix, so the 
-position data is no good.
+NMEA actually has *four* kinds of validity bits: Mode, Status, the
+Active/Void bit (some sources interpret 'V' as 'Navigation receiver
+warning'), and in later versions the FAA indicator mode.  Sentences
+that have an Active/Void send V when there is no fix, so the position
+data is no good.
 
 Let's look at which sentences send what:
 
