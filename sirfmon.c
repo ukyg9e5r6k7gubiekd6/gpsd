@@ -1,5 +1,5 @@
 /*
- * SiRF packet monitor, originally by Rob Janssen <pe1chl@amsat.org>.
+ * SiRF packet monitor, originally by Rob Janssen, PE1CHL.
  * Heavily hacked by Eric S. Raymond for use with the gpsd project.
  *
  * Autobauds.  Takes a SiRF chip in NMEA mode to binary mode, if needed.
