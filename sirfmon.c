@@ -8,6 +8,7 @@
  *
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
+ *	a -- toggle receipt of 50BPS subframe data.
  *	b -- change baud rate.
  *	c -- set or clear static navigation mode
  *	l -- start logging packets to specified file.
@@ -486,7 +487,7 @@ int main (int argc, char **argv)
 		memset(buf, '\0', sizeof(buf));
 		putb(0, 0x80);
 		putb(23, 12);
-		putb(24, subframe_enabled ? 0x00 : 0x04);
+		putb(24, subframe_enabled ? 0x00 : 0x10);
 		sendpkt(buf,25);
 		break;
 
