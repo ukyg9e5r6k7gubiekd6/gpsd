@@ -155,13 +155,17 @@ int gpsd_poll(struct gps_session_t *session)
     /* update the scoreboard structure from the GPS */
     waiting = is_input_waiting(session->fdin);
     gpscli_report(4, "GPS has %d chars waiting\n", waiting);
-    if (waiting <= 0)
-    {
-	session->gNMEAdata.online = 0;
-	REFRESH(session->gNMEAdata.online_stamp);
+    if (waiting < 0)
 	return waiting;
-    }
-    else if (waiting) {
+    else if (!waiting) {
+	if (time(NULL) <= session->gNMEAdata.online_stamp.last_refresh + session->device_type->interval*2) {
+	    return 0;
+	} else {
+	    session->gNMEAdata.online = 0;
+	    REFRESH(session->gNMEAdata.online_stamp);
+	    return -1;
+	}
+    } else {
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 

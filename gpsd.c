@@ -712,7 +712,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* get data from it */
-	if (session.fdin >= 0 && gpsd_poll(&session) <= 0) {
+	if (session.fdin >= 0 && gpsd_poll(&session) < 0) {
 	    gpscli_report(3, "GPS is offline\n");
 	    FD_CLR(session.fdin, &all_fds);
 	    gpsd_deactivate(&session);

@@ -594,5 +594,6 @@ struct gps_type_t earthmate_b =
     em_send_rtcm,	/* send DGPS correction */
     em_close,		/* wrapup function to be called on close */
     9600,		/* 4800 won't work */
+    1,			/* updates every second */
 };
 

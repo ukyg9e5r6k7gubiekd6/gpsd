@@ -24,6 +24,7 @@ struct gps_type_t
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
     int baudrate;
+    int interval;
 };
 
 struct gps_session_t

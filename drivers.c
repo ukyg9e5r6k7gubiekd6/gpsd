@@ -111,6 +111,7 @@ struct gps_type_t nmea =
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
+    1,			/* updates every second */
 };
 
 /**************************************************************************
@@ -174,6 +175,7 @@ struct gps_type_t tripmate =
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no wrapup */
     4800,			/* default speed to connect at */
+    1,				/* updates every second */
 };
 
 
@@ -201,6 +203,7 @@ struct gps_type_t earthmate_a =
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     9600,			/* connecting at 4800 will fail */
+    1,				/* updates every second */
 };
 
 /**************************************************************************
@@ -219,6 +222,7 @@ struct gps_type_t logfile =
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     0,				/* don't set a speed */
+    0,				/* should never time out */
 };
 
 struct gps_type_t *gpsd_drivers[5] = {&nmea, 
