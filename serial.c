@@ -68,6 +68,7 @@ int gpsd_set_speed(struct gps_session_t *session,
     }
 
     if ((session->packet_type = packet_sniff(session)) != BAD_PACKET) {
+	session->gNMEAdata.stopbits = stopbits;
 	session->gNMEAdata.baudrate = speed;
 	return 1;
     }
