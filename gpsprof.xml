@@ -20,6 +20,7 @@
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
       <arg choice='opt'>-o <replaceable>outfile</replaceable></arg>
       <arg choice='opt'>-r </arg>
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
       <arg choice='opt'>-T <replaceable>terminal type</replaceable></arg>
       <arg choice='opt'>-h</arg>
@@ -39,7 +40,7 @@ especially in combination with the static-precision reports from
 
 <para><application>gpsprof</application> uses instrumentation built
 into <application>gpsd</application> that will only be present if
-it was configiured to support profiling.</para>
+it was configured to support profiling.</para>
 
 <para>Graphs are generated using
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
@@ -123,8 +124,12 @@ is 100.</para>
 <para>The -o option specifies the name of a file in which to dump the
 profiling data;
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-will read ot from there.  If this option is not specified, the data
+will read out from there.  If this option is not specified, the data
 will be written to a tempfile and discarded after the plot id made</para>
+
+<para>The -s option sets the baud rate.  Note, this will only work if
+the chipset accepts a speed-change command (SiRF-II supports this
+feature).</para>
 
 <para>The -t option sets a text string to be included in the plot
 title.  Specifying the GPS make and model is a good use for it.</para>

@@ -120,10 +120,11 @@ plot \\
 formatters = (rawplot, stripplot, splitplot)
 
 if __name__ == '__main__':
-    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:T:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rs:t:T:")
     formatter = splitplot
     raw = False
     file = None
+    speed = 0
     terminal = None
     title = time.ctime()
     await = 100
@@ -141,13 +142,15 @@ if __name__ == '__main__':
 	    file = val
 	elif (switch == '-r'):
 	    raw = True
+        elif (switch == '-s'):
+            speed = int(val)
 	elif (switch == '-t'):
 	    title = val
 	elif (switch == '-T'):
 	    terminal = val
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
-                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-t title] [-o file]\n")
+                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-o file]\n")
             sys.exit(0)
     plotter = formatter()
     if file:
@@ -163,7 +166,11 @@ if __name__ == '__main__':
         sys.stderr.write("gpsprof: gpsd unreachable.\n")
         sys.exit(0)
     try:
-        session.query("wbz=1")
+        if speed:
+            session.query("b=%d", speed)
+            if session.baudrate != speed:
+                sys.stderr.write("gpsprof: baud rate change failed.\n")
+        session.query("wz+b")
         plotter.header(out)
         while await > 0:
             session.poll()

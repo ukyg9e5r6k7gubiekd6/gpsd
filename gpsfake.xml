@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd">
+<refentry id='gpsfake.1'>
+<refmeta>
+<refentrytitle>gpsfake</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='date'>12 Feb 2005</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gpsfake</refname>
+<refpurpose>test harness for gpsd, simulating a GPS</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>gpsfake</command>  
+      <arg choice='opt'>-h</arg>
+      <arg choice='opt'>-i <replaceable>interval</replaceable></arg>
+      <arg choice='opt'>-n</arg>
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='opt'><replaceable>logfile</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><application>gpsfake</application> is a test harness for 
+<application>gpsd</application> and its clients.  It opens a pty
+(pseudo-TTY), launches a <application>gpsd</application> instance that
+thinks the slave side of the pty is its GPS device, and repeatedly
+feeds the contents of a test logfile through the master side to the
+GPS.</para>
+
+</refsect1>
+<refsect1 id='options'><title>OPTIONS</title>
+
+<para>The -n option suppresses launch of the daemon.  Instead,
+<application>gpsfake</application> will tell you the name of the slave
+pty so you can launch in instance that reads it.</para>
+
+<para>The -s option sets the baud rate.  Note, this will only work if
+the chipset accepts a speed-change command (SiRF-II supports this
+feature).</para>
+
+<para>The -h option makes <application>gpsfake</application> print 
+a usage message and exit.</para>
+
+<para>The argument must be the name of a file containing the text of
+NMEA sentences to be cycled at the device.</para>
+
+</refsect1>
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title> 
+
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
+project page for <application>gpsd</application> <ulink
+url="http://gpsd.berlios.de/">here</ulink>.</para>
+
+</refsect1>
+
+</refentry>
+
