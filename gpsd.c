@@ -82,25 +82,20 @@ static int daemonize(void)
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
-    char buf[BUFSIZ];
-    va_list ap;
+    if (errlevel <= debuglevel) {
+	char buf[BUFSIZ];
+	va_list ap;
 
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
+	strcpy(buf, "gpsd: ");
+	va_start(ap, fmt) ;
+	vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
 
-    if (errlevel > debuglevel)
-	return;
-
-    if (in_background)
-	syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, buf);
-    else
-	fputs(buf, stderr);
+	if (in_background)
+	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, buf);
+	else
+	    fputs(buf, stderr);
+    }
 }
 
 static void usage(void)
@@ -516,7 +511,7 @@ int main(int argc, char *argv[])
 	FD_SET(session->gNMEAdata.gps_fd, &all_fds);
     }
 
-    while (1) {
+    for (;;) {
 	struct timeval tv;
 
         memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
