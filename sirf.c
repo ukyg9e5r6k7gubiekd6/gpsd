@@ -8,10 +8,14 @@
  */
 
 #include <unistd.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
 #include "sirf.h"
+
+#define HI(n)	((n) >> 8)
+#define LO(n)	((n) & 0xff)
 
 static u_int8_t crc_nmea(char *msg) {
    int      pos;
@@ -28,10 +32,10 @@ static u_int8_t crc_nmea(char *msg) {
       crc ^= msg[pos++];
 
    /* set upper nibble of CRC */
-   tag  = index(msg, '%');
+   tag  = index(msg, '#');
    *tag = nib_to_hex[(crc & 0xf0) >> 4];
    /* set lower nibble of CRC */
-   tag  = index(msg, '%');
+   tag  = index(msg, '#');
    *tag = nib_to_hex[crc & 0x0f];
 
    return(crc);
@@ -58,18 +62,23 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
 }
 
 
-int sirf_to_sirfbin(int ttyfd) {
+int sirf_to_sirfbin(int ttyfd, int speed) 
+/* switch GPS to SiRF binary mode at 19200 8N1 */
+{
    int      len;
-   char     msg[] = "$PSRF100,0,19200,8,1,0*%%\r\n";
+   char	    msg[128]; 
 
    crc_nmea(msg);
 
+   sprintf(msg, "$PSRF100,0,%d,8,1,0*##\r\n", speed);
    len = strlen(msg);
    return (write(ttyfd, msg, len) != len);
 }
 
 
-int sirf_waas_ctrl(int ttyfd, int enable) {
+int sirf_waas_ctrl(int ttyfd, int enable) 
+/* enable or disable WAAS */
+{
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x07,
                      0x85, 0x00,
                      0x00, 0x00, 0x00, 0x00,
@@ -82,7 +91,9 @@ int sirf_waas_ctrl(int ttyfd, int enable) {
 }
 
 
-int sirf_to_nmea(int ttyfd) {
+int sirf_to_nmea(int ttyfd, int speed) 
+/* switch from binary to NMEA at specified baud */
+{
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x18,
                      0x81, 0x02,
                      0x01, 0x01, /* GGA */
@@ -93,15 +104,19 @@ int sirf_to_nmea(int ttyfd) {
                      0x00, 0x01, /* VTG */
                      0x00, 0x01, 0x00, 0x01,
                      0x00, 0x01, 0x00, 0x01,
-                     0x12, 0xc0,
+                     0x12, 0xc0, /* 4800 bps */
                      0x00, 0x00, 0xb0, 0xb3};
 
+   msg[26] = HI(speed);
+   msg[27] = LO(speed);
    crc_sirf(msg);
    return (write(ttyfd, msg, 0x18+8) != 0x18+8);
 }
 
 
-int sirf_reset(int ttyfd) {
+int sirf_reset(int ttyfd) 
+/* reset GPS parameters */
+{
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x19,
                      0x81,
                      0x00, 0x00, 0x00, 0x00,
@@ -119,7 +134,9 @@ int sirf_reset(int ttyfd) {
 }
 
 
-int sirf_dgps_source(int ttyfd, int source) {
+int sirf_dgps_source(int ttyfd, int source) 
+/* set source for DGPS corrections */
+{
    int i;
    u_int8_t msg1[] = {0xa0, 0xa2, 0x00, 0x07,
                       0x85,
@@ -210,9 +227,11 @@ int sirf_nav_lib (int ttyfd, int enable) {
 }
 
 
-int sirf_nmea_waas(int ttyfd, int enable) {
+int sirf_nmea_waas(int ttyfd, int enable) 
+/* enable WAAS from NMEA mode */
+{
    int  len;
-   char msg[] = "$PSRF108,0?*%%\r\n";
+   char msg[] = "$PSRF108,0?*##\r\n";
    char *tag;
 
    tag = index(msg, '?');
@@ -225,7 +244,9 @@ int sirf_nmea_waas(int ttyfd, int enable) {
 }
 
 
-int sirf_power_mask(int ttyfd, int low) {
+int sirf_power_mask(int ttyfd, int low)
+/* set dB cutoff level below which satellite info will be ignored */
+{
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x03,
                      0x8c, 0x1c, 0x1c,
                      0x00, 0x00, 0xb0, 0xb3};
@@ -238,7 +259,9 @@ int sirf_power_mask(int ttyfd, int low) {
 }
 
 
-int sirf_power_save(int ttyfd, int enable) {
+int sirf_power_save(int ttyfd, int enable)
+/* enable/disable SiRF trickle-power mode */ 
+{
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x09,
                      0x97,
                      0x00, 0x00,
