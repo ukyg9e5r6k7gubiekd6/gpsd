@@ -33,7 +33,7 @@ int gpscheck(int ttyfd)
 {
     struct termios ttyset, ttyset_old;
     /* every rate we're likely to see on a GPS */
-    static unsigned int rates[] = {B4800, B9600, B19200, B38400};
+    static unsigned int rates[] = {B4800, B9600, B19200, B38400, B57600};
     unsigned int *ip;
 
     /* Save original terminal parameters */
@@ -84,16 +84,8 @@ int gpscheck(int ttyfd)
 
 	/* Check to see if we actually have a valid NMEA packet here. */
 	sum = 0;
-	for (++sp; *sp != '*' && *sp != '\0'; sp++) {
-	    if (!isascii(*sp)) {
-#ifdef TESTMAIN
-	    fprintf(stderr, "gpscheck: trailing garbage in buffer\n");
-#endif /* TESTMAIN */
-		tcsetattr(ttyfd, TCSAFLUSH, &ttyset_old);
-		continue;
-	    }
+	for (++sp; *sp != '*' && *sp != '\0'; sp++)
 	    sum ^= *sp;
-	}
 	sprintf(csum, "%02X", sum);
 	if (*sp == '\0' 
 	    	|| toupper(csum[0])!=toupper(sp[1])
@@ -104,6 +96,15 @@ int gpscheck(int ttyfd)
 	    tcsetattr(ttyfd, TCSAFLUSH, &ttyset_old);
 	    continue;
 	}
+
+	while (*sp < n)
+	    if (!isascii(*sp++)) {
+#ifdef TESTMAIN
+	    fprintf(stderr, "gpscheck: trailing garbage in buffer\n");
+#endif /* TESTMAIN */
+		tcsetattr(ttyfd, TCSAFLUSH, &ttyset_old);
+		return 0;
+	    }
 
 	/* NMEA-device-specic stuff ends here */
 
