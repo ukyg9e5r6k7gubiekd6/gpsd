@@ -523,6 +523,12 @@ static int handle_request(int fd, fd_set * fds)
 		    ",V=%f",
 		    gNMEAdata.speed);
 	    break;
+	case 'T':
+	case 't':
+           sprintf(reply + strlen(reply),
+                   ",T=%f",
+                   gNMEAdata.track);
+           break;
 	case 'G':
 	case 'g':
 	    sprintf(reply + strlen(reply),

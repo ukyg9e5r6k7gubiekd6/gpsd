@@ -21,6 +21,7 @@ original document, if in doubt, read the source...
 	d  Returns the date in the form "D=%s".
 	a  The current altitude as "A=%f".
 	v  The current speed (velocity) as "V=%f".
+	t  The track (direction of movement) as "T=%d".
 	s  The gps status as "S=%d".
 	m  The gps mode as "M=%d".
 	r  Toggles 'raw' mode. Return "R=0" or "R=1"
