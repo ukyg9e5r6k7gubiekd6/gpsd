@@ -42,7 +42,8 @@ class spaceplot:
         self.fixes = []
         self.fp = fp
     def gather(self, session):
-        self.fixes.append((session.latitude, session.longitude))
+        # Include altitude, not used here, for 3D plot experiments
+        self.fixes.append((session.latitude, session.longitude, session.latitude))
         return True
     def data(self, session):
         self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
@@ -57,13 +58,13 @@ class spaceplot:
             def d(a, b): return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
             self.fixes.sort(lambda x, y: cmp(d(centroid, x), d(centroid, y)))
             # Compute CEP(50%)
-            cep_meters = gps.EarthDistance(centroid, self.fixes[len(self.fixes)/2])
+            cep_meters = gps.EarthDistance(centroid[:2], self.fixes[len(self.fixes)/2][:2])
             # Convert fixes to offsets from centroid in meters
-            recentered = map(lambda fix: gps.MeterOffset(centroid, fix), self.fixes)
+            recentered = map(lambda fix: gps.MeterOffset(centroid, fix[:2]), self.fixes)
             for i in range(len(recentered)):
-                (lat, lon) = recentered[i]
-                (raw1, raw2) = self.fixes[i]
-                self.fp.write("%f	%f	%f	%f\n" % (lat, lon, raw1, raw2))
+                (lat, lon) = recentered[i][:2]
+                (raw1, raw2, alt) = self.fixes[i]
+                self.fp.write("%f	%f	%f	%f	%f\n" % (lat, lon, raw1, raw2, alt))
             self.fp.flush()
             if centroid[0] < 0:
                 latstring = "%fS" % -centroid[0]
