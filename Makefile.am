@@ -133,6 +133,8 @@ EXTRA_DIST = \
 	gpsdplug \
 	logextract
 
-# This is not distributed
+# These are not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -DTESTMAIN libgps.c .libs/libgps.a
+sirfmon: sirfmon.c
+	$(CC) -g -O sirfmon.c -lm -lncurses -o sirfmon
