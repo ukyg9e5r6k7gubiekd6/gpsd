@@ -125,7 +125,7 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
     out->utc[4] = '-';
     strncpy(out->utc+5, ddmmyy + 2, 2);	/* copy month */
     out->utc[7] = '-';
-    strncpy(out->utc + 8, ddmmyy, 2);	/* copy date */
+    strncpy(out->utc+8, ddmmyy, 2);	/* copy date */
     out->utc[10] = 'T';
 }
 

@@ -309,7 +309,7 @@ direct-connect to the serial device has been removed.</para>
 position information from the GPS. It accepts an -h option and
 optional argument as for <application>gps</application>.
 Additionally, it accepts -rv (reverse video) and -nc (needle color)
-options. The misfeature of previous version that allowed it to
+options. The misfeature of previous versions that allowed it to
 direct-connect to the serial device has been removed.</para>
 
 </refsect2>
