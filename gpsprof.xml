@@ -56,16 +56,7 @@ Currently the following plot types are defined:</para>
 <varlistentry>
 <term>raw</term>
 <listitem>
-<para>Plot raw data.  This is not likely to be very useful, as 
-buffering effects in the USB or RS232 layer tend to produce absurdly
-large latencies at the beginning of a session.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>strip</term>
-<listitem>
-<para>Plot filtered data.  Sentences with an apparent latency larger
-than 1 second are discarded.</para>
+<para>Plot raw data.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -73,7 +64,7 @@ than 1 second are discarded.</para>
 <listitem>
 <para>Plot filtered data.  Sentences with an apparent latency larger
 than 1 second are discarded.  Each sentence has its RS232 latency
-time coloredv differently.  This is the default.</para>
+time colored differently.  This is the default.</para>
 </listitem>
 </varlistentry>
 </variablelist>

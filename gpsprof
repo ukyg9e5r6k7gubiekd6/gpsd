@@ -64,41 +64,8 @@ plot \
                       session.baudrate, session.stopbits, session.cycle,
                       file, file, file, file)
 
-class stripplot:
-    "Discard base time, throw out latencies >1 sec."
-    name = "strip"
-    def header(self, fp):
-        fp.write("#RS-232   	Received	Transmitted 	Read\n")
-        fp.write("#---------	---------	----------- 	----------\n")
-    def formatter(self, session, fp):
-        # Throw out total line latencies above 1 second, these are
-        # serial-buffering artifacts at the start of the session
-        line_latency = (session.recv_time - session.gps_time) % 3600
-        if line_latency > 1:
-            return False
-        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
-              % (session.rs232, line_latency,
-                 (session.emit_time - session.gps_time) % 3600,
-                 (time.time() - session.gps_time) % 3600,
-                 session.tag))
-        return True
-    def plot(self, file, title, session):
-        fmt = '''
-set autoscale
-set key below
-set key title "Filtered latency data, %s, %dN%d, cycle %ds"
-plot \
-     "%s" using 0:4 title "TCP/IP latency" with impulses, \
-     "%s" using 0:3 title "Decode time" with impulses, \
-     "%s" using 0:2 title "Other latency" with impulses, \
-     "%s" using 0:1 title "RS232 time" with impulses
-'''
-        return fmt % (title,
-                      session.baudrate, session.stopbits, session.cycle,
-                      file, file, file, file)
-
 class splitplot:
-    "Discard base time, throw out latencies >1 sec."
+    "Discard base time, use color to indicate different tags."
     name = "split"
     sentences = ("GPGGA", "GPRMC", "GPGLL")
     def __init__(self):
@@ -116,8 +83,8 @@ class splitplot:
         # Throw out total line latencies above 1 second, these are
         # serial-buffering artifacts at the start of the session
         line_latency = (session.recv_time - session.gps_time) % 3600
-        if line_latency > 1:
-            return False
+        #if line_latency > session.cycle:
+        #    return False
         for s in splitplot.sentences:
             if s == session.tag:
                 fp.write("%2.6f\t"% session.rs232)
@@ -150,7 +117,7 @@ plot \\
                        (file, i+1, splitplot.sentences[i])
         return fmt[:-4] + "\n"
 
-formatters = (rawplot, stripplot, splitplot)
+formatters = (rawplot, splitplot)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rs:t:T:")
@@ -200,7 +167,7 @@ if __name__ == '__main__':
         sys.exit(0)
     try:
         if speed:
-            session.query("b=%d", speed)
+            session.query("b=%d" % speed)
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("w+z+bc")
@@ -215,10 +182,7 @@ if __name__ == '__main__':
                 continue
             session.gps_time = gps.isotime(session.utc)
             session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
-            if not plotter.formatter(session, out):
-                sys.stderr.write("%s latency %d seconds\n" %
-                            (session.tag, (session.recv_time - session.gps_time) % 3600))
-            else:
+            if plotter.formatter(session, out):
                 await -= 1
         baton.end()
     finally:
