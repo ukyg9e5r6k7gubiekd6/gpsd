@@ -316,6 +316,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	}
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
+	else
+	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
     strcat(reply, "\r\n");
