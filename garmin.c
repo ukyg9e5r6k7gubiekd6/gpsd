@@ -546,27 +546,11 @@ Packet_t* GetPacket (struct gps_session_t *session )
  * the garmin_usb driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
  *
- * gps_fd was opened in NDELAY mode to be careful about reads.
+ * gps_fd was opened in NDELAY mode so be careful about reads.
  */
 static void garmin_init(struct gps_session_t *session)
 {
-    Packet_t theProductDataPacket
-	= { GARMIN_LAYERID_APPL, 0, 0
-	    , GARMIN_PKTID_PRODUCT_RQST, 0 , 0, "" };
-    Packet_t PvtOnPacket
-	= { GARMIN_LAYERID_APPL, 0, 0
-	    , GARMIN_PKTID_L001_COMMAND_DATA, 0 , 2
-	    , "1" }; // 49, CMND_START_PVT_DATA
-#ifdef __UNUSED__
-    Packet_t RmdOnPacket
-	= { GARMIN_LAYERID_APPL, 0, 0
-	    , GARMIN_PKTID_L001_COMMAND_DATA, 0 , 2
-	    , "n" }; // 110, CMND_START_ Rcv Measurement Data
-#endif
 
-    Packet_t theStartSessionPacket
-	= { 0, 0, 0, GARMIN_PKTID_TRANSPORT_START_SESSION_REQ, 0
-	    , 0, "" };
 
     Packet_t* thePacket = 0;
     char buffer[256];
@@ -576,7 +560,7 @@ static void garmin_init(struct gps_session_t *session)
 
     gpsd_report(1, "garmin_init\n");
 
-    // get Mode 0
+    // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
     set_int(buffer+4, PRIV_PKTID_SET_MODE);
     set_int(buffer+8, 4); // data length 4
@@ -624,7 +608,12 @@ static void garmin_init(struct gps_session_t *session)
 
     // Tell the device that we are starting a session.
     gpsd_report(3, "Send Garmin Start Session\n");
-    SendPacket( session,  &theStartSessionPacket );
+
+    set_int(buffer, GARMIN_LAYERID_TRANSPORT);
+    set_int(buffer+4, GARMIN_PKTID_TRANSPORT_START_SESSION_REQ);
+    set_int(buffer+8, 0); // data length 0
+
+    SendPacket(session,  (Packet_t*) buffer);
 
     // Wait until the device is ready to the start the session
     // Toss any other packets
@@ -652,7 +641,12 @@ static void garmin_init(struct gps_session_t *session)
 
     // Tell the device to send product data
     gpsd_report(3, "Get Garmin Product Data\n");
-    SendPacket( session, &theProductDataPacket );
+
+    set_int(buffer, GARMIN_LAYERID_APPL);
+    set_int(buffer+4, GARMIN_PKTID_PRODUCT_RQST);
+    set_int(buffer+8, 0); // data length 0
+
+    SendPacket(session,  (Packet_t*) buffer);
 
     // Get the product data packet
     // Ignore any other packets on the way
@@ -680,10 +674,21 @@ static void garmin_init(struct gps_session_t *session)
 
     // turn on PVT data 49
     gpsd_report(3, "Set Garmin to send reports every 1 second\n");
-    SendPacket( session, &PvtOnPacket );
-    // turn on RMD data 110
-    //SendPacket( session, &RmdOnPacket );
 
+    set_int(buffer, GARMIN_LAYERID_APPL);
+    set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+    set_int(buffer+8, 2); // data length 2
+    set_int(buffer+12, 49); //  49, CMND_START_PVT_DATA
+
+    SendPacket(session,  (Packet_t*) buffer);
+
+    // turn on RMD data 110
+    //set_int(buffer, GARMIN_LAYERID_APPL);
+    //set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+    //set_int(buffer+8, 2); // data length 2
+    //set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
+
+    //SendPacket(session,  (Packet_t*) buffer);
 }
 
 static void garmin_handle_input(struct gps_session_t *session)
