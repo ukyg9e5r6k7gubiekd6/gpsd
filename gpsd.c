@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#include <assert.h>
 
 #include "config.h"
 #if defined (HAVE_PATH_H)
@@ -294,7 +295,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else {
 		int used;
 		sprintf(phrase, ",Y=%d:", ud->satellites);
-		if (SEEN(ud->satellite_stamp))
+		if (SEEN(ud->satellite_stamp)) {
+		    int reported = 0;
 		    for (i = 0; i < ud->satellites; i++) {
 			used = 0;
 			for (j = 0; j < ud->satellites_used; j++)
@@ -302,14 +304,18 @@ static int handle_request(int fd, char *buf, int buflen)
 				used = 1;
 				break;
 			    }
-			if (ud->PRN[i])
+			if (ud->PRN[i]) {
 			    sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
 				    ud->PRN[i], 
 				    ud->elevation[i],ud->azimuth[i],
 				    ud->ss[i],
 				    used);
+			    reported++;
+			}
 		    }
+		    assert(reported == ud->satellites);
 		}
+	    }
 	    break;
 	case '\r': case '\n':
 	    goto breakout;
