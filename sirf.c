@@ -366,6 +366,11 @@ static void decode_sirf(struct gps_session_t *session,
     int	st, i, j, cn, navtype;
     char buf2[MAX_PACKET_LENGTH*3] = "";
 
+    buf2[0] = '\0';
+    for (i = 0; i < len; i++)
+	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
+    gpsd_report(5, "Raw SiRF packet type %d length %d: %s\n", buf[0], len, buf2);
+
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
@@ -570,9 +575,9 @@ static void decode_sirf(struct gps_session_t *session,
 
 static void sirfbin_handle_input(struct gps_session_t *session)
 {
-    if (!session->outbuflen)
+    while (!session->outbuflen)
 	packet_get_sirf(session);
-    decode_sirf(session, session->outbuffer+4, session->outbuflen-4);
+    decode_sirf(session, session->outbuffer+4, session->outbuflen-8);
     packet_accept(session);
 }
 

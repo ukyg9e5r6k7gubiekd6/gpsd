@@ -14,7 +14,7 @@
 
 static void nmea_handle_input(struct gps_session_t *session)
 {
-    if (!session->outbuflen)
+    while (!session->outbuflen)
 	packet_get_nmea(session);
 
     gpsd_report(2, "<= GPS: %s", session->outbuffer);
