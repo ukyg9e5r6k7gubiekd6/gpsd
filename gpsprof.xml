@@ -65,6 +65,16 @@ This is the default.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
+<term>uninstrumented</term>
+<listitem>
+<para>Plot total latency without instrumentation.  Useful mainly as a
+check that the instrumentation is not producing significant
+distortion.  It only plots times for sentences that contain fixes;
+staircase-like artifacts in the plot are created when elapsed time
+from sentences without fixes is lumped in.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
 <term>raw</term>
 <listitem>
 <para>Plot raw data.</para>

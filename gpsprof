@@ -127,6 +127,38 @@ class spaceplot:
 	    self.fp.flush()
             return fmt
 
+class uninstrumented:
+    "Total times without instrumentation."
+    name = "uninstrumented"
+    def __init__(self, fp):
+        self.fp = fp
+        self.stats = []
+    def gather(self, session):
+        if session.fix.time:
+            seconds = time.time() - session.fix.time
+            self.stats.append(seconds)
+            return True
+        else:
+            return False
+    def data(self, session):
+        self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
+                 (title,
+                  session.gps_id, session.baudrate,
+                  session.stopbits, session.cycle))
+        for seconds in self.stats:
+            self.fp.write("%2.6lf\n" % seconds)
+    def plot(self, file, title, session):
+        fmt = '''
+set autoscale
+set key below
+set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
+plot "%s" using 0:1 title "Total time" with impulses
+'''
+        return fmt % (title,
+                      session.gps_id, session.baudrate,
+                      session.stopbits, session.cycle,
+                      file)
+
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
@@ -259,7 +291,7 @@ plot \\
                        (file, i+1, splitplot.sentences[i])
         return fmt[:-4] + "\n"
 
-formatters = (spaceplot, rawplot, splitplot)
+formatters = (spaceplot, uninstrumented, rawplot, splitplot)
 
 def plotframe(await, fname, file, speed, threshold, title):
     "Return a string containing a GNUplot script "
@@ -288,7 +320,7 @@ def plotframe(await, fname, file, speed, threshold, title):
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("w+bci")
-        if formatter != spaceplot:
+        if formatter noyt in (spaceplot, uninstrumented):
             session.query("z+")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")
