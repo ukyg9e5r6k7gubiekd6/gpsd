@@ -36,11 +36,18 @@ GPSD Frequently Asked Questions
 
 <h1 id='bug-reporting'>How do I report bugs?</h1>
 
+<p>First, make sure it is a real gpsd bug and not a problem with
+your client software.  A good way to do this is to run your client and
+the gpsd test client (xgps) side by side.  If xgps seems to report
+good numbers but your client does not, you have a client problem.
+If xgps reports the same sort of bad numbers as your client, you
+have a read gpsd bug.</p>
+
 <p>If we can reproduce your gpsd problem, we can usually fix it very
 rapidly.  If we can't reproduce it, you might get lucky or you might
 not &mdash; and we try hard, but all too often the result is 'not'.</p>
 
-<p>Therefore your first step should always be to try to capture a log
+<p>Therefore your second step should always be to try to capture a log
 of some GPS output that reproduces the bug, and your second step
 should be to feed it to a gpsd instance through gpsfake to verify that
 the log does in fact reproduce the bug.</p>
