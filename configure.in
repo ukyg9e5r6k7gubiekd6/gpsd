@@ -239,4 +239,3 @@ AC_OUTPUT(Makefile gpsd.spec)
 
 (echo "# Generated from gpsd.spec.in, do not handhack!"; cat gpsd.spec) >gpsd.tmp.$$
 mv gpsd.tmp.$$ gpsd.spec
-chmod a-w gpsd.spec
