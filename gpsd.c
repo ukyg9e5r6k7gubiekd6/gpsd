@@ -61,9 +61,9 @@ static int daemonize(void)
     switch (pid = fork()) {
     case -1:
 	return -1;
-    case 0:
+    case 0:	/* child side */
 	break;
-    default:
+    default:	/* parent side */
 	_exit(pid);
     }
 
@@ -615,7 +615,5 @@ int main(int argc, char *argv[])
     }
 
     gpsd_wrap(session);
+    exit(0);
 }
-
-
-
