@@ -75,7 +75,6 @@ static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 static Widget status;
 
-static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "localhost:2947";
 
@@ -127,6 +126,20 @@ static void build_gui(Widget lxbApp)
     int n;
     Arg args[100];
     XGCValues gcv;
+
+    n = 0;
+    XtSetArg(args[n], XmNgeometry, "620x460");
+    n++;
+    XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
+    n++;
+    XtSetArg(args[n], XmNallowShellResize, False);
+    n++;
+    XtSetArg(args[n], XmNdeleteResponse, XmDO_NOTHING);
+    n++;
+    XtSetArg(args[n], XmNmwmFunctions,
+	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
+    n++;
+    XtSetValues(lxbApp, args, n);
 
     n = 0;
     XtSetArg(args[n], XmNrubberPositioning, False);
@@ -299,6 +312,11 @@ static void build_gui(Widget lxbApp)
 				     XmNbottomAttachment, XmATTACH_FORM,
 				     NULL);
 
+    XtRealizeWidget(lxbApp);
+
+    delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
+    XmAddWMProtocolCallback(lxbApp, delw,
+			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
 }
 
 void init_list()
@@ -306,11 +324,11 @@ void init_list()
     int i;
     XmString string;
 
-    for (i = 1; i < 13; i++) {
+    for (i = 0; i < MAXCHANNELS; i++) {
 	string = XmStringCreateSimple(" ");
-	XmListAddItem(list_7, string, i);
+	XmListAddItem(list_7, string, i+1);
 #ifdef PROCESS_PRWIZCH
-	XmListAddItem(list_8, string, i);
+	XmListAddItem(list_8, string, i+1);
 #endif /* PROCESS_PRWIZCH */
 	XmStringFree(string);
     }
@@ -416,8 +434,6 @@ void update_display(char *message)
 int main(int argc, char *argv[])
 {
     XtAppContext app;
-    Arg args[100];
-    int n;
     extern char *optarg;
     int option;
     double baud;
@@ -457,36 +473,9 @@ int main(int argc, char *argv[])
     if (!device_name)
 	device_name = default_device_name;
 
-    if (session.debug > 0) {
-	fprintf(stderr, "command line options:\n");
-	fprintf(stderr, "  debug level:        %d\n", session.debug);
-	fprintf(stderr, "  gps device name:    %s\n", device_name);
-	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
-    }
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
 
-    n = 0;
-    XtSetArg(args[n], XmNgeometry, "620x460");
-    n++;
-    XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
-    n++;
-    XtSetArg(args[n], XmNallowShellResize, False);
-    n++;
-    XtSetArg(args[n], XmNdeleteResponse, XmDO_NOTHING);
-    n++;
-    XtSetArg(args[n], XmNmwmFunctions,
-	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
-    n++;
-    XtSetValues(lxbApp, args, n);
-
     build_gui(lxbApp);
-
-    XtRealizeWidget(lxbApp);
-
-
-    delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
-    XmAddWMProtocolCallback(lxbApp, delw,
-			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
 
     init_list();
 
