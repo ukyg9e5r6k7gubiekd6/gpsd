@@ -39,8 +39,8 @@ which this GPS is known to have been successfully tested.</p>
 <td>2.16</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
-<td>Haicom provided a test unit. Manual states incorrectly that VTG
-is off by default.</td>
+<td>SiRF formware level 231ES. Haicom provided a test unit. Manual
+states incorrectly that VTG is off by default.</td>
 </tr>
 <tr>
 <td><a href='http://www.haicom.com.tw/products.htm'>HI-204E</a></td>
@@ -64,7 +64,7 @@ NaviLock, Hyperdata</td>
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
-GlobalSat provided three test units.
+GlobalSat provided three test units, SiRF firmware level 231ES.
 Older versions of the BU-303 had a <a href='bu_303b.html'>design
 defect</a> that made it likely to fail if subjected to vibration or
 mechanical shock, but this was fixed in September 2004.  There is
@@ -82,10 +82,7 @@ works but no test hardware.
 <td>2.2</td>
 <td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPGLL,<br />GPVTG</td>
 <td>
-Older versions of the GlobalSat PCB the TripNav is based on 
-had a <a href='bu_303.html'>design
-defect</a> that made it likely to fail if subjected to vibration or
-mechanical shock, but this was fixed in September 2004.  The
+We tested a version with Sirf Firmare level 231ES. The
 <a href='http://ftdi-usb-sio.sourceforge.net/'>FTDI USB-to-serial
 chip</a> is supported only as alpha software not yet
 incorporated into the Linux kernel.  Rayming says it's thinking
@@ -232,7 +229,7 @@ is not available. Garmin uses a nonstandard 16-bit SNR scale.
 <td>2.5</td>
 <td>?</td>
 <td>
-PGRME,<br />GPGLL, PGRMZ,<br />GPBOD,<br />GPRTE, 
+PGRME,<br />GPGLL<br />, PGRMZ,<br />GPBOD,<br />GPRTE, 
 GPRMC,<br />GPRMB,<br />GPGGA,<br />GPGSA,<br />GPGSV
 </td>
 <td>
@@ -270,6 +267,26 @@ GPGSV,<br />GPRMC,<br />GPGSA,<br />GPGGA
 Uses SiRF firmware version 220.006.000ES.  Accepts
 WAAS Mode Disable $PSRF108,00*02 and  WAAS Mode Enable  $PSRF108,01*03
 controls.  Reported by Oleg Gusev &lt;oleg&#x40;crista.uni-wuppertal.de&lt;.
+</td>
+</tr>
+
+<tr>
+<td><a href='http://www.holux.com.tw/Temp%20web/GR-230.html'>Holux G320</a></td>
+<td>Poor</td>
+<td></td>
+<td>Bluetooth</td>
+<td><a href="http://www.holux.com.tw">Holux</a></td>
+<td>2.19</td>
+<td>2.2</td>
+<td>
+GPGLL,<br />GPRMC,<br />GPGGA,<br />GPGSA,<br />GPGSV
+</td>
+<td>
+Gets fixes OK but reports spurious high speeds. (This may be a generic
+SiRF-II problem with XTrac mode.) 
+4 color LED showing: Bluetooth, Navigation Update and Battery and
+Charger Status Indication.  FLASH based program memory. 
+Firmware upgradeable through serial interface. Water resistant.
 </td>
 </tr>
 </table>
