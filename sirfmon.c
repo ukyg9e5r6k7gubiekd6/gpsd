@@ -40,13 +40,13 @@
 #define END1		0xb0
 #define END2		0xb3
 
-int LineFd;					/* fd for RS232 line */
-int verbose;
-int nfix,fix[20];
-int rate;
-FILE *logfile;
+static int LineFd;					/* fd for RS232 line */
+static int verbose;
+static int nfix,fix[20];
+static int rate;
+static FILE *logfile;
 
-char *verbpat[] =
+static char *verbpat[] =
 {
     "#Time:",
     "@R Time:",
@@ -68,12 +68,13 @@ char *verbpat[] =
 
 #define RAD2DEG		5.729577795E-7		/* RAD/10^8 to DEG */
 
-void decode_sirf(unsigned char buf[],int len);
-void decode_time(int week, int tow);
-void decode_ecef(double x, double y, double z, double vx, double vy, double vz);
-int openline (char *name,int baud);
-int sendpkt (unsigned char *buf,int len);
-int readpkt (unsigned char *buf);
+static void decode_sirf(unsigned char buf[],int len);
+static void decode_time(int week, int tow);
+static void decode_ecef(double x, double y, double z, 
+			double vx, double vy, double vz);
+static int openline (char *name,int baud);
+static int sendpkt (unsigned char *buf,int len);
+static int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
@@ -476,11 +477,7 @@ int main (int argc, char **argv)
 
 /* SiRF high level routines */
 
-void
-decode_sirf(buf,len)
-unsigned char buf[];
-int len;
-
+static void decode_sirf(unsigned char buf[], int len)
 {
     int i,j,ch,off,cn;
 
@@ -755,7 +752,7 @@ int len;
     wprintw(debugwin, "\n");
 }
 
-void decode_time(int week, int tow)
+static void decode_time(int week, int tow)
 {
     int day = tow / 8640000;
     int tod = tow % 8640000;
@@ -771,10 +768,8 @@ void decode_time(int week, int tow)
     wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
 }
 
-void
-decode_ecef(x,y,z,vx,vy,vz)
-double x,y,z,vx,vy,vz;
-
+static void decode_ecef(double x, double y, double z,
+			double vx, double vy, double vz)
 {
     const double a = 6378137;
     const double f = 1 / 298.257223563;
@@ -819,7 +814,7 @@ double x,y,z,vx,vy,vz;
 
 /* RS232-line routines (initialization and SiRF pkt send/receive) */
 
-int readbyte (void)
+static int readbyte(void)
 {
     static int cnt = 0,pos = 0;
     static unsigned char inbuf[BUFLEN];
@@ -850,7 +845,7 @@ int readbyte (void)
     return inbuf[pos++];
 }
 
-int readword(void)
+static int readword(void)
 {
     int byte1,byte2;
 
@@ -894,7 +889,7 @@ int readpkt(unsigned char *buf)
     return len;
 }
 
-int sendpkt (unsigned char *buf, int len)
+static int sendpkt(unsigned char *buf, int len)
 {
     int i,csum;
 
