@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 	    else FD_SET(ssock, &afds);
 	}
 
-	if (input >= 0 && FD_ISSET(input, &rfds)) {
+	if (input >= 0) {
 	    handle_input(input, &afds, &nmea_fds);
 	}
 
