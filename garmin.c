@@ -252,10 +252,6 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 			, &pkt->mData[4]);
 	    break;
 	case GARMIN_PKTID_PVT_DATA:
-	    /* save the old fix for later uncertainty computations */
-	    memcpy(&session->lastfix, &session->gpsdata.fix, 
-		   sizeof(struct gps_fix_t));
-
 	    gpsd_report(3, "PVT Data Sz: %d\n", pkt->mDataSize);
 
 	    pvt = (cpo_pvt_data*)pkt->mData;
@@ -504,7 +500,7 @@ static int GetPacket (struct gps_session_t *session )
 {
     struct timespec delay, rem;
     int cnt = 0;
-    int x = 0; // for debug dump
+    // int x = 0; // for debug dump
 
     memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
     session->GarminBufferLen = 0;

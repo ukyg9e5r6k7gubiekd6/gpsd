@@ -226,6 +226,11 @@ int gpsd_poll(struct gps_session_t *session)
 			session->gpsdata.valid |= CLIMBERR_SET;
 		}
 	    }
+
+	    /* save the old fix for later uncertainty computations */
+	    memcpy(&session->lastfix, 
+		   &session->gpsdata.fix, 
+		   sizeof(struct gps_fix_t));
 	}
 
 	session->gpsdata.d_decode_time = timestamp();

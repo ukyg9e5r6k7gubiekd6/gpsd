@@ -149,10 +149,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    const double e_2 = (a*a - b*b) / (b*b);
 	    int mask = 0;
 
-	    /* save the old fix for later uncertainty computations */
-	    memcpy(&session->lastfix, &session->gpsdata.fix, 
-		   sizeof(struct gps_fix_t));
-
 	    /* position/velocity is bytes 1-18 */
 	    x = getl(1);
 	    y = getl(5);

@@ -133,9 +133,6 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-    /* save the old fix for later uncertainty computations */
-    memcpy(&session->lastfix, &session->gpsdata.fix, sizeof(struct gps_fix_t));
-
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
     gpsd_report(1, "  solution invalid:\n");
@@ -194,7 +191,7 @@ static int handle1002(struct gps_session_t *session)
     session->gpsdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 	session->Zs[i] = getw(16 + (3 * i));
-	session->Zv[i] = (getw(15 + (3 * i)) & 0xf);
+	session->Zv[i] = (getw(17 + (3 * i)) & 0xf);
 #if 0
 	gpsd_report(1, "Sat%02d:", i);
 	gpsd_report(1, " used:%d", (getw(15 + (3 * i)) & 1) ? 1 : 0);
