@@ -54,15 +54,13 @@ gpsd_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	// FIXME: must instantiate a new timestamp object here 
 
         self->first = PyString_FromString("");
-        if (self->first == NULL)
-          {
+        if (self->first == NULL) {
             Py_DECREF(self);
             return NULL;
           }
         
         self->last = PyString_FromString("");
-        if (self->last == NULL)
-          {
+        if (self->last == NULL) {
             Py_DECREF(self);
             return NULL;
           }

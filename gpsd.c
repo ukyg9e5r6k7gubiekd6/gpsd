@@ -102,8 +102,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     if (errlevel > debuglevel)
 	return;
 
-    if (in_background)
-    {
+    if (in_background) {
 	if (errlevel == 0)
 	    syslog(LOG_ERR, buf);
 	else
@@ -172,21 +171,16 @@ static int throttled_write(int fd, char *buf, int len)
 	gpsd_report(3, "Dropped client on %d to avoid overrun.\n", fd);
     else
 	gpsd_report(3, "Client write to %d: %s\n", fd, strerror(errno));
-    FD_CLR(fd, &all_fds);
-    FD_CLR(fd, &nmea_fds);
-    FD_CLR(fd, &watcher_fds);
+    FD_CLR(fd, &all_fds); FD_CLR(fd, &nmea_fds); FD_CLR(fd, &watcher_fds);
     return status;
 }
 
-#define VALIDATION_COMPLAINT(level, legend) \
-        gpsd_report(level, \
-		       legend " (status=%d, mode=%d).\r\n", \
-		       session->gNMEAdata.status, session->gNMEAdata.mode)
-
 static int validate(int fd)
 {
-    if ((session->gNMEAdata.status == STATUS_NO_FIX) != (session->gNMEAdata.mode == MODE_NO_FIX))
-    {
+#define VALIDATION_COMPLAINT(level, legend) \
+        gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
+		    session->gNMEAdata.status, session->gNMEAdata.mode)
+    if ((session->gNMEAdata.status == STATUS_NO_FIX) != (session->gNMEAdata.mode == MODE_NO_FIX)) {
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return 0;
     }
@@ -196,8 +190,8 @@ static int validate(int fd)
     }
     VALIDATION_COMPLAINT(3, "GPS has no fix");
     return 0;
-}
 #undef VALIDATION_CONSTRAINT
+}
 
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
@@ -211,8 +205,7 @@ static int handle_request(int fd, char *buf, int buflen)
     sprintf(reply, "GPSD");
     p = buf;
     while (*p) {
-	switch (toupper(*p++))
-	{
+	switch (toupper(*p++)) {
 	case 'A':
 	    if (!validate(fd))
 		strcat(reply, ",A=?");
@@ -370,8 +363,7 @@ static void raw_hook(char *sentence)
 {
     int fd;
 
-    for (fd = 0; fd < nfds; fd++) 
-    {
+    for (fd = 0; fd < nfds; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
 	if (FD_ISSET(fd, &nmea_fds))
 	    throttled_write(fd, sentence, strlen(sentence));
@@ -423,14 +415,10 @@ static int passivesock(char *service, char *protocol, int qlen)
 	type = SOCK_DGRAM;
     else
 	type = SOCK_STREAM;
-
-    s = socket(PF_INET, type, ppe->p_proto);
-    if (s < 0)
-    {
+    if ((s = socket(PF_INET, type, ppe->p_proto)) < 0) {
 	gpsd_report(0, "Can't create socket\n");
 	return -1;
     }
-
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
 	gpsd_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
@@ -501,8 +489,7 @@ int main(int argc, char *argv[])
 	    dgpsserver = optarg;
 	    break;
 #if TRIPMATE_ENABLE
-	case 'i':
-	{
+	case 'i': {
 	    char *colon;
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
 		fprintf(stderr, 
@@ -584,9 +571,7 @@ int main(int argc, char *argv[])
     session->gNMEAdata.raw_hook = raw_hook;
     if (session->dsock >= 0)
 	FD_SET(session->dsock, &all_fds);
-
-    if (nowait)
-    {
+    if (nowait) {
 	if (gpsd_activate(session) < 0) {
 	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	    exit(2);
@@ -621,8 +606,7 @@ int main(int argc, char *argv[])
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
-	    else 
-	    {
+	    else {
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		setnonblocking(ssock);
@@ -666,8 +650,7 @@ int main(int argc, char *argv[])
 
 		if (session->gNMEAdata.gps_fd == -1) {
 		    gpsd_deactivate(session);
-		    if (gpsd_activate(session) >= 0)
-		    {
+		    if (gpsd_activate(session) >= 0) {
 			notify_watchers("GPSD,X=1\r\n");
 			FD_SET(session->gNMEAdata.gps_fd, &all_fds);
 		    }

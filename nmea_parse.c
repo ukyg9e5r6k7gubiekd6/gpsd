@@ -180,8 +180,7 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    if (!strcmp(field(sentence, 2), "A"))
-    {
+    if (!strcmp(field(sentence, 2), "A")) {
 	merge_ddmmyy(field(sentence, 9), out);
 	merge_hhmmss(field(sentence, 1), out);
 
@@ -309,9 +308,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
 		out->mode_stamp.changed = 1;
 		REFRESH(out->mode_stamp);
 	    }
-	}
-	else
-	{
+	} else {
 	    double newaltitude = atof(altitude);
 
 	    out->altitude_stamp.changed = (newaltitude != out->altitude);

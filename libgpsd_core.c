@@ -68,8 +68,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	session->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (session->dsock < 0)
 	    gpsd_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
-	else
-	{
+	else {
 	    gethostname(hn, sizeof(hn));
 
 	    sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);

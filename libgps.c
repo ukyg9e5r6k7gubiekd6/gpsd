@@ -59,10 +59,8 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     double d1, d2, d3;
     int i1, i2;
 
-    if (!strncmp(buf, "GPSD", 4))
-    {
-	for (sp = buf + 5; ; sp = tp+1)
-	{
+    if (!strncmp(buf, "GPSD", 4)) {
+	for (sp = buf + 5; ; sp = tp+1) {
 	    if (!(tp = strchr(sp, ',')))
 		tp = strchr(sp, '\r');
 	    if (!tp) break;
@@ -71,8 +69,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    if (sp[2] == '?')
 		continue;
 
-	    switch (*sp)
-	    {
+	    switch (*sp) {
 	    case 'A':
 		sscanf(sp, "A=%lf", &d1);
 		gpsdata->altitude_stamp.changed = (gpsdata->altitude != d1);
@@ -286,8 +283,7 @@ void data_dump(struct gps_data_t *collect, time_t now)
 
 static void dumpline(char *buf)
 {
-    fputs(buf, stdout);
-    putchar('\n');
+    puts(buf);
 }
 
 main(int argc, char *argv[])
@@ -296,10 +292,8 @@ main(int argc, char *argv[])
     char buf[BUFSIZE];
 
     collect = gps_open(NULL, 0);
-
     gps_set_raw_hook(collect, dumpline);
-    if (argc > 1)
-    {
+    if (argc > 1) {
 	strcpy(buf, argv[1]);
 	strcat(buf,"\n");
 	gps_query(collect, buf);
