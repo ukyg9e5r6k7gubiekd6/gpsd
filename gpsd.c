@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <setjmp.h>
+#include <sys/ioctl.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -39,6 +40,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
@@ -165,6 +167,53 @@ static void print_settings(char *service, char *dgpsserver)
     }
 }
 
+static int throttled_write(int fd, char *buf, int len)
+/* write to client -- throttle if it's gone or we're close to buffer overrun */
+{
+    int status, waiting;
+
+    /*
+     * All writes to client sockets go through this function.
+     *
+     * This code addresses two cases.  First, client has dropped the connection.
+     * Second, client is still connected but not actually picking up data and
+     * our buffers are backing up.  If we let this continue, the write buffers
+     * will fill and the effect will be denial-of-service to clients that are
+     * better behaved.
+     *
+     * Our strategy is brutally simple and takes advantage of the fact that
+     * GPS data has a short shelf life.  If the client doesn't pick it up 
+     * within a few minutes, it's probably not useful to that client.  So if
+     * data is backing up to a client, drop that client. 
+     */
+#define HEADROOM 1024
+    if (ioctl(fd, TIOCOUTQ, &waiting) < 0) {
+	gpscli_report(3, "Client on %d has vanished.\n", fd);
+	status = -1;	
+    } else {
+	int limit, limlen, st;
+	st = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, 
+			    (void *)&limit, (void *)&limlen);
+
+	if (waiting  + len > limit) {
+	    gpscli_report(3, "Dropped client on %d to avoid overrun.\n", fd);
+	    status = -1;
+	} else {
+	    gpscli_report(3, "=> client(%d): %s", fd, buf);
+	    status = write(fd, buf, len);
+	    if (status < 0)
+		gpscli_report(3, "Client write to %d: %s\n", fd, strerror(errno));
+	}
+    }
+    if (status == -1) {
+	FD_CLR(fd, &all_fds);
+	FD_CLR(fd, &nmea_fds);
+	FD_CLR(fd, &watcher_fds);
+    }
+
+    return status;
+}
+
 #define VALIDATION_COMPLAINT(level, legend) \
         gpscli_report(level, \
 		       legend " (status=%d, mode=%d).\r\n", \
@@ -191,7 +240,7 @@ static int handle_request(int fd, char *buf, int buflen)
 {
     char reply[BUFSIZE];
     char *p;
-    int sc, i, j;
+    int i, j;
     time_t cur_time;
 
     cur_time = time(NULL);
@@ -396,15 +445,7 @@ static int handle_request(int fd, char *buf, int buflen)
  breakout:
     strcat(reply, "\r\n");
 
-    gpscli_report(3, "=> client(%d): %s", fd, reply);
-    sc = write(fd, reply, strlen(reply));
-    if (sc < 0) {
-	gpscli_report(3, "Response write to %d: %s\n", fd, strerror(errno));
-	FD_CLR(fd, &all_fds);
-	FD_CLR(fd, &nmea_fds);
-	FD_CLR(fd, &watcher_fds);
-    }
-    return sc;
+    return throttled_write(fd, reply, strlen(reply));
 }
 
 static void notify_watchers(char *sentence)
@@ -414,12 +455,7 @@ static void notify_watchers(char *sentence)
 
     for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, &watcher_fds)) {
-	    gpscli_report(3, "=> client(%d): %s\n", fd, sentence);
-	    if (write(fd, sentence, strlen(sentence)) < 0) {
-		gpscli_report(3, "Notification write to %d: %s\n", fd, strerror(errno));
-		FD_CLR(fd, &all_fds);
-		FD_CLR(fd, &watcher_fds);
-	    }
+	    throttled_write(fd, sentence, strlen(sentence));
 	}
     }
 }
@@ -429,49 +465,36 @@ static void raw_hook(char *sentence)
 {
     int fd;
 
-    for (fd = 0; fd < getdtablesize(); fd++) {
-	/* copy raw NMEA sentences from GPS */
-	if (FD_ISSET(fd, &nmea_fds)) {
-	    gpscli_report(3, "=> client(%d): %s\n", fd, sentence);
-	    if (write(fd, sentence, strlen(sentence)) < 0) {
-		gpscli_report(3, "Raw write to %d: %s\n", fd, strerror(errno));
-		FD_CLR(fd, &all_fds);
-		FD_CLR(fd, &nmea_fds);
-		FD_CLR(fd, &watcher_fds);
-	    }
-	}
-	if (FD_ISSET(fd, &watcher_fds)) {
-	    /* some listeners may be in push mode */
-	    int ok = 1;
+    for (fd = 0; fd < getdtablesize(); fd++) 
+    {
+	/* copy raw NMEA sentences from GPS to clients in raw mode */
+	if (FD_ISSET(fd, &nmea_fds))
+	    throttled_write(fd, sentence, strlen(sentence));
 
+	/* some listeners may be in watcher mode */
+	if (FD_ISSET(fd, &watcher_fds)) {
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
-		ok = PUBLISH(fd, "ptvds");
+		PUBLISH(fd, "ptvds");
 	    } else if (strncmp(GPGGA, sentence, sizeof(GPGGA)-1) == 0) {
-		ok = PUBLISH(fd, "spa");	
+		PUBLISH(fd, "spa");	
 	    } else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
-		ok = PUBLISH(fd, "p");
+		PUBLISH(fd, "p");
 	    } else if (strncmp(PMGNST, sentence, sizeof(PMGNST)-1) == 0) {
-		ok = PUBLISH(fd, "sm");
+		PUBLISH(fd, "sm");
 	    } else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
-		ok = PUBLISH(fd, "tv");
+		PUBLISH(fd, "tv");
 	    } else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
-		ok = PUBLISH(fd, "qm");
+		PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
 		if (nmea_sane_satellites(&session.gNMEAdata))
-		    ok = PUBLISH(fd, "y");
+		    PUBLISH(fd, "y");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
-		ok = PUBLISH(fd, "xz");
+		PUBLISH(fd, "xz");
 #endif /* PROCESS_PRWIZCH */
 	    }
 #undef PUBLISH
-	    if (ok < 0) {
-		gpscli_report(3, "Watcher write: %s\n", strerror(errno));
-		FD_CLR(fd, &all_fds);
-		FD_CLR(fd, &nmea_fds);
-		FD_CLR(fd, &watcher_fds);
-	    }
 	}
     }
 }
