@@ -16,6 +16,12 @@
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 
+#include <X11/Intrinsic.h>
+#include <X11/Shell.h>
+#include <X11/Xaw/Label.h>
+#include <X11/Xaw/Paned.h>
+#include <Xm/XmStrDefs.h>
+
 #include "config.h"
 #include "gps.h"
 #include "display.h"
@@ -27,6 +33,26 @@ static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 static GC gc;
+
+static XrmOptionDescRec options[] = {
+{"--altunits",  "*altunits",            XrmoptionSepArg,        NULL},
+{"--speedunits","*speedunits",          XrmoptionSepArg,        NULL},
+};
+String fallback_resources[] = {NULL};
+
+struct unit_t {
+    char *legend;
+    float factor;
+};
+static struct unit_t speedtable[] = {
+    {"%f knots",	1},
+    {"%f mph",		KNOTS_TO_MPH},
+    {"%f kph",		KNOTS_TO_KPH},
+}, *speedunits = speedtable;
+static struct unit_t  alttable[] = {
+    {"%f feet",		METERS_TO_FEET},
+    {"%f meters",	1},
+}, *altunits = alttable;
 
 static void quit_cb(void)
 {
@@ -231,9 +257,9 @@ static void update_panel(char *message)
     XmTextFieldSetString(text_2, s);
     sprintf(s, "%f %c", fabsf(gpsdata->longitude), (gpsdata->longitude < 0) ? 'W' : 'E');
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f meters", gpsdata->altitude);
+    sprintf(s, altunits->legend, gpsdata->altitude * altunits->factor);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f knots", gpsdata->speed);
+    sprintf(s, speedunits->legend, gpsdata->speed * speedunits->factor);
     XmTextFieldSetString(text_5, s);
     sprintf(s, "%f degrees", gpsdata->track);
     XmTextFieldSetString(text_6, s);
@@ -271,6 +297,7 @@ int main(int argc, char *argv[])
 {
     int option;
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    // char *su, *au;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
@@ -278,7 +305,7 @@ int main(int argc, char *argv[])
 	    printf("xgps %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage:  xgps [-?hv] [server[:port]]\n", stderr);
+	    fputs("usage:  xgps [-?hv] [--speedunits {mph,kph,knots}] [--altunits {ft,meters}][server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
@@ -297,7 +324,12 @@ int main(int argc, char *argv[])
 	exit(2);
     }
 
-    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc,argv, NULL,NULL);
+    lxbApp = XtVaAppInitialize(&app, "gps.ad", 
+			       options, XtNumber(options), 
+			       &argc,argv, fallback_resources,NULL);
+    // su = get_resource("speedunits", "mph");
+    // au = get_resource("altunits",   "feet");
+
     build_gui(lxbApp);
 
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);

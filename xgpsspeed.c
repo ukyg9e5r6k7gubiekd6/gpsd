@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--speedunits {kph,mph}] [server[:port]]\n", stderr);
+	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
