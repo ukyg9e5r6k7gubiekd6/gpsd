@@ -69,44 +69,48 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  * packet when it sees one of the *_RECOGNIZED states.
  */
 
-#define GROUND_STATE	0	/* we don't know what packet type to expect */
-#define NMEA_DOLLAR	1	/* we've seen first character of NMEA leader */
-#define SIRF_LEADER_1	2	/* we've seen first character of SiRF leader */
+enum {
+   GROUND_STATE,	/* we don't know what packet type to expect */
+   NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
+   SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
 
-#define NMEA_PUB_LEAD	3	/* seen second character of NMEA G leader */
-#define NMEA_LEADER_END	4	/* seen end char of NMEA leader, in body */
-#define NMEA_CR		5	/* seen terminating \r of NMEA packet */
-#define NMEA_RECOGNIZED	6	/* saw trailing \n of NMEA packet */
+   NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
+   NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
+   NMEA_CR,	   	/* seen terminating \r of NMEA packet */
+   NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
-#define ASTRAL_1	7	/* ASTRAL leader A */
-#define ASTRAL_2	8	/* ASTRAL leader S */
-#define ASTRAL_3	9	/* ASTRAL leader T */
-#define ASTRAL_4	10	/* ASTRAL leader R */
-#define ASTRAL_5	11	/* ASTRAL leader A */
+   SEATALK_LEAD_1,	/* SeaTalk packet leader 'I' */
 
-#define EARTHA_1	12	/* EARTHA leader E */
-#define EARTHA_2	13	/* EARTHA leader A */
-#define EARTHA_3	14	/* EARTHA leader R */
-#define EARTHA_4	15	/* EARTHA leader T */
-#define EARTHA_5	16	/* EARTHA leader H */
+   ASTRAL_1,		/* ASTRAL leader A */
+   ASTRAL_2,	 	/* ASTRAL leader S */
+   ASTRAL_3,		/* ASTRAL leader T */
+   ASTRAL_4,		/* ASTRAL leader R */
+   ASTRAL_5,		/* ASTRAL leader A */
 
-#define SIRF_LEADER_2	17	/* seen second character of SiRF leader */
-#define SIRF_ACK_LEAD_1	18	/* seen A of possible SiRF Ack */
-#define SIRF_ACK_LEAD_2	19	/* seen c of possible SiRF Ack */
-#define SIRF_LENGTH_1	20	/* seen first byte of SiRF length */
-#define SIRF_PAYLOAD	21	/* we're in a SiRF payload part */
-#define SIRF_DELIVERED	22	/* saw last byte of SiRF payload/checksum */
-#define SIRF_TRAILER_1	23	/* saw first byte of SiRF trailer */ 
-#define SIRF_RECOGNIZED	24	/* saw second byte of SiRF trailer */
+   EARTHA_1,		/* EARTHA leader E */
+   EARTHA_2,		/* EARTHA leader A */
+   EARTHA_3,		/* EARTHA leader R */
+   EARTHA_4,		/* EARTHA leader T */
+   EARTHA_5,		/* EARTHA leader H */
 
-#define ZODIAC_EXPECTED	25	/* expecting Zodiac packet */
-#define ZODIAC_LEADER_1	26	/* saw leading 0xff */
-#define ZODIAC_LEADER_2	27	/* saw leaing 0x81 */
-#define ZODIAC_ID_1	28	/* saw first byte of ID */
-#define ZODIAC_ID_2	29	/* saw second byte of ID */
-#define ZODIAC_LENGTH_1	30	/* saw first byte of Zodiac packet length */
-#define ZODIAC_PAYLOAD	31	/* we're in a Zodiac payload */
-#define ZODIAC_RECOGNIZED 32	/* found end of the Zodiac packet */
+   SIRF_LEADER_2,	/* seen second character of SiRF leader */
+   SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
+   SIRF_ACK_LEAD_2,	/* seen c of possible SiRF Ack */
+   SIRF_LENGTH_1,	/* seen first byte of SiRF length */
+   SIRF_PAYLOAD,	/* we're in a SiRF payload part */
+   SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
+   SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */ 
+   SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
+
+   ZODIAC_EXPECTED,	/* expecting Zodiac packet */
+   ZODIAC_LEADER_1,	/* saw leading 0xff */
+   ZODIAC_LEADER_2,	/* saw leaing 0x81 */
+   ZODIAC_ID_1, 	/* saw first byte of ID */
+   ZODIAC_ID_2, 	/* saw second byte of ID */
+   ZODIAC_LENGTH_1,	/* saw first byte of Zodiac packet length */
+   ZODIAC_PAYLOAD,	/* we're in a Zodiac payload */
+   ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
+};
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
 {
@@ -129,17 +133,19 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #endif /* EARTHMATE_ENABLE */
 	break;
     case NMEA_DOLLAR:
-	if (c == TALKERID1)
+	if (c == 'G')
 	    session->packet_state = NMEA_PUB_LEAD;
 	else if (c == 'P')	/* vendor sentence */
 	    session->packet_state = NMEA_LEADER_END;
+	else if (c =='I')	/* Seatalk */
+	    session->packet_state = SEATALK_LEAD_1;
 	else if (c =='A')	/* SiRF Ack */
 	    session->packet_state = SIRF_ACK_LEAD_1;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case NMEA_PUB_LEAD:
-	if (c == TALKERID2)
+	if (c == 'P')
 	    session->packet_state = NMEA_LEADER_END;
 	else
 	    session->packet_state = GROUND_STATE;
@@ -164,6 +170,12 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     case NMEA_RECOGNIZED:
 	if (c == '$')
 	    session->packet_state = NMEA_DOLLAR;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case SEATALK_LEAD_1:
+	if (c == 'I')
+	    session->packet_state = NMEA_LEADER_END;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
