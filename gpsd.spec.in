@@ -1,7 +1,6 @@
 Name: gpsd
 %define SO3VERSION	3.0.0
 %define SO1VERSION	2
-%define PYVERSION	2.4
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
@@ -70,8 +69,9 @@ cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
-mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
-cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
+PYVERSION=`python -c "import sys; print sys.version[:3]"`
+mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
+cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
@@ -116,8 +116,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/libgps.so
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
-%{_libdir}/python%{PYVERSION}/site-packages/gps.py*
-%{_libdir}/python%{PYVERSION}/site-packages/gpsd.py*
+%{_libdir}/python*/site-packages/gps.py*
+%{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
 * Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
