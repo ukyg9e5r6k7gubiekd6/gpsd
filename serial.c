@@ -88,7 +88,7 @@ int serial_open()
 	    ttyset.c_ispeed = device_speed;
 	    ttyset.c_ospeed = device_speed;
 #endif
-	    ttyset.c_cflag &= ~PARENB;
+	    ttyset.c_cflag &= ~(PARENB | CRTSCTS);
 	    ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
 	    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
 	    ttyset.c_oflag = (ONLCR);

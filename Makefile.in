@@ -102,7 +102,7 @@ INCLUDE = -I. $(X_INCLUDE)
 
 
 ## Libraries and object files
-LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o $(MOTIF_OBJECTS)
+LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o $(MOTIF_OBJECTS)
 
 ## Programs
 PROGRAMS=gpsd
@@ -125,4 +125,7 @@ libgpsd.a:  $(LIB_OBJECTS)
 	ranlib libgpsd.a
 
 clean:
-	rm -f *.o *.a gpsd gps *~
+	rm -f *.o *.a gpsd gps *~ config.status
+
+dist-clean: clean
+	rm -f config.cache config.log

@@ -1,5 +1,17 @@
-970421 released version 0.7 ...
-970425 version 0.8, some bug fixes. New MODE member, STATUS member changed.
-970513 some cleanups in the ini code. version 0.9 ...
-980127 combined gpsd + gpsclient. No more init files, command line only.
-980127 using GNU autoconf now. version 0.93 ...
+19970421 released version 0.7 ...
+19970425 version 0.8, some bug fixes. New MODE member, STATUS member changed.
+19970513 some cleanups in the ini code. version 0.9 ...
+19980127 combined gpsd + gpsclient. No more init files, command line only.
+19980127 using GNU autoconf now. version 0.93 ...
+19990124 Y2K compliant ;-)
+19990206 (0.95)
+	 Added suport for EarthMate receivers. Since I do not
+	 have one, this is untested.
+	 If it works, it does the following:
+	  You start gpsd with a baudrate of 9600 and give
+	  it the -Te option. If gpsd gets the EartMate id it
+	  will enable the receiver and then attempt to switch
+	  it into NMEA mode.
+	  If the EarthMate id is not received, but a binary
+	  data header is received, then we will try to switch
+	  NMEA too.

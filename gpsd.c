@@ -41,12 +41,14 @@
 #include <stdio.h>
 #include "nmea.h"
 #include "gpsd.h"
+#include "version.h"
 
 #define QLEN		5
 #define BUFSIZE		4096
 
 int debug = 0;
 int device_speed = B4800;
+int device_type;
 char *device_name = 0;
 char *latitude = 0;
 char *longitude = 0;
@@ -55,7 +57,7 @@ char lond = 'W';
 				/* command line option defaults */
 char *default_device_name = "/dev/gps";
 char *default_latitude = "3600.000";
-char *default_longitude = "12300.000";
+char *default_longitude = "-12300.000";
 
 int nfds;
 int verbose = 1;
@@ -116,8 +118,22 @@ int main(int argc, char *argv[])
     int option;
     double baud;
 
-    while ((option = getopt(argc, argv, "D:L:S:hl:p:s:")) != -1) {
+    while ((option = getopt(argc, argv, "D:L:S:T:hl:p:s:")) != -1) {
 	switch (option) {
+	case 'T':
+	    switch (*optarg) {
+		case 't':
+		    device_type = DEVICE_TRIPMATE;
+		    break;
+		case 'e':
+		    device_type = DEVICE_EARTHMATE;
+		    break;
+		default:
+		    fprintf(stderr,"Invalide device type \"%s\"\n"
+				   "Using GENERIC instead\n", device_type);
+		    break;
+	    }
+	    break;
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
 	    break;
@@ -170,6 +186,7 @@ int main(int argc, char *argv[])
   -D integer   [ set debug level ] \n\
   -L longitude [ set longitude ] \n\
   -S integer   [ set port for daemon ] \n\
+  -T e         [ erthmate flag ] \n\
   -h           [ help message ] \n\
   -l latitude  [ set latitude ] \n\
   -p string    [ set gps device name ] \n\
@@ -204,7 +221,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, onsig);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    syslog(LOG_NOTICE, "Gpsd started (Version 0.93)");
+    syslog(LOG_NOTICE, "Gpsd started (Version %s)", VERSION);
     syslog(LOG_NOTICE, "Gpsd listening on port %s", service);
 
     msock = passiveTCP(service, QLEN);
@@ -216,6 +233,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
 
     input = -1;
+
 
     while (1) {
 	bcopy((char *) &afds, (char *) &rfds, sizeof(rfds));
@@ -361,13 +379,14 @@ static int handle_request(int fd, fd_set * fds)
 
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 {
-    static char buf[BUFSIZE];	/* that is more then a sentence */
+    static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
     int fd;
 
     while (offset < BUFSIZE) {
 	if (read(input, buf + offset, 1) != 1)
 	    return 1;
+
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
@@ -386,6 +405,25 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	    offset = 0;
 	    return 1;
 	}
+
+
+	// The following tries to recognise if the EarthMate
+	// is in binary mode. If so, it will attempt to
+	// switch to NMEA mode.
+
+	if (device_type == DEVICE_EARTHMATE) {
+	    if (offset) {
+		if (buf[offset-1] == (unsigned char)0xff) {
+		    if (buf[offset] == (unsigned char)0x81) {
+			syslog(LOG_NOTICE,
+			  "Found an EarthMate (syn), switching to NMEA...");
+			em_tonmea();
+		    }
+		}
+	    }
+	}
+
+
 	offset++;
 	buf[offset] = '\0';
     }

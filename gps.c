@@ -66,6 +66,7 @@ Widget status;
 
 				/* command line options */
 int debug = 0;
+int device_type;
 int device_speed = B4800;
 char *device_name = 0;
 char *latitude = 0;
@@ -76,6 +77,16 @@ char lond = 'W';
 char *default_device_name = "localhost:5678";
 char *default_latitude = "3600.000";
 char *default_longitude = "12300.000";
+
+String fallback_resources[] =
+{
+    "*gps_data.time.label.labelString: Time",
+    "*gps_data.latitude.label.labelString: Lat.",
+    "*gps_data.longitude.label.labelString: Lon.",
+    "*gps_data.altitude.label.labelString: Alt.",
+    "*gps_data.fix_status.label.labelString: Stat",
+    "*gps_data.quit.label.labelString: Quit",
+};
 
 
 GC gc;
@@ -275,7 +286,7 @@ static void build_gui(Widget lxbApp)
 **************************************************/
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    static char buf[BUFSIZE];	/* that is more than a sentence */
+    static unsigned char buf[BUFSIZE];	/* that is more than a sentence */
     static int offset = 0;
     int count;
 
@@ -285,6 +296,21 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
     while (offset < BUFSIZE && count--) {
 	if (read(*source, buf + offset, 1) != 1)
 	    return;
+
+        // The following tries to recognise if the EarthMate
+        // is in binary mode. If so, it will attempt to
+        // switch to NMEA mode.
+ 
+        if (device_type == DEVICE_EARTHMATE) {
+            if (offset) {
+                if (buf[offset-1] == (unsigned char)0xff) {
+                    if (buf[offset] == (unsigned char)0x81) {
+                        em_tonmea();
+                    }
+                }
+            }
+        }
+
 	if (buf[offset] == '\n') {
 	    if (buf[offset - 1] == '\r')
 		buf[offset - 1] = '\0';
@@ -404,8 +430,22 @@ int main(int argc, char *argv[])
     int option;
     double baud;
 
-    while ((option = getopt(argc, argv, "D:hp:s:")) != -1) {
+    while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
 	switch (option) {
+        case 'T':
+            switch (*optarg) {
+                case 't':
+                    device_type = DEVICE_TRIPMATE;
+                    break;
+                case 'e':
+                    device_type = DEVICE_EARTHMATE;
+                    break;
+                default:
+                    fprintf(stderr,"Invalide device type \"%s\"\n"
+                                   "Using GENERIC instead\n", device_type);
+                    break;
+            }
+            break;
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
 	    break;
@@ -458,7 +498,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "  gps device name:    %s\n", device_name);
 	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     }
-    lxbApp = XtVaAppInitialize(&app, "Gps", NULL, 0, &argc, argv, NULL, NULL);
+    lxbApp = XtVaAppInitialize(&app, "Gps", NULL, 0, &argc, argv, fallback_resources, NULL);
 
     n = 0;
     XtSetArg(args[n], XmNgeometry, "620x434");

@@ -4,6 +4,8 @@
 #include <time.h>
 #include <fcntl.h>
 #include <string.h>
+#include <syslog.h>
+#include "gpsd.h"
 #include "nmea.h"
 
 
@@ -13,6 +15,7 @@ extern char *latitude;
 extern char *longitude;
 
 extern int debug;
+extern int device_type;
 extern char latd;
 extern char lond;
 
@@ -48,8 +51,9 @@ void send_init()
     t = time(NULL);
     tm = gmtime(&t);
 
-latd = 'n';
-lond = 'w';
+    latd = 'n';
+    lond = 'w';
+
     sprintf(buf,
 	    "$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
 	    latitude, latd, longitude, lond,
@@ -78,7 +82,21 @@ void process_exception(char *sentence)
 {
     if (strncmp("ASTRAL", sentence, 6) == 0 && isatty(gNMEAdata.fdout)) {
 	write(gNMEAdata.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+	syslog(LOG_NOTICE, "Found a TripMate, initializing...");
 	do_init();
+    } else if ((strncmp("EARTHA", sentence, 6) == 0 
+		&& isatty(gNMEAdata.fdout))) {
+	write(gNMEAdata.fdout, "EARTHA\r\n", 8);
+	device_type = DEVICE_EARTHMATE;
+	syslog(LOG_NOTICE, "Found an EarthMate (id), switching to NMEA...");
+
+
+	// Here we are! We need to switch
+	// the darn thing into nmea mode.
+	em_tonmea();
+
+	// Maybe we wait a bit and initialize in NMEA mode?
+
     } else if (debug > 1) {
 	fprintf(stderr, "Unknown exception: \"%s\"",
 		sentence);
