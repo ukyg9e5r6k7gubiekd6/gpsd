@@ -1,23 +1,15 @@
-1. The shared-library mess
-
-Ugh.  libtool makes me want to puke, but I am being forced to the conclusion 
-that we may have to use it.  Can I get a patch from somebody that understands
-this crap that will 
-
-(a) Arrange for both libgps.a and libgpsd.a to be installed as shared libraries
-
-(b) Do the right things to gpsd.spec.in so RPM will know about them.
-
-(c) And, ideally, beat libtool senseless until it puts the libraries in
-the *current* directory, where they're visible, instead of hiding them 
-in that evil .libs thing...
-
-2. Testing on EarthMate and TripMate
+* Testing on EarthMate and TripMate
 
 Would somebody please test the device types that aren't straight NMEA?
 (This translates as: Hey, you, Russ!  Get off your tuchis! :-))
 
-3. The strange math problem in gpsprobe 
+* Build machinery
+
+The shared-library version just defaults now.  We need to figure out how 
+to pass in --version-info.  The automake manual claims that setting a
+LIBRARY_LDFLAGS variable in Makefile.am will accomplish this, but it lies.
+
+* The strange math problem in gpsprobe 
 
 I have a Python script I'd like to ship with 2.0, called gsprobe.  It
 watches the NMEA from a GPS and tries to deduce things about the GPS.
@@ -28,16 +20,15 @@ However, something is awry in my calculation of the actual uncertainty
 of position, going from degrees of uncertainty to meters.  I posted about 
 this earlier today.  Help!
 
-4. Should PRWIZCH support drop out entirely?
+* Should PRWIZCH support drop out entirely?
 
 I asked this question before and nobody answered.  At the moment I have the
 PRWIZCH handling conditioned out.  I'd like to drop it entirely -- the 
 information it gives is redundant with the SNRs in GPGSV, and the Zodiac
-chipset reported GSVs.  
+chipset reported GSVs.  Does anyone know any good reason not to just 
+drop this code?
 
-Does anyone know any good reason not to just drop this code?
-
-6. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+* Autodetect USB GPS by scanning the USB bus, if no device is specified.
 
 This is a long-term wishlist item.  It's going to be difficult, since there
 is no GPS device class yet.

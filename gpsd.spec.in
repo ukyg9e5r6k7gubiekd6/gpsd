@@ -1,9 +1,12 @@
 Name: gpsd
+%define SO3VERSION	0.0.0
+%define SO1VERSION	0
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
 License: GPL
 Group: System Environment/Daemons
+Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -27,6 +30,7 @@ your GPS will plug in to.  Normally this will be /dev/ttyUSB0 or
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
 Group: Development/Libraries
+Requires: gpsd
 
 %description -n gpsd-devel
 This package provides C libraries and Python modules that manage
@@ -38,7 +42,7 @@ for it to work.
 
 %build
 configure --prefix=/usr
-make %{?_smp_mflags} gpsd gpsd.1 libgps.a libgps.3
+make %{?_smp_mflags}
 
 %install
 # gpsd files
@@ -50,7 +54,10 @@ mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 # gpsd-devel files
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
-cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
+cp .libs/libgps.la "$RPM_BUILD_ROOT"%{_libdir}
+cp .libs/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}
+ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO1VERSION}
+ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
@@ -72,21 +79,25 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 /sbin/chkconfig --del gpsd
 
 %post -n gpsd-devel
-#/sbin/ldconfig	-- not seeded till shared libs
+/sbin/ldconfig
 
 %postun -n gpsd-devel
-#/sbin/ldconfig	-- not seeded till shared libs
+/sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING gpsd.xml libgps.xml libgpsd.xml HACKING TODO
+%doc README INSTALL COPYING gpsd.xml TODO
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 
 %files -n gpsd-devel
-%{_libdir}/libgps.a
+%doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
+%{_libdir}/libgps.la
+%{_libdir}/libgps.so.%{SO3VERSION}
+%{_libdir}/libgps.so.%{SO1VERSION}
+%{_libdir}/libgps.so
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
@@ -95,13 +106,14 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Fri Aug 27 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
+* Tue Aug 31 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
   are now in ISO8601 format, with sub-second precision if the GPS
   delivers that.  First cuts at Python interfaces included.  libgps.a
   interface now bundles session fd into an allocated session block.
-  Automake-based build machinery from Jens Oberender.
+  Automake-based build machinery from Jens Oberender; RPM now
+  installs shared libraries.  FV18 driver added. Offline timer in GPS.
 
 * Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 

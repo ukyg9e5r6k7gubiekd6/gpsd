@@ -1,17 +1,13 @@
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
+bin_PROGRAMS = gps xgpsspeed
+
 #
 # Build gps
 #
-bin_PROGRAMS = gps xgpsspeed
-
-gps_SOURCES = \
-	display.c \
-	gps.c \
-	version.h
-
+gps_SOURCES = display.c gps.c
 gps_CFLAGS = $(X_CFLAGS)
-gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.a
+gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
 
 
 #
@@ -23,29 +19,24 @@ xgpsspeed_SOURCES = \
 	TachometerP.h \
 	Tachometer.h \
 	xgpsspeed.icon
-
 xgpsspeed_CFLAGS = $(X_CFLAGS)
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.a
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
 
 
 #
 # Build gpsd
 #
 sbin_PROGRAMS = gpsd
-
-gpsd_SOURCES = \
-	gpsd.c \
-	version.h
-
-gpsd_LDADD = $(LIBM) libgps.a
+gpsd_SOURCES = gpsd.c
+gpsd_LDADD = $(LIBM) libgps.la
 
 
 #
 # Build shared libgps
 #
-lib_LIBRARIES = libgps.a
+lib_LTLIBRARIES = libgps.la
 
-libgps_a_SOURCES = \
+libgps_la_SOURCES = \
 	netlib.c \
 	nmea_parse.c \
 	serial.c \
@@ -54,7 +45,7 @@ libgps_a_SOURCES = \
 	libgpsd_core.c \
 	libgps.c
 
-libgps_a_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
+libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
 
 #
 # Create Manpages
@@ -85,9 +76,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = \
-	gps.h \
-	gpsd.h
+include_HEADERS = gps.h gpsd.h
 
 EXTRA_DIST = \
 	README \
@@ -103,4 +92,7 @@ EXTRA_DIST = \
 	xgpsspeed.ad \
 	gpsd.init \
 	gpsd.spec \
-	gpsd.lsm
+	gpsd.lsm \
+	gps.py \
+	gpsd.py
+
