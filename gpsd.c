@@ -48,8 +48,7 @@
 
 // Temporary forward declarations
 void gps_init(char *dgpsserver, char *dgpsport);
-void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
-	      int (*handle_request)(int fd, fd_set * fds));
+void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd));
 void gps_force_repoll(void);
 
 #define QLEN		5
@@ -64,6 +63,8 @@ static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int in_background = 0;
+static fd_set afds;
+static fd_set nmea_fds;
 
 static void onsig(int sig)
 {
@@ -199,7 +200,7 @@ static int validate(void)
     return 1;
 }
 
-static int handle_request(int fd, fd_set * fds)
+static int handle_request(int fd)
 {
     char buf[BUFSIZE];
     char reply[BUFSIZE];
@@ -288,12 +289,12 @@ static int handle_request(int fd, fd_set * fds)
 	    break;
 	case 'R':
 	case 'r':
-	    if (FD_ISSET(fd, fds)) {
-		FD_CLR(fd, fds);
+	    if (FD_ISSET(fd, &nmea_fds)) {
+		FD_CLR(fd, &nmea_fds);
 		sprintf(reply + strlen(reply),
 			",R=0");
 	    } else {
-		FD_SET(fd, fds);
+		FD_SET(fd, &nmea_fds);
 		sprintf(reply + strlen(reply),
 			",R=1");
 	    }
@@ -411,9 +412,6 @@ void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
 	}
     }
 }
-
-static fd_set afds;
-static fd_set nmea_fds;
 
 static void raw_hook(char *buf)
 {
@@ -554,7 +552,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(msock, &rfds);
 	}
 
-	gps_poll(&afds, &rfds, &nmea_fds, handle_request);
+	gps_poll(&afds, &rfds, handle_request);
     }
 }
 
@@ -644,8 +642,7 @@ static void activate()
     }
 }
 
-void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
-	      int (*handle_request)(int fd, fd_set * fds))
+void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd))
 {
     int fd;
     int need_gps;
@@ -703,10 +700,9 @@ void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
 		activate();
 		FD_SET(session.fdin, afds);
 	    }
-	    if ((*handle_request)(fd, nmea_fds) == 0) {
+	    if ((*handle_request)(fd) == 0) {
 		(void) close(fd);
 		FD_CLR(fd, afds);
-		FD_CLR(fd, nmea_fds);
 	    }
 	}
 	if (fd != session.fdin && FD_ISSET(fd, afds)) {
