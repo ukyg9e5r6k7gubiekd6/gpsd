@@ -41,7 +41,9 @@ It uses the same library code as gpsd.
 
 gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
 Also with the BU-303 USB GPS sold as the NaviLock, Deluo, and Hyperdata.
-
+Note that the PL2303 USB serial driver used with the BU-2303 seems
+to have been broken sometime late in the 2.4.x series of Linux kernels
+and was not fixed until 2.6.7.  If in doubt, upgrade.
 
 
 CREDITS
@@ -94,7 +96,9 @@ New features include:
      raw mode.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
+   * Internals can now be directly linked as a library, libgpsd(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
+   * xgpsspeed is working again.
 
 Eric S. Raymond, 11 Aug 2004
