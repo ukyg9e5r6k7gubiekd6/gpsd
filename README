@@ -57,9 +57,11 @@ platform.
 Derrick J Brashear <shadow@dementia.org> (KB3EGH) added code for the
 EarthMate DeLame. He also added "incredibly gross code to output
 NMEA sentences" (his own words :-) He also did the first cut at
-DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html).
+DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html), 
+for the Earthmate.
 
-Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support.
+Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
+writing the portion for other GPS receivers.
 
 Be advised: any bugs in this code are mine, and mine only ;-)
 
