@@ -221,7 +221,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		session->gNMEAdata.altitude, 'M',
 		session->separation, 'M');
 	if (session->mag_var == NO_MAG_VAR) 
-	    strcat(bufp, ",");
+	    strcat(bufp, ",,");
 	else {
 	    sprintf(bufp+strlen(bufp), "%lf,", fabs(session->mag_var));
 	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
