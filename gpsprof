@@ -65,7 +65,59 @@ plot \
         return fmt % (session.baudrate, session.stopbits, title,
                       file, file, file, file)
 
-formatters = (rawplot, stripplot)
+class splitplot:
+    "Discard base time, throw out latencies >1 sec."
+    name = "split"
+    sentences = ("GPGGA", "GPRMC", "GPGLL")
+    def __init__(self):
+        self.found = {}
+    def header(self, fp):
+        fp.write("#")
+        for s in splitplot.sentences:
+            fp.write(s + "    \t")
+        fp.write("Received	Transmitted 	Read\n")
+        fp.write("#")
+        for s in splitplot.sentences:
+            fp.write("---------\t")
+        fp.write("---------	----------- 	----------\n")
+    def formatter(self, session, fp):
+        # Throw out total line latencies above 1 second, these are
+        # serial-buffering artifacts at the start of the session
+        line_latency = (session.recv_time - session.gps_time) % 3600
+        if line_latency > 1:
+            return False
+        for s in splitplot.sentences:
+            if s == session.tag:
+                fp.write("%2.6f\t"% session.rs232)
+                self.found[s] = True
+            else:
+                fp.write("-       \t")
+        fp.write("%2.6f\t%2.6f\t%2.6f\t# %s\n" \
+              % (line_latency,
+                 (session.emit_time - session.gps_time) % 3600,
+                 (time.time() - session.gps_time) % 3600,
+                 session.tag))
+        return True
+    def plot(self, file, title, session):
+        fixed = '''
+set autoscale
+set key below
+set key title "Filtered latency data, %dN%d, %s"
+plot \\
+     "%s" using 0:%d title "TCP/IP latency" with impulses, \\
+     "%s" using 0:%d title "Decode time" with impulses, \\
+     "%s" using 0:%d title "Other latency" with impulses, \\
+'''
+        sc = len(splitplot.sentences)
+        fmt = fixed % (session.baudrate, session.stopbits, title,
+                       file, sc+3, file, sc+2, file, sc+1)
+        for i in range(sc):
+            if splitplot.sentences[i] in self.found:
+                fmt += '     "%s" using 0:%d title "%s" with impulses, \\\n' % \
+                       (file, i+1, splitplot.sentences[i])
+        return fmt[:-4] + "\n"
+
+formatters = (rawplot, stripplot, splitplot)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:T:")
