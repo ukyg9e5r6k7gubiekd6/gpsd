@@ -132,8 +132,8 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
     time_t now = time(NULL);
     struct tm *tm = localtime(&now);
 
-    strftime(out->utc + 6, 3, "%C", tm);
-    strncpy(out->utc, ddmmyy + 4, 2);	/* copy year */
+    strftime(out->utc, 3, "%C", tm);
+    strncpy(out->utc+2, ddmmyy + 4, 2);	/* copy year */
     out->utc[4] = '-';
     strncpy(out->utc+5, ddmmyy + 2, 2);	/* copy month */
     out->utc[7] = '-';
