@@ -72,8 +72,8 @@ station.</para>
 <term>-T <replaceable>device-type</replaceable></term>
 <listitem>
 <para>Set GPS type, usually not necessary because most GPSes now speak
-the standard NMEA 0183 protocol: possible values are n=NMEA generic,
-t=TripMate, e=EarthMate, f=FV18, l=logfile.</para>
+the standard NMEA 0183 protocol. For a list of driver types,
+look at what <command>gpsd -?</command> writes to standard output.</para>
 </listitem>
 </varlistentry>
 <varlistentry>

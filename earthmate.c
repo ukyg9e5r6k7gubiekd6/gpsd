@@ -588,7 +588,7 @@ static void em_close(struct gps_session_t *session)
 struct gps_type_t earthmate_b =
 {
     '\0',		/* cannot be explicitly selected */
-    "EarthMate (b)",	/* full name of type */
+    "EarthMate binary",	/* full name of type */
     NULL,		/* only switched to by earthmate_a driver */
     do_eminit,		/* initialize the device */
     handle_EMinput,	/* read and parse message packets */

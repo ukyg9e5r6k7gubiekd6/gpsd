@@ -139,17 +139,23 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 
 static void usage()
 {
+    struct gps_type_t **dp;
     printf("usage:  gpsd [options] \n\
-  options include: \n\
+  Options include: \n\
   -p string (default %s)         = set GPS device name \n\
-  -T {e|t}  (defult 'n')         = set GPS device type \n\
-  -S integer (default %s)      = set port for daemon \n\
-  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n\
+  -T devtype (default 'n')       = set GPS device type \n\
+  -S integer (default %s)        = set port for daemon \n\
+  -i %%f[NS]:%%f[EW]             = set initial latitude/longitude \n\
   -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n\
+  Here are the available driver types:\n\
 ", default_device_name, DEFAULT_GPSD_PORT);
+
+    for (dp = gpsd_drivers; *dp; dp++)
+	if ((*dp)->typekey)
+	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
 }
 
 static int throttled_write(int fd, char *buf, int len)

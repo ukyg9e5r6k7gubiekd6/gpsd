@@ -102,7 +102,7 @@ static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbyt
 struct gps_type_t nmea =
 {
     'n', 		/* select explicitly with -T n */
-    "NMEA",		/* full name of type */
+    "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
     NULL,		/* no initialization */
     nmea_handle_input,	/* read text sentence */
@@ -194,7 +194,7 @@ void tripmate_initializer(struct gps_session_t *session)
 struct gps_type_t tripmate =
 {
     't', 			/* select explicitly with -T t */
-    "TripMate",			/* full name of type */
+    "Delorme TripMate",		/* full name of type */
     "ASTRAL",			/* tells us to switch */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     nmea_handle_input,		/* read text sentence */
@@ -223,7 +223,7 @@ struct gps_type_t tripmate =
 struct gps_type_t earthmate_a =
 {
     'e',			/* select explicitly with -T e */
-    "EarthMate (a)",		/* full name of type */
+    "Delorme EarthMate",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate-B */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
