@@ -57,7 +57,7 @@ static int gps_timeout = GPS_TIMEOUT;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int in_background = 0;
-static fd_set afds;
+static fd_set all_fds;
 static fd_set nmea_fds;
 static fd_set watcher_fds;
 static int reopen;
@@ -167,12 +167,17 @@ static void print_settings(char *service, char *dgpsserver)
 
 static int validate(void)
 {
+    gpscli_report(0, "Fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
 	 gpscli_report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
 	 return 0;
     }
-    return 1;
+    else if (session.gNMEAdata.status > STATUS_NO_FIX && session.gNMEAdata.mode > MODE_NO_FIX) {
+	 gpscli_report(0, "GPS is has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	return session.gNMEAdata.mode;
+    }
+    return 0;
 }
 
 static int handle_request(int fd, char *buf, int buflen)
@@ -185,6 +190,7 @@ static int handle_request(int fd, char *buf, int buflen)
     cur_time = time(NULL);
 
 #define STALE_COMPLAINT(l, f) gpscli_report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
+
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -205,9 +211,10 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'D':
 	case 'd':
-	    sprintf(reply + strlen(reply),
-		    ",D=%s",
-		    session.gNMEAdata.utc);
+	    if (session.gNMEAdata.utc[0])
+		sprintf(reply + strlen(reply),
+			",D=%s",
+			session.gNMEAdata.utc);
 	    break;
 	case 'L':
 	case 'l':
@@ -226,7 +233,7 @@ static int handle_request(int fd, char *buf, int buflen)
 			session.gNMEAdata.mode);
 	    }
 	    else if (session.debug > 1)
-		STALE_COMPLAINT("Mode", status_stamp);
+		STALE_COMPLAINT("Mode", mode_stamp);
 	    break;
 	case 'P':
 	case 'p':
@@ -272,9 +279,15 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'T':
 	case 't':
-	    sprintf(reply + strlen(reply),
-		    ",T=%f",
-		    session.gNMEAdata.track);
+	    if (!validate())
+		break;
+	    if (FRESH(session.gNMEAdata.track_stamp, cur_time)) {
+		sprintf(reply + strlen(reply),
+			",T=%f",
+			session.gNMEAdata.track);
+	    }
+	    else if (session.debug > 1)
+		STALE_COMPLAINT("Track", track_stamp);
 	    break;
 	case 'V':
 	case 'v':
@@ -374,7 +387,7 @@ static void raw_hook(char *sentence)
 	    gpscli_report(1, "=> client: %s\n", sentence);
 	    if (write(fd, sentence, strlen(sentence)) < 0) {
 		gpscli_report(3, "Raw write %s\n", strerror(errno));
-		FD_CLR(fd, &afds);
+		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &nmea_fds);
 	    }
 	}
@@ -406,7 +419,7 @@ static void raw_hook(char *sentence)
 #undef PUBLISH
 	    if (!ok) {
 		gpscli_report(1, "Watcher write %s", strerror(errno));
-		FD_CLR(fd, &afds);
+		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
 	    }
 	}
@@ -513,10 +526,10 @@ int main(int argc, char *argv[])
 	exit(2);	/* netlib_passiveTCP will have issued a message */
     gpscli_report(1, "gpsd listening on port %s\n", service);
 
-    FD_ZERO(&afds);
+    FD_ZERO(&all_fds);
     FD_ZERO(&nmea_fds);
     FD_ZERO(&watcher_fds);
-    FD_SET(msock, &afds);
+    FD_SET(msock, &all_fds);
     nfds = getdtablesize();
 
     gps_init(&session, gps_timeout, gpstype, dgpsserver);
@@ -525,7 +538,7 @@ int main(int argc, char *argv[])
     session.gps_device = device_name;
     session.raw_hook = raw_hook;
     if (session.dsock >= 0)
-	FD_SET(session.dsock, &afds);
+	FD_SET(session.dsock, &all_fds);
 
     if (nowait && (gps_activate(&session) < 0)) {
 	gpscli_report(0, "exiting - GPS device nonexistent or can't be read\n");
@@ -535,7 +548,7 @@ int main(int argc, char *argv[])
     while (1) {
 	struct timeval tv;
 
-        memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
+        memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 
 	/* poll for input, waiting at most a second */
 	tv.tv_sec = 1;
@@ -558,7 +571,7 @@ int main(int argc, char *argv[])
 		gpscli_report(0, "accept: %s\n", strerror(errno));
 
 	    else 
-		FD_SET(ssock, &afds);
+		FD_SET(ssock, &all_fds);
 	    FD_CLR(msock, &rfds);
 	}
 
@@ -566,13 +579,13 @@ int main(int argc, char *argv[])
 	if ((nowait || reopen) && session.fdin == -1) {
 	    gps_deactivate(&session);
 	    if (gps_activate(&session) >= 0)
-		FD_SET(session.fdin, &afds);
+		FD_SET(session.fdin, &all_fds);
 	}
 
 	/* get data from it */
 	if (session.fdin >= 0 && gps_poll(&session) <= 0) {
 	    gpscli_report(3, "GPS is offline\n");
-	    FD_CLR(session.fdin, &afds);
+	    FD_CLR(session.fdin, &all_fds);
 	    gps_deactivate(&session);
 	    if (nowait)
 		reopen = 1;
@@ -592,28 +605,28 @@ int main(int argc, char *argv[])
 		if (session.fdin == -1) {
 		    gps_deactivate(&session);
 		    if (gps_activate(&session) >= 0)
-			FD_SET(session.fdin, &afds);
+			FD_SET(session.fdin, &all_fds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
 		if (buflen <= 0) {
 		    (void) close(fd);
-		    FD_CLR(fd, &afds);
+		    FD_CLR(fd, &all_fds);
 		}
 		buf[buflen] = '\0';
 		if (session.debug >= 2)
 		    gpscli_report(1, "<= client: %s", buf);
 		if (handle_request(fd, buf, buflen) <= 0) {
 		    (void) close(fd);
-		    FD_CLR(fd, &afds);
+		    FD_CLR(fd, &all_fds);
 		}
 	    }
-	    if (fd != session.fdin && fd != msock && FD_ISSET(fd, &afds)) {
+	    if (fd != session.fdin && fd != msock && FD_ISSET(fd, &all_fds)) {
 		need_gps++;
 	    }
 	}
 
 	if (!nowait && !need_gps && session.fdin != -1) {
-	    FD_CLR(session.fdin, &afds);
+	    FD_CLR(session.fdin, &all_fds);
 	    session.fdin = -1;
 	    gps_deactivate(&session);
 	}
