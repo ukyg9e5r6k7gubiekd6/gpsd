@@ -349,7 +349,7 @@ static void decode_sirf(struct gps_session_t *session,
 	else if (st & 0x02)
 	    session->gNMEAdata.mode = MODE_2D;
 	REFRESH(session->gNMEAdata.mode_stamp);
-	/* byte 20 is DOP, see below */
+	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
 	fixtime = decode_time(getw(22), getl(24)/100.00);
 	intfixtime = (int)fixtime;
@@ -419,6 +419,10 @@ static void decode_sirf(struct gps_session_t *session,
 #endif /* UNUSED */
     	break;
 
+    case 0x06:		/* Software Version String */
+	gpsd_report(1, "Firmware version: %s\n", session->outbuffer+5);
+	break;
+
     case 0x0a:		/* Error ID Data */
 	gpsd_report(4, "Error ID type %d\n", getw(1));
 	break;
@@ -431,14 +435,40 @@ static void decode_sirf(struct gps_session_t *session,
 	gpsd_report(4, "NAK %02x\n",getb(1));
     	break;
 
-    case 0x1b:		/* Undocumented packet type */
+    case 0x0d:		/* Visible List */
+	break;
+
+    case 0x1b:		/* DGPS status (undocumented) */
 	break;
 
     case 0x29:		/* Geodetic Navigation Information */
+	/*
+	 * Many versions of the SiRF protocol manual don't document 
+	 * this sentence at all.  Those that do may incorrectly
+	 * descibe UTC Day, Hour, Minute, Second as 1-byte quantities,
+	 * not 2-byte. Chris Kuethe, our SiRF expert, tells us:
+	 *
+	 * The Geodetic Navigation packet (0x29) was not fully
+	 * implemented in firmware prior to version 2.3.2. So for
+	 * anyone running 231.000.000 or earlier (including ES,
+	 * SiRFDRive, XTrac trains) you won't get UTC time. I don't
+	 * know what's broken in firmwares before 2.3.1...
+	 *
+	 * I don't see any indication in any of my material that PDOP,
+	 * GDOP or VDOP are output. There are quantities called
+	 * Estimated {Horizontal Position, Vertical Position, Time,
+	 * Horizonal Velocity} Error, but those are apparently only
+	 * valid when SiRFDRive is active.
+	 *
+	 * (SiRFdrive is their Dead Reckoning augmented firmware. It
+	 * allows you to feed odometer ticks, gyro and possibly 
+	 * accelerometer inputs to the chip to allow it to continue 
+	 * to navigate in the absence of satellite information, and 
+	 * to improve fixes when you do have satellites.)
+	 */
 	break;
 
-    case 0x32:	/* Undocumented packet type */
-	/* Sample: a0a23278001200000000000000000000bcb0b3 */
+    case 0x32:		/* SBAS corrections */
 	break;
 
     default:
@@ -457,6 +487,17 @@ static void sirfbin_handle_input(struct gps_session_t *session)
     packet_accept(session);
 }
 
+static void sirfbin_initializer(struct gps_session_t *session)
+/* poll for software version in order to check for old firmware */
+{
+   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x02,
+                     0x84, 0x00,
+                     0x00, 0x00, 0xb0, 0xb3};
+   crc_sirf(msg);
+   write(session->gNMEAdata.gps_fd, msg, 10);
+   gpsd_report(1, "Probing for firmware version...\n");
+}
+
 static int sirfbin_switch(struct gps_session_t *session, int speed)
 {
     return sirf_speed(session->gNMEAdata.gps_fd, speed);
@@ -468,7 +509,7 @@ struct gps_type_t sirf_binary =
     's',		/* invoke with -T s */
     "SIRF-II binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
-    NULL,		/* initialize the device */
+    sirfbin_initializer,	/* initialize the device */
     sirfbin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */
     sirfbin_switch,	/* we can change baud rate */
