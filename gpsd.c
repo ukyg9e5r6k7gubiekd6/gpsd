@@ -217,7 +217,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		while (isdigit(*p)) p++;
 		sirf_mode(session, 0, i);
 	    }
-#endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),
 		    9-session->device_type->stopbits,
@@ -229,7 +228,9 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'D':
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
+#ifdef PROFILING
 		icd = 1;
+#endif /* PROFILING */
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
