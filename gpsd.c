@@ -344,13 +344,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'Y':
 	case 'y':
 	    sc = 0;
-	    if (SEEN(session.gNMEAdata.satellite_view_stamp))
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    sprintf(reply + strlen(reply),
 		    ",Y=%d ", sc);
-	    if (SEEN(session.gNMEAdata.satellite_view_stamp))
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sprintf(reply + strlen(reply),"%d %d %d %d", 

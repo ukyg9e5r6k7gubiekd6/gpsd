@@ -114,9 +114,43 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	    break;
 	case 'Y':
 	    i1 = atoi(sp+2);
-	    gpsdata->satellite_view_stamp.changed = (gpsdata->satellites != i1);
+	    gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);
 	    gpsdata->satellites = i1;
-	    REFRESH(gpsdata->satellites_stamp);
+	    if (gpsdata->satellites)
+	    {
+		char *sp;
+		int j, i3, i4;
+		int PRN[MAXCHANNELS];
+		int elevation[MAXCHANNELS];
+		int azimuth[MAXCHANNELS];
+		int ss[MAXCHANNELS];
+
+		for (j = 0; j < gpsdata->satellites; j++) {
+		    PRN[j]=elevation[j]=azimuth[j]=ss[j]=0;
+		}
+		for (j = 0; j < gpsdata->satellites; j++) {
+		    sp = strchr(sp, ' ') + 1;
+		    sscanf(sp, "%d %d %d %d", i1, i2, i3, i4);
+		    PRN[j] = i1;
+		    elevation[j] = i2;
+		    azimuth[j] = i3;
+		    ss[j] = i4;
+		}
+		/*
+		 * This won't catch the case where all values are identical
+		 * but rearranged.  We can live with that.
+		 */
+		gpsdata->satellite_stamp.changed |= \
+		    memcmp(gpsdata->PRN, PRN, sizeof(PRN)) ||
+		    memcmp(gpsdata->elevation, elevation, sizeof(elevation)) ||
+		    memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
+		    memcmp(gpsdata->ss, ss, sizeof(ss));
+		memcpy(gpsdata->PRN, PRN, sizeof(PRN));
+		memcpy(gpsdata->elevation, elevation, sizeof(elevation));
+		memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
+		memcpy(gpsdata->ss, ss, sizeof(ss));
+	    }
+	    REFRESH(gpsdata->satellite_stamp);
 	    break;
 	}
     }
@@ -215,6 +249,18 @@ void data_dump(struct gps_data *collect)
 	       collect->fix_quality_stamp.time_to_live,
 	       collect->fix_quality_stamp.refreshes,
 	       collect->fix_quality_stamp.changed);
+    }
+    if (collect->satellite_stamp.refreshes)
+    {
+	int i;
+
+	printf("satellites in view: %d\n", collect->satellites);
+	for (i = 0; i < MAXCHANNELS; i++) {
+	    printf("    %2d: %2d %2d %d\n", collect->PRN[i]);
+	    printf("    %2d: %2d %2d %d\n", collect->elevation[i]);
+	    printf("    %2d: %2d %2d %d\n", collect->azimuth[i]);
+	    printf("    %2d: %2d %2d %d\n", collect->ss[i]);
+	}
     }
 }
 

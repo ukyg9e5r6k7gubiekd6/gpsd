@@ -66,7 +66,7 @@ struct gps_data {
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
-    struct life_t satellite_view_stamp;
+    struct life_t satellite_stamp;
 
 #ifdef PROCESS_PRWIZCH
     /*
