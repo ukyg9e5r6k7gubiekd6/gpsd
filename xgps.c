@@ -29,8 +29,8 @@ static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 static GC gc;
 
 static XrmOptionDescRec options[] = {
-{"--altunits",  "*altunits",            XrmoptionSepArg,        NULL},
-{"--speedunits","*speedunits",          XrmoptionSepArg,        NULL},
+{"-altunits",  "*altunits",            XrmoptionSepArg,        NULL},
+{"-speedunits","*speedunits",          XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
 
@@ -313,13 +313,37 @@ int main(int argc, char *argv[])
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *su, *au;
 
+    toplevel = XtVaAppInitialize(&app, "xgps", 
+			       options, XtNumber(options), 
+			       &argc,argv, fallback_resources,NULL);
+
+    su = get_resource(toplevel, "speedunits", "mph");
+    for (speedunits = speedtable; 
+	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
+	 speedunits++)
+	if (strcmp(speedunits->legend, su) == 0)
+	    goto speedunits_ok;
+    speedunits = speedtable;
+    fprintf(stderr, "xgps: unknown speed unit, defaulting to %s\n", speedunits->legend);
+speedunits_ok:;
+
+    au = get_resource(toplevel, "altunits",   "feet");
+    for (altunits = alttable; 
+	 altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
+	 altunits++)
+	if (strcmp(altunits->legend, au) == 0)
+	    goto altunits_ok;
+    altunits = alttable;
+    fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
+altunits_ok:;
+
     while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
 	case 'v':
 	    printf("xgps %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage:  xgps [-?hv] [--speedunits {mph,kph,knots}] [--altunits {ft,meters}][server[:port]]\n", stderr);
+	    fputs("usage:  xgps [-?hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
@@ -337,23 +361,6 @@ int main(int argc, char *argv[])
 	fputs("xgps: no gpsd running or network error\n", stderr);
 	exit(2);
     }
-
-    toplevel = XtVaAppInitialize(&app, "xgps", 
-			       options, XtNumber(options), 
-			       &argc,argv, fallback_resources,NULL);
-
-    su = get_resource(toplevel, "speedunits", "mph");
-    for (speedunits = speedtable; 
-	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
-	 speedunits++)
-	if (strcmp(speedunits->legend, su) == 0)
-	    break;
-    au = get_resource(toplevel, "altunits",   "feet");
-    for (altunits = alttable; 
-	 altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
-	 altunits++)
-	if (strcmp(altunits->legend, au) == 0)
-	    break;
 
     build_gui(toplevel);
 
