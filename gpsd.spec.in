@@ -101,6 +101,11 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
+* Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Fix bonehead error in interpretation of PGRME.  We don't use O_SYNC
+  (it turned out not to be reliable) so remove it to make life easier
+  under Mac OS X.
+
 * Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.16-1
 - New F command allows changing the GPS device after startup time.
   Hotplug scripts to go with it are now installed by the RPM.  The

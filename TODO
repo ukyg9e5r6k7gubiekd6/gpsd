@@ -1,3 +1,7 @@
+** Explicitly turn on WAAS/EGNOS on SiRF chips
+
+Chris Kuethe reports that some firmware versions leave it off.
+
 ** HAL integration
 
 > > So, should I compose a 'gps' namespace?

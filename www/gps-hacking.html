@@ -99,9 +99,21 @@ signals pass through the ionosphere, which partly reflects radio waves.
 This can be largely compensated for by a technique called "Differential
 GPS" or DGPS, in which your receiver takes timings both from satellites
 and ground stations.  The ground stations can measure and compensate for
-the ionospheric lag.</p>
+the ionospheric lag.  WAAS and EGNOS are similar systems.</p>
 
-<p>In practice, though. the most important limit is the actual
+<p>DGPS itself requires out-of-band communication with a service
+providing GPS signal correction information to make the GPS
+positioning more accurate.  WAAS and EGNOS are almost identical
+systems, WAAS being the system covering USA, and EGNOS being the
+system covering Europe.  They provide DGPS-like corrections with
+in-band communication &mdash; geo-stationary satellites broadcasting
+GPS signal correction information on the same frequency and format as the
+GPS satellites.  The WAAS/EGNOS system makes GPSes more accurate,
+and adds integrity checks making it possible to detect when the
+GPS location is totally wrong.  Unlike DGPS, your GPS will generally
+use these systems automatically whenever it can see the satellites.</p>
+
+<p>In practice, the most important limit on accuracy is the actual
 visibility of satellites.  A timing signal has to be fairly strong and
 clear, with little noise or distortion, before a GPS can use it.  The
 frequencies GPS has to use in order to punch through the ionosphere

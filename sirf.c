@@ -94,21 +94,6 @@ static int sirf_to_nmea(int ttyfd, int speed)
 }
 
 #ifdef __UNUSED__
-static int sirf_waas_ctrl(int ttyfd, int enable) 
-/* enable or disable WAAS */
-{
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x07,
-                     0x85, 0x00,
-                     0x00, 0x00, 0x00, 0x00,
-                     0x00,
-                     0x00, 0x00, 0xb0, 0xb3};
-
-   msg[5] = (u_int8_t)enable;
-   crc_sirf(msg);
-   return (write(ttyfd, msg, 15) != 15);
-}
-
-
 static int sirf_reset(int ttyfd) 
 /* reset GPS parameters */
 {
