@@ -1,7 +1,8 @@
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
 EXTRA_PROGRAMS = gps xgpsspeed
-bin_PROGRAMS = $(MISSING_MOTIF) gps xgpsspeed
+bin_PROGRAMS = $(MISSING_MOTIF) gps xgpsspeed 
+bin_SCRIPTS = gpsprobe
 
 #
 # Build gps
@@ -55,7 +56,8 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
 man_MANS = \
 	gpsd.1 \
 	libgps.3 \
-	libgpsd.3
+	libgpsd.3 \
+	gpsprobe.1
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
@@ -65,6 +67,9 @@ libgps.3: libgps.xml
 
 libgpsd.3: libgpsd.xml
 	xmlto man libgpsd.xml
+
+gpsprobe.1: gpsprobe.xml
+	xmlto man gpsprobe.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -80,6 +85,7 @@ release: distdir
 
 include_HEADERS = gps.h gpsd.h
 
+# Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \
 	README \
 	INSTALL \
@@ -89,6 +95,7 @@ EXTRA_DIST = \
 	gpsd.xml \
 	libgpsd.xml \
 	libgps.xml \
+	gpsprobe.xml \
 	$(man_MANS) \
 	gps.ad \
 	xgpsspeed.ad \
@@ -96,5 +103,6 @@ EXTRA_DIST = \
 	gpsd.spec \
 	gpsd.lsm \
 	gps.py \
-	gpsd.py
+	gpsd.py \
+	gpsprobe
 

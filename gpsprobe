@@ -53,13 +53,16 @@ if __name__ == '__main__':
     outfile = "gpsprobe.gnuplot"
 
     # Process options
-    (options, arguments) = getopt.getopt(sys.argv[1:], "n:o:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "n:o:p:")
     await = 100;
+    device="/dev/gps"
     for (switch, val) in options:
 	if (switch == '-n'):
 	    await = int(val)
-	if (switch == '-o'):
+	elif (switch == '-o'):
 	    outfile = val
+	elif (switch == '-p'):
+	    device = val
 
     intervals = {}
     last_seen = {}
@@ -97,7 +100,7 @@ if __name__ == '__main__':
 
     try:
         # Step one: Gather data
-        dev = gpsd.gpsd()
+        dev = gpsd.gpsd(device=device)
         dev.set_raw_hook(count)
         try:
             dev.activate()

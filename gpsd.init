@@ -27,7 +27,7 @@ start() {
 	# 2. We don't need all the logging crud that daemon/initlog sets
 	# up -- gpsd does its own syslog calls.
 	#
-	if [ -f "/dev/gps" ]
+	if [ -e "/dev/gps" ]
 	then
 	    gpsd -p /dev/gps
 	    success

@@ -46,10 +46,12 @@ make %{?_smp_mflags}
 
 %install
 # gpsd files
+mkdir -p "$RPM_BUILD_ROOT"%{_sbindir}
+cp .libs/gpsd "$RPM_BUILD_ROOT"%{_sbindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
-cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
+cp .libs/gps .libs/xgpsspeed gpsprobe "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
-cp gpsd.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
+cp gpsd.1 gpsprobe.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 # gpsd-devel files
@@ -87,8 +89,11 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %files
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING gpsd.xml TODO
-%defattr(-,root,root,-)
-%attr(755, root, root) %{_bindir}/gpsd
+%defattr(,root,root,-)
+%attr(755, root, root) %{_sbindir}/gpsd
+%attr(755, root, root) %{_bindir}/gps
+%attr(755, root, root) %{_bindir}/xgpsspeed
+%attr(755, root, root) %{_bindir}/gpsprobe
 %{_mandir}/man1/gpsd.1*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 
@@ -108,7 +113,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %changelog
 * Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-2
   Removed PRWIZCH support (it still passes through in raw mode).
-  Build Motif-dependent programs conditionally.
+  Build Motif-dependent programs conditionally.  Added gpsprobe.
 
 * Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
