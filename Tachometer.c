@@ -17,6 +17,7 @@
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
+#include "display.h"
 
 /****************************************************************
  *
@@ -24,7 +25,9 @@
  *
  ****************************************************************/
 
+#if ! defined(PI)
 #define		PI		3.1415927
+#endif
 
 typedef struct {
 		unsigned char	digit[7];
@@ -117,8 +120,12 @@ static XtResource resources[] = {
 	  offst(tachometer.internal_border), XtRImmediate, (caddr_t) 0},
 };
 
-static void Initialize(), Realize(), Resize(), Redisplay(), Destroy();
-static Boolean SetValues();
+static void Initialize(Widget request, Widget new),
+  Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes),
+  Resize(Widget w),
+  Redisplay(Widget w, XEvent *event, Region region),
+  Destroy(Widget w);
+static Boolean SetValues(Widget current, Widget request UNUSED, Widget new);
 
 TachometerClassRec tachometerClassRec = {
   {
@@ -170,9 +177,21 @@ WidgetClass tachometerWidgetClass = (WidgetClass)&tachometerClassRec;
  *
  ****************************************************************/
 
-static void DrawTachometer(), FastFillCircle(), GetneedleGC();
-static void GetscaleGC(), GetbackgroundGC(), DrawGauge(), DrawNeedle();
-static void DrawNumbers(), DrawSingleNumber(), DrawLabelString(), MoveNeedle();
+static void DrawTachometer(TachometerWidget w);
+static void FastFillCircle(Display *d, Drawable w, GC gc,
+			   Cardinal center_x, Cardinal center_y,
+			   Cardinal radius_x, Cardinal radius_y);
+static void GetneedleGC(TachometerWidget ta);
+static void GetscaleGC(TachometerWidget ta);
+static void GetbackgroundGC(TachometerWidget ta);
+static void DrawGauge(TachometerWidget ta);
+static void DrawNeedle(TachometerWidget w, int load);
+static void DrawNumbers(TachometerWidget w, int which, Cardinal x,
+			Cardinal y);
+static void DrawSingleNumber(TachometerWidget w, int which, Cardinal x,
+			     Cardinal y);
+static void DrawLabelString(TachometerWidget ta);
+static void MoveNeedle(TachometerWidget w, int new);
 
 static void DrawTachometer(TachometerWidget w)
 {
@@ -490,7 +509,7 @@ static void GetbackgroundGC(TachometerWidget ta)
 	&values);
 }
 
-static void Initialize(Widget request, Widget new)
+static void Initialize(Widget request UNUSED, Widget new)
 {
     TachometerWidget ta = (TachometerWidget) new;
     
@@ -508,7 +527,7 @@ static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
     (*superclass->core_class.realize) (w, valueMask, attributes);
 } /* Realize */
 
-static void Redisplay(Widget w, XEvent *event, Region region)
+static void Redisplay(Widget w, XEvent *event, Region region UNUSED)
 /* Repaint the widget window */
 {
      TachometerWidget ta = (TachometerWidget) w;
@@ -539,7 +558,7 @@ static void Resize(Widget w)
      ta->tachometer.height = ta->core.height;
 }
 
-static Boolean SetValues(Widget current, Widget request, Widget new)
+static Boolean SetValues(Widget current, Widget request UNUSED, Widget new)
 /* Set specified arguments into widget */
 {
     Boolean back, changed = False;

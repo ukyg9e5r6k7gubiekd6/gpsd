@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "gps.h"
+#include "display.h"
 
 #define DEG2RAD         (PI/180.0)
 #define RM		20
@@ -16,7 +17,7 @@ static Dimension width, height;
 static int diameter;
 static Pixmap pixmap;
 
-void set_color(String color)
+static void set_color(String color)
 {
     Display *dpy = XtDisplay(draww);
     Colormap cmap = DefaultColormapOfScreen(XtScreen(draww));
@@ -151,7 +152,8 @@ void draw_graphics(struct gps_data_t *gpsdata)
     }
 }
 
-void redraw(Widget w, XtPointer client_data, XmDrawingAreaCallbackStruct * cbs)
+void redraw(Widget w UNUSED, XtPointer client_data UNUSED,
+	    XmDrawingAreaCallbackStruct * cbs)
 {
     XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y,

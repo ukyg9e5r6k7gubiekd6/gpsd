@@ -15,7 +15,7 @@ bin_SCRIPTS = gpsprobe
 #
 # Build gps
 #
-gps_SOURCES = display.c gps.c
+gps_SOURCES = display.c display.h gps.c
 gps_CFLAGS = $(X_CFLAGS)
 gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 

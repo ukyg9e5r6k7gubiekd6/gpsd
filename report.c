@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "gpsd.h"
+#include "display.h"
 
-void gpsd_report(int errlevel, const char *fmt, ... )
+void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* stub logger for clients that don't supply one */
 {
     va_list ap;

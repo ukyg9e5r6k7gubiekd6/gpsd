@@ -30,6 +30,7 @@
 #endif
 
 #include "gpsd.h"
+#include "display.h"
 
 #define QLEN			5
 
@@ -41,7 +42,7 @@ static int debuglevel, nfds, in_background = 0;
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
 
-static void restart(int sig)
+static void restart(int sig UNUSED)
 {
     longjmp(restartbuf, THROW_SIGHUP);
 }

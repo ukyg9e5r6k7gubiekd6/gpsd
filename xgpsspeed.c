@@ -23,6 +23,7 @@
 
 #include "xgpsspeed.icon"
 #include "gps.h"
+#include "display.h"
 
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
@@ -35,7 +36,7 @@ String fallback_resources[] = {NULL};
 static struct gps_data_t *gpsdata;
 static Widget tacho;
 
-static void update_display(char *buf)
+static void update_display(char *buf UNUSED)
 {
   int new = rint(gpsdata->speed * KNOTS_TO_MPH);
   if (new > 100)
@@ -43,7 +44,9 @@ static void update_display(char *buf)
   TachometerSetValue(tacho, new);
 }
 
-static void handle_input(XtPointer client_data, int *source, XtInputId * id)
+static void handle_input(XtPointer client_data UNUSED,
+			 int *source UNUSED,
+			 XtInputId * id UNUSED)
 {
     gps_poll(gpsdata);
 }

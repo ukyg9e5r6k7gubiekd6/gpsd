@@ -30,10 +30,12 @@
 
 #include "config.h"
 #include "gps.h"
+#include "display.h"
 
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data_t *gpsdata);
-extern void redraw();
+extern void redraw(Widget w, XtPointer client_data,
+		   XmDrawingAreaCallbackStruct * cbs);
 
 static Widget lxbApp, form, left, right;
 static Widget satellite_list, satellite_diagram, status;
@@ -45,7 +47,7 @@ static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 
 static GC gc;
 
-static void quit_cb()
+static void quit_cb(void)
 {
     exit(0);	/* closes the GPS along with other fds */
 }
@@ -207,12 +209,14 @@ static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 XtAppContext app;
 XtIntervalId timeout;
 
-static void handle_input(XtPointer client_data, int *source, XtInputId *id)
+static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
+			 XtInputId *id UNUSED)
 {
     gps_poll(gpsdata);
 }
 
-static void handle_time_out(XtPointer client_data, XtIntervalId *ignored)
+static void handle_time_out(XtPointer client_data UNUSED,
+			    XtIntervalId *ignored UNUSED)
 /* runs when there is no data for a while */
 {
     XmTextFieldSetString(status, "no data arriving");
