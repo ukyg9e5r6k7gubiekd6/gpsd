@@ -3,9 +3,10 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <unistd.h>
+#define __USE_ISOC99	1	/* needed to get log2() from math.h */
+#include <math.h>
 
 #include "config.h"
 #include "gpsd.h"
@@ -113,6 +114,29 @@ static void zodiac_init(struct gps_session_t *session)
 
       zodiac_spew(session, 1200, data, 22);
     }
+}
+
+static int zodiac_speed_switch(struct gps_session_t *session, int speed)
+{
+    unsigned short data[21];
+
+    if (session->sn++ > 32767)
+	session->sn = 0;
+      
+    memset(data, 0, sizeof(data));
+    data[0] = session->sn;		/* sequence number */
+    data[1] = 1;			/* port 1 data valid */
+    data[8] = 8;			/* port 1 character width */
+    data[9] = 1;			/* port 1 stop bits */
+    data[10] = 0;			/* port 1 parity */
+    data[11] = (short)log2(speed/300)+1;	/* port 1 speed */
+    data[12] = data[13] = data[14] = data[15] = 0;
+    data[16] = data[17] = data[18] = data[19] = 0;
+    data[20] = zodiac_checksum(data, 20);
+
+    zodiac_spew(session, 1330, data, 21);
+
+    return speed;	/* it would be nice to error-check this */
 }
 
 static void send_rtcm(struct gps_session_t *session, 
@@ -411,7 +435,7 @@ struct gps_type_t zodiac_binary =
     NULL,		/* binary protocol */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
-    NULL,		/* no speed switcher */
+    zodiac_speed_switch,/* we can change baud rate */
     NULL,		/* caller needs to supply a close hook */
     9600,		/* 4800 won't work */
     1,			/* 1 stop bit */
