@@ -16,7 +16,14 @@ struct life_t
 #define SEEN(stamp) stamp.last_refresh
 
 struct gps_data_t {
-    int	online;			/* 1 if GPS is on line, 0 if not */
+    int	online;			/* 1 if GPS is on line, 0 if not.
+				 * Note: gpsd clears this flag when sentences
+				 * fail to show up within the GPS's normal
+				 * send sycle time. If the host-to-GPS 
+				 * link is lossy enough to drop entire
+				 * sentences, this flag will be
+				 * prone to false negatives.
+				 */
     struct life_t online_stamp;
 
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
