@@ -2,6 +2,7 @@
 #
 # Upload gpsd docs
 #
+webdir=esr@shell.berlios.de:/home/groups/gpsd/htdocs
 version=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
 echo "Uploading version $version"
 sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
@@ -9,4 +10,5 @@ xmlto xhtml-nochunks ../gpsd.xml
 xmlto xhtml-nochunks ../libgps.xml
 xmlto xhtml-nochunks ../libgpsd.xml
 xmlto xhtml-nochunks ../gpsprobe.xml
-scp *.html *.css *.js esr@shell.berlios.de:/home/groups/gpsd/htdocs
+# Doesn't upload PDFs or GIFs -- they aren't expected to change frequently
+scp *.html *.css *.js *.txt $webdir
