@@ -16,7 +16,8 @@ queried on TCP port 2947 of the host computer.  With gpsd, multiple
 GPS client applications (such as navigational and wardriving software) 
 can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier
-to parse than NMEA 0183,
+to parse than NMEA 0183.  A library that manages access to gpsd for
+an application is included.
 
 %prep
 %setup -q
@@ -33,6 +34,7 @@ cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
 cp gpsd.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
 cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
+cp libgpsd.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
@@ -53,6 +55,7 @@ cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
 %{_libdir}/libgps.a
+%{_libdir}/libgpsd.a
 %{_mandir}/man3/libgps.3*
 %{_includedir}/gpsd.h
 

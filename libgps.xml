@@ -63,7 +63,12 @@ is a service library which supports querying GPS devices. The GPS daemon
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 uses it, and is appropriate for situations in which more than one
 program may need access to the GPS data stream.  This library may be
-useful for applications that have the exclusive use of a GPS.</para>
+useful for applications that have the exclusive use of a GPS;
+otherwise, you probably want to use
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+which manages access to ann instance of
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+monitoring a shared GPS.</para>
 
 <para>Calling
 <function>gps_init()</function>
@@ -144,6 +149,7 @@ It defaults to 1, but can be altered by the calling program.</para>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>lgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 </para>
 </refsect1>
 
