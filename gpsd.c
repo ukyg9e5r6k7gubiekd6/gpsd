@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 		device_type = DEVICE_TRIPMATE;
 		break;
 	    case 'e':
-		device_type = DEVICE_EARTHMATE;
+		device_type = DEVICE_EARTHMATEb;
 		break;
 	    default:
 		fprintf(stderr, "Invalid device type \"%s\"\n"
@@ -387,8 +387,6 @@ int main(int argc, char *argv[])
 	  gNMEAdata.fdin = input;
 	  gNMEAdata.fdout = input;
 	  serial_close();
-	  if (device_type == DEVICE_EARTHMATEb)
-	    device_type = DEVICE_EARTHMATE;
 	  syslog(LOG_NOTICE, "Closed gps");
 	  gNMEAdata.mode = 1;
 	  gNMEAdata.status = 0;
@@ -422,8 +420,6 @@ int main(int argc, char *argv[])
 	    gNMEAdata.fdin = input;
 	    gNMEAdata.fdout = input;
 	    serial_close();
-	    if (device_type == DEVICE_EARTHMATEb)
-		device_type = DEVICE_EARTHMATE;
 	    syslog(LOG_NOTICE, "Closed gps");
 	    gNMEAdata.mode = 1;
 	    gNMEAdata.status = 0;
@@ -540,28 +536,6 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	    }
 	    offset = 0;
 	    return 1;
-	}
-	/*
-	  The following tries to recognise if the EarthMate is
-	  in binary mode. If so, it will switch to EarthMate mode.
-
-	  Tf.20000105: this block does not serve any purpose.
-	  Please look it over, and delete it if you agree.
-	*/
-	
-	if (device_type == DEVICE_EARTHMATE) {
-	    if (offset) {
-		if (buf[offset - 1] == (unsigned char) 0xff) {
-		    if (buf[offset] == (unsigned char) 0x81) {
-			if (bincount++ == 5) {
-			    syslog(LOG_NOTICE,
-				   "Found an EarthMate (syn).");
-			    device_type = DEVICE_EARTHMATEb;
-			    return 0;
-			}
-		    }
-		}
-	    }
 	}
 	offset++;
 	buf[offset] = '\0';

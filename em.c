@@ -24,7 +24,7 @@ extern char lond;
 
 enum {
     EM_HUNT_FF, EM_HUNT_81, EM_HUNT_ID, EM_HUNT_WC,
-    EM_HUNT_FLAGS, EM_HUNT_CS, EM_HUNT_DATA, EM_HUNT_A
+    EM_HUNT_FLAGS, EM_HUNT_CS, EM_HUNT_DATA
 };
 
 #define O(x) (x-6)
@@ -32,15 +32,15 @@ enum {
 static unsigned short sn = 0;
 static int eminit;
 
-struct header {
-    unsigned short sync;
-    unsigned short id;
-    unsigned short ndata;
-    unsigned short flags;
-    unsigned short csum;
-};
 
-static void analyze(struct header *, unsigned short *, fd_set *, fd_set *);
+#define HEADER_SYNC	0
+#define HEADER_ID	1
+#define HEADER_NDATA	2
+#define HEADER_FLAGS	3
+#define HEADER_CSUM	4
+#define HEADER_SIZE	5
+
+static void analyze(unsigned short *, unsigned short *, fd_set *, fd_set *);
 
 unsigned short em_checksum(unsigned short *w, int n)
 {
@@ -52,26 +52,36 @@ unsigned short em_checksum(unsigned short *w, int n)
     return csum;
 }
 
+void writeshort(int fd, unsigned short d)
+{
+  unsigned char c[2];
+  c[0] = d & 0xff;
+  c[1] = d >>8;
+  write(fd, c, 2);
+}
+
 /* em_spew - Takes a message type, an array of data words, and a length
    for the array, and prepends a 5 word header (including checksum).
    The data words are expected to be checksummed */
 
-static void em_spew(int type, void *dat, int dlen)
+static void em_spew(int type, unsigned short *dat, int dlen)
 {
-    struct header h;
+    unsigned short h[HEADER_SIZE];
+    int i;
 
-    h.flags = 0;
+    h[HEADER_FLAGS] = 0;
+    h[HEADER_SYNC] = 0x81ff;
+    h[HEADER_ID] = type;
+    h[HEADER_NDATA] = dlen - 1;
+    h[HEADER_CSUM] = em_checksum(h, 4);
 
-    h.sync = 0x81ff;
-    h.id = type;
-    h.ndata = dlen - 1;
-    h.csum = em_checksum((unsigned short *) &h, 4);
-
-    write(gNMEAdata.fdout, &h, sizeof(h));
-    write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
+    for (i=0; i<HEADER_SIZE; i++)
+      writeshort(gNMEAdata.fdout, h[i]);
+    for (i=0; i<dlen; i++)
+      writeshort(gNMEAdata.fdout, dat[i]);
 }
 
-static long putlong(char *dm, int sign)
+static void putlong(char *dm, int sign, unsigned short *data)
 {
     double tmpl;
     long rad;
@@ -83,7 +93,8 @@ static long putlong(char *dm, int sign)
     if (sign)
 	rad = -rad;
 
-    return rad;
+    *data++ = rad & 0xffff;
+    *data++ = rad >> 16;
 }
 
 static void em_init()
@@ -105,7 +116,7 @@ static void em_init()
       
       data[0] = sn;		/* sequence number */
 
-      data[1] = (1 << 2) | (1 << 3);
+      data[1] = (1 << 2) | (1 << 3); /* UTC time valid, Lat/Lon valid */
       data[2] = data[3] = data[4] = 0;
       data[5] = tm->tm_mday;
       data[6] = tm->tm_mon + 1;
@@ -113,31 +124,35 @@ static void em_init()
       data[8] = tm->tm_hour;
       data[9] = tm->tm_min;
       data[10] = tm->tm_sec;
-      *(long *) (data + 11) = putlong(latitude, (latd == 'S') ? 1 : 0);
-      *(long *) (data + 13) = putlong(longitude, (lond == 'W') ? 1 : 0);
+      putlong(latitude, (latd == 'S') ? 1 : 0, data + 11);
+      putlong(longitude, (lond == 'W') ? 1 : 0, data + 13);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
       data[21] = em_checksum(data, 21);
 
-      em_spew(1200, &data, 22);
+      em_spew(1200, data, 22);
     }
 }
 
 void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
 {
     unsigned short data[34];
-    int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
+    int i;
 
     if (sn++ > 32767)
 	sn = 0;
 
-    memset(data, 0, sizeof(data));
+    i = 0;
+    data[i++] = sn;		/* sequence number */
+    while (rtcmbytes--) {
+      data[i] = *rtcmbuf++;
+      if (rtcmbytes--) data[i] |= *rtcmbuf++ << 8;
+      i++;
+    }
+    data[i] = em_checksum(data, i);
+    i++;
 
-    data[0] = sn;		/* sequence number */
-    memcpy(&data[1], rtcmbuf, rtcmbytes*(sizeof(char)));
-    data[n] = em_checksum(data, n);
-
-    em_spew(1351, &data, n+1);
+    em_spew(1351, data, i);
 }
 
 void do_eminit()
@@ -147,15 +162,15 @@ void do_eminit()
     eminit = 1;
 }
 
-static long getlong(void *p)
+static long getlong(unsigned short *p)
 {
-    return *(long *) p;
+    return p[0] | (p[1]<<16);
 }
 
 
-static unsigned long getulong(void *p)
+static unsigned long getulong(unsigned short *p)
 {
-    return *(unsigned long *) p;
+    return p[0] | (p[1]<<16);
 }
 
 
@@ -298,7 +313,7 @@ static void handle1005(unsigned short *p)
 {
   int i;
   int numcorrections = p[O(12)];
-#if 1
+#if 0
   fprintf(stderr, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
   fprintf(stderr, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
   fprintf(stderr, "Station ID: %d\n", p[O(10)]);
@@ -317,7 +332,7 @@ static void handle1005(unsigned short *p)
 #endif
 }
 
-static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set * nmea_fds)
+static void analyze(unsigned short *h, unsigned short *p, fd_set * afds, fd_set * nmea_fds)
 {
     unsigned char buf[BUFSIZE];
     char *bufp;
@@ -325,10 +340,10 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
     int i = 0, j = 0, k = 0, nmea = 0;
     int fd, nfds;
 
-    if (p[h->ndata] == em_checksum(p, h->ndata)) {
+    if (p[h[HEADER_NDATA]] == em_checksum(p, h[HEADER_NDATA])) {
 	if (debug > 5)
-	    fprintf(stderr, "id %d\n", h->id);
-	switch (h->id) {
+	    fprintf(stderr, "id %d\n", h[HEADER_ID]);
+	switch (h[HEADER_ID]) {
 	case 1000:
 	    handle1000(p);
 	    bufp = buf;
@@ -438,67 +453,80 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 
 static int putword(unsigned short *p, unsigned char c, unsigned int n)
 {
-    *(((unsigned char *) p) + n) = c;
-    if (n == 0)
+    if (n == 0) {
+        *p = (*p & 0xff00) | c;
 	return 1;
-    else
+    } else {
+        *p = (*p & 0xff) | (c << 8);
 	return 0;
+    }
 }
 
 
 static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 {
     static int state = EM_HUNT_FF;
-    static struct header h;
+    static unsigned short h[HEADER_SIZE];
 
     static unsigned int byte;
     static unsigned int words;
     static unsigned short *data;
 
+    static char init_string[] = "EARTHA";
+    static int init_i = 0;
+
+    if (c == init_string[init_i]) {
+      if (init_i++ == 5) {
+        write(gNMEAdata.fdout, "EARTHA\r\n", 8);
+        state = EM_HUNT_FF;
+	em_init();
+	if (debug>4) fprintf(stderr, "EARTHA\n");
+      }
+    } else init_i = 0;
+
+    if (state == 6 && data == NULL) {
+      /* how can this happen??? */
+      state = 0;
+    }
     switch (state) {
 
     case EM_HUNT_FF:
 	if (c == 0xff)
 	    state = EM_HUNT_81;
-	if (c == 'E')
-	    state = EM_HUNT_A;
-	break;
-
-    case EM_HUNT_A:
-	/* A better be right after E */
-	if (c == 'A') 
-	    write(gNMEAdata.fdout, "EARTHA\r\n", 8);
-	state = EM_HUNT_FF;
+	if (data) {
+	    free(data);
+	    data = NULL;
+	}
 	break;
 
     case EM_HUNT_81:
 	if (c == 0x81)
 	    state = EM_HUNT_ID;
-	h.sync = 0x81ff;
+	h[HEADER_SYNC] = 0x81ff;
 	byte = 0;
 	break;
 
     case EM_HUNT_ID:
-	if (!(byte = putword(&(h.id), c, byte)))
+	if (!(byte = putword(h+HEADER_ID, c, byte)))
 	    state = EM_HUNT_WC;
 	break;
 
     case EM_HUNT_WC:
-	if (!(byte = putword(&(h.ndata), c, byte)))
+	if (!(byte = putword(h+HEADER_NDATA, c, byte)))
 	    state = EM_HUNT_FLAGS;
 	break;
 
     case EM_HUNT_FLAGS:
-	if (!(byte = putword(&(h.flags), c, byte)))
+	if (!(byte = putword(h+HEADER_FLAGS, c, byte)))
 	    state = EM_HUNT_CS;
 	break;
 
     case EM_HUNT_CS:
-	if (!(byte = putword(&(h.csum), c, byte))) {
+	if (!(byte = putword(h+HEADER_CSUM, c, byte))) {
 
-	    if (h.csum == em_checksum((unsigned short *) &h, 4)) {
+	    if (h[HEADER_CSUM] == em_checksum(h, HEADER_CSUM)) {
 		state = EM_HUNT_DATA;
-		data = (unsigned short *) malloc((h.ndata + 1) * 2);
+		data = (unsigned short *) malloc((h[HEADER_NDATA] + 1) * sizeof(unsigned short));
 		words = 0;
 	    } else
 		state = EM_HUNT_FF;
@@ -506,15 +534,15 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 	break;
 
     case EM_HUNT_DATA:
-	if (!(byte = putword(data + words, c, byte)))
+        if (!(byte = putword(data + words, c, byte)))
 	    words++;
-	if (words == h.ndata + 1) {
-	    analyze(&h, data, afds, nmea_fds);
-	    free(data);
+	if (words == h[HEADER_NDATA] + 1) {
+	    analyze(h, data, afds, nmea_fds);
 	    state = EM_HUNT_FF;
 	}
 	break;
     }
+    /*fprintf(stderr, "data: %x\n", data); */
 }
 
 int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds)
