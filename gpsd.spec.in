@@ -55,8 +55,8 @@ cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/gpsd
-mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb
-cp gpsd.usermap gpsdplug "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
+mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug.d/usb
+cp gpsdplug.hotplug "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug.d/usb/
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
@@ -91,8 +91,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
-%{_sysconfdir}/hotplug/usb/gpsd.usermap
-%{_sysconfdir}/hotplug/usb/gpsdplug
+%{_sysconfdir}/hotplug.d/usb/gpsd.hotplug
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
@@ -114,7 +113,6 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   Hotplug scripts to go with it are now installed by the RPM.  The
   Garmin probe is working.  The -T and -s options are gone.  We have 
   achieved zero configuration!
-
 
 * Wed Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.15-1
 - A new packet engine autobauds much more quickly, and now iterates
