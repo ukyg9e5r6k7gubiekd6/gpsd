@@ -417,7 +417,7 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 }
 
-static short nmea_checksum(char *sentence)
+static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
 {
     unsigned char sum = '\0';
@@ -425,6 +425,8 @@ static short nmea_checksum(char *sentence)
 
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
+    if (correct_sum)
+        *correct_sum = sum;
     sprintf(csum, "%02X", sum);
     return (strncmp(csum, p, 2) == 0);
 }
@@ -466,12 +468,14 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     int retval = -1;
     unsigned int i;
     int count;
+    unsigned char sum;
     char *p, *s;
     char *field[80];
 
-    if ( ! nmea_checksum(sentence+1)) {
-      gpsd_report(1, "Bad NMEA checksum: '%s'\n", sentence);
-      return 0;
+    if ( ! nmea_checksum(sentence+1, &sum)) {
+        gpsd_report(1, "Bad NMEA checksum: '%s' should be %02X\n",
+                   sentence, sum);
+        return 0;
     }
 
     /* make an editable copy of the sentence */
