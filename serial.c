@@ -66,8 +66,6 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return 0;
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
-
-	usleep(3000000);	/* allow the UART time to settle */
     }
 
     if ((ok = (packet_sniff(session) == NMEA_PACKET)))
