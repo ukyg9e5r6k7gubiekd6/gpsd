@@ -5,22 +5,26 @@
 import time, socket, sys
 from math import *
 
-ONLINE_SET	= 0x0001
-TIME_SET	= 0x0002
-TIMERR_SET	= 0x0004
-LATLON_SET	= 0x0008
-ALTITUDE_SET	= 0x0010
-SPEED_SET	= 0x0020
-TRACK_SET	= 0x0040
-CLIMB_SET	= 0x0080
-STATUS_SET	= 0x0100
-MODE_SET	= 0x0200
-DOP_SET  	= 0x0400
-POSERR_SET	= 0x0800
-SATELLITE_SET	= 0x1000
-SPEEDERR_SET	= 0x2000
-TRACKERR_SET	= 0x4000
-CLIMBERR_SET	= 0x8000
+ONLINE_SET =	0x000001
+TIME_SET =	0x000002
+TIMERR_SET =	0x000004
+LATLON_SET =	0x000008
+ALTITUDE_SET =	0x000010
+SPEED_SET =	0x000020
+TRACK_SET =	0x000040
+CLIMB_SET =	0x000080
+STATUS_SET =	0x000100
+MODE_SET =	0x000200
+HDOP_SET =  	0x000400
+VDOP_SET =  	0x000800
+PDOP_SET =  	0x001000
+HERR_SET =	0x002000
+VERR_SET =	0x004000
+PERR_SET =	0x008000
+SATELLITE_SET =	0x010000
+SPEEDERR_SET =	0x020000
+TRACKERR_SET =	0x040000
+CLIMBERR_SET =	0x080000
 
 STATUS_NO_FIX = 0
 STATUS_FIX = 1
@@ -77,6 +81,7 @@ class gpsdata:
         self.await = self.parts = 0
 
         self.gps_id = None
+        self.driver_mode = 0
         self.profiling = False
         self.tag = ""
         self.length = 0
@@ -194,12 +199,54 @@ class gps(gpsdata):
 	    elif cmd in ('E', 'e'):
 	      parts = data.split()
 	      (self.epe, self.eph, self.epv) = map(float, parts)
-              self.valid |= POSERR_SET
+              self.valid |= HERR_SET | VERR_SET | PERR_SET
 	    elif cmd in ('I', 'i'):
 	      self.gps_id = data
 	    elif cmd in ('M', 'm'):
 	      self.mode = int(data)
               self.valid |= MODE_SET
+	    elif cmd in ('N', 'n'):
+	      self.drive_rmode = int(data)
+	    elif cmd in ('O', 'o'):
+                fields = data.split()
+                if fields[0] == '?':
+                    self.mode = MODE_NO_FIX
+                else:
+                    self.time = float(fields[0])
+                    self.ept = float(fields[1])
+                    self.latitude = float(fields[2])
+                    self.longitude = float(fields[3])
+                    def default(i, d):
+                        if fields[i] == '?':
+                            return d
+                        else:
+                            return float(fields[i])
+                    self.altitude = default(4, ALTITUDE_NOT_VALID)
+                    if self.altitude == ALTITUDE_NOT_VALID:
+                        self.mode = MODE_2D
+                    else:
+                        self.mode = MODE_3D
+                    self.eph = default(5, 0.0)
+                    self.epv = default(6, 0.0)
+                    self.track = default(7, TRACK_NOT_VALID)
+                    self.speed = default(8, 0.0)
+                    self.climb = default(9, 0.0)
+                    self.epd = default(10, 0.0)
+                    self.eps = default(11, 0.0)
+                    self.epc = default(12, 0.0)
+                    self.valid |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
+                    if self.mode == MODE_3D:
+                        self.valid |= ALTITUDE_SET | CLIMB_SET
+                    if self.eph:
+                        self.valid |= HERR_SET
+                    if self.epv:
+                        self.valid |= VERR_SET
+                    if self.track != TRACK_NOT_VALID:
+                        self.valid |= TRACK_SET | SPEED_SET
+                    if self.eps:
+                        self.valid |= SPEEDERR_SET
+                    if self.epc:
+                        self.valid |= CLIMBERR_SET
 	    elif cmd in ('P', 'p'):
 	      (self.latitude, self.longitude) = map(float, data.split())
               self.valid |= LATLON_SET
@@ -207,7 +254,7 @@ class gps(gpsdata):
 	      parts = data.split()
 	      self.satellites_used = int(parts[0])
 	      (self.pdop, self.hdop, self.vdop) = map(float, parts[1:])
-              self.valid |= DOP_SET
+              self.valid |= HDOP_SET | VDOP_SET | PDOP_SET
 	    elif cmd in ('S', 's'):
 	      self.status = int(data)
               self.valid |= STATUS_SET

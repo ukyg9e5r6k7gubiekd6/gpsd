@@ -275,7 +275,7 @@ def plotframe(await, fname, file, speed, threshold, title):
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()
-            if session.status == gps.STATUS_NO_FIX:
+            if session.mode <= gps.MODE_NO_FIX:
                 continue
             if countdown == await:
                 sys.stderr.write("gathering samples...")
