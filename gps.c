@@ -419,12 +419,19 @@ int main(int argc, char *argv[])
     XtAppContext app;
     extern char *optarg;
     int option;
-    char *server = NULL;
+    char *colon, *server = NULL;
+    char *port = DEFAULT_GPSD_PORT;
 
     while ((option = getopt(argc, argv, "hp:")) != -1) {
 	switch (option) {
 	case 'p':
 	    server = strdup(optarg);
+	    colon = strchr(server, ':');
+	    if (colon != NULL)
+	    {
+		server[colon - server] = '\0';
+		port = colon + 1;
+	    }
 	    break;
 	case 'h':
 	case '?':
@@ -441,7 +448,7 @@ int main(int argc, char *argv[])
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gpsdata = gps_open(server, DEFAULT_GPSD_PORT);
+    gpsdata = gps_open(server, port);
     if (!gpsdata)
     {
 	fprintf(stderr, "gps: no gpsd running or network error (%d).\n", errno);
