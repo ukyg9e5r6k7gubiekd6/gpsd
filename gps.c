@@ -45,7 +45,10 @@
 
 #include "outdata.h"
 #include "nmea.h"
-#include "gps.h"
+#include "gpsd.h"
+
+extern void register_canvas(Widget w, GC gc);
+extern void draw_graphics();
 
 struct session_t session;
 

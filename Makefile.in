@@ -146,10 +146,10 @@ serial.o: serial.c nmea.h outdata.h gpsd.h
 tm.o: tm.c nmea.h outdata.h gpsd.h
 em.o: em.c nmea.h outdata.h gpsd.h
 send_nmea.o: send_nmea.c nmea.h outdata.h gpsd.h
-display.o: display.c nmea.h outdata.h gps.h
+display.o: display.c nmea.h outdata.h gpsd.h
 xgpsspeed.o: xgpsspeed.c gpsd.h
-gps.o: gps.c nmea.h outdata.h gps.h version.h
-gpsd.o: gpsd.c nmea.h outdata.h gps.h version.h
+gps.o: gps.c nmea.h outdata.h gpsd.h version.h
+gpsd.o: gpsd.c nmea.h outdata.h gpsd.h version.h
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
