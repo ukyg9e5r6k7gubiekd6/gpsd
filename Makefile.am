@@ -54,6 +54,7 @@ libgps_la_SOURCES = \
 	zodiac.c \
 	libgpsd_core.c \
 	libgps.c \
+	sirf.c \
 	report.c
 
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
@@ -95,7 +96,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = gps.h gpsd.h
+include_HEADERS = gps.h gpsd.h sirf.h
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \

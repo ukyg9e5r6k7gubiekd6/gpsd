@@ -434,7 +434,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
  **************************************************************************/
 
 void nmea_add_checksum(char *sentence)
-/* add NMEA to a *-terminated sentence */
+/* add NMEA checksum to a *-terminated sentence */
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
