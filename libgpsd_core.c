@@ -24,6 +24,8 @@ int gpsd_switch_driver(struct gps_session_t *session, char* typename)
 	if (!strcmp((*dp)->typename, typename)) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
 	    session->device_type = *dp;
+	    if (session->device_type->initializer)
+		session->device_type->initializer(session);
 	    return 1;
 	}
     gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", typename);

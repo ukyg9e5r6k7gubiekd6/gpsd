@@ -30,10 +30,8 @@ static void nmea_handle_input(struct gps_session_t *session)
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
-		gpsd_report(1, "found %s.\n", (*dp)->typename);
-		session->device_type = *dp;
-		if (session->device_type->initializer)
-		    session->device_type->initializer(session);
+		gpsd_report(1, "found %s.\n", trigger);
+		gpsd_switch_driver(session, (*dp)->typename);
 		packet_accept(session);
 		return;
 	    }

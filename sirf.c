@@ -595,18 +595,28 @@ static void sirfbin_initializer(struct gps_session_t *session)
 	    gpsd_report(1, "SiRF chipset has old firmware, falling back to  SiRF NMEA\n");
 	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
 	    gpsd_switch_driver(session, "SiRF-II NMEA");
+	    return;
 	} else {
-	    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x02,
-			      0x84, 0x00,
-			      0x00, 0x00, 0xb0, 0xb3};
-
 	    gpsd_report(1, "Switching chip mode to SiRF binary.\n");
 	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,0,%d,8,1,0", session->gNMEAdata.baudrate);
 	    packet_sniff(session);
-	    crc_sirf(msg);
-	    write(session->gNMEAdata.gps_fd, msg, 10);
-	    gpsd_report(4, "Probing for firmware version...\n");
 	}
+    }
+    /* do this every time*/
+    {
+	//u_int8_t ratecontrol[] = {0xa0, 0xa2, 0x00, 0x08,
+	//			 0xa6, 0x00, 0x04, 0x05,
+	//			 0x00, 0x00, 0x00, 0x00,
+	//			 0x00, 0x00, 0xb0, 0xb3};
+	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
+				 0x84, 0x00,
+				 0x00, 0x00, 0xb0, 0xb3};
+	//gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
+	//crc_sirf(ratecontrol);
+	//write(session->gNMEAdata.gps_fd, ratecontrol, 16);
+	gpsd_report(4, "Probing for firmware version...\n");
+	crc_sirf(versionprobe);
+	write(session->gNMEAdata.gps_fd, versionprobe, 10);
     }
 }
 

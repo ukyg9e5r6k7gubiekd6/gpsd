@@ -159,7 +159,7 @@ your initializing control string will almost certainly be ignored by
 anything not specifically watching for it.
 
 Another good thing to send from the NMEA initializer is probe strings.
-These are strings which shjould elicit an identifying response from
+These are strings which should elicit an identifying response from
 the GPS that you can use as a trigger string for a driver.  This is
 how we detect SiRF chips (see step 5 under autoconfiguration above).
 

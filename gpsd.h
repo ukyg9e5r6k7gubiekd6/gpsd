@@ -115,6 +115,8 @@ struct gps_session_t {
     double seconds;
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
+#define SIRF_EQ_231	0x02		/* SiRF at firmware rev == 231 */
+#define SIRF_GE_232	0x04		/* SiRF at firmware rev >= 232 */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
