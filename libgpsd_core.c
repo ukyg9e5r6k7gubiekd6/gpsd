@@ -50,7 +50,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 		session->device_type->initializer(session);
 	    return 1;
 	}
-    gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", typename);
+    gpsd_report(1, "invalid GPS type \"%s\".\n", typename);
     return 0;
 }
 
