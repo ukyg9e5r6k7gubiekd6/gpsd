@@ -1,6 +1,6 @@
 Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.94
+Version: 1.95
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -72,11 +72,15 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %attr(755, root, root) /etc/init.d/gpsd
 
 %changelog
+* Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
+- Fixed broken 'make dist', missing display.c and Tachometer.c 
+  are in there now.
+
 * Tue Aug 24 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.94-1
 - Fix embarrassing bug -- watcher mode did not work for more than one
-- client at a time.  Y command now carries information about which 
-- satellites were used in the last fix.  New timeout mechanism, no
-- longer dependent on FIONREAD.
+  client at a time.  Y command now carries information about which 
+  satellites were used in the last fix.  New timeout mechanism, no
+  longer dependent on FIONREAD.
 
 * Mon Aug 23 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.93-1
 - Fourth prerelease. Daemon-side timeouts are gone, they complicated

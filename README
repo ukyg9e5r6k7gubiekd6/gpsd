@@ -1,6 +1,3 @@
-
-
-
 COPYRIGHT
 =========
 
@@ -28,11 +25,6 @@ velocity or altitude information.
 gpsd can take information from the gps and translate it into
 something easier to understand for clients.
 
-The client does not have to run on the same computer ;-)
-I have a boat connected to the internet (Ricochet modem) running
-gpsd, the maping program runs here at home (no, I will not give
-you the boats IP address :-)
-
 There is a GPS tester included. It is called "gps". It simply connects
 to a GPS and displays your latitude, longitude, altitude, and the signal
 quality from visible satellites.  When querying NMEA-compliant GPSes, it
@@ -40,7 +32,7 @@ will show a diagram of satellites in their current position in the sky.
 It uses the same library code as gpsd.
 
 gpsd is tested with DeLorme's TripMate and EarthMate; also with Garmin units;
-also with the BU-303 USB GPS sold as the NaviLock, Deluo, and Hyperdata.
+also with the BU-303 USB GPS sold as the NaviLock, Globalsat, and Hyperdata.
 Note that the PL2303 USB serial driver used with the BU-2303 seems
 to have been broken sometime late in the 2.4.x series of Linux kernels
 and was not fixed until 2.6.7.  If in doubt, upgrade.
@@ -76,7 +68,7 @@ Be advised: any bugs in this code are mine, and mine only ;-)
 
 Thanks for Russ Nelson for providing a home for gpsd!
 
-This is as it stands today, Feburary 05 2002.
+This is as it stands today, February 05 2002.
 
 remco@emc.rvt.com
 
@@ -106,9 +98,11 @@ New features include:
      library, libgps(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
-   * Removed the -s option -- the right speed is fixed for each type, -s was
-     just an invitation to lossage.
    * Added -n option to do batch monitoring of GPSes.
    * xgpsspeed is working again.
+   * RPMs which include installation of gpsd to start up at boot time 
+     are available.
+   * C and Python libraries are available to encapsulate the client side of
+     querying gpsd.
 
-Eric S. Raymond, 11 Aug 2004
+Eric S. Raymond, 23 Aug 2004
