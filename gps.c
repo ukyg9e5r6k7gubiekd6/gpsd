@@ -66,9 +66,10 @@ static Widget rowColumn_13;
 static Widget rowColumn_14;
 static Widget rowColumn_15;
 static Widget rowColumn_16;
+static Widget rowColumn_17;
 static Widget pushButton_11;
-static Widget text_1, text_2, text_3, text_4, text_5;
-static Widget label_1, label_2, label_3, label_4, label_5;
+static Widget text_1, text_2, text_3, text_4, text_5, text_6;
+static Widget label_1, label_2, label_3, label_4, label_5, label_6;
 static Widget status;
 
 static int device_speed = 4800;
@@ -77,11 +78,12 @@ static char *default_device_name = "/dev/gps";
 
 String fallback_resources[] =
 {
-    "*gps_data.time.label.labelString: Time",
-    "*gps_data.latitude.label.labelString: Lat.",
-    "*gps_data.longitude.label.labelString: Lon.",
-    "*gps_data.altitude.label.labelString: Alt.",
-    "*gps_data.fix_status.label.labelString: Stat",
+    "*gps_data.time.label.labelString: Time ",
+    "*gps_data.latitude.label.labelString: Lat. ",
+    "*gps_data.longitude.label.labelString: Lon. ",
+    "*gps_data.altitude.label.labelString: Alt. ",
+    "*gps_data.speed.label.labelString: Speed",
+    "*gps_data.fix_status.label.labelString: Stat ",
     "*gps_data.quit.label.labelString: Quit",
     NULL
 };
@@ -244,10 +246,13 @@ static void build_gui(Widget lxbApp)
     rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, form_6, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_14);
-    rowColumn_15 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, form_6, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_15);
-    rowColumn_16 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_16 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, form_6, args, 7);
+
+    XtSetArg(args[6], XmNtopWidget, rowColumn_16);
+    rowColumn_17 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, form_6, args, 7);
 
 
     n = 0;
@@ -256,6 +261,7 @@ static void build_gui(Widget lxbApp)
     label_3 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_13, args, n);
     label_4 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_14, args, n);
     label_5 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_15, args, n);
+    label_6 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_16, args, n);
 
     n = 0;
     XtSetArg(args[n], XmNcursorPositionVisible, False);
@@ -278,10 +284,12 @@ static void build_gui(Widget lxbApp)
 				   rowColumn_14, args, n);
     text_5 = XtCreateManagedWidget("text_5", xmTextFieldWidgetClass,
 				   rowColumn_15, args, n);
+    text_6 = XtCreateManagedWidget("text_6", xmTextFieldWidgetClass,
+				   rowColumn_16, args, n);
 
 
     pushButton_11 = XtCreateManagedWidget("label",
-			 xmPushButtonWidgetClass, rowColumn_16, args, 0);
+			 xmPushButtonWidgetClass, rowColumn_17, args, 0);
     XtAddCallback(pushButton_11, XmNactivateCallback, quit_cb, NULL);
 
     status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form_6,
@@ -351,6 +359,8 @@ void update_display(char *message)
     XmTextFieldSetString(text_3, s);
     sprintf(s, "%f", session.gNMEAdata.altitude);
     XmTextFieldSetString(text_4, s);
+    sprintf(s, "%f", session.gNMEAdata.speed);
+    XmTextFieldSetString(text_5, s);
 
     switch (session.gNMEAdata.mode) {
     case 2:
@@ -363,7 +373,7 @@ void update_display(char *message)
 	sprintf(s, "NO FIX");
 	break;
     }
-    XmTextFieldSetString(text_5, s);
+    XmTextFieldSetString(text_6, s);
 
     draw_graphics();
 }
