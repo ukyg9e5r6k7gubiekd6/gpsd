@@ -185,7 +185,7 @@ static int validate(void)
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
-    char reply[BUFSIZE], *p;
+    char reply[BUFSIZE], phrase[BUFSIZE], *p;
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
 
@@ -195,105 +195,105 @@ static int handle_request(int fd, char *buf, int buflen)
 	switch (toupper(*p++)) {
 	case 'A':
 	    if (!validate())
-		strcat(reply, ",A=?");
+		strcpy(phrase, ",A=?");
 	    else
-		sprintf(reply + strlen(reply), ",A=%f", ud->altitude);
+		sprintf(phrase, ",A=%f", ud->altitude);
 	    break;
 	case 'D':
 	    if (ud->utc[0])
-		sprintf(reply + strlen(reply), ",D=%s", ud->utc);
+		sprintf(phrase, ",D=%s", ud->utc);
 	    else
-		strcat(reply, ",D=?");
+		strcpy(phrase, ",D=?");
 	    break;
 	case 'L':
-	    sprintf(reply + strlen(reply), ",l=1 " VERSION " admpqrstvwxy");
+	    sprintf(phrase, ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
-		strcat(reply, ",M=?");
+		strcpy(phrase, ",M=?");
 	    else
-		sprintf(reply + strlen(reply), ",M=%d", ud->mode);
+		sprintf(phrase, ",M=%d", ud->mode);
 	    break;
 	case 'P':
 	    if (!validate())
-		strcat(reply, ",P=?");
+		strcpy(phrase, ",P=?");
 	    else
-		sprintf(reply + strlen(reply), ",P=%f %f", 
+		sprintf(phrase, ",P=%f %f", 
 			ud->latitude, ud->longitude);
 	    break;
 	case 'Q':
 	    if (!validate())
-		strcat(reply, ",Q=?");
+		strcpy(phrase, ",Q=?");
 	    else
-		sprintf(reply + strlen(reply), ",Q=%d %f %f %f",
+		sprintf(phrase, ",Q=%d %f %f %f",
 			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
 	    break;
 	case 'R':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
-		sprintf(reply + strlen(reply), ",R=1");
+		sprintf(phrase, ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &nmea_fds);
 		gpsd_report(3, "%d turned off raw mode\n", fd);
-		sprintf(reply + strlen(reply), ",R=0");
+		sprintf(phrase, ",R=0");
 		p++;
 	    } else if (FD_ISSET(fd, &nmea_fds)) {
 		FD_CLR(fd, &nmea_fds);
 		gpsd_report(3, "%d turned off raw mode\n", fd);
-		sprintf(reply + strlen(reply), ",R=0");
+		sprintf(phrase, ",R=0");
 	    } else {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
-		sprintf(reply + strlen(reply), ",R=1");
+		sprintf(phrase, ",R=1");
 	    }
 	    break;
 	case 'S':
-	    sprintf(reply + strlen(reply), ",S=%d", ud->status);
+	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
 	    if (!validate())
-		strcat(reply, ",T=?");
+		strcpy(phrase, ",T=?");
 	    else
-		sprintf(reply + strlen(reply), ",T=%f", ud->track);
+		sprintf(phrase, ",T=%f", ud->track);
 	    break;
 	case 'V':
 	    if (!validate())
-		strcat(reply, ",V=?");
+		strcpy(phrase, ",V=?");
 	    else
-		sprintf(reply + strlen(reply), ",V=%f", ud->speed);
+		sprintf(phrase, ",V=%f", ud->speed);
 	    break;
 	case 'W':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
-		sprintf(reply + strlen(reply), ",W=1");
+		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &watcher_fds);
 		gpsd_report(3, "%d turned off watching\n", fd);
-		sprintf(reply + strlen(reply), ",W=0");
+		sprintf(phrase, ",W=0");
 		p++;
 	    } else if (FD_ISSET(fd, &watcher_fds)) {
 		FD_CLR(fd, &watcher_fds);
 		gpsd_report(3, "%d turned off watching\n", fd);
-		sprintf(reply + strlen(reply), ",W=0");
+		sprintf(phrase, ",W=0");
 	    } else {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
-		sprintf(reply + strlen(reply), ",W=1");
+		sprintf(phrase, ",W=1");
 	    }
 	    break;
         case 'X':
-	    sprintf(reply + strlen(reply), ",X=%d", ud->online);
+	    sprintf(phrase, ",X=%d", ud->online);
 	    break;
 	case 'Y':
 	    if (!ud->satellites)
-		strcat(reply, ",Y=?");
+		strcpy(phrase, ",Y=?");
 	    else {
 		int used;
-		sprintf(reply + strlen(reply), ",Y=%d:", ud->satellites);
+		sprintf(phrase, ",Y=%d:", ud->satellites);
 		if (SEEN(ud->satellite_stamp))
 		    for (i = 0; i < ud->satellites; i++) {
 			used = 0;
@@ -303,7 +303,7 @@ static int handle_request(int fd, char *buf, int buflen)
 				break;
 			    }
 			if (ud->PRN[i])
-			    sprintf(reply + strlen(reply), "%d %d %d %d %d:", 
+			    sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
 				    ud->PRN[i], 
 				    ud->elevation[i],ud->azimuth[i],
 				    ud->ss[i],
@@ -314,6 +314,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	case '\r': case '\n':
 	    goto breakout;
 	}
+	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
+	    strcat(reply, phrase);
     }
  breakout:
     strcat(reply, "\r\n");
