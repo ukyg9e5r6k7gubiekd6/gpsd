@@ -256,8 +256,8 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 
 	    pvt = (cpo_pvt_data*)pkt->mData;
 
-	    // 631094400, unix seconds for 31 Dec 1989 Zulu
-	    time_l = 631094400 + (pvt->grmn_days * 86400);
+	    // 631065600, unix seconds for 31 Dec 1989 Zulu 
+	    time_l = 631065600 + (pvt->grmn_days * 86400);
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
