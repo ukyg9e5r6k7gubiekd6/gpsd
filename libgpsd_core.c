@@ -145,6 +145,8 @@ int gpsd_poll(struct gps_session_t *session)
 	{
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpscli_report(1, "Write to rtcm sink failed\n");
+	    else
+		gpscli_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
 	}
 	else 
 	{
@@ -189,6 +191,7 @@ int gpsd_poll(struct gps_session_t *session)
 			  session->gNMEAdata.longitude, 
 			  session->gNMEAdata.altitude);
 		  write(session->dsock, buf, strlen(buf));
+		  gpscli_report(2, "=> dgps %s", buf);
 		}
 	    }
 	}
