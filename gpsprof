@@ -117,6 +117,8 @@ class spaceplot:
             fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" ' % (file, len(self.fixes))
             if alt_avg != gps.ALTITUDE_NOT_VALID:
                 fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
+	    else:
+		fmt += "\n"
             return fmt
 
 class uninstrumented:
