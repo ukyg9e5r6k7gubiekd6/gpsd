@@ -112,7 +112,7 @@ INCLUDE = -I. $(X_INCLUDE)
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
 
 ## Libraries and object files
-GPSLIB_OBJECTS  = nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
+GPSLIB_OBJECTS  = nmea_parse.o serial.o drivers.o earthmate.o gpscore.o $(MOTIF_OBJECTS)
 GPSDLIB_OBJECTS = libgpsd.o
 COMMON_OBJECTS  = netlib.o
 
@@ -156,9 +156,9 @@ libgpsd: libgpsd.c gps.h
 netlib.o: netlib.c gps.h gpsd.h
 nmea_parse.o: nmea_parse.c
 serial.o: serial.c gps.h gpsd.h
-tm.o: tm.c gps.h gpsd.h
-em.o: em.c gps.h gpsd.h
-send_nmea.o: send_nmea.c gps.h gpsd.h
+drivers.o: drivers.c gps.h gpsd.h
+earthmate.o: earthmate.c gps.h gpsd.h
+gpscore.o: gpscore.c gps.h gpsd.h
 
 # And the main sequences of the applications
 display.o: display.c gps.h gpsd.h
