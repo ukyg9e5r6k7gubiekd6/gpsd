@@ -57,7 +57,7 @@ struct gps_data_t {
     double latitude;		/* Latitude in degrees */
     double longitude;		/* Longitude in degrees */
     struct life_t latlon_stamp;
-    double altitude;		/* Altitude in meters */
+    double altitude;		/* Altitude in meters (MSL, not WGS 84) */
     struct life_t altitude_stamp;
 
     /* velocity */

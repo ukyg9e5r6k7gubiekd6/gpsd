@@ -398,6 +398,7 @@ static void notify_watchers(char *sentence)
 
 static void raw_hook(char *sentence)
 /* hook to be executed on each incoming sentence */
+/* CAUTION: only one NMEA sentence per call */
 {
     int fd;
 
@@ -424,7 +425,7 @@ static void raw_hook(char *sentence)
 	    if (PREFIX("$GPRMC", sentence)) {
 		PUBLISH(fd, "pdtvs");
 	    } else if (PREFIX("$GPGGA", sentence)) {
-		PUBLISH(fd, "pdas");	
+		PUBLISH(fd, "pdasm");	
 	    } else if (PREFIX("$GPGLL", sentence)) {
 		PUBLISH(fd, "pd");
 	    } else if (PREFIX("$GPVTG", sentence)) {

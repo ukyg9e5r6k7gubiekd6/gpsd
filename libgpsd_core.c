@@ -1,4 +1,4 @@
-/* libgpsd_core.c -- irect access to GPSes on serial or USB devices. */
+/* libgpsd_core.c -- direct access to GPSes on serial or USB devices. */
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -203,9 +203,15 @@ static double degtodm(double a)
 
 void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 {
+    char hdop_str[128] = "";
+
+    if ( SEEN(session->gNMEAdata.fix_quality_stamp) ) {
+	sprintf(hdop_str, "%.2f", session->gNMEAdata.hdop);
+    }
+
     if (session->gNMEAdata.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
+		"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c,%s,%s*",
 		session->hours,
 		session->minutes,
 		session->seconds,
@@ -215,11 +221,17 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
 		session->gNMEAdata.mode,
 		session->gNMEAdata.satellites_used,
-		session->gNMEAdata.hdop,
+		hdop_str,
+                // altitude is MSL
 		session->gNMEAdata.altitude, 'M',
-		session->separation, 'M', "", "");
+		session->separation, 'M',
+                // next two items shoud be mag_var
+                "", "");
 	nmea_add_checksum(bufp);
-	bufp = bufp + strlen(bufp);
+	if (session->gNMEAdata.raw_hook) {
+	    session->gNMEAdata.raw_hook(bufp);
+        }
+	bufp += strlen(bufp);
     }
     sprintf(bufp,
 	    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,*",
@@ -235,17 +247,25 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	    session->month,
 	    (session->year % 100));
 	nmea_add_checksum(bufp);
+	if (session->gNMEAdata.raw_hook) {
+	    session->gNMEAdata.raw_hook(bufp);
+        }
 }
 
 void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 {
     int i, j;
+    char *bufp2 = bufp;
 
     j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
 
+    // FIXME!  only dump chanels that have data
     for( i = 0 ; i < MAXCHANNELS; i++ ) {
-	if (i % 4 == 0)
-	    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1, session->gNMEAdata.satellites);
+	if (i % 4 == 0) {
+            bufp2 = bufp;
+	    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1,
+            	session->gNMEAdata.satellites);
+	}
 	bufp += strlen(bufp);
 	if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
 	    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
@@ -253,8 +273,12 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 	else
 	    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.ss[i]);
-	if (i % 4 == 3)
+	if (i % 4 == 3) {
 	    nmea_add_checksum(bufp);
+	    if (session->gNMEAdata.raw_hook) {
+		session->gNMEAdata.raw_hook(bufp);
+	    }
+	}
     }
 }
 
@@ -279,6 +303,9 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
     sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
     nmea_add_checksum(bufp);
+    if (session->gNMEAdata.raw_hook) {
+        session->gNMEAdata.raw_hook(bufp);
+    }
 }
 
 #endif /* BINARY_ENABLE */

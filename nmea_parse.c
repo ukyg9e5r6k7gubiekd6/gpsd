@@ -427,7 +427,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
     if (correct_sum)
         *correct_sum = sum;
     sprintf(csum, "%02X", sum);
-    return (strncmp(csum, p, 2) == 0);
+    return(toupper(csum[0])==toupper(p[0]))&&(toupper(csum[1])==toupper(p[1]));
 }
 
 /**************************************************************************
