@@ -26,10 +26,9 @@
 #include <math.h>
 
 #include "gps.h"
-#include "gpsd.h"
 
 extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics();
+extern void draw_graphics(struct gps_data *gpsdata);
 
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)
@@ -39,8 +38,6 @@ extern void draw_graphics();
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-
-extern struct gpsd_t session;
 
 static Widget draww;
 static GC drawGC;
@@ -108,23 +105,23 @@ void draw_arc(int x, int y, int diam)
 }
 
 
-int get_status(int satellite)
+int get_status(struct gps_data *gpsdata, int satellite)
 {
     int i;
     int s;
 
 #ifdef PROCESS_PRWIZCH
-    if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
+    if (SEEN(gpsdata->signal_quality_stamp)) {
 	for (i = 0; i < 12; i++)
-	    if (satellite == session.gNMEAdata.Zs[i])
-		return session.gNMEAdata.Zv[i];
+	    if (satellite == gpsdata->Zs[i])
+		return gpsdata->Zv[i];
 	return 0;
     } else
 #endif /* PROCESS_PRWIZCH */
     {
 	for (i = 0; i < 12; i++)
-	    if (satellite == session.gNMEAdata.PRN[i]) {
-		s = session.gNMEAdata.ss[i];
+	    if (satellite == gpsdata->PRN[i]) {
+		s = gpsdata->ss[i];
 
 		if (s<20) return 1;
 		if (s<40) return 2;
@@ -136,13 +133,13 @@ int get_status(int satellite)
 }
 
 
-void draw_graphics()
+void draw_graphics(struct gps_data *gpsdata)
 {
     int i;
     double x, y;
     char buf[20];
 
-    if (SEEN(session.gNMEAdata.satellite_stamp)) {
+    if (SEEN(gpsdata->satellite_stamp)) {
 
 	i = min(width, height);
 
@@ -181,10 +178,10 @@ void draw_graphics()
 			(int) x-5, (int) y, "E", 1);
 
 	/* Now draw the satellites... */
-	for (i = 0; i < session.gNMEAdata.satellites; i++) {
-	    pol2cart(session.gNMEAdata.azimuth[i], session.gNMEAdata.elevation[i], &x, &y);
+	for (i = 0; i < gpsdata->satellites; i++) {
+	    pol2cart(gpsdata->azimuth[i], gpsdata->elevation[i], &x, &y);
 
-	    switch (get_status(session.gNMEAdata.PRN[i]) & 7) {
+	    switch (get_status(gpsdata, gpsdata->PRN[i]) & 7) {
 	    case 0:
 	    case 1:
 		set_color("Grey");
@@ -207,7 +204,7 @@ void draw_graphics()
 		     11, 11,	/* width, height */
 		     0, 360 * 64	/* angle1, angle2 */
 		);
-	    sprintf(buf, "%02d", session.gNMEAdata.PRN[i]);
+	    sprintf(buf, "%02d", gpsdata->PRN[i]);
 	    set_color("Blue");
 	    XDrawString(XtDisplay(draww), pixmap, drawGC,
 			(int) x + 0, (int) y + 17, buf, 2);

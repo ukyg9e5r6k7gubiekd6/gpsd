@@ -49,7 +49,7 @@
 #include "gpsd.h"
 
 extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics();
+extern void draw_graphics(struct gps_data *gpsdata);
 
 struct gpsd_t session;
 
@@ -404,7 +404,7 @@ void update_display(char *message)
     }
     XmTextFieldSetString(text_7, s);
 
-    draw_graphics();
+    draw_graphics(&session.gNMEAdata);
 }
 
 /**************************************************
