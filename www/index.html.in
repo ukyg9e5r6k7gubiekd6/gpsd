@@ -117,10 +117,18 @@ is for <code>gpsd</code> developers.</p></li>
 with some technical information.  We also have <a href='NMEA.txt'>a
 list of NMEA sentences</a>.</p>
 
-<p>If you are new to GPS technology and don't quite understand what
-<code>gpsd</code> is about, you might find <a
-href="gps-hacking.html">ESR's Guide to Hacking With GPS</a>
-interesting.</p>
+<h1 id='white_papers'>White Papers</h1>
+
+<dl>
+<dt><a href="gps-hacking.html">ESR's Guide to Hacking With GPS</a></dt>
+<dd>If you are new to GPS technology and don't quite understand what
+<code>gpsd</code> is about, you might find this interesting.</dd>
+
+<dt><a href="replacing-nmea.html">Towards A Better GPS Protocol</a></dt>
+<dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
+it.</dd>
+</dl>
+
 
 <h1 id='recipes'>Recipes and related resources</h1>
 
