@@ -34,20 +34,21 @@ feeds the contents of a test logfile through the master side to the
 GPS.</para>
 
 <para>Because of the baud-rate hunting logic, the first sentence in
-the file will not be the first presented to the sentence parser.</para>
+the file will not necessarily be the first presented to the sentence 
+parser.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
-<para>The -c option sets the delay between sentences in seconds</para>
+<para>The -c option sets the delay between sentences in
+seconds. Fractional values of seconds are legal.</para>
 
 <para>The -n option suppresses launch of the daemon.  Instead,
 <application>gpsfake</application> will tell you the name of the slave
 pty so you can launch in instance that reads it.</para>
 
-<para>The -s option sets the baud rate.  Note, this will only work if
-the chipset accepts a speed-change command (SiRF-II supports this
-feature).</para>
+<para>The -s option sets the baud rate for the slave tty.  The
+default is 4800.</para>
 
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>

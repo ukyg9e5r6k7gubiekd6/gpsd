@@ -8,11 +8,11 @@ import sys, os, time, signal, pty, getopt, tempfile, termios
 
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hns:")
 cycle = 1
-speed = 0
+speed = 4800
 spawn = True
 for (switch, val) in options:
     if (switch == '-c'):
-        cycle = int(val)
+        cycle = float(val)
     elif (switch == '-n'):
         spawn = False
     elif (switch == '-s'):
@@ -30,8 +30,6 @@ except:
 slave = os.ttyname(slave_fd)
 
 spawncmd = "gpsd -P /tmp/gpsfake%d -p %s" % (os.getpid(), slave)
-if speed:
-    spawncmd += " -s %d" % speed
 
 if not spawn:
     sys.stderr.write("gpsfake: slave tty is %s\n" % slave)
