@@ -19,7 +19,7 @@
 #include <math.h>
 #include "config.h"	/* must define UNUSED */
 
-#define D2R	(3.14159265358979323846 / 180.0)  /* Degrees to radians */
+#define D2R  0.0174532925199432957692369076848861271L /* radians = pi/180 */
 
 /****************************************************************
  *

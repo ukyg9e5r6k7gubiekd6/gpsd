@@ -168,7 +168,7 @@ static inline int get_int(const unsigned char *buf)
 
 // convert radians to degrees
 static inline double  radtodeg( double rad) {
-	return ( rad * 180.0 / PI );
+	return ( rad * RAD_2_DEG );
 }
 
 static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );
@@ -236,9 +236,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    time_l = 631065600 + (pvt->grmn_days * 86400);
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
-	    //time_l += (long)nearbyint(pvt->gps_tow);
 	    time_l += (time_t) rint(pvt->gps_tow);
-	    //time_l += pvt->gps_tow;
 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 	    tm = gmtime(&time_l);

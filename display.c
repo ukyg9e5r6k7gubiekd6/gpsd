@@ -5,7 +5,6 @@
 #include "config.h"
 #include "display.h"
 
-#define DEG2RAD         (PI/180.0)
 #define RM		20
 
 #undef min
@@ -49,9 +48,9 @@ void register_canvas(Widget w, GC gc)
 
 static void pol2cart(double azimuth, double elevation, int *xout, int *yout)
 {
-    azimuth *= DEG2RAD;
+    azimuth *= DEG_2_RAD;
 #ifdef PCORRECT
-    elevation = sin((90.0 - elevation) * DEG2RAD);
+    elevation = sin((90.0 - elevation) * DEG_2_RAD);
 #else
     elevation = ((90.0 - elevation) / 90.0);
 #endif

@@ -137,6 +137,8 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 #define KNOTS_TO_MPH	1.1507794	/* International miles and knots */
 #define KNOTS_TO_KPH	1.852		/* International knots */
 #define PI 3.1415926535897932384626433832795029L	/* for radians-to-degrees and vv. */
+#define RAD_2_DEG  57.2957795130823208767981548141051703L /* degrees = 180/pi */
+#define DEG_2_RAD  0.0174532925199432957692369076848861271L /* radians = pi/180 */
 
 /* gps_open() error return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
