@@ -2,12 +2,21 @@
  * This is the gpsd driver for SiRF-II GPSes operating in binary mode.
  *
  * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
+ * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.
  *
- * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.  Reports 
- * altititude relative to the WGS 84 reference ellipsoid, not MSL.
+ * Chris Kuethe, our SiRF expert, tells us:
+ * 
+ * "I don't see any indication in any of my material that PDOP, GDOP
+ * or VDOP are output. There are quantities called Estimated
+ * {Horizontal Position, Vertical Position, Time, Horizonal Velocity}
+ * Error, but those are apparently only valid when SiRFDRive is
+ * active."
  *
- * Rumor has it we should be able to get UERE data out of this, but I
- * have not figured out how to yet.  The SiRF documentation sucks horribly!
+ * "(SiRFdrive is their Dead Reckoning augmented firmware. It
+ * allows you to feed odometer ticks, gyro and possibly 
+ * accelerometer inputs to the chip to allow it to continue 
+ * to navigate in the absence of satellite information, and 
+ * to improve fixes when you do have satellites.)"
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -251,6 +260,13 @@ static int sirf_power_save(int ttyfd, int enable)
 
 /*
  * Handle the SiRF-II binary packet format.
+ * 
+ * SiRF message 2 (Measure Navigation Data Out) gives us everything we want
+ * except PDOP, VDOP, and altitude with respect to MSL.  SiRF message 41
+ * (Geodetic Navigation Information) adds MSL altitude, but many of its
+ * other fields are garbage in firmware versions before 232.  So...we
+ * use all the data from message 2 *except* altitude, which we get from 
+ * message 41.
  */
 
 /* driver state flags */
@@ -305,18 +321,17 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
     session->gNMEAdata.gps_time = fixtime;
 }
 
-#ifdef GEODETIC_NO_GOOD
 static void decode_ecef(struct gps_data_t *ud, 
 			double x, double y, double z, 
 			double vx, double vy, double vz)
 {
     /* WGS 84 geodesy parameters */
+    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
     const double a = 6378137;			/* equatorial radius */
     const double f = 1 / 298.257223563;		/* flattening */
     const double b = a * (1 - f);		/* polar radius */
     const double e2 = (a*a - b*b) / (a*a);
     const double e_2 = (a*a - b*b) / (b*b);
-    double lambda,p,theta,phi,n,h,vnorth,veast,heading;
 
     /* geodetic location */
     lambda = atan2(y,x);
@@ -327,9 +342,11 @@ static void decode_ecef(struct gps_data_t *ud,
     h = p / cos(phi) - n;
     ud->latitude = phi * RAD_2_DEG;
     ud->longitude = lambda * RAD_2_DEG;
-    ud->altitude = h;	/* height above ellipsoid rather than MSL */
     REFRESH(ud->latlon_stamp);
+#ifdef GEODETIC_NO_GOOD
+    ud->altitude = h;	/* height above ellipsoid rather than MSL */
     REFRESH(ud->altitude_stamp);
+#endif /* GEODETIC_NO_GOOD */
 
     /* velocity computation */
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
@@ -344,7 +361,6 @@ static void decode_ecef(struct gps_data_t *ud,
     REFRESH(ud->track_stamp);
     REFRESH(ud->climb_stamp);
 }
-#endif /* GEODETIC_NO_GOOD */
 
 static void decode_sirf(struct gps_session_t *session,
 			unsigned char *buf, int len)
@@ -355,7 +371,6 @@ static void decode_sirf(struct gps_session_t *session,
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-#ifdef GEODETIC_NO_GOOD
 	/* position/velocity is bytes 1-18 */
 	decode_ecef(&session->gNMEAdata,
 		    (double)getl(1),
@@ -364,40 +379,34 @@ static void decode_sirf(struct gps_session_t *session,
 		    (double)getw(13)/8.0,
 		    (double)getw(15)/8.0,
 		    (double)getw(17)/8.0);
-#endif /* GEODETIC_NO_GOOD */
 	/* fix status is byte 19 */
-	if (!(session->driverstate & GNI_NAVTYPE_VALID)) {
-	    int navtype = getb(19);
-	    session->gNMEAdata.status = STATUS_NO_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
-	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gNMEAdata.status = STATUS_FIX;
-	    REFRESH(session->gNMEAdata.status_stamp);
-	    session->gNMEAdata.mode = MODE_NO_FIX;
-	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gNMEAdata.mode = MODE_3D;
-	    else if (session->gNMEAdata.status)
-		session->gNMEAdata.mode = MODE_2D;
-	    REFRESH(session->gNMEAdata.mode_stamp);
-	    gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
-	}
-#ifdef GEODETIC_NO_GOOD
+	int navtype = getb(19);
+	session->gNMEAdata.status = STATUS_NO_FIX;
+	session->gNMEAdata.mode = MODE_NO_FIX;
+	if (navtype & 0x80)
+	    session->gNMEAdata.status = STATUS_DGPS_FIX;
+	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	    session->gNMEAdata.status = STATUS_FIX;
+	REFRESH(session->gNMEAdata.status_stamp);
+	session->gNMEAdata.mode = MODE_NO_FIX;
+	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	    session->gNMEAdata.mode = MODE_3D;
+	else if (session->gNMEAdata.status)
+	    session->gNMEAdata.mode = MODE_2D;
+	REFRESH(session->gNMEAdata.mode_stamp);
+	gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
+		    navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
 	gpsd_report(5, "MID 2 GPS Week: %d  TOW: %d\n", getw(22), getl(24));
 	extract_time(session, getw(22), getl(24)/100.0);
 	gpsd_report(5, "MID 2 UTC: %s\n", session->gNMEAdata.utc);
 	gpsd_binary_fix_dump(session, buf2);
-#endif /* GEODETIC_NO_GOOD */
 	/* fix quality data */
 	session->gNMEAdata.hdop = getb(20)/5.0;
 	session->gNMEAdata.satellites_used = getb(28);
 	for (i = 0; i < MAXCHANNELS; i++)
 	    session->gNMEAdata.used[i] = getb(29+i);
-	/* KNOWN BUG: we don't get PDOP or VDOP from this sentence */
 	session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
@@ -447,7 +456,7 @@ static void decode_sirf(struct gps_session_t *session,
     	break;
 
     case 0x06:		/* Software Version String */
-	gpsd_report(1, "Firmware version: %s\n", session->outbuffer+5);
+	gpsd_report(4, "Firmware version: %s\n", session->outbuffer+5);
 	if (atof(session->outbuffer+5) >= 232)
 	    session->driverstate |= GNI_NAVTYPE_VALID;
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
@@ -484,19 +493,6 @@ static void decode_sirf(struct gps_session_t *session,
 	 * anyone running 231.000.000 or earlier (including ES,
 	 * SiRFDRive, XTrac trains) you won't get UTC time. I don't
 	 * know what's broken in firmwares before 2.3.1..."
-	 *
-	 * "I don't see any indication in any of my material that PDOP,
-	 * GDOP or VDOP are output. There are quantities called
-	 * Estimated {Horizontal Position, Vertical Position, Time,
-	 * Horizonal Velocity} Error, but those are apparently only
-	 * valid when SiRFDRive is active."
-	 *
-	 * "(SiRFdrive is their Dead Reckoning augmented firmware. It
-	 * allows you to feed odometer ticks, gyro and possibly 
-	 * accelerometer inputs to the chip to allow it to continue 
-	 * to navigate in the absence of satellite information, and 
-	 * to improve fixes when you do have satellites.)"
-	 *
 	 * To work around the incomplete implementation of this
 	 * packet in 231, we use the status byte in sentence 0x02.
 	 */
@@ -543,7 +539,10 @@ static void decode_sirf(struct gps_session_t *session,
 	session->gNMEAdata.longitude = getl(27)/1e+7;
 	REFRESH(session->gNMEAdata.latlon_stamp);
 	/* skip 4 bytes of altitude from ellipsoid */
+#endif /* !GEODETIC_NO_GOOD */
 	session->gNMEAdata.altitude = getl(31)/100;
+	REFRESH(session->gNMEAdata.altitude_stamp);
+#ifndef GEODETIC_NO_GOOD
 	/* skip 1 byte of map datum */
 	session->gNMEAdata.speed = getw(36)/100;
 	REFRESH(session->gNMEAdata.speed_stamp);
@@ -552,10 +551,7 @@ static void decode_sirf(struct gps_session_t *session,
 	/* skip 2 bytes of magnetic variation */
 	session->gNMEAdata.climb = getw(42)/100;
 	REFRESH(session->gNMEAdata.climb_stamp);
-	/*
-	 * In theory HDOP should be available at byte 90,
-	 * but I see it as zero.  Pick it up from message 2.
-	 */
+	/* HDOP should be available at byte 89, but in 231 it's zero. */
 	gpsd_binary_fix_dump(session, buf2);
 	gpsd_report(3, "<= GPS: %s", buf2);
 #endif /* !GEODETIC_NO_GOOD */
@@ -575,7 +571,8 @@ static void decode_sirf(struct gps_session_t *session,
 
 static void sirfbin_handle_input(struct gps_session_t *session)
 {
-    packet_get_sirf(session);
+    if (!session->outbuflen)
+	packet_get_sirf(session);
     decode_sirf(session, session->outbuffer+4, session->outbuflen-4);
     packet_accept(session);
 }
@@ -588,7 +585,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
                      0x00, 0x00, 0xb0, 0xb3};
    crc_sirf(msg);
    write(session->gNMEAdata.gps_fd, msg, 10);
-   gpsd_report(1, "Probing for firmware version...\n");
+   gpsd_report(4, "Probing for firmware version...\n");
 }
 
 static int sirfbin_switch(struct gps_session_t *session, int speed)
