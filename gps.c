@@ -46,7 +46,6 @@
 #endif
 
 #include "gps.h"
-#include "gpsd.h"
 
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data *gpsdata);
@@ -74,9 +73,6 @@ static Widget pushButton_11;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 static Widget status;
-
-static char *device_name = 0;
-static char *default_device_name = "localhost:2947";
 
 String fallback_resources[] =
 {
@@ -338,6 +334,8 @@ void init_list()
  * No dependencies on the session structure above this point.
  */
 
+#include "gpsd.h"
+
 struct gpsd_t session;
 
 void gpscli_report(int errlevel, const char *fmt, ... )
@@ -438,6 +436,7 @@ int main(int argc, char *argv[])
     int option;
     double baud;
     char devtype = 'n';
+    char *device_name = "localhost:2947";
 
     while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
 	switch (option) {
@@ -470,19 +469,15 @@ int main(int argc, char *argv[])
 	    exit(1);
 	}
     }
-    if (!device_name)
-	device_name = default_device_name;
 
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
 
     build_gui(lxbApp);
-
     init_list();
 
     /*
      * Essentially all the interface to libgps happens below here
      */
-
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
     session.gNMEAdata.raw_hook = update_display;
