@@ -37,7 +37,8 @@ and speedometer</refpurpose>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
-      <arg choice='opt'><replaceable>X-options</replaceable></arg>
+      <arg choice='opt'>-rv</arg>
+      <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
@@ -299,9 +300,10 @@ to direct-connect to the serial device has been removed.</para>
 <refsect2><title>xgpsspeed</title>
 
 <para>xgpsspeed is a speedometer that uses position information from
-the GPS. It accepts an -h option and optional argument as for gps. The
-misfeature of previous version that allowed it to direct-connect to
-the serial device has been removed.</para>
+the GPS. It accepts an -h option and optional argument as for gps.
+Additionally, it accepts -rv (reverse video) and -nc (needle color)
+options. The misfeature of previous version that allowed it to
+direct-connect to the serial device has been removed.</para>
 
 </refsect2>
 </refsect1>
