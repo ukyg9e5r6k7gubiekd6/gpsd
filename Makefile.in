@@ -108,7 +108,7 @@ INCLUDE = -I. $(X_INCLUDE)
 LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
 
 ## Programs
-PROGRAMS=gpsd
+PROGRAMS=gpsd gpsplay
 
 ## Motif dependent programs and object files
 @MISSING_MOTIF@MOTIF_PROGRAMS=gps xgpsspeed
@@ -121,6 +121,9 @@ all: $(PROGRAMS) $(MOTIF_PROGRAMS)
 gpsd: gpsd.o libgpsd.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
 
+gpsplay: gpsplay.o libgpsd.a
+	$(LINK.c) -o $@ gpsplay.o -L. -lgpsd $(NETLIBS) $(LIBS)
+
 gps: gps.o libgpsd.a
 	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
 
@@ -132,7 +135,7 @@ libgpsd.a:  $(LIB_OBJECTS)
 	ranlib libgpsd.a
 
 clean:
-	rm -f *.o *.a gpsd gps *~ config.status
+	rm -f *.o *.a gpsd gps gpsplay *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log
