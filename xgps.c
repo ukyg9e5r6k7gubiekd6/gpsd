@@ -219,7 +219,8 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 static void update_panel(char *message)
 /* runs on each sentence */
 {
-    int i, newstate;
+    unsigned int i;
+    int newstate;
     XmString string[MAXCHANNELS+1];
     char s[128], *sp;
 
@@ -231,7 +232,7 @@ static void update_panel(char *message)
     /* This is for the satellite status display */
     if (SEEN(gpsdata->satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    if (i < gpsdata->satellites) {
+	    if (i < (unsigned int)gpsdata->satellites) {
 		sprintf(s, " %2d    %02d    %03d    %02d      %c", 
 			gpsdata->PRN[i],
 			gpsdata->elevation[i], gpsdata->azimuth[i], 
@@ -242,7 +243,7 @@ static void update_panel(char *message)
 	    string[i+1] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
-	for (i = 0; i < MAXCHANNELS+1; i++)
+	for (i = 0; i < sizeof(string)/sizeof(string[0]); i++)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
