@@ -494,6 +494,46 @@ static int handle_request(int fd, fd_set * fds)
     while (*p) {
 	switch (*p++)
 	{
+	case 'A':
+	case 'a':
+	    if (!validate())
+		break;
+	    else if (FRESH(session.gNMEAdata.altitude_stamp,cur_time)) {
+		sprintf(reply + strlen(reply),
+			",A=%f",
+			session.gNMEAdata.altitude);
+	    }
+	    else if (session.debug > 1)
+		STALE_COMPLAINT("Altitude", altitude_stamp);
+	    break;
+        case 'C':
+        case 'c':
+            if (FD_ISSET(fd, fds))
+                FD_CLR(fd, fds);
+            sprintf(reply + strlen(reply),
+                         " ,R=0");
+            break;
+	case 'D':
+	case 'd':
+	    sprintf(reply + strlen(reply),
+		    ",D=%s",
+		    session.gNMEAdata.utc);
+	    break;
+	case 'L':
+	case 'l':
+	    sprintf(reply + strlen(reply),
+		    ",l=1," VERSION ",acdmpqrsvxyz");
+	    break;
+	case 'M':
+	case 'm':
+	    if (FRESH(session.gNMEAdata.mode_stamp, cur_time)) {
+		sprintf(reply + strlen(reply),
+			",M=%d",
+			session.gNMEAdata.mode);
+	    }
+	    else if (session.debug > 1)
+		STALE_COMPLAINT("Mode", status_stamp);
+	    break;
 	case 'P':
 	case 'p':
 	    if (!validate())
@@ -507,17 +547,34 @@ static int handle_request(int fd, fd_set * fds)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Position", latlon_stamp);
 	    break;
-	case 'A':
-	case 'a':
-	    if (!validate())
-		break;
-	    else if (FRESH(session.gNMEAdata.altitude_stamp,cur_time)) {
+	case 'Q':
+	case 'q':
+	    sprintf(reply + strlen(reply),
+		    ",Q=%d %d %f %f %f",
+		    session.gNMEAdata.in_view, session.gNMEAdata.satellites,
+		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
+	    break;
+	case 'R':
+	case 'r':
+	    if (FD_ISSET(fd, fds)) {
+		FD_CLR(fd, fds);
 		sprintf(reply + strlen(reply),
-			",A=%f",
-			session.gNMEAdata.altitude);
+			",R=0");
+	    } else {
+		FD_SET(fd, fds);
+		sprintf(reply + strlen(reply),
+			",R=1");
+	    }
+	    break;
+	case 'S':
+	case 's':
+	    if (FRESH(session.gNMEAdata.status_stamp, cur_time)) {
+		sprintf(reply + strlen(reply),
+			",S=%d",
+			session.gNMEAdata.status);
 	    }
 	    else if (session.debug > 1)
-		STALE_COMPLAINT("Altitude", altitude_stamp);
+		STALE_COMPLAINT("Status", status_stamp);
 	    break;
 	case 'V':
 	case 'v':
@@ -531,12 +588,6 @@ static int handle_request(int fd, fd_set * fds)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Speed", altitude_stamp);
 	    break;
-	case 'D':
-	case 'd':
-	    sprintf(reply + strlen(reply),
-		    ",D=%s",
-		    session.gNMEAdata.utc);
-	    break;
         case 'X':
         case 'x':
             if (!FD_ISSET(fd, fds))
@@ -544,57 +595,6 @@ static int handle_request(int fd, fd_set * fds)
              sprintf(reply + strlen(reply),
                          " ,R=1");
             break;
-        case 'C':
-        case 'c':
-            if (FD_ISSET(fd, fds))
-                FD_CLR(fd, fds);
-            sprintf(reply + strlen(reply),
-                         " ,R=0");
-            break;
-	case 'R':
-	case 'r':
-	    if (FD_ISSET(fd, fds)) {
-		FD_CLR(fd, fds);
-		sprintf(reply + strlen(reply),
-			",R=0");
-	    } else {
-		FD_SET(fd, fds);
-		sprintf(reply + strlen(reply),
-			",R=1");
-	    }
-	    break;
-	case 'L':
-	case 'l':
-	    sprintf(reply + strlen(reply),
-		    ",l=1");
-	    break;
-	case 'S':
-	case 's':
-	    if (FRESH(session.gNMEAdata.status_stamp, cur_time)) {
-		sprintf(reply + strlen(reply),
-			",S=%d",
-			session.gNMEAdata.status);
-	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Status", status_stamp);
-	    break;
-	case 'M':
-	case 'm':
-	    if (FRESH(session.gNMEAdata.mode_stamp, cur_time)) {
-		sprintf(reply + strlen(reply),
-			",M=%d",
-			session.gNMEAdata.mode);
-	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Mode", status_stamp);
-	    break;
-	case 'Q':
-	case 'q':
-	    sprintf(reply + strlen(reply),
-		    ",Q=%d %d %f %f %f",
-		    session.gNMEAdata.in_view, session.gNMEAdata.satellites,
-		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
-	    break;
 	case 'Y':
 	case 'y':
 	    sc = 0;

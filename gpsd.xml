@@ -140,36 +140,32 @@ decimal integer numeral:</para>
 
 <variablelist>
 <varlistentry>
-<term>p</term>
-<listitem><para>Returns the current position in the form "P=%f %f";
-numbers are in degrees, latitude first.</para></listitem>
+<term>a</term>
+<listitem><para>The current altitude as "A=%f", meters above mean sea level.</para></listitem>
 </varlistentry>
+
 <varlistentry>
 <term>d</term>
 <listitem><para>Returns the UTC time in the form "D=dd/mm/yyyy hh:nmm:ss".</para></listitem>
 </varlistentry>
+
 <varlistentry>
-<term>a</term>
-<listitem><para>The current altitude as "A=%f", meters above mean sea level.</para></listitem>
+<term>l</term>
+<listitem><para>Returns three fields: a protocol revision number,
+the gpsd version, and a list of accepted request letters.</para></listitem>
 </varlistentry>
-<varlistentry>
-<term>v</term>
-<listitem><para>The current speed as "V=%f" in knots.</para></listitem>
-</varlistentry>
-<varlistentry>
-<term>s</term>
-<listitem><para>The gps status as "S=%d". 0=no fix, 1=fix,
-2=DGPS-corrected fix.</para></listitem>
-</varlistentry>
+
 <varlistentry>
 <term>m</term>
 <listitem><para>The gps mode as "M=%d". 1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
 </varlistentry>
+
 <varlistentry>
-<term>r</term>
-<listitem><para>Toggles 'raw' mode. Return "R=0" or "R=1". In raw mode
-you read the unfiltered data stream from the GPS</para></listitem>
+<term>p</term>
+<listitem><para>Returns the current position in the form "P=%f %f";
+numbers are in degrees, latitude first.</para></listitem>
 </varlistentry>
+
 <varlistentry>
 <term>q</term>
 <listitem>
@@ -177,6 +173,25 @@ you read the unfiltered data stream from the GPS</para></listitem>
 count of satellites used in the last fix, and three estimated position
 errors in meters &mdash; position, horizontal, and vertical.</para>
 </listitem>
+</varlistentry>
+
+<varlistentry>
+<term>r</term>
+<listitem><para>Toggles 'raw' mode. Return "R=0" or "R=1". In raw mode
+you read the unfiltered data stream from the GPS</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>s</term>
+<listitem><para>The gps status as "S=%d". 0=no fix, 1=fix,
+2=DGPS-corrected fix.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>v</term>
+<listitem><para>The current speed as "V=%f" in knots.</para></listitem>
+</varlistentry>
+
 <varlistentry>
 <term>y</term> 
 <listitem>
@@ -187,6 +202,7 @@ integer formatted as %d in range
 0-359). Each number is followed by one space.</para>
 </listitem>
 </varlistentry>
+
 <varlistentry>
 <term>z</term>
 <listitem>
