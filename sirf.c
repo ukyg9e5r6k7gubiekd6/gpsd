@@ -256,13 +256,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	strcpy(session->gpsdata.tag, "MTD");
 	return SATELLITE_SET;
 
-    case 0x09:		/* CPU Throughput */
-	gpsd_report(4, 
-		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
-		    (float)getw(1)/186, (float)getw(3)/186, 
-		    (float)getw(5)/186, getw(7));
-    	return 0;
-
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
 		    session->outbuffer+5);
@@ -274,8 +267,17 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->driverstate |= SIRF_EQ_231;
 	else
 	    session->driverstate |= SIRF_GE_232;
+	if (strstr(session->outbuffer+5, "ES"))
+	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	return 0;
+
+    case 0x09:		/* CPU Throughput */
+	gpsd_report(4, 
+		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
+		    (float)getw(1)/186, (float)getw(3)/186, 
+		    (float)getw(5)/186, getw(7));
+    	return 0;
 
     case 0x0a:		/* Error ID Data */
 	switch (getw(1))
