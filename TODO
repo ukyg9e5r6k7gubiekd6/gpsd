@@ -1,6 +1,20 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Support SiRF XTRAC mode
+
+Jose Bernardo Silva <jbs@bandos.homelinux.com>
+>The first article I found said that XT mode (refered as sirc xtrac) is
+>indeed limited to NMEA 4800
+>(http://www.gpspassion.com/fr/articles.asp?id=69); but I suppose you
+>know this one, which specifies that xtrac works in sirf mode, and
+>which commands work in xtrac:
+>
+>http://www.sirf.com/Downloads/Technical/SiRF%20Binary%20Reference%20Manual%20-%20Addendum.pdf
+>
+>The press release for sirf xtrac is here:
+>http://www.sirf.com/downloads/collateral/press_releases/SiRFXTrac%20Product%20Insert.PDF
+
 ** Supply geoidal separation for SiRF packet 2
 
 Peter H. Dana <pdana@pdana.com>:
@@ -232,10 +246,6 @@ a second, and a SiRF one maybe 18 times a second.
 
 Is this worth doing?  Maybe.  It would reduce fix latency, possibly
 to good effect if your GPS is in motion.  Opinions?  Calculations?
-
-** Explicitly turn on WAAS/EGNOS on SiRF chips
-
-Chris Kuethe reports that some firmware versions leave it off.
 
 ** HAL integration
 
