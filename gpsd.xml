@@ -43,7 +43,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
-      <arg choice='opt'>--units <replaceable>kph</replaceable></arg>
+      <arg choice='opt'>--units <group><replaceable>kph</replaceable><replaceable>mph</replaceable></group></arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
