@@ -24,7 +24,6 @@ struct gps_data {
     struct life_t online_stamp;
 
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
-    time_t ts_utc;		/* UTC last updated time stamp */
 
     /* location */
     double latitude;		/* Latitude/longitude in format "d.ddddd" */
