@@ -109,14 +109,14 @@ static int update_field_f(char *sentence, int fld, double *dest)
    Timestamps always look like hhmmss.ss, with the trailing .ss part optional.
    RMC alone has a date field, in the format ddmmyy.  
 
-   We want the output to be in the format:
+   We want the output to be in ISO 8601 format:
 
-   mm/dd/yyyy hh:mm:ss.sss
-   01234567890123456789012
+   yyyy-mm-ddThh:mm:ss.sssZ
+   012345678901234567890123
 
-   with a 4-digit year (where part or all of the decimal second suffix may 
-   be omitted).  This means that for GPRMC we must supply a century and for
-   GGA and GGL we must supply a century, year, and day.
+   (where part or all of the decimal second suffix may be omitted).
+   This means that for GPRMC we must supply a century and for GGA and
+   GGL we must supply a century, year, and day.
 
    We get the missing data from the host machine's clock time.  That
    is, the machine where this *daemon* is running -- which is probably
@@ -129,29 +129,25 @@ static int update_field_f(char *sentence, int fld, double *dest)
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
-    time_t now;
-    struct tm *tm;
+    time_t now = time(NULL);
+    struct tm *tm = localtime(&now);
 
-    strncpy(out->utc, ddmmyy + 2, 2);	/* copy month */
-    strncpy(out->utc + 3, ddmmyy, 2);	/* copy date */
-    out->utc[2] = out->utc[5] = '/';
-
-    now = time(NULL);
-    tm = localtime(&now);
     strftime(out->utc + 6, 3, "%C", tm);
-    strncpy(out->utc + 8, ddmmyy + 4, 2);	/* copy year */
-    out->utc[10] = ' ';
+    strncpy(out->utc, ddmmyy + 4, 2);	/* copy year */
+    out->utc[4] = '-';
+    strncpy(out->utc+5, ddmmyy + 2, 2);	/* copy month */
+    out->utc[7] = '-';
+    strncpy(out->utc + 8, ddmmyy, 2);	/* copy date */
+    out->utc[10] = 'T';
 }
 
 static void fake_mmddyyyy(struct gps_data_t *out)
 /* sentence didn't sypply mm/dd/yyy, so we have to fake it */
 {
-    time_t now;
-    struct tm *tm;
+    time_t now = time(NULL);
+    struct tm *tm = localtime(&now);
 
-    now = time(NULL);
-    tm = localtime(&now);
-    strftime(out->utc, sizeof(out->utc), "%m/%d/%Y ", tm);
+    strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", tm);
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
@@ -161,8 +157,9 @@ static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
     out->utc[13] = ':';
     strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
     out->utc[16] = ':';
-    strncpy(out->utc + 17 , hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
-
+    strncpy(out->utc + 17 , 
+	    hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
+    strcat(out->utc, "Z");
 }
 
 /**************************************************************************
