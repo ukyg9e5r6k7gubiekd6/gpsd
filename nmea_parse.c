@@ -482,6 +482,12 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 #else
     s = strdup(sentence); /* make a copy before we edit it. */
 #endif
+
+    /* Find checksum part, and make sure we skip it when splitting. */
+    p = s;
+    while ((*p != '*') && (*p >= ' ')) ++p;
+    *p = '\0';
+
     for (i = 0, p = s; p != NULL && *p != 0; ++i, p = strchr (p, ',')) {
 	*p = 0;
 	field[i] = ++p;
