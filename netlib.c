@@ -39,10 +39,14 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 
     if ((s = socket(PF_INET, type, ppe->p_proto)) < 0)
 	return NL_NOSOCK;
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1)
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1) {
+        close(s);
 	return NL_NOSOCKOPT;
-    if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+    }
+    if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
+        close(s);
 	return NL_NOCONNECT;
+    }
     return s;
 }
 
