@@ -73,9 +73,11 @@ is <filename>/dev/gps</filename>.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITAIONS</title>
 
-<para>This program handles only straight NMEA devices; it won't 
-handle either Rockwell or SiRF binary protocols, though it can
-recognize a SiRF device.</para>
+<para>This program handles only straight NMEA devices.  There is code
+that attempts to recognize a GPS emitting SiRF binary protocol and
+switch it to NMEA, but it is not well tested and probably fragile.
+This program won't handle the Garmin or Rockwell binary protocols at
+all.</para>
 
 <para>The logic for hunting the GPS's baud rate is vulnerable to
 various sorts of RS323 flakiness. If it hangs for longer than a few

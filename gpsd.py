@@ -343,6 +343,9 @@ class gpsd(gps.gpsdata):
         else:
             return None
 
+    def rawwrite(self, buf):
+        return self.ttyfp.write(buf)
+
     def poll(self):
         if self.dsock > -1:
             self.ttyfp.write(session.dsock.recv(1024))
