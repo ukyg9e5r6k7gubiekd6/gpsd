@@ -1,7 +1,3 @@
-** Display EPE and DOP in xgps
-
-We should show posiion uncertainty as well as position in the test client.
-
 ** Detect a Garmin USB device
 
 According to Hermann Kneissel:

@@ -246,12 +246,12 @@ static void update_panel(char *message)
 	while (isspace(*(sp = message + strlen(message) - 1)))
 	    *sp = '\0';
     XmTextFieldSetString(status, message);
-    string[0] = XmStringCreateSimple("PRN:  Elev:  Azim:  SNR:  Used:");
+    string[0] = XmStringCreateSimple("PRN:   Elev:  Azim:  SNR:  Used:");
     /* This is for the satellite status display */
     if (SEEN(gpsdata->satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < (unsigned int)gpsdata->satellites) {
-		sprintf(s, " %2d    %02d    %03d    %02d      %c", 
+		sprintf(s, " %3d    %02d    %03d    %02d      %c", 
 			gpsdata->PRN[i],
 			gpsdata->elevation[i], gpsdata->azimuth[i], 
 			gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N'

@@ -75,7 +75,7 @@ int sendpkt (unsigned char *buf,int len);
 int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
-static WINDOW *sat_win;
+static WINDOW *fix_win, *sat_win, *right_win;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -249,26 +249,42 @@ int main (int argc, char **argv)
     scrollok(stdscr,TRUE);
     setscrreg(DEBUGWIN,LINES - 1);
 
-    sat_win = subwin(stdscr, 13, 30, 9, 0);
+    fix_win   = subwin(stdscr,  5, 78, 1, 0);
+    sat_win   = subwin(stdscr, 13, 30, 9, 0);
+    right_win = subwin(stdscr, 13, 47, 9, 31);
+
+    wborder(fix_win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(fix_win, A_BOLD);
+    wmove(fix_win, 0,1);
+    mvwprintw(fix_win, 0, 12, " X "); 
+    mvwprintw(fix_win, 0, 21, " Y "); 
+    mvwprintw(fix_win, 0, 30, " Z "); 
+    mvwprintw(fix_win, 0, 43, " North "); 
+    mvwprintw(fix_win, 0, 54, " East "); 
+    mvwprintw(fix_win, 0, 67, " Alt "); 
+
+	// wprintw(fix_win, "            X        Y        Z            North      East         Alt");
+    wmove(fix_win, 1,1);
+    wprintw(fix_win, "Pos:                            m                          deg         m");
+    wmove(fix_win, 2,1);
+    wprintw(fix_win, "Vel:                            m/s                                    m/s");
+    wmove(fix_win, 3,1);
+    wprintw(fix_win, "Time:                  UTC:                Heading:        deg         m/s");
+    wattrset(fix_win, A_NORMAL);
 
     attrset(A_BOLD);
-    move(1,1);
-    printw("            X        Y        Z            North      East         Alt");
-    move(2,1);
-    printw("Pos:                            m                          deg         m");
-    move(3,1);
-    printw("Vel:                            m/s                                    m/s");
-    move(4,1);
-    printw("Time:                  UTC:                Heading:        deg         m/s");
     move(6,1);
     printw("DOP:      M1:    M2:    Fix:  ");
     move(7,1);
     printw("Max:       Lat:       Avg:       MS:");
     move(17, 40);
-    printw("RS232:");
-    move(18, 40);
-    printw("Version:");
     attrset(A_NORMAL);
+
+    wattrset(right_win, A_BOLD);
+    mvwprintw(right_win, 1, 1, "RS232:");
+    mvwprintw(right_win, 2, 1, "Version:");
+    wattrset(right_win, A_NORMAL);
+    wborder(right_win, 0, 0, 0, 0, 0, 0, 0, 0),
 
     wattrset(sat_win, A_BOLD);
     wprintw(sat_win, "Ch SV  Az El Stat  C/N");
@@ -276,7 +292,8 @@ int main (int argc, char **argv)
 	mvwprintw(sat_win, i+1, 0, "%2d",i);
     }
     wattrset(sat_win, A_NORMAL);
-    mvprintw(17, 50, "%4d N %d", bps, stopbits);
+
+    mvwprintw(right_win, 1, 10, "%4d N %d", bps, stopbits);
 
     move(DEBUGWIN,0);
     getyx(stdscr,debugy,debugx);
@@ -295,6 +312,8 @@ int main (int argc, char **argv)
 	clrtoeol();
 	refresh();
 	wrefresh(sat_win);
+	wrefresh(right_win);
+	wrefresh(fix_win);
 
 	FD_SET(0,&select_set);
 	FD_SET(LineFd,&select_set);
@@ -312,6 +331,8 @@ int main (int argc, char **argv)
 	    clrtoeol();
 	    refresh();
 	    wrefresh(sat_win);
+	    wrefresh(right_win);
+	    wrefresh(fix_win);
 
 	    if ((p = strchr(line,'\r')) != NULL)
 		*p = '\0';
@@ -433,10 +454,10 @@ int len;
     switch (buf[0])
     {
     case 0x02:		/* Measured Navigation Data */
-	move(2,6);
-	printw("%8d %8d %8d",getl(1),getl(5),getl(9));
-	move(3,6);
-	printw("%8.1f %8.1f %8.1f",
+	wmove(fix_win, 1,6);
+	wprintw(fix_win, "%8d %8d %8d",getl(1),getl(5),getl(9));
+	wmove(fix_win, 2,6);
+	wprintw(fix_win, "%8.1f %8.1f %8.1f",
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
@@ -511,8 +532,7 @@ int len;
     	break;
 
     case 0x06:		/* firmware version */
-	move(18,50);
-	printw("%s",buf + 1);
+	mvwprintw(right_win, 2, 10, "%s",buf + 1);
     	break;
 
     case 0x07:
@@ -688,10 +708,10 @@ void decode_time(int week, int tow)
 
     m = (m - s) / 6000;
 
-    move(4,7);
-    printw("%4d+%9.2f", week, (double)tow/100);
-    move(4, 29);
-    printw("%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
+    wmove(fix_win, 3,7);
+    wprintw(fix_win, "%4d+%9.2f", week, (double)tow/100);
+    wmove(fix_win, 3, 29);
+    wprintw(fix_win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
 }
 
 void
@@ -720,20 +740,20 @@ double x,y,z,vx,vy,vz;
     if (heading < 0)
 	heading += 6.283185307;
 
-    move(2,40);
-    printw("%9.5f %9.5f",57.29577795*phi,57.29577795*lambda);
-    move(2,63);
-    printw("%8d",(int)h);
+    wmove(fix_win, 1,40);
+    wprintw(fix_win, "%9.5f %9.5f",57.29577795*phi,57.29577795*lambda);
+    wmove(fix_win, 1,63);
+    wprintw(fix_win, "%8d",(int)h);
 
-    move(3,40);
-    printw("%9.1f %9.1f",vnorth,veast);
-    move(3,63);
-    printw("%8.1f",vup);
+    wmove(fix_win, 2,40);
+    wprintw(fix_win, "%9.1f %9.1f",vnorth,veast);
+    wmove(fix_win, 2,63);
+    wprintw(fix_win, "%8.1f",vup);
 
-    move(4,54);
-    printw("%5.1f",57.29577795*heading);
-    move(4,63);
-    printw("%8.1f",speed);
+    wmove(fix_win, 3,54);
+    wprintw(fix_win, "%5.1f",57.29577795*heading);
+    wmove(fix_win, 3,63);
+    wprintw(fix_win, "%8.1f",speed);
 
     if (logfile != NULL)
 	fprintf(logfile,"%d\t%d\t%d\t%d\t%f\t%f\t%.2f\n",

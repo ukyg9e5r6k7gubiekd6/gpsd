@@ -166,7 +166,4 @@ how we detect SiRF chips (see step 5 under autoconfiguration above).
 And more...
 
 If you're looking for things to hack on, first see the TODO file.
-Then, there is some C code in the contrib/ directory that has some
-potentially useful techniques in it.  Picking a good one to integrate
-into gpsd might be a useful thing.
 
