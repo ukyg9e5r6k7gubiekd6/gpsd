@@ -77,20 +77,9 @@ static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
 {
     char	buf[NMEA_BIG_BUF];
     int		n;
-    size_t	maxreads;
 
     gpsd_set_speed(ttyfd, &session->ttyset, speed);
-    buf[0] = '\0';
-    for (maxreads = 0; maxreads < 10; maxreads++) {
-	n = read(ttyfd, buf, sizeof(buf)-1);
-	if (n > 0) {
-	    buf[n] = '\0';
-	    break;
-	}
-	else if (n == -1 && errno != EAGAIN)
-	    return 0;
-    }
-
+    n = read(ttyfd, buf, sizeof(buf)-1);
     if (session->device_type->validate_buffer)
 	return session->device_type->validate_buffer(buf, n);
     else
@@ -102,7 +91,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
     int ttyfd, *ip;
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
-    if ((ttyfd = open(session->gpsd_device, O_RDWR | O_NONBLOCK)) < 0)
+    if ((ttyfd = open(session->gpsd_device, O_RDWR)) < 0)
 	return -1;
 
     if (isatty(ttyfd)) {

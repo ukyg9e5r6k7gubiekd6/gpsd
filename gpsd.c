@@ -211,8 +211,6 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
 #ifdef PROFILING
-#define RETRIES	10
-
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
@@ -232,18 +230,9 @@ static int handle_request(int fd, char *buf, int buflen)
 			 */
 			if (session->device_type->validate_buffer) {
 			    char buf[NMEA_MAX*3+1];
-			    int n, retries;
+			    int n;
 
-			    for (retries = 0; retries < RETRIES; retries++) {
-				n = read(session->gNMEAdata.gps_fd, buf, sizeof(buf)-1);
-				if (n > 0) {
-				    buf[n] = '\0';
-				    break;
-				}
-				else if (n == -1 && errno != EAGAIN)
-				    break;
-			    }
-			    
+			    n=read(session->gNMEAdata.gps_fd,buf,sizeof(buf)-1);
 			    if (n == -1 || !session->device_type->validate_buffer(buf, n))
 				gpsd_set_speed(session->gNMEAdata.gps_fd, &session->ttyset, (speed_t)oldspeed);
 			}
