@@ -8,49 +8,24 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
+AC_C_BIGENDIAN
 
 CFLAGS="$CFLAGS -Wall -Werror"
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h)
 
-dnl Locate Net Libraries
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
 AC_SUBST(LIBNSL)
-dnl
 AC_CHECK_LIB(socket, socket, LIBSOCKET="-lsocket")
 AC_SUBST(LIBSOCKET)
-
-dnl Locate Libraries
-AC_MSG_CHECKING(whether to force -lm switch)
-AC_TRY_LINK([#include <math.h>], 
-{ double foo; foo = sin(1.234); },
-link_libm=0, link_libm=1)
-if test $link_libm = 1; then
-AC_MSG_RESULT(yes)
-LIBM="-lm"
+AC_CHECK_LIB(m, sin, LIBM="-lm")
 AC_SUBST(LIBM)
-else
-AC_MSG_RESULT(no)
-fi
-dnl
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
-dnl
-AC_CHECK_LIB(gen, regcmp, LIBGEN="-lgen")
-AC_SUBST(LIBGEN)
 
 dnl Check for X libraries
 dnl
 AC_PATH_XTRA
-dnl
-dnl Autoconf bug fix: Sun CC 3.0 requires `-R lib', g++ requires `-Rlib'.
-changequote(,)dnl
-case "$CXX" in
-  *CC) X_LIBS="`echo $X_LIBS | $SED 's, -R\([^ ]\), -R \1,g'`"
-esac
-changequote([,])dnl
-dnl
-dnl
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
 CPPFLAGS="$CPPFLAGS $X_CFLAGS"
@@ -60,33 +35,20 @@ AC_SUBST(X_LIBS)
 AC_SUBST(X11_LIBS)
 AC_SUBST(X_PRE_LIBS)
 
-dnl Check for X toolkit library
+dnl Check for some auxiliary X libraries we'll need
 dnl
 AC_CHECK_LIB(Xt, XtToolkitInitialize, XT_LIBS="-lXt",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XT_LIBS)
-
-dnl Check for Xaw libraries
-dnl
 AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XAW_LIBS)
-
-dnl Check for X extension libraries
-dnl
 AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XEXT_LIBS)
-
-dnl Check for Xpm library and headers
-dnl
-XPM_LIBS=""
 AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
 	XPM_LIBS="-lXpm"
 	AC_DEFINE([HAVE_XPM],1,[Xpm available]),,${X_PRE_LIBS} ${X11_LIBS})
-if test "$XPM_LIBS" != ""; then
-AC_CHECK_HEADERS(X11/xpm.h xpm.h)
-fi
 AC_SUBST(XPM_LIBS)
 
 dnl Check for Motif widget libraries
@@ -109,9 +71,6 @@ fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
-dnl
-
-AC_C_BIGENDIAN
 
 AC_DEFINE(FV18_ENABLE,      1, [San Jose Navigation FV-18 support])
 AC_DEFINE(TRIPMATE_ENABLE,  1, [DeLorme TripMate support])
