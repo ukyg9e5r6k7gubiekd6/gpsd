@@ -70,8 +70,8 @@ cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
-#mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
-#cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
+mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
+cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python%{PYVERSION}/site-packages
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
@@ -116,12 +116,15 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/libgps.so
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
-#%{_libdir}/python%{PYVERSION}/site-packages/gps.py
-#%{_libdir}/python%{PYVERSION}/site-packages/gpsd.py
+%{_libdir}/python%{PYVERSION}/site-packages/gps.py*
+%{_libdir}/python%{PYVERSION}/site-packages/gpsd.py*
 
 %changelog
+* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Python files restored to RPM.
+
 * Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.8-1
-  Embarrassing typo fix in gps.py. Avoid buffer overrun in xgps.c.
+- Embarrassing typo fix in gps.py. Avoid buffer overrun in xgps.c.
   Plug Debian security bug 292347.  This version issued on an emergency
   basis without Python libraries, which have packaging problems due 
   to the 2.3/2.4 transition.
