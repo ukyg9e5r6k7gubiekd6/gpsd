@@ -47,7 +47,7 @@
 #include "version.h"
 
 // Temporary forward declarations
-void gps_init(char *dgpsserver, char *dgpsport);
+void gps_init(char *device, char *dgpsserver, char *dgpsport);
 void gps_activate(void), gps_deactivate(void);
 void gps_poll(void);
 void gps_force_repoll(void);
@@ -68,7 +68,7 @@ static fd_set nmea_fds;
 
 static void onsig(int sig)
 {
-    gps_close();
+    gps_deactivate();
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
-    gps_init(dgpsserver, dgpsport);
+    gps_init(device_name, dgpsserver, dgpsport);
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 void gpscli_errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
-    gps_close();
+    gps_deactivate();
     exit(2);
 }
 
@@ -605,7 +605,7 @@ static void onexit(void)
     close(session.dsock);
 }
 
-void gps_init(char *dgpsserver, char *dgpsport)
+void gps_init(char *device, char *dgpsserver, char *dgpsport)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
@@ -629,6 +629,7 @@ void gps_init(char *dgpsserver, char *dgpsport)
     }
 
     /* mark fds closed */
+    session.gps_device = strdup(device);
     session.fdin = -1;
     session.fdout = -1;
 
@@ -654,6 +655,7 @@ void gps_deactivate(void)
     session.fdin = -1;
     session.fdout = -1;
     gps_close();
+    free(session.gps_device);
     if (session.device_type->wrapup)
 	session.device_type->wrapup();
     gpscli_report(1, "closed GPS\n");
@@ -665,7 +667,7 @@ void gps_activate(void)
 {
     int input;
 
-    if ((input = gps_open(device_name, session.device_type->baudrate)) < 0)
+    if ((input = gps_open(session.gps_device, session.device_type->baudrate)) < 0)
     {
 	gpscli_errexit("Exiting - serial open\n");
     }
