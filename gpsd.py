@@ -4,7 +4,7 @@
 #
 # Like libgpsd in C, but handles only straight NMEA devices (not Zodiac).
 
-import termios, os, fcntl, copy, time, math, struct
+import sys, termios, os, fcntl, copy, time, math, struct
 import gps
 
 class NMEA:
@@ -236,8 +236,8 @@ class NMEA:
         else:
             return self.logger(0, "Not NMEA\n")
 
-    def handler(self, fp, raw_hook):
-        linebuf = fp.readline()
+    def handler(self, fd, raw_hook):
+        linebuf = os.read(fd, gps.NMEA_MAX)
         self.handle_line(linebuf[:-2])
         if raw_hook:
             raw_hook(linebuf)
@@ -260,7 +260,7 @@ class gpsd(gps.gpsdata):
             self.wrap = wrapup
     def __init__(self, device="/dev/gps", bps=4800,
                  devtype='n', dgps=None, logger=None):
-        self.ttyfp = None
+        self.ttyfd = -1
         self.device = device
         self.bps = bps
         self.drivers = {
@@ -292,14 +292,27 @@ class gpsd(gps.gpsdata):
     close = __del__
 
     def send(self, buf):
-        self.ttyfp.write(self.parser.add_checksum(buf))
+        os.write(self.ttyfd, self.parser.add_checksum(buf))
+
+    def set_speed(self, speed):
+        self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
+        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+        termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
+        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+        time.sleep(1)
+        firstline = os.read(self.ttyfd, gps.NMEA_MAX*2)
+        if firstline.find("$GP") > -1:
+            self.bps = speed
+            return 1
+        else:
+            return 0;
 
     def activate(self):
-        self.ttyfp = open(self.device, "rw")
-        if self.ttyfp == None:
+        self.ttyfd = os.open(self.device, os.O_RDWR|os.O_SYNC|os.O_NOCTTY)
+        if self.ttyfd == -1:
             return None
-	self.normal = termios.tcgetattr(self.ttyfp.fileno())
-        self.raw = termios.tcgetattr(self.ttyfp.fileno())
+	self.normal = termios.tcgetattr(self.ttyfd)
+        self.raw = termios.tcgetattr(self.ttyfd)
         self.raw[0] = 0						# iflag
         self.raw[1] = termios.ONLCR				# oflag
 	# Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
@@ -312,18 +325,25 @@ class gpsd(gps.gpsdata):
             self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
         self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
         self.raw[3] = 0						# lflag
-        self.raw[4] = self.raw[5] = eval("termios.B" + `self.bps`)
-        termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.raw)
-        termios.tcflush(self.ttyfp.fileno(), termios.TCIOFLUSH)
-        time.sleep(1.25)
+        if self.bps:
+            if not self.set_speed(self.bps):
+                self.ttyfd = -1
+                return -1
+        else:
+            for speed in (4800, 9600, 19200, 38400, 57600):
+                if self.set_speed(speed):
+                    break
+            else:
+                self.ttyfd = -1
+                return -1
         if self.devtype.initializer:
             self.devtype.initializer(self)
 	self.online = True;
-        return self.ttyfp
+        return self.ttyfd
 
     def deactivate(self):
         if hasattr(self, 'normal'):
-            termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.normal)
+            termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.normal)
         self.online = False;
         self.mode = gps.MODE_NO_FIX;
         self.status = gps.STATUS_NO_FIX;
@@ -333,27 +353,23 @@ class gpsd(gps.gpsdata):
 
     def waiting(self):
         "How much input is waiting?"
-        if self.ttyfp == None:
+        if self.ttyfd == -1:
             return -1
-        st = fcntl.ioctl(self.ttyfp.fileno(), termios.FIONREAD, " "*struct.calcsize('i'))
+        st = fcntl.ioctl(self.ttyfd, termios.FIONREAD, " "*struct.calcsize('i'))
         if st == -1:
             return -1
         st = struct.unpack('i', st)[0]
         return st
 
-    def rawread(self):
-        ready = self.waiting()
-        if ready:
-            return self.ttyfp.read(ready)
-        else:
-            return None
+    def read(self):
+        return os.read(self.ttyfd, gps.NMEA_MAX*2)
 
-    def rawwrite(self, buf):
-        return self.ttyfp.write(buf)
+    def write(self, buf):
+        return os.write(self.ttyfd, buf)
 
     def poll(self):
         if self.dsock > -1:
-            self.ttyfp.write(session.dsock.recv(1024))
+            os.write(self.ttyfd, session.dsock.recv(1024))
         waiting = self.waiting()
         if waiting < 0:
             return waiting
@@ -367,7 +383,7 @@ class gpsd(gps.gpsdata):
         else:
             self.online = True
             self.online_stamp.refresh()
-            self.devtype.parser.handler(self.ttyfp, self.raw_hook)
+            self.devtype.parser.handler(self.ttyfd, self.raw_hook)
 
             # count the good fixes
             if self.status > gps.STATUS_NO_FIX: 

@@ -80,10 +80,10 @@ if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "b:hn:")
     await = 100;
     device="/dev/gps"
-    bpslist = (4800, 9600, 19200, 38400, 57600)
+    baudrate = 0
     for (switch, val) in options:
 	if (switch == '-b'):
-	    bpslist = (int(val),)
+	    baudrate = (int(val),)
 	elif (switch == '-n'):
 	    await = int(val)
         elif (switch == '-h'):
@@ -147,45 +147,9 @@ if __name__ == '__main__':
             sys.exit(0)
 
         # Step two: Open and sync up with the device
-        for baudrate in bpslist:
-            dev = gpsd.gpsd(device=device, bps=baudrate)
-            # First, acquire the device
-            baton = Baton("Trying %s at %dbps" % (device, baudrate))
-            starttime = time.time()
-            while True:
-                baton.twirl()
-                try:
-                    dev.activate()
-                    break
-                except IOError, e:
-                    time.sleep(1)
-            baton.end("opened")
-            # Now check to see if we get recognizable NMEA from it
-            baton = Baton("Looking for NMEA sentences")
-            starttime = time.time()
-            time.sleep(2)	# Give the device time to settle
-            data = dev.rawread()
-            sys.stderr.write("%d chars seen" % len(data))
-            baton.twirl()
-            if data and looks_like_NMEA(data):
-                baton.end("found NMEA")
-                protocol =  "# This is a NMEA device.\n" \
-                		"# Use gpsd's default -T n driver."
-                break
-            elif data and looks_like_SiRF(data):
-                sys.stderr.write("found SiRF data header...switching...")
-                dev.rawwrite(SiRF().to_NMEA(baudrate))
-                time.sleep(2)
-                data = dev.rawread()
-                sys.stderr.write("%d more chars seen" % len(data))
-                baton.twirl()
-                if data and looks_like_NMEA(data):
-                    baton.end("switch to NMEA successful")
-                    protocol = "# This is a SiRF device that can be switched to NMEA."
-                    break
-            else:
-                baton.end("no protocol recognized")
-                dev.close()
+        dev = gpsd.gpsd(device=device, bps=baudrate)
+        if dev.activate() > -1:
+            sys.stderr.write("Found device at %dbps.\n" % dev.bps)
         else:
             sys.stderr.write("Couldn't acquire the device.\n")
             sys.exit(0)

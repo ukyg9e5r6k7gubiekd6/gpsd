@@ -14,6 +14,8 @@ MODE_3D = 3
 MAXCHANNELS = 12
 SIGNAL_STRENGTH_UNKNOWN = -1
 
+NMEA_MAX = 82
+
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
 
