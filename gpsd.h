@@ -45,8 +45,7 @@ struct gps_session_t
     struct gps_type_t *device_type;
     char *gpsd_device;	/* where to find the GPS */
     int baudrate;	/* baud rate of session */
-    int fdin;		/* input fd from GPS */
-    int fdout;		/* output fd to GPS */
+    int gpsd_fd;	/* input fd from GPS */
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
@@ -95,7 +94,7 @@ extern void nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
 extern int gpsd_open(char *device_name, int device_speed, int stopbits);
-extern void gpsd_close(void);
+extern void gpsd_close(int);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */

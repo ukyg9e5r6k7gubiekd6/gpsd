@@ -347,7 +347,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
         case 'X':
         case 'x':
-	    if (session->fdin == -1)
+	    if (session->gpsd_fd == -1)
 		strcat(reply, ",X=0");
 	    else
 		strcat(reply, ",X=1");
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
 	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	    exit(2);
 	}
-	FD_SET(session->fdin, &all_fds);
+	FD_SET(session->gpsd_fd, &all_fds);
     }
 
     while (1) {
@@ -679,19 +679,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* we may need to force the GPS open */
-	if (nowait && session->fdin == -1) {
+	if (nowait && session->gpsd_fd == -1) {
 	    gpsd_deactivate(session);
 	    if (gpsd_activate(session) >= 0)
 	    {
 		notify_watchers("GPSD,X=1\r\n");
-		FD_SET(session->fdin, &all_fds);
+		FD_SET(session->gpsd_fd, &all_fds);
 	    }
 	}
 
 	/* get data from it */
-	if (session->fdin >= 0 && gpsd_poll(session) < 0) {
+	if (session->gpsd_fd >= 0 && gpsd_poll(session) < 0) {
 	    gpsd_report(3, "GPS is offline\n");
-	    FD_CLR(session->fdin, &all_fds);
+	    FD_CLR(session->gpsd_fd, &all_fds);
 	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
 	}
@@ -703,7 +703,7 @@ int main(int argc, char *argv[])
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
-	    if (fd == msock || fd == session->fdin)
+	    if (fd == msock || fd == session->gpsd_fd)
 		continue;
 	    /*
 	     * GPS must be opened if commands are waiting or any client is
@@ -713,12 +713,12 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZE];
 		int buflen;
 
-		if (session->fdin == -1) {
+		if (session->gpsd_fd == -1) {
 		    gpsd_deactivate(session);
 		    if (gpsd_activate(session) >= 0)
 		    {
 			notify_watchers("GPSD,X=1\r\n");
-			FD_SET(session->fdin, &all_fds);
+			FD_SET(session->gpsd_fd, &all_fds);
 		    }
 		}
 
@@ -736,14 +736,14 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	    if (fd != session->fdin && fd != msock && FD_ISSET(fd, &all_fds)) {
+	    if (fd != session->gpsd_fd && fd != msock && FD_ISSET(fd, &all_fds)) {
 		need_gps++;
 	    }
 	}
 
-	if (!nowait && !need_gps && session->fdin != -1) {
-	    FD_CLR(session->fdin, &all_fds);
-	    session->fdin = -1;
+	if (!nowait && !need_gps && session->gpsd_fd != -1) {
+	    FD_CLR(session->gpsd_fd, &all_fds);
+	    session->gpsd_fd = -1;
 	    gpsd_deactivate(session);
 	}
     }

@@ -56,7 +56,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	{
 	    char	*trigger = (*dp)->trigger;
 
-	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->fdout)) {
+	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->gpsd_fd)) {
 		gpsd_report(1, "found %s.\n", (*dp)->typename);
 		session->device_type = *dp;
 		session->device_type->initializer(session);
@@ -74,7 +74,7 @@ static int nmea_handle_input(struct gps_session_t *session)
     static int offset = 0;
 
     while (offset < BUFSIZE) {
-	if (read(session->fdin, buf + offset, 1) != 1)
+	if (read(session->gpsd_fd, buf + offset, 1) != 1)
 	    return 1;
 
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
@@ -99,7 +99,7 @@ static int nmea_handle_input(struct gps_session_t *session)
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
 {
-    return write(session->fdout, buf, rtcmbytes);
+    return write(session->gpsd_fd, buf, rtcmbytes);
 }
 
 struct gps_type_t nmea =

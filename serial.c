@@ -14,8 +14,6 @@
 #include "gps.h"
 #include "gpsd.h"
 
-/* define global variables */
-static int ttyfd = -1;
 static struct termios ttyset, ttyset_old;
 
 static int set_baud(long baud)
@@ -43,9 +41,10 @@ static int set_baud(long baud)
 
 int gpsd_open(char *device_name, int device_speed, int stopbits)
 {
+    int ttyfd;
+
     gpsd_report(1, "opening GPS data source at %s\n", device_name);
     ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
-
     if (ttyfd < 0)
 	return -1;
 
@@ -71,7 +70,7 @@ int gpsd_open(char *device_name, int device_speed, int stopbits)
     return ttyfd;
 }
 
-void gpsd_close(void)
+void gpsd_close(int ttyfd)
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {
@@ -89,6 +88,5 @@ void gpsd_close(void)
 	tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 
 	close(ttyfd);
-	ttyfd = -1;
     }
 }

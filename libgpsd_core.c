@@ -78,9 +78,8 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	}
     }
 
-    /* mark fds closed */
-    session->fdin = -1;
-    session->fdout = -1;
+    /* mark GPS fd closed */
+    session->gpsd_fd = -1;
 
     INIT(session->gNMEAdata.online_stamp, now);
     INIT(session->gNMEAdata.latlon_stamp, now);
@@ -103,9 +102,8 @@ void gpsd_deactivate(struct gps_session_t *session)
     REFRESH(session->gNMEAdata.online_stamp);
     session->gNMEAdata.mode = MODE_NO_FIX;
     session->gNMEAdata.status = STATUS_NO_FIX;
-    session->fdin = -1;
-    session->fdout = -1;
-    gpsd_close();
+    gpsd_close(session->gpsd_fd);
+    session->gpsd_fd = -1;
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
     gpsd_report(1, "closed GPS\n");
@@ -114,22 +112,18 @@ void gpsd_deactivate(struct gps_session_t *session)
 int gpsd_activate(struct gps_session_t *session)
 /* acquire a connection to the GPS device */
 {
-    int input;
-
-    if ((input = gpsd_open(session->gpsd_device, session->baudrate, session->device_type->stopbits)) < 0)
+    if ((session->gpsd_fd = gpsd_open(session->gpsd_device, session->baudrate, session->device_type->stopbits)) < 0)
 	return -1;
     else
     {
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
-	session->fdin = input;
-	session->fdout = input;
-	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", input);
+	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsd_fd);
 
 	/* if there is an initializer and no trigger string, invoke it */
 	if (session->device_type->initializer && !session->device_type->trigger)
 	    session->device_type->initializer(session);
-	return input;
+	return session->gpsd_fd;
     }
 }
 
@@ -152,7 +146,7 @@ int gpsd_poll(struct gps_session_t *session)
 	char buf[BUFSIZE];
 	int rtcmbytes;
 
-	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->fdout!=-1))
+	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->gpsd_fd !=-1))
 	{
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
@@ -166,7 +160,7 @@ int gpsd_poll(struct gps_session_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    waiting = is_input_waiting(session->fdin);
+    waiting = is_input_waiting(session->gpsd_fd);
     gpsd_report(4, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
 	return waiting;
