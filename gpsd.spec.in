@@ -48,34 +48,19 @@ make %{?_smp_mflags}
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
-# gpsd files
-mkdir -p "$RPM_BUILD_ROOT"%{_sbindir}
-cp .libs/gpsd "$RPM_BUILD_ROOT"%{_sbindir}
-mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
-cp .libs/xgps .libs/xgpsspeed gpsprobe "$RPM_BUILD_ROOT"%{_bindir}
+%makeinstall
+# additional gpsd files
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
-mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
-cp gpsd.1 gpsprobe.1 gpsprof.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
-mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
-cp .libs/libgps.la "$RPM_BUILD_ROOT"%{_libdir}
-cp .libs/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO1VERSION}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so
-# gpsd-devel files
-mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
-cp libgps.3 libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
-mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
-cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
-cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
+# additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
-cp gpsfake "$RPM_BUILD_ROOT"%{_bindir}
-cp gpsfake.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -101,6 +86,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprobe
+%attr(755, root, root) %{_bindir}/gpsprof
 %{_libdir}/libgps.so.%{SO3VERSION}
 %{_libdir}/libgps.so.%{SO1VERSION}
 %{_libdir}/libgps.la
@@ -116,6 +102,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
+%{_libdir}/libgps.a
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
