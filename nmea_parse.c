@@ -497,7 +497,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
         if (!strcmp(nmea_phrase[i].name, s)) {
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
-		strncpy(outdata->tag, nmea_phrase[i].name, MAXNAMELEN);
+		strncpy(outdata->tag, nmea_phrase[i].name, MAXTAGLEN);
 		outdata->sentence_length = strlen(sentence);
 	    }
 	    if (nmea_phrase[i].mask)

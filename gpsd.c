@@ -419,7 +419,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (!have_fix(device))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f %.3f %.6f %.6f",
+		sprintf(phrase, ",O=%s %.2f %.3f %.6f %.6f",
+			ud->tag[0] ? ud->tag : "-",
 			ud->fix.time, ud->fix.ept, 
 			ud->fix.latitude, ud->fix.longitude);
 		if (device->gpsdata.fix.mode == MODE_3D)

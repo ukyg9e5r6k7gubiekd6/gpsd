@@ -102,16 +102,16 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'O':
 		    if (sp[2] != '?') {
 			struct gps_fix_t nf;
-			char alt[20];
+			char tag[MAXTAGLEN+1], alt[20];
 			char eph[20], epv[20], track[20],speed[20], climb[20];
 			char epd[20], eps[20], epc[20];
 			int st = sscanf(sp+2, 
-			       "%lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
-				&nf.time, &nf.ept, 
+			       "%6s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
+				tag, &nf.time, &nf.ept, 
 				&nf.latitude, &nf.longitude,
 			        alt, eph, epv, track, speed, climb,
 			        epd, eps, epc);
-			if (st == 13) {
+			if (st == 14) {
 #define DEFAULT(val, def) (val[0] == '?') ? (def) : atof(val)
 			    nf.altitude = DEFAULT(alt, ALTITUDE_NOT_VALID);
 			    nf.eph = DEFAULT(eph, 0.0);
@@ -138,6 +138,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->valid |= CLIMBERR_SET;
 
 			    gpsdata->fix = nf;
+			    strcpy(gpsdata->tag, tag);
 			    gpsdata->valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			}
 		    }

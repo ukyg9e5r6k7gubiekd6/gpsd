@@ -13,7 +13,7 @@ extern "C" {
 #include "gpsutils.h"
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
-#define MAXNAMELEN	6	/* maximum length of NMEA tag name */
+#define MAXTAGLEN	6	/* maximum length of sentence tag name */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
@@ -129,7 +129,7 @@ struct gps_data_t {
     
     /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */
-    char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
+    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
     double sentence_time;	/* sentence timestamp */
     double d_xmit_time;		/* beginning of sentence transmission */

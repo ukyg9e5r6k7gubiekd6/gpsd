@@ -245,7 +245,7 @@ Tentative answers:
 (1) The default GPS is the last one plugged in.
 (2) Nothing.  It should just get an offline indication.
 
-The main problem with this apprach is that it's complicated.  The 
+The main problem with this approach is that it's complicated.  The 
 resulting implementation is likely to be fragile and have unexpected
 edge cases.
 
