@@ -371,7 +371,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    /* FIXME: K= form not yet supported */
 	    strcpy(phrase, ",K=");
 	    for (i = 0; i < MAXDEVICES; i++) 
-		if (channels[i].device) {
+		if (channels[i].device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
 		    strcat(phrase, device->gpsd_device);
 		    strcat(phrase, " ");
 		}
