@@ -535,6 +535,20 @@ static int handle_request(int fd, fd_set * fds)
 		    ",G=%6.6s",
 		    gNMEAdata.grid);
 	    break;
+        case 'X':
+        case 'x':
+            if (!FD_ISSET(fd, fds))
+                FD_SET(fd, fds);
+             sprintf(reply + strlen(reply),
+                         " ,R=1");
+            break;
+        case 'C':
+        case 'c':
+            if (FD_ISSET(fd, fds))
+                FD_CLR(fd, fds);
+            sprintf(reply + strlen(reply),
+                         " ,R=0");
+            break;
 	case 'R':
 	case 'r':
 	    if (FD_ISSET(fd, fds)) {

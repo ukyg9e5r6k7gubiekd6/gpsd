@@ -22,7 +22,9 @@ extern char lond;
 void process_message(char *sentence)
 {
     if (checksum(sentence)) {
-	if (strncmp(GPRMC, sentence, 5) == 0) {
+	if (strncmp(PMGNST, sentence, 6) == 0) {
+	    processPMGNST(sentence);
+	} else if (strncmp(GPRMC, sentence, 5) == 0) {
 	    processGPRMC(sentence);
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
 	    processGPGGA(sentence);

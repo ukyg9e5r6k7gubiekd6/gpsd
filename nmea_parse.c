@@ -77,6 +77,38 @@ void processGPRMC(char *sentence)
 
 }
 
+/*
+  $PMGNST,02.12,3,T,534,05.0,+03327,00*40 
+
+where:
+      ST      status information
+      02.12   Version number?
+      3       2D or 3D
+      T       True if we have a fix False otherwise
+      534     numbers change - unknown
+      05.0    time left on the gps battery in hours
+      +03327  numbers change (freq. compensation?)
+      00      PRN number receiving current focus
+      *40    checksum
+ */
+
+void processPMGNST(char *sentence)
+{
+    int tmp1;
+    char foo;
+
+    sscanf(field(sentence, 2), "%d", &tmp1);	
+    sscanf(field(sentence, 3), "%c", &foo);	
+    if (foo == 'T') {
+        /* otherwise leave this alone as it may show diff */
+        if (!gNMEAdata.status)
+  	    gNMEAdata.status = 1; 
+	gNMEAdata.mode = tmp1;
+    } else 
+        gNMEAdata.mode = 1;
+		      
+}
+
 /* ----------------------------------------------------------------------- */
 
 void processGPVTG(char *sentence)
@@ -261,7 +293,7 @@ void add_checksum(char *sentence)
     unsigned char sum = '\0';
     char c, *p = sentence;
 
-    while ((c = *p++) != '*')
+    while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
 
     sprintf(p, "%02X\r\n", sum);
@@ -276,10 +308,10 @@ void add_checksum(char *sentence)
 static char *field(char *sentence, short n)
 {
     static char result[100];
-    char *p = sentence;
+    char c, *p = sentence;
 
     while (n-- > 0)
-	while (*p++ != ',');
+        while ((c = *p++) != ',' && c != '\0');
     strcpy(result, p);
     p = result;
     while (*p && *p != ',' && *p != '*' && *p != '\r')
