@@ -3,43 +3,56 @@
 # Collect latency-profiling data from a running gpsd.
 import sys, time, getopt, gps
 
-def rawplot(baud=None, gps_time=None, recv_time=None,emit_time=None, tag=None):
+def rawplot(baud=None, gps=None, recv=None,emit=None, tag=None):
+    "Print basic data, ignoring timezone skew."
     if not baud:
         print "#GPS time        	Received	Transmitted 	Read"
         print "#----------------	---------	----------- 	----------"
     else:
-            print "%.6f	%2.6f	%2.6f	%2.6f	# %s" \
-                  % (gps_time,
-                     (recv_time - gps_time) % 3600,
-                     (emit_time - gps_time) % 3600,
-                     (time.time() - gps_time) % 3600,
-                     tag)
+        print "%.6f	%2.6f	%2.6f	%2.6f	# %s" \
+              % (gps,
+                 (recv - gps) % 3600,
+                 (emit - gps) % 3600,
+                 (time.time() - gps) % 3600,
+                 tag)
+
+def stripplot(baud=None, gps=None, recv=None,emit=None, tag=None):
+    "Discard base time, throw out latencies >1 sec."
+    if not baud:
+        print "#Received	Transmitted 	Read"
+        print "#---------	----------- 	----------"
+    else:
+        # Throw out latencies above 1 second, these are
+        # serial-buffering artifacts at the start of the session
+        if (recv - gps) % 3600 > 1:
+            return
+        print "%2.6f	%2.6f	%2.6f	# %s" \
+              % ((recv - gps) % 3600,
+                 (emit - gps) % 3600,
+                 (time.time() - gps) % 3600,
+                 tag)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "hn:r")
     await = 100;
-    raw =False
+    formatter = stripplot
     for (switch, val) in options:
 	if (switch == '-n'):
 	    await = int(val)
 	elif (switch == '-r'):
-	    raw = True
+	    formatter = rawplot
         elif (switch == '-h'):
             sys.stderr.write("usage: profile_gpsd [-h] [-r] [-n samplecount] \n")
     session = gps.gps(host="localhost", port="2947")
     try:
         session.query("wZ+")
-        rawplot()
+        formatter()
         while True:
             session.poll()
             gps_time = gps.isotime(session.utc)
             recv_time = session.recv_time
             emit_time = session.emit_time
-            # Throw out latencies above 1 second, these are
-            # serial-buffering artifacts at the start of the session
-            if (recv_time - gps_time) % 3600 > 1:
-                continue
-            rawplot(session.baudrate, gps_time, recv_time, emit_time, session.tag)
+            formatter(session.baudrate, gps_time, recv_time, emit_time, session.tag)
     finally:
         session.query("wZ-")
         del session
