@@ -100,7 +100,7 @@ void gpsd_deactivate(struct gps_session_t *session)
     REFRESH(session->gNMEAdata.online_stamp);
     session->gNMEAdata.mode = MODE_NO_FIX;
     session->gNMEAdata.status = STATUS_NO_FIX;
-    gpsd_close(session->gNMEAdata.gps_fd);
+    gpsd_close(session);
     session->gNMEAdata.gps_fd = -1;
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
@@ -110,7 +110,7 @@ void gpsd_deactivate(struct gps_session_t *session)
 int gpsd_activate(struct gps_session_t *session)
 /* acquire a connection to the GPS device */
 {
-    if ((session->gNMEAdata.gps_fd = gpsd_open(session->gpsd_device, session->baudrate, session->device_type->stopbits)) < 0)
+    if ((session->gNMEAdata.gps_fd = gpsd_open(session->baudrate, session->device_type->stopbits, session)) < 0)
 	return -1;
     else {
 	session->gNMEAdata.online = 1;

@@ -117,6 +117,10 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
+* Thu Oct 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+  Documentation and comment fixes.  Last two globals removed from 
+  low-level interface; library should now be fully re-entrant.
+
 * Mon Oct 18 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.2-1
   Documentation improvements.  BSD port fixes.  Bug fix: speed timestamp
   wasn't initialized properly in libgps. Device is now an optional 

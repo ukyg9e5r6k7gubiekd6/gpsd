@@ -1,6 +1,7 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
 #include "gps.h"
+
 /*
  * Some internal capabilities depend on which drivers we're compiling.
  */
@@ -32,6 +33,14 @@ struct gps_type_t {
     int interval;
 };
 
+#if defined (HAVE_SYS_TERMIOS_H)
+#include <sys/termios.h>
+#else
+#if defined (HAVE_TERMIOS_H)
+#include <termios.h>
+#endif
+#endif
+
 struct gps_session_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gNMEAdata;
@@ -41,6 +50,7 @@ struct gps_session_t {
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
+    struct termios ttyset, ttyset_old;
 #if TRIPMATE_ENABLE
     struct longlat_t initpos;	/* public; set by -i option */
 #endif /* TRIPMATE_ENABLE */
@@ -77,8 +87,8 @@ extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
 extern void nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
-extern int gpsd_open(char *device_name, int device_speed, int stopbits);
-extern void gpsd_close(int);
+extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *context);
+extern void gpsd_close(struct gps_session_t *context);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */
