@@ -13,16 +13,19 @@
  *
  **************************************************************************/
 
-static char *field(char *sentence, short n)
+static char *field(char *sentence, short fn)
 /* return the nth comma-delimited field from the sentence */
 {
     static char result[100];
     char c, *p = sentence;
-    unsigned int i;
+    unsigned int i; int n = fn;
 
-    while (n-- > 0)
+    while (n-- > 0) {
         while ((c = *p++) != ',' && c != '\0')
 	    continue;
+	if (c == '\0' && n >= 0)
+	    return "";
+    }
     strncpy(result, p, sizeof(result)-1);
     p = result;
     i = 0;
