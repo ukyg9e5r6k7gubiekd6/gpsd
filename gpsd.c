@@ -598,9 +598,6 @@ int main(int argc, char *argv[])
 	     * streaming (raw or watcher mode).
 	     */
 	    if (FD_ISSET(fd, &rfds) || FD_ISSET(fd, &nmea_fds) || FD_ISSET(fd, &watcher_fds)) {
-		char buf[BUFSIZE];
-		int buflen;
-
 		if (session->gNMEAdata.gps_fd == -1) {
 		    gpsd_deactivate(session);
 		    if (gpsd_activate(session) >= 0) {
@@ -609,16 +606,18 @@ int main(int argc, char *argv[])
 		}
 
 		if (FD_ISSET(fd, &rfds)) {
-		    buflen = read(fd, buf, sizeof(buf) - 1);
+		    char buf[BUFSIZE];
+		    int buflen = read(fd, buf, sizeof(buf) - 1);
 		    if (buflen <= 0) {
 			(void) close(fd);
 			FD_CLR(fd, &all_fds);
-		    }
-		    buf[buflen] = '\0';
-		    gpsd_report(1, "<= client: %s", buf);
-		    if (handle_request(fd, buf, buflen) < 0) {
-			(void) close(fd);
-			FD_CLR(fd, &all_fds);
+		    } else {
+		        buf[buflen] = '\0';
+			gpsd_report(1, "<= client: %s", buf);
+			if (handle_request(fd, buf, buflen) < 0) {
+			    (void) close(fd);
+			    FD_CLR(fd, &all_fds);
+			}
 		    }
 		}
 	    }
