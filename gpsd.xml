@@ -51,9 +51,9 @@ and speedometer</refpurpose>
 
 <para>gpsd is a monitor daemon that watches a TCP/IP port (2947 by
 default), waiting for an application to request location information
-from a GPS.  The GPS will usually be direct-connected to the machine
-running gpsd via a USB port or serial port, but may be attached to
-another slave daemon reporting to this one.</para>
+from a GPS.  The GPS is expoected to be direct-connected to the
+machine running gpsd via a USB or RS232C serial port which is
+specified to gpsd at startup.</para>
 
 <para>Optionally, gpsd may get differential-GPS corrections from a
 ground station running a RCTM-S104 server; this will improve
@@ -139,8 +139,7 @@ error.</para>
 
 <para>gpsd should be able to query any GPS that speaks either the
 standard textual NMEA 0183 protocol or the binary Rockwell protocol
-used by EarthMate and some other GPSes.  gpsd is tested with DeLorme's
-TripMate and EarthMate, also with Garmin units.</para>
+used by EarthMate and some other GPSes.</para>
 
 <para>The request protocol for gpsd clients is very simple.  Each
 request consists of a single ASCII character followed by a newline.
@@ -289,23 +288,21 @@ and plugged back in.</para>
 </refsect2>
 <refsect2><title>gps</title>
 
-<para>gps is a simple test client for gpsd with an X interface; it can
-also connect direct to a GPS (not recommended, as that mode will not
-restart a timed-out connection and cannot use differential-GPS
-corrections).  It displays current GPS animation and (for GPSes that
-support the feature) the locations of accessible satellites.</para>
+<para>gps is a simple test client for gpsd with an X interface. It
+displays current GPS animation and (for GPSes that support the
+feature) the locations of accessible satellites.</para>
 
-<para>gps accepts an -h options as for gpsd. With the -p option you
-may specify an alternate server:port to get data from.  The feature of
-previous version that allowed direct connect to the serial device has
+<para>gps accepts an -h option as for gpsd. With the -p option you
+may specify an alternate server:port to get data from.  The misfeature of
+previous version that allowed it to direct-connect to the serial device has
 been removed.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
 <para>xgpsspeed is a speedometer that uses position information from
-the GPS. It accepts -TDph options as for gpsd. The feature of
-previous version that allowed direct connect to the serial device has
+the GPS. It accepts -ph options as for xgps. The misfeature of
+previous version that allowed it to direct-connect to the serial device has
 been removed.</para>
 
 </refsect2>
