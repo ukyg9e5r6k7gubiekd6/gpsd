@@ -141,8 +141,11 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
   static int offset = 0;
   int count;
 
-  ioctl(*source, FIONREAD, &count);   // this is BAD! Why can't I make the
-  // socket non blocking for read?
+  ioctl(*source, FIONREAD, &count);
+
+  /* Make the port NON-BLOCKING so reads will not wait if no data */
+  if ((flags = fcntl(port, F_GETFL)) < 0) return;
+  if (fcntl(port, F_SETFL, flags | O_NDELAY) < 0) return;
 
   while (offset < BUFSIZE && count--) {
     if (read(*source, buf + offset, 1) != 1)
