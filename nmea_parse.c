@@ -124,7 +124,8 @@ void processGPGSV(char *sentence)
     int n, m, f = 4;
 
 
-    sscanf(field(sentence, 2), "%d", &n);
+    if (sscanf(field(sentence, 2), "%d", &n) < 1)
+        return;
     update_field_i(sentence, 3, &gNMEAdata.in_view, C_SAT);
 
     n = (n - 1) * 4;
@@ -248,7 +249,7 @@ short checksum(char *sentence)
     unsigned char sum = '\0';
     char c, *p = sentence, csum[3];
 
-    while ((c = *p++) != '*')
+    while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
 
     sprintf(csum, "%02X", sum);
