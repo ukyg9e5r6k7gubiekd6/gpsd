@@ -310,9 +310,7 @@ if __name__ == '__main__':
         if len(fixes) == 0:
             print "# No fixes collected, can't estimate accuracy."
         else:
-            print "# Fixes: ", fixes
             centroid = (sum(map(lambda x:x[0], fixes))/len(fixes), sum(map(lambda x:x[1], fixes))/len(fixes))
-            print "# Centroid: ", centroid
             # Sort fixes by distance from centroid
             def d(a, b): return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
             fixes.sort(lambda x, y: cmp(d(centroid, x), d(centroid, y)))
@@ -344,8 +342,8 @@ if __name__ == '__main__':
             sys.stdout.write('cx(t, r) = sin(t)*r\n')
             sys.stdout.write('cy(t, r) = cos(t)*r\n')
             sys.stdout.write('chlen = cep/20\n')
-            #sys.stdout.write("set arrow from -chlen,0 to chlen,0 nohead\n")
-            #sys.stdout.write("set arrow from 0,-chlen to 0,chlen nohead\n")
+            sys.stdout.write("set arrow from -chlen,0 to chlen,0 nohead\n")
+            sys.stdout.write("set arrow from 0,-chlen to 0,chlen nohead\n")
             sys.stdout.write('plot "-" using 1:2 title "%d GPS fixes", cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters"\n' % (len(fixes), cep_meters))
             sys.stdout.write("#\n")
             sys.stdout.write("# Lat	Lon\n")
