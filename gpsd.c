@@ -11,7 +11,6 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <netinet/in.h>
 #include <assert.h>
 
@@ -296,7 +295,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;
 	case 'L':
-	    sprintf(phrase, ",l=1 " VERSION " abcdefilmpqrstuvwxy");	//ghjkno
+	    sprintf(phrase, ",L=1 " VERSION " abcdefilmpqrstuvwxy");	//ghjkno
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
