@@ -253,7 +253,7 @@ the replies. Examples:</para>
 </screen>
 
 <para>If the GPS stops sending updates to gpsd, gpsd will continue
-presenting the last data it got for 5 seconds 5 seconds, then begin
+presenting the last data it got for 5 seconds, then begin
 sending back empty responses xinsisting only of the GPSD prefix.</para>
 
 </refsect2>
