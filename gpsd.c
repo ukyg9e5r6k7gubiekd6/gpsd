@@ -10,8 +10,6 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <setjmp.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 
 #if defined (HAVE_PATH_H)
@@ -35,13 +33,10 @@
 
 #define QLEN			5
 
-/* the default driver is NMEA */
 struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
 static int in_background = 0;
-static fd_set all_fds;
-static fd_set nmea_fds;
-static fd_set watcher_fds;
+static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel;
 static int nfds;
 
@@ -209,8 +204,7 @@ static int validate(int fd)
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
-    char reply[BUFSIZE];
-    char *p;
+    char reply[BUFSIZE], *p;
     int i, j;
     time_t cur_time;
 
@@ -219,10 +213,9 @@ static int handle_request(int fd, char *buf, int buflen)
     sprintf(reply, "GPSD");
     p = buf;
     while (*p) {
-	switch (*p++)
+	switch (toupper(*p++))
 	{
 	case 'A':
-	case 'a':
 	    if (!validate(fd))
 		strcat(reply, ",A=?");
 	    else
@@ -231,7 +224,6 @@ static int handle_request(int fd, char *buf, int buflen)
 			session->gNMEAdata.altitude);
 	    break;
 	case 'D':
-	case 'd':
 	    if (session->gNMEAdata.utc[0])
 		sprintf(reply + strlen(reply),
 			",D=%s",
@@ -240,18 +232,15 @@ static int handle_request(int fd, char *buf, int buflen)
 		strcat(reply, ",D=?");
 	    break;
 	case 'L':
-	case 'l':
 	    sprintf(reply + strlen(reply),
 		    ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
-	case 'm':
 		sprintf(reply + strlen(reply),
 			",M=%d",
 			session->gNMEAdata.mode);
 	    break;
 	case 'P':
-	case 'p':
 	    if (!validate(fd))
 		strcat(reply, ",P=?");
 	    else
@@ -261,7 +250,6 @@ static int handle_request(int fd, char *buf, int buflen)
 			session->gNMEAdata.longitude);
 	    break;
 	case 'Q':
-	case 'q':
 	    if (!validate(fd))
 		strcat(reply, ",Q=?");
 	    else
@@ -271,7 +259,6 @@ static int handle_request(int fd, char *buf, int buflen)
 			session->gNMEAdata.pdop, session->gNMEAdata.hdop, session->gNMEAdata.vdop);
 	    break;
 	case 'R':
-	case 'r':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
@@ -297,13 +284,11 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
 	case 'S':
-	case 's':
 	    sprintf(reply + strlen(reply),
 		    ",S=%d",
 		    session->gNMEAdata.status);
 	    break;
 	case 'T':
-	case 't':
 	    if (!validate(fd))
 		strcat(reply, ",T=?");
 	    else
@@ -312,7 +297,6 @@ static int handle_request(int fd, char *buf, int buflen)
 			session->gNMEAdata.track);
 	    break;
 	case 'V':
-	case 'v':
 	    if (!validate(fd))
 		strcat(reply, ",V=?");
 	    else
@@ -321,7 +305,6 @@ static int handle_request(int fd, char *buf, int buflen)
 			session->gNMEAdata.speed);
 	    break;
 	case 'W':
-	case 'w':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
@@ -347,14 +330,12 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
         case 'X':
-        case 'x':
 	    if (session->gNMEAdata.gps_fd == -1)
 		strcat(reply, ",X=0");
 	    else
 		strcat(reply, ",X=1");
 	    break;
 	case 'Y':
-	case 'y':
 	    if (!session->gNMEAdata.satellites)
 		strcat(reply, ",Y=?");
 	    else {
@@ -424,8 +405,6 @@ static void raw_hook(char *sentence)
 		PUBLISH(fd, "pdas");	
 	    } else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
 		PUBLISH(fd, "pd");
-	    } else if (strncmp(PMGNST, sentence, sizeof(PMGNST)-1) == 0) {
-		PUBLISH(fd, "sm");
 	    } else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
 		PUBLISH(fd, "tv");
 	    } else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
@@ -508,18 +487,14 @@ static int setnonblocking(int sock)
 
 int main(int argc, char *argv[])
 {
-    char *default_service = "gpsd";
     char *service = NULL;
     char *dgpsserver = NULL;
     struct sockaddr_in fsin;
     fd_set rfds;
-    int msock;
-    int alen;
+    int msock, alen, fd, need_gps;
     extern char *optarg;
     int option, gpsd_speed = 0;
     char gpstype = 'n';
-    int fd;
-    int need_gps;
     int nowait = 0;
 
     debuglevel = 1;
@@ -589,9 +564,10 @@ int main(int argc, char *argv[])
     }
 
     if (!service) {
-	if (!getservbyname(default_service, "tcp"))
+	if (!getservbyname("gpsd", "tcp"))
 	    service = DEFAULT_GPSD_PORT;
-	else service = default_service;
+	else
+	    service = "gpsd";
     }
 
     if (debuglevel < 2)

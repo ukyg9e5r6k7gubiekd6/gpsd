@@ -1,6 +1,3 @@
-/*
- * Drivers for generic NMEA device, TripMate and Zodiac EarthMate in text mode.
- */
 #include "config.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,25 +19,6 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
     if (*sentence == '$')
     {
 	if (nmea_parse(sentence, &session->gNMEAdata) < 0)
-	    /*
-	     * Some of the stuff that comes out of supposedly NMEA-compliant
-	     * GPses is a doozy.  For example, my BU-303 occasionally and
-	     * randomly issues an ID message like this:
-	     *
-	     *  $Version 231.000.000_A2
-	     *  $TOW: 506058
-	     *  $WK:  1284
-	     *  $POS: 1222777  -4734973 4081037
-	     *  $CLK: 95872
-	     *  $CHNL:12
-	     *  $Baud rate: 4800  System clock: 12.277MHz
-	     *  $HW Type: S2AM
-	     *  $Asic Version: 0x23
-	     *  $Clock Source: GPSCLK
-	     *  $Internal Beacon: None
-	     *
-	     * Other SiRF-II-based GPSses probably do the same.
-	     */
 	    gpsd_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
@@ -152,14 +130,8 @@ struct gps_type_t fv18 =
  * Some technical FAQs on the TripMate:
  * http://vancouver-webpages.com/pub/peter/tripmate.faq
  * http://www.asahi-net.or.jp/~KN6Y-GTU/tripmate/trmfaqe.html
- * Maybe we could use the logging-interval command?
- * According to file://localhost/home/esr/svn/gpsd/trunk/hardware.html,
- * sending "$PRWIIPRO,0,RBIN\r\n" snd waiting 1.5 seconds 
- * will switch the TripMate into Rockwell binary mode at 4800.
- *
  * The TripMate was discontinued sometime before November 1998
- * and was replaced by the Zodiac EarthMate.  In 2003, the Zodiac
- * chipset in the EarthMate was replaced with the SiRF II.
+ * and was replaced by the Zodiac EarthMate.
  */
 
 static void tripmate_initializer(struct gps_session_t *session)

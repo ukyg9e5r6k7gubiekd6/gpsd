@@ -1,5 +1,4 @@
 #include "config.h"
-
 #include <Xm/Xm.h>
 #include <math.h>
 
@@ -82,11 +81,9 @@ static void draw_arc(int x, int y, int diam)
 	);
 }
 
-
 static int get_status(struct gps_data_t *gpsdata, int satellite)
 {
-    int i;
-    int s;
+    int i, s;
 
     for (i = 0; i < 12; i++)
 	if (satellite == gpsdata->PRN[i]) {
@@ -99,7 +96,6 @@ static int get_status(struct gps_data_t *gpsdata, int satellite)
 	}
     return 0;
 }
-
 
 void draw_graphics(struct gps_data_t *gpsdata)
 {

@@ -49,23 +49,12 @@ extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data_t *gpsdata);
 
 /* global variables */
-static Widget lxbApp;
-static Widget data_panel;
-static Widget satellite_list;
-static Widget satellite_diagram;
-static Widget rowColumn_10;
-static Widget rowColumn_11;
-static Widget rowColumn_12;
-static Widget rowColumn_13;
-static Widget rowColumn_14;
-static Widget rowColumn_15;
-static Widget rowColumn_16;
-static Widget rowColumn_17;
-static Widget rowColumn_18;
-static Widget pushButton_11;
+static Widget lxbApp, data_panel, satellite_list, satellite_diagram, status;
+static Widget rowColumn_10, rowColumn_11, rowColumn_12, rowColumn_13;
+static Widget rowColumn_14, rowColumn_15, rowColumn_16, rowColumn_17;
+static Widget rowColumn_18, pushButton_11;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
-static Widget status;
 
 String fallback_resources[] =
 {
@@ -117,30 +106,20 @@ static void build_gui(Widget lxbApp)
     XGCValues gcv;
 
     /* the root application window */
-    n = 0;
-    XtSetArg(args[n], XmNgeometry, "630x460");
-    n++;
-    XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
-    n++;
-    XtSetArg(args[n], XmNallowShellResize, False);
-    n++;
-    XtSetArg(args[n], XmNdeleteResponse, XmDO_NOTHING);
-    n++;
-    XtSetArg(args[n], XmNmwmFunctions,
+    XtSetArg(args[0], XmNgeometry, "630x460");
+    XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
+    XtSetArg(args[2], XmNallowShellResize, False);
+    XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
+    XtSetArg(args[4], XmNmwmFunctions,
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
-    n++;
-    XtSetValues(lxbApp, args, n);
+    XtSetValues(lxbApp, args, 5);
 
 #define LEFTSIDE_WIDTH	190
     /* the data panel */
-    n = 0;
-    XtSetArg(args[n], XmNrubberPositioning, False);
-    n++;
-    XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
-    n++;
-    XtSetArg(args[n], XmNwidth, LEFTSIDE_WIDTH);
-    n++;
-    data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
+    XtSetArg(args[0], XmNrubberPositioning, False);
+    XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
+    XtSetArg(args[2], XmNwidth, LEFTSIDE_WIDTH);
+    data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, 3);
 
     /* satellite location and SNR data panel */
 #define FRAMEHEIGHT	220

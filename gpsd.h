@@ -83,7 +83,6 @@ struct gps_session_t
 #define GPGSV "$GPGSV"
 #define GPRMC "$GPRMC"
 #define PRWIZCH "$PRWIZCH"
-#define PMGNST "$PMGNST"
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
