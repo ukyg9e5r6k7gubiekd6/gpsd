@@ -332,8 +332,26 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 		REFRESH(out->mode_stamp);
 	    }
 	} else {
+	    double oldaltitude = out->altitude;
+	    double oldaltstamp = out->altitude_stamp.last_refresh;
+	    double oldclimb = out->climb;
+
 	    out->altitude = atof(altitude);
 	    REFRESH(out->altitude_stamp);
+
+	    /*
+	     * Compute climb/sink in the simplest possible way.
+	     * This substitutes for the climb report provided by
+	     * SiRF and Garmin chips, which might have some smoothing
+	     * going on.
+	     */
+	    out->climb_stamp = out->altitude_stamp;
+	    if (!oldaltstamp)
+		out->climb = 0;
+	    else {
+		out->climb = (out->altitude-oldaltitude)/(out->altitude_stamp.last_refresh-oldaltstamp);
+	    }
+	    out->climb_stamp.changed = (out->climb != oldclimb);
 	}
     }
 }
