@@ -400,11 +400,6 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 }
 
-static void processIgnored (int count UNUSED, char *field[] UNUSED,
-			    struct gps_data_t *out UNUSED)
-{
-}
-
 static short nmea_checksum(char *sentence)
 /* is the checksum on the specified sentence good? */
 {
@@ -448,7 +443,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"GPVTG", processGPVTG},
 	{"GPGSA", processGPGSA},
 	{"GPGSV", processGPGSV},
-	{"PRWIZCH", processIgnored},
+	{"PRWIZCH", NULL},
     };
 
     int retval = -1;
@@ -479,8 +474,9 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     count = i;
 
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
-        if (!strcmp(nmea_phrase[i].name, field[0]) && nmea_phrase[i].decoder) {
-	    (nmea_phrase[i].decoder)(count, field, outdata);
+        if (!strcmp(nmea_phrase[i].name, field[0])) {
+	    if (nmea_phrase[i].decoder)
+		(nmea_phrase[i].decoder)(count, field, outdata);
 	    retval = 0;
 	    break;
 	}
