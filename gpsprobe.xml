@@ -42,8 +42,8 @@ is running.</para>
 <para>The report and scattergram is generated as a
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 script to standard output.  View it with <command>gnuplot -persist
-<emphasis>foo</emphasis></command> where <emphasis>foo</emphasis>
-should be replaced with the name of the plot script.</para>
+&lt;foo&gt;</command> where &lt;foo&gt; should be replaced with
+the name of the plot script.</para>
 
 <para>Note: <application>gpsprobe</application> needs access to the raw
 GPS device. Therefore <application>gpsd</application> must not be running
