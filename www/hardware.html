@@ -21,6 +21,7 @@ information.</p>
 
 <tr>
 <th>Name</th>
+<th>Recommendation</th>
 <th>Chipset</th>
 <th>Interface</th>
 <th>Vendor</th>
@@ -31,23 +32,37 @@ information.</p>
 <th width="50%">Notes</th>
 </tr>
 <tr>
-<td><a href='bu_303b.html'>BU-303</a></td>
-<td>SiRF-II</td>
+<td><a href='http://www.haicom.com.tw/products.htm'>HI-204S</a></td>
+<td>Excellent</td>
+<td>SiRF-II + PL2303</td>
 <td>USB</td>
-<td>M a href='http://www.globalsat.com.tw/english/products_detail.php?main_id=5&p_id=9'>Globalsat</a>; OEMed as 
+<td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
+<td align='center'>n</td>
+<td>1.97</td>
+<td>2.2</td>
+<td>GGA, GSA, GSV, RMC, VTG</td>
+<td>Haicom provided a test unit. Manual states incorrectly that VTG
+is off by default.</td>
+</tr>
+<tr>
+<td><a href='bu_303b.html'>BU-303</a></td>
+<td>Bad</d>
+<td>SiRF-II + PL2303</td>
+<td>USB</td>
+<td><a href='http://www.globalsat.com.tw/english/products_detail.php?main_id=5&p_id=9'>Globalsat</a>; OEMed as 
 NaviLock, Hyperdata, TripNav</td>
 <td align='center'>n</td>
 <td>1.97</td>
 <td>2.2</td>
 <td>GGA, GSA, GSV, RMC, GLL, VTG</td>
-<td>Very generic SiRF II device. Requires pl2303 support 
-which is broken in late 2.4 Linux kernels but good in 2.6.8.
-Here's a <a
-href='http://www.rayming.com/download/NEMA_commands.pdf'>technical
-manual</a> from Globalsat's U.S. reseller.</td>
+<td>
+The BU-303 has a <a href='bu_303.html'>design defect</a> that makes it
+likely to fail if subjected to vibration or mechanical shock.
+</td>
 </tr>
 <tr>
 <td>EarthMate</td>
+<td>Neutral</td>
 <td>Zodiac</td>
 <td>RS-232</td>
 <td>DeLorme</td>
@@ -60,7 +75,8 @@ models have been discontinued but are still common.</td>
 </tr>
 <tr>
 <td>EarthMate</td>
-<td>SiRF-II</td>
+<td>Bad</td>
+<td>SiRF-II + Cypress M8</td>
 <td>USB</td>
 <td>DeLorme</td>
 <td align='center'>-</td>
@@ -75,6 +91,7 @@ worked on</a>.</td>
 </tr>
 <tr>
 <td><a href='http://www.sanav.com/gps_engine_board/fv-18.htm'>FV 18</a></td>
+<td>Neutral</td>
 <td>FV 18</td>
 <td>RS232</td>
 <td><a href='http://www.sanav.com/'>San Jose Navigation</a></td>
@@ -88,6 +105,7 @@ worked on</a>.</td>
 <td><a
 href='http://www.royaltek.com/proditem.asp?hotitem=yes&hid=1'>RoyalTek
 Sapphire USB</a></a></td>
+<td>Neutral</td>
 <td>SiRF-II</td>
 <td>USB</td>
 <td>RoyalTek</td>
@@ -99,6 +117,7 @@ Sapphire USB</a></a></td>
 </tr>
 <tr>
 <td><a href='http://vancouver-webpages.com/peter/tripmate.faq'>TripMate</a></td>
+<td>Neutral</td>
 <td>Zodiac</td>
 <td>RS-232</td>
 <td>DeLorme</td>
@@ -111,6 +130,15 @@ Discontinued sometime before November 1998.
 Takes optional latitude/longitude initialization.</td>
 </tr>
 </table>
+
+<h2>Notes on chipset support:</h2>
+
+<p>SiRF-II: A <a
+href='http://www.rayming.com/download/NEMA_commands.pdf'>technical
+manual</a> describing this chipset is available from Globalsat's
+U.S. reseller.</p>
+
+<p>PL2303: support is broken in late 2.4 Linux kernels but good in 2.6.8.</p>
 
 </body>
 </html>
