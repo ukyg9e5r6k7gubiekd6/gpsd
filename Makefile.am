@@ -113,7 +113,8 @@ EXTRA_DIST = \
 	gpsd.spec \
 	gps.py \
 	gpsd.py \
-	gpsprobe
+	gpsprobe \
+	logextract
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
