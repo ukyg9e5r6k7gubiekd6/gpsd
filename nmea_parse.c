@@ -74,7 +74,7 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data *out)
 	if (out->mode < MODE_2D)
 	{
 	    out->mode = MODE_2D;
-	    gpscli_report(2, "Latitude/longitude implies mode is 2 or 3\n");
+	    gpscli_report(3, "Latitude/longitude implies mode is 2 or 3\n");
 	}
     }
     REFRESH(out->latlon_stamp);
@@ -172,7 +172,7 @@ static void processGPRMC(char *sentence, struct gps_data *out)
 	newstatus = STATUS_FIX;
     else
     {
-	gpscli_report(2, "Invalid GPRMC zeroes status.\n");
+	gpscli_report(3, "Invalid GPRMC zeroes status.\n");
 	newstatus = STATUS_NO_FIX;
     }
     out->status_stamp.changed = (newstatus != out->status);
@@ -225,7 +225,7 @@ static void processGPGLL(char *sentence, struct gps_data *out)
 	out->status_stamp.changed = (out->status != newstatus);
 	out->status = newstatus;
 	REFRESH(out->status_stamp);
-	gpscli_report(2, "GPGLL sets status %d\n", out->status);
+	gpscli_report(3, "GPGLL sets status %d\n", out->status);
 	/* unclear what the right thing to do with other status values is */
     }
 }
@@ -322,7 +322,7 @@ static void processGPGGA(char *sentence, struct gps_data *out)
     do_lat_lon(sentence, 2, out);
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
-    gpscli_report(2, "GPGGA sets status %d\n", out->status);
+    gpscli_report(3, "GPGGA sets status %d\n", out->status);
     update_field_i(sentence, 7, &out->satellites);
     out->altitude_stamp.changed = update_field_f(sentence, 9, &out->altitude);
     REFRESH(out->altitude_stamp);
@@ -353,7 +353,7 @@ static void processGPGSA(char *sentence, struct gps_data *out)
     
     out->mode_stamp.changed = update_field_i(sentence, 2, &out->mode);
     REFRESH(out->mode_stamp);
-    gpscli_report(2, "GPGSA sets mode %d\n", out->mode);
+    gpscli_report(3, "GPGSA sets mode %d\n", out->mode);
     changed |= update_field_f(sentence, 15, &out->pdop);
     changed |= update_field_f(sentence, 16, &out->hdop);
     changed |= update_field_f(sentence, 17, &out->vdop);
@@ -459,7 +459,7 @@ static void processPMGNST(char *sentence, struct gps_data *out)
 	REFRESH(out->status_stamp);
 	out->mode_stamp.changed = (newmode != out->mode);
 	REFRESH(out->mode_stamp);
-	gpscli_report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
+	gpscli_report(3, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
 }
 

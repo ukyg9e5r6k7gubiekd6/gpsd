@@ -413,7 +413,7 @@ static void raw_hook(char *sentence)
 	if (FD_ISSET(fd, &nmea_fds)) {
 	    gpscli_report(1, "=> client: %s\n", sentence);
 	    if (write(fd, sentence, strlen(sentence)) < 0) {
-		gpscli_report(2, "Raw write %s\n", strerror(errno));
+		gpscli_report(3, "Raw write %s\n", strerror(errno));
 		FD_CLR(fd, &afds);
 		FD_CLR(fd, &nmea_fds);
 	    }

@@ -53,7 +53,7 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
     if (*sentence == '$')
     {
 	if (gps_process_NMEA_message(sentence + 1, &session->gNMEAdata) < 0)
-	    gpscli_report(2, "Unknown sentence: \"%s\"\n", sentence);
+	    gpscli_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
 	process_exception(session, sentence);
