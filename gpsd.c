@@ -40,10 +40,6 @@ static char *device_name = DEFAULT_DEVICE_NAME;
 static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, nfds, go_background = 1, in_background = 0;
-#ifdef PROFILING
-static int sentence_length, profiling;
-static char namebuf[MAXNAMELEN+1];
-#endif /* PROFILING */
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -209,13 +205,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
 #ifdef PROFILING
-		if (profiling) {
+		if (ud->profiling) {
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
 		    sprintf(phrase+strlen(phrase), ",$=%s:%lf:%d:%ld.%ld",
-			    namebuf,
+			    ud->tag,
 			    ud->recv_time,
-			    sentence_length,
+			    ud->sentence_length,
 			    tv.tv_sec, tv.tv_usec); 
 		}
 #endif /* PROFILING */
@@ -336,35 +332,35 @@ static int handle_request(int fd, char *buf, int buflen)
 #ifdef PROFILING
 	case 'Z':
 	    if (*p == '1' || *p == '+') {
-		profiling = 1;
+		ud->profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", fd);
 		sprintf(phrase, ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		profiling = 0;
+		ud->profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", fd);
 		sprintf(phrase, ",Z=0");
 		p++;
 	    } else if (FD_ISSET(fd, &nmea_fds)) {
-		profiling = 0;
+		ud->profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", fd);
 		sprintf(phrase, ",Z=0");
 	    } else {
-		profiling=1;
+		ud->profiling=1;
 		gpsd_report(3, "%d turned on profiling mode\n", fd);
 		sprintf(phrase, ",Z=1");
 	    }
-	    sprintf(phrase + strlen(phrase), ":%d:%d", 
-		    session->gNMEAdata.baudrate, session->device_type->stopbits);
 	    break;
 
 	case 'B':		/* change baud rate (SiRF only) */
-	    if (*p != '=' && *p != '\r' && *p != '\n') {
+	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		sirf_mode(session, 0, i);
 	    }
-	    sprintf(phrase, ",B=%d", gpsd_get_speed(&session->ttyset));
+	    sprintf(phrase, ",B=%d:%d", 
+		    gpsd_get_speed(&session->ttyset),
+		    session->device_type->stopbits);
 	    break;
 #endif /* PROFILING */
 	case '\r': case '\n':
@@ -399,13 +395,13 @@ static void raw_hook(char *sentence)
 #ifdef PROFILING
     char *sp, *tp;
     if (sentence[0] != '$')
-	namebuf[0] = '\0';
+	session->gNMEAdata.tag[0] = '\0';
     else {
-	for (tp = namebuf, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
+	for (tp = session->gNMEAdata.tag, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
 	    *tp = *sp;
 	*tp = '\0';
     }
-    sentence_length = strlen(sentence);	/* used when profiling */
+    session->gNMEAdata.sentence_length = strlen(sentence);
 #endif /* PROFILING */
 
     for (fd = 0; fd < nfds; fd++) {

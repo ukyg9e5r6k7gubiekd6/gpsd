@@ -95,6 +95,7 @@ struct gps_data_t {
     struct life_t satellite_stamp;
 
     /* profiling data */
+    int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
     double recv_time,emit_time;	/* profile times */
