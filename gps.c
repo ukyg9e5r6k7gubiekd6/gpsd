@@ -6,6 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 
+#if defined (HAVE_SYS_TERMIOS_H)
+#include <sys/termios.h>
+#else
+#if defined (HAVE_TERMIOS_H)
+#include <termios.h>
+#endif
+#endif
+
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/ScrolledW.h>
