@@ -51,7 +51,11 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
-	if (tcsetattr(ttyfd, TCSANOW, &session->ttyset) != 0)
+	/*
+	 * throw away stale NMEA data that may be sitting in the buffer 
+	 * from a previous session.
+	 */
+	if (tcsetattr(ttyfd, TCSAFLUSH, &session->ttyset) != 0)
 	    return -1;
     }
     return ttyfd;
