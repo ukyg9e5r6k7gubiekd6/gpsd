@@ -136,7 +136,7 @@ int gpsd_poll(struct gps_session_t *session)
 
     /* update the scoreboard structure from the GPS */
     waiting = is_input_waiting(session->gNMEAdata.gps_fd);
-    gpsd_report(4, "GPS has %d chars waiting\n", waiting);
+    gpsd_report(5, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
 	return waiting;
     else if (!waiting) {
