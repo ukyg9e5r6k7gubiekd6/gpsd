@@ -43,7 +43,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
-      <arg choice='opt'>--units <group><replaceable>kph</replaceable><replaceable>mph</replaceable></group></arg>
+      <arg choice='opt'>--units <group><replaceable>mph</replaceable><replaceable>kph</replaceable><replaceable>knots</replaceable></group></arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
@@ -323,8 +323,9 @@ option to dump the package version and exit.  Additionally, it accepts
 -rv (reverse video) and -nc (needle color) options.</para>
 
 <para>The --units option can be used to set the units for display;
-follow the keyword with either kph for kilometres per hour, or mph for
-miles per hour.  The default is miles per hour.</para>
+follow the keyword with either knots for nautical miles per hour, kph
+for kilometres per hour, or mph for miles per hour.  The default is
+miles per hour.</para>
 
 </refsect2>
 </refsect1>

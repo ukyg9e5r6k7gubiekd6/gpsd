@@ -69,15 +69,15 @@ int main(int argc, char **argv)
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
-    speedfactor = KNOTS_TO_MPH;
+    speedfactor = KNOTS_TO_MPH;		/* Software maintained in US */
     units = get_resource("units", "mph");
-    if (!strcmp(units, "kph")) speedfactor = KNOTS_TO_KPH;
+    if (!strcmp(units, "kph")) 
+	speedfactor = KNOTS_TO_KPH;
+    else if (!strcmp(units, "knots"))
+	speedfactor = 1;
 
-    while ((option = getopt(argc, argv, "?hkv")) != -1) {
+    while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {
-	case 'k':
-	    speedfactor = KNOTS_TO_KPH;
-	    break;
 	case 'v':
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
