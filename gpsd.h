@@ -12,27 +12,27 @@ struct longlat_t
     char lond;
 };
 
-struct gpsd_t;
+struct gps_session_t;
 
 struct gps_type_t
 /* GPS method table, describes how to talk to a particular GPS type */
 {
     char typekey, *typename;
     char *trigger;
-    void (*initializer)(struct gpsd_t *session);
-    int (*handle_input)(struct gpsd_t *session);
-    int (*rctm_writer)(struct gpsd_t *session, char *rtcmbuf, int rtcmbytes);
-    void (*wrapup)(struct gpsd_t *session);
+    void (*initializer)(struct gps_session_t *session);
+    int (*handle_input)(struct gps_session_t *session);
+    int (*rctm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
+    void (*wrapup)(struct gps_session_t *session);
     int baudrate;
 };
 
-struct gpsd_t
+struct gps_session_t
 /* session object, encapsulates all global state */
 {
     struct gps_type_t *device_type;
     struct longlat_t initpos;
-    struct gps_data gNMEAdata;
-    char *gps_device;	/* where to find the GPS */
+    struct gps_data_t gNMEAdata;
+    char *gpsd_device;	/* where to find the GPS */
     int baudrate;		/* baud rate of session */
     int fdin;		/* input fd from GPS */
     int fdout;		/* output fd to GPS */
@@ -62,27 +62,27 @@ extern struct gps_type_t tripmate;
 extern struct gps_type_t earthmate_a;
 extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
-extern struct gps_type_t *gps_drivers[5];
+extern struct gps_type_t *gpsd_drivers[5];
 
 /* GPS library internal prototypes */
-extern int nmea_parse(char *sentence, struct gps_data *outdata);
-extern int nmea_sane_satellites(struct gps_data *out);
-extern void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence);
+extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
+extern int nmea_sane_satellites(struct gps_data_t *out);
+extern void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence);
 extern void nmea_add_checksum(char *sentence);
 extern short nmea_checksum(char *sentence);
-extern int gps_open(char *device_name, int device_speed);
-extern void gps_close();
+extern int gpsd_open(char *device_name, int device_speed);
+extern void gpsd_close();
 extern int netlib_passiveTCP(char *service, int qlen);
 extern int netlib_connectTCP(char *host, char *service);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */
-extern void gps_init(struct gpsd_t *session, 
+extern void gpsd_init(struct gps_session_t *session, 
 	      int timeout, char devtype, char *dgpsserver);
-extern int gps_activate(struct gpsd_t *session);
-extern void gps_deactivate(struct gpsd_t *session);
-extern int gps_poll(struct gpsd_t *session);
-extern void gps_wrap(struct gpsd_t *session);
+extern int gpsd_activate(struct gps_session_t *session);
+extern void gpsd_deactivate(struct gps_session_t *session);
+extern int gpsd_poll(struct gps_session_t *session);
+extern void gpsd_wrap(struct gps_session_t *session);
 
 /* caller must supply this */
 extern void gpscli_report(int d, const char *fmt, ...);

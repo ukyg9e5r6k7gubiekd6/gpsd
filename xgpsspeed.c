@@ -30,8 +30,8 @@
 extern double rint();
 #endif
 
-struct gps_data gpsdata;
-static int gps_fd;
+struct gps_data_t gpsdata;
+static int gpsd_fd;
 
 static Widget toplevel, base;
 static Widget tacho, label;
@@ -83,7 +83,7 @@ static void update_display(char *buf)
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gpsd_poll(gps_fd, &gpsdata);
+    gps_poll(gpsd_fd, &gpsdata);
 }
 
 int main(int argc, char **argv)
@@ -156,19 +156,19 @@ int main(int argc, char **argv)
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gps_fd = gpsd_open(&gpsdata, 5, NULL, NULL);
-    if (gps_fd < 0)
+    gpsd_fd = gps_open(&gpsdata, 5, NULL, NULL);
+    if (gpsd_fd < 0)
 	exit(2);
 
-    XtAppAddInput(app, gps_fd, (XtPointer) XtInputReadMask,
+    XtAppAddInput(app, gpsd_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
     
-    gpsd_set_raw_hook(&gpsdata, update_display);
-    gpsd_query(gps_fd, &gpsdata, "w+\n");
+    gps_set_raw_hook(&gpsdata, update_display);
+    gps_query(gpsd_fd, &gpsdata, "w+\n");
 
     XtAppMainLoop(app);
 
-    gpsd_close(gps_fd);
+    gps_close(gpsd_fd);
     return 0;
 }
 

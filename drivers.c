@@ -17,7 +17,7 @@
  *
  **************************************************************************/
 
-void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
+void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
     gpscli_report(2, "<= GPS: %s\n", sentence);
@@ -50,7 +50,7 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
 	struct gps_type_t **dp;
 
 	/* maybe this is a trigger string for a driver we know about? */
-	for (dp = gps_drivers; dp < gps_drivers + sizeof(gps_drivers)/sizeof(gps_drivers[0]); dp++)
+	for (dp = gpsd_drivers; dp < gpsd_drivers + sizeof(gpsd_drivers)/sizeof(gpsd_drivers[0]); dp++)
 	{
 	    char	*trigger = (*dp)->trigger;
 
@@ -67,7 +67,7 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
     }
 }
 
-static int nmea_handle_input(struct gpsd_t *session)
+static int nmea_handle_input(struct gps_session_t *session)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
@@ -79,7 +79,7 @@ static int nmea_handle_input(struct gpsd_t *session)
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
-	        gps_NMEA_handle_message(session, buf);
+	        gpsd_NMEA_handle_message(session, buf);
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
 		if (session->gNMEAdata.raw_hook)
@@ -96,7 +96,7 @@ static int nmea_handle_input(struct gpsd_t *session)
     return 1;
 }
 
-static int nmea_write_rctm(struct gpsd_t *session, char *buf, int rtcmbytes)
+static int nmea_write_rctm(struct gps_session_t *session, char *buf, int rtcmbytes)
 {
     return write(session->fdout, buf, rtcmbytes);
 }
@@ -126,7 +126,7 @@ struct gps_type_t nmea =
  * Maybe we could use the logging-interval command?
  */
 
-void tripmate_initializer(struct gpsd_t *session)
+void tripmate_initializer(struct gps_session_t *session)
 {
     char buf[82];
     time_t t;
@@ -211,7 +211,7 @@ struct gps_type_t logfile =
     0,				/* don't set a speed */
 };
 
-struct gps_type_t *gps_drivers[5] = {&nmea, 
+struct gps_type_t *gpsd_drivers[5] = {&nmea, 
 				   &tripmate,
 				   &earthmate_a, 
 				   &earthmate_b,

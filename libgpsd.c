@@ -8,7 +8,7 @@
 #include <gps.h>
 #include <gpsd.h>
 
-int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port)
+int gps_open(struct gps_data_t *gpsdata, int timeout, char *host, char *port)
 /* open a connection to a gpsd daemon */
 {
     int fd;
@@ -40,18 +40,18 @@ int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port)
     return fd;
 }
 
-int gpsd_close(int fd)
+int gps_close(int fd)
 /* close a gpsd connection */
 {
     return close(fd);
 }
 
-void gpsd_set_raw_hook(struct gps_data *gpsdata, void (*hook)(char *buf))
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
 {
     gpsdata->raw_hook = hook;
 }
 
-static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
+static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
     char *sp, *tp;
@@ -199,7 +199,7 @@ static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
 	;
 }
 
-int gpsd_poll(int fd, struct gps_data *gpsdata)
+int gps_poll(int fd, struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
@@ -209,15 +209,15 @@ int gpsd_poll(int fd, struct gps_data *gpsdata)
 	return -1;
 
     buf[buflen] = '\0';
-    return gpsd_unpack(buf, gpsdata);
+    return gps_unpack(buf, gpsdata);
 }
 
-int gpsd_query(int fd, struct gps_data *gpsdata, char *requests)
+int gps_query(int fd, struct gps_data_t *gpsdata, char *requests)
 /* query a gpsd instance for new data */
 {
     if (write(fd, requests, strlen(requests)) <= 0)
 	return -1;
-    return gpsd_poll(fd, gpsdata);
+    return gps_poll(fd, gpsdata);
 }
 
 #ifdef TESTMAIN
@@ -240,7 +240,7 @@ void gpscli_report(int errlevel, const char *fmt, ... )
     fputs(buf, stderr);
 }
 
-void data_dump(struct gps_data *collect, time_t now)
+void data_dump(struct gps_data_t *collect, time_t now)
 {
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
@@ -345,19 +345,19 @@ static void dumpline(char *buf)
 
 main(int argc, char *argv[])
 {
-    struct gps_data collect;
+    struct gps_data_t collect;
     int fd;
     char buf[BUFSIZE];
 
     memset(&collect, '\0', sizeof(collect));
-    fd = gpsd_open(&collect, GPS_TIMEOUT, NULL, 0);
+    fd = gps_open(&collect, GPS_TIMEOUT, NULL, 0);
 
-    gpsd_set_raw_hook(&collect, dumpline);
+    gps_set_raw_hook(&collect, dumpline);
     if (argc > 1)
     {
 	strcpy(buf, argv[1]);
 	strcat(buf,"\n");
-	gpsd_query(fd, &collect, buf);
+	gps_query(fd, &collect, buf);
 	data_dump(&collect, time(NULL));
     }
     else
@@ -376,14 +376,14 @@ main(int argc, char *argv[])
 		    putchar('\n');
 		break;
 	    }
-	    if (!gpsd_query(fd, &collect, buf))
+	    if (!gps_query(fd, &collect, buf))
 		fputs("No changes.\n", stdout);
 	    data_dump(&collect, time(NULL));
 	}
     }
 
 
-    gpsd_close(fd);
+    gps_close(fd);
 }
 
 #endif /* TESTMAIN */

@@ -45,7 +45,7 @@ static int set_baud(long baud)
 }
 
 
-int gps_open(char *device_name, int device_speed)
+int gpsd_open(char *device_name, int device_speed)
 {
     char *temp;
 
@@ -80,7 +80,7 @@ int gps_open(char *device_name, int device_speed)
     return ttyfd;
 }
 
-void gps_close()
+void gpsd_close()
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {

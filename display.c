@@ -28,7 +28,7 @@
 #include "gps.h"
 
 extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics(struct gps_data *gpsdata);
+extern void draw_graphics(struct gps_data_t *gpsdata);
 
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)
@@ -105,7 +105,7 @@ static void draw_arc(int x, int y, int diam)
 }
 
 
-static int get_status(struct gps_data *gpsdata, int satellite)
+static int get_status(struct gps_data_t *gpsdata, int satellite)
 {
     int i;
     int s;
@@ -133,7 +133,7 @@ static int get_status(struct gps_data *gpsdata, int satellite)
 }
 
 
-void draw_graphics(struct gps_data *gpsdata)
+void draw_graphics(struct gps_data_t *gpsdata)
 {
     int i;
     double x, y;

@@ -37,7 +37,7 @@ static char *field(char *sentence, short n)
 
 /* ----------------------------------------------------------------------- */
 
-static void do_lat_lon(char *sentence, int begin, struct gps_data *out)
+static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
 {
     double lat, lon, d, m;
     char str[20], *p;
@@ -121,7 +121,7 @@ static int update_field_f(char *sentence, int fld, double *dest)
    01234567890123456789
  */
 
-static void processGPRMC(char *sentence, struct gps_data *out)
+static void processGPRMC(char *sentence, struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
@@ -194,7 +194,7 @@ static void processGPRMC(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void processGPGLL(char *sentence, struct gps_data *out)
+static void processGPGLL(char *sentence, struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
     /*
@@ -241,7 +241,7 @@ static void processGPGLL(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void processGPVTG(char *sentence, struct gps_data *out)
+static void processGPVTG(char *sentence, struct gps_data_t *out)
 /* Track Made Good and Ground Speed */
 {
     /* OK, there seem to be two variants of GPVTG
@@ -311,7 +311,7 @@ static void processGPVTG(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void processGPGGA(char *sentence, struct gps_data *out)
+static void processGPGGA(char *sentence, struct gps_data_t *out)
 /* Global Positioning System Fix Data */
 {
     /*
@@ -342,7 +342,7 @@ static void processGPGGA(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void processGPGSA(char *sentence, struct gps_data *out)
+static void processGPGSA(char *sentence, struct gps_data_t *out)
 /* GPS DOP and Active Satellites */
 {
     /*
@@ -382,7 +382,7 @@ static void processGPGSA(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-int nmea_sane_satellites(struct gps_data *out)
+int nmea_sane_satellites(struct gps_data_t *out)
 {
     /* not valid data until we've seen a complete set of parts */
     if (out->part != out->await)
@@ -405,7 +405,7 @@ int nmea_sane_satellites(struct gps_data *out)
     return 0;
 }
 
-static void processGPGSV(char *sentence, struct gps_data *out)
+static void processGPGSV(char *sentence, struct gps_data_t *out)
 /* GPS Satellites in View */
 {
     /*
@@ -455,7 +455,7 @@ static void processGPGSV(char *sentence, struct gps_data *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void processPMGNST(char *sentence, struct gps_data *out)
+static void processPMGNST(char *sentence, struct gps_data_t *out)
 /* Proprietary MaGellan STatus */
 {
     /*
@@ -503,7 +503,7 @@ static void processPMGNST(char *sentence, struct gps_data *out)
 /* ----------------------------------------------------------------------- */
 
 #ifdef PROCESS_PRWIZCH
-static void processPRWIZCH(char *sentence, struct gps_data *out)
+static void processPRWIZCH(char *sentence, struct gps_data_t *out)
 /*
  * Supported by the Zodiac/Rockwell chipset.
  * Descriptions of this sentence are hard to find, but here is one:
@@ -554,7 +554,7 @@ void nmea_add_checksum(char *sentence)
     sprintf(p, "%02X\r\n", sum);
 }
 
-int nmea_parse(char *sentence, struct gps_data *outdata)
+int nmea_parse(char *sentence, struct gps_data_t *outdata)
 {
     if (nmea_checksum(sentence)) {
 	if (strncmp(GPRMC, sentence, 5) == 0) {

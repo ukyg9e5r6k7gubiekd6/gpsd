@@ -18,31 +18,31 @@
 
 #include &lt;gpsd.h&gt;
 
-struct gpsd_t session;
+struct gps_session_t session;
 
 </funcsynopsisinfo>
 <funcprototype>
-<funcdef>void <function>gps_init</function></funcdef>
-    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
+<funcdef>void <function>gpsd_init</function></funcdef>
+    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
     <paramdef>int <parameter>timeout</parameter></paramdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>int <function>gps_activate</function></funcdef>
-    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
+<funcdef>int <function>gpsd_activate</function></funcdef>
+    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_deactivate</function></funcdef>
-    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
+<funcdef>void <function>gpsd_deactivate</function></funcdef>
+    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>int <function>gps_poll</function></funcdef>
-    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
+<funcdef>int <function>gpsd_poll</function></funcdef>
+    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_wrap</function></funcdef>
-    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
+<funcdef>void <function>gpsd_wrap</function></funcdef>
+    <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 
 <funcprototype>
@@ -73,7 +73,7 @@ for a description of the high-level interface, which is almost
 certainly what you want.</para>
 
 <para>Calling
-<function>gps_init()</function>
+<function>gpsd_init()</function>
 initializes a session structure to hold the data collected by the GPS.
 You must specify a timeout in seconds after which data will be
 considered stale.  You must specify one of the following device types:</para>
@@ -97,7 +97,7 @@ of its members.</para>
 
 <variablelist>
 <varlistentry>
-<term><structfield>gps_device</structfield></term>
+<term><structfield>gpsd_device</structfield></term>
 <listitem>
 <para>This member should hold the path name of the device; it defaults to
 <filename>/dev/gps</filename>.</para>
@@ -121,22 +121,22 @@ passed to the hook.</para>
 </varlistentry>
 </variablelist>
 
-<para><function>gps_activate()</function>
+<para><function>gpsd_activate()</function>
 initializes the connection to the GPS.  
-<function>gps_deactivate()</function>
+<function>gpsd_deactivate()</function>
 closes the connection. These functions are provided so that
 long-running programs can release a connection when there is no
 activity requiring the GPS, and re-acquire it later.</para>
 
-<para><function>gps_poll()</function>
+<para><function>gpsd_poll()</function>
 queries the GPS and updates the part of the session structure that
 holds position, speed, GPS signal quality, and other data returned
 by the GPS. It returns the number of characters waiting (-1 if the
 GPS is inaccessible)</para>
 
-<para><function>gps_wrap()</function>
+<para><function>gpsd_wrap()</function>
 ends the session, implicitly performing a 
-<function>gps_deactivate()</function>.</para>
+<function>gpsd_deactivate()</function>.</para>
 
 <para>The calling application must define one additional function:
 <function>gpscli_report()</function>.

@@ -19,7 +19,7 @@ struct life_t
 #define SEEN(stamp) stamp.refreshes
 #define CHANGED(stamp) stamp.changed
 
-struct gps_data {
+struct gps_data_t {
     int	online;			/* 1 if GPS is on line, 0 if not */
     struct life_t online_stamp;
 
@@ -91,10 +91,10 @@ struct gps_data {
     void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
 };
 
-int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port);
-int gpsd_close(int fd);
-int gpsd_query(int fd, struct gps_data *gpsdata, char *requests);
-int gpsd_poll(int fd, struct gps_data *gpsdata);
-void gpsd_set_raw_hook(struct gps_data *gpsdata, void (*hook)(char *buf));
+int gps_open(struct gps_data_t *gpsdata, int timeout, char *host, char *port);
+int gps_close(int fd);
+int gps_query(int fd, struct gps_data_t *gpsdata, char *requests);
+int gps_poll(int fd, struct gps_data_t *gpsdata);
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 
 /* gps.h ends here */

@@ -48,7 +48,7 @@
 #include "gps.h"
 
 extern void register_canvas(Widget w, GC gc);
-extern void draw_graphics(struct gps_data *gpsdata);
+extern void draw_graphics(struct gps_data_t *gpsdata);
 
 void update_display(char *message);
 
@@ -76,14 +76,14 @@ static Widget status;
 
 String fallback_resources[] =
 {
-    "*gps_data.time.label.labelString: Time  ",
-    "*gps_data.latitude.label.labelString: Lat.  ",
-    "*gps_data.longitude.label.labelString: Long. ",
-    "*gps_data.altitude.label.labelString: Alt.  ",
-    "*gps_data.speed.label.labelString: Speed ",
-    "*gps_data.track.label.labelString: Track ",
-    "*gps_data.fix_status.label.labelString: Status",
-    "*gps_data.quit.label.labelString: Quit",
+    "*gps_data_t.time.label.labelString: Time  ",
+    "*gps_data_t.latitude.label.labelString: Lat.  ",
+    "*gps_data_t.longitude.label.labelString: Long. ",
+    "*gps_data_t.altitude.label.labelString: Alt.  ",
+    "*gps_data_t.speed.label.labelString: Speed ",
+    "*gps_data_t.track.label.labelString: Track ",
+    "*gps_data_t.fix_status.label.labelString: Status",
+    "*gps_data_t.quit.label.labelString: Quit",
     NULL
 };
 
@@ -143,7 +143,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
 
-    form_6 = XtCreateManagedWidget("gps_data", xmFormWidgetClass, lxbApp, args, n);
+    form_6 = XtCreateManagedWidget("gps_data_t", xmFormWidgetClass, lxbApp, args, n);
 
 #define FRAMEHEIGHT	220
     /* satellite location and SNR display */
@@ -334,8 +334,8 @@ void init_list()
  * No dependencies on the session structure above this point.
  */
 
-static struct gps_data gpsdata;
-static int gps_fd;
+static struct gps_data_t gpsdata;
+static int gpsd_fd;
 
 void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -357,7 +357,7 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    gpsd_poll(gps_fd, &gpsdata);
+    gps_poll(gpsd_fd, &gpsdata);
 }
 
 void update_display(char *message)
@@ -455,8 +455,8 @@ int main(int argc, char *argv[])
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gps_fd = gpsd_open(&gpsdata, 5, NULL, NULL);
-    if (gps_fd < 0)
+    gpsd_fd = gps_open(&gpsdata, 5, NULL, NULL);
+    if (gpsd_fd < 0)
 	exit(2);
 
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
@@ -464,14 +464,14 @@ int main(int argc, char *argv[])
     build_gui(lxbApp);
     init_list();
 
-    gpsd_set_raw_hook(&gpsdata, update_display);
-    gpsd_query(gps_fd, &gpsdata, "w+\n");
+    gps_set_raw_hook(&gpsdata, update_display);
+    gps_query(gpsd_fd, &gpsdata, "w+\n");
 
-    XtAppAddInput(app, gps_fd, (XtPointer) XtInputReadMask,
+    XtAppAddInput(app, gpsd_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 
     XtAppMainLoop(app);
 
-    gpsd_close(gps_fd);
+    gps_close(gpsd_fd);
     return 0;
 }

@@ -51,9 +51,9 @@
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 /* the default driver is NMEA */
-struct gpsd_t session;
+struct gps_session_t session;
 
-static int gps_timeout = GPS_TIMEOUT;
+static int gpsd_timeout = GPS_TIMEOUT;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int in_background = 0;
@@ -64,7 +64,7 @@ static int reopen;
 
 static void onsig(int sig)
 {
-    gps_wrap(&session);
+    gpsd_wrap(&session);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
@@ -456,7 +456,7 @@ int main(int argc, char *argv[])
     int msock, nfds;
     int alen;
     extern char *optarg;
-    int option, gps_speed = 0;
+    int option, gpsd_speed = 0;
     char gpstype = 'n', *colon;
     int fd;
     int need_gps;
@@ -504,10 +504,10 @@ int main(int argc, char *argv[])
 	    device_name = optarg;
 	    break;
 	case 't':
-	    gps_timeout = strtol(optarg, NULL, 0);
+	    gpsd_timeout = strtol(optarg, NULL, 0);
 	    break;
 	case 's':
-	    gps_speed = atoi(optarg);
+	    gpsd_speed = atoi(optarg);
 	    break;
 	case 'h':
 	case '?':
@@ -552,15 +552,15 @@ int main(int argc, char *argv[])
     FD_SET(msock, &all_fds);
     nfds = getdtablesize();
 
-    gps_init(&session, gps_timeout, gpstype, dgpsserver);
-    if (gps_speed)
-	session.baudrate = gps_speed;
-    session.gps_device = device_name;
+    gpsd_init(&session, gpsd_timeout, gpstype, dgpsserver);
+    if (gpsd_speed)
+	session.baudrate = gpsd_speed;
+    session.gpsd_device = device_name;
     session.gNMEAdata.raw_hook = raw_hook;
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &all_fds);
 
-    if (nowait && (gps_activate(&session) < 0)) {
+    if (nowait && (gpsd_activate(&session) < 0)) {
 	gpscli_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	exit(2);
     }
@@ -597,16 +597,16 @@ int main(int argc, char *argv[])
 
 	/* we may need to force the GPS open */
 	if ((nowait || reopen) && session.fdin == -1) {
-	    gps_deactivate(&session);
-	    if (gps_activate(&session) >= 0)
+	    gpsd_deactivate(&session);
+	    if (gpsd_activate(&session) >= 0)
 		FD_SET(session.fdin, &all_fds);
 	}
 
 	/* get data from it */
-	if (session.fdin >= 0 && gps_poll(&session) <= 0) {
+	if (session.fdin >= 0 && gpsd_poll(&session) <= 0) {
 	    gpscli_report(3, "GPS is offline\n");
 	    FD_CLR(session.fdin, &all_fds);
-	    gps_deactivate(&session);
+	    gpsd_deactivate(&session);
 	    if (nowait)
 		reopen = 1;
 	}
@@ -623,8 +623,8 @@ int main(int argc, char *argv[])
 		int buflen;
 
 		if (session.fdin == -1) {
-		    gps_deactivate(&session);
-		    if (gps_activate(&session) >= 0)
+		    gpsd_deactivate(&session);
+		    if (gpsd_activate(&session) >= 0)
 			FD_SET(session.fdin, &all_fds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
@@ -648,11 +648,11 @@ int main(int argc, char *argv[])
 	if (!nowait && !need_gps && session.fdin != -1) {
 	    FD_CLR(session.fdin, &all_fds);
 	    session.fdin = -1;
-	    gps_deactivate(&session);
+	    gpsd_deactivate(&session);
 	}
     }
 
-    gps_wrap(&session);
+    gpsd_wrap(&session);
 }
 
 
