@@ -171,7 +171,6 @@ class gps(gpsdata):
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
-        print "Data: %s" % `buf`
 	fields = buf.strip().split(",")
 	if fields[0] == "GPSD":
 	  for field in fields[1:]:
@@ -265,10 +264,13 @@ if __name__ == '__main__':
     print "This is the exerciser for the Python gps interface."
     session = gps()
     session.set_raw_hook(lambda s: sys.stdout.write(s + "\n"))
-    while True:
-	commands = raw_input("> ")
-	session.query(commands)
-	print session
+    try:
+        while True:
+            commands = raw_input("> ")
+            session.query(commands)
+            print session
+    except EOFError:
+        print "Goodbye!"
     session.close()
 
 
