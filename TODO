@@ -1,12 +1,3 @@
-* Things to do:
-
-** Figure out how to probe for whether the GPS is a SiRF-II or not.
-
-Shipping $PSRF105,0*3E\r\n ought to elicit an $Ack 105 response
-from SiRF-II chipsets, but I haven't been able to make this work yet.
-We'd get several things from this, including knowing when we can change
-baud rates.
-
 ** Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the

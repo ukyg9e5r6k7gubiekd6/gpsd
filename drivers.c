@@ -30,7 +30,7 @@ static void nmea_handle_input(struct gps_session_t *session)
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
 		gpsd_report(2, "<= GPS: %s\n", buf);
-		if (buf[0] == '$' && buf[1] == 'G') {
+		if (buf[0] == '$' && buf[1] == 'G' && buf[2] == 'P') {
 #ifdef PROFILING
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
@@ -119,11 +119,17 @@ struct gps_type_t nmea = {
  *
  **************************************************************************/
 
+static void sirf_initializer(struct gps_session_t *session)
+{
+    if (!strcmp(session->device_type->typename, "SiRF-II")) 
+	nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
+}
+
 struct gps_type_t sirfII = {
     's', 		/* select explicitly with -T s */
     "SiRF-II",		/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
-    NULL,		/* no initialization */
+    sirf_initializer,		/* no initialization */
     nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
