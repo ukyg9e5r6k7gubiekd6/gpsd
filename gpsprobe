@@ -185,6 +185,7 @@ if __name__ == '__main__':
                     break
             else:
                 baton.end("no protocol recognized")
+                dev.close()
         else:
             sys.stderr.write("Couldn't acquire the device.\n")
             sys.exit(0)
