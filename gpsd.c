@@ -291,10 +291,19 @@ int main(int argc, char *argv[])
 	    errexit("select");
 	}
 	if (FD_ISSET(dsock, &rfds)) {
-	  int rtcmbytes;
+	  int rtcmbytes, cnt;
+	  char *ptr;
 	  rtcmbytes = read(dsock, buf, BUFSIZE);
-	  if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
-	    em_send_rtcm(buf, rtcmbytes);
+
+	  if (device_type == DEVICE_EARTHMATEb) {
+	    ptr = buf;
+	    while (rtcmbytes > 0) {
+	      cnt = (rtcmbytes < 65) ? rtcmbytes : 64;
+	      em_send_rtcm(buf, cnt);
+	      rtcmbytes -= cnt;
+	      ptr += cnt;
+	    }	    
+	  }
 	}
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;
