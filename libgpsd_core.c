@@ -97,6 +97,7 @@ int gpsd_activate(struct gps_session_t *session)
     if ((session->gNMEAdata.gps_fd = gpsd_open(session->gNMEAdata.baudrate, session->device_type->stopbits, session)) < 0)
 	return -1;
     else {
+	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* ignore old sentences */
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
