@@ -159,6 +159,23 @@ void draw_graphics()
 	set_color("Black");
 	draw_arc(width / 2, height / 2, i - RM);
 
+	pol2cart(0, 0, &x, &y);
+	set_color("Black");
+	XDrawString(XtDisplay(draww), pixmap, drawGC,
+			(int) x, (int) y, "N", 1);
+	pol2cart(90, 0, &x, &y);
+	set_color("Black");
+	XDrawString(XtDisplay(draww), pixmap, drawGC,
+			(int) x+5, (int) y, "W", 1);
+	pol2cart(180, 0, &x, &y);
+	set_color("Black");
+	XDrawString(XtDisplay(draww), pixmap, drawGC,
+			(int) x, (int) y+10, "S", 1);
+	pol2cart(270, 0, &x, &y);
+	set_color("Black");
+	XDrawString(XtDisplay(draww), pixmap, drawGC,
+			(int) x-5, (int) y, "E", 1);
+
 	/* Now draw the satellites... */
 	for (i = 0; i < session.gNMEAdata.in_view; i++) {
 	    pol2cart(session.gNMEAdata.azimuth[i], session.gNMEAdata.elevation[i], &x, &y);
