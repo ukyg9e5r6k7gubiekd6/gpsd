@@ -34,9 +34,10 @@ struct gps_data {
 
     /* velocity */
     double speed;		/* Speed over ground, knots */
-    double mag_var;		/* magnetic variation in degrees */
-    double track;		/* course made good */
     struct life_t speed_stamp;
+    double track;		/* Course made good */
+    struct life_t track_stamp;
+    double mag_var;		/* Magnetic variation in degrees */
 
     /* status and precision of fix */
     int    status;

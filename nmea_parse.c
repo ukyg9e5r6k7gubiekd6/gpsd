@@ -179,8 +179,10 @@ static void processGPRMC(char *sentence, struct gps_data *out)
     out->status = newstatus;
     REFRESH(out->status_stamp);
 
-    out->speed_stamp.changed = (update_field_f(sentence, 7, &out->speed) || update_field_f(sentence, 8, &out->track));
+    out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
     REFRESH(out->speed_stamp);
+    out->track_stamp.changed = update_field_f(sentence, 8, &out->track);
+    REFRESH(out->track_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -289,6 +291,9 @@ static void processGPVTG(char *sentence, struct gps_data *out)
     int changed;
 
     changed = update_field_f(sentence, 1, &out->track);
+    out->track_stamp.changed = changed;
+    REFRESH(out->track_stamp);
+    changed = 0;
     if (field(sentence, 2)[0] == 'T')
 	changed |= update_field_f(sentence, 5, &out->speed);
     else
