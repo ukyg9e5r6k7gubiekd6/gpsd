@@ -140,7 +140,7 @@ struct gps_type_t fv18 =
 };
 
 
-#ifdef ENABLE_TRIPMATE
+#ifdef TRIPMATE_ENABLE
 /**************************************************************************
  *
  * TripMate -- extended NMEA, gets faster fix when primed with lat/long/time
@@ -204,7 +204,7 @@ struct gps_type_t tripmate =
     4800,			/* default speed to connect at */
     1,				/* updates every second */
 };
-#endif /* ENABLE_TRIPMATE */
+#endif /* TRIPMATE_ENABLE */
 
 
 #ifdef ZODIAC_ENABLE
@@ -259,9 +259,9 @@ struct gps_type_t logfile =
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
     &fv18,
-#ifdef ENABLE_TRIPMATE
+#ifdef TRIPMATE_ENABLE
     &tripmate,
-#endif /* ENABLE_TRIPMATE */
+#endif /* TRIPMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_a, 
     &zodiac_b,
