@@ -298,6 +298,7 @@ static void handle1005(unsigned short *p)
 {
   int i;
   int numcorrections = p[O(12)];
+
 #if 1
   fprintf(stderr, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
   fprintf(stderr, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
@@ -421,15 +422,11 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 	}
     }
     if (nmea > 0) {
-	nfds = getdtablesize();
 	if (debug > 4)
 	    fprintf(stderr, "%s", buf);
-	for (fd = 0; fd < nfds; fd++)
-	    if (FD_ISSET(fd, nmea_fds))
-		if (write(fd, buf, strlen(buf)) < 0) {
-		    FD_CLR(fd, afds);
-		    FD_CLR(fd, nmea_fds);
-		}
+
+	send_nmea(afds, nmea_fds, buf);
+
     }
     if (eminit)
 	em_init();
