@@ -622,16 +622,21 @@ int main(int argc, char *argv[])
 
 		if (FD_ISSET(fd, &rfds)) {
 		    char buf[BUFSIZE];
-		    int buflen = read(fd, buf, sizeof(buf) - 1);
-		    if (buflen <= 0) {
+		    int buflen;
+		    gpsd_report(3, "checking %d \n", fd);
+		    if ((buflen = read(fd, buf, sizeof(buf) - 1)) <= 0) {
 			(void) close(fd);
 			FD_CLR(fd, &all_fds);
+			FD_CLR(fd, &nmea_fds);
+			FD_CLR(fd, &watcher_fds);
 		    } else {
 		        buf[buflen] = '\0';
 			gpsd_report(1, "<= client: %s", buf);
 			if (handle_request(fd, buf, buflen) < 0) {
 			    (void) close(fd);
 			    FD_CLR(fd, &all_fds);
+			    FD_CLR(fd, &nmea_fds);
+			    FD_CLR(fd, &watcher_fds);
 			}
 		    }
 		}
