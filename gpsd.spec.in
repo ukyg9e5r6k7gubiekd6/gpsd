@@ -120,7 +120,7 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 * Mon Oct 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.3-1
 - Documentation and comment fixes.  Last two globals removed from 
   low-level interface; library should now be fully re-entrant. Mac OS X
-  port fixes.
+  port fixes. Q command fix from Robin L Darroch <robin@spade-men.com>.
 
 * Mon Oct 18 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.2-1
 - Documentation improvements.  BSD port fixes.  Bug fix: speed timestamp

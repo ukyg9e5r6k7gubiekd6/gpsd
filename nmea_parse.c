@@ -291,6 +291,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
 	fake_mmddyyyy(out);
 	merge_hhmmss(field(sentence, 1), out);
 	do_lat_lon(sentence, 2, out);
+        out->satellites_used = atoi(field(sentence, 7));
 	altitude = field(sentence, 9);
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
@@ -340,7 +341,9 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
 	out->used[i] = 0;
     out->satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
-	out->used[out->satellites_used++] = atoi(field(sentence, i));
+        out->used[i] = atoi(field(sentence, i+3));
+        if (out->used[i] > 0)
+                out->satellites_used++;
     }
     out->fix_quality_stamp.changed = changed;
     REFRESH(out->fix_quality_stamp);
