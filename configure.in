@@ -3,7 +3,7 @@ dnl
 
 AC_INIT
 
-AM_INIT_AUTOMAKE(gpsd, 1.98)
+AM_INIT_AUTOMAKE(gpsd, 2.0)
 
 AC_PREFIX_PROGRAM(gcc)
 
