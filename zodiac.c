@@ -93,7 +93,7 @@ static void zodiac_init(struct gps_session_t *session)
     time_t t;
     struct tm *tm;
 
-    if (session->initpos.latitude && session->initpos.longitude) {
+    if (session->latitude && session->longitude) {
       t = time(NULL);
       tm = gmtime(&t);
 
@@ -106,8 +106,8 @@ static void zodiac_init(struct gps_session_t *session)
       data[2] = data[3] = data[4] = 0;
       data[5] = tm->tm_mday; data[6] = tm->tm_mon+1; data[7]= tm->tm_year+1900; 
       data[8] = tm->tm_hour; data[9] = tm->tm_min; data[10] = tm->tm_sec;
-      *(long *) (data + 11) = putlong(session->initpos.latitude, (session->initpos.latd == 'S') ? 1 : 0);
-      *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
+      *(long *) (data + 11) = putlong(session->latitude, (session->latd == 'S') ? 1 : 0);
+      *(long *) (data + 13) = putlong(session->longitude, (session->lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
       data[17] = data[18] = data[19] = data[20] = 0;
       data[21] = zodiac_checksum(data, 21);

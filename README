@@ -13,17 +13,18 @@ GENERAL
 
 gpsd is a userland daemon acting as a liason between a GPS or
 Loran-C receiver and clients. The receiver is expected to generate
-position information as NMEA-0183 sentences, or Rockwell binary format,
-although that can be changed.
+position information either as NMEA-0183 sentences or in Rockwell 
+binary format.
 
 gpsd listens on port 2947 for clients requesting position, time,
 velocity or altitude information.  gpsd can take information from the
 GPS and translate it into something easier to understand for clients.
 
-There is a GPS tester included. It is called "gps". It simply connects
-to the daemon and displays your latitude, longitude, altitude, and the
-signal quality from visible satellites.  When the GPS emits GSV, it
-will show a diagram of satellites in their current position in the sky.
+There is a test client included. It is called "gps". It simply
+connects to the daemon and displays your latitude, longitude,
+altitude, speed, track, and the signal quality from visible
+satellites.  When the GPS emits GSV, it will show a diagram of
+satellites in their current position in the sky.
 
 The gpsprobe program queries GPSes for their capabilities and generates
 a gnuplot recipe for an error scattergram to standard outout.
@@ -86,4 +87,4 @@ His new features include:
      are available.
    * New gpsprobe program probes the capabilities of GPSes and generates
      error scattergrams from fixes.
-   * All this in fewer lines of code than the 1.10 version.
+   * All this in fewer lines of C than the 1.10 version.

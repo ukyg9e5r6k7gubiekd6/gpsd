@@ -36,8 +36,7 @@ struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
 static int in_background = 0;
 static fd_set all_fds, nmea_fds, watcher_fds;
-static int debuglevel;
-static int nfds;
+static int debuglevel, nfds;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -152,10 +151,9 @@ static int throttled_write(int fd, char *buf, int len)
      * All writes to client sockets go through this function.
      *
      * This code addresses two cases.  First, client has dropped the connection.
-     * Second, client is still connected but not actually picking up data and
-     * our buffers are backing up.  If we let this continue, the write buffers
-     * will fill and the effect will be denial-of-service to clients that are
-     * better behaved.
+     * Second, client is connected but not picking up data and our buffers are
+     * backing up.  If we let this continue, the write buffers will fill and 
+     * the effect will be denial-of-service to clients that are better behaved.
      *
      * Our strategy is brutally simple and takes advantage of the fact that
      * GPS data has a short shelf life.  If the client doesn't pick it up 
@@ -199,9 +197,7 @@ static int handle_request(int fd, char *buf, int buflen)
 {
     char reply[BUFSIZE], *p;
     int i, j;
-    time_t cur_time;
-
-    cur_time = time(NULL);
+    struct gps_data_t *ud = &session->gNMEAdata;
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -211,13 +207,11 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (!validate(fd))
 		strcat(reply, ",A=?");
 	    else
-		sprintf(reply + strlen(reply),
-			",A=%f", session->gNMEAdata.altitude);
+		sprintf(reply + strlen(reply), ",A=%f", ud->altitude);
 	    break;
 	case 'D':
-	    if (session->gNMEAdata.utc[0])
-		sprintf(reply + strlen(reply),
-			",D=%s", session->gNMEAdata.utc);
+	    if (ud->utc[0])
+		sprintf(reply + strlen(reply), ",D=%s", ud->utc);
 	    else
 		strcat(reply, ",D=?");
 	    break;
@@ -225,25 +219,21 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(reply + strlen(reply), ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
-		sprintf(reply + strlen(reply),
-			",M=%d", session->gNMEAdata.mode);
+	    sprintf(reply + strlen(reply), ",M=%d", ud->mode);
 	    break;
 	case 'P':
 	    if (!validate(fd))
 		strcat(reply, ",P=?");
 	    else
-		sprintf(reply + strlen(reply),
-			",P=%f %f", session->gNMEAdata.latitude,
-			session->gNMEAdata.longitude);
+		sprintf(reply + strlen(reply), ",P=%f %f", 
+			ud->latitude, ud->longitude);
 	    break;
 	case 'Q':
 	    if (!validate(fd))
 		strcat(reply, ",Q=?");
 	    else
-		sprintf(reply + strlen(reply),
-			",Q=%d %f %f %f",
-			session->gNMEAdata.satellites_used,
-			session->gNMEAdata.pdop, session->gNMEAdata.hdop, session->gNMEAdata.vdop);
+		sprintf(reply + strlen(reply), ",Q=%d %f %f %f",
+			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
 	    break;
 	case 'R':
 	    if (*p == '1' || *p == '+') {
@@ -267,21 +257,19 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
 	case 'S':
-	    sprintf(reply + strlen(reply), ",S=%d", session->gNMEAdata.status);
+	    sprintf(reply + strlen(reply), ",S=%d", ud->status);
 	    break;
 	case 'T':
 	    if (!validate(fd))
 		strcat(reply, ",T=?");
 	    else
-		sprintf(reply + strlen(reply),
-			",T=%f", session->gNMEAdata.track);
+		sprintf(reply + strlen(reply), ",T=%f", ud->track);
 	    break;
 	case 'V':
 	    if (!validate(fd))
 		strcat(reply, ",V=?");
 	    else
-		sprintf(reply + strlen(reply),
-			",V=%f", session->gNMEAdata.speed);
+		sprintf(reply + strlen(reply), ",V=%f", ud->speed);
 	    break;
 	case 'W':
 	    if (*p == '1' || *p == '+') {
@@ -305,39 +293,35 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
         case 'X':
-	    if (session->gNMEAdata.gps_fd == -1)
+	    if (ud->gps_fd == -1)
 		strcat(reply, ",X=0");
 	    else
 		strcat(reply, ",X=1");
 	    break;
 	case 'Y':
-	    if (!session->gNMEAdata.satellites)
+	    if (!ud->satellites)
 		strcat(reply, ",Y=?");
 	    else {
 		int used;
-		sprintf(reply + strlen(reply),
-			",Y=%d:", session->gNMEAdata.satellites);
-		if (SEEN(session->gNMEAdata.satellite_stamp))
-		    for (i = 0; i < session->gNMEAdata.satellites; i++) {
+		sprintf(reply + strlen(reply), ",Y=%d:", ud->satellites);
+		if (SEEN(ud->satellite_stamp))
+		    for (i = 0; i < ud->satellites; i++) {
 			used = 0;
-			for (j = 0; j < session->gNMEAdata.satellites_used; j++)
-			    if (session->gNMEAdata.used[j] == session->gNMEAdata.PRN[i]) {
+			for (j = 0; j < ud->satellites_used; j++)
+			    if (ud->used[j] == ud->PRN[i]) {
 				used = 1;
 				break;
 			    }
-			if (session->gNMEAdata.PRN[i])
-			    sprintf(reply + strlen(reply),
-				    "%d %d %d %d %d:", 
-				    session->gNMEAdata.PRN[i], 
-				    session->gNMEAdata.elevation[i],
-				    session->gNMEAdata.azimuth[i],
-				    session->gNMEAdata.ss[i],
+			if (ud->PRN[i])
+			    sprintf(reply + strlen(reply), "%d %d %d %d %d:", 
+				    ud->PRN[i], 
+				    ud->elevation[i],ud->azimuth[i],
+				    ud->ss[i],
 				    used);
 		    }
 		}
 	    break;
-	case '\r':
-	case '\n':
+	case '\r': case '\n':
 	    goto breakout;
 	}
     }
@@ -352,11 +336,9 @@ static void notify_watchers(char *sentence)
 {
     int fd;
 
-    for (fd = 0; fd < nfds; fd++) {
-	if (FD_ISSET(fd, &watcher_fds)) {
+    for (fd = 0; fd < nfds; fd++)
+	if (FD_ISSET(fd, &watcher_fds))
 	    throttled_write(fd, sentence, strlen(sentence));
-	}
-    }
 }
 
 static void raw_hook(char *sentence)
@@ -489,7 +471,7 @@ int main(int argc, char *argv[])
 	case 'd':
 	    dgpsserver = optarg;
 	    break;
-#if TRIPMATE_ENABLE
+#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 	case 'i': {
 	    char *colon;
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
@@ -503,16 +485,16 @@ int main(int argc, char *argv[])
 			"gpsd: longitude field is invalid; must end in E or W.\n");
 	   else {
 		*colon = '\0';
-		session->initpos.latitude = optarg;
- 		session->initpos.latd = toupper(optarg[strlen(session->initpos.latitude) - 1]);
-		session->initpos.latitude[strlen(session->initpos.latitude) - 1] = '\0';
-		session->initpos.longitude = colon+1;
-		session->initpos.lond = toupper(session->initpos.longitude[strlen(session->initpos.longitude)-1]);
-		session->initpos.longitude[strlen(session->initpos.longitude)-1] = '\0';
+		session->latitude = optarg;
+ 		session->latd = toupper(optarg[strlen(session->latitude) - 1]);
+		session->latitude[strlen(session->latitude) - 1] = '\0';
+		session->longitude = colon+1;
+		session->lond = toupper(session->longitude[strlen(session->longitude)-1]);
+		session->longitude[strlen(session->longitude)-1] = '\0';
 	    }
 	    break;
 	}
-#endif /* TRIPMATE_ENABLE */
+#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
 	case 'n':
 	    nowait = 1;
 	    break;
@@ -522,20 +504,15 @@ int main(int argc, char *argv[])
 	case 's':
 	    gpsd_speed = atoi(optarg);
 	    break;
-	case 'h':
-	case '?':
+	case 'h': case '?':
 	default:
 	    usage();
 	    exit(0);
 	}
     }
 
-    if (!service) {
-	if (!getservbyname("gpsd", "tcp"))
-	    service = DEFAULT_GPSD_PORT;
-	else
-	    service = "gpsd";
-    }
+    if (!service)
+	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
 
     if (debuglevel < 2)
 	daemonize();
@@ -671,9 +648,8 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	    if (fd != session->gNMEAdata.gps_fd && fd != msock && FD_ISSET(fd, &all_fds)) {
+	    if (fd != session->gNMEAdata.gps_fd && fd != msock && FD_ISSET(fd, &all_fds))
 		need_gps++;
-	    }
 	}
 
 	if (!nowait && !need_gps && session->gNMEAdata.gps_fd != -1) {

@@ -14,12 +14,6 @@
 
 #define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
 
-struct longlat_t {
-/* This structure is used to initialize some older GPS units */
-    char *latitude, *longitude;
-    char latd, lond;
-};
-
 struct gps_session_t;
 
 struct gps_type_t {
@@ -51,9 +45,11 @@ struct gps_session_t {
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
-#if TRIPMATE_ENABLE
-    struct longlat_t initpos;	/* public; set by -i option */
-#endif /* TRIPMATE_ENABLE */
+#if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
+    /* public; set by -i option */
+    char *latitude, *longitude;
+    char latd, lond;
+#endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
 #ifdef ZODIAC_ENABLE
     /* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
