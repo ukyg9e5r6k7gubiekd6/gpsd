@@ -67,6 +67,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
     session->mag_var = NO_MAG_VAR;
+    session->separation = NO_SEPARATION;
 
     return session;
 }
@@ -226,9 +227,11 @@ void gpsd_zero_satellites(struct gps_data_t *out)
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 
  * members are in a valid state, (b) that the private members hours, minutes, 
- * and seconds have also been filled in, and (c) that if the private member
+ * and seconds have also been filled in, (c) that if the private member
  * mag_var is nonzero it is a magnetic variation in degrees that should be
- * passed on.
+ * passed on., and (d) if the private member separation does not have the
+ * value NO_SEPARATION, it is a valid WGS84 geoidal separation in 
+ * meters for the fix.
  */
 
 static double degtodm(double a)
@@ -248,7 +251,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
     if (session->gNMEAdata.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02.3f,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,%f,%c",
+		"$GPGGA,%02d%02d%02.3f,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,",
 		session->hours,
 		session->minutes,
 		session->seconds,
@@ -259,8 +262,11 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		session->gNMEAdata.mode,
 		session->gNMEAdata.satellites_used,
 		hdop_str,
-		session->gNMEAdata.altitude, 'M',
-		session->separation, 'M');
+		session->gNMEAdata.altitude, 'M');
+	if (session->separation == NO_SEPARATION)
+	    strcat(bufp, ",,");
+	else
+	    sprintf(bufp+strlen(bufp), "%.3f,M", session->separation);
 	if (session->mag_var == NO_MAG_VAR) 
 	    strcat(bufp, ",,");
 	else {

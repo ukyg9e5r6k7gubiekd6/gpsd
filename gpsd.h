@@ -108,6 +108,7 @@ struct gps_session_t {
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
 #ifdef BINARY_ENABLE
     double separation;		/* Geoidal separation */
+#define NO_SEPARATION	-99999	/* must be out of band */
     int year, month, day;
     int hours, minutes; 
     double seconds;
