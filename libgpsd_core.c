@@ -253,7 +253,6 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 	else
 	    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.ss[i]);
-	bufp += strlen(bufp);
 	if (i % 4 == 3)
 	    nmea_add_checksum(bufp);
     }
