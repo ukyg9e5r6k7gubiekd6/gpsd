@@ -6,7 +6,7 @@
 # description: Gpsd manages access to a serial- or USB-connected GPS
 # processname: gpsd
 
-# If you must specify a non-NMEA driver, uncomment and modify the next line
+# If you must specify a driver, uncomment and modify the next line
 #GPSD_OPTS=
 
 # Source function library.
@@ -30,15 +30,9 @@ start() {
 	# 2. We don't need all the logging crud that daemon/initlog sets
 	# up -- gpsd does its own syslog calls.
 	#
-	if [ -e "/dev/gps" ]
-	then
-	    gpsd ${GPSD_OPTS} -p /dev/gps
-	    success
-	else
-	    # User needs to symlink /dev/gps to the right thing
-	    failure "No /dev/gps device, aborting gpsd startup."
-	fi
+	gpsd ${GPSD_OPTS}
 	RETVAL=$?
+	success
 	echo
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd
 	return $RETVAL

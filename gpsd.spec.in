@@ -15,17 +15,19 @@ gpsd is a service daemon that mediates access to a GPS sensor
 connected to the host computer by serial or USB interface, making its
 data on the location/course/velocity of the sensor available to be
 queried on TCP port 2947 of the host computer.  With gpsd, multiple
-GPS client applications (such as navigational and wardriving software) 
+GPS client applications (such as navigational and wardriving software)
 can share access to a GPS without contention or loss of data.  Also,
-gpsd responds to queries with a format that is substantially easier
-to parse than NMEA 0183.
+gpsd responds to queries with a format that is substantially easier to
+parse than NMEA 0183.  The daemon will be quiescent when there are no
+clients asking for location information, and copes gracefully when the
+GPS is unplugged and replugged.
 
-After installing this RPM, gpsd will try to start up at boot time.  If
-your distribution does not use udevd, you must manually create a
-symlink named /dev/gps to the serial or USB port that your GPS will
-plug in to (normally this will be /dev/ttyUSB0 or /dev/ttyS0).  The
-daemon will be quiescent when there are no clients asking for location
-information, and copes gracefully when the GPS is unplugged.
+After installing this RPM, gpsd will start up at boot time.  It will
+automatically connect to USB GPSes when they are plugged in and
+requires no configuration.  For serial GPSes, you will need to make a
+symlink from the serial device you wish to use to /dev/gps, or start
+gpsd by hand.  Once connected, the daemon automatically discovers the
+correct baudrate and stop bits.
 
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
@@ -51,8 +53,10 @@ make %{?_smp_mflags}
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
 cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
-mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
-cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
+mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/
+cp gpsd.init "$RPM_BUILD_ROOT"%{_sysconfdir}/init.d/gpsd
+mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb
+cp gpsd.usermap gpsdplug "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
@@ -65,14 +69,12 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 /sbin/chkconfig --add gpsd
 /sbin/chkconfig gpsd on
 /sbin/ldconfig
-if [ -d /etc/udev/rules.d/ ]; then echo 'KERNEL="ttyS0", SYMLINK="gps"' >/etc/udev/rules.d/80-gpsd.rules; fi
 
 %preun -n gpsd
 /sbin/chkconfig --del gpsd
 
 %postun -n gpsd
 /sbin/ldconfig
-if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %files
 %defattr(-,root,root,-)
@@ -89,6 +91,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
+%{_sysconfdir}/hotplug/usb/gpsd.usermap
+%{_sysconfdir}/hotplug/usb/gpsdplug
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
@@ -106,8 +110,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %changelog
 * Wed Mar  2 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- New F command allows changing the GPS device after startup time;
-  this will be useful with hotplug scripts.
+- New F command allows changing the GPS device after startup time.
+  Hotplug scripts to go with it are now installed by the RPM.  We
+  have zero configuration!
 
 * Wed Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.15-1
 - A new packet engine autobauds much more quickly, and now iterates
