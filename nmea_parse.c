@@ -468,12 +468,10 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     };
     unsigned char buf[NMEA_MAX+1];
 
-    int retval = 0;
+    int count, retval = 0;
     unsigned int i;
-    int count;
+    char *p, *field[80];
     unsigned char sum;
-    char *p;
-    char *field[80];
 
     if (!nmea_checksum(sentence+1, &sum)) {
         gpsd_report(1, "Bad NMEA checksum: '%s' should be %02X\n",
