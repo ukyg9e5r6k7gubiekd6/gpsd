@@ -535,11 +535,12 @@ disclosed information about the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
 sentences: RMC, GLL, GGA, GSA, GSV, ZDA.  It recognizes these with
-either the normal GP talker-ID prefix or with the II prefix emitted
-by Seahawk Autohelm marine navigation systems.  It recognizes one vendor
-extension, PGRME.  Note that <application>gpsd</application> returns
-pure decimal degrees, not the hybrid degree/minute format described in
-the NMEA standard.</para>
+either the normal GP talker-ID prefix, or with the II prefix emitted
+by Seahawk Autohelm marine navigation systems, or with the IN prefix
+emitted by some Garmin units.  It recognizes one vendor extension,
+PGRME.  Note that <application>gpsd</application> returns pure decimal
+degrees, not the hybrid degree/minute format described in the NMEA
+standard.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

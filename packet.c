@@ -65,8 +65,14 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  * that looks like the head of a SiRF packet followed by a NMEA
  * packet; in that case it won't reset until it notices that the SiRF
  * trailer is not where it should be, and the NMEA packet will be
- * lost.  The reverse scenario is not possible because the SiRF leader * characters can't occur in an NMEA packet.  Caller should consume a
+ * lost.  The reverse scenario is not possible because the SiRF leader
+ * characters can't occur in an NMEA packet.  Caller should consume a
  * packet when it sees one of the *_RECOGNIZED states.
+ *
+ * This state machine allows the following talker IDs:
+ *      GP -- Global Positioning System.
+ *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
+ *	IN -- Integrated Navigation (Garmin uses this).
  */
 
 enum {
@@ -79,19 +85,23 @@ enum {
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
-   SEATALK_LEAD_1,	/* SeaTalk packet leader 'I' */
+   SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
 
+#ifdef TRIPMATE_ENABLE
    ASTRAL_1,		/* ASTRAL leader A */
    ASTRAL_2,	 	/* ASTRAL leader S */
    ASTRAL_3,		/* ASTRAL leader T */
    ASTRAL_4,		/* ASTRAL leader R */
    ASTRAL_5,		/* ASTRAL leader A */
+#endif /* TRIPMATE_ENABLE */
 
+#ifdef EARTHMATE_ENABLE
    EARTHA_1,		/* EARTHA leader E */
    EARTHA_2,		/* EARTHA leader A */
    EARTHA_3,		/* EARTHA leader R */
    EARTHA_4,		/* EARTHA leader T */
    EARTHA_5,		/* EARTHA leader H */
+#endif /* EARTHMATE_ENABLE */
 
    SIRF_LEADER_2,	/* seen second character of SiRF leader */
    SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
@@ -174,7 +184,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case SEATALK_LEAD_1:
-	if (c == 'I')
+	if (c == 'I' || c == 'N')	/* II or IN are accepted */
 	    session->packet_state = NMEA_LEADER_END;
 	else
 	    session->packet_state = GROUND_STATE;
