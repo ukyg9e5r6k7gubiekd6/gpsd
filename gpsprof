@@ -174,7 +174,7 @@ if __name__ == '__main__':
             if plotter.formatter(session, out):
                 await -= 1
     finally:
-        session.query("wZ-")
+        session.query("wz-")
         
     out.flush()
     if not raw:
