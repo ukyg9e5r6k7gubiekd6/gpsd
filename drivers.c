@@ -13,35 +13,6 @@
 
 /**************************************************************************
  *
- * process_exception() -- handle returned sentences in non-NMEA form
- *
- **************************************************************************/
-
-/*
- * This code is shared by all the NMEA variants. It's where we handle
- * the funky non-NMEA sentences that tell us about extensions.
- */
-
-static void process_exception(struct gpsd_t *session, char *sentence)
-{
-    if (!strncmp("ASTRAL", sentence, 6) && isatty(session->fdout)) {
-	write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-	gpscli_report(1, "found a TripMate, initializing...");
-	session->device_type = &tripmate;
-	tripmate.initializer(session);
-    } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session->fdout))) {
-	write(session->fdout, "EARTHA\r\n", 8);
-	gpscli_report(1, "found an EarthMate (id).");
-	session->device_type = &earthmate_b;
-	earthmate_b.initializer(session);
-    } else if (session->debug > 1) {
-	gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
-    }
-}
-
-
-/**************************************************************************
- *
  * Generic driver -- straight NMEA 0183
  *
  **************************************************************************/
@@ -56,16 +27,25 @@ void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
 	    gpscli_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
-	process_exception(session, sentence);
+    {
+	struct gps_type_t **dp;
 
-    gpscli_report(3,
-	   "Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
-	   session->gNMEAdata.latitude,
-	   session->gNMEAdata.longitude,
-	   session->gNMEAdata.altitude,
-	   session->gNMEAdata.satellites_used,
-	   session->gNMEAdata.mode,
-	   session->gNMEAdata.utc);
+	/* maybe this is a trigger string for a driver we know about? */
+	for (dp = gps_drivers; dp < gps_drivers + sizeof(gps_drivers)/sizeof(gps_drivers[0]); dp++)
+	{
+	    char	*trigger = (*dp)->trigger;
+
+	    if (trigger && !strncmp(trigger, sentence, strlen(trigger)) && isatty(session->fdout)) {
+		gpscli_report(1, "found %s.", (*dp)->typename);
+		session->device_type = &earthmate_b;
+		session->device_type->initializer(session);
+		return;
+	    }
+	}
+	if (session->debug > 1) {
+	    gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
+	}
+    }
 }
 
 static int nmea_handle_input(struct gpsd_t *session)
@@ -106,6 +86,7 @@ struct gps_type_t nmea =
 {
     'n', 		/* select explicitly with -T n */
     "NMEA",		/* full name of type */
+    NULL,		/* no recognition string, it's the default */
     NULL,		/* no initialization */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rctm,	/* write RTCM data straight */
@@ -132,6 +113,7 @@ void tripmate_initializer(struct gpsd_t *session)
     time_t t;
     struct tm *tm;
 
+    write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
@@ -157,6 +139,7 @@ struct gps_type_t tripmate =
 {
     't', 			/* select explicitly with -T t */
     "TripMate",			/* full name of type */
+    "ASTRAL",			/* tells us to switch */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     nmea_handle_input,		/* read text sentence */
     nmea_write_rctm,		/* send RTCM data straight */
@@ -183,6 +166,7 @@ struct gps_type_t earthmate_a =
 {
     'e',			/* select explicitly with -T e */
     "EarthMate (a)",		/* full name of type */
+    "EARTHA",			/* tells us to switch to Earthmate-B */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
@@ -200,6 +184,7 @@ struct gps_type_t logfile =
 {
     'l',			/* select explicitly with -T l */
     "Logfile",			/* full name of type */
+    NULL,			/* no recognition string */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
@@ -207,6 +192,11 @@ struct gps_type_t logfile =
     0,				/* don't set a speed */
 };
 
+struct gps_type_t *gps_drivers[5] = {&nmea, 
+				   &tripmate,
+				   &earthmate_a, 
+				   &earthmate_b,
+				   &logfile};
 
 
 

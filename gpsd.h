@@ -18,6 +18,7 @@ struct gps_type_t
 /* GPS method table, describes how to talk to a particular GPS type */
 {
     char typekey, *typename;
+    char *trigger;
     void (*initializer)(struct gpsd_t *session);
     int (*handle_input)(struct gpsd_t *session);
     int (*rctm_writer)(struct gpsd_t *session, char *rtcmbuf, int rtcmbytes);
@@ -62,6 +63,7 @@ extern struct gps_type_t tripmate;
 extern struct gps_type_t earthmate_a;
 extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
+extern struct gps_type_t *gps_drivers[5];
 
 /* GPS library internal prototypes */
 extern int nmea_parse(char *sentence, struct gps_data *outdata);

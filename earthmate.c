@@ -184,6 +184,7 @@ static int em_send_rtcm(struct gpsd_t *session,
 
 static void do_eminit(struct gpsd_t *session)
 {
+    write(session->fdout, "EARTHA\r\n", 8);
     /* Make sure these are zero before 1002 handler called */
     session->gNMEAdata.pdop = session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0;
     eminit = 1;
@@ -587,6 +588,7 @@ struct gps_type_t earthmate_b =
 {
     '\0',		/* cannot be explicitly selected */
     "EarthMate (b)",	/* full name of type */
+    NULL,		/* only switched to by earthmate_a driver */
     do_eminit,		/* initialize the device */
     handle_EMinput,	/* read and parse message packets */
     em_send_rtcm,	/* send DGPS correction */
