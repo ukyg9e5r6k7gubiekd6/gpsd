@@ -169,7 +169,7 @@ that, ideally, access to all GPSes should go through the same
 well-known port.  Also, a multi-session gpsd would be convenient for
 supporting multiple GPSes in HAL.
 
-Rule 1 would still still good.  But now we want a client to be able to switch
+Rule 1 would still be good.  But now we want a client to be able to switch
 to a new device without affecting other clients, so rules 3 and 2 break.
 
 We can't just use F for device switching, because hotplug scripts
