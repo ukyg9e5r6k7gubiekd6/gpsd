@@ -470,7 +470,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 
     int count, retval = 0;
     unsigned int i;
-    char *p, *field[80];
+    char *p, *field[80], *s;
     unsigned char sum;
 
     if (!nmea_checksum(sentence+1, &sum)) {
@@ -489,11 +489,12 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	*p = 0;
 	field[count] = ++p;
     }
-    if (field[0][0] == TALKERID1 && field[0][1] == TALKERID2)
-	field[0] += 2;
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
-        if (!strcmp(nmea_phrase[i].name, field[0])) {
+	s = field[0];
+	if (strlen(nmea_phrase[i].name) == 3)
+	    s += 2;	/* skip talker ID */
+        if (!strcmp(nmea_phrase[i].name, s)) {
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
 		strncpy(outdata->tag, nmea_phrase[i].name, MAXNAMELEN);
