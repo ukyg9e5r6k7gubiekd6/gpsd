@@ -74,7 +74,7 @@ char *longitude = 0;
 char latd = 'N';
 char lond = 'W';
 				/* command line option defaults */
-char *default_device_name = "localhost:5678";
+char *default_device_name = "localhost:2947";
 char *default_latitude = "3600.000";
 char *default_longitude = "12300.000";
 
