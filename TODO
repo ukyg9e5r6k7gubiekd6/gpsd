@@ -1,2 +1,55 @@
-1. Make the text windows on the gps client wider to accommodate the new format.
-2. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+1. The shared-library mess
+
+Ugh.  libtool makes me want to puke, but I am being forced to the conclusion 
+that we may have to use it.  Can I get a patch from somebody that understands
+this crap that will 
+
+(a) Arrange for both libgps.a and libgpsd.a to be installed as shared libraries
+
+(b) Do the right things to gpsd.spec.in so RPM will know about them.
+
+(c) And, ideally, beat libtool senseless until it puts the libraries in
+the *current* directory, where they're visible, instead of hiding them 
+in that evil .libs thing...
+
+2. gps interface needs a tweak
+
+Changing the timestamps to ISO8601 format with optional trailing fractional
+seconds made them a bit longer.  The text fields on the data panel in gps need
+to be widened a few charcters to accommodate this.  Despite having successfully
+added two fields to that panel, I have been unable to figure out where the size
+of these text widgets is set.
+
+Is the person who wrote gps still around?  Would somebody other than me please
+take a look at the Motif code in gps in case I've missed something stupid and
+obvious?
+
+3. Testing on EarthMate and TripMate
+
+Would somebody please test the device types that aren't straight NMEA?
+(This translates as: Hey, you, Russ!  Get off your tuchis! :-))
+
+4. The strange math problem in gpsprobe 
+
+I have a Python script I'd like to ship with 2.0, called gsprobe.  It
+watches the NMEA from a GPS and tries to deduce things about the GPS.
+It generates a gnuplot scattergram of fixes you can use to empirically
+check accuracy against the reported HDOP.
+
+However, something is awry in my calculation of the actual uncertainty 
+of position, going from degrees of uncertainty to meters.  I posted about 
+this earlier today.  Help!
+
+5. Should PRWIZCH support drop out entirely?
+
+I asked this question before and nobody answered.  At the moment I have the
+PRWIZCH handling conditioned out.  I'd like to drop it entirely -- the 
+information it gives is redundant with the SNRs in GPGSV, and the Zodiac
+chipset reported GSVs.  
+
+Does anyone know any good reason not to just drop this code?
+
+6. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+
+This is a long-term wishlist item.  It's going to be difficult, since there
+is no GPS device class yet.

@@ -72,10 +72,10 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 /sbin/chkconfig --del gpsd
 
 %post -n gpsd-devel
-/sbin/ldconfig
+#/sbin/ldconfig	-- not seeded till shared libs
 
 %postun -n gpsd-devel
-/sbin/ldconfig
+#/sbin/ldconfig	-- not seeded till shared libs
 
 %files
 %defattr(-,root,root,-)
@@ -95,8 +95,6 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-
-
 * Fri Aug 27 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
