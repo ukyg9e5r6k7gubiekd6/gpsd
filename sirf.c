@@ -138,7 +138,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3] = "";
-    double fv;
 
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
@@ -240,18 +239,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return TIME_SET | SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
-	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
-		    session->outbuffer+5);
-	fv = atof(session->outbuffer+5);
-	if (fv > 100) {
-	    if (fv < 231) {
-		session->driverstate |= SIRF_LT_231;
-		sirfbin_mode(session, 0);
-	    } else if (fv < 232) 
-		session->driverstate |= SIRF_EQ_231;
-	    else
-		session->driverstate |= SIRF_GE_232;
-	}
+	gpsd_report(4,"FV  0x06: Firmware version: %s\n",session->outbuffer+5);
 	if (strstr(session->outbuffer+5, "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
@@ -409,16 +397,10 @@ static void sirfbin_initializer(struct gps_device_t *session)
 /* poll for software version in order to check for old firmware */
 {
     if (session->packet_type == NMEA_PACKET) {
-	if (session->driverstate & SIRF_LT_231) {
-	    gpsd_report(1, "SiRF chipset has old firmware, falling back to  SiRF NMEA\n");
-	    nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
-	    gpsd_switch_driver(session, "SiRF-II NMEA");
-	    return;
-	} else {
-	    gpsd_report(1, "Switching chip mode to SiRF binary.\n");
-	    nmea_send(session->gpsdata.gps_fd, "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
-	    packet_sniff(session);
-	}
+	gpsd_report(1, "Switching chip mode to SiRF binary.\n");
+	nmea_send(session->gpsdata.gps_fd, 
+		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
+	packet_sniff(session);
     }
     /* do this every time*/
     {
