@@ -129,8 +129,6 @@ static int sirf_to_nmea(int ttyfd, int speed)
 
 static void extract_time(struct gps_session_t *session, int week, double tow)
 {
-    struct tm when;
-    time_t intfixtime;
     double fixtime;
 
     if (week >= GPS_ROLLOVER)
@@ -141,15 +139,6 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
 	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
 	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
     }
-
-    intfixtime = (int)fixtime;
-    gmtime_r(&intfixtime, &when);
-    session->year = when.tm_year + 1900;
-    session->month = when.tm_mon + 1;
-    session->day = when.tm_mday;
-    session->hours = when.tm_hour;
-    session->minutes = when.tm_min;
-    session->seconds = fixtime - (intfixtime / 60) * 60;
     session->gpsdata.fix.time = fixtime;
 #ifdef NTPSHM_ENABLE
     ntpshm_put(session, fixtime);

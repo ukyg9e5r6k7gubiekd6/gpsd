@@ -231,16 +231,20 @@ static double degtodm(double a)
 void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 {
     char hdop_str[NMEA_MAX] = "";
+    struct tm tm;
 
     if (session->gpsdata.hdop)
 	sprintf(hdop_str, "%.2f", session->gpsdata.hdop);
 
+    time_t intfixtime = (int)session->gpsdata.fix.time;
+
+    localtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02.3f,%.4f,%c,%.4f,%c,%d,%02d,%s,%.1f,%c,",
-		session->hours,
-		session->minutes,
-		session->seconds,
+		"$GPGGA,%02d%02d%02d,%.4f,%c,%.4f,%c,%d,%02d,%s,%.1f,%c,",
+		tm.tm_hour,
+		tm.tm_min,
+		tm.tm_sec,
 		degtodm(fabs(session->gpsdata.fix.latitude)),
 		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 		degtodm(fabs(session->gpsdata.fix.longitude)),
@@ -264,8 +268,10 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02.2f,%c,%.4f,%c,%.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
-	    session->hours, session->minutes, session->seconds,
+	    "$GPRMC,%02d%02d%02d,%c,%.4f,%c,%.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
+	    tm.tm_hour, 
+	    tm.tm_min, 
+	    tm.tm_sec,
 	    session->gpsdata.status ? 'A' : 'V',
 	    degtodm(fabs(session->gpsdata.fix.latitude)),
 	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
@@ -273,9 +279,9 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 	    session->gpsdata.fix.speed,
 	    session->gpsdata.fix.track,
-	    session->day,
-	    session->month,
-	    (session->year % 100));
+	    tm.tm_mday,
+	    tm.tm_mon + 1,
+	    tm.tm_year % 100);
 	nmea_add_checksum(bufp);
 	gpsd_raw_hook(session, bufp);
 }

@@ -162,13 +162,6 @@ static int handle1000(struct gps_session_t *session)
     gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2);
 #endif
 
-    session->hours = getw(22); 
-    session->minutes = getw(23); 
-    session->seconds = getw(24);
-    session->year = getw(21);
-    session->month = getw(20);
-    session->day = getw(19);
-
     session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;

@@ -204,7 +204,6 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    struct tm tm;
     char buf[BUFSIZ], *bufp = buf;
     unsigned int i = 0, j = 0;
     double track;
@@ -264,15 +263,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
 	    session->gpsdata.fix.time -= time_l;
-
 	    gpsd_report(5, "time_l: %ld\n", time_l);
-	    gmtime_r(&time_l, &tm);
-	    session->hours   = tm.tm_hour;
-	    session->minutes = tm.tm_min;
-	    session->seconds = tm.tm_sec;
-	    session->day     = tm.tm_mday;
-	    session->month   = tm.tm_mon + 1;
-	    session->year    = tm.tm_year + 1900;
 
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
 	    session->gpsdata.fix.longitude = radtodeg(pvt->lon);

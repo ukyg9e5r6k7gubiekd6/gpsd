@@ -121,9 +121,6 @@ struct gps_session_t {
 #endif /* GARMIN_ENABLE */
     double separation;		/* Geoidal separation */
 #define NO_SEPARATION	-99999	/* must be out of band */
-    int year, month, day;
-    int hours, minutes; 
-    double seconds;
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
