@@ -22,7 +22,6 @@ C:
 </funcsynopsisinfo>
 <funcprototype>
 <funcdef>struct gps_session_t * <function>gpsd_init</function></funcdef>
-    <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
