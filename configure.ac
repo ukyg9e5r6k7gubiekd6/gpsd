@@ -12,8 +12,8 @@ AC_C_BIGENDIAN
 AC_FUNC_ALLOCA
 
 if eval "test x$GCC = xyes"; then
-	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type"
-	dnl -Wcast-qual -Wextra
+	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type" -W
+	dnl -Wcast-qual
 fi
 
 AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h)
