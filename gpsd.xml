@@ -518,6 +518,10 @@ per second.  At 50km/h (31mi/h) that's 13.8 meters change in position
 between updates.  This is good enough if you're on foot or in a car
 but not good enough for aviation applications.</para>
 
+<para>The driver for SiRF-II binary mode only has leap-second correction
+for its timestamps as of 2005. It will not include leap-second
+corrections introduced after that year.</para>
+
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
 
