@@ -12,8 +12,7 @@
 
 #include "gpsd.h"
 
-/* FIXME: ttyset_old can be global, but ttyset  */
-static struct termios ttyset, ttyset_old;
+static struct termios ttyset_old;
 
 static int set_baud(long baud)
 {
@@ -36,6 +35,7 @@ static int set_baud(long baud)
 int gpsd_open(char *device_name, int device_speed, int stopbits)
 {
     int ttyfd;
+    struct termios ttyset;
 
     gpsd_report(1, "opening GPS data source at %s\n", device_name);
     if ((ttyfd = open(device_name, O_RDWR | O_NONBLOCK)) < 0)
@@ -62,13 +62,10 @@ int gpsd_open(char *device_name, int device_speed, int stopbits)
 }
 
 void gpsd_close(int ttyfd)
-/* restore original terminal settings, but make sure DTR goes down */
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {
-	    cfsetispeed(&ttyset, (speed_t)B0);
-	    cfsetospeed(&ttyset, (speed_t)B0);
-            tcsetattr(ttyfd, TCSANOW, &ttyset);
+	    /* restore original settings, but make sure DTR goes down */
 	    ttyset_old.c_cflag |= HUPCL;
 	    tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 	}
