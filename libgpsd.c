@@ -216,7 +216,7 @@ int gps_query(int fd, struct gps_data_t *gpsdata, char *requests)
 
 #ifdef TESTMAIN
 
-void gpscli_report(int errlevel, const char *fmt, ... )
+void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     char buf[BUFSIZ];

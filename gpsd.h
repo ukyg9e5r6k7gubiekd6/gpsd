@@ -103,6 +103,6 @@ extern int gpsd_poll(struct gps_session_t *session);
 extern void gpsd_wrap(struct gps_session_t *session);
 
 /* caller must supply this */
-void gpscli_report(int d, const char *fmt, ...);
+void gpsd_report(int d, const char *fmt, ...);
 
 

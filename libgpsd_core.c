@@ -19,7 +19,7 @@ static struct gps_type_t *set_device_type(char what)
     struct gps_type_t **dp;
     for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey == what) {
-	    gpscli_report(3, "Selecting %s driver...\n", (*dp)->typename);
+	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
 	    goto foundit;
 	}
     return NULL;
@@ -42,7 +42,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->device_type = &nmea;
     devtype = set_device_type(devicetype);
     if (!devtype)
-	gpscli_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
+	gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
     else
     {
 	session->device_type = devtype;
@@ -64,7 +64,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
 	session->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (session->dsock < 0)
-	    gpscli_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
+	    gpsd_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
 	else
 	{
 	    gethostname(hn, sizeof(hn));
@@ -104,7 +104,7 @@ void gpsd_deactivate(struct gps_session_t *session)
     gpsd_close();
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
-    gpscli_report(1, "closed GPS\n");
+    gpsd_report(1, "closed GPS\n");
 }
 
 int gpsd_activate(struct gps_session_t *session)
@@ -120,7 +120,7 @@ int gpsd_activate(struct gps_session_t *session)
 	REFRESH(session->gNMEAdata.online_stamp);
 	session->fdin = input;
 	session->fdout = input;
-	gpscli_report(1, "gpsd_activate: opened GPS (%d)\n", input);
+	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", input);
 
 	/* if there is an initializer and no trigger string, invoke it */
 	if (session->device_type->initializer && !session->device_type->trigger)
@@ -151,19 +151,19 @@ int gpsd_poll(struct gps_session_t *session)
 	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->fdout!=-1))
 	{
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
-		gpscli_report(1, "Write to rtcm sink failed\n");
+		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
-		gpscli_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
+		gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
 	}
 	else 
 	{
-	    gpscli_report(1, "Read from rtcm source failed\n");
+	    gpsd_report(1, "Read from rtcm source failed\n");
 	}
     }
 
     /* update the scoreboard structure from the GPS */
     waiting = is_input_waiting(session->fdin);
-    gpscli_report(4, "GPS has %d chars waiting\n", waiting);
+    gpsd_report(4, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
 	return waiting;
     else if (!waiting) {
@@ -198,7 +198,7 @@ int gpsd_poll(struct gps_session_t *session)
 			  session->gNMEAdata.longitude, 
 			  session->gNMEAdata.altitude);
 		  write(session->dsock, buf, strlen(buf));
-		  gpscli_report(2, "=> dgps %s", buf);
+		  gpsd_report(2, "=> dgps %s", buf);
 		}
 	    }
 	}

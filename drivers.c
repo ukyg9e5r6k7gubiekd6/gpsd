@@ -21,7 +21,7 @@
 void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
-    gpscli_report(2, "<= GPS: %s\n", sentence);
+    gpsd_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
 	if (nmea_parse(sentence, &session->gNMEAdata) < 0)
@@ -44,7 +44,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	     *
 	     * Other SiRF-II-based GPSses probably do the same.
 	     */
-	    gpscli_report(2, "unknown sentence: \"%s\"\n", sentence);
+	    gpsd_report(2, "unknown sentence: \"%s\"\n", sentence);
     }
     else
     {
@@ -56,13 +56,13 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger && !strncmp(trigger, sentence, strlen(trigger)) && isatty(session->fdout)) {
-		gpscli_report(1, "found %s.", (*dp)->typename);
+		gpsd_report(1, "found %s.", (*dp)->typename);
 		session->device_type = &zodiac_binary;
 		session->device_type->initializer(session);
 		return;
 	    }
 	}
-	gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
+	gpsd_report(1, "unknown exception: \"%s\"\n", sentence);
     }
 }
 

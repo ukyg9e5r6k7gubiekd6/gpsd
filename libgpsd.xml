@@ -44,7 +44,7 @@ C:
 </funcprototype>
 
 <funcprototype>
-<funcdef>void <function>gpscli_report</function></funcdef>
+<funcdef>void <function>gpsd_report</function></funcdef>
     <paramdef>int <parameter>d</parameter></paramdef>
     <paramdef>const char * <parameter>fmt</parameter></paramdef>
     <paramdef><parameter>...</parameter></paramdef>
@@ -153,7 +153,7 @@ ends the session, implicitly performing a
 <function>gpsd_deactivate()</function>.</para>
 
 <para>The calling application must define one additional function:
-<function>gpscli_report()</function>.
+<function>gpsd_report()</function>.
 The library will use this to ordinary status messages.  Use 
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>

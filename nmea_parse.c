@@ -245,7 +245,7 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
 	out->status_stamp.changed = (out->status != newstatus);
 	out->status = newstatus;
 	REFRESH(out->status_stamp);
-	gpscli_report(3, "GPGLL sets status %d\n", out->status);
+	gpsd_report(3, "GPGLL sets status %d\n", out->status);
     }
 }
 
@@ -343,7 +343,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
     */
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
-    gpscli_report(3, "GPGGA sets status %d\n", out->status);
+    gpsd_report(3, "GPGGA sets status %d\n", out->status);
     if (out->status > STATUS_NO_FIX)
     {
 	char	*altitude;
@@ -401,7 +401,7 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
     
     out->mode_stamp.changed = update_field_i(sentence, 2, &out->mode);
     REFRESH(out->mode_stamp);
-    gpscli_report(3, "GPGSA sets mode %d\n", out->mode);
+    gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
     changed |= update_field_f(sentence, 15, &out->pdop);
     changed |= update_field_f(sentence, 16, &out->hdop);
     changed |= update_field_f(sentence, 17, &out->vdop);
@@ -482,7 +482,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await)
-	gpscli_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
+	gpsd_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
     else
     {
 	/* trim off PRNs with spurious data attached */
@@ -493,12 +493,12 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	    out->satellites--;
 
 	if (nmea_sane_satellites(out)) {
-	    gpscli_report(3, "Satellite data OK.\n");
+	    gpsd_report(3, "Satellite data OK.\n");
 	    out->satellite_stamp.changed = changed;
 	    REFRESH(out->satellite_stamp);
 	}
 	else
-	    gpscli_report(3, "Satellite data no good.\n");
+	    gpsd_report(3, "Satellite data no good.\n");
     }
 }
 
@@ -545,7 +545,7 @@ static void processPMGNST(char *sentence, struct gps_data_t *out)
 	REFRESH(out->status_stamp);
 	out->mode_stamp.changed = (newmode != out->mode);
 	REFRESH(out->mode_stamp);
-	gpscli_report(3, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
+	gpsd_report(3, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
 }
 

@@ -206,28 +206,28 @@ static double degtodm(double a)
 static void handle1000(struct gps_session_t *session, unsigned short *p)
 {
 #if 0
-    gpscli_report(1, "date: %d %d %d  %d:%d:%d\n",
+    gpsd_report(1, "date: %d %d %d  %d:%d:%d\n",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    gpscli_report(1, "  solution invalid:\n");
-    gpscli_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
-    gpscli_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
-    gpscli_report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
-    gpscli_report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
-    gpscli_report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
-    gpscli_report(1, "  solution type:\n");
-    gpscli_report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
-    gpscli_report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
-    gpscli_report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
-    gpscli_report(1, "Number of measurements in solution: %d\n", p[O(12)]);
-    gpscli_report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
-    gpscli_report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
-    gpscli_report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
-    gpscli_report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
-    gpscli_report(1, "Map datum: %d\n", p[O(39)]);
-    gpscli_report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
-    gpscli_report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
-    gpscli_report(1, "Separation: %f\n", (p[O(33)] / 100));
+    gpsd_report(1, "  solution invalid:\n");
+    gpsd_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
+    gpsd_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
+    gpsd_report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
+    gpsd_report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
+    gpsd_report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
+    gpsd_report(1, "  solution type:\n");
+    gpsd_report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
+    gpsd_report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
+    gpsd_report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
+    gpsd_report(1, "Number of measurements in solution: %d\n", p[O(12)]);
+    gpsd_report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
+    gpsd_report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
+    gpsd_report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
+    gpsd_report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
+    gpsd_report(1, "Map datum: %d\n", p[O(39)]);
+    gpsd_report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
+    gpsd_report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
+    gpsd_report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
     sprintf(session->gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
@@ -281,13 +281,13 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	session->Zs[i] = p[O(16 + (3 * i))];
 	session->Zv[i] = (p[O(15 + (3 * i))] & 0xf);
 #if 0
-	gpscli_report(1, "Sat%02d:", i);
-	gpscli_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
-	gpscli_report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
-	gpscli_report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
-	gpscli_report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
-	gpscli_report(1, " PRN:%d", p[O(16 + (3 * i))]);
-	gpscli_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
+	gpsd_report(1, "Sat%02d:", i);
+	gpsd_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
+	gpsd_report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
+	gpsd_report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
+	gpsd_report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
+	gpsd_report(1, " PRN:%d", p[O(16 + (3 * i))]);
+	gpsd_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
 	if (p[O(15 + (3 * i))] & 1)
 	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++];
@@ -316,11 +316,11 @@ static void handle1003(struct gps_session_t *session, unsigned short *p)
 	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
 	    session->gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
 #if 0
-	    gpscli_report(1, "Sat%02d:", i);
-	    gpscli_report(1, " PRN:%d", p[O(15 + (3 * i))]);
-	    gpscli_report(1, " az:%d", p[O(16 + (3 * i))]);
-	    gpscli_report(1, " el:%d", p[O(17 + (3 * i))]);
-	    gpscli_report(1, "\n");
+	    gpsd_report(1, "Sat%02d:", i);
+	    gpsd_report(1, " PRN:%d", p[O(15 + (3 * i))]);
+	    gpsd_report(1, " az:%d", p[O(16 + (3 * i))]);
+	    gpsd_report(1, " el:%d", p[O(17 + (3 * i))]);
+	    gpsd_report(1, "\n");
 #endif
 	} else {
 	    session->gNMEAdata.PRN[j] = 0;
@@ -338,20 +338,20 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
   int numcorrections = p[O(12)];
 
 #if 1
-  gpscli_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
-  gpscli_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
-  gpscli_report(1, "Station ID: %d\n", p[O(10)]);
-  gpscli_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
-  gpscli_report(1, "Number of corrections: %d\n", p[O(12)]);
+  gpsd_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
+  gpsd_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
+  gpsd_report(1, "Station ID: %d\n", p[O(10)]);
+  gpsd_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
+  gpsd_report(1, "Number of corrections: %d\n", p[O(12)]);
   for (i = 0; i < numcorrections; i++) {
-    gpscli_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
-    gpscli_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
-    gpscli_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
-    gpscli_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
-    gpscli_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
-    gpscli_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
-    gpscli_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
-    gpscli_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+    gpsd_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
+    gpsd_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
+    gpsd_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
+    gpsd_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
+    gpsd_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
+    gpsd_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
+    gpsd_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
+    gpsd_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
   }
 #endif
 }
@@ -365,7 +365,7 @@ static void analyze(struct gps_session_t *session,
     int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
-	gpscli_report(5, "id %d\n", h->id);
+	gpsd_report(5, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
 	    handle1000(session, p);
@@ -459,7 +459,7 @@ static void analyze(struct gps_session_t *session,
 	}
     }
     if (nmea > 0) {
-	gpscli_report(4, "%s", buf);
+	gpsd_report(4, "%s", buf);
 
 	if (session->gNMEAdata.raw_hook)
 	    session->gNMEAdata.raw_hook(buf);

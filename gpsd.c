@@ -72,7 +72,7 @@ static void restart(int sig)
 static void onsig(int sig)
 {
     gpsd_wrap(session);
-    gpscli_report(1, "Received signal %d. Exiting...\n", sig);
+    gpsd_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
 
@@ -107,7 +107,7 @@ static int daemonize()
     return 0;
 }
 
-void gpscli_report(int errlevel, const char *fmt, ... )
+void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     char buf[BUFSIZ];
@@ -177,15 +177,15 @@ static int throttled_write(int fd, char *buf, int len)
      * data is backing up to a client, drop that client.  That's why we set
      * the client socket to nonblocking.
      */
-    gpscli_report(3, "=> client(%d): %s", fd, buf);
+    gpsd_report(3, "=> client(%d): %s", fd, buf);
     if ((status = write(fd, buf, len)) > -1)
 	return status;
     if (errno == EBADF)
-	gpscli_report(3, "Client on %d has vanished.\n", fd);
+	gpsd_report(3, "Client on %d has vanished.\n", fd);
     else if (errno == EWOULDBLOCK)
-	gpscli_report(3, "Dropped client on %d to avoid overrun.\n", fd);
+	gpsd_report(3, "Dropped client on %d to avoid overrun.\n", fd);
     else
-	gpscli_report(3, "Client write to %d: %s\n", fd, strerror(errno));
+	gpsd_report(3, "Client write to %d: %s\n", fd, strerror(errno));
     FD_CLR(fd, &all_fds);
     FD_CLR(fd, &nmea_fds);
     FD_CLR(fd, &watcher_fds);
@@ -193,7 +193,7 @@ static int throttled_write(int fd, char *buf, int len)
 }
 
 #define VALIDATION_COMPLAINT(level, legend) \
-        gpscli_report(level, \
+        gpsd_report(level, \
 		       legend " (status=%d, mode=%d).\r\n", \
 		       session->gNMEAdata.status, session->gNMEAdata.mode)
 
@@ -281,24 +281,24 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'r':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &nmea_fds);
-		gpscli_report(3, "%d turned on raw mode\n", fd);
+		gpsd_report(3, "%d turned on raw mode\n", fd);
 		sprintf(reply + strlen(reply),
 			",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &nmea_fds);
-		gpscli_report(3, "%d turned off raw mode\n", fd);
+		gpsd_report(3, "%d turned off raw mode\n", fd);
 		sprintf(reply + strlen(reply),
 			",R=0");
 		p++;
 	    } else if (FD_ISSET(fd, &nmea_fds)) {
 		FD_CLR(fd, &nmea_fds);
-		gpscli_report(3, "%d turned off raw mode\n", fd);
+		gpsd_report(3, "%d turned off raw mode\n", fd);
 		sprintf(reply + strlen(reply),
 			",R=0");
 	    } else {
 		FD_SET(fd, &nmea_fds);
-		gpscli_report(3, "%d turned on raw mode\n", fd);
+		gpsd_report(3, "%d turned on raw mode\n", fd);
 		sprintf(reply + strlen(reply),
 			",R=1");
 	    }
@@ -331,24 +331,24 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'w':
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
-		gpscli_report(3, "%d turned on watching\n", fd);
+		gpsd_report(3, "%d turned on watching\n", fd);
 		sprintf(reply + strlen(reply),
 			",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		FD_CLR(fd, &watcher_fds);
-		gpscli_report(3, "%d turned off watching\n", fd);
+		gpsd_report(3, "%d turned off watching\n", fd);
 		sprintf(reply + strlen(reply),
 			",W=0");
 		p++;
 	    } else if (FD_ISSET(fd, &watcher_fds)) {
 		FD_CLR(fd, &watcher_fds);
-		gpscli_report(3, "%d turned off watching\n", fd);
+		gpsd_report(3, "%d turned off watching\n", fd);
 		sprintf(reply + strlen(reply),
 			",W=0");
 	    } else {
 		FD_SET(fd, &watcher_fds);
-		gpscli_report(3, "%d turned on watching\n", fd);
+		gpsd_report(3, "%d turned on watching\n", fd);
 		sprintf(reply + strlen(reply),
 			",W=1");
 	    }
@@ -461,11 +461,11 @@ static int passivesock(char *service, char *protocol, int qlen)
     if ( (pse = getservbyname(service, protocol)) )
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
-	gpscli_report(0, "Can't get \"%s\" service entry.\n", service);
+	gpsd_report(0, "Can't get \"%s\" service entry.\n", service);
 	return -1;
     }
     if ((ppe = getprotobyname(protocol)) == 0) {
-	gpscli_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
+	gpsd_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
 	return -1;
     }
     if (strcmp(protocol, "udp") == 0)
@@ -476,20 +476,20 @@ static int passivesock(char *service, char *protocol, int qlen)
     s = socket(PF_INET, type, ppe->p_proto);
     if (s < 0)
     {
-	gpscli_report(0, "Can't create socket\n");
+	gpsd_report(0, "Can't create socket\n");
 	return -1;
     }
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
-	gpscli_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	gpsd_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	gpscli_report(0, "Can't bind to port %s\n", service);
+	gpsd_report(0, "Can't bind to port %s\n", service);
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	gpscli_report(0, "Can't listen on %s port%s\n", service);
+	gpsd_report(0, "Can't listen on %s port%s\n", service);
 	return -1;
     }
     return s;
@@ -598,18 +598,18 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    gpscli_report(1, "launching (Version %s)\n", VERSION);
+    gpsd_report(1, "launching (Version %s)\n", VERSION);
     msock = passivesock(service, "tcp", QLEN);
     if (msock < 0) {
-	gpscli_report(0, "startup failed, netlib error %d\n", msock);
+	gpsd_report(0, "startup failed, netlib error %d\n", msock);
 	exit(2);
     }
-    gpscli_report(1, "listening on port %s\n", service);
+    gpsd_report(1, "listening on port %s\n", service);
 
     /* user may want to re-initialize the session */
     if (setjmp(restartbuf) == THROW_SIGHUP) {
 	gpsd_wrap(session);
-	gpscli_report(1, "gpsd restarted by SIGHUP\n");
+	gpsd_report(1, "gpsd restarted by SIGHUP\n");
     }
 
     FD_ZERO(&all_fds);
@@ -629,7 +629,7 @@ int main(int argc, char *argv[])
     if (nowait)
     {
 	if (gpsd_activate(session) < 0) {
-	    gpscli_report(0, "exiting - GPS device nonexistent or can't be read\n");
+	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	    exit(2);
 	}
 	FD_SET(session->fdin, &all_fds);
@@ -646,7 +646,7 @@ int main(int argc, char *argv[])
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    gpscli_report(0, "select: %s\n", strerror(errno));
+	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    exit(2);
 	}
 
@@ -658,10 +658,10 @@ int main(int argc, char *argv[])
 	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
-		gpscli_report(0, "accept: %s\n", strerror(errno));
+		gpsd_report(0, "accept: %s\n", strerror(errno));
 	    else 
 	    {
-		gpscli_report(3, "client connect on %d\n", ssock);
+		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		setnonblocking(ssock);
 	    }
@@ -680,7 +680,7 @@ int main(int argc, char *argv[])
 
 	/* get data from it */
 	if (session->fdin >= 0 && gpsd_poll(session) < 0) {
-	    gpscli_report(3, "GPS is offline\n");
+	    gpsd_report(3, "GPS is offline\n");
 	    FD_CLR(session->fdin, &all_fds);
 	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
@@ -719,7 +719,7 @@ int main(int argc, char *argv[])
 			FD_CLR(fd, &all_fds);
 		    }
 		    buf[buflen] = '\0';
-		    gpscli_report(1, "<= client: %s", buf);
+		    gpsd_report(1, "<= client: %s", buf);
 		    if (handle_request(fd, buf, buflen) < 0) {
 			(void) close(fd);
 			FD_CLR(fd, &all_fds);

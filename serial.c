@@ -47,14 +47,14 @@ static int set_baud(long baud)
 
 int gpsd_open(char *device_name, int device_speed, int stopbits)
 {
-    gpscli_report(1, "opening GPS data source at %s\n", device_name);
+    gpsd_report(1, "opening GPS data source at %s\n", device_name);
     ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
 
     if (ttyfd < 0)
 	return -1;
 
     if (isatty(ttyfd)) {
-	gpscli_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
+	gpsd_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
 	/* Save original terminal parameters */
 	if (tcgetattr(ttyfd,&ttyset_old) != 0)
 	  return -1;

@@ -46,7 +46,8 @@ libgps_la_SOURCES = \
 	drivers.c \
 	zodiac.c \
 	libgpsd_core.c \
-	libgps.c
+	libgps.c \
+	report.c
 
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
 
