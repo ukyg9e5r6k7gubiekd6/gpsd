@@ -8,7 +8,7 @@
 #include <gps.h>
 #include <gpsd.h>
 
-int gps_open(struct gps_data_t *gpsdata, int timeout, char *host, char *port)
+int gps_open(struct gps_data_t *gpsdata, char *host, char *port)
 /* open a connection to a gpsd daemon */
 {
     int fd;
@@ -23,17 +23,17 @@ int gps_open(struct gps_data_t *gpsdata, int timeout, char *host, char *port)
 	return (-1);
 
     now = time(NULL);
-    INIT(gpsdata->online_stamp, now, timeout);
-    INIT(gpsdata->latlon_stamp, now, timeout);
-    INIT(gpsdata->altitude_stamp, now, timeout);
-    INIT(gpsdata->track_stamp, now, timeout);
-    INIT(gpsdata->speed_stamp, now, timeout);
-    INIT(gpsdata->status_stamp, now, timeout);
-    INIT(gpsdata->mode_stamp, now, timeout);
-    INIT(gpsdata->fix_quality_stamp, now, timeout);
-    INIT(gpsdata->satellite_stamp, now, timeout);
+    INIT(gpsdata->online_stamp, now);
+    INIT(gpsdata->latlon_stamp, now);
+    INIT(gpsdata->altitude_stamp, now);
+    INIT(gpsdata->track_stamp, now);
+    INIT(gpsdata->speed_stamp, now);
+    INIT(gpsdata->status_stamp, now);
+    INIT(gpsdata->mode_stamp, now);
+    INIT(gpsdata->fix_quality_stamp, now);
+    INIT(gpsdata->satellite_stamp, now);
 #ifdef PROCESS_PRWIZCH
-    INIT(gpsdata>signal_quality_stamp, now, timeout);
+    INIT(gpsdata>signal_quality_stamp, now);
 #endif /* PROCESS_PRWIZCH */
     gpsdata->mode = MODE_NO_FIX;
 
@@ -67,7 +67,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    if (!tp) break;
 	    *tp = '\0';
 
-	    if (sp[2] == '?' || sp[2] == '!')
+	    if (sp[2] == '?')
 		continue;
 
 	    switch (*sp)

@@ -23,7 +23,6 @@ and speedometer</refpurpose>
       <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-s <replaceable>baudrate</replaceable></arg>
-      <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
       <arg choice='opt'>-n </arg>      
@@ -85,11 +84,6 @@ t=TripMate, e=EarthMate, l=logfile.</para>
 <term>-s</term>
 <listitem><para>Set GPS communication speed in bits per second 
 (default is set by device type).</para></listitem>
-</varlistentry>
-<varlistentry>
-<term>-t</term>
-<listitem><para>Set GPS session timeout (default is 5 
-seconds).</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-d</term>
@@ -254,7 +248,7 @@ percentage is in the range 0-99). Each number is an integer formatted as
 -->
 </variablelist>
 
-<para>Note that a response consisting of of ! or ? following the =
+<para>Note that a response consisting of just ? following the =
 response means that there is no valid data available.  </para>
 
 <para>Requests can be concatenated and sent as a string; gpsd will then

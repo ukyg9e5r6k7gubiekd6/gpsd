@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
     /*
      * Essentially all the interface to libgps happens below here
      */
-    gpsd_fd = gps_open(&gpsdata, 5, NULL, NULL);
+    gpsd_fd = gps_open(&gpsdata, NULL, NULL);
     if (gpsd_fd < 0)
 	exit(2);
 

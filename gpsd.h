@@ -78,7 +78,7 @@ extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */
 extern void gpsd_init(struct gps_session_t *session, 
-	      int timeout, char devtype, char *dgpsserver);
+	      char devtype, char *dgpsserver);
 extern int gpsd_activate(struct gps_session_t *session);
 extern void gpsd_deactivate(struct gps_session_t *session);
 extern int gpsd_poll(struct gps_session_t *session);

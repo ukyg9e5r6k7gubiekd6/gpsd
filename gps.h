@@ -9,15 +9,11 @@ struct life_t
 /* lifetime structure to be associated with some piece of data */
 {
     time_t	last_refresh;
-    int		time_to_live;
-    int		refreshes;
     int		changed;
 };
-#define INIT(stamp, now, tl)	stamp.time_to_live=tl; stamp.last_refresh=now
-#define REFRESH(stamp)	stamp.last_refresh = time(NULL); stamp.refreshes++
-#define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live >= t
-#define SEEN(stamp) stamp.refreshes
-#define CHANGED(stamp) stamp.changed
+#define INIT(stamp, now)	stamp.last_refresh=now
+#define REFRESH(stamp)	stamp.last_refresh = time(NULL)
+#define SEEN(stamp) stamp.last_refresh
 
 struct gps_data_t {
     int	online;			/* 1 if GPS is on line, 0 if not */
@@ -91,7 +87,7 @@ struct gps_data_t {
     void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
 };
 
-int gps_open(struct gps_data_t *gpsdata, int timeout, char *host, char *port);
+int gps_open(struct gps_data_t *gpsdata, char *host, char *port);
 int gps_close(int fd);
 int gps_query(int fd, struct gps_data_t *gpsdata, char *requests);
 int gps_poll(int fd, struct gps_data_t *gpsdata);

@@ -24,7 +24,6 @@ struct gps_session_t session;
 <funcprototype>
 <funcdef>void <function>gpsd_init</function></funcdef>
     <paramdef>struct gps_t * <parameter>session</parameter></paramdef>
-    <paramdef>int <parameter>timeout</parameter></paramdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
@@ -75,8 +74,7 @@ certainly what you want.</para>
 <para>Calling
 <function>gpsd_init()</function>
 initializes a session structure to hold the data collected by the GPS.
-You must specify a timeout in seconds after which data will be
-considered stale.  You must specify one of the following device types:</para>
+You must specify one of the following device types:</para>
 <itemizedlist>
   <listitem><para>Generic NMEA 0183 GPS</para></listitem>
   <listitem><para>TripMate GPS</para></listitem>

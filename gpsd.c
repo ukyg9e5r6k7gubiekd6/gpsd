@@ -48,12 +48,10 @@
 #include "version.h"
 
 #define QLEN		5
-#define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 /* the default driver is NMEA */
 struct gps_session_t session;
 
-static int gpsd_timeout = GPS_TIMEOUT;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int in_background = 0;
@@ -143,7 +141,6 @@ static void usage()
   -S integer         = set port for daemon \n\
   -i %f[NS]:%f[EW]   = set initial latitude/longitude \n\
   -s baud_rate       = set baud rate on gps device \n\
-  -t timeout         = set timeout in seconds on fix/mode validity \n\
   -d host[:port]     = set DGPS server \n\
   -D integer         = set debug level \n\
   -h                 = help message \n\
@@ -240,16 +237,11 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'A':
 	case 'a':
 	    if (!validate(fd))
-		strcat(reply, ",A=!");
-	    else if (FRESH(session.gNMEAdata.altitude_stamp,cur_time)) {
+		strcat(reply, ",A=?");
+	    else
 		sprintf(reply + strlen(reply),
 			",A=%f",
 			session.gNMEAdata.altitude);
-	    } else {
-		strcat(reply, ",A=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Altitude", altitude_stamp);
- 	    }
 	    break;
 	case 'D':
 	case 'd':
@@ -271,43 +263,29 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'M':
 	case 'm':
-	    if (FRESH(session.gNMEAdata.mode_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
 			",M=%d",
 			session.gNMEAdata.mode);
-	    } else {
-		strcat(reply, ",M=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Mode", mode_stamp);
-	    }
 	    break;
 	case 'P':
 	case 'p':
 	    if (!validate(fd))
-		strcat(reply, ",P=!");
-	    else if (FRESH(session.gNMEAdata.latlon_stamp,cur_time)) {
+		strcat(reply, ",P=?");
+	    else
 		sprintf(reply + strlen(reply),
 			",P=%f %f",
 			session.gNMEAdata.latitude,
 			session.gNMEAdata.longitude);
-	    } else {
-		strcat(reply, ",P=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Position", latlon_stamp);
-	    }
 	    break;
 	case 'Q':
 	case 'q':
-	    if (FRESH(session.gNMEAdata.latlon_stamp,cur_time)) {
+	    if (!validate(fd))
+		strcat(reply, ",Q=?");
+	    else
 		sprintf(reply + strlen(reply),
 			",Q=%d %f %f %f",
 			session.gNMEAdata.satellites_used,
 			session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
-	    } else {
-		strcat(reply, ",Q=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Quality", fix_quality_stamp);
-	    }
 	    break;
 	case 'R':
 	case 'r':
@@ -333,43 +311,27 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'S':
 	case 's':
-	    if (FRESH(session.gNMEAdata.status_stamp, cur_time)) {
-		sprintf(reply + strlen(reply),
-			",S=%d",
-			session.gNMEAdata.status);
-	    } else {
-		strcat(reply, ",S=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Status", status_stamp);
-	    }
+	    sprintf(reply + strlen(reply),
+		    ",S=%d",
+		    session.gNMEAdata.status);
 	    break;
 	case 'T':
 	case 't':
 	    if (!validate(fd))
-		strcat(reply, ",T=!");
-	    else if (FRESH(session.gNMEAdata.track_stamp, cur_time)) {
+		strcat(reply, ",T=?");
+	    else
 		sprintf(reply + strlen(reply),
 			",T=%f",
 			session.gNMEAdata.track);
-	    } else {
-		strcat(reply, ",T=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Track", track_stamp);
-	    }
 	    break;
 	case 'V':
 	case 'v':
 	    if (!validate(fd))
-		strcat(reply, ",V=!");
-	    else if (FRESH(session.gNMEAdata.speed_stamp, cur_time)) {
+		strcat(reply, ",V=?");
+	    else
 		sprintf(reply + strlen(reply),
 			",V=%f",
 			session.gNMEAdata.speed);
-	    } else {
-		strcat(reply, ",V=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Speed", speed_stamp);
-	    }
 	    break;
 	case 'W':
 	case 'w':
@@ -402,50 +364,41 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'Y':
 	case 'y':
-	    if (FRESH(session.gNMEAdata.satellite_stamp, cur_time))
-	    {
-		sc = 0;
-		if (SEEN(session.gNMEAdata.satellite_stamp))
-		    for (i = 0; i < MAXCHANNELS; i++)
-			if (session.gNMEAdata.PRN[i])
-			    sc++;
-		sprintf(reply + strlen(reply),
-			",Y=%d:", sc);
-		if (SEEN(session.gNMEAdata.satellite_stamp))
-		    for (i = 0; i < MAXCHANNELS; i++)
-			if (session.gNMEAdata.PRN[i])
-			    sprintf(reply + strlen(reply),"%d %d %d %d:", 
-				    session.gNMEAdata.PRN[i], 
-				    session.gNMEAdata.elevation[i],
-				    session.gNMEAdata.azimuth[i],
-				    session.gNMEAdata.ss[i]);
-	    } else {
-		strcat(reply, ",Y=?");
-		if (session.debug > 1)
-		    STALE_COMPLAINT("Satellite", satellite_stamp);		
-	    }
+	    sc = 0;
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
+		for (i = 0; i < MAXCHANNELS; i++)
+		    if (session.gNMEAdata.PRN[i])
+			sc++;
+	    sprintf(reply + strlen(reply),
+		    ",Y=%d:", sc);
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
+		for (i = 0; i < MAXCHANNELS; i++)
+		    if (session.gNMEAdata.PRN[i])
+			sprintf(reply + strlen(reply),"%d %d %d %d:", 
+				session.gNMEAdata.PRN[i], 
+				session.gNMEAdata.elevation[i],
+				session.gNMEAdata.azimuth[i],
+				session.gNMEAdata.ss[i]);
 	    break;
 #ifdef PROCESS_PRWIZCH
 	case 'Z':
 	case 'z':
 	    sc = 0;
-	    if (FRESH(session.gNMEAdata.signal_quality_stamp))
+	    for (i = 0; i < MAXCHANNELS; i++)
+		if (session.gNMEAdata.Zs[i])
+		    sc++;
+	    if (sc)
 	    {
+		sprintf(reply + strlen(reply),
+			",Z=%d ", sc);
 		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.Zs[i])
-			sc++;
-		if (sc)
-		{
-		    sprintf(reply + strlen(reply),
-			    ",Z=%d ", sc);
-		    for (i = 0; i < MAXCHANNELS; i++)
-			if (SEEN(session.gNMEAdata.signal_quality_stamp))
-			{
-			    if (session.gNMEAdata.Zs[i])
-				sprintf(reply + strlen(reply),"%d %02d ", 
-					session.gNMEAdata.Zs[i], 
-					session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
-			}
+		    if (SEEN(session.gNMEAdata.signal_quality_stamp))
+		    {
+			if (session.gNMEAdata.Zs[i])
+			    sprintf(reply + strlen(reply),"%d %02d ", 
+				    session.gNMEAdata.Zs[i], 
+				    session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
+		    }
 	    }
 #endif /* PROCESS_PRWIZCH */
 	    break;
@@ -548,7 +501,7 @@ int main(int argc, char *argv[])
     int nowait = 0;
 
     session.debug = 1;
-    while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:t:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:")) != -1) {
 	switch (option) {
 	case 'T':
 	    gpstype = *optarg;
@@ -587,9 +540,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'p':
 	    device_name = optarg;
-	    break;
-	case 't':
-	    gpsd_timeout = strtol(optarg, NULL, 0);
 	    break;
 	case 's':
 	    gpsd_speed = atoi(optarg);
@@ -637,7 +587,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &all_fds);
     nfds = getdtablesize();
 
-    gpsd_init(&session, gpsd_timeout, gpstype, dgpsserver);
+    gpsd_init(&session, gpstype, dgpsserver);
     if (gpsd_speed)
 	session.baudrate = gpsd_speed;
     session.gpsd_device = device_name;

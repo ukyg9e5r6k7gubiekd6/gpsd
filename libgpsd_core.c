@@ -27,7 +27,7 @@ static struct gps_type_t *set_device_type(char what)
     return *dp;
 }
 
-void gpsd_init(struct gps_session_t *session, int timeout, char devicetype, char *dgpsserver)
+void gpsd_init(struct gps_session_t *session, char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
@@ -72,17 +72,17 @@ void gpsd_init(struct gps_session_t *session, int timeout, char devicetype, char
     session->fdin = -1;
     session->fdout = -1;
 
-    INIT(session->gNMEAdata.online_stamp, now, timeout);
-    INIT(session->gNMEAdata.latlon_stamp, now, timeout);
-    INIT(session->gNMEAdata.altitude_stamp, now, timeout);
-    INIT(session->gNMEAdata.track_stamp, now, timeout);
-    INIT(session->gNMEAdata.speed_stamp, now, timeout);
-    INIT(session->gNMEAdata.status_stamp, now, timeout);
-    INIT(session->gNMEAdata.mode_stamp, now, timeout);
-    INIT(session->gNMEAdata.fix_quality_stamp, now, timeout);
-    INIT(session->gNMEAdata.satellite_stamp, now, timeout);
+    INIT(session->gNMEAdata.online_stamp, now);
+    INIT(session->gNMEAdata.latlon_stamp, now);
+    INIT(session->gNMEAdata.altitude_stamp, now);
+    INIT(session->gNMEAdata.track_stamp, now);
+    INIT(session->gNMEAdata.speed_stamp, now);
+    INIT(session->gNMEAdata.status_stamp, now);
+    INIT(session->gNMEAdata.mode_stamp, now);
+    INIT(session->gNMEAdata.fix_quality_stamp, now);
+    INIT(session->gNMEAdata.satellite_stamp, now);
 #ifdef PROCESS_PRWIZCH
-    INIT(session->gNMEAdata.signal_quality_stamp, now, timeout);
+    INIT(session->gNMEAdata.signal_quality_stamp, now);
 #endif /* PROCESS_PRWIZCH */
     session->gNMEAdata.mode = MODE_NO_FIX;
 }
