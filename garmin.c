@@ -368,9 +368,13 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    session->gNMEAdata.satellites = 0;
 	    session->gNMEAdata.satellites_used = 0;
 
-	    // clear used table
+	    // clear satellite tables
 	    for ( i = 0 ; i < MAXCHANNELS ; i++ ) {
 		session->gNMEAdata.used[i] = 0;
+		session->gNMEAdata.PRN[i] = 0;
+		session->gNMEAdata.azimuth[i] = 0;
+		session->gNMEAdata.elevation[i] = 0;
+		session->gNMEAdata.ss[i] = 0;
 	    }
 	    for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
 		gpsd_report(4,
