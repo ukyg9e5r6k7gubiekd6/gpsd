@@ -1,4 +1,5 @@
 This is a list of NMEA 0183 sentences with field descriptions.
+It is primarily intended to help people undestand GPS reports.
 
 It may originally have been redacted from the document cited as
 [NMEA200]; see the list of sources at the end of this document.
@@ -17,6 +18,7 @@ information on the following topics:
 * Sentence examples merged from [GIDS]
 * Sentence explanations from [GIDS] and elsewhere
 * Corrected badly mangled GPZDA description.
+* Common talker IDs
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -82,6 +84,74 @@ marine-navigation electronics called the AutoHelm Seatalk system; see
 also [SEATALK]. Until the U.S. Coast Guard terminated the Omega
 Navigation System in 1997, another common talker prefix was "OM" for
 an Omega Navigation System receiver.
+
+Here is a more complete list of talker ID prefixes.  Most are not
+relevant to GPS systems.
+
+AG	Autopilot - General
+AP	Autopilot - Magnetic
+
+CC	Computer - Programmed Calculator (outdated)
+CD	Communications - Digital Selective Calling (DSC)
+CM	Computer - Memory Data (outdated)
+CS	Communications - Satellite
+CT	Communications - Radio-Telephone (MF/HF)
+CV	Communications - Radio-Telephone (VHF)
+CX	Communications - Scanning Receiver
+
+DE	DECCA Navigation (outdated)
+DF	Direction Finder
+
+EC	Electronic Chart Display & Information System (ECDIS)
+EP	Emergency Position Indicating Beacon (EPIRB)
+ER	Engine Room Monitoring Systems
+
+GP	Global Positioning System (GPS)
+
+HC	Heading - Magnetic Compass
+HE	Heading - North Seeking Gyro
+HN   	Heading - Non North Seeking Gyro
+
+II	Integrated Instrumentation
+IN	Integrated Navigation
+
+LA	Loran A (outdated)
+LC	Loran C
+
+MP	Microwave Positioning System (outdated)
+
+OM	OMEGA Navigation System (outdated)
+OS	Distress Alarm System (outdated)
+
+RA	RADAR and/or ARPA
+
+SD	Sounder, Depth
+SN	Electronic Positioning System, other/general
+SS	Sounder, Scanning
+
+TI	Turn Rate Indicator
+TR      TRANSIT Navigation System
+
+VD	Velocity Sensor, Doppler, other/general
+DM	Velocity Sensor, Speed Log, Water, Magnetic
+VW	Velocity Sensor, Speed Log, Water, Mechanical
+
+WI	Weather Instruments 
+
+YC	Transducer - Temperature (outdated)
+YD	Transducer - Displacement, Angular or Linear (outdated)
+YF	Transducer - Frequency (outdated)
+YL	Transducer - Level (outdated)
+YP	Transducer - Pressure (outdated)
+YR	Transducer - Flow Rate (outdated)
+YT	Transducer - Tachometer (outdated)
+YV	Transducer - Volume (outdated)
+YX      Transducer
+
+ZA	Timekeeper - Atomic Clock
+ZC	Timekeeper - Chronometer
+ZQ	Timekeeper - Quartz
+ZV	Timekeeper - Radio Update, WWV or WWVH
 
 ------------------------------------------------------------------------------
 
