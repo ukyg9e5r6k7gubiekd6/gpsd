@@ -1,6 +1,6 @@
-Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.95
+Summary: service daemon for mediating access to a GPS
+Version: 1.96
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -17,8 +17,15 @@ queried on TCP port 2947 of the host computer.  With gpsd, multiple
 GPS client applications (such as navigational and wardriving software) 
 can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier
-to parse than NMEA 0183.  A library that manages access to gpsd for
-an application is included.
+to parse than NMEA 0183.
+
+%package -n gpsd-devel
+Summary: client library for talking to a running gpsd
+Group: Development/Libraries
+
+%description -n gpsd-devel
+This package provides a library that manages access to gpsd for
+applications.  You will need to have qpsd installed for it to work.
 
 %prep
 %setup -q
@@ -28,10 +35,14 @@ configure --prefix=/usr
 make %{?_smp_mflags} gpsd gpsd.1 libgps.a libgps.3
 
 %install
+# gpsd files
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
-mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
+mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
+mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
+cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
+# gpsd-devel files
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
 cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
@@ -40,21 +51,21 @@ cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
-mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
-cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 
-%post
-/sbin/ldconfig
+%post -n gpsd
 /sbin/chkconfig --add gpsd
 /sbin/chkconfig gpsd on
 
-%preun
+%preun -n gpsd
 /sbin/chkconfig --del gpsd
 
-%postun
+%post -n gpsd-devel
+/sbin/ldconfig
+
+%postun -n gpsd-devel
 /sbin/ldconfig
 
 %files
@@ -63,14 +74,17 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
+%attr(755, root, root) %{_sysconfdir}/init.d/gpsd
+
+%files -n gpsd-devel
 %{_libdir}/libgps.a
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
-%attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 
 %changelog
+* Thu Aug 26 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.
 
