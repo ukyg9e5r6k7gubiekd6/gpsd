@@ -183,9 +183,7 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
     if (!strcmp(field(sentence, 2), "A")) {
 	merge_ddmmyy(field(sentence, 9), out);
 	merge_hhmmss(field(sentence, 1), out);
-
 	do_lat_lon(sentence, 3, out);
-
 	out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
 	REFRESH(out->speed_stamp);
 	out->track_stamp.changed = update_field_f(sentence, 8, &out->track);
@@ -239,7 +237,6 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 {
     /* There are two variants of GPVTG.  One looks like this:
 
-	GPVTG Track Made Good and Ground Speed with GPS Talker ID
 	(1) True course over ground (degrees) 000 to 359
 	(2) Magnetic course over ground 000 to 359
 	(3) Speed over ground (knots) 00.0 to 99.9
@@ -360,12 +357,12 @@ int nmea_sane_satellites(struct gps_data_t *out)
 	return 0;
 
     /*
-     * This sanity check catches an odd behavior of the BU-303, and thus
-     * possibly of other SiRF-II based GPSes.  When they can't see any
-     * satellites at all (like, inside a building) they sometimes cough
-     * up a hairball in the form of a GSV packet with all the azimuth 
-     * and entries 0 (but nonzero elevations).  This behavior
-     * was observed under SiRF firmware revision 231.000.000_A2.
+     * This sanity check catches an odd behavior SiRF-II based GPSes.
+     * When they can't see any satellites at all (like, inside a
+     * building) they sometimes cough up a hairball in the form of a
+     * GSV packet with all the azimuth entries 0 (but nonzero
+     * elevations).  This behavior was observed under SiRF firmware
+     * revision 231.000.000_A2.
      */
     for (n = 0; n < out->satellites; n++)
 	if (out->azimuth[n])
@@ -377,7 +374,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 /* GPS Satellites in View */
 {
     /*
-       GSV - Satellites in view
         GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
            2            Number of sentences for full data
            1            sentence 1 of 2
@@ -389,7 +385,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
            <repeat for up to 4 satellites per sentence>
                 There my be up to three GSV sentences in a data packet
      */
-
     int changed, lower, upper, fldnum = 4;
 
     out->await = atoi(field(sentence, 1));
@@ -408,8 +403,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	if (*(field(sentence, fldnum))) {
 	    changed |= update_field_i(sentence, fldnum, &out->ss[lower]);
 	}
-	fldnum++;
-	lower++;
+	fldnum++; lower++;
     }
 
     /* not valid data until we've seen a complete set of parts */
