@@ -322,27 +322,28 @@ be stalled by a wedged client.</p>
 GPS, your application can notice the unplug and reconnect events, 
 and automatically starts getting data again a second after the reconnect.</p>
 
-<p>The <code>gpsd</code> package provides two ways for you to get data
-from a GPS.  The low-level library, <a
-href="libgpsd.html">libgpsd.a</a>, talks directly to the GPS.  The
-higher-level interface, <a href="libgps.html">libgps.a</a>,
-communicates with an instance of <code>gpsd</code>, which uses its own
-copy of libgpsd.a to talk to the device,</p>
+<p>The <code>gpsd</code> package provides two ways for C code to get
+data from a GPS.  Both go through the libgps.a library, which supports
+two sets of entry points. The <a href="libgpsd.html">low-level
+interface</a> talks directly to the GPS.  The <a
+href="libgps.html">high-level interface</a> communicates with an
+instance of <code>gpsd</code>, which uses its own copy of libgps.a to
+talk to the device. A third way would be to open a socket to
+<code>gpsd</code> and interpret <code>gpsd</code> protocol or raw NMEA
+in your application.  Before 2.0, all <code>gpsd</code>-aware
+applications had to do this because libgps.a didn't exist.  Now that
+it does, the exercise is rather pointless.  Using libgps.a will
+probably simplify your code a lot.</p>
 
-<p>A third way would be to open a socket to <code>gpsd</code> and
-interpret <code>gpsd</code> protocol or raw NMEA in your application.
-Before 2.0, all <code>gpsd</code>-aware applications had to do this
-because libgpsd.a didn't exist.  Now that it does, the exercise is
-rather pointless.  Using libgpsd.a will probably simplify your code a
-lot.</p>
+<p>You will almost always want to use the high-level interface and go
+through the daemon; among other things, this means more than one
+application will be able to query the GPS without causing confusion.
+The only exception will be in very space-constrained single-user
+scenarios, perhaps on embedded systems or PDAs. On those it may be
+appropriate to use the low-level interface directly, probably with a
+build from source that conditions out all but one of the drivers.</p>
 
-<p>You will almost always want to use libgps.a and go through the
-daemon; among other things, this means more than one application 
-will be able to query the GPS without causing confusion.  The only
-exception will be in very space-constrained single-user scenarios,
-perhaps on embedded systems or PDAs.</p>
-
-<p>There are two minor incompatibilities with <code>gpsd</code> 1.x:</p>
+<p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>
 
 <p>First, <code>gpsd</code>-2's command-line options have been changed
 and simplified.  If your <code>gpsd</code>-using application is
@@ -352,7 +353,11 @@ the invocation.  However, we don't recommend this.  New
 continuously just like any normal daemon.  It will do nothing, and be
 swapped out, unless there are clients trying to query the GPS.</p>
 
-<p>Second, the format of the timestamp returned by the D command has
+<p>Second, <code>gpsd</code> now returns "?" as the contents for a 
+field when it doesn't have valid data for that field (e.g. latitude 
+or longitude before the first fix).</p>
+
+<p>Third, the format of the timestamp returned by the D command has
 changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
 No more U.S.-centric date-format assumptions!  Also, as previously
 noted, the seconds part may have one or more digits of decimal fractional
