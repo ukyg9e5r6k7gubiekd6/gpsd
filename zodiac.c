@@ -432,6 +432,7 @@ static void zodiac_handle_input(struct gps_session_t *session)
 struct gps_type_t zodiac_binary =
 {
     "Zodiac binary",	/* full name of type */
+    NULL,		/* no probe */
     NULL,		/* only switched to by some other driver */
     zodiac_init,	/* initialize the device */
     zodiac_handle_input,/* read and parse message packets */

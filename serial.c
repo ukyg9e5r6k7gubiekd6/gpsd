@@ -92,14 +92,15 @@ int gpsd_open(struct gps_session_t *session)
 	return -1;
 
     if (isatty(session->gNMEAdata.gps_fd)) {
-
 #ifdef NON_NMEA_ENABLE
-        if (garmin_probe(session) == 0) {
-	    // IFF Garmin then skip the rest of the IO stuff
-            // The Linux Garmin driver ignores all baud rate, stop bits, etc.
-	    gpsd_switch_driver(session, "Garmin binary");
-	    return session->gNMEAdata.gps_fd;
-        }
+	struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++)
+	    if ((*dp)->probe && (*dp)->probe(session)) {
+		gpsd_report(3, "Probe found %s driver...\n", (*dp)->typename);
+		session->device_type = *dp;
+		return session->gNMEAdata.gps_fd;
+	    }
 #endif /* NON_NMEA_ENABLE */
 
 	/* Save original terminal parameters */

@@ -609,6 +609,7 @@ struct gps_type_t sirf_binary =
 {
     "SIRF-II binary",	/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    NULL,		/* no probe */
     sirfbin_initializer,	/* initialize the device */
     sirfbin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */

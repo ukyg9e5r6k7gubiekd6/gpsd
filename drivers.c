@@ -65,6 +65,7 @@ static void nmea_initializer(struct gps_session_t *session)
 struct gps_type_t nmea = {
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
+    NULL,		/* no probe */
     nmea_initializer,		/* probe for SiRF II */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
@@ -113,9 +114,11 @@ struct gps_type_t sirfII = {
     "SiRF-II NMEA",	/* full name of type */
 #ifdef BINARY_ENABLE
     NULL,		/* recognizing SiRF flips us to binary */
+    NULL,		/* no probe */
     NULL,		/* no initialization */
 #else
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    NULL,		/* no probe */
     sirf_initializer,	/* turn off debugging messages */
 #endif /* BINARY_ENABLE */
     nmea_handle_input,	/* read text sentence */
@@ -167,6 +170,7 @@ static void tripmate_initializer(struct gps_session_t *session)
 struct gps_type_t tripmate = {
     "Delorme TripMate",		/* full name of type */
     "ASTRAL",			/* tells us to switch */
+    NULL,			/* no probe */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     nmea_handle_input,		/* read text sentence */
     nmea_write_rtcm,		/* send RTCM data straight */
@@ -210,6 +214,7 @@ static void earthmate_initializer(struct gps_session_t *session)
 struct gps_type_t earthmate = {
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
+    NULL,			/* no probe */
     earthmate_initializer,	/* switch us to Zodiac mode */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */

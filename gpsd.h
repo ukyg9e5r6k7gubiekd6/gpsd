@@ -60,6 +60,7 @@ struct gps_session_t;
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     char *typename, *trigger;
+    int (*probe)(struct gps_session_t *session);
     void (*initializer)(struct gps_session_t *session);
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
@@ -158,8 +159,6 @@ extern void gpsd_binary_satellite_dump(struct gps_session_t *, char *);
 extern void gpsd_binary_quality_dump(struct gps_session_t *, char *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
-
-extern int garmin_probe(struct gps_session_t *);
 
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);
