@@ -120,16 +120,16 @@ static int throttled_write(int fd, char *buf, int len)
     return status;
 }
 
-static int have_fix(struct gps_device_t *session)
+static int have_fix(struct gps_device_t *device)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
-		    session->gpsdata.status, session->gpsdata.fix.mode)
-    if ((session->gpsdata.status == STATUS_NO_FIX) != (session->gpsdata.fix.mode == MODE_NO_FIX)) {
+		    device->gpsdata.status, device->gpsdata.fix.mode)
+    if ((device->gpsdata.status == STATUS_NO_FIX) != (device->gpsdata.fix.mode == MODE_NO_FIX)) {
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return 0;
     }
-    else if (session->gpsdata.status > STATUS_NO_FIX && session->gpsdata.fix.mode != MODE_NO_FIX) {
+    else if (device->gpsdata.status > STATUS_NO_FIX && device->gpsdata.fix.mode != MODE_NO_FIX) {
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
 	return 1;
     }
@@ -193,7 +193,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 }
 
 /* restrict the scope of the command-state globals as much as possible */
-static struct gps_device_t *session;
+static struct gps_device_t *device;
 static int need_gps;
 
 static int handle_request(int fd, char *buf, int buflen)
@@ -201,7 +201,7 @@ static int handle_request(int fd, char *buf, int buflen)
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
-    struct gps_data_t *ud = &session->gpsdata;
+    struct gps_data_t *ud = &device->gpsdata;
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -209,7 +209,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (have_fix(session) && ud->fix.mode == MODE_3D)
+	    if (have_fix(device) && ud->fix.mode == MODE_3D)
 		sprintf(phrase, ",A=%.3f", ud->fix.altitude);
 	    else
 		strcpy(phrase, ",A=?");
@@ -218,8 +218,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
-		if (session->device_type->speed_switcher)
-		    if (session->device_type->speed_switcher(session, i)) {
+		if (device->device_type->speed_switcher)
+		    if (device->device_type->speed_switcher(device, i)) {
 			/* 
 			 * Allow the control string time to register at the
 			 * GPS before we do the baud rate switch, which 
@@ -235,17 +235,17 @@ static int handle_request(int fd, char *buf, int buflen)
 			 * The minimum delay time is probably constant
 			 * across any given type of UART.
 			 */
-			tcdrain(session->gpsdata.gps_fd);
+			tcdrain(device->gpsdata.gps_fd);
 			usleep(50000);
-			gpsd_set_speed(session, (speed_t)i, 1);
+			gpsd_set_speed(device, (speed_t)i, 1);
 		    }
 	    }
 	    sprintf(phrase, ",B=%d %d N %d", 
-		    gpsd_get_speed(&session->ttyset),
+		    gpsd_get_speed(&device->ttyset),
 		    9 - ud->stopbits, ud->stopbits);
 	    break;
 	case 'C':
-	    sprintf(phrase, ",C=%d", session->device_type->cycle);
+	    sprintf(phrase, ",C=%d", device->device_type->cycle);
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
@@ -255,15 +255,15 @@ static int handle_request(int fd, char *buf, int buflen)
 		strcat(phrase, "?");
 	    break;
 	case 'E':
-	    if (have_fix(session)) {
-		if (session->gpsdata.fix.eph || session->gpsdata.fix.epv)
+	    if (have_fix(device)) {
+		if (device->gpsdata.fix.eph || device->gpsdata.fix.epv)
 		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
 			    ud->epe, ud->fix.eph, ud->fix.epv);
 		else if (ud->pdop || ud->hdop || ud->vdop)
 		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
-			    ud->pdop * UERE(session), 
-			    ud->hdop * UERE(session), 
-			    ud->vdop * UERE(session));
+			    ud->pdop * UERE(device), 
+			    ud->hdop * UERE(device), 
+			    ud->vdop * UERE(device));
 	    } else
 		strcpy(phrase, ",E=?");
 	    break;
@@ -281,28 +281,28 @@ static int handle_request(int fd, char *buf, int buflen)
 		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, need_gps);
 		else {
 		    char *stash_device;
-		    gpsd_deactivate(session);
-		    stash_device = session->gpsd_device;
-		    session->gpsd_device = strdup(bufcopy);
-		    session->gpsdata.baudrate = 0;	/* so it'll hunt */
-		    session->driverstate = 0;
-		    if (gpsd_activate(session) >= 0) {
+		    gpsd_deactivate(device);
+		    stash_device = device->gpsd_device;
+		    device->gpsd_device = strdup(bufcopy);
+		    device->gpsdata.baudrate = 0;	/* so it'll hunt */
+		    device->driverstate = 0;
+		    if (gpsd_activate(device) >= 0) {
 			gpsd_report(1, "Switch to %s succeeded\n", bufcopy);
 			free(stash_device);
 		    } else {
 			gpsd_report(1, "Switch to %s failed\n", bufcopy);
-			free(session->gpsd_device);
-			session->gpsd_device = stash_device;
-			session->gpsdata.baudrate = 0;
-			session->driverstate = 0;
+			free(device->gpsd_device);
+			device->gpsd_device = stash_device;
+			device->gpsdata.baudrate = 0;
+			device->driverstate = 0;
 		    }
 		}
-		gpsd_report(1, "GPS is %s\n", session->gpsd_device);
+		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
 	    }
-	    sprintf(phrase, ",F=%s", session->gpsd_device);
+	    sprintf(phrase, ",F=%s", device->gpsd_device);
 	    break;
 	case 'I':
-	    sprintf(phrase, ",I=%s", session->device_type->typename);
+	    sprintf(phrase, ",I=%s", device->device_type->typename);
 	    break;
 	case 'L':
 	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjko
@@ -314,30 +314,30 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",M=%d", ud->fix.mode);
 	    break;
 	case 'N':
-	    if (!session->device_type->mode_switcher)
+	    if (!device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
 	    else {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
-		    session->device_type->mode_switcher(session, 1);
+		    device->device_type->mode_switcher(device, 1);
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    session->device_type->mode_switcher(session, 0);
+		    device->device_type->mode_switcher(device, 0);
 		    p++;
 		}
 	    }
-	    sprintf(phrase, ",N=%d", session->gpsdata.driver_mode);
+	    sprintf(phrase, ",N=%d", device->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    if (!have_fix(session))
+	    if (!have_fix(device))
 		strcpy(phrase, ",O=?");
 	    else {
 		sprintf(phrase, ",O=%.2f %.3f %.6f %.6f",
 			ud->fix.time, ud->fix.ept, 
 			ud->fix.latitude, ud->fix.longitude);
-		if (session->gpsdata.fix.mode == MODE_3D)
+		if (device->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %7.2f",
-			    session->gpsdata.fix.altitude);
+			    device->gpsdata.fix.altitude);
 		else
 		    strcat(phrase, "       ?");
 		if (ud->fix.eph)
@@ -353,25 +353,25 @@ static int handle_request(int fd, char *buf, int buflen)
 			    ud->fix.track, ud->fix.speed);
 		else
 		    strcat(phrase, "        ?        ?");
-		if (session->gpsdata.fix.mode == MODE_3D)
+		if (device->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %6.3f", ud->fix.climb);
 		else
 		    strcat(phrase, "      ?");
 		strcat(phrase, " ?");	/* can't yet derive track error */ 
-		if (session->gpsdata.valid & SPEEDERR_SET)
+		if (device->gpsdata.valid & SPEEDERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
-			    session->gpsdata.fix.eps);		    
+			    device->gpsdata.fix.eps);		    
 		else
 		    strcat(phrase, "      ?");
-		if (session->gpsdata.valid & CLIMBERR_SET)
+		if (device->gpsdata.valid & CLIMBERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
-			    session->gpsdata.fix.epc);		    
+			    device->gpsdata.fix.epc);		    
 		else
 		    strcat(phrase, "      ?");
 	    }
 	    break;
 	case 'P':
-	    if (have_fix(session))
+	    if (have_fix(device))
 		sprintf(phrase, ",P=%.4f %.4f", 
 			ud->fix.latitude, ud->fix.longitude);
 	    else
@@ -410,19 +410,19 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (have_fix(session) && ud->fix.track != TRACK_NOT_VALID)
+	    if (have_fix(device) && ud->fix.track != TRACK_NOT_VALID)
 		sprintf(phrase, ",T=%.4f", ud->fix.track);
 	    else
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (have_fix(session) && ud->fix.mode == MODE_3D)
+	    if (have_fix(device) && ud->fix.mode == MODE_3D)
 		sprintf(phrase, ",U=%.3f", ud->fix.climb);
 	    else
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (have_fix(session) && ud->fix.track != TRACK_NOT_VALID)
+	    if (have_fix(device) && ud->fix.track != TRACK_NOT_VALID)
 		sprintf(phrase, ",V=%.3f", ud->fix.speed);
 	    else
 		strcpy(phrase, ",V=?");
@@ -515,7 +515,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		ud->d_xmit_time - fixtime,
 		ud->d_recv_time - fixtime,
 		ud->d_decode_time - fixtime,
-		session->poll_times[fd] - fixtime,
+		device->poll_times[fd] - fixtime,
 		timestamp() - fixtime); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
@@ -601,12 +601,12 @@ int main(int argc, char *argv[])
 	}
     }
 
-    /* user may want to re-initialize the session */
+    /* user may want to re-initialize the device */
     if ((st = setjmp(restartbuf)) == SIGHUP+1) {
-	gpsd_wrap(session);
+	gpsd_wrap(device);
 	gpsd_report(1, "gpsd restarted by SIGHUP\n");
     } else if (st > 0) {
-	gpsd_wrap(session);
+	gpsd_wrap(device);
 	gpsd_report(1, "Received terminating signal %d. Exiting...\n", st-1);
 	exit(10 + st);
     }
@@ -629,19 +629,19 @@ int main(int argc, char *argv[])
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
 
-    session = gpsd_init(dgpsserver);
+    device = gpsd_init(dgpsserver);
     if (gpsd_speed)
-	session->gpsdata.baudrate = gpsd_speed;
-    session->gpsd_device = strdup(device_name);
-    session->gpsdata.raw_hook = raw_hook;
-    if (session->dsock >= 0)
-	FD_SET(session->dsock, &all_fds);
+	device->gpsdata.baudrate = gpsd_speed;
+    device->gpsd_device = strdup(device_name);
+    device->gpsdata.raw_hook = raw_hook;
+    if (device->dsock >= 0)
+	FD_SET(device->dsock, &all_fds);
     if (nowait) {
-	if (gpsd_activate(session) < 0) {
+	if (gpsd_activate(device) < 0) {
 	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	    exit(2);
 	}
-	FD_SET(session->gpsdata.gps_fd, &all_fds);
+	FD_SET(device->gpsdata.gps_fd, &all_fds);
     }
 
     for (;;) {
@@ -681,20 +681,20 @@ int main(int argc, char *argv[])
 	}
 
 	/* we may need to force the GPS open */
-	if (nowait && session->gpsdata.gps_fd == -1) {
-	    gpsd_deactivate(session);
-	    if (gpsd_activate(session) >= 0) {
-		FD_SET(session->gpsdata.gps_fd, &all_fds);
+	if (nowait && device->gpsdata.gps_fd == -1) {
+	    gpsd_deactivate(device);
+	    if (gpsd_activate(device) >= 0) {
+		FD_SET(device->gpsdata.gps_fd, &all_fds);
 		notify_watchers("GPSD,X=1\r\n");
 	    }
 	}
 
 	/* get data from it */
 	changed = 0;
-	if (session->gpsdata.gps_fd >= 0 && !((changed=gpsd_poll(session)) | ONLINE_SET)) {
+	if (device->gpsdata.gps_fd >= 0 && !((changed=gpsd_poll(device)) | ONLINE_SET)) {
 	    gpsd_report(3, "GPS is offline\n");
-	    FD_CLR(session->gpsdata.gps_fd, &all_fds);
-	    gpsd_deactivate(session);
+	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+	    gpsd_deactivate(device);
 	    notify_watchers("GPSD,X=0\r\n");
 	}
 
@@ -702,7 +702,7 @@ int main(int argc, char *argv[])
 	    for (fd = 0; fd < FD_SETSIZE; fd++) {
 		/* some listeners may be in watcher mode */
 		if (FD_ISSET(fd, &watcher_fds)) {
-		    session->poll_times[fd] = timestamp();
+		    device->poll_times[fd] = timestamp();
 		    if (changed & LATLON_SET)
 			handle_request(fd, "o", 1);
 		    if (changed & SATELLITE_SET)
@@ -712,23 +712,23 @@ int main(int argc, char *argv[])
 	}
 
 	/* this simplifies a later test */
-	if (session->dsock > -1)
-	    FD_CLR(session->dsock, &rfds);
+	if (device->dsock > -1)
+	    FD_CLR(device->dsock, &rfds);
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < FD_SETSIZE; fd++) {
-	    if (fd == msock || fd == session->gpsdata.gps_fd)
+	    if (fd == msock || fd == device->gpsdata.gps_fd)
 		continue;
 	    /*
 	     * GPS must be opened if commands are waiting or any client is
 	     * streaming (raw or watcher mode).
 	     */
 	    if (FD_ISSET(fd, &rfds) || FD_ISSET(fd, &nmea_fds) || FD_ISSET(fd, &watcher_fds)) {
-		if (session->gpsdata.gps_fd == -1) {
-		    gpsd_deactivate(session);
-		    if (gpsd_activate(session) >= 0) {
-			FD_SET(session->gpsdata.gps_fd, &all_fds);
+		if (device->gpsdata.gps_fd == -1) {
+		    gpsd_deactivate(device);
+		    if (gpsd_activate(device) >= 0) {
+			FD_SET(device->gpsdata.gps_fd, &all_fds);
 			notify_watchers("GPSD,X=1\r\n");
 		    }
 		}
@@ -746,7 +746,7 @@ int main(int argc, char *argv[])
 		        buf[buflen] = '\0';
 			gpsd_report(1, "<= client: %s", buf);
 
-			session->poll_times[fd] = timestamp();
+			device->poll_times[fd] = timestamp();
 			if (handle_request(fd, buf, buflen) < 0) {
 			    (void) close(fd);
 			    FD_CLR(fd, &all_fds);
@@ -756,17 +756,17 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	    if (fd != session->gpsdata.gps_fd && fd != msock && FD_ISSET(fd, &all_fds))
+	    if (fd != device->gpsdata.gps_fd && fd != msock && FD_ISSET(fd, &all_fds))
 		need_gps++;
 	}
 
-	if (!nowait && !need_gps && session->gpsdata.gps_fd != -1) {
-	    FD_CLR(session->gpsdata.gps_fd, &all_fds);
-	    session->gpsdata.gps_fd = -1;
-	    gpsd_deactivate(session);
+	if (!nowait && !need_gps && device->gpsdata.gps_fd != -1) {
+	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+	    device->gpsdata.gps_fd = -1;
+	    gpsd_deactivate(device);
 	}
     }
 
-    gpsd_wrap(session);
+    gpsd_wrap(device);
     return 0;
 }
