@@ -1,6 +1,7 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #if defined (HAVE_STRINGS_H)
 #include <strings.h>
@@ -127,7 +128,7 @@ int netlib_connectsock(char *host, char *service, char *protocol)
     }
 
     if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	gpscli_report(0, "Can't connect to %s.%s", host, service);
+	gpscli_report(0, "Can't connect to %s.%s: %s\n", host, service, strerror(errno));
 	return -1;
     }
     return s;
