@@ -221,15 +221,15 @@ will be reported in the response.
 <listitem>
 <para>Attempts to return a complete time/position/velocity report as a
 unit.  Any field for which data is not available being reported as ?.
-If there is no fix, the response is simply "O=?", otherwise a
-timestamp is always reported.  Fields are as follows, in order:</para>
+If there is no fix, the response is simply "O=?", otherwise a tag and
+timestamp are always reported.  Fields are as follows, in order:</para>
 
 <variablelist>
 <varlistentry>
-<term>tag</term>
-<listitem><para>A tag identifying the last sentence received.  For
-NMEA devices this is just the NMEA sentence name; the talker-ID 
-portion may be useful.</para></listitem>
+<term>tag</term> <listitem><para>A tag identifying the last sentence
+received.  For NMEA devices this is just the NMEA sentence name; the
+talker-ID portion may be useful for distinguishing among results
+produced by different NMEA talkers in the same wire.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -240,7 +240,7 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>time error</term>
-<listitem><para>Estimated timestamp error in seconds (%f).</para></listitem>
+<listitem><para>Estimated timestamp error (%f, seconds).</para></listitem>
 </varlistentry>
 
 <varlistentry>
