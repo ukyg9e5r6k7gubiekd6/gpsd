@@ -6,6 +6,9 @@ AC_CONFIG_HEADER(config.h)
 dnl Find and check C compiler
 dnl
 ICE_PROG_CC
+
+test ! -z "$GCC" &&  CFLAGS="$CFLAGS -Wall -Werror"
+
 dnl
 dnl Find and check C preprocessor
 dnl
