@@ -53,6 +53,7 @@ C:
     <paramdef>const char * <parameter>fmt</parameter></paramdef>
     <paramdef><parameter>...</parameter></paramdef>
 </funcprototype>
+</funcsynopsis>
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
