@@ -3,6 +3,17 @@
 Would somebody please test the device types that aren't straight NMEA?
 (This translates as: Hey, you, Russ!  Get off your tuchis! :-))
 
+Remco has suggested that maybe it's time to forget about this ancient
+hardware.  Perhaps he's right.  
+
+* Should PRWIZCH support drop out entirely?
+
+Along similar lines, at the moment I have the PRWIZCH handling
+conditioned out.  I'd like to drop it entirely -- the information it
+gives is redundant with the SNRs in GPGSV, and the Zodiac chipset
+reported GSVs.  Does anyone know any good reason not to just drop this
+code?
+
 * The strange math problem in gpsprobe 
 
 I have a Python script I'd like to ship with 2.0, called gsprobe.  It
@@ -14,13 +25,15 @@ However, something is awry in my calculation of the actual uncertainty
 of position, going from degrees of uncertainty to meters.  I posted about 
 this earlier today.  Help!
 
-* Should PRWIZCH support drop out entirely?
+* Mine the contrib directory for good ideas
 
-I asked this question before and nobody answered.  At the moment I have the
-PRWIZCH handling conditioned out.  I'd like to drop it entirely -- the 
-information it gives is redundant with the SNRs in GPGSV, and the Zodiac
-chipset reported GSVs.  Does anyone know any good reason not to just 
-drop this code?
+This is a post-2.0 item.  There is code in there that can do some interesting
+tricks with SiRF-II chipsets.
+
+* gpsd.py is unsatisfactory
+
+It only handles straight NMEA devices.  It should be replaced by a
+Python extension built around libgps.a.
 
 * Autodetect USB GPS by scanning the USB bus, if no device is specified.
 
