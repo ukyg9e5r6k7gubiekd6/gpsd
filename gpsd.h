@@ -74,11 +74,6 @@ struct gps_session_t
 #endif /* ZODIAC_ENABLE */
 };
 
-/* some multipliers for interpreting GPS output */
-#define METERS_TO_FEET	3.2808399
-#define METERS_TO_MILES	0.00062137119
-#define KNOTS_TO_MPH	1.1507794
-
 #define GPGLL "$GPGLL"
 #define GPVTG "$GPVTG"
 #define GPGGA "$GPGGA"

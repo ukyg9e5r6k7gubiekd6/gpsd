@@ -103,6 +103,11 @@ int gps_query(struct gps_data_t *gpsdata, char *requests);
 int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 
+/* some multipliers for interpreting GPS output */
+#define METERS_TO_FEET	3.2808399
+#define METERS_TO_MILES	0.00062137119
+#define KNOTS_TO_MPH	1.1507794
+
 /* gps_open() error return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
 #define NL_NOHOST	-2	/* can't get host entry */

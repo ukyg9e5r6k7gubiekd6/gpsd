@@ -259,7 +259,13 @@ class gps(gpsdata):
 	self.sock.send(commands)
 	return self.poll()
 
+# some multipliers for interpreting GPS output
+METERS_TO_FEET	= 3.2808399
+METERS_TO_MILES	= 0.00062137119
+KNOTS_TO_MPH	= 1.1507794
+
 # EarthDistance code swiped from Kismet and corrected
+# (As yet, this stuff is not in the C library.)
 
 def Deg2Rad(x):
     "Degrees to radians."
