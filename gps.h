@@ -21,7 +21,6 @@ struct life_t {
 };
 static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL); return(tv.tv_sec + tv.tv_usec/1e6);}
 
-#define INIT(stamp, now)	stamp.last_refresh=now
 #define REFRESH(stamp)	stamp.last_refresh = timestamp()
 #define SEEN(stamp) stamp.last_refresh
 
@@ -83,7 +82,7 @@ struct gps_data_t {
     /* velocity */
     double speed;		/* Speed over ground, knots */
     double track;		/* Course made good (relative to true north) */
-    struct life_t track_stamp;
+#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
     double climb;               /* vertical velocity, meters/sec */
 
     /* status of fix, valid on every poll */

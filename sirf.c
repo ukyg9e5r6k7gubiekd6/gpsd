@@ -231,7 +231,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    if (heading < 0)
 		heading += 2 * PI;
 	    session->gNMEAdata.track = heading * RAD_2_DEG;
-	    REFRESH(session->gNMEAdata.track_stamp);
 	    /* fix status is byte 19 */
 	    navtype = getb(19);
 	    session->gNMEAdata.status = STATUS_NO_FIX;
@@ -430,7 +429,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    /* skip 1 byte of map datum */
 	    session->gNMEAdata.speed = getw(36)*1e-2;
 	    session->gNMEAdata.track = getw(38)*1e-2;
-	    REFRESH(session->gNMEAdata.track_stamp);
 	    /* skip 2 bytes of magnetic variation */
 	    session->gNMEAdata.climb = getw(42)*1e-2;
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */

@@ -311,7 +311,6 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 		track += 2 * PI;
 	    }
 	    session->gNMEAdata.track = radtodeg(track);
-	    REFRESH(session->gNMEAdata.track_stamp);
 
 	    switch ( pvt->fix) {
 	    case 0:

@@ -182,7 +182,6 @@ static int handle1000(struct gps_session_t *session)
 	session->gNMEAdata.mode = 1;
     REFRESH(session->gNMEAdata.latlon_stamp);
     REFRESH(session->gNMEAdata.altitude_stamp);
-    REFRESH(session->gNMEAdata.track_stamp);
 
     session->separation = getw(33) * 1e-2;	/* meters */
 

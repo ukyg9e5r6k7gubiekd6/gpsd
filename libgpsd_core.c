@@ -67,6 +67,7 @@ struct gps_session_t *gpsd_init(char *dgpsserver)
     session->gNMEAdata.gps_fd = -1;
     session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
+    session->gNMEAdata.track = TRACK_NOT_VALID;
     session->mag_var = NO_MAG_VAR;
     session->separation = NO_SEPARATION;
 
@@ -84,6 +85,7 @@ void gpsd_deactivate(struct gps_session_t *session)
     REFRESH(session->gNMEAdata.online_stamp);
     session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
+    session->gNMEAdata.track = TRACK_NOT_VALID;
     gpsd_close(session);
     session->gNMEAdata.gps_fd = -1;
     if (session->device_type->wrapup)
@@ -178,7 +180,6 @@ int gpsd_poll(struct gps_session_t *session)
 	session->gNMEAdata.latlon_stamp.changed = \
 	    (session->gNMEAdata.longitude!=old.longitude || session->gNMEAdata.latitude!=old.latitude);
 	CHANGECHECK(altitude, altitude_stamp);
-	CHANGECHECK(track, track_stamp);
 	session->gNMEAdata.fix_quality_stamp.changed = \
 	    (session->gNMEAdata.pdop!=old.pdop||session->gNMEAdata.hdop!=old.hdop||session->gNMEAdata.vdop!=old.vdop);
 	session->gNMEAdata.epe_quality_stamp.changed = \

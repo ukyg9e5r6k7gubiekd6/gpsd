@@ -197,7 +197,6 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	mask |= LATLON_SET;
 	out->speed = atof(field[7]);
 	out->track = atof(field[8]);
-	REFRESH(out->track_stamp);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -304,7 +303,6 @@ static int processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
      * which means we want to extract field 5.  We cope with both.
      */
     out->track = atof(field[1]);;
-    REFRESH(out->track_stamp);
     if (field[2][0] == 'T')
 	out->speed = atof(field[5]);
     else

@@ -357,7 +357,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    ud->vdop * UERE(session));
 		else
 		    strcat(phrase, "? ?");
-		if (SEEN(ud->track_stamp))
+		if (ud->track != TRACK_NOT_VALID)
 		    sprintf(phrase+strlen(phrase), "%.4f %.3f",
 			    ud->track, ud->speed);
 		else
@@ -409,7 +409,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (have_fix(session) && SEEN(ud->track_stamp))
+	    if (have_fix(session) && ud->track != TRACK_NOT_VALID)
 		sprintf(phrase, ",T=%.4f", ud->track);
 	    else if (explicit)
 		strcpy(phrase, ",T=?");
@@ -421,7 +421,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (have_fix(session) && SEEN(ud->track_stamp))
+	    if (have_fix(session) && ud->track != TRACK_NOT_VALID)
 		sprintf(phrase, ",V=%.3f", ud->speed);
 	    else if (explicit)
 		strcpy(phrase, ",V=?");

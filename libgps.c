@@ -28,6 +28,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 
     gpsdata->mode = MODE_NOT_SEEN;
     gpsdata->status = STATUS_NO_FIX;
+    gpsdata->track = TRACK_NOT_VALID;
     return gpsdata;
 }
 
@@ -122,10 +123,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->status = atoi(sp+2);
 		    break;
 		case 'T':
-		    sscanf(sp, "T=%lf", &d1);
-		    gpsdata->track_stamp.changed = (gpsdata->track != d1);
-		    gpsdata->track = d1;
-		    REFRESH(gpsdata->track_stamp);
+		    sscanf(sp, "T=%lf", &gpsdata->track);
 		    break;
 		case 'U':
 		    sscanf(sp, "U=%lf", &gpsdata->climb);
@@ -204,7 +202,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
-	|| gpsdata->track_stamp.changed 
 	|| gpsdata->fix_quality_stamp.changed 
 	|| gpsdata->epe_quality_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 
