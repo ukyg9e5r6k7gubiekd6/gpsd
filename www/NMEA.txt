@@ -8,22 +8,24 @@ information on the following topics:
 * FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
 
 Many of these are only emitted by high-end maritime navigation systems.
-Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.
+Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
+form of VTG is variable with NMEA version.
 
 The best other resource on this topic seems to be 
 <http://www.gpsinformation.org/dale/nmea.htm>
 
 In NMEA 2.3, several sentencea (RMC, RMB, VTG, GLL; optionally, BWC, XTE)
 got a new last field carrying the signal integrity information needed by the
-FAA.  Here are the values:
+FAA.  (The values in the GGA mode field were extended to carry this
+information as well.) Here are the values:
 
 FAA Mode Indicator
-     *   A = Autonomous mode
-     *   D = Differential Mode
-     *   E = Estimated (dead-reckoning) mode
-     *   M = Manual Input Mode
-     *   S = Simulated Mode
-     *   N = Data Not Valid
+     A = Autonomous mode
+     D = Differential Mode
+     E = Estimated (dead-reckoning) mode
+     M = Manual Input Mode
+     S = Simulated Mode
+     N = Data Not Valid
 
 This field may be empty.  In pre-2.3 versions it is omitted.
 
@@ -326,7 +328,7 @@ Here are the NMEA-standard sentences:
   5) Checksum
 
  GGA - Global Positioning System Fix Data
- Time, Position and fix related data fora GPS receiver.
+ Time, Position and fix related data for a GPS receiver.
 
                                                       11
         1         2       3 4        5 6 7  8   9  10 |  12 13  14   15
@@ -343,6 +345,12 @@ Here are the NMEA-standard sentences:
      0 - fix not available,
      1 - GPS fix,
      2 - Differential GPS fix
+     3 = PPS fix
+     4 = Real Time Kinematic
+     5 = Float RTK
+     6 = estimated (dead reckoning) (2.3 feature)
+     7 = Manual input mode
+     8 = Simulation mode
   7) Number of satellites in view, 00 - 12
   8) Horizontal Dilution of precision (meters)
   9) Antenna Altitude above/below mean-sea-level (geoid) (in meters)
@@ -624,7 +632,7 @@ Here are the NMEA-standard sentences:
  $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A,m,*hh<CR><LF>
 
  Field Number: 
-  1) Status, V = Navigation receiver warning
+  1) Status, A= Active, V = Void
   2) Cross Track error - nautical miles
   3) Direction to Steer, Left or Right
   4) TO Waypoint ID
