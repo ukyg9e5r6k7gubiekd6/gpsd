@@ -125,6 +125,11 @@ void draw_graphics(struct gps_data_t *gpsdata)
 	    set_color("Blue");
 	    XDrawString(XtDisplay(draww), pixmap, drawGC,
 			(int) x + 0, (int) y + 17, buf, 2);
+	    if (gpsdata->ss[i]) {
+		set_color("Black");
+		XDrawPoint(XtDisplay(draww), pixmap, drawGC, (int)x, (int)y);
+	    }
+		
 	}
 	XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 		  0, 0, width, height, 0, 0);
