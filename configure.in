@@ -1,5 +1,14 @@
 dnl
+dnl
 AC_INIT(gpsd.c)
+
+dnl Find and check C compiler
+dnl
+ICE_PROG_CC
+dnl
+dnl Find and check C preprocessor
+dnl
+AC_PROG_CPP
 
 AC_CHECK_HEADERS(termio.h sys/param.h)
 
@@ -57,6 +66,7 @@ dnl
 dnl
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
+CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 LDFLAGS="$LDFLAGS $X_LIBS"
 dnl
 dnl Check for X library
@@ -114,36 +124,6 @@ AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
 AC_SUBST(XEXT_LIBS)
 dnl
 dnl
-dnl
-dnl Check for Athena widget libraries
-dnl
-dnl
-XAW_LIBS=""
-if test "$athena_includes" != "no" && test "$athena_libraries" != "no"
-then
-AC_CHECK_LIB(Xmu, XmuCvtStringToOrientation,
-	XAW_LIBS="-lXmu ${XAW_LIBS}",,
-	${X_PRE_LIBS} ${XAW_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS})
-AC_CHECK_LIB(Xaw, XawTextSetInsertionPoint, 
-	XAW_LIBS="-lXaw ${XAW_LIBS}"
-	AC_DEFINE(HAVE_ATHENA),,
-	${X_PRE_LIBS} ${XAW_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS})
-if test "$XAW_LIBS" = ""; then
-dnl A warning suffices here -- DDD also works without Athena.
-AC_MSG_WARN([The Athena widgets library '-lXaw' could not be found.
-                    If you have the athena library, please use the
-                    configure options '--with-athena-includes=DIR' and 
-                    '--with-athena-libraries=DIR' to specify the Xaw location.
-                    If you do not have the athena library, use the configure
-                    option '--without-athena' to suppress this message.
-                    See the file 'config.log' for further diagnostics.])
-fi
-fi
-if test "$XAW_LIBS" != ""; then
-AC_CHECK_HEADERS(X11/Xaw/Form.h X11/Xaw/Panner.h X11/Xaw/Porthole.h)
-AC_CHECK_HEADERS(X11/Xmu/Editres.h)
-fi
-AC_SUBST(XAW_LIBS)
 dnl
 dnl
 dnl Check for Xpm library and headers

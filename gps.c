@@ -40,8 +40,6 @@
 #include "nmea.h"
 #include "gps.h"
 
-extern void _XEditResCheckMessages();
-
 void update_display(char *message);
 
 /* global variables */
@@ -471,8 +469,6 @@ int main(int argc, char *argv[])
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
     n++;
     XtSetValues(lxbApp, args, n);
-
-    XtAddEventHandler(lxbApp, (EventMask) 0, True, _XEditResCheckMessages, NULL);
 
     build_gui(lxbApp);
 

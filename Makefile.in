@@ -9,8 +9,7 @@
 CC = @CC@
 
 # The flags we use to compile C files.
-CDEBUGFLAGS = -g
-CFLAGS = @CFLAGS@ $(CDEBUGFLAGS)
+CFLAGS = @CFLAGS@
 
 
 ## The C preprocessor.
@@ -57,9 +56,6 @@ LIBXM = @XM_LIBS@
 # where Motif libraries are statically linked in.
 # LIBXM = -Wl,-Bstatic @XM_LIBS@ -Wl,-Bdynamic
 
-# Athena libraries.  (-lXaw -lXmu)
-LIBXAW = @XAW_LIBS@
-
 # X extension library; needed for Athena and Motif >= 2.0.  (-lXext)
 LIBXEXT = @XEXT_LIBS@
 
@@ -79,7 +75,7 @@ LIBXT = @XT_LIBS@
 LIBX11 = @X_PRE_LIBS@ @X11_LIBS@ @X_EXTRA_LIBS@
 
 # All libraries shown above
-ALL_X_LIBS = $(X_LDFLAGS) $(LIBXM) $(LIBXP) $(LIBXPM) $(LIBXAW) $(LIBXEXT) \
+ALL_X_LIBS = $(X_LDFLAGS) $(LIBXM) $(LIBXP) $(LIBXPM) $(LIBXEXT) \
 $(LIBXT) $(LIBX11) $(LIBGEN)
 
 
