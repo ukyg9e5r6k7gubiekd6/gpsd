@@ -1,6 +1,6 @@
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
-bin_PROGRAMS = gps xgpsspeed
+bin_PROGRAMS = $(MISSING_MOTIF) gps xgpsspeed
 
 #
 # Build gps
