@@ -32,8 +32,17 @@ dnl
 dnl
 dnl Locate Libraries
 dnl
-AC_CHECK_LIB(m, sin, LIBM="-lm")
+AC_MSG_CHECKING(whether to force -lm switch)
+AC_TRY_LINK([#include <math.h>], 
+{ double foo; foo = sin(1.234); },
+link_libm=0, link_libm=1)
+if test $link_libm = 1; then
+AC_MSG_RESULT(yes)
+LIBM="-lm"
 AC_SUBST(LIBM)
+else
+AC_MSG_RESULT(no)
+fi
 dnl
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
