@@ -102,7 +102,8 @@ e=EarthMate.</para>
 </varlistentry>
 <varlistentry>
 <term>-s</term>
-<listitem><para>Set baud rate (serial GPS devices only).</para></listitem>
+<listitem><para>Set baud rate (serial GPS devices only). Default is
+4800, except for EarthMate (-T e) devices which default to 9600.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-S</term>
@@ -139,8 +140,7 @@ e=EarthMate.</para>
 <para>gpsd should be able to query any GPS that speaks either the
 standard textual NMEA 0183 protocol or the binary Rockwell protocol
 used by EarthMate and some other GPSes.  gpsd is tested with DeLorme's
-TripMate, EarthMate and with Garmin units (note that with the
-EarthMate you must set the serial port speed to 9600 baud).</para>
+TripMate and EarthMate, also with Garmin units.</para>
 
 <para>The request protocol for gpsd clients is very simple.  Each
 request consists of a single ASCII character followed by a newline.
@@ -228,7 +228,7 @@ the GPS. It has no options.</para>
 <para>gpsplay is a fake gps daemon that plays back GPS log files to
 clients.  It is mainly useful for client debugging.  By default,
 it reads from a log dump at <filename>/tmp/gpslog</filename>; this can
-be changed with the -p option.  gpsplay also accepts -DSpnh options as
+be changed with the -p option.  gpsplay also accepts -DSph options as
 for gpsd.</para>
 
 </refsect2>

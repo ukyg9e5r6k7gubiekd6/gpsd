@@ -173,9 +173,10 @@ static int set_device_type(char what)
 
     if (what=='t')
 	type = DEVICE_TRIPMATE;
-    else if (what=='e')
+    else if (what=='e') {
 	type = DEVICE_EARTHMATE;
-    else {
+	device_speed = B9600;	/* normal 4800 speed fails */
+    } else {
 	fprintf(stderr, "Invalid device type \"%s\"\n"
 		"Using GENERIC instead\n", optarg);
 	type = 0;

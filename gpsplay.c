@@ -189,12 +189,12 @@ int main(int argc, char *argv[])
     fd_set nmea_fds;
     int alen;
     int fd, input;
-    int need_gps, need_init = 1;
+    int need_gps;
     extern char *optarg;
     int option;
     int fixcnt = 0;
 
-    while ((option = getopt(argc, argv, "D:S:hnp:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:hp:")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = (int) strtol(optarg, 0, 0);
@@ -204,9 +204,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'p':
 	    device_name = optarg;
-	    break;
-	case 'n':
-	    need_init = 0;
 	    break;
 	case 'h':
 	case '?':
