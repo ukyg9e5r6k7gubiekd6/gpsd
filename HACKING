@@ -68,3 +68,8 @@ into gpsd might be a useful thing.
 For debugging purposes, it may be helpful to configure with --disable-shared.
 This turns off all the shared-library crud, making it somewhat easier to
 use gdb.
+
+There is a script called logextract in the distribution that you can use
+to strip clean NMEA out of the log files produced by gpsd.  This can be
+useful if someone ships you a log that they allege caused gpsd to 
+misbehave.
