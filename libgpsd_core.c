@@ -247,12 +247,14 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 {
     int i, j;
     char *bufp2 = bufp;
+    bufp[0] = '\0';
 
     j = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
 
     // FIXME!  only dump chanels that have data
     for( i = 0 ; i < MAXCHANNELS; i++ ) {
 	if (i % 4 == 0) {
+	    bufp += strlen(bufp);
             bufp2 = bufp;
 	    sprintf(bufp, "$GPGSV,%d,%d,%02d", j, (i / 4) + 1,
             	session->gNMEAdata.satellites);
@@ -262,10 +264,11 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 	    sprintf(bufp, ",%02d,%02d,%03d,%02d", session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.elevation[i], session->gNMEAdata.azimuth[i], session->gNMEAdata.ss[i]);
 	else
-	    sprintf(bufp, ",%02d,00,000,%02d,", session->gNMEAdata.PRN[i],
+	    sprintf(bufp, ",%02d,00,000,%02d", session->gNMEAdata.PRN[i],
 		    session->gNMEAdata.ss[i]);
 	if (i % 4 == 3) {
-	    nmea_add_checksum(bufp);
+	    strcat( bufp2, "*");
+	    nmea_add_checksum(bufp2);
 	    if (session->gNMEAdata.raw_hook) {
 		session->gNMEAdata.raw_hook(bufp2);
 	    }
@@ -276,26 +279,27 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
 {
     int	i, j;
+    char *bufp2 = bufp;
 
     sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gNMEAdata.mode);
     j = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 	if (session->gNMEAdata.used[i]) {
-	    bufp = bufp + strlen(bufp);
+	    bufp += strlen(bufp);
 	    sprintf(bufp, "%02d,", session->gNMEAdata.PRN[i]);
 	    j++;
 	}
     }
     for (i = j; i < MAXCHANNELS; i++) {
-	bufp = bufp + strlen(bufp);
+	bufp += strlen(bufp);
 	sprintf(bufp, ",");
     }
-    bufp = bufp + strlen(bufp);
+    bufp += strlen(bufp);
     sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
-    nmea_add_checksum(bufp);
+    nmea_add_checksum(bufp2);
     if (session->gNMEAdata.raw_hook) {
-        session->gNMEAdata.raw_hook(bufp);
+        session->gNMEAdata.raw_hook(bufp2);
     }
 }
 
