@@ -38,8 +38,15 @@ position accuracy of a GPS in motion.</para>
 into <application>gpsd</application> that will only be present if
 it was configured to support profiling.</para>
 
-<para>Graphs are generated using
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+<para>To display the graph, use
+<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+Thus, for example, to display the default spatial scatter plot, do
+this:
+
+<programlisting>
+gpsplot | gnuplot -persist
+</programlisting>
+</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
