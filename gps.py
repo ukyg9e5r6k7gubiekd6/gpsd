@@ -207,7 +207,7 @@ class gps(gpsdata):
 	      self.mode = int(data)
               self.valid |= MODE_SET
 	    elif cmd in ('N', 'n'):
-	      self.drive_rmode = int(data)
+	      self.driver_mode = int(data)
 	    elif cmd in ('O', 'o'):
                 fields = data.split()
                 if fields[0] == '?':
