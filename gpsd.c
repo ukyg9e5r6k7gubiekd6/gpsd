@@ -51,7 +51,7 @@
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 /* the default driver is NMEA */
-struct session_t session = {&nmea};
+struct session_t session;
 
 static int gps_timeout = GPS_TIMEOUT;
 static char *device_name = 0;
@@ -147,25 +147,6 @@ static void usage()
   -D integer         = set debug level \n\
   -h                 = help message \n\
 ", stderr);
-}
-
-static struct gps_type_t *set_device_type(char what)
-/* select a device driver by key letter */
-{
-    struct gps_type_t **dp, *drivers[] = {&nmea, 
-					  &tripmate,
-					  &earthmate_a, 
-					  &earthmate_b,
-    					  &logfile};
-    for (dp = drivers; dp < drivers + sizeof(drivers)/sizeof(drivers[0]); dp++)
-	if ((*dp)->typekey == what) {
-	    fprintf(stderr, "Selecting %s driver...\n", (*dp)->typename);
-	    goto foundit;
-	}
-    fprintf(stderr, "Invalid device type \"%s\"\n"
-	    "Using GENERIC instead\n", optarg);
- foundit:;
-    return *dp;
 }
 
 static void print_settings(char *service, char *dgpsserver)
@@ -417,7 +398,7 @@ int main(int argc, char *argv[])
     int alen;
     extern char *optarg;
     int option;
-    char *colon;
+    char gpstype = 'n', *colon;
     int fd;
     int need_gps;
 
@@ -425,7 +406,7 @@ int main(int argc, char *argv[])
     while ((option = getopt(argc, argv, "D:S:T:hi:p:d:t:")) != -1) {
 	switch (option) {
 	case 'T':
-	    session.device_type = set_device_type(*optarg);
+	    gpstype = *optarg;
 	    break;
 	case 'D':
 	    session.debug = (int) strtol(optarg, 0, 0);
@@ -495,6 +476,8 @@ int main(int argc, char *argv[])
     openlog("gpsd", LOG_PID, LOG_USER);
     gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
     msock = netlib_passiveTCP(service, QLEN);
+    if (msock == -1)
+	exit(2);	/* netlib_passiveTCP will have issued a message */
     gpscli_report(1, "gpsd listening on port %s\n", service);
 
     FD_ZERO(&afds);
@@ -502,7 +485,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
-    gps_init(&session, device_name, gps_timeout, dgpsserver, raw_hook);
+    gps_init(&session, device_name, gps_timeout, gpstype, dgpsserver, raw_hook);
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 

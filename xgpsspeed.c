@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <getopt.h>
 
 #include <stdio.h>
 #include <math.h>
@@ -33,6 +34,7 @@ extern double rint();
 #endif
 
 struct session_t session;
+static char *device_name = NULL;
 
 static Widget toplevel, base;
 static Widget tacho, label;
@@ -70,12 +72,6 @@ static void open_input(XtAppContext app);
 
 #undef Offset
 
-void gpscli_errexit(char *s)
-{
-    perror(s);
-    exit(1);
-}
-
 void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
@@ -103,8 +99,40 @@ main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     Cardinal        i;
+    extern char *optarg;
+    char devtype = 'n';
+    int option;
 
     session.debug = 1;
+    while ((option = getopt(argc, argv, "D:T:hp:")) != -1) {
+	switch (option) {
+        case 'T':
+	    devtype = *optarg;
+            break;
+	case 'D':
+	    session.debug = (int) strtol(optarg, 0, 0);
+	    break;
+	case 'p':
+	    if (device_name)
+		free(device_name);
+	    device_name = malloc(strlen(optarg) + 1);
+	    strcpy(device_name, optarg);
+	    break;
+	case 'h':
+	case '?':
+	default:
+	    fputs("usage:  gps [options] \n\
+  options include: \n\
+  -p string    = set GPS device name \n\
+  -T {e|t}     = set GPS device type \n\
+  -s baud_rate = set baud rate on GPS device \n\
+  -D integer   = set debug level \n\
+  -h           = help message \n\
+", stderr);
+	    exit(1);
+	}
+    }
+
 
     toplevel = XtVaAppInitialize(&app, "XGpsSpeed", options, XtNumber(options),
 			    &argc, argv, fallback_resources, NULL);
@@ -144,6 +172,7 @@ main(int argc, char **argv)
 				  base, NULL, 0);
     
     XtRealizeWidget(toplevel);
+    gps_init(&session,device_name, 5, devtype, NULL, NULL);
     open_input(app);
     
     XtAppMainLoop(app);
@@ -167,7 +196,7 @@ void Usage()
 #endif	
 #endif
 
-void update_display()
+void update_display(void)
 {
   int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
 #if 0
@@ -181,60 +210,15 @@ void update_display()
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-  static unsigned char buf[BUFSIZE];  /* that is more than a sentence */
-  static int offset = 0;
-  int count;
-  int flags;
-
-  ioctl(*source, FIONREAD, &count);
-
-  /* Make the port NON-BLOCKING so reads will not wait if no data */
-  if ((flags = fcntl(*source, F_GETFL)) < 0) return;
-  if (fcntl(*source, F_SETFL, flags | O_NDELAY) < 0) return;
-
-  while (offset < BUFSIZE && count--) {
-    if (read(*source, buf + offset, 1) != 1)
-      return;
-
-    if (buf[offset] == '\n') {
-      if (buf[offset - 1] == '\r')
-	buf[offset - 1] = '\0';
-      gps_NMEA_handle_message(buf);
-      update_display();
-      offset = 0;
-      return;
-    }
-    offset++;
-  }
-}
-
-int my_gps_open()
-{
-    char *temp;
-    char *port = DEFAULTPORT;
-    char *device_name="localhost";
-    int ttyfd;
-
-    temp = malloc(strlen(device_name) + 1);
-    strcpy(temp, device_name);
-
-    /* temp now holds the HOSTNAME portion and port the port number. */
-    ttyfd = netlib_connectTCP(temp, port);
-    free(temp);
-    port = 0;
-
-    if (write(ttyfd, "r\n", 2) != 2)
-      gpscli_errexit("Can't write to socket");
-    return ttyfd;
+    gps_poll(&session);
 }
 
 static void open_input(XtAppContext app)
 {
-    int input = 0;
     XtInputId input_id;
 
-    input = my_gps_open();
+    gps_activate(&session);
 
-    input_id = XtAppAddInput(app, input, (XtPointer) XtInputReadMask,
+    input_id = XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
                              handle_input, NULL);
 }

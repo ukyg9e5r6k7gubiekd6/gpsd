@@ -171,7 +171,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
     {
-	gpscli_report(0, "Invalid GPRMC zeroes status.\n");
+	gpscli_report(2, "Invalid GPRMC zeroes status.\n");
 	out->status = 0;
     }
 

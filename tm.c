@@ -86,7 +86,8 @@ static int nmea_handle_input(int input, void (*raw_hook)(char *buf))
 	        gps_NMEA_handle_message(buf);
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
-		raw_hook(buf);
+		if (raw_hook)
+		    raw_hook(buf);
 	    }
 	    offset = 0;
 	    return 1;

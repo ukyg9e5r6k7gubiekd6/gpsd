@@ -239,14 +239,13 @@ restart a timed-out connection and cannot use differential-GPS
 corrections).  It displays current GPS animation and (for GPSes that
 support the feature) the locations of accessible satellites.</para>
 
-<para>gps accepts -TDpsh options as for gpsd, used only when it is
-directly connected to a GPS,</para>
+<para>gps accepts -TDph options as for gpsd.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
 <para>xgpsspeed is a speedometer that uses position information from
-the GPS. It has no options.</para>
+the GPS. It accepts -TDph options as for gpsd.</para>
 
 </refsect2>
 </refsect1>

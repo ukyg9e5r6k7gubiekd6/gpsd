@@ -468,7 +468,8 @@ static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *
 	if (session.debug > 4)
 	    gpscli_report(1, "%s", buf);
 
-	raw_hook(buf);
+	if (raw_hook)
+	    raw_hook(buf);
     }
     if (eminit)
 	em_init();

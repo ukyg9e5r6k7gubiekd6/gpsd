@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -72,7 +73,7 @@ static Widget status;
 
 static int device_speed = 4800;
 static char *device_name = 0;
-static char *default_device_name = "localhost:2947";
+static char *default_device_name = "/dev/gps";
 
 String fallback_resources[] =
 {
@@ -303,31 +304,7 @@ static void build_gui(Widget lxbApp)
 **************************************************/
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-    static unsigned char buf[BUFSIZE];	/* that is more than a sentence */
-    static int offset = 0;
-    int count;
-    int flags;
-
-    ioctl(*source, FIONREAD, &count);
-
-   /* Make the port NON-BLOCKING so reads will not wait if no data */
-   if ((flags = fcntl(*source, F_GETFL)) < 0) return;
-   if (fcntl(*source, F_SETFL, flags | O_NDELAY) < 0) return;
-
-    while (offset < BUFSIZE && count--) {
-	if (read(*source, buf + offset, 1) != 1)
-	    return;
-
-	if (buf[offset] == '\n') {
-	    if (buf[offset - 1] == '\r')
-		buf[offset - 1] = '\0';
-	    gps_NMEA_handle_message(buf);
-	    update_display(buf);
-	    offset = 0;
-	    return;
-	}
-	offset++;
-    }
+    gps_poll(&session);
 }
 
 /**************************************************
@@ -337,8 +314,10 @@ void update_display(char *message)
 {
     int i;
     XmString string[12];
-    char s[128];
+    char s[128], *sp;
 
+    while (isspace(*(sp = message + strlen(message) - 1)))
+	*sp = '\0';
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
@@ -397,15 +376,11 @@ void update_display(char *message)
 **************************************************/
 static void open_input(XtAppContext app)
 {
-    int input = 0;
     XtInputId input_id;
 
-    input = gps_open(device_name, device_speed);
+    gps_activate(&session);
 
-    session.fdin = input;
-    session.fdout = input;
-
-    input_id = XtAppAddInput(app, input, (XtPointer) XtInputReadMask,
+    input_id = XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 }
 
@@ -436,23 +411,13 @@ int main(int argc, char *argv[])
     extern char *optarg;
     int option;
     double baud;
+    char devtype = 'n';
 
     session.debug = 1;
     while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
 	switch (option) {
         case 'T':
-            switch (*optarg) {
-                case 't':
-                    session.device_type = &tripmate;
-                    break;
-                case 'e':
-                    session.device_type = &earthmate_a;
-                    break;
-                default:
-                    fprintf(stderr,"Invalide device type \"%c\"\n"
-                                   "Using GENERIC instead\n", *optarg);
-                    break;
-            }
+	    devtype = *optarg;
             break;
 	case 'D':
 	    session.debug = (int) strtol(optarg, 0, 0);
@@ -465,20 +430,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 's':
 	    baud = strtod(optarg, 0);
-	    if (baud < 200)
-		baud *= 1000;
-	    if (baud < 2400)
-		device_speed = B1200;
-	    else if (baud < 4800)
-		device_speed = B2400;
-	    else if (baud < 9600)
-		device_speed = B4800;
-	    else if (baud < 19200)
-		device_speed = B9600;
-	    else if (baud < 38400)
-		device_speed = B19200;
-	    else
-		device_speed = B38400;
 	    break;
 	case 'h':
 	case '?':
@@ -528,19 +479,13 @@ int main(int argc, char *argv[])
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
 
+    gps_init(&session,device_name, 5, devtype, NULL, update_display);
     open_input(app);
 
     init_list();
 
     XtAppMainLoop(app);
 
+    gps_wrap(&session);
     return 0;
-}
-
-
-void gpscli_errexit(char *s)
-{
-    perror(s);
-    gps_close();
-    exit(1);
 }

@@ -151,7 +151,7 @@ int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* High-level interface */
 void gps_init(struct session_t *session, 
-	      char *device, int timeout, 
+	      char *device, int timeout, char devtype,
 	      char *dgpsserver,
 	      void (*raw_hook)(char *buf));
 int gps_activate(struct session_t *session);

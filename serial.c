@@ -62,11 +62,16 @@ int gps_open(char *device_name, int device_speed)
 	*p = '\0';
 
 	/* temp now holds the HOSTNAME portion and port the port number. */
-	ttyfd = netlib_connectTCP(temp, port);
+	if ((ttyfd = netlib_connectTCP(temp, port)) == -1)
+	    return (-1);
+
 	port = 0;
 
 	if (write(ttyfd, "r\n", 2) != 2)
-	    gpscli_errexit("Can't write to socket");
+	{
+	    gpscli_report(0, "Can't write to socket");
+	    return (-1);
+	}
     } else {
 	gpscli_report(1, "opening GPS data source at %s\n", device_name);
 	ttyfd = open(temp, O_RDWR | O_NONBLOCK);

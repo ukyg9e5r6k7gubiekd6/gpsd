@@ -10,13 +10,40 @@
 
 #define BUFSIZE	4096
 
+static struct gps_type_t *set_device_type(char what)
+/* select a device driver by key letter */
+{
+    struct gps_type_t **dp, *drivers[] = {&nmea, 
+					  &tripmate,
+					  &earthmate_a, 
+					  &earthmate_b,
+    					  &logfile};
+    for (dp = drivers; dp < drivers + sizeof(drivers)/sizeof(drivers[0]); dp++)
+	if ((*dp)->typekey == what) {
+	    fprintf(stderr, "Selecting %s driver...\n", (*dp)->typename);
+	    goto foundit;
+	}
+    return NULL;
+ foundit:;
+    return *dp;
+}
+
 void gps_init(struct session_t *session, 
-	      char *device, int timeout, 
+	      char *device, int timeout,
+ 	      char devicetype,
 	      char *dgpsserver,
 	      void (*raw_hook)(char *buf))
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
+    struct gps_type_t *devtype;
+    
+    session->device_type = &nmea;
+    devtype = set_device_type(devicetype);
+    if (!devtype)
+	gpscli_report(1, "invalid GPS type \"%s\", using NMEA instead\n", optarg);
+    else
+	session->device_type = devtype;
 
     session->dsock = -1;
     if (dgpsserver) {
@@ -33,7 +60,7 @@ void gps_init(struct session_t *session,
 
 	session->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (session->dsock < 0)
-	    gpscli_errexit("Can't connect to dgps server");
+	    gpscli_report(1, "Can't connect to dgps server");
 
 	gethostname(hn, sizeof(hn));
 

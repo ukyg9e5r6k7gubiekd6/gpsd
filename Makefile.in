@@ -118,13 +118,16 @@ LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJEC
 ## Programs
 PROGRAMS=gpsd
 
+## Manual pages
+PAGES=gpsd.1 libgpsd.3
+
 ## Motif dependent programs and object files
 MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
 @MISSING_MOTIF@MOTIF_OBJECTS = display.o
 
 XGPSOBJS=xgpsspeed.o Tachometer.o
 
-all: $(PROGRAMS) $(MOTIF_PROGRAMS) gpsd.1
+all: $(PROGRAMS) $(MOTIF_PROGRAMS) $(PAGES)
 
 gpsd: gpsd.o libgpsd.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
@@ -155,6 +158,9 @@ xgpsspeed.o: xgpsspeed.c gpsd.h
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
 
+libgpsd.3: libgpsd.xml
+	xmlto man libgpsd.xml
+
 install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
@@ -165,7 +171,9 @@ install:
 		$(INSTALL) -m 755 $$app ${DESTDIR}${bindir} ; \
 	done
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man1/
-	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd,1
+	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd.1
+	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man3/
+	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgpsd.1
 
 clean:
 	rm -f *.o *.a gpsd gps xgpsspeed *.1 *~ config.status

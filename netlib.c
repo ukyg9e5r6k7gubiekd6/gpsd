@@ -40,12 +40,12 @@ int passivesock(char *service, char *protocol, int qlen)
     if ( (pse = getservbyname(service, protocol)) )
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
-	sprintf(mbuf, "Can't get \"%s\" service entry.\n", service);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't get \"%s\" service entry.\n", service);
+	return -1;
     }
     if ((ppe = getprotobyname(protocol)) == 0) {
-	sprintf(mbuf, "Can't get \"%s\" protocol entry.\n", protocol);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
+	return -1;
     }
     if (strcmp(protocol, "udp") == 0)
 	type = SOCK_DGRAM;
@@ -54,19 +54,22 @@ int passivesock(char *service, char *protocol, int qlen)
 
     s = socket(PF_INET, type, ppe->p_proto);
     if (s < 0)
-	gpscli_errexit("Can't create socket:");
+    {
+	gpscli_report(0, "Can't create socket:");
+	return -1;
+    }
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
-        sprintf(mbuf, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
-	gpscli_errexit(mbuf);
+	gpscli_report(0, mbuf, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
+	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	sprintf(mbuf, "Can't bind to port %s", service);
-	gpscli_errexit(mbuf);
+	gpscli_report(1, "Can't bind to port %s", service);
+	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	sprintf(mbuf, "Can't listen on %s port:", service);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't listen on %s port:", service);
+	return -1;
     }
     return s;
 }
@@ -92,18 +95,18 @@ int netlib_connectsock(char *host, char *service, char *protocol)
     if ( (pse = getservbyname(service, protocol)) )
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
-	sprintf(mbuf, "Can't get \"%s\" service entry.\n", service);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't get \"%s\" service entry.\n", service);
+	return -1;
     }
     if ( (phe = gethostbyname(host)) )
 	bcopy(phe->h_addr, (char *) &sin.sin_addr, phe->h_length);
     else if ((sin.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE) {
-	sprintf(mbuf, "Can't get host entry: \"%s\".\n", host);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't get host entry: \"%s\".\n", host);
+	return -1;
     }
     if ((ppe = getprotobyname(protocol)) == 0) {
-	sprintf(mbuf, "Can't get \"%s\" protocol entry.\n", protocol);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
+	return -1;
     }
     if (strcmp(protocol, "udp") == 0)
 	type = SOCK_DGRAM;
@@ -112,16 +115,19 @@ int netlib_connectsock(char *host, char *service, char *protocol)
 
     s = socket(PF_INET, type, ppe->p_proto);
     if (s < 0)
-	gpscli_errexit("Can't create socket:");
+    {
+	gpscli_report(0, "Can't create socket:");
+	return -1;
+    }
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
-        sprintf(mbuf, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
+	return -1;
     }
 
     if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	sprintf(mbuf, "Can't connect to %s.%s", host, service);
-	gpscli_errexit(mbuf);
+	gpscli_report(0, "Can't connect to %s.%s", host, service);
+	return -1;
     }
     return s;
 }
