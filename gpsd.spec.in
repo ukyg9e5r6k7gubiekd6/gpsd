@@ -80,7 +80,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %attr(755, root, root) %{_bindir}/gpsprof
 %{_libdir}/libgps.la
 %{_libdir}/libgps.so*
-%{_mandir}/man1/gpsd.8*
+%{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/xgps.1*
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
