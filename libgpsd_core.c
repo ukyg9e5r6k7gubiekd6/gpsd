@@ -9,6 +9,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>	/* for FIONREAD on BSD systems */
 #endif
