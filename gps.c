@@ -136,15 +136,18 @@ static void build_gui(Widget lxbApp)
     n++;
     XtSetValues(lxbApp, args, n);
 
+#define LEFTSIDE_WIDTH	180
     /* the data panel */
     n = 0;
     XtSetArg(args[n], XmNrubberPositioning, False);
     n++;
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
+    XtSetArg(args[n], XmNwidth, LEFTSIDE_WIDTH);
+    n++;
     data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
 
-    /* satellite location and SNR display */
+    /* satellite location and SNR data panel */
 #define FRAMEHEIGHT	220
     XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
     XtSetArg(args[1], XmNleftOffset, 10);
@@ -154,9 +157,9 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
 #ifdef PROCESS_PRWIZCH
-    XtSetArg(args[7], XmNwidth, 100);
+    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH-PRWIZCH_WIDTH);
 #else
-    XtSetArg(args[7], XmNwidth, 180);
+    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH);
 #endif /* PROCESS_PRWIZCH */
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
@@ -164,7 +167,8 @@ static void build_gui(Widget lxbApp)
     satellite_list = XtCreateManagedWidget("satellite_list", xmListWidgetClass, data_panel, args, 11);
 
 #ifdef PROCESS_PRWIZCH
-    /* signal quality display */
+    /* signal quality data panel */
+#define PRWIZCH_WIDTH	80
     XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNtopOffset, 10);
@@ -172,7 +176,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_WIDGET);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
-    XtSetArg(args[7], XmNwidth, 80);
+    XtSetArg(args[7], XmNwidth, PRWIZCH_WIDTH);
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
