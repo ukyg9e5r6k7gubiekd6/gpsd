@@ -47,7 +47,7 @@ sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm
 #
 # Build shared library
 #
-libgps_la_LDFLAGS = -version-number 9:0:0
+libgps_la_LDFLAGS = -version-number 10:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgps_la_SOURCES = \
