@@ -50,6 +50,7 @@
 #define BUFSIZE		4096
 #define GPS_TIMEOUT	5		/* Consider GPS connection loss after 5 sec */
 
+int gps_timeout = GPS_TIMEOUT;
 int debug = 0;
 int device_speed = B4800;
 int device_type;
@@ -136,6 +137,7 @@ static void usage()
   -l latitude  [ set latitude ] \n\
   -p string    [ set gps device name ] \n\
   -s baud_rate [ set baud rate on gps device ] \n\
+  -t timeout   [ set timeout in seconds on fix/mode validity ] \n\
   -c           [ use dgps service for corrections ] \n\
   -d host      [ set dgps server ] \n\
   -r port      [ set dgps rtcm-sc104 port ] \n\
@@ -266,7 +268,7 @@ int main(int argc, char *argv[])
     int sentdgps = 0, fixcnt = 0;
     time_t curtime;
 
-    while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:")) != -1) {
+    while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:t:")) != -1) {
 	switch (option) {
 	case 'T':
 	    device_type = set_device_type(*optarg);
@@ -316,6 +318,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'n':
 	    need_init = 0;
+	    break;
+	case 't':
+	    gps_timeout = strtol(optarg, NULL, 0);
 	    break;
 	case 'h':
 	case '?':
@@ -403,7 +408,7 @@ int main(int argc, char *argv[])
 
 	/* invalidate status if gps went quiet */
  	curtime = time(NULL);
- 	if (curtime > gNMEAdata.last_update + GPS_TIMEOUT) {
+ 	if (curtime > gNMEAdata.last_update + gps_timeout) {
  	  gNMEAdata.mode = 0;
  	  gNMEAdata.status = 0;
  	}
