@@ -75,6 +75,9 @@ LIBGEN = @LIBGEN@
 # X toolkit library.  (-lXt)
 LIBXT = @XT_LIBS@
 
+# Xaw library.  (-lXaw)
+LIBXAW = @XAW_LIBS@
+
 # X library.  (-lSM -lICE -lX11 -lnsl -lsocket)
 LIBX11 = @X_PRE_LIBS@ @X11_LIBS@ @X_EXTRA_LIBS@
 
@@ -108,9 +111,10 @@ LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o $(MOTIF_OBJECTS)
 PROGRAMS=gpsd
 
 ## Motif dependent programs and object files
-@MISSING_MOTIF@MOTIF_PROGRAMS=gps
+@MISSING_MOTIF@MOTIF_PROGRAMS=gps xgpsspeed
 @MISSING_MOTIF@MOTIF_OBJECTS = display.o
 
+XGPSOBJS=xgpsspeed.o Tachometer.o
 
 all: $(PROGRAMS) $(MOTIF_PROGRAMS)
 
@@ -119,6 +123,9 @@ gpsd: gpsd.o libgpsd.a
 
 gps: gps.o libgpsd.a
 	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
+
+xgpsspeed: $(XGPSOBJS)
+	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgpsd $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
 libgpsd.a:  $(LIB_OBJECTS)
 	ar -r libgpsd.a $(LIB_OBJECTS)

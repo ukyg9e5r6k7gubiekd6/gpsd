@@ -15,6 +15,7 @@ struct OUTDATA {
     double latitude;		// Latitude and longitude in format "d.ddddd"
 
     double longitude;
+
     double altitude;		// Altitude in meters
 
     double speed;		// Speed over ground, knots
@@ -43,12 +44,35 @@ struct OUTDATA {
 
     int ss[12];			// signal strength
 
+    int used[12];		// used in solution
+
     int ZCHseen;		// flag
 
     int Zs[12];			// for the rockwell PRWIZCH
 
     int Zv[12];			//                  value
 
+    int year;
+
+    int month;
+
+    int day;
+
+    int hours;
+
+    int minutes;
+
+    int seconds;
+
+    double separation;
+
+    double mag_var;
+
+    double course;
+
+    int seen[12];
+
+    int valid[12];		// signal valid
 };
 
 #define C_LATLON	1
@@ -64,5 +88,4 @@ extern void processPRWIZCH(char *sentence);
 extern void processGPGSA(char *sentence);
 extern void add_checksum(char *sentence);
 extern short checksum(char *sentence);
-
 extern struct OUTDATA gNMEAdata;

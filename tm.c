@@ -89,7 +89,7 @@ void process_exception(char *sentence)
 	write(gNMEAdata.fdout, "EARTHA\r\n", 8);
 	device_type = DEVICE_EARTHMATEb;
 	syslog(LOG_NOTICE, "Found an EarthMate (id).");
-	/*FIXME: should init the darn thing*/
+	do_eminit();
     } else if (debug > 1) {
 	fprintf(stderr, "Unknown exception: \"%s\"",
 		sentence);

@@ -1,4 +1,3 @@
-
 #include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -63,8 +62,10 @@ int nfds;
 int verbose = 1;
 int bincount;
 
+int reopen = 0;
+
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
-extern int handle_EMinput(int input);
+extern int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds);
 static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
@@ -72,6 +73,11 @@ static void onsig(int sig)
     serial_close();
     syslog(LOG_NOTICE, "Received signal %d. Exiting...", sig);
     exit(10 + sig);
+}
+
+static void sigusr1(int sig)
+{
+  reopen = 1;
 }
 
 int daemonize()
@@ -218,6 +224,7 @@ int main(int argc, char *argv[])
 	daemonize();
 
     /* Handle some signals */
+    signal(SIGUSR1, sigusr1);
     signal(SIGINT, onsig);
     signal(SIGHUP, onsig);
     signal(SIGTERM, onsig);
@@ -259,12 +266,22 @@ int main(int argc, char *argv[])
 	    FD_SET(ssock, &afds);
 	}
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
-	    if (device_type == DEVICE_EARTHMATEb)
-		handle_EMinput(input);
+	    if (device_type == DEVICE_EARTHMATEb) 
+		handle_EMinput(input, &afds, &nmea_fds);
 	    else
 		handle_input(input, &afds, &nmea_fds);
 	}
 	need_gps = 0;
+	if (reopen) {
+	  FD_CLR(input, &afds);
+	  reopen = 0;
+	  serial_close();
+	  if ((input = serial_open()) < 0)
+	    errexit("serial open: ");
+	  FD_SET(input, &afds);
+	  gNMEAdata.fdin = input;
+	  gNMEAdata.fdout = input;
+	}
 	for (fd = 0; fd < nfds; fd++) {
 	    if (fd != msock && fd != input && FD_ISSET(fd, &rfds)) {
 		if (input == -1) {
@@ -397,7 +414,7 @@ static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
-		handle_message(buf);
+	        handle_message(buf);
 		strcat(buf, "\r\n");
 		for (fd = 0; fd < nfds; fd++) {
 		    if (FD_ISSET(fd, nmea_fds)) {

@@ -1,13 +1,13 @@
 Begin3
 Title:          gpsd
-Version:        0.94
-Entered-date:   19990124
+Version:        0.99
+Entered-date:   19990717
 Description:    Combines gpsd and gpsclient.
                 A sample client for gpsd, and a gps debuging tool.
                 Connects to gps via serial port or socket connection.
                 A user land daemon for nmea capable gps receivers.
                 Client/server, multiple clients, chaining, filtering.
-Keywords:       gps, daemon, gis, maping, tripmate
+Keywords:       gps, daemon, gis, maping, tripmate, earthmate, garmin
 Author:         remco@rvt.com (Remco Treffkorn)
 Maintained-by:  remco@rvt.com (Remco Treffkorn)
 Primary-site:   ftp://ftp.ugraf.com/pub/gpsd

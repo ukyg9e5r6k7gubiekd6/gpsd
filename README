@@ -55,9 +55,13 @@ He also changed the configuration method from Imake to GNU
 autoconf. This made it easy to port the code to YOUR particular
 platform.
 
+Derrick J Brashear <shadow@dementia.org> added code for the
+EarthMate DeLame. He also added "incredibly gross code to output
+NMEA sentences" (his own words :-)
+                                                                            
 Be advised: any bugs in this code are mine, and mine only ;-)
 
 
-This is as it stands today, March 4 1999.
+This is as it stands today, July 17 1999.
 
 remco@emc.rvt.com

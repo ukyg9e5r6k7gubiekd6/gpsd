@@ -1,0 +1,5 @@
+
+You have to set the serial port speed to 9600 baud.
+This is done with the "-s 9600" option.
+Nothing will work, if you forget this.
+

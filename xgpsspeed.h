@@ -1,0 +1,10 @@
+#include <stdio.h>
+#include <math.h>
+#include <X11/Intrinsic.h>
+#include <X11/StringDefs.h>
+#include <X11/Shell.h>
+#include <X11/Xaw/Box.h>
+#include <X11/Xaw/Label.h>
+#include <X11/Xaw/Command.h>
+#include <X11/Xaw/Paned.h>
+#include <Tachometer.h>

@@ -128,6 +128,32 @@ AC_MSG_WARN([The X toolkit library '-lXt' could not be found.
 fi
 AC_SUBST(XT_LIBS)
 dnl
+
+
+
+
+
+dnl
+dnl Check for Xaw libraries
+dnl
+XAW_LIBS=""
+AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",,
+	${X_PRE_LIBS} ${X11_LIBS})
+if test "$XAW_LIBS" = ""; then
+dnl Not having Xaw is fatal.  Let the user fix this.
+AC_MSG_WARN([The Xaw library '-lXaw' could not be found.
+                    Please use the configure options '--x-includes=DIR'
+                    and '--x-libraries=DIR' to specify the X location.
+                    See the file 'config.log' for further diagnostics.])
+fi
+AC_SUBST(XAW_LIBS)
+dnl
+
+
+
+
+
+
 dnl
 dnl Check for X extension libraries
 dnl
