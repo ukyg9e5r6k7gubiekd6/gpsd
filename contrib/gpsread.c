@@ -56,7 +56,7 @@
 ** set for all users.  E.g. set permission from root with command
 ** `chmod 666 /dev/ttyS?`
 */ 
-#define	MODEMDEVICE	"/dev/ttyS2"	/* COM1 */
+#define	MODEMDEVICE	"/dev/ttyUSB0"	/* COM1 */
 
 #define	_POSIX_SOURCE	1	/* POSIX compliant source */
 #define	FALSE	0
@@ -121,12 +121,7 @@ main(int argc, char *argv[])
 
     if (START)
     {
-      fprintf(stderr,"now waiting for serial NMEA data at 4800 baud from ");
-      if (strstr(MODEMDEVICE,"ttyS0")) fprintf(stderr,"COM1");
-      if (strstr(MODEMDEVICE,"ttyS1")) fprintf(stderr,"COM2");
-      if (strstr(MODEMDEVICE,"ttyS2")) fprintf(stderr,"COM3");
-      if (strstr(MODEMDEVICE,"ttyS3")) fprintf(stderr,"COM4");
-      fprintf(stderr," ...\n");
+      fprintf(stderr,"now waiting for serial NMEA data at 4800 baud from " MODEMDEVICE "\n");
 
       /* Open modem device for reading and writing and not as controlling
          tty because we don't want to get killed if linenoise sends CTRL-C.
