@@ -153,7 +153,7 @@ class gps(gpsdata):
                 #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
             except socket.error, msg:
-                if self.debuglevel > 0: print 'connect fail:', (host, port)
+                #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 if self.sock:
                     self.sock.close()
                 self.sock = None
