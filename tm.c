@@ -53,7 +53,7 @@ static void process_exception(char *sentence)
 void nmea_handle_message(char *sentence)
 /* visible so the direct-connect clients can use it */
 {
-    report(2, "<= %s\n", sentence);
+    report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
 	if (process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
@@ -150,7 +150,7 @@ void tripmate_initializer()
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
 	if (session.fdout != -1) {
 	    write(session.fdout, buf, strlen(buf));
-	    report(1, "=> %s", buf);
+	    report(1, "=> GPS: %s", buf);
 	}
     }
 }

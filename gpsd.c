@@ -485,6 +485,8 @@ static int handle_request(int fd, fd_set * fds)
 
     buf[cc] = '\0';
 
+    if (session.debug >= 2)
+	report(1, "<= client: %s", buf);
     cur_time = time(NULL);
 
 #define STALE_COMPLAINT(l, f) report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
@@ -657,6 +659,8 @@ static int handle_request(int fd, fd_set * fds)
  breakout:
     strcat(reply, "\r\n");
 
+    if (session.debug >= 2)
+	report(1, "=> client: %s", reply);
     if (cc && write(fd, reply, strlen(reply) + 1) < 0)
 	return 0;
 
@@ -664,13 +668,13 @@ static int handle_request(int fd, fd_set * fds)
 }
 
 void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
-/* write to whatever client might be listening */
+/* write to GPS */
 {
     int fd;
 
     for (fd = 0; fd < nfds; fd++) {
 	if (FD_ISSET(fd, nmea_fds)) {
-	    report(1, "--> %s", buf);
+	    report(1, "=> GPS: %s", buf);
 	    if (write(fd, buf, strlen(buf)) < 0) {
 		report(1, "Raw write %s", strerror(errno));
 		FD_CLR(fd, afds);
