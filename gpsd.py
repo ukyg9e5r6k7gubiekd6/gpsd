@@ -336,6 +336,15 @@ class gpsd(gps.gpsdata):
         st = struct.unpack('i', st)[0]
         return st
 
+    def rawread(self):
+        ready = self.waiting()
+        import sys
+        sys.stderr.write("%d seen" % ready)
+        if ready:
+            return self.ttyfp.read(ready)
+        else:
+            return None
+
     def poll(self):
         if self.dsock > -1:
             self.ttyfp.write(session.dsock.recv(1024))
