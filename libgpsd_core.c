@@ -366,8 +366,13 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
     nmea_add_checksum(bufp2);
     gpsd_raw_hook(session, bufp2);
     bufp += strlen(bufp);
-    if (SEEN(session->gNMEAdata.epe_quality_stamp)) {
+    if (SEEN(session->gNMEAdata.epe_quality_stamp)
+	&& finite( session->gNMEAdata.eph)
+	&& finite( session->gNMEAdata.epv)
+	&& finite( session->gNMEAdata.epe)
+    ) {
         // output PGRME
+        // only if realistic
         sprintf(bufp, "$PGRME,%.2f,%.2f,%.2f",
 	    session->gNMEAdata.eph, 
 	    session->gNMEAdata.epv, 
