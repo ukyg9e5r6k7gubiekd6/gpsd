@@ -75,7 +75,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  **************************************************************************/
 
 /*
-   Three sentences, GGA and GGL and RMC, contain timestamps. Timestamps 
+   Three sentences, GGA and GLL and RMC, contain timestamps. Timestamps 
    always look like hhmmss.ss, with the trailing .ss part optional.
    RMC alone has a date field, in the format ddmmyy.  But we want the 
    output to be in ISO 8601 format:
