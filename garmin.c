@@ -203,7 +203,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    char buf[BUFSIZ], *bufp = buf;
+    char buf[BUFSIZ] = "", *bufp = buf;
     unsigned int i = 0, j = 0;
     double track;
 
@@ -507,7 +507,7 @@ static int GetPacket (struct gps_device_t *session )
     int cnt = 0;
     // int x = 0; // for debug dump
 
-    memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
+    memset( session->GarminBuffer, 0, sizeof(Packet_t));
     session->GarminBufferLen = 0;
 
     gpsd_report(4, "GetPacket()\n");
@@ -519,9 +519,10 @@ static int GetPacket (struct gps_device_t *session )
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
 	long theBytesReturned = 0;
+	char *buf = (char *)session->GarminBuffer;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
-		, &session->GarminBuffer[session->GarminBufferLen]
+		, buf + session->GarminBufferLen
 		, ASYNC_DATA_SIZE);
         if ( 0 >  theBytesReturned ) {
 	    // read error...
@@ -573,8 +574,9 @@ static int GetPacket (struct gps_device_t *session )
 static int garmin_probe(struct gps_device_t *session)
 {
 
-    Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
-    char buffer[256];
+    Packet_t *thePacket = NULL;
+    char *buffer = NULL;
+    char str_buf[256];
     fd_set fds, rfds;
     struct timeval tv;
     int sel_ret = 0;
@@ -589,10 +591,10 @@ static int garmin_probe(struct gps_device_t *session)
 	return 0;
     } else {
         // try to find garmin_gps driver
-	while ( fgets( buffer, sizeof(buffer), fp) ) {
+	while ( fgets( str_buf, sizeof(str_buf), fp) ) {
 		// early garmin driver: garmin_gps
 	        // later garmin driver: Garmin USB/TTY
-		if ( strcasestr( buffer, "garmin") ) {
+		if ( strcasestr( str_buf, "garmin") ) {
 			// yes, the garmin_gps driver is active
 			ok = 1;
 			break;
@@ -621,6 +623,17 @@ static int garmin_probe(struct gps_device_t *session)
 	return 0;
     }
 
+    if ( !session->GarminBuffer ) {
+	    // get a packet buffer
+	    session->GarminBuffer = calloc( sizeof(Packet_t), 1);
+	    if ( !session->GarminBuffer ) {
+		gpsd_report(0, "garmin_probe: out of memory!\n");
+		return 0;
+            }
+    }
+    thePacket = (Packet_t*)session->GarminBuffer;
+    buffer = (char *)thePacket;
+
     // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
     set_int(buffer+4, PRIV_PKTID_SET_MODE);
@@ -628,7 +641,7 @@ static int garmin_probe(struct gps_device_t *session)
     set_int(buffer+12, 0); // mode 0
 
     gpsd_report(3, "Set garmin_gps driver mode = 0\n");
-    SendPacket( session,  (Packet_t*) buffer);
+    SendPacket( session,  thePacket);
     // expect no return packet !?
 
     // get Version info
@@ -637,7 +650,7 @@ static int garmin_probe(struct gps_device_t *session)
     set_int(buffer+4, PRIV_PKTID_INFO_REQ);
     set_int(buffer+8, 0); // data length 0
 
-    SendPacket(session,  (Packet_t*) buffer);
+    SendPacket(session,  thePacket);
 
     // get and print the driver Version info
 
@@ -664,7 +677,7 @@ static int garmin_probe(struct gps_device_t *session)
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
-	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	    PrintPacket(session, thePacket);
 
 	    if( ( 75 == thePacket->mPacketType)
 	        && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
@@ -687,7 +700,7 @@ static int garmin_probe(struct gps_device_t *session)
     set_int(buffer+4, GARMIN_PKTID_TRANSPORT_START_SESSION_REQ);
     set_int(buffer+8, 0); // data length 0
 
-    SendPacket(session,  (Packet_t*) buffer);
+    SendPacket(session,  thePacket);
 
     // Wait until the device is ready to the start the session
     // Toss any other packets, up to 4
@@ -709,7 +722,7 @@ static int garmin_probe(struct gps_device_t *session)
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
-	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	    PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
 	        && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
@@ -733,7 +746,7 @@ static int garmin_probe(struct gps_device_t *session)
     set_int(buffer+4, GARMIN_PKTID_PRODUCT_RQST);
     set_int(buffer+8, 0); // data length 0
 
-    SendPacket(session,  (Packet_t*) buffer);
+    SendPacket(session,  thePacket);
 
     // Get the product data packet
     // Toss any other packets, up to 4
@@ -755,7 +768,7 @@ static int garmin_probe(struct gps_device_t *session)
 	    return(0);
         }
 	if ( !GetPacket( session ) ) {
-	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	    PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_APPL == thePacket->mPacketType)
 	        && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
@@ -786,8 +799,9 @@ static int garmin_probe(struct gps_device_t *session)
  */
 static void garmin_init(struct gps_device_t *session)
 {
+	Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
+	char *buffer = (char *)thePacket;
 	int ret;
-	char buffer[256];
 
 	gpsd_report(5, "to garmin_probe()\n");
 	ret = garmin_probe( session );
@@ -801,7 +815,7 @@ static void garmin_init(struct gps_device_t *session)
 	set_int(buffer+8, 2); // data length 2
 	set_int(buffer+12, 49); //  49, CMND_START_PVT_DATA
 
-	SendPacket(session,  (Packet_t*) buffer);
+	SendPacket(session,  thePacket);
 
 	// turn on RMD data 110
 	//set_int(buffer, GARMIN_LAYERID_APPL);
@@ -809,7 +823,7 @@ static void garmin_init(struct gps_device_t *session)
 	//set_int(buffer+8, 2); // data length 2
 	//set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
 
-	//SendPacket(session,  (Packet_t*) buffer);
+	//SendPacket(session,  thePacket);
 }
 
 static int garmin_get_packet(struct gps_device_t *session, int waiting UNUSED)

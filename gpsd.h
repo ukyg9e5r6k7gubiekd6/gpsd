@@ -127,7 +127,9 @@ struct gps_device_t {
 #define NO_SEPARATION	-99999	/* must be out of band */
     double mag_var;		/* Magnetic variation in degrees */  
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */
+    void *GarminBuffer; /* Pointer Garmin packet buffer 
+                           void *, to keep the packet details out of the 
+                           gloabl contect and save spave */
     long GarminBufferLen;                  /* current GarminBuffer Length */
 #endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
