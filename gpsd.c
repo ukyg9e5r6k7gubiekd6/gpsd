@@ -33,7 +33,6 @@
 #include "gpsd.h"
 
 #define DEFAULT_DEVICE_NAME	"/dev/gps"
-#define CONTROL_SOCKET		"/var/run/gpsd.sock"
 
 #define QLEN			5
 
@@ -289,7 +288,7 @@ static struct channel_t *find_device(char *device_name)
     struct channel_t *chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (chp->device && !strcmp(chp->device->gpsd_device, device_name))
+	if (chp->device && !strcmp(chp->device->gpsdata.gps_device, device_name))
 	    return chp;
     return NULL;
 }
@@ -423,7 +422,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		free(stash);
 	    }
 	    if (device)
-		snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
+		snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsdata.gps_device);
 	    else
 		strcpy(phrase, ".F=?");
 	    break;
@@ -434,11 +433,14 @@ static int handle_request(int cfd, char *buf, int buflen)
 		strcpy(phrase, ".B=?");
 	    break;
 	case 'K':
-	    strcpy(phrase, ",K=");
+	    for (j = i = 0; i < MAXDEVICES; i++)
+		if (channels[i].device)
+		    j++;
+	    sprintf(phrase, ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
 		device = channels[i].device;
-		if (device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
-		    strcat(phrase, device->gpsd_device);
+		if (device && strlen(phrase)+strlen(device->gpsdata.gps_device)+1 < sizeof(phrase)) {
+		    strcat(phrase, device->gpsdata.gps_device);
 		    strcat(phrase, " ");
 		}
 	    }
@@ -709,21 +711,21 @@ static void handle_control(int sfd, char *buf)
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
-    static int st, dsock = -1, changed, nowait = 0;
+    static int st, changed, dsock = -1, csock = -1, nowait = 0;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *device_name = DEFAULT_DEVICE_NAME;
-    static char *control_socket = CONTROL_SOCKET;
+    static char *control_socket = NULL;
     static struct channel_t *channel;
     struct gps_device_t *device;
     int dfd;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
-    int option, csock, msock, cfd, go_background = 1;
+    int option, msock, cfd, go_background = 1;
     extern char *optarg;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "D:S:d:f:hNnp:P:v")) != -1) {
+    while ((option = getopt(argc, argv, "F:D:S:d:f:hNnp:P:v")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
@@ -805,10 +807,13 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(1, "listening on port %s\n", service);
-    unlink(control_socket);
-    if ((csock = filesock(control_socket)) < 0) {
-	gpsd_report(0,"control socket create failed, netlib error %d\n",msock);
-	exit(2);
+    if (control_socket) {
+	unlink(control_socket);
+	if ((csock = filesock(control_socket)) < 0) {
+	    gpsd_report(0,"control socket create failed, netlib error %d\n",msock);
+	    exit(2);
+	}
+	FD_SET(csock, &all_fds);
     }
 
     if (dgpsserver) {
@@ -820,7 +825,6 @@ int main(int argc, char *argv[])
     }
 
     FD_SET(msock, &all_fds);
-    FD_SET(csock, &all_fds);
     FD_ZERO(&control_fds);
 
     channel = open_device(device_name, nowait);
@@ -882,7 +886,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* also be open to new control-socket connections */
-	if (FD_ISSET(csock, &rfds)) {
+	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
 

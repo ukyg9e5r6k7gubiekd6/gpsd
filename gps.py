@@ -135,6 +135,8 @@ class gpsdata:
         self.baudrate = 0
         self.stopbits = 0
         self.cycle = 0
+        self.device = None
+        self.devices = []
 
     def __repr__(self):
 	st = ""
@@ -229,11 +231,19 @@ class gps(gpsdata):
 	      self.fix.altitude = float(data)
               self.valid |= ALTITUDE_SET
 	    elif cmd in ('B', 'b'):
-              (f1, f2, f3, f4) = data.split()
-              self.baudrate = int(f1)
-              self.stopbits = int(f4)
+              if data == '?':
+                  self.baudrate = self.stopbits = 0
+                  self.device = None
+              else:
+                  (f1, f2, f3, f4) = data.split()
+                  self.baudrate = int(f1)
+                  self.stopbits = int(f4)
 	    elif cmd in ('C', 'c'):
-	      self.cycle = int(data)
+              if data == '?':
+                  self.cycle = -1
+                  self.device = None
+              else:
+                  self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
               self.gps_time = isotime(self.utc)
@@ -242,13 +252,31 @@ class gps(gpsdata):
 	      parts = data.split()
 	      (self.epe, self.fix.eph, self.fix.epv) = map(float, parts)
               self.valid |= HERR_SET | VERR_SET | PERR_SET
+	    elif cmd in ('F', 'f'):
+                if data == '?':
+                    self.device = None
+                else:
+                    self.device = data
 	    elif cmd in ('I', 'i'):
-	      self.gps_id = data
+              if data == '?':
+                  self.cycle = -1
+                  self.gps_id = None
+              else:
+                  self.gps_id = data
+	    elif cmd in ('K', 'K'):
+                if data == '?':
+                    self.devices = None
+                else:
+                    self.devices = data[1:].split()
 	    elif cmd in ('M', 'm'):
 	      self.fix.mode = int(data)
               self.valid |= MODE_SET
 	    elif cmd in ('N', 'n'):
-	      self.driver_mode = int(data)
+              if data == '?':
+                  self.driver_mode = -1
+                  self.device = None
+              else:
+                  self.driver_mode = int(data)
 	    elif cmd in ('O', 'o'):
                 fields = data.split()
                 if fields[0] == '?':
@@ -310,8 +338,12 @@ class gps(gpsdata):
 	      self.fix.speed = float(data)
               self.valid |= SPEED_SET
 	    elif cmd in ('X', 'x'):
-	      self.online = (data[0] == '1')
-              self.valid |= ONLINE_SET
+              if data == '?':
+                  self.online = -1
+                  self.device = None
+              else:
+                  self.online = float(data)
+                  self.valid |= ONLINE_SET
 	    elif cmd in ('Y', 'y'):
 	      satellites = data.split(":")
 	      self.timings.sentence_time = float(satellites.pop(0))

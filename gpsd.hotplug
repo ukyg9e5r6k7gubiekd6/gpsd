@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # Hotplug script for gpsd by Eric S. Raymond, March 2005
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
+# Can be called like "gpsd.hotplug [+-]/dev/ttyUSB0" for test purposes.
 import sys, os, syslog, glob, socket
+
+CONTROL_SOCKET = "/var/run/gpsd.sock"
 
 def gpsd_control_connect():
     "Acquire a connection to the GPSD control socket."
     try:
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
-        sock.connect("/var/run/gpsd.sock")
+        sock.connect(CONTROL_SOCKET)
         sockfile = sock.makefile()
     except socket.error, msg:
         if sock:
@@ -20,7 +23,7 @@ def gpsd_control_connect():
     else:
         return sockfile
 
-def wake_up_gpsd(devpath):
+def wake_up_gpsd(devpath, action):
     subnodes = glob.glob("/sys" + devpath + "/*")
     subnodes = map(os.path.basename, subnodes)
     subnodes = filter(lambda s: s.startswith("ttyUSB"), subnodes) 
@@ -38,38 +41,38 @@ def wake_up_gpsd(devpath):
         connect = gpsd_connect()
         if connect:
             syslog.syslog("reached a running gpsd")
-        else:
+        elif action == 'add':
             syslog.syslog("attempting to launch gpsd")
-            os.system("gpsd")
+            os.system("gpsd -F " + CONTROL_SOCKET)
             connect = gpsd_control_connect()
         if not connect:
             return
 
-        # We've got a live connection to the gpsd control socket. 
-        # No response, because gpsd will lock on to the device
-        # if it's really a GPS and ignore it if it's not.
-        connect.write("+%s\r\n" % tty)
+        # We've got a live connection to the gpsd control socket.  No
+        # need to parse response, because gpsd will lock on to the
+        # device if it's really a GPS and ignore it if it's not.
+        if action == 'add':
+            connect.write("+%s\r\n" % tty)
+        elif action == 'remove':
+            connect.write("-%s\r\n" % tty)
         connect.close()
         return
 
-def hotplug():
+def hotplug(action, devpath):
     syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
-    syslog.syslog("gpsdplug begins with action: %s" % os.getenv("ACTION"))
-    devpath = os.getenv("DEVPATH")
+    syslog.syslog("gpsdplug begins with action: %s" % action)
     if not devpath:
-        syslog.syslog("No DEVPATH")
+        syslog.syslog("No device")
     else:
-        # First, discover the device
-        #syslog.syslog("DEVPATH = %s" % devpath)
-        wake_up_gpsd(devpath)
+        wake_up_gpsd(devpath, action)
 
     syslog.syslog("gpsdplug ends")
     syslog.closelog()
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:	# Called as hotplug script
-        hotplug()
+        hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
     else:			# Called by hand for testing
         fp = gpsd_control_connect()
-        fp.write(sys.argv[1])
+        fp.write(sys.argv[1]+"\n")
         fp.close()

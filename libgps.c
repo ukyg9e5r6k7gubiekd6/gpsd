@@ -39,6 +39,19 @@ int gps_close(struct gps_data_t *gpsdata)
     int retval = close(gpsdata->gps_fd);
     if (gpsdata->gps_id)
 	free(gpsdata->gps_id);
+	gpsdata->gps_id = NULL;
+    if (gpsdata->gps_device) {
+	free(gpsdata->gps_device);
+	gpsdata->gps_device = NULL;
+    }
+    if (gpsdata->devicelist) {
+	int i;
+	for (i = 0; i < gpsdata->ndevices; i++)
+	    free(gpsdata->devicelist[i]);
+	free(gpsdata->devicelist);
+	gpsdata->devicelist = NULL;
+	gpsdata->ndevices = -1;
+    }    
     free(gpsdata);
     return retval;
 }
@@ -52,14 +65,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
     char *ns, *sp, *tp;
+    int i;
 
     gpsdata->valid = 0;
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (!strncmp(ns, "GPSD", 4)) {
-	    for (sp = ns + 5; ; sp = tp+1) {
-		if (!(tp = strchr(sp, ',')))
-		    tp = strchr(sp, '\r');
-		if (!tp) break;
+	    for (sp = ns + 5; ; sp = tp) {
+		tp = sp + strcspn(sp, ".\r\n");
+		if (!*tp) break;
 		*tp = '\0';
 
 		if (sp[2] == '?')
@@ -94,14 +107,46 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
 		    gpsdata->valid |= HERR_SET| VERR_SET | PERR_SET;
 		    break;
+		case 'F':
+		    if (sp[2] == '?') 
+			gpsdata->gps_device = NULL;
+		    else {
+			if (gpsdata->gps_device)
+			    free(gpsdata->gps_id);
+			gpsdata->gps_device = strdup(sp+2);
+			gpsdata->valid |= DEVICE_SET;
+		    }
+		    break;
 		case 'I':
 		    if (sp[2] == '?') 
 			gpsdata->gps_id = NULL;
 		    else {
 			if (gpsdata->gps_id)
-			free(gpsdata->gps_id);
+			    free(gpsdata->gps_id);
 			gpsdata->gps_id = strdup(sp+2);
+			gpsdata->valid |= DEVICEID_SET;
 		    }
+		    break;
+		case 'K':
+		    if (gpsdata->devicelist) {
+			for (i = 0; i < gpsdata->ndevices; i++)
+			    free(gpsdata->devicelist[i]);
+			free(gpsdata->devicelist);
+			gpsdata->devicelist = NULL;
+			gpsdata->ndevices = -1;
+			gpsdata->valid |= DEVICELIST_SET;
+		    }    
+		    if (sp[2] != '?') {
+			gpsdata->ndevices = strtol(sp+2, &sp, 10);
+			gpsdata->devicelist = (char **)calloc(
+			    gpsdata->ndevices,
+			    sizeof(char **));
+			gpsdata->devicelist[i=0] = strtok_r(sp+2, " \r\n", &ns);
+			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
+			    gpsdata->devicelist[++i] = strdup(sp);
+			gpsdata->valid |= DEVICELIST_SET;
+		    }
+		    break;
 		case 'M':
 		    gpsdata->fix.mode = atoi(sp+2);
 		    gpsdata->valid |= MODE_SET;
@@ -309,21 +354,24 @@ void data_dump(struct gps_data_t *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    printf("online: %lf\n", collect->online);
-    printf("P: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
-    if (collect->valid | ALTITUDE_SET)
+    if (collect->valid & ONLINE_SET)
+	printf("online: %lf\n", collect->online);
+    if (collect->valid & LATLON_SET)
+	printf("P: lat/lon: %lf %lf\n", collect->fix.latitude, collect->fix.longitude);
+    if (collect->valid & ALTITUDE_SET)
 	printf("A: altitude: %lf  U: climb: %lf\n", 
 	       collect->fix.altitude, collect->fix.climb);
     if (collect->fix.track != TRACK_NOT_VALID)
 	printf("T: track: %lf  V: speed: %lf\n", 
 	       collect->fix.track, collect->fix.speed);
-    if (collect->valid | STATUS_SET)
+    if (collect->valid & STATUS_SET)
 	printf("S: status: %d (%s)\n", 
 	       collect->status, status_values[collect->status]);
-    if (collect->fix.mode | MODE_SET)
+    if (collect->fix.mode & MODE_SET)
 	printf("M: mode: %d (%s)\n", 
 	   collect->fix.mode, mode_values[collect->fix.mode]);
-    printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+    if (collect->fix.mode & (HDOP_SET | VDOP_SET | PDOP_SET))
+	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
 	   collect->satellites_used, 
 	   collect->pdop, collect->hdop, collect->vdop);
 
@@ -335,6 +383,18 @@ void data_dump(struct gps_data_t *collect, time_t now)
 	    printf("    %2.2d: %2.2d %3.3d %3.3d %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
     }
+    if (collect->valid & DEVICE_SET)
+	printf("Device is %s\n", collect->gps_device);
+    if (collect->valid & DEVICEID_SET)
+	printf("GPSD ID is %s\n", collect->gps_id);
+    if (collect->valid & DEVICELIST_SET) {
+	int i;
+	printf("%d devices:\n", collect->ndevices);
+	for (i = 0; i < collect->ndevices; i++) {
+	    printf("%d: %s\n", collect->ndevices, collect->devicelist[i]);
+	}
+    }
+	
 }
 
 static void dumpline(struct gps_data_t *ud UNUSED, char *buf)
@@ -370,8 +430,8 @@ main(int argc, char *argv[])
 		    putchar('\n');
 		break;
 	    }
-	    if (!gps_query(collect, buf))
-		fputs("No changes.\n", stdout);
+	    collect->valid = 0;
+	    gps_query(collect, buf);
 	    data_dump(collect, time(NULL));
 	}
     }

@@ -61,7 +61,7 @@ struct gps_device_t *gpsd_init(char *device)
     if (!session)
 	return NULL;
 
-    session->gpsd_device = strdup(device);
+    session->gpsdata.gps_device = strdup(device);
     session->device_type = gpsd_drivers[0];
     session->dsock = -1;
 
@@ -78,7 +78,7 @@ struct gps_device_t *gpsd_init(char *device)
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-    gpsd_report(1, "closing GPS=%s\n", session->gpsd_device);
+    gpsd_report(1, "closing GPS=%s\n", session->gpsdata.gps_device);
     gpsd_close(session);
     session->gpsdata.gps_fd = -1;
     if (session->device_type->wrapup)

@@ -1,12 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Finish and test the control-socket implementation
-
-1) gpsfake needs to set the socket location to something reasonable.
-2) gpsd.hotplug needs to send remove messages
-3) libgps/gps.py need to read F and K responses
-
 ** In the SiRF driver, get leap seconds from almanac data
 
 Currently we're using a fixed 13-leap-second offset to convert GPS
@@ -129,23 +123,6 @@ now says, but it needs to be confirmed.
 This area needs some attention from somebody who cares a lot about
 GPS accuracy and is willing to do research on error budgets to pin
 down the numbers and confidence levels.
-
-** Multisession code needs to be tested.
-
-Each client is at any given time listening to a channel attached to a
-specified device. It does not see messages from other devices.
-
-The F command now has the semantics "add a GPS to gpsd's
-internal search list (and switch this client to use that GPS)".  
-
-The new 'K' command lists available devices.  Soon, it will remove a
-GPS from the GPS list (hotplug scripts can use it to cue gpsd on a
-remove event).
-
-Tentative answers:
-
-(1) The default GPS is the last one plugged in.
-(2) Nothing.  It should just get an offline indication.
 
 ** Subsecond polling
 

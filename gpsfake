@@ -35,8 +35,10 @@ except:
     sys.exit(1)
 slave = os.ttyname(slave_fd)
 
-spawncmd = "gpsd -N -P /tmp/gpsfake%d -f %s %s" % (os.getpid(),slave,doptions)
+spawncmd = "gpsd -N -P %s -f %s %s" % (pidfile, slave, doptions)
 spawncmd = spawncmd.strip()
+
+pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 
 if not spawn:
     raw_input("gpsfake: launch '%s' and press enter..." % spawncmd)
@@ -46,7 +48,7 @@ elif os.system(spawncmd + " &"):
 else:
     sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
 
-    fp = open("/tmp/gpsfake%s" % os.getpid())
+    fp = open(pidfile)
     pid = int(fp.read())
     fp.close()
     os.remove("/tmp/gpsfake%s" % os.getpid())

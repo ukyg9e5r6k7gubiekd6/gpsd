@@ -68,27 +68,30 @@ struct gps_fix_t {
 
 struct gps_data_t {
     unsigned long valid;	/* validity mask */
-#define ONLINE_SET	0x000001
-#define TIME_SET	0x000002
-#define TIMERR_SET	0x000004
-#define LATLON_SET	0x000008
-#define ALTITUDE_SET	0x000010
-#define SPEED_SET	0x000020
-#define TRACK_SET	0x000040
-#define CLIMB_SET	0x000080
-#define STATUS_SET	0x000100
-#define MODE_SET	0x000200
-#define HDOP_SET  	0x000400
-#define VDOP_SET  	0x000800
-#define PDOP_SET  	0x001000
-#define HERR_SET	0x002000
-#define VERR_SET	0x004000
-#define PERR_SET	0x008000
-#define SATELLITE_SET	0x010000
-#define SPEEDERR_SET	0x020000
-#define TRACKERR_SET	0x040000
-#define CLIMBERR_SET	0x080000
-#define ERROR_SET	0x100000
+#define ONLINE_SET	0x00000001
+#define TIME_SET	0x00000002
+#define TIMERR_SET	0x00000004
+#define LATLON_SET	0x00000008
+#define ALTITUDE_SET	0x00000010
+#define SPEED_SET	0x00000020
+#define TRACK_SET	0x00000040
+#define CLIMB_SET	0x00000080
+#define STATUS_SET	0x00000100
+#define MODE_SET	0x00000200
+#define HDOP_SET  	0x00000400
+#define VDOP_SET  	0x00000800
+#define PDOP_SET  	0x00001000
+#define HERR_SET	0x00002000
+#define VERR_SET	0x00004000
+#define PERR_SET	0x00008000
+#define SATELLITE_SET	0x00010000
+#define SPEEDERR_SET	0x00020000
+#define TRACKERR_SET	0x00040000
+#define CLIMBERR_SET	0x00080000
+#define DEVICE_SET	0x00100000
+#define DEVICELIST_SET	0x00200000
+#define DEVICEID_SET	0x00400000
+#define ERROR_SET	0x00800000
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
@@ -123,11 +126,16 @@ struct gps_data_t {
     int ss[MAXCHANNELS];	/* signal strength */
     int part, await;		/* for tracking GSV parts */
 
-    /* what type gpsd thinks the device is */
+    /* where and what gpsd thinks the device is */
+    char	*gps_device;	/* only valid if non-null. */
     char	*gps_id;	/* only valid if non-null. */
     unsigned int baudrate, stopbits;	/* RS232 link paramters */
     unsigned int driver_mode;	/* whether driver is in native mode or not */
     
+    /* device list */
+    int ndevices;		/* count of available devices */
+    char **devicelist;		/* list of pathnames */
+
     /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */

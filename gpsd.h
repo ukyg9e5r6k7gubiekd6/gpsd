@@ -95,7 +95,6 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     struct gps_type_t *device_type;
-    char *gpsd_device;	/* where to find the GPS */
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */

@@ -84,8 +84,8 @@ int gpsd_open(struct gps_device_t *session)
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] = {4800, 9600, 19200, 38400, 57600};
 
-    gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsd_device);
-    if ((session->gpsdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY)) < 0) {
+    gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
+    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NOCTTY)) < 0) {
 	gpsd_report(1, "device open failed: %s\n", strerror(errno));
 	return -1;
     }
