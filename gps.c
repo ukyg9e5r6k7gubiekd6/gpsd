@@ -28,6 +28,7 @@
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 
+#include "config.h"
 #include "gps.h"
 
 extern void register_canvas(Widget w, GC gc);
@@ -295,8 +296,11 @@ int main(int argc, char *argv[])
     int option;
     char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
 
-    while ((option = getopt(argc, argv, "h")) != -1) {
+    while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
+	case 'v':
+	    printf("gps %s\n", VERSION);
+	    exit(0);
 	case 'h':
 	case '?':
 	default:

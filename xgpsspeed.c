@@ -60,8 +60,11 @@ int main(int argc, char **argv)
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
-    while ((option = getopt(argc, argv, "h")) != -1) {
+    while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
+	case 'v':
+	    printf("xgpsspeed %s\n", VERSION);
+	    exit(0);
 	case 'h': case '?':
 	default:
 	    fputs("usage: gps [-h] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);

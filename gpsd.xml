@@ -28,11 +28,13 @@ and speedometer</refpurpose>
       <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-v </arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>gps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 <cmdsynopsis>
@@ -40,6 +42,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-rv</arg>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
@@ -133,6 +136,12 @@ monitoring of the GPS data stream.</para>
 <para>Set debug level. At debug levels 2 and above,
 <application>gpsd</application> stays in foreground and reports
 incoming sentence and actions to standard error.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-v</term>
+<listitem>
+<para>Dump version and exit.</para>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -297,7 +306,8 @@ current GPS animation and (for GPSes that support the feature) the
 locations of accessible satellites.</para>
 
 <para><application>gps</application> accepts an -h option as for
-<application>gpsd</application>. An optional argument may specify an
+<application>gpsd</application>, or a -v option to dump the package
+version and exit. An optional argument may specify an
 server to get data from; a colon-separated suffix is taken as a port
 number.  The misfeature of previous versions that allowed it to
 direct-connect to the serial device has been removed.</para>
@@ -307,10 +317,11 @@ direct-connect to the serial device has been removed.</para>
 
 <para><application>xgpsspeed</application> is a speedometer that uses
 position information from the GPS. It accepts an -h option and
-optional argument as for <application>gps</application>.
-Additionally, it accepts -rv (reverse video) and -nc (needle color)
-options. The misfeature of previous versions that allowed it to
-direct-connect to the serial device has been removed.</para>
+optional argument as for <application>gps</application>, or a -v
+option to dump the package version and exit.  Additionally, it accepts
+-rv (reverse video) and -nc (needle color) options. The misfeature of
+previous versions that allowed it to direct-connect to the serial
+device has been removed.</para>
 
 </refsect2>
 </refsect1>

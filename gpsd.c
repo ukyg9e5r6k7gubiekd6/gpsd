@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
     char gpstype = 'n';
 
     debuglevel = 1;
-    while ((option = getopt(argc, argv, "D:S:d:hnp:s:"
+    while ((option = getopt(argc, argv, "D:S:d:hnp:s:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
@@ -462,6 +462,9 @@ int main(int argc, char *argv[])
 	case 's':
 	    gpsd_speed = atoi(optarg);
 	    break;
+	case 'v':
+	    printf("gpsd %s\n", VERSION);
+	    exit(0);
 	case 'h': case '?':
 	default:
 	    usage();
