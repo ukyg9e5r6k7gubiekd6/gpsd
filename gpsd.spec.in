@@ -112,6 +112,10 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
+* Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Only do one getdtablesize() call, otherwise we're doing several
+  getrlimits() each poll cycle.
+
 * Wed Sep 08 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.97-1
   Removed PRWIZCH support (it still passes through in raw mode).
   Build Motif-dependent programs conditionally.  Added gpsprobe.
@@ -160,3 +164,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 * Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
 - Creation of specfile.
 
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:rpm-spec-mode
+# End:

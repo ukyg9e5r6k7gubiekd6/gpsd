@@ -57,7 +57,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 
 	    if (trigger && !strncmp(trigger, sentence, strlen(trigger)) && isatty(session->fdout)) {
 		gpsd_report(1, "found %s.", (*dp)->typename);
-		session->device_type = &zodiac_binary;
+		session->device_type = *dp;
 		session->device_type->initializer(session);
 		return;
 	    }
