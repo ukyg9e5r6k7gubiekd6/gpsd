@@ -1,7 +1,10 @@
 /*
  * SiRF packet monitor, originally by Rob Janssen <pe1chl@amsat.org>.
+ * Heavily hacked by Eric S. Raymond for use with the gpsd project.
  *
  * Autobauds.  Takes a SiRF chip in NMEA mode to binary mode, if needed.
+ * The autobauding code is fairly primitive and can sometimes fail to
+ * sync properly.  If that happens, just kill and restart sirfmon.
  *
  * Not shipped with gpsd, but we keep it around as a diagnostic tool
  * to double-check gpsd's SiRF decoder.
@@ -34,8 +37,6 @@
 #define START2		0xa2
 #define END1		0xb0
 #define END2		0xb3
-
-#define CHANWIN		10
 
 int LineFd;					/* fd for RS232 line */
 int verbose;
@@ -73,7 +74,8 @@ int sendpkt (unsigned char *buf,int len);
 int readpkt (unsigned char *buf);
 
 static struct termios ttyset;
-static WINDOW *mid2win, *mid4win, *right_win, *dumpwin, *cmdwin, *debugwin;
+static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
+static WINDOW *dumpwin, *cmdwin, *debugwin;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -247,9 +249,12 @@ int main (int argc, char **argv)
     scrollok(debugwin,TRUE);
     //wsetscrreg(debugwin, DEBUGWIN, 0);
 
-    mid2win   = subwin(stdscr,  6, 78,  1, 0);
+    mid2win   = subwin(stdscr,  6, 79,  1, 0);
     mid4win   = subwin(stdscr, 15, 30,  7, 0);
-    right_win = subwin(stdscr, 13, 47,  7, 31);
+    mid6win   = subwin(stdscr, 3,  48,  7, 31);
+    mid7win   = subwin(stdscr, 4,  48, 10, 31);
+    mid9win   = subwin(stdscr, 3,  48, 14, 31);
+    mid13win  = subwin(stdscr, 3,  48, 17, 31);
     cmdwin    = subwin(stdscr, 1,  40,  0, 0);
     dumpwin   = subwin(stdscr, 1,   0,  0, 31);
     debugwin  = subwin(stdscr, 0,   0, 23, 0);
@@ -273,29 +278,52 @@ int main (int argc, char **argv)
     wmove(mid2win, 4,1);
     wprintw(mid2win, "DOP:      M1:    M2:    Fix:  ");
     mvwprintw(mid2win, 5, 30, " Packet type 2 ");
-
     wattrset(mid2win, A_NORMAL);
 
-    wattrset(right_win, A_BOLD);
-    mvwprintw(right_win, 1, 1, "RS232:");
-    mvwprintw(right_win, 2, 1, "Version:");
-    wmove(right_win, 7,1);
-    wprintw(right_win, "Max:       Lat:       Avg:       MS:");
-    attrset(A_NORMAL);
-
-    wattrset(right_win, A_NORMAL);
-    wborder(right_win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid6win, A_BOLD);
+    mvwprintw(mid6win, 1, 1, "Version:");
+    mvwprintw(mid6win, 2, 10, " Packet Type 6 ");
+    wattrset(mid6win, A_NORMAL);
 
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
-    mvwprintw(mid4win, 1, 1, "Ch SV  Az El Stat  C/N");
+    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N");
     for (i = 0; i < 12; i++) {
 	mvwprintw(mid4win, i+2, 1, "%2d",i);
     }
     mvwprintw(mid4win, 14, 8, " Packet Type 4 ");
     wattrset(mid4win, A_NORMAL);
 
-    mvwprintw(right_win, 1, 10, "%4d N %d", bps, stopbits);
+    wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid7win, A_BOLD);
+    mvwprintw(mid7win, 1, 1,  "SVs: ");
+    mvwprintw(mid7win, 1, 9,  "Drift: ");
+    mvwprintw(mid7win, 1, 23, "Bias: ");
+    mvwprintw(mid7win, 2, 1,  "Estimated GPS Time: ");
+    mvwprintw(mid7win, 3, 10, " Packet type 7 ");
+    wattrset(mid7win, A_NORMAL);
+
+    wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid9win, A_BOLD);
+    mvwprintw(mid9win, 1, 1,  "Max: ");
+    mvwprintw(mid9win, 1, 13, "Lat: ");
+    mvwprintw(mid9win, 1, 25, "Time: ");
+    mvwprintw(mid9win, 1, 39, "MS: ");
+    mvwprintw(mid9win, 2, 10, " Packet type 9 ");
+    wattrset(mid9win, A_NORMAL);
+
+    wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
+    wattrset(mid13win, A_BOLD);
+    mvwprintw(mid13win, 1, 1, "SVs: ");
+    mvwprintw(mid13win, 1, 9, "=");
+    mvwprintw(mid13win, 2, 10, " Packet type 13 ");
+    wattrset(mid13win, A_NORMAL);
+
+    wattrset(stdscr, A_BOLD);
+    mvwprintw(stdscr, 22, 30, "RS232: ");
+    wattrset(stdscr, A_NORMAL);
+    mvwprintw(stdscr, 22, 37, "%4d N %d", bps, stopbits);
 
     wmove(debugwin,0, 0);
 
@@ -312,12 +340,15 @@ int main (int argc, char **argv)
 	wprintw(cmdwin, "cmd> ");
 	wclrtoeol(cmdwin);
 	refresh();
-	wrefresh(mid4win);
-	wrefresh(right_win);
 	wrefresh(mid2win);
+	wrefresh(mid4win);
+	wrefresh(mid6win);
+	wrefresh(mid7win);
+	wrefresh(mid9win);
+	wrefresh(mid13win);
 	wrefresh(dumpwin);
-	wrefresh(cmdwin);
 	wrefresh(debugwin);
+	wrefresh(cmdwin);
 
 	FD_SET(0,&select_set);
 	FD_SET(LineFd,&select_set);
@@ -334,12 +365,15 @@ int main (int argc, char **argv)
 	    //move(0,0);
 	    //clrtoeol();
 	    //refresh();
-	    wrefresh(mid4win);
-	    wrefresh(right_win);
 	    wrefresh(mid2win);
+	    wrefresh(mid4win);
+	    wrefresh(mid6win);
+	    wrefresh(mid7win);
+	    wrefresh(mid9win);
+	    wrefresh(mid13win);
 	    wrefresh(dumpwin);
-	    wrefresh(cmdwin);
 	    wrefresh(debugwin);
+	    wrefresh(cmdwin);
 
 	    if ((p = strchr(line,'\r')) != NULL)
 		*p = '\0';
@@ -372,7 +406,7 @@ int main (int argc, char **argv)
 		sendpkt(buf, 9);
 		usleep(50000);
 		set_speed(bps = v, stopbits);
-		mvprintw(17, 50, "%4d N %d", bps, stopbits);
+		mvwprintw(stdscr, 22, 37, "%4d N %d", bps, stopbits);
 		break;
 
 	    case 'n':				/* switch to NMEA */
@@ -478,10 +512,12 @@ int len;
 	wmove(mid2win, 4,30);
 	nfix = getb(28);
 	wprintw(mid2win, "%d",nfix);			/* SVs in fix */
-	for (i = 0; i < nfix; i++) {
-	    wprintw(mid2win, "%3d",fix[i] = getb(29+i));	/* SV list */
+	for (i = 0; i < 12; i++) {	/* SV list */
+	    if (i < nfix)
+		wprintw(mid2win, "%3d",fix[i] = getb(29+i));
+	    else
+		wprintw(mid2win, "   ");
 	}
-	wclrtoeol(mid2win);
 	break;
 
     case 0x04:		/* Measured Tracking Data */
@@ -493,7 +529,7 @@ int len;
 	    off = 8 + 15 * i;
 	    wmove(mid4win, i+2, 3);
 	    sv = getb(off);
-	    wprintw(mid4win, "%3d",sv);
+	    wprintw(mid4win, " %3d",sv);
 
 	    wprintw(mid4win, " %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
 
@@ -514,17 +550,18 @@ int len;
 	    wprintw(mid4win, "%5.1f %c",(float)cn/10,st);
 
 	    if (sv == 0)			/* not tracking? */
-		wprintw(mid4win, "    ");	/* clear other info */
+		wprintw(mid4win, "   ");	/* clear other info */
 	}
 	putb(0,0x90);				/* poll clock status */
 	putb(1,0);
 	sendpkt(buf,2);
     	break;
 
+#ifdef __UNUSED__
     case 0x05:		/* raw track data */
 	for (off = 1; off < len; off += 51) {
 	    ch = getl(off);
-	    move(CHANWIN+ch,19);
+	    wmove(mid4win, ch+2, 19);
 	    cn = 0;
 
 	    for (j = 0; j < 10; j++)
@@ -537,19 +574,21 @@ int len;
 	    	(float)getl(off+16)/65536,(float)getl(off+20)/1024);
 	}
     	break;
+#endif /* __UNUSED */
 
     case 0x06:		/* firmware version */
-	mvwprintw(right_win, 2, 10, "%s",buf + 1);
+	mvwprintw(mid6win, 1, 10, "%s",buf + 1);
     	break;
 
     case 0x07:		/* Response - Clock Status Data */
 	decode_time(getw(1),getl(3));
-	wmove(right_win, 4, 1);
-	wprintw(right_win, 
-		"%2d %lu %lu %lu",getb(7),getl(8),getl(12),getl(16));
-	//wclrtoeol(right_win);
+	mvwprintw(mid7win, 1, 5,  "%2d", getb(7));	/* SVs */
+	mvwprintw(mid7win, 1, 16, "%lu", getl(8));	/* Clock drift */
+	mvwprintw(mid7win, 1, 29, "%lu", getl(12));	/* Clock Bias */
+	mvwprintw(mid7win, 2, 21, "%lu", getl(16));	/* Estimated Time */
 	break;
 
+#ifdef UNUSED
     case 0x08:		/* 50 BPS data */
 	ch = getb(1);
 	move(CHANWIN+ch,77);
@@ -561,20 +600,14 @@ int len;
 	    wprintw(debugwin, "\n");
 	}
     	break;
+#endif /* __UNUSED */
 
     case 0x09:		/* Throughput */
-	wmove(right_win, 7,6);
-	wprintw(right_win, "%.3f",(float)getw(1)/186);	/* SegStatMax */
-	wmove(right_win, 7,17);
-	wprintw(right_win, "%.3f",(float)getw(3)/186);	/* SegStatLat */
-	wmove(right_win, 7,28);
-	wprintw(right_win, "%.3f",(float)getw(5)/186);	/* SegStatTime */
-	wmove(right_win, 7,38);
-	wprintw(right_win, "%3d",getw(7));		/* Last Millisecond */
+	mvwprintw(mid9win, 1, 6,  "%.3f",(float)getw(1)/186);	/*SegStatMax*/
+	mvwprintw(mid9win, 1, 18, "%.3f",(float)getw(3)/186);	/*SegStatLat*/
+	mvwprintw(mid9win, 1, 31, "%.3f",(float)getw(5)/186);	/*SegStatTime*/
+	mvwprintw(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
     	break;
-
-    case 0x0a:		/* Error ID Data */
-	break;
 
     case 0x0b:		/* Command Acknowledgement */
 	mvwprintw(dumpwin, 0, 0, "ACK %02x",getb(1));
@@ -585,29 +618,19 @@ int len;
     	break;
 
     case 0x0d:		/* Visible List */
-	wprintw(debugwin, "vis %d:",getb(1));
-	for (i = 0; i < getb(1); i++) {
-	    off = 2 + 5 * i;
-	    wprintw(debugwin, " %d",getb(off));
+	mvwprintw(mid13win, 1, 6, "%d",getb(1));
+	wmove(mid13win, 1, 10);
+	for (i = 0; i < 12; i++) {
+	    if (i < getb(1))
+		wprintw(mid13win, " %2d",getb(2 + 5 * i));
+	    else
+		wprintw(mid13win, "   ");
+
 	}
 	wprintw(debugwin, "\n");
     	break;
 
-    case 0x0e:
-    	break;
-
-    case 0x0f:
-    	break;
-
-    case 0x11:
-    	break;
-
-    case 0x12:
-    	break;
-
-    case 0x13:
-    	break;
-
+#ifdef __UNUSED__
     case 0x62:
 	attrset(A_BOLD);
 	move(2,40);
@@ -665,6 +688,7 @@ int len;
 #endif
 	}
     	break;
+#endif /* __UNUSED__ */
 
     case 0xff:		/* Development Data */
 	while (len > 0 && buf[len-1] == '\n')
@@ -688,8 +712,8 @@ int len;
 	wmove(dumpwin, 0,0);
 	wprintw(dumpwin, " %02x: ",buf[0]);
 
-	if (len > 20)
-	    len = 20;
+	if (len > 24)
+	    len = 24;
 	for (i = 1; i < len; i++)
 	    wprintw(dumpwin, "%02x",buf[i]);
 
