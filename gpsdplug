@@ -1,0 +1,27 @@
+#!/usr/bin/python
+# Hotplug script for gpsd
+import os, syslog, glob
+
+syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
+syslog.syslog("gpsdplug begins with action: %s" % os.getenv("ACTION"))
+devpath = os.getenv("DEVPATH")
+if not devpath:
+    syslog.syslog("No DEVPATH")
+else:
+    #syslog.syslog("DEVPATH = %s" % devpath)
+    subnodes = glob.glob("/sys" + devpath + "/*")
+    subnodes = map(os.path.basename, subnodes)
+    subnodes = filter(lambda s: s.startswith("ttyUSB"), subnodes) 
+    if len(subnodes) == 0:
+        syslog.syslog("no ttyUSB device under " + devpath)
+    elif len(subnodes) > 1:
+        syslog.syslog("too many ttyUSB devices under " + devpath)
+    else:
+        tty = subnodes[0]
+        syslog.syslog(tty + " has gone active")
+
+syslog.syslog("gpsdplug ends")
+syslog.closelog()
+
+
+

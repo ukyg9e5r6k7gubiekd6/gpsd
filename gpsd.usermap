@@ -1,0 +1,12 @@
+# Hotplug device map for GPSD
+#
+# GPSes don't have their own USB device class.  They're serial-over-USB 
+# devices, so what you see is actually the ID of the serial-over-USB chip.
+# Fortunately, just two of these account for over 80% of consumer-grade 
+# GPS sensors.  The gpsdplug script will tell a running gpsd that it should
+# look at the device that just went active, because it might be a GPS.
+#
+# The Prolific Technology 2303
+gpsdplug 0x0003 0x067b 0x2303 0x0000 0x0000 0x00 0x00 0x00 0x00 0x00 0x00 0x00000000
+# FTDI 8U232AM
+gpsdplug 0x0003 0x0403 0x6001 0x0000 0x0000 0x00 0x00 0x00 0x00 0x00 0x00 0x00000000
