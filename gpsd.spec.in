@@ -1,5 +1,5 @@
 Name: gpsd
-%define SO3VERSION	0.0.0
+%define SO3VERSION	0.1.0
 %define SO1VERSION	0
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
@@ -108,6 +108,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %changelog
 * Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-2
   Removed PRWIZCH support (it still passes through in raw mode).
+  Build Motif-dependent programs conditionally.
 
 * Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
