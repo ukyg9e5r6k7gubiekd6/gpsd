@@ -58,6 +58,12 @@ href="http://www.kismetwireless.net/">Kismet</a>, <a
 href="http://www.gpsdrive.cc/">GPSdrive</a>, and <a
 href="http://qpegps.sourceforge.net/">gpeGPS</a>.</p>
 
+<p>Under Linux, gpsd runs with zero configration.  The RPM
+installs an init script to start <code>gpsd</code> at boot time, and
+hotplug scripts that do the right thing when a USB device
+goes active, informing the running <code>gpsd</code> which
+device to read data from.</p>
+
 <p>No, we don't support Windows &mdash; get a better operating system.
 Our main focus is open-source Unixes &mdash; Linux, and the *BSD
 family.  We'll support proprietary Unixes and hybrids like Mac OS X if
