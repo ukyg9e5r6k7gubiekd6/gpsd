@@ -80,7 +80,7 @@ if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "b:hn:")
     await = 100;
     device="/dev/gps"
-    bpslist = (4800, 9600, 19200, 38400,)
+    bpslist = (4800, 9600, 19200, 38400, 57600)
     for (switch, val) in options:
 	if (switch == '-b'):
 	    bpslist = (int(val),)
