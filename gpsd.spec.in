@@ -82,14 +82,14 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 /sbin/chkconfig --add gpsd
 /sbin/chkconfig gpsd on
 /sbin/ldconfig
-if [ -f /etc/udev/rules.d/ ] then echo 'KERNEL="ttyS0", SYMLINK="gps"' >/etc/udev/rules.d/80-gpsd.rules
+if [ -d /etc/udev/rules.d/ ]; then echo 'KERNEL="ttyS0", SYMLINK="gps"' >/etc/udev/rules.d/80-gpsd.rules; fi
 
 %preun -n gpsd
 /sbin/chkconfig --del gpsd
 
 %postun -n gpsd
 /sbin/ldconfig
-if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
+if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %files
 %defattr(-,root,root,-)
@@ -119,6 +119,10 @@ if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
+* Mon Dec 27 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
+- Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
+  in udev scriptlets.
+
 * Thu Dec 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.5.1
 - Use gmtime instead of localtime when guessing the day or year of a date;
   this avoids jitter in the day after 19:00 GMT.  Added -v option to dump 
