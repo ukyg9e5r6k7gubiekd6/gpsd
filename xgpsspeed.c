@@ -54,6 +54,7 @@ static XtResource my_resources[] = {
 
 String fallback_resources[] =
 {
+  NULL
 };
 
 static void open_input(XtAppContext app);

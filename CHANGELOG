@@ -51,3 +51,5 @@
 20031220
 	 Removed <varargs.h> from netlib. Not needed, and new gcc does not support
 	 it any more.
+20040129 
+	 Make applications null-terminate their resource lists.

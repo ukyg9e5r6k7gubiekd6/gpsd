@@ -87,6 +87,7 @@ String fallback_resources[] =
     "*gps_data.altitude.label.labelString: Alt.",
     "*gps_data.fix_status.label.labelString: Stat",
     "*gps_data.quit.label.labelString: Quit",
+    NULL
 };
 
 
