@@ -97,7 +97,15 @@ int gpscheck(int ttyfd)
 	    continue;
 	}
 
-	while (*sp < n)
+	/*
+	 * Trailing garbage means that the data accidentally looked
+	 * like NMEA or that old data that really was NMEA happened to
+	 * be sitting in the TTY buffer unread, but the new data we
+	 * read is not sentences.  Second case shouldn't happen,
+	 * because we flush the buffer after each speed change, but
+	 * welcome to serial-programming hell.
+	 */
+	while (sp < buf + n)
 	    if (!isascii(*sp++)) {
 #ifdef TESTMAIN
 	    fprintf(stderr, "gpscheck: trailing garbage in buffer\n");

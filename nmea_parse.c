@@ -607,29 +607,13 @@ int nmea_validate_buffer(char *buf, size_t n)
     char	*sp, csum[3];
     unsigned int sum;
 
-    /*
-     * It's OK to have leading garbage, but not trailing garbage.
-     * Leading garbage may just mean the port hasn't settled yet
-     * after a baud rate change; ignore it.
-     */
-    for (sp = buf; sp < buf + n && !isprint(*sp); sp++)
-	continue;
-
     /* If no valid NMEA in the read buffer, crap out */
-    if (!(sp = strstr(sp, "$GP"))) {
+    if (!(sp = strstr(buf, "$GP"))) {
 	gpsd_report(4, "no NMEA in the buffer\n");
 	return 0;
     }
 
-    /*
-     * Check to see if we actually have a valid NMEA packet here.
-     * Trailing garbage means that the data accidentally looked
-     * like NMEA or that old data that really was NMEA happened to
-     * be sitting in the TTY buffer unread, but the new data we
-     * read is not sentences.  Second case shouldn't happen,
-     * because we flush the buffer after each speed change, but
-     * welcome to serial-programming hell.
-     */
+    /* Check to see if we actually have a valid NMEA packet here. */
     sum = 0;
     for (++sp; *sp != '*' && *sp != '\0'; sp++) {
 	if (!isascii(*sp)) {
@@ -645,5 +629,22 @@ int nmea_validate_buffer(char *buf, size_t n)
 	gpsd_report(4, "checksum incorrect\n");
 	return 0;
     }
+
+    /*
+     * Trailing garbage means that the data accidentally looked
+     * like NMEA or that old data that really was NMEA happened to
+     * be sitting in the TTY buffer unread, but the new data we
+     * read is not sentences.  Second case shouldn't happen,
+     * because we flush the buffer after each speed change, but
+     * welcome to serial-programming hell.
+     */
+    while (sp < buf + n)
+	if (!isascii(*sp++)) {
+#ifdef TESTMAIN
+	    gpsd_report(4, "trailing garbage in buffer\n");
+#endif /* TESTMAIN */
+	    return 0;
+	}
+
     return 1;
 }
