@@ -134,14 +134,14 @@ int main(int argc, char *argv[])
     fd_set nmea_fds;
     int alen;
     int fd, input;
-    int need_gps, need_dgps = 0;
+    int need_gps, need_dgps = 0, need_init = 1;
     extern char *optarg;
     int option;
     double baud;
     char buf[BUFSIZE];
     int sentdgps = 0, fixcnt = 0;
 
-    while ((option = getopt(argc, argv, "D:L:S:T:hcl:p:s:d:r:")) != -1) {
+    while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:")) != -1) {
 	switch (option) {
 	case 'T':
 	    switch (*optarg) {
@@ -210,6 +210,9 @@ int main(int argc, char *argv[])
 	case 'c':
 	  need_dgps = 1;
 	  break;
+	case 'n':
+	  need_init = 0;
+	  break;
 	case 'h':
 	case '?':
 	default:
@@ -232,9 +235,9 @@ int main(int argc, char *argv[])
     }
     if (!device_name)
 	device_name = default_device_name;
-    if (!latitude)
+    if (need_init && !latitude)
 	latitude = default_latitude;
-    if (!longitude)
+    if (need_init && !longitude)
 	longitude = default_longitude;
     if (!service)
       if (!getservbyname(default_service, "tcp")) {

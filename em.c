@@ -24,7 +24,7 @@ extern char lond;
 
 enum {
     EM_HUNT_FF, EM_HUNT_81, EM_HUNT_ID, EM_HUNT_WC,
-    EM_HUNT_FLAGS, EM_HUNT_CS, EM_HUNT_DATA
+    EM_HUNT_FLAGS, EM_HUNT_CS, EM_HUNT_DATA, EM_HUNT_A
 };
 
 #define O(x) (x-6)
@@ -97,28 +97,30 @@ static void em_init()
     t = time(NULL);
     tm = gmtime(&t);
 
-    if (sn++ > 32767)
-	sn = 0;
+    if (latitude && longitude) {
+	if (sn++ > 32767)
+	    sn = 0;
 
-    memset(data, 0, sizeof(data));
+	memset(data, 0, sizeof(data));
+	
+	data[0] = sn;		/* sequence number */
 
-    data[0] = sn;		// sequence number
+	data[1] = (1 << 2) | (1 << 3);
+	data[2] = data[3] = data[4] = 0;
+	data[5] = tm->tm_mday;
+	data[6] = tm->tm_mon + 1;
+	data[7] = tm->tm_year + 1900;
+	data[8] = tm->tm_hour;
+	data[9] = tm->tm_min;
+	data[10] = tm->tm_sec;
+	*(long *) (data + 11) = putlong(latitude, (latd == 'S') ? 1 : 0);
+	*(long *) (data + 13) = putlong(longitude, (lond == 'W') ? 1 : 0);
+	data[15] = data[16] = 0;
+	data[17] = data[18] = data[19] = data[20] = 0;
+	data[21] = em_checksum(data, 21);
 
-    data[1] = (1 << 2) | (1 << 3);
-    data[2] = data[3] = data[4] = 0;
-    data[5] = tm->tm_mday;
-    data[6] = tm->tm_mon + 1;
-    data[7] = tm->tm_year + 1900;
-    data[8] = tm->tm_hour;
-    data[9] = tm->tm_min;
-    data[10] = tm->tm_sec;
-    *(long *) (data + 11) = putlong(latitude, (latd == 'S') ? 1 : 0);
-    *(long *) (data + 13) = putlong(longitude, (lond == 'W') ? 1 : 0);
-    data[15] = data[16] = 0;
-    data[17] = data[18] = data[19] = data[20] = 0;
-    data[21] = em_checksum(data, 21);
-
-    em_spew(1200, &data, 22);
+	em_spew(1200, &data, 22);
+    }
 }
 
 void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
@@ -131,7 +133,7 @@ void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
 
     memset(data, 0, sizeof(data));
 
-    data[0] = sn;		// sequence number
+    data[0] = sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes*(sizeof(char)));
     data[n] = em_checksum(data, n);
 
@@ -458,6 +460,14 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
     case EM_HUNT_FF:
 	if (c == 0xff)
 	    state = EM_HUNT_81;
+	if (c == 'E')
+	    state = EM_HUNT_A;
+	break;
+
+    case EM_HUNT_A:
+	if (c == 'A')
+	    write(gNMEAdata.fdout, "EARTHA\r\n", 8);
+	    state = EM_HUNT_FF;
 	break;
 
     case EM_HUNT_81:

@@ -1,7 +1,7 @@
 Begin3
 Title:          gpsd
-Version:        1.01
-Entered-date:   20000305
+Version:        1.05
+Entered-date:   2000JUL10
 Description:    Combines gpsd and gpsclient.
                 A sample client for gpsd, and a gps debugging tool.
                 Connects to gps via serial port or socket connection.
