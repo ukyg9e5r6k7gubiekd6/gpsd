@@ -1,8 +1,290 @@
+This is the gpsd to-do list.  If you're viewing it with Emacs, try
+doing Ctl-C Ctl-t and browsing through the outline headers.
+
+** Rate-limiting SiRF sentence 4.
+
+The SiRF binary driver works nicely now, but it's a bit annoying that
+it ships a satellite picture (Message ID 4, Measured Tracker Data Out) 
+every second.  
+
+I spent about a day and a half trying to use SiRF sentence a6 (Set
+Message Rate) to reduce the frequency to once every 5 seconds.  It
+was frustrating.  If you run the daemon at -D 4, you'll see that the
+message gets shipped and the GPS returns ACK a6, but the frequency
+of MID 4 does not change.
+
+** Hotplug interface problems
+
+The hotplug interface works pretty nicely for telling gpsd which
+device to look at, at least on my FC3 Linux machines.  The fly in the
+ointment is that I'm using a deprecated version of the interface, the
+old-style /etc/hotplug version with usermap files.
+
+It is unlikely this interface will be dropped by distro makers any
+time soon, because it's supporting a bunch of popular USB cameras.
+Still, it would be nice not to be using a deprecated interface.
+
+I tried moving to the new-style /etc/hotplug.d interface, but I ran
+into a nasty race condition.  My hotplug agent got woken up on a USB
+add event as it should, but in the new interface the creation of
+/dev/ttyUSB* can be delayed arbitrarily long after the wakeup event.
+Thus, it may not be there when gpsd goes to probe it unless I
+busy-wait in the script.
+
+Ultimately this should all be done through udev.  The problem is that at
+the current state of udev, we'd need to do it through a script that would
+fire every time a tty activates.  Because of virtual consoles firing up at
+boot time, this would introduce significant boot lag.
+
+This would be antisocial and I'm not willing to do it, so udev needs
+to grow better filtering before I'll use it.
+
+When and if udev supports HOTPLUG and ACTION keys, this will work:
+
+# The Prolific Technology 2303 (commonly in tandem with SiRF chips)
+BUS="usb" SYSFS{vendor}="067b" SYSFS{product}="2303" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+# FTDI 8U232AM
+BUS="usb" SYSFS{vendor}="0403" SYSFS{product}="6001" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+# Cypress M8/CY7C64013 (DeLorme uses these)
+BUS="usb" SYSFS{vendor}="1163" SYSFS{product}="0100" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+
+More generally, the hotplug code we have is Linux-specific.  OpenBSD
+(at least) features a hotplug daemon with similar capabilities.  There
+has been some debate about going to the cross-platform libusb library
+to do device scanning, but this would create a complex dependency that
+gpsd doesn't now gave, and bring more complexity on board than is
+probably desirable.
+
+** Should sirfmon be part of the release?
+
+SiRF GPSes have a lot of tuning knobs on them that are accessible
+through the binary protocol but not the NMEA one.  Considering how
+ubiquitous SiRF GPSes are today (over 80% market share) maybe sirfmon
+should turn into a tool for twiddling those knobs and actually be
+installed in /usr/bin along with gpsd/xgps/xgpsspeed.
+
+Before that can happen, it needs documentation and more interface
+tweaks.
+
+** The mess near error modeling
+
+One of my goals has been to report an uncertainty along with every
+dimension of PVT, so that the return from the GPS actually (and
+realistically) describes the volume of kinematic state space within
+which it is located at 95% confidence.
+
+There are several problems with this. 
+
+A. I don't know how to derive or estimate uncertainty of time in the
+general case.  There are clock drift and bias fields in the SiRF
+binary protocol, but I don't know how to interpret these.  Does
+anyone?
+
+B. Only the Garmin reports estimated position error in meters, and I
+don't know whether its confidence level is 50% or 95%.  Does anyone?
+Gary?
+
+C. SiRF binary reports HDOP, SiRF and other NMEA devices report
+HDOP/VDOP/PDOP.
+
+Here is what I am presently doing in the new E command:
+
+1. I pass up the Garmin PGRME fields (uncertainty in meters) if
+   they're available.
+
+2. Otherwise, I apply the error model described in gpsd.h.  See the
+   comment near the definition of UERE.
+
+What non-Garmin GPSes will return in the E command is UERE multiplied
+by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP, the
+one respect in which it is functionally inferior to SiRF NMEA.
+
+I don't know, because my sources didn't say, whether the range
+uncertainties in gpsd.h are for a 50%-confidence or 95%-confidence
+error budget.  My educated guess is the latter, and that's what the
+gpsd documentation now says, but it needs to be confirmed.
+
+3. I don't currently pass back uncertainty of speed or track at all,
+though SiRF chips make those available.  To do so would require yet
+another protocol extension, which gets into "Does the GPSD protocol
+need to be redesigned?".
+
+This area needs some attention from somebody who cares a lot about
+GPS accuracy and is willing to do research on error budgets to pin
+down the numbers and confidence levels.
+
+** Multi-session semantics
+
+gpsd has been evolving away from being a simple device monitor towards
+being a persistent agent whose job it is to impedance-match between
+GPSes and applications (one which may talk to several devices in its
+lifetime).  Steps in this evolution have been:
+
+1. Automatic device reconnect, which already almost worked in 1.10.
+
+2. The X command reporting on whether a GPS is available.
+
+3. The B command allowing a client to change the connection baud rate.
+
+4. The F command allowing GPS to switch devices when only the
+   switch-requesting client is active.
+
+An issue that came up in my conversation with David Zeuthen is that
+HAL would (at least philosophically) like to support *multiple* GPSes.
+Whether HAL integration happens or not, this started me thinking about
+multi-GPS support in gpsd.
+
+Implementing multi-GPS support would not be a large problem.  One
+of my major goals in re-architecting the daemon code was to turn as
+much of it as possible into a re-entrant library keeping its data in a
+single session structure.  I achieved this so completely that the
+entire daemon has only eight global variables, all of them visible
+only within gpsd.c.  Of these, only two are potentially per-session.
+
+At the implementation level, then, gpsd is already close to being
+multi-GPS-ready. The real problem is at design level.  We need to
+figure out what the right lifetime rules for GPS sessions should be.
+
+At the moment, a GPS session begins when the first client connects.  The
+daemon takes this as a cue to open the current GPS device, which may
+have been set by the command-line -f option or an F command (the F
+command will usually have been generated by a hotplug script).  When
+the last client exits, the GPS device is closed and the session ends.   
+
+There are two rules about F commands:
+
+1. An F command fails if probing the specified device does not
+confirm it is a GPS.  gpsd reverts to the previous device.
+
+2. An F command also fails if there is more than one client attached.
+
+3, All client sessions talk to the device, the one specified by the
+   last successful F command.
+
+The effect of the combination of these rules is to prevent
+denial-of-service attacks.  They mean that a rogue client cannot
+prevent other processes from getting GPS service by pointing
+gpsd at a bogus device.  A rogue client cannot even change 
+which device another client sees.
+
+Now, suppose we want to support multiple clients talking to multiple
+GPSes using just one instance of gpsd?  The reason to want this is
+that, ideally, access to all GPSes should go through the same
+well-known port.  Also, a multi-session gpsd would be convenient for
+supporting multiple GPSes in HAL.
+
+Rule 1 would still still good.  But now we want a client to be able to switch
+to a new device without affecting other clients, so rules 3 and 2 break.
+
+We can't just use F for device switching, because hotplug scripts
+need it in order to tell gpsd when a new device is available for
+all clients.  F will need to have the semantics "add a GPS to gpsd's
+internal search list (and switch this client to use that GPS)".  
+
+We'll need to have a new command that removes a GPS from the GPS list
+(hotplug scripts will use it to cue gpsd on a remove event).  For the
+sake of the discussion, let's name that command K.
+
+The interesting questions are these: 
+
+(1) When a client connects to gpsd, and more than one GPS is hot, 
+    which one does it get by default?
+
+(2) What should happen to a client session when its GPS gets unplugged 
+    *and other devices are available*?
+
+** Subsecond polling
+
+gpsd relies on the GPS to periodically send PVT reports to it.
+
+Most GPSes send PVT reports once a second.  No GPS I am aware of
+allows you to set a cycle time of less than a second.  This is because
+at 4800bps, a full PVT report takes just under one second.
+
+At 50km/h (31mi/h) that's 13.8 meters change in position between
+updates, about the same as the uncertainty of position under typical
+conditions.
+
+There is, however, a way to sample GPSes at higher frequency.  SiRF
+chips, and some others, allow you to shut down periodic notifications
+and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
+a second, and a SiRF one maybe 18 times a second.
+
+Is this worth doing?  Maybe.  It would reduce fix latency, possibly
+to good effect if your GPS is in motion.  Opinions?  Calculations?
+
+** Does the GPSD protocol need to be redesigned?
+
+With all the commands currently implemented, only the following 
+letters are left: ghjkno.  Multi-session, if implemented, will
+eat a few of those.  
+
+These are symptoms.  The underlying problem is that gpsd does a lot
+more and has a more complex interface than it used to.  The protocol
+design is getting visibly strained, especially by the new control
+commands F and B.
+
+It's going to get worse.  There isn't enough namespace left to report
+all the kinds of kinematic uncertainty we want to, at least not
+without gracelessly dumping a bunch of unrelated information via a
+single response.
+
+Another reason to think about a protocol redesign is that the existing
+protocol reflects the quirks of NMEA all too faithfully.  This is more
+obvious now that we support SiRF and Garmin binary.  Indeed, fidelity
+to the NMEA model now limits our ability to report things like 
+course drift.
+
+It has a more subtle bad effect as well. The chunk size of what gpsd
+passes up is wrong.  You can easily end up, for example, with an
+altitude that has a different timestamp than your latitude/longitude,
+even though they were actually derived from the same fix, simply
+because the responses were shipped at different times.
+
+Maybe it's time to think about a redesign.  Matters would be helped
+by the existence of libgps; applications can link to that rather
+than supplying their own parser.
+
+Considered abstractly, what we really want a GPS to report is a
+13-element vector describing an uncertainty volume in kinematic space:
+
+time, timerr     = timestamp, estimated time error
+lat, lon, alt    = latitude, longitude, altitude
+herr, verr       = horizontal and vertical position error
+speed, speederr  = groundspeed and groundspeed error
+track, trackerr  = course over ground and course error
+climb, climberr  = climb/sink and climb/sink error
+
+Perhaps the protocol should be redesigned to ship these tuples,
+assembling them where needed from sentences shipped in the same GPS
+cycle (e.g. reporting the same fix).
+
 ** Explicitly turn on WAAS/EGNOS on SiRF chips
 
 Chris Kuethe reports that some firmware versions leave it off.
 
 ** HAL integration
+
+David Zeuthen is the lead programmer on the Hardware Abstraction
+Layer.  HAL aims to be at least two things: 
+
+(1) An attempt to centralize and/or coordinate device probes and 
+hardware autoconfiguration.  
+
+(2) A standard interface for reading and writing hardware
+configuration info on D-BUS.
+
+David wants to include GPSes in HAL.  The functional implication is
+that gpsd should publish PVT and status information on the D-BUS 
+through the HAL libraries.  
+
+Here is the state of our exchange about publishing PVT data:
 
 > > So, should I compose a 'gps' namespace?
 > 
@@ -49,7 +331,15 @@ Chris Kuethe reports that some firmware versions leave it off.
 > e.g. only every few seconds or so. You can then check this with 
 > hal-device-manager.
 
-** Do the research to figure out just what the heck is going on with status bits
+We are also discussing hotplug integration.  The issue there is that HAL
+wants to centralize all device probing into itself so that devices see
+as few probes as possible and the probes don't step on each other
+
+Playing nice in the HAL world may require that we replace our hotplug
+script with launcher code that lives in the HAL daemon.  Does anyone else
+here care enough about HAL to own this issue?
+
+** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the
 Active/Void bit (some sources interpret 'V' as 'Navigation receiver
@@ -81,14 +371,7 @@ Which of these override which other bits?  I don't think status is ever
 nonzero when mode is zero. So status overrides mode.  What other such
 relationships are there?
 
-* Things not to do:
-
-** Try to crank the update rate up past 1 per second
-
-NMEA doesn't give us control of the update rate, and SiRF/Zodiac chips
-don't seem to be able to set cycle times below once per second even in
-binary mode.  (Turns out the reason is that a full NMEA fix report
-takes about a second at 4800bps.) Even on a chipset that permitted it,
-at 50km/h (31mi/h) that's only 13.8 meters change in position between
-updates.  Faster refresh might make sense for aviation applications,
-but not on foot or in a car.
+Local variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+end:
