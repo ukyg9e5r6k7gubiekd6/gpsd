@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <ctype.h>
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
@@ -53,22 +55,86 @@ int gpsd_get_speed(struct termios* ttyctl)
     }
 }
 
+/* every rate we're likely to see on a GPS */
+static int rates[] = {4800, 9600, 19200, 38400};
+#define NRATES	sizeof(rates)/sizeof(rates[0])
+
+static int connect_at_speed(int ttyfd, struct termios *ttyctl, int speed)
+{
+    char	buf[BUFSIZE], *sp;
+    int		n;
+    size_t	maxreads;
+
+    gpsd_set_speed(ttyctl, speed);
+    /*
+     * throw away stale NMEA data that may be sitting in the buffer 
+     * from a previous session.
+     */
+    if (tcsetattr(ttyfd, TCSAFLUSH, ttyctl) != 0)
+	return 0;
+    /*
+     * for unknown reasons, the TCSAFLUSH above is not sufficient to
+     * flush the stale data from previous hunting out of the buffer.
+     */
+    tcflush(ttyfd, TCIOFLUSH);
+    buf[0] = '\0';
+    for (maxreads = 0; maxreads < NRATES; maxreads++) {
+	/*
+	 * Give device time to settle and ship some data before reading.
+	 * Less than 1.25 seconds doesn't work under Linux 2.6.10 on
+	 * an Athlon 64 3400.
+	 */
+	usleep(1250000);
+	n = read(ttyfd, buf, sizeof(buf)-1);
+	if (n > 0) {
+	    buf[n] = '\0';
+	    break;
+	}
+	else if (n == -1 && errno != EAGAIN)
+	    return 0;
+    }
+
+    /*
+     * It's OK to have leading garbage, but not trailing garbage.
+     * Leading garbage may just mean the device hasn't settled yet; ignore it.
+     */
+    for (sp = buf; sp < buf + n && !isprint(*sp); sp++)
+	continue;
+
+    /* If no valid NMEA in the read buffer, crap out */
+    if (!(sp = strstr(sp, "$GP"))) {
+	gpsd_report(4, "no NMEA in the buffer\n");
+	return 0;
+    }
+
+    /*
+     * Trailing garbage means that the data accidentally looked like
+     * NMEA or that old data that really was NMEA happened to be sitting
+     * in the TTY buffer unread, but the new data we read is not
+     * sentences.  Second case shouldn't happen, because we flushed
+     * the buffer above, but welcome to serial-programming hell.
+     */
+    for (sp += 3; sp < buf + n; sp++)
+	if (!isascii(*sp)) {
+	    gpsd_report(4, "trailing garbage in the buffer\n");
+	    return 0;	/* found garbage after $GP */
+	}
+    return 1;
+}
+
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 {
-    int ttyfd;
+    int ttyfd, *ip;
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
     if ((ttyfd = open(session->gpsd_device, O_RDWR | O_NONBLOCK)) < 0)
 	return -1;
 
     if (isatty(ttyfd)) {
-	gpsd_report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
 	/* Save original terminal parameters */
 	if (tcgetattr(ttyfd,&session->ttyset_old) != 0)
 	  return -1;
-
-	memcpy(&session->ttyset, &session->ttyset_old, sizeof(session->ttyset));
-	gpsd_set_speed(&session->ttyset, device_speed);
+	memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed
@@ -78,12 +144,24 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
-	/*
-	 * throw away stale NMEA data that may be sitting in the buffer 
-	 * from a previous session.
-	 */
-	if (tcsetattr(ttyfd, TCSAFLUSH, &session->ttyset) != 0)
-	    return -1;
+
+	if (device_speed) {
+	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
+			device_speed, stopbits);
+	    if (connect_at_speed(ttyfd, &session->ttyset, device_speed)) {
+		session->baudrate = device_speed;
+		return ttyfd;
+	    }
+	} else
+	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
+		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n", 
+			    *ip, stopbits);
+		if (connect_at_speed(ttyfd, &session->ttyset, *ip)) {
+		    session->baudrate = *ip;
+		    return ttyfd;
+		}
+	    }
+	return -1;
     }
     return ttyfd;
 }
