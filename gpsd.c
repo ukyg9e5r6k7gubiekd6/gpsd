@@ -196,26 +196,6 @@ static int handle_request(int fd, char *buf, int buflen)
 
     cur_time = time(NULL);
 
-    /* 
-     * See above...there's actually better reason for this one, as 
-     * field needs to be spliced into the structure references
-     * at compile time.
-     */
-#define STALE_COMPLAINT(label, field) do {	\
-	char buf[BUFSIZE]; \
-	int len; \
-	strcpy(buf, "# "); \
-        snprintf(buf+2, BUFSIZE, \
-		label " data is stale: %ld + %d >= %ld", \
-		session.gNMEAdata.field.last_refresh, \
-		session.gNMEAdata.field.time_to_live, cur_time); \
-	len = strlen(buf); \
-	strcpy(buf+len, "\n"); \
-	gpscli_report(3, buf+2); \
-	strcpy(buf+len, "\r\n"); \
-	write(fd, buf, strlen(buf)); \
-	} while (0)
-
     sprintf(reply, "GPSD");
     p = buf;
     while (*p) {
