@@ -341,31 +341,28 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",X=%d", ud->online);
 	    break;
 	case 'Y':
-	    if (!ud->satellites)
+	    if (!ud->satellites || !SEEN(ud->satellite_stamp))
 		strcpy(phrase, ",Y=?");
 	    else {
-		int used;
+		int used, reported = 0;
 		sprintf(phrase, ",Y=%d:", ud->satellites);
-		if (SEEN(ud->satellite_stamp)) {
-		    int reported = 0;
-		    for (i = 0; i < ud->satellites; i++) {
-			used = 0;
-			for (j = 0; j < ud->satellites_used; j++)
-			    if (ud->used[j] == ud->PRN[i]) {
-				used = 1;
-				break;
-			    }
-			if (ud->PRN[i]) {
-			    sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
-				    ud->PRN[i], 
-				    ud->elevation[i],ud->azimuth[i],
-				    ud->ss[i],
-				    used);
-			    reported++;
+		for (i = 0; i < ud->satellites; i++) {
+		    used = 0;
+		    for (j = 0; j < ud->satellites_used; j++)
+			if (ud->used[j] == ud->PRN[i]) {
+			    used = 1;
+			    break;
 			}
+		    if (ud->PRN[i]) {
+			sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
+				ud->PRN[i], 
+				ud->elevation[i],ud->azimuth[i],
+				ud->ss[i],
+				used);
+			reported++;
 		    }
-		    assert(reported == ud->satellites);
 		}
+		assert(reported == ud->satellites);
 	    }
 	    break;
 #ifdef PROFILING
