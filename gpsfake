@@ -60,11 +60,13 @@ try:
     if logdata[0] == '$':
         print "gpsfake: interpreting as NMEA"
         leader = '$';
-        legend = "gpsfake: line %d"
+        legend = "gpsfake: line %d "
+        textual = 1
     elif logdata[0] == 0xa0:
         print "gpsfake: interpreting as SiRF-II binary packets"
         leader = 0xa0
         legend = "gpsfake: packet %d"
+        textual = 0
     else:
         print "gpsfake: unknown log type, can't handle it!"
         logdata = None
@@ -83,15 +85,28 @@ try:
         raw[4] = raw[5] = eval("termios.B" + `speed`)
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 
-        i = 0;
-        while True:
-            if i % len(lines) == 0:
-                print "gpsfake: log cycle begins"
-            time.sleep(cycle)
-            if linedump:
-                print legend % (i % len(lines) + 1)
-            os.write(master_fd, lines[i % len(lines)])
-            i += 1
+        try:
+            i = 0;
+            while True:
+                if i % len(lines) == 0:
+                    print "gpsfake: log cycle begins."
+                time.sleep(cycle)
+                if linedump:
+                    if textual:
+                        ml = lines[i % len(lines)].strip()
+                    else:
+                        ml = ""
+                    print legend % (i % len(lines) + 1) + ml
+                os.write(master_fd, lines[i % len(lines)])
+                try:
+                    st = os.kill(pid, 0)
+                except OSError:
+                    pid = 0
+                    print "gpsfake: gpsd is gone."
+                    break
+                i += 1
+        except KeyboardInterrupt:
+            pass
 finally:
-    if spawn:
+    if spawn and (pid == 0 or os.kill(pid, 0) == 0):
         os.kill(pid, signal.SIGTERM)
