@@ -80,6 +80,19 @@ AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
 
+dnl check for SiRF-II support
+AC_ARG_ENABLE(sirfII,
+  AC_HELP_STRING([--disable-sirfII],
+                 [disable SiRF-II chipset support]),
+  [ac_sirfII=$enableval], [ac_sirfII=yes])
+AC_MSG_CHECKING([for FV-18 support])
+if test x"$ac_sirfII" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SIRFII_ENABLE], 1, [SiRF-II chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for FV-18 support
 AC_ARG_ENABLE(fv18,
   AC_HELP_STRING([--disable-fv18],
@@ -178,6 +191,7 @@ echo ""
 echo "=========================================="
 echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
+echo "SiRF-II                 : $ac_sirfII"
 echo "FV-18                   : $ac_fv18"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"

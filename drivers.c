@@ -88,12 +88,6 @@ static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbyt
     return write(session->gNMEAdata.gps_fd, buf, rtcmbytes);
 }
 
-/**************************************************************************
- *
- * Generic NMEA
- *
- **************************************************************************/
-
 static void nmea_initializer(struct gps_session_t *session)
 {
     /* probe for SiRF-II */
@@ -115,6 +109,7 @@ struct gps_type_t nmea = {
     1,			/* updates every second */
 };
 
+#ifdef SIRF_ENABLE
 /**************************************************************************
  *
  * SiRF-II
@@ -182,6 +177,7 @@ struct gps_type_t sirfII = {
     1,			/* 1 stop bit */
     1,			/* updates every second */
 };
+#endif /* SIRF_ENABLE */
 
 #if FV18_ENABLE
 /**************************************************************************
@@ -341,7 +337,9 @@ extern struct gps_type_t garmin_binary;
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
+#ifdef SIRF_ENABLE
     &sirfII, 
+#endif /* SIRF_ENABLE */
 #if FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
