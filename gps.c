@@ -356,10 +356,10 @@ void update_display(char *message)
 
     switch (gNMEAdata.mode) {
     case 2:
-	sprintf(s, "2D FIX");
+	sprintf(s, "2D %sFIX", (gNMEAdata.status==2) ? "DIFF ": "");
 	break;
     case 3:
-	sprintf(s, "3D FIX");
+	sprintf(s, "3D %sFIX", (gNMEAdata.status==2) ? "DIFF ": "");
 	break;
     default:
 	sprintf(s, "NO FIX");

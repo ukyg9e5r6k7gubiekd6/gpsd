@@ -38,6 +38,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <stdio.h>
+
 #include "nmea.h"
 #include "gpsd.h"
 #include "version.h"
@@ -113,7 +114,7 @@ int daemonize()
 
 int main(int argc, char *argv[])
 {
-    char *default_service = "5678";
+    char *default_service = "gpsd";
     char *default_dgpsserver = "dgps.wsrcc.com";
     char *default_dgpsport = "rtcm-sc104";
     char *service = 0;
@@ -131,6 +132,7 @@ int main(int argc, char *argv[])
     int option;
     double baud;
     char buf[BUFSIZE];
+    int sentdgps = 0, fixcnt = 0;
 
     while ((option = getopt(argc, argv, "D:L:S:T:hcl:p:s:d:r:")) != -1) {
 	switch (option) {
@@ -228,7 +230,11 @@ int main(int argc, char *argv[])
     if (!longitude)
 	longitude = default_longitude;
     if (!service)
+      if (!getservbyname(default_service, "tcp")) {
+	service = "2947";
+      } else {
 	service = default_service;
+      }
     if (need_dgps && !dgpsserver)
 	dgpsserver = default_dgpsserver;
     if (need_dgps && !dgpsport)
@@ -356,16 +362,27 @@ int main(int argc, char *argv[])
 	    else
 		handle_input(input, &afds, &nmea_fds);
 	}
+	if (gNMEAdata.status > 0) 
+	  fixcnt++;
+	if (fixcnt > 10) 
+	  if (!sentdgps) {
+	    sentdgps++;
+	    if (need_dgps)
+	      send_dgps();
+	  }
 	need_gps = 0;
 	if (reopen) {
 	  FD_CLR(input, &afds);
-	  reopen = 0;
-	  serial_close();
-	  if ((input = serial_open()) < 0)
-	    errexit("serial open: ");
-	  FD_SET(input, &afds);
+	  input = -1;
 	  gNMEAdata.fdin = input;
 	  gNMEAdata.fdout = input;
+	  serial_close();
+	  if (device_type == DEVICE_EARTHMATEb)
+	    device_type = DEVICE_EARTHMATE;
+	  syslog(LOG_NOTICE, "Closed gps");
+	  gNMEAdata.mode = 1;
+	  gNMEAdata.status = 0;
+	  need_gps++;
 	}
 	for (fd = 0; fd < nfds; fd++) {
 	    if (fd != msock && fd != input && fd != dsock && 
@@ -404,6 +421,10 @@ int main(int argc, char *argv[])
     }
 }
 
+void send_dgps() {
+  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude, gNMEAdata.longitude, double altitude);
+  write(dsock, buf, strlen(buf));
+}
 
 static int handle_request(int fd, fd_set * fds)
 {

@@ -31,7 +31,7 @@ void processGPRMC(char *sentence)
 
     strncpy(s + 3, d, 2);	// copy date
 
-    /*FIXME: This is NOT Y2K comliant, and will btrak soon! */
+    /*FIXME: This is NOT Y2K compliant, and will break soon! */
     strncpy(s + 6, "19", 2);	// 20th century
 
     strncpy(s + 8, d + 4, 2);	// copy year
@@ -52,10 +52,13 @@ void processGPRMC(char *sentence)
 
     strcpy(gNMEAdata.utc, s);
 
-    if (strcmp(field(sentence, 2), "A") == 0)
-	gNMEAdata.status = 1;
+    /* A = valid, V = invalid */
+    if (strcmp(field(sentence, 2), "V") == 0)
+	gNMEAdata.status = 0;
+#if 0    /* Let the GGA sentence do the update so we catch diff fixes */
     else
 	gNMEAdata.status = 0;
+#endif
 
     sscanf(field(sentence, 7), "%lf", &gNMEAdata.speed);
     sscanf(field(sentence, 8), "%lf", &gNMEAdata.track);
@@ -69,6 +72,7 @@ void processGPRMC(char *sentence)
 void processGPGGA(char *sentence)
 {
     do_lat_lon(sentence, 2);
+    /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
     sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
     sscanf(field(sentence, 9), "%lf", &gNMEAdata.altitude);
@@ -79,6 +83,7 @@ void processGPGGA(char *sentence)
 void processGPGSA(char *sentence)
 {
 
+  /* 1 = none, 2 = 2d, 3 = 3d */
     sscanf(field(sentence, 2), "%d", &gNMEAdata.mode);
     sscanf(field(sentence, 15), "%lf", &gNMEAdata.pdop);
     sscanf(field(sentence, 16), "%lf", &gNMEAdata.hdop);
