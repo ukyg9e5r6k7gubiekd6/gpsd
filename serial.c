@@ -56,9 +56,9 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
     else if (speed < 38400)
       speed =  B19200;
     else if (speed < 57600)
-      speed =  38400;
+      speed =  B38400;
     else
-      speed =  57600;
+      speed =  B57600;
 
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
     cfsetispeed(&session->ttyset, (speed_t)speed);
