@@ -35,16 +35,7 @@
 
 #define QLEN			5
 
-#define ZERO_WATCHERS()		FD_ZERO(&watcher_fds);
-#define IS_WATCHER(cfd) 	FD_ISSET(cfd, &watcher_fds)
-#define SET_WATCHER(cfd)	FD_SET(cfd, &watcher_fds)
-#define CLR_WATCHER(cfd)	FD_CLR(cfd, &watcher_fds)
-#define ZERO_RAW()		FD_ZERO(&nmea_fds);
-#define IS_RAW(cfd)     	FD_ISSET(cfd, &nmea_fds)
-#define SET_RAW(cfd)    	FD_SET(cfd, &nmea_fds)
-#define CLR_RAW(cfd)    	FD_CLR(cfd, &nmea_fds)
-
-static fd_set all_fds, nmea_fds, watcher_fds;
+static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
 
@@ -175,7 +166,25 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
-#ifdef MULTISESSION
+#ifndef MULTISESSION
+#define ZERO_WATCHERS()		FD_ZERO(&watcher_fds);
+#define IS_WATCHER(cfd) 	FD_ISSET(cfd, &watcher_fds)
+#define SET_WATCHER(cfd)	FD_SET(cfd, &watcher_fds)
+#define CLR_WATCHER(cfd)	FD_CLR(cfd, &watcher_fds)
+#define ZERO_RAW()		FD_ZERO(&nmea_fds);
+#define IS_RAW(cfd)     	FD_ISSET(cfd, &nmea_fds)
+#define SET_RAW(cfd)    	FD_SET(cfd, &nmea_fds)
+#define CLR_RAW(cfd)    	FD_CLR(cfd, &nmea_fds)
+static fd_set nmea_fds, watcher_fds;
+#else
+#define ZERO_WATCHERS()		/* static storage doesn't need to be zeroed */
+#define IS_WATCHER(cfd) 	subscribers[cfd].watcher
+#define SET_WATCHER(cfd)	subscribers[cfd].watcher = 1
+#define CLR_WATCHER(cfd)	subscribers[cfd].watcher = 0
+#define ZERO_RAW()		/* static storage doesn't need to be zeroed */
+#define IS_RAW(cfd)     	subscribers[cfd].raw
+#define SET_RAW(cfd)    	subscribers[cfd].raw = 1
+#define CLR_RAW(cfd)    	subscribers[cfd].raw = 0
 /*
  * Multi-session support requires us to have two arrays, one of GPS 
  * devices currently available and one of client sessions.  The number
@@ -198,6 +207,8 @@ static struct channel_t {
 static struct subscriber_t {
     int active;				/* is this a subscriber? */
     int tied;				/* is client tied to device */
+    int watcher;			/* is client in watcher mode? */
+    int raw;				/* is client in raw mode? */
     struct channel_t *channel;		/* device subscriber listens to */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
@@ -819,9 +830,12 @@ int main(int argc, char *argv[])
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 #ifdef MULTISESSION
+		/* FIXME: find most recently connected device */
 		for (dfd = 0; dfd < FD_SETSIZE; dfd++)
-		    if (channels[dfd].device)
+		    if (channels[dfd].device) {
 			attach_client_to_device(ssock, dfd);
+			break;
+		    }
 #endif /* MULTISESSION */
 	    }
 	    FD_CLR(msock, &rfds);
