@@ -191,7 +191,7 @@ static struct channel_t {
 #define CHANNEL_AVAILABLE	0
 #define CHANNEL_INUSE		1
 #define CHANNEL_KILLED		-1
-    time_t when;
+    double when;
 } channels[MAXDEVICES];
 
 static struct subscriber_t {
@@ -825,6 +825,7 @@ int main(int argc, char *argv[])
 		gpsd_deactivate(device);
 		notify_watchers("GPSD,X=0\r\n");
 	    }
+	    channel->when = device->gpsdata.sentence_time;
 
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 		/* some listeners may be in watcher mode */

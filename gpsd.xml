@@ -32,13 +32,13 @@
 
 <para><application>gpsd</application> is a monitor daemon that watches
 a TCP/IP port (2947 by default), waiting for applications to request
-location information from a GPS.  The GPS is expected to be
-direct-connected to the machine running
-<application>gpsd</application> via a USB or RS232C serial port.  The
-port may be specified to gpsd at startup, or it may be set via a
-command shipped down the client socket (e.g. by a USB hotplug
-script). Given a GPS device, <application>gpsd</application> discovers 
-the correct port speed and protocol for it.</para>
+location information from GPS devices attached to the host machine.
+Each GPS is expected to be direct-connected to the host via a USB or
+RS232C serial port.  The port may be specified to gpsd at startup, or
+it may be set via a command shipped down the client socket (e.g. by a
+USB hotplug script). Given a GPS device by either means,
+<application>gpsd</application> discovers the correct port speed and
+protocol for it.</para>
 
 <para><application>gpsd</application> should be able to query any GPS
 that speaks either the standard textual NMEA 0183 protocol, or the
@@ -58,7 +58,7 @@ See <xref linkend='accuracy'/> for discussion.</para>
 <varlistentry>
 <term>-f</term>
 <listitem>
-<para>Set GPS device name (default is <filename>/dev/gps</filename>).</para>
+<para>Set a GPS device name (default is <filename>/dev/gps</filename>).</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -118,6 +118,11 @@ to standard error.</para>
 </varlistentry>
 </variablelist>
 
+<para>At any given time, each client will be listening to only one of
+the GPSes devices known to the daemon.  By default, a client's device
+is the one most recently on-line at the time the client connects.  A
+client may use the 'F' command to specify a device to listen to.</para>
+
 <para>The request protocol for gpsd clients is very simple.  Each
 request normally consists of a single ASCII character followed by a newline.
 Case of the request character is ignored,  Each request returns a line
@@ -173,23 +178,39 @@ See also the 'q' command.</para>
 
 <varlistentry>
 <term>f</term> 
-<listitem><para>Gets or sets the active GPS device name. The bare command 'f'
-requests a response containing 'f=' followed by the name of the active
-GPS device.  The command may be followed by an '=', in which case all
-following printable characters up to the next
-CR/LF are interpreted as the name of a trial GPS device.  If
-there are no other clients active, the trial device is opened and read
-to see if a GPS can be found there.  If it can, the trial device
-becomes the active device and the trial device name is stored to be
-opened at the time of the next client request, replacing the old one.
+<listitem><para>Gets or sets the active GPS device name. The bare
+command 'f' requests a response containing 'f=' followed by the name
+of the active GPS device.  The command may be followed by an '=', in
+which case all following printable characters up to but not including
+the next CR/LF are interpreted as the name of a trial GPS device. The
+trial device is opened and read to see if a GPS can be found there.
+If it can, the trial device becomes the active device for this client.
 The response to this form of the command is to list the name of the
-active device.</para></listitem>
+active device.</para>
+
+<para>(At protocol level 1, the F command failed if more than one
+client was attached, and multiple devices were not supported.)</para>
+</listitem>
 </varlistentry>
 
 <varlistentry>
 <term>i</term>
 <listitem><para>Returns a text string identifying the GPS.  The string
 may contain spaces and is terminated by CR-LF.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>k</term>
+<listitem><para>Returns a line consisting of "K=" followed by a
+space-separated list of all GPS devices known to
+<application>gpsd</application> (that is, devices it has been pointed
+at by the command-line -f argument or an F command and has
+successfully recognized as GPSes).  Note that the fact that a
+devicename appears in this list does not guarantee that a GPS is
+connected to it and active.</para>
+
+<para>(At protocol level 1, there was no K command.)</para> 
+</listitem>
 </varlistentry>
 
 <varlistentry>
