@@ -43,7 +43,7 @@ gpsd_LDADD = $(LIBM) libgps.la -lm
 #
 # Build shared library
 #
-libgps_la_LDFLAGS = -version-number 6:0:0
+libgps_la_LDFLAGS = -version-number 7:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgps_la_SOURCES = \
@@ -129,6 +129,8 @@ EXTRA_DIST = \
 	gpsprobe \
 	gpsprof \
 	gpsfake \
+	gpsd.usermap \
+	gpsdplug \
 	logextract
 
 # This is not distributed
