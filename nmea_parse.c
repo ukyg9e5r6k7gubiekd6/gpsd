@@ -121,6 +121,20 @@ static void update_field_f(char *sentence, int fld, double *dest, int mask, stru
 static void processGPRMC(char *sentence, struct OUTDATA *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
+    /*
+        RMC - Recommended minimum specific GPS/Transit data
+        RMC,225446,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
+           225446       Time of fix 22:54:46 UTC
+           A            Navigation receiver warning A = OK, V = warning
+           4916.45,N    Latitude 49 deg. 16.45 min North
+           12311.12,W   Longitude 123 deg. 11.12 min West
+           000.5        Speed over ground, Knots
+           054.7        Course Made Good, True
+           191194       Date of fix  19 November 1994
+           020.3,E      Magnetic variation 20.3 deg East
+           *68          mandatory checksum
+
+     */
     char s[20], d[10];
     int tmp;
 
@@ -172,56 +186,26 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-/*
-  $PMGNST,02.12,3,T,534,05.0,+03327,00*40 
-
-where:
-      ST      status information
-      02.12   Version number?
-      3       2D or 3D
-      T       True if we have a fix False otherwise
-      534     numbers change - unknown
-      05.0    time left on the gps battery in hours
-      +03327  numbers change (freq. compensation?)
-      00      PRN number receiving current focus
-      *40    checksum
- */
-
-static void processPMGNST(char *sentence, struct OUTDATA *out)
-{
-    int tmp1;
-    char foo;
-
-    /* using this for mode and status seems a bit desperate */
-    /* only use it if we don't have better info */
-    sscanf(field(sentence, 2), "%d", &tmp1);	
-    sscanf(field(sentence, 3), "%c", &foo);	
-    
-    if (!(out->cmask&C_STATUS)) {
-	if (foo == 'T') {
-	    out->status = 1;
-	    out->mode = tmp1;
-	}
-	else {
-	    out->status = 0;
-	    out->mode = 1;
-	}
-	REFRESH(out->status_stamp);
-	out->cmask |= C_STATUS;
-	REFRESH(out->mode_stamp);
-	out->cmask |= C_MODE;
-	report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
-    }
-}
-
-/* ----------------------------------------------------------------------- */
-
 static void processGPGLL(char *sentence, struct OUTDATA *out)
 /* Geographic position - Latitude, Longitude */
 {
-    /* Described at 
-     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf
-     * as part of NMEA 3.0.
+    /*
+     * Described at 
+     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf>
+     * as part of NMEA 3.0.  Here are the fields:
+     *
+     * 1,2 Latitude, N (North) or S (South)
+     * 3,4 Longitude, E (East) or W (West)
+     * 5 UTC of position
+     * 6 Status: A=Valid, V=Invalid
+     * 7 Mode Indicator
+     *   A = Autonomous mode
+     *   D = Differential Mode
+     *   E = Estimated (dead-reckoning) mode
+     *   M = Manual Input Mode
+     *   S = Simulated Mode
+     *   N = Data Not Valid
+     *
      * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
      * indicating that the Garmin 65 does not return time and status.
      * This code copes gracefully.
@@ -241,7 +225,6 @@ static void processGPGLL(char *sentence, struct OUTDATA *out)
 	report(2, "GPGLL sets status %d\n", out->status);
 	/* unclear what the right thing to do with other status values is */
     }
-
 }
 
 /* ----------------------------------------------------------------------- */
@@ -314,6 +297,24 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
 static void processGPGGA(char *sentence, struct OUTDATA *out)
 /* Global Positioning System Fix Data */
 {
+    /*
+       GGA - Global Positioning System Fix Data
+        GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
+           123519       Fix taken at 12:35:19 UTC
+           4807.038,N   Latitude 48 deg 07.038' N
+           01131.324,E  Longitude 11 deg 31.324' E
+           1            Fix quality: 0 = invalid
+                                     1 = GPS fix
+                                     2 = DGPS fix
+           08           Number of satellites being tracked
+           0.9          Horizontal dilution of position
+           545.4,M      Altitude, Metres, above mean sea level
+           46.9,M       Height of geoid (mean sea level) above WGS84
+                        ellipsoid
+           (empty field) time in seconds since last DGPS update
+           (empty field) DGPS station ID number
+    */
+
     do_lat_lon(sentence, 2, out);
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &out->status);
@@ -330,8 +331,23 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
 static void processGPGSA(char *sentence, struct OUTDATA *out)
 /* GPS DOP and Active Satellites */
 {
+    /*
+	eg1. $GPGSA,A,3,,,,,,16,18,,22,24,,,3.6,2.1,2.2*3C
+	eg2. $GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35
 
-    /* 1 = none, 2 = 2d, 3 = 3d */
+	1    = Mode:
+	       M=Manual, forced to operate in 2D or 3D
+	       A=Automatic, 3D/2D
+	2    = Mode:
+	       1=Fix not available
+	       2=2D
+	       3=3D
+	3-14 = PRNs of satellites used in position fix (null for unused fields)
+	15   = PDOP
+	16   = HDOP
+	17   = VDOP
+     */
+
     sscanf(field(sentence, 2), "%d", &out->mode);
     REFRESH(out->mode_stamp);
     out->cmask |= C_MODE;
@@ -346,8 +362,21 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
 static void processGPGSV(char *sentence, struct OUTDATA *out)
 /* GPS Satellites in View */
 {
-    int n, m, f = 4;
+    /*
+       GSV - Satellites in view
+        GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
+           2            Number of sentences for full data
+           1            sentence 1 of 2
+           08           Number of satellites in view
+           01           Satellite PRN number
+           40           Elevation, degrees
+           083          Azimuth, degrees
+           46           Signal strength - higher is better
+           <repeat for up to 4 satellites per sentence>
+                There my be up to three GSV sentences in a data packet
+     */
 
+    int n, m, f = 4;
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
@@ -369,8 +398,56 @@ static void processGPGSV(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
+static void processPMGNST(char *sentence, struct OUTDATA *out)
+/* Proprietary MaGellan STatus */
+{
+    /*
+      Only supported on Magellan GPSes.
+
+      $PMGNST,02.12,3,T,534,05.0,+03327,00*40 
+
+      where:
+	  ST      status information
+	  02.12   Version number?
+	  3       2D or 3D
+	  T       True if we have a fix False otherwise
+	  534     numbers change - unknown
+	  05.0    time left on the gps battery in hours
+	  +03327  numbers change (freq. compensation?)
+	  00      PRN number receiving current focus
+	  *40    checksum
+     */
+
+    int tmp1;
+    char foo;
+
+    /* using this for mode and status seems a bit desperate */
+    /* only use it if we don't have better info */
+    sscanf(field(sentence, 2), "%d", &tmp1);	
+    sscanf(field(sentence, 3), "%c", &foo);	
+    
+    if (!(out->cmask&C_STATUS)) {
+	if (foo == 'T') {
+	    out->status = 1;
+	    out->mode = tmp1;
+	}
+	else {
+	    out->status = 0;
+	    out->mode = 1;
+	}
+	REFRESH(out->status_stamp);
+	out->cmask |= C_STATUS;
+	REFRESH(out->mode_stamp);
+	out->cmask |= C_MODE;
+	report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
+    }
+}
+
+/* ----------------------------------------------------------------------- */
+
 static void processPRWIZCH(char *sentence, struct OUTDATA *out)
 /*
+ * Supported by the Zodiac/Rockwell chipset.
  * Descriptions of this sentence are hard to find, but here is one:
  *
  * $PRWIZCH ,00,0,03,7,31,7,15,7,19,7,01,7,22,2,27,2,13,0,11,7,08,0,02,0*4C

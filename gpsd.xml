@@ -263,7 +263,9 @@ the GPS. It has no options.</para>
 the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
 Electronics Association</ulink>. A description of the protocol is
 <ulink url='http://vancouver-webpages.com/peter/nmeafaq.txt'>available on the
-Web</ulink>.</para>
+Web</ulink>.  gpsd parses the following NMEA sentences:
+GPRMC, GPGLL, GPVTG, GPGGA, GPGSA, GPGSV. It also recognizes the
+vendor extensions PMGNST and PRWIZCH.</para>
 
 <para>The Rockwell protocol is described as an addendum on <ulink
 url='http://www.gpsinformation.net/dale/nmea.htm'>this page about
