@@ -343,6 +343,7 @@ int main (int argc, char **argv)
     wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid27win, A_BOLD);
     mvwprintw(mid27win, 1, 1, "SBAS source: ");
+    mvwprintw(mid27win, 1, 31, "Corrections: ");
     mvwprintw(mid27win, 3, 8, " Packet type 27 (0x1B) ");
     wattrset(mid27win, A_NORMAL);
 
@@ -686,7 +687,14 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
-	mvwprintw(mid27win, 1, 14, "%d (%s)", getb(2), sbasvec[getb(2)]);
+	mvwprintw(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[getb(1)]);
+	for (i = j = 0; i < MAXCHANNELS; i++) {
+	    if (getb(16+2*i)) {
+		wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
+		j++;
+	    }
+	}
+	mvwprintw(mid27win, 1, 44, "%d", j);
 	wprintw(debugwin, "DST 0x1b=");
 	break;
 
