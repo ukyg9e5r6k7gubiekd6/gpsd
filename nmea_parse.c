@@ -70,6 +70,8 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     do_lat_lon(sentence, 3, out);
 }
 
+/* ----------------------------------------------------------------------- */
+
 /*
   $PMGNST,02.12,3,T,534,05.0,+03327,00*40 
 
@@ -113,12 +115,95 @@ void processPMGNST(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-void processGPVTG(char *sentence, struct OUTDATA *out)
+static void processGPGLL(char *sentence, struct OUTDATA *out)
+/* Geographic position - Latitude, Longitude */
 {
-    sscanf(field(sentence, 3), "%lf", &out->speed);
-#if GPRMC_TRACK
+    /* Described at 
+     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf
+     * as part of NMEA 3.0.
+     * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
+     * indicating that the Garmin 65 does not return time and status.
+     * This code copes gracefully.
+     */
+    char *status = field(sentence, 7);
+
+    /* we could extract the time, but the gpsd timestamp will be good enough */
+
+    if (status[0] != 'N')
+    {
+	do_lat_lon(sentence, 1, out);
+	if (status[0] == 'A')
+	    out->status = 1;	/* autonomous */
+	if (status[0] == 'D')
+	    out->status = 2;	/* differential */
+	/* unclear what the right thing to do with other status values is */
+    }
+
+}
+
+/* ----------------------------------------------------------------------- */
+
+static void processGPVTG(char *sentence, struct OUTDATA *out)
+/* Track Made Good and Ground Speed */
+{
+    /* OK, there seem to be two variants of GPVTG
+     * One, described at <http://www.sintrade.ch/nmea.htm>, looks like this:
+
+	GPVTG Track Made Good and Ground Speed with GPS Talker ID
+	(1) True course over ground (degrees) 000 to 359
+	(2) Magnetic course over ground 000 to 359
+	(3) Speed over ground (knots) 00.0 to 99.9
+	(4) Speed over ground (kilometers) 00.0 to 99.9
+
+     * Up to and including 1.10, gpsd assumed this and extracted field
+     * 3 for ground speed.  There's a GPS manual at 
+     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf>
+     * tha suggests this information was good for NMEA 3.0 at least.
+     *
+     * But, if you look in <http://www.kh-gps.de/nmea-faq.htm>. it says:
+
+	$GPVTG,t,T,,,s.ss,N,s.ss,K*hh
+
+	VTG  = Actual track made good and speed over ground
+
+	1    = Track made good
+	2    = Fixed text 'T' indicates that track made good is relative to 
+	       true north
+	3    = not used
+	4    = not used
+	5    = Speed over ground in knots
+	6    = Fixed text 'N' indicates that speed over ground in in knots
+	7    = Speed over ground in kilometers/hour
+	8    = Fixed text 'K' indicates that speed over ground is in 
+               kilometers/hour
+	9    = Checksum
+
+     * The actual NMEA spec, version 3.01, dated 1/1/2002, agrees with the
+     * second source:
+
+	1    = Track made good
+	2    = Fixed text 'T' indicates that track made good is relative to 
+	       true north
+	3    = Magnetic course over ground
+	4    = Fixed text 'M' indicates that course is relative to magnetic 
+               north.
+	5    = Speed over ground in knots
+	6    = Fixed text 'N' indicates that speed over ground in in knots
+	7    = Speed over ground in kilometers/hour
+	8    = Fixed text 'K' indicates that speed over ground is in 
+               kilometers/hour
+	9    = Checksum
+
+     * which means we want to extract field 5.  We'll deal with both
+     * possibilities here.
+     */
+#if GPMRC_TRACK
     sscanf(field(sentence, 1), "%lf", &out->track);
 #endif
+    if (field(sentence, 2)[0] == 'T')
+	sscanf(field(sentence, 5), "%lf", &out->speed);
+    else
+	sscanf(field(sentence, 3), "%lf", &out->speed);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -312,6 +397,8 @@ int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
 	    processGPRMC(sentence, outdata);
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
 	    processGPGGA(sentence, outdata);
+	} else if (strncmp(GPGLL, sentence, 5) == 0) {
+	    processGPGLL(sentence, outdata);
 	} else if (strncmp(GPVTG, sentence, 5) == 0) {
 	    processGPVTG(sentence, outdata);
 	} else if (strncmp(GPGSA, sentence, 5) == 0) {

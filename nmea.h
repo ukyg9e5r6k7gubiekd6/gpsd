@@ -1,5 +1,6 @@
 #include <time.h>
 
+#define GPGLL "GPGLL"
 #define GPVTG "GPVTG"
 #define GPGGA "GPGGA"
 #define GPGSA "GPGSA"
