@@ -111,6 +111,9 @@ is for <code>gpsd</code> developers.</p></li>
 
 <dt><a href="gpsprof.html">gpsprof.1</a></dt>
 <dd>The <code>gpsprof</code> program for measuring GPS latency.</dd>
+
+<dt><a href="gpsfake.html">gpsfake.1</a></dt>
+<dd>The <code>gpsfake</code> test harness simulating a GPS.</dd>
 </dl>
 
 <p>We have a <a href='hardware.html'>list of compatible GPSses</a>
