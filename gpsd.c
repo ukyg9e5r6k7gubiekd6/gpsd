@@ -43,7 +43,7 @@
 #include <sys/time.h>
 #endif
 
-#include "gpsd.h"
+#include "gps.h"
 #include "version.h"
 
 #define QLEN		5

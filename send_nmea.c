@@ -5,7 +5,7 @@
 #include <netdb.h>
 #include <sys/ioctl.h>
 
-#include "gpsd.h"
+#include "gps.h"
 #include "version.h"
 
 static struct gps_type_t *set_device_type(char what)

@@ -1,2 +1,27 @@
+1. Make a tarball of CVS HEAD available for testing.
+
+2. Update <http://www.pygps.org/gpsd/gpsd.html> and 
+   <http://www.pygps.org/gpsd/protocol.html>, which are now
+   seriously out of date.
+
+3. Create a new libgpsd.a that is a linkable interface
+   to the daemon.  The idea is for applications like gpsdrive
+   to be able to link this and get GPS service.
+
+4. Split the gpsd interface code out of pygps into a Python 
+   module that can be shipped with gpsd.
+
+5. File renames: 
+
+     send_nmea.c -> libgps_core.c
+     tm.c        -> nmea_drivers.c
+     em.c        -> earthmate.c
+
+   Yes, I could do these destructively, but I'd prefer to to lose the
+   project history.  Unfortunately, CVS being what it is, I can't do
+   this without write access to the project repository.
+
+6. Make RPMs available.  I've built a working specfile.
+
+Someday: 
 Autodetect USB GPS by scanning the USB bus, if no device is specified.
- 

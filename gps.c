@@ -44,7 +44,7 @@
 #include <sys/filio.h>
 #endif
 
-#include "gpsd.h"
+#include "gps.h"
 
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics();

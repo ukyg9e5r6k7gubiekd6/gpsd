@@ -116,8 +116,7 @@ LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJEC
 
 
 ## Programs
-PROGRAMS=gpsd gps
-
+PROGRAMS=gpsd gps 
 ## Manual pages
 PAGES=gpsd.1 libgpsd.3
 
@@ -129,18 +128,18 @@ XGPSOBJS=xgpsspeed.o Tachometer.o
 
 all: $(PROGRAMS) $(MOTIF_PROGRAMS) $(PAGES)
 
-gpsd: gpsd.o libgpsd.a
+gpsd: gpsd.o libgps.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
 
-gps: gps.o libgpsd.a
+gps: gps.o libgps.a
 	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
 
 xgpsspeed: $(XGPSOBJS)
 	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgpsd $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
-libgpsd.a:  $(LIB_OBJECTS)
-	ar -r libgpsd.a $(LIB_OBJECTS)
-	ranlib libgpsd.a
+libgps.a:  $(LIB_OBJECTS)
+	ar -r libgps.a $(LIB_OBJECTS)
+	ranlib libgps.a
 
 # Library parts
 netlib.o: netlib.c gpsd.h

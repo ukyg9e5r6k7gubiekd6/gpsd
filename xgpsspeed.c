@@ -24,7 +24,7 @@
 
 #include "xgpsspeed.icon"
 
-#include "gpsd.h"
+#include "gps.h"
 
 #if defined(ultrix) || defined(SOLARIS) 
 extern double rint();
