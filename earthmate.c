@@ -242,23 +242,23 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     sprintf(session->gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    session->gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
+    session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
 
     session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
     session->gNMEAdata.satellites_used = p[O(12)];
 
-    session->gNMEAdata.hours = p[O(22)];
+    session->hours = p[O(22)];
 
-    session->gNMEAdata.minutes = p[O(23)];
+    session->minutes = p[O(23)];
 
-    session->gNMEAdata.seconds = p[O(24)];
+    session->seconds = p[O(24)];
 
-    session->gNMEAdata.year = p[O(21)];
+    session->year = p[O(21)];
 
-    session->gNMEAdata.month = p[O(20)];
+    session->month = p[O(20)];
 
-    session->gNMEAdata.day = p[O(19)];
+    session->day = p[O(19)];
 
     session->gNMEAdata.latitude = 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000));
     session->gNMEAdata.longitude = 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000));
@@ -390,7 +390,7 @@ static void analyze(struct gps_session_t *session,
 	    if (session->gNMEAdata.mode > 1) {
 		sprintf(bufp,
 			"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
-		   session->gNMEAdata.hours, session->gNMEAdata.minutes, session->gNMEAdata.seconds,
+		   session->hours, session->minutes, session->seconds,
 			degtodm(fabs(session->gNMEAdata.latitude)),
 			((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
 			degtodm(fabs(session->gNMEAdata.longitude)),
@@ -402,14 +402,14 @@ static void analyze(struct gps_session_t *session,
 	    }
 	    sprintf(bufp,
 		    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,%02f,%c*",
-		    session->gNMEAdata.hours, session->gNMEAdata.minutes, session->gNMEAdata.seconds,
+		    session->hours, session->minutes, session->seconds,
 		    session->gNMEAdata.status ? 'A' : 'V', degtodm(fabs(session->gNMEAdata.latitude)),
 		    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
 		    degtodm(fabs(session->gNMEAdata.longitude)),
 		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'), session->gNMEAdata.speed,
-		    session->gNMEAdata.track, session->gNMEAdata.day, session->gNMEAdata.month,
-		    (session->gNMEAdata.year % 100), session->gNMEAdata.mag_var,
-		    (session->gNMEAdata.mag_var > 0) ? 'E' : 'W');
+		    session->gNMEAdata.track, session->day, session->month,
+		    (session->year % 100), session->mag_var,
+		    (session->mag_var > 0) ? 'E' : 'W');
 	    nmea_add_checksum(bufp + 1);
 	    nmea = 1000;
 	    break;

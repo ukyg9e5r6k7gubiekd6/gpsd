@@ -29,17 +29,29 @@ struct gps_type_t
 struct gps_session_t
 /* session object, encapsulates all global state */
 {
+    /* this is public */
+    int debug;		/* debug verbosity level */
+
+    /* the rest is private */
     struct gps_type_t *device_type;
     struct longlat_t initpos;
     struct gps_data_t gNMEAdata;
     char *gpsd_device;	/* where to find the GPS */
-    int baudrate;		/* baud rate of session */
+    int baudrate;	/* baud rate of session */
     int fdin;		/* input fd from GPS */
     int fdout;		/* output fd to GPS */
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
-    int debug;		/* debug verbosity level */
+
+    /* private housekeeping stuff for the Earthmate driver */
+    double mag_var;		/* Magnetic variation in degrees */  
+    int year;
+    int month;
+    int day;
+    int hours;
+    int minutes;
+    int seconds;
 };
 
 /* some multipliers for interpreting GPS output */
