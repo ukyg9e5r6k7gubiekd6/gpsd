@@ -179,7 +179,7 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
     }
 }
 
-static void processGPGLL(int c UNUSED, char *field[], struct gps_data_t *out)
+static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.  Here are the fields:
@@ -203,13 +203,13 @@ static void processGPGLL(int c UNUSED, char *field[], struct gps_data_t *out)
      */
     char *status = field[7];
 
-    if (!strcmp(field[6], "A") && status[0] != 'N') {
+    if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
 	do_lat_lon(&field[1], out);
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
-	if (status[0] == 'D')
+	if (*status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
@@ -511,9 +511,9 @@ int nmea_send(int fd, const char *fmt, ... )
     va_list ap;
 
     va_start(ap, fmt) ;
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+    vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     strcat(buf, "*");
-    nmea_add_checksum(buf + 1);
+    nmea_add_checksum(buf+1);
     return write(fd, buf, strlen(buf));
 }

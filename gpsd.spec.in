@@ -121,6 +121,10 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
+* Fri Feb 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Fixed core-dump bug in processing of the GLL variant that does not 
+  include an FAA Mode Indicator.
+
 * Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.11-1
 - Added gpsprof and the capability to generate GPS latency profiles.
   gpsprobe now hunts through plausible baud rates when looking for NMEA
