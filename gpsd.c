@@ -403,8 +403,7 @@ static int handle_request(int fd, char *buf, int buflen)
  breakout:
     strcat(reply, "\r\n");
 
-    if (session.debug >= 2)
-	gpscli_report(3, "=> client: %s", reply);
+    gpscli_report(3, "=> client: %s", reply);
     sc = write(fd, reply, strlen(reply) + 1);
     if (sc < 0) {
 	gpscli_report(3, "Response write: %s\n", strerror(errno));
@@ -739,8 +738,7 @@ int main(int argc, char *argv[])
 		    FD_CLR(fd, &all_fds);
 		}
 		buf[buflen] = '\0';
-		if (session.debug >= 2)
-		    gpscli_report(1, "<= client: %s", buf);
+		gpscli_report(1, "<= client: %s", buf);
 		if (handle_request(fd, buf, buflen) < 0) {
 		    (void) close(fd);
 		    FD_CLR(fd, &all_fds);
