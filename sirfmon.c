@@ -25,11 +25,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <termios.h>
-#include <fcntl.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/times.h>
-#include <sys/ioctl.h>
+#include <fcntl.h>	/* for O_RDWR */
 #include "gpsutils.h"
 #include "config.h"
 
