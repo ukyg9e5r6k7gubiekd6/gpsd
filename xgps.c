@@ -148,7 +148,7 @@ static void build_gui(Widget toplevel)
     rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, left, args, 1);
 
     label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
-    label_2 = XtCreateManagedWidget("Latitide ", xmLabelWidgetClass, rowColumn_12, args, 0);
+    label_2 = XtCreateManagedWidget("Latitude ", xmLabelWidgetClass, rowColumn_12, args, 0);
     label_3 = XtCreateManagedWidget("Longitude", xmLabelWidgetClass, rowColumn_13, args, 0);
     label_4 = XtCreateManagedWidget("Altitude ", xmLabelWidgetClass, rowColumn_14, args, 0);
     label_5 = XtCreateManagedWidget("Speed    ", xmLabelWidgetClass, rowColumn_15, args, 0);
@@ -220,7 +220,7 @@ static void update_panel(char *message)
 /* runs on each sentence */
 {
     int i, newstate;
-    XmString string[12];
+    XmString string[MAXCHANNELS+1];
     char s[128], *sp;
 
     if (message[0])
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 	exit(2);
     }
 
-    toplevel = XtVaAppInitialize(&app, "gps.ad", 
+    toplevel = XtVaAppInitialize(&app, "xgps", 
 			       options, XtNumber(options), 
 			       &argc,argv, fallback_resources,NULL);
 
