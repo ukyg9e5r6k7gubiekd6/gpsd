@@ -19,10 +19,8 @@
       <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
       <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
-      <arg choice='opt'>-r </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
-      <arg choice='opt'>-T <replaceable>terminal type</replaceable></arg>
       <arg choice='opt'>-h</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -87,7 +85,7 @@ from sentences without fixes is lumped in.</para>
 </varlistentry>
 </variablelist>
 
-<para>Each of the time plots conveys the following information:</para>
+<para>The instrumented time plots conveys the following information:</para>
 
 <variablelist>
 <varlistentry>
@@ -140,7 +138,7 @@ the chipset accepts a speed-change command (SiRF-II supports this
 feature).</para>
 
 <para>The -t option sets a text string to be included in the plot
-title..</para>
+title.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>

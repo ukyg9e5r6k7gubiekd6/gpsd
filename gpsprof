@@ -356,7 +356,7 @@ def plotframe(await, fname, speed, threshold, title):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:rs:t:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:")
         formatter = "space"
         raw = False
         speed = 0
@@ -370,8 +370,6 @@ if __name__ == '__main__':
                 threshold = int(val)
             elif (switch == '-n'):
                 await = int(val)
-            elif (switch == '-r'):
-                raw = True
             elif (switch == '-s'):
                 speed = int(val)
             elif (switch == '-t'):
