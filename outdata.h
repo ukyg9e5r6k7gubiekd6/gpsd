@@ -15,7 +15,7 @@ struct life_t
     int		time_to_live;
 };
 #define REFRESH(stamp)	stamp.last_refresh = time(NULL)
-#define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live < t
+#define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live >= t
 #define REVOKE(stamp)	stamp.last_refresh = 0
 
 struct OUTDATA {
@@ -38,8 +38,14 @@ struct OUTDATA {
     struct life_t speed_stamp;
 
     /* status and precision of fix */
-    int    status;		/* 0 = no fix, 1 = fix, 2 = dgps fix */
-    int    mode;		/* 1 = no fix, 2 = 2D, 3 = 3D */
+    int    status;
+#define STATUS_NO_FIX	0
+#define STATUS_FIX	1
+#define STATUS_DGPS_FIX	2
+    int    mode;
+#define MODE_NO_FIX	1
+#define MODE_2D  	2
+#define MODE_3D  	3
     struct life_t mode_stamp;
     struct life_t status_stamp;
 
