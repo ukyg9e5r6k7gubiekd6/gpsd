@@ -214,7 +214,7 @@ fresher by a few milliseconds (which might make a difference if, say,
 you're using a GPS-enabled autopilot to land an aircraft).  Some GPSes
 feature data rates upwards of 38400bps. However, this actually does
 little good unless the application polls the GPS at a rate faster than
-1Hz rather than waitiung for it, as most GPS sensors cannot be told to
+1Hz rather than waiting for it, as most GPS sensors cannot be told to
 ship updates faster than once per second &mdash; and the polling
 commands (when they exist at all) are proprietary. And the fact that
 GPSes don't have a single data rate graven in stone brings back all
@@ -264,7 +264,7 @@ for it in the <code>gpsd</code> code if you're really curious).</p>
 run <code>gpsd</code> in a mode something like this:</p>
 
 <listing>
-./gpsd -n -D 2 -p /dev/ttyUSB0
+./gpsd -N -n -D 2 -p /dev/ttyUSB0
 </listing>
 
 <p>Watching the output for thirty seconds or so will give you a good
