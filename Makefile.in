@@ -184,7 +184,7 @@ SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(MOTIF_OBJ
 DOCS = README INSTALL COPYING HACKING TODO gpsd.xml libgpsd.xml libgps.xml
 MANPAGES = gpsd.1 libgps.3 libgpsd.3
 XRESOURCES = gps.ad xgpsspeed.ad
-CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
+CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh mkinstalldirs
 SCRIPTS = gpsd.init gpsd.py
 META = gpsd.spec gpsd.lsm
 ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(SCRIPTS) $(META) $(MANPAGES) 
