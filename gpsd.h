@@ -35,7 +35,7 @@ struct OUTDATA {
     /* velocity */
     double speed;		/* Speed over ground, knots */
     double mag_var;		/* magnetic variation in degrees */
-    double course;		/* course made good */
+    double track;		/* course made good */
     struct life_t speed_stamp;
 
     /* status and precision of fix */

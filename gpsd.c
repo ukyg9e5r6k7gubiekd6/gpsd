@@ -274,6 +274,12 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Status", status_stamp);
 	    break;
+	case 'T':
+	case 't':
+	    sprintf(reply + strlen(reply),
+		    ",T=%f",
+		    session.gNMEAdata.track);
+	    break;
 	case 'V':
 	case 'v':
 	    if (!validate())
@@ -395,7 +401,7 @@ static void raw_hook(char *sentence)
 	    ++sentence;
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "pvs");
+		ok = PUBLISH(fd, "ptvs");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "sa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
@@ -403,7 +409,7 @@ static void raw_hook(char *sentence)
 	    } else if (strncmp(PMGNST, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "sm");
 	    } else if (strncmp(GPVTG, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "v");
+		ok = PUBLISH(fd, "tv");
 	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {

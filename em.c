@@ -242,7 +242,7 @@ static void handle1000(struct gpsd_t *session, unsigned short *p)
 
     session->gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
 
-    session->gNMEAdata.course = p[O(36)] * 180 / (PI * 1000);	/* degrees */
+    session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
     session->gNMEAdata.satellites = p[O(12)];
 
@@ -394,7 +394,7 @@ static void analyze(struct gpsd_t *session,
 		    ((session->gNMEAdata.latitude > 0) ? 'N' : 'S'),
 		    degtodm(fabs(session->gNMEAdata.longitude)),
 		((session->gNMEAdata.longitude > 0) ? 'E' : 'W'), session->gNMEAdata.speed,
-		    session->gNMEAdata.course, session->gNMEAdata.day, session->gNMEAdata.month,
+		    session->gNMEAdata.track, session->gNMEAdata.day, session->gNMEAdata.month,
 		    (session->gNMEAdata.year % 100), session->gNMEAdata.mag_var,
 		    (session->gNMEAdata.mag_var > 0) ? 'E' : 'W');
 	    gps_add_checksum(bufp + 1);

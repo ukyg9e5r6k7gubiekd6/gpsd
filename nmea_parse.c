@@ -180,7 +180,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     out->status = newstatus;
     REFRESH(out->status_stamp);
 
-    out->speed_stamp.changed = (update_field_f(sentence, 7, &out->speed) || update_field_f(sentence, 8, &out->course));
+    out->speed_stamp.changed = (update_field_f(sentence, 7, &out->speed) || update_field_f(sentence, 8, &out->track));
     REFRESH(out->speed_stamp);
 }
 
@@ -289,7 +289,7 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
      */
     int changed;
 
-    changed = update_field_f(sentence, 1, &out->course);
+    changed = update_field_f(sentence, 1, &out->track);
     if (field(sentence, 2)[0] == 'T')
 	changed |= update_field_f(sentence, 5, &out->speed);
     else

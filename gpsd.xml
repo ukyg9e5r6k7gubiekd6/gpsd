@@ -197,6 +197,13 @@ their communication format translated to NMEA on the fly.)</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>t</term>
+<listitem>
+<para>Track made good; course "T=%f" in degrees from true north.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>v</term>
 <listitem><para>The current speed as "V=%f" in knots.</para></listitem>
 </varlistentry>
