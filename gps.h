@@ -3,9 +3,6 @@
 #ifndef gps_h
 #  define gps_h 1
 
-/*
- * Make sure we can call this stuff from C++.
- */
 #ifdef __cplusplus
 extern "C" {
 #endif
