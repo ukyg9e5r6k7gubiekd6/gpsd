@@ -15,6 +15,8 @@
 
 #include "gpsd.h"
 
+#define NO_MAG_VAR	-999	/* must be out of band for degrees */
+
 struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
@@ -64,6 +66,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->gNMEAdata.gps_fd = -1;
     session->gNMEAdata.mode = MODE_NO_FIX;
     session->gNMEAdata.status = STATUS_NO_FIX;
+    session->mag_var = NO_MAG_VAR;
 
     return session;
 }
@@ -217,7 +220,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
                 // altitude is MSL
 		session->gNMEAdata.altitude, 'M',
 		session->separation, 'M');
-	if (session->mag_var == 0) 
+	if (session->mag_var == NO_MAG_VAR) 
 	    strcat(bufp, ",");
 	else {
 	    sprintf(bufp+strlen(bufp), "%lf,", fabs(session->mag_var));
