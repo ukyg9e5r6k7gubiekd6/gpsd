@@ -365,7 +365,7 @@ GBS - GPS Satellite Fault Detection
  $--GBS,hhmmss.ss,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh<CR><LF>
 
  Field Number: 
-  1) UTC time of theb GGA or GNS fix associated with this sentence
+  1) UTC time of the GGA or GNS fix associated with this sentence
   2) Expected error in latitude (meters)
   3) Expected error in longitude (meters)
   4) Expected error in altitude (meters)

@@ -388,7 +388,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
         GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
            2            Number of sentences for full data
            1            sentence 1 of 2
-           08           Number of satellites in view
+           08           Total number of satellites in view
            01           Satellite PRN number
            40           Elevation, degrees
            083          Azimuth, degrees
