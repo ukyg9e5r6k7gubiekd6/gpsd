@@ -10,7 +10,7 @@ Description:    Combines gpsd and gpsclient.
 Keywords:       gps, daemon, gis, maping, tripmate, earthmate, garmin
 Author:         remco@rvt.com (Remco Treffkorn)
 Maintained-by:  remco@rvt.com (Remco Treffkorn)
-Primary-site:   ftp://ftp.ugraf.com/pub/gpsd
+Primary-site:   ftp://ftp.mayko.com/pub/gpsd
 Alternate-site: ftp://sunsite.unc.edu:/pub/Linux/system/daemons
 Original-site:  
 Platforms:      Linux / Unix
