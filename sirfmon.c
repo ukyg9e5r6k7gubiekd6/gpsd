@@ -194,7 +194,7 @@ static int nmea_send(int fd, const char *fmt, ... )
 
 int main (int argc, char **argv)
 {
-    int len,i,stopbits,bps,speed,v,st,quit = 0;
+    int len,i,stopbits,bps,speed,v,st;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
@@ -289,7 +289,7 @@ int main (int argc, char **argv)
 
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
-    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N");
+    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N  A");
     for (i = 0; i < 12; i++) {
 	mvwprintw(mid4win, i+2, 1, "%2d",i);
     }
@@ -335,8 +335,7 @@ int main (int argc, char **argv)
     putb(1, 0x0);
     sendpkt(buf, 2);
 
-    while (!quit)
-    {
+    for (;;) {
 	wmove(cmdwin, 0,0);
 	wprintw(cmdwin, "cmd> ");
 	wclrtoeol(cmdwin);
@@ -433,8 +432,7 @@ int main (int argc, char **argv)
 		putb(21,0x01);
 		putw(22,bps);
 		sendpkt(buf,24);
-		quit++;
-		break;
+		goto quit;
 
 	    case 'l':				/* open logfile */
 		if (logfile != NULL)
@@ -444,12 +442,10 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'q':
-		quit++;
-		break;
+		goto quit;
 
 	    case 's':
 		len = 0;
-
 		while (*p != '\0')
 		{
 		    sscanf(p,"%x",&v);
@@ -463,10 +459,6 @@ int main (int argc, char **argv)
 
 		sendpkt(buf,len);
 		break;
-
-	    case 'v':
-	    	verbose = (*p == '0')? 0 : 1;
-		break;
 	    }
 	}
 
@@ -474,6 +466,7 @@ int main (int argc, char **argv)
 	    decode_sirf(buf,len);
     }
 
+ quit:
     if (logfile != NULL)
 	fclose(logfile);
 
@@ -589,20 +582,15 @@ int len;
 	wprintw(debugwin, "CSD 0x07=");
 	break;
 
-#ifdef UNUSED
     case 0x08:		/* 50 BPS data */
 	ch = getb(1);
-	move(CHANWIN+ch,77);
-	printw("A");
-	if (verbose) {
-	    wprintw(debugwin, "ALM %d (%d):",getb(2),ch);
-	    for (off = 3; off < len; off += 4)
-		wprintw(debugwin, " %d",getl(off));
-	    wprintw(debugwin, "\n");
-	}
+	mvwprintw(mid4win, ch, 26, "A");
+	wprintw(debugwin, "ALM %d (%d):",getb(2),ch);
+	for (off = 3; off < len; off += 4)
+	    wprintw(debugwin, " %d",getl(off));
+	wprintw(debugwin, "\n");
 	wprintw(debugwin, "50B 0x08=");
     	break;
-#endif /* __UNUSED */
 
     case 0x09:		/* Throughput */
 	mvwprintw(mid9win, 1, 6,  "%.3f",(float)getw(1)/186);	/*SegStatMax*/
@@ -746,16 +734,14 @@ int len;
 	    len--;
 	buf[len] = '\0';
 	j = 1;
-	if (!verbose) {
-	    for (i = 0; verbpat[i] != NULL; i++)
-		if (!strncmp(buf+1,verbpat[i],strlen(verbpat[i]))) {
-		    j = 0;
-		    break;
-		}
-	}
-		wprintw(debugwin, "DD  0xff=");
+	for (i = 0; verbpat[i] != NULL; i++)
+	    if (!strncmp(buf+1,verbpat[i],strlen(verbpat[i]))) {
+		j = 0;
+		break;
+	    }
 	if (j)
 	    wprintw(debugwin, "%s\n",buf+1);
+	wprintw(debugwin, "DD  0xff=");
 	break;
 
     default:
