@@ -196,7 +196,7 @@ gpsd-$(VERS).tar.gz: $(ALL)
 	(cd ..; tar -czvf trunk/gpsd-$(VERS).tar.gz `cat trunk/MANIFEST`)
 	(cd ..; rm gpsd-$(VERS))
 
-.PHONY: dist
+.PHONY: dist install
 dist: gpsd-$(VERS).tar.gz
 
 install:
@@ -210,20 +210,20 @@ install:
 	for lib in ${LIBRARIES}; do \
 		$(INSTALL) $$lib ${DESTDIR}${libdir} ; \
 	done
-	ldconfig
+	-ldconfig
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man1/
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd.1
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man3/
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgps.3
 	$(INSTALL) -m 755 -o 0 -g 0 gps.h $(INCLUDEDIR)/gps.h
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.h $(INCLUDEDIR)/gpsd.h
-	cp gpsd.init /etc/init.d/gpsd
-	/sbin/chkconfig --add gpsd
-	chkconfig --levels 35 gpsd on
+	-cp gpsd.init /etc/init.d/gpsd
+	-/sbin/chkconfig --add gpsd
+	-chkconfig --levels 35 gpsd on
 
 uninstall:
-	rm -f /etc/init.d/gpsd
-	/sbin/chkconfig --del gpsd
+	-rm -f /etc/init.d/gpsd
+	-/sbin/chkconfig --del gpsd
 	rm $(MANDIR)/man1/gpsd.1 $(MANDIR)/man3/{libgps.3,libgpsd.3} 
 	rm $(INCLUDEDIR)/gpsd.h $(INCLUDEDIR)/gps.h
 	for app in ${PROGRAMS}; ${MOTIF_PROGRAMS}; do \
