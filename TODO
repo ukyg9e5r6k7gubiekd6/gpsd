@@ -3,12 +3,6 @@
 Would somebody please test the device types that aren't straight NMEA?
 (This translates as: Hey, you, Russ!  Get off your tuchis! :-))
 
-* Build machinery
-
-The shared-library version just defaults now.  We need to figure out how 
-to pass in --version-info.  The automake manual claims that setting a
-LIBRARY_LDFLAGS variable in Makefile.am will accomplish this, but it lies.
-
 * The strange math problem in gpsprobe 
 
 I have a Python script I'd like to ship with 2.0, called gsprobe.  It
