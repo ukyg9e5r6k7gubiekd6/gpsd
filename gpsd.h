@@ -65,7 +65,7 @@ struct gps_type_t {
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_session_t *session, int speed);
     void (*wrapup)(struct gps_session_t *session);
-    int baudrate, stopbits, cycle;
+    int cycle;
 };
 
 #if defined (HAVE_SYS_TERMIOS_H)
@@ -83,12 +83,6 @@ struct gps_type_t {
  */
 #define MAX_PACKET_LENGTH	NMEA_MAX
 
-
-#define BAD_PACKET	-1
-#define NMEA_PACKET	0
-#define SIRF_PACKET	1
-#define ZODIAC_PACKET	2
-
 struct gps_session_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gNMEAdata;
@@ -99,6 +93,11 @@ struct gps_session_t {
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
+    int	packet_type;
+#define BAD_PACKET	-1
+#define NMEA_PACKET	0
+#define SIRF_PACKET	1
+#define ZODIAC_PACKET	2
     unsigned char inbuffer[MAX_PACKET_LENGTH+1];
     unsigned short inbuflen;
     unsigned char *inbufptr;

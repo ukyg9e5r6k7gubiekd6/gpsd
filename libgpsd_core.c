@@ -14,6 +14,7 @@
 #endif
 
 #include "gpsd.h"
+#include "sirf.h"
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
@@ -39,7 +40,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     foundit:;
     }
 #endif /* NON_NMEA_ENABLE */
-    session->gNMEAdata.baudrate = session->device_type->baudrate;
     session->dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZ];
@@ -91,7 +91,11 @@ int gpsd_activate(struct gps_session_t *session)
     if (gpsd_open(session) < 0)
 	return -1;
     else {
-	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* ignore old sentences */
+	if (session->packet_type == SIRF_PACKET) {
+	    packet_discard(session);
+	    gpsd_report(1, "switching to NMEA mode\n");
+	    sirf_to_nmea(session->gNMEAdata.gps_fd, session->gNMEAdata.baudrate);
+	}
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);

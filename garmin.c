@@ -719,8 +719,6 @@ struct gps_type_t garmin_binary =
     NULL,		/* send DGPS correction */
     NULL,		/* no speed switcher */
     NULL,		/* caller needs to supply a close hook */
-    9600,		/* bit rate, unused */
-    1,			/* stop bits, unused */
     1,			/* updates every second */
 };
 

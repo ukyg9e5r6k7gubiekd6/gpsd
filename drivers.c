@@ -88,8 +88,6 @@ struct gps_type_t nmea = {
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no wrapup */
-    0,			/* perform baud-rate hunting */
-    1,			/* 1 stop bit */
     1,			/* updates every second */
 };
 
@@ -126,8 +124,6 @@ struct gps_type_t sirfII = {
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_switcher,	/* we can change speeds */
     NULL,		/* no wrapup */
-    0,			/* perform baud-rate hunting */
-    1,			/* 1 stop bit */
     1,			/* updates every second */
 };
 #endif /* SIRFII_ENABLE */
@@ -179,8 +175,6 @@ struct gps_type_t tripmate = {
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no speed switcher */
     NULL,			/* no wrapup */
-    4800,			/* default speed to connect at */
-    1,				/* 1 stop bit */
     1,				/* updates every second */
 };
 #endif /* TRIPMATE_ENABLE */
@@ -225,8 +219,6 @@ struct gps_type_t earthmate = {
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
     NULL,			/* no wrapup code */
-    9600,			/* connecting at 4800 will fail */
-    1,				/* 1 stop bit */
     1,				/* updates every second */
 };
 #endif /* EARTHMATE_ENABLE */
@@ -247,8 +239,6 @@ struct gps_type_t logfile = {
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
     NULL,			/* no wrapup code */
-    0,				/* don't set a speed */
-    1,				/* 1 stop bit (not used) */
     -1,				/* should never time out */
 };
 #endif /* LOGFILE_ENABLE */

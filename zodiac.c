@@ -439,8 +439,6 @@ struct gps_type_t zodiac_binary =
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */
     NULL,		/* caller needs to supply a close hook */
-    9600,		/* 4800 won't work */
-    1,			/* 1 stop bit */
     1,			/* updates every second */
 };
 
