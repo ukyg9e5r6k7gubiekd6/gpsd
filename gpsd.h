@@ -42,8 +42,9 @@ struct gps_session_t
     int fixcnt;		/* count of good fixes seen */
 
 #ifdef ZODIAC_ENABLE
-    /* private housekeeping stuff for the Earthmate driver */
+    /* private housekeeping stuff for the Zodiac driver */
     double mag_var;		/* Magnetic variation in degrees */  
+    double separation;		/* Geoidal separation */
     int year;
     int month;
     int day;

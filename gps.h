@@ -81,7 +81,6 @@ struct gps_data_t {
     double pdop;		/* Position dilution of precision */
     double hdop;		/* Horizontal dilution of precision */
     double vdop;		/* Vertical dilution of precision */
-    double separation;		/* Geoidal separation [2] */
     struct life_t fix_quality_stamp;
 
     /* satellite status */

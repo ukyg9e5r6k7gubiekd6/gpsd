@@ -266,7 +266,7 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     REFRESH(session->gNMEAdata.status_stamp);
     REFRESH(session->gNMEAdata.mode_stamp);
 
-    session->gNMEAdata.separation = p[O(33)] / 100;	/* meters */
+    session->separation = p[O(33)] / 100;	/* meters */
 }
 
 static void handle1002(struct gps_session_t *session, unsigned short *p)
@@ -379,7 +379,7 @@ static void analyze(struct gps_session_t *session,
 			degtodm(fabs(session->gNMEAdata.longitude)),
 			((session->gNMEAdata.longitude > 0) ? 'E' : 'W'),
 		    session->gNMEAdata.mode, session->gNMEAdata.satellites_used, session->gNMEAdata.hdop,
-			session->gNMEAdata.altitude, 'M', session->gNMEAdata.separation, 'M', "", "");
+			session->gNMEAdata.altitude, 'M', session->separation, 'M', "", "");
 		nmea_add_checksum(bufp + 1);
 		bufp = bufp + strlen(bufp);
 	    }
