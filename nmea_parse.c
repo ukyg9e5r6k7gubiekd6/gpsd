@@ -445,7 +445,7 @@ void nmea_add_checksum(char *sentence)
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
     if (c != '*')
-	*p++ '*';
+	*p++ = '*';
     sprintf(p, "%02X\r\n", sum);
 }
 
