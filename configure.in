@@ -1,14 +1,7 @@
-dnl
-dnl
-
 AC_INIT
-
 AM_INIT_AUTOMAKE(gpsd, 2.0)
-
 AC_PREFIX_PROGRAM(gcc)
-
 AM_CONFIG_HEADER(config.h)
-
 AC_LANG([C])
 
 AC_PROG_LN_S
@@ -20,21 +13,14 @@ CFLAGS="$CFLAGS -Wall -Werror"
 
 AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h)
 
-dnl
 dnl Locate Net Libraries
-dnl
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
 AC_SUBST(LIBNSL)
 dnl
 AC_CHECK_LIB(socket, socket, LIBSOCKET="-lsocket")
 AC_SUBST(LIBSOCKET)
-dnl
-dnl
 
-
-dnl
 dnl Locate Libraries
-dnl
 AC_MSG_CHECKING(whether to force -lm switch)
 AC_TRY_LINK([#include <math.h>], 
 { double foo; foo = sin(1.234); },
@@ -52,25 +38,7 @@ AC_SUBST(LIBC)
 dnl
 AC_CHECK_LIB(gen, regcmp, LIBGEN="-lgen")
 AC_SUBST(LIBGEN)
-dnl
-dnl
-dnl
-dnl
-dnl Check for X stuff
-dnl
-dnl
-dnl Check X options
-dnl
-if test "$with_x" = no; then
-AC_MSG_WARN([Some of this software requires the X window system to compile and run.
-                    Please do not use the configure option '--without-x'.])
-fi
-if test "$with_motif" = no; then
-AC_MSG_WARN([Some of this software requires Motif to compile and run.
-                    Please do not use the configure option '--without-motif'.])
-fi
-dnl
-dnl
+
 dnl Check for X libraries
 dnl
 if test "$with_x" != no; then
@@ -110,7 +78,6 @@ AC_SUBST(X_LIBS)
 AC_SUBST(X11_LIBS)
 AC_SUBST(X_PRE_LIBS)
 dnl
-dnl
 dnl Check for -lXintl library.  Lutz Kittler <kittler@sse-erfurt.de> says
 dnl that DLD-Linux with CDE wants `-lXintl' to refine `Xlcmbcurmax'.
 dnl Guenther Roehrich <guenther@studbox.uni-stuttgart.de> says that
@@ -119,12 +86,10 @@ dnl
 AC_CHECK_LIB(Xintl, _Xlcmbcurmax, X11_LIBS="${X11_LIBS} -lXintl",,
 	${X_PRE_LIBS} ${X11_LIBS})
 dnl
-dnl
 dnl Check for -lipc library.  SCO unix is said to want that.
 dnl
 AC_CHECK_LIB(ipc, shmap, X11_LIBS="${X11_LIBS} -lipc",,
 	${X_PRE_LIBS} ${X11_LIBS})
-dnl
 dnl
 dnl Check for X toolkit libraries
 dnl
@@ -139,7 +104,6 @@ AC_MSG_WARN([The X toolkit library '-lXt' could not be found.
                     See the file 'config.log' for further diagnostics.])
 fi
 AC_SUBST(XT_LIBS)
-dnl
 
 dnl
 dnl Check for Xaw libraries
@@ -155,19 +119,13 @@ AC_MSG_WARN([The Xaw library '-lXaw' could not be found.
                     See the file 'config.log' for further diagnostics.])
 fi
 AC_SUBST(XAW_LIBS)
-dnl
 
-dnl
 dnl Check for X extension libraries
-dnl
 dnl
 XEXT_LIBS=""
 AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XEXT_LIBS)
-dnl
-dnl
-dnl
 dnl
 dnl Check for Xpm library and headers
 dnl
@@ -180,9 +138,7 @@ AC_CHECK_HEADERS(X11/xpm.h xpm.h)
 fi
 AC_SUBST(XPM_LIBS)
 dnl
-dnl
 dnl Check for Motif widget libraries
-dnl
 dnl
 XM_LIBS=""
 XP_LIBS=""
@@ -209,9 +165,6 @@ fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
-dnl
-dnl
-dnl
 dnl
 LIBS="$ice_save_LIBS"
 CFLAGS="$ice_save_CFLAGS"
