@@ -6,19 +6,20 @@
 
 import sys, os, time, signal, pty, getopt, tempfile, termios
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "i:hns:")
-interval = 1
+(options, arguments) = getopt.getopt(sys.argv[1:], "c:hns:")
+cycle = 1
 speed = 0
 spawn = True
 for (switch, val) in options:
-    if (switch == '-i'):
-        interval = int(val)
+    if (switch == '-c'):
+        cycle = int(val)
     elif (switch == '-n'):
         spawn = False
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-n] [-s speed] [-i interval]\n")
+        sys.stderr.write("usage: gpsfake [-h] [-n] [-s speed] [-c cycle] logfile\n")
+        sys.exit(0)
 logfile = arguments[0]
 
 try:
@@ -36,6 +37,7 @@ if not spawn:
     sys.stderr.write("gpsfake: slave tty is %s\n" % slave)
 elif os.system(spawncmd):
     sys.stderr.write("gpsfake: gpsd launch failed.\n")
+    sys.exit(1)
 else:
     sys.stderr.write("gpsfake: gpsd launch OK.\n")
     fp = open("/tmp/gpsfake%s" % os.getpid())
@@ -56,13 +58,14 @@ try:
     raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
     raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
     raw[3] = 0					# lflag
-    raw[4] = raw[5] = eval("termios.B" + speed)
+    raw[4] = raw[5] = eval("termios.B" + `speed`)
     termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 
     i = 0;
     while True:
-        time.sleep(interval)
+        time.sleep(cycle)
         os.write(master_fd, lines[i % len(lines)])
         i += 1
 finally:
-    os.kill(pid, signal.SIGTERM)
+    if spawn:
+        os.kill(pid, signal.SIGTERM)

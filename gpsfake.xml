@@ -17,7 +17,7 @@
 <cmdsynopsis>
   <command>gpsfake</command>  
       <arg choice='opt'>-h</arg>
-      <arg choice='opt'>-i <replaceable>interval</replaceable></arg>
+      <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
       <arg choice='opt'>-n</arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
@@ -35,6 +35,8 @@ GPS.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
+
+<para>The -c option sets the delay between sentences in seconds</para>
 
 <para>The -n option suppresses launch of the daemon.  Instead,
 <application>gpsfake</application> will tell you the name of the slave
