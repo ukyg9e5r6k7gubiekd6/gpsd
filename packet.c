@@ -335,10 +335,16 @@ static void packet_discard(struct gps_session_t *session)
 
 int packet_get(struct gps_session_t *session, int waiting)
 {
+    int newdata;
+    int room = sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer);
+
+    if (waiting > room)
+	waiting = room;
+
 #ifndef TESTMAIN
-    int newdata = read(session->gNMEAdata.gps_fd, session->inbufptr, waiting);
+    newdata = read(session->gNMEAdata.gps_fd, session->inbufptr, waiting);
 #else
-    int newdata = waiting;
+    newdata = waiting;
 #endif /* TESTMAIN */
 
     if (newdata < 0 && errno != EAGAIN)
