@@ -107,7 +107,7 @@ EXTRA_DIST = \
 	libgps.xml \
 	gpsprobe.xml \
 	$(man_MANS) \
-	gps.ad \
+	xgps.ad \
 	xgpsspeed.ad \
 	gpsd.init \
 	gpsd.spec \
