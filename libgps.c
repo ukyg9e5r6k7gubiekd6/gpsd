@@ -78,8 +78,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    sscanf(sp, "C=%d", &gpsdata->cycle);
 		    break;
 		case 'D':
-		    gpsdata->fix.time = iso8601_to_unix(sp+2);
-		    gpsdata->valid |= TIME_SET;
+		    if (sp[2] != '?') {
+			gpsdata->fix.time = iso8601_to_unix(sp+2);
+			gpsdata->valid |= TIME_SET;
+		    }
 		    break;
 		case 'E':
 		    sscanf(sp, "E=%lf %lf %lf", 

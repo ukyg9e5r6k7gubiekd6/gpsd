@@ -36,7 +36,6 @@
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
-static time_t gmt_offset;
 
 static void onsig(int sig)
 {
@@ -250,7 +249,10 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
-	    unix_to_iso8601(ud->fix.time, phrase+3);
+	    if (ud->fix.time)
+		unix_to_iso8601(ud->fix.time, phrase+3);
+	    else
+		strcat(phrase, "?");
 	    break;
 	case 'E':
 	    if (have_fix(session)) {
@@ -505,7 +507,7 @@ static int handle_request(int fd, char *buf, int buflen)
     }
  breakout:
     if (ud->profiling && ud->sentence_time) {
-	double fixtime = ud->sentence_time - gmt_offset;
+	double fixtime = ud->sentence_time;
 	sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
 		ud->tag,
 		ud->sentence_length,
@@ -641,8 +643,6 @@ int main(int argc, char *argv[])
 	}
 	FD_SET(session->gpsdata.gps_fd, &all_fds);
     }
-
-    gmt_offset = tzoffset();
 
     for (;;) {
 	struct timeval tv;
