@@ -249,15 +249,15 @@ int main (int argc, char **argv)
     scrollok(debugwin,TRUE);
     //wsetscrreg(debugwin, DEBUGWIN, 0);
 
-    mid2win   = subwin(stdscr,  6, 79,  1, 0);
-    mid4win   = subwin(stdscr, 15, 30,  7, 0);
-    mid6win   = subwin(stdscr, 3,  48,  7, 31);
-    mid7win   = subwin(stdscr, 4,  48, 10, 31);
-    mid9win   = subwin(stdscr, 3,  48, 14, 31);
-    mid13win  = subwin(stdscr, 3,  48, 17, 31);
-    cmdwin    = subwin(stdscr, 1,  40,  0, 0);
-    dumpwin   = subwin(stdscr, 1,   0,  0, 31);
-    debugwin  = subwin(stdscr, 0,   0, 23, 0);
+    mid2win   = subwin(stdscr,  6, 80,  0, 0);
+    mid4win   = subwin(stdscr, 15, 30,  6, 0);
+    mid6win   = subwin(stdscr, 3,  48,  6, 32);
+    mid7win   = subwin(stdscr, 4,  48,  9, 32);
+    mid9win   = subwin(stdscr, 3,  48, 13, 32);
+    mid13win  = subwin(stdscr, 3,  48, 16, 32);
+    cmdwin    = subwin(stdscr, 1,  48, 19, 32);
+    dumpwin   = subwin(stdscr, 1,   0, 21, 0);
+    debugwin  = subwin(stdscr, 0,   0, 20, 0);
 
     wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid2win, A_BOLD);
@@ -321,9 +321,9 @@ int main (int argc, char **argv)
     wattrset(mid13win, A_NORMAL);
 
     wattrset(stdscr, A_BOLD);
-    mvwprintw(stdscr, 22, 30, "RS232: ");
+    mvwprintw(stdscr, 20, 40, "RS232: ");
     wattrset(stdscr, A_NORMAL);
-    mvwprintw(stdscr, 22, 37, "%4d N %d", bps, stopbits);
+    mvwprintw(stdscr, 20, 47, "%4d N %d", bps, stopbits);
 
     wmove(debugwin,0, 0);
 
@@ -406,7 +406,7 @@ int main (int argc, char **argv)
 		sendpkt(buf, 9);
 		usleep(50000);
 		set_speed(bps = v, stopbits);
-		mvwprintw(stdscr, 22, 37, "%4d N %d", bps, stopbits);
+		mvwprintw(stdscr, 20, 47, "%4d N %d", bps, stopbits);
 		break;
 
 	    case 'n':				/* switch to NMEA */
@@ -707,19 +707,15 @@ int len;
 	if (j)
 	    wprintw(debugwin, "%s\n",buf+1);
 	break;
-
-    default:
-	wmove(dumpwin, 0,0);
-	wprintw(dumpwin, " %02x: ",buf[0]);
-
-	if (len > 24)
-	    len = 24;
-	for (i = 1; i < len; i++)
-	    wprintw(dumpwin, "%02x",buf[i]);
-
-	wclrtoeol(dumpwin);
-	break;
     }
+
+    wmove(dumpwin, 0,0);
+    wprintw(dumpwin, " %02x: ",buf[0]);
+
+    for (i = 1; i < len; i++)
+	wprintw(dumpwin, "%02x",buf[i]);
+
+    wclrtoeol(dumpwin);
 }
 
 void decode_time(int week, int tow)
