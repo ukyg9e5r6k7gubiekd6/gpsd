@@ -252,7 +252,7 @@ class gpsd(gps.gpsdata):
 
     def activate(self):
         self.ttyfp = open(self.device, "rw")
-        if self.ttyfp = None:
+        if self.ttyfp == None:
             return None
 	self.normal = termios.tcgetattr(self.ttyfp.fileno())
         self.raw = termios.tcgetattr(self.ttyfp.fileno())
