@@ -18,3 +18,8 @@
 19990304 (0.96)
 	 Changed EarthMate support. Rockwell binary is now almost properly
 	 supported. Only the minimum required information is extracted.
+19990717 (0.99)
+	 Rockwell binary is now translated to NMEA format, so that
+	 clients like gps will work with an EarthMate.
+	 Added speedometer application. Thanks to Derrick J Brashear
+	 for his work (see README for contact info).
