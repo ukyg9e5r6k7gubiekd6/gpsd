@@ -39,17 +39,6 @@ SiRF-II chipsets.  Lonnie Mendez is working on this.
 It only handles straight NMEA devices.  It should be replaced by a
 Python extension built around libgps.a.
 
-* Autodetect USB GPS by scanning the USB bus, if no device is specified.
-
-Integrate Lonnie Mendez's USB-discovery code to do this. Here are some IDs:
-
-BU-303          	0x067b:0x2303	This IDs itself as a serial port
-DeLorme Earthmate	0x1163:0x0100	This IDs itself as a HIDDEV.
-
-The good news is, the 0x067b:0x2303 combination will catch most
-of the GPS mice out there -- Haicom tells me that SiRF+PL2303 
-is about 80% of that market and rising.
-
 * Integrate M8 support to whatever extent needed.
 
 See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
