@@ -30,6 +30,8 @@ class NMEA:
     def __do_lat_lon(self, words):
         # The Navman sleeve's GPS firmware sometimes puts the direction in
         # the wrong order.
+        if not words[0] or not words[1] or not words[2] or not words[3]:
+            return False
         if words[0][-1] == 'N':
             words[0] = words[0][:-1]
             words[1] = 'N'
@@ -54,9 +56,11 @@ class NMEA:
             lon = intpart + frac * 100.0 / 60.0
             if words[3] == 'W':
                 lon = -lon
+        self.data.latlon_stamp.refresh()
         self.data.latlon_stamp.changed = ((lat, lon) != (self.data.latitude, self.data.longitude))
         self.data.latitude = lat
         self.data.longitude = lon
+        return True
 
     # Three sentences, GGA and GGL and RMC, contain timestamps.
     # Timestamps always look like hhmmss.ss, with the trailing .ss
@@ -92,20 +96,30 @@ class NMEA:
     def processGPRMC(self, words):
         if words[1] == "A":
             self.update_timestamp(words[8], words[0])
-            self.__do_lat_lon(words[2:])
-            if words[6]: self.data.speed = float(words[6])
-            if words[7]: self.data.track = float(words[7])
+            if self.__do_lat_lon(words[2:]):
+                if words[6]:
+                    newspeed = float(words[6])
+                    self.data.speed_stamp.changed = (self.data.speed != newspeed) 
+                    self.data.speed = newspeed
+                    self.data.speed_stamp.refresh()
+                if words[7]:
+                    newtrack = float(words[7])
+                    self.data.track_stamp.changed = (self.data.track != newtrack) 
+                    self.data.track = newtrack
+                    self.data.track_stamp.refresh()
 
     def processGPGLL(self, words):
         if words[1] == "A":
             self.__do_lat_lon(words)
             self.update_timestamp(None, words[4])
             if words[5] == 'N':
-                self.data.status = gps.STATUS_NO_FIX
+                newstatus = gps.STATUS_NO_FIX
             elif words[5] == 'D':
-                self.data.status = gps.STATUS_DGPS_FIX
+                newstatus = gps.STATUS_DGPS_FIX
             else:
-                self.data.status = gps.STATUS_FIX;
+                newstatus = gps.STATUS_FIX;
+            self.data.status_stamp = (self.data.status != newstatus)
+            self.data.status = newstatus
             self.logger(3, "GPGLL sets status %d\n", self.data.status);
  
     def processGPGGA(self,words):
@@ -118,22 +132,29 @@ class NMEA:
     def processGPGSA(self,words):
         self.data.mode = int(words[1])
         self.data.satellites_used = map(int, filter(lambda x: x, words[2:14]))
+        (newpdop, newhdop, newvdop) = (self.data.pdop, self.data.hdop, self.data.vdop)
         if words[14]:
-            self.data.pdop = float(words[14])
+            newpdop = float(words[14])
         if words[15]:
-            self.data.hdop = float(words[15])
+            newhdop = float(words[15])
         if words[16]:
-            self.data.vdop = float(words[16])
+            newvdop = float(words[16])
         if words[14] and words[15] and words[16]:
-            self.fix_quality_stamp.refresh()
+            self.data.fix_quality_stamp.refresh()
+            self.data.fix_quality_stamp.changed = (newpdop, newhdop, newvdop) != (self.data.pdop, self.data.hdop, self.data.vdop)
+            (self.data.pdop, self.data.hdop, self.data.vdop) = (newpdop, newhdop, newvdop)
         self.logger(3, "GPGGA sets mode %d\n" % self.data.mode)
 
     def processGPGVTG(self, words):
         self.data.track = float(words[0])
         if words[1] == 'T':
-            self.data.speed = float(words[4])
+            newspeed = float(words[4])
+            self.data.speed_stamp.changed = (self.data.speed != newspeed) 
+            self.data.speed = newspeed
         else:
-            self.data.speed = float(words[2])
+            newtrack = float(words[2])
+            self.data.track_stamp.changed = (self.data.track != newtrack) 
+            self.data.track = newtrack
 
     def nmea_sane_satellites(self):
         # data may be incomplete *
