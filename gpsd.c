@@ -166,37 +166,27 @@ static int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
-#define ZERO_WATCHERS()		/* static storage doesn't need to be zeroed */
-#define IS_WATCHER(cfd) 	subscribers[cfd].watcher
-#define SET_WATCHER(cfd)	subscribers[cfd].watcher = 1
-#define CLR_WATCHER(cfd)	subscribers[cfd].watcher = 0
-#define ZERO_RAW()		/* static storage doesn't need to be zeroed */
-#define IS_RAW(cfd)     	subscribers[cfd].raw
-#define SET_RAW(cfd)    	subscribers[cfd].raw = 1
-#define CLR_RAW(cfd)    	subscribers[cfd].raw = 0
 /*
  * Multi-session support requires us to have two arrays, one of GPS 
  * devices currently available and one of client sessions.  The number
  * of slots in each array is limited by the maximum number of client
  * sessions we can have open.
- *
- * We restrict the scope of these command-state globals as much as possible.
  */
 #define MAXDEVICES	FD_SETSIZE
 
 static struct channel_t {
     int nsubscribers;			/* how many subscribers? */
     struct gps_device_t *device;	/* the device data */
+    double when;			/* receipt time of last sentence */
     int state;				/* marked for deletion */
 #define CHANNEL_AVAILABLE	0
 #define CHANNEL_INUSE		1
 #define CHANNEL_KILLED		-1
-    double when;
 } channels[MAXDEVICES];
 
 static struct subscriber_t {
     int active;				/* is this a subscriber? */
-    int tied;				/* is client tied to device */
+    int tied;				/* client set device with F */
     int watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
     struct channel_t *channel;		/* device subscriber listens to */
@@ -213,14 +203,12 @@ static void attach_client_to_device(int cfd, int dfd)
     subscribers[cfd].tied = 0;
 }
 
-#define is_client(cfd)	subscribers[cfd].active 
-
 static void detach_client(int cfd)
 {
     close(cfd);
     FD_CLR(cfd, &all_fds);
-    CLR_RAW(cfd);
-    CLR_WATCHER(cfd);
+    subscribers[cfd].raw = 0;
+    subscribers[cfd].watcher = 0;
     subscribers[cfd].active = 0;
     if (subscribers[cfd].channel)
 	subscribers[cfd].channel->nsubscribers--;
@@ -245,13 +233,13 @@ static int throttled_write(int cfd, char *buf, int len)
     return status;
 }
 
-static void notify_watchers(char *sentence)
-/* notify all watching clients of an event */
+static void notify_watchers(struct gps_device_t *device, char *sentence)
+/* notify all clients watching a given device of an event */
 {
     int cfd;
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-	if (IS_WATCHER(cfd))
+	if (subscribers[cfd].watcher && subscribers[cfd].channel->device == device)
 	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
@@ -262,9 +250,20 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (IS_RAW(cfd))
+	if (subscribers[cfd].raw)
 	    throttled_write(cfd, sentence, strlen(sentence));
     }
+}
+
+static struct channel_t *find_device(char *device_name)
+/* find the channel block for and existing device name */
+{
+    struct channel_t *chp;
+
+    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	if (chp->device && !strcmp(chp->device->gpsd_device, device_name))
+	    return chp;
+    return NULL;
 }
 
 static struct channel_t *open_device(char *device_name, int nowait)
@@ -293,10 +292,24 @@ found:
     return chp;
 }
 
+static char *getline(char *p, char **out)
+/* copy the rest of the command line, before CR-LF */
+{
+    char	*stash, *q;
+
+    for (q = p; isprint(*p) && !isspace(*p); p++)
+	continue;
+    stash = (char *)malloc(p-q+1); 
+    memcpy(stash, q, p-q);
+    stash[p-q] = '\0';
+    *out = stash;
+    return p;
+}
+
 static int handle_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
-    char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
+    char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
     struct subscriber_t *whoami = subscribers + cfd;
     struct channel_t *chp, *channel = whoami->channel;
@@ -369,30 +382,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'F':
 	    if (*p == '=') {
-		struct channel_t *newdev;
-		char	*stash;
-		for (q = ++p; isgraph(*p); p++)
-		    continue;
-		stash = (char *)malloc(p-q+1); 
-		memcpy(stash, q, p-q);
-		stash[p-q] = '\0';
+		p = getline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
-		/* search for the device among active channels */
-		for (chp = channels; chp < channels + MAXDEVICES; chp++)
-		    if (chp->device&&!strcmp(chp->device->gpsd_device,stash)) {
-			whoami->channel = channel = chp;
-			device = channel->device;
-			whoami->tied = 1;
-			goto foundit;
-		    }
-		/* search failed, must attempt to initialize a new channel */
-		newdev = open_device(stash, 1);
-		if (newdev) {
+		if ((chp = find_device(stash)) 
+					|| (chp = open_device(stash, 1))) {
 		    whoami->tied = 1;
-		    whoami->channel = newdev;
-		    device = newdev->device;
+		    device = chp->device;
 		}
-	    foundit:;
 	    }
 	    snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
 	    break;
@@ -400,7 +396,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
 	    break;
 	case 'K':
-	    /* FIXME: K= form not yet supported */
+	    if (*p == '=') {
+		p = getline(++p, &stash);
+		gpsd_report(1,"<= client(%d): kill-marking %s\n", cfd, stash);
+		if ((chp = find_device(stash))) 
+		    chp->state = CHANNEL_KILLED;
+	    }
 	    strcpy(phrase, ",K=");
 	    for (i = 0; i < MAXDEVICES; i++) 
 		if (channels[i].device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
@@ -493,21 +494,21 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'R':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		SET_RAW(cfd);
+		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		CLR_RAW(cfd);
+		subscribers[cfd].raw = 0;
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 		p++;
-	    } else if (IS_RAW(cfd)) {
-		CLR_RAW(cfd);
+	    } else if (subscribers[cfd].raw) {
+		subscribers[cfd].raw = 0;
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 	    } else {
-		SET_RAW(cfd);
+		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 	    }
@@ -536,18 +537,18 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		SET_WATCHER(cfd);
+		subscribers[cfd].watcher = 1;
 		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		CLR_WATCHER(cfd);
+		subscribers[cfd].watcher = 0;
 		sprintf(phrase, ",W=0");
 		p++;
-	    } else if (IS_WATCHER(cfd)) {
-		CLR_WATCHER(cfd);
+	    } else if (subscribers[cfd].watcher) {
+		subscribers[cfd].watcher = 0;
 		sprintf(phrase, ",W=0");
 	    } else {
-		SET_WATCHER(cfd);
+		subscribers[cfd].watcher = 1;
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		sprintf(phrase, ",W=1");
 	    }
@@ -743,7 +744,6 @@ int main(int argc, char *argv[])
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
 
-    FD_ZERO(&all_fds); ZERO_RAW(); ZERO_WATCHERS();
     FD_SET(msock, &all_fds);
 
     channel = open_device(device_name, nowait);
@@ -759,6 +759,8 @@ int main(int argc, char *argv[])
 	struct timeval tv;
 
         memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
+	if (device->dsock > -1)
+	    FD_CLR(device->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
@@ -813,7 +815,7 @@ int main(int argc, char *argv[])
 		gpsd_deactivate(device);
 		if (gpsd_activate(device) >= 0) {
 		    FD_SET(device->gpsdata.gps_fd, &all_fds);
-		    notify_watchers("GPSD,X=1\r\n");
+		    notify_watchers(channel->device, "GPSD,X=1\r\n");
 		}
 	    }
 
@@ -823,13 +825,13 @@ int main(int argc, char *argv[])
 		gpsd_report(3, "GPS is offline\n");
 		FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		gpsd_deactivate(device);
-		notify_watchers("GPSD,X=0\r\n");
+		notify_watchers(channel->device, "GPSD,X=0\r\n");
 	    }
 	    channel->when = device->gpsdata.sentence_time;
 
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 		/* some listeners may be in watcher mode */
-		if (IS_WATCHER(cfd)) {
+		if (subscribers[cfd].watcher) {
 		    char cmds[4] = ""; 
 		    device->poll_times[cfd] = timestamp();
 		    if (changed &~ ONLINE_SET) {
@@ -844,15 +846,11 @@ int main(int argc, char *argv[])
 			handle_request(cfd, cmds, strlen(cmds));
 		}
 	    }
-
-	    /* this simplifies a later test */
-	    if (device->dsock > -1)
-		FD_CLR(device->dsock, &rfds);
 	}
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (!is_client(cfd))
+	    if (!subscribers[cfd].active)
 		continue;
 	    device = subscribers[cfd].channel->device;
 
@@ -860,12 +858,12 @@ int main(int argc, char *argv[])
 	     * GPS must be opened if commands are waiting or any client is
 	     * streaming (raw or watcher mode).
 	     */
-	    if (FD_ISSET(cfd, &rfds) || IS_RAW(cfd) || IS_WATCHER(cfd)) {
+	    if (FD_ISSET(cfd, &rfds) || subscribers[cfd].raw || subscribers[cfd].watcher) {
 		if (device->gpsdata.gps_fd == -1) {
 		    gpsd_deactivate(device);
 		    if (gpsd_activate(device) >= 0) {
 			FD_SET(device->gpsdata.gps_fd, &all_fds);
-			notify_watchers("GPSD,X=1\r\n");
+			notify_watchers(device, "GPSD,X=1\r\n");
 		    }
 		}
 

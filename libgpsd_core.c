@@ -78,11 +78,11 @@ struct gps_device_t *gpsd_init(char *device)
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
+    gpsd_report(1, "closing GPS=%s\n", session->gpsd_device);
     gpsd_close(session);
     session->gpsdata.gps_fd = -1;
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
-    gpsd_report(1, "closed GPS\n");
 }
 
 int gpsd_activate(struct gps_device_t *session)

@@ -209,7 +209,8 @@ successfully recognized as GPSes).  Note that the fact that a
 devicename appears in this list does not guarantee that a GPS is
 connected to it and active.</para>
 
-<para>(At protocol level 1, there was no K command.)</para> 
+<para>(At protocol level 1, there was no K command.  Note that this 
+command is experimental and its semantics may change.)</para> 
 </listitem>
 </varlistentry>
 
