@@ -9,4 +9,4 @@ xmlto xhtml-nochunks ../gpsd.xml
 xmlto xhtml-nochunks ../libgps.xml
 xmlto xhtml-nochunks ../libgpsd.xml
 xmlto xhtml-nochunks ../gpsprobe.xml
-scp *.html *.css esr@shell.berlios.de:/home/groups/gpsd/htdocs
+scp *.html *.css *.js esr@shell.berlios.de:/home/groups/gpsd/htdocs
