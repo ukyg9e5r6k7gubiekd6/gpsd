@@ -6,7 +6,6 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <stdio.h>
 #include <math.h>
 #include <X11/Intrinsic.h>
@@ -102,7 +101,7 @@ int main(int argc, char **argv)
     XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
-	fprintf(stderr, "xgpsspeed: no gpsd running or network error (%d).\n", errno);
+	perror("xgpsspeed: no gpsd running or network error");
 	exit(2);
     }
 

@@ -1,3 +1,4 @@
+# Automake descrotion for gpsd
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
 #

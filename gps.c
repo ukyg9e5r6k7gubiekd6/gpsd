@@ -3,28 +3,16 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <errno.h>
 #include <math.h>
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
-#include <Xm/ScrolledW.h>
-#include <Xm/ScrollBar.h>
 #include <Xm/PushB.h>
-#include <Xm/ToggleB.h>
-#include <Xm/ArrowB.h>
-#include <Xm/CascadeB.h>
-#include <Xm/Separator.h>
-#include <Xm/DrawnB.h>
-#include <Xm/Scale.h>
-#include <Xm/Frame.h>
 #include <Xm/Form.h>
 #include <Xm/RowColumn.h>
 #include <Xm/Label.h>
 #include <Xm/TextF.h>
-#include <Xm/Text.h>
 #include <Xm/List.h>
 #include <Xm/DrawingA.h>
-#include <Xm/MenuShell.h>
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 
@@ -305,7 +293,7 @@ int main(int argc, char *argv[])
 
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
-	fprintf(stderr,"gps: no gpsd running or network error (%d).\n", errno);
+	perror("gps: no gpsd running or network error");
 	exit(2);
     }
 
@@ -317,8 +305,8 @@ int main(int argc, char *argv[])
     gps_set_raw_hook(gpsdata, update_panel);
     gps_query(gpsdata, "w+x\n");
 
-    XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
-			     handle_input, NULL);
+    XtAppAddInput(app, gpsdata->gps_fd, 
+		  (XtPointer)XtInputReadMask, handle_input, NULL);
     XtAppMainLoop(app);
 
     gps_close(gpsdata);

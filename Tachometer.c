@@ -18,16 +18,13 @@
 #include <math.h>
 #include "config.h"	/* must define UNUSED */
 
+#define D2R	(3.14159265358979323846 / 180.0)  /* Degrees to radians */
+
 /****************************************************************
  *
  * Full class record constant
  *
  ****************************************************************/
-
-#if ! defined(PI)
-#define		PI		3.1415927
-#endif
-#define D2R	(PI / 180.0)
 
 typedef struct {
 		unsigned char	digit[7];
@@ -346,8 +343,6 @@ static void DrawTachometer(TachometerWidget w)
      if ((center_x==0) || (center_y==0) || (radius_x<=0) || (radius_y<=0))
 	  return;	  /* Can't draw anything -- no room */
      
-     /* Draw meter shape */
-
      /* Big circle */
      FastFillCircle(XtDisplay(w), XtWindow(w), w->tachometer.circle_GC,
 		    center_x, center_y, radius_x, radius_y);
