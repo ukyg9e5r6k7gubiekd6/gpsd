@@ -52,12 +52,12 @@ extern void draw_graphics(struct gps_data_t *gpsdata);
 
 /* global variables */
 static Widget lxbApp;
-static Widget form_6;
-static Widget list_7;
+static Widget data_panel;
+static Widget satellite_list;
 #ifdef PROCESS_PRWIZCH
-static Widget list_8;
+static Widget prwizch_list;
 #endif /* PROCESS_PRWIZCH */
-static Widget drawingArea_8;
+static Widget satellite_diagram;
 static Widget rowColumn_10;
 static Widget rowColumn_11;
 static Widget rowColumn_12;
@@ -141,7 +141,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
 
-    form_6 = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
+    data_panel = XtCreateManagedWidget("gpsdata", xmFormWidgetClass, lxbApp, args, n);
 
 #define FRAMEHEIGHT	220
     /* satellite location and SNR display */
@@ -160,7 +160,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
-    list_7 = XtCreateManagedWidget("list_7", xmListWidgetClass, form_6, args, 11);
+    satellite_list = XtCreateManagedWidget("satellite_list", xmListWidgetClass, data_panel, args, 11);
 
 #ifdef PROCESS_PRWIZCH
     /* signal quality display */
@@ -175,8 +175,8 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
-    XtSetArg(args[11], XmNleftWidget, list_7);
-    list_8 = XtCreateManagedWidget("list_8", xmListWidgetClass, form_6, args, 12);
+    XtSetArg(args[11], XmNleftWidget, satellite_list);
+    prwizch_list = XtCreateManagedWidget("prwizch_list", xmListWidgetClass, data_panel, args, 12);
 #endif /* PROCESS_PRWIZCH */
 
     /* the satellite diagram */
@@ -188,9 +188,9 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[5], XmNx, 80);
     XtSetArg(args[6], XmNrightAttachment, XmATTACH_NONE);
 #ifdef PROCESS_PRWIZCH
-    XtSetArg(args[7], XmNleftWidget, list_8);
+    XtSetArg(args[7], XmNleftWidget, prwizch_list);
 #else
-    XtSetArg(args[7], XmNleftWidget, list_7);
+    XtSetArg(args[7], XmNleftWidget, satellite_list);
 #endif /* PROCESS_PRWIZCH */
     XtSetArg(args[8], XmNtopOffset, 10);
     XtSetArg(args[9], XmNleftAttachment, XmATTACH_WIDGET);
@@ -198,13 +198,13 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[11], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[12], XmNheight, 402);
     XtSetArg(args[13], XmNwidth, 402);
-    drawingArea_8 = XtCreateManagedWidget("drawingArea_8",
-			     xmDrawingAreaWidgetClass, form_6, args, 14);
-    gcv.foreground = BlackPixelOfScreen(XtScreen(drawingArea_8));
-    gc = XCreateGC(XtDisplay(drawingArea_8),
-	RootWindowOfScreen(XtScreen(drawingArea_8)), GCForeground, &gcv);
-    register_canvas(drawingArea_8, gc);
-    XtAddCallback(drawingArea_8, XmNexposeCallback, redraw, NULL);
+    satellite_diagram = XtCreateManagedWidget("satellite_diagram",
+			     xmDrawingAreaWidgetClass, data_panel, args, 14);
+    gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
+    gc = XCreateGC(XtDisplay(satellite_diagram),
+	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
+    register_canvas(satellite_diagram, gc);
+    XtAddCallback(satellite_diagram, XmNexposeCallback, redraw, NULL);
 
     XtSetArg(args[0], XmNtopOffset, 10);
     XtSetArg(args[1], XmNbottomOffset, 10);
@@ -212,14 +212,14 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[3], XmNleftOffset, 10);
     XtSetArg(args[4], XmNorientation, XmVERTICAL);
     XtSetArg(args[5], XmNrightAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[6], XmNrightWidget, drawingArea_8);
+    XtSetArg(args[6], XmNrightWidget, satellite_diagram);
     XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
 
     XtSetArg(args[8], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[9], XmNtopAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[10], XmNtopWidget, list_7);
+    XtSetArg(args[10], XmNtopWidget, satellite_list);
     XtSetArg(args[11], XmNheight, 12);
-    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 12);
+    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, data_panel, args, 12);
 
     /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
@@ -227,30 +227,30 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[2], XmNrightAttachment, XmATTACH_NONE);
     XtSetArg(args[3], XmNtopAttachment, XmATTACH_WIDGET);
     XtSetArg(args[4], XmNbottomAttachment, XmATTACH_NONE);
-    XtSetArg(args[5], XmNrightWidget, drawingArea_8);
+    XtSetArg(args[5], XmNrightWidget, satellite_diagram);
     XtSetArg(args[6], XmNtopWidget, rowColumn_10);
-    rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_11);
-    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_12);
-    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_13);
-    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_14);
-    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_15);
-    rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_16);
-    rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, data_panel, args, 7);
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_17);
-    rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, form_6, args, 7);
+    rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, data_panel, args, 7);
 
 
     n = 0;
@@ -293,7 +293,7 @@ static void build_gui(Widget lxbApp)
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
     XtAddCallback(pushButton_11, XmNactivateCallback, quit_cb, NULL);
 
-    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form_6,
+    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, data_panel,
 				     XmNcursorPositionVisible, False,
 				     XmNeditable, False,
 				     XmNmarginHeight, 1,
@@ -318,9 +318,9 @@ void init_list()
 
     for (i = 0; i < MAXCHANNELS; i++) {
 	string = XmStringCreateSimple(" ");
-	XmListAddItem(list_7, string, i+1);
+	XmListAddItem(satellite_list, string, i+1);
 #ifdef PROCESS_PRWIZCH
-	XmListAddItem(list_8, string, i+1);
+	XmListAddItem(prwizch_list, string, i+1);
 #endif /* PROCESS_PRWIZCH */
 	XmStringFree(string);
     }
@@ -362,7 +362,7 @@ void update_display(char *message)
 		sprintf(s, "                  ");
 	    string[i] = XmStringCreateSimple(s);
 	}
-	XmListReplaceItemsPos(list_7, string, sizeof(string), 1);
+	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
 	for (i = 0; i < MAXCHANNELS; i++)
 	    XmStringFree(string[i]);
     }
@@ -372,7 +372,7 @@ void update_display(char *message)
 	    sprintf(s, "%2d %02x", gpsdata->Zs[i], gpsdata->Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
 	}
-	XmListReplaceItemsPos(list_8, string, sizeof(string), 1);
+	XmListReplaceItemsPos(prwizch_list, string, sizeof(string), 1);
 	for (i = 0; i < MAXCHANNELS; i++)
 	    XmStringFree(string[i]);
     }
