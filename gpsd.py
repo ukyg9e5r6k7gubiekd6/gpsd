@@ -4,6 +4,8 @@
 #
 # Like libgpsd in C, but handles only straight NMEA devices
 # with a send cycle of one second.
+#
+# TODO: Dispatch between drivers like the C version.
 
 import termios, os, fcntl, copy, time, math, struct
 import gps
@@ -335,4 +337,4 @@ if __name__ == '__main__':
         if status > 0:
             print dev
             print "=" * 75
-    del wrapup()
+    del dev
