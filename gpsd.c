@@ -115,7 +115,7 @@ int daemonize()
 void send_dgps() {
   char buf[BUFSIZE];
 
-  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude, gNMEAdata.longitude, double altitude);
+  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude, gNMEAdata.longitude, gNMEAdata.altitude);
   write(dsock, buf, strlen(buf));
 }
 
