@@ -45,6 +45,9 @@ Note that the PL2303 USB serial driver used with the BU-2303 seems
 to have been broken sometime late in the 2.4.x series of Linux kernels
 and was not fixed until 2.6.7.  If in doubt, upgrade.
 
+There is a project page for gpsd at <http://www.pygps.org/gpsd/>.
+Look there for updates, news, and project mailing lists.
+
 
 CREDITS
 =======
@@ -99,6 +102,9 @@ New features include:
    * Internals can now be directly linked as a library, libgpsd(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
+   * Removed -s option -- the right speed is fixed for each type, -s was
+     just an invitation to lossage.
+   * Added -n option.
    * xgpsspeed is working again.
 
 Eric S. Raymond, 11 Aug 2004
