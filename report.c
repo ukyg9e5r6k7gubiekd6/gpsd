@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "config.h"
+#include "gpsd.h"
 
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* stub logger for clients that don't supply one */
