@@ -269,7 +269,7 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     }
     /* here are the value fields */
     if (gpsdata->valid & TIME_SET)
-	unix_to_iso8661(gpsdata->fix.time, s);
+	unix_to_iso8601(gpsdata->fix.time, s);
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);

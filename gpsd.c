@@ -250,7 +250,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
-	    unix_to_iso8661(ud->fix.time, phrase+3);
+	    unix_to_iso8601(ud->fix.time, phrase+3);
 	    break;
 	case 'E':
 	    if (have_fix(session)) {

@@ -162,7 +162,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    char buf[28];
 	    merge_ddmmyy(field[9], buf);
 	    merge_hhmmss(field[1], buf);
-	    out->fix.time = iso8661_to_unix(buf);
+	    out->fix.time = iso8601_to_unix(buf);
 	}
 	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
@@ -225,7 +225,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
 	fake_mmddyyyy(buf);
 	merge_hhmmss(field[5], buf);
-	out->fix.time = iso8661_to_unix(buf);
+	out->fix.time = iso8601_to_unix(buf);
 	mask |= TIME_SET;
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -272,7 +272,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 #ifndef WHOLE_CYCLE
 	fake_mmddyyyy(buf);
 	merge_hhmmss(field[1], buf);
-	out->fix.time = iso8661_to_unix(buf);
+	out->fix.time = iso8601_to_unix(buf);
 	mask |= TIME_SET;
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;

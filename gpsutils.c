@@ -39,8 +39,8 @@ int tzoffset(void)
     return res;
 }
 
-double iso8661_to_unix(char *isotime)
-/* ISO8661 UTC to Unix UTC */
+double iso8601_to_unix(char *isotime)
+/* ISO8601 UTC to Unix UTC */
 {
     char *dp = NULL;
     double usec;
@@ -54,8 +54,8 @@ double iso8661_to_unix(char *isotime)
     return mktime(&tm) + usec;
 }
 
-char *unix_to_iso8661(double fixtime, char *isotime)
-/* Unix UTC time to ISO8661, no timezone adjustment */
+char *unix_to_iso8601(double fixtime, char *isotime)
+/* Unix UTC time to ISO8601, no timezone adjustment */
 {
     struct tm when;
     double integral, fractional;
