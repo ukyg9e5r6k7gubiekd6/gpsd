@@ -625,14 +625,14 @@ int main(int argc, char *argv[])
 		    FD_SET(session.fdin, &afds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
-		if (buflen < 0) {
+		if (buflen <= 0) {
 		    (void) close(fd);
 		    FD_CLR(fd, &afds);
 		}
 		buf[buflen] = '\0';
 		if (session.debug >= 2)
 		    gpscli_report(1, "<= client: %s", buf);
-		if (handle_request(fd, buf, buflen) == 0) {
+		if (handle_request(fd, buf, buflen) <= 0) {
 		    (void) close(fd);
 		    FD_CLR(fd, &afds);
 		}
