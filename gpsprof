@@ -114,9 +114,9 @@ class spaceplot:
             fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
             fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
             fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
-            fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" , ' % (file, len(self.fixes))
+            fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" ' % (file, len(self.fixes))
             if alt_avg != gps.ALTITUDE_NOT_VALID:
-                fmt += '"%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
+                fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
             return fmt
 
 class uninstrumented:
