@@ -1,11 +1,10 @@
 /*
  * SiRF packet monitor, originally by Rob Janssen <pe1chl@amsat.org>.
  *
+ * Autobauds.  Takes a SiRF chip in NMEA mode to binary mode, if needed.
+ *
  * Not shipped with gpsd, but we keep it around as a diagnostic tool
  * to double-check gpsd's SiRF decoder.
- *
- * Note, it will just hang there and do nothing if invoked with the device 
- * in NMEA mode.
  *
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
@@ -152,9 +151,47 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     return NO_PACKET;
 }
 
+static void nmea_add_checksum(char *sentence)
+/* add NMEA checksum to a possibly  *-terminated sentence */
+{
+    unsigned char sum = '\0';
+    char c, *p = sentence;
+
+    if (*p == '$') {
+	p++;
+	while ( ((c = *p) != '*') && (c != '\0')) {
+	    sum ^= c;
+	    p++;
+	}
+	*p++ = '*';
+	sprintf(p, "%02X\r\n", sum);
+    }
+}
+
+static int nmea_send(int fd, const char *fmt, ... )
+/* ship a command to the GPS, adding * and correct checksum */
+{
+    unsigned int status;
+    char buf[BUFLEN];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    va_end(ap);
+    strcat(buf, "*");
+    nmea_add_checksum(buf);
+    status = write(fd, buf, strlen(buf));
+    if (status == strlen(buf)) {
+	return status;
+    } else {
+	return -1;
+    }
+}
+
+
 int main (int argc, char **argv)
 {
-    int len,i,stopbits,speed,v,quit = 0;
+    int len,i,stopbits,speed,v,st,quit = 0;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
@@ -188,10 +225,15 @@ int main (int argc, char **argv)
     for (stopbits = 1; stopbits <= 2; stopbits++)
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
 	{
-	    fprintf(stderr, "hunting at speed %d, %dN%d\n",
+	    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
 		    *ip, 9-stopbits, stopbits);
-	    if (set_speed(*ip, stopbits) == SIRF_PACKET)
+	    if ((st = set_speed(*ip, stopbits)) == SIRF_PACKET)
 		goto rate_ok;
+	    else if (st == NMEA_PACKET) {
+		fprintf(stderr, "Switching to SiRF mode...\n");
+		nmea_send(LineFd,"$PSRF100,0,%d,8,1,0", *ip);
+		goto rate_ok;
+	    }
 	}
  bailout:
     fputs("Can't sync up with device!\n", stderr);
@@ -289,7 +331,7 @@ int main (int argc, char **argv)
 		putb(5,0x01);
 		putb(6,0x01);		  	/* GSA */
 		putb(7,0x01);
-		putb(8,0x01);			/* GSV */
+		putb(8,0x05);			/* GSV */
 		putb(9,0x01);
 		putb(10,0x01);			/* RNC */
 		putb(11,0x01);
@@ -303,7 +345,7 @@ int main (int argc, char **argv)
 		putb(19,0x01);
 		putb(20,0x00);
 		putb(21,0x01);
-		putw(22,rate);
+		putw(22,*ip);
 		sendpkt(buf,24);
 		quit++;
 		break;
