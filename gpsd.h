@@ -99,9 +99,7 @@ struct gps_session_t {
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
     jmp_buf packet_error;
-#ifdef PROFILING
     double poll_times[__FD_SETSIZE];	/* last daemon poll time */
-#endif /* PROFILING */
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)	/* public; set by -i option */
     char *latitude, *longitude;
     char latd, lond;
