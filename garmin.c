@@ -132,9 +132,9 @@ typedef struct {
 	double	gps_tow; /* gps time  os week (seconds) */
 	double	lat;     /* latitude (radians) */
 	double	lon;     /* longitude (radians) */
-	float	lon_vel; /* velovity east (meters/second) */
-	float	lat_vel; /* velovity north (meters/second) */
-	float	alt_vel; /* velovity up (meters/sec) */
+	float	lon_vel; /* velocity east (meters/second) */
+	float	lat_vel; /* velocity north (meters/second) */
+	float	alt_vel; /* velocity up (meters/sec) */
 	float	msl_hght; /* height of WGS 84 above MSL */
 	short	leap_sec; /* diff between GPS and UTC (seconds) */
 	long	grmn_days;
