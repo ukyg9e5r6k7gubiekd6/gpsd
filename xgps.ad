@@ -5,4 +5,4 @@
 *gps_data.fix_status.label.labelString:"Status"
 *gps_data.quit.label.labelString: Quit
 *speedunits:		mph
-*altunits:		ft
+*altunits:		feet
