@@ -41,6 +41,11 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
+
+#if defined (HAVE_SYS_SELECT_H)
+#include <sys/select.h>
+#endif
 
 #include "config.h"
 #include "gpsd.h"
@@ -564,9 +569,10 @@ static void garmin_init(struct gps_session_t *session)
 	    , 0, "" };
 
     Packet_t* thePacket = 0;
-
     char buffer[256];
-
+    fd_set fds, rfds;
+    struct timeval tv;
+    int nfds = FD_SETSIZE;
 
     gpsd_report(1, "garmin_init\n");
 
@@ -590,9 +596,21 @@ static void garmin_init(struct gps_session_t *session)
 
     // get and print the driver Version info
 
-    // Wait until the device returns the Version info
+    FD_ZERO(&fds); 
+    FD_SET(session->gNMEAdata.gps_fd, &fds);
+
+    // Wait, nicely, until the device returns the Version info
     // Toss any other packets
     for( ; ; ) {
+        memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
+
+	tv.tv_sec = 1; tv.tv_usec = 0;
+	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	    if (errno == EINTR)
+		continue;
+	    gpsd_report(0, "select: %s\n", strerror(errno));
+	    exit(2);
+	}
 	thePacket = GetPacket( session );
 	PrintPacket(session,  thePacket);
 
@@ -611,6 +629,15 @@ static void garmin_init(struct gps_session_t *session)
     // Wait until the device is ready to the start the session
     // Toss any other packets
     for( ; ; ) {
+        memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
+
+	tv.tv_sec = 1; tv.tv_usec = 0;
+	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	    if (errno == EINTR)
+		continue;
+	    gpsd_report(0, "select: %s\n", strerror(errno));
+	    exit(2);
+	}
 	thePacket = GetPacket( session );
 	PrintPacket(session,  thePacket);
 
@@ -630,6 +657,15 @@ static void garmin_init(struct gps_session_t *session)
     // Get the product data packet
     // Ignore any other packets on the way
     for( ; ; ) {
+        memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
+
+	tv.tv_sec = 1; tv.tv_usec = 0;
+	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	    if (errno == EINTR)
+		continue;
+	    gpsd_report(0, "select: %s\n", strerror(errno));
+	    exit(2);
+	}
 	thePacket = GetPacket( session);
 	PrintPacket( session, thePacket);
 
