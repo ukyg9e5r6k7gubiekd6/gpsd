@@ -419,8 +419,8 @@ static void decode_sirf(struct gps_session_t *session,
 #endif /* UNUSED */
     	break;
 
-    case 0x0a:		/* Undocumented packet type */
-	/* typically length 15.  Sample: a0a20a100b00000025b0b3 */
+    case 0x0a:		/* Error ID Data */
+	gpsd_report(4, "Error ID type %d\n", getw(1));
 	break;
 
     case 0x0b:		/* Command Acknowledgement */
