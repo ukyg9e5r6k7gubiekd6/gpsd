@@ -504,7 +504,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     return retval;
 }
 
-void nmea_send(int fd, const char *fmt, ... )
+int nmea_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
     char buf[BUFSIZ];
@@ -515,5 +515,5 @@ void nmea_send(int fd, const char *fmt, ... )
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf + 1);
-    write(fd, buf, strlen(buf));
+    return write(fd, buf, strlen(buf));
 }

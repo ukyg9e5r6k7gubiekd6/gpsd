@@ -13,34 +13,10 @@
 #include <sys/types.h>
 
 #include "sirf.h"
+#include "gpsd.h"
 
 #define HI(n)	((n) >> 8)
 #define LO(n)	((n) & 0xff)
-
-static u_int8_t crc_nmea(char *msg) {
-   int      pos;
-   char     *tag;
-   u_int8_t crc = 0;
-   static char nib_to_hex[] = {'0','1','2','3','4','5','6','7',
-			       '8','9','A','B','C','D','E','F'};
-
-   /* ignore a leading '$' */
-   pos = msg[0] == '$' ? 1 : 0;
-
-   /* calculate CRC */
-   while (msg[pos] != '*' && msg[pos] != 0)
-      crc ^= msg[pos++];
-
-   /* set upper nibble of CRC */
-   tag  = index(msg, '#');
-   *tag = nib_to_hex[(crc & 0xf0) >> 4];
-   /* set lower nibble of CRC */
-   tag  = index(msg, '#');
-   *tag = nib_to_hex[crc & 0x0f];
-
-   return(crc);
-}
-
 
 static u_int16_t crc_sirf(u_int8_t *msg) {
    int       pos = 0;
@@ -64,14 +40,7 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
 int sirf_mode(int ttyfd, int binary, int speed) 
 /* switch GPS to specified mode at 8N1, optionarry to binary */
 {
-   int      len;
-   char	    msg[128]; 
-
-   crc_nmea(msg);
-
-   sprintf(msg, "$PSRF100,%d,%d,8,1,0*##\r\n", !binary, speed);
-   len = strlen(msg);
-   return (write(ttyfd, msg, len) != len);
+   return nmea_send(ttyfd, "$PSRF100,%d,%d,8,1,0*##\r\n", !binary, speed);
 }
 
 
@@ -229,17 +198,7 @@ int sirf_nav_lib (int ttyfd, int enable) {
 int sirf_nmea_waas(int ttyfd, int enable) 
 /* enable WAAS from NMEA mode */
 {
-   int  len;
-   char msg[] = "$PSRF108,0?*##\r\n";
-   char *tag;
-
-   tag = index(msg, '?');
-   *tag = enable == 1 ? '1' : '0';
-
-   crc_nmea(msg);
-
-   len = strlen(msg);
-   return (write(ttyfd, msg, len) != len);
+    return nmea_send(ttyfd, "$PSRF108,0%d", enable);
 }
 
 

@@ -69,7 +69,7 @@ extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
 extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
-extern void nmea_send(int fd, const char *fmt, ... );
+extern int nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
 extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *context);
