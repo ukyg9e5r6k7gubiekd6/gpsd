@@ -22,10 +22,12 @@ can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier
 to parse than NMEA 0183.
 
-After installing this RPM, gpsd will start up at boot time.  You
-must make a symlink named /dev/gps to the serial or USB port that
+After installing this RPM, gpsd will try to start up at boot time.
+You must make a symlink named /dev/gps to the serial or USB port that
 your GPS will plug in to.  Normally this will be /dev/ttyUSB0 or
-/dev/ttyS0.
+/dev/ttyS0.  The daemon will be quiescent when there are no clients
+asking for location information, and copes gracefully when the GPS is
+unplugged.
 
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
@@ -113,7 +115,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 
 %changelog
 * Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Only do one getdtablesize() call, otherwise we're doing several
+- Only do one getdtablesize() call, otherwise we do several
   getrlimits() each poll cycle.
 
 * Wed Sep 08 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.97-1

@@ -1,4 +1,4 @@
-* Debugging EarthMate support
+* Debug Zodiac EarthMate support
 
 Russ reports it isn't working.
 
@@ -52,5 +52,5 @@ Python extension built around libgps.a.
 This is a long-term wishlist item.  It's going to be difficult, since there
 is no GPS device class yet.  Here are some IDs:
 
-BU-303          	067b:2303	This IDs itself as a serial port
+BU-303          	0x067b:0x2303	This IDs itself as a serial port
 DeLorme Earthmate	0x1163:0x0100	This IDs itself as a HIDDEV.
