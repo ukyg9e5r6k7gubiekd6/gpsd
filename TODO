@@ -154,7 +154,7 @@ confirm it is a GPS.  gpsd reverts to the previous device.
 
 2. An F command also fails if there is more than one client attached.
 
-3, All client sessions talk to the device, the one specified by the
+3, All client sessions talk to the same device, the one specified by the
    last successful F command.
 
 The effect of the combination of these rules is to prevent
