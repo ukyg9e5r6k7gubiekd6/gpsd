@@ -225,45 +225,47 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-	/* position/velocity is bytes 1-18 */
-	decode_ecef(&session->gNMEAdata,
-		    (double)getl(1),
-		    (double)getl(5),
-		    (double)getl(9),
-		    (double)getw(13)/8.0,
-		    (double)getw(15)/8.0,
-		    (double)getw(17)/8.0);
-	/* fix status is byte 19 */
-	navtype = getb(19);
-	session->gNMEAdata.status = STATUS_NO_FIX;
-	session->gNMEAdata.mode = MODE_NO_FIX;
-	if (navtype & 0x80)
-	    session->gNMEAdata.status = STATUS_DGPS_FIX;
-	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-	    session->gNMEAdata.status = STATUS_FIX;
-	REFRESH(session->gNMEAdata.status_stamp);
-	session->gNMEAdata.mode = MODE_NO_FIX;
-	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-	    session->gNMEAdata.mode = MODE_3D;
-	else if (session->gNMEAdata.status)
-	    session->gNMEAdata.mode = MODE_2D;
-	REFRESH(session->gNMEAdata.mode_stamp);
-	gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-		    navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
-	/* byte 20 is HDOP, see below */
-	/* byte 21 is "mode 2", not clear how to interpret that */ 
-	extract_time(session, getw(22), getl(24)*1e-2);
-	gpsd_binary_fix_dump(session, buf2);
-	/* fix quality data */
-	session->gNMEAdata.hdop = getb(20)/5.0;
-	session->gNMEAdata.satellites_used = getb(28);
-	for (i = 0; i < MAXCHANNELS; i++)
-	    session->gNMEAdata.used[i] = getb(29+i);
-	session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
-	REFRESH(session->gNMEAdata.fix_quality_stamp);
-	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
-	gpsd_report(3, "<= GPS: %s", buf2);
-	return TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
+	if (!(session->driverstate & SIRF_GE_232)) {
+	    /* position/velocity is bytes 1-18 */
+	    decode_ecef(&session->gNMEAdata,
+			(double)getl(1),
+			(double)getl(5),
+			(double)getl(9),
+			(double)getw(13)/8.0,
+			(double)getw(15)/8.0,
+			(double)getw(17)/8.0);
+	    /* fix status is byte 19 */
+	    navtype = getb(19);
+	    session->gNMEAdata.status = STATUS_NO_FIX;
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if (navtype & 0x80)
+		session->gNMEAdata.status = STATUS_DGPS_FIX;
+	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+		session->gNMEAdata.status = STATUS_FIX;
+	    REFRESH(session->gNMEAdata.status_stamp);
+	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+		session->gNMEAdata.mode = MODE_3D;
+	    else if (session->gNMEAdata.status)
+		session->gNMEAdata.mode = MODE_2D;
+	    REFRESH(session->gNMEAdata.mode_stamp);
+	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+			navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
+	    /* byte 20 is HDOP, see below */
+	    /* byte 21 is "mode 2", not clear how to interpret that */ 
+	    extract_time(session, getw(22), getl(24)*1e-2);
+	    gpsd_binary_fix_dump(session, buf2);
+	    /* fix quality data */
+	    session->gNMEAdata.hdop = getb(20)/5.0;
+	    session->gNMEAdata.satellites_used = getb(28);
+	    for (i = 0; i < MAXCHANNELS; i++)
+		session->gNMEAdata.used[i] = getb(29+i);
+	    session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
+	    REFRESH(session->gNMEAdata.fix_quality_stamp);
+	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
+	    gpsd_report(3, "<= GPS: %s", buf2);
+	    return TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
+	}
 
     case 0x04:		/* Measured tracker data out */
 	/*
