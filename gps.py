@@ -72,6 +72,7 @@ class gpsdata:
 	self.satellite_stamp = gps.timestamp(now)
         self.await = self.parts = 0
 
+        self.profiling = False
         self.tag = ""
         self.recv_time = 0
         self.length = 0
@@ -198,6 +199,8 @@ class gps(gpsdata):
 	      self.altitude_stamp.changed = (self.altitude != d1)
 	      self.altitude = d1
 	      self.altitude_stamp.refresh()
+	    elif cmd in ('B', 'b'):
+              (self.baudrate, self.stopbits) = map(int, data.split(":"))
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
 	    elif cmd in ('M', 'm'):
@@ -251,7 +254,7 @@ class gps(gpsdata):
 	      self.satellites = newsats
 	      self.satellite_stamp.refresh() 
 	    elif cmd in ('Z', 'z'):
-              (dummy, self.baudrate, self.stopbits) = map(int, data.split(":"))
+              self.profiling = (data[0] == '1')
             elif cmd == '$':
                   (self.tag, recv_time, length, emit_time) = data.split(":")
                   self.recv_time = float(recv_time)

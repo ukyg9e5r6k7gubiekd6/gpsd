@@ -163,7 +163,7 @@ if __name__ == '__main__':
         sys.stderr.write("gpsprof: gpsd unreachable.\n")
         sys.exit(0)
     try:
-        session.query("wZ+")
+        session.query("wbz=1")
         plotter.header(out)
         while await > 0:
             session.poll()

@@ -242,6 +242,7 @@ static int handle_request(int fd, char *buf, int buflen)
 			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
 	    break;
 	case 'R':
+	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &nmea_fds);
 		gpsd_report(3, "%d turned on raw mode\n", fd);
@@ -278,6 +279,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",V=%f", ud->speed);
 	    break;
 	case 'W':
+	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		FD_SET(fd, &watcher_fds);
 		gpsd_report(3, "%d turned on watching\n", fd);
@@ -331,6 +333,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 #ifdef PROFILING
 	case 'Z':
+	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		ud->profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", fd);

@@ -174,6 +174,9 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		REFRESH(gpsdata->satellite_stamp);
 		break;
 #ifdef PROFILING
+	    case 'B':
+		sscanf(sp, "B=%d:%d", &gpsdata->baudrate, &gpsdata->stopbits);
+		break;
 	    case 'Z':
 		sscanf(sp, "Z=%d", &gpsdata->profiling);
 		break;
