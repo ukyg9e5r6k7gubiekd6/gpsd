@@ -298,19 +298,19 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (!validate())
+	    if (!validate() || !SEEN(ud->track_stamp))
 		strcpy(phrase, ",T=?");
 	    else
 		sprintf(phrase, ",T=%f", ud->track);
 	    break;
 	case 'U':
-	    if (!validate())
-		strcpy(phrase, ",F=?");
+	    if (!validate() || !SEEN(ud->climb_stamp))
+		strcpy(phrase, ",U=?");
 	    else
-		sprintf(phrase, ",F=%f", ud->climb);
+		sprintf(phrase, ",U=%f", ud->climb);
 	    break;
 	case 'V':
-	    if (!validate())
+	    if (!validate() || !SEEN(ud->speed_stamp))
 		strcpy(phrase, ",V=?");
 	    else
 		sprintf(phrase, ",V=%f", ud->speed);
