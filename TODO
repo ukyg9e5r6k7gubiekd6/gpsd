@@ -31,11 +31,6 @@ Which of these override which other bits?  I don't think status is ever
 nonzero when mode is zero. So status overrides mode.  What other such
 relationships are there?
 
-** Mine the contrib directory for good ideas
-
-There is code in there that can do some interesting tricks with
-SiRF-II chipsets.  Lonnie Mendez is working on this.
-
 ** gpsd.py is unsatisfactory
 
 It only handles straight NMEA devices.  It should be replaced by a
@@ -43,13 +38,25 @@ Python extension built around libgps.a.
 
 * Things not to do:
 
+Here are several things that look like good ideas, but that turn out
+on closer inspection to be not possible or not worth the effort.
+
 ** Try to crank the update rate up past 1 per second
 
-NMEA doesn't give us control of the update rate, and SiRF chips don't
-seem to be able to set cycle times below once per second even in
-binary mode.  Anyway at 50km/h (31mi/h) that's only 13.8 meters change
-in position between updates.  Faster refresh might make sense for
-aviation applications, but not on foot or in a car.
+NMEA doesn't give us control of the update rate, and SiRF/Zodiac chips
+don't seem to be able to set cycle times below once per second even in
+binary mode.  Even on a chipset that permitted it, at 50km/h (31mi/h)
+that's only 13.8 meters change in position between updates.  Faster
+refresh might make sense for aviation applications, but not on foot or
+in a car.
+
+** Speak SiRF binary protocol
+
+It can't do anything interesting, for our purposes.  There's 
+little point in upping the baud rate when we can't get updates above
+1Hz -- even transmitting at infinite speed would only cut a half second
+off the expected latency,  (OK, push-to-fix mode might be interesting
+if they actually documented how to set it.)
 
 ** Try to autodetect USB devices
 
