@@ -42,7 +42,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->device_type = &nmea;
     devtype = set_device_type(devicetype);
     if (!devtype)
-	gpscli_report(1, "invalid GPS type \"%s\", using NMEA instead\n", optarg);
+	gpscli_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
     else
     {
 	session->device_type = devtype;
@@ -54,7 +54,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	char hn[256], buf[BUFSIZE];
 	char *colon, *dgpsport = "rtcm-sc104";
 
-	if ((colon = strchr(optarg, ':'))) {
+	if ((colon = strchr(dgpsserver, ':'))) {
 	    dgpsport = colon+1;
 	    *colon = '\0';
 	}
