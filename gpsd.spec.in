@@ -119,7 +119,10 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 %changelog
 * Mon Sep 20 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
 - Various internal cleanups, including fossil removal in the 
-  configuration machinery.
+  configuration machinery.  FV-18, Tripmate, Earthmate and are now enabled 
+  but can be disable with --disable-$NAME at configure time.  When you call 
+  configure with --disable-shared=libgps is linked statically
+  to the binaries (native libs are still linked shared).
 
 * Thu Sep 16 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.0-1
 - Packaging fixes for 2.0 release.
