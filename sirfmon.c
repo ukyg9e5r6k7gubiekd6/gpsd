@@ -31,6 +31,7 @@
 #include <sys/times.h>
 #include <sys/ioctl.h>
 #include "gpsutils.h"
+#include "config.h"
 
 #define BUFLEN		2048
 
@@ -236,6 +237,28 @@ static int hunt_open(int *pstopbits)
 	}
     }
     return 0;
+}
+
+static int tzoffset(void)
+{
+    time_t now = time(NULL);
+    struct tm tm;
+    int res = 0;
+
+    tzset();
+#ifdef HAVE_TIMEZONE
+    res = timezone;
+#else
+    res = localtime_r(&now, &tm)->tm.tm_gmtoff;
+#endif
+#ifdef HAVE_DAYLIGHT
+    if (daylight && localtime_r(&now, &tm)->tm_isdst)
+	res -= 3600;
+#else
+    if (localtime_r(&now, &tm)->tm_isdst)
+	res -= 3600;
+#endif
+    return res;
 }
 
 int main (int argc, char **argv)
@@ -753,7 +776,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    tm.tm_mon = getb(28) - 1;
 	    tm.tm_year = getw(26) - 1900;
 
-	    gps.tv_sec = mktime(&tm);
+	    gps.tv_sec = mkgmtime(&tm);
 	    gps.tv_usec = (((unsigned short)getw(32)%1000)/10) * 10000;
 
 	    move(5,2);

@@ -382,7 +382,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.nmea_date.tm_sec = 0;
 	    session->gpsdata.subseconds = getw(17)*1e-3;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;

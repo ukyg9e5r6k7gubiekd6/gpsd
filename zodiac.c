@@ -139,7 +139,7 @@ static int handle1000(struct gps_device_t *session)
     session->gpsdata.nmea_date.tm_sec = getw(24);
     session->gpsdata.subseconds = getl(25);
     session->gpsdata.fix.time = session->gpsdata.sentence_time =
-	mktime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
+	mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
     session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;

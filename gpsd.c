@@ -337,10 +337,6 @@ static int handle_request(int cfd, char *buf, int buflen)
 #ifndef MULTISESSION
 		if (need_gps > 1)
 		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, need_gps);
-#else
-		if (channels[cfd].nsubscribers > 1)
-		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, channels[cfd].nsubscribers);
-#endif /* MULTISESSION */ 
 		else {
 		    char *stash_device;
 		    gpsd_deactivate(device);
@@ -358,6 +354,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 			device->gpsdata.baudrate = 0;
 			device->driverstate = 0;
 		    }
+#else
+		if (channels[cfd].nsubscribers > 1)
+		    gpsd_report(1, "Switch to %s failed, %d clients\n", bufcopy, channels[cfd].nsubscribers);
+#endif /* MULTISESSION */ 
 		}
 		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
 	    }

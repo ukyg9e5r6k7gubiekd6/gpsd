@@ -17,26 +17,27 @@ double timestamp(void)
     return(tv.tv_sec + tv.tv_usec/1e6);
 }
 
-int tzoffset(void)
+time_t mkgmtime(register struct tm *t)
+/* struct tm to seconds since Unix epoch */
 {
-    time_t now = time(NULL);
-    struct tm tm;
-    int res = 0;
+    register unsigned short year;
+    register time_t result;
+    static const int cumdays[12] =
+    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-    tzset();
-#ifdef HAVE_TIMEZONE
-    res = timezone;
-#else
-    res = localtime_r(&now, &tm)->tm.tm_gmtoff;
-#endif
-#ifdef HAVE_DAYLIGHT
-    if (daylight && localtime_r(&now, &tm)->tm_isdst)
-	res -= 3600;
-#else
-    if (localtime_r(&now, &tm)->tm_isdst)
-	res -= 3600;
-#endif
-    return res;
+    year = 1900 + t->tm_year + t->tm_mon / 12;
+    result = (year - 1970) * 365 + cumdays[t->tm_mon % 12];
+    result += (year - 1968) / 4;
+    result -= (year - 1900) / 100;
+    result += (year - 1600) / 400;
+    result += t->tm_mday - 1;
+    result *= 24;
+    result += t->tm_hour;
+    result *= 60;
+    result += t->tm_min;
+    result *= 60;
+    result += t->tm_sec;
+    return (result);
 }
 
 double iso8601_to_unix(char *isotime)
@@ -51,7 +52,7 @@ double iso8601_to_unix(char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-    return mktime(&tm) - tzoffset() + usec;
+    return mkgmtime(&tm) + usec;
 }
 
 char *unix_to_iso8601(double fixtime, char *isotime)
