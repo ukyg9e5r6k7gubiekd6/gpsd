@@ -15,7 +15,7 @@ form of VTG is variable with NMEA version.
 The best other resource on this topic seems to be 
 <http://www.gpsinformation.org/dale/nmea.htm>
 
-In NMEA 2.3, several sentencea (RMC, RMB, VTG, GLL; optionally, BWC, XTE)
+In NMEA 2.3, several sentences (RMC, RMB, VTG, GLL; optionally, BWC, XTE)
 got a new last field carrying the signal integrity information needed by the
 FAA.  (The values in the GGA mode field were extended to carry this
 information as well.) Here are the values:

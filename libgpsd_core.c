@@ -141,7 +141,7 @@ int gpsd_poll(struct gps_session_t *session)
 
 	if ((rtcmbytes=read(session->dsock,buf,BUFSIZE))>0 && (session->fdout!=-1))
 	{
-	    if (session->device_type->rctm_writer(session, buf, rtcmbytes) <= 0)
+	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpscli_report(1, "Write to rtcm sink failed\n");
 	}
 	else 

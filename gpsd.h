@@ -21,7 +21,7 @@ struct gps_type_t
     char *trigger;
     void (*initializer)(struct gps_session_t *session);
     int (*handle_input)(struct gps_session_t *session);
-    int (*rctm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
+    int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
     int baudrate;
 };

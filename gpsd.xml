@@ -56,7 +56,7 @@ machine running gpsd via a USB or RS232C serial port which is
 specified to gpsd at startup.</para>
 
 <para>Optionally, gpsd may get differential-GPS corrections from a
-ground station running a RCTM-S104 server; this will improve
+ground station running a RTCM-S104 server; this will improve
 position-fix accuracy from roughly 10 meters to roughly 2 meters,
 provided you are within 1000 kilometers or so of the ground
 station.</para>

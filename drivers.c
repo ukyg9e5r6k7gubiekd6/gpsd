@@ -96,7 +96,7 @@ static int nmea_handle_input(struct gps_session_t *session)
     return 1;
 }
 
-static int nmea_write_rctm(struct gps_session_t *session, char *buf, int rtcmbytes)
+static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
 {
     return write(session->fdout, buf, rtcmbytes);
 }
@@ -108,7 +108,7 @@ struct gps_type_t nmea =
     NULL,		/* no recognition string, it's the default */
     NULL,		/* no initialization */
     nmea_handle_input,	/* read text sentence */
-    nmea_write_rctm,	/* write RTCM data straight */
+    nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
 };
@@ -171,7 +171,7 @@ struct gps_type_t tripmate =
     "ASTRAL",			/* tells us to switch */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     nmea_handle_input,		/* read text sentence */
-    nmea_write_rctm,		/* send RTCM data straight */
+    nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no wrapup */
     4800,			/* default speed to connect at */
 };
