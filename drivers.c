@@ -123,7 +123,7 @@ void fv18_initializer(struct gps_session_t *session)
     /* FV18 sends 1 start bit, 8 bits, 1 stop bit, looking like 7N2 */ 
     gpsd_set_7N2();
     /* tell it to send GSAs so we'll know if 3D is accurate */
-    write(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01*39", 18);
+    write(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01*39\r\n",46);
 }
 
 struct gps_type_t fv18 =
