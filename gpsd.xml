@@ -191,9 +191,13 @@ horizontal, and vertical.</para>
 
 <varlistentry>
 <term>r</term>
-<listitem><para>Toggles 'raw' mode. Return "R=0" or "R=1". In raw mode
-you read the NMEA data stream from the GPS. (Non-NMEA GPSes get 
-their communication format translated to NMEA on the fly.)</para></listitem>
+<listitem><para>Sets or toggles 'raw' mode. Return "R=0" or "R=1". In
+raw mode you read the NMEA data stream from the GPS. (Non-NMEA GPSes
+get their communication format translated to NMEA on the fly.)  The
+command 'r' immediately followed by the digit '1' or the plus sign '+'
+sets raw mode.  The command 'r' followed by the digit '0' or the minus
+sign '-' clears raw mode.  The command 'r' with neither suffix toggles
+raw mode.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -216,14 +220,17 @@ their communication format translated to NMEA on the fly.)</para></listitem>
 
 <varlistentry>
 <term>w</term>
-<listitem><para>Toggles 'watcher' mode. Return "W=0" or "W=1". In
+<listitem><para>Sets or toggles 'watcher' mode. Return "W=0" or "W=1". In
 watcher mode gpsd ships a line of data to the client each time the the GPS
 sends a sentence, but rather than being raw NMEA the line is a gpsd
 response as if the user had just sent some set of gpsd commands.  That set of
 commands is the minimum for which the incoming sentence is relevant,
 plus 'x' &mdash; e.g., a GPRMC sentence ships a "xpvs" response
-because it contains position, velocity and GPS status data.
-</para></listitem>
+because it contains position, velocity and GPS status data.  The
+command 'w' immediately followed by the digit '1' or the plus sign '+'
+sets watcher mode.  The command 'w' followed by the digit '0' or the minus
+sign '-' clears watcher mode.  The command 'w' with neither suffix toggles
+watcher mode.</para></listitem>
 </varlistentry>
 
 <varlistentry>

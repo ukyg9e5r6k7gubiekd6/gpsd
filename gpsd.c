@@ -257,7 +257,17 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'R':
 	case 'r':
-	    if (FD_ISSET(fd, &nmea_fds)) {
+	    if (*p == '1' || *p == '+') {
+		FD_SET(fd, &nmea_fds);
+		sprintf(reply + strlen(reply),
+			",R=1");
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		FD_CLR(fd, &nmea_fds);
+		sprintf(reply + strlen(reply),
+			",R=0");
+		p++;
+	    } else if (FD_ISSET(fd, &nmea_fds)) {
 		FD_CLR(fd, &nmea_fds);
 		sprintf(reply + strlen(reply),
 			",R=0");
@@ -303,7 +313,17 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'W':
 	case 'w':
-	    if (FD_ISSET(fd, &watcher_fds)) {
+	    if (*p == '1' || *p == '+') {
+		FD_SET(fd, &watcher_fds);
+		sprintf(reply + strlen(reply),
+			",W=1");
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		FD_CLR(fd, &watcher_fds);
+		sprintf(reply + strlen(reply),
+			",W=0");
+		p++;
+	    } else if (FD_ISSET(fd, &watcher_fds)) {
 		FD_CLR(fd, &watcher_fds);
 		sprintf(reply + strlen(reply),
 			",W=0");
