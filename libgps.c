@@ -232,8 +232,6 @@ int gps_query(struct gps_data_t *gpsdata, char *requests)
  * A simple command-line exerciser for the library.
  * Not meant to be installed in system directories,
  * as it isn't really useful for anything but debugging.
- * Build with:
- *    cc -o libgps -DTESTMAIN libgps.c .libs/libgps.a
  */
 
 void data_dump(struct gps_data_t *collect, time_t now)

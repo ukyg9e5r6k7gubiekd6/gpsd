@@ -38,7 +38,6 @@
 #include <Xm/MenuShell.h>
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
-#include <sys/ioctl.h>
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
@@ -47,8 +46,8 @@
 
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data_t *gpsdata);
+extern void redraw();
 
-/* global variables */
 static Widget lxbApp, data_panel, satellite_list, satellite_diagram, status;
 static Widget rowColumn_10, rowColumn_11, rowColumn_12, rowColumn_13;
 static Widget rowColumn_14, rowColumn_15, rowColumn_16, rowColumn_17;
@@ -69,19 +68,15 @@ String fallback_resources[] =
     NULL
 };
 
-
-GC gc;
+static GC gc;
 static Atom delw;
-
-extern void redraw();
 
 static void quit_cb()
 {
     exit(0);	/* closes the GPS along with other fds */
 }
 
-Pixel
-get_pixel(Widget w, char *resource_value)
+static Pixel get_pixel(Widget w, char *resource_value)
 {
     Colormap colormap;
     Boolean status;
@@ -261,7 +256,7 @@ static void build_gui(Widget lxbApp)
 
     delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(lxbApp, delw,
-			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
+			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
 }
 
 void init_list()

@@ -1,18 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
-
-#if defined (HAVE_STRINGS_H)
-#include <strings.h>
-#endif
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#include "config.h"
 #include "gps.h"
 #include "gpsd.h"
 
@@ -26,18 +19,16 @@ int netlib_connectsock(char *host, char *service, char *protocol)
     struct servent *pse;
     struct protoent *ppe;
     struct sockaddr_in sin;
-    int s, type;
-    int one = 1;
+    int s, type, one = 1;
 
-    bzero((char *) &sin, sizeof(sin));
+    memset((char *) &sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
-
-    if ( (pse = getservbyname(service, protocol)) )
+    if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0)
 	return NL_NOSERVICE;
-    if ( (phe = gethostbyname(host)) )
-	bcopy(phe->h_addr, (char *) &sin.sin_addr, phe->h_length);
+    if ((phe = gethostbyname(host)))
+	memcpy((char *) &sin.sin_addr, phe->h_addr, phe->h_length);
     else if ((sin.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
 	return NL_NOHOST;
     if ((ppe = getprotobyname(protocol)) == 0)
