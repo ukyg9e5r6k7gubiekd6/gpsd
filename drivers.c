@@ -82,8 +82,8 @@ static int nmea_handle_input(struct gpsd_t *session)
 	        gps_NMEA_handle_message(session, buf);
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
-		if (session->raw_hook)
-		    session->raw_hook(buf);
+		if (session->gNMEAdata.raw_hook)
+		    session->gNMEAdata.raw_hook(buf);
 	    }
 	    offset = 0;
 	    return 1;

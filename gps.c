@@ -516,7 +516,7 @@ int main(int argc, char *argv[])
 
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
-    session.raw_hook = update_display;
+    session.gNMEAdata.raw_hook = update_display;
     if (gps_activate(&session) == -1)
 	exit(1);
 

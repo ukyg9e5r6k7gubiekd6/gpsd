@@ -80,12 +80,15 @@ struct gps_data {
     struct life_t signal_quality_stamp;
 #endif /* PROCESS_PRWIZCH */
 
+    /* stuff after this point is private */
     int year;
     int month;
     int day;
     int hours;
     int minutes;
     int seconds;
+
+    void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
 };
 
 int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port);

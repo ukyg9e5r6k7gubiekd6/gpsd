@@ -39,7 +39,6 @@ struct gpsd_t
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
-    void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
     int debug;		/* debug verbosity level */
 };
 

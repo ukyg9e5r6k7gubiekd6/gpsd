@@ -222,9 +222,9 @@ void data_dump(struct gps_data *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    if (collect->online_stamp.refreshes)
+    if (collect->online_stamp.changed)
 	printf("online: %d\n", collect->online);
-    if (collect->latlon_stamp.refreshes)
+    if (collect->latlon_stamp.changed)
     {
 	printf("P: lat/lon: %lf %lf", 
 	       collect->latitude, collect->longitude);
@@ -235,7 +235,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->latlon_stamp.changed,
 	       FRESH(collect->latlon_stamp, now));
     }
-    if (collect->altitude_stamp.refreshes)
+    if (collect->altitude_stamp.changed)
     {
 	printf("A: altitude: %lf ", collect->altitude);
 	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
@@ -245,7 +245,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->altitude_stamp.changed,
 	       FRESH(collect->altitude_stamp, now));
     }
-    if (collect->speed_stamp.refreshes)
+    if (collect->speed_stamp.changed)
     {
 	printf("V: speed: %lf ", collect->speed);
 	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
@@ -255,7 +255,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->speed_stamp.changed,
 	       FRESH(collect->speed_stamp, now));
     }
-    if (collect->track_stamp.refreshes)
+    if (collect->track_stamp.changed)
     {
 	printf("T: track: %lf ", collect->track);
 	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
@@ -265,7 +265,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->track_stamp.changed,
 	       FRESH(collect->track_stamp, now));
     }
-    if (collect->status_stamp.refreshes)
+    if (collect->status_stamp.changed)
     {
 	printf("S: status: %d (%s) ", 
 	       collect->status,status_values[collect->status]);
@@ -276,7 +276,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->status_stamp.changed,
 	       FRESH(collect->status_stamp, now));
     }
-    if (collect->mode_stamp.refreshes)
+    if (collect->mode_stamp.changed)
     {
 	printf("M: mode: %d (%s) ", collect->mode, mode_values[collect->mode]);
 	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)",
@@ -286,7 +286,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->mode_stamp.changed,
 	       FRESH(collect->mode_stamp, now));
     }
-    if (collect->fix_quality_stamp.refreshes)
+    if (collect->fix_quality_stamp.changed)
     {
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
 	      collect->satellites_used, 
@@ -298,7 +298,7 @@ void data_dump(struct gps_data *collect, time_t now)
 	       collect->fix_quality_stamp.changed,
 	       FRESH(collect->fix_quality_stamp, now));
     }
-    if (collect->satellite_stamp.refreshes)
+    if (collect->satellite_stamp.changed)
     {
 	int i;
 

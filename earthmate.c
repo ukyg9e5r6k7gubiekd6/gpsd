@@ -479,8 +479,8 @@ static void analyze(struct gpsd_t *session,
 	if (session->debug > 4)
 	    gpscli_report(1, "%s", buf);
 
-	if (session->raw_hook)
-	    session->raw_hook(buf);
+	if (session->gNMEAdata.raw_hook)
+	    session->gNMEAdata.raw_hook(buf);
     }
     if (eminit)
 	em_init(session);

@@ -173,7 +173,7 @@ main(int argc, char **argv)
     XtRealizeWidget(toplevel);
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
-    session.raw_hook = update_display;
+    session.gNMEAdata.raw_hook = update_display;
     open_input(app);
     
     XtAppMainLoop(app);

@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
     if (gps_speed)
 	session.baudrate = gps_speed;
     session.gps_device = device_name;
-    session.raw_hook = raw_hook;
+    session.gNMEAdata.raw_hook = raw_hook;
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &all_fds);
 
