@@ -24,10 +24,11 @@ String fallback_resources[] = {NULL};
 
 static struct gps_data_t *gpsdata;
 static Widget tacho;
+static double speedfactor = KNOTS_TO_MPH;
 
 static void update_display(char *buf UNUSED)
 {
-    TachometerSetValue(tacho, rint(gpsdata->speed * KNOTS_TO_MPH));
+    TachometerSetValue(tacho, rint(gpsdata->speed * speedfactor));
 }
 
 static void handle_input(XtPointer client_data UNUSED,
@@ -47,8 +48,11 @@ int main(int argc, char **argv)
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
-    while ((option = getopt(argc, argv, "?hv")) != -1) {
+    while ((option = getopt(argc, argv, "?hkv")) != -1) {
 	switch (option) {
+	case 'k':
+	    speedfactor = KNOTS_TO_KMPH;
+	    break;
 	case 'v':
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
@@ -81,7 +85,10 @@ int main(int argc, char **argv)
     XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
-    XtSetArg(args[0], XtNlabel, "Miles per Hour");
+    if (speedfactor == KNOTS_TO_MPH)
+        XtSetArg(args[0], XtNlabel, "Miles per Hour");
+    else
+        XtSetArg(args[0], XtNlabel, "Km per Hour");
     XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
