@@ -131,6 +131,8 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
      */
     char s[20], d[10];
     int tmp, newstatus;
+    time_t now;
+    struct tm *tm;
 
     sscanf(field(sentence, 9), "%s", d);	/* Date: ddmmyy */
 
@@ -139,13 +141,16 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     strncpy(s + 3, d, 2);	/* copy date */
 
     sscanf((d+4), "%2d", &tmp);
-
-    /* Tf.: Window the year from 1970 to 2069. This buys us some time. */
-    if (tmp < 70) 
-      strncpy(s + 6, "20", 2);	/* 21th century */
-    else
-      strncpy(s + 6, "19", 2);	/* 20th century */
-
+    /*
+     * Uh oh, the NMEA designers screwed the pooch on this one.
+     * Get the high two digits of the year from the host machine's clock time.
+     * That is, the machine where this *daemon* is running -- which is probably
+     * connected to the GPS by a cable short enough that it doesn't cross a
+     * timezone boundary.
+     */
+    now = time(NULL);
+    tm = localtime(&now);
+    strftime(s + 6, 2, "%C", tm);
     strncpy(s + 8, d + 4, 2);	/* copy year */
 
     sscanf(field(sentence, 1), "%s", d);	/* Time: hhmmss */
