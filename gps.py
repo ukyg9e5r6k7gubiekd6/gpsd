@@ -333,10 +333,11 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
 
 def MeterOffset((lat1, lon1), (lat2, lon2)):
     "Return offset in meters of second arg from first."
-    return ( \
-        EarthDistance((lat1, lon1), (lat1, lon2)), 
-        EarthDistance((lat1, lon1), (lat2, lon1))
-        )
+    dx = EarthDistance((lat1, lon1), (lat1, lon2))
+    dy = EarthDistance((lat1, lon1), (lat2, lon1))
+    if lat1 < lat2: dy *= -1
+    if lon1 < lon2: dx *= -1
+    return (dx, dy)
 
 def isotime(s):
     "Convert gpsd timestamps in ISO8661 format to local Unix time, and back."

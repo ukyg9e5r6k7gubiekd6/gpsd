@@ -334,6 +334,7 @@ if __name__ == '__main__':
             sys.stdout.write('set key below\n')
             sys.stdout.write('set key title "%s"\n' % time.asctime())
             sys.stdout.write('set size ratio -1\n')
+            sys.stdout.write('set style line 3 pt 2 # Looks good on X11\n')
             sys.stdout.write('set xlabel "Meters east from %s"\n' % lonstring)
             sys.stdout.write('set ylabel "Meters north from %s"\n' % latstring)
             sys.stdout.write('cep=%f\n' % d((0,0), recentered[len(fixes)/2]))
@@ -344,7 +345,7 @@ if __name__ == '__main__':
             sys.stdout.write('chlen = cep/20\n')
             sys.stdout.write("set arrow from -chlen,0 to chlen,0 nohead\n")
             sys.stdout.write("set arrow from 0,-chlen to 0,chlen nohead\n")
-            sys.stdout.write('plot "-" using 1:2 title "%d GPS fixes", cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters"\n' % (len(fixes), cep_meters))
+            sys.stdout.write('plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters", "-" using 1:2 with points ls 3 title "%d GPS fixes"\n' % (cep_meters, len(fixes)))
             sys.stdout.write("#\n")
             sys.stdout.write("# Lat	Lon\n")
             for (lat, lon) in recentered:
