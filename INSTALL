@@ -3,7 +3,7 @@ Here are the steps for installing gpsd and verifying its performance:
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
 
-      stty -F /dev/ttyXXX ispeed 4800; cat </dev/ttyXXX
+      stty -F /dev/ttyXXX ispeed 4800 && cat </dev/ttyXXX
 
 replace ttyXXX with the filename of the port.  This will probably be
 either /dev/ttyUSB0 or /dev/ttyS0.  When you run this command, you

@@ -39,6 +39,13 @@ times, and the GPS being unplugged and replugged, without leaking file
 descriptors; also arrange for the GPS to be open when and only when clients 
 are active.
 
+The function is_input_waiting() is not strictly necessary for the most
+important use of the low-level interface, which is when it gets called
+from the daemon mainline.  In that context, FD_ISSET() on the element
+of the file-descriptor set representing the GPS would tell us if there
+were input waiting.  The explicit test is there for other programs
+that might call gps_poll() without such a guarantee.
+
 That's about all there is to it.
 
 If you're looking for things to hack on, first see the TODO file.

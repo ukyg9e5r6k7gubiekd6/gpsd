@@ -49,17 +49,18 @@ and speedometer</refpurpose>
 
 <refsect2 id='gpsd'><title>gpsd</title>
 
-<para>gpsd is a monitor daemon that watches a TCP/IP port (2947 by
-default), waiting for an application to request location information
-from a GPS.  The GPS is expected to be direct-connected to the
-machine running gpsd via a USB or RS232C serial port which is
-specified to gpsd at startup.</para>
+<para><application>gpsd</application> is a monitor daemon that watches
+a TCP/IP port (2947 by default), waiting for an application to request
+location information from a GPS.  The GPS is expected to be
+direct-connected to the machine running
+<application>gpsd</application> via a USB or RS232C serial port which
+is specified to gpsd at startup.</para>
 
-<para>Optionally, gpsd may get differential-GPS corrections from a
-ground station running a RTCM-S104 server; this will improve
-position-fix accuracy from roughly 10 meters to roughly 2 meters,
-provided you are within 1000 kilometers or so of the ground
-station.</para>
+<para>Optionally, <application>gpsd</application> may get
+differential-GPS corrections from a ground station running a RTCM-S104
+server; this will improve position-fix accuracy from roughly 10 meters
+to roughly 2 meters, provided you are within 1000 kilometers or so of
+the ground station.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -128,16 +129,17 @@ monitoring of the GPS data stream.</para>
 <varlistentry>
 <term>-D</term>
 <listitem>
-<para>Set debug level. At debug levels 2 and above, gpsd stays in
-foreground and reports incoming sentence and actions to standard
-error.</para>
+<para>Set debug level. At debug levels 2 and above,
+<application>gpsd</application> stays in foreground and reports
+incoming sentence and actions to standard error.</para>
 </listitem>
 </varlistentry>
 </variablelist>
 
-<para>gpsd should be able to query any GPS that speaks either the
-standard textual NMEA 0183 protocol or the binary Rockwell protocol
-used by EarthMate and some other GPSes.</para>
+<para><application>gpsd</application> should be able to query any GPS
+that speaks either the standard textual NMEA 0183 protocol or the
+binary Rockwell protocol used by EarthMate and some other
+GPSes.</para>
 
 <para>The request protocol for gpsd clients is very simple.  Each
 request consists of a single ASCII character followed by a newline.
@@ -244,7 +246,7 @@ not used in the last fix. Each number is followed by one space.</para>
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
-response means that there is no valid data available.  </para>
+means that there is no valid data available.</para>
 
 <para>Requests can be concatenated and sent as a string; gpsd will then
 respond with a comma-separated list of replies.</para>
@@ -269,38 +271,41 @@ running in background and survive having the GPS repeatedly unplugged
 and plugged back in.</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
-mode gpsd ships a line of data to the client each time the the GPS
-sends a sentence, but rather than being raw NMEA the line is a gpsd
-response as if the user had just sent some set of gpsd commands.  That
-set of commands is the minimum for which the incoming sentence is
-relevant &mdash; e.g., a GPRMC sentence ships a "pvs" response because
-it contains position, velocity and GPS status data.  Additionally,
-watching clients get notifications in the form X=0 or X=1 when the 
-online/offline status of the GPS changes.</para>
+mode <application>gpsd</application> ships a line of data to the
+client each time the the GPS sends a sentence, but rather than being
+raw NMEA the line is a gpsd response as if the user had just sent some
+set of gpsd commands.  That set of commands is the minimum for which
+the incoming sentence is relevant &mdash; e.g., a GPRMC sentence ships
+a "pvs" response because it contains position, velocity and GPS status
+data.  Additionally, watching clients get notifications in the form
+X=0 or X=1 when the online/offline status of the GPS changes.</para>
 
-<para>Sending SIGHUP to a running gpsd forces it to close the GPS and
-all client connections.  It will then attempt to reconnect to the GPS
-and resume listening for client connections.  This may be useful if
-your GPS enters a wedged or confused state but can be soft-reset by
-pulling down DTR.</para>
+<para>Sending SIGHUP to a running <application>gpsd</application>
+forces it to close the GPS and all client connections.  It will then
+attempt to reconnect to the GPS and resume listening for client
+connections.  This may be useful if your GPS enters a wedged or
+confused state but can be soft-reset by pulling down DTR.</para>
 
 </refsect2>
 <refsect2><title>gps</title>
 
-<para>gps is a simple test client for gpsd with an X interface. It
-displays current GPS animation and (for GPSes that support the
-feature) the locations of accessible satellites.</para>
+<para><application>gps</application> is a simple test client for
+<application>gpsd</application> with an X interface. It displays
+current GPS animation and (for GPSes that support the feature) the
+locations of accessible satellites.</para>
 
-<para>gps accepts an -h option as for gpsd. An optional argument may
-specify an server to get data from; a colon-separated suffix is taken
-as a port number.  The misfeature of previous versions that allowed it
-to direct-connect to the serial device has been removed.</para>
+<para><application>gps</application> accepts an -h option as for
+<application>gpsd</application>. An optional argument may specify an
+server to get data from; a colon-separated suffix is taken as a port
+number.  The misfeature of previous versions that allowed it to
+direct-connect to the serial device has been removed.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
-<para>xgpsspeed is a speedometer that uses position information from
-the GPS. It accepts an -h option and optional argument as for gps.
+<para><application>xgpsspeed</application> is a speedometer that uses
+position information from the GPS. It accepts an -h option and
+optional argument as for <application>gps</application>.
 Additionally, it accepts -rv (reverse video) and -nc (needle color)
 options. The misfeature of previous version that allowed it to
 direct-connect to the serial device has been removed.</para>
@@ -316,7 +321,7 @@ from the sensor rather than actively polling for them (which can't be
 done in a device-independent way).  Most GPSes ship updates just once
 per second.  At 50km/h (31mi/h) that's 13.8 meters change in position
 between updates.  This is good enough if you're on foot or in a car
-but not good enough for aviation applications,</para>
+but not good enough for aviation applications.</para>
 
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
@@ -347,7 +352,8 @@ NMEA</ulink>.</para>
 
 <para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
 This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
-There is a project page, with gps screenshots, <ulink
+There is a project page, with <application>gps</application>
+screenshots, <ulink
 url="http://www.berlios.de/gpsd/">here</ulink>.</para>
 
 </refsect1>
