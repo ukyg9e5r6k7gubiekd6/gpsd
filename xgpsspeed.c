@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
-	perror("xgpsspeed: no gpsd running or network error");
+	fputs("xgpsspeed: no gpsd running or network error\n", stderr);
 	exit(2);
     }
 
