@@ -10,11 +10,10 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
+#include "gpsutils.h"
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 #define MAXNAMELEN	6	/* maximum length of NMEA tag name */
-
-static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL); return(tv.tv_sec + tv.tv_usec/1e6);}
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
@@ -186,8 +185,6 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */
 #endif
-
-extern char *unix_to_iso8661(double t, char *);
 
 #endif /* gps_h */
 /* gps.h ends here */

@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "gps.h"
+#include "gpsutils.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE
@@ -173,11 +174,6 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_session_t *);
 extern int ntpshm_put(struct gps_session_t *, double);
-
-extern double iso8661_to_unix(char *);
-extern int tzoffset(void);
-extern double gpstime_to_unix(int, double);
-extern double earth_distance(double, double, double, double);
 
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);

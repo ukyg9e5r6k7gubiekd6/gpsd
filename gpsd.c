@@ -504,15 +504,16 @@ static int handle_request(int fd, char *buf, int buflen)
     }
  breakout:
     if (ud->profiling) {
+	double fixtime = ud->fix.time - gmt_offset;
 	sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
 		ud->tag,
 		ud->sentence_length,
-		ud->fix.time - gmt_offset,
-		ud->d_xmit_time,
-		ud->d_recv_time - ud->d_xmit_time,
-		ud->d_decode_time - ud->d_xmit_time,
-		session->poll_times[fd] - ud->d_xmit_time,
-		timestamp() - ud->d_xmit_time); 
+		fixtime,
+		ud->d_xmit_time - fixtime,
+		ud->d_recv_time - fixtime,
+		ud->d_decode_time - fixtime,
+		session->poll_times[fd] - fixtime,
+		timestamp() - fixtime); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }

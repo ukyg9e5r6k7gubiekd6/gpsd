@@ -96,6 +96,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
+%{_includedir}/gpsutils.h
 %{_libdir}/libgps.a
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*

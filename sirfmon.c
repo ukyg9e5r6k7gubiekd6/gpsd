@@ -30,6 +30,11 @@
 #include <sys/times.h>
 #include <sys/ioctl.h>
 
+/* from gpsutils.c */
+extern int tzoffset(void);
+extern double gpstime_to_unix(int week, double tow);
+extern double timestamp(void);
+
 #define BUFLEN		2048
 
 #define START1		0xa0
@@ -42,6 +47,7 @@
 static int LineFd;					/* fd for RS232 line */
 static int nfix,fix[20];
 static FILE *logfile;
+static int gmt_offset;
 
 static char *verbpat[] =
 {
@@ -240,6 +246,8 @@ int main (int argc, char **argv)
     unsigned char buf[BUFLEN];
     char line[80];
 
+    gmt_offset = tzoffset();
+
     if (argc < 2) {
 	fprintf(stderr,"Usage: %s <tty-device>.\n",argv[0]);
 	exit(1);
@@ -262,15 +270,15 @@ int main (int argc, char **argv)
     intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
 
-    mid2win   = subwin(stdscr,  6, 80,  0, 0);
-    mid4win   = subwin(stdscr, 15, 30,  6, 0);
-    mid6win   = subwin(stdscr, 3,  48,  6, 32);
-    mid7win   = subwin(stdscr, 4,  48,  9, 32);
-    mid9win   = subwin(stdscr, 3,  48, 13, 32);
-    mid13win  = subwin(stdscr, 3,  48, 16, 32);
-    mid27win  = subwin(stdscr, 4,  48, 19, 32);
-    cmdwin    = subwin(stdscr, 2,  30, 21, 0);
-    debugwin  = subwin(stdscr, 0,   0, 23, 0);
+    mid2win   = subwin(stdscr, 7,  80,  0, 0);
+    mid4win   = subwin(stdscr, 15, 30,  7, 0);
+    mid6win   = subwin(stdscr, 3,  48,  7, 32);
+    mid7win   = subwin(stdscr, 4,  48, 10, 32);
+    mid9win   = subwin(stdscr, 3,  48, 14, 32);
+    mid13win  = subwin(stdscr, 3,  48, 17, 32);
+    mid27win  = subwin(stdscr, 4,  48, 20, 32);
+    cmdwin    = subwin(stdscr, 2,  30, 22, 0);
+    debugwin  = subwin(stdscr, 0,   0, 24, 0);
     scrollok(debugwin,TRUE);
     wsetscrreg(debugwin, 0, LINES-21);
 
@@ -291,8 +299,10 @@ int main (int argc, char **argv)
     wmove(mid2win, 3,1);
     wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
     wmove(mid2win, 4,1);
-    wprintw(mid2win, "DOP:      M1:    M2:    Fix:  ");
-    mvwprintw(mid2win, 5, 24, " Packet type 2 (0x02) ");
+    wprintw(mid2win, "Skew:                                      HDOP:      M1:    M2:    ");
+    wmove(mid2win, 5,1);
+    wprintw(mid2win, "Fix:");
+    mvwprintw(mid2win, 6, 24, " Packet type 2 (0x02) ");
     wattrset(mid2win, A_NORMAL);
 
     wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -513,16 +523,17 @@ static void decode_sirf(unsigned char buf[], int len)
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
-	wmove(mid2win, 4,6);
-	wprintw(mid2win, "%4.1f",(float)getb(20)/5);	/* HDOP */
-	wmove(mid2win, 4,15);
-	wprintw(mid2win, "%02x",getb(19));		/* Mode 2 */
-	wmove(mid2win, 4,22);
-	wprintw(mid2win, "%02x",getb(21));		/* Mode 1 */
 	decode_time(getw(22),getl(24));
-	wmove(mid2win, 4,30);
+	/* line 4 */
+	wmove(mid2win, 4,49);
+	wprintw(mid2win, "%4.1f",(float)getb(20)/5);	/* HDOP */
+	wmove(mid2win, 4,58);
+	wprintw(mid2win, "%02x",getb(19));		/* Mode 1 */
+	wmove(mid2win, 4,65);
+	wprintw(mid2win, "%02x",getb(21));		/* Mode 2 */
+	wmove(mid2win, 5,7);
 	nfix = getb(28);
-	wprintw(mid2win, "%d",nfix);			/* SVs in fix */
+	wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
 	for (i = 0; i < MAXCHANNELS; i++) {	/* SV list */
 	    if (i < nfix)
 		wprintw(mid2win, "%3d",fix[i] = getb(29+i));
@@ -796,6 +807,9 @@ static void decode_time(int week, int tow)
     wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
     wmove(mid2win, 3, 29);
     wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
+
+    wmove(mid2win, 4, 8);
+    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow));
 }
 
 static void decode_ecef(double x, double y, double z,

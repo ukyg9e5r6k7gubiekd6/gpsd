@@ -10,6 +10,13 @@
 
 #include "gpsd.h"
 
+double timestamp(void) 
+{
+    struct timeval tv; 
+    gettimeofday(&tv, NULL); 
+    return(tv.tv_sec + tv.tv_usec/1e6);
+}
+
 int tzoffset(void)
 {
     time_t now = time(NULL);
