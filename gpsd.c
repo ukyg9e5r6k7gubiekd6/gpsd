@@ -35,6 +35,15 @@
 
 #define QLEN			5
 
+#define ZERO_WATCHERS()		FD_ZERO(&watcher_fds);
+#define IS_WATCHER(cfd) 	FD_ISSET(cfd, &watcher_fds)
+#define SET_WATCHER(cfd)	FD_SET(cfd, &watcher_fds)
+#define CLR_WATCHER(cfd)	FD_CLR(cfd, &watcher_fds)
+#define ZERO_RAW()		FD_ZERO(&nmea_fds);
+#define IS_RAW(cfd)     	FD_ISSET(cfd, &nmea_fds)
+#define SET_RAW(cfd)    	FD_SET(cfd, &nmea_fds)
+#define CLR_RAW(cfd)    	FD_CLR(cfd, &nmea_fds)
+
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
@@ -210,8 +219,8 @@ static void detach_client(int cfd)
 {
     close(cfd);
     FD_CLR(cfd, &all_fds);
-    FD_CLR(cfd, &nmea_fds);
-    FD_CLR(cfd, &watcher_fds);
+    CLR_RAW(cfd);
+    CLR_WATCHER(cfd);
 #ifdef MULTISESSION
     subscribers[cfd].active = 0;
     if (subscribers[cfd].channel)
@@ -244,7 +253,7 @@ static void notify_watchers(char *sentence)
     int cfd;
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-	if (FD_ISSET(cfd, &watcher_fds))
+	if (IS_WATCHER(cfd))
 	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
@@ -475,21 +484,21 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'R':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		FD_SET(cfd, &nmea_fds);
+		SET_RAW(cfd);
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		FD_CLR(cfd, &nmea_fds);
+		CLR_RAW(cfd);
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 		p++;
-	    } else if (FD_ISSET(cfd, &nmea_fds)) {
-		FD_CLR(cfd, &nmea_fds);
+	    } else if (IS_RAW(cfd)) {
+		CLR_RAW(cfd);
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 	    } else {
-		FD_SET(cfd, &nmea_fds);
+		SET_RAW(cfd);
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 	    }
@@ -518,18 +527,18 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		FD_SET(cfd, &watcher_fds);
+		SET_WATCHER(cfd);
 		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		FD_CLR(cfd, &watcher_fds);
+		CLR_WATCHER(cfd);
 		sprintf(phrase, ",W=0");
 		p++;
-	    } else if (FD_ISSET(cfd, &watcher_fds)) {
-		FD_CLR(cfd, &watcher_fds);
+	    } else if (IS_WATCHER(cfd)) {
+		CLR_WATCHER(cfd);
 		sprintf(phrase, ",W=0");
 	    } else {
-		FD_SET(cfd, &watcher_fds);
+		SET_WATCHER(cfd);
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		sprintf(phrase, ",W=1");
 	    }
@@ -623,7 +632,7 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (FD_ISSET(cfd, &nmea_fds))
+	if (IS_RAW(cfd))
 	    throttled_write(cfd, sentence, strlen(sentence));
     }
 }
@@ -765,7 +774,7 @@ int main(int argc, char *argv[])
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
 
-    FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
+    FD_ZERO(&all_fds); ZERO_RAW(); ZERO_WATCHERS();
     FD_SET(msock, &all_fds);
 
     device = open_device(device_name, nowait);
@@ -846,7 +855,7 @@ int main(int argc, char *argv[])
 
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 		/* some listeners may be in watcher mode */
-		if (FD_ISSET(cfd, &watcher_fds)) {
+		if (IS_WATCHER(cfd)) {
 		    device->poll_times[cfd] = timestamp();
 		    char cmds[4] = ""; 
 		    if (changed &~ ONLINE_SET) {
@@ -885,7 +894,7 @@ int main(int argc, char *argv[])
 	     * GPS must be opened if commands are waiting or any client is
 	     * streaming (raw or watcher mode).
 	     */
-	    if (FD_ISSET(cfd, &rfds) || FD_ISSET(cfd, &nmea_fds) || FD_ISSET(cfd, &watcher_fds)) {
+	    if (FD_ISSET(cfd, &rfds) || IS_RAW(cfd) || IS_WATCHER(cfd)) {
 		if (device->gpsdata.gps_fd == -1) {
 		    gpsd_deactivate(device);
 		    if (gpsd_activate(device) >= 0) {
