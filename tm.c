@@ -51,6 +51,9 @@ void send_init()
 	t = time(NULL);
 	tm = gmtime(&t);
 
+	if(tm->tm_year > 100)
+	    tm->tm_year = tm->tm_year - 100;
+
 	sprintf(buf,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
 		latitude, latd, longitude, lond,
