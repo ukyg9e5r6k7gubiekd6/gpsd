@@ -39,8 +39,7 @@ C:
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_poll</function></funcdef>
-    <paramdef>struct gps_data_t * <parameter>gpsdata</parameter></paramdef>
-    <paramdef>void *<parameter>raw_hook</parameter>(char *buf)</paramdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_close</function></funcdef>
@@ -99,15 +98,14 @@ must be a string containing letters from the command set documented at
 This function returns a 1 if any data changed since the last query, a
 0 if no data changed, or a -1 if there was a Unix-level read error.</para>
 
-<para><function>gpsd_poll()</function> accepts a one-line response from
-the daemon and interprets it as though it were a query response (the
-return value is as for a query).  It is meant to be used after the
-user has issued an 'R' or 'W' command with
-<function>gpsd_query()</function>, telling the daemon to stream updates
-to the client.  If the third argument is non-NULL, it is used as a
-hook function to be called on each line of streamed data.
-<function>gpsd_poll()</function> returns -1 if there was an error, 0 
-if no data was read or no changes or 1 if gpsdata has changes.</para>
+<para><function>gpsd_poll()</function> accepts a response, or sequence
+of responses, from the daemon and interprets it as though it were a
+query response (the return value is as for a query).  It is meant to
+be used after the user has issued an 'R' or 'W' command with
+<function>gpsd_query()</function>, telling the daemon to stream
+updates to the client.  <function>gpsd_poll()</function> returns -1 if
+there was an error, 0 if no data was read or no changes or 1 if
+gpsdata has changes.</para>
 
 <para>Several member groups within the GPS-data structure have
 last-modified timestamps and change-flag members associated with them;

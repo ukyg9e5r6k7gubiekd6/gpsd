@@ -3,8 +3,6 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 ** Finish implementing the N command
 
-** Make sure gps_poll can handle multiple-sentence returns
-
 ** Rate-limiting SiRF sentence 4.
 
 The SiRF binary driver works nicely now, but it's a bit annoying that

@@ -53,166 +53,164 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
 static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
-    char *sp, *tp;
+    char *ns, *sp, *tp;
     double d1, d2, d3;
-    int i1, i2;
+    int i1, i2, changed = 0;
 
-    if (!strncmp(buf, "GPSD", 4)) {
-	for (sp = buf + 5; ; sp = tp+1) {
-	    if (!(tp = strchr(sp, ',')))
-		tp = strchr(sp, '\r');
-	    if (!tp) break;
-	    *tp = '\0';
+    for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
+	if (!strncmp(ns, "GPSD", 4)) {
+	    for (sp = ns + 5; ; sp = tp+1) {
+		if (!(tp = strchr(sp, ',')))
+		    tp = strchr(sp, '\r');
+		if (!tp) break;
+		*tp = '\0';
 
-	    if (sp[2] == '?')
-		continue;
+		if (sp[2] == '?')
+		    continue;
 
-	    switch (*sp) {
-	    case 'A':
-		sscanf(sp, "A=%lf", &d1);
-		gpsdata->altitude_stamp.changed = (gpsdata->altitude != d1);
-		gpsdata->altitude = d1;
-		REFRESH(gpsdata->altitude_stamp);
-		break;
-	    case 'B':
-		sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
-		break;
-	    case 'C':
-		sscanf(sp, "C=%d", &gpsdata->cycle);
-		break;
-	    case 'D':
-		strcpy(gpsdata->utc, sp+2);
-		break;
-	    case 'E':
-		sscanf(sp, "E=%lf %lf %lf", &d1, &d2, &d3);
-		gpsdata->fix_quality_stamp.changed = \
-		    (gpsdata->epe != d1) || (gpsdata->eph != d2) || (gpsdata->epv != d3);
-		gpsdata->epe = d1; gpsdata->eph = d2; gpsdata->epv = d3;
-		REFRESH(gpsdata->epe_quality_stamp);
-		break;
-	    case 'I':
-		if (gpsdata->gps_id)
-		    free(gpsdata->gps_id);
-		gpsdata->gps_id = strdup(sp+2);
-	    case 'M':
-		i1 = atoi(sp+2);
-		gpsdata->mode_stamp.changed = (gpsdata->mode != i1);
-		gpsdata->mode = i1;
-		REFRESH(gpsdata->mode_stamp);
-		break;
-	    case 'P':
-		sscanf(sp, "P=%lf %lf", &d1, &d2);
-		gpsdata->latlon_stamp.changed = (gpsdata->latitude != d1) || (gpsdata->longitude != d2);
-		gpsdata->latitude = d1; gpsdata->longitude = d2;
-		REFRESH(gpsdata->latlon_stamp);
-		break;
-	    case 'Q':
-		sscanf(sp, "Q=%d %lf %lf %lf", &i1, &d1, &d2, &d3);
-		gpsdata->fix_quality_stamp.changed = \
-		    (gpsdata->satellites_used != i1)
-		    || (gpsdata->pdop != d1)
-		    || (gpsdata->hdop != d2)
-		    || (gpsdata->vdop != d3);
-		gpsdata->satellites_used = i1;
-		gpsdata->pdop = d1; gpsdata->hdop = d2; gpsdata->vdop = d3;
-		REFRESH(gpsdata->fix_quality_stamp);
-		break;
-	    case 'S':
-		i1 = atoi(sp+2);
-		gpsdata->status_stamp.changed = (gpsdata->status != i1);
-		gpsdata->status = i1;
-		REFRESH(gpsdata->status_stamp);
-		break;
-	    case 'T':
-		sscanf(sp, "T=%lf", &d1);
-		gpsdata->track_stamp.changed = (gpsdata->track != d1);
-		gpsdata->track = d1;
-		REFRESH(gpsdata->track_stamp);
-		break;
-	    case 'U':
-		sscanf(sp, "U=%lf", &d1);
-		gpsdata->climb_stamp.changed = (gpsdata->climb != d1);
-		gpsdata->climb = d1;
-		REFRESH(gpsdata->climb_stamp);
-		break;
-	    case 'V':
-		sscanf(sp, "V=%lf", &d1);
-		gpsdata->speed_stamp.changed = (gpsdata->speed != d1);
-		gpsdata->speed = d1;
-		REFRESH(gpsdata->speed_stamp);
-		break;
-	    case 'X':
-		if (!strncmp(sp, "X=1", 3)) {
-		    gpsdata->online_stamp.changed = gpsdata->online != 1;
-		    gpsdata->online = 1;
-		    REFRESH(gpsdata->online_stamp);
-		}
-		else if (!strncmp(sp, "X=0", 3)) {
-		    gpsdata->online_stamp.changed = gpsdata->online != 0;
-		    gpsdata->online = 0;
-		    REFRESH(gpsdata->online_stamp);
-		}
-		break;
-	    case 'Y':
-		i1 = atoi(sp+2);
-		gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);
-		gpsdata->satellites = i1;
-		if (gpsdata->satellites) {
-		    int j, i3, i4, i5;
-		    int PRN[MAXCHANNELS];
-		    int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
-		    int ss[MAXCHANNELS], used[MAXCHANNELS];
-
-		    for (j = 0; j < gpsdata->satellites; j++) {
-			PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
+		switch (*sp) {
+		case 'A':
+		    sscanf(sp, "A=%lf", &d1);
+		    gpsdata->altitude_stamp.changed = (gpsdata->altitude != d1);
+		    gpsdata->altitude = d1;
+		    REFRESH(gpsdata->altitude_stamp);
+		    break;
+		case 'B':
+		    sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
+		    break;
+		case 'C':
+		    sscanf(sp, "C=%d", &gpsdata->cycle);
+		    break;
+		case 'D':
+		    strcpy(gpsdata->utc, sp+2);
+		    break;
+		case 'E':
+		    sscanf(sp, "E=%lf %lf %lf", &d1, &d2, &d3);
+		    gpsdata->fix_quality_stamp.changed = \
+			(gpsdata->epe != d1) || (gpsdata->eph != d2) || (gpsdata->epv != d3);
+		    gpsdata->epe = d1; gpsdata->eph = d2; gpsdata->epv = d3;
+		    REFRESH(gpsdata->epe_quality_stamp);
+		    break;
+		case 'I':
+		    if (gpsdata->gps_id)
+			free(gpsdata->gps_id);
+		    gpsdata->gps_id = strdup(sp+2);
+		case 'M':
+		    i1 = atoi(sp+2);
+		    gpsdata->mode_stamp.changed = (gpsdata->mode != i1);
+		    gpsdata->mode = i1;
+		    REFRESH(gpsdata->mode_stamp);
+		    break;
+		case 'P':
+		    sscanf(sp, "P=%lf %lf", &d1, &d2);
+		    gpsdata->latlon_stamp.changed = (gpsdata->latitude != d1) || (gpsdata->longitude != d2);
+		    gpsdata->latitude = d1; gpsdata->longitude = d2;
+		    REFRESH(gpsdata->latlon_stamp);
+		    break;
+		case 'Q':
+		    sscanf(sp, "Q=%d %lf %lf %lf", &i1, &d1, &d2, &d3);
+		    gpsdata->fix_quality_stamp.changed = \
+			(gpsdata->satellites_used != i1)
+			|| (gpsdata->pdop != d1)
+			|| (gpsdata->hdop != d2)
+			|| (gpsdata->vdop != d3);
+		    gpsdata->satellites_used = i1;
+		    gpsdata->pdop = d1; gpsdata->hdop = d2; gpsdata->vdop = d3;
+		    REFRESH(gpsdata->fix_quality_stamp);
+		    break;
+		case 'S':
+		    i1 = atoi(sp+2);
+		    gpsdata->status_stamp.changed = (gpsdata->status != i1);
+		    gpsdata->status = i1;
+		    REFRESH(gpsdata->status_stamp);
+		    break;
+		case 'T':
+		    sscanf(sp, "T=%lf", &d1);
+		    gpsdata->track_stamp.changed = (gpsdata->track != d1);
+		    gpsdata->track = d1;
+		    REFRESH(gpsdata->track_stamp);
+		    break;
+		case 'U':
+		    sscanf(sp, "U=%lf", &d1);
+		    gpsdata->climb_stamp.changed = (gpsdata->climb != d1);
+		    gpsdata->climb = d1;
+		    REFRESH(gpsdata->climb_stamp);
+		    break;
+		case 'V':
+		    sscanf(sp, "V=%lf", &d1);
+		    gpsdata->speed_stamp.changed = (gpsdata->speed != d1);
+		    gpsdata->speed = d1;
+		    REFRESH(gpsdata->speed_stamp);
+		    break;
+		case 'X':
+		    if (!strncmp(sp, "X=1", 3)) {
+			gpsdata->online_stamp.changed = gpsdata->online != 1;
+			gpsdata->online = 1;
+			REFRESH(gpsdata->online_stamp);
 		    }
-		    for (j = 0; j < gpsdata->satellites; j++) {
-			sp = strchr(sp, ':') + 1;
-			sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
-			PRN[j] = i1;
-			elevation[j] = i2; azimuth[j] = i3;
-			ss[j] = i4; used[j] = i5;
+		    else if (!strncmp(sp, "X=0", 3)) {
+			gpsdata->online_stamp.changed = gpsdata->online != 0;
+			gpsdata->online = 0;
+			REFRESH(gpsdata->online_stamp);
 		    }
-		    /*
-		     * This won't catch the case where all values are identical
-		     * but rearranged.  We can live with that.
-		     */
-		    gpsdata->satellite_stamp.changed |= \
-			memcmp(gpsdata->PRN, PRN, sizeof(PRN)) ||
-			memcmp(gpsdata->elevation, elevation, sizeof(elevation)) ||
-			memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
-			memcmp(gpsdata->ss, ss, sizeof(ss)) ||
-			memcmp(gpsdata->used, used, sizeof(used));
-		    memcpy(gpsdata->PRN, PRN, sizeof(PRN));
-		    memcpy(gpsdata->elevation, elevation, sizeof(elevation));
-		    memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
-		    memcpy(gpsdata->ss, ss, sizeof(ss));
-		    memcpy(gpsdata->used, used, sizeof(used));
+		    break;
+		case 'Y':
+		    i1 = atoi(sp+2);
+		    gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);
+		    gpsdata->satellites = i1;
+		    if (gpsdata->satellites) {
+			int j, i3, i4, i5;
+			int PRN[MAXCHANNELS];
+			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
+			int ss[MAXCHANNELS], used[MAXCHANNELS];
+
+			for (j = 0; j < gpsdata->satellites; j++) {
+			    PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
+			}
+			for (j = 0; j < gpsdata->satellites; j++) {
+			    sp = strchr(sp, ':') + 1;
+			    sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
+			    PRN[j] = i1;
+			    elevation[j] = i2; azimuth[j] = i3;
+			    ss[j] = i4; used[j] = i5;
+			}
+			/*
+			 * This won't catch the case where all values are identical
+			 * but rearranged.  We can live with that.
+			 */
+			gpsdata->satellite_stamp.changed |= \
+			    memcmp(gpsdata->PRN, PRN, sizeof(PRN)) ||
+			    memcmp(gpsdata->elevation, elevation, sizeof(elevation)) ||
+			    memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
+			    memcmp(gpsdata->ss, ss, sizeof(ss)) ||
+			    memcmp(gpsdata->used, used, sizeof(used));
+			memcpy(gpsdata->PRN, PRN, sizeof(PRN));
+			memcpy(gpsdata->elevation, elevation, sizeof(elevation));
+			memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
+			memcpy(gpsdata->ss, ss, sizeof(ss));
+			memcpy(gpsdata->used, used, sizeof(used));
+		    }
+		    REFRESH(gpsdata->satellite_stamp);
+		    break;
+		case 'Z':
+		    sscanf(sp, "Z=%d", &gpsdata->profiling);
+		    break;
+		case '$':
+		    sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
+			   gpsdata->tag,
+			   &gpsdata->sentence_length,
+			   &gpsdata->gps_time, 
+			   &gpsdata->d_xmit_time, 
+			   &gpsdata->d_recv_time, 
+			   &gpsdata->d_decode_time, 
+			   &gpsdata->poll_time, 
+			   &gpsdata->emit_time);
+		    break;
 		}
-		REFRESH(gpsdata->satellite_stamp);
-		break;
-	    case 'Z':
-		sscanf(sp, "Z=%d", &gpsdata->profiling);
-		break;
-	    case '$':
-		sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
-		       gpsdata->tag,
-		       &gpsdata->sentence_length,
-		       &gpsdata->gps_time, 
-		       &gpsdata->d_xmit_time, 
-		       &gpsdata->d_recv_time, 
-		       &gpsdata->d_decode_time, 
-		       &gpsdata->poll_time, 
-		       &gpsdata->emit_time);
-		break;
 	    }
 	}
-    }
-
-    if (gpsdata->raw_hook)
-	gpsdata->raw_hook(gpsdata, buf);
-
-    return gpsdata->online_stamp.changed
+	changed |=
+	    gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
 	|| gpsdata->climb_stamp.changed 
@@ -224,6 +222,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	|| gpsdata->epe_quality_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 
 	;
+    }
+
+    if (gpsdata->raw_hook)
+	gpsdata->raw_hook(gpsdata, buf);
+
+    return changed;
 }
 
 /*
