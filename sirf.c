@@ -450,12 +450,10 @@ static void decode_sirf(struct gps_session_t *session,
 	break;
 
     case 0x09:		/* CPU Throughput */
-#ifdef __UNUSED__
 	gpsd_report(4, 
 		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
 		    (float)getw(1)/186, (float)getw(3)/186, 
 		    (float)getw(5)/186, getw(7));
-#endif /* UNUSED */
     	break;
 
     case 0x06:		/* Software Version String */
@@ -486,6 +484,10 @@ static void decode_sirf(struct gps_session_t *session,
     	break;
 
     case 0x0d:		/* Visible List */
+	break;
+
+    case 0x12:		/* OK To Send */
+	gpsd_report(4, "OTS 0x12: send indicator = %d\n",getb(1));
 	break;
 
     case 0x1b:		/* DGPS status (undocumented) */
@@ -568,6 +570,16 @@ static void decode_sirf(struct gps_session_t *session,
 	break;
 
     case 0x32:		/* SBAS corrections */
+	break;
+
+    case 0xff:		/* Debug messages */
+	buf2[0] = '\0';
+	for (i = 1; i < len; i++)
+	    if (isprint(buf[i]))
+		sprintf(buf2+strlen(buf2), "%c", buf[i]);
+	    else
+		sprintf(buf2+strlen(buf2), "\\x%02x", buf[i]);
+	gpsd_report(4, "DD  0xff: %s\n", buf2);
 	break;
 
     default:
