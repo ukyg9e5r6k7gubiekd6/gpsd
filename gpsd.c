@@ -539,7 +539,7 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 	    } else if (PREFIX("$GPGSA", sp)) {
 		mask |= GPGSA;
 	    } else if (PREFIX("$GPGSV", sp)) {
-		if (nmea_sane_satellites(ud))
+		if (ud->part == ud->await && nmea_sane_satellites(ud))
 		    mask |= GPGSV;
 	    } else if (PREFIX("$PGRME", sp)) {
 		mask |= PGRME;
