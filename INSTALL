@@ -1,3 +1,15 @@
+Start by making sure you can get data from your GPS, otherwise the later
+steps will be very frustrating.  In this command
+
+      stty -F /dev/ttyXXX ispeed 4800; cat </dev/ttyUSB0
+
+replace ttyXXX with the filename of the port.  This will probably be
+either /dev/ttyUSB0 or /dev/ttyS0.  When you run this command, you
+should see text lines come to stdout (possibly after a short initial
+burst of bnary garbage).  If you don't see this, you may have OS-level
+problems with your serial support, but more likely have the wrong
+device.  Look again.
+
 Run ./configure (or sh configure if the script does not have execute
 permission).
 
@@ -13,15 +25,15 @@ directory or to the system-wide X app-defaults directory.
 The "right" thing to do is to start gpsd on a serial or USB port that
 has the GPS connected to it.
 
-Then start gps and have it connect to gpsd via a socket. Give it a device
-name like "localhost:2947", which means: connect to the host localhost using
-port 2947.
+Then start gps and have it connect to gpsd via a socket.  Calling it with
+no arguments will do the right thing if you have gpsd running on the
+default port.
 
 You can also telnet to this port for testing. When doing that, type an 'R'
 followed by <cr>. This should display the RAW nmea sentences the deamon
 receives from the gps.
 
-You can (but please don't) connect gps (the program) directly to a serial
+You can (but please don't) connect the gps program directly to a serial
 port and a GPS (the device).   This mode won't do DGPS nor handle timeouts.
 
 
