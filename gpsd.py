@@ -198,19 +198,11 @@ class NMEA:
         else:
             return self.logger(0, "Not NMEA\n")
 
-    def handler(self, fd, raw_hook):
-        linebuf = ""
-        try:
-            while True:
-                linebuf += os.read(fd, 1)
-                if linebuf.find("\r\n") > -1:
-                    self.handle_line(linebuf[:-2])
-                    if raw_hook:
-                        raw_hook(linebuf)
-                    break
-        except OSError:
-            print "Line buffer on error : " + `linebuf`
-            pass
+    def handler(self, fp, raw_hook):
+        linebuf = fp.readline()
+        self.handle_line(linebuf[:-2])
+        if raw_hook:
+            raw_hook(linebuf)
 
 class gpsd(gps.gpsdata):
     "Device interface to a GPS."
@@ -229,7 +221,7 @@ class gpsd(gps.gpsdata):
             self.wrap = wrapup
     def __init__(self, device="/dev/gps", bps=4800,
                  devtype='n', dgps=None, logger=None):
-        self.ttyfd = -1
+        self.ttyfp = None
         self.device = device
         self.bps = bps
         self.drivers = {
@@ -259,9 +251,9 @@ class gpsd(gps.gpsdata):
     close = __del__
 
     def activate(self):
-        self.ttyfd = os.open(self.device, os.O_RDWR);  
-	self.normal = termios.tcgetattr(self.ttyfd)
-        self.raw = termios.tcgetattr(self.ttyfd)
+        self.ttyfp = open(self.device, "rw");  
+	self.normal = termios.tcgetattr(self.ttyfp.fileno())
+        self.raw = termios.tcgetattr(self.ttyfp.fileno())
         self.raw[0] = 0						# iflag
         self.raw[1] = termios.ONLCR				# oflag
         self.raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
@@ -269,12 +261,12 @@ class gpsd(gps.gpsdata):
         self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
         self.raw[3] = 0						# lflag
         self.raw[4] = self.raw[5] = eval("termios.B" + `self.bps`)
-        termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
+        termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.raw)
 	self.online = True;
 
     def deactivate(self):
         if hasattr(self, 'normal'):
-            termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.normal)
+            termios.tcsetattr(self.ttyfp.fileno(), termios.TCSANOW, self.normal)
         self.online = False;
         self.mode = gps.MODE_NO_FIX;
         self.status = gps.STATUS_NO_FIX;
@@ -283,9 +275,9 @@ class gpsd(gps.gpsdata):
         self.raw_hook = hook
 
     def is_input_waiting(self):
-        if self.ttyfd < 0:
+        if self.ttyfp == None:
             return -1
-        st = fcntl.ioctl(self.ttyfd, termios.FIONREAD, " "*struct.calcsize('i'))
+        st = fcntl.ioctl(self.ttyfp.fileno(), termios.FIONREAD, " "*struct.calcsize('i'))
         if st == -1:
             return -1
         st = struct.unpack('i', st)[0]
@@ -293,7 +285,7 @@ class gpsd(gps.gpsdata):
 
     def poll(self):
         if self.dsock > -1:
-            os.write(self.ttyfd, session.dsock.recv(1024))
+            self.ttyfp.write(session.dsock.recv(1024))
         waiting = self.is_input_waiting()
         if waiting < 0:
             return waiting
@@ -307,7 +299,7 @@ class gpsd(gps.gpsdata):
         else:
             self.online = True
             self.online_stamp.refresh()
-            self.devtype.parser.handler(self.ttyfd, self.raw_hook)
+            self.devtype.parser.handler(self.ttyfp, self.raw_hook)
 
             # count the good fixes
             if self.status > gps.STATUS_NO_FIX: 
