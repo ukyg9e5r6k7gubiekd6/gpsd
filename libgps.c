@@ -174,9 +174,11 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		sscanf(sp, "Z=%d", &gpsdata->profiling);
 		break;
 	    case '$':
-		sscanf(sp, "$=%s %d %lf %lf %lf %lf", 
+		sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
 		       gpsdata->tag,
 		       &gpsdata->sentence_length,
+		       &gpsdata->gps_time, 
+		       &gpsdata->d_xmit_time, 
 		       &gpsdata->d_recv_time, 
 		       &gpsdata->d_decode_time, 
 		       &gpsdata->poll_time, 
@@ -226,8 +228,8 @@ int gps_poll(struct gps_data_t *gpsdata)
     {
 	struct timeval decoded;
 	gettimeofday(&decoded, NULL);
-	gpsdata->c_decode_time = TIME2DOUBLE(received) - gpsdata->d_recv_time;
-	gpsdata->c_recv_time = TIME2DOUBLE(decoded) - gpsdata->d_recv_time;
+	gpsdata->c_decode_time = TIME2DOUBLE(received) - gpsdata->gps_time;
+	gpsdata->c_recv_time = TIME2DOUBLE(decoded) - gpsdata->gps_time;
     }
 #endif /* PROFILING */
     return n;

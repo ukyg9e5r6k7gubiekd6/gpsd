@@ -72,7 +72,7 @@ class rawplot:
     def formatter(self, session, fp):
         fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
               % (session.length,
-                 session.rs232, 
+                 session.d_xmit_time, 
                  session.d_recv_time,
                  session.d_decode_time,
                  session.poll_time,
@@ -92,8 +92,8 @@ plot \
      "%s" using 0:6 title "E2 = Daemon encode time" with impulses, \
      "%s" using 0:5 title "W  =     Poll wait time" with impulses, \
      "%s" using 0:4 title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:3 title "E1 =        GPS latency" with impulses, \
-     "%s" using 0:2 title "T1 =         RS232 time" with impulses
+     "%s" using 0:3 title "T1 =         RS232 time" with impulses, \
+     "%s" using 0:2 title "E1 =        GPS latency" with impulses
 '''
         return fmt % (title,
                       session.baudrate, session.stopbits, session.cycle,
@@ -111,16 +111,16 @@ class splitplot:
         fp.write("#")
         for s in splitplot.sentences:
             fp.write("%8s\t" % s)
-        for hn in ("E1", "D1", "W", "E2", "T2", "D2"):
+        for hn in ("T1", "D1", "W", "E2", "T2", "D2"):
             fp.write("%8s\t" % hn)
         fp.write("tag\n# ")
-        for s in splitplot.sentences + ("E1", "D1", "W", "E2", "T2", "D2"):
+        for s in splitplot.sentences + ("T1", "D1", "W", "E2", "T2", "D2"):
             fp.write("---------\t")
         fp.write("--------\n")
     def formatter(self, session, fp):
         for s in splitplot.sentences:
             if s == session.tag:
-                fp.write("%2.6f\t"% session.rs232)
+                fp.write("%2.6f\t"% session.d_xmit_time)
                 self.found[s] = True
             else:
                 fp.write("-       \t")
@@ -144,7 +144,7 @@ plot \\
      "%s" using 0:%d title "E2 = Daemon encode time" with impulses, \
      "%s" using 0:%d title "W  = Poll wait time" with impulses, \
      "%s" using 0:%d title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:%d title "E1 = GPS encode time" with impulses, \
+     "%s" using 0:%d title "T1 = RS3232 time" with impulses, \
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
@@ -230,8 +230,6 @@ if __name__ == '__main__':
             # due to RS232 buffering effects. Ignore them.
             if session.c_decode_time > 3:
                 continue
-            # Compute RS232 time
-            session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
             if plotter.formatter(session, out):
                 await -= 1
         baton.end()

@@ -35,9 +35,9 @@ Group: Development/Libraries
 Requires: gpsd
 
 %description -n gpsd-devel
-This package provides C libraries and Python modules that manage
-access to a GPS for applications.  You will need to have gpsd installed
-for it to work.
+This package provides C header files for the gpsd shared libraries
+that manage access to a GPS for applications; also Python modules.
+You will need to have gpsd installed for it to work.
 
 %prep
 %setup -q

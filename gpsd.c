@@ -386,10 +386,11 @@ static int handle_request(int fd, char *buf, int buflen)
     if (ud->profiling && icd) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	sprintf(phrase, ",$=%s %d %f %f %f %f %lf",
+	sprintf(phrase, ",$=%s %.4d %.4f %.4f %.4f %.4f %.4f %.4lf",
 		ud->tag,
 		ud->sentence_length,
 		ud->gps_time,
+		ud->d_xmit_time - ud->gps_time,
 		ud->d_recv_time - ud->gps_time,
 		ud->d_decode_time - ud->gps_time,
 		session->poll_times[fd] - ud->gps_time,

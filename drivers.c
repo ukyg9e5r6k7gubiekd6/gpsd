@@ -19,6 +19,15 @@ static void nmea_handle_input(struct gps_session_t *session)
     while (offset < BUFSIZE) {
 	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
 	    return;
+#ifdef PROFILING
+	if (offset == 0) {
+	    struct timeval tv;
+	    gettimeofday(&tv, NULL);
+	    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv);
+	    /* add 1 character time for the first to get here */
+	    session->gNMEAdata.d_xmit_time += (8.0+session->gNMEAdata.stopbits)/session->gNMEAdata.baudrate;
+	}
+#endif /* PROFILING */
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {

@@ -265,9 +265,10 @@ class gps(gpsdata):
 	    elif cmd in ('Z', 'z'):
               self.profiling = (data[0] == '1')
             elif cmd == '$':
-                  (self.tag, length, gps_time, recv_time, decode_time, poll_time, emit_time) = data.split()
+                  (self.tag, length, gps_time, xmit_time, recv_time, decode_time, poll_time, emit_time) = data.split()
                   self.length = int(length)
                   self.gps_time = float(gps_time)
+                  self.d_xmit_time = float(xmit_time)
                   self.d_recv_time = float(recv_time)
                   self.d_decode_time = float(decode_time)
                   self.poll_time = float(poll_time)
