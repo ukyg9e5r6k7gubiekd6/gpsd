@@ -1,13 +1,14 @@
 # Makefile.in
 # $Modified: Thu Jan 22 11:55:32 1998 by brook $
 
-INSTALL = @INSTALL@
-mkinstalldirs = mkinstalldirs
-exec_prefix = @exec_prefix@
+srcdir = @srcdir@
 prefix = @prefix@
+exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 
+INSTALL = @INSTALL@
+mkinstalldirs = ${srcdir}/mkinstalldirs
 ## The C compiler
 
 # What we use to compile C files.
