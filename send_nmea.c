@@ -74,6 +74,7 @@ void gps_init(struct gpsd_t *session, int timeout, char devicetype, char *dgpsse
 
     INIT(session->gNMEAdata.latlon_stamp, now, timeout);
     INIT(session->gNMEAdata.altitude_stamp, now, timeout);
+    INIT(session->gNMEAdata.track_stamp, now, timeout);
     INIT(session->gNMEAdata.speed_stamp, now, timeout);
     INIT(session->gNMEAdata.status_stamp, now, timeout);
     INIT(session->gNMEAdata.mode_stamp, now, timeout);
