@@ -43,11 +43,13 @@ Python extension built around libgps.a.
 
 * Things not to do:
 
-** Crank the update rate up past 1 per second
+** Try to crank the update rate up past 1 per second
 
-At 50km/h (31mi/h) that's only 13.8 meters change in position between updates.
-Faster refresh might make sense for aviation applications, but not on foot
-or in a car.
+NMEA doesn't give us control of the update rate, and SiRF chips don't
+seem to be able to set cycle times below once per second even in
+binary mode.  Anyway at 50km/h (31mi/h) that's only 13.8 meters change
+in position between updates.  Faster refresh might make sense for
+aviation applications, but not on foot or in a car.
 
 ** Try to autodetect USB devices
 
