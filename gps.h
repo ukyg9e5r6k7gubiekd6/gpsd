@@ -122,7 +122,6 @@ struct gps_data_t {
     char	*gps_id;	/* only valid if non-null. */
     unsigned int baudrate, stopbits;	/* RS232 link paramters */
     unsigned int driver_mode;	/* whether driver is in native mode or not */
-    struct life_t driver_mode_stamp;
     
     /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */

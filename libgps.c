@@ -56,7 +56,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     char *ns, *sp, *tp;
     double d1, d2, d3;
     int i1, i2, changed = 0;
-    unsigned int u1;
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (!strncmp(ns, "GPSD", 4)) {
@@ -100,10 +99,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->mode = atoi(sp+2);
 		    break;
 		case 'N':
-		    u1 = atoi(sp+2);
-		    gpsdata->driver_mode_stamp.changed = (gpsdata->driver_mode != u1);
-		    gpsdata->driver_mode = u1;
-		    REFRESH(gpsdata->driver_mode_stamp);
+		    gpsdata->driver_mode = atoi(sp+2);
 		    break;
 		case 'P':
 		    sscanf(sp, "P=%lf %lf", &d1, &d2);
