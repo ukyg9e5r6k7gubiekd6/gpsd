@@ -332,14 +332,16 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	case 'O':
 	    /*
 	     * Presently we don't know how to derive time error,
-	     * trackerr, speederr, or climberr, though SiRF chips
-	     * do report them.
+	     * trackerr, speederr, or climberr.  Field reports match
+	     * the theoretical prediction that expected time error
+	     * should be half the resolution of the GPS clock, so
+	     * we put that in as a constant pending getting it from
+	     * each driver.
 	     */
-	    if (have_fix(session) 
-			&& SEEN(ud->latlon_stamp)
-			&& SEEN(ud->track_stamp)
-		        && SEEN(ud->speed_stamp)) {
-		sprintf(phrase, ",O=%.2f ? %.4f %.4f",
+	    if (!have_fix(session))
+		strcpy(phrase, ",O=?");
+	    else {
+		sprintf(phrase, ",O=%.2f 0.005 %.4f %.4f",
 			ud->gps_time, ud->latitude, ud->longitude);
 		if (SEEN(session->gNMEAdata.altitude_stamp))
 		    sprintf(phrase+strlen(phrase), " %.2f",
@@ -355,11 +357,17 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    ud->vdop * UERE(session));
 		else
 		    strcat(phrase, "? ?");
-		sprintf(phrase+strlen(phrase),
-			"%.4f %.3f %.3f ? ? ?",
-			ud->track, ud->speed, ud->climb);
-	    } else
-		strcpy(phrase, ",O=?");
+		if (SEEN(ud->track_stamp) && SEEN(ud->speed_stamp))
+		    sprintf(phrase+strlen(phrase), "%.4f %.3f",
+			    ud->track, ud->speed);
+		else
+		    strcat(phrase, "? ?");
+		if (SEEN(session->gNMEAdata.climb_stamp))
+		    sprintf(phrase+strlen(phrase), " %.3f", ud->climb);
+		else
+		    strcat(phrase, "?");
+		strcpy(phrase, " ? ? ?");
+	    }
 	    break;
 	case 'P':
 	    if (have_fix(session) && SEEN(ud->latlon_stamp))
