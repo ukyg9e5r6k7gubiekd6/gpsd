@@ -2,7 +2,7 @@
 #
 # gpsd	This shell script starts and stops gpsd.
 #
-# chkconfig: 2345 90 40
+# chkconfig: 345 90 40
 # description: Gpsd manages access to a serial- or USB-connected GPS
 # processname: gpsd
 
@@ -15,7 +15,20 @@ prog="gpsd"
 start() {
 	# Start daemons.
 	echo -n "Starting $prog: "
-	daemon gpsd
+	# We don't use the daemon function here because of a known bug
+	# in initlog -- it spuriously returns a nonzero status when 
+	# starting daemons that fork themselves.  See
+	# http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=130629
+	# for discussion.  Fortunately:
+	#
+	# 1. gpsd startup can't fail, or at least not in the absence of
+	# much larger resource-exhaustion problems that would be very obvious.
+	#
+	# 2. We don't need all the logging crud that daemon/initlog sets
+	# up -- gpsd does its own syslog calls.
+	#
+	gpsd
+	success
 	RETVAL=$?
 	echo
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/gpsd

@@ -50,11 +50,13 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %post
 /sbin/ldconfig
 /sbin/chkconfig --add gpsd
-/sbin/chkconfig --levels 35 gpsd on
+/sbin/chkconfig gpsd on
+
+%preun
+/sbin/chkconfig --del gpsd
 
 %postun
 /sbin/ldconfig
-/sbin/chkconfig --del gpsd
 
 %files
 %defattr(-,root,root,-)
