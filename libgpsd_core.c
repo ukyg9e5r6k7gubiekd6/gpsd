@@ -39,7 +39,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     if (!session)
 	return NULL;
 
-    session->gpsd_device = "/dev/gps";
+    session->gpsd_device = DEFAULT_DEVICE_NAME;
     session->device_type = gpsd_drivers[0];
 #ifdef NON_NMEA_ENABLE
     {

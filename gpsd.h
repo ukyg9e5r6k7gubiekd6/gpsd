@@ -108,5 +108,7 @@ extern void gpsd_wrap(struct gps_session_t *session);
 /* caller must supply this */
 void gpsd_report(int d, const char *fmt, ...);
 
+#define DEFAULT_DEVICE_NAME	"/dev/gps"
+
 
 

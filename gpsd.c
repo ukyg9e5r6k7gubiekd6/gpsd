@@ -50,7 +50,6 @@
 #include "gpsd.h"
 
 #define QLEN			5
-#define DEFAULT_DEVICE_NAME	"/dev/gps"
 
 /* the default driver is NMEA */
 struct gps_session_t *session;
