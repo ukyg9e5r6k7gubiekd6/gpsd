@@ -339,6 +339,24 @@ Playing nice in the HAL world may require that we replace our hotplug
 script with launcher code that lives in the HAL daemon.  Does anyone else
 here care enough about HAL to own this issue?
 
+** Include NTP updating?
+
+Rob Jannsen writes:
+
+I include ntpshm.c, an example of how time syncing via ntp can be
+done.  The init function should be called sometime during startup, or
+at least when you know you can provide timestamps.  The put function
+is called with a timefix and puts the info in the shared memory
+segment for xntpd to read it.  xntpd.conf should contain some existing
+timesync configuration (e.g. via Internet) and you can add:
+
+server 127.127.28.0 minpoll 4 maxpoll 4
+fudge 127.127.28.0 refid GPS
+
+(don't make it the preferred clock yet :)
+It will read the info from gpsd every 16 seconds and "ntpq -p" should show the
+time difference when it is not very big.
+
 ** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the
