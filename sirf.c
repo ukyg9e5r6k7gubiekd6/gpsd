@@ -1,11 +1,3 @@
-/*
- * Copyright (C) 2003 Arnim Laeuger <arnim.laeuger@gmx.net>
- * Issued under GPL.  Originally part of an unpublished utility
- * called sirf_ctrl.  Contributed to gpsd by the author.
- *
- * Modified to not use stderr and so each function returns 0 on success,
- * nonzero on failure.  Alsso to use gpsd's own checksum and send code.
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
