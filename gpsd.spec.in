@@ -124,7 +124,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Fri Feb 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.12-1
 - Fixed core-dump bug in processing of the GLL variant that does not
   include an FAA Mode Indicator. When using the NMEA driver, gpsd now
   hunts for a baud rate rather than requiring a fixed one to be set.
