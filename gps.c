@@ -215,12 +215,11 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[6], XmNrightWidget, drawingArea_8);
     XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
 
-    XtSetArg(args[8], XmNx, 0);
-    XtSetArg(args[9], XmNleftAttachment, XmATTACH_FORM);
-    XtSetArg(args[10], XmNtopAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[11], XmNtopWidget, list_7);
-    XtSetArg(args[12], XmNheight, 12);
-    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 13);
+    XtSetArg(args[8], XmNleftAttachment, XmATTACH_FORM);
+    XtSetArg(args[9], XmNtopAttachment, XmATTACH_WIDGET);
+    XtSetArg(args[10], XmNtopWidget, list_7);
+    XtSetArg(args[11], XmNheight, 12);
+    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 12);
 
     /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
