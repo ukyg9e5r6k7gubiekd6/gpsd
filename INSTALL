@@ -10,8 +10,12 @@ burst of bnary garbage).  If you don't see this, you may have OS-level
 problems with your serial support, but more likely have the wrong
 device.  Look again.
 
+You will need to have either Motif or LessTif installed.  If you're on a 
+Linux system, you probably already have LessTif.  Source code is 
+available from <http://www.lesstif.org/>.
+
 Run ./configure (or sh configure if the script does not have execute
-permission).
+permission).  
 
 Check the Makefile.
 
