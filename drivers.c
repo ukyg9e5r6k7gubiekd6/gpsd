@@ -222,7 +222,7 @@ struct gps_type_t logfile =
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     0,				/* don't set a speed */
-    0,				/* should never time out */
+    -1,				/* should never time out */
 };
 
 struct gps_type_t *gpsd_drivers[5] = {&nmea, 
