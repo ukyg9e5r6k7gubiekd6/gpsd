@@ -209,10 +209,12 @@ int gps_poll(int fd, struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
+    int		n;
 
     /* the daemon makes sure that every read is NUL-terminated */
-    if (read(fd, buf, sizeof(buf)-1) <= 0)
+    if ((n = read(fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
+    buf[n] = '\0';
 
     return gps_unpack(buf, gpsdata);
 }
@@ -348,7 +350,6 @@ main(int argc, char *argv[])
 	    data_dump(&collect, time(NULL));
 	}
     }
-
 
     gps_close(fd);
 }

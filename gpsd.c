@@ -213,7 +213,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	strcpy(buf+len, "\n"); \
 	gpscli_report(3, buf+2); \
 	strcpy(buf+len, "\r\n"); \
-	write(fd, buf, strlen(buf) + 1); \
+	write(fd, buf, strlen(buf)); \
 	} while (0)
 
     sprintf(reply, "GPSD");
@@ -422,7 +422,7 @@ static int handle_request(int fd, char *buf, int buflen)
     strcat(reply, "\r\n");
 
     gpscli_report(3, "=> client(%d): %s", fd, reply);
-    sc = write(fd, reply, strlen(reply) + 1);
+    sc = write(fd, reply, strlen(reply));
     if (sc < 0) {
 	gpscli_report(3, "Response write to %d: %s\n", fd, strerror(errno));
 	FD_CLR(fd, &all_fds);
@@ -440,7 +440,7 @@ static void notify_watchers(char *sentence)
     for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, &watcher_fds)) {
 	    gpscli_report(3, "=> client(%d): %s\n", fd, sentence);
-	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
+	    if (write(fd, sentence, strlen(sentence)) < 0) {
 		gpscli_report(3, "Notification write to %d: %s\n", fd, strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
@@ -458,7 +458,7 @@ static void raw_hook(char *sentence)
 	/* copy raw NMEA sentences from GPS */
 	if (FD_ISSET(fd, &nmea_fds)) {
 	    gpscli_report(3, "=> client(%d): %s\n", fd, sentence);
-	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
+	    if (write(fd, sentence, strlen(sentence)) < 0) {
 		gpscli_report(3, "Raw write to %d: %s\n", fd, strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &nmea_fds);
