@@ -177,10 +177,10 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #ifdef PROFILING
 		if (!strcmp(sp, "Z+") || !strcmp(sp, "Z-"))
 		    break;
-		sscanf(sp, "Z=%ld:%ld:%d", 
-		       &gpsdata->seconds, 
-		       &gpsdata->usec,
-		       &gpsdata->sentence_length);
+		sscanf(sp, "Z=%lf:%d:%lf", 
+		       &gpsdata->recv_time, 
+		       &gpsdata->sentence_length,
+		       &gpsdata->emit_time);
 #endif /* PROFILING */
 		break;
 	    }

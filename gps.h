@@ -95,8 +95,7 @@ struct gps_data_t {
 
 #ifdef PROFILING
     /* profiling data */
-    time_t seconds;		/* associated with the last timestamp */
-    suseconds_t usec;		/* ditto */
+    double recv_time, emit_time;
     int sentence_length;	/* character count of associated sentence */
 #endif /* PROFILING */
 

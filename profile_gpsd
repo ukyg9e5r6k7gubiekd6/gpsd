@@ -8,11 +8,16 @@ if __name__ == '__main__':
 
     session.query("wZ+")
 
+    print "#GPS time          Received   Transmitted  Read"
+    print "-----------------  ---------  -----------  ----------"
     while True:
         session.poll()
-        gpstime = gps.isotime(session.utc)
-        daemontime = session.profile_time
-        print "%.6f %.6f %.6f" % (gpstime, daemontime, daemontime - gpstime)
+        gps_time = gps.isotime(session.utc)
+        recv_time = session.recv_time
+        emit_time = session.emit_time
+        print "%.6f  %2.6f  %2.6f      %2.6f" \
+              % (gps_time,
+                 (recv_time - gps_time) % 3600,
+                 emit_time - recv_time, time.time() - recv_time)
 
-    del session
 

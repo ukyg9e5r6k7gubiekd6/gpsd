@@ -247,9 +247,10 @@ class gps(gpsdata):
 	      self.satellite_stamp.refresh() 
 	    elif cmd in ('Z', 'z'):
               if data[1:] not in ("=1", "=0"):
-                  (sec, length) = data.split(":")
-                  self.profile_time = float(sec)
+                  (recv_time, length, emit_time) = data.split(":")
+                  self.recv_time = float(recv_time)
                   self.profile_length = int(length)
+                  self.emit_time = float(emit_time)
 	if self.raw_hook:
 	    self.raw_hook(buf);
 	return self.online_stamp.changed \

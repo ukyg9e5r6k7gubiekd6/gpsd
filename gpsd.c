@@ -210,8 +210,10 @@ static int handle_request(int fd, char *buf, int buflen)
 		if (profiling) {
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
-		    sprintf(phrase+strlen(phrase), ",Z=%ld.%ld:%d",
-			    tv.tv_sec, tv.tv_usec, sentence_length);
+		    sprintf(phrase+strlen(phrase), ",Z=%lf:%d:%ld.%ld",
+			    ud->recv_time,
+			    sentence_length,
+			    tv.tv_sec, tv.tv_usec); 
 		}
 #endif /* PROFILING */
 	    } else
@@ -636,6 +638,15 @@ int main(int argc, char *argv[])
 	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
 	}
+
+#ifdef PROFILING
+	{
+	    struct timeval tv;
+	    gettimeofday(&tv, NULL);
+	    session->gNMEAdata.recv_time = tv.tv_sec + tv.tv_usec / 1e6;
+	}
+#endif /* PROFILING */
+
 
 	/* this simplifies a later test */
 	if (session->dsock > -1)
