@@ -20,17 +20,15 @@ static void nmea_handle_input(struct gps_session_t *session)
 	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
 	    return;
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
-#ifdef PROFILING
-	    if (buf[offset] == '\n') {
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		session->gNMEAdata.d_recv_time = DTIME(tv);
-	    }
-#endif /* PROFILING */
 	    buf[offset] = '\0';
 	    if (strlen(buf)) {
 		gpsd_report(2, "<= GPS: %s\n", buf);
 		if (*buf == '$') {
+#ifdef PROFILING
+		    struct timeval tv;
+		    gettimeofday(&tv, NULL);
+		    session->gNMEAdata.d_recv_time = DTIME(tv);
+#endif /* PROFILING */
 		    if (nmea_parse(buf, &session->gNMEAdata) < 0)
 			gpsd_report(2, "unknown sentence: \"%s\"\n", buf);
 #ifdef PROFILING
