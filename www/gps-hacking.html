@@ -60,7 +60,7 @@ satellite.  This starts to be useful when the GPS can get accurate
 timings to three or more satellites; at that point, computing the
 UPS's exact position with respect to the satellites becomes a relatively
 simple if tedious exercise in spherical trigonometry (which,
-fortunately, the UPS's firmware does for you).</p>
+fortunately, the GPS's firmware does for you).</p>
 
 <p>That's the theory.  In practice, the system has important limits.
 Anything, natural or artificial, that messes with the signal timings
@@ -282,6 +282,24 @@ client connects to the daemon.</p>
 
 <h1 id='programming'>Programming With gpsd-2</h1>
 
+<p>If you have written a gpsd-aware application, here are some good
+functional reasons to migrate to 2.0:</p>
+
+<ol>
+<li>Your application can now query whether or not the GPS is online
+and get an authoritative answer.</li>
+
+<li>There is a new "watcher" mode.  It is like raw mode in that the
+GPS streams updates at you, but the updates are in GPSD format.</li>
+
+<li>The daemon now automatically tries to reconnect to the GPS once
+a second when it is offline but clients are connected.</li>
+</ol>
+
+<p>These changes mean that even if users casually unplug and reconnect a
+GPS, your application can notice the unplug and reconnect events, 
+and automatically starts getting data again a second after the reconnect.</p>
+
 <p>The gpsd package provides two ways for you to get data from a GPS.
 The low-level library, <a href="libgps.html">libgps.a</a>, talks
 directly to the GPS.  The higher-level interface, <a
@@ -302,7 +320,7 @@ perhaps on embedded systems or PDAs.</p>
 
 <p>Note that gpsd-2's command-line options have been changed and
 simplified.  If your gpsd-1.x-using application is starting up gpsd
-directly you may find you have to modify the invocation.
+directly you may find you have to modify the invocation.</p>
 
 <h1>Where to learn more</h1>
 
