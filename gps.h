@@ -101,6 +101,6 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 #define NL_NOSOCKOPT	-5	/* error SETSOCKOPT SO_REUSEADDR */
 #define NL_NOCONNECT	-6	/* can't connect to host */
 
-#define DEFAULT_GPSD_PORT	"2497"	/* IANA assignment */
+#define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
 
 /* gps.h ends here */
