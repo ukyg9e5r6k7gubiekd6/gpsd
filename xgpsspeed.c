@@ -33,7 +33,7 @@
 extern double rint();
 #endif
 
-struct session_t session;
+struct gpsd_t session;
 static char *device_name = NULL;
 
 static Widget toplevel, base;

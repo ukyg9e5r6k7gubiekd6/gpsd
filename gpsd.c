@@ -51,7 +51,7 @@
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
 /* the default driver is NMEA */
-struct session_t session;
+struct gpsd_t session;
 
 static int gps_timeout = GPS_TIMEOUT;
 static char *device_name = 0;

@@ -40,7 +40,7 @@ struct header {
     unsigned short csum;
 };
 
-static void analyze(struct session_t *session, struct header *, unsigned short *);
+static void analyze(struct gpsd_t *session, struct header *, unsigned short *);
 
 static unsigned short em_gps_checksum(unsigned short *w, int n)
 {
@@ -81,7 +81,7 @@ static int end_write(int fd, void *d, int len)
 #define end_write write
 #endif
 
-static void em_spew(struct session_t *session, int type, unsigned short *dat, int dlen)
+static void em_spew(struct gpsd_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
 
@@ -113,7 +113,7 @@ static long putlong(char *dm, int sign)
     return rad;
 }
 
-static void em_init(struct session_t *session)
+static void em_init(struct gpsd_t *session)
 {
     unsigned short data[22];
     time_t t;
@@ -150,7 +150,7 @@ static void em_init(struct session_t *session)
     }
 }
 
-static void send_rtcm(struct session_t *session, 
+static void send_rtcm(struct gpsd_t *session, 
 		      char *rtcmbuf, int rtcmbytes)
 {
     unsigned short data[34];
@@ -168,7 +168,7 @@ static void send_rtcm(struct session_t *session,
     em_spew(session, 1351, data, n+1);
 }
 
-static int em_send_rtcm(struct session_t *session,
+static int em_send_rtcm(struct gpsd_t *session,
 			char *rtcmbuf, int rtcmbytes)
 {
     int len;
@@ -183,7 +183,7 @@ static int em_send_rtcm(struct session_t *session,
 }
 
 
-static void do_eminit(struct session_t *session)
+static void do_eminit(struct gpsd_t *session)
 {
     /* Make sure these are zero before 1002 handler called */
     session->gNMEAdata.pdop = session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0;
@@ -212,7 +212,7 @@ static double degtodm(double a)
     return t;
 }
 
-static void handle1000(struct session_t *session, unsigned short *p)
+static void handle1000(struct gpsd_t *session, unsigned short *p)
 {
 #if 0
     gpscli_report(1, "date: %d %d %d  %d:%d:%d\n",
@@ -280,7 +280,7 @@ static void handle1000(struct session_t *session, unsigned short *p)
     session->gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 }
 
-static void handle1002(struct session_t *session, unsigned short *p)
+static void handle1002(struct gpsd_t *session, unsigned short *p)
 {
     int i, j;
 
@@ -310,7 +310,7 @@ static void handle1002(struct session_t *session, unsigned short *p)
     session->gNMEAdata.cmask |= C_ZCH;
 }
 
-static void handle1003(struct session_t *session, unsigned short *p)
+static void handle1003(struct gpsd_t *session, unsigned short *p)
 {
     int j;
 
@@ -339,7 +339,7 @@ static void handle1003(struct session_t *session, unsigned short *p)
     }
 }
 
-static void handle1005(struct session_t *session, unsigned short *p)
+static void handle1005(struct gpsd_t *session, unsigned short *p)
 {
   int i;
   int numcorrections = p[O(12)];
@@ -363,7 +363,7 @@ static void handle1005(struct session_t *session, unsigned short *p)
 #endif
 }
 
-static void analyze(struct session_t *session, 
+static void analyze(struct gpsd_t *session, 
 		    struct header *h, unsigned short *p)
 {
     unsigned char buf[BUFSIZE];
@@ -488,7 +488,7 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
 }
 
 
-static void em_eat(struct session_t *session, unsigned char c)
+static void em_eat(struct gpsd_t *session, unsigned char c)
 {
     static int state = EM_HUNT_FF;
     static struct header h;
@@ -559,7 +559,7 @@ static void em_eat(struct session_t *session, unsigned char c)
     }
 }
 
-static int handle_EMinput(struct session_t *session)
+static int handle_EMinput(struct gpsd_t *session)
 {
     unsigned char c;
 
@@ -569,7 +569,7 @@ static int handle_EMinput(struct session_t *session)
     return 0;
 }
 
-static void em_close(struct session_t *session)
+static void em_close(struct gpsd_t *session)
 {
     session->device_type = &earthmate_a;
 }

@@ -39,7 +39,7 @@ extern void draw_graphics();
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
-extern struct session_t session;
+extern struct gpsd_t session;
 
 static Widget draww;
 static GC drawGC;

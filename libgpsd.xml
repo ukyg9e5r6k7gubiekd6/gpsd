@@ -19,12 +19,12 @@
 
 #include &lt;gpsd.h&gt;
 
-struct session_t session;
+struct gpsd_t session;
 
 </funcsynopsisinfo>
 <funcprototype>
 <funcdef>void <function>gps_init</function></funcdef>
-    <paramdef>struct session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
     <paramdef>char * <parameter>device</parameter></paramdef>
     <paramdef>int <parameter>timeout</parameter></paramdef>
     <paramdef>char <parameter>devtype</parameter></paramdef>
@@ -33,19 +33,19 @@ struct session_t session;
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_activate</function></funcdef>
-    <paramdef>struct session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_deactivate</function></funcdef>
-    <paramdef>struct session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_poll</function></funcdef>
-    <paramdef>struct session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_wrap</function></funcdef>
-    <paramdef>struct session_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gpsd_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 
 <funcprototype>

@@ -23,7 +23,7 @@
  * the funky non-NMEA sentences that tell us about extensions.
  */
 
-static void process_exception(struct session_t *session, char *sentence)
+static void process_exception(struct gpsd_t *session, char *sentence)
 {
     if (!strncmp("ASTRAL", sentence, 6) && isatty(session->fdout)) {
 	write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
@@ -47,7 +47,7 @@ static void process_exception(struct session_t *session, char *sentence)
  *
  **************************************************************************/
 
-void gps_NMEA_handle_message(struct session_t *session, char *sentence)
+void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
     gpscli_report(2, "<= GPS: %s\n", sentence);
@@ -69,7 +69,7 @@ void gps_NMEA_handle_message(struct session_t *session, char *sentence)
 	   session->gNMEAdata.utc);
 }
 
-static int nmea_handle_input(struct session_t *session)
+static int nmea_handle_input(struct gpsd_t *session)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
@@ -98,7 +98,7 @@ static int nmea_handle_input(struct session_t *session)
     return 1;
 }
 
-static int nmea_write_rctm(struct session_t *session, char *buf, int rtcmbytes)
+static int nmea_write_rctm(struct gpsd_t *session, char *buf, int rtcmbytes)
 {
     return write(session->fdout, buf, rtcmbytes);
 }
@@ -127,7 +127,7 @@ struct gps_type_t nmea =
  * Maybe we could use the logging-interval command?
  */
 
-void tripmate_initializer(struct session_t *session)
+void tripmate_initializer(struct gpsd_t *session)
 {
     char buf[82];
     time_t t;

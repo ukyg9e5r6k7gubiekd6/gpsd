@@ -28,7 +28,7 @@ static struct gps_type_t *set_device_type(char what)
     return *dp;
 }
 
-void gps_init(struct session_t *session, 
+void gps_init(struct gpsd_t *session, 
 	      char *device, int timeout,
  	      char devicetype,
 	      char *dgpsserver,
@@ -83,7 +83,7 @@ void gps_init(struct session_t *session,
     session->raw_hook = raw_hook;
 }
 
-void gps_deactivate(struct session_t *session)
+void gps_deactivate(struct gpsd_t *session)
 /* temporarily release the GPS device */
 {
     session->fdin = -1;
@@ -97,7 +97,7 @@ void gps_deactivate(struct session_t *session)
     session->gNMEAdata.status = 0;
 }
 
-int gps_activate(struct session_t *session)
+int gps_activate(struct gpsd_t *session)
 /* acquire a connection to the GPS device */
 {
     int input;
@@ -121,7 +121,7 @@ static int is_input_waiting(int fd)
     return count;
 }
 
-void gps_poll(struct session_t *session)
+void gps_poll(struct gpsd_t *session)
 /* update the stuff in the scoreboard structure */
 {
     /* accept a DGPS correction if one is pending */
@@ -168,7 +168,7 @@ void gps_poll(struct session_t *session)
     }
 }
 
-void gps_wrap(struct session_t *session)
+void gps_wrap(struct gpsd_t *session)
 /* end-of-session wrapup */
 {
     gps_deactivate(session);

@@ -102,20 +102,20 @@ struct longlat_t
     char lond;
 };
 
-struct session_t;
+struct gpsd_t;
 
 struct gps_type_t
 /* GPS method table, describes how to talk to a particular GPS type */
 {
     char typekey, *typename;
-    void (*initializer)(struct session_t *session);
-    int (*handle_input)(struct session_t *session);
-    int (*rctm_writer)(struct session_t *session, char *rtcmbuf, int rtcmbytes);
-    void (*wrapup)(struct session_t *session);
+    void (*initializer)(struct gpsd_t *session);
+    int (*handle_input)(struct gpsd_t *session);
+    int (*rctm_writer)(struct gpsd_t *session, char *rtcmbuf, int rtcmbytes);
+    void (*wrapup)(struct gpsd_t *session);
     int baudrate;
 };
 
-struct session_t
+struct gpsd_t
 /* session object, encapsulates all global state */
 {
     struct gps_type_t *device_type;
@@ -140,7 +140,7 @@ extern struct gps_type_t logfile;
 
 /* GPS library internal prototypes */
 extern int gps_process_NMEA_message(char *sentence, struct OUTDATA *outdata);
-extern void gps_NMEA_handle_message(struct session_t *session, char *sentence);
+extern void gps_NMEA_handle_message(struct gpsd_t *session, char *sentence);
 extern void gps_add_checksum(char *sentence);
 extern short gps_checksum(char *sentence);
 
@@ -152,14 +152,14 @@ int netlib_connectTCP(char *host, char *service);
 int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* High-level interface */
-void gps_init(struct session_t *session, 
+void gps_init(struct gpsd_t *session, 
 	      char *device, int timeout, char devtype,
 	      char *dgpsserver,
 	      void (*raw_hook)(char *buf));
-int gps_activate(struct session_t *session);
-void gps_deactivate(struct session_t *session);
-void gps_poll(struct session_t *session);
-void gps_wrap(struct session_t *session);
+int gps_activate(struct gpsd_t *session);
+void gps_deactivate(struct gpsd_t *session);
+void gps_poll(struct gpsd_t *session);
+void gps_wrap(struct gpsd_t *session);
 
 /* caller must supply these */
 void gpscli_errexit(char *s);

@@ -49,7 +49,7 @@
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics();
 
-struct session_t session;
+struct gpsd_t session;
 
 void update_display(char *message);
 
