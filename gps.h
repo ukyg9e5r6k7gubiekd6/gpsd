@@ -118,7 +118,8 @@ struct gps_data_t {
     double emit_time;		/* emission time (-> E2) */
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
-    unsigned int cycle;			/* refresh cycle time in seconds */
+    double future;		/* future expansion (avoid library skew) */
+    unsigned int cycle;		/* refresh cycle time in seconds */
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
