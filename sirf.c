@@ -55,6 +55,7 @@ static u_int16_t sirf_write(int fd, u_int8_t *msg) {
        sprintf(buf+strlen(buf), " %02x", msg[i]);
    gpsd_report(4, "Writing SiRF control type %02x:%s\n", msg[4], buf);
    ok = write(fd, msg, len+8) == len+8;
+   tcdrain(fd);
    return(ok);
 }
 

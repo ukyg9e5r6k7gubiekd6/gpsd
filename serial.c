@@ -71,9 +71,6 @@ int gpsd_set_speed(struct gps_session_t *session,
     if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
 	return 0;
 
-    if (session->packet_type == SIRF_PACKET)
-	gpsd_switch_driver(session, "SiRF-II binary");
-
     session->gNMEAdata.stopbits = stopbits;
     session->gNMEAdata.baudrate = speed;
 
@@ -99,10 +96,11 @@ int gpsd_open(struct gps_session_t *session)
 
 	for (dp = gpsd_drivers; *dp; dp++)
 	    if ((*dp)->probe && (*dp)->probe(session)) {
-		gpsd_report(3, "Probe found %s driver...\n", (*dp)->typename);
+		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
 		return session->gNMEAdata.gps_fd;
 	    }
+	gpsd_report(3, "no probe matched...\n");
 #endif /* NON_NMEA_ENABLE */
 
 	/* Save original terminal parameters */

@@ -96,10 +96,11 @@ int gpsd_activate(struct gps_session_t *session)
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
+	if (session->packet_type == SIRF_PACKET)
+	    gpsd_switch_driver(session, "SiRF-II binary");
+	else
+	    gpsd_switch_driver(session, "Generic NMEA");
 
-	/* if there is an initializer and no trigger string, invoke it */
-	if (session->device_type->initializer && !session->device_type->trigger)
-	    session->device_type->initializer(session);
 	return session->gNMEAdata.gps_fd;
     }
 }

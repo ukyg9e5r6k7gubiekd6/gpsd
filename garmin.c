@@ -597,11 +597,8 @@ static int garmin_probe(struct gps_session_t *session)
     FILE *fp;
     int i;
 
-    gpsd_report(1, "garmin_probe\n");
-
     // check for USB serial drivers
     // very Linux specific
-
     if ((fp = fopen( "/proc/tty/driver/usbserial", "r")) == NULL) {
 	gpsd_report(2, "No USB serial drivers found.\n");
 	return 0;
@@ -619,7 +616,7 @@ static int garmin_probe(struct gps_session_t *session)
     }
     (void) fclose(fp);
     if ( ! ok ) {
-	gpsd_report(2, "garmin_gps not active.\n");
+	gpsd_report(5, "garmin_gps not active.\n");
 	return 0;
     }
 
