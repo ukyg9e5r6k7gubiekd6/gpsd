@@ -35,9 +35,6 @@ struct gps_data_t *gps_open(char *host, char *port)
     INIT(gpsdata->mode_stamp, now);
     INIT(gpsdata->fix_quality_stamp, now);
     INIT(gpsdata->satellite_stamp, now);
-#ifdef PROCESS_PRWIZCH
-    INIT(gpsdata>signal_quality_stamp, now);
-#endif /* PROCESS_PRWIZCH */
     gpsdata->mode = MODE_NO_FIX;
 
     return gpsdata;
@@ -202,9 +199,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	|| gpsdata->status_stamp.changed 
 	|| gpsdata->mode_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 
-#ifdef PROCESS_PRWIZCH
-	|| gpsdata->signal_quality_stamp.changed
-#endif /* PROCESS_PRWIZCH */
 	;
 }
 

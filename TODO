@@ -6,14 +6,6 @@ Would somebody please test the device types that aren't straight NMEA?
 Remco has suggested that maybe it's time to forget about this ancient
 hardware.  Perhaps he's right.  
 
-* Should PRWIZCH support drop out entirely?
-
-Along similar lines, at the moment I have the PRWIZCH handling
-conditioned out.  I'd like to drop it entirely -- the information it
-gives is redundant with the SNRs in GPGSV, and the Zodiac chipset
-reported GSVs.  Does anyone know any good reason not to just drop this
-code?
-
 * The strange math problem in gpsprobe 
 
 I have a Python script I'd like to ship with 2.0, called gsprobe.  It

@@ -522,31 +522,6 @@ static void processPMGNST(char *sentence, struct gps_data_t *out)
     }
 }
 
-/* ----------------------------------------------------------------------- */
-
-#ifdef PROCESS_PRWIZCH
-static void processPRWIZCH(char *sentence, struct gps_data_t *out)
-/*
- * Supported by the Zodiac/Rockwell chipset.
- * Descriptions of this sentence are hard to find, but here is one:
- *
- * $PRWIZCH ,00,0,03,7,31,7,15,7,19,7,01,7,22,2,27,2,13,0,11,7,08,0,02,0*4C
- *	SATELLITE IDENTIFICATION NUMBER - 0-31
- *	SIGNAL QUALITY - 0 low quality - 7 high quality
- *	Repeats 12 times
- */
-{
-    int i, changed = 0;
-
-    for (i = 0; i < 12; i++) {
-	changed |= update_field_i(sentence, 2 * i + 1, &out->Zs[i]);
-	changed |= update_field_i(sentence, 2 * i + 2, &out->Zv[i]);
-    }
-    out->signal_quality_stamp.changed = changed;
-    REFRESH(out->signal_quality_stamp);
-}
-#endif /* PROCESS_PRWIZCH */
-
 /**************************************************************************
  *
  * Entry points begin here
@@ -594,11 +569,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	} else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
 	    processGPGSV(sentence, outdata);
 	} else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
-#ifdef PROCESS_PRWIZCH
-	    processPRWIZCH(sentence, outdata);
-#else
 	    /* do nothing */;
-#endif /* PROCESS_PRWIZCH */
 	} else {
 	    return -1;
 	}

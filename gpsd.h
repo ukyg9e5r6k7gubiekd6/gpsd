@@ -40,6 +40,7 @@ struct gps_session_t
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
 
+#ifdef EARTHMATE_ENABLE
     /* private housekeeping stuff for the Earthmate driver */
     double mag_var;		/* Magnetic variation in degrees */  
     int year;
@@ -48,6 +49,17 @@ struct gps_session_t
     int hours;
     int minutes;
     int seconds;
+    /*
+     * Zodiac chipset channel status from PRWIZCH.
+     * This is actually redundant with the SNRs in GPGSV,
+     * and all known variants of the Zodiac chipsets issue GPGSV.
+     * The only reason we stash it here is so that raw-mode
+     * translation of Zodiac binary protocol will send it
+     * up to the client.
+     */
+    int Zs[MAXCHANNELS];	/* satellite PRNs */
+    int Zv[MAXCHANNELS];	/* signal values (0-7) */
+#endif /* EARTHMATE_ENABLE */
 };
 
 /* some multipliers for interpreting GPS output */

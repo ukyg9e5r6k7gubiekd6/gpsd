@@ -283,17 +283,13 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 {
     int i, j;
 
-#ifdef PROCESS_PRWIZCH
     for (j = 0; j < MAXCHANNELS; j++) {
 	session->gNMEAdata.used[j] = 0;
     }
-#endif /* PROCESS_PRWIZCH */
     session->gNMEAdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
-#ifdef PROCESS_PRWIZCH
-	session->gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
-	session->gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
-#endif /* PROCESS_PRWIZCH */
+	session->Zs[i] = p[O(16 + (3 * i))];
+	session->Zv[i] = (p[O(15 + (3 * i))] & 0xf);
 #if 0
 	gpscli_report(1, "Sat%02d:", i);
 	gpscli_report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
@@ -312,9 +308,6 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	    break;
 	}
     }
-#ifdef PROCESS_PRWIZCH
-    REFRESH(session->gNMEAdata.signal_quality_stamp);
-#endif /* PROCESS_PRWIZCH */
     REFRESH(session->gNMEAdata.satellite_stamp);
     /* this is slightly wrong, we're not updating hdop/pdop/vdop here */
     REFRESH(session->gNMEAdata.fix_quality_stamp);
@@ -434,18 +427,16 @@ static void analyze(struct gps_session_t *session,
 		    session->gNMEAdata.vdop);
 	    nmea_add_checksum(bufp2 + 1);
 	    bufp2 = bufp = bufp + strlen(bufp);
-#ifdef PROCESS_PRWIZCH
 	    sprintf(bufp, "$PRWIZCH");
 	    bufp = bufp + strlen(bufp);
 	    for (i = 0; i < 12; i++) {
-		sprintf(bufp, ",%02d,%X", session->gNMEAdata.Zs[i], session->gNMEAdata.Zv[i]);
+		sprintf(bufp, ",%02d,%X", session->Zs[i], session->Zv[i]);
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp, "*");
 	    bufp = bufp + strlen(bufp);
 	    nmea_add_checksum(bufp2 + 1);
 	    nmea = 1002;
-#endif /* PROCESS_PRWIZCH */
 	    break;
 	case 1003:
 	    handle1003(session, p);

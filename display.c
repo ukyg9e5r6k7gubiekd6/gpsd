@@ -110,26 +110,16 @@ static int get_status(struct gps_data_t *gpsdata, int satellite)
     int i;
     int s;
 
-#ifdef PROCESS_PRWIZCH
-    if (SEEN(gpsdata->signal_quality_stamp)) {
-	for (i = 0; i < 12; i++)
-	    if (satellite == gpsdata->Zs[i])
-		return gpsdata->Zv[i];
-	return 0;
-    } else
-#endif /* PROCESS_PRWIZCH */
-    {
-	for (i = 0; i < 12; i++)
-	    if (satellite == gpsdata->PRN[i]) {
-		s = gpsdata->ss[i];
+    for (i = 0; i < 12; i++)
+	if (satellite == gpsdata->PRN[i]) {
+	    s = gpsdata->ss[i];
 
-		if (s<20) return 1;
-		if (s<40) return 2;
+	    if (s<20) return 1;
+	    if (s<40) return 2;
 
-		return 7;
-	    }
-	return 0;
-    }
+	    return 7;
+	}
+    return 0;
 }
 
 

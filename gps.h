@@ -89,17 +89,6 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
     struct life_t satellite_stamp;
 
-#ifdef PROCESS_PRWIZCH
-    /*
-     * Zodiac chipset channel status from PRWIZCH.
-     * This is actually redundant with the SNRs in GPGSV,
-     * and all known variants of the Zodiac chipsets issue GPGSV.
-     */
-    int Zs[MAXCHANNELS];	/* satellite PRNs */
-    int Zv[MAXCHANNELS];	/* signal values (0-7) */
-    struct life_t signal_quality_stamp;
-#endif /* PROCESS_PRWIZCH */
-
     /* these members are private */
     int gps_fd;				/* socket or file descriptor to GPS */
     void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */

@@ -168,9 +168,8 @@ void tripmate_initializer(struct gps_session_t *session)
 
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-#ifndef PROCESS_PRWIZCH
-    write(session->fdout, "PRWIILOG,ZCH,V,,", 16); /* stop it sending PRWIZCH */
-#endif /* PROCESS_PRWIZCH */
+    /* stop it sending PRWIZCH */
+    write(session->fdout, "$PRWIILOG,ZCH,V,,", 17);
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);

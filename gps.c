@@ -55,9 +55,6 @@ extern void draw_graphics(struct gps_data_t *gpsdata);
 static Widget lxbApp;
 static Widget data_panel;
 static Widget satellite_list;
-#ifdef PROCESS_PRWIZCH
-static Widget prwizch_list;
-#endif /* PROCESS_PRWIZCH */
 static Widget satellite_diagram;
 static Widget rowColumn_10;
 static Widget rowColumn_11;
@@ -162,24 +159,6 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
     satellite_list = XtCreateManagedWidget("satellite_list", xmListWidgetClass, data_panel, args, 11);
-
-#ifdef PROCESS_PRWIZCH
-    /* signal quality data panel */
-#define PRWIZCH_WIDTH	80
-    XtSetArg(args[0], XmNbackground, get_pixel(lxbApp, "snow"));
-    XtSetArg(args[1], XmNleftOffset, 10);
-    XtSetArg(args[2], XmNtopOffset, 10);
-    XtSetArg(args[3], XmNbottomAttachment, XmATTACH_NONE);
-    XtSetArg(args[4], XmNleftAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
-    XtSetArg(args[7], XmNwidth, PRWIZCH_WIDTH);
-    XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
-    XtSetArg(args[9], XmNhighlightThickness, 0);
-    XtSetArg(args[10], XmNlistSpacing, 4);
-    XtSetArg(args[11], XmNleftWidget, satellite_list);
-    prwizch_list = XtCreateManagedWidget("prwizch_list", xmListWidgetClass, data_panel, args, 12);
-#endif /* PROCESS_PRWIZCH */
 
     /* the satellite diagram */
     XtSetArg(args[0], XmNbottomAttachment, XmATTACH_NONE);
@@ -317,9 +296,6 @@ void init_list()
     for (i = 0; i < MAXCHANNELS; i++) {
 	string = XmStringCreateSimple(" ");
 	XmListAddItem(satellite_list, string, i+1);
-#ifdef PROCESS_PRWIZCH
-	XmListAddItem(prwizch_list, string, i+1);
-#endif /* PROCESS_PRWIZCH */
 	XmStringFree(string);
     }
 }
@@ -369,17 +345,6 @@ static void update_panel(char *message)
 	for (i = 0; i < MAXCHANNELS; i++)
 	    XmStringFree(string[i]);
     }
-#ifdef PROCESS_PRWIZCH
-    if (SEEN(gpsdata->signal_quality_stamp)) {
-	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(s, "%2d %02x", gpsdata->Zs[i], gpsdata->Zv[i]);
-	    string[i] = XmStringCreateSimple(s);
-	}
-	XmListReplaceItemsPos(prwizch_list, string, sizeof(string), 1);
-	for (i = 0; i < MAXCHANNELS; i++)
-	    XmStringFree(string[i]);
-    }
-#endif /* PROCESS_PRWIZCH */
     /* here are the value fields */
     XmTextFieldSetString(text_1, gpsdata->utc);
     sprintf(s, "%f", gpsdata->latitude);

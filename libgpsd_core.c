@@ -87,9 +87,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     INIT(session->gNMEAdata.mode_stamp, now);
     INIT(session->gNMEAdata.fix_quality_stamp, now);
     INIT(session->gNMEAdata.satellite_stamp, now);
-#ifdef PROCESS_PRWIZCH
-    INIT(session->gNMEAdata.signal_quality_stamp, now);
-#endif /* PROCESS_PRWIZCH */
     session->gNMEAdata.mode = MODE_NO_FIX;
 
     return session;

@@ -249,11 +249,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'L':
 	case 'l':
 	    sprintf(reply + strlen(reply),
-		    ",l=1 " VERSION " admpqrstvwxy"
-#ifdef PROCESS_PRWIZCH
-		    "z"
-#endif
-);
+		    ",l=1 " VERSION " admpqrstvwxy");
 	    break;
 	case 'M':
 	case 'm':
@@ -392,30 +388,6 @@ static int handle_request(int fd, char *buf, int buflen)
 		    }
 		}
 	    break;
-#ifdef PROCESS_PRWIZCH
-	case 'Z':
-	case 'z':
-	    sc = 0;
-	    for (i = 0; i < MAXCHANNELS; i++)
-		if (session->gNMEAdata.Zs[i])
-		    sc++;
-	    if (!sc)
-		strcat(reply, ",Z=?");
-	    else
-	    {
-		sprintf(reply + strlen(reply),
-			",Z=%d ", sc);
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (SEEN(session->gNMEAdata.signal_quality_stamp))
-		    {
-			if (session->gNMEAdata.Zs[i])
-			    sprintf(reply + strlen(reply),"%d %02d ", 
-				    session->gNMEAdata.Zs[i], 
-				    session->gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
-		    }
-	    }
-#endif /* PROCESS_PRWIZCH */
-	    break;
 	case '\r':
 	case '\n':
 	    goto breakout;
@@ -468,10 +440,6 @@ static void raw_hook(char *sentence)
 	    } else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
 		if (nmea_sane_satellites(&session->gNMEAdata))
 		    PUBLISH(fd, "y");
-#ifdef PROCESS_PRWIZCH
-	    } else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
-		PUBLISH(fd, "xz");
-#endif /* PROCESS_PRWIZCH */
 	    }
 #undef PUBLISH
 	}
