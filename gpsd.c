@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <netdb.h>
+#include <stdarg.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -60,6 +61,7 @@ static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int nfds, dsock;
 static int reopen = 0;
+static int in_background = 0;
 
 static int handle_request(int fd, fd_set * fds);
 
@@ -67,7 +69,7 @@ static void onsig(int sig)
 {
     serial_close();
     close(dsock);
-    syslog(LOG_NOTICE, "Received signal %d. Exiting...", sig);
+    report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
 
@@ -103,7 +105,37 @@ static int daemonize()
 	if (fd > 2)
 	    close(fd);
     }
+    in_background = 1;
     return 0;
+}
+
+void report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    strcpy(buf, "gpsd: ");
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+
+    if (errlevel > session.debug+1)
+	return;
+
+    if (in_background)
+    {
+	if (errlevel == 0)
+	    syslog(LOG_ERR, buf);
+	else
+	    syslog(LOG_NOTICE, buf);
+    }
+    else
+	fputs(buf, stderr);
 }
 
 static void send_dgps()
@@ -141,8 +173,7 @@ static struct gps_type_t *set_device_type(char what)
     					  &logfile};
     for (dp = drivers; dp < drivers + sizeof(drivers)/sizeof(drivers[0]); dp++)
 	if ((*dp)->typekey == what) {
-	    if (session.debug > 1)
-		fprintf(stderr, "Selecting %s driver...\n", (*dp)->typename);
+	    fprintf(stderr, "Selecting %s driver...\n", (*dp)->typename);
 	    goto foundit;
 	}
     fprintf(stderr, "Invalid device type \"%s\"\n"
@@ -176,11 +207,11 @@ static int handle_dgps()
     if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
     {
 	if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
-	    syslog(LOG_WARNING, "Write to rtcm sink failed");
+	    report(1, "Write to rtcm sink failed\n");
     }
     else 
     {
-	syslog(LOG_WARNING, "Read from rtcm source failed");
+	report(1, "Read from rtcm source failed\n");
     }
 
     return rtcmbytes;
@@ -193,7 +224,7 @@ static void deactivate()
     serial_close();
     if (session.device_type->wrapup)
 	session.device_type->wrapup();
-    syslog(LOG_NOTICE, "Closed GPS");
+    report(1, "Closed GPS\n");
     session.gNMEAdata.mode = 1;
     session.gNMEAdata.status = 0;
 }
@@ -203,9 +234,9 @@ static int activate()
     int input;
 
     if ((input = serial_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
-	errexit("Exiting - serial open");
+	errexit("Exiting - serial open\n");
  
-    syslog(LOG_NOTICE, "Opened GPS");
+    report(1, "Opened GPS\n");
     session.fdin = input;
     session.fdout = input;
 
@@ -309,9 +340,9 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    syslog(LOG_NOTICE, "gpsd started (Version %s)", VERSION);
+    report(1, "gpsd started (Version %s)\n", VERSION);
     msock = passiveTCP(service, QLEN);
-    syslog(LOG_NOTICE, "gpsd listening on port %s", service);
+    report(1, "gpsd listening on port %s\n", service);
 
     nfds = getdtablesize();
 
@@ -431,7 +462,7 @@ static int validate(void)
 {
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
-	 syslog(LOG_ERR, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	 report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
     }
     return 1;
 }
@@ -452,7 +483,7 @@ static int handle_request(int fd, fd_set * fds)
 
     cur_time = time(NULL);
 
-#define STALE_COMPLAINT(l, f) fprintf(stderr, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
+#define STALE_COMPLAINT(l, f) report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -631,7 +662,7 @@ void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
     for (fd = 0; fd < nfds; fd++) {
 	if (FD_ISSET(fd, nmea_fds)) {
 	    if (write(fd, buf, strlen(buf)) < 0) {
-		syslog(LOG_NOTICE, "Raw write: %s", strerror(errno));
+		report(1, "Raw write: %s", strerror(errno));
 		FD_CLR(fd, afds);
 		FD_CLR(fd, nmea_fds);
 	    }
@@ -641,12 +672,12 @@ void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
 
 void errlog(char *s)
 {
-    syslog(LOG_ERR, "%s: %s\n", s, strerror(errno));
+    report(0, "%s: %s\n", s, strerror(errno));
 }
 
 void  errexit(char *s)
 {
-    syslog(LOG_ERR, "%s: %s\n", s, strerror(errno));
+    report(0, "%s: %s\n", s, strerror(errno));
     serial_close();
     close(dsock);
     exit(2);

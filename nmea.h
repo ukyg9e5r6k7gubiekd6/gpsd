@@ -10,7 +10,6 @@
 #define PMGNST "PMGNST"
 
 /* prototypes */
-extern void doNMEA(short refNum);
 extern int process_NMEA_message(char *sentence, struct OUTDATA *outdata);
 extern void nmea_handle_message(char *sentence);
 extern void add_checksum(char *sentence);

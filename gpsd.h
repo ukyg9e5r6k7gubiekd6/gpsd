@@ -38,6 +38,7 @@ extern struct gps_type_t earthmate_a;
 extern struct gps_type_t earthmate_b;
 extern struct gps_type_t logfile;
 
+void report(int d, const char *fmt, ...);
 void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf);
 int serial_open(char *device_name, int device_speed);
 void serial_close();

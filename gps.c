@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdarg.h>
 
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
@@ -97,6 +98,26 @@ void quit_cb()
     exit(0);
 }
 
+void report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    strcpy(buf, "gpsd: ");
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+
+    if (errlevel > session.debug+1)
+	return;
+
+    fputs(buf, stderr);
+}
 
 /**************************************************
 * Function: get_pixel

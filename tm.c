@@ -7,7 +7,6 @@
 #include <time.h>
 #include <fcntl.h>
 #include <string.h>
-#include <syslog.h>
 #include "outdata.h"
 #include "nmea.h"
 #include "gpsd.h"
@@ -31,17 +30,16 @@ static void process_exception(char *sentence)
 {
     if (!strncmp("ASTRAL", sentence, 6) && isatty(session.fdout)) {
 	write(session.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
-	syslog(LOG_NOTICE, "Found a TripMate, initializing...");
+	report(1, "Found a TripMate, initializing...");
 	session.device_type = &tripmate;
 	tripmate.initializer();
     } else if ((!strncmp("EARTHA", sentence, 6) && isatty(session.fdout))) {
 	write(session.fdout, "EARTHA\r\n", 8);
-	syslog(LOG_NOTICE, "Found an EarthMate (id).");
+	report(1, "Found an EarthMate (id).");
 	session.device_type = &earthmate_b;
 	earthmate_b.initializer();
     } else if (session.debug > 1) {
-	fprintf(stderr, "Unknown exception: \"%s\"",
-		sentence);
+	report(1, "Unknown exception: \"%s\"", sentence);
     }
 }
 
@@ -55,29 +53,23 @@ static void process_exception(char *sentence)
 void nmea_handle_message(char *sentence)
 /* visible so the direct-connect clients can use it */
 {
-    if (session.debug > 5)
-	fprintf(stderr, "%s\n", sentence);
+    report(6, "%s\n", sentence);
     if (*sentence == '$')
     {
 	if (process_NMEA_message(sentence + 1, &session.gNMEAdata) < 0)
-	    if (session.debug > 1) {
-		fprintf(stderr, "Unknown sentence: \"%s\"\n",
-			sentence);
-	    }
+	    report(2, "Unknown sentence: \"%s\"\n", sentence);
     }
     else
 	process_exception(sentence);
 
-    if (session.debug > 2) {
-	fprintf(stderr,
-		"Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
-		session.gNMEAdata.latitude,
-		session.gNMEAdata.longitude,
-		session.gNMEAdata.altitude,
-		session.gNMEAdata.satellites,
-		session.gNMEAdata.mode,
-		session.gNMEAdata.utc);
-    }
+    report(2,
+	   "Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
+	   session.gNMEAdata.latitude,
+	   session.gNMEAdata.longitude,
+	   session.gNMEAdata.altitude,
+	   session.gNMEAdata.satellites,
+	   session.gNMEAdata.mode,
+	   session.gNMEAdata.utc);
 }
 
 static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
@@ -156,10 +148,9 @@ void tripmate_initializer()
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	if (session.fdout != -1)
+	if (session.fdout != -1) {
 	    write(session.fdout, buf, strlen(buf));
-	if (session.debug > 1) {
-	    fprintf(stderr, "Sending: %s", buf);
+	    report(1, "Sending: %s", buf);
 	}
     }
 }

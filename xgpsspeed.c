@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "xgpsspeed.h"
 #include "xgpsspeed.icon"
@@ -64,6 +65,27 @@ void errexit(char *s)
 {
     perror(s);
     exit(1);
+}
+
+void report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    strcpy(buf, "xgpsspeed: ");
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+
+    if (errlevel > session.debug+1)
+	return;
+
+    fputs(buf, stderr);
 }
 
 int

@@ -14,7 +14,6 @@
 #include <time.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <syslog.h>
 #include <unistd.h>
 
 #include "outdata.h"
@@ -217,28 +216,28 @@ static double degtodm(double a)
 static void handle1000(unsigned short *p)
 {
 #if 0
-    fprintf(stderr, "date: %d %d %d  %d:%d:%d\n",
+    report(1, "date: %d %d %d  %d:%d:%d\n",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    fprintf(stderr, "  solution invalid:\n");
-    fprintf(stderr, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
-    fprintf(stderr, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
-    fprintf(stderr, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
-    fprintf(stderr, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
-    fprintf(stderr, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
-    fprintf(stderr, "  solution type:\n");
-    fprintf(stderr, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
-    fprintf(stderr, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
-    fprintf(stderr, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
-    fprintf(stderr, "Number of measurements in solution: %d\n", p[O(12)]);
-    fprintf(stderr, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
-    fprintf(stderr, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
-    fprintf(stderr, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
-    fprintf(stderr, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
-    fprintf(stderr, "Map datum: %d\n", p[O(39)]);
-    fprintf(stderr, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
-    fprintf(stderr, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
-    fprintf(stderr, "Separation: %f\n", (p[O(33)] / 100));
+    report(1, "  solution invalid:\n");
+    report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
+    report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
+    report(1, "    not enough satellites: %d\n", (p[O(10)] & 4) ? 1 : 0);
+    report(1, "    exceed max EHPE: %d\n", (p[O(10)] & 8) ? 1 : 0);
+    report(1, "    exceed max EVPE: %d\n", (p[O(10)] & 16) ? 1 : 0);
+    report(1, "  solution type:\n");
+    report(1, "    propagated: %d\n", (p[O(11)] & 1) ? 1 : 0);
+    report(1, "    altitude: %d\n", (p[O(11)] & 2) ? 1 : 0);
+    report(1, "    differential: %d\n", (p[O(11)] & 4) ? 1 : 0);
+    report(1, "Number of measurements in solution: %d\n", p[O(12)]);
+    report(1, "Lat: %f\n", 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000)));
+    report(1, "Lon: %f\n", 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000)));
+    report(1, "Alt: %f\n", (double) getlong(p + O(31)) / 100.0);
+    report(1, "Speed: %f\n", (double) getlong(p + O(34)) / 100.0) * 1.94387;
+    report(1, "Map datum: %d\n", p[O(39)]);
+    report(1, "Magnetic variation: %f\n", p[O(37)] * 180 / (PI * 10000));
+    report(1, "Course: %f\n", (p[O(36)] * 180 / (PI * 1000)));
+    report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
     sprintf(session.gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
@@ -293,13 +292,13 @@ static void handle1002(unsigned short *p)
 	session.gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
 	session.gNMEAdata.Zv[i] = (p[O(15 + (3 * i))] & 0xf);
 #if 0
-	fprintf(stderr, "Sat%02d:", i);
-	fprintf(stderr, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
-	fprintf(stderr, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
-	fprintf(stderr, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
-	fprintf(stderr, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
-	fprintf(stderr, " PRN:%d", p[O(16 + (3 * i))]);
-	fprintf(stderr, " C/No:%d\n", p[O(17 + (3 * i))]);
+	report(1, "Sat%02d:", i);
+	report(1, " used:%d", (p[O(15 + (3 * i))] & 1) ? 1 : 0);
+	report(1, " eph:%d", (p[O(15 + (3 * i))] & 2) ? 1 : 0);
+	report(1, " val:%d", (p[O(15 + (3 * i))] & 4) ? 1 : 0);
+	report(1, " dgps:%d", (p[O(15 + (3 * i))] & 8) ? 1 : 0);
+	report(1, " PRN:%d", p[O(16 + (3 * i))]);
+	report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
 	for (j = 0; j < 12; j++) {
 	    if (session.gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
@@ -327,11 +326,11 @@ static void handle1003(unsigned short *p)
 	    session.gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
 	    session.gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
 #if 0
-	    fprintf(stderr, "Sat%02d:", i);
-	    fprintf(stderr, " PRN:%d", p[O(15 + (3 * i))]);
-	    fprintf(stderr, " az:%d", p[O(16 + (3 * i))]);
-	    fprintf(stderr, " el:%d", p[O(17 + (3 * i))]);
-	    fprintf(stderr, "\n");
+	    report(1, "Sat%02d:", i);
+	    report(1, " PRN:%d", p[O(15 + (3 * i))]);
+	    report(1, " az:%d", p[O(16 + (3 * i))]);
+	    report(1, " el:%d", p[O(17 + (3 * i))]);
+	    report(1, "\n");
 #endif
 	} else {
 	    session.gNMEAdata.PRN[j] = 0;
@@ -347,20 +346,20 @@ static void handle1005(unsigned short *p)
   int numcorrections = p[O(12)];
 
 #if 1
-  fprintf(stderr, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
-  fprintf(stderr, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
-  fprintf(stderr, "Station ID: %d\n", p[O(10)]);
-  fprintf(stderr, "Age of last correction in seconds: %d\n", p[O(11)]);
-  fprintf(stderr, "Number of corrections: %d\n", p[O(12)]);
+  report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
+  report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
+  report(1, "Station ID: %d\n", p[O(10)]);
+  report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
+  report(1, "Number of corrections: %d\n", p[O(12)]);
   for (i = 0; i < numcorrections; i++) {
-    fprintf(stderr, "Sat%02d:", p[O(13+i)] & 0x3f);
-    fprintf(stderr, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
-    fprintf(stderr, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
-    fprintf(stderr, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
-    fprintf(stderr, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
-    fprintf(stderr, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
-    fprintf(stderr, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
-    fprintf(stderr, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+    report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
+    report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
+    report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
+    report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
+    report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
+    report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
+    report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
+    report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
   }
 #endif
 }
@@ -374,7 +373,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 
     if (p[h->ndata] == em_checksum(p, h->ndata)) {
 	if (session.debug > 5)
-	    fprintf(stderr, "id %d\n", h->id);
+	    report(1, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
 	    handle1000(p);
@@ -469,7 +468,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
     }
     if (nmea > 0) {
 	if (session.debug > 4)
-	    fprintf(stderr, "%s", buf);
+	    report(1, "%s", buf);
 
 	send_nmea(afds, nmea_fds, buf);
 
