@@ -1,6 +1,6 @@
 Name: gpsd
 Summary: service daemon for mediating access to a GPS
-Version: 1.96
+Version: @VERSION@
 Release: 1
 License: GPL
 Group: System Environment/Daemons

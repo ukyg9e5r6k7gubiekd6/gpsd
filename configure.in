@@ -234,4 +234,4 @@ fi
 
 AC_C_BIGENDIAN
  
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile gpsd.spec)
