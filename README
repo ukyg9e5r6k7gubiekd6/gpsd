@@ -88,3 +88,5 @@ His new features include:
    * New gpsprobe program probes the capabilities of GPSes and generates
      error scattergrams from fixes.
    * All this in fewer lines of C than the 1.10 version.
+
+Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.

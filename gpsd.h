@@ -4,9 +4,9 @@
 #include "gps.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
-#if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE
+#if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE || LOGFILE_ENABLE
 #define NON_NMEA_ENABLE
-#endif /* FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE */
+#endif /* FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE || LOGFILE_ENABLE */
 #if EARTHMATE_ENABLE
 #define ZODIAC_ENABLE
 #endif /* EARTHMATE_ENABLE */
@@ -47,12 +47,14 @@ struct gps_session_t {
     char *latitude, *longitude;
     char latd, lond;
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
-#ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
-    unsigned short sn;		/* packet sequence number */
-    double mag_var;		/* Magnetic variation in degrees */  
+#if defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE)
     double separation;		/* Geoidal separation */
     int year, month, day;
     int hours, minutes, seconds;
+#endif /* defined(ZODIAC_ENABLE) || defined(GARMIN_ENABLE) */
+#ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
+    unsigned short sn;		/* packet sequence number */
+    double mag_var;		/* Magnetic variation in degrees */  
     /*
      * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
      * translation of Zodiac binary protocol can send it up to the client.

@@ -119,6 +119,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Garmin support
+AC_ARG_ENABLE(garmin,
+  AC_HELP_STRING([--disable-garmin],
+                 [disable DeLorme Garmin Garmin support]),
+  [ac_garmin=$enableval], [ac_garmin=yes])
+AC_MSG_CHECKING([for Garmin support])
+if test x"$ac_garmin" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([GARMIN_ENABLE], 1, [Garmin support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Logfile support
 AC_ARG_ENABLE(logfile,
   AC_HELP_STRING([--disable-logfile],
@@ -168,6 +181,7 @@ echo "------------------------------------------"
 echo "FV-18                   : $ac_fv18"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
+echo "Garmin                  : $ac_garmin"
 echo "Logfile                 : $ac_logfile"
 echo "Enable shared libraries : $enable_shared"
 echo "Profiling               : $ac_profiling"

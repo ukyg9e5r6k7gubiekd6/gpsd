@@ -233,6 +233,8 @@ struct gps_type_t logfile = {
 };
 #endif /* LOGFILE_ENABLE */
 
+extern struct gps_type_t garmin_binary;
+
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
@@ -247,6 +249,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #endif /* EARTHMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
+#endif /* ZODIAC_ENABLE */
+#ifdef ZODIAC_ENABLE
+    &garmin_binary,
 #endif /* ZODIAC_ENABLE */
 #ifdef LOGFILE_ENABLE
     &logfile,

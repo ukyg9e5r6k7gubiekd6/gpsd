@@ -129,7 +129,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
   include an FAA Mode Indicator. When using the NMEA driver, gpsd now
   hunts for a baud rate rather than requiring a fixed one to be set.
   A new 'B' command returns the RS232 parameters.  Added gpsfake test
-  harness.
+  harness.  Alpha driver for Garmin binary protocol added, requires
+  Linux garmin_usb kernel driver.
 
 * Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.11-1
 - Added gpsprof and the capability to generate GPS latency profiles.
