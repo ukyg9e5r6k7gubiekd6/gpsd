@@ -205,7 +205,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
     cpo_pvt_data *pvt = NULL;
     struct tm tm;
     char buf[BUFSIZ], *bufp = buf;
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     double track;
 
     gpsd_report(3, "PrintPacket() ");
@@ -521,7 +521,6 @@ static int GetPacket (struct gps_session_t *session )
 {
     struct timespec delay, rem;
     int cnt = 0;
-    int x = 0;
 
     memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
     session->GarminBufferLen = 0;
