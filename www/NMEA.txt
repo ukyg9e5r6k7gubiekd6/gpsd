@@ -44,6 +44,16 @@ exactly 21 seconds.
 Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
 about 2 seconds.
 
+According to [UNMEA], the NMEA standard requires that a field (such as
+altitude, latitude, or longitude) must be left empty when the GPS has
+no valid data for it.  However, many receivers violate this.  It's
+common, for example, to see latitude/longitude/altitude figures filled
+with zeros when the GPS has no valid data.
+
+The physical-level protocol is RS232C-compatible, 4800bps, 8 bits, no
+parity, one *or two* stop bits.  The data is all ASCII, the high bit
+is not used.
+
 Here are the NMEA-standard sentences:
 
 ------------------------------------------------------------------------------
@@ -1474,3 +1484,8 @@ Sources:
     http://vancouver-webpages.com/peter/nmeafaq.txt
     Used for R00.
 
+[UNMEA]
+    "Understanding NMEA 0183"
+    http://pcptpp030.psychologie.uni-regensburg.de/trafficresearch/NMEA0183/
+    Source for the claim that NMEA requires undefined data fields to
+    be empty.
