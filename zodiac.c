@@ -192,11 +192,6 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     gpsd_report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
-    session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
-    session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
-
-    session->gNMEAdata.satellites_used = p[O(12)];
-
     session->hours = p[O(22)]; 
     session->minutes = p[O(23)]; 
     session->seconds = p[O(24)];
@@ -208,8 +203,10 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     session->gNMEAdata.longitude = 180.0 / (PI / ((double) getlong(p + O(29)) / 100000000));
     session->gNMEAdata.speed = ((double) getulong(p + O(34)) / 100.0) * 1.94387;
     session->gNMEAdata.altitude = (double) getlong(p + O(31)) / 100.0;
-
     session->gNMEAdata.status = (p[O(10)] & 0x1c) ? 0 : 1;
+    session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
+    session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
+    session->gNMEAdata.satellites_used = p[O(12)];
 
     if (session->gNMEAdata.status)
 	session->gNMEAdata.mode = (p[O(10)] & 1) ? 2 : 3;

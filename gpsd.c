@@ -1,4 +1,3 @@
-#include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -14,6 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "config.h"
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else
@@ -21,7 +21,6 @@
 #define _PATH_DEVNULL    "/dev/null"
 #endif
 #endif
-
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
@@ -475,7 +474,6 @@ int main(int argc, char *argv[])
 
     if (!service)
 	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
-
     if (debuglevel < 2)
 	daemonize();
 
