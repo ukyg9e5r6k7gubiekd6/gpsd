@@ -176,19 +176,11 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	 * code that relies on them won't mistakenly believe it has never
 	 * received a fix.
 	 */
-	if (!(out->seen_sentences & GPGGA) && out->status == STATUS_NO_FIX) {
-	    /* Upgrade to STATUS_FIX
-	     * Do not touch otherwise, may be STATUS_FIX or
-	     * STATUS_DGPS_FIX, cannot tell apart here
-	     */
-	    out->status = STATUS_FIX;
+	if (out->status == STATUS_NO_FIX) {
+	    out->status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
 	    mask |= STATUS_SET;
 	}
-	if (!(out->seen_sentences & GPGSA && out->fix.mode <= MODE_NO_FIX)) {
-	    /* Upgrade to MODE_2D
-	     * Do not touch otherwise, may be MODE_3D or
-	     * MODE_3D, cannot tell apart here
-	     */
+	if (out->fix.mode < MODE_2D) {
 	    out->fix.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}

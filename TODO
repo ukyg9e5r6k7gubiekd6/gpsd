@@ -5,34 +5,6 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 libgps will return this as '0'.  Fix it...
 
-** Can anything be done to smooth reporting from NMEA GPSes?
-
-Wojciech Kazubski <wk@ire.pw.edu.pl>:
-> 2. When xgps (v 2.18) client is connected to gpsd (v 2.15) server
-> (runing as a daemon on another machine), some fields toggle.  The
-> date and height fields toggle between n/a and the correct value. The
-> status field toggles between 2D DIFF FIX and 3D DIFF FIX showing 0
-> sec. accumulated time.
-
-Not surprising.  This may not go away when you upgrade to a 2.18
-server.  The new library interface is oriented towards GPSes that do
-entire updates in one packet (SiRF binary, Garmin, Zodiac).  The Garmin 
-17n is one of the corner cases where this produces an annoying result.
-
-The fundamental problem here is that watcher mode is producing an 'o'
-command for each sentence with a fix in it (GPGGA, GPGLL, GPRMC).  Your
-height is flickering because only GPGGA supplies it.  I'm not sure
-why the date is flickering, but it's probaly related to a minor bug
-that Daniele Giangrazi is reporting.
-
-The way to solve this in general is to add logic to gpsd that notices
-the timing of the NMEA update cycle and only ships an 'o', with
-cumulated results, on the last sentence of the cycle.  I have not tried
-this because someone on the list objected to introducing extra latency
-into the update path.
-
-But we can at least permit altitude to persist until mode goes to 1 or 2.
-
 ** In the SiRF driver, get leap seconds from almanac data
 
 Currently we're using a fixed 13-leap-second offset to convert GPS
