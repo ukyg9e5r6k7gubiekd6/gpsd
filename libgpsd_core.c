@@ -152,18 +152,22 @@ int gpsd_poll(struct gps_session_t *session)
 
 	session->gpsdata.online = timestamp();
 
+	if (!session->inbuflen || (session->driverstate & FULL_PACKET)) {
+	    session->gpsdata.d_xmit_time = timestamp();
+	    session->driverstate &=~ FULL_PACKET;
+	}
+
 	/* can we get a full packet from the device? */
 	if (!session->device_type->get_packet(session, waiting))
 	    return ONLINE_SET;
 
-	session->gpsdata.d_xmit_time = timestamp();
+	session->driverstate |= FULL_PACKET;
+	session->gpsdata.d_recv_time = timestamp();
 
 	session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);
 
+	/* count all packets and good fixes */
 	session->counter++;
-	session->gpsdata.d_decode_time = timestamp();
-
-	/* count the good fixes */
 	if (session->gpsdata.status > STATUS_NO_FIX) 
 	    session->fixcnt++;
 
@@ -221,6 +225,8 @@ int gpsd_poll(struct gps_session_t *session)
 		}
 	    }
 	}
+
+	session->gpsdata.d_decode_time = timestamp();
 
 	/* may be time to ship a DGPS correction to the GPS */
 	if (session->fixcnt > 10 && !session->sentdgps) {

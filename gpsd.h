@@ -126,6 +126,7 @@ struct gps_session_t {
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
 #define SIRF_SEEN_41    0x08            /* Seen Geodetic Navigation Data? */
+#define FULL_PACKET	0x10		/* Full packet has been seen */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  

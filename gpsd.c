@@ -504,18 +504,15 @@ static int handle_request(int fd, char *buf, int buflen)
     }
  breakout:
     if (ud->profiling) {
-	struct timeval tv;
-	double basetime = ud->fix.time - gmt_offset;
-	gettimeofday(&tv, NULL);
-	sprintf(phrase, ",$=%s %d %.4f %.4f %.4f %.4f %.4f %.4f",
+	sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
 		ud->tag,
 		ud->sentence_length,
-		basetime,
-		ud->d_xmit_time - basetime,
-		ud->d_recv_time - basetime,
-		ud->d_decode_time - basetime,
-		session->poll_times[fd] - basetime,
-		timestamp() - basetime); 
+		ud->fix.time - gmt_offset,
+		ud->d_xmit_time,
+		ud->d_recv_time - ud->d_xmit_time,
+		ud->d_decode_time - ud->d_xmit_time,
+		session->poll_times[fd] - ud->d_xmit_time,
+		timestamp() - ud->d_xmit_time); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }
@@ -703,6 +700,7 @@ int main(int argc, char *argv[])
 	    for (fd = 0; fd < FD_SETSIZE; fd++) {
 		/* some listeners may be in watcher mode */
 		if (FD_ISSET(fd, &watcher_fds)) {
+		    session->poll_times[fd] = timestamp();
 		    if (changed & LATLON_SET)
 			handle_request(fd, "o", 1);
 		    if (changed & SATELLITE_SET)
