@@ -520,7 +520,7 @@ int nmea_send(int fd, const char *fmt, ... )
     vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     strcat(buf, "*");
-    nmea_add_checksum(buf+1);
+    nmea_add_checksum(buf);
     status = write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);

@@ -217,7 +217,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 		session->gNMEAdata.hdop,
 		session->gNMEAdata.altitude, 'M',
 		session->separation, 'M', "", "");
-	nmea_add_checksum(bufp + 1);
+	nmea_add_checksum(bufp);
 	bufp = bufp + strlen(bufp);
     }
     sprintf(bufp,
@@ -233,7 +233,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	    session->day,
 	    session->month,
 	    (session->year % 100));
-	nmea_add_checksum(bufp + 1);
+	nmea_add_checksum(bufp);
 }
 
 void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
@@ -255,8 +255,7 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 	bufp += strlen(bufp);
 	if (i % 4 == 3) {
 	    sprintf(bufp, "*");
-	    nmea_add_checksum(bufp + 1);
-	    bufp += strlen(bufp);
+	    nmea_add_checksum(bufp);
 	}
     }
 }
@@ -281,7 +280,7 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
     bufp = bufp + strlen(bufp);
     sprintf(bufp, "%.2f,%.2f,%.2f*", session->gNMEAdata.pdop, session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
-    nmea_add_checksum(bufp + 1);
+    nmea_add_checksum(bufp);
 }
 
 #endif /* BINARY_ENABLE */
