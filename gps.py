@@ -64,7 +64,7 @@ class gpsdata:
 	self.mode = MODE_NO_FIX
 	self.mode_stamp = gps.timestamp(now)
 
-	self.satellites_used = []		# Satellites used in last fix
+	self.satellites_used = 0		# Satellites used in last fix
 	self.pdop = self.hdop = self.vdop = 0.0
 	self.fix_quality_stamp = gps.timestamp(now)
 
@@ -110,8 +110,7 @@ class gpsdata:
 	st += "Mode:     MODE_" + ("ZERO", "NO_FIX", "2D","3D")[self.mode]
 	st += " " + repr(self.mode_stamp) + "\n"
 	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f " % \
-              (len(self.satellites_used),
-               self.pdop, self.hdop, self.vdop)
+              self.satellites_used, self.pdop, self.hdop, self.vdop)
 	st += repr(self.fix_quality_stamp) + "\n"
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
 	for sat in self.satellites:
