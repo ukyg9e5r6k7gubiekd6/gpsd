@@ -29,10 +29,6 @@ struct gps_type_t
 struct gps_session_t
 /* session object, encapsulates all global state */
 {
-    /* this is public */
-    int debug;		/* debug verbosity level */
-
-    /* the rest is private */
     struct gps_type_t *device_type;
     struct longlat_t initpos;
     struct gps_data_t gNMEAdata;
@@ -87,8 +83,7 @@ extern void gpsd_close();
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */
-extern void gpsd_init(struct gps_session_t *session, 
-	      char devtype, char *dgpsserver);
+extern struct gps_session_t * gpsd_init(char devtype, char *dgpsserver);
 extern int gpsd_activate(struct gps_session_t *session);
 extern void gpsd_deactivate(struct gps_session_t *session);
 extern int gpsd_poll(struct gps_session_t *session);

@@ -53,7 +53,7 @@
 #define QLEN		5
 
 /* the default driver is NMEA */
-struct gps_session_t session;
+struct gps_session_t *session;
 
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
@@ -61,6 +61,7 @@ static int in_background = 0;
 static fd_set all_fds;
 static fd_set nmea_fds;
 static fd_set watcher_fds;
+static int debuglevel;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -72,7 +73,7 @@ static void restart(int sig)
 
 static void onsig(int sig)
 {
-    gpsd_wrap(&session);
+    gpsd_wrap(session);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
@@ -123,7 +124,7 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 #endif
     va_end(ap);
 
-    if (errlevel > session.debug)
+    if (errlevel > debuglevel)
 	return;
 
     if (in_background)
@@ -150,21 +151,6 @@ static void usage()
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n\
 ", default_device_name, DEFAULT_GPSD_PORT);
-}
-
-static void print_settings(char *service, char *dgpsserver)
-{
-    fprintf(stderr, "command line options:\n");
-    fprintf(stderr, "  debug level:        %d\n", session.debug);
-    fprintf(stderr, "  gps device name:    %s\n", device_name);
-    fprintf(stderr, "  gpsd port:          %s\n", service);
-    if (dgpsserver) {
-      fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
-    }
-    if (session.initpos.latitude && session.initpos.longitude) {
-      fprintf(stderr, "  latitude:           %s%c\n", session.initpos.latitude, session.initpos.latd);
-      fprintf(stderr, "  longitude:          %s%c\n", session.initpos.longitude, session.initpos.lond);
-    }
 }
 
 static int throttled_write(int fd, char *buf, int len)
@@ -205,18 +191,18 @@ static int throttled_write(int fd, char *buf, int len)
 #define VALIDATION_COMPLAINT(level, legend) \
         gpscli_report(level, \
 		       legend " (status=%d, mode=%d).\r\n", \
-		       session.gNMEAdata.status, session.gNMEAdata.mode)
+		       session->gNMEAdata.status, session->gNMEAdata.mode)
 
 static int validate(int fd)
 {
-    if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
+    if ((session->gNMEAdata.status == STATUS_NO_FIX) != (session->gNMEAdata.mode == MODE_NO_FIX))
     {
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return 0;
     }
-    else if (session.gNMEAdata.status > STATUS_NO_FIX && session.gNMEAdata.mode > MODE_NO_FIX) {
+    else if (session->gNMEAdata.status > STATUS_NO_FIX && session->gNMEAdata.mode > MODE_NO_FIX) {
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
-	return session.gNMEAdata.mode;
+	return session->gNMEAdata.mode;
     }
     VALIDATION_COMPLAINT(3, "GPS has no fix");
     return 0;
@@ -245,14 +231,14 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(reply + strlen(reply),
 			",A=%f",
-			session.gNMEAdata.altitude);
+			session->gNMEAdata.altitude);
 	    break;
 	case 'D':
 	case 'd':
-	    if (session.gNMEAdata.utc[0])
+	    if (session->gNMEAdata.utc[0])
 		sprintf(reply + strlen(reply),
 			",D=%s",
-			session.gNMEAdata.utc);
+			session->gNMEAdata.utc);
 	    else
 		strcat(reply, ",D=?");
 	    break;
@@ -269,7 +255,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'm':
 		sprintf(reply + strlen(reply),
 			",M=%d",
-			session.gNMEAdata.mode);
+			session->gNMEAdata.mode);
 	    break;
 	case 'P':
 	case 'p':
@@ -278,8 +264,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(reply + strlen(reply),
 			",P=%f %f",
-			session.gNMEAdata.latitude,
-			session.gNMEAdata.longitude);
+			session->gNMEAdata.latitude,
+			session->gNMEAdata.longitude);
 	    break;
 	case 'Q':
 	case 'q':
@@ -288,8 +274,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(reply + strlen(reply),
 			",Q=%d %f %f %f",
-			session.gNMEAdata.satellites_used,
-			session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
+			session->gNMEAdata.satellites_used,
+			session->gNMEAdata.pdop, session->gNMEAdata.hdop, session->gNMEAdata.vdop);
 	    break;
 	case 'R':
 	case 'r':
@@ -321,7 +307,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 's':
 	    sprintf(reply + strlen(reply),
 		    ",S=%d",
-		    session.gNMEAdata.status);
+		    session->gNMEAdata.status);
 	    break;
 	case 'T':
 	case 't':
@@ -330,7 +316,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(reply + strlen(reply),
 			",T=%f",
-			session.gNMEAdata.track);
+			session->gNMEAdata.track);
 	    break;
 	case 'V':
 	case 'v':
@@ -339,7 +325,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    else
 		sprintf(reply + strlen(reply),
 			",V=%f",
-			session.gNMEAdata.speed);
+			session->gNMEAdata.speed);
 	    break;
 	case 'W':
 	case 'w':
@@ -369,35 +355,35 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
         case 'X':
         case 'x':
-	    if (session.fdin == -1)
+	    if (session->fdin == -1)
 		strcat(reply, ",X=0");
 	    else
 		strcat(reply, ",X=1");
 	    break;
 	case 'Y':
 	case 'y':
-	    if (!session.gNMEAdata.satellites)
+	    if (!session->gNMEAdata.satellites)
 		strcat(reply, ",Y=?");
 	    else {
 		int used;
 		sprintf(reply + strlen(reply),
-			",Y=%d:", session.gNMEAdata.satellites);
-		if (SEEN(session.gNMEAdata.satellite_stamp))
-		    for (i = 0; i < session.gNMEAdata.satellites; i++) {
+			",Y=%d:", session->gNMEAdata.satellites);
+		if (SEEN(session->gNMEAdata.satellite_stamp))
+		    for (i = 0; i < session->gNMEAdata.satellites; i++) {
 			used = 0;
-			for (j = 0; j < session.gNMEAdata.satellites_used; j++)
-			    if (session.gNMEAdata.used[j] == session.gNMEAdata.PRN[i])
+			for (j = 0; j < session->gNMEAdata.satellites_used; j++)
+			    if (session->gNMEAdata.used[j] == session->gNMEAdata.PRN[i])
 			    {
 				used = 1;
 				break;
 			    }
-			if (session.gNMEAdata.PRN[i])
+			if (session->gNMEAdata.PRN[i])
 			    sprintf(reply + strlen(reply),
 				    "%d %d %d %d %d:", 
-				    session.gNMEAdata.PRN[i], 
-				    session.gNMEAdata.elevation[i],
-				    session.gNMEAdata.azimuth[i],
-				    session.gNMEAdata.ss[i],
+				    session->gNMEAdata.PRN[i], 
+				    session->gNMEAdata.elevation[i],
+				    session->gNMEAdata.azimuth[i],
+				    session->gNMEAdata.ss[i],
 				    used);
 		    }
 		}
@@ -407,7 +393,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'z':
 	    sc = 0;
 	    for (i = 0; i < MAXCHANNELS; i++)
-		if (session.gNMEAdata.Zs[i])
+		if (session->gNMEAdata.Zs[i])
 		    sc++;
 	    if (!sc)
 		strcat(reply, ",Z=?");
@@ -416,12 +402,12 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(reply + strlen(reply),
 			",Z=%d ", sc);
 		for (i = 0; i < MAXCHANNELS; i++)
-		    if (SEEN(session.gNMEAdata.signal_quality_stamp))
+		    if (SEEN(session->gNMEAdata.signal_quality_stamp))
 		    {
-			if (session.gNMEAdata.Zs[i])
+			if (session->gNMEAdata.Zs[i])
 			    sprintf(reply + strlen(reply),"%d %02d ", 
-				    session.gNMEAdata.Zs[i], 
-				    session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
+				    session->gNMEAdata.Zs[i], 
+				    session->gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
 		    }
 	    }
 #endif /* PROCESS_PRWIZCH */
@@ -476,7 +462,7 @@ static void raw_hook(char *sentence)
 	    } else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
 		PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
-		if (nmea_sane_satellites(&session.gNMEAdata))
+		if (nmea_sane_satellites(&session->gNMEAdata))
 		    PUBLISH(fd, "y");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
@@ -571,14 +557,14 @@ int main(int argc, char *argv[])
     int need_gps;
     int nowait = 0;
 
-    session.debug = 1;
+    debuglevel = 1;
     while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:")) != -1) {
 	switch (option) {
 	case 'T':
 	    gpstype = *optarg;
 	    break;
 	case 'D':
-	    session.debug = (int) strtol(optarg, 0, 0);
+	    debuglevel = (int) strtol(optarg, 0, 0);
 	    break;
 	case 'S':
 	    service = optarg;
@@ -598,12 +584,12 @@ int main(int argc, char *argv[])
 			"gpsd: longitude field is invalid; must end in E or W.\n");
 	   else {
 		*colon = '\0';
-		session.initpos.latitude = optarg;
- 		session.initpos.latd = toupper(optarg[strlen(session.initpos.latitude) - 1]);
-		session.initpos.latitude[strlen(session.initpos.latitude) - 1] = '\0';
-		session.initpos.longitude = colon+1;
-		session.initpos.lond = toupper(session.initpos.longitude[strlen(session.initpos.longitude)-1]);
-		session.initpos.longitude[strlen(session.initpos.longitude)-1] = '\0';
+		session->initpos.latitude = optarg;
+ 		session->initpos.latd = toupper(optarg[strlen(session->initpos.latitude) - 1]);
+		session->initpos.latitude[strlen(session->initpos.latitude) - 1] = '\0';
+		session->initpos.longitude = colon+1;
+		session->initpos.lond = toupper(session->initpos.longitude[strlen(session->initpos.longitude)-1]);
+		session->initpos.longitude[strlen(session->initpos.longitude)-1] = '\0';
 	    }
 	    break;
 	case 'n':
@@ -631,10 +617,7 @@ int main(int argc, char *argv[])
 	else service = default_service;
     }
 
-    if (session.debug > 1) 
-	print_settings(service, dgpsserver);
-    
-    if (session.debug < 2)
+    if (debuglevel < 2)
 	daemonize();
 
     /* Handle some signals */
@@ -655,7 +638,7 @@ int main(int argc, char *argv[])
 
     /* user may want to re-initialize the session */
     if (setjmp(restartbuf) == THROW_SIGHUP) {
-	gpsd_wrap(&session);
+	gpsd_wrap(session);
 	gpscli_report(1, "gpsd restarted by SIGHUP\n");
     }
 
@@ -665,21 +648,21 @@ int main(int argc, char *argv[])
     FD_SET(msock, &all_fds);
     nfds = getdtablesize();
 
-    gpsd_init(&session, gpstype, dgpsserver);
+    session = gpsd_init(gpstype, dgpsserver);
     if (gpsd_speed)
-	session.baudrate = gpsd_speed;
-    session.gpsd_device = device_name;
-    session.gNMEAdata.raw_hook = raw_hook;
-    if (session.dsock >= 0)
-	FD_SET(session.dsock, &all_fds);
+	session->baudrate = gpsd_speed;
+    session->gpsd_device = device_name;
+    session->gNMEAdata.raw_hook = raw_hook;
+    if (session->dsock >= 0)
+	FD_SET(session->dsock, &all_fds);
 
     if (nowait)
     {
-	if (gpsd_activate(&session) < 0) {
+	if (gpsd_activate(session) < 0) {
 	    gpscli_report(0, "exiting - GPS device nonexistent or can't be read\n");
 	    exit(2);
 	}
-	FD_SET(session.fdin, &all_fds);
+	FD_SET(session->fdin, &all_fds);
     }
 
     while (1) {
@@ -716,31 +699,31 @@ int main(int argc, char *argv[])
 	}
 
 	/* we may need to force the GPS open */
-	if (nowait && session.fdin == -1) {
-	    gpsd_deactivate(&session);
-	    if (gpsd_activate(&session) >= 0)
+	if (nowait && session->fdin == -1) {
+	    gpsd_deactivate(session);
+	    if (gpsd_activate(session) >= 0)
 	    {
 		notify_watchers("GPSD,X=1\r\n");
-		FD_SET(session.fdin, &all_fds);
+		FD_SET(session->fdin, &all_fds);
 	    }
 	}
 
 	/* get data from it */
-	if (session.fdin >= 0 && gpsd_poll(&session) < 0) {
+	if (session->fdin >= 0 && gpsd_poll(session) < 0) {
 	    gpscli_report(3, "GPS is offline\n");
-	    FD_CLR(session.fdin, &all_fds);
-	    gpsd_deactivate(&session);
+	    FD_CLR(session->fdin, &all_fds);
+	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
 	}
 
 	/* this simplifies a later test */
-	if (session.dsock > -1)
-	    FD_CLR(session.dsock, &rfds);
+	if (session->dsock > -1)
+	    FD_CLR(session->dsock, &rfds);
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
-	    if (fd == msock || fd == session.fdin)
+	    if (fd == msock || fd == session->fdin)
 		continue;
 	    /*
 	     * GPS must be opened if commands are waiting or any client is
@@ -750,12 +733,12 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZE];
 		int buflen;
 
-		if (session.fdin == -1) {
-		    gpsd_deactivate(&session);
-		    if (gpsd_activate(&session) >= 0)
+		if (session->fdin == -1) {
+		    gpsd_deactivate(session);
+		    if (gpsd_activate(session) >= 0)
 		    {
 			notify_watchers("GPSD,X=1\r\n");
-			FD_SET(session.fdin, &all_fds);
+			FD_SET(session->fdin, &all_fds);
 		    }
 		}
 
@@ -773,19 +756,19 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
-	    if (fd != session.fdin && fd != msock && FD_ISSET(fd, &all_fds)) {
+	    if (fd != session->fdin && fd != msock && FD_ISSET(fd, &all_fds)) {
 		need_gps++;
 	    }
 	}
 
-	if (!nowait && !need_gps && session.fdin != -1) {
-	    FD_CLR(session.fdin, &all_fds);
-	    session.fdin = -1;
-	    gpsd_deactivate(&session);
+	if (!nowait && !need_gps && session->fdin != -1) {
+	    FD_CLR(session->fdin, &all_fds);
+	    session->fdin = -1;
+	    gpsd_deactivate(session);
 	}
     }
 
-    gpsd_wrap(&session);
+    gpsd_wrap(session);
 }
 
 

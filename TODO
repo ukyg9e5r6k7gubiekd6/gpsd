@@ -1,1 +1,2 @@
-1. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+1. Make the text windows on the gps client wider to accommodate the new format.
+2. Autodetect USB GPS by scanning the USB bus, if no device is specified.

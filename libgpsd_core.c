@@ -27,11 +27,16 @@ static struct gps_type_t *set_device_type(char what)
     return *dp;
 }
 
-void gpsd_init(struct gps_session_t *session, char devicetype, char *dgpsserver)
+struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
     struct gps_type_t *devtype;
+
+    struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
+
+    if (!session)
+	return NULL;
 
     session->gpsd_device = "/dev/gps";
     session->device_type = &nmea;
@@ -87,6 +92,8 @@ void gpsd_init(struct gps_session_t *session, char devicetype, char *dgpsserver)
     INIT(session->gNMEAdata.signal_quality_stamp, now);
 #endif /* PROCESS_PRWIZCH */
     session->gNMEAdata.mode = MODE_NO_FIX;
+
+    return session;
 }
 
 void gpsd_deactivate(struct gps_session_t *session)

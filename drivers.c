@@ -61,9 +61,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 		return;
 	    }
 	}
-	if (session->debug > 1) {
-	    gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
-	}
+	gpscli_report(1, "unknown exception: \"%s\"\n", sentence);
     }
 }
 

@@ -381,8 +381,7 @@ static void analyze(struct gps_session_t *session,
     int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == em_nmea_checksum(p, h->ndata)) {
-	if (session->debug > 5)
-	    gpscli_report(1, "id %d\n", h->id);
+	gpscli_report(5, "id %d\n", h->id);
 	switch (h->id) {
 	case 1000:
 	    handle1000(session, p);
@@ -478,8 +477,7 @@ static void analyze(struct gps_session_t *session,
 	}
     }
     if (nmea > 0) {
-	if (session->debug > 4)
-	    gpscli_report(1, "%s", buf);
+	gpscli_report(4, "%s", buf);
 
 	if (session->gNMEAdata.raw_hook)
 	    session->gNMEAdata.raw_hook(buf);
