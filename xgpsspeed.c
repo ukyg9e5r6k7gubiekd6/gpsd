@@ -2,6 +2,7 @@
  * - Derrick J Brashear <shadow@dementia.org>
  */
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <math.h>
 #include <X11/Intrinsic.h>
@@ -11,11 +12,8 @@
 #include <Xm/XmStrDefs.h>
 #include <Tachometer.h>
 
-#include "xgpsspeed.icon"
-#ifdef HAVE_GETOPT
-#include <getopt.h>
-#endif
 #include "config.h"
+#include "xgpsspeed.icon"
 #include "gps.h"
 
 static XrmOptionDescRec options[] = {
