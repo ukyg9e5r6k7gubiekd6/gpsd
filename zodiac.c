@@ -87,35 +87,6 @@ static long putlong(char *dm, int sign)
     return rad;
 }
 
-static void zodiac_init(struct gps_session_t *session)
-{
-    unsigned short data[22];
-    time_t t;
-    struct tm tm;
-
-    if (session->latitude && session->longitude) {
-      t = time(NULL);
-      gmtime_r(&t, &tm);
-
-      if (session->sn++ > 32767)
-	  session->sn = 0;
-      
-      memset(data, 0, sizeof(data));
-      data[0] = session->sn;		/* sequence number */
-      data[1] = (1 << 2) | (1 << 3);
-      data[2] = data[3] = data[4] = 0;
-      data[5] = tm.tm_mday; data[6] = tm.tm_mon+1; data[7]= tm.tm_year+1900; 
-      data[8] = tm.tm_hour; data[9] = tm.tm_min; data[10] = tm.tm_sec;
-      *(long *) (data + 11) = putlong(session->latitude, (session->latd == 'S') ? 1 : 0);
-      *(long *) (data + 13) = putlong(session->longitude, (session->lond == 'W') ? 1 : 0);
-      data[15] = data[16] = 0;
-      data[17] = data[18] = data[19] = data[20] = 0;
-      data[21] = zodiac_checksum(data, 21);
-
-      zodiac_spew(session, 1200, data, 22);
-    }
-}
-
 static int zodiac_speed_switch(struct gps_session_t *session, int speed)
 {
     unsigned short data[21];
@@ -434,7 +405,7 @@ struct gps_type_t zodiac_binary =
     "Zodiac binary",	/* full name of type */
     NULL,		/* no probe */
     NULL,		/* only switched to by some other driver */
-    zodiac_init,	/* initialize the device */
+    NULL,		/* no initialization */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */
