@@ -1,7 +1,6 @@
 #include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
@@ -10,7 +9,9 @@
 #include <netdb.h>
 #include <stdarg.h>
 #include <setjmp.h>
-#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdio.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -20,28 +21,10 @@
 #endif
 #endif
 
-#if defined (HAVE_STRINGS_H)
-#include <strings.h>
-#endif
-
-
-#if defined (HAVE_SYS_TERMIOS_H)
-#include <sys/termios.h>
-#else
-#if defined (HAVE_TERMIOS_H)
-#include <termios.h>
-#endif
-#endif
-
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <stdio.h>
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
@@ -463,7 +446,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     int s, type;
     int one = 1;
 
-    bzero((char *) &sin, sizeof(sin));
+    memset((char *) &sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
 
