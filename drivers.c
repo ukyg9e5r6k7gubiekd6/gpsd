@@ -53,7 +53,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	{
 	    char	*trigger = (*dp)->trigger;
 
-	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->gpsd_fd)) {
+	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
 		gpsd_report(1, "found %s.\n", (*dp)->typename);
 		session->device_type = *dp;
 		session->device_type->initializer(session);
@@ -71,7 +71,7 @@ static int nmea_handle_input(struct gps_session_t *session)
     static int offset = 0;
 
     while (offset < BUFSIZE) {
-	if (read(session->gpsd_fd, buf + offset, 1) != 1)
+	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
 	    return 1;
 
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
@@ -96,7 +96,7 @@ static int nmea_handle_input(struct gps_session_t *session)
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
 {
-    return write(session->gpsd_fd, buf, rtcmbytes);
+    return write(session->gNMEAdata.gps_fd, buf, rtcmbytes);
 }
 
 struct gps_type_t nmea =
@@ -123,7 +123,7 @@ struct gps_type_t nmea =
 void fv18_initializer(struct gps_session_t *session)
 {
     /* tell it to send GSAs so we'll know if 3D is accurate */
-    nmea_send(session->gpsd_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
+    nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
 }
 
 struct gps_type_t fv18 =
@@ -168,9 +168,9 @@ static void tripmate_initializer(struct gps_session_t *session)
     struct tm *tm;
 
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    nmea_send(session->gpsd_fd, "$IIGPQ,ASTRAL");
+    nmea_send(session->gNMEAdata.gps_fd, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
-    nmea_send(session->gpsd_fd, "$PRWIILOG,ZCH,V,,");
+    nmea_send(session->gNMEAdata.gps_fd, "$PRWIILOG,ZCH,V,,");
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
@@ -178,7 +178,7 @@ static void tripmate_initializer(struct gps_session_t *session)
 	if(tm->tm_year > 100)
 	    tm->tm_year = tm->tm_year - 100;
 
-	nmea_send(session->gpsd_fd,
+	nmea_send(session->gNMEAdata.gps_fd,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d",
 		session->initpos.latitude, session->initpos.latd, 
 		session->initpos.longitude, session->initpos.lond,
@@ -230,7 +230,7 @@ static void earthmate_close(struct gps_session_t *session)
 
 static void earthmate_initializer(struct gps_session_t *session)
 {
-    write(session->gpsd_fd, "EARTHA\r\n", 8);
+    write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
     sleep(30);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
