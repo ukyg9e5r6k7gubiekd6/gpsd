@@ -9,15 +9,15 @@
 </head>
 <body background="paper.gif">
 
-<h1 align='center'>GPSD &mdash; a GPS service daemon</h1>
+<h1 align='center'><code>gpsd</code> &mdash; a GPS service daemon</h1>
 
-<p>This is the new home page of gpsd, moved from www.pygps.org in
-August 2004.  gpsd has just undergone a major rewrite at the hands of
+<p>This is the new home page of <code>gpsd</code>, moved from www.pygps.org in
+August 2004.  <code>gpsd</code> has just undergone a major rewrite at the hands of
 Eric S. Raymond; the upcoming 2.0 version will add many new features,
-including a linkable C service library that developers of gpsd-aware
-applications can use to encapsulate all communication with gpsd.</p>
+including a linkable C service library that developers of <code>gpsd</code>-aware
+applications can use to encapsulate all communication with <code>gpsd</code>.</p>
 
-<p>The goal of the gpsd project is to create a solid layer of
+<p>The goal of the <code>gpsd</code> project is to create a solid layer of
 infrastructure for open-source programs that want to be
 location-sensitive. We aim for simple, robust interfaces, unfussy
 operation, and an easy learning curve for application developers.</p>
@@ -27,12 +27,12 @@ with some technical information.  We also have <a href='NMEA.txt'>a
 list of NMEA sentences</a>.</p>
 
 <p>If you are new to GPS technology and don't quite understand what
-gpsd is about, you might find <a href="gps-hacking.html">ESR's Guide
+<code>gpsd</code> is about, you might find <a href="gps-hacking.html">ESR's Guide
 to Hacking With GPS</a> interesting</p>
 
-<p>There is at least one fork of gpsd in the wild, but there are plans
+<p>There is at least one fork of <code>gpsd</code> in the wild, but there are plans
 to unfork it soon.  You can read a brief <a
-href="history.html">history</a> of the gpsd project if you are
+href="history.html">history</a> of the <code>gpsd</code> project if you are
 curious.</p>
 
 <h1>Code and community</h1>
@@ -42,7 +42,7 @@ directory for tarballs of all released versions. We've now done our
 first release through berlios (1.9.0), and access to the bleeding-edge
 developer version is supported <a
 href="http://developer.berlios.de/svn/?group_id=2116">via
-Subversion</a>.  The main projecct page is <a
+Subversion</a>.  The main project page is <a
 href='http://developer.berlios.de/projects/gpsd/'>here</a>.</p>
 
 <p>There are three project mailing lists:</p>
@@ -53,31 +53,31 @@ href="https://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
 is for release announcements and project news.</p></li>
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
-is for questions and technical support on gpsd, including support
-for application builders using gpsd as a component.</p></li>
+is for questions and technical support on <code>gpsd</code>, including support
+for application builders using <code>gpsd</code> as a component.</p></li>
 
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
-is for gpsd developers.</p></li>
+is for <code>gpsd</code> developers.</p></li>
 </ul>
 
 <h1>Introduction to gpsd</h1>
 
-<p>gpsd is a translator. It takes input from a device capable of
+<p><code>gpsd</code> is a translator. It takes input from a device capable of
 generating positional data (like a GPS or a Loran receiver) and
 translates it into another, very simple format.  A client that feels
 lucky can also request raw NMEA data from the originating GPS.  This
-makes sense for debugging, but probably not much else. Gpsd
+makes sense for debugging, but probably not much else. <code>gpsd</code>
 re-publishes the data on a networking port via TCP/IP.  Multiple
 clients can connect to this port and get data from the GPS; the
 daemon will multiplex all requests from them and prevent contention.</p>
 
-<p>gpsd was meant to make programs like <a
-href="http://www.pygps.org">pyGPS</a> hardware independent. With gpsd,
+<p><code>gpsd</code> was meant to make programs like <a
+href="http://www.pygps.org">pyGPS</a> hardware independent. With <code>gpsd</code>,
 pyGPS allows you to show the position of the GPS on an electronic
-map. Since the computer running gpsd and the one running pyGPS do not
+map. Since the computer running <code>gpsd</code> and the one running pyGPS do not
 have to be the same machine, you can remotely display the position of
-one computer on the other.  Other applications that use gpsd include
+one computer on the other.  Other applications that use <code>gpsd</code> include
 <a href="http://www.kismetwireless.net/">Kismet</a> and 
 <a href="http://www.gpsdrive.cc/">GPSdrive</a>.</p>
 
@@ -85,13 +85,13 @@ one computer on the other.  Other applications that use gpsd include
 
 <dl>
 <dt><a href="gpsd.html">gpsd.1</a></dt>
-<dd>The gpsd daemon.</dd>
+<dd>The <code>gpsd</code> daemon.</dd>
 
 <dt><a href="libgpsd.html">libgpsd.3</a></dt>
 <dd>An interface library that manages communication with the daemon.</dt>
 
 <dt><a href="libgps.html">libgps.3</a></dt>
-<dd>The low-level library used by gpsd to talk to a GPS.</dd>
+<dd>The low-level library used by <code>gpsd</code> to talk to a GPS.</dd>
 </dl>
 
 <p>Note that these describe gpsd-2, not the 1.x versions you may have
@@ -100,7 +100,7 @@ seen before.</p>
 <h1>The gps client</h1>
 
 <p>Included in the package is a sample/simple client called 'gps'. It connects
-to a gpsd at any host you tell it to, and requests raw data, so that it can
+to a <code>gpsd</code> at any host you tell it to, and requests raw data, so that it can
 display the current location of all visible GPS satellites your receiver
 'sees'.</p>
 
@@ -121,7 +121,7 @@ to determine location with better accuracy.</p>
 
 <h1>Recipes and related resources</h1>
 
-<p>gpsd also works with <a href="bt.html">bluetooth GPS</a> receivers.</p>
+<p><code>gpsd</code> also works with <a href="bt.html">bluetooth GPS</a> receivers.</p>
 
 <p>Robin Cull has a Gentoo Linux <a
 href="http://www.digitalevacuation.org/ebuilds/gpsd-1.07.ebuild">ebuild
