@@ -124,7 +124,7 @@ static void build_gui(Widget lxbApp)
 
     /* the root application window */
     n = 0;
-    XtSetArg(args[n], XmNgeometry, "610x460");
+    XtSetArg(args[n], XmNgeometry, "630x460");
     n++;
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
@@ -157,11 +157,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
-#ifdef PROCESS_PRWIZCH
-    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH-PRWIZCH_WIDTH);
-#else
-    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH);
-#endif /* PROCESS_PRWIZCH */
+    XtSetArg(args[7], XmNcolumns, 23);
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
@@ -193,19 +189,14 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNy, 10);
     XtSetArg(args[5], XmNx, 80);
     XtSetArg(args[6], XmNrightAttachment, XmATTACH_NONE);
-#ifdef PROCESS_PRWIZCH
-    XtSetArg(args[7], XmNleftWidget, prwizch_list);
-#else
-    XtSetArg(args[7], XmNleftWidget, satellite_list);
-#endif /* PROCESS_PRWIZCH */
-    XtSetArg(args[8], XmNtopOffset, 10);
-    XtSetArg(args[9], XmNleftAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[10], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[11], XmNresizePolicy, XmRESIZE_NONE);
-    XtSetArg(args[12], XmNheight, 402);
-    XtSetArg(args[13], XmNwidth, 402);
+    XtSetArg(args[7], XmNtopOffset, 10);
+    XtSetArg(args[8], XmNrightAttachment, XmATTACH_FORM);
+    XtSetArg(args[9], XmNtopAttachment, XmATTACH_FORM);
+    XtSetArg(args[10], XmNresizePolicy, XmRESIZE_NONE);
+    XtSetArg(args[11], XmNheight, 402);
+    XtSetArg(args[12], XmNwidth, 402);
     satellite_diagram = XtCreateManagedWidget("satellite_diagram",
-			     xmDrawingAreaWidgetClass, data_panel, args, 14);
+			     xmDrawingAreaWidgetClass, data_panel, args, 13);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
     gc = XCreateGC(XtDisplay(satellite_diagram),
 	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
