@@ -25,5 +25,8 @@
 	 for his work (see README for contact info).
 19991213 (0.99-dgps)
 	 Added minimal DGPS support by Derrick J Brashear
-20000102 (0.100)
+20000102 (1.0)
 	 Added DGPS fixes from Curt Mills. (See README for contact info.)
+20000305 (1.01)
+	 Updated to IANA port.
+	 Fixes to DGPS support.
