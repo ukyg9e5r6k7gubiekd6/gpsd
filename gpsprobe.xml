@@ -47,7 +47,8 @@ the name of the plot script.</para>
 
 <para>Note: <application>gpsprobe</application> needs access to the raw
 GPS device. Therefore <application>gpsd</application> must not be running
-when you call <application>gpsprobe</application>.</para>
+when you call <application>gpsprobe</application>.  You will probably
+have to run as superuser to get access to the device.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -76,8 +77,8 @@ handle either Rockwell or SiRF binary protocols.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>.
-There is a project page, with gps screenshots, <ulink
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
+project page <ulink
 url="http://www.berlios.de/gpsd/">here</ulink>.</para>
 
 </refsect1>
