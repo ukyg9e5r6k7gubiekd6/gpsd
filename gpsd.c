@@ -198,7 +198,7 @@ static int handle_dgps()
     char buf[BUFSIZE];
     int rtcmbytes, cnt;
 
-    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0) {
+    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0 && (gNMEAdata.fdout!=-1)) {
 
 	if (device_type == DEVICE_EARTHMATEb)
 	    cnt = em_send_rtcm(buf, rtcmbytes);
@@ -352,7 +352,10 @@ int main(int argc, char *argv[])
 	FD_SET(dsock, &afds);
     }
 
+    /* mark fds closed */
     input = -1;
+    gNMEAdata.fdin = input;
+    gNMEAdata.fdout = input;
 
     while (1) {
 	struct timeval tv;
