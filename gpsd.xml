@@ -254,11 +254,6 @@ NMEA</ulink>.</para>
 devices speak NMEA by default before being switched to binary and
 should thus be accessible as generic GPS devices.</para>
 
-<para>The Maidenhead Locator System is a ham-radio convention for
-describing latitude/longitude cells.  It is described at the <ulink
-url='http://www.arrl.org/locate/gridinfo.html'>ARRL
-website</ulink>.</para>
-
 </refsect1>
 <refsect1 id='maintainer'><title>MAINTAINER</title> 
 
