@@ -116,22 +116,22 @@ struct gps_session_t {
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
     unsigned long counter;
 #ifdef BINARY_ENABLE
-#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */
-    long GarminBufferLen;                  /* current GarminBuffer Length */
-#endif /* GARMIN_ENABLE */
-    double separation;		/* Geoidal separation */
-#define NO_SEPARATION	-99999	/* must be out of band */
+    struct gps_fix_t lastfix;	/* use to compute uncertainties */
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
 #define SIRF_SEEN_41    0x08            /* Seen Geodetic Navigation Data? */
 #define FULL_PACKET	0x10		/* Full packet has been seen */
+    double separation;		/* Geoidal separation */
+#define NO_SEPARATION	-99999	/* must be out of band */
+    double mag_var;		/* Magnetic variation in degrees */  
+#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
+    unsigned char GarminBuffer[4096 + 12]; /* Garmin packet buffer */
+    long GarminBufferLen;                  /* current GarminBuffer Length */
+#endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
-    double mag_var;		/* Magnetic variation in degrees */  
-    struct gps_fix_t lastfix;	/* use to compute uncertainties */
     /*
      * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
      * translation of Zodiac binary protocol can send it up to the client.

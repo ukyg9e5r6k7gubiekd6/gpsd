@@ -103,8 +103,10 @@ int gpsd_activate(struct gps_session_t *session)
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
+#ifdef BINARY_ENABLE
 	session->mag_var = NO_MAG_VAR;
 	session->separation = NO_SEPARATION;
+#endif /* BINARY_ENABLE */
 
 	return session->gpsdata.gps_fd;
     }
