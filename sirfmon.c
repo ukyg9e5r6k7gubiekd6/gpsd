@@ -118,7 +118,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 
     /* sniff for NMEA or SiRF packet */
     state = 0;
-    for (count = 0; count < 300; count++) {
+    for (count = 0; count < 1200; count++) {
 	if ((st = read(LineFd, &c, 1)) < 0)
 	    return 0;
 	else
