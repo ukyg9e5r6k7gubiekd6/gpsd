@@ -231,9 +231,9 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (!validate())
 		strcpy(phrase, ",E=?");
 	    else if (ud->seen_sentences & PGRME)
-		sprintf(phrase, ",E=%f %f %f", ud->epe, ud->eph, ud->epv);
+		sprintf(phrase, ",E=%.2f %.2f %.2f", ud->epe, ud->eph, ud->epv);
 	    else if (SEEN(ud->fix_quality_stamp))
-		sprintf(phrase, ",E=%f %f %f", 
+		sprintf(phrase, ",E=%.2f %.2f %.2f", 
 			ud->pdop * UERE(session), 
 			ud->hdop * UERE(session), 
 			ud->vdop * UERE(session));
@@ -258,10 +258,10 @@ static int handle_request(int fd, char *buf, int buflen)
 			ud->latitude, ud->longitude);
 	    break;
 	case 'Q':
-	    if (!validate())
+	    if (!validate() || !SEEN(ud->fix_quality_stamp))
 		strcpy(phrase, ",Q=?");
 	    else
-		sprintf(phrase, ",Q=%d %f %f %f",
+		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
 			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
 	    break;
 	case 'R':
