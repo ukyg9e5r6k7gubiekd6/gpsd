@@ -36,8 +36,7 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
 
     while (n--)
 	csum += *(w++);
-    csum = -csum;
-    return csum;
+    return -csum;
 }
 
 /* zodiac_spew - Takes a message type, an array of data words, and a length
@@ -70,7 +69,6 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     struct header h;
 
     h.flags = 0;
-
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
@@ -89,7 +87,6 @@ static long putlong(char *dm, int sign)
 
     tmpl = fabs(atof(dm));
     rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*PI/180;
-
     if (sign)
 	rad = -rad;
 
@@ -139,7 +136,6 @@ static void send_rtcm(struct gps_session_t *session,
 	session->sn = 0;
 
     memset(data, 0, sizeof(data));
-
     data[0] = session->sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = zodiac_checksum(data, n);
@@ -432,7 +428,6 @@ static void analyze(struct gps_session_t *session,
     }
     if (nmea > 0) {
 	gpsd_report(4, "%s", buf);
-
 	if (session->gNMEAdata.raw_hook)
 	    session->gNMEAdata.raw_hook(buf);
     }

@@ -23,13 +23,13 @@ static char *field(char *sentence, short n)
     int i;
 
     while (n-- > 0)
-        while ((c = *p++) != ',' && c != '\0');
+        while ((c = *p++) != ',' && c != '\0')
+	    continue;
     strncpy(result, p, sizeof(result)-1);
     p = result;
     i = 0;
-    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i<100)
+    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i < sizeof(result))
 	p++;
-
     *p = '\0';
     return result;
 }
@@ -149,18 +149,17 @@ static void fake_mmddyyyy(struct gps_data_t *out)
 static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
 /* update last-fix field from a UTC time */
 {
-    strncpy(out->utc + 11, hhmmss, 2);	/* copy hours */
+    strncpy(out->utc+11, hhmmss, 2);	/* copy hours */
     out->utc[13] = ':';
-    strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
+    strncpy(out->utc+14, hhmmss+2, 2);	/* copy minutes */
     out->utc[16] = ':';
-    strncpy(out->utc + 17 , 
-	    hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
+    strncpy(out->utc+17 , hhmmss+4, sizeof(out->utc)-17);	/* copy seconds */
     strcat(out->utc, "Z");
 }
 
 /**************************************************************************
  *
- * NMEA sentence handling begin here
+ * NMEA sentence handling begins here
  *
  **************************************************************************/
 
@@ -229,7 +228,6 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
 	int newstatus = out->status;
 
 	do_lat_lon(sentence, 1, out);
-
 	fake_mmddyyyy(out);
 	merge_hhmmss(field(sentence, 5), out);
 	if (status[0] == 'D')
@@ -255,7 +253,7 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 	(4) Speed over ground (kilometers) 00.0 to 99.9
 
      * Up to and including 1.10, gpsd assumed this and extracted field
-     * 3 for ground speed.  But NMEA spec, version 3.01, dated 1/1/2002, 
+     * 3 for ground speed.  But the NMEA spec, version 3.01, dated 1/1/2002, 
      * gives this:
 
 	1    = Track made good
@@ -273,17 +271,12 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 
      * which means we want to extract field 5.  We cope with both.
      */
-    int changed;
-
-    changed = update_field_f(sentence, 1, &out->track);
-    out->track_stamp.changed = changed;
+    out->track_stamp.changed = update_field_f(sentence, 1, &out->track);;
     REFRESH(out->track_stamp);
-    changed = 0;
     if (field(sentence, 2)[0] == 'T')
-	changed |= update_field_f(sentence, 5, &out->speed);
+	out->speed_stamp.changed = update_field_f(sentence, 5, &out->speed);
     else
-	changed |= update_field_f(sentence, 3, &out->speed);
-    out->speed_stamp.changed = changed;
+	out->speed_stamp.changed = update_field_f(sentence, 3, &out->speed);
     REFRESH(out->speed_stamp);
 }
 
@@ -295,9 +288,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
            123519       Fix taken at 12:35:19 UTC
            4807.038,N   Latitude 48 deg 07.038' N
            01131.324,E  Longitude 11 deg 31.324' E
-           1            Fix quality: 0 = invalid
-                                     1 = GPS fix
-                                     2 = DGPS fix
+           1            Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix
            08           Number of satellites being tracked
            0.9          Horizontal dilution of position
            545.4,M      Altitude, Metres above mean sea level
@@ -322,10 +313,8 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */
-	if (!altitude[0])
-	{
-	    if (out->mode == MODE_3D)
-	    {
+	if (!altitude[0]) {
+	    if (out->mode == MODE_3D) {
 		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		out->mode_stamp.changed = 1;
 		REFRESH(out->mode_stamp);
@@ -347,14 +336,10 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
     /*
 	eg1. $GPGSA,A,3,,,,,,16,18,,22,24,,,3.6,2.1,2.2*3C
 	eg2. $GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35
-
 	1    = Mode:
 	       M=Manual, forced to operate in 2D or 3D
 	       A=Automatic, 3D/2D
-	2    = Mode:
-	       1=Fix not available
-	       2=2D
-	       3=3D
+	2    = Mode: 1=Fix not available, 2=2D, 3=3D
 	3-14 = PRNs of satellites used in position fix (null for unused fields)
 	15   = PDOP
 	16   = HDOP
@@ -380,6 +365,8 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
 
 int nmea_sane_satellites(struct gps_data_t *out)
 {
+    int n;
+
     /* data may be incomplete */
     if (out->part < out->await)
 	return 0;
@@ -392,12 +379,9 @@ int nmea_sane_satellites(struct gps_data_t *out)
      * and entries 0 (but nonzero elevations).  This behavior
      * was observed under SiRF firmware revision 231.000.000_A2.
      */
-    int n;
-
     for (n = 0; n < out->satellites; n++)
-	if (out->azimuth[n]) {
+	if (out->azimuth[n])
 	    return 1;
-	}
     return 0;
 }
 
@@ -429,7 +413,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 
     lower = (out->part - 1) * 4;
     upper = lower + 4;
-
     while (lower < out->satellites && lower < upper) {
 	changed |= update_field_i(sentence, fldnum++, &out->PRN[lower]);
 	changed |= update_field_i(sentence, fldnum++, &out->elevation[lower]);
@@ -452,7 +435,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 		    && !out->azimuth[out->satellites-1]
 		    && !out->ss[out->satellites-1])
 	    out->satellites--;
-
 	if (nmea_sane_satellites(out)) {
 	    gpsd_report(3, "Satellite data OK.\n");
 	    out->satellite_stamp.changed = changed;
@@ -471,7 +453,6 @@ static short nmea_checksum(char *sentence)
 
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
-
     sprintf(csum, "%02X", sum);
     return (strncmp(csum, p, 2) == 0);
 }
@@ -490,7 +471,6 @@ void nmea_add_checksum(char *sentence)
 
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
-
     sprintf(p, "%02X\r\n", sum);
 }
 

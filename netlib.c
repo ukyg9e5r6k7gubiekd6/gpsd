@@ -38,8 +38,7 @@ int netlib_connectsock(char *host, char *service, char *protocol)
     else
 	type = SOCK_STREAM;
 
-    s = socket(PF_INET, type, ppe->p_proto);
-    if (s < 0)
+    if ((s = socket(PF_INET, type, ppe->p_proto)) < 0)
 	return NL_NOSOCK;
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1)
 	return NL_NOSOCKOPT;

@@ -89,7 +89,7 @@ struct gps_type_t nmea = {
 #if FV18_ENABLE
 /**************************************************************************
  *
- * FV18 -- doesn't send GPGSAs, uses 2 stop bits
+ * FV18 -- uses 2 stop bits, needs to be told to send GSAs
  *
  **************************************************************************/
 
@@ -140,10 +140,8 @@ static void tripmate_initializer(struct gps_session_t *session)
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
-
-	if(tm->tm_year > 100)
+	if (tm->tm_year > 100)
 	    tm->tm_year = tm->tm_year - 100;
-
 	nmea_send(session->gNMEAdata.gps_fd,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d",
 		session->initpos.latitude, session->initpos.latd, 
