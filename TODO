@@ -1,4 +1,1 @@
-1. Split the gpsd interface code out of pygps into a Python 
-   module that can be shipped with gpsd.
-
-2. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+1. Autodetect USB GPS by scanning the USB bus, if no device is specified.
