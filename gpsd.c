@@ -7,8 +7,15 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <paths.h>
 #include <string.h>
+
+#if defined (HAVE_PATH_H)
+#include <paths.h>
+#else
+#if !defined (_PATH_DEVNULL)
+#define _PATH_DEVNULL    "/dev/null"
+#endif
+#endif
 
 #if defined (HAVE_STRINGS_H)
 #include <strings.h>

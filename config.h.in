@@ -13,6 +13,9 @@
 /* Define if you have the <X11/xpm.h> header file.  */
 #undef HAVE_X11_XPM_H
 
+/* Define if you have the <path.h> header file.  */
+#undef HAVE_PATH_H
+
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
