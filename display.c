@@ -1,4 +1,5 @@
 #include <Xm/Xm.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "gps.h"

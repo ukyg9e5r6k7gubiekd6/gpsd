@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <stdio.h>
+#include <sys/socket.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
