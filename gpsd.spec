@@ -23,7 +23,7 @@ to parse than NMEA 0183,
 
 %build
 configure --prefix=/usr
-make %{?_smp_mflags} gpsd gpsd.1 libgpsd.a libgpsd.3
+make %{?_smp_mflags} gpsd gpsd.1 libgps.a libgps.3
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -32,9 +32,9 @@ mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
 cp gpsd.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
-cp libgpsd.a "$RPM_BUILD_ROOT"%{_libdir}
+cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
-cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
+cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 
 %clean
@@ -48,12 +48,12 @@ cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING gpsd.xml libgpsd.xml HACKING TODO
+%doc README INSTALL COPYING gpsd.xml libgps.xml HACKING TODO
 %defattr(-,root,root,-)
 %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
-%{_libdir}/libgpsd.a
-%{_mandir}/man3/libgpsd.3*
+%{_libdir}/libgps.a
+%{_mandir}/man3/libgps.3*
 %{_includedir}/gpsd.h
 
 %changelog

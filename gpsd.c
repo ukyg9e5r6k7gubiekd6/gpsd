@@ -44,6 +44,7 @@
 #endif
 
 #include "gps.h"
+#include "gpsd.h"
 #include "version.h"
 
 #define QLEN		5

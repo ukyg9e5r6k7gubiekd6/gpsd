@@ -17,6 +17,7 @@
 #include <sys/param.h>
 #endif
 
+#include "gps.h"
 #include "gpsd.h"
 
 #if !defined (INADDR_NONE)

@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+#include "gps.h"
 #include "gpsd.h"
 
 #define PI 3.14159265358979323846

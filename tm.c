@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include "gps.h"
 #include "gpsd.h"
 
 /**************************************************************************

@@ -15,6 +15,7 @@
 #endif
 #endif
 
+#include "gps.h"
 #include "gpsd.h"
 
 #define DEFAULTPORT "2947"

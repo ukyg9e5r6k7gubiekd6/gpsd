@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <gpsd.h>
+
+#include "gps.h"
+#include "gpsd.h"
 
 /* ----------------------------------------------------------------------- */
 

@@ -129,45 +129,45 @@ XGPSOBJS=xgpsspeed.o Tachometer.o
 all: $(PROGRAMS) $(MOTIF_PROGRAMS) $(PAGES)
 
 gpsd: gpsd.o libgps.a
-	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
+	$(LINK.c) -o $@ gpsd.o -L. -lgps $(NETLIBS) $(LIBS)
 
 gps: gps.o libgps.a
-	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
+	$(LINK.c) -o $@ gps.o -L. -lgps $(ALL_X_LIBS) $(LIBS)
 
 xgpsspeed: $(XGPSOBJS)
-	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgpsd $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
+	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgps $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
 libgps.a:  $(LIB_OBJECTS)
 	ar -r libgps.a $(LIB_OBJECTS)
 	ranlib libgps.a
 
 # Library parts
-netlib.o: netlib.c gpsd.h
+netlib.o: netlib.c gps.h gpsd.h
 nmea_parse.o: nmea_parse.c
-serial.o: serial.c gpsd.h
-tm.o: tm.c gpsd.h
-em.o: em.c gpsd.h
-send_nmea.o: send_nmea.c gpsd.h
+serial.o: serial.c gps.h gpsd.h
+tm.o: tm.c gps.h gpsd.h
+em.o: em.c gps.h gpsd.h
+send_nmea.o: send_nmea.c gps.h gpsd.h
 
-display.o: display.c gpsd.h
-gps.o: gps.c gpsd.h version.h
-gpsd.o: gpsd.c gpsd.h version.h
-xgpsspeed.o: xgpsspeed.c gpsd.h xgpsspeed.icon
+display.o: display.c gps.h gpsd.h
+gps.o: gps.c gps.h gpsd.h version.h
+gpsd.o: gpsd.c gps.h gpsd.h version.h
+xgpsspeed.o: xgpsspeed.c gps.h gpsd.h xgpsspeed.icon
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
 
-libgpsd.3: libgpsd.xml
+libgps.3: libgpsd.xml
 	xmlto man libgpsd.xml
 
 # Version is extracted from version.h; make sure gpsd.spec stays current!
 VERS=$(shell sed <version.h -n -e '/[^"]*"\([0-9].*\)"/s//\1/p')
 
-HEADERS = config.h gpsd.h TachometerP.h nmea.h Tachometer.h version.h xgpsspeed.icon
+HEADERS = config.h gps.h gps.h gpsd.h TachometerP.h nmea.h Tachometer.h version.h xgpsspeed.icon
 
 SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(HEADERS)
 DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml
-MANPAGES = gpsd.1 libgpsd.3
+MANPAGES = gpsd.1 libgps.3
 XRESOURCES = gps.ad xgpsspeed.ad
 CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
 META = gpsd.spec gpsd.lsm
@@ -193,7 +193,7 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man1/
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd.1
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man3/
-	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgpsd.1
+	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgps.3
 
 clean:
 	rm -f *.o *.a gpsd gps xgpsspeed *~ config.status

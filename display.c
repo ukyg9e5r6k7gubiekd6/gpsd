@@ -25,6 +25,7 @@
 #include <X11/Shell.h>
 #include <math.h>
 
+#include "gps.h"
 #include "gpsd.h"
 
 extern void register_canvas(Widget w, GC gc);
