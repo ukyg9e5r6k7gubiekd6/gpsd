@@ -357,12 +357,12 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    ud->vdop * UERE(session));
 		else
 		    strcat(phrase, "? ?");
-		if (SEEN(ud->track_stamp) && SEEN(ud->speed_stamp))
+		if (SEEN(ud->track_stamp))
 		    sprintf(phrase+strlen(phrase), "%.4f %.3f",
 			    ud->track, ud->speed);
 		else
 		    strcat(phrase, "? ?");
-		if (SEEN(session->gNMEAdata.climb_stamp))
+		if (SEEN(session->gNMEAdata.altitude_stamp))
 		    sprintf(phrase+strlen(phrase), " %.3f", ud->climb);
 		else
 		    strcat(phrase, "?");
@@ -415,13 +415,13 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (have_fix(session) && SEEN(ud->climb_stamp))
+	    if (have_fix(session) && SEEN(ud->altitude_stamp))
 		sprintf(phrase, ",U=%.3f", ud->climb);
 	    else if (explicit)
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (have_fix(session) && SEEN(ud->speed_stamp))
+	    if (have_fix(session) && SEEN(ud->track_stamp))
 		sprintf(phrase, ",V=%.3f", ud->speed);
 	    else if (explicit)
 		strcpy(phrase, ",V=?");

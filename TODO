@@ -227,9 +227,8 @@ together span all the information that gpsd can get (minor exception;
 horizontal and vertical uncertainties).
 
 There are two issues connected with 'o'.  One is how to fill in the
-currently missing fields: timerr, speederr, trackerr, and climberr.
-The other is trickier and has to do with what timestamp the o return
-should have.
+currently missing fields: speederr, trackerr, and climberr.  The other
+is trickier and has to do with what timestamp the o return should have.
 
 Internally, a GPS typically takes a fix once in its basic cycle time 
 (typically once per second).  It then generates a report.  A SiRF chip

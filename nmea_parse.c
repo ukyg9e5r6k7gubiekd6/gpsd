@@ -196,7 +196,6 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
 	out->speed = atof(field[7]);
-	REFRESH(out->speed_stamp);
 	out->track = atof(field[8]);
 	REFRESH(out->track_stamp);
 	mask |= (TRACK_SET | SPEED_SET);
@@ -313,7 +312,6 @@ static int processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
 	out->speed = atof(field[5]);
     else
 	out->speed = atof(field[3]);
-    REFRESH(out->speed_stamp);
     /* 
      * Never send watcher notifications on GPVTG, as those
      * only duplicate information made available at other points
@@ -374,7 +372,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	} else {
 	    double oldaltitude = out->altitude;
 	    double oldaltstamp = out->altitude_stamp.last_refresh;
-	    double oldclimb = out->climb;
 
 	    out->altitude = atof(altitude);
 	    REFRESH(out->altitude_stamp);
@@ -386,13 +383,11 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	     * SiRF and Garmin chips, which might have some smoothing
 	     * going on.
 	     */
-	    out->climb_stamp = out->altitude_stamp;
 	    if (!oldaltstamp)
 		out->climb = 0;
 	    else {
 		out->climb = (out->altitude-oldaltitude)/(out->altitude_stamp.last_refresh-oldaltstamp);
 	    }
-	    out->climb_stamp.changed = (out->climb != oldclimb);
 	    mask |= CLIMB_SET;
 	}
     }

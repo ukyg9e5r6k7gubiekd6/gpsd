@@ -213,7 +213,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gNMEAdata.longitude = lambda * RAD_2_DEG;
 	    REFRESH(session->gNMEAdata.latlon_stamp);
 	    if (session->gNMEAdata.mode == MODE_3D) {
-		if (session->diverstate & SIRF_SEEN_41) {
+		if (session->driverstate & SIRF_SEEN_41) {
 		    /* recompute geodetic sep. from the *last* altitude fix */
 		    session->separation = session->gNMEAdata.altitude - h;
 		    /* use it to correct this one so updates will be atomic */
@@ -231,9 +231,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    if (heading < 0)
 		heading += 2 * PI;
 	    session->gNMEAdata.track = heading * RAD_2_DEG;
-	    REFRESH(session->gNMEAdata.speed_stamp);
 	    REFRESH(session->gNMEAdata.track_stamp);
-	    REFRESH(session->gNMEAdata.climb_stamp);
 	    /* fix status is byte 19 */
 	    navtype = getb(19);
 	    session->gNMEAdata.status = STATUS_NO_FIX;
@@ -378,6 +376,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * anyone running 231.000.000 or earlier (including ES,
 	     * SiRFDRive, XTrac trains) you won't get UTC time. I don't
 	     * know what's broken in firmwares before 2.3.1..."
+	     *
 	     * To work around the incomplete implementation of this
 	     * packet in 231, we assume that only the altitude field
 	     * from this packet is valid.
@@ -434,12 +433,10 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
 	    session->gNMEAdata.speed = getw(36)*1e-2;
-	    REFRESH(session->gNMEAdata.speed_stamp);
 	    session->gNMEAdata.track = getw(38)*1e-2;
 	    REFRESH(session->gNMEAdata.track_stamp);
 	    /* skip 2 bytes of magnetic variation */
 	    session->gNMEAdata.climb = getw(42)*1e-2;
-	    REFRESH(session->gNMEAdata.climb_stamp);
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);

@@ -182,8 +182,6 @@ static int handle1000(struct gps_session_t *session)
 	session->gNMEAdata.mode = 1;
     REFRESH(session->gNMEAdata.latlon_stamp);
     REFRESH(session->gNMEAdata.altitude_stamp);
-    REFRESH(session->gNMEAdata.speed_stamp);
-    REFRESH(session->gNMEAdata.climb_stamp);
     REFRESH(session->gNMEAdata.track_stamp);
     REFRESH(session->gNMEAdata.status_stamp);
     REFRESH(session->gNMEAdata.mode_stamp);

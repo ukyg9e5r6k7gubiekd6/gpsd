@@ -138,16 +138,10 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    REFRESH(gpsdata->track_stamp);
 		    break;
 		case 'U':
-		    sscanf(sp, "U=%lf", &d1);
-		    gpsdata->climb_stamp.changed = (gpsdata->climb != d1);
-		    gpsdata->climb = d1;
-		    REFRESH(gpsdata->climb_stamp);
+		    sscanf(sp, "U=%lf", &gpsdata->climb);
 		    break;
 		case 'V':
-		    sscanf(sp, "V=%lf", &d1);
-		    gpsdata->speed_stamp.changed = (gpsdata->speed != d1);
-		    gpsdata->speed = d1;
-		    REFRESH(gpsdata->speed_stamp);
+		    sscanf(sp, "V=%lf", &gpsdata->speed);
 		    break;
 		case 'X':
 		    if (!strncmp(sp, "X=1", 3)) {
@@ -220,8 +214,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
 	|| gpsdata->altitude_stamp.changed 
-	|| gpsdata->climb_stamp.changed 
-	|| gpsdata->speed_stamp.changed 
 	|| gpsdata->track_stamp.changed 
 	|| gpsdata->status_stamp.changed 
 	|| gpsdata->mode_stamp.changed 
@@ -297,19 +289,15 @@ void data_dump(struct gps_data_t *collect, time_t now)
 	       collect->latlon_stamp.changed);
     }
     if (collect->altitude_stamp.changed) {
-	printf("A: altitude: %lf ", collect->altitude);
+	printf("A: altitude: %lf  U: climb: %lf", 
+	       collect->altitude, collect->climb);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->altitude_stamp.last_refresh,
 	       collect->altitude_stamp.changed);
     }
-    if (collect->speed_stamp.changed) {
-	printf("V: speed: %lf ", collect->speed);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->speed_stamp.last_refresh,
-	       collect->speed_stamp.changed);
-    }
     if (collect->track_stamp.changed) {
-	printf("T: track: %lf ", collect->track);
+	printf("T: track: %lf  V: speed: %lf ", 
+	       collect->track, collect->speed);
 	printf("(lr=%ld, changed=%d)\n",
 	       collect->track_stamp.last_refresh,
 	       collect->track_stamp.changed);
