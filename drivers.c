@@ -2,11 +2,8 @@
  * Drivers for generic NMEA device, TripMate and Zodiac EarthMate in text mode.
  */
 #include "config.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
-#include <fcntl.h>
 #include <string.h>
 
 #include "gps.h"
@@ -126,7 +123,7 @@ struct gps_type_t nmea =
 void fv18_initializer(struct gps_session_t *session)
 {
     /* tell it to send GSAs so we'll know if 3D is accurate */
-    nmea_send(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
+    nmea_send(session->gpsd_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
 }
 
 struct gps_type_t fv18 =
@@ -171,9 +168,9 @@ static void tripmate_initializer(struct gps_session_t *session)
     struct tm *tm;
 
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    nmea_send(session->fdout, "$IIGPQ,ASTRAL");
+    nmea_send(session->gpsd_fd, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
-    nmea_send(session->fdout, "$PRWIILOG,ZCH,V,,");
+    nmea_send(session->gpsd_fd, "$PRWIILOG,ZCH,V,,");
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
@@ -181,7 +178,7 @@ static void tripmate_initializer(struct gps_session_t *session)
 	if(tm->tm_year > 100)
 	    tm->tm_year = tm->tm_year - 100;
 
-	nmea_send(session->fdout,
+	nmea_send(session->gpsd_fd,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d",
 		session->initpos.latitude, session->initpos.latd, 
 		session->initpos.longitude, session->initpos.lond,
@@ -233,7 +230,7 @@ static void earthmate_close(struct gps_session_t *session)
 
 static void earthmate_initializer(struct gps_session_t *session)
 {
-    write(session->fdout, "EARTHA\r\n", 8);
+    write(session->gpsd_fd, "EARTHA\r\n", 8);
     sleep(30);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;

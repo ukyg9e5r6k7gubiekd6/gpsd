@@ -4,6 +4,7 @@
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
 #include <netdb.h>

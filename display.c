@@ -1,6 +1,5 @@
 #include "config.h"
 
-#include <stdio.h>
 #include <Xm/Xm.h>
 #include <math.h>
 

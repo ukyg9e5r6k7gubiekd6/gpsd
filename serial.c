@@ -44,8 +44,7 @@ int gpsd_open(char *device_name, int device_speed, int stopbits)
     int ttyfd;
 
     gpsd_report(1, "opening GPS data source at %s\n", device_name);
-    ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
-    if (ttyfd < 0)
+    if ((ttyfd = open(device_name, O_RDWR | O_NONBLOCK)) < 0)
 	return -1;
 
     if (isatty(ttyfd)) {
@@ -71,6 +70,7 @@ int gpsd_open(char *device_name, int device_speed, int stopbits)
 }
 
 void gpsd_close(int ttyfd)
+/* restore original terminal settings, but make sure DTR goes down */
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {
@@ -81,12 +81,9 @@ void gpsd_close(int ttyfd)
 	    ttyset.c_ospeed = B0;
 #endif
             tcsetattr(ttyfd, TCSANOW, &ttyset);
+	    ttyset_old.c_cflag |= HUPCL;
+	    tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 	}
-	/* Restore original terminal parameters */
-	/* but make sure DTR goes down */
-	ttyset_old.c_cflag |= HUPCL;
-	tcsetattr(ttyfd,TCSANOW,&ttyset_old);
-
 	close(ttyfd);
     }
 }

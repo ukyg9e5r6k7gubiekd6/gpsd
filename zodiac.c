@@ -92,9 +92,9 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     h.ndata = dlen - 1;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
-    if (session->fdout != -1) {
-	end_write(session->fdout, &h, sizeof(h));
-	end_write(session->fdout, dat, sizeof(unsigned short) * dlen);
+    if (session->gpsd_fd != -1) {
+	end_write(session->gpsd_fd, &h, sizeof(h));
+	end_write(session->gpsd_fd, dat, sizeof(unsigned short) * dlen);
     }
 }
 
@@ -497,8 +497,8 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 
     case ZODIAC_HUNT_A:
 	/* A better be right after E */
-        if ((c == 'A') && (session->fdout != -1))
-	    write(session->fdout, "EARTHA\r\n", 8);
+        if ((c == 'A') && (session->gpsd_fd != -1))
+	    write(session->gpsd_fd, "EARTHA\r\n", 8);
 	state = ZODIAC_HUNT_FF;
 	break;
 
@@ -552,7 +552,7 @@ static int zodiac_handle_input(struct gps_session_t *session)
 {
     unsigned char c;
 
-    if (read(session->fdin, &c, 1) != 1)
+    if (read(session->gpsd_fd, &c, 1) != 1)
 	return 1;
     zodiac_eat(session, c);
     return 0;
