@@ -286,7 +286,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 #endif /* WHOLE_CYCLE */
 	altitude = field[9];
 	/*
-	 * SiRF chipsets up to version 2.2 report a null ->fix.altitude field.
+	 * SiRF chipsets up to version 2.2 report a null altitude field.
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */

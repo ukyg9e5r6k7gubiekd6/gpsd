@@ -388,7 +388,7 @@ speedunits_ok:;
 	if (strcmp(altunits->legend, au) == 0)
 	    goto altunits_ok;
     altunits = alttable;
-    fprintf(stderr, "xgps: unknown ->fix.altitude unit, defaulting to %s\n", altunits->legend);
+    fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
 altunits_ok:;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {

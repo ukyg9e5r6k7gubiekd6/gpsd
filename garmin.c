@@ -253,8 +253,8 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    break;
 	case GARMIN_PKTID_PVT_DATA:
 	    /* save the old fix for later uncertainty computations */
-	    memcpy(&session->gpsdata.fix, 
-		   &session->lastfix, sizeof(struct gps_fix_t));
+	    memcpy(&session->lastfix, &session->gpsdata.fix, 
+		   sizeof(struct gps_fix_t));
 
 	    gpsd_report(3, "PVT Data Sz: %d\n", pkt->mDataSize);
 
@@ -271,7 +271,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
 	    session->gpsdata.fix.longitude = radtodeg(pvt->lon);
 
-	    // ->fix.altitude over WGS84 cnverted to MSL
+	    // altitude over WGS84 converted to MSL
 	    session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
 
 	    // geoid separation from WGS 84

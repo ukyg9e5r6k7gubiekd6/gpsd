@@ -291,15 +291,13 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>climb/sink</term>
-<listitem><para>Error estimate for climb/sink 
+<listitem><para>Estimated error for climb/sink 
 (%f, meters/sec).</para></listitem>
 </varlistentry>
 
 </variablelist>
 
-<para>Note: this command is experimental and still under development.
-Currently the time error, track error, groundspeed error and 
-climb/sink error fields are always ?.</para>
+<para>Note: this command is experimental and still under development.</para>
 </listitem>
 </varlistentry>
 
@@ -428,13 +426,10 @@ in.</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
 mode <application>gpsd</application> ships a line of data to the
-client each time the the GPS sends a sentence, but rather than being
-raw NMEA the line is a gpsd response as if the user had just sent some
-set of gpsd commands.  That set of commands is the minimum for which
-the incoming sentence is relevant &mdash; e.g., a GGA sentence ships a
-"pdasm" response because it contains position, date, altitude, and GPS
-mode data.  Additionally, watching clients get notifications in
-the form X=0 or X=1 when the online/offline status of the GPS
+client each time the GPS gets either a fix update or a satellite
+picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
+response.  Additionally, watching clients get notifications in the
+form X=0 or X=1 when the online/offline status of the GPS
 changes.</para>
 
 <para>Sending SIGHUP to a running <application>gpsd</application>

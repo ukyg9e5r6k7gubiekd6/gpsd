@@ -82,11 +82,11 @@ static int sirf_to_nmea(int ttyfd, int speed)
    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x18,
                      0x81, 0x02,
                      0x01, 0x01, /* GGA */
-                     0x00, 0x01, /* GLL */
+                     0x00, 0x00, /* suppress GLL */
                      0x01, 0x01, /* GSA */
                      0x05, 0x01, /* GSV */
                      0x01, 0x01, /* RMC */
-                     0x00, 0x00, /* VTG */
+                     0x00, 0x00, /* suppress VTG */
                      0x00, 0x01, 0x00, 0x01,
                      0x00, 0x01, 0x00, 0x01,
                      0x12, 0xc0, /* 4800 bps */
@@ -101,10 +101,10 @@ static int sirf_to_nmea(int ttyfd, int speed)
  * Handle the SiRF-II binary packet format.
  * 
  * SiRF message 2 (Measure Navigation Data Out) gives us everything we want
- * except PDOP, VDOP, and ->fix.altitude with respect to MSL.  SiRF message 41
- * (Geodetic Navigation Information) adds MSL ->fix.altitude, but many of its
+ * except PDOP, VDOP, and altitude with respect to MSL.  SiRF message 41
+ * (Geodetic Navigation Information) adds MSLfix.altitude, but many of its
  * other fields are garbage in firmware versions before 232.  So...we
- * use all the data from message 2 *except* ->fix.altitude, which we get from 
+ * use all the data from message 2 *except* altitude, which we get from 
  * message 41.
  */
 
@@ -147,7 +147,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    int mask = 0;
 
 	    /* save the old fix for later uncertainty computations */
-	    memcpy(&session->gpsdata.fix, &session->lastfix, 
+	    memcpy(&session->lastfix, &session->gpsdata.fix, 
 		   sizeof(struct gps_fix_t));
 
 	    /* position/velocity is bytes 1-18 */
@@ -167,15 +167,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    h = p / cos(phi) - n;
 	    session->gpsdata.fix.latitude = phi * RAD_2_DEG;
 	    session->gpsdata.fix.longitude = lambda * RAD_2_DEG;
-	    if (session->gpsdata.fix.mode == MODE_3D) {
-		if (session->driverstate & SIRF_SEEN_41) {
-		    /* recompute geodetic sep. from the *last* ->fix.altitude fix */
-		    session->separation = session->gpsdata.fix.altitude - h;
-		    /* use it to correct this one so updates will be atomic */
-		    session->gpsdata.fix.altitude = h + session->separation;
-		    mask |= ALTITUDE_SET;
-		}
-	    }
 	    /* velocity computation */
 	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
 	    veast = -vx*sin(lambda)+vy*cos(lambda);
@@ -198,6 +189,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gpsdata.fix.mode = MODE_3D;
 	    else if (session->gpsdata.status)
 		session->gpsdata.fix.mode = MODE_2D;
+	    if (session->gpsdata.fix.mode == MODE_3D && (session->driverstate & SIRF_SEEN_41))
+		mask |= ALTITUDE_SET;
 	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	    /* byte 20 is HDOP, see below */
@@ -335,7 +328,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * know what's broken in firmwares before 2.3.1..."
 	     *
 	     * To work around the incomplete implementation of this
-	     * packet in 231, we assume that only the ->fix.altitude field
+	     * packet in 231, we assume that only the altitude field
 	     * from this packet is valid.
 	     */
 	    navtype = getw(3);
@@ -375,14 +368,10 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;
 	    session->gpsdata.fix.longitude = getl(27)*1e-7;
-	    /* skip 4 bytes of ->fix.altitude from ellipsoid */
+	    /* skip 4 bytes of altitude from ellipsoid */
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
-	if (session->gpsdata.fix.mode == MODE_3D) {
-	    session->gpsdata.fix.altitude = getl(31)*1e-2;
-	    mask |= ALTITUDE_SET;
-	    session->driverstate |= SIRF_SEEN_41;
-	}
+	session->gpsdata.fix.altitude = getl(31)*1e-2;
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
 	    session->gpsdata.fix.speed = getw(36)*1e-2;
@@ -396,6 +385,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gpsdata.sentence_length = 91;
 	    strcpy(session->gpsdata.tag, "GND");
 	}
+	session->driverstate |= SIRF_SEEN_41;
 	return mask;
 
     case 0x32:		/* SBAS corrections */

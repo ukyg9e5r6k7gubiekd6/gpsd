@@ -251,8 +251,8 @@ int gps_poll(struct gps_data_t *gpsdata)
 	return 0;
     }
     buf[n] = '\0';
-    if (gpsdata->profiling)
-	received = timestamp();
+
+    received = gpsdata->online = timestamp();
     gps_unpack(buf, gpsdata);
     if (gpsdata->profiling)
     {

@@ -346,39 +346,39 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		sprintf(phrase, ",O=%.2f 0.0068 %.4f %.4f",
 			ud->fix.time, ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
-		    sprintf(phrase+strlen(phrase), " %.2f",
+		    sprintf(phrase+strlen(phrase), " %7.2f",
 			    session->gpsdata.fix.altitude);
 		else
-		    strcat(phrase, " ?");
+		    strcat(phrase, "       ?");
 		if (ud->fix.eph && ud->fix.epv)
-		    sprintf(phrase+strlen(phrase), " %.2f %.2f", 
+		    sprintf(phrase+strlen(phrase), " %4.2f %4.2f", 
 			    ud->fix.eph, ud->fix.epv);
 		else if (ud->hdop || ud->vdop)
-		    sprintf(phrase+strlen(phrase), " %.2f %.2f", 
+		    sprintf(phrase+strlen(phrase), " %4.2f %4.2f", 
 			    ud->hdop * UERE(session), 
 			    ud->vdop * UERE(session));
 		else
-		    strcat(phrase, "? ?");
+		    strcat(phrase, "     ?     ?");
 		if (ud->fix.track != TRACK_NOT_VALID)
-		    sprintf(phrase+strlen(phrase), "%.4f %.3f",
+		    sprintf(phrase+strlen(phrase), " %7.4f %7.3f",
 			    ud->fix.track, ud->fix.speed);
 		else
-		    strcat(phrase, "? ?");
+		    strcat(phrase, "        ?        ?");
 		if (session->gpsdata.fix.mode == MODE_3D)
-		    sprintf(phrase+strlen(phrase), " %.3f", ud->fix.climb);
+		    sprintf(phrase+strlen(phrase), " %6.3f", ud->fix.climb);
 		else
-		    strcat(phrase, "?");
+		    strcat(phrase, "       ?");
 		strcat(phrase, " ?");	/* can't yet derive track error */ 
 		if (session->gpsdata.valid & SPEEDERR_SET)
-		    sprintf(phrase+strlen(phrase), " %.2f",
+		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    session->gpsdata.fix.eps);		    
 		else
-		    strcat(phrase, "?");
+		    strcat(phrase, "      ?");
 		if (session->gpsdata.valid & CLIMBERR_SET)
-		    sprintf(phrase+strlen(phrase), " %.2f",
+		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    session->gpsdata.fix.epc);		    
 		else
-		    strcat(phrase, "?");
+		    strcat(phrase, "      ?");
 	    }
 	    break;
 	case 'P':
@@ -709,41 +709,16 @@ int main(int argc, char *argv[])
 	    notify_watchers("GPSD,X=0\r\n");
 	}
 
-	if (changed) {
-	    char cmds[16];
-
-	    /* what data should we publish? */
-	    cmds[0] = '\0';
-	    if (changed & TIME_SET)
-		strcat(cmds, "d");
-	    if (changed & LATLON_SET)
-		strcat(cmds, "p");
-	    if (changed & ALTITUDE_SET)
-		strcat(cmds, "a");
-	    if (changed & TRACK_SET)
-		strcat(cmds, "t");
-	    if (changed & SPEED_SET)
-		strcat(cmds, "v");
-	    if (changed & CLIMB_SET)
-		strcat(cmds, "u");
-	    if (changed & STATUS_SET)
-		strcat(cmds, "s");
-	    if (changed & MODE_SET)
-		strcat(cmds, "m");
-	    if (changed & DOP_SET)
-		strcat(cmds, "q");
-	    if (changed & SATELLITE_SET)
-		strcat(cmds, "y");
-	    if ((changed & POSERR_SET) || ((changed & DOP_SET) && !(session->gpsdata.seen_sentences & PGRME)))
-		strcat(cmds, "e");
-
-	    if (cmds[0])
-		for (fd = 0; fd < FD_SETSIZE; fd++) {
-		    /* some listeners may be in watcher mode */
-		    if (FD_ISSET(fd, &watcher_fds)) {
-			handle_request(fd, cmds, strlen(cmds), 0);
-		    }
+	if (changed &~ ONLINE_SET) {
+	    for (fd = 0; fd < FD_SETSIZE; fd++) {
+		/* some listeners may be in watcher mode */
+		if (FD_ISSET(fd, &watcher_fds)) {
+		    if (changed & LATLON_SET)
+			handle_request(fd, "o", 1, 0);
+		    if (changed & SATELLITE_SET)
+			handle_request(fd, "y", 1, 0);
 		}
+	    }
 	}
 
 	/* this simplifies a later test */

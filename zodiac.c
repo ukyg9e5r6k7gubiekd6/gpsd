@@ -134,12 +134,12 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 static int handle1000(struct gps_session_t *session)
 {
     /* save the old fix for later uncertainty computations */
-    memcpy(&session->gpsdata.fix, &session->lastfix, sizeof(struct gps_fix_t));
+    memcpy(&session->lastfix, &session->gpsdata.fix, sizeof(struct gps_fix_t));
 
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
     gpsd_report(1, "  solution invalid:\n");
-    gpsd_report(1, "    ->fix.altitude: %d\n", (getw(10) & 1) ? 1 : 0);
+    gpsd_report(1, "    altitude: %d\n", (getw(10) & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (getw(10) & 2) ? 1 : 0);
     gpsd_report(1, "    not enough satellites: %d\n", (getw(10) & 4) ? 1 : 0);
     gpsd_report(1, "    exceed max EHPE: %d\n", (getw(10) & 8) ? 1 : 0);
