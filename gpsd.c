@@ -48,7 +48,8 @@
 
 // Temporary forward declarations
 void gps_init(char *dgpsserver, char *dgpsport);
-void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd));
+void gps_activate(void), gps_deactivate(void);
+void gps_poll(void);
 void gps_force_repoll(void);
 
 #define QLEN		5
@@ -431,6 +432,8 @@ int main(int argc, char *argv[])
     extern char *optarg;
     int option;
     char *colon;
+    int fd;
+    int need_gps;
 
     session.debug = 1;
     while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
@@ -552,7 +555,44 @@ int main(int argc, char *argv[])
 	    FD_CLR(msock, &rfds);
 	}
 
-	gps_poll(&afds, &rfds, handle_request);
+	/* open or reopen the GPS if it's needed */
+	if (session.reopen && session.fdin == -1) {
+	    FD_CLR(session.fdin, &afds);
+	    gps_deactivate();
+	    gps_activate();
+	    FD_SET(session.fdin, &afds);
+	}
+
+	gps_poll();
+
+	if (session.dsock > -1)
+	    FD_CLR(session.dsock, &rfds);
+	if (session.fdin > -1)
+	    FD_CLR(session.fdin, &rfds);
+
+	/* accept and execute commands for all clients */
+	need_gps = 0;
+	for (fd = 0; fd < getdtablesize(); fd++) {
+	    if (FD_ISSET(fd, &rfds)) {
+		if (session.fdin == -1) {
+		    gps_activate();
+		    FD_SET(session.fdin, &afds);
+		}
+		if (handle_request(fd) == 0) {
+		    (void) close(fd);
+		    FD_CLR(fd, &afds);
+		}
+	    }
+	    if (fd != session.fdin && FD_ISSET(fd, &afds)) {
+		need_gps++;
+	    }
+	}
+
+	if (!need_gps && session.fdin != -1) {
+	    FD_CLR(session.fdin, &afds);
+	    session.fdin = -1;
+	    gps_deactivate();
+	}
     }
 }
 
@@ -605,7 +645,7 @@ void gps_init(char *dgpsserver, char *dgpsport)
     session.gNMEAdata.mode = MODE_NO_FIX;
 }
 
-static void send_dgps()
+static void send_dgps(void)
 {
   char buf[BUFSIZE];
 
@@ -614,7 +654,7 @@ static void send_dgps()
   write(session.dsock, buf, strlen(buf));
 }
 
-static void deactivate()
+void gps_deactivate(void)
 {
     session.fdin = -1;
     session.fdout = -1;
@@ -626,7 +666,7 @@ static void deactivate()
     session.gNMEAdata.status = 0;
 }
 
-static void activate()
+void gps_activate(void)
 {
     int input;
 
@@ -642,21 +682,20 @@ static void activate()
     }
 }
 
-void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd))
+#include <sys/ioctl.h>
+
+static int is_input_waiting(int fd)
 {
-    int fd;
-    int need_gps;
+    int	count;
+    if (fd < 0 || ioctl(fd, FIONREAD, &count) < 0)
+	return 0;
+    return count;
+}
 
-    /* open or reopen the GPS if it's needed */
-    if (session.reopen && session.fdin == -1) {
-	FD_CLR(session.fdin, afds);
-	deactivate();
-	activate();
-	FD_SET(session.fdin, afds);
-    }
-
+void gps_poll(void)
+{
     /* accept a DGPS correction if one is pending */
-    if (session.dsock > -1 && FD_ISSET(session.dsock, rfds))
+    if (is_input_waiting(session.dsock))
     {
 	char buf[BUFSIZE];
 	int rtcmbytes;
@@ -670,13 +709,11 @@ void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd))
 	{
 	    gpscli_report(1, "Read from rtcm source failed\n");
 	}
-	FD_CLR(session.dsock, rfds);
     }
 
     /* update the scoreboard structure from the GPS */
-    if (session.fdin >= 0 && FD_ISSET(session.fdin, rfds)) {
+    if (is_input_waiting(session.fdin)) {
 	session.device_type->handle_input(session.fdin, raw_hook);
-	FD_CLR(session.fdin, rfds);
     }
 
     /* count the good fixes */
@@ -690,30 +727,6 @@ void gps_poll(fd_set *afds, fd_set *rfds, int (*handle_request)(int fd))
 	    if (session.dsock > -1)
 		send_dgps();
 	}
-    }
-
-    /* accept and execute commands for all clients */
-    need_gps = 0;
-    for (fd = 0; fd < getdtablesize(); fd++) {
-	if (FD_ISSET(fd, rfds)) {
-	    if (session.fdin == -1) {
-		activate();
-		FD_SET(session.fdin, afds);
-	    }
-	    if ((*handle_request)(fd) == 0) {
-		(void) close(fd);
-		FD_CLR(fd, afds);
-	    }
-	}
-	if (fd != session.fdin && FD_ISSET(fd, afds)) {
-	    need_gps++;
-	}
-    }
-
-    if (!need_gps && session.fdin != -1) {
-	FD_CLR(session.fdin, afds);
-	session.fdin = -1;
-	deactivate();
     }
 }
 
