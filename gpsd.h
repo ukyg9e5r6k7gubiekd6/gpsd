@@ -87,6 +87,7 @@ extern int nmea_validate_buffer(char *buf, size_t n);
 extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *context);
 extern int gpsd_set_speed(struct gps_session_t *session, int speed);
 extern int gpsd_get_speed(struct termios *);
+extern void gpsd_drain(int ttyfd);
 extern void gpsd_close(struct gps_session_t *context);
 extern void gpsd_binary_fix_dump(struct gps_session_t *session, char *buf);
 extern void gpsd_binary_satellite_dump(struct gps_session_t *session, char *buf);

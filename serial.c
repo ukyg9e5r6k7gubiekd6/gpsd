@@ -122,6 +122,22 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
     return session->gNMEAdata.gps_fd;
 }
 
+#ifdef UNRELIABLE_SYNC
+void gpsd_drain(int ttyfd)
+{
+    tcdrain(ttyfd);
+    /* 
+     * This definitely fails below 40 milliseconds on a BU-303b.
+     * 50ms is also verified by Chris Kuethe on 
+     *        Pharos iGPS360 + GSW 2.3.1ES + prolific
+     *        Rayming TN-200 + GSW 2.3.1 + ftdi
+     *        Rayming TN-200 + GSW 2.3.2 + ftdi
+     * so it looks pretty solid.
+     */
+    usleep(50000);
+}
+#endif /* UNRELIABLE_SYNC */
+
 void gpsd_close(struct gps_session_t *session)
 {
     if (session->gNMEAdata.gps_fd != -1) {

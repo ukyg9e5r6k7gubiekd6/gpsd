@@ -154,11 +154,9 @@ static void send_rtcm(struct gps_session_t *session,
     data[n] = zodiac_checksum(data, n);
 
     zodiac_spew(session, 1351, data, n+1);
-    tcdrain(session->gNMEAdata.gps_fd);
-    /*
-     * This is a guess at the required settle time.
-     */
-    usleep(50000);
+#ifdef UNRELIABLE_SYNC
+    gpsd_drain(session->gNMEAdata.gps_fd);
+#endif /* UNRELIABLE_SYNC */
 }
 
 static int zodiac_send_rtcm(struct gps_session_t *session,
