@@ -56,7 +56,7 @@
 struct session_t session = {&nmea};
 
 static int gps_timeout = GPS_TIMEOUT;
-static int device_speed = B4800;
+static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
 static int nfds, dsock;
