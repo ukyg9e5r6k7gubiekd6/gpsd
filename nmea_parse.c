@@ -185,15 +185,18 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
            *68          mandatory nmea_checksum
 
      */
-    merge_ddmmyy(field(sentence, 9), out);
-    merge_hhmmss(field(sentence, 1), out);
+    if (!strcmp(field(sentence, 2), "A"))
+    {
+	merge_ddmmyy(field(sentence, 9), out);
+	merge_hhmmss(field(sentence, 1), out);
 
-    do_lat_lon(sentence, 3, out);
+	do_lat_lon(sentence, 3, out);
 
-    out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
-    REFRESH(out->speed_stamp);
-    out->track_stamp.changed = update_field_f(sentence, 8, &out->track);
-    REFRESH(out->track_stamp);
+	out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
+	REFRESH(out->speed_stamp);
+	out->track_stamp.changed = update_field_f(sentence, 8, &out->track);
+	REFRESH(out->track_stamp);
+    }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -222,11 +225,11 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      * indicating that the Garmin 65 does not return time and status.
      * This code copes gracefully.
      */
-    char *status = field(sentence, 7);
-    int newstatus = out->status;
-
-    if (strcmp(field(sentence, 6), "V"))
+    if (!strcmp(field(sentence, 6), "A"))
     {
+	char *status = field(sentence, 7);
+	int newstatus = out->status;
+
 	do_lat_lon(sentence, 1, out);
 
 	fake_mmddyyyy(out);
