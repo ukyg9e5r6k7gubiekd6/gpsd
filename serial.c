@@ -63,12 +63,6 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
     if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	return 0;
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
-    /*
-     * Give the GPS and UART this much time to settle and ship some data
-     * before trying to read after open or baud rate change.  Less than
-     * 1.25 seconds doesn't work om most UARTs. 
-     */
-    usleep(1250000);
 
     /*
      * Magic -- relies on the fact that the UARTS on GPSes never seem to take 

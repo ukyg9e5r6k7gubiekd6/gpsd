@@ -8,9 +8,6 @@
  * However, it should catch over 80% of the consumer-grade GPSes
  * available in 2005.
  *
- * Note: Because of the delays to let the device settle, this function 
- * can take 5 seconds to run when the device is not a GPS.
- *
  * Return value: -1 if any of the TTY mode sets fails, 0 if they succeeed
  * but it's not a GPS, one of the values B4800, B9600, B19200, or B38400
  * if it's a GPS. 
@@ -66,13 +63,6 @@ int gpscheck(int ttyfd)
 #ifdef TESTMAIN
 	    fprintf(stderr, "gpscheck: checking at rate %d\n", *ip);
 #endif /* TESTMAIN */
-	    /*
-	     * Give the GPS and UART this much time to settle and ship
-	     * some data before trying to read after open or baud rate
-	     * change.  Less than 1.25 seconds doesn't work on most
-	     * UARTs.
-	     */
-	    usleep(1250000);
 	}
 
 	/* assumes the fd is opened for ordinary (blocking) read */
