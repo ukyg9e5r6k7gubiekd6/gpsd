@@ -125,15 +125,17 @@ class NMEA:
     def processGPGGA(self,words):
         self.update_timestamp(None, words[0])
         self.__do_lat_lon(words[1:])
-        newstatus          = int(words[5])
-        self.data.status_stamp.changed = (self.data.status != newstatus)
-        self.data.status = newstatus
-        self.data.status_stamp.refresh()
-        newaltitude        = float(words[8])
-        self.data.altitude_stamp.changed = (self.data.altitude != newaltitude)
-        self.data.altitude = newaltitude
-        self.data.altitude_stamp.refresh()
-        self.logger(3, "GPGGA sets status %d\n" % self.data.status);
+        if words[8]:
+            newaltitude        = float(words[8])
+            self.data.altitude_stamp.changed = (self.data.altitude != newaltitude)
+            self.data.altitude = newaltitude
+            self.data.altitude_stamp.refresh()
+        if words[5]:
+            newstatus          = int(words[5])
+            self.data.status_stamp.changed = (self.data.status != newstatus)
+            self.data.status = newstatus
+            self.data.status_stamp.refresh()
+            self.logger(3, "GPGGA sets status %d\n" % self.data.status);
 
     def processGPGSA(self,words):
         newmode = int(words[1])
