@@ -53,11 +53,11 @@ int serial_open(char *device_name, int device_speed)
     char *temp;
     char *p;
 
-    device_speed = set_baud(device_speed);
     temp = strdup(device_name);
 
     if ( (p = strchr(temp, ':')) ) {
 	char *port = DEFAULTPORT;
+	report(1, "opening slave daemon at %s\n", device_name);
 
 	if (*(p + 1))
 	    port = p + 1;
@@ -70,18 +70,21 @@ int serial_open(char *device_name, int device_speed)
 	if (write(ttyfd, "r\n", 2) != 2)
 	    errexit("Can't write to socket");
     } else {
+	report(1, "opening GPS data source at %s\n", device_name);
 	ttyfd = open(temp, O_RDWR | O_NONBLOCK);
 
 	if (ttyfd < 0)
 	    return (-1);
 
 	if (isatty(ttyfd)) {
+	    report(1, "setting speed %d, 8 bits, no parity\n", device_speed);
             /* Save original terminal parameters */
             if (tcgetattr(ttyfd,&ttyset_old) != 0)
               return (-1);
 
 	    memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
 
+	    device_speed = set_baud(device_speed);
 	    cfsetispeed(&ttyset, (speed_t)device_speed);
 	    cfsetospeed(&ttyset, (speed_t)device_speed);
 
