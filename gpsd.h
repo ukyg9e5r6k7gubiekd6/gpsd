@@ -142,6 +142,12 @@ struct gps_device_t {
 #endif /* BINARY_ENABLE */
 #ifdef NTPSHM_ENABLE
     struct shmTime *shmTime;
+    unsigned int time_seen;
+#define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
+#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 1? */
+#define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
+#define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 1? */
+#define TIME_SEEN_PPS	0x10	/* Seen PPS signal? */
 #endif /* defined(SHM_H) && defined(IPC_H) */
 };
 

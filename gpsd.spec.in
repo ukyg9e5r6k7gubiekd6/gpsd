@@ -106,8 +106,9 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %changelog
 * Mon Mar 28 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Rob Janssen's patches to fix timezone issues.  License changed to
-  BSD so linking to libgps won't make people nervous.
+- Rob Janssen's patches to fix timezone issues and improve cooperation
+  with NTP.  License changed to BSD so linking to libgps won't make people 
+  nervous.
 
 * Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use

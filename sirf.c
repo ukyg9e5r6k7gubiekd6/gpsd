@@ -198,8 +198,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
-	    ntpshm_put(session, session->gpsdata.fix.time);
-#endif /* defined(SHM_H) && defined(IPC_H) */
+	    session->time_seen |= TIME_SEEN_GPS_1;
+	    if (!(session->time_seen & ~TIME_SEEN_GPS_1))
+		ntpshm_put(session, session->gpsdata.fix.time);
+#endif /* NTPSHM_ENABLE */
 
 	    gpsd_binary_fix_dump(session, buf2);
 	    /* fix quality data */
@@ -237,6 +239,11 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		session->gpsdata.elevation[st];
 	    session->gpsdata.sentence_time
 		= gpstime_to_unix(getw(1), getl(3)*1e-2, -LEAP_SECONDS);
+#ifdef NTPSHM_ENABLE
+	    session->time_seen |= TIME_SEEN_GPS_2;
+	    if (!(session->time_seen & ~TIME_SEEN_GPS_2))
+		ntpshm_put(session, session->gpsdata.sentence_time);
+#endif /* NTPSHM_ENABLE */
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
@@ -378,9 +385,13 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.nmea_date.tm_hour = getb(15);
 	    session->gpsdata.nmea_date.tm_min = getb(16);
 	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = getw(17)*1e-3;
+	    session->gpsdata.subseconds = ((unsigned short)getw(17))*1e-3;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+#ifdef NTPSHM_ENABLE
+	    session->time_seen |= TIME_SEEN_UTC_1;
+	    ntpshm_put(session, session->gpsdata.fix.time);
+#endif /* NTPSHM_ENABLE */
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;
@@ -439,7 +450,13 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.nmea_date.tm_hour = getb(30);
 	    session->gpsdata.nmea_date.tm_min = getb(31);
 	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = getw(32)*1e-3;
+	    session->gpsdata.subseconds = ((unsigned short)getw(32))*1e-3;
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time
+		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+#ifdef NTPSHM_ENABLE
+	    session->time_seen |= TIME_SEEN_UTC_2;
+	    ntpshm_put(session, session->gpsdata.fix.time + 0.75);
+#endif /* NTPSHM_ENABLE */
 	}
 
 	/* session->gpsdata.gdop = getb(34) / 5.0; */
