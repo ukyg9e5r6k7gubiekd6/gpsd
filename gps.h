@@ -74,9 +74,9 @@ struct gps_data_t {
     /* precision of fix */
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* Used in last fix? */
-    double pdop;		/* Position dilution of precision, meters */
-    double hdop;		/* Horizontal dilution of precision, meters */
-    double vdop;		/* Vertical dilution of precision, meters */
+    double pdop;		/* Position dilution of precision */
+    double hdop;		/* Horizontal dilution of precision */
+    double vdop;		/* Vertical dilution of precision */
     double separation;		/* Geoidal separation [2] */
     struct life_t fix_quality_stamp;
 

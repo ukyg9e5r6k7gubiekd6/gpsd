@@ -1,8 +1,10 @@
 #include "config.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "gps.h"
 #include "gpsd.h"
@@ -13,11 +15,8 @@
  *
  **************************************************************************/
 
-/* field() returns a string containing the nth comma delimited
-   field from sentence string
- */
-
 static char *field(char *sentence, short n)
+/* return the nth comma-delimited field from the sentence */
 {
     static char result[100];
     char c, *p = sentence;
@@ -25,7 +24,7 @@ static char *field(char *sentence, short n)
 
     while (n-- > 0)
         while ((c = *p++) != ',' && c != '\0');
-    strncpy(result, p, 100);
+    strncpy(result, p, sizeof(result)-1);
     p = result;
     i = 0;
     while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i<100)
@@ -522,13 +521,7 @@ static void processPMGNST(char *sentence, struct gps_data_t *out)
     }
 }
 
-/**************************************************************************
- *
- * Entry points begin here
- *
- **************************************************************************/
-
-short nmea_checksum(char *sentence)
+static short nmea_checksum(char *sentence)
 {
     unsigned char sum = '\0';
     char c, *p = sentence, csum[3];
@@ -540,7 +533,14 @@ short nmea_checksum(char *sentence)
     return (strncmp(csum, p, 2) == 0);
 }
 
+/**************************************************************************
+ *
+ * Entry points begin here
+ *
+ **************************************************************************/
+
 void nmea_add_checksum(char *sentence)
+/* add NMEA to a *-terminated sentence */
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
@@ -552,6 +552,7 @@ void nmea_add_checksum(char *sentence)
 }
 
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
+/* parse an NMEA sentence, unpack it into a session structure */
 {
     if (nmea_checksum(sentence+1)) {
 	if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
@@ -575,5 +576,23 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	}
     }
     return 0;
+}
+
+void nmea_send(int fd, const char *fmt, ... )
+/* ship a command to the GPS, adding * and correct checksum */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+    strcat(buf, "*");
+    nmea_add_checksum(buf + 1);
+    write(fd, buf, strlen(buf));
 }
 

@@ -84,7 +84,7 @@ int gpsd_set_7N2(void)
     return 0;
 }
 
-void gpsd_close()
+void gpsd_close(void)
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {

@@ -3,6 +3,7 @@
  */
 #include "config.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
@@ -56,7 +57,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 
 	    if (trigger && !strncmp(trigger, sentence, strlen(trigger)) && isatty(session->fdout)) {
 		gpscli_report(1, "found %s.", (*dp)->typename);
-		session->device_type = &zodiac_b;
+		session->device_type = &zodiac_binary;
 		session->device_type->initializer(session);
 		return;
 	    }
@@ -123,7 +124,7 @@ void fv18_initializer(struct gps_session_t *session)
     /* FV18 sends 1 start bit, 8 bits, 1 stop bit, looking like 7N2 */ 
     gpsd_set_7N2();
     /* tell it to send GSAs so we'll know if 3D is accurate */
-    write(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01*39\r\n",46);
+    nmea_send(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
 }
 
 struct gps_type_t fv18 =
@@ -163,14 +164,13 @@ struct gps_type_t fv18 =
 
 static void tripmate_initializer(struct gps_session_t *session)
 {
-    char buf[82];
     time_t t;
     struct tm *tm;
 
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+    nmea_send(session->fdout, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
-    write(session->fdout, "$PRWIILOG,ZCH,V,,", 17);
+    nmea_send(session->fdout, "$PRWIILOG,ZCH,V,,");
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
@@ -178,17 +178,12 @@ static void tripmate_initializer(struct gps_session_t *session)
 	if(tm->tm_year > 100)
 	    tm->tm_year = tm->tm_year - 100;
 
-	sprintf(buf,
-		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
+	nmea_send(session->fdout,
+		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d",
 		session->initpos.latitude, session->initpos.latd, 
 		session->initpos.longitude, session->initpos.lond,
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
-	nmea_add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	if (session->fdout != -1) {
-	    write(session->fdout, buf, strlen(buf));
-	    gpscli_report(1, "=> GPS: %s", buf);
-	}
     }
 }
 
@@ -222,15 +217,21 @@ struct gps_type_t tripmate =
  * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
  */
 
+static void earthmate_close(struct gps_session_t *session)
+{
+    session->device_type = &earthmate;
+}
+
 static void earthmate_initializer(struct gps_session_t *session)
 {
     write(session->fdout, "EARTHA\r\n", 8);
     sleep(30);
-    session->device_type = &zodiac_b;
-    zodiac_b.initializer(session);
+    session->device_type = &zodiac_binary;
+    zodiac_binary.wrapup = earthmate_close;
+    zodiac_binary.initializer(session);
 }
 
-struct gps_type_t zodiac_a =
+struct gps_type_t earthmate =
 {
     'e',			/* select explicitly with -T e */
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
@@ -271,8 +272,8 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
-    &zodiac_a, 
-    &zodiac_b,
+    &earthmate, 
+    &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
     &logfile,
     NULL,

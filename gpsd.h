@@ -79,19 +79,18 @@ struct gps_session_t
 /* here are the available GPS drivers */
 extern struct gps_type_t nmea;
 extern struct gps_type_t tripmate;
-extern struct gps_type_t zodiac_a;
-extern struct gps_type_t zodiac_b;
+extern struct gps_type_t earthmate;
+extern struct gps_type_t zodiac_binary;
 extern struct gps_type_t logfile;
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
 extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
+extern void nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
-extern void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence);
 extern void nmea_add_checksum(char *sentence);
-extern short nmea_checksum(char *sentence);
 extern int gpsd_open(char *device_name, int device_speed);
-extern void gpsd_close();
+extern void gpsd_close(void);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
 /* External interface */

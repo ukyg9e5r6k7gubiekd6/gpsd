@@ -4,7 +4,7 @@
  * code ought to work for any Zodiac-chipset GPS; the vendor-specific 
  * trigger string isn't in here.
  *
- * Everything exported from here lives in the structure zodiac-b at the end.
+ * Everything exported from here is in the structure zodiac_binary at the end.
  */
 #include "config.h"
 #include <stdio.h>
@@ -558,21 +558,18 @@ static int zodiac_handle_input(struct gps_session_t *session)
     return 0;
 }
 
-static void zodiac_close(struct gps_session_t *session)
-{
-    session->device_type = &zodiac_a;
-}
+/* caller needs to specify a wrapup function */
 
 /* this is everything we export */
-struct gps_type_t zodiac_b =
+struct gps_type_t zodiac_binary =
 {
     '\0',		/* cannot be explicitly selected */
     "Zodiac binary",	/* full name of type */
-    NULL,		/* only switched to by zodiac_a driver */
+    NULL,		/* only switched to by some other driver */
     zodiac_init,	/* initialize the device */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
-    zodiac_close,	/* wrapup function to be called on close */
+    NULL,		/* caller needs to supply a close hook */
     9600,		/* 4800 won't work */
     1,			/* updates every second */
 };
