@@ -94,8 +94,11 @@ support for the non-NMEA drivers.</para>
 </varlistentry>
 <varlistentry>
 <term>-s</term>
-<listitem><para>Set GPS communication speed in bits per second 
-(default is set by device type).</para></listitem>
+<listitem><para>Set GPS communication speed in bits per second.
+It is generally not necessary 
+to set this, because (a) for NMEA devices the daemon will
+autoconfigure to the correct baud rate, and (b) for non-NMEA devices
+default that should be good is wired in.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-d</term>

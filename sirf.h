@@ -10,6 +10,7 @@ int sirf_to_nmea(int, int);
 int sirf_reset(int);
 int sirf_dgps_source(int, int);
 int sirf_nav_lib(int, int);
+int sirf_waas_ctrl(int, int);
 int sirf_nmea_waas(int, int);
 int sirf_power_mask(int, int);
 int sirf_power_save(int, int);

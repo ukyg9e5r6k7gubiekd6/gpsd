@@ -59,18 +59,18 @@ int gpsd_get_speed(struct termios* ttyctl)
 static int rates[] = {4800, 9600, 19200, 38400};
 #define NRATES	sizeof(rates)/sizeof(rates[0])
 
-static int connect_at_speed(int ttyfd, struct termios *ttyctl, int speed)
+static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
 {
-    char	buf[BUFSIZE], *sp;
+    char	buf[BUFSIZE];
     int		n;
     size_t	maxreads;
 
-    gpsd_set_speed(ttyctl, speed);
+    gpsd_set_speed(&session->ttyset, speed);
     /*
      * throw away stale NMEA data that may be sitting in the buffer 
      * from a previous session.
      */
-    if (tcsetattr(ttyfd, TCSAFLUSH, ttyctl) != 0)
+    if (tcsetattr(ttyfd, TCSAFLUSH, &session->ttyset) != 0)
 	return 0;
     /*
      * for unknown reasons, the TCSAFLUSH above is not sufficient to
@@ -94,7 +94,10 @@ static int connect_at_speed(int ttyfd, struct termios *ttyctl, int speed)
 	    return 0;
     }
 
-    return nmea_validate_buffer(buf, n);
+    if (session->device_type->validate_buffer)
+	return session->device_type->validate_buffer(buf, n);
+    else
+	return 1;
 }
 
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
@@ -123,7 +126,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	if (device_speed) {
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
 			device_speed, stopbits);
-	    if (connect_at_speed(ttyfd, &session->ttyset, device_speed)) {
+	    if (connect_at_speed(ttyfd, session, device_speed)) {
 		session->baudrate = device_speed;
 		return ttyfd;
 	    }
@@ -131,7 +134,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
 		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n", 
 			    *ip, stopbits);
-		if (connect_at_speed(ttyfd, &session->ttyset, *ip)) {
+		if (connect_at_speed(ttyfd, session, *ip)) {
 		    session->baudrate = *ip;
 		    return ttyfd;
 		}
