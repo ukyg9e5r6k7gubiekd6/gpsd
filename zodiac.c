@@ -189,7 +189,6 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
 #if 0
     gpsd_report(1, "date: %d %d %d  %d:%d:%d\n",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
-
     gpsd_report(1, "  solution invalid:\n");
     gpsd_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
@@ -215,7 +214,6 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
     session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
-
     session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
     session->gNMEAdata.satellites_used = p[O(12)];
@@ -452,13 +450,11 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 {
     static int state = ZODIAC_HUNT_FF;
     static struct header h;
-
     static unsigned int byte;
     static unsigned int words;
     static unsigned short *data;
 
     switch (state) {
-
     case ZODIAC_HUNT_FF:
 	if (c == 0xff)
 	    state = ZODIAC_HUNT_81;
