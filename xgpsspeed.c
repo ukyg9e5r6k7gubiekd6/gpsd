@@ -2,8 +2,6 @@
  * - Derrick J Brashear <shadow@dementia.org>
  * Tachometer widget from Kerberometer (xklife)
  */
-#include "config.h"
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,11 +11,11 @@
 #include <X11/Shell.h>
 #include <X11/Xaw/Box.h>
 #include <X11/Xaw/Label.h>
-#include <X11/Xaw/Command.h>
 #include <X11/Xaw/Paned.h>
 #include <Tachometer.h>
 
 #include "xgpsspeed.icon"
+#include "config.h"
 #include "gps.h"
 
 static XrmOptionDescRec options[] = {
@@ -33,10 +31,7 @@ static Widget tacho;
 
 static void update_display(char *buf UNUSED)
 {
-  int new = rint(gpsdata->speed * KNOTS_TO_MPH);
-  if (new > 100)
-    new = 100;
-  TachometerSetValue(tacho, new);
+  TachometerSetValue(tacho, rint(gpsdata->speed * KNOTS_TO_MPH));
 }
 
 static void handle_input(XtPointer client_data UNUSED,
