@@ -83,7 +83,7 @@ int main(int argc, char **argv)
    /**** Shell Widget ****/
     XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
-				   XtScreen(toplevel)->root, xgps_bits,
+				   XtScreen(toplevel)->root, (char*)xgps_bits,
 				   xgps_width, xgps_height));
     XtSetValues(toplevel, args, 1);
     

@@ -538,7 +538,7 @@ int main(int argc, char *argv[])
 
 	/* always be open to new connections */
 	if (FD_ISSET(msock, &rfds)) {
-	    int alen = sizeof(fsin);
+	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)

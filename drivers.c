@@ -40,7 +40,7 @@ static void gpsd_NMEA_handle_message(struct gps_session_t *session, char *senten
 
 static void nmea_handle_input(struct gps_session_t *session)
 {
-    static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
+    static char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
 
     while (offset < BUFSIZE) {

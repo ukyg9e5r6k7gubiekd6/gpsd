@@ -306,7 +306,7 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
 static void analyze(struct gps_session_t *session, 
 		    struct header *h, unsigned short *p)
 {
-    unsigned char buf[BUFSIZE], *bufp, *bufp2;
+    char buf[BUFSIZE], *bufp, *bufp2;
     int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
