@@ -96,7 +96,9 @@ void serial_close()
             tcsetattr(ttyfd, TCSANOW, &ttyset);
 	}
 	/* Restore original terminal parameters */
-        tcsetattr(ttyfd,TCSANOW,&ttyset_old);
+	/* but make sure DTR goes down */
+	ttyset_old.c_cflag |= HUPCL;
+	tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 
 	close(ttyfd);
 	ttyfd = -1;
