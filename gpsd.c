@@ -46,6 +46,12 @@
 #include "gpsd.h"
 #include "version.h"
 
+// Temporary forward declarations
+int gps_init(char *dgpsserver, char *dgpsport);
+void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
+	      int (*handle_request)(int fd, fd_set * fds));
+void gps_force_repoll(void);
+
 #define QLEN		5
 #define BUFSIZE		4096
 #define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
@@ -57,23 +63,18 @@ static int gps_timeout = GPS_TIMEOUT;
 static int device_speed = 4800;
 static char *device_name = 0;
 static char *default_device_name = "/dev/gps";
-static int nfds, dsock;
-static int reopen = 0;
 static int in_background = 0;
-
-static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
 {
     gps_close();
-    close(dsock);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
 }
 
 static void sigusr1(int sig)
 {
-  reopen = 1;
+    gps_force_repoll();
 }
 
 static int daemonize()
@@ -136,15 +137,6 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 	fputs(buf, stderr);
 }
 
-static void send_dgps()
-{
-  char buf[BUFSIZE];
-
-  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", session.gNMEAdata.latitude,
-	  session.gNMEAdata.longitude, session.gNMEAdata.altitude);
-  write(dsock, buf, strlen(buf));
-}
-
 static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
@@ -194,268 +186,6 @@ static void print_settings(char *service, char *dgpsserver, char *dgpsport)
     if (session.initpos.latitude && session.initpos.longitude) {
       fprintf(stderr, "  latitude:           %s%c\n", session.initpos.latitude, session.initpos.latd);
       fprintf(stderr, "  longitude:          %s%c\n", session.initpos.longitude, session.initpos.lond);
-    }
-}
-
-static int handle_dgps()
-{
-    char buf[BUFSIZE];
-    int rtcmbytes;
-
-    if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
-    {
-	if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
-	    gpscli_report(1, "Write to rtcm sink failed\n");
-    }
-    else 
-    {
-	gpscli_report(1, "Read from rtcm source failed\n");
-    }
-
-    return rtcmbytes;
-}
-
-static void deactivate()
-{
-    session.fdin = -1;
-    session.fdout = -1;
-    gps_close();
-    if (session.device_type->wrapup)
-	session.device_type->wrapup();
-    gpscli_report(1, "closed GPS\n");
-    session.gNMEAdata.mode = 1;
-    session.gNMEAdata.status = 0;
-}
-
-static int activate()
-{
-    int input;
-
-    if ((input = gps_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
-	gpscli_errexit("Exiting - serial open\n");
- 
-    gpscli_report(1, "opened GPS\n");
-    session.fdin = input;
-    session.fdout = input;
-
-    return input;
-}
-
-int main(int argc, char *argv[])
-{
-    char *default_service = "gpsd";
-    char *service = NULL;
-    char *dgpsport = "rtcm-sc104";
-    char *dgpsserver = NULL;
-    struct sockaddr_in fsin;
-    int msock;
-    fd_set rfds;
-    fd_set afds;
-    fd_set nmea_fds;
-    int alen;
-    int fd, input;
-    int need_gps;
-    extern char *optarg;
-    int option;
-    char buf[BUFSIZE], *colon;
-    int sentdgps = 0, fixcnt = 0;
-    time_t now;
-
-    session.debug = 1;
-    while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
-	switch (option) {
-	case 'T':
-	    session.device_type = set_device_type(*optarg);
-	    break;
-	case 'D':
-	    session.debug = (int) strtol(optarg, 0, 0);
-	    break;
-	case 'S':
-	    service = optarg;
-	    break;
-	case 'd':
-	    dgpsserver = optarg;
-	    if ((colon = strchr(optarg, ':'))) {
-		dgpsport = colon+1;
-		*colon = '\0';
-	    }
-	    break;
-	case 'i':
-	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
-		fprintf(stderr, 
-			"gpsd: required format is latitude:longitude.\n");
-	    else if (!strchr("NSns", colon[-1]))
-		fprintf(stderr,
-			"gpsd: latitude field is invalid; must end in N or S.\n");
-	    else if (!strchr("EWew", optarg[strlen(optarg)-1]))
-		fprintf(stderr,
-			"gpsd: longitude field is invalid; must end in E or W.\n");
-	   else {
-		*colon = '\0';
-		session.initpos.latitude = optarg;
- 		session.initpos.latd = toupper(optarg[strlen(session.initpos.latitude) - 1]);
-		session.initpos.latitude[strlen(session.initpos.latitude) - 1] = '\0';
-		session.initpos.longitude = colon+1;
-		session.initpos.lond = toupper(session.initpos.longitude[strlen(session.initpos.longitude)-1]);
-		session.initpos.longitude[strlen(session.initpos.longitude)-1] = '\0';
-	    }
-	    break;
-	case 'p':
-	    device_name = optarg;
-	    break;
-	case 's':
-	    device_speed = strtol(optarg, NULL, 0);
-	    break;
-	case 't':
-	    gps_timeout = strtol(optarg, NULL, 0);
-	    break;
-	case 'h':
-	case '?':
-	default:
-	    usage();
-	    exit(0);
-	}
-    }
-
-    if (!device_name) device_name = default_device_name;
-
-    if (!service) {
-	if (!getservbyname(default_service, "tcp"))
-	    service = "2947";
-	else service = default_service;
-    }
-
-    if (session.debug > 1) 
-	print_settings(service, dgpsserver, dgpsport);
-    
-    if (session.debug < 2)
-	daemonize();
-
-    /* Handle some signals */
-    signal(SIGUSR1, sigusr1);
-    signal(SIGINT, onsig);
-    signal(SIGHUP, onsig);
-    signal(SIGTERM, onsig);
-    signal(SIGQUIT, onsig);
-    signal(SIGPIPE, SIG_IGN);
-
-    openlog("gpsd", LOG_PID, LOG_USER);
-    gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
-    msock = netlib_passiveTCP(service, QLEN);
-    gpscli_report(1, "gpsd listening on port %s\n", service);
-
-    nfds = getdtablesize();
-
-    FD_ZERO(&afds);
-    FD_ZERO(&nmea_fds);
-    FD_SET(msock, &afds);
-
-    if (dgpsserver) {
-	char hn[256];
-
-	if (!getservbyname(dgpsport, "tcp"))
-	    dgpsport = "2101";
-
-	dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
-	if (dsock < 0) 
-	    gpscli_errexit("Can't connect to dgps server");
-
-	gethostname(hn, sizeof(hn));
-
-	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-	write(dsock, buf, strlen(buf));
-	FD_SET(dsock, &afds);
-    }
-
-    /* mark fds closed */
-    input = -1;
-    session.fdin = input;
-    session.fdout = input;
-
-    now = time(NULL);
-    INIT(session.gNMEAdata.latlon_stamp, now, gps_timeout);
-    INIT(session.gNMEAdata.altitude_stamp, now, gps_timeout);
-    INIT(session.gNMEAdata.speed_stamp, now, gps_timeout);
-    INIT(session.gNMEAdata.status_stamp, now, gps_timeout);
-    INIT(session.gNMEAdata.mode_stamp, now, gps_timeout);
-    session.gNMEAdata.mode = MODE_NO_FIX;
-
-    while (1) {
-	struct timeval tv;
-
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-
-        memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
-
-	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
-	    if (errno == EINTR)
-		continue;
-	    gpscli_errexit("select");
-	}
-
-	need_gps = 0;
-
-	if (reopen && input == -1) {
-	    FD_CLR(input, &afds);
-	    deactivate();
-	    input = activate();
-	    FD_SET(input, &afds);
-	}
-
-	if (FD_ISSET(dsock, &rfds))
-	    handle_dgps();
-
-	if (FD_ISSET(msock, &rfds)) {
-	    int ssock;
-
-	    alen = sizeof(fsin);
-	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
-
-	    if (ssock < 0)
-		gpscli_report(0, "accept: %s\n", strerror(errno));
-
-	    else FD_SET(ssock, &afds);
-	}
-
-	if (input >= 0 && FD_ISSET(input, &rfds)) {
-	    session.device_type->handle_input(input, &afds, &nmea_fds);
-	}
-
-	if (session.gNMEAdata.status > 0) 
-	    fixcnt++;
-	
-	if (fixcnt > 10) {
-	    if (!sentdgps) {
-		sentdgps++;
-		if (dgpsserver)
-		    send_dgps();
-	    }
-	}
-
-	for (fd = 0; fd < nfds; fd++) {
-	    if (fd != msock && fd != input && fd != dsock && 
-		FD_ISSET(fd, &rfds)) {
-		if (input == -1) {
-		    input = activate();
-		    FD_SET(input, &afds);
-		}
-		if (handle_request(fd, &nmea_fds) == 0) {
-		    (void) close(fd);
-		    FD_CLR(fd, &afds);
-		    FD_CLR(fd, &nmea_fds);
-		}
-	    }
-	    if (fd != msock && fd != input && FD_ISSET(fd, &afds)) {
-		need_gps++;
-	    }
-	}
-
-	if (!need_gps && input != -1) {
-	    FD_CLR(input, &afds);
-	    input = -1;
-	    deactivate();
-	}
     }
 }
 
@@ -666,13 +396,13 @@ static int handle_request(int fd, fd_set * fds)
 }
 
 void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
-/* write to GPS */
+/* copy raw NMEA sentences from GPS */
 {
     int fd;
 
-    for (fd = 0; fd < nfds; fd++) {
+    for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, nmea_fds)) {
-	    gpscli_report(1, "=> GPS: %s", buf);
+	    gpscli_report(1, "=> client: %s", buf);
 	    if (write(fd, buf, strlen(buf)) < 0) {
 		gpscli_report(1, "Raw write %s", strerror(errno));
 		FD_CLR(fd, afds);
@@ -682,10 +412,326 @@ void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
     }
 }
 
-void  gpscli_errexit(char *s)
+int main(int argc, char *argv[])
+{
+    char *default_service = "gpsd";
+    char *service = NULL;
+    char *dgpsport = "rtcm-sc104";
+    char *dgpsserver = NULL;
+    struct sockaddr_in fsin;
+    fd_set rfds;
+    fd_set afds;
+    fd_set nmea_fds;
+    int msock, nfds;
+    int alen;
+    extern char *optarg;
+    int option;
+    char *colon;
+
+    session.debug = 1;
+    while ((option = getopt(argc, argv, "D:S:T:hi:p:s:d:t:")) != -1) {
+	switch (option) {
+	case 'T':
+	    session.device_type = set_device_type(*optarg);
+	    break;
+	case 'D':
+	    session.debug = (int) strtol(optarg, 0, 0);
+	    break;
+	case 'S':
+	    service = optarg;
+	    break;
+	case 'd':
+	    dgpsserver = optarg;
+	    if ((colon = strchr(optarg, ':'))) {
+		dgpsport = colon+1;
+		*colon = '\0';
+	    }
+	    break;
+	case 'i':
+	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
+		fprintf(stderr, 
+			"gpsd: required format is latitude:longitude.\n");
+	    else if (!strchr("NSns", colon[-1]))
+		fprintf(stderr,
+			"gpsd: latitude field is invalid; must end in N or S.\n");
+	    else if (!strchr("EWew", optarg[strlen(optarg)-1]))
+		fprintf(stderr,
+			"gpsd: longitude field is invalid; must end in E or W.\n");
+	   else {
+		*colon = '\0';
+		session.initpos.latitude = optarg;
+ 		session.initpos.latd = toupper(optarg[strlen(session.initpos.latitude) - 1]);
+		session.initpos.latitude[strlen(session.initpos.latitude) - 1] = '\0';
+		session.initpos.longitude = colon+1;
+		session.initpos.lond = toupper(session.initpos.longitude[strlen(session.initpos.longitude)-1]);
+		session.initpos.longitude[strlen(session.initpos.longitude)-1] = '\0';
+	    }
+	    break;
+	case 'p':
+	    device_name = optarg;
+	    break;
+	case 's':
+	    device_speed = strtol(optarg, NULL, 0);
+	    break;
+	case 't':
+	    gps_timeout = strtol(optarg, NULL, 0);
+	    break;
+	case 'h':
+	case '?':
+	default:
+	    usage();
+	    exit(0);
+	}
+    }
+
+    if (!device_name) device_name = default_device_name;
+
+    if (!service) {
+	if (!getservbyname(default_service, "tcp"))
+	    service = "2947";
+	else service = default_service;
+    }
+
+    if (session.debug > 1) 
+	print_settings(service, dgpsserver, dgpsport);
+    
+    if (session.debug < 2)
+	daemonize();
+
+    /* Handle some signals */
+    signal(SIGUSR1, sigusr1);
+    signal(SIGINT, onsig);
+    signal(SIGHUP, onsig);
+    signal(SIGTERM, onsig);
+    signal(SIGQUIT, onsig);
+    signal(SIGPIPE, SIG_IGN);
+
+    openlog("gpsd", LOG_PID, LOG_USER);
+    gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
+    msock = netlib_passiveTCP(service, QLEN);
+    gpscli_report(1, "gpsd listening on port %s\n", service);
+
+    FD_ZERO(&afds);
+    FD_ZERO(&nmea_fds);
+    FD_SET(msock, &afds);
+    nfds = getdtablesize();
+
+    {
+    int dsock = gps_init(dgpsserver, dgpsport);
+    if (dsock >= 0)
+	FD_SET(dsock, &afds);
+    }
+
+    while (1) {
+	struct timeval tv;
+
+        memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
+
+	/* poll for input, waiting at most a second */
+	tv.tv_sec = 1;
+	tv.tv_usec = 0;
+	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	    if (errno == EINTR)
+		continue;
+	    gpscli_errexit("select");
+	}
+
+	if (FD_ISSET(msock, &rfds)) {
+	    int ssock;
+
+	    alen = sizeof(fsin);
+	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
+
+	    if (ssock < 0)
+		gpscli_report(0, "accept: %s\n", strerror(errno));
+
+	    else 
+		FD_SET(ssock, &afds);
+	    FD_CLR(msock, &rfds);
+	}
+
+	gps_poll(&afds, &rfds, &nmea_fds, handle_request);
+    }
+}
+
+void gpscli_errexit(char *s)
 {
     gpscli_report(0, "%s: %s\n", s, strerror(errno));
     gps_close();
-    close(dsock);
     exit(2);
 }
+
+/* LIBRARY STUFF STARTS HERE */ 
+
+static int input;
+static int sentdgps = 0, fixcnt = 0;
+static int nfds;
+static int dsock;
+static int reopen = 0;
+
+static void onexit(void)
+{
+    close(dsock);
+}
+
+int gps_init(char *dgpsserver, char *dgpsport)
+/* initialize GPS polling */
+{
+    time_t now = time(NULL);
+
+    nfds = getdtablesize();
+
+    dsock = -1;
+    if (dgpsserver) {
+	char hn[256], buf[BUFSIZE];
+
+	if (!getservbyname(dgpsport, "tcp"))
+	    dgpsport = "2101";
+
+	dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
+	if (dsock < 0)
+	    gpscli_errexit("Can't connect to dgps server");
+
+	gethostname(hn, sizeof(hn));
+
+	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
+	write(dsock, buf, strlen(buf));
+	atexit(onexit);
+    }
+
+    /* mark fds closed */
+    input = -1;
+    session.fdin = input;
+    session.fdout = input;
+
+    INIT(session.gNMEAdata.latlon_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.altitude_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.speed_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.status_stamp, now, gps_timeout);
+    INIT(session.gNMEAdata.mode_stamp, now, gps_timeout);
+    session.gNMEAdata.mode = MODE_NO_FIX;
+
+    return dsock;
+}
+
+static void send_dgps()
+{
+  char buf[BUFSIZE];
+
+  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", session.gNMEAdata.latitude,
+	  session.gNMEAdata.longitude, session.gNMEAdata.altitude);
+  write(dsock, buf, strlen(buf));
+}
+
+static void deactivate()
+{
+    session.fdin = -1;
+    session.fdout = -1;
+    gps_close();
+    if (session.device_type->wrapup)
+	session.device_type->wrapup();
+    gpscli_report(1, "closed GPS\n");
+    session.gNMEAdata.mode = 1;
+    session.gNMEAdata.status = 0;
+}
+
+static int activate()
+{
+    int input;
+
+    if ((input = gps_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
+    {
+	gpscli_errexit("Exiting - serial open\n");
+    }
+    else
+    {
+	gpscli_report(1, "opened GPS\n");
+	session.fdin = input;
+	session.fdout = input;
+    }
+    return input;
+}
+
+void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
+	      int (*handle_request)(int fd, fd_set * fds))
+{
+    int fd;
+    int need_gps;
+
+    /* open or reopen the GPS if it's needed */
+    if (reopen && input == -1) {
+	FD_CLR(input, afds);
+	deactivate();
+	input = activate();
+	FD_SET(input, afds);
+    }
+
+    /* accept a DGPS correction if one is pending */
+    if (dsock > -1 && FD_ISSET(dsock, rfds))
+    {
+	char buf[BUFSIZE];
+	int rtcmbytes;
+
+	if ((rtcmbytes=read(dsock,buf,BUFSIZE))>0 && (session.fdout!=-1))
+	{
+	    if (session.device_type->rctm_writer(buf, rtcmbytes) <= 0)
+		gpscli_report(1, "Write to rtcm sink failed\n");
+	}
+	else 
+	{
+	    gpscli_report(1, "Read from rtcm source failed\n");
+	}
+	FD_CLR(dsock, rfds);
+    }
+
+    /* update the scoreboard structure from the GPS */
+    if (input >= 0 && FD_ISSET(input, rfds)) {
+	session.device_type->handle_input(input, rfds, nmea_fds);
+	FD_CLR(input, rfds);
+    }
+
+    /* count the good fixes */
+    if (session.gNMEAdata.status > 0) 
+	fixcnt++;
+
+    /* may be time to ship a DGPS correction to the GPS */
+    if (fixcnt > 10) {
+	if (!sentdgps) {
+	    sentdgps++;
+	    if (dsock > -1)
+		send_dgps();
+	}
+    }
+
+    /* accept and execute commands for all clients */
+    need_gps = 0;
+    for (fd = 0; fd < nfds; fd++) {
+	if (FD_ISSET(fd, rfds)) {
+	    if (input == -1) {
+		input = activate();
+		FD_SET(input, afds);
+	    }
+	    if ((*handle_request)(fd, nmea_fds) == 0) {
+		(void) close(fd);
+		FD_CLR(fd, afds);
+		FD_CLR(fd, nmea_fds);
+	    }
+	}
+	if (fd != input && FD_ISSET(fd, afds)) {
+	    need_gps++;
+	}
+    }
+
+    if (!need_gps && input != -1) {
+	FD_CLR(input, afds);
+	input = -1;
+	deactivate();
+    }
+}
+
+void gps_force_repoll(void)
+{
+    reopen = 1;
+}
+
+/* LIBRARY STUFF HERE ENDS */
