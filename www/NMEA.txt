@@ -10,7 +10,7 @@ information on the following topics:
 * Units used in GGA
 * Vendor extensions PRWIZCH and PMGNST
 * FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
-* New documentation on DTM, GBS, GRS, GST, MSK, and MSS sentences.
+* New documentation on BWC, DTM, GBS, GRS, GST, MSK, and MSS sentences.
 * Sentence examples merged from [GIDS]
 * Sentence explanations from [GIDS] and elsewhere
 
@@ -268,6 +268,33 @@ to POINTB does not change during the time you are on this leg.)
 Example 1: $GPBWC,081837,,,,,,T,,M,,N,*13
 
 Example 2: GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
+
+------------------------------------------------------------------------------
+
+BWC - Bearing and Distance to Waypoint - Great Circle
+
+         1          2     3    4     5  6  7  8  9  10 11 12  13
+         |          |     |    |     |  |  |  |  |  |  |  |   |
+ $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,nnn,*hh<CR><LF>
+
+ Field number:
+  1) UTC time of fix
+  2) Latitude of waypoint
+  3) N or S
+  4) Longitude of waypoint
+  5) W or E
+  6) Bearing to waypoint, degrees true
+  7) T indicating true bearing
+  8) Bearing to waypoint, degrees magnetic
+  9) M indicating magnetic
+  10) Distance to waypoint, Nautical miles
+  11) N indicating nautical miles
+  12) Waypoint ID
+  13) Checksum
+
+Example 1: $GPBWC,225444,4917.24,N,12309.57,W,051.9,T,031.6,M,001.3,N,004*29
+
+Example 2: $GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
 
 ------------------------------------------------------------------------------
 
@@ -1096,8 +1123,6 @@ and produces a single output.
  12) Data Validity
  13) Checksum
 
-(The OLN sentence is obsolete as of 3.01)
-
 ------------------------------------------------------------------------------
 
  TTM - Tracked Target Message
@@ -1363,8 +1388,7 @@ to have been introduced with NMEA 3.01 in 2002.
 
 ------------------------------------------------------------------------------
 
- ZDA - Time & Date
- UTC, day, month, year and local time zone
+ ZDA - Time & Date - UTC, day, month, year and local time zone
 
 	1         2  3  4    5  6  7
         |         |  |  |    |  |  |
@@ -1420,8 +1444,8 @@ DSI - DSC Transponder Initiate
 DSR - DSC Transponder Response
 MWD - Wind Direction & Speed
 TLL - Target Latitude and Longitude
-WDC - Distance to Waypoint - Great Circle
 WDR - Distance to Waypoint - Rhumb Line
+WDC - Distance to Waypoint - Great Circle
 ZDL - Time and Distance to Variable Point
 
 ****************************************************************
