@@ -24,6 +24,7 @@ original document, if in doubt, read the source...
 	s  The gps status as "S=%d".
 	m  The gps mode as "M=%d".
 	r  Toggles 'raw' mode. Return "R=0" or "R=1"
+	g  Returns six-digit Maidenhead grid square (like FN12fx)
 
    If a client wants information that is contained in the gps data,
    but there is no gpsd request for it, kindly add the request.
