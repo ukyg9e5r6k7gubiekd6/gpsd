@@ -304,12 +304,12 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 {
     char hdop_str[NMEA_MAX] = "";
     struct tm tm;
+    time_t intfixtime;
 
     if (session->gpsdata.hdop)
 	sprintf(hdop_str, "%.2f", session->gpsdata.hdop);
 
-    time_t intfixtime = (int)session->gpsdata.fix.time;
-
+    intfixtime = (int)session->gpsdata.fix.time;
     gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	sprintf(bufp,
