@@ -258,19 +258,21 @@ Acceleration 4 G, max.
 
 <p>And now ESR tells a hardware-repair war story:</p>
 
-<p>The BU-303 has a design flaw.  It has an internal SuperCap,
-probably used to drive static RAM holding fix information when the
-unit is unplugged or powered down.  The only thing holding the battery
-om the PCB is the solder on its leads.</p>
+<p>Older versions of the BU-303 (before mid-September 2004) had a
+design flaw.  The device has an internal SuperCap, probably used to
+drive static RAM holding fix information when the unit is unplugged or
+powered down.  The only thing holding the battery on the PCB was the
+solder on its leads.</p>
 
 <p>Mechanical vibration and shock (from events like allowing the GPS
-to fall on the floor) can stress and eventually break the solder bond.
+to fall on the floor) could stress and eventually break the solder bond.
 If you start hearing a rattling noise from inside the BU-303 case,
 this has probably happened.  The least-bad effect this can have is
 that the unit will start taking longer to acquire a first fix, because 
 every time you plug it in will effectively be a cold start.  If the loose
 SuperCap's contacts land in the right places, they can destroy or
-subtly derange the unit.</p>
+subtly derange the unit.  At worst, this actually presented an
+explosion hazard.</p>
 
 <p>After the battery has been loose for a while, the USB transciever 
 in the device may go catatonic.  You will know this has happened if
