@@ -151,16 +151,15 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
     strftime(out->utc + 6, 3, "%C", tm);
     strncpy(out->utc + 8, ddmmyy + 4, 2);	/* copy year */
 
-    strcpy(hhmmss, field(sentence, 1));	/* Time: hhmmss */
-    strncpy(out->utc + 11, hhmmss, 2);	/* copy hours */
+    strcpy(hhmmss, field(sentence, 1));		/* Time: hhmmss */
+    strncpy(out->utc + 11, hhmmss, 2);		/* copy hours */
     strncpy(out->utc + 14, hhmmss + 2, 2);	/* copy minutes */
-    strncpy(out->utc + 17, hhmmss + 4, 2);	/* copy seconds */
+    strncpy(out->utc + 17, hhmmss + 4, sizeof(out->utc)-17);	/* copy seconds */
 
     /* add '/'s, ':'s, ' ' and string terminator */
     out->utc[2] = out->utc[5] = '/';
     out->utc[10] = ' ';
     out->utc[13] = out->utc[16] = ':';
-    out->utc[19] = '\0';
 
     do_lat_lon(sentence, 3, out);
 
