@@ -506,6 +506,7 @@ static int handle_request(int fd, fd_set * fds)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Altitude", altitude_stamp);
 	    break;
+#if 0	/* we're trying to discourage raw mode */
         case 'C':
         case 'c':
             if (FD_ISSET(fd, fds))
@@ -513,6 +514,7 @@ static int handle_request(int fd, fd_set * fds)
             sprintf(reply + strlen(reply),
                          " ,R=0");
             break;
+#endif
 	case 'D':
 	case 'd':
 	    sprintf(reply + strlen(reply),
@@ -588,6 +590,7 @@ static int handle_request(int fd, fd_set * fds)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Speed", altitude_stamp);
 	    break;
+#if 0	/* we're trying to discourage raw mode */
         case 'X':
         case 'x':
             if (!FD_ISSET(fd, fds))
@@ -595,6 +598,7 @@ static int handle_request(int fd, fd_set * fds)
              sprintf(reply + strlen(reply),
                          " ,R=1");
             break;
+#endif
 	case 'Y':
 	case 'y':
 	    sc = 0;
