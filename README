@@ -45,7 +45,7 @@ Note that the PL2303 USB serial driver used with the BU-2303 seems
 to have been broken sometime late in the 2.4.x series of Linux kernels
 and was not fixed until 2.6.7.  If in doubt, upgrade.
 
-There is a project page for gpsd at <http://www.pygps.org/gpsd/>.
+There is a project site for gpsd at <http://www.berlios/gpsd/>.
 Look there for updates, news, and project mailing lists.
 
 

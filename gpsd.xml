@@ -32,15 +32,14 @@ and speedometer</refpurpose>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>gps</command>  
+      <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-p <replaceable>server:port</replaceable></arg>
       <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
-      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>server:port</replaceable></arg>
       <arg choice='opt'>-h </arg>
 </cmdsynopsis>
 
@@ -318,8 +317,7 @@ the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
 Electronics Association</ulink>. A description of the protocol is
 <ulink url='http://vancouver-webpages.com/peter/nmeafaq.txt'>available on the
 Web</ulink>.  gpsd parses the following NMEA sentences:
-GPRMC, GPGLL, GPVTG, GPGGA, GPGSA, GPGSV. It also recognizes the
-vendor extensions PMGNST and PRWIZCH.</para>
+GPRMC, GPGLL, GPVTG, GPGGA, GPGSA, GPGSV.</para>
 
 <para>The Rockwell protocol is described as an addendum on <ulink
 url='http://www.gpsinformation.net/dale/nmea.htm'>this page about
@@ -330,12 +328,20 @@ devices speak NMEA by default before being switched to binary and
 should thus be accessible as generic GPS devices.</para>
 
 </refsect1>
-<refsect1 id='maintainer'><title>MAINTAINER</title> 
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+</para>
+</refsect1>
 
-<para>Russ Nelson <email>nelson@crynwr.com</email>.  This manual page
-by Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a project
-page, with gps screenshots, <ulink
-url="http://www.pygps.org/gpsd/gpsd.html">here</ulink>.</para>
+<refsect1 id='maintainer'><title>AUTHORS</title> 
+
+<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric Raymond.
+This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
+There is a project page, with gps screenshots, <ulink
+url="http://www.berlios.de/gpsd/">here</ulink>.</para>
+
 </refsect1>
 
 </refentry>

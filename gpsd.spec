@@ -4,7 +4,7 @@ Version: 1.90
 Release: 1
 License: GPL
 Group: System Environment/Daemons
-URL: http://www.pygps.org/gpsd/
+URL: http://berlios.de/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 

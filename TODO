@@ -1,23 +1,8 @@
-1. Make a tarball of CVS HEAD available for testing.
-
-2. Update <http://www.pygps.org/gpsd/gpsd.html> and 
-   <http://www.pygps.org/gpsd/protocol.html>, which are now
-   seriously out of date.
-
-3. Split the gpsd interface code out of pygps into a Python 
+1. Split the gpsd interface code out of pygps into a Python 
    module that can be shipped with gpsd.
 
-4. File renames: 
+2. Figure our wg=hy enabling eaw mode screws up the gps client.
 
-     send_nmea.c -> libgps_core.c
-     tm.c        -> nmea_drivers.c
-     em.c        -> earthmate.c
+2. Make RPMs available.  I've built a working specfile.
 
-   Yes, I could do these destructively, but I'd prefer not to lose the
-   project history.  Unfortunately, CVS being what it is, I can't do
-   this without write access to the project repository.
-
-5. Make RPMs available.  I've built a working specfile.
-
-Someday: 
-Autodetect USB GPS by scanning the USB bus, if no device is specified.
+3. Autodetect USB GPS by scanning the USB bus, if no device is specified.
