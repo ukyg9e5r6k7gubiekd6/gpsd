@@ -51,7 +51,7 @@ make %{?_smp_mflags}
 mkdir -p "$RPM_BUILD_ROOT"%{_sbindir}
 cp .libs/gpsd "$RPM_BUILD_ROOT"%{_sbindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
-cp .libs/gps .libs/xgpsspeed gpsprobe "$RPM_BUILD_ROOT"%{_bindir}
+cp .libs/xgps .libs/xgpsspeed gpsprobe "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd.1 gpsprobe.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
@@ -72,7 +72,7 @@ PYVERS=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/
-cp gps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/gps
+cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 %clean
@@ -96,7 +96,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %doc README INSTALL COPYING gpsd.xml TODO
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_sbindir}/gpsd
-%attr(755, root, root) %{_bindir}/gps
+%attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprobe
 %{_libdir}/libgps.so.%{SO3VERSION}
@@ -106,7 +106,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
-%{_libdir}/X11/app-defaults/gps
+%{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %files -n gpsd-devel
@@ -120,13 +120,14 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %changelog
 * Fri Jan  14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.7-1
-- More compiler-warning cleanups.  Added --speedunits option to xgpsspeed,
-  --speedunits and --altunits options to xgps.  Improved GPGSV parsing so 
-  it copes gracefully if we start in the middle of a sequence.  Merged
-  Petter Reinholdtsen's fix for GPGSA lists with holes.  In xgps,
-  satellites used in the last fix are now dotted in the middle.  New
-  -P option to create pidfile.  Audited for potential buffer overruns,
-  found and fixed two.
+- More compiler-warning cleanups.  gps client name changed to xgps.
+  Added --speedunits option to xgpsspeed, --speedunits and --altunits
+  options to xgps.  Improved GPGSV parsing so it copes gracefully if
+  we start in the middle of a sequence.  Merged Petter Reinholdtsen's
+  fix for GPGSA lists with holes.  In xgps, satellites used in the
+  last fix are now dotted in the middle.  New -P option to create
+  pidfile.  Audited for potential buffer overruns, found and fixed
+  two.
 
 * Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
 - Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
