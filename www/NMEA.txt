@@ -2,6 +2,9 @@ This is a list of NMEA 0183 sentences with field descriptions.
 
 It may originally have been redacted from the document cited as
 [NMEA200]; see the list of sources at the end of this document.
+The official NMEA standard was not consulted at any point, thus this
+document is not a derivative work of that standard and is not
+controlled by the rapacious lawyers of NMEA.
 
 It is originally from the gpsdrive distribution, but adds more
 information on the following topics:
@@ -879,7 +882,7 @@ producing true heading.
   3) Omega Pair 1
   4) Checksum
 
-(The OLN sentence is obsolete as of 3.01)
+(The OLN sentence is obsolete as of 2.30)
 
 ------------------------------------------------------------------------------
 
@@ -1122,6 +1125,8 @@ and produces a single output.
  11) Satellite ID
  12) Data Validity
  13) Checksum
+
+(The TRF sentence is obsolete as of 2.3.0)
 
 ------------------------------------------------------------------------------
 
@@ -1450,7 +1455,7 @@ ZDL - Time and Distance to Variable Point
 
 ****************************************************************
 
-Vendor extensions:
+Vendor extensions (this list is very incomplete):
 
 ------------------------------------------------------------------------------
 
@@ -1475,7 +1480,7 @@ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c*hh<CR><LF>
  $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
 
  Fields consist of 12 pairs of a satellite PRN followed by a 
- signal quality number in the range 0-7.  
+ signal quality number in the range 0-7 (0 worst, 7 best).  
 
  Only emitted by the Zodiac (Rockwell) chipset.
 
@@ -1511,7 +1516,7 @@ Sources:
 [GIDS]
     "GPS - NMEA sentence information"
     http://aprs.gids.nl/nmea/
-    Used for MSK, MSS.
+    Used for BWC, MSK, MSS.
 
 [NMEAFAQ]
     "The NMEA FAQ"
@@ -1530,5 +1535,5 @@ Sources:
     Source for the claim that Mode Indicator dominates Status.
 
 [IEC]
-    "International Standard IEC 61162-1"
-    http://domino.iec.ch/webstore/webstore.nsf/Files/iec61162-1%7Bed2.0%7Den.pdf/$File/info_iec61162-1%7Bed2.0%7Den.pdf
+    "International Standard IEC 61162-1" (preview)
+    http://domino.iec.ch/preview/info_iec61162-1%7Bed2.0%7Den.pdf
