@@ -69,14 +69,6 @@ that's only 13.8 meters change in position between updates.  Faster
 refresh might make sense for aviation applications, but not on foot or
 in a car.
 
-** Speak SiRF binary protocol
-
-It can't do anything interesting, for our purposes.  There's 
-little point in upping the baud rate when we can't get updates above
-1Hz -- even transmitting at infinite speed would only cut a half second
-off the expected latency,  (OK, push-to-fix mode might be interesting
-if they actually documented how to set it.)
-
 ** Try to autodetect USB devices
 
 Sigh.  USB scanning won't work.
