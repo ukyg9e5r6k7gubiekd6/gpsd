@@ -25,6 +25,8 @@ char *alloca ();
 
 #include "gpsd.h"
 
+#undef WHOLE_CYCLE	/* assume we'll see sentences in whole-cycle groups */
+
 /**************************************************************************
  *
  * Parser helpers begin here
@@ -103,6 +105,7 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
     out->utc[10] = 'T';
 }
 
+#ifndef WHOLE_CYCLE
 static void fake_mmddyyyy(struct gps_data_t *out)
 /* sentence didn't supply mm/dd/yyy, so we have to fake it */
 {
@@ -112,6 +115,7 @@ static void fake_mmddyyyy(struct gps_data_t *out)
     gmtime_r(&now, &tm);
     strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", &tm);
 }
+#endif /* WHOLE_CYCLE */
 
 static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
 /* update last-fix field from a UTC time */
@@ -216,6 +220,7 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
     }
 }
 
+#ifndef WHOLE_CYCLE
 static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
@@ -237,6 +242,10 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
      * indicating that the Garmin 65 does not return time and status.
      * SiRF chipsets don't return the Mode Indicator.
      * This code copes gracefully with both quirks.
+     * 
+     * Unless you care about the FAA indicator, this sentence supplies nothing
+     * that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
+     * actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
 
@@ -291,6 +300,7 @@ static void processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
 	out->speed = atof(field[3]);
     REFRESH(out->speed_stamp);
 }
+#endif /* WHOLE_CYCLE */
 
 static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Global Positioning System Fix Data */
@@ -315,11 +325,13 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
 
+#ifndef WHOLE_CYCLE
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[1], out);
 	out->gps_time = iso8661_to_unix(out->utc);
 	do_lat_lon(&field[2], out);
         out->satellites_used = atoi(field[7]);
+#endif /* WHOLE_CYCLE */
 	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
@@ -528,8 +540,13 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"GPRMB", 0,    	NULL},
 	{"GPRMC", GPRMC,	processGPRMC},
 	{"GPGGA", GPGGA,	processGPGGA},
+#ifdef WHOLE_CYCLE
+	{"GPGLL", GPGLL,	NULL},
+	{"GPVTG", GPVTG,	NULL},
+#else
 	{"GPGLL", GPGLL,	processGPGLL},
 	{"GPVTG", GPVTG,	processGPVTG},
+#endif
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
 	{"PGRME", PGRME,	processPGRME},
