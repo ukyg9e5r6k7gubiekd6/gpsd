@@ -215,11 +215,9 @@ struct gps_type_t tripmate =
  **************************************************************************/
 
 /*
- * Treat this as a straight NMEA device unless we get the exception
- * code back that says to go binary.  In that case process_exception() 
- * will flip us over to the zodiac_b driver.  But, connect at 9600
- * rather than 4800.  The Rockwell chipset does not accept DGPS in text 
- * mode.
+ * Connect at 9600 rather than 4800.  Treat this as a straight NMEA
+ * device until we get the EARTHA\r\n string back that says to go
+ * binary.  The Rockwell chipset does not accept DGPS in text mode.
  *
  * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
  */
@@ -227,6 +225,9 @@ struct gps_type_t tripmate =
 static void earthmate_initializer(struct gps_session_t *session)
 {
     write(session->fdout, "EARTHA\r\n", 8);
+    sleep(30);
+    session->device_type = &zodiac_b;
+    zodiac_b.initializer(session);
 }
 
 struct gps_type_t zodiac_a =
