@@ -31,6 +31,7 @@ information, including:</para>
 
 <itemizedlist>
 <listitem><para>the GPS type (what chipset it uses)</para></listitem>
+<listitem><para>the GPS protocol (NMEA or SiRF)</para></listitem>
 <listitem><para>the inventory of NMEA sentence types it emits</para></listitem>
 <listitem><para>its send cycle (frequency of updates)</para></listitem>
 </itemizedlist>
@@ -73,7 +74,8 @@ is <filename>/dev/gps</filename>.</para>
 <refsect1 id='bugs'><title>BUGS AND LIMITAIONS</title>
 
 <para>This program handles only straight NMEA devices; it won't 
-handle either Rockwell or SiRF binary protocols.</para>
+handle either Rockwell or SiRF binary protocols, though it can
+recognize a SiRF device.</para>
 
 <para>The logic for hunting the GPS's baud rate is vulnerable to
 various sorts of RS323 flakiness. If it hangs for longer than a few
