@@ -10,7 +10,7 @@ endif
 XMLTO = xmlto
 
 bin_PROGRAMS = $(BUILD_PROGS)
-bin_SCRIPTS = gpsprobe
+bin_SCRIPTS = gpsprobe gpsprof
 
 #
 # Build xgps
