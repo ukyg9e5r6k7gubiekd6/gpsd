@@ -204,6 +204,10 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
     double track;
 
     gpsd_report(3, "PrintPacket() ");
+    if ( 4096 < pkt->mDataSize) {
+	gpsd_report(3, "bogus packet, size too large=%d\n", pkt->mDataSize);
+	return;
+    }
 
     switch ( pkt->mPacketType ) {
     case GARMIN_LAYERID_TRANSPORT:
@@ -495,11 +499,18 @@ Packet_t* GetPacket (struct gps_session_t *session )
 {
     Packet_t *thePacket = NULL;
     long theBufferSize = 0;
-    unsigned char* theBuffer = 0;
+    unsigned char* theBuffer = NULL;
     struct timespec delay, rem;
-    unsigned char theTempBuffer[ASYNC_DATA_SIZE];
 
     gpsd_report(4, "GetPacket()\n");
+
+    thePacket = (Packet_t*) calloc(1, sizeof(Packet_t) );
+    theBuffer = (unsigned char*) thePacket;
+
+    if( !thePacket ) {
+	    gpsd_report(0, "malloc() failed\n");
+	    exit(2);
+    }
 
     for( ; ; ) {
 	// Read async data until the driver returns less than the
@@ -507,32 +518,28 @@ Packet_t* GetPacket (struct gps_session_t *session )
 
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
-	unsigned char* theNewBuffer = NULL;
 	long theBytesReturned = 0;
 
 	theBytesReturned = read(session->gNMEAdata.gps_fd
-				, theTempBuffer, sizeof(theTempBuffer));
-	if ( 0 >  theBytesReturned ) {
-	    // gotta handle theses better, but they happen often
-	    // during init
+				, &theBuffer[theBufferSize], ASYNC_DATA_SIZE);
+	if ( !theBytesReturned ) {
+	    // zero length read is a flag for got the whole packet
+            break;
+	} else if ( 0 >  theBytesReturned ) {
+	    // read error...
+	    gpsd_report(0, "GetPacket() read error=%d, errno=%d\n"
+		, theBytesReturned, errno);
 	    continue;
 	}
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
-	theBufferSize += ASYNC_DATA_SIZE;
-	theNewBuffer = (unsigned char*) malloc( theBufferSize );
-	memcpy( theNewBuffer, theBuffer, theBufferSize - ASYNC_DATA_SIZE );
-	memcpy( theNewBuffer + theBufferSize - ASYNC_DATA_SIZE,
-		theTempBuffer, ASYNC_DATA_SIZE );
-
-	free( theBuffer );
-
-	theBuffer = theNewBuffer;
-
-	if( theBytesReturned != ASYNC_DATA_SIZE ) {
-	    thePacket = (Packet_t*) theBuffer;
+	theBufferSize += theBytesReturned;
+	if ( sizeof(Packet_t) <=  theBytesReturned ) {
+	    // really bad read error...
+	    gpsd_report(3, "GetPacket() packet too long!\n");
 	    break;
 	}
+
 	delay.tv_sec = 0;
 	delay.tv_nsec = 333000L;
 	while (nanosleep(&delay, &rem) < 0)
