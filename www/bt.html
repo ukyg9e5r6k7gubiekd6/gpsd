@@ -5,22 +5,47 @@
    <meta name="Author" content="Remco Treffkorn">
    <meta name="Description" content="GPSd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
    <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <link rel="stylesheet" href="main.css" type="text/css"/>
    <title>Bluetooth and GPSd</title>
 </head>
 <body background="paper.gif">
+
+<div id="Header">
+Blurtooth and <code>gpsd</code>
+</div>
+
+<div id="Menu">
+    <a href="index.html">Home<br/>
+    <a href="#news">News</a><br/>
+    <a href="#downloads">Downloads</a><br/>
+    <a href="#mailing-lists">Mailing lists</a><br/>
+    <a href="#documentation">Documentation</a><br/>
+    <a href="xgps.html">Screenshots</a><br/>
+    <a href="#recipes">Recipes</a><br/>
+    <a href="#others">Other GPSDs</a><br/>
+    <a href="hardware.html">Hardware</a><br/>
+    <a href="history.html">History</a><br/>
+
+    <a href="http://validator.w3.org/check/referer"><img
+          src="http://www.w3.org/Icons/valid-xhtml10"
+          alt="Valid XHTML 1.0!" height="31" width="88" /></a>
+</div>
+
+<div id="Content">
 
 <p>Jean-Michel.Bouffard, who is at CRC in Canada says that he's using
 the Socket Bluetooth GPS receiver with gpsd.  Here are his notes.  The
 Bluetooth protocol is including a serial profile that makes the use of
 the Bluetooth GPS almost like a serial GPS.</p>
 
-<ul>
+<ol>
 
-<li>First, the Bluez protcol stack must be installed and all the 
-documentation can be found on http://bluez.sourceforge.net/
-In my case, I installed it on a Linux PC with a BT USB dongle but I'm 
-still trying to install it on my 3850 iPaq with
-a BT Sleeve. But once BT is installed, the rest is the same.
+<li>First, the Bluez protcol stack must be installed and all the
+documentation can be found on <a
+href='http://bluez.sourceforge.net/'>http://bluez.sourceforge.net/</a>.
+In my case, I installed it on a Linux PC with a BT USB dongle but I'm
+still trying to install it on my 3850 iPaq with a BT Sleeve. But once
+BT is installed, the rest is the same.
 
 <li>Install bluetooth for your device with the "rfcomm" module which is 
 the Serial profile (http://bluez.sourceforge.net/).
@@ -75,11 +100,13 @@ to see the NMEA GPS output
 </pre>
 to specify the path of the GPS and it will work exactly like a serial GPS
 
-</ul>
+</ol>
 
 <p>If something is unclear, write me back and I will try to help you...</p>
 
 <p>Jean-Michel Bouffard</p>
 
+</div>
+</hr>
 </body>
 </html>
