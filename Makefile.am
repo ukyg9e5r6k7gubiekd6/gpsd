@@ -55,6 +55,7 @@ libgps_la_SOURCES = \
 	garmin.c \
 	libgpsd_core.c \
 	libgps.c \
+	packet.c \
 	sirf.c \
 	report.c
 

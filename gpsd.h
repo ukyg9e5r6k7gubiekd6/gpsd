@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "gps.h"
+#include <setjmp.h>
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE || LOGFILE_ENABLE
@@ -23,7 +24,6 @@ struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     char typekey, *typename, *trigger;
     void (*initializer)(struct gps_session_t *session);
-    int (*validate_buffer)(char *buf, size_t n);
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_session_t *session, int speed);
@@ -39,6 +39,19 @@ struct gps_type_t {
 #endif
 #endif
 
+/*
+ * The point of the binary packets is to have higher bit density than NMEA.
+ * So any one binary packet should take up less space than the longest
+ * permissible NMEA packet.
+ */
+#define MAX_PACKET_LENGTH	NMEA_MAX
+
+
+#define BAD_PACKET	-1
+#define NMEA_PACKET	0
+#define SIRF_PACKET	1
+#define ZODIAC_PACKET	2
+
 struct gps_session_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gNMEAdata;
@@ -48,6 +61,13 @@ struct gps_session_t {
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
+    /* packet-getter internals */
+    unsigned char inbuffer[MAX_PACKET_LENGTH+1];
+    unsigned short inbuflen;
+    unsigned char *inbufptr;
+    unsigned char outbuffer[MAX_PACKET_LENGTH+1];
+    unsigned short outbuflen;
+    jmp_buf packet_error;
 #ifdef PROFILING
     double poll_times[__FD_SETSIZE];	/* last daemon poll time */
 #endif /* PROFILING */
@@ -83,7 +103,9 @@ extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
 extern int nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
-extern int nmea_validate_buffer(char *buf, size_t n);
+extern void packet_flush(struct gps_session_t *pstate);
+extern int packet_sniff(struct gps_session_t *pstate);
+extern int packet_get_nmea(struct gps_session_t *pstate);
 extern int gpsd_open(struct gps_session_t *context);
 extern int gpsd_set_speed(struct gps_session_t *session, unsigned int speed);
 extern int gpsd_get_speed(struct termios *);

@@ -709,7 +709,6 @@ struct gps_type_t garmin_binary =
     "Garmin binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
     garmin_init,	/* initialize the device */
-    NULL,		/* no validator */
     garmin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */
     NULL,		/* no speed switcher */

@@ -99,7 +99,6 @@ struct gps_type_t nmea = {
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
     nmea_initializer,		/* probe for SiRF II */
-    nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
@@ -133,34 +132,11 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
     return 1;
 }
 
-static int sirf_validate_buffer(char *buf, size_t n)
-/* does this buffer look like it contains a valid SiRF-II response? */
-{
-    static char *prefixes[] = {
-	"$Version",
-	"$TOW: ",
-	"$WK: ",
-	"$POS: ",
-	"$CLK: ",
-	"$CHNL:",
-	"$Baud rate: ",
-	"$HW Type: ",
-	"$Asic Version: ",
-	"$Clock Source: ",
-	"$Internal Beacon: ",
-    }, **ip;
-    for  (ip = prefixes; ip<prefixes+sizeof(prefixes)/sizeof(prefixes[0]); ip++)
-	if (!strncmp(*ip, buf, strlen(*ip)))
-	    return 1;
-    return nmea_validate_buffer(buf, n);
-}
-
 struct gps_type_t sirfII = {
     's', 		/* select explicitly with -T s */
     "SiRF-II NMEA",	/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirf_initializer,		/* no initialization */
-    sirf_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_switcher,	/* we can change speeds */
@@ -189,7 +165,6 @@ struct gps_type_t fv18 = {
     "San Jose Navigation FV18",		/* full name of type */
     NULL,		/* no recognition string */
     fv18_initializer,	/* to be sent unconditionally */
-    nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
@@ -243,7 +218,6 @@ struct gps_type_t tripmate = {
     "Delorme TripMate",		/* full name of type */
     "ASTRAL",			/* tells us to switch */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
-    nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,		/* read text sentence */
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no speed switcher */
@@ -290,7 +264,6 @@ struct gps_type_t earthmate = {
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
     earthmate_initializer,	/* switch us to Zodiac mode */
-    NULL,			/* binary protocol */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
@@ -313,7 +286,6 @@ struct gps_type_t logfile = {
     "Logfile",			/* full name of type */
     NULL,			/* no recognition string */
     NULL,			/* no initializer */
-    nmea_validate_buffer,	/* how to check that we have good data */
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */

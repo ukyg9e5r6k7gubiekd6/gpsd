@@ -26,45 +26,18 @@ distinguish them from baud barf.
 ***************************************************************************/
 #include <ctype.h>
 #include <stdio.h>
-#include <setjmp.h>
+#include <unistd.h>
+#include <string.h>
 #include "gpsd.h"
 
-#define TESTMAIN
-
-/* start of header, someday */
-
-/*
- * The point of the binary packets is to have higher bit density than NMEA.
- * So any one binary packet should take up less space than the longest
- * permissible NMEA packet.
- */
-#define MAX_PACKET_LENGTH	NMEA_MAX
-
-struct parse_state {
-    int	fd;
-    unsigned char inbuffer[MAX_PACKET_LENGTH+1];
-    unsigned short inbuflen;
-    unsigned char *inbufptr;
-    unsigned char outbuffer[MAX_PACKET_LENGTH+1];
-    unsigned short outbuflen;
-    jmp_buf packet_error;
-};
-
-#define BAD_PACKET	-1
-#define NMEA_PACKET	0
-#define SIRF_PACKET	1
-#define ZODIAC_PACKET	2
-
-/* all between "start of header" and this line goes in the header someday */
-
-static int getch(struct parse_state *pstate)
+static int getch(struct gps_session_t *pstate)
 {
     if (pstate->inbufptr >= pstate->inbuffer + pstate->inbuflen)
     {
 	int st;
 
 #ifndef TESTMAIN
-	st = read(pstate->fd, 
+	st = read(pstate->gNMEAdata.gps_fd, 
 		  pstate->inbuffer + pstate->inbuflen, 
 		  MAX_PACKET_LENGTH - pstate->inbuflen);
 	if (st < 0)
@@ -75,7 +48,7 @@ static int getch(struct parse_state *pstate)
     return pstate->outbuffer[pstate->outbuflen++] = *pstate->inbufptr++;
 }
 
-int packet_reread(struct parse_state *pstate)
+static int packet_reread(struct gps_session_t *pstate)
 /* packet type grab failed, set us up for reread */
 {
     pstate->inbufptr = pstate->inbuffer;
@@ -83,22 +56,14 @@ int packet_reread(struct parse_state *pstate)
     return 0;
 }
 
-void packet_discard(struct parse_state *pstate)
+static void packet_discard(struct gps_session_t *pstate)
 /* discard data in the packet-out buffer */
 {
     memset(pstate->outbuffer, '\0', sizeof(pstate->outbuffer)); 
     pstate->outbuflen = 0;
 }
 
-void packet_flush(struct parse_state *pstate)
-/* discard data in the buffer and prepare to receive a packet */
-{
-    memset(pstate->inbuffer, '\0', sizeof(pstate->inbuffer)); 
-    pstate->inbuflen = 0;
-    pstate->inbufptr = pstate->inbuffer;
-}
-
-void packet_shift(struct parse_state *pstate)
+static void packet_shift(struct gps_session_t *pstate)
 /* packet grab failed, shift the input buffer to discard a character */ 
 {
     pstate->inbufptr = memmove(pstate->inbuffer, 
@@ -108,9 +73,9 @@ void packet_shift(struct parse_state *pstate)
     packet_discard(pstate);	/* clear out copied garbage */
 }
 
-static int get_nmea(struct parse_state *pstate)
+static int get_nmea(struct gps_session_t *pstate)
 {
-    unsigned short checksum, crc, n;
+    unsigned short crc, n;
     unsigned char c, csum[3], *trailer;
 
     if (getch(pstate) !='$')
@@ -147,7 +112,7 @@ static int get_nmea(struct parse_state *pstate)
     return 1;
 }
 
-static int get_sirf(struct parse_state *pstate)
+static int get_sirf(struct gps_session_t *pstate)
 {
     unsigned short length, n, checksum, crc;
 
@@ -171,7 +136,7 @@ static int get_sirf(struct parse_state *pstate)
     return 1;
 }
 
-static int get_zodiac(struct parse_state *pstate)
+static int get_zodiac(struct gps_session_t *pstate)
 {
     unsigned short length, n, checksum, crc;
 
@@ -195,13 +160,24 @@ static int get_zodiac(struct parse_state *pstate)
 
 /* entry points begin here */
 
-int packet_sniff(struct parse_state *pstate)
+void packet_flush(struct gps_session_t *pstate)
+/* discard data in the buffer and prepare to receive a packet */
+{
+    memset(pstate->inbuffer, '\0', sizeof(pstate->inbuffer)); 
+    pstate->inbuflen = 0;
+    pstate->inbufptr = pstate->inbuffer;
+}
+
+int packet_sniff(struct gps_session_t *pstate)
+/* grab a packet, return its type */
 {
     if (setjmp(pstate->packet_error))
 	return BAD_PACKET;
     else {
+	int n;
 	packet_discard(pstate);
-	for (;;) {
+	packet_flush(pstate);
+	for (n = MAX_PACKET_LENGTH * 3; n; n--) {
 	    if (get_nmea(pstate)) {
 		pstate->outbuffer[pstate->outbuflen] = '\0';
 		return NMEA_PACKET;
@@ -212,11 +188,12 @@ int packet_sniff(struct parse_state *pstate)
 	    else
 		packet_shift(pstate);
 	}
+	return BAD_PACKET;
     }
 }
 
 #define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
-	outname(struct parse_state *pstate) \
+	outname(struct gps_session_t *pstate) \
 	{ \
 	    int maxgarbage = maxlength; \
 	    packet_discard(pstate); \
@@ -229,9 +206,9 @@ int packet_sniff(struct parse_state *pstate)
 	    return 0; \
 	}
 
-MAKE_PACKET_GRABBER(package_get_nmea, get_nmea, NMEA_MAX * 3)
-// MAKE_PACKET_GRABBER(package_get_sirf, get_sirf, MAX_PACKET_LENGTH)
-// MAKE_PACKET_GRABBER(package_get_zodiac, get_zodiac, MAX_PACKET_LENGTH)
+MAKE_PACKET_GRABBER(packet_get_nmea, get_nmea, NMEA_MAX * 3)
+// MAKE_PACKET_GRABBER(packet_get_sirf, get_sirf, MAX_PACKET_LENGTH)
+// MAKE_PACKET_GRABBER(packet_get_zodiac, get_zodiac, MAX_PACKET_LENGTH)
 
 #ifdef TESTMAIN
 
@@ -334,7 +311,7 @@ int main(int argc, char *argv[])
 	},
     };
     struct map *mp;
-    struct parse_state state;
+    struct gps_session_t state;
     int st;
     unsigned char *cp;
 

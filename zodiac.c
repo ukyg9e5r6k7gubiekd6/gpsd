@@ -435,7 +435,6 @@ struct gps_type_t zodiac_binary =
     "Zodiac binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
     zodiac_init,	/* initialize the device */
-    NULL,		/* binary protocol, no buffer validation */
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */

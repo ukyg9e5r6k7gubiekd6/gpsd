@@ -38,8 +38,7 @@ static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
 int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 {
-    char	buf[NMEA_MAX+1];
-    unsigned int	n, rate, ok;
+    unsigned int	rate, ok;
 
     if (speed < 300)
 	rate = 0;
@@ -71,22 +70,7 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 	usleep(3000000);	/* allow the UART time to settle */
     }
 
-    if (session->device_type->validate_buffer) {
-	n = 0;
-	while (n < NMEA_MAX) {
-	    n += read(session->gNMEAdata.gps_fd, buf+n, sizeof(buf)-n-1);
-	    if (n > 2 && buf[n-2] == '\r' && buf[n-1] == '\n')
-		break;
-	}
-	gpsd_report(4, "validating %d bytes.\n", n);
-	ok = session->device_type->validate_buffer(buf, n);
-    } else {
-	/* this has the effect of disabling baud hunting on future connects */
-	gpsd_report(4, "no buffer validation.\n");
-	ok = 1;
-    }
-
-    if (ok)
+    if ((ok = (packet_sniff(session) == NMEA_PACKET)))
 	session->gNMEAdata.baudrate = speed;
     return ok;
 }
