@@ -113,6 +113,11 @@ ends the session, implicitly performing a
 The library will use this to ordinary status messages.  Use 
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
+
+<para>The
+.B debug
+member of the session structure controls which messages are displayed.
+It defaults to 1, but can be altered by the calling program.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
