@@ -46,7 +46,7 @@ triggers = {
     "PRWIZCH": "# This GPS has a Rockwell Zodiac chipset.\n"
     }
 
-SIRF  = "# This GPS probably has a SiRF-II chipset.\n"
+SIRF  = "# This GPS probably has a SiRF-II or Evermore chipset.\n"
 GE301 = "# GPVTG format indicates NMEA version >= 3.01.\n"
 
 if __name__ == '__main__':
