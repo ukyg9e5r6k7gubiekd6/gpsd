@@ -269,7 +269,12 @@ the replies. Examples:</para>
 
 <para>If the GPS stops sending updates to gpsd, gpsd will continue
 presenting the last data it got for 5 seconds, then begin
-sending back empty responses xinsisting only of the GPSD prefix.</para>
+sending back empty responses consisting only of the GPSD prefix.</para>
+
+<para>When clients are active but the GPS is not responding, gpsd will spin 
+trying to open the GPS device once per second.  Thus, it can be left
+running in background and survive having the GPS repeatedly unplugged
+and plugged back in.</para>
 
 </refsect2>
 <refsect2><title>gps</title>

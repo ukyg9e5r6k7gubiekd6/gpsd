@@ -134,29 +134,6 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 	fputs(buf, stderr);
 }
 
-static void errexit(const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-    strcat(buf, ": ");
-    strcat(buf, strerror(errno));
-    strcat(buf, "\n");
-
-    gpscli_report(0, buf);
-    gps_wrap(&session);
-    exit(2);
-}
-
 static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
@@ -561,8 +538,10 @@ int main(int argc, char *argv[])
     if (session.dsock >= 0)
 	FD_SET(session.dsock, &afds);
 
-    if (nowait && (gps_activate(&session) < 0))
-	errexit("exiting - GPS device nonexistent or can't be read");
+    if (nowait && (gps_activate(&session) < 0)) {
+	gpscli_report(0, "exiting - GPS device nonexistent or can't be read\n");
+	exit(2);
+    }
 
     while (1) {
 	struct timeval tv;
@@ -575,9 +554,11 @@ int main(int argc, char *argv[])
 	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    errexit("select");
+	    gpscli_report(0, "select: %s\n", strerror(errno));
+	    exit(2);
 	}
 
+	/* always be open to new connections */
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;
 
@@ -592,8 +573,8 @@ int main(int argc, char *argv[])
 	    FD_CLR(msock, &rfds);
 	}
 
-	/* open or reopen the GPS if it's needed */
-	if (reopen && session.fdin == -1) {
+	/* we may need to force the GPS open */
+	if ((nowait || reopen) && session.fdin == -1) {
 	    gps_deactivate(&session);
 	    if (gps_activate(&session) >= 0)
 		FD_SET(session.fdin, &afds);
@@ -604,25 +585,25 @@ int main(int argc, char *argv[])
 	    gpscli_report(3, "GPS is offline\n");
 	    FD_CLR(session.fdin, &afds);
 	    gps_deactivate(&session);
-	    reopen = 1;
+	    if (nowait)
+		reopen = 1;
 	}
 
+	/* this simplifies a later test */
 	if (session.dsock > -1)
 	    FD_CLR(session.dsock, &rfds);
-	if (session.fdin > -1)
-	    FD_CLR(session.fdin, &rfds);
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
-	    if (fd != msock && FD_ISSET(fd, &rfds)) {
+	    if (fd != msock && fd != session.fdin && FD_ISSET(fd, &rfds)) {
 		char buf[BUFSIZE];
 		int buflen;
 
 		if (session.fdin == -1) {
-		    if (gps_activate(&session) < 0)
-			errexit("exiting - open of GPS at %s failed", session.gps_device);
-		    FD_SET(session.fdin, &afds);
+		    gps_deactivate(&session);
+		    if (gps_activate(&session) >= 0)
+			FD_SET(session.fdin, &afds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
 		if (buflen <= 0) {
