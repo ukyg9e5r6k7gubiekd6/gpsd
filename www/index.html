@@ -13,14 +13,22 @@
 
 <p>This is the new home page of <code>gpsd</code>, moved from
 www.pygps.org in August 2004.  <code>gpsd</code> has just undergone a
-major rewrite at the hands of Eric S. Raymond; the 2.0
-release adds many new features, including a linkable C service library
-and/or a Python module that developers of <code>gpsd</code>-aware
-applications can use to encapsulate all communication with
-<code>gpsd</code>.</p>
+major rewrite; this fixed many bugs and added many new features,</p>
+
+<p><code>gpsd</code> is a service daemon that monitors a GPS attached
+to a host computer through a serial or USB port, making its data on
+the location/course/velocity of the sensor available to be queried on
+TCP port 2947 of the host computer.  With <code>gpsd</code>, multiple
+GPS client applications (such as navigational and wardriving software)
+can share access to a GPS without contention or loss of data. Also,
+gpsd responds to queries with a format that is substantially easier to
+parse than NMEA 0183.  The <code>gpsd</code> distribution includes a
+linkable C service library and/or a Python module that developers of
+<code>gpsd</code>-aware applications can use to encapsulate all
+communication with <code>gpsd</code>.</para>
 
 <p>The goal of the <code>gpsd</code> project is to create a solid layer of
-infrastructure for open-source programs that want to be
+open-source infrastructure for programs that want to be
 location-sensitive. We aim for simple, robust interfaces, unfussy
 operation, and an easy learning curve for application developers.</p>
 
@@ -105,7 +113,7 @@ seen before.</p>
 
 <h1>The gps client</h1>
 
-<p>Included in the package is a sample/simple client called 'gps'. It
+<p>Included in the package is a sample client called <code>gps</code>. It
 connects to a <code>gpsd</code> at any host you tell it to, and
 requests raw data, so that it can display the current location of all
 visible GPS satellites your receiver 'sees'.</p>
