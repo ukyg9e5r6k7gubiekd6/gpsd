@@ -57,7 +57,7 @@ char lond = 'W';
 				/* command line option defaults */
 char *default_device_name = "/dev/gps";
 char *default_latitude = "3600.000";
-char *default_longitude = "-12300.000";
+char *default_longitude = "12300.000";
 
 int nfds, dsock;
 int verbose = 1;
