@@ -112,7 +112,7 @@ int gpsd_activate(struct gps_session_t *session)
 {
     int input;
 
-    if ((input = gpsd_open(session->gpsd_device, session->baudrate)) < 0)
+    if ((input = gpsd_open(session->gpsd_device, session->baudrate, session->device_type->stopbits)) < 0)
 	return -1;
     else
     {

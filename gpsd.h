@@ -23,6 +23,7 @@ struct gps_type_t
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
     int baudrate;
+    int stopbits;
     int interval;
 };
 
@@ -89,7 +90,7 @@ extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
 extern void nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
-extern int gpsd_open(char *device_name, int device_speed);
+extern int gpsd_open(char *device_name, int device_speed, int stopbits);
 extern void gpsd_close(void);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
@@ -99,7 +100,6 @@ extern int gpsd_activate(struct gps_session_t *session);
 extern void gpsd_deactivate(struct gps_session_t *session);
 extern int gpsd_poll(struct gps_session_t *session);
 extern void gpsd_wrap(struct gps_session_t *session);
-extern int gpsd_set_7N2(void);
 
 /* caller must supply this */
 void gpscli_report(int d, const char *fmt, ...);

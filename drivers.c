@@ -110,6 +110,7 @@ struct gps_type_t nmea =
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
+    1,			/* 1 stop bit */
     1,			/* updates every second */
 };
 
@@ -121,8 +122,6 @@ struct gps_type_t nmea =
 
 void fv18_initializer(struct gps_session_t *session)
 {
-    /* FV18 sends 1 start bit, 8 bits, 1 stop bit, looking like 7N2 */ 
-    gpsd_set_7N2();
     /* tell it to send GSAs so we'll know if 3D is accurate */
     nmea_send(session->fdout, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
 }
@@ -137,6 +136,7 @@ struct gps_type_t fv18 =
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
+    2,			/* 2 stop bits */
     1,			/* updates every second */
 };
 
@@ -197,6 +197,7 @@ struct gps_type_t tripmate =
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no wrapup */
     4800,			/* default speed to connect at */
+    1,				/* 1 stop bit */
     1,				/* updates every second */
 };
 #endif /* TRIPMATE_ENABLE */
@@ -241,6 +242,7 @@ struct gps_type_t earthmate =
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     9600,			/* connecting at 4800 will fail */
+    1,				/* 1 stop bit */
     1,				/* updates every second */
 };
 #endif /* ZODIAC_ENABLE */
@@ -261,6 +263,7 @@ struct gps_type_t logfile =
     NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     0,				/* don't set a speed */
+    1,				/* 1 stop bit (not used) */
     -1,				/* should never time out */
 };
 

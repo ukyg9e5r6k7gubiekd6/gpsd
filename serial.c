@@ -45,7 +45,7 @@ static int set_baud(long baud)
 }
 
 
-int gpsd_open(char *device_name, int device_speed)
+int gpsd_open(char *device_name, int device_speed, int stopbits)
 {
     gpscli_report(1, "opening GPS data source at %s\n", device_name);
     ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
@@ -66,22 +66,13 @@ int gpsd_open(char *device_name, int device_speed)
 	cfsetospeed(&ttyset, (speed_t)device_speed);
 
 	ttyset.c_cflag &= ~(PARENB | CRTSCTS);
-	ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
+	ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
 	ttyset.c_oflag = (ONLCR);
 	if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
 	    return -1;
     }
     return ttyfd;
-}
-
-int gpsd_set_7N2(void)
-{
-    ttyset.c_cflag &=~ CSIZE & CS8;
-    ttyset.c_cflag |= CSIZE & CS7;
-    if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
-	return -1;
-    return 0;
 }
 
 void gpsd_close(void)
