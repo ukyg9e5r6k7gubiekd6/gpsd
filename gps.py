@@ -110,7 +110,7 @@ class gpsdata:
 	st += "Mode:     MODE_" + ("ZERO", "NO_FIX", "2D","3D")[self.mode]
 	st += " " + repr(self.mode_stamp) + "\n"
 	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f " % \
-              self.satellites_used, self.pdop, self.hdop, self.vdop)
+              (self.satellites_used, self.pdop, self.hdop, self.vdop)
 	st += repr(self.fix_quality_stamp) + "\n"
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
 	for sat in self.satellites:
