@@ -73,7 +73,9 @@ station.</para>
 <listitem>
 <para>Set GPS type, usually not necessary because most GPSes now speak
 the standard NMEA 0183 protocol. For a list of driver types,
-look at what <command>gpsd -?</command> writes to standard output.</para>
+look at what <command>gpsd -?</command> writes to standard output.
+This option may be unavailable if the daemon was compiled without
+support for the non-NMEA drivers.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -104,7 +106,8 @@ it develop a first fix more quickly).  Required format is %f[NS]:%f[EW]; that
 is a decimal number of degrees latitude, followed by the suffix N or
 S, followed by a colon, followed by a decimal number of degrees
 longitude, followed by the suffix E or W.  The numbers may have
-fractional parts to the right of a decimal point.</para>
+fractional parts to the right of a decimal point.  This option may
+be unavailable if the daemon was compiled without TripMate support.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
