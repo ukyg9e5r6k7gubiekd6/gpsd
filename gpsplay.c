@@ -425,11 +425,16 @@ void send_nmea(fd_set *afds, fd_set *nmea_fds, char *buf)
 static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
+    char *p;
 
     if (fgets(buf, BUFSIZE-1, fp) == NULL) {
 	fseek(fp, 0L, SEEK_SET);
 	fgets(buf, BUFSIZE-1, fp);
     }
+    p = strrchr(buf, '\r');
+    if (p) *p = '\0';
+    p = strrchr(buf, '\n');
+    if (p) *p = '\0';
 	
     if (strlen(buf)) {
 	handle_message(buf);
