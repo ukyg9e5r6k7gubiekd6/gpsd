@@ -63,32 +63,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	    out->longitude = lon;
 	updated++;
     }
-    if (updated == 2)
-	out->latlon_stamp.changed = 1;
     REFRESH(out->latlon_stamp);
-}
-
-static int update_field_i(char *field, int *dest)
-/* update an integer-valued field */
-{
-    int tmp, changed;
-
-    tmp = atoi(field);
-    changed = (tmp != *dest);
-    *dest = tmp;
-    return changed;
-}
-
-static int update_field_f(char *field, double *dest)
-/* update a float-valued field */
-{
-    int changed;
-    double tmp;
-
-    tmp = atof(field);
-    changed = (tmp != *dest);
-    *dest = tmp;
-    return changed;
 }
 
 /**************************************************************************
@@ -205,9 +180,9 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
     #endif /* PROFILING */
 	}
 	do_lat_lon(&field[3], out);
-	out->speed_stamp.changed = update_field_f(field[7], &out->speed);
+	out->speed = atof(field[7]);
 	REFRESH(out->speed_stamp);
-	out->track_stamp.changed = update_field_f(field[8], &out->track);
+	out->track = atof(field[8]);
 	REFRESH(out->track_stamp);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -220,7 +195,6 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     * Do not touch otherwise, may be STATUS_FIX or
 	     * STATUS_DGPS_FIX, cannot tell apart here
 	     */
-	    out->status_stamp.changed = 1;
 	    out->status = STATUS_FIX;
 	    REFRESH(out->status_stamp);
 	}
@@ -229,7 +203,6 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     * Do not touch otherwise, may be MODE_3D or
 	     * MODE_3D, cannot tell apart here
 	     */
-	    out->mode_stamp.changed = 1;
 	    out->mode = MODE_2D;
 	    REFRESH(out->mode_stamp);
 	}
@@ -273,7 +246,6 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
-	out->status_stamp.changed = (out->status != newstatus);
 	out->status = newstatus;
 	REFRESH(out->status_stamp);
 	gpsd_report(3, "GPGLL sets status %d\n", out->status);
@@ -306,12 +278,12 @@ static void processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
 
      * which means we want to extract field 5.  We cope with both.
      */
-    out->track_stamp.changed = update_field_f(field[1], &out->track);;
+    out->track = atof(field[1]);;
     REFRESH(out->track_stamp);
     if (field[2][0] == 'T')
-	out->speed_stamp.changed = update_field_f(field[5], &out->speed);
+	out->speed = atof(field[5]);
     else
-	out->speed_stamp.changed = update_field_f(field[3], &out->speed);
+	out->speed = atof(field[3]);
     REFRESH(out->speed_stamp);
 }
 
@@ -332,7 +304,7 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    out->status_stamp.changed = update_field_i(field[6], &out->status);
+    out->status = atoi(field[6]);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
     if (out->status > STATUS_NO_FIX) {
@@ -354,14 +326,10 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	if (!altitude[0]) {
 	    if (out->mode == MODE_3D) {
 		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
-		out->mode_stamp.changed = 1;
 		REFRESH(out->mode_stamp);
 	    }
 	} else {
-	    double newaltitude = atof(altitude);
-
-	    out->altitude_stamp.changed = (newaltitude != out->altitude);
-	    out->altitude = newaltitude;
+	    out->altitude = atof(altitude);
 	    REFRESH(out->altitude_stamp);
 	}
     }
@@ -382,14 +350,14 @@ static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 	16   = HDOP
 	17   = VDOP
      */
-    int i, changed = 0;
+    int i;
     
-    out->mode_stamp.changed = update_field_i(field[2], &out->mode);
+    out->mode = atoi(field[2]);
     REFRESH(out->mode_stamp);
     gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
-    changed |= update_field_f(field[15], &out->pdop);
-    changed |= update_field_f(field[16], &out->hdop);
-    changed |= update_field_f(field[17], &out->vdop);
+    out->pdop = atof(field[15]);
+    out->hdop = atof(field[16]);
+    out->vdop = atof(field[17]);
     for (i = 0; i < MAXCHANNELS; i++)
 	out->used[i] = 0;
     out->satellites_used = 0;
@@ -400,7 +368,6 @@ static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
            out->satellites_used++;
        }
     }
-    out->fix_quality_stamp.changed = changed;
     REFRESH(out->fix_quality_stamp);
 }
 
@@ -441,7 +408,7 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
            <repeat for up to 4 satellites per sentence>
                 There my be up to three GSV sentences in a data packet
      */
-    int changed, fldnum;
+    int fldnum;
     if (count <= 3)
         return;
     out->await = atoi(field[1]);
@@ -456,12 +423,11 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
 	out->satellites = 0;
     }
 
-    changed = 0;
     for (fldnum = 4; fldnum < count; out->satellites++) {
-	changed |= update_field_i(field[fldnum++], &out->PRN[out->satellites]);
-	changed |= update_field_i(field[fldnum++], &out->elevation[out->satellites]);
-	changed |= update_field_i(field[fldnum++], &out->azimuth[out->satellites]);
-	changed |= update_field_i(field[fldnum++], &out->ss[out->satellites]);
+	out->PRN[out->satellites] = atoi(field[fldnum++]);
+	out->elevation[out->satellites] = atoi(field[fldnum++]);
+	out->azimuth[out->satellites] = atoi(field[fldnum++]);
+	out->ss[out->satellites] = atoi(field[fldnum++]);
     }
 
     /* not valid data until we've seen a complete set of parts */
@@ -471,7 +437,6 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
 	gpsd_report(3, "Satellite data no good.\n");
     else {
 	gpsd_report(3, "Satellite data OK.\n");
-	out->satellite_stamp.changed = changed;
 	REFRESH(out->satellite_stamp);
     }
 }
@@ -488,12 +453,9 @@ static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
 	5    = PDOP
         6    = units
      */
-    int changed = 0;
-    
-    changed |= update_field_f(field[1], &out->hdop);
-    changed |= update_field_f(field[3], &out->vdop);
-    changed |= update_field_f(field[5], &out->pdop);
-    out->epe_quality_stamp.changed = changed;
+    out->hdop = atof(field[1]);
+    out->vdop = atof(field[3]);
+    out->pdop = atof(field[5]);
     REFRESH(out->epe_quality_stamp);
 }
 

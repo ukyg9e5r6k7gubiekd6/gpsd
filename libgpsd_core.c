@@ -148,11 +148,40 @@ int gpsd_poll(struct gps_session_t *session)
 	    return -1;
 	}
     } else {
+	struct gps_data_t old;
+	memcpy(&old, &session->gNMEAdata, sizeof(struct gps_data_t));
+
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
+
+	/* set all the changed bits */
+#define CHANGECHECK(part, stamp) session->gNMEAdata.stamp.changed = (old.part!=session->gNMEAdata.part)
+	CHANGECHECK(online, online_stamp);
+	session->gNMEAdata.latlon_stamp.changed = \
+	    (session->gNMEAdata.longitude!=old.longitude || session->gNMEAdata.latitude!=old.latitude);
+	CHANGECHECK(altitude, altitude_stamp);
+	CHANGECHECK(speed, speed_stamp);
+	CHANGECHECK(track, track_stamp);
+	CHANGECHECK(status, status_stamp);
+	CHANGECHECK(mode, mode_stamp);
+	session->gNMEAdata.fix_quality_stamp.changed = \
+	    (session->gNMEAdata.pdop!=old.pdop||session->gNMEAdata.hdop!=old.hdop||session->gNMEAdata.vdop!=old.vdop);
+	session->gNMEAdata.epe_quality_stamp.changed = \
+	    (session->gNMEAdata.epe!=old.epe || session->gNMEAdata.eph!=old.eph || session->gNMEAdata.epv!=old.epv);
+	/*
+	 * This won't catch the case where all values are identical
+	 * but rearranged.  We can live with that.
+	 */
+	session->gNMEAdata.satellite_stamp.changed |= \
+	    memcmp(session->gNMEAdata.PRN, old.PRN, sizeof(old.PRN)) ||
+	    memcmp(session->gNMEAdata.elevation, old.elevation, sizeof(old.elevation)) ||
+	    memcmp(session->gNMEAdata.azimuth, old.azimuth,sizeof(old.azimuth)) ||
+	    memcmp(session->gNMEAdata.ss, old.ss, sizeof(old.ss)) ||
+	    memcmp(session->gNMEAdata.used, old.used, sizeof(old.used));
+#undef CHANGECHECK
 
 	/* count the good fixes */
 	if (session->gNMEAdata.status > STATUS_NO_FIX) 
@@ -164,7 +193,7 @@ int gpsd_poll(struct gps_session_t *session)
 	    if (session->dsock > -1) {
 		char buf[BUFSIZ];
 		sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
-			session->gNMEAdata.latitude,
+			session->gNMEAdata.latitude, 
 			session->gNMEAdata.longitude, 
 			session->gNMEAdata.altitude);
 		write(session->dsock, buf, strlen(buf));

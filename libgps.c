@@ -210,10 +210,10 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	|| gpsdata->altitude_stamp.changed 
 	|| gpsdata->speed_stamp.changed 
 	|| gpsdata->track_stamp.changed 
-	|| gpsdata->fix_quality_stamp.changed 
-	|| gpsdata->fix_quality_stamp.changed 
 	|| gpsdata->status_stamp.changed 
 	|| gpsdata->mode_stamp.changed 
+	|| gpsdata->fix_quality_stamp.changed 
+	|| gpsdata->epe_quality_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 
 	;
 }
