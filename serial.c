@@ -113,9 +113,10 @@ void serial_close()
 	    ttyset.c_ospeed = B0;
 #endif
 	    ioctl(ttyfd, TIOCSETAF, &ttyset);
+	    
+	    /* Restore original terminal parameters */
+            tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 	}
-	/* Restore original terminal parameters */
-        tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 
 	close(ttyfd);
 	ttyfd = -1;
