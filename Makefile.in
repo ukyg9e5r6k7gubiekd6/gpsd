@@ -181,7 +181,7 @@ HEADERS = config.h gps.h gps.h gpsd.h TachometerP.h nmea.h Tachometer.h version.
 
 LIB_OBJECTS = $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS)  $(COMMON_OBJECTS)
 SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(MOTIF_OBJECTS:.o=.c) $(HEADERS)
-DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml libgps.xml
+DOCS = README INSTALL COPYING HACKING TODO gpsd.xml libgpsd.xml libgps.xml
 MANPAGES = gpsd.1 libgps.3 libgpsd.3
 XRESOURCES = gps.ad xgpsspeed.ad
 CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
