@@ -91,7 +91,7 @@ static Atom delw;
 
 extern void redraw();
 
-void quit_cb()
+static void quit_cb()
 {
     exit(0);	/* closes the GPS along with other fds */
 }
@@ -211,6 +211,7 @@ static void build_gui(Widget lxbApp)
     register_canvas(satellite_diagram, gc);
     XtAddCallback(satellite_diagram, XmNexposeCallback, redraw, NULL);
 
+    /* the data display */
     XtSetArg(args[0], XmNtopOffset, 10);
     XtSetArg(args[1], XmNbottomOffset, 10);
     XtSetArg(args[2], XmNrightOffset, 10);
@@ -219,14 +220,12 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[5], XmNrightAttachment, XmATTACH_WIDGET);
     XtSetArg(args[6], XmNrightWidget, satellite_diagram);
     XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
-
     XtSetArg(args[8], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[9], XmNtopAttachment, XmATTACH_WIDGET);
     XtSetArg(args[10], XmNtopWidget, satellite_list);
     XtSetArg(args[11], XmNheight, 12);
     rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, data_panel, args, 12);
 
-    /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     XtSetArg(args[1], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[2], XmNrightAttachment, XmATTACH_NONE);
