@@ -151,6 +151,8 @@ struct gps_data_t {
 #define GPGSA	0x10
 #define GPGSV	0x20
 #define PGRME	0x40
+    struct tm nmea_date;
+    double subseconds;
 };
 
 struct gps_data_t *gps_open(const char *host, const char *port);

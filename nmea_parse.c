@@ -88,42 +88,30 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
    Sigh. This is only necessary because the design of NMEA 0183 is a crock.
  */
 
-static void merge_ddmmyy(char *ddmmyy, char *buf)
+#define DD(s)	((s)[0]-'0')*10+((s)[1]-'0')
+
+static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
-    time_t now = time(NULL);
     struct tm tm;
+    time_t now = time(NULL);
 
     gmtime_r(&now, &tm);
-    strftime(buf, 3, "%C", &tm);
-    strncpy(buf+2, ddmmyy + 4, 2);	/* copy year */
-    buf[4] = '-';
-    strncpy(buf+5, ddmmyy + 2, 2);	/* copy month */
-    buf[7] = '-';
-    strncpy(buf+8, ddmmyy, 2);	/* copy date */
-    buf[10] = 'T';
+    out->nmea_date.tm_year = ((1900+tm.tm_year)/100)*100 + DD(ddmmyy+4) - 1900;
+    out->nmea_date.tm_mon = DD(ddmmyy+2)-1;
+    out->nmea_date.tm_mday = DD(ddmmyy);
 }
 
-static void fake_mmddyyyy(char *buf)
-/* sentence didn't supply mm/dd/yyy, so we have to fake it */
-{
-    time_t now = time(NULL);
-    struct tm tm;
-
-    gmtime_r(&now, &tm);
-    strftime(buf, 13, "%Y-%m-%dT", &tm);
-}
-
-static void merge_hhmmss(char *hhmmss, char *buf)
+static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
 /* update from a UTC time */
 {
-    strncpy(buf+11, hhmmss, 2);	/* copy hours */
-    buf[13] = ':';
-    strncpy(buf+14, hhmmss+2, 2);	/* copy minutes */
-    buf[16] = ':';
-    strcpy(buf+17 , hhmmss+4);      /* copy seconds */
-    strcat(buf, "Z");
+    out->nmea_date.tm_hour = DD(hhmmss);
+    out->nmea_date.tm_min = DD(hhmmss+2);
+    out->nmea_date.tm_sec = DD(hhmmss+4);
+    out->subseconds = atof(hhmmss+4) - out->nmea_date.tm_sec;
 }
+
+#undef DD
 
 /**************************************************************************
  *
@@ -155,10 +143,9 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 
     if (!strcmp(field[2], "A")) {
 	if (count > 9) {
-	    char buf[28];
-	    merge_ddmmyy(field[9], buf);
-	    merge_hhmmss(field[1], buf);
-	    out->fix.time = iso8601_to_unix(buf);
+	    merge_ddmmyy(field[9], out);
+	    merge_hhmmss(field[1], out);
+	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
 	}
 	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
@@ -216,12 +203,12 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
-	char buf[28];
 
-	fake_mmddyyyy(buf);
-	merge_hhmmss(field[5], buf);
-	out->fix.time = iso8601_to_unix(buf);
-	mask |= TIME_SET;
+	merge_hhmmss(field[5], out);
+	if (out->nmea_date.tm_year) {
+	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+	    mask |= TIME_SET;
+	}
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
@@ -261,12 +248,12 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     if (out->status > STATUS_NO_FIX) {
 	char *altitude;
 	double oldfixtime = out->fix.time;
-	char buf[28];
 
-	fake_mmddyyyy(buf);
-	merge_hhmmss(field[1], buf);
-	out->fix.time = iso8601_to_unix(buf);
-	mask |= TIME_SET;
+	merge_hhmmss(field[1], out);
+	if (out->nmea_date.tm_year) {
+	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+	    mask |= TIME_SET;
+	}
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;
         out->satellites_used = atoi(field[7]);
@@ -366,18 +353,15 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
-    for (n = 0, fldnum = 4; fldnum < count;) {
-	out->PRN[n]       = atoi(field[fldnum++]);
-	out->elevation[n] = atoi(field[fldnum++]);
-	out->azimuth[n]   = atoi(field[fldnum++]);
-	out->ss[n]        = atoi(field[fldnum++]);
-	if (out->PRN[n])
-	    n++;
+    for (fldnum = 4; fldnum < count; out->satellites++) {
+	out->PRN[out->satellites]       = atoi(field[fldnum++]);
+	out->elevation[out->satellites] = atoi(field[fldnum++]);
+	out->azimuth[out->satellites]   = atoi(field[fldnum++]);
+	out->ss[out->satellites]        = atoi(field[fldnum++]);
     }
-    out->satellites = atoi(field[3]);
-    if (n != out->satellites)
+    if (out->part == out->await && atoi(field[3]) != out->satellites)
 	gpsd_report(0, "GPGSV field 3 value of %d != actual count %d\n",
-		    out->satellites, n);
+		    atoi(field[3]), out->satellites);
 
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await) {
