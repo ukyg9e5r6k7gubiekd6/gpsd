@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+#
+# Collect latency-profiling data from a running gpsd.
+import time, getopt, gps
+
+if __name__ == '__main__':
+    session = gps.gps(host="localhost", port="2947")
+
+    session.query("wZ+")
+
+    while True:
+        session.poll()
+        gpstime = gps.isotime(session.utc)
+        daemontime = session.profile_time
+        print "%.6f %.6f %.6f" % (gpstime, daemontime, daemontime - gpstime)
+
+    del session
+

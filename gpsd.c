@@ -39,7 +39,9 @@ static char *device_name = DEFAULT_DEVICE_NAME;
 static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, nfds, go_background = 1, in_background = 0;
+#ifdef PROFILING
 static int sentence_length, profiling;
+#endif /* PROFILING */
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -204,12 +206,14 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'D':
 	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
+#ifdef PROFILING
 		if (profiling) {
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
 		    sprintf(phrase+strlen(phrase), ",Z=%ld.%ld:%d",
 			    tv.tv_sec, tv.tv_usec, sentence_length);
 		}
+#endif /* PROFILING */
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
@@ -324,6 +328,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		}
 	    }
 	    break;
+#ifdef PROFILING
 	case 'Z':
 	    if (*p == '1' || *p == '+') {
 		profiling = 1;
@@ -345,6 +350,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",Z+");
 	    }
 	    break;
+#endif /* PROFILING */
 	case '\r': case '\n':
 	    goto breakout;
 	}
@@ -374,7 +380,9 @@ static void raw_hook(char *sentence)
 {
     int fd;
 
+#ifdef PROFILING
     sentence_length = strlen(sentence);	/* used when profiling */
+#endif /* PROFILING */
 
     for (fd = 0; fd < nfds; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */

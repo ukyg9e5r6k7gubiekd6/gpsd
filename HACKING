@@ -19,10 +19,14 @@ two colon-separated fields: a millisecond-precision timestamp telling when
 gpsd shipped the data, and the character length of the sentence containing the 
 timestamp data (a GPRMC, GPLL, or GPGGA sentence).
 
-The spread between D and Z timestamps measures the latency between the GPS's
-fix measurement and when it became available to the client. For it to be 
-meaningful, the GPS has to ship timestamps with sub-second precision. SiRF-II
-and Evermore chipsets do this.
+The spread between D and Z timestamps measures the latency between the
+GPS's fix measurement and when it became available to the client. For
+it to be meaningful, the GPS has to ship timestamps with sub-second
+precision. SiRF-II and Evermore chipsets ship times with millisecond
+resolution.  Your machine's time reference must also be accurate to
+subsecond precision; I recommend using ntpd, which will normally give
+you about 15 microseconds precision (two orders of magnitude better than 
+GPSes normally reported).
 
 The distribution lincludes a Python script, profile_gpsd, that uses the 
 Z command to collect profiling information from a running GPS instance.
