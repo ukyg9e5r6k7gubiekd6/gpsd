@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <signal.h>
 
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
@@ -335,6 +336,7 @@ void init_list()
  */
 
 static struct gps_data_t *gpsdata;
+static int offline_timer;	/* time since last state change in seconds*/
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
@@ -347,8 +349,9 @@ void update_display(char *message)
     XmString string[12];
     char s[128], *sp;
 
-    while (isspace(*(sp = message + strlen(message) - 1)))
-	*sp = '\0';
+    if (message[0])
+	while (isspace(*(sp = message + strlen(message) - 1)))
+	    *sp = '\0';
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
@@ -395,8 +398,13 @@ void update_display(char *message)
     XmTextFieldSetString(text_6, s);
 
     if (!gpsdata->online)
-	sprintf(s, "OFFLINE");
+    {
+	sprintf(s, "OFFLINE (%d secs)", offline_timer);
+	alarm(1);
+    }
     else
+    {
+	offline_timer = 0;
 	switch (gpsdata->mode) {
 	case 2:
 	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
@@ -408,9 +416,16 @@ void update_display(char *message)
 	    sprintf(s, "NO FIX");
 	    break;
 	}
+    }
     XmTextFieldSetString(text_7, s);
 
     draw_graphics(gpsdata);
+}
+
+static void handle_alarm(int sig)
+{
+    offline_timer++;
+    update_display("");
 }
 
 int main(int argc, char *argv[])
@@ -461,6 +476,7 @@ int main(int argc, char *argv[])
     XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 
+    signal(SIGALRM, handle_alarm);
     XtAppMainLoop(app);
 
     gps_close(gpsdata);
