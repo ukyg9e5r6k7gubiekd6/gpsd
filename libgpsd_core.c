@@ -152,6 +152,14 @@ int gpsd_poll(struct gps_session_t *session)
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
 
+#ifdef PROFILING
+	{
+	    struct timeval tv;
+	    gettimeofday(&tv, NULL);
+	    session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
+	}
+#endif /* PROFILING */
+
 	/* set all the changed bits */
 #define CHANGECHECK(part, stamp) session->gNMEAdata.stamp.changed = (old.part!=session->gNMEAdata.part)
 	CHANGECHECK(online, online_stamp);

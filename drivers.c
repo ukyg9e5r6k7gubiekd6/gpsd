@@ -14,30 +14,13 @@
 
 static void nmea_handle_input(struct gps_session_t *session)
 {
-#ifdef PROFILING
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv);
-#endif /* PROFILING */
-
     if (!session->outbuflen)
 	packet_get_nmea(session);
-
-#ifdef PROFILING
-    gettimeofday(&tv, NULL);
-    session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv);
-#endif /* PROFILING */
 
     gpsd_report(2, "<= GPS: %s", session->outbuffer);
     if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
 	if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
 	    gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
-#ifdef PROFILING
-	else {
-	    gettimeofday(&tv, NULL);
-	    session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
-	}
-#endif /* PROFILING */
     } else {
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;

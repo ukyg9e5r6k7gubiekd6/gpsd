@@ -27,6 +27,7 @@ distinguish them from baud barf.
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
 #include "gpsd.h"
 
 static int getch(struct gps_session_t *session)
@@ -220,6 +221,27 @@ int packet_sniff(struct gps_session_t *session)
     }
 }
 
+#ifdef PROFILING
+#define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
+	outname(struct gps_session_t *session) \
+	{ \
+	    struct timeval tv; \
+	    int maxgarbage = maxlength; \
+	    packet_accept(session); \
+	    gettimeofday(&tv, NULL); \
+	    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv); \
+	    while (maxgarbage--) { \
+		if (inname(session)) { \
+		    return 1; \
+		} else \
+		    packet_shift(session); \
+	    } \
+	struct timeval tv; \
+	gettimeofday(&tv, NULL); \
+	session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv); \
+	    return 0; \
+	}
+#else
 #define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
 	outname(struct gps_session_t *session) \
 	{ \
@@ -233,6 +255,7 @@ int packet_sniff(struct gps_session_t *session)
 	    } \
 	    return 0; \
 	}
+#endif /* PROFILING */
 
 MAKE_PACKET_GRABBER(packet_get_nmea, get_nmea, NMEA_MAX * 3)
 MAKE_PACKET_GRABBER(packet_get_sirf, get_sirf, MAX_PACKET_LENGTH)
