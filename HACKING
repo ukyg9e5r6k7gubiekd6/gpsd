@@ -13,9 +13,9 @@ misbehave.
 
 Next, profiling...
 
-If you build with --enable-profiling, an undocumented Z command in the daemon 
-will cause it to emit a $ clause on every D request.  The $ clause contains
-four space-separated fields: 
+There is a barely-documented Z command in the daemon will cause it to emit
+a $ clause on every D request.  The $ clause contains four
+space-separated fields:
 
 (1) The character length of the sentence containing the timestamp data
     (a GPRMC, GPLL, or GPGGA sentence)
@@ -101,7 +101,44 @@ of the file-descriptor set representing the GPS would tell us if there
 were input waiting.  The explicit test is there for other programs
 that might call gps_poll() without such a guarantee.
 
-That's about all there is to it.
+Next, autoconfiguration...
+
+One of the design goals for gpsd is to be as near zero-configuration
+as possible.  Under most circumstances, it doesn't require either
+the GPS type or the serial-line parameters rto connect to it to be
+specified.  Presently, here's how the autoconfig works.
+
+1. Ay each baud rate gpsd grabs packets until it sees either a
+   well-formed and checksum-verified NMEA packet, a well-formed and
+   checksum-verified SiRF packet, or it sees one of the two special 
+   trigger strings EARTHA or ASTRAL, or it fills a long buffer with garbage
+   (in which case it steps to the next baud rate).
+
+2. If it finds a SiRF packet, it queries the chip for firmware
+   version.  If the version is < 231.000 it drops back to SiRF NMEA.
+   We're done.
+
+3. If it finds EARTHA, it selects the Earthmade driver, which then
+   flips the connection to Zodiac binary mode.  We're done.
+
+4. If it finds ASTRAL, it feeds the TripMate on the other end what
+   it wants and goes to Tripmate NMEA mode.  We're done.
+
+5. If it finds a NMEA packet, it selects the NMEA driver.  This
+   initializes by shipping all vendor-specific initialization strings
+   to the device.  Presently there are two such, one for SiRF and one
+   for the FV-18.  The FV18 just sets some sentence frequencies, but
+   the SiRF one is itself a probe,
+
+6. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
+   invokes the matching driver.  Presently there is really only one of
+   these: "$Ack Input 105.\r\n", the response to the SiRF probe. On
+   seeing this, gpsd switches from NMEA to SiRF binary mode, probes
+   for firmware version, and either stays in binary or drops back 
+   to SiRF NMEA.
+
+The outcome is that we know exactly what we're looking at, without any
+driver or baud rate options.
 
 Adding new GPS types...
 
@@ -119,9 +156,19 @@ another driver structure and add it to the list.
 Each driver may have a trigger string that the NMEA interpreter
 watches for.  When that string is recognized at the start of a 
 line, the interpreter switches to its driver.  The new driver 
-initializer method is called immediately.  If there is no trigger string
-the initializer method is called unconditionally each time the device
-is opened.
+initializer method is called immediately. 
+
+Note: it is not necessary to add a driver just because your GPS wants
+some funky initialization string.  Simply ship the string in the
+initializer for the NMEA driver.  Because vendor control strings live
+in vendor-specific namespaces (PSRF for SiRF, PGRM for Garmin, etc.)
+your initializing control string will almost certainly be ignored by
+anythinbg not specifically watching for it.
+
+Another good thing to send from the NMEA initializer is probe strings.
+These are strings which shjould elicit an identifying response from
+the GPS that you can use as a trigger string for a driver.  This is
+how we detect SiRF chips (see step 5 under autoconfiguration above).
 
 And more...
 
