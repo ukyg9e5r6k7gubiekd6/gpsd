@@ -106,6 +106,9 @@ is for <code>gpsd</code> developers.</p></li>
 
 <dt><a href="gpsprobe.html">gpsprobe.1</a></dt>
 <dd>The <code>gpsprobe</code> program for querying GPS capabilities.</dd>
+
+<dt><a href="gpsprof.html">gpsprof.1</a></dt>
+<dd>The <code>gpsprof</code> program for measuring GPS latency.</dd>
 </dl>
 
 <p>We have a <a href='hardware.html'>list of compatible GPSses</a>
