@@ -111,9 +111,10 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-2
+* Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.97-1
   Removed PRWIZCH support (it still passes through in raw mode).
   Build Motif-dependent programs conditionally.  Added gpsprobe.
+  Fixed a brown-paper-bag-bug in 1.96 RPM packaging.
 
 * Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
