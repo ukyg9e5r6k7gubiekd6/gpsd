@@ -56,12 +56,13 @@ struct OUTDATA {
 #define C_ZCH		4
 
 /* prototypes */
-void doNMEA(short refNum);
-void processGPRMC(char *sentence);
-void processGPGGA(char *sentence);
-void processGPGSV(char *sentence);
-void processGPGSA(char *sentence);
-short checksum(char *sentence);
-
+extern void doNMEA(short refNum);
+extern void processGPRMC(char *sentence);
+extern void processGPGGA(char *sentence);
+extern void processGPGSV(char *sentence);
+extern void processPRWIZCH(char *sentence);
+extern void processGPGSA(char *sentence);
+extern void add_checksum(char *sentence);
+extern short checksum(char *sentence);
 
 extern struct OUTDATA gNMEAdata;

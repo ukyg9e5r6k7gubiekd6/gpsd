@@ -38,8 +38,11 @@
 #include <sys/termios.h>
 
 #include "nmea.h"
+#include "gps.h"
 
 extern void _XEditResCheckMessages();
+
+void update_display(char *message);
 
 /* global variables */
 Widget lxbApp;
@@ -295,7 +298,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 /**************************************************
 * Function: update_display
 **************************************************/
-update_display(char *message)
+void update_display(char *message)
 {
     int i;
     XmString string[12];
@@ -330,11 +333,11 @@ update_display(char *message)
     // here now the value fields
 
     XmTextFieldSetString(text_1, gNMEAdata.utc);
-    sprintf(s, "%lf", gNMEAdata.latitude);
+    sprintf(s, "%f", gNMEAdata.latitude);
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%lf", gNMEAdata.longitude);
+    sprintf(s, "%f", gNMEAdata.longitude);
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%lf", gNMEAdata.altitude);
+    sprintf(s, "%f", gNMEAdata.altitude);
     XmTextFieldSetString(text_4, s);
 
     switch (gNMEAdata.mode) {
@@ -357,7 +360,7 @@ update_display(char *message)
 /**************************************************
 * Function: open_input
 **************************************************/
-static open_input(XtAppContext app)
+static void open_input(XtAppContext app)
 {
     int input = 0;
     XtInputId input_id;
@@ -374,7 +377,7 @@ static open_input(XtAppContext app)
 /**************************************************
 * Function: init_list
 **************************************************/
-init_list()
+void init_list()
 {
     int i;
     XmString string;
@@ -485,6 +488,8 @@ int main(int argc, char *argv[])
     init_list();
 
     XtAppMainLoop(app);
+
+    return 0;
 }
 
 

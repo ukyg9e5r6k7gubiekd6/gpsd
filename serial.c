@@ -21,6 +21,8 @@
 #define tcflag_t	ushort
 #endif
 
+#include "gpsd.h"
+
 #define DEFAULTPORT "5678"
 
 extern int debug;
@@ -36,12 +38,11 @@ int serial_open()
 {
     char *temp;
     char *p;
-    int err;
 
     temp = malloc(strlen(device_name) + 1);
     strcpy(temp, device_name);
 
-    if (p = strchr(temp, ':')) {
+    if ( (p = strchr(temp, ':')) ) {
 	char *port = DEFAULTPORT;
 	int one = 1;
 

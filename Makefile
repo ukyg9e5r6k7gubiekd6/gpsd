@@ -11,7 +11,7 @@ CC = gcc
 
 # The flags we use to compile C files.
 CDEBUGFLAGS = -g
-CFLAGS = -g -O2 $(CDEBUGFLAGS)
+CFLAGS = -O2 -Wall $(CDEBUGFLAGS)
 
 
 ## The C preprocessor.

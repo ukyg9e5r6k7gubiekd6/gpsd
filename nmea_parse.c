@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "nmea.h"
 
 extern struct OUTDATA gNMEAdata;
@@ -7,7 +8,7 @@ static void do_lat_lon(char *sentence, int begin);
 static char *field(char *sentence, short n);
 
 static void update_field_i(char *sentence, int fld, int *dest, int mask);
-static void update_field_f(char *sentence, int fld, double *dest, int mask);
+//static void update_field_f(char *sentence, int fld, double *dest, int mask);
 /* ----------------------------------------------------------------------- */
 
 /*
@@ -65,9 +66,6 @@ void processGPRMC(char *sentence)
 
 void processGPGGA(char *sentence)
 {
-    double lat, lon, d, m;
-    char str[20];
-
     do_lat_lon(sentence, 2);
     sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
     sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
@@ -172,7 +170,7 @@ static void update_field_i(char *sentence, int fld, int *dest, int mask)
     }
 }
 
-
+#if 0
 static void update_field_f(char *sentence, int fld, double *dest, int mask)
 {
     double tmp;
@@ -184,6 +182,8 @@ static void update_field_f(char *sentence, int fld, double *dest, int mask)
 	gNMEAdata.cmask |= mask;
     }
 }
+#endif
+
 /* ----------------------------------------------------------------------- */
 
 short checksum(char *sentence)
@@ -198,10 +198,10 @@ short checksum(char *sentence)
     return (strncmp(csum, p, 2) == 0);
 }
 
-add_checksum(char *sentence)
+void add_checksum(char *sentence)
 {
     unsigned char sum = '\0';
-    char c, *p = sentence, csum[3];
+    char c, *p = sentence;
 
     while ((c = *p++) != '*')
 	sum ^= c;
@@ -215,12 +215,10 @@ add_checksum(char *sentence)
    field from sentence string
  */
 
-static char *
- field(char *sentence, short n)
+static char *field(char *sentence, short n)
 {
     static char result[100];
     char *p = sentence;
-    short m = n;
 
     while (n-- > 0)
 	while (*p++ != ',');

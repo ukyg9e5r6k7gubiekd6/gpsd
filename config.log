@@ -6,186 +6,48 @@ configure:623: checking whether the C compiler (gcc  ) works
 configure:637: gcc -o conftest    conftest.c  1>&5
 configure:657: checking whether the C compiler (gcc  ) is a cross-compiler
 configure:662: checking whether we are using GNU C
-configure:671: gcc -E conftest.c
 configure:686: checking whether gcc accepts -g
 configure:714: checking for POSIXized ISC
 configure:738: checking whether the C compiler (gcc) compiles and links a simple C program
-configure:759: gcc -o conftest -g -O2   conftest.c  1>&5
 configure:785: checking for c++
 configure:816: checking whether the C++ compiler (c++  ) works
 configure:830: c++ -o conftest    conftest.C  1>&5
 configure:856: checking whether the C++ compiler (c++  ) is a cross-compiler
 configure:861: checking whether we are using GNU C++
-configure:870: c++ -E conftest.C
 configure:885: checking whether c++ accepts -g
 configure:1068: checking whether the C++ compiler (c++) compiles a simple program
-configure:1089: c++ -o conftest -g -O2   conftest.C  1>&5
 configure:1143: checking how to run the C preprocessor
-configure:1164: gcc -E  conftest.c >/dev/null 2>conftest.out
 configure:1204: checking how to run the C++ preprocessor
-configure:1222: c++ -E  conftest.C >/dev/null 2>conftest.out
 configure:1250: checking for a traditional C preprocessor
-configure:1277: gcc -E  conftest.c >/dev/null 2>conftest.out
-configure:1271: unterminated string or character constant
-configure:1271: possible real start of unterminated constant
-configure:1270: unterminated `#if' conditional
-configure: failed program was:
-#line 1268 "configure"
-#include "confdefs.h"
-
-#if 1
-"this is an unterminated string
-#endif
-
-configure:1277: gcc -E  -traditional-cpp conftest.c >/dev/null 2>conftest.out
 configure:1307: checking for termio.h
-configure:1317: gcc -E  conftest.c >/dev/null 2>conftest.out
 configure:1307: checking for sys/param.h
-configure:1317: gcc -E  conftest.c >/dev/null 2>conftest.out
 configure:1345: checking for sin in -lm
-configure:1364: gcc -o conftest -g -O2   conftest.c -lm   1>&5
-configure:1357: warning: conflicting types for built-in function `sin'
 configure:1386: checking for open in -lc
-configure:1405: gcc -o conftest -g -O2   conftest.c -lc   1>&5
 configure:1427: checking for regcmp in -lgen
-configure:1446: gcc -o conftest -g -O2   conftest.c -lgen   1>&5
-/usr/bin/ld: cannot open -lgen: No such file or directory
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 1435 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char regcmp();
-
-int main() {
-regcmp()
-; return 0; }
 configure:1485: checking for X
 configure:1799: checking for dnet_ntoa in -ldnet
-configure:1818: gcc -o conftest -g -O2   conftest.c -ldnet   1>&5
-/usr/bin/ld: cannot open -ldnet: No such file or directory
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 1807 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char dnet_ntoa();
-
-int main() {
-dnet_ntoa()
-; return 0; }
 configure:1840: checking for dnet_ntoa in -ldnet_stub
-configure:1859: gcc -o conftest -g -O2   conftest.c -ldnet_stub   1>&5
-/usr/bin/ld: cannot open -ldnet_stub: No such file or directory
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 1848 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char dnet_ntoa();
-
-int main() {
-dnet_ntoa()
-; return 0; }
 configure:1888: checking for gethostbyname
-configure:1916: gcc -o conftest -g -O2   conftest.c  1>&5
 configure:1986: checking for connect
-configure:2014: gcc -o conftest -g -O2   conftest.c  1>&5
 configure:2078: checking for remove
-configure:2106: gcc -o conftest -g -O2   conftest.c  1>&5
 configure:2170: checking for shmat
-configure:2198: gcc -o conftest -g -O2   conftest.c  1>&5
 configure:2271: checking for IceConnectionNumber in -lICE
-configure:2290: gcc -o conftest -g -O2   -L/usr/X11R6/lib conftest.c -lICE   1>&5
 configure:2342: checking for Motif
-configure:2370: gcc -c  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include  conftest.c 1>&5
-configure:2449: gcc -o conftest  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include   -L/usr/X11R6/lib  conftest.c  -lSM -lICE -lXm -lXt -lX11   1>&5
-/usr/X11R6/lib/libXm.so: undefined reference to `XShapeCombineRectangles'
-/usr/X11R6/lib/libXm.so: undefined reference to `XShapeCombineMask'
-/usr/X11R6/lib/libXm.so: undefined reference to `XShapeQueryExtension'
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 2439 "configure"
-#include "confdefs.h"
-
-#include <X11/Intrinsic.h>
-#include <Xm/Xm.h>
-
-int main() {
-XtToolkitInitialize();
-; return 0; }
 configure:2555: checking for Athena
-configure:2586: gcc -c  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include  conftest.c 1>&5
-configure:2662: gcc -o conftest  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include   -L/usr/X11R6/lib  conftest.c  -lSM -lICE -lXaw -lXmu -lXext -lXt -lX11   1>&5
 configure:2764: checking for Xpm
-configure:2795: gcc -c  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include  conftest.c 1>&5
-configure:2872: gcc -o conftest  -I/usr/X11R6/include -g -O2  -I/usr/X11R6/include   -L/usr/X11R6/lib  conftest.c  -lSM -lICE -lXpm -lXt -lX11   1>&5
 configure:2956: checking for XOpenDisplay in -lX11
-configure:2975: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lX11  -lSM -lICE   1>&5
 configure:3005: checking for _Xlcmbcurmax in -lXintl
-configure:3024: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXintl  -lSM -lICE -lX11   1>&5
-/usr/bin/ld: cannot open -lXintl: No such file or directory
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 3013 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char _Xlcmbcurmax();
-
-int main() {
-_Xlcmbcurmax()
-; return 0; }
 configure:3045: checking for shmap in -lipc
-configure:3064: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lipc  -lSM -lICE -lX11   1>&5
-/usr/bin/ld: cannot open -lipc: No such file or directory
-collect2: ld returned 1 exit status
-configure: failed program was:
-#line 3053 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char shmap();
-
-int main() {
-shmap()
-; return 0; }
 configure:3086: checking for XtToolkitInitialize in -lXt
-configure:3105: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXt  -lSM -lICE -lX11   1>&5
 configure:3134: checking for XShapeQueryVersion in -lXext
-configure:3153: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXext  -lSM -lICE -lX11   1>&5
 configure:3178: checking for XmuCvtStringToOrientation in -lXmu
-configure:3197: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXmu  -lSM -lICE  -lXt -lXext -lX11   1>&5
 configure:3218: checking for XawTextSetInsertionPoint in -lXaw
-configure:3237: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXaw  -lSM -lICE -lXmu  -lXt -lXext -lX11   1>&5
 configure:3276: checking for X11/Xaw/Form.h
-configure:3286: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
 configure:3276: checking for X11/Xaw/Panner.h
-configure:3286: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
 configure:3276: checking for X11/Xaw/Porthole.h
-configure:3286: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
 configure:3316: checking for X11/Xmu/Editres.h
-configure:3326: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
 configure:3356: checking for XpmCreatePixmapFromXpmImage in -lXpm
-configure:3375: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXpm  -lSM -lICE -lX11   1>&5
 configure:3404: checking for X11/xpm.h
-configure:3414: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
 configure:3404: checking for xpm.h
-configure:3414: gcc -E   -I/usr/X11R6/include conftest.c >/dev/null 2>conftest.out
-configure:3410: xpm.h: No such file or directory
-configure: failed program was:
-#line 3409 "configure"
-#include "confdefs.h"
-#include <xpm.h>
 configure:3447: checking for XpSelectInput in -lXp
-configure:3466: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXp  -lSM -lICE -lXpm -lXext -lXt -lXext -lX11    1>&5
 configure:3491: checking for XmCreateOptionMenu in -lXm
-configure:3510: gcc -o conftest -g -O2  -I/usr/X11R6/include   -I/usr/X11R6/include   -L/usr/X11R6/lib conftest.c -lXm  -lSM -lICE -lXp -lXpm -lXext -lXt -lXext -lX11    1>&5

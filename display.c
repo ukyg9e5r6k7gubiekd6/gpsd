@@ -25,7 +25,7 @@
 #include <math.h>
 
 #include "nmea.h"
-
+#include "gps.h"
 
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)
@@ -42,7 +42,7 @@ Dimension width, height;
 int diameter;
 Pixmap pixmap;
 
-set_color(String color)
+void set_color(String color)
 {
     Display *dpy = XtDisplay(draww);
     Colormap cmap = DefaultColormapOfScreen(XtScreen(draww));
@@ -58,7 +58,7 @@ set_color(String color)
     XSetForeground(dpy, drawGC, col.pixel);
 }
 
-register_canvas(Widget w, GC gc)
+void register_canvas(Widget w, GC gc)
 {
     draww = w;
     drawGC = gc;
@@ -123,7 +123,7 @@ int get_status(int satellite)
 }
 
 
-draw_graphics()
+void draw_graphics()
 {
     int i;
     double x, y;
@@ -187,7 +187,7 @@ draw_graphics()
     }
 }
 
-redraw(Widget w, XtPointer client_data, XmDrawingAreaCallbackStruct * cbs)
+void redraw(Widget w, XtPointer client_data, XmDrawingAreaCallbackStruct * cbs)
 {
     XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y,

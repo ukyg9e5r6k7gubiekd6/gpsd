@@ -1,4 +1,4 @@
-
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -7,10 +7,13 @@
 #include <varargs.h>
 #include <netdb.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 
 #if defined (HAVE_SYS_PARAM_H)
 #include <sys/param.h>
 #endif
+
+#include "gpsd.h"
 
 static char mbuf[128];
 
@@ -25,7 +28,7 @@ int passivesock(char *service, char *protocol, int qlen)
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
 
-    if (pse = getservbyname(service, protocol))
+    if ( (pse = getservbyname(service, protocol)) )
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
 	sprintf(mbuf, "Can't get \"%s\" service entry.\n", service);
@@ -55,11 +58,6 @@ int passivesock(char *service, char *protocol, int qlen)
     return s;
 }
 
-int passiveUDP(char *service, int qlen)
-{
-    return passivesock(service, "udp", qlen);
-}
-
 int passiveTCP(char *service, int qlen)
 {
     return passivesock(service, "tcp", qlen);
@@ -77,13 +75,13 @@ int connectsock(char *host, char *service, char *protocol)
     bzero((char *) &sin, sizeof(sin));
     sin.sin_family = AF_INET;
 
-    if (pse = getservbyname(service, protocol))
+    if ( (pse = getservbyname(service, protocol)) )
 	sin.sin_port = htons(ntohs((u_short) pse->s_port));
     else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
 	sprintf(mbuf, "Can't get \"%s\" service entry.\n", service);
 	errexit(mbuf);
     }
-    if (phe = gethostbyname(host))
+    if ( (phe = gethostbyname(host)) )
 	bcopy(phe->h_addr, (char *) &sin.sin_addr, phe->h_length);
     else if ((sin.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE) {
 	sprintf(mbuf, "Can't get host entry: \"%s\".\n", host);
@@ -107,11 +105,6 @@ int connectsock(char *host, char *service, char *protocol)
 	errexit(mbuf);
     }
     return s;
-}
-
-int connectUDP(char *host, char *service)
-{
-    return connectsock(host, service, "udp");
 }
 
 int connectTCP(char *host, char *service)

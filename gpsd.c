@@ -1,6 +1,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <syslog.h>
 #include <signal.h>
 #include <errno.h>
@@ -14,6 +15,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include "nmea.h"
+#include "gpsd.h"
 
 #define QLEN		5
 #define BUFSIZE		4096
@@ -33,6 +35,9 @@ char *default_longitude = "12300.000";
 int nfds;
 int verbose = 1;
 
+static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
+static int handle_request(int fd, fd_set * fds);
+
 static void onsig(int sig)
 {
     serial_close();
@@ -43,14 +48,17 @@ static void onsig(int sig)
 int daemonize()
 {
     int fd;
+    pid_t pid;
 
-    switch (fork()) {
+    pid = fork();
+
+    switch (pid) {
     case -1:
 	return -1;
     case 0:
 	break;
     default:
-	_exit(0);
+	_exit(pid);
     }
 
     if (setsid() == -1)
@@ -142,7 +150,7 @@ int main(int argc, char *argv[])
   -p string    [ set gps device name ] \n\
   -s baud_rate [ set baud rate on gps device ] \n\
 ", stderr);
-	    exit(1);
+	    exit(0);
 	}
     }
     if (!device_name)
@@ -244,7 +252,7 @@ int main(int argc, char *argv[])
 }
 
 
-int handle_request(int fd, fd_set * fds)
+static int handle_request(int fd, fd_set * fds)
 {
     char buf[BUFSIZE];
     char reply[BUFSIZE];
@@ -264,7 +272,7 @@ int handle_request(int fd, fd_set * fds)
 	case 'P':
 	case 'p':
 	    sprintf(reply + strlen(reply),
-		    ",P=%lf %lf",
+		    ",P=%f %f",
 		    gNMEAdata.latitude,
 		    gNMEAdata.longitude);
 	    break;
@@ -277,13 +285,13 @@ int handle_request(int fd, fd_set * fds)
 	case 'A':
 	case 'a':
 	    sprintf(reply + strlen(reply),
-		    ",A=%lf",
+		    ",A=%f",
 		    gNMEAdata.altitude);
 	    break;
 	case 'V':
 	case 'v':
 	    sprintf(reply + strlen(reply),
-		    ",V=%lf",
+		    ",V=%f",
 		    gNMEAdata.speed);
 	    break;
 	case 'R':
@@ -326,7 +334,7 @@ int handle_request(int fd, fd_set * fds)
     return cc;
 }
 
-int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
+static int handle_input(int input, fd_set * afds, fd_set * nmea_fds)
 {
     static char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;

@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
+#include <string.h>
 #include "nmea.h"
 
 
@@ -13,7 +15,7 @@ extern int debug;
 extern char latd;
 extern char lond;
 
-process_message(char *sentence)
+void process_message(char *sentence)
 {
     if (checksum(sentence)) {
 	if (strncmp(GPRMC, sentence, 5) == 0) {
@@ -35,16 +37,18 @@ process_message(char *sentence)
     }
 }
 
-send_init()
+void send_init()
 {
     char buf[82];
     time_t t;
     struct tm *tm;
-    char lat[11], lon[11], latd[2], lond[2];
+    char latd, lond;
 
     t = time(NULL);
     tm = gmtime(&t);
 
+latd = 'n';
+lond = 'w';
     sprintf(buf,
 	    "$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
 	    latitude, latd, longitude, lond,
@@ -57,9 +61,9 @@ send_init()
     }
 }
 
-do_init()
+void do_init()
 {
-    static count = 0;
+    static int count = 0;
 
     count++;
 
@@ -69,7 +73,7 @@ do_init()
     }
 }
 
-process_exception(char *sentence)
+void process_exception(char *sentence)
 {
     if (strncmp("ASTRAL", sentence, 6) == 0 && isatty(gNMEAdata.fdout)) {
 	write(gNMEAdata.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
@@ -80,7 +84,7 @@ process_exception(char *sentence)
     }
 }
 
-handle_message(char *sentence)
+void handle_message(char *sentence)
 {
     if (debug > 5)
 	fprintf(stderr, "%s\n", sentence);
@@ -91,7 +95,7 @@ handle_message(char *sentence)
 
     if (debug > 2) {
 	fprintf(stderr,
-		"Lat: %lf Lon: %lf Alt: %lf Sat: %d Mod: %d Time: %s\n",
+		"Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
 		gNMEAdata.latitude,
 		gNMEAdata.longitude,
 		gNMEAdata.altitude,
