@@ -236,13 +236,13 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EARTHA_3:
 	if (c == 'T')
-	    session->packet_state = EARTHA_5;
+	    session->packet_state = EARTHA_4;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_4:
 	if (c == 'H')
-	    session->packet_state = EARTHA_2;
+	    session->packet_state = EARTHA_5;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
