@@ -68,13 +68,16 @@ int gpsd_set_speed(struct gps_session_t *session,
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
     }
 
-    if ((session->packet_type = packet_sniff(session)) != BAD_PACKET) {
-	session->gNMEAdata.stopbits = stopbits;
-	session->gNMEAdata.baudrate = speed;
-	return 1;
-    }
-    else
+    if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
 	return 0;
+
+    if (session->packet_type == SIRF_PACKET)
+	gpsd_switch_driver(session, 's');
+
+    session->gNMEAdata.stopbits = stopbits;
+    session->gNMEAdata.baudrate = speed;
+
+    return 1;
 }
 
 int gpsd_open(struct gps_session_t *session)

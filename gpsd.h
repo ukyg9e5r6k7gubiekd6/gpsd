@@ -76,12 +76,7 @@ struct gps_type_t {
 #endif
 #endif
 
-/*
- * The point of the binary packets is to have higher bit density than NMEA.
- * So any one binary packet should take up less space than the longest
- * permissible NMEA packet.
- */
-#define MAX_PACKET_LENGTH	NMEA_MAX
+#define MAX_PACKET_LENGTH	256
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
@@ -140,11 +135,11 @@ extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
 extern int nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
-extern void packet_flush(struct gps_session_t *pstate);
 extern int packet_sniff(struct gps_session_t *pstate);
 extern int packet_get_nmea(struct gps_session_t *pstate);
-extern void packet_discard(struct gps_session_t *pstate);
+extern void packet_accept(struct gps_session_t *pstate);
 extern int gpsd_open(struct gps_session_t *context);
+extern int gpsd_switch_driver(struct gps_session_t *session, char type);
 extern int gpsd_set_speed(struct gps_session_t *session, 
 			  unsigned int speed, unsigned int stopbits);
 extern int gpsd_get_speed(struct termios *);

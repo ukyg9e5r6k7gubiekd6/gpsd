@@ -51,7 +51,7 @@ static void nmea_handle_input(struct gps_session_t *session)
 		session->device_type = *dp;
 		if (session->device_type->initializer)
 		    session->device_type->initializer(session);
-		packet_discard(session);
+		packet_accept(session);
 		return;
 	    }
 	}
@@ -63,7 +63,7 @@ static void nmea_handle_input(struct gps_session_t *session)
     if (session->gNMEAdata.raw_hook)
 	session->gNMEAdata.raw_hook(session->outbuffer);
 
-    packet_discard(session);
+    packet_accept(session);
 }
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)

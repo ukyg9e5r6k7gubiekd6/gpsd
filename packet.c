@@ -10,12 +10,11 @@ Initial conditions of the problem:
 1. We have an file descriptor open for read. The device on the other end is 
    sending packets at us.  
 
-2. It may require more than one read to gather a packet.  However, the
-   data returned from a read never spans packet boundaries.
+2. It may require more than one read to gather a packet.  Reads may span packet
+   boundaries.
   
 3. There may be leading garbage before the first packet.  After the first
-   start-of-packet, the input should be well-formed.  If it isn't, we've
-   got the wrong packet type.
+   start-of-packet, the input should be well-formed.
 
 The problem: how do we recognize which kind of packet we're getting?
 
@@ -34,7 +33,8 @@ static int getch(struct gps_session_t *session)
 {
     if (session->inbufptr >= session->inbuffer + session->inbuflen)
     {
-	int st;
+	int st, i;
+	unsigned char buf2[BUFSIZ];
 
 #ifndef TESTMAIN
 	st = read(session->gNMEAdata.gps_fd, 
@@ -43,6 +43,10 @@ static int getch(struct gps_session_t *session)
 	if (st < 0)
 #endif /* !TESTMAIN */
 	    longjmp(session->packet_error, 1);
+	buf2[0] = '\0';
+	for (i = 0; i < st; i++)
+	    sprintf(buf2+strlen(buf2), "%02x", session->inbuffer[session->inbuflen+i]);
+	gpsd_report(5, "Packet buffer fill %d: %s\n", st, buf2);
 	session->inbuflen += st;
     }
     return session->outbuffer[session->outbuflen++] = *session->inbufptr++;
@@ -51,26 +55,22 @@ static int getch(struct gps_session_t *session)
 static int packet_reread(struct gps_session_t *session)
 /* packet type grab failed, set us up for reread */
 {
+    gpsd_report(5, "Packet buffer reread\n");
     session->inbufptr = session->inbuffer;
     session->outbuflen = 0;
     return 0;
 }
 
-void packet_discard(struct gps_session_t *session)
-/* discard data in the packet-out buffer */
-{
-    memset(session->outbuffer, '\0', sizeof(session->outbuffer)); 
-    session->outbuflen = 0;
-}
-
 static void packet_shift(struct gps_session_t *session)
 /* packet grab failed, shift the input buffer to discard a character */ 
 {
+    gpsd_report(5, "Packet buffer shift\n");
     session->inbufptr = memmove(session->inbuffer, 
 			       session->inbuffer+1, 
 			       --session->inbuflen);
     session->inbuffer[session->inbuflen] = '\0';
-    packet_discard(session);	/* clear out copied garbage */
+    memset(session->outbuffer, '\0', sizeof(session->outbuffer)); 
+    session->outbuflen = 0;
 }
 
 static int get_nmea(struct gps_session_t *session)
@@ -78,6 +78,7 @@ static int get_nmea(struct gps_session_t *session)
     unsigned short crc, n;
     unsigned char c, csum[3], *trailer;
 
+    gpsd_report(5, "NMEA packet get\n");
     if (getch(session) !='$')
 	return packet_reread(session);
     c = getch(session);
@@ -110,38 +111,46 @@ static int get_nmea(struct gps_session_t *session)
 	    return packet_reread(session);
     }
     session->outbuffer[session->outbuflen] = '\0';
-    packet_flush(session);
     return 1;
 }
 
 static int get_sirf(struct gps_session_t *session)
 {
-    unsigned short length, n, checksum, crc;
+    unsigned short length, n, checksum, crc, id;
 
+    gpsd_report(5, "SiRF packet get\n");
     if (getch(session) != 0xa0 || getch(session) != 0xa2)
 	return packet_reread(session);
     length = (getch(session) << 8) | getch(session);
-    if (length > MAX_PACKET_LENGTH-6)
+    id = (getch(session) << 8) | getch(session);
+    if (length > MAX_PACKET_LENGTH-6) {
+	gpsd_report(5, "packet rejected, id %d, length %d too large\n", id, length);
 	return packet_reread(session);
-    for (n = 0; n < length; n++)
+    }
+    for (n = 0; n < length-2; n++)
 	getch(session);
     checksum = (getch(session) << 8) | getch(session);
     crc = 0;
     for (n = 0; n < length; n++)
 	crc += session->outbuffer[4+n];
     crc &= 0x7fff;
-    if (crc != checksum)
+    if (crc != checksum) {
+	gpsd_report(5, "SiRF packet rejected, checksum incorrect\n");
 	return packet_reread(session);
-    if (getch(session) != 0xb0 || getch(session) != 0xb3)
+    }
+    if (getch(session) != 0xb0 || getch(session) != 0xb3) {
+	gpsd_report(5, "SiRF packet rejected, trailer bytes wrong\n");
 	return packet_reread(session);
-    packet_flush(session);
+    }
     return 1;
 }
 
+#ifdef __UNUSED__
 static int get_zodiac(struct gps_session_t *session)
 {
     unsigned short length, n, checksum, crc;
 
+    gpsd_report(5, "Zodiac packet get\n");
     if (getch(session) != 0x81 || getch(session) != 0x00)
 	return packet_reread(session);
     getch(session); getch(session);	/* skip the ID */
@@ -156,18 +165,24 @@ static int get_zodiac(struct gps_session_t *session)
 	crc += session->outbuffer[10+n];
     if (-crc != checksum)
 	return packet_reread(session);
-    packet_flush(session);
     return 1;
 }
+#endif /* __UNUSED__ */
 
 /* entry points begin here */
 
-void packet_flush(struct gps_session_t *session)
-/* discard data in the buffer and prepare to receive a packet */
+void packet_accept(struct gps_session_t *session)
+/* discard data in the packet-out buffer */
 {
-    memset(session->inbuffer, '\0', sizeof(session->inbuffer)); 
-    session->inbuflen = 0;
+    gpsd_report(5, "Packet buffer accept\n");
+    if (session->inbufptr)
+	memmove(session->inbuffer, 
+	    session->inbuffer + session->outbuflen,
+	    session->inbuflen - session->outbuflen);
     session->inbufptr = session->inbuffer;
+    session->inbuflen -= session->outbuflen;
+    memset(session->outbuffer, '\0', sizeof(session->outbuffer));
+    session->outbuflen = 0;
 }
 
 int packet_sniff(struct gps_session_t *session)
@@ -177,16 +192,13 @@ int packet_sniff(struct gps_session_t *session)
 	return BAD_PACKET;
     else {
 	int n;
-	packet_discard(session);
-	packet_flush(session);
+	packet_accept(session);
 	for (n = MAX_PACKET_LENGTH * 3; n; n--) {
 	    if (get_nmea(session)) {
 		session->outbuffer[session->outbuflen] = '\0';
 		return NMEA_PACKET;
 	    } else if (get_sirf(session))
 		return SIRF_PACKET;
-	    else if (get_zodiac(session))
-		return ZODIAC_PACKET;
 #ifdef TRIPMATE_ENABLE
 	    else if (!memcmp("ASTRAL", session->inbuffer, 6)) {
 		strcpy(session->outbuffer, "ASTRAL");
@@ -212,7 +224,7 @@ int packet_sniff(struct gps_session_t *session)
 	outname(struct gps_session_t *session) \
 	{ \
 	    int maxgarbage = maxlength; \
-	    packet_discard(session); \
+	    packet_accept(session); \
 	    while (maxgarbage--) { \
 		if (inname(session)) { \
 		    return 1; \

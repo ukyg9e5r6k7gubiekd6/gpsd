@@ -18,6 +18,19 @@
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
+int gpsd_switch_driver(struct gps_session_t *session, char type)
+{
+    struct gps_type_t **dp;
+    for (dp = gpsd_drivers; *dp; dp++)
+	if ((*dp)->typekey == type) {
+	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
+	    session->device_type = *dp;
+	    return 1;
+	}
+    gpsd_report(1, "invalid GPS type \"%c\", using NMEA instead\n", type);
+    return 0;
+}
+
 struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
@@ -27,19 +40,7 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
     session->gpsd_device = DEFAULT_DEVICE_NAME;
     session->device_type = gpsd_drivers[0];
-#ifdef NON_NMEA_ENABLE
-    {
-    struct gps_type_t **dp;
-    for (dp = gpsd_drivers; *dp; dp++)
-	if ((*dp)->typekey == devicetype) {
-	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
-	    session->device_type = *dp;
-	    goto foundit;
-	}
-    gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n");
-    foundit:;
-    }
-#endif /* NON_NMEA_ENABLE */
+    gpsd_switch_driver(session, devicetype);
     session->dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZ];
@@ -92,7 +93,7 @@ int gpsd_activate(struct gps_session_t *session)
 	return -1;
     else {
 	if (session->packet_type == SIRF_PACKET) {
-	    packet_discard(session);
+	    packet_accept(session);
 	    gpsd_report(1, "switching to NMEA mode\n");
 	    sirf_to_nmea(session->gNMEAdata.gps_fd, session->gNMEAdata.baudrate);
 	}
@@ -286,18 +287,18 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
 void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 {
-    int i, nparts;
+    int i;
     char *bufp2 = bufp;
     bufp[0] = '\0';
-
-    nparts = (session->gNMEAdata.satellites / 4) + (((session->gNMEAdata.satellites % 4) > 0) ? 1 : 0);
 
     for( i = 0 ; i < MAXCHANNELS; i++ ) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
             bufp2 = bufp;
-	    sprintf(bufp, "$GPGSV,%d,%d,%02d", nparts, (i / 4) + 1,
-            	session->gNMEAdata.satellites);
+	    sprintf(bufp, "$GPGSV,%d,%d,%02d", 
+		    ((session->gNMEAdata.satellites-1) / 4) + 1, 
+		    (i / 4) + 1,
+		    session->gNMEAdata.satellites);
 	}
 	bufp += strlen(bufp);
 	if (i <= session->gNMEAdata.satellites && session->gNMEAdata.elevation[i])
