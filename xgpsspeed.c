@@ -62,21 +62,21 @@ int main(int argc, char **argv)
     char *colon, *server = NULL;
     char *port = DEFAULT_GPSD_PORT;
 
+    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
+				 options, XtNumber(options),
+				 &argc, argv, fallback_resources, NULL);
+
     while ((option = getopt(argc, argv, "h")) != -1) {
 	switch (option) {
 	case 'h':
 	case '?':
 	default:
-	    fputs("usage:  gps [-h] [server[:port]]\n\
-  options include: \n\
-  -h           = help message \n\
-", stderr);
+	    fputs("usage: gps [-h] [-rv] [-nc] [-needlecolor] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
 
-    if (optind < argc)
-    {
+    if (optind < argc) {
 	server = strdup(argv[optind]);
 	colon = strchr(server, ':');
 	if (colon != NULL) {
@@ -84,10 +84,6 @@ int main(int argc, char **argv)
 	    port = colon + 1;
 	}
     }
-
-    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
-				 options, XtNumber(options),
-				 &argc, argv, fallback_resources, NULL);
 
    /**** Shell Widget ****/
     XtSetArg(args[0], XtNiconPixmap,
@@ -117,8 +113,7 @@ int main(int argc, char **argv)
      * Essentially all the interface to libgps happens below here
      */
     gpsdata = gps_open(server, DEFAULT_GPSD_PORT);
-    if (!gpsdata)
-    {
+    if (!gpsdata) {
 	fprintf(stderr, "xgpsspeed: no gpsd running or network error (%d).\n", errno);
 	exit(2);
     }
@@ -133,13 +128,6 @@ int main(int argc, char **argv)
 
     gps_close(gpsdata);
     return 0;
-}
-
-void Usage()
-{
-    fprintf(stderr, 
-	    "xgpsspeed <Toolkit Options> [-h] [-p server] [-nc needlecolor]\n");
-    exit(-1);
 }
 
 

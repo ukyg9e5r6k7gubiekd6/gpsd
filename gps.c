@@ -405,8 +405,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-    if (optind < argc)
-    {
+    if (optind < argc) {
 	server = strdup(argv[optind]);
 	colon = strchr(server, ':');
 	if (colon != NULL) {
@@ -418,8 +417,7 @@ int main(int argc, char *argv[])
      * Essentially all the interface to libgps happens below here
      */
     gpsdata = gps_open(server, port);
-    if (!gpsdata)
-    {
+    if (!gpsdata) {
 	fprintf(stderr, "gps: no gpsd running or network error (%d).\n", errno);
 	exit(2);
     }
