@@ -8,7 +8,15 @@
 #include <fcntl.h>
 #include <paths.h>
 #include <string.h>
+
+#if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
+#else
+#if defined (HAVE_TERMIOS_H)
+#include <termios.h>
+#endif
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
