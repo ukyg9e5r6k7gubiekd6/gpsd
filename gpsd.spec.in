@@ -1,5 +1,5 @@
 Name: gpsd
-%define SO3VERSION	3.0.0
+%define SO3VERSION	4.0.0
 %define SO1VERSION	2
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
@@ -122,6 +122,11 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.pyo
 
 %changelog
+* Sat Jan 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- libpgs and gps.py now have support for automatic reconnect when
+  the connection to the daemon is dropped or lost -- this changes
+  the library ABI but is source-compatible.
+
 * Fri Jan  14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.7-1
 - More compiler-warning cleanups.  gps client name changed to xgps.
   Added --speedunits option to xgpsspeed, --speedunits and --altunits

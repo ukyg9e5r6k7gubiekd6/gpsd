@@ -96,6 +96,8 @@ struct gps_data_t {
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(char *buf);/* Raw-mode hook for GPS data. */
+    const char *host; 		/* Remember hostname and port for reconnects */
+    const char *port;
 };
 
 struct gps_data_t *gps_open(const char *host, const char *port);

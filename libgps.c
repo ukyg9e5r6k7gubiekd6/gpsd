@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/socket.h>
 
 #include "gpsd.h"
 
@@ -19,6 +20,9 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	host = "localhost";
     if (!port)
 	port = DEFAULT_GPSD_PORT;
+
+    gpsdata->host = strdup(host);
+    gpsdata->port = strdup(port);
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
@@ -192,24 +196,51 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	;
 }
 
+static int try_reconnect(struct gps_data_t *gpsdata)
+{
+    int newfd;
+
+    /* Try to connect, and replace filedescriptor if it succeeds */
+    if ((newfd = netlib_connectsock(gpsdata->host,gpsdata->port, "tcp")) <= 0) 
+        return -1;
+    else {
+        close(gpsdata->gps_fd);
+	gpsdata->gps_fd = newfd;
+	return 0;
+    }
+}
+
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
     int		n;
 
-    /* the daemon makes sure that every read is NUL-terminated */
-    if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
-	return -1;
-    buf[n] = '\0';
-    return gps_unpack(buf, gpsdata);
+    for (;;) {
+	errno = 0;
+	/* the daemon makes sure that every read is NUL-terminated */
+	if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) > 0) {
+	    buf[n] = '\0';
+	    return gps_unpack(buf, gpsdata);
+	} else if (errno == EBADF && try_reconnect(gpsdata))
+	    continue;
+        else
+	    return -1;
+    }
 }
 
 int gps_query(struct gps_data_t *gpsdata, const char *requests)
 /* query a gpsd instance for new data */
 {
-    if (write(gpsdata->gps_fd, requests, strlen(requests)) <= 0)
-	return -1;
+    for (;;) {
+	errno = 0;
+	if (write(gpsdata->gps_fd, requests, sizeof(requests)) > 0) {
+	    break;
+	} else if (errno == EBADF && try_reconnect(gpsdata))
+	    continue;
+        else
+	    return -1;
+    }
     return gps_poll(gpsdata);
 }
 

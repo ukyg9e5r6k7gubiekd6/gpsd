@@ -110,7 +110,7 @@ class gpsdata:
 	st += "Mode:     MODE_" + ("ZERO", "NO_FIX", "2D","3D")[self.mode]
 	st += " " + repr(self.mode_stamp) + "\n"
 	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f " % \
-              self.satellites_used, self.pdop, self.hdop, self.vdop)
+              (self.satellites_used, self.pdop, self.hdop, self.vdop)
 	st += repr(self.fix_quality_stamp) + "\n"
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
 	for sat in self.satellites:
@@ -124,7 +124,9 @@ class gps(gpsdata):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
 	self.sockfile = None
-	self.connect(host, port)
+        self.host = host
+        self.port = port
+	self.connect(self.host, self.port)
         self.verbose = verbose
 	self.raw_hook = None
 
@@ -255,18 +257,36 @@ class gps(gpsdata):
 	    or self.mode_stamp.changed \
 	    or self.satellite_stamp.changed 
 
+    def __try_reconnect(self):
+        try:
+            self.connect(self.host, self.port)
+            return 0
+        except socket.error:
+            return -1
+
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-        data = self.sockfile.readline()
-        if self.verbose:
-            sys.stderr.write("GPS DATA %s\n" % repr(data))
-	return self.__unpack(data)
+        while True:
+            try:
+                data = self.sockfile.readline()
+                if self.verbose:
+                    sys.stderr.write("GPS DATA %s\n" % repr(data))
+                return self.__unpack(data)
+            except socket.error:
+                self.connect(self.host, self.port)
+                continue
 
     def query(self, commands):
 	"Send a command, get back a response."
- 	self.sockfile.write(commands)
- 	self.sockfile.flush()
-	return self.poll()
+        while True:
+            try:
+                self.sockfile.write(commands)
+                self.sockfile.flush()
+                break
+            except socket.error:
+                self.connect(self.host, self.port)
+                continue
+        return self.poll()
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399
