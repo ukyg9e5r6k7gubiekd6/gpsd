@@ -135,7 +135,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
     gpsd_report(5, "Raw SiRF packet type %d length %d: %s\n", buf[0],len,buf2);
-    session->gpsdata.sentence_length = len;
+    sprintf(session->gpsdata.tag, "MID%d", buf[0]);
 
     switch (buf[0])
     {
@@ -254,7 +254,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
-	strcpy(session->gpsdata.tag, "MTD");
 	return SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
@@ -401,7 +400,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
-	    strcpy(session->gpsdata.tag, "GND");
 	}
 	session->driverstate |= SIRF_SEEN_41;
 	return mask;
@@ -450,7 +448,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	session->gpsdata.hdop = getb(36) / 5.0;
 	session->gpsdata.vdop = getb(37) / 5.0;
 	/* session->gpsdata.tdop = getb(38) / 5.0; */
-	strcpy(session->gpsdata.tag, "EMND");
 	return mask;
 
     case 0xff:		/* Debug messages */

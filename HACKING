@@ -191,6 +191,12 @@ Your packet parser must return field-validity mask bits (using the
 The watcher-mode logic relies on these as its way of knowing what to
 publish.
 
+Your packet parser is also responsible for setting the tag field 
+in the gps_data_t structure.  This is the string that will be emitted
+as the first field of each $ record for profiling.  The packet getter
+will set the sentence-length for you; it will be raw byte length, 
+including both payload and header/trailer bytes.
+
 Note, also, that all the timestamps your driver puts in the session
 structure should be UTC (with leap-second corrections) not just Unix
 seconds since the epoch.  The report-generator function for D

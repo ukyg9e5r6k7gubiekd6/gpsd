@@ -167,6 +167,7 @@ int gpsd_poll(struct gps_device_t *session)
 
 	session->driverstate |= FULL_PACKET;
 	session->gpsdata.sentence_time = 0;
+	session->gpsdata.sentence_length = session->outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
 
 	session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);

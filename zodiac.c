@@ -183,7 +183,6 @@ static int handle1000(struct gps_device_t *session)
 #endif
 
     session->gpsdata.sentence_length = 55;
-    strcpy(session->gpsdata.tag, "1000");
     return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
 }
 
@@ -273,6 +272,7 @@ static int zodiac_analyze(struct gps_device_t *session)
     int i, mask = 0;
     unsigned int id = (session->outbuffer[2] << 8) | session->outbuffer[3];
 
+    sprintf(session->gpsdata.tag, "%d", id);    
     gpsd_report(5, "ID %d\n", id);
     switch (id) {
     case 1000:
