@@ -19,8 +19,8 @@ int gps_open(struct gps_data_t *gpsdata, char *host, char *port)
     if (!port)
 	port = "2947";
 
-    if ((fd = netlib_connectTCP(host, port)) == -1)
-	return (-1);
+    if ((fd = netlib_connectsock(host, port, "tcp")) < 0)
+	return fd;
 
     now = time(NULL);
     INIT(gpsdata->online_stamp, now);
@@ -226,24 +226,6 @@ int gps_query(int fd, struct gps_data_t *gpsdata, char *requests)
 /*
  * A simple command-line exerciser for the library.
  */
-
-void gpscli_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-
-    fputs(buf, stderr);
-}
 
 void data_dump(struct gps_data_t *collect, time_t now)
 {

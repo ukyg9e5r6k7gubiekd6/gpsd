@@ -1,4 +1,4 @@
-/* gps.h -- interface of the gps library */
+/* gps.h -- interface of the libgps library */
 
 #include <sys/types.h>
 #include <time.h>
@@ -22,8 +22,8 @@ struct gps_data_t {
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
 
     /* location */
-    double latitude;		/* Latitude/longitude in format "d.ddddd" */
-    double longitude;
+    double latitude;		/* Latitude */
+    double longitude;		/* Longitude */
     struct life_t latlon_stamp;
     double altitude;		/* Altitude in meters */
     struct life_t altitude_stamp;
@@ -36,15 +36,15 @@ struct gps_data_t {
     double mag_var;		/* Magnetic variation in degrees */
 
     /* status of fix */
-    int    status;
-#define STATUS_NO_FIX	0
-#define STATUS_FIX	1
-#define STATUS_DGPS_FIX	2
+    int    status;		/* do we have a fix? */
+#define STATUS_NO_FIX	0	/* no */
+#define STATUS_FIX	1	/* yes, without DGPS */
+#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
     struct life_t status_stamp;
-    int    mode;
-#define MODE_NO_FIX	1
-#define MODE_2D  	2
-#define MODE_3D  	3
+    int    mode;		/* mode of fix */
+#define MODE_NO_FIX	1	/* none */
+#define MODE_2D  	2	/* good for latitude/longitude */
+#define MODE_3D  	3	/* good for altitude too */
     struct life_t mode_stamp;
 
     /* precision of fix */
@@ -92,5 +92,13 @@ int gps_close(int fd);
 int gps_query(int fd, struct gps_data_t *gpsdata, char *requests);
 int gps_poll(int fd, struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
+
+/* gps_open() error return values */
+#define NL_NOSERVICE	-1	/* can't get service entry */
+#define NL_NOHOST	-2	/* can't get host entry */
+#define NL_NOPROTO	-3	/* can't get protocol entry */
+#define NL_NOSOCK	-4	/* can't create socket */
+#define NL_NOSOCKOPT	-5	/* error SETSOCKOPT SO_REUSEADDR */
+#define NL_NOCONNECT	-6	/* can't connect to host */
 
 /* gps.h ends here */

@@ -60,12 +60,14 @@ void gpsd_init(struct gps_session_t *session, char devicetype, char *dgpsserver)
 
 	session->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
 	if (session->dsock < 0)
-	    gpscli_report(1, "Can't connect to dgps server");
+	    gpscli_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
+	else
+	{
+	    gethostname(hn, sizeof(hn));
 
-	gethostname(hn, sizeof(hn));
-
-	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-	write(session->dsock, buf, strlen(buf));
+	    sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
+	    write(session->dsock, buf, strlen(buf));
+	}
     }
 
     /* mark fds closed */
@@ -194,5 +196,6 @@ void gpsd_wrap(struct gps_session_t *session)
 /* end-of-session wrapup */
 {
     gpsd_deactivate(session);
-    close(session->dsock);
+    if (session->dsock >= 0)
+	close(session->dsock);
 }

@@ -51,24 +51,6 @@ String fallback_resources[] =
   NULL
 };
 
-void gpscli_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "xgpsspeed: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-
-    fputs(buf, stderr);
-}
-
 static void update_display(char *buf)
 {
   int new = rint(gpsdata.speed * 6076.12 / 5280);

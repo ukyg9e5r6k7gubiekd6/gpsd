@@ -1,6 +1,6 @@
 Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.92
+Version: 1.93
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -72,6 +72,11 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %attr(755, root, root) /etc/init.d/gpsd
 
 %changelog
+* Mon Aug 23 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.93-1
+- Fourth prerelease. Daemon-side timeouts are gone, they complicated
+  the interface without adding anything.  Command responses now 
+  contain ? to tag invalid data.
+
 * Sun Aug 22 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.92-1
 - Third prerelease.  Clients in watcher mode now get notified when
   the GPS goes online or offline.  Major name changes -- old libgps

@@ -337,24 +337,6 @@ void init_list()
 static struct gps_data_t gpsdata;
 static int gpsd_fd;
 
-void gpscli_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-
-    fputs(buf, stderr);
-}
-
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
     gps_poll(gpsd_fd, &gpsdata);

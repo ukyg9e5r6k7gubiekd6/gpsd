@@ -64,7 +64,9 @@ at
 <para>Calling <function>gpsd_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
 attached to
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. Negative
+return values indicate errors at the socket layer; see
+<filename>gps.h</filename> for values and explanations.</para>
 
 <para><function>gpsd_close()</function> ends the session.</para>
 
@@ -82,12 +84,13 @@ return value is as for a query).  It is meant to be used after the
 user has issued an 'R' or 'W' command with
 <function>gpsd_query()</function>, telling the daemon to stream updates
 to the client.  If the third argument is non-NULL, it is used as a
-hook function to be called on each line of streamed data.</para>
+hook function to be called on each line of streamed data. </para>
 
 <para>Several member groups within the GPS-data structure have
-timestamp, time-to-live, update_count, and change-flag members
-associated with them; these get updated on each query or poll as
-well.</para>
+last-modified timestamps and change-flag members associated with them;
+these get updated on each query or poll as well.
+Consult <filename>gps.h</filename> to learn about the data members 
+and associated timestamps.</para>
 
 </refsect1>
 

@@ -73,7 +73,6 @@ extern short nmea_checksum(char *sentence);
 extern int gpsd_open(char *device_name, int device_speed);
 extern void gpsd_close();
 extern int netlib_connectsock(char *host, char *service, char *protocol);
-extern int netlib_connectTCP(char *host, char *service);
 
 /* External interface */
 extern void gpsd_init(struct gps_session_t *session, 
