@@ -194,7 +194,7 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 * Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
 - Creation of specfile.
 
-* Sun Mar 21 2004 Remco Treffkorn <remco@rvt.com> - 1.10
+* Sun Mar 21 2004 Remco Treffkorn <remco@rvt.com> - ?
 - Without PRWIZCH sentence: sat. colors in gps according to ss, grey==lt20, 
   yellow==lt40 else green. 
 - Added L Q and I to the protocol. Removed G and T.
@@ -226,6 +226,56 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 
 * Thu Oct 03 2002 Remco Treffkorn <remco@rvt.com> - 1.08
 - Added sockopt SO_REUSEADDR to netlib.c passive_sock.
+
+* Tue Feb 05 2002 Remco Treffkorn <remco@rvt.com> - 1.07
+- What happend with 1.02 to 1.06?
+- em.c uses <time.h> (as it should). Removed some <sys/time.h>
+- where they were not needed.
+
+* Sun Mar 05 2000 Remco Treffkorn <remco@rvt.com> - 1.01
+- Updated to IANA port.
+- Fixes to DGPS support.
+
+* Sun Jan 02 2000 Remco Treffkorn <remco@rvt.com> - 1.0
+- Added DGPS fixes from Curt Mills. (See README for contact info.)
+
+* Mon Dec 13 1999 Remco Treffkorn <remco@rvt.com> - 0.99dgps
+- Added minimal DGPS support by Derrick J Brashear
+
+* Sat Jul 17 1999 Remco Treffkorn <remco@rvt.com> - 0.99
+- Rockwell binary is now translated to NMEA format, so that
+  clients like gps will work with an EarthMate.
+- Added speedometer application. Thanks to Derrick J Brashear
+  for his work (see README for contact info).
+
+* Thu Mar 04 1999 Remco Treffkorn <remco@rvt.com> - 0.96
+- Changed EarthMate support. Rockwell binary is now almost properly
+  supported. Only the minimum required information is extracted.
+
+* Sat Feb 06 1999 Remco Treffkorn <remco@rvt.com> - 0.95
+- Added suport for EarthMate receivers. Since I do not have one, this is 
+  untested.
+- If it works, it does the following: You start gpsd with a baudrate of 9600
+  and give it the -Te option. If gpsd gets the EartMate it will enable the 
+  receiver and then attempt to switch it into NMEA mode. If the EarthMate id 
+  is not received, but a binary data header is received, then we will try to 
+  switch NMEA too.
+
+* Sun Jan 24 1999 Remco Treffkorn <remco@rvt.com> - 0.94
+- Y2K compliant ;-)  (... is NOT. Look for "FIXME:" in nmea_parse.c)
+
+* Tue Jan 27 1998 Remco Treffkorn <remco@rvt.com> - 0.93
+- using GNU autoconf now.
+- combined gpsd + gpsclient. No more init files, command line only.
+
+* Tue May 13 1997 Remco Treffkorn <remco@rvt.com> - 0.9
+- some cleanups in the ini code. version 0.9 ...
+
+* Fri Apr 25 1997 Remco Treffkorn <remco@rvt.com> - 0.8
+- version 0.8, some bug fixes. New MODE member, STATUS member changed.
+
+* Mon Apr 21 1997 Remco Treffkorn <remco@rvt.com> - 0.7
+- released version 0.7
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
