@@ -5,10 +5,11 @@
 import sys, time, getopt, gps
 
 def gnuplot(await):
+    sys.stdout.write("# GPS latency profile.\n")
     sys.stdout.write("set autoscale\n")
     sys.stdout.write('set key below\n')
     sys.stdout.write('set style fill\n')
-    sys.stdout.write('set key title "%s"\n' % time.asctime())
+    sys.stdout.write('set key title "%s, %dbps"\n' % (time.asctime(), session.baudrate))
     sys.stdout.write('plot "-" using 0:2 title "Line latency", using 0:3 title "Decode time", using 0:4 title "TCP/IP latency"\n')
     sys.stdout.write("#\n")
 
@@ -65,6 +66,6 @@ if __name__ == '__main__':
         else:
             gnuplot(await)
     finally:
-        session.query("Z-")
+        session.query("wZ-")
         del session
 

@@ -173,11 +173,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		}
 		REFRESH(gpsdata->satellite_stamp);
 		break;
-	    case 'Z':
 #ifdef PROFILING
-		if (!strcmp(sp, "Z+") || !strcmp(sp, "Z-"))
-		    break;
-		sscanf(sp, "Z=%s:%lf:%d:%lf", 
+	    case 'Z':
+		sscanf(sp, "Z=%*c:%d", &gpsdata->baudrate);
+		break;
+	    case '$':
+		sscanf(sp, "$=%s:%lf:%d:%lf", 
 		       gpsdata->tag,
 		       &gpsdata->recv_time, 
 		       &gpsdata->sentence_length,
