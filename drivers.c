@@ -11,7 +11,7 @@
  *
  **************************************************************************/
 
-void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
+static void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
     gpsd_report(2, "<= GPS: %s\n", sentence);
@@ -92,7 +92,7 @@ struct gps_type_t nmea = {
  *
  **************************************************************************/
 
-void fv18_initializer(struct gps_session_t *session)
+static void fv18_initializer(struct gps_session_t *session)
 {
     /* tell it to send GSAs so we'll know if 3D is accurate */
     nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");

@@ -19,7 +19,7 @@ static char *field(char *sentence, short n)
 {
     static char result[100];
     char c, *p = sentence;
-    int i;
+    unsigned int i;
 
     while (n-- > 0)
         while ((c = *p++) != ',' && c != '\0')

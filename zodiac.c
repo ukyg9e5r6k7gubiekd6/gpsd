@@ -471,7 +471,7 @@ static void zodiac_handle_input(struct gps_session_t *session)
 	case ZODIAC_HUNT_DATA:
 	    if (!(byte = putword(data + words, c, byte)))
 		words++;
-	    if (words == h.ndata + 1) {
+	    if (words == (unsigned int)h.ndata + 1) {
 		analyze(session, &h, data);
 		free(data);
 		state = ZODIAC_HUNT_FF;
