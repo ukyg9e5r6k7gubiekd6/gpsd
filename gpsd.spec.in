@@ -22,12 +22,12 @@ parse than NMEA 0183.  The daemon will be quiescent when there are no
 clients asking for location information, and copes gracefully when the
 GPS is unplugged and replugged.
 
-After installing this RPM, gpsd will start up at boot time.  It will
-automatically connect to USB GPSes when they are plugged in and
-requires no configuration.  For serial GPSes, you will need to make a
-symlink from the serial device you wish to use to /dev/gps, or start
-gpsd by hand.  Once connected, the daemon automatically discovers the
-correct baudrate and stop bits.
+After installing this RPM, gpsd will automatically connect to USB
+GPSes when they are plugged in and requires no configuration.  For
+serial GPSes, you will need to make a symlink from the serial device
+you wish to use to /dev/gps, or start gpsd by hand.  Once connected,
+the daemon automatically discovers the correct baudrate, stop bits,
+and protocol.
 
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
