@@ -29,7 +29,12 @@
 #include <termios.h>
 #include <fcntl.h>	/* for O_RDWR */
 #include "gpsutils.h"
+
 #include "config.h"
+
+#if defined(HAVE_SYS_TIME_H)
+#include <sys/time.h>
+#endif
 
 #define BUFLEN		2048
 
@@ -249,7 +254,7 @@ static int tzoffset(void)
 #ifdef HAVE_TIMEZONE
     res = timezone;
 #else
-    res = localtime_r(&now, &tm)->tm.tm_gmtoff;
+    res = localtime_r(&now, &tm)->tm_gmtoff;
 #endif
 #ifdef HAVE_DAYLIGHT
     if (daylight && localtime_r(&now, &tm)->tm_isdst)
