@@ -24,6 +24,7 @@ static void update_field_i(char *sentence, int fld, int *dest, int mask);
 void processGPRMC(char *sentence)
 {
     char s[20], d[10];
+    int tmp;
 
     sscanf(field(sentence, 9), "%s", d);	// Date: ddmmyy
 
@@ -32,7 +33,12 @@ void processGPRMC(char *sentence)
     strncpy(s + 3, d, 2);	// copy date
 
     /*FIXME: This is NOT Y2K compliant, and will break soon! */
-    strncpy(s + 6, "19", 2);	// 20th century
+    sscanf((d+4), "%2d", tmp);
+
+    if (tmp < 70) 
+      strncpy(s + 6, "20", 2);	// 21th century
+    else
+      strncpy(s + 6, "19", 2);	// 20th century
 
     strncpy(s + 8, d + 4, 2);	// copy year
 
