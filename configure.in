@@ -233,9 +233,9 @@ fi
 
 AC_C_BIGENDIAN
 
-AC_DEFINE(NON_NMEA_ENABLE,  1, [Support for devices other than straight NMEA])
+AC_DEFINE(FV18_ENABLE,      1, [San Jose Navigation FV-18 support])
 AC_DEFINE(TRIPMATE_ENABLE,  1, [DeLorme TripMate support])
-AC_DEFINE(ZODIAC_ENABLE, 1, [Zodiac chipset support])
+AC_DEFINE(EARTHMATE_ENABLE, 1, [DeLorme EarthMate Zodiac support])
  
 AC_OUTPUT(Makefile gpsd.spec)
 

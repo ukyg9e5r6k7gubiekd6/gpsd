@@ -1,5 +1,16 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
+/*
+ * Some internal capabilities depend on which drivers we're compiling.
+ */
+#if TRIPMATE_ENABLE || EARTHMATE_ENABLE || FV18_ENABLE
+#define NON_NMEA_ENABLE
+#endif /* TRIPMATE_ENABLE || EARTHMATE_ENABLE || FV18_ENABLE */
+
+#if EARTHMATE_ENABLE
+#define ZODIAC_ENABLE
+#endif /* EARTHMATE_ENABLE */
+
 #define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
 
 struct longlat_t
@@ -104,5 +115,6 @@ extern void gpsd_wrap(struct gps_session_t *session);
 
 /* caller must supply this */
 void gpsd_report(int d, const char *fmt, ...);
+
 
 

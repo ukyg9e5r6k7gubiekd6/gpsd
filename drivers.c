@@ -116,7 +116,7 @@ struct gps_type_t nmea =
     1,			/* updates every second */
 };
 
-#ifdef NON_NMEA_ENABLE
+#if FV18_ENABLE
 /**************************************************************************
  *
  * FV18 -- doesn't send GPGSAs, uses 2 stop bits
@@ -142,9 +142,9 @@ struct gps_type_t fv18 =
     2,			/* 2 stop bits */
     1,			/* updates every second */
 };
+#endif /* FV18_ENABLE */
 
-
-#ifdef TRIPMATE_ENABLE
+#if TRIPMATE_ENABLE
 /**************************************************************************
  *
  * TripMate -- extended NMEA, gets faster fix when primed with lat/long/time
@@ -205,8 +205,7 @@ struct gps_type_t tripmate =
 };
 #endif /* TRIPMATE_ENABLE */
 
-
-#ifdef ZODIAC_ENABLE
+#ifdef EARTHMATE_ENABLE
 /**************************************************************************
  *
  * Zodiac EarthMate textual mode
@@ -248,8 +247,7 @@ struct gps_type_t earthmate =
     1,				/* 1 stop bit */
     1,				/* updates every second */
 };
-#endif /* ZODIAC_ENABLE */
-#endif /* NON_NMEA_ENABLE */
+#endif /* EARTHMATE_ENABLE */
 
 /**************************************************************************
  *
@@ -274,16 +272,18 @@ struct gps_type_t logfile =
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
-#ifdef NON_NMEA_ENABLE
+#if FV18_ENABLE
     &fv18,
-#ifdef TRIPMATE_ENABLE
+#endif /* FV18_ENABLE */
+#if TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
-#ifdef ZODIAC_ENABLE
+#if EARTHMATE_ENABLE
     &earthmate, 
+#endif /* EARTHMATE_ENABLE */
+#ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
-#endif /* NON_NMEA_ENABLE */
     &logfile,
     NULL,
 };
