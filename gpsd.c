@@ -58,14 +58,14 @@ static void onsig(int sig)
 
 static void store_pid(pid_t pid)
 {
-	FILE *fp;
+    FILE *fp;
 
-	if ((fp = fopen(pid_file, "w")) != NULL) {
-		fprintf(fp, "%u\n", pid);
-		(void) fclose(fp);
-	} else {
-		gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
-	}
+    if ((fp = fopen(pid_file, "w")) != NULL) {
+	fprintf(fp, "%u\n", pid);
+	(void) fclose(fp);
+    } else {
+	gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
+    }
 }
 
 static int daemonize(void)
