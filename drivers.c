@@ -56,7 +56,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->fdout)) {
-		gpsd_report(1, "found %s.", (*dp)->typename);
+		gpsd_report(1, "found %s.\n", (*dp)->typename);
 		session->device_type = *dp;
 		session->device_type->initializer(session);
 		return;
