@@ -6,6 +6,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
+mandir = @mandir@
 
 INSTALL = @INSTALL@
 mkinstalldirs = ${srcdir}/mkinstalldirs
@@ -141,6 +142,9 @@ libgpsd.a:  $(LIB_OBJECTS)
 	ar -r libgpsd.a $(LIB_OBJECTS)
 	ranlib libgpsd.a
 
+gpsd.1 gps.1 xgpsspeed.1 gpsplay.1: gpsd.xml
+	xmlto man gpsd.xml
+
 install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
@@ -150,9 +154,11 @@ install:
 	for app in ${MOTIF_PROGRAMS}; do \
 		$(INSTALL) -m 755 $$app ${DESTDIR}${bindir} ; \
 	done
+	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man1/
+	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd,1
 
 clean:
-	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *~ config.status
+	rm -f *.o *.a gpsd gps gpsplay xgpsspeed *.1 *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log

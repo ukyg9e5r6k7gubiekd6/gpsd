@@ -470,10 +470,11 @@ int main(int argc, char *argv[])
 	default:
 	    fputs("usage:  gps [options] \n\
   options include: \n\
-  -D integer   [ set debug level ] \n\
-  -h           [ help message ] \n\
-  -p string    [ set gps device name ] \n\
-  -s baud_rate [ set baud rate on gps device ] \n\
+  -p string    = set GPS device name \n\
+  -T {e|t}     = set GPS device type \n\
+  -s baud_rate = set baud rate on GPS device \n\
+  -D integer   = set debug level \n\
+  -h           = help message \n\
 ", stderr);
 	    exit(1);
 	}

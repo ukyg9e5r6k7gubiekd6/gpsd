@@ -1,3 +1,8 @@
+/*
+ * Handle the proprietary extensions to NMEA 0183 supported by thr TripMATE GPS.
+ * Also, if requested, intialize it with longitude, latitude, and local time.
+ * This will speed up its first fix.
+ */
 #include "config.h"
 #include <stdio.h>
 #include <unistd.h>

@@ -1,3 +1,8 @@
+/*
+ * Handle the Rockwell binary packet format supported by the EarthMate GPS.
+ * Also, if requested, intialize it with longitude, latitude, and local time.
+ * This will speed up its first fix.
+ */
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd">
+<refentry id='gpsd.1'>
+<refmeta>
+<refentrytitle>gpsd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gpsd</refname>
+<refname>gps</refname>
+<refname>xgpsspeed</refname>
+<refname>gpsplay</refname>
+<refpurpose>interface daemon for GPS receivers, test client,
+speedometer, and log-playback program</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>gpsd</command>  
+      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
+      <arg choice='opt'>-L <replaceable>initial-longitude</replaceable></arg>
+      <arg choice='opt'>-l <replaceable>initial-latitude</replaceable></arg>
+      <arg choice='opt'>-n </arg>
+      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-s <replaceable>baud rate</replaceable></arg>
+      <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
+      <arg choice='opt'>-t <replaceable>timeout</replaceable></arg>
+      <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
+      <arg choice='opt'>-r <replaceable>DGPS-port</replaceable></arg>
+      <arg choice='opt'>-c </arg>
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>gps</command>  
+      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-s <replaceable>baud rate</replaceable></arg>
+      <arg choice='opt'>-h </arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>xgpsspeed</command>  
+      <arg choice='opt'><replaceable>X-options</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>gpsplay</command>  
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-n </arg>
+      <arg choice='opt'>-h </arg>
+</cmdsynopsis>
+
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<refsect2 id='gpsd'><title>gpsd</title>
+
+<para>gpsd is a monitor daemon that watches a TCP/IP port (2947 by
+default), waiting for an application to request location information
+from a GPS.  The GPS will usually be direct-connected to the machine
+running gpsd via a USB port or serial port, but may be attached to
+another slave daemon reporting to this one.</para>
+
+<para>Optionally, gpsd may get differential-GPS corrections from a
+ground station running a RTCM-S104 server; this will improve
+position-fix accuracy from roughly 10 meters to 2 meters, provided you
+are within 1000 kilometers or so of the ground station.</para>
+
+<para>The program accepts the following options:</para>
+<variablelist remap='TP'>
+<varlistentry>
+<term>-p</term>
+<listitem>
+<para>Set GPS device name (default is <filename>/dev/gps</filename>).</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-T <replaceable>device-type</replaceable></term>
+<listitem>
+<para>Set GPS type, usually not necessary because most GPSes now speak
+the standard NMEA 0183 protocol: possible values are t=TripMate, 
+e=EarthMate.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-L, -l</term>
+<listitem>
+<para>set initial longitude/latitude in degrees (not required for most devices)</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-n</term>
+<listitem>
+<para>require longitude/latitude initialization</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-s</term>
+<listitem><para>Set baud rate (serial GPS devices only).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-S</term>
+<listitem><para>Set TCP/IP port (default is 2947).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-t</term>
+<listitem><para>Set GPS session timeout (default is 5 seconds).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-d</term>
+<listitem><para>set differential-GPS server (default is dgps.wsrcc.com)</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-r</term>
+<listitem><para>set differential-GPS port (default is rtcm-sc104)</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-c</term>
+<listitem><para>Use differential GPS.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-h</term>
+<listitem><para>Display help message and terminate.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-D</term>
+<listitem>
+<para>set debug level</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+<para>gpsd should be able to query any GPS that speaks either the
+standard textual NMEA 0183 protocol or the binary Rockwell protocol
+used by EarthMate and some other GPSes.  gpsd is tested with DeLorme's
+TripMate, EarthMate and with Garmin units (note that with the
+EarthMate you must set the serial port speed to 9600 baud).</para>
+
+<para>The request protocol for gpsd clients is very simple.  Each
+request consists of a single ASCII character followed by a newline.
+Case of the request character is ignored,  Each request returns a line
+of response text ended by a newline.  Requests and responses are as 
+follows, with %f standing for a decimal float numeral and %d for
+decimal integer numeral:</para>
+
+<variablelist>
+<varlistentry>
+<term>p</term>
+<listitem><para>Returns the current position in the form "P=%f %f";
+numbers are in degrees, latitude first.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>d</term>
+<listitem><para>Returns the UTC time in the form "D=dd/mm/yyyy hh:nmm:ss".</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>a</term>
+<listitem><para>The current altitude as "A=%f", meters above mean sea level.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>v</term>
+<listitem><para>The current speed as "V=%f" in knots.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>s</term>
+<listitem><para>The gps status as "S=%d". 0=no fix, 1=fix,
+2=DGPS-corrected fix.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>m</term>
+<listitem><para>The gps mode as "M=%d". 1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>r</term>
+<listitem><para>Toggles 'raw' mode. Return "R=0" or "R=1". In raw mode
+you read the unfiltered data stream from the GPS</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>g</term>
+<listitem><para>Returns six-digit Maidenhead grid square (example: "FN12fx").</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>Requests can be concatenated and sent as a string; gpsd will then
+respond with a comma-separated list of replies.</para>
+
+<para>Every gpsd reply will start with the string "GPSD" followed by
+the replies. Examples:</para>
+
+<screen>
+      query:       "p\n"
+      reply:       "GPSD,P=36.000000 123.000000\r\n"
+
+      query:       "d\n"
+      reply:       "GPSD,D=11/16/2002 02:45:05\r\n"
+
+      query:       "va\n"
+      reply:       "GPSD,V=0.000000,A=37.900000\r\n"
+</screen>
+
+</refsect2>
+<refsect2><title>gps</title>
+
+<para>gps is a simple test client for gpsd with an X interface; it can
+also connect direct to a GPS (not recommended, as that mode will not
+restart a timed-out connection and cannot use differential-GPS
+corrections).  It displays current GPS animation and (for GPSes that
+support the feature) the locations of accessible satellites.</para>
+
+<para>gps accepts -TDpsh options as for gpsd, used only when it is
+directly connected to a GPS,</para>
+
+</refsect2>
+<refsect2><title>xgpsspeed</title>
+
+<para>xgpsspeed is a speedometer that uses position information from
+the GPS. It has no options.</para>
+
+</refsect2>
+<refsect2><title>gpsplay</title>
+
+<para>gpsplay is a fake gps daemon that plays back GPS log files to
+clients.  It is mainly useful for client debugging.  By default,
+it reads from a log dump at <filename>/tmp/gpslog</filename>; this can
+be changed with the -p option.  gpsplay also accepts -DSpnh options as
+for gpsd.</para>
+
+</refsect2>
+</refsect1>
+<refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
+
+<para>The official NMEA protocol standard is available on paper from
+the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
+Electronics Association</ulink>. A description of the protocol is
+<ulink url='http://vancouver-webpages.com/peter/nmeafaq.txt'>available on the
+Web</ulink>.</para>
+
+<para>The Rockwell protocol is described as an addendum on <ulink
+url='http://www.gpsinformation.org/dale/nmea.htm'>this page about
+NMEA</ulink>.</para>
+
+<para>gpsd does not yet speak the SiRF-II binary protocol, but SiRF-II
+devices speak NMEA by default before being switched to binary and
+should thus be accessible as generic GPS devices.</para>
+
+<para>The Maidenhead Locator System is a ham-radio convention for
+describing latitude/longitude cells.  It is described at the <ulink
+url='http://www.arrl.org/locate/gridinfo.html'>ARRL
+website</ulink>.</para>
+
+</refsect1>
+<refsect1 id='maintainer'><title>MAINTAINER</title> 
+
+<para>Russ Nelson <email>nelson@crynwr.com</email>.  This manual page
+by Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a project
+page, with gps screenshots, <ulink
+url="http://www.pygps.org/gpsd/gpsd.html">here</ulink>.</para>
+</refsect1>
+
+</refentry>
+

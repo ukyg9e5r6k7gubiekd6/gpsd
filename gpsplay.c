@@ -140,10 +140,10 @@ static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
   options include: \n\
-  -D integer   [ set debug level ] \n\
-  -S integer   [ set port for daemon ] \n\
-  -h           [ help message ] \n\
-  -p string    [ set gps log file path to replay ] \n\
+  -p string    = set gps log file path to replay \n\
+  -S integer   = set port for daemon \n\
+  -D integer   = set debug level \n\
+  -h           = help message \n\
 ", stderr);
 }
 

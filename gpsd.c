@@ -130,18 +130,18 @@ static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
   options include: \n\
-  -D integer   [ set debug level ] \n\
-  -L longitude [ set longitude ] \n\
-  -S integer   [ set port for daemon ] \n\
-  -T e         [ earthmate flag ] \n\
-  -h           [ help message ] \n\
-  -l latitude  [ set latitude ] \n\
-  -p string    [ set gps device name ] \n\
-  -s baud_rate [ set baud rate on gps device ] \n\
-  -t timeout   [ set timeout in seconds on fix/mode validity ] \n\
-  -c           [ use dgps service for corrections ] \n\
-  -d host      [ set dgps server ] \n\
-  -r port      [ set dgps rtcm-sc104 port ] \n\
+  -p string    = set gps device name \n\
+  -T {e|t}     = set GPS device type \n\
+  -S integer   = set port for daemon \n\
+  -L longitude = set longitude \n\
+  -l latitude  = set latitude \n\
+  -s baud_rate = set baud rate on gps device \n\
+  -t timeout   = set timeout in seconds on fix/mode validity \n\
+  -c           = use dgps service for corrections \n\
+  -d host      = set dgps server \n\
+  -r port      = set dgps rtcm-sc104 port \n\
+  -D integer   = set debug level \n\
+  -h           = help message \n\
 ", stderr);
 }
 
@@ -360,8 +360,8 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    syslog(LOG_NOTICE, "Gpsd started (Version %s)", VERSION);
-    syslog(LOG_NOTICE, "Gpsd listening on port %s", service);
+    syslog(LOG_NOTICE, "gpsd started (Version %s)", VERSION);
+    syslog(LOG_NOTICE, "gpsd listening on port %s", service);
 
     msock = passiveTCP(service, QLEN);
 

@@ -9,7 +9,7 @@ Remco Treffkorn, I am releasing it under the terms and conditions of the
 
 	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
 
-or later. A copy off which is included in the file COPYING.
+or later. A copy of which is included in the file COPYING.
 
 
 
@@ -17,15 +17,15 @@ or later. A copy off which is included in the file COPYING.
 GENERAL
 =======
 
-Gpsd is a user land daemon acting as a liason between a gps or
+gpsd is a user land daemon acting as a liason between a gps or
 Loran-C receiver and clients. The receiver is expected to generate
 position information as NMEA-0183 sentences, or Rockwell binary format,
 although that can be changed.
 
-Gpsd listens on port 2947 for clients requesting position, time,
+gpsd listens on port 2947 for clients requesting position, time,
 velocity or altitude information.
 
-Gpsd can take information from the gps and translate it into
+gpsd can take information from the gps and translate it into
 something easier to understand for clients.
 
 The client does not have to run on the same computer ;-)
@@ -37,13 +37,13 @@ There is a sample client included. It is called "gps". It simply connects
 to a gpsd and displays satellites in their current position in the sky.
 This only works for some GPS receivers!
 
-Gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
+gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
 
 
 CREDITS
 =======
 
-Nmea_parse.c is modeled after code seen in gpstrans-0.31b by
+nmea_parse.c is modeled after code seen in gpstrans-0.31b by
 Carsten Tschach.
 
 Thanks to Bob Lorenzini <hwm@netcom.com> for his testing and feedback.
