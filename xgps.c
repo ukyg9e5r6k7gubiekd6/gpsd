@@ -20,7 +20,7 @@
 #include "gps.h"
 #include "display.h"
 
-static Widget lxbApp, form, left, right, quitbutton;
+static Widget toplevel, form, left, right, quitbutton;
 static Widget satellite_list, satellite_diagram, status;
 static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
 static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
@@ -68,7 +68,7 @@ static Pixel get_pixel(Widget w, char *resource_value)
     return (color.pixel);
 }
 
-static void build_gui(Widget lxbApp)
+static void build_gui(Widget toplevel)
 {
     Arg args[100];
     XGCValues gcv;
@@ -83,10 +83,10 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
     XtSetArg(args[4], XmNmwmFunctions,
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
-    XtSetValues(lxbApp, args, 5);
+    XtSetValues(toplevel, args, 5);
 
     /* a form to assist with geometry negotiation */
-    form = XtVaCreateManagedWidget("form", xmFormWidgetClass, lxbApp, NULL);
+    form = XtVaCreateManagedWidget("form", xmFormWidgetClass, toplevel, NULL);
     /* the left half of the screen */
     left = XtVaCreateManagedWidget("left", xmRowColumnWidgetClass, form,
 				   XmNleftAttachment, XmATTACH_FORM,
@@ -115,7 +115,7 @@ static void build_gui(Widget lxbApp)
 #define LEFTSIDE_WIDTH	205
     satellite_list =
       XtVaCreateManagedWidget("satellite_list", xmListWidgetClass, left,
-			      XmNbackground, get_pixel(lxbApp, "snow"),
+			      XmNbackground, get_pixel(toplevel, "snow"),
 			      XmNheight, FRAMEHEIGHT,
 			      XmNwidth, LEFTSIDE_WIDTH,
 			      XmNlistSizePolicy, XmCONSTANT,
@@ -127,7 +127,7 @@ static void build_gui(Widget lxbApp)
     satellite_diagram = 
       XtVaCreateManagedWidget("satellite_diagram",
 			      xmDrawingAreaWidgetClass, right, 
-			      XmNbackground, get_pixel(lxbApp, "snow"),
+			      XmNbackground, get_pixel(toplevel, "snow"),
 			      XmNheight, SATDIAG_SIZE, XmNwidth, SATDIAG_SIZE,
 			      NULL);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
@@ -180,9 +180,9 @@ static void build_gui(Widget lxbApp)
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
     XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
 
-    XtRealizeWidget(lxbApp);
-    delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
-    XmAddWMProtocolCallback(lxbApp, delw,
+    XtRealizeWidget(toplevel);
+    delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
+    XmAddWMProtocolCallback(toplevel, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
 
     /* create empty list items to be replaced on update */
@@ -301,7 +301,7 @@ static char *get_resource(char *name, char *default_value)
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
-  XtGetApplicationResources(lxbApp, &value, &xtr, 1, NULL, 0);
+  XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
   if (value) return value;
   return default_value;
 }
@@ -337,7 +337,7 @@ int main(int argc, char *argv[])
 	exit(2);
     }
 
-    lxbApp = XtVaAppInitialize(&app, "gps.ad", 
+    toplevel = XtVaAppInitialize(&app, "gps.ad", 
 			       options, XtNumber(options), 
 			       &argc,argv, fallback_resources,NULL);
 
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 	if (strcmp(altunits->legend, au) == 0)
 	    break;
 
-    build_gui(lxbApp);
+    build_gui(toplevel);
 
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);
     timer = time(NULL);
