@@ -102,7 +102,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Fri Mar 18 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Wed Mar 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.18-1
 - First cut at cooperating with NTP.  Major library restructuring; 
   a fix is now a data structure of its own, and per-field timestamps 
   are gone. Use new 'o' command for watcher mode.  Compute some estimated 
