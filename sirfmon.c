@@ -315,12 +315,12 @@ int main (int argc, char **argv)
 
     mid2win   = newwin(7,  80,  0, 0);
     mid4win   = newwin(15, 30,  7, 0);
-    mid6win   = newwin(3,  48,  7, 32);
-    mid7win   = newwin(4,  48, 10, 32);
-    mid9win   = newwin(3,  48, 14, 32);
-    mid13win  = newwin(3,  48, 17, 32);
-    mid19win  = newwin(17, 48,  7, 32);
-    mid27win  = newwin(4,  48, 20, 32);
+    mid6win   = newwin(3,  50,  7, 30);
+    mid7win   = newwin(4,  50, 10, 30);
+    mid9win   = newwin(3,  50, 14, 30);
+    mid13win  = newwin(3,  50, 17, 30);
+    mid19win  = newwin(17, 50,  7, 30);
+    mid27win  = newwin(4,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
     debugwin  = newwin(0,   0, 24, 0);
     scrollok(debugwin,TRUE);
@@ -360,9 +360,9 @@ int main (int argc, char **argv)
 
     wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid19win, A_BOLD);
-    mvwprintw(mid19win, 1, 1, "Altitude hold mode:");
-    mvwprintw(mid19win, 2, 1, "Altitude hold source:");
-    mvwprintw(mid19win, 3, 1, "Altitude source input:");
+    mvwprintw(mid19win, 1, 1, "Alt. hold mode:");
+    mvwprintw(mid19win, 2, 1, "Alt. hold source:");
+    mvwprintw(mid19win, 3, 1, "Alt. source input:");
     mvwprintw(mid19win, 4, 1, "Degraded mode:");
     mvwprintw(mid19win, 5, 1, "Degraded timeout:");
     mvwprintw(mid19win, 6, 1, "DR timeout:");
@@ -370,8 +370,8 @@ int main (int argc, char **argv)
     mvwprintw(mid19win, 8, 1, "Static Navigation:");
     mvwprintw(mid19win, 9, 1, "3SV Least Squares:");
     mvwprintw(mid19win, 10,1, "DOP Mask mode:");
-    mvwprintw(mid19win, 11,1, "Navigation Elevation mask:");
-    mvwprintw(mid19win, 12,1, "Navigation Power mask:");
+    mvwprintw(mid19win, 11,1, "Nav. Elev. mask:");
+    mvwprintw(mid19win, 12,1, "Nav. Power mask:");
     mvwprintw(mid19win, 13,1, "DGPS Source:");
     mvwprintw(mid19win, 14,1, "DGPS Mode:");
     mvwprintw(mid19win, 15,1, "DGPS Timeout:");
@@ -381,7 +381,7 @@ int main (int argc, char **argv)
     wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid6win, A_BOLD);
     mvwprintw(mid6win, 1, 1, "Version:");
-    mvwprintw(mid6win, 2, 4, " Packet Type 6 (0x06) ");
+    mvwprintw(mid6win, 2, 8, " Packet Type 6 (0x06) ");
     wattrset(mid6win, A_NORMAL);
 
     wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -736,22 +736,22 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x13:
-	mvwprintw(mid19win, 1, 28, "%d", getb(5));	/* Alt. hold mode */
-	mvwprintw(mid19win, 2, 28, "%s", 		/* Alt hold source*/
+	mvwprintw(mid19win, 1, 20, "%d", getb(5));	/* Alt. hold mode */
+	mvwprintw(mid19win, 2, 20, "%s", 		/* Alt hold source*/
 		  getb(6) ? "User Input" : "Last Computed");
-	mvwprintw(mid19win, 3, 28, "%dm", getw(7));	/* Alt. source input */
-	mvwprintw(mid19win, 4, 28, "%d", getb(9));	/* Degraded mode*/
-	mvwprintw(mid19win, 5, 28, "%dsec", getb(10));	/* Degraded timeout*/
-	mvwprintw(mid19win, 6, 28, "%dsec",getb(11));	/* DR timeout*/
-	mvwprintw(mid19win, 7, 28, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
-	mvwprintw(mid19win, 8, 28, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
-	mvwprintw(mid19win, 9, 28, "0x%x", getb(14));	/* 3SV Least Squares*/
-	mvwprintw(mid19win, 10,28, "0x%x", getb(19));	/* DOP Mask mode*/
-	mvwprintw(mid19win, 11,28, "0x%x", getw(20));	/* Nav. Elev. mask*/
-	mvwprintw(mid19win, 12,28, "0x%x", getb(22));	/* Nav. Power mask*/
-	mvwprintw(mid19win, 13,28, "0x%x", getb(27));	/* DGPS Source*/
-	mvwprintw(mid19win, 14,28, "0x%x", getb(28));	/* DGPS Mode*/
-	mvwprintw(mid19win, 15,28, "%dsec",getb(29));	/* DGPS Timeout*/
+	mvwprintw(mid19win, 3, 20, "%dm", getw(7));	/* Alt. source input */
+	mvwprintw(mid19win, 4, 20, "%d", getb(9));	/* Degraded mode*/
+	mvwprintw(mid19win, 5, 20, "%dsec", getb(10));	/* Degraded timeout*/
+	mvwprintw(mid19win, 6, 20, "%dsec",getb(11));	/* DR timeout*/
+	mvwprintw(mid19win, 7, 20, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
+	mvwprintw(mid19win, 8, 20, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
+	mvwprintw(mid19win, 9, 20, "0x%x", getb(14));	/* 3SV Least Squares*/
+	mvwprintw(mid19win, 10,20, "0x%x", getb(19));	/* DOP Mask mode*/
+	mvwprintw(mid19win, 11,20, "0x%x", getw(20));	/* Nav. Elev. mask*/
+	mvwprintw(mid19win, 12,20, "0x%x", getb(22));	/* Nav. Power mask*/
+	mvwprintw(mid19win, 13,20, "0x%x", getb(27));	/* DGPS Source*/
+	mvwprintw(mid19win, 14,20, "0x%x", getb(28));	/* DGPS Mode*/
+	mvwprintw(mid19win, 15,20, "%dsec",getb(29));	/* DGPS Timeout*/
 	dispmode = !dispmode;
 	break;
 
