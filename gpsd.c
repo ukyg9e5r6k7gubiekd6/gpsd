@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <netdb.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -65,7 +66,6 @@ int bincount;
 int reopen = 0;
 
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
-extern int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds);
 static int handle_request(int fd, fd_set * fds);
 
 static void onsig(int sig)
@@ -141,6 +141,7 @@ static void usage()
 static int set_baud(long baud)
 {
     int speed;
+    
     if (baud < 200)
 	baud *= 1000;
     if (baud < 2400)
@@ -155,6 +156,7 @@ static int set_baud(long baud)
 	speed = B19200;
     else
 	speed = B38400;
+
     return speed;
 }
 
@@ -191,48 +193,26 @@ static void print_settings(char *service, char *dgpsserver,
     fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
 }
 
-static void handle_dgps()
+static int handle_dgps()
 {
     char buf[BUFSIZE];
     int rtcmbytes, cnt;
-    char *ptr;
-    rtcmbytes = read(dsock, buf, BUFSIZE);
 
-    if (device_type == DEVICE_EARTHMATEb) {
-	ptr = buf;
-	while (rtcmbytes > 0) {
-	    cnt = (rtcmbytes < 65) ? rtcmbytes : 64;
-	    em_send_rtcm(buf, cnt);
-	    rtcmbytes -= cnt;
-	    ptr += cnt;
-	}
-    } else {
-	/*
-	 * device must need generic RTCM-104 serial data.
-	 * We can send these one character at a time. 
-	 */
-	if (rtcmbytes > 0) {
-#if 0
-	    fprintf(stderr, "\n\nSending %d rtcm bytes out\n", rtcmbytes);
-	    for (cnt = 0; cnt < rtcmbytes; cnt++)
-		fprintf(stderr, "%x", (unsigned char) buf[cnt]);
-	    fprintf(stderr, "\n");
-#endif
-	    ptr = buf;
-	    while (rtcmbytes > 0) {
-		cnt = write(gNMEAdata.fdout, ptr, rtcmbytes);
-		if (cnt == rtcmbytes)
-		    rtcmbytes = 0;	/* stops the loop */
+    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0) {
 
-		if (cnt > 0) {
-		    /* Set up for next iteration */
-		    rtcmbytes -= cnt;
-		    ptr += cnt;
-		}
-	    }
-	    rtcmbytes = 0;
-	}
+	if (device_type == DEVICE_EARTHMATEb)
+	    cnt = em_send_rtcm(buf, rtcmbytes);
+	else
+	    cnt = write(gNMEAdata.fdout, buf, rtcmbytes);
+	
+	if (cnt<=0)
+	    syslog(LOG_WARNING, "Write to rtcm sink failed");
     }
+    else {
+	syslog(LOG_WARNING, "Read from rtcm source failed");
+    }
+
+    return rtcmbytes;
 }
 
 
@@ -573,7 +553,6 @@ static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
-    int fd;
 
     while (offset < BUFSIZE) {
 	if (read(input, buf + offset, 1) != 1)

@@ -45,16 +45,16 @@ typedef struct {
 /*	Number's character database - like as "LED" */
 
 DigitRec num_segment[] = {
-		{1,1,1,1,1,1,0},
-		{0,1,1,0,0,0,0},
-		{1,1,0,1,1,0,1},
-		{1,1,1,1,0,0,1},
-		{0,1,1,0,0,1,1},
-		{1,0,1,1,0,1,1},
-		{1,0,1,1,1,1,1},
-		{1,1,1,0,0,0,0},
-		{1,1,1,1,1,1,1},
-		{1,1,1,1,0,1,1}};
+    {{1,1,1,1,1,1,0}},
+    {{0,1,1,0,0,0,0}},
+    {{1,1,0,1,1,0,1}},
+    {{1,1,1,1,0,0,1}},
+    {{0,1,1,0,0,1,1}},
+    {{1,0,1,1,0,1,1}},
+    {{1,0,1,1,1,1,1}},
+    {{1,1,1,0,0,0,0}},
+    {{1,1,1,1,1,1,1}},
+    {{1,1,1,1,0,1,1}}};
 
 XSegment	offset[] = {
 		{-10,-10, 10,-10},
@@ -189,7 +189,6 @@ static void DrawTachometer();
 static void FastFillCircle();
 static void GetneedleGC();
 static void GetscaleGC();
-static void GetcSingleircleGC();
 static void GetbackgroundGC();
 static void DrawGauge();
 static void DrawNeedle();

@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <syslog.h>
+#include <unistd.h>
 
 #include "gpsd.h"
 #include "nmea.h"
@@ -56,7 +57,32 @@ unsigned short em_checksum(unsigned short *w, int n)
    for the array, and prepends a 5 word header (including checksum).
    The data words are expected to be checksummed */
 
-static void em_spew(int type, void *dat, int dlen)
+#if defined (WORDS_BIGENDIAN)
+
+/* data is assumed to contain len/2 unsigned short words
+ * we change the endianness to little, when needed.
+ */
+static int end_write(int fd, void *d, int len)
+{
+    char buf[BUFSIZE];
+    char *p = buf;
+    char *data = (char *)d;
+    int i = len;
+
+    while (i>0) {
+	*p++ = *(data+1);
+	*p++ = *data;
+	data += 2;
+	i -= 2;
+    }
+    return write(fd, buf, len);
+}
+
+#else
+#define end_write write
+#endif
+
+static void em_spew(int type, unsigned short *dat, int dlen)
 {
     struct header h;
 
@@ -67,8 +93,8 @@ static void em_spew(int type, void *dat, int dlen)
     h.ndata = dlen - 1;
     h.csum = em_checksum((unsigned short *) &h, 4);
 
-    write(gNMEAdata.fdout, &h, sizeof(h));
-    write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
+    end_write(gNMEAdata.fdout, &h, sizeof(h));
+    end_write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
 }
 
 static long putlong(char *dm, int sign)
@@ -119,11 +145,11 @@ static void em_init()
       data[17] = data[18] = data[19] = data[20] = 0;
       data[21] = em_checksum(data, 21);
 
-      em_spew(1200, &data, 22);
+      em_spew(1200, data, 22);
     }
 }
 
-void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
+static void send_rtcm(char *rtcmbuf, int rtcmbytes)
 {
     unsigned short data[34];
     int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
@@ -134,11 +160,25 @@ void em_send_rtcm(unsigned short *rtcmbuf, int rtcmbytes)
     memset(data, 0, sizeof(data));
 
     data[0] = sn;		/* sequence number */
-    memcpy(&data[1], rtcmbuf, rtcmbytes*(sizeof(char)));
+    memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = em_checksum(data, n);
 
-    em_spew(1351, &data, n+1);
+    em_spew(1351, data, n+1);
 }
+
+int em_send_rtcm(char *rtcmbuf, int rtcmbytes)
+{
+    int len;
+
+    while (rtcmbytes) {
+	len = rtcmbytes>64?64:rtcmbytes;
+	send_rtcm(rtcmbuf, len);
+	rtcmbytes -= len;
+	rtcmbuf += len;
+    }
+    return 1;
+}
+
 
 void do_eminit()
 {
@@ -236,7 +276,7 @@ static void handle1000(unsigned short *p)
 
 static void handle1002(unsigned short *p)
 {
-    int i, j, k;
+    int i, j;
 
     gNMEAdata.ZCHseen = 1;
     for (j = 0; j < 12; j++) {
@@ -266,8 +306,7 @@ static void handle1002(unsigned short *p)
 
 static void handle1003(unsigned short *p)
 {
-    int i, j, k;
-    char *bufp, *bufp2;
+    int j;
 
     gNMEAdata.pdop = p[O(10)];
     gNMEAdata.hdop = p[O(11)];
@@ -323,8 +362,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
     unsigned char buf[BUFSIZE];
     char *bufp;
     char *bufp2;
-    int i = 0, j = 0, k = 0, nmea = 0;
-    int fd, nfds;
+    int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == em_checksum(p, h->ndata)) {
 	if (debug > 5)
@@ -335,7 +373,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 	    bufp = buf;
 	    if (gNMEAdata.mode > 1) {
 		sprintf(bufp,
-			"$GPGGA,%02d%02d%02d,%lf,%c,%lf,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
+			"$GPGGA,%02d%02d%02d,%f,%c,%f,%c,%d,%02d,%.2f,%.1f,%c,%f,%c,%s,%s*",
 		   gNMEAdata.hours, gNMEAdata.minutes, gNMEAdata.seconds,
 			degtodm(fabs(gNMEAdata.latitude)),
 			((gNMEAdata.latitude > 0) ? 'N' : 'S'),
@@ -347,7 +385,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 		bufp = bufp + strlen(bufp);
 	    }
 	    sprintf(bufp,
-		    "$GPRMC,%02d%02d%02d,%c,%lf,%c,%lf,%c,%f,%f,%02d%02d%02d,%02f,%c*",
+		    "$GPRMC,%02d%02d%02d,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,%02f,%c*",
 		    gNMEAdata.hours, gNMEAdata.minutes, gNMEAdata.seconds,
 		    gNMEAdata.status ? 'A' : 'V', degtodm(fabs(gNMEAdata.latitude)),
 		    ((gNMEAdata.latitude > 0) ? 'N' : 'S'),

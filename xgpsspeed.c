@@ -10,6 +10,10 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <stdlib.h>
+
+#include "gpsd.h"
+
 #define BUFSIZE          4096
 #define DEFAULTPORT "2947"
 char latd, lond;
@@ -65,8 +69,6 @@ main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     Cardinal        i;
-    char *cp;
-    int ret;
 
 
     toplevel = XtVaAppInitialize(&app, "XGpsSpeed", options, XtNumber(options),
@@ -108,11 +110,13 @@ main(int argc, char **argv)
     open_input(app);
     
     XtAppMainLoop(app);
+
+    return 0;
 }
 
 
 
-Usage()
+void Usage()
 {
     fprintf(stderr, 
 	    "xgpsspeed <Toolkit Options> [-rv] [-nc needlecolor]\n");
@@ -140,7 +144,6 @@ void update_display()
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
-  double speed;
   static unsigned char buf[BUFSIZE];  /* that is more than a sentence */
   static int offset = 0;
   int count;
@@ -171,10 +174,8 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 int my_serial_open()
 {
     char *temp;
-    char *p;
     char *port = DEFAULTPORT;
     char *device_name="localhost";
-    int one = 1;
     int ttyfd;
 
     temp = malloc(strlen(device_name) + 1);
@@ -184,8 +185,6 @@ int my_serial_open()
     ttyfd = connectTCP(temp, port);
     free(temp);
     port = 0;
-
-    setsockopt(ttyfd, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
 
     if (write(ttyfd, "r\n", 2) != 2)
       errexit("Can't write to socket");

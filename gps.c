@@ -432,8 +432,8 @@ int main(int argc, char *argv[])
                     device_type = DEVICE_EARTHMATE;
                     break;
                 default:
-                    fprintf(stderr,"Invalide device type \"%s\"\n"
-                                   "Using GENERIC instead\n", device_type);
+                    fprintf(stderr,"Invalide device type \"%c\"\n"
+                                   "Using GENERIC instead\n", *optarg);
                     break;
             }
             break;

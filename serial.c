@@ -52,7 +52,6 @@ int serial_open()
 
     if ( (p = strchr(temp, ':')) ) {
 	char *port = DEFAULTPORT;
-	int one = 1;
 
 	if (*(p + 1))
 	    port = p + 1;
@@ -64,8 +63,6 @@ int serial_open()
 	ttyfd = connectTCP(temp, port);
 	free(temp);
 	port = 0;
-
-	setsockopt(ttyfd, SOL_SOCKET, SO_REUSEADDR, (char *) &one, sizeof(one));
 
 	if (write(ttyfd, "r\n", 2) != 2)
 	    errexit("Can't write to socket");
@@ -79,7 +76,7 @@ int serial_open()
 	if (isatty(ttyfd)) {
 
             /* Save original terminal parameters */
-            if (tcgetattr(ttyfd,&ttyset_old) != 0)
+            if (tcgetattr(ttyfd,(void *)&ttyset_old) != 0)
               return (-1);
 
 	    if (ioctl(ttyfd, TIOCGETA, &ttyset) < 0)
@@ -115,7 +112,7 @@ void serial_close()
 	    ioctl(ttyfd, TIOCSETAF, &ttyset);
 	}
 	/* Restore original terminal parameters */
-        tcsetattr(ttyfd,TCSANOW,&ttyset_old);
+        tcsetattr(ttyfd,TCSANOW,(void *)&ttyset_old);
 
 	close(ttyfd);
 	ttyfd = -1;

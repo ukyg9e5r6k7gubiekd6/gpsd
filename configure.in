@@ -217,4 +217,6 @@ CPPFLAGS="$ice_save_CPPFLAGS"
 LDFLAGS="$ice_save_LDFLAGS"
 fi
 
+AC_C_BIGENDIAN
+ 
 AC_OUTPUT(Makefile)

@@ -86,6 +86,7 @@ int connectsock(char *host, char *service, char *protocol)
     struct protoent *ppe;
     struct sockaddr_in sin;
     int s, type;
+    int one = 1;
 
     bzero((char *) &sin, sizeof(sin));
     sin.sin_family = AF_INET;
@@ -114,6 +115,11 @@ int connectsock(char *host, char *service, char *protocol)
     s = socket(PF_INET, type, ppe->p_proto);
     if (s < 0)
 	errexit("Can't create socket:");
+
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
+        sprintf(mbuf, "%s", "Error: SETSOCKOPT SO_REUSEADDR");
+	errexit(mbuf);
+    }
 
     if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
 	sprintf(mbuf, "Can't connect to %s.%s", host, service);
