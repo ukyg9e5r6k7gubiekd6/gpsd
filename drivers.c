@@ -124,6 +124,9 @@ struct gps_type_t nmea =
  * http://vancouver-webpages.com/pub/peter/tripmate.faq
  * http://www.asahi-net.or.jp/~KN6Y-GTU/tripmate/trmfaqe.html
  * Maybe we could use the logging-interval command?
+ * According to file://localhost/home/esr/svn/gpsd/trunk/hardware.html,
+ * sending "$PRWIIPRO,0,RBIN\r\n" snd waiting 1.5 seconds 
+ * will switch the TripMate into Rockwell binary mode at 4800.
  */
 
 void tripmate_initializer(struct gps_session_t *session)
@@ -132,7 +135,11 @@ void tripmate_initializer(struct gps_session_t *session)
     time_t t;
     struct tm *tm;
 
+    /* TripMate requires this response to the ASTRAL it sends at boot time */
     write(session->fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+#ifndef PROCESS_PRWIZCH
+    write(session->fdout, "PRWIILOG,ZCH,V,,", 16); /* stop it sending PRWIZCH */
+#endif /* PROCESS_PRWIZCH */
     if (session->initpos.latitude && session->initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
