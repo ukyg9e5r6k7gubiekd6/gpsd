@@ -312,63 +312,6 @@ METERS_TO_FEET	= 3.2808399
 METERS_TO_MILES	= 0.00062137119
 KNOTS_TO_MPH	= 1.1507794
 
-# SirF-II control code
-
-class SiRF:
-    def transport(payload):
-        msg = '\xa0'
-        msg += '\xa2'
-        msg += chr(len(payload) >> 8)
-        msg += chr(len(payload) & 0xff)
-        msg += payload
-
-        checksum = 0
-        for ch in payload:
-          checksum += ord(ch);
-        checksum &= 0x7fff
-
-        msg += chr((checksum >> 8) & 0xff00)
-        msg += chr(checksum & 0x00ff)
-        msg += '\xb0'
-        msg += '\xb3'
-        return msg
-    transport = staticmethod(transport)
-
-    def to_NMEA(baudrate):
-        "Generate a SiRF binary protocol command to switch back to NMEA."
-        switcher = [
-            '\x81',	# Byte  0 = 0x81: Switch to NMEA command
-            '\x02',	# Byte  1 = 0x02: Leave debug-message switch as it is.
-            '\x01',	# Byte  2 = 0x01: Enable GPGGA at 1-second interval
-            '\x01',	# Byte  3 = 0x01: GPGGA checksum enable
-            '\x01',	# Byte  4 = 0x01: Enable GPGLL at 1-second interval
-            '\x01',	# Byte  5 = 0x01: GPGLL checksum enable
-            '\x01',	# Byte  6 = 0x05: Enable GPGSA at 5-second interval
-            '\x01',	# Byte  7 = 0x01: GPGSA checksum enable
-            '\x05',	# Byte  8 = 0x05: Enable GPGSV at 5-second interval
-            '\x01',	# Byte  9 = 0x01: GPGSV checksum enable
-            '\x00',	# Byte 10 = 0x05: Disable GPMSS
-            '\x00',	# Byte 11 = 0x01: GPMSS checksum disable
-            '\x01',	# Byte 12 = 0x01: Enable GPRMC at 1-second interval
-            '\x01',	# Byte 13 = 0x01: GPRMC checksum enable
-            '\x01',	# Byte 14 = 0x01: Enable GPVTG at 1-second interval
-            '\x01',	# Byte 15 = 0x01: GPVTG checksum enable
-            '\x00',	# Byte 16 = 0x00: Unused
-            '\x00',	# Byte 17 = 0x00: Unused
-            '\x00',	# Byte 18 = 0x00: Unused
-            '\x00',	# Byte 19 = 0x00: Unused
-            '\x00',	# Byte 20 = 0x00: Unused
-            '\x00',	# Byte 21 = 0x00: Unused
-            ]
-        switcher += [chr(baudrate >> 8), chr(baudrate & 0x0ff)]
-        return SiRF.transport("".join(switcher))
-    to_NMEA = staticmethod(to_NMEA)
-
-    def reset():
-        "Generate a GPS reset command."
-        return SiRF.transport("\x85\x00\x00\x00\x00\x00\x00\x00\x00")
-    reset = staticmethod(reset)
-
 # EarthDistance code swiped from Kismet and corrected
 # (As yet, this stuff is not in the libgps C library.)
 
