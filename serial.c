@@ -61,7 +61,7 @@ int serial_open()
 
 	if (isatty(ttyfd)) {
             /* Save original terminal parameters */
-            if (tcgetattr(ttyfd,(void *)&ttyset_old) != 0)
+            if (tcgetattr(ttyfd,&ttyset_old) != 0)
               return (-1);
 
 	    memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
@@ -96,7 +96,7 @@ void serial_close()
             tcsetattr(ttyfd, TCSANOW, &ttyset);
 	}
 	/* Restore original terminal parameters */
-        tcsetattr(ttyfd,TCSANOW,(void *)&ttyset_old);
+        tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 
 	close(ttyfd);
 	ttyfd = -1;
