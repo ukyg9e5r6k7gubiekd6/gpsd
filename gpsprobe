@@ -36,6 +36,34 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+def looks_like_NMEA(data):
+    if data.find("$GP") == -1:
+        return False
+    #sys.stderr.write("[%s]" % data)
+    # It's OK to have leading garbage, but not trailing garbage.
+    # Leading garbage may just mean the device hasn't settled yet.
+    # Trailing garbage means that the data accidentally looked like
+    # NMEA or that old data that really was NMEA happened to be sitting
+    # in the TTY buffer unread, but the new data we read is not
+    # sentences.
+    while not (curses.ascii.isprint(data[0]) or curses.ascii.isspace(data[0])):
+        data = data[1:]
+    if not data:
+        return False
+    #sys.stderr.write("(%s)" % data)
+    binary = filter(lambda x: not (curses.ascii.isprint(x) or curses.ascii.isspace(x)), data)
+    #sys.stderr.write("{"+repr(data)+"}")
+    return not binary
+
+def looks_like_SiRF(data):
+    header = data.find("\xa0\xa2")
+    if header == -1:
+        return False
+    # We need a position/velocity/time message, SiRF type 0x02
+    if len(data) < header+5 or data[header+4] != chr(02):
+        return False
+    return True
+
 triggers = {
     "PRWIZCH": "# This GPS has a Rockwell Zodiac chipset.\n"
     }
@@ -118,26 +146,8 @@ if __name__ == '__main__':
             sys.stderr.write(device + " nonexistent or unreadable.\n")
             sys.exit(0)
 
-        def looks_like_NMEA(data):
-            if data.find("$GP") == -1:
-                return False
-            #sys.stderr.write("[%s]" % data)
-            # It's OK for there to be leading garbage, but not trailing garbage.
-            # Leading garbage may just mean the device hasn't settled yet.
-            # Trailing garbage means that the data accidentally looked like
-            # NMEA or that old data that really was NMEA happened to be sitting
-            # in the TTY buffer unread, but the new data we read is not
-            # sentences.
-            while not (curses.ascii.isprint(data[0]) or curses.ascii.isspace(data[0])):
-                data = data[1:]
-            if not data:
-                return False
-            #sys.stderr.write("(%s)" % data)
-            binary = filter(lambda x: not (curses.ascii.isprint(x) or curses.ascii.isspace(x)), data)
-            #sys.stderr.write("{"+repr(data)+"}")
-            return not binary
-
         # Step two: Open and sync up with the device
+        protocol = None
         for baudrate in bpslist:
             dev = gpsd.gpsd(device=device, bps=baudrate)
             # First, acquire the device
@@ -155,15 +165,18 @@ if __name__ == '__main__':
             baton = Baton("Looking for NMEA sentences")
             starttime = time.time()
             time.sleep(2)	# Give the device time to settle
-            #dev.flush()	# Might be spurious NMEA in the tty buffer 
             data = dev.rawread()
             sys.stderr.write("%d chars seen" % len(data))
             baton.twirl()
             if data and looks_like_NMEA(data):
                 baton.end("found NMEA")
+                protocol = "NMEA"
                 break
+            elif data and looks_like_SiRF(data):
+                baton.end("found probable SiRF data header")
+                protocol="SiRF"
             else:
-                baton.end("no NMEA recognized")
+                baton.end("no protocol recognized")
         else:
             sys.stderr.write("Couldn't acquire the device.\n")
             sys.exit(0)
