@@ -266,6 +266,7 @@ class gps(gpsdata):
               self.profiling = (data[0] == '1')
             elif cmd == '$':
                   (self.tag, length, recv_time, decode_time, poll_time, emit_time) = data.split()
+                  self.tag += " " + length
                   self.length = int(length)
                   self.d_recv_time = float(recv_time)
                   self.d_decode_time = float(decode_time)
@@ -292,17 +293,19 @@ class gps(gpsdata):
         if self.profiling:
             self.c_recv_time = time.time()
 	res = self.__unpack(data)
-        if self.profiling and self.utc != "?":
-            self.c_decode_time = time.time()
-            # Awful kluge that nukes all timezone problems
-            line_latency = (self.d_recv_time - isotime(self.utc)) % self.cycle
-            self.gps_time = self.d_recv_time - line_latency
-            self.d_recv_time = line_latency
-            self.d_decode_time += line_latency
-            self.emit_time += line_latency
-            self.poll_time += line_latency
-            self.c_recv_time -= self.gps_time
-            self.c_decode_time -= self.gps_time
+        if self.utc != "?":
+            self.gps_time = isotime(self.utc)
+            if self.profiling:
+                self.c_decode_time = time.time()
+                # Awful kluge that nukes all timezone problems
+                line_latency = (self.d_recv_time - self.gps_time) % self.cycle
+                self.gps_time = self.d_recv_time - line_latency
+                self.d_recv_time = line_latency
+                self.d_decode_time += line_latency
+                self.emit_time += line_latency
+                self.poll_time += line_latency
+                self.c_recv_time -= self.gps_time
+                self.c_decode_time -= self.gps_time
         return res
 
     def query(self, commands):
