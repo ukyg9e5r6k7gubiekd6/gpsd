@@ -179,17 +179,18 @@ HEADERS = config.h gps.h gps.h gpsd.h TachometerP.h nmea.h Tachometer.h version.
 
 LIB_OBJECTS = $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS)  $(COMMON_OBJECTS)
 SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(HEADERS)
-DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml
-MANPAGES = gpsd.1 libgps.3
+DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml libgps.xml
+MANPAGES = gpsd.1 libgps.3 libgpsd.3
 XRESOURCES = gps.ad xgpsspeed.ad
 CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
 META = gpsd.spec gpsd.lsm
 ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(META) $(MANPAGES) 
 
+# This assumes we're bundling up the trunk of a Subversion repo.
 gpsd-$(VERS).tar.gz: $(ALL)
 	find $(ALL) -type f | sed "s:^:gpsd-$(VERS)/:" >MANIFEST
-	(cd ..; ln -s gpsd gpsd-$(VERS))
-	(cd ..; tar -czvf gpsd/gpsd-$(VERS).tar.gz `cat gpsd/MANIFEST`)
+	(cd ..; ln -s trunk gpsd-$(VERS))
+	(cd ..; tar -czvf trunk/gpsd-$(VERS).tar.gz `cat trunk/MANIFEST`)
 	(cd ..; rm gpsd-$(VERS))
 
 .PHONY: dist
@@ -199,6 +200,7 @@ install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
 	$(mkinstalldirs) $(DESTDIR)${libdir}
+	$(mkinstalldirs) $(DESTDIR)${includedir}
 	for app in ${PROGRAMS}; do \
 		$(INSTALL) -m 755 $$app ${DESTDIR}${sbindir} ; \
 	done
@@ -213,6 +215,8 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd.1
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man3/
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgps.3
+	$(INSTALL) -m 755 -o 0 -g 0 gps.h $(INCLUDEDIR)/gps.h
+	$(INSTALL) -m 755 -o 0 -g 0 gpsd.h $(INCLUDEDIR)/gpsd.h
 
 clean:
 	rm -f *.o *.a gpsd gps xgpsspeed libgpsd *~ config.status

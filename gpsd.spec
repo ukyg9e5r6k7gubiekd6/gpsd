@@ -1,6 +1,6 @@
 Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.90
+Version: 1.91
 Release: 1
 License: GPL
 Group: System Environment/Daemons
@@ -37,6 +37,7 @@ cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
+mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 
@@ -51,7 +52,7 @@ cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING gpsd.xml libgps.xml HACKING TODO
+%doc README INSTALL COPYING gpsd.xml libgps.xml libgpsd.xml HACKING TODO
 %defattr(-,root,root,-)
 %{_bindir}/gpsd
 %{_mandir}/man1/gpsd.1*
