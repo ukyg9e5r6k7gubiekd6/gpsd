@@ -37,9 +37,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-// Linux math.h need the next two defines to get hypot() and _PI constants
-#define __USE_ISOC99	1
-#define __USE_GNU	1
 #include <math.h>
 
 #include <string.h>
@@ -47,6 +44,7 @@
 
 #include "config.h"
 #include "gpsd.h"
+#include "gps.h"
 
 #ifdef GARMIN_ENABLE
 
@@ -170,7 +168,7 @@ static inline int get_int(const unsigned char *buf)
 
 // convert radians to degrees
 static inline double  radtodeg( double rad) {
-	return ( rad * 180.0 *  M_1_PIl);
+	return ( rad * 180.0 *  (1.0/PI));
 }
 
 static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );
@@ -239,7 +237,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    //time_l += (long)nearbyint(pvt->gps_tow);
-	    time_l += lrint(pvt->gps_tow);
+	    time_l += (time_t) rint(pvt->gps_tow);
 	    //time_l += pvt->gps_tow;
 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
@@ -278,7 +276,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 
 	    track = atan2(pvt->lon_vel, pvt->lat_vel);
 	    if (track < 0) {
-		track += 2 * M_PIl;
+		track += 2 * PI;
 	    }
 	    session->gNMEAdata.track = radtodeg(track);
 	    REFRESH(session->gNMEAdata.track_stamp);
