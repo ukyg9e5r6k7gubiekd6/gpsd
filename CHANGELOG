@@ -40,3 +40,6 @@
 	 G or g command returns six-digit Maidenhead grid square (like FN12fx)
 20030216 (1.09)
 	 Include sys/time.h in gpsd.c for struct timeval.
+20030818 (1.10)
+	 Use cfset[io]speed() to set speed in serial.h. Glibc is quite insane
+	 and I am tired to chase it, so I give up. Hope this works for BSD.
