@@ -46,15 +46,11 @@ void send_init()
     char buf[82];
     time_t t;
     struct tm *tm;
-    char latd, lond;
-
-    t = time(NULL);
-    tm = gmtime(&t);
-
-    latd = 'n';
-    lond = 'w';
 
     if (latitude && longitude) {
+	t = time(NULL);
+	tm = gmtime(&t);
+
 	sprintf(buf,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
 		latitude, latd, longitude, lond,

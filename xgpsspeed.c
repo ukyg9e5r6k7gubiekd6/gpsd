@@ -171,7 +171,7 @@ int my_serial_open()
     char *temp;
     char *p;
     char *port = DEFAULTPORT;
-    char *device_name="gps.mayko.com";
+    char *device_name="localhost";
     int one = 1;
     int ttyfd;
 

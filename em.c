@@ -94,32 +94,32 @@ static void em_init()
 
     eminit = 0;
 
-    t = time(NULL);
-    tm = gmtime(&t);
-
     if (latitude && longitude) {
-	if (sn++ > 32767)
-	    sn = 0;
+      t = time(NULL);
+      tm = gmtime(&t);
 
-	memset(data, 0, sizeof(data));
-	
-	data[0] = sn;		/* sequence number */
+      if (sn++ > 32767)
+	  sn = 0;
+      
+      memset(data, 0, sizeof(data));
+      
+      data[0] = sn;		/* sequence number */
 
-	data[1] = (1 << 2) | (1 << 3);
-	data[2] = data[3] = data[4] = 0;
-	data[5] = tm->tm_mday;
-	data[6] = tm->tm_mon + 1;
-	data[7] = tm->tm_year + 1900;
-	data[8] = tm->tm_hour;
-	data[9] = tm->tm_min;
-	data[10] = tm->tm_sec;
-	*(long *) (data + 11) = putlong(latitude, (latd == 'S') ? 1 : 0);
-	*(long *) (data + 13) = putlong(longitude, (lond == 'W') ? 1 : 0);
-	data[15] = data[16] = 0;
-	data[17] = data[18] = data[19] = data[20] = 0;
-	data[21] = em_checksum(data, 21);
+      data[1] = (1 << 2) | (1 << 3);
+      data[2] = data[3] = data[4] = 0;
+      data[5] = tm->tm_mday;
+      data[6] = tm->tm_mon + 1;
+      data[7] = tm->tm_year + 1900;
+      data[8] = tm->tm_hour;
+      data[9] = tm->tm_min;
+      data[10] = tm->tm_sec;
+      *(long *) (data + 11) = putlong(latitude, (latd == 'S') ? 1 : 0);
+      *(long *) (data + 13) = putlong(longitude, (lond == 'W') ? 1 : 0);
+      data[15] = data[16] = 0;
+      data[17] = data[18] = data[19] = data[20] = 0;
+      data[21] = em_checksum(data, 21);
 
-	em_spew(1200, &data, 22);
+      em_spew(1200, &data, 22);
     }
 }
 
@@ -199,9 +199,9 @@ static void handle1000(unsigned short *p)
     sprintf(gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
 
-    gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	// degrees
+    gNMEAdata.mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
 
-    gNMEAdata.course = p[O(36)] * 180 / (PI * 1000);	// degrees
+    gNMEAdata.course = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
     gNMEAdata.satellites = p[O(12)];
 
@@ -230,7 +230,7 @@ static void handle1000(unsigned short *p)
 	gNMEAdata.mode = 1;
     }
 
-    gNMEAdata.separation = p[O(33)] / 100;	// meters
+    gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 
 }
 
@@ -465,9 +465,10 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 	break;
 
     case EM_HUNT_A:
-	if (c == 'A')
+	/* A better be right after E */
+	if (c == 'A') 
 	    write(gNMEAdata.fdout, "EARTHA\r\n", 8);
-	    state = EM_HUNT_FF;
+	state = EM_HUNT_FF;
 	break;
 
     case EM_HUNT_81:
