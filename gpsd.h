@@ -90,6 +90,6 @@ extern int gpsd_poll(struct gps_session_t *session);
 extern void gpsd_wrap(struct gps_session_t *session);
 
 /* caller must supply this */
-extern void gpscli_report(int d, const char *fmt, ...);
+void gpscli_report(int d, const char *fmt, ...);
 
 

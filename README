@@ -40,7 +40,6 @@ and was not fixed until 2.6.7.  If in doubt, upgrade.
 There is a project site for gpsd at <http://www.berlios/gpsd/>.
 Look there for updates, news, and project mailing lists.
 
-
 CREDITS
 =======
 
@@ -65,8 +64,6 @@ Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
 Be advised: any bugs in this code are mine, and mine only ;-)
-
-Thanks for Russ Nelson for providing a home for gpsd!
 
 This is as it stands today, February 05 2002.
 

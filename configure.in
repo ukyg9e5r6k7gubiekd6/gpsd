@@ -1,23 +1,24 @@
 dnl
 dnl
-AC_INIT(gpsd.c)
-AC_CONFIG_HEADER(config.h)
 
+AC_INIT
+
+AM_INIT_AUTOMAKE(gpsd, 1.95)
+
+AC_PREFIX_PROGRAM(gcc)
+
+AM_CONFIG_HEADER(config.h)
+
+AC_LANG([C])
+
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+AC_PROG_LIBTOOL
 
-dnl Find and check C compiler
-dnl
-ICE_PROG_CC
-
-test ! -z "$GCC" &&  CFLAGS="$CFLAGS -Wall -Werror"
-
-dnl
-dnl Find and check C preprocessor
-dnl
-AC_PROG_CPP
+CFLAGS="$CFLAGS -Wall -Werror"
 
 AC_CHECK_HEADERS(termio.h sys/param.h termios.h sys/termios.h sys/select.h strings.h path.h sys/filio.h sys/time.h)
-
 
 dnl
 dnl Locate Net Libraries
@@ -185,7 +186,7 @@ dnl
 XPM_LIBS=""
 AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
 	XPM_LIBS="-lXpm"
-	AC_DEFINE(HAVE_XPM),,${X_PRE_LIBS} ${X11_LIBS})
+	AC_DEFINE([HAVE_XPM],1,[Xpm available]),,${X_PRE_LIBS} ${X11_LIBS})
 if test "$XPM_LIBS" != ""; then
 AC_CHECK_HEADERS(X11/xpm.h xpm.h)
 fi
@@ -202,12 +203,12 @@ then
 dnl Motif 2.1 wants `-lXp' (X11R6.3 print server)
 AC_CHECK_LIB(Xp, XpSelectInput,
 	XP_LIBS="-lXp"
-	AC_DEFINE(HAVE_XP),,
+	AC_DEFINE([HAVE_XP],1,[Xp available]),,
 	${X_PRE_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
 dnl
 AC_CHECK_LIB(Xm, XmCreateOptionMenu, 
 	XM_LIBS="-lXm"
-	AC_DEFINE(HAVE_MOTIF),,
+	AC_DEFINE([HAVE_MOTIF],1,[Motif available]),,
 	${X_PRE_LIBS} ${XP_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
 fi
 if test "$XM_LIBS" = ""; then
