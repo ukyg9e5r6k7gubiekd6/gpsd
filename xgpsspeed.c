@@ -39,7 +39,6 @@ static void update_display(char *buf)
   int new = rint(gpsdata->speed * KNOTS_TO_MPH);
   if (new > 100)
     new = 100;
-
   TachometerSetValue(tacho, new);
 }
 

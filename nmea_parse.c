@@ -48,9 +48,8 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
 	p = field(sentence, begin + 1);
 	if (*p == 'S')
 	    lat = -lat;
-	if (out->latitude != lat) {
+	if (out->latitude != lat)
 	    out->latitude = lat;
-	}
 	updated++;
     }
     if (*(p = field(sentence, begin + 2)) != '\0') {
@@ -62,9 +61,8 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
 	p = field(sentence, begin + 3);
 	if (*p == 'W')
 	    lon = -lon;
-	if (out->longitude != lon) {
+	if (out->longitude != lon)
 	    out->longitude = lon;
-	}
 	updated++;
     }
     if (updated == 2)
@@ -400,9 +398,8 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	changed |= update_field_i(sentence, fldnum++, &out->PRN[lower]);
 	changed |= update_field_i(sentence, fldnum++, &out->elevation[lower]);
 	changed |= update_field_i(sentence, fldnum++, &out->azimuth[lower]);
-	if (*(field(sentence, fldnum))) {
+	if (*(field(sentence, fldnum)))
 	    changed |= update_field_i(sentence, fldnum, &out->ss[lower]);
-	}
 	fldnum++; lower++;
     }
 

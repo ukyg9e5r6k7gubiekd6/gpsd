@@ -50,8 +50,7 @@ static int end_write(int fd, void *d, int len)
 
     while (len>0) {
 	*p++ = *(data+1); *p++ = *data;
-	data += 2;
-	len -= 2;
+	data += 2; len -= 2;
     }
     return write(fd, buf, len);
 }
@@ -198,8 +197,8 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
 
     session->gNMEAdata.satellites_used = p[O(12)];
 
-    session->hours = p[O(22)];
-    session->minutes = p[O(23)];
+    session->hours = p[O(22)]; 
+    session->minutes = p[O(23)]; 
     session->seconds = p[O(24)];
     session->year = p[O(21)];
     session->month = p[O(20)];
@@ -417,72 +416,69 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
     return (n == 0);
 }
 
-static void zodiac_eat(struct gps_session_t *session, unsigned char c)
-{
-    static int state = ZODIAC_HUNT_FF;
-    static struct header h;
-    static unsigned int byte, words;
-    static unsigned short *data;
-
-    switch (state) {
-    case ZODIAC_HUNT_FF:
-	if (c == 0xff)
-	    state = ZODIAC_HUNT_81;
-	if (c == 'E')
-	    state = ZODIAC_HUNT_A;
-	break;
-    case ZODIAC_HUNT_A:
-	/* A better be right after E */
-        if ((c == 'A') && (session->gNMEAdata.gps_fd != -1))
-	    write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
-	state = ZODIAC_HUNT_FF;
-	break;
-    case ZODIAC_HUNT_81:
-	if (c == 0x81)
-	    state = ZODIAC_HUNT_ID;
-	h.sync = 0x81ff;
-	byte = 0;
-	break;
-    case ZODIAC_HUNT_ID:
-	if (!(byte = putword(&(h.id), c, byte)))
-	    state = ZODIAC_HUNT_WC;
-	break;
-    case ZODIAC_HUNT_WC:
-	if (!(byte = putword(&(h.ndata), c, byte)))
-	    state = ZODIAC_HUNT_FLAGS;
-	break;
-    case ZODIAC_HUNT_FLAGS:
-	if (!(byte = putword(&(h.flags), c, byte)))
-	    state = ZODIAC_HUNT_CS;
-	break;
-    case ZODIAC_HUNT_CS:
-	if (!(byte = putword(&(h.csum), c, byte))) {
-	    if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
-		state = ZODIAC_HUNT_DATA;
-		data = (unsigned short *) malloc((h.ndata + 1) * 2);
-		words = 0;
-	    } else
-		state = ZODIAC_HUNT_FF;
-	}
-	break;
-    case ZODIAC_HUNT_DATA:
-	if (!(byte = putword(data + words, c, byte)))
-	    words++;
-	if (words == h.ndata + 1) {
-	    analyze(session, &h, data);
-	    free(data);
-	    state = ZODIAC_HUNT_FF;
-	}
-	break;
-    }
-}
-
 static void zodiac_handle_input(struct gps_session_t *session)
 {
     unsigned char c;
 
     if (read(session->gNMEAdata.gps_fd, &c, 1) == 1)
-	zodiac_eat(session, c);
+    {
+	static int state = ZODIAC_HUNT_FF;
+	static struct header h;
+	static unsigned int byte, words;
+	static unsigned short *data;
+
+	switch (state) {
+	case ZODIAC_HUNT_FF:
+	    if (c == 0xff)
+		state = ZODIAC_HUNT_81;
+	    if (c == 'E')
+		state = ZODIAC_HUNT_A;
+	    break;
+	case ZODIAC_HUNT_A:
+	    /* A better be right after E */
+	    if ((c == 'A') && (session->gNMEAdata.gps_fd != -1))
+		write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
+	    state = ZODIAC_HUNT_FF;
+	    break;
+	case ZODIAC_HUNT_81:
+	    if (c == 0x81)
+		state = ZODIAC_HUNT_ID;
+	    h.sync = 0x81ff;
+	    byte = 0;
+	    break;
+	case ZODIAC_HUNT_ID:
+	    if (!(byte = putword(&(h.id), c, byte)))
+		state = ZODIAC_HUNT_WC;
+	    break;
+	case ZODIAC_HUNT_WC:
+	    if (!(byte = putword(&(h.ndata), c, byte)))
+		state = ZODIAC_HUNT_FLAGS;
+	    break;
+	case ZODIAC_HUNT_FLAGS:
+	    if (!(byte = putword(&(h.flags), c, byte)))
+		state = ZODIAC_HUNT_CS;
+	    break;
+	case ZODIAC_HUNT_CS:
+	    if (!(byte = putword(&(h.csum), c, byte))) {
+		if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
+		    state = ZODIAC_HUNT_DATA;
+		    data = (unsigned short *) malloc((h.ndata + 1) * 2);
+		    words = 0;
+		} else
+		    state = ZODIAC_HUNT_FF;
+	    }
+	    break;
+	case ZODIAC_HUNT_DATA:
+	    if (!(byte = putword(data + words, c, byte)))
+		words++;
+	    if (words == h.ndata + 1) {
+		analyze(session, &h, data);
+		free(data);
+		state = ZODIAC_HUNT_FF;
+	    }
+	    break;
+	}
+    }
 }
 
 /* caller needs to specify a wrapup function */

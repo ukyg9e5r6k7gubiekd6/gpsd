@@ -14,28 +14,11 @@
 
 #include "gpsd.h"
 
-#ifdef NON_NMEA_ENABLE
-static struct gps_type_t *set_device_type(char what)
-/* select a device driver by key letter */
-{
-    struct gps_type_t **dp;
-    for (dp = gpsd_drivers; *dp; dp++)
-	if ((*dp)->typekey == what) {
-	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
-	    goto foundit;
-	}
-    return NULL;
- foundit:;
-    return *dp;
-}
-#endif /* NON_NMEA_ENABLE */
-
 struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 /* initialize GPS polling */
 {
     time_t now = time(NULL);
     struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
-
     if (!session)
 	return NULL;
 
@@ -43,15 +26,17 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
     session->device_type = gpsd_drivers[0];
 #ifdef NON_NMEA_ENABLE
     {
-    struct gps_type_t *devtype;
-    devtype = set_device_type(devicetype);
-    if (!devtype)
-	gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", devicetype);
-    else
-	session->device_type = devtype;
+    struct gps_type_t **dp;
+    for (dp = gpsd_drivers; *dp; dp++)
+	if ((*dp)->typekey == devicetype) {
+	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
+	    session->device_type = *dp;
+	    goto foundit;
+	}
+    gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n");
+    foundit:;
     }
 #endif /* NON_NMEA_ENABLE */
-
     session->baudrate = session->device_type->baudrate;
     session->dsock = -1;
     if (dgpsserver) {
@@ -70,7 +55,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 	    gpsd_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
 	else {
 	    gethostname(hn, sizeof(hn));
-
 	    sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
 	    write(session->dsock, buf, strlen(buf));
 	}
@@ -176,18 +160,16 @@ int gpsd_poll(struct gps_session_t *session)
 	    session->fixcnt++;
 
 	/* may be time to ship a DGPS correction to the GPS */
-	if (session->fixcnt > 10) {
-	    if (!session->sentdgps) {
-		session->sentdgps++;
-		if (session->dsock > -1) {
-		  char buf[BUFSIZE];
-		  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
-			  session->gNMEAdata.latitude,
-			  session->gNMEAdata.longitude, 
-			  session->gNMEAdata.altitude);
-		  write(session->dsock, buf, strlen(buf));
-		  gpsd_report(2, "=> dgps %s", buf);
-		}
+	if (session->fixcnt > 10 && !session->sentdgps) {
+	    session->sentdgps++;
+	    if (session->dsock > -1) {
+		char buf[BUFSIZE];
+		sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
+			session->gNMEAdata.latitude,
+			session->gNMEAdata.longitude, 
+			session->gNMEAdata.altitude);
+		write(session->dsock, buf, strlen(buf));
+		gpsd_report(2, "=> dgps %s", buf);
 	    }
 	}
     }

@@ -350,34 +350,27 @@ static void DrawSingleNumber(TachometerWidget w, int which, Cardinal x, Cardinal
      XSegment        segments[7];
      Cardinal        nsegments, width, height;
      unsigned char   count;
-     GC 	gc;
      
      width = (w->core.width / 2) - w->tachometer.internal_border;
      height = (w->core.height / 2) - w->tachometer.internal_border;
      if ((width <= 0) || (height <= 0))
 	  return;
 
-     gc = w->tachometer.scale_GC;
-     
-     for (count = 0, nsegments = 0; count < 7; count++) {
+     for (count = 0, nsegments = 0; count < 7; count++)
 	  if (num_segment[which].digit[count] == 1) {
 	       segments[nsegments].x1 = (short)
-		    (x + ((double) offset[count].x1 *
-			  ((double) width / 200.0)));
+		    (x + ((double)offset[count].x1 * ((double)width / 200.0)));
 	       segments[nsegments].y1 = (short)
-		    (y + ((double) offset[count].y1 *
-			  ((double) height / 200.0)));
+		    (y + ((double)offset[count].y1 * ((double)height / 200.0)));
 	       segments[nsegments].x2 = (short)
-		    (x + ((double) offset[count].x2 *
-			  ((double) width / 200.0)));
+		    (x + ((double)offset[count].x2 * ((double)width / 200.0)));
 	       segments[nsegments].y2 = (short)
-		    (y + ((double) offset[count].y2 *
-			  ((double) height / 200.0)));
+		    (y + ((double)offset[count].y2 * ((double)height / 200.0)));
 	       nsegments++;
 	  }
-     }
 
-     XDrawSegments(XtDisplay(w), XtWindow(w), gc, segments, nsegments);
+     XDrawSegments(XtDisplay(w), XtWindow(w), 
+		   w->tachometer.scale_GC, segments, nsegments);
 }
 
 static void DrawLabelString(TachometerWidget w)
@@ -392,8 +385,7 @@ static void DrawLabelString(TachometerWidget w)
 
      gc = w->tachometer.scale_GC;
 
-     center_x = w->core.width / 2;
-     center_y = w->core.height / 2;
+     center_x = w->core.width / 2; center_y = w->core.height / 2;
      radius_x = center_x - w->tachometer.internal_border;
      radius_y = center_y - w->tachometer.internal_border;
      
@@ -424,13 +416,12 @@ static void MoveNeedle(TachometerWidget w, int new)
      old = w->tachometer.value;
      if (new > 100)
 	  new = 100;
-     
      if (old == new)
 	  return;
      else if (old < new)
 	  step = (w->tachometer.speed ? w->tachometer.speed : new - old);
      else
-	  step = (w->tachometer.speed ? - w->tachometer.speed : new - old);
+	  step = (w->tachometer.speed ? -w->tachometer.speed : new - old);
 
      if (old < new) {
 	  for (loop = old; loop < new; loop += step)
@@ -510,7 +501,6 @@ static void Initialize(Widget request, Widget new)
     ta->tachometer.width = ta->tachometer.height = 0;
 } /* Initialize */
 
-
 static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
 {
     *valueMask |= CWBitGravity;
@@ -549,14 +539,10 @@ static void Resize(Widget w)
      ta->tachometer.height = ta->core.height;
 }
 
-/*
- * Set specified arguments into widget
- */
-
 static Boolean SetValues(Widget current, Widget request, Widget new)
+/* Set specified arguments into widget */
 {
-     Boolean back;
-     Boolean changed = False;
+    Boolean back, changed = False;
      
      TachometerWidget curta = (TachometerWidget) current;
      TachometerWidget newta = (TachometerWidget) new;
