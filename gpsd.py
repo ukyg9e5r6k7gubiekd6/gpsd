@@ -242,7 +242,7 @@ class gpsd(gps.gpsdata):
             self.initializer = initializer
             self.rtcm = rtcm
             self.wrap = wrapup
-    def __init__(self, device="/dev/gps", dgps=None, logger=None):
+    def __init__(self, device="/dev/gps", logger=None):
         self.ttyfd = -1
         self.device = device
         self.bps = 0
@@ -253,13 +253,7 @@ class gpsd(gps.gpsdata):
         self.logger = logger
         self.dsock = -1
         self.fixcnt = 0
-        self.sentdgps = 0
         gps.gpsdata.__init__(self)
-        if dgps:
-            dgpsport = "2101"
-            if ":" in dgps:
-                (dgps, dgpsport) = dgps(":")
-            self.dsock = gps.gps.connect(self, dgps, dgpsport)
         self.raw_hook = None
 
     def __del__(self):
@@ -367,15 +361,6 @@ class gpsd(gps.gpsdata):
             # count the good fixes
             if self.status > gps.STATUS_NO_FIX: 
 	    	self.fixcnt += 1;
-
-            # may be time to ship a DGPS correction to the GPS
-            if self.fixcnt > 10:
-                if not self.sentdgps:
-                    self.sentdgps += 1;
-                    if self.dsock > -1:
-                        self.dsock.send(self.dsock, \
-                              "R %0.8f %0.8f %0.2f\r\n" % \
-                              (self.fix.latitude, self.fix.longitude, self.altitude))
 	return self.valid;
 
 # SirF-II control code

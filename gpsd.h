@@ -176,7 +176,8 @@ extern int ntpshm_init(struct gps_device_t *);
 extern int ntpshm_put(struct gps_device_t *, double);
 
 /* External interface */
-extern struct gps_device_t * gpsd_init(char *);
+extern int gpsd_open_dgps(char *);
+extern struct gps_device_t * gpsd_init(void);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern int gpsd_poll(struct gps_device_t *);

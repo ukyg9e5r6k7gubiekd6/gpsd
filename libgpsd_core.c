@@ -17,6 +17,28 @@
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
+int gpsd_open_dgps(char *dgpsserver)
+{
+    char hn[256], buf[BUFSIZ];
+    char *colon, *dgpsport = "rtcm-sc104";
+    int dsock;
+
+    if ((colon = strchr(dgpsserver, ':'))) {
+	dgpsport = colon+1;
+	*colon = '\0';
+    }
+    if (!getservbyname(dgpsport, "tcp"))
+	dgpsport = "2101";
+
+    dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
+    if (dsock >= 0) {
+	gethostname(hn, sizeof(hn));
+	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
+	write(dsock, buf, strlen(buf));
+    }
+    return dsock;
+}
+
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
@@ -32,7 +54,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     return 0;
 }
 
-struct gps_device_t *gpsd_init(char *dgpsserver)
+struct gps_device_t *gpsd_init(void)
 /* initialize GPS polling */
 {
     struct gps_device_t *session = (struct gps_device_t *)calloc(sizeof(struct gps_device_t), 1);
@@ -42,26 +64,6 @@ struct gps_device_t *gpsd_init(char *dgpsserver)
     session->gpsd_device = DEFAULT_DEVICE_NAME;
     session->device_type = gpsd_drivers[0];
     session->dsock = -1;
-    if (dgpsserver) {
-	char hn[256], buf[BUFSIZ];
-	char *colon, *dgpsport = "rtcm-sc104";
-
-	if ((colon = strchr(dgpsserver, ':'))) {
-	    dgpsport = colon+1;
-	    *colon = '\0';
-	}
-	if (!getservbyname(dgpsport, "tcp"))
-	    dgpsport = "2101";
-
-	session->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
-	if (session->dsock < 0)
-	    gpsd_report(1, "Can't connect to dgps server, netlib error %d\n", session->dsock);
-	else {
-	    gethostname(hn, sizeof(hn));
-	    sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-	    write(session->dsock, buf, strlen(buf));
-	}
-    }
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;

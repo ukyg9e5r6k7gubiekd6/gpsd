@@ -540,7 +540,7 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
-    static int st, changed, nowait = 0, gpsd_speed = 0;
+    static int st, dsock = -1, changed, nowait = 0;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *device_name = DEFAULT_DEVICE_NAME;
@@ -626,16 +626,22 @@ int main(int argc, char *argv[])
     }
     gpsd_report(1, "listening on port %s\n", service);
 
+    if (dgpsserver) {
+	dsock = gpsd_open_dgps(dgpsserver);
+	if (dsock >= 0)
+	    FD_SET(dsock, &all_fds);
+	else
+	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
+    }
+
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
 
-    device = gpsd_init(dgpsserver);
-    if (gpsd_speed)
-	device->gpsdata.baudrate = gpsd_speed;
+    device = gpsd_init();
     device->gpsd_device = strdup(device_name);
     device->gpsdata.raw_hook = raw_hook;
-    if (device->dsock >= 0)
-	FD_SET(device->dsock, &all_fds);
+    if (dsock >= 0)
+	device->dsock = dsock;
     if (nowait) {
 	if (gpsd_activate(device) < 0) {
 	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
