@@ -137,7 +137,7 @@ static void build_gui(Widget lxbApp)
     n++;
     XtSetValues(lxbApp, args, n);
 
-#define LEFTSIDE_WIDTH	180
+#define LEFTSIDE_WIDTH	190
     /* the data panel */
     n = 0;
     XtSetArg(args[n], XmNrubberPositioning, False);
@@ -157,7 +157,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[6], XmNheight, FRAMEHEIGHT);
-    XtSetArg(args[7], XmNcolumns, 23);
+    XtSetArg(args[7], XmNwidth, LEFTSIDE_WIDTH);
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
     XtSetArg(args[10], XmNlistSpacing, 4);
@@ -349,11 +349,12 @@ static void update_panel(char *message)
 	    *sp = '\0';
     XmTextFieldSetString(status, message);
 
+    string[0] = XmStringCreateSimple("PRN:  Elev:  Azim:  SNR:  Used:");
     /* This is for the satellite status display */
     if (SEEN(gpsdata->satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < gpsdata->satellites) {
-		sprintf(s, "%2d %02d %03d %02d %c", 
+		sprintf(s, " %2d    %02d    %03d    %02d      %c", 
 			gpsdata->PRN[i],
 			gpsdata->elevation[i],
 			gpsdata->azimuth[i], 
@@ -362,7 +363,7 @@ static void update_panel(char *message)
 		    );
 	    } else
 		sprintf(s, "                  ");
-	    string[i] = XmStringCreateSimple(s);
+	    string[i+1] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
 	for (i = 0; i < MAXCHANNELS; i++)
