@@ -507,6 +507,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 int nmea_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
+    unsigned int status;
     char buf[BUFSIZ];
     va_list ap;
 
@@ -515,5 +516,12 @@ int nmea_send(int fd, const char *fmt, ... )
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf+1);
-    return write(fd, buf, strlen(buf));
+    status = write(fd, buf, strlen(buf));
+    if (status == strlen(buf)) {
+	gpsd_report(2, "=> GPS: %s\n", buf);
+	return 0;
+    } else {
+	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
+	return -1;
+    }
 }
