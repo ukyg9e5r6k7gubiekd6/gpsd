@@ -58,11 +58,18 @@ and speedometer</refpurpose>
 <refsect2 id='gpsd'><title>gpsd</title>
 
 <para><application>gpsd</application> is a monitor daemon that watches
-a TCP/IP port (2947 by default), waiting for an application to request
+a TCP/IP port (2947 by default), waiting for applications to request
 location information from a GPS.  The GPS is expected to be
 direct-connected to the machine running
 <application>gpsd</application> via a USB or RS232C serial port which
 is specified to gpsd at startup.</para>
+
+<para><application>gpsd</application> should be able to query any GPS
+that speaks either the standard textual NMEA 0183 protocol, or the
+binary Rockwell protocol used by EarthMate and some other
+GPSes, or the Garmin binary protocol used by the USB version of the
+Garmin 18 and other Garmin USB GPSes. <application>gpsd</application>
+effectively hides the differences among these.</para>
 
 <para>Optionally, <application>gpsd</application> may get
 differential-GPS corrections from a ground station running a RTCM-S104
@@ -165,11 +172,6 @@ incoming sentence and actions to standard error.</para>
 </listitem>
 </varlistentry>
 </variablelist>
-
-<para><application>gpsd</application> should be able to query any GPS
-that speaks either the standard textual NMEA 0183 protocol or the
-binary Rockwell protocol used by EarthMate and some other
-GPSes.</para>
 
 <para>The request protocol for gpsd clients is very simple.  Each
 request consists of a single ASCII character followed by a newline.
