@@ -341,6 +341,13 @@ static int assign_channel(struct subscriber_t *user)
 	    return 0;
 	else {
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
+	    if (user->watcher) {
+		write(user-subscribers, "F=", 2);
+		write(user-subscribers, 
+		      user->device->gpsdata.gps_device,
+		      strlen(user->device->gpsdata.gps_device));
+		write(user-subscribers, "\r\n\0", 3);
+	    }
 	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
 	}
     }
@@ -605,8 +612,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		assign_channel(whoami);
 		subscribers[cfd].watcher = 1;
+		assign_channel(whoami);
 		sprintf(phrase, ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
@@ -617,8 +624,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 		subscribers[cfd].watcher = 0;
 		sprintf(phrase, ",W=0");
 	    } else {
-		assign_channel(whoami);
 		subscribers[cfd].watcher = 1;
+		assign_channel(whoami);
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		sprintf(phrase, ",W=1");
 	    }

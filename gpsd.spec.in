@@ -104,7 +104,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %changelog
 * Thu Mar 31 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Add tag and timestamp to Y response.  Use computed geoid separation as 
-  SiRF packet 42 is flaky.  
+  SiRF packet 42 is flaky.  Security fix: hotplug scripts now do device
+  add/removes through a separate local control channel.  True multi-device
+  support is in place.  When in watcher mode, device switches are announced.
 
 * Thu Mar 31 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.20-1
 - Rob Janssen's patches to fix timezone issues and improve cooperation
