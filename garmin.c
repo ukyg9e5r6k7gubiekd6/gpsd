@@ -334,6 +334,10 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, session->gpsdata.status);
 
 	    gpsd_report(3, "UTC Time: %lf\n", session->gpsdata.fix.time);
+	    gpsd_report(3, "Geoid: from garmin %lf, calculated %lf\n"
+		, pvt->msl_hght
+		, wgs84_separation(session->gpsdata.fix.latitude
+			, session->gpsdata.fix.longitude));
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"
 			, pvt->alt
 			, pvt->epe

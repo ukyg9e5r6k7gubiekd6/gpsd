@@ -21,7 +21,9 @@ static double bilinear(double x1, double y1, double x2, double y2, double x, dou
  return (z22*(y-y1)*(x-x1)+z12*(y2-y)*(x-x1)+z21*(y-y1)*(x2-x)+z11*(y2-y)*(x2-x))/delta;
 }
 
-static double wgs84_separation(double lat, double lon)
+
+/* return wgs84 to MSL geoid separtion in meters, given a lat/lot */
+double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
 #define GEOID_COL	37
