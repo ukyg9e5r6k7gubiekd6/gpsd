@@ -72,18 +72,47 @@ aligned with NMEA 0183 version 2.30".
 Here are the NMEA-standard sentences.  The names are listed without the
 "talker ID", a two-character prefix that identifies the type of the 
 transmitting unit.  By far the most common talker ID is "GP",
-identifying a generic GPS, but all of the following (according to [NMEAFAQ])
+identifying a generic GPS, but all of the following
 are well known:
 
-                GP      Global Positioning System receiver
-                LC      Loran-C receiver
-                II      Integrated Instrumentation
+		GP      Global Positioning System receiver
+		LC      Loran-C receiver
+		II      Integrated Instrumentation
+		IN	Integrated Nvigation
+		EC      Electronic Chart Display & Information System (ECDIS)
+		CD	Digital Selective Calling (DSC)
 
-II is emitted by the NMEA interface of a widely-used line of
-marine-navigation electronics called the AutoHelm Seatalk system; see
-also [SEATALK]. Until the U.S. Coast Guard terminated the Omega
-Navigation System in 1997, another common talker prefix was "OM" for
-an Omega Navigation System receiver.
+LC - LORAN-C is a marine navigation system run by the U.S. government,
+which is planning to shut it down in favor of GPS.  Some non-LORAN
+devices emit GLL but use this talker ID for backward-compatibility
+reasons, so it may outlast the actual LORAN system.
+
+II - II is emitted by the NMEA interface of a widely-used line of
+marine-navigation electronics called the AutoHelm Seatalk system, made
+by Raytheon; see also [SEATALK]. 
+
+IN -- Some Garmin GPS units use an IN talker ID.
+
+EC -- ECDIS is a specialized geographical information system intended
+to support professional maritime navigation.  NMEA talker units
+meeting the ECDIS standard use this prefix.  Some of these emit GLL.
+
+CD -- Modern marine VHF radios have a set of logic collectively known as
+Digital Selective Calling (DSC).  These radios typically take data
+from a local position indicating device.  This data is used in
+conjunction with a unique (FCC assigned) ID to cause your radio to
+broadcast your position data to others.  Conversely, these radios are
+capable of recieving position data of other stations and emitting
+sentences indicating other station positions.  This lets you plot the
+position of other vessels on a chart, for instance.  There has been at
+least one instance of a DSC enabled radio overloading (mis-using) the
+LC talker prefix for this purpose.  Otherwise they use the CD prefix.
+A vessel's nav system is likely to have both CD and some other
+position indicating talker on its bus(es).
+
+Until the U.S. Coast Guard terminated the Omega Navigation System in
+1997, another common talker prefix was "OM" for an Omega Navigation
+System receiver.
 
 Here is a more complete list of talker ID prefixes.  Most are not
 relevant to GPS systems.
