@@ -362,7 +362,7 @@ int packet_get(struct gps_session_t *session, int waiting)
     if (waiting > room)
 	waiting = room;
 
-    newdata = read(session->gNMEAdata.gps_fd, session->inbufptr, waiting);
+    newdata = read(session->gpsdata.gps_fd, session->inbufptr, waiting);
 #else
     newdata = waiting;
 #endif /* TESTMAIN */
@@ -485,7 +485,7 @@ int packet_sniff(struct gps_session_t *session)
     gpsd_report(5, "packet_sniff begins\n");
     for (n = 0; n < SNIFF_RETRIES; n += count) {
 	count = 0;
-	if (ioctl(session->gNMEAdata.gps_fd, FIONREAD, &count) < 0)
+	if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) < 0)
 	    return BAD_PACKET;
 	if (count && packet_get(session, count)) {
 	    /* push back the last packet grabbed */

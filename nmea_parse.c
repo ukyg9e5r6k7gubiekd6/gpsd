@@ -48,8 +48,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[1];
 	if (*p == 'S')
 	    lat = -lat;
-	if (out->latitude != lat)
-	    out->latitude = lat;
+	if (out->fix.latitude != lat)
+	    out->fix.latitude = lat;
 	updated++;
     }
     if (*(p = field[2]) != '\0') {
@@ -61,8 +61,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[3];
 	if (*p == 'W')
 	    lon = -lon;
-	if (out->longitude != lon)
-	    out->longitude = lon;
+	if (out->fix.longitude != lon)
+	    out->fix.longitude = lon;
 	updated++;
     }
 }
@@ -189,13 +189,13 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
-	    out->gps_time = iso8661_to_unix(out->utc);
+	    out->fix.time = iso8661_to_unix(out->utc);
 	}
 	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
-	out->speed = atof(field[7]);
-	out->track = atof(field[8]);
+	out->fix.speed = atof(field[7]);
+	out->fix.track = atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -211,12 +211,12 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    out->status = STATUS_FIX;
 	    mask |= STATUS_SET;
 	}
-	if (!(out->seen_sentences & GPGSA && out->mode <= MODE_NO_FIX)) {
+	if (!(out->seen_sentences & GPGSA && out->fix.mode <= MODE_NO_FIX)) {
 	    /* Upgrade to MODE_2D
 	     * Do not touch otherwise, may be MODE_3D or
 	     * MODE_3D, cannot tell apart here
 	     */
-	    out->mode = MODE_2D;
+	    out->fix.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
     }
@@ -259,7 +259,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
-	out->gps_time = iso8661_to_unix(out->utc);
+	out->fix.time = iso8661_to_unix(out->utc);
 	mask |= TIME_SET;
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -299,13 +299,13 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
     mask |= STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
-	char	*altitude;
-	double oldfixtime = out->gps_time;
+	char *altitude;
+	double oldfixtime = out->fix.time;
 
 #ifndef WHOLE_CYCLE
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[1], out);
-	out->gps_time = iso8661_to_unix(out->utc);
+	out->fix.time = iso8661_to_unix(out->utc);
 	mask |= TIME_SET;
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;
@@ -313,19 +313,19 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 #endif /* WHOLE_CYCLE */
 	altitude = field[9];
 	/*
-	 * SiRF chipsets up to version 2.2 report a null altitude field.
+	 * SiRF chipsets up to version 2.2 report a null ->fix.altitude field.
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */
 	if (!altitude[0]) {
-	    if (out->mode == MODE_3D) {
-		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
+	    if (out->fix.mode == MODE_3D) {
+		out->fix.mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		mask |= MODE_SET;
 	    }
 	} else {
-	    double oldaltitude = out->altitude;
+	    double oldaltitude = out->fix.altitude;
 
-	    out->altitude = atof(altitude);
+	    out->fix.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
 
 	    /*
@@ -335,9 +335,9 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	     * going on.
 	     */
 	    if (oldaltitude == ALTITUDE_NOT_VALID)
-		out->climb = 0;
+		out->fix.climb = 0;
 	    else {
-		out->climb = (out->altitude-oldaltitude)/(out->gps_time-oldfixtime);
+		out->fix.climb = (out->fix.altitude-oldaltitude)/(out->fix.time-oldfixtime);
 	    }
 	    mask |= CLIMB_SET;
 	}
@@ -362,9 +362,9 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
      */
     int i, mask = 0;
     
-    out->mode = atoi(field[2]);
+    out->fix.mode = atoi(field[2]);
     mask |= MODE_SET;
-    gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
+    gpsd_report(3, "GPGSA sets mode %d\n", out->fix.mode);
     out->pdop = atof(field[15]);
     out->hdop = atof(field[16]);
     out->vdop = atof(field[17]);
@@ -378,7 +378,6 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
            out->satellites_used++;
        }
     }
-    REFRESH(out->fix_quality_stamp);
     mask |= DOP_SET;
 
     return mask;
@@ -435,7 +434,6 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     return 0;
   sane:
     gpsd_report(3, "Satellite data OK.\n");
-    REFRESH(out->satellite_stamp);
     return SATELLITE_SET;
     }
 
@@ -454,10 +452,9 @@ static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
      * Garmin won't say, but the general belief is that these are 1-sigma.
      * See <http://gpsinformation.net/main/epenew.txt>.
      */
-    out->eph = atof(field[1]);
-    out->epv = atof(field[3]);
+    out->fix.eph = atof(field[1]);
+    out->fix.epv = atof(field[3]);
     out->epe = atof(field[5]);
-    REFRESH(out->epe_quality_stamp);
     return POSERR_SET;
 }
 

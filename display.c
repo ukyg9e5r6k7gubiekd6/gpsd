@@ -71,7 +71,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
     int i, x, y;
     char buf[20];
 
-    if (SEEN(gpsdata->satellite_stamp)) {
+    if (gpsdata->satellites) {
 	i = min(width, height);
 
 	set_color("White");

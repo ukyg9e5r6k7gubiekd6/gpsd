@@ -92,7 +92,7 @@ struct gps_type_t {
 
 struct gps_session_t {
 /* session object, encapsulates all global state */
-    struct gps_data_t gNMEAdata;
+    struct gps_data_t gpsdata;
     struct gps_type_t *device_type;
     char *gpsd_device;	/* where to find the GPS */
     int dsock;		/* socket to DGPS server */

@@ -57,22 +57,22 @@ int gpsd_set_speed(struct gps_session_t *session,
     else
       rate =  B57600;
 
-    tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* toss stale data */
-    if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gNMEAdata.stopbits) {
+    tcflush(session->gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
+    if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
 	session->ttyset.c_cflag &=~ CSIZE;
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
+	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return 0;
-	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
+	tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
 
     if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
 	return 0;
 
-    session->gNMEAdata.stopbits = stopbits;
-    session->gNMEAdata.baudrate = speed;
+    session->gpsdata.stopbits = stopbits;
+    session->gpsdata.baudrate = speed;
 
     return 1;
 }
@@ -85,13 +85,13 @@ int gpsd_open(struct gps_session_t *session)
     static unsigned int rates[] = {4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
-    if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY)) < 0) {
+    if ((session->gpsdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY)) < 0) {
 	gpsd_report(1, "device open failed: %s\n", strerror(errno));
 	return -1;
     }
 
     session->packet_type = BAD_PACKET;
-    if (isatty(session->gNMEAdata.gps_fd)) {
+    if (isatty(session->gpsdata.gps_fd)) {
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
@@ -99,13 +99,13 @@ int gpsd_open(struct gps_session_t *session)
 	    if ((*dp)->probe && (*dp)->probe(session)) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
-		return session->gNMEAdata.gps_fd;
+		return session->gpsdata.gps_fd;
 	    }
 	gpsd_report(3, "no probe matched...\n");
 #endif /* NON_NMEA_ENABLE */
 
 	/* Save original terminal parameters */
-	if (tcgetattr(session->gNMEAdata.gps_fd,&session->ttyset_old) != 0)
+	if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0)
 	  return -1;
 	memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
 	/*
@@ -118,40 +118,40 @@ int gpsd_open(struct gps_session_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
-	if (session->gNMEAdata.baudrate) {
+	if (session->gpsdata.baudrate) {
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
-			session->gNMEAdata.baudrate, 
-			session->gNMEAdata.stopbits);
-	    if (gpsd_set_speed(session, session->gNMEAdata.baudrate, session->gNMEAdata.stopbits)) {
-		return session->gNMEAdata.gps_fd;
+			session->gpsdata.baudrate, 
+			session->gpsdata.stopbits);
+	    if (gpsd_set_speed(session, session->gpsdata.baudrate, session->gpsdata.stopbits)) {
+		return session->gpsdata.gps_fd;
 	    }
 	}
 	for (stopbits = 1; stopbits <= 2; stopbits++)
 	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-		if (*ip != session->gNMEAdata.baudrate || stopbits != session->gNMEAdata.stopbits) {
+		if (*ip != session->gpsdata.baudrate || stopbits != session->gpsdata.stopbits) {
 		    gpsd_report(1, 
 				"hunting at speed %d, %dN%d\n",
 				*ip, 9-stopbits, stopbits);
 		    if (gpsd_set_speed(session, *ip, stopbits))
-			return session->gNMEAdata.gps_fd;
+			return session->gpsdata.gps_fd;
 		}
-	session->gNMEAdata.gps_fd = -1;
+	session->gpsdata.gps_fd = -1;
     }
-    return session->gNMEAdata.gps_fd;
+    return session->gpsdata.gps_fd;
 }
 
 void gpsd_close(struct gps_session_t *session)
 {
-    if (session->gNMEAdata.gps_fd != -1) {
-	if (isatty(session->gNMEAdata.gps_fd)) {
+    if (session->gpsdata.gps_fd != -1) {
+	if (isatty(session->gpsdata.gps_fd)) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
 	    cfsetispeed(&session->ttyset, (speed_t)B0);
 	    cfsetospeed(&session->ttyset, (speed_t)B0);
-	    tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset);
+	    tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
 	}
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;
-	tcsetattr(session->gNMEAdata.gps_fd,TCSANOW,&session->ttyset_old);
-	close(session->gNMEAdata.gps_fd);
+	tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
+	close(session->gpsdata.gps_fd);
     }
 }

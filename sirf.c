@@ -101,10 +101,10 @@ static int sirf_to_nmea(int ttyfd, int speed)
  * Handle the SiRF-II binary packet format.
  * 
  * SiRF message 2 (Measure Navigation Data Out) gives us everything we want
- * except PDOP, VDOP, and altitude with respect to MSL.  SiRF message 41
- * (Geodetic Navigation Information) adds MSL altitude, but many of its
+ * except PDOP, VDOP, and ->fix.altitude with respect to MSL.  SiRF message 41
+ * (Geodetic Navigation Information) adds MSL ->fix.altitude, but many of its
  * other fields are garbage in firmware versions before 232.  So...we
- * use all the data from message 2 *except* altitude, which we get from 
+ * use all the data from message 2 *except* ->fix.altitude, which we get from 
  * message 41.
  */
 
@@ -150,11 +150,11 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
     session->hours = when.tm_hour;
     session->minutes = when.tm_min;
     session->seconds = fixtime - (intfixtime / 60) * 60;
-    strftime(session->gNMEAdata.utc, sizeof(session->gNMEAdata.utc),
+    strftime(session->gpsdata.utc, sizeof(session->gpsdata.utc),
 	     "%Y-%m-%dT%H:%M:", &when);
-    sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
+    sprintf(session->gpsdata.utc+strlen(session->gpsdata.utc),
 	    "%02.3f", session->seconds);
-    session->gNMEAdata.gps_time = fixtime;
+    session->gpsdata.fix.time = fixtime;
 #ifdef NTPSHM_ENABLE
     ntpshm_put(session, fixtime);
 #endif /* defined(SHM_H) && defined(IPC_H) */
@@ -164,8 +164,8 @@ static void sirfbin_mode(struct gps_session_t *session, int mode)
 {
     if (mode == 0) {
 	gpsd_switch_driver(session, "SiRF-II NMEA");
-	sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
-	session->gNMEAdata.driver_mode = 0;
+	sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
+	session->gpsdata.driver_mode = 0;
     }
 }
 
@@ -209,52 +209,51 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
 	    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
 	    h = p / cos(phi) - n;
-	    session->gNMEAdata.latitude = phi * RAD_2_DEG;
-	    session->gNMEAdata.longitude = lambda * RAD_2_DEG;
-	    if (session->gNMEAdata.mode == MODE_3D) {
+	    session->gpsdata.fix.latitude = phi * RAD_2_DEG;
+	    session->gpsdata.fix.longitude = lambda * RAD_2_DEG;
+	    if (session->gpsdata.fix.mode == MODE_3D) {
 		if (session->driverstate & SIRF_SEEN_41) {
-		    /* recompute geodetic sep. from the *last* altitude fix */
-		    session->separation = session->gNMEAdata.altitude - h;
+		    /* recompute geodetic sep. from the *last* ->fix.altitude fix */
+		    session->separation = session->gpsdata.fix.altitude - h;
 		    /* use it to correct this one so updates will be atomic */
-		    session->gNMEAdata.altitude = h + session->separation;
+		    session->gpsdata.fix.altitude = h + session->separation;
 		    mask |= ALTITUDE_SET;
 		}
 	    }
 	    /* velocity computation */
 	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
 	    veast = -vx*sin(lambda)+vy*cos(lambda);
-	    session->gNMEAdata.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-	    session->gNMEAdata.speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
+	    session->gpsdata.fix.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
+	    session->gpsdata.fix.speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
 	    heading = atan2(veast,vnorth);
 	    if (heading < 0)
 		heading += 2 * PI;
-	    session->gNMEAdata.track = heading * RAD_2_DEG;
+	    session->gpsdata.fix.track = heading * RAD_2_DEG;
 	    /* fix status is byte 19 */
 	    navtype = getb(19);
-	    session->gNMEAdata.status = STATUS_NO_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if (navtype & 0x80)
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
+		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gNMEAdata.status = STATUS_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
+		session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gNMEAdata.mode = MODE_3D;
-	    else if (session->gNMEAdata.status)
-		session->gNMEAdata.mode = MODE_2D;
+		session->gpsdata.fix.mode = MODE_3D;
+	    else if (session->gpsdata.status)
+		session->gpsdata.fix.mode = MODE_2D;
 	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
+			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
 	    extract_time(session, getw(22), getl(24)*1e-2);
 	    gpsd_binary_fix_dump(session, buf2);
 	    /* fix quality data */
-	    session->gNMEAdata.hdop = getb(20)/5.0;
-	    session->gNMEAdata.satellites_used = getb(28);
+	    session->gpsdata.hdop = getb(20)/5.0;
+	    session->gpsdata.satellites_used = getb(28);
 	    for (i = 0; i < MAXCHANNELS; i++)
-		session->gNMEAdata.used[i] = getb(29+i);
-	    session->gNMEAdata.pdop = session->gNMEAdata.vdop = 0.0;
-	    REFRESH(session->gNMEAdata.fix_quality_stamp);
+		session->gpsdata.used[i] = getb(29+i);
+	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    return mask | TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
@@ -268,20 +267,20 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	 */
 	if (session->counter % 5)
 	    break;
-	gpsd_zero_satellites(&session->gNMEAdata);
+	gpsd_zero_satellites(&session->gpsdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
-	    session->gNMEAdata.PRN[st]       = getb(off);
-	    session->gNMEAdata.azimuth[st]   = (int)((getb(off+1)*3)/2.0);
-	    session->gNMEAdata.elevation[st] = (int)(getb(off+2)/2.0);
+	    session->gpsdata.PRN[st]       = getb(off);
+	    session->gpsdata.azimuth[st]   = (int)((getb(off+1)*3)/2.0);
+	    session->gpsdata.elevation[st] = (int)(getb(off+2)/2.0);
 	    cn = 0;
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
-	    session->gNMEAdata.ss[st] = cn/10;
-	    // session->gNMEAdata.used[st] = (getw(off+3) == 0xbf);
-	    good = session->gNMEAdata.PRN[st] && 
-		session->gNMEAdata.azimuth[st] && 
-		session->gNMEAdata.elevation[st];
+	    session->gpsdata.ss[st] = cn/10;
+	    // session->gpsdata.used[st] = (getw(off+3) == 0xbf);
+	    good = session->gpsdata.PRN[st] && 
+		session->gpsdata.azimuth[st] && 
+		session->gpsdata.elevation[st];
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
@@ -294,8 +293,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    if (good)
 		st += 1;
 	}
-	session->gNMEAdata.satellites = st;
-	REFRESH(session->gNMEAdata.satellite_stamp);
+	session->gpsdata.satellites = st;
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
@@ -373,23 +371,23 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * know what's broken in firmwares before 2.3.1..."
 	     *
 	     * To work around the incomplete implementation of this
-	     * packet in 231, we assume that only the altitude field
+	     * packet in 231, we assume that only the ->fix.altitude field
 	     * from this packet is valid.
 	     */
 	    navtype = getw(3);
-	    session->gNMEAdata.status = STATUS_NO_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if (navtype & 0x80)
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
+		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gNMEAdata.status = STATUS_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
+		session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gNMEAdata.mode = MODE_3D;
-	    else if (session->gNMEAdata.status)
-		session->gNMEAdata.mode = MODE_2D;
+		session->gpsdata.fix.mode = MODE_3D;
+	    else if (session->gpsdata.status)
+		session->gpsdata.fix.mode = MODE_2D;
 	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
+			navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 	    /*
 	     * Compute UTC from extended GPS time.  The protocol reference
 	     * claims this 16-bit field is "extended" GPS weeks, but I'm
@@ -397,7 +395,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     */
 	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
 	    extract_time(session, getw(5), getl(7)*1e-4);
-	    gpsd_report(5, "MID 41 UTC: %s\n", session->gNMEAdata.utc);
+	    gpsd_report(5, "MID 41 UTC: %s\n", session->gpsdata.utc);
 	    /*
 	     * Skip UTC, left all zeros in 231 and older firmware versions, 
 	     * and misdocumented in the Protocol Reference (version 1.4).
@@ -411,22 +409,22 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     *                11              8
 	     */
 	    /* skip 4 bytes of satellite map */
-	    session->gNMEAdata.latitude = getl(23)*1e-7;
-	    session->gNMEAdata.longitude = getl(27)*1e-7;
-	    /* skip 4 bytes of altitude from ellipsoid */
+	    session->gpsdata.fix.latitude = getl(23)*1e-7;
+	    session->gpsdata.fix.longitude = getl(27)*1e-7;
+	    /* skip 4 bytes of ->fix.altitude from ellipsoid */
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
-	if (session->gNMEAdata.mode == MODE_3D) {
-	    session->gNMEAdata.altitude = getl(31)*1e-2;
+	if (session->gpsdata.fix.mode == MODE_3D) {
+	    session->gpsdata.fix.altitude = getl(31)*1e-2;
 	    mask |= ALTITUDE_SET;
 	    session->driverstate |= SIRF_SEEN_41;
 	}
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
-	    session->gNMEAdata.speed = getw(36)*1e-2;
-	    session->gNMEAdata.track = getw(38)*1e-2;
+	    session->gpsdata.fix.speed = getw(36)*1e-2;
+	    session->gpsdata.fix.track = getw(38)*1e-2;
 	    /* skip 2 bytes of magnetic variation */
-	    session->gNMEAdata.climb = getw(42)*1e-2;
+	    session->gpsdata.fix.climb = getw(42)*1e-2;
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
@@ -464,11 +462,11 @@ static int sirfbin_parse_input(struct gps_session_t *session)
 
     if (session->packet_type == SIRF_PACKET){
 	st = sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
-	session->gNMEAdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;
 	return st;
     } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse(session->outbuffer, &session->gNMEAdata);
-	session->gNMEAdata.driver_mode = 0;
+	st = nmea_parse(session->outbuffer, &session->gpsdata);
+	session->gpsdata.driver_mode = 0;
 	return st;
     } else
 	return 0;
@@ -480,12 +478,12 @@ static void sirfbin_initializer(struct gps_session_t *session)
     if (session->packet_type == NMEA_PACKET) {
 	if (session->driverstate & SIRF_LT_231) {
 	    gpsd_report(1, "SiRF chipset has old firmware, falling back to  SiRF NMEA\n");
-	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
+	    nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
 	    gpsd_switch_driver(session, "SiRF-II NMEA");
 	    return;
 	} else {
 	    gpsd_report(1, "Switching chip mode to SiRF binary.\n");
-	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,0,%d,8,1,0", session->gNMEAdata.baudrate);
+	    nmea_send(session->gpsdata.gps_fd, "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
 	    packet_sniff(session);
 	}
     }
@@ -499,15 +497,15 @@ static void sirfbin_initializer(struct gps_session_t *session)
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
 	//gpsd_report(4, "Setting GSV rate to 0.2Hz...\n");
-	//sirf_write(session->gNMEAdata.gps_fd, ratecontrol);
+	//sirf_write(session->gpsdata.gps_fd, ratecontrol);
 	gpsd_report(4, "Probing for firmware version...\n");
-	sirf_write(session->gNMEAdata.gps_fd, versionprobe);
+	sirf_write(session->gpsdata.gps_fd, versionprobe);
     }
 }
 
 static int sirfbin_speed(struct gps_session_t *session, int speed)
 {
-    return sirf_speed(session->gNMEAdata.gps_fd, speed);
+    return sirf_speed(session->gpsdata.gps_fd, speed);
 }
 
 /* this is everything we export */

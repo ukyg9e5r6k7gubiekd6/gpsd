@@ -143,9 +143,9 @@ static void build_gui(Widget toplevel)
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
 
-    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_12 = XtCreateManagedWidget("->fix.latitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_13 = XtCreateManagedWidget("->fix.longitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_14 = XtCreateManagedWidget("->fix.altitude", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_17 = XtCreateManagedWidget("eph", xmRowColumnWidgetClass, left, args, 1);
@@ -251,7 +251,7 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     XmTextFieldSetString(status, message);
     string[0] = XmStringCreateSimple("PRN:   Elev:  Azim:  SNR:  Used:");
     /* This is for the satellite status display */
-    if (SEEN(gpsdata->satellite_stamp)) {
+    if (gpsdata->satellites) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < (unsigned int)gpsdata->satellites) {
 		sprintf(s, " %3d    %02d    %03d    %02d      %c", 
@@ -269,29 +269,29 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     }
     /* here are the value fields */
     XmTextFieldSetString(text_1, gpsdata->utc);
-    sprintf(s, "%f %c", fabsf(gpsdata->latitude), (gpsdata->latitude < 0) ? 'S' : 'N');
+    sprintf(s, "%f %c", fabsf(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f %c", fabsf(gpsdata->longitude), (gpsdata->longitude < 0) ? 'W' : 'E');
+    sprintf(s, "%f %c", fabsf(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f %s",gpsdata->altitude*altunits->factor, altunits->legend);
+    sprintf(s, "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f %s", gpsdata->speed*speedunits->factor, speedunits->legend);
+    sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
     XmTextFieldSetString(text_5, s);
-    sprintf(s, "%f degrees", gpsdata->track);
+    sprintf(s, "%f degrees", gpsdata->fix.track);
     XmTextFieldSetString(text_6, s);
-    sprintf(s, "%f %s", gpsdata->eph * altunits->factor, altunits->legend);
+    sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_7, s);
-    sprintf(s, "%f %s", gpsdata->epv * altunits->factor, altunits->legend);
+    sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_8, s);
-    sprintf(s, "%f %s/sec", gpsdata->climb * altunits->factor, altunits->legend);
+    sprintf(s, "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
     XmTextFieldSetString(text_9, s);
 
     if (!gpsdata->online) {
 	newstate = 0;
 	sprintf(s, "OFFLINE");
     } else {
-	newstate = gpsdata->mode;
-	switch (gpsdata->mode) {
+	newstate = gpsdata->fix.mode;
+	switch (gpsdata->fix.mode) {
 	case 2:
 	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
@@ -360,7 +360,7 @@ speedunits_ok:;
 	if (strcmp(altunits->legend, au) == 0)
 	    goto altunits_ok;
     altunits = alttable;
-    fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
+    fprintf(stderr, "xgps: unknown ->fix.altitude unit, defaulting to %s\n", altunits->legend);
 altunits_ok:;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {

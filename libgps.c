@@ -26,10 +26,10 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	return NULL;
     }
 
-    gpsdata->mode = MODE_NOT_SEEN;
+    gpsdata->fix.mode = MODE_NOT_SEEN;
     gpsdata->status = STATUS_NO_FIX;
-    gpsdata->track = TRACK_NOT_VALID;
-    gpsdata->altitude = ALTITUDE_NOT_VALID;
+    gpsdata->fix.track = TRACK_NOT_VALID;
+    gpsdata->fix.altitude = ALTITUDE_NOT_VALID;
     return gpsdata;
 }
 
@@ -56,8 +56,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
     char *ns, *sp, *tp;
-    double d1, d2, d3;
-    int i1, i2, changed = 0;
+    int changed = 0;
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (!strncmp(ns, "GPSD", 4)) {
@@ -72,10 +71,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 		switch (*sp) {
 		case 'A':
-		    sscanf(sp, "A=%lf", &gpsdata->altitude);
+		    sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
+		    changed |= ALTITUDE_SET;
 		    break;
 		case 'B':
-		    sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
+		    sscanf(sp, "B=%d %*d %*s %d", 
+			   &gpsdata->baudrate, &gpsdata->stopbits);
 		    break;
 		case 'C':
 		    sscanf(sp, "C=%d", &gpsdata->cycle);
@@ -84,58 +85,56 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    strcpy(gpsdata->utc, sp+2);
 		    break;
 		case 'E':
-		    sscanf(sp, "E=%lf %lf %lf", &d1, &d2, &d3);
-		    gpsdata->fix_quality_stamp.changed = \
-			(gpsdata->epe != d1) || (gpsdata->eph != d2) || (gpsdata->epv != d3);
-		    gpsdata->epe = d1; gpsdata->eph = d2; gpsdata->epv = d3;
-		    REFRESH(gpsdata->epe_quality_stamp);
+		    sscanf(sp, "E=%lf %lf %lf", 
+			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
+		    changed |= POSERR_SET;
 		    break;
 		case 'I':
 		    if (gpsdata->gps_id)
 			free(gpsdata->gps_id);
 		    gpsdata->gps_id = strdup(sp+2);
 		case 'M':
-		    gpsdata->mode = atoi(sp+2);
+		    gpsdata->fix.mode = atoi(sp+2);
+		    changed |= MODE_SET;
 		    break;
 		case 'N':
 		    gpsdata->driver_mode = atoi(sp+2);
 		    break;
 		case 'P':
-		    sscanf(sp, "P=%lf %lf", &d1, &d2);
-		    gpsdata->latitude = d1; gpsdata->longitude = d2;
+		    sscanf(sp, "P=%lf %lf",
+			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
+		    changed |= LATLON_SET;
 		    break;
 		case 'Q':
-		    sscanf(sp, "Q=%d %lf %lf %lf", &i1, &d1, &d2, &d3);
-		    gpsdata->fix_quality_stamp.changed = \
-			(gpsdata->satellites_used != i1)
-			|| (gpsdata->pdop != d1)
-			|| (gpsdata->hdop != d2)
-			|| (gpsdata->vdop != d3);
-		    gpsdata->satellites_used = i1;
-		    gpsdata->pdop = d1; gpsdata->hdop = d2; gpsdata->vdop = d3;
-		    REFRESH(gpsdata->fix_quality_stamp);
+		    sscanf(sp, "Q=%d %lf %lf %lf",
+			   &gpsdata->satellites_used,
+			   &gpsdata->pdop, &gpsdata->hdop, &gpsdata->vdop);
+		    changed |= DOP_SET;
 		    break;
 		case 'S':
 		    gpsdata->status = atoi(sp+2);
+		    changed |= STATUS_SET;
 		    break;
 		case 'T':
-		    sscanf(sp, "T=%lf", &gpsdata->track);
-		   break;
+		    sscanf(sp, "T=%lf", &gpsdata->fix.track);
+		    changed |= TRACK_SET;
+		    break;
 		case 'U':
-		    sscanf(sp, "U=%lf", &gpsdata->climb);
+		    sscanf(sp, "U=%lf", &gpsdata->fix.climb);
+		    changed |= CLIMB_SET;
 		    break;
 		case 'V':
-		    sscanf(sp, "V=%lf", &gpsdata->speed);
+		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+		    changed |= SPEED_SET;
 		    break;
 		case 'X':
-		    sscanf(sp, "V=%lf", &gpsdata->speed);
+		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+		    changed |= ONLINE_SET;
 		    break;
 		case 'Y':
-		    i1 = atoi(sp+2);
-		    gpsdata->satellite_stamp.changed = (gpsdata->satellites != i1);
-		    gpsdata->satellites = i1;
+		    gpsdata->satellites = atoi(sp+2);
 		    if (gpsdata->satellites) {
-			int j, i3, i4, i5;
+			int j, i1, i2, i3, i4, i5;
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
@@ -150,6 +149,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    elevation[j] = i2; azimuth[j] = i3;
 			    ss[j] = i4; used[j] = i5;
 			}
+#ifdef __UNUSED__
 			/*
 			 * This won't catch the case where all values are identical
 			 * but rearranged.  We can live with that.
@@ -160,13 +160,14 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
 			    memcmp(gpsdata->ss, ss, sizeof(ss)) ||
 			    memcmp(gpsdata->used, used, sizeof(used));
+#endif /* UNUSED */
 			memcpy(gpsdata->PRN, PRN, sizeof(PRN));
 			memcpy(gpsdata->elevation, elevation, sizeof(elevation));
 			memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
 			memcpy(gpsdata->ss, ss, sizeof(ss));
 			memcpy(gpsdata->used, used, sizeof(used));
 		    }
-		    REFRESH(gpsdata->satellite_stamp);
+		    changed |= SATELLITE_SET;
 		    break;
 		case 'Z':
 		    sscanf(sp, "Z=%d", &gpsdata->profiling);
@@ -175,7 +176,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
-			   &gpsdata->gps_time, 
+			   &gpsdata->fix.time, 
 			   &gpsdata->d_xmit_time, 
 			   &gpsdata->d_recv_time, 
 			   &gpsdata->d_decode_time, 
@@ -185,10 +186,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		}
 	    }
 	}
-	changed |= gpsdata->fix_quality_stamp.changed 
-	|| gpsdata->epe_quality_stamp.changed 
-	|| gpsdata->satellite_stamp.changed 
-	;
     }
 
     if (gpsdata->raw_hook)
@@ -224,8 +221,8 @@ int gps_poll(struct gps_data_t *gpsdata)
     n = gps_unpack(buf, gpsdata);
     if (gpsdata->profiling)
     {
-	gpsdata->c_decode_time = received - gpsdata->gps_time;
-	gpsdata->c_recv_time = timestamp() - gpsdata->gps_time;
+	gpsdata->c_decode_time = received - gpsdata->fix.time;
+	gpsdata->c_recv_time = timestamp() - gpsdata->fix.time;
     }
     return n;
 }
@@ -250,41 +247,26 @@ void data_dump(struct gps_data_t *collect, time_t now)
 
     printf("online: %lf\n", collect->online);
     if (collect->status)
-	printf("P: lat/lon: %lf %lf", collect->latitude, collect->longitude);
-    if (collect->altitude_stamp.changed) {
-	printf("A: altitude: %lf  U: climb: %lf", 
-	       collect->altitude, collect->climb);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->altitude_stamp.last_refresh,
-	       collect->altitude_stamp.changed);
+	printf("P: lat/lon: %lf %lf", collect->fix.latitude, collect->fix.longitude);
+    if (collect->fix.altitude_stamp.changed) {
+	printf("A: ->fix.altitude: %lf  U: climb: %lf", 
+	       collect->fix.altitude, collect->climb);
     }
     if (collect->track_stamp.changed) {
 	printf("T: track: %lf  V: speed: %lf ", 
 	       collect->track, collect->speed);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->track_stamp.last_refresh,
-	       collect->track_stamp.changed);
     }
     if (collect->status_stamp.changed) {
 	printf("S: status: %d (%s) ", 
 	       collect->status,status_values[collect->status]);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->status_stamp.last_refresh,
-	       collect->status_stamp.changed);
     }
-    if (collect->mode_stamp.changed) {
-	printf("M: mode: %d (%s) ", collect->mode, mode_values[collect->mode]);
-	printf("(lr=%ld, changed=%d)",
-	       collect->mode_stamp.last_refresh,
-	       collect->mode_stamp.changed);
+    if (collect->fix.mode_stamp.changed) {
+	printf("M: mode: %d (%s) ", collect->fix.mode, mode_values[collect->fix.mode]);
     }
     if (collect->fix_quality_stamp.changed) {
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
 	      collect->satellites_used, 
 	      collect->pdop, collect->hdop, collect->vdop);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->fix_quality_stamp.last_refresh,
-	       collect->fix_quality_stamp.changed);
     }
     if (collect->satellite_stamp.changed) {
 	int i;

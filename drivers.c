@@ -21,7 +21,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
-	    st = nmea_parse(session->outbuffer, &session->gNMEAdata);
+	    st = nmea_parse(session->outbuffer, &session->gpsdata);
 	} else {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
@@ -30,7 +30,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
-		if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
+		if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gpsdata.gps_fd)) {
 		    gpsd_report(1, "found %s.\n", trigger);
 		    gpsd_switch_driver(session, (*dp)->typename);
 		    return 1;
@@ -49,15 +49,15 @@ static int nmea_parse_input(struct gps_session_t *session)
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
 {
-    return write(session->gNMEAdata.gps_fd, buf, rtcmbytes);
+    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
 }
 
 static void nmea_initializer(struct gps_session_t *session)
 {
     /* tell an FV18 to send GSAs so we'll know if 3D is accurate */
-    nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01,GSV05");
+    nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01,GSV05");
     /* probe for SiRF-II */
-    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,1");
+    nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
 }
 
 struct gps_type_t nmea = {
@@ -87,16 +87,16 @@ struct gps_type_t nmea = {
 #ifndef BINARY_ENABLE
 static void sirf_initializer(struct gps_session_t *session)
 {
-    /* nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0"); */
-    nmea_send(session->gNMEAdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
-    nmea_send(session->gNMEAdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
+    /* nmea_send(session->gpsdata.gps_fd, "$PSRF105,0"); */
+    nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
+    nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 }
 #endif /* BINARY_ENABLE */
 
 static int sirf_switcher(struct gps_session_t *session, int nmea, int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
-    if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
+    if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
 	return 0;
     return 1;
 }
@@ -112,9 +112,9 @@ static void sirf_mode(struct gps_session_t *session, int mode)
 {
     if (mode == 1) {
 	gpsd_switch_driver(session, "SiRF-II binary");
-	session->gNMEAdata.driver_mode = sirf_switcher(session, 0, session->gNMEAdata.baudrate);
+	session->gpsdata.driver_mode = sirf_switcher(session, 0, session->gpsdata.baudrate);
     } else
-	session->gNMEAdata.driver_mode = 0;
+	session->gpsdata.driver_mode = 0;
 }
 
 struct gps_type_t sirfII = {
@@ -156,9 +156,9 @@ struct gps_type_t sirfII = {
 static void tripmate_initializer(struct gps_session_t *session)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    nmea_send(session->gNMEAdata.gps_fd, "$IIGPQ,ASTRAL");
+    nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
     /* stop it sending PRWIZCH */
-    nmea_send(session->gNMEAdata.gps_fd, "$PRWIILOG,ZCH,V,,");
+    nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
 }
 
 struct gps_type_t tripmate = {
@@ -199,7 +199,7 @@ static void earthmate_close(struct gps_session_t *session)
 
 static void earthmate_initializer(struct gps_session_t *session)
 {
-    write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
+    write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
     sleep(30);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;

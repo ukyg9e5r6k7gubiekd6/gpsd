@@ -14,15 +14,54 @@ extern "C" {
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 #define MAXNAMELEN	6	/* maximum length of NMEA tag name */
 
-struct life_t {
-/* lifetime structure to be associated with some piece of data */
-    double	last_refresh;
-    int		changed;
-};
 static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL); return(tv.tv_sec + tv.tv_usec/1e6);}
 
-#define REFRESH(stamp)	stamp.last_refresh = timestamp()
-#define SEEN(stamp) stamp.last_refresh
+/* 
+ * The structure describing an uncertainty volume in kinematic space.
+ * This is what GPSes are meant to produce; all the other info is 
+ * technical impedimenta.
+ *
+ * Values of 0 for ep[thvdsc] mean the corresponding error estimate
+ * is not available.
+ *
+ * Usually all the information in this structure was considered valid
+ * by the GPS at the time of update.  This will be so if you are using
+ * a GPS chipset that speaks SiRF binary, Garmin binary, or Zodiac binary.
+ * This covers over 80% of GPS products in early 2005.
+ *
+ * If you are using a chipset that speaks NMEA, this structure is updated
+ * in bits by GPRMC (lat/lon, track, speed), GPGGA (alt, climb), GPGLL 
+ * (lat/lon), and GPGSA (eph, epv).  Most NMEA GPSes take a single fix
+ * at the beginning of a 1-second cycle and report the same timestamp in
+ * GPRMC, GPGGA, and GPGLL; for these, all info is guaranteed correctly
+ * synced to the time member, but you'll get different stages of the same 
+ * update depending on where in the cycle you poll.  A very few GPSes, 
+ * like the Garmin 48, take a new fix before each of GPRMC/GPGGA/GPGLL;
+ * thus, they may have different timestamps and some data in this structure
+ * can be up to 1 cycle (usually 1 second) older than the fix time.
+ */
+struct gps_fix_t {
+    double time;	/* Time of update, seconds since Unix epoch */
+    int    mode;	/* Mode of fix */
+#define MODE_NOT_SEEN	0	/* mode update not seen yet */
+#define MODE_NO_FIX	1	/* none */
+#define MODE_2D  	2	/* good for latitude/longitude */
+#define MODE_3D  	3	/* good for altitude/climb too */
+    // double ept;	/* Time uncertainty (1 sigma) */
+    double latitude;	/* Latitude in degrees (valid if mode >= 2) */
+    double longitude;	/* Longitude in degrees (valid if mode >= 2) */
+    double eph;  	/* Est. horizontal position error, 1 sigma (meters) */
+    double altitude;	/* Altitude in meters (valid if mode == 3) */
+#define ALTITUDE_NOT_VALID	-999
+    double epv;  	/* Est. vertical position error, 1 sigma (meters) */
+    double track;	/* Course made good (relative to true north) */
+#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
+    // double epd;	/* Course uncertainty (1 sigma) */
+    double speed;	/* Speed over ground, knots */
+    // double eps;	/* Speed uncertainty (1 sigma) */
+    double climb;       /* Vertical velocity, meters/sec */
+    // double epc;	/* Vertical velocity uncertainty (1 sigma) */
+};
 
 #define ONLINE_SET	0x0001
 #define TIME_SET	0x0002
@@ -52,51 +91,30 @@ struct gps_data_t {
 				 * prone to false negatives.
 				 */
 
-    /* status of fix, valid on every poll */
+    struct gps_fix_t	fix;
+    char utc[28];		/* UTC date/time, "yyy-mm-ddThh:mm:ss.sssZ" */
+
+    /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */
 #define STATUS_NO_FIX	0	/* no */
 #define STATUS_FIX	1	/* yes, without DGPS */
 #define STATUS_DGPS_FIX	2	/* yes, with DGPS */
-    int    mode;		/* Mode of fix */
-#define MODE_NOT_SEEN	0	/* mode update not seen yet */
-#define MODE_NO_FIX	1	/* none */
-#define MODE_2D  	2	/* good for latitude/longitude */
-#define MODE_3D  	3	/* good for altitude too */
 
-    double gps_time;		/* time of last fix, seconds since Unix epoch */
-    char utc[28];		/* UTC date/time as "yyy-mm-ddThh:mm:ss.sssZ" */
-
-    double latitude;		/* Latitude in degrees (valid if status > 0) */
-    double longitude;		/* Longitude in degrees (valid if status > 0) */
-    double altitude;		/* Altitude in meters (valid if status >= 2) */
-#define ALTITUDE_NOT_VALID	-999
-
-    /* velocity, valid if status >= 1 */
-    double speed;		/* Speed over ground, knots */
-    double track;		/* Course made good (relative to true north) */
-#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
-    double climb;               /* vertical velocity, meters/sec */
-
-    /* precision of fix */
+    /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* Used in last fix? */
     double pdop, hdop, vdop;	/* Dilution of precision */
-    struct life_t fix_quality_stamp;
 
-    /* precision of fix in real units */
-    double epe;  /* estimated position error, 2 sigma (meters)  */
-    double eph;  /* epe, but horizontal only (meters) */
-    double epv;  /* epe but vertical only (meters) */
-    struct life_t epe_quality_stamp;
+    /* redundant with the estimate elments in the fix structure */
+    double epe;  /* estimated spherical position error, 1 sigma (meters)  */
 
-    /* satellite status */
+    /* satellite status -- valid when satellites > 0 */
     int satellites;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
     int part, await;		/* for tracking GSV parts */
-    struct life_t satellite_stamp;
 
     /* what type gpsd thinks the device is */
     char	*gps_id;	/* only valid if non-null. */
@@ -114,7 +132,6 @@ struct gps_data_t {
     double emit_time;		/* emission time (-> E2) */
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
-    double future;		/* future expansion (avoid library skew) */
     unsigned int cycle;		/* refresh cycle time in seconds */
 
     /* these members are private */

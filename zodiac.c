@@ -63,9 +63,9 @@ static void zodiac_spew(struct gps_session_t *session, int type, unsigned short 
     h.ndata = dlen - 1;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
-    if (session->gNMEAdata.gps_fd != -1) {
-	end_write(session->gNMEAdata.gps_fd, &h, sizeof(h));
-	end_write(session->gNMEAdata.gps_fd, dat, sizeof(unsigned short) * dlen);
+    if (session->gpsdata.gps_fd != -1) {
+	end_write(session->gpsdata.gps_fd, &h, sizeof(h));
+	end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
     }
 }
 
@@ -133,20 +133,20 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-    sprintf(session->gNMEAdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
+    sprintf(session->gpsdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
 	    getw(19), getw(20), getw(21), getw(22), getw(23), getw(24));
 
 #if 0
-    gpsd_report(1, "date: %s\n", session->gNMEAdata.utc);
+    gpsd_report(1, "date: %s\n", session->gpsdata.utc);
     gpsd_report(1, "  solution invalid:\n");
-    gpsd_report(1, "    altitude: %d\n", (getw(10) & 1) ? 1 : 0);
+    gpsd_report(1, "    ->fix.altitude: %d\n", (getw(10) & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (getw(10) & 2) ? 1 : 0);
     gpsd_report(1, "    not enough satellites: %d\n", (getw(10) & 4) ? 1 : 0);
     gpsd_report(1, "    exceed max EHPE: %d\n", (getw(10) & 8) ? 1 : 0);
     gpsd_report(1, "    exceed max EVPE: %d\n", (getw(10) & 16) ? 1 : 0);
     gpsd_report(1, "  solution type:\n");
     gpsd_report(1, "    propagated: %d\n", (getw(11) & 1) ? 1 : 0);
-    gpsd_report(1, "    altitude: %d\n", (getw(11) & 2) ? 1 : 0);
+    gpsd_report(1, "    ->fix.altitude: %d\n", (getw(11) & 2) ? 1 : 0);
     gpsd_report(1, "    differential: %d\n", (getw(11) & 4) ? 1 : 0);
     gpsd_report(1, "Number of measurements in solution: %d\n", getw(12));
     gpsd_report(1, "Lat: %f\n", getl(27) * RAD_2_DEG * 1e-8);
@@ -166,20 +166,20 @@ static int handle1000(struct gps_session_t *session)
     session->month = getw(20);
     session->day = getw(19);
 
-    session->gNMEAdata.latitude  = getl(27) * RAD_2_DEG * 1e-8;
-    session->gNMEAdata.longitude = getl(29) * RAD_2_DEG * 1e-8;
-    session->gNMEAdata.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
-    session->gNMEAdata.altitude  = getl(31) * 1e-2;
-    session->gNMEAdata.climb     = getl(38) * 1e-2;
-    session->gNMEAdata.status    = (getw(10) & 0x1c) ? 0 : 1;
+    session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
+    session->gpsdata.fix.altitude  = getl(31) * 1e-2;
+    session->gpsdata.fix.climb     = getl(38) * 1e-2;
+    session->gpsdata.status    = (getw(10) & 0x1c) ? 0 : 1;
     session->mag_var             = getw(37) * RAD_2_DEG * 1e-4;
-    session->gNMEAdata.track     = getw(36) * RAD_2_DEG * 1e-4;
-    session->gNMEAdata.satellites_used = getw(12);
+    session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
+    session->gpsdata.satellites_used = getw(12);
 
-    if (session->gNMEAdata.status)
-	session->gNMEAdata.mode = (getw(10) & 1) ? 2 : 3;
+    if (session->gpsdata.status)
+	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
-	session->gNMEAdata.mode = 1;
+	session->gpsdata.fix.mode = MODE_NO_FIX;
     session->separation = getw(33) * 1e-2;	/* meters */
 
     return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
@@ -190,8 +190,8 @@ static int handle1002(struct gps_session_t *session)
     int i, j;
 
     for (j = 0; j < MAXCHANNELS; j++)
-	session->gNMEAdata.used[j] = 0;
-    session->gNMEAdata.satellites_used = 0;
+	session->gpsdata.used[j] = 0;
+    session->gpsdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 	session->Zs[i] = getw(16 + (3 * i));
 	session->Zv[i] = (getw(15 + (3 * i)) & 0xf);
@@ -205,15 +205,14 @@ static int handle1002(struct gps_session_t *session)
 	gpsd_report(1, " C/No:%d\n", getw(17 + (3 * i)));
 #endif
 	if (getw(15 + (3 * i)) & 1)
-	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++] = i;
+	    session->gpsdata.used[session->gpsdata.satellites_used++] = i;
 	for (j = 0; j < MAXCHANNELS; j++) {
-	    if (session->gNMEAdata.PRN[j] != getw(16 + (3 * i)))
+	    if (session->gpsdata.PRN[j] != getw(16 + (3 * i)))
 		continue;
-	    session->gNMEAdata.ss[j] = getw(17 + (3 * i));
+	    session->gpsdata.ss[j] = getw(17 + (3 * i));
 	    break;
 	}
     }
-    REFRESH(session->gNMEAdata.satellite_stamp);
     return SATELLITE_SET;
 }
 
@@ -221,28 +220,26 @@ static int handle1003(struct gps_session_t *session)
 {
     int i;
 
-    session->gNMEAdata.pdop = getw(10);
-    session->gNMEAdata.hdop = getw(11);
-    session->gNMEAdata.vdop = getw(12);
-    session->gNMEAdata.satellites = getw(14);
+    session->gpsdata.pdop = getw(10);
+    session->gpsdata.hdop = getw(11);
+    session->gpsdata.vdop = getw(12);
+    session->gpsdata.satellites = getw(14);
 
     for (i = 0; i < MAXCHANNELS; i++) {
-	if (i < session->gNMEAdata.satellites) {
-	    session->gNMEAdata.PRN[i] = getw(15 + (3 * i));
-	    session->gNMEAdata.azimuth[i] = getw(16 + (3 * i)) * RAD_2_DEG * 1e-4;
-	    session->gNMEAdata.elevation[i] = getw(17 + (3 * i)) * RAD_2_DEG * 1e-4;
+	if (i < session->gpsdata.satellites) {
+	    session->gpsdata.PRN[i] = getw(15 + (3 * i));
+	    session->gpsdata.azimuth[i] = getw(16 + (3 * i)) * RAD_2_DEG * 1e-4;
+	    session->gpsdata.elevation[i] = getw(17 + (3 * i)) * RAD_2_DEG * 1e-4;
 #if 0
 	    gpsd_report(1, "Sat%02d:  PRN:%d az:%d el:%d\n", 
 			i, getw(15+(3 * i)),getw(16+(3 * i)),getw(17+(3 * i)));
 #endif
 	} else {
-	    session->gNMEAdata.PRN[i] = 0;
-	    session->gNMEAdata.azimuth[i] = 0.0;
-	    session->gNMEAdata.elevation[i] = 0.0;
+	    session->gpsdata.PRN[i] = 0;
+	    session->gpsdata.azimuth[i] = 0.0;
+	    session->gpsdata.elevation[i] = 0.0;
 	}
     }
-    REFRESH(session->gNMEAdata.fix_quality_stamp);
-    REFRESH(session->gNMEAdata.satellite_stamp);
     return SATELLITE_SET | DOP_SET;
 }
 

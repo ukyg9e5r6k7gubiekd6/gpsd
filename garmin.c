@@ -123,7 +123,7 @@ typedef struct {
 /* Garmin D800_Pvt_Date_Type */
 // This is the data format of the position data from the garmin USB
 typedef struct {
-	float alt;  /* altitude above WGS 84 */
+	float alt;  /* ->fix.altitude above WGS 84 */
 	float epe;  /* estimated position error, 2 sigma (meters)  */
 	float eph;  /* epe, but horizontal only (meters) */
 	float epv;  /* epe but vertical only (meters ) */
@@ -135,8 +135,8 @@ typedef struct {
                       * 5 - 3D Diff
                       */
 	double	gps_tow; /* gps time  os week (seconds) */
-	double	lat;     /* latitude (radians) */
-	double	lon;     /* longitude (radians) */
+	double	lat;     /* ->latitude (radians) */
+	double	lon;     /* ->longitude (radians) */
 	float	lon_vel; /* velocity east (meters/second) */
 	float	lat_vel; /* velocity north (meters/second) */
 	float	alt_vel; /* velocity up (meters/sec) */
@@ -273,7 +273,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    session->month   = tm.tm_mon + 1;
 	    session->year    = tm.tm_year + 1900;
 
-	    sprintf(session->gNMEAdata.utc
+	    sprintf(session->gpsdata.utc
 		    , "%04d/%02d/%dT%02d:%02d:%02dZ"
 		    , tm.tm_year + 1900
 		    , tm.tm_mon + 1
@@ -282,69 +282,68 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 		    , tm.tm_min
 		    , tm.tm_sec);
 
-	    session->gNMEAdata.latitude = radtodeg(pvt->lat);
-	    session->gNMEAdata.longitude = radtodeg(pvt->lon);
+	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
+	    session->gpsdata.fix.longitude = radtodeg(pvt->lon);
 
-	    // altitude over WGS84 cnverted to MSL
-	    session->gNMEAdata.altitude = pvt->alt + pvt->msl_hght;
+	    // ->fix.altitude over WGS84 cnverted to MSL
+	    session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
 
 	    // geoid separation from WGS 84
 	    session->separation = pvt->msl_hght;
 
 	    // esrtimated position error in meters (two sigmas)
-	    session->gNMEAdata.epe = pvt->epe;
-	    session->gNMEAdata.eph = pvt->eph;
-	    session->gNMEAdata.epv = pvt->epv;
-	    REFRESH(session->gNMEAdata.epe_quality_stamp);
+	    session->gpsdata.epe = pvt->epe;
+	    session->gpsdata.fix.eph = pvt->eph;
+	    session->gpsdata.fix.epv = pvt->epv;
 
 	    // convert lat/lon to knots
-	    session->gNMEAdata.speed
+	    session->gpsdata.fix.speed
 		= hypot(pvt->lon_vel, pvt->lat_vel) * 1.9438445;
 
             // keep climb in meters/sec
-	    session->gNMEAdata.climb = pvt->alt_vel;
+	    session->gpsdata.fix.climb = pvt->alt_vel;
 
 	    track = atan2(pvt->lon_vel, pvt->lat_vel);
 	    if (track < 0) {
 		track += 2 * PI;
 	    }
-	    session->gNMEAdata.track = radtodeg(track);
+	    session->gpsdata.fix.track = radtodeg(track);
 
 	    switch ( pvt->fix) {
 	    case 0:
 	    case 1:
 	    default:
 		// no fix
-		session->gNMEAdata.status = STATUS_NO_FIX;
-		session->gNMEAdata.mode = MODE_NO_FIX;
+		session->gpsdata.status = STATUS_NO_FIX;
+		session->gpsdata.fix.mode = MODE_NO_FIX;
 		break;
 	    case 2:
 		// 2D fix
-		session->gNMEAdata.status = STATUS_FIX;
-		session->gNMEAdata.mode = MODE_2D;
+		session->gpsdata.status = STATUS_FIX;
+		session->gpsdata.fix.mode = MODE_2D;
 		break;
 	    case 3:
 		// 3D fix
-		session->gNMEAdata.status = STATUS_FIX;
-		session->gNMEAdata.mode = MODE_3D;
+		session->gpsdata.status = STATUS_FIX;
+		session->gpsdata.fix.mode = MODE_3D;
 		break;
 	    case 4:
 		// 2D Differential fix
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
-		session->gNMEAdata.mode = MODE_2D;
+		session->gpsdata.status = STATUS_DGPS_FIX;
+		session->gpsdata.fix.mode = MODE_2D;
 		break;
 	    case 5:
 		// 3D differential fix
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
-		session->gNMEAdata.mode = MODE_3D;
+		session->gpsdata.status = STATUS_DGPS_FIX;
+		session->gpsdata.fix.mode = MODE_3D;
 		break;
 	    }
 
 	    gpsd_report(4, "mode %d, status %d\n"
-			, session->gNMEAdata.mode
-			, session->gNMEAdata.status);
+			, session->gpsdata.fix.mode
+			, session->gpsdata.status);
 
-	    gpsd_report(3, "UTC Time: %s\n", session->gNMEAdata.utc);
+	    gpsd_report(3, "UTC Time: %s\n", session->gpsdata.utc);
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"
 			, pvt->alt
 			, pvt->epe
@@ -352,8 +351,8 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 			, pvt->epv
 			, pvt->fix
 			, pvt->gps_tow
-			, session->gNMEAdata.latitude
-			, session->gNMEAdata.longitude
+			, session->gpsdata.fix.latitude
+			, session->gpsdata.fix.longitude
 			, pvt->lon_vel
 			, pvt->lat_vel
 			, pvt->alt_vel
@@ -369,10 +368,10 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
 	    sats = (cpo_sat_data*)pkt->mData;
 
-	    session->gNMEAdata.satellites_used = 0;
-	    gpsd_zero_satellites(&session->gNMEAdata);
+	    session->gpsdata.satellites_used = 0;
+	    gpsd_zero_satellites(&session->gpsdata);
 	    for ( i = 0 ; i < MAXCHANNELS ; i++ )
-                session->gNMEAdata.used[i] = 0;
+                session->gpsdata.used[i] = 0;
 	    for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
 		gpsd_report(4,
 			    "  Sat %d, snr: %d, elev: %d, Azmth: %d, Stat: %x\n"
@@ -390,23 +389,21 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 		    continue;
 		}
 
-		session->gNMEAdata.PRN[j] = sats->svid;
-		session->gNMEAdata.azimuth[j] = sats->azmth;
-		session->gNMEAdata.elevation[j] = sats->elev;
+		session->gpsdata.PRN[j] = sats->svid;
+		session->gpsdata.azimuth[j] = sats->azmth;
+		session->gpsdata.elevation[j] = sats->elev;
 		// snr units??
 		// garmin 0 -> 0xffff, NMEA 99 -> 0
-		session->gNMEAdata.ss[j]
+		session->gpsdata.ss[j]
 		    = 99 - ((100 *(long)sats->snr) >> 16);
 		if ( sats->status & 4 ) {
 		    // used in solution?
-		    session->gNMEAdata.used[ session->gNMEAdata.satellites_used++] = sats->svid;
+		    session->gpsdata.used[ session->gpsdata.satellites_used++] = sats->svid;
 		}
-		session->gNMEAdata.satellites++;
+		session->gpsdata.satellites++;
 		j++;
 	    }
-	    REFRESH(session->gNMEAdata.satellite_stamp);
 	    mask |= SATELLITE_SET;
-	    gpsd_binary_satellite_dump(session, bufp);
 	    bufp += strlen(bufp);
 	    gpsd_binary_quality_dump(session, bufp+strlen(bufp));
 	    bufp += strlen(bufp);
@@ -478,7 +475,7 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
         gpsd_report(4, "SendPacket(), writing %d bytes\n", theBytesToWrite);
         PrintPacket ( session,  aPacket);
 
-	theBytesReturned = write( session->gNMEAdata.gps_fd
+	theBytesReturned = write( session->gpsdata.gps_fd
 		    , aPacket, theBytesToWrite);
 	gpsd_report(4, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
@@ -492,7 +489,7 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 	// So here goes just in case
 	if( 0 == (theBytesToWrite % ASYNC_DATA_SIZE) ) {
 		char *n = "";
-		theBytesReturned = write( session->gNMEAdata.gps_fd
+		theBytesReturned = write( session->gpsdata.gps_fd
 		    , &n, 0);
 	}
 }
@@ -532,7 +529,7 @@ static int GetPacket (struct gps_session_t *session )
 	// the USB not too bad for a start
 	long theBytesReturned = 0;
 
-	theBytesReturned = read(session->gNMEAdata.gps_fd
+	theBytesReturned = read(session->gpsdata.gps_fd
 		, &session->GarminBuffer[session->GarminBufferLen]
 		, ASYNC_DATA_SIZE);
         if ( 0 >  theBytesReturned ) {
@@ -638,7 +635,7 @@ static int garmin_probe(struct gps_session_t *session)
     // get and print the driver Version info
 
     FD_ZERO(&fds); 
-    FD_SET(session->gNMEAdata.gps_fd, &fds);
+    FD_SET(session->gpsdata.gps_fd, &fds);
 
     // Wait, nicely, until the device returns the Version info
     // Toss any other packets, up to 4
@@ -762,7 +759,7 @@ static int garmin_probe(struct gps_session_t *session)
  * garmin_init()
  *
  * init a garmin_gps device,
- * session->gNMEAdata.gps_fd is assumed to already be open.
+ * session->gpsdata.gps_fd is assumed to already be open.
  *
  * the garmin_gps driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
