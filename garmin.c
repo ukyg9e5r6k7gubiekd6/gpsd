@@ -6,7 +6,7 @@
  * This code is partly from the Garmin IOSDK and partly from the
  * sample code in the Linux garmin_gps driver.
  *
- * Presently this code needs the Linux garmin_usb driver and will
+ * Presently this code needs the Linux garmin_gps driver and will
  * not function without it.  It also depends on the Intel byte order
  * (little-endian) so will not work on PPC or other big-endian machines
  *
@@ -535,8 +535,9 @@ static int GetPacket (struct gps_session_t *session )
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
 	session->GarminBufferLen += theBytesReturned;
-	if ( sizeof(Packet_t) <=  theBytesReturned ) {
+	if ( 256 <=  session->GarminBufferLen ) {
 	    // really bad read error...
+	    session->GarminBufferLen = 0;
 	    gpsd_report(3, "GetPacket() packet too long!\n");
 	    break;
 	}
@@ -554,20 +555,44 @@ static int GetPacket (struct gps_session_t *session )
 /*
  * garmin_probe()
  *
- * return 0 if garmin_usb device found
- * return 1 is not
+ * return 0 if garmin_gps device found
+ * return 1 if not
  */
 int garmin_probe(struct gps_session_t *session)
 {
-
 
     Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
     char buffer[256];
     fd_set fds, rfds;
     struct timeval tv;
     int sel_ret = 0;
+    int ok = 0;
+    FILE *fp;
+    int i;
 
     gpsd_report(1, "garmin_init\n");
+
+    // check for USB serial drivers
+    // very Linux specific
+
+    if ((fp = fopen( "/proc/tty/driver/usbserial", "r")) == NULL) {
+	gpsd_report(2, "No USB serial drivers found.\n");
+	return 1;
+    } else {
+        // try to find garmin_gps driver
+	while ( fgets( buffer, sizeof(buffer), fp) ) {
+		if ( strstr( buffer, "garmin_gps") ) {
+			// yes, the garmin_gps driver is active
+			ok = 1;
+			break;
+		}
+	}
+    }
+    (void) fclose(fp);
+    if ( ! ok ) {
+	gpsd_report(2, "garmin_gps not active.\n");
+	return 1;
+    }
 
     // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
@@ -575,12 +600,12 @@ int garmin_probe(struct gps_session_t *session)
     set_int(buffer+8, 4); // data length 4
     set_int(buffer+12, 0); // mode 0
 
-    gpsd_report(3, "Set garmin_usb driver mode = 0\n");
+    gpsd_report(3, "Set garmin_gps driver mode = 0\n");
     SendPacket( session,  (Packet_t*) buffer);
     // expect no return packet !?
 
     // get Version info
-    gpsd_report(3, "Get garmin_usb driver version\n");
+    gpsd_report(3, "Get garmin_gps driver version\n");
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
     set_int(buffer+4, PRIV_PKTID_INFO_REQ);
     set_int(buffer+8, 0); // data length 0
@@ -593,8 +618,9 @@ int garmin_probe(struct gps_session_t *session)
     FD_SET(session->gNMEAdata.gps_fd, &fds);
 
     // Wait, nicely, until the device returns the Version info
-    // Toss any other packets
-    for( ; ; ) {
+    // Toss any other packets, up to 4
+    ok = 0;
+    for( i = 0 ; i < 4 ; i++ ) {
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
@@ -609,15 +635,20 @@ int garmin_probe(struct gps_session_t *session)
 	    return(1);
         }
 	if ( !GetPacket( session ) ) {
-		PrintPacket(session, (Packet_t*)session->GarminBuffer);
-	}
+	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
 
-	if( ( 75 == thePacket->mPacketType)
-	    && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
-	    break;
+	    if( ( 75 == thePacket->mPacketType)
+	        && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
+                ok = 1;
+	        break;
+	    }
 	}
     }
 
+    if ( ! ok ) {
+	gpsd_report(2, "Garmin driver never answeredi to INFO_REQ.\n");
+	return 1;
+    }
     // Tell the device that we are starting a session.
     gpsd_report(3, "Send Garmin Start Session\n");
 
@@ -628,8 +659,9 @@ int garmin_probe(struct gps_session_t *session)
     SendPacket(session,  (Packet_t*) buffer);
 
     // Wait until the device is ready to the start the session
-    // Toss any other packets
-    for( ; ; ) {
+    // Toss any other packets, up to 4
+    ok = 0;
+    for( i = 0 ; i < 4 ; i++ ) {
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
@@ -644,14 +676,19 @@ int garmin_probe(struct gps_session_t *session)
 	    return(1);
         }
 	if ( !GetPacket( session ) ) {
-		PrintPacket(session, (Packet_t*)session->GarminBuffer);
-	}
+	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
 
-	if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
-	    && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
-		== thePacket->mPacketId) ) {
-	    break;
+	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
+	        && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
+		    == thePacket->mPacketId) ) {
+                ok = 1;
+	        break;
+	    }
 	}
+    }
+    if ( ! ok ) {
+	gpsd_report(2, "Garmin driver never answered to START_SESSION.\n");
+	return 1;
     }
 
     // Tell the device to send product data
@@ -664,8 +701,9 @@ int garmin_probe(struct gps_session_t *session)
     SendPacket(session,  (Packet_t*) buffer);
 
     // Get the product data packet
-    // Ignore any other packets on the way
-    for( ; ; ) {
+    // Toss any other packets, up to 4
+    ok = 0;
+    for( i = 0 ; i < 4 ; i++ ) {
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
 	tv.tv_sec = 1; tv.tv_usec = 0;
@@ -680,15 +718,20 @@ int garmin_probe(struct gps_session_t *session)
 	    return(1);
         }
 	if ( !GetPacket( session ) ) {
-		PrintPacket(session, (Packet_t*)session->GarminBuffer);
-	}
+	    PrintPacket(session, (Packet_t*)session->GarminBuffer);
 
-	if( (GARMIN_LAYERID_APPL == thePacket->mPacketType)
-	    && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
-	    break;
+	    if( (GARMIN_LAYERID_APPL == thePacket->mPacketType)
+	        && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
+    		ok = 1;
+	        break;
+	    }
 	}
     }
 
+    if ( ! ok ) {
+	gpsd_report(2, "Garmin driver never answered to PRODUCT_DATA.\n");
+	return 1;
+    }
     // turn on PVT data 49
     gpsd_report(3, "Set Garmin to send reports every 1 second\n");
 
@@ -712,10 +755,10 @@ int garmin_probe(struct gps_session_t *session)
 /*
  * garmin_init()
  *
- * init a garmin_usb device,
+ * init a garmin_gps device,
  * session->gNMEAdata.gps_fd is assumed to already be open.
  *
- * the garmin_usb driver ignores all termios, baud rates, etc. so
+ * the garmin_gps driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
  *
  * gps_fd was opened in NDELAY mode so be careful about reads.
