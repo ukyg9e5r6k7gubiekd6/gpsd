@@ -93,6 +93,8 @@ struct gps_data {
 
 int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port);
 int gpsd_close(int fd);
-int gpsd_query(int fd, char *requests, struct gps_data *gpsdata);
+int gpsd_query(int fd, struct gps_data *gpsdata, char *requests);
+int gpsd_poll(int fd, struct gps_data *gpsdata);
+void gpsd_set_raw_hook(struct gps_data *gpsdata, void (*hook)(char *buf));
 
 /* gps.h ends here */

@@ -75,7 +75,7 @@ extern int netlib_passiveTCP(char *service, int qlen);
 extern int netlib_connectTCP(char *host, char *service);
 extern int netlib_connectsock(char *host, char *service, char *protocol);
 
-/* High-level interface */
+/* External interface */
 extern void gps_init(struct gpsd_t *session, 
 	      int timeout, char devtype, char *dgpsserver);
 extern int gps_activate(struct gpsd_t *session);
