@@ -238,6 +238,16 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>n</term>
+<listitem><para>Get or set the the GPS driver mode.  Without argument,
+reports the mode as "N=%d"; N=0 means NMEA mode and N=1
+means alternate mode (binary if it has one, for SiRF chipsets in
+particular).  With argument, set the mode if possible; the new mode
+will be reported in the response.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>p</term>
 <listitem><para>Returns the current position in the form "P=%f %f";
 numbers are in degrees, latitude first.</para></listitem>

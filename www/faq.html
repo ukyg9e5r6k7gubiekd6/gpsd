@@ -55,6 +55,10 @@ it any smaller.  Then send us that.</p>
 <p>If possible, use the -l option of gpsfake to pin down the line of
 NMEA or packet of SiRF that produces the bug and tell us that.</p>
 
+<p>If you're using a SiRF-based GPS (which you can tell from the -D 4
+output), switch back to NMEA mode using the N command and see if the
+bug still reproduces.</p>
+
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
 has core-dumped, try to use gdb or whatever your local symbolic

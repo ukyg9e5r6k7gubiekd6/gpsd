@@ -58,7 +58,7 @@ struct gps_type_t {
     int (*handle_input)(struct gps_session_t *session, int waiting);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_session_t *session, int speed);
-    int (*mode_switcher)(struct gps_session_t *session, int mode);
+    void (*mode_switcher)(struct gps_session_t *session, int mode);
     void (*wrapup)(struct gps_session_t *session);
     int cycle;
 };
@@ -141,6 +141,8 @@ extern int nmea_parse(char *, struct gps_data_t *);
 extern int nmea_send(int, const char *, ... );
 extern int nmea_sane_satellites(struct gps_data_t *);
 extern void nmea_add_checksum(char *);
+
+extern void sirf_parse(struct gps_session_t *, unsigned char *, int);
 
 extern int packet_get(struct gps_session_t *, int);
 extern int packet_sniff(struct gps_session_t *);

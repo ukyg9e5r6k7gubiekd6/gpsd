@@ -1,8 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Finish implementing the N command
-
 ** Rate-limiting SiRF sentence 4.
 
 The SiRF binary driver works nicely now, but it's a bit annoying that

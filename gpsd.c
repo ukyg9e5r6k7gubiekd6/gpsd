@@ -287,13 +287,28 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;
 	case 'L':
-	    sprintf(phrase, ",L=1 " VERSION " abcdefilmpqrstuvwxy");	//ghjkno
+	    sprintf(phrase, ",L=1 " VERSION " abcdefilmnpqrstuvwxy");	//ghjko
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
 		strcpy(phrase, ",M=?");
 	    else
 		sprintf(phrase, ",M=%d", ud->mode);
+	    break;
+	case 'N':
+	    if (!session->device_type->mode_switcher)
+		strcpy(phrase, ",N=0");
+	    else {
+		if (*p == '=') ++p;
+		if (*p == '1' || *p == '+') {
+		    session->device_type->mode_switcher(session, 1);
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    session->device_type->mode_switcher(session, 0);
+		    p++;
+		}
+	    }
+	    sprintf(phrase, ",N=%d", session->gNMEAdata.driver_mode);
 	    break;
 	case 'P':
 	    if (have_fix(session) && SEEN(ud->latlon_stamp))

@@ -107,7 +107,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   don't use O_SYNC (it turned out not to be reliable) so remove it to make 
   life easier under Mac OS X.  Allow gpsfake to accept subsecond cycle times.
   Add a FAQ to the HTML documentation.  gps_poll() now handles multi-line
-  responses.
+  responses.  Add N command for switching driver modes.
 
 * Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.16-1
 - New F command allows changing the GPS device after startup time.

@@ -89,10 +89,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 #define SIRF_PAYLOAD	20	/* we're in a SiRF payload part */
 #define NMEA_RECOGNIZED	21	/* saw trailing \n of NMEA packet */
 #define SIRF_DELIVERED	22	/* saw last byte of SiRF payload/checksum */
-#define NMEA_EXPECTED	23	/* expecting NMEA packet */
-#define SIRF_TRAILER_1	24	/* saw first byte of SiRF trailer */ 
-#define SIRF_RECOGNIZED	25	/* saw second byte of SiRF trailer */
-#define SIRF_EXPECTED	26	/* expecting start of SiRF packet */
+#define SIRF_TRAILER_1	23	/* saw first byte of SiRF trailer */ 
+#define SIRF_RECOGNIZED	24	/* saw second byte of SiRF trailer */
 
 static void nexstate(struct gps_session_t *session, unsigned char c)
 {
@@ -119,20 +117,12 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	    session->packet_state = NMEA_LEADER_END;
 	else if (c =='A')	/* SiRF Ack */
 	    session->packet_state = SIRF_ACK_LEAD_1;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_LEADER_1:
 	if (c == 0xa2)
 	    session->packet_state = SIRF_LEADER_2;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -203,30 +193,18 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
    case SIRF_ACK_LEAD_1:
 	if (c == 'c')
 	    session->packet_state = SIRF_ACK_LEAD_2;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
    case SIRF_ACK_LEAD_2:
 	if (c == 'k')
 	    session->packet_state = NMEA_LEADER_END;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
    case NMEA_PUB_LEAD:
 	if (c == 'P')
 	    session->packet_state = NMEA_LEADER_END;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -242,10 +220,6 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	    session->packet_state = NMEA_RECOGNIZED;
 	else if (isprint(c))
 	    /* continue gathering body packets */;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -253,20 +227,12 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	session->packet_length += c + 2;
 	if (session->packet_length <= MAX_PACKET_LENGTH)
 	    session->packet_state = SIRF_PAYLOAD;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case NMEA_CR:
 	if (c == '\n')
 	    session->packet_state = NMEA_RECOGNIZED;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -275,38 +241,28 @@ static void nexstate(struct gps_session_t *session, unsigned char c)
 	    session->packet_state = SIRF_DELIVERED;
 	break;
     case NMEA_RECOGNIZED:
-    case NMEA_EXPECTED:
 	if (c == '$')
 	    session->packet_state = NMEA_DOLLAR;
 	else
-	    session->packet_state = NMEA_EXPECTED;
+	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_DELIVERED:
 	if (c == 0xb0)
 	    session->packet_state = SIRF_TRAILER_1;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_TRAILER_1:
 	if (c == 0xb3)
 	    session->packet_state = SIRF_RECOGNIZED;
-	else if (session->packet_type == NMEA_PACKET)
-	   session->packet_state = NMEA_EXPECTED;
-	else if (session->packet_type == SIRF_PACKET)
-	    session->packet_state = SIRF_EXPECTED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_RECOGNIZED:
-    case SIRF_EXPECTED:
         if (c == 0xa0)
 	    session->packet_state = SIRF_LEADER_1;
 	else
-	    session->packet_state = SIRF_EXPECTED;
+	    session->packet_state = GROUND_STATE;
 	break;
     }
 }
@@ -402,9 +358,7 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    if (checksum_ok) {
 		session->packet_type = NMEA_PACKET;
 		packet_copy(session);
-	    } else if (session->packet_type == NMEA_PACKET)
-		session->packet_state = NMEA_EXPECTED;
-	    else
+	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
@@ -417,9 +371,7 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    if (checksum == crc) {
 		session->packet_type = SIRF_PACKET;
 		packet_copy(session);
-	    } else if (session->packet_type == SIRF_PACKET)
-		session->packet_state = SIRF_EXPECTED;
-	    else
+	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 	}

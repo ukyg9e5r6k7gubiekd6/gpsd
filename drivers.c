@@ -19,7 +19,8 @@ static int nmea_handle_input(struct gps_session_t *session, int waiting)
 
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
-	return 0;
+	sirf_parse(session, session->outbuffer, session->outbuflen);
+	return 1;
     } else if (session->packet_type == NMEA_PACKET) {
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
@@ -94,10 +95,10 @@ static void sirf_initializer(struct gps_session_t *session)
 }
 #endif /* BINARY_ENABLE */
 
-static int sirf_switcher(struct gps_session_t *session, int speed) 
+static int sirf_switcher(struct gps_session_t *session, int nmea, int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
-    if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,1,%d,8,1,0", speed) < 0)
+    if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
 	return 0;
     tcdrain(session->gNMEAdata.gps_fd);
     /* 
@@ -110,6 +111,22 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
      */
     usleep(50000);
     return 1;
+}
+
+static int sirf_speed(struct gps_session_t *session, int speed)
+/* change the baud rate, remaining in SiRF NMWA mode */
+{
+    return sirf_switcher(session, 1, speed);
+}
+
+static void sirf_mode(struct gps_session_t *session, int mode)
+/* change mode to SiRF binary, speed unchanged */
+{
+    if (mode == 1) {
+	gpsd_switch_driver(session, "SiRF-II binary");
+	session->gNMEAdata.driver_mode = sirf_switcher(session, 0, session->gNMEAdata.baudrate);
+    } else
+	session->gNMEAdata.driver_mode = 0;
 }
 
 struct gps_type_t sirfII = {
@@ -125,8 +142,8 @@ struct gps_type_t sirfII = {
 #endif /* BINARY_ENABLE */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
-    sirf_switcher,	/* we can change speeds */
-    NULL,		/* no mode switch */
+    sirf_speed,		/* we can change speeds */
+    sirf_mode,		/* there's a mode switch */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };

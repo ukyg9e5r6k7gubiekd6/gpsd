@@ -345,8 +345,17 @@ static void decode_ecef(struct gps_data_t *ud,
     REFRESH(ud->climb_stamp);
 }
 
-static void decode_sirf(struct gps_session_t *session,
-			unsigned char *buf, int len)
+static void sirfbin_mode(struct gps_session_t *session, int mode)
+{
+    if (mode == 0) {
+	gpsd_switch_driver(session, "SiRF-II NMEA");
+	sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
+	session->gNMEAdata.driver_mode = 0;
+    }
+}
+
+
+void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype;
     char buf2[MAX_PACKET_LENGTH*3] = "";
@@ -447,8 +456,7 @@ static void decode_sirf(struct gps_session_t *session,
 	fv = atof(session->outbuffer+5);
 	if (fv < 231) {
 	    session->driverstate |= SIRF_LT_231;
-	    sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
-	    packet_sniff(session);
+	    sirfbin_mode(session, 0);
 	} else if (fv < 232) 
 	    session->driverstate |= SIRF_EQ_231;
 	else
@@ -578,8 +586,16 @@ static void decode_sirf(struct gps_session_t *session,
 
 static int sirfbin_handle_input(struct gps_session_t *session, int waiting)
 {
-    if (packet_get(session, waiting)) {
-	decode_sirf(session, session->outbuffer+4, session->outbuflen-8);
+    if (!packet_get(session, waiting)) 
+	return 0;
+
+    if (session->packet_type == SIRF_PACKET){
+	sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
+	session->gNMEAdata.driver_mode = 1;
+	return 1;
+    } else if (session->packet_type == NMEA_PACKET) {
+	nmea_parse(session->outbuffer, &session->gNMEAdata);
+	session->gNMEAdata.driver_mode = 0;
 	return 1;
     } else
 	return 0;
@@ -618,7 +634,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
     }
 }
 
-static int sirfbin_switch(struct gps_session_t *session, int speed)
+static int sirfbin_speed(struct gps_session_t *session, int speed)
 {
     return sirf_speed(session->gNMEAdata.gps_fd, speed);
 }
@@ -626,14 +642,14 @@ static int sirfbin_switch(struct gps_session_t *session, int speed)
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
-    "SIRF-II binary",	/* full name of type */
+    "SiRF-II binary",		/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     NULL,		/* no probe */
     sirfbin_initializer,	/* initialize the device */
     sirfbin_handle_input,	/* read and parse message packets */
     NULL,		/* send DGPS correction */
-    sirfbin_switch,	/* we can change baud rate */
-    NULL,		/* no mode switcher */
+    sirfbin_speed,	/* we can change baud rate */
+    sirfbin_mode,	/* there's a mode switcher */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };
