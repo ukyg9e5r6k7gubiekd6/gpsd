@@ -86,7 +86,7 @@ static WINDOW *cmdwin, *debugwin;
 static int set_speed(unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate, count, st, state;
-    unsigned char buf[300];
+    unsigned char	c;
 
     if (speed < 300)
 	rate = 0;
@@ -118,34 +118,34 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 
     /* sniff for NMEA or SiRF packet */
     state = 0;
-    for (count = 0; count < sizeof(buf); count++) {
-	if ((st = read(LineFd, buf, 1)) < 0)
+    for (count = 0; count < 300; count++) {
+	if ((st = read(LineFd, &c, 1)) < 0)
 	    return 0;
 	else
 	    count += st;
 	if (state == 0) {
-	    if (buf[0] == START1)
+	    if (c == START1)
 		state = 1;
-	    else if (buf[0] == '$')
+	    else if (c == '$')
 		state = 2;
 	} else if (state == 1) {
-	    if (buf[0] == START2)
+	    if (c == START2)
 		return SIRF_PACKET;
-	    else if (buf[0] == '$')
+	    else if (c == '$')
 		state = 2;
 	    else
 		state = 0;
 	} else if (state == 2) {
-	    if (buf[0] == 'G')
+	    if (c == 'G')
 		state = 3;
-	    else if (buf[0] == START1)
+	    else if (c == START1)
 		state = 1;
 	    else
 		state = 0;
 	} else if (state == 3) {
-	    if (buf[0] == 'P')
+	    if (c == 'P')
 		return NMEA_PACKET;
-	    else if (buf[0] == START1)
+	    else if (c == START1)
 		state = 1;
 	    else
 		state = 0;
@@ -289,7 +289,7 @@ int main (int argc, char **argv)
 
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
-    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N  A");
+    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
     for (i = 0; i < 12; i++) {
 	mvwprintw(mid4win, i+2, 1, "%2d",i);
     }
@@ -584,7 +584,7 @@ int len;
 
     case 0x08:		/* 50 BPS data */
 	ch = getb(1);
-	mvwprintw(mid4win, ch, 26, "A");
+	mvwprintw(mid4win, ch, 27, "Y");
 	wprintw(debugwin, "ALM %d (%d):",getb(2),ch);
 	for (off = 3; off < len; off += 4)
 	    wprintw(debugwin, " %d",getl(off));
