@@ -66,14 +66,11 @@ static Pixel get_pixel(Widget w, char *resource_value)
     XColor exact, color;
 
     colormap = DefaultColormapOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
-
     status = XAllocNamedColor(XtDisplay(w), colormap, resource_value, &color, &exact);
-
     if (status == 0) {
 	fprintf(stderr, "Unknown color: %s", resource_value);
 	color.pixel = BlackPixelOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
     };
-
     return (color.pixel);
 }
 
@@ -162,25 +159,18 @@ static void build_gui(Widget lxbApp)
 
     XtSetArg(args[6], XmNtopWidget, rowColumn_11);
     rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_12);
     rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_13);
     rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_14);
     rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_15);
     rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_16);
     rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, data_panel, args, 7);
-
     XtSetArg(args[6], XmNtopWidget, rowColumn_17);
     rowColumn_18 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, data_panel, args, 7);
-
 
     label_1 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_11, args, 0);
     label_2 = XtCreateManagedWidget("label", xmLabelWidgetClass, rowColumn_12, args, 0);
@@ -211,7 +201,6 @@ static void build_gui(Widget lxbApp)
     text_7 = XtCreateManagedWidget("text_7", xmTextFieldWidgetClass,
 				   rowColumn_17, args, 6);
 
-
     pushButton_11 = XtCreateManagedWidget("label",
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
     XtAddCallback(pushButton_11, XmNactivateCallback, quit_cb, NULL);
@@ -228,7 +217,6 @@ static void build_gui(Widget lxbApp)
 				     NULL);
 
     XtRealizeWidget(lxbApp);
-
     delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);

@@ -5,9 +5,8 @@
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 
-struct life_t
+struct life_t {
 /* lifetime structure to be associated with some piece of data */
-{
     time_t	last_refresh;
     int		changed;
 };
@@ -104,6 +103,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 #define METERS_TO_FEET	3.2808399
 #define METERS_TO_MILES	0.00062137119
 #define KNOTS_TO_MPH	1.1507794
+#define PI 3.14159265358979323846
 
 /* gps_open() error return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */

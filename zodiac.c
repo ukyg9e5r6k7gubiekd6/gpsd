@@ -2,18 +2,16 @@
  * Handle the Rockwell binary packet format supported by the old Zodiac chipset
  * Everything exported from here is in the structure zodiac_binary at the end.
  */
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "gpsd.h"
 
 #ifdef ZODIAC_ENABLE
-#define PI 3.14159265358979323846
-
 enum {
     ZODIAC_HUNT_FF, ZODIAC_HUNT_81, ZODIAC_HUNT_ID, ZODIAC_HUNT_WC,
     ZODIAC_HUNT_FLAGS, ZODIAC_HUNT_CS, ZODIAC_HUNT_DATA, ZODIAC_HUNT_A

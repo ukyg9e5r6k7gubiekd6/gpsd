@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include "config.h"
 #include "gpsd.h"
 
 #if !defined (INADDR_NONE)

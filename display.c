@@ -3,10 +3,7 @@
 
 #include "gps.h"
 
-#define XCENTER         (double)(width/2)
-#define YCENTER         (double)(height/2)
-#define SCALE           (double)(diameter/2)
-#define DEG2RAD         (3.1415926535897931160E0/180.0)
+#define DEG2RAD         (PI/180.0)
 #define RM		20
 
 #undef min
@@ -56,8 +53,8 @@ static void pol2cart(double azimuth, double elevation, double *xout, double *you
 #else
     elevation = ((90.0 - elevation) / 90.0);
 #endif
-    *xout = XCENTER + sin(azimuth) * elevation * SCALE;
-    *yout = YCENTER - cos(azimuth) * elevation * SCALE;
+    *xout = (width/2) + sin(azimuth) * elevation * (diameter/2);
+    *yout = (height/2) - cos(azimuth) * elevation * (diameter/2);
 }
 
 static void draw_arc(int x, int y, int diam)
