@@ -1,4 +1,4 @@
-/* gps.h -- fundamental types and structures for the GPS daemon */
+/* gps.h -- interface of the gps library */
 
 #include <sys/types.h>
 #include <time.h>
@@ -23,7 +23,6 @@ struct life_t
 struct gps_data {
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
     time_t ts_utc;		/* UTC last updated time stamp */
-
 
     /* location */
     double latitude;		/* Latitude/longitude in format "d.ddddd" */
@@ -77,50 +76,8 @@ struct gps_data {
     int hours;
     int minutes;
     int seconds;
+
+    int	sock;	/* server socket -- user most not modify this! */
 };
-
-struct longlat_t
-/* This structure is used to initialize some older GPS units */
-{
-    char *latitude;
-    char *longitude;
-    char latd;
-    char lond;
-};
-
-struct gpsd_t;
-
-struct gps_type_t
-/* GPS method table, describes how to talk to a particular GPS type */
-{
-    char typekey, *typename;
-    void (*initializer)(struct gpsd_t *session);
-    int (*handle_input)(struct gpsd_t *session);
-    int (*rctm_writer)(struct gpsd_t *session, char *rtcmbuf, int rtcmbytes);
-    void (*wrapup)(struct gpsd_t *session);
-    int baudrate;
-};
-
-struct gpsd_t
-/* session object, encapsulates all global state */
-{
-    struct gps_type_t *device_type;
-    struct longlat_t initpos;
-    struct gps_data gNMEAdata;
-    char *gps_device;	/* where to find the GPS */
-    int baudrate;		/* baud rate of session */
-    int fdin;		/* input fd from GPS */
-    int fdout;		/* output fd to GPS */
-    int dsock;		/* socket to DGPS server */
-    int sentdgps;	/* have we sent a DGPS correction? */
-    int fixcnt;		/* count of good fixes seen */
-    void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
-    int debug;		/* debug verbosity level */
-};
-
-/* some multipliers for interpreting GPS output */
-#define METERS_TO_FEET	3.2808399
-#define METERS_TO_MILES	0.00062137119
-#define KNOTS_TO_MPH	1.1507794
 
 /* gps.h ends here */
