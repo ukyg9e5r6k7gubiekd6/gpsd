@@ -14,7 +14,7 @@ misbehave.
 Next, profiling...
 
 If you build with --enable-profiling, an undocumented Z command in the daemon 
-will cause it to emit a Z clause on every D request.  The Z clause contains
+will cause it to emit a $ clause on every D request.  The $ clause contains
 two colon-separated fields: a millisecond-precision timestamp telling when
 gpsd shipped the data, and the character length of the sentence containing the 
 timestamp data (a GPRMC, GPLL, or GPGGA sentence).
@@ -26,14 +26,14 @@ precision. SiRF-II and Evermore chipsets ship times with millisecond
 resolution.  Your machine's time reference must also be accurate to
 subsecond precision; I recommend using ntpd, which will normally give
 you about 15 microseconds precision (two orders of magnitude better than 
-GPSes normally reported).
+GPSes normally report).
 
-The distribution lincludes a Python script, profile_gpsd, that uses the 
+The distribution lincludes a Python script, gpsprof, that uses the 
 Z command to collect profiling information from a running GPS instance.
 You can use this to measure the latency at each stage -- GPS to daemon,
 daemon to client library -- and to estimate the portion of the latency 
-induced by serial transmit time.  The profile_gpsd script offers its own
-interpretation.
+induced by serial transmit time.  The gpsprof script creates latency
+plots using gnuplot(1).  It can also report the raw data.
 
 Then, architecture and how to hack it...
 
@@ -70,18 +70,6 @@ all the data you can get from a GPS.  Client commands mine that
 structure and ship reports up the socket to the client.  DGPS data is
 passed through, raw, to the GPS.
 
-The program supports multiple GPS types.  All are represented by
-driver method tables; the main loop knows nothing about the driver
-methods except when to call them.  At any given time one driver is
-active; by default it's the NMEA one.  
-
-Each driver may have a trigger string that the NMEA interpreter
-watches for.  When that string is recognized at the start of a 
-line, the interpreter switches to its driver.  The new driver 
-initializer method is called immediately.  If there is no trigger string
-the initializer method is called unconditionally each time the device
-is opened.
-
 The trickiest part of the code is the handling of input sources in gpsd.c 
 itself.  It had to tolerate clients connecting and disconnecting at random
 times, and the GPS being unplugged and replugged, without leaking file 
@@ -96,6 +84,28 @@ were input waiting.  The explicit test is there for other programs
 that might call gps_poll() without such a guarantee.
 
 That's about all there is to it.
+
+Adding new GPS types...
+
+Almost all GPSes speak NMEA 0183.  However, it may occasionally be necessary
+to add support for some odd binary format.  We're told that the hex dump
+functions in CuteCom <http://cutecom.sourceforge.net/> can be useful for
+investigating such protocols.
+
+Internally, gpsd supports multiple GPS types.  All are represented by
+driver method tables; the main loop knows nothing about the driver
+methods except when to call them.  At any given time one driver is
+active; by default it's the NMEA one.  To add a new device, populate
+another driver structure and add it to the list.
+
+Each driver may have a trigger string that the NMEA interpreter
+watches for.  When that string is recognized at the start of a 
+line, the interpreter switches to its driver.  The new driver 
+initializer method is called immediately.  If there is no trigger string
+the initializer method is called unconditionally each time the device
+is opened.
+
+And more...
 
 If you're looking for things to hack on, first see the TODO file.
 Then, there is some C code in the contrib/ directory that has some

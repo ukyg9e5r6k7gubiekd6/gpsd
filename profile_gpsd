@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 #
 # Collect and plot latency-profiling data from a running gpsd.
-import sys, os, time, getopt, gps, tempfile, time
+import sys, os, time, getopt, gps, tempfile, time, socket
 
 class rawplot:
     "Print basic data, ignoring timezone skew."
+    name = "raw"
     def header(self, fp):
         fp.write("#GPS time        	Received	Transmitted 	Read\n")
         fp.write("#----------------	---------	----------- 	----------\n")
-    def formatter(self, baud, gps, recv, emit, tag, fp):
+    def formatter(self, session, fp):
         fp.write("%.6f	%2.6f	%2.6f	%2.6f	# %s" \
               % (gps,
-                 (recv - gps) % 3600,
-                 (emit - gps) % 3600,
-                 (time.time() - gps) % 3600,
-                 tag))
+                 (session.recv_time - session.gps_time) % 3600,
+                 (session.emit_time - session.gps_time) % 3600,
+                 (time.time() - session.gps_time) % 3600,
+                 session.tag))
     def plot(self, file, title):
         fmt = '''
 set autoscale
@@ -28,61 +29,82 @@ plot "%s" using 0:2 title "Line latency" with impulses,\
 
 class stripplot:
     "Discard base time, throw out latencies >1 sec."
+    name = "strip"
     def header(self, fp):
-        fp.write("#Received	Transmitted 	Read\n")
-        fp.write("#---------	----------- 	----------\n")
-    def formatter(self, baud, gps, recv, emit, tag, fp):
-        # Throw out latencies above 1 second, these are
+        fp.write("#RS-232   	Received	Transmitted 	Read\n")
+        fp.write("#---------	---------	----------- 	----------\n")
+    def formatter(self, session, fp):
+        # Throw out total line latencies above 1 second, these are
         # serial-buffering artifacts at the start of the session
-        if (recv - gps) % 3600 > 1:
+        line_latency = (session.recv_time - session.gps_time) % 3600
+        if line_latency > 1:
             return
-        fp.write("%2.6f	%2.6f	%2.6f	# %s\n" \
-              % ((recv - gps) % 3600,
-                 (emit - gps) % 3600,
-                 (time.time() - gps) % 3600,
-                 tag))
+        # Compute the amount of time required for RS232 transmission.
+        # Subtract that out of the total line latency  
+        rs232 = (session.length * 8.0) / session.baudrate
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
+              % (rs232, line_latency,
+                 (session.emit_time - session.gps_time) % 3600,
+                 (time.time() - session.gps_time) % 3600,
+                 session.tag))
     def plot(self, file, title):
         fmt = '''
 set autoscale
 set key below
 set key title "Filtered latency data, %s"
-plot "%s" using 0:1 title "Line latency" with impulses,\
-     "%s" using 0:2 title "Decode time" with points,\
-     "%s" using 0:3 title "TCP/IP latency" with points
+plot "%s" using 0:1 title "RS232 time" with impulses,\
+     "%s" using 0:2 title "Other line latency" with points,\
+     "%s" using 0:3 title "Decode time" with points,\
+     "%s" using 0:4 title "TCP/IP latency" with points
 '''
-        return fmt % (title, file, file, file)
+        return fmt % (title, file, file, file, file)
+
+formatters = (rawplot, stripplot)
 
 if __name__ == '__main__':
-    (options, arguments) = getopt.getopt(sys.argv[1:], "hn:r")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:r")
     formatter = stripplot
     raw = False
+    file = None
     await = 100
     for (switch, val) in options:
-	if (switch == '-n'):
+	if (switch == '-f'):
+            for formatter in formatters:
+                if candidate.name == val:
+                    break
+            else:
+                sys.stderr.write("gpsprof: no such formatter.\n")
+                sys.exit(1)
+	elif (switch == '-n'):
 	    await = int(val)
+	elif (switch == '-o'):
+	    file = val
 	elif (switch == '-r'):
 	    raw = True
         elif (switch == '-h'):
-            sys.stderr.write("usage: profile_gpsd [-h] [-r] [-n samplecount] \n")
+            sys.stderr.write("usage: gpsprof [-h] [-r] [-n samplecount] "
+                             + "[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-o file]\n")
+            sys.exit(0)
     plotter = formatter()
-    if raw:
+    if file:
+        out = open(file, "w")
+    elif raw:
         out = sys.stdout
     else:
         out = tempfile.NamedTemporaryFile()
 
-    session = gps.gps()
+    try:
+        session = gps.gps()
+    except socket.error:
+        sys.stderr.write("gpsprof: gpsd unreachable.\n")
+        sys.exit(0)
     try:
         session.query("wZ+")
         plotter.header(out)
         while await > 0:
             session.poll()
-            gps_time = gps.isotime(session.utc)
-            recv_time = session.recv_time
-            emit_time = session.emit_time
-            plotter.formatter(session.baudrate,
-                              gps_time, recv_time, emit_time,
-                              session.tag,
-                              out)
+            session.gps_time = gps.isotime(session.utc)
+            plotter.formatter(session, out)
             await -= 1
     finally:
         session.query("wZ-")
