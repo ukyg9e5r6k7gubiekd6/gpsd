@@ -547,10 +547,10 @@ static int GetPacket (struct gps_session_t *session )
 	    continue;
 
     }
-    // dump the individual bytes
-    for ( x = 0; x < session->GarminBufferLen; x++ ) {
-        gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
-    }
+    // dump the individual bytes, debug only
+    // for ( x = 0; x < session->GarminBufferLen; x++ ) {
+        // gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
+    // }
     if ( 10 <= cnt ) {
 	    gpsd_report(3, "GetPacket() packet too long or too slow!\n");
 	    return -1;
