@@ -132,6 +132,32 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for profiling support
+AC_ARG_ENABLE(profiling,
+  AC_HELP_STRING([--enable-profiling],
+                 [enable profiling support]),
+  [ac_profiling=$enableval], [ac_profiling=no])
+AC_MSG_CHECKING([for profiling support])
+if test x"$ac_profiling" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([PROFILING], 1, [profiling support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for profiling support
+AC_ARG_ENABLE(profiling,
+  AC_HELP_STRING([--enable-profiling],
+                 [enable profiling support]),
+  [ac_profiling=$enableval], [ac_profiling=no])
+AC_MSG_CHECKING([for profiling support])
+if test x"$ac_profiling" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([PROFILING], 1, [profiling support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
@@ -139,10 +165,12 @@ echo ""
 echo "=========================================="
 echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
-echo "FV-18       : $ac_fv18"
-echo "Tripmate    : $ac_tripmate"
-echo "Earthmate   : $ac_earthmate"
-echo "Logfile     : $ac_logfile"
+echo "FV-18                   : $ac_fv18"
+echo "Tripmate                : $ac_tripmate"
+echo "Earthmate               : $ac_earthmate"
+echo "Logfile                 : $ac_logfile"
+echo "Enable shared libraries : $enable_shared"
+echo "Profiling               : $ac_profiling"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."
 

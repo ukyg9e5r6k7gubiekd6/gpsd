@@ -1,7 +1,7 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
-#include "gps.h"
 #include "config.h"
+#include "gps.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE

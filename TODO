@@ -1,8 +1,5 @@
 * Things to do:
 
-** Add an access(2) check to gpsprobe so it can exit with a useful message
-   when it doesn't have permissions to read the device.
-
 ** Use this backtrace to figure out why the EarthDistance code in gpsprobe
    occasionally craps out.
 

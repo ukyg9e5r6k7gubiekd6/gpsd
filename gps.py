@@ -72,6 +72,10 @@ class gpsdata:
 	self.satellite_stamp = gps.timestamp(now)
         self.await = self.parts = 0
 
+        self.profile_seconds = 0
+        self.profile_usec = 0
+        self.profile_sentence_length = 0
+
         __setattr__ = setattr
 
     def setattr(self, name, value):
@@ -242,6 +246,9 @@ class gps(gpsdata):
 	      self.satellite_stamp.changed = (self.satellites) != newsats
 	      self.satellites = newsats
 	      self.satellite_stamp.refresh() 
+	    elif cmd in ('Z', 'z'):
+              if data[1:] not in ("=1". "=0"):
+                  (self.profile_seconds, self.profile_usec, self.profile_sentence_length) = map(int, data.split(":"))
 	if self.raw_hook:
 	    self.raw_hook(buf);
 	return self.online_stamp.changed \

@@ -93,6 +93,13 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
     struct life_t satellite_stamp;
 
+#ifdef PROFILING
+    /* profiling data */
+    time_t seconds;		/* associated with the last timestamp */
+    suseconds_t usec;		/* ditto */
+    int sentence_length;	/* character count of associated sentence */
+#endif /* PROFILING */
+
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(char *buf);/* Raw-mode hook for GPS data. */
