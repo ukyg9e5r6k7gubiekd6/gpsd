@@ -1,3 +1,18 @@
+/* AIX requires this to be the first thing in the file.  */
+#ifndef __GNUC__
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#   endif
+#  endif
+# endif
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -461,7 +476,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
      * Split the sentence on every comma, making a list of arguments to pass
      * to the phrase parsers.
      */
-#if defined(__GNUC__)
+#ifdef AC_FUNC_ALLOCA
     s = alloca(strlen(sentence)+1);
     strcpy(s, sentence);
 #else
@@ -481,7 +496,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    break;
 	}
     }
-#if !defined(__GNUC__)
+#ifndef AC_FUNC_ALLOCA
     free(s);
 #endif
     return retval;
