@@ -16,6 +16,8 @@ SIGNAL_STRENGTH_UNKNOWN = -1
 
 NMEA_MAX = 82
 
+GPSD_PORT = 2947
+
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
 
@@ -160,7 +162,7 @@ class gps(gpsdata):
                 try: port = int(port)
                 except ValueError:
                     raise socket.error, "nonnumeric port"
-        if not port: port = SMTP_PORT
+        if not port: port = GPSD_PORT
         #if self.debuglevel > 0: print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
