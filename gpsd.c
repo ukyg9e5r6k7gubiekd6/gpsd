@@ -275,7 +275,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    }
 	    break;
         case 'X':
-	    sprintf(reply + strlen(reply), ",X=%d", ud->gps_fd != -1);
+	    sprintf(reply + strlen(reply), ",X=%d", ud->online);
 	    break;
 	case 'Y':
 	    if (!ud->satellites)
@@ -555,7 +555,6 @@ int main(int argc, char *argv[])
 	if (nowait && session->gNMEAdata.gps_fd == -1) {
 	    gpsd_deactivate(session);
 	    if (gpsd_activate(session) >= 0) {
-		notify_watchers("GPSD,X=1\r\n");
 		FD_SET(session->gNMEAdata.gps_fd, &all_fds);
 	    }
 	}
@@ -588,7 +587,6 @@ int main(int argc, char *argv[])
 		if (session->gNMEAdata.gps_fd == -1) {
 		    gpsd_deactivate(session);
 		    if (gpsd_activate(session) >= 0) {
-			notify_watchers("GPSD,X=1\r\n");
 			FD_SET(session->gNMEAdata.gps_fd, &all_fds);
 		    }
 		}
