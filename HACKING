@@ -28,6 +28,13 @@ subsecond precision; I recommend using ntpd, which will normally give
 you about 15 microseconds precision (two orders of magnitude better than 
 GPSes normally report).
 
+Another helpful command is B.  Without arguments, it triggers a response
+of the form <baudrate> <bits> N <stopbits>, e.g. "4800 8 N 1" describing
+the communications parameters of the link to the GPS.  If profiling is 
+enabled, B may be followed by an equals sign and a baud rate; the link
+will then change to that rate.  This feature is not enabled by default
+because it is not secured and can be used to effectively disable the GPS.
+
 The distribution lincludes a Python script, gpsprof, that uses the 
 Z command to collect profiling information from a running GPS instance.
 You can use this to measure the latency at each stage -- GPS to daemon,

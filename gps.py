@@ -200,7 +200,9 @@ class gps(gpsdata):
 	      self.altitude = d1
 	      self.altitude_stamp.refresh()
 	    elif cmd in ('B', 'b'):
-              (self.baudrate, self.stopbits) = map(int, data.split(":"))
+              (f1, f2, f3, f4) = data.split()
+              self.baudrate = int(f1)
+              self.stopbits = int(f4)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
 	    elif cmd in ('M', 'm'):

@@ -354,18 +354,21 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",Z=1");
 	    }
 	    break;
+#endif /* PROFILING */
 
 	case 'B':		/* change baud rate (SiRF only) */
+#ifdef PROFILING
 	    if (*p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		sirf_mode(session, 0, i);
 	    }
-	    sprintf(phrase, ",B=%d:%d", 
+#endif /* PROFILING */
+	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),
+		    9-session->device_type->stopbits,
 		    session->device_type->stopbits);
 	    break;
-#endif /* PROFILING */
 	case '\r': case '\n':
 	    goto breakout;
 	}

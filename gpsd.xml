@@ -185,6 +185,14 @@ decimal integer numeral:</para>
 </varlistentry>
 
 <varlistentry>
+<term>b</term>
+<listitem><para>Returns four fields giving the parameters of the
+serial link to the GPS as "B=%d %d %c %d"; baud rate, byte size,
+parity, (currently always N) and stop bits (1 or 2).  Useful mainly 
+for developers profiling the daemon.</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>d</term>
 <listitem><para>Returns the UTC time in the ISO 8601 format,
 "D=yyyy-mm-ddThh:nmm:ss.ssZ". Digits of precision in the fractional-seconds
