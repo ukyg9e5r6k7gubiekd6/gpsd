@@ -42,7 +42,7 @@ static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL)
 #define CLIMBERR_SET	0x8000
 
 struct gps_data_t {
-    int	online;			/* 1 if GPS is on line, 0 if not.
+    double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
 				 * fail to show up within the GPS's normal
@@ -51,39 +51,6 @@ struct gps_data_t {
 				 * sentences, this flag will be
 				 * prone to false negatives.
 				 */
-    struct life_t online_stamp;
-    char utc[28];		/* UTC date/time as "yyy-mm-ddThh:mm:ss.sssZ".
-				 *
-				 * Updated on every valid fix (GGA, GLL or
-				 * GPRMC). The hhmmss.ss part is reliable to
-				 * within one GPS send cycle time (normally one
-				 * second).  Altitude could be one send cycle
-				 * older than the timestamp if the last
-				 * sentence was GPRMC.
-				 * 
-				 * Within one GPS send cycle after midnight,
-				 * if the last sentence was GGA or GLL and not
-				 * GPRMC, the date could be off by one.
-				 *
-				 * The century part of the year is spliced in
-				 * from host-machine time. 
-				 */
-    /*
-     * Position/velocity fields are only valid when the last_refresh
-     * field of the associated timestamp is nonzero, in which case it
-     * tells when the data was collected.
-     */
-    double latitude;		/* Latitude in degrees */
-    double longitude;		/* Longitude in degrees */
-    struct life_t latlon_stamp;
-    double altitude;		/* Altitude in meters (MSL, not WGS 84) */
-    struct life_t altitude_stamp;
-
-    /* velocity */
-    double speed;		/* Speed over ground, knots */
-    double track;		/* Course made good (relative to true north) */
-#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
-    double climb;               /* vertical velocity, meters/sec */
 
     /* status of fix, valid on every poll */
     int    status;		/* Do we have a fix? */
@@ -95,6 +62,20 @@ struct gps_data_t {
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude too */
+
+    double gps_time;		/* time of last fix, seconds since Unix epoch */
+    char utc[28];		/* UTC date/time as "yyy-mm-ddThh:mm:ss.sssZ" */
+
+    double latitude;		/* Latitude in degrees (valid if status > 0) */
+    double longitude;		/* Longitude in degrees (valid if status > 0) */
+    double altitude;		/* Altitude in meters (valid if status >= 2) */
+#define ALTITUDE_NOT_VALID	-999
+
+    /* velocity, valid if status >= 1 */
+    double speed;		/* Speed over ground, knots */
+    double track;		/* Course made good (relative to true north) */
+#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
+    double climb;               /* vertical velocity, meters/sec */
 
     /* precision of fix */
     int satellites_used;	/* Number of satellites used in solution */
@@ -126,7 +107,6 @@ struct gps_data_t {
     int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
-    double gps_time;		/* GPS time (equivalent of utc field) */
     double d_xmit_time;		/* beginning of sentence transmission */
     double d_recv_time;		/* daemon receipt time (-> E1+T1) */
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */

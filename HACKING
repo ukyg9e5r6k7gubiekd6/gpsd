@@ -170,10 +170,6 @@ These are strings which should elicit an identifying response from
 the GPS that you can use as a trigger string for a driver.  This is
 how we detect SiRF chips (see step 5 under autoconfiguration above).
 
-** Atomicity issues in driver design
-
-
-
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"

@@ -65,7 +65,6 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	    out->longitude = lon;
 	updated++;
     }
-    REFRESH(out->latlon_stamp);
 }
 
 /**************************************************************************
@@ -301,6 +300,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     mask |= STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
+	double oldfixtime = out->gps_time;
 
 #ifndef WHOLE_CYCLE
 	fake_mmddyyyy(out);
@@ -324,10 +324,8 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	    }
 	} else {
 	    double oldaltitude = out->altitude;
-	    double oldaltstamp = out->altitude_stamp.last_refresh;
 
 	    out->altitude = atof(altitude);
-	    REFRESH(out->altitude_stamp);
 	    mask |= ALTITUDE_SET;
 
 	    /*
@@ -336,10 +334,10 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	     * SiRF and Garmin chips, which might have some smoothing
 	     * going on.
 	     */
-	    if (!oldaltstamp)
+	    if (oldaltitude == ALTITUDE_NOT_VALID)
 		out->climb = 0;
 	    else {
-		out->climb = (out->altitude-oldaltitude)/(out->altitude_stamp.last_refresh-oldaltstamp);
+		out->climb = (out->altitude-oldaltitude)/(out->gps_time-oldfixtime);
 	    }
 	    mask |= CLIMB_SET;
 	}
@@ -423,7 +421,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 	return 0;
     }
     /*
-     * This sanity check catches an odd behavior SiRF-II based GPSes.
+     * This sanity check catches an odd behavior of SiRF-II based GPSes.
      * When they can't see any satellites at all (like, inside a
      * building) they sometimes cough up a hairball in the form of a
      * GSV packet with all the azimuth entries 0 (but nonzero

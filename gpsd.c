@@ -210,7 +210,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (have_fix(session) && SEEN(ud->altitude_stamp))
+	    if (have_fix(session) && ud->mode == MODE_3D)
 		sprintf(phrase, ",A=%.3f", ud->altitude);
 	    else if (explicit)
 		strcpy(phrase, ",A=?");
@@ -343,7 +343,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    else {
 		sprintf(phrase, ",O=%.2f 0.005 %.4f %.4f",
 			ud->gps_time, ud->latitude, ud->longitude);
-		if (SEEN(session->gNMEAdata.altitude_stamp))
+		if (session->gNMEAdata.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %.2f",
 			    session->gNMEAdata.altitude);
 		else
@@ -362,7 +362,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    ud->track, ud->speed);
 		else
 		    strcat(phrase, "? ?");
-		if (SEEN(session->gNMEAdata.altitude_stamp))
+		if (session->gNMEAdata.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %.3f", ud->climb);
 		else
 		    strcat(phrase, "?");
@@ -370,7 +370,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    }
 	    break;
 	case 'P':
-	    if (have_fix(session) && SEEN(ud->latlon_stamp))
+	    if (have_fix(session))
 		sprintf(phrase, ",P=%.4f %.4f", 
 			ud->latitude, ud->longitude);
 	    else if (explicit)
@@ -415,7 +415,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (have_fix(session) && SEEN(ud->altitude_stamp))
+	    if (have_fix(session) && ud->mode == MODE_3D)
 		sprintf(phrase, ",U=%.3f", ud->climb);
 	    else if (explicit)
 		strcpy(phrase, ",U=?");
@@ -446,7 +446,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    }
 	    break;
         case 'X':
-	    sprintf(phrase, ",X=%d", ud->online);
+	    sprintf(phrase, ",X=%f", ud->online);
 	    break;
 	case 'Y':
 	    if (SEEN(ud->satellite_stamp)) {
@@ -507,7 +507,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
     if (ud->profiling && icd) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	sprintf(phrase, ",$=%s %.4d %.4f %.4f %.4f %.4f %.4f %.4lf",
+	sprintf(phrase, ",$=%s %.4d %.4f %.4f %.4f %.4f %.4f %.4f",
 		ud->tag,
 		ud->sentence_length,
 		ud->gps_time,

@@ -284,14 +284,12 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 
 	    session->gNMEAdata.latitude = radtodeg(pvt->lat);
 	    session->gNMEAdata.longitude = radtodeg(pvt->lon);
-	    REFRESH(session->gNMEAdata.latlon_stamp);
 
 	    // altitude over WGS84 cnverted to MSL
 	    session->gNMEAdata.altitude = pvt->alt + pvt->msl_hght;
 
 	    // geoid separation from WGS 84
 	    session->separation = pvt->msl_hght;
-	    REFRESH(session->gNMEAdata.altitude_stamp);
 
 	    // esrtimated position error in meters (two sigmas)
 	    session->gNMEAdata.epe = pvt->epe;

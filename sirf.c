@@ -211,14 +211,12 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    h = p / cos(phi) - n;
 	    session->gNMEAdata.latitude = phi * RAD_2_DEG;
 	    session->gNMEAdata.longitude = lambda * RAD_2_DEG;
-	    REFRESH(session->gNMEAdata.latlon_stamp);
 	    if (session->gNMEAdata.mode == MODE_3D) {
 		if (session->driverstate & SIRF_SEEN_41) {
 		    /* recompute geodetic sep. from the *last* altitude fix */
 		    session->separation = session->gNMEAdata.altitude - h;
 		    /* use it to correct this one so updates will be atomic */
 		    session->gNMEAdata.altitude = h + session->separation;
-		    REFRESH(session->gNMEAdata.altitude_stamp);
 		    mask |= ALTITUDE_SET;
 		}
 	    }
@@ -415,13 +413,11 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    /* skip 4 bytes of satellite map */
 	    session->gNMEAdata.latitude = getl(23)*1e-7;
 	    session->gNMEAdata.longitude = getl(27)*1e-7;
-	    REFRESH(session->gNMEAdata.latlon_stamp);
 	    /* skip 4 bytes of altitude from ellipsoid */
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
 	if (session->gNMEAdata.mode == MODE_3D) {
 	    session->gNMEAdata.altitude = getl(31)*1e-2;
-	    REFRESH(session->gNMEAdata.altitude_stamp);
 	    mask |= ALTITUDE_SET;
 	    session->driverstate |= SIRF_SEEN_41;
 	}

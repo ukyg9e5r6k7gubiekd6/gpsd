@@ -29,6 +29,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
     gpsdata->mode = MODE_NOT_SEEN;
     gpsdata->status = STATUS_NO_FIX;
     gpsdata->track = TRACK_NOT_VALID;
+    gpsdata->altitude = ALTITUDE_NOT_VALID;
     return gpsdata;
 }
 
@@ -71,10 +72,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 		switch (*sp) {
 		case 'A':
-		    sscanf(sp, "A=%lf", &d1);
-		    gpsdata->altitude_stamp.changed = (gpsdata->altitude != d1);
-		    gpsdata->altitude = d1;
-		    REFRESH(gpsdata->altitude_stamp);
+		    sscanf(sp, "A=%lf", &gpsdata->altitude);
 		    break;
 		case 'B':
 		    sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
@@ -104,9 +102,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'P':
 		    sscanf(sp, "P=%lf %lf", &d1, &d2);
-		    gpsdata->latlon_stamp.changed = (gpsdata->latitude != d1) || (gpsdata->longitude != d2);
 		    gpsdata->latitude = d1; gpsdata->longitude = d2;
-		    REFRESH(gpsdata->latlon_stamp);
 		    break;
 		case 'Q':
 		    sscanf(sp, "Q=%d %lf %lf %lf", &i1, &d1, &d2, &d3);
@@ -124,7 +120,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'T':
 		    sscanf(sp, "T=%lf", &gpsdata->track);
-		    break;
+		   break;
 		case 'U':
 		    sscanf(sp, "U=%lf", &gpsdata->climb);
 		    break;
@@ -132,16 +128,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    sscanf(sp, "V=%lf", &gpsdata->speed);
 		    break;
 		case 'X':
-		    if (!strncmp(sp, "X=1", 3)) {
-			gpsdata->online_stamp.changed = gpsdata->online != 1;
-			gpsdata->online = 1;
-			REFRESH(gpsdata->online_stamp);
-		    }
-		    else if (!strncmp(sp, "X=0", 3)) {
-			gpsdata->online_stamp.changed = gpsdata->online != 0;
-			gpsdata->online = 0;
-			REFRESH(gpsdata->online_stamp);
-		    }
+		    sscanf(sp, "V=%lf", &gpsdata->speed);
 		    break;
 		case 'Y':
 		    i1 = atoi(sp+2);
@@ -198,11 +185,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		}
 	    }
 	}
-	changed |=
-	    gpsdata->online_stamp.changed
-	|| gpsdata->latlon_stamp.changed 
-	|| gpsdata->altitude_stamp.changed 
-	|| gpsdata->fix_quality_stamp.changed 
+	changed |= gpsdata->fix_quality_stamp.changed 
 	|| gpsdata->epe_quality_stamp.changed 
 	|| gpsdata->satellite_stamp.changed 
 	;
@@ -265,14 +248,9 @@ void data_dump(struct gps_data_t *collect, time_t now)
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
 
-    if (collect->online_stamp.changed)
-	printf("online: %d\n", collect->online);
-    if (collect->latlon_stamp.changed) {
+    printf("online: %lf\n", collect->online);
+    if (collect->status)
 	printf("P: lat/lon: %lf %lf", collect->latitude, collect->longitude);
-	printf("(lr=%ld, changed=%d)\n",
-	       collect->latlon_stamp.last_refresh,
-	       collect->latlon_stamp.changed);
-    }
     if (collect->altitude_stamp.changed) {
 	printf("A: altitude: %lf  U: climb: %lf", 
 	       collect->altitude, collect->climb);

@@ -82,10 +82,10 @@ void gpsd_deactivate(struct gps_session_t *session)
 /* temporarily release the GPS device */
 {
     session->gNMEAdata.online = 0;
-    REFRESH(session->gNMEAdata.online_stamp);
     session->gNMEAdata.mode = MODE_NOT_SEEN;
     session->gNMEAdata.status = STATUS_NO_FIX;
     session->gNMEAdata.track = TRACK_NOT_VALID;
+    session->gNMEAdata.altitude = ALTITUDE_NOT_VALID;
     gpsd_close(session);
     session->gNMEAdata.gps_fd = -1;
     if (session->device_type->wrapup)
@@ -99,9 +99,8 @@ int gpsd_activate(struct gps_session_t *session)
     if (gpsd_open(session) < 0)
 	return -1;
     else {
-	session->gNMEAdata.online = 1;
+	session->gNMEAdata.online = timestamp();
 	session->counter = 0;
-	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
 	if (session->packet_type == SIRF_PACKET)
 	    gpsd_switch_driver(session, "SiRF-II binary");
@@ -147,21 +146,18 @@ int gpsd_poll(struct gps_session_t *session)
     if (waiting < 0)
 	return 0;
     else if (!waiting) {
-	if (time(NULL) <= session->gNMEAdata.online_stamp.last_refresh + session->device_type->cycle+1) {
-	    return 0;
-	} else {
+	if (timestamp()>session->gNMEAdata.online+session->device_type->cycle+1){
 	    session->gNMEAdata.online = 0;
-	    REFRESH(session->gNMEAdata.online_stamp);
+	    return 0;
+	} else
 	    return ONLINE_SET;
-	}
     } else {
 	struct gps_data_t old;
 	int mask = 0;
 
 	memcpy(&old, &session->gNMEAdata, sizeof(struct gps_data_t));
 
-	session->gNMEAdata.online = 1;
-	REFRESH(session->gNMEAdata.online_stamp);
+	session->gNMEAdata.online = timestamp();
 
 	/* can we get a full packet from the device? */
 	if (!session->device_type->get_packet(session, waiting))
@@ -175,11 +171,6 @@ int gpsd_poll(struct gps_session_t *session)
 	session->gNMEAdata.d_decode_time = timestamp();
 
 	/* set all the changed bits */
-#define CHANGECHECK(part, stamp) session->gNMEAdata.stamp.changed = (old.part!=session->gNMEAdata.part)
-	CHANGECHECK(online, online_stamp);
-	session->gNMEAdata.latlon_stamp.changed = \
-	    (session->gNMEAdata.longitude!=old.longitude || session->gNMEAdata.latitude!=old.latitude);
-	CHANGECHECK(altitude, altitude_stamp);
 	session->gNMEAdata.fix_quality_stamp.changed = \
 	    (session->gNMEAdata.pdop!=old.pdop||session->gNMEAdata.hdop!=old.hdop||session->gNMEAdata.vdop!=old.vdop);
 	session->gNMEAdata.epe_quality_stamp.changed = \
@@ -194,7 +185,6 @@ int gpsd_poll(struct gps_session_t *session)
 	    memcmp(session->gNMEAdata.azimuth, old.azimuth,sizeof(old.azimuth)) ||
 	    memcmp(session->gNMEAdata.ss, old.ss, sizeof(old.ss)) ||
 	    memcmp(session->gNMEAdata.used, old.used, sizeof(old.used));
-#undef CHANGECHECK
 
 	/* count the good fixes */
 	if (session->gNMEAdata.status > STATUS_NO_FIX) 

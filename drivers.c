@@ -21,8 +21,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
-	    if ((st = nmea_parse(session->outbuffer, &session->gNMEAdata))==0)
-		gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
+	    st = nmea_parse(session->outbuffer, &session->gNMEAdata);
 	} else {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
