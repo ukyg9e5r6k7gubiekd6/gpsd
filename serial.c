@@ -83,7 +83,6 @@ int serial_open()
 
 #if defined (USE_TERMIO)
 	    ttyset.c_cflag = CBAUD & device_speed;
-	    ttyset.c_cflag = CBAUD & B4800;
 #else
 	    ttyset.c_ispeed = device_speed;
 	    ttyset.c_ospeed = device_speed;
