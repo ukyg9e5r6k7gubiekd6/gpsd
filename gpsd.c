@@ -730,25 +730,18 @@ int main(int argc, char *argv[])
 	for (fd = 0; fd < getdtablesize(); fd++) {
 	    if (fd == msock || fd == session.fdin)
 		continue;
-	    if (FD_ISSET(fd, &watcher_fds)) {
-		if (session.fdin == -1) {
-		    gpsd_deactivate(&session);
-		    if (gpsd_activate(&session) >= 0)
-		    {
-			notify_watchers("GPSD,X=1\r\n");
-			FD_SET(session.fdin, &all_fds);
-		    }
+	    if (session.fdin == -1) {
+		gpsd_deactivate(&session);
+		if (gpsd_activate(&session) >= 0)
+		{
+		    notify_watchers("GPSD,X=1\r\n");
+		    FD_SET(session.fdin, &all_fds);
 		}
 	    }
 	    if (FD_ISSET(fd, &rfds)) {
 		char buf[BUFSIZE];
 		int buflen;
 
-		if (session.fdin == -1) {
-		    gpsd_deactivate(&session);
-		    if (gpsd_activate(&session) >= 0)
-			FD_SET(session.fdin, &all_fds);
-		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
 		if (buflen <= 0) {
 		    (void) close(fd);
