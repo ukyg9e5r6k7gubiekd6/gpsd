@@ -19,6 +19,7 @@
 <cmdsynopsis>
   <command>gpsd</command>  
       <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
+      <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
       <arg choice='opt'>-n </arg>      
@@ -61,6 +62,13 @@ See <xref linkend='accuracy'/> for discussion.</para>
 <term>-f</term>
 <listitem>
 <para>Set a GPS device name (default is <filename>/dev/gps</filename>).</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>-F</term>
+<listitem>
+<para>Set the name of the control socket for device addition and
+removal commands (default is <filename>&gpsdsock;</filename>).</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -473,7 +481,8 @@ should require no configuration or user action to find devices.</para>
 daemon's internal search list cannot be sent over the socket from a
 client.  Instead, they must be written to a local Unix-domain socket
 which will be accessible only to programs running as root.  This
-control socket will be located at <filename>&gpsdsock;</filename>.</para>
+control socket will be located at <filename>&gpsdsock;</filename>,
+where the -F option specifies.</para>
 
 <para>To point <application>gpsd</application> at a device that may be
 a GPS, write to the control socket a plus sign ('+') followed by the
@@ -627,7 +636,7 @@ after the second sentence has arrived.</para>
 <varlistentry>
 <term><filename>&gpsdsock;</filename></term>
 <listitem>
-<para>Location of the control socket for device add/remove commands.</para>
+<para>Default location of the control socket for device add/remove commands.</para>
 </listitem>
 </varlistentry>
 </variablelist>

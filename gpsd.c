@@ -33,7 +33,7 @@
 #include "gpsd.h"
 
 #define DEFAULT_DEVICE_NAME	"/dev/gps"
-#define CONTROLSOCKET		"/var/run/gpsd.sock"
+#define CONTROL_SOCKET		"/var/run/gpsd.sock"
 
 #define QLEN			5
 
@@ -687,6 +687,7 @@ int main(int argc, char *argv[])
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *device_name = DEFAULT_DEVICE_NAME;
+    static char *control_socket = CONTROL_SOCKET;
     static struct channel_t *channel;
     struct gps_device_t *device;
     int dfd;
@@ -716,6 +717,9 @@ int main(int argc, char *argv[])
 	case 'f':
 	case 'p':
 	    device_name = optarg;
+	    break;
+	case 'F':
+	    control_socket = optarg;
 	    break;
 	case 'P':
 	    pid_file = optarg;
@@ -775,8 +779,8 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(1, "listening on port %s\n", service);
-    unlink(CONTROLSOCKET);
-    if ((csock = filesock(CONTROLSOCKET)) < 0) {
+    unlink(control_socket);
+    if ((csock = filesock(control_socket)) < 0) {
 	gpsd_report(0,"control socket create failed, netlib error %d\n",msock);
 	exit(2);
     }

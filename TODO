@@ -1,6 +1,10 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Finish and test the control-socket implementation
+
+gpsfake needs to set the socket location to something reasonable.
+
 ** In the SiRF driver, get leap seconds from almanac data
 
 Currently we're using a fixed 13-leap-second offset to convert GPS
