@@ -1,4 +1,4 @@
-/* libgpsd.c -- client interface library for the gpsd daemon */
+/* libgps.c -- client interface library for the gpsd daemon */
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -221,6 +221,9 @@ int gps_query(int fd, struct gps_data_t *gpsdata, char *requests)
 }
 
 #ifdef TESTMAIN
+/*
+ * A simple command-line exerciser for the library.
+ */
 
 void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
