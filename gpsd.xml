@@ -36,6 +36,8 @@ and speedometer</refpurpose>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
+      <arg choice='opt'>--speedunits <group><replaceable>mph</replaceable><replaceable>kph</replaceable><replaceable>knots</replaceable></group></arg>
+      <arg choice='opt'>--altunits <group><replaceable>feet</replaceable><replaceable>meters</replaceable></group></arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
@@ -43,7 +45,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
-      <arg choice='opt'>--units <group><replaceable>mph</replaceable><replaceable>kph</replaceable><replaceable>knots</replaceable></group></arg>
+      <arg choice='opt'>--speedunits <group><replaceable>mph</replaceable><replaceable>kph</replaceable><replaceable>knots</replaceable></group></arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
@@ -313,6 +315,16 @@ server to get data from; a colon-separated suffix is taken as a port
 number.  The misfeature of previous versions that allowed it to
 direct-connect to the serial device has been removed.</para>
 
+<para>The --speedunits option can be used to set the speed units for
+display; follow the keyword with knots for nautical miles per hour,
+kph for kilometres per hour, or mph for miles per hour.  The default
+is miles per hour.  This option can also be set as the X resource 
+'speedunits'.</para>
+
+<para>The --altunits option can be used to set the altitude units for
+display; follow the keyword with 'meters' or 'feet'.  The default
+is feet.  This option can also be set as the X resource 'altunits'.</para>
+
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 
@@ -325,7 +337,8 @@ option to dump the package version and exit.  Additionally, it accepts
 <para>The --speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
-is miles per hour.</para>
+is miles per hour.   This option can also be set as the X resource 
+'speedunits'.</para>
 
 </refsect2>
 </refsect1>
