@@ -54,8 +54,10 @@ int gpsd_set_speed(struct gps_device_t *session,
       rate =  B19200;
     else if (speed < 57600)
       rate =  B38400;
-    else
+    else if (speed < 115200)
       rate =  B57600;
+    else
+      rate =  B115200;
 
     tcflush(session->gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
     if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
