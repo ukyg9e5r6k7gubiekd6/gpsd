@@ -57,15 +57,15 @@ mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
 cp gpsd.1 gpsprobe.1 gpsprof.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
-# gpsd-devel files
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
 cp .libs/libgps.la "$RPM_BUILD_ROOT"%{_libdir}
 cp .libs/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO1VERSION}
 ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so
+# gpsd-devel files
+cp gpsfake.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgps.3 libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
-cp gpsfake.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
@@ -103,22 +103,22 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %attr(755, root, root) %{_bindir}/gpsprobe
 %{_libdir}/libgps.so.%{SO3VERSION}
 %{_libdir}/libgps.so.%{SO1VERSION}
+%{_libdir}/libgps.la
+%{_libdir}/libgps.so
 %{_mandir}/man1/gpsd.1*
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
-%{_mandir}/man3/libgps.3*
-%{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %files -n gpsd-devel
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
-%{_libdir}/libgps.la
-%{_libdir}/libgps.so
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
 %{_mandir}/man1/gpsfake.1*
+%{_mandir}/man3/libgps.3*
+%{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gps.py*
 %{_libdir}/python*/site-packages/gpsd.py*

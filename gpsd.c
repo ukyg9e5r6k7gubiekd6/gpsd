@@ -217,6 +217,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		while (isdigit(*p)) p++;
 		sirf_mode(session, 0, i);
 	    }
+#endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),
 		    9-session->device_type->stopbits,
