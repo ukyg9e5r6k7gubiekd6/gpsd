@@ -361,16 +361,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 	    /*
-	     * Compute UTC from extended GPS time.  The protocol reference
-	     * claims this 16-bit field is "extended" GPS weeks, but I'm
-	     * seeing a quantity that has undergone 10-bit wraparound.
-	     */
-	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
-	    session->gpsdata.fix.time = gpstime_to_unix(getw(5), getl(7)*1e-4);
-	    session->gpsdata.fix.time -= LEAP_SECONDS;
-	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
-	    /*
-	     * Skip UTC, left all zeros in 231 and older firmware versions, 
+	     * UTC is left all zeros in 231 and older firmware versions, 
 	     * and misdocumented in the Protocol Reference (version 1.4).
 	     *            Documented:        Real:
 	     * UTC year       2               2
@@ -381,6 +372,15 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * UTC second     2               2
 	     *                11              8
 	     */
+	    session->gpsdata.nmea_date.tm_year = getw(11);
+	    session->gpsdata.nmea_date.tm_mon = getb(13)-1;
+	    session->gpsdata.nmea_date.tm_mday = getb(14);
+	    session->gpsdata.nmea_date.tm_hour = getb(15);
+	    session->gpsdata.nmea_date.tm_min = getb(16);
+	    session->gpsdata.nmea_date.tm_sec = 0;
+	    session->gpsdata.subseconds = getw(17)*1e-3;
+	    session->gpsdata.fix.time=mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;
 	    session->gpsdata.fix.longitude = getl(27)*1e-7;
