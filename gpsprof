@@ -42,8 +42,9 @@ class spaceplot:
         self.fixes = []
         self.fp = fp
     def gather(self, session):
-        # Include altitude, not used here, for 3D plot experiments
-        self.fixes.append((session.latitude, session.longitude, session.latitude))
+        # Include altitude, not used here, for 3D plot experiments.
+        # Watch out for the ALTITUDE_NOT_VALID value from gps.py.
+        self.fixes.append((session.latitude, session.longitude, session.altitude))
         return True
     def data(self, session):
         self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
