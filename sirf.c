@@ -1,3 +1,14 @@
+/*
+ * This is the gpsd driver for SiRF-II GPSes operating in binary mode.
+ *
+ * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
+ *
+ * The disadvantages: Doesn't return HDOP or VDOP, just DOP.  Reports 
+ * altititude relative to the WGS 84 reference ellipsoid, not MSL.
+ *
+ * Rumor has it we should be able to get UERE data out of this, but I
+ * have not figured out how to yet.  The SiRF documentation sucks horribly!
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -344,7 +355,7 @@ static void decode_sirf(struct gps_session_t *session,
 	intfixtime = (int)fixtime;
 	when = localtime(&intfixtime);
 	session->year = when->tm_year;
-	session->month = when->tm_mon;
+	session->month = when->tm_mon + 1;
 	session->day = when->tm_mday;
 	session->hours = when->tm_hour;
 	session->minutes = when->tm_min;
@@ -362,12 +373,11 @@ static void decode_sirf(struct gps_session_t *session,
 	session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0.0;
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
 	gpsd_binary_fix_dump(session, buf2);
+	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
 	break;
 
     case 0x04:		/* Measured tracker data out */
-	//decode_time(getw(1),getl(3)/100.0);
-	// ch = getb(7);
 	gpsd_zero_satellites(&session->gNMEAdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
@@ -378,10 +388,11 @@ static void decode_sirf(struct gps_session_t *session,
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
 	    session->gNMEAdata.ss[st] = cn/10;
-	    session->gNMEAdata.used[st] = (getw(off+3) == 0xbf);
+	    // session->gNMEAdata.used[st] = (getw(off+3) == 0xbf);
 	    good = session->gNMEAdata.PRN[st] && 
 		session->gNMEAdata.azimuth[st] && 
 		session->gNMEAdata.elevation[st];
+#ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
 			getb(off+2)/2.0, 
@@ -389,21 +400,23 @@ static void decode_sirf(struct gps_session_t *session,
 			cn/10, 
 			getw(off+3),
 			good ? '*' : ' ');
+#endif /* UNUSED */
 	    if (good)
-	    st += 1;
+		st += 1;
 	}
 	session->gNMEAdata.satellites = st;
-	gpsd_report(4, "%d satellites\n", session->gNMEAdata.satellites);
 	REFRESH(session->gNMEAdata.satellite_stamp);
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(3, "<= GPS: %s", buf2);
 	break;
 
     case 0x09:		/* CPU Throughput */
+#ifdef __UNUSED__
 	gpsd_report(4, 
 		    "SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
 		    (float)getw(1)/186, (float)getw(3)/186, 
 		    (float)getw(5)/186, getw(7));
+#endif /* UNUSED */
     	break;
 
     case 0x0a:		/* Undocumented packet type */
