@@ -459,16 +459,17 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     typedef void (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
     static struct {
 	char *name;
+	int mask;
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"GPRMB", NULL},
-	{"GPRMC", processGPRMC},
-	{"GPGGA", processGPGGA},
-	{"GPGLL", processGPGLL},
-	{"GPVTG", processGPVTG},
-	{"GPGSA", processGPGSA},
-	{"GPGSV", processGPGSV},
-	{"PRWIZCH", NULL},
+	{"GPRMB", 0,    	NULL},
+	{"GPRMC", GPRMC,	processGPRMC},
+	{"GPGGA", GPGGA,	processGPGGA},
+	{"GPGLL", GPGLL,	processGPGLL},
+	{"GPVTG", GPVTG,	processGPVTG},
+	{"GPGSA", GPGSA,	processGPGSA},
+	{"GPGSV", GPGSV,	processGPGSV},
+	{"PRWIZCH", 0,  	NULL},
     };
 
     int retval = -1;
@@ -504,6 +505,8 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
         if (!strcmp(nmea_phrase[i].name, field[0])) {
 	    if (nmea_phrase[i].decoder)
 		(nmea_phrase[i].decoder)(count, field, outdata);
+	    if (nmea_phrase[i].mask)
+		outdata->seen_sentences |= nmea_phrase[i].mask;
 	    retval = 0;
 	    break;
 	}

@@ -111,6 +111,15 @@ struct gps_data_t {
     int baudrate, stopbits;	/* RS232 link paramters */
     int cycle;			/* refresh cycle time in seconds */
 
+    /* track which sentences have been seen */
+    int seen_sentences;
+#define GPRMC	0x01
+#define GPGGA	0x02
+#define GPGLL	0x04
+#define GPVTG	0x08
+#define GPGSA	0x10
+#define GPGSV	0x20
+
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(char *buf);/* Raw-mode hook for GPS data. */
