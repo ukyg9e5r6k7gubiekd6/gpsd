@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
       char hn[256];
       gethostname(hn, sizeof(hn));
 
-      sprintf(buf, "HELO %s gpsd 0.99\r\nB", hn, VERSION);
+      sprintf(buf, "HELO %s gpsd 0.99", hn, VERSION);
       write(dsock, buf, strlen(buf));
       FD_SET(dsock, &afds);
     }
