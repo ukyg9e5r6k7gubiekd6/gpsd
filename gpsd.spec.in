@@ -119,10 +119,10 @@ if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Fri Dec 17 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Thu Dec 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.5.1
 - Use gmtime instead of localtime when guessing the day or year of a date;
   this avoids jitter in the day after 19:00 GMT.  Added -v option to dump 
-  version and exit.
+  version and exit.  Commented out a crash-causing debug line in gps.py.
 
 * Thu Dec  9 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.4-1
 - Minor bugs in gpsd.py fixed.  M now returns 0 status if GPGSA not yet
