@@ -397,12 +397,12 @@ static void processGPGSV(char *sentence, struct gps_data *out)
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
-    changed = update_field_i(sentence, 3, &out->satellites_in_view);
+    changed = update_field_i(sentence, 3, &out->satellites);
 
     n = (n - 1) * 4;
     m = n + 4;
 
-    while (n < out->satellites_in_view && n < m) {
+    while (n < out->satellites && n < m) {
 	changed |= update_field_i(sentence, f++, &out->PRN[n]);
 	changed |= update_field_i(sentence, f++, &out->elevation[n]);
 	changed |= update_field_i(sentence, f++, &out->azimuth[n]);

@@ -61,7 +61,7 @@ struct gps_data {
     struct life_t fix_quality_stamp;
 
     /* satellite status */
-    int satellites_in_view;	/* # of satellites in view */
+    int satellites;	/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */

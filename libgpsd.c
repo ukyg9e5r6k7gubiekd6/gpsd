@@ -112,6 +112,12 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	    gpsdata->speed = d1;
 	    REFRESH(gpsdata->speed_stamp);
 	    break;
+	case 'Y':
+	    i1 = atoi(sp+2);
+	    gpsdata->satellite_view_stamp.changed = (gpsdata->satellites != i1);
+	    gpsdata->satellites = i1;
+	    REFRESH(gpsdata->satellites_stamp);
+	    break;
 	}
     }
 
