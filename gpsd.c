@@ -232,8 +232,9 @@ static int handle_request(int fd, char *buf, int buflen)
 		gpsd_report(1, "Switch to %s requested\n", bufcopy);
 
 		if (need_gps <= 1 && !access(bufcopy, R_OK)) {
+		    char *stash_device;
 		    gpsd_deactivate(session);
-		    char *stash_device = session->gpsd_device;
+		    stash_device = session->gpsd_device;
 		    session->gpsd_device = strdup(bufcopy);
 		    session->gNMEAdata.baudrate = 0;	/* so it'll hunt */
 		    session->driverstate = 0;
