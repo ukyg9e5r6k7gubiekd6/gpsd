@@ -575,10 +575,6 @@ static int handle_request(int cfd, char *buf, int buflen)
 		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		sprintf(phrase, ",Z=0");
 		p++;
-	    } else if (FD_ISSET(cfd, &nmea_fds)) {
-		ud->profiling = 0;
-		gpsd_report(3, "%d turned off profiling mode\n", cfd);
-		sprintf(phrase, ",Z=0");
 	    } else {
 		ud->profiling = !ud->profiling;
 		gpsd_report(3, "%d toggled profiling mode\n", cfd);
