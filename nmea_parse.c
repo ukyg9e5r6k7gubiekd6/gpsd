@@ -497,17 +497,21 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
  **************************************************************************/
 
 void nmea_add_checksum(char *sentence)
-/* add NMEA checksum to a *-terminated sentence */
+/* add NMEA checksum to a possibly  *-terminated sentence */
 {
     unsigned char sum = '\0';
     char c, *p = sentence;
 
-    if (*p == '$')
+    if (*p == '$') {
 	p++;
-    while ((c = *p++) != '*' && c != '\0')
+    } else {
+        gpsd_report(1, "Bad NMEA sentence: '%s'\n", sentence);
+    }
+    while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;
-    if (c != '*')
-	*p++ = '*';
+	p++;
+    }
+    *p++ = '*';
     sprintf(p, "%02X\r\n", sum);
 }
 
