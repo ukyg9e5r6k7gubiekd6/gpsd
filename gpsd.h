@@ -64,6 +64,13 @@ struct gps_session_t {
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
 
+/*
+ * Give the GPS and UART this much time to settle and ship some data
+ * before trying to read after open or baud rate change.  Less than
+ * 1.25 seconds doesn't work under Linux 2.6.10 on an Athlon 64 3400.
+ */
+#define SETTLE_TIME	1250000
+
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
 

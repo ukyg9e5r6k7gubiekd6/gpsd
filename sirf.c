@@ -24,10 +24,13 @@ int sirf_mode(struct gps_session_t *session, int binary, int speed)
 		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
    gpsd_report(1, "Send returned %d.\n", status);
    gpsd_set_speed(&session->ttyset, (speed_t)speed);
-   if (tcsetattr(session->gNMEAdata.gps_fd, TCIOFLUSH, &session->ttyset))
+   if (tcsetattr(session->gNMEAdata.gps_fd, TCSAFLUSH, &session->ttyset))
        return -1;
-   else
+   else {
+       tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
+       usleep(SETTLE_TIME);
        return status;
+   }
 }
 
 /* These require binary mode */

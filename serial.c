@@ -79,12 +79,7 @@ static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
     tcflush(ttyfd, TCIOFLUSH);
     buf[0] = '\0';
     for (maxreads = 0; maxreads < NRATES; maxreads++) {
-	/*
-	 * Give device time to settle and ship some data before reading.
-	 * Less than 1.25 seconds doesn't work under Linux 2.6.10 on
-	 * an Athlon 64 3400.
-	 */
-	usleep(1250000);
+	usleep(SETTLE_TIME);
 	n = read(ttyfd, buf, sizeof(buf)-1);
 	if (n > 0) {
 	    buf[n] = '\0';
