@@ -5,7 +5,7 @@
 #define DGPS_SOURCE_INTERNAL 2
 #define DGPS_SOURCE_WAAS     3
 
-int sirf_to_sirfbin(int, int);
+int sirf_mode(int, int, int);
 int sirf_waas_ctrl(int, int);
 int sirf_to_nmea(int, int);
 int sirf_reset(int);

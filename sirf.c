@@ -61,16 +61,15 @@ static u_int16_t crc_sirf(u_int8_t *msg) {
    return(crc);
 }
 
-
-int sirf_to_sirfbin(int ttyfd, int speed) 
-/* switch GPS to SiRF binary mode at 19200 8N1 */
+int sirf_mode(int ttyfd, int binary, int speed) 
+/* switch GPS to specified mode at 8N1, optionarry to binary */
 {
    int      len;
    char	    msg[128]; 
 
    crc_nmea(msg);
 
-   sprintf(msg, "$PSRF100,0,%d,8,1,0*##\r\n", speed);
+   sprintf(msg, "$PSRF100,%d,%d,8,1,0*##\r\n", !binary, speed);
    len = strlen(msg);
    return (write(ttyfd, msg, len) != len);
 }
