@@ -345,20 +345,6 @@ static void decode_ecef(struct gps_data_t *ud,
     REFRESH(ud->climb_stamp);
 }
 
-static int sirfbin_mode(struct gps_session_t *session, int mode)
-{
-    if (mode == 0) {
-	gpsd_report(4, "Dropping back to NMEA mode.\n");
-	sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
-	usleep(50000);
-	if (packet_sniff(session) == NMEA_PACKET) {
-	    gpsd_switch_driver(session, "SiRF-II NMEA");
-	    return 0;
-	}
-    } 
-    return 1;
-}
-
 static void decode_sirf(struct gps_session_t *session,
 			unsigned char *buf, int len)
 {
@@ -461,7 +447,8 @@ static void decode_sirf(struct gps_session_t *session,
 	fv = atof(session->outbuffer+5);
 	if (fv < 231) {
 	    session->driverstate |= SIRF_LT_231;
-	    sirfbin_mode(session, 0); 
+	    sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
+	    packet_sniff(session);
 	} else if (fv < 232) 
 	    session->driverstate |= SIRF_EQ_231;
 	else
@@ -631,7 +618,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
     }
 }
 
-static int sirfbin_speed(struct gps_session_t *session, int speed)
+static int sirfbin_switch(struct gps_session_t *session, int speed)
 {
     return sirf_speed(session->gNMEAdata.gps_fd, speed);
 }
@@ -645,8 +632,8 @@ struct gps_type_t sirf_binary =
     sirfbin_initializer,	/* initialize the device */
     sirfbin_handle_input,	/* read and parse message packets */
     NULL,		/* send DGPS correction */
-    sirfbin_speed,	/* we can change baud rate */
-    sirfbin_mode,	/* we have a mode switcher */
+    sirfbin_switch,	/* we can change baud rate */
+    NULL,		/* no mode switcher */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };
