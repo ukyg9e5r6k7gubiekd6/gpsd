@@ -20,11 +20,14 @@
 int sirf_mode(struct gps_session_t *session, int binary, int speed) 
 /* switch GPS to specified mode at 8N1, optionarry to binary */
 {
-   return nmea_send(session->gNMEAdata.gps_fd, 
+   int status = nmea_send(session->gNMEAdata.gps_fd, 
 		    "$PSRF100,%d,%d,8,1,0", !binary, speed);
-   cfsetispeed(&session->ttyset, (speed_t)speed);
-   cfsetospeed(&session->ttyset, (speed_t)speed);
-   tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset);
+   gpsd_report(1, "Send returned %d.\n", status);
+   gpsd_set_speed(&session->ttyset, (speed_t)speed);
+   if (tcsetattr(session->gNMEAdata.gps_fd, TCIOFLUSH, &session->ttyset))
+       return -1;
+   else
+       return status;
 }
 
 int sirf_nmea_waas(int ttyfd, int enable) 

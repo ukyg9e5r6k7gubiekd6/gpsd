@@ -73,6 +73,7 @@ extern int nmea_send(int fd, const char *fmt, ... );
 extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
 extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *context);
+extern void gpsd_set_speed(struct termios *, int);
 extern void gpsd_close(struct gps_session_t *context);
 extern int netlib_connectsock(const char *host, const char *service, const char *protocol);
 
