@@ -11,6 +11,7 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <assert.h>
 
@@ -32,6 +33,7 @@
 #include "gpsd.h"
 
 #define DEFAULT_DEVICE_NAME	"/dev/gps"
+#define CONTROLSOCKET		"/var/run/gpsd.sock"
 
 #define QLEN			5
 
@@ -161,6 +163,26 @@ static int passivesock(char *service, char *protocol, int qlen)
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
 	gpsd_report(0, "Can't listen on %s port%s\n", service);
+	return -1;
+    }
+    return s;
+}
+
+static int filesock(char *filename)
+{
+    struct sockaddr_un addr;
+    int s;
+
+    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+	gpsd_report(0, "Can't create device-control socket\n");
+	return -1;
+    }
+    strcpy(addr.sun_path, filename);
+    addr.sun_family = AF_UNIX;
+    bind(s, (struct sockaddr *) &addr, strlen(addr.sun_path) +
+	 sizeof (addr.sun_family));
+    if (listen(s, QLEN) < 0) {
+	gpsd_report(0, "Can't listen on local socket %s\n", filename);
 	return -1;
     }
     return s;
@@ -651,8 +673,8 @@ int main(int argc, char *argv[])
     struct gps_device_t *device;
     int dfd;
     struct sockaddr_in fsin;
-    fd_set rfds;
-    int option, msock, cfd, go_background = 1;
+    fd_set rfds, control_fds;
+    int option, csock, msock, cfd, go_background = 1;
     extern char *optarg;
 
     debuglevel = 0;
@@ -731,10 +753,15 @@ int main(int argc, char *argv[])
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(1, "launching (Version %s)\n", VERSION);
     if ((msock = passivesock(service, "tcp", QLEN)) < 0) {
-	gpsd_report(0, "startup failed, netlib error %d\n", msock);
+	gpsd_report(0,"command socket create failed, netlib error %d\n",msock);
 	exit(2);
     }
     gpsd_report(1, "listening on port %s\n", service);
+    unlink(CONTROLSOCKET);
+    if ((csock = filesock(CONTROLSOCKET)) < 0) {
+	gpsd_report(0,"control socket create failed, netlib error %d\n",msock);
+	exit(2);
+    }
 
     if (dgpsserver) {
 	dsock = gpsd_open_dgps(dgpsserver);
@@ -745,6 +772,8 @@ int main(int argc, char *argv[])
     }
 
     FD_SET(msock, &all_fds);
+    FD_SET(csock, &all_fds);
+    FD_ZERO(&control_fds);
 
     channel = open_device(device_name, nowait);
     if (!channel) {
@@ -803,6 +832,34 @@ int main(int argc, char *argv[])
 	    }
 	    FD_CLR(msock, &rfds);
 	}
+
+	/* also be open to new control-socket connections */
+	if (FD_ISSET(csock, &rfds)) {
+	    socklen_t alen = sizeof(fsin);
+	    int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
+
+	    if (ssock < 0)
+		gpsd_report(0, "accept: %s\n", strerror(errno));
+	    else {
+		int opts = fcntl(ssock, F_GETFL);
+
+		if (opts >= 0)
+		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
+		gpsd_report(3, "control socket connect on %d\n", ssock);
+		FD_SET(ssock, &all_fds);
+		FD_SET(ssock, &control_fds);
+	    }
+	}
+
+	/* read any commands that came in over control sockets */
+	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+	    if (FD_ISSET(cfd, &control_fds)) {
+		char buf[BUFSIZ];
+
+		if (read(cfd, buf, sizeof(buf)-1) > 0) {
+		    gpsd_report(1, "<= (control %d): %s\n", cfd, buf);
+		}
+	    }
 
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
