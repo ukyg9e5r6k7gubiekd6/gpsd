@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #if defined (HAVE_SYS_TERMIOS_H)
 #include <sys/termios.h>
@@ -76,7 +77,7 @@ static Widget status;
 
 static int device_speed = 4800;
 static char *device_name = 0;
-static char *default_device_name = "/dev/gps";
+static char *default_device_name = "localhost:2947";
 
 String fallback_resources[] =
 {
@@ -397,8 +398,6 @@ static void open_input(XtAppContext app)
 {
     XtInputId input_id;
 
-    gps_activate(&session);
-
     input_id = XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
 }
@@ -500,6 +499,9 @@ int main(int argc, char *argv[])
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
     session.raw_hook = update_display;
+    if (gps_activate(&session) == -1)
+	exit(1);
+
     open_input(app);
 
     init_list();
