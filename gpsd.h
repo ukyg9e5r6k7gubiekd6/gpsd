@@ -41,9 +41,8 @@ struct gps_type_t
 struct gps_session_t
 /* session object, encapsulates all global state */
 {
-    struct gps_type_t *device_type;
-    struct longlat_t initpos;
     struct gps_data_t gNMEAdata;
+    struct gps_type_t *device_type;
     char *gpsd_device;	/* where to find the GPS */
     int baudrate;	/* baud rate of session */
     int fdin;		/* input fd from GPS */
@@ -51,6 +50,10 @@ struct gps_session_t
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
+
+#if TRIPMATE_ENABLE
+    struct longlat_t initpos;	/* public; set by -i option */
+#endif /* TRIPMATE_ENABLE */
 
 #ifdef ZODIAC_ENABLE
     /* private housekeeping stuff for the Zodiac driver */

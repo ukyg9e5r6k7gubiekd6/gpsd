@@ -1,6 +1,6 @@
 Name: gpsd
-%define SO3VERSION	1.0.0
-%define SO1VERSION	1
+%define SO3VERSION	2.0.0
+%define SO1VERSION	2
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1

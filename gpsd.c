@@ -144,9 +144,11 @@ static void usage()
   Options include: \n\
   -p string (default %s)   = set GPS device name \n\
   -T devtype (default 'n')       = set GPS device type \n\
-  -S integer (default %4s)      = set port for daemon \n\
-  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n\
-  -s baud_rate                   = set baud rate on gps device \n\
+  -S integer (default %4s)      = set port for daemon \n"
+#ifdef TRIPMATE
+"  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
+#endif /* TRIPMATE */
+"  -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n\
@@ -545,6 +547,7 @@ int main(int argc, char *argv[])
 	case 'd':
 	    dgpsserver = optarg;
 	    break;
+#if TRIPMATE_ENABLE
 	case 'i':
 	    if (!(colon = strchr(optarg, ':')) || colon == optarg)
 		fprintf(stderr, 
@@ -565,6 +568,7 @@ int main(int argc, char *argv[])
 		session->initpos.longitude[strlen(session->initpos.longitude)-1] = '\0';
 	    }
 	    break;
+#endif /* TRIPMATE_ENABLE */
 	case 'n':
 	    nowait = 1;
 	    break;
