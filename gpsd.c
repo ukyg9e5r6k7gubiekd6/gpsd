@@ -273,7 +273,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'q':
 	    sprintf(reply + strlen(reply),
 		    ",Q=%d %f %f %f",
-		    session.gNMEAdata.in_view,
+		    session.gNMEAdata.satellites,
 		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
 	    break;
 	case 'R':
