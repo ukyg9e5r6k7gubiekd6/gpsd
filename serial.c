@@ -47,12 +47,8 @@ static int set_baud(long baud)
 
 int gpsd_open(char *device_name, int device_speed)
 {
-    char *temp;
-
-    temp = strdup(device_name);
-
     gpscli_report(1, "opening GPS data source at %s\n", device_name);
-    ttyfd = open(temp, O_RDWR | O_NONBLOCK);
+    ttyfd = open(device_name, O_RDWR | O_NONBLOCK);
 
     if (ttyfd < 0)
 	return (-1);
@@ -76,7 +72,6 @@ int gpsd_open(char *device_name, int device_speed)
 	if (tcsetattr(ttyfd, TCSANOW, &ttyset) != 0)
 	    return (-1);
     }
-    free(temp);
     return ttyfd;
 }
 
