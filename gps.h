@@ -146,13 +146,17 @@ int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf));
 
 /* some multipliers for interpreting GPS output */
-#define METERS_TO_FEET	3.2808399	/* Imperial (U.S./British) feet */
-#define METERS_TO_MILES	0.00062137119	/* International miles */
-#define KNOTS_TO_MPH	1.1507794	/* International miles and knots */
-#define KNOTS_TO_KPH	1.852		/* International knots */
-#define PI 3.1415926535897932384626433832795029L	/* for radians-to-degrees and vv. */
-#define RAD_2_DEG  57.2957795130823208767981548141051703L /* degrees = 180/pi */
-#define DEG_2_RAD  0.0174532925199432957692369076848861271L /* radians = pi/180 */
+#define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */
+#define METERS_TO_MILES	0.00062137119	/* Meters to miles */
+#define KNOTS_TO_MPH	1.1507794	/* Knots to miles per hour */
+#define KNOTS_TO_KPH	1.852		/* Knots to kilometers per hour */
+#define MPS_TO_KNOTS	1.9437		/* Meters per second to knots */
+/* miles and knots are both the international standard versions of the units */
+
+/* angle conversion multipliers */
+#define PI 3.1415926535897932384626433832795029L
+#define RAD_2_DEG  57.2957795130823208767981548141051703L
+#define DEG_2_RAD  0.0174532925199432957692369076848861271L
 
 /* gps_open() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
