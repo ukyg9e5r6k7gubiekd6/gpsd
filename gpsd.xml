@@ -111,7 +111,7 @@ fractional parts to the right of a decimal point.</para>
 <term>-n</term>
 <listitem><para>Don't wait for a client to connect before polling
 the GPS.  The wait is a feature; many serial GPSes go to a standby
-node (not drawing power) before the host machine asserts DTR, so
+mode (not drawing power) before the host machine asserts DTR, so
 waiting for the first actual request can save valuable battery power
 on portable equipment.  This option combines well with -D2 to enable
 monitoring of the GPS data stream.</para>
