@@ -26,10 +26,10 @@ static Widget satellite_list, satellite_diagram, status;
 static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
 static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
 static Widget rowColumn_19, rowColumn_20, rowColumn_21;
-static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
-static Widget text_8, text_9, text_10, text_11;
-static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
-static Widget label_8, label_9, label_10, label_11;
+static Widget text_1, text_2, text_3, text_4, text_5;
+static Widget text_6, text_7, text_8, text_9, text_10;
+static Widget label_1, label_2, label_3, label_4, label_5;
+static Widget label_6, label_7, label_8, label_9, label_10;
 static GC gc;
 
 static XrmOptionDescRec options[] = {
@@ -148,10 +148,10 @@ static void build_gui(Widget toplevel)
     rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_17 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_18 = XtCreateManagedWidget("epe", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_19 = XtCreateManagedWidget("eph", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_20 = XtCreateManagedWidget("epv", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_17 = XtCreateManagedWidget("eph", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_18 = XtCreateManagedWidget("epv", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_19 = XtCreateManagedWidget("climb", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_20 = XtCreateManagedWidget("fix_status", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_21 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, left, args, 1);
 
     label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
@@ -160,11 +160,10 @@ static void build_gui(Widget toplevel)
     label_4 = XtCreateManagedWidget("Altitude ", xmLabelWidgetClass, rowColumn_14, args, 0);
     label_5 = XtCreateManagedWidget("Speed    ", xmLabelWidgetClass, rowColumn_15, args, 0);
     label_6 = XtCreateManagedWidget("Course   ", xmLabelWidgetClass, rowColumn_16, args, 0);
-    label_7 = XtCreateManagedWidget("EPE      ", xmLabelWidgetClass, rowColumn_17, args, 0);
-    label_8 = XtCreateManagedWidget("EPH      ", xmLabelWidgetClass, rowColumn_18, args, 0);
-    label_9 = XtCreateManagedWidget("EPV      ", xmLabelWidgetClass, rowColumn_19, args, 0);
-    label_10 = XtCreateManagedWidget("VertSpeed", xmLabelWidgetClass, rowColumn_20, args, 0);
-    label_11 = XtCreateManagedWidget("Status   ", xmLabelWidgetClass, rowColumn_21, args, 0);
+    label_7 = XtCreateManagedWidget("EPH      ", xmLabelWidgetClass, rowColumn_17, args, 0);
+    label_8 = XtCreateManagedWidget("EPV      ", xmLabelWidgetClass, rowColumn_18, args, 0);
+    label_9 = XtCreateManagedWidget("Climb    ", xmLabelWidgetClass, rowColumn_19, args, 0);
+    label_10= XtCreateManagedWidget("Status   ", xmLabelWidgetClass, rowColumn_20, args, 0);
 
     XtSetArg(args[0], XmNcursorPositionVisible, False);
     XtSetArg(args[1], XmNeditable, False);
@@ -192,8 +191,6 @@ static void build_gui(Widget toplevel)
 				   rowColumn_19, args, 6);
     text_10 = XtCreateManagedWidget("text_10", xmTextFieldWidgetClass,
 				   rowColumn_20, args, 6);
-    text_11 = XtCreateManagedWidget("text_11", xmTextFieldWidgetClass,
-				   rowColumn_21, args, 6);
 
     quitbutton = XtCreateManagedWidget("Quit",
 			 xmPushButtonWidgetClass, rowColumn_21, args, 0);
@@ -216,7 +213,7 @@ static void handle_time_out(XtPointer client_data UNUSED,
 /* runs when there is no data for a while */
 {
     XmTextFieldSetString(status, "no data arriving");
-    XmTextFieldSetString(text_11, "UNKNOWN");
+    XmTextFieldSetString(text_10, "UNKNOWN");
 }
 
 /*
@@ -276,22 +273,18 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     XmTextFieldSetString(text_2, s);
     sprintf(s, "%f %c", fabsf(gpsdata->longitude), (gpsdata->longitude < 0) ? 'W' : 'E');
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f ", gpsdata->altitude * altunits->factor);
-    strcat(s, altunits->legend);
+    sprintf(s, "%f %s",gpsdata->altitude*altunits->factor, altunits->legend);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f ", gpsdata->speed * speedunits->factor);
-    strcat(s, speedunits->legend);
+    sprintf(s, "%f %s", gpsdata->speed*speedunits->factor, speedunits->legend);
     XmTextFieldSetString(text_5, s);
     sprintf(s, "%f degrees", gpsdata->track);
     XmTextFieldSetString(text_6, s);
-    sprintf(s, "%f %s", gpsdata->epe * altunits->factor, altunits->legend);
-    XmTextFieldSetString(text_7, s);
     sprintf(s, "%f %s", gpsdata->eph * altunits->factor, altunits->legend);
-    XmTextFieldSetString(text_8, s);
+    XmTextFieldSetString(text_7, s);
     sprintf(s, "%f %s", gpsdata->epv * altunits->factor, altunits->legend);
-    XmTextFieldSetString(text_9, s);
+    XmTextFieldSetString(text_8, s);
     sprintf(s, "%f %s/sec", gpsdata->climb * altunits->factor, altunits->legend);
-    XmTextFieldSetString(text_10, s);
+    XmTextFieldSetString(text_9, s);
 
     if (!gpsdata->online) {
 	newstate = 0;
@@ -315,7 +308,7 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
 	state = newstate;
     }
     sprintf(s + strlen(s), " (%d secs)", (int) (time(NULL) - timer));
-    XmTextFieldSetString(text_11, s);
+    XmTextFieldSetString(text_10, s);
     draw_graphics(gpsdata);
 
     XtRemoveTimeOut(timeout);
