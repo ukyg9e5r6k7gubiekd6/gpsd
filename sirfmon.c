@@ -278,13 +278,13 @@ int main (int argc, char **argv)
     wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
     wmove(mid2win, 4,1);
     wprintw(mid2win, "DOP:      M1:    M2:    Fix:  ");
-    mvwprintw(mid2win, 5, 30, " Packet type 2 ");
+    mvwprintw(mid2win, 5, 24, " Packet type 2 (0x02) ");
     wattrset(mid2win, A_NORMAL);
 
     wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid6win, A_BOLD);
     mvwprintw(mid6win, 1, 1, "Version:");
-    mvwprintw(mid6win, 2, 10, " Packet Type 6 ");
+    mvwprintw(mid6win, 2, 4, " Packet Type 6 (0x06) ");
     wattrset(mid6win, A_NORMAL);
 
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -293,7 +293,7 @@ int main (int argc, char **argv)
     for (i = 0; i < 12; i++) {
 	mvwprintw(mid4win, i+2, 1, "%2d",i);
     }
-    mvwprintw(mid4win, 14, 8, " Packet Type 4 ");
+    mvwprintw(mid4win, 14, 4, " Packet Type 4 (0x04) ");
     wattrset(mid4win, A_NORMAL);
 
     wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -302,7 +302,7 @@ int main (int argc, char **argv)
     mvwprintw(mid7win, 1, 9,  "Drift: ");
     mvwprintw(mid7win, 1, 23, "Bias: ");
     mvwprintw(mid7win, 2, 1,  "Estimated GPS Time: ");
-    mvwprintw(mid7win, 3, 10, " Packet type 7 ");
+    mvwprintw(mid7win, 3, 8, " Packet type 7 (0x07) ");
     wattrset(mid7win, A_NORMAL);
 
     wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -311,14 +311,14 @@ int main (int argc, char **argv)
     mvwprintw(mid9win, 1, 13, "Lat: ");
     mvwprintw(mid9win, 1, 25, "Time: ");
     mvwprintw(mid9win, 1, 39, "MS: ");
-    mvwprintw(mid9win, 2, 10, " Packet type 9 ");
+    mvwprintw(mid9win, 2, 8, " Packet type 9 (0x09) ");
     wattrset(mid9win, A_NORMAL);
 
     wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid13win, A_BOLD);
     mvwprintw(mid13win, 1, 1, "SVs: ");
     mvwprintw(mid13win, 1, 9, "=");
-    mvwprintw(mid13win, 2, 10, " Packet type 13 ");
+    mvwprintw(mid13win, 2, 8, " Packet type 13 (0x1D) ");
     wattrset(mid13win, A_NORMAL);
 
     wattrset(stdscr, A_BOLD);
