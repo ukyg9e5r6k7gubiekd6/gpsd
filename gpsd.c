@@ -505,9 +505,10 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
     char cmds[16], *sp;
 
     /* 
-     * Never send watcher notifications on GPVTG or GPGLL, as those
+     * Never send watcher notifications on GPVTG, as those
      * only duplicate information made available at other points
-     * in the same cycle.
+     * in the same cycle.  This almost true of GPGLL, except 
+     * for the Garmin 48.
      */
     for (sp = sentence; *sp; sp++) {
 	if (*sp == '$') {
@@ -515,6 +516,8 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 		mask |= GPRMC;
 	    } else if (PREFIX("$GPGGA", sp)) {
 		mask |= GPGGA;
+	    } else if (PREFIX("$GPGLL", sp)) {
+		mask |= GPGLL;
 	    } else if (PREFIX("$GPGSA", sp)) {
 		mask |= GPGSA;
 	    } else if (PREFIX("$GPGSV", sp)) {
@@ -526,8 +529,10 @@ static void raw_hook(struct gps_data_t *ud, char *sentence)
 	}
     }
     cmds[0] = '\0';
+    if (mask & (GPRMC | GPGLL))
+	strcat(cmds, "dp");
     if (mask & GPRMC)
-	strcat(cmds, "dptv");
+	strcat(cmds, "tv");
     if ((mask & GPGGA) || ((mask & GPRMC) && !(ud->seen_sentences & GPGGA)))
 	strcat(cmds, "sm");
     if (mask & GPGGA)
