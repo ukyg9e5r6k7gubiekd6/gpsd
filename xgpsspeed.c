@@ -6,6 +6,7 @@
 #include "xgpsspeed.h"
 #include "xgpsspeed.icon"
 #include "nmea.h"
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
