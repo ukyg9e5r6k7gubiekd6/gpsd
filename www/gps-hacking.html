@@ -20,6 +20,7 @@ ESR's Guide to Hacking With GPS
     <a href="index.html#downloads">Downloads</a><br/>
     <a href="index.html#mailing-lists">Mailing lists</a><br/>
     <a href="index.html#documentation">Documentation</a><br/>
+    <a href="faq.html">FAQ</a><br/>
     <a href="xgps.html">Screenshots</a><br/>
     <a href="index.html#recipes">Recipes</a><br/>
     <a href="index.html#others">Other GPSDs</a><br/>
@@ -316,92 +317,8 @@ power-management issue.  When no clients are active, <code>gpsd</code> will
 automatically close the GPS device, re-opening it only when another
 client connects to the daemon.</p>
 
-<h1 id='migrating'>Programming With <code>gpsd</code>-2</h1>
-
-<p>The easiest way to make your program GPS-aware is to link it with
-the libgps.a or libgps.so library (and ensure that your host system
-starts <code>gpsd</code> at boot time).</p>
-
-<p>There is a limitation in the accuracy of <code>gpsd</code> that
-stems from the fact that it waits passively for updates from the
-sensor rather than actively polling for them (which can't be done in a
-device-independent way).  Most GPSes ship updates just once per
-second.  At 50km/h (31mi/h) that's only 13.8 meters change in position
-between updates.  This is good enough if you're on foot or in a car
-but not good enough for aviation applications,</p>
-
-<p>If you have written a <code>gpsd</code>-aware application, here are
-some good functional reasons to migrate to 2.0:</p>
-
-<ol>
-<li>Your application can now query whether or not the GPS is online
-and get an authoritative answer.</li>
-
-<li>Timestamps are now no longer truncated to seconds, but reported to 
-whatever resolution the GPS ships.  Often (notably on SiRF-II GPSes)
-this is milliseconds.</li>
-
-<li>There is a new "watcher" mode.  It is like raw mode in that the
-GPS streams updates at you, but unlike it in that the updates are in 
-the simpler GPSD format rather than the more complex NMEA one.</li>
-
-<li>The daemon now automatically tries to reconnect to the GPS once
-a second when it is offline but clients are connected.</li>
-
-<li>Writes to clients are nonblocking, so new <code>gpsd</code> cannot
-be stalled by a wedged client.</p>
-</ol>
-
-<p>These changes mean that even if users casually unplug and reconnect a
-GPS, your application can notice the unplug and reconnect events, 
-and automatically starts getting data again a second after the reconnect.</p>
-
-<p>The <code>gpsd</code> package provides two ways for C code to get
-data from a GPS.  Both go through the libgps.a library, which supports
-two sets of entry points. The <a href="libgpsd.html">low-level
-interface</a> talks directly to the GPS.  The <a
-href="libgps.html">high-level interface</a> communicates with an
-instance of <code>gpsd</code>, which uses its own copy of libgps.a to
-talk to the device. A third way would be to open a socket to
-<code>gpsd</code> and interpret <code>gpsd</code> protocol or raw NMEA
-in your application.  Before 2.0, all <code>gpsd</code>-aware
-applications had to do this because libgps.a didn't exist.  Now that
-it does, the exercise is rather pointless.  Using libgps.a will
-probably simplify your code a lot.</p>
-
-<p>You will almost always want to use the high-level interface and go
-through the daemon; among other things, this means more than one
-application will be able to query the GPS without causing confusion.
-The only exception will be in very space-constrained single-user
-scenarios, perhaps on embedded systems or PDAs. On those it may be
-appropriate to use the low-level interface directly, probably with a
-build from source that conditions out all but one of the drivers.</p>
-
-<p>For Python programmers, there are gps.py and gpsd.py modules
-implementing respectively the high-level and low-level interfaces.
-Each exports a class that encapsulates a GPS session.</p>
-
-<p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>
-
-<p>First, <code>gpsd</code>-2's command-line options have been changed
-and simplified.  If your <code>gpsd</code>-using application is
-starting up <code>gpsd</code> directly you may find you have to modify
-the invocation.  However, we don't recommend this.  New
-<code>gpsd</code> is designed to be started at boot time and run
-continuously just like any normal daemon.  It will do nothing, and be
-swapped out, unless there are clients trying to query the GPS.</p>
-
-<p>Second, <code>gpsd</code> now returns "?" as the contents for a 
-field when it doesn't have valid data for that field (e.g. latitude 
-or longitude before the first fix).  This is only an issue if you are
-interpreting GPSD responses yourself rather than using libgps.a or the
-gps.py Python module.</p>
-
-<p>Third, the format of the timestamp returned by the D command has
-changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
-No more U.S.-centric date-format assumptions!  Also, as previously
-noted, the seconds part may have one or more digits of decimal fractional
-seconds.</p>
+<p>For more details on programming with <code>gpsd</code>, see the 
+<a href="faq.html">FAQ</a>.</p>
 
 <h1>Where to learn more</h1>
 

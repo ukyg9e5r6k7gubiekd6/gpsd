@@ -20,6 +20,7 @@
     <a href="#downloads">Downloads</a><br/>
     <a href="#mailing-lists">Mailing lists</a><br/>
     <a href="#documentation">Documentation</a><br/>
+    <a href="faq.html">FAQ</a><br/>
     <a href="xgps.html">Screenshots</a><br/>
     <a href="#recipes">Recipes</a><br/>
     <a href="#others">Other GPSDs</a><br/>
@@ -70,6 +71,9 @@ baud rate and GPS type by looking at the data stream.</p>
 Our main focus is open-source Unixes &mdash; Linux, and the *BSD
 family.  We'll support proprietary Unixes and hybrids like Mac OS X if
 it's not too much work (and it usually isn't).</p>
+
+<p>See the <a href='faq.html'>FAQ</a> for information on how to report
+bugs.</a>
 
 <h1 id='news'>News</h1>
 
