@@ -416,6 +416,15 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    gpsd_binary_quality_dump(session, bufp+strlen(bufp));
 	    bufp += strlen(bufp);
 	    break;
+	case GARMIN_PKTID_PROTOCOL_ARRAY:
+            // this packet is never requested, it just comes, in some case
+            // after a GARMIN_PKTID_PRODUCT_RQST 
+	    gpsd_report(3, "Product Capability: %d\n", pkt->mDataSize);
+            for ( i = 0; i < pkt->mDataSize ; i += 3 ) {
+		    gpsd_report(3, "  %c%03d\n", pkt->mData[i]
+			, get_short( &(pkt->mData[i+1])) );
+	    }
+	    break;
 	default:
 	    gpsd_report(3, "ID: %d, Sz: %d\n"
 			, pkt->mPacketId
@@ -499,7 +508,8 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 // is you ask for less than 64 bytes then the next packet will include
 // just the remaining bytes of the last 64 byte packet.
 //
-// Reading a packet of length Zero signals the end of the entire packet.
+// Reading a packet of length Zero, or less than 64, signals the end of 
+// the entire packet.
 //
 // The Garmin sample WinXX code also assumes the same behavior, so
 // maybe it is something in the USB protocol.
@@ -510,13 +520,15 @@ static void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 static int GetPacket (struct gps_session_t *session ) 
 {
     struct timespec delay, rem;
+    int cnt = 0;
+    int x = 0;
 
     memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
     session->GarminBufferLen = 0;
 
     gpsd_report(4, "GetPacket()\n");
 
-    for( ; ; ) {
+    for( cnt = 0 ; cnt < 10 ; cnt++ ) {
 	// Read async data until the driver returns less than the
 	// max async data size, which signifies the end of a packet
 
@@ -527,11 +539,9 @@ static int GetPacket (struct gps_session_t *session )
 	theBytesReturned = read(session->gNMEAdata.gps_fd
 		, &session->GarminBuffer[session->GarminBufferLen]
 		, ASYNC_DATA_SIZE);
-	if ( !theBytesReturned ) {
-	    // zero length read is a flag for got the whole packet
-            break;
-	} else if ( 0 >  theBytesReturned ) {
+        if ( 0 >  theBytesReturned ) {
 	    // read error...
+            // or EAGAIN, but O_NONBLOCK is never set
 	    gpsd_report(0, "GetPacket() read error=%d, errno=%d\n"
 		, theBytesReturned, errno);
 	    continue;
@@ -539,6 +549,15 @@ static int GetPacket (struct gps_session_t *session )
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
 	session->GarminBufferLen += theBytesReturned;
+	if ( 64 > theBytesReturned ) {
+	    // zero length, or short, read is a flag for got the whole packet
+            break;
+	}
+	// dump the individual bytes
+        //    for ( x = 0; x < session->GarminBufferLen; x++ ) {
+	//        gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
+	//    }
+		
 	if ( 256 <=  session->GarminBufferLen ) {
 	    // really bad read error...
 	    session->GarminBufferLen = 0;
@@ -552,6 +571,11 @@ static int GetPacket (struct gps_session_t *session )
 	    continue;
 
     }
+    if ( 10 <= cnt ) {
+	    gpsd_report(3, "GetPacket() packet too long or too slow!\n");
+	    return -1;
+    }
+
     gpsd_report(5, "GotPacket() sz=%d \n", session->GarminBufferLen);
     return 0;
 }
@@ -652,7 +676,7 @@ static int garmin_probe(struct gps_session_t *session)
     }
 
     if ( ! ok ) {
-	gpsd_report(2, "Garmin driver never answeredi to INFO_REQ.\n");
+	gpsd_report(2, "Garmin driver never answered to INFO_REQ.\n");
 	return 0;
     }
     // Tell the device that we are starting a session.
@@ -738,23 +762,6 @@ static int garmin_probe(struct gps_session_t *session)
 	gpsd_report(2, "Garmin driver never answered to PRODUCT_DATA.\n");
 	return 0;
     }
-    // turn on PVT data 49
-    gpsd_report(3, "Set Garmin to send reports every 1 second\n");
-
-    set_int(buffer, GARMIN_LAYERID_APPL);
-    set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
-    set_int(buffer+8, 2); // data length 2
-    set_int(buffer+12, 49); //  49, CMND_START_PVT_DATA
-
-    SendPacket(session,  (Packet_t*) buffer);
-
-    // turn on RMD data 110
-    //set_int(buffer, GARMIN_LAYERID_APPL);
-    //set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
-    //set_int(buffer+8, 2); // data length 2
-    //set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
-
-    //SendPacket(session,  (Packet_t*) buffer);
     return(1);
 }
 
@@ -767,15 +774,33 @@ static int garmin_probe(struct gps_session_t *session)
  * the garmin_gps driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
  *
- * gps_fd was opened in NDELAY mode so be careful about reads.
  */
 static void garmin_init(struct gps_session_t *session)
 {
 	int ret;
+	char buffer[256];
 
 	gpsd_report(5, "to garmin_probe()\n");
 	ret = garmin_probe( session );
 	gpsd_report(3, "from garmin_probe() = %d\n", ret);
+
+	// turn on PVT data 49
+	gpsd_report(3, "Set Garmin to send reports every 1 second\n");
+
+	set_int(buffer, GARMIN_LAYERID_APPL);
+	set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+	set_int(buffer+8, 2); // data length 2
+	set_int(buffer+12, 49); //  49, CMND_START_PVT_DATA
+
+	SendPacket(session,  (Packet_t*) buffer);
+
+	// turn on RMD data 110
+	//set_int(buffer, GARMIN_LAYERID_APPL);
+	//set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+	//set_int(buffer+8, 2); // data length 2
+	//set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
+
+	//SendPacket(session,  (Packet_t*) buffer);
 }
 
 static int garmin_handle_input(struct gps_session_t *session, int waiting UNUSED)
