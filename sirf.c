@@ -246,12 +246,6 @@ static int sirf_power_save(int ttyfd, int enable)
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
-#define putb(off,b)	do { buf[4+off] = (unsigned char)(b); } while (0)
-#define putw(off,w)	do { putb(off,(w) >> 8); putb(off+1,w); } while (0)
-#define putl(off,l)	do { putw(off,(l) >> 16); putw(off+2,l); } while (0)
-
-#define RAD2DEG		5.729577795E-7		/* RAD/10^8 to DEG */
-
 /*
  * The 'week' part of GPS dates are specified in weeks since 0000 on 06 
  * January 1980, with a rollover at 1024.  At time of writing the last 
@@ -261,7 +255,7 @@ static int sirf_power_save(int ttyfd, int enable)
 #define SECS_PER_WEEK	(60*60*24*7)		/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-static time_t decode_time(int week, double tow)
+static double decode_time(int week, double tow)
 {
     time_t now, last_rollover;
 
@@ -354,9 +348,11 @@ static void decode_sirf(struct gps_session_t *session,
 	session->day = when->tm_mday;
 	session->hours = when->tm_hour;
 	session->minutes = when->tm_min;
-	session->seconds = (int)rint(fixtime) % 60;
+	session->seconds = fixtime - (intfixtime / 60) * 60;
 	strftime(session->gNMEAdata.utc, sizeof(session->gNMEAdata.utc),
-		 "%Y-%m-%dT%H:%M:%S", when);
+		 "%Y-%m-%dT%H:%M:", when);
+	sprintf(session->gNMEAdata.utc+strlen(session->gNMEAdata.utc),
+		"%02.3f", session->seconds);
 	/* fix quality data */
 	session->gNMEAdata.satellites_used = getb(28);
 	for (i = 0; i < MAXCHANNELS; i++)
