@@ -1,6 +1,6 @@
 Name: gpsd
-%define SO3VERSION	0.1.0
-%define SO1VERSION	0
+%define SO3VERSION	1.0.0
+%define SO1VERSION	1
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
@@ -89,12 +89,13 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 %files
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING gpsd.xml TODO
-%defattr(,root,root,-)
+%defattr(-,root,root,-)
 %attr(755, root, root) %{_sbindir}/gpsd
 %attr(755, root, root) %{_bindir}/gps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprobe
 %{_mandir}/man1/gpsd.1*
+%{_mandir}/man1/gpsprobe.1*
 %attr(755, root, root) %{_sysconfdir}/init.d/gpsd
 
 %files -n gpsd-devel
