@@ -1,6 +1,4 @@
 Name: gpsd
-%define SO3VERSION	7.0.0
-%define SO1VERSION	7
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
@@ -55,8 +53,6 @@ cp xgps.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgps
 cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d/
 cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
-ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO1VERSION}
-ln -f "$RPM_BUILD_ROOT"%{_libdir}/libgps.so.%{SO3VERSION} "$RPM_BUILD_ROOT"%{_libdir}/libgps.so
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
@@ -87,10 +83,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprobe
 %attr(755, root, root) %{_bindir}/gpsprof
-%{_libdir}/libgps.so.%{SO3VERSION}
-%{_libdir}/libgps.so.%{SO1VERSION}
 %{_libdir}/libgps.la
-%{_libdir}/libgps.so
+%{_libdir}/libgps.so*
 %{_mandir}/man1/gpsd.1*
 %{_mandir}/man1/gpsprobe.1*
 %{_mandir}/man1/gpsprof.1*
