@@ -320,7 +320,7 @@ def plotframe(await, fname, file, speed, threshold, title):
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
         session.query("w+bci")
-        if formatter noyt in (spaceplot, uninstrumented):
+        if formatter not in (spaceplot, uninstrumented):
             session.query("z+")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")
