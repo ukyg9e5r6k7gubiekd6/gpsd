@@ -1,6 +1,6 @@
 Name: gpsd
-%define SO3VERSION	6.0.0
-%define SO1VERSION	2
+%define SO3VERSION	7.0.0
+%define SO1VERSION	7
 Summary: service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
@@ -111,7 +111,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Fri Feb 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Wed Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.15-1
 - A new packet engine autobauds much more quickly, and now iterates
   over both 1 and 2 stopbits. Explicit support for FV18 (the -T f
   option) is gone; instead, gpsd syncs with any 7N2 device and always

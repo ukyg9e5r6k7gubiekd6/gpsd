@@ -132,36 +132,40 @@ struct gps_session_t {
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
-extern int nmea_parse(char *sentence, struct gps_data_t *outdata);
-extern int nmea_send(int fd, const char *fmt, ... );
-extern int nmea_sane_satellites(struct gps_data_t *out);
-extern void nmea_add_checksum(char *sentence);
-extern int packet_sniff(struct gps_session_t *pstate);
-extern int packet_get_nmea(struct gps_session_t *pstate);
-extern int packet_get_sirf(struct gps_session_t *pstate);
-extern void packet_accept(struct gps_session_t *pstate);
-extern int gpsd_open(struct gps_session_t *context);
-extern int gpsd_switch_driver(struct gps_session_t *session, char type);
-extern int gpsd_set_speed(struct gps_session_t *session, 
-			  unsigned int speed, unsigned int stopbits);
-extern int gpsd_get_speed(struct termios *);
-extern void gpsd_close(struct gps_session_t *context);
-extern void gpsd_zero_satellites(struct gps_data_t *out);
-extern void gpsd_binary_fix_dump(struct gps_session_t *session, char *buf);
-extern void gpsd_binary_satellite_dump(struct gps_session_t *session, char *buf);
-extern void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp);
+extern int nmea_parse(char *, struct gps_data_t *);
+extern int nmea_send(int, const char *, ... );
+extern int nmea_sane_satellites(struct gps_data_t *);
+extern void nmea_add_checksum(char *);
 
-extern int netlib_connectsock(const char *host, const char *service, const char *protocol);
+extern int packet_sniff(struct gps_session_t *);
+extern int packet_get_nmea(struct gps_session_t *);
+extern int packet_get_sirf(struct gps_session_t *);
+extern void packet_accept(struct gps_session_t *);
+
+extern int gpsd_open(struct gps_session_t *);
+extern int gpsd_switch_driver(struct gps_session_t *, char);
+extern int gpsd_set_speed(struct gps_session_t *, unsigned int, unsigned int);
+extern int gpsd_get_speed(struct termios *);
+extern void gpsd_close(struct gps_session_t *);
+
+extern void gpsd_zero_satellites(struct gps_data_t *);
+extern void gpsd_binary_fix_dump(struct gps_session_t *, char *);
+extern void gpsd_binary_satellite_dump(struct gps_session_t *, char *);
+extern void gpsd_binary_quality_dump(struct gps_session_t *, char *);
+
+extern int netlib_connectsock(const char *, const char *, const char *);
+
+extern int garmin_probe(struct gps_session_t *);
 
 /* External interface */
-extern struct gps_session_t * gpsd_init(char devtype, char *dgpsserver);
-extern int gpsd_activate(struct gps_session_t *session);
-extern void gpsd_deactivate(struct gps_session_t *session);
-extern int gpsd_poll(struct gps_session_t *session);
-extern void gpsd_wrap(struct gps_session_t *session);
+extern struct gps_session_t * gpsd_init(char, char *);
+extern int gpsd_activate(struct gps_session_t *);
+extern void gpsd_deactivate(struct gps_session_t *);
+extern int gpsd_poll(struct gps_session_t *);
+extern void gpsd_wrap(struct gps_session_t *);
 
 /* caller should supply this */
-void gpsd_report(int d, const char *fmt, ...);
+void gpsd_report(int, const char *, ...);
 
 #define DEFAULT_DEVICE_NAME	"/dev/gps"
 
