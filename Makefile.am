@@ -93,6 +93,7 @@ include_HEADERS = gps.h gpsd.h
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \
+	autogen.sh \
 	README \
 	INSTALL \
 	COPYING \
