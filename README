@@ -32,6 +32,8 @@ There is a project site for gpsd at <http://www.berlios/gpsd/>.
 Look there for updates, news, and project mailing lists.  See that
 website for a list of GPS units known to be compatible.
 
+See the file INSTALL for installation instructions.
+
 CREDITS
 =======
 
@@ -57,13 +59,13 @@ Eric S. Raymond drastically rewrote this code to clean it up and extend it.
 His new features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
-   * It now understands the GLL (Geographic position - Latitude, Longitude)
+   * Now understands the GLL (Geographic position - Latitude, Longitude)
      sentence from NMEA 3.0. 
-   * It now parses both the NMEA 3.0 and pre-3.0 variants of the VTG sentence 
+   * Now parses both the NMEA 3.01 and pre-3.01 variants of the VTG sentence 
      correctly.
    * New y command supports satellite location -- it should no longer ever be 
      necessary for clients to go to raw mode unless they want to monitor and 
-     log the GPS stream.
+     log the NMEA stream itself.
    * New 'w' command toggles 'watcher' mode. In watcher mode gpsd ships
      a gpsd-style response for each incoming sentence as if the client
      had just sent all commands that asked for data contained in the sentence.
@@ -71,15 +73,15 @@ His new features include:
      is on-line.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
-   * The GPS-bashing code this program uses can now be directly linked as a
-     library, libgpsd(3).
+   * The GPS-bashing code the daemon uses can now be directly linked as a
+     library, libgpsd(3). 
+   * C and Python libraries are available to encapsulate the client side of
+     querying gpsd.
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
    * xgpsspeed is working again.  gps has been seriously reworked and improved.
    * RPMs which include installation of gpsd to start up at boot time 
      are available.
-   * C and Python libraries are available to encapsulate the client side of
-     querying gpsd.
    * New gpsprobe program probes the capabilities of GPSes and generates
      error scrattergrams from fixes.
