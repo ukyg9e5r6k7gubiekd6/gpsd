@@ -1,10 +1,10 @@
 Summary: service daemon for mediating access to a GPS
 Name: gpsd
-Version: 1.93
+Version: 1.94
 Release: 1
 License: GPL
 Group: System Environment/Daemons
-URL: http://berlios.de/gpsd/
+URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
@@ -72,6 +72,12 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 %attr(755, root, root) /etc/init.d/gpsd
 
 %changelog
+* Tue Aug 24 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.94-1
+- Fix embarrassing bug -- watcher mode did not work for more than one
+- client at a time.  Y command now carries information about which 
+- satellites were used in the last fix.  New timeout mechanism, no
+- longer dependent on FIONREAD.
+
 * Mon Aug 23 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.93-1
 - Fourth prerelease. Daemon-side timeouts are gone, they complicated
   the interface without adding anything.  Command responses now 
