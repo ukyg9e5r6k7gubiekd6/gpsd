@@ -295,7 +295,7 @@ static void analyze(struct gps_session_t *session,
 		    struct header *h, unsigned short *p)
 {
     char buf[BUFSIZE];
-    int i = 0, nmea = 0;
+    int i = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
 	gpsd_report(5, "id %d\n", h->id);
@@ -303,7 +303,6 @@ static void analyze(struct gps_session_t *session,
 	case 1000:
 	    handle1000(session, p);
 	    gpsd_binary_fix_dump(session, buf);
-	    nmea = 1000;
 	    break;
 	case 1002:
 	    handle1002(session, p);
@@ -314,7 +313,6 @@ static void analyze(struct gps_session_t *session,
 	    }
 	    strcat(buf, "*");
 	    nmea_add_checksum(buf);
-	    nmea = 1002;
 	    break;
 	case 1003:
 	    handle1003(session, p);
@@ -322,14 +320,12 @@ static void analyze(struct gps_session_t *session,
 	    break;	
 	case 1005:
 	    handle1005(session, p);
-	    break;	
+	    return;	
 	}
     }
-    if (nmea > 0) {
-	gpsd_report(4, "%s", buf);
-	if (session->gNMEAdata.raw_hook)
-	    session->gNMEAdata.raw_hook(buf);
-    }
+    gpsd_report(4, "%s", buf);
+    if (session->gNMEAdata.raw_hook)
+	session->gNMEAdata.raw_hook(buf);
 }
 
 static int putword(unsigned short *p, unsigned char c, unsigned int n)
