@@ -479,6 +479,55 @@ static void raw_hook(char *sentence)
     }
 }
 
+static int passivesock(char *service, char *protocol, int qlen)
+{
+    struct servent *pse;
+    struct protoent *ppe;
+    struct sockaddr_in sin;
+    int s, type;
+    int one = 1;
+
+    bzero((char *) &sin, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+
+    if ( (pse = getservbyname(service, protocol)) )
+	sin.sin_port = htons(ntohs((u_short) pse->s_port));
+    else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
+	gpscli_report(0, "Can't get \"%s\" service entry.\n", service);
+	return -1;
+    }
+    if ((ppe = getprotobyname(protocol)) == 0) {
+	gpscli_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
+	return -1;
+    }
+    if (strcmp(protocol, "udp") == 0)
+	type = SOCK_DGRAM;
+    else
+	type = SOCK_STREAM;
+
+    s = socket(PF_INET, type, ppe->p_proto);
+    if (s < 0)
+    {
+	gpscli_report(0, "Can't create socket\n");
+	return -1;
+    }
+
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) == -1) {
+	gpscli_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	return -1;
+    }
+    if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
+	gpscli_report(1, "Can't bind to port %s\n", service);
+	return -1;
+    }
+    if (type == SOCK_STREAM && listen(s, qlen) < 0) {
+	gpscli_report(0, "Can't listen on %s port%s\n", service);
+	return -1;
+    }
+    return s;
+}
+
 int main(int argc, char *argv[])
 {
     char *default_service = "gpsd";
@@ -571,7 +620,7 @@ int main(int argc, char *argv[])
 
     openlog("gpsd", LOG_PID, LOG_USER);
     gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
-    msock = netlib_passiveTCP(service, QLEN);
+    msock = passivesock(service, "tcp", QLEN);
     if (msock == -1)
 	exit(2);	/* netlib_passiveTCP will have issued a message */
     gpscli_report(1, "gpsd listening on port %s\n", service);
