@@ -112,13 +112,16 @@ INCLUDE = -I. $(X_INCLUDE)
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
 
 ## Libraries and object files
-LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
-
+GPSLIB_OBJECTS  = nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJECTS)
+GPSDLIB_OBJECTS = libgpsd.o
+COMMON_OBJECTS  = netlib.o
 
 ## Programs
-PROGRAMS=gpsd gps 
+PROGRAMS = gpsd gps 
+## Libraries
+LIBRARIES = libgps.a libgpsd.a
 ## Manual pages
-PAGES=gpsd.1 libgps.3
+PAGES = gpsd.1 libgps.3
 
 ## Motif dependent programs and object files
 MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
@@ -126,7 +129,7 @@ MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
 
 XGPSOBJS=xgpsspeed.o Tachometer.o
 
-all: $(PROGRAMS) $(MOTIF_PROGRAMS) $(PAGES)
+all: $(PROGRAMS) $(LIBRARIES) $(MOTIF_PROGRAMS) $(PAGES)
 
 gpsd: gpsd.o libgps.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgps $(NETLIBS) $(LIBS)
@@ -137,9 +140,18 @@ gps: gps.o libgps.a
 xgpsspeed: $(XGPSOBJS)
 	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgps $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
-libgps.a:  $(LIB_OBJECTS)
-	ar -r libgps.a $(LIB_OBJECTS)
+# This is a test instrument, it doesn't ship.
+libgpsd: libgpsd.c gps.h
+	cc -g -DTESTMAIN -I. libgpsd.c netlib.o -o libgpsd
+
+
+libgps.a:  $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
+	ar -r libgps.a $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
 	ranlib libgps.a
+
+libgpsd.a:  $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
+	ar -r libgpsd.a $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
+	ranlib libgpsd.a
 
 # Library parts
 netlib.o: netlib.c gps.h gpsd.h
@@ -165,6 +177,7 @@ VERS=$(shell sed <version.h -n -e '/[^"]*"\([0-9].*\)"/s//\1/p')
 
 HEADERS = config.h gps.h gps.h gpsd.h TachometerP.h nmea.h Tachometer.h version.h xgpsspeed.icon
 
+LIB_OBJECTS = $(GPSLIB_OBJECTS) $(GPSDLIB_OBJECTS)  $(COMMON_OBJECTS)
 SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(HEADERS)
 DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml
 MANPAGES = gpsd.1 libgps.3
@@ -184,12 +197,17 @@ dist: gpsd-$(VERS).tar.gz
 install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
 	$(mkinstalldirs) $(DESTDIR)${sbindir}
+	$(mkinstalldirs) $(DESTDIR)${libdir}
 	for app in ${PROGRAMS}; do \
 		$(INSTALL) -m 755 $$app ${DESTDIR}${sbindir} ; \
 	done
 	for app in ${MOTIF_PROGRAMS}; do \
 		$(INSTALL) -m 755 $$app ${DESTDIR}${bindir} ; \
 	done
+	for lib in ${LIBRARIES}; do \
+		$(INSTALL) $$lib ${DESTDIR}${libdir} ; \
+	done
+	ldconfig
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man1/
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man1/gpsd.1
 	$(INSTALL) -m 755 -o 0 -g 0 -d $(MANDIR)/man3/

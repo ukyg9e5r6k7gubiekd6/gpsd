@@ -1,5 +1,8 @@
 /* libgpsd.c -- client interface library for the gpsd daemon */
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 
 #include <gps.h>
@@ -128,9 +131,10 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 		for (j = 0; j < gpsdata->satellites; j++) {
 		    PRN[j]=elevation[j]=azimuth[j]=ss[j]=0;
 		}
+		sp = buf;
 		for (j = 0; j < gpsdata->satellites; j++) {
 		    sp = strchr(sp, ' ') + 1;
-		    sscanf(sp, "%d %d %d %d", i1, i2, i3, i4);
+		    sscanf(sp, "%d %d %d %d", &i1, &i2, &i3, &i4);
 		    PRN[j] = i1;
 		    elevation[j] = i2;
 		    azimuth[j] = i3;
