@@ -15,8 +15,6 @@
 #include "gpsd.h"
 #include "sirf.h"
 
-/* This we can do from NMEA mode */
-
 #ifdef __UNUSED__
 /* These require binary mode */
 

@@ -31,7 +31,6 @@
 #endif
 
 #include "gpsd.h"
-#include "sirf.h"
 
 #define QLEN			5
 
