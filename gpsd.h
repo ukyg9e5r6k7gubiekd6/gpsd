@@ -6,41 +6,33 @@
 #if  FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE
 #define NON_NMEA_ENABLE
 #endif /* FV18_ENABLE || TRIPMATE_ENABLE || EARTHMATE_ENABLE || LOGFILE_ENABLE */
-
 #if EARTHMATE_ENABLE
 #define ZODIAC_ENABLE
 #endif /* EARTHMATE_ENABLE */
 
 #define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
 
-struct longlat_t
+struct longlat_t {
 /* This structure is used to initialize some older GPS units */
-{
-    char *latitude;
-    char *longitude;
-    char latd;
-    char lond;
+    char *latitude, *longitude;
+    char latd, lond;
 };
 
 struct gps_session_t;
 
-struct gps_type_t
+struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
-{
-    char typekey, *typename;
-    char *trigger;
+    char typekey, *typename, *trigger;
     void (*initializer)(struct gps_session_t *session);
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
-    int baudrate;
-    int stopbits;
+    int baudrate, stopbits;
     int interval;
 };
 
-struct gps_session_t
+struct gps_session_t {
 /* session object, encapsulates all global state */
-{
     struct gps_data_t gNMEAdata;
     struct gps_type_t *device_type;
     char *gpsd_device;	/* where to find the GPS */
@@ -48,11 +40,9 @@ struct gps_session_t
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
-
 #if TRIPMATE_ENABLE
     struct longlat_t initpos;	/* public; set by -i option */
 #endif /* TRIPMATE_ENABLE */
-
 #ifdef ZODIAC_ENABLE
     /* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
@@ -66,10 +56,8 @@ struct gps_session_t
     int seconds;
     /*
      * Zodiac chipset channel status from PRWIZCH.
-     * This is actually redundant with the SNRs in GPGSV.
-     * The main reason we stash it here is so that raw-mode
-     * translation of Zodiac binary protocol will send it
-     * up to the client.
+     * We stash it here is so that raw-mode translation of Zodiac binary 
+     * protocol will send it up to the client.
      */
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */

@@ -43,9 +43,7 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
 /* zodiac_spew - Takes a message type, an array of data words, and a length
    for the array, and prepends a 5 word header (including nmea_checksum).
    The data words are expected to be nmea_checksummed */
-
 #if defined (WORDS_BIGENDIAN)
-
 /* data is assumed to contain len/2 unsigned short words
  * we change the endianness to little, when needed.
  */
@@ -54,17 +52,15 @@ static int end_write(int fd, void *d, int len)
     char buf[BUFSIZE];
     char *p = buf;
     char *data = (char *)d;
-    int i = len;
 
-    while (i>0) {
+    while (len>0) {
 	*p++ = *(data+1);
 	*p++ = *data;
 	data += 2;
-	i -= 2;
+	len -= 2;
     }
     return write(fd, buf, len);
 }
-
 #else
 #define end_write write
 #endif
@@ -92,7 +88,6 @@ static long putlong(char *dm, int sign)
     long rad;
 
     tmpl = fabs(atof(dm));
-
     rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*PI/180;
 
     if (sign)
@@ -115,9 +110,7 @@ static void zodiac_init(struct gps_session_t *session)
 	  session->sn = 0;
       
       memset(data, 0, sizeof(data));
-      
       data[0] = session->sn;		/* sequence number */
-
       data[1] = (1 << 2) | (1 << 3);
       data[2] = data[3] = data[4] = 0;
       data[5] = tm->tm_mday;
@@ -228,15 +221,10 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     session->gNMEAdata.satellites_used = p[O(12)];
 
     session->hours = p[O(22)];
-
     session->minutes = p[O(23)];
-
     session->seconds = p[O(24)];
-
     session->year = p[O(21)];
-
     session->month = p[O(20)];
-
     session->day = p[O(19)];
 
     session->gNMEAdata.latitude = 180.0 / (PI / ((double) getlong(p + O(27)) / 100000000));
@@ -298,7 +286,7 @@ static void handle1003(struct gps_session_t *session, unsigned short *p)
     session->gNMEAdata.vdop = p[O(12)];
     session->gNMEAdata.satellites = p[O(14)];
 
-    for (j = 0; j < 12; j++) {
+    for (j = 0; j < MAXCHANNELS; j++) {
 	if (j < session->gNMEAdata.satellites) {
 	    session->gNMEAdata.PRN[j] = p[O(15 + (3 * j))];
 	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
@@ -347,9 +335,7 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
 static void analyze(struct gps_session_t *session, 
 		    struct header *h, unsigned short *p)
 {
-    unsigned char buf[BUFSIZE];
-    char *bufp;
-    char *bufp2;
+    unsigned char buf[BUFSIZE], *bufp, *bufp2;
     int i = 0, j = 0, nmea = 0;
 
     if (p[h->ndata] == zodiac_checksum(p, h->ndata)) {
@@ -458,10 +444,7 @@ static void analyze(struct gps_session_t *session,
 static int putword(unsigned short *p, unsigned char c, unsigned int n)
 {
     *(((unsigned char *) p) + n) = c;
-    if (n == 0)
-	return 1;
-    else
-	return 0;
+    return (n == 0);
 }
 
 

@@ -16,7 +16,6 @@ struct gps_data_t *gps_open(char *host, char *port)
 
     if (!gpsdata)
 	return NULL;
-
     if (!host)
 	host = "localhost";
     if (!port)
@@ -92,8 +91,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    case 'P':
 		sscanf(sp, "P=%lf %lf", &d1, &d2);
 		gpsdata->latlon_stamp.changed = (gpsdata->latitude != d1) || (gpsdata->longitude != d2);
-		gpsdata->latitude = d1;
-		gpsdata->longitude = d2;
+		gpsdata->latitude = d1; gpsdata->longitude = d2;
 		REFRESH(gpsdata->latlon_stamp);
 		break;
 	    case 'Q':
@@ -104,9 +102,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    || (gpsdata->hdop != d2)
 		    || (gpsdata->vdop != d3);
 		gpsdata->satellites_used = i1;
-		gpsdata->pdop = d1;
-		gpsdata->hdop = d2;
-		gpsdata->vdop = d3;
+		gpsdata->pdop = d1; gpsdata->hdop = d2; gpsdata->vdop = d3;
 		REFRESH(gpsdata->fix_quality_stamp);
 		break;
 	    case 'S':
@@ -214,7 +210,6 @@ int gps_poll(struct gps_data_t *gpsdata)
     if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
     buf[n] = '\0';
-
     return gps_unpack(buf, gpsdata);
 }
 
@@ -229,8 +224,7 @@ int gps_query(struct gps_data_t *gpsdata, char *requests)
 #ifdef TESTMAIN
 /*
  * A simple command-line exerciser for the library.
- * Not meant to be installed in system directories,
- * as it isn't really useful for anything but debugging.
+ * Not really useful for anything but debugging.
  */
 
 void data_dump(struct gps_data_t *collect, time_t now)
