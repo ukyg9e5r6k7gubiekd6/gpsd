@@ -404,7 +404,7 @@ static int handle_request(int fd, char *buf, int buflen)
     strcat(reply, "\r\n");
 
     if (session.debug >= 2)
-	gpscli_report(1, "=> client(2): %s", reply);
+	gpscli_report(3, "=> client: %s", reply);
     sc = write(fd, reply, strlen(reply) + 1);
     if (sc < 0) {
 	gpscli_report(3, "Response write: %s\n", strerror(errno));
@@ -421,7 +421,7 @@ static void notify_watchers(char *sentence)
 
     for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, &watcher_fds)) {
-	    gpscli_report(1, "=> client(1): %s\n", sentence);
+	    gpscli_report(3, "=> client: %s\n", sentence);
 	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
 		gpscli_report(3, "Notification write: %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
@@ -439,7 +439,7 @@ static void raw_hook(char *sentence)
     for (fd = 0; fd < getdtablesize(); fd++) {
 	/* copy raw NMEA sentences from GPS */
 	if (FD_ISSET(fd, &nmea_fds)) {
-	    gpscli_report(1, "=> client(3): %s\n", sentence);
+	    gpscli_report(3, "=> client: %s\n", sentence);
 	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
 		gpscli_report(3, "Raw write: %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
@@ -474,7 +474,7 @@ static void raw_hook(char *sentence)
 	    }
 #undef PUBLISH
 	    if (ok < 0) {
-		gpscli_report(1, "Watcher write: %s\n", strerror(errno));
+		gpscli_report(3, "Watcher write: %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
 	    }
@@ -521,7 +521,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	gpscli_report(1, "Can't bind to port %s\n", service);
+	gpscli_report(0, "Can't bind to port %s\n", service);
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
@@ -622,11 +622,13 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     openlog("gpsd", LOG_PID, LOG_USER);
-    gpscli_report(1, "gpsd started (Version %s)\n", VERSION);
+    gpscli_report(1, "launching (Version %s)\n", VERSION);
     msock = passivesock(service, "tcp", QLEN);
-    if (msock == -1)
-	exit(2);	/* netlib_passiveTCP will have issued a message */
-    gpscli_report(1, "gpsd listening on port %s\n", service);
+    if (msock < 0) {
+	gpscli_report(0, "startup failed, netlib error %d\n", msock);
+	exit(2);
+    }
+    gpscli_report(1, "listening on port %s\n", service);
 
     /* user may want to re-initialize the session */
     if (setjmp(restartbuf) == THROW_SIGHUP) {
