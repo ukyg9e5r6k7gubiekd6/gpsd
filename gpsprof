@@ -121,7 +121,7 @@ formatters = (rawplot, stripplot, splitplot)
 
 if __name__ == '__main__':
     (options, arguments) = getopt.getopt(sys.argv[1:], "f:hn:o:rt:T:")
-    formatter = stripplot
+    formatter = splitplot
     raw = False
     file = None
     terminal = None
