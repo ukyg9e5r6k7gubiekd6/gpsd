@@ -40,7 +40,7 @@ extern int device_speed;
 
 /* define global variables */
 static int ttyfd = -1;
-static struct termios ttyset;
+static struct termios ttyset, ttyset_old;
 
 int serial_open()
 {
@@ -78,6 +78,10 @@ int serial_open()
 
 	if (isatty(ttyfd)) {
 
+            /* Save original terminal parameters */
+            if (tcgetattr(ttyfd,&ttyset_old) != 0)
+              return (-1);
+
 	    if (ioctl(ttyfd, TIOCGETA, &ttyset) < 0)
 		return (-1);
 
@@ -110,6 +114,9 @@ void serial_close()
 #endif
 	    ioctl(ttyfd, TIOCSETAF, &ttyset);
 	}
+	/* Restore original terminal parameters */
+        tcsetattr(ttyfd,TCSANOW,&ttyset_old);
+
 	close(ttyfd);
 	ttyfd = -1;
     }
