@@ -12,6 +12,7 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
