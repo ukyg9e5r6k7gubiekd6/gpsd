@@ -34,7 +34,7 @@ int gpsd_get_speed(struct termios* ttyctl)
 }
 
 /* every rate we're likely to see on a GPS */
-static int rates[] = {4800, 9600, 19200, 38400};
+static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
 int gpsd_set_speed(struct gps_session_t *session, int speed)
 {
