@@ -284,7 +284,7 @@ see the effect of profiling overhead.</para>
 <para>The first thing to notice here is that the fix latency can be
 just over a second; you can see the exact figures in the <ulink
 url='profile1.txt'>raw data</ulink>.  Where is the time going?  Our next
-graph was generated with This was generated with <command>gpsprof  -t
+graph was generated with <command>gpsprof  -t
 "Haicom 204s" -T png -f raw -s 4800</command></para>
 
 <figure><title>Instrumented latency report</title>
