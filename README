@@ -96,7 +96,7 @@ New features include:
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
-   * xgpsspeed is working again.
+   * xgpsspeed is working again.  gps has been seriously reworked and improved.
    * RPMs which include installation of gpsd to start up at boot time 
      are available.
    * C and Python libraries are available to encapsulate the client side of
