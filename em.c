@@ -41,7 +41,7 @@ struct header {
     unsigned short csum;
 };
 
-static void analyze(struct header *, unsigned short *, fd_set *, fd_set *);
+static void analyze(struct header *, unsigned short *, void (*raw_hook)(char *buf));
 
 static unsigned short em_gps_checksum(unsigned short *w, int n)
 {
@@ -362,7 +362,7 @@ static void handle1005(unsigned short *p)
 #endif
 }
 
-static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set * nmea_fds)
+static void analyze(struct header *h, unsigned short *p, void (*raw_hook)(char *buf))
 {
     unsigned char buf[BUFSIZE];
     char *bufp;
@@ -468,8 +468,7 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 	if (session.debug > 4)
 	    gpscli_report(1, "%s", buf);
 
-	gps_send_NMEA(afds, nmea_fds, buf);
-
+	raw_hook(buf);
     }
     if (eminit)
 	em_init();
@@ -486,7 +485,7 @@ static int putword(unsigned short *p, unsigned char c, unsigned int n)
 }
 
 
-static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
+static void em_eat(unsigned char c, void (*raw_hook)(char *buf))
 {
     static int state = EM_HUNT_FF;
     static struct header h;
@@ -549,7 +548,7 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 	if (!(byte = putword(data + words, c, byte)))
 	    words++;
 	if (words == h.ndata + 1) {
-	    analyze(&h, data, afds, nmea_fds);
+	    analyze(&h, data, raw_hook);
 	    free(data);
 	    state = EM_HUNT_FF;
 	}
@@ -557,13 +556,13 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
     }
 }
 
-static int handle_EMinput(int input, fd_set * afds, fd_set * nmea_fds)
+static int handle_EMinput(int input, void (*raw_hook)(char *buf))
 {
     unsigned char c;
 
     if (read(input, &c, 1) != 1)
 	return 1;
-    em_eat(c, afds, nmea_fds);
+    em_eat(c, raw_hook);
     return 0;
 }
 

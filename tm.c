@@ -71,7 +71,7 @@ void gps_NMEA_handle_message(char *sentence)
 	   session.gNMEAdata.utc);
 }
 
-static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
+static int nmea_handle_input(int input, void (*raw_hook)(char *buf))
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
@@ -86,7 +86,7 @@ static int nmea_handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 	        gps_NMEA_handle_message(buf);
 		/* also copy the sentence up to clients in raw mode */
 		strcat(buf, "\r\n");
-		gps_send_NMEA(afds, nmea_fds, buf);
+		raw_hook(buf);
 	    }
 	    offset = 0;
 	    return 1;

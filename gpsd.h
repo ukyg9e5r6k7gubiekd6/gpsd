@@ -107,7 +107,7 @@ struct gps_type_t
 {
     char typekey, *typename;
     void (*initializer)(void);
-    int (*handle_input)(int input, fd_set * afds, fd_set * nmea_fds);
+    int (*handle_input)(int input, void (*raw_hook)(char *buf));
     int (*rctm_writer)(char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(void);
     int baudrate;
@@ -142,7 +142,6 @@ extern void gps_add_checksum(char *sentence);
 extern short gps_checksum(char *sentence);
 
 /* GPS library supplies these */
-void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf);
 int gps_open(char *device_name, int device_speed);
 void gps_close();
 int netlib_passiveTCP(char *service, int qlen);

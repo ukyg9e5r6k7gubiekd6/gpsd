@@ -412,6 +412,14 @@ void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
     }
 }
 
+static fd_set afds;
+static fd_set nmea_fds;
+
+static void raw_hook(char *buf)
+{
+    gps_send_NMEA(&afds, &nmea_fds, buf);
+}
+
 int main(int argc, char *argv[])
 {
     char *default_service = "gpsd";
@@ -420,8 +428,6 @@ int main(int argc, char *argv[])
     char *dgpsserver = NULL;
     struct sockaddr_in fsin;
     fd_set rfds;
-    fd_set afds;
-    fd_set nmea_fds;
     int msock, nfds;
     int alen;
     extern char *optarg;
@@ -561,7 +567,6 @@ void gpscli_errexit(char *s)
 
 /* LIBRARY STUFF STARTS HERE */ 
 
-
 static void onexit(void)
 {
     close(session.dsock);
@@ -673,7 +678,7 @@ void gps_poll(fd_set *afds, fd_set *rfds, fd_set *nmea_fds,
 
     /* update the scoreboard structure from the GPS */
     if (session.fdin >= 0 && FD_ISSET(session.fdin, rfds)) {
-	session.device_type->handle_input(session.fdin, rfds, nmea_fds);
+	session.device_type->handle_input(session.fdin, raw_hook);
 	FD_CLR(session.fdin, rfds);
     }
 
