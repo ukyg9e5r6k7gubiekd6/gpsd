@@ -248,7 +248,7 @@ void gpsd_raw_hook(struct gps_session_t *session, char *sentence)
     }
 }
 
-#if BINARY_ENABLE
+#ifdef BINARY_ENABLE
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 

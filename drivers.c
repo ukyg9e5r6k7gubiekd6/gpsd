@@ -24,7 +24,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 	    if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
 		gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
 	} else {
-#if NON_NMEA_ENABLE
+#ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
 
 	    /* maybe this is a trigger string for a driver we know about? */
@@ -85,12 +85,12 @@ struct gps_type_t nmea = {
  *
  **************************************************************************/
 
-#if !BINARY_ENABLE
+#ifndef BINARY_ENABLE
 static void sirf_initializer(struct gps_session_t *session)
 {
     /* nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0"); */
-    nmea_send("$PSRF103,05,00,00,01");	/* disable VTG */
-    nmea_send("$PSRF103,01,00,00,01");	/* disable GLL */
+    nmea_send(session->gNMEAdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
+    nmea_send(session->gNMEAdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 }
 #endif /* BINARY_ENABLE */
 
@@ -120,7 +120,7 @@ static void sirf_mode(struct gps_session_t *session, int mode)
 
 struct gps_type_t sirfII = {
     "SiRF-II NMEA",	/* full name of type */
-#if BINARY_ENABLE
+#ifdef BINARY_ENABLE
     NULL,		/* recognizing SiRF flips us to binary */
     NULL,		/* no probe */
     NULL,		/* no initialization */
@@ -236,7 +236,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #if EARTHMATE_ENABLE
     &earthmate, 
 #endif /* EARTHMATE_ENABLE */
-#if ZODIAC_ENABLE
+#ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
 #if GARMIN_ENABLE

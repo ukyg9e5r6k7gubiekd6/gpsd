@@ -435,7 +435,7 @@ int packet_get(struct gps_session_t *session, int waiting)
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
-#if ZODIAC_ENABLE
+#ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
  #define getw(i) (session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 	    short len, n, crc1, crc2;

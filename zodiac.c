@@ -11,7 +11,7 @@
 #include "config.h"
 #include "gpsd.h"
 
-#if ZODIAC_ENABLE
+#ifdef ZODIAC_ENABLE
 
 struct header {
     unsigned short sync;

@@ -92,7 +92,7 @@ int gpsd_open(struct gps_session_t *session)
 
     session->packet_type = BAD_PACKET;
     if (isatty(session->gNMEAdata.gps_fd)) {
-#if NON_NMEA_ENABLE
+#ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++)
