@@ -651,21 +651,20 @@ static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 static struct gps_device_t *open_device(char *device_name, int nowait)
 {
     struct gps_device_t *device = gpsd_init(device_name);
+#ifdef MULTISESSION
+    struct channel_t *chp;
 
+    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	if (chp->state == CHANNEL_AVAILABLE) {
+	    chp->state = CHANNEL_INUSE;
+	    chp->device = device;
+	    goto found;
+	}
+    return NULL;
+found:
+#endif /* MULTISESSION */
     device->gpsdata.raw_hook = raw_hook;
     if (nowait) {
-#ifdef MULTISESSION
-	struct channel_t *chp;
-
-	for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	    if (chp->state == CHANNEL_AVAILABLE) {
-		chp->state = CHANNEL_INUSE;
-		chp->device = device;
-		goto found;
-	    }
-	return NULL;
-    found:
-#endif /* MULTISESSION */
 	if (gpsd_activate(device) < 0) {
 	    return NULL;
 	}
