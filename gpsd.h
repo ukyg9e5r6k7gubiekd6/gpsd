@@ -113,6 +113,10 @@ struct gps_session_t {
     unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #endif /* BINARY_ENABLE */
+#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
+    unsigned char GarminBuffer[4096 + 12]; /* packet buffer */
+    long GarminBufferLen;                  /* current GarminBuffer Length */
+#endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  

@@ -183,11 +183,11 @@ static inline double  radtodeg( double rad) {
 }
 
 static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );
-void SendPacket (struct gps_session_t *session, Packet_t *aPacket );
-Packet_t* GetPacket (struct gps_session_t *session );
+static void SendPacket (struct gps_session_t *session, Packet_t *aPacket );
+static int GetPacket (struct gps_session_t *session );
 
 // For debugging, decodes and prints some known packets.
-static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) 
+static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 {
     int maj_ver;
     int min_ver;
@@ -459,7 +459,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 
 //-----------------------------------------------------------------------------
 // send a packet in GarminUSB format
-void SendPacket (struct gps_session_t *session, Packet_t *aPacket ) 
+static void SendPacket (struct gps_session_t *session, Packet_t *aPacket ) 
 {
 	long theBytesToWrite = 12 + aPacket->mDataSize;
 	long theBytesReturned = 0;
@@ -494,24 +494,23 @@ void SendPacket (struct gps_session_t *session, Packet_t *aPacket )
 // is you ask for less than 64 bytes then the next packet will include
 // just the remaining bytes of the last 64 byte packet.
 //
+// Reading a packet of length Zero signals the end of the entire packet.
+//
 // The Garmin sample WinXX code also assumes the same behavior, so
 // maybe it is something in the USB protocol.
-Packet_t* GetPacket (struct gps_session_t *session ) 
+//
+// Return: 0 = got a good packet
+//         -1 = error
+//         1 = got partial packet
+static int GetPacket (struct gps_session_t *session ) 
 {
-    Packet_t *thePacket = NULL;
-    long theBufferSize = 0;
-    unsigned char* theBuffer = NULL;
+    Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
     struct timespec delay, rem;
 
+    memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer));
+    session->GarminBufferLen = 0;
+
     gpsd_report(4, "GetPacket()\n");
-
-    thePacket = (Packet_t*) calloc(1, sizeof(Packet_t) );
-    theBuffer = (unsigned char*) thePacket;
-
-    if( !thePacket ) {
-	    gpsd_report(0, "malloc() failed\n");
-	    exit(2);
-    }
 
     for( ; ; ) {
 	// Read async data until the driver returns less than the
@@ -522,7 +521,8 @@ Packet_t* GetPacket (struct gps_session_t *session )
 	long theBytesReturned = 0;
 
 	theBytesReturned = read(session->gNMEAdata.gps_fd
-				, &theBuffer[theBufferSize], ASYNC_DATA_SIZE);
+		, &session->GarminBuffer[session->GarminBufferLen]
+		, ASYNC_DATA_SIZE);
 	if ( !theBytesReturned ) {
 	    // zero length read is a flag for got the whole packet
             break;
@@ -534,7 +534,7 @@ Packet_t* GetPacket (struct gps_session_t *session )
 	}
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
-	theBufferSize += theBytesReturned;
+	session->GarminBufferLen += theBytesReturned;
 	if ( sizeof(Packet_t) <=  theBytesReturned ) {
 	    // really bad read error...
 	    gpsd_report(3, "GetPacket() packet too long!\n");
@@ -547,8 +547,8 @@ Packet_t* GetPacket (struct gps_session_t *session )
 	    continue;
 
     }
-    gpsd_report(5, "GotPacket() sz=%d \n", theBufferSize);
-    return thePacket;
+    gpsd_report(5, "GotPacket() sz=%d \n", session->GarminBufferLen);
+    return 0;
 }
 
 /*
@@ -561,7 +561,7 @@ int garmin_probe(struct gps_session_t *session)
 {
 
 
-    Packet_t* thePacket = 0;
+    Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
     char buffer[256];
     fd_set fds, rfds;
     struct timeval tv;
@@ -608,16 +608,15 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
-	thePacket = GetPacket( session );
-	PrintPacket(session,  thePacket);
+	if ( !GetPacket( session ) ) {
+		PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	}
 
 	if( ( 75 == thePacket->mPacketType)
 	    && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
 	    break;
 	}
-	free( thePacket );
     }
-    free( thePacket );
 
     // Tell the device that we are starting a session.
     gpsd_report(3, "Send Garmin Start Session\n");
@@ -644,17 +643,16 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
-	thePacket = GetPacket( session );
-	PrintPacket(session,  thePacket);
+	if ( !GetPacket( session ) ) {
+		PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	}
 
 	if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
 	    && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
 		== thePacket->mPacketId) ) {
 	    break;
 	}
-	free( thePacket );
     }
-    free( thePacket );
 
     // Tell the device to send product data
     gpsd_report(3, "Get Garmin Product Data\n");
@@ -681,17 +679,15 @@ int garmin_probe(struct gps_session_t *session)
 	    gpsd_report(3, "garmin_probe() timeout\n");
 	    return(1);
         }
-	thePacket = GetPacket( session);
-	PrintPacket( session, thePacket);
+	if ( !GetPacket( session ) ) {
+		PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	}
 
 	if( (GARMIN_LAYERID_APPL == thePacket->mPacketType)
 	    && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
 	    break;
 	}
-	free( thePacket );
     }
-
-    free( thePacket );
 
     // turn on PVT data 49
     gpsd_report(3, "Set Garmin to send reports every 1 second\n");
@@ -735,11 +731,9 @@ static void garmin_init(struct gps_session_t *session)
 
 static void garmin_handle_input(struct gps_session_t *session)
 {
-    Packet_t *thePacket = NULL;
-
-    thePacket = GetPacket( session );
-    PrintPacket( session, thePacket);
-    free( thePacket );
+	if ( !GetPacket( session ) ) {
+		PrintPacket(session, (Packet_t*)session->GarminBuffer);
+	}
 }
 
 /* caller needs to specify a wrapup function */
