@@ -160,47 +160,6 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
 #endif /* defined(SHM_H) && defined(IPC_H) */
 }
 
-static void decode_ecef(struct gps_data_t *ud, 
-			double x, double y, double z, 
-			double vx, double vy, double vz)
-{
-    /* WGS 84 geodesy parameters */
-    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
-    const double a = 6378137;			/* equatorial radius */
-    const double f = 1 / 298.257223563;		/* flattening */
-    const double b = a * (1 - f);		/* polar radius */
-    const double e2 = (a*a - b*b) / (a*a);
-    const double e_2 = (a*a - b*b) / (b*b);
-
-    /* geodetic location */
-    lambda = atan2(y,x);
-    p = sqrt(pow(x,2) + pow(y,2));
-    theta = atan2(z*a,p*b);
-    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
-    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
-    h = p / cos(phi) - n;
-    ud->latitude = phi * RAD_2_DEG;
-    ud->longitude = lambda * RAD_2_DEG;
-    REFRESH(ud->latlon_stamp);
-#ifdef __UNUSED__
-    ud->altitude = h;	/* height above ellipsoid rather than MSL */
-    REFRESH(ud->altitude_stamp);
-#endif /* __UNUSED__ */
-
-    /* velocity computation */
-    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
-    veast = -vx*sin(lambda)+vy*cos(lambda);
-    ud->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-    ud->speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
-    heading = atan2(veast,vnorth);
-    if (heading < 0)
-	heading += 2 * PI;
-    ud->track = heading * RAD_2_DEG;
-    REFRESH(ud->speed_stamp);
-    REFRESH(ud->track_stamp);
-    REFRESH(ud->climb_stamp);
-}
-
 static void sirfbin_mode(struct gps_session_t *session, int mode)
 {
     if (mode == 0) {
@@ -209,7 +168,6 @@ static void sirfbin_mode(struct gps_session_t *session, int mode)
 	session->gNMEAdata.driver_mode = 0;
     }
 }
-
 
 int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 {
@@ -226,14 +184,56 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
     {
     case 0x02:		/* Measure Navigation Data Out */
 	if (!(session->driverstate & SIRF_GE_232)) {
+	    /* WGS 84 geodesy parameters */
+	    double x, y, z, vx, vy, vz;
+	    double lambda,phi,p,theta,n,h,vnorth,veast,heading;
+	    const double a = 6378137;			/* equatorial radius */
+	    const double f = 1 / 298.257223563;		/* flattening */
+	    const double b = a * (1 - f);		/* polar radius */
+	    const double e2 = (a*a - b*b) / (a*a);
+	    const double e_2 = (a*a - b*b) / (b*b);
+	    int mask = 0;
+
 	    /* position/velocity is bytes 1-18 */
-	    decode_ecef(&session->gNMEAdata,
-			(double)getl(1),
-			(double)getl(5),
-			(double)getl(9),
-			(double)getw(13)/8.0,
-			(double)getw(15)/8.0,
-			(double)getw(17)/8.0);
+	    x = getl(1);
+	    y = getl(5);
+	    z = getl(9);
+	    vx = getw(13)/8.0;
+	    vy = getw(15)/8.0;
+	    vz = getw(17)/8.0;
+
+	    /* geodetic location */
+	    lambda = atan2(y,x);
+	    p = sqrt(pow(x,2) + pow(y,2));
+	    theta = atan2(z*a,p*b);
+	    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
+	    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
+	    h = p / cos(phi) - n;
+	    session->gNMEAdata.latitude = phi * RAD_2_DEG;
+	    session->gNMEAdata.longitude = lambda * RAD_2_DEG;
+	    REFRESH(session->gNMEAdata.latlon_stamp);
+	    if (session->gNMEAdata.mode == MODE_3D) {
+		if (session->diverstate & SIRF_SEEN_41) {
+		    /* recompute geodetic sep. from the *last* altitude fix */
+		    session->separation = session->gNMEAdata.altitude - h;
+		    /* use it to correct this one so updates will be atomic */
+		    session->gNMEAdata.altitude = h + session->separation;
+		    REFRESH(session->gNMEAdata.altitude_stamp);
+		    mask |= ALTITUDE_SET;
+		}
+	    }
+	    /* velocity computation */
+	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
+	    veast = -vx*sin(lambda)+vy*cos(lambda);
+	    session->gNMEAdata.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
+	    session->gNMEAdata.speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
+	    heading = atan2(veast,vnorth);
+	    if (heading < 0)
+		heading += 2 * PI;
+	    session->gNMEAdata.track = heading * RAD_2_DEG;
+	    REFRESH(session->gNMEAdata.speed_stamp);
+	    REFRESH(session->gNMEAdata.track_stamp);
+	    REFRESH(session->gNMEAdata.climb_stamp);
 	    /* fix status is byte 19 */
 	    navtype = getb(19);
 	    session->gNMEAdata.status = STATUS_NO_FIX;
@@ -264,7 +264,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    REFRESH(session->gNMEAdata.fix_quality_stamp);
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
-	    return TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
+	    return mask | TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
 	}
 
     case 0x04:		/* Measured tracker data out */
@@ -429,6 +429,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gNMEAdata.altitude = getl(31)*1e-2;
 	    REFRESH(session->gNMEAdata.altitude_stamp);
 	    mask |= ALTITUDE_SET;
+	    session->driverstate |= SIRF_SEEN_41;
 	}
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
