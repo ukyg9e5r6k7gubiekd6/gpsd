@@ -185,6 +185,13 @@ void gpsd_wrap(struct gps_session_t *session)
 }
 
 #ifdef BINARY_ENABLE
+/*
+ * Support for generic binary drivers.  These functions dump NMEA for passing
+ * to the client in raw mode.  They assume that (a) the public gps.h structure 
+ * members are in a valid state, and (b) the private members hours, minutes, 
+ * and seconds have also been filled in.
+ */
+
 static double degtodm(double a)
 {
     double m, t;
