@@ -55,6 +55,7 @@ struct gps_session_t
 
 #ifdef ZODIAC_ENABLE
     /* private housekeeping stuff for the Zodiac driver */
+    unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
     double separation;		/* Geoidal separation */
     int year;

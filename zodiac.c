@@ -22,8 +22,6 @@ enum {
 
 #define O(x) (x-6)
 
-static unsigned short sn = 0;
-
 struct header {
     unsigned short sync;
     unsigned short id;
@@ -113,12 +111,12 @@ static void zodiac_init(struct gps_session_t *session)
       t = time(NULL);
       tm = gmtime(&t);
 
-      if (sn++ > 32767)
-	  sn = 0;
+      if (session->sn++ > 32767)
+	  session->sn = 0;
       
       memset(data, 0, sizeof(data));
       
-      data[0] = sn;		/* sequence number */
+      data[0] = session->sn;		/* sequence number */
 
       data[1] = (1 << 2) | (1 << 3);
       data[2] = data[3] = data[4] = 0;
@@ -144,12 +142,12 @@ static void send_rtcm(struct gps_session_t *session,
     unsigned short data[34];
     int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
 
-    if (sn++ > 32767)
-	sn = 0;
+    if (session->sn++ > 32767)
+	session->sn = 0;
 
     memset(data, 0, sizeof(data));
 
-    data[0] = sn;		/* sequence number */
+    data[0] = session->sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = zodiac_checksum(data, n);
 
