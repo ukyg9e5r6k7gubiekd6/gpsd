@@ -396,6 +396,7 @@ struct gps_type_t zodiac_binary =
     zodiac_handle_input,/* read and parse message packets */
     zodiac_send_rtcm,	/* send DGPS correction */
     zodiac_speed_switch,/* we can change baud rate */
+    NULL,		/* no mode switcher */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };

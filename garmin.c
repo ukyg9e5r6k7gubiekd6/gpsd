@@ -823,6 +823,7 @@ struct gps_type_t garmin_binary =
     garmin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */
     NULL,		/* no speed switcher */
+    NULL,		/* no mode switcher */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };

@@ -233,7 +233,7 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 
 <varlistentry>
 <term>m</term>
-<listitem><para>The gps mode as "M=%d". 0=no mode value yet seen, 
+<listitem><para>The NMEA mode as "M=%d". 0=no mode value yet seen, 
 1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
 </varlistentry>
 
@@ -272,7 +272,7 @@ raw mode.</para></listitem>
 
 <varlistentry>
 <term>s</term>
-<listitem><para>The gps status as "S=%d". 0=no fix, 1=fix,
+<listitem><para>The NMEA status as "S=%d". 0=no fix, 1=fix,
 2=DGPS-corrected fix.</para></listitem>
 </varlistentry>
 
@@ -286,7 +286,7 @@ raw mode.</para></listitem>
 <varlistentry>
 <term>u</term>
 <listitem><para>Current rate of climb as "U=%f" in meters per second.
-Some GPses (non-Sirf-II based) do not report this.</para></listitem>
+Some GPSes (non-Sirf-II based) do not report this.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -324,20 +324,22 @@ not used in the last fix. Each number is followed by one space.</para>
 
 <varlistentry>
 <term>z</term>
-<listitem><para>The Z command returns daemon profiling
-information of interest to GPSD developers. The format of this string
-is subject to change without notice.</para></listitem>
+<listitem><para>The Z command returns daemon profiling information of
+interest to <application>gpsd</application> developers. The format of
+this string is subject to change without notice.</para></listitem>
 </varlistentry>
+
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
 means that there is no valid data available.</para>
 
-<para>Requests can be concatenated and sent as a string; gpsd will then
-respond with a comma-separated list of replies.</para>
+<para>Requests can be concatenated and sent as a string;
+<application>gpsd</application> will then respond with a
+comma-separated list of replies.</para>
 
-<para>Every gpsd reply will start with the string "GPSD" followed by
-the replies. Examples:</para>
+<para>Every <application>gpsd</application> reply will start with the
+string "GPSD" followed by the replies. Examples:</para>
 
 <screen>
       query:       "p\n"
@@ -350,10 +352,11 @@ the replies. Examples:</para>
       reply:       "GPSD,V=0.000000,A=37.900000\r\n"
 </screen>
 
-<para>When clients are active but the GPS is not responding, gpsd will spin 
-trying to open the GPS device once per second.  Thus, it can be left
-running in background and survive having the GPS repeatedly unplugged
-and plugged back in.</para>
+<para>When clients are active but the GPS is not responding,
+<application>gpsd</application> will spin trying to open the GPS
+device once per second.  Thus, it can be left running in background
+and survive having the GPS repeatedly unplugged and plugged back
+in.</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
 mode <application>gpsd</application> ships a line of data to the
@@ -436,10 +439,6 @@ on the Web</ulink>.  gpsd parses the following NMEA sentences: GPRMC,
 GPGLL, GPVTG, GPGGA, GPGSA, GPGSV.  Note that gpsd returns pure
 decimal degrees, not the hybrid degree/minute format described in the
 NMEA standard.</para>
-
-<para>The Rockwell protocol is described as an addendum on <ulink
-url='http://www.gpsinformation.org/dale/nmea.htm'>this page about
-NMEA</ulink>.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

@@ -65,6 +65,7 @@ struct gps_type_t nmea = {
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
+    NULL,		/* no mode switcher */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
@@ -119,6 +120,7 @@ struct gps_type_t sirfII = {
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_switcher,	/* we can change speeds */
+    NULL,		/* no mode switch */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
@@ -155,6 +157,7 @@ struct gps_type_t tripmate = {
     nmea_handle_input,		/* read text sentence */
     nmea_write_rtcm,		/* send RTCM data straight */
     NULL,			/* no speed switcher */
+    NULL,			/* no mode switcher */
     NULL,			/* no wrapup */
     1,				/* updates every second */
 };
@@ -199,6 +202,7 @@ struct gps_type_t earthmate = {
     nmea_handle_input,		/* read text sentence */
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
+    NULL,			/* no mode switcher */
     NULL,			/* no wrapup code */
     1,				/* updates every second */
 };

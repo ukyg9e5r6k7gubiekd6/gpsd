@@ -1,6 +1,14 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Finish implementing the N command
+
+** Make sure gps_poll can handle multiple-sentence returns
+
+** Write a document on why using raw mode is a bad idea.
+
+** Start a GPSD FAQ, including how to report bugs.
+
 ** Rate-limiting SiRF sentence 4.
 
 The SiRF binary driver works nicely now, but it's a bit annoying that
