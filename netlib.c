@@ -12,7 +12,7 @@
 #define INADDR_NONE   ((in_addr_t)-1)
 #endif
 
-int netlib_connectsock(char *host, char *service, char *protocol)
+int netlib_connectsock(const char *host, const char *service, const char *protocol)
 {
     struct hostent *phe;
     struct servent *pse;

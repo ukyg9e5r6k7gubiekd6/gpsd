@@ -7,7 +7,7 @@
 
 #include "gpsd.h"
 
-struct gps_data_t *gps_open(char *host, char *port)
+struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
 {
     time_t now;
@@ -202,7 +202,7 @@ int gps_poll(struct gps_data_t *gpsdata)
     return gps_unpack(buf, gpsdata);
 }
 
-int gps_query(struct gps_data_t *gpsdata, char *requests)
+int gps_query(struct gps_data_t *gpsdata, const char *requests)
 /* query a gpsd instance for new data */
 {
     if (write(gpsdata->gps_fd, requests, strlen(requests)) <= 0)

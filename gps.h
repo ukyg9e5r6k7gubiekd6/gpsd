@@ -98,17 +98,17 @@ struct gps_data_t {
     void (*raw_hook)(char *buf);	/* raw-mode hook for GPS data */
 };
 
-struct gps_data_t *gps_open(char *host, char *port);
+struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
-int gps_query(struct gps_data_t *gpsdata, char *requests);
+int gps_query(struct gps_data_t *gpsdata, const char *requests);
 int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf));
 
 /* some multipliers for interpreting GPS output */
-#define METERS_TO_FEET	3.2808399
-#define METERS_TO_MILES	0.00062137119
-#define KNOTS_TO_MPH	1.1507794
-#define PI 3.14159265358979323846
+#define METERS_TO_FEET	3.2808399	/* Imperial (U.S./British) feet */
+#define METERS_TO_MILES	0.00062137119	/* International miles */
+#define KNOTS_TO_MPH	1.1507794	/* International miles and knots */
+#define PI 3.14159265358979323846	/* for radians-to-degrees and vv. */
 
 /* gps_open() error return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
