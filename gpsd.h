@@ -30,7 +30,7 @@ struct gps_type_t
     char typekey, *typename;
     char *trigger;
     void (*initializer)(struct gps_session_t *session);
-    int (*handle_input)(struct gps_session_t *session);
+    void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
     int baudrate;

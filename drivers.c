@@ -39,14 +39,14 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
     }
 }
 
-static int nmea_handle_input(struct gps_session_t *session)
+static void nmea_handle_input(struct gps_session_t *session)
 {
     static unsigned char buf[BUFSIZE];	/* that is more then a sentence */
     static int offset = 0;
 
     while (offset < BUFSIZE) {
 	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
-	    return 1;
+	    return;
 
 	if (buf[offset] == '\n' || buf[offset] == '\r') {
 	    buf[offset] = '\0';
@@ -58,14 +58,14 @@ static int nmea_handle_input(struct gps_session_t *session)
 		    session->gNMEAdata.raw_hook(buf);
 	    }
 	    offset = 0;
-	    return 1;
+	    return;
 	}
 
 	offset++;
 	buf[offset] = '\0';
     }
     offset = 0;			/* discard input ! */
-    return 1;
+    return;
 }
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)

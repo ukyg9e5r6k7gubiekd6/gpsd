@@ -536,14 +536,12 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
     }
 }
 
-static int zodiac_handle_input(struct gps_session_t *session)
+static void zodiac_handle_input(struct gps_session_t *session)
 {
     unsigned char c;
 
-    if (read(session->gNMEAdata.gps_fd, &c, 1) != 1)
-	return 1;
-    zodiac_eat(session, c);
-    return 0;
+    if (read(session->gNMEAdata.gps_fd, &c, 1) == 1)
+	zodiac_eat(session, c);
 }
 
 /* caller needs to specify a wrapup function */
