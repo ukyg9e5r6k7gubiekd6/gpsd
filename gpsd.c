@@ -329,21 +329,12 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    sprintf(phrase, ",N=%d", session->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    /*
-	     * Presently we don't know how to derive time or track error.
-	     *
-	     * Field reports match the theoretical prediction that
-	     * expected time error should be half the resolution of
-	     * the GPS clock, so we put the bound of the error
-	     * in as a constant pending getting it from each driver.
-	     *
-	     * Only the Zodiacs report speed error.
-	     */
 	    if (!have_fix(session))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f 0.005 %.4f %.4f",
-			ud->fix.time, ud->fix.latitude, ud->fix.longitude);
+		sprintf(phrase, ",O=%.2f %.3f %.4f %.4f",
+			ud->fix.time, ud->fix.ept, 
+			ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %7.2f",
 			    session->gpsdata.fix.altitude);

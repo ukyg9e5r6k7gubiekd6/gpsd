@@ -168,8 +168,19 @@ int gpsd_poll(struct gps_session_t *session)
 	    session->fixcnt++;
 
 	/*
-	 * Compute derived quantities.  
+	 * Compute derived quantities.  This is where the tricky error-
+	 * modeling stuff goes. Presently we don't know how to derive 
+	 * time or track error.
+	 *
+	 * Field reports match the theoretical prediction that
+	 * expected time error should be half the resolution of
+	 * the GPS clock, so we put the bound of the error
+	 * in as a constant pending getting it from each driver.
+	 *
+	 * Some drivers set the position-error fields.  Only the Zodiacs 
+	 * report speed error.  Nobody reports track error or climb error.
 	 */
+	session->gpsdata.fix.ept = 0.005;
 	if (session->gpsdata.valid & LATLON_SET) {
 	    if (!(session->gpsdata.valid & HERR_SET) 
 	    	&& (session->gpsdata.valid & HDOP_SET)) {
