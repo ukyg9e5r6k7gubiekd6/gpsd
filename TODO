@@ -1,24 +1,3 @@
-** Detect a Garmin USB device
-
-According to Hermann Kneissel:
-
-major/minor number won't work, but assuming that if a gps ddevice is attached
-to the usb bus the driver is also installed, you may
-check /prov/bus/usb/devices
-for an entry with vendor 091e/product 0003:
-
-T:  Bus=01 Lev=02 Prnt=03 Port=00 Cnt=01 Dev#=  4 Spd=12  MxCh= 0
-D:  Ver= 1.10 Cls=ff(vend.) Sub=ff Prot=ff MxPS= 8 #Cfgs=  1
-P:  Vendor=091e ProdID=0003 Rev= 0.01
-C:* #Ifs= 1 Cfg#= 1 Atr=c0 MxPwr=  0mA
-I:  If#= 0 Alt= 0 #EPs= 3 Cls=ff(vend.) Sub=ff Prot=ff Driver=(none)
-E:  Ad=81(I) Atr=03(Int.) MxPS=  64 Ivl=1ms
-E:  Ad=02(O) Atr=02(Bulk) MxPS=  64 Ivl=0ms
-E:  Ad=83(I) Atr=02(Bulk) MxPS=   8 Ivl=0ms
-
-this will tell you, that a garmin gps is attached to the usb bus.
-
-
 ** Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the
@@ -53,33 +32,12 @@ relationships are there?
 
 * Things not to do:
 
-Here are several things that look like good ideas, but that turn out
-on closer inspection to be not possible or not worth the effort.
-
 ** Try to crank the update rate up past 1 per second
 
 NMEA doesn't give us control of the update rate, and SiRF/Zodiac chips
 don't seem to be able to set cycle times below once per second even in
-binary mode.  Even on a chipset that permitted it, at 50km/h (31mi/h)
-that's only 13.8 meters change in position between updates.  Faster
-refresh might make sense for aviation applications, but not on foot or
-in a car.
-
-** Try to autodetect USB devices
-
-Sigh.  USB scanning won't work.
-
-The fundamental problem is that there is no GPS device class in the
-USB standard.  When you get device information about a GPS from the 
-USB subsystem, all you get is info on the USB-to-serial chipset it's
-using.
-
-This means that GPSes are not distinguishable from other USB-to-serial
-devices, in particular USB-to-RS232C adaptors.  This is a crash
-landing.  We could live with the scanning code failing to detect a
-GPS that's there, but we can't live with having it mis-identify
-another USB device as a GPS.  The least bad result from that would 
-be that the daemon opens and locks up the other device.
-
-This cannot be fixed, short of USB 1.1 growing a USB device type
-and vendor firmare advertising it.
+binary mode.  (Turns out the reason is that a full NMEA fix report
+takes about a second at 4800bps.) Even on a chipset that permitted it,
+at 50km/h (31mi/h) that's only 13.8 meters change in position between
+updates.  Faster refresh might make sense for aviation applications,
+but not on foot or in a car.
