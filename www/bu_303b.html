@@ -14,6 +14,9 @@
 <p>(Found on a Korean electronics dealer's website, edited to fix the 
 English and remove promotional crap.)</p>
 
+<p>(Below this, a note on what to do if your BU-303 starts making a
+rattling noise and your USB transciever flakes out.)</p>
+
 <div align="center"><img src="BU303-2.gif" width="500" height="300"></div>
 
 <table cellspacing="0" cellpadding="2" align="center" border="0">
@@ -249,5 +252,80 @@ Velocity 514 meters / second max.
 Jerk 20 meters / second, max.
 Acceleration 4 G, max.
 </pre>
+
+<p>And now ESR tells a hardware-repair war story:</p>
+
+<p>The BU-303 has a design flaw.  It has an internal lithium battery,
+probably used to drive static RAM holding fix information when the
+unit is unplugged or powered down.  The only thing holding the battery
+om the PCB is the solder on its leads.</p>
+
+<p>Mechanical vibration and shock (from events like allowing the GPS
+to fall on the floor) can stress and eventually break the solder bond.
+If you start hearing a rattling noise from inside the BU-303 case,
+this has probably happened.  The least-bad effect this can have is
+that the unit will start taking longer to acquire a first fix, because 
+every time you plug it in will effectively be a cold start.</p>
+
+<p>After the battery has been loose for a while, the USB transciever 
+in the device may go catatonic.  You will know this has happened if
+the indicator LED still lights when the BU-303 is plugged in but the
+USB system on your laptop no longer sees the device.  Check this by
+running lsusb(1); you should see a line that looks like this:</p>
+
+<pre>
+Bus XXX: Device YYY: ID 067b:2302 Prolific Technology Inc. PL2303 Serial Port 
+</pre>
+
+<p>If you don't see this line, do not despair &mdash; it is actually
+possible to repair the unit.  Here is how:</p>
+
+<ol>
+<li>Collect the right tools.  You will need one (1) Philips-blade
+jewelers' screwdriver, one (1) tube of epoxy superglue, and one (1) 
+clean well-lighted suface on which tiny parts won't disappear.  If
+your fingers are clumsy, get a pair of tweezers or a really small pair
+of needlenose pliers.</p>
+
+<li>There's a rubber nonskid pad on the bottom of the BU-303.  Peel
+back the edge closest to where the USB cable emerges from the case (it
+isn't necessary to remove the whole thing).  You'll see two Philips
+screws.  Remove and save them. </li>
+
+<li>Carefully pry the case apart along the seam near the cable hole.
+Inside, you'll see a single small PCB (printed-circuit board).
+Watch for two small parts that may be loose inside the case.  One is
+the battery.  The other is a transparent plastic light-diffuser plug
+that sits in the hole over the LED. You want to not lose either of
+these! There is nothing really holding the diffuser in the LED hole
+but the presence of the PCB.  I dropped mine and it was only rescued
+from oblivion by my sharp-eyed wife.</li>
+
+<li>Look for a place near the edge of the PCB that has a white circle
+stenciled on it.  That is where the loose battery making the rattling
+noise should be secured.  You'll notice that there are two parallel pads on
+the PCB, like trenches a fraction of a millimeter deep, pointing
+parallel to the board-edge towards the middle of one side, that match
+two metal fingers on the loose battery.</li>
+
+<li>Place the battery within the white circle so that its figers sit on
+the pads.  There will be only one way it fits.  Once you know how to 
+put it in that position with your fingers or a pair of tweezers, get
+out a tube of epoxy superglue.  Put some on the metal rectangle on the
+bottom face of the battery and put the battery into position.  Hold it
+there long enough for the glue to set.</li>
+
+<li>Unplug the USB cable from the connector on the PCB and plug it
+back in.  This step is voodoo; it's what actually seemed to rouse the
+USB transciever from catatonia, though I don't know how or why.</li>
+
+<li>Reassemble the case around the PCB.  You'll know the right way for
+the PCB in fit in it because it puts the LED on the PCB edge right
+underneath its hole.  Be careful not to drop the transparent plastic
+diffuser!  If you still have the glue handy, glue it in too, just in
+case.</li>
+</ol>
+
+<p>If you are lucky, your BU-303 now works again.</p>
 
 </body></html>
