@@ -90,8 +90,9 @@ struct gps_type_t nmea = {
 #if !BINARY_ENABLE
 static void sirf_initializer(struct gps_session_t *session)
 {
-    if (!strcmp(session->device_type->typename, "SiRF-II")) 
-	nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
+    /* nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0"); */
+    nmea_send("$PSRF103,05,00,00,01");	/* disable VTG */
+    nmea_send("$PSRF103,01,00,00,01");	/* disable GLL */
 }
 #endif /* BINARY_ENABLE */
 
