@@ -212,7 +212,7 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      * 1,2 Latitude, N (North) or S (South)
      * 3,4 Longitude, E (East) or W (West)
      * 5 UTC of position
-     * 6 Status: A=Valid, V=Invalid
+     * 6 A=Active, V=Void
      * 7 Mode Indicator
      *   A = Autonomous mode
      *   D = Differential Mode
@@ -345,7 +345,6 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
     out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
     gpscli_report(3, "GPGGA sets status %d\n", out->status);
-    update_field_i(sentence, 7, &out->satellites_used);
     out->altitude_stamp.changed = update_field_f(sentence, 9, &out->altitude);
     REFRESH(out->altitude_stamp);
 }
