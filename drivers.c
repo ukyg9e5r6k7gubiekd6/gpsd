@@ -77,15 +77,20 @@ struct gps_type_t nmea = {
 #ifdef SIRFII_ENABLE
 /**************************************************************************
  *
- * SiRF-II
+ * SiRF-II NMEA
+ *
+ * This NMEA -mode driver is a fallback in case the SiRF chipset has
+ * firmware too old for binary to be useful.
  *
  **************************************************************************/
 
+#ifndef BINARY_ENABLE
 static void sirf_initializer(struct gps_session_t *session)
 {
     if (!strcmp(session->device_type->typename, "SiRF-II")) 
 	nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
 }
+#endif /* BINARY_ENABLE */
 
 static int sirf_switcher(struct gps_session_t *session, int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
@@ -108,8 +113,13 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
 struct gps_type_t sirfII = {
     '\0', 		/* selected implicitly */
     "SiRF-II NMEA",	/* full name of type */
+#ifdef BINARY_ENABLE
+    NULL,		/* recognizing SiRF flips us to binary */
+    NULL,		/* no initialization */
+#else
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
-    sirf_initializer,		/* no initialization */
+    sirf_initializer,	/* turn off debugging messages */
+#endif /* BINARY_ENABLE */
     nmea_handle_input,	/* read text sentence */
     nmea_write_rtcm,	/* write RTCM data straight */
     sirf_switcher,	/* we can change speeds */

@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "gpsd.h"
+#if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)	((n) >> 8)
 #define LO(n)	((n) & 0xff)
@@ -70,7 +71,6 @@ static int sirf_speed(int ttyfd, int speed)
    return (write(ttyfd, msg, 9+8) != 9+8);
 }
 
-#ifdef __UNUSED__
 static int sirf_to_nmea(int ttyfd, int speed) 
 /* switch from binary to NMEA at specified baud */
 {
@@ -93,6 +93,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
    return (write(ttyfd, msg, 0x18+8) != 0x18+8);
 }
 
+#ifdef __UNUSED__
 static int sirf_waas_ctrl(int ttyfd, int enable) 
 /* enable or disable WAAS */
 {
@@ -269,9 +270,6 @@ static int sirf_power_save(int ttyfd, int enable)
  * message 41.
  */
 
-/* driver state flags */
-#define GNI_NAVTYPE_VALID	0x01	/* NAVtype in packet type 41 is good */
-
 #define getb(off)	(buf[off])
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
@@ -365,7 +363,7 @@ static void decode_ecef(struct gps_data_t *ud,
 static void decode_sirf(struct gps_session_t *session,
 			unsigned char *buf, int len)
 {
-    int	st, i, j, cn;
+    int	st, i, j, cn, navtype;
     char buf2[MAX_PACKET_LENGTH*3] = "";
 
     switch (buf[0])
@@ -380,7 +378,7 @@ static void decode_sirf(struct gps_session_t *session,
 		    (double)getw(15)/8.0,
 		    (double)getw(17)/8.0);
 	/* fix status is byte 19 */
-	int navtype = getb(19);
+	navtype = getb(19);
 	session->gNMEAdata.status = STATUS_NO_FIX;
 	session->gNMEAdata.mode = MODE_NO_FIX;
 	if (navtype & 0x80)
@@ -457,8 +455,11 @@ static void decode_sirf(struct gps_session_t *session,
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "Firmware version: %s\n", session->outbuffer+5);
-	if (atof(session->outbuffer+5) >= 232)
-	    session->driverstate |= GNI_NAVTYPE_VALID;
+	if (atof(session->outbuffer+5) < 231) {
+	    session->driverstate |= SIRF_LT_231;
+	    sirf_to_nmea(session->gNMEAdata.gps_fd,session->gNMEAdata.baudrate);
+	    packet_sniff(session);
+	}
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	break;
 
@@ -496,24 +497,22 @@ static void decode_sirf(struct gps_session_t *session,
 	 * To work around the incomplete implementation of this
 	 * packet in 231, we use the status byte in sentence 0x02.
 	 */
-	if (session->driverstate & GNI_NAVTYPE_VALID) {
-	    int navtype = getw(3);
-	    session->gNMEAdata.status = STATUS_NO_FIX;
-	    session->gNMEAdata.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
-		session->gNMEAdata.status = STATUS_DGPS_FIX;
-	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gNMEAdata.status = STATUS_FIX;
-	    REFRESH(session->gNMEAdata.status_stamp);
-	    session->gNMEAdata.mode = MODE_NO_FIX;
-	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gNMEAdata.mode = MODE_3D;
-	    else if (session->gNMEAdata.status)
-		session->gNMEAdata.mode = MODE_2D;
-	    REFRESH(session->gNMEAdata.mode_stamp);
-	    gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
-	}
+	navtype = getw(3);
+	session->gNMEAdata.status = STATUS_NO_FIX;
+	session->gNMEAdata.mode = MODE_NO_FIX;
+	if (navtype & 0x80)
+	    session->gNMEAdata.status = STATUS_DGPS_FIX;
+	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	    session->gNMEAdata.status = STATUS_FIX;
+	REFRESH(session->gNMEAdata.status_stamp);
+	session->gNMEAdata.mode = MODE_NO_FIX;
+	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	    session->gNMEAdata.mode = MODE_3D;
+	else if (session->gNMEAdata.status)
+	    session->gNMEAdata.mode = MODE_2D;
+	REFRESH(session->gNMEAdata.mode_stamp);
+	gpsd_report(4, "Navtype = 0x%0x, Status = %d, mode = %d\n", 
+		    navtype, session->gNMEAdata.status, session->gNMEAdata.mode);
 	/*
 	 * Compute UTC from extended GPS time.  The protocol reference
 	 * claims this 16-bit field is "extended" GPS weeks, but I'm
@@ -580,12 +579,24 @@ static void sirfbin_handle_input(struct gps_session_t *session)
 static void sirfbin_initializer(struct gps_session_t *session)
 /* poll for software version in order to check for old firmware */
 {
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x02,
-                     0x84, 0x00,
-                     0x00, 0x00, 0xb0, 0xb3};
-   crc_sirf(msg);
-   write(session->gNMEAdata.gps_fd, msg, 10);
-   gpsd_report(4, "Probing for firmware version...\n");
+    if (session->packet_type == NMEA_PACKET) {
+	if (session->driverstate & SIRF_LT_231) {
+	    gpsd_report(1, "SiRF chipset has old firmware, falling back to  SiRF NMEA\n");
+	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
+	    gpsd_switch_driver(session, 'r');
+	} else {
+	    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x02,
+			      0x84, 0x00,
+			      0x00, 0x00, 0xb0, 0xb3};
+
+	    gpsd_report(1, "Switching chip mode to SiRF binary.\n");
+	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,0,%d,8,1,0", session->gNMEAdata.baudrate);
+	    packet_sniff(session);
+	    crc_sirf(msg);
+	    write(session->gNMEAdata.gps_fd, msg, 10);
+	    gpsd_report(4, "Probing for firmware version...\n");
+	}
+    }
 }
 
 static int sirfbin_switch(struct gps_session_t *session, int speed)
@@ -598,7 +609,7 @@ struct gps_type_t sirf_binary =
 {
     's',		/* invoke with -T s */
     "SIRF-II binary",	/* full name of type */
-    NULL,		/* only switched to by some other driver */
+    "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirfbin_initializer,	/* initialize the device */
     sirfbin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */
@@ -606,3 +617,4 @@ struct gps_type_t sirf_binary =
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };
+#endif /* defined(SIRFII_ENABLE) && defined(BINARY_ENABLE) */
