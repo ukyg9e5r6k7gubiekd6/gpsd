@@ -209,7 +209,7 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 	do_lat_lon(&field[1], out);
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
-	if (*status == 'D')
+	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
