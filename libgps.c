@@ -21,6 +21,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	port = DEFAULT_GPSD_PORT;
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
+	free(gpsdata);
 	errno = gpsdata->gps_fd;
 	return NULL;
     }
@@ -43,7 +44,9 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    return close(gpsdata->gps_fd);
+    int retval = close(gpsdata->gps_fd);
+    free(gpsdata);
+    return retval;
 }
 
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
