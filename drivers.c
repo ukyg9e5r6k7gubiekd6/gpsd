@@ -253,6 +253,7 @@ struct gps_type_t earthmate =
 };
 #endif /* EARTHMATE_ENABLE */
 
+#ifdef LOGFILE_ENABLE
 /**************************************************************************
  *
  * Logfile playback driver
@@ -272,6 +273,7 @@ struct gps_type_t logfile =
     1,				/* 1 stop bit (not used) */
     -1,				/* should never time out */
 };
+#endif /* LOGFILE_ENABLE */
 
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
@@ -288,7 +290,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
+#ifdef LOGFILE_ENABLE
     &logfile,
+#endif /* LOGFILE_ENABLE */
     NULL,
 };
 struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

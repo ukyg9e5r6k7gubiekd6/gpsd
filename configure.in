@@ -71,6 +71,7 @@ AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
 AC_DEFINE(FV18_ENABLE,      1, [San Jose Navigation FV-18 support])
 AC_DEFINE(TRIPMATE_ENABLE,  1, [DeLorme TripMate support])
 AC_DEFINE(EARTHMATE_ENABLE, 1, [DeLorme EarthMate Zodiac support])
+AC_DEFINE(LOGFILE_ENABLE,   1, [Logfile driver support])
  
 AC_OUTPUT(Makefile gpsd.spec)
 

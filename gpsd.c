@@ -142,22 +142,25 @@ static void usage()
     struct gps_type_t **dp;
     printf("usage:  gpsd [options] \n\
   Options include: \n\
-  -p string (default %s)   = set GPS device name \n\
-  -T devtype (default 'n')       = set GPS device type \n\
-  -S integer (default %4s)      = set port for daemon \n"
+  -p string (default %s)   = set GPS device name \n"
+#ifdef NON_NMEA_ENABLE
+"  -T devtype (default 'n')       = set GPS device type \n"
+#endif /* NON_NMEA_ENABLE */
+"  -S integer (default %4s)      = set port for daemon \n"
 #ifdef TRIPMATE_ENABLE
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
 #endif /* TRIPMATE_ENABLE */
 "  -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
   -D integer (default 0)         = set debug level \n\
-  -h                             = help message \n\
-  Here are the available driver types:\n\
-", DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
-
+  -h                             = help message \n",
+	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
+#ifdef NON_NMEA_ENABLE
+    printf("Here are the available driver types:\n"); 
     for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey)
 	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
+#endif /* NON_NMEA_ENABLE */
 }
 
 static int throttled_write(int fd, char *buf, int len)
@@ -533,15 +536,20 @@ int main(int argc, char *argv[])
     int nowait = 0;
 
     debuglevel = 1;
-    while ((option = getopt(argc, argv, "D:S:T:d:hnp:s:"
+    while ((option = getopt(argc, argv, "D:S:d:hnp:s:"
 #if TRIPMATE_ENABLE
 			    "i:"
 #endif /* TRIPMATE_ENABLE */
+#ifdef NON_NMEA_ENABLE
+			    "T:"
+#endif /* NON_NMEA_ENABLE */
 		)) != -1) {
 	switch (option) {
+#ifdef NON_NMEA_ENABLE
 	case 'T':
 	    gpstype = *optarg;
 	    break;
+#endif /* NON_NMEA_ENABLE */
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
 	    break;
