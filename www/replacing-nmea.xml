@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE article PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd" [
+<!ENTITY howto         "http://en.tldp.org/HOWTO/">
+<!ENTITY mini-howto    "http://en.tldp.org/HOWTO/mini/">
+<!ENTITY homepage      "http://catb.org/~esr/">
+]>
+<article>
+<title>Towards a Better GPS Protocol</title>
+
+<articleinfo>
+
+<author>
+  <firstname>Eric</firstname>
+  <othername>Steven</othername>
+  <surname>Raymond</surname>
+  <affiliation>
+    <orgname><ulink url="&homepage;">
+    Thyrsus Enterprises</ulink></orgname> 
+    <address>
+    <email>esr@thyrsus.com</email>
+    </address>
+  </affiliation>
+</author>
+<copyright>
+  <year>2004</year>
+  <holder role="mailto:esr@thyrsus.com">Eric S. Raymond</holder> 
+</copyright>
+<!-- legalnotice>
+  <title>Copyright</title>
+  <para>Permission is granted to copy, distribute and/or modify
+  this document under the terms of the Open Publication License,
+  version 2.0.</para>
+</legalnotice -->
+
+<revhistory>
+   <revision>
+      <revnumber>1.0</revnumber>
+      <date>11 February 2005</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Initial draft.
+      </revremark>
+   </revision>
+</revhistory>
+
+<abstract>
+<para>The NMEA 0183 protocol used by GPS units might best be described as
+"layer upon layer of cruft".  In this paper, we examine the problems
+and consider a cleaner design.</para>
+</abstract>
+
+</articleinfo>
+
+<sect1><title>What's Wrong with NMEA 0183, and Why Fix It?</title>
+
+<para>The protocol used by GPS devices to report to computers is a
+small subset of NMEA 0183.  NMEA stands for "National Marine
+Electronics Association", and the features GPSes use for reporting
+time/position/velocity information are a small part of a protocol
+originally designed for communication between parts of complex marine
+navigation systems.  Thus the full protocol includes support for depth
+sounders, LORAN, and many other things irrelevant to a modern GPS.</para>
+
+<para>The lowest level of NMEA 0183 is quite sensibly designed.  The
+protocol consists of sentences, each led by a dollar sign and an
+identifying text tag, followed by multiple comma-separated textual
+fields, ended by an asterisk, a checksum, and LF/CR.  This is a
+simple, clean format with good extensibility, easy to parse and
+generate.  It is well adapted to its job, which is to pass
+small amounts of numeric and status information.  The textual 
+format makes it easy to log NMEA sessions, edit them, and play them
+back &mdash; a substantial advantage in developing talker and
+parser software.</para>
+
+<para>Unfortunately, the good news ends there.  The design of the
+upper layers of NMEA 0183 is patchy, klugey, and replete with the kind
+of errors that arise from growth by accretion rather than forethought.
+Here are some of the more obvious problems:</para>
+
+<itemizedlist>
+<listitem><para> NMEA timestamps usually (e.g in GPBWC, GPBWR, GPGBS,
+GPGGA, GPGLL, GPGXA, GPTRF, GPZTG) report time-of-day only.  The
+exceptions (GPRMC, GPTRF, GPZDA) report only two digits of year and no
+century.  Time precision is unspecified, usually to the second though
+some devices report a fractional decimal part to millisecond
+precision.  </para></listitem>
+
+<listitem><para>
+It is not possible to get a time/position/velocity report in a single
+sentence.  Some sentences (GPRMC) report time and 2D position and velocity, 
+some (GPGGA) report time and 3D position, some (GPVTG) report velocity
+only.  As a result, the API for a protocol client is complicated by
+the necessity of maintaining separate age indications for 2D position,
+3D position, and velocity,
+</para></listitem>
+
+<listitem><para>
+NMEA sentences have at least three kinds of validity indicators &mdash; mode
+(GPGSA only), status (GPGLL, GPGGA), and the Active/Void field (GPRMC,
+GPGLL).  And that's before we get into the FAA extensions in late
+revisions of the protocol.  Interpreting these status bits is a black
+art involving knowledge of undocumented and often vendor-specific quirks.
+</para></listitem>
+
+<listitem><para>
+There is no standard way of indicating that part of a
+time/position/velocity report is invalid (e.g. because the device does
+not have a fix of the required quality).  Many devices simply report 0
+for invalid fields, which doesn't sound bad unless you're near the
+zero-zero point in the Bay of Benin &mdash; or at sea level.  It is
+also not generally possible to distinguish between information a GPS
+is not yet reporting but will return on a good fix (such as altitude)
+from information it will never report (such as, on many units, local
+magnetic variation).  </para></listitem>
+
+<listitem><para>
+As least one messy bit in NMEA 0183 was an adaptation to machines with
+only small amounts of expensive RAM: the fact that satellite status
+may show up in a sequence of as many as three sentences to be
+processed serially.  On modern machines, RAM buffers are cheap.  It
+makes more sense to ship a single long sentence and decrease code
+complexity in the receiver by not requiring a stateful parser.
+</para></listitem>
+
+<listitem><para>
+Position accuracy estimates are not easy to compute from
+NMEA reports.  Reporting a measurement without giving its 95% 
+confidence interval is bad practice.
+</para></listitem>
+
+<listitem><para>
+For modern GPS devices, even the small piece of NMEA directly
+concerned with GPS capabilities is seriously over-complex.  Whereas
+older GPS devices included elaborate facilities for waypoint tracking
+and navigational computation, newer ones are designed under the
+assumption that they are connected to a general-purpose computer that
+is more powerful and flexible at these things; thus, the GPS only
+needs to be a time/position/velocity oracle.
+</para></listitem>
+
+<listitem><para> 
+NMEA 0183 is in general very loosely specified and
+poorly documented. Its problems are compounded by the fact that it is
+a proprietary specification, jealously guarded by IP lawyers.
+</para></listitem>
+
+</itemizedlist>
+
+<para>As a result of these problems, implementing NMEA 0183 talker
+software is far more complex than need be, and the protocol tends to
+introduce latencies that vary in an unpredictable way.  The latter is
+a serious problem for aviation and other high-precision GPS
+applications, and probably provided a technical reason for the one major GPS
+vendor (Garmin) has announced that it will drop NMEA 0183 support
+entirely in favor of a tighter binary protocol (we refrain from
+speculating on other less creditable motives for this move).</para>
+</sect1>
+
+<sect1><title>How To Do Better</title>
+
+<para>The critique above immediately suggests several ways to improve
+a protocol for GPS reports;</para>
+
+<itemizedlist>
+<listitem><para>
+Keep the low-level syntax, because it's not broken.  It has all the
+advantages of textual protocols.  Going to a more tightly-packed
+binary format might look attractive at first glance, but the gain in
+information would be marginal at best. Textual formats already use 
+7 out of 8 bits per byte and encode variable-length numeric fields more 
+efficiently than binary; also they avoid endianness issues.
+</para></listitem>
+
+<listitem><para> 
+Add to the syntax standard ways of indicating that either (a) the
+GPS cannot now ship valid data for the field, or (b) the GPS will 
+<emphasis>never</emphasis> ship data for this field.
+</para></listitem>
+
+<listitem>
+<para>Include a full timestamp, to millisecond precision or better, with
+every sentence.  Every timestamp should be in the same standard form
+and should include a full date.</para>
+
+<para>The simplest way to do this is probably the best.  Just pick an
+epoch and represent the date/time as seconds since the epoch GMT. A
+human-readable format like ISO 8601 (yyyy-mm-ddThh:mm:ss.sss) might 
+make logfiles slightly easier to read, but would introduce more 
+decode latency.</para>
+</listitem>
+
+<listitem><para> 
+Report the uncertainty corresponding to a 95% confidence interval for
+each measurement field.
+</para></listitem>
+
+<listitem><para>
+Design the protocol around a single core sentence that reports
+time/position/velocity and the uncertainties in same.
+</para></listitem>
+
+<listitem><para>
+Make it an objective of the design for an informal specification to fit 
+on a single page.
+</para></listitem>
+</itemizedlist>
+
+</sect1>
+<sect1><title>Informal specification: SGPS</title>
+
+<para>Here, then, is a proposed informal specification for SGPS, Simple GPS
+Protocol.</para>
+
+<para>The protocol consists of sentences, each led by a dollar sign
+and an identifying sentence tag, followed by multiple comma-separated
+textual fields, ended by an asterisk, a CRC36 checksum, and LF/CR.
+The terminating checksum may be omitted, and listeners should accept
+this as an indication that the talker believes the transport layer to
+be reliable.  Sentences are at most 256 characters long, counting the
+trailing CR/LF.</para>
+
+<para>A field that is empty indicates that the talker does not have 
+valid information for this field.  A field consisting of a question
+mark (?) indicates that the talker will never ship valid information
+for this field.</para>
+
+<para>The first field of every sentence is a full timestamp.  We
+choose an epoch of 00:00 Jan 1 1970 because it's no worse than any
+other recent date and has the advantage of being compatible with Linux
+and Unix systems.  Millisecond or better precision is required and
+time is Zulu or GMT.</para>
+
+<para>The core sentence of SGPS has the following layout:</para>
+
+<orderedlist>
+<listitem><para>
+The sentence tag is GPTPV, standing for Time/Position/Velocity.  
+</para></listitem>
+
+<listitem><para>
+The first field is the required timestamp.
+</para></listitem>
+
+<listitem><para>
+The second field is the uncertainty of the timestamp in microseconds.
+</para></listitem>
+
+<listitem><para>
+The third field is latitude in degrees.  It must be suffixed with one
+of 'N' for North or 'S' for South.  Encoding must be decimal
+degrees, not degree/minute/second.
+</para></listitem>
+
+<listitem><para>
+The fourth field is longitude in degrees.  It must be suffixed with one
+of 'E' for East or 'W' for West. Encoding must be decimal
+degrees, not degree/minute/second.
+</para></listitem>
+
+<listitem><para>
+The fifth field is horizontal uncertainty in meters (95% confidence).
+</para></listitem>
+
+<listitem><para>
+The sixth field is altitude in meters.
+</para></listitem>
+
+<listitem><para>
+The seventh field is vertical uncertainty in meters (95% confidence).
+</para></listitem>
+
+<listitem><para>
+The eighth field is speed in meters per second.
+</para></listitem>
+
+<listitem><para>
+The ninth field is speed uncertainty in meters per second (95% confidence).
+</para></listitem>
+
+<listitem><para>
+The tenth field is course over ground in degrees from true north.
+</para></listitem>
+
+<listitem><para>
+The eleventh field is uncertainty of course over ground in degrees  (95% 
+confidence).
+</para></listitem>
+
+<listitem><para>
+The twelfth field is vertical course angle in degrees from horizontal.
+</para></listitem>
+
+<listitem><para>
+The thirteenth field is uncertainty of vertical course angle in degrees
+(95% confidence).
+</para></listitem>
+
+<listitem><para>
+The fourteenth field is an FAA mode indicator.
+</para></listitem>
+</orderedlist>
+
+<para>These fourteen fields completely describe the position and
+velocity of an object and the associated uncertainties.  The FAA
+mode field is added to satisfy a U.S. regulator's requirement.</para>
+
+<para>Here is an example:</para>
+
+<programlisting>
+$GPTPV,1108114827.1745651,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
+
+     1108114827.1745651, Time (Feb 11 04:40:51 EST 2005) in seconds since epoch
+     ?,                  Timestamp uncertainty will never be reported
+     4916.45N,           Latitude
+     123.12W,            Longitude
+     2.3,                Meters of horizontal uncertainty of position
+     70.1,               Altitude, meters above sea level
+     52,                 Uncertainty of altitude
+     0.01,               Speed, meters/sec
+     0.02,               Speed uncertainty
+     23.1,               Course over ground relative to true North
+     0.6,                Course uncertainty in degrees.
+     ,                   Vertical course angle not reported
+     ,                   Vertical course angle uncertainty not reported
+     A                   FAA mode indicator A (Auto).
+                         Checksum omitted.
+</programlisting>
+
+<para>A second sentence describes GPS satellite status.</para>
+
+<orderedlist>
+<listitem><para>
+The sentence tag is GPSVU, standing for Satellite View Update.  
+</para></listitem>
+
+<listitem><para>
+The first field is the required timestamp.
+</para></listitem>
+
+<listitem><para>
+The second field is a count of satellites.
+</para></listitem>
+
+<listitem>
+<para>The remainder of the sentence fields are groups of four, one
+for each predicted position of a visible satellite. Each group has
+the following four elements:</para>
+
+<orderedlist>
+<listitem><para>
+The PRN or satellite ID.
+</para></listitem>
+<listitem><para>
+Elevation in degrees
+</para></listitem>
+<listitem><para>
+Azimuth, degrees
+</para></listitem>
+<listitem><para>
+Signal-to-noise ratio in decibels.  If this satellite was used in the
+last fix, suffix this field with a '!'.
+</para></listitem>
+</orderedlist>
+</listitem>
+</orderedlist>
+
+<para>Here is an example:</para>
+
+<programlisting>
+$GPSVU,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
+</programlisting>
+</sect1>
+
+<sect1><title>Could This Be Adopted?</title>
+
+<para>Astute readers will already have noted that the SGPS sentences
+might be sold as a minor extension to NMEA 0183. first supplementing
+and eventually obsolescing the half-dozen or so sentences emitted by 
+most modern GPSes.</para>
+
+<para>The only fields reported in the SGPS set that cannot be
+trivially derived from data already computed for NMEA reports are
+(a) Vertical course angle, and (b) GPSTPV uncertainty fields.  None
+of these should be difficult to derive.</para>
+
+</sect1>
+</article>
+
+<!--
+Local Variables:
+compile-command: "xmlto xhtml-nochunks replacing-nmea.xml"
+End:
+-->
