@@ -443,16 +443,19 @@ static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
 {
     /*
        $PGRME,15.0,M,45.0,M,25.0,M*22
-	1    = HDOP
+	1    = horizontal error estimate
         2    = units
-	3    = VDOP
+	3    = vertical error estimate
         4    = units
-	5    = PDOP
+	5    = spherical error estimate
         6    = units
+     *
+     * Garmin won't say, but the general belief is that these are 1-sigma.
+     * See <http://gpsinformation.net/main/epenew.txt>.
      */
-    out->hdop = atof(field[1]);
-    out->vdop = atof(field[3]);
-    out->pdop = atof(field[5]);
+    out->eph = atof(field[1]);
+    out->epv = atof(field[3]);
+    out->epe = atof(field[5]);
     REFRESH(out->epe_quality_stamp);
 }
 
