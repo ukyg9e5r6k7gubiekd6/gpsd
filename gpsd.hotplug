@@ -3,26 +3,19 @@
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
 import os, syslog, glob, socket
 
-def gpsd_connect():
-    "Acquire a connection to the GPSD port."
-    msg = "getaddrinfo returns an empty list"
-    sock = None
-    sockfile = None
-    for res in socket.getaddrinfo("localhost", 2947, 0, socket.SOCK_STREAM):
-        (af, socktype, proto, canonname, sa) = res
-        try:
-            sock = socket.socket(af, socktype, proto)
-            sock.connect(sa)
-            sockfile = sock.makefile()
-        except socket.error, msg:
-            if sock:
-                sock.close()
-            sock = None
-            sockfile = None
-            continue
-        break
+def gpsd_control_connect():
+    "Acquire a connection to the GPSD control socket."
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
+        sock.connect("/var/run/gpsd.sock")
+        sockfile = sock.makefile()
+    except socket.error, msg:
+        if sock:
+            sock.close()
+        sock = None
+        sockfile = None
     if not sock:
-        syslog.syslog("gpsd is not running or is unreachable")
+        syslog.syslog("gpsd is not running or control socket is unreachable")
         return None
     else:
         return sockfile
@@ -48,7 +41,7 @@ def wake_up_gpsd(devpath):
         else:
             syslog.syslog("attempting to launch gpsd")
             os.system("gpsd")
-            connect = gpsd_connect()
+            connect = gpsd_control_connect()
         if not connect:
             return
 
