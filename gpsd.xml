@@ -2,18 +2,15 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='gpsd.1'>
+<refentry id='gpsd.8'>
 <refmeta>
 <refentrytitle>gpsd</refentrytitle>
-<manvolnum>1</manvolnum>
+<manvolnum>8</manvolnum>
 <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsd</refname>
-<refname>xgps</refname>
-<refname>xgpsspeed</refname>
-<refpurpose>interface daemon for GPS receivers, test client,
-and speedometer</refpurpose>
+<refpurpose>interface daemon for GPS receivers</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -26,34 +23,12 @@ and speedometer</refpurpose>
       <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
-      <arg choice='opt'>-p <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-v </arg>
 </cmdsynopsis>
-<cmdsynopsis>
-  <command>xgps</command>  
-      <arg choice='opt'><replaceable>X-options</replaceable></arg>
-      <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-v </arg>
-      <arg choice='opt'><replaceable>server</replaceable></arg>
-      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
-      <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
-</cmdsynopsis>
-<cmdsynopsis>
-  <command>xgpsspeed</command>  
-      <arg choice='opt'>-rv</arg>
-      <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
-      <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-v </arg>
-      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
-      <arg choice='opt'><replaceable>server</replaceable></arg>
-</cmdsynopsis>
-
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
-
-<refsect2 id='gpsd'><title>gpsd</title>
 
 <para><application>gpsd</application> is a monitor daemon that watches
 a TCP/IP port (2947 by default), waiting for applications to request
@@ -127,12 +102,6 @@ for debugging.</para>
 <term>-P</term>
 <listitem>
 <para>Specify the name and path to record the daemon's process ID.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>-p</term>
-<listitem>
-<para>Obsolete synonym for -f. May be removed in a future release.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -474,6 +443,9 @@ attempt to reconnect to the GPS and resume listening for client
 connections.  This may be useful if your GPS enters a wedged or
 confused state but can be soft-reset by pulling down DTR.</para>
 
+</refsect1>
+<refsect1 id='ntp'><title>USE WITH NTP</title> 
+
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
 and sends it to a shared-memory segment with an ID known to
@@ -503,47 +475,6 @@ posted by <application>gpsd</application> every 16 seconds;
 <command>ntpq -p</command> should show the time difference when it is
 not very large.</para>
 
-</refsect2>
-<refsect2><title>xgps</title>
-
-<para><application>xgps</application> is a simple test client for
-<application>gpsd</application> with an X interface. It displays
-current GPS animation and (for GPSes that support the feature) the
-locations of accessible satellites.</para>
-
-<para><application>xgps</application> accepts an -h option as for
-<application>gpsd</application>, or a -v option to dump the package
-version and exit. An optional argument may specify an
-server to get data from; a colon-separated suffix is taken as a port
-number.  The misfeature of previous versions that allowed it to
-direct-connect to the serial device has been removed.</para>
-
-<para>The -speedunits option can be used to set the speed units for
-display; follow the keyword with knots for nautical miles per hour,
-kph for kilometres per hour, or mph for miles per hour.  The default
-is miles per hour.  This option can also be set as the X resource 
-'speedunits'.</para>
-
-<para>The -altunits option can be used to set the altitude units for
-display; follow the keyword with 'meters' or 'feet'.  The default
-is feet.  This option can also be set as the X resource 'altunits'.</para>
-
-</refsect2>
-<refsect2><title>xgpsspeed</title>
-
-<para><application>xgpsspeed</application> is a speedometer that uses
-position information from the GPS. It accepts an -h option and
-optional argument as for <application>gps</application>, or a -v
-option to dump the package version and exit.  Additionally, it accepts
--rv (reverse video) and -nc (needle color) options.</para>
-
-<para>The -speedunits option can be used to set the speed units for
-display; follow the keyword with knots for nautical miles per hour,
-kph for kilometres per hour, or mph for miles per hour.  The default
-is miles per hour.   This option can also be set as the X resource 
-'speedunits'.</para>
-
-</refsect2>
 </refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 
 
@@ -561,21 +492,27 @@ but not good enough for aviation applications.</para>
 
 <para>The official NMEA protocol standard is available on paper from
 the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
-Electronics Association</ulink>. A description of the protocol is
-<ulink url='http://vancouver-webpages.com/peter/nmeafaq.txt'>available
-on the Web</ulink>.  gpsd parses the following NMEA sentences: GPRMC,
-GPGLL, GPVTG, GPGGA, GPGSA, GPGSV.  Note that gpsd returns pure
-decimal degrees, not the hybrid degree/minute format described in the
-NMEA standard.</para>
+Electronics Association</ulink>, but is proprietary and expensive; the
+maintainers of <application>gpsd</application> have made a point of
+not looking at it.  The <ulink url="http://gpsd.berlios.de/">GPSD
+website</ulink> links to several documents that collect publicly
+disclosed information about the protocol.</para>
+
+<para><application>gpsd</application> parses the following NMEA
+sentences: GPRMC, GPGLL, GPVTG, GPGGA, GPGSA, GPGSV. and one vendor
+extension PGRME.  Note that <application>gpsd</application> returns
+pure decimal degrees, not the hybrid degree/minute format described in
+the NMEA standard.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
@@ -583,10 +520,8 @@ NMEA standard.</para>
 
 <para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
 This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
-There is a project page, with <application>xgps</application>
-screenshots, <ulink
+There is a project page <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
-
 </refsect1>
 
 </refentry>

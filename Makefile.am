@@ -66,15 +66,19 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
 # Create Manpages
 #
 man_MANS = \
-	gpsd.1 \
+	gpsd.8 \
+	xgps.1 \
 	libgps.3 \
 	libgpsd.3 \
 	gpsprobe.1 \
 	gpsprof.1 \
 	gpsfake.1
 
-gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
+gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
+
+xgps.1 xgpsspeed.1: gpsd.xml
+	-$(XMLTO) man xgps.xml
 
 libgps.3: libgps.xml
 	-$(XMLTO) man libgps.xml

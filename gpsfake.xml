@@ -49,7 +49,7 @@ will see the messages.</para>
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>
 
-<para>The -l option maes the program dump a line or packet number just
+<para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon.</para>
 
 <para>The -n option suppresses launch of the daemon.  Instead,
@@ -57,7 +57,7 @@ before each sentence is fed to the daemon.</para>
 pty so you can launch in instance that reads it.</para>
 
 <para>The -o option specifies options to pass to the daemon.
-Passing "-n -D 4" is iften useful.</para>
+Passing "-n -D 4" is often useful.</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>
@@ -72,12 +72,13 @@ will print a notification each time it cycles.</para>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprobe</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
