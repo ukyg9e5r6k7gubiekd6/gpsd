@@ -216,6 +216,8 @@ struct gps_type_t tripmate =
  *
  **************************************************************************/
 
+extern struct gps_type_t zodiac_binary, earthmate;
+
 /*
  * Connect at 9600 rather than 4800.  Treat this as a straight NMEA
  * device until we get the EARTHA\r\n string back that says to go

@@ -87,11 +87,6 @@ struct gps_session_t
 #define PMGNST "$PMGNST"
 
 /* here are the available GPS drivers */
-extern struct gps_type_t nmea;
-extern struct gps_type_t tripmate;
-extern struct gps_type_t earthmate;
-extern struct gps_type_t zodiac_binary;
-extern struct gps_type_t logfile;
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
