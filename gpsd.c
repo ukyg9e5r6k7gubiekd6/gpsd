@@ -334,8 +334,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	     *
 	     * Field reports match the theoretical prediction that
 	     * expected time error should be half the resolution of
-	     * the GPS clock, so we put the 1-sigma point of the
-	     * normal distribution over [0.0,0.01] with mean of 0.05
+	     * the GPS clock, so we put the bound of the error
 	     * in as a constant pending getting it from each driver.
 	     *
 	     * Only the Zodiacs report speed error.
@@ -343,24 +342,29 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    if (!have_fix(session))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f 0.0068 %.4f %.4f",
+		sprintf(phrase, ",O=%.2f 0.005 %.4f %.4f",
 			ud->fix.time, ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %7.2f",
 			    session->gpsdata.fix.altitude);
 		else
 		    strcat(phrase, "       ?");
-		if (ud->fix.eph && ud->fix.epv)
-		    sprintf(phrase+strlen(phrase), " %4.2f %4.2f", 
-			    ud->fix.eph, ud->fix.epv);
-		else if (ud->hdop || ud->vdop)
-		    sprintf(phrase+strlen(phrase), " %4.2f %4.2f", 
-			    ud->hdop * UERE(session), 
-			    ud->vdop * UERE(session));
+		if (ud->fix.eph)
+		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.eph);
+		else if (ud->hdop)
+		    sprintf(phrase+strlen(phrase), " %5.2f", 
+			    ud->hdop * UERE(session)); 
 		else
-		    strcat(phrase, "     ?     ?");
+		    strcat(phrase, "        ?");
+		if (ud->fix.epv)
+		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.epv);
+		else if (ud->vdop)
+		    sprintf(phrase+strlen(phrase), " %5.2f", 
+			    ud->vdop * UERE(session)); 
+		else
+		    strcat(phrase, "        ?");
 		if (ud->fix.track != TRACK_NOT_VALID)
-		    sprintf(phrase+strlen(phrase), " %7.4f %7.3f",
+		    sprintf(phrase+strlen(phrase), " %8.4f %8.3f",
 			    ud->fix.track, ud->fix.speed);
 		else
 		    strcat(phrase, "        ?        ?");

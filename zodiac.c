@@ -166,6 +166,8 @@ static int handle1000(struct gps_session_t *session)
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
     session->gpsdata.fix.altitude  = getl(31) * 1e-2;
     session->gpsdata.fix.climb     = getl(38) * 1e-2;
+    session->gpsdata.fix.eph       = getl(40) * 1e-2;
+    session->gpsdata.fix.epv       = getl(42) * 1e-2;
     session->gpsdata.fix.eps       = getl(46) * 1e-2;
     session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
     session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
@@ -180,7 +182,7 @@ static int handle1000(struct gps_session_t *session)
 
     session->gpsdata.sentence_length = 55;
     strcpy(session->gpsdata.tag, "1000");
-    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|SPEEDERR_SET;
+    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
 }
 
 static int handle1002(struct gps_session_t *session)
@@ -238,7 +240,7 @@ static int handle1003(struct gps_session_t *session)
 	    session->gpsdata.elevation[i] = 0.0;
 	}
     }
-    return SATELLITE_SET | DOP_SET;
+    return SATELLITE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
 }
 
 static void handle1005(struct gps_session_t *session)

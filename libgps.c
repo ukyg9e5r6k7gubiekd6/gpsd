@@ -84,7 +84,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'E':
 		    sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
-		    gpsdata->valid |= POSERR_SET;
+		    gpsdata->valid |= HERR_SET| VERR_SET | PERR_SET;
 		    break;
 		case 'I':
 		    if (gpsdata->gps_id)
@@ -126,8 +126,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			    if (nf.mode == MODE_3D)
 				gpsdata->valid |= ALTITUDE_SET | CLIMB_SET;
-			    if (nf.eph || nf.epv)
-				gpsdata->valid |= POSERR_SET;
+			    if (nf.eph)
+				gpsdata->valid |= HERR_SET;
+			    if (nf.epv)
+				gpsdata->valid |= VERR_SET;
 			    if (nf.track != TRACK_NOT_VALID)
 				gpsdata->valid |= TRACK_SET | SPEED_SET;
 			    if (nf.eps)
@@ -146,7 +148,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    sscanf(sp, "Q=%d %lf %lf %lf",
 			   &gpsdata->satellites_used,
 			   &gpsdata->pdop, &gpsdata->hdop, &gpsdata->vdop);
-		    gpsdata->valid |= DOP_SET;
+		    gpsdata->valid |= HDOP_SET | VDOP_SET | PDOP_SET;
 		    break;
 		case 'S':
 		    gpsdata->status = atoi(sp+2);

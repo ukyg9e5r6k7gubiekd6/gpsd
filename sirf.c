@@ -211,7 +211,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    session->gpsdata.sentence_length = 41;
 	    strcpy(session->gpsdata.tag, "MND");
-	    return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET;
+	    return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 	}
 
     case 0x04:		/* Measured tracker data out */

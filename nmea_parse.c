@@ -351,7 +351,7 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
            out->satellites_used++;
        }
     }
-    mask |= DOP_SET;
+    mask |= HDOP_SET | VDOP_SET | PDOP_SET;
 
     return mask;
 }
@@ -428,7 +428,7 @@ static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
     out->fix.eph = atof(field[1]);
     out->fix.epv = atof(field[3]);
     out->epe = atof(field[5]);
-    return POSERR_SET;
+    return HERR_SET | VERR_SET | PERR_SET;
 }
 
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)

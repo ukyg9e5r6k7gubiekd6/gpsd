@@ -48,7 +48,7 @@ struct gps_fix_t {
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
-    double ept;		/* Time uncertainty (1 sigma) */
+    double ept;		/* Expected time uncertainty */
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double eph;  	/* Est. horizontal position error, 1 sigma (meters) */
@@ -59,29 +59,33 @@ struct gps_fix_t {
 #define TRACK_NOT_VALID	-1	/* No course/speed data yet */
     double epd;		/* Course uncertainty (1 sigma) */
     double speed;	/* Speed over ground, knots */
-    double eps;		/* Speed uncertainty (1 sigma) */
+    double eps;		/* Expected speed uncertainty */
     double climb;       /* Vertical velocity, meters/sec */
-    double epc;		/* Vertical velocity uncertainty (1 sigma) */
+    double epc;		/* Expected vertical velocity uncertainty */
 };
 
 struct gps_data_t {
     unsigned long valid;	/* validity mask */
-#define ONLINE_SET	0x0001
-#define TIME_SET	0x0002
-#define TIMERR_SET	0x0004
-#define LATLON_SET	0x0008
-#define ALTITUDE_SET	0x0010
-#define SPEED_SET	0x0020
-#define TRACK_SET	0x0040
-#define CLIMB_SET	0x0080
-#define STATUS_SET	0x0100
-#define MODE_SET	0x0200
-#define DOP_SET  	0x0400
-#define POSERR_SET	0x0800
-#define SATELLITE_SET	0x1000
-#define SPEEDERR_SET	0x2000
-#define TRACKERR_SET	0x4000
-#define CLIMBERR_SET	0x8000
+#define ONLINE_SET	0x000001
+#define TIME_SET	0x000002
+#define TIMERR_SET	0x000004
+#define LATLON_SET	0x000008
+#define ALTITUDE_SET	0x000010
+#define SPEED_SET	0x000020
+#define TRACK_SET	0x000040
+#define CLIMB_SET	0x000080
+#define STATUS_SET	0x000100
+#define MODE_SET	0x000200
+#define HDOP_SET  	0x000400
+#define VDOP_SET  	0x000800
+#define PDOP_SET  	0x001000
+#define HERR_SET	0x002000
+#define VERR_SET	0x004000
+#define PERR_SET	0x008000
+#define SATELLITE_SET	0x010000
+#define SPEEDERR_SET	0x020000
+#define TRACKERR_SET	0x040000
+#define CLIMBERR_SET	0x080000
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences

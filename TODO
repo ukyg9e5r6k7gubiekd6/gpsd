@@ -233,43 +233,6 @@ a second, and a SiRF one maybe 18 times a second.
 Is this worth doing?  Maybe.  It would reduce fix latency, possibly
 to good effect if your GPS is in motion.  Opinions?  Calculations?
 
-** Can the o command replace most of the protocol?
-
-Considered abstractly, what we really want a GPS to report is a
-13-element vector describing an uncertainty volume in kinematic space:
-
-time, timerr     = timestamp, estimated time error
-lat, lon, alt    = latitude, longitude, altitude
-herr, verr       = horizontal and vertical position error
-speed, speederr  = groundspeed and groundspeed error
-track, trackerr  = course over ground and course error
-climb, climberr  = climb/sink and climb/sink error
-
-The experimental 'o' command approximates this. The 'o' and 'y' commands
-together span all the information that gpsd can get (minor exception;
-'o' doesn't report total spherical uncertainty of position, just the
-horizontal and vertical uncertainties).
-
-There are two issues connected with 'o'.  One is how to fill in the
-currently missing fields: speederr, trackerr, and climberr.  The other
-is trickier and has to do with what timestamp the o return should have.
-
-Internally, a GPS typically takes a fix once in its basic cycle time 
-(typically once per second).  It then generates a report.  A SiRF chip
-reporting in binary mode ships almost everything we want in a single
-packet with a single timestamp.  When reporting in NMEA mode, the
-report consists of several sentences, all normally with the same 
-timestamp.
-
-There are exceptions, however.  The Garmin 48 is one -- it seems to
-have two 1-second half-cycles, one that ships GPMRC/GGA and another
-that ships GLL, with a different timestamp and possibly a different
-latitude/longitude.
-
-Un-exceptional GPSes could have the information from the entire cycle
-bundled into one 'o' report with a single timestamp, that of the
-start of cycle.
-
 ** Explicitly turn on WAAS/EGNOS on SiRF chips
 
 Chris Kuethe reports that some firmware versions leave it off.

@@ -277,7 +277,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    // geoid separation from WGS 84
 	    session->separation = pvt->msl_hght;
 
-	    // esrtimated position error in meters (two sigmas)
+	    // estimated position error in meters
 	    session->gpsdata.epe = pvt->epe;
 	    session->gpsdata.fix.eph = pvt->eph;
 	    session->gpsdata.fix.epv = pvt->epv;
@@ -348,7 +348,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 
 	    gpsd_binary_fix_dump(session, bufp);
 	    bufp += strlen(bufp);
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | POSERR_SET;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
 	    gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
