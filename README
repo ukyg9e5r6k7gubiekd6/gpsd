@@ -39,8 +39,8 @@ quality from visible satellites.  When querying NMEA-compliant GPSes, it
 will show a diagram of satellites in their current position in the sky.
 It uses the same library code as gpsd.
 
-gpsd is tested with DeLorme's TripMate, EarthMate and Garmin units.
-Also with the BU-303 USB GPS sold as the NaviLock, Deluo, and Hyperdata.
+gpsd is tested with DeLorme's TripMate and EarthMate; also with Garmin units;
+also with the BU-303 USB GPS sold as the NaviLock, Deluo, and Hyperdata.
 Note that the PL2303 USB serial driver used with the BU-2303 seems
 to have been broken sometime late in the 2.4.x series of Linux kernels
 and was not fixed until 2.6.7.  If in doubt, upgrade.
@@ -88,21 +88,24 @@ Actually, some bugs may be mine too now. Sorry.
 Derrick J. Brashear, 2 January 2000
 
 Or mine.  I drastically rewrote this code to clean it up and extend it
+
 New features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
-   * It understands the GLL (Geographic position - Latitude, Longitude)
+   * It now understands the GLL (Geographic position - Latitude, Longitude)
      sentence from NMEA 3.0. 
-   * It now parses both variants of the VTG sentence correctly.
+   * It now parses both the NMEA 3.0 and pre-3.0 variants of the VTG sentence 
+     correctly.
    * New y and z commands support signal-status reporting and satellite
      location -- it should no longer ever be necessary for clients to go to
-     raw mode.
+     raw mode unless they want to monitor and log the GPS stream.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
-   * Internals can now be directly linked as a library, libgpsd(3).
+   * The GPS-bashing code this program uses can now be directly linked as a
+     library, libgpsd(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
-   * Removed -s option -- the right speed is fixed for each type, -s was
+   * Removed the -s option -- the right speed is fixed for each type, -s was
      just an invitation to lossage.
    * Added -n option.
    * xgpsspeed is working again.
