@@ -31,6 +31,8 @@
 
 #include "gpsd.h"
 
+#define DEFAULT_DEVICE_NAME	"/dev/gps"
+
 #define QLEN			5
 
 static fd_set all_fds, nmea_fds, watcher_fds;
@@ -637,8 +639,7 @@ int main(int argc, char *argv[])
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
 
-    device = gpsd_init();
-    device->gpsd_device = strdup(device_name);
+    device = gpsd_init(device_name);
     device->gpsdata.raw_hook = raw_hook;
     if (dsock >= 0)
 	device->dsock = dsock;

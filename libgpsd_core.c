@@ -54,14 +54,14 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     return 0;
 }
 
-struct gps_device_t *gpsd_init(void)
+struct gps_device_t *gpsd_init(char *device)
 /* initialize GPS polling */
 {
     struct gps_device_t *session = (struct gps_device_t *)calloc(sizeof(struct gps_device_t), 1);
     if (!session)
 	return NULL;
 
-    session->gpsd_device = DEFAULT_DEVICE_NAME;
+    session->gpsd_device = strdup(device);
     session->device_type = gpsd_drivers[0];
     session->dsock = -1;
 

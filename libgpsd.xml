@@ -27,7 +27,8 @@ C:
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>struct gps_device_t * <function>gpsd_init</function></funcdef><void/>
+<funcdef>struct gps_device_t *<function>gpsd_init</function></funcdef>
+    <paramdef>char * <parameter>device</parameter>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_activate</function></funcdef>
