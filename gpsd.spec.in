@@ -119,9 +119,11 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Mon Dec 27 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
+* Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
 - Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
-  in udev scriptlets.
+  in udev scriptlets.  Clean up after GCC warning messages.  Drop use of 
+  vsprintf, so we get a link-time error on systems that might produce 
+  buffer overruns.
 
 * Thu Dec 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.5.1
 - Use gmtime instead of localtime when guessing the day or year of a date;
