@@ -98,12 +98,13 @@ try:
                         ml = ""
                     print legend % (i % len(lines) + 1) + ml
                 os.write(master_fd, lines[i % len(lines)])
-                try:
-                    st = os.kill(pid, 0)
-                except OSError:
-                    pid = 0
-                    print "gpsfake: gpsd is gone."
-                    break
+                if spawn:
+                    try:
+                        st = os.kill(pid, 0)
+                    except OSError:
+                        pid = 0
+                        print "gpsfake: gpsd is gone."
+                        break
                 i += 1
         except KeyboardInterrupt:
             pass
