@@ -35,6 +35,7 @@
 
 struct gps_session_t *session;
 static char *device_name = DEFAULT_DEVICE_NAME;
+static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, nfds, in_background = 0;
 
@@ -53,6 +54,18 @@ static void onsig(int sig)
     exit(10 + sig);
 }
 
+static void store_pid(pid_t pid)
+{
+	FILE *fp;
+
+	if ((fp = fopen(pid_file, "w")) != NULL) {
+		fprintf(fp, "%u\n", pid);
+		(void) fclose(fp);
+	} else {
+		gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
+	}
+}
+
 static int daemonize(void)
 {
     int fd;
@@ -64,7 +77,9 @@ static int daemonize(void)
     case 0:	/* child side */
 	break;
     default:	/* parent side */
-	_exit(pid);
+	if (pid_file)
+		store_pid(pid);
+	exit(0);
     }
 
     if (setsid() == -1)
@@ -114,6 +129,7 @@ static void usage(void)
 #endif /* TRIPMATE_ENABLE */
 "  -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
+  -P pidfile                     = set file to record process ID \n\
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n",
 	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
@@ -402,7 +418,7 @@ int main(int argc, char *argv[])
     extern char *optarg;
 
     debuglevel = 1;
-    while ((option = getopt(argc, argv, "D:S:d:hnp:s:v"
+    while ((option = getopt(argc, argv, "D:S:d:hnp:P:s:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
@@ -454,6 +470,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'p':
 	    device_name = optarg;
+	    break;
+	case 'P':
+	    pid_file = optarg;
 	    break;
 	case 's':
 	    gpsd_speed = atoi(optarg);

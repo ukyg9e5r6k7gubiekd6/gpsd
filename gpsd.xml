@@ -27,6 +27,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-i <replaceable>initial-position</replaceable></arg>
       <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-v </arg>
 </cmdsynopsis>
@@ -132,6 +133,12 @@ monitoring of the GPS data stream.</para>
 <varlistentry>
 <term>-h</term>
 <listitem><para>Display help message and terminate.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-P</term>
+<listitem>
+<para>Specify the name and path to record the daemon's process ID.</para>
+</listitem>
 </varlistentry>
 <varlistentry>
 <term>-D</term>
@@ -384,7 +391,7 @@ NMEA</ulink>.</para>
 This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
 There is a project page, with <application>xgps</application>
 screenshots, <ulink
-url="http://www.berlios.de/gpsd/">here</ulink>.</para>
+url="http://gpsd.berlios.de/">here</ulink>.</para>
 
 </refsect1>
 
