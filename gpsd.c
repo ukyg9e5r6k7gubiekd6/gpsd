@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
 
 	need_gps = 0;
 
-	if (reopen && input != -1) {
+	if (reopen && input == -1) {
 	    FD_CLR(input, &afds);
 	    deactivate();
 	    input = activate();
