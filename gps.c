@@ -122,7 +122,7 @@ static void build_gui(Widget lxbApp)
     XGCValues gcv;
 
     n = 0;
-    XtSetArg(args[n], XmNgeometry, "620x460");
+    XtSetArg(args[n], XmNgeometry, "610x460");	/* size of application window */
     n++;
     XtSetArg(args[n], XmNresizePolicy, XmRESIZE_NONE);
     n++;
@@ -203,7 +203,6 @@ static void build_gui(Widget lxbApp)
     gcv.foreground = BlackPixelOfScreen(XtScreen(drawingArea_8));
     gc = XCreateGC(XtDisplay(drawingArea_8),
 	RootWindowOfScreen(XtScreen(drawingArea_8)), GCForeground, &gcv);
-
     register_canvas(drawingArea_8, gc);
     XtAddCallback(drawingArea_8, XmNexposeCallback, redraw, NULL);
 
@@ -216,14 +215,14 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[6], XmNrightWidget, drawingArea_8);
     XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
 
-    XtSetArg(args[8], XmNy, 352);
-    XtSetArg(args[9], XmNx, 0);
-    XtSetArg(args[10], XmNleftAttachment, XmATTACH_FORM);
-    XtSetArg(args[11], XmNtopAttachment, XmATTACH_WIDGET);
-    XtSetArg(args[12], XmNtopWidget, list_7);
-    XtSetArg(args[13], XmNheight, 12);
-    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 14);
+    XtSetArg(args[8], XmNx, 0);
+    XtSetArg(args[9], XmNleftAttachment, XmATTACH_FORM);
+    XtSetArg(args[10], XmNtopAttachment, XmATTACH_WIDGET);
+    XtSetArg(args[11], XmNtopWidget, list_7);
+    XtSetArg(args[12], XmNheight, 12);
+    rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 13);
 
+    /* the data display */
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     XtSetArg(args[1], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[2], XmNrightAttachment, XmATTACH_NONE);
