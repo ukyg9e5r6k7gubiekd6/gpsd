@@ -7,6 +7,7 @@ Group: System Environment/Daemons
 URL: http://berlios.de/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+#Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 
 %description 
 gpsd is a service daemon that mediates access to a GPS sensor
@@ -63,6 +64,14 @@ cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 %{_includedir}/gpsd.h
 
 %changelog
+* Sat Aug 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.91-1
+- Second pre-2.0 release.  Features a linkable C library that hides the 
+  details of communicating with the daemon.  The daemon now recovers
+  gracefully from having the GPS unplugged and plugged in at any time;
+  one of the bits of status it can report is whether the GPS is online.
+  The gps and xgpsspeed clients now query the daemon; their code 
+  for direct access to the serial port has been deliberately removed.
+
 * Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
 - Creation of specfile.
 
