@@ -26,7 +26,7 @@ struct gps_type_t {
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
     void (*wrapup)(struct gps_session_t *session);
-    int baudrate, stopbits, interval;
+    int baudrate, stopbits, cycle;
 };
 
 #if defined (HAVE_SYS_TERMIOS_H)

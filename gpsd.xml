@@ -193,6 +193,12 @@ for developers profiling the daemon.</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>c</term>
+<listitem><para>Returns, as "C=%d", the cycle time of updates
+in seconds.</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>d</term>
 <listitem><para>Returns the UTC time in the ISO 8601 format,
 "D=yyyy-mm-ddThh:nmm:ss.ssZ". Digits of precision in the fractional-seconds

@@ -80,6 +80,7 @@ class gpsdata:
         self.read_time = 0
         self.baudrate = 0
         self.stopbits = 0
+        self.cycle = 0
 
         __setattr__ = setattr
 
@@ -203,6 +204,8 @@ class gps(gpsdata):
               (f1, f2, f3, f4) = data.split()
               self.baudrate = int(f1)
               self.stopbits = int(f4)
+	    elif cmd in ('C', 'c'):
+	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
 	    elif cmd in ('M', 'm'):

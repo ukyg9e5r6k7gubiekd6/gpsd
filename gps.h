@@ -100,6 +100,7 @@ struct gps_data_t {
     int sentence_length;	/* character count of last sentence */
     double recv_time,emit_time;	/* profile times */
     int baudrate, stopbits;	/* RS232 link paramters */
+    int cycle;			/* refresh cycle time in seconds */
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */

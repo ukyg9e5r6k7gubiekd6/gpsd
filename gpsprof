@@ -53,14 +53,15 @@ class rawplot:
         fmt = '''
 set autoscale
 set key below
-set key title "Raw latency data, %dN%d, %s"
+set key title "Raw latency data, %s, %dN%d, cycle %ds"
 plot \
      "%s" using 0:4 title "TCP/IP latency" with impulses, \
      "%s" using 0:3 title "Decode time" with impulses, \
      "%s" using 0:2 title "Other latency" with impulses, \
      "%s" using 0:1 title "RS232 time" with impulses
 '''
-        return fmt % (session.baudrate, session.stopbits, title,
+        return fmt % (title,
+                      session.baudrate, session.stopbits, session.cycle,
                       file, file, file, file)
 
 class stripplot:
@@ -85,14 +86,15 @@ class stripplot:
         fmt = '''
 set autoscale
 set key below
-set key title "Filtered latency data, %dN%d, %s"
+set key title "Filtered latency data, %s, %dN%d, cycle %ds"
 plot \
      "%s" using 0:4 title "TCP/IP latency" with impulses, \
      "%s" using 0:3 title "Decode time" with impulses, \
      "%s" using 0:2 title "Other latency" with impulses, \
      "%s" using 0:1 title "RS232 time" with impulses
 '''
-        return fmt % (session.baudrate, session.stopbits, title,
+        return fmt % (title,
+                      session.baudrate, session.stopbits, session.cycle,
                       file, file, file, file)
 
 class splitplot:
@@ -132,14 +134,15 @@ class splitplot:
         fixed = '''
 set autoscale
 set key below
-set key title "Filtered latency data, %dN%d, %s"
+set key title "Filtered latency data, %s, %dN%d, cycle %ds"
 plot \\
      "%s" using 0:%d title "TCP/IP latency" with impulses, \\
      "%s" using 0:%d title "Decode time" with impulses, \\
      "%s" using 0:%d title "Other latency" with impulses, \\
 '''
         sc = len(splitplot.sentences)
-        fmt = fixed % (session.baudrate, session.stopbits, title,
+        fmt = fixed % (title,
+                       session.baudrate, session.stopbits, session.cycle,
                        file, sc+3, file, sc+2, file, sc+1)
         for i in range(sc):
             if splitplot.sentences[i] in self.found:
@@ -200,7 +203,7 @@ if __name__ == '__main__':
             session.query("b=%d", speed)
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
-        session.query("wz+b")
+        session.query("w+z+bc")
         #session.set_raw_hook(lambda x: sys.stdout.write(x))
         plotter.header(out)
         baton = Baton("gpsprof: gathering samples")
@@ -219,7 +222,7 @@ if __name__ == '__main__':
                 await -= 1
         baton.end()
     finally:
-        session.query("wz-")
+        session.query("w-z-")
         
     out.flush()
     if not raw:

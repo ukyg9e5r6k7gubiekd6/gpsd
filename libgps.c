@@ -79,6 +79,12 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		gpsdata->altitude = d1;
 		REFRESH(gpsdata->altitude_stamp);
 		break;
+	    case 'B':
+		sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
+		break;
+	    case 'C':
+		sscanf(sp, "C=%d", &gpsdata->cycle);
+		break;
 	    case 'D':
 		strcpy(gpsdata->utc, sp+2);
 		break;
@@ -174,9 +180,6 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		REFRESH(gpsdata->satellite_stamp);
 		break;
 #ifdef PROFILING
-	    case 'B':
-		sscanf(sp, "B=%d %*d %*s %d", &gpsdata->baudrate, &gpsdata->stopbits);
-		break;
 	    case 'Z':
 		sscanf(sp, "Z=%d", &gpsdata->profiling);
 		break;
