@@ -97,8 +97,9 @@ class spaceplot:
             fmt += 'set style line 3 pt 2 # Looks good on X11\n'
             fmt += 'set xlabel "Meters east from %s"\n' % lonstring
             fmt += 'set ylabel "Meters north from %s"\n' % latstring
-            fmt += 'set y2label "Meters Altitude, Average %g"\n' % alt_avg
+            fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
             fmt += 'set border 15\n'
+            fmt += 'set ytics nomirror\n'
             fmt += 'set y2tics\n'
             fmt += 'cep=%f\n' % d((0,0), recentered[len(self.fixes)/2])
             fmt += 'set parametric\n'
@@ -108,7 +109,9 @@ class spaceplot:
             fmt += 'chlen = cep/20\n'
             fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
             fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
-            fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters", "%s" using 1:2 with points ls 3 title "%d GPS fixes" , "%s" using ( %f ):($5 > -999 ? $5 : 1/0) axes x1y2 with points ls 2 title "Altitude, Average = %f" \n' % (cep_meters, file, len(self.fixes), file, lon_max + 1, alt_avg)
+            fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
+            fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" , ' % (file, len(self.fixes))
+            fmt += '"%s" using ( %f ):($5 > -999 ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, alt_avg, alt_num, alt_avg)
             return fmt
 
 class uninstrumented:
