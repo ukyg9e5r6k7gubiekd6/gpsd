@@ -1,12 +1,6 @@
-#!/usr/bin/env python
-#
-# gpsd.hotplug -- hotplug script for gpsd
-#
-# This script will tell a running gpsd that it should look at the
-# device that just went active, because it might be a GPS.
-#
-# This script is part of the gpsd distrbution: see http://gpsd.berlios.de
-# Written by Eric S. Raymond, March 2005.
+#!/usr/bin/python
+# Hotplug script for gpsd by Eric S. Raymond, March 2005
+# This script is part of the gpsd distribution: see http://gpsd.berlios.de
 import os, syslog, glob, socket
 
 def gpsd_connect():
@@ -31,11 +25,9 @@ def gpsd_connect():
         syslog.syslog("gpsd is not running or is unreachable")
         return None
     else:
-        syslog.syslog("found gpsd.")
         return sockfile
 
 def wake_up_gpsd(devpath):
-    # First, discover the device
     subnodes = glob.glob("/sys" + devpath + "/*")
     subnodes = map(os.path.basename, subnodes)
     subnodes = filter(lambda s: s.startswith("ttyUSB"), subnodes) 
@@ -48,13 +40,6 @@ def wake_up_gpsd(devpath):
     else:
         tty = "/dev/" + subnodes[0]
         syslog.syslog(tty + " has gone active")
-        # Cope with a race condition
-        i = 0
-        while not os.path.exists(tty):
-            syslog.syslog("but " + tty + " does not actually exist (" + `i` +")")
-            time.sleep(1)
-            i += 1
-        syslog.syslog(tty + "created")
 
         # Next get a connection to gpsd; start one if not already running
         connect = gpsd_connect()
@@ -74,32 +59,18 @@ def wake_up_gpsd(devpath):
         connect.close()
         return
 
-# GPSes don't have their own USB device class.  They're serial-over-USB 
-# devices, so what you see is actually the ID of the serial-over-USB chip.
-# Fortunately, just two of these account for over 80% of consumer-grade 
-# GPS sensors.
-#
-# The Prolific Technology 2303 (commonly in tandem with SiRF chips)
-# FTDI 8U232AM
-# Cypress M8/CY7C64013 (DeLorme uses these)
-supported_products = ("67B/2303", "403/6001", "1163/100")
+syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
+syslog.syslog("gpsdplug begins with action: %s" % os.getenv("ACTION"))
+devpath = os.getenv("DEVPATH")
+if not devpath:
+    syslog.syslog("No DEVPATH")
+else:
+    # First, discover the device
+    #syslog.syslog("DEVPATH = %s" % devpath)
+    wake_up_gpsd(devpath)
 
-if __name__ == '__main__':
-    action  = os.getenv("ACTION")
-    devpath = os.getenv("DEVPATH")
-    product = os.getenv("PRODUCT")
-    syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
-    syslog.syslog("gpsdplug begins with action %s" % action)
-    syslog.syslog("PRODUCT = %s, DEVPATH = %s" % (product, devpath))
-    if not devpath or not action:
-	pass
-    elif not filter(lambda x: product.startswith(x + "/"), supported_products):
-        pass
-    elif action == "add":
-	wake_up_gpsd(devpath)
-    syslog.syslog("gpsdplug ends")
-    syslog.closelog()
-
+syslog.syslog("gpsdplug ends")
+syslog.closelog()
 
 
 

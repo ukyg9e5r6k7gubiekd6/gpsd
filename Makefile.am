@@ -130,6 +130,7 @@ EXTRA_DIST = \
 	gpsprof \
 	gpsfake \
 	gpsd.hotplug \
+	gpsd.usermap \
 	logextract
 
 # These are not distributed
