@@ -32,12 +32,6 @@ gpsd, xgps, and xgpsspeed will be built. Copy the app-defaults files
 xgps.ad and xgpsspeed.ad to your home directory or to the system-wide X
 app-defaults directory.
 
-On older Linux kernels (2.4.5 or earlier) the O_SYNC flag of open(2) 
-may not be reliable.  If you're building for an old kernel, configure 
-with --enable-unreliable-sync.  This will tell gpsd to use timeouts 
-after sends to the GPS rather than relying on write(2) to block until
-it completes.
-
 4. Determine whether you need a non-NMEA driver.  Usually you will not,
 but there are unusual exceptions.  Consult the hardware page at
 

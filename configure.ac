@@ -171,18 +171,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl is sync unreliable?
-AC_ARG_ENABLE(unreliable_sync,
-  AC_HELP_STRING([--enable-unreliable-sync],
-                 [enable unreliable_sync support]),
-  [ac_unreliable_sync=$enableval], [ac_unreliable_sync=no])
-AC_MSG_CHECKING([O_SYNC open of tty isn't reliable])
-if test x"$ac_unreliable_sync" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([UNRELIABLE_SYNC], 1, [O_SYNC open of tty isn't reliable])
-else
-  AC_MSG_RESULT([no])
-fi
 AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
@@ -197,7 +185,6 @@ echo "Garmin                  : $ac_garmin"
 echo "Logfile                 : $ac_logfile"
 echo "Enable shared libraries : $enable_shared"
 echo "Profiling               : $ac_profiling"
-echo "Unreliable sync         : $ac_unreliable_sync"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."
 

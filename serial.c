@@ -61,7 +61,8 @@ int gpsd_set_speed(struct gps_session_t *session,
     if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gNMEAdata.stopbits) {
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
-	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
+	session->ttyset.c_cflag &=~ CSIZE;
+	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return 0;
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
@@ -98,6 +99,7 @@ int gpsd_open(struct gps_session_t *session)
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
 	 */
 	session->ttyset.c_cflag &= ~(PARENB | CRTSCTS);
+	session->ttyset.c_cflag |= CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
@@ -122,22 +124,6 @@ int gpsd_open(struct gps_session_t *session)
     }
     return session->gNMEAdata.gps_fd;
 }
-
-#ifdef UNRELIABLE_SYNC
-void gpsd_drain(int ttyfd)
-{
-    tcdrain(ttyfd);
-    /* 
-     * This definitely fails below 40 milliseconds on a BU-303b.
-     * 50ms is also verified by Chris Kuethe on 
-     *        Pharos iGPS360 + GSW 2.3.1ES + prolific
-     *        Rayming TN-200 + GSW 2.3.1 + ftdi
-     *        Rayming TN-200 + GSW 2.3.2 + ftdi
-     * so it looks pretty solid.
-     */
-    usleep(50000);
-}
-#endif /* UNRELIABLE_SYNC */
 
 void gpsd_close(struct gps_session_t *session)
 {
