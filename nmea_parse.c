@@ -1,5 +1,6 @@
 #include "config.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <gpsd.h>
@@ -66,7 +67,7 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
     }
     if (updated == 2)
     {
-	REFRESH(out->latlon_stamp);
+	out->latlon_stamp.changed = 1;
 	/* this appeases the consistency checking we'll do later */
 	if (out->mode < MODE_2D)
 	{
@@ -74,25 +75,31 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 	    gpscli_report(2, "Latitude/longitude implies mode is 2 or 3\n");
 	}
     }
+    REFRESH(out->latlon_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
 
-static void update_field_i(char *sentence, int fld, int *dest, struct OUTDATA *out)
+static int update_field_i(char *sentence, int fld, int *dest)
 {
-    int tmp;
+    int tmp, changed;
 
-    sscanf(field(sentence, fld), "%d", &tmp);
+    tmp = atoi(field(sentence, fld));
+    changed = (tmp != *dest);
+    *dest = tmp;
+    return changed;
 }
 
-#if 0
-static void update_field_f(char *sentence, int fld, double *dest, struct OUTDATA *out)
+static int update_field_f(char *sentence, int fld, double *dest)
 {
+    int changed;
     double tmp;
 
-    scanf(field(sentence, fld), "%lf", &tmp);
+    tmp = atof(field(sentence, fld));
+    changed = (tmp != *dest);
+    *dest = tmp;
+    return changed;
 }
-#endif
 
 /* ----------------------------------------------------------------------- */
 
@@ -123,7 +130,7 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
      */
     char s[20], d[10];
-    int tmp;
+    int tmp, newstatus;
 
     sscanf(field(sentence, 9), "%s", d);	/* Date: ddmmyy */
 
@@ -158,17 +165,17 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
 
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "A") == 0)
-	out->status = STATUS_FIX;
+	newstatus = STATUS_FIX;
     else
     {
 	gpscli_report(2, "Invalid GPRMC zeroes status.\n");
-	out->status = STATUS_NO_FIX;
+	newstatus = STATUS_NO_FIX;
     }
-    REFRESH(out->speed_stamp);
+    out->status_stamp.changed = (newstatus != out->status);
+    out->status = newstatus;
+    REFRESH(out->status_stamp);
 
-    sscanf(field(sentence, 7), "%lf", &out->speed);
-
-    sscanf(field(sentence, 8), "%lf", &out->course);
+    out->speed_stamp.changed = (update_field_f(sentence, 7, &out->speed) || update_field_f(sentence, 8, &out->course));
     REFRESH(out->speed_stamp);
 }
 
@@ -204,12 +211,16 @@ static void processGPGLL(char *sentence, struct OUTDATA *out)
 
     if (status[0] != 'N')
     {
+	int newstatus = out->status;
+
 	do_lat_lon(sentence, 1, out);
-	REFRESH(out->status_stamp);
 	if (status[0] == 'A')
-	    out->status = 1;	/* autonomous */
+	    newstatus = STATUS_NO_FIX;	/* autonomous */
 	if (status[0] == 'D')
-	    out->status = 2;	/* differential */
+	    newstatus = STATUS_DGPS_FIX;	/* differential */
+	out->status_stamp.changed = (out->status != newstatus);
+	out->status = newstatus;
+	REFRESH(out->status_stamp);
 	gpscli_report(2, "GPGLL sets status %d\n", out->status);
 	/* unclear what the right thing to do with other status values is */
     }
@@ -271,11 +282,14 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
      * which means we want to extract field 5.  We'll deal with both
      * possibilities here.
      */
-    sscanf(field(sentence, 1), "%lf", &out->course);
+    int changed;
+
+    changed = update_field_f(sentence, 1, &out->course);
     if (field(sentence, 2)[0] == 'T')
-	sscanf(field(sentence, 5), "%lf", &out->speed);
+	changed |= update_field_f(sentence, 5, &out->speed);
     else
-	sscanf(field(sentence, 3), "%lf", &out->speed);
+	changed |= update_field_f(sentence, 3, &out->speed);
+    out->speed_stamp.changed = changed;
     REFRESH(out->speed_stamp);
 }
 
@@ -301,14 +315,12 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-
     do_lat_lon(sentence, 2, out);
-    /* 0 = none, 1 = normal, 2 = diff */
-    sscanf(field(sentence, 6), "%d", &out->status);
+    out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
     REFRESH(out->status_stamp);
     gpscli_report(2, "GPGGA sets status %d\n", out->status);
-    sscanf(field(sentence, 7), "%d", &out->satellites);
-    sscanf(field(sentence, 9), "%lf", &out->altitude);
+    update_field_i(sentence, 7, &out->satellites);
+    out->altitude_stamp.changed = update_field_f(sentence, 9, &out->altitude);
     REFRESH(out->altitude_stamp);
 }
 
@@ -333,13 +345,15 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
 	16   = HDOP
 	17   = VDOP
      */
-
-    sscanf(field(sentence, 2), "%d", &out->mode);
+    int changed = 0;
+    
+    out->mode_stamp.changed = update_field_i(sentence, 2, &out->mode);
     REFRESH(out->mode_stamp);
     gpscli_report(2, "GPGSA sets mode %d\n", out->mode);
-    sscanf(field(sentence, 15), "%lf", &out->pdop);
-    sscanf(field(sentence, 16), "%lf", &out->hdop);
-    sscanf(field(sentence, 17), "%lf", &out->vdop);
+    changed |= update_field_f(sentence, 15, &out->pdop);
+    changed |= update_field_f(sentence, 16, &out->hdop);
+    changed |= update_field_f(sentence, 17, &out->vdop);
+    out->signal_quality_stamp.changed = changed;
     REFRESH(out->signal_quality_stamp);
 }
 
@@ -362,24 +376,25 @@ static void processGPGSV(char *sentence, struct OUTDATA *out)
                 There my be up to three GSV sentences in a data packet
      */
 
-    int n, m, f = 4;
+    int changed, n, m, f = 4;
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
-    update_field_i(sentence, 3, &out->in_view, out);
+    changed = update_field_i(sentence, 3, &out->in_view);
 
     n = (n - 1) * 4;
     m = n + 4;
 
     while (n < out->in_view && n < m) {
-	update_field_i(sentence, f++, &out->PRN[n], out);
-	update_field_i(sentence, f++, &out->elevation[n], out);
-	update_field_i(sentence, f++, &out->azimuth[n], out);
+	changed |= update_field_i(sentence, f++, &out->PRN[n]);
+	changed |= update_field_i(sentence, f++, &out->elevation[n]);
+	changed |= update_field_i(sentence, f++, &out->azimuth[n]);
 	if (*(field(sentence, f)))
-	    update_field_i(sentence, f, &out->ss[n], out);
+	    changed |= update_field_i(sentence, f, &out->ss[n]);
 	f++;
 	n++;
     }
+    out->satellite_stamp.changed = changed;
     REFRESH(out->satellite_stamp);
 }
 
@@ -405,24 +420,26 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	  *40    gps_checksum
      */
 
-    int tmp1;
-    char foo;
-
-    /* using this for mode and status seems a bit desperate */
-    /* only use it if we don't have better info */
-    sscanf(field(sentence, 2), "%d", &tmp1);	
-    sscanf(field(sentence, 3), "%c", &foo);	
-    
-    if (!SEEN(out->status_stamp)) {
+   int tmp1, newstatus, newmode;
+   char foo;
+-
+   /* using this for mode and status seems a bit desperate */
+   /* only use it if we don't have better info */
+   sscanf(field(sentence, 2), "%d", &tmp1);	
+   sscanf(field(sentence, 3), "%c", &foo);	
+   
+   if (!SEEN(out->status_stamp)) {
 	if (foo == 'T') {
-	    out->status = 1;
-	    out->mode = tmp1;
+	    newstatus = STATUS_FIX;
+	    newmode = tmp1;
 	}
 	else {
-	    out->status = 0;
-	    out->mode = 1;
+	    newstatus = STATUS_NO_FIX;
+	    newmode = MODE_NO_FIX;
 	}
+	out->status_stamp.changed = (newstatus != out->status);
 	REFRESH(out->status_stamp);
+	out->mode_stamp.changed = (newmode != out->mode);
 	REFRESH(out->mode_stamp);
 	gpscli_report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
@@ -441,12 +458,13 @@ static void processPRWIZCH(char *sentence, struct OUTDATA *out)
  *	Repeats 12 times
  */
 {
-    int i;
+    int i, changed = 0;
 
     for (i = 0; i < 12; i++) {
-	update_field_i(sentence, 2 * i + 1, &out->Zs[i], out);
-	update_field_i(sentence, 2 * i + 2, &out->Zv[i], out);
+	changed |= update_field_i(sentence, 2 * i + 1, &out->Zs[i]);
+	changed |= update_field_i(sentence, 2 * i + 2, &out->Zv[i]);
     }
+    out->signal_quality_stamp.changed = changed;
     REFRESH(out->signal_quality_stamp);
 }
 
