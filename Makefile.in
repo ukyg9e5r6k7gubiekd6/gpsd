@@ -152,7 +152,7 @@ libgps: libgps.c gps.h
 
 # How to build the library parts
 netlib.o: netlib.c gps.h gpsd.h
-nmea_parse.o: nmea_parse.c
+nmea_parse.o: nmea_parse.c gps.h gpsd.h
 serial.o: serial.c gps.h gpsd.h
 drivers.o: drivers.c gps.h gpsd.h
 earthmate.o: earthmate.c gps.h gpsd.h
