@@ -25,7 +25,7 @@ static void set_color(String color)
     if (!XAllocNamedColor(dpy, cmap, color, &col, &unused)) {
 	char buf[32];
 
-	sprintf(buf, "Can't alloc %s", color);
+	snprintf(buf, sizeof(buf), "Can't alloc %s", color);
 	XtWarning(buf);
 	return;
     }
@@ -119,7 +119,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		     11, 11,		/* width, height */
 		     0, 360 * 64	/* angle1, angle2 */
 		);
-	    sprintf(buf, "%02d", gpsdata->PRN[i]);
+	    snprintf(buf, sizeof(buf), "%02d", gpsdata->PRN[i]);
 	    set_color("Blue");
 	    XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 2);
 	    if (gpsdata->ss[i]) {

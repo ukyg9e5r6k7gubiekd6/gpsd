@@ -267,7 +267,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 #endif /* MULTISESSION */
     struct gps_data_t *ud = &device->gpsdata;
 
-    sprintf(reply, "GPSD");
+    strcpy(reply, "GPSD");
     p = buf;
     while (*p && p - buf < buflen) {
 	phrase[0] = '\0';
@@ -374,10 +374,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 #endif /* MULTISESSION */ 
 		gpsd_report(1, "GPS is %s\n", device->gpsd_device);
 	    }
-	    sprintf(phrase, ",F=%s", device->gpsd_device);
+	    snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsd_device);
 	    break;
 	case 'I':
-	    sprintf(phrase, ",I=%s", device->device_type->typename);
+	    snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
 	    break;
 #ifdef MULTISESSION
 	case 'K':

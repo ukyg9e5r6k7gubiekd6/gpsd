@@ -434,7 +434,7 @@ int packet_get(struct gps_device_t *session, int waiting)
 		unsigned int n, crc = 0;
 		for (n = 1; session->inbuffer + n < trailer; n++)
 		    crc ^= session->inbuffer[n];
-		sprintf(csum, "%02X", crc);
+		snprintf(csum, sizeof(csum), "%02X", crc);
 		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
 				&& toupper(csum[1])==toupper(trailer[2]));
 	    }

@@ -272,7 +272,7 @@ static int zodiac_analyze(struct gps_device_t *session)
     int i, mask = 0;
     unsigned int id = (session->outbuffer[2] << 8) | session->outbuffer[3];
 
-    sprintf(session->gpsdata.tag, "%6d", id);    
+    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%6d", id);
     gpsd_report(5, "ID %d\n", id);
     switch (id) {
     case 1000:
@@ -281,7 +281,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	break;
     case 1002:
 	mask = handle1002(session);
-	sprintf(buf, "$PRWIZCH");
+	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
 	}

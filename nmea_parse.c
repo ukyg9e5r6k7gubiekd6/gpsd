@@ -420,7 +420,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 	sum ^= c;
     if (correct_sum)
         *correct_sum = sum;
-    sprintf(csum, "%02X", sum);
+    snprintf(csum, sizeof(csum), "%02X", sum);
     return(toupper(csum[0])==toupper(p[0]))&&(toupper(csum[1])==toupper(p[1]));
 }
 
