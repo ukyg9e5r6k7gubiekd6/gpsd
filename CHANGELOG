@@ -36,5 +36,7 @@
 	 where they were not needed.
 20021003 (1.08)
 	 Added sockopt SO_REUSEADDR to netlib.c passive_sock.
-20021103 (1.09)
+20021103 
 	 G or g command returns six-digit Maidenhead grid square (like FN12fx)
+20030216 (1.09)
+	 Include sys/time.h in gpsd.c for struct timeval.
