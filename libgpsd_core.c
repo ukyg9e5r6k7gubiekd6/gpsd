@@ -143,17 +143,18 @@ int gpsd_poll(struct gps_session_t *session)
     waiting = is_input_waiting(session->gNMEAdata.gps_fd);
     gpsd_report(7, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
-	return waiting;
+	return 0;
     else if (!waiting) {
 	if (time(NULL) <= session->gNMEAdata.online_stamp.last_refresh + session->device_type->cycle+1) {
 	    return 0;
 	} else {
 	    session->gNMEAdata.online = 0;
 	    REFRESH(session->gNMEAdata.online_stamp);
-	    return -1;
+	    return ONLINE_SET;
 	}
     } else {
 	struct gps_data_t old;
+	int mask = 0;
 
 	memcpy(&old, &session->gNMEAdata, sizeof(struct gps_data_t));
 
@@ -162,11 +163,11 @@ int gpsd_poll(struct gps_session_t *session)
 
 	/* can we get a full packet from the device? */
 	if (!session->device_type->get_packet(session, waiting))
-	    return waiting;
+	    return ONLINE_SET;
 
 	session->gNMEAdata.d_xmit_time = timestamp();
 
-	session->device_type->parse_packet(session);
+	mask = ONLINE_SET | session->device_type->parse_packet(session);
 
 	session->counter++;
 	session->gNMEAdata.d_decode_time = timestamp();
@@ -177,6 +178,7 @@ int gpsd_poll(struct gps_session_t *session)
 	session->gNMEAdata.latlon_stamp.changed = \
 	    (session->gNMEAdata.longitude!=old.longitude || session->gNMEAdata.latitude!=old.latitude);
 	CHANGECHECK(altitude, altitude_stamp);
+	CHANGECHECK(altitude, climb_stamp);
 	CHANGECHECK(speed, speed_stamp);
 	CHANGECHECK(track, track_stamp);
 	CHANGECHECK(status, status_stamp);
@@ -214,8 +216,8 @@ int gpsd_poll(struct gps_session_t *session)
 		gpsd_report(2, "=> dgps %s", buf);
 	    }
 	}
+	return mask;
     }
-    return waiting;
 }
 
 void gpsd_wrap(struct gps_session_t *session)

@@ -164,7 +164,7 @@ static double iso8661_to_unix(char *isotime)
  *
  **************************************************************************/
 
-static void processGPRMC(int count, char *field[], struct gps_data_t *out)
+static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
@@ -184,17 +184,22 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
+    int mask = 0;
+
     if (!strcmp(field[2], "A")) {
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
 	    out->gps_time = iso8661_to_unix(out->utc);
 	}
+	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
+	mask |= LATLON_SET;
 	out->speed = atof(field[7]);
 	REFRESH(out->speed_stamp);
 	out->track = atof(field[8]);
 	REFRESH(out->track_stamp);
+	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
 	 * GPRMC. In this case we set mode and status here so the client
@@ -208,6 +213,7 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     */
 	    out->status = STATUS_FIX;
 	    REFRESH(out->status_stamp);
+	    mask |= STATUS_SET;
 	}
 	if (!(out->seen_sentences & GPGSA && out->mode <= MODE_NO_FIX)) {
 	    /* Upgrade to MODE_2D
@@ -216,12 +222,15 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 	     */
 	    out->mode = MODE_2D;
 	    REFRESH(out->mode_stamp);
+	    mask |= MODE_SET;
 	}
     }
+
+    return mask;
 }
 
 #ifndef WHOLE_CYCLE
-static void processGPGLL(int count, char *field[], struct gps_data_t *out)
+static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.  Here are the fields:
@@ -248,6 +257,7 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
      * actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
+    int mask = 0;
 
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
@@ -255,18 +265,23 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[5], out);
 	out->gps_time = iso8661_to_unix(out->utc);
+	mask |= TIME_SET;
 	do_lat_lon(&field[1], out);
+	mask |= LATLON_SET;
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
 	out->status = newstatus;
 	REFRESH(out->status_stamp);
+	mask |= STATUS_SET;
 	gpsd_report(3, "GPGLL sets status %d\n", out->status);
     }
+
+    return mask;
 }
 
-static void processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
+static int processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Track Made Good and Ground Speed */
 {
     /* There are two variants of GPVTG.  One looks like this:
@@ -299,10 +314,17 @@ static void processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
     else
 	out->speed = atof(field[3]);
     REFRESH(out->speed_stamp);
+    /* 
+     * Never send watcher notifications on GPVTG, as those
+     * only duplicate information made available at other points
+     * in the same cycle.  This is almost true of GPGLL, except 
+     * for the Garmin 48.
+     */
+    return 0;
 }
 #endif /* WHOLE_CYCLE */
 
-static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
+static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Global Positioning System Fix Data */
 {
     /*
@@ -319,9 +341,12 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
+    int mask = 0;
+
     out->status = atoi(field[6]);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
+    mask |= STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
 
@@ -329,7 +354,9 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	fake_mmddyyyy(out);
 	merge_hhmmss(field[1], out);
 	out->gps_time = iso8661_to_unix(out->utc);
+	mask |= TIME_SET;
 	do_lat_lon(&field[2], out);
+	mask |= LATLON_SET;
         out->satellites_used = atoi(field[7]);
 #endif /* WHOLE_CYCLE */
 	altitude = field[9];
@@ -342,6 +369,7 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	    if (out->mode == MODE_3D) {
 		out->mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		REFRESH(out->mode_stamp);
+		mask |= MODE_SET;
 	    }
 	} else {
 	    double oldaltitude = out->altitude;
@@ -350,6 +378,7 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 
 	    out->altitude = atof(altitude);
 	    REFRESH(out->altitude_stamp);
+	    mask |= ALTITUDE_SET;
 
 	    /*
 	     * Compute climb/sink in the simplest possible way.
@@ -364,11 +393,13 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 		out->climb = (out->altitude-oldaltitude)/(out->altitude_stamp.last_refresh-oldaltstamp);
 	    }
 	    out->climb_stamp.changed = (out->climb != oldclimb);
+	    mask |= CLIMB_SET;
 	}
     }
+    return mask;
 }
 
-static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
+static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* GPS DOP and Active Satellites */
 {
     /*
@@ -383,10 +414,11 @@ static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 	16   = HDOP
 	17   = VDOP
      */
-    int i;
+    int i, mask = 0;
     
     out->mode = atoi(field[2]);
     REFRESH(out->mode_stamp);
+    mask |= MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
     out->pdop = atof(field[15]);
     out->hdop = atof(field[16]);
@@ -402,31 +434,12 @@ static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
        }
     }
     REFRESH(out->fix_quality_stamp);
+    mask |= DOP_SET;
+
+    return mask;
 }
 
-int nmea_sane_satellites(struct gps_data_t *out)
-{
-    int n;
-
-    /* data may be incomplete */
-    if (out->part < out->await)
-	return 0;
-
-    /*
-     * This sanity check catches an odd behavior SiRF-II based GPSes.
-     * When they can't see any satellites at all (like, inside a
-     * building) they sometimes cough up a hairball in the form of a
-     * GSV packet with all the azimuth entries 0 (but nonzero
-     * elevations).  This behavior was observed under SiRF firmware
-     * revision 231.000.000_A2.
-     */
-    for (n = 0; n < out->satellites; n++)
-	if (out->azimuth[n])
-	    return 1;
-    return 0;
-}
-
-static void processGPGSV(int count, char *field[], struct gps_data_t *out)
+static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 /* GPS Satellites in View */
 {
     /*
@@ -441,12 +454,12 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
            <repeat for up to 4 satellites per sentence>
                 There my be up to three GSV sentences in a data packet
      */
-    int fldnum;
+    int n, fldnum;
     if (count <= 3)
-        return;
+        return 0;
     out->await = atoi(field[1]);
     if (sscanf(field[2], "%d", &out->part) < 1)
-        return;
+        return 0;
     else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
@@ -458,17 +471,30 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 
     /* not valid data until we've seen a complete set of parts */
-    if (out->part < out->await)
+    if (out->part < out->await) {
 	gpsd_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
-    else if (!nmea_sane_satellites(out))
-	gpsd_report(3, "Satellite data no good.\n");
-    else {
-	gpsd_report(3, "Satellite data OK.\n");
-	REFRESH(out->satellite_stamp);
+	return 0;
     }
-}
+    /*
+     * This sanity check catches an odd behavior SiRF-II based GPSes.
+     * When they can't see any satellites at all (like, inside a
+     * building) they sometimes cough up a hairball in the form of a
+     * GSV packet with all the azimuth entries 0 (but nonzero
+     * elevations).  This behavior was observed under SiRF firmware
+     * revision 231.000.000_A2.
+     */
+    for (n = 0; n < out->satellites; n++)
+	if (out->azimuth[n])
+	    goto sane;
+    gpsd_report(3, "Satellite data no good.\n");
+    return 0;
+  sane:
+    gpsd_report(3, "Satellite data OK.\n");
+    REFRESH(out->satellite_stamp);
+    return SATELLITE_SET;
+    }
 
-static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
+static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Garmin Estimated Position Error */
 {
     /*
@@ -487,6 +513,7 @@ static void processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
     out->epv = atof(field[3]);
     out->epe = atof(field[5]);
     REFRESH(out->epe_quality_stamp);
+    return POSERR_SET;
 }
 
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
@@ -531,7 +558,7 @@ void nmea_add_checksum(char *sentence)
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
-    typedef void (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
+    typedef int (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
     static struct {
 	char *name;
 	int mask;
@@ -553,7 +580,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"PRWIZCH", 0,  	NULL},
     };
 
-    int retval = -1;
+    int retval = 0;
     unsigned int i;
     int count;
     unsigned char sum;
@@ -585,10 +612,9 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
         if (!strcmp(nmea_phrase[i].name, field[0])) {
 	    if (nmea_phrase[i].decoder)
-		(nmea_phrase[i].decoder)(count, field, outdata);
+		retval = (nmea_phrase[i].decoder)(count, field, outdata);
 	    if (nmea_phrase[i].mask)
 		outdata->seen_sentences |= nmea_phrase[i].mask;
-	    retval = 0;
 	    break;
 	}
     }

@@ -211,9 +211,9 @@ static void sirfbin_mode(struct gps_session_t *session, int mode)
 }
 
 
-void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
+int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 {
-    int	st, i, j, cn, navtype;
+    int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3] = "";
     double fv;
 
@@ -263,7 +263,7 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
-	break;
+	return TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
 
     case 0x04:		/* Measured tracker data out */
 	/*
@@ -304,14 +304,14 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
-	break;
+	return SATELLITE_SET;
 
     case 0x09:		/* CPU Throughput */
 	gpsd_report(4, 
 		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
 		    (float)getw(1)/186, (float)getw(3)/186, 
 		    (float)getw(5)/186, getw(7));
-    	break;
+    	return 0;
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
@@ -325,31 +325,32 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	else
 	    session->driverstate |= SIRF_GE_232;
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
-	break;
+	return 0;
 
     case 0x0a:		/* Error ID Data */
 	gpsd_report(4, "EID 0x0a: Error ID type %d\n", getw(1));
-	break;
+	return 0;
 
     case 0x0b:		/* Command Acknowledgement */
 	gpsd_report(4, "ACK 0x0b: %02x\n",getb(1));
-    	break;
+    	return 0;
 
     case 0x0c:		/* Command NAcknowledgement */
 	gpsd_report(4, "NAK 0x0c: %02x\n",getb(1));
-    	break;
+    	return 0;
 
     case 0x0d:		/* Visible List */
-	break;
+	return 0;
 
     case 0x12:		/* OK To Send */
 	gpsd_report(4, "OTS 0x12: send indicator = %d\n",getb(1));
-	break;
+	return 0;
 
     case 0x1b:		/* DGPS status (undocumented) */
-	break;
+	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
+	mask = 0;
 	if (session->driverstate & SIRF_GE_232) {
 	    /*
 	     * Many versions of the SiRF protocol manual don't document 
@@ -407,9 +408,13 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gNMEAdata.longitude = getl(27)/1e+7;
 	    REFRESH(session->gNMEAdata.latlon_stamp);
 	    /* skip 4 bytes of altitude from ellipsoid */
+	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
 	session->gNMEAdata.altitude = getl(31)/100;
-	REFRESH(session->gNMEAdata.altitude_stamp);
+	if (session->gNMEAdata.mode == MODE_3D) {
+	    REFRESH(session->gNMEAdata.altitude_stamp);
+	    mask |= ALTITUDE_SET;
+	}
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
 	    session->gNMEAdata.speed = getw(36)/100;
@@ -422,11 +427,12 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
+	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
 	}
-	break;
+	return mask;
 
     case 0x32:		/* SBAS corrections */
-	break;
+	return 0;
 
     case 0xff:		/* Debug messages */
 	buf2[0] = '\0';
@@ -436,27 +442,31 @@ void sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    else
 		sprintf(buf2+strlen(buf2), "\\x%02x", buf[i]);
 	gpsd_report(4, "DD  0xff: %s\n", buf2);
-	break;
+	return 0;
 
     default:
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
 	    sprintf(buf2+strlen(buf2), "%02x", buf[i]);
 	gpsd_report(1, "Unknown SiRF packet length %d: %s\n", len, buf2);
-	break;
+	return 0;
     }
+
+    return 0;
 }
 
 static int sirfbin_parse_input(struct gps_session_t *session)
 {
+    int st;
+
     if (session->packet_type == SIRF_PACKET){
-	sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
+	st = sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
 	session->gNMEAdata.driver_mode = 1;
-	return 1;
+	return st;
     } else if (session->packet_type == NMEA_PACKET) {
-	nmea_parse(session->outbuffer, &session->gNMEAdata);
+	st = nmea_parse(session->outbuffer, &session->gNMEAdata);
 	session->gNMEAdata.driver_mode = 0;
-	return 1;
+	return st;
     } else
 	return 0;
 }

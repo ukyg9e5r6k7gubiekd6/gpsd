@@ -516,69 +516,22 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
     return throttled_write(fd, reply, strlen(reply));
 }
 
-static void raw_hook(struct gps_data_t *ud, char *sentence)
+static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
 /* hook to be executed on each incoming sentence group */
 {
-    int fd, mask = 0;
-    char cmds[16], *sp;
+    int fd;
 
-    /* 
-     * Never send watcher notifications on GPVTG, as those
-     * only duplicate information made available at other points
-     * in the same cycle.  This almost true of GPGLL, except 
-     * for the Garmin 48.
-     */
-    for (sp = sentence; *sp; sp++) {
-	if (*sp == '$') {
-	    if (PREFIX("$GPRMC", sp)) {
-		mask |= GPRMC;
-	    } else if (PREFIX("$GPGGA", sp)) {
-		mask |= GPGGA;
-	    } else if (PREFIX("$GPGLL", sp)) {
-		mask |= GPGLL;
-	    } else if (PREFIX("$GPGSA", sp)) {
-		mask |= GPGSA;
-	    } else if (PREFIX("$GPGSV", sp)) {
-		if (ud->part == ud->await && nmea_sane_satellites(ud))
-		    mask |= GPGSV;
-	    } else if (PREFIX("$PGRME", sp)) {
-		mask |= PGRME;
-	    }
-	}
+    for (fd = 0; fd < FD_SETSIZE; fd++) {
+	/* copy raw NMEA sentences from GPS to clients in raw mode */
+	if (FD_ISSET(fd, &nmea_fds))
+	    throttled_write(fd, sentence, strlen(sentence));
     }
-    cmds[0] = '\0';
-    if (mask & (GPRMC | GPGLL))
-	strcat(cmds, "dp");
-    if (mask & GPRMC)
-	strcat(cmds, "tv");
-    if ((mask & GPGGA) || ((mask & GPRMC) && !(ud->seen_sentences & GPGGA)))
-	strcat(cmds, "sm");
-    if (mask & GPGGA)
-	strcat(cmds, "au");
-    if (mask & GPGSA)
-	strcat(cmds, "q");
-    if (mask & GPGSV)
-	strcat(cmds, "y");
-    if (mask & PGRME || ((mask & GPGSA) && !(ud->seen_sentences & PGRME)))
-	strcat(cmds, "e");
-
-    if (cmds[0])
-	for (fd = 0; fd < FD_SETSIZE; fd++) {
-	    /* copy raw NMEA sentences from GPS to clients in raw mode */
-	    if (FD_ISSET(fd, &nmea_fds))
-		throttled_write(fd, sentence, strlen(sentence));
-
-	    /* some listeners may be in watcher mode */
-	    if (FD_ISSET(fd, &watcher_fds)) {
-		handle_request(fd, cmds, strlen(cmds), 0);
-	    }
-	}
 }
 
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
-    static int st, nowait = 0, gpsd_speed = 0;
+    static int st, changed, nowait = 0, gpsd_speed = 0;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *device_name = DEFAULT_DEVICE_NAME;
@@ -728,11 +681,49 @@ int main(int argc, char *argv[])
 	}
 
 	/* get data from it */
-	if (session->gNMEAdata.gps_fd >= 0 && gpsd_poll(session) < 0) {
+	changed = 0;
+	if (session->gNMEAdata.gps_fd >= 0 && !((changed=gpsd_poll(session)) | ONLINE_SET)) {
 	    gpsd_report(3, "GPS is offline\n");
 	    FD_CLR(session->gNMEAdata.gps_fd, &all_fds);
 	    gpsd_deactivate(session);
 	    notify_watchers("GPSD,X=0\r\n");
+	}
+
+	if (changed) {
+	    char cmds[16];
+
+	    /* what data should we publish? */
+	    cmds[0] = '\0';
+	    if (changed & TIME_SET)
+		strcat(cmds, "d");
+	    if (changed & LATLON_SET)
+		strcat(cmds, "p");
+	    if (changed & ALTITUDE_SET)
+		strcat(cmds, "a");
+	    if (changed & TRACK_SET)
+		strcat(cmds, "t");
+	    if (changed & SPEED_SET)
+		strcat(cmds, "v");
+	    if (changed & CLIMB_SET)
+		strcat(cmds, "u");
+	    if (changed & STATUS_SET)
+		strcat(cmds, "s");
+	    if (changed & MODE_SET)
+		strcat(cmds, "m");
+	    if (changed & DOP_SET)
+		strcat(cmds, "q");
+	    if (changed & SATELLITE_SET)
+		strcat(cmds, "y");
+	    if ((changed & POSERR_SET) || ((changed & DOP_SET) && !(session->gNMEAdata.seen_sentences & PGRME)))
+		strcat(cmds, "e");
+
+	    if (cmds[0])
+		for (fd = 0; fd < FD_SETSIZE; fd++) {
+		    /* some listeners may be in watcher mode */
+		    if (FD_ISSET(fd, &watcher_fds)) {
+			handle_request(fd, cmds, strlen(cmds), 0);
+		    }
+		}
 	}
 
 	/* this simplifies a later test */

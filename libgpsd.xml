@@ -111,10 +111,10 @@ of its members.</para>
 <varlistentry>
 <term><structfield>baudrate</structfield></term>
 <listitem>
-<para>Communication speed in bits per second.  The default is set by
-the driver type.  For NMEA devices, the library automatically 
-hunts through all plausible baud rates, stoppong on the one where
-it sees valid NMEA </para>
+<para>Communication speed in bits per second.  For NMEA or SiRF devices, the
+library automatically hunts through all plausible baud rates, stopping
+on the one where it sees valid packets.  By setting this field you can
+designate a speed to be tried at the front of the hunt queue</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -138,8 +138,7 @@ activity requiring the GPS, and re-acquire it later.</para>
 <para><function>gpsd_poll()</function>
 queries the GPS and updates the part of the session structure that
 holds position, speed, GPS signal quality, and other data returned
-by the GPS. It returns the number of characters waiting (-1 if the
-GPS is inaccessible)</para>
+by the GPS. It returns a mask describing which fields have changed.</para>
 
 <para><function>gpsd_wrap()</function>
 ends the session, implicitly performing a 

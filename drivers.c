@@ -16,12 +16,12 @@ static int nmea_parse_input(struct gps_session_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
-	sirf_parse(session, session->outbuffer, session->outbuflen);
-	return 1;
+	return sirf_parse(session, session->outbuffer, session->outbuflen);
     } else if (session->packet_type == NMEA_PACKET) {
+	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
-	    if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
+	    if ((st = nmea_parse(session->outbuffer, &session->gNMEAdata))==0)
 		gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
 	} else {
 #ifdef NON_NMEA_ENABLE
@@ -43,7 +43,7 @@ static int nmea_parse_input(struct gps_session_t *session)
 
 	/* also copy the sentence up to clients in raw mode */
 	gpsd_raw_hook(session, session->outbuffer);
-	return 1;
+	return st;
     } else
 	return 0;
 }

@@ -153,10 +153,9 @@ extern struct gps_type_t **gpsd_drivers;
 /* GPS library internal prototypes */
 extern int nmea_parse(char *, struct gps_data_t *);
 extern int nmea_send(int, const char *, ... );
-extern int nmea_sane_satellites(struct gps_data_t *);
 extern void nmea_add_checksum(char *);
 
-extern void sirf_parse(struct gps_session_t *, unsigned char *, int);
+extern int sirf_parse(struct gps_session_t *, unsigned char *, int);
 
 extern int packet_get(struct gps_session_t *, int);
 extern int packet_sniff(struct gps_session_t *);

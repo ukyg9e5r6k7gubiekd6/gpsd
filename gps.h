@@ -25,6 +25,23 @@ static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL)
 #define REFRESH(stamp)	stamp.last_refresh = timestamp()
 #define SEEN(stamp) stamp.last_refresh
 
+#define ONLINE_SET	0x0001
+#define TIME_SET	0x0002
+#define TIMERR_SET	0x0004
+#define LATLON_SET	0x0008
+#define ALTITUDE_SET	0x0010
+#define SPEED_SET	0x0020
+#define TRACK_SET	0x0040
+#define CLIMB_SET	0x0080
+#define STATUS_SET	0x0100
+#define MODE_SET	0x0200
+#define DOP_SET  	0x0400
+#define POSERR_SET	0x0800
+#define SATELLITE_SET	0x1000
+#define SPEEDERR_SET	0x2000
+#define TRACKERR_SET	0x4000
+#define CLIMBERR_SET	0x8000
+
 struct gps_data_t {
     int	online;			/* 1 if GPS is on line, 0 if not.
 				 *

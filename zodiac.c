@@ -131,7 +131,7 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 		| (session->outbuffer[2*(n)+0] << 16) \
 		| (session->outbuffer[2*(n)+1] << 24))
 
-static void handle1000(struct gps_session_t *session)
+static int handle1000(struct gps_session_t *session)
 {
     sprintf(session->gNMEAdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
 	    getw(19), getw(20), getw(21), getw(22), getw(23), getw(24));
@@ -170,6 +170,7 @@ static void handle1000(struct gps_session_t *session)
     session->gNMEAdata.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gNMEAdata.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
     session->gNMEAdata.altitude  = getl(31) * 1e-2;
+    session->gNMEAdata.climb     = getl(38) * 1e-2;
     session->gNMEAdata.status    = (getw(10) & 0x1c) ? 0 : 1;
     session->mag_var             = getw(37) * RAD_2_DEG * 1e-4;
     session->gNMEAdata.track     = getw(36) * RAD_2_DEG * 1e-4;
@@ -179,13 +180,20 @@ static void handle1000(struct gps_session_t *session)
 	session->gNMEAdata.mode = (getw(10) & 1) ? 2 : 3;
     else
 	session->gNMEAdata.mode = 1;
+    REFRESH(session->gNMEAdata.latlon_stamp);
+    REFRESH(session->gNMEAdata.altitude_stamp);
+    REFRESH(session->gNMEAdata.speed_stamp);
+    REFRESH(session->gNMEAdata.climb_stamp);
+    REFRESH(session->gNMEAdata.track_stamp);
     REFRESH(session->gNMEAdata.status_stamp);
     REFRESH(session->gNMEAdata.mode_stamp);
 
     session->separation = getw(33) * 1e-2;	/* meters */
+
+    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
 }
 
-static void handle1002(struct gps_session_t *session)
+static int handle1002(struct gps_session_t *session)
 {
     int i, j;
 
@@ -214,9 +222,10 @@ static void handle1002(struct gps_session_t *session)
 	}
     }
     REFRESH(session->gNMEAdata.satellite_stamp);
+    return SATELLITE_SET;
 }
 
-static void handle1003(struct gps_session_t *session)
+static int handle1003(struct gps_session_t *session)
 {
     int i;
 
@@ -242,6 +251,7 @@ static void handle1003(struct gps_session_t *session)
     }
     REFRESH(session->gNMEAdata.fix_quality_stamp);
     REFRESH(session->gNMEAdata.satellite_stamp);
+    return SATELLITE_SET | DOP_SET;
 }
 
 static void handle1005(struct gps_session_t *session)
@@ -269,17 +279,17 @@ static void handle1005(struct gps_session_t *session)
 static int zodiac_analyze(struct gps_session_t *session)
 {
     char buf[BUFSIZ];
-    int i;
+    int i, mask = 0;
     unsigned int id = (session->outbuffer[2] << 8) | session->outbuffer[3];
 
     gpsd_report(5, "ID %d\n", id);
     switch (id) {
     case 1000:
-	handle1000(session);
+	mask = handle1000(session);
 	gpsd_binary_fix_dump(session, buf);
 	break;
     case 1002:
-	handle1002(session);
+	mask = handle1002(session);
 	sprintf(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
@@ -289,7 +299,7 @@ static int zodiac_analyze(struct gps_session_t *session)
 	gpsd_binary_quality_dump(session, buf+strlen(buf));
 	break;
     case 1003:
-	handle1003(session);
+	mask = handle1003(session);
 	gpsd_binary_satellite_dump(session, buf);
 	break;	
     case 1005:
@@ -297,7 +307,7 @@ static int zodiac_analyze(struct gps_session_t *session)
 	break;	
     }
 
-    return 0;
+    return mask;
 }
 
 /* caller needs to specify a wrapup function */

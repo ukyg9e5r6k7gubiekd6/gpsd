@@ -187,13 +187,14 @@ static inline double  radtodeg( double rad) {
 	return ( rad * RAD_2_DEG );
 }
 
-static void PrintPacket(struct gps_session_t *session, Packet_t *pkt );
+static int PrintPacket(struct gps_session_t *session, Packet_t *pkt );
 static void SendPacket (struct gps_session_t *session, Packet_t *aPacket );
 static int GetPacket (struct gps_session_t *session );
 
 // For debugging, decodes and prints some known packets.
-static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
+static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 {
+    int mask = 0;
     int maj_ver;
     int min_ver;
     int mode;
@@ -211,7 +212,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
     gpsd_report(3, "PrintPacket() ");
     if ( 4096 < pkt->mDataSize) {
 	gpsd_report(3, "bogus packet, size too large=%d\n", pkt->mDataSize);
-	return;
+	return 0;
     }
 
     switch ( pkt->mPacketType ) {
@@ -370,6 +371,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 
 	    gpsd_binary_fix_dump(session, bufp);
 	    bufp += strlen(bufp);
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | POSERR_SET;
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
 	    gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
@@ -411,6 +413,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 		j++;
 	    }
 	    REFRESH(session->gNMEAdata.satellite_stamp);
+	    mask |= SATELLITE_SET;
 	    gpsd_binary_satellite_dump(session, bufp);
 	    bufp += strlen(bufp);
 	    gpsd_binary_quality_dump(session, bufp+strlen(bufp));
@@ -469,6 +472,8 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt)
     if ( bufp != buf ) {
 	gpsd_report(3, "%s", buf);
     }
+
+    return mask;
 }
 
 //-----------------------------------------------------------------------------
