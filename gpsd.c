@@ -29,7 +29,6 @@
 #endif
 
 #include "gpsd.h"
-#include "display.h"
 
 #define QLEN			5
 
@@ -398,12 +397,13 @@ static int passivesock(char *service, char *protocol, int qlen)
 
 int main(int argc, char *argv[])
 {
-    char *service = NULL, *dgpsserver = NULL;
+    static int nowait = 0, gpsd_speed = 0;
+    static char gpstype = 'n', *dgpsserver = NULL;
+    char *service = NULL; 
     struct sockaddr_in fsin;
     fd_set rfds;
-    int option, msock, fd, need_gps, nowait = 0, gpsd_speed = 0;
+    int option, msock, fd, need_gps; 
     extern char *optarg;
-    char gpstype = 'n';
 
     debuglevel = 1;
     while ((option = getopt(argc, argv, "D:S:d:hnp:s:v"
