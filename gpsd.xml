@@ -334,10 +334,6 @@ NMEA standard.</para>
 url='http://www.gpsinformation.net/dale/nmea.htm'>this page about
 NMEA</ulink>.</para>
 
-<para>gpsd does not yet speak the SiRF-II binary protocol, but SiRF-II
-devices speak NMEA by default before being switched to binary and
-should thus be accessible as generic GPS devices.</para>
-
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>

@@ -207,7 +207,8 @@ OEMed by GPS makers.  It spoke NMEA, but had irritating limitations in
 that mode like not being able to accept DGPS corrections.  It
 preferred a tight-packed binary protocol.  There haven't been any new
 Zodiac-based designs in a few years, but a lot of Zodiac-based 
-designs (like the DeLorme EarthMate line) are still in production.</p>
+GPSes (like the DeLorme EarthMates made before they switched over to a
+SiRF chipset in 2003) are still around.</p>
 
 <p>2004's equivalent of the Zodiac is the SiRF-II chipset, which seems
 to be nearly ubiquitous in inexpensive GPS sensors.  It too speaks 
@@ -304,7 +305,7 @@ and get an authoritative answer.</li>
 
 <li>Timestamps are now no longer truncated to seconds, but reported to 
 whatever resolution the GPS ships.  Often (notably on SiRF-II GPses)
-this is milliseconds.</p>
+this is milliseconds.</li>
 
 <li>There is a new "watcher" mode.  It is like raw mode in that the
 GPS streams updates at you, but unlike it in that the updates are in 
@@ -354,7 +355,7 @@ swapped out, unless there are clients trying to query the GPS.</p>
 <p>Second, the format of the timestamp returned by the D command has
 changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
 No more U.S.-centric date-format assumptions!  Also, as previously
-noted, the seconds part may have digits of decimal fractional
+noted, the seconds part may have one or more digits of decimal fractional
 seconds.</p>
 
 <h1>Where to learn more</h1>
@@ -364,7 +365,7 @@ seconds.</p>
 <dd>This is where the orbital simulation came from.</dd>
 
 <dt><a href='http://www.topology.org/soft/gps.html'>GPS interfaces and 
-software</dt>
+software</a></dt>
 <dd>Linux and open-source resources for working with GPSes.</dd>
 
 <dt><a
