@@ -121,7 +121,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    int mask = 0;
+    int mask = ERROR_SET;
 
     if (!strcmp(field[2], "A")) {
 	if (count > 9) {
@@ -129,7 +129,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    merge_hhmmss(field[1], out);
 	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
 	}
-	mask |= TIME_SET;
+	mask = TIME_SET;
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
 	out->fix.speed = atof(field[7]);
@@ -181,15 +181,16 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
      * actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
-    int mask = 0;
+    int mask = ERROR_SET;
 
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
+	mask = 0;
 	merge_hhmmss(field[5], out);
 	if (out->nmea_date.tm_year) {
 	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
-	    mask |= TIME_SET;
+	    mask = TIME_SET;
 	}
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -222,11 +223,11 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    int mask = 0;
+    int mask;
 
     out->status = atoi(field[6]);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
-    mask |= STATUS_SET;
+    mask = STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
 	char *altitude;
 	double oldfixtime = out->fix.time;
@@ -288,10 +289,10 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 	16   = HDOP
 	17   = VDOP
      */
-    int i, mask = 0;
+    int i, mask;
     
     out->fix.mode = atoi(field[2]);
-    mask |= MODE_SET;
+    mask = MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", out->fix.mode);
     out->pdop = atof(field[15]);
     out->hdop = atof(field[16]);
@@ -328,10 +329,10 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
      */
     int n, fldnum;
     if (count <= 3)
-        return 0;
+        return ERROR_SET;
     out->await = atoi(field[1]);
     if (sscanf(field[2], "%d", &out->part) < 1)
-        return 0;
+        return ERROR_SET;
     else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
@@ -348,7 +349,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await) {
 	gpsd_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
-	return 0;
+	return ERROR_SET;
     }
     /*
      * This sanity check catches an odd behavior of SiRF-II based GPSes.
@@ -362,7 +363,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 	if (out->azimuth[n])
 	    goto sane;
     gpsd_report(3, "Satellite data no good.\n");
-    return 0;
+    return ERROR_SET;
   sane:
     gpsd_report(3, "Satellite data OK.\n");
     return SATELLITE_SET;
@@ -410,6 +411,7 @@ static int processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
     return TIME_SET;
 }
 
+#ifdef __UNUSED__
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
 {
@@ -423,6 +425,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
     snprintf(csum, sizeof(csum), "%02X", sum);
     return(toupper(csum[0])==toupper(p[0]))&&(toupper(csum[1])==toupper(p[1]));
 }
+#endif /* __ UNUSED__ */
 
 /**************************************************************************
  *
@@ -471,6 +474,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     int count, retval = 0;
     unsigned int i;
     char *p, *field[80], *s;
+#ifdef __UNUSED__
     unsigned char sum;
 
     if (!nmea_checksum(sentence+1, &sum)) {
@@ -478,6 +482,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
                    sentence, sum);
         return 0;
     }
+#endif /* __ UNUSED__ */
 
     /* make an editable copy of the sentence */
     strncpy(buf, sentence, NMEA_MAX);

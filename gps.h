@@ -88,6 +88,7 @@ struct gps_data_t {
 #define SPEEDERR_SET	0x020000
 #define TRACKERR_SET	0x040000
 #define CLIMBERR_SET	0x080000
+#define ERROR_SET	0x100000
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
