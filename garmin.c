@@ -1,40 +1,56 @@
 /*
  * Handle the Garmin binary packet format supported by the USB Garmins
- * tested with the Garmin 18
+ * tested with the Garmin 18 and other models.  This driver is NOT for
+ * serial port connected Garmins, they provide adequate NMEA support.
  *
  * This code is partly from the Garmin IOSDK and partly from the
  * sample code in the Linux garmin_gps driver.
  *
- * Protocol info from the:
+ * Presently this code needs the Linux garmin_usb driver and will
+ * not function without it.  It also depends on the Intel byte order
+ * (little-endian) so will not work on PPC or other big-endian machines
+ *
+ * Protocol info from:
  *	 GPS18_TechnicalSpecification.pdf
  *	 iop_spec.pdf
  * http://www.garmin.com/support/commProtocol.html
  *
  * bad code by: Gary E. Miller <gem@rellim.com>
+ * all rights abandoned, a thank would be nice if you use this code.
  *
  * -D 3 = packet trace
  * -D 4 = packet details
  * -D 5 = more packet details
  *
  * limitations:
- * do not really have from garmin:
- *      pdop, so use epe instead
- *      hdop, so use eph instead
- *      vdop, so use epv instead
- * do not have:
+ *
+ * do not have from garmin:
+ *      pdop
+ *      hdop
+ *      vdop
  *	magnetic variation
+ * we set the first three from epe info, so they are actual circular
+ * error bounds in meters rather than the dimensionless numbers NMEA
+ * describes.
+ *
+ * where:
+ * 15.0,M       Estimated horizontal position error in meters (HPE)
+ * 45.0,M       Estimated vertical error (VPE) in meters
+ * 25.0,M       Overall spherical equivalent position error
+ *
  *
  * known bugs:
- * won't work on a little-endian machine
- *	Satellties over 32 are being reported.
+ *      won't work on a little-endian machine
  *	xgps says "NO FIX" and refuses to show the speed and track.
  *      hangs in the fread loop instead of keeping state and returning.
  */
 #include <stdio.h>
 #include <stdlib.h>
+// Linux math.h need the next two defines to get hypot() and _PI constants
 #define __USE_ISOC99
 #define __USE_GNU
 #include <math.h>
+
 #include <string.h>
 #include <unistd.h>
 
@@ -82,6 +98,7 @@
 #define ASYNC_DATA_SIZE 64
 
 
+// This is the packet format to/from the Garmin USB
 #pragma pack(1)
 typedef struct {
     unsigned char  mPacketType;
@@ -93,6 +110,7 @@ typedef struct {
     char  mData[MAX_BUFFER_SIZE];
 } Packet_t;
 
+// This is the data format of the satellite data from the garmin USB
 typedef struct {
 	unsigned char  svid;
 	unsigned short snr; // 0 - 0xffff
@@ -104,6 +122,7 @@ typedef struct {
 } cpo_sat_data;
 
 /* Garmin D800_Pvt_Date_Type */
+// This is the data format of the position data from the garmin USB
 typedef struct {
 	float alt;  /* altitude above WGS 84 */
 	float epe;  /* estimated position error, 2 sigma (meters)  */
@@ -254,8 +273,9 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 		session->gNMEAdata.longitude = radtodeg(pvt->lon);
 		REFRESH(session->gNMEAdata.latlon_stamp);
 
-                // altitude over WGS84
-		session->gNMEAdata.altitude = pvt->alt;
+                // altitude over WGS84 cnverted to MSL
+		session->gNMEAdata.altitude = pvt->alt + pvt->msl_hght;
+
 		// geoid separation from WGS 84
 		session->separation = pvt->msl_hght;
 		REFRESH(session->gNMEAdata.altitude_stamp);
@@ -334,12 +354,13 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 		    , pvt->grmn_days);
 
 		gpsd_binary_fix_dump(session, bufp);
+		bufp += strlen(bufp);
 		break;
             case GARMIN_PKTID_SAT_DATA:
 		gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
 		sats = (cpo_sat_data*)pkt->mData;
 
-		session->gNMEAdata.satellites = 12; // always got data for 12
+		session->gNMEAdata.satellites = 0;
 		session->gNMEAdata.satellites_used = 0;
 
 		// clear used table
@@ -357,27 +378,31 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 
 			// busted??
 // FIXME!! need to elimate sats over 32
-			//if ( 255 == sats->svid ) {
+			if ( (32 < sats->svid) || (0 == sats->svid) ) {
 				// Garmin uses 255 for empty
                                 // gpsd uses 0 for empty
-				//sats->svid = 0;
-			//}
+				continue;
+			}
 
-			session->gNMEAdata.PRN[i] = sats->svid;
-			session->gNMEAdata.azimuth[i] = sats->azmth;
-			session->gNMEAdata.elevation[i] = sats->elev;
+			session->gNMEAdata.PRN[j] = sats->svid;
+			session->gNMEAdata.azimuth[j] = sats->azmth;
+			session->gNMEAdata.elevation[j] = sats->elev;
 			// snr units??
 			// garmin 0 -> 0xffff, NMEA 99 -> 0
-			session->gNMEAdata.ss[i]
+			session->gNMEAdata.ss[j]
 				= 99 - ((100 *(long)sats->snr) >> 16);
 			if ( sats->status & 4 ) {
 				// used in solution?
 				session->gNMEAdata.used[ session->gNMEAdata.satellites_used++] = sats->svid;
 			}
+			session->gNMEAdata.satellites++;
+			j++;
 		}
 		REFRESH(session->gNMEAdata.satellite_stamp);
 		gpsd_binary_satellite_dump(session, bufp);
+		bufp += strlen(bufp);
 		gpsd_binary_quality_dump(session, bufp+strlen(bufp));
+		bufp += strlen(bufp);
 		break;
             default:
 		gpsd_report(3, "ID: %d, Sz: %d\n"
@@ -422,9 +447,6 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt ) {
 
     if ( bufp != buf ) {
 	gpsd_report(3, "%s", buf);
-	if (session->gNMEAdata.raw_hook) {
-	    session->gNMEAdata.raw_hook(buf);
-        }
     }
 
 }
