@@ -40,17 +40,12 @@ int gpsd_close(int fd)
     return close(fd);
 }
 
-int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
-/* query a gpsd instance for new data */
+static int gpsd_unpack(char *buf, struct gps_data *gpsdata)
+/* unpack a daemon response into a status structure */
 {
-    char buf[BUFSIZE], *sp, *tp;
+    char *sp, *tp;
     double d1, d2, d3;
     int i1, i2;
-
-    if (write(fd, requests, strlen(requests)) <= 0)
-	return -1;
-    else if (read(fd, buf, sizeof(buf)-1) <= 0)
-	return -1;
 
     for (sp = buf + 5; ; sp = tp+1)
     {
@@ -58,7 +53,6 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	    tp = strchr(sp, '\r');
 	if (!tp) break;
 	*tp = '\0';
-	printf("part: %s\n", sp);
 
 	switch (*sp)
 	{
@@ -133,7 +127,7 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 		}
 		sp = buf;
 		for (j = 0; j < gpsdata->satellites; j++) {
-		    sp = strchr(sp, ' ') + 1;
+		    sp = strchr(sp, ':') + 1;
 		    sscanf(sp, "%d %d %d %d", &i1, &i2, &i3, &i4);
 		    PRN[j] = i1;
 		    elevation[j] = i2;
@@ -159,7 +153,33 @@ int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
 	}
     }
 
-    return 0;
+    return gpsdata->latlon_stamp.changed 
+	|| gpsdata->altitude_stamp.changed 
+	|| gpsdata->speed_stamp.changed 
+	|| gpsdata->track_stamp.changed 
+	|| gpsdata->fix_quality_stamp.changed 
+	|| gpsdata->fix_quality_stamp.changed 
+	|| gpsdata->status_stamp.changed 
+	|| gpsdata->mode_stamp.changed 
+	|| gpsdata->satellite_stamp.changed 
+#ifdef PROCESS_PRWIZCH
+	|| gpsdata->signal_quality_stamp.changed
+#endif /* PROCESS_PRWIZCH */
+	;
+}
+
+
+int gpsd_query(int fd, char *requests, struct gps_data *gpsdata)
+/* query a gpsd instance for new data */
+{
+    char	buf[BUFSIZE];
+
+    if (write(fd, requests, strlen(requests)) <= 0)
+	return -1;
+    else if (read(fd, buf, sizeof(buf)-1) <= 0)
+	return -1;
+
+    return gpsd_unpack(buf, gpsdata);
 }
 
 #ifdef TESTMAIN
@@ -182,7 +202,7 @@ void gpscli_report(int errlevel, const char *fmt, ... )
     fputs(buf, stderr);
 }
 
-void data_dump(struct gps_data *collect)
+void data_dump(struct gps_data *collect, time_t now)
 {
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
@@ -190,81 +210,91 @@ void data_dump(struct gps_data *collect)
     printf("utc: %s\n", collect->utc);
     if (collect->latlon_stamp.refreshes)
     {
-	printf("lat/lon: %lf %lf\n", collect->latitude, collect->longitude);
-	printf("latlon_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("P: lat/lon: %lf %lf ", collect->latitude, collect->longitude);
+	printf("(lr=%ld, ttl=%d, refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->latlon_stamp.last_refresh,
 	       collect->latlon_stamp.time_to_live,
 	       collect->latlon_stamp.refreshes,
-	       collect->latlon_stamp.changed);
+	       collect->latlon_stamp.changed,
+	       FRESH(collect->latlon_stamp, now));
     }
     if (collect->altitude_stamp.refreshes)
     {
-	printf("altitude: %lf\n", collect->altitude);
-	printf("altitude_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("A: altitude: %lf ", collect->altitude);
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->altitude_stamp.last_refresh,
 	       collect->altitude_stamp.time_to_live,
 	       collect->altitude_stamp.refreshes,
-	       collect->altitude_stamp.changed);
+	       collect->altitude_stamp.changed,
+	       FRESH(collect->altitude_stamp, now));
     }
     if (collect->speed_stamp.refreshes)
     {
-	printf("speed: %lf\n", collect->speed);
-	printf("speed_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("V: speed: %lf ", collect->speed);
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->speed_stamp.last_refresh,
 	       collect->speed_stamp.time_to_live,
 	       collect->speed_stamp.refreshes,
-	       collect->speed_stamp.changed);
+	       collect->speed_stamp.changed,
+	       FRESH(collect->speed_stamp, now));
     }
     if (collect->track_stamp.refreshes)
     {
-	printf("track: %lf\n", collect->track);
-	printf("track_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("T: track: %lf ", collect->track);
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->track_stamp.last_refresh,
 	       collect->track_stamp.time_to_live,
 	       collect->track_stamp.refreshes,
-	       collect->track_stamp.changed);
+	       collect->track_stamp.changed,
+	       FRESH(collect->track_stamp, now));
     }
     if (collect->status_stamp.refreshes)
     {
-	printf("status: %d (%s)\n", 
+	printf("S: status: %d (%s) ", 
 	       collect->status,status_values[collect->status]);
-	printf("status_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->status_stamp.last_refresh,
 	       collect->status_stamp.time_to_live,
 	       collect->status_stamp.refreshes,
-	       collect->status_stamp.changed);
+	       collect->status_stamp.changed,
+	       FRESH(collect->status_stamp, now));
     }
     if (collect->mode_stamp.refreshes)
     {
-	printf("mode: %d (%s)\n", collect->mode, mode_values[collect->mode]);
-	printf("mode_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("M: mode: %d (%s) ", collect->mode, mode_values[collect->mode]);
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)",
 	       collect->mode_stamp.last_refresh,
 	       collect->mode_stamp.time_to_live,
 	       collect->mode_stamp.refreshes,
-	       collect->mode_stamp.changed);
+	       collect->mode_stamp.changed,
+	       FRESH(collect->mode_stamp, now));
     }
     if (collect->fix_quality_stamp.refreshes)
     {
-	printf("satellites: %d, pdop=%lf, hdop=%lf, vdop=%lf\n",
+	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
 	      collect->satellites_used, 
 	      collect->pdop, collect->hdop, collect->vdop);
-	printf("fix_quality_stamp: lr=%ld, ttl=%d. refreshes=%d, changed=%d\n",
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
 	       collect->fix_quality_stamp.last_refresh,
 	       collect->fix_quality_stamp.time_to_live,
 	       collect->fix_quality_stamp.refreshes,
-	       collect->fix_quality_stamp.changed);
+	       collect->fix_quality_stamp.changed,
+	       FRESH(collect->fix_quality_stamp, now));
     }
     if (collect->satellite_stamp.refreshes)
     {
 	int i;
 
 	printf("satellites in view: %d\n", collect->satellites);
-	for (i = 0; i < MAXCHANNELS; i++) {
-	    printf("    %2d: %2d %2d %d\n", collect->PRN[i]);
-	    printf("    %2d: %2d %2d %d\n", collect->elevation[i]);
-	    printf("    %2d: %2d %2d %d\n", collect->azimuth[i]);
-	    printf("    %2d: %2d %2d %d\n", collect->ss[i]);
+	for (i = 0; i < collect->satellites; i++) {
+	    printf("    %2.2d: %2.2d %3.3d %3.3d\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i]);
 	}
+	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	       collect->satellite_stamp.last_refresh,
+	       collect->satellite_stamp.time_to_live,
+	       collect->satellite_stamp.refreshes,
+	       collect->satellite_stamp.changed,
+	       FRESH(collect->satellite_stamp, now));
     }
 }
 
@@ -272,13 +302,16 @@ main(int argc, char *argv[])
 {
     struct gps_data collect;
     int fd;
+    char buf[BUFSIZE];
 
     memset(&collect, '\0', sizeof(collect));
     fd = gpsd_open(&collect, GPS_TIMEOUT, NULL, 0);
 
-    gpsd_query(fd, "PA\n", &collect);
+    strcpy(buf, argv[1]);
+    strcat(buf,"\n");
+    gpsd_query(fd, buf, &collect);
 
-    data_dump(&collect);
+    data_dump(&collect, time(NULL));
 
     gpsd_close(fd);
 }

@@ -338,7 +338,7 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (SEEN(session.gNMEAdata.satellite_view_stamp)) {
+    if (SEEN(session.gNMEAdata.satellite_stamp)) {
 	for (i = 0; i < 12; i++) {
 	    if (i < session.gNMEAdata.satellites) {
 		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],

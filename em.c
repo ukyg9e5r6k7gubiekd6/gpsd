@@ -311,7 +311,7 @@ static void handle1002(struct gpsd_t *session, unsigned short *p)
 #ifdef PROCESS_PRWIZCH
     REFRESH(session->gNMEAdata.signal_quality_stamp);
 #endif /* PROCESS_PRWIZCH */
-    REFRESH(session->gNMEAdata.satellite_view_stamp);
+    REFRESH(session->gNMEAdata.satellite_stamp);
     /* this is slightly wrong, we're not updating hdop/pdop/vdop here */
     REFRESH(session->gNMEAdata.fix_quality_stamp);
 }

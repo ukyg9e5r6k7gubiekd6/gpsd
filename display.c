@@ -142,7 +142,7 @@ void draw_graphics()
     double x, y;
     char buf[20];
 
-    if (SEEN(session.gNMEAdata.satellite_view_stamp)) {
+    if (SEEN(session.gNMEAdata.satellite_stamp)) {
 
 	i = min(width, height);
 

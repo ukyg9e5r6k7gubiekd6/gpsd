@@ -349,11 +349,11 @@ static int handle_request(int fd, char *buf, int buflen)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    sprintf(reply + strlen(reply),
-		    ",Y=%d ", sc);
+		    ",Y=%d:", sc);
 	    if (SEEN(session.gNMEAdata.satellite_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
-			sprintf(reply + strlen(reply),"%d %d %d %d", 
+			sprintf(reply + strlen(reply),"%d %d %d %d:", 
 				session.gNMEAdata.PRN[i], 
 				session.gNMEAdata.elevation[i],
 				session.gNMEAdata.azimuth[i],
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-	if (!need_gps && session.fdin != -1) {
+	if (!nowait && !need_gps && session.fdin != -1) {
 	    FD_CLR(session.fdin, &afds);
 	    session.fdin = -1;
 	    gps_deactivate(&session);

@@ -423,8 +423,8 @@ static void processGPGSV(char *sentence, struct gps_data *out)
      * and signal-strength 0 (but nonzero elevations).
      */
     if (sirf2_sane) {
-	out->satellite_view_stamp.changed = changed;
-	REFRESH(out->satellite_view_stamp);
+	out->satellite_stamp.changed = changed;
+	REFRESH(out->satellite_stamp);
     }
 }
 
