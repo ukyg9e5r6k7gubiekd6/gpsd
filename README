@@ -77,3 +77,13 @@ remco@emc.rvt.com
 Actually, some bugs may be mine too now. Sorry.
 
 Derrick J. Brashear, 2 January 2000
+
+Or mine.  I drastically rewrote this code to clean it up and extend it
+New features include:
+   * Documentation (what a concept!)
+   * Cleaned up, simplified command-line options
+   * It understands the GLL (Geograpic position - Latitude, Longitude)
+     sentence from NMEA 3.0. 
+   * It now parses both variants of the VTG sentence correctly.
+
+Eric S. Raymond, 11 Aug 2004
