@@ -35,10 +35,14 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+#
+# Latency profiling.
+#
+
 class uninstrumented:
     "Total times without instrumentation."
     name = "uninstrumented"
-    def header(self, fp):
+    def header(self, session, fp):
         fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -61,7 +65,7 @@ plot "%s" using 0:1 title "Total time" with impulses
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
-    def header(self, fp):
+    def header(self, session, fp):
         fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -111,7 +115,7 @@ class splitplot:
     sentences = ("GPGGA", "GPRMC", "GPGLL")
     def __init__(self):
         self.found = {}
-    def header(self, fp):
+    def header(self, session, fp):
         fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -173,10 +177,67 @@ plot \\
 
 formatters = (rawplot, splitplot, uninstrumented)
 
+def timeplot(await, fname, file, speed, threshold, title):
+    "Return a string containing a GNUplot script "
+    if fname:
+        for formatter in formatters:
+            if formatter.name == fname:
+                plotter = formatter()
+                break
+        else:
+            sys.stderr.write("gpsprof: no such formatter.\n")
+            sys.exit(1)
+    if file:
+        out = open(file, "w")
+    elif formatter == None:
+        out = sys.stdout
+    else:
+        out = tempfile.NamedTemporaryFile()
+
+    try:
+        session = gps.gps()
+    except socket.error:
+        sys.stderr.write("gpsprof: gpsd unreachable.\n")
+        sys.exit(1)
+    try:
+        if speed:
+            session.query("b=%d" % speed)
+            if session.baudrate != speed:
+                sys.stderr.write("gpsprof: baud rate change failed.\n")
+        session.query("w+bci")
+        if formatter != uninstrumented:
+            session.query("z+")
+        #session.set_raw_hook(lambda x: sys.stdout.write(x))
+        plotter.header(session, out)
+        baton = Baton("gpsprof: looking for fix", "done")
+        countdown = await
+        while countdown > 0:
+            session.poll()
+            baton.twirl()
+            # If timestamp is no good, skip it.
+            if session.utc == "?":
+                continue
+            if session.status and countdown == await:
+                sys.stderr.write("gathering samples...")
+            # We can get some funky artifacts at start of session
+            # apparently due to RS232 buffering effects. Ignore
+            # them.
+            if threshold and session.c_decode_time > session.cycle * threshold:
+                continue
+            if plotter.formatter(session, out):
+                countdown -= 1
+        baton.end()
+    finally:
+        session.query("w-z-")
+    out.flush()
+    command = plotter.plot(out.name, title, session)
+    del session
+    return (out, command)
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:o:rs:t:T:")
-        formatter = splitplot
+        formatter = "split"
         raw = False
         file = None
         speed = 0
@@ -186,12 +247,7 @@ if __name__ == '__main__':
         await = 100
         for (switch, val) in options:
             if (switch == '-f'):
-                for formatter in formatters:
-                    if formatter.name == val:
-                        break
-                else:
-                    sys.stderr.write("gpsprof: no such formatter.\n")
-                    sys.exit(1)
+                formatter = val
             elif (switch == '-m'):
                 threshold = int(val)
             elif (switch == '-n'):
@@ -211,58 +267,13 @@ if __name__ == '__main__':
                     "usage: gpsprof [-h] [-r] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-o file]\n")
                 sys.exit(0)
-        plotter = formatter()
-        if file:
-            out = open(file, "w")
-        elif raw:
-            out = sys.stdout
-        else:
-            out = tempfile.NamedTemporaryFile()
-
-        try:
-            session = gps.gps()
-        except socket.error:
-            sys.stderr.write("gpsprof: gpsd unreachable.\n")
-            sys.exit(0)
-        try:
-            if speed:
-                session.query("b=%d" % speed)
-                if session.baudrate != speed:
-                    sys.stderr.write("gpsprof: baud rate change failed.\n")
-            session.query("w+bci")
-            if formatter != uninstrumented:
-                session.query("z+")
-            #session.set_raw_hook(lambda x: sys.stdout.write(x))
-            plotter.header(out)
-            baton = Baton("gpsprof: looking for fix", "done")
-            countdown = await
-            while countdown > 0:
-                session.poll()
-                baton.twirl()
-                # If timestamp is no good, skip it.
-                if session.utc == "?":
-                    continue
-                if session.status and countdown == await:
-                    sys.stderr.write("gathering samples...")
-                # We can get some funky artifacts at start of session apparently
-                # due to RS232 buffering effects. Ignore them.
-                if threshold and session.c_decode_time > session.cycle * threshold:
-                    continue
-                if plotter.formatter(session, out):
-                    countdown -= 1
-            baton.end()
-        finally:
-            session.query("w-z-")
-
-        out.flush()
+        (out, gnuplot) = timeplot(await,formatter,file,speed,threshold,title)
         if not raw:
-            command = plotter.plot(out.name, title, session)
             if terminal:
-                command = "set terminal " + terminal + "\n" + command
+                gnuplot = "set terminal " + terminal + "\n" + gnuplot
             pfp = os.popen("gnuplot -persist", "w")
-            pfp.write(command)
+            pfp.write(gnuplot)
             pfp.close()
-        del session
         out.close()
     except KeyboardInterrupt:
         pass
