@@ -121,17 +121,6 @@ static int sirf_to_nmea(int ttyfd, int speed)
    return (sirf_write(ttyfd, msg));
 }
 
-/*
- * Handle the SiRF-II binary packet format.
- * 
- * SiRF message 2 (Measure Navigation Data Out) gives us everything we want
- * except PDOP, VDOP, and altitude with respect to MSL.  SiRF message 41
- * (Geodetic Navigation Information) adds MSL altitude, but many of its
- * other fields are garbage in firmware versions before 232.  So...we
- * use all the data from message 2 *except* altitude, which we get from 
- * message 41.
- */
-
 #define getb(off)	(buf[off])
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
@@ -160,50 +149,48 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-	if (!(session->driverstate & SIRF_GE_232)) {
-	    int mask = 0;
-	    /* position/velocity is bytes 1-18 */
-	    ecef_to_wgs84fix(&session->gpsdata.fix, 
-			getl(1), getl(5), getl(9),
-			getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
-	    /* WGS 84 geodesy parameters */
-	    /* fix status is byte 19 */
-	    navtype = getb(19);
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
-		session->gpsdata.status = STATUS_DGPS_FIX;
-	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gpsdata.status = STATUS_FIX;
-	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gpsdata.fix.mode = MODE_3D;
-	    else if (session->gpsdata.status)
-		session->gpsdata.fix.mode = MODE_2D;
-	    if (session->gpsdata.fix.mode == MODE_3D && (session->driverstate & SIRF_SEEN_41))
-		mask |= ALTITUDE_SET;
-	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
-	    /* byte 20 is HDOP, see below */
-	    /* byte 21 is "mode 2", not clear how to interpret that */ 
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
+	mask = 0;
+	/* position/velocity is bytes 1-18 */
+	ecef_to_wgs84fix(&session->gpsdata.fix, 
+		    getl(1), getl(5), getl(9),
+		    getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
+	/* WGS 84 geodesy parameters */
+	/* fix status is byte 19 */
+	navtype = getb(19);
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+	if (navtype & 0x80)
+	    session->gpsdata.status = STATUS_DGPS_FIX;
+	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	    session->gpsdata.status = STATUS_FIX;
+	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	    session->gpsdata.fix.mode = MODE_3D;
+	else if (session->gpsdata.status)
+	    session->gpsdata.fix.mode = MODE_2D;
+	if (session->gpsdata.fix.mode == MODE_3D)
+	    mask |= ALTITUDE_SET;
+	gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+		    navtype,session->gpsdata.status,session->gpsdata.fix.mode);
+	/* byte 20 is HDOP, see below */
+	/* byte 21 is "mode 2", not clear how to interpret that */ 
+	session->gpsdata.fix.time = session->gpsdata.sentence_time
+	    = gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
-	    session->time_seen |= TIME_SEEN_GPS_2;
-	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
-		ntpshm_put(session, session->gpsdata.fix.time);
+	session->time_seen |= TIME_SEEN_GPS_2;
+	if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
+	    ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 
-	    gpsd_binary_fix_dump(session, buf2);
-	    /* fix quality data */
-	    session->gpsdata.hdop = getb(20)/5.0;
-	    session->gpsdata.satellites_used = getb(28);
-	    for (i = 0; i < MAXCHANNELS; i++)
-		session->gpsdata.used[i] = getb(29+i);
-	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
-	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
-	    gpsd_report(3, "<= GPS: %s", buf2);
-	    return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
-	}
+	gpsd_binary_fix_dump(session, buf2);
+	/* fix quality data */
+	session->gpsdata.hdop = getb(20)/5.0;
+	session->gpsdata.satellites_used = getb(28);
+	for (i = 0; i < MAXCHANNELS; i++)
+	    session->gpsdata.used[i] = getb(29+i);
+	session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
+	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
+	gpsd_report(3, "<= GPS: %s", buf2);
+	return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 
     case 0x04:		/* Measured tracker data out */
 	/*
