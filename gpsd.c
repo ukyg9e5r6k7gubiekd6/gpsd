@@ -411,13 +411,12 @@ int main(int argc, char *argv[])
 	    int ssock;
 
 	    alen = sizeof(fsin);
-	    ssock = accept(msock, (struct sockaddr *) &fsin,
-			   &alen);
+	    ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
-		errexit("accept");
+		errlog("accept");
 
-	    FD_SET(ssock, &afds);
+	    else FD_SET(ssock, &afds);
 	}
 
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
@@ -588,7 +587,12 @@ static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
     return 1;
 }
 
-int errexit(char *s)
+void errlog(char *s)
+{
+    syslog(LOG_ERR, "%s: %s\n", s, strerror(errno));
+}
+
+void  errexit(char *s)
 {
     syslog(LOG_ERR, "%s: %s\n", s, strerror(errno));
     serial_close();
