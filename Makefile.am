@@ -62,6 +62,7 @@ libgps_la_SOURCES = \
 	libgps.c \
 	packet.c \
 	gpsutils.c \
+	geoid.c \
 	sirf.c \
 	report.c
 

@@ -5,6 +5,7 @@
  */
 
 #include <math.h>
+#include "gpsd.h"
 
 static double bilinear(double x1, double y1, double x2, double y2, double x, double y, double z11, double z12, double z21, double z22)
 {
@@ -16,7 +17,7 @@ static double bilinear(double x1, double y1, double x2, double y2, double x, dou
 
  delta=(y2-y1)*(x2-x1);
 
- return (z22*(y-y1)*(x-x1)+z21*(y2-y)*(x-x1)+z12*(y-y1)*(x2-x)+z11*(y2-y)*(x2-x))/delta;
+ return (z22*(y-y1)*(x-x1)+z12*(y2-y)*(x-x1)+z21*(y-y1)*(x2-x)+z11*(y2-y)*(x2-x))/delta;
 }
 
 double wgs84_separation(double lat, double lon)
@@ -63,6 +64,7 @@ double wgs84_separation(double lat, double lon)
 	);
 }
 	 
+#ifdef TESTMAIN
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -95,4 +97,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
+#endif /* TESTMAIN */

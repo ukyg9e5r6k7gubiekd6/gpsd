@@ -92,6 +92,7 @@ struct gps_type_t fv18 = {
     nmea_parse_input,	/* how to interpret a packet */
     nmea_write_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
+    NULL,		/* no mode switcher */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };

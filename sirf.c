@@ -106,7 +106,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
  * 
  * SiRF message 2 (Measure Navigation Data Out) gives us everything we want
  * except PDOP, VDOP, and altitude with respect to MSL.  SiRF message 41
- * (Geodetic Navigation Information) adds MSLfix.altitude, but many of its
+ * (Geodetic Navigation Information) adds MSL altitude, but many of its
  * other fields are garbage in firmware versions before 232.  So...we
  * use all the data from message 2 *except* altitude, which we get from 
  * message 41.
@@ -166,8 +166,11 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
 	    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
 	    h = p / cos(phi) - n;
+	    gpsd_report(4, "Height above ellipsoid: %f\n", h);
 	    session->gpsdata.fix.latitude = phi * RAD_2_DEG;
 	    session->gpsdata.fix.longitude = lambda * RAD_2_DEG;
+	    gpsd_report(4, "Height with interpolated correction: %f\n", 
+			h+wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude));
 	    /* velocity computation */
 	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
 	    veast = -vx*sin(lambda)+vy*cos(lambda);
@@ -400,7 +403,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /* skip 4 bytes of altitude from ellipsoid */
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
-	session->gpsdata.fix.altitude = getl(31)*1e-2;
+	session->gpsdata.fix.altitude = getl(35)*1e-2;
+	gpsd_report(4, "Height above MSL: %f\n", session->gpsdata.fix.altitude);
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
 	    session->gpsdata.fix.speed = getw(36)*1e-2;

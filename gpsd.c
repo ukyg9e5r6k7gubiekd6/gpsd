@@ -900,8 +900,8 @@ int main(int argc, char *argv[])
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 		/* some listeners may be in watcher mode */
 		if (IS_WATCHER(cfd)) {
-		    device->poll_times[cfd] = timestamp();
 		    char cmds[4] = ""; 
+		    device->poll_times[cfd] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 			if (changed & LATLON_SET)
 			    strcat(cmds, "o");

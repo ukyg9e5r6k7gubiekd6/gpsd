@@ -34,27 +34,7 @@ the receive FIFO.  You'll have to experiment.
 
 ** Supply geoidal separation for SiRF packet 2
 
-Peter H. Dana <pdana@pdana.com>:
-> 	The classic bi-linear interpolation method is published in Table 5.3
-> of DMA TR8350.2 Supplement B (page 5.3)
-> 
-> Np(lat, lon) = a0 +a1*X + a2*Y +a3*X*Y
-> 
-> a0 = N1
-> a1 = N2-N1
-> a2 = N4-N1
-> a3=N1+N3-N2-N4
-> 
-> X= (lon-lon1)/(lon2-lon1)
-> Y = (lat-lat1)/(lat2-lat1)
-> Whre 
-> N1 (lat1, lon1) , N2 (lat1, lon2), N3( lat2,lon2), N4 (lat2, lon1) are known
-> geoid heights 
-> 
-> Rather than deal with interpolation from a table, most folks use the EGM96
-> coefficients and the formulas for direct computation of N at any point shown
-> in NIMA TR8350.2
-> http://earth-info.nga.mil/GandG/tr8350_2.html
+It's there for testing now.
 
 ** Hotplug interface problems
 
