@@ -290,6 +290,29 @@ static void handle1003(unsigned short *p)
     }
 }
 
+static void handle1005(unsigned short *p)
+{
+  int i;
+  int numcorrections = p[O(12)];
+#if 1
+  fprintf(stderr, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
+  fprintf(stderr, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
+  fprintf(stderr, "Station ID: %d\n", p[O(10)]);
+  fprintf(stderr, "Age of last correction in seconds: %d\n", p[O(11)]);
+  fprintf(stderr, "Number of corrections: %d\n", p[O(12)]);
+  for (i = 0; i < numcorrections; i++) {
+    fprintf(stderr, "Sat%02d:", p[O(13+i)] & 0x3f);
+    fprintf(stderr, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
+    fprintf(stderr, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
+    fprintf(stderr, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
+    fprintf(stderr, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
+    fprintf(stderr, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
+    fprintf(stderr, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
+    fprintf(stderr, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+  }
+#endif
+}
+
 static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set * nmea_fds)
 {
     unsigned char buf[BUFSIZE];
@@ -387,7 +410,10 @@ static void analyze(struct header *h, unsigned short *p, fd_set * afds, fd_set *
 		i++;
 	    }
 	    nmea = 1003;
-	    break;
+	    break;	
+	case 1005:
+	    handle1005(p);
+	    break;	
 	}
     }
     if (nmea > 0) {

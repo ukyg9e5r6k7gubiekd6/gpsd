@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
       char hn[256];
       gethostname(hn, sizeof(hn));
 
-      sprintf(buf, "HELO %s gpsd %s+dgps-shadow@dementia.org", hn, VERSION);
+      sprintf(buf, "HELO %s gpsd 0.99\r\nB", hn, VERSION);
       write(dsock, buf, strlen(buf));
       FD_SET(dsock, &afds);
     }
@@ -294,8 +294,8 @@ int main(int argc, char *argv[])
 	  int rtcmbytes;
 	  rtcmbytes = read(dsock, buf, BUFSIZE);
 	  fprintf(stderr, "read %d from DGPS service\n", rtcmbytes);
-	  if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
-	    em_send_rtcm(buf, rtcmbytes);
+	  //if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
+	  //em_send_rtcm(buf, rtcmbytes);
 	}
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;
