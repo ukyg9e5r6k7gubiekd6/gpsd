@@ -126,7 +126,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		REFRESH(gpsdata->track_stamp);
 		break;
 	    case 'U':
-		sscanf(sp, "F=%lf", &gpsdata->climb);
+		sscanf(sp, "U=%lf", &d1);
 		gpsdata->climb_stamp.changed = (gpsdata->climb != d1);
 		gpsdata->climb = d1;
 		REFRESH(gpsdata->climb_stamp);
