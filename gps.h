@@ -94,6 +94,9 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
     struct life_t satellite_stamp;
 
+    /* what type gpsd thinks the device is */
+    char	*gps_id;	/* only valid if non-null. */
+
 #ifdef PROFILING
     /* profiling data for last sentence */
     int profiling;		/* profiling enabled? */
@@ -111,19 +114,23 @@ struct gps_data_t {
     int baudrate, stopbits;	/* RS232 link paramters */
     int cycle;			/* refresh cycle time in seconds */
 
-    /* track which sentences have been seen */
-    int seen_sentences;
+    /* these members are private */
+    int gps_fd;			/* socket or file descriptor to GPS */
+    void (*raw_hook)(char *buf);/* Raw-mode hook for GPS data. */
+    int seen_sentences;		/* track which sentences have been seen */
 #define GPRMC	0x01
 #define GPGGA	0x02
 #define GPGLL	0x04
 #define GPVTG	0x08
 #define GPGSA	0x10
 #define GPGSV	0x20
-
-    /* these members are private */
-    int gps_fd;			/* socket or file descriptor to GPS */
-    void (*raw_hook)(char *buf);/* Raw-mode hook for GPS data. */
 };
+
+struct map_t {
+    const char *name; 
+    const int value;
+}; 
+extern struct map_t *sentence_map;
 
 struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);

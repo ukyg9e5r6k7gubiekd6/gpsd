@@ -39,8 +39,10 @@ class uninstrumented:
     "Total times without instrumentation."
     name = "uninstrumented"
     def header(self, fp):
-        fp.write("# Uninstrumented total latency, %s, %dN%d, cycle %ds\n" % \
-                 (title, session.baudrate, session.stopbits, session.cycle))
+        fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
+                 (title,
+                  session.gps_id, session.baudrate,
+                  session.stopbits, session.cycle))
     def formatter(self, session, fp):
         fp.write("%2.6lf\n" % (time.time() - gps.isotime(session.utc),))
         return True
@@ -48,19 +50,22 @@ class uninstrumented:
         fmt = '''
 set autoscale
 set key below
-set key title "Uninstrumented total latency, %s, %dN%d, cycle %ds"
+set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
 plot "%s" using 0:1 title "Total time" with impulses
 '''
         return fmt % (title,
-                      session.baudrate, session.stopbits, session.cycle,
+                      session.gps_id, session.baudrate,
+                      session.stopbits, session.cycle,
                       file)
 
 class rawplot:
     "All measurement, no deductions."
     name = "raw"
     def header(self, fp):
-        fp.write("# Raw latency data, %s, %dN%d, cycle %ds\n" % \
-                 (title, session.baudrate, session.stopbits, session.cycle))
+        fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
+                 (title,
+                  session.gps_id, session.baudrate,
+                  session.stopbits, session.cycle))
         fp.write("#\t")
         for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
             fp.write("%8s\t" % hn)
@@ -85,7 +90,7 @@ class rawplot:
         fmt = '''
 set autoscale
 set key below
-set key title "Raw latency data, %s, %dN%d, cycle %ds"
+set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \
      "%s" using 0:8 title "D2 = Client decode time" with impulses, \
      "%s" using 0:7 title "T2 =     TCP/IP latency" with impulses, \
@@ -96,7 +101,8 @@ plot \
      "%s" using 0:2 title "E1 =        GPS latency" with impulses
 '''
         return fmt % (title,
-                      session.baudrate, session.stopbits, session.cycle,
+                      session.gps_id, session.baudrate,
+                      session.stopbits, session.cycle,
                       file, file, file, file, file, file, file)
 
 class splitplot:
@@ -106,8 +112,10 @@ class splitplot:
     def __init__(self):
         self.found = {}
     def header(self, fp):
-        fp.write("# Split latency data, %s, %dN%d, cycle %ds\n" % \
-                 (title, session.baudrate, session.stopbits, session.cycle))
+        fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
+                 (title,
+                  session.gps_id, session.baudrate,
+                  session.stopbits, session.cycle))
         fp.write("#")
         for s in splitplot.sentences:
             fp.write("%8s\t" % s)
@@ -138,7 +146,7 @@ class splitplot:
         fixed = '''
 set autoscale
 set key below
-set key title "Filtered latency data, %s, %dN%d, cycle %ds"
+set key title "Filtered latency data, %s, %s, %dN%d, cycle %ds"
 plot \\
      "%s" using 0:%d title "D2 = Client decode time" with impulses, \
      "%s" using 0:%d title "T2 = TCP/IP latency" with impulses, \
@@ -149,7 +157,8 @@ plot \\
 '''
         sc = len(splitplot.sentences)
         fmt = fixed % (title,
-                       session.baudrate, session.stopbits, session.cycle,
+                       session.gps_id, session.baudrate,
+                       session.stopbits, session.cycle,
                        file, sc+6,
                        file, sc+5,
                        file, sc+4,
@@ -220,7 +229,7 @@ if __name__ == '__main__':
                 session.query("b=%d" % speed)
                 if session.baudrate != speed:
                     sys.stderr.write("gpsprof: baud rate change failed.\n")
-            session.query("w+bc")
+            session.query("w+bci")
             if formatter != uninstrumented:
                 session.query("z+")
             #session.set_raw_hook(lambda x: sys.stdout.write(x))

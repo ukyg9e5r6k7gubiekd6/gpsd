@@ -43,7 +43,7 @@ gpsd_LDADD = $(LIBM) libgps.la -lm
 #
 # Build shared library
 #
-libgps_la_LDFLAGS = -version-number 5:0:0
+libgps_la_LDFLAGS = -version-number 6:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgps_la_SOURCES = \

@@ -157,7 +157,7 @@ static int sirf_validate_buffer(char *buf, size_t n)
 
 struct gps_type_t sirfII = {
     's', 		/* select explicitly with -T s */
-    "SiRF-II",		/* full name of type */
+    "SiRF-II NMEA",	/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirf_initializer,		/* no initialization */
     sirf_validate_buffer,	/* how to check that we have good data */

@@ -74,6 +74,8 @@ class gpsdata:
 	self.satellite_stamp = gps.timestamp(now)
         self.await = self.parts = 0
 
+        self.gps_id = None
+
         self.profiling = False
         self.tag = ""
         self.length = 0
@@ -214,6 +216,8 @@ class gps(gpsdata):
 	      self.cycle = int(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
+	    elif cmd in ('I', 'i'):
+	      self.gps_id = data
 	    elif cmd in ('M', 'm'):
 	      i1 = int(data)
 	      self.mode_stamp.changed = (self.mode != i1)

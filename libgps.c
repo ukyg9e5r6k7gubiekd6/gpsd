@@ -36,6 +36,8 @@ int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     int retval = close(gpsdata->gps_fd);
+    if (gpsdata->gps_id)
+	free(gpsdata->gps_id);
     free(gpsdata);
     return retval;
 }
@@ -78,6 +80,10 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    case 'D':
 		strcpy(gpsdata->utc, sp+2);
 		break;
+	    case 'I':
+		if (gpsdata->gps_id)
+		    free(gpsdata->gps_id);
+		gpsdata->gps_id = strdup(sp+2);
 	    case 'M':
 		i1 = atoi(sp+2);
 		gpsdata->mode_stamp.changed = (gpsdata->mode != i1);

@@ -236,6 +236,9 @@ static int handle_request(int fd, char *buf, int buflen)
 	    } else
 		strcpy(phrase, ",D=?");
 	    break;
+	case 'I':
+	    sprintf(phrase, ",I=%s", session->device_type->typename);
+	    break;
 	case 'L':
 	    sprintf(phrase, ",l=1 " VERSION " abcdmpqrstvwxy");
 	    break;

@@ -38,8 +38,8 @@ and speedometer</refpurpose>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
-      <arg choice='opt'>--speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
-      <arg choice='opt'>--altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
+      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
+      <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
 </cmdsynopsis>
 <cmdsynopsis>
   <command>xgpsspeed</command>  
@@ -47,7 +47,7 @@ and speedometer</refpurpose>
       <arg choice='opt'>-nc <replaceable>X-color</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
-      <arg choice='opt'>--speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
+      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
 </cmdsynopsis>
 
@@ -208,6 +208,12 @@ part will vary and may be zero.</para></listitem>
 </varlistentry>
 
 <varlistentry>
+<term>i</term>
+<listitem><para>Returns a text string identifying the GPS.  The string
+may contain spaces and is terminated by CR-LF.</para></listitem>
+</varlistentry>
+
+<varlistentry>
 <term>l</term>
 <listitem><para>Returns three fields: a protocol revision number,
 the gpsd version, and a list of accepted request letters.</para></listitem>
@@ -348,13 +354,13 @@ server to get data from; a colon-separated suffix is taken as a port
 number.  The misfeature of previous versions that allowed it to
 direct-connect to the serial device has been removed.</para>
 
-<para>The --speedunits option can be used to set the speed units for
+<para>The -speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
 is miles per hour.  This option can also be set as the X resource 
 'speedunits'.</para>
 
-<para>The --altunits option can be used to set the altitude units for
+<para>The -altunits option can be used to set the altitude units for
 display; follow the keyword with 'meters' or 'feet'.  The default
 is feet.  This option can also be set as the X resource 'altunits'.</para>
 
@@ -367,7 +373,7 @@ optional argument as for <application>gps</application>, or a -v
 option to dump the package version and exit.  Additionally, it accepts
 -rv (reverse video) and -nc (needle color) options.</para>
 
-<para>The --speedunits option can be used to set the speed units for
+<para>The -speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
 is miles per hour.   This option can also be set as the X resource 
