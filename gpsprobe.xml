@@ -40,7 +40,9 @@ information, including:</para>
 <application>gpsprobe</application> generates a scattergram from them
 and plots a probable-error circle.  This data is only meaningful if
 the GPS is held stationary while <application>gpsprobe</application>
-is running.</para>
+is running.  Use it in combination with
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+to get a feel for the accuracy of your GPS.</para>
 
 <para>The report and scattergram is generated as a
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>
