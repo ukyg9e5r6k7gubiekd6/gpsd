@@ -134,6 +134,29 @@ void gpscli_report(int errlevel, const char *fmt, ... )
 	fputs(buf, stderr);
 }
 
+static void errexit(const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    strcpy(buf, "gpsd: ");
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+    strcat(buf, ": ");
+    strcat(buf, strerror(errno));
+    strcat(buf, "\n");
+
+    gpscli_report(0, buf);
+    gps_wrap(&session);
+    exit(2);
+}
+
 static void usage()
 {
 	    fputs("usage:  gpsd [options] \n\
@@ -388,9 +411,9 @@ static void raw_hook(char *sentence)
     for (fd = 0; fd < getdtablesize(); fd++) {
 	/* copy raw NMEA sentences from GPS */
 	if (FD_ISSET(fd, &nmea_fds)) {
-	    gpscli_report(1, "=> client: %s", sentence);
+	    gpscli_report(1, "=> client: %s\n", sentence);
 	    if (write(fd, sentence, strlen(sentence)) < 0) {
-		gpscli_report(1, "Raw write %s", strerror(errno));
+		gpscli_report(2, "Raw write %s\n", strerror(errno));
 		FD_CLR(fd, &afds);
 		FD_CLR(fd, &nmea_fds);
 	    }
@@ -426,13 +449,6 @@ static void raw_hook(char *sentence)
 	    }
 	}
     }
-}
-
-static void errexit(char *s)
-{
-    gpscli_report(0, "%s: %s\n", s, strerror(errno));
-    gps_wrap(&session);
-    exit(2);
 }
 
 int main(int argc, char *argv[])
@@ -585,7 +601,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(session.fdin, &afds);
 	    gps_deactivate(&session);
 	    if (gps_activate(&session) < 0)
-		errexit("exiting - reopen of GPS failed");
+		errexit("exiting - reopen of GPS at %s failed", session.gps_device);
 	    FD_SET(session.fdin, &afds);
 	}
 
@@ -599,13 +615,13 @@ int main(int argc, char *argv[])
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
-	    if (FD_ISSET(fd, &rfds)) {
+	    if (fd != msock && FD_ISSET(fd, &rfds)) {
 		char buf[BUFSIZE];
 		int buflen;
 
 		if (session.fdin == -1) {
 		    if (gps_activate(&session) < 0)
-			errexit("exiting - open of GPS failed");
+			errexit("exiting - open of GPS at %s failed", session.gps_device);
 		    FD_SET(session.fdin, &afds);
 		}
 		buflen = read(fd, buf, sizeof(buf) - 1);
@@ -621,7 +637,7 @@ int main(int argc, char *argv[])
 		    FD_CLR(fd, &afds);
 		}
 	    }
-	    if (fd != session.fdin && FD_ISSET(fd, &afds)) {
+	    if (fd != session.fdin && fd != msock && FD_ISSET(fd, &afds)) {
 		need_gps++;
 	    }
 	}
