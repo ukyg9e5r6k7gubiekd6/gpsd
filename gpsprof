@@ -299,7 +299,7 @@ plot \\
                    (i+1, self.sentences[i])
         res = fmt[:-4] + "\n"
         res += self.header(session)
-        for dummy in range(sc+7):
+        for dummy in range(sc+6):
             res += self.data(session) + "e\n"
         return res
 
