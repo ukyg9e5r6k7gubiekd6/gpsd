@@ -41,6 +41,27 @@ NMEA_MAX = 82
 
 GPSD_PORT = 2947
 
+class gpstimings:
+    def __init__(self):
+        self.tag = ""
+        self.length = 0
+        self.gps_time = 0.0
+        self.d_recv_time = 0
+        self.d_decode_time = 0
+        self.emit_time = 0
+        self.poll_time = 0
+        self.c_recv_time = 0
+        self.c_decode_time = 0
+    def collect(self, tag, length, gps_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
+        self.tag = tag
+        self.length = int(length)
+        self.gps_time = float(gps_time)
+        self.d_xmit_time = float(xmit_time)
+        self.d_recv_time = float(recv_time)
+        self.d_decode_time = float(decode_time)
+        self.poll_time = float(poll_time)
+        self.emit_time = float(emit_time)
+
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
 
@@ -82,15 +103,7 @@ class gpsdata:
         self.gps_id = None
         self.driver_mode = 0
         self.profiling = False
-        self.tag = ""
-        self.length = 0
-        self.gps_time = 0.0
-        self.d_recv_time = 0
-        self.d_decode_time = 0
-        self.emit_time = 0
-        self.poll_time = 0
-        self.c_recv_time = 0
-        self.c_decode_time = 0
+        self.timings = gpstimings()
         self.baudrate = 0
         self.stopbits = 0
         self.cycle = 0
@@ -282,14 +295,7 @@ class gps(gpsdata):
 	    elif cmd in ('Z', 'z'):
               self.profiling = (data[0] == '1')
             elif cmd == '$':
-                  (self.tag, length, gps_time, xmit_time, recv_time, decode_time, poll_time, emit_time) = data.split()
-                  self.length = int(length)
-                  self.gps_time = float(gps_time)
-                  self.d_xmit_time = float(xmit_time)
-                  self.d_recv_time = float(recv_time)
-                  self.d_decode_time = float(decode_time)
-                  self.poll_time = float(poll_time)
-                  self.emit_time = float(emit_time)
+                self.timings.collect(*data.split())
 	if self.raw_hook:
 	    self.raw_hook(buf);
 
@@ -300,12 +306,12 @@ class gps(gpsdata):
             return -1
         if self.verbose:
             sys.stderr.write("GPS DATA %s\n" % repr(data))
-        self.c_recv_time = time.time()
+        self.timings.c_recv_time = time.time()
 	self.__unpack(data)
         if self.gps_time:
-            self.c_decode_time = time.time()
-            self.c_recv_time -= self.gps_time
-            self.c_decode_time -= self.gps_time
+            basetime = self.gps_time - tzoffset()
+            self.timings.c_decode_time = time.time() - basetime
+            self.timings.c_recv_time -= basetime
         return 0
 
     def query(self, commands):
@@ -376,6 +382,12 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     if lon1 < lon2: dx *= -1
     return (dx, dy)
 
+def tzoffset():
+    if time.daylight and time.localtime().tm_isdst:
+        return time.altzone
+    else:
+        return time.timezone
+
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix local time."
     if type(s) == type(1):
@@ -397,10 +409,7 @@ def isotime(s):
         unpacked = time.strptime(date, "%Y-%m-%dT%H:%M:%S")
         seconds = time.mktime(unpacked)
         if gmt:
-            if time.daylight and time.localtime().tm_isdst:
-                seconds -= time.altzone
-            else:
-                seconds -= time.timezone
+            seconds -= tzoffset()
         return seconds + float("0." + msec)
     else:
         raise TypeError

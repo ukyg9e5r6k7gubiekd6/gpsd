@@ -150,15 +150,15 @@ class rawplot:
     def formatter(self, session):
         if session.gps_time:
             self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
-              % (session.length,
-                 session.d_xmit_time, 
-                 session.d_recv_time,
-                 session.d_decode_time,
-                 session.poll_time,
-                 session.emit_time,
-                 session.c_recv_time,
-                 session.c_decode_time,
-                 session.tag))
+              % (session.timings.length,
+                 session.timings.d_xmit_time, 
+                 session.timings.d_recv_time,
+                 session.timings.d_decode_time,
+                 session.timings.poll_time,
+                 session.timings.emit_time,
+                 session.timings.c_recv_time,
+                 session.timings.c_decode_time,
+                 session.timings.tag))
             return True
         else:
             return False
@@ -203,22 +203,22 @@ class splitplot:
             self.fp.write("---------\t")
         self.fp.write("--------\n")
     def formatter(self, session):
-        if session.gps_time:
+        if session.timings.gps_time:
             for s in splitplot.sentences:
-                if s == session.tag:
-                    self.fp.write("%2.6f\t"% session.d_xmit_time)
+                if s == session.timings.tag:
+                    self.fp.write("%2.6f\t"% session.timings.d_xmit_time)
                     self.found[s] = True
                 else:
                     self.fp.write("-       \t")
             self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
-                     % (session.d_recv_time,
-                        session.d_decode_time,
-                        session.poll_time,
-                        session.emit_time,
-                        session.c_recv_time,
-                        session.c_decode_time,
-                        session.length,
-                        session.tag))
+                     % (session.timings.d_recv_time,
+                        session.timings.d_decode_time,
+                        session.timings.poll_time,
+                        session.timings.emit_time,
+                        session.timings.c_recv_time,
+                        session.timings.c_decode_time,
+                        session.timings.length,
+                        session.timings.tag))
             return True
         else:
             return False
@@ -298,7 +298,7 @@ def plotframe(await, fname, file, speed, threshold, title):
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.
-            if threshold and session.c_decode_time > session.cycle * threshold:
+            if threshold and session.timings.c_decode_time > session.cycle * threshold:
                 continue
             if plotter.formatter(session):
                 countdown -= 1
