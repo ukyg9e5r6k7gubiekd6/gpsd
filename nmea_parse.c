@@ -382,12 +382,18 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
-    for (fldnum = 4; fldnum < count; out->satellites++) {
-	out->PRN[out->satellites] = atoi(field[fldnum++]);
-	out->elevation[out->satellites] = atoi(field[fldnum++]);
-	out->azimuth[out->satellites] = atoi(field[fldnum++]);
-	out->ss[out->satellites] = atoi(field[fldnum++]);
+    for (n = 0, fldnum = 4; fldnum < count;) {
+	out->PRN[n]       = atoi(field[fldnum++]);
+	out->elevation[n] = atoi(field[fldnum++]);
+	out->azimuth[n]   = atoi(field[fldnum++]);
+	out->ss[n]        = atoi(field[fldnum++]);
+	if (out->PRN[n])
+	    n++;
     }
+    out->satellites = atoi(field[3]);
+    if (n != out->satellites)
+	gpsd_report(0, "GPGSV field 3 value of %d != actual count %d\n",
+		    out->satellites, n);
 
     /* not valid data until we've seen a complete set of parts */
     if (out->part < out->await) {
