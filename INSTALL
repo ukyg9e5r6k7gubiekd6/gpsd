@@ -34,9 +34,7 @@ gpsd, xgps, and xgpsspeed will be built. Copy the app-defaults files
 xgps.ad and xgpsspeed.ad to your home directory or to the system-wide X
 app-defaults directory.
 
-4. Start gpsd.  It will not need any options except in the rare case
-that you have to specify a driver.  If you installed from an RPM, gpsd
-will be started for you automatically at boot time.
+4. Start gpsd.  It should not need any options.
 
 5. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
 device it will query.  If you need to change the device, use 'f='
