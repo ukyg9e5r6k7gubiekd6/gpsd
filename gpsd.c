@@ -215,7 +215,7 @@ static int handle_dgps()
     return rtcmbytes;
 }
 
-void deactivate()
+static void deactivate()
 {
     gNMEAdata.fdin = -1;
     gNMEAdata.fdout = -1;
@@ -225,6 +225,19 @@ void deactivate()
     syslog(LOG_NOTICE, "Closed gps");
     gNMEAdata.mode = 1;
     gNMEAdata.status = 0;
+}
+
+static int activate()
+{
+    int input;
+
+    if ((input = serial_open()) < 0)
+	errexit("serial open: ");
+    syslog(LOG_NOTICE, "Opened gps");
+    gNMEAdata.fdin = input;
+    gNMEAdata.fdout = input;
+
+    return input;
 }
 
 int main(int argc, char *argv[])
@@ -371,7 +384,7 @@ int main(int argc, char *argv[])
     while (1) {
 	struct timeval tv;
 
-	tv.tv_sec = 10;
+	tv.tv_sec = 1;
 	tv.tv_usec = 0;
 
         memcpy((char *)&rfds, (char *)&afds, sizeof(rfds));
@@ -380,6 +393,15 @@ int main(int argc, char *argv[])
 	    if (errno == EINTR)
 		continue;
 	    errexit("select");
+	}
+
+	need_gps = 0;
+
+	if (reopen && input != -1) {
+	    FD_CLR(input, &afds);
+	    deactivate();
+	    input = activate();
+	    FD_SET(input, &afds);
 	}
 
 	if (FD_ISSET(dsock, &rfds))
@@ -397,12 +419,14 @@ int main(int argc, char *argv[])
 
 	    FD_SET(ssock, &afds);
 	}
+
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
 	    if (device_type == DEVICE_EARTHMATEb) 
 		handle_EMinput(input, &afds, &nmea_fds);
 	    else
 		handle_input(input, &afds, &nmea_fds);
 	}
+
 	if (gNMEAdata.status > 0) 
 	    fixcnt++;
 	
@@ -414,27 +438,12 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-	need_gps = 0;
-	if (reopen) {
-	    FD_CLR(input, &afds);
-	    input = -1;
-	    deactivate();
-/*
- * no need to do that!
-	    need_gps++;
-*/
-	}
-
 	for (fd = 0; fd < nfds; fd++) {
 	    if (fd != msock && fd != input && fd != dsock && 
 		FD_ISSET(fd, &rfds)) {
 		if (input == -1) {
-		    if ((input = serial_open()) < 0)
-			errexit("serial open: ");
-		    syslog(LOG_NOTICE, "Opened gps");
+		    input = activate();
 		    FD_SET(input, &afds);
-		    gNMEAdata.fdin = input;
-		    gNMEAdata.fdout = input;
 		}
 		if (handle_request(fd, &nmea_fds) == 0) {
 		    (void) close(fd);
