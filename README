@@ -6,55 +6,45 @@ Remco Treffkorn, I am releasing it under the terms and conditions of the
 
 	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
 
-or later. A copy of which is included in the file COPYING.
-
-
-
+or later. a copy of which is included in the file COPYING.
 
 GENERAL
 =======
 
-gpsd is a user land daemon acting as a liason between a gps or
+gpsd is a userland daemon acting as a liason between a GPS or
 Loran-C receiver and clients. The receiver is expected to generate
 position information as NMEA-0183 sentences, or Rockwell binary format,
 although that can be changed.
 
 gpsd listens on port 2947 for clients requesting position, time,
-velocity or altitude information.
-
-gpsd can take information from the gps and translate it into
-something easier to understand for clients.
+velocity or altitude information.  gpsd can take information from the
+GPS and translate it into something easier to understand for clients.
 
 There is a GPS tester included. It is called "gps". It simply connects
-to a GPS and displays your latitude, longitude, altitude, and the signal
-quality from visible satellites.  When querying NMEA-compliant GPSes, it
+to the daemon and displays your latitude, longitude, altitude, and the
+signal quality from visible satellites.  When the GPS emits GSV, it
 will show a diagram of satellites in their current position in the sky.
-It uses the same library code as gpsd.
 
-gpsd is tested with DeLorme's TripMate and EarthMate; also with Garmin units;
-also with the BU-303 USB GPS sold as the NaviLock, Globalsat, and Hyperdata.
-Note that the PL2303 USB serial driver used with the BU-2303 seems
-to have been broken sometime late in the 2.4.x series of Linux kernels
-and was not fixed until 2.6.7.  If in doubt, upgrade.
+The gpsprobe program queries GPSes for their capabilities and generates
+a gnuplot recipe for an error scattergram to standard outout.
 
 There is a project site for gpsd at <http://www.berlios/gpsd/>.
-Look there for updates, news, and project mailing lists.
+Look there for updates, news, and project mailing lists.  See that
+website for a list of GPS units known to be compatible.
 
 CREDITS
 =======
 
-nmea_parse.c is modeled after code seen in gpstrans-0.31b by
-Carsten Tschach.
+Remco Treffkorn designed and originated the code.
 
-Thanks to Bob Lorenzini <hwm@netcom.com> for his testing and feedback.
+Carsten Tschach's gpstrans-0.31b code was the original model for nmea_parse.c.
 
-Thanks goes to Brook Milligan <brook@trillium.NMSU.Edu> for his
-efforts to combine gpsd and gpsclient into one package.
-He also changed the configuration method from Imake to GNU
-autoconf. This made it easy to port the code to YOUR particular
-platform.
+Bob Lorenzini <hwm@netcom.com> provided testing and feedback.
 
-Derrick J Brashear <shadow@dementia.org> (KB3EGH) added code for the
+Brook Milligan <brook@trillium.NMSU.Edu> combined gpsd and gpsclient
+into one package and autoconfiscated it.
+
+Derrick J. Brashear <shadow@dementia.org> (KB3EGH) added code for the
 EarthMate DeLame. He also added "incredibly gross code to output
 NMEA sentences" (his own words :-) He also did the first cut at
 DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html), 
@@ -63,18 +53,8 @@ for the Earthmate.
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
-Be advised: any bugs in this code are mine, and mine only ;-)
-
-This is as it stands today, February 05 2002.
-
-remco@emc.rvt.com
-
-Actually, some bugs may be mine too now. Sorry.
-
-Derrick J. Brashear, 2 January 2000
-
-Or mine.  I drastically rewrote this code to clean it up and extend it.
-New features include:
+Eric S. Raymond drastically rewrote this code to clean it up and extend it.
+His new features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
    * It now understands the GLL (Geographic position - Latitude, Longitude)
@@ -92,7 +72,7 @@ New features include:
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code this program uses can now be directly linked as a
-     library, libgps(3).
+     library, libgpsd(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
@@ -101,5 +81,5 @@ New features include:
      are available.
    * C and Python libraries are available to encapsulate the client side of
      querying gpsd.
-
-Eric S. Raymond, 23 Aug 2004
+   * New gpsprobe program probes the capabilities of GPSes and generates
+     error scrattergrams from fixes.
