@@ -39,7 +39,8 @@ class uninstrumented:
     "Total times without instrumentation."
     name = "uninstrumented"
     def header(self, fp):
-        pass
+        fp.write("# Uninstrumented total latency, %s, %dN%d, cycle %ds\n" % \
+                 (title, session.baudrate, session.stopbits, session.cycle))
     def formatter(self, session, fp):
         fp.write("%2.6lf\n" % (time.time() - gps.isotime(session.utc),))
         return True
@@ -58,6 +59,8 @@ class rawplot:
     "All measurement, no deductions."
     name = "raw"
     def header(self, fp):
+        fp.write("# Raw latency data, %s, %dN%d, cycle %ds\n" % \
+                 (title, session.baudrate, session.stopbits, session.cycle))
         fp.write("#\t")
         for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
             fp.write("%8s\t" % hn)
@@ -103,6 +106,8 @@ class splitplot:
     def __init__(self):
         self.found = {}
     def header(self, fp):
+        fp.write("# Filtered latency data, %s, %dN%d, cycle %ds\n" % \
+                 (title, session.baudrate, session.stopbits, session.cycle))
         fp.write("#")
         for s in splitplot.sentences:
             fp.write("%8s\t" % s)
