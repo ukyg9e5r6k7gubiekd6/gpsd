@@ -57,6 +57,7 @@ libgps_la_SOURCES = \
 	ntpshm.c \
 	libgps.c \
 	packet.c \
+	gpsutils.c \
 	sirf.c \
 	report.c
 

@@ -133,8 +133,11 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-    sprintf(session->gpsdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
+    char buf[28];
+
+    sprintf(buf, "%04d/%02d/%dT%02d:%02d:%02dZ",
 	    getw(19), getw(20), getw(21), getw(22), getw(23), getw(24));
+    session->gpsdata.fix.time = iso8661_to_unix(buf);
 
 #if 0
     gpsd_report(1, "date: %s\n", session->gpsdata.utc);

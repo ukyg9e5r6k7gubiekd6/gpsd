@@ -15,17 +15,14 @@ class NMEA:
         else:
             self.logger = lambda *args: None
 
-    def add_checksum(self,sentence):
-        csum = 0
-        for c in sentence:
-            csum = csum ^ ord(c)
-        return sentence + "%02X" % csum + "\r\n"
-
     def checksum(self,sentence, cksum):
         csum = 0
         for c in sentence:
             csum = csum ^ ord(c)
         return "%02X" % csum == cksum
+
+    def add_checksum(self,sentence):
+        return sentence + self.checksum(sentence) + "\r\n"
 
     def __do_lat_lon(self, words):
         # The Navman sleeve's GPS firmware sometimes puts the direction in
@@ -56,8 +53,6 @@ class NMEA:
             lon = intpart + frac * 100.0 / 60.0
             if words[3] == 'W':
                 lon = -lon
-        self.data.latlon_stamp.refresh()
-        self.data.latlon_stamp.changed = ((lat, lon) != (self.data.latitude, self.data.longitude))
         self.data.latitude = lat
         self.data.longitude = lon
         return True
@@ -94,23 +89,23 @@ class NMEA:
         self.data.utc = yyyymmdd + "T" + hhmmss + "Z"
 
     def processGPRMC(self, words):
+        mask = 0
         if words[1] == "A":
             self.update_timestamp(words[8], words[0])
+            mask |= gps.TIME_SET
             if self.__do_lat_lon(words[2:]):
                 if words[6]:
-                    newspeed = float(words[6])
-                    self.data.speed_stamp.changed = (self.data.speed != newspeed) 
-                    self.data.speed = newspeed
-                    self.data.speed_stamp.refresh()
+                    self.data.speed = float(words[6])
+                    mask |= gps.SPEED_SET
                 if words[7]:
-                    newtrack = float(words[7])
-                    self.data.track_stamp.changed = (self.data.track != newtrack) 
-                    self.data.track = newtrack
-                    self.data.track_stamp.refresh()
+                    self.data.track = float(words[7])
+                    mask |= gps.TRACK_SET
+        self.data.valid =  mask
 
     def processGPGLL(self, words):
         if words[1] == "A":
             self.__do_lat_lon(words)
+            mask |= gps.TIME_SET
             self.update_timestamp(None, words[4])
             if words[5] == 'N':
                 newstatus = gps.STATUS_NO_FIX
@@ -118,30 +113,37 @@ class NMEA:
                 newstatus = gps.STATUS_DGPS_FIX
             else:
                 newstatus = gps.STATUS_FIX;
-            self.data.status_stamp.changed = (self.data.status != newstatus)
             self.data.status = newstatus
+            mask |= gps.STATUS_SET
             self.logger(3, "GPGLL sets status %d\n", self.data.status);
  
     def processGPGGA(self,words):
+        oldfixtime = self.fixtime
         self.update_timestamp(None, words[0])
+        mask = TIME_SET
         self.__do_lat_lon(words[1:])
         if words[8]:
-            newaltitude        = float(words[8])
-            self.data.altitude_stamp.changed = (self.data.altitude != newaltitude)
-            self.data.altitude = newaltitude
-            self.data.altitude_stamp.refresh()
+	    oldaltitude = self.altitude;
+            self.data.altitude = float(words[8])
+	    mask |= ALTITUDE_SET;
+	    # Compute climb/sink in the simplest possible way.
+	    # This substitutes for the climb report provided by
+	    # SiRF and Garmin chips, which might have some smoothing
+	    # going on.
+            if oldaltitude == gps.ALTITUDE_NOT_VALID:
+		self.climb = 0;
+	    else:
+		self.climb = float(self.altitude-oldaltitude)/(self.fixtime-oldfixtime);
+	    mask |= gps.CLIMB_SET;
         if words[5]:
-            newstatus          = int(words[5])
-            self.data.status_stamp.changed = (self.data.status != newstatus)
-            self.data.status = newstatus
-            self.data.status_stamp.refresh()
+            self.data.status = int(words[5])
+	    mask |= gps.STATUS_SET;
             self.logger(3, "GPGGA sets status %d\n" % self.data.status);
+        self.data.valid =  mask
 
     def processGPGSA(self,words):
-        newmode = int(words[1])
-        self.data.mode_stamp.changed = (self.data.mode != newmode)
-        self.data.mode = newmode
-        self.data.mode_stamp.refresh()
+        mask = 0
+        self.data.mode = int(words[1])
         self.data.satellites_used = map(int, filter(lambda x: x, words[2:14]))
         (newpdop, newhdop, newvdop) = (self.data.pdop, self.data.hdop, self.data.vdop)
         if words[14]:
@@ -151,27 +153,12 @@ class NMEA:
         if words[16]:
             newvdop = float(words[16])
         if words[14] and words[15] and words[16]:
-            self.data.fix_quality_stamp.refresh()
-            self.data.fix_quality_stamp.changed = (newpdop, newhdop, newvdop) != (self.data.pdop, self.data.hdop, self.data.vdop)
             (self.data.pdop, self.data.hdop, self.data.vdop) = (newpdop, newhdop, newvdop)
-        self.logger(3, "GPGGA sets mode %d\n" % self.data.mode)
+            mask = gps.DOP_SET
+        self.logger(3, "GPGSA sets mode %d\n" % self.data.mode)
+        self.data.valid = mask
 
-    def processGPGVTG(self, words):
-        if words[0]:
-            newtrack = float(words[0])
-            self.data.track_stamp.changed = (self.data.track != newtrack) 
-            self.data.track = newtrack
-            self.data.track_stamp.refresh()
-        if words[1] == 'T':
-            newspeed = words[4]
-        else:
-            newspeed = words[2]
-        if newspeed:
-            newspeed = float(newspeed)
-            self.data.speed_stamp.changed = (self.data.speed != newspeed) 
-            self.data.speed = newspeed
-
-    def nmea_sane_satellites(self):
+    def __nmea_sane_satellites(self):
         # data may be incomplete *
         if self.data.part < self.data.await:
             return False;
@@ -215,11 +202,12 @@ class NMEA:
                         and not newsats[-1].azimuth \
                         and not newsats[-1].ss:
                 newsats.pop()
-            if self.nmea_sane_satellites():
+            if self.__nmea_sane_satellites():
                 self.data.satellites = newsats
                 self.logger(3, "Satellite data OK.\n")
             else:
                 self.logger(3, "Satellite data no good.\n");
+        self.data.valid = gps.SATELLITE_SET
 
     def handle_line(self, line):
         if line and line[0] == '$':
@@ -231,8 +219,6 @@ class NMEA:
             words = line[0].split(',')
             if NMEA.__dict__.has_key('process'+words[0]):
                 NMEA.__dict__['process'+words[0]](self, words[1:])
-            else:
-                self.logger(0, "Unknown sentence\n")
         else:
             return self.logger(0, "Not NMEA\n")
 
@@ -306,6 +292,10 @@ class gpsd(gps.gpsdata):
             return 0;
 
     def activate(self):
+        self.mode = gps.MODE_NO_FIX;
+        self.status = gps.STATUS_NO_FIX;
+        self.altitude = gps.ALTITUDE_NOT_VALID
+        self.track = gps.TRACK_NOT_VALID
         self.ttyfd = os.open(self.device, os.O_RDWR|os.O_SYNC|os.O_NOCTTY)
         if self.ttyfd == -1:
             return None
@@ -338,8 +328,6 @@ class gpsd(gps.gpsdata):
         if hasattr(self, 'normal'):
             termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.normal)
         self.online = False;
-        self.mode = gps.MODE_NO_FIX;
-        self.status = gps.STATUS_NO_FIX;
 
     def set_raw_hook(self, hook=None):
         self.raw_hook = hook
@@ -365,17 +353,15 @@ class gpsd(gps.gpsdata):
             os.write(self.ttyfd, session.dsock.recv(1024))
         waiting = self.waiting()
         if waiting < 0:
-            return waiting
+            return 0
         elif waiting == 0:
-            if time.time() < self.online_stamp.last_refresh + self.devtype.cycle + 1:
+            if time.time() > self.online + self.devtype.cycle + 1:
+                self.online = 0
                 return 0
             else:
-                self.online = False
-                self.online_stamp.refresh()
-                return -1
+                return gps.ONLINE_SET
         else:
-            self.online = True
-            self.online_stamp.refresh()
+            self.online = time.time()
             self.devtype.parser.handler(self.readline(), self.raw_hook)
 
             # count the good fixes
@@ -390,7 +376,7 @@ class gpsd(gps.gpsdata):
                         self.dsock.send(self.dsock, \
                               "R %0.8f %0.8f %0.2f\r\n" % \
                               (self.latitude, self.longitude, self.altitude))
-	return waiting;
+	return self.valid;
 
 # SirF-II control code
 
@@ -431,7 +417,7 @@ class SiRF:
             '\x00',	# Byte 11 = 0x01: GPMSS checksum disable
             '\x01',	# Byte 12 = 0x01: Enable GPRMC at 1-second interval
             '\x01',	# Byte 13 = 0x01: GPRMC checksum enable
-            '\x01',	# Byte 14 = 0x01: Enable GPVTG at 1-second interval
+            '\x00',	# Byte 14 = 0x01: Disable GPVTG
             '\x01',	# Byte 15 = 0x01: GPVTG checksum enable
             '\x00',	# Byte 16 = 0x00: Unused
             '\x00',	# Byte 17 = 0x00: Unused
@@ -455,12 +441,12 @@ if __name__ == '__main__':
         sys.stdout.write(message)
     def dumpline(message):
         sys.stdout.write("Raw line: " + `message`+ "\n")
-    dev = gpsd(logger=logger)
+    dev = gpsd(device=sys.argv[1], logger=logger)
     dev.set_raw_hook(dumpline)
     dev.activate()
     while True:
         status = dev.poll()
-        if status > 0:
+        if status & gps.ONLINE_SET:
             print dev
             print "=" * 75
     del dev

@@ -48,16 +48,12 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
     gpsdata->raw_hook = hook;
 }
 
-/*
- * return: 0, no changes
- *         1, something changed
- */
-static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
+static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
     char *ns, *sp, *tp;
-    int changed = 0;
 
+    gpsdata->valid = 0;
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
 	if (!strncmp(ns, "GPSD", 4)) {
 	    for (sp = ns + 5; ; sp = tp+1) {
@@ -72,7 +68,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		switch (*sp) {
 		case 'A':
 		    sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
-		    changed |= ALTITUDE_SET;
+		    gpsdata->valid |= ALTITUDE_SET;
 		    break;
 		case 'B':
 		    sscanf(sp, "B=%d %*d %*s %d", 
@@ -82,12 +78,13 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    sscanf(sp, "C=%d", &gpsdata->cycle);
 		    break;
 		case 'D':
-		    strcpy(gpsdata->utc, sp+2);
+		    gpsdata->fix.time = iso8661_to_unix(sp+2);
+		    gpsdata->valid |= TIME_SET;
 		    break;
 		case 'E':
 		    sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
-		    changed |= POSERR_SET;
+		    gpsdata->valid |= POSERR_SET;
 		    break;
 		case 'I':
 		    if (gpsdata->gps_id)
@@ -95,7 +92,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->gps_id = strdup(sp+2);
 		case 'M':
 		    gpsdata->fix.mode = atoi(sp+2);
-		    changed |= MODE_SET;
+		    gpsdata->valid |= MODE_SET;
 		    break;
 		case 'N':
 		    gpsdata->driver_mode = atoi(sp+2);
@@ -103,33 +100,33 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'P':
 		    sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
-		    changed |= LATLON_SET;
+		    gpsdata->valid |= LATLON_SET;
 		    break;
 		case 'Q':
 		    sscanf(sp, "Q=%d %lf %lf %lf",
 			   &gpsdata->satellites_used,
 			   &gpsdata->pdop, &gpsdata->hdop, &gpsdata->vdop);
-		    changed |= DOP_SET;
+		    gpsdata->valid |= DOP_SET;
 		    break;
 		case 'S':
 		    gpsdata->status = atoi(sp+2);
-		    changed |= STATUS_SET;
+		    gpsdata->valid |= STATUS_SET;
 		    break;
 		case 'T':
 		    sscanf(sp, "T=%lf", &gpsdata->fix.track);
-		    changed |= TRACK_SET;
+		    gpsdata->valid |= TRACK_SET;
 		    break;
 		case 'U':
 		    sscanf(sp, "U=%lf", &gpsdata->fix.climb);
-		    changed |= CLIMB_SET;
+		    gpsdata->valid |= CLIMB_SET;
 		    break;
 		case 'V':
 		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
-		    changed |= SPEED_SET;
+		    gpsdata->valid |= SPEED_SET;
 		    break;
 		case 'X':
 		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
-		    changed |= ONLINE_SET;
+		    gpsdata->valid |= ONLINE_SET;
 		    break;
 		case 'Y':
 		    gpsdata->satellites = atoi(sp+2);
@@ -167,7 +164,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			memcpy(gpsdata->ss, ss, sizeof(ss));
 			memcpy(gpsdata->used, used, sizeof(used));
 		    }
-		    changed |= SATELLITE_SET;
+		    gpsdata->valid |= SATELLITE_SET;
 		    break;
 		case 'Z':
 		    sscanf(sp, "Z=%d", &gpsdata->profiling);
@@ -191,12 +188,10 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     if (gpsdata->raw_hook)
 	gpsdata->raw_hook(gpsdata, buf);
 
-    return changed;
 }
 
 /*
- * return: 0, no changes or no read
- *         1, something changed
+ * return: 0, success
  *        -1, read error
  */
 int gps_poll(struct gps_data_t *gpsdata)
@@ -218,13 +213,13 @@ int gps_poll(struct gps_data_t *gpsdata)
     buf[n] = '\0';
     if (gpsdata->profiling)
 	received = timestamp();
-    n = gps_unpack(buf, gpsdata);
+    gps_unpack(buf, gpsdata);
     if (gpsdata->profiling)
     {
 	gpsdata->c_decode_time = received - gpsdata->fix.time;
 	gpsdata->c_recv_time = timestamp() - gpsdata->fix.time;
     }
-    return n;
+    return 0;
 }
 
 int gps_query(struct gps_data_t *gpsdata, const char *requests)

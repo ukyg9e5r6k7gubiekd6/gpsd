@@ -92,8 +92,7 @@ struct gps_data_t {
 				 * prone to false negatives.
 				 */
 
-    struct gps_fix_t	fix;
-    char utc[28];		/* UTC date/time, "yyy-mm-ddThh:mm:ss.sssZ" */
+    struct gps_fix_t	fix;	/* PVT data */
 
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */
@@ -180,6 +179,8 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */
 #endif
+
+extern char *unix_to_iso8661(double t, char *);
 
 #endif /* gps_h */
 /* gps.h ends here */

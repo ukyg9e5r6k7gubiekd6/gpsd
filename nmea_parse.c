@@ -88,73 +88,43 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
    from the host machine's clock time.
  */
 
-static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
+static void merge_ddmmyy(char *ddmmyy, char *buf)
 /* sentence supplied ddmmyy, but no century part */
 {
     time_t now = time(NULL);
     struct tm tm;
 
     gmtime_r(&now, &tm);
-    strftime(out->utc, 3, "%C", &tm);
-    strncpy(out->utc+2, ddmmyy + 4, 2);	/* copy year */
-    out->utc[4] = '-';
-    strncpy(out->utc+5, ddmmyy + 2, 2);	/* copy month */
-    out->utc[7] = '-';
-    strncpy(out->utc+8, ddmmyy, 2);	/* copy date */
-    out->utc[10] = 'T';
+    strftime(buf, 3, "%C", &tm);
+    strncpy(buf+2, ddmmyy + 4, 2);	/* copy year */
+    buf[4] = '-';
+    strncpy(buf+5, ddmmyy + 2, 2);	/* copy month */
+    buf[7] = '-';
+    strncpy(buf+8, ddmmyy, 2);	/* copy date */
+    buf[10] = 'T';
 }
 
 #ifndef WHOLE_CYCLE
-static void fake_mmddyyyy(struct gps_data_t *out)
+static void fake_mmddyyyy(char *buf)
 /* sentence didn't supply mm/dd/yyy, so we have to fake it */
 {
     time_t now = time(NULL);
     struct tm tm;
 
     gmtime_r(&now, &tm);
-    strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", &tm);
+    strftime(buf, 13, "%Y-%m-%dT", &tm);
 }
 #endif /* WHOLE_CYCLE */
 
-static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
+static void merge_hhmmss(char *hhmmss, char *buf)
 /* update last-fix field from a UTC time */
 {
-    strncpy(out->utc+11, hhmmss, 2);	/* copy hours */
-    out->utc[13] = ':';
-    strncpy(out->utc+14, hhmmss+2, 2);	/* copy minutes */
-    out->utc[16] = ':';
-    strncpy(out->utc+17 , hhmmss+4, sizeof(out->utc)-17);	/* copy seconds */
-    strcat(out->utc, "Z");
-}
-
-static double iso8661_to_unix(char *isotime)
-{
-    char *dp = NULL;
-    struct tm tm;
-    double usec, res;
-    time_t now;
-
-    dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
-    if (*dp == '.')
-	usec = strtod(dp, NULL);
-    else
-	usec = 0;
-#ifdef HAVE_TIMEZONE
-    res = mktime(&tm) - timezone + usec;
-#else
-    res = mktime(&tm) - tm.tm_gmtoff + usec;
-#endif
-    now = time(NULL);
-#ifdef HAVE_DAYLIGHT
-    if (daylight && localtime_r(&now, &tm)->tm_isdst)
-	res -= 3600;
-#else
-    if (localtime_r(&now, &tm)->tm_isdst)
-	res -= 3600;
-#endif
-    if (now != (int)res)
-	gpsd_report(4, "clock skew is %lf seconds\n", now-(int)res);
-    return res;
+    strncpy(buf+11, hhmmss, 2);	/* copy hours */
+    buf[13] = ':';
+    strncpy(buf+14, hhmmss+2, 2);	/* copy minutes */
+    buf[16] = ':';
+    strncpy(buf+17 , hhmmss+4, sizeof(buf)-17);	/* copy seconds */
+    strcat(buf, "Z");
 }
 
 /**************************************************************************
@@ -187,9 +157,10 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 
     if (!strcmp(field[2], "A")) {
 	if (count > 9) {
-	    merge_ddmmyy(field[9], out);
-	    merge_hhmmss(field[1], out);
-	    out->fix.time = iso8661_to_unix(out->utc);
+	    char buf[28];
+	    merge_ddmmyy(field[9], buf);
+	    merge_hhmmss(field[1], buf);
+	    out->fix.time = iso8661_to_unix(buf);
 	}
 	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
@@ -256,10 +227,11 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
+	char buf[28];
 
-	fake_mmddyyyy(out);
-	merge_hhmmss(field[5], out);
-	out->fix.time = iso8661_to_unix(out->utc);
+	fake_mmddyyyy(buf);
+	merge_hhmmss(field[5], buf);
+	out->fix.time = iso8661_to_unix(buf);
 	mask |= TIME_SET;
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -301,11 +273,12 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     if (out->status > STATUS_NO_FIX) {
 	char *altitude;
 	double oldfixtime = out->fix.time;
+	char buf[28];
 
 #ifndef WHOLE_CYCLE
-	fake_mmddyyyy(out);
-	merge_hhmmss(field[1], out);
-	out->fix.time = iso8661_to_unix(out->utc);
+	fake_mmddyyyy(buf);
+	merge_hhmmss(field[1], buf);
+	out->fix.time = iso8661_to_unix(buf);
 	mask |= TIME_SET;
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;

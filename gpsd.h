@@ -178,6 +178,8 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 extern int ntpshm_init(struct gps_session_t *);
 extern int ntpshm_put(struct gps_session_t *, double);
 
+extern double iso8661_to_unix(char *);
+
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);
 extern int gpsd_activate(struct gps_session_t *);

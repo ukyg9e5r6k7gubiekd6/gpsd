@@ -86,7 +86,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
                      0x01, 0x01, /* GSA */
                      0x05, 0x01, /* GSV */
                      0x01, 0x01, /* RMC */
-                     0x00, 0x01, /* VTG */
+                     0x00, 0x00, /* VTG */
                      0x00, 0x01, 0x00, 0x01,
                      0x00, 0x01, 0x00, 0x01,
                      0x12, 0xc0, /* 4800 bps */
@@ -150,10 +150,6 @@ static void extract_time(struct gps_session_t *session, int week, double tow)
     session->hours = when.tm_hour;
     session->minutes = when.tm_min;
     session->seconds = fixtime - (intfixtime / 60) * 60;
-    strftime(session->gpsdata.utc, sizeof(session->gpsdata.utc),
-	     "%Y-%m-%dT%H:%M:", &when);
-    sprintf(session->gpsdata.utc+strlen(session->gpsdata.utc),
-	    "%02.3f", session->seconds);
     session->gpsdata.fix.time = fixtime;
 #ifdef NTPSHM_ENABLE
     ntpshm_put(session, fixtime);
@@ -395,7 +391,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     */
 	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
 	    extract_time(session, getw(5), getl(7)*1e-4);
-	    gpsd_report(5, "MID 41 UTC: %s\n", session->gpsdata.utc);
+	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /*
 	     * Skip UTC, left all zeros in 231 and older firmware versions, 
 	     * and misdocumented in the Protocol Reference (version 1.4).

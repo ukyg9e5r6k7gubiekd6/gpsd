@@ -95,22 +95,18 @@ one-line response, and updates parts of the GPS-data structure that
 correspond to data changed since the last call.  The second argument
 must be a string containing letters from the command set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-This function returns a 1 if any data changed since the last query, a
-0 if no data changed, or a -1 if there was a Unix-level read error.</para>
+This function returns a 0 on success, or a -1 if there was a
+Unix-level read error.</para>
 
 <para><function>gpsd_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).  It is meant to
 be used after the user has issued an 'R' or 'W' command with
 <function>gpsd_query()</function>, telling the daemon to stream
-updates to the client.  <function>gpsd_poll()</function> returns -1 if
-there was an error, 0 if no data was read or no changes or 1 if
-gpsdata has changes.</para>
+updates to the client.  <function>gpsd_poll()</function> returns the
+vakidity mask of the received structure.</para>
 
-<para>Several member groups within the GPS-data structure have
-last-modified timestamps and change-flag members associated with them;
-these get updated on each query or poll as well.
-Consult <filename>gps.h</filename> to learn about the data members 
+<para>Consult <filename>gps.h</filename> to learn more about the data members 
 and associated timestamps.</para>
 
 <para>The Python implementation supports the same facilities as the C

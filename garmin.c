@@ -263,6 +263,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
+	    session->gpsdata.fix.time -= time_l;
 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 	    gmtime_r(&time_l, &tm);
@@ -272,15 +273,6 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    session->day     = tm.tm_mday;
 	    session->month   = tm.tm_mon + 1;
 	    session->year    = tm.tm_year + 1900;
-
-	    sprintf(session->gpsdata.utc
-		    , "%04d/%02d/%dT%02d:%02d:%02dZ"
-		    , tm.tm_year + 1900
-		    , tm.tm_mon + 1
-		    , tm.tm_mday
-		    , tm.tm_hour
-		    , tm.tm_min
-		    , tm.tm_sec);
 
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
 	    session->gpsdata.fix.longitude = radtodeg(pvt->lon);
@@ -343,7 +335,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 			, session->gpsdata.fix.mode
 			, session->gpsdata.status);
 
-	    gpsd_report(3, "UTC Time: %s\n", session->gpsdata.utc);
+	    gpsd_report(3, "UTC Time: %lf\n", session->gpsdata.fix.time);
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"
 			, pvt->alt
 			, pvt->epe

@@ -202,7 +202,6 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
     int i, j;
     struct gps_data_t *ud = &session->gpsdata;
-    int icd = 0;
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -249,11 +248,11 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    sprintf(phrase, ",C=%d", session->device_type->cycle);
 	    break;
 	case 'D':
-	    if (ud->utc[0]) {
-		sprintf(phrase, ",D=%s", ud->utc);
-		icd = 1;
+	    strcpy(phrase, ",D=");
+	    if (ud->valid & TIME_SET) {
+	        unix_to_iso8661(ud->fix.time, phrase+3);
 	    } else if (explicit)
-		strcpy(phrase, ",D=?");
+		strcat(phrase, "?");
 	    break;
 	case 'E':
 	    if (have_fix(session)) {
@@ -505,7 +504,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-    if (ud->profiling && icd) {
+    if (ud->profiling && (ud->valid & TIME_SET)) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	sprintf(phrase, ",$=%s %.4d %.4f %.4f %.4f %.4f %.4f %.4f",

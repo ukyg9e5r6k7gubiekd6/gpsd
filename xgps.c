@@ -268,7 +268,8 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
-    XmTextFieldSetString(text_1, gpsdata->utc);
+    unix_to_iso8661(gpsdata->fix.time, s);
+    XmTextFieldSetString(text_1, s);
     sprintf(s, "%f %c", fabsf(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     XmTextFieldSetString(text_2, s);
     sprintf(s, "%f %c", fabsf(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
