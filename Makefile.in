@@ -117,7 +117,7 @@ GPSDLIB_OBJECTS = libgpsd.o
 COMMON_OBJECTS  = netlib.o
 
 ## Programs
-PROGRAMS = gpsd gps 
+PROGRAMS = gpsd gps
 ## Libraries
 LIBRARIES = libgps.a libgpsd.a
 ## Manual pages
@@ -195,6 +195,7 @@ gpsd-$(VERS).tar.gz: $(ALL)
 	(cd ..; tar -czvf gpsd/gpsd-$(VERS).tar.gz `cat gpsd/MANIFEST`)
 	(cd ..; rm gpsd-$(VERS))
 
+.PHONY: dist
 dist: gpsd-$(VERS).tar.gz
 
 install:
