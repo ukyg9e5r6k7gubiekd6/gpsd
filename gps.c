@@ -409,17 +409,20 @@ void update_display(char *message)
     sprintf(s, "%f", gpsdata.track);
     XmTextFieldSetString(text_6, s);
 
-    switch (gpsdata.mode) {
-    case 2:
-	sprintf(s, "2D %sFIX", (gpsdata.status==2) ? "DIFF ": "");
-	break;
-    case 3:
-	sprintf(s, "3D %sFIX", (gpsdata.status==2) ? "DIFF ": "");
-	break;
-    default:
-	sprintf(s, "NO FIX");
-	break;
-    }
+    if (!gpsdata.online)
+	sprintf(s, "OFFLINE");
+    else
+	switch (gpsdata.mode) {
+	case 2:
+	    sprintf(s, "2D %sFIX",(gpsdata.status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    break;
+	case 3:
+	    sprintf(s, "3D %sFIX",(gpsdata.status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    break;
+	default:
+	    sprintf(s, "NO FIX");
+	    break;
+	}
     XmTextFieldSetString(text_7, s);
 
     draw_graphics(&gpsdata);

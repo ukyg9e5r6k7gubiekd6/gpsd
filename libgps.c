@@ -67,6 +67,9 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	    if (!tp) break;
 	    *tp = '\0';
 
+	    if (sp[2] == '?' || sp[2] == '!')
+		continue;
+
 	    switch (*sp)
 	    {
 	    case 'A':
@@ -203,12 +206,11 @@ int gps_poll(int fd, struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZE];
-    int		buflen;
 
-    if ((buflen = read(fd, buf, sizeof(buf)-1)) <= 0)
+    /* the daemon makes sure that every read is NUL-terminated */
+    if (read(fd, buf, sizeof(buf)-1) <= 0)
 	return -1;
 
-    buf[buflen] = '\0';
     return gps_unpack(buf, gpsdata);
 }
 

@@ -1,6 +1,4 @@
 1. Split the gpsd interface code out of pygps into a Python 
    module that can be shipped with gpsd.
 
-2. Figure out why enabling raw mode screws up the gps client.
-
-3. Autodetect USB GPS by scanning the USB bus, if no device is specified.
+2. Autodetect USB GPS by scanning the USB bus, if no device is specified.

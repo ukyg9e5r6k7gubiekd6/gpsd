@@ -174,12 +174,16 @@ static void print_settings(char *service, char *dgpsserver)
  */
 #define VALIDATION_COMPLAINT(level, legend) do {	\
 	char buf[BUFSIZE]; \
+	int len; \
 	strcpy(buf, "# "); \
         snprintf(buf+2, BUFSIZE, \
 		legend " (status=%d, mode=%d).\n", \
 		session.gNMEAdata.status, session.gNMEAdata.mode); \
+	len = strlen(buf); \
+	strcpy(buf+len, "\n"); \
 	gpscli_report(level, buf+2); \
-	write(fd, buf, strlen(buf)); \
+	strcpy(buf+len, "\r\n"); \
+	write(fd, buf, strlen(buf) + 1); \
 	} while (0)
 
 static int validate(int fd)
@@ -193,7 +197,7 @@ static int validate(int fd)
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
 	return session.gNMEAdata.mode;
     }
-    VALIDATION_COMPLAINT(3, "GPS hads no fix");
+    VALIDATION_COMPLAINT(3, "GPS has no fix");
     return 0;
 }
 #undef VALIDATION_CONSTRAINT
@@ -215,13 +219,17 @@ static int handle_request(int fd, char *buf, int buflen)
      */
 #define STALE_COMPLAINT(label, field) do {	\
 	char buf[BUFSIZE]; \
+	int len; \
 	strcpy(buf, "# "); \
         snprintf(buf+2, BUFSIZE, \
-		label " data is stale: %ld + %d >= %ld\n", \
+		label " data is stale: %ld + %d >= %ld", \
 		session.gNMEAdata.field.last_refresh, \
 		session.gNMEAdata.field.time_to_live, cur_time); \
+	len = strlen(buf); \
+	strcpy(buf+len, "\n"); \
 	gpscli_report(3, buf+2); \
-	write(fd, buf, strlen(buf)); \
+	strcpy(buf+len, "\r\n"); \
+	write(fd, buf, strlen(buf) + 1); \
 	} while (0)
 
     sprintf(reply, "GPSD");
@@ -232,14 +240,16 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'A':
 	case 'a':
 	    if (!validate(fd))
-		break;
+		strcat(reply, ",A=!");
 	    else if (FRESH(session.gNMEAdata.altitude_stamp,cur_time)) {
 		sprintf(reply + strlen(reply),
 			",A=%f",
 			session.gNMEAdata.altitude);
-	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Altitude", altitude_stamp);
+	    } else {
+		strcat(reply, ",A=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Altitude", altitude_stamp);
+ 	    }
 	    break;
 	case 'D':
 	case 'd':
@@ -247,6 +257,8 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(reply + strlen(reply),
 			",D=%s",
 			session.gNMEAdata.utc);
+	    else
+		strcat(reply, ",D=?");
 	    break;
 	case 'L':
 	case 'l':
@@ -263,29 +275,39 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(reply + strlen(reply),
 			",M=%d",
 			session.gNMEAdata.mode);
+	    } else {
+		strcat(reply, ",M=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Mode", mode_stamp);
 	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Mode", mode_stamp);
 	    break;
 	case 'P':
 	case 'p':
 	    if (!validate(fd))
-		break;
+		strcat(reply, ",P=!");
 	    else if (FRESH(session.gNMEAdata.latlon_stamp,cur_time)) {
 		sprintf(reply + strlen(reply),
 			",P=%f %f",
 			session.gNMEAdata.latitude,
 			session.gNMEAdata.longitude);
+	    } else {
+		strcat(reply, ",P=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Position", latlon_stamp);
 	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Position", latlon_stamp);
 	    break;
 	case 'Q':
 	case 'q':
-	    sprintf(reply + strlen(reply),
-		    ",Q=%d %f %f %f",
-		    session.gNMEAdata.satellites_used,
-		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
+	    if (FRESH(session.gNMEAdata.latlon_stamp,cur_time)) {
+		sprintf(reply + strlen(reply),
+			",Q=%d %f %f %f",
+			session.gNMEAdata.satellites_used,
+			session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
+	    } else {
+		strcat(reply, ",Q=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Quality", fix_quality_stamp);
+	    }
 	    break;
 	case 'R':
 	case 'r':
@@ -315,33 +337,39 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(reply + strlen(reply),
 			",S=%d",
 			session.gNMEAdata.status);
+	    } else {
+		strcat(reply, ",S=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Status", status_stamp);
 	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Status", status_stamp);
 	    break;
 	case 'T':
 	case 't':
 	    if (!validate(fd))
-		break;
-	    if (FRESH(session.gNMEAdata.track_stamp, cur_time)) {
+		strcat(reply, ",T=!");
+	    else if (FRESH(session.gNMEAdata.track_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
 			",T=%f",
 			session.gNMEAdata.track);
+	    } else {
+		strcat(reply, ",T=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Track", track_stamp);
 	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Track", track_stamp);
 	    break;
 	case 'V':
 	case 'v':
 	    if (!validate(fd))
-		break;
+		strcat(reply, ",V=!");
 	    else if (FRESH(session.gNMEAdata.speed_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
 			",V=%f",
 			session.gNMEAdata.speed);
+	    } else {
+		strcat(reply, ",V=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Speed", speed_stamp);
 	    }
-	    else if (session.debug > 1)
-		STALE_COMPLAINT("Speed", altitude_stamp);
 	    break;
 	case 'W':
 	case 'w':
@@ -374,42 +402,51 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 	case 'Y':
 	case 'y':
-	    sc = 0;
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.PRN[i])
-			sc++;
-	    sprintf(reply + strlen(reply),
-		    ",Y=%d:", sc);
-	    if (SEEN(session.gNMEAdata.satellite_stamp))
-		for (i = 0; i < MAXCHANNELS; i++)
-		    if (session.gNMEAdata.PRN[i])
-			sprintf(reply + strlen(reply),"%d %d %d %d:", 
-				session.gNMEAdata.PRN[i], 
-				session.gNMEAdata.elevation[i],
-				session.gNMEAdata.azimuth[i],
-			        session.gNMEAdata.ss[i]);
+	    if (FRESH(session.gNMEAdata.satellite_stamp, cur_time))
+	    {
+		sc = 0;
+		if (SEEN(session.gNMEAdata.satellite_stamp))
+		    for (i = 0; i < MAXCHANNELS; i++)
+			if (session.gNMEAdata.PRN[i])
+			    sc++;
+		sprintf(reply + strlen(reply),
+			",Y=%d:", sc);
+		if (SEEN(session.gNMEAdata.satellite_stamp))
+		    for (i = 0; i < MAXCHANNELS; i++)
+			if (session.gNMEAdata.PRN[i])
+			    sprintf(reply + strlen(reply),"%d %d %d %d:", 
+				    session.gNMEAdata.PRN[i], 
+				    session.gNMEAdata.elevation[i],
+				    session.gNMEAdata.azimuth[i],
+				    session.gNMEAdata.ss[i]);
+	    } else {
+		strcat(reply, ",Y=?");
+		if (session.debug > 1)
+		    STALE_COMPLAINT("Satellite", satellite_stamp);		
+	    }
 	    break;
 #ifdef PROCESS_PRWIZCH
 	case 'Z':
 	case 'z':
 	    sc = 0;
-	    if (SEEN(session.gNMEAdata.signal_quality_stamp))
+	    if (FRESH(session.gNMEAdata.signal_quality_stamp))
 	    {
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.Zs[i])
 			sc++;
-	    }
-	    sprintf(reply + strlen(reply),
-		    ",Z=%d ", sc);
-	    for (i = 0; i < MAXCHANNELS; i++)
-	    	if (SEEN(session.gNMEAdata.signal_quality_stamp))
+		if (sc)
 		{
-		    if (session.gNMEAdata.Zs[i])
-			sprintf(reply + strlen(reply),"%d %02d ", 
-				session.gNMEAdata.Zs[i], 
-				session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
-		}
+		    sprintf(reply + strlen(reply),
+			    ",Z=%d ", sc);
+		    for (i = 0; i < MAXCHANNELS; i++)
+			if (SEEN(session.gNMEAdata.signal_quality_stamp))
+			{
+			    if (session.gNMEAdata.Zs[i])
+				sprintf(reply + strlen(reply),"%d %02d ", 
+					session.gNMEAdata.Zs[i], 
+					session.gNMEAdata.Zv[i] * (int)(99.0 / 7.0));
+			}
+	    }
 #endif /* PROCESS_PRWIZCH */
 	    break;
 	case '\r':
@@ -423,7 +460,7 @@ static int handle_request(int fd, char *buf, int buflen)
     if (session.debug >= 2)
 	gpscli_report(1, "=> client: %s", reply);
     return write(fd, reply, strlen(reply) + 1);
-}
+ }
 #undef STALE_COMPLAINT
 
 static void notify_watchers(char *sentence)
@@ -434,7 +471,7 @@ static void notify_watchers(char *sentence)
     for (fd = 0; fd < getdtablesize(); fd++) {
 	if (FD_ISSET(fd, &watcher_fds)) {
 	    gpscli_report(1, "=> client: %s\n", sentence);
-	    if (write(fd, sentence, strlen(sentence)) < 0) {
+	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
 		gpscli_report(3, "Notification write %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
@@ -452,7 +489,7 @@ static void raw_hook(char *sentence)
 	/* copy raw NMEA sentences from GPS */
 	if (FD_ISSET(fd, &nmea_fds)) {
 	    gpscli_report(1, "=> client: %s\n", sentence);
-	    if (write(fd, sentence, strlen(sentence)) < 0) {
+	    if (write(fd, sentence, strlen(sentence)+1) < 0) {
 		gpscli_report(3, "Raw write %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &nmea_fds);
@@ -486,7 +523,7 @@ static void raw_hook(char *sentence)
 	    }
 #undef PUBLISH
 	    if (ok < 0) {
-		gpscli_report(1, "Watcher write %s", strerror(errno));
+		gpscli_report(1, "Watcher write %s\n", strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
 	    }

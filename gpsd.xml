@@ -144,7 +144,7 @@ used by EarthMate and some other GPSes.</para>
 <para>The request protocol for gpsd clients is very simple.  Each
 request consists of a single ASCII character followed by a newline.
 Case of the request character is ignored,  Each request returns a line
-of response text ended by a newline.  Requests and responses are as 
+of response text ended by a CR/LF.  Requests and responses are as 
 follows, with %f standing for a decimal float numeral and %d for
 decimal integer numeral:</para>
 
@@ -253,6 +253,9 @@ percentage is in the range 0-99). Each number is an integer formatted as
 </varlistentry>
 -->
 </variablelist>
+
+<para>Note that a response consisting of of ! or ? following the =
+response means that there is no valid data available.  </para>
 
 <para>Requests can be concatenated and sent as a string; gpsd will then
 respond with a comma-separated list of replies.</para>
