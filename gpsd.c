@@ -145,9 +145,9 @@ static void usage()
   -p string (default %s)   = set GPS device name \n\
   -T devtype (default 'n')       = set GPS device type \n\
   -S integer (default %4s)      = set port for daemon \n"
-#ifdef TRIPMATE
+#ifdef TRIPMATE_ENABLE
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
-#endif /* TRIPMATE */
+#endif /* TRIPMATE_ENABLE */
 "  -s baud_rate                   = set baud rate on gps device \n\
   -d host[:port]                 = set DGPS server \n\
   -D integer (default 0)         = set debug level \n\
@@ -533,7 +533,11 @@ int main(int argc, char *argv[])
     int nowait = 0;
 
     debuglevel = 1;
-    while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:")) != -1) {
+    while ((option = getopt(argc, argv, "D:S:T:d:hnp:s:"
+#if TRIPMATE_ENABLE
+			    "i:"
+#endif /* TRIPMATE_ENABLE */
+		)) != -1) {
 	switch (option) {
 	case 'T':
 	    gpstype = *optarg;
