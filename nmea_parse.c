@@ -520,7 +520,7 @@ int nmea_send(int fd, const char *fmt, ... )
     status = write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);
-	return 0;
+	return status;
     } else {
 	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
 	return -1;

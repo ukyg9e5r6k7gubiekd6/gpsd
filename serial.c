@@ -49,7 +49,7 @@ int gpsd_set_speed(int ttyfd, struct termios *ttyctl, int device_speed)
     /*
      * Give the GPS and UART this much time to settle and ship some data
      * before trying to read after open or baud rate change.  Less than
-     * 1.25 seconds doesn't work under Linux 2.6.10 on an Athlon 64 3400.
+     * 1.25 seconds doesn't work om most UARTs. 
      */
     usleep(1250000);
     return 1;
