@@ -226,9 +226,12 @@ Garmin GPS-18</a></td>
 GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA,<br />GPGLL
 </td>
 <td>
-USB version rquires -T g and the Linux kernel garmin_usb driver.
-DOP (Dilution of Precision) information not available (Garmin protocol 
-includes EPE only). DGPS information in GPGGA sentence is not returned.
+The USB version rquires -T g and the Linux kernel garmin_usb driver;
+the RS232 version emits NMEA and uses the default -T n driver.
+DOP (Dilution of Precision) information is not available (Garmin protocol 
+includes EPE only); thus -T g can plug in EPE information, bit -T n 
+version omits the DOP fields entirely.
+DGPS information in GPGGA sentence is not returned.
 Speed and course over ground are calculated from the north/east
 velocity  and may not be accurate.  Magnetic variation information 
 is not available. Garmin uses a nonstandard 16-bit SNR scale.
