@@ -7,8 +7,6 @@
 #include <unistd.h>
 #define __USE_ISOC99	1	/* needed to get log2() from math.h */
 #include <math.h>
-
-#include "config.h"
 #include "gpsd.h"
 
 #ifdef ZODIAC_ENABLE
@@ -133,15 +131,33 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-    session->gpsdata.nmea_date.tm_mday = getb(19);
-    session->gpsdata.nmea_date.tm_mon = getb(20) - 1;
-    session->gpsdata.nmea_date.tm_year = getb(21) - 1900;
-    session->gpsdata.nmea_date.tm_hour = getb(22);
-    session->gpsdata.nmea_date.tm_min = getb(23);
-    session->gpsdata.nmea_date.tm_sec = getb(24);
-    session->gpsdata.subsecond = getw(25);
-    session->gpsdata.fix.time = session->gpsdata->sentence_time =
-	mktime(&out->nmea_date) + out->subseconds;
+    session->gpsdata.nmea_date.tm_mday = getw(19);
+    session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
+    session->gpsdata.nmea_date.tm_year = getw(21) - 1900;
+    session->gpsdata.nmea_date.tm_hour = getw(22);
+    session->gpsdata.nmea_date.tm_min = getw(23);
+    session->gpsdata.nmea_date.tm_sec = getw(24);
+    session->gpsdata.subseconds = getl(25);
+    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	mktime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
+    session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
+    session->gpsdata.fix.altitude  = getl(31) * 1e-2;
+    session->gpsdata.fix.climb     = getl(38) * 1e-2;
+    session->gpsdata.fix.eph       = getl(40) * 1e-2;
+    session->gpsdata.fix.epv       = getl(42) * 1e-2;
+    session->gpsdata.fix.eps       = getl(46) * 1e-2;
+    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
+    session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
+    session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
+    session->gpsdata.satellites_used = getw(12);
+
+    if (session->gpsdata.status)
+	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
+    else
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+    session->separation = getw(33) * 1e-2;	/* meters */
 
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
@@ -165,25 +181,6 @@ static int handle1000(struct gps_session_t *session)
     gpsd_report(1, "Course: %f\n", getw(36) * RAD_2_DEG * 1e-4);
     gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2);
 #endif
-
-    session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
-    session->gpsdata.fix.altitude  = getl(31) * 1e-2;
-    session->gpsdata.fix.climb     = getl(38) * 1e-2;
-    session->gpsdata.fix.eph       = getl(40) * 1e-2;
-    session->gpsdata.fix.epv       = getl(42) * 1e-2;
-    session->gpsdata.fix.eps       = getl(46) * 1e-2;
-    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
-    session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
-    session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
-    session->gpsdata.satellites_used = getw(12);
-
-    if (session->gpsdata.status)
-	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
-    else
-	session->gpsdata.fix.mode = MODE_NO_FIX;
-    session->separation = getw(33) * 1e-2;	/* meters */
 
     session->gpsdata.sentence_length = 55;
     strcpy(session->gpsdata.tag, "1000");
