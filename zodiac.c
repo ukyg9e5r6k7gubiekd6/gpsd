@@ -1,9 +1,5 @@
 /*
- * Handle the Rockwell binary packet format supported by the older
- * Zodiac-chipset versions of the Delorme EarthMate GPS.  Actually this
- * code ought to work for any Zodiac-chipset GPS; the vendor-specific 
- * trigger string isn't in here.
- *
+ * Handle the Rockwell binary packet format supported by the old Zodiac chipset
  * Everything exported from here is in the structure zodiac_binary at the end.
  */
 #include "config.h"
@@ -11,12 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <time.h>
-#include <fcntl.h>
-#include <netinet/in.h>
 #include <unistd.h>
 
 #include "gps.h"
