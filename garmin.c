@@ -785,8 +785,8 @@ static void garmin_handle_input(struct gps_session_t *session)
 struct gps_type_t garmin_binary =
 {
     "Garmin binary",	/* full name of type */
-    garmin_probe,	/* how to detect this at startup time */
     NULL,		/* only switched to by some other driver */
+    garmin_probe,	/* how to detect this at startup time */
     garmin_init,	/* initialize the device */
     garmin_handle_input,/* read and parse message packets */
     NULL,		/* send DGPS correction */
