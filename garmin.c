@@ -161,6 +161,12 @@ static inline void set_int(unsigned char *buf, int value)
         buf[2] = 0xFF & (value >> 16);
         buf[3] = 0xFF & (value >> 24);
 }
+
+static inline int get_short(const unsigned char *buf)
+{
+        return  (0xFF & buf[0]) | ((0xFF & buf[1]) << 8);
+}
+
 static inline int get_int(const unsigned char *buf)
 {
         return  (0xFF & buf[0]) | ((0xFF & buf[1]) << 8) | ((0xFF & buf[2]) << 16) | ((0xFF & buf[3]) << 24);
@@ -221,11 +227,16 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    gpsd_report(3, "Product Data req\n");
 	    break;
 	case GARMIN_PKTID_PRODUCT_DATA:
-	    prod_id = get_int(&pkt->mData[0]);
-	    ver = get_int(&pkt->mData[4]);
-	    gpsd_report(3, "Product Data, sz: %d, ProdID: %d, SoftVer: %d, Desc: %s\n"
-			, pkt->mDataSize
-			, prod_id, ver, &pkt->mData[8]);
+	    prod_id = get_short(&pkt->mData[0]);
+	    ver = get_short(&pkt->mData[2]);
+	    maj_ver = ver / 100;
+	    min_ver = ver - (maj_ver * 100);
+	    gpsd_report(3, "Product Data, sz: %d\n"
+			, pkt->mDataSize);
+	    gpsd_report(1, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
+			, prod_id, maj_ver, min_ver);
+	    gpsd_report(1, "Garmin Product Desc: %s\n"
+			, &pkt->mData[4]);
 	    break;
 	case GARMIN_PKTID_PVT_DATA:
 	    gpsd_report(3, "PVT Data Sz: %d\n", pkt->mDataSize);
@@ -405,7 +416,7 @@ static void PrintPacket(struct gps_session_t *session, Packet_t *pkt )
 	    mode = get_int(pkt->mData + 4);
 	    serial = get_int(pkt->mData + 8);
 	    gpsd_report(3, "ID: Info Resp\n");
-	    gpsd_report(3, "  Version %d. %d, Mode: %d, Serial:%u\n"
+	    gpsd_report(1, "Garmin USB Driver found, Version %d.%d, Mode: %d, GPS Serial# %u\n"
 			,  maj_ver, min_ver, mode, serial);
 	    break;
 	default:
