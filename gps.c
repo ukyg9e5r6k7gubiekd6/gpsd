@@ -336,7 +336,8 @@ void init_list()
  */
 
 static struct gps_data_t *gpsdata;
-static int offline_timer;	/* time since last state change in seconds*/
+static int timer;	/* time since last state change in seconds*/
+static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D= 3 */
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
@@ -345,7 +346,7 @@ static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 
 void update_display(char *message)
 {
-    int i;
+    int i, newstate;
     XmString string[12];
     char s[128], *sp;
 
@@ -399,12 +400,12 @@ void update_display(char *message)
 
     if (!gpsdata->online)
     {
-	sprintf(s, "OFFLINE (%d secs)", offline_timer);
-	alarm(1);
+	newstate = 0;
+	sprintf(s, "OFFLINE");
     }
     else
     {
-	offline_timer = 0;
+	newstate = gpsdata->mode;
 	switch (gpsdata->mode) {
 	case 2:
 	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
@@ -417,6 +418,12 @@ void update_display(char *message)
 	    break;
 	}
     }
+    if (newstate != state)
+    {
+	timer = 0;
+	state = newstate;
+    }
+    sprintf(s + strlen(s), " (%d secs)", timer);
     XmTextFieldSetString(text_7, s);
 
     draw_graphics(gpsdata);
@@ -424,8 +431,9 @@ void update_display(char *message)
 
 static void handle_alarm(int sig)
 {
-    offline_timer++;
+    timer++;
     update_display("");
+    alarm(1);
 }
 
 int main(int argc, char *argv[])
@@ -477,6 +485,7 @@ int main(int argc, char *argv[])
 			     handle_input, NULL);
 
     signal(SIGALRM, handle_alarm);
+    alarm(1);
     XtAppMainLoop(app);
 
     gps_close(gpsdata);
