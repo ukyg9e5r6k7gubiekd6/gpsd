@@ -51,8 +51,6 @@
 extern void register_canvas(Widget w, GC gc);
 extern void draw_graphics(struct gps_data *gpsdata);
 
-struct gpsd_t session;
-
 void update_display(char *message);
 
 /* global variables */
@@ -102,34 +100,9 @@ extern void redraw();
 
 void quit_cb()
 {
-    gps_close();
-    exit(0);
+    exit(0);	/* closes the GPS along with other fds */
 }
 
-void gpscli_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    char buf[BUFSIZ];
-    va_list ap;
-
-    strcpy(buf, "gpsd: ");
-    va_start(ap, fmt) ;
-#ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-#else
-    vsprintf(buf + strlen(buf), fmt, ap);
-#endif
-    va_end(ap);
-
-    if (errlevel > session.debug)
-	return;
-
-    fputs(buf, stderr);
-}
-
-/**************************************************
-* Function: get_pixel
-**************************************************/
 Pixel
 get_pixel(Widget w, char *resource_value)
 {
@@ -149,9 +122,6 @@ get_pixel(Widget w, char *resource_value)
     return (color.pixel);
 }
 
-/**************************************************
-* Function: build_gui
-**************************************************/
 static void build_gui(Widget lxbApp)
 {
     int n;
@@ -331,9 +301,6 @@ static void build_gui(Widget lxbApp)
 
 }
 
-/**************************************************
-* Function: init_list
-**************************************************/
 void init_list()
 {
     int i;
@@ -349,17 +316,38 @@ void init_list()
     }
 }
 
-/**************************************************
-* Function: handle_input
-**************************************************/
+/*
+ * No dependencies on the session structure above this point.
+ */
+
+struct gpsd_t session;
+
+void gpscli_report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    strcpy(buf, "gpsd: ");
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+
+    if (errlevel > session.debug)
+	return;
+
+    fputs(buf, stderr);
+}
+
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
     gps_poll(&session);
 }
 
-/**************************************************
-* Function: update_display
-**************************************************/
 void update_display(char *message)
 {
     int i;
@@ -425,9 +413,6 @@ void update_display(char *message)
     draw_graphics(&session.gNMEAdata);
 }
 
-/**************************************************
-* Function: main
-**************************************************/
 int main(int argc, char *argv[])
 {
     XtAppContext app;
@@ -503,6 +488,12 @@ int main(int argc, char *argv[])
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc) quit_cb, (XtPointer) NULL);
 
+    init_list();
+
+    /*
+     * Essentially all the interface to libgps happens below here
+     */
+
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
     session.gNMEAdata.raw_hook = update_display;
@@ -511,8 +502,6 @@ int main(int argc, char *argv[])
 
     XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
-
-    init_list();
 
     XtAppMainLoop(app);
 
