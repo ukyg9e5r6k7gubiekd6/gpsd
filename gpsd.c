@@ -389,26 +389,21 @@ static int handle_request(int fd)
     return cc;
 }
 
-void gps_send_NMEA(fd_set *afds, fd_set *nmea_fds, char *buf)
+static void raw_hook(char *buf)
 /* copy raw NMEA sentences from GPS */
 {
     int fd;
 
     for (fd = 0; fd < getdtablesize(); fd++) {
-	if (FD_ISSET(fd, nmea_fds)) {
+	if (FD_ISSET(fd, &nmea_fds)) {
 	    gpscli_report(1, "=> client: %s", buf);
 	    if (write(fd, buf, strlen(buf)) < 0) {
 		gpscli_report(1, "Raw write %s", strerror(errno));
-		FD_CLR(fd, afds);
-		FD_CLR(fd, nmea_fds);
+		FD_CLR(fd, &afds);
+		FD_CLR(fd, &nmea_fds);
 	    }
 	}
     }
-}
-
-static void raw_hook(char *buf)
-{
-    gps_send_NMEA(&afds, &nmea_fds, buf);
 }
 
 int main(int argc, char *argv[])
