@@ -410,9 +410,9 @@ int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
 	    processGPGGA(sentence, outdata);
 	} else if (strncmp(GPGLL, sentence, 5) == 0) {
-	    processPMGNST(sentence, outdata);
-	} else if (strncmp(PMGNST, sentence, 5) == 0) {
 	    processGPGLL(sentence, outdata);
+	} else if (strncmp(PMGNST, sentence, 5) == 0) {
+	    processPMGNST(sentence, outdata);
 	} else if (strncmp(GPVTG, sentence, 5) == 0) {
 	    processGPVTG(sentence, outdata);
 	} else if (strncmp(GPGSA, sentence, 5) == 0) {
