@@ -79,6 +79,8 @@ static void build_gui(Widget lxbApp)
     Arg args[100];
     XGCValues gcv;
     Atom delw;
+    int i;
+    XmString string;
 
     /* the root application window */
     XtSetArg(args[0], XmNgeometry, "630x460");
@@ -221,18 +223,11 @@ static void build_gui(Widget lxbApp)
     delw = XmInternAtom(XtDisplay(lxbApp), "WM_DELETE_WINDOW", False);
     XmAddWMProtocolCallback(lxbApp, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
-}
 
-void init_list()
-{
-    int i;
-    XmString string;
-
-    for (i = 0; i < MAXCHANNELS; i++) {
-	string = XmStringCreateSimple(" ");
+    string = XmStringCreateSimple(" ");
+    for (i = 0; i < MAXCHANNELS; i++)
 	XmListAddItem(satellite_list, string, i+1);
-	XmStringFree(string);
-    }
+    XmStringFree(string);
 }
 
 /*
@@ -377,7 +372,6 @@ int main(int argc, char *argv[])
 
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
     build_gui(lxbApp);
-    init_list();
 
     gps_set_raw_hook(gpsdata, update_display);
     gps_query(gpsdata, "w+x\n");
