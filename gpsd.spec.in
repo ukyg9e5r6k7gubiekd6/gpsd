@@ -124,7 +124,7 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Mon Feb 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.13-1
 - Correct a bug in binary-protocol dumping (applies to Zodiac and
   Garmin only).  Gary Miller's patch to deal gracefully with GPSes
   like the Magellan EC10X that send only GPRMC and never GPGGA or
