@@ -196,7 +196,7 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
     gps_poll(gpsdata);
 }
 
-static int update_panel(char *message)
+static void update_panel(char *message)
 /* runs on each sentence */
 {
     int i, newstate;
@@ -265,7 +265,6 @@ static int update_panel(char *message)
 
     XtRemoveTimeOut(timeout);
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
-    return 0;
 }
 
 int main(int argc, char *argv[])

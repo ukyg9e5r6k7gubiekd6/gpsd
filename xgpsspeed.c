@@ -25,10 +25,9 @@ String fallback_resources[] = {NULL};
 static struct gps_data_t *gpsdata;
 static Widget tacho;
 
-static int update_display(char *buf UNUSED)
+static void update_display(char *buf UNUSED)
 {
     TachometerSetValue(tacho, rint(gpsdata->speed * KNOTS_TO_MPH));
-    return 0;
 }
 
 static void handle_input(XtPointer client_data UNUSED,

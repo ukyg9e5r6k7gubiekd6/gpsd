@@ -46,7 +46,7 @@ int gps_close(struct gps_data_t *gpsdata)
     return close(gpsdata->gps_fd);
 }
 
-void gps_set_raw_hook(struct gps_data_t *gpsdata, int (*hook)(char *buf))
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
 {
     gpsdata->raw_hook = hook;
 }
