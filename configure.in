@@ -24,19 +24,16 @@ AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
 
 dnl Check for X libraries
-dnl
 AC_PATH_XTRA
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
 CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 LDFLAGS="$LDFLAGS $X_LIBS"
-dnl
 AC_SUBST(X_LIBS)
 AC_SUBST(X11_LIBS)
 AC_SUBST(X_PRE_LIBS)
 
 dnl Check for some auxiliary X libraries we'll need
-dnl
 AC_CHECK_LIB(Xt, XtToolkitInitialize, XT_LIBS="-lXt",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XT_LIBS)
@@ -52,7 +49,6 @@ AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
 AC_SUBST(XPM_LIBS)
 
 dnl Check for Motif widget libraries
-dnl
 XM_LIBS=""
 XP_LIBS=""
 if test "$motif_includes" != "no" && test "$motif_libraries" != "no"
