@@ -41,37 +41,35 @@ class gpsdata:
 
     def __init__(self):
 	# Initialize all data members 
-	now = time.time()
-
 	self.online = False			# True if GPS on, False if not
-	self.online_stamp = gps.timestamp(now)
+	self.online_stamp = gps.timestamp(0)
 
         self.utc = ""
 
 	self.latitude = self.longitude = 0.0
-	self.latlon_stamp = gps.timestamp(now)
+	self.latlon_stamp = gps.timestamp(0)
 
 	self.altitude = 0.0			# Meters
-	self.altitude_stamp = gps.timestamp(now)
+	self.altitude_stamp = gps.timestamp(0)
 
 	self.speed = 0.0			# Knots
-	self.speed_stamp = gps.timestamp(now)
+	self.speed_stamp = gps.timestamp(0)
 
 	self.track = 0.0			# Degrees from true north
-	self.track_stamp = gps.timestamp(now)
+	self.track_stamp = gps.timestamp(0)
 
 	self.status = STATUS_NO_FIX
-	self.status_stamp = gps.timestamp(now)
+	self.status_stamp = gps.timestamp(0)
 
 	self.mode = MODE_NO_FIX
-	self.mode_stamp = gps.timestamp(now)
+	self.mode_stamp = gps.timestamp(0)
 
 	self.satellites_used = 0		# Satellites used in last fix
 	self.pdop = self.hdop = self.vdop = 0.0
-	self.fix_quality_stamp = gps.timestamp(now)
+	self.fix_quality_stamp = gps.timestamp(0)
 
 	self.satellites = []			# satellite objects in view
-	self.satellite_stamp = gps.timestamp(now)
+	self.satellite_stamp = gps.timestamp(0)
         self.await = self.parts = 0
 
         self.gps_id = None

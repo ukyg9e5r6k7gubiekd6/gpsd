@@ -236,8 +236,7 @@ class NMEA:
         else:
             return self.logger(0, "Not NMEA\n")
 
-    def handler(self, fd, raw_hook):
-        linebuf = os.read(fd, gps.NMEA_MAX)
+    def handler(self, linebuf, raw_hook):
         self.handle_line(linebuf[:-2])
         if raw_hook:
             raw_hook(linebuf)
@@ -294,14 +293,21 @@ class gpsd(gps.gpsdata):
     def send(self, buf):
         os.write(self.ttyfd, self.parser.add_checksum(buf))
 
+    def readline(self):
+        buf = ""
+        while len(buf) < gps.NMEA_MAX:
+            buf += os.read(self.ttyfd, gps.NMEA_MAX-len(buf))
+            if buf.endswith("\r\n"):
+                break
+        return buf
+
     def set_speed(self, speed):
         self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
         termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
         termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
         termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
         time.sleep(1)
-        firstline = os.read(self.ttyfd, gps.NMEA_MAX*2)
-        if firstline.find("$GP") > -1:
+        if self.readline().find("$GP") > -1:
             self.bps = speed
             return 1
         else:
@@ -383,7 +389,7 @@ class gpsd(gps.gpsdata):
         else:
             self.online = True
             self.online_stamp.refresh()
-            self.devtype.parser.handler(self.ttyfd, self.raw_hook)
+            self.devtype.parser.handler(self.readline(), self.raw_hook)
 
             # count the good fixes
             if self.status > gps.STATUS_NO_FIX: 
