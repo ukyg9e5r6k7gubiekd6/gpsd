@@ -149,7 +149,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[3], XmNbottomAttachment, XmATTACH_NONE);
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[6], XmNheight, 204);
+    XtSetArg(args[6], XmNheight, 220);
     XtSetArg(args[7], XmNwidth, 100);
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
@@ -162,7 +162,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[3], XmNbottomAttachment, XmATTACH_NONE);
     XtSetArg(args[4], XmNleftAttachment, XmATTACH_WIDGET);
     XtSetArg(args[5], XmNtopAttachment, XmATTACH_FORM);
-    XtSetArg(args[6], XmNheight, 204);
+    XtSetArg(args[6], XmNheight, 220);
     XtSetArg(args[7], XmNwidth, 80);
     XtSetArg(args[8], XmNlistSizePolicy, XmCONSTANT);
     XtSetArg(args[9], XmNhighlightThickness, 0);
@@ -207,7 +207,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[10], XmNleftAttachment, XmATTACH_FORM);
     XtSetArg(args[11], XmNtopAttachment, XmATTACH_WIDGET);
     XtSetArg(args[12], XmNtopWidget, list_7);
-    XtSetArg(args[13], XmNheight, 30);
+    XtSetArg(args[13], XmNheight, 12);
     rowColumn_10 = XtCreateManagedWidget("rowColumn_10", xmRowColumnWidgetClass, form_6, args, 14);
 
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
