@@ -630,6 +630,49 @@ int len;
 	wprintw(debugwin, "\n");
     	break;
 
+    case 0x1b:
+	/******************************************************************
+	 Not actually documented in any published materials.
+	 Here is what Chris Kuethe got from the SiRF folks:
+
+	Start of message
+	----------------
+	Message ID          1 byte    27
+	Correction Source   1 byte    0=None, 1=SBAS, 2=Serial, 3=Beacon,
+	4=Software
+
+	total:              2 bytes
+
+	Middle part of message varies if using beacon or other:
+	-------------------------------------------------------
+	If Beacon:
+	Receiver Freq Hz    4 bytes
+	Bit rate BPS        1 byte
+	Status bit map      1 byte    01=Signal Valid,
+				     02=Auto frequency detect
+				     04=Auto bit rate detect
+	Signal Magnitude    4 bytes   Note: in internal units
+	Signal Strength dB  2 bytes   derived from Signal Magnitude
+	SNR  dB             2 bytes
+
+	total:             14 bytes
+
+	If Not Beacon:
+	Correction Age[12]  1 byte x 12  Age in seconds in same order as follows
+	Reserved            2 bytes
+
+	total:             14 bytes
+
+	End of Message
+	--------------
+	Repeated 12 times (pad with 0 if less than 12 SV corrections):
+	SVID                1 byte
+	Correction (m)      1 byte
+
+	total               2 x 12 = 24 bytes
+	******************************************************************/
+	break;
+
 #ifdef __UNUSED__
     case 0x62:
 	attrset(A_BOLD);
