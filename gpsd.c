@@ -160,6 +160,8 @@ static void usage()
     for (dp = gpsd_drivers; *dp; dp++)
 	if ((*dp)->typekey)
 	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
+#else
+    printf("This gpsd was compiled with support for NMEA only.");
 #endif /* NON_NMEA_ENABLE */
 }
 
