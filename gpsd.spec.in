@@ -105,7 +105,7 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
-* Sat Mar 06 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
+* Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2/19-1
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use
   SBAS.  sirfmon now displays SBAS parameters, and is included in the
   installed programs.  Add to FAQ a fix for spurious high speeds reported
