@@ -1,10 +1,10 @@
-* Testing on EarthMate and TripMate
+* Debugging EarthMate support
 
-Would somebody please test the device types that aren't straight NMEA?
-(This translates as: Hey, you, Russ!  Get off your tuchis! :-))
+Russ reports it isn't working.
 
-Remco has suggested that maybe it's time to forget about this ancient
-hardware.  Perhaps he's right.  
+* Integrate M8 support
+
+See <http://trans.civil.northwestern.edu/~jay/gpsd.html>.
 
 * Do the research to figure out just what the heck is going on with status bits
 
