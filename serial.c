@@ -70,7 +70,7 @@ int gps_open(char *device_name, int device_speed)
 
 	if (write(ttyfd, "r\n", 2) != 2)
 	{
-	    gpscli_report(0, "Can't write to socket");
+	    gpscli_report(0, "Can't write to socket\n");
 	    return (-1);
 	}
     } else {
