@@ -48,6 +48,13 @@ void gpsd_close(struct gps_session_t *session)
 It looks as though there may be something wrong with cfsetispeed() and/or 
 cfsetospeed() in rea's environment.
 
+** gps.py/gpsd.py has an arithmetic bug in the EarthDistance formula
+
+This one is hard to figure out because it's nondeterministic -- adjacent
+runs of gpsprobe at the same spot may get it or not.  It may be
+a trig function overflow.  The symptom is Value Error thrown within
+EarthDistance (actually within MeterOffset).
+
 ** Do the research to figure out just what the heck is going on with status bits
 
 NMEA actually has *three* kinds of validity bits.  Mode, status, and the

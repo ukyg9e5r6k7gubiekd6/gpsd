@@ -118,9 +118,14 @@ class NMEA:
     def processGPGSA(self,words):
         self.data.mode = int(words[1])
         self.data.satellites_used = map(int, filter(lambda x: x, words[2:14]))
-        self.data.pdop = float(words[14])
-        self.data.hdop = float(words[15])
-        self.data.vdop = float(words[16])
+        if words[14]:
+            self.data.pdop = float(words[14])
+        if words[15]:
+            self.data.hdop = float(words[15])
+        if words[16]:
+            self.data.vdop = float(words[16])
+        if words[14] and words[15] and words[16]:
+            self.fix_quality_stamp.refresh()
         self.logger(3, "GPGGA sets mode %d\n" % self.data.mode)
 
     def processGPGVTG(self, words):

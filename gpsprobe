@@ -61,7 +61,7 @@ if __name__ == '__main__':
     for (switch, val) in options:
 	if (switch == '-n'):
 	    await = int(val)
-        else (switch == '-h'):
+        elif (switch == '-h'):
             sys.stderr.write("usage: gpsprobe [-h] [-n samplecount] [device]\n")
     if arguments:
         device = arguments[0]
