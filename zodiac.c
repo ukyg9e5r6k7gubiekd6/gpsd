@@ -1,6 +1,5 @@
 /*
  * Handle the Rockwell binary packet format supported by the old Zodiac chipset
- * Everything exported from here is in the structure zodiac_binary at the end.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,8 +49,7 @@ static int end_write(int fd, void *d, int len)
     char *data = (char *)d;
 
     while (len>0) {
-	*p++ = *(data+1);
-	*p++ = *data;
+	*p++ = *(data+1); *p++ = *data;
 	data += 2;
 	len -= 2;
     }
@@ -86,7 +84,6 @@ static long putlong(char *dm, int sign)
     rad = (floor(tmpl/100) + (fmod(tmpl, 100.0)/60)) * 100000000*PI/180;
     if (sign)
 	rad = -rad;
-
     return rad;
 }
 
@@ -107,12 +104,8 @@ static void zodiac_init(struct gps_session_t *session)
       data[0] = session->sn;		/* sequence number */
       data[1] = (1 << 2) | (1 << 3);
       data[2] = data[3] = data[4] = 0;
-      data[5] = tm->tm_mday;
-      data[6] = tm->tm_mon + 1;
-      data[7] = tm->tm_year + 1900;
-      data[8] = tm->tm_hour;
-      data[9] = tm->tm_min;
-      data[10] = tm->tm_sec;
+      data[5] = tm->tm_mday; data[6] = tm->tm_mon+1; data[7]= tm->tm_year+1900; 
+      data[8] = tm->tm_hour; data[9] = tm->tm_min; data[10] = tm->tm_sec;
       *(long *) (data + 11) = putlong(session->initpos.latitude, (session->initpos.latd == 'S') ? 1 : 0);
       *(long *) (data + 13) = putlong(session->initpos.longitude, (session->initpos.lond == 'W') ? 1 : 0);
       data[15] = data[16] = 0;
@@ -166,19 +159,19 @@ static unsigned long getulong(void *p)
 
 static double degtodm(double a)
 {
-    double d, m, t;
-
-    d = floor(a);
+    double m, t;
     m = modf(a, &t);
-    t = d * 100 + m * 60;
+    t = floor(a) * 100 + m * 60;
     return t;
 }
 
 static void handle1000(struct gps_session_t *session, unsigned short *p)
 {
-#if 0
-    gpsd_report(1, "date: %d %d %d  %d:%d:%d\n",
+    sprintf(session->gNMEAdata.utc, "%04d/%02d/%dT%02d:%02d:%02dZ",
 	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
+
+#if 0
+    gpsd_report(1, "date: %s\n", session->gNMEAdata.utc);
     gpsd_report(1, "  solution invalid:\n");
     gpsd_report(1, "    altitude: %d\n", (p[O(10)] & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (p[O(10)] & 2) ? 1 : 0);
@@ -200,9 +193,6 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
     gpsd_report(1, "Separation: %f\n", (p[O(33)] / 100));
 #endif
 
-    sprintf(session->gNMEAdata.utc, "%02d/%02d/%d %02d:%02d:%02d",
-	    p[O(19)], p[O(20)], p[O(21)], p[O(22)], p[O(23)], p[O(24)]);
-
     session->mag_var = p[O(37)] * 180 / (PI * 10000);	/* degrees */
     session->gNMEAdata.track = p[O(36)] * 180 / (PI * 1000);	/* degrees */
 
@@ -222,11 +212,10 @@ static void handle1000(struct gps_session_t *session, unsigned short *p)
 
     session->gNMEAdata.status = (p[O(10)] & 0x1c) ? 0 : 1;
 
-    if (session->gNMEAdata.status) {
+    if (session->gNMEAdata.status)
 	session->gNMEAdata.mode = (p[O(10)] & 1) ? 2 : 3;
-    } else {
+    else
 	session->gNMEAdata.mode = 1;
-    }
     REFRESH(session->gNMEAdata.status_stamp);
     REFRESH(session->gNMEAdata.mode_stamp);
 
@@ -237,9 +226,8 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 {
     int i, j;
 
-    for (j = 0; j < MAXCHANNELS; j++) {
+    for (j = 0; j < MAXCHANNELS; j++)
 	session->gNMEAdata.used[j] = 0;
-    }
     session->gNMEAdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 	session->Zs[i] = p[O(16 + (3 * i))];
@@ -280,11 +268,8 @@ static void handle1003(struct gps_session_t *session, unsigned short *p)
 	    session->gNMEAdata.azimuth[j] = p[O(16 + (3 * j))] * 180 / (PI * 10000);
 	    session->gNMEAdata.elevation[j] = p[O(17 + (3 * j))] * 180 / (PI * 10000);
 #if 0
-	    gpsd_report(1, "Sat%02d:", i);
-	    gpsd_report(1, " PRN:%d", p[O(15 + (3 * i))]);
-	    gpsd_report(1, " az:%d", p[O(16 + (3 * i))]);
-	    gpsd_report(1, " el:%d", p[O(17 + (3 * i))]);
-	    gpsd_report(1, "\n");
+	    gpsd_report(1, "Sat%02d:  PRN:%d az:%d el:%d\n", 
+			i, p[O(15+(3*i))], p[O(16+(3*i))], p[O(17+(3*i))]);
 #endif
 	} else {
 	    session->gNMEAdata.PRN[j] = 0;
@@ -298,8 +283,7 @@ static void handle1003(struct gps_session_t *session, unsigned short *p)
 
 static void handle1005(struct gps_session_t *session, unsigned short *p)
 {
-  int i;
-  int numcorrections = p[O(12)];
+    int i, numcorrections = p[O(12)];
 
 #if 1
   gpsd_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
@@ -437,8 +421,7 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 {
     static int state = ZODIAC_HUNT_FF;
     static struct header h;
-    static unsigned int byte;
-    static unsigned int words;
+    static unsigned int byte, words;
     static unsigned short *data;
 
     switch (state) {
@@ -448,36 +431,30 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 	if (c == 'E')
 	    state = ZODIAC_HUNT_A;
 	break;
-
     case ZODIAC_HUNT_A:
 	/* A better be right after E */
         if ((c == 'A') && (session->gNMEAdata.gps_fd != -1))
 	    write(session->gNMEAdata.gps_fd, "EARTHA\r\n", 8);
 	state = ZODIAC_HUNT_FF;
 	break;
-
     case ZODIAC_HUNT_81:
 	if (c == 0x81)
 	    state = ZODIAC_HUNT_ID;
 	h.sync = 0x81ff;
 	byte = 0;
 	break;
-
     case ZODIAC_HUNT_ID:
 	if (!(byte = putword(&(h.id), c, byte)))
 	    state = ZODIAC_HUNT_WC;
 	break;
-
     case ZODIAC_HUNT_WC:
 	if (!(byte = putword(&(h.ndata), c, byte)))
 	    state = ZODIAC_HUNT_FLAGS;
 	break;
-
     case ZODIAC_HUNT_FLAGS:
 	if (!(byte = putword(&(h.flags), c, byte)))
 	    state = ZODIAC_HUNT_CS;
 	break;
-
     case ZODIAC_HUNT_CS:
 	if (!(byte = putword(&(h.csum), c, byte))) {
 	    if (h.csum == zodiac_checksum((unsigned short *) &h, 4)) {
@@ -488,7 +465,6 @@ static void zodiac_eat(struct gps_session_t *session, unsigned char c)
 		state = ZODIAC_HUNT_FF;
 	}
 	break;
-
     case ZODIAC_HUNT_DATA:
 	if (!(byte = putword(data + words, c, byte)))
 	    words++;

@@ -113,8 +113,7 @@ int gpsd_activate(struct gps_session_t *session)
 {
     if ((session->gNMEAdata.gps_fd = gpsd_open(session->gpsd_device, session->baudrate, session->device_type->stopbits)) < 0)
 	return -1;
-    else
-    {
+    else {
 	session->gNMEAdata.online = 1;
 	REFRESH(session->gNMEAdata.online_stamp);
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gNMEAdata.gps_fd);
@@ -140,8 +139,7 @@ int gpsd_poll(struct gps_session_t *session)
     int waiting;
 
     /* accept a DGPS correction if one is pending */
-    if (is_input_waiting(session->dsock) > 0)
-    {
+    if (is_input_waiting(session->dsock) > 0) {
 	char buf[BUFSIZE];
 	int rtcmbytes;
 
@@ -150,11 +148,8 @@ int gpsd_poll(struct gps_session_t *session)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
 		gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
-	}
-	else 
-	{
+	} else
 	    gpsd_report(1, "Read from rtcm source failed\n");
-	}
     }
 
     /* update the scoreboard structure from the GPS */
@@ -185,10 +180,8 @@ int gpsd_poll(struct gps_session_t *session)
 	if (session->fixcnt > 10) {
 	    if (!session->sentdgps) {
 		session->sentdgps++;
-		if (session->dsock > -1)
-		{
+		if (session->dsock > -1) {
 		  char buf[BUFSIZE];
-
 		  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
 			  session->gNMEAdata.latitude,
 			  session->gNMEAdata.longitude, 
