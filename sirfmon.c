@@ -304,10 +304,8 @@ int len;
 	move(3,6);
 	printw("%8.1f %8.1f %8.1f",
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
-#ifdef DECODE_ECEF
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
 		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
-#endif
 	move(6,6);
 	printw("%4.1f",(float)getb(20)/5);
 	move(6,15);
@@ -546,10 +544,7 @@ int len;
     }
 }
 
-void
-decode_time(week,tow)
-int week,tow;
-
+void decode_time(int week, int tow)
 {
     int day = tow / 8640000;
     int tod = tow % 8640000;
@@ -560,8 +555,8 @@ int week,tow;
     m = (m - s) / 6000;
 
     move(4,7);
-    printw("%4d %9.2f %d %02d:%02d:%05.2f",week,(double)tow/100,day,
-    	h,m,(float)s/100);
+    printw("%4d+%9.2f   UTC: %d %02d:%02d:%05.2f",
+	   week,(double)tow/100,day, h,m,(float)s/100);
 }
 
 void
@@ -717,11 +712,7 @@ int readpkt(unsigned char *buf)
     return len;
 }
 
-int
-sendpkt (buf,len)
-unsigned char *buf;
-int len;
-
+int sendpkt (unsigned char *buf, int len)
 {
     int i,csum;
 
