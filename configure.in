@@ -13,6 +13,19 @@ AC_PROG_CPP
 
 AC_CHECK_HEADERS(termio.h sys/param.h termios.h sys/termios.h sys/select.h strings.h path.h)
 
+
+dnl
+dnl Locate Net Libraries
+dnl
+AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
+AC_SUBST(LIBNSL)
+dnl
+AC_CHECK_LIB(socket, socket, LIBSOCKET="-lsocket")
+AC_SUBST(LIBSOCKET)
+dnl
+dnl
+
+
 dnl
 dnl Locate Libraries
 dnl

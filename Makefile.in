@@ -43,6 +43,10 @@ LIBC       = @LIBC@
 # All libraries shown above
 LIBS = $(LIBM) $(LIBC)
 
+# Network libraries
+LIBNSL = @LIBNSL@
+LIBSOCKET = @LIBSOCKET@
+NETLIBS = $(LIBNSL) $(LIBSOCKET)
 
 ## X Libraries
 
@@ -111,7 +115,7 @@ PROGRAMS=gpsd
 all: $(PROGRAMS) $(MOTIF_PROGRAMS)
 
 gpsd: gpsd.o libgpsd.a
-	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(LIBS)
+	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
 
 gps: gps.o libgpsd.a
 	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
