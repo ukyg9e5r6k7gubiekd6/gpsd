@@ -490,9 +490,6 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
 	{"PGRME", PGRME,	processPGRME},
-	{"GPVTG", 0,		NULL},	/* duplicates info in GPRMC */
-	{"GPRMB", 0,    	NULL},
-	{"PRWIZCH", 0,  	NULL},
     };
 
     int retval = 0;
@@ -526,8 +523,11 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
         if (!strcmp(nmea_phrase[i].name, field[0])) {
-	    if (nmea_phrase[i].decoder)
+	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
+		strcpy(outdata->tag, nmea_phrase[i].name);
+		outdata->sentence_length = strlen(sentence);
+	    }
 	    if (nmea_phrase[i].mask)
 		outdata->seen_sentences |= nmea_phrase[i].mask;
 	    break;

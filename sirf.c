@@ -252,6 +252,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
+	    session->gpsdata.sentence_length = 41;
+	    strcpy(session->gpsdata.tag, "MND");
 	    return mask | TIME_SET | LATLON_SET | STATUS_SET | MODE_SET | DOP_SET;
 	}
 
@@ -293,6 +295,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
+	session->gpsdata.sentence_length = 188;
+	strcpy(session->gpsdata.tag, "MTD");
 	return SATELLITE_SET;
 
     case 0x09:		/* CPU Throughput */
@@ -425,6 +429,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
+	    session->gpsdata.sentence_length = 91;
+	    strcpy(session->gpsdata.tag, "GND");
 	}
 	return mask;
 

@@ -237,7 +237,7 @@ plot \\
 
 formatters = (spaceplot, rawplot, splitplot, uninstrumented)
 
-def timeplot(await, fname, file, speed, threshold, title):
+def plotframe(await, fname, file, speed, threshold, title):
     "Return a string containing a GNUplot script "
     if file:
         out = open(file, "w")
@@ -327,7 +327,7 @@ if __name__ == '__main__':
                     "usage: gpsprof [-h] [-r] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-o file]\n")
                 sys.exit(0)
-        (out, gnuplot) = timeplot(await,formatter,file,speed,threshold,title)
+        (out, gnuplot) = plotframe(await,formatter,file,speed,threshold,title)
         if not raw:
             if terminal:
                 gnuplot = "set terminal " + terminal + "\n" + gnuplot

@@ -154,12 +154,12 @@ static int handle1000(struct gps_session_t *session)
     gpsd_report(1, "Number of measurements in solution: %d\n", getw(12));
     gpsd_report(1, "Lat: %f\n", getl(27) * RAD_2_DEG * 1e-8);
     gpsd_report(1, "Lon: %f\n", getl(29) * RAD_2_DEG * 1e-8);
-    gpsd_report(1, "Alt: %f\n", (double) getl(31) * 1e-2;
-    gpsd_report(1, "Speed: %f\n", (double) getl(34) * 1e-2 * MPS_TO_KNOTS;
+    gpsd_report(1, "Alt: %f\n", (double) getl(31) * 1e-2);
+    gpsd_report(1, "Speed: %f\n", (double) getl(34) * 1e-2 * MPS_TO_KNOTS);
     gpsd_report(1, "Map datum: %d\n", getw(39));
-    gpsd_report(1, "Magnetic variation: %f\n", getw(37) * RAD_2_DEG * 1e-4;
-    gpsd_report(1, "Course: %f\n", getw(36) * RAD_2_DEG * 1e-4;
-    gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2;
+    gpsd_report(1, "Magnetic variation: %f\n", getw(37) * RAD_2_DEG * 1e-4);
+    gpsd_report(1, "Course: %f\n", getw(36) * RAD_2_DEG * 1e-4);
+    gpsd_report(1, "Separation: %f\n", getw(33) * 1e-2);
 #endif
 
     session->hours = getw(22); 
@@ -185,6 +185,8 @@ static int handle1000(struct gps_session_t *session)
 	session->gpsdata.fix.mode = MODE_NO_FIX;
     session->separation = getw(33) * 1e-2;	/* meters */
 
+    session->gpsdata.sentence_length = 55;
+    strcpy(session->gpsdata.tag, "1000");
     return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET;
 }
 

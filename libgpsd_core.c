@@ -203,16 +203,6 @@ void gpsd_zero_satellites(struct gps_data_t *out)
 
 void gpsd_raw_hook(struct gps_session_t *session, char *sentence)
 {
-    char *sp, *tp;
-    if (sentence[0] != '$')
-	session->gpsdata.tag[0] = '\0';
-    else {
-	for (tp = session->gpsdata.tag, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
-	    *tp = *sp;
-	*tp = '\0';
-    }
-    session->gpsdata.sentence_length = strlen(sentence);
-
     if (session->gpsdata.raw_hook) {
 	session->gpsdata.raw_hook(&session->gpsdata, sentence);
     }
