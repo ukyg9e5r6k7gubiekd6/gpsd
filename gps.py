@@ -45,22 +45,38 @@ class gpstimings:
     def __init__(self):
         self.tag = ""
         self.length = 0
-        self.gps_time = 0.0
+        self.sentence_time = 0.0
         self.d_recv_time = 0
         self.d_decode_time = 0
         self.emit_time = 0
         self.poll_time = 0
         self.c_recv_time = 0
         self.c_decode_time = 0
-    def collect(self, tag, length, gps_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
+    def collect(self, tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
         self.tag = tag
         self.length = int(length)
-        self.gps_time = float(gps_time)
+        self.sentence_time = float(sentence_time)
         self.d_xmit_time = float(xmit_time)
         self.d_recv_time = float(recv_time)
         self.d_decode_time = float(decode_time)
         self.poll_time = float(poll_time)
         self.emit_time = float(emit_time)
+
+class gpsfix:
+    def __init__(self):
+	self.mode = MODE_NO_FIX
+        self.time = 0.0
+        self.ept = 0.0
+	self.latitude = self.longitude = 0.0
+        self.eph = 0.0
+	self.altitude = ALTITUDE_NOT_VALID	# Meters
+        self.epv = 0.0
+	self.track = TRACK_NOT_VALID		# Degrees from true north
+	self.speed = 0.0			# Knots
+	self.climb = 0.0			# Meters per second
+        self.epd = 0.0
+        self.eps = 0.0
+        self.epc = 0.0
 
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
@@ -79,16 +95,9 @@ class gpsdata:
 	# Initialize all data members 
 	self.online = 0			# NZ if GPS on, zero if not
 
-	self.mode = MODE_NO_FIX
-	self.latitude = self.longitude = 0.0
-        self.eph = 0.0
-	self.altitude = ALTITUDE_NOT_VALID	# Meters
-        self.epv = 0.0
-	self.track = TRACK_NOT_VALID		# Degrees from true north
-	self.speed = 0.0			# Knots
-	self.climb = 0.0			# Meters per second
-
         self.valid = 0
+        self.fix = gpsfix()
+        
 	self.status = STATUS_NO_FIX
         self.utc = ""
 
@@ -110,18 +119,18 @@ class gpsdata:
 
     def __repr__(self):
 	st = ""
-	st += "Lat/lon:  %f %f\n" % (self.latitude, self.longitude)
-        if self.altitude == ALTITUDE_NOT_VALID:
+	st += "Lat/lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
+        if self.fix.altitude == ALTITUDE_NOT_VALID:
             st += "Altitude: ALTITUDE_NOT_VALID\n"
         else:
-            st += "Altitude: %f\n" % (self.altitude)
-	st += "Speed:    %f\n" % (self.speed)
+            st += "Altitude: %f\n" % (self.fix.altitude)
+	st += "Speed:    %f\n" % (self.fix.speed)
         if self.track == TRACK_NOT_VALID:
             st += "Track:    TRACK_NOT_VALID\n"
         else:
-            st += "Track:    %f\n" % (self.track)
+            st += "Track:    %f\n" % (self.fix.track)
 	st += "Status:   STATUS_%s\n" %("NO_FIX","FIX","DGPS_FIX")[self.status]
-	st += "Mode:     MODE_"+("ZERO", "NO_FIX", "2D","3D")[self.mode]+"\n"
+	st += "Mode:     MODE_"+("ZERO", "NO_FIX", "2D","3D")[self.fix.mode]+"\n"
 	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f\n" % \
               (self.satellites_used, self.pdop, self.hdop, self.vdop)
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
@@ -198,7 +207,7 @@ class gps(gpsdata):
 	    if data[0] == "?":
 		continue
 	    if cmd in ('A', 'a'):
-	      self.altitude = float(data)
+	      self.fix.altitude = float(data)
               self.valid |= ALTITUDE_SET
 	    elif cmd in ('B', 'b'):
               (f1, f2, f3, f4) = data.split()
@@ -212,57 +221,57 @@ class gps(gpsdata):
               self.valid |= TIME_SET
 	    elif cmd in ('E', 'e'):
 	      parts = data.split()
-	      (self.epe, self.eph, self.epv) = map(float, parts)
+	      (self.epe, self.fix.eph, self.fix.epv) = map(float, parts)
               self.valid |= HERR_SET | VERR_SET | PERR_SET
 	    elif cmd in ('I', 'i'):
 	      self.gps_id = data
 	    elif cmd in ('M', 'm'):
-	      self.mode = int(data)
+	      self.fix.mode = int(data)
               self.valid |= MODE_SET
 	    elif cmd in ('N', 'n'):
 	      self.driver_mode = int(data)
 	    elif cmd in ('O', 'o'):
                 fields = data.split()
                 if fields[0] == '?':
-                    self.mode = MODE_NO_FIX
+                    self.fix.mode = MODE_NO_FIX
                 else:
-                    self.gps_time = float(fields[0])
-                    self.ept = float(fields[1])
-                    self.latitude = float(fields[2])
-                    self.longitude = float(fields[3])
+                    self.fix.time = float(fields[0])
+                    self.fix.ept = float(fields[1])
+                    self.fix.latitude = float(fields[2])
+                    self.fix.longitude = float(fields[3])
                     def default(i, d):
                         if fields[i] == '?':
                             return d
                         else:
                             return float(fields[i])
-                    self.altitude = default(4, ALTITUDE_NOT_VALID)
-                    if self.altitude == ALTITUDE_NOT_VALID:
-                        self.mode = MODE_2D
+                    self.fix.altitude = default(4, ALTITUDE_NOT_VALID)
+                    if self.fix.altitude == ALTITUDE_NOT_VALID:
+                        self.fix.mode = MODE_2D
                     else:
-                        self.mode = MODE_3D
-                    self.eph = default(5, 0.0)
-                    self.epv = default(6, 0.0)
-                    self.track = default(7, TRACK_NOT_VALID)
-                    self.speed = default(8, 0.0)
-                    self.climb = default(9, 0.0)
-                    self.epd = default(10, 0.0)
-                    self.eps = default(11, 0.0)
-                    self.epc = default(12, 0.0)
+                        self.fix.mode = MODE_3D
+                    self.fix.eph = default(5, 0.0)
+                    self.fix.epv = default(6, 0.0)
+                    self.fix.track = default(7, TRACK_NOT_VALID)
+                    self.fix.speed = default(8, 0.0)
+                    self.fix.climb = default(9, 0.0)
+                    self.fix.epd = default(10, 0.0)
+                    self.fix.eps = default(11, 0.0)
+                    self.fix.epc = default(12, 0.0)
                     self.valid |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
-                    if self.mode == MODE_3D:
+                    if self.fix.mode == MODE_3D:
                         self.valid |= ALTITUDE_SET | CLIMB_SET
-                    if self.eph:
+                    if self.fix.eph:
                         self.valid |= HERR_SET
-                    if self.epv:
+                    if self.fix.epv:
                         self.valid |= VERR_SET
-                    if self.track != TRACK_NOT_VALID:
+                    if self.fix.track != TRACK_NOT_VALID:
                         self.valid |= TRACK_SET | SPEED_SET
-                    if self.eps:
+                    if self.fix.eps:
                         self.valid |= SPEEDERR_SET
-                    if self.epc:
+                    if self.fix.epc:
                         self.valid |= CLIMBERR_SET
 	    elif cmd in ('P', 'p'):
-	      (self.latitude, self.longitude) = map(float, data.split())
+	      (self.fix.latitude, self.fix.longitude) = map(float, data.split())
               self.valid |= LATLON_SET
 	    elif cmd in ('Q', 'q'):
 	      parts = data.split()
@@ -273,13 +282,13 @@ class gps(gpsdata):
 	      self.status = int(data)
               self.valid |= STATUS_SET
 	    elif cmd in ('T', 't'):
-	      self.track = float(data)
+	      self.fix.track = float(data)
               self.valid |= TRACK_SET
 	    elif cmd in ('U', 'u'):
-	      self.climb = float(data)
+	      self.fix.climb = float(data)
               self.valid |= CLIMB_SET
 	    elif cmd in ('V', 'v'):
-	      self.speed = float(data)
+	      self.fix.speed = float(data)
               self.valid |= SPEED_SET
 	    elif cmd in ('X', 'x'):
 	      self.online = (data[0] == '1')
@@ -308,8 +317,8 @@ class gps(gpsdata):
             sys.stderr.write("GPS DATA %s\n" % repr(data))
         self.timings.c_recv_time = time.time()
 	self.__unpack(data)
-        if self.gps_time:
-            basetime = self.gps_time - tzoffset()
+        if self.timings.sentence_time:
+            basetime = self.sentence_time - tzoffset()
             self.timings.c_decode_time = time.time() - basetime
             self.timings.c_recv_time -= basetime
         return 0

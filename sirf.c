@@ -194,7 +194,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
-	    session->gpsdata.fix.time
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
 	    ntpshm_put(session, session->gpsdata.fix.time);
@@ -236,6 +236,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    good = session->gpsdata.PRN[st] && 
 		session->gpsdata.azimuth[st] && 
 		session->gpsdata.elevation[st];
+	    session->gpsdata.sentence_time
+		= gpstime_to_unix(getw(1), getl(5)*1e-2, -LEAP_SECONDS);
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
@@ -379,7 +381,8 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	    session->gpsdata.nmea_date.tm_min = getb(16);
 	    session->gpsdata.nmea_date.tm_sec = 0;
 	    session->gpsdata.subseconds = getw(17)*1e-3;
-	    session->gpsdata.fix.time=mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time
+		= mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;

@@ -131,6 +131,7 @@ struct gps_data_t {
     int profiling;		/* profiling enabled? */
     char tag[MAXNAMELEN+1];	/* tag of last sentence processed */
     int sentence_length;	/* character count of last sentence */
+    double sentence_time;	/* sentence timestamp */
     double d_xmit_time;		/* beginning of sentence transmission */
     double d_recv_time;		/* daemon receipt time (-> E1+T1) */
     double d_decode_time;	/* daemon end-of-decode time (-> D1) */

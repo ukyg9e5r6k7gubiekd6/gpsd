@@ -504,8 +504,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-    if (ud->profiling && (ud->valid & TIME_SET)) {
-	double fixtime = ud->fix.time - gmt_offset;
+    if (ud->profiling && ud->sentence_time) {
+	double fixtime = ud->sentence_time - gmt_offset;
 	sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
 		ud->tag,
 		ud->sentence_length,

@@ -315,10 +315,10 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     } else {
 	newstate = gpsdata->fix.mode;
 	switch (gpsdata->fix.mode) {
-	case 2:
+	case MODE_2D:
 	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
-	case 3:
+	case MODE_3D:
 	    sprintf(s, "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	default:

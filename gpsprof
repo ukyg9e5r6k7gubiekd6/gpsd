@@ -44,7 +44,7 @@ class spaceplot:
     def gather(self, session):
         # Include altitude, not used here, for 3D plot experiments.
         # Watch out for the ALTITUDE_NOT_VALID value from gps.py.
-        self.fixes.append((session.latitude, session.longitude, session.altitude))
+        self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
         return True
     def data(self, session):
         self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
@@ -314,7 +314,7 @@ def plotframe(await, fname, file, speed, threshold, title):
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()
-            if session.mode <= gps.MODE_NO_FIX:
+            if session.fix.mode <= gps.MODE_NO_FIX:
                 continue
             if countdown == await:
                 sys.stderr.write("gathering samples...")

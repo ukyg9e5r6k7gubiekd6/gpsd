@@ -143,7 +143,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
-	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = mktime(&out->nmea_date) + out->subseconds;
 	}
 	mask |= TIME_SET;
 	do_lat_lon(&field[3], out);
@@ -204,7 +204,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 
 	merge_hhmmss(field[5], out);
 	if (out->nmea_date.tm_year) {
-	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = mktime(&out->nmea_date) + out->subseconds;
 	    mask |= TIME_SET;
 	}
 	do_lat_lon(&field[1], out);
@@ -249,7 +249,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 
 	merge_hhmmss(field[1], out);
 	if (out->nmea_date.tm_year) {
-	    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = mktime(&out->nmea_date) + out->subseconds;
 	    mask |= TIME_SET;
 	}
 	do_lat_lon(&field[2], out);
@@ -422,7 +422,7 @@ static int processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
     out->nmea_date.tm_year = atoi(field[4]) - 1900;
     out->nmea_date.tm_mon = atoi(field[3]);
     out->nmea_date.tm_mday = atoi(field[2]);
-    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+    out->fix.time = out->sentence_time = mktime(&out->nmea_date) + out->subseconds;
     return TIME_SET;
 }
 

@@ -53,8 +53,8 @@ class NMEA:
             lon = intpart + frac * 100.0 / 60.0
             if words[3] == 'W':
                 lon = -lon
-        self.data.latitude = lat
-        self.data.longitude = lon
+        self.data.fix.latitude = lat
+        self.data.fix.longitude = lon
         return True
 
     # Three sentences, GGA and GGL and RMC, contain timestamps.
@@ -143,7 +143,7 @@ class NMEA:
 
     def processGPGSA(self,words):
         mask = 0
-        self.data.mode = int(words[1])
+        self.data.fix.mode = int(words[1])
         self.data.satellites_used = map(int, filter(lambda x: x, words[2:14]))
         (newpdop, newhdop, newvdop) = (self.data.pdop, self.data.hdop, self.data.vdop)
         if words[14]:
@@ -155,7 +155,7 @@ class NMEA:
         if words[14] and words[15] and words[16]:
             (self.data.pdop, self.data.hdop, self.data.vdop) = (newpdop, newhdop, newvdop)
             mask = gps.DOP_SET
-        self.logger(3, "GPGSA sets mode %d\n" % self.data.mode)
+        self.logger(3, "GPGSA sets mode %d\n" % self.data.fix.mode)
         self.data.valid = mask
 
     def __nmea_sane_satellites(self):
@@ -292,7 +292,7 @@ class gpsd(gps.gpsdata):
             return 0;
 
     def activate(self):
-        self.mode = gps.MODE_NO_FIX;
+        self.fix.mode = gps.MODE_NO_FIX;
         self.status = gps.STATUS_NO_FIX;
         self.altitude = gps.ALTITUDE_NOT_VALID
         self.track = gps.TRACK_NOT_VALID
@@ -375,7 +375,7 @@ class gpsd(gps.gpsdata):
                     if self.dsock > -1:
                         self.dsock.send(self.dsock, \
                               "R %0.8f %0.8f %0.2f\r\n" % \
-                              (self.latitude, self.longitude, self.altitude))
+                              (self.fix.latitude, self.fix.longitude, self.altitude))
 	return self.valid;
 
 # SirF-II control code

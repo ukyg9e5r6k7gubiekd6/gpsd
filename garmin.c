@@ -261,7 +261,7 @@ static int PrintPacket(struct gps_session_t *session, Packet_t *pkt)
 	    time_l -= pvt->leap_sec;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
-	    session->gpsdata.fix.time = time_l;
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time = time_l;
 #ifdef NTPSHM_ENABLE
 	    ntpshm_put(session, session->gpsdata.fix.time);
 #endif 
