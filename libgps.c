@@ -122,8 +122,6 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    nf.epc = DEFAULT(epc, 0.0);
 #undef DEFAULT
 			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
-			    gpsdata->fix = nf;
-			    gpsdata->valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			    if (nf.mode == MODE_3D)
 				gpsdata->valid |= ALTITUDE_SET | CLIMB_SET;
 			    if (nf.eph)
@@ -136,6 +134,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->valid |= SPEEDERR_SET;
 			    if (nf.epc)
 				gpsdata->valid |= CLIMBERR_SET;
+
+			    gpsdata->fix = nf;
+			    gpsdata->valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			}
 		    }
 		    break;
