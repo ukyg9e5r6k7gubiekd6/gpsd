@@ -248,6 +248,92 @@ will be reported in the response.
 </varlistentry>
 
 <varlistentry>
+<term>o</term>
+<listitem>
+<para>Attempts to return a complete time/position/velocity report as a
+unit.  Any field for which data is not available being reported as ?.
+If there is no fix, the response is simply "O=?", otherwise a
+timestamp is always reported.  Fields are as follows, in order:</para>
+
+<variablelist>
+<varlistentry>
+<term>timestamp</term>
+<listitem><para>An ISO8601 timestamp as in the D report.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>time error</term>
+<listitem><para>Estimated timestamp error in seconds (%f).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>latitude</term>
+<listitem><para>Latitude as in the P report (%f, degrees).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>longitude</term>
+<listitem><para>Longitude as in the P report (%f, degrees).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>altitude</term>
+<listitem><para>Altitude as in the A report (%f, meters).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>horizontal error estimate</term>
+<listitem><para>Horizontal error estimate as in the E report 
+(%f, meters).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>vertical error estimate</term>
+<listitem><para>Vertical error estimate as in the E report 
+(%f, meters).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>course over ground</term>
+<listitem><para>Track as in the T report (%f, degrees).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>speed over ground</term>
+<listitem><para>Speed as in the V report (%f, knots).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>climb/sink</term>
+<listitem><para>Vertical velocity as in the U report 
+(%f, meters/sec).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>estimated error in course over ground</term>
+<listitem><para>Error estimate for course (%f, degrees).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>estimated error in speed over ground</term>
+<listitem><para>Error estimate for speed (%f, knots).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>climb/sink</term>
+<listitem><para>Error estimate for climb/sink 
+(%f, meters/sec).</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+<para>Note: this command is experimental and still under development.
+Currently the time error, track error, groundspeed error and 
+climb/sink error fields are always ?.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>p</term>
 <listitem><para>Returns the current position in the form "P=%f %f";
 numbers are in degrees, latitude first.</para></listitem>

@@ -239,8 +239,9 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    break;
 	case 'E':
 	    if (have_fix(session)) {
-		if (ud->seen_sentences & PGRME)
-		    sprintf(phrase, ",E=%.2f %.2f %.2f", ud->epe, ud->eph, ud->epv);
+		if (SEEN(session->gNMEAdata.epe_quality_stamp))
+		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
+			    ud->epe, ud->eph, ud->epv);
 		else if (SEEN(ud->fix_quality_stamp))
 		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
 			    ud->pdop * UERE(session), 
@@ -309,6 +310,38 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		}
 	    }
 	    sprintf(phrase, ",N=%d", session->gNMEAdata.driver_mode);
+	    break;
+	case 'O':
+	    /*
+	     * Presently we don't know how to derive time error,
+	     * trackerr, speederr, or climberr, though SiRF chips
+	     * do report them.
+	     */
+	    if (have_fix(session) 
+			&& SEEN(ud->latlon_stamp)
+			&& SEEN(ud->track_stamp)
+		        && SEEN(ud->speed_stamp)) {
+		sprintf(phrase, ",O=%s ? %f %f",
+			ud->utc, ud->latitude, ud->longitude);
+		if (SEEN(session->gNMEAdata.altitude_stamp))
+		    sprintf(phrase+strlen(phrase), " %.2f",
+			    session->gNMEAdata.altitude);
+		else
+		    strcat(phrase, " ?");
+		if (SEEN(session->gNMEAdata.epe_quality_stamp))
+		    sprintf(phrase+strlen(phrase), " %.2f %.2f", 
+			    ud->eph, ud->epv);
+		else if (SEEN(ud->fix_quality_stamp))
+		    sprintf(phrase+strlen(phrase), " %.2f %.2f", 
+			    ud->hdop * UERE(session), 
+			    ud->vdop * UERE(session));
+		else
+		    strcat(phrase, "? ?");
+		sprintf(phrase+strlen(phrase),
+			"%f %f %f ? ? ?",
+			ud->track, ud->speed, ud->climb);
+	    } else
+		strcpy(phrase, ",O=?");
 	    break;
 	case 'P':
 	    if (have_fix(session) && SEEN(ud->latlon_stamp))
