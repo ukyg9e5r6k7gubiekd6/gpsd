@@ -29,7 +29,7 @@ Gpsd can take information from the gps and translate it into
 something easier to understand for clients.
 
 The client does not have to run on the same computer ;-)
-I have a boat connected to the internet (Ricochet modem) runing
+I have a boat connected to the internet (Ricochet modem) running
 gpsd, the maping program runs here at home (no, I will not give
 you the boats IP address :-)
 
@@ -65,7 +65,9 @@ writing the portion for other GPS receivers.
 
 Be advised: any bugs in this code are mine, and mine only ;-)
 
-This is as it stands today, July 17 1999.
+Thanks for Russ Nelson for providing a home for gpsd!
+
+This is as it stands today, Feburary 05 2002.
 
 remco@emc.rvt.com
 

@@ -30,3 +30,7 @@
 20000305 (1.01)
 	 Updated to IANA port.
 	 Fixes to DGPS support.
+20020205 (1.07)
+	 What happend with 1.02 to 1.06?
+	 em.c uses <time.h> (as it should). Removed some <sys/time.h>
+	 where they were not needed.
