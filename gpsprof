@@ -225,20 +225,21 @@ if __name__ == '__main__':
         #session.set_raw_hook(lambda x: sys.stdout.write(x))
         plotter.header(out)
         baton = Baton("gpsprof: looking for fix", "done")
-        while await > 0:
+        countdown = await
+        while countdown > 0:
             session.poll()
             baton.twirl()
             # If timestamp is no good, skip it.
             if session.utc == "?":
                 continue
-            if session.status:
-                baton.end("gathering samples")
+            if session.status and countdown == await:
+                sys.stderr.write("gathering samples...")
             # We can get some funky artifacts at start of session apparently
             # due to RS232 buffering effects. Ignore them.
             if threshold and session.c_decode_time > session.cycle * threshold:
                 continue
             if plotter.formatter(session, out):
-                await -= 1
+                countdown -= 1
         baton.end()
     finally:
         session.query("w-z-")
