@@ -50,9 +50,9 @@ no valid data for it.  However, many receivers violate this.  It's
 common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
-The physical-level protocol is RS232C-compatible, 4800bps, 8 bits, no
-parity, one *or two* stop bits.  The data is all ASCII, the high bit
-is not used.
+The physical-level protocol is RS232C-compatible (actually RS422),
+4800bps, 8 bits, no parity, one *or two* stop bits.  The data is all
+ASCII, the high bit is not used.
 
 Here are the NMEA-standard sentences:
 
