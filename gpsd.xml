@@ -170,7 +170,8 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 
 <varlistentry>
 <term>m</term>
-<listitem><para>The gps mode as "M=%d". 1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
+<listitem><para>The gps mode as "M=%d". 0=no mode value yet seen, 
+1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
 </varlistentry>
 
 <varlistentry>

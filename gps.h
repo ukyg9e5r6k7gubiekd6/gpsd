@@ -75,6 +75,7 @@ struct gps_data_t {
 #define STATUS_DGPS_FIX	2	/* yes, with DGPS */
     struct life_t status_stamp;
     int    mode;		/* Mode of fix */
+#define MODE_NOT_SEEN	0	/* GSA not seen yet */
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude too */

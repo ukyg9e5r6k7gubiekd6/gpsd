@@ -36,7 +36,7 @@ struct gps_data_t *gps_open(char *host, char *port)
     INIT(gpsdata->mode_stamp, now);
     INIT(gpsdata->fix_quality_stamp, now);
     INIT(gpsdata->satellite_stamp, now);
-    gpsdata->mode = MODE_NO_FIX;
+    /* gpsdata->mode = MODE_NOT_SEEN ; */
 
     return gpsdata;
 }
