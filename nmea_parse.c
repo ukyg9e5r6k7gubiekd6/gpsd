@@ -380,7 +380,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
            <repeat for up to 4 satellites per sentence>
                 There my be up to three GSV sentences in a data packet
      */
-    int changed, lower, upper, fldnum = 4;
+    int changed, fldnum;
 
     out->await = atoi(field(sentence, 1));
     if (sscanf(field(sentence, 2), "%d", &out->part) < 1)
@@ -389,15 +389,13 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	out->satellites = 0;
 
     changed = 0;
-    lower = (out->part - 1) * 4;
-    upper = lower + 4;
-    while (lower < out->satellites && lower < upper) {
-	changed |= update_field_i(sentence, fldnum++, &out->PRN[lower]);
-	changed |= update_field_i(sentence, fldnum++, &out->elevation[lower]);
-	changed |= update_field_i(sentence, fldnum++, &out->azimuth[lower]);
+    for (fldnum = 4; fldnum < 20; ) {
+	changed |= update_field_i(sentence, fldnum++, &out->PRN[out->satellites]);
+	changed |= update_field_i(sentence, fldnum++, &out->elevation[out->satellites]);
+	changed |= update_field_i(sentence, fldnum++, &out->azimuth[out->satellites]);
 	if (*(field(sentence, fldnum)))
-	    changed |= update_field_i(sentence, fldnum, &out->ss[lower]);
-	fldnum++; lower++; out->satellites++;
+	    changed |= update_field_i(sentence, fldnum, &out->ss[out->satellites]);
+	fldnum++; out->satellites++;
     }
 
     /* not valid data until we've seen a complete set of parts */
