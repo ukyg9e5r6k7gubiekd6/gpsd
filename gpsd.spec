@@ -34,10 +34,11 @@ cp gpsd "$RPM_BUILD_ROOT"%{_bindir}
 cp gpsd.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/
 cp libgps.a "$RPM_BUILD_ROOT"%{_libdir}
-cp libgpsd.a "$RPM_BUILD_ROOT"%{_libdir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp libgps.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
+cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
+cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -58,6 +59,7 @@ cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
+%{_includedir}/gpsd.h
 
 %changelog
 * Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
