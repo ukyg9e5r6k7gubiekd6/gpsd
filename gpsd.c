@@ -250,7 +250,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;
 	case 'L':
-	    sprintf(phrase, ",l=1 " VERSION " abcdmpqrstvwxy");
+	    sprintf(phrase, ",l=1 " VERSION " abcdempqrstuvwxy");
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
@@ -461,13 +461,13 @@ static void raw_hook(char *sentence)
 	if (FD_ISSET(fd, &watcher_fds)) {
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (PREFIX("$GPRMC", sentence)) {
-		PUBLISH(fd, "pdtvsm");
+		PUBLISH(fd, "pdtuvsm");
 	    } else if (PREFIX("$GPGGA", sentence)) {
 		PUBLISH(fd, "pdasm");	
 	    } else if (PREFIX("$GPGLL", sentence)) {
 		PUBLISH(fd, "pd");
 	    } else if (PREFIX("$GPVTG", sentence)) {
-		PUBLISH(fd, "tv");
+		PUBLISH(fd, "tuv");
 	    } else if (PREFIX("$GPGSA", sentence)) {
 		PUBLISH(fd, "qme");
 	    } else if (PREFIX("$GPGSV", sentence)) {
