@@ -129,15 +129,9 @@ to standard error.</para>
 
 <para>At any given time, each client will be listening to only one of
 the GPSes known to the daemon.  By default, a client's device is the
-one most recently on-line at the time the client connects.  A client
-may use the 'F' command to specify a device to listen to.</para>
-
-<para>The 'F' command fails if the specified device name is not on the
-daemon's internal search list.  This search list is initialized with
-<filename>/dev/gps</filename> or the path given in the -f command-line
-option if that was specified.  For security reasons, ordinary clients
-cannot change this search list; instead, this must be done via the
-daemon's local control socket declared with the -F option.</para>
+one that most recently shipped information to the daemon at the time
+the client first requests GPS information (that is, issues any comand
+other than F, K, W=0 or R=0).</para>
 
 <para>The request protocol for <application>gpsd</application> clients
 is very simple.  Each request normally consists of a single ASCII
@@ -193,7 +187,7 @@ See also the 'q' command.</para>
 </varlistentry>
 
 <varlistentry>
-<term>f</term> 
+<term>f</term>
 <listitem><para>Gets or sets the active GPS device name. The bare
 command 'f' requests a response containing 'f=' followed by the name
 of the active GPS device.  The command may be followed by an '=', in
@@ -201,9 +195,20 @@ which case all following printable characters up to but not including
 the next CR/LF are interpreted as the name of a trial GPS device. If
 the trial device is in <application>gpsd</application>'s device list,
 it is opened and read to see if a GPS can be found there.  If it can,
-the trial device becomes the active device for this client.  The
-response to this form of the command is to list the name of the active
-device.</para>
+the trial device becomes the active device for this client.</para>
+
+<para>The 'F=' command may fail if the specified device name is not on the
+daemon's internal search list.  This search list is initialized with
+<filename>/dev/gps</filename> or the path given in the -f command-line
+option if that was specified.  For security reasons, ordinary clients
+cannot change this search list; instead, this must be done via the
+daemon's local control socket declared with the -F option.</para>
+
+<para>Once an 'F=' command succeeds, the client is tied to the
+specified device until the client disconnects.</para>
+
+<para>Whether the command is 'F' or 'F=' or not, and whether it succeeds
+or not, the response always lists the name of the client's device.</para>
 
 <para>(At protocol level 1, the F command failed if more than one
 client was attached, and multiple devices were not supported.)</para>

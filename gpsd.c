@@ -334,7 +334,7 @@ static int assign_channel(struct subscriber_t *user)
     struct gps_device_t *device;
 
     /* if subscriber has no device... */
-    if (!user->channel) {
+    if (!user->channel || (!user->tied && !user->channel->device)) {
 	time_t most_recent = 0;
 	int mychannel = -1;
 	struct channel_t *channel;
