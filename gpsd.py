@@ -256,18 +256,11 @@ class gpsd(gps.gpsdata):
             self.initializer = initializer
             self.rtcm = rtcm
             self.wrap = wrapup
-    def __init__(self, device="/dev/gps", bps=0,
-                 devtype='n', dgps=None, logger=None):
+    def __init__(self, device="/dev/gps", dgps=None, logger=None):
         self.ttyfd = -1
         self.device = device
-        self.bps = bps
-        self.drivers = {
-            'n' : gpsd.gps_driver("NMEA"),
-            'f' : gpsd.gps_driver("NMEA", stopbits=2,
-                                  initializer = lambda gps: gps.send("$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01")),
-            # Someday, other drivers go here
-            }
-        self.devtype = self.drivers[devtype]
+        self.bps = 0
+        self.devtype = gpsd.gps_driver("NMEA")
         if not logger:
             logger = lambda level, message: None
         self.devtype.parser = self.devtype.parser(self, logger=logger)
