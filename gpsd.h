@@ -79,7 +79,7 @@ struct OUTDATA {
     int seconds;
 };
 
-#define BUFSIZE	4096	/* longer than max-length NMEA sentence */
+#define BUFSIZE	4096	/* longer than max-length NMEA sentence (82 chars) */
 
 #define GPGLL "GPGLL"
 #define GPVTG "GPVTG"

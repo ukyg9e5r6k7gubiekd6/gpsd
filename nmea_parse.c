@@ -302,11 +302,11 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
                                      2 = DGPS fix
            08           Number of satellites being tracked
            0.9          Horizontal dilution of position
-           545.4,M      Altitude, Metres, above mean sea level
+           545.4,M      Altitude, Metres above mean sea level
            46.9,M       Height of geoid (mean sea level) above WGS84
-                        ellipsoid
+                        ellipsoid, in Meters
            (empty field) time in seconds since last DGPS update
-           (empty field) DGPS station ID number
+           (empty field) DGPS station ID number (0000-1023)
     */
 
     do_lat_lon(sentence, 2, out);
