@@ -47,8 +47,10 @@ XGpsResources resources;
 
 #define Offset(field) (XtOffset(XGpsResources *, field))
 
+#if 0
 static XtResource my_resources[] = {
 };
+#endif
 
 String fallback_resources[] =
 {
