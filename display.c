@@ -50,21 +50,15 @@ void register_canvas(Widget w, GC gc)
 
 static void pol2cart(double azimuth, double elevation, double *xout, double *yout)
 {
-    double sinelev;
-
     azimuth *= DEG2RAD;
-    elevation = 90.0 - elevation;
-
 #ifdef PCORRECT
-    elevation *= DEG2RAD;
-    sinelev = sin(elevation) * SCALE;
+    elevation = sin((90.0 - elevation) * DEG2RAD);
 #else
-    sinelev = (elevation / 90.0) * SCALE;
+    elevation = ((90.0 - elevation) / 90.0);
 #endif
-    *xout = XCENTER + sin(azimuth) * sinelev;
-    *yout = YCENTER - cos(azimuth) * sinelev;
+    *xout = XCENTER + sin(azimuth) * elevation * SCALE;
+    *yout = YCENTER - cos(azimuth) * elevation * SCALE;
 }
-
 
 static void draw_arc(int x, int y, int diam)
 {
@@ -105,9 +99,9 @@ void draw_graphics(struct gps_data_t *gpsdata)
 
 	/* draw the 45 degree circle */
 #ifdef PCORRECT
-	draw_arc(width / 2, height / 2, ((i - RM) * 7) / 10);	/* sin(45) ~ 0.7 */
+	draw_arc(width / 2, height / 2, (i - RM) * 0.7); /* sin(45) ~ 0.7 */
 #else
-	draw_arc(width / 2, height / 2, (i - RM) / 2);
+	draw_arc(width / 2, height / 2, (i - RM) * 0.5);
 #endif
 
 	set_color("Black");
