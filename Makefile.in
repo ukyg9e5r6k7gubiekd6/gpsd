@@ -112,7 +112,7 @@ INCLUDE = -I. $(X_INCLUDE)
 	$(COMPILE.c) $(INCLUDE) -o $@ $<
 
 ## Libraries and object files
-GPSLIB_OBJECTS  = nmea_parse.o serial.o drivers.o earthmate.o gpscore.o $(MOTIF_OBJECTS)
+GPSLIB_OBJECTS  = nmea_parse.o serial.o drivers.o earthmate.o gpscore.o
 GPSDLIB_OBJECTS = libgpsd.o
 COMMON_OBJECTS  = netlib.o
 
@@ -134,8 +134,8 @@ all: $(PROGRAMS) $(LIBRARIES) $(MOTIF_PROGRAMS) $(PAGES)
 gpsd: gpsd.o libgps.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgps $(NETLIBS) $(LIBS)
 
-gps: gps.o libgps.a
-	$(LINK.c) -o $@ gps.o -L. -lgps $(ALL_X_LIBS) $(LIBS)
+gps: gps.o display.o libgps.a
+	$(LINK.c) -o $@ gps.o display.o -L. -lgps $(ALL_X_LIBS) $(LIBS)
 
 xgpsspeed: $(XGPSOBJS)
 	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgps $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
