@@ -55,21 +55,20 @@ plot "%s" using 0:1 title "Total time" with impulses
                       file)
 
 class rawplot:
-    "Print basic data, ignoring timezone skew."
+    "All measurement, no deductions."
     name = "raw"
     def header(self, fp):
         fp.write("# ")
-        for hn in ("T1", "E1", "D1", "W", "E2", "T2", "D2"):
+        for hn in ("T1+E1", "D1", "W", "E2", "T2", "D2"):
             fp.write("%8s\t" % hn)
         fp.write("tag\n# ")
-        for i in range(0, 7):
+        for i in range(0, 6):
             fp.write("--------\t")
         fp.write("--------\n")
 
     def formatter(self, session, fp):
-        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
-              % (session.rs232,
-                 session.d_recv_time - session.rs232,
+        fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
+              % (session.d_recv_time,
                  session.d_decode_time,
                  session.poll_time,
                  session.emit_time,
@@ -83,17 +82,16 @@ set autoscale
 set key below
 set key title "Raw latency data, %s, %dN%d, cycle %ds"
 plot \
-     "%s" using 0:7 title "D2 = Client decode time" with impulses, \
-     "%s" using 0:6 title "T2 = TCP/IP latency" with impulses, \
-     "%s" using 0:5 title "E2 = Daemon encode time" with impulses, \
-     "%s" using 0:4 title "W  = Poll wait time" with impulses, \
-     "%s" using 0:3 title "D1 = Daemon decode time" with impulses, \
-     "%s" using 0:2 title "E1 = GPS encode time" with impulses, \
-     "%s" using 0:1 title "T1 = RS232 time" with impulses
+     "%s" using 0:6 title "D2 =  Client decode time  " with impulses, \
+     "%s" using 0:5 title "T2 =  TCP/IP latency      " with impulses, \
+     "%s" using 0:4 title "E2    = Daemon encode time" with impulses, \
+     "%s" using 0:3 title "W     = Poll wait time    " with impulses, \
+     "%s" using 0:2 title "D1    = Daemon decode time" with impulses, \
+     "%s" using 0:1 title "T1+E1 = GPS latency       " with impulses
 '''
         return fmt % (title,
                       session.baudrate, session.stopbits, session.cycle,
-                      file, file, file, file, file, file, file)
+                      file, file, file, file, file, file)
 
 class splitplot:
     "Discard base time, use color to indicate different tags."
