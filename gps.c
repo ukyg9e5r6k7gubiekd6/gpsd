@@ -332,6 +332,24 @@ static void build_gui(Widget lxbApp)
 }
 
 /**************************************************
+* Function: init_list
+**************************************************/
+void init_list()
+{
+    int i;
+    XmString string;
+
+    for (i = 1; i < 13; i++) {
+	string = XmStringCreateSimple(" ");
+	XmListAddItem(list_7, string, i);
+#ifdef PROCESS_PRWIZCH
+	XmListAddItem(list_8, string, i);
+#endif /* PROCESS_PRWIZCH */
+	XmStringFree(string);
+    }
+}
+
+/**************************************************
 * Function: handle_input
 **************************************************/
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
@@ -405,24 +423,6 @@ void update_display(char *message)
     XmTextFieldSetString(text_7, s);
 
     draw_graphics(&session.gNMEAdata);
-}
-
-/**************************************************
-* Function: init_list
-**************************************************/
-void init_list()
-{
-    int i;
-    XmString string;
-
-    for (i = 1; i < 13; i++) {
-	string = XmStringCreateSimple(" ");
-	XmListAddItem(list_7, string, i);
-#ifdef PROCESS_PRWIZCH
-	XmListAddItem(list_8, string, i);
-#endif /* PROCESS_PRWIZCH */
-	XmStringFree(string);
-    }
 }
 
 /**************************************************
