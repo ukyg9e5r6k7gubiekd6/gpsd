@@ -83,8 +83,10 @@ struct gps_data {
     int hours;
     int minutes;
     int seconds;
-
-    int	sock;	/* server socket -- user most not modify this! */
 };
+
+int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port);
+int gpsd_close(int fd);
+int gpsd_query(int fd, char *requests, struct gps_data *gpsdata);
 
 /* gps.h ends here */
