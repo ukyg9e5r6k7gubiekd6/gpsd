@@ -57,6 +57,29 @@ thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
+7. Check out the list of supported hardware at 
 
+   http://gpsd.berlios.de/hardware.html
 
+If your GPS isn't on the list, please send us information to add a new
+line to the table.  Here's what we need:
+
+1. Name (preferably with a URL to the vendor's product page or spec sheet).
+2. Chipset.  Ideally we'd like to know both the GPS engine chip and
+   the USB-to-serial chip the device uses.  80% of the time this will be
+   SiRF-II + PL2303, but it's the exceptions that are interesting.
+3. Interface type -- RS232, USB, CF, etc.
+4. Vendor (preferably with a URL to the vendor's website).
+5. gpsd type -- usually this will be 'n'.  If you had to specify a
+   non-NMEA driver type to make gpsd work, give it.
+6. Version of gpsd you tested with.
+7. NMEA protocol version.
+8. List of NMEA sentences the GPS emits.
+9. Notes -- anything interesting or unusual about this GPS.
+
+You may get some help on fields 2, 7, and 8 by running gpsprobe.  Note that
+you will have to stop gpsd to do this.
+
+We can also use updates of the latest version number known to work with
+hardware already supported.
 
