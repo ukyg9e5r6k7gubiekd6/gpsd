@@ -420,7 +420,6 @@ int main(int argc, char *argv[])
     double baud;
     char devtype = 'n';
 
-    session.debug = 1;
     while ((option = getopt(argc, argv, "D:T:hp:s:")) != -1) {
 	switch (option) {
         case 'T':

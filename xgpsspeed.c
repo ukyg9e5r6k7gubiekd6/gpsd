@@ -102,7 +102,6 @@ main(int argc, char **argv)
     char devtype = 'n';
     int option;
 
-    session.debug = 1;
     while ((option = getopt(argc, argv, "D:T:hp:")) != -1) {
 	switch (option) {
         case 'T':
