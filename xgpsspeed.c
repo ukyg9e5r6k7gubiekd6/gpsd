@@ -47,28 +47,10 @@ static XrmOptionDescRec options[] = {
  * Definition of the Application resources structure.
  */
 
-#if 0
-typedef struct _XGpsResources {
-} XGpsResources;
-
-XGpsResources resources;
-#endif
-
-#define Offset(field) (XtOffset(XGpsResources *, field))
-
-#if 0
-static XtResource my_resources[] = {
-};
-#endif
-
 String fallback_resources[] =
 {
   NULL
 };
-
-static void open_input(XtAppContext app);
-
-#undef Offset
 
 void gpscli_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -91,10 +73,24 @@ void gpscli_report(int errlevel, const char *fmt, ... )
     fputs(buf, stderr);
 }
 
-static void update_display(char *);
+static void update_display(char *buf)
+{
+  int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
+#if 0
+  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", session.gNMEAdata.speed, rint(session.gNMEAdata.speed * 5208/6706.12), (int)rint(session.gNMEAdata.speed * 5208/6706.12));
+#endif
+  if (new > 100)
+    new = 100;
 
-int
-main(int argc, char **argv)
+  TachometerSetValue(tacho, new);
+}
+
+static void handle_input(XtPointer client_data, int *source, XtInputId * id)
+{
+    gps_poll(&session);
+}
+
+int main(int argc, char **argv)
 {
     Arg             args[10];
     XtAppContext app;
@@ -174,14 +170,19 @@ main(int argc, char **argv)
     gps_init(&session, GPS_TIMEOUT, devtype, NULL);
     session.gps_device = device_name;
     session.gNMEAdata.raw_hook = update_display;
-    open_input(app);
+    if (gps_activate(&session) == -1)
+    {
+	perror("xgpsspeed: opening GPS");
+	exit(2);
+    }
+
+    XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
+		  handle_input, NULL);
     
     XtAppMainLoop(app);
 
     return 0;
 }
-
-
 
 void Usage()
 {
@@ -191,35 +192,5 @@ void Usage()
 }
 
 
-#if 0
-#if defined(i386) || defined(__hpux)
-#define rint (int)
-#endif	
-#endif
 
-void update_display(char *buf)
-{
-  int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
-#if 0
-  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", session.gNMEAdata.speed, rint(session.gNMEAdata.speed * 5208/6706.12), (int)rint(session.gNMEAdata.speed * 5208/6706.12));
-#endif
-  if (new > 100)
-    new = 100;
 
-  TachometerSetValue(tacho, new);
-}
-
-static void handle_input(XtPointer client_data, int *source, XtInputId * id)
-{
-    gps_poll(&session);
-}
-
-static void open_input(XtAppContext app)
-{
-    XtInputId input_id;
-
-    gps_activate(&session);
-
-    input_id = XtAppAddInput(app, session.fdin, (XtPointer) XtInputReadMask,
-                             handle_input, NULL);
-}
