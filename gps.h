@@ -19,15 +19,27 @@ struct gps_data_t {
     int	online;			/* 1 if GPS is on line, 0 if not.
 				 * Note: gpsd clears this flag when sentences
 				 * fail to show up within the GPS's normal
-				 * send sycle time. If the host-to-GPS 
+				 * send cycle time. If the host-to-GPS 
 				 * link is lossy enough to drop entire
 				 * sentences, this flag will be
 				 * prone to false negatives.
 				 */
     struct life_t online_stamp;
-
-    char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
-
+    char utc[32];		/* UTC date/time as "mm/dd/yy hh:mm:ss.ssss".
+				 * Gets updated on every fix (GGA, GLL, or
+				 * GPRMC). The hhmmss.ss part is reliable.
+				 * The century part of the year is spliced
+				 * in from host-machine time and could be
+				 * wrong if the host and GPS are on opposite
+				 * sides of the International Date Line and
+				 * it's close to midnight of a new century.
+				 * Within one GPS send cycle after any 
+				 * midnight, if the last sentence was GGA or
+				 * GLL and not GPRMC, the date could be off
+				 * by one.  Altitude could be one send cycle
+				 * older than the timestamp if the last 
+				 * sentence was GPRMC.
+				 */
     /* location */
     double latitude;		/* Latitude */
     double longitude;		/* Longitude */

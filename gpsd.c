@@ -464,11 +464,11 @@ static void raw_hook(char *sentence)
 	if (FD_ISSET(fd, &watcher_fds)) {
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
-		PUBLISH(fd, "ptvds");
+		PUBLISH(fd, "pdtvs");
 	    } else if (strncmp(GPGGA, sentence, sizeof(GPGGA)-1) == 0) {
-		PUBLISH(fd, "spa");	
+		PUBLISH(fd, "pdas");	
 	    } else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
-		PUBLISH(fd, "p");
+		PUBLISH(fd, "pd");
 	    } else if (strncmp(PMGNST, sentence, sizeof(PMGNST)-1) == 0) {
 		PUBLISH(fd, "sm");
 	    } else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
