@@ -101,16 +101,6 @@ static int sirf_switcher(struct gps_session_t *session, int nmea, int speed)
 {
     if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
 	return 0;
-    tcdrain(session->gNMEAdata.gps_fd);
-    /* 
-     * This definitely fails below 40 milliseconds on a BU-303b.
-     * 50ms is also verified by Chris Kuethe on 
-     *        Pharos iGPS360 + GSW 2.3.1ES + prolific
-     *        Rayming TN-200 + GSW 2.3.1 + ftdi
-     *        Rayming TN-200 + GSW 2.3.2 + ftdi
-     * so it looks pretty solid.
-     */
-    usleep(50000);
     return 1;
 }
 

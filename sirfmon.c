@@ -926,12 +926,10 @@ int sendpkt (unsigned char *buf, int len)
     putb(len + 3,END2);
     len += 8;
 
-    if (verbose) {
-	wprintw(debugwin, ">>>");
-	for (i = 0; i < len; i++)
-	    wprintw(debugwin, " %02x",buf[i]);
-	wprintw(debugwin, "\n");
-    }
+    wprintw(debugwin, ">>>");
+    for (i = 0; i < len; i++)
+	wprintw(debugwin, " %02x",buf[i]);
+    wprintw(debugwin, "\n");
 
     return (write(LineFd,buf,len) == len);
 }

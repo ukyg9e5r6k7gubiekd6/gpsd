@@ -220,8 +220,26 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		if (session->device_type->speed_switcher)
-		    if (session->device_type->speed_switcher(session, i))
+		    if (session->device_type->speed_switcher(session, i)) {
+			/* 
+			 * Allow the control string time to register at the
+			 * GPS before we do the baud rate switch, which 
+			 * effectively trashes the UART's buffer.
+			 *
+			 * This definitely fails below 40 milliseconds on a
+			 * BU-303b. 50ms is also verified by Chris Kuethe on 
+			 *        Pharos iGPS360 + GSW 2.3.1ES + prolific
+			 *        Rayming TN-200 + GSW 2.3.1 + ftdi
+			 *        Rayming TN-200 + GSW 2.3.2 + ftdi
+			 * so it looks pretty solid.
+			 *
+			 * The minimum delay time is probably constant
+			 * across any given type of UART.
+			 */
+			tcdrain(session->gNMEAdata.gps_fd);
+			usleep(50000);
 			gpsd_set_speed(session, (speed_t)i, 1);
+		    }
 	    }
 	    sprintf(phrase, ",B=%d %d N %d", 
 		    gpsd_get_speed(&session->ttyset),

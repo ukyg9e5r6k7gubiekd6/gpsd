@@ -486,11 +486,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
 
 static int sirfbin_speed(struct gps_session_t *session, int speed)
 {
-    if (sirf_speed(session->gNMEAdata.gps_fd, speed)) {
-	usleep(50000);
-	return 1;
-    } else
-	return 0;
+    return sirf_speed(session->gNMEAdata.gps_fd, speed);
 }
 
 /* this is everything we export */
