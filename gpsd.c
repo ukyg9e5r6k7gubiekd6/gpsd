@@ -403,8 +403,7 @@ static int handle_request(int fd, char *buf, int buflen)
     if (session.debug >= 2)
 	gpscli_report(1, "=> client: %s", reply);
     return write(fd, reply, strlen(reply) + 1);
- }
-#undef STALE_COMPLAINT
+}
 
 static void notify_watchers(char *sentence)
 /* notify all watching clients of an event */
