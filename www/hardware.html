@@ -15,12 +15,13 @@
 <p>gpsd should work with any GPS using an RS232C or USB interface that
 advertises NMEA-0183 compliance.  Here are some notes on hardware we
 have tested (all under Linux 2.6.8).  Hyperlinks lead to technical
-information.</p>
+information.  The "Works with" column is the last version with which
+this GPS is known to have been successfully tested.</p>
 
 <table border='1'>
 <tr>
 <th>Name</th>
-<th>Recommendation</th>
+<th>Compatibility</th>
 <th>Chipset</th>
 <th>Interface</th>
 <th>Vendor</th>
@@ -152,8 +153,28 @@ Sapphire USB</a></a></td>
 <td>GPRMC, GPGSA, GPGGA, GPGSV, PRWIRID, PRWIZCH</td>
 <td>
 Discontinued sometime before November 1998. 
-Takes optional latitude/longitude initialization.</td>
+Takes optional latitude/longitude initialization.
+</td>
 </tr>
+<tr>
+<td>Garmin 48</td>
+<td>Excellent</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td><a href="http://www.garmin.com">Garmin</a></td>
+<td align='center'>n</td>
+<td>2.3</td>
+<td>2.0</td>
+<td>
+PGRME, GPGLL, PGRMZ, PGRMM, GPBOD, GPRTE, GPWPL, 
+GPRMC, GPRMB, GPGGA, GPGSA, GPGSV, GPGSV, GPGSV
+</td>
+<td>
+Garmin 12XL and 45 are nearly identical and should work as well.<BR>
+NMEA mode must be set to 183 v2.0.<BR>
+Details on Garmin's proprietary protocol can be found
+<a href="http://www.garmin.com/support/commProtocol.html">here</a>.
+</td>
 </table>
 
 <p>We want to extend this table.  To report on a GPS, please
