@@ -123,11 +123,11 @@ static void sirf_initializer(struct gps_session_t *session)
 }
 
 static int sirf_switcher(struct gps_session_t *session, int speed) 
-/* switch GPS to specified mode at 8N1, optionarry to binary */
+/* switch GPS to specified mode at 8N1, optionally to binary */
 {
     if (nmea_send(session->gNMEAdata.gps_fd, "$PSRF100,1,%d,8,1,0", speed) < 0)
 	return 0;
-
+#ifdef UNRELIABLE_SYNC
     tcdrain(session->gNMEAdata.gps_fd);
     /* 
      * This definitely fails below 40 milliseconds on a BU-303b.
@@ -138,6 +138,7 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
      * so it looks pretty solid.
      */
     usleep(50000);
+#endif /* UNRELIABLE_SYNC */
     return 1;
 }
 

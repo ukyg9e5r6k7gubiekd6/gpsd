@@ -86,7 +86,7 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
     int *ip;
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
-    if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR)) < 0)
+    if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY|O_SYNC)) < 0)
 	return -1;
 
     if (isatty(session->gNMEAdata.gps_fd)) {

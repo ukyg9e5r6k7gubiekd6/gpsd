@@ -124,6 +124,12 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 %{_libdir}/python*/site-packages/gpsd.py*
 
 %changelog
+* Tue Feb 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Pass zero magnetic variation in generated NMEA from binary GPSes
+  correctly.  Use O_SYNC rather than timeouts to guarantee that 
+  baud-rate change strings get to the GPS before changing the line
+  parameters.
+
 * Mon Feb 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.13-1
 - Correct a bug in binary-protocol dumping (applies to Zodiac and
   Garmin only).  Gary Miller's patch to deal gracefully with GPSes
