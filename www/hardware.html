@@ -45,6 +45,18 @@ which this GPS is known to have been successfully tested.</p>
 is off by default.</td>
 </tr>
 <tr>
+<td><a href='http://www.haicom.com.tw/products.htm'>HI-204E</a></td>
+<td>Excellent</td>
+<td>Evermore BBP1202 + PL2303</td>
+<td>USB</td>
+<td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
+<td align='center'>n</td>
+<td>2.6</td>
+<td>2.2</td>
+<td>GPGGA, GPGSA, GPGSV, GPRMC, GPVTG</td>
+<td>Probably uses PL2303 but we have not verified this.</td>
+</tr>
+<tr>
 <td><a href='bu_303b.html'>BU-303</a></td>
 <td>Excellent</d>
 <td>SiRF-II + PL2303</td>
@@ -52,7 +64,7 @@ is off by default.</td>
 <td><a href='http://www.globalsat.com.tw/english/products_detail.php?main_id=5&p_id=9'>Globalsat</a>; OEMed as 
 NaviLock, Hyperdata</td>
 <td align='center'>n</td>
-<td>2.5</td>
+<td>2.6</td>
 <td>2.2</td>
 <td>GPGGA, GPGSA, GPGSV, GPRMC, GPGLL, GPVTG</td>
 <td>
@@ -239,7 +251,8 @@ tell us the following:</p>
 <li>The GPS model name</li>
 <li>Whether or not it works</li>
 <li>If possible, an URL to a technical reference on it</li>
-<li>The GPS and (if applicable) USB-to-serial chip it uses</li>
+<li>The GPS and (if applicable) USB-to-serial chip it uses.  (Look at
+the output of lsusb(1), it may identifty the USB-to-serial chip.)</li>
 <li>The interface type (RS232, USB, CF)</li>
 <li>The vendor</li>
 <li>The gpsd driver type (almost always 'n')</li>
@@ -259,6 +272,10 @@ href='http://www.rayming.com/download/NEMA_commands.pdf'>technical
 manual</a> describing NMEA extensions supported by this chipset is
 available from Globalsat's U.S. reseller.  For SiRF binary '
 protocol itself, look <a href='sirf_protocol.pdf'>here</a>.</p>
+
+<p>A technical spec for the Evermore chipset <a
+href='http://www.twintrading.co.kr/pdf/himark/bbp120brief.pdf'>is
+available</a>.</p>
 
 <p>Zodiac: See the <a href='zodiac.pdf'>Zodiac Serial Data
 Interface Specification</a></p>

@@ -331,9 +331,11 @@ static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 	out->used[i] = 0;
     out->satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
-        out->used[i] = atoi(field[i+3]);
-        if (out->used[i] > 0)
-                out->satellites_used++;
+        int prn = atoi(field[i+3]);
+        if (prn > 0) {
+           out->used[out->satellites_used] = prn;
+           out->satellites_used++;
+       }
     }
     out->fix_quality_stamp.changed = changed;
     REFRESH(out->fix_quality_stamp);

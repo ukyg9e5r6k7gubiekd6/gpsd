@@ -122,7 +122,8 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 * Sat Jan  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - More compiler-warning cleanups.  Added --speedunits option to xgpsspeed,
   --spedunits and --altunits options to xgps.  Improved GPGSV parsing so 
-  it copes gracefully if we start in the middle of a sequence.  In xgps,
+  it copes gracefully if we start in the middle of a sequence.  Merged
+  Petter Reinholtdsen's fix for GPGSA lisrs with holes.  In xgps,
   satellites used in the last fix are now dotted in the middle.
 
 * Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
