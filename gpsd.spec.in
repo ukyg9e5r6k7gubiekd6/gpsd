@@ -82,12 +82,14 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 /sbin/chkconfig --add gpsd
 /sbin/chkconfig gpsd on
 /sbin/ldconfig
+if [ -f /etc/udev/rules.d/ ] then echo 'KERNEL="ttyS0", SYMLINK="gps"' >/etc/udev/rules.d/80-gpsd.rules
 
 %preun -n gpsd
 /sbin/chkconfig --del gpsd
 
 %postun -n gpsd
 /sbin/ldconfig
+if [ -f /etc/udev/rules.d/ ] then rm /etc/udev/rules.d/80-gpsd.rules
 
 %files
 %defattr(-,root,root,-)
@@ -120,7 +122,9 @@ cp xgpsspeed.ad "$RPM_BUILD_ROOT"%{_libdir}/X11/app-defaults/xgpsspeed
 * Wed Nov 17 2004 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Minor bugs in gpsd.py fixed.  M now returns 0 status if GPGSA not yet
   seen; this change also fixes a bug where gpsd claimed it was confused
-  if GPGSA had not been seen and status was set.
+  if GPGSA had not been seen and status was set.  RPM will now install 
+  a udevd rule if the host system uses it.  Don't set the online flag
+  on activate.
 
 * Mon Oct 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.3-1
 - Documentation and comment fixes.  Last two globals removed from 
