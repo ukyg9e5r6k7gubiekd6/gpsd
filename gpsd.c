@@ -140,21 +140,22 @@ static void usage()
 
 static int set_baud(long baud)
 {
-
+    int speed;
     if (baud < 200)
 	baud *= 1000;
     if (baud < 2400)
-	device_speed = B1200;
+	speed = B1200;
     else if (baud < 4800)
-	device_speed = B2400;
+	speed = B2400;
     else if (baud < 9600)
-	device_speed = B4800;
+	speed = B4800;
     else if (baud < 19200)
-	device_speed = B9600;
+	speed = B9600;
     else if (baud < 38400)
-	device_speed = B19200;
+	speed = B19200;
     else
-	device_speed = B38400;
+	speed = B38400;
+    return speed;
 }
 
 static int set_device_type(char what)
@@ -589,30 +590,6 @@ static int handle_input(int input, fd_set *afds, fd_set *nmea_fds)
 	    return 1;
 	}
 
-#if 0
-	/*
-	  The following tries to recognise if the EarthMate is
-	  in binary mode. If so, it will switch to EarthMate mode.
-
-	  Tf.20000105: this block does not serve any purpose.
-	  Please look it over, and delete it if you agree.
-	*/
-	
-	if (device_type == DEVICE_EARTHMATE) {
-	    if (offset) {
-		if (buf[offset - 1] == (unsigned char) 0xff) {
-		    if (buf[offset] == (unsigned char) 0x81) {
-			if (bincount++ == 5) {
-			    syslog(LOG_NOTICE,
-				   "Found an EarthMate (syn).");
-			    device_type = DEVICE_EARTHMATEb;
-			    return 0;
-			}
-		    }
-		}
-	    }
-	}
-#endif
 	offset++;
 	buf[offset] = '\0';
     }
