@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "config.h"	/* in case PROFILING is defined */
 #include "gpsd.h"
 
 struct gps_data_t *gps_open(const char *host, const char *port)
@@ -171,6 +172,16 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    memcpy(gpsdata->used, used, sizeof(used));
 		}
 		REFRESH(gpsdata->satellite_stamp);
+		break;
+	    case 'Z':
+#ifdef PROFILING
+		if (!strcmp(sp, "Z+") || !strcmp(sp, "Z-"))
+		    break;
+		sscanf(sp, "Z=%ld:%ld:%d", 
+		       &gpsdata->seconds, 
+		       &gpsdata->usec,
+		       &gpsdata->sentence_length);
+#endif /* PROFILING */
 		break;
 	    }
 	}

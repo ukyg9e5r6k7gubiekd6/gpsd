@@ -11,6 +11,26 @@ to strip clean NMEA out of the log files produced by gpsd.  This can be
 useful if someone ships you a log that they allege caused gpsd to 
 misbehave.
 
+Next, profiling...
+
+If you build with --enable-profiling, an undocumented Z command in the daemon 
+will cause it to emit a Z clause on every D request.  The Z clause contains
+two colon-separated fields: a millisecond-precision timestamp telling when
+gpsd shipped the data, and the character length of the sentence containing the 
+timestamp data (a GPRMC, GPLL, or GPGGA sentence).
+
+The spread between D and Z timestamps measures the latency between the GPS's
+fix measurement and when it became available to the client. For it to be 
+meaningful, the GPS has to ship timestamps with sub-second precision. SiRF-II
+and Evermore chipsets do this.
+
+The distribution lincludes a Python script, profile_gpsd, that uses the 
+Z command to collect profiling information from a running GPS instance.
+You can use this to measure the latency at each stage -- GPS to daemon,
+daemon to client library -- and to estimate the portion of the latency 
+induced by serial transmit time.  The profile_gpsd script offers its own
+interpretation.
+
 Then, architecture and how to hack it...
 
 This is not a complicated piece of code.  Essentially, it spins in a loop 

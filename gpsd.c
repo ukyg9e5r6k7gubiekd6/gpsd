@@ -39,6 +39,7 @@ static char *device_name = DEFAULT_DEVICE_NAME;
 static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
 static int debuglevel, nfds, go_background = 1, in_background = 0;
+static int sentence_length, profiling;
 
 static jmp_buf	restartbuf;
 #define THROW_SIGHUP	1
@@ -201,9 +202,15 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",A=%f", ud->altitude);
 	    break;
 	case 'D':
-	    if (ud->utc[0])
+	    if (ud->utc[0]) {
 		sprintf(phrase, ",D=%s", ud->utc);
-	    else
+		if (profiling) {
+		    struct timeval tv;
+		    gettimeofday(&tv, NULL);
+		    sprintf(phrase+strlen(phrase), ",Z=%ld.%ld:%d",
+			    tv.tv_sec, tv.tv_usec, sentence_length);
+		}
+	    } else
 		strcpy(phrase, ",D=?");
 	    break;
 	case 'L':
@@ -317,6 +324,27 @@ static int handle_request(int fd, char *buf, int buflen)
 		}
 	    }
 	    break;
+	case 'Z':
+	    if (*p == '1' || *p == '+') {
+		profiling = 1;
+		gpsd_report(3, "%d turned on profiling mode\n", fd);
+		sprintf(phrase, ",Z+");
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		profiling = 0;
+		gpsd_report(3, "%d turned off profiling mode\n", fd);
+		sprintf(phrase, ",Z-");
+		p++;
+	    } else if (FD_ISSET(fd, &nmea_fds)) {
+		profiling = 0;
+		gpsd_report(3, "%d turned off profiling mode\n", fd);
+		sprintf(phrase, ",Z-");
+	    } else {
+		profiling=1;
+		gpsd_report(3, "%d turned on profiling mode\n", fd);
+		sprintf(phrase, ",Z+");
+	    }
+	    break;
 	case '\r': case '\n':
 	    goto breakout;
 	}
@@ -345,6 +373,8 @@ static void raw_hook(char *sentence)
 /* hook to be executed on each incoming sentence */
 {
     int fd;
+
+    sentence_length = strlen(sentence);	/* used when profiling */
 
     for (fd = 0; fd < nfds; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
@@ -427,7 +457,7 @@ int main(int argc, char *argv[])
     int option, msock, fd, need_gps; 
     extern char *optarg;
 
-    debuglevel = 1;
+    debuglevel = 0;
     while ((option = getopt(argc, argv, "D:S:d:hNnp:P:s:v"
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"

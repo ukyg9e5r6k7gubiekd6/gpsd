@@ -114,7 +114,8 @@ EXTRA_DIST = \
 	gps.py \
 	gpsd.py \
 	gpsprobe \
-	logextract
+	logextract \
+	profile_gpsd
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
