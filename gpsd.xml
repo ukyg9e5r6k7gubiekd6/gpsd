@@ -530,6 +530,12 @@ but not good enough for aviation applications.</para>
 for its timestamps as of 2005. It will not include leap-second
 corrections introduced after that year.</para>
 
+<para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
+to the same serial device (possible with an RS422 adapter hooked up to
+some marine-navigation systems), an 'O' response may mix an altitude
+from one device's GGA with latitude/longitude from another's RMC/GLL
+after the second sentence has arrived.</para>
+
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
 
