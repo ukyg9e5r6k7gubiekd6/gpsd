@@ -198,8 +198,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
-	    session->time_seen |= TIME_SEEN_GPS_1;
-	    if (!(session->time_seen & ~TIME_SEEN_GPS_1))
+	    session->time_seen |= TIME_SEEN_GPS_2;
+	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
 		ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 
@@ -240,8 +240,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.sentence_time
 		= gpstime_to_unix(getw(1), getl(3)*1e-2, -LEAP_SECONDS);
 #ifdef NTPSHM_ENABLE
-	    session->time_seen |= TIME_SEEN_GPS_2;
-	    if (!(session->time_seen & ~TIME_SEEN_GPS_2))
+	    session->time_seen |= TIME_SEEN_GPS_1;
+	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))
 		ntpshm_put(session, session->gpsdata.sentence_time);
 #endif /* NTPSHM_ENABLE */
 #ifdef __UNUSED__
@@ -390,7 +390,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_UTC_1;
-	    ntpshm_put(session, session->gpsdata.fix.time);
+	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
+		ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 	    /* skip 4 bytes of satellite map */
@@ -455,7 +456,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_UTC_2;
-	    ntpshm_put(session, session->gpsdata.fix.time + 0.75);
+	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
+		ntpshm_put(session, session->gpsdata.fix.time + 0.75);
 #endif /* NTPSHM_ENABLE */
 	}
 

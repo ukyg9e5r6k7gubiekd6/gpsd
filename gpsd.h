@@ -148,8 +148,10 @@ struct gps_device_t {
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 1? */
 #define TIME_SEEN_PPS	0x10	/* Seen PPS signal? */
-#endif /* defined(SHM_H) && defined(IPC_H) */
+#endif /* NTPSHM_ENABLE */
 };
+
+#define IS_HIGHEST_BIT(v,m)	!(v & ~((m<<1)-1))
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
