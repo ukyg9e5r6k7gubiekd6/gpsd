@@ -5,6 +5,7 @@
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
+#include "gpsd.h"
 /* Workaround for HP-UX 11.23, which is missing CRTSCTS */
 #ifndef CRTSCTS
 #  ifdef CNEW_RTSCTS
@@ -13,8 +14,6 @@
 #    define CRTSCTS 0
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
-
-#include "gpsd.h"
 
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 {

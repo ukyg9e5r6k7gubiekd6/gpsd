@@ -284,23 +284,22 @@ static void handle1005(struct gps_session_t *session, unsigned short *p)
 {
     int i, numcorrections = p[O(12)];
 
-#if 1
-  gpsd_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
-  gpsd_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
-  gpsd_report(1, "Station ID: %d\n", p[O(10)]);
-  gpsd_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
-  gpsd_report(1, "Number of corrections: %d\n", p[O(12)]);
-  for (i = 0; i < numcorrections; i++) {
-    gpsd_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
-    gpsd_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
-    gpsd_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
-    gpsd_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
-    gpsd_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
-    gpsd_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
-    gpsd_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
-    gpsd_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
-  }
-#endif
+    gpsd_report(1, "Packet: %d\n", session->sn);
+    gpsd_report(1, "Station bad: %d\n", (p[O(9)] & 1) ? 1 : 0);
+    gpsd_report(1, "User disabled: %d\n", (p[O(9)] & 2) ? 1 : 0);
+    gpsd_report(1, "Station ID: %d\n", p[O(10)]);
+    gpsd_report(1, "Age of last correction in seconds: %d\n", p[O(11)]);
+    gpsd_report(1, "Number of corrections: %d\n", p[O(12)]);
+    for (i = 0; i < numcorrections; i++) {
+	gpsd_report(1, "Sat%02d:", p[O(13+i)] & 0x3f);
+	gpsd_report(1, "ephemeris:%d", (p[O(13+i)] & 64) ? 1 : 0);
+	gpsd_report(1, "rtcm corrections:%d", (p[O(13+i)] & 128) ? 1 : 0);
+	gpsd_report(1, "rtcm udre:%d", (p[O(13+i)] & 256) ? 1 : 0);
+	gpsd_report(1, "sat health:%d", (p[O(13+i)] & 512) ? 1 : 0);
+	gpsd_report(1, "rtcm sat health:%d", (p[O(13+i)] & 1024) ? 1 : 0);
+	gpsd_report(1, "corrections state:%d", (p[O(13+i)] & 2048) ? 1 : 0);
+	gpsd_report(1, "iode mismatch:%d", (p[O(13+i)] & 4096) ? 1 : 0);
+    }
 }
 
 static void analyze(struct gps_session_t *session, 

@@ -12,6 +12,7 @@ AC_C_BIGENDIAN
 
 if eval "test x$GCC = xyes"; then
 	CFLAGS="$CFLAGS -Wall -Werror"
+	del -W -Wcast-align -Wcast-qual -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type
 fi
 
 AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h)

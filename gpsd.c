@@ -153,7 +153,7 @@ static int throttled_write(int fd, char *buf, int len)
     return status;
 }
 
-static int validate(int fd)
+static int validate(void)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
@@ -180,10 +180,10 @@ static int handle_request(int fd, char *buf, int buflen)
 
     sprintf(reply, "GPSD");
     p = buf;
-    while (*p) {
+    while (*p && p - buf < buflen) {
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (!validate(fd))
+	    if (!validate())
 		strcat(reply, ",A=?");
 	    else
 		sprintf(reply + strlen(reply), ",A=%f", ud->altitude);
@@ -204,14 +204,14 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(reply + strlen(reply), ",M=%d", ud->mode);
 	    break;
 	case 'P':
-	    if (!validate(fd))
+	    if (!validate())
 		strcat(reply, ",P=?");
 	    else
 		sprintf(reply + strlen(reply), ",P=%f %f", 
 			ud->latitude, ud->longitude);
 	    break;
 	case 'Q':
-	    if (!validate(fd))
+	    if (!validate())
 		strcat(reply, ",Q=?");
 	    else
 		sprintf(reply + strlen(reply), ",Q=%d %f %f %f",
@@ -242,13 +242,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(reply + strlen(reply), ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (!validate(fd))
+	    if (!validate())
 		strcat(reply, ",T=?");
 	    else
 		sprintf(reply + strlen(reply), ",T=%f", ud->track);
 	    break;
 	case 'V':
-	    if (!validate(fd))
+	    if (!validate())
 		strcat(reply, ",V=?");
 	    else
 		sprintf(reply + strlen(reply), ",V=%f", ud->speed);
