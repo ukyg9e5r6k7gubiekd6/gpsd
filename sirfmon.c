@@ -45,7 +45,7 @@
 
 #define MAXCHANNELS	12
 
-/* how many characters to look at when tryting to find baud rate lock */
+/* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
 static int LineFd;					/* fd for RS232 line */

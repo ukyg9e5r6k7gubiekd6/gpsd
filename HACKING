@@ -21,7 +21,7 @@ smoke out any repeatable bug pretty quickly.
 ** Profiling
 
 There is a barely-documented Z command in the daemon will cause it to emit
-a $ clause on every D request.  The $ clause contains four
+a $ clause on every request.  The $ clause contains four
 space-separated fields:
 
 (1) An identifing sentence tag.
@@ -30,20 +30,24 @@ space-separated fields:
 
 (3) The timestamp associated with the sentence, in seconds since
     the Unix epoch (this time *is* leap-second corrected, like UTC).
+    This timestamp may be zero.  If nonzero, it is the base time for
+    the packet.
 
 (4) An offset from the timestamp telling when gpsd believes the
     transmission of the current packet started (this is actually 
-    recorded just before the first read od the new packet).
+    recorded just before the first read od the new packet).  If
+    the sentence timestamp was zero, this offset is a full timestamp 
+    and the base time of the packet.
 
-(5) An offset from the timestamp telling when gpsd received the last
+(5) An offset from the base time telling when gpsd received the last
     bytes of the packet.
 
-(6) An offset from the timestamp telling when gpsd decoded the data.
+(6) An offset from the base time telling when gpsd decoded the data.
 
-(7) An offset from the timestamp taken just before encoding the
+(7) An offset from the base time taken just before encoding the
     response -- effectively, when gpsd was polled to transmit the data.
 
-(8) An offset from the timestamp telling when gpsd transmitted 
+(8) An offset from the base time telling when gpsd transmitted 
     the data.
 
 The Z figures measure components of the latency between the GPS's time
@@ -73,16 +77,13 @@ polling for input from one of three sources:
 
 1) A client making requests over a TCP/IP port.
 
-2) The GPS, connected via serial or USB device.
+2) A set of GPSes, connected via serial or USB devices.
 
 3) A DGPS server issuing periodic differential-GPS updates.
 
-The daemon only connects to the GPS when clients are connected to it.
-Otherwise the GPS device is closed and the daemon is quiescent, but
-retains fix and timestamp data from the last active period.  This is
-better functional design than starting the daemon from a hotplug
-script would be; that would lose the old data, leaving no fix at all
-available if the GPS were momentarily unplugged.
+The daemon only connects to a GPS when clients are connected to it.
+Otherwise all GPS devices are closed and the daemon is quiescent, but
+retains fix and timestamp data from the last active period. 
 
 All writes to client sockets go through throttled_write().
 This code addresses two cases.  First, client has dropped the connection.
@@ -113,6 +114,43 @@ from the daemon mainline.  In that context, FD_ISSET() on the element
 of the file-descriptor set representing the GPS would tell us if there
 were input waiting.  The explicit test is there for other programs
 that might call gps_poll() without such a guarantee.
+
+** Security Issues
+
+Between versions 2.16 and 2.20, hotplugging was handled in the most
+obvious obvious way, by allowing the F command to declare new GPS
+devices for gpsd to look at.  Because gpsd runs as root, this had
+problems:
+
+1) A malicious client with non-root access on the host could use F to
+point gpsd at a spoof GPS that was actually a pty feeding bogus
+location data.
+
+2) A malicious client could use repeated probes of a target tty or
+other device to cause data loss to other users.  This is a potential
+remote exploit! Not too bad if the bytes he steals are your mouse, it
+would just get jumpy and jerky -- but suppose they're from your disk
+drive and sections drop out of a file you are retrieving for edit?
+
+The conclusion was inescapable.  Switching among and probing devices
+that gpsd already knows about can be an unprivileged operation, but 
+editing gpsd's device list must be privileged.  Hotplug scripts 
+should be able to do it, but ordinary clients should not.
+
+Adding an authentication mechanism was considered and rejected (can you
+say "can of big wriggly worms"?).  Instead, there is a separate
+control channel for the daemon, only locally accessible, only
+recognizing "add device" and "remove device" commands.
+
+The channel is a Unix-domain socket owned by root, so it has
+file-system protection bits.  An intruder would need root permissions
+to get at it, in which case you'd have much bigger problems than a
+spoofed GPS.
+
+More generally, certainly gpsd needs to treat command input as
+untrusted and for saferty's sake should treat GPS data as untrusted
+too (in particular this means never assuming that either source won't
+try to overflow a buffer).
 
 ** Autoconfiguration
 

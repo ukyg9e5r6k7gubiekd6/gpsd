@@ -107,7 +107,11 @@ updates to the client.  <function>gpsd_poll()</function> returns the
 vakidity mask of the received structure.</para>
 
 <para>Consult <filename>gps.h</filename> to learn more about the data members 
-and associated timestamps.</para>
+and associated timestamps.  Note that information will accumulate
+in the session structure over time, and the 'valid' field is not
+automatically zeroed by each poll.  It is up to the client to
+zero that field when appropriate and to keep an eye on the fix 
+and sentence timestamps.</para>
 
 <para>The Python implementation supports the same facilities as the C
 library.  <function>gps_open()</function> is replaced by the
