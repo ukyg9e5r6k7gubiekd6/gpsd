@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #
 # Collect and plot latency-profiling data from a running gpsd.
+# Requires gnuplot.
+#
 import sys, os, time, getopt, gps, tempfile, time, socket
 
 class rawplot:
@@ -16,6 +18,7 @@ class rawplot:
                  (session.emit_time - session.gps_time) % 3600,
                  (time.time() - session.gps_time) % 3600,
                  session.tag))
+        return True
     def plot(self, file, title):
         fmt = '''
 set autoscale
@@ -38,15 +41,13 @@ class stripplot:
         # serial-buffering artifacts at the start of the session
         line_latency = (session.recv_time - session.gps_time) % 3600
         if line_latency > 1:
-            return
-        # Compute the amount of time required for RS232 transmission.
-        # Subtract that out of the total line latency  
-        rs232 = (session.length * (8.0 + session.stopbits)) / session.baudrate
+            return False
         fp.write("%2.6f	%2.6f	%2.6f	%2.6f	# %s\n" \
-              % (rs232, line_latency,
+              % (session.rs232, line_latency,
                  (session.emit_time - session.gps_time) % 3600,
                  (time.time() - session.gps_time) % 3600,
                  session.tag))
+        return True
     def plot(self, file, title):
         fmt = '''
 set autoscale
@@ -104,8 +105,9 @@ if __name__ == '__main__':
         while await > 0:
             session.poll()
             session.gps_time = gps.isotime(session.utc)
-            plotter.formatter(session, out)
-            await -= 1
+            session.rs232 = (session.length * (8.0+session.stopbits))/session.baudrate
+            if plotter.formatter(session, out):
+                await -= 1
     finally:
         session.query("wZ-")
         
