@@ -13,54 +13,32 @@
  *
  **************************************************************************/
 
-static char *field(char *sentence, short fn)
-/* return the nth comma-delimited field from the sentence */
-{
-    static char result[100];
-    char c, *p = sentence;
-    unsigned int i; int n = fn;
-
-    while (n-- > 0) {
-        while ((c = *p++) != ',' && c != '\0')
-	    continue;
-	if (c == '\0' && n >= 0)
-	    return "";
-    }
-    strncpy(result, p, sizeof(result)-1);
-    p = result;
-    i = 0;
-    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i < sizeof(result))
-	p++;
-    *p = '\0';
-    return result;
-}
-
-static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
+static void do_lat_lon(char *field[], struct gps_data_t *out)
 /* process a pair of latitude/longitude fields starting at field index BEGIN */
 {
     double lat, lon, d, m;
     char str[20], *p;
     int updated = 0;
 
-    if (*(p = field(sentence, begin + 0)) != '\0') {
+    if (*(p = field[0]) != '\0') {
 	strncpy(str, p, 20);
 	sscanf(p, "%lf", &lat);
 	m = 100.0 * modf(lat / 100.0, &d);
 	lat = d + m / 60.0;
-	p = field(sentence, begin + 1);
+	p = field[1];
 	if (*p == 'S')
 	    lat = -lat;
 	if (out->latitude != lat)
 	    out->latitude = lat;
 	updated++;
     }
-    if (*(p = field(sentence, begin + 2)) != '\0') {
+    if (*(p = field[2]) != '\0') {
 	strncpy(str, p, 20);
 	sscanf(p, "%lf", &lon);
 	m = 100.0 * modf(lon / 100.0, &d);
 	lon = d + m / 60.0;
 
-	p = field(sentence, begin + 3);
+	p = field[3];
 	if (*p == 'W')
 	    lon = -lon;
 	if (out->longitude != lon)
@@ -72,24 +50,24 @@ static void do_lat_lon(char *sentence, int begin, struct gps_data_t *out)
     REFRESH(out->latlon_stamp);
 }
 
-static int update_field_i(char *sentence, int fld, int *dest)
+static int update_field_i(char *field, int *dest)
 /* update an integer-valued field */
 {
     int tmp, changed;
 
-    tmp = atoi(field(sentence, fld));
+    tmp = atoi(field);
     changed = (tmp != *dest);
     *dest = tmp;
     return changed;
 }
 
-static int update_field_f(char *sentence, int fld, double *dest)
+static int update_field_f(char *field, double *dest)
 /* update a float-valued field */
 {
     int changed;
     double tmp;
 
-    tmp = atof(field(sentence, fld));
+    tmp = atof(field);
     changed = (tmp != *dest);
     *dest = tmp;
     return changed;
@@ -157,7 +135,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
  *
  **************************************************************************/
 
-static void processGPRMC(char *sentence, struct gps_data_t *out)
+static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
@@ -175,18 +153,23 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    if (!strcmp(field(sentence, 2), "A")) {
-	merge_ddmmyy(field(sentence, 9), out);
-	merge_hhmmss(field(sentence, 1), out);
-	do_lat_lon(sentence, 3, out);
-	out->speed_stamp.changed = update_field_f(sentence, 7, &out->speed);
+
+    if (count <= 9) {
+        return;
+    }
+
+    if (!strcmp(field[2], "A")) {
+	merge_ddmmyy(field[9], out);
+	merge_hhmmss(field[1], out);
+	do_lat_lon(&field[3], out);
+	out->speed_stamp.changed = update_field_f(field[7], &out->speed);
 	REFRESH(out->speed_stamp);
-	out->track_stamp.changed = update_field_f(sentence, 8, &out->track);
+	out->track_stamp.changed = update_field_f(field[8], &out->track);
 	REFRESH(out->track_stamp);
     }
 }
 
-static void processGPGLL(char *sentence, struct gps_data_t *out)
+static void processGPGLL(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.  Here are the fields:
@@ -208,14 +191,14 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      * SiRF chipsets don't return the Mode Indicator.
      * This code copes gracefully with both quirks.
      */
-    char *status = field(sentence, 7);
+    char *status = field[7];
 
-    if (!strcmp(field(sentence, 6), "A") && status[0] != 'N') {
+    if (!strcmp(field[6], "A") && status[0] != 'N') {
 	int newstatus = out->status;
 
-	do_lat_lon(sentence, 1, out);
+	do_lat_lon(&field[1], out);
 	fake_mmddyyyy(out);
-	merge_hhmmss(field(sentence, 5), out);
+	merge_hhmmss(field[5], out);
 	if (status[0] == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
@@ -227,7 +210,7 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
     }
 }
 
-static void processGPVTG(char *sentence, struct gps_data_t *out)
+static void processGPVTG(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Track Made Good and Ground Speed */
 {
     /* There are two variants of GPVTG.  One looks like this:
@@ -253,16 +236,16 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 
      * which means we want to extract field 5.  We cope with both.
      */
-    out->track_stamp.changed = update_field_f(sentence, 1, &out->track);;
+    out->track_stamp.changed = update_field_f(field[1], &out->track);;
     REFRESH(out->track_stamp);
-    if (field(sentence, 2)[0] == 'T')
-	out->speed_stamp.changed = update_field_f(sentence, 5, &out->speed);
+    if (field[2][0] == 'T')
+	out->speed_stamp.changed = update_field_f(field[5], &out->speed);
     else
-	out->speed_stamp.changed = update_field_f(sentence, 3, &out->speed);
+	out->speed_stamp.changed = update_field_f(field[3], &out->speed);
     REFRESH(out->speed_stamp);
 }
 
-static void processGPGGA(char *sentence, struct gps_data_t *out)
+static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Global Positioning System Fix Data */
 {
     /*
@@ -279,17 +262,17 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    out->status_stamp.changed = update_field_i(sentence, 6, &out->status);
+    out->status_stamp.changed = update_field_i(field[6], &out->status);
     REFRESH(out->status_stamp);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
     if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
 
 	fake_mmddyyyy(out);
-	merge_hhmmss(field(sentence, 1), out);
-	do_lat_lon(sentence, 2, out);
-        out->satellites_used = atoi(field(sentence, 7));
-	altitude = field(sentence, 9);
+	merge_hhmmss(field[1], out);
+	do_lat_lon(&field[2], out);
+        out->satellites_used = atoi(field[7]);
+	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
@@ -311,7 +294,7 @@ static void processGPGGA(char *sentence, struct gps_data_t *out)
     }
 }
 
-static void processGPGSA(char *sentence, struct gps_data_t *out)
+static void processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* GPS DOP and Active Satellites */
 {
     /*
@@ -328,17 +311,17 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
      */
     int i, changed = 0;
     
-    out->mode_stamp.changed = update_field_i(sentence, 2, &out->mode);
+    out->mode_stamp.changed = update_field_i(field[2], &out->mode);
     REFRESH(out->mode_stamp);
     gpsd_report(3, "GPGSA sets mode %d\n", out->mode);
-    changed |= update_field_f(sentence, 15, &out->pdop);
-    changed |= update_field_f(sentence, 16, &out->hdop);
-    changed |= update_field_f(sentence, 17, &out->vdop);
+    changed |= update_field_f(field[15], &out->pdop);
+    changed |= update_field_f(field[16], &out->hdop);
+    changed |= update_field_f(field[17], &out->vdop);
     for (i = 0; i < MAXCHANNELS; i++)
 	out->used[i] = 0;
     out->satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
-        out->used[i] = atoi(field(sentence, i+3));
+        out->used[i] = atoi(field[i+3]);
         if (out->used[i] > 0)
                 out->satellites_used++;
     }
@@ -368,7 +351,7 @@ int nmea_sane_satellites(struct gps_data_t *out)
     return 0;
 }
 
-static void processGPGSV(char *sentence, struct gps_data_t *out)
+static void processGPGSV(int count, char *field[], struct gps_data_t *out)
 /* GPS Satellites in View */
 {
     /*
@@ -384,9 +367,12 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
                 There my be up to three GSV sentences in a data packet
      */
     int changed, fldnum;
+    if (count <= 3) {
+        return;
+    }
 
-    out->await = atoi(field(sentence, 1));
-    if (sscanf(field(sentence, 2), "%d", &out->part) < 1)
+    out->await = atoi(field[1]);
+    if (sscanf(field[2], "%d", &out->part) < 1)
         return;
     else if (out->part == 1)
     {
@@ -399,10 +385,10 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 
     changed = 0;
     for (fldnum = 4; fldnum < 20; ) {
-	changed |= update_field_i(sentence, fldnum++, &out->PRN[out->satellites]);
-	changed |= update_field_i(sentence, fldnum++, &out->elevation[out->satellites]);
-	changed |= update_field_i(sentence, fldnum++, &out->azimuth[out->satellites]);
-	changed |= update_field_i(sentence, fldnum++, &out->ss[out->satellites]);
+	changed |= update_field_i(field[fldnum++], &out->PRN[out->satellites]);
+	changed |= update_field_i(field[fldnum++], &out->elevation[out->satellites]);
+	changed |= update_field_i(field[fldnum++], &out->azimuth[out->satellites]);
+	changed |= update_field_i(field[fldnum++], &out->ss[out->satellites]);
 	if (!out->PRN[out->satellites])
 	    break;
 	else
@@ -419,6 +405,79 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	out->satellite_stamp.changed = changed;
 	REFRESH(out->satellite_stamp);
     }
+}
+
+/* Based on code from roadmap NMEA parsing code. */
+static void processPGRMM (int count, char *field[],
+			  struct gps_data_t *out UNUSED)
+{
+    struct {
+        char  datum[256];
+    } pgrmm;
+
+    if (count <= 1) {
+        return;
+    }
+
+    strncpy (pgrmm.datum, field[1], sizeof(pgrmm.datum));
+}
+
+
+/* Based on code from roadmap NMEA parsing code. */
+static int decode_numeric (char *value, int unit)
+{
+    int result;
+
+    if (strchr (value, '.') != NULL) {
+       result = (int) (atof(value) * unit);
+    } else {
+       result = atoi (value) * unit;
+    }
+    return result;
+}
+
+
+/* Based on code from roadmap NMEA parsing code. */
+static char *pgrme_unit (const char *original)
+{
+    if (strcasecmp (original, "M") == 0) {
+        return "cm";
+    }
+
+    gpsd_report(1, "unknown distance unit '%s'", original);
+    return "??";
+}
+
+/* Based on code from roadmap NMEA parsing code. */
+static void processPGRME (int count, char *field[],
+			  struct gps_data_t *out UNUSED)
+{
+    struct {
+       int   horizontal;
+       char  horizontal_unit[4];
+       int   vertical;
+       char  vertical_unit[4];
+       int   three_dimensions;
+       char  three_dimensions_unit[4];
+    } pgrme;
+    
+    if (count <= 6) {
+       return;
+    }
+
+    pgrme.horizontal = decode_numeric (field[1], 100);
+    strcpy (pgrme.horizontal_unit, pgrme_unit (field[2]));
+
+    pgrme.vertical = decode_numeric (field[3], 100);
+    strcpy (pgrme.vertical_unit, pgrme_unit (field[4]));
+
+    pgrme.three_dimensions = decode_numeric (field[5], 100);
+    strcpy (pgrme.three_dimensions_unit, pgrme_unit (field[6]));
+}
+
+static void processIgnored (int count UNUSED, char *field[] UNUSED,
+			    struct gps_data_t *out UNUSED)
+{
 }
 
 static short nmea_checksum(char *sentence)
@@ -450,29 +509,61 @@ void nmea_add_checksum(char *sentence)
     sprintf(p, "%02X\r\n", sum);
 }
 
+typedef void (*nmea_decoder) (int count, char *f[], struct gps_data_t *out);
+#define NMEA_PHRASE( s, d ) { s, d }
+static struct {
+    char *name;
+    nmea_decoder decoder;
+} nmea_phrase[] = {
+    NMEA_PHRASE("GPRMC", processGPRMC),
+    NMEA_PHRASE("GPGGA", processGPGGA),
+    NMEA_PHRASE("GPGLL", processGPGLL), /* Not supported by roadmap */
+    NMEA_PHRASE("GPVTG", processGPVTG), /* Not supported by roadmap */
+    NMEA_PHRASE("GPGSA", processGPGSA),
+    NMEA_PHRASE("GPGSV", processGPGSV),
+
+    NMEA_PHRASE("PRWIZCH", processIgnored),
+
+    /* Garmin extensions: */
+    NMEA_PHRASE("PGRME", processPGRME),
+    NMEA_PHRASE("PGRMM", processPGRMM),
+};
+
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
-    if (nmea_checksum(sentence+1)) {
-	if (PREFIX("$GPRMC", sentence)) {
-	    processGPRMC(sentence, outdata);
-	} else if (PREFIX("$GPGGA", sentence)) {
-	    processGPGGA(sentence, outdata);
-	} else if (PREFIX("$GPGLL", sentence)) {
-	    processGPGLL(sentence, outdata);
-	} else if (PREFIX("$GPVTG", sentence)) {
-	    processGPVTG(sentence, outdata);
-	} else if (PREFIX("$GPGSA", sentence)) {
-	    processGPGSA(sentence, outdata);
-	} else if (PREFIX("$GPGSV", sentence)) {
-	    processGPGSV(sentence, outdata);
-	} else if (PREFIX("$PRWIZCH", sentence)) {
-	    /* do nothing */;
-	} else
-	    return -1;
-    } else
-        gpsd_report(1, "Bad NMEA checksum: '%s'\n", sentence);
-    return 0;
+    int retval = -1;
+    unsigned int i;
+    int count;
+    char *p, *s;
+    char *field[80];
+
+    if ( ! nmea_checksum(sentence+1)) {
+      gpsd_report(1, "Bad NMEA checksum: '%s'\n", sentence);
+      return 0;
+    }
+
+    /*
+     * Split the sentence on every comma, making a list of arguments to pass
+     * to the phrase parsers.
+     */
+    s = strdup(sentence); /* make a copy before we edit it. */
+    for (i = 0, p = s; p != NULL && *p != 0; ++i, p = strchr (p, ',')) {
+	*p = 0;
+	field[i] = ++p;
+    }
+    count = i;
+
+    for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
+        if (0 == strcmp(nmea_phrase[i].name, field[0]) &&
+	    nmea_phrase[i].decoder) {
+	    (nmea_phrase[i].decoder)(count, field, outdata);
+	    retval = 0;
+	    break;
+	}
+    }
+    free(s);
+    return retval;
 }
 
 void nmea_send(int fd, const char *fmt, ... )
