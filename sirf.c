@@ -18,7 +18,27 @@
  * accelerometer inputs to the chip to allow it to continue 
  * to navigate in the absence of satellite information, and 
  * to improve fixes when you do have satellites.)"
+ *
+ * Why we don't use packet 42 (Geodetic Navigation Information): 
+ *
+ * Many versions of the SiRF protocol manual don't document 
+ * this sentence at all.  Those that do may incorrectly
+ * describe UTC Day, Hour, and Minute as 2-byte quantities,
+ * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
+ *
+ * "The Geodetic Navigation packet (0x29) was not fully
+ * implemented in firmware prior to version 2.3.2. So for
+ * anyone running 231.000.000 or earlier (including ES,
+ * SiRFDRive, XTrac trains) you won't get UTC time. I don't
+ * know what's broken in firmwares before 2.3.1..."
+ *
+ * To work around the incomplete implementation of this
+ * packet in 231, we used to assume that only the altitude field
+ * from this packet is valid.  But even this doesn't necessarily
+ * seem to be the case.  Instead, we do our own computation 
+ * of geoid separation now.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -166,11 +186,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
 	    n = a / sqrt(1.0 - e2*pow(sin(phi),2));
 	    h = p / cos(phi) - n;
-	    gpsd_report(4, "Height above ellipsoid: %f\n", h);
 	    session->gpsdata.fix.latitude = phi * RAD_2_DEG;
 	    session->gpsdata.fix.longitude = lambda * RAD_2_DEG;
-	    gpsd_report(4, "Height with interpolated correction: %f\n", 
-			h+wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude));
+	    session->gpsdata.fix.altitude =
+			h+wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
 	    /* velocity computation */
 	    vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
 	    veast = -vx*sin(lambda)+vy*cos(lambda);
@@ -339,85 +358,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
-	mask = 0;
-	if (session->driverstate & SIRF_GE_232) {
-	    /*
-	     * Many versions of the SiRF protocol manual don't document 
-	     * this sentence at all.  Those that do may incorrectly
-	     * describe UTC Day, Hour, and Minute as 2-byte quantities,
-	     * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
-	     *
-	     * "The Geodetic Navigation packet (0x29) was not fully
-	     * implemented in firmware prior to version 2.3.2. So for
-	     * anyone running 231.000.000 or earlier (including ES,
-	     * SiRFDRive, XTrac trains) you won't get UTC time. I don't
-	     * know what's broken in firmwares before 2.3.1..."
-	     *
-	     * To work around the incomplete implementation of this
-	     * packet in 231, we assume that only the altitude field
-	     * from this packet is valid.
-	     */
-	    navtype = getw(3);
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
-		session->gpsdata.status = STATUS_DGPS_FIX;
-	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gpsdata.status = STATUS_FIX;
-	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gpsdata.fix.mode = MODE_3D;
-	    else if (session->gpsdata.status)
-		session->gpsdata.fix.mode = MODE_2D;
-	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype, session->gpsdata.status, session->gpsdata.fix.mode);
-	    /*
-	     * UTC is left all zeros in 231 and older firmware versions, 
-	     * and misdocumented in the Protocol Reference (version 1.4).
-	     *            Documented:        Real:
-	     * UTC year       2               2
-	     * UTC month      1               1
-	     * UTC day        2               1
-	     * UTC hour       2               1
-	     * UTC minute     2               1
-	     * UTC second     2               2
-	     *                11              8
-	     */
-	    session->gpsdata.nmea_date.tm_year = getw(11);
-	    session->gpsdata.nmea_date.tm_mon = getb(13)-1;
-	    session->gpsdata.nmea_date.tm_mday = getb(14);
-	    session->gpsdata.nmea_date.tm_hour = getb(15);
-	    session->gpsdata.nmea_date.tm_min = getb(16);
-	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = ((unsigned short)getw(17))*1e-3;
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
-#ifdef NTPSHM_ENABLE
-	    session->time_seen |= TIME_SEEN_UTC_1;
-	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
-		ntpshm_put(session, session->gpsdata.fix.time);
-#endif /* NTPSHM_ENABLE */
-	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
-	    /* skip 4 bytes of satellite map */
-	    session->gpsdata.fix.latitude = getl(23)*1e-7;
-	    session->gpsdata.fix.longitude = getl(27)*1e-7;
-	    /* skip 4 bytes of altitude from ellipsoid */
-	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
-	}
-	session->gpsdata.fix.altitude = getl(35)*1e-2;
-	gpsd_report(4, "Height above MSL: %f\n", session->gpsdata.fix.altitude);
-	if (session->driverstate & SIRF_GE_232) {
-	    /* skip 1 byte of map datum */
-	    session->gpsdata.fix.speed = getw(36)*1e-2;
-	    session->gpsdata.fix.track = getw(38)*1e-2;
-	    /* skip 2 bytes of magnetic variation */
-	    session->gpsdata.fix.climb = getw(42)*1e-2;
-	    /* HDOP should be available at byte 89, but in 231 it's zero. */
-	    gpsd_binary_fix_dump(session, buf2);
-	    gpsd_report(3, "<= GPS: %s", buf2);
-	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
-	}
-	session->driverstate |= SIRF_SEEN_41;
-	return mask;
+	return 0;
 
     case 0x32:		/* SBAS corrections */
 	return 0;
