@@ -2,12 +2,10 @@
  * - Derrick J Brashear <shadow@dementia.org>
  * Tachometer widget from Kerberometer (xklife)
  */
-#include "config.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <errno.h>
-
 #include <stdio.h>
 #include <math.h>
 #include <X11/Intrinsic.h>
@@ -19,8 +17,8 @@
 #include <X11/Xaw/Paned.h>
 #include <Tachometer.h>
 
+#include "config.h"
 #include "xgpsspeed.icon"
-
 #include "gps.h"
 
 #if defined(ultrix) || defined(SOLARIS) 
@@ -28,7 +26,6 @@ extern double rint();
 #endif
 
 static struct gps_data_t *gpsdata;
-
 static Widget toplevel, base, tacho, label;
 
 static XrmOptionDescRec options[] = {
@@ -71,8 +68,7 @@ int main(int argc, char **argv)
 	case 'p':
 	    server = strdup(optarg);
 	    colon = strchr(server, ':');
-	    if (colon != NULL)
-	    {
+	    if (colon != NULL) {
 		server[colon - server] = '\0';
 		port = colon + 1;
 	    }
@@ -94,35 +90,28 @@ int main(int argc, char **argv)
 				 &argc, argv, fallback_resources, NULL);
 
    /**** Shell Widget ****/
-    i = 0;
     XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
 				   XtScreen(toplevel)->root, xgps_bits,
 				   xgps_width, xgps_height)); i++;
-    XtSetValues(toplevel, args, i);
+    XtSetValues(toplevel, args, 1);
     
     /**** Form widget ****/
     base = XtCreateManagedWidget("pane", panedWidgetClass, toplevel, NULL, 0);
 
     /**** Label widget (Title) ****/
-    i = 0;
-    XtSetArg(args[i], XtNlabel, "GPS Speedometer"); i++;
-    label = XtCreateManagedWidget("title", labelWidgetClass,
-				  base, args, i);
+    XtSetArg(args[0], XtNlabel, "GPS Speedometer"); i++;
+    label = XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
-    i = 0;
-    XtSetArg(args[i], XtNlabel, "Miles per Hour"); i++;
-    label = XtCreateManagedWidget("name", labelWidgetClass,
-				  base, args, i);
+    XtSetArg(args[0], XtNlabel, "Miles per Hour"); i++;
+    label = XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
     tacho = XtCreateManagedWidget("meter",
 				  tachometerWidgetClass,
-				  base, NULL, 0);
-    
+				  base, NULL, 0);    
     XtRealizeWidget(toplevel);
-
 
     /*
      * Essentially all the interface to libgps happens below here
@@ -149,7 +138,7 @@ int main(int argc, char **argv)
 void Usage()
 {
     fprintf(stderr, 
-	    "xgpsspeed <Toolkit Options> [-rv] [-nc needlecolor]\n");
+	    "xgpsspeed <Toolkit Options> [-h] [-p server] [-nc needlecolor]\n");
     exit(-1);
 }
 

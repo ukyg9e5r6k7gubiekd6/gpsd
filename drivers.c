@@ -16,19 +16,15 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
 /* visible so the direct-connect clients can use it */
 {
     gpsd_report(2, "<= GPS: %s\n", sentence);
-    if (*sentence == '$')
-    {
+    if (*sentence == '$') {
 	if (nmea_parse(sentence, &session->gNMEAdata) < 0)
 	    gpsd_report(2, "unknown sentence: \"%s\"\n", sentence);
-    }
-    else
-    {
+    } else {
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
 	/* maybe this is a trigger string for a driver we know about? */
-	for (dp = gpsd_drivers; *dp; dp++)
-	{
+	for (dp = gpsd_drivers; *dp; dp++) {
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger && !strncmp(sentence, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
@@ -77,8 +73,7 @@ static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbyt
     return write(session->gNMEAdata.gps_fd, buf, rtcmbytes);
 }
 
-struct gps_type_t nmea =
-{
+struct gps_type_t nmea = {
     'n', 		/* select explicitly with -T n */
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
@@ -104,8 +99,7 @@ void fv18_initializer(struct gps_session_t *session)
     nmea_send(session->gNMEAdata.gps_fd, "$PFEC,GPint,GSA01,DTM00,ZDA00,RMC01,GLL01");
 }
 
-struct gps_type_t fv18 =
-{
+struct gps_type_t fv18 = {
     'f', 		/* select explicitly with -T f */
     "San Jose Navigation FV18",		/* full name of type */
     NULL,		/* no recognition string */
@@ -159,8 +153,7 @@ static void tripmate_initializer(struct gps_session_t *session)
     }
 }
 
-struct gps_type_t tripmate =
-{
+struct gps_type_t tripmate = {
     't', 			/* select explicitly with -T t */
     "Delorme TripMate",		/* full name of type */
     "ASTRAL",			/* tells us to switch */
@@ -209,8 +202,7 @@ static void earthmate_initializer(struct gps_session_t *session)
     zodiac_binary.initializer(session);
 }
 
-struct gps_type_t earthmate =
-{
+struct gps_type_t earthmate = {
     'e',			/* select explicitly with -T e */
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
@@ -231,8 +223,7 @@ struct gps_type_t earthmate =
  *
  **************************************************************************/
 
-struct gps_type_t logfile =
-{
+struct gps_type_t logfile = {
     'l',			/* select explicitly with -T l */
     "Logfile",			/* full name of type */
     NULL,			/* no recognition string */

@@ -398,8 +398,7 @@ int main(int argc, char *argv[])
 	case 'p':
 	    server = strdup(optarg);
 	    colon = strchr(server, ':');
-	    if (colon != NULL)
-	    {
+	    if (colon != NULL) {
 		server[colon - server] = '\0';
 		port = colon + 1;
 	    }

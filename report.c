@@ -1,12 +1,8 @@
-/*
- * Stub function, only here because the linker wants to see it even if
- * a client does not actually require it.
- */
 #include <stdio.h>
 #include <stdarg.h>
 
 void gpsd_report(int errlevel, const char *fmt, ... )
-/* assemble report in printf(3) style, use stderr or syslog */
+/* stub logger for clients that don't supply one */
 {
     va_list ap;
 
