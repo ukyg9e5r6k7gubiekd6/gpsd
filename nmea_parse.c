@@ -440,8 +440,12 @@ void nmea_add_checksum(char *sentence)
     unsigned char sum = '\0';
     char c, *p = sentence;
 
+    if (*p == '$')
+	p++;
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
+    if (c != '*')
+	*p++ '*';
     sprintf(p, "%02X\r\n", sum);
 }
 
