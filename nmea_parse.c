@@ -12,6 +12,7 @@ static void update_field_i(char *sentence, int fld, int *dest, int mask, struct 
 #if 0
 static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out);
 #endif
+
 /* ----------------------------------------------------------------------- */
 
 /*
@@ -107,9 +108,9 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	    out->status = 0;
 	    out->mode = 1;
 	}
-	out->ts_status = out->last_update;
+	REFRESH(out->status_stamp);
 	out->cmask |= C_STATUS;
-	out->ts_mode = out->last_update;
+	REFRESH(out->mode_stamp);
 	out->cmask |= C_MODE;
     }
 }
@@ -133,6 +134,7 @@ static void processGPGLL(char *sentence, struct OUTDATA *out)
     if (status[0] != 'N')
     {
 	do_lat_lon(sentence, 1, out);
+	REFRESH(out->status_stamp);
 	if (status[0] == 'A')
 	    out->status = 1;	/* autonomous */
 	if (status[0] == 'D')
@@ -215,11 +217,11 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
     do_lat_lon(sentence, 2, out);
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &out->status);
-    out->ts_status = out->last_update;
+    REFRESH(out->status_stamp);
     out->cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &out->satellites);
     sscanf(field(sentence, 9), "%lf", &out->altitude);
-    out->ts_alt = out->last_update;
+    REFRESH(out->altitude_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -230,7 +232,7 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
 
   /* 1 = none, 2 = 2d, 3 = 3d */
     sscanf(field(sentence, 2), "%d", &out->mode);
-    out->ts_mode = out->last_update;
+    REFRESH(out->mode_stamp);
     out->cmask |= C_MODE;
     sscanf(field(sentence, 15), "%lf", &out->pdop);
     sscanf(field(sentence, 16), "%lf", &out->hdop);
@@ -322,7 +324,7 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 	updated++;
     }
     if (updated == 2)
-	out->ts_latlon = time(NULL);
+	REFRESH(out->latlon_stamp);
 }
 
 /* ----------------------------------------------------------------------- */

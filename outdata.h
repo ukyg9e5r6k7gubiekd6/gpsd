@@ -8,10 +8,17 @@
 
 #define MAXSATS       12
 
-struct OUTDATA {
-    time_t last_update;		/* When we got last data from GPS receiver */
-				/* This will be copied to the ts_* members */
+struct life_t
+/* lifetime structure to be associated with some piece of data */
+{
+    time_t	last_refresh;
+    int		time_to_live;
+};
+#define REFRESH(stamp)	stamp.last_refresh = time(NULL)
+#define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live < t
+#define REVOKE(stamp)	stamp.last_refresh = 0
 
+struct OUTDATA {
     long cmask;			/* Change flag, set by backend. Reset by app. */
 
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
@@ -21,25 +28,20 @@ struct OUTDATA {
     /* location */
     double latitude;		/* Latitude/longitude in format "d.ddddd" */
     double longitude;
-    time_t ts_latlon;		/* Update time stamp */
-    int    v_latlon;		/* Valid for v_latlon seconds */
+    struct life_t latlon_stamp;
 
     double altitude;		/* Altitude in meters */
-    time_t ts_alt;
-    int    v_alt;
+    struct life_t altitude_stamp;
 
     /* velocity */
     double speed;		/* Speed over ground, knots */
-    time_t ts_speed;
-    int    v_speed;
+    struct life_t speed_stamp;
 
     /* status and precision of fix */
     int    status;		/* 0 = no fix, 1 = fix, 2 = dgps fix */
     int    mode;		/* 1 = no fix, 2 = 2D, 3 = 3D */
-    time_t ts_mode;
-    time_t ts_status;
-    int    v_mode;
-    int    v_status;
+    struct life_t mode_stamp;
+    struct life_t status_stamp;
 
     double pdop;		/* Position dilution of precision */
     double hdop;		/* Horizontal dilution of precision */

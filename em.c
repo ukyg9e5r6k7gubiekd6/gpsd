@@ -274,9 +274,9 @@ static void handle1000(unsigned short *p)
     } else {
 	session.gNMEAdata.mode = 1;
     }
-    session.gNMEAdata.ts_status = session.gNMEAdata.last_update;
+    REFRESH(session.gNMEAdata.status_stamp);
     session.gNMEAdata.cmask |= C_STATUS;
-    session.gNMEAdata.ts_mode = session.gNMEAdata.last_update;
+    REFRESH(session.gNMEAdata.mode_stamp);
     session.gNMEAdata.cmask |= C_MODE;
 
     session.gNMEAdata.separation = p[O(33)] / 100;	/* meters */

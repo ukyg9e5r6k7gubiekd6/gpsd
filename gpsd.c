@@ -341,11 +341,11 @@ int main(int argc, char *argv[])
     session.fdin = input;
     session.fdout = input;
 
-    session.gNMEAdata.v_latlon = gps_timeout;
-    session.gNMEAdata.v_alt = gps_timeout;
-    session.gNMEAdata.v_speed = gps_timeout;
-    session.gNMEAdata.v_status = gps_timeout;
-    session.gNMEAdata.v_mode = gps_timeout;
+    session.gNMEAdata.latlon_stamp.time_to_live = gps_timeout;
+    session.gNMEAdata.altitude_stamp.time_to_live = gps_timeout;
+    session.gNMEAdata.speed_stamp.time_to_live = gps_timeout;
+    session.gNMEAdata.status_stamp.time_to_live = gps_timeout;
+    session.gNMEAdata.mode_stamp.time_to_live = gps_timeout;
 
     while (1) {
 	struct timeval tv;
@@ -386,7 +386,6 @@ int main(int argc, char *argv[])
 	}
 
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
-	    session.gNMEAdata.last_update = time(NULL);
 	    session.device_type->handle_input(input, &afds, &nmea_fds);
 	}
 
@@ -444,10 +443,10 @@ static int validate_sm(time_t cur_time)
     if (session.debug>1) fprintf(stderr, "status=%d, mode=%d\n",
     			ostatus, omode);
 
-    if ((session.gNMEAdata.ts_status + session.gNMEAdata.v_status) >= cur_time) {
+    if (FRESH(session.gNMEAdata.status_stamp, cur_time)) {
         status = ostatus;
-	if (session.debug>1) fprintf(stderr, "status is valid!\n");
-	if ((session.gNMEAdata.ts_mode + session.gNMEAdata.v_mode) >= cur_time) {
+	if (session.debug>1) fprintf(stderr, "status is fresh!\n");
+	if (FRESH(session.gNMEAdata.mode_stamp, cur_time)) {
 	    switch (ostatus) {
 		case 0:
 		    if (omode != 1) invalidate = 1;
@@ -463,15 +462,15 @@ static int validate_sm(time_t cur_time)
 	}
     }
     else {
-	session.gNMEAdata.ts_mode = 0;	/* invalidate mode */
+	REVOKE(session.gNMEAdata.mode_stamp);	/* invalidate mode */
     }
     session.gNMEAdata.cmask &= ~(C_STATUS|C_MODE);
 
     if (invalidate) {
 	syslog(LOG_ERR, "Impossible status(%d)/mode(%d) reason(%d)\n",
 		ostatus, omode, invalidate);
-	session.gNMEAdata.ts_status = 0;
-	session.gNMEAdata.ts_mode = 0;
+	REVOKE(session.gNMEAdata.status_stamp);	/* invalidate status */
+	REVOKE(session.gNMEAdata.mode_stamp);	/* invalidate mode */
 	status = 0;
     }
     return status;
@@ -501,7 +500,7 @@ static int handle_request(int fd, fd_set * fds)
 	    switch (*p) {
 	    case 'P':
 	    case 'p':
-		if ((session.gNMEAdata.ts_latlon + session.gNMEAdata.v_latlon) >= cur_time) {
+		if (FRESH(session.gNMEAdata.latlon_stamp, cur_time)) {
 		    sprintf(reply + strlen(reply),
 			    ",P=%f %f",
 			    session.gNMEAdata.latitude,
@@ -510,7 +509,7 @@ static int handle_request(int fd, fd_set * fds)
 		break;
 	    case 'A':
 	    case 'a':
-		if ((session.gNMEAdata.ts_alt + session.gNMEAdata.v_alt) >= cur_time) {
+		if (FRESH(session.gNMEAdata.altitude_stamp, cur_time)) {
 		    sprintf(reply + strlen(reply),
 			    ",A=%f",
 			    session.gNMEAdata.altitude);
@@ -518,7 +517,7 @@ static int handle_request(int fd, fd_set * fds)
 		break;
 	    case 'V':
 	    case 'v':
-		if ((session.gNMEAdata.ts_speed + session.gNMEAdata.v_speed) >= cur_time) {
+		if (FRESH(session.gNMEAdata.speed_stamp, cur_time)) {
 		    sprintf(reply + strlen(reply),
 			    ",V=%f",
 			    session.gNMEAdata.speed);
@@ -571,7 +570,7 @@ static int handle_request(int fd, fd_set * fds)
 	    break;
 	case 'S':
 	case 's':
-	    if ((session.gNMEAdata.ts_status + session.gNMEAdata.v_status) >= cur_time) {
+	    if (FRESH(session.gNMEAdata.status_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
 			",S=%d",
 			session.gNMEAdata.status);
@@ -579,7 +578,7 @@ static int handle_request(int fd, fd_set * fds)
 	    break;
 	case 'M':
 	case 'm':
-	    if ((session.gNMEAdata.ts_mode + session.gNMEAdata.v_mode) >= cur_time) {
+	    if (FRESH(session.gNMEAdata.mode_stamp, cur_time)) {
 		sprintf(reply + strlen(reply),
 			",M=%d",
 			session.gNMEAdata.mode);
