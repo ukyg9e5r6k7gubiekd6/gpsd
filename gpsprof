@@ -41,91 +41,90 @@ class spaceplot:
     def __init__(self, fp):
         self.fixes = []
         self.fp = fp
+    def d(self, a, b):
+        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
     def gather(self, session):
         # Include altitude, not used here, for 3D plot experiments.
         # Watch out for the ALTITUDE_NOT_VALID value from gps.py.
         self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
         return True
-    def data(self, session):
+    def header(self, session):
         self.fp.write("# Position uncertainty, %s, %s, %ds cycle\n" % \
                  (title, session.gps_id, session.cycle))
-    def plot(self, file, title, session):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
         else:
-            centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
+            self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
             # Sort fixes by distance from centroid
-            def d(a, b): return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
-            self.fixes.sort(lambda x, y: cmp(d(centroid, x), d(centroid, y)))
-            # Compute CEP(50%)
-            cep_meters = gps.EarthDistance(centroid[:2], self.fixes[len(self.fixes)/2][:2])
+            self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
-            recentered = map(lambda fix: gps.MeterOffset(centroid, fix[:2]), self.fixes)
-	    alt_sum = 0
-	    alt_num = 0
-	    lon_max = -9999
-            for i in range(len(recentered)):
-                (lat, lon) = recentered[i][:2]
-                (raw1, raw2, alt) = self.fixes[i]
-                if alt > gps.ALTITUDE_NOT_VALID:
-			alt_sum += alt
-			alt_num += 1
-		if lon > lon_max :
-			lon_max = lon
-                self.fp.write("%f	%f	%f	%f	%f\n" % (lat, lon, raw1, raw2, alt))
-            if alt_num == 0:
-                alt_avg = gps.ALTITUDE_NOT_VALID
-            else:
-                alt_avg = alt_sum / alt_num
-            if centroid[0] < 0:
-                latstring = "%fS" % -centroid[0]
-            elif centroid[0] == 0:
-                latstring = "0"
-            else:
-                latstring = "%fN" % centroid[0]
-            if centroid[1] < 0:
-                lonstring = "%fW" % -centroid[1]
-            elif centroid[1] == 0:
-                lonstring = "0"
-            else:
-                lonstring = "%fE" % centroid[1]
-            fmt = ""
-            fmt += "set autoscale\n"
-            fmt += 'set key below\n'
-            fmt += 'set key title "%s"\n' % time.asctime()
-            fmt += 'set size ratio -1\n'
-            fmt += 'set style line 2 pt 1\n'
-            fmt += 'set style line 3 pt 2\n'
-            fmt += 'set xlabel "Meters east from %s"\n' % lonstring
-            fmt += 'set ylabel "Meters north from %s"\n' % latstring
-            fmt += 'set border 15\n'
-            if alt_avg != gps.ALTITUDE_NOT_VALID:
-                fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
-                fmt += 'set ytics nomirror\n'
-                fmt += 'set y2tics\n'
-            fmt += 'cep=%f\n' % d((0,0), recentered[len(self.fixes)/2])
-            fmt += 'set parametric\n'
-            fmt += 'set trange [0:2*pi]\n'
-            fmt += 'cx(t, r) = sin(t)*r\n'
-            fmt += 'cy(t, r) = cos(t)*r\n'
-            fmt += 'chlen = cep/20\n'
-            fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
-            fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
-            fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
-            fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" ' % (file, len(self.fixes))
-            if alt_avg != gps.ALTITUDE_NOT_VALID:
-                fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
-	    else:
-		fmt += "\n"
-
-	    #  document the plot file for later use
-            self.fp.write("#\n# This plot function was used:\n#\n")
-	    for s in fmt.split( "\n"):
-                self.fp.write("# %s\n" % s)
-
-	    self.fp.flush()
-            return fmt
+            self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+    def data(self, session):
+        for i in range(len(self.recentered)):
+            (lat, lon) = self.recentered[i][:2]
+            (raw1, raw2, alt) = self.fixes[i]
+            self.fp.write("%f	%f	%f	%f	%f\n" % (lat, lon, raw1, raw2, alt))
+    def plot(self, file, title, session):
+        # Compute CEP(50%)
+        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[len(self.fixes)/2][:2])
+        alt_sum = 0
+        alt_num = 0
+        lon_max = -9999
+        for i in range(len(self.recentered)):
+            (lat, lon) = self.recentered[i][:2]
+            (raw1, raw2, alt) = self.fixes[i]
+            if alt > gps.ALTITUDE_NOT_VALID:
+                    alt_sum += alt
+                    alt_num += 1
+            if lon > lon_max :
+                    lon_max = lon
+        if alt_num == 0:
+            alt_avg = gps.ALTITUDE_NOT_VALID
+        else:
+            alt_avg = alt_sum / alt_num
+        if self.centroid[0] < 0:
+            latstring = "%fS" % -self.centroid[0]
+        elif self.centroid[0] == 0:
+            latstring = "0"
+        else:
+            latstring = "%fN" % self.centroid[0]
+        if self.centroid[1] < 0:
+            lonstring = "%fW" % -self.centroid[1]
+        elif self.centroid[1] == 0:
+            lonstring = "0"
+        else:
+            lonstring = "%fE" % self.centroid[1]
+        fmt = ""
+        fmt += "set autoscale\n"
+        fmt += 'set key below\n'
+        fmt += 'set key title "%s"\n' % time.asctime()
+        fmt += 'set size ratio -1\n'
+        fmt += 'set style line 2 pt 1\n'
+        fmt += 'set style line 3 pt 2\n'
+        fmt += 'set xlabel "Meters east from %s"\n' % lonstring
+        fmt += 'set ylabel "Meters north from %s"\n' % latstring
+        fmt += 'set border 15\n'
+        if alt_avg != gps.ALTITUDE_NOT_VALID:
+            fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
+            fmt += 'set ytics nomirror\n'
+            fmt += 'set y2tics\n'
+        fmt += 'cep=%f\n' % self.d((0,0), self.recentered[len(self.fixes)/2])
+        fmt += 'set parametric\n'
+        fmt += 'set trange [0:2*pi]\n'
+        fmt += 'cx(t, r) = sin(t)*r\n'
+        fmt += 'cy(t, r) = cos(t)*r\n'
+        fmt += 'chlen = cep/20\n'
+        fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
+        fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
+        fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
+        fmt += ' "%s" using 1:2 with points ls 3 title "%d GPS fixes" ' % (file, len(self.fixes))
+        if alt_avg != gps.ALTITUDE_NOT_VALID:
+            fmt += ', "%s" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % ( file, lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
+        else:
+            fmt += "\n"
+        self.fp.flush()
+        return fmt
 
 class uninstrumented:
     "Total times without instrumentation."
@@ -140,11 +139,12 @@ class uninstrumented:
             return True
         else:
             return False
-    def data(self, session):
+    def header(self, session):
         self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
+    def data(self, session):
         for seconds in self.stats:
             self.fp.write("%2.6lf\n" % seconds)
     def plot(self, file, title, session):
@@ -168,7 +168,7 @@ class rawplot:
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
         return True
-    def data(self, session):
+    def header(self, session):
         self.fp.write("# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -180,6 +180,7 @@ class rawplot:
         for i in range(0, 7):
             self.fp.write("--------\t")
         self.fp.write("--------\n")
+    def data(self, session):
         for timings in self.stats:
             if timings.sentence_time:
                 e1 = timings.d_xmit_time
@@ -228,7 +229,7 @@ class splitplot:
         if session.timings.tag not in self.sentences:
             self.sentences.append(session.timings.tag)
         return True
-    def data(self, session):
+    def header(self, session):
         self.fp.write("# Split latency data, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
@@ -242,6 +243,7 @@ class splitplot:
         for s in tuple(splitplot.sentences) + ("T1", "D1", "W", "E2", "T2", "D2", "length"):
             self.fp.write("---------\t")
         self.fp.write("--------\n")
+    def data(self, session):
         for timings in self.stats:
             if timings.sentence_time:
                 e1 = timings.d_xmit_time
@@ -344,6 +346,7 @@ def plotframe(await, fname, file, speed, threshold, title):
         baton.end()
     finally:
         session.query("w-z-")
+    plotter.header(session)
     plotter.data(session)
     out.flush()
     command = plotter.plot(out.name, title, session)
