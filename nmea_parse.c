@@ -472,28 +472,22 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
       return 0;
     }
 
-    /*
-     * Split the sentence on every comma, making a list of arguments to pass
-     * to the phrase parsers.
-     */
+    /* make an editable copy of the sentence */
 #ifdef AC_FUNC_ALLOCA
     s = alloca(strlen(sentence)+1);
     strcpy(s, sentence);
 #else
-    s = strdup(sentence); /* make a copy before we edit it. */
+    s = strdup(sentence);
 #endif
-
-    /* Find checksum part, and make sure we skip it when splitting. */
-    p = s;
-    while ((*p != '*') && (*p >= ' ')) ++p;
+    /* discard the checksum part */
+    for (p = s; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
-
-    for (i = 0, p = s; p != NULL && *p != 0; ++i, p = strchr (p, ',')) {
+    /* split sentence copy on commas, filling the field array */
+    for (count = 0, p = s; p != NULL && *p != 0; ++count, p = strchr(p, ',')) {
 	*p = 0;
-	field[i] = ++p;
+	field[count] = ++p;
     }
-    count = i;
-
+    /* dispatch on field zero, the sentence tag */
     for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
         if (!strcmp(nmea_phrase[i].name, field[0])) {
 	    if (nmea_phrase[i].decoder)
@@ -521,4 +515,3 @@ void nmea_send(int fd, const char *fmt, ... )
     nmea_add_checksum(buf + 1);
     write(fd, buf, strlen(buf));
 }
-
