@@ -33,6 +33,7 @@ and speedometer</refpurpose>
 <cmdsynopsis>
   <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
+      <arg choice='opt'>-k </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'><replaceable>server</replaceable></arg>
@@ -304,6 +305,11 @@ confused state but can be soft-reset by pulling down DTR.</para>
 <application>gpsd</application> with an X interface. It displays
 current GPS animation and (for GPSes that support the feature) the
 locations of accessible satellites.</para>
+
+<para><application>xgps</application> accepts a -k option to change
+speed reporting to use km/h as a unit, rather than mp/h.  This option
+is experimental and may be dropped or replaced by an X resource
+un a future release.</para>
 
 <para><application>xgps</application> accepts an -h option as for
 <application>gpsd</application>, or a -v option to dump the package
