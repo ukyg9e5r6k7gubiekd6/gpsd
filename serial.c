@@ -38,8 +38,8 @@ static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
 int gpsd_set_speed(struct gps_session_t *session, int speed)
 {
-    char	buf[20*NMEA_MAX+1];
-    int		n, rate;
+    char	buf[NMEA_MAX+1];
+    unsigned int	n, rate;
 
     if (speed < 300)
 	rate = 0;
@@ -67,17 +67,18 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
 	return 0;
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
 
-    usleep(300000);	/* allow the UART time to settle */
+    usleep(1250000);	/* allow the UART time to settle */
 
-    /*
-     * Magic -- relies on the fact that the UARTS on GPSes never seem to take 
-     * longer than 3 NMEA sentences to sync.
-     */
     if (session->device_type->validate_buffer) {
-	n = read(session->gNMEAdata.gps_fd, buf, sizeof(buf)-1);
+	n = 0;
+	while (n < NMEA_MAX) {
+	    n += read(session->gNMEAdata.gps_fd, buf+n, sizeof(buf)-n-1);
+	}
+	gpsd_report(4, "validating %d bytes.\n", n);
 	return session->device_type->validate_buffer(buf, n);
     } else {
 	/* this has the effect of disabling baud hunting on future connects */
+	gpsd_report(4, "no buffer validation.\n");
 	session->gNMEAdata.baudrate = speed;
 	return 1;
     }
