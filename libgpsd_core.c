@@ -76,11 +76,6 @@ struct gps_session_t *gpsd_init(char *dgpsserver)
 void gpsd_deactivate(struct gps_session_t *session)
 /* temporarily release the GPS device */
 {
-    session->gpsdata.online = 0;
-    session->gpsdata.fix.mode = MODE_NOT_SEEN;
-    session->gpsdata.status = STATUS_NO_FIX;
-    session->gpsdata.fix.track = TRACK_NOT_VALID;
-    session->gpsdata.fix.altitude = ALTITUDE_NOT_VALID;
     gpsd_close(session);
     session->gpsdata.gps_fd = -1;
     if (session->device_type->wrapup)
@@ -104,6 +99,7 @@ int gpsd_activate(struct gps_session_t *session)
 	else if (session->device_type->initializer)
 	    session->device_type->initializer(session);
 
+	session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
