@@ -133,7 +133,7 @@ main(int argc, char **argv)
     }
 
 
-    toplevel = XtVaAppInitialize(&app, "XGpsSpeed", options, XtNumber(options),
+    toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", options, XtNumber(options),
 			    &argc, argv, fallback_resources, NULL);
 
 #if 0

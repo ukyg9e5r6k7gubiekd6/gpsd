@@ -1,0 +1,6 @@
+*gps_data.time.label.labelString: Time
+*gps_data.latitude.label.labelString: Lat.
+*gps_data.longitude.label.labelString: Lon.
+*gps_data.altitude.label.labelString: Alt.
+*gps_data.fix_status.label.labelString: Stat
+*gps_data.quit.label.labelString: Quit

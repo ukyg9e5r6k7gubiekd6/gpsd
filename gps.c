@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "  gps device name:    %s\n", device_name);
 	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     }
-    lxbApp = XtVaAppInitialize(&app, "Gps", NULL, 0, &argc, argv, fallback_resources, NULL);
+    lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
 
     n = 0;
     XtSetArg(args[n], XmNgeometry, "620x434");

@@ -7,11 +7,11 @@ run make:  libgpsd.a, gpsd, gps, xgpsspeed, and gpsplay are built.
 
 Copy the applications wherever you want them to live.
 
-Copy the app-defaults file Gps to your home directory or to the
-system-wide X app-defaults directory.
+Copy the app-defaults file gps.ad and xgpsspeed.ad to your home
+directory or to the system-wide X app-defaults directory.
 
-The "right" thing to do is, to start gpsd on a serial or USB port that has the GPS
-connected to it.
+The "right" thing to do is to start gpsd on a serial or USB port that
+has the GPS connected to it.
 
 Then start gps and have it connect to gpsd via a socket. Give it a device
 name like "localhost:2947", which means: connect to the host localhost using

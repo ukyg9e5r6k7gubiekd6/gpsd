@@ -169,7 +169,7 @@ HEADERS = config.h gpsd.h TachometerP.h nmea.h Tachometer.h version.h xgpsspeed.
 SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(HEADERS)
 DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml
 MANPAGES = gpsd.1 libgpsd.3
-XRESOURCES = Gps XGpsSpeed
+XRESOURCES = gps.ad xgpsspeed.ad
 CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
 META = gpsd.spec gpsd.lsm
 ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(META) $(MANPAGES) 
