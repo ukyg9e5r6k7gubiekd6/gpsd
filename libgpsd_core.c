@@ -348,7 +348,7 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
 	sprintf(bufp, ",");
     }
     bufp += strlen(bufp);
-    sprintf(bufp, "%.2f,%.2f,%.2f*", 
+    sprintf(bufp, "%.1f,%.1f,%.1f*", 
 	    session->gNMEAdata.pdop, 
 	    session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
