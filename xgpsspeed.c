@@ -20,7 +20,7 @@ static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
-{"--speedunits","*units",               XrmoptionSepArg,        NULL},
+{"-speedunits", "*speedunits",          XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [--speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
+	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
