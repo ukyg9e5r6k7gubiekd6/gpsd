@@ -64,9 +64,8 @@ struct gps_session_t
     int seconds;
     /*
      * Zodiac chipset channel status from PRWIZCH.
-     * This is actually redundant with the SNRs in GPGSV,
-     * and all known variants of the Zodiac chipsets issue GPGSV.
-     * The only reason we stash it here is so that raw-mode
+     * This is actually redundant with the SNRs in GPGSV.
+     * The main reason we stash it here is so that raw-mode
      * translation of Zodiac binary protocol will send it
      * up to the client.
      */
