@@ -1,6 +1,7 @@
 dnl
 dnl
 AC_INIT(gpsd.c)
+AC_CONFIG_HEADER(config.h)
 
 dnl Find and check C compiler
 dnl
@@ -10,7 +11,7 @@ dnl Find and check C preprocessor
 dnl
 AC_PROG_CPP
 
-AC_CHECK_HEADERS(termio.h sys/param.h termios.h sys/termios.h)
+AC_CHECK_HEADERS(termio.h sys/param.h termios.h sys/termios.h sys/select.h)
 
 dnl
 dnl Locate Libraries

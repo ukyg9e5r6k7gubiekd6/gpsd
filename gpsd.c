@@ -17,6 +17,10 @@
 #endif
 #endif
 
+#if defined (HAVE_SYS_SELECT_H)
+#include <sys/select.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
