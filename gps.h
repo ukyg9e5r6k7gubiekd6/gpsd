@@ -46,10 +46,7 @@ struct gps_data_t {
 				 * GPRMC, the date could be off by one.
 				 *
 				 * The century part of the year is spliced in
-				 * from host-machine time and could be wrong if
-				 * the host and GPS are on opposite sides of
-				 * the International Date Line and it's close
-				 * to midnight of a new century. 
+				 * from host-machine time. 
 				 */
     /*
      * Position/velocity fields are only valid when the last_refresh

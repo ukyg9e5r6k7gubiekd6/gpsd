@@ -110,20 +110,15 @@ static int update_field_f(char *sentence, int fld, double *dest)
 
    (where part or all of the decimal second suffix may be omitted).
    This means that for GPRMC we must supply a century and for GGA and
-   GGL we must supply a century, year, and day.
-
-   We get the missing data from the host machine's clock time.  That is, 
-   the machine where this *daemon* is running -- which is probably hooked
-   to the GPS by a link short enough that it doesn't cross the International
-   Date Line.  Even if it does, this hack could only screw the year number 
-   up for two hours around the first midnight of a new century.
+   GGL we must supply a century, year, and day.  We get the missing data 
+   from the host machine's clock time.
  */
 
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
     time_t now = time(NULL);
-    struct tm *tm = localtime(&now);
+    struct tm *tm = gmtime(&now);
 
     strftime(out->utc, 3, "%C", tm);
     strncpy(out->utc+2, ddmmyy + 4, 2);	/* copy year */
@@ -135,10 +130,10 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 }
 
 static void fake_mmddyyyy(struct gps_data_t *out)
-/* sentence didn't sypply mm/dd/yyy, so we have to fake it */
+/* sentence didn't supply mm/dd/yyy, so we have to fake it */
 {
     time_t now = time(NULL);
-    struct tm *tm = localtime(&now);
+    struct tm *tm = gmtime(&now);
 
     strftime(out->utc, sizeof(out->utc), "%Y-%m-%dT", tm);
 }
