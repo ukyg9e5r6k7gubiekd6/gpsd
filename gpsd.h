@@ -151,6 +151,7 @@ extern int gpsd_set_speed(struct gps_session_t *, unsigned int, unsigned int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_session_t *);
 
+extern void gpsd_raw_hook(struct gps_session_t *, char *);
 extern void gpsd_zero_satellites(struct gps_data_t *);
 extern void gpsd_binary_fix_dump(struct gps_session_t *, char *);
 extern void gpsd_binary_satellite_dump(struct gps_session_t *, char *);

@@ -34,40 +34,16 @@
 
 #define QLEN			5
 
-struct gps_session_t *session;
-static char *device_name = DEFAULT_DEVICE_NAME;
-static char *pid_file = NULL;
 static fd_set all_fds, nmea_fds, watcher_fds;
-static int debuglevel, nfds, go_background = 1, in_background = 0, need_gps;
-
-static jmp_buf	restartbuf;
-#define THROW_SIGHUP	1
-
-static void restart(int sig UNUSED)
-{
-    longjmp(restartbuf, THROW_SIGHUP);
-}
+static int debuglevel, in_background = 0;
+static jmp_buf restartbuf;
 
 static void onsig(int sig)
 {
-    gpsd_wrap(session);
-    gpsd_report(1, "Received signal %d. Exiting...\n", sig);
-    exit(10 + sig);
+    longjmp(restartbuf, sig+1);
 }
 
-static void store_pid(pid_t pid)
-{
-    FILE *fp;
-
-    if ((fp = fopen(pid_file, "w")) != NULL) {
-	fprintf(fp, "%u\n", pid);
-	(void) fclose(fp);
-    } else {
-	gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
-    }
-}
-
-static int daemonize(void)
+static int daemonize(char *pid_file)
 {
     int fd;
     pid_t pid;
@@ -78,8 +54,16 @@ static int daemonize(void)
     case 0:	/* child side */
 	break;
     default:	/* parent side */
-	if (pid_file)
-		store_pid(pid);
+	if (pid_file) {
+	    FILE *fp;
+
+	    if ((fp = fopen(pid_file, "w")) != NULL) {
+		fprintf(fp, "%u\n", pid);
+		(void) fclose(fp);
+	    } else {
+		gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
+	    }
+	}
 	exit(0);
     }
 
@@ -120,15 +104,12 @@ static void usage(void)
 {
     printf("usage:  gpsd [options] \n\
   Options include: \n\
-  -f string (default %s)   = set GPS device name \n"
-"  -S integer (default %4s)      = set port for daemon \n"
-#if TRIPMATE_ENABLE || ZODIAC_ENABLE
-"  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
-#endif /* TRIPMATE_ENABLE || ZODIAC_ENABLE */
-  "-d host[:port]                 = set DGPS server \n\
-  -P pidfile                     = set file to record process ID \n\
-  -D integer (default 0)         = set debug level \n\
-  -h                             = help message \n",
+  -f string (default %s)  	= set GPS device name \n\
+  -S integer (default %s)	= set port for daemon \n\
+  -d host[:port]         	= set DGPS server \n\
+  -P pidfile              	= set file to record process ID \n\
+  -D integer (default 0)  	= set debug level \n\
+  -h                     	= help message \n",
 	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
 }
 
@@ -150,7 +131,7 @@ static int throttled_write(int fd, char *buf, int len)
     return status;
 }
 
-static int validate(void)
+static int validate(struct gps_session_t *session)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
         gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
@@ -168,6 +149,64 @@ static int validate(void)
 #undef VALIDATION_CONSTRAINT
 }
 
+static void notify_watchers(char *sentence)
+/* notify all watching clients of an event */
+{
+    int fd;
+
+    for (fd = 0; fd < FD_SETSIZE; fd++)
+	if (FD_ISSET(fd, &watcher_fds))
+	    throttled_write(fd, sentence, strlen(sentence));
+}
+
+static int passivesock(char *service, char *protocol, int qlen)
+{
+    struct servent *pse;
+    struct protoent *ppe;
+    struct sockaddr_in sin;
+    int s, type, one = 1;
+
+    memset((char *) &sin, '\0', sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+
+    if ( (pse = getservbyname(service, protocol)) )
+	sin.sin_port = htons(ntohs((u_short) pse->s_port));
+    else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
+	gpsd_report(0, "Can't get \"%s\" service entry.\n", service);
+	return -1;
+    }
+    if ((ppe = getprotobyname(protocol)) == 0) {
+	gpsd_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
+	return -1;
+    }
+    if (strcmp(protocol, "udp") == 0)
+	type = SOCK_DGRAM;
+    else
+	type = SOCK_STREAM;
+    if ((s = socket(PF_INET, type, ppe->p_proto)) < 0) {
+	gpsd_report(0, "Can't create socket\n");
+	return -1;
+    }
+    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,sizeof(one)) == -1) {
+	gpsd_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	return -1;
+    }
+    if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
+	gpsd_report(0, "Can't bind to port %s\n", service);
+	return -1;
+    }
+    if (type == SOCK_STREAM && listen(s, qlen) < 0) {
+	gpsd_report(0, "Can't listen on %s port%s\n", service);
+	return -1;
+    }
+    return s;
+}
+
+/* restrict the scope of the command-state globals as much as possible */
+static struct gps_session_t *session;
+static int need_gps;
+
 static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
@@ -176,14 +215,12 @@ static int handle_request(int fd, char *buf, int buflen)
     struct gps_data_t *ud = &session->gNMEAdata;
     int icd = 0;
 
-    session->poll_times[fd] = timestamp();
-
     sprintf(reply, "GPSD");
     p = buf;
     while (*p && p - buf < buflen) {
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (!validate())
+	    if (!validate(session))
 		strcpy(phrase, ",A=?");
 	    else
 		sprintf(phrase, ",A=%f", ud->altitude);
@@ -211,7 +248,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		strcpy(phrase, ",D=?");
 	    break;
 	case 'E':
-	    if (!validate())
+	    if (!validate(session))
 		strcpy(phrase, ",E=?");
 	    else if (ud->seen_sentences & PGRME)
 		sprintf(phrase, ",E=%.2f %.2f %.2f", ud->epe, ud->eph, ud->epv);
@@ -259,7 +296,7 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",I=%s", session->device_type->typename);
 	    break;
 	case 'L':
-	    sprintf(phrase, ",l=1 " VERSION " abcdefimpqrstuvwxy");
+	    sprintf(phrase, ",l=1 " VERSION " abcdefilmpqrstuvwxy");	//ghjkno
 	    break;
 	case 'M':
 	    if (ud->mode == MODE_NOT_SEEN)
@@ -268,14 +305,14 @@ static int handle_request(int fd, char *buf, int buflen)
 		sprintf(phrase, ",M=%d", ud->mode);
 	    break;
 	case 'P':
-	    if (!validate())
+	    if (!validate(session))
 		strcpy(phrase, ",P=?");
 	    else
 		sprintf(phrase, ",P=%f %f", 
 			ud->latitude, ud->longitude);
 	    break;
 	case 'Q':
-	    if (!validate() || !SEEN(ud->fix_quality_stamp))
+	    if (!validate(session) || !SEEN(ud->fix_quality_stamp))
 		strcpy(phrase, ",Q=?");
 	    else
 		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
@@ -307,19 +344,19 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(phrase, ",S=%d", ud->status);
 	    break;
 	case 'T':
-	    if (!validate() || !SEEN(ud->track_stamp))
+	    if (!validate(session) || !SEEN(ud->track_stamp))
 		strcpy(phrase, ",T=?");
 	    else
 		sprintf(phrase, ",T=%f", ud->track);
 	    break;
 	case 'U':
-	    if (!validate() || !SEEN(ud->climb_stamp))
+	    if (!validate(session) || !SEEN(ud->climb_stamp))
 		strcpy(phrase, ",U=?");
 	    else
 		sprintf(phrase, ",U=%f", ud->climb);
 	    break;
 	case 'V':
-	    if (!validate() || !SEEN(ud->speed_stamp))
+	    if (!validate(session) || !SEEN(ud->speed_stamp))
 		strcpy(phrase, ",V=?");
 	    else
 		sprintf(phrase, ",V=%f", ud->speed);
@@ -426,113 +463,73 @@ static int handle_request(int fd, char *buf, int buflen)
     return throttled_write(fd, reply, strlen(reply));
 }
 
-static void notify_watchers(char *sentence)
-/* notify all watching clients of an event */
+static void raw_hook(struct gps_data_t *ud, char *sentence)
+/* hook to be executed on each incoming sentence group */
 {
     int fd;
+    char *sp;
 
-    for (fd = 0; fd < nfds; fd++)
-	if (FD_ISSET(fd, &watcher_fds))
-	    throttled_write(fd, sentence, strlen(sentence));
-}
-
-static void raw_hook(char *sentence)
-/* hook to be executed on each incoming sentence */
-/* CAUTION: only one NMEA sentence per call */
-{
-    int fd;
-
-    char *sp, *tp;
-    if (sentence[0] != '$')
-	session->gNMEAdata.tag[0] = '\0';
-    else {
-	for (tp = session->gNMEAdata.tag, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
-	    *tp = *sp;
-	*tp = '\0';
-    }
-    session->gNMEAdata.sentence_length = strlen(sentence);
-
-    for (fd = 0; fd < nfds; fd++) {
+    for (fd = 0; fd < FD_SETSIZE; fd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
 	if (FD_ISSET(fd, &nmea_fds))
 	    throttled_write(fd, sentence, strlen(sentence));
 
 	/* some listeners may be in watcher mode */
 	if (FD_ISSET(fd, &watcher_fds)) {
-#define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
-	    if (PREFIX("$GPRMC", sentence)) {
-		PUBLISH(fd, "pdtuvsm");
-	    } else if (PREFIX("$GPGGA", sentence)) {
-		PUBLISH(fd, "pdasm");	
-	    } else if (PREFIX("$GPGLL", sentence)) {
-		PUBLISH(fd, "pd");
-	    } else if (PREFIX("$GPVTG", sentence)) {
-		PUBLISH(fd, "tuv");
-	    } else if (PREFIX("$GPGSA", sentence)) {
-		PUBLISH(fd, "qme");
-	    } else if (PREFIX("$GPGSV", sentence)) {
-		if (nmea_sane_satellites(&session->gNMEAdata))
-		    PUBLISH(fd, "y");
-	    } else if (PREFIX("$PGRME", sentence)) {
-		PUBLISH(fd, "e");
+	    char cmds[10];
+	    int mask = 0;
+	    for (sp = sentence; *sp; sp++) {
+		if (*sp == '$') {
+		    if (PREFIX("$GPRMC", sp)) {
+			mask |= GPRMC;
+		    } else if (PREFIX("$GPGGA", sp)) {
+			mask |= GPGGA;
+		    } else if (PREFIX("$GPGLL", sp)) {
+			mask |= GPGLL;
+		    } else if (PREFIX("$GPVTG", sp)) {
+			mask |= GPVTG;
+		    } else if (PREFIX("$GPGSA", sp)) {
+			mask |= GPGSA;
+		    } else if (PREFIX("$GPGSV", sp)) {
+			if (nmea_sane_satellites(ud))
+			    mask |= GPGSA;
+		    } else if (PREFIX("$PGRME", sp)) {
+			mask |= PGRME;
+		    }
+		}
 	    }
-#undef PUBLISH
+	    cmds[0] = '\0';
+	    if (mask & (GPRMC | GPGGA | GPGLL))
+		strcat(cmds, "dp");
+	    if (mask & (GPGGA))
+		strcat(cmds, "a");
+	    if (mask & (GPRMC | GPVTG))
+		strcat(cmds, "tuv");
+	    if (mask & (GPRMC | GPGGA))
+		strcat(cmds, "s");
+	    if (mask & (GPGSA | GPGGA))
+		strcat(cmds, "m");
+	    if (mask & (GPGGA))
+		strcat(cmds, "q");
+	    if (mask & (GPGSV))
+		strcat(cmds, "y");
+	    if (mask & (GPGSA | PGRME))
+		strcat(cmds, "e");
+	    handle_request(fd, cmds, sizeof(cmds)-1);
 	}
     }
 }
 
-static int passivesock(char *service, char *protocol, int qlen)
-{
-    struct servent *pse;
-    struct protoent *ppe;
-    struct sockaddr_in sin;
-    int s, type, one = 1;
-
-    memset((char *) &sin, '\0', sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
-
-    if ( (pse = getservbyname(service, protocol)) )
-	sin.sin_port = htons(ntohs((u_short) pse->s_port));
-    else if ((sin.sin_port = htons((u_short) atoi(service))) == 0) {
-	gpsd_report(0, "Can't get \"%s\" service entry.\n", service);
-	return -1;
-    }
-    if ((ppe = getprotobyname(protocol)) == 0) {
-	gpsd_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
-	return -1;
-    }
-    if (strcmp(protocol, "udp") == 0)
-	type = SOCK_DGRAM;
-    else
-	type = SOCK_STREAM;
-    if ((s = socket(PF_INET, type, ppe->p_proto)) < 0) {
-	gpsd_report(0, "Can't create socket\n");
-	return -1;
-    }
-    if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,sizeof(one)) == -1) {
-	gpsd_report(0, "Error: SETSOCKOPT SO_REUSEADDR\n");
-	return -1;
-    }
-    if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-	gpsd_report(0, "Can't bind to port %s\n", service);
-	return -1;
-    }
-    if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	gpsd_report(0, "Can't listen on %s port%s\n", service);
-	return -1;
-    }
-    return s;
-}
-
 int main(int argc, char *argv[])
 {
-    static int nowait = 0, gpsd_speed = 0;
+    static char *pid_file = NULL;
+    static int st, nowait = 0, gpsd_speed = 0;
     static char *dgpsserver = NULL;
-    char *service = NULL; 
+    static char *service = NULL; 
+    static char *device_name = DEFAULT_DEVICE_NAME;
     struct sockaddr_in fsin;
     fd_set rfds;
-    int option, msock, fd; 
+    int option, msock, fd, go_background = 1;
     extern char *optarg;
 
     debuglevel = 0;
@@ -572,11 +569,22 @@ int main(int argc, char *argv[])
 
     if (!service)
 	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
+
     if (go_background)
-	daemonize();
+	daemonize(pid_file);
+
+    /* user may want to re-initialize the session */
+    if ((st == setjmp(restartbuf)) == SIGHUP+1) {
+	gpsd_wrap(session);
+	gpsd_report(1, "gpsd restarted by SIGHUP\n");
+    } else if (st > 0) {
+	gpsd_wrap(session);
+	gpsd_report(1, "Received terminating signal %d. Exiting...\n", st-1);
+	exit(10 + st);
+    }
 
     /* Handle some signals */
-    signal(SIGHUP, restart);
+    signal(SIGHUP, onsig);
     signal(SIGINT, onsig);
     signal(SIGTERM, onsig);
     signal(SIGQUIT, onsig);
@@ -590,15 +598,8 @@ int main(int argc, char *argv[])
     }
     gpsd_report(1, "listening on port %s\n", service);
 
-    /* user may want to re-initialize the session */
-    if (setjmp(restartbuf) == THROW_SIGHUP) {
-	gpsd_wrap(session);
-	gpsd_report(1, "gpsd restarted by SIGHUP\n");
-    }
-
     FD_ZERO(&all_fds); FD_ZERO(&nmea_fds); FD_ZERO(&watcher_fds);
     FD_SET(msock, &all_fds);
-    nfds = FD_SETSIZE;
 
     session = gpsd_init(dgpsserver);
     if (gpsd_speed)
@@ -626,7 +627,7 @@ int main(int argc, char *argv[])
 	 * the file descriptors in the set goes ready. 
 	 */
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(nfds, &rfds, NULL, NULL, &tv) < 0) {
+	if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
@@ -674,7 +675,7 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	need_gps = 0;
-	for (fd = 0; fd < nfds; fd++) {
+	for (fd = 0; fd < FD_SETSIZE; fd++) {
 	    if (fd == msock || fd == session->gNMEAdata.gps_fd)
 		continue;
 	    /*
@@ -702,6 +703,8 @@ int main(int argc, char *argv[])
 		    } else {
 		        buf[buflen] = '\0';
 			gpsd_report(1, "<= client: %s", buf);
+
+			session->poll_times[fd] = timestamp();
 			if (handle_request(fd, buf, buflen) < 0) {
 			    (void) close(fd);
 			    FD_CLR(fd, &all_fds);

@@ -35,7 +35,7 @@ C:
 <funcprototype>
 <funcdef>void <function>gps_set_raw_hook</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>void (*<parameter>hook</parameter>)(char *buf)</paramdef>
+    <paramdef>void (*<parameter>hook</parameter>)(struct gps_data_t *, char *buf)</paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_poll</function></funcdef>

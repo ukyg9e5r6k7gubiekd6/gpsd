@@ -58,8 +58,6 @@ session.activate()
 
 session.deactivate()
 
-session.set_raw_hook(hook=None)
-
 session.poll()
 
 del session

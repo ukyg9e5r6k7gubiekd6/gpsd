@@ -292,13 +292,13 @@ static void analyze(struct gps_session_t *session,
 	    break;
 	case 1002:
 	    handle1002(session, p);
-	    gpsd_binary_quality_dump(session, buf);
-	    sprintf(buf+strlen(buf), "$PRWIZCH");
+	    sprintf(buf, "$PRWIZCH");
 	    for (i = 0; i < MAXCHANNELS; i++) {
 		sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
 	    }
 	    strcat(buf, "*");
 	    nmea_add_checksum(buf);
+	    gpsd_binary_quality_dump(session, buf+strlen(buf));
 	    break;
 	case 1003:
 	    handle1003(session, p);
@@ -309,9 +309,6 @@ static void analyze(struct gps_session_t *session,
 	    return;	
 	}
     }
-    gpsd_report(4, "%s", buf);
-    if (session->gNMEAdata.raw_hook)
-	session->gNMEAdata.raw_hook(buf);
 }
 
 static int putword(unsigned short *p, unsigned char c, unsigned int n)

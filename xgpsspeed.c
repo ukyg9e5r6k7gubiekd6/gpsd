@@ -29,7 +29,7 @@ static Widget tacho;
 static double speedfactor;
 static Widget toplevel;
 
-static void update_display(char *buf UNUSED)
+static void update_display(struct gps_data_t *gpsdata, char *buf UNUSED)
 {
     TachometerSetValue(tacho, rint(gpsdata->speed * speedfactor));
 }

@@ -219,6 +219,23 @@ void gpsd_zero_satellites(struct gps_data_t *out)
     out->satellites = 0;
 }
 
+void gpsd_raw_hook(struct gps_session_t *session, char *sentence)
+{
+    char *sp, *tp;
+    if (sentence[0] != '$')
+	session->gNMEAdata.tag[0] = '\0';
+    else {
+	for (tp = session->gNMEAdata.tag, sp = sentence+1; *sp && *sp != ','; sp++, tp++)
+	    *tp = *sp;
+	*tp = '\0';
+    }
+    session->gNMEAdata.sentence_length = strlen(sentence);
+
+    if (session->gNMEAdata.raw_hook) {
+	session->gNMEAdata.raw_hook(&session->gNMEAdata, sentence);
+    }
+}
+
 #if BINARY_ENABLE
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
@@ -271,9 +288,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
-	if (session->gNMEAdata.raw_hook) {
-	    session->gNMEAdata.raw_hook(bufp);
-        }
+	gpsd_raw_hook(session, bufp);
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
@@ -290,9 +305,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	    session->month,
 	    (session->year % 100));
 	nmea_add_checksum(bufp);
-	if (session->gNMEAdata.raw_hook) {
-	    session->gNMEAdata.raw_hook(bufp);
-        }
+	gpsd_raw_hook(session, bufp);
 }
 
 void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
@@ -319,9 +332,7 @@ void gpsd_binary_satellite_dump(struct gps_session_t *session, char *bufp)
 		    session->gNMEAdata.ss[i]);
 	if (i % 4 == 3 || i == session->gNMEAdata.satellites-1) {
 	    nmea_add_checksum(bufp2);
-	    if (session->gNMEAdata.raw_hook) {
-		session->gNMEAdata.raw_hook(bufp2);
-	    }
+	    gpsd_raw_hook(session, bufp2);
 	}
     }
 }
@@ -350,9 +361,7 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
 	    session->gNMEAdata.hdop,
 	    session->gNMEAdata.vdop);
     nmea_add_checksum(bufp2);
-    if (session->gNMEAdata.raw_hook) {
-        session->gNMEAdata.raw_hook(bufp2);
-    }
+    gpsd_raw_hook(session, bufp2);
     bufp += strlen(bufp);
     if (SEEN(session->gNMEAdata.epe_quality_stamp)) {
         // output PGRME
@@ -361,9 +370,7 @@ void gpsd_binary_quality_dump(struct gps_session_t *session, char *bufp)
 	    session->gNMEAdata.epv, 
 	    session->gNMEAdata.epe);
         nmea_add_checksum(bufp);
-        if (session->gNMEAdata.raw_hook) {
-	    session->gNMEAdata.raw_hook(bufp);
-	}
+	gpsd_raw_hook(session, bufp);
 	session->gNMEAdata.seen_sentences |= PGRME;
      }
 }

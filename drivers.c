@@ -43,9 +43,7 @@ static void nmea_handle_input(struct gps_session_t *session)
     }
 
     /* also copy the sentence up to clients in raw mode */
-    if (session->gNMEAdata.raw_hook)
-	session->gNMEAdata.raw_hook(session->outbuffer);
-
+    gpsd_raw_hook(session, session->outbuffer);
     packet_accept(session);
 }
 

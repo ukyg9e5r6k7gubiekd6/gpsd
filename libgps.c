@@ -41,7 +41,7 @@ int gps_close(struct gps_data_t *gpsdata)
     return retval;
 }
 
-void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(char *buf))
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *, char *))
 {
     gpsdata->raw_hook = hook;
 }
@@ -210,7 +210,7 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 
     if (gpsdata->raw_hook)
-	gpsdata->raw_hook(buf);
+	gpsdata->raw_hook(gpsdata, buf);
 
     return gpsdata->online_stamp.changed
 	|| gpsdata->latlon_stamp.changed 
