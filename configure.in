@@ -1,59 +1,5 @@
-dnl configure.in
-dnl $Modified: Thu Jan 22 12:53:31 1998 by brook $
-dnl
-dnl This file is in part inspired by and derived from the DDD Library.
-dnl
-dnl
-dnl Process this file with autoconf to produce a configure script.
-dnl $Id: configure.in,v 1.1 1998/08/18 20:43:57 remco Exp $
-dnl 
-dnl Copyright (C) 1995-1997 Technische Universitaet Braunschweig, Germany.
-dnl Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
-dnl 
-dnl This file is part of the DDD Library.
-dnl 
-dnl The DDD Library is free software; you can redistribute it and/or
-dnl modify it under the terms of the GNU Library General Public
-dnl License as published by the Free Software Foundation; either
-dnl version 2 of the License, or (at your option) any later version.
-dnl 
-dnl The DDD Library is distributed in the hope that it will be useful,
-dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
-dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-dnl See the GNU Library General Public License for more details.
-dnl 
-dnl You should have received a copy of the GNU Library General Public
-dnl License along with the DDD Library -- see the file COPYING.LIB.
-dnl If not, write to the Free Software Foundation, Inc.,
-dnl 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-dnl 
-dnl DDD is the data display debugger.
-dnl For details, see the DDD World-Wide-Web page, 
-dnl `http://www.cs.tu-bs.de/softech/ddd/',
-dnl or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
-dnl
-dnl
-dnl
-dnl
 dnl
 AC_INIT(gpsd.c)
-
-dnl Find and check C/C++ compilers
-dnl
-ICE_PROG_CC
-ICE_PROG_CXX
-dnl
-dnl 
-dnl Find and check C/C++ preprocessors
-dnl
-AC_PROG_CPP
-AC_PROG_CXXCPP
-
-dnl
-dnl
-dnl Check for compiler characteristics
-dnl
-ICE_PROG_CPP_TRADITIONAL
 
 AC_CHECK_HEADERS(termio.h sys/param.h)
 
@@ -111,7 +57,6 @@ dnl
 dnl
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
-CPPFLAGS="$CPPFLAGS $X_CFLAGS"
 LDFLAGS="$LDFLAGS $X_LIBS"
 dnl
 dnl Check for X library
