@@ -254,7 +254,9 @@ satellite geometry; they are factors by which to multiply the
 estimated UERE (user error in meters at specified confidence level due
 to ionospheric delay, multipath reception, etc.) to get actual
 circular error ranges in meters at the same confidence level. See also
-the 'e' command.  </para>
+the 'e' command.  Note: Some GPSes may fail to report these, or report
+only one of them (often HDOP or PDOP); a value of 0.0 should be taken
+as an indication that the data is not available.</para>
 </listitem>
 </varlistentry>
 

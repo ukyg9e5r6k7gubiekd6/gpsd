@@ -3,7 +3,7 @@
  *
  * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
  *
- * The disadvantages: Doesn't return HDOP or VDOP, just DOP.  Reports 
+ * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.  Reports 
  * altititude relative to the WGS 84 reference ellipsoid, not MSL.
  *
  * Rumor has it we should be able to get UERE data out of this, but I
@@ -369,7 +369,7 @@ static void decode_sirf(struct gps_session_t *session,
 	for (i = 0; i < MAXCHANNELS; i++)
 	    session->gNMEAdata.used[i] = getb(29+i);
 	session->gNMEAdata.pdop = getb(21)/5.0;
-	/* KNOWN BUG: we don't get HDOP or VDOP from this sentence */
+	/* KNOWN BUG: we don't get PDOP or VDOP from this sentence */
 	session->gNMEAdata.hdop = session->gNMEAdata.vdop = 0.0;
 	REFRESH(session->gNMEAdata.fix_quality_stamp);
 	gpsd_binary_fix_dump(session, buf2);
@@ -434,7 +434,7 @@ static void decode_sirf(struct gps_session_t *session,
     case 0x1b:		/* Undocumented packet type */
 	break;
 
-    case 0x29:		/* Undocumented packet type */
+    case 0x29:		/* Geodetic Navigation Information */
 	break;
 
     case 0x32:	/* Undocumented packet type */
