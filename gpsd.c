@@ -196,7 +196,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 static struct gps_session_t *session;
 static int need_gps;
 
-static int handle_request(int fd, char *buf, int buflen, int explicit)
+static int handle_request(int fd, char *buf, int buflen)
 /* interpret a client request; fd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *q;
@@ -211,7 +211,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	case 'A':
 	    if (have_fix(session) && ud->fix.mode == MODE_3D)
 		sprintf(phrase, ",A=%.3f", ud->fix.altitude);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
@@ -249,10 +249,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
-	    if (ud->valid & TIME_SET) {
-	        unix_to_iso8661(ud->fix.time, phrase+3);
-	    } else if (explicit)
-		strcat(phrase, "?");
+	    unix_to_iso8661(ud->fix.time, phrase+3);
 	    break;
 	case 'E':
 	    if (have_fix(session)) {
@@ -264,7 +261,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    ud->pdop * UERE(session), 
 			    ud->hdop * UERE(session), 
 			    ud->vdop * UERE(session));
-	    } else if (explicit)
+	    } else
 		strcpy(phrase, ",E=?");
 	    break;
 	case 'F':
@@ -374,14 +371,14 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    if (have_fix(session))
 		sprintf(phrase, ",P=%.4f %.4f", 
 			ud->fix.latitude, ud->fix.longitude);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",P=?");
 	    break;
 	case 'Q':
 	    if (ud->pdop || ud->hdop || ud->vdop)
 		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
 			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",Q=?");
 	    break;
 	case 'R':
@@ -412,19 +409,19 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	case 'T':
 	    if (have_fix(session) && ud->fix.track != TRACK_NOT_VALID)
 		sprintf(phrase, ",T=%.4f", ud->fix.track);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
 	    if (have_fix(session) && ud->fix.mode == MODE_3D)
 		sprintf(phrase, ",U=%.3f", ud->fix.climb);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
 	    if (have_fix(session) && ud->fix.track != TRACK_NOT_VALID)
 		sprintf(phrase, ",V=%.3f", ud->fix.speed);
-	    else if (explicit)
+	    else
 		strcpy(phrase, ",V=?");
 	    break;
 	case 'W':
@@ -470,7 +467,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 		    }
 		}
 		assert(reported == ud->satellites);
-	    } else if (explicit)
+	    } else
 		strcpy(phrase, ",Y=?");
 	    break;
 	case 'Z':
@@ -505,10 +502,10 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-    if (ud->profiling && (ud->valid & TIME_SET)) {
+    if (ud->profiling) {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	sprintf(phrase, ",$=%s %.4d %.4f %.4f %.4f %.4f %.4f %.4f",
+	sprintf(phrase, ",$=%s %d %.4f %.4f %.4f %.4f %.4f %.4f",
 		ud->tag,
 		ud->sentence_length,
 		ud->fix.time,
@@ -703,9 +700,9 @@ int main(int argc, char *argv[])
 		/* some listeners may be in watcher mode */
 		if (FD_ISSET(fd, &watcher_fds)) {
 		    if (changed & LATLON_SET)
-			handle_request(fd, "o", 1, 0);
+			handle_request(fd, "o", 1);
 		    if (changed & SATELLITE_SET)
-			handle_request(fd, "y", 1, 0);
+			handle_request(fd, "y", 1);
 		}
 	    }
 	}
@@ -746,7 +743,7 @@ int main(int argc, char *argv[])
 			gpsd_report(1, "<= client: %s", buf);
 
 			session->poll_times[fd] = timestamp();
-			if (handle_request(fd, buf, buflen, 1) < 0) {
+			if (handle_request(fd, buf, buflen) < 0) {
 			    (void) close(fd);
 			    FD_CLR(fd, &all_fds);
 			    FD_CLR(fd, &nmea_fds);
