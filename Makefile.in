@@ -140,11 +140,6 @@ gps: gps.o libgps.a
 xgpsspeed: $(XGPSOBJS)
 	$(LINK.c) -o $@ $(XGPSOBJS) -L. -lgps $(LIBXAW) $(ALL_X_LIBS) $(LIBS)
 
-# This is a test instrument, it doesn't ship.
-libgpsd: libgpsd.c gps.h
-	cc -g -DTESTMAIN -I. libgpsd.c netlib.o -o libgpsd
-
-
 libgps.a:  $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
 	ar -r libgps.a $(GPSLIB_OBJECTS) $(COMMON_OBJECTS)
 	ranlib libgps.a
@@ -153,7 +148,11 @@ libgpsd.a:  $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
 	ar -r libgpsd.a $(GPSDLIB_OBJECTS) $(COMMON_OBJECTS)
 	ranlib libgpsd.a
 
-# Library parts
+# This is a test instrument, it doesn't ship.
+libgpsd: libgpsd.c gps.h
+	cc -g -DTESTMAIN -I. libgpsd.c netlib.o -o libgpsd
+
+# How to build the library parts
 netlib.o: netlib.c gps.h gpsd.h
 nmea_parse.o: nmea_parse.c
 serial.o: serial.c gps.h gpsd.h
@@ -161,6 +160,7 @@ tm.o: tm.c gps.h gpsd.h
 em.o: em.c gps.h gpsd.h
 send_nmea.o: send_nmea.c gps.h gpsd.h
 
+# And the main sequences of the applications
 display.o: display.c gps.h gpsd.h
 gps.o: gps.c gps.h gpsd.h version.h
 gpsd.o: gpsd.c gps.h gpsd.h version.h
@@ -214,7 +214,7 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgps.3
 
 clean:
-	rm -f *.o *.a gpsd gps xgpsspeed *~ config.status
+	rm -f *.o *.a gpsd gps xgpsspeed libgpsd *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log
