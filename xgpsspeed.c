@@ -11,23 +11,21 @@
 
 #include "xgpsspeed.h"
 #include "xgpsspeed.icon"
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
 #include "gpsd.h"
 
 #define BUFSIZE          4096
 #define DEFAULTPORT "2947"
-char latd, lond;
-double latitude, longitude;
-int device_type;
-int debug = 0;
 
 #if defined(ultrix) || defined(SOLARIS) 
 extern double rint();
 #endif
 
-Widget toplevel, base;
-Widget tacho, label, title;
+struct session_t session;
+
+static Widget toplevel, base;
+static Widget tacho, label;
 
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
@@ -139,9 +137,9 @@ void Usage()
 
 void update_display()
 {
-  int new = rint(gNMEAdata.speed * 6076.12 / 5280);
+  int new = rint(session.gNMEAdata.speed * 6076.12 / 5280);
 #if 0
-  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gNMEAdata.speed, rint(gNMEAdata.speed * 5208/6706.12), (int)rint(gNMEAdata.speed * 5208/6706.12));
+  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", session.gNMEAdata.speed, rint(session.gNMEAdata.speed * 5208/6706.12), (int)rint(session.gNMEAdata.speed * 5208/6706.12));
 #endif
   if (new > 100)
     new = 100;

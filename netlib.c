@@ -17,6 +17,8 @@
 #include <sys/param.h>
 #endif
 
+#include "outdata.h"
+#include "nmea.h"
 #include "gpsd.h"
 
 

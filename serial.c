@@ -15,20 +15,17 @@
 #endif
 #endif
 
+#include "outdata.h"
+#include "nmea.h"
 #include "gpsd.h"
 
 #define DEFAULTPORT "2947"
-
-extern int debug;
-extern char *device_name;
-extern int device_speed;
-
 
 /* define global variables */
 static int ttyfd = -1;
 static struct termios ttyset, ttyset_old;
 
-int serial_open()
+int serial_open(char *device_name, int device_speed)
 {
     char *temp;
     char *p;
@@ -43,8 +40,6 @@ int serial_open()
 	*p = '\0';
 
 	/* temp now holds the HOSTNAME portion and port the port number. */
-	if (debug > 5)
-	    fprintf(stderr, "Host: %s  Port: %s\n", temp, port);
 	ttyfd = connectTCP(temp, port);
 	port = 0;
 

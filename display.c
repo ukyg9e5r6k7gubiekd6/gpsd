@@ -25,9 +25,10 @@
 #include <X11/Shell.h>
 #include <math.h>
 
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
 #include "gps.h"
+
 
 #define XCENTER         (double)(width/2)
 #define YCENTER         (double)(height/2)
@@ -38,11 +39,13 @@
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
-Widget draww;
-GC drawGC;
-Dimension width, height;
-int diameter;
-Pixmap pixmap;
+extern struct session_t session;
+
+static Widget draww;
+static GC drawGC;
+static Dimension width, height;
+static int diameter;
+static Pixmap pixmap;
 
 void set_color(String color)
 {
@@ -109,15 +112,15 @@ int get_status(int satellite)
     int i;
     int s;
 
-    if (gNMEAdata.ZCHseen) {
+    if (session.gNMEAdata.ZCHseen) {
 	for (i = 0; i < 12; i++)
-	    if (satellite == gNMEAdata.Zs[i])
-		return gNMEAdata.Zv[i];
+	    if (satellite == session.gNMEAdata.Zs[i])
+		return session.gNMEAdata.Zv[i];
 	return 0;
     } else {
 	for (i = 0; i < 12; i++)
-	    if (satellite == gNMEAdata.PRN[i]) {
-		s = gNMEAdata.ss[i];
+	    if (satellite == session.gNMEAdata.PRN[i]) {
+		s = session.gNMEAdata.ss[i];
 
 		if (s<20) return 1;
 		if (s<40) return 2;
@@ -135,7 +138,7 @@ void draw_graphics()
     double x, y;
     char buf[20];
 
-    if (gNMEAdata.cmask & (C_SAT | C_ZCH)) {
+    if (session.gNMEAdata.cmask & (C_SAT | C_ZCH)) {
 
 	i = min(width, height);
 
@@ -157,10 +160,10 @@ void draw_graphics()
 	draw_arc(width / 2, height / 2, i - RM);
 
 	/* Now draw the satellites... */
-	for (i = 0; i < gNMEAdata.in_view; i++) {
-	    pol2cart(gNMEAdata.azimuth[i], gNMEAdata.elevation[i], &x, &y);
+	for (i = 0; i < session.gNMEAdata.in_view; i++) {
+	    pol2cart(session.gNMEAdata.azimuth[i], session.gNMEAdata.elevation[i], &x, &y);
 
-	    switch (get_status(gNMEAdata.PRN[i]) & 7) {
+	    switch (get_status(session.gNMEAdata.PRN[i]) & 7) {
 	    case 0:
 	    case 1:
 		set_color("Grey");
@@ -183,7 +186,7 @@ void draw_graphics()
 		     11, 11,	/* width, height */
 		     0, 360 * 64	/* angle1, angle2 */
 		);
-	    sprintf(buf, "%02d", gNMEAdata.PRN[i]);
+	    sprintf(buf, "%02d", session.gNMEAdata.PRN[i]);
 	    set_color("Blue");
 	    XDrawString(XtDisplay(draww), pixmap, drawGC,
 			(int) x + 0, (int) y + 17, buf, 2);

@@ -42,43 +42,35 @@
 #include <sys/filio.h>
 #endif
 
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
 #include "gps.h"
+
+struct session_t session;
 
 void update_display(char *message);
 
 /* global variables */
-Widget lxbApp;
-Widget form_6;
-Widget list_7;
-Widget list_8;
-Widget drawingArea_8;
-Widget rowColumn_10;
-Widget rowColumn_11;
-Widget rowColumn_12;
-Widget rowColumn_13;
-Widget rowColumn_14;
-Widget rowColumn_15;
-Widget rowColumn_16;
-Widget pushButton_11;
-Widget text_1, text_2, text_3, text_4, text_5;
-Widget label_1, label_2, label_3, label_4, label_5;
-Widget status;
+static Widget lxbApp;
+static Widget form_6;
+static Widget list_7;
+static Widget list_8;
+static Widget drawingArea_8;
+static Widget rowColumn_10;
+static Widget rowColumn_11;
+static Widget rowColumn_12;
+static Widget rowColumn_13;
+static Widget rowColumn_14;
+static Widget rowColumn_15;
+static Widget rowColumn_16;
+static Widget pushButton_11;
+static Widget text_1, text_2, text_3, text_4, text_5;
+static Widget label_1, label_2, label_3, label_4, label_5;
+static Widget status;
 
-				/* command line options */
-int debug = 0;
-int device_type;
-int device_speed = B4800;
-char *device_name = 0;
-char *latitude = 0;
-char *longitude = 0;
-char latd = 'N';
-char lond = 'W';
-				/* command line option defaults */
-char *default_device_name = "localhost:2947";
-char *default_latitude = "3600.000";
-char *default_longitude = "12300.000";
+static int device_speed = B4800;
+static char *device_name = 0;
+static char *default_device_name = "localhost:2947";
 
 String fallback_resources[] =
 {
@@ -328,12 +320,12 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (gNMEAdata.cmask & C_SAT) {
+    if (session.gNMEAdata.cmask & C_SAT) {
 	for (i = 0; i < 12; i++) {
-	    if (i < gNMEAdata.in_view) {
-		sprintf(s, "%2d %02d %03d %02d", gNMEAdata.PRN[i],
-			gNMEAdata.elevation[i],
-			gNMEAdata.azimuth[i], gNMEAdata.ss[i]);
+	    if (i < session.gNMEAdata.in_view) {
+		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],
+			session.gNMEAdata.elevation[i],
+			session.gNMEAdata.azimuth[i], session.gNMEAdata.ss[i]);
 	    } else
 		sprintf(s, " ");
 	    string[i] = XmStringCreateSimple(s);
@@ -342,9 +334,9 @@ void update_display(char *message)
 	for (i = 0; i < 12; i++)
 	    XmStringFree(string[i]);
     }
-    if (gNMEAdata.cmask & C_ZCH) {
+    if (session.gNMEAdata.cmask & C_ZCH) {
 	for (i = 0; i < 12; i++) {
-	    sprintf(s, "%2d %02x", gNMEAdata.Zs[i], gNMEAdata.Zv[i]);
+	    sprintf(s, "%2d %02x", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(list_8, string, 12, 1);
@@ -353,20 +345,20 @@ void update_display(char *message)
     }
     /* here now the value fields */
 
-    XmTextFieldSetString(text_1, gNMEAdata.utc);
-    sprintf(s, "%f", gNMEAdata.latitude);
+    XmTextFieldSetString(text_1, session.gNMEAdata.utc);
+    sprintf(s, "%f", session.gNMEAdata.latitude);
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f", gNMEAdata.longitude);
+    sprintf(s, "%f", session.gNMEAdata.longitude);
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f", gNMEAdata.altitude);
+    sprintf(s, "%f", session.gNMEAdata.altitude);
     XmTextFieldSetString(text_4, s);
 
-    switch (gNMEAdata.mode) {
+    switch (session.gNMEAdata.mode) {
     case 2:
-	sprintf(s, "2D %sFIX", (gNMEAdata.status==2) ? "DIFF ": "");
+	sprintf(s, "2D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
 	break;
     case 3:
-	sprintf(s, "3D %sFIX", (gNMEAdata.status==2) ? "DIFF ": "");
+	sprintf(s, "3D %sFIX", (session.gNMEAdata.status==2) ? "DIFF ": "");
 	break;
     default:
 	sprintf(s, "NO FIX");
@@ -375,7 +367,7 @@ void update_display(char *message)
     XmTextFieldSetString(text_5, s);
 
     draw_graphics();
-    gNMEAdata.cmask = 0;
+    session.gNMEAdata.cmask = 0;
 }
 
 /**************************************************
@@ -386,10 +378,10 @@ static void open_input(XtAppContext app)
     int input = 0;
     XtInputId input_id;
 
-    input = serial_open();
+    input = serial_open(device_name, device_speed);
 
-    gNMEAdata.fdin = input;
-    gNMEAdata.fdout = input;
+    session.gNMEAdata.fdin = input;
+    session.gNMEAdata.fdout = input;
 
     input_id = XtAppAddInput(app, input, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
@@ -428,10 +420,10 @@ int main(int argc, char *argv[])
         case 'T':
             switch (*optarg) {
                 case 't':
-                    device_type = DEVICE_TRIPMATE;
+                    session.device_type = DEVICE_TRIPMATE;
                     break;
                 case 'e':
-                    device_type = DEVICE_EARTHMATE;
+                    session.device_type = DEVICE_EARTHMATE;
                     break;
                 default:
                     fprintf(stderr,"Invalide device type \"%c\"\n"
@@ -440,7 +432,7 @@ int main(int argc, char *argv[])
             }
             break;
 	case 'D':
-	    debug = (int) strtol(optarg, 0, 0);
+	    session.debug = (int) strtol(optarg, 0, 0);
 	    break;
 	case 'p':
 	    if (device_name)
@@ -481,14 +473,10 @@ int main(int argc, char *argv[])
     }
     if (!device_name)
 	device_name = default_device_name;
-    if (!latitude)
-	latitude = default_latitude;
-    if (!longitude)
-	longitude = default_longitude;
 
-    if (debug > 0) {
+    if (session.debug > 0) {
 	fprintf(stderr, "command line options:\n");
-	fprintf(stderr, "  debug level:        %d\n", debug);
+	fprintf(stderr, "  debug level:        %d\n", session.debug);
 	fprintf(stderr, "  gps device name:    %s\n", device_name);
 	fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     }

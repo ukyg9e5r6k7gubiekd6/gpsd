@@ -1,7 +1,7 @@
 /*
- * Handle the proprietary extensions to NMEA 0183 supported by thr TripMATE GPS.
- * Also, if requested, intialize it with longitude, latitude, and local time.
- * This will speed up its first fix.
+ * Handle the proprietary extensions to NMEA 0183 supported by the
+ * TripMATE GPS.  Also, if requested, intialize it with longitude,
+ * latitude, and local time.  This will speed up its first fix.
  */
 #include "config.h"
 #include <stdio.h>
@@ -10,46 +10,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include <syslog.h>
-#include "gpsd.h"
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
+#include "gpsd.h"
 
-
-struct OUTDATA gNMEAdata;
-
-extern char *latitude;
-extern char *longitude;
-
-extern int debug;
-extern int device_type;
-extern char latd;
-extern char lond;
-
-void process_message(char *sentence)
-{
-    if (checksum(sentence)) {
-	if (strncmp(PMGNST, sentence, 6) == 0) {
-	    processPMGNST(sentence);
-	} else if (strncmp(GPRMC, sentence, 5) == 0) {
-	    processGPRMC(sentence);
-	} else if (strncmp(GPGGA, sentence, 5) == 0) {
-	    processGPGGA(sentence);
-	} else if (strncmp(GPVTG, sentence, 5) == 0) {
-	    processGPVTG(sentence);
-	} else if (strncmp(GPGSA, sentence, 5) == 0) {
-	    processGPGSA(sentence);
-	} else if (strncmp(GPGSV, sentence, 5) == 0) {
-	    processGPGSV(sentence);
-	} else if (strncmp(PRWIZCH, sentence, 7) == 0) {
-	    processPRWIZCH(sentence);
-	} else {
-	    if (debug > 1) {
-		fprintf(stderr, "Unknown sentence: \"%s\"\n",
-			sentence);
-	    }
-	}
-    }
-}
+extern struct session_t session;
 
 void send_init()
 {
@@ -57,7 +22,7 @@ void send_init()
     time_t t;
     struct tm *tm;
 
-    if (latitude && longitude) {
+    if (session.initpos.latitude && session.initpos.longitude) {
 	t = time(NULL);
 	tm = gmtime(&t);
 
@@ -66,13 +31,14 @@ void send_init()
 
 	sprintf(buf,
 		"$PRWIINIT,V,,,%s,%c,%s,%c,100.0,0.0,M,0.0,T,%02d%02d%02d,%02d%02d%02d*",
-		latitude, latd, longitude, lond,
+		session.initpos.latitude, session.initpos.latd, 
+		session.initpos.longitude, session.initpos.lond,
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	if (gNMEAdata.fdout != -1)
-	    write(gNMEAdata.fdout, buf, strlen(buf));
-	if (debug > 1) {
+	if (session.gNMEAdata.fdout != -1)
+	    write(session.gNMEAdata.fdout, buf, strlen(buf));
+	if (session.debug > 1) {
 	    fprintf(stderr, "Sending: %s", buf);
 	}
     }
@@ -92,17 +58,17 @@ void do_init()
 
 void process_exception(char *sentence)
 {
-    if (strncmp("ASTRAL", sentence, 6) == 0 && isatty(gNMEAdata.fdout)) {
-	write(gNMEAdata.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
+    if (strncmp("ASTRAL", sentence, 6) == 0 && isatty(session.gNMEAdata.fdout)) {
+	write(session.gNMEAdata.fdout, "$IIGPQ,ASTRAL*73\r\n", 18);
 	syslog(LOG_NOTICE, "Found a TripMate, initializing...");
 	do_init();
     } else if ((strncmp("EARTHA", sentence, 6) == 0 
-		&& isatty(gNMEAdata.fdout))) {
-	write(gNMEAdata.fdout, "EARTHA\r\n", 8);
-	device_type = DEVICE_EARTHMATEb;
+		&& isatty(session.gNMEAdata.fdout))) {
+	write(session.gNMEAdata.fdout, "EARTHA\r\n", 8);
+	session.device_type = DEVICE_EARTHMATEb;
 	syslog(LOG_NOTICE, "Found an EarthMate (id).");
 	do_eminit();
-    } else if (debug > 1) {
+    } else if (session.debug > 1) {
 	fprintf(stderr, "Unknown exception: \"%s\"",
 		sentence);
     }
@@ -110,22 +76,22 @@ void process_exception(char *sentence)
 
 void handle_message(char *sentence)
 {
-    if (debug > 5)
+    if (session.debug > 5)
 	fprintf(stderr, "%s\n", sentence);
 
     if (*sentence == '$')
-	process_message(sentence + 1);
+	process_NMEA_message(sentence + 1, &session.gNMEAdata);
     else
 	process_exception(sentence);
 
-    if (debug > 2) {
+    if (session.debug > 2) {
 	fprintf(stderr,
 		"Lat: %f Lon: %f Alt: %f Sat: %d Mod: %d Time: %s\n",
-		gNMEAdata.latitude,
-		gNMEAdata.longitude,
-		gNMEAdata.altitude,
-		gNMEAdata.satellites,
-		gNMEAdata.mode,
-		gNMEAdata.utc);
+		session.gNMEAdata.latitude,
+		session.gNMEAdata.longitude,
+		session.gNMEAdata.altitude,
+		session.gNMEAdata.satellites,
+		session.gNMEAdata.mode,
+		session.gNMEAdata.utc);
     }
 }

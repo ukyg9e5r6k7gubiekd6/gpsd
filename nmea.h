@@ -10,13 +10,6 @@
 
 /* prototypes */
 extern void doNMEA(short refNum);
-extern void processGPVTG(char *sentence);
-extern void processGPRMC(char *sentence);
-extern void processGPGGA(char *sentence);
-extern void processGPGSV(char *sentence);
-extern void processGPGSA(char *sentence);
-extern void processPRWIZCH(char *sentence);
-extern void processPMGNST(char *sentence);
+extern int process_NMEA_message(char *sentence, struct OUTDATA *outdata);
 extern void add_checksum(char *sentence);
 extern short checksum(char *sentence);
-extern struct OUTDATA gNMEAdata;

@@ -200,6 +200,10 @@ the replies. Examples:</para>
       reply:       "GPSD,V=0.000000,A=37.900000\r\n"
 </screen>
 
+<para>If the GPS stops sending updates to gpsd, gpsd will continue
+presenting the last data it got, except that after 5 seconds the
+status (S) and mode (M) responses will bothe go to zero.</para>
+
 </refsect2>
 <refsect2><title>gps</title>
 

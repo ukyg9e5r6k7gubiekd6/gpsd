@@ -42,31 +42,23 @@
 #include <sys/time.h>
 #endif
 
+#include "outdata.h"
 #include "nmea.h"
 #include "gpsd.h"
-#include "outdata.h"
 #include "version.h"
 
 #define QLEN		5
 #define BUFSIZE		4096
-#define GPS_TIMEOUT	5		/* Consider GPS connection loss after 5 sec */
+#define GPS_TIMEOUT	5	/* Consider GPS connection loss after 5 sec */
 
-int gps_timeout = GPS_TIMEOUT;
-int debug = 0;
-int device_speed = B4800;
-int device_type;
-char *device_name = 0;
-char *latitude = 0;
-char *longitude = 0;
-char latd = 'N';
-char lond = 'W';
-char *default_device_name = "/dev/gps";
+struct session_t session;
 
-int nfds, dsock;
-int verbose = 1;
-int bincount;
-
-int reopen = 0;
+static int gps_timeout = GPS_TIMEOUT;
+static int device_speed = B4800;
+static char *device_name = 0;
+static char *default_device_name = "/dev/gps";
+static int nfds, dsock;
+static int reopen = 0;
 
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
 static int handle_request(int fd, fd_set * fds);
@@ -118,8 +110,8 @@ static void send_dgps()
 {
   char buf[BUFSIZE];
 
-  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", gNMEAdata.latitude,
-	  gNMEAdata.longitude, gNMEAdata.altitude);
+  sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", session.gNMEAdata.latitude,
+	  session.gNMEAdata.longitude, session.gNMEAdata.altitude);
   write(dsock, buf, strlen(buf));
 }
 
@@ -182,7 +174,7 @@ static int set_device_type(char what)
 static void print_settings(char *service, char *dgpsserver, char *dgpsport)
 {
     fprintf(stderr, "command line options:\n");
-    fprintf(stderr, "  debug level:        %d\n", debug);
+    fprintf(stderr, "  debug level:        %d\n", session.debug);
     fprintf(stderr, "  gps device name:    %s\n", device_name);
     fprintf(stderr, "  gps device speed:   %d\n", device_speed);
     fprintf(stderr, "  gpsd port:          %s\n", service);
@@ -190,9 +182,9 @@ static void print_settings(char *service, char *dgpsserver, char *dgpsport)
       fprintf(stderr, "  dgps server:        %s\n", dgpsserver);
       fprintf(stderr, "  dgps port:          %s\n", dgpsport);
     }
-    if (latitude && longitude) {
-      fprintf(stderr, "  latitude:           %s%c\n", latitude, latd);
-      fprintf(stderr, "  longitude:          %s%c\n", longitude, lond);
+    if (session.initpos.latitude && session.initpos.longitude) {
+      fprintf(stderr, "  latitude:           %s%c\n", session.initpos.latitude, session.initpos.latd);
+      fprintf(stderr, "  longitude:          %s%c\n", session.initpos.longitude, session.initpos.lond);
     }
 }
 
@@ -201,12 +193,12 @@ static int handle_dgps()
     char buf[BUFSIZE];
     int rtcmbytes, cnt;
 
-    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0 && (gNMEAdata.fdout!=-1)) {
+    if ((rtcmbytes=read(dsock, buf, BUFSIZE))>0 && (session.gNMEAdata.fdout!=-1)) {
 
-	if (device_type == DEVICE_EARTHMATEb)
+	if (session.device_type == DEVICE_EARTHMATEb)
 	    cnt = em_send_rtcm(buf, rtcmbytes);
 	else
-	    cnt = write(gNMEAdata.fdout, buf, rtcmbytes);
+	    cnt = write(session.gNMEAdata.fdout, buf, rtcmbytes);
 	
 	if (cnt<=0)
 	    syslog(LOG_WARNING, "Write to rtcm sink failed");
@@ -220,26 +212,26 @@ static int handle_dgps()
 
 static void deactivate()
 {
-    gNMEAdata.fdin = -1;
-    gNMEAdata.fdout = -1;
+    session.gNMEAdata.fdin = -1;
+    session.gNMEAdata.fdout = -1;
     serial_close();
-    if (device_type == DEVICE_EARTHMATEb)
-	device_type = DEVICE_EARTHMATE;
+    if (session.device_type == DEVICE_EARTHMATEb)
+	session.device_type = DEVICE_EARTHMATE;
     syslog(LOG_NOTICE, "Closed gps");
-    gNMEAdata.mode = 1;
-    gNMEAdata.status = 0;
+    session.gNMEAdata.mode = 1;
+    session.gNMEAdata.status = 0;
 }
 
 static int activate()
 {
     int input;
 
-    if ((input = serial_open()) < 0)
+    if ((input = serial_open(device_name, device_speed)) < 0)
 	errexit("Exiting - serial open");
  
     syslog(LOG_NOTICE, "Opened gps");
-    gNMEAdata.fdin = input;
-    gNMEAdata.fdout = input;
+    session.gNMEAdata.fdin = input;
+    session.gNMEAdata.fdout = input;
 
     return input;
 }
@@ -266,10 +258,10 @@ int main(int argc, char *argv[])
     while ((option = getopt(argc, argv, "D:L:S:T:hncl:p:s:d:r:t:")) != -1) {
 	switch (option) {
 	case 'T':
-	    device_type = set_device_type(*optarg);
+	    session.device_type = set_device_type(*optarg);
 	    break;
 	case 'D':
-	    debug = (int) strtol(optarg, 0, 0);
+	    session.debug = (int) strtol(optarg, 0, 0);
 	    break;
 	case 'S':
 	    service = optarg;
@@ -293,12 +285,12 @@ int main(int argc, char *argv[])
 			"gpsd: longitude field is invalid; must end in E or W.\n");
 	   else {
 		*colon = '\0';
-		latitude = optarg;
- 		latd = toupper(optarg[strlen(latitude) - 1]);
-		latitude[strlen(latitude) - 1] = '\0';
-		longitude = colon+1;
-		lond = toupper(longitude[strlen(longitude)-1]);
-		longitude[strlen(longitude)-1] = '\0';
+		session.initpos.latitude = optarg;
+ 		session.initpos.latd = toupper(optarg[strlen(session.initpos.latitude) - 1]);
+		session.initpos.latitude[strlen(session.initpos.latitude) - 1] = '\0';
+		session.initpos.longitude = colon+1;
+		session.initpos.lond = toupper(session.initpos.longitude[strlen(session.initpos.longitude)-1]);
+		session.initpos.longitude[strlen(session.initpos.longitude)-1] = '\0';
 	    }
 	    break;
 	case 'p':
@@ -326,10 +318,10 @@ int main(int argc, char *argv[])
 	else service = default_service;
     }
 
-    if (debug > 0) 
+    if (session.debug > 0) 
 	print_settings(service, dgpsserver, dgpsport);
     
-    if (debug < 2)
+    if (session.debug < 2)
 	daemonize();
 
     /* Handle some signals */
@@ -371,14 +363,14 @@ int main(int argc, char *argv[])
 
     /* mark fds closed */
     input = -1;
-    gNMEAdata.fdin = input;
-    gNMEAdata.fdout = input;
+    session.gNMEAdata.fdin = input;
+    session.gNMEAdata.fdout = input;
 
-    gNMEAdata.v_latlon = gps_timeout;
-    gNMEAdata.v_alt = gps_timeout;
-    gNMEAdata.v_speed = gps_timeout;
-    gNMEAdata.v_status = gps_timeout;
-    gNMEAdata.v_mode = gps_timeout;
+    session.gNMEAdata.v_latlon = gps_timeout;
+    session.gNMEAdata.v_alt = gps_timeout;
+    session.gNMEAdata.v_speed = gps_timeout;
+    session.gNMEAdata.v_status = gps_timeout;
+    session.gNMEAdata.v_mode = gps_timeout;
 
     while (1) {
 	struct timeval tv;
@@ -419,14 +411,14 @@ int main(int argc, char *argv[])
 	}
 
 	if (input >= 0 && FD_ISSET(input, &rfds)) {
-	    gNMEAdata.last_update = time(NULL);
-	    if (device_type == DEVICE_EARTHMATEb) 
+	    session.gNMEAdata.last_update = time(NULL);
+	    if (session.device_type == DEVICE_EARTHMATEb) 
 		handle_EMinput(input, &afds, &nmea_fds);
 	    else
 		handle_input(input, &afds, &nmea_fds);
 	}
 
-	if (gNMEAdata.status > 0) 
+	if (session.gNMEAdata.status > 0) 
 	    fixcnt++;
 	
 	if (fixcnt > 10) {
@@ -469,21 +461,21 @@ static int validate_sm(time_t cur_time)
     int ostatus, omode;
     int status = 0;
 
-     ostatus = gNMEAdata.status;
-     omode   = gNMEAdata.mode;
+     ostatus = session.gNMEAdata.status;
+     omode   = session.gNMEAdata.mode;
 
     /* status: 0 = no fix, 1 = fix, 2 = dgps fix */
     /* mode:   1 = no fix, 2 = 2D, 3 = 3D */
 
     /* always slave mode to status, consider mode only if status is valid */
    
-    if (debug>1) fprintf(stderr, "status=%d, mode=%d\n",
+    if (session.debug>1) fprintf(stderr, "status=%d, mode=%d\n",
     			ostatus, omode);
 
-    if ((gNMEAdata.ts_status + gNMEAdata.v_status) >= cur_time) {
+    if ((session.gNMEAdata.ts_status + session.gNMEAdata.v_status) >= cur_time) {
         status = ostatus;
-	if (debug>1) fprintf(stderr, "status is valid!\n");
-	if ((gNMEAdata.ts_mode + gNMEAdata.v_mode) >= cur_time) {
+	if (session.debug>1) fprintf(stderr, "status is valid!\n");
+	if ((session.gNMEAdata.ts_mode + session.gNMEAdata.v_mode) >= cur_time) {
 	    switch (ostatus) {
 		case 0:
 		    if (omode != 1) invalidate = 1;
@@ -499,15 +491,15 @@ static int validate_sm(time_t cur_time)
 	}
     }
     else {
-	gNMEAdata.ts_mode = 0;	/* invalidate mode */
+	session.gNMEAdata.ts_mode = 0;	/* invalidate mode */
     }
-    gNMEAdata.cmask &= ~(C_STATUS|C_MODE);
+    session.gNMEAdata.cmask &= ~(C_STATUS|C_MODE);
 
     if (invalidate) {
 	syslog(LOG_ERR, "Impossible status(%d)/mode(%d) reason(%d)\n",
 		ostatus, omode, invalidate);
-	gNMEAdata.ts_status = 0;
-	gNMEAdata.ts_mode = 0;
+	session.gNMEAdata.ts_status = 0;
+	session.gNMEAdata.ts_mode = 0;
 	status = 0;
     }
     return status;
@@ -537,27 +529,27 @@ static int handle_request(int fd, fd_set * fds)
 	    switch (*p) {
 	    case 'P':
 	    case 'p':
-		if ((gNMEAdata.ts_latlon + gNMEAdata.v_latlon) >= cur_time) {
+		if ((session.gNMEAdata.ts_latlon + session.gNMEAdata.v_latlon) >= cur_time) {
 		    sprintf(reply + strlen(reply),
 			    ",P=%f %f",
-			    gNMEAdata.latitude,
-			    gNMEAdata.longitude);
+			    session.gNMEAdata.latitude,
+			    session.gNMEAdata.longitude);
 		}
 		break;
 	    case 'A':
 	    case 'a':
-		if ((gNMEAdata.ts_alt + gNMEAdata.v_alt) >= cur_time) {
+		if ((session.gNMEAdata.ts_alt + session.gNMEAdata.v_alt) >= cur_time) {
 		    sprintf(reply + strlen(reply),
 			    ",A=%f",
-			    gNMEAdata.altitude);
+			    session.gNMEAdata.altitude);
 		}
 		break;
 	    case 'V':
 	    case 'v':
-		if ((gNMEAdata.ts_speed + gNMEAdata.v_speed) >= cur_time) {
+		if ((session.gNMEAdata.ts_speed + session.gNMEAdata.v_speed) >= cur_time) {
 		    sprintf(reply + strlen(reply),
 			    ",V=%f",
-			    gNMEAdata.speed);
+			    session.gNMEAdata.speed);
 		}
 		break;
 	    }
@@ -568,7 +560,7 @@ static int handle_request(int fd, fd_set * fds)
 	case 'd':
 	    sprintf(reply + strlen(reply),
 		    ",D=%s",
-		    gNMEAdata.utc);
+		    session.gNMEAdata.utc);
 	    break;
         case 'X':
         case 'x':
@@ -607,26 +599,26 @@ static int handle_request(int fd, fd_set * fds)
 	    break;
 	case 'S':
 	case 's':
-	    if ((gNMEAdata.ts_status + gNMEAdata.v_status) >= cur_time) {
+	    if ((session.gNMEAdata.ts_status + session.gNMEAdata.v_status) >= cur_time) {
 		sprintf(reply + strlen(reply),
 			",S=%d",
-			gNMEAdata.status);
+			session.gNMEAdata.status);
 	    }
 	    break;
 	case 'M':
 	case 'm':
-	    if ((gNMEAdata.ts_mode + gNMEAdata.v_mode) >= cur_time) {
+	    if ((session.gNMEAdata.ts_mode + session.gNMEAdata.v_mode) >= cur_time) {
 		sprintf(reply + strlen(reply),
 			",M=%d",
-			gNMEAdata.mode);
+			session.gNMEAdata.mode);
 	    }
 	    break;
 	case 'Q':
 	case 'q':
 	    sprintf(reply + strlen(reply),
 		    ",Q=%d %d %f %f %f",
-		    gNMEAdata.in_view, gNMEAdata.satellites,
-		    gNMEAdata.pdop, gNMEAdata.hdop, gNMEAdata.vdop);
+		    session.gNMEAdata.in_view, session.gNMEAdata.satellites,
+		    session.gNMEAdata.pdop, session.gNMEAdata.hdop, session.gNMEAdata.vdop);
 	    break;
 	case 'I':
 	case 'i':
@@ -636,12 +628,12 @@ static int handle_request(int fd, fd_set * fds)
 		
 		q = p;
 		i = (int)strtol(p+1, &q, 10);
-		if (i>=0 && i<gNMEAdata.in_view) {
-		    fprintf(stderr, "i=%d in view=%d\n", i, gNMEAdata.in_view);
+		if (i>=0 && i<session.gNMEAdata.in_view) {
+		    fprintf(stderr, "i=%d in view=%d\n", i, session.gNMEAdata.in_view);
 		    sprintf(reply + strlen(reply),
 			    ",I=%d %d %d %d",
-			    gNMEAdata.PRN[i], gNMEAdata.azimuth[i],
-			    gNMEAdata.elevation[i], gNMEAdata.ss[i]);
+			    session.gNMEAdata.PRN[i], session.gNMEAdata.azimuth[i],
+			    session.gNMEAdata.elevation[i], session.gNMEAdata.ss[i]);
 		}
 		else sprintf(reply + strlen(reply), ",I=-1 -1 -1 -1");
 		if (q!=p) p = q-1;

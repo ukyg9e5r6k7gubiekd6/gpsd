@@ -6,6 +6,8 @@
 #define C_STATUS	8
 #define C_MODE		16
 
+#define MAXSATS       12
+
 struct OUTDATA {
     int fdin;
     int fdout;
@@ -15,10 +17,12 @@ struct OUTDATA {
 
     long cmask;			/* Change flag, set by backend. Reset by app. */
 
-    char utc[20];		/* UTC date / time in format "mm/dd/yy hh:mm:ss" */
+    char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
     time_t ts_utc;		/* UTC last updated time stamp */
 
-    double latitude;		/* Latitude and longitude in format "d.ddddd" */
+
+    /* location */
+    double latitude;		/* Latitude/longitude in format "d.ddddd" */
     double longitude;
     time_t ts_latlon;		/* Update time stamp */
     int    v_latlon;		/* Valid for v_latlon seconds */
@@ -27,10 +31,12 @@ struct OUTDATA {
     time_t ts_alt;
     int    v_alt;
 
+    /* velocity */
     double speed;		/* Speed over ground, knots */
     time_t ts_speed;
     int    v_speed;
 
+    /* status and precision of fix */
     int    status;		/* 0 = no fix, 1 = fix, 2 = dgps fix */
     int    mode;		/* 1 = no fix, 2 = 2D, 3 = 3D */
     time_t ts_mode;
@@ -42,6 +48,7 @@ struct OUTDATA {
     double hdop;		/* Horizontal dilution of precision */
     double vdop;		/* Vertical dilution of precision */
 
+    /* satellite status */
     int in_view;		/* # of satellites in view */
     int satellites;		/* Number of satellites used in solution */
     int PRN[12];		/* PRN of satellite */

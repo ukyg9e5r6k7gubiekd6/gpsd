@@ -2,16 +2,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
 
-extern struct OUTDATA gNMEAdata;
-static void do_lat_lon(char *sentence, int begin);
+static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out);
 static char *field(char *sentence, short n);
 
-static void update_field_i(char *sentence, int fld, int *dest, int mask);
+static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out);
 #if 0
-static void update_field_f(char *sentence, int fld, double *dest, int mask);
+static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out);
 #endif
 /* ----------------------------------------------------------------------- */
 
@@ -24,7 +23,7 @@ static void update_field_f(char *sentence, int fld, double *dest, int mask);
    01234567890123456789
  */
 
-void processGPRMC(char *sentence)
+static void processGPRMC(char *sentence, struct OUTDATA *out)
 {
     char s[20], d[10];
     int tmp;
@@ -56,19 +55,19 @@ void processGPRMC(char *sentence)
     s[13] = s[16] = ':';
     s[19] = '\0';
 
-    strcpy(gNMEAdata.utc, s);
+    strcpy(out->utc, s);
 
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
-	gNMEAdata.status = 0;
+	out->status = 0;
 
-    sscanf(field(sentence, 7), "%lf", &gNMEAdata.speed);
+    sscanf(field(sentence, 7), "%lf", &out->speed);
 
 #if GPRMC_TRACK
-    sscanf(field(sentence, 8), "%lf", &gNMEAdata.track);
+    sscanf(field(sentence, 8), "%lf", &out->track);
 #endif
 
-    do_lat_lon(sentence, 3);
+    do_lat_lon(sentence, 3, out);
 }
 
 /*
@@ -86,7 +85,7 @@ where:
       *40    checksum
  */
 
-void processPMGNST(char *sentence)
+void processPMGNST(char *sentence, struct OUTDATA *out)
 {
     int tmp1;
     char foo;
@@ -96,80 +95,80 @@ void processPMGNST(char *sentence)
     sscanf(field(sentence, 2), "%d", &tmp1);	
     sscanf(field(sentence, 3), "%c", &foo);	
     
-    if (!(gNMEAdata.cmask&C_STATUS)) {
+    if (!(out->cmask&C_STATUS)) {
 	if (foo == 'T') {
-	    gNMEAdata.status = 1;
-	    gNMEAdata.mode = tmp1;
+	    out->status = 1;
+	    out->mode = tmp1;
 	}
 	else {
-	    gNMEAdata.status = 0;
-	    gNMEAdata.mode = 1;
+	    out->status = 0;
+	    out->mode = 1;
 	}
-	gNMEAdata.ts_status = gNMEAdata.last_update;
-	gNMEAdata.cmask |= C_STATUS;
-	gNMEAdata.ts_mode = gNMEAdata.last_update;
-	gNMEAdata.cmask |= C_MODE;
+	out->ts_status = out->last_update;
+	out->cmask |= C_STATUS;
+	out->ts_mode = out->last_update;
+	out->cmask |= C_MODE;
     }
 }
 
 /* ----------------------------------------------------------------------- */
 
-void processGPVTG(char *sentence)
+void processGPVTG(char *sentence, struct OUTDATA *out)
 {
-    sscanf(field(sentence, 3), "%lf", &gNMEAdata.speed);
+    sscanf(field(sentence, 3), "%lf", &out->speed);
 #if GPRMC_TRACK
-    sscanf(field(sentence, 1), "%lf", &gNMEAdata.track);
+    sscanf(field(sentence, 1), "%lf", &out->track);
 #endif
 }
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGGA(char *sentence)
+void processGPGGA(char *sentence, struct OUTDATA *out)
 {
-    do_lat_lon(sentence, 2);
+    do_lat_lon(sentence, 2, out);
     /* 0 = none, 1 = normal, 2 = diff */
-    sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
-    gNMEAdata.ts_status = gNMEAdata.last_update;
-    gNMEAdata.cmask |= C_STATUS;
-    sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
-    sscanf(field(sentence, 9), "%lf", &gNMEAdata.altitude);
-    gNMEAdata.ts_alt = gNMEAdata.last_update;
+    sscanf(field(sentence, 6), "%d", &out->status);
+    out->ts_status = out->last_update;
+    out->cmask |= C_STATUS;
+    sscanf(field(sentence, 7), "%d", &out->satellites);
+    sscanf(field(sentence, 9), "%lf", &out->altitude);
+    out->ts_alt = out->last_update;
 }
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGSA(char *sentence)
+void processGPGSA(char *sentence, struct OUTDATA *out)
 {
 
   /* 1 = none, 2 = 2d, 3 = 3d */
-    sscanf(field(sentence, 2), "%d", &gNMEAdata.mode);
-    gNMEAdata.ts_mode = gNMEAdata.last_update;
-    gNMEAdata.cmask |= C_MODE;
-    sscanf(field(sentence, 15), "%lf", &gNMEAdata.pdop);
-    sscanf(field(sentence, 16), "%lf", &gNMEAdata.hdop);
-    sscanf(field(sentence, 17), "%lf", &gNMEAdata.vdop);
+    sscanf(field(sentence, 2), "%d", &out->mode);
+    out->ts_mode = out->last_update;
+    out->cmask |= C_MODE;
+    sscanf(field(sentence, 15), "%lf", &out->pdop);
+    sscanf(field(sentence, 16), "%lf", &out->hdop);
+    sscanf(field(sentence, 17), "%lf", &out->vdop);
 }
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGSV(char *sentence)
+void processGPGSV(char *sentence, struct OUTDATA *out)
 {
     int n, m, f = 4;
 
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
-    update_field_i(sentence, 3, &gNMEAdata.in_view, C_SAT);
+    update_field_i(sentence, 3, &out->in_view, C_SAT, out);
 
     n = (n - 1) * 4;
     m = n + 4;
 
-    while (n < gNMEAdata.in_view && n < m) {
-	update_field_i(sentence, f++, &gNMEAdata.PRN[n], C_SAT);
-	update_field_i(sentence, f++, &gNMEAdata.elevation[n], C_SAT);
-	update_field_i(sentence, f++, &gNMEAdata.azimuth[n], C_SAT);
+    while (n < out->in_view && n < m) {
+	update_field_i(sentence, f++, &out->PRN[n], C_SAT, out);
+	update_field_i(sentence, f++, &out->elevation[n], C_SAT, out);
+	update_field_i(sentence, f++, &out->azimuth[n], C_SAT, out);
 	if (*(field(sentence, f)))
-	    update_field_i(sentence, f, &gNMEAdata.ss[n], C_SAT);
+	    update_field_i(sentence, f, &out->ss[n], C_SAT, out);
 	f++;
 	n++;
     }
@@ -177,20 +176,20 @@ void processGPGSV(char *sentence)
 
 /* ----------------------------------------------------------------------- */
 
-void processPRWIZCH(char *sentence)
+static void processPRWIZCH(char *sentence, struct OUTDATA *out)
 {
     int i;
 
     for (i = 0; i < 12; i++) {
-	update_field_i(sentence, 2 * i + 1, &gNMEAdata.Zs[i], C_ZCH);
-	update_field_i(sentence, 2 * i + 2, &gNMEAdata.Zv[i], C_ZCH);
+	update_field_i(sentence, 2 * i + 1, &out->Zs[i], C_ZCH, out);
+	update_field_i(sentence, 2 * i + 2, &out->Zv[i], C_ZCH, out);
     }
-    gNMEAdata.ZCHseen = 1;
+    out->ZCHseen = 1;
 }
 
 /* ----------------------------------------------------------------------- */
 
-static void do_lat_lon(char *sentence, int begin)
+static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 {
     double lat, lon, d, m;
     char str[20], *p;
@@ -205,9 +204,9 @@ static void do_lat_lon(char *sentence, int begin)
 	p = field(sentence, begin + 1);
 	if (*p == 'S')
 	    lat = -lat;
-	if (gNMEAdata.latitude != lat) {
-	    gNMEAdata.latitude = lat;
-	    gNMEAdata.cmask |= C_LATLON;
+	if (out->latitude != lat) {
+	    out->latitude = lat;
+	    out->cmask |= C_LATLON;
 	}
 	updated++;
     }
@@ -220,19 +219,19 @@ static void do_lat_lon(char *sentence, int begin)
 	p = field(sentence, begin + 3);
 	if (*p == 'W')
 	    lon = -lon;
-	if (gNMEAdata.longitude != lon) {
-	    gNMEAdata.longitude = lon;
-	    gNMEAdata.cmask |= C_LATLON;
+	if (out->longitude != lon) {
+	    out->longitude = lon;
+	    out->cmask |= C_LATLON;
 	}
 	updated++;
     }
     if (updated == 2)
-	gNMEAdata.ts_latlon = time(NULL);
+	out->ts_latlon = time(NULL);
 }
 
 /* ----------------------------------------------------------------------- */
 
-static void update_field_i(char *sentence, int fld, int *dest, int mask)
+static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out)
 {
     int tmp;
 
@@ -240,12 +239,12 @@ static void update_field_i(char *sentence, int fld, int *dest, int mask)
 
     if (tmp != *dest) {
 	*dest = tmp;
-	gNMEAdata.cmask |= mask;
+	out->cmask |= mask;
     }
 }
 
 #if 0
-static void update_field_f(char *sentence, int fld, double *dest, int mask)
+static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out)
 {
     double tmp;
 
@@ -253,7 +252,7 @@ static void update_field_f(char *sentence, int fld, double *dest, int mask)
 
     if (tmp != *dest) {
 	*dest = tmp;
-	gNMEAdata.cmask |= mask;
+	out->cmask |= mask;
     }
 }
 #endif
@@ -306,3 +305,26 @@ static char *field(char *sentence, short n)
     *p = '\0';
     return result;
 }
+
+int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
+{
+    if (checksum(sentence)) {
+	if (strncmp(GPRMC, sentence, 5) == 0) {
+	    processGPRMC(sentence, outdata);
+	} else if (strncmp(GPGGA, sentence, 5) == 0) {
+	    processGPGGA(sentence, outdata);
+	} else if (strncmp(GPVTG, sentence, 5) == 0) {
+	    processGPVTG(sentence, outdata);
+	} else if (strncmp(GPGSA, sentence, 5) == 0) {
+	    processGPGSA(sentence, outdata);
+	} else if (strncmp(GPGSV, sentence, 5) == 0) {
+	    processGPGSV(sentence, outdata);
+	} else if (strncmp(PRWIZCH, sentence, 7) == 0) {
+	    processPRWIZCH(sentence, outdata);
+	} else {
+	    return -1;
+	}
+    }
+    return 0;
+}
+

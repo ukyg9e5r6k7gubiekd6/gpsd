@@ -42,30 +42,24 @@
 #include <sys/time.h>
 #endif
 
-#include "nmea.h"
 #include "outdata.h"
+#include "nmea.h"
 #include "gpsd.h"
 #include "version.h"
 
 #define QLEN		5
 #define BUFSIZE		4096
 
-int debug = 0;
-char *device_name = 0;
-char *latitude = 0;
-char *longitude = 0;
-char latd = 'N';
-char lond = 'W';
-int device_type;
+
+struct session_t session;
 
 char *default_device_name = "/tmp/gpslog";
 
-int nfds, dsock;
-int verbose = 1;
-int bincount;
+static int nfds, dsock;
+static char *device_name;
 static int ttyfd = -1;
 static FILE *fp = 0;
-int reopen = 0;
+static int reopen = 0;
 
 static int handle_input(int input, fd_set * afds, fd_set * nmea_fds);
 static int handle_request(int fd, fd_set * fds);
@@ -150,19 +144,19 @@ static void usage()
 static void print_settings(char *service)
 {
     fprintf(stderr, "command line options:\n");
-    fprintf(stderr, "  debug level:        %d\n", debug);
+    fprintf(stderr, "  debug level:        %d\n", session.debug);
     fprintf(stderr, "  gps device name:    %s\n", device_name);
     fprintf(stderr, "  gpsd port:          %s\n", service);
 }
 
 static void deactivate()
 {
-    gNMEAdata.fdin = -1;
-    gNMEAdata.fdout = -1;
+    session.gNMEAdata.fdin = -1;
+    session.gNMEAdata.fdout = -1;
     gpslog_close();
     syslog(LOG_NOTICE, "Closed gps");
-    gNMEAdata.mode = 1;
-    gNMEAdata.status = 0;
+    session.gNMEAdata.mode = 1;
+    session.gNMEAdata.status = 0;
 }
 
 static int activate()
@@ -172,8 +166,8 @@ static int activate()
     if ((input = gpslog_open()) < 0)
 	errexit("gpslog open: ");
     syslog(LOG_NOTICE, "Opened gps");
-    gNMEAdata.fdin = input;
-    gNMEAdata.fdout = -1;
+    session.gNMEAdata.fdin = input;
+    session.gNMEAdata.fdout = -1;
 
     return input;
 }
@@ -197,7 +191,7 @@ int main(int argc, char *argv[])
     while ((option = getopt(argc, argv, "D:S:hp:")) != -1) {
 	switch (option) {
 	case 'D':
-	    debug = (int) strtol(optarg, 0, 0);
+	    session.debug = (int) strtol(optarg, 0, 0);
 	    break;
 	case 'S':
 	    service = optarg;
@@ -221,10 +215,10 @@ int main(int argc, char *argv[])
 	else service = default_service;
     }
 
-    if (debug > 0) 
+    if (session.debug > 0) 
       print_settings(service);
     
-    if (debug < 2)
+    if (session.debug < 2)
 	daemonize();
 
     /* Handle some signals */
@@ -249,8 +243,8 @@ int main(int argc, char *argv[])
 
     /* mark fds closed */
     input = -1;
-    gNMEAdata.fdin = input;
-    gNMEAdata.fdout = -1;
+    session.gNMEAdata.fdin = input;
+    session.gNMEAdata.fdout = -1;
 
     while (1) {
 	struct timeval tv;
@@ -289,7 +283,7 @@ int main(int argc, char *argv[])
 	    handle_input(input, &afds, &nmea_fds);
 	}
 
-	if (gNMEAdata.status > 0) 
+	if (session.gNMEAdata.status > 0) 
 	    fixcnt++;
 	
 	for (fd = 0; fd < nfds; fd++) {
@@ -338,26 +332,26 @@ static int handle_request(int fd, fd_set * fds)
 	case 'p':
 	    sprintf(reply + strlen(reply),
 		    ",P=%f %f",
-		    gNMEAdata.latitude,
-		    gNMEAdata.longitude);
+		    session.gNMEAdata.latitude,
+		    session.gNMEAdata.longitude);
 	    break;
 	case 'D':
 	case 'd':
 	    sprintf(reply + strlen(reply),
 		    ",D=%s",
-		    gNMEAdata.utc);
+		    session.gNMEAdata.utc);
 	    break;
 	case 'A':
 	case 'a':
 	    sprintf(reply + strlen(reply),
 		    ",A=%f",
-		    gNMEAdata.altitude);
+		    session.gNMEAdata.altitude);
 	    break;
 	case 'V':
 	case 'v':
 	    sprintf(reply + strlen(reply),
 		    ",V=%f",
-		    gNMEAdata.speed);
+		    session.gNMEAdata.speed);
 	    break;
 	case 'R':
 	case 'r':
@@ -375,13 +369,13 @@ static int handle_request(int fd, fd_set * fds)
 	case 's':
 	    sprintf(reply + strlen(reply),
 		    ",S=%d",
-		    gNMEAdata.status);
+		    session.gNMEAdata.status);
 	    break;
 	case 'M':
 	case 'm':
 	    sprintf(reply + strlen(reply),
 		    ",M=%d",
-		    gNMEAdata.mode);
+		    session.gNMEAdata.mode);
 	    break;
 	case '\r':
 	case '\n':
