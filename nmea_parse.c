@@ -99,7 +99,11 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
 /* update from a UTC time */
 {
+    int old_hour = out->nmea_date.tm_hour;
+
     out->nmea_date.tm_hour = DD(hhmmss);
+	if (out->nmea_date.tm_hour < old_hour)	/* midnight wrap */ 
+	out->nmea_date.tm_mday++;
     out->nmea_date.tm_min = DD(hhmmss+2);
     out->nmea_date.tm_sec = DD(hhmmss+4);
     out->subseconds = atof(hhmmss+4) - out->nmea_date.tm_sec;

@@ -1,31 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Filling in NMEA timestamps from the system clock hurts replay
-
-"Dan Oetting" <dan_oetting@qwest.net>
-> You simply need to keep track of the last known time.
-> 
-> When a sentence with only time comes in (GPGGA/GPGLL), you can easily
-> see if it's the start of a new day because the new time will be 24
-> hours less than the saved time.  You should then increment the saved
-> day when you store the new time.
-> 
-> To set the century when first setting the saved day:
-> 1. If a valid sentence with a 4 digit year ($GPZDA?) has been seen use
-> it to set day and time.
-> 2. if the system clock is "close enough" to the GPS time, use the
-> century from the system time.an/listinfo/gpsd-dev
-> 3. Otherwize, assume the year is in the range 1973...2072 (the first
-> 100 years of NEMA data).
-> 
-> This should cover most of the bases because historical data can simply
-> be tagged with a sentence containing the valid 4 digit year, The system
-> clock should be good enough unless it reset to the EPOC (1970 or
-> whatever PCs use). And I don't think many of us will care much after
-> 2072 what problems some retro-geek has when trying to use software that
-> hasn't been updated in the last 50 years.
-
 ** In the SiRF driver, get leap seconds from almanac data
 
 Currently we're using a fixed 13-leap-second offset to convert GPS
