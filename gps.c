@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
     init_list();
 
     gpsd_set_raw_hook(&gpsdata, update_display);
-    gpsd_query(gps_fd, &gpsdata, "w+r+\n");
+    gpsd_query(gps_fd, &gpsdata, "w+\n");
 
     XtAppAddInput(app, gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
