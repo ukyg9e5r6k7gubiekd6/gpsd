@@ -33,7 +33,7 @@
 #if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
 /* FIX ME -- get actual leap seconds from subframe data */
-#define LEAP_SECONDS	-13
+#define LEAP_SECONDS	13
 
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
@@ -237,7 +237,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		session->gpsdata.azimuth[st] && 
 		session->gpsdata.elevation[st];
 	    session->gpsdata.sentence_time
-		= gpstime_to_unix(getw(1), getl(5)*1e-2, -LEAP_SECONDS);
+		= gpstime_to_unix(getw(1), getl(3)*1e-2, -LEAP_SECONDS);
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
