@@ -273,6 +273,10 @@ static void handle1000(unsigned short *p)
     } else {
 	gNMEAdata.mode = 1;
     }
+    gNMEAdata.ts_status = gNMEAdata.last_update;
+    gNMEAdata.cmask |= C_STATUS;
+    gNMEAdata.ts_mode = gNMEAdata.last_update;
+    gNMEAdata.cmask |= C_MODE;
 
     gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 }

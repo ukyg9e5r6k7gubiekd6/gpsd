@@ -33,8 +33,7 @@ int serial_open()
     char *temp;
     char *p;
 
-    temp = malloc(strlen(device_name) + 1);
-    strcpy(temp, device_name);
+    temp = strdup(device_name);
 
     if ( (p = strchr(temp, ':')) ) {
 	char *port = DEFAULTPORT;
@@ -47,14 +46,12 @@ int serial_open()
 	if (debug > 5)
 	    fprintf(stderr, "Host: %s  Port: %s\n", temp, port);
 	ttyfd = connectTCP(temp, port);
-	free(temp);
 	port = 0;
 
 	if (write(ttyfd, "r\n", 2) != 2)
 	    errexit("Can't write to socket");
     } else {
 	ttyfd = open(temp, O_RDWR | O_NONBLOCK);
-	free(temp);
 
 	if (ttyfd < 0)
 	    return (-1);
@@ -77,6 +74,7 @@ int serial_open()
 		return (-1);
 	}
     }
+    free(temp);
     return ttyfd;
 }
 

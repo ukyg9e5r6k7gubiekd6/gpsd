@@ -3,6 +3,8 @@
 #define C_LATLON	1
 #define C_SAT		2
 #define C_ZCH		4
+#define C_STATUS	8
+#define C_MODE		16
 
 struct OUTDATA {
     int fdin;
@@ -19,16 +21,22 @@ struct OUTDATA {
     double latitude;		/* Latitude and longitude in format "d.ddddd" */
     double longitude;
     time_t ts_latlon;		/* Update time stamp */
+    int    v_latlon;		/* Valid for v_latlon seconds */
 
     double altitude;		/* Altitude in meters */
     time_t ts_alt;
+    int    v_alt;
 
     double speed;		/* Speed over ground, knots */
     time_t ts_speed;
+    int    v_speed;
 
-
-    int status;			/* 0 = no fix, 1 = fix, 2 = dgps fix */
-    int mode;			/* 1 = no fix, 2 = 2D, 3 = 3D */
+    int    status;		/* 0 = no fix, 1 = fix, 2 = dgps fix */
+    int    mode;		/* 1 = no fix, 2 = 2D, 3 = 3D */
+    time_t ts_mode;
+    time_t ts_status;
+    int    v_mode;
+    int    v_status;
 
     double pdop;		/* Position dilution of precision */
     double hdop;		/* Horizontal dilution of precision */

@@ -393,6 +393,12 @@ int main(int argc, char *argv[])
     gNMEAdata.fdin = input;
     gNMEAdata.fdout = input;
 
+    gNMEAdata.v_latlon = gps_timeout;
+    gNMEAdata.v_alt = gps_timeout;
+    gNMEAdata.v_speed = gps_timeout;
+    gNMEAdata.v_status = gps_timeout;
+    gNMEAdata.v_mode = gps_timeout;
+
     while (1) {
 	struct timeval tv;
 
@@ -476,12 +482,63 @@ int main(int argc, char *argv[])
     }
 }
 
+static int validate_sm(time_t cur_time)
+{
+    int invalidate = 0;
+    int ostatus, omode;
+    int status = 0;
+
+     ostatus = gNMEAdata.status;
+     omode   = gNMEAdata.mode;
+
+    /* status: 0 = no fix, 1 = fix, 2 = dgps fix */
+    /* mode:   1 = no fix, 2 = 2D, 3 = 3D */
+
+    /* always slave mode to status, consider mode only if status is valid */
+   
+    if (debug>1) fprintf(stderr, "status=%d, mode=%d\n",
+    			ostatus, omode);
+
+    if ((gNMEAdata.ts_status + gNMEAdata.v_status) >= cur_time) {
+        status = ostatus;
+	if (debug>1) fprintf(stderr, "status is valid!\n");
+	if ((gNMEAdata.ts_mode + gNMEAdata.v_mode) >= cur_time) {
+	    switch (ostatus) {
+		case 0:
+		    if (omode != 1) invalidate = 1;
+		    break;
+		case 1:
+		case 2:
+		    if ((omode!=2) && (omode!=3)) invalidate = 2;
+		    break;
+		default:
+		    invalidate = 3;
+		    break;
+	    }
+	}
+    }
+    else {
+	gNMEAdata.ts_mode = 0;	/* invalidate mode */
+    }
+    gNMEAdata.cmask &= ~(C_STATUS|C_MODE);
+
+    if (invalidate) {
+	syslog(LOG_ERR, "Impossible status(%d)/mode(%d) reason(%d)\n",
+		ostatus, omode, invalidate);
+	gNMEAdata.ts_status = 0;
+	gNMEAdata.ts_mode = 0;
+	status = 0;
+    }
+    return status;
+}
+
 static int handle_request(int fd, fd_set * fds)
 {
     char buf[BUFSIZE];
     char reply[BUFSIZE];
     char *p;
-    int cc;
+    int cc, status;
+    time_t cur_time;
 
     cc = read(fd, buf, sizeof(buf) - 1);
     if (cc < 0)
@@ -489,43 +546,49 @@ static int handle_request(int fd, fd_set * fds)
 
     buf[cc] = '\0';
 
+    cur_time = time(NULL);
+    status = validate_sm(cur_time);		/* validate status and mode */
+
     sprintf(reply, "GPSD");
     p = buf;
     while (*p) {
+	if (status) {
+	    switch (*p) {
+	    case 'P':
+	    case 'p':
+		if ((gNMEAdata.ts_latlon + gNMEAdata.v_latlon) >= cur_time) {
+		    sprintf(reply + strlen(reply),
+			    ",P=%f %f",
+			    gNMEAdata.latitude,
+			    gNMEAdata.longitude);
+		}
+		break;
+	    case 'A':
+	    case 'a':
+		if ((gNMEAdata.ts_alt + gNMEAdata.v_alt) >= cur_time) {
+		    sprintf(reply + strlen(reply),
+			    ",A=%f",
+			    gNMEAdata.altitude);
+		}
+		break;
+	    case 'V':
+	    case 'v':
+		if ((gNMEAdata.ts_speed + gNMEAdata.v_speed) >= cur_time) {
+		    sprintf(reply + strlen(reply),
+			    ",V=%f",
+			    gNMEAdata.speed);
+		}
+		break;
+	    }
+	}
+
 	switch (*p) {
-	case 'P':
-	case 'p':
-	    sprintf(reply + strlen(reply),
-		    ",P=%f %f",
-		    gNMEAdata.latitude,
-		    gNMEAdata.longitude);
-	    break;
 	case 'D':
 	case 'd':
 	    sprintf(reply + strlen(reply),
 		    ",D=%s",
 		    gNMEAdata.utc);
 	    break;
-	case 'A':
-	case 'a':
-	    sprintf(reply + strlen(reply),
-		    ",A=%f",
-		    gNMEAdata.altitude);
-	    break;
-	case 'V':
-	case 'v':
-	    sprintf(reply + strlen(reply),
-		    ",V=%f",
-		    gNMEAdata.speed);
-	    break;
-#if GPRMC_TRACK
-	case 'T':
-	case 't':
-           sprintf(reply + strlen(reply),
-                   ",T=%f",
-                   gNMEAdata.track);
-           break;
-#endif
         case 'X':
         case 'x':
             if (!FD_ISSET(fd, fds))
@@ -552,23 +615,57 @@ static int handle_request(int fd, fd_set * fds)
 			",R=1");
 	    }
 	    break;
-	case 'S':
-	case 's':
+	case 'L':
+	case 'l':
 	    sprintf(reply + strlen(reply),
-		    ",S=%d",
-		    gNMEAdata.status);
-	    break;
-	case 'M':
-	case 'm':
-	    sprintf(reply + strlen(reply),
-		    ",M=%d",
-		    gNMEAdata.mode);
+		    ",l=1");
 	    break;
 	case '\r':
 	case '\n':
 	    *p = '\0';		/* ignore the rest */
 	    break;
-
+	case 'S':
+	case 's':
+	    if ((gNMEAdata.ts_status + gNMEAdata.v_status) >= cur_time) {
+		sprintf(reply + strlen(reply),
+			",S=%d",
+			gNMEAdata.status);
+	    }
+	    break;
+	case 'M':
+	case 'm':
+	    if ((gNMEAdata.ts_mode + gNMEAdata.v_mode) >= cur_time) {
+		sprintf(reply + strlen(reply),
+			",M=%d",
+			gNMEAdata.mode);
+	    }
+	    break;
+	case 'Q':
+	case 'q':
+	    sprintf(reply + strlen(reply),
+		    ",Q=%d %d %f %f %f",
+		    gNMEAdata.in_view, gNMEAdata.satellites,
+		    gNMEAdata.pdop, gNMEAdata.hdop, gNMEAdata.vdop);
+	    break;
+	case 'I':
+	case 'i':
+	    {
+	    	int i;
+		char *q;
+		
+		q = p;
+		i = (int)strtol(p+1, &q, 10);
+		if (i>=0 && i<gNMEAdata.in_view) {
+		    fprintf(stderr, "i=%d in view=%d\n", i, gNMEAdata.in_view);
+		    sprintf(reply + strlen(reply),
+			    ",I=%d %d %d %d",
+			    gNMEAdata.PRN[i], gNMEAdata.azimuth[i],
+			    gNMEAdata.elevation[i], gNMEAdata.ss[i]);
+		}
+		else sprintf(reply + strlen(reply), ",I=-1 -1 -1 -1");
+		if (q!=p) p = q-1;
+	    }
+	    break;
 	}
 	p++;
     }

@@ -55,4 +55,7 @@
 	 Make applications null-terminate their resource lists.
 20040321
 	 Without PRWIZCH sentence:
-	 sat. colors in gps according to ss, grey==lt10, yellow==lt50 else green.
+	 sat. colors in gps according to ss, grey==lt20, yellow==lt40 else green.
+	 Added L Q and I to the protocol. Removed G and T.
+	 Changed the timeout mechanism. Try to not return Lat/Lon/Alt if
+	 validity is in doubt.

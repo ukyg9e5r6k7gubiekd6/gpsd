@@ -61,10 +61,6 @@ void processGPRMC(char *sentence)
     /* A = valid, V = invalid */
     if (strcmp(field(sentence, 2), "V") == 0)
 	gNMEAdata.status = 0;
-#if 0    /* Let the GGA sentence do the update so we catch diff fixes */
-    else
-	gNMEAdata.status = 0;
-#endif
 
     sscanf(field(sentence, 7), "%lf", &gNMEAdata.speed);
 
@@ -95,16 +91,25 @@ void processPMGNST(char *sentence)
     int tmp1;
     char foo;
 
+    /* using this for mode and status seems a bit desperate */
+    /* only use it if we don't have better info */
     sscanf(field(sentence, 2), "%d", &tmp1);	
     sscanf(field(sentence, 3), "%c", &foo);	
-    if (foo == 'T') {
-        /* otherwise leave this alone as it may show diff */
-        if (!gNMEAdata.status)
-  	    gNMEAdata.status = 1; 
-	gNMEAdata.mode = tmp1;
-    } else 
-        gNMEAdata.mode = 1;
-		      
+    
+    if (!(gNMEAdata.cmask&C_STATUS)) {
+	if (foo == 'T') {
+	    gNMEAdata.status = 1;
+	    gNMEAdata.mode = tmp1;
+	}
+	else {
+	    gNMEAdata.status = 0;
+	    gNMEAdata.mode = 1;
+	}
+	gNMEAdata.ts_status = gNMEAdata.last_update;
+	gNMEAdata.cmask |= C_STATUS;
+	gNMEAdata.ts_mode = gNMEAdata.last_update;
+	gNMEAdata.cmask |= C_MODE;
+    }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -124,10 +129,8 @@ void processGPGGA(char *sentence)
     do_lat_lon(sentence, 2);
     /* 0 = none, 1 = normal, 2 = diff */
     sscanf(field(sentence, 6), "%d", &gNMEAdata.status);
-    if ((gNMEAdata.status > 0) && (gNMEAdata.mode < 2))
-	gNMEAdata.mode = 2;
-    if ((gNMEAdata.status < 1) && (gNMEAdata.mode > 1))
-	gNMEAdata.mode = 1;
+    gNMEAdata.ts_status = gNMEAdata.last_update;
+    gNMEAdata.cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &gNMEAdata.satellites);
     sscanf(field(sentence, 9), "%lf", &gNMEAdata.altitude);
 }
@@ -139,10 +142,8 @@ void processGPGSA(char *sentence)
 
   /* 1 = none, 2 = 2d, 3 = 3d */
     sscanf(field(sentence, 2), "%d", &gNMEAdata.mode);
-    if ((gNMEAdata.mode > 1) && (gNMEAdata.status < 1))
-	gNMEAdata.status = 1;
-    if ((gNMEAdata.mode < 2) && (gNMEAdata.status > 0))
-	gNMEAdata.status = 0;
+    gNMEAdata.ts_mode = gNMEAdata.last_update;
+    gNMEAdata.cmask |= C_MODE;
     sscanf(field(sentence, 15), "%lf", &gNMEAdata.pdop);
     sscanf(field(sentence, 16), "%lf", &gNMEAdata.hdop);
     sscanf(field(sentence, 17), "%lf", &gNMEAdata.vdop);
@@ -291,12 +292,14 @@ static char *field(char *sentence, short n)
 {
     static char result[100];
     char c, *p = sentence;
+    int i;
 
     while (n-- > 0)
         while ((c = *p++) != ',' && c != '\0');
-    strcpy(result, p);
+    strncpy(result, p, 100);
     p = result;
-    while (*p && *p != ',' && *p != '*' && *p != '\r')
+    i = 0;
+    while (*p && *p != ',' && *p != '*' && *p != '\r' && ++i<100)
 	p++;
 
     *p = '\0';

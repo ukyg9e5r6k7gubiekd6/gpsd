@@ -120,7 +120,7 @@ int get_status(int satellite)
 		s = gNMEAdata.ss[i];
 
 		if (s<20) return 1;
-		if (s<50) return 2;
+		if (s<40) return 2;
 
 		return 7;
 	    }
