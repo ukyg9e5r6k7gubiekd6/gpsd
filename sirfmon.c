@@ -414,7 +414,7 @@ int main (int argc, char **argv)
 	    wmove(cmdwin, 0,5);
 	    wrefresh(cmdwin);
 	    echo();
-	    wgetstr(cmdwin, line);
+	    wgetnstr(cmdwin, line, 80);
 	    noecho();
 	    //move(0,0);
 	    //clrtoeol();
