@@ -330,8 +330,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    break;
 	case 'O':
 	    /*
-	     * Presently we don't know how to derive time error, track
-	     * error, speed error, or climb error.  
+	     * Presently we don't know how to derive time or track error.
 	     *
 	     * Field reports match the theoretical prediction that
 	     * expected time error should be half the resolution of
@@ -344,7 +343,7 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 	    if (!have_fix(session))
 		strcpy(phrase, ",O=?");
 	    else {
-		sprintf(phrase, ",O=%.2f 0.006 %.4f %.4f",
+		sprintf(phrase, ",O=%.2f 0.0068 %.4f %.4f",
 			ud->fix.time, ud->fix.latitude, ud->fix.longitude);
 		if (session->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %.2f",
@@ -375,7 +374,11 @@ static int handle_request(int fd, char *buf, int buflen, int explicit)
 			    session->gpsdata.fix.eps);		    
 		else
 		    strcat(phrase, "?");
-		strcat(phrase, " ?");	/* can't yet derive climb error */ 
+		if (session->gpsdata.valid & CLIMBERR_SET)
+		    sprintf(phrase+strlen(phrase), " %.2f",
+			    session->gpsdata.fix.epc);		    
+		else
+		    strcat(phrase, "?");
 	    }
 	    break;
 	case 'P':

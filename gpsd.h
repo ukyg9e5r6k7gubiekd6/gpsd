@@ -129,6 +129,7 @@ struct gps_session_t {
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     double mag_var;		/* Magnetic variation in degrees */  
+    struct gps_fix_t lastfix;	/* use to compute uncertainties */
     /*
      * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
      * translation of Zodiac binary protocol can send it up to the client.
@@ -174,6 +175,7 @@ extern int ntpshm_put(struct gps_session_t *, double);
 
 extern double iso8661_to_unix(char *);
 extern double gpstime_to_unix(int, double);
+extern double earth_distance(double, double, double, double);
 
 /* External interface */
 extern struct gps_session_t * gpsd_init(char *);

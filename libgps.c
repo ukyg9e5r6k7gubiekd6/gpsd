@@ -97,6 +97,46 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'N':
 		    gpsdata->driver_mode = atoi(sp+2);
 		    break;
+		case 'O':
+		    if (sp[2] != '?') {
+			struct gps_fix_t nf;
+			char alt[20];
+			char eph[20], epv[20], track[20],speed[20], climb[20];
+			char epd[20], eps[20], epc[20];
+			int st = sscanf(sp+2, 
+			       "%lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
+				&nf.time, &nf.ept, 
+				&nf.latitude, &nf.longitude,
+			        alt, eph, epv, track, speed, climb,
+			        epd, eps, epc);
+			if (st == 13) {
+#define DEFAULT(val, def) (val[0] == '?') ? (def) : atof(val)
+			    nf.altitude = DEFAULT(alt, ALTITUDE_NOT_VALID);
+			    nf.eph = DEFAULT(eph, 0.0);
+			    nf.epv = DEFAULT(epv, 0.0);
+			    nf.track = DEFAULT(track, TRACK_NOT_VALID);
+			    nf.speed = DEFAULT(speed, 0.0);
+			    nf.climb = DEFAULT(climb, 0.0);
+			    nf.epd = DEFAULT(epd, 0.0);
+			    nf.eps = DEFAULT(eps, 0.0);
+			    nf.epc = DEFAULT(epc, 0.0);
+#undef DEFAULT
+			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
+			    gpsdata->fix = nf;
+			    gpsdata->valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
+			    if (nf.mode == MODE_3D)
+				gpsdata->valid |= ALTITUDE_SET | CLIMB_SET;
+			    if (nf.eph || nf.epv)
+				gpsdata->valid |= POSERR_SET;
+			    if (nf.track != TRACK_NOT_VALID)
+				gpsdata->valid |= TRACK_SET | SPEED_SET;
+			    if (nf.eps)
+				gpsdata->valid |= SPEEDERR_SET;
+			    if (nf.epc)
+				gpsdata->valid |= CLIMBERR_SET;
+			}
+		    }
+		    break;
 		case 'P':
 		    sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);

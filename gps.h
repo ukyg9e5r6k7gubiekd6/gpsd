@@ -48,7 +48,7 @@ struct gps_fix_t {
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
-    // double ept;	/* Time uncertainty (1 sigma) */
+    double ept;		/* Time uncertainty (1 sigma) */
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double eph;  	/* Est. horizontal position error, 1 sigma (meters) */
@@ -57,11 +57,11 @@ struct gps_fix_t {
     double epv;  	/* Est. vertical position error, 1 sigma (meters) */
     double track;	/* Course made good (relative to true north) */
 #define TRACK_NOT_VALID	-1	/* No course/speed data yet */
-    // double epd;	/* Course uncertainty (1 sigma) */
+    double epd;		/* Course uncertainty (1 sigma) */
     double speed;	/* Speed over ground, knots */
     double eps;		/* Speed uncertainty (1 sigma) */
     double climb;       /* Vertical velocity, meters/sec */
-    // double epc;	/* Vertical velocity uncertainty (1 sigma) */
+    double epc;		/* Vertical velocity uncertainty (1 sigma) */
 };
 
 struct gps_data_t {

@@ -167,6 +167,27 @@ int gpsd_poll(struct gps_session_t *session)
 	if (session->gpsdata.status > STATUS_NO_FIX) 
 	    session->fixcnt++;
 
+	/* compute derived uncertainties */
+	if (!(session->gpsdata.valid & SPEEDERR_SET)) {
+	    session->gpsdata.fix.eps = 0.0;
+	    if (session->lastfix.mode > MODE_NO_FIX 
+			&& session->gpsdata.fix.mode > MODE_NO_FIX) {
+		double t = session->gpsdata.fix.time - session->lastfix.time;
+		double e = session->lastfix.eph + session->gpsdata.fix.eph;
+		session->gpsdata.fix.eps = 2 * 0.68 * e/t;
+	    }
+	}
+	if (!(session->gpsdata.valid & CLIMBERR_SET)) {
+	    session->gpsdata.fix.epc = 0.0;
+	    if (session->lastfix.mode > MODE_3D 
+			&& session->gpsdata.fix.mode > MODE_3D) {
+		double t = session->gpsdata.fix.time - session->lastfix.time;
+		double e = session->lastfix.epv + session->gpsdata.fix.epv;
+		/* if the vertical uncertainties are zero this will be too */
+		session->gpsdata.fix.epc = 2 * 0.68 * e/t;
+	    }
+	}
+
 	/* may be time to ship a DGPS correction to the GPS */
 	if (session->fixcnt > 10 && !session->sentdgps) {
 	    session->sentdgps++;

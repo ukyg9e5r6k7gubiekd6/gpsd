@@ -133,7 +133,8 @@ static int zodiac_send_rtcm(struct gps_session_t *session,
 
 static int handle1000(struct gps_session_t *session)
 {
-
+    /* save the old fix for later uncertainty computations */
+    memcpy(&session->gpsdata.fix, &session->lastfix, sizeof(struct gps_fix_t));
 
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
