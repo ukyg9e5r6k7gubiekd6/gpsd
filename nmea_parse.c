@@ -385,10 +385,10 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     out->await = atoi(field(sentence, 1));
     if (sscanf(field(sentence, 2), "%d", &out->part) < 1)
         return;
+    else if (out->part == 1)
+	out->satellites = 0;
 
-    changed = update_field_i(sentence, 3, &out->satellites);
-    if (out->satellites > MAXCHANNELS) out->satellites = MAXCHANNELS;
-
+    changed = 0;
     lower = (out->part - 1) * 4;
     upper = lower + 4;
     while (lower < out->satellites && lower < upper) {
@@ -397,7 +397,7 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
 	changed |= update_field_i(sentence, fldnum++, &out->azimuth[lower]);
 	if (*(field(sentence, fldnum)))
 	    changed |= update_field_i(sentence, fldnum, &out->ss[lower]);
-	fldnum++; lower++;
+	fldnum++; lower++; out->satellites++;
     }
 
     /* not valid data until we've seen a complete set of parts */
