@@ -594,14 +594,18 @@ int main(int argc, char *argv[])
 
 	/* open or reopen the GPS if it's needed */
 	if (reopen && session.fdin == -1) {
-	    FD_CLR(session.fdin, &afds);
 	    gps_deactivate(&session);
-	    if (gps_activate(&session) < 0)
-		errexit("exiting - reopen of GPS at %s failed", session.gps_device);
-	    FD_SET(session.fdin, &afds);
+	    if (gps_activate(&session) >= 0)
+		FD_SET(session.fdin, &afds);
 	}
 
-	gps_poll(&session);
+	/* get data from it */
+	if (session.fdin >= 0 && gps_poll(&session) <= 0) {
+	    gpscli_report(3, "GPS is offline\n");
+	    FD_CLR(session.fdin, &afds);
+	    gps_deactivate(&session);
+	    reopen = 1;
+	}
 
 	if (session.dsock > -1)
 	    FD_CLR(session.dsock, &rfds);
