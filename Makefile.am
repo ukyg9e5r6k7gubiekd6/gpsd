@@ -1,5 +1,6 @@
 # Copyright (C) 2004 Jens Oberender <j.obi at troja.net>
 
+EXTRA_PROGRAMS = gps xgpsspeed
 bin_PROGRAMS = $(MISSING_MOTIF) gps xgpsspeed
 
 #
