@@ -24,6 +24,7 @@ static void update_field_f(char *sentence, int fld, double *dest, int mask, stru
  */
 
 static void processGPRMC(char *sentence, struct OUTDATA *out)
+/* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     char s[20], d[10];
     int tmp;
@@ -87,7 +88,7 @@ where:
       *40    checksum
  */
 
-void processPMGNST(char *sentence, struct OUTDATA *out)
+static void processPMGNST(char *sentence, struct OUTDATA *out)
 {
     int tmp1;
     char foo;
@@ -208,7 +209,8 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGGA(char *sentence, struct OUTDATA *out)
+static void processGPGGA(char *sentence, struct OUTDATA *out)
+/* Global Positioning System Fix Data */
 {
     do_lat_lon(sentence, 2, out);
     /* 0 = none, 1 = normal, 2 = diff */
@@ -222,7 +224,8 @@ void processGPGGA(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGSA(char *sentence, struct OUTDATA *out)
+static void processGPGSA(char *sentence, struct OUTDATA *out)
+/* GPS DOP and Active Satellites */
 {
 
   /* 1 = none, 2 = 2d, 3 = 3d */
@@ -236,7 +239,8 @@ void processGPGSA(char *sentence, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-void processGPGSV(char *sentence, struct OUTDATA *out)
+static void processGPGSV(char *sentence, struct OUTDATA *out)
+/* GPS Satellites in View */
 {
     int n, m, f = 4;
 
@@ -262,6 +266,14 @@ void processGPGSV(char *sentence, struct OUTDATA *out)
 /* ----------------------------------------------------------------------- */
 
 static void processPRWIZCH(char *sentence, struct OUTDATA *out)
+/*
+ * Descriptions of this sentence are hard to find, but here is one:
+ *
+ * $PRWIZCH ,00,0,03,7,31,7,15,7,19,7,01,7,22,2,27,2,13,0,11,7,08,0,02,0*4C
+ *	SATELLITE IDENTIFICATION NUMBER - 0-31
+ *	SIGNAL QUALITY - 0 low quality - 7 high quality
+ *	Repeats 12 times
+ */
 {
     int i;
 
@@ -398,6 +410,8 @@ int process_NMEA_message(char *sentence, struct OUTDATA *outdata)
 	} else if (strncmp(GPGGA, sentence, 5) == 0) {
 	    processGPGGA(sentence, outdata);
 	} else if (strncmp(GPGLL, sentence, 5) == 0) {
+	    processPMGNST(sentence, outdata);
+	} else if (strncmp(PMGNST, sentence, 5) == 0) {
 	    processGPGLL(sentence, outdata);
 	} else if (strncmp(GPVTG, sentence, 5) == 0) {
 	    processGPVTG(sentence, outdata);
