@@ -386,7 +386,10 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     if (sscanf(field(sentence, 2), "%d", &out->part) < 1)
         return;
     else if (out->part == 1)
+    {
+	memset(out->PRN, '\0', sizeof(out->PRN));
 	out->satellites = 0;
+    }
 
     changed = 0;
     for (fldnum = 4; fldnum < 20; ) {
