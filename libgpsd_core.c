@@ -251,7 +251,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 
     if (session->gNMEAdata.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02.3f,%f,%c,%f,%c,%d,%02d,%s,%.1f,%c,",
+		"$GPGGA,%02d%02d%02.3f,%.4f,%c,%.4f,%c,%d,%02d,%s,%.1f,%c,",
 		session->hours,
 		session->minutes,
 		session->seconds,
@@ -270,7 +270,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	if (session->mag_var == NO_MAG_VAR) 
 	    strcat(bufp, ",,");
 	else {
-	    sprintf(bufp+strlen(bufp), "%lf,", fabs(session->mag_var));
+	    sprintf(bufp+strlen(bufp), "%3.2f,", fabs(session->mag_var));
 	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
@@ -280,7 +280,7 @@ void gpsd_binary_fix_dump(struct gps_session_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02.3f,%c,%f,%c,%f,%c,%f,%f,%02d%02d%02d,,",
+	    "$GPRMC,%02d%02d%02.3f,%c,%.4f,%c,%.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    session->hours, session->minutes, session->seconds,
 	    session->gNMEAdata.status ? 'A' : 'V',
 	    degtodm(fabs(session->gNMEAdata.latitude)),
