@@ -65,7 +65,7 @@ session.set_raw_hook(hook=None)
 
 session.poll()
 
-session.close()
+del session
 </funcsynopsisinfo>
 </funcsynopsis>
 </refsynopsisdiv>
@@ -162,9 +162,8 @@ and 2 or higher for debugging messages.</para>
 library, but only for straight NMEA devices with a 1-second send cycle
 (no Zodiac binary-protocol support).  <function>gps_init()</function>
 is replaced by the initialization of a gpsd session object; the other
-calls are methods of that object.  The <function>wrap()</function>
-call is optional, resources within the session object will be properly
-released when it is garbage-collected.</para>
+calls are methods of that object.  Resources within the session object
+will be properly released when it is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>

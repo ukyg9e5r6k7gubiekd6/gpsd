@@ -167,7 +167,6 @@ class gps(gpsdata):
     def __del__(self):
 	if self.sock:
 	    self.sock.close()
-    close = __del__
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
@@ -271,7 +270,4 @@ if __name__ == '__main__':
             print session
     except EOFError:
         print "Goodbye!"
-    session.close()
-
-
-
+    del session

@@ -335,4 +335,4 @@ if __name__ == '__main__':
         if status > 0:
             print dev
             print "=" * 75
-    dev.wrapup()
+    del wrapup()
