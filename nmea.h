@@ -10,47 +10,47 @@ struct OUTDATA {
     int fdout;
 
     long cmask;
-    char utc[20];		// UTC date / time in format "mm/dd/yy hh:mm:ss"
+    char utc[20];		/* UTC date / time in format "mm/dd/yy hh:mm:ss" */
 
-    double latitude;		// Latitude and longitude in format "d.ddddd"
+    double latitude;		/* Latitude and longitude in format "d.ddddd" */
 
     double longitude;
 
-    double altitude;		// Altitude in meters
+    double altitude;		/* Altitude in meters */
 
-    double speed;		// Speed over ground, knots
+    double speed;		/* Speed over ground, knots */
 
-    double track;		// Track made good, degress True
+    double track;		/* Track made good, degress True */
 
-    int satellites;		// Number of satellites used in solution
+    int satellites;		/* Number of satellites used in solution */
 
-    int status;			// 0 = no fix, 1 = fix, 2 = dgps fix 
+    int status;			/* 0 = no fix, 1 = fix, 2 = dgps fix */
 
-    int mode;			// 1 = no fix, 2 = 2D, 3 = 3D
+    int mode;			/* 1 = no fix, 2 = 2D, 3 = 3D */
 
-    double pdop;		// Position dilution of precision
+    double pdop;		/* Position dilution of precision */
 
-    double hdop;		// Horizontal dilution of precision
+    double hdop;		/* Horizontal dilution of precision */
 
-    double vdop;		// Vertical dilution of precision
+    double vdop;		/* Vertical dilution of precision */
 
-    int in_view;		// # of satellites in view
+    int in_view;		/* # of satellites in view */
 
-    int PRN[12];		// PRN of satellite
+    int PRN[12];		/* PRN of satellite */
 
-    int elevation[12];		// elevation of satellite
+    int elevation[12];		/* elevation of satellite */
 
-    int azimuth[12];		// azimuth
+    int azimuth[12];		/* azimuth */
 
-    int ss[12];			// signal strength
+    int ss[12];			/* signal strength */
 
-    int used[12];		// used in solution
+    int used[12];		/* used in solution */
 
-    int ZCHseen;		// flag
+    int ZCHseen;		/* flag */
 
-    int Zs[12];			// for the rockwell PRWIZCH
+    int Zs[12];			/* for the rockwell PRWIZCH */
 
-    int Zv[12];			//                  value
+    int Zv[12];			/*                  value */
 
     int year;
 
@@ -72,7 +72,7 @@ struct OUTDATA {
 
     int seen[12];
 
-    int valid[12];		// signal valid
+    int valid[12];		/* signal valid */
 };
 
 #define C_LATLON	1

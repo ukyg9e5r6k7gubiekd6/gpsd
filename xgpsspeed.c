@@ -55,7 +55,7 @@ static void open_input(XtAppContext app);
 int errexit(char *s)
 {
     perror(s);
-    //serial_close();
+    /* serial_close(); */
     exit(1);
 }
 
@@ -129,7 +129,9 @@ Usage()
 void update_display()
 {
   int new = rint(gNMEAdata.speed * 6076.12 / 5280);
-  //  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gNMEAdata.speed, rint(gNMEAdata.speed * 5208/6706.12), (int)rint(gNMEAdata.speed * 5208/6706.12));
+#if 0
+  fprintf(stderr, "gNMEAspeed %f scaled %f %d\n", gNMEAdata.speed, rint(gNMEAdata.speed * 5208/6706.12), (int)rint(gNMEAdata.speed * 5208/6706.12));
+#endif
   if (new > 100)
     new = 100;
 
@@ -178,7 +180,7 @@ int my_serial_open()
     temp = malloc(strlen(device_name) + 1);
     strcpy(temp, device_name);
 
-    //temp now holds the HOSTNAME portion and port the port number.
+    /* temp now holds the HOSTNAME portion and port the port number. */
     ttyfd = connectTCP(temp, port);
     free(temp);
     port = 0;

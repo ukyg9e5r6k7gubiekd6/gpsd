@@ -73,7 +73,7 @@ void register_canvas(Widget w, GC gc)
     diameter = min(width, height) - RM;
 }
 
-//#define PCORRECT
+/* #define PCORRECT */
 
 static void pol2cart(double azimuth, double elevation, double *xout, double *yout)
 {
@@ -96,9 +96,9 @@ static void pol2cart(double azimuth, double elevation, double *xout, double *you
 void draw_arc(int x, int y, int diam)
 {
     XDrawArc(XtDisplay(draww), pixmap, drawGC,
-	     x - diam / 2, y - diam / 2,	// x,y
-	      diam, diam,	// width, height
-	      0, 360 * 64	// angle1, angle2
+	     x - diam / 2, y - diam / 2,	/* x,y */
+	     diam, diam,	/* width, height */
+	     0, 360 * 64	/* angle1, angle2 */
 	);
 }
 
@@ -137,13 +137,13 @@ void draw_graphics()
 	set_color("White");
 	XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0, 0, width, height);
 
-	// draw something in the center
+	/* draw something in the center */
 	set_color("Grey");
 	draw_arc(width / 2, height / 2, 6);
 
-	// draw the 45 degree circle
+	/* draw the 45 degree circle */
 #ifdef PCORRECT
-	draw_arc(width / 2, height / 2, ((i - RM) * 7) / 10);	// sin(45) ~ 0.7
+	draw_arc(width / 2, height / 2, ((i - RM) * 7) / 10);	/* sin(45) ~ 0.7 */
 #else
 	draw_arc(width / 2, height / 2, (i - RM) / 2);
 #endif
@@ -151,7 +151,7 @@ void draw_graphics()
 	set_color("Black");
 	draw_arc(width / 2, height / 2, i - RM);
 
-	// Now draw the satellites...
+	/* Now draw the satellites... */
 	for (i = 0; i < gNMEAdata.in_view; i++) {
 	    pol2cart(gNMEAdata.azimuth[i], gNMEAdata.elevation[i], &x, &y);
 
@@ -174,9 +174,9 @@ void draw_graphics()
 		break;
 	    }
 	    XFillArc(XtDisplay(draww), pixmap, drawGC,
-		     (int) x - 5, (int) y - 5,	// x,y
-		      11, 11,	// width, height
-		      0, 360 * 64	// angle1, angle2
+		     (int) x - 5, (int) y - 5,	/* x,y */
+		     11, 11,	/* width, height */
+		     0, 360 * 64	/* angle1, angle2 */
 		);
 	    sprintf(buf, "%02d", gNMEAdata.PRN[i]);
 	    set_color("Blue");

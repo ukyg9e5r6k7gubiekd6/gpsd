@@ -200,7 +200,7 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[4], XmNorientation, XmVERTICAL);
     XtSetArg(args[5], XmNrightAttachment, XmATTACH_WIDGET);
     XtSetArg(args[6], XmNrightWidget, drawingArea_8);
-    XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	//tf
+    XtSetArg(args[7], XmNbottomAttachment, XmATTACH_NONE);	/* XXX */
 
     XtSetArg(args[8], XmNy, 352);
     XtSetArg(args[9], XmNx, 0);
@@ -325,7 +325,7 @@ void update_display(char *message)
 
     XmTextFieldSetString(status, message);
 
-    // This is for the satellite status display
+    /* This is for the satellite status display */
     if (gNMEAdata.cmask & C_SAT) {
 	for (i = 0; i < 12; i++) {
 	    if (i < gNMEAdata.in_view) {
@@ -349,7 +349,7 @@ void update_display(char *message)
 	for (i = 0; i < 12; i++)
 	    XmStringFree(string[i]);
     }
-    // here now the value fields
+    /* here now the value fields */
 
     XmTextFieldSetString(text_1, gNMEAdata.utc);
     sprintf(s, "%f", gNMEAdata.latitude);

@@ -58,7 +58,7 @@ int serial_open()
 	    port = p + 1;
 	*p = '\0';
 
-	//temp now holds the HOSTNAME portion and port the port number.
+	/* temp now holds the HOSTNAME portion and port the port number. */
 	if (debug > 5)
 	    fprintf(stderr, "Host: %s  Port: %s\n", temp, port);
 	ttyfd = connectTCP(temp, port);

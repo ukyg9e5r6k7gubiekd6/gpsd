@@ -9,7 +9,9 @@ static void do_lat_lon(char *sentence, int begin);
 static char *field(char *sentence, short n);
 
 static void update_field_i(char *sentence, int fld, int *dest, int mask);
-//static void update_field_f(char *sentence, int fld, double *dest, int mask);
+#if 0
+static void update_field_f(char *sentence, int fld, double *dest, int mask);
+#endif
 /* ----------------------------------------------------------------------- */
 
 /*
@@ -26,31 +28,31 @@ void processGPRMC(char *sentence)
     char s[20], d[10];
     int tmp;
 
-    sscanf(field(sentence, 9), "%s", d);	// Date: ddmmyy
+    sscanf(field(sentence, 9), "%s", d);	/* Date: ddmmyy */
 
-    strncpy(s, d + 2, 2);	// copy month
+    strncpy(s, d + 2, 2);	/* copy month */
 
-    strncpy(s + 3, d, 2);	// copy date
+    strncpy(s + 3, d, 2);	/* copy date */
 
     sscanf((d+4), "%2d", &tmp);
 
-    //Tf.: Window the year from 1970 to 2069. This buys us some time.
+    /* Tf.: Window the year from 1970 to 2069. This buys us some time. */
     if (tmp < 70) 
-      strncpy(s + 6, "20", 2);	// 21th century
+      strncpy(s + 6, "20", 2);	/* 21th century */
     else
-      strncpy(s + 6, "19", 2);	// 20th century
+      strncpy(s + 6, "19", 2);	/* 20th century */
 
-    strncpy(s + 8, d + 4, 2);	// copy year
+    strncpy(s + 8, d + 4, 2);	/* copy year */
 
-    sscanf(field(sentence, 1), "%s", d);	// Time: hhmmss
+    sscanf(field(sentence, 1), "%s", d);	/* Time: hhmmss */
 
-    strncpy(s + 11, d, 2);	// copy hours
+    strncpy(s + 11, d, 2);	/* copy hours */
 
-    strncpy(s + 14, d + 2, 2);	// copy minutes
+    strncpy(s + 14, d + 2, 2);	/* copy minutes */
 
-    strncpy(s + 17, d + 4, 2);	// copy seconds
+    strncpy(s + 17, d + 4, 2);	/* copy seconds */
 
-    s[2] = s[5] = '/';		// add the '/'s, ':'s, ' ' and string terminator
+    s[2] = s[5] = '/';		/* add the '/'s, ':'s, ' ' and string terminator */
 
     s[10] = ' ';
     s[13] = s[16] = ':';
