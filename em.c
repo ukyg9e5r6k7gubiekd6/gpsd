@@ -94,8 +94,10 @@ static void em_spew(int type, unsigned short *dat, int dlen)
     h.ndata = dlen - 1;
     h.csum = em_checksum((unsigned short *) &h, 4);
 
-    end_write(gNMEAdata.fdout, &h, sizeof(h));
-    end_write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
+    if (gNMEAdata.fdout != -1) {
+	end_write(gNMEAdata.fdout, &h, sizeof(h));
+	end_write(gNMEAdata.fdout, dat, sizeof(unsigned short) * dlen);
+    }
 }
 
 static long putlong(char *dm, int sign)
@@ -502,7 +504,7 @@ static void em_eat(unsigned char c, fd_set * afds, fd_set * nmea_fds)
 
     case EM_HUNT_A:
 	/* A better be right after E */
-	if (c == 'A') 
+        if ((c == 'A') && (gNMEAdata.fdout != -1))
 	    write(gNMEAdata.fdout, "EARTHA\r\n", 8);
 	state = EM_HUNT_FF;
 	break;

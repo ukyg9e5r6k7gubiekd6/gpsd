@@ -62,7 +62,8 @@ void send_init()
 		tm->tm_hour, tm->tm_min, tm->tm_sec,
 		tm->tm_mday, tm->tm_mon + 1, tm->tm_year);
 	add_checksum(buf + 1);	/* add c-sum + cr/lf */
-	write(gNMEAdata.fdout, buf, strlen(buf));
+	if (gNMEAdata.fdout != -1)
+	    write(gNMEAdata.fdout, buf, strlen(buf));
 	if (debug > 1) {
 	    fprintf(stderr, "Sending: %s", buf);
 	}
