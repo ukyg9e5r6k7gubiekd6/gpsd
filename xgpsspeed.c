@@ -30,9 +30,7 @@ static XrmOptionDescRec options[] = {
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
 };
 
-String fallback_resources[] = {
-  NULL
-};
+String fallback_resources[] = {NULL};
 
 static struct gps_data_t *gpsdata;
 static Widget tacho;
@@ -57,7 +55,7 @@ int main(int argc, char **argv)
     int option;
     char *colon, *server = NULL;
     char *port = DEFAULT_GPSD_PORT;
-    Widget toplevel, base, label;
+    Widget toplevel, base;
 
     toplevel = XtVaAppInitialize(&app, "xpsspeed.ad", 
 				 options, XtNumber(options),
@@ -91,11 +89,11 @@ int main(int argc, char **argv)
 
     /**** Label widget (Title) ****/
     XtSetArg(args[0], XtNlabel, "GPS Speedometer");
-    label = XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
+    XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
     XtSetArg(args[0], XtNlabel, "Miles per Hour");
-    label = XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
+    XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
     tacho = XtCreateManagedWidget("meter",
