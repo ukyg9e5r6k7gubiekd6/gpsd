@@ -17,9 +17,11 @@
 
 void gpsd_set_speed(struct termios *ttyctl, int device_speed)
 {
-    if (device_speed < 200)
-      device_speed *= 1000;
-    if (device_speed < 2400)
+    if (device_speed < 300)
+	device_speed = 0;
+    else if (device_speed < 1200)
+      device_speed =  B300;
+    else if (device_speed < 2400)
       device_speed =  B1200;
     else if (device_speed < 4800)
       device_speed =  B2400;
@@ -39,9 +41,10 @@ void gpsd_set_speed(struct termios *ttyctl, int device_speed)
 int gpsd_get_speed(struct termios* ttyctl)
 {
     int code = cfgetospeed(ttyctl);
-    if (code < 2000)
-	return(code/1000);
     switch (code) {
+    case B0:     return(0);
+    case B300:   return(300);
+    case B1200:  return(1200);
     case B2400:  return(2400);
     case B4800:  return(4800);
     case B9600:  return(9600);

@@ -359,8 +359,8 @@ static int handle_request(int fd, char *buf, int buflen)
 	    break;
 
 	case 'B':		/* change baud rate (SiRF only) */
-	    if (!isspace(*p)) {
-		i = atoi(p++);
+	    if (*p != '=' && *p != '\r' && *p != '\n') {
+		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		sirf_mode(session, 0, i);
 	    }
