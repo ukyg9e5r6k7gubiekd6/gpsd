@@ -3,7 +3,8 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 ** Finish and test the control-socket implementation
 
-gpsfake needs to set the socket location to something reasonable.
+1) gpsfake needs to set the socket location to something reasonable.
+2) gpsd.hotplug needs to send remove messages
 
 ** In the SiRF driver, get leap seconds from almanac data
 

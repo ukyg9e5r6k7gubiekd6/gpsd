@@ -255,14 +255,20 @@ static int throttled_write(int cfd, char *buf, int len)
     return status;
 }
 
-static void notify_watchers(struct gps_device_t *device, char *sentence)
+static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 /* notify all clients watching a given device of an event */
 {
     int cfd;
+    va_list ap;
+    char buf[BUFSIZ];
+
+    va_start(ap, sentence) ;
+    vsnprintf(buf, sizeof(buf), sentence, ap);
+    va_end(ap);
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	if (subscribers[cfd].watcher && subscribers[cfd].channel->device == device)
-	    throttled_write(cfd, sentence, strlen(sentence));
+	    throttled_write(cfd, buf, strlen(buf));
 }
 
 static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
@@ -419,11 +425,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'K':
 	    strcpy(phrase, ",K=");
-	    for (i = 0; i < MAXDEVICES; i++) 
-		if (channels[i].device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
+	    for (i = 0; i < MAXDEVICES; i++) {
+		device = channels[i].device;
+		if (device && strlen(phrase)+strlen(device->gpsd_device)+1 < sizeof(phrase)) {
 		    strcat(phrase, device->gpsd_device);
 		    strcat(phrase, " ");
 		}
+	    }
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
@@ -670,7 +678,7 @@ static void handle_control(int sfd, char *buf)
 	free(stash);
     } else if (buf[0] == '+') {
 	p = getline(buf+1, &stash);
-	if (!find_device(stash))
+	if (find_device(stash))
 	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
 	else {
 	    gpsd_report(1,"<= control(%d): adding %s \n", sfd, stash);
@@ -879,7 +887,7 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 
 		if (read(cfd, buf, sizeof(buf)-1) > 0) {
-		    gpsd_report(1, "<= (control %d): %s\n", cfd, buf);
+		    gpsd_report(1, "<= control(%d): %s\n", cfd, buf);
 		    handle_control(cfd, buf);
 		}
 	    }
@@ -895,7 +903,7 @@ int main(int argc, char *argv[])
 		gpsd_deactivate(device);
 		if (gpsd_activate(device) >= 0) {
 		    FD_SET(device->gpsdata.gps_fd, &all_fds);
-		    notify_watchers(channel->device, "GPSD,X=1\r\n");
+		    notify_watchers(channel->device, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
 
@@ -943,7 +951,7 @@ int main(int argc, char *argv[])
 		    gpsd_deactivate(device);
 		    if (gpsd_activate(device) >= 0) {
 			FD_SET(device->gpsdata.gps_fd, &all_fds);
-			notify_watchers(device, "GPSD,X=1\r\n");
+			notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
 		    }
 		}
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Hotplug script for gpsd by Eric S. Raymond, March 2005
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
-import os, syslog, glob, socket
+import sys, os, syslog, glob, socket
 
 def gpsd_control_connect():
     "Acquire a connection to the GPSD control socket."
@@ -52,18 +52,24 @@ def wake_up_gpsd(devpath):
         connect.close()
         return
 
-syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
-syslog.syslog("gpsdplug begins with action: %s" % os.getenv("ACTION"))
-devpath = os.getenv("DEVPATH")
-if not devpath:
-    syslog.syslog("No DEVPATH")
-else:
-    # First, discover the device
-    #syslog.syslog("DEVPATH = %s" % devpath)
-    wake_up_gpsd(devpath)
+def hotplug():
+    syslog.openlog('gpsdplug', 0, syslog.LOG_DAEMON)
+    syslog.syslog("gpsdplug begins with action: %s" % os.getenv("ACTION"))
+    devpath = os.getenv("DEVPATH")
+    if not devpath:
+        syslog.syslog("No DEVPATH")
+    else:
+        # First, discover the device
+        #syslog.syslog("DEVPATH = %s" % devpath)
+        wake_up_gpsd(devpath)
 
-syslog.syslog("gpsdplug ends")
-syslog.closelog()
+    syslog.syslog("gpsdplug ends")
+    syslog.closelog()
 
-
-
+if __name__ == '__main__':
+    if len(sys.argv) == 1:	# Called as hotplug script
+        hotplug()
+    else:			# Called by hand for testing
+        fp = gpsd_control_connect()
+        fp.write(sys.argv[1])
+        fp.close()
