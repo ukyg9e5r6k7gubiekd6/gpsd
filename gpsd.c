@@ -58,6 +58,7 @@ static char *default_device_name = "/dev/gps";
 static int in_background = 0;
 static fd_set afds;
 static fd_set nmea_fds;
+static fd_set watcher_fds;
 static int reopen;
 
 static void onsig(int sig)
@@ -173,22 +174,13 @@ static int validate(void)
     return 1;
 }
 
-static int handle_request(int fd)
+static int handle_request(int fd, char *buf, int buflen)
 {
-    char buf[BUFSIZE];
     char reply[BUFSIZE];
     char *p;
-    int cc, sc, i;
+    int sc, i;
     time_t cur_time;
 
-    cc = read(fd, buf, sizeof(buf) - 1);
-    if (cc < 0)
-	return 0;
-
-    buf[cc] = '\0';
-
-    if (session.debug >= 2)
-	gpscli_report(1, "<= client: %s", buf);
     cur_time = time(NULL);
 
 #define STALE_COMPLAINT(l, f) gpscli_report(1, l " data is stale: %ld + %d >= %ld\n", session.gNMEAdata.f.last_refresh, session.gNMEAdata.f.time_to_live, cur_time)
@@ -294,6 +286,18 @@ static int handle_request(int fd)
 	    else if (session.debug > 1)
 		STALE_COMPLAINT("Speed", altitude_stamp);
 	    break;
+	case 'W':
+	case 'w':
+	    if (FD_ISSET(fd, &watcher_fds)) {
+		FD_CLR(fd, &watcher_fds);
+		sprintf(reply + strlen(reply),
+			",W=0");
+	    } else {
+		FD_SET(fd, &watcher_fds);
+		sprintf(reply + strlen(reply),
+			",W=1");
+	    }
+	    break;
 #if 0	/* we're trying to discourage raw mode */
         case 'X':
         case 'x':
@@ -325,19 +329,19 @@ static int handle_request(int fd)
 	    sc = 0;
 	    if (session.gNMEAdata.cmask & C_SAT)
 	    {
-		for (i = 0; i < MAXSATS; i++)
+		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    }
 	    else if (session.gNMEAdata.cmask & C_ZCH)
 	    {
-		for (i = 0; i < MAXSATS; i++)
+		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.Zs[i])
 			sc++;
 	    }
 	    sprintf(reply + strlen(reply),
 		    ",Z=%d ", sc);
-	    for (i = 0; i < MAXSATS; i++)
+	    for (i = 0; i < MAXCHANNELS; i++)
 		if (session.gNMEAdata.cmask & C_SAT)
 		{
 		    if (session.gNMEAdata.PRN[i])
@@ -363,24 +367,54 @@ static int handle_request(int fd)
 
     if (session.debug >= 2)
 	gpscli_report(1, "=> client: %s", reply);
-    if (cc && write(fd, reply, strlen(reply) + 1) < 0)
+    if (buflen && write(fd, reply, strlen(reply) + 1) < 0)
 	return 0;
-
-    return cc;
+    else
+	return 1;
 }
 
-static void raw_hook(char *buf)
-/* copy raw NMEA sentences from GPS */
+static void raw_hook(char *sentence)
+/* hook to be executed on each incoming sentence */
 {
     int fd;
 
     for (fd = 0; fd < getdtablesize(); fd++) {
+	/* copy raw NMEA sentences from GPS */
 	if (FD_ISSET(fd, &nmea_fds)) {
-	    gpscli_report(1, "=> client: %s", buf);
-	    if (write(fd, buf, strlen(buf)) < 0) {
+	    gpscli_report(1, "=> client: %s", sentence);
+	    if (write(fd, sentence, strlen(sentence)) < 0) {
 		gpscli_report(1, "Raw write %s", strerror(errno));
 		FD_CLR(fd, &afds);
 		FD_CLR(fd, &nmea_fds);
+	    }
+	}
+	if (FD_ISSET(fd, &watcher_fds)) {
+	    /* some listeners may be in push mode */
+	    int ok = 1;
+
+#define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
+	    if (strncmp(GPRMC, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "");
+	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "sa");	
+	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "p");
+	    } else if (strncmp(PMGNST, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "sm");
+	    } else if (strncmp(GPVTG, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "v");
+	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "qm");
+	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
+		ok = PUBLISH(fd, "y");
+	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
+		ok = PUBLISH(fd, "z");
+	    }
+#undef PUBLISH
+	    if (!ok) {
+		gpscli_report(1, "Watcher write %s", strerror(errno));
+		FD_CLR(fd, &afds);
+		FD_CLR(fd, &watcher_fds);
 	    }
 	}
     }
@@ -481,6 +515,7 @@ int main(int argc, char *argv[])
 
     FD_ZERO(&afds);
     FD_ZERO(&nmea_fds);
+    FD_ZERO(&watcher_fds);
     FD_SET(msock, &afds);
     nfds = getdtablesize();
 
@@ -539,12 +574,23 @@ int main(int argc, char *argv[])
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
 	    if (FD_ISSET(fd, &rfds)) {
+		char buf[BUFSIZE];
+		int buflen;
+
 		if (session.fdin == -1) {
 		    if (gps_activate(&session) < 0)
 			gpscli_errexit("exiting - open of GPS failed");
 		    FD_SET(session.fdin, &afds);
 		}
-		if (handle_request(fd) == 0) {
+		buflen = read(fd, buf, sizeof(buf) - 1);
+		if (buflen < 0) {
+		    (void) close(fd);
+		    FD_CLR(fd, &afds);
+		}
+		buf[buflen] = '\0';
+		if (session.debug >= 2)
+		    gpscli_report(1, "<= client: %s", buf);
+		if (handle_request(fd, buf, buflen) == 0) {
 		    (void) close(fd);
 		    FD_CLR(fd, &afds);
 		}
