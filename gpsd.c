@@ -742,7 +742,11 @@ int main(int argc, char *argv[])
 	for (fd = 0; fd < getdtablesize(); fd++) {
 	    if (fd == msock || fd == session.fdin)
 		continue;
-	    if (FD_ISSET(fd, &rfds)) {
+	    /*
+	     * GPS must be opened if commands are waiting or any client is
+	     * streaming (raw or watcher mode).
+	     */
+	    if (FD_ISSET(fd, &rfds) || FD_ISSET(fd, &nmea_fds) || FD_ISSET(fd, &watcher_fds)) {
 		char buf[BUFSIZE];
 		int buflen;
 
@@ -755,16 +759,18 @@ int main(int argc, char *argv[])
 		    }
 		}
 
-		buflen = read(fd, buf, sizeof(buf) - 1);
-		if (buflen <= 0) {
-		    (void) close(fd);
-		    FD_CLR(fd, &all_fds);
-		}
-		buf[buflen] = '\0';
-		gpscli_report(1, "<= client: %s", buf);
-		if (handle_request(fd, buf, buflen) < 0) {
-		    (void) close(fd);
-		    FD_CLR(fd, &all_fds);
+		if (FD_ISSET(fd, &rfds)) {
+		    buflen = read(fd, buf, sizeof(buf) - 1);
+		    if (buflen <= 0) {
+			(void) close(fd);
+			FD_CLR(fd, &all_fds);
+		    }
+		    buf[buflen] = '\0';
+		    gpscli_report(1, "<= client: %s", buf);
+		    if (handle_request(fd, buf, buflen) < 0) {
+			(void) close(fd);
+			FD_CLR(fd, &all_fds);
+		    }
 		}
 	    }
 	    if (fd != session.fdin && fd != msock && FD_ISSET(fd, &all_fds)) {
