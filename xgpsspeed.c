@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <getopt.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
 #include <X11/Xaw/Label.h>
@@ -13,6 +12,9 @@
 #include <Tachometer.h>
 
 #include "xgpsspeed.icon"
+#ifdef HAVE_GETOPT
+#include <getopt.h>
+#endif
 #include "config.h"
 #include "gps.h"
 
@@ -20,7 +22,7 @@ static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
 {"-needlecolor","*needleColor",         XrmoptionSepArg,        NULL},
-{"--units",     "*units",               XrmoptionSepArg,        NULL},
+{"--speedunits","*units",               XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
 
