@@ -194,14 +194,14 @@ static void processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    if (count > 9) {
-	merge_ddmmyy(field[9], out);
-	merge_hhmmss(field[1], out);
-#ifdef PROFILING
-	out->gps_time = iso8661_to_unix(out->utc);
-#endif /* PROFILING */
-    }
     if (!strcmp(field[2], "A")) {
+	if (count > 9) {
+	    merge_ddmmyy(field[9], out);
+	    merge_hhmmss(field[1], out);
+    #ifdef PROFILING
+	    out->gps_time = iso8661_to_unix(out->utc);
+    #endif /* PROFILING */
+	}
 	do_lat_lon(&field[3], out);
 	out->speed_stamp.changed = update_field_f(field[7], &out->speed);
 	REFRESH(out->speed_stamp);
@@ -258,14 +258,14 @@ static void processGPGLL(int count, char *field[], struct gps_data_t *out)
      */
     char *status = field[7];
 
-    fake_mmddyyyy(out);
-    merge_hhmmss(field[5], out);
 #ifdef PROFILING
     out->gps_time = iso8661_to_unix(out->utc);
 #endif /* PROFILING */
     if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
+	fake_mmddyyyy(out);
+	merge_hhmmss(field[5], out);
 	do_lat_lon(&field[1], out);
 	if (count >= 8 && *status == 'D')
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
@@ -330,8 +330,6 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    fake_mmddyyyy(out);
-    merge_hhmmss(field[1], out);
 #ifdef PROFILING
     out->gps_time = iso8661_to_unix(out->utc);
 #endif /* PROFILING */
@@ -341,6 +339,8 @@ static void processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     if (out->status > STATUS_NO_FIX) {
 	char	*altitude;
 
+	fake_mmddyyyy(out);
+	merge_hhmmss(field[1], out);
 	do_lat_lon(&field[2], out);
         out->satellites_used = atoi(field[7]);
 	altitude = field[9];
