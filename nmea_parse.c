@@ -407,74 +407,6 @@ static void processGPGSV(int count, char *field[], struct gps_data_t *out)
     }
 }
 
-/* Based on code from roadmap NMEA parsing code. */
-static void processPGRMM (int count, char *field[],
-			  struct gps_data_t *out UNUSED)
-{
-    struct {
-        char  datum[256];
-    } pgrmm;
-
-    if (count <= 1) {
-        return;
-    }
-
-    strncpy (pgrmm.datum, field[1], sizeof(pgrmm.datum));
-}
-
-
-/* Based on code from roadmap NMEA parsing code. */
-static int decode_numeric (char *value, int unit)
-{
-    int result;
-
-    if (strchr (value, '.') != NULL) {
-       result = (int) (atof(value) * unit);
-    } else {
-       result = atoi (value) * unit;
-    }
-    return result;
-}
-
-
-/* Based on code from roadmap NMEA parsing code. */
-static char *pgrme_unit (const char *original)
-{
-    if (strcasecmp (original, "M") == 0) {
-        return "cm";
-    }
-
-    gpsd_report(1, "unknown distance unit '%s'", original);
-    return "??";
-}
-
-/* Based on code from roadmap NMEA parsing code. */
-static void processPGRME (int count, char *field[],
-			  struct gps_data_t *out UNUSED)
-{
-    struct {
-       int   horizontal;
-       char  horizontal_unit[4];
-       int   vertical;
-       char  vertical_unit[4];
-       int   three_dimensions;
-       char  three_dimensions_unit[4];
-    } pgrme;
-    
-    if (count <= 6) {
-       return;
-    }
-
-    pgrme.horizontal = decode_numeric (field[1], 100);
-    strcpy (pgrme.horizontal_unit, pgrme_unit (field[2]));
-
-    pgrme.vertical = decode_numeric (field[3], 100);
-    strcpy (pgrme.vertical_unit, pgrme_unit (field[4]));
-
-    pgrme.three_dimensions = decode_numeric (field[5], 100);
-    strcpy (pgrme.three_dimensions_unit, pgrme_unit (field[6]));
-}
-
 static void processIgnored (int count UNUSED, char *field[] UNUSED,
 			    struct gps_data_t *out UNUSED)
 {
@@ -521,12 +453,7 @@ static struct {
     NMEA_PHRASE("GPVTG", processGPVTG), /* Not supported by roadmap */
     NMEA_PHRASE("GPGSA", processGPGSA),
     NMEA_PHRASE("GPGSV", processGPGSV),
-
     NMEA_PHRASE("PRWIZCH", processIgnored),
-
-    /* Garmin extensions: */
-    NMEA_PHRASE("PGRME", processPGRME),
-    NMEA_PHRASE("PGRMM", processPGRMM),
 };
 
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
