@@ -255,7 +255,7 @@ Acceleration 4 G, max.
 
 <p>And now ESR tells a hardware-repair war story:</p>
 
-<p>The BU-303 has a design flaw.  It has an internal lithium battery,
+<p>The BU-303 has a design flaw.  It has an internal SuperCap,
 probably used to drive static RAM holding fix information when the
 unit is unplugged or powered down.  The only thing holding the battery
 om the PCB is the solder on its leads.</p>
@@ -265,7 +265,9 @@ to fall on the floor) can stress and eventually break the solder bond.
 If you start hearing a rattling noise from inside the BU-303 case,
 this has probably happened.  The least-bad effect this can have is
 that the unit will start taking longer to acquire a first fix, because 
-every time you plug it in will effectively be a cold start.</p>
+every time you plug it in will effectively be a cold start.  If the loose
+SuperCap's contacts land in the right places, they can destroy or
+subtly derange the unit.</p>
 
 <p>After the battery has been loose for a while, the USB transciever 
 in the device may go catatonic.  You will know this has happened if
@@ -326,6 +328,8 @@ diffuser!  If you still have the glue handy, glue it in too, just in
 case.</li>
 </ol>
 
-<p>If you are lucky, your BU-303 now works again.</p>
+<p>If you are lucky, your BU-303 now works again.  But you need to be
+luckier than me; I got my USB subsystem to see it again, but it still
+doesn't send bits.</p>
 
 </body></html>
