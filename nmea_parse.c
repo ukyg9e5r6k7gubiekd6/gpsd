@@ -469,51 +469,6 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     }
 }
 
-static void processPMGNST(char *sentence, struct gps_data_t *out)
-/* Proprietary MaGellan STatus */
-{
-    /*
-      Only supported on Magellan GPSes.
-
-      $PMGNST,02.12,3,T,534,05.0,+03327,00*40 
-
-      where:
-	  ST      status information
-	  02.12   Version number?
-	  3       2D or 3D
-	  T       True if we have a fix False otherwise
-	  534     numbers change - unknown
-	  05.0    time left on the gps battery in hours
-	  +03327  numbers change (freq. compensation?)
-	  00      PRN number receiving current focus
-	  *40    nmea_checksum
-     */
-
-   int tmp1, newstatus, newmode;
-   char foo;
--
-   /* using this for mode and status seems a bit desperate */
-   /* only use it if we don't have better info */
-   sscanf(field(sentence, 2), "%d", &tmp1);	
-   sscanf(field(sentence, 3), "%c", &foo);	
-   
-   if (!SEEN(out->status_stamp)) {
-	if (foo == 'T') {
-	    newstatus = STATUS_FIX;
-	    newmode = tmp1;
-	}
-	else {
-	    newstatus = STATUS_NO_FIX;
-	    newmode = MODE_NO_FIX;
-	}
-	out->status_stamp.changed = (newstatus != out->status);
-	REFRESH(out->status_stamp);
-	out->mode_stamp.changed = (newmode != out->mode);
-	REFRESH(out->mode_stamp);
-	gpsd_report(3, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
-    }
-}
-
 static short nmea_checksum(char *sentence)
 /* is the checksum on the specified sentence good? */
 {
@@ -555,8 +510,6 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    processGPGGA(sentence, outdata);
 	} else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
 	    processGPGLL(sentence, outdata);
-	} else if (strncmp(PMGNST, sentence, sizeof(PMGNST)-1) == 0) {
-	    processPMGNST(sentence, outdata);
 	} else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
 	    processGPVTG(sentence, outdata);
 	} else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
