@@ -97,14 +97,14 @@ class spaceplot:
             fmt += 'set key title "%s"\n' % time.asctime()
             fmt += 'set size ratio -1\n'
             fmt += 'set style line 2 pt 1\n'
-            fmt += 'set style line 3 pt 2 # Looks good on X11\n'
+            fmt += 'set style line 3 pt 2\n'
             fmt += 'set xlabel "Meters east from %s"\n' % lonstring
             fmt += 'set ylabel "Meters north from %s"\n' % latstring
+            fmt += 'set border 15\n'
             if alt_avg != gps.ALTITUDE_NOT_VALID:
                 fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
-            fmt += 'set border 15\n'
-            fmt += 'set ytics nomirror\n'
-            fmt += 'set y2tics\n'
+                fmt += 'set ytics nomirror\n'
+                fmt += 'set y2tics\n'
             fmt += 'cep=%f\n' % d((0,0), recentered[len(self.fixes)/2])
             fmt += 'set parametric\n'
             fmt += 'set trange [0:2*pi]\n'
