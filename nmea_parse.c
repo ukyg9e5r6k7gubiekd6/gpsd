@@ -198,24 +198,20 @@ static void processGPGLL(char *sentence, struct gps_data_t *out)
      * This code copes gracefully.
      */
     char *status = field(sentence, 7);
+    int newstatus = out->status;
 
     /* we could extract the time, but the gpsd timestamp will be good enough */
-
-    if (status[0] != 'N')
-    {
-	int newstatus = out->status;
-
-	do_lat_lon(sentence, 1, out);
-	if (status[0] == 'A')
-	    newstatus = STATUS_NO_FIX;	/* autonomous */
-	if (status[0] == 'D')
-	    newstatus = STATUS_DGPS_FIX;	/* differential */
-	out->status_stamp.changed = (out->status != newstatus);
-	out->status = newstatus;
-	REFRESH(out->status_stamp);
-	gpscli_report(3, "GPGLL sets status %d\n", out->status);
-	/* unclear what the right thing to do with other status values is */
-    }
+    do_lat_lon(sentence, 1, out);
+    if (status[0] == 'N')
+	newstatus = STATUS_NO_FIX;
+    else if (status[0] == 'D')
+	newstatus = STATUS_DGPS_FIX;	/* differential */
+    else
+	newstatus = STATUS_FIX;
+    out->status_stamp.changed = (out->status != newstatus);
+    out->status = newstatus;
+    REFRESH(out->status_stamp);
+    gpscli_report(3, "GPGLL sets status %d\n", out->status);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -363,6 +359,10 @@ static void processGPGSA(char *sentence, struct gps_data_t *out)
 
 int nmea_sane_satellites(struct gps_data_t *out)
 {
+    /* data may be incomplete */
+    if (out->part < out->await)
+	return 0;
+
     /*
      * This sanity check catches an odd behavior of the BU-303, and thus
      * possibly of other SiRF-II based GPSes.  When they can't see any
@@ -420,7 +420,9 @@ static void processGPGSV(char *sentence, struct gps_data_t *out)
     }
 
     /* not valid data until we've seen a complete set of parts */
-    if (out->part == out->await)
+    if (out->part < out->await)
+	gpscli_report(3, "Partial satellite data (%d of %d).\n", out->part, out->await);
+    else
     {
 	/* trim off PRNs with spurious data attached */
 	while (out->satellites
@@ -542,22 +544,22 @@ void nmea_add_checksum(char *sentence)
 
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
 {
-    if (nmea_checksum(sentence)) {
-	if (strncmp(GPRMC, sentence, 5) == 0) {
+    if (nmea_checksum(sentence+1)) {
+	if (strncmp(GPRMC, sentence, sizeof(GPRMC)-1) == 0) {
 	    processGPRMC(sentence, outdata);
-	} else if (strncmp(GPGGA, sentence, 5) == 0) {
+	} else if (strncmp(GPGGA, sentence, sizeof(GPGGA)-1) == 0) {
 	    processGPGGA(sentence, outdata);
-	} else if (strncmp(GPGLL, sentence, 5) == 0) {
+	} else if (strncmp(GPGLL, sentence, sizeof(GPGLL)-1) == 0) {
 	    processGPGLL(sentence, outdata);
-	} else if (strncmp(PMGNST, sentence, 5) == 0) {
+	} else if (strncmp(PMGNST, sentence, sizeof(PMGNST)-1) == 0) {
 	    processPMGNST(sentence, outdata);
-	} else if (strncmp(GPVTG, sentence, 5) == 0) {
+	} else if (strncmp(GPVTG, sentence, sizeof(GPVTG)-1) == 0) {
 	    processGPVTG(sentence, outdata);
-	} else if (strncmp(GPGSA, sentence, 5) == 0) {
+	} else if (strncmp(GPGSA, sentence, sizeof(GPGSA)-1) == 0) {
 	    processGPGSA(sentence, outdata);
-	} else if (strncmp(GPGSV, sentence, 5) == 0) {
+	} else if (strncmp(GPGSV, sentence, sizeof(GPGSV)-1) == 0) {
 	    processGPGSV(sentence, outdata);
-	} else if (strncmp(PRWIZCH, sentence, 7) == 0) {
+	} else if (strncmp(PRWIZCH, sentence, sizeof(PRWIZCH)-1) == 0) {
 #ifdef PROCESS_PRWIZCH
 	    processPRWIZCH(sentence, outdata);
 #else

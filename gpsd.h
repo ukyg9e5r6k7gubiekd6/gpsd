@@ -47,14 +47,14 @@ struct gps_session_t
 #define METERS_TO_MILES	0.00062137119
 #define KNOTS_TO_MPH	1.1507794
 
-#define GPGLL "GPGLL"
-#define GPVTG "GPVTG"
-#define GPGGA "GPGGA"
-#define GPGSA "GPGSA"
-#define GPGSV "GPGSV"
-#define GPRMC "GPRMC"
-#define PRWIZCH "PRWIZCH"
-#define PMGNST "PMGNST"
+#define GPGLL "$GPGLL"
+#define GPVTG "$GPVTG"
+#define GPGGA "$GPGGA"
+#define GPGSA "$GPGSA"
+#define GPGSV "$GPGSV"
+#define GPRMC "$GPRMC"
+#define PRWIZCH "$PRWIZCH"
+#define PMGNST "$PMGNST"
 
 /* here are the available GPS drivers */
 extern struct gps_type_t nmea;

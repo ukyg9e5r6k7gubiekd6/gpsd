@@ -23,7 +23,7 @@ void gpsd_NMEA_handle_message(struct gps_session_t *session, char *sentence)
     gpscli_report(2, "<= GPS: %s\n", sentence);
     if (*sentence == '$')
     {
-	if (nmea_parse(sentence + 1, &session->gNMEAdata) < 0)
+	if (nmea_parse(sentence, &session->gNMEAdata) < 0)
 	    /*
 	     * Some of the stuff that comes out of supposedly NMEA-compliant
 	     * GPses is a doozy.  For example, my BU-303 occasionally and
