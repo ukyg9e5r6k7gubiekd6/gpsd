@@ -289,7 +289,7 @@ static void update_panel(char *message)
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
 }
 
-static char *get_resource(char *name, char *default_value)
+static char *get_resource(Widget w, char *name, char *default_value)
 {
   XtResource xtr;
   char *value = NULL;
@@ -301,7 +301,7 @@ static char *get_resource(char *name, char *default_value)
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
-  XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
+  XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
   if (value) return value;
   return default_value;
 }
@@ -341,13 +341,13 @@ int main(int argc, char *argv[])
 			       options, XtNumber(options), 
 			       &argc,argv, fallback_resources,NULL);
 
-    su = get_resource("speedunits", "mph");
+    su = get_resource(toplevel, "speedunits", "mph");
     for (speedunits = speedtable; 
 	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
 	 speedunits++)
 	if (strcmp(speedunits->legend, su) == 0)
 	    break;
-    au = get_resource("altunits",   "feet");
+    au = get_resource(toplevel, "altunits",   "feet");
     for (altunits = alttable; 
 	 altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
 	 altunits++)
