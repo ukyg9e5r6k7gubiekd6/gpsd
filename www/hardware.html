@@ -156,6 +156,26 @@ Takes optional latitude/longitude initialization.</td>
 </tr>
 </table>
 
+<p>We want to extend this table.  To report on a GPS, please
+tell us the following:</p>
+
+<ol>
+<li>The GPS model name</li>
+<li>Whether or not it works</li>
+<li>If possible, an URL to a technical reference on it</li>
+<li>The GPS and (if applicable) USB-to-serial chip it uses</li>
+<li>The interface type (RS232, USB, CF)</li>
+<li>The vendor</li>
+<li>The gpsd driver type (almost always 'n')</li>
+<li>Version of gpsd you tested with</li>
+<li>NMEA version it emits, or '?' if the documentation doesn't say</li>
+<li>A list of NMEA sentences it emits</li>
+<li>Notes on the device</li>
+</ol>
+
+<p>You should be able to determine many of these things by running
+gpsprobe against the device and looking at the output.</p>
+
 <h2>Notes on chipset support:</h2>
 
 <p>SiRF-II: A <a
