@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <math.h>
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/ScrolledW.h>
@@ -36,7 +37,7 @@ extern void redraw();
 static Widget lxbApp, data_panel, satellite_list, satellite_diagram, status;
 static Widget rowColumn_10, rowColumn_11, rowColumn_12, rowColumn_13;
 static Widget rowColumn_14, rowColumn_15, rowColumn_16, rowColumn_17;
-static Widget rowColumn_18, pushButton_11;
+static Widget rowColumn_18, quitbutton;
 static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 
@@ -204,9 +205,9 @@ static void build_gui(Widget lxbApp)
     text_7 = XtCreateManagedWidget("text_7", xmTextFieldWidgetClass,
 				   rowColumn_17, args, 6);
 
-    pushButton_11 = XtCreateManagedWidget("label",
+    quitbutton = XtCreateManagedWidget("label",
 			 xmPushButtonWidgetClass, rowColumn_18, args, 0);
-    XtAddCallback(pushButton_11, XmNactivateCallback, quit_cb, NULL);
+    XtAddCallback(quitbutton, XmNactivateCallback, quit_cb, NULL);
 
     status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, data_panel,
 				     XmNcursorPositionVisible, False,
@@ -236,7 +237,7 @@ static void build_gui(Widget lxbApp)
 
 static struct gps_data_t *gpsdata;
 static int timer;	/* time since last state change in seconds*/
-static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D= 3 */
+static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 
 static void handle_input(XtPointer client_data, int *source, XtInputId * id)
 {
@@ -262,10 +263,8 @@ static void update_panel(char *message)
 	    if (i < gpsdata->satellites) {
 		sprintf(s, " %2d    %02d    %03d    %02d      %c", 
 			gpsdata->PRN[i],
-			gpsdata->elevation[i],
-			gpsdata->azimuth[i], 
-			gpsdata->ss[i],
-			gpsdata->used[i] ? 'Y' : 'N'
+			gpsdata->elevation[i], gpsdata->azimuth[i], 
+			gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N'
 		    );
 	    } else
 		sprintf(s, "                  ");
@@ -277,15 +276,15 @@ static void update_panel(char *message)
     }
     /* here are the value fields */
     XmTextFieldSetString(text_1, gpsdata->utc);
-    sprintf(s, "%f", gpsdata->latitude);
+    sprintf(s, "%f %c", fabsf(gpsdata->latitude), (gpsdata->latitude < 0) ? 'S' : 'N');
     XmTextFieldSetString(text_2, s);
-    sprintf(s, "%f", gpsdata->longitude);
+    sprintf(s, "%f %c", fabsf(gpsdata->longitude), (gpsdata->longitude < 0) ? 'W' : 'E');
     XmTextFieldSetString(text_3, s);
-    sprintf(s, "%f", gpsdata->altitude);
+    sprintf(s, "%f meters", gpsdata->altitude);
     XmTextFieldSetString(text_4, s);
-    sprintf(s, "%f", gpsdata->speed);
+    sprintf(s, "%f knots", gpsdata->speed);
     XmTextFieldSetString(text_5, s);
-    sprintf(s, "%f", gpsdata->track);
+    sprintf(s, "%f degrees", gpsdata->track);
     XmTextFieldSetString(text_6, s);
 
     if (!gpsdata->online) {
@@ -343,8 +342,7 @@ int main(int argc, char *argv[])
 {
     XtAppContext app;
     int option;
-    char *colon, *server = NULL;
-    char *port = DEFAULT_GPSD_PORT;
+    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
 
     while ((option = getopt(argc, argv, "h")) != -1) {
 	switch (option) {
