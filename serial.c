@@ -39,33 +39,35 @@ static int rates[] = {4800, 9600, 19200, 38400, 57600};
 int gpsd_set_speed(struct gps_session_t *session, int speed)
 {
     char	buf[20*NMEA_MAX+1];
-    int		n;
+    int		n, rate;
 
     if (speed < 300)
-	speed = 0;
+	rate = 0;
     else if (speed < 1200)
-      speed =  B300;
+      rate =  B300;
     else if (speed < 2400)
-      speed =  B1200;
+      rate =  B1200;
     else if (speed < 4800)
-      speed =  B2400;
+      rate =  B2400;
     else if (speed < 9600)
-      speed =  B4800;
+      rate =  B4800;
     else if (speed < 19200)
-      speed =  B9600;
+      rate =  B9600;
     else if (speed < 38400)
-      speed =  B19200;
+      rate =  B19200;
     else if (speed < 57600)
-      speed =  B38400;
+      rate =  B38400;
     else
-      speed =  B57600;
+      rate =  B57600;
 
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
-    cfsetispeed(&session->ttyset, (speed_t)speed);
-    cfsetospeed(&session->ttyset, (speed_t)speed);
+    cfsetispeed(&session->ttyset, (speed_t)rate);
+    cfsetospeed(&session->ttyset, (speed_t)rate);
     if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	return 0;
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
+
+    usleep(300000);	/* allow the UART time to settle */
 
     /*
      * Magic -- relies on the fact that the UARTS on GPSes never seem to take 
@@ -74,8 +76,11 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
     if (session->device_type->validate_buffer) {
 	n = read(session->gNMEAdata.gps_fd, buf, sizeof(buf)-1);
 	return session->device_type->validate_buffer(buf, n);
-    } else
+    } else {
+	/* this has the effect of disabling baud hunting on future connects */
+	session->gNMEAdata.baudrate = speed;
 	return 1;
+    }
 }
 
 int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
@@ -105,7 +110,6 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
 			device_speed, stopbits);
 	    if (gpsd_set_speed(session, device_speed)) {
-		session->gNMEAdata.baudrate = device_speed;
 		return session->gNMEAdata.gps_fd;
 	    }
 	} else
@@ -113,7 +117,6 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n", 
 			    *ip, stopbits);
 		if (gpsd_set_speed(session, *ip)) {
-		    session->gNMEAdata.baudrate = *ip;
 		    return session->gNMEAdata.gps_fd;
 		}
 	    }
