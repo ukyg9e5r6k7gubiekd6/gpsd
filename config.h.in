@@ -3,11 +3,17 @@
 #undef HAVE_XP
 #undef HAVE_XPM
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Motif available */
+#undef HAVE_MOTIF
 
 /* Define to 1 if you have the <path.h> header file. */
 #undef HAVE_PATH_H
@@ -57,8 +63,17 @@
 /* Define to 1 if you have the <X11/xpm.h> header file. */
 #undef HAVE_X11_XPM_H
 
+/* Xp available */
+#undef HAVE_XP
+
+/* Xpm available */
+#undef HAVE_XPM
+
 /* Define to 1 if you have the <xpm.h> header file. */
 #undef HAVE_XPM_H
+
+/* Name of package */
+#undef PACKAGE
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -77,6 +92,9 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Version number of package */
+#undef VERSION
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
