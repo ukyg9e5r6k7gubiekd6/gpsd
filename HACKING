@@ -35,3 +35,7 @@ are active.
 
 That's about all there is to it.
 
+If you're looking for things to hack on, first see the TODO file.
+Then, there is some C code in the contrib/ directory that has some
+potentially useful techniques in it.  Picking a good one to integrate
+into gpsd might be a useful thing.
