@@ -86,7 +86,6 @@ void gps_deactivate(struct gpsd_t *session)
     session->fdin = -1;
     session->fdout = -1;
     gps_close();
-    free(session->gps_device);
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
     gpscli_report(1, "closed GPS\n");
