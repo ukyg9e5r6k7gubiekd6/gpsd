@@ -73,22 +73,22 @@ man_MANS = \
 	gpsfake.1
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
-	$(XMLTO) man gpsd.xml
+	-$(XMLTO) man gpsd.xml
 
 libgps.3: libgps.xml
-	$(XMLTO) man libgps.xml
+	-$(XMLTO) man libgps.xml
 
 libgpsd.3: libgpsd.xml
-	$(XMLTO) man libgpsd.xml
+	-$(XMLTO) man libgpsd.xml
 
 gpsprobe.1: gpsprobe.xml
-	$(XMLTO) man gpsprobe.xml
+	-$(XMLTO) man gpsprobe.xml
 
 gpsprof.1: gpsprof.xml
-	$(XMLTO) man gpsprof.xml
+	-$(XMLTO) man gpsprof.xml
 
 gpsfake.1: gpsfake.xml
-	$(XMLTO) man gpsfake.xml
+	-$(XMLTO) man gpsfake.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
