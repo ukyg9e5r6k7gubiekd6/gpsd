@@ -119,6 +119,7 @@ struct session_t
     struct gps_type_t *device_type;
     struct longlat_t initpos;
     struct OUTDATA gNMEAdata;
+    char *gps_device;	/* where to find the GPS */
     int fdin;		/* input fd from GPS */
     int fdout;		/* output fd to GPS */
     int reopen;		/* does GPS connection need to be reopened? */
@@ -147,6 +148,12 @@ void gps_close();
 int netlib_passiveTCP(char *service, int qlen);
 int netlib_connectTCP(char *host, char *service);
 int netlib_connectsock(char *host, char *service, char *protocol);
+
+/* High-level interface */
+void gps_init(char *device, int timeout, char *dgpsserver, char *dgpsport);
+void gps_activate(void), gps_deactivate(void);
+void gps_poll(void (*raw_hook)(char *buf));
+void gps_force_repoll(void);
 
 /* caller must supply these */
 void gpscli_errexit(char *s);
