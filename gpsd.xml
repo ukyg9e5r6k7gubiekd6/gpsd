@@ -50,10 +50,8 @@ effectively hides the differences among these.</para>
 
 <para>Optionally, <application>gpsd</application> may get
 differential-GPS corrections from a ground station running a RTCM-S104
-server; this will improve user error (UERE) from roughly 8 meters
-to roughly 2 meters, provided you are within 1000 kilometers or so of
-the ground station.  (Actual error will be UERE times a dilution
-factor dependent on current satellite position.)</para>
+server; this will improve user error by roughly a factor of four.
+See <xref linkend='accuracy'/> for discussion.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -429,15 +427,17 @@ string "GPSD" followed by the replies. Examples:</para>
 <para>When clients are active but the GPS is not responding,
 <application>gpsd</application> will spin trying to open the GPS
 device once per second.  Thus, it can be left running in background
-and survive having the GPS repeatedly unplugged and plugged back
-in.</para>
+and survive having a GPS repeatedly unplugged and plugged back
+in.  When it is properly installed along with hotplug notifier
+scripts feeding it F commands, <application>gpsd</application> 
+should require no configuration or user action to find devices.</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
 mode <application>gpsd</application> ships a line of data to the
 client each time the GPS gets either a fix update or a satellite
 picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
 response.  Additionally, watching clients get notifications in the
-form X=0 or X=1 when the online/offline status of the GPS
+form X=0 or X=%f when the online/offline status of the GPS
 changes.</para>
 
 <para>Sending SIGHUP to a running <application>gpsd</application>
@@ -445,6 +445,45 @@ forces it to close the GPS and all client connections.  It will then
 attempt to reconnect to the GPS and resume listening for client
 connections.  This may be useful if your GPS enters a wedged or
 confused state but can be soft-reset by pulling down DTR.</para>
+
+</refsect1>
+<refsect1 id='accuracy'><title>ACCURACY</title> 
+
+<para>The base user error (UERE) of GPSes is 8 meters or less at 66%
+confidence, 15 meters or less at 95% confidence.  Actual horizontal
+error will be UERE times a dilution factor dependent on current
+satellite position.  Altitude determination is more sensitive to
+variability to atmospheric signal lag than latitude/longitude, and is
+also subject to errors in the estimation of local mean sea level; base
+error is 12 meters at 66% confidence, 23 meters at 95% confidence.
+Again, this will be multiplied by a vertical dilution of precision
+(VDOP) dependent on satellite geometry, and VDOP is typically larger
+than HDOP.  Users should <emphasis>not</emphasis> rely on GPS altitude for
+life-critical tasks such as landing an airplane.</para>
+
+<para>These errors are intrinsic to the design and physics of the GPS
+system.  <application>gpsd</application> does its internal
+computations at sufficient accuracy that it will add no measurable
+position error of its own.</para>
+
+<para>DGPS correction will reduce UERE from roughly 8 meters to
+roughly 2 meters, provided you are within 1000 kilometers or so of the
+DGPS ground station.</para>
+
+<para>On a 4800bps connection, the time latency of fixes provided by
+<application>gpsd</application> will be one second or less 95% of the
+time.  Most of this lag is due to the fact that GPSes normally emit
+fixes once per second, thus expected latency is 0.5sec.  On the
+personal-computer hardware available in 2005, computation lag induced
+by <application>gpsd</application> will be negligible, on the order of
+a millisecond.  Nevertheless, latency can introduce significant errors
+for vehicles in motion; at 50km/h (31mi/h) of speed over ground, 1
+second of lag corresponds to 13.8 meters change in position between
+updates.</para>
+
+<para>The driver for SiRF-II binary mode only has leap-second correction
+for its timestamps as of 2005. It will not include any leap-second
+corrections introduced after 1 Jan 2006.</para>
 
 </refsect1>
 <refsect1 id='ntp'><title>USE WITH NTP</title> 
@@ -517,18 +556,6 @@ make and type of receiver.</para>
 </refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 
 
-<para>There is a limitation in the accuracy of
-<application>gpsd</application>-using applications that stems from the
-fact that <application>gpsd</application> waits passively for updates
-from the sensor rather than actively polling for them (which can't be
-done in a device-independent way).  Most GPSes ship updates just once
-per second.  At 50km/h (31mi/h) that's 13.8 meters change in position
-between updates.  This is good enough if you're on foot or in a car
-but not good enough for aviation applications.</para>
-
-<para>The driver for SiRF-II binary mode only has leap-second correction
-for its timestamps as of 2005. It will not include leap-second
-corrections introduced after that year.</para>
 
 <para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
 to the same serial device (possible with an RS422 adapter hooked up to
