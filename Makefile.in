@@ -176,7 +176,7 @@ install:
 	$(INSTALL) -m 755 -o 0 -g 0 gpsd.1 $(MANDIR)/man3/libgpsd.1
 
 clean:
-	rm -f *.o *.a gpsd gps xgpsspeed *.1 *~ config.status
+	rm -f *.o *.a gpsd gps xgpsspeed *~ config.status
 
 dist-clean: clean
 	rm -f config.cache config.log
