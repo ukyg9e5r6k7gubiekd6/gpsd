@@ -145,23 +145,24 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		gpsdata->satellites = i1;
 		if (gpsdata->satellites)
 		{
-		    int j, i3, i4;
+		    int j, i3, i4, i5;
 		    int PRN[MAXCHANNELS];
 		    int elevation[MAXCHANNELS];
 		    int azimuth[MAXCHANNELS];
 		    int ss[MAXCHANNELS];
+		    int used[MAXCHANNELS];
 
 		    for (j = 0; j < gpsdata->satellites; j++) {
-			PRN[j]=elevation[j]=azimuth[j]=ss[j]=0;
+			PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
 		    }
-		    sp = strchr(sp, ' ')+1;
 		    for (j = 0; j < gpsdata->satellites; j++) {
 			sp = strchr(sp, ':') + 1;
-			sscanf(sp, "%d %d %d %d", &i1, &i2, &i3, &i4);
+			sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
 			PRN[j] = i1;
 			elevation[j] = i2;
 			azimuth[j] = i3;
 			ss[j] = i4;
+			used[j] = i5;
 		    }
 		    /*
 		     * This won't catch the case where all values are identical
@@ -171,11 +172,13 @@ static int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			memcmp(gpsdata->PRN, PRN, sizeof(PRN)) ||
 			memcmp(gpsdata->elevation, elevation, sizeof(elevation)) ||
 			memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
-			memcmp(gpsdata->ss, ss, sizeof(ss));
+			memcmp(gpsdata->ss, ss, sizeof(ss)) ||
+			memcmp(gpsdata->used, used, sizeof(used));
 		    memcpy(gpsdata->PRN, PRN, sizeof(PRN));
 		    memcpy(gpsdata->elevation, elevation, sizeof(elevation));
 		    memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
 		    memcpy(gpsdata->ss, ss, sizeof(ss));
+		    memcpy(gpsdata->used, used, sizeof(used));
 		}
 		REFRESH(gpsdata->satellite_stamp);
 		break;
@@ -238,96 +241,73 @@ void data_dump(struct gps_data_t *collect, time_t now)
     {
 	printf("P: lat/lon: %lf %lf", 
 	       collect->latitude, collect->longitude);
-	printf("(lr=%ld, ttl=%d, refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->latlon_stamp.last_refresh,
-	       collect->latlon_stamp.time_to_live,
-	       collect->latlon_stamp.refreshes,
-	       collect->latlon_stamp.changed,
-	       FRESH(collect->latlon_stamp, now));
+	       collect->latlon_stamp.changed);
     }
     if (collect->altitude_stamp.changed)
     {
 	printf("A: altitude: %lf ", collect->altitude);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->altitude_stamp.last_refresh,
-	       collect->altitude_stamp.time_to_live,
-	       collect->altitude_stamp.refreshes,
-	       collect->altitude_stamp.changed,
-	       FRESH(collect->altitude_stamp, now));
+	       collect->altitude_stamp.changed);
     }
     if (collect->speed_stamp.changed)
     {
 	printf("V: speed: %lf ", collect->speed);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->speed_stamp.last_refresh,
-	       collect->speed_stamp.time_to_live,
-	       collect->speed_stamp.refreshes,
-	       collect->speed_stamp.changed,
-	       FRESH(collect->speed_stamp, now));
+	       collect->speed_stamp.changed);
     }
     if (collect->track_stamp.changed)
     {
 	printf("T: track: %lf ", collect->track);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->track_stamp.last_refresh,
-	       collect->track_stamp.time_to_live,
-	       collect->track_stamp.refreshes,
-	       collect->track_stamp.changed,
-	       FRESH(collect->track_stamp, now));
+	       collect->track_stamp.changed);
     }
     if (collect->status_stamp.changed)
     {
 	printf("S: status: %d (%s) ", 
 	       collect->status,status_values[collect->status]);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->status_stamp.last_refresh,
-	       collect->status_stamp.time_to_live,
-	       collect->status_stamp.refreshes,
-	       collect->status_stamp.changed,
-	       FRESH(collect->status_stamp, now));
+	       collect->status_stamp.changed);
     }
     if (collect->mode_stamp.changed)
     {
 	printf("M: mode: %d (%s) ", collect->mode, mode_values[collect->mode]);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)",
+	printf("(lr=%ld, changed=%d)",
 	       collect->mode_stamp.last_refresh,
-	       collect->mode_stamp.time_to_live,
-	       collect->mode_stamp.refreshes,
-	       collect->mode_stamp.changed,
-	       FRESH(collect->mode_stamp, now));
+	       collect->mode_stamp.changed);
     }
     if (collect->fix_quality_stamp.changed)
     {
 	printf("Q: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf ",
 	      collect->satellites_used, 
 	      collect->pdop, collect->hdop, collect->vdop);
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->fix_quality_stamp.last_refresh,
-	       collect->fix_quality_stamp.time_to_live,
-	       collect->fix_quality_stamp.refreshes,
-	       collect->fix_quality_stamp.changed,
-	       FRESH(collect->fix_quality_stamp, now));
+	       collect->fix_quality_stamp.changed);
     }
     if (collect->satellite_stamp.changed)
     {
 	int i;
 
-	printf("satellites in view: %d\n", collect->satellites);
+	printf("Y: satellites in view: %d\n", collect->satellites);
 	for (i = 0; i < collect->satellites; i++) {
-	    printf("    %2.2d: %2.2d %3.3d %3.3d\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i]);
+	    printf("    %2.2d: %2.2d %3.3d %3.3d %c\n", collect->PRN[i], collect->elevation[i], collect->azimuth[i], collect->ss[i], collect->used[i]? 'Y' : 'N');
 	}
-	printf("(lr=%ld, ttl=%d. refreshes=%d, changed=%d, fresh=%d)\n",
+	printf("(lr=%ld, changed=%d)\n",
 	       collect->satellite_stamp.last_refresh,
-	       collect->satellite_stamp.time_to_live,
-	       collect->satellite_stamp.refreshes,
-	       collect->satellite_stamp.changed,
-	       FRESH(collect->satellite_stamp, now));
+	       collect->satellite_stamp.changed);
     }
 }
 
 static void dumpline(char *buf)
 {
     fputs(buf, stdout);
+    putchar('\n');
 }
 
 main(int argc, char *argv[])
@@ -337,7 +317,7 @@ main(int argc, char *argv[])
     char buf[BUFSIZE];
 
     memset(&collect, '\0', sizeof(collect));
-    fd = gps_open(&collect, GPS_TIMEOUT, NULL, 0);
+    fd = gps_open(&collect, NULL, 0);
 
     gps_set_raw_hook(&collect, dumpline);
     if (argc > 1)

@@ -191,7 +191,7 @@ static int handle_request(int fd, char *buf, int buflen)
 {
     char reply[BUFSIZE];
     char *p;
-    int sc, i;
+    int sc, i, j;
     time_t cur_time;
 
     cur_time = time(NULL);
@@ -367,16 +367,26 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (!sc)
 		strcat(reply, ",Y=?");
 	    else {
+		int used = 0;
 		sprintf(reply + strlen(reply),
 			",Y=%d:", sc);
 		if (SEEN(session.gNMEAdata.satellite_stamp))
-		    for (i = 0; i < MAXCHANNELS; i++)
+		    for (i = 0; i < MAXCHANNELS; i++) {
+			for (j = 0; j < MAXCHANNELS; j++)
+			    if (session.gNMEAdata.used[j] == session.gNMEAdata.PRN[i])
+			    {
+				used = 1;
+				break;
+			    }
 			if (session.gNMEAdata.PRN[i])
-			    sprintf(reply + strlen(reply),"%d %d %d %d:", 
+			    sprintf(reply + strlen(reply),
+				    "%d %d %d %d %d:", 
 				    session.gNMEAdata.PRN[i], 
 				    session.gNMEAdata.elevation[i],
 				    session.gNMEAdata.azimuth[i],
-				    session.gNMEAdata.ss[i]);
+				    session.gNMEAdata.ss[i],
+				    used);
+		    }
 		}
 	    break;
 #ifdef PROCESS_PRWIZCH
@@ -730,17 +740,18 @@ int main(int argc, char *argv[])
 	for (fd = 0; fd < getdtablesize(); fd++) {
 	    if (fd == msock || fd == session.fdin)
 		continue;
-	    if (session.fdin == -1) {
-		gpsd_deactivate(&session);
-		if (gpsd_activate(&session) >= 0)
-		{
-		    notify_watchers("GPSD,X=1\r\n");
-		    FD_SET(session.fdin, &all_fds);
-		}
-	    }
 	    if (FD_ISSET(fd, &rfds)) {
 		char buf[BUFSIZE];
 		int buflen;
+
+		if (session.fdin == -1) {
+		    gpsd_deactivate(&session);
+		    if (gpsd_activate(&session) >= 0)
+		    {
+			notify_watchers("GPSD,X=1\r\n");
+			FD_SET(session.fdin, &all_fds);
+		    }
+		}
 
 		buflen = read(fd, buf, sizeof(buf) - 1);
 		if (buflen <= 0) {

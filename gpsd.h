@@ -1,7 +1,6 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
 #define BUFSIZE		4096	/* longer than longest NMEA sentence (82) */
-#define GPS_TIMEOUT	5	/* consider GPS connection lost after 5 sec */
 
 struct longlat_t
 /* This structure is used to initialize some older GPS units */

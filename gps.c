@@ -354,9 +354,13 @@ void update_display(char *message)
     if (SEEN(gpsdata.satellite_stamp)) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < gpsdata.satellites) {
-		sprintf(s, "%2d %02d %03d %02d", gpsdata.PRN[i],
+		sprintf(s, "%2d %02d %03d %02d %c", 
+			gpsdata.PRN[i],
 			gpsdata.elevation[i],
-			gpsdata.azimuth[i], gpsdata.ss[i]);
+			gpsdata.azimuth[i], 
+			gpsdata.ss[i],
+			gpsdata.used[i] ? 'Y' : 'N'
+		    );
 	    } else
 		sprintf(s, "                  ");
 	    string[i] = XmStringCreateSimple(s);
