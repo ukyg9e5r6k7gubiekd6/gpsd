@@ -17,20 +17,20 @@
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
-int gpsd_switch_driver(struct gps_session_t *session, char type)
+int gpsd_switch_driver(struct gps_session_t *session, char* typename)
 {
     struct gps_type_t **dp;
     for (dp = gpsd_drivers; *dp; dp++)
-	if ((*dp)->typekey == type) {
+	if (!strcmp((*dp)->typename, typename)) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
 	    session->device_type = *dp;
 	    return 1;
 	}
-    gpsd_report(1, "invalid GPS type \"%c\", using NMEA instead\n", type);
+    gpsd_report(1, "invalid GPS type \"%s\", using NMEA instead\n", typename);
     return 0;
 }
 
-struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
+struct gps_session_t *gpsd_init(char *dgpsserver)
 /* initialize GPS polling */
 {
     struct gps_session_t *session = (struct gps_session_t *)calloc(sizeof(struct gps_session_t), 1);
@@ -39,7 +39,6 @@ struct gps_session_t *gpsd_init(char devicetype, char *dgpsserver)
 
     session->gpsd_device = DEFAULT_DEVICE_NAME;
     session->device_type = gpsd_drivers[0];
-    gpsd_switch_driver(session, devicetype);
     session->dsock = -1;
     if (dgpsserver) {
 	char hn[256], buf[BUFSIZ];

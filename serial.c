@@ -72,7 +72,7 @@ int gpsd_set_speed(struct gps_session_t *session,
 	return 0;
 
     if (session->packet_type == SIRF_PACKET)
-	gpsd_switch_driver(session, 's');
+	gpsd_switch_driver(session, "SIRF-II binary");
 
     session->gNMEAdata.stopbits = stopbits;
     session->gNMEAdata.baudrate = speed;

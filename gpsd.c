@@ -120,10 +120,7 @@ static void usage(void)
 {
     printf("usage:  gpsd [options] \n\
   Options include: \n\
-  -p string (default %s)   = set GPS device name \n"
-#ifdef NON_NMEA_ENABLE
-"  -T devtype (default 'n')       = set GPS device type \n"
-#endif /* NON_NMEA_ENABLE */
+  -f string (default %s)   = set GPS device name \n"
 "  -S integer (default %4s)      = set port for daemon \n"
 #ifdef TRIPMATE_ENABLE
 "  -i %%f[NS]:%%f[EW]               = set initial latitude/longitude \n"
@@ -134,17 +131,6 @@ static void usage(void)
   -D integer (default 0)         = set debug level \n\
   -h                             = help message \n",
 	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
-#ifdef NON_NMEA_ENABLE
-    {
-    struct gps_type_t **dp;
-    printf("Here are the available driver types:\n"); 
-    for (dp = gpsd_drivers; *dp; dp++)
-	if ((*dp)->typekey)
-	    printf("   %c -- %s\n", (*dp)->typekey, (*dp)->typename);
-    }
-#else
-    printf("This gpsd was compiled with support for NMEA only.\n");
-#endif /* NON_NMEA_ENABLE */
 }
 
 static int throttled_write(int fd, char *buf, int len)
@@ -540,7 +526,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 int main(int argc, char *argv[])
 {
     static int nowait = 0, gpsd_speed = 0;
-    static char gpstype = 'n', *dgpsserver = NULL;
+    static char *dgpsserver = NULL;
     char *service = NULL; 
     struct sockaddr_in fsin;
     fd_set rfds;
@@ -552,16 +538,8 @@ int main(int argc, char *argv[])
 #if TRIPMATE_ENABLE || defined(ZODIAC_ENABLE)
 			    "i:"
 #endif /* TRIPMATE_ENABLE || defined(ZODIAC_ENABLE) */
-#ifdef NON_NMEA_ENABLE
-			    "T:"
-#endif /* NON_NMEA_ENABLE */
 		)) != -1) {
 	switch (option) {
-#ifdef NON_NMEA_ENABLE
-	case 'T':
-	    gpstype = *optarg;
-	    break;
-#endif /* NON_NMEA_ENABLE */
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
 	    if (debuglevel >= 2)
@@ -653,7 +631,7 @@ int main(int argc, char *argv[])
     FD_SET(msock, &all_fds);
     nfds = FD_SETSIZE;
 
-    session = gpsd_init(gpstype, dgpsserver);
+    session = gpsd_init(dgpsserver);
     if (gpsd_speed)
 	session->gNMEAdata.baudrate = gpsd_speed;
     session->gpsd_device = strdup(device_name);

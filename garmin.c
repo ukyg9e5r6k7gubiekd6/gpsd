@@ -784,7 +784,6 @@ static void garmin_handle_input(struct gps_session_t *session)
 /* this is everything we export */
 struct gps_type_t garmin_binary =
 {
-    'g',		/* select with 'g' */
     "Garmin binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
     garmin_init,	/* initialize the device */

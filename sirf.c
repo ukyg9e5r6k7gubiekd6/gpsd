@@ -583,7 +583,7 @@ static void sirfbin_initializer(struct gps_session_t *session)
 	if (session->driverstate & SIRF_LT_231) {
 	    gpsd_report(1, "SiRF chipset has old firmware, falling back to  SiRF NMEA\n");
 	    nmea_send(session->gNMEAdata.gps_fd, "$PSRF105,0");
-	    gpsd_switch_driver(session, 'r');
+	    gpsd_switch_driver(session, "SiRF-II NMEA");
 	} else {
 	    u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x02,
 			      0x84, 0x00,
@@ -607,7 +607,6 @@ static int sirfbin_switch(struct gps_session_t *session, int speed)
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
-    's',		/* invoke with -T s */
     "SIRF-II binary",	/* full name of type */
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     sirfbin_initializer,	/* initialize the device */

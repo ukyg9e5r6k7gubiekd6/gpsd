@@ -5,9 +5,9 @@
 #include <setjmp.h>
 
 /* Some internal capabilities depend on which drivers we're compiling. */
-#if  TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE || LOGFILE_ENABLE
+#if  TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE
 #define NON_NMEA_ENABLE
-#endif /* TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE || LOGFILE_ENABLE */
+#endif /* TRIPMATE_ENABLE || EARTHMATE_ENABLE || GARMIN_ENABLE */
 #if EARTHMATE_ENABLE
 #define ZODIAC_ENABLE
 #endif /* EARTHMATE_ENABLE */
@@ -59,7 +59,7 @@ struct gps_session_t;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
-    char typekey, *typename, *trigger;
+    char *typename, *trigger;
     void (*initializer)(struct gps_session_t *session);
     void (*handle_input)(struct gps_session_t *session);
     int (*rtcm_writer)(struct gps_session_t *session, char *rtcmbuf, int rtcmbytes);
@@ -147,7 +147,7 @@ extern int packet_get_sirf(struct gps_session_t *);
 extern void packet_accept(struct gps_session_t *);
 
 extern int gpsd_open(struct gps_session_t *);
-extern int gpsd_switch_driver(struct gps_session_t *, char);
+extern int gpsd_switch_driver(struct gps_session_t *, char *);
 extern int gpsd_set_speed(struct gps_session_t *, unsigned int, unsigned int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_session_t *);
@@ -162,7 +162,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 extern int garmin_probe(struct gps_session_t *);
 
 /* External interface */
-extern struct gps_session_t * gpsd_init(char, char *);
+extern struct gps_session_t * gpsd_init(char *);
 extern int gpsd_activate(struct gps_session_t *);
 extern void gpsd_deactivate(struct gps_session_t *);
 extern int gpsd_poll(struct gps_session_t *);

@@ -431,7 +431,6 @@ static void zodiac_handle_input(struct gps_session_t *session)
 /* this is everything we export */
 struct gps_type_t zodiac_binary =
 {
-    '\0',		/* cannot be explicitly selected */
     "Zodiac binary",	/* full name of type */
     NULL,		/* only switched to by some other driver */
     zodiac_init,	/* initialize the device */

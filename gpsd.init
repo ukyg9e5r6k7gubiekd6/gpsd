@@ -6,7 +6,7 @@
 # description: Gpsd manages access to a serial- or USB-connected GPS
 # processname: gpsd
 
-# If you must specify a driver, uncomment and modify the next line
+# If you must specify options, uncomment and modify the next line
 #GPSD_OPTS=
 
 # Source function library.

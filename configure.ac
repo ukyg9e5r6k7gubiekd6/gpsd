@@ -132,19 +132,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for Logfile support
-AC_ARG_ENABLE(logfile,
-  AC_HELP_STRING([--disable-logfile],
-                 [disable Logfile driver support]),
-  [ac_logfile=$enableval], [ac_logfile=yes])
-AC_MSG_CHECKING([for Logfile support])
-if test x"$ac_logfile" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([LOGFILE_ENABLE], 1, [Logfile driver support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],

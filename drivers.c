@@ -63,7 +63,6 @@ static void nmea_initializer(struct gps_session_t *session)
 }
 
 struct gps_type_t nmea = {
-    'n', 		/* select explicitly with -T n */
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
     nmea_initializer,		/* probe for SiRF II */
@@ -111,7 +110,6 @@ static int sirf_switcher(struct gps_session_t *session, int speed)
 }
 
 struct gps_type_t sirfII = {
-    '\0', 		/* selected implicitly */
     "SiRF-II NMEA",	/* full name of type */
 #ifdef BINARY_ENABLE
     NULL,		/* recognizing SiRF flips us to binary */
@@ -167,7 +165,6 @@ static void tripmate_initializer(struct gps_session_t *session)
 }
 
 struct gps_type_t tripmate = {
-    't', 			/* select explicitly with -T t */
     "Delorme TripMate",		/* full name of type */
     "ASTRAL",			/* tells us to switch */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
@@ -211,7 +208,6 @@ static void earthmate_initializer(struct gps_session_t *session)
 }
 
 struct gps_type_t earthmate = {
-    'e',			/* select explicitly with -T e */
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
     earthmate_initializer,	/* switch us to Zodiac mode */
@@ -222,26 +218,6 @@ struct gps_type_t earthmate = {
     1,				/* updates every second */
 };
 #endif /* EARTHMATE_ENABLE */
-
-#ifdef LOGFILE_ENABLE
-/**************************************************************************
- *
- * Logfile playback driver
- *
- **************************************************************************/
-
-struct gps_type_t logfile = {
-    'l',			/* select explicitly with -T l */
-    "Logfile",			/* full name of type */
-    NULL,			/* no recognition string */
-    NULL,			/* no initializer */
-    nmea_handle_input,		/* read text sentence */
-    NULL,			/* don't send RTCM data */
-    NULL,			/* no speed switcher */
-    NULL,			/* no wrapup code */
-    -1,				/* should never time out */
-};
-#endif /* LOGFILE_ENABLE */
 
 extern struct gps_type_t garmin_binary, sirf_binary;
 

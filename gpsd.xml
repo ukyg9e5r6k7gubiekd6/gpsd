@@ -19,7 +19,6 @@ and speedometer</refpurpose>
 
 <cmdsynopsis>
   <command>gpsd</command>  
-      <arg choice='opt'>-T <replaceable>GPS-type</replaceable></arg>
       <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-s <replaceable>baudrate</replaceable></arg>
@@ -89,14 +88,6 @@ factor dependent on current satellite position.)</para>
 <term>-f</term>
 <listitem>
 <para>Set GPS device name (default is <filename>/dev/gps</filename>).</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>-T <replaceable>device-type</replaceable></term>
-<listitem>
-<para>Set GPS type, usually not necessary because GPS can figure it
-out by looking at the GPS data stream.  The only exception is the
-driver for USB Garmin GPSes, which requires -T g.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
