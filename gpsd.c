@@ -167,14 +167,13 @@ static void print_settings(char *service, char *dgpsserver)
 
 static int validate(void)
 {
-    gpscli_report(0, "Fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
     if ((session.gNMEAdata.status == STATUS_NO_FIX) != (session.gNMEAdata.mode == MODE_NO_FIX))
     {
-	 gpscli_report(0, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	 gpscli_report(3, "GPS is confused about whether it has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
 	 return 0;
     }
     else if (session.gNMEAdata.status > STATUS_NO_FIX && session.gNMEAdata.mode > MODE_NO_FIX) {
-	 gpscli_report(0, "GPS is has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
+	 gpscli_report(3, "GPS is has a fix (status=%d, mode=%d).\n", session.gNMEAdata.status, session.gNMEAdata.mode);
 	return session.gNMEAdata.mode;
     }
     return 0;
