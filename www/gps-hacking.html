@@ -97,7 +97,7 @@ you're not there any more.</p>
 <p>Another limit, implicit in the geometry, is that GPS is relatively
 poor at getting your precise altitude.  When you can get a signal lock
 on four satellites, a modern GPS will give you longitude and latitude
-within about 10 or yards, down to 2 with DGPS correction.  Vertical 
+within about 10 meters or yards, down to 2 with DGPS correction.  Vertical 
 uncertainty will be much higher, as much as fifty meters.</p>
 
 <p>People who really <a
@@ -290,7 +290,8 @@ functional reasons to migrate to 2.0:</p>
 and get an authoritative answer.</li>
 
 <li>There is a new "watcher" mode.  It is like raw mode in that the
-GPS streams updates at you, but the updates are in GPSD format.</li>
+GPS streams updates at you, but unlike it in that the updates are in 
+the simpler GPSD format rather than the more complex NMEA one.</li>
 
 <li>The daemon now automatically tries to reconnect to the GPS once
 a second when it is offline but clients are connected.</li>
@@ -325,7 +326,9 @@ perhaps on embedded systems or PDAs.</p>
 simplified.  If your gpsd-1.x-using application is starting up gpsd
 directly you may find you have to modify the invocation.  However,
 we don't recommend this.  New gpsd is designed to be started at
-boot time and run continuously just like any normal daemon.</p>
+boot time and run continuously just like any normal daemon.  It will
+do nothing, and be swapped out, unless there are clients trying
+to query the GPS.</p>
 
 <h1>Where to learn more</h1>
 
