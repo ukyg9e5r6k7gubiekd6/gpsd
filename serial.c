@@ -34,10 +34,8 @@ int gpsd_get_speed(struct termios* ttyctl)
     }
 }
 
-/* every rate we're likely to see on a GPS */
-static int rates[] = {4800, 9600, 19200, 38400, 57600};
-
-int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
+int gpsd_set_speed(struct gps_session_t *session, 
+		   unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate;
 
@@ -61,9 +59,10 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
       rate =  B57600;
 
     tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* toss stale data */
-    if (speed != cfgetispeed(&session->ttyset)) {
+    if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gNMEAdata.stopbits) {
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
+	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return 0;
 	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
@@ -86,7 +85,10 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 
 int gpsd_open(struct gps_session_t *session)
 {
-    int *ip;
+    unsigned int *ip;
+    unsigned int stopbits;
+    /* every rate we're likely to see on a GPS */
+    static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at %s\n", session->gpsd_device);
     if ((session->gNMEAdata.gps_fd = open(session->gpsd_device, O_RDWR|O_NOCTTY|O_SYNC)) < 0)
@@ -103,7 +105,6 @@ int gpsd_open(struct gps_session_t *session)
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
 	 */
 	session->ttyset.c_cflag &= ~(PARENB | CRTSCTS);
-	session->ttyset.c_cflag |= (CSIZE & (session->gNMEAdata.stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
@@ -111,17 +112,19 @@ int gpsd_open(struct gps_session_t *session)
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
 			session->gNMEAdata.baudrate, 
 			session->gNMEAdata.stopbits);
-	    if (gpsd_set_speed(session, session->gNMEAdata.baudrate)) {
+	    if (gpsd_set_speed(session, session->gNMEAdata.baudrate, session->gNMEAdata.stopbits)) {
 		return session->gNMEAdata.gps_fd;
 	    }
 	}
-	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) 
-	    if (*ip != session->gNMEAdata.baudrate) {
-		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n",
-			    *ip, session->gNMEAdata.stopbits);
-		if (gpsd_set_speed(session, *ip))
-		    return session->gNMEAdata.gps_fd;
-	}
+	for (stopbits = 1; stopbits <= 2; stopbits++)
+	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
+		if (*ip != session->gNMEAdata.baudrate || stopbits != session->gNMEAdata.stopbits) {
+		    gpsd_report(1, 
+				"hunting at speed %d, %dN%d\n",
+				*ip, 9-stopbits, stopbits);
+		    if (gpsd_set_speed(session, *ip, stopbits))
+			return session->gNMEAdata.gps_fd;
+		}
 	session->gNMEAdata.gps_fd = -1;
     }
     return session->gNMEAdata.gps_fd;

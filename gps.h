@@ -111,8 +111,8 @@ struct gps_data_t {
     double c_recv_time;		/* client receipt time (-> T2) */
     double c_decode_time;	/* client end-of-decode time (-> D2) */
 #endif /* PROFILING */
-    int baudrate, stopbits;	/* RS232 link paramters */
-    int cycle;			/* refresh cycle time in seconds */
+    unsigned int baudrate, stopbits;	/* RS232 link paramters */
+    unsigned int cycle;			/* refresh cycle time in seconds */
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */

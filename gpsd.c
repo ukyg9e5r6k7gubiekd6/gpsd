@@ -216,7 +216,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		while (isdigit(*p)) p++;
 		if (session->device_type->speed_switcher)
 		    if (session->device_type->speed_switcher(session, i))
-			gpsd_set_speed(session, (speed_t)i);
+			gpsd_set_speed(session, (speed_t)i, 1);
 	    }
 #endif /* PROFILING */
 	    sprintf(phrase, ",B=%d %d N %d", 
