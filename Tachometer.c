@@ -119,8 +119,7 @@ static XtResource resources[] = {
 
 static void Initialize(Widget request, Widget new),
   Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes),
-  Resize(Widget w),
-  Redisplay(Widget w, XEvent *event, Region region),
+  Resize(Widget w), Redisplay(Widget w, XEvent *event, Region region),
   Destroy(Widget w);
 static Boolean SetValues(Widget current, Widget request UNUSED, Widget new);
 
@@ -199,7 +198,6 @@ static void DrawTachometer(TachometerWidget w)
      center_y = w->core.height / 2;
      radius_x = center_x - w->tachometer.internal_border;
      radius_y = center_y - w->tachometer.internal_border;
-
      if ((center_x==0) || (center_y==0) || (radius_x<=0) || (radius_y<=0))
 	  return;	  /* Can't draw anything -- no room */
      
@@ -208,17 +206,14 @@ static void DrawTachometer(TachometerWidget w)
      /* Big circle */     
      FastFillCircle(XtDisplay(w), XtWindow(w), w->tachometer.circle_GC,
 		    center_x, center_y, radius_x, radius_y);
-
      /* Inner circle same color as the background */
      FastFillCircle(XtDisplay(w), XtWindow(w), w->tachometer.background_GC,
 		    center_x, center_y, (Cardinal) (radius_x * 0.95),
 		    (Cardinal) (radius_y * 0.95));
-
      /* Small circle */
      FastFillCircle(XtDisplay(w), XtWindow(w), w->tachometer.circle_GC,
 		    center_x, center_y, (Cardinal) (radius_x * 0.1),
 		    (Cardinal) (radius_y * 0.1));
-	  
      /* Draw the details */
      DrawGauge(w);
      DrawNeedle(w, w->tachometer.value);
@@ -256,7 +251,6 @@ static void DrawGauge(TachometerWidget w)
      center_y = w->core.height / 2;
      radius_x = center_x - w->tachometer.internal_border;
      radius_y = center_y - w->tachometer.internal_border;
-     
      if ((center_x==0) || (center_y==0) || (radius_x<=0) || (radius_y<=0))
 	  return;	  /* Can't draw anything */
 
@@ -280,7 +274,6 @@ static void DrawGauge(TachometerWidget w)
 		    + center_x;
 	       points[3].y = cos((step + 1.0) * PI / 180.0) * radius_y * 0.85
 		    + center_y;
-
 	       XFillPolygon(XtDisplay(w), XtWindow(w), gc, points, 4,
 			    Complex, CoordModeOrigin);
 
@@ -288,19 +281,15 @@ static void DrawGauge(TachometerWidget w)
 		    + center_x;
 	       number_y = cos((step + 1.0) * PI / 180.0) * radius_y * 0.65
 		    + center_y;
-
 	       if ((int)((330.0 - step) / 30.0) == 1)
 		   jump = 3.0;
-
 	       DrawNumbers(w, (unsigned char) ((330.0 - step) / 30.0),
 			   number_x, number_y);
-
 	  } else {
 	       in_gauge_x = sin(step * PI/180.0) * radius_x * 0.8 + center_x;
 	       in_gauge_y = cos(step * PI/180.0) * radius_y * 0.8 + center_y;
 	       out_gauge_x = sin(step * PI/180.0) * radius_x * 0.85 + center_x;
 	       out_gauge_y = cos(step * PI/180.0) * radius_y * 0.85 + center_y;
-	       
 	       XDrawLine(XtDisplay(w), XtWindow(w), gc, in_gauge_x,
 			 in_gauge_y, out_gauge_x, out_gauge_y);
 	  }
@@ -403,8 +392,7 @@ static void DrawLabelString(TachometerWidget w)
 
      center_x = w->core.width / 2; center_y = w->core.height / 2;
      radius_x = center_x - w->tachometer.internal_border;
-     radius_y = center_y - w->tachometer.internal_border;
-     
+     radius_y = center_y - w->tachometer.internal_border;     
      if (!(center_x && center_y && (radius_x > 0) && (radius_y > 0)))
 	  return;
      
@@ -525,13 +513,12 @@ static void Realize(Widget w, Mask *valueMask, XSetWindowAttributes *attributes)
 } /* Realize */
 
 static void Redisplay(Widget w, XEvent *event, Region region UNUSED)
-/* Repaint the widget window */
 {
      TachometerWidget ta = (TachometerWidget) w;
 
      if (event->xexpose.count == 0)
 	  DrawTachometer(ta);
-}
+} /* Redisplay */
 
 static void Resize(Widget w)
 {
