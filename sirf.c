@@ -252,7 +252,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 		    navtype,session->gNMEAdata.status,session->gNMEAdata.mode);
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
-	extract_time(session, getw(22), getl(24)/100.0);
+	extract_time(session, getw(22), getl(24)*1e-2);
 	gpsd_binary_fix_dump(session, buf2);
 	/* fix quality data */
 	session->gNMEAdata.hdop = getb(20)/5.0;
@@ -328,7 +328,20 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x0a:		/* Error ID Data */
-	gpsd_report(4, "EID 0x0a: Error ID type %d\n", getw(1));
+	switch (getw(1))
+	{
+	case 2:
+	    gpsd_report(4, "EID 0x0a type 2: Subframe error on PRN %ld\n", getl(5));
+	    break;
+
+	case 4107:
+	    gpsd_report(4, "EID 0x0a type 4177: neither KF nor LSQ fix.\n", getl(5));
+	    break;
+
+	default:
+	    gpsd_report(4, "EID 0x0a: Error ID type %d\n", getw(1));
+	    break;
+	}
 	return 0;
 
     case 0x0b:		/* Command Acknowledgement */
@@ -389,7 +402,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     * seeing a quantity that has undergone 10-bit wraparound.
 	     */
 	    gpsd_report(5, "MID 41 GPS Week: %d  TOW: %d\n", getw(5), getl(7));
-	    extract_time(session, getw(5), getl(7)/1000.00);
+	    extract_time(session, getw(5), getl(7)*1e-4);
 	    gpsd_report(5, "MID 41 UTC: %s\n", session->gNMEAdata.utc);
 	    /*
 	     * Skip UTC, left all zeros in 231 and older firmware versions, 
@@ -404,25 +417,25 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	     *                11              8
 	     */
 	    /* skip 4 bytes of satellite map */
-	    session->gNMEAdata.latitude = getl(23)/1e+7;
-	    session->gNMEAdata.longitude = getl(27)/1e+7;
+	    session->gNMEAdata.latitude = getl(23)*1e-7;
+	    session->gNMEAdata.longitude = getl(27)*1e-7;
 	    REFRESH(session->gNMEAdata.latlon_stamp);
 	    /* skip 4 bytes of altitude from ellipsoid */
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	}
-	session->gNMEAdata.altitude = getl(31)/100;
 	if (session->gNMEAdata.mode == MODE_3D) {
+	    session->gNMEAdata.altitude = getl(31)*1e-2;
 	    REFRESH(session->gNMEAdata.altitude_stamp);
 	    mask |= ALTITUDE_SET;
 	}
 	if (session->driverstate & SIRF_GE_232) {
 	    /* skip 1 byte of map datum */
-	    session->gNMEAdata.speed = getw(36)/100;
+	    session->gNMEAdata.speed = getw(36)*1e-2;
 	    REFRESH(session->gNMEAdata.speed_stamp);
-	    session->gNMEAdata.track = getw(38)/100;
+	    session->gNMEAdata.track = getw(38)*1e-2;
 	    REFRESH(session->gNMEAdata.track_stamp);
 	    /* skip 2 bytes of magnetic variation */
-	    session->gNMEAdata.climb = getw(42)/100;
+	    session->gNMEAdata.climb = getw(42)*1e-2;
 	    REFRESH(session->gNMEAdata.climb_stamp);
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_fix_dump(session, buf2);
