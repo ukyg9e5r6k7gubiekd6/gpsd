@@ -120,9 +120,8 @@ class gpsdata:
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="localhost", port="2947", debuglevel=0):
+    def __init__(self, host="localhost", port="2947"):
 	gpsdata.__init__(self)
-	self.debuglevel = debuglevel
 	self.sock = None	# in case we blow up in connect
 	self.connect(host, port)
 
@@ -143,14 +142,14 @@ class gps(gpsdata):
                 except ValueError:
                     raise socket.error, "nonnumeric port"
         if not port: port = SMTP_PORT
-        if self.debuglevel > 0: print 'connect:', (host, port)
+        #if self.debuglevel > 0: print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
-                if self.debuglevel > 0: print 'connect:', (host, port)
+                #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
             except socket.error, msg:
                 if self.debuglevel > 0: print 'connect fail:', (host, port)
@@ -168,6 +167,7 @@ class gps(gpsdata):
     def __del__(self):
 	if self.sock:
 	    self.sock.close()
+    close = __del__
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
@@ -262,14 +262,14 @@ class gps(gpsdata):
 
 if __name__ == '__main__':
     import sys,readline
-    print "This is the exerciser for the Python gpsd interface."
+    print "This is the exerciser for the Python gps interface."
     session = gps()
     session.set_raw_hook(lambda s: sys.stdout.write(s + "\n"))
     while True:
 	commands = raw_input("> ")
 	session.query(commands)
 	print session
-
+    session.close()
 
 
 

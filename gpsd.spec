@@ -19,13 +19,19 @@ can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier
 to parse than NMEA 0183.
 
+After installing this RPM, gpsd will start up at boot time.  You
+must make a symlink named /dev/gps to the serial or USB port that
+your GPS will plug in to.  Normally this will be /dev/ttyUSB0 or
+/dev/ttyS0.
+
 %package -n gpsd-devel
 Summary: client library for talking to a running gpsd
 Group: Development/Libraries
 
 %description -n gpsd-devel
-This package provides a library that manages access to gpsd for
-applications.  You will need to have qpsd installed for it to work.
+This package provides C libraries and Python modules that manage
+access to a GPS for applications.  You will need to have gpsd installed
+for it to work.
 
 %prep
 %setup -q
@@ -51,6 +57,9 @@ cp libgpsd.3 "$RPM_BUILD_ROOT"%{_mandir}/man3/
 mkdir -p "$RPM_BUILD_ROOT"%{_includedir}
 cp gpsd.h "$RPM_BUILD_ROOT"%{_includedir}
 cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
+PYVERS=`python -c "import sys; print sys.version[:3]"`
+mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
+cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERS}/site-packages
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -82,11 +91,17 @@ cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 %{_mandir}/man3/libgpsd.3*
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
+%{_libdir}/python*/site-packages/gps.py
+%{_libdir}/python*/site-packages/gpsd.py
 
 %changelog
-* Thu Aug 26 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
+
+
+* Fri Aug 27 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.96-1
 - Implemented non-blocking writes to clients, so a stalled client
-  cannot stall gpsd.  Fixed a nasty array-overrun bug.
+  cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
+  are now in ISO8601 format, with sub-second precision if the GPS
+  delivers that.  First cuts at Python interfaces included.
 
 * Wed Aug 25 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.95-1
 - Fixed broken 'make dist', missing display.c and Tachometer.c 
@@ -107,7 +122,7 @@ cp gps.h "$RPM_BUILD_ROOT"%{_includedir}
 - Third prerelease.  Clients in watcher mode now get notified when
   the GPS goes online or offline.  Major name changes -- old libgps
   is new libgpsd and vice-versa (so the high-level interface is more
-  prominent.  Specfile now includes code to install gpsd so it will
+  prominent).  Specfile now includes code to install gpsd so it will
   be started at boot time.  -D2 now causes command error messages
   to be echoed to the client.
 

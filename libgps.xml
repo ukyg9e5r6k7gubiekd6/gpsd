@@ -17,6 +17,8 @@
 <funcsynopsis>
 <funcsynopsisinfo>
 
+C:
+
 #include &lt;gps.h&gt;
 
 </funcsynopsisinfo>
@@ -33,6 +35,11 @@
     <paramdef>char *<parameter>requests</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcdef>void <function>gps_set_raw_hook</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>void (*<parameter>hook</parameter>)(char *buf)</paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>int <function>gps_poll</function></funcdef>
     <paramdef>int <parameter>fd</parameter></paramdef>
     <paramdef>struct gps_data_t * <parameter>gpsdata</parameter></paramdef>
@@ -43,8 +50,24 @@
     <paramdef>int <parameter>fd</parameter></paramdef>
 </funcprototype>
 </funcsynopsis>
-</refsynopsisdiv>
+<funcsynopsisinfo>
 
+Python:
+
+import gps
+
+session = gps.gps(host="localhost", port="2947")
+
+session.set_raw_hook(raw_hook)
+
+session.query(commands)
+
+session.poll()
+
+session.close()
+
+</funcsynopsisinfo>
+</refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
@@ -91,6 +114,13 @@ last-modified timestamps and change-flag members associated with them;
 these get updated on each query or poll as well.
 Consult <filename>gps.h</filename> to learn about the data members 
 and associated timestamps.</para>
+
+<para>The Python implementation supports the same facilities as the C 
+library.  <function>gps_open()</function> is replaced by the
+initialization of a gps session object; the other calls are methods
+of that object.  The <function>close()</function> call is optional,
+resources within the session object will be properly released when
+it is garbage-collected.</para>
 
 </refsect1>
 
