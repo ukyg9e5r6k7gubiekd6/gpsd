@@ -75,7 +75,7 @@ cp gpsd.init "$RPM_BUILD_ROOT"/etc/init.d/gpsd
 * Mon Aug 23 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.93-1
 - Fourth prerelease. Daemon-side timeouts are gone, they complicated
   the interface without adding anything.  Command responses now 
-  contain ? to tag invalid data.
+  contain ? to tag invalid data. -D2 feature of 1.92 backed out.
 
 * Sun Aug 22 2004 Eric S. Raymond <esr@golux.thyrsus.com> - 1.92-1
 - Third prerelease.  Clients in watcher mode now get notified when
