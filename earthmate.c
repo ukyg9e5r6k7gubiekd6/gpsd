@@ -287,6 +287,7 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	session->gNMEAdata.used[j] = 0;
     }
 #endif /* PROCESS_PRWIZCH */
+    session->gNMEAdata.satellites_used = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 #ifdef PROCESS_PRWIZCH
 	session->gNMEAdata.Zs[i] = p[O(16 + (3 * i))];
@@ -301,10 +302,11 @@ static void handle1002(struct gps_session_t *session, unsigned short *p)
 	gpscli_report(1, " PRN:%d", p[O(16 + (3 * i))]);
 	gpscli_report(1, " C/No:%d\n", p[O(17 + (3 * i))]);
 #endif
+	if (p[O(15 + (3 * i))] & 1)
+	    session->gNMEAdata.used[session->gNMEAdata.satellites_used++];
 	for (j = 0; j < MAXCHANNELS; j++) {
 	    if (session->gNMEAdata.PRN[j] != p[O(16 + (3 * i))])
 		continue;
-	    session->gNMEAdata.used[j] = (p[O(15 + (3 * i))] & 1);
 	    session->gNMEAdata.ss[j] = p[O(17 + (3 * i))];
 	    break;
 	}
