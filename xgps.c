@@ -301,6 +301,7 @@ int main(int argc, char *argv[])
     build_gui(lxbApp);
 
     timeout = XtAppAddTimeOut(app, 2000, handle_time_out, app);
+    timer = time(NULL);
 
     gps_set_raw_hook(gpsdata, update_panel);
     gps_query(gpsdata, "w+x\n");
