@@ -81,9 +81,16 @@ Derrick J. Brashear, 2 January 2000
 Or mine.  I drastically rewrote this code to clean it up and extend it
 New features include:
    * Documentation (what a concept!)
-   * Cleaned up, simplified command-line options
-   * It understands the GLL (Geograpic position - Latitude, Longitude)
+   * Cleaned up, simplified command-line options.
+   * It understands the GLL (Geographic position - Latitude, Longitude)
      sentence from NMEA 3.0. 
    * It now parses both variants of the VTG sentence correctly.
+   * New y and z commands support signal-status reporting and satellite
+     location -- it should no longer ever be necessary for clients to go to
+     raw mode.
+   * Massive refactoring -- one main loop now calls a self-contained
+     driver object for each type.
+   * Cleaned-up error reporting, we don't use syslog when running in foreground
+     but send all error and status messages to the tty instead.
 
 Eric S. Raymond, 11 Aug 2004
