@@ -15,10 +15,12 @@
 #define BUFSIZE 4096
 
 extern int debug;
+extern char *latitude;
+extern char *longitude;
+extern char latd;
+extern char lond;
 
 #define PI 3.14159265358979323846
-extern char *latitude, *longitude;
-extern char latd, lond;
 
 enum {
     EM_HUNT_FF, EM_HUNT_81, EM_HUNT_ID, EM_HUNT_WC,
