@@ -187,6 +187,7 @@ int gpsd_poll(struct gps_session_t *session)
 	 * report speed error.  Nobody reports track error or climb error.
 	 */
 	session->gpsdata.fix.ept = 0.005;
+#ifdef BINARY_ENABLE
 	if (session->gpsdata.valid & LATLON_SET) {
 	    if (!(session->gpsdata.valid & HERR_SET) 
 	    	&& (session->gpsdata.valid & HDOP_SET)) {
@@ -232,6 +233,7 @@ int gpsd_poll(struct gps_session_t *session)
 		   &session->gpsdata.fix, 
 		   sizeof(struct gps_fix_t));
 	}
+#endif /* BINARY_ENABLE */
 
 	session->gpsdata.d_decode_time = timestamp();
 
