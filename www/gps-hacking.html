@@ -14,16 +14,16 @@
 <p>This is a gentle introduction to writing GPS-aware applications
 &mdash; or, How I Stopped Worrying And Learned To Love Spherical
 Trigonometry. It will explain the capabilities and limitations of GPS
-hardware and the gpsd software that you need to know about when
+hardware and the <code>gpsd</code> software that you need to know about when
 writing location-aware applications.</p>
 
 <p>We'll go from general to specific, beginning with an overview of how
 GPS works and ending with architectural suggestions about how to use
-gpsd to make your application location-aware.</p>
+<code>gpsd</code> to make your application location-aware.</p>
 
-<p>Developers who have written gpsd-1.x-aware applications may want
-to skip directly to the advice on <a href="#programming">programming
-with gpsd-2</a>.</p>
+<p>Developers who have written applications with <code>gpsd</code> 1.x
+may want to skip directly to the advice on <a
+href="#migrating">programming with gpsd-2</a>.</p>
 
 <h2>How GPS Works</h2>
 
@@ -48,7 +48,7 @@ the middle of the Atlantic and Pacific oceans.</p>
 <p>You can look at a very nifty <a
 href="http://www.mich.com/%7Ebuffalo/rhp/gps.html">simulation</a>
 of GPS satellite orbits. (Also includes GLONASS, the Russian military 
-equivalent.)  You can also look at 
+equivalent of GPS.)  You can also look at 
 <a href='http://www.tsgc.utexas.edu/images/spacecraft/gps/'>pictures</a> 
 of GPS satellites and the control systm.</p>
 
@@ -58,7 +58,7 @@ pulses, can compare it to an internal clock and know the time it took
 to arrive. Multiplying by lightspeed gives the distance to the
 satellite.  This starts to be useful when the GPS can get accurate
 timings to three or more satellites; at that point, computing the
-UPS's exact position with respect to the satellites becomes a relatively
+GPS's exact position with respect to the satellites becomes a relatively
 simple if tedious exercise in spherical trigonometry (which,
 fortunately, the GPS's firmware does for you).</p>
 
@@ -124,14 +124,14 @@ to a computer in a form your application can use.</p>
 to communicate with the host machine.  Most track a standard called 
 NMEA 0183 which prescribes both electrical signal levels and a data
 encoding.  The protocol is bidirectional, but designed in the expectation
-that most of the traffic will be GPS-to-computer, with commands in
+that most of the traffic will be GPS-to-computer, with commands 
 going in the computer-to-GPS direction rare.</p>
 
 <p>The modern trend in GPSes is away from RS232C and towards USB.  USB
 GPSes keep the NMEA data protocol but discard the NMEA link layer. Under
 Linux, USB GPSes use the usbserial module and look like serial ports.
-Part of gpsd's job is to hide this stuff; applications don't have
-to be aware of NMEA or the link layer, they just query gpsd for
+Part of <code>gpsd</code>'s job is to hide this stuff; applications don't have
+to be aware of NMEA or the link layer, they just query <code>gpsd</code> for
 information.</p>
 
 <h2>The good news about NMEA</h2>
@@ -162,7 +162,7 @@ standard does a pretty good job of specifying a message set for GPSes
 that want to convey data to computers.</p>
 
 <p>More good news: you should never have to deal with this level
-&mdash; gpsd's purpose is to insulate you from it.</p>
+&mdash; <code>gpsd</code>'s purpose is to insulate you from it.</p>
 
 <h2>The bad news about NMEA</h2>
 
@@ -225,16 +225,16 @@ depended upon for accuracy,</q> then mutters darkly about copyright
 violations.</p>
 
 <p><a href='NMEA.txt'>Here</a> is the best compendium I know of.  I
-have never seen a copy of the official NMEA standard.  Fortunately,
-it isn't necessary for even gpsd developers to know most of it, since
-most modern UPS sensors only emit about a half-dozen of the eighty
-or so NMEA sentences.  RMC, GLL, VTG, GGA, GSA, GSV are all you are
-ever likely to need to know about, and the only even moderately 
-tricky bit is that there are two variants of the VTG sentence
-(grep for it in the gpsd code if you're really curious).</p>
+have never seen a copy of the official NMEA standard.  Fortunately, it
+isn't necessary for even <code>gpsd</code> developers to know most of
+it, since most modern GPS sensors only emit about a half-dozen of the
+eighty or so NMEA sentences.  RMC, GLL, VTG, GGA, GSA, GSV are all you
+are ever likely to need to know about, and the only even moderately
+tricky bit is that there are two variants of the VTG sentence (grep
+for it in the <code>gpsd</code> code if you're really curious).</p>
 
 <p>After you've read about those sentences, it can be instructive to
-run gpsd in a mode something like this:</p>
+run <code>gpsd</code> in a mode something like this:</p>
 
 <listing>
 ./gpsd -n -D 2 -p /dev/ttyUSB0
@@ -247,10 +247,15 @@ feel for what your GPS has to say, and how often it says it.</p>
 
 <p>Many GPSes are designed to power down or go to standby mode when
 DTR or its USB equivalent goes low (under Linux, this happens when you
-close the port).  This can be a valuable power-saving measure if the
-GPS if (say) running off of laptop batteries in a navigation or 
-wardriving system.  Thus, you don't want to keep your GPS device
-open when you don't actually need information from it.</p>
+close the port).  An important category of exceptions is USB SiRF-II
+GPSes; these don't seem to power down on DTR low, but instead go
+to a low-power standby mode for the 8/10s of every second that they're
+not shipping packets.</p>
+
+<p>Powering down on DTR low can be a valuable power-saving measure if
+the GPS is (say) running off of laptop batteries in a navigation or
+wardriving system.  Thus, you don't want to keep your GPS device open
+when you don't actually need information from it.</p>
 
 <p>Unfortunately, this rule can collide with one of the persistent
 problems with GPSes &mdash; though they can update a previous fix
@@ -267,27 +272,27 @@ separate ear for as many satellites as they're ever likely to see.
 Even so, it's not uncommon for them to take 30 or 40 seconds after a
 cold boot to get a fix.</p>
 
-<p>The really good designs seem to do something like backing up their
-last fix to SRAM when they power down.  I think the SiRF-II chipset in
-my BU-303 (which is about the cheapest GPS sensor on the market right
-now) does this &mdash; at least, when it's only been off for a few
-minutes it sometimes finds a lock rapidly enough after powering up to
-suggest that's updating a fix with the satellites it found
-earlier.</p>
-
-<p>One of the things gpsd does for applications is handle this
-power-management issue.  When no clients are active, gpsd will
+<p>One of the things <code>gpsd</code> does for applications is handle this
+power-management issue.  When no clients are active, <code>gpsd</code> will
 automatically close the GPS device, re-opening it only when another
 client connects to the daemon.</p>
 
-<h1 id='programming'>Programming With gpsd-2</h1>
+<h1 id='migrating'>Programming With <code>gpsd</code>-2</h1>
 
-<p>If you have written a gpsd-aware application, here are some good
+<p>The easiest way to make your program GPS-aware is to link it with
+the libgps.a library (and ensure that your host system starts <code>gpsd</code>
+at boot time).</p>
+
+<p>If you have written a <code>gpsd</code>-aware application, here are some good
 functional reasons to migrate to 2.0:</p>
 
 <ol>
 <li>Your application can now query whether or not the GPS is online
 and get an authoritative answer.</li>
+
+<li>Timestamps are now no longer truncated to seconds, but reported to 
+whatever resolution the GPS ships.  Often (notably on SiRF-II GPses)
+this is milliseconds.</p>
 
 <li>There is a new "watcher" mode.  It is like raw mode in that the
 GPS streams updates at you, but unlike it in that the updates are in 
@@ -296,25 +301,27 @@ the simpler GPSD format rather than the more complex NMEA one.</li>
 <li>The daemon now automatically tries to reconnect to the GPS once
 a second when it is offline but clients are connected.</li>
 
-<li>Writes to clients are nonblocking, so new gpsd cannot be stalled
-by a wedged client.</p>
+<li>Writes to clients are nonblocking, so new <code>gpsd</code> cannot
+be stalled by a wedged client.</p>
 </ol>
 
 <p>These changes mean that even if users casually unplug and reconnect a
 GPS, your application can notice the unplug and reconnect events, 
 and automatically starts getting data again a second after the reconnect.</p>
 
-<p>The gpsd package provides two ways for you to get data from a GPS.
-The low-level library, <a href="libgps.html">libgps.a</a>, talks
-directly to the GPS.  The higher-level interface, <a
-href="libgpsd.html">libgpsd.a</a>, communicates with an instance of
-gpsd, which uses its own copy of libgps.a to talk to the device,</p>
+<p>The <code>gpsd</code> package provides two ways for you to get data
+from a GPS.  The low-level library, <a
+href="libgps.html">libgps.a</a>, talks directly to the GPS.  The
+higher-level interface, <a href="libgpsd.html">libgpsd.a</a>,
+communicates with an instance of <code>gpsd</code>, which uses its own
+copy of libgps.a to talk to the device,</p>
 
-<p>A third way would be to open a socket to gpsd and interpret gpsd
-protocol in your application.  Before 2.0, all gpsd-aware applications
-had to do this because libgpsd.a didn't exist.  Now that it does, the
-exercise is rather pointless.  Using libgpsd.a will probably simplify 
-your code a lot.</p>
+<p>A third way would be to open a socket to <code>gpsd</code> and
+interpret <code>gpsd</code> protocol or raw NMEA in your application.
+Before 2.0, all <code>gpsd</code>-aware applications had to do this
+because libgpsd.a didn't exist.  Now that it does, the exercise is
+rather pointless.  Using libgpsd.a will probably simplify your code a
+lot.</p>
 
 <p>You will almost always want to use libgps.a and go through the
 daemon; among other things, this means more than one application 
@@ -322,13 +329,21 @@ will be able to query the GPS without causing confusion.  The only
 exception will be in very space-constrained single-user scenarios,
 perhaps on embedded systems or PDAs.</p>
 
-<p>Note that gpsd-2's command-line options have been changed and
-simplified.  If your gpsd-1.x-using application is starting up gpsd
-directly you may find you have to modify the invocation.  However,
-we don't recommend this.  New gpsd is designed to be started at
-boot time and run continuously just like any normal daemon.  It will
-do nothing, and be swapped out, unless there are clients trying
-to query the GPS.</p>
+<p>There are two minor incompatibilities with <code>gpsd</code> 1.x:</p>
+
+<p>First, <code>gpsd</code>-2's command-line options have been changed
+and simplified.  If your <code>gpsd</code>-using application is
+starting up <code>gpsd</code> directly you may find you have to modify
+the invocation.  However, we don't recommend this.  New
+<code>gpsd</code> is designed to be started at boot time and run
+continuously just like any normal daemon.  It will do nothing, and be
+swapped out, unless there are clients trying to query the GPS.</p>
+
+<p>Second, the format of the timestamp returned by the D command has
+changed, from "%m/%d/%Y %H:%M:%S" to ISO-8601: "%Y-%m-%dT%H:%M:%SZ".
+No more U.S.-centric date-format assumptions!  Also, as previously
+noted, the seconds part may have digits of decimal fractional
+seconds.</p>
 
 <h1>Where to learn more</h1>
 
