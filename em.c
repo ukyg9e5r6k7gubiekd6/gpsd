@@ -271,9 +271,7 @@ static void handle1000(struct gpsd_t *session, unsigned short *p)
 	session->gNMEAdata.mode = 1;
     }
     REFRESH(session->gNMEAdata.status_stamp);
-    session->gNMEAdata.cmask |= C_STATUS;
     REFRESH(session->gNMEAdata.mode_stamp);
-    session->gNMEAdata.cmask |= C_MODE;
 
     session->gNMEAdata.separation = p[O(33)] / 100;	/* meters */
 }
@@ -305,7 +303,7 @@ static void handle1002(struct gpsd_t *session, unsigned short *p)
 	    break;
 	}
     }
-    session->gNMEAdata.cmask |= C_ZCH;
+    REFRESH(session->gNMEAdata.signal_quality_stamp);
 }
 
 static void handle1003(struct gpsd_t *session, unsigned short *p)

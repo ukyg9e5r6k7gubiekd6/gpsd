@@ -112,7 +112,7 @@ int get_status(int satellite)
     int i;
     int s;
 
-    if (session.gNMEAdata.cmask & C_ZCH) {
+    if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
 	for (i = 0; i < 12; i++)
 	    if (satellite == session.gNMEAdata.Zs[i])
 		return session.gNMEAdata.Zv[i];
@@ -138,7 +138,7 @@ void draw_graphics()
     double x, y;
     char buf[20];
 
-    if (session.gNMEAdata.cmask & (C_SAT | C_ZCH)) {
+    if (SEEN(session.gNMEAdata.satellite_stamp) || SEEN(session.gNMEAdata.signal_quality_stamp)) {
 
 	i = min(width, height);
 

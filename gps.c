@@ -319,7 +319,7 @@ void update_display(char *message)
     XmTextFieldSetString(status, message);
 
     /* This is for the satellite status display */
-    if (session.gNMEAdata.cmask & C_SAT) {
+    if (SEEN(session.gNMEAdata.satellite_stamp)) {
 	for (i = 0; i < 12; i++) {
 	    if (i < session.gNMEAdata.in_view) {
 		sprintf(s, "%2d %02d %03d %02d", session.gNMEAdata.PRN[i],
@@ -333,7 +333,7 @@ void update_display(char *message)
 	for (i = 0; i < 12; i++)
 	    XmStringFree(string[i]);
     }
-    if (session.gNMEAdata.cmask & C_ZCH) {
+    if (SEEN(session.gNMEAdata.signal_quality_stamp)) {
 	for (i = 0; i < 12; i++) {
 	    sprintf(s, "%2d %02x", session.gNMEAdata.Zs[i], session.gNMEAdata.Zv[i]);
 	    string[i] = XmStringCreateSimple(s);
@@ -366,7 +366,6 @@ void update_display(char *message)
     XmTextFieldSetString(text_5, s);
 
     draw_graphics();
-    session.gNMEAdata.cmask = 0;
 }
 
 /**************************************************

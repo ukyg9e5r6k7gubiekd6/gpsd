@@ -310,14 +310,14 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'Y':
 	case 'y':
 	    sc = 0;
-	    if (session.gNMEAdata.cmask & C_SAT)
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    sprintf(reply + strlen(reply),
 		    ",Y=%d ", sc);
-	    for (i = 0; i < MAXCHANNELS; i++)
-		if (session.gNMEAdata.cmask & C_SAT)
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
+		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sprintf(reply + strlen(reply),"%d %2d %2d ", 
 				session.gNMEAdata.PRN[i], 
@@ -327,13 +327,13 @@ static int handle_request(int fd, char *buf, int buflen)
 	case 'Z':
 	case 'z':
 	    sc = 0;
-	    if (session.gNMEAdata.cmask & C_SAT)
+	    if (SEEN(session.gNMEAdata.satellite_stamp))
 	    {
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.PRN[i])
 			sc++;
 	    }
-	    else if (session.gNMEAdata.cmask & C_ZCH)
+	    else if (SEEN(session.gNMEAdata.signal_quality_stamp))
 	    {
 		for (i = 0; i < MAXCHANNELS; i++)
 		    if (session.gNMEAdata.Zs[i])
@@ -342,14 +342,14 @@ static int handle_request(int fd, char *buf, int buflen)
 	    sprintf(reply + strlen(reply),
 		    ",Z=%d ", sc);
 	    for (i = 0; i < MAXCHANNELS; i++)
-		if (session.gNMEAdata.cmask & C_SAT)
+		if (SEEN(session.gNMEAdata.satellite_stamp))
 		{
 		    if (session.gNMEAdata.PRN[i])
 			sprintf(reply + strlen(reply),"%d %02d ", 
 				session.gNMEAdata.PRN[i], 
 				session.gNMEAdata.ss[i]);
 		}
-	    	else
+	    	else if (SEEN(session.gNMEAdata.signal_quality_stamp))
 		{
 		    if (session.gNMEAdata.Zs[i])
 			sprintf(reply + strlen(reply),"%d %02d ", 
@@ -392,6 +392,7 @@ static void raw_hook(char *sentence)
 	    /* some listeners may be in push mode */
 	    int ok = 1;
 
+	    ++sentence;
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
 		ok = PUBLISH(fd, "pvs");

@@ -3,12 +3,6 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define C_LATLON	1
-#define C_SAT		2
-#define C_ZCH		4
-#define C_STATUS	8
-#define C_MODE		16
-
 #define MAXCHANNELS	12
 
 struct life_t
@@ -20,10 +14,10 @@ struct life_t
 #define INIT(stamp, now, tl)	stamp.time_to_live=tl; stamp.last_refresh=now
 #define REFRESH(stamp)	stamp.last_refresh = time(NULL)
 #define FRESH(stamp, t) stamp.last_refresh + stamp.time_to_live >= t
+#define CHANGED(stamp, now) stamp.last_refresh == now
+#define SEEN(stamp) stamp.last_refresh != 0
 
 struct OUTDATA {
-    long cmask;			/* Change flag, set by backend. Reset by app. */
-
     char utc[20];		/* UTC date/time as "mm/dd/yy hh:mm:ss" */
     time_t ts_utc;		/* UTC last updated time stamp */
 
@@ -38,25 +32,26 @@ struct OUTDATA {
 
     /* velocity */
     double speed;		/* Speed over ground, knots */
-    struct life_t speed_stamp;
     double mag_var;		/* magnetic variation in degrees */
     double course;		/* course made good */
+    struct life_t speed_stamp;
 
     /* status and precision of fix */
     int    status;
 #define STATUS_NO_FIX	0
 #define STATUS_FIX	1
 #define STATUS_DGPS_FIX	2
+    struct life_t status_stamp;
     int    mode;
 #define MODE_NO_FIX	1
 #define MODE_2D  	2
 #define MODE_3D  	3
     struct life_t mode_stamp;
-    struct life_t status_stamp;
     double pdop;		/* Position dilution of precision, meters */
     double hdop;		/* Horizontal dilution of precision, meters */
     double vdop;		/* Vertical dilution of precision, meters */
     double separation;		/* geoidal separation */
+    struct life_t fix_quality_stamp;
 
     /* satellite status */
     int in_view;		/* # of satellites in view */
@@ -66,10 +61,12 @@ struct OUTDATA {
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
     int used[MAXCHANNELS];	/* used in solution */
+    struct life_t satellite_stamp;
 
     /* Zodiac chipset channel status from PRWIZCH */
     int Zs[MAXCHANNELS];	/* satellite PRNs */
     int Zv[MAXCHANNELS];	/* signal values (0-7) */
+    struct life_t signal_quality_stamp;
 
     int year;
     int month;

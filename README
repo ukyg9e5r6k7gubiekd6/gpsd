@@ -99,6 +99,9 @@ New features include:
    * New y and z commands support signal-status reporting and satellite
      location -- it should no longer ever be necessary for clients to go to
      raw mode unless they want to monitor and log the GPS stream.
+   * New 'w' command toggles 'watcher' mode. In watcher mode gpsd ships
+     a gpsd-style response for each incoming sentence as if the client
+     had just sent all commands that asked for data contained in the sentence.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code this program uses can now be directly linked as a

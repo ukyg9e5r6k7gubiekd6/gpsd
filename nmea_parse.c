@@ -47,7 +47,6 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 	    lat = -lat;
 	if (out->latitude != lat) {
 	    out->latitude = lat;
-	    out->cmask |= C_LATLON;
 	}
 	updated++;
     }
@@ -62,7 +61,6 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 	    lon = -lon;
 	if (out->longitude != lon) {
 	    out->longitude = lon;
-	    out->cmask |= C_LATLON;
 	}
 	updated++;
     }
@@ -80,29 +78,19 @@ static void do_lat_lon(char *sentence, int begin, struct OUTDATA *out)
 
 /* ----------------------------------------------------------------------- */
 
-static void update_field_i(char *sentence, int fld, int *dest, int mask, struct OUTDATA *out)
+static void update_field_i(char *sentence, int fld, int *dest, struct OUTDATA *out)
 {
     int tmp;
 
     sscanf(field(sentence, fld), "%d", &tmp);
-
-    if (tmp != *dest) {
-	*dest = tmp;
-	out->cmask |= mask;
-    }
 }
 
 #if 0
-static void update_field_f(char *sentence, int fld, double *dest, int mask, struct OUTDATA *out)
+static void update_field_f(char *sentence, int fld, double *dest, struct OUTDATA *out)
 {
     double tmp;
 
     scanf(field(sentence, fld), "%lf", &tmp);
-
-    if (tmp != *dest) {
-	*dest = tmp;
-	out->cmask |= mask;
-    }
 }
 #endif
 
@@ -169,15 +157,19 @@ static void processGPRMC(char *sentence, struct OUTDATA *out)
     do_lat_lon(sentence, 3, out);
 
     /* A = valid, V = invalid */
-    if (strcmp(field(sentence, 2), "V") == 0)
+    if (strcmp(field(sentence, 2), "A") == 0)
+	out->status = STATUS_FIX;
+    else
     {
 	gpscli_report(2, "Invalid GPRMC zeroes status.\n");
-	out->status = 0;
+	out->status = STATUS_NO_FIX;
     }
+    REFRESH(out->speed_stamp);
 
     sscanf(field(sentence, 7), "%lf", &out->speed);
 
     sscanf(field(sentence, 8), "%lf", &out->course);
+    REFRESH(out->speed_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -284,6 +276,7 @@ static void processGPVTG(char *sentence, struct OUTDATA *out)
 	sscanf(field(sentence, 5), "%lf", &out->speed);
     else
 	sscanf(field(sentence, 3), "%lf", &out->speed);
+    REFRESH(out->speed_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -314,7 +307,6 @@ static void processGPGGA(char *sentence, struct OUTDATA *out)
     sscanf(field(sentence, 6), "%d", &out->status);
     REFRESH(out->status_stamp);
     gpscli_report(2, "GPGGA sets status %d\n", out->status);
-    out->cmask |= C_STATUS;
     sscanf(field(sentence, 7), "%d", &out->satellites);
     sscanf(field(sentence, 9), "%lf", &out->altitude);
     REFRESH(out->altitude_stamp);
@@ -344,11 +336,11 @@ static void processGPGSA(char *sentence, struct OUTDATA *out)
 
     sscanf(field(sentence, 2), "%d", &out->mode);
     REFRESH(out->mode_stamp);
-    out->cmask |= C_MODE;
     gpscli_report(2, "GPGSA sets mode %d\n", out->mode);
     sscanf(field(sentence, 15), "%lf", &out->pdop);
     sscanf(field(sentence, 16), "%lf", &out->hdop);
     sscanf(field(sentence, 17), "%lf", &out->vdop);
+    REFRESH(out->signal_quality_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -374,20 +366,21 @@ static void processGPGSV(char *sentence, struct OUTDATA *out)
 
     if (sscanf(field(sentence, 2), "%d", &n) < 1)
         return;
-    update_field_i(sentence, 3, &out->in_view, C_SAT, out);
+    update_field_i(sentence, 3, &out->in_view, out);
 
     n = (n - 1) * 4;
     m = n + 4;
 
     while (n < out->in_view && n < m) {
-	update_field_i(sentence, f++, &out->PRN[n], C_SAT, out);
-	update_field_i(sentence, f++, &out->elevation[n], C_SAT, out);
-	update_field_i(sentence, f++, &out->azimuth[n], C_SAT, out);
+	update_field_i(sentence, f++, &out->PRN[n], out);
+	update_field_i(sentence, f++, &out->elevation[n], out);
+	update_field_i(sentence, f++, &out->azimuth[n], out);
 	if (*(field(sentence, f)))
-	    update_field_i(sentence, f, &out->ss[n], C_SAT, out);
+	    update_field_i(sentence, f, &out->ss[n], out);
 	f++;
 	n++;
     }
+    REFRESH(out->satellite_stamp);
 }
 
 /* ----------------------------------------------------------------------- */
@@ -420,7 +413,7 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
     sscanf(field(sentence, 2), "%d", &tmp1);	
     sscanf(field(sentence, 3), "%c", &foo);	
     
-    if (!(out->cmask&C_STATUS)) {
+    if (!SEEN(out->status_stamp)) {
 	if (foo == 'T') {
 	    out->status = 1;
 	    out->mode = tmp1;
@@ -430,9 +423,7 @@ static void processPMGNST(char *sentence, struct OUTDATA *out)
 	    out->mode = 1;
 	}
 	REFRESH(out->status_stamp);
-	out->cmask |= C_STATUS;
 	REFRESH(out->mode_stamp);
-	out->cmask |= C_MODE;
 	gpscli_report(2, "PMGNST sets status %d, mode %d\n", out->status, out->mode);
     }
 }
@@ -453,9 +444,10 @@ static void processPRWIZCH(char *sentence, struct OUTDATA *out)
     int i;
 
     for (i = 0; i < 12; i++) {
-	update_field_i(sentence, 2 * i + 1, &out->Zs[i], C_ZCH, out);
-	update_field_i(sentence, 2 * i + 2, &out->Zv[i], C_ZCH, out);
+	update_field_i(sentence, 2 * i + 1, &out->Zs[i], out);
+	update_field_i(sentence, 2 * i + 2, &out->Zv[i], out);
     }
+    REFRESH(out->signal_quality_stamp);
 }
 
 /* ----------------------------------------------------------------------- */

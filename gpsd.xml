@@ -186,7 +186,8 @@ errors in meters &mdash; position, horizontal, and vertical.</para>
 <varlistentry>
 <term>r</term>
 <listitem><para>Toggles 'raw' mode. Return "R=0" or "R=1". In raw mode
-you read the unfiltered data stream from the GPS</para></listitem>
+you read the NMEA data stream from the GPS. (Non-NMEA GPSes get 
+their communication format translated to NMEA on the fly.)</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -198,6 +199,18 @@ you read the unfiltered data stream from the GPS</para></listitem>
 <varlistentry>
 <term>v</term>
 <listitem><para>The current speed as "V=%f" in knots.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>w</term>
+<listitem><para>Toggles 'watcher' mode. Return "W=0" or "W=1". In
+watcher mode gpsd ships a line of data to the client each time the the GPS
+sends a sentence, but rather than being raw NMEA the line is a gpsd
+response as if the user had just sent some set of gpsd commands.  That set of
+commands is the minimum for which the incoming sentence is relevant &mdash;
+e.g., a GPRMC sentence ships a "pvs" response because it contains
+position, velocity and GPS status data.
+</para></listitem>
 </varlistentry>
 
 <varlistentry>
