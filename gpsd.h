@@ -64,13 +64,6 @@ struct gps_session_t {
 
 #define PREFIX(pref, sentence)	!strncmp(pref, sentence, sizeof(pref)-1)
 
-/*
- * Give the GPS and UART this much time to settle and ship some data
- * before trying to read after open or baud rate change.  Less than
- * 1.25 seconds doesn't work under Linux 2.6.10 on an Athlon 64 3400.
- */
-#define SETTLE_TIME	1250000
-
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
 
@@ -81,7 +74,7 @@ extern int nmea_sane_satellites(struct gps_data_t *out);
 extern void nmea_add_checksum(char *sentence);
 extern int nmea_validate_buffer(char *buf, size_t n);
 extern int gpsd_open(int device_speed, int stopbits, struct gps_session_t *context);
-extern void gpsd_set_speed(struct termios *, int);
+extern int gpsd_set_speed(int, struct termios *, int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_session_t *context);
 extern int netlib_connectsock(const char *host, const char *service, const char *protocol);

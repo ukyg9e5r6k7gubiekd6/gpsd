@@ -17,7 +17,7 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
-void gpsd_set_speed(struct termios *ttyctl, int device_speed)
+int gpsd_set_speed(int ttyfd, struct termios *ttyctl, int device_speed)
 {
     if (device_speed < 300)
 	device_speed = 0;
@@ -38,6 +38,21 @@ void gpsd_set_speed(struct termios *ttyctl, int device_speed)
 
     cfsetispeed(ttyctl, (speed_t)device_speed);
     cfsetospeed(ttyctl, (speed_t)device_speed);
+    if (tcsetattr(ttyfd, TCSAFLUSH, ttyctl) != 0)
+	return 0;
+    /*
+     * for unknown reasons, the TCSAFLUSH above is not sufficient to
+     * flush the stale data from previous hunting out of the buffer.
+     */
+    tcflush(ttyfd, TCIOFLUSH);
+
+    /*
+     * Give the GPS and UART this much time to settle and ship some data
+     * before trying to read after open or baud rate change.  Less than
+     * 1.25 seconds doesn't work under Linux 2.6.10 on an Athlon 64 3400.
+     */
+    usleep(1250000);
+    return 1;
 }
 
 int gpsd_get_speed(struct termios* ttyctl)
@@ -65,21 +80,9 @@ static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
     int		n;
     size_t	maxreads;
 
-    gpsd_set_speed(&session->ttyset, speed);
-    /*
-     * throw away stale NMEA data that may be sitting in the buffer 
-     * from a previous session.
-     */
-    if (tcsetattr(ttyfd, TCSAFLUSH, &session->ttyset) != 0)
-	return 0;
-    /*
-     * for unknown reasons, the TCSAFLUSH above is not sufficient to
-     * flush the stale data from previous hunting out of the buffer.
-     */
-    tcflush(ttyfd, TCIOFLUSH);
+    gpsd_set_speed(ttyfd, &session->ttyset, speed);
     buf[0] = '\0';
     for (maxreads = 0; maxreads < NRATES; maxreads++) {
-	usleep(SETTLE_TIME);
 	n = read(ttyfd, buf, sizeof(buf)-1);
 	if (n > 0) {
 	    buf[n] = '\0';
