@@ -428,6 +428,13 @@ static void raw_hook(char *sentence)
     }
 }
 
+static void gpscli_errexit(char *s)
+{
+    gpscli_report(0, "%s: %s\n", s, strerror(errno));
+    gps_wrap(&session);
+    exit(2);
+}
+
 int main(int argc, char *argv[])
 {
     char *default_service = "gpsd";
@@ -629,11 +636,5 @@ int main(int argc, char *argv[])
     gps_wrap(&session);
 }
 
-void gpscli_errexit(char *s)
-{
-    gpscli_report(0, "%s: %s\n", s, strerror(errno));
-    gps_wrap(&session);
-    exit(2);
-}
 
 

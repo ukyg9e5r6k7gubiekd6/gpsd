@@ -1,4 +1,15 @@
-/* gpsd.h -- internals for the gpsd library */
+/* gpsd.h -- internals for the gps library */
+
+#define BUFSIZE	4096	/* longer than max-length NMEA sentence (82 chars) */
+
+#define GPGLL "GPGLL"
+#define GPVTG "GPVTG"
+#define GPGGA "GPGGA"
+#define GPGSA "GPGSA"
+#define GPGSV "GPGSV"
+#define GPRMC "GPRMC"
+#define PRWIZCH "PRWIZCH"
+#define PMGNST "PMGNST"
 
 /* here are the available GPS drivers */
 extern struct gps_type_t nmea;
@@ -28,8 +39,7 @@ void gps_deactivate(struct gpsd_t *session);
 void gps_poll(struct gpsd_t *session);
 void gps_wrap(struct gpsd_t *session);
 
-/* caller must supply these */
-void gpscli_errexit(char *s);
+/* caller must supply this */
 void gpscli_report(int d, const char *fmt, ...);
 
 

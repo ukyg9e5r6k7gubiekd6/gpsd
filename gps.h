@@ -79,17 +79,6 @@ struct OUTDATA {
     int seconds;
 };
 
-#define BUFSIZE	4096	/* longer than max-length NMEA sentence (82 chars) */
-
-#define GPGLL "GPGLL"
-#define GPVTG "GPVTG"
-#define GPGGA "GPGGA"
-#define GPGSA "GPGSA"
-#define GPGSV "GPGSV"
-#define GPRMC "GPRMC"
-#define PRWIZCH "PRWIZCH"
-#define PMGNST "PMGNST"
-
 struct longlat_t
 /* This structure is used to initialize some older GPS units */
 {
