@@ -60,8 +60,8 @@ int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
     else
       rate =  B57600;
 
+    tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);	/* toss stale data */
     if (speed != cfgetispeed(&session->ttyset)) {
-	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
 	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
