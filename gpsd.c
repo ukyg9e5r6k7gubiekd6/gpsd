@@ -329,15 +329,50 @@ static char *getline(char *p, char **out)
     return p;
 }
 
+static int assign_channel(struct subscriber_t *user)
+{
+    struct gps_device_t *device;
+
+    /* if subscriber has no device... */
+    if (!user->channel) {
+	time_t most_recent = 0;
+	int mychannel = -1;
+	struct channel_t *channel;
+
+	/* ...connect him to the most recently active device */
+	for(channel=channels;channel<channels+MAXDEVICES;channel++)
+	    if (channel->device && channel->when >= most_recent) {
+		most_recent = channel->when;
+		mychannel = channel - channels;
+	    }
+	if (mychannel <= -1)
+	    return 0;
+	else
+	    attach_client_to_device(user - subscribers, mychannel);
+    }
+    device = user->channel->device;
+
+    /* and open that device */
+    if (device->gpsdata.gps_fd == -1) {
+	gpsd_deactivate(device);
+	if (gpsd_activate(device) < 0) 
+	    return 0;
+	else {
+	    FD_SET(device->gpsdata.gps_fd, &all_fds);
+	    notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
+	}
+    }
+
+    return 1;
+}
+
 static int handle_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
     struct subscriber_t *whoami = subscribers + cfd;
-    struct channel_t *chp, *channel = whoami->channel;
-    struct gps_device_t *device = channel->device;
-    struct gps_data_t *ud = &device->gpsdata;
+    struct channel_t *chp;
 
     strcpy(reply, "GPSD");
     p = buf;
@@ -345,17 +380,20 @@ static int handle_request(int cfd, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (have_fix(device) && ud->fix.mode == MODE_3D)
-		sprintf(phrase, ",A=%.3f", ud->fix.altitude);
+	    if (assign_channel(whoami) && 
+			have_fix(whoami->channel->device) && 
+			whoami->channel->device->gpsdata.fix.mode == MODE_3D)
+		sprintf(phrase, ",A=%.3f", 
+			whoami->channel->device->gpsdata.fix.altitude);
 	    else
 		strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF only) */
-	    if (device && *p == '=') {
+	    if (assign_channel(whoami) && *p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
-		if (device->device_type->speed_switcher)
-		    if (device->device_type->speed_switcher(device, i)) {
+		if (whoami->channel->device->device_type->speed_switcher)
+		    if (whoami->channel->device->device_type->speed_switcher(whoami->channel->device, i)) {
 			/* 
 			 * Allow the control string time to register at the
 			 * GPS before we do the baud rate switch, which 
@@ -371,41 +409,46 @@ static int handle_request(int cfd, char *buf, int buflen)
 			 * The minimum delay time is probably constant
 			 * across any given type of UART.
 			 */
-			tcdrain(device->gpsdata.gps_fd);
+			tcdrain(whoami->channel->device->gpsdata.gps_fd);
 			usleep(50000);
-			gpsd_set_speed(device, (speed_t)i, 1);
+			gpsd_set_speed(whoami->channel->device, (speed_t)i, 1);
 		    }
 	    }
-	    if (device)
+	    if (whoami->channel->device)
 		sprintf(phrase, ",B=%d %d N %d", 
-		    gpsd_get_speed(&device->ttyset),
-		    9 - ud->stopbits, ud->stopbits);
+		    gpsd_get_speed(&whoami->channel->device->ttyset),
+			9 - whoami->channel->device->gpsdata.stopbits, 
+			whoami->channel->device->gpsdata.stopbits);
 	    else
 		strcpy(phrase, ".B=?");
 	    break;
 	case 'C':
-	    if (device)
-		sprintf(phrase, ",C=%d", device->device_type->cycle);
+	    if (assign_channel(whoami))
+		sprintf(phrase, ",C=%d", 
+			whoami->channel->device->device_type->cycle);
 	    else
 		strcpy(phrase, ".C=?");
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
-	    if (ud->fix.time)
-		unix_to_iso8601(ud->fix.time, phrase+3);
+	    if (assign_channel(whoami) && whoami->channel->device->gpsdata.fix.time)
+		unix_to_iso8601(whoami->channel->device->gpsdata.fix.time, phrase+3);
 	    else
 		strcpy(phrase, "?");
 	    break;
 	case 'E':
-	    if (have_fix(device)) {
-		if (device->gpsdata.fix.eph || device->gpsdata.fix.epv)
+	    if (assign_channel(whoami) && have_fix(whoami->channel->device)) {
+		if (whoami->channel->device->gpsdata.fix.eph 
+			|| whoami->channel->device->gpsdata.fix.epv)
 		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
-			    ud->epe, ud->fix.eph, ud->fix.epv);
-		else if (ud->pdop || ud->hdop || ud->vdop)
+			    whoami->channel->device->gpsdata.epe, 
+			    whoami->channel->device->gpsdata.fix.eph, 
+			    whoami->channel->device->gpsdata.fix.epv);
+		else if (whoami->channel->device->gpsdata.pdop || whoami->channel->device->gpsdata.hdop || whoami->channel->device->gpsdata.vdop)
 		    sprintf(phrase, ",E=%.2f %.2f %.2f", 
-			    ud->pdop * UERE(device), 
-			    ud->hdop * UERE(device), 
-			    ud->vdop * UERE(device));
+			    whoami->channel->device->gpsdata.pdop * UERE(whoami->channel->device), 
+			    whoami->channel->device->gpsdata.hdop * UERE(whoami->channel->device), 
+			    whoami->channel->device->gpsdata.vdop * UERE(whoami->channel->device));
 	    } else
 		strcpy(phrase, ",E=?");
 	    break;
@@ -414,19 +457,21 @@ static int handle_request(int cfd, char *buf, int buflen)
 		p = getline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
 		if ((chp = find_device(stash))) {
+		    attach_client_to_device(whoami-subscribers,chp-channels);
 		    whoami->tied = 1;
-		    device = chp->device;
 		}
 		free(stash);
 	    }
-	    if (device)
-		snprintf(phrase, sizeof(phrase), ",F=%s", device->gpsdata.gps_device);
+	    if (whoami->channel->device)
+		snprintf(phrase, sizeof(phrase), ",F=%s", 
+			 whoami->channel->device->gpsdata.gps_device);
 	    else
 		strcpy(phrase, ".F=?");
 	    break;
 	case 'I':
-	    if (device)
-		snprintf(phrase, sizeof(phrase), ",I=%s", device->device_type->typename);
+	    if (assign_channel(whoami))
+		snprintf(phrase, sizeof(phrase), ",I=%s", 
+			 whoami->channel->device->device_type->typename);
 	    else
 		strcpy(phrase, ".B=?");
 	    break;
@@ -436,9 +481,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    j++;
 	    sprintf(phrase, ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		device = channels[i].device;
-		if (device && strlen(phrase)+strlen(device->gpsdata.gps_device)+1 < sizeof(phrase)) {
-		    strcat(phrase, device->gpsdata.gps_device);
+		if (channels[i].device && strlen(phrase)+strlen(channels[i].device->gpsdata.gps_device)+1 < sizeof(phrase)) {
+		    strcat(phrase, channels[i].device->gpsdata.gps_device);
 		    strcat(phrase, " ");
 		}
 	    }
@@ -448,88 +492,90 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    sprintf(phrase, ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
 	    break;
 	case 'M':
-	    if (ud->fix.mode == MODE_NOT_SEEN)
+	    if (!assign_channel(whoami) && whoami->channel->device->gpsdata.fix.mode == MODE_NOT_SEEN)
 		strcpy(phrase, ",M=?");
 	    else
-		sprintf(phrase, ",M=%d", ud->fix.mode);
+		sprintf(phrase, ",M=%d", whoami->channel->device->gpsdata.fix.mode);
 	    break;
 	case 'N':
-	    if (!device)
+	    if (!assign_channel(whoami))
 		strcpy(phrase, ".N=?");
-	    else if (!device->device_type->mode_switcher)
+	    else if (!whoami->channel->device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
 	    else {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
-		    device->device_type->mode_switcher(device, 1);
+		    whoami->channel->device->device_type->mode_switcher(whoami->channel->device, 1);
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    device->device_type->mode_switcher(device, 0);
+		    whoami->channel->device->device_type->mode_switcher(whoami->channel->device, 0);
 		    p++;
 		}
 	    }
-	    sprintf(phrase, ",N=%d", device->gpsdata.driver_mode);
+	    sprintf(phrase, ",N=%d", whoami->channel->device->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    if (!have_fix(device))
+	    if (!assign_channel(whoami) || !have_fix(whoami->channel->device))
 		strcpy(phrase, ",O=?");
 	    else {
 		sprintf(phrase, ",O=%s %.2f %.3f %.6f %.6f",
-			ud->tag[0] ? ud->tag : "-",
-			ud->fix.time, ud->fix.ept, 
-			ud->fix.latitude, ud->fix.longitude);
-		if (device->gpsdata.fix.mode == MODE_3D)
+			whoami->channel->device->gpsdata.tag[0] ? whoami->channel->device->gpsdata.tag : "-",
+			whoami->channel->device->gpsdata.fix.time, whoami->channel->device->gpsdata.fix.ept, 
+			whoami->channel->device->gpsdata.fix.latitude, whoami->channel->device->gpsdata.fix.longitude);
+		if (whoami->channel->device->gpsdata.fix.mode == MODE_3D)
 		    sprintf(phrase+strlen(phrase), " %7.2f",
-			    device->gpsdata.fix.altitude);
+			    whoami->channel->device->gpsdata.fix.altitude);
 		else
 		    strcat(phrase, "       ?");
-		if (ud->fix.eph)
-		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.eph);
+		if (whoami->channel->device->gpsdata.fix.eph)
+		    sprintf(phrase+strlen(phrase), " %5.2f",  whoami->channel->device->gpsdata.fix.eph);
 		else
 		    strcat(phrase, "        ?");
-		if (ud->fix.epv)
-		    sprintf(phrase+strlen(phrase), " %5.2f",  ud->fix.epv);
+		if (whoami->channel->device->gpsdata.fix.epv)
+		    sprintf(phrase+strlen(phrase), " %5.2f",  whoami->channel->device->gpsdata.fix.epv);
 		else
 		    strcat(phrase, "        ?");
-		if (ud->fix.track != TRACK_NOT_VALID)
+		if (whoami->channel->device->gpsdata.fix.track != TRACK_NOT_VALID)
 		    sprintf(phrase+strlen(phrase), " %8.4f %8.3f",
-			    ud->fix.track, ud->fix.speed);
+			    whoami->channel->device->gpsdata.fix.track, whoami->channel->device->gpsdata.fix.speed);
 		else
 		    strcat(phrase, "        ?        ?");
-		if (device->gpsdata.fix.mode == MODE_3D)
-		    sprintf(phrase+strlen(phrase), " %6.3f", ud->fix.climb);
+		if (whoami->channel->device->gpsdata.fix.mode == MODE_3D)
+		    sprintf(phrase+strlen(phrase), " %6.3f", whoami->channel->device->gpsdata.fix.climb);
 		else
 		    strcat(phrase, "      ?");
 		strcat(phrase, " ?");	/* can't yet derive track error */ 
-		if (device->gpsdata.valid & SPEEDERR_SET)
+		if (whoami->channel->device->gpsdata.valid & SPEEDERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
-			    device->gpsdata.fix.eps);		    
+			    whoami->channel->device->gpsdata.fix.eps);		    
 		else
 		    strcat(phrase, "      ?");
-		if (device->gpsdata.valid & CLIMBERR_SET)
+		if (whoami->channel->device->gpsdata.valid & CLIMBERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
-			    device->gpsdata.fix.epc);		    
+			    whoami->channel->device->gpsdata.fix.epc);		    
 		else
 		    strcat(phrase, "      ?");
 	    }
 	    break;
 	case 'P':
-	    if (have_fix(device))
+	    if (assign_channel(whoami) || have_fix(whoami->channel->device))
 		sprintf(phrase, ",P=%.4f %.4f", 
-			ud->fix.latitude, ud->fix.longitude);
+			whoami->channel->device->gpsdata.fix.latitude, 
+			whoami->channel->device->gpsdata.fix.longitude);
 	    else
 		strcpy(phrase, ",P=?");
 	    break;
 	case 'Q':
-	    if (ud->pdop || ud->hdop || ud->vdop)
+	    if (assign_channel(whoami) && (whoami->channel->device->gpsdata.pdop || whoami->channel->device->gpsdata.hdop || whoami->channel->device->gpsdata.vdop))
 		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
-			ud->satellites_used, ud->pdop, ud->hdop, ud->vdop);
+			whoami->channel->device->gpsdata.satellites_used, whoami->channel->device->gpsdata.pdop, whoami->channel->device->gpsdata.hdop, whoami->channel->device->gpsdata.vdop);
 	    else
 		strcpy(phrase, ",Q=?");
 	    break;
 	case 'R':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
+		assign_channel(whoami);
 		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
@@ -544,35 +590,40 @@ static int handle_request(int cfd, char *buf, int buflen)
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		sprintf(phrase, ",R=0");
 	    } else {
+		assign_channel(whoami);
 		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		sprintf(phrase, ",R=1");
 	    }
 	    break;
 	case 'S':
-	    sprintf(phrase, ",S=%d", ud->status);
+	    if (assign_channel(whoami))
+		sprintf(phrase, ",S=%d", whoami->channel->device->gpsdata.status);
+	    else
+		strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (have_fix(device) && ud->fix.track != TRACK_NOT_VALID)
-		sprintf(phrase, ",T=%.4f", ud->fix.track);
+	    if (assign_channel(whoami) && have_fix(whoami->channel->device) && whoami->channel->device->gpsdata.fix.track != TRACK_NOT_VALID)
+		sprintf(phrase, ",T=%.4f", whoami->channel->device->gpsdata.fix.track);
 	    else
 		strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (have_fix(device) && ud->fix.mode == MODE_3D)
-		sprintf(phrase, ",U=%.3f", ud->fix.climb);
+	    if (assign_channel(whoami) && have_fix(whoami->channel->device) && whoami->channel->device->gpsdata.fix.mode == MODE_3D)
+		sprintf(phrase, ",U=%.3f", whoami->channel->device->gpsdata.fix.climb);
 	    else
 		strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (have_fix(device) && ud->fix.track != TRACK_NOT_VALID)
-		sprintf(phrase, ",V=%.3f", ud->fix.speed);
+	    if (assign_channel(whoami) && have_fix(whoami->channel->device) && whoami->channel->device->gpsdata.fix.track != TRACK_NOT_VALID)
+		sprintf(phrase, ",V=%.3f", whoami->channel->device->gpsdata.fix.speed);
 	    else
 		strcpy(phrase, ",V=?");
 	    break;
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
+		assign_channel(whoami);
 		subscribers[cfd].watcher = 1;
 		sprintf(phrase, ",W=1");
 		p++;
@@ -584,86 +635,88 @@ static int handle_request(int cfd, char *buf, int buflen)
 		subscribers[cfd].watcher = 0;
 		sprintf(phrase, ",W=0");
 	    } else {
+		assign_channel(whoami);
 		subscribers[cfd].watcher = 1;
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		sprintf(phrase, ",W=1");
 	    }
 	    break;
         case 'X':
-	    if (device)
-		sprintf(phrase, ",X=%f", ud->online);
+	    if (assign_channel(whoami) && whoami->channel->device)
+		sprintf(phrase, ",X=%f", whoami->channel->device->gpsdata.online);
 	    else
 		strcpy(phrase, ".X=?");
 	    break;
 	case 'Y':
-	    if (ud->satellites) {
+	    if (assign_channel(whoami) && whoami->channel->device->gpsdata.satellites) {
 		int used, reported = 0;
 		strcpy(phrase, ",Y=");
-		if (ud->valid & TIME_SET)
-		    sprintf(phrase+strlen(phrase), "%f ", ud->sentence_time);
+		if (whoami->channel->device->gpsdata.valid & TIME_SET)
+		    sprintf(phrase+strlen(phrase), "%f ", whoami->channel->device->gpsdata.sentence_time);
 		else
 		    strcat(phrase, "? ");
-		sprintf(phrase+strlen(phrase), "%d:", ud->satellites);
-		for (i = 0; i < ud->satellites; i++) {
+		sprintf(phrase+strlen(phrase), "%d:", whoami->channel->device->gpsdata.satellites);
+		for (i = 0; i < whoami->channel->device->gpsdata.satellites; i++) {
 		    used = 0;
-		    for (j = 0; j < ud->satellites_used; j++)
-			if (ud->used[j] == ud->PRN[i]) {
+		    for (j = 0; j < whoami->channel->device->gpsdata.satellites_used; j++)
+			if (whoami->channel->device->gpsdata.used[j] == whoami->channel->device->gpsdata.PRN[i]) {
 			    used = 1;
 			    break;
 			}
-		    if (ud->PRN[i]) {
+		    if (whoami->channel->device->gpsdata.PRN[i]) {
 			sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
-				ud->PRN[i], 
-				ud->elevation[i],ud->azimuth[i],
-				ud->ss[i],
+				whoami->channel->device->gpsdata.PRN[i], 
+				whoami->channel->device->gpsdata.elevation[i],whoami->channel->device->gpsdata.azimuth[i],
+				whoami->channel->device->gpsdata.ss[i],
 				used);
 			reported++;
 		    }
 		}
-		if (ud->satellites != reported)
+		if (whoami->channel->device->gpsdata.satellites != reported)
 		    gpsd_report(1,"Satellite count %d != PRN count %d\n",
-				ud->satellites, reported);
+				whoami->channel->device->gpsdata.satellites, reported);
 	    } else
 		strcpy(phrase, ",Y=?");
 	    break;
 	case 'Z':
+	    assign_channel(whoami); 
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
-		ud->profiling = 1;
+		whoami->channel->device->gpsdata.profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		sprintf(phrase, ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		ud->profiling = 0;
+		whoami->channel->device->gpsdata.profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		sprintf(phrase, ",Z=0");
 		p++;
 	    } else {
-		ud->profiling = !ud->profiling;
+		whoami->channel->device->gpsdata.profiling = !whoami->channel->device->gpsdata.profiling;
 		gpsd_report(3, "%d toggled profiling mode\n", cfd);
-		sprintf(phrase, ",Z=%d", ud->profiling);
+		sprintf(phrase, ",Z=%d", whoami->channel->device->gpsdata.profiling);
 	    }
 	    break;
         case '$':
-	    if (ud->sentence_time)
+	    if (whoami->channel->device->gpsdata.sentence_time)
 		sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
-			ud->tag,
-			ud->sentence_length,
-			ud->sentence_time,
-			ud->d_xmit_time - ud->sentence_time,
-			ud->d_recv_time - ud->sentence_time,
-			ud->d_decode_time - ud->sentence_time,
-			device->poll_times[cfd] - ud->sentence_time,
-			timestamp() - ud->sentence_time);
+			whoami->channel->device->gpsdata.tag,
+			whoami->channel->device->gpsdata.sentence_length,
+			whoami->channel->device->gpsdata.sentence_time,
+			whoami->channel->device->gpsdata.d_xmit_time - whoami->channel->device->gpsdata.sentence_time,
+			whoami->channel->device->gpsdata.d_recv_time - whoami->channel->device->gpsdata.sentence_time,
+			whoami->channel->device->gpsdata.d_decode_time - whoami->channel->device->gpsdata.sentence_time,
+			whoami->channel->device->poll_times[cfd] - whoami->channel->device->gpsdata.sentence_time,
+			timestamp() - whoami->channel->device->gpsdata.sentence_time);
 	    else
 		sprintf(phrase, ",$=%s %d 0 %f %f %f %f %f",
-			ud->tag,
-			ud->sentence_length,
-			ud->d_xmit_time,
-			ud->d_recv_time - ud->d_xmit_time,
-			ud->d_decode_time - ud->d_xmit_time,
-			device->poll_times[cfd] - ud->d_xmit_time,
-			timestamp() - ud->d_xmit_time);
+			whoami->channel->device->gpsdata.tag,
+			whoami->channel->device->gpsdata.sentence_length,
+			whoami->channel->device->gpsdata.d_xmit_time,
+			whoami->channel->device->gpsdata.d_recv_time - whoami->channel->device->gpsdata.d_xmit_time,
+			whoami->channel->device->gpsdata.d_decode_time - whoami->channel->device->gpsdata.d_xmit_time,
+			whoami->channel->device->poll_times[cfd] - whoami->channel->device->gpsdata.d_xmit_time,
+			timestamp() - whoami->channel->device->gpsdata.d_xmit_time);
 	    break;
 	case '\r': case '\n':
 	    goto breakout;
@@ -704,43 +757,6 @@ static void handle_control(int sfd, char *buf)
 	}
 	free(stash);
     }
-}
-
-static int assign_channel(struct subscriber_t *user)
-{
-    struct gps_device_t *device;
-
-    /* if subscriber has no device... */
-    if (!user->channel) {
-	time_t most_recent = 0;
-	int mychannel = -1;
-	struct channel_t *channel;
-
-	/* ...connect him to the most recently active device */
-	for(channel=channels;channel<channels+MAXDEVICES;channel++)
-	    if (channel->device && channel->when >= most_recent) {
-		most_recent = channel->when;
-		mychannel = channel - channels;
-	    }
-	if (mychannel <= -1)
-	    return 0;
-	else
-	    attach_client_to_device(user - subscribers, mychannel);
-    }
-    device = user->channel->device;
-
-    /* and open that device */
-    if (device->gpsdata.gps_fd == -1) {
-	gpsd_deactivate(device);
-	if (gpsd_activate(device) < 0) 
-	    return 0;
-	else {
-	    FD_SET(device->gpsdata.gps_fd, &all_fds);
-	    notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
-	}
-    }
-
-    return 1;
 }
 
 int main(int argc, char *argv[])
@@ -1008,7 +1024,6 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client: %s", buf);
 
-		    assign_channel(subscribers+cfd);
 		    subscribers[cfd].channel->device->poll_times[cfd] = timestamp();
 		    if (handle_request(cfd, buf, buflen) < 0)
 			detach_client(cfd);
