@@ -41,13 +41,13 @@ static Widget text_1, text_2, text_3, text_4, text_5, text_6, text_7;
 static Widget label_1, label_2, label_3, label_4, label_5, label_6, label_7;
 
 String fallback_resources[] = {
-    "*gpsdata.time.label.labelString: Time  ",
-    "*gpsdata.latitude.label.labelString: Lat.  ",
-    "*gpsdata.longitude.label.labelString: Long. ",
-    "*gpsdata.altitude.label.labelString: Alt.  ",
-    "*gpsdata.speed.label.labelString: Speed ",
-    "*gpsdata.track.label.labelString: Track ",
-    "*gpsdata.fix_status.label.labelString: Status",
+    "*gpsdata.time.label.labelString: Time     ",
+    "*gpsdata.latitude.label.labelString: Latitude ",
+    "*gpsdata.longitude.label.labelString: Longitude",
+    "*gpsdata.altitude.label.labelString: Altitude ",
+    "*gpsdata.speed.label.labelString: Speed    ",
+    "*gpsdata.track.label.labelString: Course   ",
+    "*gpsdata.fix_status.label.labelString: Status   ",
     "*gpsdata.quit.label.labelString: Quit",
     NULL
 };
@@ -89,7 +89,7 @@ static void build_gui(Widget lxbApp)
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
     XtSetValues(lxbApp, args, 5);
 
-#define LEFTSIDE_WIDTH	190
+#define LEFTSIDE_WIDTH	205
     /* the data panel */
     XtSetArg(args[0], XmNrubberPositioning, False);
     XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
@@ -112,6 +112,7 @@ static void build_gui(Widget lxbApp)
     satellite_list = XtCreateManagedWidget("satellite_list", xmListWidgetClass, data_panel, args, 11);
 
     /* the satellite diagram */
+#define SATDIAG_SIZE	400
     XtSetArg(args[0], XmNbottomAttachment, XmATTACH_NONE);
     XtSetArg(args[1], XmNleftOffset, 10);
     XtSetArg(args[2], XmNrightOffset, 10);
@@ -123,8 +124,8 @@ static void build_gui(Widget lxbApp)
     XtSetArg(args[8], XmNrightAttachment, XmATTACH_FORM);
     XtSetArg(args[9], XmNtopAttachment, XmATTACH_FORM);
     XtSetArg(args[10], XmNresizePolicy, XmRESIZE_NONE);
-    XtSetArg(args[11], XmNheight, 402);
-    XtSetArg(args[12], XmNwidth, 402);
+    XtSetArg(args[11], XmNheight, SATDIAG_SIZE);
+    XtSetArg(args[12], XmNwidth, SATDIAG_SIZE);
     satellite_diagram = XtCreateManagedWidget("satellite_diagram",
 			     xmDrawingAreaWidgetClass, data_panel, args, 13);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
@@ -375,7 +376,6 @@ int main(int argc, char *argv[])
     }
 
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
-
     build_gui(lxbApp);
     init_list();
 
@@ -384,7 +384,6 @@ int main(int argc, char *argv[])
 
     XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 			     handle_input, NULL);
-
     signal(SIGALRM, handle_alarm);
     alarm(1);
     XtAppMainLoop(app);
