@@ -46,6 +46,9 @@ the screen is a scrolling hex dump of all packets the GPS is issuing.
 Dump lines beginning &gt;&gt;&gt; represent control packets sent to the
 GPS.</para>
 
+<para>To interpret what you see, you will need a copy of the
+<citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
+
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>
 

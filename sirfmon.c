@@ -14,7 +14,7 @@
  *	s -- send hex bytes to device.
  *	q -- quit, leaving device in binary mode.
  *      Ctrl-S -- freeze display.
- *      Ctrl-Q -- unfreese display.
+ *      Ctrl-Q -- unfreeze display.
  */
 #include <stdio.h>
 #include <curses.h>
@@ -30,11 +30,7 @@
 #include <sys/types.h>
 #include <sys/times.h>
 #include <sys/ioctl.h>
-
-/* from gpsutils.c */
-extern int tzoffset(void);
-extern double gpstime_to_unix(int week, double tow);
-extern double timestamp(void);
+#include "gpsutils.h"
 
 #define BUFLEN		2048
 
@@ -45,6 +41,7 @@ extern double timestamp(void);
 
 #define MAXCHANNELS	12
 
+/* how many characters to look at when tryting to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
 static int LineFd;					/* fd for RS232 line */
@@ -87,8 +84,8 @@ static void decode_sirf(unsigned char buf[],int len);
 static void decode_time(int week, int tow);
 static void decode_ecef(double x, double y, double z, 
 			double vx, double vy, double vz);
-static int sendpkt (unsigned char *buf,int len);
-static int readpkt (unsigned char *buf);
+static int sendpkt(unsigned char *buf,int len);
+static int readpkt(unsigned char *buf);
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
@@ -302,7 +299,7 @@ int main (int argc, char **argv)
     wmove(mid2win, 3,1);
     wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
     wmove(mid2win, 4,1);
-    wprintw(mid2win, "Skew:                                      HDOP:      M1:    M2:    ");
+    wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:          M2:    ");
     wmove(mid2win, 5,1);
     wprintw(mid2win, "Fix:");
     mvwprintw(mid2win, 6, 24, " Packet type 2 (0x02) ");
@@ -538,7 +535,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	wprintw(mid2win, "%4.1f",(float)getb(20)/5);	/* HDOP */
 	wmove(mid2win, 4,58);
 	wprintw(mid2win, "%02x",getb(19));		/* Mode 1 */
-	wmove(mid2win, 4,65);
+	wmove(mid2win, 4,72);
 	wprintw(mid2win, "%02x",getb(21));		/* Mode 2 */
 	wmove(mid2win, 5,7);
 	nfix = getb(28);
@@ -816,9 +813,10 @@ static void decode_time(int week, int tow)
     wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
     wmove(mid2win, 3, 29);
     wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
-
     wmove(mid2win, 4, 8);
-    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow));
+    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100)+gmt_offset);
+    wmove(mid2win, 4, 29);
+    wprintw(mid2win, "%d", gmt_offset);
 }
 
 static void decode_ecef(double x, double y, double z,
