@@ -17,7 +17,7 @@
 <funcsynopsis>
 <funcsynopsisinfo>
 
-#include &lt;gpsd.h&gt;
+#include &lt;gps.h&gt;
 
 struct gpsd_t session;
 
