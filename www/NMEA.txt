@@ -932,9 +932,9 @@ Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B
 
  RMC - Recommended Minimum Navigation Information
                                                             12
-        1         2 3       4 5        6 7   8   9    10  11|  13
-        |         | |       | |        | |   |   |    |   | |   |
- $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a*,m,hh<CR><LF>
+        1         2 3       4 5        6  7   8   9    10 11|  13
+        |         | |       | |        |  |   |   |    |  | |   |
+ $--RMC,hhmmss.ss,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,xxxx,x.x,a,m,*hh<CR><LF>
 
  Field Number: 
   1) UTC Time
@@ -1200,8 +1200,8 @@ and produces a single output.
 
  VTG - Track made good and Ground speed
 
-        1   2 3   4 5	6 7   8 9   10
-        |   | |   | |	| |   | |   |
+         1  2  3  4  5	6  7  8 9   10
+         |  |  |  |  |	|  |  | |   |
  $--VTG,x.x,T,x.x,M,x.x,N,x.x,K,m,*hh<CR><LF>
 
  Field Number: 
@@ -1218,9 +1218,9 @@ and produces a single output.
 
 Note: in some older versions of NMEA 0183, the sentence looks like this:
 
-        1   2 3 4  5
-        |   | | |  |
- $--VTG,x.x,x,x.x,*hh<CR><LF>
+         1  2  3   4  5
+         |  |  |   |  |
+ $--VTG,x.x,x,x.x,x.x,*hh<CR><LF>
 
  Field Number: 
   1) True course over ground (degrees) 000 to 359
