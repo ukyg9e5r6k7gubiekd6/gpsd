@@ -88,44 +88,129 @@ int openline (char *name,int baud);
 int sendpkt (unsigned char *buf,int len);
 int readpkt (unsigned char *buf);
 
+static struct termios ttyset, ttyset_old;
+
+#define NO_PACKET	0
+#define SIRF_PACKET	1
+#define NMEA_PACKET	2
+
+static int set_speed(unsigned int speed, unsigned int stopbits)
+{
+    unsigned int	rate, count, st, state;
+    unsigned char buf[300];
+
+    if (speed < 300)
+	rate = 0;
+    else if (speed < 1200)
+      rate =  B300;
+    else if (speed < 2400)
+      rate =  B1200;
+    else if (speed < 4800)
+      rate =  B2400;
+    else if (speed < 9600)
+      rate =  B4800;
+    else if (speed < 19200)
+      rate =  B9600;
+    else if (speed < 38400)
+      rate =  B19200;
+    else if (speed < 57600)
+      rate =  B38400;
+    else
+      rate =  B57600;
+
+    tcflush(LineFd, TCIOFLUSH);	/* toss stale data */
+    cfsetispeed(&ttyset, (speed_t)rate);
+    cfsetospeed(&ttyset, (speed_t)rate);
+    ttyset.c_cflag &=~ CSIZE;
+    ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
+    if (tcsetattr(LineFd, TCSANOW, &ttyset) != 0)
+	return 0;
+    tcflush(LineFd, TCIOFLUSH);
+
+    /* sniff for NMEA or SiRF packet */
+    state = 0;
+    for (count = 0; count < sizeof(buf); count++) {
+	if ((st = read(LineFd, buf, 1)) < 0)
+	    return 0;
+	else
+	    count += st;
+	if (state == 0) {
+	    if (buf[0] == START1)
+		state = 1;
+	    else if (buf[0] == '$')
+		state = 2;
+	} else if (state == 1) {
+	    if (buf[0] == START2)
+		return SIRF_PACKET;
+	    else if (buf[0] == '$')
+		state = 2;
+	    else
+		state = 0;
+	} else if (state == 2) {
+	    if (buf[0] == 'G')
+		state = 3;
+	    else if (buf[0] == START1)
+		state = 1;
+	    else
+		state = 0;
+	} else if (state == 3) {
+	    if (buf[0] == 'P')
+		return NMEA_PACKET;
+	    else if (buf[0] == START1)
+		state = 1;
+	    else
+		state = 0;
+	}
+    }
+
+    return NO_PACKET;
+}
+
 int main (int argc, char **argv)
 {
-    int len,i,speed,v,quit = 0;
+    int len,i,stopbits,speed,v,quit = 0;
     char *p;
     fd_set select_set;
     unsigned char buf[BUFLEN];
     char line[80];
+    static unsigned int *ip, rates[] = {4800, 9600, 19200, 38400, 57600};
 
     if (argc < 2) {
-	fprintf(stderr,"Usage: %s <tty-device>, <speed>\n",argv[0]);
+	fprintf(stderr,"Usage: %s <tty-device>.\n",argv[0]);
 	exit(1);
     }
 
-    if (argc < 3)
-	rate = B9600;
-    else {
-	speed = atoi(argv[2]);
-	if (speed < 300)
-	    rate = 0;
-	else if (speed < 1200)
-	  rate =  B300;
-	else if (speed < 2400)
-	  rate =  B1200;
-	else if (speed < 4800)
-	  rate =  B2400;
-	else if (speed < 9600)
-	  rate =  B4800;
-	else if (speed < 19200)
-	  rate =  B9600;
-	else if (speed < 38400)
-	  rate =  B19200;
-	else if (speed < 57600)
-	  rate =  B38400;
-	else
-	  rate =  B57600;
+    if ((LineFd = open(argv[1],O_RDWR)) < 0) {
+	perror(argv[1]);
+	return 1;
     }
-    if (openline(argv[1], rate))
-	exit(2);
+    
+    /* Save original terminal parameters */
+    if (tcgetattr(LineFd, &ttyset_old) != 0)
+      goto bailout;
+    memcpy(&ttyset, &ttyset_old,sizeof(ttyset));
+    /*
+     * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
+     * 200 (and possibly other USB GPSes) gets completely hosed
+     * in the presence of flow control.  Thus, turn off CRTSCTS.
+     */
+    ttyset.c_cflag &= ~(PARENB | CRTSCTS);
+    ttyset.c_cflag |= CREAD | CLOCAL;
+    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
+    ttyset.c_oflag = (ONLCR);
+
+    for (stopbits = 1; stopbits <= 2; stopbits++)
+	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
+	{
+	    fprintf(stderr, "hunting at speed %d, %dN%d\n",
+		    *ip, 9-stopbits, stopbits);
+	    if (set_speed(*ip, stopbits) == SIRF_PACKET)
+		goto rate_ok;
+	}
+ bailout:
+    fputs("Can't sync up with device!\n", stderr);
+    exit(1);
+ rate_ok:;
 
     initscr();
     cbreak();
@@ -143,7 +228,7 @@ int main (int argc, char **argv)
     move(3,1);
     printw("Vel:                            m/s                                    m/s");
     move(4,1);
-    printw("Time:                                      Heading:        deg         m/s");
+    printw("Time:                  UTC:                Heading:        deg         m/s");
     move(6,1);
     printw("DOP:      M1:    M2:    Fix:  ");
     move(7,1);
@@ -199,20 +284,6 @@ int main (int argc, char **argv)
 
 	    switch (line[0])
 	    {
-	    case 'b':
-		v = B19200;
-		if (*p == '3')
-		    v = B38400;
-		if (*p == '9')
-		    v = B9600;
-
-		close(LineFd);
-
-		if (openline(argv[1],v))
-		    exit(2);
-
-		break;
-
 	    case 'n':				/* switch to NMEA */
 		putb(0,0x81);			/* id */
 		putb(1,0x02);			/* mode */
@@ -555,8 +626,9 @@ void decode_time(int week, int tow)
     m = (m - s) / 6000;
 
     move(4,7);
-    printw("%4d+%9.2f   UTC: %d %02d:%02d:%05.2f",
-	   week,(double)tow/100,day, h,m,(float)s/100);
+    printw("%4d+%9.2f", week, (double)tow/100);
+    move(4, 29);
+    printw("%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
 }
 
 void
@@ -606,36 +678,6 @@ double x,y,z,vx,vy,vz;
 }
 
 /* RS232-line routines (initialization and SiRF pkt send/receive) */
-
-int openline (char *name, int baud)
-{
-    struct termios tios;
-
-    if ((LineFd = open(name,O_RDWR)) < 0) {
-	perror(name);
-	return 1;
-    }
-
-    if (ioctl(LineFd,TCGETS,&tios) < 0) {
-	perror(name);
-	return 1;
-    }
-
-    tios.c_iflag = IGNBRK|IGNPAR;
-    tios.c_oflag = 0;
-    tios.c_cflag = baud|CS8|CREAD|CLOCAL;
-    tios.c_lflag = 0;
-    tios.c_line = N_TTY;
-    memset(tios.c_cc,0,sizeof(tios.c_cc));
-    tios.c_cc[VMIN] = 1;
-
-    if (ioctl(LineFd,TCSETS,&tios) < 0) {
-	perror(name);
-	return 1;
-    }
-
-    return 0;
-}
 
 int readbyte (void)
 {
