@@ -66,12 +66,9 @@ int serial_open()
 
 	    memcpy(&ttyset, &ttyset_old, sizeof(ttyset));
 
-#if defined (USE_TERMIO)
-	    ttyset.c_cflag = CBAUD & device_speed;
-#else
-	    ttyset.c_ispeed = device_speed;
-	    ttyset.c_ospeed = device_speed;
-#endif
+	    cfsetispeed(&ttyset, (speed_t)device_speed);
+	    cfsetospeed(&ttyset, (speed_t)device_speed);
+
 	    ttyset.c_cflag &= ~(PARENB | CRTSCTS);
 	    ttyset.c_cflag |= (CSIZE & CS8) | CREAD | CLOCAL;
 	    ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
