@@ -124,7 +124,7 @@ MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
 
 XGPSOBJS=xgpsspeed.o Tachometer.o
 
-all: $(PROGRAMS) $(MOTIF_PROGRAMS)
+all: $(PROGRAMS) $(MOTIF_PROGRAMS) gpsd.1
 
 gpsd: gpsd.o libgpsd.a
 	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(NETLIBS) $(LIBS)
