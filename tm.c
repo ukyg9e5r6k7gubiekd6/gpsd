@@ -108,7 +108,7 @@ struct gps_type_t nmea =
     "NMEA",		/* full name of type */
     NULL,		/* no initialization */
     nmea_handle_input,	/* read text sentence */
-    nmea_write_rctm,	/* write RCTM data straight */
+    nmea_write_rctm,	/* write RTCM data straight */
     NULL,		/* no wrapup */
     4800,		/* default speed to connect at */
 };
@@ -159,7 +159,7 @@ struct gps_type_t tripmate =
     "TripMate",			/* full name of type */
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     nmea_handle_input,		/* read text sentence */
-    nmea_write_rctm,		/* send RCTM data straight */
+    nmea_write_rctm,		/* send RTCM data straight */
     NULL,			/* no wrapup */
     4800,			/* default speed to connect at */
 };
@@ -175,7 +175,8 @@ struct gps_type_t tripmate =
  * Treat this as a straight NMEA device unless we get the exception
  * code back that says to go binary.  In that case process_exception() 
  * will flip us over to the earthmate_b driver.  But, connect at 9600
- * rather than 4800.
+ * rather than 4800.  The Rockwell chipset does not accept DGPS in text 
+ * mode.
  */
 
 struct gps_type_t earthmate_a =
@@ -184,7 +185,7 @@ struct gps_type_t earthmate_a =
     "EarthMate (a)",		/* full name of type */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
-    NULL,			/* don't send RCTM data */
+    NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     9600,			/* connecting at 4800 will fail */
 };
@@ -201,7 +202,7 @@ struct gps_type_t logfile =
     "Logfile",			/* full name of type */
     NULL,			/* no initializer */
     nmea_handle_input,		/* read text sentence */
-    NULL,			/* don't send RCTM data */
+    NULL,			/* don't send RTCM data */
     NULL,			/* no wrapup code */
     0,				/* don't set a speed */
 };
