@@ -104,24 +104,6 @@ static void usage(void)
 	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
 }
 
-static int throttled_write(int fd, char *buf, int len)
-/* write to client -- throttle if it's gone or we're close to buffer overrun */
-{
-    int status;
-
-    gpsd_report(3, "=> client(%d): %s", fd, buf);
-    if ((status = write(fd, buf, len)) > -1)
-	return status;
-    if (errno == EBADF)
-	gpsd_report(3, "Client on %d has vanished.\n", fd);
-    else if (errno == EWOULDBLOCK)
-	gpsd_report(3, "Dropped client on %d to avoid overrun.\n", fd);
-    else
-	gpsd_report(3, "Client write to %d: %s\n", fd, strerror(errno));
-    FD_CLR(fd, &all_fds); FD_CLR(fd, &nmea_fds); FD_CLR(fd, &watcher_fds);
-    return status;
-}
-
 static int have_fix(struct gps_device_t *device)
 {
 #define VALIDATION_COMPLAINT(level, legend) \
@@ -138,16 +120,6 @@ static int have_fix(struct gps_device_t *device)
     VALIDATION_COMPLAINT(3, "GPS has no fix");
     return 0;
 #undef VALIDATION_CONSTRAINT
-}
-
-static void notify_watchers(char *sentence)
-/* notify all watching clients of an event */
-{
-    int cfd;
-
-    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-	if (FD_ISSET(cfd, &watcher_fds))
-	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
 static int passivesock(char *service, char *protocol, int qlen)
@@ -192,6 +164,42 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     return s;
+}
+
+static void detach_client(int cfd)
+{
+    close(cfd);
+    FD_CLR(cfd, &all_fds);
+    FD_CLR(cfd, &nmea_fds);
+    FD_CLR(cfd, &watcher_fds);
+}
+
+static int throttled_write(int cfd, char *buf, int len)
+/* write to client -- throttle if it's gone or we're close to buffer overrun */
+{
+    int status;
+
+    gpsd_report(3, "=> client(%d): %s", cfd, buf);
+    if ((status = write(cfd, buf, len)) > -1)
+	return status;
+    if (errno == EBADF)
+	gpsd_report(3, "Client on %d has vanished.\n", cfd);
+    else if (errno == EWOULDBLOCK)
+	gpsd_report(3, "Dropped client on %d to avoid overrun.\n", cfd);
+    else
+	gpsd_report(3, "Client write to %d: %s\n", cfd, strerror(errno));
+    detach_client(cfd);
+    return status;
+}
+
+static void notify_watchers(char *sentence)
+/* notify all watching clients of an event */
+{
+    int cfd;
+
+    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+	if (FD_ISSET(cfd, &watcher_fds))
+	    throttled_write(cfd, sentence, strlen(sentence));
 }
 
 /* restrict the scope of the command-state globals as much as possible */
@@ -669,7 +677,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
 
-	/* always be open to new connections */
+	/* always be open to new client connections */
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
@@ -745,21 +753,14 @@ int main(int argc, char *argv[])
 		    int buflen;
 		    gpsd_report(3, "checking %d \n", cfd);
 		    if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
-			(void) close(cfd);
-			FD_CLR(cfd, &all_fds);
-			FD_CLR(cfd, &nmea_fds);
-			FD_CLR(cfd, &watcher_fds);
+			detach_client(cfd);
 		    } else {
 		        buf[buflen] = '\0';
 			gpsd_report(1, "<= client: %s", buf);
 
 			device->poll_times[cfd] = timestamp();
-			if (handle_request(cfd, buf, buflen) < 0) {
-			    (void) close(cfd);
-			    FD_CLR(cfd, &all_fds);
-			    FD_CLR(cfd, &nmea_fds);
-			    FD_CLR(cfd, &watcher_fds);
-			}
+			if (handle_request(cfd, buf, buflen) < 0)
+			    detach_client(cfd);
 		    }
 		}
 	    }
@@ -772,7 +773,7 @@ int main(int argc, char *argv[])
 	    gpsd_deactivate(device);
 	}
     }
-
     gpsd_wrap(device);
+
     return 0;
 }
