@@ -16,6 +16,7 @@ information on the following topics:
 * New documentation on BWC, DTM, GBS, GRS, GST, MSK, and MSS sentences.
 * Sentence examples merged from [GIDS]
 * Sentence explanations from [GIDS] and elsewhere
+* Corrected badly mangled GPZDA description.
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -1399,14 +1400,16 @@ to have been introduced with NMEA 3.01 in 2002.
         |         |  |  |    |  |  |
  $--ZDA,hhmmss.ss,xx,xx,xxxx,xx,xx*hh<CR><LF>
 
- Field Number: 
-  1) Local zone minutes description, same sign as local hours
-  2) Local zone description, 00 to +- 13 hours
-  3) Year
-  4) Month, 01 to 12
-  5) Day, 01 to 31
-  6) Universal Time Coordinated (UTC)
+ Field Number:
+  1) UTC time (hours, minutes, seconds, may have fractional subsecond)
+  2) Day, 01 to 31
+  3) Month, 01 to 12
+  4) Year (4 digits)
+  5) Local zone description, 00 to +- 13 hours
+  6) Local zone minutes description, apply same sign as local hours
   7) Checksum
+
+Example: $GPZDA,160012.71,11,03,2004,-1,00*7D
 
 ------------------------------------------------------------------------------
 

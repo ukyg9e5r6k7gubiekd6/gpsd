@@ -69,35 +69,29 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  *
  * Scary timestamp fudging begins here
  *
+ * Four sentences, GGA and GLL and RMC and ZDA, contain timestamps.
+ * Timestamps always look like hhmmss.ss, with the trailing .ss part
+ * optional.  RMC has a date field, in the format ddmmyy.  ZDA has
+ * separate fields for day/month/year, with a 4-digit year.  This
+ * means that for RMC we must supply a century and for GGA and GGL we
+ * must supply a century, year, and day.  We get the missing data from
+ * a previous RMC or ZDA; century in RMC is supplied by the host
+ * machine's clock time if there has been no previous RMC.
+ *
  **************************************************************************/
-
-/*
-   Three sentences, GGA and GLL and RMC, contain timestamps. Timestamps 
-   always look like hhmmss.ss, with the trailing .ss part optional.
-   RMC alone has a date field, in the format ddmmyy.  These functions
-   generate a canonical form in ISO 8601 format:
-
-   yyyy-mm-ddThh:mm:ss.sssZ
-   012345678901234567890123
-
-   (where part or all of the decimal second suffix may be omitted).
-   This means that for GPRMC we must supply a century and for GGA and
-   GGL we must supply a century, year, and day.  We get the missing data 
-   from the host machine's clock time.
-
-   Sigh. This is only necessary because the design of NMEA 0183 is a crock.
- */
 
 #define DD(s)	((s)[0]-'0')*10+((s)[1]-'0')
 
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
-    struct tm tm;
-    time_t now = time(NULL);
+    if (!out->nmea_date.tm_year) {
+	struct tm tm;
+	time_t now = time(NULL);
 
-    gmtime_r(&now, &tm);
-    out->nmea_date.tm_year = ((1900+tm.tm_year)/100)*100 + DD(ddmmyy+4) - 1900;
+	gmtime_r(&now, &tm);
+	out->nmea_date.tm_year = ((1900+tm.tm_year)/100)*100+DD(ddmmyy+4)-1900;
+    }
     out->nmea_date.tm_mon = DD(ddmmyy+2)-1;
     out->nmea_date.tm_mday = DD(ddmmyy);
 }
@@ -407,6 +401,27 @@ static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
     return HERR_SET | VERR_SET | PERR_SET;
 }
 
+static int processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
+/* Time & Date */
+{
+    /*
+      $GPZDA,160012.71,11,03,2004,-1,00*7D
+      1) UTC time (hours, minutes, seconds, may have fractional subsecond)
+      2) Day, 01 to 31
+      3) Month, 01 to 12
+      4) Year (4 digits)
+      5) Local zone description, 00 to +- 13 hours
+      6) Local zone minutes description, apply same sign as local hours
+      7) Checksum
+     */
+    merge_hhmmss(field[1], out);
+    out->nmea_date.tm_year = atoi(field[4]) - 1900;
+    out->nmea_date.tm_mon = atoi(field[3]);
+    out->nmea_date.tm_mday = atoi(field[2]);
+    out->fix.time = mktime(&out->nmea_date) + out->subseconds;
+    return TIME_SET;
+}
+
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
 {
@@ -460,6 +475,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	{"GPGLL", GPGLL,	processGPGLL},
 	{"GPGSA", GPGSA,	processGPGSA},
 	{"GPGSV", GPGSV,	processGPGSV},
+	{"GZDA",  GPZDA,	processGPZDA},
 	{"PGRME", PGRME,	processPGRME},
     };
 

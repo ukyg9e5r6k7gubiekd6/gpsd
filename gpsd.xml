@@ -530,10 +530,10 @@ website</ulink> links to several documents that collect publicly
 disclosed information about the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
-sentences: GPRMC, GPGLL, GPGGA, GPGSA, GPGSV. and one vendor extension
-PGRME.  Note that <application>gpsd</application> returns pure decimal
-degrees, not the hybrid degree/minute format described in the NMEA
-standard.</para>
+sentences: GPRMC, GPGLL, GPGGA, GPGSA, GPGSV, GPZDA, and one vendor
+extension PGRME.  Note that <application>gpsd</application> returns
+pure decimal degrees, not the hybrid degree/minute format described in
+the NMEA standard.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

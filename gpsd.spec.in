@@ -109,7 +109,8 @@ cp gps.py gpsd.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 - Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use
   SBAS.  sirfmon now displays SBAS parameters, and is included in the
   installed programs.  Add to FAQ a fix for spurious high speeds reported
-  in XTrac mode.
+  in XTrac mode.  We now interpret GPZDA.  We no longer fudge a missing 
+  ddmmyy in NMEA timestamps from the system clock, so replay will work better.
 
 * Wed Mar 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.18-1
 - First cut at cooperating with NTP.  Major library restructuring; 

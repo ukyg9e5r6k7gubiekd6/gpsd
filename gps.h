@@ -150,7 +150,8 @@ struct gps_data_t {
 #define GPVTG	0x08
 #define GPGSA	0x10
 #define GPGSV	0x20
-#define PGRME	0x40
+#define GPZDA	0x40
+#define PGRME	0x80
     struct tm nmea_date;
     double subseconds;
 };
