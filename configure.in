@@ -18,7 +18,7 @@ AC_PROG_LIBTOOL
 
 CFLAGS="$CFLAGS -Wall -Werror"
 
-AC_CHECK_HEADERS(termio.h sys/param.h termios.h sys/termios.h sys/select.h strings.h path.h sys/filio.h sys/time.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/filio.h sys/time.h)
 
 dnl
 dnl Locate Net Libraries
@@ -80,9 +80,6 @@ ice_save_CPPFLAGS="$CPPFLAGS"
 ice_save_LDFLAGS="$LDFLAGS"
 dnl
 AC_PATH_XTRA
-ICE_FIND_MOTIF
-ICE_FIND_ATHENA
-ICE_FIND_XPM
 dnl
 dnl Autoconf bug fix: Sun CC 3.0 requires `-R lib', g++ requires `-Rlib'.
 changequote(,)dnl
@@ -144,10 +141,6 @@ fi
 AC_SUBST(XT_LIBS)
 dnl
 
-
-
-
-
 dnl
 dnl Check for Xaw libraries
 dnl
@@ -163,11 +156,6 @@ AC_MSG_WARN([The Xaw library '-lXaw' could not be found.
 fi
 AC_SUBST(XAW_LIBS)
 dnl
-
-
-
-
-
 
 dnl
 dnl Check for X extension libraries
