@@ -236,7 +236,6 @@ int packet_sniff(struct gps_session_t *session)
 		} else \
 		    packet_shift(session); \
 	    } \
-	struct timeval tv; \
 	gettimeofday(&tv, NULL); \
 	session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv); \
 	    return 0; \
