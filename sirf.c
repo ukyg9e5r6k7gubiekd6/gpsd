@@ -226,8 +226,6 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	 */
 	if (session->counter % 5)
 	    break;
-	session->gpsdata.fix.time=gpstime_to_unix(getw(1), getl(3)*1e-2);
-	session->gpsdata.fix.time -= LEAP_SECONDS;
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
@@ -260,7 +258,7 @@ int sirf_parse(struct gps_session_t *session, unsigned char *buf, int len)
 	gpsd_report(3, "<= GPS: %s", buf2);
 	session->gpsdata.sentence_length = 188;
 	strcpy(session->gpsdata.tag, "MTD");
-	return TIME_SET | SATELLITE_SET;
+	return SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 

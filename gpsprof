@@ -101,14 +101,22 @@ class uninstrumented:
     name = "uninstrumented"
     def __init__(self, fp):
         self.fp = fp
-    def header(self, session, fp):
-        fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
+    def header(self, session):
+        self.fp.write("# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle))
-    def formatter(self, session, fp):
-        fp.write("%2.6lf\n" % (time.time() - gps.isotime(session.utc),))
-        return True
+    def formatter(self, session):
+        if session.gps_time:
+            seconds = time.time() - session.gps_time
+            if time.daylight and time.localtime().tm_isdst:
+                seconds += time.altzone
+            else:
+                seconds += time.timezone
+            self.fp.write("%2.6lf\n" % seconds)
+            return True
+        else:
+            return False
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -140,7 +148,8 @@ class rawplot:
         self.fp.write("--------\n")
 
     def formatter(self, session):
-        self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
+        if session.gps_time:
+            self.fp.write("%2d	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f  	# %s\n" \
               % (session.length,
                  session.d_xmit_time, 
                  session.d_recv_time,
@@ -150,7 +159,9 @@ class rawplot:
                  session.c_recv_time,
                  session.c_decode_time,
                  session.tag))
-        return True
+            return True
+        else:
+            return False
     def plot(self, file, title, session):
         fmt = '''
 set autoscale
@@ -192,22 +203,25 @@ class splitplot:
             self.fp.write("---------\t")
         self.fp.write("--------\n")
     def formatter(self, session):
-        for s in splitplot.sentences:
-            if s == session.tag:
-                self.fp.write("%2.6f\t"% session.d_xmit_time)
-                self.found[s] = True
-            else:
-                self.fp.write("-       \t")
-        self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
-                 % (session.d_recv_time,
-                    session.d_decode_time,
-                    session.poll_time,
-                    session.emit_time,
-                    session.c_recv_time,
-                    session.c_decode_time,
-                    session.length,
-                    session.tag))
-        return True
+        if session.gps_time:
+            for s in splitplot.sentences:
+                if s == session.tag:
+                    self.fp.write("%2.6f\t"% session.d_xmit_time)
+                    self.found[s] = True
+                else:
+                    self.fp.write("-       \t")
+            self.fp.write("%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%2.6f	%8d	# %s\n" \
+                     % (session.d_recv_time,
+                        session.d_decode_time,
+                        session.poll_time,
+                        session.emit_time,
+                        session.c_recv_time,
+                        session.c_decode_time,
+                        session.length,
+                        session.tag))
+            return True
+        else:
+            return False
     def plot(self, file, title, session):
         fixed = '''
 set autoscale
