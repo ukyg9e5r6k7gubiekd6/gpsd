@@ -193,7 +193,7 @@ static void deactivate()
     serial_close();
     if (session.device_type->wrapup)
 	session.device_type->wrapup();
-    syslog(LOG_NOTICE, "Closed gps");
+    syslog(LOG_NOTICE, "Closed GPS");
     session.gNMEAdata.mode = 1;
     session.gNMEAdata.status = 0;
 }
@@ -205,7 +205,7 @@ static int activate()
     if ((input = serial_open(device_name, device_speed ? device_speed : session.device_type->baudrate)) < 0)
 	errexit("Exiting - serial open");
  
-    syslog(LOG_NOTICE, "Opened gps");
+    syslog(LOG_NOTICE, "Opened GPS");
     session.fdin = input;
     session.fdout = input;
 
