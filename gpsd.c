@@ -38,6 +38,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#if defined(HAVE_SYS_TIME_H)
+#include <sys/time.h>
+#endif
 
 #include "nmea.h"
 #include "gpsd.h"
