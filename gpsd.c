@@ -293,9 +293,8 @@ int main(int argc, char *argv[])
 	if (FD_ISSET(dsock, &rfds)) {
 	  int rtcmbytes;
 	  rtcmbytes = read(dsock, buf, BUFSIZE);
-	  fprintf(stderr, "read %d from DGPS service\n", rtcmbytes);
-	  //if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
-	  //em_send_rtcm(buf, rtcmbytes);
+	  if ((device_type == DEVICE_EARTHMATEb) && (rtcmbytes < 65)) 
+	    em_send_rtcm(buf, rtcmbytes);
 	}
 	if (FD_ISSET(msock, &rfds)) {
 	    int ssock;
@@ -327,7 +326,8 @@ int main(int argc, char *argv[])
 	  gNMEAdata.fdout = input;
 	}
 	for (fd = 0; fd < nfds; fd++) {
-	    if (fd != msock && fd != input && FD_ISSET(fd, &rfds)) {
+	    if (fd != msock && fd != input && fd != dsock && 
+		FD_ISSET(fd, &rfds)) {
 		if (input == -1) {
 		    if ((input = serial_open()) < 0)
 			errexit("serial open: ");
