@@ -175,10 +175,8 @@ static int handle_request(int fd, char *buf, int buflen)
     int i, j;
     struct gps_data_t *ud = &session->gNMEAdata;
     int icd = 0;
-    struct timeval tv;
 
-    gettimeofday(&tv, NULL);
-    session->poll_times[fd] = TIME2DOUBLE(tv);
+    session->poll_times[fd] = timestamp();
 
     sprintf(reply, "GPSD");
     p = buf;
@@ -414,7 +412,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		ud->d_recv_time - ud->gps_time,
 		ud->d_decode_time - ud->gps_time,
 		session->poll_times[fd] - ud->gps_time,
-		TIME2DOUBLE(tv) - ud->gps_time); 
+		timestamp() - ud->gps_time); 
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
 	    strcat(reply, phrase);
     }

@@ -227,21 +227,19 @@ int gps_poll(struct gps_data_t *gpsdata)
 {
     char	buf[BUFSIZ];
     int		n;
-    struct timeval received;
+    double received = 0;
 
     /* the daemon makes sure that every read is NUL-terminated */
     if ((n = read(gpsdata->gps_fd, buf, sizeof(buf)-1)) <= 0)
 	return -1;
     buf[n] = '\0';
     if (gpsdata->profiling)
-	gettimeofday(&received, NULL);
+	received = timestamp();
     n = gps_unpack(buf, gpsdata);
     if (gpsdata->profiling)
     {
-	struct timeval decoded;
-	gettimeofday(&decoded, NULL);
-	gpsdata->c_decode_time = TIME2DOUBLE(received) - gpsdata->gps_time;
-	gpsdata->c_recv_time = TIME2DOUBLE(decoded) - gpsdata->gps_time;
+	gpsdata->c_decode_time = received - gpsdata->gps_time;
+	gpsdata->c_recv_time = timestamp() - gpsdata->gps_time;
     }
     return n;
 }

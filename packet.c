@@ -224,19 +224,16 @@ int packet_sniff(struct gps_session_t *session)
 #define MAKE_PACKET_GRABBER(outname, inname, maxlength)	int \
 	outname(struct gps_session_t *session) \
 	{ \
-	    struct timeval tv; \
 	    int maxgarbage = maxlength; \
 	    packet_accept(session); \
-	    gettimeofday(&tv, NULL); \
-	    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv); \
+	    session->gNMEAdata.d_xmit_time = timestamp(); \
 	    while (maxgarbage--) { \
 		if (inname(session)) { \
 		    return 1; \
 		} else \
 		    packet_shift(session); \
 	    } \
-	gettimeofday(&tv, NULL); \
-	session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv); \
+	    session->gNMEAdata.d_recv_time = timestamp(); \
 	    return 0; \
 	}
 

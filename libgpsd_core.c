@@ -144,7 +144,6 @@ int gpsd_poll(struct gps_session_t *session)
 	}
     } else {
 	struct gps_data_t old;
-	struct timeval tv;
 
 	memcpy(&old, &session->gNMEAdata, sizeof(struct gps_data_t));
 
@@ -154,8 +153,7 @@ int gpsd_poll(struct gps_session_t *session)
 	/* call the input routine from the device-specific driver */
 	session->device_type->handle_input(session);
 
-	gettimeofday(&tv, NULL);
-	session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
+	session->gNMEAdata.d_decode_time = timestamp();
 
 	/* set all the changed bits */
 #define CHANGECHECK(part, stamp) session->gNMEAdata.stamp.changed = (old.part!=session->gNMEAdata.part)

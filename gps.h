@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <time.h>
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
@@ -15,11 +16,13 @@ extern "C" {
 
 struct life_t {
 /* lifetime structure to be associated with some piece of data */
-    time_t	last_refresh;
+    double	last_refresh;
     int		changed;
 };
+static inline double timestamp(void) {struct timeval tv; gettimeofday(&tv, NULL); return(tv.tv_sec + tv.tv_usec/1e6);}
+
 #define INIT(stamp, now)	stamp.last_refresh=now
-#define REFRESH(stamp)	stamp.last_refresh = time(NULL)
+#define REFRESH(stamp)	stamp.last_refresh = timestamp()
 #define SEEN(stamp) stamp.last_refresh
 
 struct gps_data_t {
