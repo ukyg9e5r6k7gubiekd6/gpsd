@@ -216,17 +216,12 @@ raw mode.</para></listitem>
 
 <varlistentry>
 <term>w</term>
-<listitem><para>Sets or toggles 'watcher' mode. Return "W=0" or "W=1". In
-watcher mode gpsd ships a line of data to the client each time the the GPS
-sends a sentence, but rather than being raw NMEA the line is a gpsd
-response as if the user had just sent some set of gpsd commands.  That set of
-commands is the minimum for which the incoming sentence is relevant,
-plus 'x' &mdash; e.g., a GPRMC sentence ships a "xpvs" response
-because it contains position, velocity and GPS status data.  The
-command 'w' immediately followed by the digit '1' or the plus sign '+'
-sets watcher mode.  The command 'w' followed by the digit '0' or the minus
-sign '-' clears watcher mode.  The command 'w' with neither suffix toggles
-watcher mode.</para></listitem>
+<listitem><para>Sets or toggles 'watcher' mode (see the descroiption
+below). Return "W=0" or "W=1".The command 'w' immediately followed by
+the digit '1' or the plus sign '+' sets watcher mode.  The command 'w'
+followed by the digit '0' or the minus sign '-' clears watcher mode.
+The command 'w' with neither suffix toggles watcher
+mode.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -284,6 +279,16 @@ the value of the -t option).</para>
 trying to open the GPS device once per second.  Thus, it can be left
 running in background and survive having the GPS repeatedly unplugged
 and plugged back in.</para>
+
+<para>The recommended mode for clients is watcher mode.  In watcher
+mode gpsd ships a line of data to the client each time the the GPS
+sends a sentence, but rather than being raw NMEA the line is a gpsd
+response as if the user had just sent some set of gpsd commands.  That
+set of commands is the minimum for which the incoming sentence is
+relevant &mdash; e.g., a GPRMC sentence ships a "pvs" response because
+it contains position, velocity and GPS status data.  Additionally,
+watching clients get X notifications when the online/offline status of
+the GPS changes.</para>
 
 </refsect2>
 <refsect2><title>gps</title>

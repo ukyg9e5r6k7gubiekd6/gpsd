@@ -389,10 +389,24 @@ static int handle_request(int fd, char *buf, int buflen)
 
     if (session.debug >= 2)
 	gpscli_report(1, "=> client: %s", reply);
-    if (buflen && write(fd, reply, strlen(reply) + 1) < 0)
-	return 0;
-    else
-	return 1;
+    return write(fd, reply, strlen(reply) + 1);
+}
+
+static void notify_watchers(char *sentence)
+/* notify all watching clients of an event */
+{
+    int fd;
+
+    for (fd = 0; fd < getdtablesize(); fd++) {
+	if (FD_ISSET(fd, &watcher_fds)) {
+	    gpscli_report(1, "=> client: %s\n", sentence);
+	    if (write(fd, sentence, strlen(sentence)) < 0) {
+		gpscli_report(3, "Notification write %s\n", strerror(errno));
+		FD_CLR(fd, &all_fds);
+		FD_CLR(fd, &watcher_fds);
+	    }
+	}
+    }
 }
 
 static void raw_hook(char *sentence)
@@ -417,27 +431,27 @@ static void raw_hook(char *sentence)
 	    ++sentence;
 #define PUBLISH(fd, cmds)	handle_request(fd, cmds, sizeof(cmds)-1)
 	    if (strncmp(GPRMC, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xptvds");
+		ok = PUBLISH(fd, "ptvds");
 	    } else if (strncmp(GPGGA, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xsa");	
+		ok = PUBLISH(fd, "sa");	
 	    } else if (strncmp(GPGLL, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xp");
+		ok = PUBLISH(fd, "p");
 	    } else if (strncmp(PMGNST, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xsm");
+		ok = PUBLISH(fd, "sm");
 	    } else if (strncmp(GPVTG, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xtv");
+		ok = PUBLISH(fd, "tv");
 	    } else if (strncmp(GPGSA, sentence, 5) == 0) {
-		ok = PUBLISH(fd, "xqm");
+		ok = PUBLISH(fd, "qm");
 	    } else if (strncmp(GPGSV, sentence, 5) == 0) {
 		if (nmea_sane_satellites(&session.gNMEAdata))
-		    ok = PUBLISH(fd, "xy");
+		    ok = PUBLISH(fd, "y");
 #ifdef PROCESS_PRWIZCH
 	    } else if (strncmp(PRWIZCH, sentence, 7) == 0) {
 		ok = PUBLISH(fd, "xz");
 #endif /* PROCESS_PRWIZCH */
 	    }
 #undef PUBLISH
-	    if (!ok) {
+	    if (ok < 0) {
 		gpscli_report(1, "Watcher write %s", strerror(errno));
 		FD_CLR(fd, &all_fds);
 		FD_CLR(fd, &watcher_fds);
@@ -599,7 +613,10 @@ int main(int argc, char *argv[])
 	if ((nowait || reopen) && session.fdin == -1) {
 	    gpsd_deactivate(&session);
 	    if (gpsd_activate(&session) >= 0)
+	    {
+		notify_watchers("GPSD,X=1\r\n");
 		FD_SET(session.fdin, &all_fds);
+	    }
 	}
 
 	/* get data from it */
@@ -607,6 +624,7 @@ int main(int argc, char *argv[])
 	    gpscli_report(3, "GPS is offline\n");
 	    FD_CLR(session.fdin, &all_fds);
 	    gpsd_deactivate(&session);
+	    notify_watchers("GPSD,X=0\r\n");
 	    if (nowait)
 		reopen = 1;
 	}
@@ -618,7 +636,19 @@ int main(int argc, char *argv[])
 	/* accept and execute commands for all clients */
 	need_gps = 0;
 	for (fd = 0; fd < getdtablesize(); fd++) {
-	    if (fd != msock && fd != session.fdin && FD_ISSET(fd, &rfds)) {
+	    if (fd == msock || fd == session.fdin)
+		continue;
+	    if (FD_ISSET(fd, &watcher_fds)) {
+		if (session.fdin == -1) {
+		    gpsd_deactivate(&session);
+		    if (gpsd_activate(&session) >= 0)
+		    {
+			notify_watchers("GPSD,X=1\r\n");
+			FD_SET(session.fdin, &all_fds);
+		    }
+		}
+	    }
+	    if (FD_ISSET(fd, &rfds)) {
 		char buf[BUFSIZE];
 		int buflen;
 
@@ -635,7 +665,7 @@ int main(int argc, char *argv[])
 		buf[buflen] = '\0';
 		if (session.debug >= 2)
 		    gpscli_report(1, "<= client: %s", buf);
-		if (handle_request(fd, buf, buflen) <= 0) {
+		if (handle_request(fd, buf, buflen) < 0) {
 		    (void) close(fd);
 		    FD_CLR(fd, &all_fds);
 		}
