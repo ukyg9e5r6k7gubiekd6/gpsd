@@ -302,11 +302,12 @@ class gpsd(gps.gpsdata):
         return buf
 
     def set_speed(self, speed):
-        self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
-        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
-        termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
-        termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
-        time.sleep(1)
+        if self.bps != speed:
+            self.raw[4] = self.raw[5] = eval("termios.B" + `speed`)
+            termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+            termios.tcsetattr(self.ttyfd, termios.TCSANOW, self.raw)
+            termios.tcflush(self.ttyfd, termios.TCIOFLUSH)
+            time.sleep(3)
         if self.readline().find("$GP") > -1:
             self.bps = speed
             return 1
@@ -331,17 +332,14 @@ class gpsd(gps.gpsdata):
             self.raw[2] |= (termios.CSIZE & termios.CS8)	# cflag
         self.raw[2] |= termios.CREAD | termios.CLOCAL		# cflag
         self.raw[3] = 0						# lflag
-        if self.bps:
-            if not self.set_speed(self.bps):
-                self.ttyfd = -1
-                return -1
-        else:
+        if self.bps and not self.set_speed(self.bps):
             for speed in (4800, 9600, 19200, 38400, 57600):
-                if self.set_speed(speed):
-                    break
+                if speed != self.bps:
+                    if self.set_speed(speed):
+                        break
             else:
                 self.ttyfd = -1
-                return -1
+                return self.ttyfd
         if self.devtype.initializer:
             self.devtype.initializer(self)
 	self.online = True;

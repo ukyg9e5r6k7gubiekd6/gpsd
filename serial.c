@@ -36,10 +36,10 @@ int gpsd_get_speed(struct termios* ttyctl)
 /* every rate we're likely to see on a GPS */
 static int rates[] = {4800, 9600, 19200, 38400, 57600};
 
-int gpsd_set_speed(struct gps_session_t *session, int speed)
+int gpsd_set_speed(struct gps_session_t *session, unsigned int speed)
 {
     char	buf[NMEA_MAX+1];
-    unsigned int	n, rate;
+    unsigned int	n, rate, ok;
 
     if (speed < 300)
 	rate = 0;
@@ -60,31 +60,38 @@ int gpsd_set_speed(struct gps_session_t *session, int speed)
     else
       rate =  B57600;
 
-    tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
-    cfsetispeed(&session->ttyset, (speed_t)rate);
-    cfsetospeed(&session->ttyset, (speed_t)rate);
-    if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
-	return 0;
-    tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
+    if (speed != cfgetispeed(&session->ttyset)) {
+	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
+	cfsetispeed(&session->ttyset, (speed_t)rate);
+	cfsetospeed(&session->ttyset, (speed_t)rate);
+	if (tcsetattr(session->gNMEAdata.gps_fd, TCSANOW, &session->ttyset) != 0)
+	    return 0;
+	tcflush(session->gNMEAdata.gps_fd, TCIOFLUSH);
 
-    usleep(1250000);	/* allow the UART time to settle */
+	usleep(3000000);	/* allow the UART time to settle */
+    }
 
     if (session->device_type->validate_buffer) {
 	n = 0;
 	while (n < NMEA_MAX) {
 	    n += read(session->gNMEAdata.gps_fd, buf+n, sizeof(buf)-n-1);
+	    if (n > 2 && buf[n-2] == '\r' && buf[n-1] == '\n')
+		break;
 	}
 	gpsd_report(4, "validating %d bytes.\n", n);
-	return session->device_type->validate_buffer(buf, n);
+	ok = session->device_type->validate_buffer(buf, n);
     } else {
 	/* this has the effect of disabling baud hunting on future connects */
 	gpsd_report(4, "no buffer validation.\n");
-	session->gNMEAdata.baudrate = speed;
-	return 1;
+	ok = 1;
     }
+
+    if (ok)
+	session->gNMEAdata.baudrate = speed;
+    return ok;
 }
 
-int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
+int gpsd_open(struct gps_session_t *session)
 {
     int *ip;
 
@@ -103,25 +110,26 @@ int gpsd_open(int device_speed, int stopbits, struct gps_session_t *session)
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
 	 */
 	session->ttyset.c_cflag &= ~(PARENB | CRTSCTS);
-	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
+	session->ttyset.c_cflag |= (CSIZE & (session->gNMEAdata.stopbits==2 ? CS7 : CS8)) | CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
-	if (device_speed) {
+	if (session->gNMEAdata.baudrate) {
 	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
-			device_speed, stopbits);
-	    if (gpsd_set_speed(session, device_speed)) {
+			session->gNMEAdata.baudrate, 
+			session->gNMEAdata.stopbits);
+	    if (gpsd_set_speed(session, session->gNMEAdata.baudrate)) {
 		return session->gNMEAdata.gps_fd;
 	    }
-	} else
-	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
-		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n", 
-			    *ip, stopbits);
-		if (gpsd_set_speed(session, *ip)) {
+	}
+	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) 
+	    if (*ip != session->gNMEAdata.baudrate) {
+		gpsd_report(1, "hunting at speed %d, %d stopbits, no parity\n",
+			    *ip, session->gNMEAdata.stopbits);
+		if (gpsd_set_speed(session, *ip))
 		    return session->gNMEAdata.gps_fd;
-		}
-	    }
-	return -1;
+	}
+	session->gNMEAdata.gps_fd = -1;
     }
     return session->gNMEAdata.gps_fd;
 }
