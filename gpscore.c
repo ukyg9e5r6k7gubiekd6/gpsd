@@ -68,12 +68,18 @@ void gps_init(struct gpsd_t *session, int timeout, char devicetype, char *dgpsse
     session->fdin = -1;
     session->fdout = -1;
 
+    INIT(session->gNMEAdata.online_stamp, now, timeout);
     INIT(session->gNMEAdata.latlon_stamp, now, timeout);
     INIT(session->gNMEAdata.altitude_stamp, now, timeout);
     INIT(session->gNMEAdata.track_stamp, now, timeout);
     INIT(session->gNMEAdata.speed_stamp, now, timeout);
     INIT(session->gNMEAdata.status_stamp, now, timeout);
     INIT(session->gNMEAdata.mode_stamp, now, timeout);
+    INIT(session->gNMEAdata.fix_quality_stamp, now, timeout);
+    INIT(session->gNMEAdata.satellite_stamp, now, timeout);
+#ifdef PROCESS_PRWIZCH
+    INIT(session->gNMEAdata.signal_quality_stamp, now, timeout);
+#endif /* PROCESS_PRWIZCH */
     session->gNMEAdata.mode = MODE_NO_FIX;
 }
 

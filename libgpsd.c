@@ -23,12 +23,18 @@ int gpsd_open(struct gps_data *gpsdata, int timeout, char *host, char *port)
 	return (-1);
 
     now = time(NULL);
+    INIT(gpsdata->online_stamp, now, timeout);
     INIT(gpsdata->latlon_stamp, now, timeout);
     INIT(gpsdata->altitude_stamp, now, timeout);
     INIT(gpsdata->track_stamp, now, timeout);
     INIT(gpsdata->speed_stamp, now, timeout);
     INIT(gpsdata->status_stamp, now, timeout);
     INIT(gpsdata->mode_stamp, now, timeout);
+    INIT(gpsdata->fix_quality_stamp, now, timeout);
+    INIT(gpsdata->satellite_stamp, now, timeout);
+#ifdef PROCESS_PRWIZCH
+    INIT(gpsdata>signal_quality_stamp, now, timeout);
+#endif /* PROCESS_PRWIZCH */
     gpsdata->mode = MODE_NO_FIX;
 
     return fd;
