@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "config.h"
 #include "gpsd.h"
 
 struct gps_data_t *gps_open(char *host, char *port)
@@ -30,6 +31,7 @@ struct gps_data_t *gps_open(char *host, char *port)
     INIT(gpsdata->latlon_stamp, now);
     INIT(gpsdata->altitude_stamp, now);
     INIT(gpsdata->track_stamp, now);
+    INIT(gpsdata->speed_stamp, now);
     INIT(gpsdata->status_stamp, now);
     INIT(gpsdata->mode_stamp, now);
     INIT(gpsdata->fix_quality_stamp, now);
@@ -302,9 +304,7 @@ main(int argc, char *argv[])
 	strcat(buf,"\n");
 	gps_query(collect, buf);
 	data_dump(collect, time(NULL));
-    }
-    else
-    {
+    } else {
 	int	tty = isatty(0);
 
 	if (tty)
