@@ -85,6 +85,8 @@ static int get_nmea(struct gps_session_t *session)
 	/* OK */;
     else if (c == 'P')				/* vendor private extension */
 	/* OK */;
+    else if (c == 'A' && getch(session) == 'c')	/* SiRF $Ack */
+	/* OK */;
     else
 	return packet_reread(session);
     for (;;) {
@@ -185,6 +187,20 @@ int packet_sniff(struct gps_session_t *session)
 		return SIRF_PACKET;
 	    else if (get_zodiac(session))
 		return ZODIAC_PACKET;
+#ifdef TRIPMATE_ENABLE
+	    else if (!memcmp("ASTRAL", session->inbuffer, 6)) {
+		strcpy(session->outbuffer, "ASTRAL");
+		session->outbuflen = 6;
+		return NMEA_PACKET;
+	    }
+#endif /* TRIPMATE_ENABLE */
+#ifdef EARTHMATE_ENABLE
+	    else if (!memcmp("EARTHA", session->inbuffer, 6)) {
+		strcpy(session->outbuffer, "EARTHA");
+		session->outbuflen = 6;
+		return NMEA_PACKET;
+	    }
+#endif /* EARTHMATE_ENABLE */
 	    else
 		packet_shift(session);
 	}

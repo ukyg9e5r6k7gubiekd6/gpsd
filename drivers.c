@@ -14,73 +14,56 @@
 
 static void nmea_handle_input(struct gps_session_t *session)
 {
-    static char buf[NMEA_BIG_BUF];
-    static unsigned int offset = 0;
-
-    while (offset < sizeof(buf)) {
-	if (read(session->gNMEAdata.gps_fd, buf + offset, 1) != 1)
-	    return;
 #ifdef PROFILING
-	if (offset == 0) {
-	    struct timeval tv;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv);
+#endif /* PROFILING */
+
+    if (!session->outbuflen)
+	packet_get_nmea(session);
+
+#ifdef PROFILING
+    gettimeofday(&tv, NULL);
+    session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv);
+#endif /* PROFILING */
+
+    gpsd_report(2, "<= GPS: %s", session->outbuffer);
+    if (session->outbuffer[0] == '$'  && session->outbuffer[1] == 'G') {
+	if (nmea_parse(session->outbuffer, &session->gNMEAdata) < 0)
+	    gpsd_report(2, "unknown sentence: \"%s\"\n", session->outbuffer);
+#ifdef PROFILING
+	else {
 	    gettimeofday(&tv, NULL);
-	    session->gNMEAdata.d_xmit_time = TIME2DOUBLE(tv);
+	    session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
 	}
 #endif /* PROFILING */
-	if (buf[offset] == '\n' || buf[offset] == '\r') {
-	    buf[offset] = '\0';
-	    if (strlen(buf)) {
-		gpsd_report(2, "<= GPS: %s\n", buf);
-		if (buf[0] == '$' && buf[1] == 'G' && buf[2] == 'P') {
-#ifdef PROFILING
-		    struct timeval tv;
-		    gettimeofday(&tv, NULL);
-		    session->gNMEAdata.d_recv_time = TIME2DOUBLE(tv);
-#endif /* PROFILING */
-		    if (nmea_parse(buf, &session->gNMEAdata) < 0)
-			gpsd_report(2, "unknown sentence: \"%s\"\n", buf);
-#ifdef PROFILING
-		    else {
-			struct timeval tv;
-			gettimeofday(&tv, NULL);
-			session->gNMEAdata.d_decode_time = TIME2DOUBLE(tv);
-		    }
-#endif /* PROFILING */
-		} else {
+    } else {
 #ifdef NON_NMEA_ENABLE
-		    struct gps_type_t **dp;
+	struct gps_type_t **dp;
 
-		    /* maybe this is a trigger string for a driver we know about? */
-		    for (dp = gpsd_drivers; *dp; dp++) {
-			char	*trigger = (*dp)->trigger;
+	/* maybe this is a trigger string for a driver we know about? */
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    char	*trigger = (*dp)->trigger;
 
-			if (trigger && !strncmp(buf, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
-			    gpsd_report(1, "found %s.\n", (*dp)->typename);
-			    session->device_type = *dp;
-			    if (session->device_type->initializer)
-				session->device_type->initializer(session);
-			    buf[offset=0] = '\0';
-			    return;
-			}
-		    }
-#endif /* NON_NMEA_ENABLE */
-		    gpsd_report(1, "unknown exception: \"%s\"\n", buf);
-		}
-
-		/* also copy the sentence up to clients in raw mode */
-		strcat(buf, "\r\n");
-		if (session->gNMEAdata.raw_hook)
-		    session->gNMEAdata.raw_hook(buf);
+	    if (trigger && !strncmp(session->outbuffer, trigger, strlen(trigger)) && isatty(session->gNMEAdata.gps_fd)) {
+		gpsd_report(1, "found %s.\n", (*dp)->typename);
+		session->device_type = *dp;
+		if (session->device_type->initializer)
+		    session->device_type->initializer(session);
+		packet_discard(session);
+		return;
 	    }
-	    offset = 0;
-	    return;
 	}
-
-	offset++;
-	buf[offset] = '\0';
+#endif /* NON_NMEA_ENABLE */
+	gpsd_report(1, "unknown exception: \"%s\"\n", session->outbuffer);
     }
-    offset = 0;			/* discard input ! */
-    return;
+
+    /* also copy the sentence up to clients in raw mode */
+    if (session->gNMEAdata.raw_hook)
+	session->gNMEAdata.raw_hook(session->outbuffer);
+
+    packet_discard(session);
 }
 
 static int nmea_write_rtcm(struct gps_session_t *session, char *buf, int rtcmbytes)
