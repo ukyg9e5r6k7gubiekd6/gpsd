@@ -242,7 +242,7 @@ static void update_panel(char *message)
 	    string[i+1] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
-	for (i = 0; i < MAXCHANNELS; i++)
+	for (i = 0; i < MAXCHANNELS+1; i++)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
