@@ -75,10 +75,14 @@ static int rates[] = {4800, 9600, 19200, 38400};
 
 static int connect_at_speed(int ttyfd, struct gps_session_t *session, int speed)
 {
-    char	buf[NMEA_BIG_BUF];
+    char	buf[4*NMEA_MAX+1];
     int		n;
 
     gpsd_set_speed(ttyfd, &session->ttyset, speed);
+    /*
+     * Magic -- relies on the fact that the UARTS on GPSes never seem to take 
+     * longer than 3 NMEA sentences to sync.
+     */
     n = read(ttyfd, buf, sizeof(buf)-1);
     if (session->device_type->validate_buffer)
 	return session->device_type->validate_buffer(buf, n);
