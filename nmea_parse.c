@@ -197,10 +197,7 @@ static void processGPRMC(char *sentence, struct gps_data_t *out)
 static void processGPGLL(char *sentence, struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
-    /*
-     * Described at 
-     * <http://www.tri-m.com/products/royaltek/files/manual/teb1000_man.pdf>
-     * as part of NMEA 3.0.  Here are the fields:
+    /* Introduced in NMEA 3.0.  Here are the fields:
      *
      * 1,2 Latitude, N (North) or S (South)
      * 3,4 Longitude, E (East) or W (West)
@@ -250,19 +247,17 @@ static void processGPVTG(char *sentence, struct gps_data_t *out)
 	(4) Speed over ground (kilometers) 00.0 to 99.9
 
      * Up to and including 1.10, gpsd assumed this and extracted field 3.
-     * But the NMEA spec, version 3.01, dated 1/1/2002, gives this:
+     * But I'm told the NMEA spec, version 3.01, dated 1/1/2002, gives this:
 
 	1    = Track made good
 	2    = Fixed text 'T' indicates that track made good is relative to 
 	       true north
 	3    = Magnetic course over ground
-	4    = Fixed text 'M' indicates that course is relative to magnetic 
-               north.
+	4    = Fixed text 'M' indicates course is relative to magnetic north.
 	5    = Speed over ground in knots
 	6    = Fixed text 'N' indicates that speed over ground in in knots
 	7    = Speed over ground in kilometers/hour
-	8    = Fixed text 'K' indicates that speed over ground is in 
-               kilometers/hour
+	8    = Fixed text 'K' indicates that speed over ground is in km/h.
 	9    = Checksum
 
      * which means we want to extract field 5.  We cope with both.

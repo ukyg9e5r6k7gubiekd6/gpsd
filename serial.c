@@ -65,7 +65,6 @@ void gpsd_close(int ttyfd)
 {
     if (ttyfd != -1) {
 	if (isatty(ttyfd)) {
-	    /* restore original settings, but make sure DTR goes down */
 	    ttyset_old.c_cflag |= HUPCL;
 	    tcsetattr(ttyfd,TCSANOW,&ttyset_old);
 	}
