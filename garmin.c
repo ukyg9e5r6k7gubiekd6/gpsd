@@ -32,7 +32,7 @@
  *
  * known bugs:
  *      hangs in the fread loop instead of keeping state and returning.
- *      won't work on a little-endian machine
+ *      may or may not work on a little-endian machine
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,18 +96,7 @@
 #define ASYNC_DATA_SIZE 64
 
 
-// This is the packet format to/from the Garmin USB
 #pragma pack(1)
-typedef struct {
-    unsigned char  mPacketType;
-    unsigned char  mReserved1;
-    unsigned short mReserved2;
-    unsigned short mPacketId;
-    unsigned short mReserved3;
-    unsigned long  mDataSize;
-    char  mData[MAX_BUFFER_SIZE];
-} Packet_t;
-
 // This is the data format of the satellite data from the garmin USB
 typedef struct {
 	unsigned char  svid;
@@ -160,6 +149,21 @@ typedef struct {
 	cpo_rcv_sv_data sv[MAXCHANNELS];
 } cpo_rcv_data;
 
+
+// This is the packet format to/from the Garmin USB
+typedef struct {
+    unsigned char  mPacketType;
+    unsigned char  mReserved1;
+    unsigned short mReserved2;
+    unsigned short mPacketId;
+    unsigned short mReserved3;
+    unsigned long  mDataSize;
+    union {
+	    char  chars[MAX_BUFFER_SIZE];
+            cpo_pvt_data pvt;
+            cpo_sat_data sats;
+    } mData;
+} Packet_t;
 
 // useful funcs to read/write ints, only tested on Intel byte order
 //  floats and doubles are Intel order only...
@@ -241,8 +245,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Product Data req\n");
 	    break;
 	case GARMIN_PKTID_PRODUCT_DATA:
-	    prod_id = get_short(&pkt->mData[0]);
-	    ver = get_short(&pkt->mData[2]);
+	    prod_id = get_short(&pkt->mData.chars[0]);
+	    ver = get_short(&pkt->mData.chars[2]);
 	    maj_ver = ver / 100;
 	    min_ver = ver - (maj_ver * 100);
 	    gpsd_report(3, "Product Data, sz: %d\n"
@@ -250,12 +254,12 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(1, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
 			, prod_id, maj_ver, min_ver);
 	    gpsd_report(1, "Garmin Product Desc: %s\n"
-			, &pkt->mData[4]);
+			, &pkt->mData.chars[4]);
 	    break;
 	case GARMIN_PKTID_PVT_DATA:
 	    gpsd_report(3, "PVT Data Sz: %d\n", pkt->mDataSize);
 
-	    pvt = (cpo_pvt_data*)pkt->mData;
+	    pvt = &pkt->mData.pvt;
 
 	    // 631065600, unix seconds for 31 Dec 1989 Zulu 
 	    time_l = 631065600 + (pvt->grmn_days * 86400);
@@ -352,7 +356,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
 	    gpsd_report(3, "SAT Data Sz: %d\n", pkt->mDataSize);
-	    sats = (cpo_sat_data*)pkt->mData;
+	    sats = &pkt->mData.sats;
 
 	    session->gpsdata.satellites_used = 0;
 	    gpsd_zero_satellites(&session->gpsdata);
@@ -403,8 +407,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
             // after a GARMIN_PKTID_PRODUCT_RQST 
 	    gpsd_report(3, "Product Capability: %d\n", pkt->mDataSize);
             for ( i = 0; i < pkt->mDataSize ; i += 3 ) {
-		    gpsd_report(3, "  %c%03d\n", pkt->mData[i]
-			, get_short( &(pkt->mData[i+1])) );
+		    gpsd_report(3, "  %c%03d\n", pkt->mData.chars[i]
+			, get_short( &(pkt->mData.chars[i+1])) );
 	    }
 	    break;
 	default:
@@ -422,11 +426,11 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "ID: Info Req\n");
 	    break;
 	case PRIV_PKTID_INFO_RESP:
-	    ver = get_int(pkt->mData);
+	    ver = get_int(pkt->mData.chars);
 	    maj_ver = ver >> 16;
 	    min_ver = ver & 0xffff;
-	    mode = get_int(pkt->mData + 4);
-	    serial = get_int(pkt->mData + 8);
+	    mode = get_int(&pkt->mData.chars[4]);
+	    serial = get_int(&pkt->mData.chars[8]);
 	    gpsd_report(3, "ID: Info Resp\n");
 	    gpsd_report(1, "Garmin USB Driver found, Version %d.%d, Mode: %d, GPS Serial# %u\n"
 			,  maj_ver, min_ver, mode, serial);
