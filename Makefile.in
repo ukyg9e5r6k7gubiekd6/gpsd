@@ -116,14 +116,14 @@ LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o em.o send_nmea.o $(MOTIF_OBJEC
 
 
 ## Programs
-PROGRAMS=gpsd
+PROGRAMS=gpsd gps
 
 ## Manual pages
 PAGES=gpsd.1 libgpsd.3
 
 ## Motif dependent programs and object files
 MOTIF_PROGRAMS=xgpsspeed @MISSING_MOTIF@gps
-@MISSING_MOTIF@MOTIF_OBJECTS = display.o
+@MISSING_MOTIF@MOTIF_OBJECTS = display.o Tachometer.o
 
 XGPSOBJS=xgpsspeed.o Tachometer.o
 
@@ -153,13 +153,34 @@ send_nmea.o: send_nmea.c gpsd.h
 display.o: display.c gpsd.h
 gps.o: gps.c gpsd.h version.h
 gpsd.o: gpsd.c gpsd.h version.h
-xgpsspeed.o: xgpsspeed.c gpsd.h
+xgpsspeed.o: xgpsspeed.c gpsd.h xgpsspeed.icon
 
 gpsd.1 gps.1 xgpsspeed.1: gpsd.xml
 	xmlto man gpsd.xml
 
 libgpsd.3: libgpsd.xml
 	xmlto man libgpsd.xml
+
+# Version is extracted from version.h; make sure gpsd.spec stays current!
+VERS=$(shell sed <version.h -n -e '/[^"]*"\([0-9].*\)"/s//\1/p')
+
+HEADERS = config.h gpsd.h TachometerP.h nmea.h Tachometer.h version.h xgpsspeed.icon
+
+SOURCES = $(LIB_OBJECTS:.o=.c) $(PROGRAMS:=.c) $(MOTIF_PROGRAMS:=.c) $(HEADERS)
+DOCS = README INSTALL COPYING HACKING TODO CHANGELOG gpsd.xml libgpsd.xml
+MANPAGES = gpsd.1 libgpsd.3
+XRESOURCES = Gps XGpsSpeed
+CONFIGURATION = configure.in config.h.in Makefile.in configure Makefile install-sh
+META = gpsd.spec gpsd.lsm
+ALL = $(SOURCES) $(DOCS) $(XRESOURCES) $(CONFIGURATION) $(META) $(MANPAGES) 
+
+gpsd-$(VERS).tar.gz: $(ALL)
+	find $(ALL) -type f | sed "s:^:gpsd-$(VERS)/:" >MANIFEST
+	(cd ..; ln -s gpsd gpsd-$(VERS))
+	(cd ..; tar -czvf gpsd/gpsd-$(VERS).tar.gz `cat gpsd/MANIFEST`)
+	(cd ..; rm gpsd-$(VERS))
+
+dist: gpsd-$(VERS).tar.gz
 
 install:
 	$(mkinstalldirs) $(DESTDIR)${bindir}
