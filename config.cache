@@ -1,0 +1,64 @@
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs.  It is not useful on other systems.
+# If it contains results you don't want to keep, you may remove or edit it.
+#
+# By default, configure uses ./config.cache as the cache file,
+# creating it if it does not exist already.  You can give configure
+# the --cache-file=FILE option to use a different cache file; that is
+# what configure does when it calls configure scripts in
+# subdirectories, so they share the cache.
+# Giving --cache-file=/dev/null disables caching, for debugging configure.
+# config.status only pays attention to the cache file if you give it the
+# --recheck option to rerun configure.
+#
+ac_cv_func_connect=${ac_cv_func_connect='yes'}
+ac_cv_func_gethostbyname=${ac_cv_func_gethostbyname='yes'}
+ac_cv_func_remove=${ac_cv_func_remove='yes'}
+ac_cv_func_shmat=${ac_cv_func_shmat='yes'}
+ac_cv_have_x=${ac_cv_have_x='have_x=yes 		ac_x_includes=/usr/X11R6/include ac_x_libraries=/usr/X11R6/lib'}
+ac_cv_header_X11_Xaw_Form_h=${ac_cv_header_X11_Xaw_Form_h='yes'}
+ac_cv_header_X11_Xaw_Panner_h=${ac_cv_header_X11_Xaw_Panner_h='yes'}
+ac_cv_header_X11_Xaw_Porthole_h=${ac_cv_header_X11_Xaw_Porthole_h='yes'}
+ac_cv_header_X11_Xmu_Editres_h=${ac_cv_header_X11_Xmu_Editres_h='yes'}
+ac_cv_header_X11_xpm_h=${ac_cv_header_X11_xpm_h='yes'}
+ac_cv_header_sys_param_h=${ac_cv_header_sys_param_h='yes'}
+ac_cv_header_termio_h=${ac_cv_header_termio_h='yes'}
+ac_cv_header_xpm_h=${ac_cv_header_xpm_h='no'}
+ac_cv_lib_ICE_IceConnectionNumber=${ac_cv_lib_ICE_IceConnectionNumber='yes'}
+ac_cv_lib_X11_XOpenDisplay=${ac_cv_lib_X11_XOpenDisplay='yes'}
+ac_cv_lib_Xaw_XawTextSetInsertionPoint=${ac_cv_lib_Xaw_XawTextSetInsertionPoint='yes'}
+ac_cv_lib_Xext_XShapeQueryVersion=${ac_cv_lib_Xext_XShapeQueryVersion='yes'}
+ac_cv_lib_Xintl__Xlcmbcurmax=${ac_cv_lib_Xintl__Xlcmbcurmax='no'}
+ac_cv_lib_Xm_XmCreateOptionMenu=${ac_cv_lib_Xm_XmCreateOptionMenu='yes'}
+ac_cv_lib_Xmu_XmuCvtStringToOrientation=${ac_cv_lib_Xmu_XmuCvtStringToOrientation='yes'}
+ac_cv_lib_Xp_XpSelectInput=${ac_cv_lib_Xp_XpSelectInput='yes'}
+ac_cv_lib_Xpm_XpmCreatePixmapFromXpmImage=${ac_cv_lib_Xpm_XpmCreatePixmapFromXpmImage='yes'}
+ac_cv_lib_Xt_XtToolkitInitialize=${ac_cv_lib_Xt_XtToolkitInitialize='yes'}
+ac_cv_lib_c_open=${ac_cv_lib_c_open='yes'}
+ac_cv_lib_dnet_dnet_ntoa=${ac_cv_lib_dnet_dnet_ntoa='no'}
+ac_cv_lib_dnet_stub_dnet_ntoa=${ac_cv_lib_dnet_stub_dnet_ntoa='no'}
+ac_cv_lib_gen_regcmp=${ac_cv_lib_gen_regcmp='no'}
+ac_cv_lib_ipc_shmap=${ac_cv_lib_ipc_shmap='no'}
+ac_cv_lib_m_sin=${ac_cv_lib_m_sin='yes'}
+ac_cv_prog_CC=${ac_cv_prog_CC='gcc'}
+ac_cv_prog_CPP=${ac_cv_prog_CPP='gcc -E'}
+ac_cv_prog_CXX=${ac_cv_prog_CXX='c++'}
+ac_cv_prog_CXXCPP=${ac_cv_prog_CXXCPP='c++ -E'}
+ac_cv_prog_cc_cross=${ac_cv_prog_cc_cross='no'}
+ac_cv_prog_cc_g=${ac_cv_prog_cc_g='yes'}
+ac_cv_prog_cc_works=${ac_cv_prog_cc_works='yes'}
+ac_cv_prog_cxx_cross=${ac_cv_prog_cxx_cross='no'}
+ac_cv_prog_cxx_g=${ac_cv_prog_cxx_g='yes'}
+ac_cv_prog_cxx_works=${ac_cv_prog_cxx_works='yes'}
+ac_cv_prog_gcc=${ac_cv_prog_gcc='yes'}
+ac_cv_prog_gxx=${ac_cv_prog_gxx='yes'}
+ice_cv_athena_includes=${ice_cv_athena_includes=''}
+ice_cv_athena_libraries=${ice_cv_athena_libraries=''}
+ice_cv_motif_includes=${ice_cv_motif_includes=''}
+ice_cv_motif_libraries=${ice_cv_motif_libraries='/usr/X11R6/lib'}
+ice_cv_prog_cc=${ice_cv_prog_cc='yes'}
+ice_cv_prog_cxx=${ice_cv_prog_cxx='yes'}
+ice_cv_traditional_cpp=${ice_cv_traditional_cpp='gcc -E -traditional-cpp'}
+ice_cv_xpm_includes=${ice_cv_xpm_includes=''}
+ice_cv_xpm_libraries=${ice_cv_xpm_libraries=''}

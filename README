@@ -1,0 +1,64 @@
+
+
+
+COPYRIGHT
+=========
+
+This software (gpsd) is Copyrighted 1997 by Remco Treffkorn,
+I am releasing it under the terms and conditions of the 
+
+	GNU GENERAL PUBLIC LICENSE Version 2, June 1991
+
+or later. A copy off which is included in the file COPYING.
+
+
+
+
+GENERAL
+=======
+
+This is the second public release of "gpsd".
+
+Gpsd is a user land daemon acting as a liason between a gps or
+Loran-C receiver and clients. The reiceiver is expected to generate
+position information as NMEA0138 sentences, although that can be changed.
+
+Gpsd listens on port 5678 for clients requesting position, time,
+velocity or altitude information.
+
+Gpsd can take information from the gps and translate it into
+something easier to understand for clients.
+
+The client does not have to run on the same computer ;-)
+I have a boat connected to the internet (Ricochet modem) runing
+gpsd, the maping program runs here at home (no, I will not give
+you the boats IP address :-)
+
+
+There is a sample client released separately. The package is called
+"gpsclient". It simply connects to a gpsd and displays satellites
+in their current position in the sky.
+
+Gpsd is tested with DeLormes TripMate und Garmin 38 units.
+
+
+CREDITS
+=======
+
+Nmea_parse.c is modeled after code seen in gpstrans-0.31b by
+Carsten Tschach.
+
+Thanks to Bob Lorenzini <hwm@netcom.com> for his testing and feedback.
+
+Thanks goes to Brook Milligan <brook@trillium.NMSU.Edu> for his
+efforts to combine gpsd and gpsclient into one package.
+He also changed the configuration method from Imake to GNU
+autoconf. This made it easy to port the code to YOUR particular
+platform.
+
+Be advised: any bugs in this code are mine, and mine only ;-)
+
+
+This is as it stands today, January 27 1998.
+
+remco@emc.rvt.com

@@ -1,0 +1,255 @@
+dnl configure.in
+dnl $Modified: Thu Jan 22 12:53:31 1998 by brook $
+dnl
+dnl This file is in part inspired by and derived from the DDD Library.
+dnl
+dnl
+dnl Process this file with autoconf to produce a configure script.
+dnl $Id: configure.in,v 1.1 1998/08/18 20:43:57 remco Exp $
+dnl 
+dnl Copyright (C) 1995-1997 Technische Universitaet Braunschweig, Germany.
+dnl Written by Andreas Zeller <zeller@ips.cs.tu-bs.de>.
+dnl 
+dnl This file is part of the DDD Library.
+dnl 
+dnl The DDD Library is free software; you can redistribute it and/or
+dnl modify it under the terms of the GNU Library General Public
+dnl License as published by the Free Software Foundation; either
+dnl version 2 of the License, or (at your option) any later version.
+dnl 
+dnl The DDD Library is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+dnl See the GNU Library General Public License for more details.
+dnl 
+dnl You should have received a copy of the GNU Library General Public
+dnl License along with the DDD Library -- see the file COPYING.LIB.
+dnl If not, write to the Free Software Foundation, Inc.,
+dnl 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+dnl 
+dnl DDD is the data display debugger.
+dnl For details, see the DDD World-Wide-Web page, 
+dnl `http://www.cs.tu-bs.de/softech/ddd/',
+dnl or send a mail to the DDD developers <ddd@ips.cs.tu-bs.de>.
+dnl
+dnl
+dnl
+dnl
+dnl
+AC_INIT(gpsd.c)
+
+dnl Find and check C/C++ compilers
+dnl
+ICE_PROG_CC
+ICE_PROG_CXX
+dnl
+dnl 
+dnl Find and check C/C++ preprocessors
+dnl
+AC_PROG_CPP
+AC_PROG_CXXCPP
+
+dnl
+dnl
+dnl Check for compiler characteristics
+dnl
+ICE_PROG_CPP_TRADITIONAL
+
+AC_CHECK_HEADERS(termio.h sys/param.h)
+
+dnl
+dnl Locate Libraries
+dnl
+AC_CHECK_LIB(m, sin, LIBM="-lm")
+AC_SUBST(LIBM)
+dnl
+AC_CHECK_LIB(c, open, LIBC="-lc")
+AC_SUBST(LIBC)
+dnl
+AC_CHECK_LIB(gen, regcmp, LIBGEN="-lgen")
+AC_SUBST(LIBGEN)
+dnl
+dnl
+dnl
+dnl
+dnl Check for X stuff
+dnl
+dnl
+dnl Check X options
+dnl
+if test "$with_x" = no; then
+AC_MSG_WARN([Some of this software requires the X window system to compile and run.
+                    Please do not use the configure option '--without-x'.])
+fi
+if test "$with_motif" = no; then
+AC_MSG_WARN([Some of this software requires Motif to compile and run.
+                    Please do not use the configure option '--without-motif'.])
+fi
+dnl
+dnl
+dnl Check for X libraries
+dnl
+if test "$with_x" != no; then
+ice_save_LIBS="$LIBS"
+ice_save_CFLAGS="$CFLAGS"
+ice_save_CPPFLAGS="$CPPFLAGS"
+ice_save_LDFLAGS="$LDFLAGS"
+dnl
+AC_PATH_XTRA
+ICE_FIND_MOTIF
+ICE_FIND_ATHENA
+ICE_FIND_XPM
+dnl
+dnl Autoconf bug fix: Sun CC 3.0 requires `-R lib', g++ requires `-Rlib'.
+changequote(,)dnl
+case "$CXX" in
+  *CC) X_LIBS="`echo $X_LIBS | $SED 's, -R\([^ ]\), -R \1,g'`"
+esac
+changequote([,])dnl
+dnl
+dnl
+dnl
+LIBS="$LIBS $X_EXTRA_LIBS"
+CFLAGS="$CFLAGS $X_CFLAGS"
+CPPFLAGS="$CPPFLAGS $X_CFLAGS"
+LDFLAGS="$LDFLAGS $X_LIBS"
+dnl
+dnl Check for X library
+dnl
+X11_LIBS=""
+AC_CHECK_LIB(X11, XOpenDisplay, X11_LIBS="-lX11",,${X_PRE_LIBS})
+if test "$X11_LIBS" = ""; then
+dnl Not having X may be fatal.  Let the user fix this.
+AC_MSG_WARN([The X11 library '-lX11' could not be found.
+                    Please use the configure options '--x-includes=DIR'
+                    and '--x-libraries=DIR' to specify the X location.
+                    See the file 'config.log' for further diagnostics.])
+fi
+AC_SUBST(X_LIBS)
+AC_SUBST(X11_LIBS)
+AC_SUBST(X_PRE_LIBS)
+dnl
+dnl
+dnl Check for -lXintl library.  Lutz Kittler <kittler@sse-erfurt.de> says
+dnl that DLD-Linux with CDE wants `-lXintl' to refine `Xlcmbcurmax'.
+dnl Guenther Roehrich <guenther@studbox.uni-stuttgart.de> says that
+dnl we must check for `_Xlcmbcurmax' instead of `Xlcmbcurmax'.
+dnl
+AC_CHECK_LIB(Xintl, _Xlcmbcurmax, X11_LIBS="${X11_LIBS} -lXintl",,
+	${X_PRE_LIBS} ${X11_LIBS})
+dnl
+dnl
+dnl Check for -lipc library.  SCO unix is said to want that.
+dnl
+AC_CHECK_LIB(ipc, shmap, X11_LIBS="${X11_LIBS} -lipc",,
+	${X_PRE_LIBS} ${X11_LIBS})
+dnl
+dnl
+dnl Check for X toolkit libraries
+dnl
+XT_LIBS=""
+AC_CHECK_LIB(Xt, XtToolkitInitialize, XT_LIBS="-lXt",,
+	${X_PRE_LIBS} ${X11_LIBS})
+if test "$XT_LIBS" = ""; then
+dnl Not having Xt is fatal.  Let the user fix this.
+AC_MSG_WARN([The X toolkit library '-lXt' could not be found.
+                    Please use the configure options '--x-includes=DIR'
+                    and '--x-libraries=DIR' to specify the X location.
+                    See the file 'config.log' for further diagnostics.])
+fi
+AC_SUBST(XT_LIBS)
+dnl
+dnl
+dnl Check for X extension libraries
+dnl
+dnl
+XEXT_LIBS=""
+AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
+	${X_PRE_LIBS} ${X11_LIBS})
+AC_SUBST(XEXT_LIBS)
+dnl
+dnl
+dnl
+dnl Check for Athena widget libraries
+dnl
+dnl
+XAW_LIBS=""
+if test "$athena_includes" != "no" && test "$athena_libraries" != "no"
+then
+AC_CHECK_LIB(Xmu, XmuCvtStringToOrientation,
+	XAW_LIBS="-lXmu ${XAW_LIBS}",,
+	${X_PRE_LIBS} ${XAW_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS})
+AC_CHECK_LIB(Xaw, XawTextSetInsertionPoint, 
+	XAW_LIBS="-lXaw ${XAW_LIBS}"
+	AC_DEFINE(HAVE_ATHENA),,
+	${X_PRE_LIBS} ${XAW_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS})
+if test "$XAW_LIBS" = ""; then
+dnl A warning suffices here -- DDD also works without Athena.
+AC_MSG_WARN([The Athena widgets library '-lXaw' could not be found.
+                    If you have the athena library, please use the
+                    configure options '--with-athena-includes=DIR' and 
+                    '--with-athena-libraries=DIR' to specify the Xaw location.
+                    If you do not have the athena library, use the configure
+                    option '--without-athena' to suppress this message.
+                    See the file 'config.log' for further diagnostics.])
+fi
+fi
+if test "$XAW_LIBS" != ""; then
+AC_CHECK_HEADERS(X11/Xaw/Form.h X11/Xaw/Panner.h X11/Xaw/Porthole.h)
+AC_CHECK_HEADERS(X11/Xmu/Editres.h)
+fi
+AC_SUBST(XAW_LIBS)
+dnl
+dnl
+dnl Check for Xpm library and headers
+dnl
+XPM_LIBS=""
+AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
+	XPM_LIBS="-lXpm"
+	AC_DEFINE(HAVE_XPM),,${X_PRE_LIBS} ${X11_LIBS})
+if test "$XPM_LIBS" != ""; then
+AC_CHECK_HEADERS(X11/xpm.h xpm.h)
+fi
+AC_SUBST(XPM_LIBS)
+dnl
+dnl
+dnl Check for Motif widget libraries
+dnl
+dnl
+XM_LIBS=""
+XP_LIBS=""
+if test "$motif_includes" != "no" && test "$motif_libraries" != "no"
+then
+dnl Motif 2.1 wants `-lXp' (X11R6.3 print server)
+AC_CHECK_LIB(Xp, XpSelectInput,
+	XP_LIBS="-lXp"
+	AC_DEFINE(HAVE_XP),,
+	${X_PRE_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
+dnl
+AC_CHECK_LIB(Xm, XmCreateOptionMenu, 
+	XM_LIBS="-lXm"
+	AC_DEFINE(HAVE_MOTIF),,
+	${X_PRE_LIBS} ${XP_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
+fi
+if test "$XM_LIBS" = ""; then
+dnl Without Motif, we won't get far.  Let the user fix this.
+AC_MSG_WARN([The Motif library '-lXm' could not be found.
+                    Please use the configure options '--with-motif-includes=DIR'
+                    and '--with-motif-libraries=DIR' to specify the Xm location.
+                    See the file 'config.log' for further diagnostics.])
+MISSING_MOTIF="# "
+AC_SUBST(MISSING_MOTIF)
+fi
+AC_SUBST(XP_LIBS)
+AC_SUBST(XM_LIBS)
+dnl
+dnl
+dnl
+dnl
+LIBS="$ice_save_LIBS"
+CFLAGS="$ice_save_CFLAGS"
+CPPFLAGS="$ice_save_CPPFLAGS"
+LDFLAGS="$ice_save_LDFLAGS"
+fi
+
+AC_OUTPUT(Makefile)

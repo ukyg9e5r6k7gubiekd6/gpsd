@@ -1,0 +1,128 @@
+# Makefile.in
+# $Modified: Thu Jan 22 11:55:32 1998 by brook $
+
+
+## The C compiler
+
+# What we use to compile C files.
+# CC = cc
+CC = @CC@
+
+# The flags we use to compile C files.
+CDEBUGFLAGS = -g
+CFLAGS = @CFLAGS@ $(CDEBUGFLAGS)
+
+
+## The C preprocessor.
+
+# What we use for preprocessing.  (gcc -E -traditional-cpp)
+CPP = @CPP_TRADITIONAL@
+
+# Flags passed to the C preprocessor.  ()
+CPPFLAGS = @CPPFLAGS@
+
+# Definitions to be passed to the C preprocessor.  (-DHAVE_CONFIG_H)
+DEFS = @DEFS@
+
+
+## The Linker.
+
+# Flags passed to the linker.  (-g -O)
+LDFLAGS = @LDFLAGS@
+
+# Use this for building statically linked executables with GCC.
+# LDFLAGS = -static @LDFLAGS@
+
+
+## Local libraries
+
+# Math library (-lm)
+LIBM       = @LIBM@
+# C library (-lc)
+LIBC       = @LIBC@
+
+# All libraries shown above
+LIBS = $(LIBM) $(LIBC)
+
+
+## X Libraries
+
+# Special flags for linking with X.  (-L/usr/X11R5/lib)
+X_LDFLAGS = @X_LIBS@
+
+# Motif library.  (-lXm)
+LIBXM = @XM_LIBS@
+
+# Use this alternative for building `semistatic' executables
+# where Motif libraries are statically linked in.
+# LIBXM = -Wl,-Bstatic @XM_LIBS@ -Wl,-Bdynamic
+
+# Athena libraries.  (-lXaw -lXmu)
+LIBXAW = @XAW_LIBS@
+
+# X extension library; needed for Athena and Motif >= 2.0.  (-lXext)
+LIBXEXT = @XEXT_LIBS@
+
+# Xpm library; needed for DDD and sometimes for Motif >= 2.0.  (-lXpm)
+LIBXPM = @XPM_LIBS@
+
+# Xp library; sometimes needed for Motif >= 2.1.  (-lXp)
+LIBXP = @XP_LIBS@
+
+# gen library; sometimes needed for Motif >= 2.0.  (-lgen)
+LIBGEN = @LIBGEN@
+
+# X toolkit library.  (-lXt)
+LIBXT = @XT_LIBS@
+
+# X library.  (-lSM -lICE -lX11 -lnsl -lsocket)
+LIBX11 = @X_PRE_LIBS@ @X11_LIBS@ @X_EXTRA_LIBS@
+
+# All libraries shown above
+ALL_X_LIBS = $(X_LDFLAGS) $(LIBXM) $(LIBXP) $(LIBXPM) $(LIBXAW) $(LIBXEXT) \
+$(LIBXT) $(LIBX11) $(LIBGEN)
+
+
+## C compile commands.
+COMPILE.c = $(CC) $(CPPFLAGS) $(DEFS) $(CFLAGS) -c
+LINK.c = $(CC) $(LDFLAGS)
+COMPILE_AND_LINK.c = \
+    $(CC) $(CPPFLAGS) $(DEFS) $(CFLAGS) $(LDFLAGS)
+
+## Where to look for X include files.  (-I/usr/X11R5/include)
+X_INCLUDE = @X_CFLAGS@
+
+## Where to look for include files.
+INCLUDE = -I. $(X_INCLUDE)
+
+## Implicit rules.
+.SUFFIXES: .c
+.c.o:
+	$(COMPILE.c) $(INCLUDE) -o $@ $<
+
+
+## Libraries and object files
+LIB_OBJECTS = netlib.o nmea_parse.o serial.o tm.o $(MOTIF_OBJECTS)
+
+## Programs
+PROGRAMS=gpsd
+
+## Motif dependent programs and object files
+@MISSING_MOTIF@MOTIF_PROGRAMS=gps
+@MISSING_MOTIF@MOTIF_OBJECTS = display.o
+
+
+all: $(PROGRAMS) $(MOTIF_PROGRAMS)
+
+gpsd: gpsd.o libgpsd.a
+	$(LINK.c) -o $@ gpsd.o -L. -lgpsd $(LIBS)
+
+gps: gps.o libgpsd.a
+	$(LINK.c) -o $@ gps.o -L. -lgpsd $(ALL_X_LIBS) $(LIBS)
+
+libgpsd.a:  $(LIB_OBJECTS)
+	ar -r libgpsd.a $(LIB_OBJECTS)
+	ranlib libgpsd.a
+
+clean:
+	rm -f *.o *.a gpsd gps *~

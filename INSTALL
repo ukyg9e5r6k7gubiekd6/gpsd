@@ -1,0 +1,56 @@
+
+The following is from Brook:==================================================
+
+Run ./configure (or sh configure if the script does not have execute
+permission).
+
+Check the Makefile.
+
+run make:  libgpsd.a, gpsd, and gps are built.
+
+Copy gpsd and gps wherever you want them to live.
+
+Copy the app-defaults file Gps to your home directory or to the
+system-wide X app-defaults directory.
+
+Command line options:
+  -D integer   [ set debug level ] 
+  -L longitude [ set longitude ] 
+  -S integer   [ set port for daemon ] 
+  -h           [ help message ] 
+  -l latitude  [ set latitude ] 
+  -p string    [ set gps device name ] 
+  -s baud_rate [ set baud rate on gps device ] 
+
+Gps device names may be either device files (e.g., /dev/gps) or ports
+served by gpsd (e.g., localhost:5678).  The deamon port option
+determines which port the daemon will monitor for connections from
+either clients or cascaded daemons.  Note that the baud rate is only
+important when connected directly to the gps device through a serial
+port.  The latitude/longitude (which must be strings ending in E/W or
+N/S, respectively) options are only required if the gps device must be
+initialized with a position.
+
+Good luck ;)
+==============================================================================
+
+
+Let me add:
+
+The "right" thing to do is, to start gpsd on a serial port that has the gps
+connected to it.
+
+Then start gps and have it connect to gpsd via a socket. Give it a device
+name like "localhost:5678", which means: connect to the host localhost using
+port 5678.
+
+You can also telnet to this port for testing. When doing that, type an 'R'
+followed by <cr>. This should display the RAW nmea sentences the deamon
+receives from the gps.
+
+You can (but please don't) connect gps (the program) directly to a serial
+port and a gps (the device). 
+
+Now I am geting confused :)
+
+ Remco
