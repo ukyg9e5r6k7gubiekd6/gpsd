@@ -213,7 +213,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	return 0;
     }
 
-    sprintf(session->gpsdata.tag, "%d", pkt->mPacketType);
+    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%d", pkt->mPacketType);
     switch ( pkt->mPacketType ) {
     case GARMIN_LAYERID_TRANSPORT:
 	gpsd_report(3, "Transport ");
@@ -819,7 +819,6 @@ static int garmin_get_packet(struct gps_device_t *session, int waiting UNUSED)
 
 static int garmin_parse_input(struct gps_device_t *session)
 {
-    sprintf(session->gpsdata.tag, "%d", 3);    
     return PrintPacket(session, (Packet_t*)session->GarminBuffer);
 }
 
