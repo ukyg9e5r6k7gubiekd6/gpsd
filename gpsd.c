@@ -211,7 +211,7 @@ static int handle_request(int fd, char *buf, int buflen)
 		if (profiling) {
 		    struct timeval tv;
 		    gettimeofday(&tv, NULL);
-		    sprintf(phrase+strlen(phrase), ",Z=%s:%lf:%d:%ld.%ld",
+		    sprintf(phrase+strlen(phrase), ",$=%s:%lf:%d:%ld.%ld",
 			    namebuf,
 			    ud->recv_time,
 			    sentence_length,
@@ -337,22 +337,23 @@ static int handle_request(int fd, char *buf, int buflen)
 	    if (*p == '1' || *p == '+') {
 		profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", fd);
-		sprintf(phrase, ",Z+");
+		sprintf(phrase, ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", fd);
-		sprintf(phrase, ",Z-");
+		sprintf(phrase, ",Z=0");
 		p++;
 	    } else if (FD_ISSET(fd, &nmea_fds)) {
 		profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", fd);
-		sprintf(phrase, ",Z-");
+		sprintf(phrase, ",Z=0");
 	    } else {
 		profiling=1;
 		gpsd_report(3, "%d turned on profiling mode\n", fd);
-		sprintf(phrase, ",Z+");
+		sprintf(phrase, ",Z=1");
 	    }
+	    sprintf(phrase + strlen(phrase), ":%d", session->baudrate);
 	    break;
 #endif /* PROFILING */
 	case '\r': case '\n':

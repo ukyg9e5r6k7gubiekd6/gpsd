@@ -99,6 +99,7 @@ struct gps_data_t {
     char tag[MAXNAMELEN+1];
     double recv_time, emit_time;
     int sentence_length;	/* character count of associated sentence */
+    int baudrate;
 #endif /* PROFILING */
 
     /* these members are private */
