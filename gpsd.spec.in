@@ -121,7 +121,9 @@ if [ -d /etc/udev/rules.d/ ]; then rm /etc/udev/rules.d/80-gpsd.rules; fi
 
 %changelog
 * Sun Feb  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Added -b (baudrate) option to gpsprobe.
+- gpsprobe now hunts through plausible baud rates when looking for NMEA
+  data from a GPS. The -b (baudrate) option fixes a speed, disabling
+  the baud-matching logic. 
 
 * Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.10
 - Add -N option to explicitly foreground the daemon.  Fixed a bug

@@ -4,20 +4,14 @@
 
 from math import *
 import time, os
-import gps, gpsd
+import gps, gpsd, curses.ascii
 
 class Baton:
-    "Ship progress indication to stdout or stserr, whichever isn't redirected."
+    "Ship progress indication to stderr."
     def __init__(self, prompt, endmsg=None):
-        if os.isatty(1):
-            self.stream = sys.stdout
-        elif os.isatty(2):
-            self.stream = sys.stderr
-        else:
-            self.stream = None
-        if self.stream:
-            self.stream.write(prompt + "... \010")
-            self.stream.flush()
+        self.stream = sys.stderr
+        self.stream.write(prompt + "... \010")
+        self.stream.flush()
         self.count = 0
         self.endmsg = endmsg
         self.time = time.time()
@@ -55,13 +49,13 @@ if __name__ == '__main__':
     fixes = []
 
     # Process options
-    (options, arguments) = getopt.getopt(sys.argv[1:], "hn:s:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "b:hn:")
     await = 100;
     device="/dev/gps"
-    bps = 4800
+    bpslist = (4800, 9600, 19200, 38400,)
     for (switch, val) in options:
 	if (switch == '-b'):
-	    bps = int(val)
+	    bpslist = (int(val),)
 	elif (switch == '-n'):
 	    await = int(val)
         elif (switch == '-h'):
@@ -119,17 +113,62 @@ if __name__ == '__main__':
                  register("# GPRMC format indicates NMEA version < 2.3.\n")
 
     try:
-        # Step one: Gather data
-        dev = gpsd.gpsd(device=device, bps=bps)
-        baton = Baton("Waiting for %s" % device)
-        while True:
+        # Step one: Check that we have read permission on the device
+        if not os.access(device, os.R_OK):
+            sys.stderr.write(device + " nonexistent or unreadable.\n")
+            sys.exit(0)
+
+        def looks_like_NMEA(data):
+            if data.find("$GP") == -1:
+                return False
+            #sys.stderr.write("[%s]" % data)
+            # It's OK for there to be leading garbage, but not trailing garbage.
+            # Leading garbage may just mean the device hasn't settled yet.
+            # Trailing garbage means that the data accidentally looked like
+            # NMEA or that old data that really was NMEA happened to be sitting
+            # in the TTY buffer unread, but the new data we read is not
+            # sentences.
+            while not (curses.ascii.isprint(data[0]) or curses.ascii.isspace(data[0])):
+                data = data[1:]
+            if not data:
+                return False
+            #sys.stderr.write("(%s)" % data)
+            binary = filter(lambda x: not (curses.ascii.isprint(x) or curses.ascii.isspace(x)), data)
+            #sys.stderr.write("{"+repr(data)+"}")
+            return not binary
+
+        # Step two: Open and sync up with the device
+        for baudrate in bpslist:
+            dev = gpsd.gpsd(device=device, bps=baudrate)
+            # First, acquire the device
+            baton = Baton("Trying %s at %dbps" % (device, baudrate))
+            starttime = time.time()
+            while True:
+                baton.twirl()
+                try:
+                    dev.activate()
+                    break
+                except IOError, e:
+                    time.sleep(1)
+            baton.end("opened")
+            # Now check to see if we get recognizable NMEA from it
+            baton = Baton("Looking for NMEA sentences")
+            starttime = time.time()
+            time.sleep(2)	# Give the device time to settle
+            #dev.flush()	# Might be spurious NMEA in the tty buffer 
+            data = dev.rawread()
+            sys.stderr.write("%d chars seen" % len(data))
             baton.twirl()
-            try:
-                dev.activate()
+            if data and looks_like_NMEA(data):
+                baton.end("found NMEA")
                 break
-            except IOError, e:
-                time.sleep(1)
-        baton.end("acquired")
+            else:
+                baton.end("no NMEA recognized")
+        else:
+            sys.stderr.write("Couldn't acquire the device.\n")
+            sys.exit(0)
+
+        # Step three: Gather data
         starttime = time.time()
         dev.set_raw_hook(count)
         sys.stderr.write("Gathering %d sentences will probably take about %d seconds.\n"%(await, await/3,))
@@ -150,7 +189,7 @@ if __name__ == '__main__':
         baton.end()
         del last_seen
  
-        # Step two: get command frequencies and the basic send cycle time
+        # Step three: get command frequencies and the basic send cycle time
         frequencies = {}
         for (key, interval_list) in intervals.items():
             frequencies[key] = {}
@@ -198,10 +237,10 @@ if __name__ == '__main__':
         if SIRF in notifications and GE301 in notifications:
             notifications.remove(GE301)
 
-        # Step three: print out registered traits
+        # Step four: print out registered traits
         sys.stdout.write("".join(notifications) + "\n")
 
-        # Step four: run an empirical check on uncertainty of position.
+        # Step five: run an empirical check on uncertainty of position.
         if len(fixes) == 0:
             print "# No fixes collected, can't estimate accuracy."
         else:

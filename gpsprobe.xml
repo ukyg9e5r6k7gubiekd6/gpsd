@@ -55,8 +55,10 @@ have to run as superuser to get access to the device.</para>
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
-<para>The -b option sets the baud rate at which to connect.  The
-default is 4800.</para>
+<para>The -b option sets a baud rate at which to connect.  If no -b
+option is given, <application>gpsprobe</application> will hunt through
+plausible baud rates beginning with the NMEA standard 4800, looking
+for one that elicits text looking like NMEA sentences.</para>
 
 <para>The -n option sets the number of packets to sample.  The
 default is 100.</para>
@@ -72,6 +74,10 @@ is <filename>/dev/gps</filename>.</para>
 
 <para>This program handles only straight NMEA devices; it won't 
 handle either Rockwell or SiRF binary protocols.</para>
+
+<para>The logic for hunting the GPS's baud rate is vulnerable to
+various sorts of RS323 flakiness. If it hangs for longer than a few
+seconds, kill the program and restart.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

@@ -338,8 +338,6 @@ class gpsd(gps.gpsdata):
 
     def rawread(self):
         ready = self.waiting()
-        import sys
-        sys.stderr.write("%d seen" % ready)
         if ready:
             return self.ttyfp.read(ready)
         else:
