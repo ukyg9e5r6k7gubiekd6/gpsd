@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
 }
 
 
-int errexit(char *s)
+void errexit(char *s)
 {
     perror(s);
     serial_close();

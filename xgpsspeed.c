@@ -56,10 +56,9 @@ static void open_input(XtAppContext app);
 
 #undef Offset
 
-int errexit(char *s)
+void errexit(char *s)
 {
     perror(s);
-    /* serial_close(); */
     exit(1);
 }
 
