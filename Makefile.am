@@ -11,7 +11,7 @@ gps_SOURCES = \
 	version.h
 
 gps_CFLAGS = $(X_CFLAGS)
-gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
+gps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.a
 
 
 #
@@ -25,7 +25,7 @@ xgpsspeed_SOURCES = \
 	xgpsspeed.icon
 
 xgpsspeed_CFLAGS = $(X_CFLAGS)
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.a
 
 
 #
@@ -37,15 +37,15 @@ gpsd_SOURCES = \
 	gpsd.c \
 	version.h
 
-gpsd_LDADD = $(LIBM) libgps.la
+gpsd_LDADD = $(LIBM) libgps.a
 
 
 #
 # Build shared libgps
 #
-lib_LTLIBRARIES = libgps.la
+lib_LIBRARIES = libgps.a
 
-libgps_la_SOURCES = \
+libgps_a_SOURCES = \
 	netlib.c \
 	nmea_parse.c \
 	serial.c \
@@ -54,8 +54,7 @@ libgps_la_SOURCES = \
 	libgpsd_core.c \
 	libgps.c
 
-libgps_la_LDFLAGS = -no-undefined
-libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
+libgps_a_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
 
 #
 # Create Manpages
