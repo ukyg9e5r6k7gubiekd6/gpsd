@@ -442,7 +442,10 @@ int main(int argc, char *argv[])
      */
     gpsd_fd = gps_open(&gpsdata, NULL, NULL);
     if (gpsd_fd < 0)
+    {
+	fprintf(stderr, "gps: no gpsd running.\n");
 	exit(2);
+    }
 
     lxbApp = XtVaAppInitialize(&app, "gps.ad", NULL, 0, &argc, argv, fallback_resources, NULL);
 

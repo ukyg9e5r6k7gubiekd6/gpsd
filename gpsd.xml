@@ -287,6 +287,12 @@ it contains position, velocity and GPS status data.  Additionally,
 watching clients get X notifications when the online/offline status of
 the GPS changes.</para>
 
+<para>Sending SIGHUP to a running gpsd forces it to close the GPS and
+all client connections.  It will then attempt to reconnect to the GPS
+and resume listening for client connections.  This may be useful if
+your GPS enters a wedged or confused state but can be soft-reset by
+pulling down DTR.</para>
+
 </refsect2>
 <refsect2><title>gps</title>
 

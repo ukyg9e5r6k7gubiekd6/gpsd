@@ -9,6 +9,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <stdarg.h>
+#include <setjmp.h>
 
 #if defined (HAVE_PATH_H)
 #include <paths.h>
@@ -58,18 +59,20 @@ static int in_background = 0;
 static fd_set all_fds;
 static fd_set nmea_fds;
 static fd_set watcher_fds;
-static int reopen;
+
+static jmp_buf	restartbuf;
+#define THROW_SIGHUP	1
+
+static void restart(int sig)
+{
+    longjmp(restartbuf, THROW_SIGHUP);
+}
 
 static void onsig(int sig)
 {
     gpsd_wrap(&session);
     gpscli_report(1, "Received signal %d. Exiting...\n", sig);
     exit(10 + sig);
-}
-
-static void sigusr1(int sig)
-{
-    reopen = 1;
 }
 
 static int daemonize()
@@ -543,6 +546,7 @@ int main(int argc, char *argv[])
     int fd;
     int need_gps;
     int nowait = 0;
+    int reopen = 0;
 
     session.debug = 1;
     while ((option = getopt(argc, argv, "D:S:T:d:hi:np:s:")) != -1) {
@@ -611,9 +615,8 @@ int main(int argc, char *argv[])
 	daemonize();
 
     /* Handle some signals */
-    signal(SIGUSR1, sigusr1);
+    signal(SIGHUP, restart);
     signal(SIGINT, onsig);
-    signal(SIGHUP, onsig);
     signal(SIGTERM, onsig);
     signal(SIGQUIT, onsig);
     signal(SIGPIPE, SIG_IGN);
@@ -624,6 +627,12 @@ int main(int argc, char *argv[])
     if (msock == -1)
 	exit(2);	/* netlib_passiveTCP will have issued a message */
     gpscli_report(1, "gpsd listening on port %s\n", service);
+
+    /* user may want to re-initialize the session */
+    if (setjmp(restartbuf) == THROW_SIGHUP) {
+	gpsd_wrap(&session);
+	gpscli_report(1, "gpsd restarted by SIGHUP\n");
+    }
 
     FD_ZERO(&all_fds);
     FD_ZERO(&nmea_fds);

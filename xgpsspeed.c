@@ -140,7 +140,10 @@ int main(int argc, char **argv)
      */
     gpsd_fd = gps_open(&gpsdata, NULL, NULL);
     if (gpsd_fd < 0)
+    {
+	fprintf(stderr, "xgpsspeed: no gpsd running.\n");
 	exit(2);
+    }
 
     XtAppAddInput(app, gpsd_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
