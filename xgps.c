@@ -236,6 +236,7 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 
     ret = gps_poll(gpsdata);
     if ( 0 > ret ) {
+	fprintf(stderr, "xgps: gps_poll(): %d, %s\n", errno, strerror(errno));
     }
 }
 
