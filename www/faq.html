@@ -95,6 +95,28 @@ Try bringing up <code>sirfmon</code> and using the 'c1' command to
 set Static Navigation Mode.  This setting should persist between
 GPS uses.</p>
 
+<h1 id='date_flicker'>The date in <code>xgps</code> flickers to "n/a" part of the time</h1>
+
+<p>The sentence or packet your GPS uses to report satellite
+bearing/elevation has no timestamp. The <code>xgps</code>
+date display flickers to "n/a" when it has just seen this report.</p>
+
+<p>This is a known problem.  It's not a bug &mdash; or, at least, not
+a bug in the GPSD code.  Blame the idiot protocol designers who
+saw fit not to timestamp their satellite-data packet.  (NMEA and Garmin 
+GPSes don't.  SiRF GPSes do.  Score one for SiRF.)</p>
+
+<p><code>gpsd</code> is faithfully reporting the information it is
+getting from the GPS, including the fact that the Y sentence contains
+no date, That's its job.  The libgps library is doing its bit by
+passing everything from <code>gpsd</code> on to the client application
+as it arrives, including the lack of date.</p>
+
+<p>It's the <em>client's</em> job to interpret/interpolate/fill in
+gaps, to do policy.  What you're seeing as a bug only looks like one
+because <code>xgps</code>, as is proper for a test client, has as
+little policy as possible.</p>
+
 <h1 id='why_migrate'>Why this version of <code>gpsd</code>?</h1>
 
 <p>If you have written a <code>gpsd</code>-aware application using one
