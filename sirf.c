@@ -210,7 +210,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
-	    strcpy(session->gpsdata.tag, "MND");
 	    return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 	}
 

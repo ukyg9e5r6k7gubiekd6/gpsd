@@ -503,6 +503,12 @@ int main (int argc, char **argv)
 		logfile = fopen(p,"a");
 		break;
 
+	    case 'p':				/* poll for almanac data */
+		putb(0,0x92);
+		putb(1,0x00);
+		sendpkt(buf,2);
+		break;
+
 	    case 'q':
 		goto quit;
 

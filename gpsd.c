@@ -571,7 +571,27 @@ static int handle_request(int cfd, char *buf, int buflen)
 		sprintf(phrase, ",Z=%d", ud->profiling);
 	    }
 	    break;
-
+        case '$':
+	    if (ud->sentence_time)
+		sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
+			ud->tag,
+			ud->sentence_length,
+			ud->sentence_time,
+			ud->d_xmit_time - ud->sentence_time,
+			ud->d_recv_time - ud->sentence_time,
+			ud->d_decode_time - ud->sentence_time,
+			device->poll_times[cfd] - ud->sentence_time,
+			timestamp() - ud->sentence_time);
+	    else
+		sprintf(phrase, ",$=%s %d 0 %f %f %f %f %f",
+			ud->tag,
+			ud->sentence_length,
+			ud->d_xmit_time,
+			ud->d_recv_time - ud->d_xmit_time,
+			ud->d_decode_time - ud->d_xmit_time,
+			device->poll_times[cfd] - ud->d_xmit_time,
+			timestamp() - ud->d_xmit_time);
+	    break;
 	case '\r': case '\n':
 	    goto breakout;
 	}
@@ -581,29 +601,6 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
  breakout:
-    if (ud->profiling) {
-	if (ud->sentence_time)
-	    sprintf(phrase, ",$=%s %d %f %f %f %f %f %f",
-		    ud->tag,
-		    ud->sentence_length,
-		    ud->sentence_time,
-		    ud->d_xmit_time - ud->sentence_time,
-		    ud->d_recv_time - ud->sentence_time,
-		    ud->d_decode_time - ud->sentence_time,
-		    device->poll_times[cfd] - ud->sentence_time,
-		    timestamp() - ud->sentence_time);
-	else
-	    sprintf(phrase, ",$=%s %d 0 %f %f %f %f %f",
-		    ud->tag,
-		    ud->sentence_length,
-		    ud->d_xmit_time,
-		    ud->d_recv_time - ud->d_xmit_time,
-		    ud->d_decode_time - ud->d_xmit_time,
-		    device->poll_times[cfd] - ud->d_xmit_time,
-		    timestamp() - ud->d_xmit_time);
-	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
-	    strcat(reply, phrase);
-    }
     strcat(reply, "\r\n");
 
     return throttled_write(cfd, reply, strlen(reply));
@@ -827,22 +824,28 @@ int main(int argc, char *argv[])
 		notify_watchers("GPSD,X=0\r\n");
 	    }
 
-	    if (changed &~ ONLINE_SET) {
-		for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-		    /* some listeners may be in watcher mode */
-		    if (FD_ISSET(cfd, &watcher_fds)) {
-			device->poll_times[cfd] = timestamp();
+	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+		/* some listeners may be in watcher mode */
+		if (FD_ISSET(cfd, &watcher_fds)) {
+		    device->poll_times[cfd] = timestamp();
+		    char cmds[4] = ""; 
+		    if (changed &~ ONLINE_SET) {
 			if (changed & LATLON_SET)
-			    handle_request(cfd, "o", 1);
+			    strcat(cmds, "o");
 			if (changed & SATELLITE_SET)
-			    handle_request(cfd, "y", 1);
+			    strcat(cmds, "y");
 		    }
+		    if ((device->gpsdata.profiling) && (device->driverstate & FULL_PACKET))
+			strcat(cmds, "$");
+		    if (cmds[0])
+			handle_request(cfd, cmds, strlen(cmds));
 		}
+	    }
 
 	    /* this simplifies a later test */
 	    if (device->dsock > -1)
 		FD_CLR(device->dsock, &rfds);
-#ifndef MULTISESSION
+#ifdef MULTISESSION
 	}
 #endif /* MULTISESSION */
 
