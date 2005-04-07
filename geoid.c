@@ -89,7 +89,7 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix,
     h = p / cos(phi) - n;
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
-    fix->altitude = h + wgs84_separation(fix->latitude, fix->longitude);
+    fix->altitude = h - wgs84_separation(fix->latitude, fix->longitude);
     /* velocity computation */
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
