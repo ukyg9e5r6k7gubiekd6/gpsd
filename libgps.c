@@ -237,7 +237,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'Y':
-		    if (sp[2] != '?') {
+		    if (sp[2] != '?' || !strchr("\r\n", sp[3])) {
 			int j, i1, i2, i3, i4, i5;
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
