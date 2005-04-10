@@ -158,7 +158,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->driver_mode = atoi(sp+2);
 		    break;
 		case 'O':
-		    if (sp[2] != '?') {
+		    {
 			struct gps_fix_t nf;
 			char tag[MAXTAGLEN+1], alt[20];
 			char eph[20], epv[20], track[20],speed[20], climb[20];
@@ -237,7 +237,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'Y':
-		    if (sp[2] != '?' || !strchr("\r\n", sp[3])) {
+		    {
 			int j, i1, i2, i3, i4, i5;
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];

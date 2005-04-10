@@ -341,7 +341,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02d,%c,%.4f,%c,%.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
+	    "$GPRMC,%02d%02d%02d,%c,%07.4f,%c,%07.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    tm.tm_hour, 
 	    tm.tm_min, 
 	    tm.tm_sec,

@@ -640,9 +640,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites) {
 		int used, reported = 0;
 		strcpy(phrase, ",Y=");
+		if (whoami->device->gpsdata.tag[0])
+		    strcat(phrase, whoami->device->gpsdata.tag);
+		else
+		    strcat(phrase, "-");
 		if (whoami->device->gpsdata.valid & TIME_SET)
-		    sprintf(phrase+strlen(phrase), "%s %f ", 
-			    whoami->device->gpsdata.tag[0] ? whoami->device->gpsdata.tag : "-",
+		    sprintf(phrase+strlen(phrase), " %f ", 
 			    whoami->device->gpsdata.sentence_time);
 		else
 		    strcat(phrase, "? ");
