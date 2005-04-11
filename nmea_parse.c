@@ -348,11 +348,19 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
-    for (fldnum = 4; fldnum < count; out->satellites++) {
+    for (fldnum = 4; fldnum < count; ) {
 	out->PRN[out->satellites]       = atoi(field[fldnum++]);
 	out->elevation[out->satellites] = atoi(field[fldnum++]);
 	out->azimuth[out->satellites]   = atoi(field[fldnum++]);
 	out->ss[out->satellites]        = atoi(field[fldnum++]);
+	/*
+	 * Incrementing this unconditionally falls afoul of chipsets like 
+	 * the Motorola Oncore GT+ that emit empty fields at the end of the
+	 * last sentence in a GPGSV set if the number of satellites is not
+	 * a multiiple of 4.
+	 */
+	if (out->PRN[out->satellites])
+	    out->satellites++;
     }
     if (out->part == out->await && atoi(field[3]) != out->satellites)
 	gpsd_report(0, "GPGSV field 3 value of %d != actual count %d\n",
