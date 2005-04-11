@@ -36,9 +36,12 @@
 
 #define QLEN			5
 
+#define LEAP_SECONDS	13	/* good for 2005 */
+
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
+static struct gps_context_t context = {0, LEAP_SECONDS};
 
 static void onsig(int sig)
 {
@@ -279,7 +282,7 @@ static struct gps_device_t **find_device(char *device_name)
 static struct gps_device_t *open_device(char *device_name, int nowait)
 /* open and initialize a new channel block */
 {
-    struct gps_device_t **chp, *device = gpsd_init(device_name);
+    struct gps_device_t **chp, *device = gpsd_init(&context, device_name);
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++) {
 	if (!*chp) {

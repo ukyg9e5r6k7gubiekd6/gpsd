@@ -52,9 +52,6 @@
 #include "gpsd.h"
 #if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
 
-/* FIX ME -- get actual leap seconds from subframe data */
-#define LEAP_SECONDS	13
-
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
@@ -173,7 +170,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */ 
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getw(22), getl(24)*1e-2, -LEAP_SECONDS);
+	    = gpstime_to_unix(getw(22), getl(24)*1e-2, -session->context->leap_seconds);
 #ifdef NTPSHM_ENABLE
 	session->time_seen |= TIME_SEEN_GPS_2;
 	if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
@@ -214,7 +211,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		session->gpsdata.azimuth[st] && 
 		session->gpsdata.elevation[st];
 	    session->gpsdata.sentence_time
-		= gpstime_to_unix(getw(1), getl(3)*1e-2, -LEAP_SECONDS);
+		= gpstime_to_unix(getw(1), getl(3)*1e-2, -session->context->leap_seconds);
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_GPS_1;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))

@@ -58,6 +58,12 @@
 #define UERE_WITH_DGPS	1.9444
 #define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
+struct gps_context_t {
+    int valid;
+#define LEAP_SECOND_VALID	0x01
+    int leap_seconds;
+};
+
 struct gps_device_t;
 
 struct gps_type_t {
@@ -146,6 +152,8 @@ struct gps_device_t {
 #define TIME_SEEN_PPS	0x10	/* Seen PPS signal? */
 #endif /* NTPSHM_ENABLE */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
+
+    struct gps_context_t	*context;
 };
 
 #define IS_HIGHEST_BIT(v,m)	!(v & ~((m<<1)-1))
@@ -186,7 +194,7 @@ extern void ecef_to_wgs84fix(struct gps_fix_t *,
 
 /* External interface */
 extern int gpsd_open_dgps(char *);
-extern struct gps_device_t * gpsd_init(char *device);
+extern struct gps_device_t * gpsd_init(struct gps_context_t *, char *device);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern int gpsd_poll(struct gps_device_t *);
