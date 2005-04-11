@@ -80,8 +80,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 		switch (*sp) {
 		case 'A':
-		    sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
-		    gpsdata->valid |= ALTITUDE_SET;
+		    if (sp[2] == '?') {
+			    gpsdata->fix.altitude = 0;
+		    } else {
+		        sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
+		        gpsdata->valid |= ALTITUDE_SET;
+		    }
 		    break;
 		case 'B':
 		    if (sp[2] == '?') {
@@ -103,9 +107,15 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'E':
-		    sscanf(sp, "E=%lf %lf %lf", 
+		    if (sp[2] == '?') {
+			   gpsdata->epe = 0;
+			   gpsdata->fix.eph = 0;
+			   gpsdata->fix.epv = 0;
+		    } else {
+		        sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
-		    gpsdata->valid |= HERR_SET| VERR_SET | PERR_SET;
+		        gpsdata->valid |= HERR_SET| VERR_SET | PERR_SET;
+		    }
 		    break;
 		case 'F':
 		    if (sp[2] == '?') 
@@ -148,8 +158,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'M':
-		    gpsdata->fix.mode = atoi(sp+2);
-		    gpsdata->valid |= MODE_SET;
+		    if (sp[2] == '?') {
+		        gpsdata->fix.mode = 0;
+		    } else {
+		        gpsdata->fix.mode = atoi(sp+2);
+		        gpsdata->valid |= MODE_SET;
+		    }
 		    break;
 		case 'N':
 		    if (sp[2] == '?') 
@@ -158,7 +172,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->driver_mode = atoi(sp+2);
 		    break;
 		case 'O':
-		    {
+		    if (sp[2] == '?') {
+			gpsdata->fix.mode = MODE_NOT_SEEN;
+		    } else {
 			struct gps_fix_t nf;
 			char tag[MAXTAGLEN+1], alt[20];
 			char eph[20], epv[20], track[20],speed[20], climb[20];
@@ -202,31 +218,59 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'P':
-		    sscanf(sp, "P=%lf %lf",
+		    if (sp[2] == '?') {
+			   gpsdata->fix.latitude = 0;
+			   gpsdata->fix.longitude = 0;
+		    } else {
+		        sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
-		    gpsdata->valid |= LATLON_SET;
+		        gpsdata->valid |= LATLON_SET;
+		    }
 		    break;
 		case 'Q':
-		    sscanf(sp, "Q=%d %lf %lf %lf",
+		    if (sp[2] == '?') {
+			   gpsdata->satellites_used = 0;
+			   gpsdata->pdop = 0;
+			   gpsdata->hdop = 0;
+			   gpsdata->vdop = 0;
+		    } else {
+		        sscanf(sp, "Q=%d %lf %lf %lf",
 			   &gpsdata->satellites_used,
 			   &gpsdata->pdop, &gpsdata->hdop, &gpsdata->vdop);
-		    gpsdata->valid |= HDOP_SET | VDOP_SET | PDOP_SET;
+		        gpsdata->valid |= HDOP_SET | VDOP_SET | PDOP_SET;
+		    }
 		    break;
 		case 'S':
-		    gpsdata->status = atoi(sp+2);
-		    gpsdata->valid |= STATUS_SET;
+		    if (sp[2] == '?') {
+		        gpsdata->status = 0;
+		    } else {
+		        gpsdata->status = atoi(sp+2);
+		        gpsdata->valid |= STATUS_SET;
+		    }
 		    break;
 		case 'T':
-		    sscanf(sp, "T=%lf", &gpsdata->fix.track);
-		    gpsdata->valid |= TRACK_SET;
+		    if (sp[2] == '?') {
+		        gpsdata->fix.track = 0;
+		    } else {
+		        sscanf(sp, "T=%lf", &gpsdata->fix.track);
+		        gpsdata->valid |= TRACK_SET;
+		    }
 		    break;
 		case 'U':
-		    sscanf(sp, "U=%lf", &gpsdata->fix.climb);
-		    gpsdata->valid |= CLIMB_SET;
+		    if (sp[2] == '?') {
+		        gpsdata->fix.climb = 0;
+		    } else {
+		        sscanf(sp, "U=%lf", &gpsdata->fix.climb);
+		        gpsdata->valid |= CLIMB_SET;
+		    }
 		    break;
 		case 'V':
-		    sscanf(sp, "V=%lf", &gpsdata->fix.speed);
-		    gpsdata->valid |= SPEED_SET;
+		    if (sp[2] == '?') {
+		        gpsdata->fix.speed = 0;
+		    } else {
+		        sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+		        gpsdata->valid |= SPEED_SET;
+		    }
 		    break;
 		case 'X':
 		    if (sp[2] == '?') 
@@ -237,7 +281,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'Y':
-		    {
+		    if (sp[2] == '?') {
+			gpsdata->satellites = 0;
+		    } else {
 			int j, i1, i2, i3, i4, i5;
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
@@ -246,8 +292,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 			sscanf(sp, "Y=%20s %20s %d ", 
 			       tag, timestamp, &gpsdata->satellites);
-			if (tag[0] != '?') {
-			    strncpy(gpsdata->tag, tag, MAXTAGLEN);
+			strncpy(gpsdata->tag, tag, MAXTAGLEN);
+			if (timestamp[0] != '?') {
 			    gpsdata->sentence_time = atof(timestamp);
 			    gpsdata->valid |= TIME_SET;
 			}
