@@ -262,20 +262,28 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * changes 1 second every few years. Maybe."
 	 */
         {
+	    unsigned int i, subframe, words[10];
 	    unsigned int svid = getb(1);
 	    unsigned int chan = getb(2);
-	    unsigned int i, subframe, page, words[10];
+	    words[0] = getl(3);
+	    words[1] = getl(7);
+	    words[2] = getl(11);
+	    words[3] = getl(15);
+	    words[4] = getl(19);
+	    words[5] = getl(23);
+	    words[6] = getl(27);
+	    words[7] = getl(31);
+	    words[8] = getl(35);
+	    words[9] = getl(39);
+	    gpsd_report(2, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
+			chan, svid, 
+			words[0], words[1], words[2], words[3], words[4], 
+			words[5], words[6], words[7], words[8], words[9]);
 	    /* mask off the high 2 bits and shift out the 6 parity bits */
-	    words[0] = (getl(3)  & 0x3fffffff) >> 6;
-	    words[1] = (getl(7)  & 0x3fffffff) >> 6;
-	    words[2] = (getl(11) & 0x3fffffff) >> 6;
-	    words[3] = (getl(15) & 0x3fffffff) >> 6;
-	    words[4] = (getl(19) & 0x3fffffff) >> 6;
-	    words[5] = (getl(23) & 0x3fffffff) >> 6;
-	    words[6] = (getl(27) & 0x3fffffff) >> 6;
-	    words[7] = (getl(31) & 0x3fffffff) >> 6;
-	    words[8] = (getl(35) & 0x3fffffff) >> 6;
-	    words[9] = (getl(39) & 0x3fffffff) >> 6;
+	    /* once we've filtered, we can ignore the TEL and HOW words */
+	    /* FIXME: do we need to check parity here? */
+	    for (i = 0; i < 10; i++)
+		words[i] = (words[i]  & 0x3fffffff) >> 6;
 	    /*
 	     * "First, throw away everything that doesn't start with 8b or
 	     * 74. more correctly the first byte should be 10001011. If
