@@ -264,8 +264,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
         {
 	    unsigned int svid = getb(1);
 	    unsigned int chan = getb(2);
-	    unsigned int i, words[10];
-	    /* mask off the high 2 bits and shift out the 6 parity bit */
+	    unsigned int i, subframe, page, words[10];
+	    /* mask off the high 2 bits and shift out the 6 parity bits */
 	    words[0] = (getl(3)  & 0x3fffffff) >> 6;
 	    words[1] = (getl(7)  & 0x3fffffff) >> 6;
 	    words[2] = (getl(11) & 0x3fffffff) >> 6;
@@ -292,9 +292,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /*
 	     * The subframe ID is in the Hand Over Word (page 80) 
 	     */
+	    subframe = ((words[1] >> 2) & 0x07);
 	    /* once we've filtered, we can ignore the TEL and HOW words */
 	    gpsd_report(2, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
-			chan, svid, ((words[1] >> 2) & 0x07),
+			chan, svid, subframe,
 			    words[2], words[3], words[4], words[5], 
 			    words[6], words[7], words[8], words[9]);
 
@@ -306,7 +307,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * "Pages 105 of ICD-GPS-200. Pages 66-76a,80 of ICD-GPS-200
 	     * are the actual subframe structures."
 	     */
-	    //gpsd_report(2, "50B ID field: \n", 
 	}
 #endif /* SUBFRAME */
 	break;
@@ -474,7 +474,7 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				 0x00, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x1C,
+				 0x00, 0x00, 0x00, 0x0C,
 				 0x10,
 				 0x00, 0x00, 0xb0, 0xb3};
 #endif /* SUBFRAME */
@@ -485,10 +485,8 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
 #ifdef SUBFRAME
-	if (!session->counter) {
-	    gpsd_report(4, "Enabling subframe transmission...\n");
-	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
-	}
+	gpsd_report(4, "Enabling subframe transmission...\n");
+	sirf_write(session->gpsdata.gps_fd, enablesubframe);
 #endif /* SUBFRAME */
     }
 }
