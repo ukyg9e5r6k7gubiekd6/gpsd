@@ -102,7 +102,7 @@ int gpsd_activate(struct gps_device_t *session)
 	else if (session->device_type->initializer)
 	    session->device_type->initializer(session);
 
-	session->gpsdata.online = 0;
+	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
@@ -121,6 +121,100 @@ static int is_input_waiting(int fd)
     if (fd < 0 || ioctl(fd, FIONREAD, &count) < 0)
 	return -1;
     return count;
+}
+
+static int handle_packet(struct gps_device_t *session)
+{
+    session->packet_full = 0;
+    session->gpsdata.sentence_time = 0;
+    session->gpsdata.sentence_length = session->outbuflen;
+    session->gpsdata.d_recv_time = timestamp();
+
+    session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);
+
+    /* count all packets and good fixes */
+    session->counter++;
+    if (session->gpsdata.status > STATUS_NO_FIX) 
+	session->fixcnt++;
+
+    /*
+     * Compute derived quantities.  This is where the tricky error-
+     * modeling stuff goes. Presently we don't know how to derive 
+     * time or track error.
+     *
+     * Field reports match the theoretical prediction that
+     * expected time error should be half the resolution of
+     * the GPS clock, so we put the bound of the error
+     * in as a constant pending getting it from each driver.
+     *
+     * Some drivers set the position-error fields.  Only the Zodiacs 
+     * report speed error.  Nobody reports track error or climb error.
+     */
+    session->gpsdata.fix.ept = 0.005;
+#ifdef BINARY_ENABLE
+    if (session->gpsdata.valid & LATLON_SET) {
+	if (!(session->gpsdata.valid & HERR_SET) 
+	    && (session->gpsdata.valid & HDOP_SET)) {
+	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
+	    session->gpsdata.valid |= HERR_SET;
+	}
+	if (!(session->gpsdata.valid & VERR_SET) 
+	    && (session->gpsdata.valid & VDOP_SET)) {
+	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
+	    session->gpsdata.valid |= VERR_SET;
+	}
+	if (!(session->gpsdata.valid & PERR_SET) 
+	    && (session->gpsdata.valid & PDOP_SET)) {
+	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
+	    session->gpsdata.valid |= PERR_SET;
+	}
+	if (!(session->gpsdata.valid & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	    session->gpsdata.fix.eps = 0.0;
+	    if (session->lastfix.mode > MODE_NO_FIX 
+		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
+		double t = session->gpsdata.fix.time-session->lastfix.time;
+		double e = session->lastfix.eph + session->gpsdata.fix.eph;
+		session->gpsdata.fix.eps = e/t;
+		if (session->gpsdata.fix.eps)
+		    session->gpsdata.valid |= SPEEDERR_SET;
+	    }
+	}
+	if (!(session->gpsdata.valid & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	    session->gpsdata.fix.epc = 0.0;
+	    if (session->lastfix.mode > MODE_3D 
+		&& session->gpsdata.fix.mode > MODE_3D) {
+		double t = session->gpsdata.fix.time-session->lastfix.time;
+		double e = session->lastfix.epv + session->gpsdata.fix.epv;
+		/* if vertical uncertainties are zero this will be too */
+		session->gpsdata.fix.epc = e/t;
+		if (session->gpsdata.fix.epc)
+		    session->gpsdata.valid |= CLIMBERR_SET;
+	    }
+	}
+
+	/* save the old fix for later uncertainty computations */
+	memcpy(&session->lastfix, 
+	       &session->gpsdata.fix, 
+	       sizeof(struct gps_fix_t));
+    }
+#endif /* BINARY_ENABLE */
+
+    session->gpsdata.d_decode_time = timestamp();
+
+    /* may be time to ship a DGPS correction to the GPS */
+    if (session->fixcnt > 10 && !session->sentdgps) {
+	session->sentdgps++;
+	if (session->dsock > -1) {
+	    char buf[BUFSIZ];
+	    sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
+		    session->gpsdata.fix.latitude, 
+		    session->gpsdata.fix.longitude, 
+		    session->gpsdata.fix.altitude);
+	    write(session->dsock, buf, strlen(buf));
+	    gpsd_report(2, "=> dgps %s", buf);
+	}
+    }
+    return session->gpsdata.valid;
 }
 
 int gpsd_poll(struct gps_device_t *session)
@@ -143,119 +237,34 @@ int gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    waiting = is_input_waiting(session->gpsdata.gps_fd);
-    gpsd_report(7, "GPS has %d chars waiting\n", waiting);
-    if (waiting < 0)
-	return 0;
-    else if (!waiting) {
-	if (timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-	    session->gpsdata.online = 0;
-	    return 0;
-	} else
-	    return ONLINE_SET;
+    if (!session->counter) {
+	session->gpsdata.d_xmit_time = timestamp();
+	return handle_packet(session);	/* packet gathered by the sniffer */
     } else {
+	waiting = is_input_waiting(session->gpsdata.gps_fd);
+	gpsd_report(7, "GPS has %d chars waiting\n", waiting);
+	if (waiting < 0)
+	    return 0;
+	else if (!waiting) {
+	    if (timestamp()>session->gpsdata.online+session->device_type->cycle+1){
+		session->gpsdata.online = 0;
+		return 0;
+	    } else
+		return ONLINE_SET;
+	} else {
+	    session->gpsdata.online = timestamp();
 
-	session->gpsdata.online = timestamp();
+	    if (!session->inbuflen || session->packet_full) {
+		session->gpsdata.d_xmit_time = timestamp();
+		session->packet_full = 0;
+	    }
 
-	if (!session->inbuflen || session->packet_full) {
-	    session->gpsdata.d_xmit_time = timestamp();
-	    session->packet_full = 0;
+	    /* can we get a full packet from the device? */
+	    if (!session->device_type->get_packet(session, waiting))
+		return ONLINE_SET;
+
+	    return handle_packet(session);
 	}
-
-	/* can we get a full packet from the device? */
-	if (!session->device_type->get_packet(session, waiting))
-	    return ONLINE_SET;
-
-	session->packet_full = 0;
-	session->gpsdata.sentence_time = 0;
-	session->gpsdata.sentence_length = session->outbuflen;
-	session->gpsdata.d_recv_time = timestamp();
-
-	session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);
-
-	/* count all packets and good fixes */
-	session->counter++;
-	if (session->gpsdata.status > STATUS_NO_FIX) 
-	    session->fixcnt++;
-
-	/*
-	 * Compute derived quantities.  This is where the tricky error-
-	 * modeling stuff goes. Presently we don't know how to derive 
-	 * time or track error.
-	 *
-	 * Field reports match the theoretical prediction that
-	 * expected time error should be half the resolution of
-	 * the GPS clock, so we put the bound of the error
-	 * in as a constant pending getting it from each driver.
-	 *
-	 * Some drivers set the position-error fields.  Only the Zodiacs 
-	 * report speed error.  Nobody reports track error or climb error.
-	 */
-	session->gpsdata.fix.ept = 0.005;
-#ifdef BINARY_ENABLE
-	if (session->gpsdata.valid & LATLON_SET) {
-	    if (!(session->gpsdata.valid & HERR_SET) 
-	    	&& (session->gpsdata.valid & HDOP_SET)) {
-		session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
-		session->gpsdata.valid |= HERR_SET;
-	    }
-	    if (!(session->gpsdata.valid & VERR_SET) 
-	    	&& (session->gpsdata.valid & VDOP_SET)) {
-		session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
-		session->gpsdata.valid |= VERR_SET;
-	    }
-	    if (!(session->gpsdata.valid & PERR_SET) 
-	    	&& (session->gpsdata.valid & PDOP_SET)) {
-		session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
-		session->gpsdata.valid |= PERR_SET;
-	    }
-	    if (!(session->gpsdata.valid & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
-		session->gpsdata.fix.eps = 0.0;
-		if (session->lastfix.mode > MODE_NO_FIX 
-		    && session->gpsdata.fix.mode > MODE_NO_FIX) {
-		    double t = session->gpsdata.fix.time-session->lastfix.time;
-		    double e = session->lastfix.eph + session->gpsdata.fix.eph;
-		    session->gpsdata.fix.eps = e/t;
-		    if (session->gpsdata.fix.eps)
-			session->gpsdata.valid |= SPEEDERR_SET;
-		}
-	    }
-	    if (!(session->gpsdata.valid & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
-		session->gpsdata.fix.epc = 0.0;
-		if (session->lastfix.mode > MODE_3D 
-		    && session->gpsdata.fix.mode > MODE_3D) {
-		    double t = session->gpsdata.fix.time-session->lastfix.time;
-		    double e = session->lastfix.epv + session->gpsdata.fix.epv;
-		    /* if vertical uncertainties are zero this will be too */
-		    session->gpsdata.fix.epc = e/t;
-		    if (session->gpsdata.fix.epc)
-			session->gpsdata.valid |= CLIMBERR_SET;
-		}
-	    }
-
-	    /* save the old fix for later uncertainty computations */
-	    memcpy(&session->lastfix, 
-		   &session->gpsdata.fix, 
-		   sizeof(struct gps_fix_t));
-	}
-#endif /* BINARY_ENABLE */
-
-	session->gpsdata.d_decode_time = timestamp();
-
-	/* may be time to ship a DGPS correction to the GPS */
-	if (session->fixcnt > 10 && !session->sentdgps) {
-	    session->sentdgps++;
-	    if (session->dsock > -1) {
-		char buf[BUFSIZ];
-		sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
-			session->gpsdata.fix.latitude, 
-			session->gpsdata.fix.longitude, 
-			session->gpsdata.fix.altitude);
-		write(session->dsock, buf, strlen(buf));
-		gpsd_report(2, "=> dgps %s", buf);
-	    }
-	}
-	return session->gpsdata.valid;
     }
 }
 
