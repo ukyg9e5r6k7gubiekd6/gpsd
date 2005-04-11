@@ -209,7 +209,7 @@ int gpsd_poll(struct gps_device_t *session)
 		session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
 		session->gpsdata.valid |= PERR_SET;
 	    }
-	    if (!(session->gpsdata.valid & SPEEDERR_SET)) {
+	    if (!(session->gpsdata.valid & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
 		session->gpsdata.fix.eps = 0.0;
 		if (session->lastfix.mode > MODE_NO_FIX 
 		    && session->gpsdata.fix.mode > MODE_NO_FIX) {
@@ -220,7 +220,7 @@ int gpsd_poll(struct gps_device_t *session)
 			session->gpsdata.valid |= SPEEDERR_SET;
 		}
 	    }
-	    if (!(session->gpsdata.valid & CLIMBERR_SET)) {
+	    if (!(session->gpsdata.valid & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
 		session->gpsdata.fix.epc = 0.0;
 		if (session->lastfix.mode > MODE_3D 
 		    && session->gpsdata.fix.mode > MODE_3D) {
