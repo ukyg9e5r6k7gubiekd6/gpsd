@@ -648,7 +648,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    sprintf(phrase+strlen(phrase), " %f ", 
 			    whoami->device->gpsdata.sentence_time);
 		else
-		    strcat(phrase, "? ");
+		    strcat(phrase, " ? ");
 		sprintf(phrase+strlen(phrase), "%d:", 
 			whoami->device->gpsdata.satellites);
 		for (i = 0; i < whoami->device->gpsdata.satellites; i++) {
