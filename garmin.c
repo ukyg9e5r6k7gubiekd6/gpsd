@@ -264,6 +264,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    // 631065600, unix seconds for 31 Dec 1989 Zulu 
 	    time_l = 631065600 + (pvt->grmn_days * 86400);
 	    time_l -= pvt->leap_sec;
+	    session->context->leap_seconds = pvt->leap_sec;
+	    session->context->valid = LEAP_SECOND_VALID;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time = time_l;
