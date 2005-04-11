@@ -491,7 +491,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'N':
 	    if (!assign_channel(whoami))
-		strcpy(phrase, ".N=?");
+		strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
 	    else {
