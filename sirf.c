@@ -259,7 +259,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * changes 1 second every few years. Maybe."
 	 */
         {
-	    unsigned int i, subframe, words[10];
+	    unsigned int i, pageid, subframe, words[10];
 	    unsigned int svid = getb(1);
 	    unsigned int chan = getb(2);
 	    words[0] = getl(3);
@@ -272,13 +272,16 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    words[7] = getl(31);
 	    words[8] = getl(35);
 	    words[9] = getl(39);
-	    gpsd_report(2, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
-			chan, svid, 
-			words[0], words[1], words[2], words[3], words[4], 
-			words[5], words[6], words[7], words[8], words[9]);
-	    /* mask off the high 2 bits and shift out the 6 parity bits */
-	    /* once we've filtered, we can ignore the TEL and HOW words */
-	    /* FIXME: do we need to check parity here? */
+	    gpsd_report(5, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
+	    	chan, svid, 
+	    	words[0], words[1], words[2], words[3], words[4], 
+	    	words[5], words[6], words[7], words[8], words[9]);
+	    /*
+	     * Mask off the high 2 bits and shift out the 6 parity bits.
+	     * Once we've filtered, we can ignore the TEL and HOW words.
+	     * We don't need to check parity here, the SiRF chipset does
+	     * that and throws a subframe error if the parity is wrong.
+	     */
 	    for (i = 0; i < 10; i++)
 		words[i] = (words[i]  & 0x3fffffff) >> 6;
 	    /*
@@ -298,20 +301,36 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * The subframe ID is in the Hand Over Word (page 80) 
 	     */
 	    subframe = ((words[1] >> 2) & 0x07);
-	    /* once we've filtered, we can ignore the TEL and HOW words */
-	    gpsd_report(2, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
-			chan, svid, subframe,
-			    words[2], words[3], words[4], words[5], 
-			    words[6], words[7], words[8], words[9]);
-
-
+	    /* we're not interested in anything but subframe 4 */
+	    if (subframe != 4)
+		break;
 	    /*
-	     * How do I get the subframe and page numbers associated with each
-	     * of these 10-byte segments?
-	     *
-	     * "Pages 105 of ICD-GPS-200. Pages 66-76a,80 of ICD-GPS-200
-	     * are the actual subframe structures."
+	     * Pages 66-76a,80 of ICD-GPS-200 are the subframe structures.
+	     * See page 105 for the mapping between magic SVIDs and pages.
 	     */
+	    pageid = (words[2] & 0x3F0000) >> 16;
+	    gpsd_report(5, "Subframe 4 SVID is %d\n", pageid);
+	    if (pageid == 56) {	/* magic SVID for page 18 */
+		u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+					      0x80, 0x00, 0x00, 0x00,
+					      0x00, 0x00, 0x00, 0x00,
+					      0x00, 0x00, 0x00, 0x00,
+					      0x00, 0x00, 0x00, 0x00,
+					      0x00, 0x00, 0x00, 0x00,
+					      0x00, 0x00, 0x00, 0x0C,
+					      0x00,
+					      0x00, 0x00, 0xb0, 0xb3};
+		/* once we've filtered, we can ignore the TEL and HOW words */
+		gpsd_report(5, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
+			    chan, svid, subframe,
+				words[2], words[3], words[4], words[5], 
+				words[6], words[7], words[8], words[9]);
+		session->context->leap_seconds = (words[9] & 0xff0000) >> 16;
+		session->context->valid = LEAP_SECOND_VALID;
+		gpsd_report(2, "Leap-seconds is %d\n", session->context->leap_seconds);
+		gpsd_report(4, "Disabling subframe transmission...\n");
+		sirf_write(session->gpsdata.gps_fd, disablesubframe);
+	    }
 	}
 #endif /* SUBFRAME */
 	break;
@@ -490,8 +509,10 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
 #ifdef SUBFRAME
-	gpsd_report(4, "Enabling subframe transmission...\n");
-	sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	if (!(session->context->valid & LEAP_SECOND_VALID)) {
+	    gpsd_report(4, "Enabling subframe transmission...\n");
+	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	}
 #endif /* SUBFRAME */
     }
 }
