@@ -54,6 +54,7 @@ struct gps_fix_t {
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double eph;  	/* Horizontal position uncertainty, meters */
+#define UNCERTAINTY_NOT_VALID	-1
     double altitude;	/* Altitude in meters (valid if mode == 3) */
 #define ALTITUDE_NOT_VALID	-999
     double epv;  	/* Vertical position uncertainty, meters */

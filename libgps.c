@@ -187,27 +187,27 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (st == 14) {
 #define DEFAULT(val, def) (val[0] == '?') ? (def) : atof(val)
 			    nf.altitude = DEFAULT(alt, ALTITUDE_NOT_VALID);
-			    nf.eph = DEFAULT(eph, 0.0);
-			    nf.epv = DEFAULT(epv, 0.0);
+			    nf.eph = DEFAULT(eph, UNCERTAINTY_NOT_VALID);
+			    nf.epv = DEFAULT(epv, UNCERTAINTY_NOT_VALID);
 			    nf.track = DEFAULT(track, TRACK_NOT_VALID);
 			    nf.speed = DEFAULT(speed, 0.0);
 			    nf.climb = DEFAULT(climb, 0.0);
-			    nf.epd = DEFAULT(epd, 0.0);
-			    nf.eps = DEFAULT(eps, 0.0);
-			    nf.epc = DEFAULT(epc, 0.0);
+			    nf.epd = DEFAULT(epd, UNCERTAINTY_NOT_VALID);
+			    nf.eps = DEFAULT(eps, UNCERTAINTY_NOT_VALID);
+			    nf.epc = DEFAULT(epc, UNCERTAINTY_NOT_VALID);
 #undef DEFAULT
 			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
 			    if (nf.mode == MODE_3D)
 				gpsdata->valid |= ALTITUDE_SET | CLIMB_SET;
-			    if (nf.eph)
+			    if (nf.eph != UNCERTAINTY_NOT_VALID)
 				gpsdata->valid |= HERR_SET;
-			    if (nf.epv)
+			    if (nf.epv != UNCERTAINTY_NOT_VALID)
 				gpsdata->valid |= VERR_SET;
 			    if (nf.track != TRACK_NOT_VALID)
 				gpsdata->valid |= TRACK_SET | SPEED_SET;
-			    if (nf.eps)
+			    if (nf.eps != UNCERTAINTY_NOT_VALID)
 				gpsdata->valid |= SPEEDERR_SET;
-			    if (nf.epc)
+			    if (nf.epc != UNCERTAINTY_NOT_VALID)
 				gpsdata->valid |= CLIMBERR_SET;
 
 			    gpsdata->fix = nf;
