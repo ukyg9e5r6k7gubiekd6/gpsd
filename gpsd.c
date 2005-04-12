@@ -412,14 +412,14 @@ static int handle_request(int cfd, char *buf, int buflen)
 			9 - whoami->device->gpsdata.stopbits, 
 			whoami->device->gpsdata.stopbits);
 	    else
-		strcpy(phrase, ".B=?");
+		strcpy(phrase, ",B=?");
 	    break;
 	case 'C':
 	    if (assign_channel(whoami))
 		sprintf(phrase, ",C=%d", 
 			whoami->device->device_type->cycle);
 	    else
-		strcpy(phrase, ".C=?");
+		strcpy(phrase, ",C=?");
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
@@ -458,14 +458,14 @@ static int handle_request(int cfd, char *buf, int buflen)
 		snprintf(phrase, sizeof(phrase), ",F=%s", 
 			 whoami->device->gpsdata.gps_device);
 	    else
-		strcpy(phrase, ".F=?");
+		strcpy(phrase, ",F=?");
 	    break;
 	case 'I':
 	    if (assign_channel(whoami))
 		snprintf(phrase, sizeof(phrase), ",I=%s", 
 			 whoami->device->device_type->typename);
 	    else
-		strcpy(phrase, ".B=?");
+		strcpy(phrase, ",B=?");
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -637,7 +637,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (assign_channel(whoami) && whoami->device)
 		sprintf(phrase, ",X=%f", whoami->device->gpsdata.online);
 	    else
-		strcpy(phrase, ".X=?");
+		strcpy(phrase, ",X=?");
 	    break;
 	case 'Y':
 	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites) {
