@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
 		    char cmds[4] = ""; 
 		    device->poll_times[cfd] = timestamp();
 		    if (changed &~ ONLINE_SET) {
-			if (changed & LATLON_SET)
+			if (changed & (LATLON_SET | MODE_SET))
 			    strcat(cmds, "o");
 			if (changed & SATELLITE_SET)
 			    strcat(cmds, "y");

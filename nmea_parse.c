@@ -125,8 +125,14 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 
     if (!strcmp(field[2], "V")) {
 	/* copes with Magellan EC-10X, see below */
-	out->fix.mode = MODE_NO_FIX;
-	out->status = STATUS_NO_FIX;
+	if (out->status != STATUS_NO_FIX) {
+	    out->status = STATUS_NO_FIX;
+	    mask |= STATUS_SET;
+	}
+	if (out->fix.mode >= MODE_2D) {
+	    out->fix.mode = MODE_NO_FIX;
+	    mask |= MODE_SET;
+	}
     } else if (!strcmp(field[2], "A")) {
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
