@@ -835,6 +835,13 @@ static void decode_sirf(unsigned char buf[], int len)
 	wprintw(debugwin, "DST 0x1b=");
 	break;
 
+    case 0x1C:	/* NL Measurement Data */
+    case 0x1D:	/* DGPS Data */
+    case 0x1E:	/* SV State Data */
+    case 0x1F:	/* NL Initialized Data */
+	subframe_enabled = 1;
+	break;
+
 #ifdef __UNUSED__
     case 0x62:
 	attrset(A_BOLD);
