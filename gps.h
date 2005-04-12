@@ -45,23 +45,27 @@ extern "C" {
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
+#define TIME_NOT_VALID	0
     int    mode;	/* Mode of fix */
 #define MODE_NOT_SEEN	0	/* mode update not seen yet */
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
     double ept;		/* Expected time uncertainty */
-    double latitude;	/* Latitude in degrees (valid if mode >= 2) */
-    double longitude;	/* Longitude in degrees (valid if mode >= 2) */
-    double eph;  	/* Horizontal position uncertainty, meters */
 #define UNCERTAINTY_NOT_VALID	-1
+    double latitude;	/* Latitude in degrees (valid if mode >= 2) */
+#define LATITUDE_NOT_VALID	-1
+    double longitude;	/* Longitude in degrees (valid if mode >= 2) */
+#define LONGITUDE_NOT_VALID	-1
+    double eph;  	/* Horizontal position uncertainty, meters */
     double altitude;	/* Altitude in meters (valid if mode == 3) */
 #define ALTITUDE_NOT_VALID	-999
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
-#define TRACK_NOT_VALID	-1	/* No course/speed data yet */
+#define TRACK_NOT_VALID	-1	/* No course data yet */
     double epd;		/* Track uncertainty, degrees */
     double speed;	/* Speed over ground */
+#define SPEED_NOT_VALID	-1	/* No speed data yet */
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
@@ -167,7 +171,8 @@ struct gps_data_t {
     double subseconds;
 };
 
-struct gps_data_t *gps_open(const char *host, const char *port);
+extern void gps_clear_fix(struct gps_fix_t *fixp);
+extern struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *requests);
 int gps_poll(struct gps_data_t *gpsdata);

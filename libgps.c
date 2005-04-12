@@ -8,6 +8,23 @@
 
 #include "gpsd.h"
 
+void gps_clear_fix(struct gps_fix_t *fixp)
+/* stuff a fix structure with recognizable out-of-band values */
+{
+    fixp->time = TIME_NOT_VALID;
+    fixp->mode = MODE_NOT_SEEN;
+    fixp->track = TRACK_NOT_VALID;
+    fixp->speed = SPEED_NOT_VALID;
+    fixp->climb = SPEED_NOT_VALID;
+    fixp->altitude = ALTITUDE_NOT_VALID;
+    fixp->ept = UNCERTAINTY_NOT_VALID;
+    fixp->eph = UNCERTAINTY_NOT_VALID;
+    fixp->epv = UNCERTAINTY_NOT_VALID;
+    fixp->epd = UNCERTAINTY_NOT_VALID;
+    fixp->eps = UNCERTAINTY_NOT_VALID;
+    fixp->epc = UNCERTAINTY_NOT_VALID;
+}
+
 struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
 {
@@ -26,10 +43,8 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 	return NULL;
     }
 
-    gpsdata->fix.mode = MODE_NOT_SEEN;
     gpsdata->status = STATUS_NO_FIX;
-    gpsdata->fix.track = TRACK_NOT_VALID;
-    gpsdata->fix.altitude = ALTITUDE_NOT_VALID;
+    gps_clear_fix(&gpsdata->fix);
     return gpsdata;
 }
 
@@ -78,7 +93,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		switch (*sp) {
 		case 'A':
 		    if (sp[2] == '?') {
-			    gpsdata->fix.altitude = 0;
+			    gpsdata->fix.altitude = ALTITUDE_NOT_VALID;
 		    } else {
 		        sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
 		        gpsdata->valid |= ALTITUDE_SET;
@@ -98,16 +113,18 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			sscanf(sp, "C=%d", &gpsdata->cycle);
 		    break;
 		case 'D':
-		    if (sp[2] != '?') {
+		    if (sp[2] == '?') 
+			gpsdata->fix.time = TIME_NOT_VALID;
+		    else {
 			gpsdata->fix.time = iso8601_to_unix(sp+2);
 			gpsdata->valid |= TIME_SET;
 		    }
 		    break;
 		case 'E':
 		    if (sp[2] == '?') {
-			   gpsdata->epe = 0;
-			   gpsdata->fix.eph = 0;
-			   gpsdata->fix.epv = 0;
+			   gpsdata->epe = UNCERTAINTY_NOT_VALID;
+			   gpsdata->fix.eph = UNCERTAINTY_NOT_VALID;
+			   gpsdata->fix.epv = UNCERTAINTY_NOT_VALID;
 		    } else {
 		        sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
@@ -156,7 +173,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'M':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.mode = 0;
+		        gpsdata->fix.mode = MODE_NOT_SEEN;
 		    } else {
 		        gpsdata->fix.mode = atoi(sp+2);
 		        gpsdata->valid |= MODE_SET;
@@ -171,8 +188,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'O':
 		    if (sp[2] == '?') {
 			gpsdata->valid = MODE_SET | STATUS_SET;
-			gpsdata->fix.mode = MODE_NOT_SEEN;
-			gpsdata->status = STATUS_NO_FIX;
+			gps_clear_fix(&gpsdata->fix);
 		    } else {
 			struct gps_fix_t nf;
 			char tag[MAXTAGLEN+1], alt[20];
@@ -190,8 +206,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    nf.eph = DEFAULT(eph, UNCERTAINTY_NOT_VALID);
 			    nf.epv = DEFAULT(epv, UNCERTAINTY_NOT_VALID);
 			    nf.track = DEFAULT(track, TRACK_NOT_VALID);
-			    nf.speed = DEFAULT(speed, 0.0);
-			    nf.climb = DEFAULT(climb, 0.0);
+			    nf.speed = DEFAULT(speed, SPEED_NOT_VALID);
+			    nf.climb = DEFAULT(climb, SPEED_NOT_VALID);
 			    nf.epd = DEFAULT(epd, UNCERTAINTY_NOT_VALID);
 			    nf.eps = DEFAULT(eps, UNCERTAINTY_NOT_VALID);
 			    nf.epc = DEFAULT(epc, UNCERTAINTY_NOT_VALID);
@@ -218,8 +234,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'P':
 		    if (sp[2] == '?') {
-			   gpsdata->fix.latitude = 0;
-			   gpsdata->fix.longitude = 0;
+			   gpsdata->fix.latitude = LATITUDE_NOT_VALID;
+			   gpsdata->fix.longitude = LONGITUDE_NOT_VALID;
 		    } else {
 		        sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
@@ -241,7 +257,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'S':
 		    if (sp[2] == '?') {
-		        gpsdata->status = 0;
+		        gpsdata->status = -1;
 		    } else {
 		        gpsdata->status = atoi(sp+2);
 		        gpsdata->valid |= STATUS_SET;
@@ -249,7 +265,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'T':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.track = 0;
+		        gpsdata->fix.track = TRACK_NOT_VALID;
 		    } else {
 		        sscanf(sp, "T=%lf", &gpsdata->fix.track);
 		        gpsdata->valid |= TRACK_SET;
@@ -257,7 +273,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'U':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.climb = 0;
+		        gpsdata->fix.climb = SPEED_NOT_VALID;
 		    } else {
 		        sscanf(sp, "U=%lf", &gpsdata->fix.climb);
 		        gpsdata->valid |= CLIMB_SET;
@@ -265,7 +281,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'V':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.speed = 0;
+		        gpsdata->fix.speed = SPEED_NOT_VALID;
 		    } else {
 		        sscanf(sp, "V=%lf", &gpsdata->fix.speed);
 		        gpsdata->valid |= SPEED_SET;

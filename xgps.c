@@ -263,7 +263,7 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
-    if (gpsdata->valid & TIME_SET)
+    if (gpsdata->fix.time != TIME_NOT_VALID)
 	unix_to_iso8601(gpsdata->fix.time, s);
     else
 	strcpy(s, "n/a");
@@ -293,12 +293,12 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
-    if (gpsdata->valid & HERR_SET)
+    if (gpsdata->fix.eph != UNCERTAINTY_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
-    if (gpsdata->valid & VERR_SET)
+    if (gpsdata->fix.epv != UNCERTAINTY_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     else
 	strcpy(s, "n/a");
