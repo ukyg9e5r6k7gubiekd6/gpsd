@@ -75,9 +75,6 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		if (!*tp) break;
 		*tp = '\0';
 
-		if (sp[2] == '?')
-		    continue;
-
 		switch (*sp) {
 		case 'A':
 		    if (sp[2] == '?') {
@@ -174,6 +171,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'O':
 		    if (sp[2] == '?') {
 			gpsdata->fix.mode = MODE_NOT_SEEN;
+			gpsdata->fix.speed = 0;
+			gpsdata->fix.eph = 0;
+			gpsdata->fix.epv = 0;
+			gpsdata->fix.epc = 0;
+			gpsdata->fix.eps = 0;
+			gpsdata->fix.track = TRACK_NOT_VALID;
 		    } else {
 			struct gps_fix_t nf;
 			char tag[MAXTAGLEN+1], alt[20];
