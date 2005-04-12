@@ -283,22 +283,22 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_4, s);
-    if (gpsdata->fix.track != TRACK_NOT_VALID)
+    if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_5, s);
-    if (gpsdata->fix.track != TRACK_NOT_VALID)
+    if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
 	sprintf(s, "%f degrees", gpsdata->fix.track);
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
-    if (gpsdata->fix.eph)
+    if (gpsdata->valid & HERR_SET)
 	sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
-    if (gpsdata->fix.epv)
+    if (gpsdata->valid & VERR_SET)
 	sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     else
 	strcpy(s, "n/a");
