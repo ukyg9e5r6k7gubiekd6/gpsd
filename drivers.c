@@ -60,6 +60,8 @@ static void nmea_initializer(struct gps_device_t *session)
     nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
     /* probe for SiRF-II */
     nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+    /* enable GPZDA on a Motorola Oncore GT+ */
+    nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
 }
 
 struct gps_type_t nmea = {
