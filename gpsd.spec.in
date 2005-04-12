@@ -102,7 +102,7 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/python*/site-packages/gps.py*
 
 %changelog
-* Thu Mar 31 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.21-1
+* Tue Apr 12 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.21-1
 - Add tag and timestamp to Y response.  Use computed geoid separation as 
   SiRF packet 42 is flaky.  Security fix: hotplug scripts now do device
   add/removes through a separate local control channel.  True multi-device
