@@ -8,7 +8,7 @@
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
-#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE)
+#if defined(ZODIAC_ENABLE) || defined(SIRFII_ENABLE) || defined(GARMIN_ENABLE)
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
