@@ -130,7 +130,7 @@ static int handle_packet(struct gps_device_t *session)
     session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
 
-    session->gpsdata.valid = ONLINE_SET | session->device_type->parse_packet(session);
+    session->gpsdata.set = ONLINE_SET | session->device_type->parse_packet(session);
 
     /* count all packets and good fixes */
     session->counter++;
@@ -152,23 +152,23 @@ static int handle_packet(struct gps_device_t *session)
      */
     session->gpsdata.fix.ept = 0.005;
 #ifdef BINARY_ENABLE
-    if (session->gpsdata.valid & LATLON_SET) {
-	if (!(session->gpsdata.valid & HERR_SET) 
-	    && (session->gpsdata.valid & HDOP_SET)) {
+    if (session->gpsdata.set & LATLON_SET) {
+	if (!(session->gpsdata.set & HERR_SET) 
+	    && (session->gpsdata.set & HDOP_SET)) {
 	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
-	    session->gpsdata.valid |= HERR_SET;
+	    session->gpsdata.set |= HERR_SET;
 	}
-	if (!(session->gpsdata.valid & VERR_SET) 
-	    && (session->gpsdata.valid & VDOP_SET)) {
+	if (!(session->gpsdata.set & VERR_SET) 
+	    && (session->gpsdata.set & VDOP_SET)) {
 	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
-	    session->gpsdata.valid |= VERR_SET;
+	    session->gpsdata.set |= VERR_SET;
 	}
-	if (!(session->gpsdata.valid & PERR_SET) 
-	    && (session->gpsdata.valid & PDOP_SET)) {
+	if (!(session->gpsdata.set & PERR_SET) 
+	    && (session->gpsdata.set & PDOP_SET)) {
 	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
-	    session->gpsdata.valid |= PERR_SET;
+	    session->gpsdata.set |= PERR_SET;
 	}
-	if (!(session->gpsdata.valid & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	if (!(session->gpsdata.set & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = 0.0;
 	    if (session->lastfix.mode > MODE_NO_FIX 
 		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
@@ -176,10 +176,10 @@ static int handle_packet(struct gps_device_t *session)
 		double e = session->lastfix.eph + session->gpsdata.fix.eph;
 		session->gpsdata.fix.eps = e/t;
 		if (session->gpsdata.fix.eps)
-		    session->gpsdata.valid |= SPEEDERR_SET;
+		    session->gpsdata.set |= SPEEDERR_SET;
 	    }
 	}
-	if (!(session->gpsdata.valid & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	if (!(session->gpsdata.set & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.epc = 0.0;
 	    if (session->lastfix.mode > MODE_3D 
 		&& session->gpsdata.fix.mode > MODE_3D) {
@@ -188,7 +188,7 @@ static int handle_packet(struct gps_device_t *session)
 		/* if vertical uncertainties are zero this will be too */
 		session->gpsdata.fix.epc = e/t;
 		if (session->gpsdata.fix.epc)
-		    session->gpsdata.valid |= CLIMBERR_SET;
+		    session->gpsdata.set |= CLIMBERR_SET;
 	    }
 	}
 
@@ -214,7 +214,7 @@ static int handle_packet(struct gps_device_t *session)
 	    gpsd_report(2, "=> dgps %s", buf);
 	}
     }
-    return session->gpsdata.valid;
+    return session->gpsdata.set;
 }
 
 int gpsd_poll(struct gps_device_t *session)

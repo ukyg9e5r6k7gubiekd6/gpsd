@@ -547,12 +547,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 		else
 		    strcat(phrase, "      ?");
 		strcat(phrase, " ?");	/* can't yet derive track error */ 
-		if (whoami->device->gpsdata.valid & SPEEDERR_SET)
+		if (whoami->device->gpsdata.set & SPEEDERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    whoami->device->gpsdata.fix.eps);		    
 		else
 		    strcat(phrase, "      ?");
-		if (whoami->device->gpsdata.valid & CLIMBERR_SET)
+		if (whoami->device->gpsdata.set & CLIMBERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    whoami->device->gpsdata.fix.epc);		    
 		else
@@ -657,7 +657,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    strcat(phrase, whoami->device->gpsdata.tag);
 		else
 		    strcat(phrase, "-");
-		if (whoami->device->gpsdata.valid & TIME_SET)
+		if (whoami->device->gpsdata.set & TIME_SET)
 		    sprintf(phrase+strlen(phrase), " %f ", 
 			    whoami->device->gpsdata.sentence_time);
 		else

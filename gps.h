@@ -72,7 +72,7 @@ struct gps_fix_t {
 };
 
 struct gps_data_t {
-    unsigned long valid;	/* validity mask */
+    unsigned long set;	/* has field been set since this was last cleared? */
 #define ONLINE_SET	0x00000001
 #define TIME_SET	0x00000002
 #define TIMERR_SET	0x00000004
