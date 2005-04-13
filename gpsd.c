@@ -36,7 +36,17 @@
 
 #define QLEN			5
 
-#define LEAP_SECONDS	13	/* good for 2005 */
+/*
+ * The current (fixed) leap-second correction, and the future Unix
+ * time after which to start hunting leap-second corrections from GPS
+ * subframe data if the GPS doesn't supply them any more readily.
+ * Currently 1 Jan 2006, as the current fixed correction will be good
+ * until at least then.  Deferring the check is a hack to speed up fix
+ * acquisition -- subframe data is bulky enough to substantially
+ * increase latency.
+ */
+#define LEAP_SECONDS	13
+#define START_SUBFRAME	1136091600
 
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
@@ -877,6 +887,10 @@ int main(int argc, char *argv[])
 
     FD_SET(msock, &all_fds);
     FD_ZERO(&control_fds);
+
+    /* optimization hack to defer having to read subframe data */
+    if (time(NULL) < START_SUBFRAME)
+	context.valid |= LEAP_SECOND_VALID;
 
     device = open_device(device_name, nowait);
     if (!device) {

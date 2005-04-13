@@ -243,9 +243,11 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x08:
-#ifdef SUBFRAME
 	/*
-	 * Heavy black mgic begins here!
+	 * Heavy black magic begins here!
+	 *
+	 * A description of how to decode these bits is at
+	 * <http://home-2.worldonline.nl/~samsvl/nav2eu.htm>
 	 *
 	 * We're after subframe 4 page 18 word 9, the leap year correction.
 	 *
@@ -259,7 +261,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * changes 1 second every few years. Maybe."
 	 */
         {
-	    unsigned int i, pageid, subframe, words[10];
+	    unsigned int i, pageid, subframe, leap, words[10];
 	    unsigned int svid = getb(1);
 	    unsigned int chan = getb(2);
 	    words[0] = getl(3);
@@ -306,6 +308,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		break;
 	    /*
 	     * Pages 66-76a,80 of ICD-GPS-200 are the subframe structures.
+	     * Subframe 4 page 18 is on page 74.
 	     * See page 105 for the mapping between magic SVIDs and pages.
 	     */
 	    pageid = (words[2] & 0x3F0000) >> 16;
@@ -325,14 +328,23 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 			    chan, svid, subframe,
 				words[2], words[3], words[4], words[5], 
 				words[6], words[7], words[8], words[9]);
-		session->context->leap_seconds = (words[9] & 0xff0000) >> 16;
+		leap = (words[8] & 0xff0000) >> 16;
+		/*
+		 * There appears to be some bizarre bug that randomly causes
+		 * this field to come out two's-complemented.  Work around
+		 * this.  At the current expected rate of issuing leap-seconds
+		 * this kluge won't bite until about 2070, by which time SiRF
+		 * had better have fixed their damn firmware...
+		 */
+		if (leap > 128)
+		    leap ^= 0xff;
+		gpsd_report(2, "leap-seconds is %d\n", leap);
+		session->context->leap_seconds = leap;
 		session->context->valid = LEAP_SECOND_VALID;
-		gpsd_report(2, "Leap-seconds is %d\n", session->context->leap_seconds);
 		gpsd_report(4, "Disabling subframe transmission...\n");
 		sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
 	}
-#endif /* SUBFRAME */
 	break;
     case 0x09:		/* CPU Throughput */
 	gpsd_report(4, 
@@ -491,7 +503,6 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-#ifdef SUBFRAME
 	u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				 0x80, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
@@ -501,19 +512,16 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				 0x00, 0x00, 0x00, 0x0C,
 				 0x10,
 				 0x00, 0x00, 0xb0, 0xb3};
-#endif /* SUBFRAME */
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
 	sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");
 	sirf_write(session->gpsdata.gps_fd, sbasparams);
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
-#ifdef SUBFRAME
 	if (!(session->context->valid & LEAP_SECOND_VALID)) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
-#endif /* SUBFRAME */
     }
 }
 

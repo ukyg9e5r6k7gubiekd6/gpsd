@@ -7,11 +7,6 @@ Currently we're using a fixed 13-leap-second offset to convert GPS
 time to UTC.  This is wrong for the long term.  We should compute
 it from message 8 subframe data.
 
-Gary Miller writes:
->subframe 4 page 18 word 9 byte 1 in the ephemeris contains the leap seconds,
->details here:
->        http://home-2.worldonline.nl/~samsvl/nav2eu.htm
-
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
@@ -99,7 +94,7 @@ anyone?
 B. SiRF binary reports HDOP, SiRF and other NMEA devices report
 HDOP/VDOP/PDOP.
 
-C. Only Garmin devices report estimated position errord in meters.
+C. Only Garmin devices report estimated position uncertainties in meters.
 They won't say what the confidence interval is, but it is generally
 believed to be 1-sigma.  See <http://gpsinformation.net/main/epenew.txt>.
 
