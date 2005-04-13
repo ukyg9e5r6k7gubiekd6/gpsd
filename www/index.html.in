@@ -127,6 +127,9 @@ repository.</p></li>
 <dt><a href="gpsd.html">gpsd.1</a></dt>
 <dd>The <code>gpsd</code> daemon.</dd>
 
+<dt><a href="xgps.html">xgps.1</a></dt>
+<dd>The <code>gpsd</code> test clients.</dd>
+
 <dt><a href="libgps.html">libgps.3</a></dt>
 <dd>An interface library that manages communication with the daemon.</dt>
 

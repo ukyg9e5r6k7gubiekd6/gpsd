@@ -125,6 +125,7 @@ EXTRA_DIST = \
 	TODO \
 	AUTHORS \
 	gpsd.xml \
+	xgps.xml \
 	libgpsd.xml \
 	libgps.xml \
 	gpsprof.xml \
