@@ -1,12 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** In the SiRF driver, get leap seconds from almanac data
-
-Currently we're using a fixed 13-leap-second offset to convert GPS
-time to UTC.  This is wrong for the long term.  We should compute
-it from message 8 subframe data.
-
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
