@@ -550,14 +550,6 @@ for vehicles in motion; at 50km/h (31mi/h) of speed over ground, 1
 second of lag corresponds to 13.8 meters change in position between
 updates.</para>
 
-<para>SiRF-II chips at firmware releases 231 and earlier cannot
-accurately report either UTC or a leap-second correction from GPS time
-to UTC.  Therefore SiRF binary mode uses a fixed 13-second leap-second
-correction, which will be accurate until the next leap-second is
-introduced. This will not occur until after 31 Jan 2005; check the
-<ulink url='http://www.boulder.nist.gov/timefreq/pubs/bulletin/leapsecond.htm'>NIST
-Leap Second page</ulink> if in doubt.</para>
-
 </refsect1>
 <refsect1 id='ntp'><title>USE WITH NTP</title> 
 
