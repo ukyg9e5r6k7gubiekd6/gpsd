@@ -8,6 +8,65 @@
 
 #include "gpsd.h"
 
+/* 
+ * check the environment to determine proper GPS units
+ *
+ * clients should only call this if no user preference on the command line or
+ * Xresources
+ *
+ * return 0 - Use miles/feet
+ *        1 - Use knots/feet
+ *        2 - Use km/meters
+ * 
+ * In order check these environment vars:
+ *    GPSD_UNITS one of: 
+ *            	imperial   = miles/feet
+ *              nautical   = knots/feet
+ *              metric     = km/meters
+ *    LC_MEASUREMENT
+ *		en_US      = miles/feet
+ *              C          = miles/feet
+ *              POSIX      = miles/feet
+ *              [other]    = km/meters
+ *    LANG
+ *		en_US      = miles/feet
+ *              C          = miles/feet
+ *              POSIX      = miles/feet
+ *              [other]    = km/meters
+ *
+ * if none found then return compiled in default
+ */
+int gpsd_units(void)
+{
+	char *envu = NULL;
+
+ 	if ((envu = getenv("GPSD_UNITS")) && *envu) {
+		if (strcasecmp(envu, "imperial")) {
+			return 0;
+		}
+		if (strcasecmp(envu, "nautical")) {
+			return 1;
+		}
+		if (strcasecmp(envu, "metric")) {
+			return 2;
+		}
+		/* unrecognized, ignore it */
+	}
+ 	if (((envu = getenv("LC_MEASUREMENT")) && *envu) 
+ 	    || ((envu = getenv("LANG")) && *envu)) {
+		if (   strstr(envu, "_US") 
+		    || strcasecmp(envu, "C")
+		    || strcasecmp(envu, "POSIX")) {
+			return 0;
+		}
+		/* Other, must be metric */
+		return 2;
+	}
+	/* TODO: allow a compile time default here */
+	return 0;
+}
+
+
 void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
