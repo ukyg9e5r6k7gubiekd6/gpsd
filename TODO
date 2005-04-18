@@ -234,6 +234,16 @@ Which of these override which other bits?  I don't think status is ever
 nonzero when mode is zero. So status overrides mode.  What other such
 relationships are there?
 
+News flash: it develops that the "Navigation receiver warning" is
+supposed to indicate a valid fix that has a DOP too high or fails
+an elevation test.
+
+** Contact info:
+
+SiRF-II contacts: 
+	Carl Carter (714)-435-4902  ccarter@sirf.com.
+	Richard Saucedo  (408)-392-8385 rsaucedo@sirf.com
+
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"
