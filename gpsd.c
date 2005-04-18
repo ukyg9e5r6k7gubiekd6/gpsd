@@ -757,7 +757,9 @@ static void handle_control(int sfd, char *buf)
 		if (subscribers[cfd].device == *chp)
 		    subscribers[cfd].device = NULL;
 	    *chp = NULL;
-	}
+	    write(sfd, "OK\n", 3);
+	} else
+	    write(sfd, "ERROR\n", 6);
 	free(stash);
     } else if (buf[0] == '+') {
 	p = getline(buf+1, &stash);
@@ -765,7 +767,10 @@ static void handle_control(int sfd, char *buf)
 	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
 	else {
 	    gpsd_report(1,"<= control(%d): adding %s \n", sfd, stash);
-	    open_device(stash, 1);
+	    if (open_device(stash, 1))
+		write(sfd, "OK\n", 3);
+	    else
+		write(sfd, "ERROR\n", 6);
 	}
 	free(stash);
     }

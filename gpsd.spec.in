@@ -104,6 +104,7 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %changelog
 * Wed Apr 13 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - SiRF-binary driver can now get leap-second corrections from subframe data.
+  Device add/delete commands now send back OK or ERROR.
 
 * Tue Apr 12 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.21-1
 - Add tag and timestamp to Y response.  Use computed geoid separation as 

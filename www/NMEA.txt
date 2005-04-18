@@ -1093,7 +1093,7 @@ Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B
 
  Field Number: 
   1) UTC Time
-  2) Status, V = Navigation receiver warning A=Valid
+  2) Status, V=Navigation receiver warning A=Valid
   3) Latitude
   4) N or S
   5) Longitude
@@ -1105,6 +1105,10 @@ Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B
  11) E or W
  12) FAA mode indicator (NMEA 2.3 and later)
  13) Checksum
+
+A status of V means the GPS has a valid fix that is below an internal
+quality threshold, e.g. because the dilution of precision is too high 
+or an elevation mask test failed.
 
 ------------------------------------------------------------------------------
 
