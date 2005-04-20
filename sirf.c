@@ -507,6 +507,19 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
+	u_int8_t modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
+				  0x88, 
+				  0x00, 0x00,	/* pad bytes */
+				  0x00,		/* degraded mode off */
+				  0x00, 0x00,	/* pad bytes */
+				  0x00, 0x00,	/* altitude */
+				  0x00,		/* altitude hold auto */
+				  0x00,		/* use last computed alt */
+				  0x00,		/* reserved */
+				  0x00,		/* disable degraded mode */
+				  0x00,		/* disable dead reckoning */
+				  0x01,		/* enable track smoothing */
+				 0x00, 0x00, 0xb0, 0xb3};
 	u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				 0x80, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
@@ -522,6 +535,8 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	sirf_write(session->gpsdata.gps_fd, sbasparams);
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
+	gpsd_report(4, "setting mode...\n");
+	sirf_write(session->gpsdata.gps_fd, modecontrol);
 	if (!(session->context->valid & LEAP_SECOND_VALID)) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
