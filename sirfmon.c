@@ -536,6 +536,21 @@ int main (int argc, char **argv)
 		sendpkt(buf,2);
 		break;
 
+	    case 'd':		/* MID 4 rate change -- not documented */
+		v = atoi(line+1);
+		if (v > 30)
+		    break;
+		putb(0,0xa6);
+		putb(1,0);
+		putb(2, 4);	/* satellite picture */
+		putb(3, v);
+		putb(4, 0);
+		putb(5, 0);
+		putb(6, 0);
+		putb(7, 0);
+		sendpkt(buf,8);
+		break;
+
 	    case 'n':				/* switch to NMEA */
 		putb(0,0x81);			/* id */
 		putb(1,0x02);			/* mode */
