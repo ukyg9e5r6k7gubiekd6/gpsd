@@ -41,10 +41,38 @@
  * Code range noise (P-code)                       0.03m
  * Phase range                                     0.005m
  *
- * Taking the square root of the sum of aa squares...
- * UERE=sqrt(7.0^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2 + 0.03^2 + 0.005^2)
+ * Carl Carter of SiRF says: "Ionospheric error is typically corrected for 
+ * at least in large part, by receivers applying the Klobuchar model using 
+ * data supplied in the navigation message (subframe 4, page 18, Ionospheric 
+ * and UTC data).  As a result, its effect is closer to that of the 
+ * troposphere, amounting to the residual between real error and corrections.
  *
- * Note: we're assume these are 1-sigma error ranges. This needs to
+ * "Multipath effect is dramatically variable, ranging from near 0 in
+ * good conditions (for example, our roof-mounted antenna with few if any
+ * multipath sources within any reasonable range) to hundreds of meters in
+ * tough conditions like urban canyons.  Picking a number to use for that
+ * is, at any instant, a guess."
+ *
+ * "Using Hoffman-Wellenhoff is fine, but you can't use all 3 values.
+ * You need to use one at a time, depending on what you are using for
+ * range measurements.  For example, our receiver only uses the C/A
+ * code, never the P code, so the 0.03 value does not apply.  But once
+ * we lock onto the carrier phase, we gradually apply that as a
+ * smoothing on our C/A code, so we gradually shift from pure C/A code
+ * to nearly pure carrier phase.  Rather than applying both C/A and
+ * carrier phase, you need to determine how long we have been using
+ * the carrier smoothing and use a blend of the two."
+ *
+ * Incorporating Carl's advice, we construct an error budget including the
+ * troposphere correction twice and the most conservative of the 
+ * Hoffmann-Wellenhof numbers.  We have no choice but to accept that this
+ * will be an underestimate for urban-canyon conditions, because we
+ * don't know anything about the distribution of multipath errors.
+ * 
+ * Taking the square root of the sum of squares...
+ * UERE=sqrt(0.7^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2)
+ *
+ * Note: we're assuming these are 1-sigma error ranges. This needs to
  * be checked in the sources.
  *
  * See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
@@ -52,10 +80,10 @@
  *
  * DGPS corrects for atmospheric distortion, ephemeris error, and satellite/
  * receiver clock error.  Thus:
- * UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2 + 0.03^2 + 0.005^2)
+ * UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2)
  */
-#define UERE_NO_DGPS	8.1382
-#define UERE_WITH_DGPS	1.9444
+#define UERE_NO_DGPS	4.2095
+#define UERE_WITH_DGPS	1.9442
 #define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
 struct gps_context_t {
@@ -191,6 +219,7 @@ extern int ntpshm_put(struct gps_device_t *, double);
 extern void ecef_to_wgs84fix(struct gps_fix_t *,
 			     double, double, double, 
 			     double, double, double);
+extern void dop(int, struct gps_data_t *);
 
 /* External interface */
 extern int gpsd_open_dgps(char *);
