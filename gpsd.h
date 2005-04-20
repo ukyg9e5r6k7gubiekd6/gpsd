@@ -18,72 +18,9 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
-/*
- * User Equivalent Range Error
- * UERE is the square root of the sum of the squares of individual
- * errors.  We compute based on the following error budget for
- * satellite range measurements.  Note: this is only used if the
- * GPS doesn't report estimated position error itself.
- *
- * From R.B Langley's 1997 "The GPS error budget". 
- * GPS World , Vol. 8, No. 3, pp. 51-56
- *
- * Atmospheric error -- ionosphere                 7.0m
- * Atmospheric error -- troposphere                0.7m
- * Clock and ephemeris error                       3.6m
- * Receiver noise                                  1.5m
- * Multipath effect                                1.2m
- *
- * From Hoffmann-Wellenhof et al. (1997), "GPS: Theory and Practice", 4th
- * Ed., Springer.
- *
- * Code range noise (C/A)                          0.3m
- * Code range noise (P-code)                       0.03m
- * Phase range                                     0.005m
- *
- * Carl Carter of SiRF says: "Ionospheric error is typically corrected for 
- * at least in large part, by receivers applying the Klobuchar model using 
- * data supplied in the navigation message (subframe 4, page 18, Ionospheric 
- * and UTC data).  As a result, its effect is closer to that of the 
- * troposphere, amounting to the residual between real error and corrections.
- *
- * "Multipath effect is dramatically variable, ranging from near 0 in
- * good conditions (for example, our roof-mounted antenna with few if any
- * multipath sources within any reasonable range) to hundreds of meters in
- * tough conditions like urban canyons.  Picking a number to use for that
- * is, at any instant, a guess."
- *
- * "Using Hoffman-Wellenhoff is fine, but you can't use all 3 values.
- * You need to use one at a time, depending on what you are using for
- * range measurements.  For example, our receiver only uses the C/A
- * code, never the P code, so the 0.03 value does not apply.  But once
- * we lock onto the carrier phase, we gradually apply that as a
- * smoothing on our C/A code, so we gradually shift from pure C/A code
- * to nearly pure carrier phase.  Rather than applying both C/A and
- * carrier phase, you need to determine how long we have been using
- * the carrier smoothing and use a blend of the two."
- *
- * Incorporating Carl's advice, we construct an error budget including the
- * troposphere correction twice and the most conservative of the 
- * Hoffmann-Wellenhof numbers.  We have no choice but to accept that this
- * will be an underestimate for urban-canyon conditions, because we
- * don't know anything about the distribution of multipath errors.
- * 
- * Taking the square root of the sum of squares...
- * UERE=sqrt(0.7^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2)
- *
- * Note: we're assuming these are 1-sigma error ranges. This needs to
- * be checked in the sources.
- *
- * See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
- * for discussion.
- *
- * DGPS corrects for atmospheric distortion, ephemeris error, and satellite/
- * receiver clock error.  Thus:
- * UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2)
- */
-#define UERE_NO_DGPS	4.2095
-#define UERE_WITH_DGPS	1.9442
+/* only used if the GPS doesn't report estimated position error itself */
+#define UERE_NO_DGPS	8	/* meters */
+#define UERE_WITH_DGPS	2	/* meters */
 #define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
 struct gps_context_t {

@@ -191,6 +191,58 @@ specified.  Presently, here's how the autoconfig works.
 The outcome is that we know exactly what we're looking at, without any
 driver or baud rate options.
 
+** Error modeling
+
+To estimate errors (which we must do if the GPS isn't nice like a
+Garmin and reports them in meters), we need to multiply an estimate of
+User Equivalent Range Error (UERE) by the appropriate dilution factor,
+
+The UERE estimate is usually computed as the square root of the sum of
+the squares of individual error estimates from a physical model.  The
+following is a representative physical error model for satellite range
+measurements:
+
+From R.B Langley's 1997 "The GPS error budget". 
+GPS World , Vol. 8, No. 3, pp. 51-56
+
+Atmospheric error -- ionosphere                 7.0m
+Atmospheric error -- troposphere                0.7m
+Clock and ephemeris error                       3.6m
+Receiver noise                                  1.5m
+Multipath effect                                1.2m
+
+From Hoffmann-Wellenhof et al. (1997), "GPS: Theory and Practice", 4th
+Ed., Springer.
+
+Code range noise (C/A)                          0.3m
+Code range noise (P-code)                       0.03m
+Phase range                                     0.005m
+
+Carl Carter of SiRF says: "Ionospheric error is typically corrected for 
+at least in large part, by receivers applying the Klobuchar model using 
+data supplied in the navigation message (subframe 4, page 18, Ionospheric 
+and UTC data).  As a result, its effect is closer to that of the 
+troposphere, amounting to the residual between real error and corrections.
+
+"Multipath effect is dramatically variable, ranging from near 0 in
+good conditions (for example, our roof-mounted antenna with few if any
+multipath sources within any reasonable range) to hundreds of meters in
+tough conditions like urban canyons.  Picking a number to use for that
+is, at any instant, a guess."
+
+"Using Hoffman-Wellenhoff is fine, but you can't use all 3 values.
+You need to use one at a time, depending on what you are using for
+range measurements.  For example, our receiver only uses the C/A
+code, never the P code, so the 0.03 value does not apply.  But once
+we lock onto the carrier phase, we gradually apply that as a
+smoothing on our C/A code, so we gradually shift from pure C/A code
+to nearly pure carrier phase.  Rather than applying both C/A and
+carrier phase, you need to determine how long we have been using
+the carrier smoothing and use a blend of the two."
+
+Due to multipath uncertainty, Carl recommends a non-DGPS UERE estimate
+of 8.
+
 ** Adding new GPS types
 
 Almost all GPSes speak NMEA 0183.  However, it may occasionally be necessary
