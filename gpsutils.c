@@ -157,3 +157,206 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 	a = -1;
     return CalcRad((lat1+lat2) / 2) * acos(a);
 }
+
+#ifdef __UNUSED__
+/*****************************************************************************
+
+Carl Carter of SiRF supplied this algorithm for computing DOPs from 
+a list of visible satellites...
+
+For satellite n, let az(n) = azimuth angle from North and el(n) be elevation.
+Let:
+
+    a(k, 1) = sin az(k) * cos el(k)
+    a(k, 2) = cos az(k) * cos el(k)
+    a(k, 3) = sin el(k)
+
+Then form the line-of-sight matrix A for satellites used in the solution:
+
+    | a(1,1) a(1,2) a(1,3) 1 |
+    | a(2,1) a(2,2) a(2,3) 1 |
+    |   :       :      :   : |
+    | a(n,1) a(n,2) a(n,3) 1 |
+
+And its transpose A~:
+
+    |a(1, 1) a(2, 1) .  .  .  a(n, 1) |
+    |a(1, 2) a(2, 2) .  .  .  a(n, 2) |
+    |a(1, 3) a(2, 3) .  .  .  a(n, 3) |
+    |    1       1   .  .  .     1    |
+
+Compute the covariance matrix (A~*A)^-1, which is guaranteed symmetric:
+
+    | s(x)^2    s(x)*s(y)  s(x)*s(z)  s(x)*s(t) | 
+    | s(x)*s(y) s(y)^2     s(y)*s(z)  s(y)*s(t) |
+    | s(z)*s(t) s(y)*s(z)  s(z)^2     s(z)*s(t) |
+    | s(x)*s(t) s(y)*s(t)  s(z)*s(t)  s(z)^2    |
+
+Then:
+
+GDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2 + s(t)^2)
+TDOP = sqrt(s(t)^2)
+PDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2)
+HDOP = sqrt(s(x)^2 + s(y)^2)
+VDOP = sqrt(s(y)^2)
+
+Here's how we implement it...
+
+First, each compute element P(i,j) of the 4x4 product A~*A.
+If S(k=1,k=n): f(...) is the sum of f(...) as k varies from 1 to n, then
+applying the definition of matrix product tells us: 
+
+P(i,j) = S(k=1,k=n): B(i, k) * A(k, j) + 1
+
+But because B is the transpose of A, this reduces to 
+
+P(i,j) = S(k=1,k=n): A(k, i) * A(k, j) + 1
+
+******************************************************************************/
+
+static int invert(double mat[4][4], double inverse[4][4])
+{
+  // Find all NECESSARY 2x2 subdeterminants
+  double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
+  double Det2_12_02 = mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0];
+  double Det2_12_03 = mat[1][0]*mat[2][3] - mat[1][3]*mat[2][0];
+  double Det2_12_12 = mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1];
+  double Det2_12_13 = mat[1][1]*mat[2][3] - mat[1][3]*mat[2][1];
+  double Det2_12_23 = mat[1][2]*mat[2][3] - mat[1][3]*mat[2][2];
+  double Det2_13_01 = mat[1][0]*mat[3][1] - mat[1][1]*mat[3][0];
+  double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
+  double Det2_13_03 = mat[1][0]*mat[3][3] - mat[1][3]*mat[3][0];
+  double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1];  
+  double Det2_13_13 = mat[1][1]*mat[3][3] - mat[1][3]*mat[3][1];
+  double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2];  
+  double Det2_23_01 = mat[2][0]*mat[3][1] - mat[2][1]*mat[3][0];
+  double Det2_23_02 = mat[2][0]*mat[3][2] - mat[2][2]*mat[3][0];
+  double Det2_23_03 = mat[2][0]*mat[3][3] - mat[2][3]*mat[3][0];
+  double Det2_23_12 = mat[2][1]*mat[3][2] - mat[2][2]*mat[3][1];
+  double Det2_23_13 = mat[2][1]*mat[3][3] - mat[2][3]*mat[3][1];
+  double Det2_23_23 = mat[2][2]*mat[3][3] - mat[2][3]*mat[3][2];
+
+  // Find all NECESSARY 3x3 subdeterminants
+  double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02 
+				+ mat[0][2]*Det2_12_01;
+  double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03 
+				+ mat[0][3]*Det2_12_01;
+  double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03 
+				+ mat[0][3]*Det2_12_02;
+  double Det3_012_123 = mat[0][1]*Det2_12_23 - mat[0][2]*Det2_12_13 
+				+ mat[0][3]*Det2_12_12;
+  double Det3_013_012 = mat[0][0]*Det2_13_12 - mat[0][1]*Det2_13_02 
+				+ mat[0][2]*Det2_13_01;
+  double Det3_013_013 = mat[0][0]*Det2_13_13 - mat[0][1]*Det2_13_03
+				+ mat[0][3]*Det2_13_01;
+  double Det3_013_023 = mat[0][0]*Det2_13_23 - mat[0][2]*Det2_13_03
+				+ mat[0][3]*Det2_13_02;
+  double Det3_013_123 = mat[0][1]*Det2_13_23 - mat[0][2]*Det2_13_13
+				+ mat[0][3]*Det2_13_12;
+  double Det3_023_012 = mat[0][0]*Det2_23_12 - mat[0][1]*Det2_23_02 
+				+ mat[0][2]*Det2_23_01;
+  double Det3_023_013 = mat[0][0]*Det2_23_13 - mat[0][1]*Det2_23_03
+				+ mat[0][3]*Det2_23_01;
+  double Det3_023_023 = mat[0][0]*Det2_23_23 - mat[0][2]*Det2_23_03
+				+ mat[0][3]*Det2_23_02;
+  double Det3_023_123 = mat[0][1]*Det2_23_23 - mat[0][2]*Det2_23_13
+				+ mat[0][3]*Det2_23_12;
+  double Det3_123_012 = mat[1][0]*Det2_23_12 - mat[1][1]*Det2_23_02 
+				+ mat[1][2]*Det2_23_01;
+  double Det3_123_013 = mat[1][0]*Det2_23_13 - mat[1][1]*Det2_23_03 
+				+ mat[1][3]*Det2_23_01;
+  double Det3_123_023 = mat[1][0]*Det2_23_23 - mat[1][2]*Det2_23_03 
+				+ mat[1][3]*Det2_23_02;
+  double Det3_123_123 = mat[1][1]*Det2_23_23 - mat[1][2]*Det2_23_13 
+				+ mat[1][3]*Det2_23_12;
+
+  // Find the 4x4 determinant
+  static double det;
+          det =   mat[0][0]*Det3_123_123 
+		- mat[0][1]*Det3_123_023 
+		+ mat[0][2]*Det3_123_013 
+		- mat[0][3]*Det3_123_012;
+
+  // ??? Should the test be made: fabs(det) <= epsilon ???
+  if (det == 0.0)
+      return 0;
+
+  inverse[0][0] =  Det3_123_123 / det;
+  inverse[0][1] = -Det3_023_123 / det;
+  inverse[0][2] =  Det3_013_123 / det;
+  inverse[0][3] = -Det3_012_123 / det;
+
+  inverse[1][0] = -Det3_123_023 / det;
+  inverse[1][1] =  Det3_023_023 / det;
+  inverse[1][2] = -Det3_013_023 / det;
+  inverse[1][3] =  Det3_012_023 / det;
+
+  inverse[2][0] =  Det3_123_013 / det;
+  inverse[2][1] = -Det3_023_013 / det;
+  inverse[2][2] =  Det3_013_013 / det;
+  inverse[2][3] = -Det3_012_013 / det;
+
+  inverse[3][0] = -Det3_123_012 / det;
+  inverse[3][1] =  Det3_023_012 / det;
+  inverse[3][2] = -Det3_013_012 / det;
+  inverse[3][3] =  Det3_012_012 / det;
+
+  return 1;
+}  
+
+void dop(int channels, struct gps_data_t *gpsdata)
+{
+    double prod[4][4];
+    double inv[4][4];
+    double satpos[MAXCHANNELS][4];
+    int i, j, k, n;
+
+    gpsd_report(0, "Satellite picture:\n");
+    for (k = 0; k < MAXCHANNELS; k++) {
+	if (gpsdata->used[k])
+	    gpsd_report(0, "%d %d %d\n",
+			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);
+    }
+
+    for (n = k = 0; k < channels; k++) {
+	if (!gpsdata->used[k])
+	    continue;
+	satpos[n][0] = sin(gpsdata->azimuth[k]*DEG_2_RAD)
+	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
+	satpos[n][1] = cos(gpsdata->azimuth[k]*DEG_2_RAD)
+	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
+	satpos[n][2] = sin(gpsdata->elevation[k]*DEG_2_RAD);
+	satpos[n][3] = 1;
+	n++;
+    }
+
+    gpsd_report(0, "Line-of-sight matrix:\n");
+    for (k = 0; k < n; k++) {
+	gpsd_report(0, "%f %f %f %f\n",
+		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
+    }
+
+    for (i = 0; i < 4; i++)
+	for (j = 0; j < 4; j++) {
+	    prod[i][j] = 1;
+	    for (k = 0; k < n; k++)
+		prod[i][j] += satpos[k][i] + satpos[k][j];
+	}
+
+    gpsd_report(0, "product:\n");
+    for (k = 0; k < 4; k++) {
+	gpsd_report(0, "%f %f %f %f\n",
+		    prod[k][0], prod[k][1], prod[k][2], prod[k][3]);
+    }
+
+    if (invert(prod, inv))
+	gpsd_report(0, "HDOP: actual = %f, computed = %f\n",
+		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
+    else
+	gpsd_report(0, "Matrix is singular.\n");
+
+    //gpsdata->hdop = sqrt(diag[0] + diag[1]);
+    //gpsdata->vdop = sqrt(diag[1]);
+    //gpsdata->pdop = sqrt(diag[0] + diag[1] + diag[2]);
+}
+#endif /* __UNUSED__ */

@@ -181,6 +181,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	/* fix quality data */
 	session->gpsdata.hdop = getb(20)/5.0;
 	session->gpsdata.satellites_used = getb(28);
+#ifdef __UNUSED__
+	if (session->gpsdata.satellites)
+	    dop(session->gpsdata.satellites_used, &session->gpsdata);
+#endif /* __UNUSED */
 	for (i = 0; i < MAXCHANNELS; i++)
 	    session->gpsdata.used[i] = getb(29+i);
 	session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
@@ -189,13 +193,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 
     case 0x04:		/* Measured tracker data out */
-	/*
-	 * The freaking brain-dead SiRF chip doesn't obey its own
-	 * rate-control command for 04, at least at firmware rev. 231, 
-	 * so we have to do our own rate-limiting here...
-	 */
-	if (session->counter % 5)
-	    break;
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
@@ -230,6 +227,13 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		st += 1;
 	}
 	session->gpsdata.satellites = st;
+	/*
+	 * The freaking brain-dead SiRF chip doesn't obey its own
+	 * rate-control command for 04, at least at firmware rev. 231, 
+	 * so we have to do our own rate-limiting here...
+	 */
+	if (session->counter % 5)
+	    break;
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
