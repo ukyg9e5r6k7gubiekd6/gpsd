@@ -323,9 +323,8 @@ Charger Status Indication.  FLASH based program memory.
 Firmware upgradeable through serial interface. Water resistant.
 </td>
 </tr>
-
 <tr>
-<td><a href='http://www.synergy-gps.com/TR_Manual.html'>Oncore GT+</a></td>
+<td><a href='http://www.synergy-gps.com/TR_Manual.htm'>Oncore GT+</a></td>
 <td>Good</td>
 <td>Motorola</td>
 <td>RS232 or TTL</td>
@@ -339,7 +338,39 @@ GPGSV,<br />GPRMC,<br />GPGSA,<br />GPGGA,<br />GPVTG,<br />GPZDA.
 RTCM input, no WAAS. In binary mode can deliver differential
 correction for another Oncore GT+. Similar Motorola Oncore UT timing
 receiver has less functions but better timing accuracy.
-Reported by Wojciech Kazubski &lt;wk@ire.pw.edu.pl&gt;.
+Reported by Wojciech Kazubski &lt;wk&#40;ire.pw.edu.pl&gt;.
+</td>
+</tr>
+<tr>
+<td><a href='http://www.magellangps.com/en/products/product.asp?PRODID=1'>Magellan Meridian Platinum</a></td>
+<td>Excellent</td>
+<td>Magellan</td>
+<td>RS232</td>
+<td>Motorola</td>
+<td>2.21</td>
+<td>v1.5 APA, v1.5 XTE, v2.1 GSA</td>
+<td>
+GPGSV,<br />GPRMC,<br />GPGLL,<br />GPGSA,<br />GPGGA,<br />PMGNST.
+</td>
+<td>
+Reported by Chris S. Newell &lt;chris&#40;newellfamily.net&gt;.
+</td>
+</tr>
+
+<tr>
+<td><a href='http://www.holux.com.tw/Temp%20web/GM-210.html'>Holux GM-210</a></td>
+<td>Bad</td>
+<td><a href="http://www.holux.com.tw">Holux</a></td>
+<td>RS232</td>
+<td>SiRF</td>
+<td>2.21</td>
+<td>?</td>
+<td>
+GPGSV,<br />GPRMC,<br />GPGLL,<br />GPGSA,<br />GPGGA,<br />GPVTG.
+</td>
+<td>
+Hangs when gpsd sends it the probe strings.
+Reported by  Patrick L. McGillan &lt;pmcgillan@pateri.com&gt;.
 </td>
 </tr>
 
