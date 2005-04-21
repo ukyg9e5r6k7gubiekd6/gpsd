@@ -97,8 +97,7 @@ Here is what I am presently doing in the new E command:
 1. I pass up the Garmin PGRME fields (uncertainty in meters) if
    they're available.
 
-2. Otherwise, I apply the error model described in gpsd.h.  See the
-   comment near the definition of UERE.
+2. Otherwise, I apply the error model described in the HACKING dociment.
 
 What non-Garmin GPSes will return in the E command is UERE multiplied
 by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP,

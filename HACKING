@@ -218,6 +218,12 @@ Code range noise (C/A)                          0.3m
 Code range noise (P-code)                       0.03m
 Phase range                                     0.005m
 
+We're assuming these are 1-sigma error ranges. This needs to
+be checked in the sources.
+
+See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
+for discussion.
+
 Carl Carter of SiRF says: "Ionospheric error is typically corrected for 
 at least in large part, by receivers applying the Klobuchar model using 
 data supplied in the navigation message (subframe 4, page 18, Ionospheric 
@@ -240,8 +246,20 @@ to nearly pure carrier phase.  Rather than applying both C/A and
 carrier phase, you need to determine how long we have been using
 the carrier smoothing and use a blend of the two."
 
-Due to multipath uncertainty, Carl recommends a non-DGPS UERE estimate
-of 8.
+On Carl's advice we would apply tropospheric error twice, and use
+the largest Wellehof figure:
+
+UERE = sqrt(0.7^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2) = 4.1
+
+DGPS corrects for atmospheric distortion, ephemeris error, and satellite/
+receiver clock error.  Thus:
+
+UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2) = 1.8
+
+which we round up to 2.
+
+Due to multipath uncertainty, Carl says 4.1 is too low and recommends
+a non-DGPS UERE estimate of 8.  That's what we use.
 
 ** Adding new GPS types
 
