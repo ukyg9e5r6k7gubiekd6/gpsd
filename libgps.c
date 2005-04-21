@@ -437,12 +437,9 @@ int gps_poll(struct gps_data_t *gpsdata)
 
     /* the daemon makes sure that every read is NUL-terminated */
     n = read(gpsdata->gps_fd, buf, sizeof(buf)-1);
-    if (n < 0) {
-        /* error */
+    if (n <= 0) {
+        /* error or nothiung read */
 	return -1;
-    } else if ( n == 0 ) {
-        /* nothing read */
-	return 0;
     }
     buf[n] = '\0';
 
