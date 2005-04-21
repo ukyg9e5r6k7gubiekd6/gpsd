@@ -339,6 +339,26 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		 * this.  At the current expected rate of issuing leap-seconds
 		 * this kluge won't bite until about 2070, by which time SiRF
 		 * had better have fixed their damn firmware...
+		 *
+		 * Carl: ...I am unsure, and suggest you
+		 * experiment.  The D30 bit is in bit 30 of the 32-bit
+		 * word (next to MSB), and should signal an inverted
+		 * value when it is one coming over the air.  But if
+		 * the bit is set and the word decodes right without
+		 * inversion, then we properly caught it.  Cases where
+		 * you see subframe 6 rather than 1 means we should
+		 * have done the inversion but we did not.  Some other
+		 * things you can watch for: in any subframe, the
+		 * second word (HOW word) should have last 2 parity
+		 * bits 00 -- there are bits within the rest of the
+		 * word that are set as required to ensure that.  The
+		 * same goes for word 10.  That means that both words
+		 * 1 and 3 (the words that immediately follow words 10
+		 * and 2, respectively) should always be uninverted.
+		 * In these cases, the D29 and D30 from the previous
+		 * words, found in the two MSBs of the word, should
+		 * show 00 -- if they don't then you may find an
+		 * unintended inversion due to noise on the data link.
 		 */
 		if (leap > 128)
 		    leap ^= 0xff;
