@@ -25,7 +25,7 @@
 
 struct gps_context_t {
     int valid;
-#define LEAP_SECOND_VALID	0x01
+#define LEAP_SECOND_VALID	0x01	/* we have or don't need correctiomn */
     int leap_seconds;
 };
 
@@ -88,6 +88,10 @@ struct gps_device_t {
 #ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
     unsigned int driverstate;	/* for private use */
+#define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
+#define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
+#define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
+#define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 #define NO_SEPARATION	-99999	/* must be out of band */
     double mag_var;		/* Magnetic variation in degrees */  

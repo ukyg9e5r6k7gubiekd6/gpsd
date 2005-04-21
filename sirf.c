@@ -19,7 +19,7 @@
  * to navigate in the absence of satellite information, and 
  * to improve fixes when you do have satellites.)"
  *
- * Why we don't use packet 42 (Geodetic Navigation Information): 
+ * Why we only use packet 42 (Geodetic Navigation Information) conditionally: 
  *
  * Many versions of the SiRF protocol manual don't document 
  * this sentence at all.  Those that do may incorrectly
@@ -135,6 +135,16 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3] = "";
+    double fv;
+    u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+				  0x80, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x0C,
+				  0x00,
+				  0x00, 0x00, 0xb0, 0xb3};
 
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
@@ -146,51 +156,54 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     {
     case 0x02:		/* Measure Navigation Data Out */
 	mask = 0;
-	/* position/velocity is bytes 1-18 */
-	ecef_to_wgs84fix(&session->gpsdata.fix, 
-		    getl(1), getl(5), getl(9),
-		    getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
-	/* WGS 84 geodesy parameters */
-	/* fix status is byte 19 */
-	navtype = getb(19);
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.mode = MODE_NO_FIX;
-	if (navtype & 0x80)
-	    session->gpsdata.status = STATUS_DGPS_FIX;
-	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-	    session->gpsdata.status = STATUS_FIX;
-	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-	    session->gpsdata.fix.mode = MODE_3D;
-	else if (session->gpsdata.status)
-	    session->gpsdata.fix.mode = MODE_2D;
-	if (session->gpsdata.fix.mode == MODE_3D)
-	    mask |= ALTITUDE_SET;
-	gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-		    navtype,session->gpsdata.status,session->gpsdata.fix.mode);
-	/* byte 20 is HDOP, see below */
-	/* byte 21 is "mode 2", not clear how to interpret that */ 
-	session->gpsdata.fix.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getw(22), getl(24)*1e-2, -session->context->leap_seconds);
+	if (!(session->driverstate & (SIRF_GE_232 | UBLOX))) {
+	    /* position/velocity is bytes 1-18 */
+	    ecef_to_wgs84fix(&session->gpsdata.fix, 
+			     getl(1), getl(5), getl(9),
+			     getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
+	    /* WGS 84 geodesy parameters */
+	    /* fix status is byte 19 */
+	    navtype = getb(19);
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    if (navtype & 0x80)
+		session->gpsdata.status = STATUS_DGPS_FIX;
+	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+		session->gpsdata.status = STATUS_FIX;
+	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+		session->gpsdata.fix.mode = MODE_3D;
+	    else if (session->gpsdata.status)
+		session->gpsdata.fix.mode = MODE_2D;
+	    if (session->gpsdata.fix.mode == MODE_3D)
+		mask |= ALTITUDE_SET;
+	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
+	    /* byte 20 is HDOP, see below */
+	    /* byte 21 is "mode 2", not clear how to interpret that */ 
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time
+		= gpstime_to_unix(getw(22), getl(24)*1e-2, -session->context->leap_seconds);
 #ifdef NTPSHM_ENABLE
-	session->time_seen |= TIME_SEEN_GPS_2;
-	if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
-	    ntpshm_put(session, session->gpsdata.fix.time);
+	    session->time_seen |= TIME_SEEN_GPS_2;
+	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
+		ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 
-	gpsd_binary_fix_dump(session, buf2);
-	/* fix quality data */
-	session->gpsdata.hdop = getb(20)/5.0;
-	session->gpsdata.satellites_used = getb(28);
+	    gpsd_binary_fix_dump(session, buf2);
+	    /* fix quality data */
+	    session->gpsdata.hdop = getb(20)/5.0;
+	    session->gpsdata.satellites_used = getb(28);
 #ifdef __UNUSED__
-	if (session->gpsdata.satellites)
-	    dop(session->gpsdata.satellites_used, &session->gpsdata);
+	    if (session->gpsdata.satellites)
+		dop(session->gpsdata.satellites_used, &session->gpsdata);
 #endif /* __UNUSED */
-	for (i = 0; i < MAXCHANNELS; i++)
-	    session->gpsdata.used[i] = getb(29+i);
-	session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
-	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
-	gpsd_report(3, "<= GPS: %s", buf2);
-	return mask | TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
+	    for (i = 0; i < MAXCHANNELS; i++)
+		session->gpsdata.used[i] = getb(29+i);
+	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
+	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
+	    gpsd_report(3, "<= GPS: %s", buf2);
+	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
+	}
+	return mask;
 
     case 0x04:		/* Measured tracker data out */
 	gpsd_zero_satellites(&session->gpsdata);
@@ -240,7 +253,18 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return TIME_SET | SATELLITE_SET;
 
     case 0x06:		/* Software Version String */
-	gpsd_report(4,"FV  0x06: Firmware version: %s\n",session->outbuffer+5);
+	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
+		    session->outbuffer+5);
+	fv = atof(session->outbuffer+5);
+	if (fv < 231) {
+	    session->driverstate |= SIRF_LT_231;
+	    sirfbin_mode(session, 0);
+	} else if (fv < 232) 
+	    session->driverstate |= SIRF_EQ_231;
+	else {
+	    session->driverstate |= SIRF_GE_232;
+	    session->context->valid |= LEAP_SECOND_VALID;
+	}
 	if (strstr(session->outbuffer+5, "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
@@ -318,15 +342,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    pageid = (words[2] & 0x3F0000) >> 16;
 	    gpsd_report(5, "Subframe 4 SVID is %d\n", pageid);
 	    if (pageid == 56) {	/* magic SVID for page 18 */
-		u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
-					      0x80, 0x00, 0x00, 0x00,
-					      0x00, 0x00, 0x00, 0x00,
-					      0x00, 0x00, 0x00, 0x00,
-					      0x00, 0x00, 0x00, 0x00,
-					      0x00, 0x00, 0x00, 0x00,
-					      0x00, 0x00, 0x00, 0x0C,
-					      0x00,
-					      0x00, 0x00, 0xb0, 0xb3};
 		/* once we've filtered, we can ignore the TEL and HOW words */
 		gpsd_report(5, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
 			    chan, svid, subframe,
@@ -413,7 +428,81 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
-	return 0;
+	mask = 0;
+	if (session->driverstate & SIRF_GE_232) {
+	    /*
+	     * Many versions of the SiRF protocol manual don't document 
+	     * this sentence at all.  Those that do may incorrectly
+	     * describe UTC Day, Hour, and Minute as 2-byte quantities,
+	     * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
+	     *
+	     * "The Geodetic Navigation packet (0x29) was not fully
+	     * implemented in firmware prior to version 2.3.2. So for
+	     * anyone running 231.000.000 or earlier (including ES,
+	     * SiRFDRive, XTrac trains) you won't get UTC time. I don't
+	     * know what's broken in firmwares before 2.3.1..."
+	     *
+	     * To work around the incomplete implementation of this
+	     * packet in 231, we assume that only the altitude field
+	     * from this packet is valid.
+	     */
+	    navtype = getw(3);
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    if (navtype & 0x80)
+		session->gpsdata.status = STATUS_DGPS_FIX;
+	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+		session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+		session->gpsdata.fix.mode = MODE_3D;
+	    else if (session->gpsdata.status)
+		session->gpsdata.fix.mode = MODE_2D;
+	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+			navtype, session->gpsdata.status, session->gpsdata.fix.mode);
+	    /*
+	     * UTC is left all zeros in 231 and older firmware versions, 
+	     * and misdocumented in the Protocol Reference (version 1.4).
+	     *            Documented:        Real:
+	     * UTC year       2               2
+	     * UTC month      1               1
+	     * UTC day        2               1
+	     * UTC hour       2               1
+	     * UTC minute     2               1
+	     * UTC second     2               2
+	     *                11              8
+	     */
+	    session->gpsdata.nmea_date.tm_year = getw(11);
+	    session->gpsdata.nmea_date.tm_mon = getb(13)-1;
+	    session->gpsdata.nmea_date.tm_mday = getb(14);
+	    session->gpsdata.nmea_date.tm_hour = getb(15);
+	    session->gpsdata.nmea_date.tm_min = getb(16);
+	    session->gpsdata.nmea_date.tm_sec = 0;
+	    session->gpsdata.subseconds = getw(17)*1e-3;
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time
+		= mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
+	    /* skip 4 bytes of satellite map */
+	    session->gpsdata.fix.latitude = getl(23)*1e-7;
+	    session->gpsdata.fix.longitude = getl(27)*1e-7;
+	    /* skip 4 bytes of altitude from ellipsoid */
+	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
+	    session->gpsdata.fix.altitude = getl(31)*1e-2;
+	    /* skip 1 byte of map datum */
+	    session->gpsdata.fix.speed = getw(36)*1e-2;
+	    session->gpsdata.fix.track = getw(38)*1e-2;
+	    /* skip 2 bytes of magnetic variation */
+	    session->gpsdata.fix.climb = getw(42)*1e-2;
+	    /* HDOP should be available at byte 89, but in 231 it's zero. */
+	    gpsd_binary_fix_dump(session, buf2);
+	    gpsd_report(3, "<= GPS: %s", buf2);
+	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
+	    session->gpsdata.sentence_length = 91;
+	    strcpy(session->gpsdata.tag, "GND");
+	    gpsd_report(4, "Disabling subframe transmission...\n");
+	    sirf_write(session->gpsdata.gps_fd, disablesubframe);
+	}
+	return mask;
 
     case 0x32:		/* SBAS corrections */
 	return 0;
@@ -466,6 +555,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	session->gpsdata.hdop = getb(36) / 5.0;
 	session->gpsdata.vdop = getb(37) / 5.0;
 	/* session->gpsdata.tdop = getb(38) / 5.0; */
+	session->driverstate |= UBLOX;
+	//gpsd_report(4, "Disabling subframe transmission...\n");
+	//sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	return mask;
 
     case 0xff:		/* Debug messages */
