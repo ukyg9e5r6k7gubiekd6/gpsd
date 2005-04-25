@@ -561,7 +561,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'P':
 	    if (assign_channel(whoami) && have_fix(whoami->device))
-		sprintf(phrase, ",P=%.4f %.4f", 
+		sprintf(phrase, ",P=%.6f %.6f", 
 			whoami->device->gpsdata.fix.latitude, 
 			whoami->device->gpsdata.fix.longitude);
 	    else
