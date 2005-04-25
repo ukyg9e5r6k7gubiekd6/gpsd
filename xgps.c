@@ -229,7 +229,10 @@ XtIntervalId timeout;
 static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
 {
-    gps_poll(gpsdata);
+    if (gps_poll(gpsdata) < 0) {
+	fprintf(stderr, "Read error on server socket.");
+	exit(1);
+    }
 }
 
 static void update_panel(struct gps_data_t *gpsdata, char *message)
