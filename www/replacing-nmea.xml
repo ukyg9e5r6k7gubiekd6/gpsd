@@ -43,6 +43,15 @@
 	 Initial draft.
       </revremark>
    </revision>
+   <revision>
+      <revnumber>1.1</revnumber>
+      <date></date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Specify UTC.  Fix time-uncertainty units.  Vertical course
+	 angle changed to climb/sink rate.
+      </revremark>
+   </revision>
 </revhistory>
 
 <abstract>
@@ -185,7 +194,7 @@ every sentence.  Every timestamp should be in the same standard form
 and should include a full date.</para>
 
 <para>The simplest way to do this is probably the best.  Just pick an
-epoch and represent the date/time as seconds since the epoch GMT. A
+epoch and represent the date/time as seconds since the epoch UTC. A
 human-readable format like ISO 8601 (yyyy-mm-ddThh:mm:ss.sss) might 
 make logfiles slightly easier to read, but would introduce more 
 decode latency.</para>
@@ -215,7 +224,7 @@ Protocol.</para>
 
 <para>The protocol consists of sentences, each led by a dollar sign
 and an identifying sentence tag, followed by multiple comma-separated
-textual fields, ended by an asterisk, a CRC36 checksum, and LF/CR.
+textual fields, ended by an asterisk, a CRC32 checksum, and LF/CR.
 The terminating checksum may be omitted, and listeners should accept
 this as an indication that the talker believes the transport layer to
 be reliable.  Sentences are at most 256 characters long, counting the
@@ -230,7 +239,7 @@ for this field.</para>
 choose an epoch of 00:00 Jan 1 1970 because it's no worse than any
 other recent date and has the advantage of being compatible with Linux
 and Unix systems.  Millisecond or better precision is required and
-time is Zulu or GMT.</para>
+time is Zulu or UTC (with leap-second correction).</para>
 
 <para>The core sentence of SGPS has the following layout:</para>
 
@@ -244,7 +253,7 @@ The first field is the required timestamp.
 </para></listitem>
 
 <listitem><para>
-The second field is the uncertainty of the timestamp in microseconds.
+The second field is the uncertainty of the timestamp in (fractional) seconds.
 </para></listitem>
 
 <listitem><para>
@@ -272,11 +281,11 @@ The seventh field is vertical uncertainty in meters (95% confidence).
 </para></listitem>
 
 <listitem><para>
-The eighth field is speed in meters per second.
+The eighth field is speed over ground in meters per second.
 </para></listitem>
 
 <listitem><para>
-The ninth field is speed uncertainty in meters per second (95% confidence).
+The ninth field is speed-over-ground uncertainty in meters per second (95% confidence).
 </para></listitem>
 
 <listitem><para>
@@ -289,11 +298,11 @@ confidence).
 </para></listitem>
 
 <listitem><para>
-The twelfth field is vertical course angle in degrees from horizontal.
+The twelfth field is climb/sink in meters per second.
 </para></listitem>
 
 <listitem><para>
-The thirteenth field is uncertainty of vertical course angle in degrees
+The thirteenth field is uncertainty of climb/sink in meters per second
 (95% confidence).
 </para></listitem>
 
@@ -322,8 +331,8 @@ $GPTPV,1108114827.1745651,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,
      0.02,               Speed uncertainty
      23.1,               Course over ground relative to true North
      0.6,                Course uncertainty in degrees.
-     ,                   Vertical course angle not reported
-     ,                   Vertical course angle uncertainty not reported
+     ,                   Climb/sink not reported
+     ,                   Climb/sink uncertainty not reported
      A                   FAA mode indicator A (Auto).
                          Checksum omitted.
 </programlisting>
@@ -382,7 +391,7 @@ most modern GPSes.</para>
 
 <para>The only fields reported in the SGPS set that cannot be
 trivially derived from data already computed for NMEA reports are
-(a) Vertical course angle, and (b) GPSTPV uncertainty fields.  None
+(a) Climb/sink, and (b) GPSTPV uncertainty fields.  None
 of these should be difficult to derive.</para>
 
 </sect1>
