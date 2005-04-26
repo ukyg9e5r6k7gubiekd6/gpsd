@@ -181,10 +181,6 @@ there are plans to unfork at least one of them soon.  You can read a brief <a
 href="history.html">history</a> of the <code>gpsd</code> project if
 you are curious.</p>
 
-<p>There is a <a href='http://www.navsys.org/navsys/'>NavSys</a>
-project that includes a fork of gpsd called ngpsd.  The developer
-is now on the <code>gpsd</code> list and we plan an unfork.</p>
-
 <p>There is a project called <a
 href='http://www.mgix.com/gps3d/'>gps3d</a> that ships a gpsd with
 similar goals to ours, but which appears to be an independent
