@@ -84,7 +84,11 @@ try:
         raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
         raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
         raw[3] = 0					# lflag
-        raw[4] = raw[5] = eval("termios.B" + `speed`)
+        try:
+            raw[4] = raw[5] = eval("termios.B" + `speed`)
+        except AttributeError:
+            print "gpsfake: illegal baud rate."
+            sys.exit(1)
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 
         try:
