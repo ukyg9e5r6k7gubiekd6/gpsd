@@ -61,10 +61,9 @@ href="http://qpegps.sourceforge.net/">gpeGPS</a>, and
 <a href="http://roadmap.digitalomaha.net/index.html">roadmap</a>.</p>
 
 <p>Under Linux, gpsd normally runs with zero configration.  The RPM
-installs an init script to start <code>gpsd</code> at boot time, and
-hotplug scripts that do the right thing when a USB device
-goes active, informing the running <code>gpsd</code> which
-device to read data from.  Then, <code>gpsd</code> deduces a
+installs hotplug scripts that do the right thing when a USB device
+goes active, launching gpsd if needed and telling it <code>gpsd</code>
+which device to read data from.  Then, <code>gpsd</code> deduces a
 baud rate and GPS type by looking at the data stream.</p>
 
 <p>No, we don't support Windows &mdash; get a better operating system.
