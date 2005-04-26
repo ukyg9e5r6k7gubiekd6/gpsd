@@ -62,6 +62,8 @@ static void nmea_initializer(struct gps_device_t *session)
     nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
     /* enable GPZDA on a Motorola Oncore GT+ */
     nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
+    /* enable GPGSA on Garmin serial GPS */
+    nmea_send(session->gpsdata.gps_fd, "$PGRM0,GSA,1");
 }
 
 struct gps_type_t nmea = {
