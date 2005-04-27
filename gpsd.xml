@@ -319,7 +319,8 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>speed over ground</term>
-<listitem><para>Speed as in the V report (%f, knots).</para></listitem>
+<listitem><para>Speed (%f, meters/sec). Note: older versions 
+of the O command reported this field in knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -335,7 +336,9 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>estimated error in speed over ground</term>
-<listitem><para>Error estimate for speed (%f, knots).</para></listitem>
+<listitem><para>Error estimate for speed (%f, meters/sec). Note: older
+versions of the O command reported this field in
+knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>

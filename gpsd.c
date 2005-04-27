@@ -618,7 +618,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'V':
 	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
-		sprintf(phrase, ",V=%.3f", whoami->device->gpsdata.fix.speed);
+		sprintf(phrase, ",V=%.3f", whoami->device->gpsdata.fix.speed / KNOTS_TO_KPH);
 	    else
 		strcpy(phrase, ",V=?");
 	    break;

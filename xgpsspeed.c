@@ -72,9 +72,9 @@ int main(int argc, char **argv)
     speedfactor = KNOTS_TO_MPH;		/* Software maintained in US */
     speedunits = get_resource("speedunits", "mph");
     if (!strcmp(speedunits, "kph")) 
-	speedfactor = KNOTS_TO_KPH;
+	speedfactor = MPS_TO_KPH;
     else if (!strcmp(speedunits, "knots"))
-	speedfactor = 1;
+	speedfactor = 1/MPS_TO_KNOTS;
 
     while ((option = getopt(argc, argv, "?hv")) != -1) {
 	switch (option) {

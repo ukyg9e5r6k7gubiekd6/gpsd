@@ -124,7 +124,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %changelog
 * Tue Apr 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - gpsd-clients is now a separate RPM; this is helpful on lean systems
-  that don't run X.
+  that don't run X.  The O command now reports speeds in meters per second 
+  rather than knots, client code has been adjusted so there is no user-visible
+  change.
 
 * Mon Apr 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.22-1
 - SiRF-binary driver can now get leap-second corrections from subframe data.

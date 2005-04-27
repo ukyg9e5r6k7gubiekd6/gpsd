@@ -64,7 +64,7 @@ struct gps_fix_t {
     double track;	/* Course made good (relative to true north) */
 #define TRACK_NOT_VALID	-1	/* No course data yet */
     double epd;		/* Track uncertainty, degrees */
-    double speed;	/* Speed over ground */
+    double speed;	/* Speed over ground, meters/sec */
 #define SPEED_NOT_VALID	-1	/* No speed data yet */
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
@@ -183,6 +183,8 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
 #define METERS_TO_MILES	0.00062137119	/* Meters to miles */
 #define KNOTS_TO_MPH	1.1507794	/* Knots to miles per hour */
 #define KNOTS_TO_KPH	1.852		/* Knots to kilometers per hour */
+#define MPS_TO_KPH	3.6		/* Meters per second to klicks/hr */
+#define MPS_TO_MPH	2.2369363	/* Meters/second to miles per hour */
 #define MPS_TO_KNOTS	1.9437		/* Meters per second to knots */
 /* miles and knots are both the international standard versions of the units */
 

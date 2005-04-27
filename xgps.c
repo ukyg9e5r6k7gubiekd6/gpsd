@@ -43,9 +43,9 @@ struct unit_t {
     float factor;
 };
 static struct unit_t speedtable[] = {
-    {"knots",	1},
-    {"mph",		KNOTS_TO_MPH},
-    {"kph",		KNOTS_TO_KPH},
+    {"knots",		1/KNOTS_TO_KPH},
+    {"mph",		MPS_TO_MPH},
+    {"kph",		MPS_TO_KPH},
 }, *speedunits = speedtable;
 static struct unit_t  alttable[] = {
     {"feet",		METERS_TO_FEET},

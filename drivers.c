@@ -54,9 +54,9 @@ static void nmea_initializer(struct gps_device_t *session)
 {
     /*
      * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
-     * Suppress GLL.  Enable ZDA so dates will se accurate for replay.
+     * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
      */
-#define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,GSV05"
+#define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
     nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
     /* probe for SiRF-II */
     nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
