@@ -7,6 +7,7 @@ Group: System Environment/Daemons
 Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
+BuildRequires: ncurses-devel
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 
@@ -39,10 +40,26 @@ This package provides C header files for the gpsd shared libraries
 that manage access to a GPS for applications; also Python modules.
 You will need to have gpsd installed for it to work.
 
+%package -n gpsd-clients
+Summary: Clients for gpsd with an X interface.
+Group: Applications/System
+BuildRequires: openmotif-devel
+
+%description -n gpsd-clients
+xgps is a simple test client for gpsd with an X interface. It displays
+current GPS position/time/velocity information and (for GPSes that
+support the feature) the locations of accessible satellites.
+
+xgpsspeed is a speedometer that uses position information from the GPS.
+It accepts an -h option and optional argument as for gps, or a -v option
+to dump the package version and exit. Additionally, it accepts -rv
+(reverse video) and -nc (needle color) options.
+
 %prep
 %setup -q
 
 %build
+#./autogen.sh
 %configure
 make %{?_smp_mflags}
 
@@ -72,24 +89,19 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %files
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING TODO
-%defattr(-,root,root,-)
 %attr(755, root, root) %{_sbindir}/gpsd
-%attr(755, root, root) %{_bindir}/xgps
-%attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
 %{_libdir}/libgps.so*
 %{_mandir}/man8/gpsd.8*
-%{_mandir}/man1/xgps.1*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/sirfmon.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
-%{_libdir}/X11/app-defaults/xgps
-%{_libdir}/X11/app-defaults/xgpsspeed
 
 %files -n gpsd-devel
+%defattr(-,root,root,-)
 %doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
@@ -101,9 +113,18 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gps.py*
 
+%files -n gpsd-clients
+%defattr(-,root,root,-)
+%attr(755, root, root) %{_bindir}/xgps
+%attr(755, root, root) %{_bindir}/xgpsspeed
+%{_mandir}/man1/xgps.1*
+%{_libdir}/X11/app-defaults/xgps
+%{_libdir}/X11/app-defaults/xgpsspeed
+
 %changelog
 * Tue Apr 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Initialization for Garmin serial GPSes enables GSA.
+- gpsd-clients is now a separate RPM; this is helpful on lean systems
+  that don't run X.
 
 * Mon Apr 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.22-1
 - SiRF-binary driver can now get leap-second corrections from subframe data.
