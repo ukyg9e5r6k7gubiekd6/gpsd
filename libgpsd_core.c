@@ -69,10 +69,6 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
 
-#ifdef NTPSHM_ENABLE
-    ntpshm_init(session);
-#endif /* defined(SHM_H) && defined(IPC_H) */
-
     return session;
 }
 

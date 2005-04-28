@@ -185,7 +185,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_GPS_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
-		ntpshm_put(session, session->gpsdata.fix.time);
+		ntpshm_put(session->context, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 
 	    gpsd_binary_fix_dump(session, buf2);
@@ -225,7 +225,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_GPS_1;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))
-		ntpshm_put(session, session->gpsdata.sentence_time);
+		ntpshm_put(session->context, session->gpsdata.sentence_time);
 #endif /* NTPSHM_ENABLE */
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
@@ -546,7 +546,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 #ifdef NTPSHM_ENABLE
 	    session->time_seen |= TIME_SEEN_UTC_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
-		ntpshm_put(session, session->gpsdata.fix.time + 0.75);
+		ntpshm_put(session->context, session->gpsdata.fix.time + 0.75);
 #endif /* NTPSHM_ENABLE */
 	}
 

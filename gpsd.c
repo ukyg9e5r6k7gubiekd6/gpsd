@@ -51,7 +51,7 @@
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
-static struct gps_context_t context = {0, LEAP_SECONDS};
+static struct gps_context_t context = {0, LEAP_SECONDS, NULL};
 
 static void onsig(int sig)
 {
@@ -789,6 +789,10 @@ int main(int argc, char *argv[])
     fd_set rfds, control_fds;
     int option, msock, cfd, dfd, go_background = 1;
     extern char *optarg;
+
+#ifdef NTPSHM_ENABLE
+    ntpshm_init(&context);
+#endif /* defined(SHM_H) && defined(IPC_H) */
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:d:f:hNnp:P:v")) != -1) {

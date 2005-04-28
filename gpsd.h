@@ -27,6 +27,9 @@ struct gps_context_t {
     int valid;
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correctiomn */
     int leap_seconds;
+#ifdef NTPSHM_ENABLE
+    struct shmTime *shmTime;
+#endif /* NTPSHM_ENABLE */
 };
 
 struct gps_device_t;
@@ -112,7 +115,6 @@ struct gps_device_t {
 #endif /* ZODIAC_ENABLE */
 #endif /* BINARY_ENABLE */
 #ifdef NTPSHM_ENABLE
-    struct shmTime *shmTime;
     unsigned int time_seen;
 #define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 1? */
@@ -154,8 +156,8 @@ extern void gpsd_binary_quality_dump(struct gps_device_t *, char *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
-extern int ntpshm_init(struct gps_device_t *);
-extern int ntpshm_put(struct gps_device_t *, double);
+extern int ntpshm_init(struct gps_context_t *);
+extern int ntpshm_put(struct gps_context_t *, double);
 
 extern void ecef_to_wgs84fix(struct gps_fix_t *,
 			     double, double, double, 

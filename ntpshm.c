@@ -59,36 +59,36 @@ static struct shmTime *getShmTime(int unit)
     }
 }
 
-int ntpshm_init(struct gps_device_t *session)
+int ntpshm_init(struct gps_context_t *context)
 {
-    if ((session->shmTime = getShmTime(SHM_UNIT)) == NULL)
+    if ((context->shmTime = getShmTime(SHM_UNIT)) == NULL)
 	return 0;
 
-    memset((void *)session->shmTime,0,sizeof(struct shmTime));
-    session->shmTime->mode = 1;
+    memset((void *)context->shmTime,0,sizeof(struct shmTime));
+    context->shmTime->mode = 1;
 
     return 1;
 }
 
-int ntpshm_put(struct gps_device_t *session, double fixtime)
+int ntpshm_put(struct gps_context_t *context, double fixtime)
 {
     struct timeval tv;
     double seconds,microseconds;
 
-    if (session->shmTime == NULL)
+    if (context->shmTime == NULL)
 	return 0;
 
     gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
-    session->shmTime->count++;
-    session->shmTime->clockTimeStampSec = seconds;
-    session->shmTime->clockTimeStampUSec = microseconds;
-    session->shmTime->receiveTimeStampSec = tv.tv_sec;
-    session->shmTime->receiveTimeStampUSec = tv.tv_usec;
-    session->shmTime->precision = -1;	/* this needs work */
-    session->shmTime->count++;
-    session->shmTime->valid = 1;
+    context->shmTime->count++;
+    context->shmTime->clockTimeStampSec = seconds;
+    context->shmTime->clockTimeStampUSec = microseconds;
+    context->shmTime->receiveTimeStampSec = tv.tv_sec;
+    context->shmTime->receiveTimeStampUSec = tv.tv_usec;
+    context->shmTime->precision = -1;	/* this needs work */
+    context->shmTime->count++;
+    context->shmTime->valid = 1;
 
     return 1;
 }

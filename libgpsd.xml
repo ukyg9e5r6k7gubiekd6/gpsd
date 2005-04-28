@@ -85,7 +85,9 @@ null pointer.</para>
 
 <para>The second argument must be a context structure.  The library 
 will use it for information that need to be shared between sessions; 
-presently this includes the leap-second correction.</para>
+presently this includes the leap-second correction and possibly a
+pointer to a shared-memory segment used to communicate with the
+Network Time Protocol daemon.</para>
 
 <para>After the session structure has been set up, you may modify some
 of its members.</para>
