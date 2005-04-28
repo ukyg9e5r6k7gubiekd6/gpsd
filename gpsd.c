@@ -14,6 +14,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <assert.h>
+#include <pwd.h>
 
 #include "config.h"
 #if defined (HAVE_PATH_H)
@@ -25,6 +26,9 @@
 #endif
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
+#endif
+#if defined (HAVE_SYS_STAT_H)
+#include <sys/stat.h>
 #endif
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
@@ -788,11 +792,11 @@ int main(int argc, char *argv[])
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int option, msock, cfd, dfd, go_background = 1;
+#ifdef DROPPRIVS
+    struct passwd *pw;
+    struct stat stb;
+#endif /* DROPPRIVS */
     extern char *optarg;
-
-#ifdef NTPSHM_ENABLE
-    ntpshm_init(&context);
-#endif /* defined(SHM_H) && defined(IPC_H) */
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:d:f:hNnp:P:v")) != -1) {
@@ -893,6 +897,28 @@ int main(int argc, char *argv[])
 	else
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
+
+#ifdef NTPSHM_ENABLE
+    ntpshm_init(&context);
+#endif /* defined(SHM_H) && defined(IPC_H) */
+
+#ifdef DROPPRIVS
+    /*
+     * Drop privileges.  Up to now we've been running as root.  Instead,
+     * set the user ID to 'nobody' and the group ID to the owning group 
+     * of a representative TTY device. 
+     */
+    pw = getpwnam("nobody");
+    if (pw)
+	setuid(pw->pw_uid);
+    gpsd_report(1, "running with effective user ID %d\n", geteuid());
+    if (stat(device_name, &stb) == 0 || stat("/dev/ttyS0", &stb) == 0) {
+	gpsd_report(1, "changing to group %d\n", stb.st_gid);
+	if (setgid(stb.st_gid))
+	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
+    }
+    gpsd_report(1, "running with effective group ID %d\n", getegid());
+#endif /* DROPPRIVS */
 
     FD_SET(msock, &all_fds);
     FD_ZERO(&control_fds);
