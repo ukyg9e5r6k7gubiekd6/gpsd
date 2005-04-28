@@ -205,11 +205,11 @@ First, each compute element P(i,j) of the 4x4 product A~*A.
 If S(k=1,k=n): f(...) is the sum of f(...) as k varies from 1 to n, then
 applying the definition of matrix product tells us: 
 
-P(i,j) = S(k=1,k=n): B(i, k) * A(k, j) + 1
+P(i,j) = S(k=1,k=n): B(i, k) * A(k, j)
 
 But because B is the transpose of A, this reduces to 
 
-P(i,j) = S(k=1,k=n): A(k, i) * A(k, j) + 1
+P(i,j) = S(k=1,k=n): A(k, i) * A(k, j)
 
 ******************************************************************************/
 
@@ -335,12 +335,14 @@ void dop(int channels, struct gps_data_t *gpsdata)
 		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
     }
 
-    for (i = 0; i < 4; i++)
-	for (j = 0; j < 4; j++) {
-	    prod[i][j] = 1;
-	    for (k = 0; k < n; k++)
-		prod[i][j] += satpos[k][i] + satpos[k][j];
-	}
+    for (i = 0; i < 4; ++i) { //< rows
+        for (j = 0; j < 4; ++j) { //< cols
+            prod[i][j] = 0.0;
+            for (k = 0; k < n; ++k) {
+                prod[i][j] += satpos[k][i] * satpos[k][j];
+            }
+        }
+    }
 
     gpsd_report(0, "product:\n");
     for (k = 0; k < 4; k++) {
