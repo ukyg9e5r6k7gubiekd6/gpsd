@@ -669,6 +669,12 @@ don't have this problem.  You may run <application>gpsd</application> at
 debug level 4 to see the chipset type and firmware revision
 level.</para>
 
+<para>When using SiRF chips, the VDOP figure and associated error estimates
+are computed by <application>gpsd</application> rather than reported
+by the chip.  The computation does not exactly match what SiRF chips
+do internally, which includes some satellite weighting using
+parameters <application>gpsd</application> cannot see.</para>
+
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
 

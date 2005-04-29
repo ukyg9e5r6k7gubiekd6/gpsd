@@ -30,6 +30,8 @@ struct gps_context_t {
 #ifdef NTPSHM_ENABLE
     struct shmTime *shmTime;
 #endif /* NTPSHM_ENABLE */
+    int probeflags;
+#define GARMIN_ACTIVE	0x01
 };
 
 struct gps_device_t;
@@ -153,6 +155,7 @@ extern void gpsd_zero_satellites(struct gps_data_t *);
 extern void gpsd_binary_fix_dump(struct gps_device_t *, char *);
 extern void gpsd_binary_satellite_dump(struct gps_device_t *, char *);
 extern void gpsd_binary_quality_dump(struct gps_device_t *, char *);
+extern void gpsd_root_probe(struct gps_context_t *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 

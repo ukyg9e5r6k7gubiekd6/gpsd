@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <math.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
@@ -12,6 +11,8 @@
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>	/* for FIONREAD on BSD systems */
 #endif
+#define __USE_GNU
+#include <string.h>
 
 #include "gpsd.h"
 
@@ -37,6 +38,30 @@ int gpsd_open_dgps(char *dgpsserver)
 	write(dsock, buf, strlen(buf));
     }
     return dsock;
+}
+
+void gpsd_root_probe(struct gps_context_t *context)
+/* probes that have to be excuted while daemon is still root */
+{
+    FILE *fp;
+    char str_buf[BUFSIZ];
+
+    /* check for USB serial drivers -- very Linux-specific */
+    if ((fp = fopen( "/proc/tty/driver/usbserial", "r")) == NULL) {
+	gpsd_report(2, "No USB serial drivers found.\n");
+    } else {
+        // try to find garmin_gps driver
+	while (fgets( str_buf, sizeof(str_buf), fp)) {
+	    // early garmin driver: garmin_gps
+	    // later garmin driver: Garmin USB/TTY
+	    if (strcasestr( str_buf, "garmin")) {
+		// yes, the garmin_gps driver is active
+		context->probeflags |= GARMIN_ACTIVE;
+		break;
+	    }
+	}
+    }
+    (void) fclose(fp);
 }
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)

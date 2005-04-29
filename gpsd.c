@@ -904,6 +904,8 @@ int main(int argc, char *argv[])
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
 
+    gpsd_root_probe(&context);
+
 #ifdef NTPSHM_ENABLE
     ntpshm_init(&context);
 #endif /* defined(SHM_H) && defined(IPC_H) */
