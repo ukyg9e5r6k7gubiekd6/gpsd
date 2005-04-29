@@ -222,6 +222,23 @@ This is not, however, the entire algorithm that SiRF uses.  Carl writes:
 > way to duplicate on the outside since we don't output the weighting
 > factors.  In fact those are not even available to API users.
 
+Queried about the deweighting, Carl says:
+
+> In the SiRF tracking engine, each satellite track is assigned a quality
+> value based on the tracker's estimate of that signal.  It includes C/No
+> estimate, ability to hold onto the phase, stability of the I vs. Q phase
+> angle, etc.  The navigation algorithm then ranks all the tracks into
+> quality order and selects which ones to use in the solution and what
+> weight to give those used in the solution.  The process is actually a
+> bit of a "trial and error" method -- we initially use all available
+> tracks in the solution, then we sequentially remove the lowest quality
+> ones until the solution stabilizes.  The weighting is inherent in the
+> Kalman filter algorithm.  Once the solution is stable, the DOP is
+> computed from those SVs used, and there is an algorithm that looks at
+> the quality ratings and determines if we need to deweight any.
+> Likewise, if we use altitude hold mode for a 3-SV solution, we deweight
+> the phantom satellite at the center of the Earth.
+
 So we cannot exactly duplicate what SiRF does internally.  We'll leave
 HDOP alone and use our computed values for VDOP and PDOP.  Note, this
 may have to change in the future if this code is used by a non-SiRF
