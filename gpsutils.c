@@ -211,6 +211,22 @@ But because B is the transpose of A, this reduces to
 
 P(i,j) = S(k=1,k=n): A(k, i) * A(k, j)
 
+This is not, however, the entire algorithm that SiRF uses.  Carl writes:
+
+> As you note, with rounding accounted for, most values agree exactly, and
+> those that don't agree our number is higher.  That is because we
+> deweight some satellites and account for that in the DOP calculation.
+> If a satellite is not used in a solution at the same weight as others,
+> it should not contribute to DOP calculation at the same weight.  So our
+> internal algorithm does a compensation for that which you would have no
+> way to duplicate on the outside since we don't output the weighting
+> factors.  In fact those are not even available to API users.
+
+So we cannot exactly duplicate what SiRF does internally.  We'll leave
+HDOP alone and use our computed values for VDOP and PDOP.  Note, this
+may have to change in the future if this code is used by a non-SiRF
+driver.
+
 ******************************************************************************/
 
 static int invert(double mat[4][4], double inverse[4][4])
@@ -310,12 +326,14 @@ void dop(int channels, struct gps_data_t *gpsdata)
     double satpos[MAXCHANNELS][4];
     int i, j, k, n;
 
+#ifdef __UNUSED__
     gpsd_report(0, "Satellite picture:\n");
     for (k = 0; k < MAXCHANNELS; k++) {
 	if (gpsdata->used[k])
 	    gpsd_report(0, "az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);
     }
+#endif /* __UNUSED__ */
 
     for (n = k = 0; k < channels; k++) {
 	if (!gpsdata->used[k])
@@ -329,11 +347,13 @@ void dop(int channels, struct gps_data_t *gpsdata)
 	n++;
     }
 
+#ifdef __UNUSED__
     gpsd_report(0, "Line-of-sight matrix:\n");
     for (k = 0; k < n; k++) {
 	gpsd_report(0, "%f %f %f %f\n",
 		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
     }
+#endif /* __UNUSED__ */
 
     for (i = 0; i < 4; ++i) { //< rows
         for (j = 0; j < 4; ++j) { //< cols
@@ -344,12 +364,15 @@ void dop(int channels, struct gps_data_t *gpsdata)
         }
     }
 
+#ifdef __UNUSED__
     gpsd_report(0, "product:\n");
     for (k = 0; k < 4; k++) {
 	gpsd_report(0, "%f %f %f %f\n",
 		    prod[k][0], prod[k][1], prod[k][2], prod[k][3]);
     }
+#endif /* __UNUSED__ */
 
+#ifdef __UNUSED__
     if (invert(prod, inv)) {
 	gpsd_report(0, "inverse:\n");
 	for (k = 0; k < 4; k++) {
@@ -360,10 +383,11 @@ void dop(int channels, struct gps_data_t *gpsdata)
 		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
     } else
 	gpsd_report(0, "Matrix is singular.\n");
+#else
+    invert(prod, inv);
+#endif /* __UNUSED__ */
 
-    //gpsdata->hdop = sqrt(diag[0] + diag[1]);
-    //gpsdata->vdop = sqrt(diag[1]);
-    //gpsdata->pdop = sqrt(diag[0] + diag[1] + diag[2]);
+    //gpsdata->hdop = sqrt(inv[0][0] + inv[1][1]);
+    gpsdata->vdop = sqrt(inv[1][1]);
+    gpsdata->pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
 }
-#ifdef __UNUSED__
-#endif /* __UNUSED */

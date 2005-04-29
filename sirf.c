@@ -192,10 +192,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /* fix quality data */
 	    session->gpsdata.hdop = getb(20)/5.0;
 	    session->gpsdata.satellites_used = getb(28);
-#ifdef __UNUSED__
 	    if (session->gpsdata.satellites)
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
-#endif /* __UNUSED */
 	    for (i = 0; i < MAXCHANNELS; i++)
 		session->gpsdata.used[i] = getb(29+i);
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
