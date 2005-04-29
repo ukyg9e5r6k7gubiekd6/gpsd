@@ -867,6 +867,8 @@ int main(int argc, char *argv[])
 	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
 	else if (st > 0) {
 	    gpsd_report(1,"Received terminating signal %d. Exiting...\n",st-1);
+	    if (control_socket)
+		unlink(control_socket);
 	    exit(10 + st);
 	}
     }
@@ -1088,5 +1090,7 @@ int main(int argc, char *argv[])
 	}
     }
 
+    if (control_socket)
+	unlink(control_socket);
     return 0;
 }
