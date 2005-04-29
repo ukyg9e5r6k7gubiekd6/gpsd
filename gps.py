@@ -2,7 +2,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, socket, sys
+import time, calendar, socket, sys
 from math import *
 
 ONLINE_SET =	0x000001
@@ -446,21 +446,6 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     if lon1 < lon2: dx *= -1
     return (dx, dy)
 
-def mkgmtime(tm):
-    cumdays[12] = (0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334);
-    year = 1900 + tm.tm_year + tm.tm_mon / 12;
-    result = (year - 1970) * 365 + cumdays[tm.tm_mon % 12];
-    result += (year - 1968) / 4;
-    result -= (year - 1900) / 100;
-    result += (year - 1600) / 400;
-    result += tm.tm_mday - 1;
-    result *= 24;
-    result += tm.tm_hour;
-    result *= 60;
-    result += tm.tm_min;
-    result *= 60;
-    result += tm.tm_sec;
-    return result
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
@@ -479,7 +464,8 @@ def isotime(s):
         else:
             date = s
             msec = "0"
-        return mkgmtime(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
+        # Note: no leap-second correction! 
+        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
     else:
         raise TypeError
 
