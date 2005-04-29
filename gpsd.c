@@ -52,6 +52,12 @@
 #define LEAP_SECONDS	13
 #define START_SUBFRAME	1136091600
 
+/*
+ * The name of a tty device from which to pick up whatever the local
+ * owning group for tty devices is.  Used when we drop privileges.
+ */
+#define PROTO_TTY "/dev/ttyS0"
+
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
@@ -792,10 +798,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int option, msock, cfd, dfd, go_background = 1;
-#ifdef DROPPRIVS
     struct passwd *pw;
     struct stat stb;
-#endif /* DROPPRIVS */
     extern char *optarg;
 
     debuglevel = 0;
@@ -803,6 +807,9 @@ int main(int argc, char *argv[])
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
+	    break;
+	case 'F':
+	    control_socket = optarg;
 	    break;
 	case 'N':
 	    go_background = 0;
@@ -819,9 +826,6 @@ int main(int argc, char *argv[])
 	case 'f':
 	case 'p':
 	    device_name = optarg;
-	    break;
-	case 'F':
-	    control_socket = optarg;
 	    break;
 	case 'P':
 	    pid_file = optarg;
@@ -902,23 +906,22 @@ int main(int argc, char *argv[])
     ntpshm_init(&context);
 #endif /* defined(SHM_H) && defined(IPC_H) */
 
-#ifdef DROPPRIVS
     /*
      * Drop privileges.  Up to now we've been running as root.  Instead,
      * set the user ID to 'nobody' and the group ID to the owning group 
-     * of a representative TTY device. 
+     * of a prototypical TTY device.  This limits the scope of any
+     * compromises in the code.
      */
-    pw = getpwnam("nobody");
-    if (pw)
-	setuid(pw->pw_uid);
-    gpsd_report(1, "running with effective user ID %d\n", geteuid());
-    if (stat(device_name, &stb) == 0 || stat("/dev/ttyS0", &stb) == 0) {
-	gpsd_report(1, "changing to group %d\n", stb.st_gid);
+    if (stat(device_name, &stb) == 0 || stat(PROTO_TTY, &stb) == 0) {
+	gpsd_report(2, "changing to group %d\n", stb.st_gid);
 	if (setgid(stb.st_gid))
 	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
     }
-    gpsd_report(1, "running with effective group ID %d\n", getegid());
-#endif /* DROPPRIVS */
+    gpsd_report(2, "running with effective group ID %d\n", getegid());
+    pw = getpwnam("nobody");
+    if (pw)
+	setuid(pw->pw_uid);
+    gpsd_report(2, "running with effective user ID %d\n", geteuid());
 
     FD_SET(msock, &all_fds);
     FD_ZERO(&control_fds);

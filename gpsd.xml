@@ -626,6 +626,32 @@ receiver.  Please send us the output of the "ntpq -p" command and the
 make and type of receiver.</para>
 
 </refsect1>
+<refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title> 
+
+<para><application>gpsd</application> must start up as root in order
+to open the NTPD shared-memory segment, open its logfile, and create
+its local control socket.  Before doing any processing of GPS data, it
+tries to drop root privileges by setting its UID to "nobody" and its
+group ID to the group of <filename>/dev/gps</filename> &mdash; or, if
+that device doesn't exist, to the group of
+<filename>/dev/ttyS0</filename>.</para>
+
+<para>Privilege-dropping is a hedge against the possibility that
+carefully crafted data, either presented from a client socket or from
+a subverted serial device posing as a GPS, could be used to induce
+misbehavior in the internals of <application>gpsd</application>.
+It ensures that any such compromises cannot be used for privilege
+elevation to root.</para>
+
+<para>The assumption behind <application>gpsd</application>'s
+particular behavior is that all the tty devices to which a GPS might
+be connected are owned by the same non-root group and allow group
+read/write, though the group may vary because of distribution-specific
+or local administrative practice.  If this assumption is false,
+<application>gpsd</application> may not be able to open GPS devices in
+order to read them (such failures will be logged).</para>
+
+</refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 
 
 <para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
@@ -650,7 +676,17 @@ level.</para>
 <varlistentry>
 <term><filename>/dev/gps</filename></term>
 <listitem>
-<para>Default path to a GPS device.</para>
+<para>Default path to a GPS device. After startup 
+<application>gpsd</application> sets its group ID to the owner of this
+device if it exists.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/dev/ttyS0</filename></term>
+<listitem>
+<para>Prototype TTY device. After startup,
+<application>gpsd</application> sets its group ID to the owner of this
+device if <filename>/dev/gps</filename> does not exist.</para>
 </listitem>
 </varlistentry>
 </variablelist>

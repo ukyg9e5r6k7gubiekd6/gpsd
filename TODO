@@ -1,18 +1,6 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
-** Make gpsd run as non-root.
-
-gpsd has to start as root in order to to be able to connect to a SHM
-segment created by ntpd running as root.  It should thereafter drop
-privileges and go to 'nobody' or 'uucp' or some other non-privileged 
-user.
-
-For this to work, the tty device it uses will have to be assigned to
-that group.  For hotplug USB devices this won't be hard, we just need
-to write udev rules that will create devices with appropriate
-ownership.  Not clear how to handle this for serrial devices.
-
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
