@@ -118,9 +118,8 @@ that might call gps_poll() without such a guarantee.
 ** Security Issues
 
 Between versions 2.16 and 2.20, hotplugging was handled in the most
-obvious obvious way, by allowing the F command to declare new GPS
-devices for gpsd to look at.  Because gpsd runs as root, this had
-problems:
+obvious way, by allowing the F command to declare new GPS devices for
+gpsd to look at.  Because gpsd runs as root, this had problems:
 
 1) A malicious client with non-root access on the host could use F to
 point gpsd at a spoof GPS that was actually a pty feeding bogus
@@ -151,6 +150,12 @@ More generally, certainly gpsd needs to treat command input as
 untrusted and for saferty's sake should treat GPS data as untrusted
 too (in particular this means never assuming that either source won't
 try to overflow a buffer).
+
+Daemon versions after 2.21 drop privileges after startup, setting UID
+to "nobody" and GID to whichever group owns the GPS device specified
+at startup time -- or, if it doesn't exist, the system's
+lowest-numbered TTY device named in PROTO_TTY.  It may be necessary to
+change PROTO_TTY in gpsd.c for non-Linux systems.
 
 ** Autoconfiguration
 
