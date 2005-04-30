@@ -440,10 +440,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * anyone running 231.000.000 or earlier (including ES,
 	     * SiRFDRive, XTrac trains) you won't get UTC time. I don't
 	     * know what's broken in firmwares before 2.3.1..."
-	     *
-	     * To work around the incomplete implementation of this
-	     * packet in 231, we assume that only the altitude field
-	     * from this packet is valid.
 	     */
 	    navtype = getw(3);
 	    session->gpsdata.status = STATUS_NO_FIX;

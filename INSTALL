@@ -18,6 +18,8 @@ port; the command will be
 
      ln -s /dev/ttyXXX /dev/gps
 
+where ttyXXX is as in step 1.
+
 3. Ensure that device permissions will enable gpsd to read GPS devices
 even after it drops root privileges.  If you are running Fedora you
 can skip this step, as the stock configuration has the right properties.
@@ -27,8 +29,6 @@ enabled, and (2) all of them are owned by the same group.
 On a Linux with udev, check the files in /etc/udev/permissions.d to
 ensure that /dev/tty* devices are all created with the same group 
 and with 0660 permissions.
-
-where ttyXXX is as in step 1.
 
 4. Build gpsd from source (skip this step if you have installed a gpsd
 binary package).
