@@ -144,6 +144,7 @@ static int handle1000(struct gps_device_t *session)
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
     session->gpsdata.fix.altitude  = getl(31) * 1e-2;
+    session->gpsdata.fix.separation = getw(33) * 1e-2;        /* meters */
     session->gpsdata.fix.climb     = getl(38) * 1e-2;
     session->gpsdata.fix.eph       = getl(40) * 1e-2;
     session->gpsdata.fix.epv       = getl(42) * 1e-2;
@@ -157,7 +158,6 @@ static int handle1000(struct gps_device_t *session)
 	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->gpsdata.fix.mode = MODE_NO_FIX;
-    session->gpsdata.fix.separation = getw(33) * 1e-2;	/* meters */
 
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
