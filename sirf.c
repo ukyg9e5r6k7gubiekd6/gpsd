@@ -256,7 +256,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	fv = atof(session->outbuffer+5);
 	if (fv < 231) {
 	    session->driverstate |= SIRF_LT_231;
-	    sirfbin_mode(session, 0);
+	    if (fv > 200)
+		sirfbin_mode(session, 0);
 	} else if (fv < 232) 
 	    session->driverstate |= SIRF_EQ_231;
 	else {
