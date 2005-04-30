@@ -61,7 +61,7 @@
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
-static struct gps_context_t context = {0, LEAP_SECONDS, NULL, 0};
+static struct gps_context_t context = {0, LEAP_SECONDS, NULL};
 
 static void onsig(int sig)
 {
@@ -903,8 +903,6 @@ int main(int argc, char *argv[])
 	else
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
-
-    gpsd_root_probe(&context);
 
 #ifdef NTPSHM_ENABLE
     ntpshm_init(&context);

@@ -157,7 +157,7 @@ static int handle1000(struct gps_device_t *session)
 	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->gpsdata.fix.mode = MODE_NO_FIX;
-    session->separation = getw(33) * 1e-2;	/* meters */
+    session->gpsdata.fix.separation = getw(33) * 1e-2;	/* meters */
 
 #if 0
     gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);

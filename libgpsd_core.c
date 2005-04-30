@@ -46,22 +46,6 @@ void gpsd_root_probe(struct gps_context_t *context)
     FILE *fp;
     char str_buf[BUFSIZ];
 
-    /* check for USB serial drivers -- very Linux-specific */
-    if ((fp = fopen( "/proc/tty/driver/usbserial", "r")) == NULL) {
-	gpsd_report(2, "No USB serial drivers found.\n");
-    } else {
-        // try to find garmin_gps driver
-	while (fgets( str_buf, sizeof(str_buf), fp)) {
-	    // early garmin driver: garmin_gps
-	    // later garmin driver: Garmin USB/TTY
-	    if (strcasestr( str_buf, "garmin")) {
-		// yes, the garmin_gps driver is active
-		context->probeflags |= GARMIN_ACTIVE;
-		break;
-	    }
-	}
-    }
-    (void) fclose(fp);
 }
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)

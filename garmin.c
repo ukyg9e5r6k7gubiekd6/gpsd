@@ -268,9 +268,9 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    session->context->valid = LEAP_SECOND_VALID;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time = time_l;
+	    session->gpsdata.fix.time=session->gpsdata.sentence_time = time_l;
 #ifdef NTPSHM_ENABLE
-	    ntpshm_put(session, session->gpsdata.fix.time);
+	    ntpshm_put(session->context, session->gpsdata.fix.time);
 #endif 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 
@@ -282,7 +282,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 
 	    // geoid separation from WGS 84
             // gpsd sign is opposite of garmin sign
-	    session->separation = -pvt->msl_hght;
+	    session->gpsdata.fix.separation = -pvt->msl_hght;
 
 	    // estimated position error in meters
 	    session->gpsdata.epe = pvt->epe;
@@ -595,9 +595,10 @@ static int garmin_probe(struct gps_device_t *session)
     FILE *fp;
     int i;
 
-    if (!(session->context->probeflags & GARMIN_ACTIVE)) {
-	gpsd_report(5, "garmin_gps not active.\n");
-	return 0;
+    /* check for USB serial drivers -- very Linux-specific */
+    if (access("/sys/module/garmin_gps", R_OK) != 0) {
+	gpsd_report(5, "garmin_gps not active.\n"); 
+        return 0;
     }
 
     /* Save original terminal parameters */
