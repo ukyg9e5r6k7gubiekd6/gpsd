@@ -283,15 +283,10 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	    mask |= CLIMB_SET;
 	}
 	if ( strlen( field[11] ) ) {
-	   separation = atof(field[11] );
+	   separation = atof(field[11]);
 	} else {
-	   separation = ALTITUDE_NOT_VALID;
+	   separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
 	}
-	gpsd_report(3, "Geoid Separation (MSL - WGS84): from NMEA %lf, calculated %lf\n"
-	    , separation
-	    , wgs84_separation(out->fix.latitude
-		, out->fix.longitude));
-
     }
     return mask;
 }
