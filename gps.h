@@ -69,6 +69,8 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
+    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
+#define NO_SEPARATION	-99999	/* must be out of band */
 };
 
 struct gps_data_t {

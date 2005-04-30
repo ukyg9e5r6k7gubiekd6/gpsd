@@ -129,7 +129,7 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
 #ifdef BINARY_ENABLE
 	session->mag_var = NO_MAG_VAR;
-	session->separation = NO_SEPARATION;
+	session->gpsdata.fix.separation = NO_SEPARATION;
 #endif /* BINARY_ENABLE */
 
 	return session->gpsdata.gps_fd;
@@ -357,10 +357,11 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 		session->gpsdata.satellites_used,
 		hdop_str,
 		session->gpsdata.fix.altitude, 'M');
-	if (session->separation == NO_SEPARATION)
+	if (session->gpsdata.fix.separation == NO_SEPARATION)
 	    strcat(bufp, ",,");
 	else
-	    sprintf(bufp+strlen(bufp), "%.3f,M", session->separation);
+	    sprintf(bufp+strlen(bufp), "%.3f,M", 
+		    session->gpsdata.fix.separation);
 	if (session->mag_var == NO_MAG_VAR) 
 	    strcat(bufp, ",,");
 	else {
