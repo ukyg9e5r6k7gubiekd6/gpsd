@@ -234,7 +234,6 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) DGPS station ID number (0000-1023)
     */
     int mask;
-    double separation;  /* MSL - WGS84) in meters */
 
     out->status = atoi(field[6]);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
@@ -283,9 +282,9 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	    mask |= CLIMB_SET;
 	}
 	if ( strlen( field[11] ) ) {
-	   separation = atof(field[11]);
+	   out->fix.separation = atof(field[11]);
 	} else {
-	   separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
+	   out->fix.separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
 	}
     }
     return mask;

@@ -157,6 +157,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     {
     case 0x02:		/* Measure Navigation Data Out */
 	mask = 0;
+	session->gpsdata.satellites_used = getb(28);
+	for (i = 0; i < MAXCHANNELS; i++)
+	    session->gpsdata.used[i] = getb(29+i);
 	if (!(session->driverstate & (SIRF_GE_232 | UBLOX))) {
 	    /* position/velocity is bytes 1-18 */
 	    ecef_to_wgs84fix(&session->gpsdata.fix, 
@@ -192,12 +195,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    gpsd_binary_fix_dump(session, buf2);
 	    /* fix quality data */
 	    session->gpsdata.hdop = getb(20)/5.0;
-	    session->gpsdata.satellites_used = getb(28);
+	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    if (session->gpsdata.satellites)
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
-	    for (i = 0; i < MAXCHANNELS; i++)
-		session->gpsdata.used[i] = getb(29+i);
-	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
@@ -215,7 +215,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
 	    session->gpsdata.ss[st] = cn/10;
-	    // session->gpsdata.used[st] = (getw(off+3) == 0xbf);
 	    good = session->gpsdata.PRN[st] && 
 		session->gpsdata.azimuth[st] && 
 		session->gpsdata.elevation[st];
@@ -512,7 +511,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
 	session->gpsdata.fix.latitude = getl(1) * RAD_2_DEG * 1e-8; 
 	session->gpsdata.fix.longitude = getl(5) * RAD_2_DEG * 1e-8;
-	session->gpsdata.fix.altitude = getl(9) * 1e-3;
+	session->gpsdata.fix.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
+	session->gpsdata.fix.altitude = getl(9) * 1e-3 - session->gpsdata.fix.separation;
 	session->gpsdata.fix.speed = getl(13) * 1e-3;
 	session->gpsdata.fix.climb = getl(17) * 1e-3;
 	session->gpsdata.fix.track = getl(21) * RAD_2_DEG * 1e-8;
@@ -549,11 +549,13 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 #endif /* NTPSHM_ENABLE */
 	}
 
+	gpsd_binary_fix_dump(session, buf2);
 	/* session->gpsdata.gdop = getb(34) / 5.0; */
 	session->gpsdata.pdop = getb(35) / 5.0;
 	session->gpsdata.hdop = getb(36) / 5.0;
 	session->gpsdata.vdop = getb(37) / 5.0;
 	/* session->gpsdata.tdop = getb(38) / 5.0; */
+	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	session->driverstate |= UBLOX;
 	//gpsd_report(4, "Disabling subframe transmission...\n");
 	//sirf_write(session->gpsdata.gps_fd, disablesubframe);
