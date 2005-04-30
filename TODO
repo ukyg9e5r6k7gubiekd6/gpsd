@@ -85,10 +85,7 @@ general case.  There are clock drift and bias fields in the SiRF
 binary protocol, but I don't know how to interpret these.  Does
 anyone?
 
-B. SiRF binary reports HDOP, SiRF and other NMEA devices report
-HDOP/VDOP/PDOP.
-
-C. Only Garmin devices report estimated position uncertainties in meters.
+B. Only Garmin devices report estimated position uncertainties in meters.
 They won't say what the confidence interval is, but it is generally
 believed to be 1-sigma.  See <http://gpsinformation.net/main/epenew.txt>.
 
@@ -101,7 +98,8 @@ Here is what I am presently doing in the new E command:
 
 What non-Garmin GPSes will return in the E command is UERE multiplied
 by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP,
-one respect in which it is functionally inferior to SiRF NMEA.
+one respect in which it is functionally inferior to SiRF NMEA.  We
+compute VDOP and PDOP using an algorithm supplied by SiRF.
 
 I don't know, because my sources didn't give, the confidence level
 associated with the range uncertainties in gpsd.h.  My educated guess

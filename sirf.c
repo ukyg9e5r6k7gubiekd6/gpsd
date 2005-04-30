@@ -146,6 +146,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				  0x00,
 				  0x00, 0x00, 0xb0, 0xb3};
 
+    if (len < 0)
+	return 0;
+
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
@@ -250,10 +253,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	gpsd_report(3, "<= GPS: %s", buf2);
 	return TIME_SET | SATELLITE_SET;
 
+    case 0x05:		/* Raw Tracker Data Out */
+	return 0;
+
     case 0x06:		/* Software Version String */
-	gpsd_report(4, "FV  0x06: Firmware version: %s\n", 
-		    session->outbuffer+5);
-	fv = atof(session->outbuffer+5);
+	gpsd_report(4, "FV  0x06: Firmware version: %s\n", buf+1);
+	fv = atof(buf+1);
 	if (fv < 231) {
 	    session->driverstate |= SIRF_LT_231;
 	    if (fv > 200)
@@ -264,7 +269,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->driverstate |= SIRF_GE_232;
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
-	if (strstr(session->outbuffer+5, "ES"))
+	if (strstr(buf+1, "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	return 0;
@@ -289,8 +294,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 */
         {
 	    unsigned int i, pageid, subframe, leap, words[10];
-	    unsigned int svid = getb(1);
-	    unsigned int chan = getb(2);
+	    unsigned int chan = getb(1);
+	    unsigned int svid = getb(2);
 	    words[0] = getl(3);
 	    words[1] = getl(7);
 	    words[2] = getl(11);
@@ -301,7 +306,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    words[7] = getl(31);
 	    words[8] = getl(35);
 	    words[9] = getl(39);
-	    gpsd_report(5, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
+	    gpsd_report(4, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
 	    	chan, svid, 
 	    	words[0], words[1], words[2], words[3], words[4], 
 	    	words[5], words[6], words[7], words[8], words[9]);
@@ -339,10 +344,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * See page 105 for the mapping between magic SVIDs and pages.
 	     */
 	    pageid = (words[2] & 0x3F0000) >> 16;
-	    gpsd_report(5, "Subframe 4 SVID is %d\n", pageid);
+	    gpsd_report(2, "Subframe 4 SVID is %d\n", pageid);
 	    if (pageid == 56) {	/* magic SVID for page 18 */
 		/* once we've filtered, we can ignore the TEL and HOW words */
-		gpsd_report(5, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
+		gpsd_report(2, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
 			    chan, svid, subframe,
 				words[2], words[3], words[4], words[5], 
 				words[6], words[7], words[8], words[9]);
@@ -379,6 +384,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		gpsd_report(2, "leap-seconds is %d\n", leap);
 		session->context->leap_seconds = leap;
 		session->context->valid = LEAP_SECOND_VALID;
+	    }
+
+	    if (session->context->valid & LEAP_SECOND_VALID) {
 		gpsd_report(4, "Disabling subframe transmission...\n");
 		sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
@@ -477,6 +485,13 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
+#ifdef NTPSHM_ENABLE
+	    if (session->driverstate & SIRF_GE_232) {
+		session->time_seen |= TIME_SEEN_UTC_1;
+		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
+		    ntpshm_put(session->context, session->gpsdata.fix.time);
+	    }
+#endif /* NTPSHM_ENABLE */
 	    /* skip 4 bytes of satellite map */
 	    session->gpsdata.fix.latitude = getl(23)*1e-7;
 	    session->gpsdata.fix.longitude = getl(27)*1e-7;
@@ -494,8 +509,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
 	    session->gpsdata.sentence_length = 91;
 	    strcpy(session->gpsdata.tag, "GND");
-	    gpsd_report(4, "Disabling subframe transmission...\n");
-	    sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	}
 	return mask;
 
@@ -544,6 +557,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
 		ntpshm_put(session->context, session->gpsdata.fix.time + 0.75);
 #endif /* NTPSHM_ENABLE */
+	    session->context->valid = LEAP_SECOND_VALID;
 	}
 
 	gpsd_binary_fix_dump(session, buf2);
@@ -554,8 +568,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	/* session->gpsdata.tdop = getb(38) / 5.0; */
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	session->driverstate |= UBLOX;
-	//gpsd_report(4, "Disabling subframe transmission...\n");
-	//sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	return mask;
 
     case 0xff:		/* Debug messages */
