@@ -840,8 +840,19 @@ int main(int argc, char *argv[])
 	}
     }
 
-    if (!service)
-	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
+    /*
+     * Control socket has to be created before we go background in order to
+     * avoid a race condition in which hotplug scripts can try oprning
+     * the socket before it's created.
+     */
+    if (control_socket) {
+	unlink(control_socket);
+	if ((csock = filesock(control_socket)) < 0) {
+	    gpsd_report(0,"control socket create failed, netlib error %d\n",csock);
+	    exit(2);
+	}
+	FD_SET(csock, &all_fds);
+    }
 
     if (go_background)
 	daemonize();
@@ -857,44 +868,15 @@ int main(int argc, char *argv[])
 	}
     }
 
-    /* user may want to re-initialize all channels */
-    if ((st = setjmp(restartbuf)) > 0) {
-	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
-	    if (channels[dfd])
-		gpsd_wrap(channels[dfd]);
-	}
-	if (st == SIGHUP+1)
-	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
-	else if (st > 0) {
-	    gpsd_report(1,"Received terminating signal %d. Exiting...\n",st-1);
-	    if (control_socket)
-		unlink(control_socket);
-	    exit(10 + st);
-	}
-    }
-
-    /* Handle some signals */
-    signal(SIGHUP, onsig);
-    signal(SIGINT, onsig);
-    signal(SIGTERM, onsig);
-    signal(SIGQUIT, onsig);
-    signal(SIGPIPE, SIG_IGN);
-
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(1, "launching (Version %s)\n", VERSION);
+    if (!service)
+	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     if ((msock = passivesock(service, "tcp", QLEN)) < 0) {
 	gpsd_report(0,"command socket create failed, netlib error %d\n",msock);
 	exit(2);
     }
     gpsd_report(1, "listening on port %s\n", service);
-    if (control_socket) {
-	unlink(control_socket);
-	if ((csock = filesock(control_socket)) < 0) {
-	    gpsd_report(0,"control socket create failed, netlib error %d\n",msock);
-	    exit(2);
-	}
-	FD_SET(csock, &all_fds);
-    }
 
     if (dgpsserver) {
 	dsock = gpsd_open_dgps(dgpsserver);
@@ -924,6 +906,29 @@ int main(int argc, char *argv[])
     if (pw)
 	setuid(pw->pw_uid);
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
+
+    /* user may want to re-initialize all channels */
+    if ((st = setjmp(restartbuf)) > 0) {
+	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
+	    if (channels[dfd])
+		gpsd_wrap(channels[dfd]);
+	}
+	if (st == SIGHUP+1)
+	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
+	else if (st > 0) {
+	    gpsd_report(1,"Received terminating signal %d. Exiting...\n",st-1);
+	    if (control_socket)
+		unlink(control_socket);
+	    exit(10 + st);
+	}
+    }
+
+    /* Handle some signals */
+    signal(SIGHUP, onsig);
+    signal(SIGINT, onsig);
+    signal(SIGTERM, onsig);
+    signal(SIGQUIT, onsig);
+    signal(SIGPIPE, SIG_IGN);
 
     FD_SET(msock, &all_fds);
     FD_ZERO(&control_fds);
