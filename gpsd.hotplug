@@ -3,7 +3,7 @@
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
 # Can be called like "gpsd.hotplug [add|remove] /dev/ttyUSB0" for test
 # purposes.
-import sys, os, syslog, glob, socket
+import sys, os, syslog, glob, socket, stat
 
 CONTROL_SOCKET = "/var/run/gpsd.sock"
 
@@ -19,7 +19,7 @@ def gpsd_control_connect():
         sock = None
         sockfile = None
     if not sock:
-        syslog.syslog("gpsd is not running or control socket is unreachable")
+        syslog.syslog("gpsd is not running or %s is unreachable" % CONTROL_SOCKET)
         return None
     else:
         return sockfile
@@ -39,6 +39,9 @@ def gpsd_control(action, argument):
     # need to parse the response, because gpsd will lock on to the
     # device if it's really a GPS and ignore it if it's not.
     if action == 'add':
+        # Force the group-read & group-write bits on, so gpsd will still be
+        # able to use this device after dropping root privileges.
+        os.chmod(argument, stat.S_IMODE(os.stat(argument)[stat.ST_MODE])|0660)
         connect.write("+%s\r\n" % argument)
     elif action == 'remove':
         connect.write("-%s\r\n" % argument)
@@ -70,7 +73,13 @@ def hotplug(action, devpath):
     syslog.closelog()
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:	# Called as hotplug script
-        hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
-    else:			# Called by hand for testing
-        gpsd_control(sys.argv[1], sys.argv[2])
+    try: 
+        if len(sys.argv) == 1:	# Called as hotplug script
+            hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
+        else:			# Called by hand for testing
+            gpsd_control(sys.argv[1], sys.argv[2])
+    except:
+        (exc_type, exc_value, exc_traceback) = sys.exc_info()
+        syslog.syslog("gpsd.hotplug: exception %s yields %s" % (exc_type, exc_value))
+        raise exc_type, exc_value, exc_traceback
+        
