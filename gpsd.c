@@ -890,11 +890,16 @@ int main(int argc, char *argv[])
     ntpshm_init(&context);
 #endif /* defined(SHM_H) && defined(IPC_H) */
 
+    /* make default device accessible even after we drop privileges */
+    if (stat(device_name, &stb) == 0)
+	chmod(device_name, stb.st_mode|S_IRGRP|S_IWGRP);
+
     /*
      * Drop privileges.  Up to now we've been running as root.  Instead,
      * set the user ID to 'nobody' and the group ID to the owning group 
      * of a prototypical TTY device.  This limits the scope of any
-     * compromises in the code.
+     * compromises in the code.  It requires that all GPS devices have
+     * their group read/write permissions set.
      */
     if (stat(device_name, &stb) == 0 || stat(PROTO_TTY, &stb) == 0) {
 	gpsd_report(2, "changing to group %d\n", stb.st_gid);
