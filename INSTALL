@@ -13,7 +13,7 @@ may have OS-level problems with your serial support, but more likely
 have the wrong device.  Look again.
 
 2. If your system supports Linux hotplug and you're using a USB GPS,
-go to step 3.  Otherwise, make a symlink named /dev/gps to your GPS
+go to step 4.  Otherwise, make a symlink named /dev/gps to your GPS
 port; the command will be
 
      ln -s /dev/ttyXXX /dev/gps
@@ -29,6 +29,11 @@ enabled, and (2) all of them are owned by the same group.
 On a Linux with udev, check the files in /etc/udev/permissions.d to
 ensure that /dev/tty* devices are all created with the same group 
 and with 0660 permissions.
+
+If your system has the Linux hotplug facility installed you can skip
+the permission-setting part; the hotplug scripts will force the
+permissions for you.  You still have to make sure all the tty devices
+are in the same group.
 
 4. Build gpsd from source (skip this step if you have installed a gpsd
 binary package).
