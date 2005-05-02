@@ -6,6 +6,7 @@
 import sys, os, syslog, glob, socket, stat
 
 CONTROL_SOCKET = "/var/run/gpsd.sock"
+WHEREAMI = "/etc/hotplug/usb/gpsd.hotplug"
 
 def gpsd_control_connect():
     "Acquire a connection to the GPSD control socket."
@@ -28,7 +29,7 @@ def gpsd_control_connect():
 
 def gpsd_control(action, argument):
     "Pass a command to gpsd; start the daemon if not already running."
-    syslog.syslog("gpsd_control begins with action=%s, arg=%s:" % (action, argument))
+    syslog.syslog("gpsd_control begins with action=%s, arg=%s" % (action, argument))
     connect = gpsd_control_connect()
     if connect:
         syslog.syslog("reached a running gpsd")
@@ -72,6 +73,13 @@ def hotplug(action, devpath):
             syslog.syslog(tty + " has gone active")
 
             gpsd_control(action, tty)
+
+            remover = os.getenv("REMOVER")
+            #syslog.syslog("REMOVER=%s" % remover)
+            fp = open(remover, "w")
+            fp.write(WHEREAMI + " remove " + tty)
+            fp.close()
+            os.chmod(remover, stat.S_IRUSR|stat.S_IXUSR|stat.S_IRGRP|stat.S_IXGRP)
             return
     syslog.syslog("gpsd.hotplug ends")
     syslog.closelog()
