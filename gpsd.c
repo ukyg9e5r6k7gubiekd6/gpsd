@@ -36,8 +36,6 @@
 
 #include "gpsd.h"
 
-#define DEFAULT_DEVICE_NAME	"/dev/gps"
-
 #define QLEN			5
 
 /*
@@ -119,13 +117,13 @@ static void usage(void)
 {
     printf("usage:  gpsd [options] \n\
   Options include: \n\
-  -f string (default %s)  	= set GPS device name \n\
+  -f string              	= set GPS device name \n\
   -S integer (default %s)	= set port for daemon \n\
   -d host[:port]         	= set DGPS server \n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
   -h                     	= help message \n",
-	   DEFAULT_DEVICE_NAME, DEFAULT_GPSD_PORT);
+	   DEFAULT_GPSD_PORT);
 }
 
 static int have_fix(struct gps_device_t *device)
@@ -792,9 +790,9 @@ int main(int argc, char *argv[])
     static int st, changed, dsock = -1, csock = -1, nowait = 0;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
-    static char *device_name = DEFAULT_DEVICE_NAME;
+    static char *device_name = NULL;
     static char *control_socket = NULL;
-    struct gps_device_t *device, **channel;
+    static struct gps_device_t *device, **channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int option, msock, cfd, dfd, go_background = 1;
@@ -891,7 +889,7 @@ int main(int argc, char *argv[])
 #endif /* defined(SHM_H) && defined(IPC_H) */
 
     /* make default device accessible even after we drop privileges */
-    if (stat(device_name, &stb) == 0)
+    if (device_name && stat(device_name, &stb) == 0)
 	chmod(device_name, stb.st_mode|S_IRGRP|S_IWGRP);
 
     /*
@@ -901,7 +899,7 @@ int main(int argc, char *argv[])
      * compromises in the code.  It requires that all GPS devices have
      * their group read/write permissions set.
      */
-    if (stat(device_name, &stb) == 0 || stat(PROTO_TTY, &stb) == 0) {
+    if ((device_name && stat(device_name, &stb)==0) || stat(PROTO_TTY, &stb)==0) {
 	gpsd_report(2, "changing to group %d\n", stb.st_gid);
 	if (setgid(stb.st_gid))
 	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
@@ -942,19 +940,21 @@ int main(int argc, char *argv[])
     if (time(NULL) < START_SUBFRAME)
 	context.valid |= LEAP_SECOND_VALID;
 
-    device = open_device(device_name, nowait);
-    if (!device) {
-	gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
-	exit(2);
+    if (device_name) { 
+	device = open_device(device_name, nowait);
+	if (!device) {
+	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
+	    exit(2);
+	}
+	if (dsock >= 0)
+	    device->dsock = dsock;
     }
-    if (dsock >= 0)
-	device->dsock = dsock;
 
     for (;;) {
 	struct timeval tv;
 
         memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
-	if (device->dsock > -1)
+	if (device && device->dsock > -1)
 	    FD_CLR(device->dsock, &rfds);
 
 	/* 

@@ -61,7 +61,7 @@ See <xref linkend='accuracy'/> for discussion.</para>
 <varlistentry>
 <term>-f</term>
 <listitem>
-<para>Set a GPS device name (default is <filename>/dev/gps</filename>).</para>
+<para>Set a GPS device name.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -199,8 +199,8 @@ the trial device becomes the active device for this client.</para>
 
 <para>The 'F=' command may fail if the specified device name is not on the
 daemon's internal search list.  This search list is initialized with
-<filename>/dev/gps</filename> or the path given in the -f command-line
-option if that was specified.  For security reasons, ordinary clients
+the path given in the -f command-line
+option, if that was specified.  For security reasons, ordinary clients
 cannot change this search list; instead, this must be done via the
 daemon's local control socket declared with the -F option.</para>
 
@@ -632,8 +632,8 @@ make and type of receiver.</para>
 to open the NTPD shared-memory segment, open its logfile, and create
 its local control socket.  Before doing any processing of GPS data, it
 tries to drop root privileges by setting its UID to "nobody" and its
-group ID to the group of <filename>/dev/gps</filename> &mdash; or, if
-that device doesn't exist, to the group of
+group ID to the group of the initial GPS passed on the command line
+&mdash; or, if that device doesn't exist, to the group of
 <filename>/dev/ttyS0</filename>.</para>
 
 <para>Privilege-dropping is a hedge against the possibility that
@@ -680,19 +680,12 @@ parameters <application>gpsd</application> cannot see.</para>
 
 <variablelist>
 <varlistentry>
-<term><filename>/dev/gps</filename></term>
-<listitem>
-<para>Default path to a GPS device. After startup 
-<application>gpsd</application> sets its group ID to the owner of this
-device if it exists.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
 <term><filename>/dev/ttyS0</filename></term>
 <listitem>
 <para>Prototype TTY device. After startup,
 <application>gpsd</application> sets its group ID to the owner of this
-device if <filename>/dev/gps</filename> does not exist.</para>
+device if no GPS device was specified on the command line does not
+exist.</para>
 </listitem>
 </varlistentry>
 </variablelist>

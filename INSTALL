@@ -12,15 +12,7 @@ a short initial burst of binary garbage).  If you don't see this, you
 may have OS-level problems with your serial support, but more likely
 have the wrong device.  Look again.
 
-2. If your system supports Linux hotplug and you're using a USB GPS,
-go to step 4.  Otherwise, make a symlink named /dev/gps to your GPS
-port; the command will be
-
-     ln -s /dev/ttyXXX /dev/gps
-
-where ttyXXX is as in step 1.
-
-3. Ensure that device permissions will enable gpsd to read GPS devices
+2. Ensure that device permissions will enable gpsd to read GPS devices
 even after it drops root privileges.  If you are running Fedora you
 can skip this step, as the stock configuration has the right properties.
 
@@ -35,7 +27,7 @@ the permission-setting part; the hotplug scripts will force the
 permissions for you.  You still have to make sure all the tty devices
 are in the same group.
 
-4. Build gpsd from source (skip this step if you have installed a gpsd
+3. Build gpsd from source (skip this step if you have installed a gpsd
 binary package).
 
 You will need to have either Motif or LessTif installed in order for
@@ -52,13 +44,13 @@ Then run make: libgps.so, gpsd, xgps, and xgpsspeed will be
 built. Copy the app-defaults files xgps.ad and xgpsspeed.ad to your
 home directory or to the system-wide X app-defaults directory.
 
-5. Start gpsd.  It should not need any options.
+4. Start gpsd.  It should not need any options.
 
-6. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
+5. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
 device it will query.  If you need to change the device, use 'f='
 to do so (see the manual page for details). Now plug in your GPS.
 
-7. Type "wr" to start raw and watcher modes.  You should see NMEA data
+6. Type "wr" to start raw and watcher modes.  You should see NMEA data
 (text lines beginning with $) spewing out.  You will also see lines
 with a GPSD prefix; these are sentence translations in GPSD protocol.
 
@@ -72,12 +64,12 @@ sending data, merely that gpsd has not yet seen any *valid* position data.
 You will have to wait for the GPS to acquire satellite lock.  If you have 
 raw or watcher mode on, it should be obvious when you get a lock.
 
-8. Start the xgps client.  Calling it with no arguments should do the right 
+7. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-9. Check out the list of supported hardware at 
+8. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
