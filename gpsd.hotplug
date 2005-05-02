@@ -9,23 +9,26 @@ CONTROL_SOCKET = "/var/run/gpsd.sock"
 
 def gpsd_control_connect():
     "Acquire a connection to the GPSD control socket."
+    if not os.path.exists(CONTROL_SOCKET):
+        syslog.syslog("socket %s doesn't exist" % CONTROL_SOCKET)
+        return None
     try:
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
         sock.connect(CONTROL_SOCKET)
         sockfile = sock.makefile()
     except socket.error, msg:
+        syslog.syslog("socket %s creation failure: %s" % (CONTROL_SOCKET, msg))
         if sock:
             sock.close()
         sock = None
         sockfile = None
-    if not sock:
-        syslog.syslog("gpsd is not running or %s is unreachable" % CONTROL_SOCKET)
-        return None
     else:
-        return sockfile
+        syslog.syslog("socket %s created OK" % CONTROL_SOCKET)
+    return sockfile
 
 def gpsd_control(action, argument):
     "Pass a command to gpsd; start the daemon if not already running."
+    syslog.syslog("gpsd_control begins with action=%s, arg=%s:" % (action, argument))
     connect = gpsd_control_connect()
     if connect:
         syslog.syslog("reached a running gpsd")
@@ -46,6 +49,7 @@ def gpsd_control(action, argument):
     elif action == 'remove':
         connect.write("-%s\r\n" % argument)
     connect.close()
+    syslog.syslog("gpsd_control ends")
     return action
 
 def hotplug(action, devpath):
