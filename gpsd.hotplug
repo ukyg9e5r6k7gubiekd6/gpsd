@@ -54,8 +54,7 @@ def gpsd_control(action, argument):
     return action
 
 def hotplug(action, devpath):
-    syslog.openlog('gpsd.hotplug', 0, syslog.LOG_DAEMON)
-    syslog.syslog("gpsd.hotplug begins with action: %s" % action)
+    #syslog.syslog("ACTION=%s" % action)
     if not devpath:
         syslog.syslog("No device")
     else:
@@ -81,10 +80,9 @@ def hotplug(action, devpath):
             fp.close()
             os.chmod(remover, stat.S_IRUSR|stat.S_IXUSR|stat.S_IRGRP|stat.S_IXGRP)
             return
-    syslog.syslog("gpsd.hotplug ends")
-    syslog.closelog()
 
 if __name__ == '__main__':
+    syslog.openlog('gpsd.hotplug', 0, syslog.LOG_DAEMON)
     try: 
         if len(sys.argv) == 1:	# Called as hotplug script
             hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
@@ -94,4 +92,6 @@ if __name__ == '__main__':
         (exc_type, exc_value, exc_traceback) = sys.exc_info()
         syslog.syslog("gpsd.hotplug: exception %s yields %s" % (exc_type, exc_value))
         raise exc_type, exc_value, exc_traceback
+    syslog.syslog("gpsd.hotplug ends")
+    syslog.closelog()
         
