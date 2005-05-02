@@ -96,6 +96,9 @@ struct gps_device_t {
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
 #define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
     double mag_var;		/* Magnetic variation in degrees */  
+#ifdef SIRFII_ENABLE
+    unsigned long satcounter;
+#endif /* SIRFII_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     void *GarminBuffer; /* Pointer Garmin packet buffer 
                            void *, to keep the packet details out of the 

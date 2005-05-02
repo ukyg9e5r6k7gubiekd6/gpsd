@@ -246,7 +246,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * rate-control command for 04, at least at firmware rev. 231, 
 	 * so we have to do our own rate-limiting here...
 	 */
-	if (session->counter % 5)
+	if (session->satcounter++ % 5)
 	    break;
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
