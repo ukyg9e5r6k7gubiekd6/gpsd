@@ -23,13 +23,13 @@ def gpsd_control_connect():
             sock.close()
         sock = None
         sockfile = None
-    else:
-        syslog.syslog("socket %s created OK" % CONTROL_SOCKET)
+    #else:
+    #    syslog.syslog("socket %s created OK" % CONTROL_SOCKET)
     return sockfile
 
 def gpsd_control(action, argument):
     "Pass a command to gpsd; start the daemon if not already running."
-    syslog.syslog("gpsd_control begins with action=%s, arg=%s" % (action, argument))
+    syslog.syslog("gpsd_control(action=%s, arg=%s)" % (action, argument))
     connect = gpsd_control_connect()
     if connect:
         syslog.syslog("reached a running gpsd")
@@ -38,6 +38,7 @@ def gpsd_control(action, argument):
         os.system("gpsd -F " + CONTROL_SOCKET)
         connect = gpsd_control_connect()
     if not connect:
+        syslog.syslog("can't reach gpsd")
         return None
     # We've got a live connection to the gpsd control socket.  No
     # need to parse the response, because gpsd will lock on to the
@@ -50,7 +51,7 @@ def gpsd_control(action, argument):
     elif action == 'remove':
         connect.write("-%s\r\n" % argument)
     connect.close()
-    syslog.syslog("gpsd_control ends")
+    #syslog.syslog("gpsd_control ends")
     return action
 
 def hotplug(action, devpath):
@@ -92,6 +93,6 @@ if __name__ == '__main__':
         (exc_type, exc_value, exc_traceback) = sys.exc_info()
         syslog.syslog("gpsd.hotplug: exception %s yields %s" % (exc_type, exc_value))
         raise exc_type, exc_value, exc_traceback
-    syslog.syslog("gpsd.hotplug ends")
+    #syslog.syslog("gpsd.hotplug ends")
     syslog.closelog()
         
