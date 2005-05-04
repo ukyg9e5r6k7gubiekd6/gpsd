@@ -970,6 +970,17 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
 
+#ifdef __UNUSED__
+	{
+	    char dbuf[BUFSIZ];
+	    dbuf[0] = '\0';
+	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+		if (FD_ISSET(cfd, &rfds))
+		    sprintf(dbuf + strlen(dbuf), " %d", cfd);
+	    gpsd_report(4, "New input on these descriptors: %s\n", dbuf);
+	}
+#endif /* UNUSED */
+
 	/* always be open to new client connections */
 	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
@@ -1006,6 +1017,7 @@ int main(int argc, char *argv[])
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);
 	    }
+	    FD_CLR(csock, &rfds);
 	}
 
 	/* read any commands that came in over control sockets */
@@ -1013,10 +1025,13 @@ int main(int argc, char *argv[])
 	    if (FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
 
-		if (read(cfd, buf, sizeof(buf)-1) > 0) {
+		while (read(cfd, buf, sizeof(buf)-1) > 0) {
 		    gpsd_report(1, "<= control(%d): %s\n", cfd, buf);
 		    handle_control(cfd, buf);
 		}
+		close(cfd);
+		FD_CLR(cfd, &all_fds);
+		FD_CLR(cfd, &control_fds);
 	    }
 
 	/* poll all active devices */
