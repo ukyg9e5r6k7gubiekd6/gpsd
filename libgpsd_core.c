@@ -40,14 +40,6 @@ int gpsd_open_dgps(char *dgpsserver)
     return dsock;
 }
 
-void gpsd_root_probe(struct gps_context_t *context)
-/* probes that have to be excuted while daemon is still root */
-{
-    FILE *fp;
-    char str_buf[BUFSIZ];
-
-}
-
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;

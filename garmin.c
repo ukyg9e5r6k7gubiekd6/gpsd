@@ -587,12 +587,10 @@ static int garmin_probe(struct gps_device_t *session)
 
     Packet_t *thePacket = NULL;
     char *buffer = NULL;
-    char str_buf[256];
     fd_set fds, rfds;
     struct timeval tv;
     int sel_ret = 0;
     int ok = 0;
-    FILE *fp;
     int i;
 
     /* check for USB serial drivers -- very Linux-specific */
