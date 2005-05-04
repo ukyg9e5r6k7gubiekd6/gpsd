@@ -122,14 +122,15 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Tue Apr 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Wed May  4 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.23-1
 - For better security, the daemon now drops root privileges after startup.
   gpsd-clients is now a separate RPM; this is helpful on lean systems
   that don't run X.  The O command now reports speeds in meters per second 
   rather than knots, client code has been adjusted so there is no user-visible
   change.  We now compute the missing components of DOP when using SiRF chips.
   /dev/gps is no longer special; there is no default GPS device unless you
-  specify one.
+  specify one.  The intermittent processor-hogging problem introduced by the
+  control-channel change in 2.21 has been solved.
 
 * Mon Apr 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.22-1
 - SiRF-binary driver can now get leap-second corrections from subframe data.

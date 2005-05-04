@@ -34,7 +34,7 @@ def gpsd_control(action, argument):
     if connect:
         syslog.syslog("reached a running gpsd")
     elif action == 'add':
-        gpsdcmd = "gpsd -D 4 -F " + CONTROL_SOCKET
+        gpsdcmd = "gpsd -F " + CONTROL_SOCKET
         syslog.syslog("launching %s" % gpsdcmd)
         os.system(gpsdcmd)
         connect = gpsd_control_connect()
