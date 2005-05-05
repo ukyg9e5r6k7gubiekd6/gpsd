@@ -1,6 +1,19 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** The crazy-speed bug
+
+Two gpsd users have reported that their clients report insanely high
+speeds in a moving car.  Here's what we know about this bug:
+
+1. It has only been reported from SiRF chips.
+2. It does not occur when the SiRF chip is switched to NMEA mode using N.
+3. Setting the static-navigation and track-smoothing bits doen't banish it.
+4. It isn't specific to gpsd -- sirfmon shows the same high speeds.
+
+Not all SiRF users are rreporting this.  It may be specific to some
+SiRF firmware versions. 
+
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
@@ -165,12 +178,6 @@ relationships are there?
 News flash: it develops that the "Navigation receiver warning" is
 supposed to indicate a valid fix that has a DOP too high or fails
 an elevation test.
-
-** Contact info:
-
-SiRF-II contacts: 
-	Carl Carter (714)-435-4902  ccarter@sirf.com.
-	Richard Saucedo  (408)-392-8385 rsaucedo@sirf.com
 
 Local variables:
 mode: outline
