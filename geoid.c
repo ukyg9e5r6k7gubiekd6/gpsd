@@ -95,7 +95,7 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix,
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
     fix->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-    fix->speed = RAD_2_DEG * sqrt(pow(vnorth,2) + pow(veast,2));
+    fix->speed = sqrt(pow(vnorth,2) + pow(veast,2));
     heading = atan2(veast,vnorth);
     if (heading < 0)
 	heading += 2 * PI;
