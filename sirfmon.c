@@ -45,6 +45,9 @@
 
 #define MAXCHANNELS	12
 
+#define PI 3.1415926535897932384626433832795029L
+#define RAD2DEG  57.2957795130823208767981548141051703L
+
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
@@ -84,7 +87,6 @@ static char *sbasvec[] =
 #define putw(off,w)	{ putb(off,(w) >> 8); putb(off+1,w); }
 #define putl(off,l)	{ putw(off,(l) >> 16); putw(off+2,l); }
 
-#define RAD2DEG		5.729577795E-7		/* RAD/10^8 to DEG */
 
 static void decode_sirf(unsigned char buf[],int len);
 static void decode_time(int week, int tow);
@@ -861,7 +863,7 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x62:
 	attrset(A_BOLD);
 	move(2,40);
-	printw("%9.5f %9.5f",RAD2DEG*getl(1),RAD2DEG*getl(5));
+	printw("%9.5f %9.5f",RAD2DEG*1e8*getl(1),RAD2DEG*1e8*getl(5));
 	move(2,63);
 	printw("%8d",getl(9)/1000);
 
@@ -870,7 +872,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	move(4,54);
 	if (getl(13) > 50) {
-	    float heading = RAD2DEG*getl(21);
+	    float heading = RAD2DEG*1e8*getl(21);
 	    if (heading < 0)
 		heading += 360;
 	    printw("%5.1f",heading);
@@ -988,10 +990,10 @@ static void decode_ecef(double x, double y, double z,
     speed = sqrt(pow(vnorth,2) + pow(veast,2));
     heading = atan2(veast,vnorth);
     if (heading < 0)
-	heading += 6.283185307;
+	heading += 2 * PI;
 
     wmove(mid2win, 1,40);
-    wprintw(mid2win, "%9.5f %9.5f",57.29577795*phi,57.29577795*lambda);
+    wprintw(mid2win, "%9.5f %9.5f",RAD2DEG*phi,RAD2DEG*lambda);
     wmove(mid2win, 1,63);
     wprintw(mid2win, "%8d",(int)h);
 
@@ -1001,13 +1003,13 @@ static void decode_ecef(double x, double y, double z,
     wprintw(mid2win, "%8.1f",vup);
 
     wmove(mid2win, 3,54);
-    wprintw(mid2win, "%5.1f",57.29577795*heading);
+    wprintw(mid2win, "%5.1f",RAD2DEG*heading);
     wmove(mid2win, 3,63);
     wprintw(mid2win, "%8.1f",speed);
 
     if (logfile != NULL)
 	fprintf(logfile,"%d\t%d\t%d\t%d\t%f\t%f\t%.2f\n",
-		(int)time(NULL),(int)x,(int)y,(int)z,57.29577795*phi,57.29577795*lambda,h);
+		(int)time(NULL),(int)x,(int)y,(int)z,RAD2DEG*phi,RAD2DEG*lambda,h);
 }
 
 /* RS232-line routines (initialization and SiRF pkt send/receive) */
