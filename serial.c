@@ -29,7 +29,8 @@ int gpsd_get_speed(struct termios* ttyctl)
     case B9600:  return(9600);
     case B19200: return(19200);
     case B38400: return(38400);
-    default: return(57600);
+    case B57600: return(57600);
+    default: return(115200);
     }
 }
 
@@ -39,7 +40,7 @@ int gpsd_set_speed(struct gps_device_t *session,
     unsigned int	rate;
 
     if (speed < 300)
-	rate = 0;
+	rate = B0;
     else if (speed < 1200)
       rate =  B300;
     else if (speed < 2400)
@@ -60,7 +61,7 @@ int gpsd_set_speed(struct gps_device_t *session,
       rate =  B115200;
 
     tcflush(session->gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
-    if (speed!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
+    if (rate!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
 	session->ttyset.c_cflag &=~ CSIZE;
@@ -84,7 +85,7 @@ int gpsd_open(struct gps_device_t *session)
     unsigned int *ip;
     unsigned int stopbits;
     /* every rate we're likely to see on a GPS */
-    static unsigned int rates[] = {4800, 9600, 19200, 38400, 57600};
+    static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NOCTTY)) < 0) {
@@ -122,17 +123,11 @@ int gpsd_open(struct gps_device_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
-	if (session->gpsdata.baudrate) {
-	    gpsd_report(1, "setting speed %d, %d stopbits, no parity\n", 
-			session->gpsdata.baudrate, 
-			session->gpsdata.stopbits);
-	    if (gpsd_set_speed(session, session->gpsdata.baudrate, session->gpsdata.stopbits)) {
-		return session->gpsdata.gps_fd;
-	    }
-	}
+	rates[0] = gpsd_get_speed(&session->ttyset_old);
 	for (stopbits = 1; stopbits <= 2; stopbits++)
 	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-		if (*ip != session->gpsdata.baudrate || stopbits != session->gpsdata.stopbits) {
+		if (ip == rates || *ip != rates[0])
+		{
 		    gpsd_report(1, 
 				"hunting at speed %d, %dN%d\n",
 				*ip, 9-stopbits, stopbits);
