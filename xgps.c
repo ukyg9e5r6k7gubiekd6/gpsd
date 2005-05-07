@@ -272,12 +272,12 @@ static void update_panel(struct gps_data_t *gpsdata, char *message)
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);
     if (gpsdata->fix.mode >= MODE_2D)
-	sprintf(s, "%f %c", fabsf(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+	sprintf(s, "%lf %c", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_2, s);
     if (gpsdata->fix.mode >= MODE_2D)
-	sprintf(s, "%f %c", fabsf(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+	sprintf(s, "%lf %c", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     else
 	strcpy(s, "n/a");
     XmTextFieldSetString(text_3, s);
