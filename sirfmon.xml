@@ -46,6 +46,10 @@ the screen is a scrolling hex dump of all packets the GPS is issuing.
 Dump lines beginning &gt;&gt;&gt; represent control packets sent to the
 GPS.</para>
 
+<para>At SiRF firmware level 231, he "UTC" time displayed is not real
+UTC, as it is not leap-second-corrected.  This is due to an inadequacy 
+in the SiRF firmware.</para>
+
 <para>To interpret what you see, you will need a copy of the
 <citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
 
