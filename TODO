@@ -6,20 +6,20 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 This can matter if you're using gpsd as a time reference.
 
 Rob Janssen <gpsd@xs4all.nl>:
->> Setting the FIFO threshold to 1 can improve things.
+>>> Setting the FIFO threshold to 1 can improve things.
+>>
+>> How does one do this?
 >
-> How does one do this?
-
-#include <linux/serial.h>
-
-use ioctl TIOCGSERIAL to get a struct serial_struct filled with the
-settings of the UART, modify what you want, and write it back using ioctl
-TIOCSSERIAL.
-
-Hmmm, now that I check this in the kernel source it does not seem to be
-possible to set the receive FIFO size from a user program, only the
-transmit FIFO.  However it appears that setting it to 1 will also disable
-the receive FIFO.  You'll have to experiment.
+>#include <linux/serial.h>
+>
+>use ioctl TIOCGSERIAL to get a struct serial_struct filled with the
+>settings of the UART, modify what you want, and write it back using ioctl
+>TIOCSSERIAL.
+>
+>Hmmm, now that I check this in the kernel source it does not seem to be
+>possible to set the receive FIFO size from a user program, only the
+>transmit FIFO.  However it appears that setting it to 1 will also disable
+>the receive FIFO.  You'll have to experiment.
 
 ** Hotplug interface problems
 
