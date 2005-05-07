@@ -115,7 +115,7 @@ static void build_gui(Widget toplevel)
 				     XmNtopWidget, left,
 				     NULL);
     /* satellite location and SNR data panel */
-#define FRAMEHEIGHT	220
+#define FRAMEHEIGHT	234
 #define LEFTSIDE_WIDTH	205
     satellite_list =
       XtVaCreateManagedWidget("satellite_list", xmListWidgetClass, left,
@@ -203,8 +203,8 @@ static void build_gui(Widget toplevel)
 
     /* create empty list items to be replaced on update */
     string = XmStringCreateSimple(" ");
-    for (i = 0; i < MAXCHANNELS; i++)
-	XmListAddItem(satellite_list, string, i+1);
+    for (i = 0; i <= MAXCHANNELS; i++)
+	XmListAddItem(satellite_list, string, 0);
     XmStringFree(string);
 }
 
