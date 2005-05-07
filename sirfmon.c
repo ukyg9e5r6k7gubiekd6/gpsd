@@ -11,7 +11,6 @@
  *	a -- toggle receipt of 50BPS subframe data.
  *	b -- change baud rate.
  *	c -- set or clear static navigation mode
- *	l -- start logging packets to specified file.
  *	s -- send hex bytes to device.
  *	t -- toggle navigation-parameter display mode
  *	q -- quit, leaving device in binary mode.
@@ -53,7 +52,6 @@
 
 static int LineFd;					/* fd for RS232 line */
 static int nfix,fix[20];
-static FILE *logfile;
 static int gmt_offset;
 static int dispmode = 0;
 static int subframe_enabled = 0;
@@ -580,12 +578,6 @@ int main (int argc, char **argv)
 		sendpkt(buf,24);
 		goto quit;
 
-	    case 'l':				/* open logfile */
-		if (logfile != NULL)
-		    fclose(logfile);
-		logfile = fopen(p,"a");
-		break;
-
 	    case 't':				/* poll navigation params */
 		putb(0,0x98);
 		putb(1,0x00);
@@ -618,9 +610,6 @@ int main (int argc, char **argv)
     }
 
  quit:
-    if (logfile != NULL)
-	fclose(logfile);
-
     endwin();
     exit(0);
 }
@@ -984,6 +973,7 @@ static void decode_ecef(double x, double y, double z,
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
     n = a / sqrt(1.0 - e2*pow(sin(phi),2));
     h = p / cos(phi) - n;
+    h -= wgs84_separation(RAD2DEG*phi,RAD2DEG*lambda);
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
     vup = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
@@ -1006,10 +996,6 @@ static void decode_ecef(double x, double y, double z,
     wprintw(mid2win, "%5.1f",RAD2DEG*heading);
     wmove(mid2win, 3,63);
     wprintw(mid2win, "%8.1f",speed);
-
-    if (logfile != NULL)
-	fprintf(logfile,"%d\t%d\t%d\t%d\t%f\t%f\t%.2f\n",
-		(int)time(NULL),(int)x,(int)y,(int)z,RAD2DEG*phi,RAD2DEG*lambda,h);
 }
 
 /* RS232-line routines (initialization and SiRF pkt send/receive) */

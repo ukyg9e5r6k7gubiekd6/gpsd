@@ -87,13 +87,6 @@ set distance may vary with software versions.</quote></para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>l</term>
-<listitem>
-<para>Start logging of packets to specified file. If logging is
-enabled, turn it off.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
 <term>s</term>
 <listitem>
 <para>Send hex bytes to device. Following the 's' you may type hex

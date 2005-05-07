@@ -122,6 +122,13 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Sat May  7 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Crazy-speed bug is finally fixed. Autobauding now starts with the
+  current speed of the device, not the stored gpsd speed; this means
+  hunting only takes place when device and GPS speed aren't matched.  
+  xgpsspeed unit-conversion bug introduced in 2.23 is fixed.  Satellite
+  display now really shows 12 channels, not just 11.
+
 * Wed May  4 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.23-1
 - For better security, the daemon now drops root privileges after startup.
   gpsd-clients is now a separate RPM; this is helpful on lean systems
