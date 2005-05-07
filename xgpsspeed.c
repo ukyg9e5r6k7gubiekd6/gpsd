@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
-    speedfactor = KNOTS_TO_MPH;		/* Software maintained in US */
+    speedfactor = MPS_TO_MPH;		/* Software maintained in US */
     speedunits = get_resource("speedunits", "mph");
     if (!strcmp(speedunits, "kph")) 
 	speedfactor = MPS_TO_KPH;
