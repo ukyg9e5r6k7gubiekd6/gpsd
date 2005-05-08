@@ -513,7 +513,7 @@ int packet_sniff(struct gps_device_t *session)
 	count = 0;
 	if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) < 0)
 	    return BAD_PACKET;
-	if (count == 0)
+	if (count == 0) {
 	    /*
 	     * Wait 4 character times at 9 bits per character, in usec.
 	     * This keeps us from eating the processor if we're running
@@ -521,8 +521,10 @@ int packet_sniff(struct gps_device_t *session)
 	     * sends through characters in 7- or 8-character bursts, so
 	     * Nyquist's Theorem tells us this is optimal.
 	     */
-	    usleep(36000000.0 / session->gpsdata.baudrate);
-	else if (packet_get(session, count)) {
+	    int delay = 36000000.0 / session->gpsdata.baudrate;
+	    gpsd_report(5, "usleep(%d)\n", delay);
+	    usleep(delay);
+	} else if (packet_get(session, count)) {
 	    /* push back the last packet grabbed */
 	    if (session->outbuflen + session->inbuflen < MAX_PACKET_LENGTH) {
 		memmove(session->inbuffer+session->outbuflen,
