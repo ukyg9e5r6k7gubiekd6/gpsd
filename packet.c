@@ -141,6 +141,10 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
         else if (c == 'E')
 	    session->packet_state = EARTHA_1;
 #endif /* EARTHMATE_ENABLE */
+#ifdef ZODIAC_ENABLE
+       else if (c == 0xff)
+           session->packet_state = ZODIAC_LEADER_1;
+#endif /* ZODIAC_ENABLE */
 	break;
     case NMEA_DOLLAR:
 	if (c == 'G')
