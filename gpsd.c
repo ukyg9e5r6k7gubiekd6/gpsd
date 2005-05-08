@@ -522,7 +522,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    p++;
 		}
 	    }
-	    sprintf(phrase, ",N=%d", whoami->device->gpsdata.driver_mode);
+	    if (!whoami->device)
+		sprintf(phrase, ",N=?");
+	    else
+		sprintf(phrase, ",N=%d", whoami->device->gpsdata.driver_mode);
 	    break;
 	case 'O':
 	    if (!assign_channel(whoami) || !have_fix(whoami->device))
@@ -697,7 +700,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'Z':
 	    assign_channel(whoami); 
 	    if (*p == '=') ++p;
-	    if (*p == '1' || *p == '+') {
+	    if (whoami->device == NULL) {
+		sprintf(phrase, ",Z=?");
+		p++;		
+	    } else if (*p == '1' || *p == '+') {
 		whoami->device->gpsdata.profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		sprintf(phrase, ",Z=1");
