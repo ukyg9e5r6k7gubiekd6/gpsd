@@ -455,7 +455,11 @@ int packet_get(struct gps_device_t *session, int waiting)
 #ifdef TESTMAINOLD
 	    gpsd_report(6, "Character discarded\n", session->inbufptr[-1]);
 #endif /* TESTMAIN */
-	    packet_discard(session);
+	    session->inbufptr = memmove(session->inbufptr-1, 
+					session->inbufptr, 
+					session->inbuffer + session->inbuflen - session->inbufptr 
+		);
+	    session->inbuflen--;
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    int checksum_ok = 1;
 	    unsigned char csum[3];
