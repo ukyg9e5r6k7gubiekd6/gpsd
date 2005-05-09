@@ -118,6 +118,10 @@ enum {
    ZODIAC_ID_1, 	/* saw first byte of ID */
    ZODIAC_ID_2, 	/* saw second byte of ID */
    ZODIAC_LENGTH_1,	/* saw first byte of Zodiac packet length */
+   ZODIAC_LENGTH_2,	/* saw second byte of Zodiac packet length */
+   ZODIAC_FLAGS_1, 	/* saw first byte of FLAGS */
+   ZODIAC_FLAGS_2, 	/* saw second byte of FLAGS */
+   ZODIAC_HSUM_1, 	/* saw first byte of Header sum */
    ZODIAC_PAYLOAD,	/* we're in a Zodiac payload */
    ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
 };
@@ -142,8 +146,8 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = EARTHA_1;
 #endif /* EARTHMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
-       else if (c == 0xff)
-           session->packet_state = ZODIAC_LEADER_1;
+	else if (c == 0xff)
+	    session->packet_state = ZODIAC_LEADER_1;
 #endif /* ZODIAC_ENABLE */
 	break;
     case NMEA_DOLLAR:
@@ -312,6 +316,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #endif /* SIRFII_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
+    case ZODIAC_RECOGNIZED:
 	if (c == 0xff)
 	    session->packet_state = ZODIAC_LEADER_1;
 	else
@@ -334,18 +339,43 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	session->packet_state = ZODIAC_LENGTH_1;
 	break;
     case ZODIAC_LENGTH_1:
-	/* extra three words are flags, header checkum, and data checksum */
-	session->packet_length += (c << 8);	/* word count! */
-	session->packet_length *= 2;		/* to byte count */
-	if (session->packet_length == 0)
-	    session->packet_length += 4;	/* hdrcheck, flags */
-	else
-	    session->packet_length += 6;	/* hdrcheck, flags, datachk */
+	session->packet_length += (c << 8);
+	session->packet_state = ZODIAC_LENGTH_2;
+	break;
+    case ZODIAC_LENGTH_2:
+	session->packet_state = ZODIAC_FLAGS_1;
+	break;
+    case ZODIAC_FLAGS_1:
+	session->packet_state = ZODIAC_FLAGS_2;
+	break;
+    case ZODIAC_FLAGS_2:
+	session->packet_state = ZODIAC_HSUM_1;
+	break;
+    case ZODIAC_HSUM_1:
+	{
+ #define getw(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+	    short sum = getw(0) + getw(1) + getw(2) + getw(3);
+	    sum *= -1;
+	    if (sum != getw(4)) {
+		gpsd_report(4, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
+		       sum, getw(4));
+		session->packet_state = GROUND_STATE;
+		break;
+	    }
+	}
+	gpsd_report(6,"Zodiac header id=%hd len=%hd flags=%hx\n", getw(1), getw(2), getw(3));
+	if (session->packet_length == 0) {
+	    session->packet_state = ZODIAC_RECOGNIZED;
+	    break;
+	}
+	session->packet_length *= 2;		/* word count to byte count */
+	session->packet_length += 2;		/* checksum */
 	if (session->packet_length <= MAX_PACKET_LENGTH)
 	    session->packet_state = ZODIAC_PAYLOAD;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
+ #undef getw
     case ZODIAC_PAYLOAD:
 	if (--session->packet_length == 0)
 	    session->packet_state = ZODIAC_RECOGNIZED;
@@ -425,11 +455,7 @@ int packet_get(struct gps_device_t *session, int waiting)
 #ifdef TESTMAINOLD
 	    gpsd_report(6, "Character discarded\n", session->inbufptr[-1]);
 #endif /* TESTMAIN */
-	    session->inbufptr = memmove(session->inbufptr-1, 
-					session->inbufptr, 
-					session->inbuffer + session->inbuflen - session->inbufptr 
-		);
-	    session->inbuflen--;
+	    packet_discard(session);
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    int checksum_ok = 1;
 	    unsigned char csum[3];
@@ -463,25 +489,21 @@ int packet_get(struct gps_device_t *session, int waiting)
 	    packet_discard(session);
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
- #define getw(i) (session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
-	    short len, n, crc1, crc2;
-	    for (n = crc1 = 0; n < 4; n++)
-		crc1 += (short)getw(n);
-	    crc1 *= -1;
-	    gpsd_report(6, "Header checksum 0x%hx expecting 0x%hx\n", 
-		   crc1, (short)getw(4));
+ #define getw(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+	    short len, n, sum;
 	    len = getw(2);
-	    for (n = crc2 = 0; n < len; n++)
-		crc2 += (short)getw(5+n);
-	    crc2 *= -1;
-	    gpsd_report(6,
-		"Data checksum 0x%hx over length %d, expecting 0x%hx\n", 
-			crc2, len, getw(5 + len));
-	    if (crc2 == (short)getw(5 + len) && crc1 == (short)getw(4)) {
+	    for (n = sum = 0; n < len; n++)
+		sum += getw(5+n);
+	    sum *= -1;
+	    if (len == 0 || sum == getw(5 + len)) {
 		session->packet_type = ZODIAC_PACKET;
 		packet_copy(session);
-	    } else
+	    } else {
+		gpsd_report(4,
+		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
+			sum, len, getw(5 + len));
 		session->packet_state = GROUND_STATE;
+	    }
 	    packet_discard(session);
 #undef getw
 #endif /* ZODIAC_ENABLE */
@@ -536,7 +558,7 @@ int packet_sniff(struct gps_device_t *session)
 		session->inbuflen += session->outbuflen;
 		session->outbuflen = 0;
 	    }
-	    gpsd_report(5, "packet_sniff ends\n");
+	    gpsd_report(5, "packet_sniff returns %d\n",session->packet_type);
 	    return session->packet_type;
 	}
     }

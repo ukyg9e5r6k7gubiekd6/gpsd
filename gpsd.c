@@ -891,6 +891,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef NTPSHM_ENABLE
+    nice(-10);			/* for precise timekeeping, increase priority */
     ntpshm_init(&context);
 #endif /* defined(SHM_H) && defined(IPC_H) */
 

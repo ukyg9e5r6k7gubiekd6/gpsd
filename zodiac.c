@@ -137,9 +137,12 @@ static int handle1000(struct gps_device_t *session)
     session->gpsdata.nmea_date.tm_hour = getw(22);
     session->gpsdata.nmea_date.tm_min = getw(23);
     session->gpsdata.nmea_date.tm_sec = getw(24);
-    session->gpsdata.subseconds = getl(25);
+    session->gpsdata.subseconds = getl(25) / 1e9;
     session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
+#ifdef NTPSHM_ENABLE
+    ntpshm_put(session->context, session->gpsdata.sentence_time + 1.1);
+#endif
     session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
@@ -160,7 +163,7 @@ static int handle1000(struct gps_device_t *session)
 	session->gpsdata.fix.mode = MODE_NO_FIX;
 
 #if 0
-    gpsd_report(1, "date: %%lf\n", session->gpsdata.fix.time);
+    gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
     gpsd_report(1, "  solution invalid:\n");
     gpsd_report(1, "    altitude: %d\n", (getw(10) & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (getw(10) & 2) ? 1 : 0);
@@ -246,6 +249,7 @@ static int handle1003(struct gps_device_t *session)
 
 static void handle1005(struct gps_device_t *session)
 {
+#if 0
     int i, numcorrections = getw(12);
 
     gpsd_report(1, "Packet: %d\n", session->sn);
@@ -264,22 +268,50 @@ static void handle1005(struct gps_device_t *session)
 	gpsd_report(1, "corrections state:%d", (getw(13+i) & 2048) ? 1 : 0);
 	gpsd_report(1, "iode mismatch:%d", (getw(13+i) & 4096) ? 1 : 0);
     }
+#endif
+}
+
+static void handle1108(struct gps_device_t *session)
+{
+    if ((getw(19) & 3) == 3)
+	session->context->leap_seconds = getw(16);
+#if 0
+    gpsd_report(1, "Leap seconds: %d.%09d\n", getw(16), getl(17));
+    gpsd_report(1, "UTC validity: %d\n", getw(19) & 3);
+#endif
 }
 
 static int zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
+    char buf2[MAX_PACKET_LENGTH*3];
     int i, mask = 0;
-    unsigned int id = (session->outbuffer[2] << 8) | session->outbuffer[3];
+    unsigned int id = (session->outbuffer[3] << 8) | session->outbuffer[2];
 
-    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%6d", id);
+    if (session->packet_type != ZODIAC_PACKET) {
+	gpsd_report(2, "zodiac_analyze packet type %d",session->packet_type);
+	return 0;
+    }
+
+    buf2[0] = '\0';
+    for (i = 0; i < session->outbuflen; i++)
+	sprintf(buf2+strlen(buf2), "%02x", session->outbuffer[i]);
+    gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf2);
+
+    if (session->outbuflen < 10)
+	return 0;
+
+    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%d", id);
     gpsd_report(5, "ID %d\n", id);
     switch (id) {
     case 1000:
 	mask = handle1000(session);
 	gpsd_binary_fix_dump(session, buf);
+	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1002:
+	if (session->satcounter++ % 5)
+	    break;
 	mask = handle1002(session);
 	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
@@ -288,14 +320,19 @@ static int zodiac_analyze(struct gps_device_t *session)
 	strcat(buf, "*");
 	nmea_add_checksum(buf);
 	gpsd_binary_quality_dump(session, buf+strlen(buf));
+	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1003:
 	mask = handle1003(session);
 	gpsd_binary_satellite_dump(session, buf);
+	gpsd_report(3, "<= GPS: %s", buf);
 	break;	
     case 1005:
 	handle1005(session);
 	break;	
+    case 1108:
+	handle1108(session);
+	break;
     }
 
     return mask;

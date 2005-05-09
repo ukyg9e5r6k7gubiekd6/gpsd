@@ -99,6 +99,8 @@ int gpsd_activate(struct gps_device_t *session)
 	    gpsd_switch_driver(session, "SiRF-II binary");
 	else if (session->packet_type == NMEA_PACKET)
 	    gpsd_switch_driver(session, "Generic NMEA");
+	else if (session->packet_type == ZODIAC_PACKET)
+	    gpsd_switch_driver(session, "Zodiac binary");
 	else if (session->device_type->initializer)
 	    session->device_type->initializer(session);
 

@@ -134,7 +134,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype, mask;
-    char buf2[MAX_PACKET_LENGTH*3] = "";
+    char buf2[MAX_PACKET_LENGTH*3];
     double fv;
     u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				  0x80, 0x00, 0x00, 0x00,

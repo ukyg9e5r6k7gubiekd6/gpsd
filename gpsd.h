@@ -159,6 +159,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *);
 extern int ntpshm_put(struct gps_context_t *, double);
+extern int ntpshm_pps(struct gps_context_t *,struct timeval *);
 
 extern void ecef_to_wgs84fix(struct gps_fix_t *,
 			     double, double, double, 
@@ -172,6 +173,7 @@ extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern int gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);
+extern int gpsd_ppsmonitor(struct gps_device_t *);
 
 /* caller should supply this */
 void gpsd_report(int, const char *, ...);
