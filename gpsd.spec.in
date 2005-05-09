@@ -19,16 +19,15 @@ queried on TCP port 2947 of the host computer.  With gpsd, multiple
 GPS client applications (such as navigational and wardriving software)
 can share access to a GPS without contention or loss of data.  Also,
 gpsd responds to queries with a format that is substantially easier to
-parse than NMEA 0183.  The daemon will be quiescent when there are no
-clients asking for location information, and copes gracefully when the
-GPS is unplugged and replugged.
+parse than NMEA 0183.  A client library is provided for applications.
 
 After installing this RPM, gpsd will automatically connect to USB
 GPSes when they are plugged in and requires no configuration.  For
-serial GPSes, you will need to make a symlink from the serial device
-you wish to use to /dev/gps, or start gpsd by hand.  Once connected,
+serial GPSes, you will need to start gpsd by hand.  Once connected,
 the daemon automatically discovers the correct baudrate, stop bits,
-and protocol.
+and protocol. The daemon will be quiescent when there are no
+clients asking for location information, and copes gracefully when the
+GPS is unplugged and replugged.
 
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS.

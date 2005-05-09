@@ -90,7 +90,10 @@ int gpsd_activate(struct gps_device_t *session)
 	return -1;
     else {
 	session->gpsdata.online = timestamp();
-	session->satcounter = session->counter = 0;
+#ifdef SIRFII_ENABLE
+	session->satcounter = 0;
+#endif
+	session->counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	if (session->packet_type == SIRF_PACKET)
 	    gpsd_switch_driver(session, "SiRF-II binary");
