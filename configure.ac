@@ -207,6 +207,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for PPS time syncing support
+AC_ARG_ENABLE(pps,
+  AC_HELP_STRING([--enable-pps],
+                 [enable PPS time syncing support]),
+  [ac_pps=$enableval], [ac_pps=no])
+AC_MSG_CHECKING([for PPS time syncing support])
+if test x"$ac_pps" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([PPS_ENABLE], 1, [PPS time syncing support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
@@ -219,6 +232,7 @@ echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
 echo "Garmin                  : $ac_garmin"
 echo "NTP SHM                 : $ac_ntpshm"
+echo "NTP PPS                 : $ac_pps"
 echo "Enable shared libraries : $enable_shared"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."

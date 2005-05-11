@@ -13,6 +13,9 @@
 #endif
 #define __USE_GNU
 #include <string.h>
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+#include <pthread.h>
+#endif
 
 #include "gpsd.h"
 
@@ -86,6 +89,10 @@ void gpsd_deactivate(struct gps_device_t *session)
 int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+    pthread_t pt;
+#endif
+
     if (gpsd_open(session) < 0)
 	return -1;
     else {
@@ -112,6 +119,10 @@ int gpsd_activate(struct gps_device_t *session)
 	session->mag_var = NO_MAG_VAR;
 	session->gpsdata.fix.separation = NO_SEPARATION;
 #endif /* BINARY_ENABLE */
+
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+	pthread_create(&pt,NULL,gpsd_ppsmonitor,(void*)session);
+#endif
 
 	return session->gpsdata.gps_fd;
     }
@@ -445,3 +456,29 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 }
 
 #endif /* BINARY_ENABLE */
+
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+int gpsd_ppsmonitor(struct gps_device_t *session)
+{
+    int c,plen,pa;
+    struct timeval tv;
+    struct timeval pulse[2] = {{0,0},{0,0}};
+
+    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
+	gettimeofday(&tv,NULL);
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &c) != 0)
+	    break;
+
+        c = (c & TIOCM_CAR) != 0;
+	plen = (tv.tv_sec-pulse[c].tv_sec)*1000000+tv.tv_usec-pulse[c].tv_usec;
+	pa = (tv.tv_sec-pulse[!c].tv_sec)*1000000+tv.tv_usec-pulse[!c].tv_usec;
+	
+	if (plen > 999000 && plen < 1001000 && pa > 800000)
+	    ntpshm_pps(session->context, &tv);
+
+	pulse[c] = tv;
+    }
+
+    return 0;
+}
+#endif
