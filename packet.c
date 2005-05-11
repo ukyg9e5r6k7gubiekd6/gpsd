@@ -370,7 +370,8 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	}
 	session->packet_length *= 2;		/* word count to byte count */
 	session->packet_length += 2;		/* checksum */
-	if (session->packet_length <= MAX_PACKET_LENGTH)
+	/* 10 bytes is the length of the Zodiac header */
+	if (session->packet_length <= MAX_PACKET_LENGTH - 10)
 	    session->packet_state = ZODIAC_PAYLOAD;
 	else
 	    session->packet_state = GROUND_STATE;
@@ -455,11 +456,10 @@ int packet_get(struct gps_device_t *session, int waiting)
 #ifdef TESTMAINOLD
 	    gpsd_report(6, "Character discarded\n", session->inbufptr[-1]);
 #endif /* TESTMAIN */
-	    session->inbufptr = memmove(session->inbufptr-1, 
-					session->inbufptr, 
-					session->inbuffer + session->inbuflen - session->inbufptr 
+	    session->inbufptr = memmove(session->inbuffer,
+					session->inbuffer + 1,
+					--session->inbuflen
 		);
-	    session->inbuflen--;
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    int checksum_ok = 1;
 	    unsigned char csum[3];
