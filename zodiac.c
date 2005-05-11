@@ -310,8 +310,6 @@ static int zodiac_analyze(struct gps_device_t *session)
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1002:
-	if (session->satcounter++ % 5)
-	    break;
 	mask = handle1002(session);
 	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
