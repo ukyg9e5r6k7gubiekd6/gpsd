@@ -71,11 +71,11 @@ int gpsd_set_speed(struct gps_device_t *session,
 	tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
 
-    if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
-	return 0;
-
     session->gpsdata.stopbits = stopbits;
     session->gpsdata.baudrate = speed;
+
+    if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
+	return 0;
 
     return 1;
 }
