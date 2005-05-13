@@ -186,7 +186,7 @@ static int handle1000(struct gps_device_t *session)
 #endif
 
     session->gpsdata.sentence_length = 55;
-    return TIME_SET|LATLON_SET||ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
+    return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
 }
 
 static int handle1002(struct gps_device_t *session)
@@ -247,7 +247,7 @@ static int handle1003(struct gps_device_t *session)
     return SATELLITE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
 }
 
-static void handle1005(struct gps_device_t *session)
+static void handle1005(struct gps_device_t *session UNUSED)
 {
 #if 0
     int i, numcorrections = getw(12);
@@ -317,6 +317,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	}
 	strcat(buf, "*");
 	nmea_add_checksum(buf);
+	gpsd_raw_hook(session, buf);
 	gpsd_binary_quality_dump(session, buf+strlen(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;

@@ -219,6 +219,7 @@ if test x"$ac_pps" = "xyes"; then
 else
   AC_MSG_RESULT([no])
 fi
+AM_CONDITIONAL([HAVE_PPS], [test x"$ac_pps" == x"yes"])
 
 AC_OUTPUT(Makefile gpsd.spec)
 
