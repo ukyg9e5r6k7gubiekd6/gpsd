@@ -114,7 +114,7 @@ AC_CHECK_LIB(Xm, XmCreateOptionMenu,
 fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
-AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
+AM_CONDITIONAL([HAVE_MOTIF], [test \("$have_x" == "yes"\) -a \("$XM_LIBS" != ""\)])
 
 dnl check for SiRF-II support
 AC_ARG_ENABLE(sirfII,

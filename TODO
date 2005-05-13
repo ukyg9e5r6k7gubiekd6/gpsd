@@ -1,6 +1,10 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** On Zodiac receivers, enabling W only causes Y responses to bwe shipped.
+
+Bug reported by Rob Janssen.
+
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
