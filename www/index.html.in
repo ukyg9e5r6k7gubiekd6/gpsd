@@ -166,8 +166,7 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 <p><code>gpsd</code> also works with <a href="bt.html">bluetooth
 GPS</a> receivers.</p>
 
-<p>Robin Cull has a Gentoo Linux <a
-href="http://www.digitalevacuation.org/ebuilds/gpsd-1.07.ebuild">ebuild
+<p>We supply a Gentoo Linux <a href="www/gpsd.ebuild">ebuild
 script</a>.</p>
 
 <h1 id='others'>Other GPSDs</h1>
