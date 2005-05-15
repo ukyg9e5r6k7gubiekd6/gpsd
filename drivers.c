@@ -116,14 +116,13 @@ struct gps_type_t fv18 = {
  *
  **************************************************************************/
 
-#ifndef BINARY_ENABLE
 static void sirf_initializer(struct gps_device_t *session)
 {
     /* nmea_send(session->gpsdata.gps_fd, "$PSRF105,0"); */
+    nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
     nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 }
-#endif /* BINARY_ENABLE */
 
 static int sirf_switcher(struct gps_device_t *session, int nmea, int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
@@ -149,17 +148,15 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = 0;
 }
 
-struct gps_type_t sirfII = {
+struct gps_type_t sirfII_nmea = {
     "SiRF-II NMEA",	/* full name of type */
-#ifdef BINARY_ENABLE
-    NULL,		/* recognizing SiRF flips us to binary */
-    NULL,		/* no probe */
-    NULL,		/* no initialization */
-#else
+#ifndef SIRFII_ENABLE
     "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+#else
+    NULL,		/* no initialization */
+#endif /* SIRFII_ENABLE */
     NULL,		/* no probe */
     sirf_initializer,	/* turn off debugging messages */
-#endif /* BINARY_ENABLE */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
     nmea_write_rtcm,	/* write RTCM data straight */
@@ -257,12 +254,10 @@ extern struct gps_type_t garmin_binary, sirf_binary;
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
+    &sirfII_nmea,
 #if FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
-#ifdef SIRFII_ENABLE
-    &sirfII, 
-#endif /* SIRFII_ENABLE */
 #if TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
