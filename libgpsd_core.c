@@ -252,7 +252,15 @@ int gpsd_poll(struct gps_device_t *session)
     /* update the scoreboard structure from the GPS */
     if (!session->counter) {
 	session->gpsdata.d_xmit_time = timestamp();
-	return handle_packet(session);	/* packet gathered by the sniffer */
+	/*
+	 * Handle one initial packet gathered by the sniffer.
+	 * This works when gpsfake is feeding the daemon log lines
+	 * through a pty, but in actual use hooked up to a tty more
+	 * than one packet may be present in the first input grab.
+	 * In that case this code will only see the last packet
+	 * the sniffer gathered.
+	 */
+	return handle_packet(session);
     } else {
 	waiting = is_input_waiting(session->gpsdata.gps_fd);
 	gpsd_report(7, "GPS has %d chars waiting\n", waiting);
