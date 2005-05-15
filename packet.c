@@ -385,6 +385,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     }
 }
 
+#ifdef STATE_DEBUG
 static char *buffer_dump(unsigned char *base, unsigned char *end)
 /* dump the state of a specified buffer */
 {
@@ -400,6 +401,7 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
     *tp = '\0';
     return buf;
 }
+#endif /* STATE_DEBUG */
 
 static void packet_accept(struct gps_device_t *session)
 /* packet grab succeeded, move to output buffer */
@@ -407,11 +409,13 @@ static void packet_accept(struct gps_device_t *session)
     int packetlen = session->inbufptr-session->inbuffer;
     memcpy(session->outbuffer, session->inbuffer, packetlen);
     session->outbuffer[session->outbuflen = packetlen] = '\0';
+#ifdef STATE_DEBUG
     gpsd_report(6, "Packet type %d accepted %d = %s\n", 
 		session->packet_type,
 		packetlen,
 		buffer_dump(session->outbuffer, 
 			    session->outbuffer+session->outbuflen));
+#endif /* STATE_DEBUG */
 }
 
 static void packet_discard(struct gps_device_t *session)
@@ -423,10 +427,12 @@ static void packet_discard(struct gps_device_t *session)
 				session->inbufptr, 
 				remaining);
     session->inbuflen = remaining;
+#ifdef STATE_DEBUG
     gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n", 
 		discard, remaining, 
 		buffer_dump(session->inbuffer, 
 			    session->inbuffer + session->inbuflen));
+#endif /* STATE_DEBUG */
 }
 
 static void character_discard(struct gps_device_t *session)
@@ -434,25 +440,33 @@ static void character_discard(struct gps_device_t *session)
 {
     memmove(session->inbuffer, session->inbuffer + 1, --session->inbuflen);
     session->inbufptr = session->inbuffer;
+#ifdef STATE_DEBUG
     gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
 		session->inbuflen,
 		buffer_dump(session->inbuffer, 
 			    session->inbuffer + session->inbuflen));
+#endif /* STATE_DEBUG */
 }
 
 /* entry points begin here */
 
-int packet_get(struct gps_device_t *session, int waiting)
+int packet_get(struct gps_device_t *session, unsigned int waiting)
 {
     int newdata;
 #ifndef TESTMAIN
-    int room = sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer);
-
-    if (waiting > room) {
-	gpsd_report(6, "No room (%d) for more input\n", room);
-	waiting = room;
+    /*
+     * This should never happen.  If it does, it means that either
+     * (a) You've added a protocol with a max packet size larger than
+     * the input buffer can handle; fix this by adjusting MAX_PACKET_LENGTH.
+     * (b) The state machine is hosed -- it is not recognizing packets and
+     * flushing them out of the input buffer as it should.  Enable STATE_DEBUG
+     * and watch the transitions.
+     */
+    if (waiting>sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer)){
+	gpsd_report(6, "out of room, flushing input buffer\n");
+	session->inbufptr = session->inbuffer;
+	session->inbuflen = 0;
     }
-
     newdata = read(session->gpsdata.gps_fd, session->inbufptr, waiting);
 #else
     newdata = waiting;
@@ -461,11 +475,13 @@ int packet_get(struct gps_device_t *session, int waiting)
     if (newdata < 0 && errno != EAGAIN)
 	return BAD_PACKET;
 
+#ifdef STATE_DEBUG
     gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n", 
 		newdata,
 		session->inbufptr-session->inbuffer,
 		session->inbuflen+newdata, 
 		buffer_dump(session->inbufptr, session->inbufptr + newdata));
+#endif /* STATE_DEBUG */
 
     session->outbuflen = 0;
     session->inbuflen += newdata;

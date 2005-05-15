@@ -39,7 +39,7 @@ struct gps_type_t {
     char *typename, *trigger;
     int (*probe)(struct gps_device_t *session);
     void (*initializer)(struct gps_device_t *session);
-    int (*get_packet)(struct gps_device_t *session, int waiting);
+    int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
     int (*parse_packet)(struct gps_device_t *session);
     int (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, int rtcmbytes);
     int (*speed_switcher)(struct gps_device_t *session, int speed);
@@ -140,7 +140,7 @@ extern void nmea_add_checksum(char *);
 
 extern int sirf_parse(struct gps_device_t *, unsigned char *, int);
 
-extern int packet_get(struct gps_device_t *, int);
+extern int packet_get(struct gps_device_t *, unsigned int);
 extern int packet_sniff(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);

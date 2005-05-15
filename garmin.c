@@ -818,7 +818,7 @@ static void garmin_init(struct gps_device_t *session)
 	//SendPacket(session,  thePacket);
 }
 
-static int garmin_get_packet(struct gps_device_t *session, int waiting UNUSED)
+static int garmin_get_packet(struct gps_device_t *session, unsigned int waiting UNUSED)
 {
     return !GetPacket( session );
 }
