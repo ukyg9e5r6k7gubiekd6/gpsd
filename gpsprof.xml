@@ -35,8 +35,7 @@ useful for establishing an upper bound on latency, and thus on
 position accuracy of a GPS in motion.</para>
 
 <para><application>gpsprof</application> uses instrumentation built
-into <application>gpsd</application> that will only be present if
-it was configured to support profiling.</para>
+into <application>gpsd</application>.</para>
 
 <para>To display the graph, use
 <citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -44,7 +43,7 @@ Thus, for example, to display the default spatial scatter plot, do
 this:
 
 <programlisting>
-gpsplot | gnuplot -persist
+gpsprof | gnuplot -persist
 </programlisting>
 </para>
 
