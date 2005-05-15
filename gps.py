@@ -346,8 +346,10 @@ class gps(gpsdata):
                   self.valid |= ONLINE_SET
 	    elif cmd in ('Y', 'y'):
 	      satellites = data.split(":")
-              self.timings.sentenvce_tag = satellites.pop(0)
-	      self.timings.sentence_time = float(satellites.pop(0))
+              self.timings.sentence_tag = satellites.pop(0)
+	      self.timings.sentence_time = satellites.pop(0)
+              if self.timings.sentence_time != "?":
+                  float(self.timings.sentence_time)
 	      d1 = int(satellites.pop(0))
 	      newsats = []
 	      for i in range(d1):
