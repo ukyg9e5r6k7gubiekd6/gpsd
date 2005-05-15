@@ -62,12 +62,12 @@ static void nmea_initializer(struct gps_device_t *session)
      */
 #define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
     nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
-    /* probe for SiRF-II */
-    nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
     /* enable GPZDA on a Motorola Oncore GT+ */
     nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
     /* enable GPGSA on Garmin serial GPS */
     nmea_send(session->gpsdata.gps_fd, "$PGRM0,GSA,1");
+    /* probe for SiRF-II */
+    nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
 }
 
 struct gps_type_t nmea = {
@@ -106,13 +106,13 @@ struct gps_type_t fv18 = {
 };
 #endif /* FV18_ENABLE */
 
-#ifdef SIRFII_ENABLE
 /**************************************************************************
  *
  * SiRF-II NMEA
  *
  * This NMEA -mode driver is a fallback in case the SiRF chipset has
- * firmware too old for binary to be useful.
+ * firmware too old for binary to be useful, or we're not compiling in
+ * the SiRF binary driver at all.
  *
  **************************************************************************/
 
@@ -168,7 +168,6 @@ struct gps_type_t sirfII = {
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
-#endif /* SIRFII_ENABLE */
 
 #if TRIPMATE_ENABLE
 /**************************************************************************

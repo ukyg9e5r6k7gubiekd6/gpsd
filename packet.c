@@ -114,7 +114,7 @@ enum {
 
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */
    ZODIAC_LEADER_1,	/* saw leading 0xff */
-   ZODIAC_LEADER_2,	/* saw leaing 0x81 */
+   ZODIAC_LEADER_2,	/* saw leading 0x81 */
    ZODIAC_ID_1, 	/* saw first byte of ID */
    ZODIAC_ID_2, 	/* saw second byte of ID */
    ZODIAC_LENGTH_1,	/* saw first byte of Zodiac packet length */
@@ -261,13 +261,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break; 
 #endif /* EARTHMATE_ENABLE */
-#ifdef SIRFII_ENABLE
-    case SIRF_LEADER_1:
-	if (c == 0xa2)
-	    session->packet_state = SIRF_LEADER_2;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
     case SIRF_ACK_LEAD_1:
 	if (c == 'c')
 	    session->packet_state = SIRF_ACK_LEAD_2;
@@ -277,6 +270,13 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
    case SIRF_ACK_LEAD_2:
 	if (c == 'k')
 	    session->packet_state = NMEA_LEADER_END;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+#ifdef SIRFII_ENABLE
+    case SIRF_LEADER_1:
+	if (c == 0xa2)
+	    session->packet_state = SIRF_LEADER_2;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -364,6 +364,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    }
 	}
 	gpsd_report(6,"Zodiac header id=%hd len=%hd flags=%hx\n", getw(1), getw(2), getw(3));
+ #undef getw
 	if (session->packet_length == 0) {
 	    session->packet_state = ZODIAC_RECOGNIZED;
 	    break;
@@ -376,7 +377,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
- #undef getw
     case ZODIAC_PAYLOAD:
 	if (--session->packet_length == 0)
 	    session->packet_state = ZODIAC_RECOGNIZED;
@@ -385,27 +385,59 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     }
 }
 
-static void packet_copy(struct gps_device_t *session)
+static char *buffer_dump(unsigned char *base, unsigned char *end)
+/* dump the state of a specified buffer */
+{
+    static unsigned char buf[BUFSIZ];
+    unsigned char *cp, *tp = buf;
+    for (cp = base; cp < end; cp++)
+	if (isgraph(*cp))
+	    *tp++ = *cp;
+	else {
+	    sprintf(tp, "\\x%02x", *cp);
+	    tp += 4;
+	}
+    *tp = '\0';
+    return buf;
+}
+
+static void packet_accept(struct gps_device_t *session)
 /* packet grab succeeded, move to output buffer */
 {
     int packetlen = session->inbufptr-session->inbuffer;
-    gpsd_report(6, "Packet copy, type %d\n", session->packet_type);
     memcpy(session->outbuffer, session->inbuffer, packetlen);
     session->outbuffer[session->outbuflen = packetlen] = '\0';
+    gpsd_report(6, "Packet type %d accepted %d = %s\n", 
+		session->packet_type,
+		packetlen,
+		buffer_dump(session->outbuffer, 
+			    session->outbuffer+session->outbuflen));
 }
 
 static void packet_discard(struct gps_device_t *session)
-/* shift the input buffer to discard old data */ 
+/* shift the input buffer to discard all data up to current input pointer */ 
 {
-    int remaining = session->inbuffer + session->inbuflen - session->inbufptr;
-#ifndef TESTMAIN
-    gpsd_report(6, "Packet discard with %d remaining\n", remaining);
-#endif /* TESTMAIN */
-    memmove(session->inbuffer, 
-	    session->inbufptr, 
-	    remaining);
-    session->inbufptr = session->inbuffer;
+    int discard = session->inbufptr - session->inbuffer;
+    int remaining = session->inbuflen - discard;
+    session->inbufptr = memmove(session->inbuffer, 
+				session->inbufptr, 
+				remaining);
     session->inbuflen = remaining;
+    gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n", 
+		discard, remaining, 
+		buffer_dump(session->inbuffer, 
+			    session->inbuffer + session->inbuflen));
+}
+
+static void character_discard(struct gps_device_t *session)
+/* shift the input buffer to discard one character and reread data */
+{
+    memmove(session->inbuffer, session->inbuffer + 1, --session->inbuflen);
+    session->inbufptr = session->inbuffer;
+    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
+		session->inbuflen,
+		buffer_dump(session->inbuffer, 
+			    session->inbuffer + session->inbuflen));
 }
 
 /* entry points begin here */
@@ -416,8 +448,10 @@ int packet_get(struct gps_device_t *session, int waiting)
 #ifndef TESTMAIN
     int room = sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer);
 
-    if (waiting > room)
+    if (waiting > room) {
+	gpsd_report(6, "No room (%d) for more input\n", room);
 	waiting = room;
+    }
 
     newdata = read(session->gpsdata.gps_fd, session->inbufptr, waiting);
 #else
@@ -427,39 +461,23 @@ int packet_get(struct gps_device_t *session, int waiting)
     if (newdata < 0 && errno != EAGAIN)
 	return BAD_PACKET;
 
-    {
-	unsigned char buf[BUFSIZ], *cp, *tp = buf;
-	for (cp = session->inbufptr; cp < session->inbufptr + newdata; cp++)
-	    if (isgraph(*cp))
-		*tp++ = *cp;
-	    else {
-		sprintf(tp, "\\x%02x", *cp);
-		tp += 4;
-	    }
-	*tp = '\0';
-	gpsd_report(6, "Read %d chars (total %d): %s\n", newdata, session->inbuflen+newdata, buf);
-    }
-
+    gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n", 
+		newdata,
+		session->inbufptr-session->inbuffer,
+		session->inbuflen+newdata, 
+		buffer_dump(session->inbufptr, session->inbufptr + newdata));
 
     session->outbuflen = 0;
     session->inbuflen += newdata;
     while (session->inbufptr < session->inbuffer + session->inbuflen) {
 	unsigned char c = *session->inbufptr++;
 	nexstate(session, c);
-#ifdef TESTMAINOLD
 	if (isprint(c))
-	    printf("Character '%c', new state: %d\n",c,session->packet_state);
+	    gpsd_report(7, "Character '%c', new state: %d\n",c,session->packet_state);
 	else
-	    printf("Character 0x%02x, new state: %d\n",c,session->packet_state);
-#endif /* TESTMAIN */
+	    gpsd_report(7, "Character 0x%02x, new state: %d\n",c,session->packet_state);
 	if (session->packet_state == GROUND_STATE) {
-#ifdef TESTMAINOLD
-	    gpsd_report(6, "Character discarded\n", session->inbufptr[-1]);
-#endif /* TESTMAIN */
-	    session->inbufptr = memmove(session->inbuffer,
-					session->inbuffer + 1,
-					--session->inbuflen
-		);
+	    character_discard(session);
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    int checksum_ok = 1;
 	    unsigned char csum[3];
@@ -474,7 +492,7 @@ int packet_get(struct gps_device_t *session, int waiting)
 	    }
 	    if (checksum_ok) {
 		session->packet_type = NMEA_PACKET;
-		packet_copy(session);
+		packet_accept(session);
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
@@ -487,7 +505,7 @@ int packet_get(struct gps_device_t *session, int waiting)
 	    crc &= 0x7fff;
 	    if (checksum == crc) {
 		session->packet_type = SIRF_PACKET;
-		packet_copy(session);
+		packet_accept(session);
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
@@ -501,7 +519,7 @@ int packet_get(struct gps_device_t *session, int waiting)
 	    sum *= -1;
 	    if (len == 0 || sum == getw(5 + len)) {
 		session->packet_type = ZODIAC_PACKET;
-		packet_copy(session);
+		packet_accept(session);
 	    } else {
 		gpsd_report(4,
 		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
