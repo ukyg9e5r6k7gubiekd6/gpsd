@@ -586,16 +586,23 @@ notfications:</para>
 <programlisting>
 server 127.127.28.0 minpoll 4 maxpoll 4
 fudge 127.127.28.0 time1 0.035 refid GPS
+
+server 127.127.28.1 minpoll 4 maxpoll 4 prefer
+fudge 127.127.28.1 refid GPS1
 </programlisting>
 
 <para>The magic pseudo-IP address 127.127.28.0 identifies unit 0 of
-the <application>ntpd</application> shared-memory driver, which is
-what <application>gpsd</application> writes to.  With this
-configuration, <application>ntpd</application> will read the timestamp
-posted by <application>gpsd</application> every 16 seconds.  The number
-after the parameter time1 is an offset in seconds.  You can use it to
-adjust out some of the fixed delays in the system.  0.035 is a good starting
-value for the Garmin.</para>
+the <application>ntpd</application> shared-memory driver; 127.127.28.1
+identifies unit 1.  Unit 0 is used for message-decoded time and unit 1
+for the (more accurate, when available) time derived from the PPS 
+synchronization pulse.</para>
+
+<para>With this configuration, <application>ntpd</application> will
+read the timestamp posted by <application>gpsd</application> every 16
+seconds and send it to unit 0.  The number after the parameter time1
+is an offset in seconds.  You can use it to adjust out some of the
+fixed delays in the system.  0.035 is a good starting value for the
+Garmin.</para>
 
 <para>After restarting ntpd, a line similar to the one below should
 appear in the output of the command "ntpq -p" (after allowing a couple
