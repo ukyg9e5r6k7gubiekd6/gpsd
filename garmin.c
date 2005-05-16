@@ -269,9 +269,6 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) rint(pvt->gps_tow);
 	    session->gpsdata.fix.time=session->gpsdata.sentence_time = time_l;
-#ifdef NTPSHM_ENABLE
-	    ntpshm_put(session->context, session->gpsdata.fix.time);
-#endif 
 	    gpsd_report(5, "time_l: %ld\n", time_l);
 
 	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
@@ -331,6 +328,10 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		session->gpsdata.fix.mode = MODE_3D;
 		break;
 	    }
+#ifdef NTPSHM_ENABLE
+	    if (session->gpsdata.fix.mode > MODE_NO_FIX)
+		ntpshm_put(session->context, session->gpsdata.fix.time);
+#endif 
 
 	    gpsd_report(4, "mode %d, status %d\n"
 			, session->gpsdata.fix.mode
@@ -366,9 +367,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    sats = &pkt->mData.sats;
 
 	    session->gpsdata.satellites_used = 0;
+	    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	    gpsd_zero_satellites(&session->gpsdata);
-	    for ( i = 0 ; i < MAXCHANNELS ; i++ )
-                session->gpsdata.used[i] = 0;
 	    for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
 		gpsd_report(4,
 			    "  Sat %d, snr: %d, elev: %d, Azmth: %d, Stat: %x\n"
@@ -395,7 +395,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		    = 99 - ((100 *(long)sats->snr) >> 16);
 		if ( sats->status & 4 ) {
 		    // used in solution?
-		    session->gpsdata.used[ session->gpsdata.satellites_used++] = sats->svid;
+		    session->gpsdata.used[session->gpsdata.satellites_used++] = sats->svid;
 		}
 		session->gpsdata.satellites++;
 		j++;

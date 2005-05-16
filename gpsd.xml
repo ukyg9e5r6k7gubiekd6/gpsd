@@ -614,9 +614,8 @@ mode.  When the SHM(0) line does not appear at all, check the system logs for
 error messages from ntpd.</para>
  
 <para>When no other reference clocks appear in the NTP configuration,
-the system clock will lock onto the GPS clock.  Because GPS clocks
-only return 0.01sec resolution, <application>ntpd</application> is
-unlikely to use this cue unless your system is off-net. When you have
+the system clock will lock onto the GPS clock.
+When you have
 previously used <application>ntpd</application>, and other reference
 clocks appear in your configuration, there may be a fixed offset
 between the GPS clock and other clocks.  The

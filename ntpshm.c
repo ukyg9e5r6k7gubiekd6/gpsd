@@ -75,6 +75,16 @@ int ntpshm_init(struct gps_context_t *context)
     context->shmTime->precision = -1;	/* initially 0.5 sec */
     context->shmTime->nsamples = 3;	/* stages of median filter */
 
+#ifdef PPS_ENABLE
+    if ((context->shmTimeP = getShmTime(SHM_UNIT+1)) == NULL)
+	return 0;
+
+    memset((void *)context->shmTimeP,0,sizeof(struct shmTime));
+    context->shmTimeP->mode = 1;
+    context->shmTimeP->precision = -1;
+    context->shmTimeP->nsamples = 3;
+#endif
+
     return 1;
 }
 
@@ -92,18 +102,6 @@ int ntpshm_put(struct gps_context_t *context, double fixtime)
     gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
-    if (shmTime->precision < -1) {	/* PPS lock? */
-	/* check if recent update received and within locking range */
-
-	if ((tv.tv_sec - shmTime->receiveTimeStampSec) < 3 &&
-	    abs((seconds-tv.tv_sec)*1000000 + microseconds-tv.tv_usec)
-		< PUT_MAX_OFFSET)
-	    return 1;			/* don't disturb */
-
-	shmTime->precision = -1;	/* lost lock */
-	gpsd_report(2, "ntpshm_put: lost PPS lock\n");
-    }
-
     shmTime->count++;
     shmTime->clockTimeStampSec = seconds;
     shmTime->clockTimeStampUSec = microseconds;
@@ -115,16 +113,25 @@ int ntpshm_put(struct gps_context_t *context, double fixtime)
     return 1;
 }
 
+#ifdef PPS_ENABLE
 /* put NTP shared memory info based on received PPS pulse */
 
 int ntpshm_pps(struct gps_context_t *context,struct timeval *tv)
 {
-    struct shmTime *shmTime;
+    struct shmTime *shmTime,*shmTimeP;
     time_t seconds;
     double offset;
 
-    if ((shmTime = context->shmTime) == NULL)
+    if ((shmTime = context->shmTime) == NULL ||
+	(shmTimeP = context->shmTimeP) == NULL)
 	return 0;
+
+    /* check if received time messages are within locking range */
+
+    if (abs((shmTime->receiveTimeStampSec-shmTime->clockTimeStampSec)*1000000 +
+	     shmTime->receiveTimeStampUSec-shmTime->clockTimeStampUSec)
+	    > PUT_MAX_OFFSET)
+	return -1;
 
     if (tv->tv_usec < PPS_MAX_OFFSET) {
 	seconds = tv->tv_sec;
@@ -134,23 +141,23 @@ int ntpshm_pps(struct gps_context_t *context,struct timeval *tv)
 	    seconds = tv->tv_sec + 1;
 	    offset = 1 - (tv->tv_usec / 1000000.0);
 	} else {
-	    shmTime->precision = -1;	/* lost lock */
+	    shmTimeP->precision = -1;	/* lost lock */
 	    gpsd_report(2, "ntpshm_pps: lost PPS lock\n");
 	    return -1;
 	}
     }
 
-    shmTime->count++;
-    shmTime->clockTimeStampSec = seconds;
-    shmTime->clockTimeStampUSec = 0;
-    shmTime->receiveTimeStampSec = tv->tv_sec;
-    shmTime->receiveTimeStampUSec = tv->tv_usec;
-    shmTime->precision = offset? ceil(log(offset) / M_LN2) : -20;
-    shmTime->count++;
-    shmTime->valid = 1;
+    shmTimeP->count++;
+    shmTimeP->clockTimeStampSec = seconds;
+    shmTimeP->clockTimeStampUSec = 0;
+    shmTimeP->receiveTimeStampSec = tv->tv_sec;
+    shmTimeP->receiveTimeStampUSec = tv->tv_usec;
+    shmTimeP->precision = offset? ceil(log(offset) / M_LN2) : -20;
+    shmTimeP->count++;
+    shmTimeP->valid = 1;
 
-    gpsd_report(5, "ntpshm_pps: precision %d\n",shmTime->precision);
+    gpsd_report(5, "ntpshm_pps: precision %d\n",shmTimeP->precision);
     return 1;
 }
-
+#endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */

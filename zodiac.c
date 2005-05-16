@@ -131,6 +131,11 @@ static int zodiac_send_rtcm(struct gps_device_t *session,
 
 static int handle1000(struct gps_device_t *session)
 {
+    if (session->gpsdata.status)
+	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
+    else
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+
     session->gpsdata.nmea_date.tm_mday = getw(19);
     session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
     session->gpsdata.nmea_date.tm_year = getw(21) - 1900;
@@ -141,7 +146,8 @@ static int handle1000(struct gps_device_t *session)
     session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
-    ntpshm_put(session->context, session->gpsdata.sentence_time + 1.1);
+    if (session->gpsdata.fix.mode > MODE_NO_FIX)
+	ntpshm_put(session->context, session->gpsdata.fix.time + 1.1);
 #endif
     session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
@@ -156,11 +162,6 @@ static int handle1000(struct gps_device_t *session)
     session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
     session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
     session->gpsdata.satellites_used = getw(12);
-
-    if (session->gpsdata.status)
-	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
-    else
-	session->gpsdata.fix.mode = MODE_NO_FIX;
 
 #if 0
     gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
@@ -191,13 +192,12 @@ static int handle1000(struct gps_device_t *session)
 
 static int handle1002(struct gps_device_t *session)
 {
-    int i, j;
+    int i, j, prn;
 
-    for (j = 0; j < MAXCHANNELS; j++)
-	session->gpsdata.used[j] = 0;
     session->gpsdata.satellites_used = 0;
+    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     for (i = 0; i < MAXCHANNELS; i++) {
-	session->Zs[i] = getw(16 + (3 * i));
+	session->Zs[i] = prn = getw(16 + (3 * i));
 	session->Zv[i] = (getw(17 + (3 * i)) & 0xf);
 #if 0
 	gpsd_report(1, "Sat%02d:", i);
@@ -205,13 +205,13 @@ static int handle1002(struct gps_device_t *session)
 	gpsd_report(1, " eph:%d", (getw(15 + (3 * i)) & 2) ? 1 : 0);
 	gpsd_report(1, " val:%d", (getw(15 + (3 * i)) & 4) ? 1 : 0);
 	gpsd_report(1, " dgps:%d", (getw(15 + (3 * i)) & 8) ? 1 : 0);
-	gpsd_report(1, " PRN:%d", getw(16 + (3 * i)));
+	gpsd_report(1, " PRN:%d", prn);
 	gpsd_report(1, " C/No:%d\n", getw(17 + (3 * i)));
 #endif
 	if (getw(15 + (3 * i)) & 1)
-	    session->gpsdata.used[session->gpsdata.satellites_used++] = i;
+	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
 	for (j = 0; j < MAXCHANNELS; j++) {
-	    if (session->gpsdata.PRN[j] != getw(16 + (3 * i)))
+	    if (session->gpsdata.PRN[j] != prn)
 		continue;
 	    session->gpsdata.ss[j] = getw(17 + (3 * i));
 	    break;

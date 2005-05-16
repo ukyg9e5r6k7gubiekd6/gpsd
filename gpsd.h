@@ -29,6 +29,9 @@ struct gps_context_t {
     int leap_seconds;
 #ifdef NTPSHM_ENABLE
     struct shmTime *shmTime;
+# ifdef PPS_ENABLE
+    struct shmTime *shmTimeP;
+# endif /* NTPSHM_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
 
@@ -121,7 +124,6 @@ struct gps_device_t {
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 1? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 1? */
-#define TIME_SEEN_PPS	0x10	/* Seen PPS signal? */
 #endif /* NTPSHM_ENABLE */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 

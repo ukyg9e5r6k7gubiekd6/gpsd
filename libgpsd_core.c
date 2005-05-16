@@ -481,7 +481,7 @@ int gpsd_ppsmonitor(struct gps_device_t *session)
 	plen = (tv.tv_sec-pulse[c].tv_sec)*1000000+tv.tv_usec-pulse[c].tv_usec;
 	pa = (tv.tv_sec-pulse[!c].tv_sec)*1000000+tv.tv_usec-pulse[!c].tv_usec;
 	
-	if (plen > 999000 && plen < 1001000 && pa > 800000)
+	if (plen > 999000 && plen < 1001000 && pa > 800000 && session->gpsdata.fix.mode > MODE_NO_FIX)
 	    ntpshm_pps(session->context, &tv);
 
 	pulse[c] = tv;

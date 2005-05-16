@@ -119,14 +119,14 @@ struct gps_data_t {
 
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
-    int used[MAXCHANNELS];	/* Used in last fix? */
+    int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     double pdop, hdop, vdop;	/* Dilution of precision */
 
     /* redundant with the estimate elments in the fix structure */
     double epe;  /* estimated spherical position error, 1 sigma (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
-    int satellites;	/* # of satellites in view */
+    int satellites;		/* # of satellites in view */
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */

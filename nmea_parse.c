@@ -313,15 +313,12 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
     out->pdop = atof(field[15]);
     out->hdop = atof(field[16]);
     out->vdop = atof(field[17]);
-    for (i = 0; i < MAXCHANNELS; i++)
-	out->used[i] = 0;
     out->satellites_used = 0;
+    memset(out->used,0,sizeof(out->used));
     for (i = 0; i < MAXCHANNELS; i++) {
         int prn = atoi(field[i+3]);
-        if (prn > 0) {
-           out->used[out->satellites_used] = prn;
-           out->satellites_used++;
-       }
+        if (prn > 0)
+	    out->used[out->satellites_used++] = prn;
     }
     mask |= HDOP_SET | VDOP_SET | PDOP_SET;
 
