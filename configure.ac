@@ -63,6 +63,10 @@ AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
 
+dnl Check for pthread, needed by the callback
+AC_CHECK_LIB(pthread, main, LIBPTHREAD="-lpthread")
+AC_SUBST(LIBPTHREAD)
+
 AH_VERBATIM([_GNU_SOURCE],
           [/* Macro for declaring function arguments unused. */
 #if defined(__GNUC__)
