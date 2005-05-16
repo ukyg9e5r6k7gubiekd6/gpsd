@@ -502,7 +502,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    sprintf(phrase, ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
 	    break;
 	case 'M':
-	    if (!assign_channel(whoami) && whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN)
+	    if (!assign_channel(whoami) && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
 		strcpy(phrase, ",M=?");
 	    else
 		sprintf(phrase, ",M=%d", whoami->device->gpsdata.fix.mode);
