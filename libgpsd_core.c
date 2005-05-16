@@ -345,7 +345,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
     gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	sprintf(bufp,
-		"$GPGGA,%02d%02d%02d,%.4f,%c,%.4f,%c,%d,%02d,%s,%.1f,%c,",
+		"$GPGGA,%02d%02d%02d,%07.4f,%c,%08.4f,%c,%d,%02d,%s,%.1f,%c,",
 		tm.tm_hour,
 		tm.tm_min,
 		tm.tm_sec,
@@ -373,7 +373,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
-	    "$GPRMC,%02d%02d%02d,%c,%07.4f,%c,%07.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
+	    "$GPRMC,%02d%02d%02d,%c,%07.4f,%c,%08.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    tm.tm_hour, 
 	    tm.tm_min, 
 	    tm.tm_sec,
