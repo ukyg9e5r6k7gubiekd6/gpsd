@@ -41,6 +41,10 @@ static int nmea_parse_input(struct gps_device_t *session)
 #endif /* NON_NMEA_ENABLE */
 	    gpsd_report(1, "unknown sentence: \"%s\"\n", session->outbuffer);
 	}
+#ifdef NTPSHM_ENABLE
+	if (st & TIME_SET)
+	    ntpshm_put(session->context, session->gpsdata.fix.time);
+#endif
 
 	/* also copy the sentence up to clients in raw mode */
 	gpsd_raw_hook(session, session->outbuffer);
