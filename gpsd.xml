@@ -41,8 +41,8 @@ a TCP/IP port (2947 by default), waiting for applications to request
 location information from GPS devices attached to the host machine.
 Each GPS is expected to be direct-connected to the host via a USB or
 RS232C serial port.  The port may be specified to gpsd at startup, or
-it may be set via a command shipped down the client socket (e.g. by a
-USB hotplug script). Given a GPS device by either means,
+it may be set via a command shipped down a local control socket
+(e.g. by a USB hotplug script). Given a GPS device by either means,
 <application>gpsd</application> discovers the correct port speed and
 protocol for it.</para>
 
@@ -64,10 +64,11 @@ See <xref linkend='accuracy'/> for discussion.</para>
 <varlistentry>
 <term>-f</term>
 <listitem>
-<para>Set a GPS device name.  This option is deprecated and may
-be removed in a future version.  Each command-line argument will be 
-treated as a GPS device to be probed; that is the preferred way
-of specifying GPS ports.</para>
+<para>Set a GPS device name.  This option is deprecated and may be
+removed in a future version.  Each command-line argument will be
+treated as a device to be probed for the presence of a GPS; that,
+rather than the -f option, is the preferred way of specifying GPS
+devices at startup.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -138,16 +139,17 @@ to standard error.</para>
 
 <para>Internally, the daemon maintains a device list holding the
 pathnames of GPSes known to the daemon. Initially, this list is the
-list of device-name arguments specified on the command line.  That list
-may be empty, in which case the daemon will have no devices on its
-search list until they are added by a control-socket command
-(described below).  Daemon startup will abort with an error if
-neither any devices nor a control socket is specified.</para>
+list of device-name arguments specified on the command line.  That
+list may be empty, in which case the daemon will have no devices on
+its search list until they are added by a control-socket command (see
+<xref linkend='devices'/> for details in this).  Daemon startup will
+abort with an error if neither any devices nor a control socket are
+specified.</para>
 
 <para>At any given time, each client will be listening to only one of
 the GPSes on the device list.  By default, a client's device is the
 one that most recently shipped information to the daemon at the time
-the client first requests GPS information (that is, issues any comand
+the client first requests GPS information (that is, issues any command
 other than F, K, W=0 or R=0).</para>
 
 <para>The request protocol for <application>gpsd</application> clients
@@ -502,9 +504,26 @@ in.  When it is properly installed along with hotplug notifier
 scripts feeding it device-add commands, <application>gpsd</application> 
 should require no configuration or user action to find devices.</para>
 
+<para>The recommended mode for clients is watcher mode.  In watcher
+mode <application>gpsd</application> ships a line of data to the
+client each time the GPS gets either a fix update or a satellite
+picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
+response.  Additionally, watching clients get notifications in the
+form X=0 or X=%f when the online/offline status of the GPS
+changes.</para>
+
+<para>Sending SIGHUP to a running <application>gpsd</application>
+forces it to close the GPS and all client connections.  It will then
+attempt to reconnect to the GPS and resume listening for client
+connections.  This may be useful if your GPS enters a wedged or
+confused state but can be soft-reset by pulling down DTR.</para>
+
+</refsect1>
+<refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title> 
+
 <para><application>gpsd</application> maintains an internal list of
 GPS devices.  If you specify an -f option, the list is initialized
-with that pathname as its only member; otherwuse the list starts
+with that pathname as its only member; otherwise the list starts
 empty.  Commands to add and remove GPS device paths from the daemon's
 device list must be written to a local Unix-domain socket which will
 be accessible only to programs running as root.  This control socket
@@ -521,21 +540,13 @@ list. send "-/dev/foo\n". Your client may await a response, which
 will be a line beginning with either "OK" or "ERROR".  An ERROR reponse
 to an add command means the device did not emit data recognizable as
 GPS packets; an ERROR response to a remove command means the specified
-device was not in <application>gpsd</application>'s device list,</para>
+device was not in <application>gpsd</application>'s device list.</para>
 
-<para>The recommended mode for clients is watcher mode.  In watcher
-mode <application>gpsd</application> ships a line of data to the
-client each time the GPS gets either a fix update or a satellite
-picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
-response.  Additionally, watching clients get notifications in the
-form X=0 or X=%f when the online/offline status of the GPS
-changes.</para>
-
-<para>Sending SIGHUP to a running <application>gpsd</application>
-forces it to close the GPS and all client connections.  It will then
-attempt to reconnect to the GPS and resume listening for client
-connections.  This may be useful if your GPS enters a wedged or
-confused state but can be soft-reset by pulling down DTR.</para>
+<para>The control socket is intended for use by hotplug scripts and 
+other device-discovery services.  This control channel is separate 
+from the public <application>gpsd</application> service port, and only
+locally accessible, in order to prevent remote denial-of-service and
+spoofing attacks.</para>
 
 </refsect1>
 <refsect1 id='accuracy'><title>ACCURACY</title> 
