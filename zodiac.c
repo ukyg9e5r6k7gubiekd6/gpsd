@@ -131,11 +131,13 @@ static int zodiac_send_rtcm(struct gps_device_t *session,
 
 static int handle1000(struct gps_device_t *session)
 {
+    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
     if (session->gpsdata.status)
 	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->gpsdata.fix.mode = MODE_NO_FIX;
 
+    session->gpsdata.satellites_used = getw(12);
     session->gpsdata.nmea_date.tm_mday = getw(19);
     session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
     session->gpsdata.nmea_date.tm_year = getw(21) - 1900;
@@ -149,19 +151,18 @@ static int handle1000(struct gps_device_t *session)
     if (session->gpsdata.fix.mode > MODE_NO_FIX)
 	ntpshm_put(session->context, session->gpsdata.fix.time + 1.1);
 #endif
-    session->gpsdata.fix.latitude  = getl(27) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.longitude = getl(29) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.speed     = getl(34) * 1e-2 * MPS_TO_KNOTS;
-    session->gpsdata.fix.altitude  = getl(31) * 1e-2;
-    session->gpsdata.fix.separation = getw(33) * 1e-2;        /* meters */
-    session->gpsdata.fix.climb     = getl(38) * 1e-2;
+    session->gpsdata.fix.latitude  = ((long)getl(27)) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.longitude = ((long)getl(29)) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.altitude  = ((long)getl(31)) * 1e-2;
+    session->gpsdata.fix.separation = ((short)getw(33)) * 1e-2;
+    session->gpsdata.fix.speed     = getl(34) * 1e-2;
+    session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-3;
+    session->mag_var               = ((short)getw(37)) * RAD_2_DEG * 1e-4;
+    session->gpsdata.fix.climb     = ((short)getw(38)) * 1e-2;
     session->gpsdata.fix.eph       = getl(40) * 1e-2;
     session->gpsdata.fix.epv       = getl(42) * 1e-2;
-    session->gpsdata.fix.eps       = getl(46) * 1e-2;
-    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
-    session->mag_var               = getw(37) * RAD_2_DEG * 1e-4;
-    session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-4;
-    session->gpsdata.satellites_used = getw(12);
+    session->gpsdata.fix.ept       = getl(44) * 1e-2;
+    session->gpsdata.fix.eps       = getw(46) * 1e-2;
 
 #if 0
     gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
@@ -224,16 +225,18 @@ static int handle1003(struct gps_device_t *session)
 {
     int i;
 
-    session->gpsdata.pdop = getw(10);
-    session->gpsdata.hdop = getw(11);
-    session->gpsdata.vdop = getw(12);
+    session->gpsdata.pdop = getw(10) * 1e-2;
+    session->gpsdata.hdop = getw(11) * 1e-2;
+    session->gpsdata.vdop = getw(12) * 1e-2;
     session->gpsdata.satellites = getw(14);
 
     for (i = 0; i < MAXCHANNELS; i++) {
 	if (i < session->gpsdata.satellites) {
 	    session->gpsdata.PRN[i] = getw(15 + (3 * i));
-	    session->gpsdata.azimuth[i] = getw(16 + (3 * i)) * RAD_2_DEG * 1e-4;
-	    session->gpsdata.elevation[i] = getw(17 + (3 * i)) * RAD_2_DEG * 1e-4;
+	    session->gpsdata.azimuth[i] = ((short)getw(16 + (3 * i))) * RAD_2_DEG * 1e-4;
+	    if (session->gpsdata.azimuth[i] < 0)
+		session->gpsdata.azimuth[i] += 360;
+	    session->gpsdata.elevation[i] = ((short)getw(17 + (3 * i))) * RAD_2_DEG * 1e-4;
 #if 0
 	    gpsd_report(1, "Sat%02d:  PRN:%d az:%d el:%d\n", 
 			i, getw(15+(3 * i)),getw(16+(3 * i)),getw(17+(3 * i)));
