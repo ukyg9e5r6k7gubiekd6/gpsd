@@ -137,11 +137,18 @@ to standard error.</para>
 </variablelist>
 
 <para>Internally, the daemon maintains a device list holding the
-pathnames of GPSes known to the daemon. At any given time, each client
-will be listening to only one of these.  By default, a client's device
-is the one that most recently shipped information to the daemon at the
-time the client first requests GPS information (that is, issues any
-comand other than F, K, W=0 or R=0).</para>
+pathnames of GPSes known to the daemon. Initially, this list is the
+list of device-name arguments specified on the command line.  That list
+may be empty, in which case the daemon will have no devices on its
+search list until they are added by a control-socket command
+(described below).  Daemon startup will abort with an error if
+neither any devices nor a control socket is specified.</para>
+
+<para>At any given time, each client will be listening to only one of
+the GPSes on the device list.  By default, a client's device is the
+one that most recently shipped information to the daemon at the time
+the client first requests GPS information (that is, issues any comand
+other than F, K, W=0 or R=0).</para>
 
 <para>The request protocol for <application>gpsd</application> clients
 is very simple.  Each request normally consists of a single ASCII
@@ -358,8 +365,6 @@ knots.</para></listitem>
 </varlistentry>
 
 </variablelist>
-
-<para>Note: this command is experimental and still under development.</para>
 </listitem>
 </varlistentry>
 

@@ -843,6 +843,11 @@ int main(int argc, char *argv[])
 	}
     }
 
+    if (!control_socket && optind >= argc) {
+	gpsd_report(0, "can't run with neither control socket nor devices\n");
+	exit(1);
+    }
+
     /*
      * Control socket has to be created before we go background in order to
      * avoid a race condition in which hotplug scripts can try oprning
