@@ -796,18 +796,17 @@ int main(int argc, char *argv[])
     static int st, changed, dsock = -1, csock = -1, nowait = 0;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
-    static char *device_name = NULL;
     static char *control_socket = NULL;
     static struct gps_device_t *device, **channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
-    int option, msock, cfd, dfd, go_background = 1;
+    int i, option, msock, cfd, dfd, go_background = 1;
     struct passwd *pw;
     struct stat stb;
     extern char *optarg;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:d:f:hNnp:P:v")) != -1) {
+    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:v")) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
@@ -829,7 +828,7 @@ int main(int argc, char *argv[])
 	    break;
 	case 'f':
 	case 'p':
-	    device_name = optarg;
+	    /* skip this option, treat following as argument */ 
 	    break;
 	case 'P':
 	    pid_file = optarg;
@@ -895,9 +894,10 @@ int main(int argc, char *argv[])
     ntpshm_init(&context);
 #endif /* defined(SHM_H) && defined(IPC_H) */
 
-    /* make default device accessible even after we drop privileges */
-    if (device_name && stat(device_name, &stb) == 0)
-	chmod(device_name, stb.st_mode|S_IRGRP|S_IWGRP);
+    /* make default devices accessible even after we drop privileges */
+    for (i = optind; i < argc; i++) 
+	if (stat(argv[i], &stb) == 0)
+	    chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
 
     /*
      * Drop privileges.  Up to now we've been running as root.  Instead,
@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
      * compromises in the code.  It requires that all GPS devices have
      * their group read/write permissions set.
      */
-    if ((device_name && stat(device_name, &stb)==0) || stat(PROTO_TTY, &stb)==0) {
+    if ((optind<argc && stat(argv[optind], &stb)==0) || stat(PROTO_TTY, &stb)==0) {
 	gpsd_report(2, "changing to group %d\n", stb.st_gid);
 	if (setgid(stb.st_gid))
 	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
@@ -947,13 +947,11 @@ int main(int argc, char *argv[])
     if (time(NULL) < START_SUBFRAME)
 	context.valid |= LEAP_SECOND_VALID;
 
-    if (device_name) { 
-	device = open_device(device_name, nowait);
+    for (i = optind; i < argc; i++) { 
+	device = open_device(argv[i], nowait);
 	if (!device) {
-	    gpsd_report(0, "exiting - GPS device nonexistent or can't be read\n");
-	    exit(2);
-	}
-	if (dsock >= 0)
+	    gpsd_report(0, "GPS device %s nonexistent or can't be read\n", argv[i]);
+	} else if (dsock >= 0)
 	    device->dsock = dsock;
     }
 

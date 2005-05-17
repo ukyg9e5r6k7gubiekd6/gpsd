@@ -28,6 +28,9 @@
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-v </arg>
+      <arg rep='repeat'>
+           <group><replaceable>GPS-devicename</replaceable></group>
+      </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -61,7 +64,10 @@ See <xref linkend='accuracy'/> for discussion.</para>
 <varlistentry>
 <term>-f</term>
 <listitem>
-<para>Set a GPS device name.</para>
+<para>Set a GPS device name.  This option is deprecated and may
+be removed in a future version.  Each command-line argument will be 
+treated as a GPS device to be probed; that is the preferred way
+of specifying GPS ports.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
