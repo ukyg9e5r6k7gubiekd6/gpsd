@@ -47,20 +47,23 @@ support the feature) the locations of accessible satellites.</para>
 
 <para><application>xgps</application> accepts an -h option as for
 <application>gpsd</application>, or a -v option to dump the package
-version and exit. An optional argument may specify an
-server to get data from; a colon-separated suffix is taken as a port
-number.  The misfeature of previous versions that allowed it to
-direct-connect to the serial device has been removed.</para>
+version and exit.</para>
 
-<para>The -speedunits option can be used to set the speed units for
-display; follow the keyword with knots for nautical miles per hour,
-kph for kilometres per hour, or mph for miles per hour.  The default
-is miles per hour.  This option can also be set as the X resource 
-'speedunits'.</para>
+<para>An optional argument may specify a server to get data from; a
+colon-separated suffix is taken as a port number. If there is a second
+colon-separated suffix, that is taken as a device name to be handed
+to the daemon in an F= command.</para>
 
-<para>The -altunits option can be used to set the altitude units for
-display; follow the keyword with 'meters' or 'feet'.  The default
-is feet.  This option can also be set as the X resource 'altunits'.</para>
+<para>The <option>-speedunits</option> option can be used to set the
+speed units for display; follow the keyword with knots for nautical
+miles per hour, kph for kilometres per hour, or mph for miles per
+hour.  The default is miles per hour.  This option can also be set as
+the X resource 'speedunits'.</para>
+
+<para>The <option>-altunits</option> option can be used to set the
+altitude units for display; follow the keyword with 'meters' or
+'feet'.  The default is feet.  This option can also be set as the X
+resource 'altunits'.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>

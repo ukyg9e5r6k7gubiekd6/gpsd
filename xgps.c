@@ -361,7 +361,7 @@ static char *get_resource(Widget w, char *name, char *default_value)
 int main(int argc, char *argv[])
 {
     int option;
-    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    char *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *su, *au;
     char *err_str = NULL;
 
@@ -395,16 +395,21 @@ altunits_ok:;
 	    printf("xgps %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage:  xgps [-?hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port]]\n", stderr);
+	    fputs("usage:  xgps [-?hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
     if (optind < argc) {
 	server = strdup(argv[optind]);
-	colon = strchr(server, ':');
-	if (colon != NULL) {
-	    server[colon - server] = '\0';
-	    port = colon + 1;
+	colon1 = strchr(server, ':');
+	if (colon1 != NULL) {
+	    server[colon1 - server] = '\0';
+	    port = strdup(colon1 + 1);
+	    colon2 = strchr(server, ':');
+	    if (colon2 != NULL) {
+		port[colon2 - port] = '\0';
+		device = colon2 + 1;
+	    }
 	}
     }
 
@@ -430,6 +435,15 @@ altunits_ok:;
     timer = time(NULL);
 
     gps_set_raw_hook(gpsdata, update_panel);
+
+    if (device) {
+	char *channelcmd = (char *)malloc(strlen(device)+3);
+
+	strcpy(channelcmd, "F=");
+	strcpy(channelcmd+2, device);
+	gps_query(channelcmd);
+    }
+	
     gps_query(gpsdata, "w+x\n");
 
     XtAppAddInput(app, gpsdata->gps_fd, 
