@@ -441,7 +441,7 @@ altunits_ok:;
 
 	strcpy(channelcmd, "F=");
 	strcpy(channelcmd+2, device);
-	gps_query(channelcmd);
+	gps_query(gpsdata, channelcmd);
     }
 	
     gps_query(gpsdata, "w+x\n");
