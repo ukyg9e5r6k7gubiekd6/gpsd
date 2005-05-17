@@ -43,7 +43,7 @@ GPSD_PORT = 2947
 
 class gpstimings:
     def __init__(self):
-        self.tag = ""
+        self.sentence_tag = ""
         self.sentence_length = 0
         self.sentence_time = 0.0
         self.d_xmit_time = 0.0
@@ -59,7 +59,7 @@ class gpstimings:
         else:
             return self.d_recv_time + self.d_xmit_time
     def collect(self, tag, length, sentence_time, xmit_time, recv_time, decode_time, poll_time, emit_time):
-        self.tag = tag
+        self.sentence_tag = tag
         self.sentence_length = int(length)
         self.sentence_time = float(sentence_time)
         self.d_xmit_time = float(xmit_time)
@@ -69,7 +69,7 @@ class gpstimings:
         self.emit_time = float(emit_time)
     def __str__(self):
             return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
-              % (timings.tag,
+              % (timings.sentence_tag,
                  timings.sentence_length,
                  timings.sentence_time,
                  timings.d_xmit_time, 
@@ -282,28 +282,29 @@ class gps(gpsdata):
                 if fields[0] == '?':
                     self.fix.mode = MODE_NO_FIX
                 else:
-                    self.fix.time = float(fields[0])
-                    self.fix.ept = float(fields[1])
-                    self.fix.latitude = float(fields[2])
-                    self.fix.longitude = float(fields[3])
+                    self.timings.sentence_tag = fields[0]
+                    self.fix.time = float(fields[1])
+                    self.fix.ept = float(fields[2])
+                    self.fix.latitude = float(fields[3])
+                    self.fix.longitude = float(fields[4])
                     def default(i, d):
                         if fields[i] == '?':
                             return d
                         else:
                             return float(fields[i])
-                    self.fix.altitude = default(4, ALTITUDE_NOT_VALID)
+                    self.fix.altitude = default(5, ALTITUDE_NOT_VALID)
                     if self.fix.altitude == ALTITUDE_NOT_VALID:
                         self.fix.mode = MODE_2D
                     else:
                         self.fix.mode = MODE_3D
-                    self.fix.eph = default(5, 0.0)
-                    self.fix.epv = default(6, 0.0)
-                    self.fix.track = default(7, TRACK_NOT_VALID)
-                    self.fix.speed = default(8, 0.0)
-                    self.fix.climb = default(9, 0.0)
-                    self.fix.epd = default(10, 0.0)
-                    self.fix.eps = default(11, 0.0)
-                    self.fix.epc = default(12, 0.0)
+                    self.fix.eph = default(6, 0.0)
+                    self.fix.epv = default(7, 0.0)
+                    self.fix.track = default(8, TRACK_NOT_VALID)
+                    self.fix.speed = default(9, 0.0)
+                    self.fix.climb = default(10, 0.0)
+                    self.fix.epd = default(11, 0.0)
+                    self.fix.eps = default(12, 0.0)
+                    self.fix.epc = default(13, 0.0)
                     self.valid |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
                     if self.fix.mode == MODE_3D:
                         self.valid |= ALTITUDE_SET | CLIMB_SET
