@@ -566,6 +566,17 @@ experimental feature, currently only working with SiRF-II and Garmin binary
 mode.  Making it work with other GPSes that report subsecond time resolution
 may come later.</para>
 
+<para>Note that deriving time from messages received from the GPS
+receiver is not as accurate as you might expect.  Messages are often
+delayed in the receiver and on the link by several hundred
+milliseconds, and this delay is not constant.  Attempts have been made
+to correct the time based on typical delays observed, but for really
+correct time you need to use the PPS signal from the receiver, when
+available.  To do this, connect the PPS signal to the DCD input of the
+serial port and build <application>gpsd</application> with
+"./configure --enable-pps" to enable the PPS code.
+</para>
+
 <para>To use the time information, you first need to install and
 configure ntp as usual.  The package manager and system
 administration tools of the distribution you use may provide some
@@ -594,8 +605,10 @@ fudge 127.127.28.1 refid GPS1
 <para>The magic pseudo-IP address 127.127.28.0 identifies unit 0 of
 the <application>ntpd</application> shared-memory driver; 127.127.28.1
 identifies unit 1.  Unit 0 is used for message-decoded time and unit 1
-for the (more accurate, when available) time derived from the PPS 
-synchronization pulse.</para>
+for the (more accurate, when available) time derived from the PPS
+synchronization pulse.  Splitting these notifications allows
+<application>ntpd</application> to use its normal heuristics to weight
+them.</para>
 
 <para>With this configuration, <application>ntpd</application> will
 read the timestamp posted by <application>gpsd</application> every 16

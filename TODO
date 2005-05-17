@@ -1,6 +1,16 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.
 
+** Allow multiple devices to be specified on the gpsd command line
+
+Probably the right thing to do is abolish the -f option and treat
+arguments as device names to be checked.
+
+** Allow xgps and gpsspeed to specify a device to listen to
+
+So we can have xgps instances for several devices running off the
+same daemon.
+
 ** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
