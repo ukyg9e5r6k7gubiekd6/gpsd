@@ -531,6 +531,28 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	return 0;
 
     case 0x34:		/* PPS Time */
+	/*
+	 * Carl Carter from SiRF writes: "We do not output on the
+	 * second (unless you are using message ID 52).  We make
+	 * measurements in the receiver in time with an internal
+	 * counter that is not slaved to GPS time, so the measurements
+	 * are made at a time that wanders around the second.  Then,
+	 * after the measurements are made (all normalized to the same
+	 * point in time) we dispatch the navigation software to make
+	 * a solution, and that solution comes out some 200 to 300 ms
+	 * after the measurement time.  So you may get a message at
+	 * 700 ms after the second that uses measurements time tagged
+	 * 450 ms after the second.  And if some other task jumps up
+	 * and delays things, that message may not come out until 900
+	 * ms after the second.  Things can get out of sync to the
+	 * point that if you try to resolve the GPS time of our 1 PPS
+	 * pulses using the navigation messages, you will find it
+	 * impossible to be consistent.  That is why I added message
+	 * ID 52 to our system -- it is tied to the creation of the 1
+	 * PPS and always comes out right around the top of the
+	 * second."
+	 */
+
 	mask = 0;
 	gpsd_report(4, "PPS 0x34: Status = 0x%02x\n", getb(14));
 	if ((getb(14) & 0x07) == 0x07) {	/* valid UTC time? */
