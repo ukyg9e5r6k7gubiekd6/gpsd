@@ -101,39 +101,62 @@ static WINDOW *mid19win, *mid27win, *cmdwin, *debugwin;
 #define SIRF_PACKET	1
 #define NMEA_PACKET	2
 
+static int get_speed(struct termios* ttyctl)
+{
+    int code = cfgetospeed(ttyctl);
+    switch (code) {
+    case B0:     return(0);
+    case B300:   return(300);
+    case B1200:  return(1200);
+    case B2400:  return(2400);
+    case B4800:  return(4800);
+    case B9600:  return(9600);
+    case B19200: return(19200);
+    case B38400: return(38400);
+    case B57600: return(57600);
+    default: return(115200);
+    }
+}
+
 static int set_speed(unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate, count, state;
     int st;
     unsigned char	c;
 
-    if (speed < 300)
-	rate = 0;
-    else if (speed < 1200)
-      rate =  B300;
-    else if (speed < 2400)
-      rate =  B1200;
-    else if (speed < 4800)
-      rate =  B2400;
-    else if (speed < 9600)
-      rate =  B4800;
-    else if (speed < 19200)
-      rate =  B9600;
-    else if (speed < 38400)
-      rate =  B19200;
-    else if (speed < 57600)
-      rate =  B38400;
-    else
-      rate =  B57600;
-
     tcflush(LineFd, TCIOFLUSH);	/* toss stale data */
-    cfsetispeed(&ttyset, (speed_t)rate);
-    cfsetospeed(&ttyset, (speed_t)rate);
+
+    if (speed) {
+	if (speed < 300)
+	    rate = 0;
+	else if (speed < 1200)
+	  rate =  B300;
+	else if (speed < 2400)
+	  rate =  B1200;
+	else if (speed < 4800)
+	  rate =  B2400;
+	else if (speed < 9600)
+	  rate =  B4800;
+	else if (speed < 19200)
+	  rate =  B9600;
+	else if (speed < 38400)
+	  rate =  B19200;
+	else if (speed < 57600)
+	  rate =  B38400;
+	else
+	  rate =  B57600;
+
+	cfsetispeed(&ttyset, (speed_t)rate);
+	cfsetospeed(&ttyset, (speed_t)rate);
+    }
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
     if (tcsetattr(LineFd, TCSANOW, &ttyset) != 0)
 	return NO_PACKET;
     tcflush(LineFd, TCIOFLUSH);
+
+    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
+	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */
     state = 0;
@@ -211,7 +234,7 @@ static int nmea_send(int fd, const char *fmt, ... )
     }
 }
 
-static unsigned int *ip, rates[] = {4800, 9600, 19200, 38400, 57600};
+static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
 static int hunt_open(int *pstopbits)
 {
@@ -230,10 +253,8 @@ static int hunt_open(int *pstopbits)
 	*pstopbits = stopbits;
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
 	{
-	    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
-		    *ip, 9-stopbits, stopbits);
 	    if ((st = set_speed(*ip, stopbits)) == SIRF_PACKET)
-		return *ip;
+		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		fprintf(stderr, "Switching to SiRF mode...\n");
 		nmea_send(LineFd,"$PSRF100,0,%d,8,1,0", *ip);
