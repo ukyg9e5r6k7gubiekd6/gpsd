@@ -213,9 +213,9 @@ fi
 
 dnl check for PPS time syncing support
 AC_ARG_ENABLE(pps,
-  AC_HELP_STRING([--enable-pps],
-                 [enable PPS time syncing support]),
-  [ac_pps=$enableval], [ac_pps=no])
+  AC_HELP_STRING([--disable-pps],
+                 [disable PPS time syncing support]),
+  [ac_pps=$enableval], [ac_pps=yes])
 AC_MSG_CHECKING([for PPS time syncing support])
 if test x"$ac_pps" = "xyes"; then
     AC_MSG_RESULT([yes])

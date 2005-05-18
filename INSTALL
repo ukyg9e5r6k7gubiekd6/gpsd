@@ -79,3 +79,6 @@ line to the table.  Directions are included on that page.
 We can also use updates of the latest version number known to work with
 hardware already supported.
 
+9. Note for small embedded systems and those without threading.  It is
+possible to build gpsd without thread support if you configure with
+--disable-pps.  You'll lose support for updating the clock from PPS pulses.

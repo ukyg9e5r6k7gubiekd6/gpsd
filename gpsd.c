@@ -61,7 +61,14 @@
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
-static struct gps_context_t context = {0, LEAP_SECONDS, NULL};
+static struct gps_context_t context = {0, LEAP_SECONDS, 
+#ifdef NTPSHM_ENABLE
+				       NULL,
+#ifdef PPS_ENABLE
+				       NULL,
+#endif /* NTPSHM_ENABLE */
+#endif /* NTPSHM_ENABLE */
+};
 
 static void onsig(int sig)
 {

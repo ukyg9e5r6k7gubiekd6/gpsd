@@ -175,7 +175,6 @@ extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern int gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);
-extern int gpsd_ppsmonitor(struct gps_device_t *);
 
 /* caller should supply this */
 void gpsd_report(int, const char *, ...);

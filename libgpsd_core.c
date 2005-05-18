@@ -86,12 +86,43 @@ void gpsd_deactivate(struct gps_device_t *session)
 	session->device_type->wrapup(session);
 }
 
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+static void *gpsd_ppsmonitor(void *arg)
+{
+    struct gps_device_t *session = (struct gps_device_t *)arg;
+    int high,plen,pa;
+    struct timeval tv;
+    struct timeval pulse[2] = {{0,0},{0,0}};
+
+    /* wait for status change on the device's carrier-detect line */
+    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
+	gettimeofday(&tv,NULL);
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &high) != 0)
+	    break;
+
+        high = (high & TIOCM_CAR) != 0;
+	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
+		    session->gpsdata.gps_device, high);
+#define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
+	plen = timediff(tv, pulse[high]);
+	pa = timediff(tv, pulse[!high]);
+#undef timediff
+	if (plen > 999000 && plen < 1001000 && pa > 800000 && session->gpsdata.fix.mode > MODE_NO_FIX)
+	    ntpshm_pps(session->context, &tv);
+
+	pulse[high] = tv;
+    }
+
+    return NULL;
+}
+#endif /* PPS_ENABLE */
+
 int gpsd_activate(struct gps_device_t *session)
 /* acquire a connection to the GPS device */
 {
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     pthread_t pt;
-#endif
+#endif /* PPS_ENABLE */
 
     if (gpsd_open(session) < 0)
 	return -1;
@@ -121,8 +152,8 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* BINARY_ENABLE */
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-	pthread_create(&pt,NULL,gpsd_ppsmonitor,(void*)session);
-#endif
+	pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
+#endif /* PPS_ENABLE */
 
 	return session->gpsdata.gps_fd;
     }
@@ -464,32 +495,3 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 }
 
 #endif /* BINARY_ENABLE */
-
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-int gpsd_ppsmonitor(struct gps_device_t *session)
-{
-    int high,plen,pa;
-    struct timeval tv;
-    struct timeval pulse[2] = {{0,0},{0,0}};
-
-    /* wait for status change on the device's carrier-detect line */
-    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
-	gettimeofday(&tv,NULL);
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &high) != 0)
-	    break;
-
-        high = (high & TIOCM_CAR) != 0;
-	gpsd_report(5, "CD on %s changed to %d\n", session->device_name);
-#define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	plen = timediff(tv, pulse[high]);
-	pa = timediff(tv, pulse[!high])
-#undef timediff
-	if (plen > 999000 && plen < 1001000 && pa > 800000 && session->gpsdata.fix.mode > MODE_NO_FIX)
-	    ntpshm_pps(session->context, &tv);
-
-	pulse[high] = tv;
-    }
-
-    return 0;
-}
-#endif
