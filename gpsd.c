@@ -45,7 +45,8 @@
  * Currently 1 Jan 2006, as the current fixed correction will be good
  * until at least then.  Deferring the check is a hack to speed up fix
  * acquisition -- subframe data is bulky enough to substantially
- * increase latency.
+ * increase latency.  To update LEAP_SECONDS and START_SUBFRAME, see
+ * <http://hpiers.obspm.fr/eop-pc/products/bulletins/bulletins.html>
  */
 #define LEAP_SECONDS	13
 #define START_SUBFRAME	1136091600
