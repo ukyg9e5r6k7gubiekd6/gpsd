@@ -18,25 +18,6 @@
  * accelerometer inputs to the chip to allow it to continue 
  * to navigate in the absence of satellite information, and 
  * to improve fixes when you do have satellites.)"
- *
- * Why we only use packet 42 (Geodetic Navigation Information) conditionally: 
- *
- * Many versions of the SiRF protocol manual don't document 
- * this sentence at all.  Those that do may incorrectly
- * describe UTC Day, Hour, and Minute as 2-byte quantities,
- * not 1-byte. Chris Kuethe, our SiRF expert, tells us:
- *
- * "The Geodetic Navigation packet (0x29) was not fully
- * implemented in firmware prior to version 2.3.2. So for
- * anyone running 231.000.000 or earlier (including ES,
- * SiRFDRive, XTrac trains) you won't get UTC time. I don't
- * know what's broken in firmwares before 2.3.1..."
- *
- * To work around the incomplete implementation of this
- * packet in 231, we used to assume that only the altitude field
- * from this packet is valid.  But even this doesn't necessarily
- * seem to be the case.  Instead, we do our own computation 
- * of geoid separation now.
  */
 
 #include <stdio.h>
@@ -473,6 +454,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * anyone running 231.000.000 or earlier (including ES,
 	     * SiRFDRive, XTrac trains) you won't get UTC time. I don't
 	     * know what's broken in firmwares before 2.3.1..."
+	     *
+	     * To work around the incomplete implementation of this
+	     * packet in 231, we used to assume that only the altitude field
+	     * from this packet is valid.  But even this doesn't necessarily
+	     * seem to be the case.  Instead, we do our own computation 
+	     * of geoid separation now.
 	     */
 	    navtype = getw(3);
 	    session->gpsdata.status = STATUS_NO_FIX;
