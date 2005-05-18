@@ -80,7 +80,7 @@ static int zodiac_speed_switch(struct gps_device_t *session, int speed)
     data[8] = 8;			/* port 1 character width */
     data[9] = 1;			/* port 1 stop bits */
     data[10] = 0;			/* port 1 parity */
-    data[11] = (short)log2(speed/300)+1;	/* port 1 speed */
+    data[11] = (short)(log(speed/300)/log(2))+1;       /* port 1 speed */
     data[12] = data[13] = data[14] = data[15] = 0;
     data[16] = data[17] = data[18] = data[19] = 0;
     data[20] = zodiac_checksum(data, 20);
