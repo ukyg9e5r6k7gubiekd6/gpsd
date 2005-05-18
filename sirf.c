@@ -136,6 +136,15 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3];
     double fv;
+    u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+				 0x80, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x0C,
+				 0x10,
+				 0x00, 0x00, 0xb0, 0xb3};
     u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				  0x80, 0x00, 0x00, 0x00,
 				  0x00, 0x00, 0x00, 0x00,
@@ -284,6 +293,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	session->time_seen = 0;
+	if (!(session->context->valid & LEAP_SECOND_VALID)) {
+	    gpsd_report(4, "Enabling subframe transmission...\n");
+	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	}
 	return 0;
 
     case 0x08:
@@ -552,7 +565,6 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * PPS and always comes out right around the top of the
 	 * second."
 	 */
-
 	mask = 0;
 	gpsd_report(4, "PPS 0x34: Status = 0x%02x\n", getb(14));
 	if ((getb(14) & 0x07) == 0x07) {	/* valid UTC time? */
@@ -706,27 +718,14 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				  0x00,		/* disable dead reckoning */
 				  0x01,		/* enable track smoothing */
 				 0x00, 0x00, 0xb0, 0xb3};
-	u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
-				 0x80, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x0C,
-				 0x10,
-				 0x00, 0x00, 0xb0, 0xb3};
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
 	sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");
 	sirf_write(session->gpsdata.gps_fd, sbasparams);
 	gpsd_report(4, "Probing for firmware version...\n");
 	sirf_write(session->gpsdata.gps_fd, versionprobe);
-	gpsd_report(4, "setting mode...\n");
+	gpsd_report(4, "Setting mode...\n");
 	sirf_write(session->gpsdata.gps_fd, modecontrol);
-	if (!(session->context->valid & LEAP_SECOND_VALID)) {
-	    gpsd_report(4, "Enabling subframe transmission...\n");
-	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
-	}
     }
 }
 
