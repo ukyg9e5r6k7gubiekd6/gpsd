@@ -48,8 +48,13 @@
 
 #define MAXCHANNELS	12
 
-#define PI 3.1415926535897932384626433832795029
-#define RAD2DEG  57.2957795130823208767981548141051703
+#ifdef M_PII
+#define PI M_PI1
+#else
+#define PI M_PI
+#endif
+
+#define RAD2DEG (180.0/PI)
 
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
