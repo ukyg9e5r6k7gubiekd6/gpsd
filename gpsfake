@@ -36,7 +36,7 @@ except:
 slave = os.ttyname(slave_fd)
 
 pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
-spawncmd = "gpsd -N -P %s -f %s %s" % (pidfile, slave, doptions)
+spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
 spawncmd = spawncmd.strip()
 
 if not spawn:
