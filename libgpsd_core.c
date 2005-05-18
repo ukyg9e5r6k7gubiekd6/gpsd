@@ -103,12 +103,25 @@ static void *gpsd_ppsmonitor(void *arg)
         high = (high & TIOCM_CAR) != 0;
 	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
 		    session->gpsdata.gps_device, high);
+
+	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
+	    /*
+	     * The PPS pulse is normally a short pulse with a frequency of
+	     * 1 Hz, and the UTC second is defined by the front edge.  But we
+	     * don't know the polarity of the pulse (different receivers
+	     * emit different polarities).  The pa variable is used to
+	     * determine which way the pulse is going.  The code assumes
+	     * that the UTC second is changing when the signal has not
+	     * been changing for at least 800ms, i.e. it assumes the duty
+	     * cycle is at most 20%.
+	     */
 #define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	plen = timediff(tv, pulse[high]);
-	pa = timediff(tv, pulse[!high]);
+	    plen = timediff(tv, pulse[high]);
+	    pa = timediff(tv, pulse[!high]);
 #undef timediff
-	if (plen > 999000 && plen < 1001000 && pa > 800000 && session->gpsdata.fix.mode > MODE_NO_FIX)
-	    ntpshm_pps(session->context, &tv);
+	    if (plen > 999000 && plen < 1001000 && pa > 800000)
+		ntpshm_pps(session->context, &tv);
+	}
 
 	pulse[high] = tv;
     }
