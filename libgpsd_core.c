@@ -468,23 +468,26 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 int gpsd_ppsmonitor(struct gps_device_t *session)
 {
-    int c,plen,pa;
+    int high,plen,pa;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
+    /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
 	gettimeofday(&tv,NULL);
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &c) != 0)
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &high) != 0)
 	    break;
 
-        c = (c & TIOCM_CAR) != 0;
-	plen = (tv.tv_sec-pulse[c].tv_sec)*1000000+tv.tv_usec-pulse[c].tv_usec;
-	pa = (tv.tv_sec-pulse[!c].tv_sec)*1000000+tv.tv_usec-pulse[!c].tv_usec;
-	
+        high = (high & TIOCM_CAR) != 0;
+	gpsd_report(5, "CD on %s changed to %d\n", session->device_name);
+#define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
+	plen = timediff(tv, pulse[high]);
+	pa = timediff(tv, pulse[!high])
+#undef timediff
 	if (plen > 999000 && plen < 1001000 && pa > 800000 && session->gpsdata.fix.mode > MODE_NO_FIX)
 	    ntpshm_pps(session->context, &tv);
 
-	pulse[c] = tv;
+	pulse[high] = tv;
     }
 
     return 0;

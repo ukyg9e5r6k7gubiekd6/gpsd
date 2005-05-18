@@ -87,5 +87,12 @@ His new features include:
      rate to use and what the GPS's device type is.
    * More new commands: 'I', 'U', 'E', 'B', 'Z'. See the docs.
    * Support for SiRF binary mode.
+   * Support for multiple devices.
 
 Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.
+
+We are delighted to acknowlege the assistance of Carl Carter, a field
+application engineer at SiRF.  He assisted us with the correction and
+tuning of the SiRF binary-protocol driver, shedding a good deal of 
+light on murky aspects of the chip's behavior.
+

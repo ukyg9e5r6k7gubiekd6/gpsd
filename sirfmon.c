@@ -16,6 +16,10 @@
  *	q -- quit, leaving device in binary mode.
  *      Ctrl-S -- freeze display.
  *      Ctrl-Q -- unfreeze display.
+ *
+ * Note: one of the objectives of sirfmon.c is *not* to include gps.h.  
+ * sirfmon is intended to be an independent sanity check on SiRF decoding,
+ * so it deliberately doesn't use much of the library. 
  */
 #include <stdio.h>
 #include <curses.h>

@@ -122,9 +122,11 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %changelog
 * Tue May 17 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Various signedness and scaling fixes for the Zodiac driver. Command-line 
-  arguments to gpsd are now treated as a default device list; -f is still
-  supported but deprecated.
+- Various signedness and scaling fixes and an OpenBSD port patch for the 
+  Zodiac driver. Command-line arguments to gpsd are now treated as a default 
+  device list; -f is still supported but deprecated.  sirfmon now tries not
+  changing the line speed first, so it syncs up much faster.  Prevent a 
+  potential buffer overrun in the client library.
 
 * Tue May 17 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.24-1
 - Crazy-speed bug is finally fixed. Autobauding now starts with the

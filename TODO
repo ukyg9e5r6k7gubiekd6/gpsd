@@ -6,8 +6,9 @@ will unfold thenm again.
 
 *** Problems with the leap-second offset
 
-Remco, using a SiRF chip at level 231, is still seeing a 10-second
-offset in his reported GPS times.  Rob Janssen and I, with the same
+Remco, using a SiRF chip at level 231, reports he is still seeing a
+10-second offset in his reported GPS times (that is, even after the
+13-second leap-second correction).  Rob Janssen and I, with the same
 hardware, aren't seeing this.
 
 *** Devicename pointer may get clobbered during very long runs
@@ -204,7 +205,7 @@ gpsd relies on the GPS to periodically send PVT reports to it.
 
 Most GPSes send PVT reports once a second.  No GPS I am aware of
 allows you to set a cycle time of less than a second.  This is because
-at 4800bps, a full PVT report takes just under one second.
+at 4800bps, a full PVT report takes just under one second in NMEA.
 
 At 50km/h (31mi/h) that's 13.8 meters change in position between
 updates, about the same as the uncertainty of position under typical
