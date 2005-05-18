@@ -361,7 +361,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
-			char tag[20], timestamp[20];
+			char tag[21], timestamp[21];
 
 			sscanf(sp, "Y=%20s %20s %d ", 
 			       tag, timestamp, &gpsdata->satellites);
