@@ -590,19 +590,19 @@ updates.</para>
 <application>ntpd</application>, to keep the system clock synchronized
 to the time provided by the GPS receiver.  Note that if you're going
 to use <application>gpsd</application> you probably want to run it
-<option>-n</option> mode so the clock will be updated ebven when no
+<option>-n</option> mode so the clock will be updated even when no
 clients are active.</para>
 
-<para>Note that deriving time from messages received from the GPS
-receiver is not as accurate as you might expect.  Messages are often
-delayed in the receiver and on the link by several hundred
-milliseconds, and this delay is not constant.  On Linux,
-<application>gpsd</application> includes support for interpreting the
-PPS pulses emitted at the start of every clock second on the
-carrier-detect lines of some serial GPSes; this pulse is used to
-update NTP at much higher precision.  You can determine whethher
-your GPS emits this pulse by running at -D 5 and watching for 
-carrier-detect state change messages in the logfile.</para>
+<para>Note that deriving time from messages received from the GPS is
+not as accurate as you might expect.  Messages are often delayed in
+the receiver and on the link by several hundred milliseconds, and this
+delay is not constant.  On Linux, <application>gpsd</application>
+includes support for interpreting the PPS pulses emitted at the start
+of every clock second on the carrier-detect lines of some serial
+GPSes; this pulse can be used to update NTP at much higher accuracy
+than message time provides.  You can determine whether your GPS emits
+this pulse by running at -D 5 and watching for carrier-detect state
+change messages in the logfile.</para>
 
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
