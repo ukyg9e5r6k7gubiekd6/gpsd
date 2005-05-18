@@ -35,7 +35,7 @@ space-separated fields:
 
 (4) An offset from the timestamp telling when gpsd believes the
     transmission of the current packet started (this is actually 
-    recorded just before the first read od the new packet).  If
+    recorded just before the first read of the new packet).  If
     the sentence timestamp was zero, this offset is a full timestamp 
     and the base time of the packet.
 
@@ -72,7 +72,7 @@ plots using gnuplot(1).  It can also report the raw data.
 
 ** Architecture and how to hack it
 
-This is not a complicated piece of code.  Essentially, it spins in a loop 
+gpsd is not a complicated piece of code.  Essentially, it spins in a loop 
 polling for input from one of three sources:
 
 1) A client making requests over a TCP/IP port.
@@ -164,29 +164,33 @@ as possible.  Under most circumstances, it doesn't require either
 the GPS type or the serial-line parameters to connect to it to be
 specified.  Presently, here's how the autoconfig works.
 
-1. Ay each baud rate gpsd grabs packets until it sees either a
+1. At each baud rate gpsd grabs packets until it sees either a
    well-formed and checksum-verified NMEA packet, a well-formed and
-   checksum-verified SiRF packet, or it sees one of the two special 
-   trigger strings EARTHA or ASTRAL, or it fills a long buffer with garbage
-   (in which case it steps to the next baud rate).
+   checksum-verified SiRF packet, a well-formed and checksum-verified
+   Zodiac packet, or it sees one of the two special trigger strings
+   EARTHA or ASTRAL, or it fills a long buffer with garbage (in which
+   case it steps to the next baud rate).
 
 2. If it finds a SiRF packet, it queries the chip for firmware
    version.  If the version is < 231.000 it drops back to SiRF NMEA.
    We're done.
 
-3. If it finds EARTHA, it selects the Earthmade driver, which then
+3. If it finds a Zodiac binary packet (led with 0xff 0x81), it
+   switches to the Zodiac driver.  We're done.
+
+4. If it finds EARTHA, it selects the Earthmade driver, which then
    flips the connection to Zodiac binary mode.  We're done.
 
-4. If it finds ASTRAL, it feeds the TripMate on the other end what
+5. If it finds ASTRAL, it feeds the TripMate on the other end what
    it wants and goes to Tripmate NMEA mode.  We're done.
 
-5. If it finds a NMEA packet, it selects the NMEA driver.  This
+6. If it finds a NMEA packet, it selects the NMEA driver.  This
    initializes by shipping all vendor-specific initialization strings
-   to the device.  Presently there are two such, one for SiRF and one
-   for the FV-18.  The FV18 just sets some sentence frequencies, but
-   the SiRF one is itself a probe,
+   to the device.  The objectives are to enable GSA, disable GLL, and
+   disable VTG.  Probe strings go here too, like the one that turns 
+   on SiRF debugging output in order to detect SiRF chips.
 
-6. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
+7. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
    invokes the matching driver.  Presently there is really only one of
    these: "$Ack Input 105.\r\n", the response to the SiRF probe. On
    seeing this, gpsd switches from NMEA to SiRF binary mode, probes
@@ -194,7 +198,7 @@ specified.  Presently, here's how the autoconfig works.
    to SiRF NMEA.
 
 The outcome is that we know exactly what we're looking at, without any
-driver or baud rate options.
+driver-type or baud rate options.
 
 ** Error modeling
 
@@ -252,7 +256,7 @@ carrier phase, you need to determine how long we have been using
 the carrier smoothing and use a blend of the two."
 
 On Carl's advice we would apply tropospheric error twice, and use
-the largest Wellehof figure:
+the largest Wellenhof figure:
 
 UERE = sqrt(0.7^2 + 0.7^2 + 3.6^2 + 1.5^2 + 1.2^2 + 0.3^2) = 4.1
 
