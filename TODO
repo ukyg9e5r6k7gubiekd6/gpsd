@@ -1,13 +1,16 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
-doing Ctl-C Ctl-t and browsing through the outline headers.
+doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
+will unfold thenm again.
 
-** Problems with the leap-second offset
+** Bugs:
+
+*** Problems with the leap-second offset
 
 Remco, using a SiRF chip at level 231, is still seeing a 10-second
 offset in his reported GPS times.  Rob Janssen and I, with the same
 hardware, aren't seeing this.
 
-** Devicename pointer may get clobbered during very long runs
+*** Devicename pointer may get clobbered during very long runs
 
 Wallace E. Owen <owen@titan.com> and Rainer Scholz <ras@sigos.de>,
 who may or may not be different people :-), have reported that after
@@ -17,13 +20,15 @@ seems to have established that this is due to some change introduced
 between 2.21 and 2.22; I've sent him a diff which we're going to try
 to whittle down until we can figure out what.
 
-** No data from BU-303?
+*** No data from BU-303?
 
 Roeland Th. Jansen <roeland@linux-it.nl> was reporting no data from
 a BU-303.  I have a BU-303 and it's working fine.  I don't know if
 he has checked out SVN head recently.
 
-** Design problems with he NTP interface:
+** To do:
+
+*** Design problems with the NTP interface:
 
 There's a messy question about how NTP shared-memory segments should
 be associated with GPSes.  At the moment, the code allocates just
@@ -46,7 +51,7 @@ I think we're going to be stuck with grabbing pointers to all four
 segments just in case gpsd wants them, and then having control-socket
 commands to bind NTP unit numbers to devices.
 
-** Set FIFO threshold to 1 to reduce jitter in serial-message times
+*** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.
 
@@ -66,7 +71,7 @@ Rob Janssen <gpsd@xs4all.nl>:
 >transmit FIFO.  However it appears that setting it to 1 will also disable
 >the receive FIFO.  You'll have to experiment.
 
-** Hotplug interface problems
+*** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which
 device to look at, at least on my FC3 Linux machines.  The fly in the
@@ -114,7 +119,7 @@ to do device scanning, but this would create a complex dependency that
 gpsd doesn't now gave, and bring more complexity on board than is
 probably desirable.
 
-** The mess near error modeling
+*** The mess near error modeling
 
 One of my goals has been to report an uncertainty along with every
 dimension of PVT, so that the return from the GPS actually (and
@@ -155,27 +160,7 @@ This area needs some attention from somebody who cares a lot about
 GPS accuracy and is willing to do research on error budgets to pin
 down the numbers and confidence levels.
 
-** Subsecond polling
-
-gpsd relies on the GPS to periodically send PVT reports to it.
-
-Most GPSes send PVT reports once a second.  No GPS I am aware of
-allows you to set a cycle time of less than a second.  This is because
-at 4800bps, a full PVT report takes just under one second.
-
-At 50km/h (31mi/h) that's 13.8 meters change in position between
-updates, about the same as the uncertainty of position under typical
-conditions.
-
-There is, however, a way to sample GPSes at higher frequency.  SiRF
-chips, and some others, allow you to shut down periodic notifications
-and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
-a second, and a SiRF one maybe 18 times a second.
-
-Is this worth doing?  Maybe.  It would reduce fix latency, possibly
-to good effect if your GPS is in motion.  Opinions?  Calculations?
-
-** Do the research to figure out just what is going on with status bits
+*** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the
 Active/Void bit (some sources interpret 'V' as 'Navigation receiver
@@ -210,6 +195,28 @@ relationships are there?
 News flash: it develops that the "Navigation receiver warning" is
 supposed to indicate a valid fix that has a DOP too high or fails
 an elevation test.
+
+** Future features (?)
+
+*** Subsecond polling
+
+gpsd relies on the GPS to periodically send PVT reports to it.
+
+Most GPSes send PVT reports once a second.  No GPS I am aware of
+allows you to set a cycle time of less than a second.  This is because
+at 4800bps, a full PVT report takes just under one second.
+
+At 50km/h (31mi/h) that's 13.8 meters change in position between
+updates, about the same as the uncertainty of position under typical
+conditions.
+
+There is, however, a way to sample GPSes at higher frequency.  SiRF
+chips, and some others, allow you to shut down periodic notifications
+and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
+a second, and a SiRF one maybe 18 times a second.
+
+Is this worth doing?  Maybe.  It would reduce fix latency, possibly
+to good effect if your GPS is in motion.  Opinions?  Calculations?
 
 Local variables:
 mode: outline
