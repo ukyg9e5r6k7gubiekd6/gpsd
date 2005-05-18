@@ -33,6 +33,9 @@
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
+#if defined(PPS_ENABLE)
+#include <pthread.h>
+#endif
 
 #include "gpsd.h"
 
@@ -103,6 +106,10 @@ static int daemonize(void)
     return 0;
 }
 
+#if defined(PPS_ENABLE)
+static pthread_mutex_t report_mutex;
+#endif /* PPS_ENABLE */
+
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
@@ -110,6 +117,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	char buf[BUFSIZ];
 	va_list ap;
 
+#if defined(PPS_ENABLE)
+	pthread_mutex_lock(&report_mutex);
+#endif /* PPS_ENABLE */
 	strcpy(buf, "gpsd: ");
 	va_start(ap, fmt) ;
 	vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
@@ -119,6 +129,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf);
 	else
 	    fputs(buf, stderr);
+#if defined(PPS_ENABLE)
+	pthread_mutex_unlock(&report_mutex);
+#endif /* PPS_ENABLE */
     }
 }
 
