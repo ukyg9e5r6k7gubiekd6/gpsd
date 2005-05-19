@@ -73,6 +73,9 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
 
+    /* necessary in case we start reading in the middle of a GPGSV sequence */
+    gpsd_zero_satellites(&session->gpsdata);
+
     return session;
 }
 
@@ -90,7 +93,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 static void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    int high,plen,pa;
+    int high,cycle,duration;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
@@ -109,17 +112,17 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge.  But we
 	     * don't know the polarity of the pulse (different receivers
-	     * emit different polarities).  The pa variable is used to
+	     * emit different polarities).  The duration variable is used to
 	     * determine which way the pulse is going.  The code assumes
 	     * that the UTC second is changing when the signal has not
 	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
 	     */
 #define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	    plen = timediff(tv, pulse[high]);
-	    pa = timediff(tv, pulse[!high]);
+	    cycle = timediff(tv, pulse[high]);
+	    duration = timediff(tv, pulse[!high]);
 #undef timediff
-	    if (plen > 999000 && plen < 1001000 && pa > 800000)
+	    if (cycle > 999000 && cycle < 1001000 && duration > 800000)
 		ntpshm_pps(session->context, &tv);
 	}
 
