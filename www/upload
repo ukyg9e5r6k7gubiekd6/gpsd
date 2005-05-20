@@ -9,6 +9,7 @@ sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.h
 xmlto xhtml-nochunks ../gpsd.xml
 xmlto xhtml-nochunks ../xgps.xml
 xmlto xhtml-nochunks ../libgps.xml
+xmlto xhtml-nochunks ../libgpsmm.xml
 xmlto xhtml-nochunks ../libgpsd.xml
 xmlto xhtml-nochunks ../gpsprof.xml
 xmlto xhtml-nochunks ../gpsfake.xml

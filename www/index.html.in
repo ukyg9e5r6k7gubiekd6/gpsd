@@ -128,6 +128,9 @@ repository.</p></li>
 <dt><a href="libgps.html">libgps.3</a></dt>
 <dd>An interface library that manages communication with the daemon.</dt>
 
+<dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
+<dd>C++ class wrapper for the libgps C binding.</dd>
+
 <dt><a href="libgpsd.html">libgpsd.3</a></dt>
 <dd>The low-level library used by <code>gpsd</code> to talk to a GPS.</dd>
 
