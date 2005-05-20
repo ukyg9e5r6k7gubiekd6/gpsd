@@ -12,29 +12,6 @@ I don't know if he has checked out SVN head recently.
 
 ** To do:
 
-*** Design problems with the NTP interface:
-
-There's a messy question about how NTP shared-memory segments should
-be associated with GPSes.  At the moment, the code allocates just
-one and all devices report through it.  It would be better for each
-device to have its own segment, so they look like separate time
-sources to NTP and it can apply its heuristics for weeding out
-the less consistent ones.  
-
-The trouble with this is that:
-
-1) The default build of NTP only supports 4 segments.  Thus, if we
-allocate them per GPS device, we're not unlikely to run out of them.
-
-2) We may actually want *two* segments per device, one for message time
-and one for PPS time.
-
-3) We can't grab new segments after privileges are dropped.
-
-I think we're going to be stuck with grabbing pointers to all four
-segments just in case gpsd wants them, and then having control-socket
-commands to bind NTP unit numbers to devices.
-
 *** Set FIFO threshold to 1 to reduce jitter in serial-message times
 
 This can matter if you're using gpsd as a time reference.

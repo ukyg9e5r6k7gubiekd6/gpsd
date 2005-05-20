@@ -71,9 +71,7 @@ static jmp_buf restartbuf;
 static struct gps_context_t context = {0, LEAP_SECONDS,
 #ifdef NTPSHM_ENABLE
 				       {0},
-#ifdef PPS_ENABLE
 				       {0},
-#endif /* NTPSHM_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
 

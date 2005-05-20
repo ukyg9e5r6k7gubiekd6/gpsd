@@ -32,8 +32,10 @@ struct gps_context_t {
     int valid;
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     int leap_seconds;
+#ifdef NTPSHM_ENABLE
     struct shmTime *shmTime[NTPSHMSEGS];
     int shmTimeInuse[NTPSHMSEGS];
+#endif /* NTPSHM_ENABLE */
 };
 
 struct gps_device_t;
