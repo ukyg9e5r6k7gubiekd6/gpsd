@@ -1,3 +1,6 @@
+#ifndef _gpsd_h_
+#define _gpsd_h_
+
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
 #include "config.h"
@@ -181,3 +184,4 @@ void gpsd_report(int, const char *, ...);
 
 
 
+#endif /* _gpsd_h_ */

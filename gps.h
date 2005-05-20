@@ -1,7 +1,7 @@
 /* gps.h -- interface of the libgps library */
 
 #ifndef gps_h
-#  define gps_h 1
+#define gps_h 1
 
 #ifdef __cplusplus
 extern "C" {

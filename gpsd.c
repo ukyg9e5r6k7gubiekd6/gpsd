@@ -37,6 +37,10 @@
 #include <pthread.h>
 #endif
 
+#if DBUS_ENABLE
+#include <gpsd_dbus.h>
+#endif
+
 #include "gpsd.h"
 
 #define QLEN			5
@@ -926,6 +930,16 @@ int main(int argc, char *argv[])
 	if (stat(argv[i], &stb) == 0)
 	    chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
 
+#if DBUS_ENABLE
+    /* we need to connect to dbus as root */
+
+    if (initialize_dbus_conection ()) {
+	/* the connection could not be started */
+	gpsd_report (2, "Unable to connect to the DBUS system bus\n");
+    } else
+	gpsd_report (2, "Successfully connected to the DBUS system bus\n");
+#endif
+    
     /*
      * Drop privileges.  Up to now we've been running as root.  Instead,
      * set the user ID to 'nobody' and the group ID to the owning group 
@@ -1107,6 +1121,12 @@ int main(int argc, char *argv[])
 			handle_request(cfd, cmds, strlen(cmds));
 		}
 	    }
+#if DBUS_ENABLE
+	    if (changed &~ ONLINE_SET) {
+		    if (changed & (LATLON_SET | MODE_SET)) 
+			    send_dbus_fix (*channel);
+	    }
+#endif
 	}
 
 	/* accept and execute commands for all clients */

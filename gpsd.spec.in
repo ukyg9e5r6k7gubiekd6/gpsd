@@ -126,8 +126,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   Zodiac driver. Command-line arguments to gpsd are now treated as a default 
   device list; -f is still supported but deprecated.  sirfmon now tries not
   changing the line speed first, so it syncs up much faster.  Prevent a 
-  potential buffer overrun in the client library.  PPS support is now
-  on by default.  Lots of documentation improvements.
+  potential buffer overrun in the client library.  PPS-thread support is now
+  on by default.  Lots of documentation improvements. DBUS broadcast support 
+  by Amaury Jaquot.
 
 * Tue May 17 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.24-1
 - Crazy-speed bug is finally fixed. Autobauding now starts with the

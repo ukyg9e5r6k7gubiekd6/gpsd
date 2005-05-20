@@ -225,6 +225,23 @@ else
 fi
 AM_CONDITIONAL([HAVE_PPS], [test x"$ac_pps" == x"yes"])
 
+dnl check for DBUS
+AC_ARG_ENABLE(dbus,
+  AC_HELP_STRING([--enable-dbus],
+  		 [enable DBUS support]),
+  [ac_dbus=$enableval], [ac_dbus=no])
+AC_MSG_CHECKING([for DBUS support])
+if test x"$ac_dbus" == "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
+    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
+    AC_SUBST(DBUS_CFLAGS)
+    AC_SUBST(DBUS_LIBS)
+else
+  AC_MSG_RESULT([no])
+fi
+AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" == x"yes"])
+
 AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
@@ -239,6 +256,7 @@ echo "Garmin                  : $ac_garmin"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo "Enable shared libraries : $enable_shared"
+echo "Enable DBUS support     : $ac_dbus"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."
 
