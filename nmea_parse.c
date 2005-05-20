@@ -349,6 +349,11 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 	gpsd_zero_satellites(out);
 
     for (fldnum = 4; fldnum < count; ) {
+	if (out->satellites >= MAXCHANNELS) {
+	    gpsd_report(0, "internal error - too many satellites!\n");
+	    gpsd_zero_satellites(out);
+	    break;
+	}
 	out->PRN[out->satellites]       = atoi(field[fldnum++]);
 	out->elevation[out->satellites] = atoi(field[fldnum++]);
 	out->azimuth[out->satellites]   = atoi(field[fldnum++]);
