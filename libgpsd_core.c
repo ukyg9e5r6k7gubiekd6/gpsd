@@ -354,6 +354,7 @@ void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
     gpsd_deactivate(session);
+    free(session->gpsdata.gps_device);
     free(session);
 }
 

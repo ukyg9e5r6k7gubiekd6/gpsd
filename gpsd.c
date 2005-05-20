@@ -345,7 +345,7 @@ found:
     return *chp;
 }
 
-static char *getline(char *p, char **out)
+static char *snarfline(char *p, char **out)
 /* copy the rest of the command line, before CR-LF */
 {
     char	*stash, *q;
@@ -488,7 +488,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'F':
 	    if (*p == '=') {
-		p = getline(++p, &stash);
+		p = snarfline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
 		if ((newchan = find_device(stash))) {
 		    whoami->device = *newchan;
@@ -786,7 +786,7 @@ static void handle_control(int sfd, char *buf)
     int cfd;
 
     if (buf[0] == '-') {
-	p = getline(buf+1, &stash);
+	p = snarfline(buf+1, &stash);
 	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
 	if ((chp = find_device(stash))) {
 	    gpsd_deactivate(*chp);
@@ -800,7 +800,7 @@ static void handle_control(int sfd, char *buf)
 	    write(sfd, "ERROR\n", 6);
 	free(stash);
     } else if (buf[0] == '+') {
-	p = getline(buf+1, &stash);
+	p = snarfline(buf+1, &stash);
 	if (find_device(stash))
 	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
 	else {
