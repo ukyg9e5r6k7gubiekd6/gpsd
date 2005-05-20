@@ -27,6 +27,32 @@ gpsfake enables you to repeatedly feed a packet sequence to a gpsd
 instance running as non-root.  Watching such a session with gdb should
 smoke out any repeatable bug pretty quickly.
 
+The parsing of GPGSV sentences in the NMEA driver has been a
+persistent and nasty trouble spot, causing more buffer overruns and
+weird secondary damage than all the rest of the code put together.
+Any time you get a bug report that seems to afflict NMEA devices
+only, suspicion should focus here.
+
+** The Y2.1K problem and other calendar issues
+
+Because of limitations in various GPS protocols (e.g., they were
+designed by fools who weren't looking past the ends of their noses) 
+this code unavoidably includes some assumptions that will turn around
+and bite on various future dates. 
+
+The two specific problms are:
+
+1) NMEA delivers only two-digit years.
+
+2) SiRF chips at firmware level 231 deliver only GPS time in binary mode,
+not leap-second-corrected UTC.
+
+See the timebase.h file for various constants that will need to
+be tweaked accasionally to cope with these problems.
+
+Note that gpsd does not rely on the system clock in any way.  This
+is so you can use it to set the system clock.
+
 ** Profiling
 
 There is a barely-documented Z command in the daemon will cause it to emit
@@ -156,7 +182,7 @@ to get at it, in which case you'd have much bigger problems than a
 spoofed GPS.
 
 More generally, certainly gpsd needs to treat command input as
-untrusted and for saferty's sake should treat GPS data as untrusted
+untrusted and for safety's sake should treat GPS data as untrusted
 too (in particular this means never assuming that either source won't
 try to overflow a buffer).
 
