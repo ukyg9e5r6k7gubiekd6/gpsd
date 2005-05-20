@@ -38,7 +38,7 @@ xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) 
 #
 gpsmm_test_SOURCES = \
 	gpsmm_test.cpp
-gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgpsmm.la -lm
+gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Build gpsd
@@ -61,7 +61,7 @@ sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 # Build shared libraries
 #
 libgps_la_LDFLAGS = -version-number 12:0:0
-lib_LTLIBRARIES = libgps.la libgpsmm.la
+lib_LTLIBRARIES = libgps.la
 
 libgps_la_SOURCES = \
 	netlib.c \
@@ -77,13 +77,10 @@ libgps_la_SOURCES = \
 	gpsutils.c \
 	geoid.c \
 	sirf.c \
-	report.c
+	report.c \
+	libgpsmm.cpp
 
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
-
-libgpsmm_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) libgps.la
-libgpsmm_la_SOURCES = \
-	libgpsmm.cpp
 
 #
 # Create Manpages
@@ -149,6 +146,7 @@ EXTRA_DIST = \
 	xgps.xml \
 	libgpsd.xml \
 	libgps.xml \
+	libgpsmm.xml \
 	gpsprof.xml \
 	gpsfake.xml \
 	sirfmon.xml \

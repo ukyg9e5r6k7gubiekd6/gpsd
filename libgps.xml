@@ -11,7 +11,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>libgps</refname>
-<refpurpose>service library for communicationg with the GPS daemon</refpurpose>
+<refpurpose>C service library for communicating with the GPS daemon</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 <funcsynopsis>

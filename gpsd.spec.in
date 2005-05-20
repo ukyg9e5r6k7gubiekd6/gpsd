@@ -87,7 +87,7 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING TODO
+%doc README INSTALL COPYING
 %attr(755, root, root) %{_sbindir}/gpsd
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
@@ -101,13 +101,14 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %files -n gpsd-devel
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING libgps.xml libgpsd.xml HACKING
+%doc README INSTALL COPYING HACKING TODO
 %{_includedir}/gps.h
 %{_includedir}/gpsd.h
 %{_includedir}/gpsutils.h
 %{_libdir}/libgps.a
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*
+%{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gps.py*
