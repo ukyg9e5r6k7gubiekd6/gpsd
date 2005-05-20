@@ -63,40 +63,61 @@ static struct shmTime *getShmTime(int unit)
     }
 }
 
-/* initialize NTP SHM segment.  called once at startup, while still root */
+/* attach all NTP SHM segments.  called once at startup, while still root */
 
 int ntpshm_init(struct gps_context_t *context)
 {
-    if ((context->shmTime = getShmTime(SHM_UNIT)) == NULL)
+    int i;
+
+    for (i = 0; i < NTPSHMSEGS; i++)
+	context->shmTime[i] = getShmTime(i);
+
+    memset(context->shmTimeInuse,0,sizeof(context->shmTimeInuse));
+    return 1;
+}
+
+/* allocate NTP SHM segment.  return its segment number, or -1 */
+
+int ntpshm_alloc(struct gps_context_t *context)
+{
+    int i;
+
+    for (i = 0; i < NTPSHMSEGS; i++)
+	if (context->shmTime[i] != NULL && !context->shmTimeInuse[i]) {
+	    context->shmTimeInuse[i]++;
+
+	    memset((void *)context->shmTime[i],0,sizeof(struct shmTime));
+	    context->shmTime[i]->mode = 1;
+	    context->shmTime[i]->precision = -1; /* initially 0.5 sec */
+	    context->shmTime[i]->nsamples = 3;	/* stages of median filter */
+
+	    return i;
+	}
+
+    return -1;
+}
+
+/* free NTP SHM segment */
+
+int ntpshm_free(struct gps_context_t *context, int segment)
+{
+    if (segment < 0 || segment >= NTPSHMSEGS)
 	return 0;
 
-    memset((void *)context->shmTime,0,sizeof(struct shmTime));
-    context->shmTime->mode = 1;
-    context->shmTime->precision = -1;	/* initially 0.5 sec */
-    context->shmTime->nsamples = 3;	/* stages of median filter */
-
-#ifdef PPS_ENABLE
-    if ((context->shmTimeP = getShmTime(SHM_UNIT+1)) == NULL)
-	return 0;
-
-    memset((void *)context->shmTimeP,0,sizeof(struct shmTime));
-    context->shmTimeP->mode = 1;
-    context->shmTimeP->precision = -1;
-    context->shmTimeP->nsamples = 3;
-#endif
-
+    context->shmTimeInuse[segment] = 0;
     return 1;
 }
 
 /* put a received fix time into shared memory for NTP */
 
-int ntpshm_put(struct gps_context_t *context, double fixtime)
+int ntpshm_put(struct gps_device_t *session, double fixtime)
 {
     struct shmTime *shmTime;
     struct timeval tv;
     double seconds,microseconds;
 
-    if ((shmTime = context->shmTime) == NULL)
+    if (session->shmTime < 0 ||
+	(shmTime = session->context->shmTime[session->shmTime]) == NULL)
 	return 0;
 
     gettimeofday(&tv,NULL);
@@ -116,14 +137,15 @@ int ntpshm_put(struct gps_context_t *context, double fixtime)
 #ifdef PPS_ENABLE
 /* put NTP shared memory info based on received PPS pulse */
 
-int ntpshm_pps(struct gps_context_t *context,struct timeval *tv)
+int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
     struct shmTime *shmTime,*shmTimeP;
     time_t seconds;
     double offset;
 
-    if ((shmTime = context->shmTime) == NULL ||
-	(shmTimeP = context->shmTimeP) == NULL)
+    if (session->shmTime < 0 || session->shmTimeP < 0 ||
+	(shmTime = session->context->shmTime[session->shmTime]) == NULL ||
+	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
     /* check if received time messages are within locking range */

@@ -82,3 +82,7 @@ hardware already supported.
 9. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
+
+10. Note for systems using DBUS: gpsd includes support for shipping fixes
+as DBUS notofications, but it is not compiled in by default.  Configure 
+with the option "--enable-dbus" to get it working.

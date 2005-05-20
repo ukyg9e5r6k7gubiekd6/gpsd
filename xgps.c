@@ -361,7 +361,7 @@ static char *get_resource(Widget w, char *name, char *default_value)
 int main(int argc, char *argv[])
 {
     int option;
-    char *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    char *arg, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *su, *au;
     char *err_str = NULL;
 
@@ -400,14 +400,21 @@ altunits_ok:;
 	}
     }
     if (optind < argc) {
-	server = strdup(argv[optind]);
-	colon1 = strchr(server, ':');
+	arg = strdup(argv[optind]);
+	colon1 = strchr(arg, ':');
+	server = arg;
 	if (colon1 != NULL) {
-	    server[colon1 - server] = '\0';
-	    port = strdup(colon1 + 1);
-	    colon2 = strchr(server, ':');
+	    if (colon1 == arg)
+		server = NULL;
+	    else
+		*colon1 = '\0';
+	    port = colon1 + 1;
+	    colon2 = strchr(port, ':');
 	    if (colon2 != NULL) {
-		port[colon2 - port] = '\0';
+		if (colon2 == port)
+		    port = NULL;
+	        else
+		    *colon2 = '\0';
 		device = colon2 + 1;
 	    }
 	}

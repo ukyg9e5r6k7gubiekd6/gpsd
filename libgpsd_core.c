@@ -85,6 +85,14 @@ void gpsd_deactivate(struct gps_device_t *session)
     gpsd_report(1, "closing GPS=%s\n", session->gpsdata.gps_device);
     gpsd_close(session);
     session->gpsdata.gps_fd = -1;
+#ifdef NTPSHM_ENABLE
+    ntpshm_free(session->context, session->shmTime);
+    session->shmTime = -1;
+# ifdef PPS_ENABLE
+    ntpshm_free(session->context, session->shmTimeP);
+    session->shmTimeP = -1;
+# endif /* NTPSHM_ENABLE */
+#endif /* NTPSHM_ENABLE */
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
 }
@@ -93,19 +101,19 @@ void gpsd_deactivate(struct gps_device_t *session)
 static void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    int high,cycle,duration;
+    int state,cycle,duration;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
 	gettimeofday(&tv,NULL);
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &high) != 0)
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
 	    break;
 
-        high = (high & TIOCM_CAR) != 0;
+        state = (state & TIOCM_CAR) != 0;
 	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
-		    session->gpsdata.gps_device, high);
+		    session->gpsdata.gps_device, state);
 
 	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	    /*
@@ -119,14 +127,14 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * cycle is at most 20%.
 	     */
 #define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	    cycle = timediff(tv, pulse[high]);
-	    duration = timediff(tv, pulse[!high]);
+	    cycle = timediff(tv, pulse[state]);
+	    duration = timediff(tv, pulse[!state]);
 #undef timediff
 	    if (cycle > 999000 && cycle < 1001000 && duration > 800000)
-		ntpshm_pps(session->context, &tv);
+		ntpshm_pps(session, &tv);
 	}
 
-	pulse[high] = tv;
+	pulse[state] = tv;
     }
 
     return NULL;
@@ -167,9 +175,15 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.fix.separation = NO_SEPARATION;
 #endif /* BINARY_ENABLE */
 
+#ifdef NTPSHM_ENABLE
+	session->shmTime = ntpshm_alloc(session->context);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-	pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
+	if (session->shmTime >= 0) {
+	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
+		pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
+	}
 #endif /* PPS_ENABLE */
+#endif /* NTPSHM_ENABLE */
 
 	return session->gpsdata.gps_fd;
     }

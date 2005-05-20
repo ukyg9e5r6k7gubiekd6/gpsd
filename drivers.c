@@ -44,7 +44,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
 	if (st & TIME_SET)
 	    /* this magic number is derived from observation */
-	    ntpshm_put(session->context, session->gpsdata.fix.time + 0.675);
+	    ntpshm_put(session, session->gpsdata.fix.time + 0.675);
 #endif
 
 	/* also copy the sentence up to clients in raw mode */

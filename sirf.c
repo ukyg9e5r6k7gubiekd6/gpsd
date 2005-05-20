@@ -187,7 +187,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				session->time_seen);
 		session->time_seen |= TIME_SEEN_GPS_2;
 		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
-		    ntpshm_put(session->context, session->gpsdata.fix.time + 0.8);
+		    ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
 
@@ -239,7 +239,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 			    session->time_seen);
 	    session->time_seen |= TIME_SEEN_GPS_1;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))
-		ntpshm_put(session->context, session->gpsdata.sentence_time + 0.8);
+		ntpshm_put(session, session->gpsdata.sentence_time + 0.8);
 	}
 #endif /* NTPSHM_ENABLE */
 	/*
@@ -504,7 +504,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				session->time_seen);
 		session->time_seen |= TIME_SEEN_UTC_1;
 		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
-		    ntpshm_put(session->context, session->gpsdata.fix.time + 0.8);
+		    ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
 	    /* skip 4 bytes of satellite map */
@@ -569,7 +569,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				session->time_seen);
 	    session->time_seen |= TIME_SEEN_UTC_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
-		ntpshm_put(session->context, session->gpsdata.fix.time + 0.3);
+		ntpshm_put(session, session->gpsdata.fix.time + 0.3);
 #endif /* NTPSHM_ENABLE */
 	    mask |= TIME_SET;
 	}
@@ -618,7 +618,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				session->time_seen);
 	    session->time_seen |= TIME_SEEN_UTC_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
-		ntpshm_put(session->context, session->gpsdata.fix.time + 0.8);
+		ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 #endif /* NTPSHM_ENABLE */
 	    session->context->valid = LEAP_SECOND_VALID;
 	}

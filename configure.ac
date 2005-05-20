@@ -1,5 +1,5 @@
 AC_INIT
-AM_INIT_AUTOMAKE(gpsd, 2.24)
+AM_INIT_AUTOMAKE(gpsd, 2.25)
 AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(config.h)
 AC_LANG([C])
@@ -62,8 +62,6 @@ AC_CHECK_LIB(m, rint, LIBM="-lm")
 AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
-
-dnl Check for pthread, needed by the callback
 AC_CHECK_LIB(pthread, main, LIBPTHREAD="-lpthread")
 AC_SUBST(LIBPTHREAD)
 
@@ -223,7 +221,6 @@ if test x"$ac_pps" = "xyes"; then
 else
   AC_MSG_RESULT([no])
 fi
-AM_CONDITIONAL([HAVE_PPS], [test x"$ac_pps" == x"yes"])
 
 dnl check for DBUS
 AC_ARG_ENABLE(dbus,

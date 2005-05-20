@@ -98,11 +98,11 @@ DGPS corrections over the Internet</ulink>.</para>
 <varlistentry>
 <term>-n</term>
 <listitem><para>Don't wait for a client to connect before polling
-the GPS.  The wait is a feature; many serial GPSes go to a standby
-mode (not drawing power) before the host machine asserts DTR, so
-waiting for the first actual request can save valuable battery power
-on portable equipment.  This option combines well with -D2 to enable
-monitoring of the GPS data stream.</para>
+whatever GPS is associated with it.  The wait is a feature; many
+serial GPSes go to a standby mode (not drawing power) before the host
+machine asserts DTR, so waiting for the first actual request can save
+valuable battery power on portable equipment.  This option combines
+well with -D2 to enable monitoring of the GPS data stream.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -665,6 +665,15 @@ between the GPS clock and other clocks.  The
 information about the offsets observed by users for each type of
 receiver.  Please send us the output of the "ntpq -p" command and the
 make and type of receiver.</para>
+
+</refsect1>
+<refsect1 id='dbus'><title>USE WITH DBUS</title> 
+
+<para>On operating systems that support D-BUS, <application>gpsd</application>
+can be built to broadcast GPS fixes to D-BUS-aware applications.  As
+D-BUS is still at a pre-1.0 stage, we will not attempt to document
+this interface here; read the <application>gpsd</application> source
+code to learn more.</para>
 
 </refsect1>
 <refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title> 

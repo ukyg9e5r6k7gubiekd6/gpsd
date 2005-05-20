@@ -9,12 +9,7 @@ endif
 
 XMLTO = xmlto
 
-if HAVE_PPS
-LPTHREAD = -lpthread
-endif
-
 if HAVE_DBUS
-LPTHREAD = -lpthread
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
@@ -25,7 +20,7 @@ bin_SCRIPTS = gpsprof gpsfake
 # Build xgps
 #
 xgps_SOURCES = display.c display.h xgps.c
-xgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LPTHREAD)
+xgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build xgpsspeed
@@ -36,7 +31,7 @@ xgpsspeed_SOURCES = \
 	TachometerP.h \
 	Tachometer.h \
 	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LPTHREAD)
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 
 #
@@ -47,14 +42,14 @@ gpsd_SOURCES = \
 	gpsd_dbus.h \
 	gpsd_dbus.c \
 	gpsd.c
-gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LPTHREAD)
+gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 
 #
 # Build sirfmon
 #
 sirfmon_SOURCES = sirfmon.c
-sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LPTHREAD)
+sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build shared library

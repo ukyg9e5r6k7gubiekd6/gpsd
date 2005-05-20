@@ -330,7 +330,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    }
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.fix.mode > MODE_NO_FIX)
-		ntpshm_put(session->context, session->gpsdata.fix.time);
+		ntpshm_put(session, session->gpsdata.fix.time);
 #endif 
 
 	    gpsd_report(4, "mode %d, status %d\n"

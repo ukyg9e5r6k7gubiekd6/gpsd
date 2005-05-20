@@ -149,7 +149,7 @@ static int handle1000(struct gps_device_t *session)
 	mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
     if (session->gpsdata.fix.mode > MODE_NO_FIX)
-	ntpshm_put(session->context, session->gpsdata.fix.time + 1.1);
+	ntpshm_put(session, session->gpsdata.fix.time + 1.1);
 #endif
     session->gpsdata.fix.latitude  = ((long)getl(27)) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = ((long)getl(29)) * RAD_2_DEG * 1e-8;

@@ -26,16 +26,14 @@
 #define UERE_WITH_DGPS	2	/* meters */
 #define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
+#define NTPSHMSEGS	4		/* number of NTP SHM segments */
+
 struct gps_context_t {
     int valid;
-#define LEAP_SECOND_VALID	0x01	/* we have or don't need correctiomn */
+#define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     int leap_seconds;
-#ifdef NTPSHM_ENABLE
-    struct shmTime *shmTime;
-# ifdef PPS_ENABLE
-    struct shmTime *shmTimeP;
-# endif /* NTPSHM_ENABLE */
-#endif /* NTPSHM_ENABLE */
+    struct shmTime *shmTime[NTPSHMSEGS];
+    int shmTimeInuse[NTPSHMSEGS];
 };
 
 struct gps_device_t;
@@ -108,7 +106,7 @@ struct gps_device_t {
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     void *GarminBuffer; /* Pointer Garmin packet buffer 
                            void *, to keep the packet details out of the 
-                           gloabl contect and save spave */
+                           global context and save spave */
     long GarminBufferLen;                  /* current GarminBuffer Length */
 #endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
@@ -131,6 +129,12 @@ struct gps_device_t {
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 
     struct gps_context_t	*context;
+#ifdef NTPSHM_ENABLE
+    int shmTime;
+# ifdef PPS_ENABLE
+    int shmTimeP;
+# endif /* NTPSHM_ENABLE */
+#endif /* NTPSHM_ENABLE */
 };
 
 #define IS_HIGHEST_BIT(v,m)	!(v & ~((m<<1)-1))
@@ -163,8 +167,10 @@ extern void gpsd_binary_quality_dump(struct gps_device_t *, char *);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *);
-extern int ntpshm_put(struct gps_context_t *, double);
-extern int ntpshm_pps(struct gps_context_t *,struct timeval *);
+extern int ntpshm_alloc(struct gps_context_t *context);
+extern int ntpshm_free(struct gps_context_t *context, int segment);
+extern int ntpshm_put(struct gps_device_t *, double);
+extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 
 extern void ecef_to_wgs84fix(struct gps_fix_t *,
 			     double, double, double, 
