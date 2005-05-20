@@ -932,13 +932,12 @@ int main(int argc, char *argv[])
 
 #if DBUS_ENABLE
     /* we need to connect to dbus as root */
-
-    if (initialize_dbus_conection ()) {
+    if (initialize_dbus_connection()) {
 	/* the connection could not be started */
-	gpsd_report (2, "Unable to connect to the DBUS system bus\n");
+	gpsd_report (2, "unable to connect to the DBUS system bus\n");
     } else
-	gpsd_report (2, "Successfully connected to the DBUS system bus\n");
-#endif
+	gpsd_report (2, "successfully connected to the DBUS system bus\n");
+#endif /* DBUS_ENABLE */
     
     /*
      * Drop privileges.  Up to now we've been running as root.  Instead,
