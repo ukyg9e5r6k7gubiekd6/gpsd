@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!-- lifted from troff+man by doclifter -->
+<refentry>
+<refentryinfo><date>13 May 2005</date></refentryinfo>
+<refmeta>
+<refentrytitle>3</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class='source'>Linux</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>libgpsmm</refname>
+<refpurpose>service library for communicationg with the GPS daemon</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+<funcsynopsis>
+<funcsynopsisinfo>
+
+C++:
+
+#include &lt;libgpsmm&gt;
+
+</funcsynopsisinfo>
+<funcprototype>
+<funcdef>struct gps_data_t *<function>gps_open</function></funcdef>
+    <paramdef>char *<parameter>host</parameter></paramdef>
+    <paramdef>char * <parameter>port</parameter></paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>struct gps_data_t *<function>gps_open</function></funcdef>
+    <paramdef>void</paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>int <function>gps_query</function></funcdef>
+    <paramdef>char *<parameter>requests</parameter></paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>int <function>gps_poll</function></funcdef>
+    <paramdef>void</paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>void <function>gps_set_callback</function></funcdef>
+    <paramdef>void (*<parameter>callback</parameter>)(struct gps_data_t *sentence, char *buf)</paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>void <function>gps_del_callback</function></funcdef>
+    <paramdef>void</paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><emphasis remap='B'>libgpsmm</emphasis> is mere wrapper over
+<emphasis remap='B'>libgps</emphasis>. Method names are the same as
+the analogue C functions. For a detailed description of the function
+please read
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+<function>gps_open()</function> must be called after class constructor and before any other method
+(it is not inside the constructor since it may fail, but constructors have no return value).
+The analogue of the C function <function>gps_close()</function> is in the destructor.</para>
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='author'><title>AUTHOR</title>
+<para>Alfredo Pironti &lt;alfredio@users.sourceforge.net&gt;.</para>
+</refsect1>
+</refentry>
+

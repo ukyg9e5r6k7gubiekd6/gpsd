@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <pthread.h>
 
 #include "gpsd.h"
 
@@ -428,6 +429,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
  * return: 0, success
  *        -1, read error
  */
+
 int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
@@ -438,7 +440,7 @@ int gps_poll(struct gps_data_t *gpsdata)
     /* the daemon makes sure that every read is NUL-terminated */
     n = read(gpsdata->gps_fd, buf, sizeof(buf)-1);
     if (n <= 0) {
-        /* error or nothiung read */
+	 /* error or nothing read */    
 	return -1;
     }
     buf[n] = '\0';
@@ -459,6 +461,50 @@ int gps_query(struct gps_data_t *gpsdata, const char *requests)
     if (write(gpsdata->gps_fd, requests, strlen(requests)) <= 0)
 	return -1;
     return gps_poll(gpsdata);
+}
+
+static void *poll_gpsd(void *args) 
+/* helper for the thread launcher */
+{
+    int oldtype, oldstate;
+    int res;
+    struct gps_data_t *gpsdata;
+
+    /* set thread parameters */
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,&oldstate);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype); /* we want to be canceled also when blocked on gps_poll() */
+    gpsdata = (struct gps_data_t *) args;
+    do {
+	res = gps_poll(gpsdata); /* this is not actually polling */
+    } while 
+	(res == 0);
+    /* if we are here an error occured with gpsd */
+    return NULL;
+}
+
+int gps_set_callback(struct gps_data_t *gpsdata, 
+		     void (*callback)(struct gps_data_t *sentence, char *buf),
+		     pthread_t *handler) 
+/* set an asynchronous callback and launch a thread for it */
+{
+    if (gpsdata->raw_hook != NULL)
+	return 0;
+    gps_set_raw_hook(gpsdata,callback); /* set the callback function */
+    gps_query(gpsdata,"w+\n");	/* ensure gpsd is in watcher mode, so we'll have data to read */
+
+    /* start the thread which will read data from gpsd */
+    return pthread_create(handler,NULL,poll_gpsd,(void*)gpsdata);
+}
+
+int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
+/* delete asynchronous callback and kill its thread */
+{
+    int res;
+    res = pthread_cancel(*handler);	/* we cancel the whole thread */
+    if (res == 0) 			/* tell gpsd to stop sending data */
+	gps_query(gpsdata,"w-\n");	/* disable watcher mode */
+    gps_set_raw_hook(gpsdata,NULL);	/* finally we cancel the callback */
+    return res;
 }
 
 #ifdef TESTMAIN
@@ -557,3 +603,5 @@ main(int argc, char *argv[])
 }
 
 #endif /* TESTMAIN */
+
+

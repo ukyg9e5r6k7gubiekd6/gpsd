@@ -13,7 +13,7 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
-bin_PROGRAMS = $(BUILD_PROGS) sirfmon
+bin_PROGRAMS = $(BUILD_PROGS) sirfmon gpsmm_test
 bin_SCRIPTS = gpsprof gpsfake 
 
 #
@@ -33,6 +33,12 @@ xgpsspeed_SOURCES = \
 	xgpsspeed.icon
 xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
+#
+# Build gpsmm_test
+#
+gpsmm_test_SOURCES = \
+	gpsmm_test.cpp
+gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgpsmm.la -lm
 
 #
 # Build gpsd
@@ -52,10 +58,10 @@ sirfmon_SOURCES = sirfmon.c
 sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build shared library
+# Build shared libraries
 #
 libgps_la_LDFLAGS = -version-number 12:0:0
-lib_LTLIBRARIES = libgps.la
+lib_LTLIBRARIES = libgps.la libgpsmm.la
 
 libgps_la_SOURCES = \
 	netlib.c \
@@ -73,7 +79,11 @@ libgps_la_SOURCES = \
 	sirf.c \
 	report.c
 
-libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET)
+libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
+
+libgpsmm_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD) libgps.la
+libgpsmm_la_SOURCES = \
+	libgpsmm.cpp
 
 #
 # Create Manpages
@@ -82,6 +92,7 @@ man_MANS = \
 	gpsd.8 \
 	xgps.1 \
 	libgps.3 \
+	libgpsmm.3 \
 	libgpsd.3 \
 	gpsprof.1 \
 	gpsfake.1 \
@@ -95,6 +106,9 @@ xgps.1 xgpsspeed.1: xgps.xml
 
 libgps.3: libgps.xml
 	-$(XMLTO) man libgps.xml
+
+libgpsmm.3: libgpsmm.xml
+	-$(XMLTO) man libgpsmm.xml
 
 libgpsd.3: libgpsd.xml
 	-$(XMLTO) man libgpsd.xml
@@ -120,7 +134,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = gps.h gpsd.h gpsutils.h
+include_HEADERS = gps.h gpsd.h gpsutils.h libgpsmm.h
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \

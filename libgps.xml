@@ -45,6 +45,17 @@ C:
 <funcdef>void <function>gps_close</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
+<funcprototype>
+<funcdef>void <function>gps_set_callback</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>void (*<parameter>callback</parameter>)(struct gps_data_t *sentence, char *buf)</paramdef>
+    <paramdef>pthread_t *<parameter>handler</parameter></paramdef>
+</funcprototype>
+<funcprototype>
+<funcdef>void <function>gps_del_callback</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>pthread *<parameter>handler</parameter></paramdef>
+</funcprototype>
 <funcsynopsisinfo>
 
 Python:
@@ -107,6 +118,33 @@ set documented at
 This function returns a 0 on success, or a -1 if there was a
 Unix-level read error.</para>
 
+<para><function>gps_set_raw_hook()</function> takes a function you
+specify and run it (synchronously) on the raw data pulled by a
+<function>gpsd_query()</function> or <function>gpsd_poll()</function>
+call.  The arguments passed to this hook will be a pointer to a
+structure containing parsed data, and a buffer containining the
+raw <application>gpsd</application> response.</para>
+
+<para><function>gps_set_callback()</function> takes a function you
+specify and run it asynchronously each time new data arrives from
+<application>gpsd</application>, using POSIX threads.  For example,
+you can call gps_set_callback(gpsdata, my_function, handler) once in
+your program, and from there on your gpsdata structure will be parsed
+by your <function>my_function()</function> each time new data are
+available.  <function>my_function()</function> could change some
+global variables in your program based on received data; it is your
+responsibility to ensure that your program uses mutexes or other
+mechanisms to avoid race conditions.  Note that you can only have one
+callback active for one gpsdata structure. If you call
+<function>gps_set_callback()</function> twice, the second time it will
+replace the current callback function.  Also note that this function
+will fail, returning zero, if you have a synchronous raw-mode hook set.</para>
+
+<para><function>gps_del_callback()</function> deregisters the callback
+function previously set with <function>gps_set_callback()</function>.
+After the invocation of this funcion no operation will be done when
+new data arrives.</para>
+
 <para>Consult <filename>gps.h</filename> to learn more about the data members 
 and associated timestamps.  Note that information will accumulate
 in the session structure over time, and the 'valid' field is not
@@ -115,10 +153,11 @@ zero that field when appropriate and to keep an eye on the fix
 and sentence timestamps.</para>
 
 <para>The Python implementation supports the same facilities as the C
-library.  <function>gps_open()</function> is replaced by the
-initialization of a gps session object; the other calls are methods of
-that object.  Resources within the session object will be properly
-released when it is garbage-collected.</para>
+library, except there is as yet no thread support.
+<function>gps_open()</function> is replaced by the initialization of a
+gps session object; the other calls are methods of that object.
+Resources within the session object will be properly released when it
+is garbage-collected.</para>
 
 </refsect1>
 
@@ -127,11 +166,12 @@ released when it is garbage-collected.</para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
 <refsect1 id='author'><title>AUTHOR</title>
-<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;.</para>
+<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, Callback methods added by Alfredo Pironti &lt;alfredio@users.sourceforge.net&gt;.</para>
 </refsect1>
 </refentry>
 

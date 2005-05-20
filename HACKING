@@ -3,6 +3,15 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 If you're looking for things to hack on, first see the TODO file.
 
+** The license on contributions
+
+The GPSD libraries are under the BSD license.  Please do not send 
+contributions with GPL attached!
+
+The reason for this policy is to avoid making people nervous about
+linking the GPSD libraries to applications that may be under other
+kicenses (such as MIT, BSD, AFL, etc.).
+
 ** Debugging
 
 For debugging purposes, it may be helpful to configure with --disable-shared.
