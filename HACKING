@@ -209,6 +209,26 @@ specified.  Presently, here's how the autoconfig works.
 The outcome is that we know exactly what we're looking at, without any
 driver-type or baud rate options.
 
+** Don't add options!
+
+If you send a patch that adds a command-line option to the daemon, it
+will almost certainly be refused.  Ditto for any patch that requires
+gpsd to parse a dotfile.  
+
+One of the major objectives of this project is for gpsd *not to
+require administration* -- under Linux, at least.  It autobauds,
+it does protocol discovery, and it's activated by the hotplug
+system.  Arranging these things involved quite a lot of work, 
+and we're not willing to lose the zero-configuration property
+that work gained us.
+
+Instead of adding a command-line option to support whatever feature
+you had in mind, try to figure out a way that the feature can
+autoconfigure itself by doing runtime checks.  If you're not clever
+enough to manage that, consider whether your feature control might be
+implemented with an extension to the gpsd protocol or the
+control-socket command set.
+
 ** Error modeling
 
 To estimate errors (which we must do if the GPS isn't nice like a
