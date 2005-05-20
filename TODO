@@ -4,28 +4,11 @@ will unfold thenm again.
 
 ** Bugs:
 
-*** Problems with the leap-second offset
-
-Remco, using a SiRF chip at level 231, reports he is still seeing a
-10-second offset in his reported GPS times (that is, even after the
-13-second leap-second correction).  Rob Janssen and I, with the same
-hardware, aren't seeing this.
-
-*** Devicename pointer may get clobbered during very long runs
-
-Wallace E. Owen <owen@titan.com> and Rainer Scholz <ras@sigos.de>,
-who may or may not be different people :-), have reported that after
-gpsd has been running for a long time (5 hours in Rainer's original
-report) something clobbers the device name and zeros it out.  Rainer
-seems to have established that this is due to some change introduced
-between 2.21 and 2.22; I've sent him a diff which we're going to try
-to whittle down until we can figure out what.
-
 *** No data from BU-303?
 
-Roeland Th. Jansen <roeland@linux-it.nl> was reporting no data from
-a BU-303.  I have a BU-303 and it's working fine.  I don't know if
-he has checked out SVN head recently.
+Roeland Th. Jansen <roeland@linux-it.nl> was reporting no data from a
+BU-303 running under SuSE 9.9.  I have a BU-303 and it's working fine.
+I don't know if he has checked out SVN head recently.
 
 ** To do:
 
