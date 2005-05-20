@@ -341,12 +341,15 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
                 There my be up to three GSV sentences in a data packet
      */
     int n, fldnum;
-    if (count <= 3)
+    if (count <= 3) {
+	gpsd_zero_satellites(out);
         return ERROR_SET;
+    }
     out->await = atoi(field[1]);
-    if (sscanf(field[2], "%d", &out->part) < 1)
+    if (sscanf(field[2], "%d", &out->part) < 1) {
+	gpsd_zero_satellites(out);
         return ERROR_SET;
-    else if (out->part == 1)
+    } else if (out->part == 1)
 	gpsd_zero_satellites(out);
 
     for (fldnum = 4; fldnum < count; ) {
@@ -384,6 +387,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 	if (out->azimuth[n])
 	    goto sane;
     gpsd_report(3, "Satellite data no good.\n");
+    gpsd_zero_satellites(out);
     return ERROR_SET;
   sane:
     gpsd_report(3, "Satellite data OK.\n");
