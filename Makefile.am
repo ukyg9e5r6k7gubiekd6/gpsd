@@ -131,7 +131,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = gps.h gpsd.h gpsutils.h libgpsmm.h
+include_HEADERS = gps.h gpsd.h gpsutils.h libgpsmm.h timebase.h
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \

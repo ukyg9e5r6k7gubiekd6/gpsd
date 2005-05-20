@@ -735,9 +735,8 @@ parameters <application>gpsd</application> cannot see.</para>
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
 Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the
 start of its update cycle (which most consumer-grade NMEA GPSes do
-not) and your system clock is zeroed or set incorrectly, then the
-century part of the dates <application>gpsd</application> delivers
-will be wrong.</para>
+not) and it is after 2099, then the century part of the dates
+<application>gpsd</application> delivers will be wrong.</para>
 
 </refsect1>
 <refsect1 id='files'><title>FILES</title>

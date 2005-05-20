@@ -32,6 +32,7 @@ struct gps_context_t {
     int valid;
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     int leap_seconds;
+    int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
     struct shmTime *shmTime[NTPSHMSEGS];
     int shmTimeInuse[NTPSHMSEGS];

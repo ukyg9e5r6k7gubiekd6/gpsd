@@ -42,22 +42,9 @@
 #endif
 
 #include "gpsd.h"
+#include "timebase.h"
 
 #define QLEN			5
-
-/*
- * The current (fixed) leap-second correction, and the future Unix
- * time after which to start hunting leap-second corrections from GPS
- * subframe data if the GPS doesn't supply them any more readily.
- * Currently 1 Jan 2006, as the current fixed correction is expected
- * to be good until at least then.  Deferring the check is a hack to
- * speed up fix acquisition -- subframe data is bulky enough to
- * substantially increase latency.  To update LEAP_SECONDS and
- * START_SUBFRAME, see the IERS leap-second bulletin page at:
- * <http://hpiers.obspm.fr/eop-pc/products/bulletins/bulletins.html>
- */
-#define LEAP_SECONDS	13
-#define START_SUBFRAME	1136091600
 
 /*
  * The name of a tty device from which to pick up whatever the local
@@ -68,7 +55,7 @@
 static fd_set all_fds;
 static int debuglevel, in_background = 0;
 static jmp_buf restartbuf;
-static struct gps_context_t context = {0, LEAP_SECONDS,
+static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE,
 #ifdef NTPSHM_ENABLE
 				       {0},
 				       {0},

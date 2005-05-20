@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "gpsd.h"
+#include "timebase.h"
 
 /**************************************************************************
  *
@@ -69,13 +70,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
-    if (!out->nmea_date.tm_year) {
-	struct tm tm;
-	time_t now = time(NULL);
-
-	gmtime_r(&now, &tm);
-	out->nmea_date.tm_year = ((1900+tm.tm_year)/100)*100+DD(ddmmyy+4)-1900;
-    }
+    if (!out->nmea_date.tm_year)
+	out->nmea_date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
     out->nmea_date.tm_mon = DD(ddmmyy+2)-1;
     out->nmea_date.tm_mday = DD(ddmmyy);
 }
