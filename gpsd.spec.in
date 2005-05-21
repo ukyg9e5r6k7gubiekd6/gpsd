@@ -130,7 +130,8 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   potential buffer overrun in the client library.  PPS-thread support is now
   on by default.  Lots of documentation improvements. D-BUS broadcast support 
   by Amaury Jacquot.  Added Alfredo Pironti's thread-callback and C++
-  support.
+  support.  gpsd no longer uses the system clock for anything, so it
+  can be used to set that clock.
 
 * Tue May 17 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.24-1
 - Crazy-speed bug is finally fixed. Autobauding now starts with the
