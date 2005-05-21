@@ -122,7 +122,7 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Fri May 20 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
+* Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 
   Zodiac driver. Command-line arguments to gpsd are now treated as a default 
   device list; -f is still supported but deprecated.  sirfmon now tries not
