@@ -12,26 +12,6 @@ I don't know if he has checked out SVN head recently.
 
 ** To do:
 
-*** Set FIFO threshold to 1 to reduce jitter in serial-message times
-
-This can matter if you're using gpsd as a time reference.
-
-Rob Janssen <gpsd@xs4all.nl>:
->>> Setting the FIFO threshold to 1 can improve things.
->>
->> How does one do this?
->
->#include <linux/serial.h>
->
->use ioctl TIOCGSERIAL to get a struct serial_struct filled with the
->settings of the UART, modify what you want, and write it back using ioctl
->TIOCSSERIAL.
->
->Hmmm, now that I check this in the kernel source it does not seem to be
->possible to set the receive FIFO size from a user program, only the
->transmit FIFO.  However it appears that setting it to 1 will also disable
->the receive FIFO.  You'll have to experiment.
-
 *** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which
@@ -74,11 +54,7 @@ BUS="usb" SYSFS{vendor}="1163" SYSFS{product}="0100" \
 		HOTPLUG="/usr/bin/gps-probe"
 
 More generally, the hotplug code we have is Linux-specific.  OpenBSD
-(at least) features a hotplug daemon with similar capabilities.  There
-has been some debate about going to the cross-platform libusb library
-to do device scanning, but this would create a complex dependency that
-gpsd doesn't now gave, and bring more complexity on board than is
-probably desirable.
+(at least) features a hotplug daemon with similar capabilities.
 
 *** The mess near error modeling
 
