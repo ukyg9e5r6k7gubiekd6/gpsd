@@ -78,7 +78,9 @@ libgps_la_SOURCES = \
 	geoid.c \
 	sirf.c \
 	report.c \
-	libgpsmm.cpp
+	libgpsmm.cpp \
+	gpsutils.h \
+	timebase.h
 
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
@@ -131,7 +133,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = gps.h gpsd.h gpsutils.h libgpsmm.h timebase.h
+include_HEADERS = gps.h gpsd.h libgpsmm.h 
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \
