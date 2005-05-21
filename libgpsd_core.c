@@ -91,7 +91,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 # ifdef PPS_ENABLE
     ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
-# endif /* NTPSHM_ENABLE */
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     if (session->device_type->wrapup)
 	session->device_type->wrapup(session);
@@ -154,7 +154,7 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.online = timestamp();
 #ifdef SIRFII_ENABLE
 	session->satcounter = 0;
-#endif
+#endif /* SIRFII_ENABLE */
 	session->counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	if (session->packet_type == SIRF_PACKET)
@@ -182,7 +182,7 @@ int gpsd_activate(struct gps_device_t *session)
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
 		pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
 	}
-#endif /* PPS_ENABLE */
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
 
 	return session->gpsdata.gps_fd;
