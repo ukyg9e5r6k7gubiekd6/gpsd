@@ -13,7 +13,8 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
-bin_PROGRAMS = $(BUILD_PROGS) sirfmon gpsmm_test
+bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
+check_PROGRAMS = gpsmm_test
 bin_SCRIPTS = gpsprof gpsfake 
 
 #
