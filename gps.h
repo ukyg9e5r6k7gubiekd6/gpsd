@@ -187,6 +187,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 #define METERS_TO_MILES	0.00062137119	/* Meters to miles */
 #define KNOTS_TO_MPH	1.1507794	/* Knots to miles per hour */
 #define KNOTS_TO_KPH	1.852		/* Knots to kilometers per hour */
+#define KNOTS_TO_MPS	0.51444444	/* Knots to meters per second */
 #define MPS_TO_KPH	3.6		/* Meters per second to klicks/hr */
 #define MPS_TO_MPH	2.2369363	/* Meters/second to miles per hour */
 #define MPS_TO_KNOTS	1.9437		/* Meters per second to knots */
