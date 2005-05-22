@@ -308,9 +308,13 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   gpsdata->hdop = 0;
 			   gpsdata->vdop = 0;
 		    } else {
-		        sscanf(sp, "Q=%d %lf %lf %lf",
-			   &gpsdata->satellites_used,
-			   &gpsdata->pdop, &gpsdata->hdop, &gpsdata->vdop);
+		        sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
+			       &gpsdata->satellites_used,
+			       &gpsdata->pdop,
+			       &gpsdata->hdop,
+			       &gpsdata->vdop,
+			       &gpsdata->tdop,
+			       &gpsdata->gdop);
 		        gpsdata->set |= HDOP_SET | VDOP_SET | PDOP_SET;
 		    }
 		    break;

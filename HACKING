@@ -382,7 +382,7 @@ Things we've considered doing and rejected.
 
 Tempting -- it would allow us to do sirfmon-like things with the
 daemon running -- but a bad idea.  It would make denial-of-service 
-attacks on applications using the GPS far too easy.  For examples,
+attacks on applications using the GPS far too easy.  For example,
 suppose the control string were a baud-rate change?
 
 *** Using libusb to do USB device discovery

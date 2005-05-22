@@ -225,9 +225,11 @@ static int handle1003(struct gps_device_t *session)
 {
     int i;
 
+    session->gpsdata.gdop = getw(9) * 1e-2;
     session->gpsdata.pdop = getw(10) * 1e-2;
     session->gpsdata.hdop = getw(11) * 1e-2;
     session->gpsdata.vdop = getw(12) * 1e-2;
+    session->gpsdata.tdop = getw(13) * 1e-2;
     session->gpsdata.satellites = getw(14);
 
     for (i = 0; i < MAXCHANNELS; i++) {

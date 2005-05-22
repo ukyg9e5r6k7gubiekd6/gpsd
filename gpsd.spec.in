@@ -122,6 +122,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Sun May 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Time DOP and total DOP are now passed on from GPSes that report them.
+
 * Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 
   Zodiac driver. Command-line arguments to gpsd are now treated as a default 

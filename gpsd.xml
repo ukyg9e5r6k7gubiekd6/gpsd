@@ -379,16 +379,20 @@ numbers are in degrees, latitude first.</para></listitem>
 <varlistentry>
 <term>q</term>
 <listitem>
-<para>Returns "Q=%d %f %f %f": a count of satellites used in the last
-fix, and three dimensionless dilution-of-precision (DOP) numbers
-&mdash; total, horizontal, and vertical.  These are computed from the
-satellite geometry; they are factors by which to multiply the
-estimated UERE (user error in meters at specified confidence level due
-to ionospheric delay, multipath reception, etc.) to get actual
-circular error ranges in meters at the same confidence level. See also
-the 'e' command.  Note: Some GPSes may fail to report these, or report
-only one of them (often HDOP); a value of 0.0 should be taken
-as an indication that the data is not available.</para>
+<para>Returns "Q=%d %f %f %f %f %f": a count of satellites used in the
+last fix, and five dimensionless dilution-of-precision (DOP) numbers
+&mdash; spherical, horizontal, vertical, time, and total geometric.
+These are computed from the satellite geometry; they are factors by
+which to multiply the estimated UERE (user error in meters at
+specified confidence level due to ionospheric delay, multipath
+reception, etc.) to get actual circular error ranges in meters (or
+seconds) at the same confidence level. See also the 'e' command.
+Note: Some GPSes may fail to report these, or report only one of them
+(often HDOP); a value of 0.0 should be taken as an indication that the
+data is not available.</para>
+
+<para>Note: Older versions of <application>gpsd</application> reported
+only the first three DOP numbers, omitting time DOP and total DOP.</para>
 </listitem>
 </varlistentry>
 
@@ -726,11 +730,11 @@ don't have this problem.  You may run <application>gpsd</application> at
 debug level 4 to see the chipset type and firmware revision
 level.</para>
 
-<para>When using SiRF chips, the VDOP figure and associated error estimates
-are computed by <application>gpsd</application> rather than reported
-by the chip.  The computation does not exactly match what SiRF chips
-do internally, which includes some satellite weighting using
-parameters <application>gpsd</application> cannot see.</para>
+<para>When using SiRF chips, the VDOP/TDOP/GDOP figures and associated
+error estimates are computed by <application>gpsd</application> rather
+than reported by the chip.  The computation does not exactly match
+what SiRF chips do internally, which includes some satellite weighting
+using parameters <application>gpsd</application> cannot see.</para>
 
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
 Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the

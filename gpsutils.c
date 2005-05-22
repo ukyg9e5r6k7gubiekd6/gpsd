@@ -407,4 +407,6 @@ void dop(int channels, struct gps_data_t *gpsdata)
     //gpsdata->hdop = sqrt(inv[0][0] + inv[1][1]);
     gpsdata->vdop = sqrt(inv[1][1]);
     gpsdata->pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
+    gpsdata->tdop = sqrt(inv[3][3]);
+    gpsdata->gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 }

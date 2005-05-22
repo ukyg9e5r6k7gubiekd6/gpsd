@@ -591,8 +591,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'Q':
 	    if (assign_channel(whoami) && (whoami->device->gpsdata.pdop || whoami->device->gpsdata.hdop || whoami->device->gpsdata.vdop))
-		sprintf(phrase, ",Q=%d %.2f %.2f %.2f",
-			whoami->device->gpsdata.satellites_used, whoami->device->gpsdata.pdop, whoami->device->gpsdata.hdop, whoami->device->gpsdata.vdop);
+		sprintf(phrase, ",Q=%d %.2f %.2f %.2f %.2f %.2f",
+			whoami->device->gpsdata.satellites_used, 
+			whoami->device->gpsdata.pdop, 
+			whoami->device->gpsdata.hdop, 
+			whoami->device->gpsdata.vdop,
+			whoami->device->gpsdata.tdop,
+			whoami->device->gpsdata.gdop);
 	    else
 		strcpy(phrase, ",Q=?");
 	    break;

@@ -624,11 +624,11 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	}
 
 	gpsd_binary_fix_dump(session, buf2);
-	/* session->gpsdata.gdop = getb(34) / 5.0; */
+	session->gpsdata.gdop = getb(34) / 5.0;
 	session->gpsdata.pdop = getb(35) / 5.0;
 	session->gpsdata.hdop = getb(36) / 5.0;
 	session->gpsdata.vdop = getb(37) / 5.0;
-	/* session->gpsdata.tdop = getb(38) / 5.0; */
+	session->gpsdata.tdop = getb(38) / 5.0;
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	session->driverstate |= UBLOX;
 	return mask;

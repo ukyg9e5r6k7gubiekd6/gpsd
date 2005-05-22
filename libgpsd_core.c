@@ -69,6 +69,11 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     session->device_type = gpsd_drivers[0];
     session->dsock = -1;
     session->context = context;
+    session->gpsdata.hdop = 0.0;
+    session->gpsdata.vdop = 0.0;
+    session->gpsdata.pdop = 0.0;
+    session->gpsdata.tdop = 0.0;
+    session->gpsdata.gdop = 0.0;
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
