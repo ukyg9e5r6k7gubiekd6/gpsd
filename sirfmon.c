@@ -48,7 +48,7 @@
 
 #define MAXCHANNELS	12
 
-#ifdef M_PII
+#ifdef M_PI1
 #define PI M_PI1
 #else
 #define PI M_PI
@@ -59,7 +59,7 @@
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
-static int LineFd;					/* fd for RS232 line */
+static int gps_fd;					/* fd for RS232 line */
 static int nfix,fix[20];
 static int gmt_offset;
 static int dispmode = 0;
@@ -133,7 +133,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     int st;
     unsigned char	c;
 
-    tcflush(LineFd, TCIOFLUSH);	/* toss stale data */
+    tcflush(gps_fd, TCIOFLUSH);	/* toss stale data */
 
     if (speed) {
 	if (speed < 300)
@@ -160,9 +160,9 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     }
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-    if (tcsetattr(LineFd, TCSANOW, &ttyset) != 0)
+    if (tcsetattr(gps_fd, TCSANOW, &ttyset) != 0)
 	return NO_PACKET;
-    tcflush(LineFd, TCIOFLUSH);
+    tcflush(gps_fd, TCIOFLUSH);
 
     fprintf(stderr, "Hunting at speed %d, %dN%d\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
@@ -170,7 +170,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     /* sniff for NMEA or SiRF packet */
     state = 0;
     for (count = 0; count < SNIFF_RETRIES; count++) {
-	if ((st = read(LineFd, &c, 1)) < 0)
+	if ((st = read(gps_fd, &c, 1)) < 0)
 	    return 0;
 	else
 	    count += st;
@@ -266,7 +266,7 @@ static int hunt_open(int *pstopbits)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		fprintf(stderr, "Switching to SiRF mode...\n");
-		nmea_send(LineFd,"$PSRF100,0,%d,8,1,0", *ip);
+		nmea_send(gps_fd,"$PSRF100,0,%d,8,1,0", *ip);
 		return *ip;
 	    }
 	}
@@ -326,13 +326,13 @@ int main (int argc, char **argv)
 	exit(1);
     }
 
-    if ((LineFd = open(argv[1],O_RDWR)) < 0) {
+    if ((gps_fd = open(argv[1],O_RDWR)) < 0) {
 	perror(argv[1]);
 	return 1;
     }
     
     /* Save original terminal parameters */
-    if (tcgetattr(LineFd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
+    if (tcgetattr(gps_fd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
 	fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
@@ -492,9 +492,9 @@ int main (int argc, char **argv)
 	wrefresh(cmdwin);
 
 	FD_SET(0,&select_set);
-	FD_SET(LineFd,&select_set);
+	FD_SET(gps_fd,&select_set);
 
-	if (select(LineFd + 1,&select_set,NULL,NULL,NULL) < 0)
+	if (select(gps_fd + 1,&select_set,NULL,NULL,NULL) < 0)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
@@ -635,7 +635,7 @@ int main (int argc, char **argv)
 	    }
 	}
 
-	if (/* FD_ISSET(LineFd,&select_set) && */ (len = readpkt(buf)) != EOF)
+	if (/* FD_ISSET(gps_fd,&select_set) && */ (len = readpkt(buf)) != EOF)
 	    decode_sirf(buf,len);
     }
 
@@ -1040,19 +1040,19 @@ static int readbyte(void)
 	struct timeval timeval;
 
 	FD_ZERO(&select_set);
-	FD_SET(LineFd,&select_set);
+	FD_SET(gps_fd,&select_set);
 	timeval.tv_sec = 0;
 	timeval.tv_usec = 500000;
 
-	if (select(LineFd + 1,&select_set,NULL,NULL,&timeval) < 0)
+	if (select(gps_fd + 1,&select_set,NULL,NULL,&timeval) < 0)
 	    return EOF;
 
-	if (!FD_ISSET(LineFd,&select_set))
+	if (!FD_ISSET(gps_fd,&select_set))
 	    return EOF;
 
 	usleep(100000);
 
-	if ((cnt = read(LineFd,inbuf,BUFLEN)) <= 0)
+	if ((cnt = read(gps_fd,inbuf,BUFLEN)) <= 0)
 	    return EOF;
 
 	pos = 0;
@@ -1128,5 +1128,5 @@ static int sendpkt(unsigned char *buf, int len)
 	wprintw(debugwin, " %02x",buf[i]);
     wprintw(debugwin, "\n");
 
-    return (write(LineFd,buf,len) == len);
+    return (write(gps_fd,buf,len) == len);
 }

@@ -2,7 +2,7 @@
 #
 # gpsfake -- test harness for gpsd
 #
-# Simulates a GPS, playing back an NMEA logfile
+# Simulates a GPS, playing back a logfile
 
 import sys, os, time, signal, pty, getopt, tempfile, termios
 

@@ -51,7 +51,7 @@ seconds. Fractional values of seconds are legal.</para>
 
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is
-textual (e.g., NMEA, the text is dumped as well).</para>
+textual (e.g. NMEA, the text is dumped as well).</para>
 
 <para>The -n option suppresses launch of the daemon.  Instead,
 <application>gpsfake</application> will tell you the name of the slave
