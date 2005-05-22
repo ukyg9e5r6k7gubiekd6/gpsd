@@ -54,38 +54,45 @@ static int end_write(int fd, void *d, int len)
 static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *dat, int dlen)
 {
     struct header h;
+    int i;
+    char buf[BUFSIZ];
 
-    h.flags = 0;
     h.sync = 0x81ff;
     h.id = type;
     h.ndata = dlen - 1;
+    h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
     if (session->gpsdata.gps_fd != -1) {
 	end_write(session->gpsdata.gps_fd, &h, sizeof(h));
 	end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
     }
+
+    sprintf(buf,"%04x %04x %04x %04x %04x",h.sync,h.id,h.ndata,h.flags,h.csum);
+    for (i = 0; i < dlen; i++)
+	sprintf(buf+strlen(buf), " %04x", dat[i]);
+
+    gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
 }
 
 static int zodiac_speed_switch(struct gps_device_t *session, int speed)
 {
-    unsigned short data[21];
+    unsigned short data[15];
 
     if (session->sn++ > 32767)
 	session->sn = 0;
       
     memset(data, 0, sizeof(data));
+    /* data is the part of the message starting at word 6 */
     data[0] = session->sn;		/* sequence number */
     data[1] = 1;			/* port 1 data valid */
-    data[8] = 8;			/* port 1 character width */
-    data[9] = 1;			/* port 1 stop bits */
-    data[10] = 0;			/* port 1 parity */
-    data[11] = (short)(log(speed/300)/log(2))+1;       /* port 1 speed */
-    data[12] = data[13] = data[14] = data[15] = 0;
-    data[16] = data[17] = data[18] = data[19] = 0;
-    data[20] = zodiac_checksum(data, 20);
+    data[2] = 1;			/* port 1 character width (8 bits) */
+    data[3] = 0;			/* port 1 stop bits (1 stopbit) */
+    data[4] = 0;			/* port 1 parity (none) */
+    data[5] = (short)(round(log(speed/300)/M_LN2))+1; /* port 1 speed */
+    data[14] = zodiac_checksum(data, 14);
 
-    zodiac_spew(session, 1330, data, 21);
+    zodiac_spew(session, 1330, data, 15);
 
     return speed;	/* it would be nice to error-check this */
 }
@@ -131,13 +138,21 @@ static int zodiac_send_rtcm(struct gps_device_t *session,
 
 static int handle1000(struct gps_device_t *session)
 {
-    session->gpsdata.status        = (getw(10) & 0x1c) ? 0 : 1;
+    /* ticks                      = getl(6); */
+    /* sequence                   = getw(8); */
+    /* measurement_sequence       = getw(9); */
+    session->gpsdata.status       = (getw(10) & 0x1c) ? 0 : 1;
     if (session->gpsdata.status)
 	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->gpsdata.fix.mode = MODE_NO_FIX;
 
+    /* solution_type                 = getw(11); */
     session->gpsdata.satellites_used = getw(12);
+    /* polar_navigation              = getw(13); */
+    /* gps_week                      = getw(14); */
+    /* gps_seconds                   = getl(15); */
+    /* gps_nanoseconds               = getl(17); */
     session->gpsdata.nmea_date.tm_mday = getw(19);
     session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
     session->gpsdata.nmea_date.tm_year = getw(21) - 1900;
@@ -159,10 +174,15 @@ static int handle1000(struct gps_device_t *session)
     session->gpsdata.fix.track     = getw(36) * RAD_2_DEG * 1e-3;
     session->mag_var               = ((short)getw(37)) * RAD_2_DEG * 1e-4;
     session->gpsdata.fix.climb     = ((short)getw(38)) * 1e-2;
+    /* map_datum                   = getw(39); */
     session->gpsdata.fix.eph       = getl(40) * 1e-2;
     session->gpsdata.fix.epv       = getl(42) * 1e-2;
     session->gpsdata.fix.ept       = getl(44) * 1e-2;
     session->gpsdata.fix.eps       = getw(46) * 1e-2;
+    /* clock_bias                  = getl(47) * 1e-2; */
+    /* clock_bias_sd               = getl(49) * 1e-2; */
+    /* clock_drift                 = getl(51) * 1e-2; */
+    /* clock_drift_sd              = getl(53) * 1e-2; */
 
 #if 0
     gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
@@ -193,23 +213,29 @@ static int handle1000(struct gps_device_t *session)
 
 static int handle1002(struct gps_device_t *session)
 {
-    int i, j, prn;
+    int i, j, status, prn;
 
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
+    /* ticks                      = getl(6); */
+    /* sequence                   = getw(8); */
+    /* measurement_sequence       = getw(9); */
+    /* gps_week                   = getw(10); */
+    /* gps_seconds                = getl(11); */
+    /* gps_nanoseconds            = getl(13); */
     for (i = 0; i < MAXCHANNELS; i++) {
+	session->Zv[i] = status = getw(15 + (3 * i));
 	session->Zs[i] = prn = getw(16 + (3 * i));
-	session->Zv[i] = (getw(17 + (3 * i)) & 0xf);
 #if 0
 	gpsd_report(1, "Sat%02d:", i);
-	gpsd_report(1, " used:%d", (getw(15 + (3 * i)) & 1) ? 1 : 0);
-	gpsd_report(1, " eph:%d", (getw(15 + (3 * i)) & 2) ? 1 : 0);
-	gpsd_report(1, " val:%d", (getw(15 + (3 * i)) & 4) ? 1 : 0);
-	gpsd_report(1, " dgps:%d", (getw(15 + (3 * i)) & 8) ? 1 : 0);
+	gpsd_report(1, " used:%d", (status & 1) ? 1 : 0);
+	gpsd_report(1, " eph:%d", (status & 2) ? 1 : 0);
+	gpsd_report(1, " val:%d", (status & 4) ? 1 : 0);
+	gpsd_report(1, " dgps:%d", (status & 8) ? 1 : 0);
 	gpsd_report(1, " PRN:%d", prn);
 	gpsd_report(1, " C/No:%d\n", getw(17 + (3 * i)));
 #endif
-	if (getw(15 + (3 * i)) & 1)
+	if (status & 1)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
 	for (j = 0; j < MAXCHANNELS; j++) {
 	    if (session->gpsdata.PRN[j] != prn)
@@ -225,6 +251,8 @@ static int handle1003(struct gps_device_t *session)
 {
     int i;
 
+    /* ticks              = getl(6); */
+    /* sequence           = getw(8); */
     session->gpsdata.gdop = getw(9) * 1e-2;
     session->gpsdata.pdop = getw(10) * 1e-2;
     session->gpsdata.hdop = getw(11) * 1e-2;
@@ -254,6 +282,8 @@ static int handle1003(struct gps_device_t *session)
 
 static void handle1005(struct gps_device_t *session UNUSED)
 {
+    /* ticks              = getl(6); */
+    /* sequence           = getw(8); */
 #if 0
     int i, numcorrections = getw(12);
 
@@ -278,6 +308,10 @@ static void handle1005(struct gps_device_t *session UNUSED)
 
 static void handle1108(struct gps_device_t *session)
 {
+    /* ticks              = getl(6); */
+    /* sequence           = getw(8); */
+    /* utc_week_seconds   = getl(14); */
+    /* leap_nanoseconds   = getl(17); */
     if ((getw(19) & 3) == 3)
 	session->context->leap_seconds = getw(16);
 #if 0
@@ -318,7 +352,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	mask = handle1002(session);
 	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i]);
+	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i] & 0x0f);
 	}
 	strcat(buf, "*");
 	nmea_add_checksum(buf);

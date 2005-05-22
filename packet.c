@@ -582,7 +582,6 @@ int packet_sniff(struct gps_device_t *session)
 	     * Nyquist's Theorem tells us this is optimal.
 	     */
 	    int delay = 36000000.0 / session->gpsdata.baudrate;
-	    gpsd_report(5, "usleep(%d)\n", delay);
 	    usleep(delay);
 	} else if (packet_get(session, count)) {
 	    /* push back the last packet grabbed */

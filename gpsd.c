@@ -409,7 +409,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    else
 		strcpy(phrase, ",A=?");
 	    break;
-	case 'B':		/* change baud rate (SiRF only) */
+	case 'B':		/* change baud rate (SiRF/Zodiac only) */
 	    if (assign_channel(whoami) && *p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;

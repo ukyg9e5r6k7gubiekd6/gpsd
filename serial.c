@@ -60,8 +60,9 @@ int gpsd_set_speed(struct gps_device_t *session,
     else
       rate =  B115200;
 
-    tcflush(session->gpsdata.gps_fd, TCIOFLUSH);	/* toss stale data */
     if (rate!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
+	gpsd_report(1, "speed %d, %dN%d\n", speed, 9-stopbits, stopbits);
+
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
 	session->ttyset.c_cflag &=~ CSIZE;
@@ -127,13 +128,8 @@ int gpsd_open(struct gps_device_t *session)
 	for (stopbits = 1; stopbits <= 2; stopbits++)
 	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
 		if (ip == rates || *ip != rates[0])
-		{
-		    gpsd_report(1, 
-				"hunting at speed %d, %dN%d\n",
-				*ip, 9-stopbits, stopbits);
 		    if (gpsd_set_speed(session, *ip, stopbits))
 			return session->gpsdata.gps_fd;
-		}
 	session->gpsdata.gps_fd = -1;
     }
     return session->gpsdata.gps_fd;

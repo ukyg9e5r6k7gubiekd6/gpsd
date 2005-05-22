@@ -48,8 +48,8 @@
 
 #define MAXCHANNELS	12
 
-#ifdef M_PI1
-#define PI M_PI1
+#ifdef M_PIl
+#define PI M_PIl
 #else
 #define PI M_PI
 #endif
@@ -657,13 +657,13 @@ static void decode_sirf(unsigned char buf[], int len)
 	wprintw(mid2win, "%8d %8d %8d",getl(1),getl(5),getl(9));
 	wmove(mid2win, 2,6);
 	wprintw(mid2win, "%8.1f %8.1f %8.1f",
-		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
+		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
-		(float)getw(13)/8,(float)getw(15)/8,(float)getw(17)/8);
+		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
 	decode_time(getw(22),getl(24));
 	/* line 4 */
 	wmove(mid2win, 4,49);
-	wprintw(mid2win, "%4.1f",(float)getb(20)/5);	/* HDOP */
+	wprintw(mid2win, "%4.1f",(double)getb(20)/5);	/* HDOP */
 	wmove(mid2win, 4,58);
 	wprintw(mid2win, "%02x",getb(19));		/* Mode 1 */
 	wmove(mid2win, 4,72);
@@ -707,7 +707,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
 
-	    wprintw(mid4win, "%5.1f %c",(float)cn/10,st);
+	    wprintw(mid4win, "%5.1f %c",(double)cn/10,st);
 
 	    if (sv == 0)			/* not tracking? */
 		wprintw(mid4win, "   ");	/* clear other info */
@@ -725,11 +725,11 @@ static void decode_sirf(unsigned char buf[], int len)
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+34+j);
 
-	    printw("%5.1f",(float)cn/10);
+	    printw("%5.1f",(double)cn/10);
 
 	    printw("%9d%3d%5d",getl(off+8),getw(off+12),getw(off+14));
 	    printw("%8.5f %10.5f",
-	    	(float)getl(off+16)/65536,(float)getl(off+20)/1024);
+	    	(double)getl(off+16)/65536,(double)getl(off+20)/1024);
 	}
 	wprintw(debugwin, "RTD 0x05=");
     	break;
@@ -757,9 +757,9 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x09:		/* Throughput */
-	mvwprintw(mid9win, 1, 6,  "%.3f",(float)getw(1)/186);	/*SegStatMax*/
-	mvwprintw(mid9win, 1, 18, "%.3f",(float)getw(3)/186);	/*SegStatLat*/
-	mvwprintw(mid9win, 1, 31, "%.3f",(float)getw(5)/186);	/*SegStatTime*/
+	mvwprintw(mid9win, 1, 6,  "%.3f",(double)getw(1)/186);	/*SegStatMax*/
+	mvwprintw(mid9win, 1, 18, "%.3f",(double)getw(3)/186);	/*SegStatLat*/
+	mvwprintw(mid9win, 1, 31, "%.3f",(double)getw(5)/186);	/*SegStatTime*/
 	mvwprintw(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
 	wprintw(debugwin, "THR 0x09=");
     	break;
@@ -882,16 +882,17 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x62:
 	attrset(A_BOLD);
 	move(2,40);
-	printw("%9.5f %9.5f",RAD2DEG*1e8*getl(1),RAD2DEG*1e8*getl(5));
+	printw("%9.5f %9.5f",(double)(RAD2DEG*1e8*getl(1)),
+			     (double)(RAD2DEG*1e8*getl(5)));
 	move(2,63);
 	printw("%8d",getl(9)/1000);
 
 	move(3,63);
-	printw("%8.1f",(float)getl(17)/1000);
+	printw("%8.1f",(double)getl(17)/1000);
 
 	move(4,54);
 	if (getl(13) > 50) {
-	    float heading = RAD2DEG*1e8*getl(21);
+	    double heading = RAD2DEG*1e8*getl(21);
 	    if (heading < 0)
 		heading += 360;
 	    printw("%5.1f",heading);
@@ -899,7 +900,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    printw("  0.0");
 
 	move(4,63);
-	printw("%8.1f",(float)getl(13)/1000);
+	printw("%8.1f",(double)getl(13)/1000);
 	attrset(A_NORMAL);
 
 	move(5,13);
@@ -980,7 +981,7 @@ static void decode_time(int week, int tow)
     wmove(mid2win, 3,7);
     wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
     wmove(mid2win, 3, 29);
-    wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(float)s/100);
+    wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(double)s/100);
     wmove(mid2win, 4, 8);
     wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100,0));
     wmove(mid2win, 4, 29);
@@ -1003,7 +1004,7 @@ static void decode_ecef(double x, double y, double z,
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
     n = a / sqrt(1.0 - e2*pow(sin(phi),2));
     h = p / cos(phi) - n;
-    h -= wgs84_separation(RAD2DEG*phi,RAD2DEG*lambda);
+    h -= wgs84_separation((double)(RAD2DEG*phi),(double)(RAD2DEG*lambda));
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
     vup = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
@@ -1013,7 +1014,8 @@ static void decode_ecef(double x, double y, double z,
 	heading += 2 * PI;
 
     wmove(mid2win, 1,40);
-    wprintw(mid2win, "%9.5f %9.5f",RAD2DEG*phi,RAD2DEG*lambda);
+    wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
+				   (double)(RAD2DEG*lambda));
     wmove(mid2win, 1,63);
     wprintw(mid2win, "%8d",(int)h);
 
@@ -1023,7 +1025,7 @@ static void decode_ecef(double x, double y, double z,
     wprintw(mid2win, "%8.1f",vup);
 
     wmove(mid2win, 3,54);
-    wprintw(mid2win, "%5.1f",RAD2DEG*heading);
+    wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
     wmove(mid2win, 3,63);
     wprintw(mid2win, "%8.1f",speed);
 }
