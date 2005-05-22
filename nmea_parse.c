@@ -138,7 +138,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	mask = TIME_SET;
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
-	out->fix.speed = atof(field[7]) * KNOTS_TO_KPH;
+	out->fix.speed = atof(field[7]) * KNOTS_TO_MPS;
 	out->fix.track = atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
