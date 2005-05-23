@@ -319,46 +319,47 @@ class gps(gpsdata):
                     if self.fix.epc:
                         self.valid |= CLIMBERR_SET
 	    elif cmd in ('P', 'p'):
-	      (self.fix.latitude, self.fix.longitude) = map(float, data.split())
-              self.valid |= LATLON_SET
+                (self.fix.latitude, self.fix.longitude) = map(float, data.split())
+                self.valid |= LATLON_SET
 	    elif cmd in ('Q', 'q'):
-	      parts = data.split()
-	      self.satellites_used = int(parts[0])
-	      (self.pdop, self.hdop, self.vdop) = map(float, parts[1:])
-              self.valid |= HDOP_SET | VDOP_SET | PDOP_SET
+                parts = data.split()
+                self.satellites_used = int(parts[0])
+                (self.pdop, self.hdop, self.vdop) = map(float, parts[1:])
+                self.valid |= HDOP_SET | VDOP_SET | PDOP_SET
 	    elif cmd in ('S', 's'):
-	      self.status = int(data)
-              self.valid |= STATUS_SET
+                self.status = int(data)
+                self.valid |= STATUS_SET
 	    elif cmd in ('T', 't'):
-	      self.fix.track = float(data)
-              self.valid |= TRACK_SET
+                self.fix.track = float(data)
+                self.valid |= TRACK_SET
 	    elif cmd in ('U', 'u'):
-	      self.fix.climb = float(data)
-              self.valid |= CLIMB_SET
+                self.fix.climb = float(data)
+                self.valid |= CLIMB_SET
 	    elif cmd in ('V', 'v'):
-	      self.fix.speed = float(data)
-              self.valid |= SPEED_SET
+                self.fix.speed = float(data)
+                self.valid |= SPEED_SET
 	    elif cmd in ('X', 'x'):
-              if data == '?':
-                  self.online = -1
-                  self.device = None
-              else:
-                  self.online = float(data)
-                  self.valid |= ONLINE_SET
+                if data == '?':
+                    self.online = -1
+                    self.device = None
+                else:
+                    self.online = float(data)
+                    self.valid |= ONLINE_SET
 	    elif cmd in ('Y', 'y'):
 	      satellites = data.split(":")
-              self.timings.sentence_tag = satellites.pop(0)
-	      self.timings.sentence_time = satellites.pop(0)
+              prefix = satellites.pop(0).split()
+              self.timings.sentence_tag = prefix.pop(0)
+	      self.timings.sentence_time = prefix.pop(0)
               if self.timings.sentence_time != "?":
-                  float(self.timings.sentence_time)
-	      d1 = int(satellites.pop(0))
+                  self.timings.sentence_time = float(self.timings.sentence_time)
+	      d1 = int(prefix.pop(0))
 	      newsats = []
 	      for i in range(d1):
 		newsats.append(gps.satellite(*map(int, satellites[i].split())))
 	      self.satellites = newsats
               self.valid |= SATELLITE_SET
 	    elif cmd in ('Z', 'z'):
-              self.profiling = (data[0] == '1')
+                self.profiling = (data[0] == '1')
             elif cmd == '$':
                 self.timings.collect(*data.split())
 	if self.raw_hook:
@@ -373,12 +374,13 @@ class gps(gpsdata):
             sys.stderr.write("GPS DATA %s\n" % repr(data))
         self.timings.c_recv_time = time.time()
 	self.__unpack(data)
-        if self.timings.sentence_time:
-            basetime = self.timings.sentence_time
-        else:
-            basetime = self.timings.d_xmit_time
-        self.timings.c_decode_time = time.time() - basetime
-        self.timings.c_recv_time -= basetime
+        if self.profiling:
+            if self.timings.sentence_time != '?':
+                basetime = self.timings.sentence_time
+            else:
+                basetime = self.timings.d_xmit_time
+            self.timings.c_decode_time = time.time() - basetime
+            self.timings.c_recv_time -= basetime
         return 0
 
     def query(self, commands):
