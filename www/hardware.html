@@ -54,6 +54,25 @@ states incorrectly that VTG is off by default.</td>
 <td>Probably uses PL2303 but we have not verified this.</td>
 </tr>
 <tr>
+<td><a href="http://www.haicom.com.tw/gps303s.shtml">Haicom HI-303S</a></td>
+<td>Good</td>
+<td><a href="http://www.haicom.com.tw/">Haicom</a></td>
+<td>RS232</td>
+<td>SiRFII XTrac</td>
+<td>2.25</td>
+<td>NMEA V2.2</td>
+<td>GPGGA,<br>
+GPGSA,<br>
+GPGSV,<br>
+GPRMC,<br>
+GPVTG</td>
+<td>
+NMEA works, but (oddly) SiRF binary does not.  This device seems to ignore
+the $PSRF100 mode switch.
+Denis Perchine &lt;dyp&#x40;perchine.com&gt;
+</td>
+</tr>
+<tr>
 <td><a href='bu_303b.html'>BU-303</a></td>
 <td>Excellent</d>
 <td>SiRF-II + PL2303</td>
