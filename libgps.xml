@@ -134,8 +134,7 @@ by your <function>my_function()</function> each time new data are
 available.  <function>my_function()</function> could change some
 global variables in your program based on received data; it is your
 responsibility to ensure that your program uses mutexes or other
-mechanisms to avoid race conditions. Note that this function
-will fail, returning -1, if you have a synchronous raw-mode hook set.</para>
+mechanisms to avoid race conditions.</para>
 
 <para><function>gps_del_callback()</function> deregisters the callback
 function previously set with <function>gps_set_callback()</function>.
