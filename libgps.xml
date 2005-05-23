@@ -134,11 +134,8 @@ by your <function>my_function()</function> each time new data are
 available.  <function>my_function()</function> could change some
 global variables in your program based on received data; it is your
 responsibility to ensure that your program uses mutexes or other
-mechanisms to avoid race conditions.  Note that you can only have one
-callback active for one gpsdata structure. If you call
-<function>gps_set_callback()</function> twice, the second time it will
-replace the current callback function.  Also note that this function
-will fail, returning zero, if you have a synchronous raw-mode hook set.</para>
+mechanisms to avoid race conditions. Note that this function
+will fail, returning -1, if you have a synchronous raw-mode hook set.</para>
 
 <para><function>gps_del_callback()</function> deregisters the callback
 function previously set with <function>gps_set_callback()</function>.

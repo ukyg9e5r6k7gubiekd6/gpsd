@@ -160,6 +160,7 @@ struct gps_data_t {
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *);/* Raw-mode hook for GPS data. */
+    void (*thread_hook)(struct gps_data_t *, char *);/* Thread-callback hook for GPS data. */
     int seen_sentences;		/* track which sentences have been seen */
 #define GPRMC	0x01
 #define GPGGA	0x02

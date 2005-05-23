@@ -426,7 +426,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
     if (gpsdata->raw_hook)
 	gpsdata->raw_hook(gpsdata, buf);
-
+    if (gpsdata->thread_hook)
+	gpsdata->thread_hook(gpsdata, buf);
 }
 
 /*
@@ -491,10 +492,12 @@ int gps_set_callback(struct gps_data_t *gpsdata,
 		     pthread_t *handler) 
 /* set an asynchronous callback and launch a thread for it */
 {
-    if (gpsdata->raw_hook != NULL)
-	return 0;
-    gps_set_raw_hook(gpsdata,callback); /* set the callback function */
     gps_query(gpsdata,"w+\n");	/* ensure gpsd is in watcher mode, so we'll have data to read */
+    if (gpsdata->thread_hook != NULL) {
+	gpsdata->thread_hook = callback;
+	return 0;
+    }
+    gpsdata->thread_hook = callback;
 
     /* start the thread which will read data from gpsd */
     return pthread_create(handler,NULL,poll_gpsd,(void*)gpsdata);
@@ -505,9 +508,9 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 {
     int res;
     res = pthread_cancel(*handler);	/* we cancel the whole thread */
+    gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
 	gps_query(gpsdata,"w-\n");	/* disable watcher mode */
-    gps_set_raw_hook(gpsdata,NULL);	/* finally we cancel the callback */
     return res;
 }
 
