@@ -267,6 +267,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	} else if (fv < 232) 
 	    session->driverstate |= SIRF_EQ_231;
 	else {
+	    u_int8_t enablemid52[] = {
+		0xa0, 0xa2, 0x00, 0x08, 
+		0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0xdb, 0xb0, 0xb3};
+	    gpsd_report(4, "Enabling PPS message...\n");
+	    sirf_write(session->gpsdata.gps_fd, enablemid52);
 	    session->driverstate |= SIRF_GE_232;
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
