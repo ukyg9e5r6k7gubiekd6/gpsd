@@ -98,7 +98,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    if (session->device_type->wrapup)
+    if (session->device_type && session->device_type->wrapup)
 	session->device_type->wrapup(session);
 }
 
@@ -359,7 +359,8 @@ void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
     gpsd_deactivate(session);
-    free(session->gpsdata.gps_device);
+    if (session->gpsdata.gps_device)
+	free(session->gpsdata.gps_device);
     free(session);
 }
 

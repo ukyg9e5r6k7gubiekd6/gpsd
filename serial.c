@@ -93,8 +93,6 @@ void gpsd_set_speed(struct gps_device_t *session,
 
 int gpsd_open(struct gps_device_t *session)
 {
-    /* every rate we're likely to see on a GPS */
-
     gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NOCTTY)) < 0) {
 	gpsd_report(1, "device open failed: %s\n", strerror(errno));
@@ -148,6 +146,7 @@ int gpsd_open(struct gps_device_t *session)
 int gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
+    /* every rate we're likely to see on a GPS */
     static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
     if (session->counter++ >= SNIFF_RETRIES) {
