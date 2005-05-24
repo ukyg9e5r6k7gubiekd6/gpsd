@@ -136,7 +136,7 @@ struct gps_data_t {
     /* where and what gpsd thinks the device is */
     char	*gps_device;	/* only valid if non-null. */
     char	*gps_id;	/* only valid if non-null. */
-    unsigned int baudrate, stopbits;	/* RS232 link paramters */
+    unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
     unsigned int driver_mode;	/* whether driver is in native mode or not */
     
     /* device list */

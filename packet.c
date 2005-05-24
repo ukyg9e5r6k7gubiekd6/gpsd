@@ -78,7 +78,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 enum {
    GROUND_STATE,	/* we don't know what packet type to expect */
    NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
-   SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
 
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
    NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
@@ -103,6 +102,7 @@ enum {
    EARTHA_5,		/* EARTHA leader H */
 #endif /* EARTHMATE_ENABLE */
 
+   SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
    SIRF_LEADER_2,	/* seen second character of SiRF leader */
    SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
    SIRF_ACK_LEAD_2,	/* seen c of possible SiRF Ack */
@@ -111,6 +111,11 @@ enum {
    SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
    SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */ 
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
+
+   TSIP_LEADER,		/* we've seen the TSIP leader (DLE) */
+   TSIP_PAYLOAD,	/* we're in TSIP payload */
+   TSIP_DLE,		/* we've seen a DLE in TSIP payload */
+   TSIP_RECOGNIZED,	/* found end of the TSIP packet */
 
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */
    ZODIAC_LEADER_1,	/* saw leading 0xff */
@@ -137,6 +142,10 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
         else if (c == 0xa0)
 	    session->packet_state = SIRF_LEADER_1;
 #endif /* SIRFII_ENABLE */
+#ifdef TSIP_ENABLE
+        else if (c == 0x10)
+	    session->packet_state = TSIP_LEADER;
+#endif /* TSIP_ENABLE */
 #ifdef TRIPMATE_ENABLE
         else if (c == 'A')
 	    session->packet_state = ASTRAL_1;
@@ -314,6 +323,28 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* SIRFII_ENABLE */
+#ifdef TSIP_ENABLE
+    case TSIP_LEADER:
+	if (c == 0x03 || c == 0x10)
+	    session->packet_state = GROUND_STATE;
+	else
+	    session->packet_state = TSIP_PAYLOAD;
+	break;
+    case TSIP_PAYLOAD:
+	if (c == 0x10)
+	    session->packet_state = TSIP_DLE;
+	break;
+    case TSIP_DLE:
+	if (c == 0x03)
+	    session->packet_state = TSIP_RECOGNIZED;
+	break;
+    case TSIP_RECOGNIZED:
+        if (c == 0x10)
+	    session->packet_state = TSIP_LEADER;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+#endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
     case ZODIAC_RECOGNIZED:
@@ -407,15 +438,20 @@ static void packet_accept(struct gps_device_t *session)
 /* packet grab succeeded, move to output buffer */
 {
     int packetlen = session->inbufptr-session->inbuffer;
-    memcpy(session->outbuffer, session->inbuffer, packetlen);
-    session->outbuffer[session->outbuflen = packetlen] = '\0';
+    if (packetlen < sizeof(session->outbuffer)) {
+	memcpy(session->outbuffer, session->inbuffer, packetlen);
+	session->outbuffer[session->outbuflen = packetlen] = '\0';
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Packet type %d accepted %d = %s\n", 
+	gpsd_report(6, "Packet type %d accepted %d = %s\n", 
 		session->packet_type,
 		packetlen,
 		buffer_dump(session->outbuffer, 
 			    session->outbuffer+session->outbuflen));
 #endif /* STATE_DEBUG */
+    } else {
+	gpsd_report(1, "Rejected too long packet type %d len %d\n",
+		session->packet_type,packetlen);
+    }
 }
 
 static void packet_discard(struct gps_device_t *session)
@@ -526,6 +562,16 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
+#ifdef TSIP_ENABLE
+	} else if (session->packet_state == TSIP_RECOGNIZED) {
+	    int len = session->inbufptr - session->inbuffer;
+	    if (len >= 4 && len < 80) {		/* this needs more work */
+		session->packet_type = TSIP_PACKET;
+		packet_accept(session);
+	    } else
+		session->packet_state = GROUND_STATE;
+	    packet_discard(session);
+#endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
  #define getw(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))

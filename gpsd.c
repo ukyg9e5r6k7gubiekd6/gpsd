@@ -432,13 +432,14 @@ static int handle_request(int cfd, char *buf, int buflen)
 			 */
 			tcdrain(whoami->device->gpsdata.gps_fd);
 			usleep(50000);
-			gpsd_set_speed(whoami->device, (speed_t)i, 1);
+			gpsd_set_speed(whoami->device, (speed_t)i, 'N', 1);
 		    }
 	    }
 	    if (whoami->device)
-		sprintf(phrase, ",B=%d %d N %d", 
+		sprintf(phrase, ",B=%d %d %c %d", 
 		    gpsd_get_speed(&whoami->device->ttyset),
 			9 - whoami->device->gpsdata.stopbits, 
+			whoami->device->gpsdata.parity,
 			whoami->device->gpsdata.stopbits);
 	    else
 		strcpy(phrase, ",B=?");

@@ -254,7 +254,7 @@ struct gps_type_t earthmate = {
 };
 #endif /* EARTHMATE_ENABLE */
 
-extern struct gps_type_t garmin_binary, sirf_binary;
+extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
 
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
@@ -278,6 +278,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef SIRFII_ENABLE
     &sirf_binary, 
 #endif /* SIRFII_ENABLE */
+#ifdef TSIP_ENABLE
+    &tsip_binary, 
+#endif /* TSIP_ENABLE */
     NULL,
 };
 struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

@@ -35,7 +35,7 @@ int gpsd_get_speed(struct termios* ttyctl)
 }
 
 void gpsd_set_speed(struct gps_device_t *session, 
-		   unsigned int speed, unsigned int stopbits)
+		   unsigned int speed, unsigned int parity, unsigned int stopbits)
 {
     unsigned int	rate;
 
@@ -60,19 +60,33 @@ void gpsd_set_speed(struct gps_device_t *session,
     else
       rate =  B115200;
 
-    if (rate!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
+    if (rate!=cfgetispeed(&session->ttyset) || parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
-	session->ttyset.c_cflag &=~ CSIZE;
+ 	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
+ 	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
+ 	session->ttyset.c_cflag |= (stopbits==2 ? CS7|CSTOPB : CS8);
+ 	switch (parity)
+ 	{
+ 	case 'E':
+ 	    session->ttyset.c_iflag |= INPCK;
+ 	    session->ttyset.c_cflag |= PARENB;
+ 	    break;
+ 	case 'O':
+ 	    session->ttyset.c_iflag |= INPCK;
+ 	    session->ttyset.c_cflag |= PARENB | PARODD;
+ 	    break;
+ 	}	session->ttyset.c_cflag &=~ CSIZE;
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return;
 	tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
-    gpsd_report(1, "speed %d, %dN%d\n", speed, 9-stopbits, stopbits);
+    gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
 
     session->gpsdata.baudrate = speed;
+    session->gpsdata.parity = parity;
     session->gpsdata.stopbits = stopbits;
     packet_reset(session);
 }
@@ -112,15 +126,13 @@ int gpsd_open(struct gps_device_t *session)
 	 * 200 (and possibly other USB GPSes) gets completely hosed
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
 	 */
-	session->ttyset.c_cflag &= ~(PARENB | CRTSCTS);
+	session->ttyset.c_cflag &= ~(PARENB | PARODD | CBAUDEX | CRTSCTS);
 	session->ttyset.c_cflag |= CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
-	session->ttyset.c_oflag = (ONLCR);
 
 	session->counter = session->baudindex = 0;
-	session->gpsdata.stopbits = 1;
 	gpsd_set_speed(session, 
-		       gpsd_get_speed(&session->ttyset_old), 1);
+		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
     return session->gpsdata.gps_fd;
 }
@@ -133,7 +145,6 @@ int gpsd_open(struct gps_device_t *session)
  */
 #define SNIFF_RETRIES	600
 
-#include "stdio.h"
 int gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
@@ -148,7 +159,7 @@ int gpsd_next_hunt_setting(struct gps_device_t *session)
 	}
 	gpsd_set_speed(session, 
 		       rates[session->baudindex],
-		       session->gpsdata.stopbits);
+		       'N', session->gpsdata.stopbits);
     }
 
     return 1;	/* keep hunting */

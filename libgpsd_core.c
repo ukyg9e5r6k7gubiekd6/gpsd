@@ -337,6 +337,8 @@ int gpsd_poll(struct gps_device_t *session)
 			    session->packet_type);
 		if (session->packet_type == SIRF_PACKET)
 		    gpsd_switch_driver(session, "SiRF-II binary");
+		else if (session->packet_type == TSIP_PACKET)
+		    gpsd_switch_driver(session, "Trimble TSIP");
 		else if (session->packet_type == NMEA_PACKET)
 		    gpsd_switch_driver(session, "Generic NMEA");
 		else if (session->packet_type == ZODIAC_PACKET)

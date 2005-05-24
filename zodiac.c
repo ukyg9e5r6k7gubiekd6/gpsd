@@ -341,7 +341,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	return 0;
 
     snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%d", id);
-    gpsd_report(5, "ID %d\n", id);
+
     switch (id) {
     case 1000:
 	mask = handle1000(session);

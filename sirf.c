@@ -179,7 +179,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= gpstime_to_unix(getw(22), getl(24)*1e-2, -session->context->leap_seconds);
+		= gpstime_to_unix(getw(22), getl(24)*1e-2) - session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 		if (!(session->time_seen & TIME_SEEN_GPS_2))
@@ -206,7 +206,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     case 0x04:		/* Measured tracker data out */
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.sentence_time
-	    = gpstime_to_unix(getw(1), getl(3)*1e-2, -session->context->leap_seconds);
+	    = gpstime_to_unix(getw(1), getl(3)*1e-2) - session->context->leap_seconds;
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
 	    session->gpsdata.PRN[st]       = getb(off);

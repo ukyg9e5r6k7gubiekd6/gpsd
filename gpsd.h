@@ -87,6 +87,7 @@ struct gps_device_t {
 #define NMEA_PACKET	0
 #define SIRF_PACKET	1
 #define ZODIAC_PACKET	2
+#define TSIP_PACKET	3
     unsigned int baudindex;
     unsigned int packet_state;
     unsigned int packet_length;
@@ -126,9 +127,9 @@ struct gps_device_t {
 #ifdef NTPSHM_ENABLE
     unsigned int time_seen;
 #define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
-#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 1? */
+#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
-#define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 1? */
+#define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 #endif /* NTPSHM_ENABLE */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 
@@ -161,7 +162,7 @@ extern int packet_sniff(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
 extern int gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
-extern void gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int);
+extern void gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int, unsigned int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_device_t *);
 
