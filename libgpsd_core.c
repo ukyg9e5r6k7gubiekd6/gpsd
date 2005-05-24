@@ -312,7 +312,7 @@ int gpsd_poll(struct gps_device_t *session)
     if (waiting < 0)
 	return 0;
     else if (!waiting) {
-	if (timestamp()>session->gpsdata.online+session->device_type->cycle+1){
+	if (session->device_type && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
