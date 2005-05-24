@@ -126,7 +126,8 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 - Time DOP and total DOP are now passed on from GPSes that report them.
   Ensure longitude has a leading zero when <100, for compatibility with 
   gpsdrive.  Synchronous and thread hooks are now separate in the client
-  library.
+  library.  Packet-sniffing on a new device no longer holds up incoming
+  data on already-connected ones.
 
 * Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 

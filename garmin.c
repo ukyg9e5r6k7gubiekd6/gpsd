@@ -211,7 +211,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     unsigned int i = 0, j = 0;
     double track;
 
-    gpsd_report(3, "PrintPacket() ");
+    gpsd_report(3, "PrintPacket()\n");
     if ( 4096 < pkt->mDataSize) {
 	gpsd_report(3, "bogus packet, size too large=%d\n", pkt->mDataSize);
 	return 0;
@@ -220,7 +220,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%d", pkt->mPacketType);
     switch ( pkt->mPacketType ) {
     case GARMIN_LAYERID_TRANSPORT:
-	gpsd_report(3, "Transport ");
+	gpsd_report(3, "Transport\n");
 	switch( pkt->mPacketId ) {
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_REQ:
 	    gpsd_report(3, "Start Session req\n");
@@ -239,7 +239,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	}
 	break;
     case GARMIN_LAYERID_APPL:
-	gpsd_report(3, "Appl ");
+	gpsd_report(3, "Appl\n");
 	switch( pkt->mPacketId ) {
 	case GARMIN_PKTID_PRODUCT_RQST:
 	    gpsd_report(3, "Product Data req\n");
@@ -427,7 +427,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	break;
     case 75:
 	// private
-	gpsd_report(3, "Private ");
+	gpsd_report(3, "Private\n");
 	switch( pkt->mPacketId ) {
 	case PRIV_PKTID_INFO_REQ:
 	    gpsd_report(3, "ID: Info Req\n");

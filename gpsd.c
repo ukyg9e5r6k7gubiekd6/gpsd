@@ -140,11 +140,11 @@ static void usage(void)
 static int have_fix(struct gps_device_t *device)
 {
     if (!device) {
-	gpsd_report(4, "Client has no device");
+	gpsd_report(4, "Client has no device\n");
 	return 0;
     }
 #define VALIDATION_COMPLAINT(level, legend) \
-        gpsd_report(level, legend " (status=%d, mode=%d).\r\n", \
+        gpsd_report(level, legend " (status=%d, mode=%d).\n", \
 		    device->gpsdata.status, device->gpsdata.fix.mode)
     if ((device->gpsdata.status == STATUS_NO_FIX) != (device->gpsdata.fix.mode == MODE_NO_FIX)) {
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
@@ -1132,7 +1132,7 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		int buflen;
 
-		gpsd_report(3, "checking %d \n", cfd);
+		gpsd_report(3, "checking %d\n", cfd);
 		if ((buflen = read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
 		} else {

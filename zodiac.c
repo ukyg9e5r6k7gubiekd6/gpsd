@@ -227,12 +227,12 @@ static int handle1002(struct gps_device_t *session)
 	session->Zv[i] = status = getw(15 + (3 * i));
 	session->Zs[i] = prn = getw(16 + (3 * i));
 #if 0
-	gpsd_report(1, "Sat%02d:", i);
-	gpsd_report(1, " used:%d", (status & 1) ? 1 : 0);
-	gpsd_report(1, " eph:%d", (status & 2) ? 1 : 0);
-	gpsd_report(1, " val:%d", (status & 4) ? 1 : 0);
-	gpsd_report(1, " dgps:%d", (status & 8) ? 1 : 0);
-	gpsd_report(1, " PRN:%d", prn);
+	gpsd_report(1, "Sat%02d:\n", i);
+	gpsd_report(1, " used:%d\n", (status & 1) ? 1 : 0);
+	gpsd_report(1, " eph:%d\n", (status & 2) ? 1 : 0);
+	gpsd_report(1, " val:%d\n", (status & 4) ? 1 : 0);
+	gpsd_report(1, " dgps:%d\n", (status & 8) ? 1 : 0);
+	gpsd_report(1, " PRN:%d\n", prn);
 	gpsd_report(1, " C/No:%d\n", getw(17 + (3 * i)));
 #endif
 	if (status & 1)
@@ -294,14 +294,14 @@ static void handle1005(struct gps_device_t *session UNUSED)
     gpsd_report(1, "Age of last correction in seconds: %d\n", getw(11));
     gpsd_report(1, "Number of corrections: %d\n", getw(12));
     for (i = 0; i < numcorrections; i++) {
-	gpsd_report(1, "Sat%02d:", getw(13+i) & 0x3f);
-	gpsd_report(1, "ephemeris:%d", (getw(13+i) & 64) ? 1 : 0);
-	gpsd_report(1, "rtcm corrections:%d", (getw(13+i) & 128) ? 1 : 0);
-	gpsd_report(1, "rtcm udre:%d", (getw(13+i) & 256) ? 1 : 0);
-	gpsd_report(1, "sat health:%d", (getw(13+i) & 512) ? 1 : 0);
-	gpsd_report(1, "rtcm sat health:%d", (getw(13+i) & 1024) ? 1 : 0);
-	gpsd_report(1, "corrections state:%d", (getw(13+i) & 2048) ? 1 : 0);
-	gpsd_report(1, "iode mismatch:%d", (getw(13+i) & 4096) ? 1 : 0);
+	gpsd_report(1, "Sat%02d:\n", getw(13+i) & 0x3f);
+	gpsd_report(1, "ephemeris:%d\n", (getw(13+i) & 64) ? 1 : 0);
+	gpsd_report(1, "rtcm corrections:%d\n", (getw(13+i) & 128) ? 1 : 0);
+	gpsd_report(1, "rtcm udre:%d\n", (getw(13+i) & 256) ? 1 : 0);
+	gpsd_report(1, "sat health:%d\n", (getw(13+i) & 512) ? 1 : 0);
+	gpsd_report(1, "rtcm sat health:%d\n", (getw(13+i) & 1024) ? 1 : 0);
+	gpsd_report(1, "corrections state:%d\n", (getw(13+i) & 2048) ? 1 : 0);
+	gpsd_report(1, "iode mismatch:%d\n", (getw(13+i) & 4096) ? 1 : 0);
     }
 #endif
 }
@@ -328,7 +328,7 @@ static int zodiac_analyze(struct gps_device_t *session)
     unsigned int id = (session->outbuffer[3] << 8) | session->outbuffer[2];
 
     if (session->packet_type != ZODIAC_PACKET) {
-	gpsd_report(2, "zodiac_analyze packet type %d",session->packet_type);
+	gpsd_report(2, "zodiac_analyze packet type %d\n",session->packet_type);
 	return 0;
     }
 
