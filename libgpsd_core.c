@@ -318,7 +318,7 @@ int gpsd_poll(struct gps_device_t *session)
 	} else
 	    return ONLINE_SET;
     } else {
-	int ptype;
+	int packet_length;
 	session->gpsdata.online = timestamp();
 
 	if (!session->inbuflen || session->packet_full) {
@@ -328,11 +328,11 @@ int gpsd_poll(struct gps_device_t *session)
 
 	/* can we get a full packet from the device? */
 	if (session->device_type)
-	    ptype = session->device_type->get_packet(session, waiting);
+	    packet_length = session->device_type->get_packet(session, waiting);
 	else {
-	    ptype = packet_get(session, waiting);
-	    if (ptype) {
-		gpsd_report(5, 
+	    packet_length = packet_get(session, waiting);
+	    if (session->packet_type != BAD_PACKET) {
+		gpsd_report(3, 
 			    "packet sniff finds type %d\n", 
 			    session->packet_type);
 		if (session->packet_type == SIRF_PACKET)
@@ -342,15 +342,14 @@ int gpsd_poll(struct gps_device_t *session)
 		else if (session->packet_type == ZODIAC_PACKET)
 		    gpsd_switch_driver(session, "Zodiac binary");
 		session->gpsdata.d_xmit_time = timestamp();
-	    }
-	    if (ptype == BAD_PACKET && !gpsd_next_hunt_setting(session))
+	    } else if (!gpsd_next_hunt_setting(session))
 		return ERROR_SET;
 	}
 
-	if (!ptype)
+	if (packet_length)
+	    return handle_packet(session);
+	else
 	    return ONLINE_SET;
-
-	return handle_packet(session);
     }
 }
 

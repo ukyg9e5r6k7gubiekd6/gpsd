@@ -451,6 +451,7 @@ static void character_discard(struct gps_device_t *session)
 /* entry points begin here */
 
 int packet_get(struct gps_device_t *session, unsigned int waiting)
+/* grab a packet; returns ether BAD_PACKET or the length */
 {
     int newdata;
 #ifndef TESTMAIN
