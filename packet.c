@@ -444,23 +444,23 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
 }
 #endif /* STATE_DEBUG */
 
-static void packet_accept(struct gps_device_t *session)
+static void packet_accept(struct gps_device_t *session, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
     unsigned int packetlen = session->inbufptr-session->inbuffer;
     if (packetlen < sizeof(session->outbuffer)) {
 	memcpy(session->outbuffer, session->inbuffer, packetlen);
 	session->outbuffer[session->outbuflen = packetlen] = '\0';
+	session->packet_type = packet_type;
 #ifdef STATE_DEBUG
 	gpsd_report(6, "Packet type %d accepted %d = %s\n", 
-		session->packet_type,
-		packetlen,
+		packet_type, packetlen,
 		buffer_dump(session->outbuffer, 
 			    session->outbuffer+session->outbuflen));
 #endif /* STATE_DEBUG */
     } else {
 	gpsd_report(1, "Rejected too long packet type %d len %d\n",
-		session->packet_type,packetlen);
+		packet_type,packetlen);
     }
 }
 
@@ -553,11 +553,9 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
 				&& toupper(csum[1])==toupper(trailer[2]));
 	    }
-	    if (checksum_ok) {
-		session->packet_type = NMEA_PACKET;
-		packet_accept(session);
-	    } else
-		session->packet_state = GROUND_STATE;
+	    if (checksum_ok)
+		packet_accept(session, NMEA_PACKET);
+	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
@@ -566,20 +564,15 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	    for (n = 4; n < (size_t)(trailer - session->inbuffer); n++)
 		crc += session->inbuffer[n];
 	    crc &= 0x7fff;
-	    if (checksum == crc) {
-		session->packet_type = SIRF_PACKET;
-		packet_accept(session);
-	    } else
-		session->packet_state = GROUND_STATE;
+	    if (checksum == crc)
+		packet_accept(session, SIRF_PACKET);
+	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #ifdef TSIP_ENABLE
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
-	    int len = session->inbufptr - session->inbuffer;
-	    if (len >= 4 && len < MAX_PACKET_LENGTH) {
-		session->packet_type = TSIP_PACKET;
-		packet_accept(session);
-	    } else
-		session->packet_state = GROUND_STATE;
+	    if ((session->inbufptr - session->inbuffer) >= 4)
+		packet_accept(session, TSIP_PACKET);
+	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
@@ -591,14 +584,13 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 		sum += getw(5+n);
 	    sum *= -1;
 	    if (len == 0 || sum == getw(5 + len)) {
-		session->packet_type = ZODIAC_PACKET;
-		packet_accept(session);
+		packet_accept(session, ZODIAC_PACKET);
 	    } else {
 		gpsd_report(4,
 		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
 			sum, len, getw(5 + len));
-		session->packet_state = GROUND_STATE;
 	    }
+	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #undef getw
 #endif /* ZODIAC_ENABLE */
