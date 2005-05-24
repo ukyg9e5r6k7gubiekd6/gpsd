@@ -551,6 +551,30 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
     return session->outbuflen;
 }
 
+void packet_reset(struct gps_device_t *session)
+/* return the packet machine to the ground state */
+{
+    session->packet_type = BAD_PACKET;
+    session->packet_state = GROUND_STATE;
+    session->inbuflen = 0;
+    session->inbufptr = session->inbuffer;
+}
+
+void packet_pushback(struct gps_device_t *session)
+/* push back the last packet grabbed */
+{
+    if (session->outbuflen + session->inbuflen < MAX_PACKET_LENGTH) {
+	memmove(session->inbuffer+session->outbuflen,
+		session->inbuffer,
+		session->inbuflen);
+	memmove(session->inbuffer,
+		session->outbuffer,
+		session->outbuflen);
+	session->inbuflen += session->outbuflen;
+	session->outbuflen = 0;
+    }
+}
+
 /*
  * This constant controls how long the packet sniffer will spend looking
  * for a packet leader before it gives up.  It *must* be larger than
@@ -563,11 +587,7 @@ int packet_sniff(struct gps_device_t *session)
 /* try to sync up with the packet stream */
 {
     unsigned int n, count = 0;
-    session->packet_type = BAD_PACKET;
-    session->packet_state = GROUND_STATE;
-    session->inbuflen = 0;
-    session->inbufptr = session->inbuffer;
-
+    packet_reset(session);
     gpsd_report(5, "packet_sniff begins\n");
     for (n = 0; n < SNIFF_RETRIES; n += count) {
 	count = 0;
@@ -584,17 +604,7 @@ int packet_sniff(struct gps_device_t *session)
 	    int delay = 36000000.0 / session->gpsdata.baudrate;
 	    usleep(delay);
 	} else if (packet_get(session, count)) {
-	    /* push back the last packet grabbed */
-	    if (session->outbuflen + session->inbuflen < MAX_PACKET_LENGTH) {
-		memmove(session->inbuffer+session->outbuflen,
-			session->inbuffer,
-			session->inbuflen);
-		memmove(session->inbuffer,
-			session->outbuffer,
-			session->outbuflen);
-		session->inbuflen += session->outbuflen;
-		session->outbuflen = 0;
-	    }
+	    packet_pushback(session);
 	    gpsd_report(5, "packet_sniff returns %d\n",session->packet_type);
 	    return session->packet_type;
 	}

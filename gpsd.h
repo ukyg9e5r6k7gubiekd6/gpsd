@@ -152,6 +152,8 @@ extern void nmea_add_checksum(char *);
 
 extern int sirf_parse(struct gps_device_t *, unsigned char *, int);
 
+extern void packet_reset(struct gps_device_t *session);
+extern void packet_pushback(struct gps_device_t *session);
 extern int packet_get(struct gps_device_t *, unsigned int);
 extern int packet_sniff(struct gps_device_t *);
 
