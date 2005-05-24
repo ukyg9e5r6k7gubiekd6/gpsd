@@ -131,7 +131,7 @@ int gps_close(struct gps_data_t *gpsdata)
     return retval;
 }
 
-void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *, char *))
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *, char *, int level))
 {
     gpsdata->raw_hook = hook;
 }
@@ -425,9 +425,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 
     if (gpsdata->raw_hook)
-	gpsdata->raw_hook(gpsdata, buf);
+	gpsdata->raw_hook(gpsdata, buf, 1);
     if (gpsdata->thread_hook)
-	gpsdata->thread_hook(gpsdata, buf);
+	gpsdata->thread_hook(gpsdata, buf, 1);
 }
 
 /*
@@ -488,7 +488,7 @@ static void *poll_gpsd(void *args)
 }
 
 int gps_set_callback(struct gps_data_t *gpsdata, 
-		     void (*callback)(struct gps_data_t *sentence, char *buf),
+		     void (*callback)(struct gps_data_t *sentence, char *buf, int level),
 		     pthread_t *handler) 
 /* set an asynchronous callback and launch a thread for it */
 {

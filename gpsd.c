@@ -285,14 +285,14 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 	    throttled_write(cfd, buf, strlen(buf));
 }
 
-static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence)
+static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence, int level)
 /* hook to be executed on each incoming packet */
 {
     int cfd;
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (subscribers[cfd].raw && !strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device)))
+	if (subscribers[cfd].raw >= level && !strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device)))
 	    throttled_write(cfd, sentence, strlen(sentence));
     }
 }
@@ -604,7 +604,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'R':
 	    if (*p == '=') ++p;
-	    if (*p == '1' || *p == '+') {
+	    if (*p == '2') {
+		assign_channel(whoami);
+		subscribers[cfd].raw = 2;
+		gpsd_report(3, "%d turned on super-raw mode\n", cfd);
+		sprintf(phrase, ",R=2");
+		p++;
+	    } else if (*p == '1' || *p == '+') {
 		assign_channel(whoami);
 		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);

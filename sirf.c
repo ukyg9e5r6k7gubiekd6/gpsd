@@ -115,7 +115,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
     int	st, i, j, cn, navtype, mask;
-    char buf2[MAX_PACKET_LENGTH*3];
+    char buf2[MAX_PACKET_LENGTH*3+2];
     double fv;
     u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				 0x80, 0x00, 0x00, 0x00,
@@ -139,10 +139,18 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     if (len < 0)
 	return 0;
 
-    buf2[0] = '\0';
+    buf2[0] = '=';
+    buf2[1] = '\0';
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
+    strcat(buf2, "\n");
+    if (session->gpsdata.raw_hook)
+	session->gpsdata.raw_hook(&session->gpsdata, buf2, 2);
     gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
+    buf += 4;
+    len -= 8;
+
+
     if (buf[0] != 0xff)
 	snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"MID%d",buf[0]);
 
@@ -665,7 +673,7 @@ static int sirfbin_parse_input(struct gps_device_t *session)
     int st;
 
     if (session->packet_type == SIRF_PACKET){
-	st = sirf_parse(session, session->outbuffer+4, session->outbuflen-8);
+	st = sirf_parse(session, session->outbuffer, session->outbuflen);
 	session->gpsdata.driver_mode = 1;
 	return st;
     } else if (session->packet_type == NMEA_PACKET) {

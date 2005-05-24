@@ -323,7 +323,7 @@ static void handle1108(struct gps_device_t *session)
 static int zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
-    char buf2[MAX_PACKET_LENGTH*3];
+    char buf2[MAX_PACKET_LENGTH*3+2];
     int i, mask = 0;
     unsigned int id = (session->outbuffer[3] << 8) | session->outbuffer[2];
 
@@ -332,9 +332,13 @@ static int zodiac_analyze(struct gps_device_t *session)
 	return 0;
     }
 
-    buf2[0] = '\0';
+    buf2[0] = '=';
+    buf2[1] = '\0';
     for (i = 0; i < session->outbuflen; i++)
 	sprintf(buf2+strlen(buf2), "%02x", session->outbuffer[i]);
+    strcat(buf2, "\n");
+    if (session->gpsdata.raw_hook)
+	session->gpsdata.raw_hook(&session->gpsdata, buf2, 2);
     gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf2);
 
     if (session->outbuflen < 10)
@@ -356,7 +360,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	}
 	strcat(buf, "*");
 	nmea_add_checksum(buf);
-	gpsd_raw_hook(session, buf);
+	gpsd_raw_hook(session, buf, 1);
 	gpsd_binary_quality_dump(session, buf+strlen(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;

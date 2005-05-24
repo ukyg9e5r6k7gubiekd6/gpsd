@@ -48,7 +48,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 #endif /* NTPSHM_ENABLE */
 
 	/* also copy the sentence up to clients in raw mode */
-	gpsd_raw_hook(session, session->outbuffer);
+	gpsd_raw_hook(session, session->outbuffer, 1);
 	return st;
     } else
 	return 0;

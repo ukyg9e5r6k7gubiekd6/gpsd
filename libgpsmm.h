@@ -28,7 +28,7 @@ class gpsmm {
 		struct gps_data_t* open(void); //open() with default values
 		struct gps_data_t* query(const char *request); //put a command to gpsd and return the updated struct
 		struct gps_data_t* poll(void); //block until gpsd returns new data, then return the updated struct
-		int set_callback(void (*hook)(struct gps_data_t *sentence, char *buf)); //set a callback funcition, called each time new data arrives
+		int set_callback(void (*hook)(struct gps_data_t *sentence, char *buf, int level)); //set a callback funcition, called each time new data arrives
 		int del_callback(void); //delete the callback function
 		void clear_fix(void);
 

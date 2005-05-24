@@ -398,13 +398,20 @@ only the first three DOP numbers, omitting time DOP and total DOP.</para>
 
 <varlistentry>
 <term>r</term>
-<listitem><para>Sets or toggles 'raw' mode. Return "R=0" or "R=1". In
-raw mode you read the NMEA data stream from the GPS. (Non-NMEA GPSes
-get their communication format translated to NMEA on the fly.)  The
-command 'r' immediately followed by the digit '1' or the plus sign '+'
-sets raw mode.  The command 'r' followed by the digit '0' or the minus
-sign '-' clears raw mode.  The command 'r' with neither suffix toggles
-raw mode.</para></listitem>
+<listitem><para>Sets or toggles 'raw' mode. Return "R=0" or "R=1" or
+"R=2". In raw mode you read the NMEA data stream from the
+GPS. (Non-NMEA GPSes get their communication format translated to NMEA
+on the fly.)  The command 'r' immediately followed by the digit '1' or
+the plus sign '+' sets raw mode.  The command 'r' immediately followed
+by the digit '2' sets super-raw mode; for non-NMEA (binary) GPSes this
+dumps '=', followed by a hex encoding of the raw binary packet, then
+dumps translated NMEA.  The command 'r' followed by the digit '0' or
+the minus sign '-' clears raw mode.  The command 'r' with neither
+suffix toggles raw mode.</para>
+
+<para>Note: older versions of <application>gpsd</application> did not
+support super-raw mode.</para>
+</listitem>
 </varlistentry>
 
 <varlistentry>

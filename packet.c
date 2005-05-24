@@ -437,7 +437,7 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
 static void packet_accept(struct gps_device_t *session)
 /* packet grab succeeded, move to output buffer */
 {
-    int packetlen = session->inbufptr-session->inbuffer;
+    unsigned int packetlen = session->inbufptr-session->inbuffer;
     if (packetlen < sizeof(session->outbuffer)) {
 	memcpy(session->outbuffer, session->inbuffer, packetlen);
 	session->outbuffer[session->outbuflen = packetlen] = '\0';

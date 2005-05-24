@@ -127,7 +127,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   Ensure longitude has a leading zero when <100, for compatibility with 
   gpsdrive.  Synchronous and thread hooks are now separate in the client
   library.  Packet-sniffing on a new device no longer holds up incoming
-  data on already-connected ones.
+  data on already-connected ones.  There is now a super-raw mode (R=2) 
+  that dumps a hex-encoding of every binary packet received to the 
+  client.
 
 * Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 
