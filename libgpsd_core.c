@@ -66,7 +66,7 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
 	return NULL;
 
     session->gpsdata.gps_device = strdup(device);
-    session->device_type = gpsd_drivers[0];
+    session->device_type = NULL;	/* start by hunting packets */
     session->dsock = -1;
     session->context = context;
     session->gpsdata.hdop = 0.0;
@@ -162,15 +162,6 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* SIRFII_ENABLE */
 	session->counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
-	if (session->packet_type == SIRF_PACKET)
-	    gpsd_switch_driver(session, "SiRF-II binary");
-	else if (session->packet_type == NMEA_PACKET)
-	    gpsd_switch_driver(session, "Generic NMEA");
-	else if (session->packet_type == ZODIAC_PACKET)
-	    gpsd_switch_driver(session, "Zodiac binary");
-	else if (session->device_type->initializer)
-	    session->device_type->initializer(session);
-
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
@@ -316,42 +307,50 @@ int gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    if (!session->counter) {
-	session->gpsdata.d_xmit_time = timestamp();
-	/*
-	 * Handle one initial packet gathered by the sniffer.
-	 * This works when gpsfake is feeding the daemon log lines
-	 * through a pty, but in actual use hooked up to a tty more
-	 * than one packet may be present in the first input grab.
-	 * In that case this code will only see the last packet
-	 * the sniffer gathered.
-	 */
-	return handle_packet(session);
-    } else {
-	waiting = is_input_waiting(session->gpsdata.gps_fd);
-	gpsd_report(7, "GPS has %d chars waiting\n", waiting);
-	if (waiting < 0)
+    waiting = is_input_waiting(session->gpsdata.gps_fd);
+    gpsd_report(7, "GPS has %d chars waiting\n", waiting);
+    if (waiting < 0)
+	return 0;
+    else if (!waiting) {
+	if (timestamp()>session->gpsdata.online+session->device_type->cycle+1){
+	    session->gpsdata.online = 0;
 	    return 0;
-	else if (!waiting) {
-	    if (timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-		session->gpsdata.online = 0;
-		return 0;
-	    } else
-		return ONLINE_SET;
-	} else {
-	    session->gpsdata.online = timestamp();
+	} else
+	    return ONLINE_SET;
+    } else {
+	int ptype;
+	session->gpsdata.online = timestamp();
 
-	    if (!session->inbuflen || session->packet_full) {
-		session->gpsdata.d_xmit_time = timestamp();
-		session->packet_full = 0;
-	    }
-
-	    /* can we get a full packet from the device? */
-	    if (!session->device_type->get_packet(session, waiting))
-		return ONLINE_SET;
-
-	    return handle_packet(session);
+	if (!session->inbuflen || session->packet_full) {
+	    session->gpsdata.d_xmit_time = timestamp();
+	    session->packet_full = 0;
 	}
+
+	/* can we get a full packet from the device? */
+	if (session->device_type)
+	    ptype = session->device_type->get_packet(session, waiting);
+	else {
+	    ptype = packet_get(session, waiting);
+	    if (ptype) {
+		gpsd_report(5, 
+			    "packet sniff finds type %d\n", 
+			    session->packet_type);
+		if (session->packet_type == SIRF_PACKET)
+		    gpsd_switch_driver(session, "SiRF-II binary");
+		else if (session->packet_type == NMEA_PACKET)
+		    gpsd_switch_driver(session, "Generic NMEA");
+		else if (session->packet_type == ZODIAC_PACKET)
+		    gpsd_switch_driver(session, "Zodiac binary");
+		session->gpsdata.d_xmit_time = timestamp();
+	    }
+	    if (ptype == BAD_PACKET && !gpsd_next_hunt_setting(session))
+		return ERROR_SET;
+	}
+
+	if (!ptype)
+	    return ONLINE_SET;
+
+	return handle_packet(session);
     }
 }
 

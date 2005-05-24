@@ -575,45 +575,6 @@ void packet_pushback(struct gps_device_t *session)
     }
 }
 
-/*
- * This constant controls how long the packet sniffer will spend looking
- * for a packet leader before it gives up.  It *must* be larger than
- * MAX_PACKET_LENGTH or we risk never syncing up at all.  Large values
- * will produce annoying startup lag.
- */
-#define SNIFF_RETRIES	600
-
-int packet_sniff(struct gps_device_t *session)
-/* try to sync up with the packet stream */
-{
-    unsigned int n, count = 0;
-    packet_reset(session);
-    gpsd_report(5, "packet_sniff begins\n");
-    for (n = 0; n < SNIFF_RETRIES; n += count) {
-	count = 0;
-	if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) < 0)
-	    return BAD_PACKET;
-	if (count == 0) {
-	    /*
-	     * Wait 4 character times at 9 bits per character, in usec.
-	     * This keeps us from eating the processor if we're running
-	     * at high priority.  Wait 4 chars because a 16550 normally
-	     * sends through characters in 7- or 8-character bursts, so
-	     * Nyquist's Theorem tells us this is optimal.
-	     */
-	    int delay = 36000000.0 / session->gpsdata.baudrate;
-	    usleep(delay);
-	} else if (packet_get(session, count)) {
-	    packet_pushback(session);
-	    gpsd_report(5, "packet_sniff returns %d\n",session->packet_type);
-	    return session->packet_type;
-	}
-    }
-
-    gpsd_report(5, "packet_sniff found no packet\n");
-    return BAD_PACKET;
-}
-
 #ifdef TESTMAIN
 /* To build a test main, compile with cc -DTESTMAIN -g packet.c -o packet */
 

@@ -87,6 +87,7 @@ struct gps_device_t {
 #define NMEA_PACKET	0
 #define SIRF_PACKET	1
 #define ZODIAC_PACKET	2
+    unsigned int baudindex;
     unsigned int packet_state;
     unsigned int packet_length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -158,8 +159,9 @@ extern int packet_get(struct gps_device_t *, unsigned int);
 extern int packet_sniff(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);
+extern int gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
-extern int gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int);
+extern void gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int);
 extern int gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_device_t *);
 

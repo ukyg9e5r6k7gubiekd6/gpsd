@@ -34,7 +34,7 @@ int gpsd_get_speed(struct termios* ttyctl)
     }
 }
 
-int gpsd_set_speed(struct gps_device_t *session, 
+void gpsd_set_speed(struct gps_device_t *session, 
 		   unsigned int speed, unsigned int stopbits)
 {
     unsigned int	rate;
@@ -61,32 +61,24 @@ int gpsd_set_speed(struct gps_device_t *session,
       rate =  B115200;
 
     if (rate!=cfgetispeed(&session->ttyset) || stopbits!=session->gpsdata.stopbits) {
-	gpsd_report(1, "speed %d, %dN%d\n", speed, 9-stopbits, stopbits);
 
 	cfsetispeed(&session->ttyset, (speed_t)rate);
 	cfsetospeed(&session->ttyset, (speed_t)rate);
 	session->ttyset.c_cflag &=~ CSIZE;
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
-	    return 0;
+	    return;
 	tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
+    gpsd_report(1, "speed %d, %dN%d\n", speed, 9-stopbits, stopbits);
 
-    session->gpsdata.stopbits = stopbits;
     session->gpsdata.baudrate = speed;
-
-    if ((session->packet_type = packet_sniff(session)) == BAD_PACKET)
-	return 0;
-
-    return 1;
+    packet_reset(session);
 }
 
 int gpsd_open(struct gps_device_t *session)
 {
-    unsigned int *ip;
-    unsigned int stopbits;
     /* every rate we're likely to see on a GPS */
-    static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
     gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NOCTTY)) < 0) {
@@ -124,15 +116,40 @@ int gpsd_open(struct gps_device_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 	session->ttyset.c_oflag = (ONLCR);
 
-	rates[0] = gpsd_get_speed(&session->ttyset_old);
-	for (stopbits = 1; stopbits <= 2; stopbits++)
-	    for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-		if (ip == rates || *ip != rates[0])
-		    if (gpsd_set_speed(session, *ip, stopbits))
-			return session->gpsdata.gps_fd;
-	session->gpsdata.gps_fd = -1;
+	session->counter = session->baudindex = 0;
+	session->gpsdata.stopbits = 1;
+	gpsd_set_speed(session, 
+		       gpsd_get_speed(&session->ttyset_old), 1);
     }
     return session->gpsdata.gps_fd;
+}
+
+/*
+ * This constant controls how long the packet sniffer will spend looking
+ * for a packet leader before it gives up.  It *must* be larger than
+ * MAX_PACKET_LENGTH or we risk never syncing up at all.  Large values
+ * will produce annoying startup lag.
+ */
+#define SNIFF_RETRIES	600
+
+int gpsd_next_hunt_setting(struct gps_device_t *session)
+/* advance to the next hunt setting  */
+{
+    static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
+
+    if (session->counter++ >= SNIFF_RETRIES) {
+	session->counter = 0;
+	if (session->baudindex++ >= sizeof(rates)/sizeof(rates[0])) {
+	    session->baudindex = 0;
+	    if (session->gpsdata.stopbits++ >= 2)
+		return 0;			/* hunt is over, no sync */
+	    gpsd_set_speed(session, 
+			   rates[session->baudindex],
+			   session->gpsdata.stopbits);
+	}
+    }
+
+    return 1;	/* keep hunting */
 }
 
 void gpsd_close(struct gps_device_t *session)

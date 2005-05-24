@@ -1086,11 +1086,19 @@ int main(int argc, char *argv[])
 
 	    /* get data from the device */
 	    changed = 0;
-	    if (device->gpsdata.gps_fd >= 0 && !((changed=gpsd_poll(device)) & ONLINE_SET)) {
-		gpsd_report(3, "GPS is offline\n");
-		FD_CLR(device->gpsdata.gps_fd, &all_fds);
-		gpsd_deactivate(device);
-		notify_watchers(device, "GPSD,X=0\r\n");
+	    if (device->gpsdata.gps_fd >= 0)
+	    {
+		changed = gpsd_poll(device);
+		if (changed == ERROR_SET) {
+		    gpsd_report(3, "packet sniffer failed to sync up\n");
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(device);
+		} if (!(changed & ONLINE_SET)) {
+		    gpsd_report(3, "GPS is offline\n");
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(device);
+		    notify_watchers(device, "GPSD,X=0\r\n");
+		}
 	    }
 
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
