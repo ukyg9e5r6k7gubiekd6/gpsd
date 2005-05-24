@@ -683,7 +683,6 @@ static void sirfbin_initializer(struct gps_device_t *session)
 	gpsd_report(1, "Switching chip mode to SiRF binary.\n");
 	nmea_send(session->gpsdata.gps_fd, 
 		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
-	packet_sniff(session);
     }
     /* do this every time*/
     {
