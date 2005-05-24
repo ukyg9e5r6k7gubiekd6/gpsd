@@ -73,6 +73,7 @@ void gpsd_set_speed(struct gps_device_t *session,
     gpsd_report(1, "speed %d, %dN%d\n", speed, 9-stopbits, stopbits);
 
     session->gpsdata.baudrate = speed;
+    session->gpsdata.stopbits = stopbits;
     packet_reset(session);
 }
 
