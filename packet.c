@@ -335,8 +335,18 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = TSIP_DLE;
 	break;
     case TSIP_DLE:
-	if (c == 0x03)
+	switch (c)
+	{
+	case 0x03:
 	    session->packet_state = TSIP_RECOGNIZED;
+	    break;
+	case 0x10:
+	    session->packet_state = TSIP_PAYLOAD;
+	    break;
+	default:
+	    session->packet_state = GROUND_STATE;
+	    break;
+	}
 	break;
     case TSIP_RECOGNIZED:
         if (c == 0x10)
@@ -565,7 +575,7 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 #ifdef TSIP_ENABLE
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
 	    int len = session->inbufptr - session->inbuffer;
-	    if (len >= 4 && len < 80) {		/* this needs more work */
+	    if (len >= 4 && len < MAX_PACKET_LENGTH) {
 		session->packet_type = TSIP_PACKET;
 		packet_accept(session);
 	    } else
