@@ -609,6 +609,7 @@ void packet_reset(struct gps_device_t *session)
     session->inbufptr = session->inbuffer;
 }
 
+#ifdef __UNUSED__
 void packet_pushback(struct gps_device_t *session)
 /* push back the last packet grabbed */
 {
@@ -623,6 +624,7 @@ void packet_pushback(struct gps_device_t *session)
 	session->outbuflen = 0;
     }
 }
+#endif /* __UNUSED */
 
 #ifdef TESTMAIN
 /* To build a test main, compile with cc -DTESTMAIN -g packet.c -o packet */
