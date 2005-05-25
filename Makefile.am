@@ -71,6 +71,7 @@ libgps_la_SOURCES = \
 	drivers.c \
 	zodiac.c \
 	garmin.c \
+	tsip.c \
 	libgpsd_core.c \
 	ntpshm.c \
 	libgps.c \

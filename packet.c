@@ -31,10 +31,6 @@ distinguish them from baud barf.
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include "config.h"
-#ifdef HAVE_SYS_FILIO_H
-#include <sys/filio.h>	/* for FIONREAD on BSD systems */
-#endif
-
 #include "gpsd.h"
 
 #ifdef TESTMAIN
@@ -325,7 +321,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
-	if (c == 0x03 || c == 0x10)
+	if (c < 0x13)
 	    session->packet_state = GROUND_STATE;
 	else
 	    session->packet_state = TSIP_PAYLOAD;

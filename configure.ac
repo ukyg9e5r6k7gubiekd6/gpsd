@@ -131,6 +131,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Trimble TSIP support
+AC_ARG_ENABLE(tsip,
+  AC_HELP_STRING([--disable-tsip],
+                 [disable Trimble TSIP support]),
+  [ac_tsip=$enableval], [ac_tsip=yes])
+AC_MSG_CHECKING([for Trimble TSIP support])
+if test x"$ac_tsip" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([TSIP_ENABLE], 1, [Trimble TSIP support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for FV-18 support
 AC_ARG_ENABLE(fv18,
   AC_HELP_STRING([--disable-fv18],
@@ -247,6 +260,7 @@ echo "=========================================="
 echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
 echo "SiRF-II                 : $ac_sirfII"
+echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
 echo "Garmin                  : $ac_garmin"

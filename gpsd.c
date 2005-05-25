@@ -435,7 +435,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 			 */
 			tcdrain(whoami->device->gpsdata.gps_fd);
 			usleep(50000);
-			gpsd_set_speed(whoami->device, (speed_t)i, 'N', 1);
+			gpsd_set_speed(whoami->device, (speed_t)i,
+				whoami->device->gpsdata.parity,
+				whoami->device->gpsdata.stopbits);
 		    }
 	    }
 	    if (whoami->device)
