@@ -733,36 +733,50 @@ static int readword(void)
     return (byte1 << 8) | byte2;
 }
 
-static int readpkt(unsigned char *buf)
+static int readpkt(unsigned char *buf, unsigned maxlen)
 {
     int byte,len,csum,cnt;
 
-    do {
-	while ((byte = readbyte()) != START1)
-	    if (byte == EOF)
-		return EOF;
-    } while ((byte = readbyte()) != START2);
+    if (!serial) {
+	len = read(devicefd, buf, maxlen);
+	if (buf[0] == '=') {
+	    unsigned char *sp, *tp;
+	    unsigned int c;
+	    for (sp = buf+1, tp = buf; *sp; sp += 2) {
+		if (sscanf(sp, "%02x", &c))
+		    *tp++ = c;
+	    }
+	    *tp = '\0';
+	    len = tp - buf;
+	}
+    } else {
+	do {
+	    while ((byte = readbyte()) != START1)
+		if (byte == EOF)
+		    return EOF;
+	} while ((byte = readbyte()) != START2);
 
-    if ((len = readword()) == EOF || len > BUFLEN)
-	return EOF;
-
-    csum = 0;
-    cnt = len;
-
-    while (cnt-- > 0) {
-	if ((byte = readbyte()) == EOF)
+	if ((len = readword()) == EOF || len > BUFLEN)
 	    return EOF;
-	*buf++ = byte;
-	csum += byte;
+
+	csum = 0;
+	cnt = len;
+
+	while (cnt-- > 0) {
+	    if ((byte = readbyte()) == EOF)
+		return EOF;
+	    *buf++ = byte;
+	    csum += byte;
+	}
+
+	csum &= 0x7fff;
+
+	if (readword() != csum)
+	    return EOF;
+
+	if (readbyte() != END1 || readbyte() != END2)
+	    return EOF;
     }
-
-    csum &= 0x7fff;
-
-    if (readword() != csum)
-	return EOF;
-
-    if (readbyte() != END1 || readbyte() != END2)
-	return EOF;
 
     return len;
 }
@@ -1051,7 +1065,7 @@ int main (int argc, char **argv)
     if (serial)
     	mvwprintw(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
     else
-    	mvwprintw(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
+	mvwprintw(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
     wattrset(cmdwin, A_NORMAL);
 
     wmove(debugwin,0, 0);
@@ -1082,7 +1096,7 @@ int main (int argc, char **argv)
 	FD_SET(0,&select_set);
 	FD_SET(devicefd,&select_set);
 
-	if (select(devicefd + 1,&select_set,NULL,NULL,NULL) < 0)
+	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
@@ -1229,16 +1243,7 @@ int main (int argc, char **argv)
 	    }
 	}
 
-	if ((len = readpkt(buf)) != EOF) {
-	    if (!serial && buf[0] == '=') {
-		unsigned char *sp, *tp;
-		unsigned int c;
-		for (sp = buf+1, tp = buf; *sp; sp += 2) {
-		    sscanf(sp, "%02x", &c);
-		    *tp++ = c;
-		}
-		*tp = '\0';
-	    }
+	if ((len = readpkt(buf, sizeof(buf))) != EOF) {
 	    decode_sirf(buf,len);
 	}
     }
