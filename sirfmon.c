@@ -17,7 +17,7 @@
  *      Ctrl-S -- freeze display.
  *      Ctrl-Q -- unfreeze display.
  *
- * Note: one of the objectives of sirfmon.c is *not* to include gps.h.  
+ * Note: one of the goals of sirfmon.c is *not* to use the gpsdata structure.  
  * sirfmon is intended to be an independent sanity check on SiRF decoding,
  * so it deliberately doesn't use much of the library. 
  */
@@ -34,10 +34,13 @@
 
 #include "config.h"
 #include "gpsutils.h"
+#include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
 
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
+
+extern int netlib_connectsock(const char *, const char *, const char *);
 
 #define BUFLEN		2048
 
@@ -48,18 +51,12 @@
 
 #define MAXCHANNELS	12
 
-#ifdef M_PIl
-#define PI M_PIl
-#else
-#define PI M_PI
-#endif
-
 #define RAD2DEG (180.0/PI)
 
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
-static int gps_fd;					/* fd for RS232 line */
+static int devicefd = -1, controlfd = -1, serial;
 static int nfix,fix[20];
 static int gmt_offset;
 static int dispmode = 0;
@@ -566,7 +563,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     int st;
     unsigned char	c;
 
-    tcflush(gps_fd, TCIOFLUSH);	/* toss stale data */
+    tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
 
     if (speed) {
 	if (speed < 300)
@@ -593,9 +590,9 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     }
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
-    if (tcsetattr(gps_fd, TCSANOW, &ttyset) != 0)
+    if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
 	return NO_PACKET;
-    tcflush(gps_fd, TCIOFLUSH);
+    tcflush(devicefd, TCIOFLUSH);
 
     fprintf(stderr, "Hunting at speed %d, %dN%d\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
@@ -603,7 +600,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     /* sniff for NMEA or SiRF packet */
     state = 0;
     for (count = 0; count < SNIFF_RETRIES; count++) {
-	if ((st = read(gps_fd, &c, 1)) < 0)
+	if ((st = read(devicefd, &c, 1)) < 0)
 	    return 0;
 	else
 	    count += st;
@@ -662,7 +659,7 @@ static int hunt_open(int *pstopbits)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		fprintf(stderr, "Switching to SiRF mode...\n");
-		nmea_send(gps_fd,"$PSRF100,0,%d,8,1,0", *ip);
+		nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
 		return *ip;
 	    }
 	}
@@ -670,18 +667,20 @@ static int hunt_open(int *pstopbits)
     return 0;
 }
 
-static void serial_initialize(char *device)
+static int serial_initialize(char *device)
 {
-    if ((gps_fd = open(device,O_RDWR)) < 0) {
+    if ((devicefd = open(device,O_RDWR)) < 0) {
 	perror(device);
 	exit(1);
     }
     
     /* Save original terminal parameters */
-    if (tcgetattr(gps_fd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
+    if (tcgetattr(devicefd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
 	fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
+
+    return devicefd;
 }
 
 
@@ -701,19 +700,21 @@ static int readbyte(void)
 	struct timeval timeval;
 
 	FD_ZERO(&select_set);
-	FD_SET(gps_fd,&select_set);
+	FD_SET(devicefd,&select_set);
+	if (controlfd < -1)
+	    FD_SET(controlfd,&select_set);
 	timeval.tv_sec = 0;
 	timeval.tv_usec = 500000;
 
-	if (select(gps_fd + 1,&select_set,NULL,NULL,&timeval) < 0)
+	if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
 	    return EOF;
 
-	if (!FD_ISSET(gps_fd,&select_set))
+	if (!FD_ISSET(devicefd,&select_set))
 	    return EOF;
 
 	usleep(100000);
 
-	if ((cnt = read(gps_fd,inbuf,BUFLEN)) <= 0)
+	if ((cnt = read(devicefd,inbuf,BUFLEN)) <= 0)
 	    return EOF;
 
 	pos = 0;
@@ -766,9 +767,9 @@ static int readpkt(unsigned char *buf)
     return len;
 }
 
-static int sendpkt(unsigned char *buf, int len)
+static int sendpkt(unsigned char *buf, int len, char *device)
 {
-    int i,csum;
+    int i,csum, st;
 
     putb(-4,START1);			/* start of packet */
     putb(-3,START2);
@@ -789,7 +790,19 @@ static int sendpkt(unsigned char *buf, int len)
 	wprintw(debugwin, " %02x",buf[i]);
     wprintw(debugwin, "\n");
 
-    return (write(gps_fd,buf,len) == len);
+    if (controlfd == -1) 
+	return -1;
+    else {
+	if (!serial) {
+	    write(controlfd, "!", 1);
+	    write(controlfd, device, strlen(device));
+	    write(controlfd, "=", 1);
+	}
+	st = write(controlfd, buf,len);
+	if (!serial)
+	    read(controlfd, buf, 8);	/* enough room for "ERROR\r\n\0" */
+	return (st == len);
+    }
 }
 
 /*****************************************************************************
@@ -836,21 +849,76 @@ static void refresh_rightpanel1(void)
 
 int main (int argc, char **argv)
 {
-    unsigned int i,v;
-    int len;
-    char *p;
+    unsigned int i, v;
+    int len, option;
+    char *p, *arg = NULL, *colon1 = NULL, *colon2 = NULL, *slash = NULL;
+    char *server=NULL, *port = DEFAULT_GPSD_PORT, *device = NULL;
+    char *controlsock = "/var/run/gpsd.sock";
     fd_set select_set;
     unsigned char buf[BUFLEN];
     char line[80];
 
     gmt_offset = tzoffset();
 
-    if (argc < 2) {
-	fprintf(stderr,"Usage: %s <tty-device>.\n",argv[0]);
-	exit(1);
+    while ((option = getopt(argc, argv, "hvF:")) != -1) {
+	switch (option) {
+	case 'v':
+	    printf("sirfmon %s\n", VERSION);
+	    exit(0);
+	case 'h': case '?': default:
+	    fputs("usage:  sirfmon [-?hv] [server[:port:[device]]]\n", stderr);
+	    exit(1);
+	}
+    }
+    if (optind < argc) {
+	arg = strdup(argv[optind]);
+	colon1 = strchr(arg, ':');
+	slash = strchr(arg, '/');
+	server = arg;
+	if (colon1 != NULL) {
+	    if (colon1 == arg)
+		server = NULL;
+	    else
+		*colon1 = '\0';
+	    port = colon1 + 1;
+	    colon2 = strchr(port, ':');
+	    if (colon2 != NULL) {
+		if (colon2 == port)
+		    port = NULL;
+	        else
+		    *colon2 = '\0';
+		device = colon2 + 1;
+	    }
+	}
     }
 
-    serial_initialize(argv[1]);
+    if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
+	devicefd = netlib_connectsock(server, port, "tcp");
+	controlfd = open(controlsock, O_RDWR);
+	if (devicefd == -1) {
+	    fprintf(stderr, "%s: no daemon running.\n", argv[0]);
+	    exit(1);
+	}
+	if (device) {
+	    char *channelcmd = (char *)malloc(strlen(device)+5);
+
+	    strcpy(channelcmd, "F=");
+	    strcpy(channelcmd, device);
+	    strcat(channelcmd, "\r\n");
+	    write(devicefd, channelcmd, strlen(channelcmd));
+	} else
+	    write(devicefd, "F\r\n", 3);
+	read(devicefd, buf, sizeof(buf));	/* read F response */ 
+	while (isspace(buf[strlen(buf)-1]))
+	    buf[strlen(buf)-1] = '\0';
+	device = strdup(buf);
+	write(devicefd, "R=2\r\n", 5);
+	read(devicefd, buf, sizeof(buf));	/* discard R response */ 
+	serial = FALSE;
+    } else {
+	devicefd = controlfd = serial_initialize(device = arg);
+	serial = TRUE;
+    }
 
     initscr();
     cbreak();
@@ -977,9 +1045,11 @@ int main (int argc, char **argv)
     wattrset(mid27win, A_NORMAL);
 
     wattrset(cmdwin, A_BOLD);
-    mvwprintw(cmdwin, 1, 5, "RS232: ");
+    if (serial)
+    	mvwprintw(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
+    else
+    	mvwprintw(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
     wattrset(cmdwin, A_NORMAL);
-    mvwprintw(cmdwin, 1, 15, "%4d N %d", bps, stopbits);
 
     wmove(debugwin,0, 0);
 
@@ -988,7 +1058,7 @@ int main (int argc, char **argv)
     /* probe for version */
     putb(0, 0x84);
     putb(1, 0x0);
-    sendpkt(buf, 2);
+    sendpkt(buf, 2, device);
 
     for (;;) {
 	wmove(cmdwin, 0,0);
@@ -1007,9 +1077,9 @@ int main (int argc, char **argv)
 	wrefresh(cmdwin);
 
 	FD_SET(0,&select_set);
-	FD_SET(gps_fd,&select_set);
+	FD_SET(devicefd,&select_set);
 
-	if (select(gps_fd + 1,&select_set,NULL,NULL,NULL) < 0)
+	if (select(devicefd + 1,&select_set,NULL,NULL,NULL) < 0)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
@@ -1053,32 +1123,38 @@ int main (int argc, char **argv)
 		putb(0, 0x80);
 		putb(23, 12);
 		putb(24, subframe_enabled ? 0x00 : 0x10);
-		sendpkt(buf,25);
+		sendpkt(buf, 25, device);
 		break;
 
 	    case 'b':
-		v = atoi(line+1);
-		for (ip=rates; ip < rates+sizeof(rates)/sizeof(rates[0]); ip++)
-		    if (v == *ip)
-			goto goodspeed;
-		break;
-	    goodspeed:
-		putb(0, 0x86);
-		putl(1, v);		/* new baud rate */
-		putb(5, 8);		/* 8 data bits */
-		putb(6, stopbits);	/* 1 stop bit */
-		putb(7, 0);		/* no parity */
-		putb(8, 0);		/* reserved */
-		sendpkt(buf, 9);
-		usleep(50000);
-		set_speed(bps = v, stopbits);
-		mvwprintw(cmdwin, 1, 15, "%4d N %d", bps, stopbits);
+		if (serial) {
+		    v = atoi(line+1);
+		    for (ip=rates; ip<rates+sizeof(rates)/sizeof(rates[0]);ip++)
+			if (v == *ip)
+			    goto goodspeed;
+		    break;
+		goodspeed:
+		    putb(0, 0x86);
+		    putl(1, v);		/* new baud rate */
+		    putb(5, 8);		/* 8 data bits */
+		    putb(6, stopbits);	/* 1 stop bit */
+		    putb(7, 0);		/* no parity */
+		    putb(8, 0);		/* reserved */
+		    sendpkt(buf, 9, device);
+		    usleep(50000);
+		    set_speed(bps = v, stopbits);
+		    mvwprintw(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
+		} else {
+		    line[0] = 'b';
+		    write(devicefd, line, strlen(line));
+		    read(devicefd, buf, sizeof(buf));	/* discard response */
+		}
 		break;
 
 	    case 'c':				/* static navigation */
 		putb(0,0x8f);			/* id */
 		putb(1, atoi(line+1));
-		sendpkt(buf,2);
+		sendpkt(buf, 2, device);
 		break;
 
 	    case 'd':		/* MID 4 rate change -- not documented */
@@ -1093,7 +1169,7 @@ int main (int argc, char **argv)
 		putb(5, 0);
 		putb(6, 0);
 		putb(7, 0);
-		sendpkt(buf,8);
+		sendpkt(buf, 8, device);
 		break;
 
 	    case 'n':				/* switch to NMEA */
@@ -1120,13 +1196,13 @@ int main (int argc, char **argv)
 		putb(20,0x00);
 		putb(21,0x01);
 		putw(22,bps);
-		sendpkt(buf,24);
+		sendpkt(buf, 24, device);
 		goto quit;
 
 	    case 't':				/* poll navigation params */
 		putb(0,0x98);
 		putb(1,0x00);
-		sendpkt(buf,2);
+		sendpkt(buf, 2, device);
 		break;
 
 	    case 'q':
@@ -1145,13 +1221,23 @@ int main (int argc, char **argv)
 			p++;
 		}
 
-		sendpkt(buf,len);
+		sendpkt(buf, len, device);
 		break;
 	    }
 	}
 
-	if (/* FD_ISSET(gps_fd,&select_set) && */ (len = readpkt(buf)) != EOF)
+	if ((len = readpkt(buf)) != EOF) {
+	    if (!serial && buf[0] == '=') {
+		unsigned char *sp, *tp;
+		unsigned int c;
+		for (sp = buf+1, tp = buf; *sp; sp += 2) {
+		    sscanf(sp, "%02x", &c);
+		    *tp++ = c;
+		}
+		*tp = '\0';
+	    }
 	    decode_sirf(buf,len);
+	}
     }
 
  quit:

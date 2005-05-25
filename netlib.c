@@ -21,6 +21,8 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     struct sockaddr_in sin;
     int s, type, one = 1;
 
+    if (!host)
+	host = "localhost";
     memset((char *) &sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
     if ((pse = getservbyname(service, protocol)))

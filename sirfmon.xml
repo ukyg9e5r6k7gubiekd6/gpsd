@@ -10,13 +10,27 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>sirfmon</refname>
-<refpurpose>monitor a SiRF GPS</refpurpose>
+<refpurpose>monitor and control a SiRF GPS in binary mode</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
   <command>sirfmon</command>  
-      <arg choice='opt'><replaceable>device</replaceable></arg>
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-v </arg>
+      <arg>-F <replaceable>control-socket</replaceable></arg>
+      <arg choice='opt'>
+	<group>
+	  <arg choice='plain'>
+            <replaceable>server</replaceable>
+            <group> 
+	      <replaceable>:port</replaceable> 
+              <group><replaceable>:device</replaceable></group>
+            </group>
+          </arg>
+          <arg choice='plain'><replaceable>device</replaceable></arg>
+        </group>
+      </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -32,13 +46,31 @@ logic that different from the decoder in the
 <application>gpsd</application> SiRF driver, so behaviors that show up
 in both are unlikely to be due to logic bugs in either.</para>
 
-<para>The device argument should be the serial devicename associated
-with the GPS; <application>sirfmon</application> will search for a
-correct baud rate and lock on to it automatically.</para>
+<para><application>xgps</application> accepts an -h option that
+displays a usage message, or a -v option to dump the package
+version and exit.</para>
 
-<para>Note that <application>sirfmon</application> will fail if 
-<application>gpsd</application> is running, and vice-versa. You will
-probably need to be root to run this program.</para>
+<para>This program may be run in either of two modes, as a client for
+the <application>gpsd</application> daemon (and its associated control
+socket) or directly connected to a specified serial device.  When run
+with no argument, it attempts to connect to the daemon.  If the
+argument looks like a server:port specification it will also attempt
+to connect to the daemon.  If the argument looks like a bare server
+name it will attempt to connect to a daemon running on the default
+gpsd port on that server.  Only if the device argument contains
+slashes but no colons will it be treated as a serial device for direct
+connection. In direct-connect mode <application>sirfmon</application>
+will hunt for a correct baud rate and lock on to it
+automatically.</para>
+
+<para>The -F option is only valid in client mode; it specifies a
+control socket to which the program should send device control
+strings.  You must specify a valid pathname of a Unix-domain socket on
+your local filesystem.</para>
+
+<para> You will probably need to be root to run this program, as the
+serial devices and control socket it uses are normally
+privileged.</para>
 
 <para>After startup, the top part of the screen reports the contents
 of several especially interesting packet types.  The bottom half of
@@ -112,6 +144,18 @@ MID 19, including the Static Navigation bit toggled by the 'c' command.</para>
 <term>Ctrl-Q</term>
 <listitem>
 <para>Unfreeze display, resume normal operation.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsect1>
+<refsect1 id='files'><title>FILES</title>
+
+<variablelist>
+<varlistentry>
+<term><filename>/var/run/gpsd.sock</filename></term>
+<listitem>
+<para>The default location of the control socket.</para>
 </listitem>
 </varlistentry>
 </variablelist>
