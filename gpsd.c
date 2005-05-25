@@ -783,7 +783,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
 {
-    char	*p, *stash;
+    char	*p, *stash, *eq;
     struct gps_device_t	**chp;
     int cfd;
 
@@ -811,6 +811,24 @@ static void handle_control(int sfd, char *buf)
 		write(sfd, "OK\n", 3);
 	    else
 		write(sfd, "ERROR\n", 6);
+	}
+	free(stash);
+    } else if (buf[0] == '!') {
+	p = snarfline(buf+1, &stash);
+	eq = strchr(stash, '=');
+	if (!eq) {
+	    gpsd_report(1,"<= control(%d): ill-formed command \n", sfd);
+	    write(sfd, "ERROR\n", 3);
+	} else {
+	    *eq++ = '\0';
+	    if ((chp = find_device(stash))) {
+		gpsd_report(1,"<= control(%d): writing to %s \n", sfd, stash);
+		write((*chp)->gpsdata.gps_fd, eq, strlen(eq));
+		write(sfd, "OK\n", 3);
+	    } else {
+		gpsd_report(1,"<= control(%d): %s not active \n", sfd, stash);
+		write(sfd, "ERROR\n", 3);
+	    }
 	}
 	free(stash);
     }

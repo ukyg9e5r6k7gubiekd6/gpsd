@@ -63,7 +63,8 @@ int main(int argc, char **argv)
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *colon, *server = NULL, *port = DEFAULT_GPSD_PORT, *speedunits;
+    char *arg, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    char *speedunits;
     Widget base;
 
     toplevel = XtVaAppInitialize(&app, "xgpsspeed", 
@@ -77,22 +78,34 @@ int main(int argc, char **argv)
     else if (!strcmp(speedunits, "knots"))
 	speedfactor = 1/MPS_TO_KNOTS;
 
-    while ((option = getopt(argc, argv, "?hv")) != -1) {
+    while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
 	case 'v':
 	    printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
-	case 'h': case '?': default:
-	    fputs("usage: gps [-?] [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
+	case 'h': default:
+	    fputs("usage: gps [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
     if (optind < argc) {
-	server = strdup(argv[optind]);
-	colon = strchr(server, ':');
-	if (colon != NULL) {
-	    server[colon - server] = '\0';
-	    port = colon + 1;
+	arg = strdup(argv[optind]);
+	colon1 = strchr(arg, ':');
+	server = arg;
+	if (colon1 != NULL) {
+	    if (colon1 == arg)
+		server = NULL;
+	    else
+		*colon1 = '\0';
+	    port = colon1 + 1;
+	    colon2 = strchr(port, ':');
+	    if (colon2 != NULL) {
+		if (colon2 == port)
+		    port = NULL;
+	        else
+		    *colon2 = '\0';
+		device = colon2 + 1;
+	    }
 	}
     }
 
@@ -130,6 +143,15 @@ int main(int argc, char **argv)
 		  handle_input, NULL);
     
     gps_set_raw_hook(gpsdata, update_display);
+
+    if (device) {
+	char *channelcmd = (char *)malloc(strlen(device)+3);
+
+	strcpy(channelcmd, "F=");
+	strcpy(channelcmd+2, device);
+	gps_query(gpsdata, channelcmd);
+    }
+	
     gps_query(gpsdata, "w+x\n");
 
     XtAppMainLoop(app);

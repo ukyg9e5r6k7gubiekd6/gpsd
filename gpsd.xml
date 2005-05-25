@@ -547,11 +547,19 @@ device name followed by LF or CR-LF.  Thus, to point the daemon at
 that a device has been disconnected and is no longer available, send a
 minus sign ('-') followed by the device name followed by LF or
 CR-LF. Thus, to remove <filename>/dev/foo</filename> from the search
-list. send "-/dev/foo\n". Your client may await a response, which
-will be a line beginning with either "OK" or "ERROR".  An ERROR reponse
-to an add command means the device did not emit data recognizable as
-GPS packets; an ERROR response to a remove command means the specified
-device was not in <application>gpsd</application>'s device list.</para>
+list. send "-/dev/foo\n".</para>
+
+<para>To send a control string to a specified device, write to the 
+control socket a '!', followed by the device name, followed by '=',
+followed by the control string.</para>
+
+<para>Your client may await a response, which will be a line beginning
+with either "OK" or "ERROR".  An ERROR reponse to an add command means
+the device did not emit data recognizable as GPS packets; an ERROR
+response to a remove command means the specified device was not in
+<application>gpsd</application>'s device list. An ERROR response to a
+! command means the daemon did not recognize the devicename
+specified.</para>
 
 <para>The control socket is intended for use by hotplug scripts and 
 other device-discovery services.  This control channel is separate 

@@ -391,13 +391,13 @@ speedunits_ok:;
     fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
 altunits_ok:;
 
-    while ((option = getopt(argc, argv, "?hv")) != -1) {
+    while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
 	case 'v':
 	    printf("xgps %s\n", VERSION);
 	    exit(0);
-	case 'h': case '?': default:
-	    fputs("usage:  xgps [-?hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
+	case 'h': default:
+	    fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
