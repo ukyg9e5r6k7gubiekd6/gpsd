@@ -893,12 +893,15 @@ int main (int argc, char **argv)
     }
 
     if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
+	if (!server)
+	    server = "localhost";
 	devicefd = netlib_connectsock(server, port, "tcp");
-	controlfd = open(controlsock, O_RDWR);
-	if (devicefd == -1) {
-	    fprintf(stderr, "%s: no daemon running.\n", argv[0]);
+	if (devicefd < 0) {
+	    fprintf(stderr, "%s: connection failure on %s:%s, error %d.\n", 
+		    argv[0], server, port, devicefd);
 	    exit(1);
 	}
+	controlfd = open(controlsock, O_RDWR);
 	if (device) {
 	    char *channelcmd = (char *)malloc(strlen(device)+5);
 
