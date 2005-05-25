@@ -36,6 +36,9 @@ struct gps_context_t {
 #ifdef NTPSHM_ENABLE
     struct shmTime *shmTime[NTPSHMSEGS];
     int shmTimeInuse[NTPSHMSEGS];
+# ifdef PPS_ENABLE
+    int shmTimePPS;
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
 
@@ -108,6 +111,9 @@ struct gps_device_t {
 #ifdef SIRFII_ENABLE
     unsigned long satcounter;
 #endif /* SIRFII_ENABLE */
+#ifdef TSIP_ENABLE
+    time_t last_request;	/* Last time a packets were sent */
+#endif /* SIRFII_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     void *GarminBuffer; /* Pointer Garmin packet buffer 
                            void *, to keep the packet details out of the 
@@ -138,7 +144,7 @@ struct gps_device_t {
     int shmTime;
 # ifdef PPS_ENABLE
     int shmTimeP;
-# endif /* NTPSHM_ENABLE */
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
 
@@ -174,7 +180,7 @@ extern void gpsd_binary_quality_dump(struct gps_device_t *, char *);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
-extern int ntpshm_init(struct gps_context_t *);
+extern int ntpshm_init(struct gps_context_t *, int);
 extern int ntpshm_alloc(struct gps_context_t *context);
 extern int ntpshm_free(struct gps_context_t *context, int segment);
 extern int ntpshm_put(struct gps_device_t *, double);

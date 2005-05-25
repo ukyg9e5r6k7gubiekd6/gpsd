@@ -174,7 +174,7 @@ int gpsd_activate(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
 	session->shmTime = ntpshm_alloc(session->context);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-	if (session->shmTime >= 0) {
+	if (session->shmTime >= 0 && session->context->shmTimePPS) {
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
 		pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
 	}

@@ -59,6 +59,9 @@ static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE,
 #ifdef NTPSHM_ENABLE
 				       {0},
 				       {0},
+# ifdef PPS_ENABLE
+					0,
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
 
@@ -919,7 +922,7 @@ int main(int argc, char *argv[])
 
 #ifdef NTPSHM_ENABLE
     nice(-10);			/* for precise timekeeping, increase priority */
-    ntpshm_init(&context);
+    ntpshm_init(&context,nowait);
 #endif /* NTPSHM_ENABLE */
 
     /* make default devices accessible even after we drop privileges */

@@ -172,6 +172,9 @@ GPS</a> receivers.</p>
 <p>We supply a Gentoo Linux <a href="gpsd.ebuild">ebuild
 script</a>.</p>
 
+<p>You can find Debian-stable packages 
+<a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
+
 <h1 id='others'>Other GPSDs</h1>
 
 <p>There are two Linux-based forks of <code>gpsd</code> in the wild, but
@@ -202,9 +205,11 @@ program that simulates the output of a GPS in motion, and can be used
 for testing GPS-aware applications.</p>
 
 <p>We aren't Green Parrot Software Development, nor are we the
-Greenville Public School District or the Greater Peoria Sanitary
-District, nor do we have anything to do with the General Product
-Safety Directive.</p>
+Greenville Public School District nor the Greater Peoria Sanitary
+District, nor even the Greater Portland Soccer District, nor the Green
+Party of San Diego, nor do we have anything to do with the General
+Product Safety Directive, the the Guiding Principles of Sustainable
+Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 
 </div>
 <hr/>

@@ -65,7 +65,7 @@ static struct shmTime *getShmTime(int unit)
 
 /* attach all NTP SHM segments.  called once at startup, while still root */
 
-int ntpshm_init(struct gps_context_t *context)
+int ntpshm_init(struct gps_context_t *context, int enablepps)
 {
     int i;
 
@@ -73,6 +73,9 @@ int ntpshm_init(struct gps_context_t *context)
 	context->shmTime[i] = getShmTime(i);
 
     memset(context->shmTimeInuse,0,sizeof(context->shmTimeInuse));
+# ifdef PPS_ENABLE
+    context->shmTimePPS = enablepps;
+# endif /* PPS_ENABLE */
     return 1;
 }
 
