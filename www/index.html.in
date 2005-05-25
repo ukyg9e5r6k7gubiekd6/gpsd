@@ -187,11 +187,15 @@ href='http://www.mgix.com/gps3d/'>gps3d</a> that ships a gpsd with
 similar goals to ours, but which appears to be an independent
 development. There haven't been any releases since early 2002.</p>
 
+<p>There is a <a href='http://www.crs4.it:8000/gpsweb/14'>GPSd</a>
+project that is a GPS daemon written in Java and apparently intended
+to provide location informtion for browsers.</p>
+
 <p>There is a <code>gpsd</code>-like hack hosted under <a
 href='http://www2.musatcha.com/musatcha/computers/software/gpsd/'>Microsoft
 Windows</a>. It provides gpsd service from data in netstumbler under
 win32.  This way programs such as <a
-href='http://www.wigle.net'>JiGLE</a> can still get gps data from
+href='http://www.wigle.net'>JiGLE</a> can still get GPS data from
 netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
 
