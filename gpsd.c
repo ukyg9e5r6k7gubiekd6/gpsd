@@ -258,8 +258,19 @@ static int throttled_write(int cfd, char *buf, int len)
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
     int status;
+    
+    if (debuglevel >= 3) {
+	if (isprint(buf[0]))
+	    gpsd_report(3, "=> client(%d): %s", cfd, buf);
+	else {
+	    char *cp, buf2[MAX_PACKET_LENGTH*3];
+	    buf2[0] = '\0';
+	    for (cp = buf; cp < buf + len; cp++)
+		sprintf(buf2 + strlen(buf2), "%02x", *cp & 0xff);
+	    gpsd_report(3, "=> client(%d): =%s\r\n", cfd, buf2);
+	}
+    }
 
-    gpsd_report(3, "=> client(%d): %s", cfd, isprint(buf[0]) ? buf : "UNPRINTABLE\n");
     if ((status = write(cfd, buf, len)) > -1)
 	return status;
     if (errno == EBADF)
