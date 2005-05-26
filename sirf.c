@@ -99,7 +99,7 @@ static int sirf_to_nmea(int ttyfd, int speed)
    return (sirf_write(ttyfd, msg));
 }
 
-#define getb(off)	(buf[off])
+#define getb(off)	((u_int8_t)buf[off])
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
@@ -277,7 +277,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0xdb, 0xb0, 0xb3};
 	    gpsd_report(4, "Enabling PPS message...\n");
-	    sirf_write(session->gpsdata.gps_fd, enablemid52);
+	    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
 	    session->driverstate |= SIRF_GE_232;
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
@@ -287,7 +287,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	session->time_seen = 0;
 	if (!(session->context->valid & LEAP_SECOND_VALID)) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
-	    sirf_write(session->gpsdata.gps_fd, enablesubframe);
+	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
 	return 0;
 
@@ -405,7 +405,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
 	    if (session->context->valid & LEAP_SECOND_VALID) {
 		gpsd_report(4, "Disabling subframe transmission...\n");
-		sirf_write(session->gpsdata.gps_fd, disablesubframe);
+		(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
 	}
 	break;
@@ -716,13 +716,13 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				  0x01,		/* enable track smoothing */
 				 0x00, 0x00, 0xb0, 0xb3};
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
-	sirf_write(session->gpsdata.gps_fd, dgpscontrol);
+	(void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");
-	sirf_write(session->gpsdata.gps_fd, sbasparams);
+	(void)sirf_write(session->gpsdata.gps_fd, sbasparams);
 	gpsd_report(4, "Probing for firmware version...\n");
-	sirf_write(session->gpsdata.gps_fd, versionprobe);
+	(void)sirf_write(session->gpsdata.gps_fd, versionprobe);
 	gpsd_report(4, "Setting mode...\n");
-	sirf_write(session->gpsdata.gps_fd, modecontrol);
+	(void)sirf_write(session->gpsdata.gps_fd, modecontrol);
     }
 }
 

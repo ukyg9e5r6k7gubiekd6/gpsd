@@ -169,3 +169,7 @@ EXTRA_DIST = \
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
+
+# Run splint on all sources
+splint:
+	splint *.c

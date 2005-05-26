@@ -26,8 +26,8 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     memset((char *) &sin, '\0', sizeof(sin));
     sin.sin_family = AF_INET;
     if ((pse = getservbyname(service, protocol)))
-	sin.sin_port = htons(ntohs((u_short) pse->s_port));
-    else if ((sin.sin_port = htons((u_short) atoi(service))) == 0)
+	sin.sin_port = htons(ntohs((unsigned short) pse->s_port));
+    else if ((sin.sin_port = htons((unsigned short) atoi(service))) == 0)
 	return NL_NOSERVICE;
     if ((phe = gethostbyname(host)))
 	memcpy((char *) &sin.sin_addr, phe->h_addr, phe->h_length);
@@ -43,11 +43,11 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     if ((s = socket(PF_INET, type, ppe->p_proto)) < 0)
 	return NL_NOSOCK;
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1) {
-        close(s);
+        (void)close(s);
 	return NL_NOSOCKOPT;
     }
     if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-        close(s);
+        (void)close(s);
 	return NL_NOCONNECT;
     }
     return s;

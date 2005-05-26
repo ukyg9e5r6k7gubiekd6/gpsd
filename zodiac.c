@@ -341,7 +341,7 @@ static int zodiac_analyze(struct gps_device_t *session)
     if (session->outbuflen < 10)
 	return 0;
 
-    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%d", id);
+    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%u", id);
 
     switch (id) {
     case 1000:
@@ -353,7 +353,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	mask = handle1002(session);
 	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(buf+strlen(buf), ",%02d,%X", session->Zs[i], session->Zv[i] & 0x0f);
+	    sprintf(buf+strlen(buf), ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
 	}
 	strcat(buf, "*");
 	nmea_add_checksum(buf);

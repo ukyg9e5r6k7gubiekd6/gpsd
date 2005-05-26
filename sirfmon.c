@@ -101,6 +101,8 @@ static WINDOW *mid19win, *mid27win, *cmdwin, *debugwin;
 #define SIRF_PACKET	1
 #define NMEA_PACKET	2
 
+#define display	(void)mvwprintw
+
 /*****************************************************************************
  *
  * NMEA command composition
@@ -160,14 +162,14 @@ static void decode_time(int week, int tow)
 
     m = (m - s) / 6000;
 
-    wmove(mid2win, 3,7);
-    wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
-    wmove(mid2win, 3, 29);
-    wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(double)s/100);
-    wmove(mid2win, 4, 8);
-    wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100));
-    wmove(mid2win, 4, 29);
-    wprintw(mid2win, "%d", gmt_offset);
+    (void)wmove(mid2win, 3,7);
+    (void)wprintw(mid2win, "%4d+%9.2f", week, (double)tow/100);
+    (void)wmove(mid2win, 3, 29);
+    (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(double)s/100);
+    (void)wmove(mid2win, 4, 8);
+    (void)wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100));
+    (void)wmove(mid2win, 4, 29);
+    (void)wprintw(mid2win, "%d", gmt_offset);
 }
 
 static void decode_ecef(double x, double y, double z,
@@ -195,21 +197,21 @@ static void decode_ecef(double x, double y, double z,
     if (heading < 0)
 	heading += 2 * PI;
 
-    wmove(mid2win, 1,40);
-    wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
+    (void)wmove(mid2win, 1,40);
+    (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
 				   (double)(RAD2DEG*lambda));
-    wmove(mid2win, 1,63);
-    wprintw(mid2win, "%8d",(int)h);
+    (void)wmove(mid2win, 1,63);
+    (void)wprintw(mid2win, "%8d",(int)h);
 
-    wmove(mid2win, 2,40);
-    wprintw(mid2win, "%9.1f %9.1f",vnorth,veast);
-    wmove(mid2win, 2,63);
-    wprintw(mid2win, "%8.1f",vup);
+    (void)wmove(mid2win, 2,40);
+    (void)wprintw(mid2win, "%9.1f %9.1f",vnorth,veast);
+    (void)wmove(mid2win, 2,63);
+    (void)wprintw(mid2win, "%8.1f",vup);
 
-    wmove(mid2win, 3,54);
-    wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
-    wmove(mid2win, 3,63);
-    wprintw(mid2win, "%8.1f",speed);
+    (void)wmove(mid2win, 3,54);
+    (void)wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
+    (void)wmove(mid2win, 3,63);
+    (void)wprintw(mid2win, "%8.1f",speed);
 }
 
 static void decode_sirf(unsigned char buf[], int len)
@@ -219,31 +221,31 @@ static void decode_sirf(unsigned char buf[], int len)
     switch (buf[0])
     {
     case 0x02:		/* Measured Navigation Data */
-	wmove(mid2win, 1,6);
-	wprintw(mid2win, "%8d %8d %8d",getl(1),getl(5),getl(9));
-	wmove(mid2win, 2,6);
-	wprintw(mid2win, "%8.1f %8.1f %8.1f",
+	(void)wmove(mid2win, 1,6);
+	(void)wprintw(mid2win, "%8d %8d %8d",getl(1),getl(5),getl(9));
+	(void)wmove(mid2win, 2,6);
+	(void)wprintw(mid2win, "%8.1f %8.1f %8.1f",
 		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
 		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
 	decode_time(getw(22),getl(24));
 	/* line 4 */
-	wmove(mid2win, 4,49);
-	wprintw(mid2win, "%4.1f",(double)getb(20)/5);	/* HDOP */
-	wmove(mid2win, 4,58);
-	wprintw(mid2win, "%02x",getb(19));		/* Mode 1 */
-	wmove(mid2win, 4,72);
-	wprintw(mid2win, "%02x",getb(21));		/* Mode 2 */
-	wmove(mid2win, 5,7);
+	(void)wmove(mid2win, 4,49);
+	(void)wprintw(mid2win, "%4.1f",(double)getb(20)/5);	/* HDOP */
+	(void)wmove(mid2win, 4,58);
+	(void)wprintw(mid2win, "%02x",getb(19));		/* Mode 1 */
+	(void)wmove(mid2win, 4,72);
+	(void)wprintw(mid2win, "%02x",getb(21));		/* Mode 2 */
+	(void)wmove(mid2win, 5,7);
 	nfix = getb(28);
-	wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
+	(void)wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
 	for (i = 0; i < MAXCHANNELS; i++) {	/* SV list */
 	    if (i < nfix)
-		wprintw(mid2win, "%3d",fix[i] = getb(29+i));
+		(void)wprintw(mid2win, "%3d",fix[i] = getb(29+i));
 	    else
-		wprintw(mid2win, "   ");
+		(void)wprintw(mid2win, "   ");
 	}
-	wprintw(debugwin, "MND 0x02=");
+	(void)wprintw(debugwin, "MND 0x02=");
 	break;
 
     case 0x04:		/* Measured Tracking Data */
@@ -253,11 +255,11 @@ static void decode_sirf(unsigned char buf[], int len)
 	    int sv,st;
 	    
 	    off = 8 + 15 * i;
-	    wmove(mid4win, i+2, 3);
+	    (void)wmove(mid4win, i+2, 3);
 	    sv = getb(off);
-	    wprintw(mid4win, " %3d",sv);
+	    (void)wprintw(mid4win, " %3d",sv);
 
-	    wprintw(mid4win, " %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
+	    (void)wprintw(mid4win, " %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
 
 	    st = ' ';
 	    if (getw(off+3) == 0xbf)
@@ -273,19 +275,19 @@ static void decode_sirf(unsigned char buf[], int len)
 	    for (j = 0; j < 10; j++)
 		cn += getb(off+5+j);
 
-	    wprintw(mid4win, "%5.1f %c",(double)cn/10,st);
+	    (void)wprintw(mid4win, "%5.1f %c",(double)cn/10,st);
 
 	    if (sv == 0)			/* not tracking? */
-		wprintw(mid4win, "   ");	/* clear other info */
+		(void)wprintw(mid4win, "   ");	/* clear other info */
 	}
-	wprintw(debugwin, "MTD 0x04=");
+	(void)wprintw(debugwin, "MTD 0x04=");
     	break;
 
 #ifdef __UNUSED__
     case 0x05:		/* raw track data */
 	for (off = 1; off < len; off += 51) {
 	    ch = getl(off);
-	    wmove(mid4win, ch+2, 19);
+	    (void)wmove(mid4win, ch+2, 19);
 	    cn = 0;
 
 	    for (j = 0; j < 10; j++)
@@ -297,91 +299,91 @@ static void decode_sirf(unsigned char buf[], int len)
 	    printw("%8.5f %10.5f",
 	    	(double)getl(off+16)/65536,(double)getl(off+20)/1024);
 	}
-	wprintw(debugwin, "RTD 0x05=");
+	(void)wprintw(debugwin, "RTD 0x05=");
     	break;
 #endif /* __UNUSED */
 
     case 0x06:		/* firmware version */
-	mvwprintw(mid6win, 1, 10, "%s",buf + 1);
-	wprintw(debugwin, "FV  0x06=");
+	display(mid6win, 1, 10, "%s",buf + 1);
+	(void)wprintw(debugwin, "FV  0x06=");
     	break;
 
     case 0x07:		/* Response - Clock Status Data */
 	decode_time(getw(1),getl(3));
-	mvwprintw(mid7win, 1, 5,  "%2d", getb(7));	/* SVs */
-	mvwprintw(mid7win, 1, 16, "%lu", getl(8));	/* Clock drift */
-	mvwprintw(mid7win, 1, 29, "%lu", getl(12));	/* Clock Bias */
-	mvwprintw(mid7win, 2, 21, "%lu", getl(16));	/* Estimated Time */
-	wprintw(debugwin, "CSD 0x07=");
+	display(mid7win, 1, 5,  "%2d", getb(7));	/* SVs */
+	display(mid7win, 1, 16, "%lu", getl(8));	/* Clock drift */
+	display(mid7win, 1, 29, "%lu", getl(12));	/* Clock Bias */
+	display(mid7win, 2, 21, "%lu", getl(16));	/* Estimated Time */
+	(void)wprintw(debugwin, "CSD 0x07=");
 	break;
 
     case 0x08:		/* 50 BPS data */
 	ch = getb(1);
-	mvwprintw(mid4win, ch, 27, "Y");
-	wprintw(debugwin, "50B 0x08=");
+	display(mid4win, ch, 27, "Y");
+	(void)wprintw(debugwin, "50B 0x08=");
 	subframe_enabled = 1;
     	break;
 
     case 0x09:		/* Throughput */
-	mvwprintw(mid9win, 1, 6,  "%.3f",(double)getw(1)/186);	/*SegStatMax*/
-	mvwprintw(mid9win, 1, 18, "%.3f",(double)getw(3)/186);	/*SegStatLat*/
-	mvwprintw(mid9win, 1, 31, "%.3f",(double)getw(5)/186);	/*SegStatTime*/
-	mvwprintw(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
-	wprintw(debugwin, "THR 0x09=");
+	display(mid9win, 1, 6,  "%.3f",(double)getw(1)/186);	/*SegStatMax*/
+	display(mid9win, 1, 18, "%.3f",(double)getw(3)/186);	/*SegStatLat*/
+	display(mid9win, 1, 31, "%.3f",(double)getw(5)/186);	/*SegStatTime*/
+	display(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
+	(void)wprintw(debugwin, "THR 0x09=");
     	break;
 
     case 0x0b:		/* Command Acknowledgement */
-	wprintw(debugwin, "ACK 0x0b=");
+	(void)wprintw(debugwin, "ACK 0x0b=");
     	break;
 
     case 0x0c:		/* Command NAcknowledgement */
-	wprintw(debugwin, "NAK 0x0c=");
+	(void)wprintw(debugwin, "NAK 0x0c=");
     	break;
 
     case 0x0d:		/* Visible List */
-	mvwprintw(mid13win, 1, 6, "%d",getb(1));
-	wmove(mid13win, 1, 10);
+	display(mid13win, 1, 6, "%d",getb(1));
+	(void)wmove(mid13win, 1, 10);
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < getb(1))
-		wprintw(mid13win, " %2d",getb(2 + 5 * i));
+		(void)wprintw(mid13win, " %2d",getb(2 + 5 * i));
 	    else
-		wprintw(mid13win, "   ");
+		(void)wprintw(mid13win, "   ");
 
 	}
-	wprintw(mid13win, "\n");
-	wprintw(debugwin, "VL  0x0d=");
+	(void)wprintw(mid13win, "\n");
+	(void)wprintw(debugwin, "VL  0x0d=");
     	break;
 
     case 0x13:
-	mvwprintw(mid19win, 1, 20, "%d", getb(5));	/* Alt. hold mode */
-	mvwprintw(mid19win, 2, 20, "%d", getb(6));	/* Alt. hold source*/
-	mvwprintw(mid19win, 3, 20, "%dm", getw(7));	/* Alt. source input */
-	mvwprintw(mid19win, 4, 20, "%d", getb(9));	/* Degraded mode*/
-	mvwprintw(mid19win, 5, 20, "%dsec", getb(10));	/* Degraded timeout*/
-	mvwprintw(mid19win, 6, 20, "%dsec",getb(11));	/* DR timeout*/
-	mvwprintw(mid19win, 7, 20, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
-	mvwprintw(mid19win, 8, 20, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
-	mvwprintw(mid19win, 9, 20, "0x%x", getb(14));	/* 3SV Least Squares*/
-	mvwprintw(mid19win, 10,20, "0x%x", getb(19));	/* DOP Mask mode*/
-	mvwprintw(mid19win, 11,20, "0x%x", getw(20));	/* Nav. Elev. mask*/
-	mvwprintw(mid19win, 12,20, "0x%x", getb(22));	/* Nav. Power mask*/
-	mvwprintw(mid19win, 13,20, "0x%x", getb(27));	/* DGPS Source*/
-	mvwprintw(mid19win, 14,20, "0x%x", getb(28));	/* DGPS Mode*/
-	mvwprintw(mid19win, 15,20, "%dsec",getb(29));	/* DGPS Timeout*/
-	mvwprintw(mid19win, 1, 42, "%c", getb(34)?'Y':'N');/* LP Push-to-Fix */
-	mvwprintw(mid19win, 2, 42, "%dms", getl(35));	/* LP On Time */
-	mvwprintw(mid19win, 3, 42, "%d", getl(39));	/* LP Interval */
-	mvwprintw(mid19win, 4, 42, "%c", getb(43)?'Y':'N');/* User Tasks enabled */
-	mvwprintw(mid19win, 5, 42, "%d", getl(44));	/* User Task Interval */
-	mvwprintw(mid19win, 6, 42, "%c", getb(48)?'Y':'N');/* LP Power Cycling Enabled */
-	mvwprintw(mid19win, 7, 42, "%d", getl(49));/* LP Max Acq Search Time */
-	mvwprintw(mid19win, 8, 42, "%d", getl(53));/* LP Max Off Time */
-	mvwprintw(mid19win, 9, 42, "%c", getb(57)?'Y':'N');/* APM Enabled */
-	mvwprintw(mid19win,10, 42, "%d", getw(58));/* # of fixes */
-	mvwprintw(mid19win,11, 42, "%d", getw(60));/* Time Between fixes */
-	mvwprintw(mid19win,12, 42, "%d", getb(62));/* H/V Error Max */
-	mvwprintw(mid19win,13, 42, "%d", getb(63));/* Response Time Max */
-	mvwprintw(mid19win,14, 42, "%d", getb(64));/* Time/Accu & Duty Cycle Priority */
+	display(mid19win, 1, 20, "%d", getb(5));	/* Alt. hold mode */
+	display(mid19win, 2, 20, "%d", getb(6));	/* Alt. hold source*/
+	display(mid19win, 3, 20, "%dm", getw(7));	/* Alt. source input */
+	display(mid19win, 4, 20, "%d", getb(9));	/* Degraded mode*/
+	display(mid19win, 5, 20, "%dsec", getb(10));	/* Degraded timeout*/
+	display(mid19win, 6, 20, "%dsec",getb(11));	/* DR timeout*/
+	display(mid19win, 7, 20, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
+	display(mid19win, 8, 20, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
+	display(mid19win, 9, 20, "0x%x", getb(14));	/* 3SV Least Squares*/
+	display(mid19win, 10,20, "0x%x", getb(19));	/* DOP Mask mode*/
+	display(mid19win, 11,20, "0x%x", getw(20));	/* Nav. Elev. mask*/
+	display(mid19win, 12,20, "0x%x", getb(22));	/* Nav. Power mask*/
+	display(mid19win, 13,20, "0x%x", getb(27));	/* DGPS Source*/
+	display(mid19win, 14,20, "0x%x", getb(28));	/* DGPS Mode*/
+	display(mid19win, 15,20, "%dsec",getb(29));	/* DGPS Timeout*/
+	display(mid19win, 1, 42, "%c", getb(34)?'Y':'N');/* LP Push-to-Fix */
+	display(mid19win, 2, 42, "%dms", getl(35));	/* LP On Time */
+	display(mid19win, 3, 42, "%d", getl(39));	/* LP Interval */
+	display(mid19win, 4, 42, "%c", getb(43)?'Y':'N');/* User Tasks enabled */
+	display(mid19win, 5, 42, "%d", getl(44));	/* User Task Interval */
+	display(mid19win, 6, 42, "%c", getb(48)?'Y':'N');/* LP Power Cycling Enabled */
+	display(mid19win, 7, 42, "%d", getl(49));/* LP Max Acq Search Time */
+	display(mid19win, 8, 42, "%d", getl(53));/* LP Max Off Time */
+	display(mid19win, 9, 42, "%c", getb(57)?'Y':'N');/* APM Enabled */
+	display(mid19win,10, 42, "%d", getw(58));/* # of fixes */
+	display(mid19win,11, 42, "%d", getw(60));/* Time Between fixes */
+	display(mid19win,12, 42, "%d", getb(62));/* H/V Error Max */
+	display(mid19win,13, 42, "%d", getb(63));/* Response Time Max */
+	display(mid19win,14, 42, "%d", getb(64));/* Time/Accu & Duty Cycle Priority */
 	dispmode = !dispmode;
 	break;
 
@@ -426,15 +428,15 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
-	mvwprintw(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[getb(1)]);
+	display(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[getb(1)]);
 	for (i = j = 0; i < MAXCHANNELS; i++) {
 	    if (getb(16+2*i)) {
-		wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
+		(void)wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
 		j++;
 	    }
 	}
-	mvwprintw(mid27win, 1, 44, "%d", j);
-	wprintw(debugwin, "DST 0x1b=");
+	display(mid27win, 1, 44, "%d", j);
+	(void)wprintw(debugwin, "DST 0x1b=");
 	break;
 
     case 0x1C:	/* NL Measurement Data */
@@ -503,7 +505,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    			     clk.tv_sec % 3600,clk.tv_usec);
 #endif
 	}
-		wprintw(debugwin, "??? 0x62=");
+		(void)wprintw(debugwin, "??? 0x62=");
     	break;
 #endif /* __UNUSED__ */
 
@@ -520,19 +522,19 @@ static void decode_sirf(unsigned char buf[], int len)
 		break;
 	    }
 	if (j)
-	    wprintw(debugwin, "%s\n",buf+1);
-	wprintw(debugwin, "DD  0xff=");
+	    (void)wprintw(debugwin, "%s\n",buf+1);
+	(void)wprintw(debugwin, "DD  0xff=");
 	break;
 
     default:
-	wprintw(debugwin, "    0x%02x=", buf[0]);
+	(void)wprintw(debugwin, "    0x%02x=", buf[0]);
 	break;
     }
 
-    wprintw(debugwin, "(%d) ", len);
+    (void)wprintw(debugwin, "(%d) ", len);
     for (i = 1; i < len; i++)
-	wprintw(debugwin, "%02x",buf[i]);
-    wprintw(debugwin, "\n");
+	(void)wprintw(debugwin, "%02x",buf[i]);
+    (void)wprintw(debugwin, "\n");
 }
 
 /*****************************************************************************
@@ -785,10 +787,10 @@ static int sendpkt(unsigned char *buf, int len, char *device)
     putb(len + 3,END2);
     len += 8;
 
-    wprintw(debugwin, ">>>");
+    (void)wprintw(debugwin, ">>>");
     for (i = 0; i < len; i++)
-	wprintw(debugwin, " %02x",buf[i]);
-    wprintw(debugwin, "\n");
+	(void)wprintw(debugwin, " %02x",buf[i]);
+    (void)wprintw(debugwin, "\n");
 
     if (controlfd == -1) 
 	return -1;
@@ -835,16 +837,16 @@ static int tzoffset(void)
 
 static void refresh_rightpanel1(void)
 {
-    touchwin(mid6win);
-    touchwin(mid7win);
-    touchwin(mid9win);
-    touchwin(mid13win);
-    touchwin(mid27win);
-    wrefresh(mid6win);
-    wrefresh(mid7win);
-    wrefresh(mid9win);
-    wrefresh(mid13win);
-    wrefresh(mid27win);
+    (void)touchwin(mid6win);
+    (void)touchwin(mid7win);
+    (void)touchwin(mid9win);
+    (void)touchwin(mid13win);
+    (void)touchwin(mid27win);
+    (void)wrefresh(mid6win);
+    (void)wrefresh(mid7win);
+    (void)wrefresh(mid9win);
+    (void)wrefresh(mid13win);
+    (void)wrefresh(mid27win);
 }
 
 static void command(char *buf, int len, const char *fmt, ... )
@@ -955,117 +957,117 @@ int main (int argc, char **argv)
 
     wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid2win, A_BOLD);
-    wmove(mid2win, 0,1);
-    mvwprintw(mid2win, 0, 12, " X "); 
-    mvwprintw(mid2win, 0, 21, " Y "); 
-    mvwprintw(mid2win, 0, 30, " Z "); 
-    mvwprintw(mid2win, 0, 43, " North "); 
-    mvwprintw(mid2win, 0, 54, " East "); 
-    mvwprintw(mid2win, 0, 67, " Alt "); 
+    (void)wmove(mid2win, 0,1);
+    display(mid2win, 0, 12, " X "); 
+    display(mid2win, 0, 21, " Y "); 
+    display(mid2win, 0, 30, " Z "); 
+    display(mid2win, 0, 43, " North "); 
+    display(mid2win, 0, 54, " East "); 
+    display(mid2win, 0, 67, " Alt "); 
 
-    wmove(mid2win, 1,1);
-    wprintw(mid2win, "Pos:                            m                          deg         m");
-    wmove(mid2win, 2,1);
-    wprintw(mid2win, "Vel:                            m/s                                    m/s");
-    wmove(mid2win, 3,1);
-    wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
-    wmove(mid2win, 4,1);
-    wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:          M2:    ");
-    wmove(mid2win, 5,1);
-    wprintw(mid2win, "Fix:");
-    mvwprintw(mid2win, 6, 24, " Packet type 2 (0x02) ");
+    (void)wmove(mid2win, 1,1);
+    (void)wprintw(mid2win, "Pos:                            m                          deg         m");
+    (void)wmove(mid2win, 2,1);
+    (void)wprintw(mid2win, "Vel:                            m/s                                    m/s");
+    (void)wmove(mid2win, 3,1);
+    (void)wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
+    (void)wmove(mid2win, 4,1);
+    (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:          M2:    ");
+    (void)wmove(mid2win, 5,1);
+    (void)wprintw(mid2win, "Fix:");
+    display(mid2win, 6, 24, " Packet type 2 (0x02) ");
     wattrset(mid2win, A_NORMAL);
 
     wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid4win, A_BOLD);
-    mvwprintw(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
+    display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
     for (i = 0; i < MAXCHANNELS; i++) {
-	mvwprintw(mid4win, i+2, 1, "%2d",i);
+	display(mid4win, i+2, 1, "%2d",i);
     }
-    mvwprintw(mid4win, 14, 4, " Packet Type 4 (0x04) ");
+    display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
     wattrset(mid4win, A_NORMAL);
 
     wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid19win, A_BOLD);
-    mvwprintw(mid19win, 1, 1, "Alt. hold mode:");
-    mvwprintw(mid19win, 2, 1, "Alt. hold source:");
-    mvwprintw(mid19win, 3, 1, "Alt. source input:");
-    mvwprintw(mid19win, 4, 1, "Degraded mode:");
-    mvwprintw(mid19win, 5, 1, "Degraded timeout:");
-    mvwprintw(mid19win, 6, 1, "DR timeout:");
-    mvwprintw(mid19win, 7, 1, "Track smooth mode:");
-    mvwprintw(mid19win, 8, 1, "Static Navigation:");
-    mvwprintw(mid19win, 9, 1, "3SV Least Squares:");
-    mvwprintw(mid19win, 10,1, "DOP Mask mode:");
-    mvwprintw(mid19win, 11,1, "Nav. Elev. mask:");
-    mvwprintw(mid19win, 12,1, "Nav. Power mask:");
-    mvwprintw(mid19win, 13,1, "DGPS Source:");
-    mvwprintw(mid19win, 14,1, "DGPS Mode:");
-    mvwprintw(mid19win, 15,1, "DGPS Timeout:");
-    mvwprintw(mid19win, 1, 26,"LP Push-to-Fix:");
-    mvwprintw(mid19win, 2, 26,"LP On Time:");
-    mvwprintw(mid19win, 3, 26,"LP Interval:");
-    mvwprintw(mid19win, 4, 26,"U. Tasks Enab.:");
-    mvwprintw(mid19win, 5, 26,"U. Task Inter.:");
-    mvwprintw(mid19win, 6, 26,"LP Pwr Cyc En:");
-    mvwprintw(mid19win, 7, 26,"LP Max Acq Srch:");
-    mvwprintw(mid19win, 8, 26,"LP Max Off Time:");
-    mvwprintw(mid19win, 9, 26,"APM enabled:");
-    mvwprintw(mid19win,10, 26,"# of Fixes:");
-    mvwprintw(mid19win,11, 26,"Time btw Fixes:");
-    mvwprintw(mid19win,12, 26,"H/V Error Max:");
-    mvwprintw(mid19win,13, 26,"Rsp Time Max:");
-    mvwprintw(mid19win,14, 26,"Time/Accu:");
+    display(mid19win, 1, 1, "Alt. hold mode:");
+    display(mid19win, 2, 1, "Alt. hold source:");
+    display(mid19win, 3, 1, "Alt. source input:");
+    display(mid19win, 4, 1, "Degraded mode:");
+    display(mid19win, 5, 1, "Degraded timeout:");
+    display(mid19win, 6, 1, "DR timeout:");
+    display(mid19win, 7, 1, "Track smooth mode:");
+    display(mid19win, 8, 1, "Static Navigation:");
+    display(mid19win, 9, 1, "3SV Least Squares:");
+    display(mid19win, 10,1, "DOP Mask mode:");
+    display(mid19win, 11,1, "Nav. Elev. mask:");
+    display(mid19win, 12,1, "Nav. Power mask:");
+    display(mid19win, 13,1, "DGPS Source:");
+    display(mid19win, 14,1, "DGPS Mode:");
+    display(mid19win, 15,1, "DGPS Timeout:");
+    display(mid19win, 1, 26,"LP Push-to-Fix:");
+    display(mid19win, 2, 26,"LP On Time:");
+    display(mid19win, 3, 26,"LP Interval:");
+    display(mid19win, 4, 26,"U. Tasks Enab.:");
+    display(mid19win, 5, 26,"U. Task Inter.:");
+    display(mid19win, 6, 26,"LP Pwr Cyc En:");
+    display(mid19win, 7, 26,"LP Max Acq Srch:");
+    display(mid19win, 8, 26,"LP Max Off Time:");
+    display(mid19win, 9, 26,"APM enabled:");
+    display(mid19win,10, 26,"# of Fixes:");
+    display(mid19win,11, 26,"Time btw Fixes:");
+    display(mid19win,12, 26,"H/V Error Max:");
+    display(mid19win,13, 26,"Rsp Time Max:");
+    display(mid19win,14, 26,"Time/Accu:");
 
-    mvwprintw(mid19win, 16, 8, " Packet type 19 (0x13) ");
+    display(mid19win, 16, 8, " Packet type 19 (0x13) ");
     wattrset(mid19win, A_NORMAL);
 
     wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid6win, A_BOLD);
-    mvwprintw(mid6win, 1, 1, "Version:");
-    mvwprintw(mid6win, 2, 8, " Packet Type 6 (0x06) ");
+    display(mid6win, 1, 1, "Version:");
+    display(mid6win, 2, 8, " Packet Type 6 (0x06) ");
     wattrset(mid6win, A_NORMAL);
 
     wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid7win, A_BOLD);
-    mvwprintw(mid7win, 1, 1,  "SVs: ");
-    mvwprintw(mid7win, 1, 9,  "Drift: ");
-    mvwprintw(mid7win, 1, 23, "Bias: ");
-    mvwprintw(mid7win, 2, 1,  "Estimated GPS Time: ");
-    mvwprintw(mid7win, 3, 8, " Packet type 7 (0x07) ");
+    display(mid7win, 1, 1,  "SVs: ");
+    display(mid7win, 1, 9,  "Drift: ");
+    display(mid7win, 1, 23, "Bias: ");
+    display(mid7win, 2, 1,  "Estimated GPS Time: ");
+    display(mid7win, 3, 8, " Packet type 7 (0x07) ");
     wattrset(mid7win, A_NORMAL);
 
     wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid9win, A_BOLD);
-    mvwprintw(mid9win, 1, 1,  "Max: ");
-    mvwprintw(mid9win, 1, 13, "Lat: ");
-    mvwprintw(mid9win, 1, 25, "Time: ");
-    mvwprintw(mid9win, 1, 39, "MS: ");
-    mvwprintw(mid9win, 2, 8, " Packet type 9 (0x09) ");
+    display(mid9win, 1, 1,  "Max: ");
+    display(mid9win, 1, 13, "Lat: ");
+    display(mid9win, 1, 25, "Time: ");
+    display(mid9win, 1, 39, "MS: ");
+    display(mid9win, 2, 8, " Packet type 9 (0x09) ");
     wattrset(mid9win, A_NORMAL);
 
     wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid13win, A_BOLD);
-    mvwprintw(mid13win, 1, 1, "SVs: ");
-    mvwprintw(mid13win, 1, 9, "=");
-    mvwprintw(mid13win, 2, 8, " Packet type 13 (0x0D) ");
+    display(mid13win, 1, 1, "SVs: ");
+    display(mid13win, 1, 9, "=");
+    display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
     wattrset(mid13win, A_NORMAL);
 
     wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
     wattrset(mid27win, A_BOLD);
-    mvwprintw(mid27win, 1, 1, "SBAS source: ");
-    mvwprintw(mid27win, 1, 31, "Corrections: ");
-    mvwprintw(mid27win, 3, 8, " Packet type 27 (0x1B) ");
+    display(mid27win, 1, 1, "SBAS source: ");
+    display(mid27win, 1, 31, "Corrections: ");
+    display(mid27win, 3, 8, " Packet type 27 (0x1B) ");
     wattrset(mid27win, A_NORMAL);
 
     wattrset(cmdwin, A_BOLD);
     if (serial)
-    	mvwprintw(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
+    	display(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
     else
-	mvwprintw(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
+	display(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
     wattrset(cmdwin, A_NORMAL);
 
-    wmove(debugwin,0, 0);
+    (void)wmove(debugwin,0, 0);
 
     FD_ZERO(&select_set);
 
@@ -1075,20 +1077,20 @@ int main (int argc, char **argv)
     sendpkt(buf, 2, device);
 
     for (;;) {
-	wmove(cmdwin, 0,0);
-	wprintw(cmdwin, "cmd> ");
+	(void)wmove(cmdwin, 0,0);
+	(void)wprintw(cmdwin, "cmd> ");
 	wclrtoeol(cmdwin);
-	refresh();
-	wrefresh(mid2win);
-	wrefresh(mid4win);
+	(void)refresh();
+	(void)wrefresh(mid2win);
+	(void)wrefresh(mid4win);
 	if (dispmode == 0) {
 	    refresh_rightpanel1();
 	} else {
-	    touchwin(mid19win);
-	    wrefresh(mid19win);
+	    (void)touchwin(mid19win);
+	    (void)wrefresh(mid19win);
 	}
-	wrefresh(debugwin);
-	wrefresh(cmdwin);
+	(void)wrefresh(debugwin);
+	(void)wrefresh(cmdwin);
 
 	FD_SET(0,&select_set);
 	FD_SET(devicefd,&select_set);
@@ -1097,25 +1099,25 @@ int main (int argc, char **argv)
 	    break;
 
 	if (FD_ISSET(0,&select_set)) {
-	    wmove(cmdwin, 0,5);
-	    wrefresh(cmdwin);
+	    (void)wmove(cmdwin, 0,5);
+	    (void)wrefresh(cmdwin);
 	    echo();
 	    wgetnstr(cmdwin, line, 80);
 	    noecho();
 	    //move(0,0);
 	    //clrtoeol();
-	    //refresh();
-	    wrefresh(mid2win);
-	    wrefresh(mid4win);
+	    //(void)refresh();
+	    (void)wrefresh(mid2win);
+	    (void)wrefresh(mid4win);
 	    if (dispmode == 0) {
 		refresh_rightpanel1();
 	    } else {
-		touchwin(mid19win);
-		wrefresh(mid19win);
+		(void)touchwin(mid19win);
+		(void)wrefresh(mid19win);
 	    }
-	    wrefresh(mid19win);
-	    wrefresh(debugwin);
-	    wrefresh(cmdwin);
+	    (void)wrefresh(mid19win);
+	    (void)wrefresh(debugwin);
+	    (void)wrefresh(cmdwin);
 
 	    if ((p = strchr(line,'\r')) != NULL)
 		*p = '\0';
@@ -1157,7 +1159,7 @@ int main (int argc, char **argv)
 		    sendpkt(buf, 9, device);
 		    usleep(50000);
 		    set_speed(bps = v, stopbits);
-		    mvwprintw(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
+		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
 		    write(devicefd, line, strlen(line));

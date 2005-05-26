@@ -223,8 +223,8 @@ static void handle_time_out(XtPointer client_data UNUSED,
 static struct gps_data_t *gpsdata;
 static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
-XtAppContext app;
-XtIntervalId timeout;
+static XtAppContext app;
+static XtIntervalId timeout;
 
 static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
@@ -237,7 +237,7 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 
 static void update_panel(struct gps_data_t *gpsdata, 
 			 char *message, 
-			 int level UNUSED)
+			 int len UNUSED, int level UNUSED)
 /* runs on each sentence */
 {
     unsigned int i;
@@ -459,6 +459,6 @@ altunits_ok:;
 		  (XtPointer)XtInputReadMask, handle_input, NULL);
     XtAppMainLoop(app);
 
-    gps_close(gpsdata);
+    (void)gps_close(gpsdata);
     return 0;
 }

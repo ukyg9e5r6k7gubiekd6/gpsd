@@ -22,14 +22,14 @@ static void set_color(String color)
     Colormap cmap = DefaultColormapOfScreen(XtScreen(draww));
     XColor col, unused;
 
-    if (!XAllocNamedColor(dpy, cmap, color, &col, &unused)) {
+    if (XAllocNamedColor(dpy, cmap, color, &col, &unused)==0) {
 	char buf[32];
 
-	snprintf(buf, sizeof(buf), "Can't alloc %s", color);
+	(void)snprintf(buf, sizeof(buf), "Can't alloc %s", color);
 	XtWarning(buf);
 	return;
     }
-    XSetForeground(dpy, drawGC, col.pixel);
+    (void)XSetForeground(dpy, drawGC, col.pixel);
 }
 
 void register_canvas(Widget w, GC gc)
@@ -40,9 +40,9 @@ void register_canvas(Widget w, GC gc)
     XtVaGetValues(w, XmNwidth, &width, XmNheight, &height, NULL);
     pixmap = XCreatePixmap(XtDisplay(w),
 			   RootWindowOfScreen(XtScreen(w)), width, height,
-			   DefaultDepthOfScreen(XtScreen(w)));
+			   (unsigned int)DefaultDepthOfScreen(XtScreen(w)));
     set_color("White");
-    XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0, 0, width, height);
+    (void)XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0,0, width,height);
     diameter = min(width, height) - RM;
 }
 
@@ -58,9 +58,9 @@ static void pol2cart(double azimuth, double elevation, int *xout, int *yout)
     *yout = (int)((height/2) - cos(azimuth) * elevation * (diameter/2));
 }
 
-static void draw_arc(int x, int y, int diam)
+static void draw_arc(int x, int y, unsigned int diam)
 {
-    XDrawArc(XtDisplay(draww), pixmap, drawGC,
+    (void)XDrawArc(XtDisplay(draww), pixmap, drawGC,
 	     x - diam / 2, y - diam / 2,	/* x,y */
 	     diam, diam,	/* width, height */
 	     0, 360 * 64);	/* angle1, angle2 */
@@ -71,11 +71,11 @@ void draw_graphics(struct gps_data_t *gpsdata)
     int i, x, y;
     char buf[20];
 
-    if (gpsdata->satellites) {
+    if (gpsdata->satellites != 0) {
 	i = min(width, height);
 
 	set_color("White");
-	XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0, 0, width, height);
+	(void)XFillRectangle(XtDisplay(draww),pixmap,drawGC,0,0,width,height);
 
 	/* draw something in the center */
 	set_color("Grey");
@@ -93,16 +93,16 @@ void draw_graphics(struct gps_data_t *gpsdata)
 
 	pol2cart(0, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww),pixmap, drawGC, x, y, "N", 1);
+	(void)XDrawString(XtDisplay(draww),pixmap, drawGC, x, y, "N", 1);
 	pol2cart(90, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww),pixmap, drawGC, x+2, y, "E", 1);
+	(void)XDrawString(XtDisplay(draww),pixmap, drawGC, x+2, y, "E", 1);
 	pol2cart(180, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww),pixmap, drawGC, x, y+10, "S", 1);
+	(void)XDrawString(XtDisplay(draww),pixmap, drawGC, x, y+10, "S", 1);
 	pol2cart(270, 0, &x, &y);
 	set_color("Black");
-	XDrawString(XtDisplay(draww),pixmap, drawGC, x-5,y, "W", 1);
+	(void)XDrawString(XtDisplay(draww),pixmap, drawGC, x-5,y, "W", 1);
 
 	/* Now draw the satellites... */
 	for (i = 0; i < gpsdata->satellites; i++) {
@@ -121,7 +121,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		);
 	    snprintf(buf, sizeof(buf), "%02d", gpsdata->PRN[i]);
 	    set_color("Blue");
-	    XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 2);
+	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 2);
 	    if (gpsdata->ss[i]) {
 		set_color("Black");
 		XDrawPoint(XtDisplay(draww), pixmap, drawGC, x, y);

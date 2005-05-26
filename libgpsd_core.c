@@ -88,7 +88,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
     gpsd_report(1, "closing GPS=%s\n", session->gpsdata.gps_device);
-    gpsd_close(session);
+    (void)gpsd_close(session);
     session->gpsdata.gps_fd = -1;
 #ifdef NTPSHM_ENABLE
     ntpshm_free(session->context, session->shmTime);

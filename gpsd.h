@@ -46,15 +46,16 @@ struct gps_device_t;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
-    char *typename, *trigger;
-    int (*probe)(struct gps_device_t *session);
-    void (*initializer)(struct gps_device_t *session);
-    int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
-    int (*parse_packet)(struct gps_device_t *session);
-    int (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, int rtcmbytes);
-    int (*speed_switcher)(struct gps_device_t *session, int speed);
-    void (*mode_switcher)(struct gps_device_t *session, int mode);
-    void (*wrapup)(struct gps_device_t *session);
+    char *typename;
+    /*@null@*/char *trigger;
+    /*@null@*/int (*probe)(struct gps_device_t *session);
+    /*@null@*/void (*initializer)(struct gps_device_t *session);
+    /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
+    /*@null@*/int (*parse_packet)(struct gps_device_t *session);
+    /*@null@*/int (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, int rtcmbytes);
+    /*@null@*/int (*speed_switcher)(struct gps_device_t *session, int speed);
+    /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
+    /*@null@*/void (*wrapup)(struct gps_device_t *session);
     int cycle;
 };
 
@@ -127,8 +128,8 @@ struct gps_device_t {
      * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
      * translation of Zodiac binary protocol can send it up to the client.
      */
-    int Zs[MAXCHANNELS];	/* satellite PRNs */
-    int Zv[MAXCHANNELS];	/* signal values (0-7) */
+    unsigned int Zs[MAXCHANNELS];	/* satellite PRNs */
+    unsigned int Zv[MAXCHANNELS];	/* signal values (0-7) */
 #endif /* ZODIAC_ENABLE */
 #endif /* BINARY_ENABLE */
 #ifdef NTPSHM_ENABLE

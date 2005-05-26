@@ -470,8 +470,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 // send a packet in GarminUSB format
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket ) 
 {
-	long theBytesToWrite = 12 + aPacket->mDataSize;
-	long theBytesReturned = 0;
+	ssize_t theBytesToWrite = 12 + aPacket->mDataSize;
+	ssize_t theBytesReturned = 0;
 
         gpsd_report(4, "SendPacket(), writing %d bytes\n", theBytesToWrite);
         PrintPacket ( session,  aPacket);

@@ -1,0 +1,9 @@
+-I. 
++posixlib 
+-Dfd_set=int 
+-Dpthread_t=int 
+-Dsocklen_t=ssize_t
+-Din_addr_t=int
+-Du_int16_t=short
+-Du_int8_t=short
+-Dcaddr_t=short

@@ -529,7 +529,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
 		strncpy(outdata->tag, nmea_phrase[i].name, MAXTAGLEN);
-		outdata->sentence_length = strlen(sentence);
+		outdata->sentence_length = (int)strlen(sentence);
 	    }
 	    if (nmea_phrase[i].mask)
 		outdata->seen_sentences |= nmea_phrase[i].mask;
@@ -547,7 +547,7 @@ int nmea_send(int fd, const char *fmt, ... )
     va_list ap;
 
     va_start(ap, fmt) ;
-    vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf);

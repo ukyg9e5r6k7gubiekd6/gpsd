@@ -607,7 +607,7 @@ main(int argc, char *argv[])
 	}
     }
 
-    gps_close(collect);
+    (void)gps_close(collect);
 }
 
 #endif /* TESTMAIN */
