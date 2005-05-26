@@ -74,7 +74,7 @@ NMEA or packet of SiRF that produces the bug and tell us that.</p>
 <p>If you're using a SiRF-based GPS (which you can tell from the -D 4
 output), switch back to NMEA mode using the N command and see if the
 bug still reproduces.  Also try switching on <a
-href="#crazy_speed">static navigation mode</a>.</p>
+static navigation mode using sirfmon.</p>
 
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
@@ -85,15 +85,6 @@ that.</p>
 <p>Always include with your bug report the GPS vendor and model.  If
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
-
-<h1 id='crazy_speed'><code>gpsd</code> reports crazy high speeds</h1>
-
-<p>You are probably using a SiRF-II GPS.  Some of these come up in
-XTrac mode, which makes them more sensitive but also more sensitive
-to multipath interference and prone to report spurious large velocities.  
-Try bringing up <code>sirfmon</code> and using the 'c1' command to 
-set Static Navigation Mode.  This setting should persist between
-GPS uses.</p>
 
 <h1 id='date_flicker'>The date in <code>xgps</code> flickers to "n/a" part of the time</h1>
 
@@ -197,11 +188,10 @@ scenarios, perhaps on embedded systems or PDAs. On those it may be
 appropriate to use the low-level interface directly, probably with a
 build from source that conditions out all but one of the drivers.</p>
 
-<p>For Python programmers, there are gps.py and gpsd.py modules
-implementing respectively the high-level and low-level interfaces.
-Each exports a class that encapsulates a GPS session.</p>
+<p>For Python programmers, there is a gps.py module the high-level
+interface.  It exports a class that encapsulates a GPS session.</p>
 
-<h1 id='accuracy'>How has the <code>gpsd</code> interface changed since
+<h1 id='changes'>How has the <code>gpsd</code> interface changed since
 1.x?</h1>
 
 <p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>

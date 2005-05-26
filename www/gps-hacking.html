@@ -44,10 +44,6 @@ writing location-aware applications.</p>
 GPS works and ending with architectural suggestions about how to use
 <code>gpsd</code> to make your application location-aware.</p>
 
-<p>Developers who have written applications with <code>gpsd</code> 1.x
-may want to skip directly to the advice on <a
-href="#migrating">programming with gpsd-2</a>.</p>
-
 <h2>How GPS Works</h2>
 
 <p>First, the basics of how GPS works.  It depends on the fact that
@@ -277,7 +273,7 @@ for it in the <code>gpsd</code> code if you're really curious).</p>
 run <code>gpsd</code> in a mode something like this:</p>
 
 <listing>
-./gpsd -N -n -D 2 -p /dev/ttyUSB0
+./gpsd -N -n -D 2 -f /dev/ttyUSB0
 </listing>
 
 <p>Watching the output for thirty seconds or so will give you a good
