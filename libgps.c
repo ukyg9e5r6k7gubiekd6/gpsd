@@ -592,10 +592,10 @@ main(int argc, char *argv[])
 	int	tty = isatty(0);
 
 	if (tty)
-	    fputs("This is the gpsd exerciser.\n", stdout);
+	    (void)fputs("This is the gpsd exerciser.\n", stdout);
 	for (;;) {
 	    if (tty)
-		fputs("> ", stdout);
+		(void)fputs("> ", stdout);
 	    if (fgets(buf, sizeof(buf), stdin) == NULL) {
 		if (tty)
 		    putchar('\n');

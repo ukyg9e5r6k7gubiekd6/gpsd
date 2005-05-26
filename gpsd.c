@@ -686,7 +686,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		subscribers[cfd].watcher = 0;
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 		p++;
-	    } else if (subscribers[cfd].watcher) {
+	    } else if (subscribers[cfd].watcher!=0) {
 		subscribers[cfd].watcher = 0;
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 	    } else {
@@ -762,7 +762,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    }
 	    break;
         case '$':
-	    if (whoami->device->gpsdata.sentence_time)
+	    if (whoami->device->gpsdata.sentence_time!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %f %f %f %f %f %f",
 			whoami->device->gpsdata.tag,
 			whoami->device->gpsdata.sentence_length,

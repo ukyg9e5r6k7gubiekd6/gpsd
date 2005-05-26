@@ -260,7 +260,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 			gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N'
 		    );
 	    } else
-		sprintf(s, "                  ");
+		(void)strcpy(s, "                  ");
 	    string[i+1] = XmStringCreateSimple(s);
 	}
 	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
@@ -271,47 +271,47 @@ static void update_panel(struct gps_data_t *gpsdata,
     if (gpsdata->fix.time != TIME_NOT_VALID)
 	unix_to_iso8601(gpsdata->fix.time, s);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);
     if (gpsdata->fix.mode >= MODE_2D)
 	sprintf(s, "%lf %c", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_2, s);
     if (gpsdata->fix.mode >= MODE_2D)
 	sprintf(s, "%lf %c", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_3, s);
     if (gpsdata->fix.mode == MODE_3D)
 	sprintf(s, "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_4, s);
     if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_5, s);
     if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
 	sprintf(s, "%f degrees", gpsdata->fix.track);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
     if (gpsdata->fix.eph != UNCERTAINTY_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
     if (gpsdata->fix.epv != UNCERTAINTY_NOT_VALID)
 	sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_8, s);
     if (gpsdata->fix.mode == MODE_3D)
 	sprintf(s, "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
     else
-	strcpy(s, "n/a");
+	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_9, s);
 
     if (!gpsdata->online) {
@@ -394,10 +394,10 @@ altunits_ok:;
     while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
 	case 'v':
-	    printf("xgps %s\n", VERSION);
+	    (void)printf("xgps %s\n", VERSION);
 	    exit(0);
 	case 'h': default:
-	    fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
@@ -448,16 +448,16 @@ altunits_ok:;
     if (device) {
 	char *channelcmd = (char *)malloc(strlen(device)+3);
 
-	strcpy(channelcmd, "F=");
-	strcpy(channelcmd+2, device);
+	(void)strcpy(channelcmd, "F=");
+	(void)strcpy(channelcmd+2, device);
 	gps_query(gpsdata, channelcmd);
     }
 	
     gps_query(gpsdata, "w+x\n");
 
-    XtAppAddInput(app, gpsdata->gps_fd, 
+    (void)XtAppAddInput(app, gpsdata->gps_fd, 
 		  (XtPointer)XtInputReadMask, handle_input, NULL);
-    XtAppMainLoop(app);
+    (void)XtAppMainLoop(app);
 
     (void)gps_close(gpsdata);
     return 0;

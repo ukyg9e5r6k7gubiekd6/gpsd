@@ -50,7 +50,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
-	fputs(buf, stderr);
+	(void)fputs(buf, stderr);
     }
 }
 #endif /* TESTMAIN */
@@ -781,17 +781,17 @@ int main(int argc, char *argv[])
 	     cp < state.outbuffer + state.outbuflen; 
 	     cp++) {
 	    if (st != NMEA_PACKET)
-		printf(" 0x%02x", *cp);
+		(void)printf(" 0x%02x", *cp);
 	    else if (*cp == '\r')
-		fputs("\\r", stdout);
+		(void)fputs("\\r", stdout);
 	    else if (*cp == '\n')
-		fputs("\\n", stdout);
+		(void)fputs("\\n", stdout);
 	    else if (isprint(*cp))
-		putchar(*cp);
+		(void)putchar(*cp);
 	    else
-		printf("\\x%02x", *cp);
+		(void)printf("\\x%02x", *cp);
 	}
-	putchar('\n');
+	(void)putchar('\n');
 #endif /* DUMPIT */
     }
 }

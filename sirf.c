@@ -151,38 +151,39 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     for (i = 0; i < len; i++)
 	(void)snprintf(buf2+strlen(buf2), 
 		       sizeof(buf2)-strlen(buf2),
-		       "%02x", (int)buf[i]);
+		       "%02x", (unsigned int)buf[i]);
     strcat(buf2, "\n");
     buf += 4;
     len -= 8;
     gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
-    snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"MID%d",buf[0]);
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
+		   "MID%d",(int)buf[0]);
 
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
 	mask = 0;
-	session->gpsdata.satellites_used = getb(28);
+	session->gpsdata.satellites_used = (int)getb(28);
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	for (i = 0; i < MAXCHANNELS; i++)
-	    session->gpsdata.used[i] = getb(29+i);
-	if (!(session->driverstate & (SIRF_GE_232 | UBLOX))) {
+	    session->gpsdata.used[i] = (int)getb(29+i);
+	if ((session->driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	    /* position/velocity is bytes 1-18 */
 	    ecef_to_wgs84fix(&session->gpsdata.fix, 
-			     getl(1), getl(5), getl(9),
+			     getl(1)*1.0, getl(5)*1.0, getl(9)*1.0,
 			     getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
 	    /* WGS 84 geodesy parameters */
 	    /* fix status is byte 19 */
-	    navtype = getb(19);
+	    navtype = (int)getb(19);
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
+	    if ((navtype & 0x80) != 0)
 		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gpsdata.status = STATUS_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gpsdata.fix.mode = MODE_3D;
-	    else if (session->gpsdata.status)
+	    else if (session->gpsdata.status != 0)
 		session->gpsdata.fix.mode = MODE_2D;
 	    if (session->gpsdata.fix.mode == MODE_3D)
 		mask |= ALTITUDE_SET;
@@ -194,12 +195,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		= gpstime_to_unix(getw(22), getl(24)*1e-2) - session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.fix.mode > MODE_NO_FIX) {
-		if (!(session->time_seen & TIME_SEEN_GPS_2))
+		if ((session->time_seen & TIME_SEEN_GPS_2) == 0)
 		    gpsd_report(4, "valid time in message 0x02, seen=0x%02x\n",
 				session->time_seen);
 		session->time_seen |= TIME_SEEN_GPS_2;
 		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
-		    ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+		    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
 
@@ -207,7 +208,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /* fix quality data */
 	    session->gpsdata.hdop = getb(20)/5.0;
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
-	    if (session->gpsdata.satellites)
+	    if (session->gpsdata.satellites > 0)
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
 	    gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	    gpsd_report(3, "<= GPS: %s", buf2);
@@ -221,16 +222,16 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    = gpstime_to_unix(getw(1), getl(3)*1e-2) - session->context->leap_seconds;
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
-	    session->gpsdata.PRN[st]       = getb(off);
+	    session->gpsdata.PRN[st]       = (int)getb(off);
 	    session->gpsdata.azimuth[st]   = (int)((getb(off+1)*3)/2.0);
 	    session->gpsdata.elevation[st] = (int)(getb(off+2)/2.0);
 	    cn = 0;
 	    for (j = 0; j < 10; j++)
-		cn += getb(off+5+j);
+		cn += (int)getb(off+5+j);
 	    session->gpsdata.ss[st] = cn/10;
-	    good = session->gpsdata.PRN[st] && 
-		session->gpsdata.azimuth[st] && 
-		session->gpsdata.elevation[st];
+	    good = session->gpsdata.PRN[st]!=0 && 
+		session->gpsdata.azimuth[st]!=0 && 
+		session->gpsdata.elevation[st]!=0;
 #ifdef __UNUSED__
 	    gpsd_report(4, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
 			getb(off), 
@@ -240,18 +241,18 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 			getw(off+3),
 			good ? '*' : ' ');
 #endif /* UNUSED */
-	    if (good)
+	    if (good!=0)
 		st += 1;
 	}
 	session->gpsdata.satellites = st;
 #ifdef NTPSHM_ENABLE
 	if (st > 3) {
-	    if (!(session->time_seen & TIME_SEEN_GPS_1))
+	    if ((session->time_seen & TIME_SEEN_GPS_1)==0)
 		gpsd_report(4, "valid time in message 0x04, seen=0x%02x\n",
 			    session->time_seen);
 	    session->time_seen |= TIME_SEEN_GPS_1;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))
-		ntpshm_put(session, session->gpsdata.sentence_time + 0.8);
+		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
 	}
 #endif /* NTPSHM_ENABLE */
 	/*
@@ -259,7 +260,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * rate-control command for 04, at least at firmware rev. 231, 
 	 * so we have to do our own rate-limiting here...
 	 */
-	if (session->satcounter++ % 5)
+	if ((session->satcounter++ % 5) != 0)
 	    break;
 	gpsd_binary_satellite_dump(session, buf2);
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
@@ -294,7 +295,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	session->time_seen = 0;
-	if (!(session->context->valid & LEAP_SECOND_VALID)) {
+	if ((session->context->valid & LEAP_SECOND_VALID)==0) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
@@ -319,19 +320,19 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 * changes 1 second every few years. Maybe."
 	 */
         {
-	    unsigned int i, pageid, subframe, leap, words[10];
-	    unsigned int chan = getb(1);
-	    unsigned int svid = getb(2);
-	    words[0] = getl(3);
-	    words[1] = getl(7);
-	    words[2] = getl(11);
-	    words[3] = getl(15);
-	    words[4] = getl(19);
-	    words[5] = getl(23);
-	    words[6] = getl(27);
-	    words[7] = getl(31);
-	    words[8] = getl(35);
-	    words[9] = getl(39);
+	    unsigned int pageid, subframe, leap, words[10];
+	    unsigned int chan = (unsigned int)getb(1);
+	    unsigned int svid = (unsigned int)getb(2);
+	    words[0] = (unsigned int)getl(3);
+	    words[1] = (unsigned int)getl(7);
+	    words[2] = (unsigned int)getl(11);
+	    words[3] = (unsigned int)getl(15);
+	    words[4] = (unsigned int)getl(19);
+	    words[5] = (unsigned int)getl(23);
+	    words[6] = (unsigned int)getl(27);
+	    words[7] = (unsigned int)getl(31);
+	    words[8] = (unsigned int)getl(35);
+	    words[9] = (unsigned int)getl(39);
 	    gpsd_report(4, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
 	    	chan, svid, 
 	    	words[0], words[1], words[2], words[3], words[4], 
@@ -657,9 +658,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	buf2[0] = '\0';
 	for (i = 1; i < len; i++)
 	    if (isprint(buf[i]))
-		sprintf(buf2+strlen(buf2), "%c", buf[i]);
+		(void)sprintf(buf2+strlen(buf2), "%c", buf[i]);
 	    else
-		sprintf(buf2+strlen(buf2), "\\x%02x", buf[i]);
+		(void)sprintf(buf2+strlen(buf2), "\\x%02x", buf[i]);
 	gpsd_report(4, "DD  0xff: %s\n", buf2);
 	return 0;
 

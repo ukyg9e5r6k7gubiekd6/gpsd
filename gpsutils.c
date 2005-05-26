@@ -13,7 +13,7 @@
 double timestamp(void) 
 {
     struct timeval tv; 
-    gettimeofday(&tv, NULL); 
+    (void)gettimeofday(&tv, NULL); 
     return(tv.tv_sec + tv.tv_usec/1e6);
 }
 
@@ -65,13 +65,13 @@ char *unix_to_iso8601(double fixtime, char *isotime)
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t)integral;
-    gmtime_r(&intfixtime, &when);
+    (void)gmtime_r(&intfixtime, &when);
 
-    strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
+    (void)strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
     slen = strlen(isotime);
-    sprintf(isotime + slen, "%.1f", fractional);
-    memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
-    strcat(isotime, "Z");
+    (void)sprintf(isotime + slen, "%.1f", fractional);
+    (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
+    (void)strcat(isotime, "Z");
     return isotime;
 }
 
@@ -101,7 +101,7 @@ double gpstime_to_unix(int week, double tow)
 	fixtime = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
     else {
 	time_t now, last_rollover;
-	time(&now);
+	(void)time(&now);
 	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
 	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
     }

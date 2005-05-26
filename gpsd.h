@@ -150,7 +150,7 @@ struct gps_device_t {
 #endif /* NTPSHM_ENABLE */
 };
 
-#define IS_HIGHEST_BIT(v,m)	!(v & ~((m<<1)-1))
+#define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;

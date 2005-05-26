@@ -122,25 +122,25 @@ static void nmea_add_checksum(char *sentence)
 	    p++;
 	}
 	*p++ = '*';
-	sprintf(p, "%02X\r\n", sum);
+	(void)snprintf(p, 4, "%02X\r\n", (unsigned int)sum);
     }
 }
 
 static int nmea_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
-    unsigned int status;
+    size_t status;
     char buf[BUFLEN];
     va_list ap;
 
     va_start(ap, fmt) ;
-    vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf);
-    status = write(fd, buf, strlen(buf));
+    status = (size_t)write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
-	return status;
+	return (int)status;
     } else {
 	return -1;
     }
@@ -167,7 +167,7 @@ static void decode_time(int week, int tow)
     (void)wmove(mid2win, 3, 29);
     (void)wprintw(mid2win, "%d %02d:%02d:%05.2f", day, h,m,(double)s/100);
     (void)wmove(mid2win, 4, 8);
-    (void)wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100));
+    (void)wprintw(mid2win, "%f", timestamp()-gpstime_to_unix(week,tow/100.0));
     (void)wmove(mid2win, 4, 29);
     (void)wprintw(mid2win, "%d", gmt_offset);
 }
@@ -588,8 +588,10 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	else
 	  rate =  B57600;
 
-	cfsetispeed(&ttyset, (speed_t)rate);
-	cfsetospeed(&ttyset, (speed_t)rate);
+	/*@ ignore @*/
+	(void)cfsetispeed(&ttyset, (speed_t)rate);
+	(void)cfsetospeed(&ttyset, (speed_t)rate);
+	/*@ end @*/
     }
     ttyset.c_cflag &=~ CSIZE;
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
@@ -679,7 +681,7 @@ static int serial_initialize(char *device)
     
     /* Save original terminal parameters */
     if (tcgetattr(devicefd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
-	fputs("Can't sync up with device!\n", stderr);
+	(void)fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
 
@@ -884,10 +886,10 @@ int main (int argc, char **argv)
     while ((option = getopt(argc, argv, "hvF:")) != -1) {
 	switch (option) {
 	case 'v':
-	    printf("sirfmon %s\n", VERSION);
+	    (void)printf("sirfmon %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    fputs("usage:  sirfmon [-?hv] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  sirfmon [-?hv] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
