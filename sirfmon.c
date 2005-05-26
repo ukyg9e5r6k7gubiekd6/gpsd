@@ -31,6 +31,7 @@
 #include <time.h>
 #include <termios.h>
 #include <fcntl.h>	/* for O_RDWR */
+#include <stdarg.h>
 
 #include "config.h"
 #include "gpsutils.h"
@@ -846,6 +847,25 @@ static void refresh_rightpanel1(void)
     wrefresh(mid27win);
 }
 
+static void command(char *buf, int len, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    va_list ap;
+    int n;
+
+    va_start(ap, fmt) ;
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    write(devicefd, buf, strlen(buf));
+    n = read(devicefd, buf, len);
+    if (n >= 0) {
+	buf[n] = '\0';
+	while (isspace(buf[strlen(buf)-1]))
+	    buf[strlen(buf)-1] = '\0';
+    }
+}
+
 int main (int argc, char **argv)
 {
     unsigned int i, v;
@@ -901,21 +921,13 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
-	if (device) {
-	    char *channelcmd = (char *)malloc(strlen(device)+5);
-
-	    strcpy(channelcmd, "F=");
-	    strcpy(channelcmd, device);
-	    strcat(channelcmd, "\r\n");
-	    write(devicefd, channelcmd, strlen(channelcmd));
-	} else
-	    write(devicefd, "F\r\n", 3);
-	read(devicefd, buf, sizeof(buf));	/* read F response */ 
-	while (isspace(buf[strlen(buf)-1]))
-	    buf[strlen(buf)-1] = '\0';
-	device = strdup(buf);
-	write(devicefd, "R=2\r\n", 5);
-	read(devicefd, buf, sizeof(buf));	/* discard R response */ 
+	if (device)
+	    command(buf, sizeof(buf), "F=%s\r\n", device);
+	else
+	    command(buf, sizeof(buf), "O\r\n");	/* force device allocation */
+	command(buf, sizeof(buf), "F\r\n");
+	device = strdup(buf+7);
+	command(buf, sizeof(buf), "R=2\r\n");
 	serial = FALSE;
     } else {
 	devicefd = controlfd = serial_initialize(device = arg);
