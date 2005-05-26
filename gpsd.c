@@ -119,7 +119,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
-	if (in_background)
+	if (in_background!=0)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf);
 	else
 	    (void)fputs(buf, stderr);
@@ -171,7 +171,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     struct sockaddr_in sin;
     int s, type, one = 1;
 
-    memset((char *) &sin, '\0', sizeof(sin));
+    memset((char *) &sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
 
@@ -533,13 +533,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
 	    break;
 	case 'M':
-	    if (!assign_channel(whoami)!=0 && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
+	    if (assign_channel(whoami)==0 && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
 		strcpy(phrase, ",M=?");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->device->gpsdata.fix.mode);
 	    break;
 	case 'N':
-	    if (!assign_channel(whoami)!=0)
+	    if (assign_channel(whoami)==0)
 		strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
@@ -559,7 +559,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",N=%d", whoami->device->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    if (!assign_channel(whoami)!=0 || !have_fix(whoami->device))
+	    if (assign_channel(whoami)==0 || !have_fix(whoami->device))
 		strcpy(phrase, ",O=?");
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s %.2f %.3f %.6f %.6f",
@@ -645,7 +645,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 	    } else {
-		assign_channel(whoami)!=0;
+		assign_channel(whoami);
 		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
@@ -679,7 +679,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		subscribers[cfd].watcher = 1;
-		assign_channel(whoami)!=0;
+		assign_channel(whoami);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
@@ -691,7 +691,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 	    } else {
 		subscribers[cfd].watcher = 1;
-		assign_channel(whoami)!=0;
+		assign_channel(whoami);
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 	    }
@@ -1209,6 +1209,6 @@ int main(int argc, char *argv[])
     }
 
     if (control_socket)
-	unlink(control_socket);
+	(void)unlink(control_socket);
     return 0;
 }

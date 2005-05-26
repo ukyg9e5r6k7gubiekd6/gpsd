@@ -35,7 +35,7 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
 }
 
 void gpsd_set_speed(struct gps_device_t *session, 
-		   speed_t speed, unsigned int parity, unsigned int stopbits)
+		   speed_t speed, unsigned char parity, unsigned int stopbits)
 {
     speed_t	rate;
 
@@ -60,10 +60,12 @@ void gpsd_set_speed(struct gps_device_t *session,
     else
       rate =  B115200;
 
-    if (rate!=cfgetispeed(&session->ttyset) || parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
+    if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 
+	/*@ignore@*/
 	(void)cfsetispeed(&session->ttyset, (speed_t)rate);
 	(void)cfsetospeed(&session->ttyset, (speed_t)rate);
+	/*@end@*/
  	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
  	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
  	session->ttyset.c_cflag |= (stopbits==2 ? CS7|CSTOPB : CS8);
@@ -85,8 +87,8 @@ void gpsd_set_speed(struct gps_device_t *session,
     }
     gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
 
-    session->gpsdata.baudrate = speed;
-    session->gpsdata.parity = parity;
+    session->gpsdata.baudrate = (unsigned int)speed;
+    session->gpsdata.parity = (unsigned int)parity;
     session->gpsdata.stopbits = stopbits;
     packet_reset(session);
 }
@@ -106,7 +108,7 @@ int gpsd_open(struct gps_device_t *session)
 
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
-	    if ((*dp)->probe && (*dp)->probe(session)) {
+	    if ((*dp)->probe!=NULL && (*dp)->probe(session)!=NULL) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
 		if (session->device_type->initializer)
@@ -154,7 +156,7 @@ int gpsd_next_hunt_setting(struct gps_device_t *session)
 
     if (session->counter++ >= SNIFF_RETRIES) {
 	session->counter = 0;
-	if (session->baudindex++ >= sizeof(rates)/sizeof(rates[0])) {
+	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.stopbits++ >= 2)
 		return 0;			/* hunt is over, no sync */
@@ -172,9 +174,11 @@ void gpsd_close(struct gps_device_t *session)
     if (session->gpsdata.gps_fd != -1) {
 	if (isatty(session->gpsdata.gps_fd)!=0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
-	    cfsetispeed(&session->ttyset, (speed_t)B0);
-	    cfsetospeed(&session->ttyset, (speed_t)B0);
-	    tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
+	    /*@ ignore @*/
+	    (void)cfsetispeed(&session->ttyset, (speed_t)B0);
+	    (void)cfsetospeed(&session->ttyset, (speed_t)B0);
+	    /*@ end @*/
+	    (void)tcsetattr(session->gpsdata.gps_fd,TCSANOW, &session->ttyset);
 	}
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;

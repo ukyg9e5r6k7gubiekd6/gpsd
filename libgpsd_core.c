@@ -223,22 +223,22 @@ static int handle_packet(struct gps_device_t *session)
     session->gpsdata.fix.ept = 0.005;
 #ifdef BINARY_ENABLE
     if (session->gpsdata.set & LATLON_SET) {
-	if (!(session->gpsdata.set & HERR_SET) 
+	if ((session->gpsdata.set & HERR_SET)==0 
 	    && (session->gpsdata.set & HDOP_SET)) {
 	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
 	    session->gpsdata.set |= HERR_SET;
 	}
-	if (!(session->gpsdata.set & VERR_SET) 
+	if ((session->gpsdata.set & VERR_SET)==0 
 	    && (session->gpsdata.set & VDOP_SET)) {
 	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
 	    session->gpsdata.set |= VERR_SET;
 	}
-	if (!(session->gpsdata.set & PERR_SET) 
+	if ((session->gpsdata.set & PERR_SET)==0
 	    && (session->gpsdata.set & PDOP_SET)) {
 	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
 	    session->gpsdata.set |= PERR_SET;
 	}
-	if (!(session->gpsdata.set & SPEEDERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = 0.0;
 	    if (session->lastfix.mode > MODE_NO_FIX 
 		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
@@ -249,7 +249,7 @@ static int handle_packet(struct gps_device_t *session)
 		    session->gpsdata.set |= SPEEDERR_SET;
 	    }
 	}
-	if (!(session->gpsdata.set & CLIMBERR_SET) && session->gpsdata.fix.time > session->lastfix.time) {
+	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.epc = 0.0;
 	    if (session->lastfix.mode > MODE_3D 
 		&& session->gpsdata.fix.mode > MODE_3D) {

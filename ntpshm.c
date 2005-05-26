@@ -127,8 +127,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
     shmTime->count++;
-    shmTime->clockTimeStampSec = seconds;
-    shmTime->clockTimeStampUSec = microseconds;
+    shmTime->clockTimeStampSec = (time_t)seconds;
+    shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->receiveTimeStampSec = tv.tv_sec;
     shmTime->receiveTimeStampUSec = tv.tv_usec;
     shmTime->count++;
