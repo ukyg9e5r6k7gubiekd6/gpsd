@@ -17,14 +17,14 @@ static int nmea_parse_input(struct gps_device_t *session)
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
 #ifdef SIRFII_ENABLE
-	return sirf_parse(session, session->outbuffer, session->outbuflen);
+	return sirf_parse(session, session->outbuffer,(int)session->outbuflen);
 #else
 	return 0;
 #endif /* SIRFII_ENABLE */
     } else if (session->packet_type == NMEA_PACKET) {
 	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
-	if (!(st = nmea_parse(session->outbuffer, &session->gpsdata))) {
+	if ((st = nmea_parse(session->outbuffer, &session->gpsdata))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
 
@@ -32,7 +32,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
-		if (trigger && strncmp(session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)) {
+		if (trigger!=NULL && strncmp(session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(1, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->typename);
 		    return 1;
@@ -54,9 +54,9 @@ static int nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static int nmea_write_rtcm(struct gps_device_t *session, char *buf, int rtcmbytes)
+static size_t nmea_write_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 {
-    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
+    return (size_t)write(session->gpsdata.gps_fd, buf, rtcmbytes);
 }
 
 static void nmea_initializer(struct gps_device_t *session)
@@ -129,7 +129,7 @@ static void sirf_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 }
 
-static int sirf_switcher(struct gps_device_t *session, int nmea, int speed) 
+static int sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
     if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
@@ -137,7 +137,7 @@ static int sirf_switcher(struct gps_device_t *session, int nmea, int speed)
     return 1;
 }
 
-static int sirf_speed(struct gps_device_t *session, int speed)
+static int sirf_speed(struct gps_device_t *session, unsigned int speed)
 /* change the baud rate, remaining in SiRF NMWA mode */
 {
     return sirf_switcher(session, 1, speed);
@@ -233,7 +233,7 @@ static void earthmate_close(struct gps_device_t *session)
 static void earthmate_initializer(struct gps_device_t *session)
 {
     (void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
-    usleep(10000);
+    (void)usleep(10000);
     session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
     if (zodiac_binary.initializer) zodiac_binary.initializer(session);

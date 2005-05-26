@@ -88,7 +88,7 @@ static void tsip_initializer(struct gps_device_t *session)
     tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
 }
 
-static int tsip_speed_switch(struct gps_device_t *session, int speed)
+static int tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
 {
     unsigned char buf[100];
 

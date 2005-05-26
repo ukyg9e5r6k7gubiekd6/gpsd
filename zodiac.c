@@ -75,7 +75,7 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
 }
 
-static int zodiac_speed_switch(struct gps_device_t *session, int speed)
+static int zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 {
     unsigned short data[15];
 
@@ -98,7 +98,7 @@ static int zodiac_speed_switch(struct gps_device_t *session, int speed)
 }
 
 static void send_rtcm(struct gps_device_t *session, 
-		      char *rtcmbuf, int rtcmbytes)
+		      char *rtcmbuf, size_t rtcmbytes)
 {
     unsigned short data[34];
     int n = 1 + (rtcmbytes/2 + rtcmbytes%2);
@@ -114,8 +114,8 @@ static void send_rtcm(struct gps_device_t *session,
     zodiac_spew(session, 1351, data, n+1);
 }
 
-static int zodiac_send_rtcm(struct gps_device_t *session,
-			char *rtcmbuf, int rtcmbytes)
+static size_t zodiac_send_rtcm(struct gps_device_t *session,
+			char *rtcmbuf, size_t rtcmbytes)
 {
     int len;
 

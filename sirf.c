@@ -737,7 +737,7 @@ static void sirfbin_initializer(struct gps_device_t *session)
     }
 }
 
-static int sirfbin_speed(struct gps_device_t *session, int speed)
+static int sirfbin_speed(struct gps_device_t *session, unsigned int speed)
 {
     return sirf_speed(session->gpsdata.gps_fd, speed);
 }

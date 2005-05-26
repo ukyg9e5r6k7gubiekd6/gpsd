@@ -52,8 +52,8 @@ struct gps_type_t {
     /*@null@*/void (*initializer)(struct gps_device_t *session);
     /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
     /*@null@*/int (*parse_packet)(struct gps_device_t *session);
-    /*@null@*/int (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, int rtcmbytes);
-    /*@null@*/int (*speed_switcher)(struct gps_device_t *session, int speed);
+    /*@null@*/size_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
+    /*@null@*/int (*speed_switcher)(struct gps_device_t *session, unsigned int speed);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
     int cycle;
