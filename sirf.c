@@ -139,13 +139,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     if (len < 0)
 	return 0;
 
-    buf2[0] = '=';
-    buf2[1] = '\0';
+    buf2[0] = '\0';
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
     strcat(buf2, "\n");
-    if (session->gpsdata.raw_hook)
-	session->gpsdata.raw_hook(&session->gpsdata, buf2, 2);
     gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
     buf += 4;
     len -= 8;

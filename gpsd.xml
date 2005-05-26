@@ -48,11 +48,12 @@ protocol for it.</para>
 
 <para><application>gpsd</application> should be able to query any GPS
 that speaks either the standard textual NMEA 0183 protocol, or the
-binary Rockwell protocol used by EarthMate and some other GPSes, or
-the binary SiRF protocol used by SiRf-II and SiRF-Star chipsets, or
-the Garmin binary protocol used by the USB version of the Garmin 18
-and other Garmin USB GPSes. <application>gpsd</application>
-effectively hides the differences among these.</para>
+binary Rockwell protocol used by EarthMate and some other GPSes, the
+TSIP binary protocol used by Trimble GPSes, or the binary SiRF
+protocol used by SiRf-II and SiRF-Star chipsets, or the Garmin binary
+protocol used by the USB version of the Garmin 18 and other Garmin USB
+GPSes. <application>gpsd</application> effectively hides the
+differences among these.</para>
 
 <para>Optionally, <application>gpsd</application> may get
 differential-GPS corrections from a ground station running a RTCM-S104
@@ -404,8 +405,7 @@ GPS. (Non-NMEA GPSes get their communication format translated to NMEA
 on the fly.)  The command 'r' immediately followed by the digit '1' or
 the plus sign '+' sets raw mode.  The command 'r' immediately followed
 by the digit '2' sets super-raw mode; for non-NMEA (binary) GPSes this
-dumps '=', followed by a hex encoding of the raw binary packet, then
-dumps translated NMEA.  The command 'r' followed by the digit '0' or
+dumps the raw binary packet.  The command 'r' followed by the digit '0' or
 the minus sign '-' clears raw mode.  The command 'r' with neither
 suffix toggles raw mode.</para>
 
@@ -750,6 +750,12 @@ error estimates are computed by <application>gpsd</application> rather
 than reported by the chip.  The computation does not exactly match
 what SiRF chips do internally, which includes some satellite weighting
 using parameters <application>gpsd</application> cannot see.</para>
+
+<para>Trimble (TSIP) receivers do not output satellite AZ/EL in any
+normal packet, only in debug packets and raw measurement data packets
+(which are quite large).  Thus, the TSIP driver does not return Y
+responses.  Autobauding on the Trimble GPSes can take as long as
+5 seconds if the device speed is not matched to the GPS speed.</para>
 
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
 Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the

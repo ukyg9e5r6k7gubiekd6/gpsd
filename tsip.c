@@ -41,7 +41,6 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
 	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
-
     gpsd_report(5, "Sent TSIP packet id 0x%02x: %s\n",id,buf2);
 
     buf2[0] = 0x10;
@@ -125,15 +124,6 @@ static int tsip_analyze(struct gps_device_t *session)
 
     if (session->outbuflen < 4 || session->outbuffer[0] != 0x10)
 	return 0;
-
-    if (session->gpsdata.raw_hook) {
-	buf2[0] = '=';
-	buf2[1] = '\0';
-	for (i = 0; i < session->outbuflen; i++)
-	    sprintf(buf2+strlen(buf2), "%02x", session->outbuffer[i]);
-	strcat(buf2, "\n");
-	session->gpsdata.raw_hook(&session->gpsdata, buf2, 2);
-    }
 
     /* remove DLE stuffing and put data part of message in buf */
 

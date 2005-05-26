@@ -159,8 +159,8 @@ struct gps_data_t {
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
-    void (*raw_hook)(struct gps_data_t *, char *, int level);/* Raw-mode hook for GPS data. */
-    void (*thread_hook)(struct gps_data_t *, char *, int level);/* Thread-callback hook for GPS data. */
+    void (*raw_hook)(struct gps_data_t *, char *, int len, int level);/* Raw-mode hook for GPS data. */
+    void (*thread_hook)(struct gps_data_t *, char *, int len, int level);/* Thread-callback hook for GPS data. */
     int seen_sentences;		/* track which sentences have been seen */
 #define GPRMC	0x01
 #define GPGGA	0x02
@@ -179,8 +179,8 @@ extern struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *requests);
 int gps_poll(struct gps_data_t *gpsdata);
-void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, int level));
-int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, int level), pthread_t *handler);
+    void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, int len, int level));
+    int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, int len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 
 /* some multipliers for interpreting GPS output */

@@ -733,51 +733,36 @@ static int readword(void)
     return (byte1 << 8) | byte2;
 }
 
-static int readpkt(unsigned char *buf, unsigned maxlen)
+static int readpkt(unsigned char *buf)
 {
     int byte,len,csum,cnt;
 
-    if (!serial) {
-	len = read(devicefd, buf, maxlen);
-	if (buf[0] == '=') {
-	    unsigned char *sp, *tp;
-	    unsigned int c;
-	    for (sp = buf+1, tp = buf; *sp; sp += 2) {
-		if (sscanf(sp, "%02x", &c))
-		    *tp++ = c;
-	    }
-	    *tp = '\0';
-	    len = tp - buf;
-	}
-    } else {
-	do {
-	    while ((byte = readbyte()) != START1)
-		if (byte == EOF)
-		    return EOF;
-	} while ((byte = readbyte()) != START2);
-
-	if ((len = readword()) == EOF || len > BUFLEN)
-	    return EOF;
-
-	csum = 0;
-	cnt = len;
-
-	while (cnt-- > 0) {
-	    if ((byte = readbyte()) == EOF)
+    do {
+	while ((byte = readbyte()) != START1)
+	    if (byte == EOF)
 		return EOF;
-	    *buf++ = byte;
-	    csum += byte;
-	}
+    } while ((byte = readbyte()) != START2);
 
-	csum &= 0x7fff;
+    if ((len = readword()) == EOF || len > BUFLEN)
+	return EOF;
 
-	if (readword() != csum)
+    csum = 0;
+    cnt = len;
+
+    while (cnt-- > 0) {
+	if ((byte = readbyte()) == EOF)
 	    return EOF;
-
-	if (readbyte() != END1 || readbyte() != END2)
-	    return EOF;
+	*buf++ = byte;
+	csum += byte;
     }
 
+    csum &= 0x7fff;
+
+    if (readword() != csum)
+	return EOF;
+
+    if (readbyte() != END1 || readbyte() != END2)
+	return EOF;
     return len;
 }
 
@@ -1243,7 +1228,7 @@ int main (int argc, char **argv)
 	    }
 	}
 
-	if ((len = readpkt(buf, sizeof(buf))) != EOF) {
+	if ((len = readpkt(buf)) != EOF) {
 	    decode_sirf(buf,len);
 	}
     }

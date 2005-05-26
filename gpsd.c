@@ -259,7 +259,7 @@ static int throttled_write(int cfd, char *buf, int len)
 {
     int status;
 
-    gpsd_report(3, "=> client(%d): %s", cfd, buf);
+    gpsd_report(3, "=> client(%d): %s", cfd, isprint(buf[0]) ? buf : "UNPRINTABLE\n");
     if ((status = write(cfd, buf, len)) > -1)
 	return status;
     if (errno == EBADF)
@@ -288,15 +288,16 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 	    throttled_write(cfd, buf, strlen(buf));
 }
 
-static void raw_hook(struct gps_data_t *ud UNUSED, char *sentence, int level)
+static void raw_hook(struct gps_data_t *ud UNUSED, 
+		     char *sentence, int len, int level)
 /* hook to be executed on each incoming packet */
 {
     int cfd;
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (subscribers[cfd].raw >= level && !strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device)))
-	    throttled_write(cfd, sentence, strlen(sentence));
+	if (subscribers[cfd].raw == level && !strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device)))
+	    throttled_write(cfd, sentence, len);
     }
 }
 

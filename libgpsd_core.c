@@ -348,9 +348,13 @@ int gpsd_poll(struct gps_device_t *session)
 		return ERROR_SET;
 	}
 
-	if (packet_length)
+	if (packet_length) {
+	    if (session->gpsdata.raw_hook)
+		session->gpsdata.raw_hook(&session->gpsdata, 
+					  session->outbuffer,
+					  packet_length, 2);
 	    return handle_packet(session);
-	else
+	} else
 	    return ONLINE_SET;
     }
 }
@@ -373,10 +377,10 @@ void gpsd_zero_satellites(struct gps_data_t *out)
     out->satellites = 0;
 }
 
-void gpsd_raw_hook(struct gps_device_t *session, char *sentence, int level)
+void gpsd_raw_hook(struct gps_device_t *session, char *sentence, int len, int level)
 {
     if (session->gpsdata.raw_hook) {
-	session->gpsdata.raw_hook(&session->gpsdata, sentence, level);
+	session->gpsdata.raw_hook(&session->gpsdata, sentence, len, level);
     }
 }
 
@@ -437,7 +441,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, 1);
+	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 	bufp += strlen(bufp);
     }
     sprintf(bufp,
@@ -456,7 +460,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 	    tm.tm_mon + 1,
 	    tm.tm_year % 100);
 	nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, 1);
+	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 }
 
 void gpsd_binary_satellite_dump(struct gps_device_t *session, char *bufp)
@@ -483,7 +487,7 @@ void gpsd_binary_satellite_dump(struct gps_device_t *session, char *bufp)
 		    session->gpsdata.ss[i]);
 	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
 	    nmea_add_checksum(bufp2);
-	    gpsd_raw_hook(session, bufp2, 1);
+	    gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
 	}
     }
 }
@@ -512,7 +516,7 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 	    session->gpsdata.hdop,
 	    session->gpsdata.vdop);
     nmea_add_checksum(bufp2);
-    gpsd_raw_hook(session, bufp2, 1);
+    gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
     bufp += strlen(bufp);
     if ((session->gpsdata.fix.eph || session->gpsdata.fix.epv)
 	&& finite(session->gpsdata.fix.eph)
@@ -526,7 +530,7 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 	    session->gpsdata.fix.epv, 
 	    session->gpsdata.epe);
         nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, 1);
+	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 	session->gpsdata.seen_sentences |= PGRME;
      }
 }

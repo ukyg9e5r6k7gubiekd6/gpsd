@@ -116,7 +116,8 @@ designate a speed to be tried at the front of the hunt queue</para>
 sentence or as it is read from the GPS.  The data from non-NMEA GPSes like
 the EarthMate will be translated to an NMEA sentence before being
 passed to the hook.  Parameters are a pointer to a gps_data structure
-full of parsed data, the sentence, and a rawness level.</para>
+full of parsed data, the sentence, the length of the sentence, 
+and a rawness level.</para>
 </listitem>
 </varlistentry>
 </variablelist>
