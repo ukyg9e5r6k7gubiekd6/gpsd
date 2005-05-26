@@ -36,35 +36,38 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-static u_int16_t sirf_write(int fd, u_int8_t *msg) {
-   int       i, len, ok, crc;
+static size_t sirf_write(int fd, unsigned char *msg) {
+   unsigned int       crc;
+   size_t    i, len, ok;
    char	     buf[MAX_PACKET_LENGTH*2];
 
-   len = (msg[2] << 8) | msg[3];
+   len = (size_t)((msg[2] << 8) | msg[3]);
 
    /* calculate CRC */
    crc = 0;
    for (i = 0; i < len; i++)
-	crc += msg[4 + i];
+	crc += (int)msg[4 + i];
    crc &= 0x7fff;
 
    /* enter CRC after payload */
-   msg[len + 4] = (u_int8_t)((crc & 0xff00) >> 8);
-   msg[len + 5] = (u_int8_t)( crc & 0x00ff);
+   msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
+   msg[len + 5] = (unsigned char)( crc & 0x00ff);
 
    buf[0] = '\0';
    for (i = 0; i < len+8; i++)
-       sprintf(buf+strlen(buf), " %02x", msg[i]);
+       (void)snprintf(buf+strlen(buf),sizeof(buf)-strlen(buf),
+		      " %02x", (unsigned)msg[i]);
    gpsd_report(4, "Writing SiRF control type %02x:%s\n", msg[4], buf);
-   ok = write(fd, msg, len+8) == len+8;
-   tcdrain(fd);
+   ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
+   (void)tcdrain(fd);
    return(ok);
 }
 
-static int sirf_speed(int ttyfd, int speed) 
+static size_t sirf_speed(int ttyfd, speed_t speed) 
 /* change speed in binary mode */
 {
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x09,
+    /*@ +charint @*/
+   unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
                      0x86, 
                      0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
 		     0x08,			/* 8 data bits */
@@ -72,16 +75,18 @@ static int sirf_speed(int ttyfd, int speed)
 		     0x00,			/* no parity */
 		     0x00,			/* reserved */
                      0x00, 0x00, 0xb0, 0xb3};
+   /*@ -charint @*/
 
-   msg[7] = HI(speed);
-   msg[8] = LO(speed);
+   msg[7] = (unsigned char)HI(speed);
+   msg[8] = (unsigned char)LO(speed);
    return (sirf_write(ttyfd, msg));
 }
 
-static int sirf_to_nmea(int ttyfd, int speed) 
+static size_t sirf_to_nmea(int ttyfd, speed_t speed) 
 /* switch from binary to NMEA at specified baud */
 {
-   u_int8_t msg[] = {0xa0, 0xa2, 0x00, 0x18,
+    /*@ +charint @*/
+   unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x18,
                      0x81, 0x02,
                      0x01, 0x01, /* GGA */
                      0x00, 0x00, /* suppress GLL */
@@ -93,21 +98,22 @@ static int sirf_to_nmea(int ttyfd, int speed)
                      0x00, 0x01, 0x00, 0x01,
                      0x12, 0xc0, /* 4800 bps */
                      0x00, 0x00, 0xb0, 0xb3};
+   /*@ -charint @*/
 
-   msg[26] = HI(speed);
-   msg[27] = LO(speed);
+   msg[26] = (unsigned char)HI(speed);
+   msg[27] = (unsigned char)LO(speed);
    return (sirf_write(ttyfd, msg));
 }
 
-#define getb(off)	((u_int8_t)buf[off])
+#define getb(off)	((unsigned char)buf[off])
 #define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
-	gpsd_switch_driver(session, "SiRF-II NMEA");
-	sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
+	(void)gpsd_switch_driver(session, "SiRF-II NMEA");
+	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;
     }
 }
@@ -117,7 +123,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     int	st, i, j, cn, navtype, mask;
     char buf2[MAX_PACKET_LENGTH*3+2];
     double fv;
-    u_int8_t enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+    /*@ +charint @*/
+    unsigned char enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				 0x80, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
@@ -126,7 +133,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				 0x00, 0x00, 0x00, 0x0C,
 				 0x10,
 				 0x00, 0x00, 0xb0, 0xb3};
-    u_int8_t disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+    unsigned char disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				  0x80, 0x00, 0x00, 0x00,
 				  0x00, 0x00, 0x00, 0x00,
 				  0x00, 0x00, 0x00, 0x00,
@@ -136,20 +143,20 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				  0x00,
 				  0x00, 0x00, 0xb0, 0xb3};
 
+    /*@ -charint @*/
     if (len < 0)
 	return 0;
 
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
-	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
+	(void)snprintf(buf2+strlen(buf2), 
+		       sizeof(buf2)-strlen(buf2),
+		       "%02x", (int)buf[i]);
     strcat(buf2, "\n");
-    gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
     buf += 4;
     len -= 8;
-
-
-    if (buf[0] != 0xff)
-	snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"MID%d",buf[0]);
+    gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
+    snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"MID%d",buf[0]);
 
     switch (buf[0])
     {
@@ -272,10 +279,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	} else if (fv < 232) 
 	    session->driverstate |= SIRF_EQ_231;
 	else {
-	    u_int8_t enablemid52[] = {
+	    /*@ +charint @*/
+	    unsigned char enablemid52[] = {
 		0xa0, 0xa2, 0x00, 0x08, 
 		0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0xdb, 0xb0, 0xb3};
+	    /*@ -charint @*/
 	    gpsd_report(4, "Enabling PPS message...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
 	    session->driverstate |= SIRF_GE_232;
@@ -691,18 +700,19 @@ static void sirfbin_initializer(struct gps_device_t *session)
     }
     /* do this every time*/
     {
-	u_int8_t dgpscontrol[] = {0xa0, 0xa2, 0x00, 0x07,
+	/*@ +charint @*/
+	unsigned char dgpscontrol[] = {0xa0, 0xa2, 0x00, 0x07,
 				 0x85, 0x01, 0x00, 0x00,
 				 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-	u_int8_t sbasparams[] = {0xa0, 0xa2, 0x00, 0x06,
+	unsigned char sbasparams[] = {0xa0, 0xa2, 0x00, 0x06,
 				 0xaa, 0x00, 0x01, 0x00,
 				 0x00, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-	u_int8_t versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
+	unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				 0x84, 0x00,
 				 0x00, 0x00, 0xb0, 0xb3};
-	u_int8_t modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
+	unsigned char modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
 				  0x88, 
 				  0x00, 0x00,	/* pad bytes */
 				  0x00,		/* degraded mode off */
@@ -715,6 +725,7 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				  0x00,		/* disable dead reckoning */
 				  0x01,		/* enable track smoothing */
 				 0x00, 0x00, 0xb0, 0xb3};
+	/*@ -charint @*/
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");

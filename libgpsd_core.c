@@ -38,7 +38,7 @@ int gpsd_open_dgps(char *dgpsserver)
     if (dsock >= 0) {
 	gethostname(hn, sizeof(hn));
 	snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
-	write(dsock, buf, strlen(buf));
+	(void)write(dsock, buf, strlen(buf));
     }
     return dsock;
 }
@@ -91,10 +91,10 @@ void gpsd_deactivate(struct gps_device_t *session)
     (void)gpsd_close(session);
     session->gpsdata.gps_fd = -1;
 #ifdef NTPSHM_ENABLE
-    ntpshm_free(session->context, session->shmTime);
+    (void)ntpshm_free(session->context, session->shmTime);
     session->shmTime = -1;
 # ifdef PPS_ENABLE
-    ntpshm_free(session->context, session->shmTimeP);
+    (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
@@ -112,7 +112,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
-	gettimeofday(&tv,NULL);
+	(void)gettimeofday(&tv,NULL);
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
 	    break;
 
@@ -176,7 +176,7 @@ int gpsd_activate(struct gps_device_t *session)
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 	if (session->shmTime >= 0 && session->context->shmTimePPS) {
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
-		pthread_create(&pt,NULL,gpsd_ppsmonitor, (void *)session);
+		(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	}
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
@@ -263,9 +263,9 @@ static int handle_packet(struct gps_device_t *session)
 	}
 
 	/* save the old fix for later uncertainty computations */
-	memcpy(&session->lastfix, 
-	       &session->gpsdata.fix, 
-	       sizeof(struct gps_fix_t));
+	(void)memcpy(&session->lastfix, 
+		     &session->gpsdata.fix, 
+		     sizeof(struct gps_fix_t));
     }
 #endif /* BINARY_ENABLE */
 
@@ -276,11 +276,11 @@ static int handle_packet(struct gps_device_t *session)
 	session->sentdgps++;
 	if (session->dsock > -1) {
 	    char buf[BUFSIZ];
-	    snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n", 
-		    session->gpsdata.fix.latitude, 
-		    session->gpsdata.fix.longitude, 
-		    session->gpsdata.fix.altitude);
-	    write(session->dsock, buf, strlen(buf));
+	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n", 
+			   session->gpsdata.fix.latitude, 
+			   session->gpsdata.fix.longitude, 
+			   session->gpsdata.fix.altitude);
+	    (void)write(session->dsock, buf, strlen(buf));
 	    gpsd_report(2, "=> dgps %s", buf);
 	}
     }
@@ -364,16 +364,16 @@ void gpsd_wrap(struct gps_device_t *session)
 {
     gpsd_deactivate(session);
     if (session->gpsdata.gps_device)
-	free(session->gpsdata.gps_device);
-    free(session);
+	(void)free(session->gpsdata.gps_device);
+    (void)free(session);
 }
 
 void gpsd_zero_satellites(struct gps_data_t *out)
 {
-    memset(out->PRN,       '\0', sizeof(out->PRN));
-    memset(out->elevation, '\0', sizeof(out->elevation));
-    memset(out->azimuth,   '\0', sizeof(out->azimuth));
-    memset(out->ss,        '\0', sizeof(out->ss));
+    (void)memset(out->PRN,       0, sizeof(out->PRN));
+    (void)memset(out->elevation, 0, sizeof(out->elevation));
+    (void)memset(out->azimuth,   0, sizeof(out->azimuth));
+    (void)memset(out->ss,        0, sizeof(out->ss));
     out->satellites = 0;
 }
 
@@ -416,7 +416,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
     intfixtime = (int)session->gpsdata.fix.time;
     gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
-	sprintf(bufp,
+	(void)sprintf(bufp,
 		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
 		tm.tm_hour,
 		tm.tm_min,
@@ -430,21 +430,21 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char *bufp)
 		hdop_str,
 		session->gpsdata.fix.altitude, 'M');
 	if (session->gpsdata.fix.separation == NO_SEPARATION)
-	    strcat(bufp, ",,");
+	    (void)strcat(bufp, ",,");
 	else
-	    sprintf(bufp+strlen(bufp), "%.3f,M", 
+	    (void)sprintf(bufp+strlen(bufp), "%.3f,M", 
 		    session->gpsdata.fix.separation);
 	if (session->mag_var == NO_MAG_VAR) 
-	    strcat(bufp, ",,");
+	    (void)strcat(bufp, ",,");
 	else {
-	    sprintf(bufp+strlen(bufp), "%3.2f,", fabs(session->mag_var));
-	    strcat(bufp, (session->mag_var > 0) ? "E": "W");
+	    (void)sprintf(bufp+strlen(bufp), "%3.2f,", fabs(session->mag_var));
+	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
 	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 	bufp += strlen(bufp);
     }
-    sprintf(bufp,
+    (void)sprintf(bufp,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    tm.tm_hour, 
 	    tm.tm_min, 
@@ -480,7 +480,7 @@ void gpsd_binary_satellite_dump(struct gps_device_t *session, char *bufp)
 	}
 	bufp += strlen(bufp);
 	if (i < session->gpsdata.satellites)
-	    sprintf(bufp, ",%02d,%02d,%03d,%02d", 
+	    (void)sprintf(bufp, ",%02d,%02d,%03d,%02d", 
 		    session->gpsdata.PRN[i],
 		    session->gpsdata.elevation[i], 
 		    session->gpsdata.azimuth[i], 
@@ -497,7 +497,7 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
     int	i, j;
     char *bufp2 = bufp;
 
-    sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
+    (void)sprintf(bufp, "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
     j = 0;
     for (i = 0; i < MAXCHANNELS; i++) {
 	if (session->gpsdata.used[i]) {
@@ -511,7 +511,7 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
 	sprintf(bufp, ",");
     }
     bufp += strlen(bufp);
-    sprintf(bufp, "%.1f,%.1f,%.1f*", 
+    (void)sprintf(bufp, "%.1f,%.1f,%.1f*", 
 	    session->gpsdata.pdop, 
 	    session->gpsdata.hdop,
 	    session->gpsdata.vdop);
@@ -525,7 +525,7 @@ void gpsd_binary_quality_dump(struct gps_device_t *session, char *bufp)
     ) {
         // output PGRME
         // only if realistic
-        sprintf(bufp, "$PGRME,%.2f,%.2f,%.2f",
+        (void)sprintf(bufp, "$PGRME,%.2f,%.2f,%.2f",
 	    session->gpsdata.fix.eph, 
 	    session->gpsdata.fix.epv, 
 	    session->gpsdata.epe);

@@ -7,3 +7,4 @@
 -Du_int16_t=short
 -Du_int8_t=short
 -Dcaddr_t=short
+-DFD_SETSIZE=31

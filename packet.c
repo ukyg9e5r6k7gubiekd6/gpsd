@@ -129,6 +129,7 @@ enum {
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
 {
+/*@ +charint */
     switch(session->packet_state)
     {
     case GROUND_STATE:
@@ -420,6 +421,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
 #endif /* ZODIAC_ENABLE */
     }
+/*@ -charint */
 }
 
 #ifdef STATE_DEBUG
@@ -558,7 +560,7 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	    unsigned int checksum = (trailer[0] << 8) | trailer[1];
 	    unsigned int n, crc = 0;
 	    for (n = 4; n < (size_t)(trailer - session->inbuffer); n++)
-		crc += session->inbuffer[n];
+		crc += (int)session->inbuffer[n];
 	    crc &= 0x7fff;
 	    if (checksum == crc)
 		packet_accept(session, SIRF_PACKET);
