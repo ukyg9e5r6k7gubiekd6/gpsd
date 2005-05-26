@@ -109,6 +109,8 @@ int gpsd_open(struct gps_device_t *session)
 	    if ((*dp)->probe && (*dp)->probe(session)) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
+		if (session->device_type->initializer)
+		    session->device_type->initializer(session);
 		return session->gpsdata.gps_fd;
 	    }
  	}
