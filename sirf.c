@@ -105,8 +105,8 @@ static size_t sirf_to_nmea(int ttyfd, speed_t speed)
    return (sirf_write(ttyfd, msg));
 }
 
-#define getb(off)	((unsigned char)buf[off])
-#define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
+#define getb(off)	buf[off]
+#define getw(off)	((getb(off) << 8) | getb(off+1))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
@@ -170,8 +170,8 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	if ((session->driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	    /* position/velocity is bytes 1-18 */
 	    ecef_to_wgs84fix(&session->gpsdata.fix, 
-			     getl(1)*1.0, getl(5)*1.0, getl(9)*1.0,
-			     getw(13)/8.0, getw(15)/8.0, getw(17)/8.0);
+			     (double)getl(1), (double)getl(5), (double)getl(9),
+			     (int)getw(13)/8.0, (int)getw(15)/8.0, (int)getw(17)/8.0);
 	    /* WGS 84 geodesy parameters */
 	    /* fix status is byte 19 */
 	    navtype = (int)getb(19);
@@ -192,7 +192,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    /* byte 20 is HDOP, see below */
 	    /* byte 21 is "mode 2", not clear how to interpret that */ 
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= gpstime_to_unix(getw(22), getl(24)*1e-2) - session->context->leap_seconds;
+		= gpstime_to_unix((int)getw(22), (int)getl(24)*1e-2) - session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 		if ((session->time_seen & TIME_SEEN_GPS_2) == 0)
@@ -206,7 +206,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
 	    gpsd_binary_fix_dump(session, buf2);
 	    /* fix quality data */
-	    session->gpsdata.hdop = getb(20)/5.0;
+	    session->gpsdata.hdop = (int)getb(20)/5.0;
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
 	    if (session->gpsdata.satellites > 0)
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
@@ -219,12 +219,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     case 0x04:		/* Measured tracker data out */
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.sentence_time
-	    = gpstime_to_unix(getw(1), getl(3)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix((int)getw(1), (int)getl(3)*1e-2) - session->context->leap_seconds;
 	for (i = st = 0; i < MAXCHANNELS; i++) {
 	    int good, off = 8 + 15 * i;
 	    session->gpsdata.PRN[st]       = (int)getb(off);
-	    session->gpsdata.azimuth[st]   = (int)((getb(off+1)*3)/2.0);
-	    session->gpsdata.elevation[st] = (int)(getb(off+2)/2.0);
+	    session->gpsdata.azimuth[st]   = (int)(((int)getb(off+1)*3)/2.0);
+	    session->gpsdata.elevation[st] = (int)((int)getb(off+2)/2.0);
 	    cn = 0;
 	    for (j = 0; j < 10; j++)
 		cn += (int)getb(off+5+j);
@@ -272,12 +272,12 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", buf+1);
-	fv = atof(buf+1);
-	if (fv < 231) {
+	fv = atof((char *)(buf+1));
+	if (fv < 231.0) {
 	    session->driverstate |= SIRF_LT_231;
-	    if (fv > 200)
+	    if (fv > 200.0)
 		sirfbin_mode(session, 0);
-	} else if (fv < 232) 
+	} else if (fv < 232.0) 
 	    session->driverstate |= SIRF_EQ_231;
 	else {
 	    /*@ +charint @*/
@@ -291,7 +291,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->driverstate |= SIRF_GE_232;
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
-	if (strstr(buf+1, "ES"))
+	if (strstr((char *)(buf+1), "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
 	session->time_seen = 0;
@@ -409,11 +409,11 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		if (leap > 128)
 		    leap ^= 0xff;
 		gpsd_report(2, "leap-seconds is %d\n", leap);
-		session->context->leap_seconds = leap;
+		session->context->leap_seconds = (int)leap;
 		session->context->valid = LEAP_SECOND_VALID;
 	    }
 
-	    if (session->context->valid & LEAP_SECOND_VALID) {
+	    if ((session->context->valid & LEAP_SECOND_VALID) != 0) {
 		gpsd_report(4, "Disabling subframe transmission...\n");
 		(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
@@ -463,7 +463,7 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
     case 0x29:		/* Geodetic Navigation Information */
 	mask = 0;
-	if (session->driverstate & SIRF_GE_232) {
+	if ((session->driverstate & SIRF_GE_232) != 0) {
 	    /*
 	     * Many versions of the SiRF protocol manual don't document 
 	     * this sentence at all.  Those that do may incorrectly
@@ -482,17 +482,17 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * seem to be the case.  Instead, we do our own computation 
 	     * of geoid separation now.
 	     */
-	    navtype = getw(3);
+	    navtype = (int)getw(3);
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if (navtype & 0x80)
+	    if ((navtype & 0x80) != 0)
 		session->gpsdata.status = STATUS_DGPS_FIX;
 	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 		session->gpsdata.status = STATUS_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 		session->gpsdata.fix.mode = MODE_3D;
-	    else if (session->gpsdata.status)
+	    else if (session->gpsdata.status != 0)
 		session->gpsdata.fix.mode = MODE_2D;
 	    gpsd_report(4, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype, session->gpsdata.status, session->gpsdata.fix.mode);
@@ -508,24 +508,24 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	     * UTC second     2               2
 	     *                11              8
 	     */
-	    session->gpsdata.nmea_date.tm_year = getw(11);
-	    session->gpsdata.nmea_date.tm_mon = getb(13)-1;
-	    session->gpsdata.nmea_date.tm_mday = getb(14);
-	    session->gpsdata.nmea_date.tm_hour = getb(15);
-	    session->gpsdata.nmea_date.tm_min = getb(16);
+	    session->gpsdata.nmea_date.tm_year = (int)getw(11);
+	    session->gpsdata.nmea_date.tm_mon = (int)getb(13)-1;
+	    session->gpsdata.nmea_date.tm_mday = (int)getb(14);
+	    session->gpsdata.nmea_date.tm_hour = (int)getb(15);
+	    session->gpsdata.nmea_date.tm_min = (int)getb(16);
 	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = getw(17)*1e-3;
+	    session->gpsdata.subseconds = (int)getw(17)*1e-3;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 #ifdef NTPSHM_ENABLE
-	    if (session->gpsdata.fix.mode > MODE_NO_FIX && session->gpsdata.nmea_date.tm_year) {
-		if (!(session->time_seen & TIME_SEEN_UTC_1))
+	    if (session->gpsdata.fix.mode > MODE_NO_FIX && session->gpsdata.nmea_date.tm_year != 0) {
+		if ((session->time_seen & TIME_SEEN_UTC_1) == 0)
 		    gpsd_report(4, "valid time in message 0x29, seen=0x%02x\n",
 				session->time_seen);
 		session->time_seen |= TIME_SEEN_UTC_1;
 		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
-		    ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+		    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
 	    /* skip 4 bytes of satellite map */
@@ -535,10 +535,10 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	    session->gpsdata.fix.altitude = getl(31)*1e-2;
 	    /* skip 1 byte of map datum */
-	    session->gpsdata.fix.speed = getw(36)*1e-2;
-	    session->gpsdata.fix.track = getw(38)*1e-2;
+	    session->gpsdata.fix.speed = (int)getw(36)*1e-2;
+	    session->gpsdata.fix.track = (int)getw(38)*1e-2;
 	    /* skip 2 bytes of magnetic variation */
-	    session->gpsdata.fix.climb = getw(42)*1e-2;
+	    session->gpsdata.fix.climb = (int)getw(42)*1e-2;
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_fix_dump(session, buf2);
 	    gpsd_report(3, "<= GPS: %s", buf2);
@@ -575,22 +575,22 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	 */
 	mask = 0;
 	gpsd_report(4, "PPS 0x34: Status = 0x%02x\n", getb(14));
-	if ((getb(14) & 0x07) == 0x07) {	/* valid UTC time? */
-	    session->gpsdata.nmea_date.tm_hour = getb(1);
-	    session->gpsdata.nmea_date.tm_min = getb(2);
-	    session->gpsdata.nmea_date.tm_sec = getb(3);
-	    session->gpsdata.nmea_date.tm_mday = getb(4);
-	    session->gpsdata.nmea_date.tm_mon = getb(5) - 1;
-	    session->gpsdata.nmea_date.tm_year = getw(6) - 1900;
-	    session->context->leap_seconds = getw(8);
+	if (((int)getb(14) & 0x07) == 0x07) {	/* valid UTC time? */
+	    session->gpsdata.nmea_date.tm_hour = (int)getb(1);
+	    session->gpsdata.nmea_date.tm_min = (int)getb(2);
+	    session->gpsdata.nmea_date.tm_sec = (int)getb(3);
+	    session->gpsdata.nmea_date.tm_mday = (int)getb(4);
+	    session->gpsdata.nmea_date.tm_mon = (int)getb(5) - 1;
+	    session->gpsdata.nmea_date.tm_year = (int)getw(6) - 1900;
+	    session->context->leap_seconds = (int)getw(8);
 	    session->context->valid = LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
-	    if (!(session->time_seen & TIME_SEEN_UTC_2))
+	    if ((session->time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x34, seen=0x%02x\n",
 				session->time_seen);
 	    session->time_seen |= TIME_SEEN_UTC_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
-		ntpshm_put(session, session->gpsdata.fix.time + 0.3);
+		(void)ntpshm_put(session, session->gpsdata.fix.time + 0.3);
 #endif /* NTPSHM_ENABLE */
 	    mask |= TIME_SET;
 	}
@@ -608,48 +608,48 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	session->gpsdata.fix.climb = getl(17) * 1e-3;
 	session->gpsdata.fix.track = getl(21) * RAD_2_DEG * 1e-8;
 
-	navtype = getb(25);
+	navtype = (int)getb(25);
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.mode = MODE_NO_FIX;
-	if (navtype & 0x80)
+	if ((navtype & 0x80) != 0)
 	    session->gpsdata.status = STATUS_DGPS_FIX;
 	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
 	    session->gpsdata.status = STATUS_FIX;
 	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
 	    session->gpsdata.fix.mode = MODE_3D;
-	else if (session->gpsdata.status)
+	else if (session->gpsdata.status != 0)
 	    session->gpsdata.fix.mode = MODE_2D;
 	gpsd_report(4, "EMND 0x62: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 		    navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 
-	if (navtype & 0x40) {		/* UTC corrected timestamp? */
+	if ((navtype & 0x40) != 0) {		/* UTC corrected timestamp? */
 	    mask |= TIME_SET;
-	    session->gpsdata.nmea_date.tm_year = getw(26) - 1900;
-	    session->gpsdata.nmea_date.tm_mon = getb(28) - 1;
-	    session->gpsdata.nmea_date.tm_mday = getb(29);
-	    session->gpsdata.nmea_date.tm_hour = getb(30);
-	    session->gpsdata.nmea_date.tm_min = getb(31);
+	    session->gpsdata.nmea_date.tm_year = (int)getw(26) - 1900;
+	    session->gpsdata.nmea_date.tm_mon = (int)getb(28) - 1;
+	    session->gpsdata.nmea_date.tm_mday = (int)getb(29);
+	    session->gpsdata.nmea_date.tm_hour = (int)getb(30);
+	    session->gpsdata.nmea_date.tm_min = (int)getb(31);
 	    session->gpsdata.nmea_date.tm_sec = 0;
 	    session->gpsdata.subseconds = ((unsigned short)getw(32))*1e-3;
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
-	    if (!(session->time_seen & TIME_SEEN_UTC_2))
+	    if ((session->time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x62, seen=0x%02x\n",
 				session->time_seen);
 	    session->time_seen |= TIME_SEEN_UTC_2;
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
-		ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+		(void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 #endif /* NTPSHM_ENABLE */
 	    session->context->valid = LEAP_SECOND_VALID;
 	}
 
 	gpsd_binary_fix_dump(session, buf2);
-	session->gpsdata.gdop = getb(34) / 5.0;
-	session->gpsdata.pdop = getb(35) / 5.0;
-	session->gpsdata.hdop = getb(36) / 5.0;
-	session->gpsdata.vdop = getb(37) / 5.0;
-	session->gpsdata.tdop = getb(38) / 5.0;
+	session->gpsdata.gdop = (int)getb(34) / 5.0;
+	session->gpsdata.pdop = (int)getb(35) / 5.0;
+	session->gpsdata.hdop = (int)getb(36) / 5.0;
+	session->gpsdata.vdop = (int)getb(37) / 5.0;
+	session->gpsdata.tdop = (int)getb(38) / 5.0;
 	gpsd_binary_quality_dump(session, buf2 + strlen(buf2));
 	session->driverstate |= UBLOX;
 	return mask;
@@ -658,16 +658,22 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	buf2[0] = '\0';
 	for (i = 1; i < len; i++)
 	    if (isprint(buf[i]))
-		(void)sprintf(buf2+strlen(buf2), "%c", buf[i]);
+		(void)snprintf(buf2+strlen(buf2), 
+			       sizeof(buf2)-strlen(buf2),
+			       "%c", buf[i]);
 	    else
-		(void)sprintf(buf2+strlen(buf2), "\\x%02x", buf[i]);
+		(void)snprintf(buf2+strlen(buf2), 
+			       sizeof(buf2)-strlen(buf2),
+			       "\\x%02x", (unsigned int)buf[i]);
 	gpsd_report(4, "DD  0xff: %s\n", buf2);
 	return 0;
 
     default:
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
-	    sprintf(buf2+strlen(buf2), "%02x", buf[i]);
+	    (void)snprintf(buf2+strlen(buf2), 
+			   sizeof(buf2)-strlen(buf2),
+			   "%02x", (unsigned int)buf[i]);
 	gpsd_report(3, "Unknown SiRF packet id %d length %d: %s\n", buf[0], len, buf2);
 	return 0;
     }
@@ -696,8 +702,8 @@ static void sirfbin_initializer(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET) {
 	gpsd_report(1, "Switching chip mode to SiRF binary.\n");
-	nmea_send(session->gpsdata.gps_fd, 
-		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
+	(void)nmea_send(session->gpsdata.gps_fd, 
+			"$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
     }
     /* do this every time*/
     {
