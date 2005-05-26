@@ -219,7 +219,8 @@ static struct gps_type_t tripmate = {
  *
  **************************************************************************/
 
-extern struct gps_type_t zodiac_binary, earthmate;
+extern struct gps_type_t zodiac_binary;
+static struct gps_type_t earthmate;
 
 /*
  * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
@@ -239,7 +240,7 @@ static void earthmate_initializer(struct gps_device_t *session)
     if (zodiac_binary.initializer) zodiac_binary.initializer(session);
 }
 
-/* static */ struct gps_type_t earthmate = {
+static struct gps_type_t earthmate = {
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
     NULL,			/* no probe */
