@@ -74,12 +74,15 @@ static void tsip_initializer(struct gps_device_t *session)
     /* I/O Options */
     putb(0,0x1e);		/* Position: DP, MSL, LLA */
     putb(1,0x02);		/* Velocity: ENU */
-    putb(2,0x01);		/* Time: UTC */
-    putb(3,0x0a);		/* Aux: dBHz, Filtered */
+    putb(2,0x00);		/* Time: GPS */
+    putb(3,0x08);		/* Aux: dBHz */
     tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
 
     /* Request Software Versions */
     tsip_write(session->gpsdata.gps_fd, 0x1f, buf, 0);
+
+    /* Request Current Time */
+    tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
 
     /* Request GPS Systems Message */
     tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
@@ -153,14 +156,14 @@ static int tsip_analyze(struct gps_device_t *session)
 	s1 = getw(4);			/* week */
 	f2 = getf(6);			/* leap seconds */
 	if (f2 > 10.0) {
+	    session->gps_week = s1;
 	    session->context->leap_seconds = roundf(f2);
 	    session->context->valid = LEAP_SECOND_VALID;
 
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= gpstime_to_unix(s1, f1) - f2;
+	    session->gpsdata.sentence_time = gpstime_to_unix(s1, f1) - f2;
 
 #ifdef NTPSHM_ENABLE
-	    ntpshm_put(session, session->gpsdata.fix.time + 0.075);
+	    ntpshm_put(session, session->gpsdata.sentence_time + 0.075);
 #endif
 	    mask |= TIME_SET;
 	}
@@ -168,20 +171,20 @@ static int tsip_analyze(struct gps_device_t *session)
     case 0x42:		/* Single-Precision Position Fix, XYZ ECEF */
 	if (len != 16)
 	    break;
-	f1 = getf(0);
-	f2 = getf(4);
-	f3 = getf(8);
-	f4 = getf(12);
+	f1 = getf(0);			/* X */
+	f2 = getf(4);			/* Y */
+	f3 = getf(8);			/* Z */
+	f4 = getf(12);			/* time-of-fix */
 	gpsd_report(4, "GPS Position XYZ %f %f %f %f\n",f1,f2,f3,f4);
 	break;
     case 0x43:		/* Velocity Fix, XYZ ECEF */
 	if (len != 20)
 	    break;
-	f1 = getf(0);
-	f2 = getf(4);
-	f3 = getf(8);
-	f4 = getf(12);
-	f5 = getf(16);
+	f1 = getf(0);			/* X velocity */
+	f2 = getf(4);			/* Y velocity */
+	f3 = getf(8);			/* Z velocity */
+	f4 = getf(12);			/* bias rate */
+	f5 = getf(16);			/* time-of-fix */
 	gpsd_report(4, "GPS Velocity XYZ %f %f %f %f %f\n",f1,f2,f3,f4,f5);
 	break;
     case 0x45:		/* Software Version Information */
@@ -197,7 +200,7 @@ static int tsip_analyze(struct gps_device_t *session)
 	gpsd_report(4, "Receiver health %02x %02x\n",getb(0),getb(1));
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
-	s1 = getb(0);
+	s1 = getb(0);			/* count */
 	if (len != (5*s1 + 1))
 	    break;
 	gpsd_zero_satellites(&session->gpsdata);
@@ -221,8 +224,11 @@ static int tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.fix.latitude  = getf(0) * RAD_2_DEG;
 	session->gpsdata.fix.longitude = getf(4) * RAD_2_DEG;
 	session->gpsdata.fix.altitude  = getf(8);
-	/* clock_bias                  = getf(12); */
-	/* time_of_fix                 = getf(16); */
+	f1 = getf(12);			/* clock bias */
+	f2 = getf(16);			/* time-of-fix */
+	if (session->gps_week)
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+		gpstime_to_unix(session->gps_week, f2) - session->context->leap_seconds;
 	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
 	gpsd_binary_fix_dump(session, buf2);
@@ -242,11 +248,11 @@ static int tsip_analyze(struct gps_device_t *session)
     case 0x56:		/* Velocity Fix, East-North-Up (ENU) */
 	if (len != 20)
 	    break;
-	f1 = getf(0);
-	f2 = getf(4);
-	f3 = getf(8);
-	f4 = getf(12);
-	f5 = getf(16);
+	f1 = getf(0);			/* East velocity */
+	f2 = getf(4);			/* North velocity */
+	f3 = getf(8);			/* Up velocity */
+	f4 = getf(12);			/* clock bias rate */
+	f5 = getf(16);			/* time-of-fix */
 	session->gpsdata.fix.climb = f1;
 	session->gpsdata.fix.speed = sqrt(pow(f2,2) + pow(f1,2));
 	if ((session->gpsdata.fix.track = atan2(f1,f2) * RAD_2_DEG) < 0)
@@ -257,8 +263,10 @@ static int tsip_analyze(struct gps_device_t *session)
     case 0x57:		/* Information About Last Computed Fix */
 	if (len != 8)
 	    break;
-	f1 = getf(2);
-	s1 = getw(6);
+	f1 = getf(2);			/* gps_time */
+	s1 = getw(6);			/* gps_weeks */
+	if (getb(0))			/* good current fix? */
+	    session->gps_week = s1;
 	gpsd_report(4, "Fix info %02x %02x %d %f\n",getb(0),getb(1),s1,f1);
 	break;
     case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
@@ -271,7 +279,7 @@ static int tsip_analyze(struct gps_device_t *session)
 	break;
     case 0x6d:		/* All-In-View Satellite Selection */
 	s1 = getb(0);
-	switch (s1 & 7)
+	switch (s1 & 7)			/* dimension */
 	{
 	case 3:
 	    session->gpsdata.fix.mode = MODE_2D;
@@ -288,6 +296,7 @@ static int tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.hdop = getf(5);
 	session->gpsdata.vdop = getf(9);
 	session->gpsdata.tdop = getf(13);
+	session->gpsdata.gdop = sqrt(pow(session->gpsdata.pdop,2)+pow(session->gpsdata.tdop,2));
 
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	for (i = 0; i < session->gpsdata.satellites_used; i++)
@@ -320,11 +329,11 @@ static int tsip_analyze(struct gps_device_t *session)
     case 0x83:		/* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36)
 	    break;
-	d1 = getd(0);
-	d2 = getd(8);
-	d3 = getd(16);
-	d4 = getd(24);
-	f1 = getf(32);
+	d1 = getd(0);			/* X */
+	d2 = getd(8);			/* Y */
+	d3 = getd(16);			/* Z */
+	d4 = getd(24);			/* clock bias */
+	f1 = getf(32);			/* time-of-fix */
 	gpsd_report(4, "GPS Position XYZ %f %f %f %f %f\n",d1,d2,d3,d4,f1);
 	break;
     case 0x84:		/* Double-Precision LLA Position Fix and Bias Information */
@@ -333,13 +342,31 @@ static int tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.fix.latitude  = getd(0) * RAD_2_DEG;
 	session->gpsdata.fix.longitude = getd(8) * RAD_2_DEG;
 	session->gpsdata.fix.altitude  = getd(16);
-	/* clock_bias                  = getd(24); */
-	/* time_of_fix                 = getf(32); */
+	f1 = getd(24);			/* clock bias */
+	f2 = getf(32);			/* time-of-fix */
+	if (session->gps_week)
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+		gpstime_to_unix(session->gps_week, f2) - session->context->leap_seconds;
 	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
 	gpsd_binary_fix_dump(session, buf2);
 	gpsd_report(3, "<= GPS: %s", buf2);
 	mask |= LATLON_SET | ALTITUDE_SET;
+	break;
+    case 0x8f:		/* Super Packet.  Well...  */
+	switch (getb(0))		/* sub-packet ID */
+	{
+	case 0x20:	/* Last Fix with Extra Information (binary fixed point) */
+	    if (len != 56)
+		break;
+	    break;
+	case 0x23:	/* Compact Super Packet */
+	    if (len != 29)
+		break;
+	    break;
+	default:
+	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",getb(0));
+	}
 	break;
     default:
 	gpsd_report(4,"Unhandled TSIP packet type 0x%02x\n",id);

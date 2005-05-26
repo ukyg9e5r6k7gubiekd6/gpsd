@@ -52,11 +52,11 @@ struct gps_fix_t {
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
     double ept;		/* Expected time uncertainty */
-#define UNCERTAINTY_NOT_VALID	-721
+#define UNCERTAINTY_NOT_VALID	-1
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
 #define LATITUDE_NOT_VALID	-721
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
-#define LONGITUDE_NOT_VALID	-1
+#define LONGITUDE_NOT_VALID	-721
     double eph;  	/* Horizontal position uncertainty, meters */
     double altitude;	/* Altitude in meters (valid if mode == 3) */
 #define ALTITUDE_NOT_VALID	-999

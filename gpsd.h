@@ -112,7 +112,8 @@ struct gps_device_t {
     unsigned long satcounter;
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
-    time_t last_request;	/* Last time a packets were sent */
+    unsigned int gps_week;	/* Current GPS week number */
+    time_t last_request;	/* Last time request packets were sent */
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     void *GarminBuffer; /* Pointer Garmin packet buffer 
