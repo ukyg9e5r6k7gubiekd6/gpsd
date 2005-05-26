@@ -168,15 +168,14 @@ decimal float numeral and %d for decimal integer numeral:</para>
 
 <varlistentry>
 <term>b</term>
-
 <listitem><para>The B command with no argument returns four fields
 giving the parameters of the serial link to the GPS as "B=%d %d %c
-%d"; baud rate, byte size, parity, (currently always N) and stop bits
-(1 or 2).  The command "B=%d" sets the baud rate, not changing parity
-or stop bits; watch the response, because it is possible for this to
-fail if the GPS does not support a speed-switching command.  In case
-of failure, the daemon and GPS will continue to communicate at the
-old speed.</para></listitem>
+%d"; baud rate, byte size, parity, (N, O or E for no parity, odd, or
+even) and stop bits (1 or 2).  The command "B=%d" sets the baud rate,
+not changing parity or stop bits; watch the response, because it is
+possible for this to fail if the GPS does not support a
+speed-switching command.  In case of failure, the daemon and GPS will
+continue to communicate at the old speed.</para></listitem>
 </varlistentry>
 
 <varlistentry>
