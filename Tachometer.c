@@ -36,6 +36,7 @@ typedef struct {
 		XPoint	point_list[5];
 		} StringRec;
 
+/*@ +charint @*/
 /*	Number character database - like an LED */
 static DigitRec num_segment[] = {
     {{1,1,1,1,1,1,0}},
@@ -93,6 +94,7 @@ static StringRec	char_data[] = {
 			{24, 5},
 			{24, 2}}}};
 #endif
+/*@ -charint @*/
 
 #define offst(field) XtOffset(TachometerWidget, field)
 static XtResource resources[] = {

@@ -37,7 +37,7 @@ int gpsd_open_dgps(char *dgpsserver)
     dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
     if (dsock >= 0) {
 	gethostname(hn, sizeof(hn));
-	sprintf(buf, "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
+	snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn, VERSION);
 	write(dsock, buf, strlen(buf));
     }
     return dsock;
@@ -276,7 +276,7 @@ static int handle_packet(struct gps_device_t *session)
 	session->sentdgps++;
 	if (session->dsock > -1) {
 	    char buf[BUFSIZ];
-	    sprintf(buf, "R %0.8f %0.8f %0.2f\r\n", 
+	    snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n", 
 		    session->gpsdata.fix.latitude, 
 		    session->gpsdata.fix.longitude, 
 		    session->gpsdata.fix.altitude);
@@ -377,7 +377,7 @@ void gpsd_zero_satellites(struct gps_data_t *out)
     out->satellites = 0;
 }
 
-void gpsd_raw_hook(struct gps_device_t *session, char *sentence, int len, int level)
+void gpsd_raw_hook(struct gps_device_t *session, char *sentence, size_t len, int level)
 {
     if (session->gpsdata.raw_hook) {
 	session->gpsdata.raw_hook(&session->gpsdata, sentence, len, level);

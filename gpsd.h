@@ -170,11 +170,11 @@ extern int packet_sniff(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
 extern int gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
-extern void gpsd_set_speed(struct gps_device_t *, unsigned int, unsigned int, unsigned int);
-extern int gpsd_get_speed(struct termios *);
+extern void gpsd_set_speed(struct gps_device_t *, speed_t, unsigned int, unsigned int);
+extern speed_t gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_device_t *);
 
-extern void gpsd_raw_hook(struct gps_device_t *, char *, int len, int level);
+extern void gpsd_raw_hook(struct gps_device_t *, char *, size_t len, int level);
 extern void gpsd_zero_satellites(struct gps_data_t *);
 extern void gpsd_binary_fix_dump(struct gps_device_t *, char *);
 extern void gpsd_binary_satellite_dump(struct gps_device_t *, char *);

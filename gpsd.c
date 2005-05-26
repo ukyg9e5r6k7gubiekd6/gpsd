@@ -268,7 +268,7 @@ static int throttled_write(int cfd, char *buf, int len)
 	    char *cp, buf2[MAX_PACKET_LENGTH*3];
 	    buf2[0] = '\0';
 	    for (cp = buf; cp < buf + len; cp++)
-		sprintf(buf2 + strlen(buf2), "%02x", *cp & 0xff);
+		(void)sprintf(buf2 + strlen(buf2), "%02x", *cp & 0xff);
 	    gpsd_report(3, "=> client(%d): =%s\r\n", cfd, buf2);
 	}
     }
@@ -418,7 +418,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (assign_channel(whoami) && 
+	    if (assign_channel(whoami)!=0 && 
 			have_fix(whoami->device) && 
 			whoami->device->gpsdata.fix.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",A=%.3f", 
@@ -427,7 +427,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
-	    if (assign_channel(whoami) && *p == '=') {
+	    if (assign_channel(whoami)!=0 && *p == '=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		if (whoami->device->device_type->speed_switcher)
@@ -464,7 +464,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		strcpy(phrase, ",B=?");
 	    break;
 	case 'C':
-	    if (assign_channel(whoami))
+	    if (assign_channel(whoami)!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",C=%d", 
 			whoami->device->device_type->cycle);
 	    else
@@ -472,13 +472,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    strcpy(phrase, ",D=");
-	    if (assign_channel(whoami) && whoami->device->gpsdata.fix.time)
+	    if (assign_channel(whoami)!=0 && whoami->device->gpsdata.fix.time)
 		unix_to_iso8601(whoami->device->gpsdata.fix.time, phrase+3);
 	    else
 		strcpy(phrase, "?");
 	    break;
 	case 'E':
-	    if (assign_channel(whoami) && have_fix(whoami->device)) {
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device)) {
 		if (whoami->device->gpsdata.fix.eph 
 			|| whoami->device->gpsdata.fix.epv)
 		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
@@ -510,7 +510,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		strcpy(phrase, ",F=?");
 	    break;
 	case 'I':
-	    if (assign_channel(whoami))
+	    if (assign_channel(whoami)!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
 			 whoami->device->device_type->typename);
 	    else
@@ -533,13 +533,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
 	    break;
 	case 'M':
-	    if (!assign_channel(whoami) && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
+	    if (!assign_channel(whoami)!=0 && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
 		strcpy(phrase, ",M=?");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->device->gpsdata.fix.mode);
 	    break;
 	case 'N':
-	    if (!assign_channel(whoami))
+	    if (!assign_channel(whoami)!=0)
 		strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		strcpy(phrase, ",N=0");
@@ -559,7 +559,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",N=%d", whoami->device->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    if (!assign_channel(whoami) || !have_fix(whoami->device))
+	    if (!assign_channel(whoami)!=0 || !have_fix(whoami->device))
 		strcpy(phrase, ",O=?");
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s %.2f %.3f %.6f %.6f",
@@ -567,50 +567,50 @@ static int handle_request(int cfd, char *buf, int buflen)
 			whoami->device->gpsdata.fix.time, whoami->device->gpsdata.fix.ept, 
 			whoami->device->gpsdata.fix.latitude, whoami->device->gpsdata.fix.longitude);
 		if (whoami->device->gpsdata.fix.mode == MODE_3D)
-		    sprintf(phrase+strlen(phrase), " %7.2f",
+		    (void)sprintf(phrase+strlen(phrase), " %7.2f",
 			    whoami->device->gpsdata.fix.altitude);
 		else
 		    strcat(phrase, "       ?");
 		if (whoami->device->gpsdata.fix.eph)
-		    sprintf(phrase+strlen(phrase), " %5.2f",  whoami->device->gpsdata.fix.eph);
+		    (void)sprintf(phrase+strlen(phrase), " %5.2f",  whoami->device->gpsdata.fix.eph);
 		else
 		    strcat(phrase, "        ?");
 		if (whoami->device->gpsdata.fix.epv)
-		    sprintf(phrase+strlen(phrase), " %5.2f",  whoami->device->gpsdata.fix.epv);
+		    (void)sprintf(phrase+strlen(phrase), " %5.2f",  whoami->device->gpsdata.fix.epv);
 		else
 		    strcat(phrase, "        ?");
 		if (whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
-		    sprintf(phrase+strlen(phrase), " %8.4f %8.3f",
+		    (void)sprintf(phrase+strlen(phrase), " %8.4f %8.3f",
 			    whoami->device->gpsdata.fix.track, whoami->device->gpsdata.fix.speed);
 		else
 		    strcat(phrase, "        ?        ?");
 		if (whoami->device->gpsdata.fix.mode == MODE_3D)
-		    sprintf(phrase+strlen(phrase), " %6.3f", whoami->device->gpsdata.fix.climb);
+		    (void)sprintf(phrase+strlen(phrase), " %6.3f", whoami->device->gpsdata.fix.climb);
 		else
-		    strcat(phrase, "      ?");
-		strcat(phrase, " ?");	/* can't yet derive track error */ 
+		    (void)strcat(phrase, "      ?");
+		(void)strcat(phrase, " ?");	/* can't yet derive track error */ 
 		if (whoami->device->gpsdata.set & SPEEDERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    whoami->device->gpsdata.fix.eps);		    
 		else
-		    strcat(phrase, "      ?");
+		    (void)strcat(phrase, "      ?");
 		if (whoami->device->gpsdata.set & CLIMBERR_SET)
 		    sprintf(phrase+strlen(phrase), " %5.2f",
 			    whoami->device->gpsdata.fix.epc);		    
 		else
-		    strcat(phrase, "      ?");
+		    (void)strcat(phrase, "      ?");
 	    }
 	    break;
 	case 'P':
-	    if (assign_channel(whoami) && have_fix(whoami->device))
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device))
 		(void)snprintf(phrase, sizeof(phrase), ",P=%.6f %.6f", 
 			whoami->device->gpsdata.fix.latitude, 
 			whoami->device->gpsdata.fix.longitude);
 	    else
-		strcpy(phrase, ",P=?");
+		(void)strcpy(phrase, ",P=?");
 	    break;
 	case 'Q':
-	    if (assign_channel(whoami) && (whoami->device->gpsdata.pdop || whoami->device->gpsdata.hdop || whoami->device->gpsdata.vdop))
+	    if (assign_channel(whoami)!=0 && (whoami->device->gpsdata.pdop || whoami->device->gpsdata.hdop || whoami->device->gpsdata.vdop))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
 			whoami->device->gpsdata.satellites_used, 
 			whoami->device->gpsdata.pdop, 
@@ -619,7 +619,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 			whoami->device->gpsdata.tdop,
 			whoami->device->gpsdata.gdop);
 	    else
-		strcpy(phrase, ",Q=?");
+		(void)strcpy(phrase, ",Q=?");
 	    break;
 	case 'R':
 	    if (*p == '=') ++p;
@@ -645,41 +645,41 @@ static int handle_request(int cfd, char *buf, int buflen)
 		gpsd_report(3, "%d turned off raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 	    } else {
-		assign_channel(whoami);
+		assign_channel(whoami)!=0;
 		subscribers[cfd].raw = 1;
 		gpsd_report(3, "%d turned on raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 	    }
 	    break;
 	case 'S':
-	    if (assign_channel(whoami))
+	    if (assign_channel(whoami)!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",S=%d", whoami->device->gpsdata.status);
 	    else
-		strcpy(phrase, ",S=?");
+		(void)strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->device->gpsdata.fix.track);
 	    else
-		strcpy(phrase, ",T=?");
+		(void)strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.mode == MODE_3D)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", whoami->device->gpsdata.fix.climb);
 	    else
-		strcpy(phrase, ",U=?");
+		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed / KNOTS_TO_KPH);
 	    else
-		strcpy(phrase, ",V=?");
+		(void)strcpy(phrase, ",V=?");
 	    break;
 	case 'W':
 	    if (*p == '=') ++p;
 	    if (*p == '1' || *p == '+') {
 		subscribers[cfd].watcher = 1;
-		assign_channel(whoami);
+		assign_channel(whoami)!=0;
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
@@ -691,31 +691,31 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 	    } else {
 		subscribers[cfd].watcher = 1;
-		assign_channel(whoami);
+		assign_channel(whoami)!=0;
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 	    }
 	    break;
         case 'X':
-	    if (assign_channel(whoami) && whoami->device)
+	    if (assign_channel(whoami)!=0 && whoami->device)
 		(void)snprintf(phrase, sizeof(phrase), ",X=%f", whoami->device->gpsdata.online);
 	    else
-		strcpy(phrase, ",X=?");
+		(void)strcpy(phrase, ",X=?");
 	    break;
 	case 'Y':
-	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites) {
+	    if (assign_channel(whoami)!=0 && whoami->device->gpsdata.satellites) {
 		int used, reported = 0;
-		strcpy(phrase, ",Y=");
+		(void)strcpy(phrase, ",Y=");
 		if (whoami->device->gpsdata.tag[0])
-		    strcat(phrase, whoami->device->gpsdata.tag);
+		    (void)strcat(phrase, whoami->device->gpsdata.tag);
 		else
-		    strcat(phrase, "-");
+		    (void)strcat(phrase, "-");
 		if (whoami->device->gpsdata.set & TIME_SET)
-		    sprintf(phrase+strlen(phrase), " %f ", 
+		    (void)sprintf(phrase+strlen(phrase), " %f ", 
 			    whoami->device->gpsdata.sentence_time);
 		else
-		    strcat(phrase, " ? ");
-		sprintf(phrase+strlen(phrase), "%d:", 
+		    (void)strcat(phrase, " ? ");
+		(void)sprintf(phrase+strlen(phrase), "%d:", 
 			whoami->device->gpsdata.satellites);
 		for (i = 0; i < whoami->device->gpsdata.satellites; i++) {
 		    used = 0;
@@ -725,7 +725,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 			    break;
 			}
 		    if (whoami->device->gpsdata.PRN[i]) {
-			sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
+			(void)sprintf(phrase+strlen(phrase), "%d %d %d %d %d:", 
 				whoami->device->gpsdata.PRN[i], 
 				whoami->device->gpsdata.elevation[i],whoami->device->gpsdata.azimuth[i],
 				whoami->device->gpsdata.ss[i],
@@ -737,7 +737,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    gpsd_report(1,"Satellite count %d != PRN count %d\n",
 				whoami->device->gpsdata.satellites, reported);
 	    } else
-		strcpy(phrase, ",Y=?");
+		(void)strcpy(phrase, ",Y=?");
 	    break;
 	case 'Z':
 	    assign_channel(whoami); 
@@ -786,7 +786,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    goto breakout;
 	}
 	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
-	    strcat(reply, phrase);
+	    (void)strcat(reply, phrase);
 	else
 	    return -1;	/* Buffer would overflow.  Just return an error */
     }
@@ -816,7 +816,7 @@ static void handle_control(int sfd, char *buf)
 	    (void)write(sfd, "OK\n", 3);
 	} else
 	    (void)write(sfd, "ERROR\n", 6);
-	free(stash);
+	(void)free(stash);
     } else if (buf[0] == '+') {
 	p = snarfline(buf+1, &stash);
 	if (find_device(stash))
@@ -828,7 +828,7 @@ static void handle_control(int sfd, char *buf)
 	    else
 		(void)write(sfd, "ERROR\n", 6);
 	}
-	free(stash);
+	(void)free(stash);
     } else if (buf[0] == '!') {
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
@@ -846,7 +846,7 @@ static void handle_control(int sfd, char *buf)
 		(void)write(sfd, "ERROR\n", 3);
 	    }
 	}
-	free(stash);
+	(void)free(stash);
     }
 }
 
@@ -914,7 +914,7 @@ int main(int argc, char *argv[])
      * the socket before it's created.
      */
     if (control_socket) {
-	unlink(control_socket);
+	(void)unlink(control_socket);
 	if ((csock = filesock(control_socket)) < 0) {
 	    gpsd_report(0,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
@@ -929,7 +929,7 @@ int main(int argc, char *argv[])
 	FILE *fp;
 
 	if ((fp = fopen(pid_file, "w")) != NULL) {
-	    fprintf(fp, "%u\n", getpid());
+	    (void)fprintf(fp, "%u\n", getpid());
 	    (void)fclose(fp);
 	} else {
 	    gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
@@ -955,14 +955,14 @@ int main(int argc, char *argv[])
     }
 
 #ifdef NTPSHM_ENABLE
-    nice(-10);			/* for precise timekeeping, increase priority */
-    ntpshm_init(&context,nowait);
+    (void)nice(-10);		/* for precise timekeeping increase priority */
+    (void)ntpshm_init(&context,nowait);
 #endif /* NTPSHM_ENABLE */
 
     /* make default devices accessible even after we drop privileges */
     for (i = optind; i < argc; i++) 
 	if (stat(argv[i], &stb) == 0)
-	    chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
+	    (void)chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
 
 #if DBUS_ENABLE
     /* we need to connect to dbus as root */
@@ -988,21 +988,21 @@ int main(int argc, char *argv[])
     gpsd_report(2, "running with effective group ID %d\n", getegid());
     pw = getpwnam("nobody");
     if (pw)
-	setuid(pw->pw_uid);
+	(void)setuid(pw->pw_uid);
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
 	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
 	    if (channels[dfd])
-		gpsd_wrap(channels[dfd]);
+		(void)gpsd_wrap(channels[dfd]);
 	}
 	if (st == SIGHUP+1)
 	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
 	else if (st > 0) {
 	    gpsd_report(1,"Received terminating signal %d. Exiting...\n",st-1);
 	    if (control_socket)
-		unlink(control_socket);
+		(void)unlink(control_socket);
 	    exit(10 + st);
 	}
     }
@@ -1032,7 +1032,7 @@ int main(int argc, char *argv[])
     for (;;) {
 	struct timeval tv;
 
-        memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
+        (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 	if (device && device->dsock > -1)
 	    FD_CLR(device->dsock, &rfds);
 
@@ -1091,7 +1091,7 @@ int main(int argc, char *argv[])
 		int opts = fcntl(ssock, F_GETFL);
 
 		if (opts >= 0)
-		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
+		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "control socket connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);

@@ -796,13 +796,13 @@ static int sendpkt(unsigned char *buf, int len, char *device)
 	return -1;
     else {
 	if (!serial) {
-	    write(controlfd, "!", 1);
-	    write(controlfd, device, strlen(device));
-	    write(controlfd, "=", 1);
+	    (void)write(controlfd, "!", 1);
+	    (void)write(controlfd, device, strlen(device));
+	    (void)write(controlfd, "=", 1);
 	}
 	st = write(controlfd, buf,len);
 	if (!serial)
-	    read(controlfd, buf, 8);	/* enough room for "ERROR\r\n\0" */
+	    (void)read(controlfd, buf, 8);	/* enough room for "ERROR\r\n\0" */
 	return (st == len);
     }
 }
@@ -859,7 +859,7 @@ static void command(char *buf, int len, const char *fmt, ... )
     vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
-    write(devicefd, buf, strlen(buf));
+    (void)write(devicefd, buf, strlen(buf));
     n = read(devicefd, buf, len);
     if (n >= 0) {
 	buf[n] = '\0';
@@ -1162,8 +1162,8 @@ int main (int argc, char **argv)
 		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
-		    write(devicefd, line, strlen(line));
-		    read(devicefd, buf, sizeof(buf));	/* discard response */
+		    (void)write(devicefd, line, strlen(line));
+		    (void)read(devicefd, buf, sizeof(buf));	/* discard response */
 		}
 		break;
 

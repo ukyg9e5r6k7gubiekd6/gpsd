@@ -17,9 +17,9 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
-int gpsd_get_speed(struct termios* ttyctl)
+speed_t gpsd_get_speed(struct termios* ttyctl)
 {
-    int code = cfgetospeed(ttyctl);
+    speed_t code = cfgetospeed(ttyctl);
     switch (code) {
     case B0:     return(0);
     case B300:   return(300);
@@ -35,9 +35,9 @@ int gpsd_get_speed(struct termios* ttyctl)
 }
 
 void gpsd_set_speed(struct gps_device_t *session, 
-		   unsigned int speed, unsigned int parity, unsigned int stopbits)
+		   speed_t speed, unsigned int parity, unsigned int stopbits)
 {
-    unsigned int	rate;
+    speed_t	rate;
 
     if (speed < 300)
 	rate = B0;
@@ -62,8 +62,8 @@ void gpsd_set_speed(struct gps_device_t *session,
 
     if (rate!=cfgetispeed(&session->ttyset) || parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 
-	cfsetispeed(&session->ttyset, (speed_t)rate);
-	cfsetospeed(&session->ttyset, (speed_t)rate);
+	(void)cfsetispeed(&session->ttyset, (speed_t)rate);
+	(void)cfsetospeed(&session->ttyset, (speed_t)rate);
  	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
  	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
  	session->ttyset.c_cflag |= (stopbits==2 ? CS7|CSTOPB : CS8);
@@ -81,7 +81,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return;
-	tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
+	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
     gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
 
@@ -100,12 +100,12 @@ int gpsd_open(struct gps_device_t *session)
     }
 
     session->packet_type = BAD_PACKET;
-    if (isatty(session->gpsdata.gps_fd)) {
+    if (isatty(session->gpsdata.gps_fd)!=0) {
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++) {
-           tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe && (*dp)->probe(session)) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
@@ -120,7 +120,8 @@ int gpsd_open(struct gps_device_t *session)
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0)
 	  return -1;
-	memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
+	(void)memcpy(&session->ttyset,
+		     &session->ttyset_old, sizeof(session->ttyset));
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed
@@ -169,7 +170,7 @@ int gpsd_next_hunt_setting(struct gps_device_t *session)
 void gpsd_close(struct gps_device_t *session)
 {
     if (session->gpsdata.gps_fd != -1) {
-	if (isatty(session->gpsdata.gps_fd)) {
+	if (isatty(session->gpsdata.gps_fd)!=0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
 	    cfsetispeed(&session->ttyset, (speed_t)B0);
 	    cfsetospeed(&session->ttyset, (speed_t)B0);
@@ -177,7 +178,7 @@ void gpsd_close(struct gps_device_t *session)
 	}
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;
-	tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
+	(void)tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
 	(void)close(session->gpsdata.gps_fd);
     }
 }

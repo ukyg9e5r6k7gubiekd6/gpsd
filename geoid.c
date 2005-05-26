@@ -23,6 +23,7 @@ static double bilinear(double x1, double y1, double x2, double y2, double x, dou
 
 
 /* return geoid separtion (MSL - WGS84) in meters, given a lat/lot in degrees */
+/*@ +charint @*/
 double wgs84_separation(double lat, double lon)
 {
 #define GEOID_ROW	19
@@ -47,6 +48,7 @@ double wgs84_separation(double lat, double lon)
 	/* 70N */   2,  2,  1, -1, -3, -7,-14,-24,-27,-25,-19,  3, 24, 37, 47, 60, 61, 58, 51, 43, 29, 20, 12,  5, -2,-10, -14,-12,-10,-14,-12, -6, -2,  3,  6,  4,  2,
 	/* 80N */   3,  1, -2, -3, -3, -3, -1,  3,  1,  5,  9, 11, 19, 27, 31, 34, 33, 34, 33, 34, 28, 23, 17, 13,  9,  4,   4,  1, -2, -2,  0,  2,  3,  2,  1,  1,  3,
 	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13}; 
+/*@ -charint @*/
     int	ilat, ilon;
     int	ilat1, ilat2, ilon1, ilon2;
 

@@ -155,7 +155,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 			    gpsdata->fix.altitude = ALTITUDE_NOT_VALID;
 		    } else {
-		        sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
+		        (void)sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
 		        gpsdata->set |= ALTITUDE_SET;
 		    }
 		    break;
@@ -163,14 +163,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 			gpsdata->baudrate = gpsdata->stopbits = 0;
 		    } else
-			sscanf(sp, "B=%d %*d %*s %d", 
+			(void)sscanf(sp, "B=%d %*d %*s %d", 
 			       &gpsdata->baudrate, &gpsdata->stopbits);
 		    break;
 		case 'C':
 		    if (sp[2] == '?')
 			gpsdata->cycle = 0;
 		    else
-			sscanf(sp, "C=%d", &gpsdata->cycle);
+			(void)sscanf(sp, "C=%d", &gpsdata->cycle);
 		    break;
 		case 'D':
 		    if (sp[2] == '?') 
@@ -186,7 +186,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   gpsdata->fix.eph = UNCERTAINTY_NOT_VALID;
 			   gpsdata->fix.epv = UNCERTAINTY_NOT_VALID;
 		    } else {
-		        sscanf(sp, "E=%lf %lf %lf", 
+		        (void)sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
 		        gpsdata->set |= HERR_SET| VERR_SET | PERR_SET;
 		    }
@@ -297,7 +297,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   gpsdata->fix.latitude = LATITUDE_NOT_VALID;
 			   gpsdata->fix.longitude = LONGITUDE_NOT_VALID;
 		    } else {
-		        sscanf(sp, "P=%lf %lf",
+		        (void)sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
 		        gpsdata->set |= LATLON_SET;
 		    }
@@ -309,7 +309,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   gpsdata->hdop = 0;
 			   gpsdata->vdop = 0;
 		    } else {
-		        sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
+		        (void)sscanf(sp, "Q=%d %lf %lf %lf %lf %lf",
 			       &gpsdata->satellites_used,
 			       &gpsdata->pdop,
 			       &gpsdata->hdop,
@@ -331,7 +331,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 		        gpsdata->fix.track = TRACK_NOT_VALID;
 		    } else {
-		        sscanf(sp, "T=%lf", &gpsdata->fix.track);
+		        (void)sscanf(sp, "T=%lf", &gpsdata->fix.track);
 		        gpsdata->set |= TRACK_SET;
 		    }
 		    break;
@@ -339,7 +339,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 		        gpsdata->fix.climb = SPEED_NOT_VALID;
 		    } else {
-		        sscanf(sp, "U=%lf", &gpsdata->fix.climb);
+		        (void)sscanf(sp, "U=%lf", &gpsdata->fix.climb);
 		        gpsdata->set |= CLIMB_SET;
 		    }
 		    break;
@@ -347,7 +347,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 		        gpsdata->fix.speed = SPEED_NOT_VALID;
 		    } else {
-		        sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+		        (void)sscanf(sp, "V=%lf", &gpsdata->fix.speed);
 		        gpsdata->set |= SPEED_SET;
 		    }
 		    break;
@@ -355,7 +355,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') 
 			gpsdata->online = -1;
 		    else {
-			sscanf(sp, "X=%lf", &gpsdata->online);
+			(void)sscanf(sp, "X=%lf", &gpsdata->online);
 			gpsdata->set |= ONLINE_SET;
 		    }
 		    break;
@@ -369,7 +369,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
 			char tag[21], timestamp[21];
 
-			sscanf(sp, "Y=%20s %20s %d ", 
+			(void)sscanf(sp, "Y=%20s %20s %d ", 
 			       tag, timestamp, &gpsdata->satellites);
 			strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			if (timestamp[0] != '?') {
@@ -381,7 +381,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			}
 			for (j = 0; j < gpsdata->satellites; j++) {
 			    sp = strchr(sp, ':') + 1;
-			    sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
+			    (void)sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
 			    PRN[j] = i1;
 			    elevation[j] = i2; azimuth[j] = i3;
 			    ss[j] = i4; used[j] = i5;
@@ -407,10 +407,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->set |= SATELLITE_SET;
 		    break;
 		case 'Z':
-		    sscanf(sp, "Z=%d", &gpsdata->profiling);
+		    (void)sscanf(sp, "Z=%d", &gpsdata->profiling);
 		    break;
 		case '$':
-		    sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
+		    (void)sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
 			   &gpsdata->fix.time, 

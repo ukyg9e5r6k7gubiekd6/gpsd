@@ -219,7 +219,7 @@ static struct gps_type_t tripmate = {
  *
  **************************************************************************/
 
-extern struct gps_type_t zodiac_binary, earthmate;
+static struct gps_type_t zodiac_binary, earthmate;
 
 /*
  * There is a good HOWTO at <http://www.hamhud.net/ka9mva/earthmate.htm>.
