@@ -25,7 +25,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 
     if (*(p = field[0]) != '\0') {
 	strncpy(str, p, 20);
-	sscanf(p, "%lf", &lat);
+	(void)sscanf(p, "%lf", &lat);
 	m = 100.0 * modf(lat / 100.0, &d);
 	lat = d + m / 60.0;
 	p = field[1];
@@ -37,7 +37,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
     }
     if (*(p = field[2]) != '\0') {
 	strncpy(str, p, 20);
-	sscanf(p, "%lf", &lon);
+	(void)sscanf(p, "%lf", &lon);
 	m = 100.0 * modf(lon / 100.0, &d);
 	lon = d + m / 60.0;
 
@@ -70,7 +70,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
 {
-    if (!out->nmea_date.tm_year)
+    if (out->nmea_date.tm_year == 0)
 	out->nmea_date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
     out->nmea_date.tm_mon = DD(ddmmyy+2)-1;
     out->nmea_date.tm_mday = DD(ddmmyy);
@@ -119,7 +119,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
      */
     int mask = ERROR_SET;
 
-    if (!strcmp(field[2], "V")) {
+    if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
 	if (out->status != STATUS_NO_FIX) {
 	    out->status = STATUS_NO_FIX;
@@ -129,7 +129,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    out->fix.mode = MODE_NO_FIX;
 	    mask |= MODE_SET;
 	}
-    } else if (!strcmp(field[2], "A")) {
+    } else if (strcmp(field[2], "A")==0) {
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
@@ -189,12 +189,12 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
     char *status = field[7];
     int mask = ERROR_SET;
 
-    if (!strcmp(field[6], "A") && (count < 8 || *status != 'N')) {
+    if (strcmp(field[6], "A")==0 && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
 
 	mask = 0;
 	merge_hhmmss(field[5], out);
-	if (out->nmea_date.tm_year) {
+	if (out->nmea_date.tm_year != 0) {
 	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask = TIME_SET;
 	}
@@ -239,7 +239,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	double oldfixtime = out->fix.time;
 
 	merge_hhmmss(field[1], out);
-	if (out->nmea_date.tm_year) {
+	if (out->nmea_date.tm_year != 0) {
 	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask |= TIME_SET;
 	}
@@ -252,7 +252,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */
-	if (!altitude[0]) {
+	if (altitude[0] == 0.0) {
 	    if (out->fix.mode == MODE_3D) {
 		out->fix.mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		mask |= MODE_SET;
@@ -277,7 +277,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	    }
 	    mask |= CLIMB_SET;
 	}
-	if ( strlen( field[11] ) ) {
+	if (strlen(field[11]) > 0) {
 	   out->fix.separation = atof(field[11]);
 	} else {
 	   out->fix.separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
@@ -364,7 +364,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
 	 * last sentence in a GPGSV set if the number of satellites is not
 	 * a multiiple of 4.
 	 */
-	if (out->PRN[out->satellites])
+	if (out->PRN[out->satellites] != 0)
 	    out->satellites++;
     }
     if (out->part == out->await && atoi(field[3]) != out->satellites)
@@ -385,7 +385,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
      * revision 231.000.000_A2.
      */
     for (n = 0; n < out->satellites; n++)
-	if (out->azimuth[n])
+	if (out->azimuth[n] != 0)
 	    goto sane;
     gpsd_report(3, "Satellite data no good.\n");
     gpsd_zero_satellites(out);
@@ -475,7 +475,7 @@ void nmea_add_checksum(char *sentence)
 	p++;
     }
     *p++ = '*';
-    sprintf(p, "%02X\r\n", sum);
+    (void)snprintf(p, 5, "%02X\r\n", sum);
 }
 
 int nmea_parse(char *sentence, struct gps_data_t *outdata)

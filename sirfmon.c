@@ -122,7 +122,7 @@ static void nmea_add_checksum(char *sentence)
 	    p++;
 	}
 	*p++ = '*';
-	(void)snprintf(p, 4, "%02X\r\n", (unsigned int)sum);
+	(void)snprintf(p, 5, "%02X\r\n", (unsigned int)sum);
     }
 }
 
