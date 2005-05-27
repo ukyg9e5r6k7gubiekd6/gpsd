@@ -613,13 +613,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 		else
 		    (void)strcat(phrase, "      ?");
 		(void)strcat(phrase, " ?");	/* can't yet derive track error */ 
-		if (whoami->device->gpsdata.set & SPEEDERR_SET)
+		if ((whoami->device->gpsdata.set & SPEEDERR_SET)!=0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
 		else
 		    (void)strcat(phrase, "      ?");
-		if (whoami->device->gpsdata.set & CLIMBERR_SET)
+		if ((whoami->device->gpsdata.set & CLIMBERR_SET)!=0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
@@ -729,7 +729,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",X=?");
 	    break;
 	case 'Y':
-	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites) {
+	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites > 0) {
 		int used, reported = 0;
 		(void)strcpy(phrase, ",Y=");
 		if (whoami->device->gpsdata.tag[0])
@@ -777,12 +777,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",Z=?");
 		p++;		
 	    } else if (*p == '1' || *p == '+') {
-		whoami->device->gpsdata.profiling = 1;
+		whoami->device->gpsdata.profiling = true;
 		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		whoami->device->gpsdata.profiling = 0;
+		whoami->device->gpsdata.profiling = false;
 		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
 		p++;
@@ -892,7 +892,8 @@ int main(int argc, char *argv[])
     static struct gps_device_t *device, **channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
-    int i, option, msock, cfd, dfd, go_background = 1;
+    int i, option, msock, cfd, dfd; 
+    bool go_background = true;
     struct passwd *pw;
     struct stat stb;
     struct timeval tv;
@@ -908,7 +909,7 @@ int main(int argc, char *argv[])
 	    control_socket = optarg;
 	    break;
 	case 'N':
-	    go_background = 0;
+	    go_background = false;
 	    break;
 	case 'S':
 	    service = optarg;
@@ -917,7 +918,7 @@ int main(int argc, char *argv[])
 	    dgpsserver = optarg;
 	    break;
 	case 'n':
-	    nowait = 1;
+	    nowait = true;
 	    break;
 	case 'f':
 	case 'p':
@@ -952,17 +953,17 @@ int main(int argc, char *argv[])
 	    gpsd_report(0,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
 	}
-	FD_SET(csock, &all_fds);
+	/*@i@*/FD_SET(csock, &all_fds);
     }
 
     if (go_background)
-	daemonize();
+	(void)daemonize();
 
     if (pid_file) {
 	FILE *fp;
 
 	if ((fp = fopen(pid_file, "w")) != NULL) {
-	    (void)fprintf(fp, "%u\n", getpid());
+	    (void)fprintf(fp, "%u\n", (unsigned int)getpid());
 	    (void)fclose(fp);
 	} else {
 	    gpsd_report(1, "Cannot create PID file: %s.\n", pid_file);
@@ -982,7 +983,7 @@ int main(int argc, char *argv[])
     if (dgpsserver) {
 	dsock = gpsd_open_dgps(dgpsserver);
 	if (dsock >= 0)
-	    FD_SET(dsock, &all_fds);
+	    /*@i@*/FD_SET(dsock, &all_fds);
 	else
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
@@ -1015,7 +1016,7 @@ int main(int argc, char *argv[])
      */
     if ((optind<argc && stat(argv[optind], &stb)==0) || stat(PROTO_TTY, &stb)==0) {
 	gpsd_report(2, "changing to group %d\n", stb.st_gid);
-	if (setgid(stb.st_gid))
+	if (setgid(stb.st_gid) != 0)
 	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
     }
     gpsd_report(2, "running with effective group ID %d\n", getegid());
@@ -1047,8 +1048,8 @@ int main(int argc, char *argv[])
     (void)signal(SIGQUIT, onsig);
     (void)signal(SIGPIPE, SIG_IGN);
 
-    FD_SET(msock, &all_fds);
-    FD_ZERO(&control_fds);
+    /*@i@*/FD_SET(msock, &all_fds);
+    /*@i@*/FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
     if (time(NULL) < START_SUBFRAME)
@@ -1064,8 +1065,8 @@ int main(int argc, char *argv[])
 
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
-	if (device && device->dsock > -1)
-	    FD_CLR(device->dsock, &rfds);
+	if (device != NULL && device->dsock > -1)
+	    /*@i@*/FD_CLR(device->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
@@ -1085,7 +1086,7 @@ int main(int argc, char *argv[])
 	    char dbuf[BUFSIZ];
 	    dbuf[0] = '\0';
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		if (FD_ISSET(cfd, &rfds))
+		if (/*@i@*/FD_ISSET(cfd, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf), 
 				   sizeof(dbuf)-strlen(dbuf),
 				   " %d", cfd);
@@ -1094,7 +1095,7 @@ int main(int argc, char *argv[])
 #endif /* UNUSED */
 
 	/* always be open to new client connections */
-	if (FD_ISSET(msock, &rfds)) {
+	if (/*@i@*/FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
@@ -1106,15 +1107,15 @@ int main(int argc, char *argv[])
 		if (opts >= 0)
 		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
-		FD_SET(ssock, &all_fds);
+		/*@i@*/FD_SET(ssock, &all_fds);
 		subscribers[ssock].active = 1;
 		subscribers[ssock].tied = 0;
 	    }
-	    FD_CLR(msock, &rfds);
+	    /*@i@*/FD_CLR(msock, &rfds);
 	}
 
 	/* also be open to new control-socket connections */
-	if (csock > -1 && FD_ISSET(csock, &rfds)) {
+	if (csock > -1 && /*@i@*/FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = sizeof(fsin);
 	    int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
 
@@ -1126,10 +1127,10 @@ int main(int argc, char *argv[])
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "control socket connect on %d\n", ssock);
-		FD_SET(ssock, &all_fds);
-		FD_SET(ssock, &control_fds);
+		/*@i@*/FD_SET(ssock, &all_fds);
+		/*@i@*/FD_SET(ssock, &control_fds);
 	    }
-	    FD_CLR(csock, &rfds);
+	    /*@i@*/FD_CLR(csock, &rfds);
 	}
 
 	/* read any commands that came in over control sockets */
@@ -1142,8 +1143,8 @@ int main(int argc, char *argv[])
 		    handle_control(cfd, buf);
 		}
 		(void)close(cfd);
-		FD_CLR(cfd, &all_fds);
-		FD_CLR(cfd, &control_fds);
+		/*@i@*/FD_CLR(cfd, &all_fds);
+		/*@i@*/FD_CLR(cfd, &control_fds);
 	    }
 
 	/* poll all active devices */
@@ -1156,7 +1157,7 @@ int main(int argc, char *argv[])
 	    if (nowait && device->gpsdata.gps_fd == -1) {
 		gpsd_deactivate(device);
 		if (gpsd_activate(device) >= 0) {
-		    FD_SET(device->gpsdata.gps_fd, &all_fds);
+		    /*@i@*/FD_SET(device->gpsdata.gps_fd, &all_fds);
 		    notify_watchers(device, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
@@ -1168,11 +1169,11 @@ int main(int argc, char *argv[])
 		changed = gpsd_poll(device);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
-		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    /*@i@*/FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(device);
 		} if (!(changed & ONLINE_SET)) {
 		    gpsd_report(3, "GPS is offline\n");
-		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    /*@i@*/FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(device);
 		    notify_watchers(device, "GPSD,X=0\r\n");
 		}
@@ -1205,7 +1206,7 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (subscribers[cfd].active && FD_ISSET(cfd, &rfds)) {
+	    if (subscribers[cfd].active && /*@i@*/FD_ISSET(cfd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
 
@@ -1227,14 +1228,14 @@ int main(int argc, char *argv[])
 	/* close devices with no remaining subscribers */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
 	    if (*channel) {
-		int need_gps = 0;
+		bool need_gps = false;
 
 		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		    if (subscribers[cfd].active&&subscribers[cfd].device==*channel)
-			need_gps++;
+			need_gps = true;
 
 		if (!nowait && !need_gps && (*channel)->gpsdata.gps_fd > -1) {
-		    FD_CLR((*channel)->gpsdata.gps_fd, &all_fds);
+		    /*@i@*/FD_CLR((*channel)->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(*channel);
 		}
 	    }

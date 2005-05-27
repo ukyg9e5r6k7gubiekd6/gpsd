@@ -23,7 +23,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 
     if (!host)
 	host = "localhost";
-    memset((char *) &sin, '\0', sizeof(sin));
+    memset((char *) &sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((unsigned short) pse->s_port));

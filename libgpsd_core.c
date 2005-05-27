@@ -336,13 +336,13 @@ int gpsd_poll(struct gps_device_t *session)
 			    "packet sniff finds type %d\n", 
 			    session->packet_type);
 		if (session->packet_type == SIRF_PACKET)
-		    gpsd_switch_driver(session, "SiRF-II binary");
+		    (void)gpsd_switch_driver(session, "SiRF-II binary");
 		else if (session->packet_type == TSIP_PACKET)
-		    gpsd_switch_driver(session, "Trimble TSIP");
+		    (void)gpsd_switch_driver(session, "Trimble TSIP");
 		else if (session->packet_type == NMEA_PACKET)
-		    gpsd_switch_driver(session, "Generic NMEA");
+		    (void)gpsd_switch_driver(session, "Generic NMEA");
 		else if (session->packet_type == ZODIAC_PACKET)
-		    gpsd_switch_driver(session, "Zodiac binary");
+		    (void)gpsd_switch_driver(session, "Zodiac binary");
 		session->gpsdata.d_xmit_time = timestamp();
 	    } else if (!gpsd_next_hunt_setting(session))
 		return ERROR_SET;

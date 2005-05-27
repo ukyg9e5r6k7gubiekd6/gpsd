@@ -1,7 +1,11 @@
 -I. 
 +posixlib 
 +charindex
++charintliteral
+-exitarg
 -booltype bool
+-paramuse
+
 -Dfd_set=int 
 -Dpthread_t=int 
 -Dsocklen_t=ssize_t

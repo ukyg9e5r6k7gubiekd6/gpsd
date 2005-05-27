@@ -148,7 +148,7 @@ int gpsd_open(struct gps_device_t *session)
  */
 #define SNIFF_RETRIES	600
 
-int gpsd_next_hunt_setting(struct gps_device_t *session)
+bool gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
     /* every rate we're likely to see on a GPS */
@@ -159,14 +159,14 @@ int gpsd_next_hunt_setting(struct gps_device_t *session)
 	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.stopbits++ >= 2)
-		return 0;			/* hunt is over, no sync */
+		return false;			/* hunt is over, no sync */
 	}
 	gpsd_set_speed(session, 
 		       rates[session->baudindex],
 		       'N', session->gpsdata.stopbits);
     }
 
-    return 1;	/* keep hunting */
+    return true;	/* keep hunting */
 }
 
 void gpsd_close(struct gps_device_t *session)

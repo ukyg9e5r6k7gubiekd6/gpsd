@@ -61,7 +61,7 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 static int devicefd = -1, controlfd = -1;
 static int nfix,fix[20];
 static int gmt_offset;
-static int dispmode = 0;
+static bool dispmode = false;
 static bool serial, subframe_enabled = false;
 static unsigned int stopbits, bps;
 
@@ -434,7 +434,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	******************************************************************/
 	display(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[(int)getb(1)]);
 	for (i = j = 0; i < MAXCHANNELS; i++) {
-	    if (getb(16+2*i) != 0) {
+	    if (getb(16+2*i) != '\0') {
 		(void)wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
 		j++;
 	    }
@@ -514,10 +514,12 @@ static void decode_sirf(unsigned char buf[], int len)
 #endif /* __UNUSED__ */
 
     case 0xff:		/* Development Data */
+	/*@ +ignoresigns @*/
 	while (len > 0 && buf[len-1] == '\n')
 	    len--;
 	while (len > 0 && buf[len-1] == ' ')
 	    len--;
+	/*@ -ignoresigns @*/
 	buf[len] = '\0';
 	j = 1;
 	for (i = 0; verbpat[i] != NULL; i++)
@@ -573,6 +575,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
 
     if (speed != 0) {
+	/*@ +ignoresigns @*/
 	if (speed < 300)
 	    rate = 0;
 	else if (speed < 1200)
@@ -591,6 +594,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	    rate =  B38400;
 	else
 	    rate =  B57600;
+	/*@ -ignoresigns @*/
 
 	/*@ ignore @*/
 	(void)cfsetispeed(&ttyset, (speed_t)rate);
@@ -603,7 +607,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	return NO_PACKET;
     (void)tcflush(devicefd, TCIOFLUSH);
 
-    fprintf(stderr, "Hunting at speed %d, %dN%d\n",
+    fprintf(stderr, "Hunting at speed %d, %dN%u\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */
@@ -649,7 +653,7 @@ static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
 static int hunt_open(int *pstopbits)
 {
-    int stopbits, st;
+    int trystopbits, st;
     /*
      * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -660,11 +664,11 @@ static int hunt_open(int *pstopbits)
     ttyset.c_iflag = ttyset.c_oflag = ttyset.c_lflag = (tcflag_t) 0;
     ttyset.c_oflag = (ONLCR);
 
-    for (stopbits = 1; stopbits <= 2; stopbits++) {
-	*pstopbits = stopbits;
+    for (trystopbits = 1; trystopbits <= 2; trystopbits++) {
+	*pstopbits = trystopbits;
 	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
 	{
-	    if ((st = set_speed(*ip, stopbits)) == SIRF_PACKET)
+	    if ((st = set_speed(*ip, trystopbits)) == SIRF_PACKET)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
 		fprintf(stderr, "Switching to SiRF mode...\n");
@@ -684,7 +688,7 @@ static int serial_initialize(char *device)
     }
     
     /* Save original terminal parameters */
-    if (tcgetattr(devicefd, &ttyset) != 0 || !(bps = hunt_open(&stopbits))) {
+    if (tcgetattr(devicefd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
 	(void)fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
@@ -775,7 +779,7 @@ static int readpkt(unsigned char *buf)
     return len;
 }
 
-static int sendpkt(unsigned char *buf, int len, char *device)
+static bool sendpkt(unsigned char *buf, int len, char *device)
 {
     int i,csum, st;
 

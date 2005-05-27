@@ -204,17 +204,17 @@ static int tsip_analyze(struct gps_device_t *session)
 	gpsd_report(4, "Receiver health %02x %02x\n",getb(0),getb(1));
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
-	s1 = (int)getb(0);			/* count */
+	s1 = getb(0);			/* count */
 	if (len != (5*s1 + 1))
 	    break;
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites = s1;
 	buf2[0] = '\0';
 	for (i = 0; i < s1; i++) {
-	    session->gpsdata.PRN[i] = s2 = (int)getb(5*i + 1);
+	    session->gpsdata.PRN[i] = s2 = getb(5*i + 1);
 	    session->gpsdata.ss[i] = f1 = getf(5*i + 2);
-	    snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
-		     " %d=%.1f",s2,f1);
+	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
+			   " %d=%.1f",s2,f1);
 	}
 	gpsd_report(4, "Signal Levels (%d):%s\n",s1,buf2);
 	mask |= SATELLITE_SET;
