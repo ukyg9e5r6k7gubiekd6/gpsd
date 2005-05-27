@@ -116,7 +116,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 #endif /* PPS_ENABLE */
 	(void)strcpy(buf, "gpsd: ");
 	va_start(ap, fmt) ;
-	(void)(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
 	/*@ -unrecog @*/
@@ -350,7 +350,7 @@ found:
 	if (gpsd_activate(*chp) < 0) {
 	    return NULL;
 	}
-	FD_SET(device->gpsdata.gps_fd, &all_fds);
+	FD_SET((*chp)->gpsdata.gps_fd, &all_fds);
     }
 
     return *chp;
@@ -480,7 +480,8 @@ static int handle_request(int cfd, char *buf, int buflen)
 	case 'D':
 	    (void)strcpy(phrase, ",D=");
 	    if (assign_channel(whoami)!=0 && whoami->device->gpsdata.fix.time)
-		unix_to_iso8601(whoami->device->gpsdata.fix.time, phrase+3);
+		unix_to_iso8601(whoami->device->gpsdata.fix.time, 
+				phrase+3, sizeof(phrase)-3);
 	    else
 		(void)strcpy(phrase, "?");
 	    break;
@@ -609,13 +610,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    (void)strcat(phrase, "      ?");
 		(void)strcat(phrase, " ?");	/* can't yet derive track error */ 
 		if (whoami->device->gpsdata.set & SPEEDERR_SET)
-		    snprintf(phrase+strlen(phrase),
+		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
 		else
 		    (void)strcat(phrase, "      ?");
 		if (whoami->device->gpsdata.set & CLIMBERR_SET)
-		    snprintf(phrase+strlen(phrase),
+		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
 		else
@@ -1080,9 +1081,9 @@ int main(int argc, char *argv[])
 	    dbuf[0] = '\0';
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (FD_ISSET(cfd, &rfds))
-		    snprintf(dbuf + strlen(dbuf), 
-			     sizeof(dbuf)-strlen(dbuf),
-			     " %d", cfd);
+		    (void)snprintf(dbuf + strlen(dbuf), 
+				   sizeof(dbuf)-strlen(dbuf),
+				   " %d", cfd);
 	    gpsd_report(4, "New input on these descriptors: %s\n", dbuf);
 	}
 #endif /* UNUSED */

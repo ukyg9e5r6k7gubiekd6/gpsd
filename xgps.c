@@ -254,11 +254,11 @@ static void update_panel(struct gps_data_t *gpsdata,
     if (gpsdata->satellites) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < (unsigned int)gpsdata->satellites) {
-		snprintf(s, sizeof(s), " %3d    %02d    %03d    %02d      %c", 
-			gpsdata->PRN[i],
-			gpsdata->elevation[i], gpsdata->azimuth[i], 
-			gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N'
-		    );
+		(void)snprintf(s, sizeof(s), 
+			       " %3d    %02d    %03d    %02d      %c", 
+			       gpsdata->PRN[i],
+			       gpsdata->elevation[i], gpsdata->azimuth[i], 
+			       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
 	    } else
 		(void)strcpy(s, "                  ");
 	    string[i+1] = XmStringCreateSimple(s);
@@ -269,7 +269,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     }
     /* here are the value fields */
     if (gpsdata->fix.time != TIME_NOT_VALID)
-	unix_to_iso8601(gpsdata->fix.time, s);
+	unix_to_iso8601(gpsdata->fix.time, s, sizeof(s));
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);

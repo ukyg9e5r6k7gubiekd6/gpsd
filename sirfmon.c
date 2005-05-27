@@ -860,7 +860,7 @@ static void command(char *buf, int len, const char *fmt, ... )
     int n;
 
     va_start(ap, fmt) ;
-    vsnprintf(buf, sizeof(buf), fmt, ap);
+    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
     (void)write(devicefd, buf, strlen(buf));
@@ -1065,7 +1065,7 @@ int main (int argc, char **argv)
     wattrset(mid27win, A_NORMAL);
 
     wattrset(cmdwin, A_BOLD);
-    if (serial)
+    if (serial!=0)
     	display(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
     else
 	display(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
@@ -1126,7 +1126,7 @@ int main (int argc, char **argv)
 	    if ((p = strchr(line,'\r')) != NULL)
 		*p = '\0';
 
-	    if (!line[0])
+	    if (line[0] == '\0')
 		continue;
 
 	    p = line;

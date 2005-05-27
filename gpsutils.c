@@ -55,7 +55,7 @@ double iso8601_to_unix(char *isotime)
     return mkgmtime(&tm) + usec;
 }
 
-char *unix_to_iso8601(double fixtime, char *isotime)
+char *unix_to_iso8601(double fixtime, char isotime[], int len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 {
     struct tm when;
@@ -69,7 +69,7 @@ char *unix_to_iso8601(double fixtime, char *isotime)
 
     (void)strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
     slen = strlen(isotime);
-    (void)sprintf(isotime + slen, "%.1f", fractional);
+    (void)snprintf(isotime + slen, len, "%.1f", fractional);
     (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
     (void)strcat(isotime, "Z");
     return isotime;

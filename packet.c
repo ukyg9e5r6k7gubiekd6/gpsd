@@ -47,7 +47,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 	buf[0] = '\0';
 	va_start(ap, fmt) ;
-	vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
 	(void)fputs(buf, stderr);
@@ -431,10 +431,10 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
     static unsigned char buf[BUFSIZ];
     unsigned char *cp, *tp = buf;
     for (cp = base; cp < end; cp++)
-	if (isgraph(*cp))
+	if (isgraph(*cp)) {
 	    *tp++ = *cp;
-	else {
-	    sprintf(tp, "\\x%02x", *cp);
+	}else {
+	    (void)snprintf(tp, sizeof(buf)-(tp-buf), "\\x%02x", *cp);
 	    tp += 4;
 	}
     *tp = '\0';
@@ -547,7 +547,7 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 		unsigned int n, crc = 0;
 		for (n = 1; session->inbuffer + n < trailer; n++)
 		    crc ^= session->inbuffer[n];
-		snprintf(csum, sizeof(csum), "%02X", crc);
+		(void)snprintf(csum, sizeof(csum), "%02X", crc);
 		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
 				&& toupper(csum[1])==toupper(trailer[2]));
 	    }

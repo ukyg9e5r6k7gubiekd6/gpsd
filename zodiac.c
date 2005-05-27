@@ -337,7 +337,8 @@ static int zodiac_analyze(struct gps_device_t *session)
 
     buf2[0] = '\0';
     for (i = 0; i < session->outbuflen; i++)
-	sprintf(buf2+strlen(buf2), "%02x", session->outbuffer[i]);
+	(void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
+		       "%02x", session->outbuffer[i]);
     (void)strcat(buf2, "\n");
     gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf2);
 
@@ -349,24 +350,26 @@ static int zodiac_analyze(struct gps_device_t *session)
     switch (id) {
     case 1000:
 	mask = handle1000(session);
-	gpsd_binary_fix_dump(session, buf);
+	gpsd_binary_fix_dump(session, buf, sizeof(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1002:
 	mask = handle1002(session);
 	strcpy(buf, "$PRWIZCH");
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    sprintf(buf+strlen(buf), ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
+	    (void)snprintf(buf+strlen(buf),  sizeof(buf)-strlen(buf),
+			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
 	}
 	(void)strcat(buf, "*");
 	nmea_add_checksum(buf);
 	gpsd_raw_hook(session, buf, strlen(buf),  1);
-	gpsd_binary_quality_dump(session, buf+strlen(buf));
+	gpsd_binary_quality_dump(session, 
+				 buf+strlen(buf), sizeof(buf)-strlen(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1003:
 	mask = handle1003(session);
-	gpsd_binary_satellite_dump(session, buf);
+	gpsd_binary_satellite_dump(session, buf, sizeof(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;	
     case 1005:
