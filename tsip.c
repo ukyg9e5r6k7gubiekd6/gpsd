@@ -27,7 +27,7 @@ union long_double {
 #define putl(off,l)	{ putw(off,(l) >> 16); putw(off+2,l); }
 
 #define getb(off)	(buf[off])
-#define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
+#define getw(off)	(((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 #define getL(off)	((long long)(((long long)getl(off) << 32) | ((long long)getl(off+4) & 0xffffffffL)))
 #define getf(off)	(i_f.i = getl(off), i_f.f)
@@ -40,16 +40,17 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
 
     buf2[0] = '\0';
     for (i = 0; i < len; i++)
-	sprintf(buf2+strlen(buf2), "%02x", buf[i]);
+	(void)snprintf(buf2+strlen(buf2), sizeof(buf)-strlen(buf), 
+		      "%02x", buf[i]);
     gpsd_report(5, "Sent TSIP packet id 0x%02x: %s\n",id,buf2);
 
-    buf2[0] = 0x10;
-    buf2[1] = id;
+    buf2[0] = '\x10';
+    buf2[1] = (unsigned char)id;
     if (write(fd,buf2,2) != 2)
 	return -1;
 
     while (len-- > 0) {
-	if (*buf == 0x10)
+	if (*buf == '\x10')
 	    if (write(fd,buf2,1) != 1)
 		return -1;
 
@@ -57,7 +58,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
 	    return -1;
     }
 
-    buf2[1] = 0x03;
+    buf2[1] = '\x03';
     if (write(fd,buf2,2) != 2)
 	return -1;
 
@@ -76,16 +77,16 @@ static void tsip_initializer(struct gps_device_t *session)
     putb(1,0x02);		/* Velocity: ENU */
     putb(2,0x00);		/* Time: GPS */
     putb(3,0x08);		/* Aux: dBHz */
-    tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
 
     /* Request Software Versions */
-    tsip_write(session->gpsdata.gps_fd, 0x1f, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x1f, buf, 0);
 
     /* Request Current Time */
-    tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
 
     /* Request GPS Systems Message */
-    tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
 }
 
 static int tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
@@ -102,9 +103,9 @@ static int tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
     putb(7,0x02);		/* input protocol (TSIP) */
     putb(8,0x02);		/* input protocol (TSIP) */
     putb(9,0);			/* reserved */
-    tsip_write(session->gpsdata.gps_fd, 0xbc, buf, 10);
+    (void)tsip_write(session->gpsdata.gps_fd, 0xbc, buf, 10);
 
-    return speed;	/* it would be nice to error-check this */
+    return (int)speed;	/* it would be nice to error-check this */
 }
 
 static int tsip_analyze(struct gps_device_t *session)
@@ -136,7 +137,9 @@ static int tsip_analyze(struct gps_device_t *session)
 	    if (session->outbuffer[++i] == 0x03)
 		break;
 
-	sprintf(buf2+strlen(buf2), "%02x", buf[len++] = session->outbuffer[i]);
+	(void)snprintf(buf2+strlen(buf2), 
+		      sizeof(buf)-strlen(buf),
+		      "%02x", buf[len++] = session->outbuffer[i]);
     }
 
     snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "ID%02x",
@@ -191,8 +194,8 @@ static int tsip_analyze(struct gps_device_t *session)
 	if (len != 10)
 	    break;
 	gpsd_report(4, "Software versions %d.%d %02d%02d%02d %d.%d %02d%02d%02d\n",
-		getb(0),getb(1),getb(4),getb(2),getb(3),
-		getb(5),getb(6),getb(9),getb(7),getb(8));
+		(int)getb(0),(int)getb(1),(int)getb(4),(int)getb(2),(int)getb(3),
+		(int)getb(5),(int)getb(6),(int)getb(9),(int)getb(7),(int)getb(8));
 	break;
     case 0x46:		/* Health of Receiver */
 	if (len != 2)
@@ -200,14 +203,14 @@ static int tsip_analyze(struct gps_device_t *session)
 	gpsd_report(4, "Receiver health %02x %02x\n",getb(0),getb(1));
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
-	s1 = getb(0);			/* count */
+	s1 = (int)getb(0);			/* count */
 	if (len != (5*s1 + 1))
 	    break;
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites = s1;
 	buf2[0] = '\0';
 	for (i = 0; i < s1; i++) {
-	    session->gpsdata.PRN[i] = s2 = getb(5*i + 1);
+	    session->gpsdata.PRN[i] = s2 = (int)getb(5*i + 1);
 	    session->gpsdata.ss[i] = f1 = getf(5*i + 2);
 	    sprintf(buf2+strlen(buf2)," %d=%.1f",s2,f1);
 	}
@@ -265,7 +268,7 @@ static int tsip_analyze(struct gps_device_t *session)
 	    break;
 	f1 = getf(2);			/* gps_time */
 	s1 = getw(6);			/* gps_weeks */
-	if (getb(0))			/* good current fix? */
+	if (getb(0) != 0)			/* good current fix? */
 	    session->gps_week = s1;
 	gpsd_report(4, "Fix info %02x %02x %d %f\n",getb(0),getb(1),s1,f1);
 	break;
@@ -379,10 +382,10 @@ static int tsip_analyze(struct gps_device_t *session)
     time(&t);
     if ((t - session->last_request) >= 5) {
 	/* Request GPS Receiver Position Fix Mode */
-	tsip_write(session->gpsdata.gps_fd, 0x24, buf, 0);
+	(void)tsip_write(session->gpsdata.gps_fd, 0x24, buf, 0);
 
 	/* Request Signal Levels */
-	tsip_write(session->gpsdata.gps_fd, 0x27, buf, 0);
+	(void)tsip_write(session->gpsdata.gps_fd, 0x27, buf, 0);
 
 	session->last_request = t;
     }
