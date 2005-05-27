@@ -34,6 +34,10 @@
  *      hangs in the fread loop instead of keeping state and returning.
  *      may or may not work on a little-endian machine
  */
+
+#define __USE_POSIX199309 1
+#include <time.h> // for nanosleep()
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -624,7 +628,7 @@ static int garmin_probe(struct gps_device_t *session)
     if ( !session->GarminBuffer ) {
 	    // get a packet buffer
 	    session->GarminBuffer = calloc( sizeof(Packet_t), 1);
-	    if ( !session->GarminBuffer ) {
+	    if ( NULL == session->GarminBuffer ) {
 		gpsd_report(0, "garmin_probe: out of memory!\n");
 		return 0;
             }
@@ -831,7 +835,7 @@ static void garmin_init(struct gps_device_t *session)
 	//SendPacket(session,  thePacket);
 }
 
-static int garmin_get_packet(struct gps_device_t *session, unsigned int waiting UNUSED)
+static int garmin_get_packet(struct gps_device_t *session, /*@unused@*/ unsigned int waiting UNUSED ) 
 {
     return ( 0 == GetPacket( session ) ? 1 : 0);
 }
