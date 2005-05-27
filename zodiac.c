@@ -23,7 +23,7 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
 {
     unsigned short csum = 0;
 
-    while (n--)
+    while (n-- > 0)
 	csum += *(w++);
     return -csum;
 }
@@ -58,19 +58,22 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     char buf[BUFSIZ];
 
     h.sync = 0x81ff;
-    h.id = type;
-    h.ndata = dlen - 1;
+    h.id = (short)type;
+    h.ndata = (short)(dlen - 1);
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
     if (session->gpsdata.gps_fd != -1) {
-	end_write(session->gpsdata.gps_fd, &h, sizeof(h));
-	end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
+	(void)end_write(session->gpsdata.gps_fd, &h, sizeof(h));
+	(void)end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
     }
 
-    sprintf(buf,"%04x %04x %04x %04x %04x",h.sync,h.id,h.ndata,h.flags,h.csum);
+    (void)snprintf(buf, sizeof(buf),
+		   "%04x %04x %04x %04x %04x",
+		   h.sync,h.id,h.ndata,h.flags,h.csum);
     for (i = 0; i < dlen; i++)
-	sprintf(buf+strlen(buf), " %04x", dat[i]);
+	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
+		       " %04x", dat[i]);
 
     gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
 }
@@ -94,7 +97,7 @@ static int zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 
     zodiac_spew(session, 1330, data, 15);
 
-    return speed;	/* it would be nice to error-check this */
+    return (int)speed;	/* it would be nice to error-check this */
 }
 
 static void send_rtcm(struct gps_device_t *session, 
@@ -119,7 +122,7 @@ static size_t zodiac_send_rtcm(struct gps_device_t *session,
 {
     int len;
 
-    while (rtcmbytes) {
+    while (rtcmbytes > 0) {
 	len = rtcmbytes>64?64:rtcmbytes;
 	send_rtcm(session, rtcmbuf, len);
 	rtcmbytes -= len;
@@ -142,23 +145,23 @@ static int handle1000(struct gps_device_t *session)
     /* sequence                   = getw(8); */
     /* measurement_sequence       = getw(9); */
     session->gpsdata.status       = (getw(10) & 0x1c) ? 0 : 1;
-    if (session->gpsdata.status)
+    if (session->gpsdata.status != 0)
 	session->gpsdata.fix.mode = (getw(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->gpsdata.fix.mode = MODE_NO_FIX;
 
     /* solution_type                 = getw(11); */
-    session->gpsdata.satellites_used = getw(12);
+    session->gpsdata.satellites_used = (int)getw(12);
     /* polar_navigation              = getw(13); */
     /* gps_week                      = getw(14); */
     /* gps_seconds                   = getl(15); */
     /* gps_nanoseconds               = getl(17); */
-    session->gpsdata.nmea_date.tm_mday = getw(19);
-    session->gpsdata.nmea_date.tm_mon = getw(20) - 1;
-    session->gpsdata.nmea_date.tm_year = getw(21) - 1900;
-    session->gpsdata.nmea_date.tm_hour = getw(22);
-    session->gpsdata.nmea_date.tm_min = getw(23);
-    session->gpsdata.nmea_date.tm_sec = getw(24);
+    session->gpsdata.nmea_date.tm_mday = (int)getw(19);
+    session->gpsdata.nmea_date.tm_mon = (int)getw(20) - 1;
+    session->gpsdata.nmea_date.tm_year = (int)getw(21) - 1900;
+    session->gpsdata.nmea_date.tm_hour = (int)getw(22);
+    session->gpsdata.nmea_date.tm_min = (int)getw(23);
+    session->gpsdata.nmea_date.tm_sec = (int)getw(24);
     session->gpsdata.subseconds = getl(25) / 1e9;
     session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
@@ -335,13 +338,13 @@ static int zodiac_analyze(struct gps_device_t *session)
     buf2[0] = '\0';
     for (i = 0; i < session->outbuflen; i++)
 	sprintf(buf2+strlen(buf2), "%02x", session->outbuffer[i]);
-    strcat(buf2, "\n");
+    (void)strcat(buf2, "\n");
     gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf2);
 
     if (session->outbuflen < 10)
 	return 0;
 
-    snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%u", id);
+    (void)snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"%u",id);
 
     switch (id) {
     case 1000:
@@ -355,7 +358,7 @@ static int zodiac_analyze(struct gps_device_t *session)
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    sprintf(buf+strlen(buf), ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
 	}
-	strcat(buf, "*");
+	(void)strcat(buf, "*");
 	nmea_add_checksum(buf);
 	gpsd_raw_hook(session, buf, strlen(buf),  1);
 	gpsd_binary_quality_dump(session, buf+strlen(buf));
