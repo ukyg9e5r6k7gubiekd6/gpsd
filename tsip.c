@@ -27,8 +27,9 @@ union long_double {
 #define putl(off,l)	{ putw(off,(l) >> 16); putw(off+2,l); }
 
 #define getb(off)	(buf[off])
-#define getw(off)	(((getb(off) << 8) | getb(off+1)))
-#define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
+#define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
+#define getl(off)	((int)((getb(off) << 24) | (getb(off+1) << 16) \
+				| (getb(off+3) << 8) | getb(off+4)))
 #define getL(off)	((long long)(((long long)getl(off) << 32) | ((long long)getl(off+4) & 0xffffffffL)))
 #define getf(off)	(i_f.i = getl(off), i_f.f)
 #define getd(off)	(l_d.l = getL(off), l_d.d)
@@ -89,7 +90,7 @@ static void tsip_initializer(struct gps_device_t *session)
     (void)tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
 }
 
-static int tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
+static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
 {
     unsigned char buf[100];
 
@@ -105,7 +106,7 @@ static int tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
     putb(9,0);			/* reserved */
     (void)tsip_write(session->gpsdata.gps_fd, 0xbc, buf, 10);
 
-    return (int)speed;	/* it would be nice to error-check this */
+    return true;	/* it would be nice to error-check this */
 }
 
 static int tsip_analyze(struct gps_device_t *session)

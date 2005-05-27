@@ -78,7 +78,7 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
 }
 
-static int zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
+static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 {
     unsigned short data[15];
 
@@ -97,7 +97,7 @@ static int zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 
     zodiac_spew(session, 1330, data, 15);
 
-    return (int)speed;	/* it would be nice to error-check this */
+    return true;	/* it would be nice to error-check this */
 }
 
 static void send_rtcm(struct gps_device_t *session, 
@@ -326,7 +326,6 @@ static void handle1108(struct gps_device_t *session)
 static int zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
-    char buf2[MAX_PACKET_LENGTH*3+2];
     int i, mask = 0;
     unsigned int id = (session->outbuffer[3] << 8) | session->outbuffer[2];
 
@@ -335,12 +334,12 @@ static int zodiac_analyze(struct gps_device_t *session)
 	return 0;
     }
 
-    buf2[0] = '\0';
+    buf[0] = '\0';
     for (i = 0; i < session->outbuflen; i++)
-	(void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
+	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
 		       "%02x", session->outbuffer[i]);
-    (void)strcat(buf2, "\n");
-    gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf2);
+    (void)strcat(buf, "\n");
+    gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf);
 
     if (session->outbuflen < 10)
 	return 0;

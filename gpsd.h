@@ -3,6 +3,7 @@
 
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
+#include <stdbool.h>
 #include "config.h"
 #include "gps.h"
 #include "gpsutils.h"
@@ -53,7 +54,7 @@ struct gps_type_t {
     /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
     /*@null@*/int (*parse_packet)(struct gps_device_t *session);
     /*@null@*/size_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
-    /*@null@*/int (*speed_switcher)(struct gps_device_t *session, unsigned int speed);
+    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, unsigned int speed);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
     int cycle;

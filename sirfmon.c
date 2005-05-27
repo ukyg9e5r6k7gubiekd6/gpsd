@@ -32,6 +32,7 @@
 #include <termios.h>
 #include <fcntl.h>	/* for O_RDWR */
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "gpsutils.h"
@@ -57,11 +58,11 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
 
-static int devicefd = -1, controlfd = -1, serial;
+static int devicefd = -1, controlfd = -1;
 static int nfix,fix[20];
 static int gmt_offset;
 static int dispmode = 0;
-static int subframe_enabled = 0;
+static bool serial, subframe_enabled = false;
 static unsigned int stopbits, bps;
 
 static char *verbpat[] =
@@ -86,8 +87,9 @@ static char *sbasvec[] =
 };
 
 #define getb(off)	(buf[off])
-#define getw(off)	(((getb(off) << 8) | getb(off+1)))
-#define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
+#define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
+#define getl(off)	((int)((getb(off) << 24) | (getb(off+1) << 16) \
+				| (getb(off+3) << 8) | getb(off+4)))
 
 #define putb(off,b)	{ buf[4+off] = (unsigned char)(b); }
 #define putw(off,w)	{ putb(off,(w) >> 8); putb(off+1,w); }
@@ -321,7 +323,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	ch = (int)getb(1);
 	display(mid4win, ch, 27, "Y");
 	(void)wprintw(debugwin, "50B 0x08=");
-	subframe_enabled = 1;
+	subframe_enabled = true;
     	break;
 
     case 0x09:		/* Throughput */
@@ -445,7 +447,7 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x1D:	/* DGPS Data */
     case 0x1E:	/* SV State Data */
     case 0x1F:	/* NL Initialized Data */
-	subframe_enabled = 1;
+	subframe_enabled = true;
 	break;
 
 #ifdef __UNUSED__
@@ -922,8 +924,9 @@ int main (int argc, char **argv)
 	    server = "localhost";
 	devicefd = netlib_connectsock(server, port, "tcp");
 	if (devicefd < 0) {
-	    fprintf(stderr, "%s: connection failure on %s:%s, error %d.\n", 
-		    argv[0], server, port, devicefd);
+	    (void)fprintf(stderr, 
+			  "%s: connection failure on %s:%s, error %d.\n", 
+			  argv[0], server, port, devicefd);
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
@@ -934,15 +937,15 @@ int main (int argc, char **argv)
 	command(buf, sizeof(buf), "F\r\n");
 	device = strdup(buf+7);
 	command(buf, sizeof(buf), "R=2\r\n");
-	serial = FALSE;
+	serial = false;
     } else {
 	devicefd = controlfd = serial_initialize(device = arg);
-	serial = TRUE;
+	serial = true;
     }
 
-    initscr();
-    cbreak();
-    noecho();
+    (void)initscr();
+    (void)cbreak();
+    (void)noecho();
     intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
 
@@ -956,11 +959,11 @@ int main (int argc, char **argv)
     mid27win  = newwin(4,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
     debugwin  = newwin(0,   0, 24, 0);
-    scrollok(debugwin,TRUE);
-    wsetscrreg(debugwin, 0, LINES-21);
+    (void)scrollok(debugwin,TRUE);
+    (void)wsetscrreg(debugwin, 0, LINES-21);
 
-    wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid2win, A_BOLD);
+    (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid2win, A_BOLD);
     (void)wmove(mid2win, 0,1);
     display(mid2win, 0, 12, " X "); 
     display(mid2win, 0, 21, " Y "); 
@@ -980,19 +983,19 @@ int main (int argc, char **argv)
     (void)wmove(mid2win, 5,1);
     (void)wprintw(mid2win, "Fix:");
     display(mid2win, 6, 24, " Packet type 2 (0x02) ");
-    wattrset(mid2win, A_NORMAL);
+    (void)wattrset(mid2win, A_NORMAL);
 
-    wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid4win, A_BOLD);
+    (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid4win, A_BOLD);
     display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
     for (i = 0; i < MAXCHANNELS; i++) {
 	display(mid4win, i+2, 1, "%2d",i);
     }
     display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
-    wattrset(mid4win, A_NORMAL);
+    (void)wattrset(mid4win, A_NORMAL);
 
-    wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid19win, A_BOLD);
+    (void)wborder(mid19win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid19win, A_BOLD);
     display(mid19win, 1, 1, "Alt. hold mode:");
     display(mid19win, 2, 1, "Alt. hold source:");
     display(mid19win, 3, 1, "Alt. source input:");
@@ -1024,52 +1027,52 @@ int main (int argc, char **argv)
     display(mid19win,14, 26,"Time/Accu:");
 
     display(mid19win, 16, 8, " Packet type 19 (0x13) ");
-    wattrset(mid19win, A_NORMAL);
+    (void)wattrset(mid19win, A_NORMAL);
 
-    wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid6win, A_BOLD);
+    (void)wborder(mid6win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid6win, A_BOLD);
     display(mid6win, 1, 1, "Version:");
     display(mid6win, 2, 8, " Packet Type 6 (0x06) ");
-    wattrset(mid6win, A_NORMAL);
+    (void)wattrset(mid6win, A_NORMAL);
 
-    wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid7win, A_BOLD);
+    (void)wborder(mid7win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid7win, A_BOLD);
     display(mid7win, 1, 1,  "SVs: ");
     display(mid7win, 1, 9,  "Drift: ");
     display(mid7win, 1, 23, "Bias: ");
     display(mid7win, 2, 1,  "Estimated GPS Time: ");
     display(mid7win, 3, 8, " Packet type 7 (0x07) ");
-    wattrset(mid7win, A_NORMAL);
+    (void)wattrset(mid7win, A_NORMAL);
 
-    wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid9win, A_BOLD);
+    (void)wborder(mid9win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid9win, A_BOLD);
     display(mid9win, 1, 1,  "Max: ");
     display(mid9win, 1, 13, "Lat: ");
     display(mid9win, 1, 25, "Time: ");
     display(mid9win, 1, 39, "MS: ");
     display(mid9win, 2, 8, " Packet type 9 (0x09) ");
-    wattrset(mid9win, A_NORMAL);
+    (void)wattrset(mid9win, A_NORMAL);
 
-    wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid13win, A_BOLD);
+    (void)wborder(mid13win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid13win, A_BOLD);
     display(mid13win, 1, 1, "SVs: ");
     display(mid13win, 1, 9, "=");
     display(mid13win, 2, 8, " Packet type 13 (0x0D) ");
-    wattrset(mid13win, A_NORMAL);
+    (void)wattrset(mid13win, A_NORMAL);
 
-    wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
-    wattrset(mid27win, A_BOLD);
+    (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
+    (void)wattrset(mid27win, A_BOLD);
     display(mid27win, 1, 1, "SBAS source: ");
     display(mid27win, 1, 31, "Corrections: ");
     display(mid27win, 3, 8, " Packet type 27 (0x1B) ");
-    wattrset(mid27win, A_NORMAL);
+    (void)wattrset(mid27win, A_NORMAL);
 
-    wattrset(cmdwin, A_BOLD);
-    if (serial!=0)
+    (void)wattrset(cmdwin, A_BOLD);
+    if (serial)
     	display(cmdwin, 1, 0, "%s %4d N %d", device, bps, stopbits);
     else
 	display(cmdwin, 1, 0, "%s:%s:%s", server, port, device);
-    wattrset(cmdwin, A_NORMAL);
+    (void)wattrset(cmdwin, A_NORMAL);
 
     (void)wmove(debugwin,0, 0);
 
@@ -1083,7 +1086,7 @@ int main (int argc, char **argv)
     for (;;) {
 	(void)wmove(cmdwin, 0,0);
 	(void)wprintw(cmdwin, "cmd> ");
-	wclrtoeol(cmdwin);
+	(void)wclrtoeol(cmdwin);
 	(void)refresh();
 	(void)wrefresh(mid2win);
 	(void)wrefresh(mid4win);
@@ -1105,11 +1108,11 @@ int main (int argc, char **argv)
 	if (FD_ISSET(0,&select_set)) {
 	    (void)wmove(cmdwin, 0,5);
 	    (void)wrefresh(cmdwin);
-	    echo();
-	    wgetnstr(cmdwin, line, 80);
-	    noecho();
-	    //move(0,0);
-	    //clrtoeol();
+	    (void)echo();
+	    (void)wgetnstr(cmdwin, line, 80);
+	    (void)noecho();
+	    //(void)move(0,0);
+	    //(void)clrtoeol();
 	    //(void)refresh();
 	    (void)wrefresh(mid2win);
 	    (void)wrefresh(mid4win);
@@ -1139,7 +1142,7 @@ int main (int argc, char **argv)
 	    switch (line[0])
 	    {
 	    case 'a':		/* toggle 50bps subframe data */
-		memset(buf, '\0', sizeof(buf));
+		(void)memset(buf, '\0', sizeof(buf));
 		putb(0, 0x80);
 		putb(23, 12);
 		putb(24, subframe_enabled ? 0x00 : 0x10);
@@ -1232,7 +1235,7 @@ int main (int argc, char **argv)
 		len = 0;
 		while (*p != '\0')
 		{
-		    sscanf(p,"%x",&v);
+		    (void)sscanf(p,"%x",&v);
 		    putb(len,v);
 		    len++;
 		    while (*p != '\0' && !isspace(*p))
@@ -1252,7 +1255,7 @@ int main (int argc, char **argv)
     }
 
  quit:
-    endwin();
+    (void)endwin();
     exit(0);
 }
 

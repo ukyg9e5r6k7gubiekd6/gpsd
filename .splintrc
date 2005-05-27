@@ -1,5 +1,7 @@
 -I. 
 +posixlib 
++charindex
+-booltype bool
 -Dfd_set=int 
 -Dpthread_t=int 
 -Dsocklen_t=ssize_t

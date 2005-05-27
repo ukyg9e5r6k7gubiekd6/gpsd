@@ -129,15 +129,15 @@ static void sirf_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 }
 
-static int sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
+static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
     if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
-	return 0;
-    return 1;
+	return false;
+    return true;
 }
 
-static int sirf_speed(struct gps_device_t *session, unsigned int speed)
+static bool sirf_speed(struct gps_device_t *session, unsigned int speed)
 /* change the baud rate, remaining in SiRF NMWA mode */
 {
     return sirf_switcher(session, 1, speed);

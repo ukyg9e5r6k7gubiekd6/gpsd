@@ -64,7 +64,7 @@ sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 libgps_la_LDFLAGS = -version-number 13:0:0
 lib_LTLIBRARIES = libgps.la
 
-libgps_la_SOURCES = \
+libgps_c_sources = \
 	netlib.c \
 	nmea_parse.c \
 	serial.c \
@@ -80,10 +80,10 @@ libgps_la_SOURCES = \
 	geoid.c \
 	sirf.c \
 	report.c \
-	libgpsmm.cpp \
 	gpsutils.h \
 	timebase.h
 
+libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
@@ -170,6 +170,12 @@ EXTRA_DIST = \
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
 
-# Run splint on all sources
+# Run splint on the daemon and its support libraries
 splint:
-	splint *.c
+	splint -fileextensions $(gpsd_SOURCES) $(libgps_c_sources) $(sirfmon_SOURCES) $(xgps_SOURCES) $(xgpsspeed_SOURCES)
+
+# When the splint message count is down to a reasonable number, use this:
+#-splint $(gpsd_SOURCES) $(libgps_c_sources)
+#-splint $(xgps_SOURCES)
+#-splint -fileextensions $(xgpsspeed_SOURCES)
+#-splint $(sirfmon_SOURCES)

@@ -187,7 +187,7 @@ int gpsd_activate(struct gps_device_t *session)
 
 static int is_input_waiting(int fd)
 {
-    int	count;
+    int	count = 0;
     if (fd < 0 || ioctl(fd, FIONREAD, &count) < 0)
 	return -1;
     return count;
