@@ -57,7 +57,7 @@
 
 #ifdef GARMIN_ENABLE
 
-#define GARMIN_LAYERID_TRANSPORT (unsigned int)  0
+#define GARMIN_LAYERID_TRANSPORT (unsigned char)  0
 #define GARMIN_LAYERID_APPL      (unsigned int) 20
 // Linux Garmin USB driver layer-id to use for some control mechanisms
 #define GARMIN_LAYERID_PRIVATE  0x01106E4B
@@ -210,7 +210,8 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    char buf[BUFSIZ] = "", *bufp = buf;
+    char buf[BUFSIZ] = "";
+    char *bufp = buf;
     int i = 0, j = 0;
     double track;
 
@@ -474,7 +475,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 // send a packet in GarminUSB format
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket ) 
 {
-	ssize_t theBytesToWrite = 12 + aPacket->mDataSize;
+	size_t theBytesToWrite = (size_t)(12 + aPacket->mDataSize);
 	ssize_t theBytesReturned = 0;
 
         gpsd_report(4, "SendPacket(), writing %d bytes\n", theBytesToWrite);
@@ -523,6 +524,7 @@ static int GetPacket (struct gps_device_t *session )
     // int x = 0; // for debug dump
 
     memset( session->GarminBuffer, 0, sizeof(Packet_t));
+    memset( &delay, 0, sizeof(delay));
     session->GarminBufferLen = 0;
 
     gpsd_report(4, "GetPacket()\n");
@@ -590,7 +592,7 @@ static int garmin_probe(struct gps_device_t *session)
 {
 
     Packet_t *thePacket = NULL;
-    char *buffer = NULL;
+    unsigned char *buffer = NULL;
     fd_set fds, rfds;
     struct timeval tv;
     int sel_ret = 0;
@@ -628,7 +630,7 @@ static int garmin_probe(struct gps_device_t *session)
             }
     }
     thePacket = (Packet_t*)session->GarminBuffer;
-    buffer = (char *)thePacket;
+    buffer = (unsigned char *)thePacket;
 
     // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
@@ -656,6 +658,7 @@ static int garmin_probe(struct gps_device_t *session)
     // Wait, nicely, until the device returns the Version info
     // Toss any other packets, up to 4
     ok = 0;
+    memset( &tv,0,sizeof(tv));
     for( i = 0 ; i < 4 ; i++ ) {
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
 
@@ -676,7 +679,7 @@ static int garmin_probe(struct gps_device_t *session)
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
 
-	    if( ( 75 == thePacket->mPacketType)
+	    if( ( (unsigned char)75 == thePacket->mPacketType)
 	        && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
                 ok = 1;
 	        break;
@@ -771,7 +774,7 @@ static int garmin_probe(struct gps_device_t *session)
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
 
-	    if( (GARMIN_LAYERID_APPL == thePacket->mPacketType)
+	    if( (GARMIN_LAYERID_APPL == (unsigned int)thePacket->mPacketType)
 	        && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
     		ok = 1;
 	        break;
@@ -802,7 +805,7 @@ static int garmin_probe(struct gps_device_t *session)
 static void garmin_init(struct gps_device_t *session)
 {
 	Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
-	char *buffer = (char *)thePacket;
+	unsigned char *buffer = (unsigned char *)thePacket;
 	int ret;
 
 	gpsd_report(5, "to garmin_probe()\n");
