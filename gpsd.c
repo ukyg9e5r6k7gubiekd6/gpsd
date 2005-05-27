@@ -329,7 +329,7 @@ static /*@null@*/ struct gps_device_t **find_device(char *device_name)
     struct gps_device_t **chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (*chp && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
+	if (*chp!=NULL && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
 }
@@ -337,19 +337,17 @@ static /*@null@*/ struct gps_device_t **find_device(char *device_name)
 static /*@null@*/ struct gps_device_t *open_device(char *device_name, int nowait)
 /* open and initialize a new channel block */
 {
-    struct gps_device_t **chp, *device = gpsd_init(&context, device_name);
+    struct gps_device_t **chp;
 
-    for (chp = channels; chp < channels + MAXDEVICES; chp++) {
-	if (!*chp) {
-	    *chp = device;
+    for (chp = channels; chp < channels + MAXDEVICES; chp++)
+	if (!*chp)
 	    goto found;
-	}
-    }
     return NULL;
 found:
-    device->gpsdata.raw_hook = raw_hook;
+    *chp = gpsd_init(&context, device_name);
+    (*chp)->gpsdata.raw_hook = raw_hook;
     if (nowait != 0) {
-	if (gpsd_activate(device) < 0) {
+	if (gpsd_activate(*chp) < 0) {
 	    return NULL;
 	}
 	FD_SET(device->gpsdata.gps_fd, &all_fds);
@@ -681,19 +679,19 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device)!=0 && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->device->gpsdata.fix.track);
 	    else
 		(void)strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.mode == MODE_3D)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device)!=0 && whoami->device->gpsdata.fix.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", whoami->device->gpsdata.fix.climb);
 	    else
 		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami)!=0 && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami)!=0 && have_fix(whoami->device)!=0 && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed / KNOTS_TO_KPH);
 	    else
 		(void)strcpy(phrase, ",V=?");
@@ -891,6 +889,7 @@ int main(int argc, char *argv[])
     int i, option, msock, cfd, dfd, go_background = 1;
     struct passwd *pw;
     struct stat stb;
+    struct timeval tv;
     extern char *optarg;
 
     debuglevel = 0;
@@ -1058,8 +1057,6 @@ int main(int argc, char *argv[])
     }
 
     for (;;) {
-	struct timeval tv;
-
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 	if (device && device->dsock > -1)
 	    FD_CLR(device->dsock, &rfds);
