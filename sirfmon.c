@@ -718,7 +718,7 @@ static int readbyte(void)
     /*@ -type -shiftnegative -compdef -nullpass @*/
     static int cnt = 0,pos = 0;
     static unsigned char inbuf[BUFLEN];
-    struct timeval timeval = {0, 500000};
+    struct timeval timeval;
 
     if (pos >= cnt) {
 	fd_set select_set;
@@ -727,6 +727,8 @@ static int readbyte(void)
 	FD_SET(devicefd,&select_set);
 	if (controlfd < -1)
 	    FD_SET(controlfd,&select_set);
+	timeval.tv_sec = 0;
+	timeval.tv_usec = 500000;
 	if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
 	    return EOF;
 

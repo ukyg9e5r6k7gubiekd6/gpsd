@@ -106,7 +106,8 @@ void gpsd_deactivate(struct gps_device_t *session)
 static void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    int state,cycle,duration;
+    int cycle,duration;
+    bool state;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
@@ -321,7 +322,7 @@ int gpsd_poll(struct gps_device_t *session)
 	int packet_length;
 	session->gpsdata.online = timestamp();
 
-	if (!session->inbuflen || session->packet_full) {
+	if (session->inbuflen==0 || session->packet_full!=0) {
 	    session->gpsdata.d_xmit_time = timestamp();
 	    session->packet_full = 0;
 	}

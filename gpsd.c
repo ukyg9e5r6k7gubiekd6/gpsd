@@ -530,11 +530,11 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
-		if (channels[i])
+		if (channels[i] != NULL)
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (channels[i] && strlen(phrase)+strlen(channels[i]->gpsdata.gps_device)+1 < sizeof(phrase)) {
+		if (channels[i] != NULL && strlen(phrase)+strlen(channels[i]->gpsdata.gps_device)+1 < sizeof(phrase)) {
 		    (void)strcat(phrase, channels[i]->gpsdata.gps_device);
 		    (void)strcat(phrase, " ");
 		}
@@ -1105,7 +1105,7 @@ int main(int argc, char *argv[])
 		int opts = fcntl(ssock, F_GETFL);
 
 		if (opts >= 0)
-		    fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
+		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		/*@i@*/FD_SET(ssock, &all_fds);
 		subscribers[ssock].active = 1;

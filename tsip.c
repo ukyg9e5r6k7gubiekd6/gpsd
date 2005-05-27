@@ -259,7 +259,9 @@ static int tsip_analyze(struct gps_device_t *session)
 	f4 = getf(12);			/* clock bias rate */
 	f5 = getf(16);			/* time-of-fix */
 	session->gpsdata.fix.climb = f1;
+	/*@ -evalorder @*/
 	session->gpsdata.fix.speed = sqrt(pow(f2,2) + pow(f1,2));
+	/*@ +evalorder @*/
 	if ((session->gpsdata.fix.track = atan2(f1,f2) * RAD_2_DEG) < 0)
 	    session->gpsdata.fix.track += 360.0;
 	gpsd_report(4, "GPS Velocity ENU %f %f %f %f %f\n",f1,f2,f3,f4,f5);

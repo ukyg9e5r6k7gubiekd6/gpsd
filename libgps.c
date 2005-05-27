@@ -99,7 +99,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 
     if ((gpsdata->gps_fd = netlib_connectsock(host, port, "tcp")) < 0) {
 	errno = gpsdata->gps_fd;
-	free(gpsdata);
+	(void)free(gpsdata);
 	return NULL;
     }
 
@@ -113,21 +113,21 @@ int gps_close(struct gps_data_t *gpsdata)
 {
     int retval = close(gpsdata->gps_fd);
     if (gpsdata->gps_id)
-	free(gpsdata->gps_id);
+	(void)free(gpsdata->gps_id);
 	gpsdata->gps_id = NULL;
     if (gpsdata->gps_device) {
-	free(gpsdata->gps_device);
+	(void)free(gpsdata->gps_device);
 	gpsdata->gps_device = NULL;
     }
     if (gpsdata->devicelist) {
 	int i;
 	for (i = 0; i < gpsdata->ndevices; i++)
-	    free(gpsdata->devicelist[i]);
-	free(gpsdata->devicelist);
+	    (void)free(gpsdata->devicelist[i]);
+	(void)free(gpsdata->devicelist);
 	gpsdata->devicelist = NULL;
 	gpsdata->ndevices = -1;
     }    
-    free(gpsdata);
+    (void)free(gpsdata);
     return retval;
 }
 
@@ -214,8 +214,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'K':
 		    if (gpsdata->devicelist) {
 			for (i = 0; i < gpsdata->ndevices; i++)
-			    free(gpsdata->devicelist[i]);
-			free(gpsdata->devicelist);
+			    (void)free(gpsdata->devicelist[i]);
+			(void)free(gpsdata->devicelist);
 			gpsdata->devicelist = NULL;
 			gpsdata->ndevices = -1;
 			gpsdata->set |= DEVICELIST_SET;
@@ -287,7 +287,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->set |= CLIMBERR_SET;
 
 			    gpsdata->fix = nf;
-			    strcpy(gpsdata->tag, tag);
+			    (void)strcpy(gpsdata->tag, tag);
 			    gpsdata->set = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			}
 		    }
@@ -371,7 +371,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 			(void)sscanf(sp, "Y=%20s %20s %d ", 
 			       tag, timestamp, &gpsdata->satellites);
-			strncpy(gpsdata->tag, tag, MAXTAGLEN);
+			(void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			if (timestamp[0] != '?') {
 			    gpsdata->sentence_time = atof(timestamp);
 			    gpsdata->set |= TIME_SET;
@@ -511,7 +511,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
     res = pthread_cancel(*handler);	/* we cancel the whole thread */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
-	gps_query(gpsdata,"w-\n");	/* disable watcher mode */
+	(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
     return res;
 }
 

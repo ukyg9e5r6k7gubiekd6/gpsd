@@ -24,7 +24,7 @@ static int nmea_parse_input(struct gps_device_t *session)
     } else if (session->packet_type == NMEA_PACKET) {
 	int st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
-	if ((st = nmea_parse(session->outbuffer, &session->gpsdata))==0) {
+	if ((st=nmea_parse((char *)session->outbuffer,&session->gpsdata))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
 
@@ -32,7 +32,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
-		if (trigger!=NULL && strncmp(session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
+		if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(1, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->typename);
 		    return 1;
@@ -48,7 +48,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 #endif /* NTPSHM_ENABLE */
 
 	/* also copy the sentence up to clients in raw mode */
-	gpsd_raw_hook(session,session->outbuffer,strlen(session->outbuffer), 1);
+	gpsd_raw_hook(session,(char *)session->outbuffer,strlen((char *)session->outbuffer), 1);
 	return st;
     } else
 	return 0;
@@ -148,7 +148,7 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 1) {
 	(void)gpsd_switch_driver(session, "SiRF-II binary");
-	session->gpsdata.driver_mode = sirf_switcher(session, 0, session->gpsdata.baudrate);
+	session->gpsdata.driver_mode = (unsigned int)sirf_switcher(session, 0, session->gpsdata.baudrate);
     } else
 	session->gpsdata.driver_mode = 0;
 }
@@ -240,6 +240,7 @@ static void earthmate_initializer(struct gps_device_t *session)
     if (zodiac_binary.initializer) zodiac_binary.initializer(session);
 }
 
+/*@ -redef @*/
 static struct gps_type_t earthmate = {
     "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
     "EARTHA",			/* tells us to switch to Earthmate */
@@ -253,10 +254,12 @@ static struct gps_type_t earthmate = {
     NULL,			/* no wrapup code */
     1,				/* updates every second */
 };
+/*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
 
 extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
 
+/*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
     &nmea, 
@@ -284,4 +287,5 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #endif /* TSIP_ENABLE */
     NULL,
 };
+/*@ +nullassign @*/
 struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];

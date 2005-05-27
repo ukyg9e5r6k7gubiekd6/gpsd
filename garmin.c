@@ -367,7 +367,7 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, pvt->leap_sec
 			, pvt->grmn_days);
 
-	    gpsd_binary_fix_dump(session, bufp, sizeof(buf)-strlen(buf));
+	    gpsd_binary_fix_dump(session, bufp,(int)(sizeof(buf)-strlen(buf)));
 	    bufp += strlen(bufp);
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
 	    break;
@@ -414,11 +414,11 @@ static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    bufp += strlen(bufp);
 	    // dump NMEA GPGSA, PGRME
 	    gpsd_binary_quality_dump(session, 
-				     bufp, sizeof(buf)-strlen(buf)); 
+				     bufp, (int)(sizeof(buf)-strlen(buf))); 
 	    bufp += strlen(bufp);
 	    // dump NMEA GPGSV
 	    gpsd_binary_satellite_dump(session, 
-				       bufp, sizeof(buf)-strlen(buf)); 
+				       bufp, (int)(sizeof(buf)-strlen(buf))); 
 	    bufp += strlen(bufp);
 	    break;
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
