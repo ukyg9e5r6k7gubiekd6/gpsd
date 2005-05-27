@@ -217,7 +217,7 @@ static int filesock(char *filename)
 	gpsd_report(0, "Can't create device-control socket\n");
 	return -1;
     }
-    strcpy(addr.sun_path, filename);
+    (void)strcpy(addr.sun_path, filename);
     addr.sun_family = AF_UNIX;
     bind(s, (struct sockaddr *) &addr, strlen(addr.sun_path) +
 	 sizeof (addr.sun_family));
@@ -268,7 +268,9 @@ static int throttled_write(int cfd, char *buf, int len)
 	    char *cp, buf2[MAX_PACKET_LENGTH*3];
 	    buf2[0] = '\0';
 	    for (cp = buf; cp < buf + len; cp++)
-		(void)sprintf(buf2 + strlen(buf2), "%02x", *cp & 0xff);
+		(void)snprintf(buf2 + strlen(buf2), 
+			       sizeof(buf2)-strlen(buf2),
+			      "%02x", (unsigned int)(*cp & 0xff));
 	    gpsd_report(3, "=> client(%d): =%s\r\n", cfd, buf2);
 	}
     }
@@ -298,7 +300,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	if (subscribers[cfd].watcher && subscribers[cfd].device == device)
-	    throttled_write(cfd, buf, strlen(buf));
+	    (void)throttled_write(cfd, buf, strlen(buf));
 }
 
 static void raw_hook(struct gps_data_t *ud UNUSED, 
@@ -309,8 +311,8 @@ static void raw_hook(struct gps_data_t *ud UNUSED,
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (subscribers[cfd].raw == level && !strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device)))
-	    throttled_write(cfd, sentence, len);
+	if (subscribers[cfd].raw == level && strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device))==0)
+	    (void)throttled_write(cfd, sentence, len);
     }
 }
 
@@ -320,7 +322,7 @@ static struct gps_device_t **find_device(char *device_name)
     struct gps_device_t **chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (*chp && !strcmp((*chp)->gpsdata.gps_device, device_name))
+	if (*chp && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
 }

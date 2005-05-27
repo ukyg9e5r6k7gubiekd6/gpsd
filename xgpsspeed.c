@@ -13,8 +13,9 @@
 #include <Tachometer.h>
 
 #include "config.h"
-#include "xgpsspeed.icon"
 #include "gps.h"
+
+#include "xgpsspeed.icon"
 
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
@@ -32,13 +33,16 @@ static Widget toplevel;
 static void update_display(struct gps_data_t *gpsdata, 
 			   char *buf UNUSED, int len UNUSED, int level UNUSED)
 {
-    TachometerSetValue(tacho, rint(gpsdata->fix.speed * speedfactor));
+    TachometerSetValue(tacho, (int)rint(gpsdata->fix.speed * speedfactor));
 }
 
 static void handle_input(XtPointer client_data UNUSED,
 			 int *source UNUSED, XtInputId * id UNUSED)
 {
-    gps_poll(gpsdata);
+    if (gps_poll(gpsdata) < 0) {
+	fprintf(stderr, "Read error on server socket.");
+	exit(1);
+    }
 }
 
 static char *get_resource(char *name, char *default_value)
@@ -53,7 +57,7 @@ static char *get_resource(char *name, char *default_value)
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
-  XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
+  (void)XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
   if (value) return value;
   return default_value;
 }
@@ -110,29 +114,29 @@ int main(int argc, char **argv)
     }
 
    /**** Shell Widget ****/
-    XtSetArg(args[0], XtNiconPixmap,
+    (void)XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
 				   XtScreen(toplevel)->root, (char*)xgps_bits,
 				   xgps_width, xgps_height));
-    XtSetValues(toplevel, args, 1);
+    (void)XtSetValues(toplevel, args, 1);
     
     /**** Form widget ****/
     base = XtCreateManagedWidget("pane", panedWidgetClass, toplevel, NULL, 0);
 
     /**** Label widget (Title) ****/
-    XtSetArg(args[0], XtNlabel, "GPS Speedometer");
-    XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
+    (void)XtSetArg(args[0], XtNlabel, "GPS Speedometer");
+    (void)XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
     if (speedfactor == KNOTS_TO_MPH)
-        XtSetArg(args[0], XtNlabel, "Miles per Hour");
+        (void)XtSetArg(args[0], XtNlabel, "Miles per Hour");
     else
-        XtSetArg(args[0], XtNlabel, "Km per Hour");
-    XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
+        (void)XtSetArg(args[0], XtNlabel, "Km per Hour");
+    (void)XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
     tacho = XtCreateManagedWidget("meter", tachometerWidgetClass,base,NULL,0);
-    XtRealizeWidget(toplevel);
+    (void)XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
 	fputs("xgpsspeed: no gpsd running or network error\n", stderr);
@@ -147,14 +151,14 @@ int main(int argc, char **argv)
     if (device) {
 	char *channelcmd = (char *)malloc(strlen(device)+3);
 
-	strcpy(channelcmd, "F=");
-	strcpy(channelcmd+2, device);
-	gps_query(gpsdata, channelcmd);
+	(void)strcpy(channelcmd, "F=");
+	(void)strcpy(channelcmd+2, device);
+	(void)gps_query(gpsdata, channelcmd);
     }
 	
-    gps_query(gpsdata, "w+x\n");
+    (void)gps_query(gpsdata, "w+x\n");
 
-    XtAppMainLoop(app);
+    (void)XtAppMainLoop(app);
 
     gps_close(gpsdata);
     return 0;

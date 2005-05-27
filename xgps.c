@@ -450,10 +450,10 @@ altunits_ok:;
 
 	(void)strcpy(channelcmd, "F=");
 	(void)strcpy(channelcmd+2, device);
-	gps_query(gpsdata, channelcmd);
+	(void)gps_query(gpsdata, channelcmd);
     }
 	
-    gps_query(gpsdata, "w+x\n");
+    (void)gps_query(gpsdata, "w+x\n");
 
     (void)XtAppAddInput(app, gpsdata->gps_fd, 
 		  (XtPointer)XtInputReadMask, handle_input, NULL);

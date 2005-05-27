@@ -86,7 +86,7 @@ static char *sbasvec[] =
 };
 
 #define getb(off)	(buf[off])
-#define getw(off)	((short)((getb(off) << 8) | getb(off+1)))
+#define getw(off)	(((getb(off) << 8) | getb(off+1)))
 #define getl(off)	((int)((getw(off) << 16) | (getw(off+2) & 0xffff)))
 
 #define putb(off,b)	{ buf[4+off] = (unsigned char)(b); }
@@ -228,7 +228,7 @@ static void decode_sirf(unsigned char buf[], int len)
 		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
 	decode_ecef((double)getl(1),(double)getl(5),(double)getl(9),
 		(double)getw(13)/8,(double)getw(15)/8,(double)getw(17)/8);
-	decode_time(getw(22),getl(24));
+	decode_time((int)getw(22),getl(24));
 	/* line 4 */
 	(void)wmove(mid2win, 4,49);
 	(void)wprintw(mid2win, "%4.1f",(double)getb(20)/5);	/* HDOP */
@@ -237,11 +237,11 @@ static void decode_sirf(unsigned char buf[], int len)
 	(void)wmove(mid2win, 4,72);
 	(void)wprintw(mid2win, "%02x",getb(21));		/* Mode 2 */
 	(void)wmove(mid2win, 5,7);
-	nfix = getb(28);
+	nfix = (int)getb(28);
 	(void)wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
 	for (i = 0; i < MAXCHANNELS; i++) {	/* SV list */
 	    if (i < nfix)
-		(void)wprintw(mid2win, "%3d",fix[i] = getb(29+i));
+		(void)wprintw(mid2win, "%3d",fix[i] = (int)getb(29+i));
 	    else
 		(void)wprintw(mid2win, "   ");
 	}
@@ -249,20 +249,20 @@ static void decode_sirf(unsigned char buf[], int len)
 	break;
 
     case 0x04:		/* Measured Tracking Data */
-	decode_time(getw(1),getl(3));
-	ch = getb(7);
+	decode_time((int)getw(1),getl(3));
+	ch = (int)getb(7);
 	for (i = 0; i < ch; i++) {
 	    int sv,st;
 	    
 	    off = 8 + 15 * i;
 	    (void)wmove(mid4win, i+2, 3);
-	    sv = getb(off);
+	    sv = (int)getb(off);
 	    (void)wprintw(mid4win, " %3d",sv);
 
-	    (void)wprintw(mid4win, " %3d%3d %04x",(getb(off+1)*3)/2,getb(off+2)/2,getw(off+3));
+	    (void)wprintw(mid4win, " %3d%3d %04x",((int)getb(off+1)*3)/2,(int)getb(off+2)/2,(int)getw(off+3));
 
 	    st = ' ';
-	    if (getw(off+3) == 0xbf)
+	    if ((int)getw(off+3) == 0xbf)
 		st = 'T';
 	    for (j = 0; j < nfix; j++)
 		if (sv == fix[j]) {
@@ -273,7 +273,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    cn = 0;
 
 	    for (j = 0; j < 10; j++)
-		cn += getb(off+5+j);
+		cn += (int)getb(off+5+j);
 
 	    (void)wprintw(mid4win, "%5.1f %c",(double)cn/10,st);
 
@@ -295,7 +295,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	    printw("%5.1f",(double)cn/10);
 
-	    printw("%9d%3d%5d",getl(off+8),getw(off+12),getw(off+14));
+	    printw("%9d%3d%5d",getl(off+8),(int)getw(off+12),(int)getw(off+14));
 	    printw("%8.5f %10.5f",
 	    	(double)getl(off+16)/65536,(double)getl(off+20)/1024);
 	}
@@ -309,7 +309,7 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x07:		/* Response - Clock Status Data */
-	decode_time(getw(1),getl(3));
+	decode_time((int)getw(1),getl(3));
 	display(mid7win, 1, 5,  "%2d", getb(7));	/* SVs */
 	display(mid7win, 1, 16, "%lu", getl(8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getl(12));	/* Clock Bias */
@@ -318,7 +318,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	break;
 
     case 0x08:		/* 50 BPS data */
-	ch = getb(1);
+	ch = (int)getb(1);
 	display(mid4win, ch, 27, "Y");
 	(void)wprintw(debugwin, "50B 0x08=");
 	subframe_enabled = 1;
@@ -328,7 +328,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid9win, 1, 6,  "%.3f",(double)getw(1)/186);	/*SegStatMax*/
 	display(mid9win, 1, 18, "%.3f",(double)getw(3)/186);	/*SegStatLat*/
 	display(mid9win, 1, 31, "%.3f",(double)getw(5)/186);	/*SegStatTime*/
-	display(mid9win, 1, 42, "%3d",getw(7));	/* Last Millisecond */
+	display(mid9win, 1, 42, "%3d",(int)getw(7));	/* Last Millisecond */
 	(void)wprintw(debugwin, "THR 0x09=");
     	break;
 
@@ -344,7 +344,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid13win, 1, 6, "%d",getb(1));
 	(void)wmove(mid13win, 1, 10);
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    if (i < getb(1))
+	    if (i < (int)getb(1))
 		(void)wprintw(mid13win, " %2d",getb(2 + 5 * i));
 	    else
 		(void)wprintw(mid13win, "   ");
@@ -355,35 +355,37 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x13:
+#define YESNO(n)	(((int)getb(n) != 0)?'Y':'N')
 	display(mid19win, 1, 20, "%d", getb(5));	/* Alt. hold mode */
 	display(mid19win, 2, 20, "%d", getb(6));	/* Alt. hold source*/
-	display(mid19win, 3, 20, "%dm", getw(7));	/* Alt. source input */
+	display(mid19win, 3, 20, "%dm", (int)getw(7));	/* Alt. source input */
 	display(mid19win, 4, 20, "%d", getb(9));	/* Degraded mode*/
 	display(mid19win, 5, 20, "%dsec", getb(10));	/* Degraded timeout*/
 	display(mid19win, 6, 20, "%dsec",getb(11));	/* DR timeout*/
-	display(mid19win, 7, 20, "%c", getb(12)?'Y':'N');/* Track smooth mode*/
-	display(mid19win, 8, 20, "%c", getb(13)?'Y':'N'); /* Static Nav.*/
+	display(mid19win, 7, 20, "%c", YESNO(12));/* Track smooth mode*/
+	display(mid19win, 8, 20, "%c", YESNO(13)); /* Static Nav.*/
 	display(mid19win, 9, 20, "0x%x", getb(14));	/* 3SV Least Squares*/
 	display(mid19win, 10,20, "0x%x", getb(19));	/* DOP Mask mode*/
-	display(mid19win, 11,20, "0x%x", getw(20));	/* Nav. Elev. mask*/
+	display(mid19win, 11,20, "0x%x", (int)getw(20));	/* Nav. Elev. mask*/
 	display(mid19win, 12,20, "0x%x", getb(22));	/* Nav. Power mask*/
 	display(mid19win, 13,20, "0x%x", getb(27));	/* DGPS Source*/
 	display(mid19win, 14,20, "0x%x", getb(28));	/* DGPS Mode*/
 	display(mid19win, 15,20, "%dsec",getb(29));	/* DGPS Timeout*/
-	display(mid19win, 1, 42, "%c", getb(34)?'Y':'N');/* LP Push-to-Fix */
+	display(mid19win, 1, 42, "%c", YESNO(34));/* LP Push-to-Fix */
 	display(mid19win, 2, 42, "%dms", getl(35));	/* LP On Time */
 	display(mid19win, 3, 42, "%d", getl(39));	/* LP Interval */
-	display(mid19win, 4, 42, "%c", getb(43)?'Y':'N');/* User Tasks enabled */
+	display(mid19win, 4, 42, "%c", YESNO(43));/* User Tasks enabled */
 	display(mid19win, 5, 42, "%d", getl(44));	/* User Task Interval */
-	display(mid19win, 6, 42, "%c", getb(48)?'Y':'N');/* LP Power Cycling Enabled */
+	display(mid19win, 6, 42, "%c", YESNO(48));/* LP Power Cycling Enabled */
 	display(mid19win, 7, 42, "%d", getl(49));/* LP Max Acq Search Time */
 	display(mid19win, 8, 42, "%d", getl(53));/* LP Max Off Time */
-	display(mid19win, 9, 42, "%c", getb(57)?'Y':'N');/* APM Enabled */
-	display(mid19win,10, 42, "%d", getw(58));/* # of fixes */
-	display(mid19win,11, 42, "%d", getw(60));/* Time Between fixes */
+	display(mid19win, 9, 42, "%c", YESNO(57));/* APM Enabled */
+	display(mid19win,10, 42, "%d", (int)getw(58));/* # of fixes */
+	display(mid19win,11, 42, "%d", (int)getw(60));/* Time Between fixes */
 	display(mid19win,12, 42, "%d", getb(62));/* H/V Error Max */
 	display(mid19win,13, 42, "%d", getb(63));/* Response Time Max */
 	display(mid19win,14, 42, "%d", getb(64));/* Time/Accu & Duty Cycle Priority */
+#undef YESNO
 	dispmode = !dispmode;
 	break;
 
@@ -428,9 +430,9 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
-	display(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[getb(1)]);
+	display(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[(int)getb(1)]);
 	for (i = j = 0; i < MAXCHANNELS; i++) {
-	    if (getb(16+2*i)) {
+	    if (getb(16+2*i) != 0) {
 		(void)wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
 		j++;
 	    }
@@ -474,7 +476,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	move(5,13);
 	printw("%04d-%02d-%02d %02d:%02d:%02d.%02d",
-		getw(26),getb(28),getb(29),getb(30),getb(31),
+		(int)getw(26),getb(28),getb(29),getb(30),getb(31),
 		(unsigned short)getw(32)/1000,
 		((unsigned short)getw(32)%1000)/10);
 	{
@@ -489,7 +491,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	    tm.tm_hour = getb(30);
 	    tm.tm_mday = getb(29);
 	    tm.tm_mon = getb(28) - 1;
-	    tm.tm_year = getw(26) - 1900;
+	    tm.tm_year = (int)getw(26) - 1900;
 
 	    gps.tv_sec = mkgmtime(&tm);
 	    gps.tv_usec = (((unsigned short)getw(32)%1000)/10) * 10000;
@@ -517,11 +519,11 @@ static void decode_sirf(unsigned char buf[], int len)
 	buf[len] = '\0';
 	j = 1;
 	for (i = 0; verbpat[i] != NULL; i++)
-	    if (!strncmp(buf+1,verbpat[i],strlen(verbpat[i]))) {
+	    if (strncmp(buf+1,verbpat[i],strlen(verbpat[i])) == 0) {
 		j = 0;
 		break;
 	    }
-	if (j)
+	if (j != 0)
 	    (void)wprintw(debugwin, "%s\n",buf+1);
 	(void)wprintw(debugwin, "DD  0xff=");
 	break;
@@ -545,7 +547,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 static int get_speed(struct termios* ttyctl)
 {
-    int code = cfgetospeed(ttyctl);
+    speed_t code = cfgetospeed(ttyctl);
     switch (code) {
     case B0:     return(0);
     case B300:   return(300);
@@ -566,27 +568,27 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     int st;
     unsigned char	c;
 
-    tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
+    (void)tcflush(devicefd, TCIOFLUSH);	/* toss stale data */
 
-    if (speed) {
+    if (speed != 0) {
 	if (speed < 300)
 	    rate = 0;
 	else if (speed < 1200)
-	  rate =  B300;
+	    rate =  B300;
 	else if (speed < 2400)
-	  rate =  B1200;
+	    rate =  B1200;
 	else if (speed < 4800)
-	  rate =  B2400;
+	    rate =  B2400;
 	else if (speed < 9600)
-	  rate =  B4800;
+	    rate =  B4800;
 	else if (speed < 19200)
-	  rate =  B9600;
+	    rate =  B9600;
 	else if (speed < 38400)
-	  rate =  B19200;
+	    rate =  B19200;
 	else if (speed < 57600)
-	  rate =  B38400;
+	    rate =  B38400;
 	else
-	  rate =  B57600;
+	    rate =  B57600;
 
 	/*@ ignore @*/
 	(void)cfsetispeed(&ttyset, (speed_t)rate);
@@ -597,7 +599,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
     if (tcsetattr(devicefd, TCSANOW, &ttyset) != 0)
 	return NO_PACKET;
-    tcflush(devicefd, TCIOFLUSH);
+    (void)tcflush(devicefd, TCIOFLUSH);
 
     fprintf(stderr, "Hunting at speed %d, %dN%d\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
@@ -605,7 +607,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
     /* sniff for NMEA or SiRF packet */
     state = 0;
     for (count = 0; count < SNIFF_RETRIES; count++) {
-	if ((st = read(devicefd, &c, 1)) < 0)
+	if ((st = (int)read(devicefd, &c, 1)) < 0)
 	    return 0;
 	else
 	    count += st;
@@ -717,7 +719,7 @@ static int readbyte(void)
 	if (!FD_ISSET(devicefd,&select_set))
 	    return EOF;
 
-	usleep(100000);
+	(void)usleep(100000);
 
 	if ((cnt = read(devicefd,inbuf,BUFLEN)) <= 0)
 	    return EOF;
@@ -1076,7 +1078,7 @@ int main (int argc, char **argv)
     /* probe for version */
     putb(0, 0x84);
     putb(1, 0x0);
-    sendpkt(buf, 2, device);
+    (void)sendpkt(buf, 2, device);
 
     for (;;) {
 	(void)wmove(cmdwin, 0,0);
@@ -1141,7 +1143,7 @@ int main (int argc, char **argv)
 		putb(0, 0x80);
 		putb(23, 12);
 		putb(24, subframe_enabled ? 0x00 : 0x10);
-		sendpkt(buf, 25, device);
+		(void)sendpkt(buf, 25, device);
 		break;
 
 	    case 'b':
@@ -1158,8 +1160,8 @@ int main (int argc, char **argv)
 		    putb(6, stopbits);	/* 1 stop bit */
 		    putb(7, 0);		/* no parity */
 		    putb(8, 0);		/* reserved */
-		    sendpkt(buf, 9, device);
-		    usleep(50000);
+		    (void)sendpkt(buf, 9, device);
+		    (void)usleep(50000);
 		    set_speed(bps = v, stopbits);
 		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
@@ -1172,7 +1174,7 @@ int main (int argc, char **argv)
 	    case 'c':				/* static navigation */
 		putb(0,0x8f);			/* id */
 		putb(1, atoi(line+1));
-		sendpkt(buf, 2, device);
+		(void)sendpkt(buf, 2, device);
 		break;
 
 	    case 'd':		/* MID 4 rate change -- not documented */
@@ -1187,7 +1189,7 @@ int main (int argc, char **argv)
 		putb(5, 0);
 		putb(6, 0);
 		putb(7, 0);
-		sendpkt(buf, 8, device);
+		(void)sendpkt(buf, 8, device);
 		break;
 
 	    case 'n':				/* switch to NMEA */
@@ -1214,13 +1216,13 @@ int main (int argc, char **argv)
 		putb(20,0x00);
 		putb(21,0x01);
 		putw(22,bps);
-		sendpkt(buf, 24, device);
+		(void)sendpkt(buf, 24, device);
 		goto quit;
 
 	    case 't':				/* poll navigation params */
 		putb(0,0x98);
 		putb(1,0x00);
-		sendpkt(buf, 2, device);
+		(void)sendpkt(buf, 2, device);
 		break;
 
 	    case 'q':
@@ -1239,7 +1241,7 @@ int main (int argc, char **argv)
 			p++;
 		}
 
-		sendpkt(buf, len, device);
+		(void)sendpkt(buf, len, device);
 		break;
 	    }
 	}

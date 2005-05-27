@@ -273,8 +273,8 @@ static int handle1003(struct gps_device_t *session)
 #endif
 	} else {
 	    session->gpsdata.PRN[i] = 0;
-	    session->gpsdata.azimuth[i] = 0.0;
-	    session->gpsdata.elevation[i] = 0.0;
+	    session->gpsdata.azimuth[i] = 0;
+	    session->gpsdata.elevation[i] = 0;
 	}
     }
     return SATELLITE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
