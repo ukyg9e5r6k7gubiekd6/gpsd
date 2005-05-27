@@ -469,7 +469,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %d %c %u", 
 		    (int)gpsd_get_speed(&whoami->device->ttyset),
 			9 - whoami->device->gpsdata.stopbits, 
-			whoami->device->gpsdata.parity,
+			(int)whoami->device->gpsdata.parity,
 			whoami->device->gpsdata.stopbits);
 	    else
 		(void)strcpy(phrase, ",B=?");
@@ -732,7 +732,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (assign_channel(whoami) && whoami->device->gpsdata.satellites > 0) {
 		int used, reported = 0;
 		(void)strcpy(phrase, ",Y=");
-		if (whoami->device->gpsdata.tag[0])
+		if (whoami->device->gpsdata.tag[0] != '\0')
 		    (void)strcat(phrase, whoami->device->gpsdata.tag);
 		else
 		    (void)strcat(phrase, "-");
@@ -777,17 +777,17 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",Z=?");
 		p++;		
 	    } else if (*p == '1' || *p == '+') {
-		whoami->device->gpsdata.profiling = true;
+		whoami->device->gpsdata.profiling = 1;
 		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		whoami->device->gpsdata.profiling = false;
+		whoami->device->gpsdata.profiling = 0;
 		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
 		p++;
 	    } else {
-		whoami->device->gpsdata.profiling = !whoami->device->gpsdata.profiling;
+		/*@i@*/whoami->device->gpsdata.profiling = !whoami->device->gpsdata.profiling;
 		gpsd_report(3, "%d toggled profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=%d", whoami->device->gpsdata.profiling);
 	    }
@@ -824,7 +824,7 @@ static int handle_request(int cfd, char *buf, int buflen)
  breakout:
     (void)strcat(reply, "\r\n");
 
-    return throttled_write(cfd, reply, strlen(reply));
+    return (int)throttled_write(cfd, reply, (ssize_t)strlen(reply));
 }
 
 static void handle_control(int sfd, char *buf)
@@ -990,7 +990,7 @@ int main(int argc, char *argv[])
 
 #ifdef NTPSHM_ENABLE
     (void)nice(-10);		/* for precise timekeeping increase priority */
-    (void)ntpshm_init(&context,nowait);
+    (void)ntpshm_init(&context, nowait);
 #endif /* NTPSHM_ENABLE */
 
     /* make default devices accessible even after we drop privileges */
@@ -1135,7 +1135,7 @@ int main(int argc, char *argv[])
 
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-	    if (FD_ISSET(cfd, &control_fds)) {
+	    if (/*@i@*/FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
 
 		while (read(cfd, buf, sizeof(buf)-1) > 0) {
@@ -1193,7 +1193,7 @@ int main(int argc, char *argv[])
 		    if (device->gpsdata.profiling && device->packet_full)
 			(void)strcat(cmds, "$");
 		    if (cmds[0])
-			handle_request(cfd, cmds, strlen(cmds));
+			(void)handle_request(cfd, cmds, strlen(cmds));
 		}
 	    }
 #if DBUS_ENABLE

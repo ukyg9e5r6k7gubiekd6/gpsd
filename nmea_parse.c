@@ -133,7 +133,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
-	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
 	}
 	mask = TIME_SET;
 	do_lat_lon(&field[3], out);
@@ -195,7 +195,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
 	mask = 0;
 	merge_hhmmss(field[5], out);
 	if (out->nmea_date.tm_year != 0) {
-	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask = TIME_SET;
 	}
 	do_lat_lon(&field[1], out);
@@ -240,7 +240,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 
 	merge_hhmmss(field[1], out);
 	if (out->nmea_date.tm_year != 0) {
-	    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
+	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask |= TIME_SET;
 	}
 	do_lat_lon(&field[2], out);
@@ -252,7 +252,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */
-	if (altitude[0] == 0.0) {
+	if (altitude[0] == '\0') {
 	    if (out->fix.mode == MODE_3D) {
 		out->fix.mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		mask |= MODE_SET;
@@ -433,7 +433,7 @@ static int processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
     out->nmea_date.tm_year = atoi(field[4]) - 1900;
     out->nmea_date.tm_mon = atoi(field[3]);
     out->nmea_date.tm_mday = atoi(field[2]);
-    out->fix.time = out->sentence_time = mkgmtime(&out->nmea_date) + out->subseconds;
+    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
     return TIME_SET;
 }
 
@@ -475,7 +475,7 @@ void nmea_add_checksum(char *sentence)
 	p++;
     }
     *p++ = '*';
-    (void)snprintf(p, 5, "%02X\r\n", sum);
+    (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
 }
 
 int nmea_parse(char *sentence, struct gps_data_t *outdata)
@@ -517,7 +517,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     *p = '\0';
     /* split sentence copy on commas, filling the field array */
     for (count = 0, p = buf; p != NULL && *p; ++count, p = strchr(p, ',')) {
-	*p = 0;
+	*p = '\0';
 	field[count] = ++p;
     }
     /* dispatch on field zero, the sentence tag */
@@ -525,7 +525,7 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	s = field[0];
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
-        if (!strcmp(nmea_phrase[i].name, s)) {
+        if (strcmp(nmea_phrase[i].name, s) == 0) {
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
 		strncpy(outdata->tag, nmea_phrase[i].name, MAXTAGLEN);

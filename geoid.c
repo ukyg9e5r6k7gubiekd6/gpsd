@@ -84,7 +84,8 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix,
 
     /* geodetic location */
     lambda = atan2(y,x);
-    p = sqrt(pow(x,2) + pow(y,2));
+    /*@ -evalorder @*/ 
+    p = sqrt(pow(x,2) + pow(y,2)); 
     theta = atan2(z*a,p*b);
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
     n = a / sqrt(1.0 - e2*pow(sin(phi),2));
@@ -99,6 +100,7 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix,
     fix->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
     fix->speed = sqrt(pow(vnorth,2) + pow(veast,2));
     heading = atan2(veast,vnorth);
+    /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * PI;
     fix->track = heading * RAD_2_DEG;

@@ -58,8 +58,8 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     char buf[BUFSIZ];
 
     h.sync = 0x81ff;
-    h.id = (short)type;
-    h.ndata = (short)(dlen - 1);
+    h.id = (unsigned short)type;
+    h.ndata = (unsigned short)(dlen - 1);
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 

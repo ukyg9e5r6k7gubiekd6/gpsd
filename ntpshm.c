@@ -63,9 +63,8 @@ static struct shmTime *getShmTime(int unit)
     }
 }
 
+int ntpshm_init(struct gps_context_t *context, bool enablepps)
 /* attach all NTP SHM segments.  called once at startup, while still root */
-
-int ntpshm_init(struct gps_context_t *context, int enablepps)
 {
     int i;
 
@@ -79,15 +78,14 @@ int ntpshm_init(struct gps_context_t *context, int enablepps)
     return 1;
 }
 
-/* allocate NTP SHM segment.  return its segment number, or -1 */
-
 int ntpshm_alloc(struct gps_context_t *context)
+/* allocate NTP SHM segment.  return its segment number, or -1 */
 {
     int i;
 
     for (i = 0; i < NTPSHMSEGS; i++)
 	if (context->shmTime[i] != NULL && !context->shmTimeInuse[i]) {
-	    context->shmTimeInuse[i]++;
+	    context->shmTimeInuse[i] = true;
 
 	    memset((void *)context->shmTime[i],0,sizeof(struct shmTime));
 	    context->shmTime[i]->mode = 1;
@@ -100,20 +98,20 @@ int ntpshm_alloc(struct gps_context_t *context)
     return -1;
 }
 
-/* free NTP SHM segment */
 
-int ntpshm_free(struct gps_context_t *context, int segment)
+bool ntpshm_free(struct gps_context_t *context, int segment)
+/* free NTP SHM segment */
 {
     if (segment < 0 || segment >= NTPSHMSEGS)
-	return 0;
+	return false;
 
-    context->shmTimeInuse[segment] = 0;
-    return 1;
+    context->shmTimeInuse[segment] = false;
+    return true;
 }
 
-/* put a received fix time into shared memory for NTP */
 
 int ntpshm_put(struct gps_device_t *session, double fixtime)
+/* put a received fix time into shared memory for NTP */
 {
     struct shmTime *shmTime;
     struct timeval tv;

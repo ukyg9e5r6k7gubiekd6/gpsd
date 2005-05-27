@@ -2,9 +2,12 @@
 +posixlib 
 +charindex
 +charintliteral
+-realcompare
 -exitarg
 -booltype bool
 -paramuse
+-predboolint
+-nestedextern
 
 -Dfd_set=int 
 -Dpthread_t=int 
@@ -19,3 +22,5 @@
 -DB115200=0010011
 -Dusleep=sleep
 -DEWOULDBLOCK=EAGAIN
+-DCRTSCTS=0x00020000
+-DONLCR=0x00000002

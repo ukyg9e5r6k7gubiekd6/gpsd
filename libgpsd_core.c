@@ -47,7 +47,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
     for (dp = gpsd_drivers; *dp; dp++)
-	if (!strcmp((*dp)->typename, typename)) {
+	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
 	    session->device_type = *dp;
 	    if (session->device_type->initializer)
@@ -224,17 +224,17 @@ static int handle_packet(struct gps_device_t *session)
 #ifdef BINARY_ENABLE
     if (session->gpsdata.set & LATLON_SET) {
 	if ((session->gpsdata.set & HERR_SET)==0 
-	    && (session->gpsdata.set & HDOP_SET)) {
+	    && (session->gpsdata.set & HDOP_SET)!=0) {
 	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
 	    session->gpsdata.set |= HERR_SET;
 	}
 	if ((session->gpsdata.set & VERR_SET)==0 
-	    && (session->gpsdata.set & VDOP_SET)) {
+	    && (session->gpsdata.set & VDOP_SET)!=0) {
 	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
 	    session->gpsdata.set |= VERR_SET;
 	}
 	if ((session->gpsdata.set & PERR_SET)==0
-	    && (session->gpsdata.set & PDOP_SET)) {
+	    && (session->gpsdata.set & PDOP_SET)!=0) {
 	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
 	    session->gpsdata.set |= PERR_SET;
 	}

@@ -184,7 +184,7 @@ static void FastFillCircle(
 	  points[angle].y = (short) (cos((double) angle * D2R) *
 				     (double) radius_y + (double) center_y);
      }
-     XFillPolygon(d, w, gc, points, 360, Complex, CoordModeOrigin);
+     (void)XFillPolygon(d, w, gc, points, 360, Complex, CoordModeOrigin);
 }
 
 static void DrawSingleNumber(TachometerWidget w, int which, Cardinal x, Cardinal y)
@@ -211,7 +211,7 @@ static void DrawSingleNumber(TachometerWidget w, int which, Cardinal x, Cardinal
 	       nsegments++;
 	  }
 
-     XDrawSegments(XtDisplay(w), XtWindow(w), 
+     (void)XDrawSegments(XtDisplay(w), XtWindow(w), 
 		   w->tachometer.scale_GC, segments, nsegments);
 }
 
@@ -279,7 +279,7 @@ static void DrawGauge(TachometerWidget w)
 	       points[2].y = cos((step - 1.0)*D2R) * radius_y*0.85 + center_y;
 	       points[3].x = sin((step + 1.0)*D2R) * radius_x*0.85 + center_x;
 	       points[3].y = cos((step + 1.0)*D2R) * radius_y*0.85 + center_y;
-	       XFillPolygon(XtDisplay(w), XtWindow(w), gc, points, 4,
+	       (void)XFillPolygon(XtDisplay(w), XtWindow(w), gc, points, 4,
 			    Complex, CoordModeOrigin);
 
 	       number_x = sin((step + 1.0)*D2R) * radius_x*0.65 + center_x;
@@ -293,7 +293,7 @@ static void DrawGauge(TachometerWidget w)
 	       in_gauge_y = cos(step * D2R) * radius_y * 0.8 + center_y;
 	       out_gauge_x = sin(step * D2R) * radius_x * 0.85 + center_x;
 	       out_gauge_y = cos(step * D2R) * radius_y * 0.85 + center_y;
-	       XDrawLine(XtDisplay(w), XtWindow(w), gc, in_gauge_x,
+	       (void)XDrawLine(XtDisplay(w), XtWindow(w), gc, in_gauge_x,
 			 in_gauge_y, out_gauge_x, out_gauge_y);
 	  }
      }
@@ -319,20 +319,20 @@ static void DrawNeedle(TachometerWidget w, int load)
      cur_theta4 = (330.0 - ((double) load * 3.0) + 7.0) * D2R;
      cur_theta5 = (330.0 - ((double) load * 3.0) - 7.0) * D2R;
 
-     points[0].x = sin(cur_theta1) * radius_x * 0.75 + center_x;
-     points[0].y = cos(cur_theta1) * radius_y * 0.75 + center_y;
-     points[1].x = sin(cur_theta2) * radius_x * 0.7 + center_x;
-     points[1].y = cos(cur_theta2) * radius_y * 0.7 + center_y;
-     points[2].x = sin(cur_theta4) * radius_x * 0.1 + center_x;
-     points[2].y = cos(cur_theta4) * radius_y * 0.1 + center_y;
-     points[3].x = sin(cur_theta5) * radius_x * 0.1 + center_x;
-     points[3].y = cos(cur_theta5) * radius_y * 0.1 + center_y;
-     points[4].x = sin(cur_theta3) * radius_x * 0.7 + center_x;
-     points[4].y = cos(cur_theta3) * radius_y * 0.7 + center_y;
+     points[0].x = (short)(sin(cur_theta1) * radius_x * 0.75 + center_x);
+     points[0].y = (short)(cos(cur_theta1) * radius_y * 0.75 + center_y);
+     points[1].x = (short)(sin(cur_theta2) * radius_x * 0.7 + center_x);
+     points[1].y = (short)(cos(cur_theta2) * radius_y * 0.7 + center_y);
+     points[2].x = (short)(sin(cur_theta4) * radius_x * 0.1 + center_x);
+     points[2].y = (short)(cos(cur_theta4) * radius_y * 0.1 + center_y);
+     points[3].x = (short)(sin(cur_theta5) * radius_x * 0.1 + center_x);
+     points[3].y = (short)(cos(cur_theta5) * radius_y * 0.1 + center_y);
+     points[4].x = (short)(sin(cur_theta3) * radius_x * 0.7 + center_x);
+     points[4].y = (short)(cos(cur_theta3) * radius_y * 0.7 + center_y);
      points[5].x = points[0].x;
      points[5].y = points[0].y;
 
-     XDrawLines(XtDisplay(w), XtWindow(w), 
+     (void)XDrawLines(XtDisplay(w), XtWindow(w), 
 		w->tachometer.needle_GC, points, 6, CoordModeOrigin);
 }
 
@@ -469,24 +469,24 @@ static void Redisplay(Widget w, XEvent *event, Region region UNUSED)
 
 static void Resize(Widget w)
 {
-     TachometerWidget ta = (TachometerWidget) w;
+    TachometerWidget ta = (TachometerWidget) w;
 
-     if ((ta->core.width == ta->tachometer.width) &&
-	 (ta->core.height == ta->tachometer.height))
-	  /* What resize?  We don't see a resize! */
-	  return;
+    if ((ta->core.width == ta->tachometer.width) &&
+	(ta->core.height == ta->tachometer.height))
+	/* What resize?  We don't see a resize! */
+	return;
 
-     XClearWindow(XtDisplay(w), XtWindow(w));
+    (void)XClearWindow(XtDisplay(w), XtWindow(w));
      
-     if ((ta->core.width <= ta->tachometer.width) &&
-	 (ta->core.height <= ta->tachometer.height))
-	  /* Only redraw here if no expose events are going to be */
-	  /* generated, i.e. if the window has not grown horizontally */
-	  /* or vertically. */
-	  DrawTachometer(ta);
+    if ((ta->core.width <= ta->tachometer.width) &&
+	(ta->core.height <= ta->tachometer.height))
+	/* Only redraw here if no expose events are going to be */
+	/* generated, i.e. if the window has not grown horizontally */
+	/* or vertically. */
+	DrawTachometer(ta);
 
-     ta->tachometer.width = ta->core.width;
-     ta->tachometer.height = ta->core.height;
+    ta->tachometer.width = ta->core.width;
+    ta->tachometer.height = ta->core.height;
 } /* Resize */
 
 static Boolean SetValues(Widget current, Widget request UNUSED, Widget new)
@@ -499,22 +499,22 @@ static Boolean SetValues(Widget current, Widget request UNUSED, Widget new)
 
      back = (curta->core.background_pixel != newta->core.background_pixel);
      if (back || (curta->tachometer.needle != newta->tachometer.needle)) {
-	 XtReleaseGC(new, newta->tachometer.needle_GC);
+	 (void)XtReleaseGC(new, newta->tachometer.needle_GC);
 	 GetneedleGC(newta);
 	 changed = True;
      }
      if (back || (curta->tachometer.scale != newta->tachometer.scale)) {
-	 XtReleaseGC(new, newta->tachometer.scale_GC);
+	 (void)XtReleaseGC(new, newta->tachometer.scale_GC);
 	 GetscaleGC(newta);
 	 changed = True;
      }
      if (back || (curta->tachometer.circle != newta->tachometer.circle)) {
-	 XtReleaseGC(new, newta->tachometer.circle_GC);
+	 (void)XtReleaseGC(new, newta->tachometer.circle_GC);
 	 GetcircleGC(newta);
 	 changed = True;
      }
      if (back) {
-	 XtReleaseGC(new, newta->tachometer.background_GC);
+	 (void)XtReleaseGC(new, newta->tachometer.background_GC);
 	 GetbackgroundGC(newta);
 	 changed = True;
      }
@@ -530,10 +530,10 @@ static void Destroy(Widget w)
 {
     TachometerWidget ta = (TachometerWidget) w;
      
-    XtReleaseGC( w, ta->tachometer.needle_GC );
-    XtReleaseGC( w, ta->tachometer.circle_GC );
-    XtReleaseGC( w, ta->tachometer.scale_GC );
-    XtReleaseGC( w, ta->tachometer.background_GC );
+    (void)XtReleaseGC( w, ta->tachometer.needle_GC );
+    (void)XtReleaseGC( w, ta->tachometer.circle_GC );
+    (void)XtReleaseGC( w, ta->tachometer.scale_GC );
+    (void)XtReleaseGC( w, ta->tachometer.background_GC );
 }
 
 /* Exported Procedures */

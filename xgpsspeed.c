@@ -17,6 +17,7 @@
 
 #include "xgpsspeed.icon"
 
+/*@ -nullassign @*/
 static XrmOptionDescRec options[] = {
 {"-rv",		"*reverseVideo",	XrmoptionNoArg,		"TRUE"},
 {"-nc",         "*needleColor",         XrmoptionSepArg,        NULL},
@@ -24,6 +25,7 @@ static XrmOptionDescRec options[] = {
 {"-speedunits", "*speedunits",          XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
+/*@ +nullassign @*/
 
 static struct gps_data_t *gpsdata;
 static Widget tacho;
@@ -33,7 +35,7 @@ static Widget toplevel;
 static void update_display(struct gps_data_t *gpsdata, 
 			   char *buf UNUSED, int len UNUSED, int level UNUSED)
 {
-    TachometerSetValue(tacho, (int)rint(gpsdata->fix.speed * speedfactor));
+    (void)TachometerSetValue(tacho, (int)rint(gpsdata->fix.speed*speedfactor));
 }
 
 static void handle_input(XtPointer client_data UNUSED,
@@ -53,7 +55,7 @@ static char *get_resource(char *name, char *default_value)
   xtr.resource_name = name;
   xtr.resource_class = "AnyClass";
   xtr.resource_type = XmRString;
-  xtr.resource_size = sizeof(String);
+  xtr.resource_size = (Cardinal)sizeof(String);
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
@@ -77,9 +79,9 @@ int main(int argc, char **argv)
 
     speedfactor = MPS_TO_MPH;		/* Software maintained in US */
     speedunits = get_resource("speedunits", "mph");
-    if (!strcmp(speedunits, "kph")) 
+    if (strcmp(speedunits, "kph")==0) 
 	speedfactor = MPS_TO_KPH;
-    else if (!strcmp(speedunits, "knots"))
+    else if (strcmp(speedunits, "knots")==0)
 	speedfactor = 1/MPS_TO_KNOTS;
 
     while ((option = getopt(argc, argv, "hv")) != -1) {

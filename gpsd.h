@@ -36,9 +36,9 @@ struct gps_context_t {
     int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
     /*@null@*/struct shmTime *shmTime[NTPSHMSEGS];
-    int shmTimeInuse[NTPSHMSEGS];
+    bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
-    int shmTimePPS;
+    bool shmTimePPS;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
@@ -80,7 +80,7 @@ struct gps_type_t {
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
-    struct gps_type_t *device_type;
+    /*@relnull@*/struct gps_type_t *device_type;
     int dsock;		/* socket to DGPS server */
     int sentdgps;	/* have we sent a DGPS correction? */
     int fixcnt;		/* count of good fixes seen */
@@ -183,9 +183,9 @@ extern void gpsd_binary_quality_dump(struct gps_device_t *, char[], int);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
-extern int ntpshm_init(struct gps_context_t *, int);
+extern int ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_alloc(struct gps_context_t *context);
-extern int ntpshm_free(struct gps_context_t *context, int segment);
+extern bool ntpshm_free(struct gps_context_t *context, int segment);
 extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 

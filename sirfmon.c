@@ -41,6 +41,9 @@
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
+#if defined (HAVE_SYS_SELECT_H)
+#include <sys/select.h>
+#endif
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
@@ -65,6 +68,7 @@ static bool dispmode = false;
 static bool serial, subframe_enabled = false;
 static unsigned int stopbits, bps;
 
+/*@ -nullassign @*/
 static char *verbpat[] =
 {
     "#Time:",
@@ -76,6 +80,7 @@ static char *verbpat[] =
     "rtcaj tow ",
     NULL
 };
+/*@ +nullassign @*/
 
 static char *sbasvec[] =
 {
@@ -185,6 +190,7 @@ static void decode_ecef(double x, double y, double z,
     double lambda,p,theta,phi,n,h,vnorth,veast,vup,speed,heading;
 
     lambda = atan2(y,x);
+    /*@ -evalorder @*/ 
     p = sqrt(pow(x,2) + pow(y,2));
     theta = atan2(z*a,p*b);
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
@@ -196,6 +202,7 @@ static void decode_ecef(double x, double y, double z,
     vup = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
     speed = sqrt(pow(vnorth,2) + pow(veast,2));
     heading = atan2(veast,vnorth);
+    /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * PI;
 
@@ -434,7 +441,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	******************************************************************/
 	display(mid27win, 1, 14, "%d (%s)", getb(1), sbasvec[(int)getb(1)]);
 	for (i = j = 0; i < MAXCHANNELS; i++) {
-	    if (getb(16+2*i) != '\0') {
+	    if (/*@i1@*/getb(16+2*i) != '\0') {
 		(void)wprintw(mid27win, "%d=%d ", getb(16+2*i), getb(16+2*i+1));
 		j++;
 	    }
@@ -523,7 +530,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	buf[len] = '\0';
 	j = 1;
 	for (i = 0; verbpat[i] != NULL; i++)
-	    if (strncmp(buf+1,verbpat[i],strlen(verbpat[i])) == 0) {
+	    if (strncmp((char *)(buf+1),verbpat[i],strlen(verbpat[i])) == 0) {
 		j = 0;
 		break;
 	    }
@@ -549,7 +556,7 @@ static void decode_sirf(unsigned char buf[], int len)
  *
  *****************************************************************************/
 
-static int get_speed(struct termios* ttyctl)
+static unsigned int get_speed(struct termios* ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
     switch (code) {
@@ -607,7 +614,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	return NO_PACKET;
     (void)tcflush(devicefd, TCIOFLUSH);
 
-    fprintf(stderr, "Hunting at speed %d, %dN%u\n",
+    fprintf(stderr, "Hunting at speed %u, %dN%u\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */
@@ -617,6 +624,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	    return 0;
 	else
 	    count += st;
+	/*@ +charint @*/
 	if (state == 0) {
 	    if (c == START1)
 		state = 1;
@@ -644,6 +652,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	    else
 		state = 0;
 	}
+	/*@ -charint @*/
     }
 
     return NO_PACKET;
@@ -651,9 +660,10 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 
 static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
-static int hunt_open(int *pstopbits)
+static unsigned int hunt_open(unsigned int *pstopbits)
 {
-    int trystopbits, st;
+    unsigned int trystopbits;
+    int st;
     /*
      * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -671,8 +681,8 @@ static int hunt_open(int *pstopbits)
 	    if ((st = set_speed(*ip, trystopbits)) == SIRF_PACKET)
 		return get_speed(&ttyset);
 	    else if (st == NMEA_PACKET) {
-		fprintf(stderr, "Switching to SiRF mode...\n");
-		nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
+		(void)fprintf(stderr, "Switching to SiRF mode...\n");
+		(void)nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
 		return *ip;
 	    }
 	}
@@ -705,20 +715,18 @@ static int serial_initialize(char *device)
 
 static int readbyte(void)
 {
+    /*@ -type -shiftnegative -compdef -nullpass @*/
     static int cnt = 0,pos = 0;
     static unsigned char inbuf[BUFLEN];
+    struct timeval timeval = {0, 500000};
 
     if (pos >= cnt) {
 	fd_set select_set;
-	struct timeval timeval;
 
 	FD_ZERO(&select_set);
 	FD_SET(devicefd,&select_set);
 	if (controlfd < -1)
 	    FD_SET(controlfd,&select_set);
-	timeval.tv_sec = 0;
-	timeval.tv_usec = 500000;
-
 	if (select(devicefd + 1,&select_set,NULL,NULL,&timeval) < 0)
 	    return EOF;
 
@@ -727,13 +735,14 @@ static int readbyte(void)
 
 	(void)usleep(100000);
 
-	if ((cnt = read(devicefd,inbuf,BUFLEN)) <= 0)
+	if ((cnt = (int)read(devicefd,inbuf,BUFLEN)) <= 0)
 	    return EOF;
 
 	pos = 0;
     }
+    /*@ +type +shiftnegative +compdef +nullpass @*/
 
-    return inbuf[pos++];
+    return (int)inbuf[pos++];
 }
 
 static int readword(void)
@@ -743,7 +752,7 @@ static int readword(void)
     if ((byte1 = readbyte()) == EOF || (byte2 = readbyte()) == EOF)
 	return EOF;
 
-    return (byte1 << 8) | byte2;
+    /*@i@*/return (byte1 << 8) | byte2;
 }
 
 static int readpkt(unsigned char *buf)
@@ -765,7 +774,7 @@ static int readpkt(unsigned char *buf)
     while (cnt-- > 0) {
 	if ((byte = readbyte()) == EOF)
 	    return EOF;
-	*buf++ = byte;
+	*buf++ = (unsigned char)byte;
 	csum += byte;
     }
 
@@ -779,9 +788,11 @@ static int readpkt(unsigned char *buf)
     return len;
 }
 
-static bool sendpkt(unsigned char *buf, int len, char *device)
+static bool sendpkt(unsigned char *buf, size_t len, char *device)
 {
-    int i,csum, st;
+    unsigned int csum;
+    ssize_t st;
+    size_t i;
 
     putb(-4,START1);			/* start of packet */
     putb(-3,START2);
@@ -789,7 +800,7 @@ static bool sendpkt(unsigned char *buf, int len, char *device)
 
     csum = 0;
     for (i = 0; i < len; i++)
-	csum += buf[4 + i];
+	csum += (int)buf[4 + i];
 
     csum &= 0x7fff;
     putw(len,csum);			/* checksum */
@@ -803,7 +814,7 @@ static bool sendpkt(unsigned char *buf, int len, char *device)
     (void)wprintw(debugwin, "\n");
 
     if (controlfd == -1) 
-	return -1;
+	return false;
     else {
 	if (!serial) {
 	    (void)write(controlfd, "!", 1);
@@ -813,7 +824,7 @@ static bool sendpkt(unsigned char *buf, int len, char *device)
 	st = write(controlfd, buf,len);
 	if (!serial)
 	    (void)read(controlfd, buf, 8);	/* enough room for "ERROR\r\n\0" */
-	return (st == len);
+	return ((size_t)st == len);
     }
 }
 
@@ -829,6 +840,7 @@ static int tzoffset(void)
     struct tm tm;
     int res = 0;
 
+    /*@ -unrecog **/
     tzset();
 #ifdef HAVE_TIMEZONE
     res = timezone;
@@ -842,11 +854,13 @@ static int tzoffset(void)
     if (localtime_r(&now, &tm)->tm_isdst)
 	res -= 3600;
 #endif
+    /*@ +unrecog **/
     return res;
 }
 
 static void refresh_rightpanel1(void)
 {
+    /*@ -nullpass @*/
     (void)touchwin(mid6win);
     (void)touchwin(mid7win);
     (void)touchwin(mid9win);
@@ -857,16 +871,17 @@ static void refresh_rightpanel1(void)
     (void)wrefresh(mid9win);
     (void)wrefresh(mid13win);
     (void)wrefresh(mid27win);
+    /*@ +nullpass @*/
 }
 
-static void command(char *buf, int len, const char *fmt, ... )
+static void command(char buf[], size_t len, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     va_list ap;
-    int n;
+    ssize_t n;
 
     va_start(ap, fmt) ;
-    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+    (void)vsnprintf(buf, len, fmt, ap);
     va_end(ap);
 
     (void)write(devicefd, buf, strlen(buf));
@@ -950,7 +965,7 @@ int main (int argc, char **argv)
     (void)initscr();
     (void)cbreak();
     (void)noecho();
-    intrflush(stdscr, FALSE);
+    (void)intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
 
     mid2win   = newwin(7,  80,  0, 0);
@@ -966,6 +981,7 @@ int main (int argc, char **argv)
     (void)scrollok(debugwin,TRUE);
     (void)wsetscrreg(debugwin, 0, LINES-21);
 
+    /*@ -nullpass @*/
     (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(mid2win, A_BOLD);
     (void)wmove(mid2win, 0,1);
@@ -1080,7 +1096,7 @@ int main (int argc, char **argv)
 
     (void)wmove(debugwin,0, 0);
 
-    FD_ZERO(&select_set);
+    /*@i@*/FD_ZERO(&select_set);
 
     /* probe for version */
     putb(0, 0x84);
@@ -1103,13 +1119,13 @@ int main (int argc, char **argv)
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
-	FD_SET(0,&select_set);
-	FD_SET(devicefd,&select_set);
+	/*@i@*/FD_SET(0,&select_set);
+	/*@i@*/FD_SET(devicefd,&select_set);
 
-	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
+	if (select(/*@i@*/FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
 	    break;
 
-	if (FD_ISSET(0,&select_set)) {
+	if (/*@i@*/FD_ISSET(0,&select_set)) {
 	    (void)wmove(cmdwin, 0,5);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
@@ -1169,7 +1185,7 @@ int main (int argc, char **argv)
 		    putb(8, 0);		/* reserved */
 		    (void)sendpkt(buf, 9, device);
 		    (void)usleep(50000);
-		    set_speed(bps = v, stopbits);
+		    (void)set_speed(bps = v, stopbits);
 		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
@@ -1248,7 +1264,7 @@ int main (int argc, char **argv)
 			p++;
 		}
 
-		(void)sendpkt(buf, len, device);
+		(void)sendpkt(buf, (size_t)len, device);
 		break;
 	    }
 	}
@@ -1257,6 +1273,7 @@ int main (int argc, char **argv)
 	    decode_sirf(buf,len);
 	}
     }
+    /*@ +nullpass @*/
 
  quit:
     (void)endwin();
