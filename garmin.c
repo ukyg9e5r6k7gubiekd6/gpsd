@@ -569,11 +569,12 @@ static int GetPacket (struct gps_device_t *session )
 	    break;
 	}
 
+	/*@ ignore @*/
 	delay.tv_sec = 0;
 	delay.tv_nsec = 3330000L;
 	while (nanosleep(&delay, &rem) < 0)
 	    continue;
-
+	/*@ end @*/
     }
     // dump the individual bytes, debug only
     // for ( x = 0; x < session->GarminBufferLen; x++ ) {

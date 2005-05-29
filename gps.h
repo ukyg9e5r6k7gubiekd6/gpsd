@@ -121,6 +121,7 @@ struct gps_data_t {
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
+#define DOP_NOT_VALID	0.0
 
     /* redundant with the estimate elments in the fix structure */
     double epe;  /* estimated spherical position error, 1 sigma (meters)  */

@@ -1,5 +1,5 @@
 -I. 
-+posixlib 
++unixlib
 +charindex
 +charintliteral
 -realcompare
@@ -8,10 +8,8 @@
 -paramuse
 -predboolint
 -nestedextern
+-abstract
 
--Dfd_set=int 
--Dpthread_t=int 
--Dsocklen_t=ssize_t
 -Din_addr_t=int
 -Du_int16_t=short
 -Du_int8_t=short
@@ -20,7 +18,5 @@
 -DCBAUDEX=0010000
 -DB57600=010001
 -DB115200=0010011
--Dusleep=sleep
--DEWOULDBLOCK=EAGAIN
 -DCRTSCTS=0x00020000
 -DONLCR=0x00000002

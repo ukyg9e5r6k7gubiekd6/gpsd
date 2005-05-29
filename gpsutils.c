@@ -14,17 +14,18 @@ double timestamp(void)
 {
     struct timeval tv; 
     (void)gettimeofday(&tv, NULL); 
-    return(tv.tv_sec + tv.tv_usec/1e6);
+    /*@i1@*/return(tv.tv_sec + tv.tv_usec*1e-6);
 }
 
 time_t mkgmtime(register struct tm *t)
 /* struct tm to seconds since Unix epoch */
 {
-    register unsigned short year;
+    register int year;
     register time_t result;
     static const int cumdays[12] =
     {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
+    /*@ +matchanyintegral @*/
     year = 1900 + t->tm_year + t->tm_mon / 12;
     result = (year - 1970) * 365 + cumdays[t->tm_mon % 12];
     result += (year - 1968) / 4;
@@ -37,6 +38,7 @@ time_t mkgmtime(register struct tm *t)
     result += t->tm_min;
     result *= 60;
     result += t->tm_sec;
+    /*@ -matchanyintegral @*/
     return (result);
 }
 
@@ -47,12 +49,15 @@ double iso8601_to_unix(char *isotime)
     double usec;
     struct tm tm;
 
+    /*@ -unrecog -compdef @*//* splint 3.1.1 doesn't grok strptime */
     dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    /*@ +unrecog @*/
     if (*dp == '.')
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-    return mkgmtime(&tm) + usec;
+    return (double)mkgmtime(&tm) + usec;
+    /*@ +compdef @*/
 }
 
 char *unix_to_iso8601(double fixtime, char isotime[], int len)
@@ -61,15 +66,18 @@ char *unix_to_iso8601(double fixtime, char isotime[], int len)
     struct tm when;
     double integral, fractional;
     time_t intfixtime;
-    int slen;
+    size_t slen;
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t)integral;
+    /*@ -unrecog -compdef */
     (void)gmtime_r(&intfixtime, &when);
+    /*@ -unrecog */
 
     (void)strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
+    /*@ -unrecog -compdef */
     slen = strlen(isotime);
-    (void)snprintf(isotime + slen, len, "%.1f", fractional);
+    (void)snprintf(isotime + slen, (size_t)len, "%.1f", fractional);
     (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
     (void)strcat(isotime, "Z");
     return isotime;
@@ -103,7 +111,7 @@ double gpstime_to_unix(int week, double tow)
 	time_t now, last_rollover;
 	(void)time(&now);
 	last_rollover = GPS_EPOCH+((now-GPS_EPOCH)/GPS_ROLLOVER)*GPS_ROLLOVER;
-	fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
+	/*@i@*/fixtime = last_rollover + (week * SECS_PER_WEEK) + tow;
     }
     return fixtime;
 }
@@ -247,6 +255,7 @@ driver.
 
 ******************************************************************************/
 
+/*@ -fixedformalarray @*/
 static int invert(double mat[4][4], double inverse[4][4])
 {
   // Find all NECESSARY 2x2 subdeterminants
@@ -336,6 +345,7 @@ static int invert(double mat[4][4], double inverse[4][4])
 
   return 1;
 }  
+/*@ +fixedformalarray @*/
 
 void dop(int channels, struct gps_data_t *gpsdata)
 {
@@ -354,7 +364,7 @@ void dop(int channels, struct gps_data_t *gpsdata)
 #endif /* __UNUSED__ */
 
     for (n = k = 0; k < channels; k++) {
-	if (!gpsdata->used[k])
+	if (gpsdata->used[k] != 0)
 	    continue;
 	satpos[n][0] = sin(gpsdata->azimuth[k]*DEG_2_RAD)
 	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
@@ -402,12 +412,14 @@ void dop(int channels, struct gps_data_t *gpsdata)
     } else
 	gpsd_report(0, "Matrix is singular.\n");
 #else
-    invert(prod, inv);
+    (void)invert(prod, inv);
 #endif /* __UNUSED__ */
 
+    /*@ -usedef @*/
     //gpsdata->hdop = sqrt(inv[0][0] + inv[1][1]);
     gpsdata->vdop = sqrt(inv[1][1]);
     gpsdata->pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
     gpsdata->tdop = sqrt(inv[3][3]);
     gpsdata->gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
+    /*@ +usedef @*/
 }

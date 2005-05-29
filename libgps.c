@@ -144,7 +144,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     int i;
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
-	if (!strncmp(ns, "GPSD", 4)) {
+	if (strncmp(ns, "GPSD", 4) == 0) {
 	    for (sp = ns + 5; ; sp = tp) {
 		tp = sp + strcspn(sp, ",\r\n");
 		if (!*tp) break;
@@ -163,7 +163,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 			gpsdata->baudrate = gpsdata->stopbits = 0;
 		    } else
-			(void)sscanf(sp, "B=%d %*d %*s %d", 
+			(void)sscanf(sp, "B=%d %*d %*s %u", 
 			       &gpsdata->baudrate, &gpsdata->stopbits);
 		    break;
 		case 'C':
@@ -241,7 +241,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'N':
 		    if (sp[2] == '?') 
-			gpsdata->driver_mode = -1;
+			gpsdata->driver_mode = 0;
 		    else
 			gpsdata->driver_mode = atoi(sp+2);
 		    break;

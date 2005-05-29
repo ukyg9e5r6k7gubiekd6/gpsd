@@ -36,7 +36,7 @@ int gpsd_open_dgps(char *dgpsserver)
 
     dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
     if (dsock >= 0) {
-	gethostname(hn, sizeof(hn));
+	(void)gethostname(hn, sizeof(hn));
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	(void)write(dsock, buf, strlen(buf));
     }
@@ -69,11 +69,11 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     session->device_type = NULL;	/* start by hunting packets */
     session->dsock = -1;
     session->context = context;
-    session->gpsdata.hdop = 0.0;
-    session->gpsdata.vdop = 0.0;
-    session->gpsdata.pdop = 0.0;
-    session->gpsdata.tdop = 0.0;
-    session->gpsdata.gdop = 0.0;
+    session->gpsdata.hdop = DOP_NOT_VALID;
+    session->gpsdata.vdop = DOP_NOT_VALID;
+    session->gpsdata.pdop = DOP_NOT_VALID;
+    session->gpsdata.tdop = DOP_NOT_VALID;
+    session->gpsdata.gdop = DOP_NOT_VALID;
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
@@ -106,8 +106,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 static void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    int cycle,duration;
-    bool state;
+    int cycle,duration, state;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
@@ -134,10 +133,10 @@ static void *gpsd_ppsmonitor(void *arg)
 	     */
 #define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
-	    duration = timediff(tv, pulse[!state]);
+	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 	    if (cycle > 999000 && cycle < 1001000 && duration > 800000)
-		ntpshm_pps(session, &tv);
+		(void)ntpshm_pps(session, &tv);
 	}
 
 	pulse[state] = tv;
@@ -194,7 +193,7 @@ static int is_input_waiting(int fd)
     return count;
 }
 
-static int handle_packet(struct gps_device_t *session)
+static long handle_packet(struct gps_device_t *session)
 {
     session->packet_full = 0;
     session->gpsdata.sentence_time = 0;
@@ -273,7 +272,7 @@ static int handle_packet(struct gps_device_t *session)
     session->gpsdata.d_decode_time = timestamp();
 
     /* may be time to ship a DGPS correction to the GPS */
-    if (session->fixcnt > 10 && !session->sentdgps) {
+    if (session->fixcnt > 10 && session->sentdgps==0) {
 	session->sentdgps++;
 	if (session->dsock > -1) {
 	    char buf[BUFSIZ];
@@ -414,7 +413,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
     if (session->gpsdata.hdop)
 	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
 
-    intfixtime = (int)session->gpsdata.fix.time;
+    intfixtime = (time_t)session->gpsdata.fix.time;
     gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	(void)snprintf(bufp, len,

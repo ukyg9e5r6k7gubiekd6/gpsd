@@ -180,9 +180,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    session->packet_state = NMEA_RECOGNIZED;
-	else if (isprint(c))
-	    /* continue gathering body packets */;
-	else
+	else if (!isprint(c))
 	    session->packet_state = GROUND_STATE;
 	break;
     case NMEA_CR:
@@ -391,18 +389,18 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case ZODIAC_HSUM_1:
 	{
- #define getw(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
-	    short sum = getw(0) + getw(1) + getw(2) + getw(3);
+ #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+	    short sum = getword(0) + getword(1) + getword(2) + getword(3);
 	    sum *= -1;
-	    if (sum != getw(4)) {
+	    if (sum != getword(4)) {
 		gpsd_report(4, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
-		       sum, getw(4));
+		       sum, getword(4));
 		session->packet_state = GROUND_STATE;
 		break;
 	    }
 	}
-	gpsd_report(6,"Zodiac header id=%hd len=%hd flags=%hx\n", getw(1), getw(2), getw(3));
- #undef getw
+	gpsd_report(6,"Zodiac header id=%hd len=%hd flags=%hx\n", getword(1), getword(2), getword(3));
+ #undef getword
 	if (session->packet_length == 0) {
 	    session->packet_state = ZODIAC_RECOGNIZED;
 	    break;
@@ -445,10 +443,11 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
 static void packet_accept(struct gps_device_t *session, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
-    unsigned int packetlen = session->inbufptr-session->inbuffer;
+    size_t packetlen = session->inbufptr-session->inbuffer;
     if (packetlen < sizeof(session->outbuffer)) {
 	memcpy(session->outbuffer, session->inbuffer, packetlen);
-	session->outbuffer[session->outbuflen = packetlen] = '\0';
+	session->outbuflen = (unsigned short)packetlen;
+	session->outbuffer[packetlen] = '\0';
 	session->packet_type = packet_type;
 #ifdef STATE_DEBUG
 	gpsd_report(6, "Packet type %d accepted %d = %s\n", 
@@ -465,12 +464,12 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 static void packet_discard(struct gps_device_t *session)
 /* shift the input buffer to discard all data up to current input pointer */ 
 {
-    int discard = session->inbufptr - session->inbuffer;
-    int remaining = session->inbuflen - discard;
+    size_t discard = session->inbufptr - session->inbuffer;
+    size_t remaining = session->inbuflen - discard;
     session->inbufptr = memmove(session->inbuffer, 
 				session->inbufptr, 
 				remaining);
-    session->inbuflen = remaining;
+    session->inbuflen = (unsigned short)remaining;
 #ifdef STATE_DEBUG
     gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n", 
 		discard, remaining, 
@@ -482,7 +481,7 @@ static void packet_discard(struct gps_device_t *session)
 static void character_discard(struct gps_device_t *session)
 /* shift the input buffer to discard one character and reread data */
 {
-    memmove(session->inbuffer, session->inbuffer + 1, --session->inbuflen);
+    memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
     session->inbufptr = session->inbuffer;
 #ifdef STATE_DEBUG
     gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
@@ -512,7 +511,7 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	session->inbufptr = session->inbuffer;
 	session->inbuflen = 0;
     }
-    newdata = read(session->gpsdata.gps_fd, session->inbufptr, waiting);
+    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr, (size_t)waiting);
 #else
     newdata = waiting;
 #endif /* TESTMAIN */
@@ -540,12 +539,12 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
-	    int checksum_ok = 1;
-	    unsigned char csum[3];
-	    unsigned char *trailer = session->inbufptr-5;
+	    bool checksum_ok = true;
+	    char csum[3];
+	    char *trailer = (char *)session->inbufptr-5;
 	    if (*trailer == '*') {
 		unsigned int n, crc = 0;
-		for (n = 1; session->inbuffer + n < trailer; n++)
+		for (n = 1; (char *)session->inbuffer + n < trailer; n++)
 		    crc ^= session->inbuffer[n];
 		(void)snprintf(csum, sizeof(csum), "%02X", crc);
 		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
@@ -557,9 +556,9 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	    packet_discard(session);
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
-	    unsigned int checksum = (trailer[0] << 8) | trailer[1];
+	    unsigned int checksum = (unsigned)((trailer[0] << 8) | trailer[1]);
 	    unsigned int n, crc = 0;
-	    for (n = 4; n < (size_t)(trailer - session->inbuffer); n++)
+	    for (n = 4; n < (unsigned)(trailer - session->inbuffer); n++)
 		crc += (int)session->inbuffer[n];
 	    crc &= 0x7fff;
 	    if (checksum == crc)
@@ -575,27 +574,27 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 #endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
- #define getw(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+ #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 	    short len, n, sum;
-	    len = getw(2);
+	    len = getword(2);
 	    for (n = sum = 0; n < len; n++)
-		sum += getw(5+n);
+		sum += getword(5+n);
 	    sum *= -1;
-	    if (len == 0 || sum == getw(5 + len)) {
+	    if (len == 0 || sum == getword(5 + len)) {
 		packet_accept(session, ZODIAC_PACKET);
 	    } else {
 		gpsd_report(4,
 		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
-			sum, len, getw(5 + len));
+			sum, len, getword(5 + len));
 	    }
 	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
-#undef getw
+#undef getword
 #endif /* ZODIAC_ENABLE */
 	}
     }
 
-    return session->outbuflen;
+    return (int)session->outbuflen;
 }
 
 void packet_reset(struct gps_device_t *session)

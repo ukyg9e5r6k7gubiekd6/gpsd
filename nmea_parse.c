@@ -65,7 +65,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  *
  **************************************************************************/
 
-#define DD(s)	((s)[0]-'0')*10+((s)[1]-'0')
+#define DD(s)	((int)((s)[0]-'0')*10+(int)((s)[1]-'0'))
 
 static void merge_ddmmyy(char *ddmmyy, struct gps_data_t *out)
 /* sentence supplied ddmmyy, but no century part */
@@ -510,18 +510,19 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     }
 #endif /* __ UNUSED__ */
 
+    /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
-    strncpy(buf, sentence, NMEA_MAX);
+    strncpy((char *)buf, sentence, NMEA_MAX);
     /* discard the checksum part */
-    for (p = buf; (*p != '*') && (*p >= ' '); ) ++p;
+    for (p = (char *)buf; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
     /* split sentence copy on commas, filling the field array */
-    for (count = 0, p = buf; p != NULL && *p; ++count, p = strchr(p, ',')) {
+    for (count = 0, p = (char *)buf; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
 	*p = '\0';
 	field[count] = ++p;
     }
     /* dispatch on field zero, the sentence tag */
-    for (i = 0; i < sizeof(nmea_phrase)/sizeof(nmea_phrase[0]); ++i) {
+    for (i = 0; i < (unsigned)(sizeof(nmea_phrase)/sizeof(nmea_phrase[0])); ++i) {
 	s = field[0];
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
@@ -536,13 +537,14 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    break;
 	}
     }
+    /*@ +usedef @*/
     return retval;
 }
 
 int nmea_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
-    unsigned int status;
+    int status;
     char buf[BUFSIZ];
     va_list ap;
 
@@ -551,8 +553,8 @@ int nmea_send(int fd, const char *fmt, ... )
     va_end(ap);
     strcat(buf, "*");
     nmea_add_checksum(buf);
-    status = write(fd, buf, strlen(buf));
-    if (status == strlen(buf)) {
+    status = (int)write(fd, buf, strlen(buf));
+    if (status == (int)strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);
 	return status;
     } else {
