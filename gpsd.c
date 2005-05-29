@@ -721,10 +721,10 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 		p++;
 	    } else if (subscribers[cfd].watcher!=0) {
-		subscribers[cfd].watcher = 0;
+		subscribers[cfd].watcher = false;
 		(void)snprintf(phrase, sizeof(phrase), ",W=0");
 	    } else {
-		subscribers[cfd].watcher = 1;
+		subscribers[cfd].watcher = true;
 		(void)assign_channel(whoami);
 		gpsd_report(3, "%d turned on watching\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
@@ -897,7 +897,7 @@ int main(int argc, char *argv[])
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *control_socket = NULL;
-    static struct gps_device_t *device, **channel;
+    struct gps_device_t *device, **channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
@@ -1073,8 +1073,9 @@ int main(int argc, char *argv[])
 
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
-	if (device != NULL && device->dsock > -1)
-	    /*@i@*/FD_CLR(device->dsock, &rfds);
+	for (channel = channels; channel < channels + MAXDEVICES; channel++)
+	    if (*channel != NULL && (*channel)->dsock > -1)
+		/*@i@*/FD_CLR((*channel)->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't

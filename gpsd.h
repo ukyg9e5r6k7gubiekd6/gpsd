@@ -118,7 +118,7 @@ struct gps_device_t {
     time_t last_request;	/* Last time request packets were sent */
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    void *GarminBuffer; /* Pointer Garmin packet buffer 
+    /*@relnull@*/void *GarminBuffer; /* Pointer Garmin packet buffer 
                            void *, to keep the packet details out of the 
                            global context and save spave */
     long GarminBufferLen;                  /* current GarminBuffer Length */

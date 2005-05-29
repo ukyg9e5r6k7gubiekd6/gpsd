@@ -620,7 +620,9 @@ static int garmin_probe(struct gps_device_t *session)
     }
     memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
 
+    /*@ -unrecog @*/
     cfmakeraw(&session->ttyset);
+    /*@ +unrecog @*/
 
     if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
 	gpsd_report(0, "garmin_probe: error changing port attributes: %s\n",

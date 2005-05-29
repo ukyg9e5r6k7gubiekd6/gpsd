@@ -136,7 +136,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 void redraw(Widget w UNUSED, XtPointer client_data UNUSED,
 	    XmDrawingAreaCallbackStruct * cbs)
 {
-    XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
+    (void)XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y,
 	      cbs->event->xexpose.width, cbs->event->xexpose.height,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y);
