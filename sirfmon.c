@@ -860,10 +860,10 @@ static long tzoffset(void)
     return res;
 }
 
+/*@ -nullpass -globstate @*/
 static void refresh_rightpanel1(void)
 {
-    /*@ -nullpass @*/
-    (void)touchwin(mid6win);
+     (void)touchwin(mid6win);
     (void)touchwin(mid7win);
     (void)touchwin(mid9win);
     (void)touchwin(mid13win);
@@ -873,8 +873,8 @@ static void refresh_rightpanel1(void)
     (void)wrefresh(mid9win);
     (void)wrefresh(mid13win);
     (void)wrefresh(mid27win);
-    /*@ +nullpass @*/
 }
+/*@ +nullpass +globstate @*/
 
 static void command(char buf[], size_t len, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -906,7 +906,7 @@ int main (int argc, char **argv)
     unsigned char buf[BUFLEN];
     char line[80];
 
-    gmt_offset = tzoffset();
+    gmt_offset = (int)tzoffset();
 
     while ((option = getopt(argc, argv, "hvF:")) != -1) {
 	switch (option) {
@@ -918,6 +918,7 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
     }
+    /*@ -nullpass -branchstate @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
 	colon1 = strchr(arg, ':');
@@ -939,7 +940,9 @@ int main (int argc, char **argv)
 	    }
 	}
     }
+    /*@ +nullpass +branchstate @*/
 
+    /*@ -boolops */
     if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
 	if (!server)
 	    server = "localhost";
@@ -951,25 +954,29 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
 	controlfd = open(controlsock, O_RDWR);
+	/*@ -compdef @*/
 	if (device)
-	    command(buf, sizeof(buf), "F=%s\r\n", device);
+	    command((char *)buf, sizeof(buf), "F=%s\r\n", device);
 	else
-	    command(buf, sizeof(buf), "O\r\n");	/* force device allocation */
-	command(buf, sizeof(buf), "F\r\n");
-	device = strdup(buf+7);
-	command(buf, sizeof(buf), "R=2\r\n");
+	    command((char *)buf, sizeof(buf), "O\r\n");	/* force device allocation */
+	command((char *)buf, sizeof(buf), "F\r\n");
+	device = strdup((char *)buf+7);
+	command((char *)buf, sizeof(buf), "R=2\r\n");
+	/*@ +compdef @*/
 	serial = false;
     } else {
 	devicefd = controlfd = serial_initialize(device = arg);
 	serial = true;
     }
+    /*@ +boolops */
 
     (void)initscr();
     (void)cbreak();
     (void)noecho();
     (void)intrflush(stdscr, FALSE);
-    keypad(stdscr, TRUE);
+    (void)keypad(stdscr, true);
 
+    /*@ -onlytrans @*/
     mid2win   = newwin(7,  80,  0, 0);
     mid4win   = newwin(15, 30,  7, 0);
     mid6win   = newwin(3,  50,  7, 30);
@@ -980,8 +987,9 @@ int main (int argc, char **argv)
     mid27win  = newwin(4,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
     debugwin  = newwin(0,   0, 24, 0);
-    (void)scrollok(debugwin,TRUE);
+    (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);
+    /*@ +onlytrans @*/
 
     /*@ -nullpass @*/
     (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -1011,7 +1019,7 @@ int main (int argc, char **argv)
     (void)wattrset(mid4win, A_BOLD);
     display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
     for (i = 0; i < MAXCHANNELS; i++) {
-	display(mid4win, i+2, 1, "%2d",i);
+	display(mid4win, (int)(i+2), 1, "%2d",i);
     }
     display(mid4win, 14, 4, " Packet Type 4 (0x04) ");
     (void)wattrset(mid4win, A_NORMAL);
@@ -1103,7 +1111,9 @@ int main (int argc, char **argv)
     /* probe for version */
     putbyte(0, 0x84);
     putbyte(1, 0x0);
+    /*@ -compdef @*/
     (void)sendpkt(buf, 2, device);
+    /*@ +compdef @*/
 
     for (;;) {
 	(void)wmove(cmdwin, 0,0);
@@ -1131,6 +1141,7 @@ int main (int argc, char **argv)
 	    (void)wmove(cmdwin, 0,5);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
+	    /*@ -usedef -compdef @*/
 	    (void)wgetnstr(cmdwin, line, 80);
 	    (void)noecho();
 	    //(void)move(0,0);
@@ -1153,6 +1164,7 @@ int main (int argc, char **argv)
 
 	    if (line[0] == '\0')
 		continue;
+	    /*@ +usedef +compdef @*/
 
 	    p = line;
 
@@ -1203,7 +1215,7 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'd':		/* MID 4 rate change -- not documented */
-		v = atoi(line+1);
+		v = (unsigned)atoi(line+1);
 		if (v > 30)
 		    break;
 		putbyte(0,0xa6);
@@ -1257,7 +1269,7 @@ int main (int argc, char **argv)
 		len = 0;
 		while (*p != '\0')
 		{
-		    (void)sscanf(p,"%x",&v);
+		    /*@i1@*/(void)sscanf(p,"%x",&v);
 		    putbyte(len,v);
 		    len++;
 		    while (*p != '\0' && !isspace(*p))
