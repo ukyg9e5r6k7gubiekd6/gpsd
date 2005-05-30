@@ -114,7 +114,7 @@ static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
 
 static int tsip_analyze(struct gps_device_t *session)
 {
-    int i, len = 0, mask = 0;
+    int i, len, mask = 0;
     unsigned int id;
     short s1,s2;
     float f1,f2,f3,f4,f5;
@@ -136,20 +136,21 @@ static int tsip_analyze(struct gps_device_t *session)
 
     /* remove DLE stuffing and put data part of message in buf */
 
-    buf2[0] = '\0';
+    memset(buf, 0, sizeof(buf));
+    buf2[len = 0] = '\0';
     for (i = 2; i < (int)session->outbuflen; i++) {
 	if (session->outbuffer[i] == 0x10)
 	    if (session->outbuffer[++i] == 0x03)
 		break;
 
 	(void)snprintf(buf2+strlen(buf2), 
-		      sizeof(buf)-strlen(buf),
+		      sizeof(buf2)-strlen(buf2),
 		      "%02x", buf[len++] = session->outbuffer[i]);
     }
     /*@ -charint @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
-		   "ID%02x", id = session->outbuffer[1]);
+		   "ID%02x", id = (unsigned)session->outbuffer[1]);
 
     gpsd_report(5, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
 
@@ -165,8 +166,8 @@ static int tsip_analyze(struct gps_device_t *session)
 	s1 = getword(4);			/* week */
 	f2 = getf(6);			/* leap seconds */
 	if (f2 > 10.0) {
-	    session->gps_week = s1;
-	    session->context->leap_seconds = roundf(f2);
+	    session->gps_week = (unsigned)s1;
+	    /*@i@*/session->context->leap_seconds = roundf(f2);
 	    session->context->valid = LEAP_SECOND_VALID;
 
 	    session->gpsdata.sentence_time = gpstime_to_unix(s1, f1) - f2;
@@ -209,7 +210,7 @@ static int tsip_analyze(struct gps_device_t *session)
 	gpsd_report(4, "Receiver health %02x %02x\n",getbyte(0),getbyte(1));
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
-	s1 = getbyte(0);			/* count */
+	s1 = (short)getbyte(0);			/* count */
 	if (len != (5*s1 + 1))
 	    break;
 	gpsd_zero_satellites(&session->gpsdata);
@@ -308,14 +309,16 @@ static int tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.hdop = getf(5);
 	session->gpsdata.vdop = getf(9);
 	session->gpsdata.tdop = getf(13);
+	/*@ -evalorder @*/
 	session->gpsdata.gdop = sqrt(pow(session->gpsdata.pdop,2)+pow(session->gpsdata.tdop,2));
+	/*@ +evalorder @*/
 
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	for (i = 0; i < session->gpsdata.satellites_used; i++)
 	    session->gpsdata.used[i] = getbyte(16 + i);
 
 	gpsd_report(4, "Sat info: %d %d\n",session->gpsdata.fix.mode,session->gpsdata.satellites_used);
-	gpsd_binary_quality_dump(session, buf2, sizeof(buf2));
+	gpsd_binary_quality_dump(session, buf2, (int)sizeof(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
         mask |= HDOP_SET | VDOP_SET | PDOP_SET | MODE_SET;
 	break;

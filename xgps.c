@@ -32,15 +32,17 @@ static Widget label_1, label_2, label_3, label_4, label_5;
 static Widget label_6, label_7, label_8, label_9, label_10;
 static GC gc;
 
+/*@ -nullassign @*/
 static XrmOptionDescRec options[] = {
 {"-altunits",  "*altunits",            XrmoptionSepArg,        NULL},
 {"-speedunits","*speedunits",          XrmoptionSepArg,        NULL},
 };
 String fallback_resources[] = {NULL};
+/*@ +nullassign @*/
 
 struct unit_t {
     char *legend;
-    float factor;
+    double factor;
 };
 static struct unit_t speedtable[] = {
     {"knots",		1/KNOTS_TO_KPH},
@@ -57,19 +59,21 @@ static void quit_cb(void)
     exit(0);	/* closes the GPS along with other fds */
 }
 
+/*@ -mustfreefresh -compdef +ignoresigns @*/
 static Pixel get_pixel(Widget w, char *resource_value)
 {
     Colormap colormap;
-    Boolean status;
+    Boolean cstatus;
     XColor exact, color;
 
     colormap = DefaultColormapOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
-    status = XAllocNamedColor(XtDisplay(w), colormap, resource_value, &color, &exact);
-    if (status == 0) {
+    /*@i@*/cstatus = XAllocNamedColor(XtDisplay(w), colormap, resource_value, &color, &exact);
+    if (cstatus == (Boolean)False) {
 	fprintf(stderr, "Unknown color: %s", resource_value);
 	color.pixel = BlackPixelOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
+	return (color.pixel);
     };
-    return (color.pixel);
+    return 0;
 }
 
 static void build_gui(Widget toplevel)
@@ -80,6 +84,7 @@ static void build_gui(Widget toplevel)
     int i;
     XmString string;
 
+    /*@ -immediatetrans -usedef @*/
     /* the root application window */
     XtSetArg(args[0], XmNgeometry, "700x570");
     XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
@@ -87,8 +92,10 @@ static void build_gui(Widget toplevel)
     XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
     XtSetArg(args[4], XmNmwmFunctions,
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
+    /*@ +immediatetrans +usedef @*/
     XtSetValues(toplevel, args, 5);
 
+    /*@ -onlytrans @*/
     /* a form to assist with geometry negotiation */
     form = XtVaCreateManagedWidget("form", xmFormWidgetClass, toplevel, NULL);
     /* the left half of the screen */
@@ -138,9 +145,11 @@ static void build_gui(Widget toplevel)
     gc = XCreateGC(XtDisplay(satellite_diagram),
 	RootWindowOfScreen(XtScreen(satellite_diagram)), GCForeground, &gcv);
     register_canvas(satellite_diagram, gc);
-    XtAddCallback(satellite_diagram, XmNexposeCallback, (XtPointer)redraw, NULL);
+    /*@i@*/XtAddCallback(satellite_diagram, XmNexposeCallback, (XtPointer)redraw, NULL);
     /* the data display */
+    /*@ -immediatetrans @*/
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
+    /*@ +immediatetrans @*/
     rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
 
     rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, left, args, 1);
@@ -165,12 +174,14 @@ static void build_gui(Widget toplevel)
     label_9 = XtCreateManagedWidget("Climb    ", xmLabelWidgetClass, rowColumn_19, args, 0);
     label_10= XtCreateManagedWidget("Status   ", xmLabelWidgetClass, rowColumn_20, args, 0);
 
+    /*@ -immediatetrans @*/
     XtSetArg(args[0], XmNcursorPositionVisible, False);
     XtSetArg(args[1], XmNeditable, False);
     XtSetArg(args[2], XmNmarginHeight, 2);
     XtSetArg(args[3], XmNhighlightThickness, 0);
     XtSetArg(args[4], XmNshadowThickness, 1);
     XtSetArg(args[5], XmNcolumns, 23);
+    /*@ +immediatetrans @*/
     text_1 = XtCreateManagedWidget("text_1", xmTextFieldWidgetClass,
 				   rowColumn_11, args, 6);
     text_2 = XtCreateManagedWidget("text_2", xmTextFieldWidgetClass,
@@ -194,12 +205,14 @@ static void build_gui(Widget toplevel)
 
     quitbutton = XtCreateManagedWidget("Quit",
 			 xmPushButtonWidgetClass, rowColumn_21, args, 0);
-    XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
+    /*@i@*/XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
 
     XtRealizeWidget(toplevel);
     delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
-    XmAddWMProtocolCallback(toplevel, delw,
+    /*@ -nullpass @*//* splint 3.1.1 lacks annotated prototype... */
+    /*@i@*/XmAddWMProtocolCallback(toplevel, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
+    /*@ +onlytrans +nullpass @*/
 
     /* create empty list items to be replaced on update */
     string = XmStringCreateSimple(" ");
@@ -207,6 +220,7 @@ static void build_gui(Widget toplevel)
 	XmListAddItem(satellite_list, string, 0);
     XmStringFree(string);
 }
+/*@ +mustfreefresh -ignoresigns +immediatetrans @*/
 
 static void handle_time_out(XtPointer client_data UNUSED,
 			    XtIntervalId *ignored UNUSED)
@@ -245,7 +259,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     XmString string[MAXCHANNELS+1];
     char s[128], *sp;
 
-    if (message[0])
+    if (message[0] != '\0')
 	while (isspace(*(sp = message + strlen(message) - 1)))
 	    *sp = '\0';
     XmTextFieldSetString(status, message);
@@ -254,7 +268,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     if (gpsdata->satellites) {
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < (unsigned int)gpsdata->satellites) {
-		(void)snprintf(s, sizeof(s), 
+		(void)snprintf(s, sizeof(s),  
 			       " %3d    %02d    %03d    %02d      %c", 
 			       gpsdata->PRN[i],
 			       gpsdata->elevation[i], gpsdata->azimuth[i], 
@@ -263,71 +277,71 @@ static void update_panel(struct gps_data_t *gpsdata,
 		(void)strcpy(s, "                  ");
 	    string[i+1] = XmStringCreateSimple(s);
 	}
-	XmListReplaceItemsPos(satellite_list, string, sizeof(string), 1);
-	for (i = 0; i < sizeof(string)/sizeof(string[0]); i++)
+	XmListReplaceItemsPos(satellite_list, string, (int)sizeof(string), 1);
+	for (i = 0; i < (unsigned int)(sizeof(string)/sizeof(string[0])); i++)
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
     if (gpsdata->fix.time != TIME_NOT_VALID)
-	unix_to_iso8601(gpsdata->fix.time, s, sizeof(s));
+	(void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);
     if (gpsdata->fix.mode >= MODE_2D)
-	sprintf(s, "%lf %c", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+	(void)snprintf(s, sizeof(s), "%lf %c", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_2, s);
     if (gpsdata->fix.mode >= MODE_2D)
-	sprintf(s, "%lf %c", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+	(void)snprintf(s, sizeof(s), "%lf %c", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_3, s);
     if (gpsdata->fix.mode == MODE_3D)
-	sprintf(s, "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
+	(void)snprintf(s, sizeof(s), "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_4, s);
     if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
-	sprintf(s, "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
+	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_5, s);
     if (gpsdata->fix.mode >= MODE_2D && gpsdata->fix.track != TRACK_NOT_VALID)
-	sprintf(s, "%f degrees", gpsdata->fix.track);
+	(void)snprintf(s, sizeof(s), "%f degrees", gpsdata->fix.track);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
     if (gpsdata->fix.eph != UNCERTAINTY_NOT_VALID)
-	sprintf(s, "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
+	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
     if (gpsdata->fix.epv != UNCERTAINTY_NOT_VALID)
-	sprintf(s, "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
+	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_8, s);
     if (gpsdata->fix.mode == MODE_3D)
-	sprintf(s, "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
+	(void)snprintf(s, sizeof(s), "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_9, s);
 
-    if (!gpsdata->online) {
+    if (gpsdata->online == 0) {
 	newstate = 0;
-	sprintf(s, "OFFLINE");
+	(void)snprintf(s, sizeof(s), "OFFLINE");
     } else {
 	newstate = gpsdata->fix.mode;
 	switch (gpsdata->fix.mode) {
 	case MODE_2D:
-	    sprintf(s, "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    (void)snprintf(s, sizeof(s), "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	case MODE_3D:
-	    sprintf(s, "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    (void)snprintf(s, sizeof(s), "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	default:
-	    sprintf(s, "NO FIX");
+	    (void)snprintf(s, sizeof(s), "NO FIX");
 	    break;
 	}
     }
@@ -335,7 +349,8 @@ static void update_panel(struct gps_data_t *gpsdata,
 	timer = time(NULL);
 	state = newstate;
     }
-    sprintf(s + strlen(s), " (%d secs)", (int) (time(NULL) - timer));
+    (void)snprintf(s+strlen(s), sizeof(s)-strlen(s),
+		   " (%d secs)", (int) (time(NULL) - timer));
     XmTextFieldSetString(text_10, s);
     draw_graphics(gpsdata);
 
@@ -348,29 +363,34 @@ static char *get_resource(Widget w, char *name, char *default_value)
   XtResource xtr;
   char *value = NULL;
 
+  /*@ -observertrans -statictrans -immediatetrans -compdestroy @*/
   xtr.resource_name = name;
   xtr.resource_class = "AnyClass";
   xtr.resource_type = XmRString;
-  xtr.resource_size = sizeof(String);
+  xtr.resource_size = (Cardinal)sizeof(String);
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
   XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
   if (value) return value;
-  return default_value;
+  /*@ +observertrans +statictrans +immediatetrans +compdestroy @*/
+  /*@i@*/return default_value;
 }
 
+/*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
     int option;
-    char *arg, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *su, *au;
     char *err_str = NULL;
 
+    /*@ -onlytrans */
     toplevel = XtVaAppInitialize(&app, "xgps", 
 			       options, XtNumber(options), 
 			       &argc,argv, fallback_resources,NULL);
 
+    /*@ +onlytrans */
     su = get_resource(toplevel, "speedunits", "mph");
     for (speedunits = speedtable; 
 	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
@@ -401,9 +421,10 @@ altunits_ok:;
 	    exit(1);
 	}
     }
+    /*@ -branchstate @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
-	colon1 = strchr(arg, ':');
+	/*@i@*/colon1 = strchr(arg, ':');
 	server = arg;
 	if (colon1 != NULL) {
 	    if (colon1 == arg)
@@ -420,7 +441,9 @@ altunits_ok:;
 		device = colon2 + 1;
 	    }
 	}
+	colon1 = colon2 = NULL;
     }
+    /*@ +branchstate @*/
 
     gpsdata = gps_open(server, port);
     if (!gpsdata) {
@@ -448,9 +471,12 @@ altunits_ok:;
     if (device) {
 	char *channelcmd = (char *)malloc(strlen(device)+3);
 
-	(void)strcpy(channelcmd, "F=");
-	(void)strcpy(channelcmd+2, device);
-	(void)gps_query(gpsdata, channelcmd);
+	if (channelcmd) {
+	    /*@i1@*/(void)strcpy(channelcmd, "F=");
+	    (void)strcpy(channelcmd+2, device);
+	    (void)gps_query(gpsdata, channelcmd);
+	    (void)free(channelcmd);
+	}
     }
 	
     (void)gps_query(gpsdata, "w+x\n");
@@ -460,5 +486,8 @@ altunits_ok:;
     (void)XtAppMainLoop(app);
 
     (void)gps_close(gpsdata);
+    if (arg != NULL)
+	(void)free(arg);
     return 0;
 }
+/*@ +mustfreefresh @*/

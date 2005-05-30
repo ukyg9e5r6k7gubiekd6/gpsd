@@ -16,6 +16,7 @@ static Dimension width, height;
 static int diameter;
 static Pixmap pixmap;
 
+/*@ -usedef -compdef -mustfreefresh @*/
 static void set_color(String color)
 {
     Display *dpy = XtDisplay(draww);
@@ -31,6 +32,7 @@ static void set_color(String color)
     }
     (void)XSetForeground(dpy, drawGC, col.pixel);
 }
+/*@ +usedef @*/
 
 void register_canvas(Widget w, GC gc)
 {
@@ -46,7 +48,8 @@ void register_canvas(Widget w, GC gc)
     diameter = min(width, height) - RM;
 }
 
-static void pol2cart(double azimuth, double elevation, int *xout, int *yout)
+static void pol2cart(double azimuth, double elevation, 
+		     /*@out@*/int *xout, /*@out@*/int *yout)
 {
     azimuth *= DEG_2_RAD;
 #ifdef PCORRECT
@@ -65,6 +68,7 @@ static void draw_arc(int x, int y, unsigned int diam)
 	     diam, diam,	/* width, height */
 	     0, 360 * 64);	/* angle1, angle2 */
 }
+/*@ +compdef @*/
 
 void draw_graphics(struct gps_data_t *gpsdata)
 {
@@ -72,7 +76,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
     char buf[20];
 
     if (gpsdata->satellites != 0) {
-	i = min(width, height);
+	i = (int)min(width, height);
 
 	set_color("White");
 	(void)XFillRectangle(XtDisplay(draww),pixmap,drawGC,0,0,width,height);
@@ -83,13 +87,15 @@ void draw_graphics(struct gps_data_t *gpsdata)
 
 	/* draw the 45 degree circle */
 #ifdef PCORRECT
-	draw_arc(width / 2, height / 2, (i - RM) * 0.7); /* sin(45) ~ 0.7 */
+#define FF	0.7 /* sin(45) ~ 0.7 */
 #else
-	draw_arc(width / 2, height / 2, (i - RM) * 0.5);
+#define FF	0.5
 #endif
+	draw_arc(width / 2, height / 2, (unsigned)((i - RM) * FF));
+#undef FF
 
 	set_color("Black");
-	draw_arc(width / 2, height / 2, i - RM);
+	draw_arc(width / 2, height / 2, (unsigned)(i - RM));
 
 	pol2cart(0, 0, &x, &y);
 	set_color("Black");
@@ -106,7 +112,9 @@ void draw_graphics(struct gps_data_t *gpsdata)
 
 	/* Now draw the satellites... */
 	for (i = 0; i < gpsdata->satellites; i++) {
-	    pol2cart(gpsdata->azimuth[i], gpsdata->elevation[i], &x, &y);
+	    pol2cart((double)gpsdata->azimuth[i], 
+		     (double)gpsdata->elevation[i], 
+		     &x, &y);
 
 	    if (gpsdata->ss[i] < 20) 
 		set_color("Grey");
@@ -114,7 +122,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		set_color("Yellow");
 	    else
 		set_color("Green");
-	    XFillArc(XtDisplay(draww), pixmap, drawGC,
+	    (void)XFillArc(XtDisplay(draww), pixmap, drawGC,
 		     x - 5, y - 5,	/* x,y */
 		     11, 11,		/* width, height */
 		     0, 360 * 64	/* angle1, angle2 */
@@ -124,11 +132,11 @@ void draw_graphics(struct gps_data_t *gpsdata)
 	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 2);
 	    if (gpsdata->ss[i]) {
 		set_color("Black");
-		XDrawPoint(XtDisplay(draww), pixmap, drawGC, x, y);
+		(void)XDrawPoint(XtDisplay(draww), pixmap, drawGC, x, y);
 	    }
 		
 	}
-	XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
+	(void)XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 		  0, 0, width, height, 0, 0);
     }
 }
@@ -138,6 +146,8 @@ void redraw(Widget w UNUSED, XtPointer client_data UNUSED,
 {
     (void)XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y,
-	      cbs->event->xexpose.width, cbs->event->xexpose.height,
+	      (unsigned int)cbs->event->xexpose.width, 
+	      (unsigned int)cbs->event->xexpose.height,
 	      cbs->event->xexpose.x, cbs->event->xexpose.y);
 }
+/*@ +mustfreefresh @*/

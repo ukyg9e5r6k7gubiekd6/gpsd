@@ -85,7 +85,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epc = UNCERTAINTY_NOT_VALID;
 }
 
-struct gps_data_t *gps_open(const char *host, const char *port)
+struct gps_data_t *gps_open(/*@null@*/const char *host, /*@null@*/const char *port)
 /* open a connection to a gpsd daemon */
 {
     struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
@@ -440,7 +440,7 @@ int gps_poll(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */ 
 {
     char	buf[BUFSIZ];
-    int		n;
+    ssize_t	n;
     double received = 0;
 
     /* the daemon makes sure that every read is NUL-terminated */

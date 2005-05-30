@@ -64,8 +64,10 @@ double wgs84_separation(double lat, double lon)
 	ilon1*10.-180.,ilat1*10.-90.,
 	ilon2*10.-180.,ilat2*10.-90.,
 	lon,           lat,
-	geoid_delta[ilon1+ilat1*GEOID_COL], geoid_delta[ilon2+ilat1*GEOID_COL],
-	geoid_delta[ilon1+ilat2*GEOID_COL], geoid_delta[ilon2+ilat2*GEOID_COL]
+	(double)geoid_delta[ilon1+ilat1*GEOID_COL], 
+	(double)geoid_delta[ilon2+ilat1*GEOID_COL],
+	(double)geoid_delta[ilon1+ilat2*GEOID_COL], 
+	(double)geoid_delta[ilon2+ilat2*GEOID_COL]
 	);
 }
 

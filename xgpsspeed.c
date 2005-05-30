@@ -47,11 +47,12 @@ static void handle_input(XtPointer client_data UNUSED,
     }
 }
 
-static char *get_resource(char *name, char *default_value)
+static char *get_resource(Widget w, char *name, char *default_value)
 {
   XtResource xtr;
   char *value = NULL;
 
+  /*@ -observertrans -statictrans -immediatetrans -compdestroy -nullpass @*/
   xtr.resource_name = name;
   xtr.resource_class = "AnyClass";
   xtr.resource_type = XmRString;
@@ -59,26 +60,30 @@ static char *get_resource(char *name, char *default_value)
   xtr.resource_offset = 0;
   xtr.default_type = XmRImmediate;
   xtr.default_addr = default_value;
-  (void)XtGetApplicationResources(toplevel, &value, &xtr, 1, NULL, 0);
+  XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
   if (value) return value;
-  return default_value;
+  /*@ +observertrans +statictrans +immediatetrans +compdestroy +nullpass @*/
+  /*@i@*/return default_value;
 }
 
+/*@ -mustfreefresh @*/
 int main(int argc, char **argv)
 {
     Arg             args[10];
     XtAppContext app;
     int option;
-    char *arg, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+    char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *speedunits;
     Widget base;
 
+    /*@ -compdef -nullpass @*/
     toplevel = XtVaAppInitialize(&app, "xgpsspeed", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
+    /*@ +compdef +nullpass @*/
     speedfactor = MPS_TO_MPH;		/* Software maintained in US */
-    speedunits = get_resource("speedunits", "mph");
+    speedunits = get_resource(toplevel, "speedunits", "mph");
     if (strcmp(speedunits, "kph")==0) 
 	speedfactor = MPS_TO_KPH;
     else if (strcmp(speedunits, "knots")==0)
@@ -87,13 +92,14 @@ int main(int argc, char **argv)
     while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
 	case 'v':
-	    printf("xgpsspeed %s\n", VERSION);
+	    (void)printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': default:
-	    fputs("usage: gps [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
+	    (void)fputs("usage: gps [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }
+    /*@ -branchstate @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
 	colon1 = strchr(arg, ':');
@@ -113,7 +119,9 @@ int main(int argc, char **argv)
 		device = colon2 + 1;
 	    }
 	}
+	colon1 = colon2 = NULL;
     }
+    /*@ +branchstate @*/
 
    /**** Shell Widget ****/
     (void)XtSetArg(args[0], XtNiconPixmap,
@@ -141,11 +149,11 @@ int main(int argc, char **argv)
     (void)XtRealizeWidget(toplevel);
 
     if (!(gpsdata = gps_open(server, DEFAULT_GPSD_PORT))) {
-	fputs("xgpsspeed: no gpsd running or network error\n", stderr);
+	(void)fputs("xgpsspeed: no gpsd running or network error\n", stderr);
 	exit(2);
     }
 
-    XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
+    (void)XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
     
     gps_set_raw_hook(gpsdata, update_display);
@@ -153,15 +161,21 @@ int main(int argc, char **argv)
     if (device) {
 	char *channelcmd = (char *)malloc(strlen(device)+3);
 
-	(void)strcpy(channelcmd, "F=");
-	(void)strcpy(channelcmd+2, device);
-	(void)gps_query(gpsdata, channelcmd);
+	if (channelcmd) {
+	    /*@i1@*/(void)strcpy(channelcmd, "F=");
+	    (void)strcpy(channelcmd+2, device);
+	    (void)gps_query(gpsdata, channelcmd);
+	    (void)free(channelcmd);
+	}
     }
 	
     (void)gps_query(gpsdata, "w+x\n");
 
     (void)XtAppMainLoop(app);
 
-    gps_close(gpsdata);
+    (void)gps_close(gpsdata);
+    if (arg != NULL)
+	(void)free(arg);
     return 0;
 }
+/*@ +mustfreefresh @*/
