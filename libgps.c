@@ -9,6 +9,7 @@
 
 #include "gpsd.h"
 
+#ifdef __UNUSED__
 /* 
  * check the environment to determine proper GPS units
  *
@@ -66,7 +67,7 @@ int gpsd_units(void)
 	/* TODO: allow a compile time default here */
 	return 0;
 }
-
+#endif /* __UNUSED__ */
 
 void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
@@ -85,7 +86,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epc = UNCERTAINTY_NOT_VALID;
 }
 
-struct gps_data_t *gps_open(/*@null@*/const char *host, /*@null@*/const char *port)
+struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
 {
     struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
@@ -221,7 +222,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->set |= DEVICELIST_SET;
 		    }    
 		    if (sp[2] != '?') {
-			gpsdata->ndevices = strtol(sp+2, &sp, 10);
+			gpsdata->ndevices = (int)strtol(sp+2, &sp, 10);
 			gpsdata->devicelist = (char **)calloc(
 			    gpsdata->ndevices,
 			    sizeof(char **));
@@ -243,7 +244,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') 
 			gpsdata->driver_mode = 0;
 		    else
-			gpsdata->driver_mode = atoi(sp+2);
+			gpsdata->driver_mode = (unsigned)atoi(sp+2);
 		    break;
 		case 'O':
 		    if (sp[2] == '?') {
@@ -477,8 +478,8 @@ static void *poll_gpsd(void *args)
     struct gps_data_t *gpsdata;
 
     /* set thread parameters */
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,&oldstate);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype); /* we want to be canceled also when blocked on gps_poll() */
+    (void)pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,&oldstate);
+    (void)pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype); /* we want to be canceled also when blocked on gps_poll() */
     gpsdata = (struct gps_data_t *) args;
     do {
 	res = gps_poll(gpsdata); /* this is not actually polling */
@@ -493,7 +494,7 @@ int gps_set_callback(struct gps_data_t *gpsdata,
 		     pthread_t *handler) 
 /* set an asynchronous callback and launch a thread for it */
 {
-    gps_query(gpsdata,"w+\n");	/* ensure gpsd is in watcher mode, so we'll have data to read */
+    (void)gps_query(gpsdata,"w+\n");	/* ensure gpsd is in watcher mode, so we'll have data to read */
     if (gpsdata->thread_hook != NULL) {
 	gpsdata->thread_hook = callback;
 	return 0;

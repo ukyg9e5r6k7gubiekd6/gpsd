@@ -47,9 +47,10 @@ struct shmTime {
     int    pad[10];
 };
 
-static struct shmTime *getShmTime(int unit)
+static /*@null@*/ struct shmTime *getShmTime(int unit)
 {
-    int shmid=shmget (NTPD_BASE+unit, sizeof (struct shmTime), IPC_CREAT|0700);
+    int shmid=shmget ((key_t)(NTPD_BASE+unit), 
+		      sizeof (struct shmTime), IPC_CREAT|0700);
     if (shmid == -1) {
 	gpsd_report(1, "shmget failed\n");
 	return NULL;

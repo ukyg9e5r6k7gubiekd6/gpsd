@@ -26,11 +26,13 @@ xgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XM_LIBS) $(XT_LIBS) $(X_LI
 #
 # Build xgpsspeed
 #
-xgpsspeed_SOURCES = \
+xgpsspeed_c_sources = \
 	xgpsspeed.c \
 	Tachometer.c \
 	TachometerP.h \
-	Tachometer.h \
+	Tachometer.h
+xgpsspeed_SOURCES = \
+	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
 xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
@@ -170,12 +172,13 @@ EXTRA_DIST = \
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
 
-# Run splint on the daemon and its support libraries
+# Report splint warnings
 splint:
-	splint -fileextensions $(gpsd_SOURCES) $(libgps_c_sources) $(sirfmon_SOURCES) $(xgps_SOURCES) $(xgpsspeed_SOURCES)
-
-# When the splint message count is down to a reasonable number, use this:
-#-splint $(gpsd_SOURCES) $(libgps_c_sources)
-#-splint $(xgps_SOURCES)
-#-splint -fileextensions $(xgpsspeed_SOURCES)
-#-splint $(sirfmon_SOURCES)
+	@echo "Running splint on daemon and libraries..."
+	-splint -redef $(gpsd_SOURCES) $(libgps_c_sources)
+	@echo "Running splint on xgps..."
+	-splint -exportlocal $(xgps_SOURCES)
+	@echo "Running splint on xgpsspeed..."
+	-splint -exportlocal $(xgpsspeed_c_sources)
+	@echo "Running splint on sirfmon..."
+	-splint $(sirfmon_SOURCES)

@@ -228,14 +228,14 @@ static struct gps_type_t earthmate;
 
 static void earthmate_close(struct gps_device_t *session)
 {
-    session->device_type = &earthmate;
+    /*@i@*/session->device_type = &earthmate;
 }
 
 static void earthmate_initializer(struct gps_device_t *session)
 {
     (void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
     (void)usleep(10000);
-    session->device_type = &zodiac_binary;
+    /*@i@*/session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
     if (zodiac_binary.initializer) zodiac_binary.initializer(session);
 }

@@ -110,10 +110,10 @@ int gpsd_open(struct gps_device_t *session)
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe!=NULL && (*dp)->probe(session)!=0) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
-		session->device_type = *dp;
+		/*@i1@*/session->device_type = *dp;
 		if (session->device_type->initializer)
 		    session->device_type->initializer(session);
-		return session->gpsdata.gps_fd;
+		/*@i1@*/return session->gpsdata.gps_fd;
 	    }
  	}
 	gpsd_report(3, "no probe matched...\n");

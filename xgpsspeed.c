@@ -76,12 +76,12 @@ int main(int argc, char **argv)
     char *speedunits;
     Widget base;
 
-    /*@ -compdef -nullpass @*/
+    /*@ -compdef -nullpass -onlytrans @*/
     toplevel = XtVaAppInitialize(&app, "xgpsspeed", 
 				 options, XtNumber(options),
 				 &argc, argv, fallback_resources, NULL);
 
-    /*@ +compdef +nullpass @*/
+    /*@ +compdef +nullpass +onlytrans @*/
     speedfactor = MPS_TO_MPH;		/* Software maintained in US */
     speedunits = get_resource(toplevel, "speedunits", "mph");
     if (strcmp(speedunits, "kph")==0) 
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
     }
-    /*@ -branchstate @*/
+    /*@ -branchstate -nullpass @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
 	colon1 = strchr(arg, ':');
@@ -123,7 +123,8 @@ int main(int argc, char **argv)
     }
     /*@ +branchstate @*/
 
-   /**** Shell Widget ****/
+    /*@ -immediatetrans -usedef -observertrans -statictrans @*/
+    /**** Shell Widget ****/
     (void)XtSetArg(args[0], XtNiconPixmap,
 	     XCreateBitmapFromData(XtDisplay(toplevel),
 				   XtScreen(toplevel)->root, (char*)xgps_bits,
@@ -142,9 +143,11 @@ int main(int argc, char **argv)
         (void)XtSetArg(args[0], XtNlabel, "Miles per Hour");
     else
         (void)XtSetArg(args[0], XtNlabel, "Km per Hour");
+    /*@ +immediatetrans +usedef +observertrans +statictrans @*/
     (void)XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/
+    /*@ -onlytrans -mustfreeonly @*/
     tacho = XtCreateManagedWidget("meter", tachometerWidgetClass,base,NULL,0);
     (void)XtRealizeWidget(toplevel);
 
@@ -152,10 +155,13 @@ int main(int argc, char **argv)
 	(void)fputs("xgpsspeed: no gpsd running or network error\n", stderr);
 	exit(2);
     }
+    /*@ +onlytrans +mustfreeonly @*/
 
+    /*@ -usedef @*/
     (void)XtAppAddInput(app, gpsdata->gps_fd, (XtPointer) XtInputReadMask,
 		  handle_input, NULL);
-    
+    /*@ +nullpass +usedef @*/
+
     gps_set_raw_hook(gpsdata, update_display);
 
     if (device) {

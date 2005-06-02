@@ -445,7 +445,7 @@ altunits_ok:;
     }
     /*@ +branchstate @*/
 
-    gpsdata = gps_open(server, port);
+    /*@i@*/gpsdata = gps_open(server, port);
     if (!gpsdata) {
 	switch ( errno ) {
 	case NL_NOSERVICE: 	err_str = "can't get service entry"; break;

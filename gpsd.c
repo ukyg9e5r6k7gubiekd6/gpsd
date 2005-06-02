@@ -57,7 +57,7 @@ static fd_set all_fds;
 static int debuglevel;
 static bool in_background = false;
 static jmp_buf restartbuf;
-/*@ -initallelements @*/
+/*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE,
 #ifdef NTPSHM_ENABLE
 				       {0},
@@ -67,7 +67,7 @@ static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE,
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
-/*@ +initallelements @*/
+/*@ +initallelements +nullassign +nullderef @*/
 
 static void onsig(int sig)
 {
@@ -327,6 +327,7 @@ static void raw_hook(struct gps_data_t *ud UNUSED,
     }
 }
 
+/*@ -globstate @*/
 static /*@null@*/ struct gps_device_t **find_device(char *device_name)
 /* find the channel block for and existing device name */
 {
@@ -360,42 +361,27 @@ found:
 
     return *chp;
 }
+/*@ +globstate @*/
 
-static char *snarfline(char *p, /*@out@*/char **out)
-/* copy the rest of the command line, before CR-LF */
-{
-    char *q;
-    static char	stash[BUFSIZ];
-
-    /*@ -temptrans -mayaliasunique @*/
-    for (q = p; isprint(*p) && !isspace(*p) && /*@i@*/(p-q < BUFSIZ-1); p++)
-	continue;
-    (void)memcpy(stash, q, (size_t)(p-q));
-    stash[p-q] = '\0';
-    *out = stash;
-    return p;
-    /*@ +temptrans +mayaliasunique @*/
-}
-
+/*@ -branchstate @*/
 static bool assign_channel(struct subscriber_t *user)
 {
     /* if subscriber has no device... */
-    if (!user->device) {
+    if (user->device == NULL) {
 	double most_recent = 0;
-	struct gps_device_t **channel, *mychannel = NULL;
+	struct gps_device_t **channel;
 
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (*channel != NULL && (*channel)->gpsdata.sentence_time >= most_recent) {
 		most_recent = (*channel)->gpsdata.sentence_time;
-		mychannel = *channel;
+		user->device = *channel;
 		break;
 	    }
-	if (mychannel == NULL)
-	    return false;
-	else
-	    user->device = mychannel;
     }
+
+    if (user->device == NULL)
+	return false;
 
     /* and open that device */
     if (user->device->gpsdata.gps_fd == -1) {
@@ -416,6 +402,23 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     return true;
+}
+/*@ +branchstate @*/
+
+static char *snarfline(char *p, /*@out@*/char **out)
+/* copy the rest of the command line, before CR-LF */
+{
+    char *q;
+    static char	stash[BUFSIZ];
+
+    /*@ -temptrans -mayaliasunique @*/
+    for (q = p; isprint(*p) && !isspace(*p) && /*@i@*/(p-q < BUFSIZ-1); p++)
+	continue;
+    (void)memcpy(stash, q, (size_t)(p-q));
+    stash[p-q] = '\0';
+    *out = stash;
+    return p;
+    /*@ +temptrans +mayaliasunique @*/
 }
 
 static int handle_request(int cfd, char *buf, int buflen)
@@ -980,8 +983,10 @@ int main(int argc, char *argv[])
 
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(1, "launching (Version %s)\n", VERSION);
+    /*@ -observertrans @*/
     if (!service)
 	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
+    /*@ +observertrans @*/
     if ((msock = passivesock(service, "tcp", QLEN)) < 0) {
 	gpsd_report(0,"command socket create failed, netlib error %d\n",msock);
 	exit(2);

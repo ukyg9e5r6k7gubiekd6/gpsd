@@ -21,6 +21,7 @@
 
 #define NO_MAG_VAR	-999	/* must be out of band for degrees */
 
+/*@ -branchstate */
 int gpsd_open_dgps(char *dgpsserver)
 {
     char hn[256], buf[BUFSIZ];
@@ -42,6 +43,7 @@ int gpsd_open_dgps(char *dgpsserver)
     }
     return dsock;
 }
+/*@ +branchstate */
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
@@ -49,7 +51,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
-	    session->device_type = *dp;
+	    /*@i1@*/session->device_type = *dp;
 	    if (session->device_type->initializer)
 		session->device_type->initializer(session);
 	    return 1;
@@ -98,7 +100,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    if (session->device_type && session->device_type->wrapup)
+    if (session->device_type != NULL && session->device_type->wrapup != NULL)
 	session->device_type->wrapup(session);
 }
 
@@ -120,6 +122,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
 		    session->gpsdata.gps_device, state);
 
+	/*@ +boolint @*/
 	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
@@ -131,13 +134,14 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
 	     */
-#define timediff(x, y)	((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
+#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 	    if (cycle > 999000 && cycle < 1001000 && duration > 800000)
 		(void)ntpshm_pps(session, &tv);
 	}
+	/*@ -boolint @*/
 
 	pulse[state] = tv;
     }
@@ -297,7 +301,7 @@ int gpsd_poll(struct gps_device_t *session)
 	char buf[BUFSIZ];
 	int rtcmbytes;
 
-	if ((rtcmbytes=read(session->dsock,buf,sizeof(buf)))>0 && (session->gpsdata.gps_fd !=-1)) {
+	if ((rtcmbytes=(int)read(session->dsock,buf,sizeof(buf)))>0 && (session->gpsdata.gps_fd !=-1)) {
 	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
@@ -311,8 +315,8 @@ int gpsd_poll(struct gps_device_t *session)
     gpsd_report(7, "GPS has %d chars waiting\n", waiting);
     if (waiting < 0)
 	return 0;
-    else if (!waiting) {
-	if (session->device_type && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
+    else if (waiting == 0) {
+	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
@@ -328,7 +332,7 @@ int gpsd_poll(struct gps_device_t *session)
 
 	/* can we get a full packet from the device? */
 	if (session->device_type)
-	    packet_length = session->device_type->get_packet(session, waiting);
+	    packet_length = session->device_type->get_packet(session, (unsigned)waiting);
 	else {
 	    packet_length = packet_get(session, waiting);
 	    if (session->packet_type != BAD_PACKET) {
@@ -380,7 +384,7 @@ void gpsd_zero_satellites(struct gps_data_t *out)
 void gpsd_raw_hook(struct gps_device_t *session, char *sentence, size_t len, int level)
 {
     if (session->gpsdata.raw_hook) {
-	session->gpsdata.raw_hook(&session->gpsdata, sentence, len, level);
+	session->gpsdata.raw_hook(&session->gpsdata, sentence, (int)len, level);
     }
 }
 
@@ -410,7 +414,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
     struct tm tm;
     time_t intfixtime;
 
-    if (session->gpsdata.hdop)
+    if (session->gpsdata.hdop != DOP_NOT_VALID)
 	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
 
     intfixtime = (time_t)session->gpsdata.fix.time;
@@ -531,7 +535,8 @@ void gpsd_binary_quality_dump(struct gps_device_t *session,
     nmea_add_checksum(bufp2);
     gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
     bufp += strlen(bufp);
-    if ((session->gpsdata.fix.eph || session->gpsdata.fix.epv)
+    if ((session->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID 
+			|| session->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
 	&& finite(session->gpsdata.fix.eph)
 	&& finite(session->gpsdata.fix.epv)
 	&& finite(session->gpsdata.epe)

@@ -60,7 +60,7 @@ double iso8601_to_unix(char *isotime)
     /*@ +compdef @*/
 }
 
-char *unix_to_iso8601(double fixtime, char isotime[], int len)
+char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], int len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 {
     struct tm when;
@@ -78,7 +78,9 @@ char *unix_to_iso8601(double fixtime, char isotime[], int len)
     /*@ -unrecog -compdef */
     slen = strlen(isotime);
     (void)snprintf(isotime + slen, (size_t)len, "%.1f", fractional);
+    /*@ -aliasunique @*/
     (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
+    /*@ -aliasunique @*/
     (void)strcat(isotime, "Z");
     return isotime;
 }
