@@ -4,6 +4,11 @@ will unfold thenm again.
 
 ** Bugs:
 
+*** Running the BU-303b-nofix test file through gpsfake produces a nan
+
+Running the BU-303b-nofix test file through gpsfake produces a nan in
+the GPGSA dump.
+
 *** No data from BU-303?
 
 Roeland Th. Jansen <roeland@linux-it.nl> was reporting no data from a

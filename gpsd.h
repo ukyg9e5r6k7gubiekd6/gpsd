@@ -114,7 +114,6 @@ struct gps_device_t {
     unsigned long satcounter;
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
-    unsigned int gps_week;	/* Current GPS week number */
     time_t last_request;	/* Last time request packets were sent */
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
@@ -123,6 +122,9 @@ struct gps_device_t {
                            global context and save spave */
     long GarminBufferLen;                  /* current GarminBuffer Length */
 #endif /* GARMIN_ENABLE */
+#if defined(SIRFII_ENABLE) || defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
+    unsigned int gps_week;	/* Current GPS week number */
+#endif /*defined(SIRFII_ENABLE)||defined(TSIP_ENABLE)||defined(GARMIN_ENABLE)*/
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
     unsigned short sn;		/* packet sequence number */
     /*

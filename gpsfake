@@ -64,13 +64,13 @@ try:
         leader = '$';
         legend = "gpsfake: line %d "
         textual = 1
-    elif logdata[0] == 0xa0:
+    elif logdata[0] == '\xa0':
         print "gpsfake: interpreting as SiRF-II binary packets"
-        leader = 0xa0
+        leader = '\xa0'
         legend = "gpsfake: packet %d"
         textual = 0
     else:
-        print "gpsfake: unknown log type, can't handle it!"
+        print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
         logdata = None
 
     if logdata:
