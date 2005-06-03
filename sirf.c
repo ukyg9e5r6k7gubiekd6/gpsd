@@ -107,9 +107,8 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 }
 
 #define getbyte(off)	buf[off]
-#define getword(off)	((short)((getbyte(off) << 8) | getbyte(off+1)))
-#define getlong(off)	((int)((getbyte(off) << 24) | (getbyte(off+1) << 16) \
-				| (getbyte(off+3) << 8) | getbyte(off+4)))
+#define getword(off)	((getbyte(off) << 8) | getbyte(off+1))
+#define getlong(off)	((int)((getword(off) << 16) | (getword(off+2) & 0xffff)))
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
