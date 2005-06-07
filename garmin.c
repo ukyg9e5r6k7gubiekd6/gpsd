@@ -196,14 +196,14 @@ static inline double  radtodeg( double rad) {
 	return (double)(rad * RAD_2_DEG );
 }
 
-static int PrintPacket(struct gps_device_t *session, Packet_t *pkt );
+static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt );
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket );
 static int GetPacket (struct gps_device_t *session );
 
 // For debugging, decodes and prints some known packets.
-static int PrintPacket(struct gps_device_t *session, Packet_t *pkt)
+static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 {
-    int mask = 0;
+    gps_mask_t mask = 0;
     int maj_ver;
     int min_ver;
     unsigned int mode;
@@ -843,7 +843,7 @@ static int garmin_get_packet(struct gps_device_t *session, /*@unused@*/ unsigned
     return ( 0 == GetPacket( session ) ? 1 : 0);
 }
 
-static int garmin_parse_input(struct gps_device_t *session)
+static gps_mask_t garmin_parse_input(struct gps_device_t *session)
 {
     return PrintPacket(session, (Packet_t*)session->GarminBuffer);
 }

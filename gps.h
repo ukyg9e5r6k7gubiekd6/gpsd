@@ -70,35 +70,37 @@ struct gps_fix_t {
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
-#define NO_SEPARATION	-99999.0	/* must be out of band */
+#define SEPARATION_NOT_VALID	-99999.0	/* must be out of band */
 };
 
+typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
+
 struct gps_data_t {
-    unsigned long set;	/* has field been set since this was last cleared? */
-#define ONLINE_SET	0x00000001
-#define TIME_SET	0x00000002
-#define TIMERR_SET	0x00000004
-#define LATLON_SET	0x00000008
-#define ALTITUDE_SET	0x00000010
-#define SPEED_SET	0x00000020
-#define TRACK_SET	0x00000040
-#define CLIMB_SET	0x00000080
-#define STATUS_SET	0x00000100
-#define MODE_SET	0x00000200
-#define HDOP_SET  	0x00000400
-#define VDOP_SET  	0x00000800
-#define PDOP_SET  	0x00001000
-#define HERR_SET	0x00002000
-#define VERR_SET	0x00004000
-#define PERR_SET	0x00008000
-#define SATELLITE_SET	0x00010000
-#define SPEEDERR_SET	0x00020000
-#define TRACKERR_SET	0x00040000
-#define CLIMBERR_SET	0x00080000
-#define DEVICE_SET	0x00100000
-#define DEVICELIST_SET	0x00200000
-#define DEVICEID_SET	0x00400000
-#define ERROR_SET	0x00800000
+    gps_mask_t set;	/* has field been set since this was last cleared? */
+#define ONLINE_SET	0x00000001u
+#define TIME_SET	0x00000002u
+#define TIMERR_SET	0x00000004u
+#define LATLON_SET	0x00000008u
+#define ALTITUDE_SET	0x00000010u
+#define SPEED_SET	0x00000020u
+#define TRACK_SET	0x00000040u
+#define CLIMB_SET	0x00000080u
+#define STATUS_SET	0x00000100u
+#define MODE_SET	0x00000200u
+#define HDOP_SET  	0x00000400u
+#define VDOP_SET  	0x00000800u
+#define PDOP_SET  	0x00001000u
+#define HERR_SET	0x00002000u
+#define VERR_SET	0x00004000u
+#define PERR_SET	0x00008000u
+#define SATELLITE_SET	0x00010000u
+#define SPEEDERR_SET	0x00020000u
+#define TRACKERR_SET	0x00040000u
+#define CLIMBERR_SET	0x00080000u
+#define DEVICE_SET	0x00100000u
+#define DEVICELIST_SET	0x00200000u
+#define DEVICEID_SET	0x00400000u
+#define ERROR_SET	0x00800000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
@@ -180,7 +182,7 @@ extern struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *requests);
 int gps_poll(struct gps_data_t *gpsdata);
-    void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, int len, int level));
+void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, int len, int level));
     int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, int len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 

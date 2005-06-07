@@ -160,6 +160,15 @@ a second, and a SiRF one maybe 18 times a second.
 Is this worth doing?  Maybe.  It would reduce fix latency, possibly
 to good effect if your GPS is in motion.  Opinions?  Calculations?
 
+*** Set the system time zone from latitude/longitude
+
+If we're going to give gpsd the capability to set system time via
+ntpd, why not let it set timezone as well?  A good thing for hackers
+travelling with laptops!
+
+The major issue here is that I have not yet found code, or a
+database, that would allow mapping from lon/lat to timezone.
+
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"

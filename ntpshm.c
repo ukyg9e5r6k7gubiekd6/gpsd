@@ -56,11 +56,13 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
 	return NULL;
     } else {
 	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
+	/*@ -mustfreefresh */
 	if ((int)(long)p == -1) {
 	    gpsd_report(1, "shmat failed\n");
-	    p=0;
+	    return NULL;
 	}
 	return p;
+	/*@ +mustfreefresh */
     }
 }
 
@@ -141,7 +143,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
 
 int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 {
-    struct shmTime *shmTime,*shmTimeP;
+    struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
     double offset;
 
@@ -152,18 +154,20 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     /* check if received time messages are within locking range */
 
+    /*@ +ignorequals */
     if (abs((shmTime->receiveTimeStampSec-shmTime->clockTimeStampSec)*1000000 +
 	     shmTime->receiveTimeStampUSec-shmTime->clockTimeStampUSec)
 	    > PUT_MAX_OFFSET)
 	return -1;
+    /*@ -ignorequals */
 
     if (tv->tv_usec < PPS_MAX_OFFSET) {
-	seconds = tv->tv_sec;
-	offset = tv->tv_usec / 1000000.0;
+	seconds = (time_t)tv->tv_sec;
+	offset = (double)tv->tv_usec / 1000000.0;
     } else {
 	if (tv->tv_usec > (1000000 - PPS_MAX_OFFSET)) {
-	    seconds = tv->tv_sec + 1;
-	    offset = 1 - (tv->tv_usec / 1000000.0);
+	    seconds = (time_t)(tv->tv_sec + 1);
+	    offset = 1 - ((double)tv->tv_usec / 1000000.0);
 	} else {
 	    shmTimeP->precision = -1;	/* lost lock */
 	    gpsd_report(2, "ntpshm_pps: lost PPS lock\n");
@@ -174,9 +178,9 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = 0;
-    shmTimeP->receiveTimeStampSec = tv->tv_sec;
+    shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = tv->tv_usec;
-    shmTimeP->precision = offset? (ceil(log(offset) / M_LN2)) != 0 : -20;
+    shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     shmTimeP->count++;
     shmTimeP->valid = 1;
 

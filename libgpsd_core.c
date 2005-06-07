@@ -115,8 +115,10 @@ static void *gpsd_ppsmonitor(void *arg)
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
 	(void)gettimeofday(&tv,NULL);
+	/*@ +ignoresigns */
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
 	    break;
+	/*@ -ignoresigns */
 
         state = (state & TIOCM_CAR) != 0;
 	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
@@ -172,7 +174,7 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
 #ifdef BINARY_ENABLE
 	session->mag_var = NO_MAG_VAR;
-	session->gpsdata.fix.separation = NO_SEPARATION;
+	session->gpsdata.fix.separation = SEPARATION_NOT_VALID;
 #endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE
@@ -291,7 +293,7 @@ static long handle_packet(struct gps_device_t *session)
     return session->gpsdata.set;
 }
 
-int gpsd_poll(struct gps_device_t *session)
+gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
     int waiting;
@@ -372,7 +374,7 @@ void gpsd_wrap(struct gps_device_t *session)
     (void)free(session);
 }
 
-void gpsd_zero_satellites(struct gps_data_t *out)
+void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
 {
     (void)memset(out->PRN,       0, sizeof(out->PRN));
     (void)memset(out->elevation, 0, sizeof(out->elevation));
@@ -396,7 +398,7 @@ void gpsd_raw_hook(struct gps_device_t *session, char *sentence, size_t len, int
  * and seconds have also been filled in, (c) that if the private member
  * mag_var is nonzero it is a magnetic variation in degrees that should be
  * passed on., and (d) if the private member separation does not have the
- * value NO_SEPARATION, it is a valid WGS84 geoidal separation in 
+ * value SEPARATION_NOT_VALID, it is a valid WGS84 geoidal separation in 
  * meters for the fix.
  */
 
@@ -433,7 +435,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 		session->gpsdata.satellites_used,
 		hdop_str,
 		session->gpsdata.fix.altitude, 'M');
-	if (session->gpsdata.fix.separation == NO_SEPARATION)
+	if (session->gpsdata.fix.separation == SEPARATION_NOT_VALID)
 	    (void)strcat(bufp, ",,");
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 

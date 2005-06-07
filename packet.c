@@ -511,7 +511,9 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
 	session->inbufptr = session->inbuffer;
 	session->inbuflen = 0;
     }
+    /*@ -modobserver @*/
     newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr, (size_t)waiting);
+    /*@ +modobserver @*/
 #else
     newdata = waiting;
 #endif /* TESTMAIN */
@@ -530,7 +532,9 @@ int packet_get(struct gps_device_t *session, unsigned int waiting)
     session->outbuflen = 0;
     session->inbuflen += newdata;
     while (session->inbufptr < session->inbuffer + session->inbuflen) {
+	/*@ -modobserver @*/
 	unsigned char c = *session->inbufptr++;
+	/*@ +modobserver @*/
 	nexstate(session, c);
 	if (isprint(c))
 	    gpsd_report(7, "Character '%c', new state: %d\n",c,session->packet_state);

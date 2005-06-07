@@ -40,7 +40,7 @@ C:
     <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>int <function>gpsd_poll</function></funcdef>
+<funcdef>gps_mask_t <function>gpsd_poll</function></funcdef>
     <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
 </funcprototype>
 <funcprototype>

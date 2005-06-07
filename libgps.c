@@ -88,6 +88,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epd = UNCERTAINTY_NOT_VALID;
     fixp->eps = UNCERTAINTY_NOT_VALID;
     fixp->epc = UNCERTAINTY_NOT_VALID;
+    fixp->separation = SEPARATION_NOT_VALID;
 }
 
 struct gps_data_t *gps_open(const char *host, const char *port)

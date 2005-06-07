@@ -119,9 +119,10 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
 }
 
-int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
+gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 {
-    int	st, i, j, cn, navtype, mask;
+    int	st, i, j, cn, navtype;
+    gps_mask_t mask;
     char buf2[MAX_PACKET_LENGTH*3+2];
     double fv;
     /*@ +charint @*/
@@ -687,9 +688,9 @@ int sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
     return 0;
 }
 
-static int sirfbin_parse_input(struct gps_device_t *session)
+static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 {
-    int st;
+    gps_mask_t st;
 
     if (session->packet_type == SIRF_PACKET){
 	st = sirf_parse(session, session->outbuffer, (int)session->outbuflen);

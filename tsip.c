@@ -119,9 +119,10 @@ static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
     return true;	/* it would be nice to error-check this */
 }
 
-static int tsip_analyze(struct gps_device_t *session)
+static gps_mask_t tsip_analyze(struct gps_device_t *session)
 {
-    int i, len, mask = 0;
+    int i, len;
+    gps_mask_t mask = 0;
     unsigned int id, u1;
     short s1,s2;
     float f1,f2,f3,f4,f5;

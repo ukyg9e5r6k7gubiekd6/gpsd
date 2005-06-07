@@ -52,7 +52,7 @@ struct gps_type_t {
     /*@null@*/int (*probe)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
     /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
-    /*@null@*/int (*parse_packet)(struct gps_device_t *session);
+    /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/size_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, unsigned int speed);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
@@ -98,7 +98,7 @@ struct gps_device_t {
     unsigned int packet_length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
     unsigned short inbuflen;
-    unsigned char *inbufptr;
+    unsigned /*@observer@*/char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     unsigned short outbuflen;
     unsigned long counter;
@@ -159,11 +159,11 @@ struct gps_device_t {
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
-extern int nmea_parse(char *, struct gps_data_t *);
+extern gps_mask_t nmea_parse(char *, struct gps_data_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
-extern int sirf_parse(struct gps_device_t *, unsigned char *, int);
+extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, int);
 
 extern void packet_reset(struct gps_device_t *session);
 extern void packet_pushback(struct gps_device_t *session);
@@ -178,10 +178,10 @@ extern speed_t gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_raw_hook(struct gps_device_t *, char *, size_t len, int level);
-extern void gpsd_zero_satellites(struct gps_data_t *);
-extern void gpsd_binary_fix_dump(struct gps_device_t *, char[], int);
-extern void gpsd_binary_satellite_dump(struct gps_device_t *, char[], int);
-extern void gpsd_binary_quality_dump(struct gps_device_t *, char[], int);
+extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
+extern void gpsd_binary_fix_dump(/*@in@*/struct gps_device_t *, char[], int);
+extern void gpsd_binary_satellite_dump(/*@in@*/struct gps_device_t *, char[], int);
+extern void gpsd_binary_quality_dump(/*@in@*/struct gps_device_t *, char[], int);
 
 extern int netlib_connectsock(const char *, const char *, const char *);
 
@@ -201,7 +201,7 @@ extern int gpsd_open_dgps(char *);
 extern struct gps_device_t * gpsd_init(struct gps_context_t *, char *device);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
-extern int gpsd_poll(struct gps_device_t *);
+extern gps_mask_t gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);
 
 /* caller should supply this */

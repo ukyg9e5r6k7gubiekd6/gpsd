@@ -139,7 +139,7 @@ static size_t zodiac_send_rtcm(struct gps_device_t *session,
 		| (session->outbuffer[2*(n)+0] << 16) \
 		| (session->outbuffer[2*(n)+1] << 24))
 
-static int handle1000(struct gps_device_t *session)
+static gps_mask_t handle1000(struct gps_device_t *session)
 {
     /* ticks                      = getlong(6); */
     /* sequence                   = getword(8); */
@@ -218,7 +218,7 @@ static int handle1000(struct gps_device_t *session)
     return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
 }
 
-static int handle1002(struct gps_device_t *session)
+static gps_mask_t handle1002(struct gps_device_t *session)
 {
     int i, j, status, prn;
 
@@ -256,7 +256,7 @@ static int handle1002(struct gps_device_t *session)
     return SATELLITE_SET;
 }
 
-static int handle1003(struct gps_device_t *session)
+static gps_mask_t handle1003(struct gps_device_t *session)
 {
     int i;
 
@@ -329,10 +329,11 @@ static void handle1108(struct gps_device_t *session)
 #endif
 }
 
-static int zodiac_analyze(struct gps_device_t *session)
+static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
-    int i, mask = 0;
+    int i;
+    gps_mask_t mask = 0;
     unsigned int id = (unsigned int)((session->outbuffer[3]<<8) | session->outbuffer[2]);
 
     if (session->packet_type != ZODIAC_PACKET) {

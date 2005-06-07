@@ -325,7 +325,7 @@ static void raw_hook(struct gps_data_t *ud UNUSED,
 }
 
 /*@ -globstate @*/
-static /*@null@*/ struct gps_device_t **find_device(char *device_name)
+static /*@null@*/ /*@observer@*/struct gps_device_t **find_device(char *device_name)
 /* find the channel block for and existing device name */
 {
     struct gps_device_t **chp;
@@ -402,7 +402,7 @@ static bool assign_channel(struct subscriber_t *user)
 }
 /*@ +branchstate @*/
 
-static char *snarfline(char *p, /*@out@*/char **out)
+static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
 {
     char *q;
@@ -851,7 +851,7 @@ static void handle_control(int sfd, char *buf)
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (subscribers[cfd].device == *chp)
 		    subscribers[cfd].device = NULL;
-	    *chp = NULL;
+	    /*@i1@*/*chp = NULL;	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
 	} else
 	    (void)write(sfd, "ERROR\n", 6);
@@ -893,7 +893,8 @@ int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
     static bool nowait = false;
-    static int st, changed, dsock = -1, csock = -1;
+    static int st, dsock = -1, csock = -1;
+    static gps_mask_t changed;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *control_socket = NULL;

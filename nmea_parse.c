@@ -97,7 +97,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_data_t *out)
  *
  **************************************************************************/
 
-static int processGPRMC(int count, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPRMC(int count, char *field[], struct gps_data_t *out)
 /* Recommend Minimum Specific GPS/TRANSIT Data */
 {
     /*
@@ -117,7 +117,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    int mask = ERROR_SET;
+    gps_mask_t mask = ERROR_SET;
 
     if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
@@ -160,7 +160,7 @@ static int processGPRMC(int count, char *field[], struct gps_data_t *out)
     return mask;
 }
 
-static int processGPGLL(int count, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPGLL(int count, char *field[], struct gps_data_t *out)
 /* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.  Here are the fields:
@@ -187,7 +187,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
      * actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
-    int mask = ERROR_SET;
+    gps_mask_t mask = ERROR_SET;
 
     if (strcmp(field[6], "A")==0 && (count < 8 || *status != 'N')) {
 	int newstatus = out->status;
@@ -212,7 +212,7 @@ static int processGPGLL(int count, char *field[], struct gps_data_t *out)
     return mask;
 }
 
-static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Global Positioning System Fix Data */
 {
     /*
@@ -229,7 +229,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
            (empty field) time in seconds since last DGPS update
            (empty field) DGPS station ID number (0000-1023)
     */
-    int mask;
+    gps_mask_t mask;
 
     out->status = atoi(field[6]);
     gpsd_report(3, "GPGGA sets status %d\n", out->status);
@@ -286,7 +286,7 @@ static int processGPGGA(int c UNUSED, char *field[], struct gps_data_t *out)
     return mask;
 }
 
-static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* GPS DOP and Active Satellites */
 {
     /*
@@ -301,7 +301,8 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
 	16   = HDOP
 	17   = VDOP
      */
-    int i, mask;
+    gps_mask_t mask;
+    int i;
     
     out->fix.mode = atoi(field[2]);
     mask = MODE_SET;
@@ -321,7 +322,7 @@ static int processGPGSA(int c UNUSED, char *field[], struct gps_data_t *out)
     return mask;
 }
 
-static int processGPGSV(int count, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPGSV(int count, char *field[], struct gps_data_t *out)
 /* GPS Satellites in View */
 {
     /*
@@ -395,7 +396,7 @@ static int processGPGSV(int count, char *field[], struct gps_data_t *out)
     return SATELLITE_SET;
     }
 
-static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
+static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Garmin Estimated Position Error */
 {
     /*
@@ -416,7 +417,7 @@ static int processPGRME(int c UNUSED, char *field[], struct gps_data_t *out)
     return HERR_SET | VERR_SET | PERR_SET;
 }
 
-static int processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
+static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Time & Date */
 {
     /*
@@ -478,10 +479,10 @@ void nmea_add_checksum(char *sentence)
     (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
 }
 
-int nmea_parse(char *sentence, struct gps_data_t *outdata)
+gps_mask_t nmea_parse(char *sentence, struct gps_data_t *outdata)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
-    typedef int (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
+    typedef gps_mask_t (*nmea_decoder)(int count, char *f[], struct gps_data_t *out);
     static struct {
 	char *name;
 	int mask;
@@ -497,7 +498,8 @@ int nmea_parse(char *sentence, struct gps_data_t *outdata)
     };
     unsigned char buf[NMEA_MAX+1];
 
-    int count, retval = 0;
+    int count;
+    gps_mask_t retval = 0;
     unsigned int i;
     char *p, *field[80], *s;
 #ifdef __UNUSED__

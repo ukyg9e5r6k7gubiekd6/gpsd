@@ -12,7 +12,7 @@
  *
  **************************************************************************/
 
-static int nmea_parse_input(struct gps_device_t *session)
+static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
@@ -22,7 +22,7 @@ static int nmea_parse_input(struct gps_device_t *session)
 	return 0;
 #endif /* SIRFII_ENABLE */
     } else if (session->packet_type == NMEA_PACKET) {
-	int st = 0;
+	gps_mask_t st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
 	if ((st=nmea_parse((char *)session->outbuffer,&session->gpsdata))==0) {
 #ifdef NON_NMEA_ENABLE
