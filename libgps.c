@@ -9,6 +9,10 @@
 
 #include "gpsd.h"
 
+#ifdef S_SPLINT_S
+extern char *strtok_r(char *, const char *, char **);
+#endif /* S_SPLINT_S */
+
 #ifdef __UNUSED__
 /* 
  * check the environment to determine proper GPS units
@@ -148,7 +152,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	if (strncmp(ns, "GPSD", 4) == 0) {
 	    for (sp = ns + 5; ; sp = tp) {
 		tp = sp + strcspn(sp, ",\r\n");
-		if (!*tp) break;
+		if (*tp == '\0') break;
 		*tp = '\0';
 
 		switch (*sp) {
@@ -164,14 +168,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?') {
 			gpsdata->baudrate = gpsdata->stopbits = 0;
 		    } else
-			(void)sscanf(sp, "B=%d %*d %*s %u", 
+			(void)sscanf(sp, "B=%u %*d %*s %u", 
 			       &gpsdata->baudrate, &gpsdata->stopbits);
 		    break;
 		case 'C':
 		    if (sp[2] == '?')
 			gpsdata->cycle = 0;
 		    else
-			(void)sscanf(sp, "C=%d", &gpsdata->cycle);
+			(void)sscanf(sp, "C=%u", &gpsdata->cycle);
 		    break;
 		case 'D':
 		    if (sp[2] == '?') 
@@ -224,7 +228,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] != '?') {
 			gpsdata->ndevices = (int)strtol(sp+2, &sp, 10);
 			gpsdata->devicelist = (char **)calloc(
-			    gpsdata->ndevices,
+			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
 			gpsdata->devicelist[i=0] = strtok_r(sp+2, " \r\n", &ns);
 			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
@@ -387,23 +391,13 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    elevation[j] = i2; azimuth[j] = i3;
 			    ss[j] = i4; used[j] = i5;
 			}
-#ifdef __UNUSED__
-			/*
-			 * This won't catch the case where all values are identical
-			 * but rearranged.  We can live with that.
-			 */
-			gpsdata->satellite_stamp.changed |= \
-			    memcmp(gpsdata->PRN, PRN, sizeof(PRN)) ||
-			    memcmp(gpsdata->elevation, elevation, sizeof(elevation)) ||
-			    memcmp(gpsdata->azimuth, azimuth,sizeof(azimuth)) ||
-			    memcmp(gpsdata->ss, ss, sizeof(ss)) ||
-			    memcmp(gpsdata->used, used, sizeof(used));
-#endif /* UNUSED */
+			/*@ -compdef @*/
 			memcpy(gpsdata->PRN, PRN, sizeof(PRN));
 			memcpy(gpsdata->elevation, elevation, sizeof(elevation));
 			memcpy(gpsdata->azimuth, azimuth,sizeof(azimuth));
 			memcpy(gpsdata->ss, ss, sizeof(ss));
 			memcpy(gpsdata->used, used, sizeof(used));
+			/*@ +compdef @*/
 		    }
 		    gpsdata->set |= SATELLITE_SET;
 		    break;
@@ -427,9 +421,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 
     if (gpsdata->raw_hook)
-	gpsdata->raw_hook(gpsdata, buf, strlen(buf),  1);
+	gpsdata->raw_hook(gpsdata, buf, (int)strlen(buf),  1);
     if (gpsdata->thread_hook)
-	gpsdata->thread_hook(gpsdata, buf, strlen(buf), 1);
+	gpsdata->thread_hook(gpsdata, buf, (int)strlen(buf), 1);
 }
 
 /*

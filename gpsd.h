@@ -35,7 +35,7 @@ struct gps_context_t {
     int leap_seconds;
     int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
-    /*@null@*/struct shmTime *shmTime[NTPSHMSEGS];
+    /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
     bool shmTimePPS;
@@ -207,6 +207,11 @@ extern void gpsd_wrap(struct gps_device_t *);
 /* caller should supply this */
 void gpsd_report(int, const char *, ...);
 
-
+#ifdef S_SPLINT_S
+extern bool finite(double);
+extern int cfmakeraw(struct termios *);
+extern struct protoent *getprotobyname(const char *);
+extern char *strptime(const char *, const char *, struct tm *);
+#endif /* S_SPLINT_S */
 
 #endif /* _gpsd_h_ */

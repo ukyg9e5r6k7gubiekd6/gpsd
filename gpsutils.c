@@ -49,9 +49,7 @@ double iso8601_to_unix(char *isotime)
     double usec;
     struct tm tm;
 
-    /*@ -unrecog -compdef @*//* splint 3.1.1 doesn't grok strptime */
     dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
-    /*@ +unrecog @*/
     if (*dp == '.')
 	usec = strtod(dp, NULL);
     else

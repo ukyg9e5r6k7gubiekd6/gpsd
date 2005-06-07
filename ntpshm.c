@@ -39,7 +39,7 @@ struct shmTime {
     time_t clockTimeStampSec;
     int    clockTimeStampUSec;
     time_t receiveTimeStampSec;
-    int    receiveTimeStampUSec;
+    long   receiveTimeStampUSec;
     int    leap;
     int    precision;
     int    nsamples;
@@ -114,7 +114,7 @@ bool ntpshm_free(struct gps_context_t *context, int segment)
 int ntpshm_put(struct gps_device_t *session, double fixtime)
 /* put a received fix time into shared memory for NTP */
 {
-    struct shmTime *shmTime;
+    struct shmTime *shmTime = NULL;
     struct timeval tv;
     double seconds,microseconds;
 
@@ -122,13 +122,13 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
 	(shmTime = session->context->shmTime[session->shmTime]) == NULL)
 	return 0;
 
-    gettimeofday(&tv,NULL);
+    (void)gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
     shmTime->count++;
     shmTime->clockTimeStampSec = (time_t)seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
-    shmTime->receiveTimeStampSec = tv.tv_sec;
+    shmTime->receiveTimeStampSec = (time_t)tv.tv_sec;
     shmTime->receiveTimeStampUSec = tv.tv_usec;
     shmTime->count++;
     shmTime->valid = 1;
@@ -176,7 +176,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->clockTimeStampUSec = 0;
     shmTimeP->receiveTimeStampSec = tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = tv->tv_usec;
-    shmTimeP->precision = offset? ceil(log(offset) / M_LN2) : -20;
+    shmTimeP->precision = offset? (ceil(log(offset) / M_LN2)) != 0 : -20;
     shmTimeP->count++;
     shmTimeP->valid = 1;
 

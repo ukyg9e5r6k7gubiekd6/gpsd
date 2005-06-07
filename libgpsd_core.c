@@ -302,7 +302,7 @@ int gpsd_poll(struct gps_device_t *session)
 	int rtcmbytes;
 
 	if ((rtcmbytes=(int)read(session->dsock,buf,sizeof(buf)))>0 && (session->gpsdata.gps_fd !=-1)) {
-	    if (session->device_type->rtcm_writer(session, buf, rtcmbytes) <= 0)
+	    if (session->device_type->rtcm_writer(session, buf, (size_t)rtcmbytes) == 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
 		gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
@@ -334,7 +334,7 @@ int gpsd_poll(struct gps_device_t *session)
 	if (session->device_type)
 	    packet_length = session->device_type->get_packet(session, (unsigned)waiting);
 	else {
-	    packet_length = packet_get(session, waiting);
+	    packet_length = packet_get(session, (unsigned)waiting);
 	    if (session->packet_type != BAD_PACKET) {
 		gpsd_report(3, 
 			    "packet sniff finds type %d\n", 
@@ -355,8 +355,8 @@ int gpsd_poll(struct gps_device_t *session)
 	if (packet_length) {
 	    if (session->gpsdata.raw_hook)
 		session->gpsdata.raw_hook(&session->gpsdata, 
-					  session->outbuffer,
-					  packet_length, 2);
+					  (char *)session->outbuffer,
+					  (int)packet_length, 2);
 	    return handle_packet(session);
 	} else
 	    return ONLINE_SET;

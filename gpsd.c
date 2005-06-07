@@ -123,7 +123,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
-	/*@ -unrecog @*/
 	if (in_background)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf);
 	else
@@ -131,8 +130,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 #if defined(PPS_ENABLE)
 	(void)pthread_mutex_unlock(&report_mutex);
 #endif /* PPS_ENABLE */
-	/*@ +unrecog @*/
-
     }
 }
 
@@ -174,10 +171,11 @@ static bool have_fix(struct gps_device_t *device)
 static int passivesock(char *service, char *protocol, int qlen)
 {
     struct servent *pse;
-    struct protoent *ppe;
+    struct protoent *ppe ;
     struct sockaddr_in sin;
     int s, type, one = 1;
 
+    /*@ -mustfreefresh @*/
     memset((char *) &sin, 0, sizeof(sin));
     /*@i1@*/sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
@@ -188,12 +186,10 @@ static int passivesock(char *service, char *protocol, int qlen)
 	gpsd_report(0, "Can't get \"%s\" service entry.\n", service);
 	return -1;
     }
-    /*@ -unrecog @*/
-    if ((ppe = getprotobyname(protocol)) == 0) {
+    if ((ppe = getprotobyname(protocol)) == NULL) {
 	gpsd_report(0, "Can't get \"%s\" protocol entry.\n", protocol);
 	return -1;
     }
-    /*@ +unrecog @*/
     if (strcmp(protocol, "udp") == 0)
 	type = SOCK_DGRAM;
     else
@@ -215,6 +211,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     return s;
+    /*@ +mustfreefresh @*/
 }
 
 static int filesock(char *filename)
