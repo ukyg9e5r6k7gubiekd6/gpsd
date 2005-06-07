@@ -51,7 +51,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
-	    /*@i1@*/session->device_type = *dp;
+	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->initializer)
 		session->device_type->initializer(session);
 	    return 1;
@@ -418,8 +418,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
 
     intfixtime = (time_t)session->gpsdata.fix.time;
-    /*@ -usedef -unrecog @*//* splint 3.1.1 doesn't know about gmtime_r */
-    gmtime_r(&intfixtime, &tm);
+    (void)gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	(void)snprintf(bufp, (size_t)len,
 		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
@@ -434,7 +433,6 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 		session->gpsdata.satellites_used,
 		hdop_str,
 		session->gpsdata.fix.altitude, 'M');
-    /*@ +usedef +unrecog @*/
 	if (session->gpsdata.fix.separation == NO_SEPARATION)
 	    (void)strcat(bufp, ",,");
 	else
@@ -452,7 +450,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 	bufp += strlen(bufp);
     }
-    /*@ -usedef -unrecog @*//* splint 3.1.1 doesn't know about gmtime_r */
+    /*@ -usedef @*/
     (void)snprintf(bufp, len-strlen(bufp),
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    tm.tm_hour, 
@@ -468,7 +466,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 	    tm.tm_mday,
 	    tm.tm_mon + 1,
 	    tm.tm_year % 100);
-    /*@ +usedef +unrecog @*/
+    /*@ +usedef @*/
 	nmea_add_checksum(bufp);
 	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
 }

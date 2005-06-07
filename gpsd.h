@@ -47,8 +47,8 @@ struct gps_device_t;
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
-    char *typename;
-    /*@null@*/char *trigger;
+    /*@observer@*/char *typename;
+    /*@observer@*//*@null@*/char *trigger;
     /*@null@*/int (*probe)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
     /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
@@ -211,7 +211,9 @@ void gpsd_report(int, const char *, ...);
 extern bool finite(double);
 extern int cfmakeraw(struct termios *);
 extern struct protoent *getprotobyname(const char *);
-extern char *strptime(const char *, const char *, struct tm *);
+extern /*@observer@*/char *strptime(const char *,const char *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
+extern struct tm *gmtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
+extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
 #endif /* S_SPLINT_S */
 
 #endif /* _gpsd_h_ */

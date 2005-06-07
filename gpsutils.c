@@ -42,7 +42,7 @@ time_t mkgmtime(register struct tm *t)
     return (result);
 }
 
-double iso8601_to_unix(char *isotime)
+double iso8601_to_unix(/*@in@*/char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
     char *dp = NULL;
@@ -55,10 +55,9 @@ double iso8601_to_unix(char *isotime)
     else
 	usec = 0;
     return (double)mkgmtime(&tm) + usec;
-    /*@ +compdef @*/
 }
 
-char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], int len)
+/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], int len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 {
     struct tm when;
@@ -68,12 +67,9 @@ char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], int len)
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t)integral;
-    /*@ -unrecog -compdef */
     (void)gmtime_r(&intfixtime, &when);
-    /*@ -unrecog */
 
     (void)strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
-    /*@ -unrecog -compdef */
     slen = strlen(isotime);
     (void)snprintf(isotime + slen, (size_t)len, "%.1f", fractional);
     /*@ -aliasunique @*/
@@ -255,8 +251,8 @@ driver.
 
 ******************************************************************************/
 
-/*@ -fixedformalarray @*/
-static int invert(double mat[4][4], double inverse[4][4])
+/*@ -fixedformalarray -mustdefine @*/
+static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 {
   // Find all NECESSARY 2x2 subdeterminants
   //double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
@@ -345,7 +341,7 @@ static int invert(double mat[4][4], double inverse[4][4])
 
   return 1;
 }  
-/*@ +fixedformalarray @*/
+/*@ +fixedformalarray +mustdefine @*/
 
 void dop(int channels, struct gps_data_t *gpsdata)
 {

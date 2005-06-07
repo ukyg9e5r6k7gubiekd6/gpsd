@@ -22,7 +22,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     int s, type, one = 1;
 
     memset((char *) &sin, 0, sizeof(sin));
-    /*@ -unrecog -type -mustfreefresh @*/
+    /*@ -type -mustfreefresh @*/
     sin.sin_family = AF_INET;
     if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((unsigned short) pse->s_port));
@@ -50,6 +50,6 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 	return NL_NOCONNECT;
     }
     return s;
-    /*@ +unrecog +type +mustfreefresh @*/
+    /*@ +type +mustfreefresh @*/
 }
 

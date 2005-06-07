@@ -45,6 +45,10 @@
 #include <sys/select.h>
 #endif
 
+#ifdef S_SPLINT_S
+extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
+#endif /* S_SPLINT_S */
+
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 #define BUFLEN		2048
@@ -842,7 +846,6 @@ static long tzoffset(void)
     struct tm tm;
     long res = 0;
 
-    /*@ -unrecog **/
     tzset();
 #ifdef HAVE_TIMEZONE
     res = timezone;
@@ -850,13 +853,12 @@ static long tzoffset(void)
     res = localtime_r(&now, &tm)->tm_gmtoff;
 #endif
 #ifdef HAVE_DAYLIGHT
-    if (daylight && localtime_r(&now, &tm)->tm_isdst)
+    if (daylight != 0 && localtime_r(&now, &tm)->tm_isdst != 0)
 	res -= 3600;
 #else
     if (localtime_r(&now, &tm)->tm_isdst)
 	res -= 3600;
 #endif
-    /*@ +unrecog **/
     return res;
 }
 
