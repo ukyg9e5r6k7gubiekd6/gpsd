@@ -17,6 +17,35 @@ I don't know if he has checked out SVN head recently.
 
 ** To do:
 
+*** Verify that the SiRF and TSIP drivers now work
+
+And re-clean the SiRF driver, carefully.
+
+*** Unternal types cleanup
+
+Audit all the unntegral structure members to ensure that they have
+types of the right size and signedness.  Use splint to spot the places
+where tweaking signatures produces potential bugs.
+
+*** Create a regression-test suite
+
+Create a regression test for the daemon that developers
+can run after each change to verify that it doesn't break anything
+
+We already have a collection of GPS logs that gpsfake can take as input.
+Build the regression set by adding an option to gpsfake so that it
+will run an input file exactly once, and use netcat from port 2947 to
+capture the GPSD O messages it sends up.
+
+This mode of gpsfake will, in effect, act as a filter that turns 
+GPS logs into gpsd session logs.  A few lines of shell script 
+later, this will be a regression test.
+
+*** Integrate the True North support
+
+Curt Meyers <cmeyers@boilerbots.com> has sent patches to integrate the
+True North magnetic compass.
+
 *** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which
@@ -168,6 +197,41 @@ travelling with laptops!
 
 The major issue here is that I have not yet found code, or a
 database, that would allow mapping from lon/lat to timezone.
+And the rules change from year to year.
+
+Actually this should be built as a specialized client, as some
+people won't want it.
+
+From <http://www.linuxsa.org.au/tips/time.html>:
+
+    The timezone under Linux is set by a symbolic link from
+    /etc/localtime[1] to a file in the /usr/share/zoneinfo[2] directory
+    that corresponds with what timezone you are in. For example, since I'm
+    in South Australia, /etc/localtime is a symlink to
+    /usr/share/zoneinfo/Australia/South. To set this link, type:
+
+    ln -sf ../usr/share/zoneinfo/your/zone /etc/localtime
+
+    Replace your/zone with something like Australia/NSW or
+    Australia/Perth. Have a look in the directories under
+    /usr/share/zoneinfo to see what timezones are available.
+
+    [1] This assumes that /usr/share/zoneinfo is linked to /etc/localtime as it is under Red Hat Linux.
+
+    [2] On older systems, you'll find that /usr/lib/zoneinfo is used
+    instead of /usr/share/zoneinfo.
+
+Changing the hardlink will, of course, update the system timezone for
+all users.  If I were designing this feature, I'd ensure that the
+system timezone can be overridden by a user-set TZ, but I don't know
+if it actually works that way.
+
+If I'm reading the tea leaves correctly, this functionality is actually
+embedded in the GCC library version of tzset(), so the same method will
+work on any system that uses that.
+
+Problem: system daemons use the timezone set when they start up. You
+can't get them to grok a new one short of rebooting
 
 Local variables:
 mode: outline
