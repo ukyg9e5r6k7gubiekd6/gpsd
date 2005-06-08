@@ -172,6 +172,14 @@ EXTRA_DIST = \
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
 
+# Regression-test the daemon
+test:
+	@for f in test/*.log; do echo "$$(f}:"; gpsfake -p $${f} >test.chk; diff -c $${f}.chk test.chk; done; rm test/test.chk
+
+# Build the regression tests
+regress:
+	@for f in test/*.log; do gpsfake -p $${f} >$${f}.chk; done
+
 # Report splint warnings
 splint:
 	@echo "Running splint on daemon and libraries..."

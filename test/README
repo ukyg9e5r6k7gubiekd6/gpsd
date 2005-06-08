@@ -1,0 +1,15 @@
+These are data logs from various weird GPSes.  Use them to test
+assumptions about NMEA formats and cycle regularities, or as 
+regression-test loads for gpsfake -p.
+
+Structured headers are as follows:
+
+# Name: Product name
+# Description: product description (optional)
+# Cycle time: Time to repeat a sentence in seconds
+# Start-of-cycle: sentence that begins cycle
+# Pause-noted: did submitter note the intercycle pause? (Y/N)
+# Well-behaved: Timestamps are constant across cycle (Y/N)
+# Submitted-by: who sent it
+# Date: when it was received
+# Location: city, state/province, country, approximate lat/lon
