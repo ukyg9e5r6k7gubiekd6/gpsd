@@ -4,7 +4,7 @@
 #
 # Simulates a GPS, playing back a logfile
 
-import sys, os, time, signal, pty, getopt, tempfile, termios, socket
+import sys, os, time, signal, pty, getopt, tempfile, termios, socket, string
 import gps
 
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:")
@@ -57,29 +57,58 @@ else:
     fp.close()
     os.remove(pidfile)
 
+def packet_get(fp):
+    "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
+    first = fp.read(1)
+    if not first:
+        return None
+    elif first == '$':					# NMEA packet
+        return "$" + fp.readline()
+    second = fp.read(1)
+    if first == '\xa0' and second == '\xa2':	# SiRF packet
+        third = fp.read(1)
+        fourth = fp.read(1)
+        length = (ord(third) << 8) | ord(fourth)
+        return "\xa0\xa2" + third + fourth + fp.read(length+4)
+    else:
+        raise ValueError, "unknown packet type, leader %s, (0x%x)" % (first, ord(first))
+
 try:
     logfp = open(logfile, "r")
-    logdata = logfp.read()
-    logfp.close()
-    while logdata[0] == "#":
-        logdata = logdata[logdata.find('\n')+1:]
-    if logdata[0] == '$':
+    sentences = []
+    # Skip the comment header
+    while True:
+        first = logfp.read(1)
+        if first == "#":
+            logfp.readline()
+        else:
+            logfp.seek(-1, 1)	# Must be a real file, not stdin
+            break
+    # Grab the packets
+    try:
+        while True:
+            packet = packet_get(logfp)
+            if not packet:
+                break
+            else:
+                sentences.append(packet)
+    except ValueError, msg:
+        sys.stderr.write(msg + "\n")
+        raise SystemExit, 1
+    # Look at the first packet to grok the GPS type
+    if sentences[0][0] == '$':
         sys.stderr.write("gpsfake: interpreting as NMEA\n");
-        leader = '$';
         legend = "gpsfake: line %d "
         textual = 1
-    elif logdata[0] == '\xa0':
+    elif sentences[0][0] == '\xa0':
         sys.stderr.write("gpsfake: interpreting as SiRF-II binary packets\n")
-        leader = '\xa0'
         legend = "gpsfake: packet %d"
         textual = 0
     else:
         print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
-        logdata = None
-
-    if logdata:
-        lines = map(lambda x: leader+x, logdata.split(leader)[1:])
-
+        sentences = None
+    # Feed the daemon
+    if sentences:
         ttyfp = open(slave, "rw")
         raw = termios.tcgetattr(ttyfp.fileno())
         raw[0] = 0					# iflag
@@ -107,7 +136,7 @@ try:
         try:
             i = 0;
             while True:
-                if i % len(lines) == 0:
+                if i % len(sentences) == 0:
                     if pipe and i > 0:
                         break
                     if not pipe:
@@ -115,11 +144,11 @@ try:
                 time.sleep(cycle)
                 if linedump:
                     if textual:
-                        ml = lines[i % len(lines)].strip()
+                        ml = sentences[i % len(sentences)].strip()
                     else:
                         ml = ""
-                    print legend % (i % len(lines) + 1) + ml
-                os.write(master_fd, lines[i % len(lines)])
+                    print legend % (i % len(sentences) + 1) + ml
+                os.write(master_fd, sentences[i % len(sentences)])
                 if spawn:
                     try:
                         st = os.kill(pid, 0)

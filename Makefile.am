@@ -178,7 +178,7 @@ test:
 
 # Build the regression tests
 regress:
-	@for f in test/*.log; do gpsfake -p $${f} >$${f}.chk; done
+	@for f in test/*.log; do echo "$$(f}:"; gpsfake -p $${f} >$${f}.chk; done
 
 # Report splint warnings
 splint:
