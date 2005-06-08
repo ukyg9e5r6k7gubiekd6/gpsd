@@ -149,9 +149,9 @@ zero that field when appropriate and to keep an eye on the fix
 and sentence timestamps.</para>
 
 <para>The Python implementation supports the same facilities as the C
-library, except there is as yet no thread support.
-<function>gps_open()</function> is replaced by the initialization of a
-gps session object; the other calls are methods of that object.
+library. <function>gps_open()</function> is replaced by the
+initialization of a gps session object; the other calls are methods of
+that object, and have the same names as the corresponding C functions.
 Resources within the session object will be properly released when it
 is garbage-collected.</para>
 
@@ -167,7 +167,9 @@ is garbage-collected.</para>
 </refsect1>
 
 <refsect1 id='author'><title>AUTHOR</title>
-<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, Callback methods added by Alfredo Pironti &lt;alfredio@users.sourceforge.net&gt;.</para>
+<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, Thread-callback methods
+in the C binding added by Alfredo Pironti
+&lt;alfredio@users.sourceforge.net&gt;.</para>
 </refsect1>
 </refentry>
 

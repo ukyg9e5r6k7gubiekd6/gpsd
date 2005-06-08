@@ -21,6 +21,7 @@
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-n</arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
+      <arg choice='opt'>-p</arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
@@ -59,6 +60,10 @@ pty so you can launch in instance that reads it.</para>
 
 <para>The -o option specifies options to pass to the daemon.
 Passing "-n -D 4" is often useful.</para>
+
+<para>The -p option dumps the NMEA and GPSD notifications generated
+by the log to standard output.  The logfile is interpreted once
+only.  (This option is intended to facilitate regression testing.)</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>

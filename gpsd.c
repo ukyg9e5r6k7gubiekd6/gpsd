@@ -1028,7 +1028,7 @@ int main(int argc, char *argv[])
      * compromises in the code.  It requires that all GPS devices have
      * their group read/write permissions set.
      */
-    if ((optind<argc && stat(argv[optind], &stb)==0) || stat(PROTO_TTY, &stb)==0) {
+    if (getuid() == 0 && ((optind<argc && stat(argv[optind], &stb)==0) || stat(PROTO_TTY, &stb)==0)) {
 	gpsd_report(2, "changing to group %d\n", stb.st_gid);
 	if (setgid(stb.st_gid) != 0)
 	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));

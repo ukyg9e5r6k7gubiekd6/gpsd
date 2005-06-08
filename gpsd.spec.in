@@ -131,6 +131,8 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   that dumps a hex-encoding of every binary packet received to the 
   client; sirfmon uses it to operate through the daemon if one is running. 
   Support for Trimble TSIP GPSes merged. gpsfake now works with SiRF logs.
+  Python library supports thread callbacks.  New -p option of gpsfake
+  supports regression testing.
 
 * Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 

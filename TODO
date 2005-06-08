@@ -17,13 +17,13 @@ I don't know if he has checked out SVN head recently.
 
 ** To do:
 
-*** Verify that the SiRF and TSIP drivers now work
+*** Verify that the TSIP driver now works
 
-And re-clean the SiRF driver, carefully.
+And finish re-cleaning the SiRF driver, carefully.
 
-*** Unternal types cleanup
+*** Internal types cleanup
 
-Audit all the unntegral structure members to ensure that they have
+Audit all the integral structure members to ensure that they have
 types of the right size and signedness.  Use splint to spot the places
 where tweaking signatures produces potential bugs.
 

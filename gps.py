@@ -2,7 +2,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, calendar, socket, sys
+import time, calendar, socket, sys, thread
 from math import *
 
 ONLINE_SET =	0x000001
@@ -168,6 +168,8 @@ class gps(gpsdata):
 	self.connect(host, port)
         self.verbose = verbose
 	self.raw_hook = None
+	self.thread_hook = None
+        self.thread_id = None
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -208,6 +210,17 @@ class gps(gpsdata):
 
     def set_raw_hook(self, hook):
         self.raw_hook = hook
+
+    def __thread_poll(self):
+        while True:
+            st = self.poll()
+            if st == -1:
+                break
+        thread.exit()
+
+    def set_thread_hook(self, hook):
+        self.thread_hook = hook
+        self.thread_id = thread.start_new_thread(self.__thread_poll, ())
 
     def __del__(self):
 	if self.sock:
@@ -364,6 +377,8 @@ class gps(gpsdata):
                 self.timings.collect(*data.split())
 	if self.raw_hook:
 	    self.raw_hook(buf);
+	if self.thread_hook:
+	    self.thread_hook(buf);
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."

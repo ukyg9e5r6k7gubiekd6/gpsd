@@ -4,13 +4,15 @@
 #
 # Simulates a GPS, playing back a logfile
 
-import sys, os, time, signal, pty, getopt, tempfile, termios
+import sys, os, time, signal, pty, getopt, tempfile, termios, socket
+import gps
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:s:")
+(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:")
 cycle = 1
 speed = 4800
 spawn = True
 linedump = False
+pipe = False
 doptions = ""
 for (switch, val) in options:
     if (switch == '-c'):
@@ -21,10 +23,12 @@ for (switch, val) in options:
         spawn = False
     elif (switch == '-o'):
         doptions = val
+    elif (switch == '-p'):
+        pipe = True
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-l] [-n] [-o options] [-s speed] [-c cycle] logfile\n")
+        sys.stderr.write("usage: gpsfake [-h] [-l] [-n] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
         sys.exit(0)
 logfile = arguments[0]
 
@@ -60,12 +64,12 @@ try:
     while logdata[0] == "#":
         logdata = logdata[logdata.find('\n')+1:]
     if logdata[0] == '$':
-        print "gpsfake: interpreting as NMEA"
+        sys.stderr.write("gpsfake: interpreting as NMEA\n");
         leader = '$';
         legend = "gpsfake: line %d "
         textual = 1
     elif logdata[0] == '\xa0':
-        print "gpsfake: interpreting as SiRF-II binary packets"
+        sys.stderr.write("gpsfake: interpreting as SiRF-II binary packets\n")
         leader = '\xa0'
         legend = "gpsfake: packet %d"
         textual = 0
@@ -91,11 +95,23 @@ try:
             sys.exit(1)
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 
+        if pipe:
+            try:
+                session = gps.gps()
+            except socket.error:
+                sys.stderr.write("gpsfake: gpsd unreachable.\n")
+                raise SystemExit, 1
+            session.query("w+r+")
+            session.set_thread_hook(lambda x: sys.stdout.write(x)) 
+
         try:
             i = 0;
             while True:
                 if i % len(lines) == 0:
-                    print "gpsfake: log cycle begins."
+                    if pipe and i > 0:
+                        break
+                    if not pipe:
+                        sys.stderr.write("gpsfake: log cycle begins.\n")
                 time.sleep(cycle)
                 if linedump:
                     if textual:
@@ -115,5 +131,5 @@ try:
         except KeyboardInterrupt:
             pass
 finally:
-    if spawn and (pid == 0 or os.kill(pid, 0) == 0):
+    if spawn and pid:
         os.kill(pid, signal.SIGTERM)
