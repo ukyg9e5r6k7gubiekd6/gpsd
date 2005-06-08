@@ -288,7 +288,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 
 	    // geoid separation from WGS 84
             // gpsd sign is opposite of garmin sign
-	    session->gpsdata.fix.separation = -pvt->msl_hght;
+	    session->gpsdata.separation = -pvt->msl_hght;
 
 	    // estimated position error in meters
 	    session->gpsdata.epe = pvt->epe;

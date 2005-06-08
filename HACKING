@@ -3,6 +3,26 @@ doing Ctl-C Ctl-t and browsing through the outline headers.
 
 If you're looking for things to hack on, first see the TODO file.
 
+** Contribution guidelines
+
+We prefer diff -u format, but diff -c is acceptable.  Do not send
+patches in the default (-e or ed) mode, as they are too brittle.
+
+If you are introducing a new feature, include a documentation patch.
+
+If you are contributing a driver for a new GPS, please also do the
+following things:
+
+1) Send us a representative sample of the GPS output for future 
+   regression-testing.
+
+2) Write a hardware entry describing the GPS for the hardware page at
+   <http://gpsd.berlios.de/hardware.html>.
+
+Before shipping a patch, it is a good idea to make sure the patched
+code displays no warnings when you run 'make splint'.  See
+http://www.splint.org for a description of this tool.
+
 ** The license on contributions
 
 The GPSD libraries are under the BSD license.  Please do not send 

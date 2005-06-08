@@ -171,7 +171,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 	    session->gpsdata.used[i] = (int)getbyte(29+i);
 	if ((session->driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	    /* position/velocity is bytes 1-18 */
-	    ecef_to_wgs84fix(&session->gpsdata.fix, 
+	    ecef_to_wgs84fix(&session->gpsdata, 
 			     (double)getlong(1), (double)getlong(5), (double)getlong(9),
 			     (int)getword(13)/8.0, (int)getword(15)/8.0, (int)getword(17)/8.0);
 	    /* WGS 84 geodesy parameters */
@@ -607,8 +607,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 		STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
 	session->gpsdata.fix.latitude = getlong(1) * RAD_2_DEG * 1e-8; 
 	session->gpsdata.fix.longitude = getlong(5) * RAD_2_DEG * 1e-8;
-	session->gpsdata.fix.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-	session->gpsdata.fix.altitude = getlong(9) * 1e-3 - session->gpsdata.fix.separation;
+	session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
+	session->gpsdata.fix.altitude = getlong(9) * 1e-3 - session->gpsdata.separation;
 	session->gpsdata.fix.speed = getlong(13) * 1e-3;
 	session->gpsdata.fix.climb = getlong(17) * 1e-3;
 	session->gpsdata.fix.track = getlong(21) * RAD_2_DEG * 1e-8;

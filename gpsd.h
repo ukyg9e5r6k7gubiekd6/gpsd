@@ -191,7 +191,7 @@ extern bool ntpshm_free(struct gps_context_t *context, int segment);
 extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 
-extern void ecef_to_wgs84fix(struct gps_fix_t *,
+extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 
 			     double, double, double);
 extern void dop(int, struct gps_data_t *);

@@ -69,8 +69,6 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
-    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
-#define SEPARATION_NOT_VALID	-99999.0	/* must be out of band */
 };
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
@@ -112,6 +110,9 @@ struct gps_data_t {
 				 */
 
     struct gps_fix_t	fix;	/* PVT data */
+
+    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
+#define SEPARATION_NOT_VALID	-99999.0	/* must be out of band */
 
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */

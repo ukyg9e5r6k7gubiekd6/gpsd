@@ -72,7 +72,7 @@ double wgs84_separation(double lat, double lon)
 }
 
 
-void ecef_to_wgs84fix(struct gps_fix_t *fix,
+void ecef_to_wgs84fix(struct gps_data_t *gpsdata,
 			double x, double y, double z, 
 			double vx, double vy, double vz)
 /* fill in WGS84 position/velocity fields from ECEF coordinates */
@@ -92,20 +92,20 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix,
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
     n = a / sqrt(1.0 - e2*pow(sin(phi),2));
     h = p / cos(phi) - n;
-    fix->latitude = phi * RAD_2_DEG;
-    fix->longitude = lambda * RAD_2_DEG;
-    fix->separation = wgs84_separation(fix->latitude, fix->longitude);
-    fix->altitude = h - fix->separation;
+    gpsdata->fix.latitude = phi * RAD_2_DEG;
+    gpsdata->fix.longitude = lambda * RAD_2_DEG;
+    gpsdata->separation = wgs84_separation(gpsdata->fix.latitude, gpsdata->fix.longitude);
+    gpsdata->fix.altitude = h - gpsdata->separation;
     /* velocity computation */
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
-    fix->climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
-    fix->speed = sqrt(pow(vnorth,2) + pow(veast,2));
+    gpsdata->fix.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
+    gpsdata->fix.speed = sqrt(pow(vnorth,2) + pow(veast,2));
     heading = atan2(veast,vnorth);
     /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * PI;
-    fix->track = heading * RAD_2_DEG;
+    gpsdata->fix.track = heading * RAD_2_DEG;
 }
 
 #ifdef TESTMAIN

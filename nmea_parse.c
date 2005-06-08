@@ -278,9 +278,9 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 	    mask |= CLIMB_SET;
 	}
 	if (strlen(field[11]) > 0) {
-	   out->fix.separation = atof(field[11]);
+	   out->separation = atof(field[11]);
 	} else {
-	   out->fix.separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
+	   out->separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
 	}
     }
     return mask;

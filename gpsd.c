@@ -135,7 +135,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    printf("usage:  gpsd [options] \n\
+    (void)printf("usage:  gpsd [options] \n\
   Options include: \n\
   -f string              	= set GPS device name \n\
   -S integer (default %s)	= set port for daemon \n\
@@ -511,11 +511,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",E=?");
 	    break;
 	case 'F':
+	    /*@ -branchstate @*/
 	    if (*p == '=') {
 		p = snarfline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
 		if ((newchan = find_device(stash))) {
-		    whoami->device = *newchan;
+		    /*@i@*/whoami->device = *newchan;
 		    whoami->tied = true;
 		}
 		free(stash);
@@ -525,6 +526,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 			 whoami->device->gpsdata.gps_device);
 	    else
 		(void)strcpy(phrase, ",F=?");
+	    /*@ +branchstate @*/
 	    break;
 	case 'I':
 	    if (assign_channel(whoami))
@@ -889,6 +891,7 @@ static void handle_control(int sfd, char *buf)
     }
 }
 
+/*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
@@ -1260,3 +1263,4 @@ int main(int argc, char *argv[])
 	(void)unlink(control_socket);
     return 0;
 }
+/*@ +mustfreefresh @*/

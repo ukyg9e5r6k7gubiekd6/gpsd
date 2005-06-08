@@ -48,6 +48,7 @@ int gpsd_open_dgps(char *dgpsserver)
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
+    /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
@@ -58,6 +59,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	}
     gpsd_report(1, "invalid GPS type \"%s\".\n", typename);
     return 0;
+    /*@ +compmempass @*/
 }
 
 struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
@@ -67,10 +69,14 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     if (!session)
 	return NULL;
 
+    /*@ -mustfreeonly @*//* splint 3.1.1 can't deduce storage is zero */
     session->gpsdata.gps_device = strdup(device);
     session->device_type = NULL;	/* start by hunting packets */
     session->dsock = -1;
+    /*@ -temptrans @*/
     session->context = context;
+    /*@ +temptrans @*/
+    /*@ +mustfreeonly @*/
     session->gpsdata.hdop = DOP_NOT_VALID;
     session->gpsdata.vdop = DOP_NOT_VALID;
     session->gpsdata.pdop = DOP_NOT_VALID;
@@ -120,7 +126,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    break;
 	/*@ -ignoresigns */
 
-        state = (state & TIOCM_CAR) != 0;
+        state = (int)((state & TIOCM_CAR) != 0);
 	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
 		    session->gpsdata.gps_device, state);
 
@@ -174,7 +180,7 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.fix.track = TRACK_NOT_VALID;
 #ifdef BINARY_ENABLE
 	session->mag_var = NO_MAG_VAR;
-	session->gpsdata.fix.separation = SEPARATION_NOT_VALID;
+	session->gpsdata.separation = SEPARATION_NOT_VALID;
 #endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE
@@ -182,7 +188,7 @@ int gpsd_activate(struct gps_device_t *session)
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 	if (session->shmTime >= 0 && session->context->shmTimePPS) {
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
-		(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+		/*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	}
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
@@ -199,7 +205,7 @@ static int is_input_waiting(int fd)
     return count;
 }
 
-static long handle_packet(struct gps_device_t *session)
+static gps_mask_t handle_packet(struct gps_device_t *session)
 {
     session->packet_full = 0;
     session->gpsdata.sentence_time = 0;
@@ -355,10 +361,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
 
 	if (packet_length) {
+	    /*@ -nullstate @*/
 	    if (session->gpsdata.raw_hook)
 		session->gpsdata.raw_hook(&session->gpsdata, 
 					  (char *)session->outbuffer,
 					  (int)packet_length, 2);
+	    /*@ -nullstate @*/
 	    return handle_packet(session);
 	} else
 	    return ONLINE_SET;
@@ -371,7 +379,7 @@ void gpsd_wrap(struct gps_device_t *session)
     gpsd_deactivate(session);
     if (session->gpsdata.gps_device)
 	(void)free(session->gpsdata.gps_device);
-    (void)free(session);
+    /*@i@*/(void)free(session);
 }
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
@@ -435,11 +443,11 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 		session->gpsdata.satellites_used,
 		hdop_str,
 		session->gpsdata.fix.altitude, 'M');
-	if (session->gpsdata.fix.separation == SEPARATION_NOT_VALID)
+	if (session->gpsdata.separation == SEPARATION_NOT_VALID)
 	    (void)strcat(bufp, ",,");
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.3f,M", session->gpsdata.fix.separation);
+			   "%.3f,M", session->gpsdata.separation);
 	if (session->mag_var == NO_MAG_VAR) 
 	    (void)strcat(bufp, ",,");
 	else {

@@ -88,7 +88,6 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epd = UNCERTAINTY_NOT_VALID;
     fixp->eps = UNCERTAINTY_NOT_VALID;
     fixp->epc = UNCERTAINTY_NOT_VALID;
-    fixp->separation = SEPARATION_NOT_VALID;
 }
 
 struct gps_data_t *gps_open(const char *host, const char *port)
@@ -96,6 +95,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
 {
     struct gps_data_t *gpsdata = (struct gps_data_t *)calloc(sizeof(struct gps_data_t), 1);
 
+    /*@ -branchstate @*/
     if (!gpsdata)
 	return NULL;
     if (!host)
@@ -112,6 +112,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
     gpsdata->status = STATUS_NO_FIX;
     gps_clear_fix(&gpsdata->fix);
     return gpsdata;
+    /*@ +branchstate @*/
 }
 
 int gps_close(struct gps_data_t *gpsdata)
@@ -128,12 +129,12 @@ int gps_close(struct gps_data_t *gpsdata)
     if (gpsdata->devicelist) {
 	int i;
 	for (i = 0; i < gpsdata->ndevices; i++)
-	    (void)free(gpsdata->devicelist[i]);
+	    /*@i1@*/(void)free(gpsdata->devicelist[i]);
 	(void)free(gpsdata->devicelist);
 	gpsdata->devicelist = NULL;
 	gpsdata->ndevices = -1;
     }    
-    (void)free(gpsdata);
+    /*@i@*/(void)free(gpsdata);
     return retval;
 }
 
@@ -143,6 +144,7 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata,
     gpsdata->raw_hook = hook;
 }
 
+/*@ -branchstate -usereleased @*/
 static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a daemon response into a status structure */
 {
@@ -150,7 +152,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
     int i;
 
     for (ns = buf; ns; ns = strstr(ns+1, "GPSD")) {
-	if (strncmp(ns, "GPSD", 4) == 0) {
+	if (/*@i1@*/strncmp(ns, "GPSD", 4) == 0) {
 	    for (sp = ns + 5; ; sp = tp) {
 		tp = sp + strcspn(sp, ",\r\n");
 		if (*tp == '\0') break;
@@ -198,6 +200,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'F':
+		    /*@ -mustfreeonly */
 		    if (sp[2] == '?') 
 			gpsdata->gps_device = NULL;
 		    else {
@@ -206,8 +209,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->gps_device = strdup(sp+2);
 			gpsdata->set |= DEVICE_SET;
 		    }
+		    /*@ +mustfreeonly */
 		    break;
 		case 'I':
+		    /*@ -mustfreeonly */
 		    if (sp[2] == '?') 
 			gpsdata->gps_id = NULL;
 		    else {
@@ -216,24 +221,29 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->gps_id = strdup(sp+2);
 			gpsdata->set |= DEVICEID_SET;
 		    }
+		    /*@ +mustfreeonly */
 		    break;
 		case 'K':
 		    if (gpsdata->devicelist) {
 			for (i = 0; i < gpsdata->ndevices; i++)
-			    (void)free(gpsdata->devicelist[i]);
+			    /*@i1@*/(void)free(gpsdata->devicelist[i]);
 			(void)free(gpsdata->devicelist);
 			gpsdata->devicelist = NULL;
 			gpsdata->ndevices = -1;
 			gpsdata->set |= DEVICELIST_SET;
 		    }    
 		    if (sp[2] != '?') {
+			/*@ -nullderef @*/
 			gpsdata->ndevices = (int)strtol(sp+2, &sp, 10);
 			gpsdata->devicelist = (char **)calloc(
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
+			/*@ -nullstate @*/
 			gpsdata->devicelist[i=0] = strtok_r(sp+2, " \r\n", &ns);
 			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
 			    gpsdata->devicelist[++i] = strdup(sp);
+			/*@ +nullstate @*/
+			/*@ +nullderef @*/
 			gpsdata->set |= DEVICELIST_SET;
 		    }
 		    break;
@@ -421,11 +431,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	}
     }
 
+/*@ -nullstate -compdef @*/
     if (gpsdata->raw_hook)
 	gpsdata->raw_hook(gpsdata, buf, (int)strlen(buf),  1);
     if (gpsdata->thread_hook)
 	gpsdata->thread_hook(gpsdata, buf, (int)strlen(buf), 1);
 }
+/*@ +nullstate +compdef @*/
+/*@ -branchstate +usereleased @*/
 
 /*
  * return: 0, success
@@ -473,8 +486,10 @@ static void *poll_gpsd(void *args)
     struct gps_data_t *gpsdata;
 
     /* set thread parameters */
+    /*@ -compdef @*/
     (void)pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,&oldstate);
     (void)pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype); /* we want to be canceled also when blocked on gps_poll() */
+    /*@ +compdef @*/
     gpsdata = (struct gps_data_t *) args;
     do {
 	res = gps_poll(gpsdata); /* this is not actually polling */
@@ -504,7 +519,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 /* delete asynchronous callback and kill its thread */
 {
     int res;
-    res = pthread_cancel(*handler);	/* we cancel the whole thread */
+    /*@i@*/res = pthread_cancel(*handler);	/* we cancel the whole thread */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
 	(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
