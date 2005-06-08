@@ -8,6 +8,7 @@
  *
  * Useful commands:
  *	n -- switch device to NMEA at current speed and exit.
+ *	l -- toggle packet logging
  *	a -- toggle receipt of 50BPS subframe data.
  *	b -- change baud rate.
  *	c -- set or clear static navigation mode
@@ -107,6 +108,7 @@ static char *sbasvec[] =
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win, *cmdwin, *debugwin;
+static FILE *logfile;
 
 #define NO_PACKET	0
 #define SIRF_PACKET	1
@@ -761,6 +763,7 @@ static int readword(void)
     /*@i@*/return (byte1 << 8) | byte2;
 }
 
+/*@ -globstate @*/
 static int readpkt(unsigned char *buf)
 {
     int byte,len,csum,cnt;
@@ -791,8 +794,21 @@ static int readpkt(unsigned char *buf)
 
     if (readbyte() != END1 || readbyte() != END2)
 	return EOF;
+
+    if (logfile != NULL) {
+	/*@ -shiftimplementation @*/
+	(void)fwrite("\xa0\xa2", (size_t)2,  sizeof(char), logfile);
+	(void)fputc(len >> 8, logfile);
+	(void)fputc(len & 0xff, logfile);
+	(void)fwrite(buf, (size_t)len, sizeof(char), logfile);
+	(void)fputc(csum >> 8, logfile);
+	(void)fputc(csum & 0xff, logfile);
+	(void)fwrite("\xb0\xb3", (size_t)2,  sizeof(char), logfile);
+	/*@ +shiftimplementation @*/
+    }
     return len;
 }
+/*@ +globstate @*/
 
 static bool sendpkt(unsigned char *buf, size_t len, char *device)
 {
@@ -865,7 +881,7 @@ static long tzoffset(void)
 /*@ -nullpass -globstate @*/
 static void refresh_rightpanel1(void)
 {
-     (void)touchwin(mid6win);
+    (void)touchwin(mid6win);
     (void)touchwin(mid7win);
     (void)touchwin(mid9win);
     (void)touchwin(mid13win);
@@ -1231,6 +1247,16 @@ int main (int argc, char **argv)
 		(void)sendpkt(buf, 8, device);
 		break;
 
+	    case 'l':				/* open logfile */
+		if (logfile != NULL) {
+		    (void)wprintw(debugwin, ">>> Logging to %s off", logfile);
+		    (void)fclose(logfile);
+		}
+
+		logfile = fopen(line+1,"a");
+		(void)wprintw(debugwin, ">>> Logging to %s on", logfile);
+		break;
+
 	    case 'n':				/* switch to NMEA */
 		putbyte(0,0x81);			/* id */
 		putbyte(1,0x02);			/* mode */
@@ -1292,6 +1318,8 @@ int main (int argc, char **argv)
     /*@ +nullpass @*/
 
  quit:
+    if (logfile)
+	(void)fclose(logfile);
     (void)endwin();
     exit(0);
 }
