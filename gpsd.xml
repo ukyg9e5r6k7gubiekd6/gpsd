@@ -606,7 +606,8 @@ updates.</para>
 
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
-to the time provided by the GPS receiver.  Note that if you're going
+to the time provided by the GPS receiver.  This facility is
+only available when the daemon is started from root.  If you're going
 to use <application>gpsd</application> you probably want to run it
 <option>-n</option> mode so the clock will be updated even when no
 clients are active.</para>

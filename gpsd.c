@@ -1003,8 +1003,10 @@ int main(int argc, char *argv[])
     }
 
 #ifdef NTPSHM_ENABLE
-    (void)nice(-10);		/* for precise timekeeping increase priority */
-    (void)ntpshm_init(&context, nowait);
+    if (getuid() == 0) {
+	(void)nice(-10);		/* for precise timekeeping increase priority */
+	(void)ntpshm_init(&context, nowait);
+    }
 #endif /* NTPSHM_ENABLE */
 
     /* make default devices accessible even after we drop privileges */
