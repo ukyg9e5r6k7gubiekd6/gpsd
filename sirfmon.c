@@ -767,6 +767,7 @@ static int readword(void)
 static int readpkt(unsigned char *buf)
 {
     int byte,len,csum,cnt;
+    unsigned char *cp = buf;
 
     do {
 	while ((byte = readbyte()) != START1)
@@ -783,7 +784,7 @@ static int readpkt(unsigned char *buf)
     while (cnt-- > 0) {
 	if ((byte = readbyte()) == EOF)
 	    return EOF;
-	*buf++ = (unsigned char)byte;
+	*cp++ = (unsigned char)byte;
 	csum += byte;
     }
 
