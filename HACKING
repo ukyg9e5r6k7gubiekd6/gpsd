@@ -19,12 +19,14 @@ following things:
 2) Write a hardware entry describing the GPS for the hardware page at
    <http://gpsd.berlios.de/hardware.html>.
 
+There's a whole section on adding new drivers 
+
 Before shipping a patch, it is a good idea to make sure the patched
 code displays no warnings when you run 'make splint'.  See
 http://www.splint.org for a description of this tool.
 
 Also, use the regression-test suite -- "make testregress" -- to check
-that your patch doesn't break the handling of any existing receiver.
+that your patch doesn't break the handling of any already-supported GPS.
 
 ** The license on contributions
 
@@ -236,19 +238,22 @@ specified.  Presently, here's how the autoconfig works.
 3. If it finds a Zodiac binary packet (led with 0xff 0x81), it
    switches to the Zodiac driver.  We're done.
 
-4. If it finds EARTHA, it selects the Earthmade driver, which then
+4. If it finds a TSIP binary packet (led with 0x10=DLE), it
+   switches to the TSIP driver.  We're done.
+
+5. If it finds EARTHA, it selects the Earthmade driver, which then
    flips the connection to Zodiac binary mode.  We're done.
 
-5. If it finds ASTRAL, it feeds the TripMate on the other end what
+6. If it finds ASTRAL, it feeds the TripMate on the other end what
    it wants and goes to Tripmate NMEA mode.  We're done.
 
-6. If it finds a NMEA packet, it selects the NMEA driver.  This
+7. If it finds a NMEA packet, it selects the NMEA driver.  This
    initializes by shipping all vendor-specific initialization strings
    to the device.  The objectives are to enable GSA, disable GLL, and
    disable VTG.  Probe strings go here too, like the one that turns 
    on SiRF debugging output in order to detect SiRF chips.
 
-7. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
+8. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
    invokes the matching driver.  Presently there is really only one of
    these: "$Ack Input 105.\r\n", the response to the SiRF probe. On
    seeing this, gpsd switches from NMEA to SiRF binary mode, probes
@@ -463,6 +468,9 @@ any empty comment lines.
 An ideal log file would include an initial portion during which the
 GPS has no fix, a portion during which it has a fix but is stationary,
 and a portion during which it is moving.
+
+If your GPS is SiRF-based, it's easy to capture packets using the
+'l' command.
 
 ** Blind alleys
 
