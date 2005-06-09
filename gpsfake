@@ -7,12 +7,43 @@
 import sys, os, time, signal, pty, getopt, tempfile, termios, socket, string
 import gps
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:")
+class Baton:
+    "Ship progress indication to stderr."
+    def __init__(self, prompt, endmsg=None):
+        self.stream = sys.stderr
+        self.stream.write(prompt + "... \010")
+        self.stream.flush()
+        self.count = 0
+        self.endmsg = endmsg
+        self.time = time.time()
+        return
+
+    def twirl(self, ch=None):
+        if self.stream is None:
+            return
+        if ch:
+            self.stream.write(ch)
+        else:
+            self.stream.write("-/|\\"[self.count % 4])
+            self.stream.write("\010")
+        self.count = self.count + 1
+        self.stream.flush()
+        return
+
+    def end(self, msg=None):
+        if msg == None:
+            msg = self.endmsg
+        if self.stream:
+            self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
+        return
+
+(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
 cycle = 1
 speed = 4800
 spawn = True
 linedump = False
 pipe = False
+verbose = False
 doptions = ""
 for (switch, val) in options:
     if (switch == '-c'):
@@ -25,8 +56,11 @@ for (switch, val) in options:
         doptions = val
     elif (switch == '-p'):
         pipe = True
+        cycle = 0
     elif (switch == '-s'):
         speed = int(val)
+    elif (switch == '-v'):
+        verbose = True
     elif (switch == '-h'):
         sys.stderr.write("usage: gpsfake [-h] [-l] [-n] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
         sys.exit(0)
@@ -50,7 +84,8 @@ elif os.system(spawncmd + " &"):
     sys.exit(1)
 else:
     time.sleep(1)	# Time for pidfile to get written.
-    sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
+    if not pipe or verbose:
+        sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
 
     fp = open(pidfile)
     pid = int(fp.read())
@@ -97,16 +132,18 @@ try:
         raise SystemExit, 1
     # Look at the first packet to grok the GPS type
     if sentences[0][0] == '$':
-        sys.stderr.write("gpsfake: interpreting as NMEA\n");
+        packtype = "NMEA"
         legend = "gpsfake: line %d "
         textual = 1
     elif sentences[0][0] == '\xa0':
-        sys.stderr.write("gpsfake: interpreting as SiRF-II binary packets\n")
+        packtype = "SiRF-II binary"
         legend = "gpsfake: packet %d"
         textual = 0
     else:
         print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
         sentences = None
+    if verbose:
+        sys.stderr.write("gpsfake: interpreting as %s packets\n" % packtype)
     # Feed the daemon
     if sentences:
         ttyfp = open(slave, "rw")
@@ -131,7 +168,8 @@ try:
                 sys.stderr.write("gpsfake: gpsd unreachable.\n")
                 raise SystemExit, 1
             session.query("w+r+")
-            session.set_thread_hook(lambda x: sys.stdout.write(x)) 
+            session.set_thread_hook(lambda x: sys.stdout.write(x))
+            baton = Baton("Processing %s" % logfile, "done")
 
         try:
             i = 0;
@@ -149,6 +187,8 @@ try:
                         ml = ""
                     print legend % (i % len(sentences) + 1) + ml
                 os.write(master_fd, sentences[i % len(sentences)])
+                if pipe:
+                    baton.twirl()
                 if spawn:
                     try:
                         st = os.kill(pid, 0)
@@ -157,6 +197,8 @@ try:
                         print "gpsfake: gpsd is gone."
                         break
                 i += 1
+            if pipe:
+                baton.end()
         except KeyboardInterrupt:
             pass
 finally:
