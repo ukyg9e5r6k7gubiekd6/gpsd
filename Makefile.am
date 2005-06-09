@@ -14,7 +14,7 @@ INCLUDES = $(DBUS_CFLAGS)
 endif
 
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
-check_PROGRAMS = gpsmm_test
+check_PROGRAMS = gpsmm_test bits
 bin_SCRIPTS = gpsprof gpsfake 
 
 #
