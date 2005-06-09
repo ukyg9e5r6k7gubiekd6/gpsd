@@ -128,7 +128,7 @@ try:
             else:
                 sentences.append(packet)
     except ValueError, msg:
-        sys.stderr.write(msg + "\n")
+        sys.stderr.write(`msg` + "\n")
         raise SystemExit, 1
     # Look at the first packet to grok the GPS type
     if sentences[0][0] == '$':
