@@ -124,7 +124,10 @@ set distance may vary with software versions.</quote></para>
 <para>Toggle packet logging. If packet logging is on, it will be
 turned off and the log closed.  If it is off, logging to the filename
 following the l will be enabled.  Differs from simply capturing the
-data from the GPS device in that only whole packets are logged.</para>
+data from the GPS device in that only whole packets are logged.
+The logfile is opened for append, so you can log more than one
+portion of the packet stream and they will be stitched together
+correctly.</para>
 </listitem>
 </varlistentry>
 <varlistentry>

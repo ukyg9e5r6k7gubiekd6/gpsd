@@ -379,7 +379,8 @@ the GPS that you can use as a trigger string for a driver.  This is
 how we detect SiRF chips (see step 5 under autoconfiguration above).
 
 If you're writing a driver, look in gpsutils.c; driver helper
-functions live there.
+functions live there.  The easiest way is probably to copy an
+existing driver and change the guts of the analyzer function.
 
 Your packet parser must return field-validity mask bits (using the
 *_SET macros in gps.h), suitable to be put in session->gpsdata.valid.
@@ -396,6 +397,13 @@ Note, also, that all the timestamps your driver puts in the session
 structure should be UTC (with leap-second corrections) not just Unix
 seconds since the epoch.  The report-generator function for D
 does *not* apply a timezone offset.
+
+If you have to add a new packet type to packet.c, add tests for the
+type to the TESTMAIN code. Also, remember to tell gpsfake how to
+gather the new packet type so it can handle logs for regression
+testing.  The relevant function in gpsfake is packet_get().  It
+doesn't have to deal with garbage or verify checksums, as we assume
+the logfiles will be clean packet sequences,
 
 ** Log files for regression testing
 
