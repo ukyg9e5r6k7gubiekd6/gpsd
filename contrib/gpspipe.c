@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 #include "../gpsd.h"
 
 void usage(const char *prog) {
