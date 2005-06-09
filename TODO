@@ -9,42 +9,17 @@ will unfold thenm again.
 Running the BU-303b-nofix test file through gpsfake produces a nan in
 the GPGSA dump.
 
-*** No data from BU-303?
-
-Roeland Th. Jansen <roeland@linux-it.nl> was reporting no data from a
-BU-303 running under SuSE 9.9.  I have a BU-303 and it's working fine.
-I don't know if he has checked out SVN head recently.
-
 ** To do:
 
 *** Verify that the TSIP driver now works
 
-And finish re-cleaning the SiRF driver, carefully.
+It needs to be tweaked to use bits.h.
 
 *** Internal types cleanup
 
 Audit all the integral structure members to ensure that they have
 types of the right size and signedness.  Use splint to spot the places
 where tweaking signatures produces potential bugs.
-
-*** Create a regression-test suite
-
-Create a regression test for the daemon that developers
-can run after each change to verify that it doesn't break anything
-
-We already have a collection of GPS logs that gpsfake can take as input.
-Build the regression set by adding an option to gpsfake so that it
-will run an input file exactly once, and use netcat from port 2947 to
-capture the GPSD O messages it sends up.
-
-This mode of gpsfake will, in effect, act as a filter that turns 
-GPS logs into gpsd session logs.  A few lines of shell script 
-later, this will be a regression test.
-
-*** Integrate the True North support
-
-Curt Meyers <cmeyers@boilerbots.com> has sent patches to integrate the
-True North magnetic compass.
 
 *** Hotplug interface problems
 
