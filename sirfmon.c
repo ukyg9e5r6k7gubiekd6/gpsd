@@ -38,6 +38,8 @@
 #include "config.h"
 #include "gpsutils.h"
 #include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
+
+#define PUT_ORIGIN	4
 #include "bits.h"
 
 #if defined(HAVE_SYS_TIME_H)
@@ -96,10 +98,6 @@ static char *sbasvec[] =
     "Beacon",
     "Software",
 };
-
-#define putbyte(off,b)	{ buf[4+off] = (unsigned char)(b); }
-#define putword(off,w)	{ putbyte(off,(w) >> 8); putbyte(off+1,w); }
-#define putlong(off,l)	{ putword(off,(l) >> 16); putword(off+2,l); }
 
 static struct termios ttyset;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
@@ -813,18 +811,18 @@ static bool sendpkt(unsigned char *buf, size_t len, char *device)
     ssize_t st;
     size_t i;
 
-    putbyte(-4,START1);			/* start of packet */
-    putbyte(-3,START2);
-    putword(-2,len);			/* length */
+    putbyte(buf, -4, START1);			/* start of packet */
+    putbyte(buf, -3, START2);
+    putword(buf, -2, len);			/* length */
 
     csum = 0;
     for (i = 0; i < len; i++)
 	csum += (int)buf[4 + i];
 
     csum &= 0x7fff;
-    putword(len,csum);			/* checksum */
-    putbyte(len + 2,END1);			/* end of packet */
-    putbyte(len + 3,END2);
+    putword(buf, len, csum);			/* checksum */
+    putbyte(buf, len + 2,END1);			/* end of packet */
+    putbyte(buf, len + 3,END2);
     len += 8;
 
     (void)wprintw(debugwin, ">>>");
@@ -1124,8 +1122,8 @@ int main (int argc, char **argv)
     /*@i@*/FD_ZERO(&select_set);
 
     /* probe for version */
-    putbyte(0, 0x84);
-    putbyte(1, 0x0);
+    putbyte(buf, 0, 0x84);
+    putbyte(buf, 1, 0x0);
     /*@ -compdef @*/
     (void)sendpkt(buf, 2, device);
     /*@ +compdef @*/
@@ -1192,9 +1190,9 @@ int main (int argc, char **argv)
 	    {
 	    case 'a':		/* toggle 50bps subframe data */
 		(void)memset(buf, '\0', sizeof(buf));
-		putbyte(0, 0x80);
-		putbyte(23, 12);
-		putbyte(24, subframe_enabled ? 0x00 : 0x10);
+		putbyte(buf, 0, 0x80);
+		putbyte(buf, 23, 12);
+		putbyte(buf, 24, subframe_enabled ? 0x00 : 0x10);
 		(void)sendpkt(buf, 25, device);
 		break;
 
@@ -1206,12 +1204,12 @@ int main (int argc, char **argv)
 			    goto goodspeed;
 		    break;
 		goodspeed:
-		    putbyte(0, 0x86);
-		    putlong(1, v);		/* new baud rate */
-		    putbyte(5, 8);		/* 8 data bits */
-		    putbyte(6, stopbits);	/* 1 stop bit */
-		    putbyte(7, 0);		/* no parity */
-		    putbyte(8, 0);		/* reserved */
+		    putbyte(buf, 0, 0x86);
+		    putlong(buf, 1, v);		/* new baud rate */
+		    putbyte(buf, 5, 8);		/* 8 data bits */
+		    putbyte(buf, 6, stopbits);	/* 1 stop bit */
+		    putbyte(buf, 7, 0);		/* no parity */
+		    putbyte(buf, 8, 0);		/* reserved */
 		    (void)sendpkt(buf, 9, device);
 		    (void)usleep(50000);
 		    (void)set_speed(bps = v, stopbits);
@@ -1224,8 +1222,8 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'c':				/* static navigation */
-		putbyte(0,0x8f);			/* id */
-		putbyte(1, atoi(line+1));
+		putbyte(buf, 0,0x8f);			/* id */
+		putbyte(buf, 1, atoi(line+1));
 		(void)sendpkt(buf, 2, device);
 		break;
 
@@ -1233,14 +1231,14 @@ int main (int argc, char **argv)
 		v = (unsigned)atoi(line+1);
 		if (v > 30)
 		    break;
-		putbyte(0,0xa6);
-		putbyte(1,0);
-		putbyte(2, 4);	/* satellite picture */
-		putbyte(3, v);
-		putbyte(4, 0);
-		putbyte(5, 0);
-		putbyte(6, 0);
-		putbyte(7, 0);
+		putbyte(buf, 0,0xa6);
+		putbyte(buf, 1,0);
+		putbyte(buf, 2, 4);	/* satellite picture */
+		putbyte(buf, 3, v);
+		putbyte(buf, 4, 0);
+		putbyte(buf, 5, 0);
+		putbyte(buf, 6, 0);
+		putbyte(buf, 7, 0);
 		(void)sendpkt(buf, 8, device);
 		break;
 
@@ -1255,35 +1253,35 @@ int main (int argc, char **argv)
 		break;
 
 	    case 'n':				/* switch to NMEA */
-		putbyte(0,0x81);			/* id */
-		putbyte(1,0x02);			/* mode */
-		putbyte(2,0x01);			/* GGA */
-		putbyte(3,0x01);
-		putbyte(4,0x01);			/* GLL */
-		putbyte(5,0x01);
-		putbyte(6,0x01);		  	/* GSA */
-		putbyte(7,0x01);
-		putbyte(8,0x05);			/* GSV */
-		putbyte(9,0x01);
-		putbyte(10,0x01);			/* RNC */
-		putbyte(11,0x01);
-		putbyte(12,0x01);			/* VTG */
-		putbyte(13,0x01);
-		putbyte(14,0x00);			/* unused fields */
-		putbyte(15,0x01);
-		putbyte(16,0x00);
-		putbyte(17,0x01);
-		putbyte(18,0x00);
-		putbyte(19,0x01);
-		putbyte(20,0x00);
-		putbyte(21,0x01);
-		putword(22,bps);
+		putbyte(buf, 0,0x81);			/* id */
+		putbyte(buf, 1,0x02);			/* mode */
+		putbyte(buf, 2,0x01);			/* GGA */
+		putbyte(buf, 3,0x01);
+		putbyte(buf, 4,0x01);			/* GLL */
+		putbyte(buf, 5,0x01);
+		putbyte(buf, 6,0x01);		  	/* GSA */
+		putbyte(buf, 7,0x01);
+		putbyte(buf, 8,0x05);			/* GSV */
+		putbyte(buf, 9,0x01);
+		putbyte(buf, 10,0x01);			/* RNC */
+		putbyte(buf, 11,0x01);
+		putbyte(buf, 12,0x01);			/* VTG */
+		putbyte(buf, 13,0x01);
+		putbyte(buf, 14,0x00);			/* unused fields */
+		putbyte(buf, 15,0x01);
+		putbyte(buf, 16,0x00);
+		putbyte(buf, 17,0x01);
+		putbyte(buf, 18,0x00);
+		putbyte(buf, 19,0x01);
+		putbyte(buf, 20,0x00);
+		putbyte(buf, 21,0x01);
+		putword(buf, 22,bps);
 		(void)sendpkt(buf, 24, device);
 		goto quit;
 
 	    case 't':				/* poll navigation params */
-		putbyte(0,0x98);
-		putbyte(1,0x00);
+		putbyte(buf, 0,0x98);
+		putbyte(buf, 1,0x00);
 		(void)sendpkt(buf, 2, device);
 		break;
 
@@ -1295,7 +1293,7 @@ int main (int argc, char **argv)
 		while (*p != '\0')
 		{
 		    /*@i1@*/(void)sscanf(p,"%x",&v);
-		    putbyte(len,v);
+		    putbyte(buf, len,v);
 		    len++;
 		    while (*p != '\0' && !isspace(*p))
 			p++;
