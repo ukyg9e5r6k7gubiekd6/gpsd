@@ -5,6 +5,7 @@
 #include <string.h>
 #include "bits.h"
 
+/*@ -duplicatequals +ignorequals @*/
 int main(void)
 {
     unsigned char buf[80];

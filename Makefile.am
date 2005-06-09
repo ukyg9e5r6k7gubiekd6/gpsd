@@ -190,3 +190,5 @@ splint:
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
+	@echo "Running splint on bits test harness..."
+	-splint bits.c
