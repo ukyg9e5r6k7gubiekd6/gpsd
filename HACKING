@@ -23,6 +23,9 @@ Before shipping a patch, it is a good idea to make sure the patched
 code displays no warnings when you run 'make splint'.  See
 http://www.splint.org for a description of this tool.
 
+Also, use the regression-test suite -- "make testregress" -- to check
+that your patch doesn't break the handling of any existing receiver.
+
 ** The license on contributions
 
 The GPSD libraries are under the BSD license.  Please do not send 
