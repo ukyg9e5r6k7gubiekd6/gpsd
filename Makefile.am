@@ -83,6 +83,7 @@ libgps_c_sources = \
 	sirf.c \
 	report.c \
 	gpsutils.h \
+	bits.h \
 	timebase.h
 
 libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp
