@@ -56,7 +56,7 @@ for (switch, val) in options:
         doptions = val
     elif (switch == '-p'):
         pipe = True
-        cycle = 0
+        cycle = 0.1
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-v'):

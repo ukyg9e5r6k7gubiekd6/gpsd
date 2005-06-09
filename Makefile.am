@@ -174,11 +174,11 @@ libgps: libgps.c .libs/libgps.a
 
 # Regression-test the daemon
 testregress:
-	@for f in test/*.log; do gpsfake -p $${f} >test/test.chk; diff -c $${f}.chk test/test.chk; done; rm test/test.chk
+	@for f in test/*.log; do gpsfake -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -c $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Build the regression tests
 makeregress:
-	@for f in test/*.log; do gpsfake -p $${f} >$${f}.chk; done
+	@for f in test/*.log; do gpsfake -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
 # Report splint warnings
 splint:
