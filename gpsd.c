@@ -941,7 +941,7 @@ int main(int argc, char *argv[])
 	    pid_file = optarg;
 	    break;
 	case 'v':
-	    printf("gpsd %s\n", VERSION);
+	    (void)printf("gpsd %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?':
 	default:

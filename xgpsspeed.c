@@ -42,7 +42,7 @@ static void handle_input(XtPointer client_data UNUSED,
 			 int *source UNUSED, XtInputId * id UNUSED)
 {
     if (gps_poll(gpsdata) < 0) {
-	fprintf(stderr, "Read error on server socket.");
+	(void)fprintf(stderr, "Read error on server socket.");
 	exit(1);
     }
 }

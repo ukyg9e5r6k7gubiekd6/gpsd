@@ -614,7 +614,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	return NO_PACKET;
     (void)tcflush(devicefd, TCIOFLUSH);
 
-    fprintf(stderr, "Hunting at speed %u, %dN%u\n",
+    (void)fprintf(stderr, "Hunting at speed %u, %dN%u\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */

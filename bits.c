@@ -46,32 +46,32 @@ int main(void)
     f1 = getf(buf, 24);
     d1 = getd(buf, 16);
 
-    printf("getsb: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getsb: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)sb1, (unsigned long long)sb2,
 		(unsigned long long)getsb(buf, 0), (unsigned long long)getsb(buf, 8));
-    printf("getub: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getub: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)ub1, (unsigned long long)ub2,
 		(unsigned long long)getub(buf, 0), (unsigned long long)getub(buf, 8));
-    printf("getsw: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getsw: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)sw1, (unsigned long long)sw2,
 		(unsigned long long)getsw(buf, 0), (unsigned long long)getsw(buf, 8));
-    printf("getuw: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getuw: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)uw1, (unsigned long long)uw2,
 		(unsigned long long)getuw(buf, 0), (unsigned long long)getuw(buf, 8));
-    printf("getsl: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getsl: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)sl1, (unsigned long long)sl2,
 		(unsigned long long)getsl(buf, 0), (unsigned long long)getsl(buf, 8));
-    printf("getul: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getul: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)ul1, (unsigned long long)ul2,
 		(unsigned long long)getul(buf, 0), (unsigned long long)getul(buf, 8));
-    printf("getsL: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getsL: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)sL1, (unsigned long long)sL2,
 		(unsigned long long)getsL(buf, 0), (unsigned long long)getsL(buf, 8));
-    printf("getuL: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getuL: %016llx %016llx %016llx %016llx\n",
 		(unsigned long long)uL1, (unsigned long long)uL2,
 		(unsigned long long)getuL(buf, 0), (unsigned long long)getuL(buf, 8));
-    printf("getf: %f %f\n", f1, getf(buf, 24));
-    printf("getd: %.16f %.16f\n", d1, getd(buf, 16));
+    (void)printf("getf: %f %f\n", f1, getf(buf, 24));
+    (void)printf("getd: %.16f %.16f\n", d1, getd(buf, 16));
 
     exit(0);
 }

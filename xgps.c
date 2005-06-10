@@ -69,7 +69,7 @@ static Pixel get_pixel(Widget w, char *resource_value)
     colormap = DefaultColormapOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
     /*@i@*/cstatus = XAllocNamedColor(XtDisplay(w), colormap, resource_value, &color, &exact);
     if (cstatus == (Boolean)False) {
-	fprintf(stderr, "Unknown color: %s", resource_value);
+	(void)fprintf(stderr, "Unknown color: %s", resource_value);
 	color.pixel = BlackPixelOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
     };
     /*@i1@*/return (color.pixel);
@@ -243,7 +243,7 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
 {
     if (gps_poll(gpsdata) < 0) {
-	fprintf(stderr, "Read error on server socket.");
+	(void)fprintf(stderr, "Read error on server socket.");
 	exit(1);
     }
 }
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
 	if (strcmp(speedunits->legend, su) == 0)
 	    goto speedunits_ok;
     speedunits = speedtable;
-    fprintf(stderr, "xgps: unknown speed unit, defaulting to %s\n", speedunits->legend);
+    (void)fprintf(stderr, "xgps: unknown speed unit, defaulting to %s\n", speedunits->legend);
 speedunits_ok:;
 
     au = get_resource(toplevel, "altunits",   "feet");
@@ -407,7 +407,7 @@ speedunits_ok:;
 	if (strcmp(altunits->legend, au) == 0)
 	    goto altunits_ok;
     altunits = alttable;
-    fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
+    (void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
 altunits_ok:;
 
     while ((option = getopt(argc, argv, "hv")) != -1) {
@@ -455,8 +455,9 @@ altunits_ok:;
 	case NL_NOCONNECT: 	err_str = "can't connect to host"; break;
 	default:             	err_str = "Unknown"; break;
 	}
-	fprintf( stderr, "xgps: no gpsd running or network error: %d, %s\n"
-		, errno, err_str);
+	(void)fprintf( stderr, 
+		       "xgps: no gpsd running or network error: %d, %s\n", 
+		       errno, err_str);
 	exit(2);
     }
 
