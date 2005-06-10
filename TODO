@@ -2,24 +2,11 @@ This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
 will unfold thenm again.
 
-** Bugs:
-
-*** Running the BU-303b-nofix test file through gpsfake produces a nan
-
-Running the BU-303b-nofix test file through gpsfake produces a nan in
-the GPGSA dump.
-
 ** To do:
 
 *** Verify that the TSIP driver now works
 
 It needs to be tweaked to use bits.h.
-
-*** Internal types cleanup
-
-Audit all the integral structure members to ensure that they have
-types of the right size and signedness.  Use splint to spot the places
-where tweaking signatures produces potential bugs.
 
 *** Hotplug interface problems
 

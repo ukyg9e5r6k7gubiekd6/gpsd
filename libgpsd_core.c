@@ -535,11 +535,14 @@ void gpsd_binary_quality_dump(struct gps_device_t *session,
 	(void)strcpy(bufp, ",");
     }
     bufp += strlen(bufp);
-    (void)snprintf(bufp, len-strlen(bufp),
-	    "%.1f,%.1f,%.1f*", 
-	    session->gpsdata.pdop, 
-	    session->gpsdata.hdop,
-	    session->gpsdata.vdop);
+    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+	(void)strcat(bufp, ",,,");
+    else
+	(void)snprintf(bufp, len-strlen(bufp),
+		       "%.1f,%.1f,%.1f*", 
+		       session->gpsdata.pdop, 
+		       session->gpsdata.hdop,
+		       session->gpsdata.vdop);
     nmea_add_checksum(bufp2);
     gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
     bufp += strlen(bufp);
