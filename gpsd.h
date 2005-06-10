@@ -180,10 +180,9 @@ extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_raw_hook(struct gps_device_t *, char *, size_t len, int level);
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
-extern void gpsd_binary_fix_dump(/*@in@*/struct gps_device_t *, char[], int);
-extern void gpsd_binary_satellite_dump(/*@in@*/struct gps_device_t *, char[], int);
-extern void gpsd_binary_quality_dump(/*@in@*/struct gps_device_t *, char[], int);
-
+extern void gpsd_binary_fix_dump(/*@in@*/struct gps_device_t *, char[], size_t);
+extern void gpsd_binary_satellite_dump(/*@in@*/struct gps_device_t *, char[], size_t);
+extern void gpsd_binary_quality_dump(/*@in@*/struct gps_device_t *, char[], size_t);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *, bool);

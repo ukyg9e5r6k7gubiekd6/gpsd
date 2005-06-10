@@ -418,7 +418,7 @@ static double degtodm(double a)
     return t;
 }
 
-void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
+void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[],size_t len)
 {
     char hdop_str[NMEA_MAX] = "";
     struct tm tm;
@@ -430,7 +430,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
     intfixtime = (time_t)session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
-	(void)snprintf(bufp, (size_t)len,
+	(void)snprintf(bufp, len,
 		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
 		tm.tm_hour,
 		tm.tm_min,
@@ -482,7 +482,7 @@ void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[], int len)
 }
 
 void gpsd_binary_satellite_dump(struct gps_device_t *session, 
-				char bufp[], int len)
+				char bufp[], size_t len)
 {
     int i;
     char *bufp2 = bufp;
@@ -514,7 +514,7 @@ void gpsd_binary_satellite_dump(struct gps_device_t *session,
 }
 
 void gpsd_binary_quality_dump(struct gps_device_t *session, 
-			      char bufp[], int len)
+			      char bufp[], size_t len)
 {
     int	i, j;
     char *bufp2 = bufp;

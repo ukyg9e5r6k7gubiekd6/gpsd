@@ -356,7 +356,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     switch (id) {
     case 1000:
 	mask = handle1000(session);
-	gpsd_binary_fix_dump(session, buf, (int)sizeof(buf));
+	gpsd_binary_fix_dump(session, buf, sizeof(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1002:
@@ -371,12 +371,12 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	gpsd_raw_hook(session, buf, strlen(buf),  1);
 	gpsd_binary_quality_dump(session, 
 				 buf+strlen(buf), 
-				 (int)(sizeof(buf)-strlen(buf)));
+				 (sizeof(buf)-strlen(buf)));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;
     case 1003:
 	mask = handle1003(session);
-	gpsd_binary_satellite_dump(session, buf, (int)sizeof(buf));
+	gpsd_binary_satellite_dump(session, buf, sizeof(buf));
 	gpsd_report(3, "<= GPS: %s", buf);
 	break;	
     case 1005:
