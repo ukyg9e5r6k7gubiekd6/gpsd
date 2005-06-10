@@ -251,7 +251,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)session->gps_week, f2) - session->context->leap_seconds;
 	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
-	gpsd_binary_fix_dump(session, buf2, (int)sizeof(buf2));
+	gpsd_binary_fix_dump(session, buf2, sizeof(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
@@ -327,7 +327,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.used[i] = (int)getbyte(16 + i);
 
 	gpsd_report(4, "Sat info: %d %d\n",session->gpsdata.fix.mode,session->gpsdata.satellites_used);
-	gpsd_binary_quality_dump(session, buf2, (int)sizeof(buf2));
+	gpsd_binary_quality_dump(session, buf2, sizeof(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
         mask |= HDOP_SET | VDOP_SET | PDOP_SET | MODE_SET;
 	break;
@@ -373,7 +373,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)session->gps_week, f2) - session->context->leap_seconds;
 	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
-	gpsd_binary_fix_dump(session, buf2, (int)sizeof(buf2));
+	gpsd_binary_fix_dump(session, buf2, sizeof(buf2));
 	gpsd_report(3, "<= GPS: %s", buf2);
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;

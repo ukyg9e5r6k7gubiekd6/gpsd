@@ -204,7 +204,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    }
 #endif /* NTPSHM_ENABLE */
 
-	    gpsd_binary_fix_dump(session, buf2, (int)sizeof(buf2));
+	    gpsd_binary_fix_dump(session, buf2, sizeof(buf2));
 	    /* fix quality data */
 	    session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
 	    session->gpsdata.pdop = session->gpsdata.vdop = 0.0;
@@ -212,7 +212,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
 	    gpsd_binary_quality_dump(session,
 				     buf2 + strlen(buf2),
-				     (int)(sizeof(buf2)-strlen(buf2)));
+				     (sizeof(buf2)-strlen(buf2)));
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
 	}
@@ -265,7 +265,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	 */
 	if ((session->satcounter++ % 5) != 0)
 	    break;
-	gpsd_binary_satellite_dump(session, buf2, (int)sizeof(buf2));
+	gpsd_binary_satellite_dump(session, buf2, sizeof(buf2));
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	gpsd_report(3, "<= GPS: %s", buf2);
 	return TIME_SET | SATELLITE_SET;
@@ -545,7 +545,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    gpsd_binary_quality_dump(session, 
 				     buf2 + strlen(buf2),
-				     (int)(sizeof(buf2)-strlen(buf2)));
+				     (sizeof(buf2)-strlen(buf2)));
 	    gpsd_report(3, "<= GPS: %s", buf2);
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
 	    session->gpsdata.sentence_length = 91;
@@ -649,7 +649,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    session->context->valid = LEAP_SECOND_VALID;
 	}
 
-	gpsd_binary_fix_dump(session, buf2, (int)sizeof(buf2));
+	gpsd_binary_fix_dump(session, buf2, sizeof(buf2));
 	session->gpsdata.gdop = (int)getub(buf, 34) / 5.0;
 	session->gpsdata.pdop = (int)getub(buf, 35) / 5.0;
 	session->gpsdata.hdop = (int)getub(buf, 36) / 5.0;
@@ -657,7 +657,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	session->gpsdata.tdop = (int)getub(buf, 38) / 5.0;
 	gpsd_binary_quality_dump(session, 
 				 buf2 + strlen(buf2),
-				 (int)(sizeof(buf2)-strlen(buf2)));
+				 (sizeof(buf2)-strlen(buf2)));
 	session->driverstate |= UBLOX;
 	return mask;
 
