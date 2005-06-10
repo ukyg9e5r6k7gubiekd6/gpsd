@@ -480,7 +480,7 @@ Things we've considered doing and rejected.
 
 Tempting -- it would allow us to do sirfmon-like things with the
 daemon running -- but a bad idea.  It would make denial-of-service 
-attacks on applications using the GPS far too easy.  For examples,
+attacks on applications using the GPS far too easy.  For example,
 suppose the control string were a baud-rate change?
 
 *** Using libusb to do USB device discovery
@@ -509,6 +509,12 @@ But it's almost certainly not worth the work.  Rob Janssen, our timekeeping
 expert, reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.
+
+*** Evermore binary protocol
+
+Described at <http://www-ri.hive.no/nmea/GM-X205_UG_revB.pdf>.
+Doesn't seem to support any capabilities that NMEA doesn't, other
+than shipping TDOP.
 
 Local variables:
 mode: outline

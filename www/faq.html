@@ -57,9 +57,15 @@ rapidly.  If we can't reproduce it, you might get lucky or you might
 not &mdash; and we try hard, but all too often the result is 'not'.</p>
 
 <p>Therefore your third step should always be to try to capture a log
-of some GPS output that reproduces the bug, and your second step
-should be to feed it to a gpsd instance through gpsfake to verify that
-the log does in fact reproduce the bug.</p>
+of some GPS output that reproduces the bug.  If you're using a SiRF
+chip, the 'l' command of sirfmon will help you.  If you're using
+a GPS that emits NMEA, telnetting to port 2947 and enabling raw
+mode will do the trick.  For non-SiRF binary protocols, you will
+have to cat direct from the serial device into a file.</p>
+
+<p>Your fourth step should be to feed the log you just captured to a
+gpsd instance through gpsfake to verify that the log does in fact
+reproduce the bug.</p>
 
 <p>Once you have the log, trim it to the smallest span of data that
 reproduces the bug.  A systematic way to do this is to cut the log in
@@ -73,8 +79,8 @@ NMEA or packet of SiRF that produces the bug and tell us that.</p>
 
 <p>If you're using a SiRF-based GPS (which you can tell from the -D 4
 output), switch back to NMEA mode using the N command and see if the
-bug still reproduces.  Also try switching on <a
-static navigation mode using sirfmon.</p>
+bug still reproduces.  Also try switching on static navigation mode 
+using the 'c' command in sirfmon.</p>
 
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
@@ -115,6 +121,10 @@ of the old 1.x versions, or a fork such as ngpsd or tgpsd, here are
 some good functional reasons to migrate to 2.0:</p>
 
 <ol>
+<li>Hotplug- and reconnect support.  Your application does not have to be
+aware of GPS device connects and disconnects, but can choose to be by
+watching for X commands.</li>
+
 <li>Your application can now query whether or not the GPS is online
 and get an authoritative answer.</li>
 
@@ -130,12 +140,12 @@ the simpler GPSD format rather than the more complex NMEA one.</li>
 a second when it is offline but clients are connected.</li>
 
 <li>Writes to clients are nonblocking, so new <code>gpsd</code> cannot
-be stalled by a wedged client.</p>
-</ol>
+be stalled by a wedged client.</li>
 
-<p>These changes mean that even if users casually unplug and reconnect a
-GPS, your application can notice the unplug and reconnect events, 
-and automatically starts getting data again a second after the reconnect.</p>
+<li>The code in the new version has been carefully audited for quality,
+static-checked using <a href='http://www.splint.org'>splint</a>, and
+is regression-tested before every release.</li>
+</ol>
 
 <h1 id='accuracy'>Why use <code>gpsd</code> protocol rather than
 parsing raw NMEA?</h1>

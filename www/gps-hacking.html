@@ -264,16 +264,14 @@ violations.</p>
 have never seen a copy of the official NMEA standard.  Fortunately, it
 isn't necessary for even <code>gpsd</code> developers to know most of
 it, since most modern GPS sensors only emit about a half-dozen of the
-eighty or so NMEA sentences.  RMC, GLL, VTG, GGA, GSA, GSV are all you
-are ever likely to need to know about, and the only even moderately
-tricky bit is that there are two variants of the VTG sentence (grep
-for it in the <code>gpsd</code> code if you're really curious).</p>
+eighty or so NMEA sentences.  RMC, GGA, GSA, GSV are all you are ever
+likely to need to know about.</p>
 
 <p>After you've read about those sentences, it can be instructive to
 run <code>gpsd</code> in a mode something like this:</p>
 
 <listing>
-./gpsd -N -n -D 2 -f /dev/ttyUSB0
+./gpsd -N -n -D 2 /dev/ttyUSB0
 </listing>
 
 <p>Watching the output for thirty seconds or so will give you a good

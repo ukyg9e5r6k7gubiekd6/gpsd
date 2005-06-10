@@ -60,11 +60,17 @@ href="http://www.gpsdrive.cc/">GPSdrive</a>, <a
 href="http://qpegps.sourceforge.net/">gpeGPS</a>, and
 <a href="http://roadmap.digitalomaha.net/index.html">roadmap</a>.</p>
 
-<p>Under Linux, gpsd normally runs with zero configration.  The RPM
+<p>Under Linux, gpsd normally runs with zero configuration.  The RPM
 installs hotplug scripts that do the right thing when a USB device
-goes active, launching gpsd if needed and telling it <code>gpsd</code>
-which device to read data from.  Then, <code>gpsd</code> deduces a
-baud rate and GPS type by looking at the data stream.</p>
+goes active, launching <code>gpsd</code> if needed and telling it
+<code>gpsd</code> which device to read data from.  Then,
+<code>gpsd</code> deduces a baud rate and GPS type by looking at the
+data stream.</p>
+
+<p><code>gpsd</code> is high-quality, carefully-audited code.  It has been
+checked with the standard mode of <a href='http://www.splint.org'>splint</a>,
+and an extensive regression-test suite is used to check correct behavior
+before each release.</p>
 
 <p>No, we don't support Windows &mdash; get a better operating system.
 Our main focus is open-source Unixes &mdash; Linux, and the *BSD
@@ -135,7 +141,8 @@ repository.</p></li>
 <dd>The low-level library used by <code>gpsd</code> to talk to a GPS.</dd>
 
 <dt><a href="gpsprof.html">gpsprof.1</a></dt>
-<dd>The <code>gpsprof</code> program for measuring GPS latency.</dd>
+<dd>The <code>gpsprof</code> program for plotting spatial scatter of fixes
+and fix latency.</dd>
 
 <dt><a href="gpsfake.html">gpsfake.1</a></dt>
 <dd>The <code>gpsfake</code> test harness simulating a GPS.</dd>

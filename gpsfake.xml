@@ -37,6 +37,10 @@ thinks the slave side of the pty is its GPS device, and repeatedly
 feeds the contents of a test logfile through the master side to the
 GPS.</para>
 
+<para><application>gpsfake</application> does not require root
+privileges, and can be run concurrently with a production 
+<application>gpsd</application> instance without causing problems.</para>
+
 <para>The logfile may be of either NMEA sentences or SiRF-II packets.
 Leading lines beginning with # will be treated as comments and
 ignored.</para>
