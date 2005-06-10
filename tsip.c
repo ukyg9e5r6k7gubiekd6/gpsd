@@ -105,7 +105,7 @@ static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
     unsigned char buf[100];
 
     putbyte(0,0xff);		/* current port */
-    putbyte(1,(round(log((double)speed/300)/M_LN2))+2); /* input baudrate */
+    putbyte(1,(rint(log((double)speed/300)/M_LN2))+2); /* input baudrate */
     putbyte(2,buf[1]);		/* output baudrate */
     putbyte(3,8);			/* character width (8 bits) */
     putbyte(4,1);			/* parity (odd) */
@@ -175,7 +175,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getf(6);			/* leap seconds */
 	if (f2 > 10.0) {
 	    session->gps_week = (unsigned)s1;
-	    /*@i@*/session->context->leap_seconds = roundf(f2);
+	    session->context->leap_seconds = (int)rintf(f2);
 	    session->context->valid = LEAP_SECOND_VALID;
 
 	    session->gpsdata.sentence_time = gpstime_to_unix(s1, f1) - f2;

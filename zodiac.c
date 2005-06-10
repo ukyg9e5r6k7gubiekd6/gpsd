@@ -92,7 +92,7 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
     data[2] = 1;			/* port 1 character width (8 bits) */
     data[3] = 0;			/* port 1 stop bits (1 stopbit) */
     data[4] = 0;			/* port 1 parity (none) */
-    data[5] = (unsigned short)(round(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
+    data[5] = (unsigned short)(rint(log((double)speed/300)/M_LN2)+1); /* port 1 speed */
     data[14] = zodiac_checksum(data, 14);
 
     zodiac_spew(session, 1330, data, 15);
