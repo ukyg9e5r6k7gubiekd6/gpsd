@@ -209,7 +209,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 {
     session->packet_full = 0;
     session->gpsdata.sentence_time = 0;
-    session->gpsdata.sentence_length = (int)session->outbuflen;
+    session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
 
     session->gpsdata.set = ONLINE_SET | session->device_type->parse_packet(session);
@@ -340,9 +340,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* can we get a full packet from the device? */
 	if (session->device_type)
-	    packet_length = session->device_type->get_packet(session, (unsigned)waiting);
+	    packet_length = session->device_type->get_packet(session, (size_t)waiting);
 	else {
-	    packet_length = packet_get(session, (unsigned)waiting);
+	    packet_length = packet_get(session, (size_t)waiting);
 	    if (session->packet_type != BAD_PACKET) {
 		gpsd_report(3, 
 			    "packet sniff finds type %d\n", 

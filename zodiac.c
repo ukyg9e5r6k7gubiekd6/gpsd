@@ -78,7 +78,7 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
 }
 
-static bool zodiac_speed_switch(struct gps_device_t *session, unsigned int speed)
+static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 {
     unsigned short data[15];
 

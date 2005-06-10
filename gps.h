@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
@@ -148,9 +149,9 @@ struct gps_data_t {
     char **devicelist;		/* list of pathnames */
 
     /* profiling data for last sentence */
-    int profiling;		/* profiling enabled? */
+    bool profiling;		/* profiling enabled? */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
-    int sentence_length;	/* character count of last sentence */
+    size_t sentence_length;	/* character count of last sentence */
     double sentence_time;	/* sentence timestamp */
     double d_xmit_time;		/* beginning of sentence transmission */
     double d_recv_time;		/* daemon receipt time (-> E1+T1) */

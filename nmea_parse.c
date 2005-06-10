@@ -532,7 +532,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_data_t *outdata)
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, outdata);
 		strncpy(outdata->tag, nmea_phrase[i].name, MAXTAGLEN);
-		outdata->sentence_length = (int)strlen(sentence);
+		outdata->sentence_length = strlen(sentence);
 	    }
 	    if (nmea_phrase[i].mask)
 		outdata->seen_sentences |= nmea_phrase[i].mask;

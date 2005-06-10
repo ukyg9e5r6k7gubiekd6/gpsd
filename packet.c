@@ -285,7 +285,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case SIRF_LEADER_2:
-	session->packet_length = c << 8;
+	session->packet_length = (size_t)(c << 8);
 	session->packet_state = SIRF_LENGTH_1;
 	break;
     case SIRF_LENGTH_1:
@@ -371,7 +371,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	session->packet_state = ZODIAC_ID_2;
 	break;
     case ZODIAC_ID_2:
-	session->packet_length = c;
+	session->packet_length = (size_t)c;
 	session->packet_state = ZODIAC_LENGTH_1;
 	break;
     case ZODIAC_LENGTH_1:
@@ -446,7 +446,7 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
     size_t packetlen = session->inbufptr-session->inbuffer;
     if (packetlen < sizeof(session->outbuffer)) {
 	memcpy(session->outbuffer, session->inbuffer, packetlen);
-	session->outbuflen = (unsigned short)packetlen;
+	session->outbuflen = packetlen;
 	session->outbuffer[packetlen] = '\0';
 	session->packet_type = packet_type;
 #ifdef STATE_DEBUG
@@ -469,7 +469,7 @@ static void packet_discard(struct gps_device_t *session)
     session->inbufptr = memmove(session->inbuffer, 
 				session->inbufptr, 
 				remaining);
-    session->inbuflen = (unsigned short)remaining;
+    session->inbuflen = remaining;
 #ifdef STATE_DEBUG
     gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n", 
 		discard, remaining, 
@@ -493,7 +493,7 @@ static void character_discard(struct gps_device_t *session)
 
 /* entry points begin here */
 
-int packet_get(struct gps_device_t *session, unsigned int waiting)
+int packet_get(struct gps_device_t *session, size_t waiting)
 /* grab a packet; returns ether BAD_PACKET or the length */
 {
     int newdata;

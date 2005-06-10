@@ -4,6 +4,7 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
 #include <stdbool.h>
+#include <termios.h>
 #include "config.h"
 #include "gps.h"
 #include "gpsutils.h"
@@ -49,12 +50,12 @@ struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *typename;
     /*@observer@*//*@null@*/char *trigger;
-    /*@null@*/int (*probe)(struct gps_device_t *session);
+    /*@null@*/bool (*probe)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
-    /*@null@*/int (*get_packet)(struct gps_device_t *session, unsigned int waiting);
+    /*@null@*/int (*get_packet)(struct gps_device_t *session, size_t waiting);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/size_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
-    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, unsigned int speed);
+    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
     int cycle;
@@ -95,12 +96,12 @@ struct gps_device_t {
 #define TSIP_PACKET	3
     unsigned int baudindex;
     unsigned int packet_state;
-    unsigned int packet_length;
+    size_t packet_length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
-    unsigned short inbuflen;
+    size_t inbuflen;
     unsigned /*@observer@*/char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
-    unsigned short outbuflen;
+    size_t outbuflen;
     unsigned long counter;
 #ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
@@ -120,7 +121,7 @@ struct gps_device_t {
     /*@relnull@*/void *GarminBuffer; /* Pointer Garmin packet buffer 
                            void *, to keep the packet details out of the 
                            global context and save spave */
-    long GarminBufferLen;                  /* current GarminBuffer Length */
+    size_t GarminBufferLen;                  /* current GarminBuffer Length */
 #endif /* GARMIN_ENABLE */
 #if defined(SIRFII_ENABLE) || defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
     unsigned int gps_week;	/* Current GPS week number */
@@ -163,11 +164,11 @@ extern gps_mask_t nmea_parse(char *, struct gps_data_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
-extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, int);
+extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 
 extern void packet_reset(struct gps_device_t *session);
 extern void packet_pushback(struct gps_device_t *session);
-extern int packet_get(struct gps_device_t *, unsigned int);
+extern int packet_get(struct gps_device_t *, size_t);
 extern int packet_sniff(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);

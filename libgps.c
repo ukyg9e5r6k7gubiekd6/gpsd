@@ -413,10 +413,11 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->set |= SATELLITE_SET;
 		    break;
 		case 'Z':
-		    (void)sscanf(sp, "Z=%d", &gpsdata->profiling);
+		    gpsdata->profiling = (sp[2] == '1');
 		    break;
 		case '$':
-		    (void)sscanf(sp, "$=%s %d %lf %lf %lf %lf %lf %lf", 
+		    /*@ +matchanyintegral @*/
+		    (void)sscanf(sp, "$=%s %u %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
 			   &gpsdata->fix.time, 
@@ -425,6 +426,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			   &gpsdata->d_decode_time, 
 			   &gpsdata->poll_time, 
 			   &gpsdata->emit_time);
+		    /*@ -matchanyintegral @*/
 		    break;
 		}
 	    }

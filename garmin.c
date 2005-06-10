@@ -595,7 +595,7 @@ static int GetPacket (struct gps_device_t *session )
  * return 1 if garmin_gps device found
  * return 0 if not
  */
-static int garmin_probe(struct gps_device_t *session)
+static bool garmin_probe(struct gps_device_t *session)
 {
 
     Packet_t *thePacket = NULL;
@@ -609,14 +609,14 @@ static int garmin_probe(struct gps_device_t *session)
     /* check for USB serial drivers -- very Linux-specific */
     if (access("/sys/module/garmin_gps", R_OK) != 0) {
 	gpsd_report(5, "garmin_gps not active.\n"); 
-        return 0;
+        return false;
     }
 
     /* Save original terminal parameters */
     if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
 	gpsd_report(0, "garmin_probe: error getting port attributes: %s\n",
              strerror(errno));
-	return 0;
+	return false;
     }
     memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
 
@@ -625,7 +625,7 @@ static int garmin_probe(struct gps_device_t *session)
     if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
 	gpsd_report(0, "garmin_probe: error changing port attributes: %s\n",
              strerror(errno));
-	return 0;
+	return false;
     }
 
     if ( !session->GarminBuffer ) {
@@ -633,7 +633,7 @@ static int garmin_probe(struct gps_device_t *session)
 	    session->GarminBuffer = calloc( sizeof(Packet_t), 1);
 	    if ( NULL == session->GarminBuffer ) {
 		gpsd_report(0, "garmin_probe: out of memory!\n");
-		return 0;
+		return false;
             }
     }
     thePacket = (Packet_t*)session->GarminBuffer;
@@ -675,13 +675,13 @@ static int garmin_probe(struct gps_device_t *session)
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
-	    return(0);
+	    return false;
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout\n");
 	    // restore old terminal settings
             (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
-	    return(0);
+	    return false;
         }
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
@@ -699,7 +699,7 @@ static int garmin_probe(struct gps_device_t *session)
 	// restore old terminal settings
         (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
-	return 0;
+	return false;
     }
     // Tell the device that we are starting a session.
     gpsd_report(3, "Send Garmin Start Session\n");
@@ -746,7 +746,7 @@ static int garmin_probe(struct gps_device_t *session)
 	// restore old terminal settings
         (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
-	return 0;
+	return false;
     }
 
     // Tell the device to send product data
@@ -770,13 +770,13 @@ static int garmin_probe(struct gps_device_t *session)
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
-	    return(0);
+	    return false;
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout\n");
 	    // restore old terminal settings
             (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
-	    return(0);
+	    return false;
         }
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
@@ -794,9 +794,9 @@ static int garmin_probe(struct gps_device_t *session)
 	// restore old terminal settings
         (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
-	return 0;
+	return false;
     }
-    return(1);
+    return true;
 }
 
 /*
@@ -813,11 +813,11 @@ static void garmin_init(struct gps_device_t *session)
 {
 	Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
 	unsigned char *buffer = (unsigned char *)thePacket;
-	int ret;
+	bool ret;
 
 	gpsd_report(5, "to garmin_probe()\n");
 	ret = garmin_probe( session );
-	gpsd_report(3, "from garmin_probe() = %d\n", ret);
+	gpsd_report(3, "from garmin_probe() = %d\n", (int)ret);
 
 	// turn on PVT data 49
 	gpsd_report(3, "Set Garmin to send reports every 1 second\n");
@@ -838,7 +838,7 @@ static void garmin_init(struct gps_device_t *session)
 	//SendPacket(session,  thePacket);
 }
 
-static int garmin_get_packet(struct gps_device_t *session, /*@unused@*/ unsigned int waiting UNUSED ) 
+static int garmin_get_packet(struct gps_device_t *session, /*@unused@*/size_t waiting UNUSED ) 
 {
     return ( 0 == GetPacket( session ) ? 1 : 0);
 }

@@ -208,6 +208,14 @@ work on any system that uses that.
 Problem: system daemons use the timezone set when they start up. You
 can't get them to grok a new one short of rebooting
 
+Sources: 
+
+Sources for Time Zone and Daylight Saving Time Data
+http://www.twinsun.com/tz/tz-link.htm
+
+Free time-zone maps of the U.S.
+http://www.manifold.net/download/freemaps.html
+
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"

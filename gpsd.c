@@ -787,26 +787,27 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",Z=?");
 		p++;		
 	    } else if (*p == '1' || *p == '+') {
-		whoami->device->gpsdata.profiling = 1;
+		whoami->device->gpsdata.profiling = true;
 		gpsd_report(3, "%d turned on profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
-		whoami->device->gpsdata.profiling = 0;
+		whoami->device->gpsdata.profiling = false;
 		gpsd_report(3, "%d turned off profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
 		p++;
 	    } else {
-		/*@i@*/whoami->device->gpsdata.profiling = !whoami->device->gpsdata.profiling;
+		whoami->device->gpsdata.profiling = !whoami->device->gpsdata.profiling;
 		gpsd_report(3, "%d toggled profiling mode\n", cfd);
-		(void)snprintf(phrase, sizeof(phrase), ",Z=%d", whoami->device->gpsdata.profiling);
+		(void)snprintf(phrase, sizeof(phrase), ",Z=%d",
+			       (int)whoami->device->gpsdata.profiling);
 	    }
 	    break;
         case '$':
 	    if (whoami->device->gpsdata.sentence_time!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %f %f %f %f %f %f",
 			whoami->device->gpsdata.tag,
-			whoami->device->gpsdata.sentence_length,
+			(int)whoami->device->gpsdata.sentence_length,
 			whoami->device->gpsdata.sentence_time,
 			whoami->device->gpsdata.d_xmit_time - whoami->device->gpsdata.sentence_time,
 			whoami->device->gpsdata.d_recv_time - whoami->device->gpsdata.sentence_time,
@@ -816,7 +817,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d 0 %f %f %f %f %f",
 			whoami->device->gpsdata.tag,
-			whoami->device->gpsdata.sentence_length,
+			(int)whoami->device->gpsdata.sentence_length,
 			whoami->device->gpsdata.d_xmit_time,
 			whoami->device->gpsdata.d_recv_time - whoami->device->gpsdata.d_xmit_time,
 			whoami->device->gpsdata.d_decode_time - whoami->device->gpsdata.d_xmit_time,

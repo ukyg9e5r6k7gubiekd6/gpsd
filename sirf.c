@@ -116,7 +116,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
 }
 
-gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
+gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
     unsigned short navtype;
@@ -144,11 +144,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 				  0x00, 0x00, 0xb0, 0xb3};
 
     /*@ -charint @*/
-    if (len < 0)
+    if (len == 0)
 	return 0;
 
     buf2[0] = '\0';
-    for (i = 0; i < len; i++)
+    for (i = 0; i < (int)len; i++)
 	(void)snprintf(buf2+strlen(buf2), 
 		       sizeof(buf2)-strlen(buf2),
 		       "%02x", (unsigned int)buf[i]);
@@ -663,7 +663,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
     case 0xff:		/* Debug messages */
 	buf2[0] = '\0';
-	for (i = 1; i < len; i++)
+	for (i = 1; i < (int)len; i++)
 	    if (isprint(buf[i]))
 		(void)snprintf(buf2+strlen(buf2), 
 			       sizeof(buf2)-strlen(buf2),
@@ -677,7 +677,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, int len)
 
     default:
 	buf2[0] = '\0';
-	for (i = 0; i < len; i++)
+	for (i = 0; i < (int)len; i++)
 	    (void)snprintf(buf2+strlen(buf2), 
 			   sizeof(buf2)-strlen(buf2),
 			   "%02x", (unsigned int)buf[i]);
@@ -693,7 +693,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
     gps_mask_t st;
 
     if (session->packet_type == SIRF_PACKET){
-	st = sirf_parse(session, session->outbuffer, (int)session->outbuflen);
+	st = sirf_parse(session, session->outbuffer, session->outbuflen);
 	session->gpsdata.driver_mode = 1;
 	return st;
     } else if (session->packet_type == NMEA_PACKET) {
@@ -751,7 +751,7 @@ static void sirfbin_initializer(struct gps_device_t *session)
     }
 }
 
-static bool sirfbin_speed(struct gps_device_t *session, unsigned int speed)
+static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 {
     return sirf_speed(session->gpsdata.gps_fd, speed);
 }
