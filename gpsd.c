@@ -257,7 +257,7 @@ static struct subscriber_t {
 static void detach_client(int cfd)
 {
     (void)close(cfd);
-    /*@i@*/ FD_CLR(cfd, &all_fds);
+    FD_CLR(cfd, &all_fds);
     subscribers[cfd].raw = 0;
     subscribers[cfd].watcher = false;
     subscribers[cfd].active = false;
@@ -353,7 +353,7 @@ found:
 	if (gpsd_activate(*chp) < 0) {
 	    return NULL;
 	}
-	/*@i@*/FD_SET((*chp)->gpsdata.gps_fd, &all_fds);
+	FD_SET((*chp)->gpsdata.gps_fd, &all_fds);
     }
 
     return *chp;
@@ -386,7 +386,7 @@ static bool assign_channel(struct subscriber_t *user)
 	if (gpsd_activate(user->device) < 0) 
 	    return false;
 	else {
-	    /*@i@*/FD_SET(user->device->gpsdata.gps_fd, &all_fds);
+	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    if (user->watcher && !user->tied) {
 		(void)write(user-subscribers, "F=", 2);
 		(void)write(user-subscribers, 
@@ -966,7 +966,7 @@ int main(int argc, char *argv[])
 	    gpsd_report(0,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
 	}
-	/*@i@*/FD_SET(csock, &all_fds);
+	FD_SET(csock, &all_fds);
     }
 
     if (go_background)
@@ -998,7 +998,7 @@ int main(int argc, char *argv[])
     if (dgpsserver) {
 	dsock = gpsd_open_dgps(dgpsserver);
 	if (dsock >= 0)
-	    /*@i@*/FD_SET(dsock, &all_fds);
+	    FD_SET(dsock, &all_fds);
 	else
 	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
     }
@@ -1065,7 +1065,7 @@ int main(int argc, char *argv[])
     (void)signal(SIGQUIT, onsig);
     (void)signal(SIGPIPE, SIG_IGN);
 
-    /*@i@*/FD_SET(msock, &all_fds);
+    FD_SET(msock, &all_fds);
     /*@i@*/FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
@@ -1127,7 +1127,7 @@ int main(int argc, char *argv[])
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
-		/*@i@*/FD_SET(ssock, &all_fds);
+		FD_SET(ssock, &all_fds);
 		subscribers[ssock].active = true;
 		subscribers[ssock].tied = false;
 	    }
@@ -1147,8 +1147,8 @@ int main(int argc, char *argv[])
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "control socket connect on %d\n", ssock);
-		/*@i@*/FD_SET(ssock, &all_fds);
-		/*@i@*/FD_SET(ssock, &control_fds);
+		FD_SET(ssock, &all_fds);
+		FD_SET(ssock, &control_fds);
 	    }
 	    /*@i@*/FD_CLR(csock, &rfds);
 	}
@@ -1177,7 +1177,7 @@ int main(int argc, char *argv[])
 	    if (nowait && polldevice->gpsdata.gps_fd == -1) {
 		gpsd_deactivate(polldevice);
 		if (gpsd_activate(polldevice) >= 0) {
-		    /*@i@*/FD_SET(polldevice->gpsdata.gps_fd, &all_fds);
+		    FD_SET(polldevice->gpsdata.gps_fd, &all_fds);
 		    notify_watchers(polldevice, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
@@ -1189,11 +1189,11 @@ int main(int argc, char *argv[])
 		changed = gpsd_poll(polldevice);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
-		    /*@i@*/FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
+		    FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(polldevice);
 		} if ((changed & ONLINE_SET) == 0) {
 		    gpsd_report(3, "GPS is offline\n");
-		    /*@i@*/FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
+		    FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(polldevice);
 		    notify_watchers(polldevice, "GPSD,X=0\r\n");
 		}
@@ -1255,7 +1255,7 @@ int main(int argc, char *argv[])
 			need_gps = true;
 
 		if (!nowait && !need_gps && (*channel)->gpsdata.gps_fd > -1) {
-		    /*@i@*/FD_CLR((*channel)->gpsdata.gps_fd, &all_fds);
+		    FD_CLR((*channel)->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(*channel);
 		}
 	    }
