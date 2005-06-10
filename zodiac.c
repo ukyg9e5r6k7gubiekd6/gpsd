@@ -8,6 +8,7 @@
 #define __USE_ISOC99	1	/* needed to get log2() from math.h */
 #include <math.h>
 #include "gpsd.h"
+#include "bits.h"
 
 #ifdef ZODIAC_ENABLE
 
@@ -130,14 +131,6 @@ static size_t zodiac_send_rtcm(struct gps_device_t *session,
     }
     return 1;
 }
-
-/* Zodiac protocol description uses 1-origin indexing by little-endian word */
-#define getword(n)	( (session->outbuffer[2*(n)-2]) \
-		| (session->outbuffer[2*(n)-1] << 8))
-#define getlong(n)	( (session->outbuffer[2*(n)-2]) \
-		| (session->outbuffer[2*(n)-1] << 8) \
-		| (session->outbuffer[2*(n)+0] << 16) \
-		| (session->outbuffer[2*(n)+1] << 24))
 
 static gps_mask_t handle1000(struct gps_device_t *session)
 {
