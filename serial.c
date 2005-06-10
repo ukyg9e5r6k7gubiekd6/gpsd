@@ -129,7 +129,7 @@ int gpsd_open(struct gps_device_t *session)
 	 * 200 (and possibly other USB GPSes) gets completely hosed
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
 	 */
-	session->ttyset.c_cflag &= ~(PARENB | PARODD | CBAUDEX | CRTSCTS);
+	session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS);
 	session->ttyset.c_cflag |= CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 
