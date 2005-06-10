@@ -71,9 +71,8 @@ static Pixel get_pixel(Widget w, char *resource_value)
     if (cstatus == (Boolean)False) {
 	fprintf(stderr, "Unknown color: %s", resource_value);
 	color.pixel = BlackPixelOfScreen(DefaultScreenOfDisplay(XtDisplay(w)));
-	return (color.pixel);
     };
-    return 0;
+    /*@i1@*/return (color.pixel);
 }
 
 static void build_gui(Widget toplevel)
