@@ -214,6 +214,11 @@ extern struct protoent *getprotobyname(const char *);
 extern /*@observer@*/char *strptime(const char *,const char *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
 extern struct tm *gmtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
 extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;
+extern float roundf(float x);
 #endif /* S_SPLINT_S */
+
+/* BSD port hack */ 
+#define rint(x)	round(x)
+#define rintf(x) roundf(x)
 
 #endif /* _gpsd_h_ */
