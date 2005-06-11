@@ -63,8 +63,8 @@ void gpsd_set_speed(struct gps_device_t *session,
     if (rate!=cfgetispeed(&session->ttyset) || (unsigned int)parity!=session->gpsdata.parity || stopbits!=session->gpsdata.stopbits) {
 
 	/*@ignore@*/
-	(void)cfsetispeed(&session->ttyset, (speed_t)rate);
-	(void)cfsetospeed(&session->ttyset, (speed_t)rate);
+	(void)cfsetispeed(&session->ttyset, rate);
+	(void)cfsetospeed(&session->ttyset, rate);
 	/*@end@*/
  	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
  	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);

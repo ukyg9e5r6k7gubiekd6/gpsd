@@ -1066,7 +1066,7 @@ int main(int argc, char *argv[])
     (void)signal(SIGPIPE, SIG_IGN);
 
     FD_SET(msock, &all_fds);
-    /*@i@*/FD_ZERO(&control_fds);
+    FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
     if (time(NULL) < START_SUBFRAME)
@@ -1084,7 +1084,7 @@ int main(int argc, char *argv[])
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 	for (channel = channels; channel < channels + MAXDEVICES; channel++)
 	    if (*channel != NULL && (*channel)->dsock > -1)
-		/*@i@*/FD_CLR((*channel)->dsock, &rfds);
+		FD_CLR((*channel)->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
@@ -1106,7 +1106,7 @@ int main(int argc, char *argv[])
 	    char dbuf[BUFSIZ];
 	    dbuf[0] = '\0';
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		if (/*@i@*/FD_ISSET(cfd, &rfds))
+		if (FD_ISSET(cfd, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf), 
 				   sizeof(dbuf)-strlen(dbuf),
 				   " %d", cfd);
@@ -1115,7 +1115,7 @@ int main(int argc, char *argv[])
 #endif /* UNUSED */
 
 	/* always be open to new client connections */
-	if (/*@i@*/FD_ISSET(msock, &rfds)) {
+	if (FD_ISSET(msock, &rfds)) {
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
@@ -1131,11 +1131,11 @@ int main(int argc, char *argv[])
 		subscribers[ssock].active = true;
 		subscribers[ssock].tied = false;
 	    }
-	    /*@i@*/FD_CLR(msock, &rfds);
+	    FD_CLR(msock, &rfds);
 	}
 
 	/* also be open to new control-socket connections */
-	if (csock > -1 && /*@i@*/FD_ISSET(csock, &rfds)) {
+	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
 
@@ -1150,12 +1150,12 @@ int main(int argc, char *argv[])
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);
 	    }
-	    /*@i@*/FD_CLR(csock, &rfds);
+	    FD_CLR(csock, &rfds);
 	}
 
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-	    if (/*@i@*/FD_ISSET(cfd, &control_fds)) {
+	    if (FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
 
 		while (read(cfd, buf, sizeof(buf)-1) > 0) {
@@ -1163,8 +1163,8 @@ int main(int argc, char *argv[])
 		    handle_control(cfd, buf);
 		}
 		(void)close(cfd);
-		/*@i@*/FD_CLR(cfd, &all_fds);
-		/*@i@*/FD_CLR(cfd, &control_fds);
+		FD_CLR(cfd, &all_fds);
+		FD_CLR(cfd, &control_fds);
 	    }
 
 	/* poll all active devices */
