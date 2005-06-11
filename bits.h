@@ -15,12 +15,12 @@
  */
 
 union int_float {
-    int i;
+    int32_t i;
     float f;
 };
 
 union long_double {
-    long long l;
+    int64_t l;
     double d;
 };
 
