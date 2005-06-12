@@ -250,7 +250,7 @@ static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 
 static void update_panel(struct gps_data_t *gpsdata, 
 			 char *message, 
-			 int len UNUSED, int level UNUSED)
+			 size_t len UNUSED, int level UNUSED)
 /* runs on each sentence */
 {
     unsigned int i;

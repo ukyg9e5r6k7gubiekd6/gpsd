@@ -312,7 +312,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 }
 
 static void raw_hook(struct gps_data_t *ud UNUSED, 
-		     char *sentence, int len, int level)
+		     char *sentence, size_t len, int level)
 /* hook to be executed on each incoming packet */
 {
     int cfd;

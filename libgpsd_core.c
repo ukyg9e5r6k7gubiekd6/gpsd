@@ -452,7 +452,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     if (session->packet_type == NMEA_PACKET)
 	session->gpsdata.raw_hook(&session->gpsdata,
 				  (char *)session->outbuffer,
-				  (int)strlen((char *)session->outbuffer), 1);
+				  strlen((char *)session->outbuffer), 1);
     else {
 	char buf2[MAX_PACKET_LENGTH*3+2];
 
@@ -480,7 +480,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	gpsd_report(3, "<= GPS: %s", buf2);
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata, 
-				      buf2, (int)strlen(buf2), 1);
+				      buf2, strlen(buf2), 1);
     }
 
     /* may be time to ship a DGPS correction to the GPS */
@@ -531,7 +531,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	} else
 	    return ONLINE_SET;
     } else {
-	int packet_length;
+	size_t packet_length;
 	session->gpsdata.online = timestamp();
 
 	if (session->inbuflen==0 || session->packet_full!=0) {
@@ -541,9 +541,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* can we get a full packet from the device? */
 	if (session->device_type)
-	    packet_length = session->device_type->get_packet(session, (size_t)waiting);
+	    packet_length = (size_t)session->device_type->get_packet(session, (size_t)waiting);
 	else {
-	    packet_length = packet_get(session, (size_t)waiting);
+	    packet_length = (size_t)packet_get(session, (size_t)waiting);
 	    if (session->packet_type != BAD_PACKET) {
 		gpsd_report(3, 
 			    "packet sniff finds type %d\n", 
@@ -566,7 +566,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->gpsdata.raw_hook)
 		session->gpsdata.raw_hook(&session->gpsdata, 
 					  (char *)session->outbuffer,
-					  (int)packet_length, 2);
+					  packet_length, 2);
 	    /*@ -nullstate @*/
 	    return handle_packet(session);
 	} else

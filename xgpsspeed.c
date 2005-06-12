@@ -33,7 +33,7 @@ static double speedfactor;
 static Widget toplevel;
 
 static void update_display(struct gps_data_t *gpsdata, 
-			   char *buf UNUSED, int len UNUSED, int level UNUSED)
+			   char *buf UNUSED, size_t len UNUSED, int level UNUSED)
 {
     (void)TachometerSetValue(tacho, (int)rint(gpsdata->fix.speed*speedfactor));
 }
