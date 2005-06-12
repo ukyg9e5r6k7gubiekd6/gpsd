@@ -290,7 +290,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
             bufp2 = bufp;
-	    (void)snprintf(bufp, len-strlen(bufp),
+	    len -= snprintf(bufp, len,
 		    "$GPGSV,%d,%d,%02d", 
 		    ((session->gpsdata.satellites-1) / 4) + 1, 
 		    (i / 4) + 1,
@@ -298,7 +298,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	}
 	bufp += strlen(bufp);
 	if (i < session->gpsdata.satellites)
-	    (void)snprintf(bufp, len-strlen(bufp), 
+	    len -= snprintf(bufp, len, 
 		    ",%02d,%02d,%03d,%02d", 
 		    session->gpsdata.PRN[i],
 		    session->gpsdata.elevation[i], 
@@ -306,8 +306,22 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 		    session->gpsdata.ss[i]);
 	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
 	    nmea_add_checksum(bufp2);
+	    len -= 5;
 	}
     }
+
+#ifdef ZODIAC_ENABLE
+    if (session->Zs[0] != 0) {
+	bufp += strlen(bufp);
+	bufp2 = bufp;
+	strcpy(bufp, "$PRWIZCH");
+	for (i = 0; i < MAXCHANNELS; i++) {
+	    len -= snprintf(bufp+strlen(bufp), len,
+			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
+	}
+	nmea_add_checksum(bufp2);
+    }
+#endif /* ZODIAC_ENABLE */
 }
 
 static void gpsd_binary_quality_dump(struct gps_device_t *session, 
@@ -399,22 +413,22 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      */
     session->gpsdata.fix.ept = 0.005;
 #ifdef BINARY_ENABLE
+    if ((session->gpsdata.set & HERR_SET)==0 
+	&& (session->gpsdata.set & HDOP_SET)!=0) {
+	session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
+	session->gpsdata.set |= HERR_SET;
+    }
+    if ((session->gpsdata.set & VERR_SET)==0 
+	&& (session->gpsdata.set & VDOP_SET)!=0) {
+	session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
+	session->gpsdata.set |= VERR_SET;
+    }
+    if ((session->gpsdata.set & PERR_SET)==0
+	&& (session->gpsdata.set & PDOP_SET)!=0) {
+	session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
+	session->gpsdata.set |= PERR_SET;
+    }
     if (session->gpsdata.set & LATLON_SET) {
-	if ((session->gpsdata.set & HERR_SET)==0 
-	    && (session->gpsdata.set & HDOP_SET)!=0) {
-	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
-	    session->gpsdata.set |= HERR_SET;
-	}
-	if ((session->gpsdata.set & VERR_SET)==0 
-	    && (session->gpsdata.set & VDOP_SET)!=0) {
-	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
-	    session->gpsdata.set |= VERR_SET;
-	}
-	if ((session->gpsdata.set & PERR_SET)==0
-	    && (session->gpsdata.set & PDOP_SET)!=0) {
-	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
-	    session->gpsdata.set |= PERR_SET;
-	}
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = 0.0;
 	    if (session->lastfix.mode > MODE_NO_FIX 
@@ -469,18 +483,12 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	    gpsd_binary_satellite_dump(session,
 				     buf2 + strlen(buf2),
 				     (sizeof(buf2)-strlen(buf2)));
-#ifdef __UNUSED__
-	strcpy(buf, "$PRWIZCH");
-	for (i = 0; i < MAXCHANNELS; i++) {
-	    (void)snprintf(buf+strlen(buf), (size_t)(sizeof(buf)-strlen(buf)),
-			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
+	if (buf2[0] != '\0') {
+	    gpsd_report(3, "<= GPS: %s", buf2);
+	    if (session->gpsdata.raw_hook)
+		session->gpsdata.raw_hook(&session->gpsdata, 
+					  buf2, strlen(buf2), 1);
 	}
-	(void)strcat(buf, "*");
-#endif /* __UNUSED__ */
-	gpsd_report(3, "<= GPS: %s", buf2);
-	if (session->gpsdata.raw_hook)
-	    session->gpsdata.raw_hook(&session->gpsdata, 
-				      buf2, strlen(buf2), 1);
     }
 
     /* may be time to ship a DGPS correction to the GPS */

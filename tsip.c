@@ -200,13 +200,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +charint @*/
 	    session->gpsdata.PRN[i] = u1 = getub(buf,5*i + 1);
 	    /*@ -charint @*/
-	    f1 = getf(buf,5*i + 2);
-	    session->gpsdata.ss[i] = (int)f1;
+	    if ((f1 = getf(buf,5*i + 2)) < 0)
+		f1 = 0.0;
+	    session->gpsdata.ss[i] = (int)roundf(f1);
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
 			   " %d=%1f",(int)u1,f1);
 	}
 	gpsd_report(4, "Signal Levels (%d):%s\n",count,buf2);
-	mask |= SATELLITE_SET;
 	break;
     case 0x48:		/* GPS System Message */
 	buf[len] = '\0';
@@ -289,12 +289,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getf(buf,8);			/* time of Last measurement */
 	d1 = getf(buf,12) * RAD_2_DEG;		/* Elevation */
 	d2 = getf(buf,16) * RAD_2_DEG;		/* Azimuth */
-	id = (unsigned)u2 >> 3;			/* channel number */
-	session->gpsdata.PRN[id] = (int)u1;
-	session->gpsdata.ss[id] = (int)roundf(f1);
-	session->gpsdata.elevation[id] = (int)round(d1);
-	session->gpsdata.azimuth[id] = (int)round(d2);
-	gpsd_report(4, "Satellite Tracking Status %d: %d 0x%02x %d %d %f %f %f %f\n",id,u1,u2,u3,u4,f1,f2,d1,d2);
+	for (i = 0; i < session->gpsdata.satellites; i++)
+	    if (session->gpsdata.PRN[i] == (int)u1) {
+		session->gpsdata.ss[i] = (int)roundf(f1);
+		session->gpsdata.elevation[i] = (int)round(d1);
+		session->gpsdata.azimuth[i] = (int)round(d2);
+		break;
+	    }
+	gpsd_report(4, "Satellite Tracking Status %d: %d 0x%02x %d %d %f %f %f %f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
+	mask |= SATELLITE_SET;
 	break;
     case 0x6d:		/* All-In-View Satellite Selection */
 	u1 = getub(buf,0);
@@ -327,7 +330,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 			" %d",session->gpsdata.used[i] = getub(buf,17 + i));
 	/*@ -charint @*/
 
-	gpsd_report(4, "Sat info: %d %d:%s\n",session->gpsdata.fix.mode,session->gpsdata.satellites_used,buf2);
+	gpsd_report(4, "Sat info: %d %f %f %f %f %f %d:%s\n",
+		session->gpsdata.fix.mode, session->gpsdata.pdop,
+		session->gpsdata.hdop, session->gpsdata.vdop,
+		session->gpsdata.tdop, session->gpsdata.gdop,
+		session->gpsdata.satellites_used,buf2);
         mask |= HDOP_SET | VDOP_SET | PDOP_SET | MODE_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
