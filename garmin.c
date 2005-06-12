@@ -214,8 +214,6 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    char buf[BUFSIZ] = "";
-    char *bufp = buf;
     int i = 0, j = 0;
     double track;
 
@@ -274,7 +272,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    session->context->leap_seconds = pvt->leap_sec;
 	    session->context->valid = LEAP_SECOND_VALID;
 	    // gps_tow is always like x.999 or x.998 so just round it
-	    time_l += (time_t) rint(pvt->gps_tow);
+	    time_l += (time_t) round(pvt->gps_tow);
 	    session->gpsdata.fix.time 
 		= session->gpsdata.sentence_time 
 		= (double)time_l;
@@ -367,8 +365,6 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, pvt->leap_sec
 			, pvt->grmn_days);
 
-	    gpsd_binary_fix_dump(session, bufp,(sizeof(buf)-strlen(buf)));
-	    bufp += strlen(bufp);
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
@@ -410,16 +406,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		session->gpsdata.satellites++;
 		j++;
 	    }
-	    mask |= SATELLITE_SET;
-	    bufp += strlen(bufp);
-	    // dump NMEA GPGSA, PGRME
-	    gpsd_binary_quality_dump(session, 
-				     bufp, (sizeof(buf)-strlen(buf))); 
-	    bufp += strlen(bufp);
-	    // dump NMEA GPGSV
-	    gpsd_binary_satellite_dump(session, 
-				       bufp, (sizeof(buf)-strlen(buf))); 
-	    bufp += strlen(bufp);
+	    mask |= SATELLITE_SET | HDOP_SET;
 	    break;
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
             // this packet is never requested, it just comes, in some case
@@ -468,10 +455,6 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		    , pkt->mPacketId
 		    , pkt->mDataSize);
 	break;
-    }
-
-    if ( bufp != buf ) {
-	gpsd_report(3, "%s", buf);
     }
 
     return mask;

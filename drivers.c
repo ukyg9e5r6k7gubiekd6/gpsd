@@ -46,9 +46,6 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    /* this magic number is derived from observation */
 	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.675);
 #endif /* NTPSHM_ENABLE */
-
-	/* also copy the sentence up to clients in raw mode */
-	gpsd_raw_hook(session,(char *)session->outbuffer,strlen((char *)session->outbuffer), 1);
 	return st;
     } else
 	return 0;

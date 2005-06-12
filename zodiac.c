@@ -326,7 +326,6 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
     int i;
-    gps_mask_t mask = 0;
     unsigned int id = (unsigned int)((session->outbuffer[3]<<8) | session->outbuffer[2]);
 
     if (session->packet_type != ZODIAC_PACKET) {
@@ -348,39 +347,20 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     switch (id) {
     case 1000:
-	mask = handle1000(session);
-	gpsd_binary_fix_dump(session, buf, sizeof(buf));
-	gpsd_report(3, "<= GPS: %s", buf);
-	break;
+	return handle1000(session);
     case 1002:
-	mask = handle1002(session);
-	strcpy(buf, "$PRWIZCH");
-	for (i = 0; i < MAXCHANNELS; i++) {
-	    (void)snprintf(buf+strlen(buf), (size_t)(sizeof(buf)-strlen(buf)),
-			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
-	}
-	(void)strcat(buf, "*");
-	nmea_add_checksum(buf);
-	gpsd_raw_hook(session, buf, strlen(buf),  1);
-	gpsd_binary_quality_dump(session, 
-				 buf+strlen(buf), 
-				 (sizeof(buf)-strlen(buf)));
-	gpsd_report(3, "<= GPS: %s", buf);
-	break;
+	return handle1002(session);
     case 1003:
-	mask = handle1003(session);
-	gpsd_binary_satellite_dump(session, buf, sizeof(buf));
-	gpsd_report(3, "<= GPS: %s", buf);
-	break;	
+	return handle1003(session);
     case 1005:
 	handle1005(session);
-	break;	
+	return 0;	
     case 1108:
 	handle1108(session);
-	break;
+	return 0;
+    default:
+	return 0;
     }
-
-    return mask;
 }
 
 /* caller needs to specify a wrapup function */

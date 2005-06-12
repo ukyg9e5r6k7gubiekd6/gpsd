@@ -197,6 +197,171 @@ int gpsd_activate(struct gps_device_t *session)
     }
 }
 
+#ifdef BINARY_ENABLE
+/*
+ * Support for generic binary drivers.  These functions dump NMEA for passing
+ * to the client in raw mode.  They assume that (a) the public gps.h structure 
+ * members are in a valid state, (b) that the private members hours, minutes, 
+ * and seconds have also been filled in, (c) that if the private member
+ * mag_var is nonzero it is a magnetic variation in degrees that should be
+ * passed on., and (d) if the private member separation does not have the
+ * value SEPARATION_NOT_VALID, it is a valid WGS84 geoidal separation in 
+ * meters for the fix.
+ */
+
+static double degtodm(double a)
+{
+    double m, t;
+    m = modf(a, &t);
+    t = floor(a) * 100 + m * 60;
+    return t;
+}
+
+static void gpsd_binary_fix_dump(struct gps_device_t *session, 
+				 char bufp[],size_t len)
+{
+    char hdop_str[NMEA_MAX] = "";
+    struct tm tm;
+    time_t intfixtime;
+
+    if (session->gpsdata.hdop != DOP_NOT_VALID)
+	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
+
+    intfixtime = (time_t)session->gpsdata.fix.time;
+    (void)gmtime_r(&intfixtime, &tm);
+    if (session->gpsdata.fix.mode > 1) {
+	(void)snprintf(bufp, len,
+		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
+		tm.tm_hour,
+		tm.tm_min,
+		tm.tm_sec,
+		degtodm(fabs(session->gpsdata.fix.latitude)),
+		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
+		degtodm(fabs(session->gpsdata.fix.longitude)),
+		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
+		session->gpsdata.fix.mode,
+		session->gpsdata.satellites_used,
+		hdop_str,
+		session->gpsdata.fix.altitude, 'M');
+	if (session->gpsdata.separation == SEPARATION_NOT_VALID)
+	    (void)strcat(bufp, ",,");
+	else
+	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
+			   "%.3f,M", session->gpsdata.separation);
+	if (session->mag_var == NO_MAG_VAR) 
+	    (void)strcat(bufp, ",,");
+	else {
+	    (void)snprintf(bufp+strlen(bufp),
+			   len-strlen(bufp),
+			   "%3.2f,", fabs(session->mag_var));
+	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
+	}
+	nmea_add_checksum(bufp);
+	bufp += strlen(bufp);
+    }
+    /*@ -usedef @*/
+    (void)snprintf(bufp, len-strlen(bufp),
+	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
+	    tm.tm_hour, 
+	    tm.tm_min, 
+	    tm.tm_sec,
+	    session->gpsdata.status ? 'A' : 'V',
+	    degtodm(fabs(session->gpsdata.fix.latitude)),
+	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
+	    degtodm(fabs(session->gpsdata.fix.longitude)),
+	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
+	    session->gpsdata.fix.speed,
+	    session->gpsdata.fix.track,
+	    tm.tm_mday,
+	    tm.tm_mon + 1,
+	    tm.tm_year % 100);
+    /*@ +usedef @*/
+    nmea_add_checksum(bufp);
+}
+
+static void gpsd_binary_satellite_dump(struct gps_device_t *session, 
+				char bufp[], size_t len)
+{
+    int i;
+    char *bufp2 = bufp;
+    bufp[0] = '\0';
+
+    for( i = 0 ; i < session->gpsdata.satellites; i++ ) {
+	if (i % 4 == 0) {
+	    bufp += strlen(bufp);
+            bufp2 = bufp;
+	    (void)snprintf(bufp, len-strlen(bufp),
+		    "$GPGSV,%d,%d,%02d", 
+		    ((session->gpsdata.satellites-1) / 4) + 1, 
+		    (i / 4) + 1,
+		    session->gpsdata.satellites);
+	}
+	bufp += strlen(bufp);
+	if (i < session->gpsdata.satellites)
+	    (void)snprintf(bufp, len-strlen(bufp), 
+		    ",%02d,%02d,%03d,%02d", 
+		    session->gpsdata.PRN[i],
+		    session->gpsdata.elevation[i], 
+		    session->gpsdata.azimuth[i], 
+		    session->gpsdata.ss[i]);
+	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
+	    nmea_add_checksum(bufp2);
+	}
+    }
+}
+
+static void gpsd_binary_quality_dump(struct gps_device_t *session, 
+			      char bufp[], size_t len)
+{
+    int	i, j;
+    char *bufp2 = bufp;
+
+    (void)snprintf(bufp, len-strlen(bufp),
+		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
+    j = 0;
+    for (i = 0; i < MAXCHANNELS; i++) {
+	if (session->gpsdata.used[i]) {
+	    bufp += strlen(bufp);
+	    (void)snprintf(bufp, len-strlen(bufp),
+			   "%02d,", session->gpsdata.PRN[i]);
+	    j++;
+	}
+    }
+    for (i = j; i < MAXCHANNELS; i++) {
+	bufp += strlen(bufp);
+	(void)strcpy(bufp, ",");
+    }
+    bufp += strlen(bufp);
+    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+	(void)strcat(bufp, ",,,");
+    else
+	(void)snprintf(bufp, len-strlen(bufp),
+		       "%.1f,%.1f,%.1f*", 
+		       session->gpsdata.pdop, 
+		       session->gpsdata.hdop,
+		       session->gpsdata.vdop);
+    nmea_add_checksum(bufp2);
+    bufp += strlen(bufp);
+    if ((session->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID 
+			|| session->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
+	&& finite(session->gpsdata.fix.eph)
+	&& finite(session->gpsdata.fix.epv)
+	&& finite(session->gpsdata.epe)
+    ) {
+        // output PGRME
+        // only if realistic
+        (void)snprintf(bufp, len-strlen(bufp),
+	    "$PGRME,%.2f,%.2f,%.2f",
+	    session->gpsdata.fix.eph, 
+	    session->gpsdata.fix.epv, 
+	    session->gpsdata.epe);
+        nmea_add_checksum(bufp);
+	session->gpsdata.seen_sentences |= PGRME;
+     }
+}
+
+#endif /* BINARY_ENABLE */
+
 static int is_input_waiting(int fd)
 {
     int	count = 0;
@@ -283,6 +448,41 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 
     session->gpsdata.d_decode_time = timestamp();
 
+    /* also copy the sentence up to clients in raw mode */
+    if (session->packet_type == NMEA_PACKET)
+	session->gpsdata.raw_hook(&session->gpsdata,
+				  (char *)session->outbuffer,
+				  (int)strlen((char *)session->outbuffer), 1);
+    else {
+	char buf2[MAX_PACKET_LENGTH*3+2];
+
+	buf2[0] = '\0';
+	if ((session->gpsdata.set & LATLON_SET) != 0)
+	    gpsd_binary_fix_dump(session, 
+				 buf2+strlen(buf2), 
+				 (sizeof(buf2)-strlen(buf2)));
+	if ((session->gpsdata.set & HDOP_SET) != 0)
+	    gpsd_binary_quality_dump(session,
+				     buf2 + strlen(buf2),
+				     (sizeof(buf2)-strlen(buf2)));
+	if ((session->gpsdata.set & SATELLITE_SET) != 0)
+	    gpsd_binary_satellite_dump(session,
+				     buf2 + strlen(buf2),
+				     (sizeof(buf2)-strlen(buf2)));
+#ifdef __UNUSED__
+	strcpy(buf, "$PRWIZCH");
+	for (i = 0; i < MAXCHANNELS; i++) {
+	    (void)snprintf(buf+strlen(buf), (size_t)(sizeof(buf)-strlen(buf)),
+			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
+	}
+	(void)strcat(buf, "*");
+#endif /* __UNUSED__ */
+	gpsd_report(3, "<= GPS: %s", buf2);
+	if (session->gpsdata.raw_hook)
+	    session->gpsdata.raw_hook(&session->gpsdata, 
+				      buf2, (int)strlen(buf2), 1);
+    }
+
     /* may be time to ship a DGPS correction to the GPS */
     if (session->fixcnt > 10 && session->sentdgps==0) {
 	session->sentdgps++;
@@ -296,6 +496,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	    gpsd_report(2, "=> dgps %s", buf);
 	}
     }
+
     return session->gpsdata.set;
 }
 
@@ -391,178 +592,3 @@ void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
     out->satellites = 0;
 }
 
-void gpsd_raw_hook(struct gps_device_t *session, char *sentence, size_t len, int level)
-{
-    if (session->gpsdata.raw_hook) {
-	session->gpsdata.raw_hook(&session->gpsdata, sentence, (int)len, level);
-    }
-}
-
-#ifdef BINARY_ENABLE
-/*
- * Support for generic binary drivers.  These functions dump NMEA for passing
- * to the client in raw mode.  They assume that (a) the public gps.h structure 
- * members are in a valid state, (b) that the private members hours, minutes, 
- * and seconds have also been filled in, (c) that if the private member
- * mag_var is nonzero it is a magnetic variation in degrees that should be
- * passed on., and (d) if the private member separation does not have the
- * value SEPARATION_NOT_VALID, it is a valid WGS84 geoidal separation in 
- * meters for the fix.
- */
-
-static double degtodm(double a)
-{
-    double m, t;
-    m = modf(a, &t);
-    t = floor(a) * 100 + m * 60;
-    return t;
-}
-
-void gpsd_binary_fix_dump(struct gps_device_t *session, char bufp[],size_t len)
-{
-    char hdop_str[NMEA_MAX] = "";
-    struct tm tm;
-    time_t intfixtime;
-
-    if (session->gpsdata.hdop != DOP_NOT_VALID)
-	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
-
-    intfixtime = (time_t)session->gpsdata.fix.time;
-    (void)gmtime_r(&intfixtime, &tm);
-    if (session->gpsdata.fix.mode > 1) {
-	(void)snprintf(bufp, len,
-		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
-		tm.tm_hour,
-		tm.tm_min,
-		tm.tm_sec,
-		degtodm(fabs(session->gpsdata.fix.latitude)),
-		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-		degtodm(fabs(session->gpsdata.fix.longitude)),
-		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-		session->gpsdata.fix.mode,
-		session->gpsdata.satellites_used,
-		hdop_str,
-		session->gpsdata.fix.altitude, 'M');
-	if (session->gpsdata.separation == SEPARATION_NOT_VALID)
-	    (void)strcat(bufp, ",,");
-	else
-	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.3f,M", session->gpsdata.separation);
-	if (session->mag_var == NO_MAG_VAR) 
-	    (void)strcat(bufp, ",,");
-	else {
-	    (void)snprintf(bufp+strlen(bufp),
-			   len-strlen(bufp),
-			   "%3.2f,", fabs(session->mag_var));
-	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
-	}
-	nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
-	bufp += strlen(bufp);
-    }
-    /*@ -usedef @*/
-    (void)snprintf(bufp, len-strlen(bufp),
-	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
-	    tm.tm_hour, 
-	    tm.tm_min, 
-	    tm.tm_sec,
-	    session->gpsdata.status ? 'A' : 'V',
-	    degtodm(fabs(session->gpsdata.fix.latitude)),
-	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-	    degtodm(fabs(session->gpsdata.fix.longitude)),
-	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-	    session->gpsdata.fix.speed,
-	    session->gpsdata.fix.track,
-	    tm.tm_mday,
-	    tm.tm_mon + 1,
-	    tm.tm_year % 100);
-    /*@ +usedef @*/
-	nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
-}
-
-void gpsd_binary_satellite_dump(struct gps_device_t *session, 
-				char bufp[], size_t len)
-{
-    int i;
-    char *bufp2 = bufp;
-    bufp[0] = '\0';
-
-    for( i = 0 ; i < session->gpsdata.satellites; i++ ) {
-	if (i % 4 == 0) {
-	    bufp += strlen(bufp);
-            bufp2 = bufp;
-	    (void)snprintf(bufp, len-strlen(bufp),
-		    "$GPGSV,%d,%d,%02d", 
-		    ((session->gpsdata.satellites-1) / 4) + 1, 
-		    (i / 4) + 1,
-		    session->gpsdata.satellites);
-	}
-	bufp += strlen(bufp);
-	if (i < session->gpsdata.satellites)
-	    (void)snprintf(bufp, len-strlen(bufp), 
-		    ",%02d,%02d,%03d,%02d", 
-		    session->gpsdata.PRN[i],
-		    session->gpsdata.elevation[i], 
-		    session->gpsdata.azimuth[i], 
-		    session->gpsdata.ss[i]);
-	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
-	    nmea_add_checksum(bufp2);
-	    gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
-	}
-    }
-}
-
-void gpsd_binary_quality_dump(struct gps_device_t *session, 
-			      char bufp[], size_t len)
-{
-    int	i, j;
-    char *bufp2 = bufp;
-
-    (void)snprintf(bufp, len-strlen(bufp),
-		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
-    j = 0;
-    for (i = 0; i < MAXCHANNELS; i++) {
-	if (session->gpsdata.used[i]) {
-	    bufp += strlen(bufp);
-	    (void)snprintf(bufp, len-strlen(bufp),
-			   "%02d,", session->gpsdata.PRN[i]);
-	    j++;
-	}
-    }
-    for (i = j; i < MAXCHANNELS; i++) {
-	bufp += strlen(bufp);
-	(void)strcpy(bufp, ",");
-    }
-    bufp += strlen(bufp);
-    if (session->gpsdata.fix.mode == MODE_NO_FIX)
-	(void)strcat(bufp, ",,,");
-    else
-	(void)snprintf(bufp, len-strlen(bufp),
-		       "%.1f,%.1f,%.1f*", 
-		       session->gpsdata.pdop, 
-		       session->gpsdata.hdop,
-		       session->gpsdata.vdop);
-    nmea_add_checksum(bufp2);
-    gpsd_raw_hook(session, bufp2, strlen(bufp2), 1);
-    bufp += strlen(bufp);
-    if ((session->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID 
-			|| session->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
-	&& finite(session->gpsdata.fix.eph)
-	&& finite(session->gpsdata.fix.epv)
-	&& finite(session->gpsdata.epe)
-    ) {
-        // output PGRME
-        // only if realistic
-        (void)snprintf(bufp, len-strlen(bufp),
-	    "$PGRME,%.2f,%.2f,%.2f",
-	    session->gpsdata.fix.eph, 
-	    session->gpsdata.fix.epv, 
-	    session->gpsdata.epe);
-        nmea_add_checksum(bufp);
-	gpsd_raw_hook(session, bufp, strlen(bufp), 1);
-	session->gpsdata.seen_sentences |= PGRME;
-     }
-}
-
-#endif /* BINARY_ENABLE */
