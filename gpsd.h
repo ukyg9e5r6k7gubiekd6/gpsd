@@ -116,7 +116,10 @@ struct gps_device_t {
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
     int16_t gps_week;		/* Current GPS week number */
-    time_t last_request;	/* Last time request packets were sent */
+    bool superpkt;		/* Super Packet mode requested */
+    time_t last_41;		/* Timestamps for packet requests */
+    time_t last_5c;
+    time_t last_6d;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
     /*@relnull@*/void *GarminBuffer; /* Pointer Garmin packet buffer 

@@ -11,6 +11,10 @@
 #include "gpsd.h"
 #include "bits.h"
 
+#define USE_SUPERPACKET	1			/* use Super Packet mode? */
+
+#define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
+
 #ifdef TSIP_ENABLE
 
 static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
@@ -70,6 +74,10 @@ static void tsip_initializer(struct gps_device_t *session)
 
     /* Request GPS Systems Message */
     (void)tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
+
+    /* Request Current Datum Values */
+    putbyte(buf,0,0x15);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 1);
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
@@ -93,16 +101,18 @@ static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
 
 static gps_mask_t tsip_analyze(struct gps_device_t *session)
 {
-    int i, len, count;
+    int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
     u_int8_t u1,u2,u3,u4;
-    int16_t s1;
+    int16_t s1,s2,s3,s4;
+    int32_t sl1,sl2,sl3;
+    u_int32_t ul1,ul2;
     float f1,f2,f3,f4,f5;
-    double d1,d2,d3,d4;
+    double d1,d2,d3,d4,d5;
     union int_float i_f;
     union long_double l_d;
-    time_t t;
+    time_t now;
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
@@ -134,22 +144,35 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		   "ID%02x", id = (unsigned)session->outbuffer[1]);
 
     gpsd_report(5, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
+    (void)time(&now);
 
     switch (id) {
     case 0x13:		/* Packet Received */
-	gpsd_report(4, "Received packet of type %02x cannot be parsed\n",
-		getub(buf,0));
+	u1 = getub(buf,0);
+	u2 = getub(buf,1);
+	gpsd_report(4, "Received packet of type %02x cannot be parsed\n",u1);
+#if USE_SUPERPACKET
+	if ((int)u1 == 0x8e && (int)u2 == 0x23) { /* no Compact Super Packet */
+	    gpsd_report(2, "No Compact Super Packet, use LFwEI\n");
+
+	    /* Request LFwEI Super Packet */
+	    putbyte(buf,0,0x20);
+	    putbyte(buf,1,0x01);		/* enabled */
+	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+	}
+#endif /* USE_SUPERPACKET */
 	break;
     case 0x41:		/* GPS Time */
 	if (len != 10)
 	    break;
+	session->last_41 = now;			/* keep timestamp for request */
 	f1 = getf(buf,0);			/* gpstime */
 	s1 = getsw(buf,4);			/* week */
 	f2 = getf(buf,6);			/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->gps_week = s1;
 	    session->context->leap_seconds = (int)roundf(f2);
-	    session->context->valid = LEAP_SECOND_VALID;
+	    session->context->valid |= LEAP_SECOND_VALID;
 
 	    session->gpsdata.sentence_time = gpstime_to_unix((int)s1, f1) - f2;
 
@@ -158,6 +181,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 #endif
 	    mask |= TIME_SET;
 	}
+	gpsd_report(4, "GPS Time %f %d %f\n",f1,s1,f2);
 	break;
     case 0x42:		/* Single-Precision Position Fix, XYZ ECEF */
 	if (len != 16)
@@ -197,14 +221,16 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.satellites = count;
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++) {
-	    /*@ +charint @*/
-	    session->gpsdata.PRN[i] = u1 = getub(buf,5*i + 1);
-	    /*@ -charint @*/
+	    u1 = getub(buf,5*i + 1);
 	    if ((f1 = getf(buf,5*i + 2)) < 0)
 		f1 = 0.0;
-	    session->gpsdata.ss[i] = (int)roundf(f1);
+	    for (j = 0; j < MAXCHANNELS; j++)
+		if (session->gpsdata.PRN[j] == (int)u1) {
+		    session->gpsdata.ss[j] = (int)roundf(f1);
+		    break;
+		}
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
-			   " %d=%1f",(int)u1,f1);
+			   " %d=%.1f",(int)u1,f1);
 	}
 	gpsd_report(4, "Signal Levels (%d):%s\n",count,buf2);
 	break;
@@ -223,19 +249,51 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (session->gps_week)
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)session->gps_week, f2) - session->context->leap_seconds;
-	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
 	if (len != 3)
 	    break;
-	gpsd_report(4, "Machine ID %02x %02x %02x\n",getub(buf,0),getub(buf,1),getub(buf,2));
+	u1 = getub(buf,0);
+	u2 = getub(buf,1);
+	u3 = getub(buf,2);
+	gpsd_report(4, "Machine ID %02x %02x %02x\n",u1,u2,u3);
+#if USE_SUPERPACKET
+	if ((u3 & 0x01) != (u_int8_t)0 && !session->superpkt) {
+	    gpsd_report(2, "Switching to Super Packet mode\n");
+
+	    /* set new I/O Options for Super Packet output */
+	    putbyte(buf,0,0x2c);		/* Position: SP, MSL */
+	    putbyte(buf,1,0x00);		/* Velocity: none (via SP) */
+	    putbyte(buf,2,0x00);		/* Time: GPS */
+	    putbyte(buf,3,0x08);		/* Aux: dBHz */
+	    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+	    session->superpkt = true;
+	}
+#endif /* USE_SUPERPACKET */
 	break;
     case 0x55:		/* IO Options */
 	if (len != 4)
 	    break;
-	gpsd_report(4, "IO Options %02x %02x %02x %02x\n",getub(buf,0),getub(buf,1),getub(buf,2),getub(buf,3));
+	u1 = getub(buf,0);
+	u2 = getub(buf,1);
+	u3 = getub(buf,2);
+	u4 = getub(buf,3);
+	gpsd_report(4, "IO Options %02x %02x %02x %02x\n",u1,u2,u3,u4);
+#if USE_SUPERPACKET
+	if ((u1 & 0x20) != (u_int8_t)0) {
+	    /* No LFwEI Super Packet */
+	    putbyte(buf,0,0x20);
+	    putbyte(buf,1,0x00);		/* disabled */
+	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+
+	    /* Request Compact Super Packet */
+	    putbyte(buf,0,0x23);
+	    putbyte(buf,1,0x01);		/* enabled */
+	    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 2);
+	}
+#endif /* USE_SUPERPACKET */
 	break;
     case 0x56:		/* Velocity Fix, East-North-Up (ENU) */
 	if (len != 20)
@@ -281,6 +339,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x5c:		/* Satellite Tracking Status */
 	if (len != 24)
 	    break;
+	session->last_5c = now;			/* keep timestamp for request */
 	u1 = getub(buf,0);			/* PRN */
 	u2 = getub(buf,1);			/* chan */
 	u3 = getub(buf,2);			/* Acquisition flag */
@@ -289,31 +348,41 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getf(buf,8);			/* time of Last measurement */
 	d1 = getf(buf,12) * RAD_2_DEG;		/* Elevation */
 	d2 = getf(buf,16) * RAD_2_DEG;		/* Azimuth */
-	for (i = 0; i < session->gpsdata.satellites; i++)
-	    if (session->gpsdata.PRN[i] == (int)u1) {
-		session->gpsdata.ss[i] = (int)roundf(f1);
-		session->gpsdata.elevation[i] = (int)round(d1);
-		session->gpsdata.azimuth[i] = (int)round(d2);
-		break;
-	    }
-	gpsd_report(4, "Satellite Tracking Status %d: %d 0x%02x %d %d %f %f %f %f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
-	mask |= SATELLITE_SET;
+	i = (int)u2 >> 3;			/* channel number */
+	gpsd_report(4, "Satellite Tracking Status %d: %2d 0x%02x %d %d %.1f %f %.1f %.1f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
+	if (i < MAXCHANNELS) {
+	    session->gpsdata.PRN[i] = (int)u1;
+	    session->gpsdata.ss[i] = (int)roundf(f1);
+	    session->gpsdata.elevation[i] = (int)round(d1);
+	    session->gpsdata.azimuth[i] = (int)round(d2);
+	    if (++i == session->gpsdata.satellites)
+		mask |= SATELLITE_SET;		/* last of the series */
+	    if (i > session->gpsdata.satellites)
+		session->gpsdata.satellites = i;
+	}
 	break;
     case 0x6d:		/* All-In-View Satellite Selection */
 	u1 = getub(buf,0);
-	switch (u1 & 7)			/* dimension */
+	count = (int)((u1 >> 4) & 0x0f);
+	if (len != (17 + count))
+	    break;
+	session->last_6d = now;			/* keep timestamp for request */
+	switch (u1 & 7)				/* dimension */
 	{
 	case 3:
+	    session->gpsdata.status = STATUS_FIX;
 	    session->gpsdata.fix.mode = MODE_2D;
 	    break;
 	case 4:
+	    session->gpsdata.status = STATUS_FIX;
 	    session->gpsdata.fix.mode = MODE_3D;
 	    break;
 	default:
+	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    break;
 	}
-	session->gpsdata.satellites_used = (int)((u1 >> 4) & 0x0f);
+	session->gpsdata.satellites_used = count;
 	session->gpsdata.pdop = getf(buf,1);
 	session->gpsdata.hdop = getf(buf,5);
 	session->gpsdata.vdop = getf(buf,9);
@@ -325,7 +394,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	buf2[0] = '\0';
 	/*@ +charint @*/
-	for (i = 0; i < session->gpsdata.satellites_used; i++)
+	for (i = 0; i < count; i++)
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
 			" %d",session->gpsdata.used[i] = getub(buf,17 + i));
 	/*@ -charint @*/
@@ -381,23 +450,138 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (session->gps_week)
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)session->gps_week, f1) - session->context->leap_seconds;
-	session->gpsdata.status = STATUS_FIX;
 	gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET;
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
-	switch (getub(buf,0))		/* sub-packet ID */
+	/*@ +charint @*/
+	(void)snprintf(session->gpsdata.tag+strlen(session->gpsdata.tag),
+		       sizeof(session->gpsdata.tag)-strlen(session->gpsdata.tag), 
+		       "%02x", u1 = getub(buf,0));
+	/*@ -charint @*/
+	switch (u1)				/* sub-packet ID */
 	{
+	case 0x15:	/* Current Datum Values */
+	    if (len != 43)
+		break;
+	    s1 = getsw(buf,1);			/* Datum Index */
+	    d1 = getd(buf,3);			/* DX */
+	    d2 = getd(buf,11);			/* DY */
+	    d3 = getd(buf,19);			/* DZ */
+	    d4 = getd(buf,27);			/* A-axis */
+	    d5 = getd(buf,35);			/* Eccentricity Squared */
+	    gpsd_report(4, "Current Datum %d %f %f %f %f %f\n",s1,d1,d2,d3,d4,d5);
+	    break;
+
 	case 0x20:	/* Last Fix with Extra Information (binary fixed point) */
 	    if (len != 56)
 		break;
+	    s1 = getsw(buf,2);			/* east velocity */
+	    s2 = getsw(buf,4);			/* north velocity */
+	    s3 = getsw(buf,6);			/* up velocity */
+	    ul1 = getul(buf,8);			/* time */
+	    sl1 = getsl(buf,12);		/* latitude */
+	    ul2 = getul(buf,16);		/* longitude */
+	    sl2 = getsl(buf,20);		/* altitude */
+	    u1 = getub(buf,24);			/* velocity scaling */
+	    u2 = getub(buf,27);			/* fix flags */
+	    u3 = getub(buf,28);			/* num svs */
+	    u4 = getub(buf,29);			/* utc offset */
+	    s4 = getsw(buf,30);			/* gps_week */
+						/* PRN/IODE data follows */
+	    gpsd_report(4, "LFwEI %d %d %d %u %d %u %u %x %x %u %u %d\n",s1,s2,s3,ul1,sl1,ul2,sl2,u1,u2,u3,u4,s4);
+
+	    if ((u1 & 0x01) != (u_int8_t)0)	/* check velocity scaling */
+		d5 = 0.02;
+	    else
+		d5 = 0.005;
+	    d1 = s1 * d5;			/* east velocity m/s */
+	    d2 = s2 * d5;			/* north velocity m/s */
+	    session->gpsdata.fix.climb = s3 * d5; /* up velocity m/s */
+	    /*@ -evalorder @*/
+	    session->gpsdata.fix.speed = sqrt(pow(d2,2) + pow(d1,2));
+	    /*@ +evalorder @*/
+	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
+		session->gpsdata.fix.track += 360.0;
+	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
+	    if ((session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG) > 180.0)
+		session->gpsdata.fix.longitude -= 360.0;
+	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
+	    session->gpsdata.fix.altitude  = sl2 * 1e-3 - session->gpsdata.separation;;
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    if ((u2 & 0x01) == (u_int8_t)0) {	/* Fix Available */
+		session->gpsdata.status = STATUS_FIX;
+		if ((u2 & 0x02) != (u_int8_t)0)	/* DGPS Corrected */
+		    session->gpsdata.status = STATUS_DGPS_FIX;
+		if ((u2 & 0x04) != (u_int8_t)0)	/* Fix Dimension */
+		    session->gpsdata.fix.mode = MODE_2D;
+		else
+		    session->gpsdata.fix.mode = MODE_3D;
+	    }
+	    session->gpsdata.satellites_used = (int)u3;
+	    if ((int)u4 > 10) {
+		session->context->leap_seconds = (int)u4;
+		session->context->valid |= LEAP_SECOND_VALID;
+	    }
+	    session->gps_week = s4;
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | MODE_SET; 
 	    break;
 	case 0x23:	/* Compact Super Packet */
 	    if (len != 29)
 		break;
+	    ul1 = getul(buf,1);			/* time */
+	    s1 = getsw(buf,5);			/* gps_week */
+	    u1 = getub(buf,7);			/* utc offset */
+	    u2 = getub(buf,8);			/* fix flags */
+	    sl1 = getsl(buf,9);			/* latitude */
+	    ul2 = getul(buf,13);		/* longitude */
+	    sl3 = getsl(buf,17);		/* altitude */
+	    s2 = getsw(buf,21);			/* east velocity */
+	    s3 = getsw(buf,23);			/* north velocity */
+	    s4 = getsw(buf,25);			/* up velocity */
+	    gpsd_report(4, "CSP %u %d %u %u %d %u %d %d %d %d\n",ul1,s1,u1,u2,sl1,ul2,sl3,s2,s3,s4);
+	    session->gps_week = s1;
+	    if ((int)u1 > 10) {
+		session->context->leap_seconds = (int)u1;
+		session->context->valid |= LEAP_SECOND_VALID;
+	    }
+	    session->gpsdata.fix.time = session->gpsdata.sentence_time =
+		gpstime_to_unix((int)s1, ul1 * 1e-3) - session->context->leap_seconds;
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    if ((u2 & 0x01) == (u_int8_t)0) {	/* Fix Available */
+		session->gpsdata.status = STATUS_FIX;
+		if ((u2 & 0x02) != (u_int8_t)0)	/* DGPS Corrected */
+		    session->gpsdata.status = STATUS_DGPS_FIX;
+		if ((u2 & 0x04) != (u_int8_t)0)	/* Fix Dimension */
+		    session->gpsdata.fix.mode = MODE_2D;
+		else
+		    session->gpsdata.fix.mode = MODE_3D;
+	    }
+	    session->gpsdata.fix.latitude  = sl1 * SEMI_2_DEG;
+	    if ((session->gpsdata.fix.longitude = ul2 * SEMI_2_DEG) > 180.0)
+		session->gpsdata.fix.longitude -= 360.0;
+	    session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
+	    session->gpsdata.fix.altitude  = sl3 * 1e-3 - session->gpsdata.separation;;
+	    if ((u2 & 0x20) != (u_int8_t)0)	/* check velocity scaling */
+		d5 = 0.02;
+	    else
+		d5 = 0.005;
+	    d1 = s2 * d5;			/* east velocity m/s */
+	    d2 = s3 * d5;			/* north velocity m/s */
+	    session->gpsdata.fix.climb = s4 * d5; /* up velocity m/s */
+	    /*@ -evalorder @*/
+	    session->gpsdata.fix.speed = sqrt(pow(d2,2) + pow(d1,2));
+	    /*@ +evalorder @*/
+	    if ((session->gpsdata.fix.track = atan2(d1,d2) * RAD_2_DEG) < 0)
+		session->gpsdata.fix.track += 360.0;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | MODE_SET; 
 	    break;
 	default:
-	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",getub(buf,0));
+	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",u1);
 	}
 	break;
     default:
@@ -408,19 +592,23 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     /* see if it is time to send some request packets for reports that */
     /* the receiver won't send at fixed intervals */
 
-    (void)time(&t);
-    if ((t - session->last_request) >= 5) {
+    if ((now - session->last_41) > 5) {
+	/* Request Current Time */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
+	session->last_41 = now;
+    }
+
+    if ((now - session->last_6d) > 5) {
 	/* Request GPS Receiver Position Fix Mode */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x24, buf, 0);
+	session->last_6d = now;
+    }
 
-	/* Request Signal Levels */
-	(void)tsip_write(session->gpsdata.gps_fd, 0x27, buf, 0);
-
+    if ((now - session->last_5c) >= 5) {
 	/* Request Current Satellite Tracking Status */
 	putbyte(buf,0,0x00);		/* All satellites */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x3c, buf, 1);
-
-	session->last_request = t;
+	session->last_5c = now;
     }
 
     return mask;

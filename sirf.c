@@ -406,7 +406,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		    leap ^= 0xff;
 		gpsd_report(2, "leap-seconds is %d\n", leap);
 		session->context->leap_seconds = (int)leap;
-		session->context->valid = LEAP_SECOND_VALID;
+		session->context->valid |= LEAP_SECOND_VALID;
 	    }
 
 	    if (session->context->valid & LEAP_SECOND_VALID) {
@@ -577,7 +577,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    session->gpsdata.nmea_date.tm_mon = (int)getub(buf, 5) - 1;
 	    session->gpsdata.nmea_date.tm_year = (int)getuw(buf, 6) - 1900;
 	    session->context->leap_seconds = (int)getuw(buf, 8);
-	    session->context->valid = LEAP_SECOND_VALID;
+	    session->context->valid |= LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
 	    if ((session->time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x34, seen=0x%02x\n",
@@ -635,7 +635,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
 		(void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
 #endif /* NTPSHM_ENABLE */
-	    session->context->valid = LEAP_SECOND_VALID;
+	    session->context->valid |= LEAP_SECOND_VALID;
 	}
 
 	session->gpsdata.gdop = (int)getub(buf, 34) / 5.0;
