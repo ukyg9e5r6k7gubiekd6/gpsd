@@ -5,6 +5,7 @@
 # Simulates a GPS, playing back a logfile
 
 import sys, os, time, signal, pty, getopt, tempfile, termios, socket, string
+import exceptions
 import gps
 
 class Baton:
@@ -92,6 +93,11 @@ else:
     fp.close()
     os.remove(pidfile)
 
+class PacketError(exceptions.Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+
 def packet_get(fp):
     "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
     first = fp.read(1)
@@ -100,13 +106,21 @@ def packet_get(fp):
     elif first == '$':					# NMEA packet
         return "$" + fp.readline()
     second = fp.read(1)
-    if first == '\xa0' and second == '\xa2':	# SiRF packet
+    if first == '\xa0' and second == '\xa2':		# SiRF packet
         third = fp.read(1)
         fourth = fp.read(1)
         length = (ord(third) << 8) | ord(fourth)
         return "\xa0\xa2" + third + fourth + fp.read(length+4)
+    elif first == '\xff' and second == '\x81':
+        third = fp.read(1)
+        fourth = fp.read(1)
+        fifth = fp.read(1)
+        sixth = fp.read(1)
+        id = ord(third) | (ord(fourth) << 8)
+        ndata = ord(fifth) | (ord(sixth) << 8)
+        return "\xff\x81" + third + fourth + fifth + sixth + fp.read(2*ndata+6)
     else:
-        raise ValueError, "unknown packet type, leader %s, (0x%x)" % (first, ord(first))
+        raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
 try:
     logfp = open(logfile, "r")
@@ -123,18 +137,23 @@ try:
     try:
         while True:
             packet = packet_get(logfp)
+            #print "I see: %s, length %d" % (`packet`, len(packet))
             if not packet:
                 break
             else:
                 sentences.append(packet)
-    except ValueError, msg:
-        sys.stderr.write(`msg` + "\n")
+    except PacketError, e:
+        sys.stderr.write(`e.msg` + "\n")
         raise SystemExit, 1
     # Look at the first packet to grok the GPS type
     if sentences[0][0] == '$':
         packtype = "NMEA"
         legend = "gpsfake: line %d "
         textual = 1
+    elif sentences[0][0] == '\xff':
+        packtype = "Zodiac binary"
+        legend = "gpsfake: packet %d"
+        textual = 0
     elif sentences[0][0] == '\xa0':
         packtype = "SiRF-II binary"
         legend = "gpsfake: packet %d"

@@ -167,9 +167,15 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /*@ -type @*/
     session->gpsdata.fix.latitude  = ((long)getlong(27)) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = ((long)getlong(29)) * RAD_2_DEG * 1e-8;
+    /*
+     * The Rockwell Jupiter TU30-D140 reports altitude as uncorrected height
+     * above WGS84 geoid.  The Zodiac binary protocol manual does not 
+     * specify whether word 31 is geodetic or WGS 84. 
+     */
     session->gpsdata.fix.altitude  = ((long)getlong(31)) * 1e-2;
     /*@ +type @*/
     session->gpsdata.separation    = ((short)getword(33)) * 1e-2;
+    session->gpsdata.fix.altitude -= session->gpsdata.separation;
     session->gpsdata.fix.speed     = (int)getlong(34) * 1e-2;
     session->gpsdata.fix.track     = (int)getword(36) * RAD_2_DEG * 1e-3;
     session->mag_var               = ((short)getword(37)) * RAD_2_DEG * 1e-4;
