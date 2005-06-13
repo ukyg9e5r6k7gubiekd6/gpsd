@@ -398,8 +398,29 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     if (session->gpsdata.status > STATUS_NO_FIX) 
 	session->fixcnt++;
 
+    /* 
+     * When there is valid fix data, we have an accumulating policy
+     * about position data.  This does the right thing in cases 
+     * like SiRF and Zodiac where we get all the fix info in one
+     * packet per turn, and papers over the commonest crack -- the
+     * fact that NMEA devices ship altitude separately in GGA from most of
+     * the rest of the fix information we want in RMC.  
+     *
+     * Thus, we never clear 2D or 3D position data here unless the mode
+     * has gone from 3D to 2D.  But we do want to clear velocity data,
+     * because that's always shipped atomically if it's valid (in RMC
+     * or a binary packet)
+     */
+    if ((session->gpsdata.set & MODE_SET)!=0 && session->gpsdata.fix.mode < MODE_3D)
+	session->gpsdata.fix.altitude = ALTITUDE_NOT_VALID;
+    if ((session->gpsdata.set & SPEED_SET)==0)
+    	session->gpsdata.fix.speed = SPEED_NOT_VALID;
+    if ((session->gpsdata.set & TRACK_SET)==0)
+	session->gpsdata.fix.track = TRACK_NOT_VALID;
+    if ((session->gpsdata.set & CLIMB_SET)==0)
+    	session->gpsdata.fix.climb = SPEED_NOT_VALID;
     /*
-     * Compute derived quantities.  This is where the tricky error-
+     * Now we compute derived quantities.  This is where the tricky error-
      * modeling stuff goes. Presently we don't know how to derive 
      * time or track error.
      *
@@ -412,7 +433,6 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * report speed error.  Nobody reports track error or climb error.
      */
     session->gpsdata.fix.ept = 0.005;
-#ifdef BINARY_ENABLE
     if ((session->gpsdata.set & HERR_SET)==0 
 	&& (session->gpsdata.set & HDOP_SET)!=0) {
 	session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
@@ -428,29 +448,36 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
 	session->gpsdata.set |= PERR_SET;
     }
+    /*
+     * If we have a current fix and an old fix, and the packet handler 
+     * didn't set the speed error and climb error members itself, 
+     * try to compute them now.
+     * FIXME:  We need to compute track error here.
+     */
+    session->gpsdata.fix.epd = UNCERTAINTY_NOT_VALID;
     if (session->gpsdata.set & LATLON_SET) {
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.eps = 0.0;
+	    session->gpsdata.fix.eps = UNCERTAINTY_NOT_VALID;
 	    if (session->lastfix.mode > MODE_NO_FIX 
 		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
 		double t = session->gpsdata.fix.time-session->lastfix.time;
 		double e = session->lastfix.eph + session->gpsdata.fix.eph;
 		session->gpsdata.fix.eps = e/t;
-		if (session->gpsdata.fix.eps != UNCERTAINTY_NOT_VALID)
-		    session->gpsdata.set |= SPEEDERR_SET;
 	    }
+	    if (session->gpsdata.fix.eps != UNCERTAINTY_NOT_VALID)
+		session->gpsdata.set |= SPEEDERR_SET;
 	}
 	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.epc = 0.0;
+	    session->gpsdata.fix.epc = UNCERTAINTY_NOT_VALID;
 	    if (session->lastfix.mode > MODE_3D 
 		&& session->gpsdata.fix.mode > MODE_3D) {
 		double t = session->gpsdata.fix.time-session->lastfix.time;
 		double e = session->lastfix.epv + session->gpsdata.fix.epv;
 		/* if vertical uncertainties are zero this will be too */
 		session->gpsdata.fix.epc = e/t;
-		if (session->gpsdata.fix.epc != UNCERTAINTY_NOT_VALID)
-		    session->gpsdata.set |= CLIMBERR_SET;
 	    }
+	    if (session->gpsdata.fix.epc != UNCERTAINTY_NOT_VALID)
+		session->gpsdata.set |= CLIMBERR_SET;
 	}
 
 	/* save the old fix for later uncertainty computations */
@@ -458,7 +485,6 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 		     &session->gpsdata.fix, 
 		     sizeof(struct gps_fix_t));
     }
-#endif /* BINARY_ENABLE */
 
     session->gpsdata.d_decode_time = timestamp();
 

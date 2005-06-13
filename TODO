@@ -19,6 +19,11 @@ He adds that this occurs with SiRF+Zodiac and SiRF+TSIP, not a single GPS,
 
 ** To do:
 
+*** Track error computation
+
+Presently the track error member in the fix structure is neither
+reported by any GPS nor filled in by computation.
+
 *** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which

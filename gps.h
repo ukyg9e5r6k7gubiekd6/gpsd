@@ -63,7 +63,7 @@ struct gps_fix_t {
 #define ALTITUDE_NOT_VALID	-999.0
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
-#define TRACK_NOT_VALID	-1.0	/* No course data yet */
+#define TRACK_NOT_VALID	-721.0	/* No course data yet */
     double epd;		/* Track uncertainty, degrees */
     double speed;	/* Speed over ground, meters/sec */
 #define SPEED_NOT_VALID	-1.0	/* No speed data yet */

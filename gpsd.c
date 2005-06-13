@@ -591,7 +591,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 				   " %7.2f",
 				   whoami->device->gpsdata.fix.altitude);
 		else
-		    (void)strcat(phrase, "       ?");
+		    (void)strcat(phrase, "          ?");
 		if (whoami->device->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
@@ -611,27 +611,33 @@ static int handle_request(int cfd, char *buf, int buflen)
 				   whoami->device->gpsdata.fix.track, 
 				   whoami->device->gpsdata.fix.speed);
 		else
-		    (void)strcat(phrase, "        ?        ?");
-		if (whoami->device->gpsdata.fix.mode == MODE_3D)
+		    (void)strcat(phrase, "             ?            ?");
+		if (whoami->device->gpsdata.fix.climb != SPEED_NOT_VALID)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %6.3f", 
 				   whoami->device->gpsdata.fix.climb);
 		else
-		    (void)strcat(phrase, "      ?");
-		(void)strcat(phrase, " ?");	/* can't yet derive track error */ 
-		if ((whoami->device->gpsdata.set & SPEEDERR_SET)!=0)
+		    (void)strcat(phrase, "          ?");
+		if (whoami->device->gpsdata.fix.epd != UNCERTAINTY_NOT_VALID)
+		    (void)snprintf(phrase+strlen(phrase), 
+				   sizeof(phrase)-strlen(phrase),
+				   " %8.4f",
+				   whoami->device->gpsdata.fix.epd);
+		else
+		    (void)strcat(phrase, "             ?");
+		if (whoami->device->gpsdata.fix.eps != UNCERTAINTY_NOT_VALID)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
 		else
-		    (void)strcat(phrase, "      ?");
-		if ((whoami->device->gpsdata.set & CLIMBERR_SET)!=0)
+		    (void)strcat(phrase, "        ?");
+		if (whoami->device->gpsdata.fix.epc != UNCERTAINTY_NOT_VALID)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
 		else
-		    (void)strcat(phrase, "      ?");
+		    (void)strcat(phrase, "        ?");
 	    }
 	    break;
 	case 'P':
