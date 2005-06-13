@@ -348,7 +348,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getf(buf,8);			/* time of Last measurement */
 	d1 = getf(buf,12) * RAD_2_DEG;		/* Elevation */
 	d2 = getf(buf,16) * RAD_2_DEG;		/* Azimuth */
-	i = (int)u2 >> 3;			/* channel number */
+	i = (int)(u2 >> 3);			/* channel number */
 	gpsd_report(4, "Satellite Tracking Status %d: %2d 0x%02x %d %d %.1f %f %.1f %.1f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
 	if (i < MAXCHANNELS) {
 	    session->gpsdata.PRN[i] = (int)u1;

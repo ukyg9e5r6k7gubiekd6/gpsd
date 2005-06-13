@@ -2,11 +2,22 @@ This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
 will unfold them again.
 
+** Bugs:
+
+*** gpsd with multiple GPSes eats the processor
+
+Rob Janssen writes:
+> When gpsd is running and I start a backup of my system, which starts and
+> mounts a normally idle disk and does a tar cvzf to it, the load of the
+> system is quite high and gpsd seems to get out of sync with the received
+> data from the SiRF receiver.
+> It then gets stuck in a tight loop.  As gpsd is running at nice
+> --10, this further increases the load and slows down the backup to a crawl.
+> Killing gpsd makes the backup finish and then it can be started again.
+
+He adds that this occurs with SiRF+Zodiac and SiRF+TSIP, not a single GPS, 
+
 ** To do:
-
-*** Verify that the TSIP driver now works
-
-It needs to be tweaked to use bits.h.
 
 *** Hotplug interface problems
 

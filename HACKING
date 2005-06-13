@@ -238,6 +238,80 @@ at startup time -- or, if it doesn't exist, the system's
 lowest-numbered TTY device named in PROTO_TTY.  It may be necessary to
 change PROTO_TTY in gpsd.c for non-Linux systems.
 
+** Report-per-packet vs. accumulation across an entire cycle
+
+Considered in the abstract, the cleanest thing for a
+position/velocity/time oracle to return is a 14-tuple including
+position components in all four dimensions, velocity in three, and
+associated error estimates for all seven degrees of freedom.  This is
+what the O message in GPSD protocol attempts to deliver.
+
+Unfortunately GPS protocols are, in general, rather badly designed for
+approximating this.  For historical reasons, NMEA splits 2-D position
+info and altitude in two different messages, each issued once
+during the normal 1-second send cycle.  Some vendor binary
+protocols have similar problems.
+
+This means that gpsd may execute one of two policies.  Either it
+must issue a separate report on each sentence or packet containing PVT
+information, or it must accumulate data across an entire send cycle
+and issue a unified report at end of cycle.  Report-per-packet is
+simpler, and adds minimum reporting latency, but means that O
+responses may issue more than once per second with complementary
+sets of data that add up to a complete report.  The accumulating
+policy means there will be exactly one report per cycle and it will
+contain full PVT information, but it may have additional latency
+of up to one second.
+
+Presently gpsd implements only report-per-packet.  This works well
+with the SiRF protocol (all PVT data is in packet type 02) and with
+the Zodiac protocol (all PVT data is in the type 1000 packet).  These,
+together, account for a share of the GPS market that is 80% and rising
+in 2005.  It works less well with generic NMEA devices.
+
+The reason we have not attempted an accumulating policy is that it
+would require gpsd to know which sentences start and end the GPS send
+cycle is, so as to know when to ship the accumulated data to the
+client and clear the buffers.  Which sentence this is does, in fact,
+vary across GPS types. One of gpsd's design goals, zero configuration,
+means that we can't count on the user or administrator passing gpsd
+this information; instead, gpsd must somehow be able to autodetect it.
+
+This turns out to be hard. We can get timestamps from some (though not
+all) NMEA sentences, but there are some GPSes that change the timestamp
+during the send cycle as well as at start and end.  Thus, we can't
+use coincidence of timestamps to map the cycle.
+
+We can't even count on all send cycles of the same device looking the
+same.  Many GPSes only send GSV when they have satellite lock.
+Without knowing the GPS type in advance, it isn't predictable where in
+the send cycle the GSV will be emitted.
+
+Thus, the only information we have to go on is the wall-clock timing
+of the sentences in the send cycle.  The feature we need to look for
+is the inter-cycle pause.  And the first problem is that at some
+speeds, with some devices, there isn't one.  In particular, at 4800bps
+on an NMEA device sending GGA/RMC/VTG/GLL/GSA/GSV, the intercycle
+pause is nonexistent or too small to be detectible.  See the first
+graph in the paper on GPS latency profiling at
+<http://www.berlios.de/performance.html>. In that one, transmission
+times sometimes add to slightly more than a full 1-second cycle,
+probably due to instrumentation error; the point is, there is no
+significant gap to be detected before the next cycle.
+
+Even if we could rely on that gap to be present, the logic needed to
+detect it is of the sort that is notoriously prone to subtle timing
+failures.  For example, a system-load-induced stall in the host
+operating system's serial layer, happening at the right time shortly
+after device open, might masquerade as an intercycle gap, causing gpsd
+to lock onto the wrong sentence.
+
+With great effort and ingenuity some of these problems could be at
+least partly solved.  Unfortunately, there is every reason to suspect
+the resulting code would be complex, brittle and bug-prone.
+Presently, it doesn't seem like a good idea for a marginal improvemnt
+in 20% of GPSes.
+
 ** Autoconfiguration
 
 One of the design goals for gpsd is to be as near zero-configuration
