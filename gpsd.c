@@ -752,7 +752,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    (void)strcat(phrase, whoami->device->gpsdata.tag);
 		else
 		    (void)strcat(phrase, "-");
-		if (whoami->device->gpsdata.set & TIME_SET)
+		if (whoami->device->gpsdata.sentence_time != TIME_NOT_VALID)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %f ",

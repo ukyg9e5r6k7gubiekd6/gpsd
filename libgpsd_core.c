@@ -398,6 +398,8 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     if (session->gpsdata.status > STATUS_NO_FIX) 
 	session->fixcnt++;
 
+    if ((session->gpsdata.set & TIME_SET)==0)
+    	session->gpsdata.sentence_time = TIME_NOT_VALID;
     /* 
      * When there is valid fix data, we have an accumulating policy
      * about position data.  This does the right thing in cases 
