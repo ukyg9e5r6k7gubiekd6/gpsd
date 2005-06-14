@@ -71,6 +71,10 @@ def hotplug(action, devpath):
             return
         else:
             tty = "/dev/" + subnodes[0]
+
+            syslog.syslog("waiting for " + tty)
+            while not os.path.exists(tty):
+                time.sleep(1)
             syslog.syslog(tty + " has gone active")
 
             gpsd_control(action, tty)

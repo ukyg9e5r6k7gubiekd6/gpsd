@@ -217,23 +217,23 @@ static int passivesock(char *service, char *protocol, int qlen)
 static int filesock(char *filename)
 {
     struct sockaddr_un addr;
-    int s;
+    int sock;
 
     /*@ -mayaliasunique @*/
-    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
 	gpsd_report(0, "Can't create device-control socket\n");
 	return -1;
     }
     (void)strcpy(addr.sun_path, filename);
     /*@i1@*/addr.sun_family = AF_UNIX;
-    (void)bind(s, (struct sockaddr *) &addr, 
+    (void)bind(sock, (struct sockaddr *) &addr, 
 	 (int)(strlen(addr.sun_path) + sizeof (addr.sun_family)));
-    if (listen(s, QLEN) < 0) {
-	gpsd_report(0, "Can't listen on local socket %s\n", filename);
+    if (listen(sock, QLEN) < 0) {
+	gpsd_report(0, "can't listen on local socket %s\n", filename);
 	return -1;
     }
     /*@ +mayaliasunique @*/
-    return s;
+    return sock;
 }
 
 /*
@@ -963,7 +963,7 @@ int main(int argc, char *argv[])
 
     /*
      * Control socket has to be created before we go background in order to
-     * avoid a race condition in which hotplug scripts can try oprning
+     * avoid a race condition in which hotplug scripts can try opening
      * the socket before it's created.
      */
     if (control_socket) {
@@ -973,6 +973,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
 	FD_SET(csock, &all_fds);
+	gpsd_report(1, "control socket opened at %s\n", control_socket);
     }
 
     if (go_background)

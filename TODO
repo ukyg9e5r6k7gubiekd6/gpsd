@@ -4,12 +4,7 @@ will unfold them again.
 
 ** Bugs:
 
-*** PGRME is not filled in on Garmin USB
-
-Something is zeroing the Garmin USB error estimate member between the 
-driver and the 'O' report.
-
-*** gpsd with multiple GPSes eats the processor
+*** Under uncertain circumstances, gpsd eats the processor
 
 Rob Janssen writes:
 > When gpsd is running and I start a backup of my system, which starts and
@@ -20,7 +15,29 @@ Rob Janssen writes:
 > --10, this further increases the load and slows down the backup to a crawl.
 > Killing gpsd makes the backup finish and then it can be started again.
 
-He adds that this occurs with SiRF+Zodiac and SiRF+TSIP, not a single GPS, 
+He adds that this occurs with SiRF+Zodiac and SiRF+TSIP.  He suspects
+this may be due to a bug in the SiRF support, interacting with extreme
+conditions in the Linux kernel's memory management. 
+
+>The method to trigger this is caused by a Linux problem that I think is
+>mainly visible with Reiserfs, but I am not sure.  For years I am using
+>SuSE linux and they like Reiserfs, so it has been the default FS on many
+>systems I administer.
+>What I observe is: when you copy many gigabytes of data from disk to disk,
+>the kernel's buffer management goes completely haywire.  The copy
+>operation is reading and writing many files, and the kernel tries to
+>buffer as much filedata as possible, even to the point where it starts to
+>swap out most of the running applications to get more memory available for
+>buffers.
+>I think this is caused both by allocation of many buffers for reading
+>files, and by accumulation of many dirty buffers that still have to be
+>written.
+>At some point, programs like gpsd (but also all interactive programs and
+>the X display manager) come to a complete standstill while the system is
+>swapping like mad.
+>(of course the swap partition is on one of the disks involved in the copy,
+>so swapping really does not help things in this case, it only slows down
+>the system)
 
 ** To do:
 
