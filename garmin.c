@@ -407,7 +407,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		session->gpsdata.satellites++;
 		j++;
 	    }
-	    mask |= SATELLITE_SET | HDOP_SET;
+	    mask |= SATELLITE_SET;
 	    break;
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
             // this packet is never requested, it just comes, in some case
