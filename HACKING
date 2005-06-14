@@ -411,7 +411,9 @@ existing driver and change the guts of the analyzer function.
 Your packet parser must return field-validity mask bits (using the
 *_SET macros in gps.h), suitable to be put in session->gpsdata.valid.
 The watcher-mode logic relies on these as its way of knowing what to
-publish.
+publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
+indicate fix validity after each message; the framework code relies on
+this.
 
 Your packet parser is also responsible for setting the tag field 
 in the gps_data_t structure.  This is the string that will be emitted
@@ -522,13 +524,15 @@ policy means there will be exactly one report per cycle and it will
 contain full PVT information, but it may have additional latency
 of up to one second.
 
-Presently gpsd implements only report-per-packet.  This works well
-with the SiRF protocol (all PVT data is in packet type 02) and with
-the Zodiac protocol (all PVT data is in the type 1000 packet).  These,
-together, account for a share of the GPS market that is 80% and rising
-in 2005.  It works less well with generic NMEA devices.
+Presently gpsd implements mainly report-per-packet, with a limited
+exception for 2D fix data (not cleared until a mode change invalidates
+it).  This works well with the SiRF protocol (all PVT data is in
+packet type 02) and with the Zodiac protocol (all PVT data is in the
+type 1000 packet).  These, together, account for a share of the GPS
+market that is 80% and rising in 2005.  It works less well with
+generic NMEA devices.
 
-The reason we have not attempted an accumulating policy is that it
+The reason we have not attempted a fully accumulating policy is that it
 would require gpsd to know which sentences start and end the GPS send
 cycle is, so as to know when to ship the accumulated data to the
 client and clear the buffers.  Which sentence this is does, in fact,

@@ -408,10 +408,10 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * fact that NMEA devices ship altitude separately in GGA from most of
      * the rest of the fix information we want in RMC.  
      *
-     * Thus, we never clear 2D or 3D position data here unless the mode
-     * has gone from 3D to 2D.  But we do want to clear velocity data,
-     * because that's always shipped atomically if it's valid (in RMC
-     * or a binary packet)
+     * Thus, we never clear 2D or 3D position data here unless the
+     * mode has gone from 3D to 2D (or lower).  But we do want to clear
+     * velocity data, because that's always shipped atomically if it's
+     * valid (in RMC or a binary packet)
      */
     if ((session->gpsdata.set & MODE_SET)!=0 && session->gpsdata.fix.mode < MODE_3D)
 	session->gpsdata.fix.altitude = ALTITUDE_NOT_VALID;
@@ -457,7 +457,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * FIXME:  We need to compute track error here.
      */
     session->gpsdata.fix.epd = UNCERTAINTY_NOT_VALID;
-    if (session->gpsdata.set & LATLON_SET) {
+    if (session->gpsdata.fix.mode >= MODE_2D) {
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = UNCERTAINTY_NOT_VALID;
 	    if (session->lastfix.mode > MODE_NO_FIX 
