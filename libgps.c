@@ -74,23 +74,6 @@ int gpsd_units(void)
 }
 #endif /* __UNUSED__ */
 
-void gps_clear_fix(struct gps_fix_t *fixp)
-/* stuff a fix structure with recognizable out-of-band values */
-{
-    fixp->time = NAN;
-    fixp->mode = MODE_NOT_SEEN;
-    fixp->track = NAN;
-    fixp->speed = NAN;
-    fixp->climb = NAN;
-    fixp->altitude = NAN;
-    fixp->ept = NAN;
-    fixp->eph = NAN;
-    fixp->epv = NAN;
-    fixp->epd = NAN;
-    fixp->eps = NAN;
-    fixp->epc = NAN;
-}
-
 struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
 {

@@ -82,7 +82,6 @@ libgps_c_sources = \
 	geoid.c \
 	sirf.c \
 	report.c \
-	gpsutils.h \
 	bits.h \
 	timebase.h
 

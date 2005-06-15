@@ -11,7 +11,6 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
-#include "gpsutils.h"
 
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 #define MAXTAGLEN	6	/* maximum length of sentence tag name */
@@ -103,7 +102,8 @@ struct gps_data_t {
 				 * prone to false negatives.
 				 */
 
-    struct gps_fix_t	fix;	/* PVT data */
+    struct gps_fix_t	fix;		/* accumulated PVT data */
+    struct gps_fix_t	newdata;	/* PVT data from last packet */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
@@ -170,7 +170,6 @@ struct gps_data_t {
     double subseconds;
 };
 
-extern void gps_clear_fix(struct gps_fix_t *fixp);
 extern struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *requests);
@@ -178,6 +177,20 @@ int gps_poll(struct gps_data_t *gpsdata);
 void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t *sentence, char *buf, size_t len, int level));
     int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
+
+extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
+extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
+			  gps_mask_t,
+			  /*@ in @*/struct gps_fix_t *);
+
+extern time_t mkgmtime(register struct tm *);
+extern double timestamp(void);
+extern double iso8601_to_unix(char *);
+extern /*@observer@*/char *unix_to_iso8601(double t, /*@ out @*/char[], int len);
+extern double gpstime_to_unix(int, double);
+/* extern double earth_distance(double, double, double, double); */
+extern double wgs84_separation(double lat, double lon);
+extern int gpsd_units(void);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

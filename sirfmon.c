@@ -36,7 +36,6 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "gpsutils.h"
 #include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
 
 #define PUT_ORIGIN	4

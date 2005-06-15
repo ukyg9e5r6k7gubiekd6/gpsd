@@ -347,14 +347,15 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	(void)strcpy(bufp, ",");
     }
     bufp += strlen(bufp);
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
     if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	(void)strcat(bufp, ",,,");
     else
 	(void)snprintf(bufp, len-strlen(bufp),
 		       "%.1f,%.1f,%.1f*", 
-		       session->gpsdata.pdop, 
-		       session->gpsdata.hdop,
-		       session->gpsdata.vdop);
+		       ZEROIZE(session->gpsdata.pdop), 
+		       ZEROIZE(session->gpsdata.hdop),
+		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
     if (finite(session->gpsdata.fix.eph)
@@ -364,12 +365,13 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
         // only if realistic
         (void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,%.2f,%.2f",
-	    session->gpsdata.fix.eph, 
-	    session->gpsdata.fix.epv, 
-	    session->gpsdata.epe);
+	    ZEROIZE(session->gpsdata.fix.eph), 
+	    ZEROIZE(session->gpsdata.fix.epv), 
+	    ZEROIZE(session->gpsdata.epe));
         nmea_add_checksum(bufp);
 	session->gpsdata.seen_sentences |= PGRME;
      }
+#undef ZEROIZE
 }
 
 #endif /* BINARY_ENABLE */
@@ -384,17 +386,23 @@ static int is_input_waiting(int fd)
 
 static gps_mask_t handle_packet(struct gps_device_t *session)
 {
+    gps_mask_t received;
+
     session->packet_full = 0;
     session->gpsdata.sentence_time = 0;
     session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
 
-    session->gpsdata.set = ONLINE_SET | session->device_type->parse_packet(session);
+    received = session->device_type->parse_packet(session);
+
+    gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
+    session->gpsdata.set = ONLINE_SET | received;
 
     /* count all packets and good fixes */
     session->counter++;
     if (session->gpsdata.status > STATUS_NO_FIX) 
 	session->fixcnt++;
+
 
     if ((session->gpsdata.set & TIME_SET)==0)
     	session->gpsdata.sentence_time = NAN;

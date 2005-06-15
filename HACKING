@@ -387,6 +387,15 @@ methods except when to call them.  At any given time one driver is
 active; by default it's the NMEA one.  To add a new device, populate
 another driver structure and add it to the list.
 
+Your driver should put new data from each incoming packet or sentence
+in the 'newdata' member of the GPS, and return a validity flag mask
+telling what members were updated.  There is driver-independent code
+that will be responsible for merging that new data into the existing
+fix.  To assist this, the CYCLE_START_SET flag is special.  Set this
+when the driver returns the first timestamped message containing fix
+data in in an update cycle.  (This excludes satellite-picture messages
+and GPS status indications.)
+
 Each driver may have a trigger string that the NMEA interpreter
 watches for.  When that string is recognized at the start of a 
 line, the interpreter switches to its driver.  The new driver 
@@ -414,10 +423,6 @@ The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
 this.
-
-The CYCLE_START_SET flag is special.  Set this when the driver returns
-the first timestamped message containing fix data in in an update cycle.  
-(This excludes satellite-picture messages and GPS status indications.)
 
 Your packet parser is also responsible for setting the tag field 
 in the gps_data_t structure.  This is the string that will be emitted

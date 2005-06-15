@@ -114,7 +114,7 @@ typedef struct {
 /* Garmin D800_Pvt_Date_Type */
 // This is the data format of the position data from the garmin USB
 typedef struct {
-	float alt;  /* ->fix.altitude above WGS 84 (meters) */
+	float alt;  /* altitude above WGS 84 (meters) */
 	float epe;  /* estimated position error, 2 sigma (meters)  */
 	float eph;  /* epe, but horizontal only (meters) */
 	float epv;  /* epe but vertical only (meters ) */
@@ -272,16 +272,16 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    session->context->valid = LEAP_SECOND_VALID;
 	    // gps_tow is always like x.999 or x.998 so just round it
 	    time_l += (time_t) round(pvt->gps_tow);
-	    session->gpsdata.fix.time 
+	    session->gpsdata.newdata.time 
 		= session->gpsdata.sentence_time 
 		= (double)time_l;
 	    gpsd_report(5, "time_l: %ld\n", (long int)time_l);
 
-	    session->gpsdata.fix.latitude = radtodeg(pvt->lat);
-	    session->gpsdata.fix.longitude = radtodeg(pvt->lon);
+	    session->gpsdata.newdata.latitude = radtodeg(pvt->lat);
+	    session->gpsdata.newdata.longitude = radtodeg(pvt->lon);
 
 	    // altitude over WGS84 converted to MSL
-	    session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
+	    session->gpsdata.newdata.altitude = pvt->alt + pvt->msl_hght;
 
 	    // geoid separation from WGS 84
             // gpsd sign is opposite of garmin sign
@@ -289,21 +289,21 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 
 	    // estimated position error in meters
 	    session->gpsdata.epe = pvt->epe;
-	    session->gpsdata.fix.eph = pvt->eph;
-	    session->gpsdata.fix.epv = pvt->epv;
+	    session->gpsdata.newdata.eph = pvt->eph;
+	    session->gpsdata.newdata.epv = pvt->epv;
 
 	    // convert lat/lon to knots
-	    session->gpsdata.fix.speed
+	    session->gpsdata.newdata.speed
 		= hypot(pvt->lon_vel, pvt->lat_vel) * 1.9438445;
 
             // keep climb in meters/sec
-	    session->gpsdata.fix.climb = pvt->alt_vel;
+	    session->gpsdata.newdata.climb = pvt->alt_vel;
 
 	    track = atan2(pvt->lon_vel, pvt->lat_vel);
 	    if (track < 0) {
 		track += 2 * PI;
 	    }
-	    session->gpsdata.fix.track = radtodeg(track);
+	    session->gpsdata.newdata.track = radtodeg(track);
 
 	    switch ( pvt->fix) {
 	    case 0:
@@ -311,43 +311,43 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    default:
 		// no fix
 		session->gpsdata.status = STATUS_NO_FIX;
-		session->gpsdata.fix.mode = MODE_NO_FIX;
+		session->gpsdata.newdata.mode = MODE_NO_FIX;
 		break;
 	    case 2:
 		// 2D fix
 		session->gpsdata.status = STATUS_FIX;
-		session->gpsdata.fix.mode = MODE_2D;
+		session->gpsdata.newdata.mode = MODE_2D;
 		break;
 	    case 3:
 		// 3D fix
 		session->gpsdata.status = STATUS_FIX;
-		session->gpsdata.fix.mode = MODE_3D;
+		session->gpsdata.newdata.mode = MODE_3D;
 		break;
 	    case 4:
 		// 2D Differential fix
 		session->gpsdata.status = STATUS_DGPS_FIX;
-		session->gpsdata.fix.mode = MODE_2D;
+		session->gpsdata.newdata.mode = MODE_2D;
 		break;
 	    case 5:
 		// 3D differential fix
 		session->gpsdata.status = STATUS_DGPS_FIX;
-		session->gpsdata.fix.mode = MODE_3D;
+		session->gpsdata.newdata.mode = MODE_3D;
 		break;
 	    }
 #ifdef NTPSHM_ENABLE
-	    if (session->gpsdata.fix.mode > MODE_NO_FIX)
-		(void) ntpshm_put(session, session->gpsdata.fix.time);
+	    if (session->gpsdata.newdata.mode > MODE_NO_FIX)
+		(void) ntpshm_put(session, session->gpsdata.newdata.time);
 #endif /* NTPSHM_ENABLE */
 
 	    gpsd_report(4, "Appl, mode %d, status %d\n"
-			, session->gpsdata.fix.mode
+			, session->gpsdata.newdata.mode
 			, session->gpsdata.status);
 
-	    gpsd_report(3, "UTC Time: %lf\n", session->gpsdata.fix.time);
+	    gpsd_report(3, "UTC Time: %lf\n", session->gpsdata.newdata.time);
 	    gpsd_report(3, "Geoid Separation (MSL - WGS84): from garmin %lf, calculated %lf\n"
 		, -pvt->msl_hght
-		, wgs84_separation(session->gpsdata.fix.latitude
-			, session->gpsdata.fix.longitude));
+		, wgs84_separation(session->gpsdata.newdata.latitude
+			, session->gpsdata.newdata.longitude));
 	    gpsd_report(3, "Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %ld\n"
 			, pvt->alt
 			, pvt->epe
@@ -355,8 +355,8 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, pvt->epv
 			, pvt->fix
 			, pvt->gps_tow
-			, session->gpsdata.fix.latitude
-			, session->gpsdata.fix.longitude
+			, session->gpsdata.newdata.latitude
+			, session->gpsdata.newdata.longitude
 			, pvt->lon_vel
 			, pvt->lat_vel
 			, pvt->alt_vel

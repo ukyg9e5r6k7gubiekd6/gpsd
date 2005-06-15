@@ -9,6 +9,56 @@
 
 #include "gpsd.h"
 
+void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
+/* stuff a fix structure with recognizable out-of-band values */
+{
+    fixp->time = NAN;
+    fixp->mode = MODE_NOT_SEEN;
+    fixp->track = NAN;
+    fixp->speed = NAN;
+    fixp->climb = NAN;
+    fixp->altitude = NAN;
+    fixp->ept = NAN;
+    fixp->eph = NAN;
+    fixp->epv = NAN;
+    fixp->epd = NAN;
+    fixp->eps = NAN;
+    fixp->epc = NAN;
+}
+
+void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
+		   gps_mask_t transfer,
+		   /*@ in @*/struct gps_fix_t *from)
+/* merge new data into an old fix */
+{
+    if ((transfer & TIME_SET)!=0)
+	to->time = from->time;
+    if ((transfer & LATLON_SET)!=0) {
+	to->latitude = from->latitude;
+	to->longitude = from->longitude;
+    }
+    if ((transfer & MODE_SET)!=0)
+	to->mode = from->mode;
+    if ((transfer & ALTITUDE_SET)!=0)
+	to->altitude = from->altitude;
+    if ((transfer & TRACK_SET)!=0)
+	to->track = from->track;
+    if ((transfer & SPEED_SET)!=0)
+	to->speed = from->speed;
+    if ((transfer & CLIMB_SET)!=0)
+	to->climb = from->climb;
+    if ((transfer & TIMERR_SET)!=0)
+	to->ept = from->ept;
+    if ((transfer & HERR_SET)!=0)
+	to->eph = from->eph;
+    if ((transfer & VERR_SET)!=0)
+	to->epv = from->epv;
+    if ((transfer & SPEEDERR_SET)!=0)
+	to->eps = from->eps;
+    if ((transfer & CLIMBERR_SET)!=0)
+	to->epc = from->epc;
+}
+
 double timestamp(void) 
 {
     struct timeval tv; 

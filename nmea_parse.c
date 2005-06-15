@@ -31,8 +31,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[1];
 	if (*p == 'S')
 	    lat = -lat;
-	if (out->fix.latitude != lat)
-	    out->fix.latitude = lat;
+	if (out->newdata.latitude != lat)
+	    out->newdata.latitude = lat;
 	updated++;
     }
     if (*(p = field[2]) != '\0') {
@@ -44,8 +44,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 	p = field[3];
 	if (*p == 'W')
 	    lon = -lon;
-	if (out->fix.longitude != lon)
-	    out->fix.longitude = lon;
+	if (out->newdata.longitude != lon)
+	    out->newdata.longitude = lon;
 	updated++;
     }
 }
@@ -125,8 +125,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    out->status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
 	}
-	if (out->fix.mode >= MODE_2D) {
-	    out->fix.mode = MODE_NO_FIX;
+	if (out->newdata.mode >= MODE_2D) {
+	    out->newdata.mode = MODE_NO_FIX;
 	    mask |= MODE_SET;
 	}
     } else if (strcmp(field[2], "A")==0) {
@@ -134,28 +134,28 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_data_t *out)
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
 	    mask |= TIME_SET;
-	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
-	    if (out->sentence_time != out->fix.time)
+	    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+	    if (out->sentence_time != out->newdata.time)
 		mask |= CYCLE_START_SET;
-	    out->sentence_time = out->fix.time;
+	    out->sentence_time = out->newdata.time;
 	}
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
-	out->fix.speed = atof(field[7]) * KNOTS_TO_MPS;
-	out->fix.track = atof(field[8]);
+	out->newdata.speed = atof(field[7]) * KNOTS_TO_MPS;
+	out->newdata.track = atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
 	 * GPRMC. In this case we set mode and status here so the client
 	 * code that relies on them won't mistakenly believe it has never
-	 * received a fix.
+	 * received a newdata.
 	 */
 	if (out->status == STATUS_NO_FIX) {
 	    out->status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
 	    mask |= STATUS_SET;
 	}
-	if (out->fix.mode < MODE_2D) {
-	    out->fix.mode = MODE_2D;
+	if (out->newdata.mode < MODE_2D) {
+	    out->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
     }
@@ -199,10 +199,10 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_data_t *out)
 	merge_hhmmss(field[5], out);
 	if (out->nmea_date.tm_year != 0) {
 	    mask = TIME_SET;
-	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
-	    if (out->sentence_time != out->fix.time)
+	    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+	    if (out->sentence_time != out->newdata.time)
 		mask |= CYCLE_START_SET;
-	    out->sentence_time = out->fix.time;
+	    out->sentence_time = out->newdata.time;
 	}
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -242,12 +242,12 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
     mask = STATUS_SET;
     if (out->status > STATUS_NO_FIX) {
 	char *altitude;
-	double oldfixtime = out->fix.time;
+	double oldfixtime = out->newdata.time;
 
 	merge_hhmmss(field[1], out);
 	if (out->nmea_date.tm_year != 0) {
 	    mask |= TIME_SET;
-	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+	    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
 	}
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;
@@ -259,14 +259,14 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 	 * If we see this, force mode to 2D at most.
 	 */
 	if (altitude[0] == '\0') {
-	    if (out->fix.mode == MODE_3D) {
-		out->fix.mode = out->status ? MODE_2D : MODE_NO_FIX; 
+	    if (out->newdata.mode == MODE_3D) {
+		out->newdata.mode = out->status ? MODE_2D : MODE_NO_FIX; 
 		mask |= MODE_SET;
 	    }
 	} else {
-	    double oldaltitude = out->fix.altitude;
+	    double oldaltitude = out->newdata.altitude;
 
-	    out->fix.altitude = atof(altitude);
+	    out->newdata.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
 
 
@@ -276,17 +276,17 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 	     * SiRF and Garmin chips, which might have some smoothing
 	     * going on.
 	     */
-	    if (isnan(oldaltitude)==0 || out->fix.time==oldfixtime)
-		out->fix.climb = 0;
+	    if (isnan(oldaltitude)==0 || out->newdata.time==oldfixtime)
+		out->newdata.climb = 0;
 	    else {
-		out->fix.climb = (out->fix.altitude-oldaltitude)/(out->fix.time-oldfixtime);
+		out->newdata.climb = (out->newdata.altitude-oldaltitude)/(out->newdata.time-oldfixtime);
 	    }
 	    mask |= CLIMB_SET;
 	}
 	if (strlen(field[11]) > 0) {
 	   out->separation = atof(field[11]);
 	} else {
-	   out->separation = wgs84_separation(out->fix.latitude,out->fix.longitude);
+	   out->separation = wgs84_separation(out->newdata.latitude,out->newdata.longitude);
 	}
     }
     return mask;
@@ -310,9 +310,9 @@ static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_data_t *o
     gps_mask_t mask;
     int i;
     
-    out->fix.mode = atoi(field[2]);
+    out->newdata.mode = atoi(field[2]);
     mask = MODE_SET;
-    gpsd_report(3, "GPGSA sets mode %d\n", out->fix.mode);
+    gpsd_report(3, "GPGSA sets mode %d\n", out->newdata.mode);
     out->pdop = atof(field[15]);
     out->hdop = atof(field[16]);
     out->vdop = atof(field[17]);
@@ -417,8 +417,8 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_data_t *o
      * Garmin won't say, but the general belief is that these are 1-sigma.
      * See <http://gpsinformation.net/main/epenew.txt>.
      */
-    out->fix.eph = atof(field[1]);
-    out->fix.epv = atof(field[3]);
+    out->newdata.eph = atof(field[1]);
+    out->newdata.epv = atof(field[3]);
     out->epe = atof(field[5]);
     return HERR_SET | VERR_SET | PERR_SET;
 }
@@ -441,10 +441,10 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_data_t *o
     out->nmea_date.tm_year = atoi(field[4]) - 1900;
     out->nmea_date.tm_mon = atoi(field[3]);
     out->nmea_date.tm_mday = atoi(field[2]);
-    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
-    if (out->sentence_time != out->fix.time)
+    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+    if (out->sentence_time != out->newdata.time)
 	mask |= CYCLE_START_SET;
-    out->sentence_time = out->fix.time;
+    out->sentence_time = out->newdata.time;
     return mask;
 }
 
