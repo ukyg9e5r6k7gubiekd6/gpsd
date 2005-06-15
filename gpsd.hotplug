@@ -49,8 +49,10 @@ def gpsd_control(action, argument):
         # able to use this device after dropping root privileges.
         os.chmod(argument, stat.S_IMODE(os.stat(argument)[stat.ST_MODE])|0660)
         connect.write("+%s\r\n" % argument)
+        connect.readline()
     elif action == 'remove':
         connect.write("-%s\r\n" % argument)
+        connect.readline()
     connect.close()
     #syslog.syslog("gpsd_control ends")
     return action

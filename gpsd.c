@@ -891,7 +891,7 @@ static void handle_control(int sfd, char *buf)
 		(void)write(sfd, "OK\n", 3);
 	    } else {
 		gpsd_report(1,"<= control(%d): %s not active \n", sfd, stash);
-		(void)write(sfd, "ERROR\n", 3);
+		(void)write(sfd, "ERROR\n", 6);
 	    }
 	}
 	(void)free(stash);
