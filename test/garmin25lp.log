@@ -1,6 +1,6 @@
 # Name: Garmin 25LP
 # Cycle-time: 1-second
-# Start-of-cycle: ?
+# Start-of-cycle: GPRMC
 # Pause-noted: ?
 # Well-behaved: Y
 # Submitted-by: Daniele Giangrazi <daniele.giangrazi@elital.net>

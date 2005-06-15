@@ -58,7 +58,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  * Timestamps always look like hhmmss.ss, with the trailing .ss part
  * optional.  RMC has a date field, in the format ddmmyy.  ZDA has
  * separate fields for day/month/year, with a 4-digit year.  This
- * means that for RMC we must supply a century and for GGA and GGL we
+ * means that for RMC we must supply a century and for GGA and GLL we
  * must supply a century, year, and day.  We get the missing data from
  * a previous RMC or ZDA; century in RMC is supplied by the host
  * machine's clock time if there has been no previous RMC.

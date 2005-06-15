@@ -1,6 +1,6 @@
 # Name: Garmin Geko 201
 # Cycle-time: 1-second
-# Start-of-cycle: GPRMC?
+# Start-of-cycle: GPRMC
 # Pause-noted: Y
 # Well-behaved: ?
 # Submitted-by: "Jose Luis Domingo Lopez" <gps@24x7linux.com>

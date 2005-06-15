@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#define __USE_ISOC99	1	/* needed to get log2() from math.h */
 #include <math.h>
 #include "gpsd.h"
 #include "bits.h"

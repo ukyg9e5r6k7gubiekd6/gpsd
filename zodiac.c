@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#define __USE_ISOC99	1	/* needed to get log2() from math.h */
 #include <math.h>
 #include "gpsd.h"
 #include "bits.h"
@@ -118,7 +117,7 @@ static void send_rtcm(struct gps_device_t *session,
     zodiac_spew(session, 1351, data, n+1);
 }
 
-static size_t zodiac_send_rtcm(struct gps_device_t *session,
+static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
 			char *rtcmbuf, size_t rtcmbytes)
 {
     size_t len;

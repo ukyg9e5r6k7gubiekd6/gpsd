@@ -51,9 +51,9 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static size_t nmea_write_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
+static ssize_t nmea_write_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 {
-    return (size_t)write(session->gpsdata.gps_fd, buf, rtcmbytes);
+    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
 }
 
 static void nmea_initializer(struct gps_device_t *session)

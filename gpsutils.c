@@ -5,7 +5,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdarg.h>
-#define __USE_XOPEN
 #include <time.h>
 
 #include "gpsd.h"

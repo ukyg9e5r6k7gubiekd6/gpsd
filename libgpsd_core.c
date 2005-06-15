@@ -11,7 +11,6 @@
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>	/* for FIONREAD on BSD systems */
 #endif
-#define __USE_GNU
 #include <string.h>
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #include <pthread.h>

@@ -12,7 +12,7 @@ AC_C_BIGENDIAN
 AC_FUNC_ALLOCA
 
 if eval "test x$GCC = xyes"; then
-	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -W"
+	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -W -D_GNU_SOURCE"
 	dnl -Wcast-qual
 fi
 

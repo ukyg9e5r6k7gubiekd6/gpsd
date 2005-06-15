@@ -1,6 +1,6 @@
 # Name: Holux GM-210
 # Cycle-time: 1-second
-# Start-of-cycle: ?
+# Start-of-cycle: GPGGA
 # Pause-noted: ?
 # Well-behaved: N
 # Submitted-by: "Patrick L. McGillan" <pmcgillan@pateri.com>

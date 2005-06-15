@@ -40,10 +40,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define __USE_ISOC99	1	/* needed to get round() from math.h */
 #include <math.h>
 
-#define __USE_GNU
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
