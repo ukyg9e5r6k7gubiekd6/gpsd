@@ -321,7 +321,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_8, s);
-    if (gpsdata->fix.mode == MODE_3D)
+    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
 	(void)snprintf(s, sizeof(s), "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
