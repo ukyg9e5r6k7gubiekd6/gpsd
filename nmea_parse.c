@@ -270,7 +270,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 	     * SiRF and Garmin chips, which might have some smoothing
 	     * going on.
 	     */
-	    if (oldaltitude == ALTITUDE_NOT_VALID || out->fix.time==oldfixtime)
+	    if (!isnan(oldaltitude) || out->fix.time==oldfixtime)
 		out->fix.climb = 0;
 	    else {
 		out->fix.climb = (out->fix.altitude-oldaltitude)/(out->fix.time-oldfixtime);

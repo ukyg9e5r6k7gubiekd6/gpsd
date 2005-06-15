@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include <math.h>
 
 #include "gpsd.h"
 
@@ -76,18 +77,18 @@ int gpsd_units(void)
 void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
-    fixp->time = TIME_NOT_VALID;
+    fixp->time = NAN;
     fixp->mode = MODE_NOT_SEEN;
-    fixp->track = TRACK_NOT_VALID;
-    fixp->speed = SPEED_NOT_VALID;
-    fixp->climb = SPEED_NOT_VALID;
-    fixp->altitude = ALTITUDE_NOT_VALID;
-    fixp->ept = UNCERTAINTY_NOT_VALID;
-    fixp->eph = UNCERTAINTY_NOT_VALID;
-    fixp->epv = UNCERTAINTY_NOT_VALID;
-    fixp->epd = UNCERTAINTY_NOT_VALID;
-    fixp->eps = UNCERTAINTY_NOT_VALID;
-    fixp->epc = UNCERTAINTY_NOT_VALID;
+    fixp->track = NAN;
+    fixp->speed = NAN;
+    fixp->climb = NAN;
+    fixp->altitude = NAN;
+    fixp->ept = NAN;
+    fixp->eph = NAN;
+    fixp->epv = NAN;
+    fixp->epd = NAN;
+    fixp->eps = NAN;
+    fixp->epc = NAN;
 }
 
 struct gps_data_t *gps_open(const char *host, const char *port)
@@ -161,7 +162,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		switch (*sp) {
 		case 'A':
 		    if (sp[2] == '?') {
-			    gpsdata->fix.altitude = ALTITUDE_NOT_VALID;
+			    gpsdata->fix.altitude = NAN;
 		    } else {
 		        (void)sscanf(sp, "A=%lf", &gpsdata->fix.altitude);
 		        gpsdata->set |= ALTITUDE_SET;
@@ -182,7 +183,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'D':
 		    if (sp[2] == '?') 
-			gpsdata->fix.time = TIME_NOT_VALID;
+			gpsdata->fix.time = NAN;
 		    else {
 			gpsdata->fix.time = iso8601_to_unix(sp+2);
 			gpsdata->set |= TIME_SET;
@@ -190,9 +191,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'E':
 		    if (sp[2] == '?') {
-			   gpsdata->epe = UNCERTAINTY_NOT_VALID;
-			   gpsdata->fix.eph = UNCERTAINTY_NOT_VALID;
-			   gpsdata->fix.epv = UNCERTAINTY_NOT_VALID;
+			   gpsdata->epe = NAN;
+			   gpsdata->fix.eph = NAN;
+			   gpsdata->fix.epv = NAN;
 		    } else {
 		        (void)sscanf(sp, "E=%lf %lf %lf", 
 			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
@@ -278,28 +279,28 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			        epd, eps, epc);
 			if (st == 14) {
 #define DEFAULT(val, def) (val[0] == '?') ? (def) : atof(val)
-			    nf.altitude = DEFAULT(alt, ALTITUDE_NOT_VALID);
-			    nf.eph = DEFAULT(eph, UNCERTAINTY_NOT_VALID);
-			    nf.epv = DEFAULT(epv, UNCERTAINTY_NOT_VALID);
-			    nf.track = DEFAULT(track, TRACK_NOT_VALID);
-			    nf.speed = DEFAULT(speed, SPEED_NOT_VALID);
-			    nf.climb = DEFAULT(climb, SPEED_NOT_VALID);
-			    nf.epd = DEFAULT(epd, UNCERTAINTY_NOT_VALID);
-			    nf.eps = DEFAULT(eps, UNCERTAINTY_NOT_VALID);
-			    nf.epc = DEFAULT(epc, UNCERTAINTY_NOT_VALID);
+			    nf.altitude = DEFAULT(alt, NAN);
+			    nf.eph = DEFAULT(eph, NAN);
+			    nf.epv = DEFAULT(epv, NAN);
+			    nf.track = DEFAULT(track, NAN);
+			    nf.speed = DEFAULT(speed, NAN);
+			    nf.climb = DEFAULT(climb, NAN);
+			    nf.epd = DEFAULT(epd, NAN);
+			    nf.eps = DEFAULT(eps, NAN);
+			    nf.epc = DEFAULT(epc, NAN);
 #undef DEFAULT
 			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
 			    if (nf.mode == MODE_3D)
 				gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
-			    if (nf.eph != UNCERTAINTY_NOT_VALID)
+			    if (!isnan(nf.eph))
 				gpsdata->set |= HERR_SET;
-			    if (nf.epv != UNCERTAINTY_NOT_VALID)
+			    if (!isnan(nf.epv))
 				gpsdata->set |= VERR_SET;
-			    if (nf.track != TRACK_NOT_VALID)
+			    if (!isnan(nf.track))
 				gpsdata->set |= TRACK_SET | SPEED_SET;
-			    if (nf.eps != UNCERTAINTY_NOT_VALID)
+			    if (!isnan(nf.eps))
 				gpsdata->set |= SPEEDERR_SET;
-			    if (nf.epc != UNCERTAINTY_NOT_VALID)
+			    if (!isnan(nf.epc))
 				gpsdata->set |= CLIMBERR_SET;
 
 			    gpsdata->fix = nf;
@@ -310,8 +311,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'P':
 		    if (sp[2] == '?') {
-			   gpsdata->fix.latitude = LATITUDE_NOT_VALID;
-			   gpsdata->fix.longitude = LONGITUDE_NOT_VALID;
+			   gpsdata->fix.latitude = NAN;
+			   gpsdata->fix.longitude = NAN;
 		    } else {
 		        (void)sscanf(sp, "P=%lf %lf",
 			   &gpsdata->fix.latitude, &gpsdata->fix.longitude);
@@ -345,7 +346,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'T':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.track = TRACK_NOT_VALID;
+		        gpsdata->fix.track = NAN;
 		    } else {
 		        (void)sscanf(sp, "T=%lf", &gpsdata->fix.track);
 		        gpsdata->set |= TRACK_SET;
@@ -353,7 +354,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'U':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.climb = SPEED_NOT_VALID;
+		        gpsdata->fix.climb = NAN;
 		    } else {
 		        (void)sscanf(sp, "U=%lf", &gpsdata->fix.climb);
 		        gpsdata->set |= CLIMB_SET;
@@ -361,7 +362,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'V':
 		    if (sp[2] == '?') {
-		        gpsdata->fix.speed = SPEED_NOT_VALID;
+		        gpsdata->fix.speed = NAN;
 		    } else {
 		        (void)sscanf(sp, "V=%lf", &gpsdata->fix.speed);
 		        gpsdata->set |= SPEED_SET;
@@ -545,7 +546,7 @@ void data_dump(struct gps_data_t *collect, time_t now)
     if (collect->set & ALTITUDE_SET)
 	printf("A: altitude: %lf  U: climb: %lf\n", 
 	       collect->fix.altitude, collect->fix.climb);
-    if (collect->fix.track != TRACK_NOT_VALID)
+    if (!isnan(collect->fix.track))
 	printf("T: track: %lf  V: speed: %lf\n", 
 	       collect->fix.track, collect->fix.speed);
     if (collect->set & STATUS_SET)

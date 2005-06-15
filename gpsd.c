@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <pwd.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "config.h"
 #if defined (HAVE_PATH_H)
@@ -486,7 +487,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    (void)strcpy(phrase, ",D=");
-	    if (assign_channel(whoami) && whoami->device->gpsdata.fix.time!=TIME_NOT_VALID)
+	    if (assign_channel(whoami) && !isnan(whoami->device->gpsdata.fix.time))
 		(void)unix_to_iso8601(whoami->device->gpsdata.fix.time, 
 				phrase+3, (int)(sizeof(phrase)-3));
 	    else
@@ -494,15 +495,15 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'E':
 	    if (assign_channel(whoami) && have_fix(whoami->device)) {
-		if (whoami->device->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID
-			|| whoami->device->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.eph)
+		    || !isnan(whoami->device->gpsdata.fix.epv))
 		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			    whoami->device->gpsdata.epe, 
 			    whoami->device->gpsdata.fix.eph, 
 			    whoami->device->gpsdata.fix.epv);
-		else if (whoami->device->gpsdata.pdop != DOP_NOT_VALID
-			 || whoami->device->gpsdata.hdop != DOP_NOT_VALID
-			 || whoami->device->gpsdata.vdop!= DOP_NOT_VALID)
+		else if (!isnan(whoami->device->gpsdata.pdop)
+			 || !isnan(whoami->device->gpsdata.hdop)
+			 || !isnan(whoami->device->gpsdata.vdop))
 		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			    whoami->device->gpsdata.pdop * UERE(whoami->device), 
 			    whoami->device->gpsdata.hdop * UERE(whoami->device), 
@@ -585,26 +586,26 @@ static int handle_request(int cfd, char *buf, int buflen)
 			whoami->device->gpsdata.tag[0]!='\0' ? whoami->device->gpsdata.tag : "-",
 			whoami->device->gpsdata.fix.time, whoami->device->gpsdata.fix.ept, 
 			whoami->device->gpsdata.fix.latitude, whoami->device->gpsdata.fix.longitude);
-		if (whoami->device->gpsdata.fix.mode == MODE_3D)
+		if (!isnan(whoami->device->gpsdata.fix.altitude))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %7.2f",
 				   whoami->device->gpsdata.fix.altitude);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (whoami->device->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.eph))
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				  " %5.2f",  whoami->device->gpsdata.fix.eph);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (whoami->device->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.epv))
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %5.2f",  whoami->device->gpsdata.fix.epv);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.track))
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f %8.3f",
@@ -612,27 +613,27 @@ static int handle_request(int cfd, char *buf, int buflen)
 				   whoami->device->gpsdata.fix.speed);
 		else
 		    (void)strcat(phrase, "             ?            ?");
-		if (whoami->device->gpsdata.fix.climb != SPEED_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.climb))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %6.3f", 
 				   whoami->device->gpsdata.fix.climb);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (whoami->device->gpsdata.fix.epd != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.epd))
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f",
 				   whoami->device->gpsdata.fix.epd);
 		else
 		    (void)strcat(phrase, "             ?");
-		if (whoami->device->gpsdata.fix.eps != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.eps))
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
 		else
 		    (void)strcat(phrase, "        ?");
-		if (whoami->device->gpsdata.fix.epc != UNCERTAINTY_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.fix.epc))
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
@@ -650,9 +651,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'Q':
 	    if (assign_channel(whoami) && 
-		(whoami->device->gpsdata.pdop != UNCERTAINTY_NOT_VALID
-		 || whoami->device->gpsdata.hdop != UNCERTAINTY_NOT_VALID
-		 || whoami->device->gpsdata.vdop != UNCERTAINTY_NOT_VALID))
+		(!isnan(whoami->device->gpsdata.pdop)
+		 || !isnan(whoami->device->gpsdata.hdop)
+		 || !isnan(whoami->device->gpsdata.vdop)))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
 			whoami->device->gpsdata.satellites_used, 
 			whoami->device->gpsdata.pdop, 
@@ -700,7 +701,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami) && have_fix(whoami->device) && !isnan(whoami->device->gpsdata.fix.track))
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->device->gpsdata.fix.track);
 	    else
 		(void)strcpy(phrase, ",T=?");
@@ -712,7 +713,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.track != TRACK_NOT_VALID)
+	    if (assign_channel(whoami) && have_fix(whoami->device) && !isnan(whoami->device->gpsdata.fix.track))
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed / KNOTS_TO_KPH);
 	    else
 		(void)strcpy(phrase, ",V=?");
@@ -752,7 +753,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    (void)strcat(phrase, whoami->device->gpsdata.tag);
 		else
 		    (void)strcat(phrase, "-");
-		if (whoami->device->gpsdata.sentence_time != TIME_NOT_VALID)
+		if (!isnan(whoami->device->gpsdata.sentence_time))
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %f ",

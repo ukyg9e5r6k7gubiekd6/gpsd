@@ -18,8 +18,6 @@
 
 #include "gpsd.h"
 
-#define NO_MAG_VAR	-999	/* must be out of band for degrees */
-
 /*@ -branchstate */
 int gpsd_open_dgps(char *dgpsserver)
 {
@@ -76,11 +74,11 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     session->context = context;
     /*@ +temptrans @*/
     /*@ +mustfreeonly @*/
-    session->gpsdata.hdop = DOP_NOT_VALID;
-    session->gpsdata.vdop = DOP_NOT_VALID;
-    session->gpsdata.pdop = DOP_NOT_VALID;
-    session->gpsdata.tdop = DOP_NOT_VALID;
-    session->gpsdata.gdop = DOP_NOT_VALID;
+    session->gpsdata.hdop = NAN;
+    session->gpsdata.vdop = NAN;
+    session->gpsdata.pdop = NAN;
+    session->gpsdata.tdop = NAN;
+    session->gpsdata.gdop = NAN;
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
@@ -176,10 +174,10 @@ int gpsd_activate(struct gps_device_t *session)
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.track = TRACK_NOT_VALID;
+	session->gpsdata.fix.track = NAN;
 #ifdef BINARY_ENABLE
-	session->mag_var = NO_MAG_VAR;
-	session->gpsdata.separation = SEPARATION_NOT_VALID;
+	session->mag_var = NAN;
+	session->gpsdata.separation = NAN;
 #endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE
@@ -204,7 +202,7 @@ int gpsd_activate(struct gps_device_t *session)
  * and seconds have also been filled in, (c) that if the private member
  * mag_var is nonzero it is a magnetic variation in degrees that should be
  * passed on., and (d) if the private member separation does not have the
- * value SEPARATION_NOT_VALID, it is a valid WGS84 geoidal separation in 
+ * value NAN, it is a valid WGS84 geoidal separation in 
  * meters for the fix.
  */
 
@@ -219,18 +217,14 @@ static double degtodm(double a)
 static void gpsd_binary_fix_dump(struct gps_device_t *session, 
 				 char bufp[],size_t len)
 {
-    char hdop_str[NMEA_MAX] = "";
     struct tm tm;
     time_t intfixtime;
-
-    if (session->gpsdata.hdop != DOP_NOT_VALID)
-	(void)snprintf(hdop_str,sizeof(hdop_str),"%.2f",session->gpsdata.hdop);
 
     intfixtime = (time_t)session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
     if (session->gpsdata.fix.mode > 1) {
 	(void)snprintf(bufp, len,
-		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,%s,%.1f,%c,",
+		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,",
 		tm.tm_hour,
 		tm.tm_min,
 		tm.tm_sec,
@@ -239,16 +233,24 @@ static void gpsd_binary_fix_dump(struct gps_device_t *session,
 		degtodm(fabs(session->gpsdata.fix.longitude)),
 		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 		session->gpsdata.fix.mode,
-		session->gpsdata.satellites_used,
-		hdop_str,
-		session->gpsdata.fix.altitude, 'M');
-	if (session->gpsdata.separation == SEPARATION_NOT_VALID)
-	    (void)strcat(bufp, ",,");
+		session->gpsdata.satellites_used);
+	if (isnan(session->gpsdata.hdop))
+	    (void)strcat(bufp, ",");
+	else
+	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
+			   "%.2f,",session->gpsdata.hdop);
+	if (isnan(session->gpsdata.fix.altitude))
+	    (void)strcat(bufp, ",");
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.3f,M", session->gpsdata.separation);
-	if (session->mag_var == NO_MAG_VAR) 
-	    (void)strcat(bufp, ",,");
+			   "%.1f,M,", session->gpsdata.fix.altitude);
+	if (isnan(session->gpsdata.separation))
+	    (void)strcat(bufp, ",");
+	else
+	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
+			   "%.3f,M,", session->gpsdata.separation);
+	if (isnan(session->mag_var)) 
+	    (void)strcat(bufp, ",");
 	else {
 	    (void)snprintf(bufp+strlen(bufp),
 			   len-strlen(bufp),
@@ -355,12 +357,9 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       session->gpsdata.vdop);
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
-    if ((session->gpsdata.fix.eph != UNCERTAINTY_NOT_VALID 
-			|| session->gpsdata.fix.epv != UNCERTAINTY_NOT_VALID)
-	&& finite(session->gpsdata.fix.eph)
+    if (finite(session->gpsdata.fix.eph)
 	&& finite(session->gpsdata.fix.epv)
-	&& finite(session->gpsdata.epe)
-    ) {
+	&& finite(session->gpsdata.epe)) {
         // output PGRME
         // only if realistic
         (void)snprintf(bufp, len-strlen(bufp),
@@ -398,7 +397,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	session->fixcnt++;
 
     if ((session->gpsdata.set & TIME_SET)==0)
-    	session->gpsdata.sentence_time = TIME_NOT_VALID;
+    	session->gpsdata.sentence_time = NAN;
     /* 
      * When there is valid fix data, we have an accumulating policy
      * about position data.  This does the right thing in cases 
@@ -413,13 +412,13 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * valid (in RMC or a binary packet)
      */
     if ((session->gpsdata.set & MODE_SET)!=0 && session->gpsdata.fix.mode < MODE_3D)
-	session->gpsdata.fix.altitude = ALTITUDE_NOT_VALID;
+	session->gpsdata.fix.altitude = NAN;
     if ((session->gpsdata.set & SPEED_SET)==0)
-    	session->gpsdata.fix.speed = SPEED_NOT_VALID;
+    	session->gpsdata.fix.speed = NAN;
     if ((session->gpsdata.set & TRACK_SET)==0)
-	session->gpsdata.fix.track = TRACK_NOT_VALID;
+	session->gpsdata.fix.track = NAN;
     if ((session->gpsdata.set & CLIMB_SET)==0)
-    	session->gpsdata.fix.climb = SPEED_NOT_VALID;
+    	session->gpsdata.fix.climb = NAN;
     /*
      * Now we compute derived quantities.  This is where the tricky error-
      * modeling stuff goes. Presently we don't know how to derive 
@@ -455,21 +454,21 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * try to compute them now.
      * FIXME:  We need to compute track error here.
      */
-    session->gpsdata.fix.epd = UNCERTAINTY_NOT_VALID;
+    session->gpsdata.fix.epd = NAN;
     if (session->gpsdata.fix.mode >= MODE_2D) {
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.eps = UNCERTAINTY_NOT_VALID;
+	    session->gpsdata.fix.eps = NAN;
 	    if (session->lastfix.mode > MODE_NO_FIX 
 		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
 		double t = session->gpsdata.fix.time-session->lastfix.time;
 		double e = session->lastfix.eph + session->gpsdata.fix.eph;
 		session->gpsdata.fix.eps = e/t;
 	    }
-	    if (session->gpsdata.fix.eps != UNCERTAINTY_NOT_VALID)
+	    if (session->gpsdata.fix.eps != NAN)
 		session->gpsdata.set |= SPEEDERR_SET;
 	}
 	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.epc = UNCERTAINTY_NOT_VALID;
+	    session->gpsdata.fix.epc = NAN;
 	    if (session->lastfix.mode > MODE_3D 
 		&& session->gpsdata.fix.mode > MODE_3D) {
 		double t = session->gpsdata.fix.time-session->lastfix.time;
@@ -477,7 +476,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 		/* if vertical uncertainties are zero this will be too */
 		session->gpsdata.fix.epc = e/t;
 	    }
-	    if (session->gpsdata.fix.epc != UNCERTAINTY_NOT_VALID)
+	    if (!isnan(session->gpsdata.fix.epc))
 		session->gpsdata.set |= CLIMBERR_SET;
 	}
 

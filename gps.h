@@ -21,8 +21,7 @@ extern "C" {
  * This is what GPSes are meant to produce; all the other info is 
  * technical impedimenta.
  *
- * Values of 0 for ep[thvdsc] mean the corresponding error estimate
- * is not available.
+ * All double values use NAN to indicate data not available.
  *
  * Usually all the information in this structure was considered valid
  * by the GPS at the time of update.  This will be so if you are using
@@ -46,27 +45,20 @@ extern "C" {
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
-#define TIME_NOT_VALID	0.0
     int    mode;	/* Mode of fix */
 #define MODE_NOT_SEEN	0	/* mode update not seen yet */
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
     double ept;		/* Expected time uncertainty */
-#define UNCERTAINTY_NOT_VALID	-1.0
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
-#define LATITUDE_NOT_VALID	-721.0
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
-#define LONGITUDE_NOT_VALID	-721.0
     double eph;  	/* Horizontal position uncertainty, meters */
     double altitude;	/* Altitude in meters (valid if mode == 3) */
-#define ALTITUDE_NOT_VALID	-999.0
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
-#define TRACK_NOT_VALID	-721.0	/* No course data yet */
     double epd;		/* Track uncertainty, degrees */
     double speed;	/* Speed over ground, meters/sec */
-#define SPEED_NOT_VALID	-1.0	/* No speed data yet */
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
@@ -113,7 +105,6 @@ struct gps_data_t {
     struct gps_fix_t	fix;	/* PVT data */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
-#define SEPARATION_NOT_VALID	-99999.0	/* must be out of band */
 
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */
@@ -125,7 +116,6 @@ struct gps_data_t {
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
-#define DOP_NOT_VALID	0.0
 
     /* redundant with the estimate elments in the fix structure */
     double epe;  /* estimated spherical position error, 1 sigma (meters)  */
