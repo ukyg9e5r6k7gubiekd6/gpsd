@@ -278,29 +278,31 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			        alt, eph, epv, track, speed, climb,
 			        epd, eps, epc);
 			if (st == 14) {
-#define DEFAULT(val, def) (val[0] == '?') ? (def) : atof(val)
-			    nf.altitude = DEFAULT(alt, NAN);
-			    nf.eph = DEFAULT(eph, NAN);
-			    nf.epv = DEFAULT(epv, NAN);
-			    nf.track = DEFAULT(track, NAN);
-			    nf.speed = DEFAULT(speed, NAN);
-			    nf.climb = DEFAULT(climb, NAN);
-			    nf.epd = DEFAULT(epd, NAN);
-			    nf.eps = DEFAULT(eps, NAN);
-			    nf.epc = DEFAULT(epc, NAN);
+#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+			    /*@ +floatdouble @*/
+			    nf.altitude = DEFAULT(alt);
+			    nf.eph = DEFAULT(eph);
+			    nf.epv = DEFAULT(epv);
+			    nf.track = DEFAULT(track);
+			    nf.speed = DEFAULT(speed);
+			    nf.climb = DEFAULT(climb);
+			    nf.epd = DEFAULT(epd);
+			    nf.eps = DEFAULT(eps);
+			    nf.epc = DEFAULT(epc);
+			    /*@ -floatdouble @*/
 #undef DEFAULT
 			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
 			    if (nf.mode == MODE_3D)
 				gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
-			    if (!isnan(nf.eph))
+			    if (isnan(nf.eph)==0)
 				gpsdata->set |= HERR_SET;
-			    if (!isnan(nf.epv))
+			    if (isnan(nf.epv)==0)
 				gpsdata->set |= VERR_SET;
-			    if (!isnan(nf.track))
+			    if (isnan(nf.track)==0)
 				gpsdata->set |= TRACK_SET | SPEED_SET;
-			    if (!isnan(nf.eps))
+			    if (isnan(nf.eps)==0)
 				gpsdata->set |= SPEEDERR_SET;
-			    if (!isnan(nf.epc))
+			    if (isnan(nf.epc)==0)
 				gpsdata->set |= CLIMBERR_SET;
 
 			    gpsdata->fix = nf;

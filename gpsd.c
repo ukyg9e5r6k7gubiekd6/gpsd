@@ -487,7 +487,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    (void)strcpy(phrase, ",D=");
-	    if (assign_channel(whoami) && !isnan(whoami->device->gpsdata.fix.time))
+	    if (assign_channel(whoami) && isnan(whoami->device->gpsdata.fix.time)==0)
 		(void)unix_to_iso8601(whoami->device->gpsdata.fix.time, 
 				phrase+3, (int)(sizeof(phrase)-3));
 	    else
@@ -495,15 +495,15 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'E':
 	    if (assign_channel(whoami) && have_fix(whoami->device)) {
-		if (!isnan(whoami->device->gpsdata.fix.eph)
-		    || !isnan(whoami->device->gpsdata.fix.epv))
+		if (isnan(whoami->device->gpsdata.fix.eph)==0
+		    || isnan(whoami->device->gpsdata.fix.epv)==0)
 		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			    whoami->device->gpsdata.epe, 
 			    whoami->device->gpsdata.fix.eph, 
 			    whoami->device->gpsdata.fix.epv);
-		else if (!isnan(whoami->device->gpsdata.pdop)
-			 || !isnan(whoami->device->gpsdata.hdop)
-			 || !isnan(whoami->device->gpsdata.vdop))
+		else if (isnan(whoami->device->gpsdata.pdop)==0
+			 || isnan(whoami->device->gpsdata.hdop)==0
+			 || isnan(whoami->device->gpsdata.vdop)==0)
 		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			    whoami->device->gpsdata.pdop * UERE(whoami->device), 
 			    whoami->device->gpsdata.hdop * UERE(whoami->device), 
@@ -586,26 +586,26 @@ static int handle_request(int cfd, char *buf, int buflen)
 			whoami->device->gpsdata.tag[0]!='\0' ? whoami->device->gpsdata.tag : "-",
 			whoami->device->gpsdata.fix.time, whoami->device->gpsdata.fix.ept, 
 			whoami->device->gpsdata.fix.latitude, whoami->device->gpsdata.fix.longitude);
-		if (!isnan(whoami->device->gpsdata.fix.altitude))
+		if (isnan(whoami->device->gpsdata.fix.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %7.2f",
 				   whoami->device->gpsdata.fix.altitude);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (!isnan(whoami->device->gpsdata.fix.eph))
+		if (isnan(whoami->device->gpsdata.fix.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				  " %5.2f",  whoami->device->gpsdata.fix.eph);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (!isnan(whoami->device->gpsdata.fix.epv))
+		if (isnan(whoami->device->gpsdata.fix.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %5.2f",  whoami->device->gpsdata.fix.epv);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (!isnan(whoami->device->gpsdata.fix.track))
+		if (isnan(whoami->device->gpsdata.fix.track)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f %8.3f",
@@ -613,27 +613,27 @@ static int handle_request(int cfd, char *buf, int buflen)
 				   whoami->device->gpsdata.fix.speed);
 		else
 		    (void)strcat(phrase, "             ?            ?");
-		if (!isnan(whoami->device->gpsdata.fix.climb))
+		if (isnan(whoami->device->gpsdata.fix.climb)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %6.3f", 
 				   whoami->device->gpsdata.fix.climb);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (!isnan(whoami->device->gpsdata.fix.epd))
+		if (isnan(whoami->device->gpsdata.fix.epd)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f",
 				   whoami->device->gpsdata.fix.epd);
 		else
 		    (void)strcat(phrase, "             ?");
-		if (!isnan(whoami->device->gpsdata.fix.eps))
+		if (isnan(whoami->device->gpsdata.fix.eps)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
 		else
 		    (void)strcat(phrase, "        ?");
-		if (!isnan(whoami->device->gpsdata.fix.epc))
+		if (isnan(whoami->device->gpsdata.fix.epc)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
@@ -651,9 +651,9 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'Q':
 	    if (assign_channel(whoami) && 
-		(!isnan(whoami->device->gpsdata.pdop)
-		 || !isnan(whoami->device->gpsdata.hdop)
-		 || !isnan(whoami->device->gpsdata.vdop)))
+		(isnan(whoami->device->gpsdata.pdop)==0
+		 || isnan(whoami->device->gpsdata.hdop)==0
+		 || isnan(whoami->device->gpsdata.vdop)==0))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
 			whoami->device->gpsdata.satellites_used, 
 			whoami->device->gpsdata.pdop, 
@@ -701,7 +701,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && !isnan(whoami->device->gpsdata.fix.track))
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.track)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->device->gpsdata.fix.track);
 	    else
 		(void)strcpy(phrase, ",T=?");
@@ -713,7 +713,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && !isnan(whoami->device->gpsdata.fix.track))
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.track)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed / KNOTS_TO_KPH);
 	    else
 		(void)strcpy(phrase, ",V=?");
@@ -753,7 +753,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    (void)strcat(phrase, whoami->device->gpsdata.tag);
 		else
 		    (void)strcat(phrase, "-");
-		if (!isnan(whoami->device->gpsdata.sentence_time))
+		if (isnan(whoami->device->gpsdata.sentence_time)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %f ",

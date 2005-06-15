@@ -281,7 +281,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
-    if (!isnan(gpsdata->fix.time))
+    if (isnan(gpsdata->fix.time)==0)
 	(void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
     else
 	(void)strcpy(s, "n/a");
@@ -301,22 +301,22 @@ static void update_panel(struct gps_data_t *gpsdata,
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_4, s);
-    if (gpsdata->fix.mode >= MODE_2D && !isnan(gpsdata->fix.track))
+    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
 	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_5, s);
-    if (gpsdata->fix.mode >= MODE_2D && !isnan(gpsdata->fix.track))
+    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
 	(void)snprintf(s, sizeof(s), "%f degrees", gpsdata->fix.track);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_6, s);
-    if (!isnan(gpsdata->fix.eph))
+    if (isnan(gpsdata->fix.eph)==0)
 	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_7, s);
-    if (!isnan(gpsdata->fix.epv))
+    if (isnan(gpsdata->fix.epv)==0)
 	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
     else
 	(void)strcpy(s, "n/a");

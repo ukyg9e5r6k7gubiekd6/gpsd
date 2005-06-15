@@ -476,7 +476,7 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 		/* if vertical uncertainties are zero this will be too */
 		session->gpsdata.fix.epc = e/t;
 	    }
-	    if (!isnan(session->gpsdata.fix.epc))
+	    if (isnan(session->gpsdata.fix.epc)==0)
 		session->gpsdata.set |= CLIMBERR_SET;
 	}
 
