@@ -213,7 +213,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 #endif
 
     session->gpsdata.sentence_length = 55;
-    return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET;
+    return TIME_SET|LATLON_SET|ALTITUDE_SET|CLIMB_SET|SPEED_SET|TRACK_SET|STATUS_SET|MODE_SET|HERR_SET|VERR_SET|SPEEDERR_SET|CYCLE_START_SET;
 }
 
 static gps_mask_t handle1002(struct gps_device_t *session)

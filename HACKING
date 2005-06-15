@@ -415,6 +415,10 @@ publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
 this.
 
+The CYCLE_START_SET flag is special.  Set this when the driver returns
+the first timestamped message containing fix data in in an update cycle.  
+(This excludes satellite-picture messages and GPS status indications.)
+
 Your packet parser is also responsible for setting the tag field 
 in the gps_data_t structure.  This is the string that will be emitted
 as the first field of each $ record for profiling.  The packet getter

@@ -364,7 +364,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, pvt->leap_sec
 			, pvt->grmn_days);
 
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET;
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET | CYCLE_START_SET;
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
 	    gpsd_report(3, "Appl, SAT Data Sz: %d\n", pkt->mDataSize);

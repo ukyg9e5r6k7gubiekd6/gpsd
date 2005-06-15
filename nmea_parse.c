@@ -60,8 +60,8 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  * separate fields for day/month/year, with a 4-digit year.  This
  * means that for RMC we must supply a century and for GGA and GLL we
  * must supply a century, year, and day.  We get the missing data from
- * a previous RMC or ZDA; century in RMC is supplied by the host
- * machine's clock time if there has been no previous RMC.
+ * a previous RMC or ZDA; century in RMC is supplied by a constant if 
+ * there has been no previous RMC.
  *
  **************************************************************************/
 
@@ -117,7 +117,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_data_t *out)
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    gps_mask_t mask = ERROR_SET;
+    gps_mask_t mask = 0;
 
     if (strcmp(field[2], "V")==0) {
 	/* copes with Magellan EC-10X, see below */
@@ -133,9 +133,12 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_data_t *out)
 	if (count > 9) {
 	    merge_ddmmyy(field[9], out);
 	    merge_hhmmss(field[1], out);
-	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
+	    mask |= TIME_SET;
+	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+	    if (out->sentence_time != out->fix.time)
+		mask |= CYCLE_START_SET;
+	    out->sentence_time = out->fix.time;
 	}
-	mask = TIME_SET;
 	do_lat_lon(&field[3], out);
 	mask |= LATLON_SET;
 	out->fix.speed = atof(field[7]) * KNOTS_TO_MPS;
@@ -195,8 +198,11 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_data_t *out)
 	mask = 0;
 	merge_hhmmss(field[5], out);
 	if (out->nmea_date.tm_year != 0) {
-	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask = TIME_SET;
+	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+	    if (out->sentence_time != out->fix.time)
+		mask |= CYCLE_START_SET;
+	    out->sentence_time = out->fix.time;
 	}
 	do_lat_lon(&field[1], out);
 	mask |= LATLON_SET;
@@ -240,8 +246,8 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 
 	merge_hhmmss(field[1], out);
 	if (out->nmea_date.tm_year != 0) {
-	    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
 	    mask |= TIME_SET;
+	    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
 	}
 	do_lat_lon(&field[2], out);
 	mask |= LATLON_SET;
@@ -420,6 +426,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_data_t *o
 static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_data_t *out)
 /* Time & Date */
 {
+    gps_mask_t mask = TIME_SET;
     /*
       $GPZDA,160012.71,11,03,2004,-1,00*7D
       1) UTC time (hours, minutes, seconds, may have fractional subsecond)
@@ -434,8 +441,11 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_data_t *o
     out->nmea_date.tm_year = atoi(field[4]) - 1900;
     out->nmea_date.tm_mon = atoi(field[3]);
     out->nmea_date.tm_mday = atoi(field[2]);
-    out->fix.time = out->sentence_time = (double)mkgmtime(&out->nmea_date) + out->subseconds;
-    return TIME_SET;
+    out->fix.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
+    if (out->sentence_time != out->fix.time)
+	mask |= CYCLE_START_SET;
+    out->sentence_time = out->fix.time;
+    return mask;
 }
 
 #ifdef __UNUSED__

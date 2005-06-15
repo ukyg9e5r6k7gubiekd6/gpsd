@@ -92,6 +92,7 @@ struct gps_data_t {
 #define DEVICELIST_SET	0x00200000u
 #define DEVICEID_SET	0x00400000u
 #define ERROR_SET	0x00800000u
+#define CYCLE_START_SET	0x01000000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
