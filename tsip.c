@@ -211,13 +211,14 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x46:		/* Health of Receiver */
 	if (len != 2)
 	    break;
-	gpsd_report(4, "Receiver health %02x %02x\n",getub(buf,0),getub(buf,1));
+	u1 = getub(buf,0);			/* Status code */
+	u2 = getub(buf,1);			/* Antenna/Battery */
+	gpsd_report(4, "Receiver health %02x %02x\n",u1,u2);
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
 	count = (int)getub(buf,0);		/* satellite count */
 	if (len != (5*count + 1))
 	    break;
-	session->gpsdata.satellites = count;
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++) {
 	    u1 = getub(buf,5*i + 1);
@@ -232,6 +233,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 			   " %d=%.1f",(int)u1,f1);
 	}
 	gpsd_report(4, "Signal Levels (%d):%s\n",count,buf2);
+	mask |= SATELLITE_SET;
 	break;
     case 0x48:		/* GPS System Message */
 	buf[len] = '\0';
@@ -245,18 +247,20 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.newdata.altitude  = getf(buf,8);
 	f1 = getf(buf,12);			/* clock bias */
 	f2 = getf(buf,16);			/* time-of-fix */
-	if (session->gps_week)
+	if (session->gps_week) {
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)session->gps_week, f2) - session->context->leap_seconds;
+	    mask |= TIME_SET;
+	}
 	gpsd_report(4, "GPS LLA %f %f %f\n",session->gpsdata.newdata.latitude,session->gpsdata.newdata.longitude,session->gpsdata.newdata.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET;
+	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
 	if (len != 3)
 	    break;
-	u1 = getub(buf,0);
-	u2 = getub(buf,1);
-	u3 = getub(buf,2);
+	u1 = getub(buf,0);			/* Machine ID */
+	u2 = getub(buf,1);			/* Status 1 */
+	u3 = getub(buf,2);			/* Status 2 */
 	gpsd_report(4, "Machine ID %02x %02x %02x\n",u1,u2,u3);
 #if USE_SUPERPACKET
 	if ((u3 & 0x01) != (u_int8_t)0 && !session->superpkt) {
@@ -275,13 +279,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x55:		/* IO Options */
 	if (len != 4)
 	    break;
-	u1 = getub(buf,0);
-	u2 = getub(buf,1);
-	u3 = getub(buf,2);
-	u4 = getub(buf,3);
+	u1 = getub(buf,0);			/* Position */
+	u2 = getub(buf,1);			/* Velocity */
+	u3 = getub(buf,2);			/* Timing */
+	u4 = getub(buf,3);			/* Aux */
 	gpsd_report(4, "IO Options %02x %02x %02x %02x\n",u1,u2,u3,u4);
 #if USE_SUPERPACKET
-	if ((u1 & 0x20) != (u_int8_t)0) {
+	if ((u1 & 0x20) != (u_int8_t)0) {	/* Output Super Packets? */
 	    /* No LFwEI Super Packet */
 	    putbyte(buf,0,0x20);
 	    putbyte(buf,1,0x00);		/* disabled */
@@ -314,13 +318,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x57:		/* Information About Last Computed Fix */
 	if (len != 8)
 	    break;
+	u1 = getub(buf,0);			/* Source of information */
+	u2 = getub(buf,1);			/* Mfg. diagnostic */
 	f1 = getf(buf,2);			/* gps_time */
 	s1 = getsw(buf,6);			/* gps_week */
 	/*@ +charint @*/
 	if (getub(buf,0) == 0x01)		/* good current fix? */
 	    session->gps_week = s1;
 	/*@ -charint @*/
-	gpsd_report(4, "Fix info %02x %02x %d %f\n",getub(buf,0),getub(buf,1),s1,f1);
+	gpsd_report(4, "Fix info %02x %02x %d %f\n",u1,u2,s1,f1);
 	break;
     case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
 	break;
@@ -361,7 +367,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	}
 	break;
     case 0x6d:		/* All-In-View Satellite Selection */
-	u1 = getub(buf,0);
+	u1 = getub(buf,0);			/* nsvs/dimension */
 	count = (int)((u1 >> 4) & 0x0f);
 	if (len != (17 + count))
 	    break;
@@ -403,7 +409,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.hdop, session->gpsdata.vdop,
 		session->gpsdata.tdop, session->gpsdata.gdop,
 		session->gpsdata.satellites_used,buf2);
-        mask |= HDOP_SET | VDOP_SET | PDOP_SET | MODE_SET;
+        mask |= HDOP_SET | VDOP_SET | PDOP_SET | STATUS_SET | MODE_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
 	break;
@@ -422,11 +428,14 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x82:		/* Differential Position Fix Mode */
 	if (len != 1)
 	    break;
+	u1 = getub(buf,0);			/* fix mode */
 	/*@ +charint @*/
-	if (session->gpsdata.status == STATUS_FIX && (getub(buf,0) & 0x01)!=0)
+	if (session->gpsdata.status == STATUS_FIX && (u1 & 0x01)!=0) {
 	    session->gpsdata.status = STATUS_DGPS_FIX;
+	    mask |= STATUS_SET;
+	}
 	/*@ -charint @*/
-	gpsd_report(4, "DGPS mode %d\n",getub(buf,0));
+	gpsd_report(4, "DGPS mode %d\n",u1);
 	break;
     case 0x83:		/* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36)
@@ -446,11 +455,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.newdata.altitude  = getd(buf,16);
 	d1 = getd(buf,24);			/* clock bias */
 	f1 = getf(buf,32);			/* time-of-fix */
-	if (session->gps_week)
+	if (session->gps_week) {
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)session->gps_week, f1) - session->context->leap_seconds;
+	    mask |= TIME_SET;
+	}
 	gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.newdata.latitude,session->gpsdata.newdata.longitude,session->gpsdata.newdata.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET;
+	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
 	/*@ +charint @*/
@@ -526,7 +537,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gps_week = s4;
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | MODE_SET; 
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
 	    break;
 	case 0x23:	/* Compact Super Packet */
 	    if (len != 29)
@@ -577,7 +588,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.newdata.track += 360.0;
-	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | MODE_SET; 
+	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
 	    break;
 	default:
 	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",u1);
