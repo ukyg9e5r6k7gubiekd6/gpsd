@@ -206,12 +206,13 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
 	    /* fix quality data */
 	    session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
+	    //gpsd_report(4, "HDOP: %lf\n", session->gpsdata.hdop);
 	    session->gpsdata.pdop = session->gpsdata.vdop = NAN;
 	    if (session->gpsdata.satellites > 0)
 		dop(session->gpsdata.satellites_used, &session->gpsdata);
-	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET;
+	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | CYCLE_START_SET;
 	}
-	return mask | CYCLE_START_SET;
+	return mask;
 
     case 0x04:		/* Measured tracker data out */
 	gpsd_zero_satellites(&session->gpsdata);
@@ -536,11 +537,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    /* skip 2 bytes of magnetic variation */
 	    session->gpsdata.newdata.climb = getsw(buf, 42)*1e-2;
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
-	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
+	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET; 
 	    session->gpsdata.sentence_length = 91;
 	    strcpy(session->gpsdata.tag, "GND");
 	}
-	return mask | CYCLE_START_SET;
+	return mask;
 
     case 0x32:		/* SBAS corrections */
 	return 0;
