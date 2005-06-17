@@ -80,18 +80,20 @@ struct gps_data_t {
 #define HDOP_SET  	0x00000400u
 #define VDOP_SET  	0x00000800u
 #define PDOP_SET  	0x00001000u
-#define HERR_SET	0x00002000u
-#define VERR_SET	0x00004000u
-#define PERR_SET	0x00008000u
-#define SATELLITE_SET	0x00010000u
-#define SPEEDERR_SET	0x00020000u
-#define TRACKERR_SET	0x00040000u
-#define CLIMBERR_SET	0x00080000u
-#define DEVICE_SET	0x00100000u
-#define DEVICELIST_SET	0x00200000u
-#define DEVICEID_SET	0x00400000u
-#define ERROR_SET	0x00800000u
-#define CYCLE_START_SET	0x01000000u
+#define TDOP_SET	0x00002000u
+#define GDOP_SET	0x00004000u
+#define HERR_SET	0x00008000u
+#define VERR_SET	0x00010000u
+#define PERR_SET	0x00020000u
+#define SATELLITE_SET	0x00040000u
+#define SPEEDERR_SET	0x00080000u
+#define TRACKERR_SET	0x00100000u
+#define CLIMBERR_SET	0x00200000u
+#define DEVICE_SET	0x00400000u
+#define DEVICELIST_SET	0x00800000u
+#define DEVICEID_SET	0x01000000u
+#define ERROR_SET	0x02000000u
+#define CYCLE_START_SET	0x04000000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences

@@ -359,8 +359,8 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
     if (finite(session->gpsdata.fix.eph)
-	&& finite(session->gpsdata.fix.epv)
-	&& finite(session->gpsdata.epe)) {
+	|| finite(session->gpsdata.fix.epv)
+	|| finite(session->gpsdata.epe)) {
         // output PGRME
         // only if realistic
         (void)snprintf(bufp, len-strlen(bufp),
@@ -389,12 +389,14 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     gps_mask_t received;
 
     session->packet_full = 0;
-    session->gpsdata.sentence_time = 0;
+    session->gpsdata.sentence_time = NAN;
     session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
 
     received = session->device_type->parse_packet(session);
 
+    if ((received & CYCLE_START_SET)!=0)
+	gps_clear_fix(&session->gpsdata.fix);
     gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
     session->gpsdata.set = ONLINE_SET | received;
 
@@ -403,30 +405,6 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     if (session->gpsdata.status > STATUS_NO_FIX) 
 	session->fixcnt++;
 
-
-    if ((session->gpsdata.set & TIME_SET)==0)
-    	session->gpsdata.sentence_time = NAN;
-    /* 
-     * When there is valid fix data, we have an accumulating policy
-     * about position data.  This does the right thing in cases 
-     * like SiRF and Zodiac where we get all the fix info in one
-     * packet per turn, and papers over the commonest crack -- the
-     * fact that NMEA devices ship altitude separately in GGA from most of
-     * the rest of the fix information we want in RMC.  
-     *
-     * Thus, we never clear 2D or 3D position data here unless the
-     * mode has gone from 3D to 2D (or lower).  But we do want to clear
-     * velocity data, because that's always shipped atomically if it's
-     * valid (in RMC or a binary packet)
-     */
-    if ((session->gpsdata.set & MODE_SET)!=0 && session->gpsdata.fix.mode < MODE_3D)
-	session->gpsdata.fix.altitude = NAN;
-    if ((session->gpsdata.set & SPEED_SET)==0)
-    	session->gpsdata.fix.speed = NAN;
-    if ((session->gpsdata.set & TRACK_SET)==0)
-	session->gpsdata.fix.track = NAN;
-    if ((session->gpsdata.set & CLIMB_SET)==0)
-    	session->gpsdata.fix.climb = NAN;
     /*
      * Now we compute derived quantities.  This is where the tricky error-
      * modeling stuff goes. Presently we don't know how to derive 

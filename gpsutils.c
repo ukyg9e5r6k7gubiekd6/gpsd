@@ -392,7 +392,7 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 }  
 /*@ +fixedformalarray +mustdefine @*/
 
-void dop(int channels, struct gps_data_t *gpsdata)
+gps_mask_t dop(int channels, struct gps_data_t *gpsdata)
 {
     double prod[4][4];
     double inv[4][4];
@@ -445,20 +445,20 @@ void dop(int channels, struct gps_data_t *gpsdata)
     }
 #endif /* __UNUSED__ */
 
-#ifdef __UNUSED__
     if (invert(prod, inv)) {
+#ifdef __UNUSED__
 	gpsd_report(0, "inverse:\n");
 	for (k = 0; k < 4; k++) {
 	    gpsd_report(0, "%f %f %f %f\n",
 			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
 	}
-	gpsd_report(0, "HDOP: reported = %f, computed = %f\n",
+	gpsd_report(1, "HDOP: reported = %f, computed = %f\n",
 		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
-    } else
-	gpsd_report(0, "Matrix is singular.\n");
-#else
-    (void)invert(prod, inv);
 #endif /* __UNUSED__ */
+    } else {
+	gpsd_report(1, "Matrix is singular.\n");
+	return 0;
+    }
 
     /*@ -usedef @*/
     //gpsdata->hdop = sqrt(inv[0][0] + inv[1][1]);
@@ -467,4 +467,6 @@ void dop(int channels, struct gps_data_t *gpsdata)
     gpsdata->tdop = sqrt(inv[3][3]);
     gpsdata->gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
     /*@ +usedef @*/
+
+    return VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET;
 }

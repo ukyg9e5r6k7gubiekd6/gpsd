@@ -209,7 +209,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    //gpsd_report(4, "HDOP: %lf\n", session->gpsdata.hdop);
 	    session->gpsdata.pdop = session->gpsdata.vdop = NAN;
 	    if (session->gpsdata.satellites > 0)
-		dop(session->gpsdata.satellites_used, &session->gpsdata);
+		mask |= dop(session->gpsdata.satellites_used, &session->gpsdata);
 	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | CYCLE_START_SET;
 	}
 	return mask;
