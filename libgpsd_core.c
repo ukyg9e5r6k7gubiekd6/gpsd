@@ -395,8 +395,10 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 
     received = session->device_type->parse_packet(session);
 
-    if ((received & CYCLE_START_SET)!=0)
+    if ((received & CYCLE_START_SET)!=0) {
 	gps_clear_fix(&session->gpsdata.fix);
+	session->gpsdata.set &=~ FIX_SET;
+    }
     gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
     session->gpsdata.set = ONLINE_SET | received;
 

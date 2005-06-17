@@ -94,6 +94,7 @@ struct gps_data_t {
 #define DEVICEID_SET	0x01000000u
 #define ERROR_SET	0x02000000u
 #define CYCLE_START_SET	0x04000000u
+#define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
