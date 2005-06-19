@@ -456,7 +456,7 @@ gps_mask_t dop(int channels, struct gps_data_t *gpsdata)
 		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
 #endif /* __UNUSED__ */
     } else {
-	gpsd_report(1, "Matrix is singular.\n");
+	gpsd_report(1, "LOS matrix is singular, can't calculate DOPs.\n");
 	return 0;
     }
 
