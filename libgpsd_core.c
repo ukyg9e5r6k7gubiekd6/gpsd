@@ -111,7 +111,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 static void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    int cycle,duration, state = 0;
+    int cycle,duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
 
@@ -124,8 +124,18 @@ static void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
 
         state = (int)((state & TIOCM_CAR) != 0);
-	gpsd_report(5, "carrier-detect on %s changed to %d\n", 
-		    session->gpsdata.gps_device, state);
+
+	if (state == laststate) {
+	    if (++unchanged == 10) {
+		gpsd_report(1, "TIOCMIWAIT returns unchanged state, ppsmonitor terminates\n");
+		break;
+	    }
+	} else {
+	    gpsd_report(5, "carrier-detect on %s changed to %d\n", 
+			session->gpsdata.gps_device, state);
+	    laststate = state;
+	    unchanged = 0;
+	}
 
 	/*@ +boolint @*/
 	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
