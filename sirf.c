@@ -203,13 +203,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		    (void)ntpshm_put(session, session->gpsdata.newdata.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
-
 	    /* fix quality data */
 	    session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	    //gpsd_report(4, "HDOP: %lf\n", session->gpsdata.hdop);
-	    session->gpsdata.pdop = session->gpsdata.vdop = NAN;
-	    if (session->gpsdata.satellites > 0)
-		mask |= dop(&session->gpsdata);
 	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | CYCLE_START_SET;
 	}
 	return mask;

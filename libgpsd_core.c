@@ -396,7 +396,7 @@ static int is_input_waiting(int fd)
 
 static gps_mask_t handle_packet(struct gps_device_t *session)
 {
-    gps_mask_t received;
+    gps_mask_t received, dopmask = 0;
 
     session->packet_full = 0;
     session->gpsdata.sentence_time = NAN;
@@ -411,19 +411,15 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 	gps_clear_fix(&session->gpsdata.fix);
 	session->gpsdata.set &=~ FIX_SET;
     }
-#ifdef __UNUSED__
     /*
      * Compute fix-quality data from the satellite positions.
      * This may be overridden by DOPs reported from the packet we just got.
      */
-    if ((session->gpsdata.set & SATELLITE_SET)!=0) {
-	if (session->gpsdata.satellites > 0)
-	    dop_compute(session->gpsdata.satellites_used,&session->gpsdata);
-    }
-#endif /* __UNUSED__ */
+    if ((session->gpsdata.set&SATELLITE_SET)!=0&&session->gpsdata.satellites>0)
+	dopmask = dop(&session->gpsdata);
     /* Merge in the data from the current packet. */
     gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
-    session->gpsdata.set = ONLINE_SET | received;
+    session->gpsdata.set = ONLINE_SET | dopmask | received;
 
     /* count all packets and good fixes */
     session->counter++;
