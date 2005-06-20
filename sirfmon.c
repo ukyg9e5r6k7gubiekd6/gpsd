@@ -208,17 +208,17 @@ static void decode_ecef(double x, double y, double z,
     (void)wmove(mid2win, 1,40);
     (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
 				   (double)(RAD2DEG*lambda));
-    (void)wmove(mid2win, 1,63);
+    (void)wmove(mid2win, 1,61);
     (void)wprintw(mid2win, "%8d",(int)h);
 
     (void)wmove(mid2win, 2,40);
     (void)wprintw(mid2win, "%9.1f %9.1f",vnorth,veast);
-    (void)wmove(mid2win, 2,63);
+    (void)wmove(mid2win, 2,61);
     (void)wprintw(mid2win, "%8.1f",vup);
 
     (void)wmove(mid2win, 3,54);
     (void)wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
-    (void)wmove(mid2win, 3,63);
+    (void)wmove(mid2win, 3,61);
     (void)wprintw(mid2win, "%8.1f",speed);
 }
 
@@ -229,9 +229,9 @@ static void decode_sirf(unsigned char buf[], int len)
     switch (buf[0])
     {
     case 0x02:		/* Measured Navigation Data */
-	(void)wmove(mid2win, 1,6);
+	(void)wmove(mid2win, 1,6);	/* ECEF position */
 	(void)wprintw(mid2win, "%8d %8d %8d",getsl(buf, 1),getsl(buf, 5),getsl(buf, 9));
-	(void)wmove(mid2win, 2,6);
+	(void)wmove(mid2win, 2,6);	/* ECEF velocity */
 	(void)wprintw(mid2win, "%8.1f %8.1f %8.1f",
 		(double)getsw(buf, 13)/8,(double)getsw(buf, 15)/8,(double)getsw(buf, 17)/8);
 	decode_ecef((double)getsl(buf, 1),(double)getsl(buf, 5),(double)getsl(buf, 9),
@@ -242,7 +242,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	(void)wprintw(mid2win, "%4.1f",(double)getub(buf, 20)/5);	/* HDOP */
 	(void)wmove(mid2win, 4,58);
 	(void)wprintw(mid2win, "%02x",getub(buf, 19));		/* Mode 1 */
-	(void)wmove(mid2win, 4,72);
+	(void)wmove(mid2win, 4,70);
 	(void)wprintw(mid2win, "%02x",getub(buf, 21));		/* Mode 2 */
 	(void)wmove(mid2win, 5,7);
 	nfix = (int)getub(buf, 28);
@@ -1012,16 +1012,17 @@ int main (int argc, char **argv)
     display(mid2win, 0, 30, " Z "); 
     display(mid2win, 0, 43, " North "); 
     display(mid2win, 0, 54, " East "); 
-    display(mid2win, 0, 67, " Alt "); 
+    display(mid2win, 0, 65, " Alt "); 
 
     (void)wmove(mid2win, 1,1);
-    (void)wprintw(mid2win, "Pos:                            m                          deg         m");
+    (void)wprintw(mid2win, "Pos:                            m                                    m");
     (void)wmove(mid2win, 2,1);
-    (void)wprintw(mid2win, "Vel:                            m/s                                    m/s");
+    (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
     (void)wmove(mid2win, 3,1);
-    (void)wprintw(mid2win, "Time:                  UTC:                Heading:        deg         m/s");
+    (void)wprintw(mid2win, "Time:                  UTC:                Heading:                  speed m/s");
+    (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
     (void)wmove(mid2win, 4,1);
-    (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:          M2:    ");
+    (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
     (void)wmove(mid2win, 5,1);
     (void)wprintw(mid2win, "Fix:");
     display(mid2win, 6, 24, " Packet type 2 (0x02) ");
@@ -1118,7 +1119,7 @@ int main (int argc, char **argv)
 
     (void)wmove(debugwin,0, 0);
 
-    /*@i@*/FD_ZERO(&select_set);
+    FD_ZERO(&select_set);
 
     /* probe for version */
     putbyte(buf, 0, 0x84);
@@ -1143,13 +1144,13 @@ int main (int argc, char **argv)
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
 
-	/*@i@*/FD_SET(0,&select_set);
-	/*@i@*/FD_SET(devicefd,&select_set);
+	FD_SET(0,&select_set);
+	FD_SET(devicefd,&select_set);
 
-	if (select(/*@i@*/FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
+	if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) < 0)
 	    break;
 
-	if (/*@i@*/FD_ISSET(0,&select_set)) {
+	if (FD_ISSET(0,&select_set)) {
 	    (void)wmove(cmdwin, 0,5);
 	    (void)wrefresh(cmdwin);
 	    (void)echo();
