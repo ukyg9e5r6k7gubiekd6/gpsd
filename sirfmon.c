@@ -208,6 +208,8 @@ static void decode_ecef(double x, double y, double z,
     (void)wmove(mid2win, 1,40);
     (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
 				   (double)(RAD2DEG*lambda));
+    (void)mvwaddch(mid2win, 1, 49, ACS_DEGREE);
+    (void)mvwaddch(mid2win, 1, 59, ACS_DEGREE);
     (void)wmove(mid2win, 1,61);
     (void)wprintw(mid2win, "%8d",(int)h);
 
@@ -218,6 +220,7 @@ static void decode_ecef(double x, double y, double z,
 
     (void)wmove(mid2win, 3,54);
     (void)wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
+    (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
     (void)wmove(mid2win, 3,61);
     (void)wprintw(mid2win, "%8.1f",speed);
 }
@@ -1020,7 +1023,6 @@ int main (int argc, char **argv)
     (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
     (void)wmove(mid2win, 3,1);
     (void)wprintw(mid2win, "Time:                  UTC:                Heading:                  speed m/s");
-    (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
     (void)wmove(mid2win, 4,1);
     (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
     (void)wmove(mid2win, 5,1);
