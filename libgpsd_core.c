@@ -415,7 +415,9 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
      * Compute fix-quality data from the satellite positions.
      * This may be overridden by DOPs reported from the packet we just got.
      */
-    if ((session->gpsdata.set&SATELLITE_SET)!=0&&session->gpsdata.satellites>0)
+    if (session->gpsdata.fix.mode > MODE_NO_FIX 
+		&& (session->gpsdata.set & SATELLITE_SET) != 0
+		&& session->gpsdata.satellites > 0)
 	dopmask = dop(&session->gpsdata);
     /* Merge in the data from the current packet. */
     gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
