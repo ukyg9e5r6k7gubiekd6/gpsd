@@ -392,7 +392,7 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 }  
 /*@ +fixedformalarray +mustdefine @*/
 
-void dop_compute(int channels, struct gps_data_t *gpsdata)
+gps_mask_t dop(int channels, struct gps_data_t *gpsdata)
 {
     double prod[4][4];
     double inv[4][4];

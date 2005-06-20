@@ -190,7 +190,7 @@ extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 
 			     double, double, double);
-extern void dop_compute(int, struct gps_data_t *);
+extern gps_mask_t dop(int, struct gps_data_t *);
 
 /* External interface */
 extern int gpsd_open_dgps(char *);
