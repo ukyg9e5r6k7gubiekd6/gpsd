@@ -356,10 +356,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	i = (int)(u2 >> 3);			/* channel number */
 	gpsd_report(4, "Satellite Tracking Status %d: %2d 0x%02x %d %d %.1f %f %.1f %.1f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
 	if (i < MAXCHANNELS) {
-	    session->gpsdata.PRN[i] = (int)u1;
-	    session->gpsdata.ss[i] = (int)roundf(f1);
-	    session->gpsdata.elevation[i] = (int)round(d1);
-	    session->gpsdata.azimuth[i] = (int)round(d2);
+	    if (d1 >= 0.0) {
+		session->gpsdata.PRN[i] = (int)u1;
+		session->gpsdata.ss[i] = (int)roundf(f1);
+		session->gpsdata.elevation[i] = (int)round(d1);
+		session->gpsdata.azimuth[i] = (int)round(d2);
+	    } else {
+		session->gpsdata.PRN[i] = session->gpsdata.ss[i] =
+		session->gpsdata.elevation[i] = session->gpsdata.azimuth[i] = 0;
+	    }
 	    if (++i == session->gpsdata.satellites)
 		mask |= SATELLITE_SET;		/* last of the series */
 	    if (i > session->gpsdata.satellites)
@@ -409,7 +414,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.hdop, session->gpsdata.vdop,
 		session->gpsdata.tdop, session->gpsdata.gdop,
 		session->gpsdata.satellites_used,buf2);
-        mask |= HDOP_SET | VDOP_SET | PDOP_SET | STATUS_SET | MODE_SET;
+        mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
 	break;
