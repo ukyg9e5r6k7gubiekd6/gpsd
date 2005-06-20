@@ -186,7 +186,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    else if (session->gpsdata.status != 0)
 		session->gpsdata.newdata.mode = MODE_2D;
 	    if (session->gpsdata.newdata.mode == MODE_3D)
-		mask |= ALTITUDE_SET;
+		mask |= ALTITUDE_SET | CLIMB_SET;
 	    gpsd_report(4, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
 			navtype,session->gpsdata.status,session->gpsdata.newdata.mode);
 	    /* byte 20 is HDOP, see below */
