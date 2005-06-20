@@ -403,12 +403,25 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
     session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
 
+    /* Get data from current packet into the newdata structure */
     received = session->device_type->parse_packet(session);
 
+    /* Clear fix data at start of cycle */
     if ((received & CYCLE_START_SET)!=0) {
 	gps_clear_fix(&session->gpsdata.fix);
 	session->gpsdata.set &=~ FIX_SET;
     }
+#ifdef __UNUSED__
+    /*
+     * Compute fix-quality data from the satellite positions.
+     * This may be overridden by DOPs reported from the packet we just got.
+     */
+    if ((session->gpsdata.set & SATELLITE_SET)!=0) {
+	if (session->gpsdata.satellites > 0)
+	    dop_compute(session->gpsdata.satellites_used,&session->gpsdata);
+    }
+#endif /* __UNUSED__ */
+    /* Merge in the data from the current packet. */
     gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
     session->gpsdata.set = ONLINE_SET | received;
 
