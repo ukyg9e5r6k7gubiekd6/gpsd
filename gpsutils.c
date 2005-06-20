@@ -392,7 +392,7 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 }  
 /*@ +fixedformalarray +mustdefine @*/
 
-gps_mask_t dop(int channels, struct gps_data_t *gpsdata)
+gps_mask_t dop(struct gps_data_t *gpsdata)
 {
     double prod[4][4];
     double inv[4][4];
@@ -408,7 +408,7 @@ gps_mask_t dop(int channels, struct gps_data_t *gpsdata)
     }
 #endif /* __UNUSED__ */
 
-    for (n = k = 0; k < channels; k++) {
+    for (n = k = 0; k < gpsdata->satellites_used; k++) {
 	if (gpsdata->used[k] != 0)
 	    continue;
 	satpos[n][0] = sin(gpsdata->azimuth[k]*DEG_2_RAD)
