@@ -68,6 +68,12 @@ for (switch, val) in options:
 logfile = arguments[0]
 
 try:
+    logfp = open(logfile, "r")
+except IOError, OSError:
+    sys.stderr.write("gsfake: no such file, or file unreadable\n")
+    raise SystemExit, 1
+
+try:
     (master_fd, slave_fd) = pty.openpty()
 except:
     sys.stderr.write("gpsfake: can't open pty.\n")
@@ -97,7 +103,6 @@ class PacketError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
-
 def packet_get(fp):
     "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
     first = fp.read(1)
@@ -123,7 +128,6 @@ def packet_get(fp):
         raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
 try:
-    logfp = open(logfile, "r")
     sentences = []
     # Skip the comment header
     while True:
