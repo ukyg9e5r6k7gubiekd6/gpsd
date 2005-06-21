@@ -312,15 +312,15 @@ class gps(gpsdata):
 		    self.fix.mode = MODE_NO_FIX
 		else:
 		    self.timings.sentence_tag = fields[0]
-		    self.fix.time = float(fields[1])
-		    self.fix.ept = float(fields[2])
-		    self.fix.latitude = float(fields[3])
-		    self.fix.longitude = float(fields[4])
 		    def default(i):
 			if fields[i] == '?':
 			    return NaN
 			else:
 			    return float(fields[i])
+		    self.fix.time = default(1)
+		    self.fix.ept = default(2)
+		    self.fix.latitude = default(3)
+		    self.fix.longitude = default(4)
 		    self.fix.altitude = default(5)
 		    if not isnan(self.fix.altitude):
 			self.fix.mode = MODE_2D

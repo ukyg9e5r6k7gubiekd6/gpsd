@@ -74,6 +74,7 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
     session->context = context;
     /*@ +temptrans @*/
     /*@ +mustfreeonly @*/
+    gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.hdop = NAN;
     session->gpsdata.vdop = NAN;
     session->gpsdata.pdop = NAN;

@@ -321,7 +321,7 @@ static void raw_hook(struct gps_data_t *ud,
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
 	if (subscribers[cfd].raw == level && 
-	    subscribers[cfd].device &&
+	    subscribers[cfd].device!=NULL &&
 	    strcmp(ud->gps_device, subscribers[cfd].device->gpsdata.gps_device)==0)
 	    (void)throttled_write(cfd, sentence, (ssize_t)len);
     }
@@ -584,10 +584,36 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    if (!assign_channel(whoami) || !have_fix(whoami->device))
 		(void)strcpy(phrase, ",O=?");
 	    else {
-		(void)snprintf(phrase, sizeof(phrase), ",O=%s %.2f %.3f %.6f %.6f",
-			whoami->device->gpsdata.tag[0]!='\0' ? whoami->device->gpsdata.tag : "-",
-			whoami->device->gpsdata.fix.time, whoami->device->gpsdata.fix.ept, 
-			whoami->device->gpsdata.fix.latitude, whoami->device->gpsdata.fix.longitude);
+		(void)snprintf(phrase, sizeof(phrase), ",O=%s",
+			       whoami->device->gpsdata.tag[0]!='\0' ? whoami->device->gpsdata.tag : "-");
+		if (isnan(whoami->device->gpsdata.fix.time)==0)
+		    (void)snprintf(phrase+strlen(phrase),
+				   sizeof(phrase)-strlen(phrase),
+				   " %.2f",
+				   whoami->device->gpsdata.fix.time);
+		else
+		    (void)strcat(phrase, "          ?");
+		if (isnan(whoami->device->gpsdata.fix.ept)==0)
+		    (void)snprintf(phrase+strlen(phrase),
+				   sizeof(phrase)-strlen(phrase),
+				   " %.3f",
+				   whoami->device->gpsdata.fix.ept);
+		else
+		    (void)strcat(phrase, "          ?");
+		if (isnan(whoami->device->gpsdata.fix.latitude)==0)
+		    (void)snprintf(phrase+strlen(phrase),
+				   sizeof(phrase)-strlen(phrase),
+				   " %.6f",
+				   whoami->device->gpsdata.fix.latitude);
+		else
+		    (void)strcat(phrase, "          ?");
+		if (isnan(whoami->device->gpsdata.fix.longitude)==0)
+		    (void)snprintf(phrase+strlen(phrase),
+				   sizeof(phrase)-strlen(phrase),
+				   " %.6f",
+				   whoami->device->gpsdata.fix.longitude);
+		else
+		    (void)strcat(phrase, "          ?");
 		if (isnan(whoami->device->gpsdata.fix.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
