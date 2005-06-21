@@ -220,15 +220,20 @@ if child:
         os.kill(child, signal.SIGTERM)
         sys.exit(1)
 else:
-    # Child side
-    time.sleep(1)	# Time for pidfile to get written.
+    # Child side -- wait for daemon to make pidfile so we know it's running
+    while True:
+        try:
+            fp = open(pidfile)
+        except IOError:
+            time.sleep(1)
+            continue
+        pid = int(fp.read())
+        fp.close()
+        os.remove(pidfile)
+        break
     if not pipe or verbose:
         sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
 
-    fp = open(pidfile)
-    pid = int(fp.read())
-    fp.close()
-    os.remove(pidfile)
     try:
         if pipe:
             baton = Baton("Processing %s" % digest.logfile, "done")
