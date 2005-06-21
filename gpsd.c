@@ -312,7 +312,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
 	    (void)throttled_write(cfd, buf, (ssize_t)strlen(buf));
 }
 
-static void raw_hook(struct gps_data_t *ud UNUSED, 
+static void raw_hook(struct gps_data_t *ud, 
 		     char *sentence, size_t len, int level)
 /* hook to be executed on each incoming packet */
 {
@@ -320,7 +320,7 @@ static void raw_hook(struct gps_data_t *ud UNUSED,
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (subscribers[cfd].raw == level && strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device))==0)
+	if (subscribers[cfd].raw == level && ud->gps_device!=NULL && strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device))==0)
 	    (void)throttled_write(cfd, sentence, (ssize_t)len);
     }
 }
