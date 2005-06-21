@@ -197,7 +197,9 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_data_t *out)
 
 	mask = 0;
 	merge_hhmmss(field[5], out);
-	if (out->nmea_date.tm_year != 0) {
+	if (out->nmea_date.tm_year != 0) 
+	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	else {
 	    mask = TIME_SET;
 	    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
 	    if (out->sentence_time != out->newdata.time)
@@ -245,7 +247,9 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_data_t *o
 	double oldfixtime = out->newdata.time;
 
 	merge_hhmmss(field[1], out);
-	if (out->nmea_date.tm_year != 0) {
+	if (out->nmea_date.tm_year == 0) 
+	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	else {
 	    mask |= TIME_SET;
 	    out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
 	}

@@ -61,7 +61,7 @@ common, for example, to see latitude/longitude/altitude figures filled
 with zeros when the GPS has no valid data.
 
 The physical-level protocol is RS232C-compatible (actually RS422),
-4800bps, 8N1 or 7N2 (the latter is rare bu does occur; the FV18 from
+4800bps, 8N1 or 7N2 (the latter is rare but does occur; the FV18 from
 San Jose Navigation uses it, for example).  The data is all
 ASCII, the high bit is not used.
 
