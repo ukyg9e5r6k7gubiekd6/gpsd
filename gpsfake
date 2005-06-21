@@ -66,11 +66,11 @@ def packet_get(fp):
     else:
         raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
-def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
-    "Feed the contents of logfp to the daemon at pid, capture its responses."
-    try:
-        sentences = []
-        responses = []
+class PacketDigest:
+    "Class encapsulating a digested logfile."
+    def __init__(self, logfp):
+        self.sentences = []
+        self.logfile = logfp.name 
         # Skip the comment header
         while True:
             first = logfp.read(1)
@@ -87,89 +87,72 @@ def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
                 if not packet:
                     break
                 else:
-                    sentences.append(packet)
+                    self.sentences.append(packet)
         except PacketError, e:
             sys.stderr.write(`e.msg` + "\n")
             raise SystemExit, 1
         # Look at the first packet to grok the GPS type
-        if sentences[0][0] == '$':
-            packtype = "NMEA"
-            legend = "gpsfake: line %d "
-            textual = 1
-        elif sentences[0][0] == '\xff':
-            packtype = "Zodiac binary"
-            legend = "gpsfake: packet %d"
-            textual = 0
-        elif sentences[0][0] == '\xa0':
-            packtype = "SiRF-II binary"
-            legend = "gpsfake: packet %d"
-            textual = 0
+        if self.sentences[0][0] == '$':
+            self.packtype = "NMEA"
+            self.legend = "gpsfake: line %d "
+            self.textual = True
+        elif self.sentences[0][0] == '\xff':
+            self.packtype = "Zodiac binary"
+            self.legend = "gpsfake: packet %d"
+            self.textual = True
+        elif self.sentences[0][0] == '\xa0':
+            self.packtype = "SiRF-II binary"
+            self.legend = "gpsfake: packet %d"
+            self.textual = False
         else:
             print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
-            sentences = None
-        if verbose:
-            sys.stderr.write("gpsfake: interpreting as %s packets\n" % packtype)
-        # Feed the daemon
-        if sentences:
-            ttyfp = open(slave, "rw")
-            raw = termios.tcgetattr(ttyfp.fileno())
-            raw[0] = 0					# iflag
-            raw[1] = termios.ONLCR				# oflag
-            raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-            raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
-            raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
-            raw[3] = 0					# lflag
-            try:
-                raw[4] = raw[5] = eval("termios.B" + `speed`)
-            except AttributeError:
-                print "gpsfake: illegal baud rate."
-                sys.exit(1)
-            termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+            self.sentences = None
 
+def gpsfake(master_fd, digest, pid, pipe, cycle, linedump):
+    "Feed the contents of the digest to the daemon, capture its responses."
+    responses = []
+    if pipe:
+        try:
+            session = gps.gps()
+        except socket.error:
+            sys.stderr.write("gpsfake: gpsd unreachable.\n")
+            raise SystemExit, 1
+        session.query("w+r+")
+        session.set_thread_hook(lambda x: responses.append(x))
+        baton = Baton("Processing %s" % digest.logfile, "done")
+
+    try:
+        i = 0;
+        while True:
+            if i % len(digest.sentences) == 0:
+                if pipe and i > 0:
+                    break
+                if not pipe:
+                    sys.stderr.write("gpsfake: log cycle begins.\n")
+            time.sleep(cycle)
+            if linedump:
+                if digest.textual:
+                    ml = digest.sentences[i % len(digest.sentences)].strip()
+                else:
+                    ml = ""
+                print digest.legend % (i % len(digest.sentences) + 1) + ml
+            os.write(master_fd, digest.sentences[i % len(digest.sentences)])
             if pipe:
+                baton.twirl()
+            if spawn:
                 try:
-                    session = gps.gps()
-                except socket.error:
-                    sys.stderr.write("gpsfake: gpsd unreachable.\n")
-                    raise SystemExit, 1
-                session.query("w+r+")
-                session.set_thread_hook(lambda x: responses.append(x))
-                baton = Baton("Processing %s" % logfile, "done")
-
-            try:
-                i = 0;
-                while True:
-                    if i % len(sentences) == 0:
-                        if pipe and i > 0:
-                            break
-                        if not pipe:
-                            sys.stderr.write("gpsfake: log cycle begins.\n")
-                    time.sleep(cycle)
-                    if linedump:
-                        if textual:
-                            ml = sentences[i % len(sentences)].strip()
-                        else:
-                            ml = ""
-                        print legend % (i % len(sentences) + 1) + ml
-                    os.write(master_fd, sentences[i % len(sentences)])
-                    if pipe:
-                        baton.twirl()
-                    if spawn:
-                        try:
-                            st = os.kill(pid, 0)
-                        except OSError:
-                            pid = 0
-                            print "gpsfake: gpsd is gone."
-                            break
-                    i += 1
-                if pipe:
-                    baton.end()
-            except KeyboardInterrupt:
-                pass
+                    st = os.kill(pid, 0)
+                except OSError:
+                    pid = 0
+                    print "gpsfake: gpsd is gone."
+                    break
+            i += 1
+        if pipe:
+            baton.end()
+    except KeyboardInterrupt:
+        pass
+    if pipe:
         sys.stdout.write("".join(responses))
-    finally:
-        if spawn and pid:
-            os.kill(pid, signal.SIGTERM)
 
 # Main sequence
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
@@ -201,23 +184,43 @@ for (switch, val) in options:
         sys.exit(0)
 logfile = arguments[0]
 
+# First step: grab packets from the specified input source
+# and turn them into an internal sentence list.  Croak if this fails.
 try:
     logfp = open(logfile, "r")
 except IOError, OSError:
     sys.stderr.write("gsfake: no such file, or file unreadable\n")
     raise SystemExit, 1
+digest = PacketDigest(logfp)
+if verbose:
+    sys.stderr.write("gpsfake: interpreting as %s packets\n" % digest.packtype)
 
+# Second step: Prepare to launch the daemon, creating the pty to feed it with.
 try:
     (master_fd, slave_fd) = pty.openpty()
+    slave = os.ttyname(slave_fd)
+    ttyfp = open(slave, "rw")
+    raw = termios.tcgetattr(ttyfp.fileno())
+    raw[0] = 0					# iflag
+    raw[1] = termios.ONLCR				# oflag
+    raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
+    raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+    raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+    raw[3] = 0					# lflag
+    try:
+        raw[4] = raw[5] = eval("termios.B" + `speed`)
+    except AttributeError:
+        print "gpsfake: illegal baud rate."
+        raise SystemExit,1
+    termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
 except:
     sys.stderr.write("gpsfake: can't open pty.\n")
     sys.exit(1)
-slave = os.ttyname(slave_fd)
-
 pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
 spawncmd = spawncmd.strip()
 
+# Third step: Launch the daemon and the thread to monitor it.
 if not spawn:
     raw_input("gpsfake: launch '%s' and press enter..." % spawncmd)
 elif os.system(spawncmd + " &"):
@@ -232,5 +235,8 @@ else:
     pid = int(fp.read())
     fp.close()
     os.remove(pidfile)
-
-gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose)
+try:
+    gpsfake(master_fd, digest, pid, pipe, cycle, linedump)
+finally:
+        if spawn and pid:
+            os.kill(pid, signal.SIGTERM)
