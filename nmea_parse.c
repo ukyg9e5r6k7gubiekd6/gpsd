@@ -439,7 +439,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_data_t *o
      */
     merge_hhmmss(field[1], out);
     out->nmea_date.tm_year = atoi(field[4]) - 1900;
-    out->nmea_date.tm_mon = atoi(field[3]);
+    out->nmea_date.tm_mon = atoi(field[3])-1;
     out->nmea_date.tm_mday = atoi(field[2]);
     out->newdata.time = (double)mkgmtime(&out->nmea_date)+out->subseconds;
     if (out->sentence_time != out->newdata.time)

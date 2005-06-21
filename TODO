@@ -4,6 +4,23 @@ will unfold them again.
 
 ** Bugs:
 
+*** Various things are unhappy in the TSIP driverr
+
+EPH and EPV reports are zeroed too often in the TSIP code.  There is
+some bad interaction between the policy code in libgpsd_core.c and the
+driver that we haven't figured out.
+
+Turning on raw mode on the TSIP driver core-dumps the daemon.
+
+*** PPS code is flaky
+
+Som code attempting to terminate the PPS-monutoring thread when there
+is no DCD (e.g., on a USB device) seems to have tickled some kind of
+bug in pthreads -- termination seems to close the GPS device or
+otherwise do something nasty to the serial I/O layer.  
+
+The default build has ENABLE_PPS off until we figure this one out.
+
 *** Under uncertain circumstances, gpsd eats the processor
 
 Rob Janssen writes:
@@ -39,7 +56,52 @@ conditions in the Linux kernel's memory management.
 >so swapping really does not help things in this case, it only slows down
 >the system)
 
+Rob recommends:
+
+>When you have a system with ext3 maybe you could do a test to see if it at
+>least performs similar to what I see.  You need a system with 2 disks, of
+>"modern" size (say 20GB or more).  One disk has a lot of files on it
+>(preferably in not too small files), the other has space.
+>
+>Then you do something like:
+>
+>cp -a * /disk2
+>
+>or
+>
+>tar cf /disk2/backup.tar.gz .
+>
+>or
+>
+>rsync -a * /disk2
+>
+>well, anything that makes it read several gigabytes of data and write it
+>to another disk.
+>while this is running, look at "top" to see if the system is swapping, and
+>if it starts feeling sluggish.  in extreme cases (like on my system) it
+>will become that slow that you will have trouble moving focus from window
+>to window, and obtaining even character echo in a terminal window.
+>
+>the "load average" reported by Linux is high, but that value is buggy
+>because Linux counts processes waiting for disk I/O completion as loading
+
+I have not yet reproduced this.
+
+*** Possible resource-leak bug, not yet reproduced or confirmed.
+
+Wojciech Kazubski <wk@ire.pw.edu.pl> reports: when I connect to gpsd first
+time everything goes fine, and several clients can connect without
+problem but if the last client disconnects, the gpsd does not respond
+to any inquiry. It is living and accepting commands but responding
+with GPSD,P=? or so. And possibly after some time (few hours?) it
+stops responding but the process still looks active (running out of
+resources??).
+
 ** To do:
+
+*** gpsfake -p output can't be piped.
+
+This has something to do with the threading code.  It should be fixed.
 
 *** Track error computation
 

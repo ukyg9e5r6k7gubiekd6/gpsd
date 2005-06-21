@@ -134,7 +134,8 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
   merged. gpsfake now works with SiRF and Zodiac logs.  Python library
   supports thread callbacks.  New -p option of gpsfake supports
   regression testing of the daemon, and there is a test suite included
-  with the distribution.
+  with the distribution.  PPS support is turned off, as there is some
+  pthreads problem that sometimes kills the daemon on pthreads exit.
 
 * Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
 - Various signedness and scaling fixes and an OpenBSD port patch for the 
