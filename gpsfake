@@ -108,7 +108,7 @@ class PacketDigest:
             print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
             self.sentences = None
 
-def gpsfake(master_fd, digest, pid, pipe, cycle, linedump):
+def gpsfake(master_fd, digest, pid, pipe, cycle, linedump, hook):
     "Feed the contents of the digest to the daemon, capture its responses."
     responses = []
     if pipe:
@@ -119,7 +119,6 @@ def gpsfake(master_fd, digest, pid, pipe, cycle, linedump):
             raise SystemExit, 1
         session.query("w+r+")
         session.set_thread_hook(lambda x: responses.append(x))
-        baton = Baton("Processing %s" % digest.logfile, "done")
 
     try:
         i = 0;
@@ -137,22 +136,18 @@ def gpsfake(master_fd, digest, pid, pipe, cycle, linedump):
                     ml = ""
                 print digest.legend % (i % len(digest.sentences) + 1) + ml
             os.write(master_fd, digest.sentences[i % len(digest.sentences)])
-            if pipe:
-                baton.twirl()
+            hook()
             if spawn:
                 try:
                     st = os.kill(pid, 0)
                 except OSError:
-                    pid = 0
-                    print "gpsfake: gpsd is gone."
-                    break
+                    return False
             i += 1
-        if pipe:
-            baton.end()
     except KeyboardInterrupt:
         pass
     if pipe:
         sys.stdout.write("".join(responses))
+    return True
 
 # Main sequence
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
@@ -220,7 +215,7 @@ pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
 spawncmd = spawncmd.strip()
 
-# Third step: Launch the daemon and the thread to monitor it.
+# Third step: Launch the daemon and the thread to monitor it (in gpsfake).
 if not spawn:
     raw_input("gpsfake: launch '%s' and press enter..." % spawncmd)
 elif os.system(spawncmd + " &"):
@@ -236,7 +231,12 @@ else:
     fp.close()
     os.remove(pidfile)
 try:
-    gpsfake(master_fd, digest, pid, pipe, cycle, linedump)
+    if pipe:
+        baton = Baton("Processing %s" % digest.logfile, "done")
+    if not gpsfake(master_fd, digest, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl()):
+        print "gpsfake: gpsd is gone."
+    if pipe:
+        baton.end()
 finally:
         if spawn and pid:
             os.kill(pid, signal.SIGTERM)
