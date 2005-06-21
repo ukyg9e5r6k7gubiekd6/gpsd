@@ -137,23 +137,19 @@ def gpsfake(master_fd, digest, pid, pipe, cycle, linedump, hook):
                 print digest.legend % (i % len(digest.sentences) + 1) + ml
             os.write(master_fd, digest.sentences[i % len(digest.sentences)])
             hook()
-            if spawn:
-                try:
-                    st = os.kill(pid, 0)
-                except OSError:
-                    return False
+            try:
+                st = os.kill(pid, 0)
+            except OSError:
+                return (False, responses)
             i += 1
     except KeyboardInterrupt:
         pass
-    if pipe:
-        sys.stdout.write("".join(responses))
-    return True
+    return (True, responses)
 
 # Main sequence
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
 cycle = 1
 speed = 4800
-spawn = True
 linedump = False
 pipe = False
 verbose = False
@@ -163,8 +159,6 @@ for (switch, val) in options:
         cycle = float(val)
     elif (switch == '-l'):
         linedump = True
-    elif (switch == '-n'):
-        spawn = False
     elif (switch == '-o'):
         doptions = val
     elif (switch == '-p'):
@@ -215,13 +209,18 @@ pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
 spawncmd = spawncmd.strip()
 
-# Third step: Launch the daemon and the thread to monitor it (in gpsfake).
-if not spawn:
-    raw_input("gpsfake: launch '%s' and press enter..." % spawncmd)
-elif os.system(spawncmd + " &"):
-    sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
-    sys.exit(1)
+# Third step: Launch the daemon and the thread to monitor it
+child = os.fork()
+if child:
+    # Parent side
+    try:
+        os.system(spawncmd)
+    except OSError:
+        sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
+        os.kill(child, signal.SIGTERM)
+        sys.exit(1)
 else:
+    # Child side
     time.sleep(1)	# Time for pidfile to get written.
     if not pipe or verbose:
         sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
@@ -230,13 +229,16 @@ else:
     pid = int(fp.read())
     fp.close()
     os.remove(pidfile)
-try:
-    if pipe:
-        baton = Baton("Processing %s" % digest.logfile, "done")
-    if not gpsfake(master_fd, digest, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl()):
-        print "gpsfake: gpsd is gone."
-    if pipe:
-        baton.end()
-finally:
-        if spawn and pid:
+    try:
+        if pipe:
+            baton = Baton("Processing %s" % digest.logfile, "done")
+        (status, responses) = gpsfake(master_fd, digest, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
+        if not status:
+            print "gpsfake: gpsd is gone."
+        if pipe:
+            baton.end()
+            sys.stdout.write("".join(responses))
+    finally:
+        if pid:
             os.kill(pid, signal.SIGTERM)
+    sys.exit(0)
