@@ -18,6 +18,8 @@
   <command>gpsfake</command>  
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-g</arg>
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
@@ -40,13 +42,13 @@ GPS.</para>
 privileges, and can be run concurrently with a production 
 <application>gpsd</application> instance without causing problems.</para>
 
-<para>The logfile may be of either NMEA sentences or SiRF-II packets.
+<para>The logfile may be of NMEA, SiRF-II packets, or Zodiac packets.
 Leading lines beginning with # will be treated as comments and
 ignored.</para>
 
 <para>The <application>gpsd</application> instance is run in
-background, but with logging to standard error attached so you 
-will see the messages.</para>
+foreground.  The thread sending fake GPS data to the daemon 
+uis run in background.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -54,12 +56,19 @@ will see the messages.</para>
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>
 
+<para>The -g option runs <application>gpsd</application> under the
+control of gdb, the GNU debugger. The thread that will send data to
+the daemon instance waits until it sees the pidfile created, so you
+may do any setup necessary at the gdb command prompt before typing
+"run" to begin feeding the log to the daemon.</para>
+
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is
 textual (e.g. NMEA, the text is dumped as well).</para>
 
 <para>The -o option specifies options to pass to the daemon.
-Passing "-n -D 4" is often useful.</para>
+Passing "-n" is often useful.  The -D option passes a -D option
+to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
 
 <para>The -p option dumps the NMEA and GPSD notifications generated
 by the log to standard output.  The logfile is interpreted once

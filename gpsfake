@@ -147,8 +147,9 @@ def gpsfake(master_fd, digest, pid, pipe, cycle, linedump, hook):
     return (True, responses)
 
 # Main sequence
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
+(options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
 cycle = 1
+gdb = False
 speed = 4800
 linedump = False
 pipe = False
@@ -157,6 +158,10 @@ doptions = ""
 for (switch, val) in options:
     if (switch == '-c'):
         cycle = float(val)
+    elif (switch == '-D'):
+        doptions += " -D " + val
+    elif (switch == '-g'):
+        gdb = True
     elif (switch == '-l'):
         linedump = True
     elif (switch == '-o'):
@@ -169,7 +174,7 @@ for (switch, val) in options:
     elif (switch == '-v'):
         verbose = True
     elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-l] [-n] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
+        sys.stderr.write("usage: gpsfake [-h] [-l] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
         sys.exit(0)
 logfile = arguments[0]
 
@@ -208,6 +213,8 @@ except:
 pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
 spawncmd = spawncmd.strip()
+if gdb:
+    spawncmd = "gdb --args " + spawncmd
 
 # Third step: Launch the daemon and the thread to monitor it
 child = os.fork()
@@ -219,6 +226,8 @@ if child:
         sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
         os.kill(child, signal.SIGTERM)
         sys.exit(1)
+    os.kill(child, signal.SIGTERM)
+    sys.exit(0)
 else:
     # Child side -- wait for daemon to make pidfile so we know it's running
     while True:
