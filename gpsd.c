@@ -320,7 +320,9 @@ static void raw_hook(struct gps_data_t *ud,
 
     for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
-	if (subscribers[cfd].raw == level && ud->gps_device!=NULL && strcmp(ud->gps_device, (subscribers[cfd].device->gpsdata.gps_device))==0)
+	if (subscribers[cfd].raw == level && 
+	    subscribers[cfd].device &&
+	    strcmp(ud->gps_device, subscribers[cfd].device->gpsdata.gps_device)==0)
 	    (void)throttled_write(cfd, sentence, (ssize_t)len);
     }
 }

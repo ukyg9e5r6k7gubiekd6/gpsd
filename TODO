@@ -10,8 +10,6 @@ EPH and EPV reports are zeroed too often in the TSIP code.  There is
 some bad interaction between the policy code in libgpsd_core.c and the
 driver that we haven't figured out.
 
-Turning on raw mode on the TSIP driver core-dumps the daemon.
-
 *** PPS code is flaky
 
 Som code attempting to terminate the PPS-monutoring thread when there
