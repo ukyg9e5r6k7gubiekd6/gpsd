@@ -38,6 +38,138 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+class PacketError(exceptions.Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def packet_get(fp):
+    "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
+    first = fp.read(1)
+    if not first:
+        return None
+    elif first == '$':					# NMEA packet
+        return "$" + fp.readline()
+    second = fp.read(1)
+    if first == '\xa0' and second == '\xa2':		# SiRF packet
+        third = fp.read(1)
+        fourth = fp.read(1)
+        length = (ord(third) << 8) | ord(fourth)
+        return "\xa0\xa2" + third + fourth + fp.read(length+4)
+    elif first == '\xff' and second == '\x81':
+        third = fp.read(1)
+        fourth = fp.read(1)
+        fifth = fp.read(1)
+        sixth = fp.read(1)
+        id = ord(third) | (ord(fourth) << 8)
+        ndata = ord(fifth) | (ord(sixth) << 8)
+        return "\xff\x81" + third + fourth + fifth + sixth + fp.read(2*ndata+6)
+    else:
+        raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
+
+def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
+    "Feed the contents of logfp to the daemon at pid, capture its responses."
+    try:
+        sentences = []
+        # Skip the comment header
+        while True:
+            first = logfp.read(1)
+            if first == "#":
+                logfp.readline()
+            else:
+                logfp.seek(-1, 1)	# Must be a real file, not stdin
+                break
+        # Grab the packets
+        try:
+            while True:
+                packet = packet_get(logfp)
+                #print "I see: %s, length %d" % (`packet`, len(packet))
+                if not packet:
+                    break
+                else:
+                    sentences.append(packet)
+        except PacketError, e:
+            sys.stderr.write(`e.msg` + "\n")
+            raise SystemExit, 1
+        # Look at the first packet to grok the GPS type
+        if sentences[0][0] == '$':
+            packtype = "NMEA"
+            legend = "gpsfake: line %d "
+            textual = 1
+        elif sentences[0][0] == '\xff':
+            packtype = "Zodiac binary"
+            legend = "gpsfake: packet %d"
+            textual = 0
+        elif sentences[0][0] == '\xa0':
+            packtype = "SiRF-II binary"
+            legend = "gpsfake: packet %d"
+            textual = 0
+        else:
+            print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
+            sentences = None
+        if verbose:
+            sys.stderr.write("gpsfake: interpreting as %s packets\n" % packtype)
+        # Feed the daemon
+        if sentences:
+            ttyfp = open(slave, "rw")
+            raw = termios.tcgetattr(ttyfp.fileno())
+            raw[0] = 0					# iflag
+            raw[1] = termios.ONLCR				# oflag
+            raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
+            raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+            raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+            raw[3] = 0					# lflag
+            try:
+                raw[4] = raw[5] = eval("termios.B" + `speed`)
+            except AttributeError:
+                print "gpsfake: illegal baud rate."
+                sys.exit(1)
+            termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+
+            if pipe:
+                try:
+                    session = gps.gps()
+                except socket.error:
+                    sys.stderr.write("gpsfake: gpsd unreachable.\n")
+                    raise SystemExit, 1
+                session.query("w+r+")
+                session.set_thread_hook(lambda x: sys.stdout.write(x))
+                baton = Baton("Processing %s" % logfile, "done")
+
+            try:
+                i = 0;
+                while True:
+                    if i % len(sentences) == 0:
+                        if pipe and i > 0:
+                            break
+                        if not pipe:
+                            sys.stderr.write("gpsfake: log cycle begins.\n")
+                    time.sleep(cycle)
+                    if linedump:
+                        if textual:
+                            ml = sentences[i % len(sentences)].strip()
+                        else:
+                            ml = ""
+                        print legend % (i % len(sentences) + 1) + ml
+                    os.write(master_fd, sentences[i % len(sentences)])
+                    if pipe:
+                        baton.twirl()
+                    if spawn:
+                        try:
+                            st = os.kill(pid, 0)
+                        except OSError:
+                            pid = 0
+                            print "gpsfake: gpsd is gone."
+                            break
+                    i += 1
+                if pipe:
+                    baton.end()
+            except KeyboardInterrupt:
+                pass
+    finally:
+        if spawn and pid:
+            os.kill(pid, signal.SIGTERM)
+
+# Main sequence
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:hlno:ps:v")
 cycle = 1
 speed = 4800
@@ -99,131 +231,4 @@ else:
     fp.close()
     os.remove(pidfile)
 
-class PacketError(exceptions.Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-def packet_get(fp):
-    "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
-    first = fp.read(1)
-    if not first:
-        return None
-    elif first == '$':					# NMEA packet
-        return "$" + fp.readline()
-    second = fp.read(1)
-    if first == '\xa0' and second == '\xa2':		# SiRF packet
-        third = fp.read(1)
-        fourth = fp.read(1)
-        length = (ord(third) << 8) | ord(fourth)
-        return "\xa0\xa2" + third + fourth + fp.read(length+4)
-    elif first == '\xff' and second == '\x81':
-        third = fp.read(1)
-        fourth = fp.read(1)
-        fifth = fp.read(1)
-        sixth = fp.read(1)
-        id = ord(third) | (ord(fourth) << 8)
-        ndata = ord(fifth) | (ord(sixth) << 8)
-        return "\xff\x81" + third + fourth + fifth + sixth + fp.read(2*ndata+6)
-    else:
-        raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
-
-try:
-    sentences = []
-    # Skip the comment header
-    while True:
-        first = logfp.read(1)
-        if first == "#":
-            logfp.readline()
-        else:
-            logfp.seek(-1, 1)	# Must be a real file, not stdin
-            break
-    # Grab the packets
-    try:
-        while True:
-            packet = packet_get(logfp)
-            #print "I see: %s, length %d" % (`packet`, len(packet))
-            if not packet:
-                break
-            else:
-                sentences.append(packet)
-    except PacketError, e:
-        sys.stderr.write(`e.msg` + "\n")
-        raise SystemExit, 1
-    # Look at the first packet to grok the GPS type
-    if sentences[0][0] == '$':
-        packtype = "NMEA"
-        legend = "gpsfake: line %d "
-        textual = 1
-    elif sentences[0][0] == '\xff':
-        packtype = "Zodiac binary"
-        legend = "gpsfake: packet %d"
-        textual = 0
-    elif sentences[0][0] == '\xa0':
-        packtype = "SiRF-II binary"
-        legend = "gpsfake: packet %d"
-        textual = 0
-    else:
-        print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
-        sentences = None
-    if verbose:
-        sys.stderr.write("gpsfake: interpreting as %s packets\n" % packtype)
-    # Feed the daemon
-    if sentences:
-        ttyfp = open(slave, "rw")
-        raw = termios.tcgetattr(ttyfp.fileno())
-        raw[0] = 0					# iflag
-        raw[1] = termios.ONLCR				# oflag
-        raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-        raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
-        raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
-        raw[3] = 0					# lflag
-        try:
-            raw[4] = raw[5] = eval("termios.B" + `speed`)
-        except AttributeError:
-            print "gpsfake: illegal baud rate."
-            sys.exit(1)
-        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
-
-        if pipe:
-            try:
-                session = gps.gps()
-            except socket.error:
-                sys.stderr.write("gpsfake: gpsd unreachable.\n")
-                raise SystemExit, 1
-            session.query("w+r+")
-            session.set_thread_hook(lambda x: sys.stdout.write(x))
-            baton = Baton("Processing %s" % logfile, "done")
-
-        try:
-            i = 0;
-            while True:
-                if i % len(sentences) == 0:
-                    if pipe and i > 0:
-                        break
-                    if not pipe:
-                        sys.stderr.write("gpsfake: log cycle begins.\n")
-                time.sleep(cycle)
-                if linedump:
-                    if textual:
-                        ml = sentences[i % len(sentences)].strip()
-                    else:
-                        ml = ""
-                    print legend % (i % len(sentences) + 1) + ml
-                os.write(master_fd, sentences[i % len(sentences)])
-                if pipe:
-                    baton.twirl()
-                if spawn:
-                    try:
-                        st = os.kill(pid, 0)
-                    except OSError:
-                        pid = 0
-                        print "gpsfake: gpsd is gone."
-                        break
-                i += 1
-            if pipe:
-                baton.end()
-        except KeyboardInterrupt:
-            pass
-finally:
-    if spawn and pid:
-        os.kill(pid, signal.SIGTERM)
+gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose)
