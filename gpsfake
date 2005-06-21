@@ -70,6 +70,7 @@ def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
     "Feed the contents of logfp to the daemon at pid, capture its responses."
     try:
         sentences = []
+        responses = []
         # Skip the comment header
         while True:
             first = logfp.read(1)
@@ -132,7 +133,7 @@ def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
                     sys.stderr.write("gpsfake: gpsd unreachable.\n")
                     raise SystemExit, 1
                 session.query("w+r+")
-                session.set_thread_hook(lambda x: sys.stdout.write(x))
+                session.set_thread_hook(lambda x: responses.append(x))
                 baton = Baton("Processing %s" % logfile, "done")
 
             try:
@@ -165,6 +166,7 @@ def gpsfake(master_fd, logfp, pid, pipe, speed, cycle, linedump, verbose):
                     baton.end()
             except KeyboardInterrupt:
                 pass
+        sys.stdout.write("".join(responses))
     finally:
         if spawn and pid:
             os.kill(pid, signal.SIGTERM)

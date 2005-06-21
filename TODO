@@ -99,10 +99,6 @@ resources??).
 
 ** To do:
 
-*** gpsfake -p output can't be piped.
-
-This has something to do with the threading code.  It should be fixed.
-
 *** Track error computation
 
 Presently the track error member in the fix structure is neither
