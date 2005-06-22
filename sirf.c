@@ -165,7 +165,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	mask = 0;
 	session->gpsdata.satellites_used = (int)getub(buf, 28);
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
-	for (i = 0; i < MAXCHANNELS; i++)
+	for (i = 0; i < SIRF_CHANNELS; i++)
 	    session->gpsdata.used[i] = (int)getub(buf, 29+i);
 	if ((session->driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	    /* position/velocity is bytes 1-18 */
@@ -213,7 +213,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.sentence_time
 	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
-	for (i = st = 0; i < MAXCHANNELS; i++) {
+	for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	    int off = 8 + 15 * i;
 	    bool good;
 	    session->gpsdata.PRN[st]       = (int)getub(buf, off);

@@ -132,8 +132,9 @@ struct gps_device_t {
      * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
      * translation of Zodiac binary protocol can send it up to the client.
      */
-    unsigned int Zs[MAXCHANNELS];	/* satellite PRNs */
-    unsigned int Zv[MAXCHANNELS];	/* signal values (0-7) */
+#define ZODIAC_CHANNELS	12
+    unsigned int Zs[ZODIAC_CHANNELS];	/* satellite PRNs */
+    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
 #endif /* ZODIAC_ENABLE */
 #endif /* BINARY_ENABLE */
 #ifdef NTPSHM_ENABLE

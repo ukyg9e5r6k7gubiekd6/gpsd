@@ -322,7 +322,7 @@ static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_data_t *o
     out->vdop = atof(field[17]);
     out->satellites_used = 0;
     memset(out->used,0,sizeof(out->used));
-    for (i = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < NMEA_CHANNELS; i++) {
         int prn = atoi(field[i+3]);
         if (prn > 0)
 	    out->used[out->satellites_used++] = prn;
@@ -360,7 +360,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_data_t *out)
 	gpsd_zero_satellites(out);
 
     for (fldnum = 4; fldnum < count; ) {
-	if (out->satellites >= MAXCHANNELS) {
+	if (out->satellites >= NMEA_CHANNELS) {
 	    gpsd_report(0, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(out);
 	    break;

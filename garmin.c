@@ -93,6 +93,8 @@
 
 #define MAX_BUFFER_SIZE 4096
 
+#define GARMIN_CHANNELS	12
+
 // something magic about 64, garmin driver will not return more than
 // 64 at a time.  If you read less than 64 bytes the next read will
 // just get the last of the 64 byte buffer.
@@ -136,6 +138,7 @@ typedef struct {
 	long	grmn_days;
 } cpo_pvt_data;
 
+#ifdef __UNUSED__
 typedef struct {
 	unsigned long cycles;
 	double	 pr;
@@ -149,9 +152,9 @@ typedef struct {
 typedef struct {
 	double rcvr_tow;
 	short	rcvr_wn;
-	cpo_rcv_sv_data sv[MAXCHANNELS];
+	cpo_rcv_sv_data sv[GARMIN_CHANNELS];
 } cpo_rcv_data;
-
+#endif /* __UNUSED__ */
 
 // This is the packet format to/from the Garmin USB
 typedef struct {
@@ -373,7 +376,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    session->gpsdata.satellites_used = 0;
 	    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	    gpsd_zero_satellites(&session->gpsdata);
-	    for ( i = 0, j = 0 ; i < MAXCHANNELS ; i++, sats++ ) {
+	    for ( i = 0, j = 0 ; i < GARMIN_CHANNELS ; i++, sats++ ) {
 		gpsd_report(4,
 			    "  Sat %d, snr: %d, elev: %d, Azmth: %d, Stat: %x\n"
 			    , sats->svid

@@ -327,7 +327,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	bufp += strlen(bufp);
 	bufp2 = bufp;
 	strcpy(bufp, "$PRWIZCH");
-	for (i = 0; i < MAXCHANNELS; i++) {
+	for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	    len -= snprintf(bufp+strlen(bufp), len,
 			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
 	}
@@ -345,7 +345,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     (void)snprintf(bufp, len-strlen(bufp),
 		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
     j = 0;
-    for (i = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < NMEA_CHANNELS; i++) {
 	if (session->gpsdata.used[i]) {
 	    bufp += strlen(bufp);
 	    (void)snprintf(bufp, len-strlen(bufp),
@@ -353,7 +353,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    j++;
 	}
     }
-    for (i = j; i < MAXCHANNELS; i++) {
+    for (i = j; i < NMEA_CHANNELS; i++) {
 	bufp += strlen(bufp);
 	(void)strcpy(bufp, ",");
     }

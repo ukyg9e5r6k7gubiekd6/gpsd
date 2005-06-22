@@ -248,7 +248,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	(void)wmove(mid2win, 5,7);
 	nfix = (int)getub(buf, 28);
 	(void)wprintw(mid2win, "%d = ",nfix);		/* SVs in fix */
-	for (i = 0; i < MAXCHANNELS; i++) {	/* SV list */
+	for (i = 0; i < SIRF_CHANNELS; i++) {	/* SV list */
 	    if (i < nfix)
 		(void)wprintw(mid2win, "%3d",fix[i] = (int)getub(buf, 29+i));
 	    else
@@ -352,7 +352,7 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x0d:		/* Visible List */
 	display(mid13win, 1, 6, "%d",getub(buf, 1));
 	(void)wmove(mid13win, 1, 10);
-	for (i = 0; i < MAXCHANNELS; i++) {
+	for (i = 0; i < SIRF_CHANNELS; i++) {
 	    if (i < (int)getub(buf, 1))
 		(void)wprintw(mid13win, " %2d",getub(buf, 2 + 5 * i));
 	    else
@@ -1031,7 +1031,7 @@ int main (int argc, char **argv)
     (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(mid4win, A_BOLD);
     display(mid4win, 1, 1, " Ch SV  Az El Stat  C/N ? A");
-    for (i = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < SIRF_CHANNELS; i++) {
 	display(mid4win, (int)(i+2), 1, "%2d",i);
     }
     display(mid4win, 14, 4, " Packet Type 4 (0x04) ");

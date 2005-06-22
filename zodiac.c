@@ -228,7 +228,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* gps_week                   = getword(10); */
     /* gps_seconds                = getlong(11); */
     /* gps_nanoseconds            = getlong(13); */
-    for (i = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	/*@ -type @*/ 
 	session->Zv[i] = status = (int)getword(15 + (3 * i));
 	session->Zs[i] = prn = (int)getword(16 + (3 * i));
@@ -244,7 +244,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 #endif
 	if (status & 1)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
-	for (j = 0; j < MAXCHANNELS; j++) {
+	for (j = 0; j < ZODIAC_CHANNELS; j++) {
 	    if (session->gpsdata.PRN[j] != prn)
 		continue;
 	    session->gpsdata.ss[j] = (int)getword(17 + (3 * i));
@@ -267,7 +267,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
     session->gpsdata.tdop = (unsigned int)getword(13) * 1e-2;
     session->gpsdata.satellites = (int)getword(14);
 
-    for (i = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	if (i < session->gpsdata.satellites) {
 	    session->gpsdata.PRN[i] = (int)getword(15 + (3 * i));
 	    session->gpsdata.azimuth[i] = (int)(((short)getword(16 + (3 * i))) * RAD_2_DEG * 1e-4);

@@ -12,8 +12,10 @@ extern "C" {
 #include <sys/time.h>
 #include <time.h>
 
-#define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 #define MAXTAGLEN	6	/* maximum length of sentence tag name */
+#define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
+#define NMEA_CHANNELS	12	/* max channels allowed in NMEA format */
+#define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
