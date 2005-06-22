@@ -104,26 +104,11 @@ class TestLoad:
         else:
             raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
-def fakehook(linenumber, fakegps):
-    if linenumber % len(fakegps.testload.sentences) == 0:
-        if pipe and linenumber > 0:
-            return False
-        if not pipe:
-            sys.stderr.write("gpsfake: log cycle begins.\n")
-    time.sleep(cycle)
-    if linedump:
-        if fakegps.testload.textual:
-            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
-        else:
-            ml = ""
-        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
-    if pipe:
-        baton.twirl()
-    return True
-
 class FakeGPS:
-    "Class encapsulating a pty with a gest load attached to it."
+    "Class encapsulating a pty with a test load attached to it."
     def __init__(self, logfp, rate):
+        if type(logfp) == type(""):
+            logfp = open(logfp, "r");
         self.testload = TestLoad(logfp)
         (self.master_fd, self.slave_fd) = pty.openpty()
         self.slave = os.ttyname(self.slave_fd)
@@ -160,6 +145,24 @@ class FakeGPS:
         return True
 
 # Main sequence
+
+def fakehook(linenumber, fakegps):
+    if linenumber % len(fakegps.testload.sentences) == 0:
+        if pipe and linenumber > 0:
+            return False
+        if not pipe:
+            sys.stderr.write("gpsfake: log cycle begins.\n")
+    time.sleep(cycle)
+    if linedump:
+        if fakegps.testload.textual:
+            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+        else:
+            ml = ""
+        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+    if pipe:
+        baton.twirl()
+    return True
+
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
 cycle = 1
 gdb = False
@@ -200,29 +203,25 @@ except AttributeError:
 # First step: grab packets from the specified input source
 # and turn them into an internal sentence list.  Croak if this fails.
 try:
-    logfp = open(logfile, "r")
-except IOError, OSError:
-    sys.stderr.write("gsfake: no such file, or file unreadable\n")
-    raise SystemExit, 1
-if verbose:
-    sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
-
-# Second step: Prepare to launch the daemon, creating the pty to feed it with.
-try:
-    fakegps = FakeGPS(logfp, rate)
+    fakegps = FakeGPS(logfile, rate)
 except PacketError, e:
-    sys.stderr.write(`e.msg` + "\n")
+    sys.stderr.write("gsfake: " + e.msg + "\n")
+    raise SystemExit, 1
+except IOError:
+    sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
     raise SystemExit, 1
 except OSError:
     sys.stderr.write("gpsfake: can't open pty.\n")
     raise SystemExit, 1
+if verbose:
+    sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
 pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
 spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, fakegps.slave)
 spawncmd = spawncmd.strip()
 if gdb:
     spawncmd = "gdb --args " + spawncmd
 
-# Third step: Launch the daemon and the thread to monitor it
+# Next step: Launch the daemon and the thread to monitor it
 child = os.fork()
 if child:
     # Parent side
