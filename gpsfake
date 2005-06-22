@@ -120,44 +120,39 @@ class FakeGPS:
         raw[3] = 0					# lflag
         raw[4] = raw[5] = rate
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
-
-def gpsfake(fakegps, pid, pipe, cycle, linedump, hook):
-    "Feed the contents of the digest to the daemon, capture its responses."
-    responses = []
-    if pipe:
+    def enable_capture(self):
+        self.responses = []
         try:
             session = gps.gps()
         except socket.error:
-            sys.stderr.write("gpsfake: gpsd unreachable.\n")
-            raise SystemExit, 1
+            return False
         session.query("w+r+")
-        session.set_thread_hook(lambda x: responses.append(x))
-
-    try:
+        session.set_thread_hook(lambda x: self.responses.append(x))
+        return True
+    def feed(self, pid, pipe, cycle, linedump, hook):
+        "Feed the contents of the digest to the daemon, capture its responses."
         i = 0;
         while True:
-            if i % len(fakegps.testload.sentences) == 0:
+            if i % len(self.testload.sentences) == 0:
                 if pipe and i > 0:
                     break
                 if not pipe:
                     sys.stderr.write("gpsfake: log cycle begins.\n")
             time.sleep(cycle)
             if linedump:
-                if fakegps.testload.textual:
-                    ml = fakegps.testload.sentences[i % len(fakegps.testload.sentences)].strip()
+                if self.testload.textual:
+                    ml = self.testload.sentences[i % len(self.testload.sentences)].strip()
                 else:
                     ml = ""
-                print fakegps.testload.legend % (i % len(fakegps.testload.sentences) + 1) + ml
-            os.write(fakegps.master_fd, fakegps.testload.sentences[i % len(fakegps.testload.sentences)])
+                print self.testload.legend % (i % len(self.testload.sentences) + 1) + ml
+            os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
             hook()
             try:
                 st = os.kill(pid, 0)
             except OSError:
-                return (False, responses)
+                return False
             i += 1
-    except KeyboardInterrupt:
-        pass
-    return (True, responses)
+        return True
 
 # Main sequence
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
@@ -252,12 +247,18 @@ else:
     try:
         if pipe:
             baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
-        (status, responses) = gpsfake(fakegps, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
+            if not fakegps.enable_capture():
+                sys.stderr.write("gpsfake: gpsd unreachable.\n")
+                raise SystemExit, 1
+        try:
+            status = fakegps.feed(pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
+        except KeyboardInterrupt:
+            status = True
         if not status:
             print "gpsfake: gpsd is gone."
         if pipe:
             baton.end()
-            sys.stdout.write("".join(responses))
+            sys.stdout.write("".join(fakegps.responses))
     finally:
         if pid:
             os.kill(pid, signal.SIGTERM)
