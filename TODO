@@ -4,13 +4,12 @@ will unfold them again.
 
 ** Bugs:
 
-*** Various things are unhappy in the TSIP driverr
+*** EPH and EPV reports are zeroed too often in the TSIP driver 
 
-EPH and EPV reports are zeroed too often in the TSIP code.  There is
-some bad interaction between the policy code in libgpsd_core.c and the
-driver that we haven't figured out.
+There is some bad interaction between the policy code in
+libgpsd_core.c and the driver that we haven't figured out.
 
-*** PPS code is flaky
+*** PPS code is flaky, possibly due to a pthreads bug
 
 Some code attempting to terminate the PPS-monutoring thread when there
 is no DCD (e.g., on a USB device) seems to have tickled some kind of
@@ -85,7 +84,7 @@ Rob recommends:
 
 I have not yet reproduced this.
 
-*** Possible resource-leak bug, not yet reproduced or confirmed.
+*** Possible resource-leak bug, not yet reproduced or confirmed
 
 Wojciech Kazubski <wk@ire.pw.edu.pl> reports: when I connect to gpsd first
 time everything goes fine, and several clients can connect without

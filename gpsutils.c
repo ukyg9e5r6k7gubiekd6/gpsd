@@ -9,6 +9,8 @@
 
 #include "gpsd.h"
 
+#define MONTHSPERYEAR	12		/* months per calendar year */
+
 void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
@@ -71,12 +73,12 @@ time_t mkgmtime(register struct tm *t)
 {
     register int year;
     register time_t result;
-    static const int cumdays[12] =
+    static const int cumdays[MONTHSPERYEAR] =
     {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
     /*@ +matchanyintegral @*/
-    year = 1900 + t->tm_year + t->tm_mon / 12;
-    result = (year - 1970) * 365 + cumdays[t->tm_mon % 12];
+    year = 1900 + t->tm_year + t->tm_mon / MONTHSPERYEAR;
+    result = (year - 1970) * 365 + cumdays[t->tm_mon % MONTHSPERYEAR];
     result += (year - 1968) / 4;
     result -= (year - 1900) / 100;
     result += (year - 1600) / 400;

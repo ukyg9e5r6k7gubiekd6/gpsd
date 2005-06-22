@@ -61,8 +61,6 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define END1		0xb0
 #define END2		0xb3
 
-#define MAXCHANNELS	12
-
 #define RAD2DEG (180.0/PI)
 
 /* how many characters to look at when trying to find baud rate lock */
@@ -442,7 +440,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	total               2 x 12 = 24 bytes
 	******************************************************************/
 	display(mid27win, 1, 14, "%d (%s)", getub(buf, 1), sbasvec[(int)getub(buf, 1)]);
-	for (i = j = 0; i < MAXCHANNELS; i++) {
+	for (i = j = 0; i < 12; i++) {
 	    if (/*@i1@*/getub(buf, 16+2*i) != '\0') {
 		(void)wprintw(mid27win, "%d=%d ", getub(buf, 16+2*i), getub(buf, 16+2*i+1));
 		j++;
