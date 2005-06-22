@@ -78,7 +78,7 @@ int ntpshm_init(struct gps_context_t *context, bool enablepps)
 # ifdef PPS_ENABLE
     context->shmTimePPS = enablepps;
 # endif /* PPS_ENABLE */
-    return enablepps;
+    return (int)enablepps;
 }
 
 int ntpshm_alloc(struct gps_context_t *context)
