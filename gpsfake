@@ -159,6 +159,14 @@ class DaemonInstance:
             return True
         except OSError:
             return False
+    def add_device(self, path):
+        "Add a device to the daemon's internal search list."
+        self.sockfile.write("+%s\r\n" % path)
+        self.sockfile.readline()
+    def remove_device(self, path):
+        "Remove a device from the daemon's internal search list."
+        self.sockfile.write("-%s\r\n" % path)
+        self.sockfile.readline()
     def __del__(self):
         "Kill the daemon instance."
         if self.pid:
@@ -272,6 +280,7 @@ if __name__ == "__main__":
         elif not pipe or verbose:
             sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
         try:
+            #daemon.add_device(fakegps.slave)
             if pipe:
                 baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
                 if not fakegps.enable_capture():
