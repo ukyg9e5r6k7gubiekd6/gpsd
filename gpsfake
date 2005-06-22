@@ -144,6 +144,54 @@ class FakeGPS:
             i += 1
         return True
 
+class DaemonInstance:
+    def __init__(self, control_socket):
+        self.sockfile = None
+        self.pid = None
+        self.control_socket = control_socket
+        self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
+    def spawn(self, doptions, background=False, gdb=False):
+        "Spawn a daemon instance."
+        spawncmd = "gpsd -N -P %s %s" % (self.pidfile, doptions)
+        spawncmd = spawncmd.strip()
+        if gdb:
+            spawncmd = "gdb --args " + spawncmd
+        if background:
+            spawncmd += " &"
+        os.system(spawncmd)
+    def wait_pid(self):
+        "Get the running daeomon's PID from where it's written."
+        while True:
+            try:
+                fp = open(self.pidfile)
+            except IOError:
+                time.sleep(1)
+                continue
+            self.pid = int(fp.read())
+            fp.close()
+            break
+    def __del__(self):
+        "Kill the daemon instance and remove its pid file."
+        if self.pid:
+            os.kill(self.pid, signal.SIGTERM)
+        if os.path.exists(self.pidfile):
+            os.remove(self.pidfile)
+    def gpsd_control_connect(self):
+        "Acquire a connection to the GPSD control socket."
+        if not os.path.exists(self.control_socket):
+            return None
+        try:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
+            sock.connect(self.control_socket)
+            self.sockfile = sock.makefile()
+        except socket.error, msg:
+            if sock:
+                sock.close()
+            sock = None
+            self.sockfile = None
+        return self.sockfile
+
+
 # Main sequence
 
 def fakehook(linenumber, fakegps):
@@ -215,18 +263,15 @@ except OSError:
     raise SystemExit, 1
 if verbose:
     sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
-pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
-spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, fakegps.slave)
-spawncmd = spawncmd.strip()
-if gdb:
-    spawncmd = "gdb --args " + spawncmd
+
+daemon = DaemonInstance("/tmp/gpsfake-%d.sock" % os.getpid())
 
 # Next step: Launch the daemon and the thread to monitor it
 child = os.fork()
 if child:
     # Parent side
     try:
-        os.system(spawncmd)
+        daemon.spawn(doptions + " " + fakegps.slave)
     except OSError:
         sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
         os.kill(child, signal.SIGTERM)
@@ -235,16 +280,7 @@ if child:
     sys.exit(0)
 else:
     # Child side -- wait for daemon to make pidfile so we know it's running
-    while True:
-        try:
-            fp = open(pidfile)
-        except IOError:
-            time.sleep(1)
-            continue
-        pid = int(fp.read())
-        fp.close()
-        os.remove(pidfile)
-        break
+    daemon.wait_pid()
     if not pipe or verbose:
         sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
 
@@ -255,7 +291,7 @@ else:
                 sys.stderr.write("gpsfake: gpsd unreachable.\n")
                 raise SystemExit, 1
         try:
-            status = fakegps.feed(pid, fakehook)
+            status = fakegps.feed(daemon.pid, fakehook)
         except KeyboardInterrupt:
             status = True
         if not status:
@@ -264,6 +300,5 @@ else:
             baton.end()
             sys.stdout.write("".join(fakegps.responses))
     finally:
-        if pid:
-            os.kill(pid, signal.SIGTERM)
+        del daemon
     sys.exit(0)
