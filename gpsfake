@@ -104,6 +104,23 @@ class TestLoad:
         else:
             raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
+def fakehook(linenumber, fakegps):
+    if linenumber % len(fakegps.testload.sentences) == 0:
+        if pipe and linenumber > 0:
+            return False
+        if not pipe:
+            sys.stderr.write("gpsfake: log cycle begins.\n")
+    time.sleep(cycle)
+    if linedump:
+        if fakegps.testload.textual:
+            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+        else:
+            ml = ""
+        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+    if pipe:
+        baton.twirl()
+    return True
+
 class FakeGPS:
     "Class encapsulating a pty with a gest load attached to it."
     def __init__(self, logfp, rate):
@@ -121,6 +138,7 @@ class FakeGPS:
         raw[4] = raw[5] = rate
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
     def enable_capture(self):
+        "Enable capture of the responses from the daemon."
         self.responses = []
         try:
             session = gps.gps()
@@ -129,24 +147,11 @@ class FakeGPS:
         session.query("w+r+")
         session.set_thread_hook(lambda x: self.responses.append(x))
         return True
-    def feed(self, pid, pipe, cycle, linedump, hook):
-        "Feed the contents of the digest to the daemon, capture its responses."
+    def feed(self, pid, go_predicate):
+        "Feed the contents of the digest to the daemon."
         i = 0;
-        while True:
-            if i % len(self.testload.sentences) == 0:
-                if pipe and i > 0:
-                    break
-                if not pipe:
-                    sys.stderr.write("gpsfake: log cycle begins.\n")
-            time.sleep(cycle)
-            if linedump:
-                if self.testload.textual:
-                    ml = self.testload.sentences[i % len(self.testload.sentences)].strip()
-                else:
-                    ml = ""
-                print self.testload.legend % (i % len(self.testload.sentences) + 1) + ml
+        while go_predicate(i, self):
             os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
-            hook()
             try:
                 st = os.kill(pid, 0)
             except OSError:
@@ -251,7 +256,7 @@ else:
                 sys.stderr.write("gpsfake: gpsd unreachable.\n")
                 raise SystemExit, 1
         try:
-            status = fakegps.feed(pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
+            status = fakegps.feed(pid, fakehook)
         except KeyboardInterrupt:
             status = True
         if not status:
