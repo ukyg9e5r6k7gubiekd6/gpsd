@@ -4,39 +4,8 @@
 #
 # Simulates a GPS, playing back a logfile
 
-import sys, os, time, signal, pty, getopt, tempfile, termios, socket, string
-import exceptions
+import sys, os, time, signal, pty, termios, socket, string, exceptions
 import gps
-
-class Baton:
-    "Ship progress indication to stderr."
-    def __init__(self, prompt, endmsg=None):
-        self.stream = sys.stderr
-        self.stream.write(prompt + "... \010")
-        self.stream.flush()
-        self.count = 0
-        self.endmsg = endmsg
-        self.time = time.time()
-        return
-
-    def twirl(self, ch=None):
-        if self.stream is None:
-            return
-        if ch:
-            self.stream.write(ch)
-        else:
-            self.stream.write("-/|\\"[self.count % 4])
-            self.stream.write("\010")
-        self.count = self.count + 1
-        self.stream.flush()
-        return
-
-    def end(self, msg=None):
-        if msg == None:
-            msg = self.endmsg
-        if self.stream:
-            self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
-        return
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
@@ -196,114 +165,144 @@ class DaemonInstance:
             os.kill(self.pid, signal.SIGTERM)
             self.pid = None
 
-# Main sequence
+if __name__ == "__main__":
+    class Baton:
+        "Ship progress indications to stderr."
+        def __init__(self, prompt, endmsg=None):
+            self.stream = sys.stderr
+            self.stream.write(prompt + "... \010")
+            self.stream.flush()
+            self.count = 0
+            self.endmsg = endmsg
+            self.time = time.time()
+            return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
-cycle = 1
-gdb = False
-speed = 4800
-linedump = False
-pipe = False
-verbose = False
-doptions = ""
-for (switch, val) in options:
-    if (switch == '-c'):
-        cycle = float(val)
-    elif (switch == '-D'):
-        doptions += " -D " + val
-    elif (switch == '-g'):
-        gdb = True
-    elif (switch == '-l'):
-        linedump = True
-    elif (switch == '-o'):
-        doptions = val
-    elif (switch == '-p'):
-        pipe = True
-        cycle = 0.05
-    elif (switch == '-s'):
-        speed = int(val)
-    elif (switch == '-v'):
-        verbose = True
-    elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-l] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
-        sys.exit(0)
-logfile = arguments[0]
+        def twirl(self, ch=None):
+            if self.stream is None:
+                return
+            if ch:
+                self.stream.write(ch)
+            else:
+                self.stream.write("-/|\\"[self.count % 4])
+                self.stream.write("\010")
+            self.count = self.count + 1
+            self.stream.flush()
+            return
 
-try:
-    rate = eval("termios.B" + `speed`)
-except AttributeError:
-    print "gpsfake: illegal baud rate."
-    raise SystemExit,1
+        def end(self, msg=None):
+            if msg == None:
+                msg = self.endmsg
+            if self.stream:
+                self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
+            return
 
-# First step: grab packets from the specified input source
-# and turn them into an internal sentence list.  Croak if this fails.
-try:
-    fakegps = FakeGPS(logfile, rate)
-except PacketError, e:
-    sys.stderr.write("gsfake: " + e.msg + "\n")
-    raise SystemExit, 1
-except IOError:
-    sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
-    raise SystemExit, 1
-except OSError:
-    sys.stderr.write("gpsfake: can't open pty.\n")
-    raise SystemExit, 1
-if verbose:
-    sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
+    import getopt
+    (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
+    cycle = 1
+    gdb = False
+    speed = 4800
+    linedump = False
+    pipe = False
+    verbose = False
+    doptions = ""
+    for (switch, val) in options:
+        if (switch == '-c'):
+            cycle = float(val)
+        elif (switch == '-D'):
+            doptions += " -D " + val
+        elif (switch == '-g'):
+            gdb = True
+        elif (switch == '-l'):
+            linedump = True
+        elif (switch == '-o'):
+            doptions = val
+        elif (switch == '-p'):
+            pipe = True
+            cycle = 0.05
+        elif (switch == '-s'):
+            speed = int(val)
+        elif (switch == '-v'):
+            verbose = True
+        elif (switch == '-h'):
+            sys.stderr.write("usage: gpsfake [-h] [-l] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
+            raise SystemExit,0
+    logfile = arguments[0]
 
-daemon = DaemonInstance("/tmp/gpsfake-%d.sock" % os.getpid())
-
-# Next step: Launch the daemon and the thread to monitor it
-child = os.fork()
-if child:
-    # Parent side
     try:
-        daemon.spawn(doptions + " " + fakegps.slave)
-    except OSError:
-        sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
-        os.kill(child, signal.SIGTERM)
-        sys.exit(1)
-    os.kill(child, signal.SIGTERM)
-    sys.exit(0)
-else:
-    # Child side -- wait for daemon to make pidfile so we know it's running
-    if not daemon.wait_pid():
-        sys.stderr.write("gpsfake: can't get control socket.\n")
+        rate = eval("termios.B" + `speed`)
+    except AttributeError:
+        print "gpsfake: illegal baud rate."
+        raise SystemExit,1
+
+    # First step: grab packets from the specified input source
+    # and turn them into an internal sentence list.  Croak if this fails.
+    try:
+        fakegps = FakeGPS(logfile, rate)
+    except PacketError, e:
+        sys.stderr.write("gsfake: " + e.msg + "\n")
         raise SystemExit, 1
-    elif not pipe or verbose:
-        sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
-    try:
-        if pipe:
-            baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
-            if not fakegps.enable_capture():
-                sys.stderr.write("gpsfake: gpsd unreachable.\n")
-                raise SystemExit, 1
-        try:
-            def fakehook(linenumber, fakegps):
-                if linenumber % len(fakegps.testload.sentences) == 0:
-                    if pipe and linenumber > 0:
-                        return False
-                    if not pipe:
-                        sys.stderr.write("gpsfake: log cycle begins.\n")
-                time.sleep(cycle)
-                if linedump:
-                    if fakegps.testload.textual:
-                        ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
-                    else:
-                        ml = ""
-                    print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
-                if pipe:
-                    baton.twirl()
-                return True
+    except IOError:
+        sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
+        raise SystemExit, 1
+    except OSError:
+        sys.stderr.write("gpsfake: can't open pty.\n")
+        raise SystemExit, 1
+    if verbose:
+        sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
 
-            status = fakegps.feed(daemon, fakehook)
-        except KeyboardInterrupt:
-            status = True
-        if not status:
-            print "gpsfake: gpsd is gone."
-        if pipe:
-            baton.end()
-            sys.stdout.write("".join(fakegps.responses))
-    finally:
-        del daemon
-    sys.exit(0)
+    daemon = DaemonInstance("/tmp/gpsfake-%d.sock" % os.getpid())
+
+    # Next step: Launch the daemon and the thread to monitor it
+    child = os.fork()
+    if child:
+        # Parent side
+        try:
+            daemon.spawn(doptions + " " + fakegps.slave)
+        except OSError:
+            sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
+            os.kill(child, signal.SIGTERM)
+            raise SytemExit,1
+        os.kill(child, signal.SIGTERM)
+        raise SystemExit,0
+    else:
+        # Child side -- wait for daemon to make pidfile so we know it's running
+        if not daemon.wait_pid():
+            sys.stderr.write("gpsfake: can't get control socket.\n")
+            raise SystemExit, 1
+        elif not pipe or verbose:
+            sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
+        try:
+            if pipe:
+                baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
+                if not fakegps.enable_capture():
+                    sys.stderr.write("gpsfake: gpsd unreachable.\n")
+                    raise SystemExit, 1
+            try:
+                def fakehook(linenumber, fakegps):
+                    if linenumber % len(fakegps.testload.sentences) == 0:
+                        if pipe and linenumber > 0:
+                            return False
+                        if not pipe:
+                            sys.stderr.write("gpsfake: log cycle begins.\n")
+                    time.sleep(cycle)
+                    if linedump:
+                        if fakegps.testload.textual:
+                            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+                        else:
+                            ml = ""
+                        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+                    if pipe:
+                        baton.twirl()
+                    return True
+
+                status = fakegps.feed(daemon, fakehook)
+            except KeyboardInterrupt:
+                status = True
+            if not status:
+                print "gpsfake: gpsd is gone."
+            if pipe:
+                baton.end()
+                sys.stdout.write("".join(fakegps.responses))
+        finally:
+            del daemon
+        raise SystemExit,0
