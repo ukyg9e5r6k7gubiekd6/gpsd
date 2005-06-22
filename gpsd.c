@@ -1090,6 +1090,8 @@ int main(int argc, char *argv[])
 	    gpsd_report(1,"Received terminating signal %d. Exiting...\n",st-1);
 	    if (control_socket)
 		(void)unlink(control_socket);
+	    if (pid_file)
+		(void)unlink(pid_file);
 	    exit(10 + st);
 	}
     }
@@ -1300,6 +1302,8 @@ int main(int argc, char *argv[])
 
     if (control_socket)
 	(void)unlink(control_socket);
+    if (pid_file)
+	(void)unlink(pid_file);
     return 0;
 }
 /*@ +mustfreefresh @*/
