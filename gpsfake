@@ -152,7 +152,7 @@ class DaemonInstance:
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, doptions, background=False, gdb=False):
         "Spawn a daemon instance."
-        spawncmd = "gpsd -N -P %s %s" % (self.pidfile, doptions)
+        spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, doptions)
         spawncmd = spawncmd.strip()
         if gdb:
             spawncmd = "gdb --args " + spawncmd
@@ -160,7 +160,7 @@ class DaemonInstance:
             spawncmd += " &"
         os.system(spawncmd)
     def wait_pid(self):
-        "Get the running daeomon's PID from where it's written."
+        "Wait for the daemon, get its PID and a control-socket connection."
         while True:
             try:
                 fp = open(self.pidfile)
@@ -170,14 +170,7 @@ class DaemonInstance:
             self.pid = int(fp.read())
             fp.close()
             break
-    def __del__(self):
-        "Kill the daemon instance and remove its pid file."
-        if self.pid:
-            os.kill(self.pid, signal.SIGTERM)
-        if os.path.exists(self.pidfile):
-            os.remove(self.pidfile)
-    def gpsd_control_connect(self):
-        "Acquire a connection to the GPSD control socket."
+        # Now we know it's running, get a connection to the control socket.
         if not os.path.exists(self.control_socket):
             return None
         try:
@@ -185,12 +178,16 @@ class DaemonInstance:
             sock.connect(self.control_socket)
             self.sockfile = sock.makefile()
         except socket.error, msg:
+            sys.stderr("gpsfake: " + msg + "\n")
             if sock:
                 sock.close()
             sock = None
             self.sockfile = None
         return self.sockfile
-
+    def __del__(self):
+        "Kill the daemon instance."
+        if self.pid:
+            os.kill(self.pid, signal.SIGTERM)
 
 # Main sequence
 
@@ -280,10 +277,11 @@ if child:
     sys.exit(0)
 else:
     # Child side -- wait for daemon to make pidfile so we know it's running
-    daemon.wait_pid()
-    if not pipe or verbose:
+    if not daemon.wait_pid():
+        sys.stderr.write("gpsfake: can't get control socket.\n")
+        raise SystemExit, 1
+    elif not pipe or verbose:
         sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
-
     try:
         if pipe:
             baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
