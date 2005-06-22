@@ -42,34 +42,11 @@ class PacketError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
-def packet_get(fp):
-    "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
-    first = fp.read(1)
-    if not first:
-        return None
-    elif first == '$':					# NMEA packet
-        return "$" + fp.readline()
-    second = fp.read(1)
-    if first == '\xa0' and second == '\xa2':		# SiRF packet
-        third = fp.read(1)
-        fourth = fp.read(1)
-        length = (ord(third) << 8) | ord(fourth)
-        return "\xa0\xa2" + third + fourth + fp.read(length+4)
-    elif first == '\xff' and second == '\x81':
-        third = fp.read(1)
-        fourth = fp.read(1)
-        fifth = fp.read(1)
-        sixth = fp.read(1)
-        id = ord(third) | (ord(fourth) << 8)
-        ndata = ord(fifth) | (ord(sixth) << 8)
-        return "\xff\x81" + third + fourth + fifth + sixth + fp.read(2*ndata+6)
-    else:
-        raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
-
-class PacketDigest:
+class TestLoad:
     "Class encapsulating a digested logfile."
     def __init__(self, logfp):
         self.sentences = []
+        self.logfp = logfp
         self.logfile = logfp.name 
         # Skip the comment header
         while True:
@@ -80,17 +57,13 @@ class PacketDigest:
                 logfp.seek(-1, 1)	# Must be a real file, not stdin
                 break
         # Grab the packets
-        try:
-            while True:
-                packet = packet_get(logfp)
-                #print "I see: %s, length %d" % (`packet`, len(packet))
-                if not packet:
-                    break
-                else:
-                    self.sentences.append(packet)
-        except PacketError, e:
-            sys.stderr.write(`e.msg` + "\n")
-            raise SystemExit, 1
+        while True:
+            packet = self.packet_get()
+            #print "I see: %s, length %d" % (`packet`, len(packet))
+            if not packet:
+                break
+            else:
+                self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
         if self.sentences[0][0] == '$':
             self.packtype = "NMEA"
@@ -107,8 +80,48 @@ class PacketDigest:
         else:
             print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
             self.sentences = None
+    def packet_get(self):
+        "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
+        first = self.logfp.read(1)
+        if not first:
+            return None
+        elif first == '$':					# NMEA packet
+            return "$" + self.logfp.readline()
+        second = self.logfp.read(1)
+        if first == '\xa0' and second == '\xa2':		# SiRF packet
+            third = self.logfp.read(1)
+            fourth = self.logfp.read(1)
+            length = (ord(third) << 8) | ord(fourth)
+            return "\xa0\xa2" + third + fourth + self.logfp.read(length+4)
+        elif first == '\xff' and second == '\x81':
+            third = self.logfp.read(1)
+            fourth = self.logfp.read(1)
+            fifth = self.logfp.read(1)
+            sixth = self.logfp.read(1)
+            id = ord(third) | (ord(fourth) << 8)
+            ndata = ord(fifth) | (ord(sixth) << 8)
+            return "\xff\x81" + third + fourth + fifth + sixth + self.logfp.read(2*ndata+6)
+        else:
+            raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
-def gpsfake(master_fd, digest, pid, pipe, cycle, linedump, hook):
+class FakeGPS:
+    "Class encapsulating a pty with a gest load attached to it."
+    def __init__(self, logfp, rate):
+        self.testload = TestLoad(logfp)
+        (self.master_fd, self.slave_fd) = pty.openpty()
+        self.slave = os.ttyname(self.slave_fd)
+        ttyfp = open(self.slave, "rw")
+        raw = termios.tcgetattr(ttyfp.fileno())
+        raw[0] = 0					# iflag
+        raw[1] = termios.ONLCR				# oflag
+        raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
+        raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
+        raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
+        raw[3] = 0					# lflag
+        raw[4] = raw[5] = rate
+        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+
+def gpsfake(fakegps, pid, pipe, cycle, linedump, hook):
     "Feed the contents of the digest to the daemon, capture its responses."
     responses = []
     if pipe:
@@ -123,19 +136,19 @@ def gpsfake(master_fd, digest, pid, pipe, cycle, linedump, hook):
     try:
         i = 0;
         while True:
-            if i % len(digest.sentences) == 0:
+            if i % len(fakegps.testload.sentences) == 0:
                 if pipe and i > 0:
                     break
                 if not pipe:
                     sys.stderr.write("gpsfake: log cycle begins.\n")
             time.sleep(cycle)
             if linedump:
-                if digest.textual:
-                    ml = digest.sentences[i % len(digest.sentences)].strip()
+                if fakegps.testload.textual:
+                    ml = fakegps.testload.sentences[i % len(fakegps.testload.sentences)].strip()
                 else:
                     ml = ""
-                print digest.legend % (i % len(digest.sentences) + 1) + ml
-            os.write(master_fd, digest.sentences[i % len(digest.sentences)])
+                print fakegps.testload.legend % (i % len(fakegps.testload.sentences) + 1) + ml
+            os.write(fakegps.master_fd, fakegps.testload.sentences[i % len(fakegps.testload.sentences)])
             hook()
             try:
                 st = os.kill(pid, 0)
@@ -178,6 +191,12 @@ for (switch, val) in options:
         sys.exit(0)
 logfile = arguments[0]
 
+try:
+    rate = eval("termios.B" + `speed`)
+except AttributeError:
+    print "gpsfake: illegal baud rate."
+    raise SystemExit,1
+
 # First step: grab packets from the specified input source
 # and turn them into an internal sentence list.  Croak if this fails.
 try:
@@ -185,33 +204,20 @@ try:
 except IOError, OSError:
     sys.stderr.write("gsfake: no such file, or file unreadable\n")
     raise SystemExit, 1
-digest = PacketDigest(logfp)
 if verbose:
-    sys.stderr.write("gpsfake: interpreting as %s packets\n" % digest.packtype)
+    sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
 
 # Second step: Prepare to launch the daemon, creating the pty to feed it with.
 try:
-    (master_fd, slave_fd) = pty.openpty()
-    slave = os.ttyname(slave_fd)
-    ttyfp = open(slave, "rw")
-    raw = termios.tcgetattr(ttyfp.fileno())
-    raw[0] = 0					# iflag
-    raw[1] = termios.ONLCR				# oflag
-    raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-    raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
-    raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
-    raw[3] = 0					# lflag
-    try:
-        raw[4] = raw[5] = eval("termios.B" + `speed`)
-    except AttributeError:
-        print "gpsfake: illegal baud rate."
-        raise SystemExit,1
-    termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
-except:
+    fakegps = FakeGPS(logfp, rate)
+except PacketError, e:
+    sys.stderr.write(`e.msg` + "\n")
+    raise SystemExit, 1
+except OSError:
     sys.stderr.write("gpsfake: can't open pty.\n")
-    sys.exit(1)
+    raise SystemExit, 1
 pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
-spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, slave)
+spawncmd = "gpsd -N -P %s %s %s" % (pidfile, doptions, fakegps.slave)
 spawncmd = spawncmd.strip()
 if gdb:
     spawncmd = "gdb --args " + spawncmd
@@ -245,8 +251,8 @@ else:
 
     try:
         if pipe:
-            baton = Baton("Processing %s" % digest.logfile, "done")
-        (status, responses) = gpsfake(master_fd, digest, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
+            baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
+        (status, responses) = gpsfake(fakegps, pid, pipe, cycle, linedump, lambda: pipe and baton.twirl())
         if not status:
             print "gpsfake: gpsd is gone."
         if pipe:
