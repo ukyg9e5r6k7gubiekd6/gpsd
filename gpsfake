@@ -132,19 +132,18 @@ class FakeGPS:
         session.query("w+r+")
         session.set_thread_hook(lambda x: self.responses.append(x))
         return True
-    def feed(self, pid, go_predicate):
+    def feed(self, daemon, go_predicate):
         "Feed the contents of the digest to the daemon."
         i = 0;
         while go_predicate(i, self):
             os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
-            try:
-                st = os.kill(pid, 0)
-            except OSError:
+            if not daemon.is_alive():
                 return False
             i += 1
         return True
 
 class DaemonInstance:
+    "Control a gpsd instance."
     def __init__(self, control_socket):
         self.sockfile = None
         self.pid = None
@@ -184,29 +183,20 @@ class DaemonInstance:
             sock = None
             self.sockfile = None
         return self.sockfile
+    def is_alive(self):
+        "Is the daemon still alive?"
+        try:
+            st = os.kill(self.pid, 0)
+            return True
+        except OSError:
+            return False
     def __del__(self):
         "Kill the daemon instance."
         if self.pid:
             os.kill(self.pid, signal.SIGTERM)
+            self.pid = None
 
 # Main sequence
-
-def fakehook(linenumber, fakegps):
-    if linenumber % len(fakegps.testload.sentences) == 0:
-        if pipe and linenumber > 0:
-            return False
-        if not pipe:
-            sys.stderr.write("gpsfake: log cycle begins.\n")
-    time.sleep(cycle)
-    if linedump:
-        if fakegps.testload.textual:
-            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
-        else:
-            ml = ""
-        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
-    if pipe:
-        baton.twirl()
-    return True
 
 (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
 cycle = 1
@@ -289,7 +279,24 @@ else:
                 sys.stderr.write("gpsfake: gpsd unreachable.\n")
                 raise SystemExit, 1
         try:
-            status = fakegps.feed(daemon.pid, fakehook)
+            def fakehook(linenumber, fakegps):
+                if linenumber % len(fakegps.testload.sentences) == 0:
+                    if pipe and linenumber > 0:
+                        return False
+                    if not pipe:
+                        sys.stderr.write("gpsfake: log cycle begins.\n")
+                time.sleep(cycle)
+                if linedump:
+                    if fakegps.testload.textual:
+                        ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+                    else:
+                        ml = ""
+                    print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+                if pipe:
+                    baton.twirl()
+                return True
+
+            status = fakegps.feed(daemon, fakehook)
         except KeyboardInterrupt:
             status = True
         if not status:
