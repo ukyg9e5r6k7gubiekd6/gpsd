@@ -16,16 +16,14 @@ def gpsd_control_connect():
     try:
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
         sock.connect(CONTROL_SOCKET)
-        sockfile = sock.makefile()
     except socket.error, msg:
         syslog.syslog("socket %s creation failure: %s" % (CONTROL_SOCKET, msg))
         if sock:
             sock.close()
         sock = None
-        sockfile = None
     #else:
     #    syslog.syslog("socket %s created OK" % CONTROL_SOCKET)
-    return sockfile
+    return sock
 
 def gpsd_control(action, argument):
     "Pass a command to gpsd; start the daemon if not already running."
@@ -48,11 +46,11 @@ def gpsd_control(action, argument):
         # Force the group-read & group-write bits on, so gpsd will still be
         # able to use this device after dropping root privileges.
         os.chmod(argument, stat.S_IMODE(os.stat(argument)[stat.ST_MODE])|0660)
-        connect.write("+%s\r\n" % argument)
-        connect.readline()
+        connect.sendall("+%s\r\n" % argument)
+        connect.recv(12)
     elif action == 'remove':
-        connect.write("-%s\r\n" % argument)
-        connect.readline()
+        connect.sendall("-%s\r\n" % argument)
+        connect.recv(12)
     connect.close()
     #syslog.syslog("gpsd_control ends")
     return action

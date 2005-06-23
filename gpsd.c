@@ -522,14 +522,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 		    /*@i@*/whoami->device = *newchan;
 		    whoami->tied = true;
 		}
-		free(stash);
 	    }
+	    /*@ +branchstate @*/
 	    if (whoami->device != NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",F=%s", 
 			 whoami->device->gpsdata.gps_device);
 	    else
 		(void)strcpy(phrase, ",F=?");
-	    /*@ +branchstate @*/
 	    break;
 	case 'I':
 	    if (assign_channel(whoami))
@@ -893,7 +892,6 @@ static void handle_control(int sfd, char *buf)
 	    (void)write(sfd, "OK\n", 3);
 	} else
 	    (void)write(sfd, "ERROR\n", 6);
-	(void)free(stash);
     } else if (buf[0] == '+') {
 	p = snarfline(buf+1, &stash);
 	if (find_device(stash))
@@ -905,7 +903,6 @@ static void handle_control(int sfd, char *buf)
 	    else
 		(void)write(sfd, "ERROR\n", 6);
 	}
-	(void)free(stash);
     } else if (buf[0] == '!') {
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
@@ -923,7 +920,6 @@ static void handle_control(int sfd, char *buf)
 		(void)write(sfd, "ERROR\n", 6);
 	    }
 	}
-	(void)free(stash);
     }
 }
 
@@ -1180,10 +1176,6 @@ int main(int argc, char *argv[])
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
 	    else {
-		int opts = fcntl(ssock, F_GETFL);
-
-		if (opts >= 0)
-		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "control socket connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);

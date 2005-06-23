@@ -138,20 +138,18 @@ class DaemonInstance:
             self.pid = int(fp.read())
             fp.close()
             break
+    def get_control_socket(self):
         # Now we know it's running, get a connection to the control socket.
         if not os.path.exists(self.control_socket):
             return None
         try:
-            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
-            sock.connect(self.control_socket)
-            self.sockfile = sock.makefile()
-        except socket.error, msg:
-            sys.stderr("gpsfake: " + msg + "\n")
-            if sock:
-                sock.close()
-            sock = None
-            self.sockfile = None
-        return self.sockfile
+            self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM, 0)
+            self.sock.connect(self.control_socket)
+        except socket.error:
+            if self.sock:
+                self.sock.close()
+            self.sock = None
+        return self.sock
     def is_alive(self):
         "Is the daemon still alive?"
         try:
@@ -161,12 +159,16 @@ class DaemonInstance:
             return False
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
-        self.sockfile.write("+%s\r\n" % path)
-        self.sockfile.readline()
+        if self.get_control_socket():
+            self.sock.sendall("+%s\r\n" % path)
+            self.sock.recv(12)
+            self.sock.close()
     def remove_device(self, path):
         "Remove a device from the daemon's internal search list."
-        self.sockfile.write("-%s\r\n" % path)
-        self.sockfile.readline()
+        if self.get_control_socket():
+            self.sock.sendall("-%s\r\n" % path)
+            self.sock.recv(12)
+            self.sock.close()
     def __del__(self):
         "Kill the daemon instance."
         if self.pid:
@@ -274,10 +276,8 @@ if __name__ == "__main__":
         raise SystemExit,0
     else:
         # Child side -- wait for daemon to make pidfile so we know it's running
-        if not daemon.wait_pid():
-            sys.stderr.write("gpsfake: can't get control socket.\n")
-            raise SystemExit, 1
-        elif not pipe or verbose:
+        daemon.wait_pid()
+        if not pipe or verbose:
             sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
         try:
             #daemon.add_device(fakegps.slave)
