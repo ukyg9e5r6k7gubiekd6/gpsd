@@ -21,6 +21,7 @@
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-g</arg>
       <arg choice='opt'>-l</arg>
+      <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
@@ -65,6 +66,11 @@ may do any setup necessary at the gdb command prompt before typing
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is
 textual (e.g. NMEA, the text is dumped as well).</para>
+
+<para>The -m option specifies a monitor program inside which the
+daemon should be run.  This option is intended to be used with
+<citerefentry><refentrytitle>valgrind</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+and similar programs.</para>
 
 <para>The -o option specifies options to pass to the daemon.
 Passing "-n" is often useful.  The -D option passes a -D option

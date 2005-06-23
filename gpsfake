@@ -118,12 +118,10 @@ class DaemonInstance:
         self.pid = None
         self.control_socket = control_socket
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
-    def spawn(self, doptions, background=False, gdb=False):
+    def spawn(self, doptions, background=False, prefix=""):
         "Spawn a daemon instance."
         spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, doptions)
-        spawncmd = spawncmd.strip()
-        if gdb:
-            spawncmd = "gdb --args " + spawncmd
+        spawncmd = prefix + spawncmd.strip()
         if background:
             spawncmd += " &"
         os.system(spawncmd)
@@ -138,7 +136,7 @@ class DaemonInstance:
             self.pid = int(fp.read())
             fp.close()
             break
-    def get_control_socket(self):
+    def __get_control_socket(self):
         # Now we know it's running, get a connection to the control socket.
         if not os.path.exists(self.control_socket):
             return None
@@ -159,13 +157,13 @@ class DaemonInstance:
             return False
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
-        if self.get_control_socket():
+        if self.__get_control_socket():
             self.sock.sendall("+%s\r\n" % path)
             self.sock.recv(12)
             self.sock.close()
     def remove_device(self, path):
         "Remove a device from the daemon's internal search list."
-        if self.get_control_socket():
+        if self.__get_control_socket():
             self.sock.sendall("-%s\r\n" % path)
             self.sock.recv(12)
             self.sock.close()
@@ -207,9 +205,9 @@ if __name__ == "__main__":
             return
 
     import getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlo:ps:v")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlm:o:ps:v")
     cycle = 1
-    gdb = False
+    monitor = ""
     speed = 4800
     linedump = False
     pipe = False
@@ -221,9 +219,11 @@ if __name__ == "__main__":
         elif (switch == '-D'):
             doptions += " -D " + val
         elif (switch == '-g'):
-            gdb = True
+            monitor = "gdb --args "
         elif (switch == '-l'):
             linedump = True
+        elif (switch == '-m'):
+            monitor = val + " "
         elif (switch == '-o'):
             doptions = val
         elif (switch == '-p'):
@@ -234,7 +234,7 @@ if __name__ == "__main__":
         elif (switch == '-v'):
             verbose = True
         elif (switch == '-h'):
-            sys.stderr.write("usage: gpsfake [-h] [-l] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
+            sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
             raise SystemExit,0
     logfile = arguments[0]
 
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     if child:
         # Parent side
         try:
-            daemon.spawn(doptions)
+            daemon.spawn(doptions, monitor)
         except OSError:
             sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
             os.kill(child, signal.SIGTERM)

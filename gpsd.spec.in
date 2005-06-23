@@ -123,7 +123,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %changelog
 * Thu Jun 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Arrange for the daemon to remove its pid file on exit.
+- Arrange for the daemon to remove its pid file on exit.  Fix some
+  buffering problems with the Python side of the hotplug interface.
+  gpsfake can now run sessions under a monitor like Valgrind.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 
