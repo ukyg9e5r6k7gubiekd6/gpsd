@@ -267,7 +267,7 @@ if __name__ == "__main__":
     if child:
         # Parent side
         try:
-            daemon.spawn(doptions + " " + fakegps.slave)
+            daemon.spawn(doptions)
         except OSError:
             sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
             os.kill(child, signal.SIGTERM)
@@ -280,7 +280,7 @@ if __name__ == "__main__":
         if not pipe or verbose:
             sys.stderr.write("gpsfake: '%s' launch OK.\n" % spawncmd)
         try:
-            #daemon.add_device(fakegps.slave)
+            daemon.add_device(fakegps.slave)
             if pipe:
                 baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
                 if not fakegps.enable_capture():
