@@ -938,8 +938,6 @@ int main(int argc, char *argv[])
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
     bool go_background = true;
-    struct passwd *pw;
-    struct stat stb;
     struct timeval tv;
     // extern char *optarg;
 
@@ -1042,11 +1040,6 @@ int main(int argc, char *argv[])
     }
 #endif /* NTPSHM_ENABLE */
 
-    /* make default devices accessible even after we drop privileges */
-    for (i = optind; i < argc; i++) 
-	if (stat(argv[i], &stb) == 0)
-	    (void)chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
-
 #if DBUS_ENABLE
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
@@ -1055,23 +1048,32 @@ int main(int argc, char *argv[])
     } else
 	gpsd_report (2, "successfully connected to the DBUS system bus\n");
 #endif /* DBUS_ENABLE */
-    
-    /*
-     * Drop privileges.  Up to now we've been running as root.  Instead,
-     * set the user ID to 'nobody' and the group ID to the owning group 
-     * of a prototypical TTY device.  This limits the scope of any
-     * compromises in the code.  It requires that all GPS devices have
-     * their group read/write permissions set.
-     */
-    if (getuid() == 0 && ((optind<argc && stat(argv[optind], &stb)==0) || stat(PROTO_TTY, &stb)==0)) {
-	gpsd_report(2, "changing to group %d\n", stb.st_gid);
-	if (setgid(stb.st_gid) != 0)
-	    gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
+
+    if (getuid() == 0 && go_background) {
+	struct passwd *pw;
+	struct stat stb;
+
+	/* make default devices accessible even after we drop privileges */
+	for (i = optind; i < argc; i++) 
+	    if (stat(argv[i], &stb) == 0)
+		(void)chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
+	/*
+	 * Drop privileges.  Up to now we've been running as root.  Instead,
+	 * set the user ID to 'nobody' and the group ID to the owning group 
+	 * of a prototypical TTY device.  This limits the scope of any
+	 * compromises in the code.  It requires that all GPS devices have
+	 * their group read/write permissions set.
+	 */
+	if ((optind<argc&&stat(argv[optind], &stb)==0)||stat(PROTO_TTY,&stb)==0) {
+	    gpsd_report(2, "changing to group %d\n", stb.st_gid);
+	    if (setgid(stb.st_gid) != 0)
+		gpsd_report(0, "setgid() failed, errno %s\n", strerror(errno));
+	}
+	pw = getpwnam("nobody");
+	if (pw)
+	    (void)setuid(pw->pw_uid);
     }
     gpsd_report(2, "running with effective group ID %d\n", getegid());
-    pw = getpwnam("nobody");
-    if (pw)
-	(void)setuid(pw->pw_uid);
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
 
     /* user may want to re-initialize all channels */

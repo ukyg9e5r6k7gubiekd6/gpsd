@@ -109,8 +109,9 @@ well with -D2 to enable monitoring of the GPS data stream.</para>
 </varlistentry>
 <varlistentry>
 <term>-N</term>
-<listitem><para>Don't daemonize; run in foreground. Mainly useful
-for debugging.</para>
+<listitem><para>Don't daemonize; run in foreground.  Also suppresses 
+privilege-dropping.  This switch is mainly useful for debugging.
+Its meaning may change in future versions.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
