@@ -271,7 +271,7 @@ if __name__ == "__main__":
         except OSError:
             sys.stderr.write("gpsfake: '%s' failed.\n" % spawncmd)
             os.kill(child, signal.SIGTERM)
-            raise SytemExit,1
+            raise SystemExit,1
         os.kill(child, signal.SIGTERM)
         raise SystemExit,0
     else:

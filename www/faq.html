@@ -92,7 +92,8 @@ that.</p>
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
 
-<h1 id='date_flicker'>The date in <code>xgps</code> flickers to "n/a" part of the time</h1>
+<h1 id='flicker'>The date and other fields in <code>xgps</code> flicker 
+to "n/a" part of the time even when there's a fix.</h1>
 
 <p>The sentence or packet your GPS uses to report satellite
 bearing/elevation has no timestamp. The <code>xgps</code>
@@ -108,6 +109,15 @@ getting from the GPS, including the fact that the Y sentence contains
 no date. That's its job.  The libgps library is doing its bit by
 passing everything from <code>gpsd</code> on to the client application
 as it arrives, including the lack of date.</p>
+
+<p>Other fields may flicker as well; latitude is prone to this on NMEA
+devices.  It's the same problem.  In theory, a client could accumulate
+data through an entire send cycle from the GPS, and change the display
+only once at end of cycle.  The problem with this is that there is
+so much variation in the order GPS sends sentences that there is no
+no way to spot end-of-cycle &mdash; the best you could do would be
+to wait until a sentence-timestamp change signals the start of a new
+cycle, at which time the buffered data is by definition obsolete.</p>
 
 <p>It's the <em>client's</em> job to interpret/interpolate/fill in
 gaps, to do policy.  What you're seeing as a bug only looks like one

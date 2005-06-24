@@ -151,6 +151,8 @@ and fix latency.</dd>
 <dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
 </dl>
 
+<p>Also, see the <a href="faq.html">FAQ</a>.</p>
+
 <p>We have a <a href='hardware.html'>list of compatible GPSses</a>
 with some technical information.  We also have <a href='NMEA.txt'>a
 list of NMEA sentences</a>.</p>
@@ -196,7 +198,7 @@ development. There haven't been any releases since early 2002.</p>
 
 <p>There is a <a href='http://www.crs4.it:8000/gpsweb/14'>GPSd</a>
 project that is a GPS daemon written in Java and apparently intended
-to provide location informtion for browsers.</p>
+to provide location information for browsers.</p>
 
 <p>There is a <code>gpsd</code>-like hack hosted under <a
 href='http://www2.musatcha.com/musatcha/computers/software/gpsd/'>Microsoft
