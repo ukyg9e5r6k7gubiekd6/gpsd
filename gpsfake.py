@@ -124,18 +124,18 @@ class FakeGPS:
         session.query("w+r+")
         session.set_thread_hook(lambda x: self.responses.append(x))
         return True
-    def __start(self, go_predicate):
+    def __feed(self, go_predicate):
         "Feed the contents of the GPS log to the daemon."
         i = 0;
         while not self.stopme and go_predicate(i, self):
             os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
             i += 1
     def start(self, go_predicate=lambda i,s: True, thread=False):
+        self.thread = threading.Thread(self.__feed(go_predicate))
         if thread:
-            self.thread = threading.Thread(self.__start(go_predicate))
-            self.thread.run()
+            self.thread.start()	# Run asynchronously
         else:
-            self.__start(go_predicate)
+            self.thread.run()	# Run synchronously
     def stop(self):
         "Stop this fake GPS."
         self.stopme = True
@@ -210,17 +210,30 @@ class TestSession:
     def __init__(self, prefix, options):
         "Initialize the test session by launching the daemon."
         self.daemon = DaemonInstance()
-        self.devices = []
+        self.devices = {}
         self.clients = []
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
-    def add(self, logfile):
+    def add_gps(self, name):
         "Add a simulated GPS being fed by the specified logfile."
-        if not logfile.endswith(".log"):
-            logfile += ".log"
-        newgps = FakeGPS(logfile)
-        self.clients.append(newgps)
+        if name not in self.devices:
+            if not name.endswith(".log"):
+                logfile = name + ".log"
+            else:
+                logfile = name
+            newgps = FakeGPS(logfile)
+            self.devices[name] = newgps
         self.daemon.add_device(newgps.slave)
-        newgps.thread_id = thread
+        #self.devices[name].start(thread=True)
+    def remove_gps(self, name):
+        self.devices[name].stop()
+        self.daemon.remove_device(newgps.slave)
+    def add_client(self):
+        "Initiate a client session."
+        pass
+    def remove_client(self, id):
+        "Terminate a client session."
+        pass
+    
 
 # End
