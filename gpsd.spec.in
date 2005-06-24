@@ -74,7 +74,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 # additional gpsd-devel files
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
-cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
+cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -93,11 +93,13 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
 %{_libdir}/libgps.so*
+%{_libdir}/libgps.a
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/sirfmon.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
+%{_libdir}/python*/site-packages/gps.py*
 
 %files -n gpsd-devel
 %defattr(-,root,root,-)
@@ -105,13 +107,12 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
-%{_libdir}/libgps.a
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
 %attr(755, root, root) %{_bindir}/gpsfake
-%{_libdir}/python*/site-packages/gps.py*
+%{_libdir}/python*/site-packages/gpsfake.py*
 
 %files -n gpsd-clients
 %defattr(-,root,root,-)
@@ -125,7 +126,9 @@ cp gps.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 * Thu Jun 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Arrange for the daemon to remove its pid file on exit.  Fix some
   buffering problems with the Python side of the hotplug interface.
-  gpsfake can now run sessions under a monitor like Valgrind.
+  gpsfake can now run sessions under a monitor like Valgrind.  Most
+  of the gpsfake logic now lives in a module that can be used to write
+  other test loads.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 

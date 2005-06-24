@@ -162,6 +162,7 @@ EXTRA_DIST = \
 	gpsd.spec.in \
 	gpsd.spec \
 	gps.py \
+	gpsfake.py \
 	gpsprof \
 	gpsfake \
 	gpsd.hotplug \
