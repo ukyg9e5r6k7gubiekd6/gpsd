@@ -75,6 +75,7 @@ class TestLoad:
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp, rate=4800):
+        self.go_predicate = lambda i, s: True
         self.stopme = False
         self.thread = None
         baudrates = {
@@ -124,14 +125,15 @@ class FakeGPS:
         session.query("w+r+")
         session.set_thread_hook(lambda x: self.responses.append(x))
         return True
-    def __feed(self, go_predicate):
+    def __feed(self):
         "Feed the contents of the GPS log to the daemon."
         i = 0;
-        while not self.stopme and go_predicate(i, self):
+        while not self.stopme and self.go_predicate(i, self):
             os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
             i += 1
-    def start(self, go_predicate=lambda i,s: True, thread=False):
-        self.thread = threading.Thread(self.__feed(go_predicate))
+    def start(self, thread=False):
+        self.thread = threading.Thread(self.__feed())
+        self.stopme = False
         if thread:
             self.thread.start()	# Run asynchronously
         else:

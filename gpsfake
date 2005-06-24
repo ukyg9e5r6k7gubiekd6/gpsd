@@ -131,7 +131,8 @@ else:
                 if pipe:
                     baton.twirl()
                 return True
-            fakegps.start(fakehook)
+            fakegps.go_predicate = fakehook
+            fakegps.start(thread=False)
         except KeyboardInterrupt:
             pass
         if not daemon.is_alive():
