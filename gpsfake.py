@@ -145,10 +145,13 @@ class FakeGPS:
                 self.thread.start()	# Run asynchronously
             else:
                 self.thread.run()	# Run synchronously
-    def stop(self):
+    def release(self):
         "Decrement pseudodevice's reader count; it will stop when count==0."
         if self.readers > 0:
             self.readers -= 1
+    def stop(self):
+        "Zero pseudodevice's reader count; it will stop."
+        self.readers = 0
 
 class DaemonInstance:
     "Control a gpsd instance."
@@ -223,9 +226,10 @@ class TestSession:
         self.devices = {}
         self.clients = []
         self.client_id = 0
+        self.reporter = sys.stdout.write
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
-    def add_gps(self, name):
+    def gps_add(self, name):
         "Add a simulated GPS being fed by the specified logfile."
         if name not in self.devices:
             if not name.endswith(".log"):
@@ -235,24 +239,34 @@ class TestSession:
             newgps = FakeGPS(logfile)
             self.devices[name] = newgps
         self.daemon.add_device(newgps.slave)
-        #self.devices[name].start(thread=True)
-    def remove_gps(self, name):
+    def gps_remove(self, name):
+        "Remove a simulated GPS from the daeon's search list."
         self.devices[name].stop()
         self.daemon.remove_device(newgps.slave)
-    def add_client(self):
-        "Initiate a client session."
+    def client_add(self, commands):
+        "Initiate a client session and force connection to a fake GPS."
         newclient = gps.gps()
         self.client_id += 1
         newclient.id = self.client_id 
         self.clients.append(newclient)
-        session.query("w+")
-    def remove_client(self, id):
+        newclient.query("of")
+        self.devices[newclient.device].start(thread=True)
+        session.set_thread_hook(self.reporter)
+        if commands:
+            newclient.query(commands)
+        return newclient
+    def client_order(self, id, commands):
+        "Ship a command down a client channel, accept a response."
+        for client in self.clients:
+            if client.id == id:
+                client.query(commands)
+    def client_remove(self, id):
         "Terminate a client session."
         for client in self.clients:
             if client.id == id:
-                self.devices[gps.device].stop()
+                self.devices[gps.device].release()
                 self.clients.remove(client)
+                del client
                 break
-            
 
 # End

@@ -17,6 +17,7 @@
 <cmdsynopsis>
   <command>gpsfake</command>  
       <arg choice='opt'>-h</arg>
+      <arg choice='opt'>-b</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-g</arg>
@@ -53,6 +54,9 @@ uis run in background.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
+
+<para>The -b option enables a twirling-baton progress indicator
+on standard error.  At termination, it reports elaped time.</para>
 
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>

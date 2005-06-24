@@ -39,7 +39,8 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "c:D:ghlm:o:ps:v")
+(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghlm:o:ps:v")
+progress = False
 cycle = 1
 monitor = ""
 speed = 4800
@@ -48,7 +49,9 @@ pipe = False
 verbose = False
 doptions = ""
 for (switch, val) in options:
-    if (switch == '-c'):
+    if (switch == '-b'):
+        progress = True
+    elif (switch == '-c'):
         cycle = float(val)
     elif (switch == '-D'):
         doptions += " -D " + val
@@ -68,7 +71,7 @@ for (switch, val) in options:
     elif (switch == '-v'):
         verbose = True
     elif (switch == '-h'):
-        sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] logfile\n")
+        sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
         raise SystemExit,0
 logfile = arguments[0]
 
@@ -109,8 +112,9 @@ else:
         sys.stderr.write("gpsfake: daemon launch OK.\n")
     try:
         daemon.add_device(fakegps.slave)
-        if pipe:
+        if progress:
             baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
+        if pipe:
             if not fakegps.enable_capture():
                 sys.stderr.write("gpsfake: gpsd unreachable.\n")
                 raise SystemExit, 1
@@ -128,7 +132,7 @@ else:
                     else:
                         ml = ""
                     print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
-                if pipe:
+                if progress:
                     baton.twirl()
                 return True
             fakegps.go_predicate = fakehook
@@ -137,8 +141,9 @@ else:
             pass
         if not daemon.is_alive():
             print "gpsfake: gpsd is gone."
-        if pipe:
+        if progress:
             baton.end()
+        if pipe:
             sys.stdout.write("".join(fakegps.responses))
     finally:
         del daemon
