@@ -95,7 +95,7 @@ child = os.fork()
 if child:
     # Parent side
     try:
-        daemon.spawn(doptions, monitor)
+        daemon.spawn(doptions, prefix=monitor, background=False)
     except OSError:
         sys.stderr.write("gpsfake: '%s' failed.\n" % daemon.spawncmd)
         os.kill(child, signal.SIGTERM)
@@ -106,7 +106,7 @@ else:
     # Child side -- wait for daemon to make pidfile so we know it's running
     daemon.wait_pid()
     if not pipe or verbose:
-        sys.stderr.write("gpsfake: '%s' launch OK.\n" % daemon.spawncmd)
+        sys.stderr.write("gpsfake: daemon launch OK.\n")
     try:
         daemon.add_device(fakegps.slave)
         if pipe:
