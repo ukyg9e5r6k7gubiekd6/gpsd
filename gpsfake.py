@@ -166,7 +166,8 @@ class DaemonInstance:
     def spawn(self, options, background=False, prefix=""):
         "Spawn a daemon instance."
         self.spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, options)
-        self.spawncmd = prefix + self.spawncmd.strip()
+        if prefix:
+            self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
             self.spawncmd += " &"
         os.system(self.spawncmd)
@@ -214,16 +215,18 @@ class DaemonInstance:
             self.sock.close()
     def __del__(self):
         "Kill the daemon instance."
+        import signal	# Avoids some strange condition on Python exit
         if self.pid:
             os.kill(self.pid, signal.SIGTERM)
             self.pid = None
+            time.sleep(1)	# Give signal time to land
 
 class TestSession:
     "Manage a session including a daemon with fake GPS and client threads."
-    def __init__(self, prefix, options):
+    def __init__(self, prefix=None, options=None):
         "Initialize the test session by launching the daemon."
         self.daemon = DaemonInstance()
-        self.devices = {}
+        self.fakegpslist = {}
         self.clients = []
         self.client_id = 0
         self.reporter = sys.stdout.write
@@ -231,13 +234,13 @@ class TestSession:
         self.daemon.wait_pid()
     def gps_add(self, name):
         "Add a simulated GPS being fed by the specified logfile."
-        if name not in self.devices:
+        if name not in self.fakegpslist:
             if not name.endswith(".log"):
                 logfile = name + ".log"
             else:
                 logfile = name
             newgps = FakeGPS(logfile)
-            self.devices[name] = newgps
+            self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
     def gps_remove(self, name):
         "Remove a simulated GPS from the daeon's search list."
@@ -249,8 +252,8 @@ class TestSession:
         self.client_id += 1
         newclient.id = self.client_id 
         self.clients.append(newclient)
-        newclient.query("of")
-        self.devices[newclient.device].start(thread=True)
+        newclient.query("of\n")
+        self.fakegpslist[newclient.device].start(thread=True)
         session.set_thread_hook(self.reporter)
         if commands:
             newclient.query(commands)
@@ -264,9 +267,16 @@ class TestSession:
         "Terminate a client session."
         for client in self.clients:
             if client.id == id:
-                self.devices[gps.device].release()
+                self.fakegpslist[client.device].release()
                 self.clients.remove(client)
                 del client
                 break
+
+if __name__ == "__main__":
+    #prefix="valgrind --tool=memcheck", 
+    test = TestSession(options="-D 4")
+    test.gps_add("FUCKUP")
+    test.client_add("w+\n")
+    time.sleep(5)
 
 # End
