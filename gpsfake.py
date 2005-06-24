@@ -76,7 +76,7 @@ class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp, rate=4800):
         self.go_predicate = lambda i, s: True
-        self.stopme = False
+        self.readers = 0
         self.thread = None
         self.index = 0
         baudrates = {
@@ -128,19 +128,22 @@ class FakeGPS:
         return True
     def __feed(self):
         "Feed the contents of the GPS log to the daemon."
-        while not self.stopme and self.go_predicate(self.index, self):
+        while self.readers and self.go_predicate(self.index, self):
             os.write(self.master_fd, self.testload.sentences[self.index % len(self.testload.sentences)])
             self.index += 1
     def start(self, thread=False):
-        self.thread = threading.Thread(self.__feed())
-        self.stopme = False
-        if thread:
-            self.thread.start()	# Run asynchronously
-        else:
-            self.thread.run()	# Run synchronously
+        "Increment pseudodevice's reader count, starting it if necessary."
+        self.readers += 1
+        if self.readers == 1:
+            self.thread = threading.Thread(self.__feed())
+            if thread:
+                self.thread.start()	# Run asynchronously
+            else:
+                self.thread.run()	# Run synchronously
     def stop(self):
-        "Stop this fake GPS."
-        self.stopme = True
+        "Decrement pseudodevice's reader count; it will stop when count==0."
+        if self.readers > 0:
+            self.readers -= 1
 
 class DaemonInstance:
     "Control a gpsd instance."
