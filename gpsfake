@@ -131,11 +131,10 @@ else:
                 if pipe:
                     baton.twirl()
                 return True
-
-            status = fakegps.feed(daemon, fakehook)
+            fakegps.start(fakehook)
         except KeyboardInterrupt:
-            status = True
-        if not status:
+            pass
+        if not daemon.is_alive():
             print "gpsfake: gpsd is gone."
         if pipe:
             baton.end()
