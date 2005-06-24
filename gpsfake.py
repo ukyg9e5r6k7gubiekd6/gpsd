@@ -133,10 +133,13 @@ class FakeGPS:
 
 class DaemonInstance:
     "Control a gpsd instance."
-    def __init__(self, control_socket):
+    def __init__(self, control_socket=None):
         self.sockfile = None
         self.pid = None
-        self.control_socket = control_socket
+        if control_socket:
+            self.control_socket = control_socket
+        else:
+            self.control_socket = "/tmp/gpsfake-%d.sock" % os.getpid()
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, doptions, background=False, prefix=""):
         "Spawn a daemon instance."

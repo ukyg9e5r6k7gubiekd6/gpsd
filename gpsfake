@@ -88,7 +88,7 @@ except OSError:
 if verbose:
     sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
 
-daemon = gpsfake.DaemonInstance("/tmp/gpsfake-%d.sock" % os.getpid())
+daemon = gpsfake.DaemonInstance()
 
 # Next step: Launch the daemon and the thread to monitor it
 child = os.fork()
