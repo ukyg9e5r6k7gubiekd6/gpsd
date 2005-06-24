@@ -75,7 +75,7 @@ class TestLoad:
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp, rate=4800):
-        self.go_predicate = lambda i, s: True
+        self.go_predicate = lambda i, s: time.sleep(1) or True
         self.readers = 0
         self.thread = None
         self.index = 0
@@ -253,6 +253,7 @@ class TestSession:
         newclient.id = self.client_id 
         self.clients.append(newclient)
         newclient.query("of\n")
+        time.sleep(0.05)	# Avoid mysterious
         self.fakegpslist[newclient.device].start(thread=True)
         newclient.set_thread_hook(lambda x: self.reporter(x+"\n"))
         if commands:
@@ -275,8 +276,8 @@ class TestSession:
 if __name__ == "__main__":
     #prefix="valgrind --tool=memcheck", 
     test = TestSession(options="-D 4")
-    test.gps_add("FUCKUP")
-    test.client_add("w+\n")
+    test.gps_add("test/bu303-moving.log")
+    test.client_add("w\n")
     time.sleep(5)
 
 # End
