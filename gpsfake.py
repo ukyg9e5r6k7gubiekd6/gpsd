@@ -78,6 +78,7 @@ class FakeGPS:
         self.go_predicate = lambda i, s: True
         self.stopme = False
         self.thread = None
+        self.index = 0
         baudrates = {
             0: termios.B0,
             50: termios.B50,
@@ -127,10 +128,9 @@ class FakeGPS:
         return True
     def __feed(self):
         "Feed the contents of the GPS log to the daemon."
-        i = 0;
-        while not self.stopme and self.go_predicate(i, self):
-            os.write(self.master_fd, self.testload.sentences[i % len(self.testload.sentences)])
-            i += 1
+        while not self.stopme and self.go_predicate(self.index, self):
+            os.write(self.master_fd, self.testload.sentences[self.index % len(self.testload.sentences)])
+            self.index += 1
     def start(self, thread=False):
         self.thread = threading.Thread(self.__feed())
         self.stopme = False
