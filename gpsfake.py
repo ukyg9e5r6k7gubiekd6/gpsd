@@ -140,11 +140,11 @@ class DaemonInstance:
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, doptions, background=False, prefix=""):
         "Spawn a daemon instance."
-        spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, doptions)
-        spawncmd = prefix + spawncmd.strip()
+        self.spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, doptions)
+        self.spawncmd = prefix + self.spawncmd.strip()
         if background:
-            spawncmd += " &"
-        os.system(spawncmd)
+            self.spawncmd += " &"
+        os.system(self.spawncmd)
     def wait_pid(self):
         "Wait for the daemon, get its PID and a control-socket connection."
         while True:
