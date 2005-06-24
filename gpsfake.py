@@ -116,6 +116,9 @@ class FakeGPS:
         raw[3] = 0					# lflag
         raw[4] = raw[5] = rate
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+    def slave_is_open(self):
+        "Is the slave device of this pty opened?"
+        return os.system("fuser -s " + self.slave) == 0
     def enable_capture(self):
         "Enable capture of the responses from the daemon."
         self.responses = []
@@ -136,6 +139,8 @@ class FakeGPS:
         self.readers += 1
         if self.readers == 1:
             self.thread = threading.Thread(self.__feed())
+            while not self.slave_is_open():
+                time.sleep(0.01);
             if thread:
                 self.thread.start()	# Run asynchronously
             else:
@@ -217,6 +222,7 @@ class TestSession:
         self.daemon = DaemonInstance()
         self.devices = {}
         self.clients = []
+        self.client_id = 0
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
     def add_gps(self, name):
@@ -235,10 +241,18 @@ class TestSession:
         self.daemon.remove_device(newgps.slave)
     def add_client(self):
         "Initiate a client session."
-        pass
+        newclient = gps.gps()
+        self.client_id += 1
+        newclient.id = self.client_id 
+        self.clients.append(newclient)
+        session.query("w+")
     def remove_client(self, id):
         "Terminate a client session."
-        pass
-    
+        for client in self.clients:
+            if client.id == id:
+                self.devices[gps.device].stop()
+                self.clients.remove(client)
+                break
+            
 
 # End
