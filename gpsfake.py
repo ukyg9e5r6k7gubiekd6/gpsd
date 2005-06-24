@@ -138,7 +138,7 @@ class FakeGPS:
         "Increment pseudodevice's reader count, starting it if necessary."
         self.readers += 1
         if self.readers == 1:
-            self.thread = threading.Thread(self.__feed())
+            self.thread = threading.Thread(target=self.__feed)
             while not self.slave_is_open():
                 time.sleep(0.01);
             if thread:
@@ -254,7 +254,7 @@ class TestSession:
         self.clients.append(newclient)
         newclient.query("of\n")
         self.fakegpslist[newclient.device].start(thread=True)
-        session.set_thread_hook(self.reporter)
+        newclient.set_thread_hook(lambda x: self.reporter(x+"\n"))
         if commands:
             newclient.query(commands)
         return newclient

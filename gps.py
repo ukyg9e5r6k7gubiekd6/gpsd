@@ -513,7 +513,7 @@ if __name__ == '__main__':
     try:
 	while True:
 	    commands = raw_input("> ")
-	    session.query(commands)
+	    session.query(commands+"\n")
 	    print session
     except EOFError:
         print "Goodbye!"
