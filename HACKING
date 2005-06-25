@@ -23,7 +23,9 @@ There's a whole section on adding new drivers Later in this document.
 
 Before shipping a patch, it is a good idea to make sure the patched
 code displays no warnings when you run 'make splint'.  See
-http://www.splint.org for a description of this tool.
+http://www.splint.org for a description of this tool.  It is also
+a good idea to run valgrind-audit and look out for reports of memory
+leaks and other dynamic-allocation problems.
 
 Also, use the regression-test suite -- "make testregress" -- to check
 that your patch doesn't break the handling of any already-supported GPS.
