@@ -245,10 +245,11 @@ class TestSession:
                 newgps.go_predicate = self.default_predicate
             self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
+        return newgps.slave
     def gps_remove(self, name):
         "Remove a simulated GPS from the daeon's search list."
         self.fakegpslist[name].stop()
-        self.daemon.remove_device(newgps.slave)
+        self.daemon.remove_device(name)
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         newclient = gps.gps()
@@ -261,7 +262,7 @@ class TestSession:
         newclient.set_thread_hook(lambda x: self.reporter(x))
         if commands:
             newclient.query(commands)
-        return newclient
+        return newclient.id
     def client_order(self, id, commands):
         "Ship a command down a client channel, accept a response."
         for client in self.clients:
@@ -295,12 +296,5 @@ class TestSession:
         for fakegps in self.fakegpslist.values():
             if fakegps.thread.isAlive():
                 fakegps.stop()
-
-if __name__ == "__main__":
-    #prefix="valgrind --tool=memcheck", 
-    test = TestSession(options="-D 4")
-    test.gps_add("test/bu303-moving.log")
-    test.client_add("w\n")
-    time.sleep(5)
 
 # End

@@ -115,6 +115,7 @@ except OSError:
 
 test.client_add("w+r+\n")
 test.cleanup();
+test.killall()
 
 if progress:
     baton.end()

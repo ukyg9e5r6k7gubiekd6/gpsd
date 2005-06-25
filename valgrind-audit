@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+#
+# This is a valgrind torture test for the daemon.
+#
+import gpsfake 
+
+invocation="valgrind --tool=memcheck --gen-suppressions=yes --suppressions=valgrind-suppressions"
+test = gpsfake.TestSession(prefix=invocation, options="-D 3")
+
+try:
+    print "*** Add a GPS."
+    gps1 = test.gps_add("test/bu303-moving.log")
+
+    print "*** Add and remove a client."
+    c1 = test.client_add("w\n")
+    test.wait(3)
+    test.client_remove(c1)
+
+    print "*** Remove a GPS."
+    test.gps_remove(gps1)
+finally:
+    test.cleanup();
+    test.killall()
