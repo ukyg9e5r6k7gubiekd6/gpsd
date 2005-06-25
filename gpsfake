@@ -75,10 +75,37 @@ for (switch, val) in options:
         raise SystemExit,0
 logfile = arguments[0]
 
-# First step: grab packets from the specified input source
-# and turn them into an internal sentence list.  Croak if this fails.
+
+def fakehook(linenumber, fakegps):
+    if linenumber % len(fakegps.testload.sentences) == 0:
+        if pipe and linenumber > 0:
+            return False
+        if not pipe:
+            sys.stderr.write("gpsfake: log cycle begins.\n")
+    time.sleep(cycle)
+    if linedump:
+        if fakegps.testload.textual:
+            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+        else:
+            ml = ""
+        print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+    if progress:
+        baton.twirl()
+    return True
+
+if progress:
+    baton = Baton("Processing %s" % logfile, "done")
+
+test = gpsfake.TestSession(prefix=monitor, options=doptions)
+
+if pipe:
+    test.reporter = sys.stdout.write
+
+signal.signal(signal.SIGQUIT, lambda sig, frame: test.killall())
+signal.signal(signal.SIGINT, lambda sig, frame: test.killall())
+
 try:
-    fakegps = gpsfake.FakeGPS(logfile, speed)
+    test.gps_add(logfile, speed=speed, pred=fakehook)
 except gpsfake.PacketError, e:
     sys.stderr.write("gsfake: " + e.msg + "\n")
     raise SystemExit, 1
@@ -88,63 +115,14 @@ except IOError:
 except OSError:
     sys.stderr.write("gpsfake: can't open pty.\n")
     raise SystemExit, 1
-if verbose:
-    sys.stderr.write("gpsfake: interpreting as %s packets\n" % testload.packtype)
 
-daemon = gpsfake.DaemonInstance()
+try:
+    test.client_add("w+r+\n")
+    test.cleanup();
+except KeyboardInterrupt:
+    test.killall()
 
-# Next step: Launch the daemon and the thread to monitor it
-child = os.fork()
-if child:
-    # Parent side
-    try:
-        daemon.spawn(doptions, prefix=monitor, background=False)
-    except OSError:
-        sys.stderr.write("gpsfake: '%s' failed.\n" % daemon.spawncmd)
-        os.kill(child, signal.SIGTERM)
-        raise SystemExit,1
-    os.kill(child, signal.SIGTERM)
-    raise SystemExit,0
-else:
-    # Child side -- wait for daemon to make pidfile so we know it's running
-    daemon.wait_pid()
-    if not pipe or verbose:
-        sys.stderr.write("gpsfake: daemon launch OK.\n")
-    try:
-        daemon.add_device(fakegps.slave)
-        if progress:
-            baton = Baton("Processing %s" % fakegps.testload.logfile, "done")
-        if pipe:
-            if not fakegps.enable_capture():
-                sys.stderr.write("gpsfake: gpsd unreachable.\n")
-                raise SystemExit, 1
-        try:
-            def fakehook(linenumber, fakegps):
-                if linenumber % len(fakegps.testload.sentences) == 0:
-                    if pipe and linenumber > 0:
-                        return False
-                    if not pipe:
-                        sys.stderr.write("gpsfake: log cycle begins.\n")
-                time.sleep(cycle)
-                if linedump:
-                    if fakegps.testload.textual:
-                        ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
-                    else:
-                        ml = ""
-                    print fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
-                if progress:
-                    baton.twirl()
-                return True
-            fakegps.go_predicate = fakehook
-            fakegps.start(thread=False)
-        except KeyboardInterrupt:
-            pass
-        if not daemon.is_alive():
-            print "gpsfake: gpsd is gone."
-        if progress:
-            baton.end()
-        if pipe:
-            sys.stdout.write("".join(fakegps.responses))
-    finally:
-        del daemon
-    raise SystemExit,0
+if progress:
+    baton.end()
+
+# gpsfake ends here

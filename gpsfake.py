@@ -74,8 +74,8 @@ class TestLoad:
 
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
-    def __init__(self, logfp, rate=4800):
-        self.go_predicate = lambda i, s: time.sleep(1) or True
+    def __init__(self, logfp, speed=4800):
+        self.go_predicate = lambda i, s: time.sleep(0.2) or True
         self.readers = 0
         self.thread = None
         self.index = 0
@@ -100,7 +100,7 @@ class FakeGPS:
             115200: termios.B115200,
             230400: termios.B230400,
         }
-        rate = baudrates[rate]	# Throw an error if the rate isn't legal
+        speed = baudrates[speed]	# Throw an error if the speed isn't legal
         if type(logfp) == type(""):
             logfp = open(logfp, "r");            
         self.testload = TestLoad(logfp)
@@ -114,21 +114,11 @@ class FakeGPS:
         raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
         raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
         raw[3] = 0					# lflag
-        raw[4] = raw[5] = rate
+        raw[4] = raw[5] = speed
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
     def slave_is_open(self):
         "Is the slave device of this pty opened?"
         return os.system("fuser -s " + self.slave) == 0
-    def enable_capture(self):
-        "Enable capture of the responses from the daemon."
-        self.responses = []
-        try:
-            session = gps.gps()
-        except socket.error:
-            return False
-        session.query("w+r+")
-        session.set_thread_hook(lambda x: self.responses.append(x))
-        return True
     def __feed(self):
         "Feed the contents of the GPS log to the daemon."
         while self.readers and self.go_predicate(self.index, self):
@@ -217,7 +207,10 @@ class DaemonInstance:
         "Kill the daemon instance."
         import signal	# Avoids some strange condition on Python exit
         if self.pid:
-            os.kill(self.pid, signal.SIGTERM)
+            try:
+                os.kill(self.pid, signal.SIGTERM)
+            except OSError:
+                pass
             self.pid = None
             time.sleep(1)	# Give signal time to land
 
@@ -229,22 +222,30 @@ class TestSession:
         self.fakegpslist = {}
         self.clients = []
         self.client_id = 0
-        self.reporter = sys.stdout.write
+        self.reporter = lambda x: None
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
-    def gps_add(self, name):
+        self.default_predicate = None
+    def set_predicate(self, pred):
+        "Set a default go predicate for the session."
+        self.default_predicate = pred
+    def gps_add(self, name, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."
         if name not in self.fakegpslist:
             if not name.endswith(".log"):
                 logfile = name + ".log"
             else:
                 logfile = name
-            newgps = FakeGPS(logfile)
+            newgps = FakeGPS(logfile, speed=speed)
+            if pred:
+                newgps.go_predicate = pred
+            elif self.default_predicate:
+                newgps.go_predicate = self.default_predicate
             self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
     def gps_remove(self, name):
         "Remove a simulated GPS from the daeon's search list."
-        self.devices[name].stop()
+        self.fakegpslist[name].stop()
         self.daemon.remove_device(newgps.slave)
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
@@ -255,7 +256,7 @@ class TestSession:
         newclient.query("of\n")
         time.sleep(0.05)	# Avoid mysterious
         self.fakegpslist[newclient.device].start(thread=True)
-        newclient.set_thread_hook(lambda x: self.reporter(x+"\n"))
+        newclient.set_thread_hook(lambda x: self.reporter(x))
         if commands:
             newclient.query(commands)
         return newclient
@@ -272,6 +273,23 @@ class TestSession:
                 self.clients.remove(client)
                 del client
                 break
+    def gps_count(self):
+        "Return the number of GPSes active in this session"
+        tc = 0
+        for fakegps in self.fakegpslist.values():
+            if fakegps.thread.isAlive():
+                tc += 1
+        return tc
+    def cleanup(self):
+        "Wait for all threads to end and kill the daemon."
+        while self.gps_count():
+            time.sleep(0.1)
+        self.daemon = None
+    def killall(self):
+        "Kill all fake-GPS threads and the daemon."
+        for fakegps in self.fakegpslist.values():
+            if fakegps.thread.isAlive():
+                fakegps.stop()
 
 if __name__ == "__main__":
     #prefix="valgrind --tool=memcheck", 
