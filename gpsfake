@@ -101,9 +101,6 @@ test = gpsfake.TestSession(prefix=monitor, options=doptions)
 if pipe:
     test.reporter = sys.stdout.write
 
-signal.signal(signal.SIGQUIT, lambda sig, frame: test.killall())
-signal.signal(signal.SIGINT, lambda sig, frame: test.killall())
-
 try:
     test.gps_add(logfile, speed=speed, pred=fakehook)
 except gpsfake.PacketError, e:
@@ -116,11 +113,8 @@ except OSError:
     sys.stderr.write("gpsfake: can't open pty.\n")
     raise SystemExit, 1
 
-try:
-    test.client_add("w+r+\n")
-    test.cleanup();
-except KeyboardInterrupt:
-    test.killall()
+test.client_add("w+r+\n")
+test.cleanup();
 
 if progress:
     baton.end()

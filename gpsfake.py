@@ -223,6 +223,8 @@ class TestSession:
         self.clients = []
         self.client_id = 0
         self.reporter = lambda x: None
+        for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, lambda signal, frame: self.killall())
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
         self.default_predicate = None
@@ -273,6 +275,9 @@ class TestSession:
                 self.clients.remove(client)
                 del client
                 break
+    def wait(self, seconds):
+        "Wait, doing nothing."
+        time.sleep(seconds)
     def gps_count(self):
         "Return the number of GPSes active in this session"
         tc = 0
@@ -286,7 +291,7 @@ class TestSession:
             time.sleep(0.1)
         self.daemon = None
     def killall(self):
-        "Kill all fake-GPS threads and the daemon."
+        "Kill all fake-GPS threads."
         for fakegps in self.fakegpslist.values():
             if fakegps.thread.isAlive():
                 fakegps.stop()
