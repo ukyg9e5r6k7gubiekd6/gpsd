@@ -883,6 +883,7 @@ static void handle_control(int sfd, char *buf)
 	p = snarfline(buf+1, &stash);
 	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
 	if ((chp = find_device(stash))) {
+	    FD_CLR((*chp)->gpsdata.gps_fd , &all_fds);
 	    gpsd_deactivate(*chp);
 	    notify_watchers(*chp, "X=0\r\n");
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
