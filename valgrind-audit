@@ -4,7 +4,7 @@
 #
 import gpsfake 
 
-invocation="valgrind --tool=memcheck --gen-suppressions=yes --suppressions=valgrind-suppressions"
+invocation="valgrind --tool=memcheck --gen-suppressions=yes --leak-check=yes --suppressions=valgrind-suppressions"
 test = gpsfake.TestSession(prefix=invocation, options="-D 3")
 
 try:

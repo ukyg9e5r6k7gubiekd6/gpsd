@@ -128,7 +128,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   buffering problems with the Python side of the hotplug interface.
   gpsfake can now run sessions under a monitor like Valgrind.  Most
   of the gpsfake logic now lives in a module that can be used to write
-  other test loads. Its progress prompt is now optional.
+  other test loads. Its progress prompt is now optional.  Valgrind found
+  a memory leak in device deallocation.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 

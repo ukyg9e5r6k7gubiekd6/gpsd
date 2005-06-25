@@ -888,6 +888,7 @@ static void handle_control(int sfd, char *buf)
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (subscribers[cfd].device == *chp)
 		    subscribers[cfd].device = NULL;
+	    gpsd_wrap(*chp);
 	    /*@i1@*/*chp = NULL;	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
 	} else
