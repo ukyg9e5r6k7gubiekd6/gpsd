@@ -1,6 +1,63 @@
 """
-gpsfake.py -- classes for creating a controlled test environment around gpsd
+gpsfake.py -- classes for creating a controlled test environment around gpsd.
 
+The gpsfake(1) regression tester shipped with gpsd is a trivial wrapper
+around this code.  For a more interesting usage example, see the
+valgrind-audit script shipped with the gpsd code.
+
+To use this code, start by instantiating a TestSession class.  Use the
+prefix argument if you want to run the daemon under some kind of run-time
+monitor like valgrind or gdb.  Here are some particularly useful possibilities:
+
+valgrind --tool=memcheck --gen-suppressions=yes --leak-check=yes
+    Run under Valgrind, checking for malloc errors and memory leaks.
+
+xterm -e gdb -tui
+    Run under gdb, controlled from a new xterm.
+
+You can use the options argument to pass in daemon options; normally you will
+use this to set the debug-logging level.
+
+On initialization, the test object spawns an instance of gpsd with no
+devices or clients attached, connected to a control socket.
+
+TestSession has methods to attach and detch fake GPSes. The
+TestSession class simulates GPS devices for you with objects composed
+from a pty and a thread that cycles sentences into the master side
+from some specified logfile; gpsd reads the slave side.  A fake GPS is
+identified by the string naming its slave device.
+
+Test session also has methods to start and end client sessions.  Daemon
+responses to a client are fed to a hook function which, by default, discards
+them.  You can change the hook to sys.stdout.write dump responses to standard
+output (this is what the gpsfake executable does) or do something more exotic
+A client session is identified by a small integer that counts the number of
+client session starts.
+
+There are a couple of convenience methods.  TestSession.wait() does nothing,
+allowing a specified number of seconds to elapse.  TestSession.client_order()
+ships commands to an open client session.
+
+TestSession does not currently capture the daemon's log output.  It is
+run with -N, so the output will go to stderr (along with, for example,
+Valgrind notifications).
+
+Your test code should be wrapped in a try/finally block that calls the
+TestSession cleanup() method; this will ensure that any stray threads
+are properly terminated.  If you do anything with the SIGINT, SIGQUIT,
+or SIGTERM signals, ensure that they call the TestSession.killall()
+method; otherwise your code will fail to clean up after itself when
+interrupted.
+
+There are some limitations.  Trying to run more than one instance of
+TestSession concurrently will fail as the daemon instances contend for
+port 2947.  Due to indeterminacy in thread timings, it is not guaranteed
+that runs with identical options will present exactly the same
+sentences to the daemon at the same times from start.
+
+This code requires that you have fuser(1) installed and executable.
+The fake-GPS threads use it to detect when their slave device has
+been opened.
 """
 import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
@@ -203,9 +260,8 @@ class DaemonInstance:
             self.sock.sendall("-%s\r\n" % path)
             self.sock.recv(12)
             self.sock.close()
-    def __del__(self):
+    def kill(self):
         "Kill the daemon instance."
-        import signal	# Avoids some strange condition on Python exit
         if self.pid:
             try:
                 os.kill(self.pid, signal.SIGTERM)
@@ -257,7 +313,7 @@ class TestSession:
         newclient.id = self.client_id 
         self.clients.append(newclient)
         newclient.query("of\n")
-        time.sleep(0.05)	# Avoid mysterious
+        time.sleep(0.05)	# Avoid mysterious "connection reset by peer"
         self.fakegpslist[newclient.device].start(thread=True)
         newclient.set_thread_hook(lambda x: self.reporter(x))
         if commands:
@@ -275,7 +331,9 @@ class TestSession:
                 self.fakegpslist[client.device].release()
                 self.clients.remove(client)
                 del client
-                break
+                return True
+        else:
+            return False
     def wait(self, seconds):
         "Wait, doing nothing."
         time.sleep(seconds)
@@ -290,11 +348,12 @@ class TestSession:
         "Wait for all threads to end and kill the daemon."
         while self.gps_count():
             time.sleep(0.1)
-        self.daemon = None
+        self.daemon.kill()
     def killall(self):
-        "Kill all fake-GPS threads."
+        "Kill all fake-GPS threads and the daemon."
         for fakegps in self.fakegpslist.values():
             if fakegps.thread.isAlive():
                 fakegps.stop()
+        self.daemon.kill()
 
 # End
