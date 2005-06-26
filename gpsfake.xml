@@ -20,13 +20,11 @@
       <arg choice='opt'>-b</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-g</arg>
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
-      <arg choice='opt'>-v</arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -61,19 +59,14 @@ on standard error.  At termination, it reports elaped time.</para>
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.</para>
 
-<para>The -g option runs <application>gpsd</application> under the
-control of gdb, the GNU debugger. The thread that will send data to
-the daemon instance waits until it sees the pidfile created, so you
-may do any setup necessary at the gdb command prompt before typing
-"run" to begin feeding the log to the daemon.</para>
-
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is
 textual (e.g. NMEA, the text is dumped as well).</para>
 
 <para>The -m option specifies a monitor program inside which the
 daemon should be run.  This option is intended to be used with
-<citerefentry><refentrytitle>valgrind</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>valgrind</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gdb</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 and similar programs.</para>
 
 <para>The -o option specifies options to pass to the daemon.
@@ -87,14 +80,26 @@ only.  (This option is intended to facilitate regression testing.)</para>
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>
 
-<para>The -v option enables more progress messages to standard error.</para>
-
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>
 
 <para>The argument must be the name of a file containing the 
 data to be cycled at the device. <application>gpsfake</application> 
 will print a notification each time it cycles.</para>
+
+</refsect1>
+<refsect1 id='options'><title>CUSTOM TESTS</title>
+
+<para><application>gpsfake</application> is a trivial wrapper around a
+Python module, also named gpsfake, that can be used to fully script
+sessions involving a <application>gpsd</application> instance, any
+number of client sessions, and any number of fake GPSes feeding the
+daemon instance with data from specified sentence logs.</para>
+
+<para>Source and embedded documentation for this module is shipped with the 
+<application>gpsd</application> development tools.  You can use it to
+torture-test either <application>gpsd</application> itself or any
+<application>gpsd</application>-aware client application.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

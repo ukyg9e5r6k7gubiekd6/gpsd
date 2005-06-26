@@ -39,14 +39,13 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghlm:o:ps:v")
+(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghlm:o:ps:")
 progress = False
 cycle = 1
 monitor = ""
 speed = 4800
 linedump = False
 pipe = False
-verbose = False
 doptions = ""
 for (switch, val) in options:
     if (switch == '-b'):
@@ -68,8 +67,6 @@ for (switch, val) in options:
         cycle = 0.05
     elif (switch == '-s'):
         speed = int(val)
-    elif (switch == '-v'):
-        verbose = True
     elif (switch == '-h'):
         sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
         raise SystemExit,0
@@ -102,20 +99,21 @@ if pipe:
     test.reporter = sys.stdout.write
 
 try:
-    test.gps_add(logfile, speed=speed, pred=fakehook)
-except gpsfake.PacketError, e:
-    sys.stderr.write("gsfake: " + e.msg + "\n")
-    raise SystemExit, 1
-except IOError:
-    sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
-    raise SystemExit, 1
-except OSError:
-    sys.stderr.write("gpsfake: can't open pty.\n")
-    raise SystemExit, 1
+    try:
+        test.gps_add(logfile, speed=speed, pred=fakehook)
+    except gpsfake.PacketError, e:
+        sys.stderr.write("gsfake: " + e.msg + "\n")
+        raise SystemExit, 1
+    except IOError:
+        sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
+        raise SystemExit, 1
+    except OSError:
+        sys.stderr.write("gpsfake: can't open pty.\n")
+        raise SystemExit, 1
 
-test.client_add("w+r+\n")
-test.cleanup();
-test.killall()
+    test.client_add("w+r+\n")
+finally:
+    test.cleanup();
 
 if progress:
     baton.end()

@@ -167,6 +167,7 @@ EXTRA_DIST = \
 	gpsfake \
 	gpsd.hotplug \
 	gpsd.usermap \
+	valgrind-audit \
 	valgrind-suppressions \
 	logextract
 
