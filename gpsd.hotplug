@@ -3,7 +3,7 @@
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
 # Can be called like "gpsd.hotplug [add|remove] /dev/ttyUSB0" for test
 # purposes.
-import sys, os, syslog, glob, socket, stat
+import sys, time, os, syslog, glob, socket, stat
 
 CONTROL_SOCKET = "/var/run/gpsd.sock"
 WHEREAMI = "/etc/hotplug/usb/gpsd.hotplug"
