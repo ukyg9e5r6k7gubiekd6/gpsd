@@ -373,15 +373,18 @@ static bool assign_channel(struct subscriber_t *user)
 
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
-	    if (*channel != NULL && (*channel)->gpsdata.sentence_time >= most_recent) {
-		most_recent = (*channel)->gpsdata.sentence_time;
-		user->device = *channel;
-		break;
+	    if (*channel != NULL) {
+		if (user->device == NULL || (*channel)->gpsdata.sentence_time >= most_recent) {
+		    user->device = *channel;
+		    most_recent = (*channel)->gpsdata.sentence_time;
+		}
 	    }
     }
 
-    if (user->device == NULL)
+    if (user->device == NULL) {
+	gpsd_report(1, "channel assignment failed.\n");
 	return false;
+    }
 
     /* and open that device */
     if (user->device->gpsdata.gps_fd == -1) {

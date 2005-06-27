@@ -398,13 +398,13 @@ class gps(gpsdata):
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-	data = self.sockfile.readline()
-	if not data:
+	self.response = self.sockfile.readline()
+	if not self.response:
 	    return -1
 	if self.verbose:
-	    sys.stderr.write("GPS DATA %s\n" % repr(data))
+	    sys.stderr.write("GPS DATA %s\n" % repr(self.response))
 	self.timings.c_recv_time = time.time()
-	self.__unpack(data)
+	self.__unpack(self.response)
 	if self.profiling:
 	    if self.timings.sentence_time != '?':
 		basetime = self.timings.sentence_time

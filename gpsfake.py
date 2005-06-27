@@ -35,7 +35,7 @@ A client session is identified by a small integer that counts the number of
 client session starts.
 
 There are a couple of convenience methods.  TestSession.wait() does nothing,
-allowing a specified number of seconds to elapse.  TestSession.client_order()
+allowing a specified number of seconds to elapse.  TestSession.client_query()
 ships commands to an open client session.
 
 TestSession does not currently capture the daemon's log output.  It is
@@ -315,8 +315,8 @@ class TestSession:
         self.daemon.remove_device(name)
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
+        self.progress("gpsfake: client_add()\n")
         newclient = gps.gps()
-        self.progress("gpsfake: Adding client %d on %s\n" % (self.client_id+1,newclient.device))
         self.client_id += 1
         newclient.id = self.client_id 
         self.clients.append(newclient)
@@ -325,17 +325,20 @@ class TestSession:
         if not newclient.device:
             raise TestSessionError("gpsd returned no device for client open.\n")
         else:
+            self.progress("gpsfake: Client %d has %s\n" % (self.client_id,newclient.device))
             self.fakegpslist[newclient.device].start(thread=True)
             newclient.set_thread_hook(lambda x: self.reporter(x))
             if commands:
                 newclient.query(commands)
             return newclient.id
-    def client_order(self, id, commands):
+    def client_query(self, id, commands):
         "Ship a command down a client channel, accept a response."
-        self.progress("gpsfake: client_order(commands, %d)\n" % (commands, id))
+        self.progress("gpsfake: client_query(%d, %s)\n" % (id, `commands`))
         for client in self.clients:
             if client.id == id:
                 client.query(commands)
+                return client.response
+        return None
     def client_remove(self, id):
         "Terminate a client session."
         self.progress("gpsfake: client_remove(%d)\n" % id)
@@ -351,6 +354,13 @@ class TestSession:
         "Wait, doing nothing."
         self.progress("gpsfake: wait(%d)\n" % seconds)
         time.sleep(seconds)
+    def gather(self, seconds):
+        "Wait, doing nothing but watching for sentences."
+        self.progress("gpsfake: gather(%d)\n" % seconds)
+        #mark = time.time()
+        time.sleep(seconds)
+        #if self.timings.c_recv_time <= mark:
+        #    TestSessionError("no sentences received\n")
     def gps_count(self):
         "Return the number of GPSes active in this session"
         tc = 0
