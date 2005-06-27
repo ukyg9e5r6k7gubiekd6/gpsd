@@ -246,6 +246,8 @@ static int filesock(char *filename)
 #define MAXDEVICES	FD_SETSIZE
 
 static struct gps_device_t *channels[MAXDEVICES];
+#define allocated_channel(chp)	((chp) != NULL)
+#define free_channel(chp)	chp = NULL
 
 static struct subscriber_t {
     bool active;				/* is this a subscriber? */
@@ -334,7 +336,7 @@ static /*@null@*/ /*@observer@*/struct gps_device_t **find_device(char *device_n
     struct gps_device_t **chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (*chp!=NULL && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
+	if (allocated_channel(*chp) && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
 }
@@ -373,7 +375,7 @@ static bool assign_channel(struct subscriber_t *user)
 
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
-	    if (*channel != NULL) {
+	    if (allocated_channel(*channel)) {
 		if (user->device == NULL || (*channel)->gpsdata.sentence_time >= most_recent) {
 		    user->device = *channel;
 		    most_recent = (*channel)->gpsdata.sentence_time;
@@ -542,11 +544,11 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
-		if (channels[i] != NULL)
+		if (allocated_channel(channels[i]))
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (channels[i] != NULL && strlen(phrase)+strlen(channels[i]->gpsdata.gps_device)+1 < sizeof(phrase)) {
+		if (allocated_channel(channels[i]) && strlen(phrase)+strlen(channels[i]->gpsdata.gps_device)+1 < sizeof(phrase)) {
 		    (void)strcat(phrase, channels[i]->gpsdata.gps_device);
 		    (void)strcat(phrase, " ");
 		}
@@ -894,7 +896,7 @@ static void handle_control(int sfd, char *buf)
 		if (subscribers[cfd].device == *chp)
 		    subscribers[cfd].device = NULL;
 	    gpsd_wrap(*chp);
-	    /*@i1@*/*chp = NULL;	/* modifying observer storage */
+	    /*@i1@*/free_channel(*chp);	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
 	} else
 	    (void)write(sfd, "ERROR\n", 6);
@@ -1125,7 +1127,7 @@ int main(int argc, char *argv[])
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 	for (channel = channels; channel < channels + MAXDEVICES; channel++)
-	    if (*channel != NULL && (*channel)->dsock > -1)
+	    if (allocated_channel(*channel) && (*channel)->dsock > -1)
 		FD_CLR((*channel)->dsock, &rfds);
 
 	/* 
