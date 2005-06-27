@@ -4,6 +4,48 @@ will unfold them again.
 
 ** Bugs:
 
+*** Under unknown conditions, a long-running xgps induces a memory leak in the X server
+
+Rob Janssen writes:
+>I have found something that leaks.  Not in our software, but in the X server.
+>But caused by xgps.
+>
+>After 3 copies of xgps ran for a couple of days, I noticed a lot of swap
+>is in use:
+>             total       used       free     shared    buffers     cached
+>Mem:       1035776     992324      43452          0     174580      54756
+>-/+ buffers/cache:     762988     272788
+>Swap:      2104440    1444944     659496
+>
+>This is more than normal for my system.  I noticed it when switching to a
+>virtual screen where mozilla is running.  It took several seconds to
+>redraw.
+>
+>I did a "ps axu" and found these interesting lines:
+>
+>USER       PID %CPU %MEM   VSZ  RSS TTY      STAT START   TIME COMMAND
+>root      7004  2.5 33.6 1861128 348460 ?    SL   Jun19 210:46 /usr/X11R6/bi
+>ntp      18011  0.0  0.2  2696 2692 ?        SLs  Jun19   0:00 /usr/sbin/ntp
+>nobody   23105  0.0  0.0  7004  900 ?        S<sl Jun21   0:17 /home/rob/src
+>rob      28724  0.2  0.1  7084 1968 pts/18   S    Jun22   9:03 /home/rob/src
+>rob      28744  0.3  0.1  7084 2040 pts/18   S    Jun22  14:52 /home/rob/src
+>rob      28759  0.2  0.1  7084 1936 pts/18   S    Jun22   9:44 /home/rob/src
+>
+>So the gps programs were not consuming that much memory.
+>I still stopped the 3 xgps programs (the last three in this list) and then
+>the X server showed:
+>root      7004  2.5  2.2 367140 23424 ?      SL   Jun19 210:49 /usr/X11R6/bi
+>
+>So there certainly is a relation here.
+>Unfortunately I have zero knowledge about X programming.  I would guess
+>some kind of session or operation is started and never ended, or something
+>is said to be saved, but apparently it remains related to the specific
+>window because the X server neatly frees it once the program disconnects.
+
+But Rob's xgps memory leak doesn't reproduce on a stock Fedora Core 3
+system.  ESR tested for this in the simplest possible way, by doing
+system("free t") at the end of each handle_input() call.
+
 *** EPH and EPV reports are zeroed too often in the TSIP driver 
 
 There is some bad interaction between the policy code in
@@ -83,16 +125,6 @@ Rob recommends:
 >because Linux counts processes waiting for disk I/O completion as loading
 
 I have not yet reproduced this.
-
-*** Possible resource-leak bug, not yet reproduced or confirmed
-
-Wojciech Kazubski <wk@ire.pw.edu.pl> reports: when I connect to gpsd first
-time everything goes fine, and several clients can connect without
-problem but if the last client disconnects, the gpsd does not respond
-to any inquiry. It is living and accepting commands but responding
-with GPSD,P=? or so. And possibly after some time (few hours?) it
-stops responding but the process still looks active (running out of
-resources??).
 
 ** To do:
 

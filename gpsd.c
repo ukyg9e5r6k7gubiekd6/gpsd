@@ -554,7 +554,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
-	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnpqrstuvwxy");	//ghj
+	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnopqrstuvwxyz");	//ghj
 	    break;
 	case 'M':
 	    if (assign_channel(whoami)==0 && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))

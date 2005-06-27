@@ -4,6 +4,7 @@
 # Pause-noted: Y
 # Well-behaved: Y
 # Submitted-by: Wojciech Kazubski <wk@ire.pw.edu.pl>
+# Comment: Only emits GPRMC when it has a fix.
 # Date: 12 Mar 2005
 $GPRMC,093802,A,5213.1439,N,02100.6511,E,000.0,226.0,160305,004.2,E,D*15
 $GPGGA,093802,5213.1439,N,02100.6511,E,2,10,0.9,137.2,M,36.2,M,,*43

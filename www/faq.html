@@ -124,6 +124,44 @@ gaps, to do policy.  What you're seeing as a bug only looks like one
 because <code>xgps</code>, as is proper for a test client, has as
 little policy as possible.</p>
 
+<h1 id='lockup'>My <code>gpsd</code> sometimes stops responding overnight</h1>
+
+<p>At one point in the development of <code>gpsd</code> we got a
+report of the daemon ceasing to respond to queries when run for
+more than a day or so; the user, quite reasonably, suspected some sort
+of resource leak in the daemon.  On the other hand, other users reported
+good operation over much longer periods with the same version of
+the software. That suggests a bug at the level of the user's operating 
+system or local site configuration.</p>
+
+<p>Nevertheless, the possibility of a resource-leak bug alarmed us
+enough that after 2.26 one of us (ESR) built an entire test framework
+for auditing the code's dynamic behavior and used it to apply <a
+href="http://valgrind.org">Valgrind</a>.  You can look at the
+resulting script, valgrind-audit, in the source distribution.  This
+turned up a couple of minor leaks, but nothing sufficient to explain
+the report.</p>
+
+<p>One of our senior developers, Rob Janssen, has seen
+<code>gpsd</code> interact badly with overnight backups, pushing the
+system load average through the roof.  He says: "when you copy many
+gigabytes of data from disk to disk, the [Linux] kernel's buffer
+management goes completely haywire. [...]  I think this is caused both
+by allocation of many buffers for reading files, and by accumulation
+of many dirty buffers that still have to be written.  At some point,
+programs like gpsd (but also all interactive programs and the X
+display manager) come to a complete standstill while the system is
+swapping like mad."</p></p>
+
+<p>If Rob's analysis is correct, <code>gpsd</code> is a canary in a
+coal mine.  If your <code>gpsd</code> locks up after a long period of
+operation, you should look at your logs and see if you can connect the
+point at which it stopped responding to some kind of resource crisis 
+brought on by lots of I/O activity.</p>
+
+<p>Another thing to try is running <code>gpsd</code> under Valgrind overnight 
+and seeing if it reports any leaks.</p>
+
 <h1 id='why_migrate'>Why this version of <code>gpsd</code>?</h1>
 
 <p>If you have written a <code>gpsd</code>-aware application using one
