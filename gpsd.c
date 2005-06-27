@@ -348,7 +348,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name,
     struct gps_device_t **chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (!*chp)
+	if (!allocated_channel(*chp))
 	    goto found;
     return NULL;
 found:
@@ -1211,7 +1211,7 @@ int main(int argc, char *argv[])
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
 	    struct gps_device_t *polldevice = *channel;
 
-	    if (!polldevice)
+	    if (!allocated_channel(polldevice))
 		continue;
 	    /* we may need to force the GPS open */
 	    if (nowait && polldevice->gpsdata.gps_fd == -1) {
@@ -1287,7 +1287,7 @@ int main(int argc, char *argv[])
 
 	/* close devices with no remaining subscribers */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    if (*channel) {
+	    if (allocated_channel(*channel)) {
 		bool need_gps = false;
 
 		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
