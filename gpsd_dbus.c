@@ -57,7 +57,6 @@ void send_dbus_fix(struct gps_device_t* channel) {
     dbus_message_iter_append_double(&iter, gpsfix->eps);
     dbus_message_iter_append_double(&iter, gpsfix->climb);
     dbus_message_iter_append_double(&iter, gpsfix->epc);
-    dbus_message_iter_append_double(&iter, gpsfix->separation);
 
     dbus_message_set_no_reply(message, TRUE);
 
