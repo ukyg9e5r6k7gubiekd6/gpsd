@@ -2,11 +2,32 @@ This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
 will unfold them again.
 
-** Bugs:
+** Bugs in gpsd and its clients:
 
-*** Under unknown conditions, a long-running xgps induces a memory leak in the X server
+*** EPH and EPV reports are zeroed too often in the TSIP driver 
 
-Rob Janssen writes:
+There is some bad interaction between the policy code in
+libgpsd_core.c and the TSIP driver that we haven't figured out.
+
+This may be a symptom of more general problems in data management
+on devices that ship several sentences of fix and related data
+per cycle.  It does not affect devices speaking SiRF or Zodac or 
+Garmin-binary protocol.
+
+*** PPS code is flaky, possibly due to a pthreads bug
+
+Some code attempting to terminate the PPS-monutoring thread when there
+is no DCD (e.g., on a USB device) seems to have tickled some kind of
+bug in pthreads -- termination seems to close the GPS device or
+otherwise do something nasty to the serial I/O layer.  
+
+The default build has ENABLE_PPS off until we figure this one out.
+
+** Bugs gpsd tickles in other software
+
+*** A long-running xgps may induce a memory leak in the X server
+
+Rob Janssen writes, reporting from SuSE 9.2 + Xorg 6.8.1 + KDE 3.3:
 >I have found something that leaks.  Not in our software, but in the X server.
 >But caused by xgps.
 >
@@ -46,21 +67,7 @@ But Rob's xgps memory leak doesn't reproduce on a stock Fedora Core 3
 system.  ESR tested for this in the simplest possible way, by doing
 system("free t") at the end of each handle_input() call.
 
-*** EPH and EPV reports are zeroed too often in the TSIP driver 
-
-There is some bad interaction between the policy code in
-libgpsd_core.c and the driver that we haven't figured out.
-
-*** PPS code is flaky, possibly due to a pthreads bug
-
-Some code attempting to terminate the PPS-monutoring thread when there
-is no DCD (e.g., on a USB device) seems to have tickled some kind of
-bug in pthreads -- termination seems to close the GPS device or
-otherwise do something nasty to the serial I/O layer.  
-
-The default build has ENABLE_PPS off until we figure this one out.
-
-*** Under uncertain circumstances, gpsd eats the processor
+*** Under Reiserfs gpsd may conspire with I/O buffering traffic to eat the CPU.
 
 Rob Janssen writes:
 > When gpsd is running and I start a backup of my system, which starts and
@@ -73,58 +80,8 @@ Rob Janssen writes:
 
 He adds that this occurs with SiRF+Zodiac and SiRF+TSIP.  He suspects
 this may be due to a bug in the SiRF support, interacting with extreme
-conditions in the Linux kernel's memory management. 
-
->The method to trigger this is caused by a Linux problem that I think is
->mainly visible with Reiserfs, but I am not sure.  For years I am using
->SuSE linux and they like Reiserfs, so it has been the default FS on many
->systems I administer.
->What I observe is: when you copy many gigabytes of data from disk to disk,
->the kernel's buffer management goes completely haywire.  The copy
->operation is reading and writing many files, and the kernel tries to
->buffer as much filedata as possible, even to the point where it starts to
->swap out most of the running applications to get more memory available for
->buffers.
->I think this is caused both by allocation of many buffers for reading
->files, and by accumulation of many dirty buffers that still have to be
->written.
->At some point, programs like gpsd (but also all interactive programs and
->the X display manager) come to a complete standstill while the system is
->swapping like mad.
->(of course the swap partition is on one of the disks involved in the copy,
->so swapping really does not help things in this case, it only slows down
->the system)
-
-Rob recommends:
-
->When you have a system with ext3 maybe you could do a test to see if it at
->least performs similar to what I see.  You need a system with 2 disks, of
->"modern" size (say 20GB or more).  One disk has a lot of files on it
->(preferably in not too small files), the other has space.
->
->Then you do something like:
->
->cp -a * /disk2
->
->or
->
->tar cf /disk2/backup.tar.gz .
->
->or
->
->rsync -a * /disk2
->
->well, anything that makes it read several gigabytes of data and write it
->to another disk.
->while this is running, look at "top" to see if the system is swapping, and
->if it starts feeling sluggish.  in extreme cases (like on my system) it
->will become that slow that you will have trouble moving focus from window
->to window, and obtaining even character echo in a terminal window.
->
->the "load average" reported by Linux is high, but that value is buggy
->because Linux counts processes waiting for disk I/O completion as loading
-
-I have not yet reproduced this.
+conditions in the Linux kernel's memory management.  The bug seems not
+to occur during ext3 backups, only Reiserfs ones.
 
 ** To do:
 
