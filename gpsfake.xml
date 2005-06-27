@@ -88,7 +88,7 @@ data to be cycled at the device. <application>gpsfake</application>
 will print a notification each time it cycles.</para>
 
 </refsect1>
-<refsect1 id='options'><title>CUSTOM TESTS</title>
+<refsect1 id='custom'><title>CUSTOM TESTS</title>
 
 <para><application>gpsfake</application> is a trivial wrapper around a
 Python module, also named gpsfake, that can be used to fully script

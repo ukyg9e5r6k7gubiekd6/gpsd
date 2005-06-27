@@ -22,6 +22,7 @@ try:
     print "\n**** Remove the GPS.\n"
     test.gps_remove(gps1)
     print "*** Test #1 complete."
+    test.wait(3)
 
     ######################################################################
 
@@ -44,6 +45,30 @@ try:
     print "\n**** Remove the GPS.\n"
     test.gps_remove(gps1)
     print "*** Test #2 complete."
-    test.wait(15)
-finally:
+    test.wait(3)
+
+    ######################################################################
+
+    print "\n*** Test #3: Overlapping client sessions."
+    print "**** Add a GPS.\n"
+    gps1 = test.gps_add("test/bu303-climbing.log")
+
+    print "\n**** Add first client.\n"
+    c1 = test.client_add("w\n")
+    test.wait(2)
+    print "\n**** Add second client.\n"
+    c2 = test.client_add("w\n")
+    test.wait(3)
+    print "\n**** Remove first client.\n"
+    test.client_remove(c1)
+    test.wait(2)
+    print "\n**** Remove second client.\n"
+    test.client_remove(c2)
+
+    print "\n**** Remove the GPS.\n"
+    test.gps_remove(gps1)
+    print "*** Test #3 complete."
+
     test.cleanup();
+finally:
+    test.killall();

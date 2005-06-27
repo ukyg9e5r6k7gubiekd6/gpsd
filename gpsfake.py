@@ -270,6 +270,10 @@ class DaemonInstance:
             self.pid = None
             time.sleep(1)	# Give signal time to land
 
+class TestSessionError(exceptions.Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
 class TestSession:
     "Manage a session including a daemon with fake GPS and client threads."
     def __init__(self, prefix=None, options=None):
@@ -279,6 +283,7 @@ class TestSession:
         self.clients = []
         self.client_id = 0
         self.reporter = lambda x: None
+        self.progress = sys.stderr.write
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, lambda signal, frame: self.killall())
         self.daemon.spawn(background=True, prefix=prefix, options=options)
@@ -289,6 +294,7 @@ class TestSession:
         self.default_predicate = pred
     def gps_add(self, name, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."
+        self.progress("gpsfake: gps_add(%s, %d)\n" % (name, speed))
         if name not in self.fakegpslist:
             if not name.endswith(".log"):
                 logfile = name + ".log"
@@ -304,28 +310,35 @@ class TestSession:
         return newgps.slave
     def gps_remove(self, name):
         "Remove a simulated GPS from the daeon's search list."
+        self.progress("gpsfake: gps_remove(%s)\n" % name)
         self.fakegpslist[name].stop()
         self.daemon.remove_device(name)
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         newclient = gps.gps()
+        self.progress("gpsfake: Adding client %d on %s\n" % (self.client_id+1,newclient.device))
         self.client_id += 1
         newclient.id = self.client_id 
         self.clients.append(newclient)
         newclient.query("of\n")
-        time.sleep(0.05)	# Avoid mysterious "connection reset by peer"
-        self.fakegpslist[newclient.device].start(thread=True)
-        newclient.set_thread_hook(lambda x: self.reporter(x))
-        if commands:
-            newclient.query(commands)
-        return newclient.id
+        time.sleep(1)	# Avoid mysterious "connection reset by peer"
+        if not newclient.device:
+            raise TestSessionError("gpsd returned no device for client open.\n")
+        else:
+            self.fakegpslist[newclient.device].start(thread=True)
+            newclient.set_thread_hook(lambda x: self.reporter(x))
+            if commands:
+                newclient.query(commands)
+            return newclient.id
     def client_order(self, id, commands):
         "Ship a command down a client channel, accept a response."
+        self.progress("gpsfake: client_order(commands, %d)\n" % (commands, id))
         for client in self.clients:
             if client.id == id:
                 client.query(commands)
     def client_remove(self, id):
         "Terminate a client session."
+        self.progress("gpsfake: client_remove(%d)\n" % id)
         for client in self.clients:
             if client.id == id:
                 self.fakegpslist[client.device].release()
@@ -336,23 +349,26 @@ class TestSession:
             return False
     def wait(self, seconds):
         "Wait, doing nothing."
+        self.progress("gpsfake: wait(%d)\n" % seconds)
         time.sleep(seconds)
     def gps_count(self):
         "Return the number of GPSes active in this session"
         tc = 0
         for fakegps in self.fakegpslist.values():
-            if fakegps.thread.isAlive():
+            if fakegps.thread and fakegps.thread.isAlive():
                 tc += 1
         return tc
     def cleanup(self):
         "Wait for all threads to end and kill the daemon."
+        self.progress("gpsfake: cleanup()\n")
         while self.gps_count():
             time.sleep(0.1)
         self.daemon.kill()
     def killall(self):
         "Kill all fake-GPS threads and the daemon."
+        self.progress("gpsfake: killall()\n")
         for fakegps in self.fakegpslist.values():
-            if fakegps.thread.isAlive():
+            if fakegps.thread and fakegps.thread.isAlive():
                 fakegps.stop()
         self.daemon.kill()
 
