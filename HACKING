@@ -8,27 +8,36 @@ If you're looking for things to hack on, first see the TODO file.
 We prefer diff -u format, but diff -c is acceptable.  Do not send
 patches in the default (-e or ed) mode, as they are too brittle.
 
-If you are introducing a new feature, include a documentation patch.
+Before shipping a patch, you should go through the following checklist:
+
+(1) If you are introducing a new feature or driver, include a
+    documentation patch.
+
+(2) Use the regression-test suite -- "make testregress" -- to check
+    that your patch doesn't break the handling of any already-supported GPS.
+
+(3) If you have valgrind(1) on your development system, run
+    valgrind-audit and look out for reports of memory leaks and
+    other dynamic-allocation problems (see <http://valgrind.org> for
+    a description of this tool if you don't already know about it).  
+    If you can't run valgrind. tell us that you couldn't do it.
+
+(4) If you have splint(1) on your development system, make sure the
+    patched code displays no warnings when you run 'make
+    splint' (see <http://www.splint.org> for further description of 
+    this tool if you don't already know about it). If you can't run
+    splint. tell us that you couldn't do it.
 
 If you are contributing a driver for a new GPS, please also do the
 following things:
 
-1) Send us a representative sample of the GPS output for future 
-   regression-testing.
+(5) Send us a representative sample of the GPS output for future 
+    regression-testing.
 
-2) Write a hardware entry describing the GPS for the hardware page at
-   <http://gpsd.berlios.de/hardware.html>.
+(6) Write a hardware entry describing the GPS for the hardware page at
+    <http://gpsd.berlios.de/hardware.html>.
 
-There's a whole section on adding new drivers Later in this document.
-
-Before shipping a patch, it is a good idea to make sure the patched
-code displays no warnings when you run 'make splint'.  See
-http://www.splint.org for a description of this tool.  It is also
-a good idea to run valgrind-audit and look out for reports of memory
-leaks and other dynamic-allocation problems.
-
-Also, use the regression-test suite -- "make testregress" -- to check
-that your patch doesn't break the handling of any already-supported GPS.
+There's a whole section on adding new drivers later in this document.
 
 ** The license on contributions
 

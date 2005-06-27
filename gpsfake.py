@@ -283,7 +283,7 @@ class TestSession:
         self.clients = []
         self.client_id = 0
         self.reporter = lambda x: None
-        self.progress = sys.stderr.write
+        self.progress = lambda x: None
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, lambda signal, frame: self.killall())
         self.daemon.spawn(background=True, prefix=prefix, options=options)
@@ -317,15 +317,16 @@ class TestSession:
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
         newclient = gps.gps()
-        self.client_id += 1
-        newclient.id = self.client_id 
+        newclient.id = self.client_id+1 
         self.clients.append(newclient)
         newclient.query("of\n")
         time.sleep(1)	# Avoid mysterious "connection reset by peer"
         if not newclient.device:
-            raise TestSessionError("gpsd returned no device for client open.\n")
+            self.progress("gpsd: returned no device for client open.\n")
+            return None
         else:
-            self.progress("gpsfake: Client %d has %s\n" % (self.client_id,newclient.device))
+            self.client_id += 1
+            self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
             self.fakegpslist[newclient.device].start(thread=True)
             newclient.set_thread_hook(lambda x: self.reporter(x))
             if commands:
