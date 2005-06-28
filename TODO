@@ -78,10 +78,14 @@ Rob Janssen writes:
 > --10, this further increases the load and slows down the backup to a crawl.
 > Killing gpsd makes the backup finish and then it can be started again.
 
-He adds that this occurs with SiRF+Zodiac and SiRF+TSIP.  He suspects
-this may be due to a bug in the SiRF support, interacting with extreme
-conditions in the Linux kernel's memory management.  The bug seems not
-to occur during ext3 backups, only Reiserfs ones.
+He further observers that the FIONREAD ioctl() we use to check for
+input waiting spins returning 0 when this happens.  We suspect that
+memory resource crises do something nasty to the buffering in the
+Linux serial layer.  The bug seems not to occur during ext3 backups,
+only Reiserfs ones.
+
+This probably means we need to get rid of the FIONREAD ioctl(), which
+has always been kind of dodgy anyway.
 
 ** To do:
 

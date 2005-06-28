@@ -7,8 +7,8 @@ DESCRIPTION:
 
 Initial conditions of the problem:
 
-1. We have a file descriptor open for read. The device on the other end is 
-   sending packets at us.  
+1. We have a file descriptor open for (possibly non-blockin) read. The device 
+   on the other end is sending packets at us.  
 
 2. It may require more than one read to gather a packet.  Reads may span packet
    boundaries.
@@ -527,6 +527,8 @@ int packet_get(struct gps_device_t *session, size_t waiting)
 
     if (newdata < 0 && errno != EAGAIN)
 	return BAD_PACKET;
+    else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
+	return 0;
 
 #ifdef STATE_DEBUG
     gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n", 
