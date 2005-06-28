@@ -51,7 +51,7 @@ struct gps_type_t {
     /*@observer@*//*@null@*/char *trigger;
     /*@null@*/bool (*probe)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
-    /*@null@*/int (*get_packet)(struct gps_device_t *session, size_t waiting);
+    /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
@@ -86,7 +86,6 @@ struct gps_device_t {
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
-    int packet_full;	/* do we presently see a full packet? */
     int	packet_type;
 #define BAD_PACKET	-1
 #define NMEA_PACKET	0
@@ -167,7 +166,7 @@ extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 
 extern void packet_reset(struct gps_device_t *session);
 extern void packet_pushback(struct gps_device_t *session);
-extern int packet_get(struct gps_device_t *, size_t);
+extern ssize_t packet_get(struct gps_device_t *);
 extern int packet_sniff(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);

@@ -200,7 +200,6 @@ static inline double  radtodeg( double rad) {
 
 static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt );
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket );
-static int GetPacket (struct gps_device_t *session );
 
 // For debugging, decodes and prints some known packets.
 static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
@@ -505,10 +504,7 @@ static void SendPacket (struct gps_device_t *session, Packet_t *aPacket )
 // The Garmin sample WinXX code also assumes the same behavior, so
 // maybe it is something in the USB protocol.
 //
-// Return: 0 = got a good packet
-//         -1 = error
-//         1 = got partial packet
-static int GetPacket (struct gps_device_t *session ) 
+static ssize_t garmin_get_packet (struct gps_device_t *session ) 
 {
     struct timespec delay, rem;
     int cnt = 0;
@@ -518,7 +514,7 @@ static int GetPacket (struct gps_device_t *session )
     memset( &delay, 0, sizeof(delay));
     session->GarminBufferLen = 0;
 
-    gpsd_report(4, "GetPacket()\n");
+    gpsd_report(4, "garmin_get_packet()\n");
 
     for( cnt = 0 ; cnt < 10 ; cnt++ ) {
 	// Read async data until the driver returns less than the
@@ -533,9 +529,10 @@ static int GetPacket (struct gps_device_t *session )
 		, buf + session->GarminBufferLen
 		, ASYNC_DATA_SIZE);
         if ( 0 >  theBytesReturned ) {
-	    // read error...
-            // or EAGAIN, but O_NONBLOCK is never set
-	    gpsd_report(0, "GetPacket() read error=%d, errno=%d\n"
+	    if (errno == EAGAIN)
+		return 0;
+	    // real read error...
+	    gpsd_report(0, "garmin_get_packet() read error=%d, errno=%d\n"
 		, theBytesReturned, errno);
 	    continue;
 	}
@@ -550,7 +547,7 @@ static int GetPacket (struct gps_device_t *session )
 	if ( 256 <=  session->GarminBufferLen ) {
 	    // really bad read error...
 	    session->GarminBufferLen = 0;
-	    gpsd_report(3, "GetPacket() packet too long!\n");
+	    gpsd_report(3, "garmin_get_packet() packet too long!\n");
 	    break;
 	}
 
@@ -566,12 +563,12 @@ static int GetPacket (struct gps_device_t *session )
         // gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
     // }
     if ( 10 <= cnt ) {
-	    gpsd_report(3, "GetPacket() packet too long or too slow!\n");
+	    gpsd_report(3, "garmin_get_packet() packet too long or too slow!\n");
 	    return -1;
     }
 
     gpsd_report(5, "GotPacket() sz=%d \n", session->GarminBufferLen);
-    return 0;
+    return (ssize_t)session->GarminBufferLen;
 }
 
 /*
@@ -670,7 +667,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return false;
         }
-	if ( 0 == GetPacket( session ) ) {
+	if (garmin_get_packet( session ) > 0) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( ( (unsigned char)75 == thePacket->mPacketType)
@@ -717,7 +714,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return(0);
         }
-	if ( 0 == GetPacket( session ) ) {
+	if ( garmin_get_packet( session ) > 0) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
@@ -765,7 +762,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return false;
         }
-	if ( 0 == GetPacket( session ) ) {
+	if ( garmin_get_packet( session ) > 0) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_APPL == (unsigned int)thePacket->mPacketType)
@@ -823,11 +820,6 @@ static void garmin_init(struct gps_device_t *session)
 	//set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
 
 	//SendPacket(session,  thePacket);
-}
-
-static int garmin_get_packet(struct gps_device_t *session, /*@unused@*/size_t waiting UNUSED ) 
-{
-    return ( 0 == GetPacket( session ) ? 1 : 0);
 }
 
 static gps_mask_t garmin_parse_input(struct gps_device_t *session)

@@ -7,11 +7,11 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include "config.h"
-#ifdef HAVE_SYS_FILIO_H
-#include <sys/filio.h>	/* for FIONREAD on BSD systems */
-#endif
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+
+#include "config.h"
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #include <pthread.h>
 #endif
@@ -23,7 +23,7 @@ int gpsd_open_dgps(char *dgpsserver)
 {
     char hn[256], buf[BUFSIZ];
     char *colon, *dgpsport = "rtcm-sc104";
-    int dsock;
+    int dsock, opts;
 
     if ((colon = strchr(dgpsserver, ':'))) {
 	dgpsport = colon+1;
@@ -38,6 +38,10 @@ int gpsd_open_dgps(char *dgpsserver)
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	(void)write(dsock, buf, strlen(buf));
     }
+    opts = fcntl(dsock, F_GETFL);
+
+    if (opts >= 0)
+	(void)fcntl(dsock, F_SETFL, opts | O_NONBLOCK);
     return dsock;
 }
 /*@ +branchstate */
@@ -383,19 +387,10 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 
 #endif /* BINARY_ENABLE */
 
-static int is_input_waiting(int fd)
-{
-    int	count = 0;
-    if (fd < 0 || ioctl(fd, FIONREAD, &count) < 0)
-	return -1;
-    return count;
-}
-
 static gps_mask_t handle_packet(struct gps_device_t *session)
 {
     gps_mask_t received, dopmask = 0;
 
-    session->packet_full = 0;
     session->gpsdata.sentence_time = NAN;
     session->gpsdata.sentence_length = session->outbuflen;
     session->gpsdata.d_recv_time = timestamp();
@@ -543,74 +538,67 @@ static gps_mask_t handle_packet(struct gps_device_t *session)
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
-    int waiting;
+    ssize_t packet_length;
 
-    /* accept a DGPS correction if one is pending */
-    if (is_input_waiting(session->dsock) > 0) {
+    if (session->dsock > -1) {
 	char buf[BUFSIZ];
 	int rtcmbytes;
 
+	/* accept a DGPS correction if one is pending */
 	if ((rtcmbytes=(int)read(session->dsock,buf,sizeof(buf)))>0 && (session->gpsdata.gps_fd !=-1)) {
 	    if (session->device_type->rtcm_writer(session, buf, (size_t)rtcmbytes) == 0)
 		gpsd_report(1, "Write to rtcm sink failed\n");
 	    else
 		gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
-	} else
+	} else if (errno != EAGAIN)
 	    gpsd_report(1, "Read from rtcm source failed\n");
     }
 
+    if (session->inbuflen==0)
+	session->gpsdata.d_xmit_time = timestamp();
+
+    /* can we get a full packet from the device? */
+    if (session->device_type)
+	packet_length = session->device_type->get_packet(session);
+    else {
+	packet_length = packet_get(session);
+	if (session->packet_type != BAD_PACKET) {
+	    gpsd_report(3, 
+			"packet sniff finds type %d\n", 
+			session->packet_type);
+	    if (session->packet_type == SIRF_PACKET)
+		(void)gpsd_switch_driver(session, "SiRF-II binary");
+	    else if (session->packet_type == TSIP_PACKET)
+		(void)gpsd_switch_driver(session, "Trimble TSIP");
+	    else if (session->packet_type == NMEA_PACKET)
+		(void)gpsd_switch_driver(session, "Generic NMEA");
+	    else if (session->packet_type == ZODIAC_PACKET)
+		(void)gpsd_switch_driver(session, "Zodiac binary");
+	    session->gpsdata.d_xmit_time = timestamp();
+	} else if (!gpsd_next_hunt_setting(session))
+	    return ERROR_SET;
+    }
+
     /* update the scoreboard structure from the GPS */
-    waiting = is_input_waiting(session->gpsdata.gps_fd);
-    gpsd_report(7, "GPS has %d chars waiting\n", waiting);
-    if (waiting < 0)
+    gpsd_report(7, "GPS sent %d characters\n", packet_length);
+    if (packet_length == BAD_PACKET)
 	return 0;
-    else if (waiting == 0) {
+    else if (packet_length == 0) {
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
     } else {
-	size_t packet_length;
 	session->gpsdata.online = timestamp();
 
-	if (session->inbuflen==0 || session->packet_full!=0) {
-	    session->gpsdata.d_xmit_time = timestamp();
-	    session->packet_full = 0;
-	}
-
-	/* can we get a full packet from the device? */
-	if (session->device_type)
-	    packet_length = (size_t)session->device_type->get_packet(session, (size_t)waiting);
-	else {
-	    packet_length = (size_t)packet_get(session, (size_t)waiting);
-	    if (session->packet_type != BAD_PACKET) {
-		gpsd_report(3, 
-			    "packet sniff finds type %d\n", 
-			    session->packet_type);
-		if (session->packet_type == SIRF_PACKET)
-		    (void)gpsd_switch_driver(session, "SiRF-II binary");
-		else if (session->packet_type == TSIP_PACKET)
-		    (void)gpsd_switch_driver(session, "Trimble TSIP");
-		else if (session->packet_type == NMEA_PACKET)
-		    (void)gpsd_switch_driver(session, "Generic NMEA");
-		else if (session->packet_type == ZODIAC_PACKET)
-		    (void)gpsd_switch_driver(session, "Zodiac binary");
-		session->gpsdata.d_xmit_time = timestamp();
-	    } else if (!gpsd_next_hunt_setting(session))
-		return ERROR_SET;
-	}
-
-	if (packet_length) {
-	    /*@ -nullstate @*/
-	    if (session->gpsdata.raw_hook)
-		session->gpsdata.raw_hook(&session->gpsdata, 
-					  (char *)session->outbuffer,
-					  packet_length, 2);
-	    /*@ -nullstate @*/
-	    return handle_packet(session);
-	} else
-	    return ONLINE_SET;
+	/*@ -nullstate @*/
+	if (session->gpsdata.raw_hook)
+	    session->gpsdata.raw_hook(&session->gpsdata, 
+				      (char *)session->outbuffer,
+				      (size_t)packet_length, 2);
+	/*@ -nullstate @*/
+	return handle_packet(session);
     }
 }
 

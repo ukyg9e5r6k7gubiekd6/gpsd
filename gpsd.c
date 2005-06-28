@@ -1248,9 +1248,9 @@ int main(int argc, char *argv[])
 			    (void)strcat(cmds, "o");
 			if (changed & SATELLITE_SET)
 			    (void)strcat(cmds, "y");
+			if (channel->gpsdata.profiling!=0)
+			    (void)strcat(cmds, "$");
 		    }
-		    if (channel->gpsdata.profiling!=0 && channel->packet_full!=0)
-			(void)strcat(cmds, "$");
 		    if (cmds[0] != '\0')
 			(void)handle_request(cfd, cmds, (int)strlen(cmds));
 		}

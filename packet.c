@@ -500,26 +500,14 @@ static void character_discard(struct gps_device_t *session)
 
 /* entry points begin here */
 
-int packet_get(struct gps_device_t *session, size_t waiting)
+ssize_t packet_get(struct gps_device_t *session)
 /* grab a packet; returns ether BAD_PACKET or the length */
 {
     int newdata;
 #ifndef TESTMAIN
-    /*
-     * This should never happen.  If it does, it means that either
-     * (a) You've added a protocol with a max packet size larger than
-     * the input buffer can handle; fix this by adjusting MAX_PACKET_LENGTH.
-     * (b) The state machine is hosed -- it is not recognizing packets and
-     * flushing them out of the input buffer as it should.  Enable STATE_DEBUG
-     * and watch the transitions.
-     */
-    if (waiting>sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer)){
-	gpsd_report(6, "out of room, flushing input buffer\n");
-	session->inbufptr = session->inbuffer;
-	session->inbuflen = 0;
-    }
     /*@ -modobserver @*/
-    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr, (size_t)waiting);
+    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr, 
+			sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer));
     /*@ +modobserver @*/
 #else
     newdata = waiting;
@@ -607,7 +595,7 @@ int packet_get(struct gps_device_t *session, size_t waiting)
 	}
     }
 
-    return (int)session->outbuflen;
+    return (ssize_t)session->outbuflen;
 }
 
 void packet_reset(struct gps_device_t *session)

@@ -133,7 +133,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   memory leak, (2) a possible but unconfirmed file-descriptor leak, 
   and (3) a subtle error in the channel-assignment logic that only
   showed up with multiple sessions active.  In fact, the daemon code
-  no longer uses dynamic-memory allocation at all.
+  no longer uses dynamic-memory allocation at all.  Also, the code
+  no longer relies on FIONREAD working.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 
