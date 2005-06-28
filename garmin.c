@@ -527,7 +527,7 @@ static int GetPacket (struct gps_device_t *session )
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
 	ssize_t theBytesReturned = 0;
-	char *buf = (char *)session->GarminBuffer;
+	unsigned char *buf = session->GarminBuffer;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
 		, buf + session->GarminBufferLen
@@ -613,16 +613,18 @@ static bool garmin_probe(struct gps_device_t *session)
 	return false;
     }
 
-    if ( !session->GarminBuffer ) {
-	    // get a packet buffer
-	    session->GarminBuffer = calloc( sizeof(Packet_t), 1);
-	    if ( NULL == session->GarminBuffer ) {
-		gpsd_report(0, "garmin_probe: out of memory!\n");
-		return false;
-            }
+    /* reset the buffer and buffer length */
+    memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer) );
+    session->GarminBufferLen = 0;
+
+    if (sizeof(session->GarminBuffer) < sizeof(Packet_t)) {
+	gpsd_report(0, "garmin_probe: Compile error, GarminBuffer too small.\n",
+             strerror(errno));
+	return false;
     }
-    thePacket = (Packet_t*)session->GarminBuffer;
-    buffer = (unsigned char *)thePacket;
+
+    buffer = session->GarminBuffer;
+    thePacket = (Packet_t*)buffer;
 
     // set Mode 0
     set_int(buffer, GARMIN_LAYERID_PRIVATE);
@@ -796,8 +798,8 @@ static bool garmin_probe(struct gps_device_t *session)
  */
 static void garmin_init(struct gps_device_t *session)
 {
-	Packet_t *thePacket = (Packet_t*)session->GarminBuffer;
-	unsigned char *buffer = (unsigned char *)thePacket;
+	unsigned char *buffer = session->GarminBuffer;
+	Packet_t *thePacket = (Packet_t*)buffer;
 	bool ret;
 
 	gpsd_report(5, "to garmin_probe()\n");

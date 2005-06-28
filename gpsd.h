@@ -121,9 +121,7 @@ struct gps_device_t {
     time_t last_6d;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    /*@relnull@*/void *GarminBuffer; /* Pointer Garmin packet buffer 
-                           void *, to keep the packet details out of the 
-                           global context and save spave */
+    unsigned char GarminBuffer[4096+12]; /* Garmin packet buffer */
     size_t GarminBufferLen;                  /* current GarminBuffer Length */
 #endif /* GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
