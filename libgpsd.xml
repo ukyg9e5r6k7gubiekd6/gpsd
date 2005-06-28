@@ -133,7 +133,8 @@ activity requiring the GPS, and re-acquire it later.</para>
 <para><function>gpsd_poll()</function>
 queries the GPS and updates the part of the session structure that
 holds position, speed, GPS signal quality, and other data returned
-by the GPS. It returns a mask describing which fields have changed.</para>
+by the GPS. It returns a mask describing which fields have changed.
+This function will not block if no GPS data is waiting.</para>
 
 <para><function>gpsd_wrap()</function>
 ends the session, implicitly performing a 
@@ -148,7 +149,7 @@ and 2 or higher for debugging messages.</para>
 <para>The low-level functions do not allocate or free any dynamic 
 storage.  They can thus be used in a long-running application (such as
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
-itself) with a guarantee that thwy won't cause memory leaks.</para>
+itself) with a guarantee that they won't cause memory leaks.</para>
 
 </refsect1>
 
