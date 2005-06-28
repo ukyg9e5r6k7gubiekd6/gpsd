@@ -58,12 +58,19 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 /* 
  * The packet-recognition state machine.  It doesn't do checksums,
  * caller is responsible for that part.  It can be fooled by garbage
- * that looks like the head of a SiRF packet followed by a NMEA
- * packet; in that case it won't reset until it notices that the SiRF
- * trailer is not where it should be, and the NMEA packet will be
- * lost.  The reverse scenario is not possible because the SiRF leader
- * characters can't occur in an NMEA packet.  Caller should consume a
- * packet when it sees one of the *_RECOGNIZED states.
+ * that looks like the head of a binary packet followed by a NMEA
+ * packet; in that case it won't reset until it notices that the
+ * binary trailer is not where it should be, and the NMEA packet will
+ * be lost.  The reverse scenario is not possible because none of the
+ * binary leader character can occur in an NMEA packet.  Caller should
+ * consume a packet when it sees one of the *_RECOGNIZED states.
+ *
+ * Error handling is brutally simple; any time we see an unexpected
+ * character, go to GROUND_STATE and reset the machine.  Because
+ * another good packet will be usually along in less than a second
+ * repeating the same data, Boyer-Moore-like attempts to do parallel
+ * recognition beyond the headers would make no sense in this
+ * application, they'd just add complexity.
  *
  * This state machine allows the following talker IDs:
  *      GP -- Global Positioning System.

@@ -103,13 +103,11 @@ int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
     int retval = close(gpsdata->gps_fd);
-    if (gpsdata->gps_id)
+    if (gpsdata->gps_id) {
 	(void)free(gpsdata->gps_id);
 	gpsdata->gps_id = NULL;
-    if (gpsdata->gps_device) {
-	(void)free(gpsdata->gps_device);
-	gpsdata->gps_device = NULL;
     }
+    gpsdata->gps_device[0] = '\0';
     if (gpsdata->devicelist) {
 	int i;
 	for (i = 0; i < gpsdata->ndevices; i++)
@@ -186,11 +184,11 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'F':
 		    /*@ -mustfreeonly */
 		    if (sp[2] == '?') 
-			gpsdata->gps_device = NULL;
+			gpsdata->gps_device[0] = '\0';
 		    else {
-			if (gpsdata->gps_device)
-			    free(gpsdata->gps_id);
-			gpsdata->gps_device = strdup(sp+2);
+			/*@ -mayaliasunique @*/
+			strncpy(gpsdata->gps_device, sp+2, PATH_MAX);
+			/*@ +mayaliasunique @*/
 			gpsdata->set |= DEVICE_SET;
 		    }
 		    /*@ +mustfreeonly */

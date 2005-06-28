@@ -59,20 +59,18 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     /*@ +compmempass @*/
 }
 
-struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
+void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char *device)
 /* initialize GPS polling */
 {
-    struct gps_device_t *session = (struct gps_device_t *)calloc(sizeof(struct gps_device_t), 1);
-    if (!session)
-	return NULL;
-
-    /*@ -mustfreeonly @*//* splint 3.1.1 can't deduce storage is zero */
-    session->gpsdata.gps_device = strdup(device);
+    /*@ -mayaliasunique @*/
+    strncpy(session->gpsdata.gps_device, device, PATH_MAX);
+    /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
     session->dsock = -1;
     /*@ -temptrans @*/
     session->context = context;
     /*@ +temptrans @*/
+    /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.hdop = NAN;
@@ -86,8 +84,6 @@ struct gps_device_t *gpsd_init(struct gps_context_t *context, char *device)
 
     /* necessary in case we start reading in the middle of a GPGSV sequence */
     gpsd_zero_satellites(&session->gpsdata);
-
-    return session;
 }
 
 void gpsd_deactivate(struct gps_device_t *session)
@@ -622,9 +618,6 @@ void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
     gpsd_deactivate(session);
-    if (session->gpsdata.gps_device)
-	(void)free(session->gpsdata.gps_device);
-    /*@i@*/(void)free(session);
 }
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)

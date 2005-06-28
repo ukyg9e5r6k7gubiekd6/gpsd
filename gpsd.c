@@ -245,9 +245,9 @@ static int filesock(char *filename)
  */
 #define MAXDEVICES	FD_SETSIZE
 
-static struct gps_device_t *channels[MAXDEVICES];
-#define allocated_channel(chp)	((chp) != NULL)
-#define free_channel(chp)	chp = NULL
+static struct gps_device_t channels[MAXDEVICES];
+#define allocated_channel(chp)	((chp)->gpsdata.gps_device[0] != '\0')
+#define free_channel(chp)	(chp)->gpsdata.gps_device[0] = '\0'
 
 static struct subscriber_t {
     bool active;				/* is this a subscriber? */
@@ -330,13 +330,13 @@ static void raw_hook(struct gps_data_t *ud,
 }
 
 /*@ -globstate @*/
-static /*@null@*/ /*@observer@*/struct gps_device_t **find_device(char *device_name)
+static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_name)
 /* find the channel block for and existing device name */
 {
-    struct gps_device_t **chp;
+    struct gps_device_t *chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (allocated_channel(*chp) && strcmp((*chp)->gpsdata.gps_device, device_name)==0)
+	if (allocated_channel(chp) && strcmp(chp->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
 }
@@ -345,40 +345,40 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name,
 						   bool nowait)
 /* open and initialize a new channel block */
 {
-    struct gps_device_t **chp;
+    struct gps_device_t *chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (!allocated_channel(*chp))
+	if (!allocated_channel(chp))
 	    goto found;
     return NULL;
 found:
-    *chp = gpsd_init(&context, device_name);
-    (*chp)->gpsdata.raw_hook = raw_hook;
+    gpsd_init(chp, &context, device_name);
+    chp->gpsdata.raw_hook = raw_hook;
     if (nowait) {
-	if (gpsd_activate(*chp) < 0) {
+	if (gpsd_activate(chp) < 0) {
 	    return NULL;
 	}
-	FD_SET((*chp)->gpsdata.gps_fd, &all_fds);
+	FD_SET(chp->gpsdata.gps_fd, &all_fds);
     }
 
-    return *chp;
+    return chp;
 }
 /*@ +globstate @*/
 
-/*@ -branchstate @*/
+/*@ -branchstate -usedef -globstate @*/
 static bool assign_channel(struct subscriber_t *user)
 {
     /* if subscriber has no device... */
     if (user->device == NULL) {
 	double most_recent = 0;
-	struct gps_device_t **channel;
+	struct gps_device_t *channel;
 
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
-	    if (allocated_channel(*channel)) {
-		if (user->device == NULL || (*channel)->gpsdata.sentence_time >= most_recent) {
-		    user->device = *channel;
-		    most_recent = (*channel)->gpsdata.sentence_time;
+	    if (allocated_channel(channel)) {
+		if (user->device == NULL || channel->gpsdata.sentence_time >= most_recent) {
+		    user->device = channel;
+		    most_recent = channel->gpsdata.sentence_time;
 		}
 	    }
     }
@@ -408,7 +408,7 @@ static bool assign_channel(struct subscriber_t *user)
 
     return true;
 }
-/*@ +branchstate @*/
+/*@ +branchstate +usedef +globstate @*/
 
 static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
@@ -432,7 +432,7 @@ static int handle_request(int cfd, char *buf, int buflen)
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
     int i, j;
     struct subscriber_t *whoami = subscribers + cfd;
-    struct gps_device_t **newchan;
+    struct gps_device_t *newchan;
 
     (void)strcpy(reply, "GPSD");
     p = buf;
@@ -524,7 +524,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		p = snarfline(++p, &stash);
 		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
 		if ((newchan = find_device(stash))) {
-		    /*@i@*/whoami->device = *newchan;
+		    /*@i@*/whoami->device = newchan;
 		    whoami->tied = true;
 		}
 	    }
@@ -544,12 +544,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
-		if (allocated_channel(channels[i]))
+		if (allocated_channel(&channels[i]))
 		    j++;
 	    (void)snprintf(phrase, sizeof(phrase), ",K=%d ", j);
 	    for (i = 0; i < MAXDEVICES; i++) {
-		if (allocated_channel(channels[i]) && strlen(phrase)+strlen(channels[i]->gpsdata.gps_device)+1 < sizeof(phrase)) {
-		    (void)strcat(phrase, channels[i]->gpsdata.gps_device);
+		if (allocated_channel(&channels[i]) && strlen(phrase)+strlen(channels[i].gpsdata.gps_device)+1 < sizeof(phrase)) {
+		    (void)strcat(phrase, channels[i].gpsdata.gps_device);
 		    (void)strcat(phrase, " ");
 		}
 	    }
@@ -881,22 +881,22 @@ static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
 {
     char	*p, *stash, *eq;
-    struct gps_device_t	**chp;
+    struct gps_device_t	*chp;
     int cfd;
 
     if (buf[0] == '-') {
 	p = snarfline(buf+1, &stash);
 	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
 	if ((chp = find_device(stash))) {
-	    if ((*chp)->gpsdata.gps_fd > 0)
-		FD_CLR((*chp)->gpsdata.gps_fd, &all_fds);
-	    gpsd_deactivate(*chp);
-	    notify_watchers(*chp, "X=0\r\n");
+	    if (chp->gpsdata.gps_fd > 0)
+		FD_CLR(chp->gpsdata.gps_fd, &all_fds);
+	    gpsd_deactivate(chp);
+	    notify_watchers(chp, "X=0\r\n");
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		if (subscribers[cfd].device == *chp)
+		if (subscribers[cfd].device == chp)
 		    subscribers[cfd].device = NULL;
-	    gpsd_wrap(*chp);
-	    /*@i1@*/free_channel(*chp);	/* modifying observer storage */
+	    gpsd_wrap(chp);
+	    /*@i@*/free_channel(chp);	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
 	} else
 	    (void)write(sfd, "ERROR\n", 6);
@@ -921,7 +921,7 @@ static void handle_control(int sfd, char *buf)
 	    *eq++ = '\0';
 	    if ((chp = find_device(stash))) {
 		gpsd_report(1,"<= control(%d): writing to %s \n", sfd, stash);
-		(void)write((*chp)->gpsdata.gps_fd, eq, strlen(eq));
+		(void)write(chp->gpsdata.gps_fd, eq, strlen(eq));
 		(void)write(sfd, "OK\n", 3);
 	    } else {
 		gpsd_report(1,"<= control(%d): %s not active \n", sfd, stash);
@@ -941,7 +941,7 @@ int main(int argc, char *argv[])
     static char *dgpsserver = NULL;
     static char *service = NULL; 
     static char *control_socket = NULL;
-    struct gps_device_t *device, **channel;
+    struct gps_device_t *device, *channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
@@ -1087,8 +1087,8 @@ int main(int argc, char *argv[])
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
 	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
-	    if (channels[dfd])
-		(void)gpsd_wrap(channels[dfd]);
+	    if (allocated_channel(&channels[dfd]))
+		(void)gpsd_wrap(&channels[dfd]);
 	}
 	if (st == SIGHUP+1)
 	    gpsd_report(1, "gpsd restarted by SIGHUP\n");
@@ -1127,8 +1127,8 @@ int main(int argc, char *argv[])
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 	for (channel = channels; channel < channels + MAXDEVICES; channel++)
-	    if (allocated_channel(*channel) && (*channel)->dsock > -1)
-		FD_CLR((*channel)->dsock, &rfds);
+	    if (allocated_channel(channel) && channel->dsock > -1)
+		FD_CLR(channel->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
@@ -1209,33 +1209,32 @@ int main(int argc, char *argv[])
 
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    struct gps_device_t *polldevice = *channel;
 
-	    if (!allocated_channel(polldevice))
+	    if (!allocated_channel(channel))
 		continue;
 	    /* we may need to force the GPS open */
-	    if (nowait && polldevice->gpsdata.gps_fd == -1) {
-		gpsd_deactivate(polldevice);
-		if (gpsd_activate(polldevice) >= 0) {
-		    FD_SET(polldevice->gpsdata.gps_fd, &all_fds);
-		    notify_watchers(polldevice, "GPSD,X=%f\r\n", timestamp());
+	    if (nowait && channel->gpsdata.gps_fd == -1) {
+		gpsd_deactivate(channel);
+		if (gpsd_activate(channel) >= 0) {
+		    FD_SET(channel->gpsdata.gps_fd, &all_fds);
+		    notify_watchers(channel, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
 
 	    /* get data from the device */
 	    changed = 0;
-	    if (polldevice->gpsdata.gps_fd >= 0)
+	    if (channel->gpsdata.gps_fd >= 0)
 	    {
-		changed = gpsd_poll(polldevice);
+		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
-		    FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
-		    gpsd_deactivate(polldevice);
+		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(channel);
 		} if ((changed & ONLINE_SET) == 0) {
 		    gpsd_report(3, "GPS is offline\n");
-		    FD_CLR(polldevice->gpsdata.gps_fd, &all_fds);
-		    gpsd_deactivate(polldevice);
-		    notify_watchers(polldevice, "GPSD,X=0\r\n");
+		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(channel);
+		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
 	    }
 
@@ -1243,14 +1242,14 @@ int main(int argc, char *argv[])
 		/* some listeners may be in watcher mode */
 		if (subscribers[cfd].watcher) {
 		    char cmds[4] = ""; 
-		    polldevice->poll_times[cfd] = timestamp();
+		    channel->poll_times[cfd] = timestamp();
 		    if (changed &~ ONLINE_SET) {
 			if (changed & (LATLON_SET | MODE_SET))
 			    (void)strcat(cmds, "o");
 			if (changed & SATELLITE_SET)
 			    (void)strcat(cmds, "y");
 		    }
-		    if (polldevice->gpsdata.profiling!=0 && polldevice->packet_full!=0)
+		    if (channel->gpsdata.profiling!=0 && channel->packet_full!=0)
 			(void)strcat(cmds, "$");
 		    if (cmds[0] != '\0')
 			(void)handle_request(cfd, cmds, (int)strlen(cmds));
@@ -1287,16 +1286,16 @@ int main(int argc, char *argv[])
 
 	/* close devices with no remaining subscribers */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    if (allocated_channel(*channel)) {
+	    if (allocated_channel(channel)) {
 		bool need_gps = false;
 
 		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		    if (subscribers[cfd].active&&subscribers[cfd].device==*channel)
+		    if (subscribers[cfd].active&&subscribers[cfd].device==channel)
 			need_gps = true;
 
-		if (!nowait && !need_gps && (*channel)->gpsdata.gps_fd > -1) {
-		    FD_CLR((*channel)->gpsdata.gps_fd, &all_fds);
-		    gpsd_deactivate(*channel);
+		if (!nowait && !need_gps && channel->gpsdata.gps_fd > -1) {
+		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    gpsd_deactivate(channel);
 		}
 	    }
 	}

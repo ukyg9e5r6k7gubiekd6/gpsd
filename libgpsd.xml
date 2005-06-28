@@ -27,7 +27,8 @@ C:
     <paramdef>char * <parameter>dgpsserver</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>struct gps_device_t *<function>gpsd_init</function></funcdef>
+<funcdef>void <function>gpsd_init</function></funcdef>
+    <paramdef>struct gps_device_t *<parameter>session</parameter></paramdef>
     <paramdef>struct * <parameter>gps_context_t *</parameter></paramdef>
     <paramdef>char * <parameter>device</parameter></paramdef>
 </funcprototype>
@@ -144,6 +145,11 @@ The library will use this to issue ordinary status messages.  Use
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
 </refsect1>
+
+<!-- para>These functions do not allocate or free any dynamic storage.
+(This isn't true yet. The use of dynamic storage in the Garmin driver
+needs to be fixed.)
+</para -->
 
 <refsect1 id='bugs'><title>BUGS</title>
 

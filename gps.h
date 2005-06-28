@@ -10,6 +10,7 @@ extern "C" {
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <limits.h>
 #include <time.h>
 
 #define MAXTAGLEN	6	/* maximum length of sentence tag name */
@@ -136,7 +137,7 @@ struct gps_data_t {
     int part, await;		/* for tracking GSV parts */
 
     /* where and what gpsd thinks the device is */
-    char	*gps_device;	/* only valid if non-null. */
+    char	gps_device[PATH_MAX];	/* only valid if non-null. */
     char	*gps_id;	/* only valid if non-null. */
     unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
     unsigned int driver_mode;	/* whether driver is in native mode or not */

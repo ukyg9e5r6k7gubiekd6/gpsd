@@ -195,7 +195,8 @@ extern gps_mask_t dop(struct gps_data_t *);
 
 /* External interface */
 extern int gpsd_open_dgps(char *);
-extern struct gps_device_t * gpsd_init(struct gps_context_t *, char *device);
+extern void gpsd_init(struct gps_device_t *, 
+			     struct gps_context_t *, char *device);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
