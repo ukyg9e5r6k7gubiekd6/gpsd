@@ -667,7 +667,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return false;
         }
-	if (garmin_get_packet( session ) > 0) {
+	if (garmin_get_packet( session ) == (ssize_t)sizeof(session->GarminBuffer)) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( ( (unsigned char)75 == thePacket->mPacketType)
@@ -714,7 +714,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return(0);
         }
-	if ( garmin_get_packet( session ) > 0) {
+	if ( garmin_get_packet( session ) == (ssize_t)sizeof(session->GarminBuffer)) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
@@ -762,7 +762,7 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	    return false;
         }
-	if ( garmin_get_packet( session ) > 0) {
+	if ( garmin_get_packet( session ) == (ssize_t)sizeof(session->GarminBuffer)) {
 	    (void)PrintPacket(session, thePacket);
 
 	    if( (GARMIN_LAYERID_APPL == (unsigned int)thePacket->mPacketType)

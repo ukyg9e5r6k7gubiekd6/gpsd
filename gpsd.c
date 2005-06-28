@@ -1223,7 +1223,7 @@ int main(int argc, char *argv[])
 
 	    /* get data from the device */
 	    changed = 0;
-	    if (channel->gpsdata.gps_fd >= 0)
+	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
 	    {
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
@@ -1265,7 +1265,7 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (subscribers[cfd].active && /*@i@*/FD_ISSET(cfd, &rfds)) {
+	    if (subscribers[cfd].active && FD_ISSET(cfd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
 
