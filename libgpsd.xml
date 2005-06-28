@@ -144,12 +144,13 @@ ends the session, implicitly performing a
 The library will use this to issue ordinary status messages.  Use 
 first argument of 0 for errors, 1 for ordinary status messages,
 and 2 or higher for debugging messages.</para>
-</refsect1>
 
-<!-- para>These functions do not allocate or free any dynamic storage.
-(This isn't true yet. The use of dynamic storage in the Garmin driver
-needs to be fixed.)
-</para -->
+<para>The low-level functions do not allocate or free any dynamic 
+storage.  They can thus be used in a long-running application (such as
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
+itself) with a guarantee that thwy won't cause memory leaks.</para>
+
+</refsect1>
 
 <refsect1 id='bugs'><title>BUGS</title>
 

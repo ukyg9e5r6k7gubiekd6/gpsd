@@ -315,6 +315,16 @@ enough to manage that, consider whether your feature control might be
 implemented with an extension to the gpsd protocol or the
 control-socket command set.
 
+** Don't use malloc!
+
+The best way to avoid having dynamic-memory allocation problems is
+not to use malloc/free at all.  The gpsd daemon doesn't (though the
+client-side code does).  Thus, even the longest-running instance 
+can't have memory leaks.  The only cost for this turned out to be
+embedding a PATH_MAX-sized buffer in the gpsd.h structure.
+
+Don't undo this by using malloc/free in a driver or anywhere else.
+
 ** Error modeling
 
 To estimate errors (which we must do if the GPS isn't nice like a
