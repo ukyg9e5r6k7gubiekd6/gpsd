@@ -128,8 +128,10 @@ int gpsd_open(struct gps_device_t *session)
 	 * Only block until we get at least one character, whatever the
 	 * third arg of read(2) says.
 	 */
+	/*@ ignore @*/
 	memset(session->ttyset.c_cc,0,sizeof(session->ttyset.c_cc));
 	session->ttyset.c_cc[VMIN] = 1;
+	/*@ end @*/
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed

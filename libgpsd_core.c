@@ -18,34 +18,6 @@
 
 #include "gpsd.h"
 
-/*@ -branchstate */
-int gpsd_open_dgps(char *dgpsserver)
-{
-    char hn[256], buf[BUFSIZ];
-    char *colon, *dgpsport = "rtcm-sc104";
-    int dsock, opts;
-
-    if ((colon = strchr(dgpsserver, ':'))) {
-	dgpsport = colon+1;
-	*colon = '\0';
-    }
-    if (!getservbyname(dgpsport, "tcp"))
-	dgpsport = "2101";
-
-    dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
-    if (dsock >= 0) {
-	(void)gethostname(hn, sizeof(hn));
-	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
-	(void)write(dsock, buf, strlen(buf));
-    }
-    opts = fcntl(dsock, F_GETFL);
-
-    if (opts >= 0)
-	(void)fcntl(dsock, F_SETFL, opts | O_NONBLOCK);
-    return dsock;
-}
-/*@ +branchstate */
-
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
@@ -70,7 +42,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     strncpy(session->gpsdata.gps_device, device, PATH_MAX);
     /*@ -mustfreeonly @*/
     session->device_type = NULL;	/* start by hunting packets */
-    session->dsock = -1;
+    session->rtcmtime = 0;
     /*@ -temptrans @*/
     session->context = context;
     /*@ +temptrans @*/
@@ -392,20 +364,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 {
     ssize_t packet_length;
 
-    if (session->dsock > -1) {
-	char buf[BUFSIZ];
-	int rtcmbytes;
-
-	/* accept a DGPS correction if one is pending */
-	if ((rtcmbytes=(int)read(session->dsock,buf,sizeof(buf)))>0 && (session->gpsdata.gps_fd !=-1)) {
-	    if (session->device_type->rtcm_writer(session, buf, (size_t)rtcmbytes) == 0)
-		gpsd_report(1, "Write to rtcm sink failed\n");
-	    else
-		gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", rtcmbytes);
-	} else if (errno != EAGAIN)
-	    gpsd_report(1, "Read from rtcm source failed\n");
-    }
-
     if (session->inbuflen==0)
 	session->gpsdata.d_xmit_time = timestamp();
 
@@ -578,19 +536,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 	}
 
-	/* may< be time to ship a DGPS correction to the GPS */
-	if (session->fixcnt > 10 && session->sentdgps==0) {
-	    session->sentdgps++;
-	    if (session->dsock > -1) {
-		char buf[BUFSIZ];
-		(void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n", 
-			       session->gpsdata.fix.latitude, 
-			       session->gpsdata.fix.longitude, 
-			       session->gpsdata.fix.altitude);
-		(void)write(session->dsock, buf, strlen(buf));
-		gpsd_report(2, "=> dgps %s", buf);
-	    }
-	}
+	dgpsip_report(session);
 
 	return session->gpsdata.set;
     }

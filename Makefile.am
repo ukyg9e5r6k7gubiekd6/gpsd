@@ -80,6 +80,7 @@ libgps_c_sources = \
 	packet.c \
 	gpsutils.c \
 	geoid.c \
+	dgpsip.c \
 	sirf.c \
 	report.c \
 	bits.h \

@@ -59,7 +59,8 @@ static int debuglevel;
 static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
-static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE,
+static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE, 
+				       0, 0, {'\0'}, 0,
 #ifdef NTPSHM_ENABLE
 				       {0},
 				       {0},
@@ -936,7 +937,7 @@ int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
     static bool nowait = false;
-    static int st, dsock = -1, csock = -1;
+    static int st, csock = -1;
     static gps_mask_t changed;
     static char *dgpsserver = NULL;
     static char *service = NULL; 
@@ -1034,11 +1035,11 @@ int main(int argc, char *argv[])
     gpsd_report(1, "listening on port %s\n", service);
 
     if (dgpsserver) {
-	dsock = gpsd_open_dgps(dgpsserver);
-	if (dsock >= 0)
+        int dsock = dgpsip_open(&context, dgpsserver);
+	if (dsock >= 0) {
 	    FD_SET(dsock, &all_fds);
-	else
-	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n",dsock);
+	} else
+	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n", dsock);
     }
 
 #ifdef NTPSHM_ENABLE
@@ -1120,15 +1121,11 @@ int main(int argc, char *argv[])
 	device = open_device(argv[i], nowait);
 	if (!device) {
 	    gpsd_report(0, "GPS device %s nonexistent or can't be read\n", argv[i]);
-	} else if (dsock >= 0)
-	    device->dsock = dsock;
+	}
     }
 
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
-	for (channel = channels; channel < channels + MAXDEVICES; channel++)
-	    if (allocated_channel(channel) && channel->dsock > -1)
-		FD_CLR(channel->dsock, &rfds);
 
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
@@ -1193,6 +1190,11 @@ int main(int argc, char *argv[])
 	    FD_CLR(csock, &rfds);
 	}
 
+	/* be ready for DGPSIP reports */
+	if (FD_ISSET(context.dsock, &rfds)) {
+	    dgpsip_poll(&context);
+	}
+
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
@@ -1212,6 +1214,7 @@ int main(int argc, char *argv[])
 
 	    if (!allocated_channel(channel))
 		continue;
+
 	    /* we may need to force the GPS open */
 	    if (nowait && channel->gpsdata.gps_fd == -1) {
 		gpsd_deactivate(channel);
@@ -1220,6 +1223,9 @@ int main(int argc, char *argv[])
 		    notify_watchers(channel, "GPSD,X=%f\r\n", timestamp());
 		}
 	    }
+
+	    /* pass the current DGPSIP coorection to the GPS if new */
+	    dgpsip_relay(channel);
 
 	    /* get data from the device */
 	    changed = 0;

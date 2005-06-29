@@ -25,7 +25,7 @@
 /* only used if the GPS doesn't report estimated position error itself */
 #define UERE_NO_DGPS	8	/* meters */
 #define UERE_WITH_DGPS	2	/* meters */
-#define UERE(session)	((session->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
+#define UERE(session)	((session->context->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
@@ -34,6 +34,10 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     int leap_seconds;
     int century;			/* for NMEA-only devices without ZDA */
+    int dsock;				/* socket to DGPS server */
+    ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
+    char rtcmbuf[40];			/* last RTCM104 report */
+    double rtcmtime;			/* timestamp of last RTCM104 report */ 
 #ifdef NTPSHM_ENABLE
     /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
@@ -81,8 +85,8 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     /*@relnull@*/struct gps_type_t *device_type;
-    int dsock;		/* socket to DGPS server */
-    int sentdgps;	/* have we sent a DGPS correction? */
+    double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
+    bool sentdgps;	/* have we sent a DGPSIP usage report? */
     int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
@@ -164,10 +168,15 @@ extern void nmea_add_checksum(char *);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 
-extern void packet_reset(struct gps_device_t *session);
-extern void packet_pushback(struct gps_device_t *session);
+extern void packet_reset(struct gps_device_t *);
+extern void packet_pushback(struct gps_device_t *);
 extern ssize_t packet_get(struct gps_device_t *);
 extern int packet_sniff(struct gps_device_t *);
+
+extern int dgpsip_open(struct gps_context_t *, const char *);
+extern void dgpsip_poll(struct gps_context_t *);
+extern void dgpsip_relay(struct gps_device_t *);
+extern void dgpsip_report(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
@@ -191,7 +200,6 @@ extern void ecef_to_wgs84fix(struct gps_data_t *,
 extern gps_mask_t dop(struct gps_data_t *);
 
 /* External interface */
-extern int gpsd_open_dgps(char *);
 extern void gpsd_init(struct gps_device_t *, 
 			     struct gps_context_t *, char *device);
 extern int gpsd_activate(struct gps_device_t *);
