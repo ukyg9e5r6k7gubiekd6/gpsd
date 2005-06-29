@@ -37,6 +37,7 @@ distinguish them from baud barf.
 #include <stdarg.h>
 
 static int verbose = 0;
+static int waiting;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -769,7 +770,8 @@ int main(int argc, char *argv[])
 	state.inbuflen = 0;
 	memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
 	gpsd_report(2, "%s starts with state %d\n", mp->legend, mp->initstate);
-	st = packet_get(&state, mp->testlen);
+	waiting = mp->testlen;
+	st = packet_get(&state);
 	if (state.packet_type != mp->type)
 	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, st);
 	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen))
