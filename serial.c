@@ -125,6 +125,12 @@ int gpsd_open(struct gps_device_t *session)
 	(void)memcpy(&session->ttyset,
 		     &session->ttyset_old, sizeof(session->ttyset));
 	/*
+	 * Only block until we get at least one character, whatever the
+	 * third arg of read(2) says.
+	 */
+	memset(session->ttyset.c_cc,0,sizeof(session->ttyset.c_cc));
+	session->ttyset.c_cc[VMIN] = 1;
+	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.

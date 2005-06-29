@@ -133,8 +133,7 @@ activity requiring the GPS, and re-acquire it later.</para>
 <para><function>gpsd_poll()</function>
 queries the GPS and updates the part of the session structure that
 holds position, speed, GPS signal quality, and other data returned
-by the GPS. It returns a mask describing which fields have changed.
-This function will not block if no GPS data is waiting.</para>
+by the GPS. It returns a mask describing which fields have changed.</para>
 
 <para><function>gpsd_wrap()</function>
 ends the session, implicitly performing a 
