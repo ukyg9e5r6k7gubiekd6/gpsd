@@ -177,6 +177,8 @@ extern int dgpsip_open(struct gps_context_t *, const char *);
 extern void dgpsip_poll(struct gps_context_t *);
 extern void dgpsip_relay(struct gps_device_t *);
 extern void dgpsip_report(struct gps_device_t *);
+extern void dgpsip_autoconnect(struct gps_context_t *, 
+			       double, double, const char *);
 
 extern int gpsd_open(struct gps_device_t *);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);

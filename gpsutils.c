@@ -165,7 +165,6 @@ double gpstime_to_unix(int week, double tow)
 
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 
-#ifdef __UNUSED__
 static double CalcRad(double lat)
 /* earth's radius of curvature in meters at specified latitude.*/
 {
@@ -206,13 +205,12 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
     // a very small amount due to rounding errors in the preceding
     // calculations (this is prone to happen when the argument points
     // are very close together).  Thus we constrain it here.
-    if (abs(a) > 1) 
+    if (fabs(a) > 1) 
 	a = 1;
     else if (a < -1) 
 	a = -1;
     return CalcRad((lat1+lat2) / 2) * acos(a);
 }
-#endif /* __UNUSED__ */
 
 /*****************************************************************************
 

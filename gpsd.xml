@@ -21,7 +21,7 @@
       <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>DGPS-server</replaceable></arg>
+      <arg choice='opt'>-d <replaceable>DGPSIP-server</replaceable></arg>
       <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
@@ -56,10 +56,12 @@ protocol used by the USB version of the Garmin 18 and other Garmin USB
 GPSes. <application>gpsd</application> effectively hides the
 differences among these.</para>
 
-<para>Optionally, <application>gpsd</application> may get
-differential-GPS corrections from a ground station running a RTCM-S104
-server; this will improve user error by roughly a factor of four.
-See <xref linkend='accuracy'/> for discussion.</para>
+<para><application>gpsd</application> can use differential-GPS
+corrections from a ground station running a DGPSIP server that reports
+RTCM-S104 data; this will improve user error by roughly a factor of
+four.  If no server is specified, <application>gpsd</application> will
+hunt for one.  See <xref linkend='accuracy'/> and <xref
+linkend='files'/> for discussion.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -779,6 +781,18 @@ not) and it is after 2099, then the century part of the dates
 <application>gpsd</application> sets its group ID to the owner of this
 device if no GPS device was specified on the command line does not
 exist.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/usr/share/gpsd/dgpsip-servers</filename></term>
+<listitem>
+<para>A text file listing DGPSIP servers worldwide.  If no DGPSIP
+server is specified at startup (via the -d option)
+<application>gpsd</application> will look here to find the 
+nearest one.  Each line has three space-separated fields: 
+latitude (decimal degrees), longitude (decimal degrees) and
+a server name (optionally followed by a colon and a port number).
+Text following # on a line is ignored.  Blank lines are ignored.</para>
 </listitem>
 </varlistentry>
 </variablelist>

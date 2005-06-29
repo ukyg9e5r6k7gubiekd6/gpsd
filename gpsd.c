@@ -48,6 +48,10 @@
 
 #define QLEN			5
 
+/* Where to find the list of DGPS correction servers, if there is one */
+#define DGPS_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
+
+
 /*
  * The name of a tty device from which to pick up whatever the local
  * owning group for tty devices is.  Used when we drop privileges.
@@ -60,7 +64,7 @@ static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {0, 
-				       false, 0, 0, 0, {'\0'}, 0,
+				       false, 0, -1, 0, {'\0'}, 0,
 				       LEAP_SECONDS, CENTURY_BASE, 
 #ifdef NTPSHM_ENABLE
 				       {0},
@@ -138,13 +142,13 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    (void)printf("usage:  gpsd [options] \n\
+    (void)printf("usage: gpsd [-d dgpsip-server] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
-  -f string              	= set GPS device name \n\
-  -S integer (default %s)	= set port for daemon \n\
   -d host[:port]         	= set DGPS server \n\
+  -F sockfile                   = specift control socket location\n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
+  -S integer (default %s)	= set port for daemon \n\
   -h                     	= help message \n",
 	   DEFAULT_GPSD_PORT);
 }
@@ -1037,10 +1041,8 @@ int main(int argc, char *argv[])
 
     if (dgpsserver) {
         int dsock = dgpsip_open(&context, dgpsserver);
-	if (dsock >= 0) {
+	if (dsock >= 0)
 	    FD_SET(dsock, &all_fds);
-	} else
-	    gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n", dsock);
     }
 
 #ifdef NTPSHM_ENABLE
@@ -1192,9 +1194,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* be ready for DGPSIP reports */
-	if (FD_ISSET(context.dsock, &rfds)) {
+	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds))
 	    dgpsip_poll(&context);
-	}
 
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
@@ -1212,7 +1213,6 @@ int main(int argc, char *argv[])
 
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-
 	    if (!allocated_channel(channel))
 		continue;
 
@@ -1268,6 +1268,19 @@ int main(int argc, char *argv[])
 			    send_dbus_fix (*channel);
 	    }
 #endif
+	}
+
+	/* may be time to hunt up a DGPSIP server */
+	if (context.fixcnt > 0 && context.dsock == -1) {
+	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
+		if (channel->gpsdata.fix.mode < MODE_NO_FIX) {
+		    dgpsip_autoconnect(&context,
+				       channel->gpsdata.fix.latitude,
+				       channel->gpsdata.fix.longitude,
+				       DGPS_SERVER_LIST);
+		    break;
+		}
+	    }
 	}
 
 	/* accept and execute commands for all clients */

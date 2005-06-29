@@ -31,7 +31,8 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	(void)gethostname(hn, sizeof(hn));
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	(void)write(context->dsock, buf, strlen(buf));
-    }
+    } else
+	gpsd_report(1, "Can't connect to DGPS server, netlib error %d\n", context->dsock);
     opts = fcntl(context->dsock, F_GETFL);
 
     if (opts >= 0)
@@ -89,3 +90,47 @@ void dgpsip_report(struct gps_device_t *session)
     }
 }
 
+/* maximum distance from DGPS server for it to be useful (meters) */
+#define DGPS_THRESHOLD	1600000
+
+void dgpsip_autoconnect(struct gps_context_t *context,
+			double lat, double lon,
+			const char *serverlist)
+/* tell the library to talk to the nearest DGPSIP server */
+{
+    char buf[BUFSIZ];
+    struct dgps_server_t {
+	double lat, lon;
+	char server[255];
+	double dist;
+    } keep, hold;
+    FILE *sfp = fopen(serverlist, "r");
+
+    if (sfp == NULL) {
+	gpsd_report(1, "no DGPS server list found.\n");
+	context->dsock = -2;	/* don't try this again */
+	return;
+    }
+
+    keep.dist = DGPS_THRESHOLD;
+    keep.server[0] = '\0';
+    while (fgets(buf, (int)sizeof(buf), sfp)) {
+	char *cp = strchr(buf, '#');
+	if (cp)
+	    *cp = '\0';
+	if (sscanf(buf,"%lf %lf %256s",&hold.lat, &hold.lon, hold.server)==3) {
+	    hold.dist = earth_distance(lat, lon, hold.lat, hold.lon);
+	    if (hold.dist < keep.dist)
+		memcpy(&keep, &hold, sizeof(struct dgps_server_t));
+	}
+    }
+    (void)fclose(sfp);
+
+    if (keep.server[0] == '\0') {
+	gpsd_report(1, "no DGPS server within %d m\n", DGPS_THRESHOLD);
+	context->dsock = -2;	/* don't try this again */
+	return;
+    }
+
+    (void)dgpsip_open(context, keep.server);
+}
