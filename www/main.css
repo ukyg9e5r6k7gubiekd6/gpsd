@@ -108,6 +108,11 @@ body>#Menu {width:8em;}
 	margin-right: auto;
 	}
 
+.right {
+	float:right;
+	margin:0px;
+	}
+
 .notebox {
 	background-color:#eee;
 	border:1px dashed #999;
