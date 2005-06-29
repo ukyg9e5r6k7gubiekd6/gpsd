@@ -59,8 +59,9 @@ static int debuglevel;
 static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
-static struct gps_context_t context = {0, LEAP_SECONDS, CENTURY_BASE, 
-				       0, 0, {'\0'}, 0,
+static struct gps_context_t context = {0, 
+				       false, 0, 0, 0, {'\0'}, 0,
+				       LEAP_SECONDS, CENTURY_BASE, 
 #ifdef NTPSHM_ENABLE
 				       {0},
 				       {0},

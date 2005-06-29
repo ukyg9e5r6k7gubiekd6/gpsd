@@ -71,8 +71,12 @@ void dgpsip_relay(struct gps_device_t *session)
 void dgpsip_report(struct gps_device_t *session)
 /* may be time to ship a usage report to the DGPSIP server */
 {
-    if (session->fixcnt > 10 && !session->sentdgps) {
-	session->sentdgps = true;
+    /*
+     * 10 is an arbitrary number, the point is to have gotten several good
+     * fixes before reporting usage to our DGPSIP server.
+     */
+    if (session->context->fixcnt > 10 && !session->context->sentdgps) {
+	session->context->sentdgps = true;
 	if (session->context->dsock > -1) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n", 

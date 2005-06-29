@@ -32,12 +32,14 @@
 struct gps_context_t {
     int valid;
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
-    int leap_seconds;
-    int century;			/* for NMEA-only devices without ZDA */
+    bool sentdgps;			/* have we sent a DGPSIP R report? */
+    int fixcnt;				/* count of good fixes seen */
     int dsock;				/* socket to DGPS server */
     ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[40];			/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
+    int leap_seconds;
+    int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
     /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
@@ -86,8 +88,6 @@ struct gps_device_t {
     struct gps_data_t gpsdata;
     /*@relnull@*/struct gps_type_t *device_type;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
-    bool sentdgps;	/* have we sent a DGPSIP usage report? */
-    int fixcnt;		/* count of good fixes seen */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
     int	packet_type;

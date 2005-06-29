@@ -436,7 +436,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* count all packets and good fixes */
 	session->counter++;
 	if (session->gpsdata.status > STATUS_NO_FIX) 
-	    session->fixcnt++;
+	    session->context->fixcnt++;
 
 	/*
 	 * Now we compute derived quantities.  This is where the tricky error-
