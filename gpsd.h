@@ -25,20 +25,22 @@
 /* only used if the GPS doesn't report estimated position error itself */
 #define UERE_NO_DGPS	8	/* meters */
 #define UERE_WITH_DGPS	2	/* meters */
-#define UERE(session)	((session->context->dsock==-1) ? UERE_NO_DGPS : UERE_WITH_DGPS)
+#define UERE(session)	((session->context->dsock<0) ? UERE_NO_DGPS : UERE_WITH_DGPS)
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
 struct gps_context_t {
-    int valid;
+    int valid;				/* member validity flags */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
+    /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPSIP R report? */
     int fixcnt;				/* count of good fixes seen */
     int dsock;				/* socket to DGPS server */
     ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[40];			/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
-    int leap_seconds;
+    /* timekeeping */
+    int leap_seconds;			/* Unix seconds to UTC */
     int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
     /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];

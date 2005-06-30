@@ -98,12 +98,12 @@ void dgpsip_autoconnect(struct gps_context_t *context,
 			const char *serverlist)
 /* tell the library to talk to the nearest DGPSIP server */
 {
-    char buf[BUFSIZ];
     struct dgps_server_t {
 	double lat, lon;
-	char server[255];
+	char server[257];
 	double dist;
     } keep, hold;
+    char buf[BUFSIZ];
     FILE *sfp = fopen(serverlist, "r");
 
     if (sfp == NULL) {

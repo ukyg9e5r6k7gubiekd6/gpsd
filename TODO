@@ -11,12 +11,12 @@ libgpsd_core.c and the TSIP driver that we haven't figured out.
 
 This may be a symptom of more general problems in data management
 on devices that ship several sentences of fix and related data
-per cycle.  It does not affect devices speaking SiRF or Zodac or 
+per cycle.  It does not affect devices speaking SiRF or Zodiac or 
 Garmin-binary protocol.
 
 *** PPS code is flaky, possibly due to a pthreads bug
 
-Some code attempting to terminate the PPS-monutoring thread when there
+Some code attempting to terminate the PPS-monitoring thread when there
 is no DCD (e.g., on a USB device) seems to have tickled some kind of
 bug in pthreads -- termination seems to close the GPS device or
 otherwise do something nasty to the serial I/O layer.  
@@ -83,9 +83,6 @@ input waiting spins returning 0 when this happens.  We suspect that
 memory resource crises do something nasty to the buffering in the
 Linux serial layer.  The bug seems not to occur during ext3 backups,
 only Reiserfs ones.
-
-This probably means we need to get rid of the FIONREAD ioctl(), which
-has always been kind of dodgy anyway.
 
 ** To do:
 

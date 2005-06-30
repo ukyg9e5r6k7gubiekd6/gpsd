@@ -131,7 +131,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   buffering problems with the Python side of the hotplug interface.
   gpsfake can now run sessions under a monitor like Valgrind.  Most
   of the gpsfake logic now lives in a module that can be used to write
-  other test loads.  Its progress baton is now optional.  Fixed
+  other test loads; its progress baton is now optional.  Fixed
   some minor bugs found by valgrind audit, including (1) a slow
   memory leak, (2) a possible but unconfirmed file-descriptor leak, 
   and (3) a subtle error in the channel-assignment logic that only
