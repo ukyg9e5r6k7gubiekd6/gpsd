@@ -276,7 +276,7 @@ embedded in the GCC library version of tzset(), so the same method will
 work on any system that uses that.
 
 Problem: system daemons use the timezone set when they start up. You
-can't get them to grok a new one short of rebooting
+can't get them to grok a new one short of rebooting.
 
 Sources: 
 

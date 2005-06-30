@@ -3,9 +3,13 @@
 # Upload gpsd docs
 #
 webdir=esr@shell.berlios.de:/home/groups/gpsd/htdocs
-version=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
+makeversion=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
+
+version=${1:-$makeversion}
 echo "Uploading version $version"
+
 sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
+
 xmlto xhtml-nochunks ../gpsd.xml
 xmlto xhtml-nochunks ../xgps.xml
 xmlto xhtml-nochunks ../libgps.xml

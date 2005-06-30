@@ -15,6 +15,7 @@
 </div>
 
 <div id="Menu">
+    <img src="gpsd-logo-small.png"/><br />
     Home<br/>
     <a href="#news">News</a><br/>
     <a href="#downloads">Downloads</a><br/>
@@ -27,6 +28,10 @@
     <a href="hardware.html">Hardware</a><br/>
     <a href="history.html">History</a><br/>
 
+    <a href='http://www.catb.org/hacker-emblem/'>
+    <img src='http://www.catb.org/hacker-emblem/glider.png'
+    alt='hacker emblem' /></a><br />
+
     <a href="http://validator.w3.org/check/referer"><img
           src="http://www.w3.org/Icons/valid-xhtml10"
           alt="Valid XHTML 1.0!" height="31" width="88" /></a>
@@ -36,17 +41,23 @@
 
 <h1>About <code>gpsd</code></h1>
 
-<p><code>gpsd</code> is a service daemon that monitors a GPS attached
-to a host computer through a serial or USB port, making its data on
-the location/course/velocity of the sensor available to be queried on
-TCP port 2947 of the host computer.  With <code>gpsd</code>, multiple
-GPS client applications (such as navigational and wardriving software)
-can share access to a GPS without contention or loss of data. Also,
-gpsd responds to queries with a format that is substantially easier to
-parse than the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
-distribution includes a linkable C service library and a Python
-module that developers of <code>gpsd</code>-aware applications can use
-to encapsulate all communication with <code>gpsd</code>.</para>
+<p><code>gpsd</code> is a service daemon that monitors one or more
+GPSes attached to a host computer through serial or USB ports, making
+all data on the location/course/velocity of the sensors available to
+be queried on TCP port 2947 of the host computer.  With
+<code>gpsd</code>, multiple GPS client applications (such as
+navigational and wardriving software) can share access to GPSes
+without contention or loss of data. Also, gpsd responds to queries
+with a format that is substantially easier to parse than the NMEA 0183
+emitted by most GPSes.  The <code>gpsd</code> distribution includes
+linkable C service library, a C++ wrapper class, and a Python module
+that developers of <code>gpsd</code>-aware applications can use to
+encapsulate all communication with <code>gpsd</code>.</para>
+
+<p>Besides <code>gpsd</code> itself, the project provides
+auxiliary tools for diagnostic monitoring and profiling of GPSes 
+and feeding GPS-aware applications specified track data for 
+diagnostic purposes.</p>
 
 <p>The goal of the <code>gpsd</code> project is to create a solid
 layer of open-source infrastructure for programs running under Linux
@@ -67,8 +78,9 @@ goes active, launching <code>gpsd</code> if needed and telling it
 <code>gpsd</code> deduces a baud rate and GPS type by looking at the
 data stream.</p>
 
-<p><code>gpsd</code> is high-quality, carefully-audited code.  It has been
+<p><code>gpsd</code> is high-quality, carefully-audited code.  It is regularly
 checked with the standard mode of <a href='http://www.splint.org'>splint</a>,
+audited with <a href='http://valgrind.org/'>Valgrind</a>,
 and an extensive regression-test suite is used to check correct behavior
 before each release.</p>
 
@@ -183,6 +195,12 @@ script</a>.</p>
 
 <p>You can find Debian-stable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
+
+<p>The penguin-with-satellites logo is a hacked version of one I found
+<a
+href='http://www.gfz-potsdam.de/pb1/staff/gbeyerle/opengps/'>here</a>.
+This project seems to be defunct, or at least the maintainer is not
+responding to email.</p>
 
 <h1 id='others'>Other GPSDs</h1>
 
