@@ -149,6 +149,7 @@ EXTRA_DIST = \
 	HACKING \
 	TODO \
 	AUTHORS \
+	dgpsip-servers \
 	gpsd.xml \
 	xgps.xml \
 	libgpsd.xml \
