@@ -1273,7 +1273,7 @@ int main(int argc, char *argv[])
 	/* may be time to hunt up a DGPSIP server */
 	if (context.fixcnt > 0 && context.dsock == -1) {
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
-		if (channel->gpsdata.fix.mode < MODE_NO_FIX) {
+		if (channel->gpsdata.fix.mode > MODE_NO_FIX) {
 		    dgpsip_autoconnect(&context,
 				       channel->gpsdata.fix.latitude,
 				       channel->gpsdata.fix.longitude,
