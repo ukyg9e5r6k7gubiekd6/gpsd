@@ -73,7 +73,7 @@ mkdir -p "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb
 cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 # additional gpsd-devel files
 mkdir -p "$RPM_BUILD_ROOT"%{_datadir}/gpsd
-cp dgpsip-servers "$RPM_BUILD_ROOT"%{_datadir}/gpsd/
+#cp dgpsip-servers "$RPM_BUILD_ROOT"%{_datadir}/gpsd/
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
@@ -101,7 +101,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_mandir}/man1/sirfmon.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
-%{_datadir}/gpsd/dgpsip-servers
+#%{_datadir}/gpsd/dgpsip-servers
 %{_libdir}/python*/site-packages/gps.py*
 
 %files -n gpsd-devel
@@ -137,9 +137,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   and (3) a subtle error in the channel-assignment logic that only
   showed up with multiple sessions active.  In fact, the daemon code
   no longer uses dynamic-memory allocation at all.  Also, the code
-  no longer relies on FIONREAD working.  The daemon now hunts for a 
-  DGPSIP server within 1600000m if the user didn't specify one. The
-  project website has some new eye candy.
+  no longer relies on FIONREAD working.  The project website has some 
+  new eye candy.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 

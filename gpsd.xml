@@ -59,8 +59,10 @@ differences among these.</para>
 <para><application>gpsd</application> can use differential-GPS
 corrections from a ground station running a DGPSIP server that reports
 RTCM-S104 data; this will improve user error by roughly a factor of
-four.  If no server is specified, <application>gpsd</application> will
-hunt for one.  See <xref linkend='accuracy'/> and <xref
+four.  
+<!-- If no server is specified, <application>gpsd</application> will 
+hunt for one.-->
+See <xref linkend='accuracy'/> and <xref
 linkend='files'/> for discussion.</para>
 
 <para>The program accepts the following options:</para>
@@ -783,6 +785,7 @@ device if no GPS device was specified on the command line does not
 exist.</para>
 </listitem>
 </varlistentry>
+<!--
 <varlistentry>
 <term><filename>/usr/share/gpsd/dgpsip-servers</filename></term>
 <listitem>
@@ -795,6 +798,7 @@ a server name (optionally followed by a colon and a port number).
 Text following # on a line is ignored.  Blank lines are ignored.</para>
 </listitem>
 </varlistentry>
+-->
 </variablelist>
 
 </refsect1>

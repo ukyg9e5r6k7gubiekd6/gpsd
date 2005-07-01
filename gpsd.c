@@ -1270,6 +1270,7 @@ int main(int argc, char *argv[])
 #endif
 	}
 
+#ifdef NOT_FIXED
 	/* may be time to hunt up a DGPSIP server */
 	if (context.fixcnt > 0 && context.dsock == -1) {
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
@@ -1282,6 +1283,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	}
+#endif
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
