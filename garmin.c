@@ -825,9 +825,9 @@ static void garmin_init(struct gps_device_t *session)
 	//SendPacket(session,  thePacket);
 }
 
-static int garmin_get_packet(struct gps_device_t *session) 
+static ssize_t garmin_get_packet(struct gps_device_t *session) 
 {
-    return ( 0 == GetPacket( session ) ? 1 : 0);
+    return (ssize_t)( 0 == GetPacket( session ) ? 1 : 0);
 }
 
 static gps_mask_t garmin_parse_input(struct gps_device_t *session)
