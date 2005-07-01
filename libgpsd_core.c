@@ -379,8 +379,8 @@ static void apply_error_model(struct gps_device_t *session)
      * report speed error.  Nobody reports track error or climb error.
      */
     /* only used if the GPS doesn't report estimated position error itself */
-#define UERE_NO_DGPS	8	/* meters */
-#define UERE_WITH_DGPS	2	/* meters */
+#define UERE_NO_DGPS	8.0	/* meters */
+#define UERE_WITH_DGPS	2.0	/* meters */
     double uere = ((session->context->dsock<0) ? UERE_NO_DGPS : UERE_WITH_DGPS);
 
     session->gpsdata.fix.ept = 0.005;
@@ -403,9 +403,7 @@ static void apply_error_model(struct gps_device_t *session)
      * If we have a current fix and an old fix, and the packet handler 
      * didn't set the speed error and climb error members itself, 
      * try to compute them now.
-     * FIXME:  We need to compute track error here.
      */
-    session->gpsdata.fix.epd = NAN;
     if (session->gpsdata.fix.mode >= MODE_2D) {
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = NAN;
@@ -429,6 +427,31 @@ static void apply_error_model(struct gps_device_t *session)
 	    }
 	    if (isnan(session->gpsdata.fix.epc)==0)
 		session->gpsdata.set |= CLIMBERR_SET;
+	    /*
+	     * We compute track error solely from the position of this 
+	     * fix and the last one.  The maximum track error, as seen from the
+	     * position of last fix, is the angle subtended by the two
+	     * most extreme possible error positions of the current fix.
+	     * Let the position of the old fix be A and of the new fix B.
+	     * We model the view from A as two right triangles ABC and ABD
+	     * with BC and BD both having the length of the new fix's 
+	     * estimated error.  adj = len(AB), opp = len(BC) = len(BD), 
+	     * hyp = len(AC) = len(AD). Yes, this normally leads to 
+	     * uncertainties near 180 when we're moving slowly.
+	     */
+	    session->gpsdata.fix.epd = NAN;
+	    if (session->lastfix.mode >= MODE_2D) {
+		double adj = earth_distance(
+		    session->lastfix.latitude,
+		    session->lastfix.longitude,
+		    session->gpsdata.fix.latitude,      
+		    session->gpsdata.fix.longitude);
+		if (adj != 0) {
+		    double opp = session->gpsdata.fix.eph;
+		    double hyp = sqrt(adj*adj + opp*opp);
+		    session->gpsdata.fix.epd = RAD_2_DEG * 2 * asin(opp / hyp);
+		}
+	    }
 	}
     }
 }

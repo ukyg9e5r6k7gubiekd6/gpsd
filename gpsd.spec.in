@@ -137,8 +137,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   and (3) a subtle error in the channel-assignment logic that only
   showed up with multiple sessions active.  In fact, the daemon code
   no longer uses dynamic-memory allocation at all.  Also, the code
-  no longer relies on FIONREAD working.  The project website has some 
-  new eye candy.
+  no longer relies on FIONREAD working.  The track error field in the
+  O response is now computed.  The project website has some new eye candy.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 
