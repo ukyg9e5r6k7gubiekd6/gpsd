@@ -361,6 +361,78 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 
 #endif /* BINARY_ENABLE */
 
+
+static void apply_error_model(struct gps_device_t *session)
+/* compute errors and derived quantities */
+{
+    /*
+     * Now we compute derived quantities.  This is where the tricky error-
+     * modeling stuff goes. Presently we don't know how to derive 
+     * time or track error.
+     *
+     * Field reports match the theoretical prediction that
+     * expected time error should be half the resolution of
+     * the GPS clock, so we put the bound of the error
+     * in as a constant pending getting it from each driver.
+     *
+     * Some drivers set the position-error fields.  Only the Zodiacs 
+     * report speed error.  Nobody reports track error or climb error.
+     */
+    /* only used if the GPS doesn't report estimated position error itself */
+#define UERE_NO_DGPS	8	/* meters */
+#define UERE_WITH_DGPS	2	/* meters */
+    double uere = ((session->context->dsock<0) ? UERE_NO_DGPS : UERE_WITH_DGPS);
+
+    session->gpsdata.fix.ept = 0.005;
+    if ((session->gpsdata.set & HERR_SET)==0 
+	&& (session->gpsdata.set & HDOP_SET)!=0) {
+	session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
+	session->gpsdata.set |= HERR_SET;
+    }
+    if ((session->gpsdata.set & VERR_SET)==0 
+	&& (session->gpsdata.set & VDOP_SET)!=0) {
+	session->gpsdata.fix.epv = session->gpsdata.vdop * uere;
+	session->gpsdata.set |= VERR_SET;
+    }
+    if ((session->gpsdata.set & PERR_SET)==0
+	&& (session->gpsdata.set & PDOP_SET)!=0) {
+	session->gpsdata.epe = session->gpsdata.pdop * uere;
+	session->gpsdata.set |= PERR_SET;
+    }
+    /*
+     * If we have a current fix and an old fix, and the packet handler 
+     * didn't set the speed error and climb error members itself, 
+     * try to compute them now.
+     * FIXME:  We need to compute track error here.
+     */
+    session->gpsdata.fix.epd = NAN;
+    if (session->gpsdata.fix.mode >= MODE_2D) {
+	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
+	    session->gpsdata.fix.eps = NAN;
+	    if (session->lastfix.mode > MODE_NO_FIX 
+		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
+		double t = session->gpsdata.fix.time-session->lastfix.time;
+		double e = session->lastfix.eph + session->gpsdata.fix.eph;
+		session->gpsdata.fix.eps = e/t;
+	    }
+	    if (session->gpsdata.fix.eps != NAN)
+		session->gpsdata.set |= SPEEDERR_SET;
+	}
+	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
+	    session->gpsdata.fix.epc = NAN;
+	    if (session->lastfix.mode > MODE_3D 
+		&& session->gpsdata.fix.mode > MODE_3D) {
+		double t = session->gpsdata.fix.time-session->lastfix.time;
+		double e = session->lastfix.epv + session->gpsdata.fix.epv;
+		/* if vertical uncertainties are zero this will be too */
+		session->gpsdata.fix.epc = e/t;
+	    }
+	    if (isnan(session->gpsdata.fix.epc)==0)
+		session->gpsdata.set |= CLIMBERR_SET;
+	}
+    }
+}
+
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
@@ -440,72 +512,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->gpsdata.status > STATUS_NO_FIX) 
 	    session->context->fixcnt++;
 
-	/*
-	 * Now we compute derived quantities.  This is where the tricky error-
-	 * modeling stuff goes. Presently we don't know how to derive 
-	 * time or track error.
-	 *
-	 * Field reports match the theoretical prediction that
-	 * expected time error should be half the resolution of
-	 * the GPS clock, so we put the bound of the error
-	 * in as a constant pending getting it from each driver.
-	 *
-	 * Some drivers set the position-error fields.  Only the Zodiacs 
-	 * report speed error.  Nobody reports track error or climb error.
-	 */
-	session->gpsdata.fix.ept = 0.005;
-	if ((session->gpsdata.set & HERR_SET)==0 
-	    && (session->gpsdata.set & HDOP_SET)!=0) {
-	    session->gpsdata.fix.eph = session->gpsdata.hdop*UERE(session);
-	    session->gpsdata.set |= HERR_SET;
-	}
-	if ((session->gpsdata.set & VERR_SET)==0 
-	    && (session->gpsdata.set & VDOP_SET)!=0) {
-	    session->gpsdata.fix.epv = session->gpsdata.vdop*UERE(session);
-	    session->gpsdata.set |= VERR_SET;
-	}
-	if ((session->gpsdata.set & PERR_SET)==0
-	    && (session->gpsdata.set & PDOP_SET)!=0) {
-	    session->gpsdata.epe = session->gpsdata.pdop*UERE(session);
-	    session->gpsdata.set |= PERR_SET;
-	}
-	/*
-	 * If we have a current fix and an old fix, and the packet handler 
-	 * didn't set the speed error and climb error members itself, 
-	 * try to compute them now.
-	 * FIXME:  We need to compute track error here.
-	 */
-	session->gpsdata.fix.epd = NAN;
-	if (session->gpsdata.fix.mode >= MODE_2D) {
-	    if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-		session->gpsdata.fix.eps = NAN;
-		if (session->lastfix.mode > MODE_NO_FIX 
-		    && session->gpsdata.fix.mode > MODE_NO_FIX) {
-		    double t = session->gpsdata.fix.time-session->lastfix.time;
-		    double e = session->lastfix.eph + session->gpsdata.fix.eph;
-		    session->gpsdata.fix.eps = e/t;
-		}
-		if (session->gpsdata.fix.eps != NAN)
-		    session->gpsdata.set |= SPEEDERR_SET;
-	    }
-	    if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-		session->gpsdata.fix.epc = NAN;
-		if (session->lastfix.mode > MODE_3D 
-		    && session->gpsdata.fix.mode > MODE_3D) {
-		    double t = session->gpsdata.fix.time-session->lastfix.time;
-		    double e = session->lastfix.epv + session->gpsdata.fix.epv;
-		    /* if vertical uncertainties are zero this will be too */
-		    session->gpsdata.fix.epc = e/t;
-		}
-		if (isnan(session->gpsdata.fix.epc)==0)
-		    session->gpsdata.set |= CLIMBERR_SET;
-	    }
+	/* compute errors and derived quantities */
+	apply_error_model(session);
 
-	    /* save the old fix for later uncertainty computations */
+	/* save the old fix for later uncertainty computations */
+	if (session->gpsdata.fix.mode >= MODE_2D)
 	    (void)memcpy(&session->lastfix, 
-			 &session->gpsdata.fix, 
-			 sizeof(struct gps_fix_t));
-	}
+		     &session->gpsdata.fix, 
+		     sizeof(struct gps_fix_t));
 
 	session->gpsdata.d_decode_time = timestamp();
 

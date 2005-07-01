@@ -507,22 +507,12 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, "?");
 	    break;
 	case 'E':
-	    if (assign_channel(whoami) && have_fix(whoami->device)) {
-		if (isnan(whoami->device->gpsdata.fix.eph)==0
-		    || isnan(whoami->device->gpsdata.fix.epv)==0)
-		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
-			    whoami->device->gpsdata.epe, 
-			    whoami->device->gpsdata.fix.eph, 
-			    whoami->device->gpsdata.fix.epv);
-		else if (isnan(whoami->device->gpsdata.pdop)==0
-			 || isnan(whoami->device->gpsdata.hdop)==0
-			 || isnan(whoami->device->gpsdata.vdop)==0)
-		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
-			    whoami->device->gpsdata.pdop * UERE(whoami->device), 
-			    whoami->device->gpsdata.hdop * UERE(whoami->device), 
-			    whoami->device->gpsdata.vdop * UERE(whoami->device));
-	    } else
-		(void)strcpy(phrase, ",E=?");
+	    (void)strcpy(phrase, ",E=?");
+	    if (assign_channel(whoami) && have_fix(whoami->device))
+		(void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
+			       whoami->device->gpsdata.epe, 
+			       whoami->device->gpsdata.fix.eph, 
+			       whoami->device->gpsdata.fix.epv);
 	    break;
 	case 'F':
 	    /*@ -branchstate @*/
