@@ -126,7 +126,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Thu Jun 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Thu Jul 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.27
 - Arrange for the daemon to remove its pid file on exit.  Fix some
   buffering problems with the Python side of the hotplug interface.
   gpsfake can now run sessions under a monitor like Valgrind.  Most
@@ -138,7 +138,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   showed up with multiple sessions active.  In fact, the daemon code
   no longer uses dynamic-memory allocation at all.  Also, the code
   no longer relies on FIONREAD working.  The daemon now hunts for a 
-  DGPSIP server within 1600000m if the user didn't specify one.
+  DGPSIP server within 1600000m if the user didn't specify one. The
+  project website has some new eye candy.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 
