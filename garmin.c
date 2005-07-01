@@ -514,9 +514,9 @@ static int GetPacket (struct gps_device_t *session )
     int cnt = 0;
     // int x = 0; // for debug dump
 
-    memset( session->GarminBuffer, 0, sizeof(Packet_t));
+    memset( session->garmin.Buffer, 0, sizeof(Packet_t));
     memset( &delay, 0, sizeof(delay));
-    session->GarminBufferLen = 0;
+    session->garmin.BufferLen = 0;
 
     gpsd_report(4, "GetPacket()\n");
 
@@ -527,10 +527,10 @@ static int GetPacket (struct gps_device_t *session )
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
 	ssize_t theBytesReturned = 0;
-	unsigned char *buf = session->GarminBuffer;
+	unsigned char *buf = session->garmin.Buffer;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
-		, buf + session->GarminBufferLen
+		, buf + session->garmin.BufferLen
 		, ASYNC_DATA_SIZE);
         if ( 0 >  theBytesReturned ) {
 	    // read error...
@@ -541,15 +541,15 @@ static int GetPacket (struct gps_device_t *session )
 	}
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
-	session->GarminBufferLen += theBytesReturned;
+	session->garmin.BufferLen += theBytesReturned;
 	if ( 64 > theBytesReturned ) {
 	    // zero length, or short, read is a flag for got the whole packet
             break;
 	}
 		
-	if ( 256 <=  session->GarminBufferLen ) {
+	if ( 256 <=  session->garmin.BufferLen ) {
 	    // really bad read error...
-	    session->GarminBufferLen = 0;
+	    session->garmin.BufferLen = 0;
 	    gpsd_report(3, "GetPacket() packet too long!\n");
 	    break;
 	}
@@ -562,15 +562,15 @@ static int GetPacket (struct gps_device_t *session )
 	/*@ end @*/
     }
     // dump the individual bytes, debug only
-    // for ( x = 0; x < session->GarminBufferLen; x++ ) {
-        // gpsd_report(6, "p[%d] = %x\n", x, session->GarminBuffer[x]);
+    // for ( x = 0; x < session->garmin.BufferLen; x++ ) {
+        // gpsd_report(6, "p[%d] = %x\n", x, session->garmin.Buffer[x]);
     // }
     if ( 10 <= cnt ) {
 	    gpsd_report(3, "GetPacket() packet too long or too slow!\n");
 	    return -1;
     }
 
-    gpsd_report(5, "GotPacket() sz=%d \n", session->GarminBufferLen);
+    gpsd_report(5, "GotPacket() sz=%d \n", session->garmin.BufferLen);
     return 0;
 }
 
@@ -614,16 +614,16 @@ static bool garmin_probe(struct gps_device_t *session)
     }
 
     /* reset the buffer and buffer length */
-    memset( session->GarminBuffer, 0, sizeof(session->GarminBuffer) );
-    session->GarminBufferLen = 0;
+    memset( session->garmin.Buffer, 0, sizeof(session->garmin.Buffer) );
+    session->garmin.BufferLen = 0;
 
-    if (sizeof(session->GarminBuffer) < sizeof(Packet_t)) {
-	gpsd_report(0, "garmin_probe: Compile error, GarminBuffer too small.\n",
+    if (sizeof(session->garmin.Buffer) < sizeof(Packet_t)) {
+	gpsd_report(0, "garmin_probe: Compile error, garmin.Buffer too small.\n",
              strerror(errno));
 	return false;
     }
 
-    buffer = session->GarminBuffer;
+    buffer = session->garmin.Buffer;
     thePacket = (Packet_t*)buffer;
 
     // set Mode 0
@@ -798,7 +798,7 @@ static bool garmin_probe(struct gps_device_t *session)
  */
 static void garmin_init(struct gps_device_t *session)
 {
-	unsigned char *buffer = session->GarminBuffer;
+	unsigned char *buffer = session->garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	bool ret;
 
@@ -832,7 +832,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
 
 static gps_mask_t garmin_parse_input(struct gps_device_t *session)
 {
-    return PrintPacket(session, (Packet_t*)session->GarminBuffer);
+    return PrintPacket(session, (Packet_t*)session->garmin.Buffer);
 }
 
 /* this is everything we export */

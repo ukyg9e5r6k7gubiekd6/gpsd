@@ -167,7 +167,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	for (i = 0; i < SIRF_CHANNELS; i++)
 	    session->gpsdata.used[i] = (int)getub(buf, 29+i);
-	if ((session->driverstate & (SIRF_GE_232 | UBLOX))==0) {
+	if ((session->sirf.driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	    /* position/velocity is bytes 1-18 */
 	    ecef_to_wgs84fix(&session->gpsdata, 
 			     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
@@ -195,11 +195,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		= gpstime_to_unix(getsw(buf, 22), getul(buf, 24)*1e-2) - session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.newdata.mode > MODE_NO_FIX) {
-		if ((session->time_seen & TIME_SEEN_GPS_2) == 0)
+		if ((session->sirf.time_seen & TIME_SEEN_GPS_2) == 0)
 		    gpsd_report(4, "valid time in message 0x02, seen=0x%02x\n",
-				session->time_seen);
-		session->time_seen |= TIME_SEEN_GPS_2;
-		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_2))
+				session->sirf.time_seen);
+		session->sirf.time_seen |= TIME_SEEN_GPS_2;
+		if (IS_HIGHEST_BIT(session->sirf.time_seen,TIME_SEEN_GPS_2))
 		    (void)ntpshm_put(session, session->gpsdata.newdata.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
@@ -241,11 +241,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	session->gpsdata.satellites = st;
 #ifdef NTPSHM_ENABLE
 	if (st > 3) {
-	    if ((session->time_seen & TIME_SEEN_GPS_1)==0)
+	    if ((session->sirf.time_seen & TIME_SEEN_GPS_1)==0)
 		gpsd_report(4, "valid time in message 0x04, seen=0x%02x\n",
-			    session->time_seen);
-	    session->time_seen |= TIME_SEEN_GPS_1;
-	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_GPS_1))
+			    session->sirf.time_seen);
+	    session->sirf.time_seen |= TIME_SEEN_GPS_1;
+	    if (IS_HIGHEST_BIT(session->sirf.time_seen,TIME_SEEN_GPS_1))
 		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
 	}
 #endif /* NTPSHM_ENABLE */
@@ -254,7 +254,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	 * rate-control command for 04, at least at firmware rev. 231, 
 	 * so we have to do our own rate-limiting here...
 	 */
-	if ((session->satcounter++ % 5) != 0)
+	if ((session->sirf.satcounter++ % 5) != 0)
 	    break;
 	gpsd_report(4, "MTD 0x04: %d satellites\n", st);
 	return TIME_SET | SATELLITE_SET;
@@ -266,11 +266,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", buf+1);
 	fv = atof((char *)(buf+1));
 	if (fv < 231) {
-	    session->driverstate |= SIRF_LT_231;
+	    session->sirf.driverstate |= SIRF_LT_231;
 	    if (fv > 200)
 		sirfbin_mode(session, 0);
 	} else if (fv < 232) 
-	    session->driverstate |= SIRF_EQ_231;
+	    session->sirf.driverstate |= SIRF_EQ_231;
 	else {
 	    /*@ +charint @*/
 	    unsigned char enablemid52[] = {
@@ -280,13 +280,13 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    /*@ -charint @*/
 	    gpsd_report(4, "Enabling PPS message...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
-	    session->driverstate |= SIRF_GE_232;
+	    session->sirf.driverstate |= SIRF_GE_232;
 	    session->context->valid |= LEAP_SECOND_VALID;
 	}
 	if (strstr((char *)(buf+1), "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
-	gpsd_report(4, "Driver state flags are: %0x\n", session->driverstate);
-	session->time_seen = 0;
+	gpsd_report(4, "Driver state flags are: %0x\n", session->sirf.driverstate);
+	session->sirf.time_seen = 0;
 	if ((session->context->valid & LEAP_SECOND_VALID)==0) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
@@ -455,7 +455,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     case 0x29:		/* Geodetic Navigation Information */
 	mask = 0;
-	if (session->driverstate & SIRF_GE_232) {
+	if (session->sirf.driverstate & SIRF_GE_232) {
 	    /*
 	     * Many versions of the SiRF protocol manual don't document 
 	     * this sentence at all.  Those that do may incorrectly
@@ -512,11 +512,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.newdata.time);
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.newdata.mode > MODE_NO_FIX && session->gpsdata.nmea_date.tm_year != 0) {
-		if ((session->time_seen & TIME_SEEN_UTC_1) == 0)
+		if ((session->sirf.time_seen & TIME_SEEN_UTC_1) == 0)
 		    gpsd_report(4, "valid time in message 0x29, seen=0x%02x\n",
-				session->time_seen);
-		session->time_seen |= TIME_SEEN_UTC_1;
-		if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_1))
+				session->sirf.time_seen);
+		session->sirf.time_seen |= TIME_SEEN_UTC_1;
+		if (IS_HIGHEST_BIT(session->sirf.time_seen,TIME_SEEN_UTC_1))
 		    (void)ntpshm_put(session, session->gpsdata.newdata.time + 0.8);
 	    }
 #endif /* NTPSHM_ENABLE */
@@ -575,11 +575,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    session->context->leap_seconds = (int)getuw(buf, 8);
 	    session->context->valid |= LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
-	    if ((session->time_seen & TIME_SEEN_UTC_2) == 0)
+	    if ((session->sirf.time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x34, seen=0x%02x\n",
-				session->time_seen);
-	    session->time_seen |= TIME_SEEN_UTC_2;
-	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
+				session->sirf.time_seen);
+	    session->sirf.time_seen |= TIME_SEEN_UTC_2;
+	    if (IS_HIGHEST_BIT(session->sirf.time_seen,TIME_SEEN_UTC_2))
 		(void)ntpshm_put(session, session->gpsdata.newdata.time + 0.3);
 #endif /* NTPSHM_ENABLE */
 	    mask |= TIME_SET;
@@ -624,11 +624,11 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time
 		= (double)mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
 #ifdef NTPSHM_ENABLE
-	    if ((session->time_seen & TIME_SEEN_UTC_2) == 0)
+	    if ((session->sirf.time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x62, seen=0x%02x\n",
-				session->time_seen);
-	    session->time_seen |= TIME_SEEN_UTC_2;
-	    if (IS_HIGHEST_BIT(session->time_seen,TIME_SEEN_UTC_2))
+				session->sirf.time_seen);
+	    session->sirf.time_seen |= TIME_SEEN_UTC_2;
+	    if (IS_HIGHEST_BIT(session->sirf.time_seen,TIME_SEEN_UTC_2))
 		(void)ntpshm_put(session, session->gpsdata.newdata.time + 0.8);
 #endif /* NTPSHM_ENABLE */
 	    session->context->valid |= LEAP_SECOND_VALID;
@@ -639,7 +639,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	session->gpsdata.hdop = (int)getub(buf, 36) / 5.0;
 	session->gpsdata.vdop = (int)getub(buf, 37) / 5.0;
 	session->gpsdata.tdop = (int)getub(buf, 38) / 5.0;
-	session->driverstate |= UBLOX;
+	session->sirf.driverstate |= UBLOX;
 	return mask;
 
     case 0xff:		/* Debug messages */

@@ -150,7 +150,7 @@ int gpsd_activate(struct gps_device_t *session)
     else {
 	session->gpsdata.online = timestamp();
 #ifdef SIRFII_ENABLE
-	session->satcounter = 0;
+	session->sirf.satcounter = 0;
 #endif /* SIRFII_ENABLE */
 	session->counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
@@ -295,13 +295,15 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     }
 
 #ifdef ZODIAC_ENABLE
-    if (session->Zs[0] != 0) {
+    if (session->packet_type == ZODIAC_PACKET && session->zodiac.Zs[0] != 0) {
 	bufp += strlen(bufp);
 	bufp2 = bufp;
 	strcpy(bufp, "$PRWIZCH");
 	for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	    len -= snprintf(bufp+strlen(bufp), len,
-			  ",%02u,%X", session->Zs[i], session->Zv[i] & 0x0f);
+			  ",%02u,%X", 
+			    session->zodiac.Zs[i], 
+			    session->zodiac.Zv[i] & 0x0f);
 	}
 	nmea_add_checksum(bufp2);
     }

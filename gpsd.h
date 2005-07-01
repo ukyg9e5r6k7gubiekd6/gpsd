@@ -104,6 +104,7 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     /*@relnull@*/struct gps_type_t *device_type;
+    struct gps_context_t	*context;
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
@@ -122,55 +123,64 @@ struct gps_device_t {
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     size_t outbuflen;
     unsigned long counter;
-#ifdef BINARY_ENABLE
-    struct gps_fix_t lastfix;	/* use to compute uncertainties */
-    unsigned int driverstate;	/* for private use */
-#define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
-#define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
-#define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
-#define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
-    double mag_var;		/* Magnetic variation in degrees */  
-#ifdef SIRFII_ENABLE
-    unsigned long satcounter;
-#endif /* SIRFII_ENABLE */
-#ifdef TSIP_ENABLE
-    int16_t gps_week;		/* Current GPS week number */
-    bool superpkt;		/* Super Packet mode requested */
-    time_t last_41;		/* Timestamps for packet requests */
-    time_t last_5c;
-    time_t last_6d;
-#endif /* TSIP_ENABLE */
-#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
-    unsigned char GarminBuffer[4096+12]; /* Garmin packet buffer */
-    size_t GarminBufferLen;                  /* current GarminBuffer Length */
-#endif /* GARMIN_ENABLE */
-#ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
-    unsigned short sn;		/* packet sequence number */
-    /*
-     * Zodiac chipset channel status from PRWIZCH. Keep it so raw-mode 
-     * translation of Zodiac binary protocol can send it up to the client.
-     */
-#define ZODIAC_CHANNELS	12
-    unsigned int Zs[ZODIAC_CHANNELS];	/* satellite PRNs */
-    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
-#endif /* ZODIAC_ENABLE */
-#endif /* BINARY_ENABLE */
-#ifdef NTPSHM_ENABLE
-    unsigned int time_seen;
-#define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
-#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
-#define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
-#define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
-#endif /* NTPSHM_ENABLE */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
-
-    struct gps_context_t	*context;
 #ifdef NTPSHM_ENABLE
     int shmTime;
 # ifdef PPS_ENABLE
     int shmTimeP;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+#ifdef BINARY_ENABLE
+    struct gps_fix_t lastfix;	/* use to compute uncertainties */
+    double mag_var;		/* Magnetic variation in degrees */  
+    union {
+#ifdef SIRFII_ENABLE
+	struct {
+	    unsigned int driverstate;	/* for private use */
+#define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
+#define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
+#define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
+#define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
+	    unsigned long satcounter;
+#ifdef NTPSHM_ENABLE
+	    unsigned int time_seen;
+#define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
+#define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
+#define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
+#define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
+#endif /* NTPSHM_ENABLE */
+	} sirf;
+#endif /* SIRFII_ENABLE */
+#ifdef TSIP_ENABLE
+	struct {
+	    int16_t gps_week;		/* Current GPS week number */
+	    bool superpkt;		/* Super Packet mode requested */
+	    time_t last_41;		/* Timestamps for packet requests */
+	    time_t last_5c;
+	    time_t last_6d;
+	} tsip;
+#endif /* TSIP_ENABLE */
+#ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
+	struct {
+	    unsigned char Buffer[4096+12];	/* Garmin packet buffer */
+	    size_t BufferLen;		/* current GarminBuffer Length */
+	} garmin;
+#endif /* GARMIN_ENABLE */
+#ifdef ZODIAC_ENABLE	/* private housekeeping stuff for the Zodiac driver */
+	struct {
+	    unsigned short sn;		/* packet sequence number */
+	    /*
+	     * Zodiac chipset channel status from PRWIZCH. Keep it so
+	     * raw-mode translation of Zodiac binary protocol can send
+	     * it up to the client.
+	     */
+#define ZODIAC_CHANNELS	12
+	    unsigned int Zs[ZODIAC_CHANNELS];	/* satellite PRNs */
+	    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
+	} zodiac;
+#endif /* ZODIAC_ENABLE */
+    };
+#endif /* BINARY_ENABLE */
 };
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0

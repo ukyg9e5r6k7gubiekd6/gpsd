@@ -82,12 +82,12 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 {
     unsigned short data[15];
 
-    if (session->sn++ > 32767)
-	session->sn = 0;
+    if (session->zodiac.sn++ > 32767)
+	session->zodiac.sn = 0;
       
     memset(data, 0, sizeof(data));
     /* data is the part of the message starting at word 6 */
-    data[0] = session->sn;		/* sequence number */
+    data[0] = session->zodiac.sn;	/* sequence number */
     data[1] = 1;			/* port 1 data valid */
     data[2] = 1;			/* port 1 character width (8 bits) */
     data[3] = 0;			/* port 1 stop bits (1 stopbit) */
@@ -106,11 +106,11 @@ static void send_rtcm(struct gps_device_t *session,
     unsigned short data[34];
     int n = 1 + (int)(rtcmbytes/2 + rtcmbytes%2);
 
-    if (session->sn++ > 32767)
-	session->sn = 0;
+    if (session->zodiac.sn++ > 32767)
+	session->zodiac.sn = 0;
 
     memset(data, 0, sizeof(data));
-    data[0] = session->sn;		/* sequence number */
+    data[0] = session->zodiac.sn;		/* sequence number */
     memcpy(&data[1], rtcmbuf, rtcmbytes);
     data[n] = zodiac_checksum(data, n);
 
@@ -230,8 +230,8 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* gps_nanoseconds            = getlong(13); */
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	/*@ -type @*/ 
-	session->Zv[i] = status = (int)getword(15 + (3 * i));
-	session->Zs[i] = prn = (int)getword(16 + (3 * i));
+	session->zodiac.Zv[i] = status = (int)getword(15 + (3 * i));
+	session->zodiac.Zs[i] = prn = (int)getword(16 + (3 * i));
 	/*@ +type @*/ 
 #if 0
 	gpsd_report(1, "Sat%02d:\n", i);
@@ -294,7 +294,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 #if 0
     int i, numcorrections = getword(12);
 
-    gpsd_report(1, "Packet: %d\n", session->sn);
+    gpsd_report(1, "Packet: %d\n", session->zodiac.sn);
     gpsd_report(1, "Station bad: %d\n", (getword(9) & 1) ? 1 : 0);
     gpsd_report(1, "User disabled: %d\n", (getword(9) & 2) ? 1 : 0);
     gpsd_report(1, "Station ID: %d\n", getword(10));
