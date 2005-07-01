@@ -22,6 +22,21 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
+/*  
+ * From the RCTM104 standard:
+ *
+ * The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
+ * transmission rate provides a convenient timing capability where the
+ * times of word boundaries are a rational multiple of 0.6 seconds."
+ *
+ * Each frame is N+2 words long, where N is the number of message data
+ * words. For example, a filler message (type 6 or 34) with no message
+ * data will have N=0, and will consist only of two header words. The
+ * maximum number of data words allowed by the format is 31, so that
+ * the longest possible message will have a total of 33 words."
+ */
+#define RTCM_MAX	33*sizeof(int32_t)
+
 /* only used if the GPS doesn't report estimated position error itself */
 #define UERE_NO_DGPS	8	/* meters */
 #define UERE_WITH_DGPS	2	/* meters */
@@ -37,7 +52,7 @@ struct gps_context_t {
     int fixcnt;				/* count of good fixes seen */
     int dsock;				/* socket to DGPS server */
     ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
-    char rtcmbuf[40];			/* last RTCM104 report */
+    char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
     /* timekeeping */
     int leap_seconds;			/* Unix seconds to UTC */
