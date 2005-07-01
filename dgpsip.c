@@ -24,7 +24,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	*colon = '\0';
     }
     if (!getservbyname(dgpsport, "tcp"))
-	dgpsport = "2101";
+	dgpsport = DEFAULT_RTCM_PORT;
 
     context->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
     if (context->dsock >= 0) {

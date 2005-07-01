@@ -224,6 +224,7 @@ extern int gpsd_units(void);
 #define NL_NOCONNECT	-6	/* can't connect to host */
 
 #define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
+#define DEFAULT_RTCM_PORT	"2101"	/* IANA assignment */
 
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */
