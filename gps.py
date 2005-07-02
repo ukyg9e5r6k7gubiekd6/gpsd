@@ -215,10 +215,7 @@ class gps(gpsdata):
 		self.sockfile = self.sock.makefile()
 	    except socket.error, msg:
 		#if self.debuglevel > 0: print 'connect fail:', (host, port)
-		if self.sock:
-		    self.sock.close()
-		self.sock = None
-		self.sockfile = None
+                self.close()
 		continue
 	    break
 	if not self.sock:
@@ -238,11 +235,16 @@ class gps(gpsdata):
 	self.thread_hook = hook
 	self.thread_id = thread.start_new_thread(self.__thread_poll, ())
 
+    def close(self):
+        if self.sockfile:
+            self.sockfile.close()
+        if self.sock:
+            self.sock.close()
+        self.sock = None
+        self.sockfile = None
+
     def __del__(self):
-	if self.sock:
-	    self.sock.close()
-	self.sock = None
-	self.sockfile = None
+        self.close()
 
     def __unpack(self, buf):
 	# unpack a daemon response into the instance members
