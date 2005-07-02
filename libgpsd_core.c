@@ -65,9 +65,9 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-    gpsd_report(1, "closing GPS=%s\n", session->gpsdata.gps_device);
+    gpsd_report(1, "closing GPS=%s (%d)\n", 
+		session->gpsdata.gps_device, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
-    session->gpsdata.gps_fd = -1;
 #ifdef NTPSHM_ENABLE
     (void)ntpshm_free(session->context, session->shmTime);
     session->shmTime = -1;

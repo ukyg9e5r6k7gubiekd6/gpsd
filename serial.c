@@ -193,5 +193,6 @@ void gpsd_close(struct gps_device_t *session)
 	session->ttyset_old.c_cflag |= HUPCL;
 	(void)tcsetattr(session->gpsdata.gps_fd,TCSANOW,&session->ttyset_old);
 	(void)close(session->gpsdata.gps_fd);
+	session->gpsdata.gps_fd = -1;
     }
 }

@@ -303,7 +303,7 @@ class TestSession:
     def sanity_check(self):
         now = self.daemon.fd_set()
         if now != self.fd_set:
-            print "File descriptors:", now
+            self.progress("File descriptors: %s\n" % now)
             self.fd_set = now
     def gps_add(self, name, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."

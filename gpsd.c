@@ -886,7 +886,6 @@ static void handle_control(int sfd, char *buf)
 	if ((chp = find_device(stash))) {
 	    if (chp->gpsdata.gps_fd > 0)
 		FD_CLR(chp->gpsdata.gps_fd, &all_fds);
-	    gpsd_deactivate(chp);
 	    notify_watchers(chp, "X=0\r\n");
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (subscribers[cfd].device == chp)
