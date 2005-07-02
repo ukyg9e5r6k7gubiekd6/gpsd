@@ -57,7 +57,9 @@ sentences to the daemon at the same times from start.
 
 This code requires that you have fuser(1) installed and executable.
 The fake-GPS threads use it to detect when their slave device has
-been opened.
+been opened.  It also requires that for any process ID <foo>,
+/proc/<foo>/fd lists the numbers of file descriptors opened by that process
+(in particular, this is true under Linux).
 """
 import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
@@ -248,6 +250,11 @@ class DaemonInstance:
             return True
         except OSError:
             return False
+    def fd_set(self):
+        "Return the set of file descriptors currently opened by the daemon."
+        fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
+        # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
+        return filter(lambda x: x < 1000, fds)
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
@@ -289,9 +296,15 @@ class TestSession:
         self.daemon.spawn(background=True, prefix=prefix, options=options)
         self.daemon.wait_pid()
         self.default_predicate = None
+        self.fd_set = []
     def set_predicate(self, pred):
         "Set a default go predicate for the session."
         self.default_predicate = pred
+    def sanity_check(self):
+        now = self.daemon.fd_set()
+        if now != self.fd_set:
+            print "File descriptors:", now
+            self.fd_set = now
     def gps_add(self, name, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (name, speed))
@@ -307,12 +320,14 @@ class TestSession:
                 newgps.go_predicate = self.default_predicate
             self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
+        self.sanity_check()
         return newgps.slave
     def gps_remove(self, name):
         "Remove a simulated GPS from the daeon's search list."
         self.progress("gpsfake: gps_remove(%s)\n" % name)
         self.fakegpslist[name].stop()
         self.daemon.remove_device(name)
+        self.sanity_check()
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
@@ -323,6 +338,7 @@ class TestSession:
         time.sleep(1)	# Avoid mysterious "connection reset by peer"
         if not newclient.device:
             self.progress("gpsd: returned no device for client open.\n")
+            self.sanity_check()
             return None
         else:
             self.client_id += 1
@@ -331,6 +347,7 @@ class TestSession:
             newclient.set_thread_hook(lambda x: self.reporter(x))
             if commands:
                 newclient.query(commands)
+            self.sanity_check()
             return newclient.id
     def client_query(self, id, commands):
         "Ship a command down a client channel, accept a response."
@@ -339,6 +356,7 @@ class TestSession:
             if client.id == id:
                 client.query(commands)
                 return client.response
+        self.sanity_check()
         return None
     def client_remove(self, id):
         "Terminate a client session."
@@ -348,13 +366,16 @@ class TestSession:
                 self.fakegpslist[client.device].release()
                 self.clients.remove(client)
                 del client
+                self.sanity_check()
                 return True
         else:
+            self.sanity_check()
             return False
     def wait(self, seconds):
         "Wait, doing nothing."
         self.progress("gpsfake: wait(%d)\n" % seconds)
         time.sleep(seconds)
+        self.sanity_check()
     def gather(self, seconds):
         "Wait, doing nothing but watching for sentences."
         self.progress("gpsfake: gather(%d)\n" % seconds)
@@ -362,6 +383,7 @@ class TestSession:
         time.sleep(seconds)
         #if self.timings.c_recv_time <= mark:
         #    TestSessionError("no sentences received\n")
+        self.sanity_check()
     def gps_count(self):
         "Return the number of GPSes active in this session"
         tc = 0
