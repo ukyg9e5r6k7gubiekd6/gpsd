@@ -297,6 +297,7 @@ class TestSession:
         self.daemon.wait_pid()
         self.default_predicate = None
         self.fd_set = []
+        self.sanity_check()
     def set_predicate(self, pred):
         "Set a default go predicate for the session."
         self.default_predicate = pred
