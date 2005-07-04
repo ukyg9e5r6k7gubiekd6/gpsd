@@ -471,7 +471,8 @@ Your packet parser must return field-validity mask bits (using the
 The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
-this.
+this.  Finally, you must set gpsdata.stutus to indicate wheen DGPS 
+fixes are available, whether through RTCM or WAAS/Egnos.
 
 Your packet parser is also responsible for setting the tag field 
 in the gps_data_t structure.  This is the string that will be emitted
