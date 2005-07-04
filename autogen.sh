@@ -49,11 +49,11 @@ AC_VERSION=`autoconf --version | sed -n -e 's#[^0-9]* \([0-9]*\)\.\([0-9]*\).*$#
 AC_V1=`echo $AC_VERSION | awk '{print $1}'`
 AC_V2=`echo $AC_VERSION | awk '{print $2}'`
 
-if [ $AC_1 -gt $AC_V1 ]; then
+if [ "$AC_1" -gt "$AC_V1" ]; then
 	AC_ERROR=1 
 else
-	if [ $AC_1 -eq $AC_V1 ]; then
-		if [ $AC_2 -gt $AC_V2 ]; then
+	if [ "$AC_1" -eq "$AC_V1" ]; then
+		if [ "$AC_2" -gt "$AC_V2" ]; then
 			AC_ERROR=1 
 		fi
 	fi
@@ -73,11 +73,11 @@ LT_VERSION=`libtool --version | sed -n -e 's#[^0-9]* \([0-9]*\)\.\([0-9]*\).*$#\
 LT_V1=`echo $LT_VERSION | awk '{print $1}'`
 LT_V2=`echo $LT_VERSION | awk '{print $2}'`
 
-if [ $LT_1 -gt $LT_V1 ]; then
+if [ "$LT_1" -gt "$LT_V1" ]; then
 	LT_ERROR=1 
 else
-	if [ $LT_1 -eq $LT_V1 ]; then
-		if [ $LT_2 -gt $LT_V2 ]; then
+	if [ "$LT_1" -eq "$LT_V1" ]; then
+		if [ "$LT_2" -gt "$LT_V2" ]; then
 			LT_ERROR=1 
 		fi
 	fi
