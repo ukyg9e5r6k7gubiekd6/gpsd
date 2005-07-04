@@ -381,7 +381,22 @@ static void apply_error_model(struct gps_device_t *session)
     /* only used if the GPS doesn't report estimated position error itself */
 #define UERE_NO_DGPS	8.0	/* meters */
 #define UERE_WITH_DGPS	2.0	/* meters */
-    double uere = ((session->context->dsock<0) ? UERE_NO_DGPS : UERE_WITH_DGPS);
+    double uere;
+    int i;
+    bool waas_active = false;
+    bool dgps_active = (session->context->dsock<0);
+
+    /*
+     * If we have a satellite picture that includes a WAAS/Egnos PRN,
+     * it will ship DGPS corrections.  Note: this assumes only WAAS-capable
+     * GPSes can see these PRNs at all.
+     */
+    if (session->gpsdata.set & SATELLITE_SET)
+	for (i = 0; i < session->gpsdata.satellites; i++)
+	    if (session->gpsdata.PRN[i] > 32)
+		waas_active = true;
+
+    uere = ((dgps_active || waas_active) ? UERE_NO_DGPS : UERE_WITH_DGPS);
 
     session->gpsdata.fix.ept = 0.005;
     if ((session->gpsdata.set & HERR_SET)==0 
