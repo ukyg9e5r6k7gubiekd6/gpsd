@@ -46,6 +46,19 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+/*
+ * Timeout policy.  We can't rely on clients closing connections 
+ * correctly, so we need timeouts to tell us when it's OK to 
+ * reclaim client fds.  The assignment timeout fends off programs
+ * that open connections and just sit there, not issuing a W or
+ * doing anything else that triggers a device assignment.  Clients
+ * in watcher or raw mode that don't read their data will get dropped 
+ * when throttled_write() fills up the outbound buffers.  Clients
+ * in the original polling mode have to be timed out.
+ */
+#define ASSIGNMENT_TIMEOUT	60
+#define POLLER_TIMEOUT  	60*15
+
 #define QLEN			5
 
 /* Where to find the list of DGPS correction servers, if there is one */
@@ -256,7 +269,7 @@ static struct gps_device_t channels[MAXDEVICES];
 #define free_channel(chp)	(chp)->gpsdata.gps_device[0] = '\0'
 
 static struct subscriber_t {
-    bool active;				/* is this a subscriber? */
+    double active;			/* when subscriber signed on */
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
@@ -269,7 +282,7 @@ static void detach_client(int cfd)
     FD_CLR(cfd, &all_fds);
     subscribers[cfd].raw = 0;
     subscribers[cfd].watcher = false;
-    subscribers[cfd].active = false;
+    subscribers[cfd].active = 0;
     subscribers[cfd].device = NULL;
 }
 
@@ -1161,7 +1174,7 @@ int main(int argc, char *argv[])
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
-		subscribers[ssock].active = true;
+		subscribers[ssock].active = timestamp();
 		subscribers[ssock].tied = false;
 	    }
 	    FD_CLR(msock, &rfds);
@@ -1276,7 +1289,9 @@ int main(int argc, char *argv[])
 
 	/* accept and execute commands for all clients */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
-	    if (subscribers[cfd].active && FD_ISSET(cfd, &rfds)) {
+	    if (subscribers[cfd].active == 0) 
+		continue;
+	    else if (FD_ISSET(cfd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
 
@@ -1284,14 +1299,24 @@ int main(int argc, char *argv[])
 		if ((buflen = (int)read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
 		} else {
+		    double now = timestamp();
+
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client: %s", buf);
 
 		    if (subscribers[cfd].device)
-			subscribers[cfd].device->poll_times[cfd] = timestamp();
+			subscribers[cfd].device->poll_times[cfd] = now;
 		    if (handle_request(cfd, buf, buflen) < 0)
 			detach_client(cfd);
+		    else
+			subscribers[cfd].active = now;
 		}
+	    } else if (subscribers[cfd].device == NULL && timestamp() - subscribers[cfd].active > ASSIGNMENT_TIMEOUT) {
+		gpsd_report(1, "client timed out before assignment request\n");
+		detach_client(cfd);
+	    } else if (subscribers[cfd].device != NULL && !(subscribers[cfd].watcher || subscribers[cfd].raw>0) && timestamp() - subscribers[cfd].active > POLLER_TIMEOUT) {
+		gpsd_report(1, "client timed out on command wait\n");
+		detach_client(cfd);
 	    }
 	}
 
@@ -1301,7 +1326,7 @@ int main(int argc, char *argv[])
 		bool need_gps = false;
 
 		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		    if (subscribers[cfd].active&&subscribers[cfd].device==channel)
+		    if (subscribers[cfd].device == channel)
 			need_gps = true;
 
 		if (!nowait && !need_gps && channel->gpsdata.gps_fd > -1) {

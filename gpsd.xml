@@ -728,6 +728,17 @@ or local administrative practice.  If this assumption is false,
 <application>gpsd</application> may not be able to open GPS devices in
 order to read them (such failures will be logged).</para>
 
+<para>In order to fend off inadvertent denial-of-service attacks by
+port scanners (not to mention deliberate ones),
+<application>gpsd</application> will time out inactive client
+connections.  Before the client has issued a command that requests a
+channel assignment, a short timeout (60 seconds) applies.  There is no
+timeout for clients in watcher or raw modes; rather,
+<application>gpsd</application> drops these clients if they fail to
+read data long enough for the outbound socket write buffer to fill.
+Clients with an assigned device in polling mode are subject to a
+longer timeout (15 minutes).</para>
+
 </refsect1>
 <refsect1 id='limitations'><title>LIMITATIONS</title> 
 
