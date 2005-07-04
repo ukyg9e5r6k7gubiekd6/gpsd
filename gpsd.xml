@@ -594,7 +594,7 @@ computations at sufficient accuracy that it will add no measurable
 position error of its own.</para>
 
 <para>DGPS correction will reduce UERE from roughly 8 meters to
-roughly 2 meters, provided you are within 1000 kilometers or so of the
+roughly 2 meters, provided you are within about 100mi (160km) of a
 DGPS ground station.</para>
 
 <para>On a 4800bps connection, the time latency of fixes provided by

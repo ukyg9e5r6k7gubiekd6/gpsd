@@ -1312,10 +1312,10 @@ int main(int argc, char *argv[])
 			subscribers[cfd].active = now;
 		}
 	    } else if (subscribers[cfd].device == NULL && timestamp() - subscribers[cfd].active > ASSIGNMENT_TIMEOUT) {
-		gpsd_report(1, "client timed out before assignment request\n");
+		gpsd_report(1, "client timed out before assignment request.\n");
 		detach_client(cfd);
 	    } else if (subscribers[cfd].device != NULL && !(subscribers[cfd].watcher || subscribers[cfd].raw>0) && timestamp() - subscribers[cfd].active > POLLER_TIMEOUT) {
-		gpsd_report(1, "client timed out on command wait\n");
+		gpsd_report(1, "client timed out on command wait.\n");
 		detach_client(cfd);
 	    }
 	}

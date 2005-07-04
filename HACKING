@@ -388,6 +388,41 @@ which we round up to 2.
 Due to multipath uncertainty, Carl says 4.1 is too low and recommends
 a non-DGPS UERE estimate of 8.  That's what we use.
 
+** Impact of DGPS on error estimates
+
+Wolfgang S. Rupprecht:
+> In any case, the 2 meter number almost certainly is for a differential
+> reference station that is located very close to the GPS in question.
+> The whole differential hack assumes that the paths and angles between
+> the reference station and the mobile GPS unit are similar enough that
+> one can simply subtract the path-length errors the reference station
+> is seeing from the path the mobile GPS had calculated.  If the angles
+> to the satellite are vastly different (as in the case of dgpsip from
+> across the country) one can start adding errors.  In the days of SA
+> the largest component of error was due to SA, so miscorrecting the
+> paths hardly mattered at all.  Even cross-country dgpsip was
+> worthwhile and improved accuracy.  I doubt that one would see any that
+> 2meter accuracy if one were more than a 100 miles away.
+> 
+> Just for completeness, there are other issues too, like different
+> ionospheric and tropospheric pierce points for the rays going to the
+> reference and mobile units.  The speed of light is slightly lowered by
+> going through the atmosphere.  The amount it slows down is enough to
+> add a few meters (very roughly, up to 15 meters) of path-length error.
+> The ionosphere and troposphere aren't a constant height.  They are
+> substantially pumped up by sunlight, so taking a reading from one
+> location in heavy sun and applying it to a distant area with a lower
+> sun angle could make things quite a bit worse.  (There may also be
+> roughness associated with the layer thickness that defies modeling
+> with a simple sun-angle model.  I don't know enough about that sort of
+> thing.)
+> 
+> In summary, while I have no problem believing the SiRF engineer that
+> you can get 2 meters accuracy from their chips when using a very close
+> reference, I fear that the average user will be getting the same 8m or
+> worse accuracy by using dgpsip.
+
+
 ** Adding new GPS types
 
 Almost all GPSes speak NMEA 0183.  However, it may occasionally be necessary
