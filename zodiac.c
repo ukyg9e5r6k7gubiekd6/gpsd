@@ -291,8 +291,9 @@ static void handle1005(struct gps_device_t *session UNUSED)
 {
     /* ticks              = getlong(6); */
     /* sequence           = getword(8); */
+    int numcorrections = getword(12);
 #if 0
-    int i, numcorrections = getword(12);
+    int i;
 
     gpsd_report(1, "Packet: %d\n", session->zodiac.sn);
     gpsd_report(1, "Station bad: %d\n", (getword(9) & 1) ? 1 : 0);
@@ -311,6 +312,12 @@ static void handle1005(struct gps_device_t *session UNUSED)
 	gpsd_report(1, "iode mismatch:%d\n", (getword(13+i) & 4096) ? 1 : 0);
     }
 #endif
+    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+	session->gpsdata.status = STATUS_NO_FIX;
+    else if (numcorrections == 0)
+	session->gpsdata.status = STATUS_FIX;
+    else
+	session->gpsdata.status = STATUS_DGPS_FIX;
 }
 
 static void handle1108(struct gps_device_t *session)
