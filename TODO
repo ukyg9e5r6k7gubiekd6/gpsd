@@ -67,23 +67,6 @@ But Rob's xgps memory leak doesn't reproduce on a stock Fedora Core 3
 system.  ESR tested for this in the simplest possible way, by doing
 system("free t") at the end of each handle_input() call.
 
-*** Under Reiserfs gpsd may conspire with I/O buffering traffic to eat the CPU.
-
-Rob Janssen writes:
-> When gpsd is running and I start a backup of my system, which starts and
-> mounts a normally idle disk and does a tar cvzf to it, the load of the
-> system is quite high and gpsd seems to get out of sync with the received
-> data from the SiRF receiver.
-> It then gets stuck in a tight loop.  As gpsd is running at nice
-> --10, this further increases the load and slows down the backup to a crawl.
-> Killing gpsd makes the backup finish and then it can be started again.
-
-He further observers that the FIONREAD ioctl() we use to check for
-input waiting spins returning 0 when this happens.  We suspect that
-memory resource crises do something nasty to the buffering in the
-Linux serial layer.  The bug seems not to occur during ext3 backups,
-only Reiserfs ones.
-
 ** To do:
 
 *** Hotplug interface problems
