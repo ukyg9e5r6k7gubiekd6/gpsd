@@ -53,11 +53,13 @@
  * that open connections and just sit there, not issuing a W or
  * doing anything else that triggers a device assignment.  Clients
  * in watcher or raw mode that don't read their data will get dropped 
- * when throttled_write() fills up the outbound buffers.  Clients
- * in the original polling mode have to be timed out.
+ * when throttled_write() fills up the outbound buffers and the 
+ * NOREAD_TIMEOUT expires.  Clients in the original polling mode have 
+ * to be timed out as well.
  */
 #define ASSIGNMENT_TIMEOUT	60
 #define POLLER_TIMEOUT  	60*15
+#define NOREAD_TIMEOUT		60*3
 
 #define QLEN			5
 
@@ -309,8 +311,8 @@ static ssize_t throttled_write(int cfd, char *buf, ssize_t len)
 	return status;
     if (errno == EBADF)
 	gpsd_report(3, "Client on %d has vanished.\n", cfd);
-    else if (errno == EWOULDBLOCK)
-	gpsd_report(3, "Dropped client on %d to avoid overrun.\n", cfd);
+    else if (errno == EWOULDBLOCK && timestamp() - subscribers[cfd].active > NOREAD_TIMEOUT)
+	gpsd_report(3, "Client on %d timed out.\n", cfd);
     else
 	gpsd_report(3, "Client write to %d: %s\n", cfd, strerror(errno));
     detach_client(cfd);

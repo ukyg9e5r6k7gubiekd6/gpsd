@@ -368,7 +368,7 @@ static void apply_error_model(struct gps_device_t *session)
     /*
      * Now we compute derived quantities.  This is where the tricky error-
      * modeling stuff goes. Presently we don't know how to derive 
-     * time or track error.
+     * time error.
      *
      * Field reports match the theoretical prediction that
      * expected time error should be half the resolution of

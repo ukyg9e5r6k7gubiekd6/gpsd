@@ -97,11 +97,13 @@ the signals.  The U.S. military knew the pattern, but nobody else did
 
 <p>Now that 'Selective Availability' is gone, the important limits are
 natural.  One is a variable amount of signal lag produced as the GPS
-signals pass through the ionosphere, which partly reflects radio waves.
-This can be largely compensated for by a technique called "Differential
-GPS" or DGPS, in which your receiver takes timings both from satellites
-and ground stations.  The ground stations can measure and compensate for
-the ionospheric lag.  WAAS and EGNOS are similar systems.</p>
+signals pass through the ionosphere, which partly reflects radio
+waves.  This can be largely compensated for by a technique called
+"Differential GPS" or DGPS, in which your receiver takes timings both
+from satellites and ground stations.  The ground stations are in a
+known fixed osition, so they can compute the exact distance to
+satellites from an ephemeris. Thus, they can measure and compensate
+for the ionospheric lag.  WAAS and EGNOS are similar systems.</p>
 
 <p>DGPS itself requires out-of-band communication with a service
 providing GPS signal correction information to make the GPS
@@ -202,7 +204,7 @@ that want to convey data to computers.</p>
 
 <h2>The bad news about NMEA</h2>
 
-<p>That's the good news.  Now for the bad news, which comes in three
+<p>That's the good news.  Now for the bad news, which comes in five
 pieces:</p>
 
 <p>First, the NMEA standard does <em>not</em> specify a command
@@ -252,6 +254,14 @@ a binary protocol, but only if you ask it to; it's fully capable
 in NMEA mode. which is where it boots up.  The idea seems to be 
 that you can switch to binary to improve your bits-per-second
 in latency-critical applications.</p>
+
+<p>The fourth problem with NMEA is that it doesn't deliver all the
+information that the GPS has in one atomic message.  In particular,
+you can't get altitude (delivered in the GPGGA sentence only) and speed
+(delivered in GPRMC and GPVTG) at the same time.  This is annoying;
+ideal, you want you position/velocity/time oracle to deliver one
+observation tuple conveying all seven degrees of freedom (t, x, y, z,
+vx, vy, vz) and their error estimates.</p>
 
 <h2>Learning more about NMEA</h2>
 
