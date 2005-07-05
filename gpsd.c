@@ -551,7 +551,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
 			 whoami->device->device_type->typename);
 	    else
-		(void)strcpy(phrase, ",B=?");
+		(void)strcpy(phrase, ",I=?");
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
@@ -570,13 +570,13 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnopqrstuvwxyz");	//ghj
 	    break;
 	case 'M':
-	    if (assign_channel(whoami)==0 && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
+	    if (!assign_channel(whoami) && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
 		(void)strcpy(phrase, ",M=?");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->device->gpsdata.fix.mode);
 	    break;
 	case 'N':
-	    if (assign_channel(whoami)==0)
+	    if (!assign_channel(whoami))
 		(void)strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		(void)strcpy(phrase, ",N=0");
