@@ -291,7 +291,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 {
     /* ticks              = getlong(6); */
     /* sequence           = getword(8); */
-    int numcorrections = getword(12);
+    int numcorrections = (int)getword(12);
 #if 0
     int i;
 
