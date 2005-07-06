@@ -107,6 +107,7 @@ enum {
    EARTHA_5,		/* EARTHA leader H */
 #endif /* EARTHMATE_ENABLE */
 
+#ifdef SIRFII_ENABLE
    SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
    SIRF_LEADER_2,	/* seen second character of SiRF leader */
    SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
@@ -116,12 +117,16 @@ enum {
    SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
    SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */ 
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
+#endif /* SIRFII_ENABLE */
 
-   TSIP_LEADER,		/* we've seen the TSIP leader (DLE) */
+#ifdef TSIP_ENABLE
+   DLE_LEADER,		/* we've seen the TSIP leader (DLE) */
    TSIP_PAYLOAD,	/* we're in TSIP payload */
    TSIP_DLE,		/* we've seen a DLE in TSIP payload */
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
+#endif /* TSIP_ENABLE */
 
+#ifdef ZODIAC_ENABLE
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */
    ZODIAC_LEADER_1,	/* saw leading 0xff */
    ZODIAC_LEADER_2,	/* saw leading 0x81 */
@@ -134,6 +139,7 @@ enum {
    ZODIAC_HSUM_1, 	/* saw first byte of Header sum */
    ZODIAC_PAYLOAD,	/* we're in a Zodiac payload */
    ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
+#endif /* ZODIAC_ENABLE */
 };
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
@@ -150,7 +156,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
         else if (c == 0x10)
-	    session->packet_state = TSIP_LEADER;
+	    session->packet_state = DLE_LEADER;
 #endif /* TSIP_ENABLE */
 #ifdef TRIPMATE_ENABLE
         else if (c == 'A')
@@ -331,7 +337,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
-    case TSIP_LEADER:
+    case DLE_LEADER:
 	if (c < 0x13)
 	    session->packet_state = GROUND_STATE;
 	else
@@ -357,7 +363,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case TSIP_RECOGNIZED:
         if (c == 0x10)
-	    session->packet_state = TSIP_LEADER;
+	    session->packet_state = DLE_LEADER;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
