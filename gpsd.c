@@ -352,7 +352,7 @@ static void raw_hook(struct gps_data_t *ud,
 
 /*@ -globstate @*/
 static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_name)
-/* find the channel block for and existing device name */
+/* find the channel block for an existing device name */
 {
     struct gps_device_t *chp;
 
@@ -470,7 +470,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
-	    if (assign_channel(whoami) && *p == '=') {
+	    if (assign_channel(whoami) && whoami->device->device_type && *p=='=') {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		if (whoami->device->device_type->speed_switcher)
@@ -507,7 +507,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",B=?");
 	    break;
 	case 'C':
-	    if (assign_channel(whoami))
+	    if (assign_channel(whoami) && whoami->device->device_type)
 		(void)snprintf(phrase, sizeof(phrase), ",C=%d", 
 			whoami->device->device_type->cycle);
 	    else
@@ -547,7 +547,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",F=?");
 	    break;
 	case 'I':
-	    if (assign_channel(whoami))
+	    if (assign_channel(whoami) && whoami->device->device_type)
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
 			 whoami->device->device_type->typename);
 	    else

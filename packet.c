@@ -67,7 +67,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  * consume a packet when it sees one of the *_RECOGNIZED states.
  *
  * Error handling is brutally simple; any time we see an unexpected
- * character, go to GROUND_STATE and reset the machine.  Because
+ * character, go to GROUND_STATE and reset the machine (except that a
+ * $ in an NMEA payload only resets back to NMEA_DOLLAR state).  Because
  * another good packet will be usually along in less than a second
  * repeating the same data, Boyer-Moore-like attempts to do parallel
  * recognition beyond the headers would make no sense in this
@@ -188,6 +189,9 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    session->packet_state = NMEA_RECOGNIZED;
+	else if (c == '$')
+	    /* faster recovery from missing sentence trailers */
+	    session->packet_state = NMEA_DOLLAR;
 	else if (!isprint(c))
 	    session->packet_state = GROUND_STATE;
 	break;

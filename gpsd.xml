@@ -186,15 +186,19 @@ continue to communicate at the old speed.</para></listitem>
 
 <varlistentry>
 <term>c</term>
-<listitem><para>Returns, as "C=%d", the cycle time of updates
-in seconds.</para></listitem>
+<listitem><para>Returns, as "C=%d", the cycle time of updates in
+seconds. This command will return '?' at start of session, before the
+first full packet has been received from the GPS, because its type is
+not yet known. To set up conditions for a real answer, issue it
+after some command that reads position/velocity/time information
+from the device.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>d</term>
 <listitem><para>Returns the UTC time in the ISO 8601 format,
 "D=yyyy-mm-ddThh:nmm:ss.ssZ". Digits of precision in the fractional-seconds
-part will vary and may be zero.</para></listitem>
+part will vary and may be absent.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -243,7 +247,9 @@ client was attached, and multiple devices were not supported.)</para>
 <varlistentry>
 <term>i</term>
 <listitem><para>Returns a text string identifying the GPS.  The string
-may contain spaces and is terminated by CR-LF.</para></listitem>
+may contain spaces and is terminated by CR-LF.  This command will
+return '?' at start of session, before the first full packet has been
+received from the GPS, because its type is not yet known.</para></listitem>
 </varlistentry>
 
 <varlistentry>
