@@ -89,6 +89,8 @@ enum {
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
+   DLE_LEADER,		/* we've seen the TSIP/Evermore leader (DLE) */
+
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
 
 #ifdef TRIPMATE_ENABLE
@@ -120,7 +122,6 @@ enum {
 #endif /* SIRFII_ENABLE */
 
 #ifdef TSIP_ENABLE
-   TSIP_LEADER,		/* we've seen the TSIP leader (DLE) */
    TSIP_PAYLOAD,	/* we're in TSIP payload */
    TSIP_DLE,		/* we've seen a DLE in TSIP payload */
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
@@ -142,7 +143,6 @@ enum {
 #endif /* ZODIAC_ENABLE */
 
 #ifdef EVERMORE_ENABLE
-   EVERMORE_LEADER_1,	/* seen opening DLE of Evermore packet */
    EVERMORE_LEADER_2,	/* seen opening STX of Evermore packet */
    EVERMORE_LENGTH,	/* seen 1-byte packet length */
    EVERMORE_HEADER_DLE,	/* 1-byte packet length was DLE */
@@ -166,10 +166,10 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
         else if (c == 0xa0)
 	    session->packet_state = SIRF_LEADER_1;
 #endif /* SIRFII_ENABLE */
-#ifdef TSIP_ENABLE
+#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
         else if (c == 0x10)
-	    session->packet_state = TSIP_LEADER;
-#endif /* TSIP_ENABLE */
+	    session->packet_state = DLE_LEADER;
+#endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
 #ifdef TRIPMATE_ENABLE
         else if (c == 'A')
 	    session->packet_state = ASTRAL_1;
@@ -182,10 +182,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else if (c == 0xff)
 	    session->packet_state = ZODIAC_LEADER_1;
 #endif /* ZODIAC_ENABLE */
-#ifdef EVERMORE_ENABLE
-	else if (c == 0x10)
-	    session->packet_state = EVERMORE_LEADER_1;
-#endif /* EVERMORE_ENABLE */
 	break;
     case NMEA_DOLLAR:
 	if (c == 'G')
@@ -352,13 +348,22 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* SIRFII_ENABLE */
-#ifdef TSIP_ENABLE
-    case TSIP_LEADER:
-	if (c < 0x13)
-	    session->packet_state = GROUND_STATE;
+#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
+    case DLE_LEADER:
+#ifdef EVERMORE_ENABLE
+	if (c == 0x02)
+	    session->packet_state = EVERMORE_LEADER_2;
 	else
+#endif /* EVERMORE_ENABLE */
+#ifdef TSIP_ENABLE
+	if (c >= 0x13)
 	    session->packet_state = TSIP_PAYLOAD;
+	else
+#endif /* TSIP_ENABLE */
+	    session->packet_state = GROUND_STATE;
 	break;
+#endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
+#ifdef TSIP_ENABLE
     case TSIP_PAYLOAD:
 	if (c == 0x10)
 	    session->packet_state = TSIP_DLE;
@@ -379,7 +384,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case TSIP_RECOGNIZED:
         if (c == 0x10)
-	    session->packet_state = TSIP_LEADER;
+	    session->packet_state = DLE_LEADER;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -453,12 +458,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
-    case EVERMORE_LEADER_1:
-	if (c == 0x02)
-	    session->packet_state = EVERMORE_LEADER_2;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
     case EVERMORE_LEADER_2:
 	session->packet_length = (size_t)c;
 	if (c == 0x10)
@@ -496,7 +495,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EVERMORE_RECOGNIZED:
         if (c == 0xa0)
-	    session->packet_state = EVERMORE_LEADER_1;
+	    session->packet_state = DLE_LEADER;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
