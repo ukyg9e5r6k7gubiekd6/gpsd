@@ -71,6 +71,8 @@ static void nmea_initializer(struct gps_device_t *session)
      */
 #define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
     (void)nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
+    /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
+    (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
     /* enable GPGSA on Garmin serial GPS */
