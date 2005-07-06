@@ -122,6 +122,7 @@ enum {
 #endif /* SIRFII_ENABLE */
 
 #ifdef TSIP_ENABLE
+   TSIP_LEADER,		/* a DLE after having seen TSIP data */
    TSIP_PAYLOAD,	/* we're in TSIP payload */
    TSIP_DLE,		/* we've seen a DLE in TSIP payload */
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
@@ -143,6 +144,7 @@ enum {
 #endif /* ZODIAC_ENABLE */
 
 #ifdef EVERMORE_ENABLE
+   EVERMORE_LEADER_1,	/* a DLE after having seen Evermore data */
    EVERMORE_LEADER_2,	/* seen opening STX of Evermore packet */
    EVERMORE_LENGTH,	/* seen 1-byte packet length */
    EVERMORE_HEADER_DLE,	/* 1-byte packet length was DLE */
@@ -364,6 +366,12 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
 #endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
 #ifdef TSIP_ENABLE
+    case TSIP_LEADER:
+	if (c >= 0x13)
+	    session->packet_state = TSIP_PAYLOAD;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
     case TSIP_PAYLOAD:
 	if (c == 0x10)
 	    session->packet_state = TSIP_DLE;
@@ -384,7 +392,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case TSIP_RECOGNIZED:
         if (c == 0x10)
-	    session->packet_state = DLE_LEADER;
+	    session->packet_state = TSIP_LEADER;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
@@ -458,6 +466,12 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
+    case EVERMORE_LEADER_1:
+	if (c == 0x02)
+	    session->packet_state = EVERMORE_LEADER_2;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
     case EVERMORE_LEADER_2:
 	session->packet_length = (size_t)c;
 	if (c == 0x10)
@@ -494,8 +508,8 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case EVERMORE_RECOGNIZED:
-        if (c == 0xa0)
-	    session->packet_state = DLE_LEADER;
+        if (c == 0x10)
+	    session->packet_state = EVERMORE_LEADER_1;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
