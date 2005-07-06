@@ -76,7 +76,7 @@ static struct gps_type_t nmea = {
     "Generic NMEA",	/* full name of type */
     NULL,		/* no recognition string, it's the default */
     NULL,		/* no probe */
-    nmea_initializer,		/* probe for SiRF II */
+    nmea_initializer,	/* probe for SiRF II and other special types */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
     nmea_write_rtcm,	/* write RTCM data straight */

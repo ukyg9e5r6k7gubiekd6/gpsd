@@ -126,7 +126,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Thu Jul 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.27
+* Wed Jul 06 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.27
 - Arrange for the daemon to remove its pid file on exit.  Fix some
   buffering problems with the Python side of the hotplug interface.
   gpsfake can now run sessions under a monitor like Valgrind.  Most
@@ -140,6 +140,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   no longer relies on FIONREAD working.  The track error field in the
   O response is now computed.  The project website has some new eye candy.
   Client connections now time out when the mode is neither raw nor watcher.
+  Fixed a core-dump that could happen if C, B or I commands were issued
+  at odd times.
 
 * Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
 - Time DOP and total DOP are now passed on from GPSes that report 

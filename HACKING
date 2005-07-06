@@ -642,12 +642,6 @@ expert, reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.
 
-*** Evermore binary protocol
-
-Described at <http://www-ri.hive.no/nmea/GM-X205_UG_revB.pdf>.
-Doesn't seem to support any capabilities that NMEA doesn't, other
-than shipping TDOP.
-
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"
