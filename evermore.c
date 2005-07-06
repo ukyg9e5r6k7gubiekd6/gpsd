@@ -246,7 +246,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
-	(void)gpsd_switch_driver(session, "Generic MEA");
+	(void)gpsd_switch_driver(session, "Generic NMEA");
 	(void)evermore_set_mode(session, session->gpsdata.baudrate, false);
 	session->gpsdata.driver_mode = 0;
     }
@@ -262,7 +262,7 @@ static void evermore_initializer(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
-    "Evermore-II binary",	/* full name of type */
+    "Evermore binary",		/* full name of type */
     "$PEMT",			/* recognize the type */
     NULL,			/* no probe */
     evermore_initializer,	/* initialize the device */
