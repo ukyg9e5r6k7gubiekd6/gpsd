@@ -74,6 +74,7 @@ libgps_c_sources = \
 	zodiac.c \
 	garmin.c \
 	tsip.c \
+	evermore.c \
 	libgpsd_core.c \
 	ntpshm.c \
 	libgps.c \

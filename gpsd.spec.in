@@ -126,6 +126,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Added Evermore binary support (untested!).
+
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.
   Due to procedural mechanics at berlios.de, shipping a new release

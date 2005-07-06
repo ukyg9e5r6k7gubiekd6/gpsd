@@ -53,7 +53,8 @@ binary Rockwell protocol used by EarthMate and some other GPSes, the
 TSIP binary protocol used by Trimble GPSes, or the binary SiRF
 protocol used by SiRf-II and SiRF-Star chipsets, or the Garmin binary
 protocol used by the USB version of the Garmin 18 and other Garmin USB
-GPSes. <application>gpsd</application> effectively hides the
+GPSes, or the binary protocol used by Evermore
+chipsets. <application>gpsd</application> effectively hides the
 differences among these.</para>
 
 <para><application>gpsd</application> can use differential-GPS

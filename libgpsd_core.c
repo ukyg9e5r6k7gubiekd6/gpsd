@@ -481,6 +481,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "Generic NMEA");
 	    else if (session->packet_type == ZODIAC_PACKET)
 		(void)gpsd_switch_driver(session, "Zodiac binary");
+	    else if (session->packet_type == EVERMORE_PACKET)
+		(void)gpsd_switch_driver(session, "Evermore binary");
 	    session->gpsdata.d_xmit_time = timestamp();
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;

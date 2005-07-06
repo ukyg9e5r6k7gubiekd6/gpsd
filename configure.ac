@@ -158,6 +158,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Evermore support
+AC_ARG_ENABLE(evermore,
+  AC_HELP_STRING([--disable-evermore],
+                 [disable Evermore binary support]),
+  [ac_fv18=$enableval], [ac_evermore=yes])
+AC_MSG_CHECKING([for Evermore support])
+if test x"$ac_evermore" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([EVERMORE_ENABLE], 1, [Evermore binary support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Tripmate support
 AC_ARG_ENABLE(tripmate,
   AC_HELP_STRING([--disable-tripmate],
@@ -265,6 +278,7 @@ echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
 echo "Garmin                  : $ac_garmin"
+echo "Evermore                : $ac_evermore"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo "Enable shared libraries : $enable_shared"

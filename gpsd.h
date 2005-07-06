@@ -109,6 +109,7 @@ struct gps_device_t {
 #define SIRF_PACKET	1
 #define ZODIAC_PACKET	2
 #define TSIP_PACKET	3
+#define EVERMORE_PACKET	4
     unsigned int baudindex;
     unsigned int packet_state;
     size_t packet_length;
@@ -189,6 +190,7 @@ extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
+extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
 
 extern void packet_reset(struct gps_device_t *);
 extern void packet_pushback(struct gps_device_t *);
