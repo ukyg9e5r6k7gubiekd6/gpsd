@@ -101,21 +101,11 @@ signals pass through the ionosphere, which partly reflects radio
 waves.  This can be largely compensated for by a technique called
 "Differential GPS" or DGPS, in which your receiver takes timings both
 from satellites and ground stations.  The ground stations are in a
-known fixed osition, so they can compute the exact distance to
-satellites from an ephemeris. Thus, they can measure and compensate
-for the ionospheric lag.  WAAS and EGNOS are similar systems.</p>
-
-<p>DGPS itself requires out-of-band communication with a service
-providing GPS signal correction information to make the GPS
-positioning more accurate.  WAAS and EGNOS are almost identical
-systems, WAAS being the system covering USA, and EGNOS being the
-system covering Europe.  They provide DGPS-like corrections with
-in-band communication &mdash; geo-stationary satellites broadcasting
-GPS signal correction information on the same frequency and format as the
-GPS satellites.  The WAAS/EGNOS system makes GPSes more accurate,
-and adds integrity checks making it possible to detect when the
-GPS location is totally wrong.  Unlike DGPS, your GPS will generally
-use these systems automatically whenever it can see the satellites.</p>
+known fixed positions, so they can compute the exact distance to
+satellites from an ephemeris. Thus, they can measure the for the
+ionospheric lag and tell nearby GPSes how to correct ranges for it.
+WAAS and EGNOS are similar systems.  See <a href="#ggps">DGPS, WAAS,
+and EGNOS</a> for details on how this works.</p>
 
 <p>In practice, the most important limit on accuracy is the actual
 visibility of satellites.  A timing signal has to be fairly strong and
@@ -150,6 +140,46 @@ href="http://vancouver-webpages.com/pub/peter/gpsfaq.txt">GPS FAQ</a>;
 note however that their accuracy estimates are from the Selective
 Availability period and expected error has decreased quite a bit
 since (the WAAS system they talk about is now generally deployed).</p>
+
+<h1 id='dgps'>DGPS, WAAS, and EGNOS</h1>
+
+<p>DGPS requires out-of-band communication with a service
+providing GPS signal correction information to make the GPS
+positioning more accurate.  WAAS and EGNOS are almost identical
+systems, WAAS being the system covering USA, and EGNOS being the
+system covering Europe.  They provide DGPS-like corrections with
+in-band communication &mdash; geo-stationary satellites broadcasting
+GPS signal correction information on the same frequency and format as the
+GPS satellites.  The WAAS/EGNOS system makes GPSes more accurate,
+and adds integrity checks making it possible to detect when the
+GPS location is totally wrong.  Unlike DGPS, your GPS will generally
+use these systems automatically whenever it can see the satellites.</p>
+
+<p>WAAS/EGNOS data starts out as normal DGPS stations observing the errors.
+That data gets processed and interpolated into a grid which models
+ionospheric and tropospheric delay over the WAAS/EGNOS .  The GPSes then
+interpolate into that grid to get an estimate of lag for their current
+position. For points close to a DGPS station, raw DGPS should give better
+accuracy than WAAS/EGNOS.  For points far between any reference stations, 
+WAAS should be more accurate than software arbitrarily choosing one 
+'nearby' DGPS station or another.</p>
+
+<p>The definitive <a href='http://gps.gov/gps/WAAS-DGPS.htm'>FAQ</a>
+says this: "On the average, WAAS and DGPS accuracy are virtually the
+same, although DGPS accuracy is better when the user is near a DGPS
+transmitting site.  The WAAS architecture is designed to provide
+uniform 7m accuracy (95%) regardless of the location of the receiver
+within the WAAS service area. DGPS is designed to provide better than
+10m navigation service (95%), but typically provides better than 1
+meter horizontal positioning accuracy (95%) when the user is less than
+100 nautical miles from the DGPS transmitting site. Accuracy then
+degrades at a rate of approximately 1 meter per hundred nautical miles
+as the user moves away from the transmitting site.</p>
+
+<!-- System management: 
+Lt Cdr John Schutzenhofer
+john.e.schutzenhofer@uscg.mil
+703-313-5939 -->
 
 <h1>How GPS Hardware Talks To Computers</h1>
 
