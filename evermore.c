@@ -132,7 +132,9 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	else
 	    session->gpsdata.newdata.mode = MODE_3D;
 	//visible = getub(buf2, 26) & 0xb0;
-	gpsd_report(4, "NDO 0x02:\n");
+	gpsd_report(4, "NDO 0x02:  mode=%d, status=%d\n",
+		    session->gpsdata.newdata.mode,
+		    session->gpsdata.status);
 	return TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 
     case 0x04:	/* DOP Data Output */
@@ -162,6 +164,9 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    session->gpsdata.newdata.mode = MODE_3D;
 	    break;
 	}
+	gpsd_report(4, "DDO 0x04: mode=%d, status=%d\n", 
+		    session->gpsdata.newdata.mode,
+		    session->gpsdata.status);
 	return TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
 
     case 0x06:	/* Channel Status Output */
@@ -169,7 +174,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	channels = (int)getub(buf2, 8);
 	/* FIXME: read full status for each channel */
-	gpsd_report(4, "CSO 0x04: %d satellites\n", channels);
+	gpsd_report(4, "CSO 0x04: %d channels\n", channels);
 	return TIME_SET;
 
     case 0x08:	/* Measurement Data Output */
@@ -179,6 +184,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
+	gpsd_report(4, "MDO 0x04: visible=%d\n", visible);
 	return TIME_SET | SATELLITE_SET;
 
     default:
