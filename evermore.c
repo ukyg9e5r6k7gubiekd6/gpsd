@@ -224,13 +224,14 @@ static bool evermore_set_mode(struct gps_device_t *session,
 			   0x40,			/* checksum + binary */
 			   0,			/* baud rate */
 			  };
-    gpsd_report(1, "Switching chip mode to Evermore binary.\n");
     switch (speed) {
     case 4800:  msg[17] = 0; break;
     case 9600:  msg[17] = 1; break;
     case 19200: msg[17] = 2; break;
     case 38400: msg[17] = 3; break;
+    default: return false;
     }
+    gpsd_report(1, "Switching chip mode to Evermore binary.\n");
     if (mode)
 	msg[16] |= 0x40;
     return evermore_write(session->gpsdata.gps_fd, msg);
