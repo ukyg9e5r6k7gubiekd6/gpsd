@@ -172,7 +172,6 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    ecef_to_wgs84fix(&session->gpsdata, 
 			     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
 			     getsw(buf, 13)/8.0, getsw(buf, 15)/8.0, getsw(buf, 17)/8.0);
-	    /* WGS 84 geodesy parameters */
 	    /* fix status is byte 19 */
 	    navtype = (unsigned short)getub(buf, 19);
 	    session->gpsdata.status = STATUS_NO_FIX;

@@ -4,12 +4,6 @@ will unfold them again.
 
 ** Bugs in gpsd and its clients:
 
-*** Nail down Daryl Ross's SiRF bugs
-
-Daryl Ross is reporting some very odd bugs on the BU-303 that I can't
-reproduce with my almost identical test setup.  This bothers me, and
-I want to understand why it is happening.
-
 *** EPH and EPV reports are zeroed too often in the TSIP driver 
 
 There is some bad interaction between the policy code in
@@ -74,13 +68,6 @@ system.  ESR tested for this in the simplest possible way, by doing
 system("free t") at the end of each handle_input() call.
 
 ** To do:
-
-*** Evermore driver
-
-Petr Slansky wants Evermore chipset support.  His email reads as
-though he is competent to write it.  An unanswered question is whether
-there is a probe string that can elicit a PEMT or other unique
-response from the Evermore chipset.
 
 *** SiRF firmware uploader
 

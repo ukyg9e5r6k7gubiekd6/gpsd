@@ -116,6 +116,12 @@ zero. This condition will continue until the computed velocity rises
 above 1.2 times the threshold or until the computed position is at
 least a set distance from the frozen place. The threshold velocity and
 set distance may vary with software versions.</quote></para>
+
+<para>Non-static mode is designed for use with road navigation
+software, which often snaps the reported position to the nearest road
+within some uncertainty radius.  You probably want to turn static
+navigation off for pedestrian use, as it is likely to report speed
+zero and position changing in lsrge jumps.</para>
 </listitem>
 </varlistentry>
 <varlistentry>

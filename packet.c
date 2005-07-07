@@ -28,8 +28,6 @@ distinguish them from baud barf.
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
 #include "config.h"
 #include "gpsd.h"
 
@@ -57,14 +55,18 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 #endif /* TESTMAIN */
 
 /* 
- * The packet-recognition state machine.  It doesn't do checksums,
- * caller is responsible for that part.  It can be fooled by garbage
+ * The packet-recognition state machine.  It can be fooled by garbage
  * that looks like the head of a binary packet followed by a NMEA
  * packet; in that case it won't reset until it notices that the
  * binary trailer is not where it should be, and the NMEA packet will
  * be lost.  The reverse scenario is not possible because none of the
  * binary leader character can occur in an NMEA packet.  Caller should
  * consume a packet when it sees one of the *_RECOGNIZED states.
+ * It's good practice to follow the _RECOGNIZED transition with one
+ * that recognizes a leader of the same packet type rather than
+ * dropping back to ground state -- this for example will prevent
+ * the state machine from hopping between recognizing TSIP and
+ * Evermore packets that both start with a DLE.
  *
  * Error handling is brutally simple; any time we see an unexpected
  * character, go to GROUND_STATE and reset the machine (except that a
@@ -82,8 +84,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 enum {
    GROUND_STATE,	/* we don't know what packet type to expect */
-   NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
 
+   /* NMEA 0183 packet states */
+   NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
    NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
@@ -150,7 +153,7 @@ enum {
    EVERMORE_HEADER_DLE,	/* 1-byte packet length was DLE */
    EVERMORE_PAYLOAD,	/* in payload part of Evermore packet */
    EVERMORE_DELIVERED,	/* got to end of payload, looking for checksum */
-   EVERMORE_CHECKSUM_DLE,	/* in payload part of Evermore packet */
+   EVERMORE_SUM_DLE,	/* in payload part of Evermore packet */
    EVERMORE_TRAILER_1,	/* looking for first byte of Evermore trailer */ 
    EVERMORE_RECOGNIZED,	/* found end of Evermore packet */
 #endif /* EVERMORE_ENABLE */
@@ -491,11 +494,11 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EVERMORE_DELIVERED:
 	if (c == 0x10)
-	    session->packet_state = EVERMORE_CHECKSUM_DLE;
+	    session->packet_state = EVERMORE_SUM_DLE;
 	else
 	    session->packet_state = EVERMORE_TRAILER_1;
 	break;
-    case EVERMORE_CHECKSUM_DLE:
+    case EVERMORE_SUM_DLE:
 	if (c == 0x10)
 	    session->packet_state = EVERMORE_TRAILER_1;
 	else
