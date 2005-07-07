@@ -642,7 +642,8 @@ ssize_t packet_get(struct gps_device_t *session)
 	    }
 	    if (checksum_ok)
 		packet_accept(session, NMEA_PACKET);
-	    session->packet_state = GROUND_STATE;
+	    else
+		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #ifdef SIRFII_ENABLE
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
@@ -654,14 +655,16 @@ ssize_t packet_get(struct gps_device_t *session)
 	    crc &= 0x7fff;
 	    if (checksum == crc)
 		packet_accept(session, SIRF_PACKET);
-	    session->packet_state = GROUND_STATE;
+	    else
+		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
 	    if ((session->inbufptr - session->inbuffer) >= 4)
 		packet_accept(session, TSIP_PACKET);
-	    session->packet_state = GROUND_STATE;
+	    else
+		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
@@ -678,8 +681,8 @@ ssize_t packet_get(struct gps_device_t *session)
 		gpsd_report(4,
 		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
 			sum, len, getword(5 + len));
+		session->packet_state = GROUND_STATE;
 	    }
-	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #undef getword
 #endif /* ZODIAC_ENABLE */
