@@ -25,56 +25,47 @@
 #define LO(n)		((n) & 0xff)
 
 /*@ +charint@ */
-static bool evermore_write(int fd, unsigned char *msg) {
+static bool evermore_write(int fd, unsigned char *msg, unsigned char msglen) {
    unsigned int       crc;
    size_t    i, len;
-   unsigned char stuffed[MAX_PACKET_LENGTH], buf[MAX_PACKET_LENGTH*2], *cp, *emit;
+   unsigned char stuffed[MAX_PACKET_LENGTH], buf[MAX_PACKET_LENGTH*3+1], *cp;
    bool      ok;
 
    /* prepare a DLE-stuffed copy of the message */
-   cp = stuffed + 4;
-   for (i = 0; i < sizeof(msg); i++) {
+   cp = stuffed;
+   *cp++ = 0x10;  /* message starts with DLE STX */
+   *cp++ = 0x02;
+
+   len = msglen + 2;  /* msglen < 254 !! */
+   *cp++ = LO(len);   /* message length */
+   if (len == 0x10) *cp++ = 0x10;
+   
+   /* payload */
+   crc = 0;
+   for (i = 0; i < msglen; i++) {
        *cp++ = msg[i];
-       if (msg[i] == 0x10)
-	   *cp++ = 0x10;
-   }
-   len = cp - (stuffed+4);
-   if (len == 0x10) {
-       stuffed[0] = 0x10;
-       stuffed[1] = 0x02;
-       stuffed[2] = (unsigned char)len;
-       stuffed[3] = 0x10;
-       emit = stuffed;
-   } else {
-       stuffed[1] = 0x10;
-       stuffed[2] = 0x02;
-       stuffed[3] = (unsigned char)len;
-       emit = stuffed + 1;
+       crc += msg[i];
+       if (msg[i] == 0x10) *cp++ = 0x10;
    }
 
-   /* calculate CRC */
-   crc = 0;
-   for (i = 0; i < len; i++) {
-	crc += (int)stuffed[3 + i];
-   }
-   crc %= 256;
+   crc &= 0xff;
 
    /* enter CRC after payload */
-   cp = stuffed + 3 + len;
-   *cp++ = crc;
-   if (crc == 0x10)
-       *cp = 0x10;
-   *cp++ = 0x10;
+   *cp++ = LO(crc);  
+   if (crc == 0x10) *cp++ = 0x10;
+
+   *cp++ = 0x10;   /* message ends with DLE ETX */
    *cp++ = 0x03;
-   len = (size_t)(cp - emit);
+
+   len = (size_t)(cp - stuffed);
 
    /* we may need to dump the message */
    buf[0] = '\0';
    for (i = 0; i < len; i++)
        (void)snprintf((char*)buf+strlen((char *)buf),sizeof((char*)buf)-strlen((char*)buf),
-		      " %02x", (unsigned)emit[i]);
-   gpsd_report(4, "Writing Evermore control type %02x:%s\n", stuffed[4], buf);
-   ok = (write(fd, emit, len) == (ssize_t)len);
+		      " %02x", (unsigned)stuffed[i]);
+   gpsd_report(4, "writing Evermore control type %02x:%s\n", msg[0], buf);
+   ok = (write(fd, stuffed, len) == (ssize_t)len);
    (void)tcdrain(fd);
    return(ok);
 }
@@ -98,14 +89,14 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		       sizeof(buf2)-strlen((char*)buf2),
 		       "%02x", (unsigned int)buf[i]);
     strcat((char*)buf2, "\n");
-    gpsd_report(5, "Raw Evermore packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
+    gpsd_report(5, "raw Evermore packet type 0x%02x length %d: %s\n", buf[0], len, buf2);
 
     /* time to unstuff it and discard the header and footer */
     cp = buf + 2;
+    tp = buf2;
     if (*cp == 0x10)
 	cp++;
     len = (size_t)*cp;
-    tp = buf2;
     ++cp;
     for (i = 0; i < len; i++) {
 	*tp = cp[i];
@@ -193,7 +184,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    (void)snprintf((char*)buf+strlen((char*)buf), 
 			   sizeof(buf)-strlen((char*)buf),
 			   "%02x", (unsigned int)buf2[i]);
-	gpsd_report(3, "Unknown Evermore packet id %d length %d: %s\n", buf2[0], len, buf);
+	gpsd_report(3, "unknown Evermore packet id %d length %d: %s\n", buf2[0], len, buf);
 	return 0;
     }
 }
@@ -218,6 +209,7 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 static bool evermore_set_mode(struct gps_device_t *session, 
 			      speed_t speed, bool mode)
 {
+	unsigned char tmp8;
     /*@ +charint @*/
     unsigned char msg[] = {0x80,
 			   0x00, 0x00,		/* GPS week */
@@ -231,16 +223,18 @@ static bool evermore_set_mode(struct gps_device_t *session,
 			   0,			/* baud rate */
 			  };
     switch (speed) {
-    case 4800:  msg[17] = 0; break;
-    case 9600:  msg[17] = 1; break;
-    case 19200: msg[17] = 2; break;
-    case 38400: msg[17] = 3; break;
+    case 4800:  tmp8 = 0; break;
+    case 9600:  tmp8 = 1; break;
+    case 19200: tmp8 = 2; break;
+    case 38400: tmp8 = 3; break;
     default: return false;
     }
-    gpsd_report(1, "Switching chip mode to Evermore binary.\n");
-    if (mode)
+    msg[17]=tmp8;
+    if (mode) {
+        gpsd_report(1, "Switching chip mode to Evermore binary.\n");
 	msg[16] |= 0x40;
-    return evermore_write(session->gpsdata.gps_fd, msg);
+    }
+    return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
     /*@ +charint @*/
 }
 
@@ -270,7 +264,7 @@ static void evermore_initializer(struct gps_device_t *session)
 struct gps_type_t evermore_binary =
 {
     "Evermore binary",		/* full name of type */
-    "$PEMT",			/* recognize the type */
+    "$PEMT,100,05.",		/* recognize the type */
     NULL,			/* no probe */
     evermore_initializer,	/* initialize the device */
     packet_get,			/* how to grab a packet */
