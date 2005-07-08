@@ -133,6 +133,8 @@ static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
 
 static gps_mask_t handle1000(struct gps_device_t *session)
 {
+    double subseconds;
+    struct tm unpacked_date;
     /* ticks                      = getlong(6); */
     /* sequence                   = getword(8); */
     /* measurement_sequence       = getword(9); */
@@ -150,15 +152,17 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* gps_week                      = getword(14); */
     /* gps_seconds                   = getlong(15); */
     /* gps_nanoseconds               = getlong(17); */
-    session->gpsdata.nmea_date.tm_mday = (int)getword(19);
-    session->gpsdata.nmea_date.tm_mon = (int)getword(20) - 1;
-    session->gpsdata.nmea_date.tm_year = (int)getword(21) - 1900;
-    session->gpsdata.nmea_date.tm_hour = (int)getword(22);
-    session->gpsdata.nmea_date.tm_min = (int)getword(23);
-    session->gpsdata.nmea_date.tm_sec = (int)getword(24);
-    session->gpsdata.subseconds = (int)getlong(25) / 1e9;
+    unpacked_date.tm_mday = (int)getword(19);
+    unpacked_date.tm_mon = (int)getword(20) - 1;
+    unpacked_date.tm_year = (int)getword(21) - 1900;
+    unpacked_date.tm_hour = (int)getword(22);
+    unpacked_date.tm_min = (int)getword(23);
+    unpacked_date.tm_sec = (int)getword(24);
+    subseconds = (int)getlong(25) / 1e9;
+    /*@ -compdef */
     session->gpsdata.newdata.time = session->gpsdata.sentence_time =
-	(double)mkgmtime(&session->gpsdata.nmea_date) + session->gpsdata.subseconds;
+	(double)mkgmtime(&unpacked_date) + subseconds;
+    /*@ +compdef */
 #ifdef NTPSHM_ENABLE
     if (session->gpsdata.newdata.mode > MODE_NO_FIX)
 	(void)ntpshm_put(session, session->gpsdata.newdata.time + 1.1);
@@ -180,6 +184,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->mag_var               = ((short)getword(37)) * RAD_2_DEG * 1e-4;
     session->gpsdata.newdata.climb     = ((short)getword(38)) * 1e-2;
     /* map_datum                   = getword(39); */
+    /* manual doesn't specify 1-sigma or 2-sigma */
     session->gpsdata.newdata.eph       = (int)getlong(40) * 1e-2;
     session->gpsdata.newdata.epv       = (int)getlong(42) * 1e-2;
     session->gpsdata.newdata.ept       = (int)getlong(44) * 1e-2;

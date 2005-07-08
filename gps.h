@@ -42,9 +42,6 @@ extern "C" {
  * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different 
  * timestamps and some data in this structure can be up to 1 cycle (usually
  * 1 second) older than the fix time.
- *
- * Time uncertainty is expected value (mean).
- * Position and velocity uncertainties are 1-sigma values with a mean of zero.
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
@@ -128,7 +125,7 @@ struct gps_data_t {
     double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
 
     /* redundant with the estimate elments in the fix structure */
-    double epe;  /* estimated spherical position error, 1 sigma (meters)  */
+    double epe;  /* estimated spherical position error, 2 sigma (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
     int satellites;		/* # of satellites in view */
@@ -136,7 +133,6 @@ struct gps_data_t {
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
-    int part, await;		/* for tracking GSV parts */
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */
@@ -166,17 +162,6 @@ struct gps_data_t {
     int gps_fd;			/* socket or file descriptor to GPS */
     void (*raw_hook)(struct gps_data_t *, char *, size_t len, int level);/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
-    int seen_sentences;		/* track which sentences have been seen */
-#define GPRMC	0x01
-#define GPGGA	0x02
-#define GPGLL	0x04
-#define GPVTG	0x08
-#define GPGSA	0x10
-#define GPGSV	0x20
-#define GPZDA	0x40
-#define PGRME	0x80
-    struct tm nmea_date;
-    double subseconds;
 };
 
 extern struct gps_data_t *gps_open(const char *host, const char *port);
@@ -213,9 +198,9 @@ extern int gpsd_units(void);
 /* miles and knots are both the international standard versions of the units */
 
 /* angle conversion multipliers */
-#define PI 3.1415926535897932384626433832795029L
-#define RAD_2_DEG  57.2957795130823208767981548141051703
-#define DEG_2_RAD  0.0174532925199432957692369076848861271
+#define PI      	3.1415926535897932384626433832795029
+#define RAD_2_DEG	57.2957795130823208767981548141051703
+#define DEG_2_RAD	0.0174532925199432957692369076848861271
 
 /* gps_open() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */

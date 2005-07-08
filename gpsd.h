@@ -130,6 +130,11 @@ struct gps_device_t {
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
     double mag_var;		/* Magnetic variation in degrees */  
     union {
+	struct {
+	    int part, await;		/* for tracking GSV parts */
+	    struct tm date;
+	    double subseconds;
+	} nmea;
 #ifdef SIRFII_ENABLE
 	struct {
 	    unsigned int driverstate;	/* for private use */
@@ -185,7 +190,7 @@ struct gps_device_t {
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
-extern gps_mask_t nmea_parse(char *, struct gps_data_t *);
+extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 

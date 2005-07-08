@@ -455,6 +455,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x29:		/* Geodetic Navigation Information */
 	mask = 0;
 	if (session->sirf.driverstate & SIRF_GE_232) {
+	    struct tm unpacked_date;
+	    double subseconds;
 	    /*
 	     * Many versions of the SiRF protocol manual don't document 
 	     * this sentence at all.  Those that do may incorrectly
@@ -499,18 +501,20 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	     * UTC second     2               2
 	     *                11              8
 	     */
-	    session->gpsdata.nmea_date.tm_year = (int)getuw(buf, 11);
-	    session->gpsdata.nmea_date.tm_mon = (int)getub(buf, 13)-1;
-	    session->gpsdata.nmea_date.tm_mday = (int)getub(buf, 14);
-	    session->gpsdata.nmea_date.tm_hour = (int)getub(buf, 15);
-	    session->gpsdata.nmea_date.tm_min = (int)getub(buf, 16);
-	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = getuw(buf, 17)*1e-3;
+	    unpacked_date.tm_year = (int)getuw(buf, 11);
+	    unpacked_date.tm_mon = (int)getub(buf, 13)-1;
+	    unpacked_date.tm_mday = (int)getub(buf, 14);
+	    unpacked_date.tm_hour = (int)getub(buf, 15);
+	    unpacked_date.tm_min = (int)getub(buf, 16);
+	    unpacked_date.tm_sec = 0;
+	    subseconds = getuw(buf, 17)*1e-3;
+	    /*@ -compdef */
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time
-		= (double)mktime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+		= (double)mktime(&unpacked_date)+subseconds;
+	    /*@ +compdef */
 	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.newdata.time);
 #ifdef NTPSHM_ENABLE
-	    if (session->gpsdata.newdata.mode > MODE_NO_FIX && session->gpsdata.nmea_date.tm_year != 0) {
+	    if (session->gpsdata.newdata.mode > MODE_NO_FIX && unpacked_date.tm_year != 0) {
 		if ((session->sirf.time_seen & TIME_SEEN_UTC_1) == 0)
 		    gpsd_report(4, "valid time in message 0x29, seen=0x%02x\n",
 				session->sirf.time_seen);
@@ -565,12 +569,17 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	mask = 0;
 	gpsd_report(4, "PPS 0x34: Status = 0x%02x\n", getub(buf, 14));
 	if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
-	    session->gpsdata.nmea_date.tm_hour = (int)getub(buf, 1);
-	    session->gpsdata.nmea_date.tm_min = (int)getub(buf, 2);
-	    session->gpsdata.nmea_date.tm_sec = (int)getub(buf, 3);
-	    session->gpsdata.nmea_date.tm_mday = (int)getub(buf, 4);
-	    session->gpsdata.nmea_date.tm_mon = (int)getub(buf, 5) - 1;
-	    session->gpsdata.nmea_date.tm_year = (int)getuw(buf, 6) - 1900;
+	    struct tm unpacked_date;
+	    unpacked_date.tm_hour = (int)getub(buf, 1);
+	    unpacked_date.tm_min = (int)getub(buf, 2);
+	    unpacked_date.tm_sec = (int)getub(buf, 3);
+	    unpacked_date.tm_mday = (int)getub(buf, 4);
+	    unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
+	    unpacked_date.tm_year = (int)getuw(buf, 6) - 1900;
+	    /*@ -compdef */
+	    session->gpsdata.newdata.time = session->gpsdata.sentence_time
+		= (double)mktime(&unpacked_date);
+	    /*@ +compdef */
 	    session->context->leap_seconds = (int)getuw(buf, 8);
 	    session->context->valid |= LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
@@ -612,16 +621,20 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		    navtype, session->gpsdata.status, session->gpsdata.newdata.mode);
 
 	if (navtype & 0x40) {		/* UTC corrected timestamp? */
+	    struct tm unpacked_date;
+	    double subseconds;
 	    mask |= TIME_SET;
-	    session->gpsdata.nmea_date.tm_year = (int)getuw(buf, 26) - 1900;
-	    session->gpsdata.nmea_date.tm_mon = (int)getub(buf, 28) - 1;
-	    session->gpsdata.nmea_date.tm_mday = (int)getub(buf, 29);
-	    session->gpsdata.nmea_date.tm_hour = (int)getub(buf, 30);
-	    session->gpsdata.nmea_date.tm_min = (int)getub(buf, 31);
-	    session->gpsdata.nmea_date.tm_sec = 0;
-	    session->gpsdata.subseconds = ((unsigned short)getuw(buf, 32))*1e-3;
+	    unpacked_date.tm_year = (int)getuw(buf, 26) - 1900;
+	    unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
+	    unpacked_date.tm_mday = (int)getub(buf, 29);
+	    unpacked_date.tm_hour = (int)getub(buf, 30);
+	    unpacked_date.tm_min = (int)getub(buf, 31);
+	    unpacked_date.tm_sec = 0;
+	    subseconds = ((unsigned short)getuw(buf, 32))*1e-3;
+	    /*@ -compdef */
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time
-		= (double)mkgmtime(&session->gpsdata.nmea_date)+session->gpsdata.subseconds;
+		= (double)mkgmtime(&unpacked_date)+subseconds;
+	    /*@ +compdef */
 #ifdef NTPSHM_ENABLE
 	    if ((session->sirf.time_seen & TIME_SEEN_UTC_2) == 0)
 		gpsd_report(4, "valid time in message 0x62, seen=0x%02x\n",
@@ -677,7 +690,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	session->gpsdata.driver_mode = 1;
 	return st;
     } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->outbuffer, &session->gpsdata);
+	st = nmea_parse((char *)session->outbuffer, session);
 	session->gpsdata.driver_mode = 0;
 	return st;
     } else

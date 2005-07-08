@@ -354,7 +354,6 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    ZEROIZE(session->gpsdata.fix.epv), 
 	    ZEROIZE(session->gpsdata.epe));
         nmea_add_checksum(bufp);
-	session->gpsdata.seen_sentences |= PGRME;
      }
 #undef ZEROIZE
 }
@@ -378,9 +377,8 @@ static void apply_error_model(struct gps_device_t *session)
      * Some drivers set the position-error fields.  Only the Zodiacs 
      * report speed error.  Nobody reports track error or climb error.
      */
-    /* only used if the GPS doesn't report estimated position error itself */
-#define UERE_NO_DGPS	8.0	/* meters */
-#define UERE_WITH_DGPS	2.0	/* meters */
+#define UERE_NO_DGPS	8.0	/* meters, 2-sigma confidence */
+#define UERE_WITH_DGPS	2.0	/* meters, 2-sigma confidence */
     double uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
 
     session->gpsdata.fix.ept = 0.005;

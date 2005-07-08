@@ -290,7 +290,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
             // gpsd sign is opposite of garmin sign
 	    session->gpsdata.separation = -pvt->msl_hght;
 
-	    // estimated position error in meters
+	    // estimated position error in meters (sigma unknown)
 	    session->gpsdata.epe = pvt->epe;
 	    session->gpsdata.newdata.eph = pvt->eph;
 	    session->gpsdata.newdata.epv = pvt->epv;

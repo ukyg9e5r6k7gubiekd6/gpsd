@@ -31,7 +31,7 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else if (session->packet_type == NMEA_PACKET) {
 	gps_mask_t st = 0;
 	gpsd_report(2, "<= GPS: %s", session->outbuffer);
-	if ((st=nmea_parse((char *)session->outbuffer,&session->gpsdata))==0) {
+	if ((st=nmea_parse((char *)session->outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
 

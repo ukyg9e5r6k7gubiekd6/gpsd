@@ -224,7 +224,7 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	session->gpsdata.driver_mode = 1;
 	return st;
     } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->outbuffer, &session->gpsdata);
+	st = nmea_parse((char *)session->outbuffer, session);
 	session->gpsdata.driver_mode = 0;
 	return st;
     } else
