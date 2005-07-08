@@ -184,11 +184,11 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->mag_var               = ((short)getword(37)) * RAD_2_DEG * 1e-4;
     session->gpsdata.newdata.climb     = ((short)getword(38)) * 1e-2;
     /* map_datum                   = getword(39); */
-    /* manual doesn't specify the confidence interval */
-    // session->gpsdata.newdata.eph       = (int)getlong(40) * 1e-2;
-    // session->gpsdata.newdata.epv       = (int)getlong(42) * 1e-2;
-    // session->gpsdata.newdata.ept       = (int)getlong(44) * 1e-2;
-    // session->gpsdata.newdata.eps       = (int)getword(46) * 1e-2;
+    /* manual says these are 1-sigma */
+    session->gpsdata.newdata.eph       = (int)getlong(40) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.newdata.epv       = (int)getlong(42) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.newdata.ept       = (int)getlong(44) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.newdata.eps       = (int)getword(46) * 1e-2 * GPSD_CONFIDENCE;
     /* clock_bias                  = (int)getlong(47) * 1e-2; */
     /* clock_bias_sd               = (int)getlong(49) * 1e-2; */
     /* clock_drift                 = (int)getlong(51) * 1e-2; */
