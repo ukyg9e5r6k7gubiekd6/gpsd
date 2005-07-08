@@ -1,9 +1,12 @@
 This is the Hacker's Guide to gpsd.  If you're viewing it with Emacs, try
-doing Ctl-C Ctl-t and browsing through the outline headers.
+doing Ctl-C Ctl-t and browsing through the outline headers. Ctl-C Ctl-a
+will unfold them again.
 
 If you're looking for things to hack on, first see the TODO file.
 
 ** Contribution guidelines
+
+*** Send patches in diff -u or -c format
 
 We prefer diff -u format, but diff -c is acceptable.  Do not send
 patches in the default (-e or ed) mode, as they are too brittle.
@@ -39,7 +42,7 @@ following things:
 
 There's a whole section on adding new drivers later in this document.
 
-** The license on contributions
+*** The license on contributions
 
 The GPSD libraries are under the BSD license.  Please do not send 
 contributions with GPL attached!
@@ -48,7 +51,39 @@ The reason for this policy is to avoid making people nervous about
 linking the GPSD libraries to applications that may be under other
 licenses (such as MIT, BSD, AFL, etc.).
 
-** Debugging
+*** Don't add invocation options!
+
+If you send a patch that adds a command-line option to the daemon, it
+will almost certainly be refused.  Ditto for any patch that requires
+gpsd to parse a dotfile.  
+
+One of the major objectives of this project is for gpsd *not to
+require administration* -- under Linux, at least.  It autobauds,
+it does protocol discovery, and it's activated by the hotplug
+system.  Arranging these things involved quite a lot of work, 
+and we're not willing to lose the zero-configuration property
+that work gained us.
+
+Instead of adding a command-line option to support whatever feature
+you had in mind, try to figure out a way that the feature can
+autoconfigure itself by doing runtime checks.  If you're not clever
+enough to manage that, consider whether your feature control might be
+implemented with an extension to the gpsd protocol or the
+control-socket command set.
+
+*** Don't use malloc!
+
+The best way to avoid having dynamic-memory allocation problems is
+not to use malloc/free at all.  The gpsd daemon doesn't (though the
+client-side code does).  Thus, even the longest-running instance 
+can't have memory leaks.  The only cost for this turned out to be
+embedding a PATH_MAX-sized buffer in the gpsd.h structure.
+
+Don't undo this by using malloc/free in a driver or anywhere else.
+
+** Understanding the code
+
+*** Debugging
 
 For debugging purposes, it may be helpful to configure with --disable-shared.
 This turns off all the shared-library crud, making it somewhat easier to
@@ -69,27 +104,7 @@ weird secondary damage than all the rest of the code put together.
 Any time you get a bug report that seems to afflict NMEA devices
 only, suspicion should focus here.
 
-** The Y2.1K problem and other calendar issues
-
-Because of limitations in various GPS protocols (e.g., they were
-designed by fools who weren't looking past the ends of their noses) 
-this code unavoidably includes some assumptions that will turn around
-and bite on various future dates. 
-
-The two specific problms are:
-
-1) NMEA delivers only two-digit years.
-
-2) SiRF chips at firmware level 231 deliver only GPS time in binary mode,
-not leap-second-corrected UTC.
-
-See the timebase.h file for various constants that will need to
-be tweaked accasionally to cope with these problems.
-
-Note that gpsd does not rely on the system clock in any way.  This
-is so you can use it to set the system clock.
-
-** Profiling
+*** Profiling
 
 There is a barely-documented Z command in the daemon will cause it to emit
 a $ clause on every request.  The $ clause contains four
@@ -141,7 +156,7 @@ daemon to client library -- and to estimate the portion of the latency
 induced by serial transmit time.  The gpsprof script creates latency
 plots using gnuplot(1).  It can also report the raw data.
 
-** Porting to weird machines: endianness, type width, and signedness issues.
+*** Porting to weird machines: endianness, width, and signedness issues.
 
 The gpsd code is well-tested on 32- and 64-bit IA chips, also on PPCs.
 Thus, it's known to work on mainstream chips of either 32 or 64 bits
@@ -162,7 +177,7 @@ directives in .splintrc that are used to define away fixed-width typedefs.
 
 (No, we don't know why splint doesn't handle these natively.)
 
-** Architecture and how to hack it
+*** Architecture and how to hack it
 
 gpsd is not a complicated piece of code.  Essentially, it spins in a loop 
 polling for input from one of three sources:
@@ -200,49 +215,7 @@ times, and the GPS being unplugged and replugged, without leaking file
 descriptors; also arrange for the GPS to be open when and only when clients 
 are active.
 
-** Security Issues
-
-Between versions 2.16 and 2.20, hotplugging was handled in the most
-obvious way, by allowing the F command to declare new GPS devices for
-gpsd to look at.  Because gpsd runs as root, this had problems:
-
-1) A malicious client with non-root access on the host could use F to
-point gpsd at a spoof GPS that was actually a pty feeding bogus
-location data.
-
-2) A malicious client could use repeated probes of a target tty or
-other device to cause data loss to other users.  This is a potential
-remote exploit! Not too bad if the bytes he steals are your mouse, it
-would just get jumpy and jerky -- but suppose they're from an actual
-tty and sections drop out of a serial data stream you were relying on?
-
-The conclusion was inescapable.  Switching among and probing devices
-that gpsd already knows about can be an unprivileged operation, but 
-editing gpsd's device list must be privileged.  Hotplug scripts 
-should be able to do it, but ordinary clients should not.
-
-Adding an authentication mechanism was considered and rejected (can you
-say "can of big wriggly worms"?).  Instead, there is a separate
-control channel for the daemon, only locally accessible, only
-recognizing "add device" and "remove device" commands.
-
-The channel is a Unix-domain socket owned by root, so it has
-file-system protection bits.  An intruder would need root permissions
-to get at it, in which case you'd have much bigger problems than a
-spoofed GPS.
-
-More generally, certainly gpsd needs to treat command input as
-untrusted and for safety's sake should treat GPS data as untrusted
-too (in particular this means never assuming that either source won't
-try to overflow a buffer).
-
-Daemon versions after 2.21 drop privileges after startup, setting UID
-to "nobody" and GID to whichever group owns the GPS device specified
-at startup time -- or, if it doesn't exist, the system's
-lowest-numbered TTY device named in PROTO_TTY.  It may be necessary to
-change PROTO_TTY in gpsd.c for non-Linux systems.
-
-** Autoconfiguration
+*** Autoconfiguration
 
 One of the design goals for gpsd is to be as near zero-configuration
 as possible.  Under most circumstances, it doesn't require either
@@ -288,58 +261,7 @@ specified.  Presently, here's how the autoconfig works.
 The outcome is that we know exactly what we're looking at, without any
 driver-type or baud rate options.
 
-** Don't add options!
-
-If you send a patch that adds a command-line option to the daemon, it
-will almost certainly be refused.  Ditto for any patch that requires
-gpsd to parse a dotfile.  
-
-One of the major objectives of this project is for gpsd *not to
-require administration* -- under Linux, at least.  It autobauds,
-it does protocol discovery, and it's activated by the hotplug
-system.  Arranging these things involved quite a lot of work, 
-and we're not willing to lose the zero-configuration property
-that work gained us.
-
-Instead of adding a command-line option to support whatever feature
-you had in mind, try to figure out a way that the feature can
-autoconfigure itself by doing runtime checks.  If you're not clever
-enough to manage that, consider whether your feature control might be
-implemented with an extension to the gpsd protocol or the
-control-socket command set.
-
-** Don't use malloc!
-
-The best way to avoid having dynamic-memory allocation problems is
-not to use malloc/free at all.  The gpsd daemon doesn't (though the
-client-side code does).  Thus, even the longest-running instance 
-can't have memory leaks.  The only cost for this turned out to be
-embedding a PATH_MAX-sized buffer in the gpsd.h structure.
-
-Don't undo this by using malloc/free in a driver or anywhere else.
-
-** Error modeling
-
-gpsd drivers are expected to report position error estimates with
-a 95% confidence interval.  A few devices (Garmins and Zodiacs)
-actually report these.  For the rest we have to compute them 
-using an error model.
-
-Here's a table that explains how to convert from various
-confidence interval units you might see in vendor documentation.
-
-sqr(alpha)  Probability  Notation
------------------------------------------------------------------------
- 1.00            39.4%        1-sigma or standard ellipse
- 1.18            50.0%        Circular Error Probable (CEP)
- 1.414           63.2%        Distance RMS (DRMS)
- 2.00            86.5%        2 sigma ellipse
- 2.45            95.0%        95% confidence level
- 2.818           98.2%        2DRMS
- 3.00            98.9%        3 sigma ellipse
------------------------------------------------------------------------- 
-
-There are constants in gpsd,h for these factors.
+*** Error modeling
 
 To estimate errors (which we must do if the GPS isn't nice and reports
 them in meters with a documented confidence interval), we need to
@@ -411,52 +333,176 @@ which we round up to 2 (95% confidence).
 Due to multipath uncertainty, Carl says 4.1 is too low and recommends
 a non-DGPS UERE estimate of 8 (95% confidence).  That's what we use.
 
-** Impact of DGPS on error estimates
+** Known trouble spots
 
-Wolfgang S. Rupprecht:
-> In any case, the 2 meter number almost certainly is for a differential
-> reference station that is located very close to the GPS in question.
-> The whole differential hack assumes that the paths and angles between
-> the reference station and the mobile GPS unit are similar enough that
-> one can simply subtract the path-length errors the reference station
-> is seeing from the path the mobile GPS had calculated.  If the angles
-> to the satellite are vastly different (as in the case of dgpsip from
-> across the country) one can start adding errors.  In the days of SA
-> the largest component of error was due to SA, so miscorrecting the
-> paths hardly mattered at all.  Even cross-country dgpsip was
-> worthwhile and improved accuracy.  I doubt that one would see any that
-> 2meter accuracy if one were more than a 100 miles away.
-> 
-> Just for completeness, there are other issues too, like different
-> ionospheric and tropospheric pierce points for the rays going to the
-> reference and mobile units.  The speed of light is slightly lowered by
-> going through the atmosphere.  The amount it slows down is enough to
-> add a few meters (very roughly, up to 15 meters) of path-length error.
-> The ionosphere and troposphere aren't a constant height.  They are
-> substantially pumped up by sunlight, so taking a reading from one
-> location in heavy sun and applying it to a distant area with a lower
-> sun angle could make things quite a bit worse.  (There may also be
-> roughness associated with the layer thickness that defies modeling
-> with a simple sun-angle model.  I don't know enough about that sort of
-> thing.)
-> 
-> In summary, while I have no problem believing the SiRF engineer that
-> you can get 2 meters accuracy from their chips when using a very close
-> reference, I fear that the average user will be getting the same 8m or
-> worse accuracy by using dgpsip.
+*** The Y2.1K problem and other calendar issues
+
+Because of limitations in various GPS protocols (e.g., they were
+designed by fools who weren't looking past the ends of their noses) 
+this code unavoidably includes some assumptions that will turn around
+and bite on various future dates. 
+
+The two specific problms are:
+
+1) NMEA delivers only two-digit years.
+
+2) SiRF chips at firmware level 231 deliver only GPS time in binary mode,
+not leap-second-corrected UTC.
+
+See the timebase.h file for various constants that will need to
+be tweaked accasionally to cope with these problems.
+
+Note that gpsd does not rely on the system clock in any way.  This
+is so you can use it to set the system clock.
+
+*** Hotplug interface problems
+
+The hotplug interface works pretty nicely for telling gpsd which
+device to look at, at least on my FC3 Linux machines.  The fly in the
+ointment is that I'm using a deprecated version of the interface, the
+old-style /etc/hotplug version with usermap files.
+
+It is unlikely this interface will be dropped by distro makers any
+time soon, because it's supporting a bunch of popular USB cameras.
+Still, it would be nice not to be using a deprecated interface.
+
+I tried moving to the new-style /etc/hotplug.d interface, but I ran
+into a nasty race condition.  My hotplug agent got woken up on a USB
+add event as it should, but in the new interface the creation of
+/dev/ttyUSB* can be delayed arbitrarily long after the wakeup event.
+Thus, it may not be there when gpsd goes to probe it unless I
+busy-wait in the script.
+
+Ultimately this should all be done through udev.  The problem is that at
+the current state of udev, we'd need to do it through a script that would
+fire every time a tty activates.  Because of virtual consoles firing up at
+boot time, this would introduce significant boot lag.
+
+This would be antisocial and I'm not willing to do it, so udev needs
+to grow better filtering before I'll use it.
+
+When and if udev supports HOTPLUG and ACTION keys, this will work:
+
+# The Prolific Technology 2303 (commonly in tandem with SiRF chips)
+BUS="usb" SYSFS{vendor}="067b" SYSFS{product}="2303" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+# FTDI 8U232AM
+BUS="usb" SYSFS{vendor}="0403" SYSFS{product}="6001" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+# Cypress M8/CY7C64013 (DeLorme uses these)
+BUS="usb" SYSFS{vendor}="1163" SYSFS{product}="0100" \
+		NAME="gps%e" \
+		HOTPLUG="/usr/bin/gps-probe"
+
+More generally, the hotplug code we have is Linux-specific.  OpenBSD
+(at least) features a hotplug daemon with similar capabilities.
+
+*** Security Issues
+
+Between versions 2.16 and 2.20, hotplugging was handled in the most
+obvious way, by allowing the F command to declare new GPS devices for
+gpsd to look at.  Because gpsd runs as root, this had problems:
+
+1) A malicious client with non-root access on the host could use F to
+point gpsd at a spoof GPS that was actually a pty feeding bogus
+location data.
+
+2) A malicious client could use repeated probes of a target tty or
+other device to cause data loss to other users.  This is a potential
+remote exploit! Not too bad if the bytes he steals are your mouse, it
+would just get jumpy and jerky -- but suppose they're from an actual
+tty and sections drop out of a serial data stream you were relying on?
+
+The conclusion was inescapable.  Switching among and probing devices
+that gpsd already knows about can be an unprivileged operation, but 
+editing gpsd's device list must be privileged.  Hotplug scripts 
+should be able to do it, but ordinary clients should not.
+
+Adding an authentication mechanism was considered and rejected (can you
+say "can of big wriggly worms"?).  Instead, there is a separate
+control channel for the daemon, only locally accessible, only
+recognizing "add device" and "remove device" commands.
+
+The channel is a Unix-domain socket owned by root, so it has
+file-system protection bits.  An intruder would need root permissions
+to get at it, in which case you'd have much bigger problems than a
+spoofed GPS.
+
+More generally, certainly gpsd needs to treat command input as
+untrusted and for safety's sake should treat GPS data as untrusted
+too (in particular this means never assuming that either source won't
+try to overflow a buffer).
+
+Daemon versions after 2.21 drop privileges after startup, setting UID
+to "nobody" and GID to whichever group owns the GPS device specified
+at startup time -- or, if it doesn't exist, the system's
+lowest-numbered TTY device named in PROTO_TTY.  It may be necessary to
+change PROTO_TTY in gpsd.c for non-Linux systems.
 
 ** Adding new GPS types
 
-Almost all GPSes speak NMEA 0183.  However, it may occasionally be necessary
-to add support for some odd binary format.  We're told that the hex dump
-functions in CuteCom <http://cutecom.sourceforge.net/> can be useful for
-investigating such protocols.
+This section explains the conventions drivers for new devices should follow.
+
+*** Driver architecture
 
 Internally, gpsd supports multiple GPS types.  All are represented by
 driver method tables; the main loop knows nothing about the driver
 methods except when to call them.  At any given time one driver is
-active; by default it's the NMEA one.  To add a new device, populate
-another driver structure and add it to the list.
+active; by default it's the NMEA one.  
+
+To add a new device, populate another driver structure and add it to
+the null-terminated array in drivers.c.
+
+Unless your driver is a nearly trivial variant on an existing one,
+it should live in its own C source file named after the driver type.
+Add it to the libgps_c_sources name list in Makefile.am
+
+The easiest way write a driver is probably to copy an existing driver
+and change the guts of the analyzer function.  Look in gpsutils.c
+before you do; driver helper functions live there.
+
+*** When not to add a driver
+
+It is not necessary to add a driver just because your NMEA GPS wants
+some funky initialization string.  Simply ship the string in the
+initializer for the default NMEA driver.  Because vendor control
+strings live in vendor-specific namespaces (PSRF for SiRF, PGRM for
+Garmin, etc.)  your initializing control string will almost certainly
+be ignored by anything not specifically watching for it.
+
+*** How drivers are invoked
+
+Drivers are invoked in one of two ways: (1) when the NMEA driver
+notices a trigger string associated with another driver. or (2) when
+the packet state machine in packet.c recognizes a special packet type.
+
+Each driver may have a trigger string that the NMEA interpreter
+watches for.  When that string is recognized at the start of a 
+line, the interpreter switches to its driver.  The new driver 
+initializer method is called immediately. 
+
+A good thing to send from the NMEA initializer is probe strings.  These are
+strings which should elicit an identifying response from the GPS that
+you can use as a trigger string for a native-mode driver.  This is how
+we detect SiRF chips (see step 5 under autoconfiguration above).
+
+Incoming characters from the GPS device are gathered into packets
+by an elaborate state machine in packet.c.  The purpose of this 
+state machine is so gpsd can autobaud and recignize GPS types
+automatically. The other way for a driver to be invoked is for 
+the state machine to recognize a special packet type associated
+with the driver.
+
+If you have to add a new packet type to packet.c, add tests for the
+type to the TESTMAIN code. Also, remember to tell gpsfake how to
+gather the new packet type so it can handle logs for regression
+testing.  The relevant function in gpsfake is packet_get().  It
+doesn't have to deal with garbage or verify checksums, as we assume
+the logfiles will be clean packet sequences,
+
+*** Where to put the data
 
 Your driver should put new data from each incoming packet or sentence
 in the 'newdata' member of the GPS, and return a validity flag mask
@@ -465,31 +511,10 @@ that will be responsible for merging that new data into the existing
 fix.  To assist this, the CYCLE_START_SET flag is special.  Set this
 when the driver returns the first timestamped message containing fix
 data in in an update cycle.  (This excludes satellite-picture messages
-and GPS status indications.)
-
-Each driver may have a trigger string that the NMEA interpreter
-watches for.  When that string is recognized at the start of a 
-line, the interpreter switches to its driver.  The new driver 
-initializer method is called immediately. 
-
-Note: it is not necessary to add a driver just because your GPS wants
-some funky initialization string.  Simply ship the string in the
-initializer for the default NMEA driver.  Because vendor control
-strings live in vendor-specific namespaces (PSRF for SiRF, PGRM for
-Garmin, etc.)  your initializing control string will almost certainly
-be ignored by anything not specifically watching for it.
-
-Another good thing to send from the NMEA initializer is probe strings.
-These are strings which should elicit an identifying response from
-the GPS that you can use as a trigger string for a driver.  This is
-how we detect SiRF chips (see step 5 under autoconfiguration above).
-
-If you're writing a driver, look in gpsutils.c; driver helper
-functions live there.  The easiest way is probably to copy an
-existing driver and change the guts of the analyzer function.
+and messages about GPS status that don't contain fix data.)
 
 Your packet parser must return field-validity mask bits (using the
-*_SET macros in gps.h), suitable to be put in session->gpsdata.valid.
+_SET macros in gps.h), suitable to be put in session->gpsdata.valid.
 The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
@@ -507,14 +532,30 @@ structure should be UTC (with leap-second corrections) not just Unix
 seconds since the epoch.  The report-generator function for D
 does *not* apply a timezone offset.
 
-If you have to add a new packet type to packet.c, add tests for the
-type to the TESTMAIN code. Also, remember to tell gpsfake how to
-gather the new packet type so it can handle logs for regression
-testing.  The relevant function in gpsfake is packet_get().  It
-doesn't have to deal with garbage or verify checksums, as we assume
-the logfiles will be clean packet sequences,
+*** Report errors with a 95% confidence interval
 
-** Log files for regression testing
+gpsd drivers are expected to report position error estimates with
+a 95% confidence interval.  A few devices (Garmins and Zodiacs)
+actually report error estimates.  For the rest we have to compute them 
+using an error model.
+
+Here's a table that explains how to convert from various
+confidence interval units you might see in vendor documentation.
+
+sqr(alpha)  Probability  Notation
+-----------------------------------------------------------------------
+ 1.00            39.4%        1-sigma or standard ellipse
+ 1.18            50.0%        Circular Error Probable (CEP)
+ 1.414           63.2%        Distance RMS (DRMS)
+ 2.00            86.5%        2 sigma ellipse
+ 2.45            95.0%        95% confidence level
+ 2.818           98.2%        2DRMS
+ 3.00            98.9%        3 sigma ellipse
+------------------------------------------------------------------------ 
+
+There are constants in gpsd.h for these factors.
+
+*** Log files for regression testing
 
 Any time you add support for a new GPS type, you should also send us a
 representative log for your GPS.  This will help ensure that support
@@ -574,7 +615,7 @@ GPS has no fix, a portion during which it has a fix but is stationary,
 and a portion during which it is moving.
 
 If your GPS is SiRF-based, it's easy to capture packets using the
-'l' command.
+'l' command of sirfmon.
 
 ** Blind alleys
 
