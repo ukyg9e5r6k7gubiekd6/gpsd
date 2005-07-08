@@ -8,6 +8,14 @@
 
 extern struct gps_type_t zodiac_binary;
 
+#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLL) || defined(EVERMORE_ENABLE) 
+ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
+/* most GPSes take their RTCM corrections straight up */
+{
+    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
+}
+#endif
+
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
@@ -61,11 +69,6 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static ssize_t nmea_write_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
-{
-    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
-}
-
 static void nmea_initializer(struct gps_device_t *session)
 {
     /*
@@ -91,7 +94,7 @@ static struct gps_type_t nmea = {
     nmea_initializer,	/* probe for SiRF II and other special types */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
-    nmea_write_rtcm,	/* write RTCM data straight */
+    pass_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
     NULL,		/* no wrapup */
@@ -112,7 +115,7 @@ static struct gps_type_t fv18 = {
     NULL,		/* to be sent unconditionally */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
-    nmea_write_rtcm,	/* write RTCM data straight */
+    pass_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
     NULL,		/* no wrapup */
@@ -173,7 +176,7 @@ static struct gps_type_t sirfII_nmea = {
     sirf_initializer,	/* turn off debugging messages */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
-    nmea_write_rtcm,	/* write RTCM data straight */
+    pass_rtcm,	/* write RTCM data straight */
     sirf_speed,		/* we can change speeds */
     sirf_mode,		/* there's a mode switch */
     NULL,		/* no wrapup */
@@ -210,7 +213,7 @@ static struct gps_type_t tripmate = {
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     packet_get,			/* how to get a packet */
     nmea_parse_input,		/* how to interpret a packet */
-    nmea_write_rtcm,		/* send RTCM data straight */
+    pass_rtcm,		/* send RTCM data straight */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
     NULL,			/* no wrapup */

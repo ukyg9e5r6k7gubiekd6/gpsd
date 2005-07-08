@@ -459,9 +459,11 @@ Unless your driver is a nearly trivial variant on an existing one,
 it should live in its own C source file named after the driver type.
 Add it to the libgps_c_sources name list in Makefile.am
 
-The easiest way write a driver is probably to copy an existing driver
-and change the guts of the analyzer function.  Look in gpsutils.c
-before you do; driver helper functions live there.
+The easiest way write a driver is probably to copy the driver_proto.c
+file in the source distribution, change names appropriately, and write
+the guts of the analyzer and writer functions.  Look in gpsutils.c
+before you do; driver helper functions live there.  Also read some
+existing drivers for clues.
 
 *** When not to add a driver
 
@@ -474,9 +476,10 @@ be ignored by anything not specifically watching for it.
 
 *** How drivers are invoked
 
-Drivers are invoked in one of two ways: (1) when the NMEA driver
-notices a trigger string associated with another driver. or (2) when
-the packet state machine in packet.c recognizes a special packet type.
+Drivers are invoked in one of three ways: (1) when the NMEA driver
+notices a trigger string associated with another driver. (2) when the
+packet state machine in packet.c recognizes a special packet type, or
+(3) when a probe function returns true during device open.
 
 Each driver may have a trigger string that the NMEA interpreter
 watches for.  When that string is recognized at the start of a 
@@ -502,7 +505,11 @@ testing.  The relevant function in gpsfake is packet_get().  It
 doesn't have to deal with garbage or verify checksums, as we assume
 the logfiles will be clean packet sequences,
 
-*** Where to put the data
+Probe functions are interpreted for drivers that don't use the packet
+getter because they read from a device with special kernel support.
+See the Garmin binary driver for an example.
+
+*** Where to put the data you get from the GPS
 
 Your driver should put new data from each incoming packet or sentence
 in the 'newdata' member of the GPS, and return a validity flag mask
@@ -518,7 +525,7 @@ _SET macros in gps.h), suitable to be put in session->gpsdata.valid.
 The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
-this.  Finally, you must set gpsdata.stutus to indicate wheen DGPS 
+this.  Finally, you must set gpsdata.status to indicate wheen DGPS 
 fixes are available, whether through RTCM or WAAS/Egnos.
 
 Your packet parser is also responsible for setting the tag field 

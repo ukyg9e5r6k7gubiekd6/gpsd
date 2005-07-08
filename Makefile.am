@@ -174,6 +174,7 @@ EXTRA_DIST = \
 	gpsd.usermap \
 	valgrind-audit \
 	valgrind-suppressions \
+	driver_proto.c \
 	logextract
 
 # This is not distributed

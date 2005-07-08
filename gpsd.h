@@ -204,6 +204,8 @@ extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
+ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
+
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
 

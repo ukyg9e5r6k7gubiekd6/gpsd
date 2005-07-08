@@ -296,7 +296,7 @@ struct gps_type_t evermore_binary =
     evermore_initializer,	/* initialize the device */
     packet_get,			/* how to grab a packet */
     evermore_parse_input,	/* read and parse message packets */
-    NULL,			/* send DGPS correction */
+    pass_rtcm,		/* send RTCM data straight */
     evermore_speed,		/* we can change baud rates */
     evermore_mode,		/* there is a mode switcher */
     NULL,			/* caller needs to supply a close hook */
