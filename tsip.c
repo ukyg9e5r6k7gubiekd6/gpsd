@@ -414,7 +414,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.hdop, session->gpsdata.vdop,
 		session->gpsdata.tdop, session->gpsdata.gdop,
 		session->gpsdata.satellites_used,buf2);
-        mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET;
+        mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET | USED_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
 	break;

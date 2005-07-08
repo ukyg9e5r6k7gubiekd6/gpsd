@@ -327,7 +327,7 @@ static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_data_t *o
         if (prn > 0)
 	    out->used[out->satellites_used++] = prn;
     }
-    mask |= HDOP_SET | VDOP_SET | PDOP_SET;
+    mask |= HDOP_SET | VDOP_SET | PDOP_SET | USED_SET;
 
     return mask;
 }

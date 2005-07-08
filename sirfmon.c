@@ -38,7 +38,7 @@
 #include "config.h"
 #include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
 
-#define PUT_ORIGIN	4
+#define PUT_ORIGIN	-4
 #include "bits.h"
 
 #if defined(HAVE_SYS_TIME_H)

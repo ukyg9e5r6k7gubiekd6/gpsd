@@ -204,7 +204,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 #endif /* NTPSHM_ENABLE */
 	    /* fix quality data */
 	    session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | CYCLE_START_SET;
+	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET | CYCLE_START_SET;
 	}
 	return mask;
 

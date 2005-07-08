@@ -251,7 +251,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	    break;
 	}
     }
-    return SATELLITE_SET;
+    return SATELLITE_SET | USED_SET;
 }
 
 static gps_mask_t handle1003(struct gps_device_t *session)
