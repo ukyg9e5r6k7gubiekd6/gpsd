@@ -11,6 +11,8 @@ AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_C_BIGENDIAN
 AC_FUNC_ALLOCA
+AC_STDC_HEADERS
+AC_C_CONST
 
 if eval "test x$GCC = xyes"; then
 	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -W -D_GNU_SOURCE"
@@ -250,23 +252,33 @@ else
 fi
 
 dnl check for DBUS
-AC_ARG_ENABLE(dbus,
-  AC_HELP_STRING([--enable-dbus],
-  		 [enable DBUS support]),
-  [ac_dbus=$enableval], [ac_dbus=no])
-AC_MSG_CHECKING([for DBUS support])
-if test x"$ac_dbus" == "xyes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
-    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
-    AC_SUBST(DBUS_CFLAGS)
-    AC_SUBST(DBUS_LIBS)
-else
-  AC_MSG_RESULT([no])
-fi
-AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" == x"yes"])
+AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
+if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
+   # Found dbus library, check for required versions and enable it
 
-AC_OUTPUT(Makefile gpsd.spec)
+   AC_MSG_CHECKING([for DBUS support])
+   PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
+      [ac_dbus=yes],[ac_dbus=no])
+   AC_MSG_RESULT([$ac_dbus])
+   AC_SUBST(DBUS_CFLAGS)
+   AC_SUBST(DBUS_LIBS)
+
+   if test x"ac_dbus" = x"yes" ; then
+      AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
+   fi
+   AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
+
+   # Check for glib and dbus-glib, used by gpxlogger
+   PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
+   AC_SUBST(GLIB_CFLAGS)
+   AC_SUBST(GLIB_LIBS)
+
+   PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
+   AC_SUBST(DBUS_GLIB_CFLAGS)
+   AC_SUBST(DBUS_GLIB_LIBS)
+fi
+
+AC_OUTPUT(Makefile contrib/Makefile gpsd.spec)
 
 dnl Output the configuration summary
 echo ""
