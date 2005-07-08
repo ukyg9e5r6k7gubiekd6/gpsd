@@ -151,47 +151,6 @@ BUS="usb" SYSFS{vendor}="1163" SYSFS{product}="0100" \
 More generally, the hotplug code we have is Linux-specific.  OpenBSD
 (at least) features a hotplug daemon with similar capabilities.
 
-*** The mess near error modeling
-
-One of my goals has been to report an uncertainty along with every
-dimension of PVT, so that the return from the GPS actually (and
-realistically) describes the volume of kinematic state space within
-which it is located at 1-sigma or 66% confidence. (Because the errors
-are taken to be normally distributed, we can square the error to get
-2-sigma or 95% confidence.)
-
-There are several problems with this. 
-
-A. I don't know how to derive or estimate uncertainty of time in the
-general case.  There are clock drift and bias fields in the SiRF
-binary protocol, but I don't know how to interpret these.  Does
-anyone?
-
-B. Only Garmin devices report estimated position uncertainties in meters.
-They won't say what the confidence interval is, but it is generally
-believed to be 1-sigma.  See <http://gpsinformation.net/main/epenew.txt>.
-
-Here is what I am presently doing in the new E command:
-
-1. I pass up the Garmin PGRME fields (uncertainty in meters) if
-   they're available.
-
-2. Otherwise, I apply the error model described in the HACKING dociment.
-
-What non-Garmin GPSes will return in the E command is UERE multiplied
-by PDOP/HDOP/VDOP.  Annoyingly, SiRF binary mode only offers HDOP,
-one respect in which it is functionally inferior to SiRF NMEA.  We
-compute VDOP and PDOP using an algorithm supplied by SiRF.
-
-I don't know, because my sources didn't give, the confidence level
-associated with the range uncertainties in gpsd.h.  My educated guess
-is that they are 1-sigma (66%), and that's what the gpsd documentation
-now says, but it needs to be confirmed.
-
-This area needs some attention from somebody who cares a lot about
-GPS accuracy and is willing to do research on error budgets to pin
-down the numbers and confidence levels.
-
 *** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the

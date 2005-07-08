@@ -320,9 +320,31 @@ Don't undo this by using malloc/free in a driver or anywhere else.
 
 ** Error modeling
 
-To estimate errors (which we must do if the GPS isn't nice like a
-Garmin and reports them in meters), we need to multiply an estimate of
-User Equivalent Range Error (UERE) by the appropriate dilution factor,
+gpsd drivers are expected to report position error estimates with
+a 95% confidence interval.  A few devices (Garmins and Zodiacs)
+actually report these.  For the rest we have to compute them 
+using an error model.
+
+Here's a table that explains how to convert from various
+confidence interval units you might see in vendor documentation.
+
+sqr(alpha)  Probability  Notation
+-----------------------------------------------------------------------
+ 1.00            39.4%        1-sigma or standard ellipse
+ 1.18            50.0%        Circular Error Probable (CEP)
+ 1.414           63.2%        Distance RMS (DRMS)
+ 2.00            86.5%        2 sigma ellipse
+ 2.45            95.0%        95% confidence level
+ 2.818           98.2%        2DRMS
+ 3.00            98.9%        3 sigma ellipse
+------------------------------------------------------------------------ 
+
+There are constants in gpsd,h for these factors.
+
+To estimate errors (which we must do if the GPS isn't nice and reports
+them in meters with a documented confidence interval), we need to
+multiply an estimate of User Equivalent Range Error (UERE) by the
+appropriate dilution factor,
 
 The UERE estimate is usually computed as the square root of the sum of
 the squares of individual error estimates from a physical model.  The
@@ -345,8 +367,9 @@ Code range noise (C/A)                          0.3m
 Code range noise (P-code)                       0.03m
 Phase range                                     0.005m
 
-We're assuming these are 1-sigma error ranges. This needs to
-be checked in the sources.
+We're assuming these are 2-sigma error ranges. This needs to
+be checked in the sources.  If they're 1-sigma the resulting UEREs
+need to be doubled.
 
 See http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/
 for discussion.
@@ -383,10 +406,10 @@ receiver clock error.  Thus:
 
 UERE =  sqrt(1.5^2 + 1.2^2 + 0.3^2) = 1.8
 
-which we round up to 2.
+which we round up to 2 (95% confidence).
 
 Due to multipath uncertainty, Carl says 4.1 is too low and recommends
-a non-DGPS UERE estimate of 8.  That's what we use.
+a non-DGPS UERE estimate of 8 (95% confidence).  That's what we use.
 
 ** Impact of DGPS on error estimates
 
@@ -421,7 +444,6 @@ Wolfgang S. Rupprecht:
 > you can get 2 meters accuracy from their chips when using a very close
 > reference, I fear that the average user will be getting the same 8m or
 > worse accuracy by using dgpsip.
-
 
 ** Adding new GPS types
 

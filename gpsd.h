@@ -22,6 +22,14 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
+/* factors for constants for converting among confidence interval units */
+#define CEP50_SIGMA	1.18
+#define DRMS_SIGMA	1.414
+#define CEP95_SIGMA	2.45
+
+/* this is where we choose the confidence level to use in reports */
+#define GPSD_CONFIDENCE	CEP95_SIGMA
+
 /*  
  * From the RCTM104 standard:
  *

@@ -377,8 +377,8 @@ static void apply_error_model(struct gps_device_t *session)
      * Some drivers set the position-error fields.  Only the Zodiacs 
      * report speed error.  Nobody reports track error or climb error.
      */
-#define UERE_NO_DGPS	8.0	/* meters, 2-sigma confidence */
-#define UERE_WITH_DGPS	2.0	/* meters, 2-sigma confidence */
+#define UERE_NO_DGPS	8.0	/* meters, 95% confidence */
+#define UERE_WITH_DGPS	2.0	/* meters, 95% confidence */
     double uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
 
     session->gpsdata.fix.ept = 0.005;

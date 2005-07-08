@@ -418,12 +418,12 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
 	5    = spherical error estimate
         6    = units
      *
-     * Garmin won't say, but the general belief is that these are 1-sigma.
-     * See <http://gpsinformation.net/main/epenew.txt>.
+     * Garmin won't say, but the general belief is that these are 50% CEP.
+     * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
      */
-    session->gpsdata.newdata.eph = atof(field[1]);
-    session->gpsdata.newdata.epv = atof(field[3]);
-    session->gpsdata.epe = atof(field[5]);
+    session->gpsdata.newdata.eph = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+    session->gpsdata.newdata.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+    session->gpsdata.epe = atof(field[5]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
     return HERR_SET | VERR_SET | PERR_SET;
 }
 

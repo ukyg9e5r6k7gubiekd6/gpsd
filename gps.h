@@ -42,6 +42,8 @@ extern "C" {
  * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different 
  * timestamps and some data in this structure can be up to 1 cycle (usually
  * 1 second) older than the fix time.
+ *
+ * Error estimates are at 95% confidence.
  */
 struct gps_fix_t {
     double time;	/* Time of update, seconds since Unix epoch */
@@ -125,7 +127,7 @@ struct gps_data_t {
     double pdop, hdop, vdop, tdop, gdop;	/* Dilution of precision */
 
     /* redundant with the estimate elments in the fix structure */
-    double epe;  /* estimated spherical position error, 2 sigma (meters)  */
+    double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites > 0 */
     int satellites;		/* # of satellites in view */
