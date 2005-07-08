@@ -57,8 +57,8 @@ GPSes, or the binary protocol used by Evermore
 chipsets. <application>gpsd</application> effectively hides the
 differences among these. It also knows about and uses commands that
 tune the GPS for lower latency, decrease bandwidth usage, or increased
-accuracy on the San Jose Navigation FV18, the Sony CXD2951, and the
-Motorola OnCore GT+.</para>
+accuracy on the San Jose Navigation FV18, the Sony CXD2951, the uBlox,
+and the Motorola OnCore GT+.</para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a ground station running a DGPSIP server that reports
@@ -286,11 +286,10 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 <varlistentry>
 <term>n</term>
 <listitem><para>Get or set the GPS driver mode.  Without argument,
-reports the mode as "N=%d"; N=0 means NMEA mode and N=1
-means alternate mode (binary if it has one, for SiRF chipsets in
-particular).  With argument, set the mode if possible; the new mode
-will be reported in the response.
-</para></listitem>
+reports the mode as "N=%d"; N=0 means NMEA mode and N=1 means
+alternate mode (binary if it has one, for SiRF and Evermore chipsets
+in particular).  With argument, set the mode if possible; the new mode
+will be reported in the response.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -708,9 +707,8 @@ make and type of receiver.</para>
 <para>On operating systems that support D-BUS,
 <application>gpsd</application> can be built to broadcast GPS fixes to
 D-BUS-aware applications.  As D-BUS is still at a pre-1.0 stage, we
-will not attempt to document this interface here, nor is it configured
-into the default build.  Read the <application>gpsd</application>
-source code to learn more.</para>
+will not attempt to document this interface here.  Read the
+<application>gpsd</application> source code to learn more.</para>
 
 </refsect1>
 <refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title> 
@@ -780,12 +778,8 @@ than reported by the chip.  The computation does not exactly match
 what SiRF chips do internally, which includes some satellite weighting
 using parameters <application>gpsd</application> cannot see.</para>
 
-<para>Trimble (TSIP) receivers do not output satellite azimuth or
-elevation in any normal packet, only in debug packets and raw
-measurement data packets (which are quite large).  Thus, the TSIP
-driver does not return Y responses.  Autobauding on the Trimble GPSes
-can take as long as 5 seconds if the device speed is not matched to
-the GPS speed.</para>
+<para>Autobauding on the Trimble GPSes can take as long as 5 seconds
+if the device speed is not matched to the GPS speed.</para>
 
 <para>If you are using an NMEA-only GPS (that is, not using SiRF or
 Garmin or Zodiac binary mode) and the GPS does not emit GPZDA at the

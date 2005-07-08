@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include "../gpsd.h"
 
-void usage(const char *prog) {
+static void usage(const char *prog) {
 	fprintf(stderr, "%s: connect to local gpsd and dump data to stdout\n\n"
 		"-h show this help\n"
 		"-r Dump raw NMEA\n"
@@ -54,7 +54,7 @@ int main( int argc, char **argv) {
 	int s = 0;
         char buf[4096];
 	char *cstr = NULL;
-        int wrote = 0;
+        unsigned int wrote = 0;
         int dump_nmea = 0;
         int dump_gpsd = 0;
         int timestamp = 0;

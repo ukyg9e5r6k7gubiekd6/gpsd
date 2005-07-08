@@ -689,10 +689,12 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	st = sirf_parse(session, session->outbuffer, session->outbuflen);
 	session->gpsdata.driver_mode = 1;
 	return st;
+#ifdef NMEA_ENABLE
     } else if (session->packet_type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->outbuffer, session);
 	session->gpsdata.driver_mode = 0;
 	return st;
+#endif /* NMEA_ENABLE */
     } else
 	return 0;
 }

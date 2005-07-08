@@ -121,6 +121,19 @@ AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
 
+dnl check for NMEA support
+AC_ARG_ENABLE(nmea,
+  AC_HELP_STRING([--disable-nmea],
+                 [disable NMEA support]),
+  [ac_nmea=$enableval], [ac_nmea=yes])
+AC_MSG_CHECKING([for NMEA support])
+if test x"$ac_nmea" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([NMEA_ENABLE], 1, [NMEA chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for SiRF-II support
 AC_ARG_ENABLE(sirfII,
   AC_HELP_STRING([--disable-sirfII],
@@ -285,6 +298,7 @@ echo ""
 echo "=========================================="
 echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
+echo "NMEA                    : $ac_nmea"
 echo "SiRF-II                 : $ac_sirfII"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"

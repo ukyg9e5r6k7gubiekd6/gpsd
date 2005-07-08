@@ -85,16 +85,20 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 enum {
    GROUND_STATE,	/* we don't know what packet type to expect */
 
-   /* NMEA 0183 packet states */
+#ifdef NMEA_ENABLE
    NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
    NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
-   DLE_LEADER,		/* we've seen the TSIP/Evermore leader (DLE) */
+   SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
+   SIRF_ACK_LEAD_2,	/* seen c of possible SiRF Ack */
 
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
+#endif /* NMEA_ENABLE */
+
+   DLE_LEADER,		/* we've seen the TSIP/Evermore leader (DLE) */
 
 #ifdef TRIPMATE_ENABLE
    ASTRAL_1,		/* ASTRAL leader A */
@@ -115,8 +119,6 @@ enum {
 #ifdef SIRFII_ENABLE
    SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
    SIRF_LEADER_2,	/* seen second character of SiRF leader */
-   SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
-   SIRF_ACK_LEAD_2,	/* seen c of possible SiRF Ack */
    SIRF_LENGTH_1,	/* seen first byte of SiRF length */
    SIRF_PAYLOAD,	/* we're in a SiRF payload part */
    SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
@@ -164,30 +166,45 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 /*@ +charint */
     switch(session->packet_state)
     {
+#ifdef NMEA_ENABLE
     case GROUND_STATE:
-	if (c == '$')
+	if (c == '$') {
 	    session->packet_state = NMEA_DOLLAR;
+	    break;
+	}
+#endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
-        else if (c == 0xa0)
+        if (c == 0xa0) {
 	    session->packet_state = SIRF_LEADER_1;
+	    break;
+	}
 #endif /* SIRFII_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
-        else if (c == 0x10)
+        if (c == 0x10) {
 	    session->packet_state = DLE_LEADER;
+	    break;
+	}
 #endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
 #ifdef TRIPMATE_ENABLE
-        else if (c == 'A')
+        if (c == 'A') {
 	    session->packet_state = ASTRAL_1;
+	    break;
+	}
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
-        else if (c == 'E')
+        if (c == 'E') {
 	    session->packet_state = EARTHA_1;
+	    break;
+	}
 #endif /* EARTHMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
-	else if (c == 0xff)
+	if (c == 0xff) {
 	    session->packet_state = ZODIAC_LEADER_1;
+	    break;
+	}
 #endif /* ZODIAC_ENABLE */
 	break;
+#ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
 	    session->packet_state = NMEA_PUB_LEAD;
@@ -312,6 +329,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
+#endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
     case SIRF_LEADER_1:
 	if (c == 0xa2)
@@ -631,6 +649,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	    gpsd_report(7, "Character 0x%02x, new state: %d\n",c,session->packet_state);
 	if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);
+#ifdef NMEA_ENABLE
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
 	    char csum[3];
@@ -648,6 +667,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	    else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
+#endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;

@@ -6,6 +6,9 @@
 
 #include "gpsd.h"
 
+extern struct gps_type_t zodiac_binary;
+
+#ifdef NMEA_ENABLE
 /**************************************************************************
  *
  * Generic driver -- straight NMEA 0183
@@ -225,7 +228,6 @@ static struct gps_type_t tripmate = {
  *
  **************************************************************************/
 
-extern struct gps_type_t zodiac_binary;
 static struct gps_type_t earthmate;
 
 /*
@@ -262,12 +264,14 @@ static struct gps_type_t earthmate = {
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
+#endif /* NMEA_ENABLE */
 
 extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary, evermore_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
 static struct gps_type_t *gpsd_driver_array[] = {
+#ifdef NMEA_ENABLE
     &nmea, 
     &sirfII_nmea,
 #if FV18_ENABLE
@@ -279,6 +283,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #if EARTHMATE_ENABLE
     &earthmate, 
 #endif /* EARTHMATE_ENABLE */
+#endif /* NMEA_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */

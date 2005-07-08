@@ -10,6 +10,7 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#ifdef NMEA_ENABLE
 /**************************************************************************
  *
  * Parser helpers begin here
@@ -474,25 +475,6 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
  *
  **************************************************************************/
 
-void nmea_add_checksum(char *sentence)
-/* add NMEA checksum to a possibly  *-terminated sentence */
-{
-    unsigned char sum = '\0';
-    char c, *p = sentence;
-
-    if (*p == '$') {
-	p++;
-    } else {
-        gpsd_report(1, "Bad NMEA sentence: '%s'\n", sentence);
-    }
-    while ( ((c = *p) != '*') && (c != '\0')) {
-	sum ^= c;
-	p++;
-    }
-    *p++ = '*';
-    (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
-}
-
 gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
@@ -552,6 +534,26 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     }
     /*@ +usedef @*/
     return retval;
+}
+#endif /* NMEA_ENABLE */
+
+void nmea_add_checksum(char *sentence)
+/* add NMEA checksum to a possibly  *-terminated sentence */
+{
+    unsigned char sum = '\0';
+    char c, *p = sentence;
+
+    if (*p == '$') {
+	p++;
+    } else {
+        gpsd_report(1, "Bad NMEA sentence: '%s'\n", sentence);
+    }
+    while ( ((c = *p) != '*') && (c != '\0')) {
+	sum ^= c;
+	p++;
+    }
+    *p++ = '*';
+    (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
 }
 
 int nmea_send(int fd, const char *fmt, ... )

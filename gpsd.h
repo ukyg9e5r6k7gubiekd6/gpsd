@@ -138,11 +138,13 @@ struct gps_device_t {
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
     double mag_var;		/* Magnetic variation in degrees */  
     union {
+#ifdef NMEA_ENABLE
 	struct {
 	    int part, await;		/* for tracking GSV parts */
 	    struct tm date;
 	    double subseconds;
 	} nmea;
+#endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
 	struct {
 	    unsigned int driverstate;	/* for private use */
