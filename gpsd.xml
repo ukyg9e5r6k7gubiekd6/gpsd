@@ -209,7 +209,7 @@ part will vary and may be absent.</para></listitem>
 <term>e</term>
 <listitem>
 <para>Returns "E=%f %f %f": three estimated position errors in meters
-&mdash; total, horizontal, and vertical (1-sigma or 66% confidence
+&mdash; total, horizontal, and vertical (95% confidence
 level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
 them from satellite DOP using fixed figures for expected non-DGPS 
@@ -316,7 +316,8 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>time error</term>
-<listitem><para>Estimated timestamp error (%f, seconds).</para></listitem>
+<listitem><para>Estimated timestamp error (%f, seconds, 
+95% confidence).</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -365,20 +366,20 @@ of the O command reported this field in knots.</para></listitem>
 
 <varlistentry>
 <term>estimated error in course over ground</term>
-<listitem><para>Error estimate for course (%f, degrees).</para></listitem>
+<listitem><para>Error estimate for course (%f, degrees, 95% confidence).</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>estimated error in speed over ground</term>
-<listitem><para>Error estimate for speed (%f, meters/sec). Note: older
-versions of the O command reported this field in
+<listitem><para>Error estimate for speed (%f, meters/sec, 95% 
+confidence). Note: older versions of the O command reported this field in
 knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>climb/sink</term>
 <listitem><para>Estimated error for climb/sink 
-(%f, meters/sec).</para></listitem>
+(%f, meters/sec, 95% confidence).</para></listitem>
 </varlistentry>
 
 </variablelist>

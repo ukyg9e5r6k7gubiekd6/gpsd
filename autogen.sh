@@ -19,15 +19,15 @@ AM_V1=`echo $AM_VERSION | awk '{print $1}'`
 AM_V2=`echo $AM_VERSION | awk '{print $2}'`
 AM_V3=`echo $AM_VERSION | awk '{print $3}'`
 
-if [ $AM_1 -gt $AM_V1 ]; then
+if [ "$AM_1" -gt "$AM_V1" ]; then
 	AM_ERROR=1 
 else
-	if [ $AM_1 -eq $AM_V1 ]; then
-		if [ $AM_2 -gt $AM_V2 ]; then
+	if [ "$AM_1" -eq "$AM_V1" ]; then
+		if [ "$AM_2" -gt "$AM_V2" ]; then
 			AM_ERROR=1 
 		else
-			if [ $AM_2 -eq $AM_V2 ]; then
-				if [ $AM_3 -gt $AM_V3 ]; then
+			if [ "$AM_2" -eq "$AM_V2" ]; then
+				if [ "$AM_3" -gt "$AM_V3" ]; then
 					AM_ERROR=1 
 				fi
 			fi

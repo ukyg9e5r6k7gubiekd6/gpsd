@@ -137,6 +137,12 @@ struct gps_device_t {
 #ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
     double mag_var;		/* Magnetic variation in degrees */  
+    /*
+     * The rest of this structure is driver-specific private storage.
+     * Because the Garmin driver uses a long buffer, you can have
+     * up to 4096+12 bytes of private storage in your own union member
+     * without making this structure larger or changing the API at all.
+     */
     union {
 #ifdef NMEA_ENABLE
 	struct {
