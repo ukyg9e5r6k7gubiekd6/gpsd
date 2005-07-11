@@ -202,3 +202,6 @@ splint:
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
 	-splint bits.c
+
+rtcmdecode:
+	cc  -o rtcmdecode rtcmdecode.c
