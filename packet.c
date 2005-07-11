@@ -28,6 +28,7 @@ distinguish them from baud barf.
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
 #include "config.h"
 #include "gpsd.h"
 
@@ -159,6 +160,16 @@ enum {
    EVERMORE_TRAILER_1,	/* looking for first byte of Evermore trailer */ 
    EVERMORE_RECOGNIZED,	/* found end of Evermore packet */
 #endif /* EVERMORE_ENABLE */
+
+#ifdef ITALK_ENABLE
+   ITALK_LEADER_1,	/* saw leading < of iTalk packet */
+   ITALK_LEADER_2,	/* saw leading * of iTalk packet */
+   ITALK_LENGTH_1,	/* saw MSB of packet length */
+   ITALK_LENGTH_2,	/* saw LSB of packet length */
+   ITALK_DELIVERED,	/* seen end of payload */
+   ITALK_TRAILER_1,	/* saw iTalk trailer byte */
+   ITALK_RECOGNIZED,	/* found end of the iTalk packet */
+#endif /* ITALK_ENABLE */
 };
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
@@ -203,6 +214,12 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif /* ZODIAC_ENABLE */
+#ifdef ITALK_ENABLE
+	if (c == '<') {
+	    session->packet_state = ITALK_LEADER_1;
+	    break;
+	}
+#endif /* ITALK_ENABLE */
 	break;
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
@@ -535,6 +552,44 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* EVERMORE_ENABLE */
+#ifdef ITALK_ENABLE
+    case ITALK_LEADER_1:
+        if (c == '*')
+	    session->packet_state = ITALK_LEADER_2;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ITALK_LEADER_2:
+	session->packet_length = (size_t)(c << 8);
+	session->packet_state = ITALK_LENGTH_1;
+	break;
+    case ITALK_LENGTH_1:
+	session->packet_length += c + 1;
+	session->packet_length *= 2;	/* count is in words */
+	session->packet_state = ITALK_LENGTH_2;
+	break;
+    case ITALK_LENGTH_2:
+	if (--session->packet_length == 0)
+	    session->packet_state = ITALK_DELIVERED;
+    case ITALK_DELIVERED:
+	if (c == '>')
+	    session->packet_state = ITALK_TRAILER_1;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ITALK_TRAILER_1:
+	if (c == 0xb3)
+	    session->packet_state = ITALK_RECOGNIZED;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case ITALK_RECOGNIZED:
+        if (c == 0xa0)
+	    session->packet_state = ITALK_LEADER_1;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+#endif /* ITALK_ENABLE */
     }
 /*@ -charint */
 }
@@ -609,6 +664,10 @@ static void character_discard(struct gps_device_t *session)
 }
 
 /* entry points begin here */
+
+/* get 0-origin big-endian words relative to start of packet buffer */
+#define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
+
 
 ssize_t packet_get(struct gps_device_t *session)
 /* grab a packet; returns ether BAD_PACKET or the length */
@@ -692,7 +751,6 @@ ssize_t packet_get(struct gps_device_t *session)
 #endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
- #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 	    short len, n, sum;
 	    len = getword(2);
 	    for (n = sum = 0; n < len; n++)
@@ -702,12 +760,11 @@ ssize_t packet_get(struct gps_device_t *session)
 		packet_accept(session, ZODIAC_PACKET);
 	    } else {
 		gpsd_report(4,
-		    "Zodiac Data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
+		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
 			sum, len, getword(5 + len));
 		session->packet_state = GROUND_STATE;
 	    }
 	    packet_discard(session);
-#undef getword
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLED
 	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
@@ -730,11 +787,28 @@ ssize_t packet_get(struct gps_device_t *session)
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #endif /* EVERMORE_ENABLED */
+#ifdef ITALK_ENABLE
+	} else if (session->packet_state == ITALK_RECOGNIZED) {
+	    u_int16_t len, n, sum;
+	    len = session->packet_length / 2 - 1;
+	    /*
+	     * Skip first 9 words so we compute checksum only over data
+	     * portion of packet.
+	     */
+	    for (n = sum = 0; n < len - 9; n++)
+		sum += getword(9 + n);
+	    if (len == 0 || sum == getword(len+1)) {
+		packet_accept(session, ITALK_PACKET);
+	    } else
+		session->packet_state = GROUND_STATE;
+	    packet_discard(session);
+#endif /* ITALK_ENABLE */
 	}
     }
 
     return (ssize_t)session->outbuflen;
 }
+#undef getword
 
 void packet_reset(struct gps_device_t *session)
 /* return the packet machine to the ground state */

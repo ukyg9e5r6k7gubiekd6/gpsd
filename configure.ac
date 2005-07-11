@@ -212,6 +212,32 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for iTrax support
+AC_ARG_ENABLE(itrax,
+  AC_HELP_STRING([--disable-itrax],
+                 [disable iTrax support]),
+  [ac_itrax=$enableval], [ac_itrax=yes])
+AC_MSG_CHECKING([for iTrax support])
+if test x"$ac_itrax" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([ITRAX_ENABLE], 1, [iTrax chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for italk support
+AC_ARG_ENABLE(italk,
+  AC_HELP_STRING([--disable-italk],
+                 [disable iTalk support]),
+  [ac_italk=$enableval], [ac_italk=yes])
+AC_MSG_CHECKING([for iTalk support])
+if test x"$ac_italk" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([ITALK_ENABLE], 1, [iTalk binary support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Garmin support
 AC_ARG_ENABLE(garmin,
   AC_HELP_STRING([--disable-garmin],
@@ -303,6 +329,8 @@ echo "SiRF-II                 : $ac_sirfII"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
+echo "iTrax                   : $ac_itrax"
+echo "iTalk                   : $ac_italk"
 echo "Garmin                  : $ac_garmin"
 echo "Evermore                : $ac_evermore"
 echo "NTP SHM                 : $ac_ntpshm"

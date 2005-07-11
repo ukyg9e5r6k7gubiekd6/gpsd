@@ -118,6 +118,7 @@ struct gps_device_t {
 #define ZODIAC_PACKET	2
 #define TSIP_PACKET	3
 #define EVERMORE_PACKET	4
+#define ITALK_PACKET	5
     unsigned int baudindex;
     unsigned int packet_state;
     size_t packet_length;

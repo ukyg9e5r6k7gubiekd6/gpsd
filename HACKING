@@ -224,10 +224,10 @@ specified.  Presently, here's how the autoconfig works.
 
 1. At each baud rate gpsd grabs packets until it sees either a
    well-formed and checksum-verified NMEA packet, a well-formed and
-   checksum-verified SiRF packet, a well-formed and checksum-verified
-   Zodiac packet, or it sees one of the two special trigger strings
-   EARTHA or ASTRAL, or it fills a long buffer with garbage (in which
-   case it steps to the next baud rate).
+   checksum-verified packet of one of the binary protocols, or it sees
+   one of the two special trigger strings EARTHA or ASTRAL, or it
+   fills a long buffer with garbage (in which case it steps to the
+   next baud rate).
 
 2. If it finds a SiRF packet, it queries the chip for firmware
    version.  If the version is < 231.000 it drops back to SiRF NMEA.
@@ -236,22 +236,28 @@ specified.  Presently, here's how the autoconfig works.
 3. If it finds a Zodiac binary packet (led with 0xff 0x81), it
    switches to the Zodiac driver.  We're done.
 
-4. If it finds a TSIP binary packet (led with 0x10=DLE), it
+4. If it finds an Evermore binary packet (led with DEL=0x10 followed
+   by STX=0x02) it switches to Evermore binary protocol.  We're done.
+
+5. If it finds a TSIP binary packet (led with 0x10=DLE), it
    switches to the TSIP driver.  We're done.
 
-5. If it finds EARTHA, it selects the Earthmade driver, which then
+6. If it finds n iTrax binary packet (led with <* ), it
+   switches to the iTrax driver.  We're done.
+
+7. If it finds EARTHA, it selects the Earthmade driver, which then
    flips the connection to Zodiac binary mode.  We're done.
 
-6. If it finds ASTRAL, it feeds the TripMate on the other end what
+8. If it finds ASTRAL, it feeds the TripMate on the other end what
    it wants and goes to Tripmate NMEA mode.  We're done.
 
-7. If it finds a NMEA packet, it selects the NMEA driver.  This
+9. If it finds a NMEA packet, it selects the NMEA driver.  This
    initializes by shipping all vendor-specific initialization strings
    to the device.  The objectives are to enable GSA, disable GLL, and
    disable VTG.  Probe strings go here too, like the one that turns 
    on SiRF debugging output in order to detect SiRF chips.
 
-8. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
+10. Now gpsd reads NMEA packets.  If it sees a driver trigger string it
    invokes the matching driver.  Presently there is really only one of
    these: "$Ack Input 105.\r\n", the response to the SiRF probe. On
    seeing this, gpsd switches from NMEA to SiRF binary mode, probes
@@ -623,6 +629,26 @@ and a portion during which it is moving.
 
 If your GPS is SiRF-based, it's easy to capture packets using the
 'l' command of sirfmon.
+
+*** Throughput computation for baud rate changes
+
+At low baud rates it is possible to try to push more characters of
+NMEA through per cycle than the time to transmit will allow.  Here
+are the maxima to use for computation:
+
+GLL       51
+GGA       82
+VTG       40
+RMC       75
+GSA       67
+GSV       60 (per line, thus 180 for a set of 3)
+ZDA       34
+
+The transmit time for a cycle (which must be less than 1 second)
+is the total character count multiplied by 10 and divided by the 
+baud rate.  
+
+A typical budget is GGA, RMC, GSA, 3*GSV = 82+75+67+(3*60) = 404.
 
 ** Blind alleys
 

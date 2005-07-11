@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
+#include <math.h>
 #include <sys/time.h>
 
 #include "gpsd.h"
@@ -85,6 +87,8 @@ static void nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRM0,GSA,1");
     /* probe for SiRF-II */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+    /* probe for iTrax, looking for "OK" */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT");
 }
 
 static struct gps_type_t nmea = {
@@ -94,7 +98,7 @@ static struct gps_type_t nmea = {
     nmea_initializer,	/* probe for SiRF II and other special types */
     packet_get,		/* how to get a packet */
     nmea_parse_input,	/* how to interpret a packet */
-    pass_rtcm,	/* write RTCM data straight */
+    pass_rtcm,		/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
     NULL,		/* no wrapup */
@@ -213,7 +217,7 @@ static struct gps_type_t tripmate = {
     tripmate_initializer,	/* wants to see lat/long for faster fix */
     packet_get,			/* how to get a packet */
     nmea_parse_input,		/* how to interpret a packet */
-    pass_rtcm,		/* send RTCM data straight */
+    pass_rtcm,			/* send RTCM data straight */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
     NULL,			/* no wrapup */
@@ -267,9 +271,91 @@ static struct gps_type_t earthmate = {
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
+
+#ifdef ITRAX_ENABLE
+/**************************************************************************
+ *
+ * The NMEA mode of the iTrax chipset, as used in the FastTrax and others.
+ *
+ * As described by v1.31 of the NMEA Protocol Specification for the
+ * iTrax02 Evaluation Kit, 2003-06-12.
+ * v1.18 of the  manual, 2002-19-6, describes effectively
+ * the same protocol, but without ZDA.
+ *
+ **************************************************************************/
+
+/*
+ * Enable GGA=0x2000, RMC=0x8000, GSA=0x0002, GSV=0x0001, ZDA=0x0004.
+ * Disable GLL=0x1000, VTG=0x4000, FOM=0x0020, PPS=0x0010.
+ * This is 82+75+67+(3*60)+34 = 438 characters 
+ * 
+ * 1200   => at most 1 fix per 4 seconds
+ * 2400   => at most 1 fix per 2 seconds
+ * 4800   => at most 1 fix per 1 seconds
+ * 9600   => at most 2 fixes per second
+ * 19200  => at most 4 fixes per second
+ * 57600  => at most 13 fixes per second
+ * 115200 => at most 26 fixes per second
+ *
+ * We'd use FOM, but they don't specify a confidence interval.
+ */
+#define ITRAX_MODESTRING	"$PSFT,NMEA,A007,%d"
+
+static void itrax_initializer(struct gps_device_t *session)
+/* start navigation and synchronous mode */
+{
+    /* initialize GPS clock with current system time */ 
+    struct tm when;
+    double integral, fractional;
+    time_t intfixtime;
+    char buf[31], frac[6];
+    fractional = modf(timestamp(), &integral);
+    intfixtime = (time_t)integral;
+    (void)gmtime_r(&intfixtime, &when);
+    (void)strftime(buf, sizeof(buf), "$PSFT,INITAID,%H%M%S.XX,%d%m%y", &when);
+    (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
+    buf[21] = frac[2]; buf[22] = frac[3];
+    (void)nmea_send(session->gpsdata.gps_fd, buf);
+
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,START");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,SYCMODE,1");
+    (void)nmea_send(session->gpsdata.gps_fd, 
+		    ITRAX_MODESTRING, session->gpsdata.baudrate);
+}
+
+static bool itrax_speed(struct gps_device_t *session, unsigned int speed)
+/* change the baud rate */
+{
+    return nmea_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
+}
+
+static void itrax_wrap(struct gps_device_t *session)
+/* stop navigation, this cuts the power drain */
+{
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,SYCMODE,0");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,STOP");
+}
+
+/*@ -redef @*/
+static struct gps_type_t itrax = {
+    "iTrax",			/* full name of type */
+    "$PFST,OK",			/* tells us to switch to Itrax */
+    NULL,			/* no probe */
+    itrax_initializer,		/* initialize */
+    packet_get,			/* how to get a packet */
+    nmea_parse_input,		/* how to interpret a packet */
+    pass_rtcm,			/* write RTCM data straight */
+    itrax_speed,		/* no speed switcher */
+    NULL,			/* no mode switcher */
+    itrax_wrap,			/* sleep the receiver */
+    1,				/* updates every second */
+};
+/*@ -redef @*/
+#endif /* ITRAX_ENABLE */
 #endif /* NMEA_ENABLE */
 
-extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary, evermore_binary;
+extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
+extern struct gps_type_t evermore_binary, italk_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
@@ -286,6 +372,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #if EARTHMATE_ENABLE
     &earthmate, 
 #endif /* EARTHMATE_ENABLE */
+#if ITRAX_ENABLE
+    &itrax, 
+#endif /* ITRAX_ENABLE */
 #endif /* NMEA_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
@@ -302,6 +391,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef EVERMORE_ENABLE
     &evermore_binary, 
 #endif /* EVERMORE_ENABLE */
+#ifdef ITALK_ENABLE
+    &italk_binary, 
+#endif /* ITALK_ENABLE */
     NULL,
 };
 /*@ +nullassign @*/
