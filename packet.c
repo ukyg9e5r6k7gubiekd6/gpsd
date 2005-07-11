@@ -127,13 +127,6 @@ enum {
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
 #endif /* SIRFII_ENABLE */
 
-#ifdef TSIP_ENABLE
-   TSIP_LEADER,		/* a DLE after having seen TSIP data */
-   TSIP_PAYLOAD,	/* we're in TSIP payload */
-   TSIP_DLE,		/* we've seen a DLE in TSIP payload */
-   TSIP_RECOGNIZED,	/* found end of the TSIP packet */
-#endif /* TSIP_ENABLE */
-
 #ifdef ZODIAC_ENABLE
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */
    ZODIAC_LEADER_1,	/* saw leading 0xff */
@@ -170,6 +163,19 @@ enum {
    ITALK_TRAILER_1,	/* saw iTalk trailer byte */
    ITALK_RECOGNIZED,	/* found end of the iTalk packet */
 #endif /* ITALK_ENABLE */
+
+/*
+ * Packet formats without checksums start here.  We list them last so
+ * that if a format with a conflicting structure *and* a checksum can
+ * be recognized, that will be preferred.
+ */
+
+#ifdef TSIP_ENABLE
+   TSIP_LEADER,		/* a DLE after having seen TSIP data */
+   TSIP_PAYLOAD,	/* we're in TSIP payload */
+   TSIP_DLE,		/* we've seen a DLE in TSIP payload */
+   TSIP_RECOGNIZED,	/* found end of the TSIP packet */
+#endif /* TSIP_ENABLE */
 };
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
@@ -403,43 +409,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
-#ifdef TSIP_ENABLE
-    case TSIP_LEADER:
-	if (c >= 0x13)
-	    session->packet_state = TSIP_PAYLOAD;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
-    case TSIP_PAYLOAD:
-	if (c == 0x10)
-	    session->packet_state = TSIP_DLE;
-	break;
-    case TSIP_DLE:
-	switch (c)
-	{
-	case 0x03:
-	    session->packet_state = TSIP_RECOGNIZED;
-	    break;
-	case 0x10:
-	    session->packet_state = TSIP_PAYLOAD;
-	    break;
-	default:
-	    session->packet_state = GROUND_STATE;
-	    break;
-	}
-	break;
-    case TSIP_RECOGNIZED:
-        if (c == 0x10)
-	    /*
-	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
-	     * checksumed, so false positives are easy.  We might be
-	     * looking at another DLE-stuffed protocol like Evermore.
-	     */
-	    session->packet_state = DLE_LEADER;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
-#endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
     case ZODIAC_RECOGNIZED:
@@ -596,6 +565,43 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* ITALK_ENABLE */
+#ifdef TSIP_ENABLE
+    case TSIP_LEADER:
+	if (c >= 0x13)
+	    session->packet_state = TSIP_PAYLOAD;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+    case TSIP_PAYLOAD:
+	if (c == 0x10)
+	    session->packet_state = TSIP_DLE;
+	break;
+    case TSIP_DLE:
+	switch (c)
+	{
+	case 0x03:
+	    session->packet_state = TSIP_RECOGNIZED;
+	    break;
+	case 0x10:
+	    session->packet_state = TSIP_PAYLOAD;
+	    break;
+	default:
+	    session->packet_state = GROUND_STATE;
+	    break;
+	}
+	break;
+    case TSIP_RECOGNIZED:
+        if (c == 0x10)
+	    /*
+	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
+	     * checksumed, so false positives are easy.  We might be
+	     * looking at another DLE-stuffed protocol like Evermore.
+	     */
+	    session->packet_state = DLE_LEADER;
+	else
+	    session->packet_state = GROUND_STATE;
+	break;
+#endif /* TSIP_ENABLE */
     }
 /*@ -charint */
 }
