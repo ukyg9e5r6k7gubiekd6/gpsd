@@ -402,6 +402,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	else
 #endif /* EVERMORE_ENABLE */
 #ifdef TSIP_ENABLE
+	/* check last because there's no checksum */
 	if (c >= 0x13)
 	    session->packet_state = TSIP_PAYLOAD;
 	else
@@ -594,7 +595,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
         if (c == 0x10)
 	    /*
 	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
-	     * checksumed, so false positives are easy.  We might be
+	     * checksummed, so false positives are easy.  We might be
 	     * looking at another DLE-stuffed protocol like Evermore.
 	     */
 	    session->packet_state = DLE_LEADER;
