@@ -93,7 +93,7 @@ static void nmea_initializer(struct gps_device_t *session)
 #endif /* SIRFII_ENABLE */
 #ifdef ITRAX_ENABLE
     /* probe for iTrax, looking for "OK" */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFST");
 #endif /* ITRAX_ENABLE */
 #ifdef EVERMORE_ENABLE
     /* probe for Evermore by trying to read the LogConfig */
@@ -320,7 +320,7 @@ static struct gps_type_t earthmate = {
  *
  * We'd use FOM, but they don't specify a confidence interval.
  */
-#define ITRAX_MODESTRING	"$PSFT,NMEA,A007,%d"
+#define ITRAX_MODESTRING	"$PFST,NMEA,A007,%d"
 
 static void itrax_initializer(struct gps_device_t *session)
 /* start navigation and synchronous mode */
@@ -333,13 +333,13 @@ static void itrax_initializer(struct gps_device_t *session)
     fractional = modf(timestamp(), &integral);
     intfixtime = (time_t)integral;
     (void)gmtime_r(&intfixtime, &when);
-    (void)strftime(buf, sizeof(buf), "$PSFT,INITAID,%H%M%S.XX,%d%m%y", &when);
+    (void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y", &when);
     (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
     buf[21] = frac[2]; buf[22] = frac[3];
     (void)nmea_send(session->gpsdata.gps_fd, buf);
 
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,START");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,SYCMODE,1");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,START");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1");
     (void)nmea_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
 }
@@ -359,8 +359,8 @@ static bool itrax_rate(struct gps_device_t *session, double rate)
 static void itrax_wrap(struct gps_device_t *session)
 /* stop navigation, this cuts the power drain */
 {
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,SYCMODE,0");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSFT,STOP");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,0");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,STOP");
 }
 
 /*@ -redef @*/
