@@ -571,6 +571,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     case ITALK_LENGTH_2:
 	if (--session->packet_length == 0)
 	    session->packet_state = ITALK_DELIVERED;
+	break;
     case ITALK_DELIVERED:
 	if (c == '>')
 	    session->packet_state = ITALK_TRAILER_1;
@@ -790,14 +791,14 @@ ssize_t packet_get(struct gps_device_t *session)
 #ifdef ITALK_ENABLE
 	} else if (session->packet_state == ITALK_RECOGNIZED) {
 	    u_int16_t len, n, sum;
-	    len = session->packet_length / 2 - 1;
+	    len = (unsigned short)(session->packet_length / 2 - 1);
 	    /*
 	     * Skip first 9 words so we compute checksum only over data
 	     * portion of packet.
 	     */
-	    for (n = sum = 0; n < len - 9; n++)
+	    for (n = sum = 0; n < (unsigned short)(len - 9); n++)
 		sum += getword(9 + n);
-	    if (len == 0 || sum == getword(len+1)) {
+	    if (len == 0 || sum == (u_int16_t)getword(len+1)) {
 		packet_accept(session, ITALK_PACKET);
 	    } else
 		session->packet_state = GROUND_STATE;
