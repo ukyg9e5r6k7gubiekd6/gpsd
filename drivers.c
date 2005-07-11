@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <sys/time.h>
+#include <stdarg.h>
 
 #include "gpsd.h"
 
@@ -320,7 +321,27 @@ static struct gps_type_t earthmate = {
  *
  * We'd use FOM, but they don't specify a confidence interval.
  */
-#define ITRAX_MODESTRING	"$PFST,NMEA,A007,%d"
+#define ITRAX_MODESTRING	"$PFST,NMEA,A007,%d\r\n"
+
+static int literal_send(int fd, const char *fmt, ... )
+/* ship a raw command to the GPS */
+{
+    int status;
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    status = (int)write(fd, buf, strlen(buf));
+    if (status == (int)strlen(buf)) {
+	gpsd_report(2, "=> GPS: %s\n", buf);
+	return status;
+    } else {
+	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
+	return -1;
+    }
+}
 
 static void itrax_initializer(struct gps_device_t *session)
 /* start navigation and synchronous mode */
@@ -333,34 +354,34 @@ static void itrax_initializer(struct gps_device_t *session)
     fractional = modf(timestamp(), &integral);
     intfixtime = (time_t)integral;
     (void)gmtime_r(&intfixtime, &when);
-    (void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y", &when);
+    (void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y\r\n", &when);
     (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
     buf[21] = frac[2]; buf[22] = frac[3];
-    (void)nmea_send(session->gpsdata.gps_fd, buf);
+    (void)literal_send(session->gpsdata.gps_fd, buf);
 
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,START");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1");
-    (void)nmea_send(session->gpsdata.gps_fd, 
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
+    (void)literal_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
 }
 
 static bool itrax_speed(struct gps_device_t *session, speed_t speed)
 /* change the baud rate */
 {
-    return nmea_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
+    return literal_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
 }
 
 static bool itrax_rate(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
-    return nmea_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d", rate) >= 0;
+    return literal_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d\r\n", rate) >= 0;
 }
 
 static void itrax_wrap(struct gps_device_t *session)
 /* stop navigation, this cuts the power drain */
 {
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,0");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFST,STOP");
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,0\r\n");
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,STOP\r\n");
 }
 
 /*@ -redef @*/
