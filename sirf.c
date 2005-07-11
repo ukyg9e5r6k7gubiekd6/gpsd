@@ -760,9 +760,11 @@ struct gps_type_t sirf_binary =
     sirfbin_initializer,	/* initialize the device */
     packet_get,			/* how to grab a packet */
     sirfbin_parse_input,	/* read and parse message packets */
-    pass_rtcm,		/* send RTCM data straight */
+    pass_rtcm,			/* send RTCM data straight */
     sirfbin_speed,		/* we can change baud rate */
     sirfbin_mode,		/* there's a mode switcher */
+    NULL,			/* no sample-rate switcher */
+    -1,				/* not relevant, no rate switch */
     NULL,			/* caller needs to supply a close hook */
     1,				/* updates every second */
 };

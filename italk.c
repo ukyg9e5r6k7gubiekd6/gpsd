@@ -29,7 +29,7 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    for (i = 0; i < msglen; i++)
        (void)snprintf((char*)buf+strlen((char *)buf),sizeof((char*)buf)-strlen((char*)buf),
 		      " %02x", msg[i]);
-   len = (size_t)strlen(buf);
+   len = (size_t)strlen((char *)buf);
    gpsd_report(4, "writing italk control type %02x:%s\n", msg[0], buf);
    ok = (write(fd, buf, len) == (ssize_t)len);
    (void)tcdrain(fd);
@@ -96,7 +96,7 @@ static bool italk_set_mode(struct gps_device_t *session,
 			      speed_t speed, bool mode)
 {
     /*@ +charint @*/
-    unsigned char msg[] = {/* FILL ME*/};
+    unsigned char msg[] = {0,};
 
     /* HACK THE MESSAGE */
 
@@ -137,6 +137,8 @@ struct gps_type_t italk_binary =
     pass_rtcm,	/* send RTCM data straight */
     italk_speed,	/* we can change baud rates */
     italk_mode,		/* there is a mode switcher */
+    NULL,		/* no sample-rate switcher */
+    -1,			/* not relevant, no rate switch */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };

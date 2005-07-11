@@ -299,6 +299,8 @@ struct gps_type_t evermore_binary =
     pass_rtcm,		/* send RTCM data straight */
     evermore_speed,		/* we can change baud rates */
     evermore_mode,		/* there is a mode switcher */
+    NULL,			/* no sample-rate switcher */
+    -1,				/* not relevant, no rate switch */
     NULL,			/* caller needs to supply a close hook */
     1,				/* updates every second */
 };

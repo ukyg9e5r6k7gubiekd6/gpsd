@@ -160,7 +160,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (sp[2] == '?')
 			gpsdata->cycle = 0;
 		    else
-			(void)sscanf(sp, "C=%u", &gpsdata->cycle);
+			(void)sscanf(sp, "C=%lf", &gpsdata->cycle);
 		    break;
 		case 'D':
 		    if (sp[2] == '?') 

@@ -32,7 +32,7 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen) {
    for (i = 0; i < msglen; i++)
        (void)snprintf((char*)buf+strlen((char *)buf),sizeof((char*)buf)-strlen((char*)buf),
 		      " %02x", msg[i]);
-   len = (size_t)strlen(buf);
+   len = (size_t)strlen((char *)buf);
    gpsd_report(4, "writing proto control type %02x:%s\n", msg[0], buf);
    ok = (write(fd, buf, len) == (ssize_t)len);
    (void)tcdrain(fd);
@@ -141,6 +141,8 @@ struct gps_type_t proto_binary =
     pass_rtcm,	/* send RTCM data straight */
     proto_speed,	/* we can change baud rates */
     proto_mode,		/* there is a mode switcher */
+    NULL,		/* no rate switcher */
+    -1,			/* not relevant, no rate switcher,
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };

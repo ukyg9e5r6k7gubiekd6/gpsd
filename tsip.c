@@ -641,6 +641,8 @@ struct gps_type_t tsip_binary =
     NULL,		/* send DGPS correction */
     tsip_speed_switch,	/* change baud rate */
     NULL,		/* no mode switcher */
+    NULL,		/* no rate switcher */
+    -1,			/* not relevant, no rate switcher */
     NULL,		/* caller needs to supply a close hook */
     1,			/* updates every second */
 };

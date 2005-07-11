@@ -82,8 +82,10 @@ struct gps_type_t {
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
+    /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
+    int cycle_chars;
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
-    int cycle;
+    double cycle;
 };
 
 #if defined (HAVE_SYS_TERMIOS_H)

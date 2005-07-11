@@ -101,6 +101,8 @@ static struct gps_type_t nmea = {
     pass_rtcm,		/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
+    NULL,		/* no sample-rate switcher */
+    -1,			/* not relevant, no rate switch */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
@@ -122,6 +124,8 @@ static struct gps_type_t fv18 = {
     pass_rtcm,	/* write RTCM data straight */
     NULL,		/* no speed switcher */
     NULL,		/* no mode switcher */
+    NULL,		/* no sample-rate switcher */
+    -1,			/* not relevant, no rate switch */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
@@ -183,6 +187,8 @@ static struct gps_type_t sirfII_nmea = {
     pass_rtcm,	/* write RTCM data straight */
     sirf_speed,		/* we can change speeds */
     sirf_mode,		/* there's a mode switch */
+    NULL,		/* no sample-rate switcher */
+    -1,			/* cycle char count not relevant, no rate switch */
     NULL,		/* no wrapup */
     1,			/* updates every second */
 };
@@ -220,6 +226,8 @@ static struct gps_type_t tripmate = {
     pass_rtcm,			/* send RTCM data straight */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
+    NULL,			/* no sample-rate switcher */
+    -1,				/* not relevant, no rate switch */
     NULL,			/* no wrapup */
     1,				/* updates every second */
 };
@@ -266,6 +274,8 @@ static struct gps_type_t earthmate = {
     NULL,			/* don't send RTCM data */
     NULL,			/* no speed switcher */
     NULL,			/* no mode switcher */
+    NULL,			/* no sample-rate switcher */
+    -1,				/* not relevant, no rate switch */
     NULL,			/* no wrapup code */
     1,				/* updates every second */
 };
@@ -323,10 +333,16 @@ static void itrax_initializer(struct gps_device_t *session)
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
 }
 
-static bool itrax_speed(struct gps_device_t *session, unsigned int speed)
+static bool itrax_speed(struct gps_device_t *session, speed_t speed)
 /* change the baud rate */
 {
     return nmea_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
+}
+
+static bool itrax_rate(struct gps_device_t *session, double rate)
+/* change the sample rate of the GPS */
+{
+    return nmea_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d", rate) >= 0;
 }
 
 static void itrax_wrap(struct gps_device_t *session)
@@ -347,6 +363,8 @@ static struct gps_type_t itrax = {
     pass_rtcm,			/* write RTCM data straight */
     itrax_speed,		/* no speed switcher */
     NULL,			/* no mode switcher */
+    itrax_rate,			/* there's a sample-rate switcher */
+    438,			/* not relevant, no rate switch */
     itrax_wrap,			/* sleep the receiver */
     1,				/* updates every second */
 };

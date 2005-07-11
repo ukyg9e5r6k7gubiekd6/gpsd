@@ -274,7 +274,7 @@ class gps(gpsdata):
 		  self.cycle = -1
 		  self.device = None
 	      else:
-		  self.cycle = int(data)
+		  self.cycle = float(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
 	      self.gps_time = isotime(self.utc)

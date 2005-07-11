@@ -507,11 +507,26 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",B=?");
 	    break;
 	case 'C':
-	    if (assign_channel(whoami) && whoami->device->device_type!=NULL)
-		(void)snprintf(phrase, sizeof(phrase), ",C=%d", 
-			whoami->device->device_type->cycle);
-	    else
+	    if (!assign_channel(whoami) || whoami->device->device_type==NULL)
 		(void)strcpy(phrase, ",C=?");
+	    else {
+		struct gps_type_t *dev = whoami->device->device_type;
+		double mincycle = (dev->cycle_chars * 10.0) / whoami->device->gpsdata.baudrate;
+		if (*p == '=') {
+		    double cycle = strtod(++p, &p);
+		    if (cycle >= mincycle)
+			if (dev->rate_switcher != NULL)
+			    if (dev->rate_switcher(whoami->device, cycle))
+				dev->cycle = cycle;
+		    if (dev->rate_switcher == NULL)
+			(void)snprintf(phrase, sizeof(phrase), ",C=%.2f", 
+				       dev->cycle);
+		    else
+			(void)snprintf(
+			    phrase, sizeof(phrase), ",C=%.2f %.2f",
+			    dev->cycle, mincycle);
+		}
+	    }
 	    break;
 	case 'D':
 	    (void)strcpy(phrase, ",D=");

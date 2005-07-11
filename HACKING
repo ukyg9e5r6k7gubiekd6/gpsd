@@ -650,6 +650,12 @@ baud rate.
 
 A typical budget is GGA, RMC, GSA, 3*GSV = 82+75+67+(3*60) = 404.
 
+When you write a driver that includes the capability to change
+sampling rates, you must fill in the cycle_chars member with 
+a maximum character length so the daemon framework code will
+be able to compute when a sample-rate change will work.  If
+you have to estimate this number, err on the high side.
+
 ** Blind alleys
 
 Things we've considered doing and rejected.
