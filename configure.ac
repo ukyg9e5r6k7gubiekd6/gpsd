@@ -305,7 +305,6 @@ if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
    if test x"ac_dbus" = x"yes" ; then
       AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
    fi
-   AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
    # Check for glib and dbus-glib, used by gpxlogger
    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
@@ -316,6 +315,7 @@ if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
    AC_SUBST(DBUS_GLIB_CFLAGS)
    AC_SUBST(DBUS_GLIB_LIBS)
 fi
+AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
 AC_OUTPUT(Makefile contrib/Makefile gpsd.spec)
 

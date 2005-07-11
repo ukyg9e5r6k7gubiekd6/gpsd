@@ -34,7 +34,7 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #else
 	return 0;
 #endif /* SIRFII_ENABLE */
-    } else if (session->packet_type == SIRF_PACKET) {
+    } else if (session->packet_type == EVERMORE_PACKET) {
 	gpsd_report(2, "Evermore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
 	return evermore_parse(session, session->outbuffer, session->outbuflen);

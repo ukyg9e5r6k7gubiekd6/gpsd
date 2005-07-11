@@ -494,8 +494,13 @@ initializer method is called immediately.
 
 A good thing to send from the NMEA initializer is probe strings.  These are
 strings which should elicit an identifying response from the GPS that
-you can use as a trigger string for a native-mode driver.  This is how
-we detect SiRF chips (see step 5 under autoconfiguration above).
+you can use as a trigger string for a native-mode driver.
+
+Don't worry about probe strings messing up GPSes they aren't meant for.
+In general, all GPSes have rather rigidly defined packet formats with
+checksums.  Thus, for this probe to look legal in a different binary
+command set, not only would the prefix and any suffix characters have
+to match, but the checksum algorithm would have to be identical.
 
 Incoming characters from the GPS device are gathered into packets
 by an elaborate state machine in packet.c.  The purpose of this 
