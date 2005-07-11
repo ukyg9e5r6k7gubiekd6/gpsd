@@ -158,9 +158,9 @@ int gpsd_activate(struct gps_device_t *session)
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.track = NAN;
+	session->gpsdata.separation = NAN;
 #ifdef BINARY_ENABLE
 	session->mag_var = NAN;
-	session->gpsdata.separation = NAN;
 #endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE

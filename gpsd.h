@@ -22,7 +22,7 @@
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
-/* factors for constants for converting among confidence interval units */
+/* factors for converting among confidence interval units */
 #define CEP50_SIGMA	1.18
 #define DRMS_SIGMA	1.414
 #define CEP95_SIGMA	2.45
@@ -137,8 +137,8 @@ struct gps_device_t {
     int shmTimeP;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-#ifdef BINARY_ENABLE
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
+#ifdef BINARY_ENABLE
     double mag_var;		/* Magnetic variation in degrees */  
     /*
      * The rest of this structure is driver-specific private storage.
