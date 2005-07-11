@@ -430,7 +430,12 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	break;
     case TSIP_RECOGNIZED:
         if (c == 0x10)
-	    session->packet_state = TSIP_LEADER;
+	    /*
+	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
+	     * checksumed, so false positives are easy.  We might be
+	     * looking at another DLE-stuffed protocol like Evermore.
+	     */
+	    session->packet_state = DLE_LEADER;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
