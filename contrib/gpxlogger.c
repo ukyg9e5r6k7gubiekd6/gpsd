@@ -41,19 +41,19 @@ static struct {
 } gpsfix;
 
 
-void print_gpx_trk_start (void) {
+static void print_gpx_trk_start (void) {
 	fprintf (gpxfile, " <trk>\n");
 	fprintf (gpxfile, "  <trkseg>\n");
 	fflush (gpxfile);
 }
 
-void print_gpx_trk_end (void) {
+static void print_gpx_trk_end (void) {
 	fprintf (gpxfile, "  </trkseg>\n");
 	fprintf (gpxfile, " </trk>\n");
 	fflush (gpxfile);
 }
 
-DBusHandlerResult handle_gps_fix (DBusMessage* message) {
+static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 	DBusMessageIter	iter;
 	double		temp_time;
 	
@@ -132,7 +132,7 @@ DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 	return DBUS_HANDLER_RESULT_HANDLED;
 }
 
-void print_gpx_header (void) {
+static void print_gpx_header (void) {
 	if (!gpxfile) return;
 
 	fprintf (gpxfile, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
@@ -149,14 +149,14 @@ void print_gpx_header (void) {
 	fflush (gpxfile);
 }
 
-void print_gpx_footer (void) {
+static void print_gpx_footer (void) {
 	if (intrack)
 		print_gpx_trk_end();
 	fprintf (gpxfile, "</gpx>\n");
 	fclose (gpxfile);
 }
 
-void quit_handler (int signum) {
+static void quit_handler (int signum) {
 	syslog (LOG_INFO, "exiting, signal %d received", signum);
 	print_gpx_footer ();
 	exit (0);

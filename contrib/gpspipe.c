@@ -54,7 +54,7 @@ int main( int argc, char **argv) {
 	int s = 0;
         char buf[4096];
 	char *cstr = NULL;
-        unsigned int wrote = 0;
+        ssize_t wrote = 0;
         int dump_nmea = 0;
         int dump_gpsd = 0;
         int timestamp = 0;
@@ -105,7 +105,7 @@ int main( int argc, char **argv) {
 	}
 
 	wrote = write( s, cstr, strlen(cstr) );
-	if ( strlen(cstr) != wrote ) {
+	if ( (ssize_t)strlen(cstr) != wrote ) {
 		fprintf( stderr, "%s: write error, %s(%d)\n", argv[0]
 			, strerror(errno), errno);
 		exit (1);
