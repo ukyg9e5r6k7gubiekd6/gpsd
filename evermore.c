@@ -238,16 +238,16 @@ static bool evermore_set_mode(struct gps_device_t *session,
 {
     unsigned char tmp8;
     /*@ +charint @*/
-    unsigned char msg[] = {0x80,
-			   0x00, 0x00,		/* GPS week */
-			   0x00, 0x00, 0x00, 0x00,	/* GPS TOW */
-			   0x00, 0x00,		/* Latitude */
-			   0x00, 0x00,		/* Longitude */
-			   0x00, 0x00,		/* Altitude */
-			   0x00, 0x00,		/* Datum ID WGS84 */
-			   0x01,			/* hot start */
-			   0x40,			/* checksum + binary */
-			   0,			/* baud rate */
+    unsigned char msg[] = {0x80,		/*  0: msg ID */
+			   0x00, 0x00,		/*  1: GPS week */
+			   0x00, 0x00, 0x00, 0x00,	/*  3: GPS TOW */
+			   0x00, 0x00,		/*  7: Latitude */
+			   0x00, 0x00,		/*  9: Longitude */
+			   0x00, 0x00,		/* 11: Altitude */
+			   0x00, 0x00,		/* 13: Datum ID WGS84 */
+			   0x01,		/* 15: hot start */
+			   0x5d,		/* 16: cksum(6) + bin(7) + GGA(0) + GSA(2) + GSV(3) + RMC(4) */
+			   0,			/* 17: baud rate */
 			  };
     switch (speed) {
     case 4800:  tmp8 = 0; break;
@@ -259,7 +259,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     msg[17] = tmp8;
     if (mode) {
         gpsd_report(1, "Switching chip mode to Evermore binary.\n");
-	msg[16] |= 0x40;
+	msg[16] |= 0x80;  /* binary mode */
     }
     return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
     /*@ +charint @*/
@@ -287,6 +287,12 @@ static void evermore_initializer(struct gps_device_t *session)
 	(void)evermore_set_mode(session, session->gpsdata.baudrate, true);
 }
 
+static void evermore_close(struct gps_device_t *session)
+/* set GPS to NMEA, 4800, GGA, GSA, GSV, RMC (default) */ 
+{
+	(void)evermore_set_mode(session, 4800, false);
+}
+
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
@@ -296,12 +302,12 @@ struct gps_type_t evermore_binary =
     evermore_initializer,	/* initialize the device */
     packet_get,			/* how to grab a packet */
     evermore_parse_input,	/* read and parse message packets */
-    pass_rtcm,		/* send RTCM data straight */
+    pass_rtcm,			/* send RTCM data straight */
     evermore_speed,		/* we can change baud rates */
     evermore_mode,		/* there is a mode switcher */
     NULL,			/* no sample-rate switcher */
     -1,				/* not relevant, no rate switch */
-    NULL,			/* caller needs to supply a close hook */
+    evermore_close,		/* caller needs to supply a close hook */
     1,				/* updates every second */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */
