@@ -158,9 +158,13 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'C':
 		    if (sp[2] == '?')
-			gpsdata->cycle = 0;
-		    else
-			(void)sscanf(sp, "C=%lf", &gpsdata->cycle);
+			gpsdata->mincycle = gpsdata->cycle = 0;
+		    else {
+			if (sscanf(sp, "C=%lf %lf", 
+				     &gpsdata->cycle,
+				   &gpsdata->mincycle) < 2)
+			    gpsdata->mincycle = gpsdata->cycle;
+		    }
 		    break;
 		case 'D':
 		    if (sp[2] == '?') 

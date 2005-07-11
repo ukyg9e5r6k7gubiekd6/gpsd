@@ -148,6 +148,7 @@ class gpsdata:
 	self.baudrate = 0
 	self.stopbits = 0
 	self.cycle = 0
+	self.mincycle = 0
 	self.device = None
 	self.devices = []
 
@@ -273,8 +274,10 @@ class gps(gpsdata):
 	      if data == '?':
 		  self.cycle = -1
 		  self.device = None
-	      else:
-		  self.cycle = float(data)
+	      elif len(data.split()) == 2:
+		  (self.cycle, self.mincycle) = map(float, data)
+              else:
+		  self.mincycle = self.cycle = float(data)
 	    elif cmd in ('D', 'd'):
 	      self.utc = data
 	      self.gps_time = isotime(self.utc)

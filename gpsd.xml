@@ -202,11 +202,15 @@ If the driver does not have the capability to change sampling rate,
 this returns, as "C=%f", the cycle time in seconds only.</para>
 
 <para>Either number may be fractional, indicating a GPS cycle shorter
-than a second; however, if >1 cycle time must be a whole number. This
-command will return '?' at start of session, before the first full
-packet has been received from the GPS, because its type is not yet
-known. To set up conditions for a real answer, issue it after some
-command that reads position/velocity/time information from the
+than a second; however, if >1 the cycle time must be a whole number. Also
+note that relatively few GPSes have the ability to set sub-second
+cycle times; consult your hardware protocol description to make sure
+this works.</para>
+ 
+<para>This command will return '?' at start of session, before the
+first full packet has been received from the GPS, because its type is
+not yet known. To set up conditions for a real answer, issue it after
+some command that reads position/velocity/time information from the
 device.</para></listitem>
 
 </varlistentry>
