@@ -73,6 +73,7 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_initializer(struct gps_device_t *session)
 {
+#ifdef NMEA_ENABLE
     /*
      * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
      * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
@@ -85,10 +86,20 @@ static void nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
     /* enable GPGSA on Garmin serial GPS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRM0,GSA,1");
+#endif /* NMEA_ENABLE */
+#ifdef SIRFII_ENABLE
     /* probe for SiRF-II */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+#endif /* SIRFII_ENABLE */
+#ifdef ITRAX_ENABLE
     /* probe for iTrax, looking for "OK" */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSFT");
+#endif /* ITRAX_ENABLE */
+#ifdef EVERMORE_ENABLE
+    /* probe for Evermore by trying to read the LogConfig */
+    (void)nmea_send(session->gpsdata.gps_fd,
+		    "\x10\x02\x04\x81\x13\x94\x10\x03");
+#endif /* EVERMORE_ENABLE */
 }
 
 static struct gps_type_t nmea = {
