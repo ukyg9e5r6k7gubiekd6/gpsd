@@ -6,28 +6,7 @@
 #include "rtcm.h"
 #include "gpsd.h"
 
-#ifdef TESTMAIN
-#include <stdio.h>
-#include <stdarg.h>
-
-static int verbose = 5;
-
-void gpsd_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    if (errlevel <= verbose) {
-	char buf[BUFSIZ];
-	va_list ap;
-
-	buf[0] = '\0';
-	va_start(ap, fmt) ;
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-	va_end(ap);
-
-	(void)fputs(buf, stderr);
-    }
-}
-#endif /* TESTMAIN */
+/* ################ */
 
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
@@ -282,7 +261,29 @@ void rtcm_output_mag(RTCMWORD * ip)
 }
 #endif /* UNUSED */
 
+/* ################ */
+
 #ifdef TESTMAIN
+#include <stdio.h>
+#include <stdarg.h>
+
+static int verbose = 5;
+
+void gpsd_report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    if (errlevel <= verbose) {
+	char buf[BUFSIZ];
+	va_list ap;
+
+	buf[0] = '\0';
+	va_start(ap, fmt) ;
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
+
+	(void)fputs(buf, stderr);
+    }
+}
 void rtcm_print_msg(struct rtcm_msghdr *msghdr)
 /* dump the contents of a parsed RTCM104 message */
 {
