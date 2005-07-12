@@ -124,10 +124,12 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
     ctx->bufindex = 0;
 }
 
-void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
+struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 {
+    struct rtcm_msghdr *res;
+
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	return;
+	return RTCM_NO_SYNC;
     }
     c = reverse_bits[c & 0x3f];
 
@@ -158,6 +160,8 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	}			/* end while */
     }
     if (ctx->locked) {
+	res = RTCM_SYNC;
+
 	if (ctx->curr_offset > 0) {
 	    ctx->curr_word |= c << ctx->curr_offset;
 	} else {
@@ -189,7 +193,7 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 		     */
 		    if (ctx->bufindex >= RTCM_CTX_MAX_MSGSZ){
 			ctx->bufindex = 0;
-			return;
+			return RTCM_NO_SYNC;
 		    }
 
 		    ctx->buf[ctx->bufindex] = ctx->curr_word;
@@ -197,17 +201,15 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 		    if ((ctx->bufindex == 0) &&
 			(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
 			gpsd_report(6, "word 0 not a preamble- punting\n");
-			return;
+			return RTCM_NO_SYNC;
 		    }
 		    ctx->bufindex++;
 		    /* rtcm_print_msg(msghdr); */
 
 		    if (ctx->bufindex > 2) {	/* do we have the length yet? */
 			if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
-			    rtcm_print_msg(msghdr);
-			    /* do other processing here */
+			    res = msghdr;
 			    ctx->bufindex = 0;
-			    bzero((char *)ctx->buf, (int)sizeof(ctx->buf));	/* XXX debug */
 			}
 		    }
 		}
@@ -225,10 +227,15 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	}
 	ctx->curr_offset -= 6;
 	gpsd_report(7, "residual %d", ctx->curr_offset);
+	return res;
     }
     /*@ +shiftnegative @*/
+
+    /* never achieved lock */
+    return RTCM_NO_SYNC;
 }
 
+#ifdef TESTMAIN
 void rtcm_print_msg(struct rtcm_msghdr *msghdr)
 {
     int             len = (int)msghdr->w2.frmlen;
@@ -287,14 +294,13 @@ void rtcm_print_msg(struct rtcm_msghdr *msghdr)
     default:
 	break;
     }
-    /* complain(""); */
 }
 
 int main(int argc, char **argv)
 {
     int             c;
-    struct rtcm_ctx ctxbuf,
-                   *ctx = &ctxbuf;
+    struct rtcm_ctx ctxbuf, *ctx = &ctxbuf;
+    struct rtcm_msghdr *res;
 
     while ((c = getopt(argc, argv, "v:")) != EOF) {
 	switch (c) {
@@ -314,9 +320,12 @@ int main(int argc, char **argv)
     rtcm_init(ctx);
 
     while ((c = getchar()) != EOF) {
-	rtcm_decode(ctx, (unsigned int)c);
+	res = rtcm_decode(ctx, (unsigned int)c);
+	if (res != RTCM_NO_SYNC && res != RTCM_SYNC)
+	    rtcm_print_msg(res);
     }
     exit(0);
 }
+#endif /* TESTMAIN */
 
 /* end */

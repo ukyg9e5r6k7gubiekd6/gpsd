@@ -129,8 +129,11 @@ struct rtcm_ctx {
     unsigned int    bufindex;
 };
 
+#define RTCM_NO_SYNC	(struct rtcm_msghdr *)0
+#define RTCM_SYNC	(struct rtcm_msghdr *)-1
+
 void rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
-void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
+struct rtcm_msghdr * rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
 void rtcm_print_msg(struct rtcm_msghdr * m);
 
 /* end */
