@@ -125,4 +125,20 @@ struct rtcm_msg1 {
     struct rtcm_msg1w7   w17;
 };
 
+typedef /*@unsignedintegraltype@*/ unsigned char uchar;
+
+#define RTCM_CTX_MAX_MSGSZ	128
+
+struct rtcm_ctx {
+    bool            locked;
+    int             curr_offset;
+    RTCMWORD        curr_word;
+    RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
+    unsigned int            bufindex;
+};
+
+void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
+void            rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
+void            rtcm_print_msg(struct rtcm_msghdr * m);
+
 /* end */

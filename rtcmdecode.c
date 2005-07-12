@@ -6,25 +6,9 @@
 
 #include "rtcm.h"
 
-typedef /*@unsignedintegraltype@*/ unsigned char uchar;
-
-#define RTCM_CTX_MAX_MSGSZ	128
-
-struct rtcm_ctx {
-    bool            locked;
-    int             curr_offset;
-    RTCMWORD        curr_word;
-    RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
-    unsigned int            bufindex;
-};
+static int             verbose = 0;
 
 #define W_DATA_MASK	0x3fffffc0u
-
-void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
-void            rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
-void            print_msg(struct rtcm_msghdr * m);
-
-static int             verbose = 0;
 
 /*@ +charint @*/
 static unsigned char   parity_array[] = {
@@ -133,11 +117,11 @@ static void process_word(struct rtcm_ctx * ctx, RTCMWORD r)
 	return;
     }
     ctx->bufindex++;
-    /* print_msg(msghdr); */
+    /* rtcm_print_msg(msghdr); */
 
     if (ctx->bufindex > 2) {	/* do we have the length yet? */
 	if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
-	    print_msg(msghdr);
+	    rtcm_print_msg(msghdr);
 	    /* do other processing here */
 	    ctx->bufindex = 0;
 	    bzero((char *)ctx->buf, (int)sizeof(ctx->buf));	/* XXX debug */
@@ -228,7 +212,7 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
     /*@ +shiftnegative @*/
 }
 
-void print_msg(struct rtcm_msghdr *msghdr)
+void rtcm_print_msg(struct rtcm_msghdr *msghdr)
 {
     int             len = (int)msghdr->w2.frmlen;
     double          zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
