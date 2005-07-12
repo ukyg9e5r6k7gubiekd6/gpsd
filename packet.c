@@ -81,6 +81,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
  *      GP -- Global Positioning System.
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *	IN -- Integrated Navigation (Garmin uses this).
+ *
  */
 
 enum {
@@ -714,11 +715,75 @@ ssize_t packet_get(struct gps_device_t *session)
 	/*@ -modobserver @*/
 	unsigned char c = *session->inbufptr++;
 	/*@ +modobserver @*/
+	/* to regenerate this table, see  statetable.el */	
+	/*%start%*/
+	char *state_table[] = {
+	"GROUND_STATE",
+	"NMEA_DOLLAR",
+	"NMEA_PUB_LEAD",
+	"NMEA_LEADER_END",
+	"NMEA_CR",
+	"NMEA_RECOGNIZED",
+	"SIRF_ACK_LEAD_1",
+	"SIRF_ACK_LEAD_2",
+	"SEATALK_LEAD_1",
+	"DLE_LEADER",
+	"ASTRAL_1",
+	"ASTRAL_2",
+	"ASTRAL_3",
+	"ASTRAL_4",
+	"ASTRAL_5",
+	"EARTHA_1",
+	"EARTHA_2",
+	"EARTHA_3",
+	"EARTHA_4",
+	"EARTHA_5",
+	"SIRF_LEADER_1",
+	"SIRF_LEADER_2",
+	"SIRF_LENGTH_1",
+	"SIRF_PAYLOAD",
+	"SIRF_DELIVERED",
+	"SIRF_TRAILER_1",
+	"SIRF_RECOGNIZED",
+	"ZODIAC_EXPECTED",
+	"ZODIAC_LEADER_1",
+	"ZODIAC_LEADER_2",
+	"ZODIAC_ID_1",
+	"ZODIAC_ID_2",
+	"ZODIAC_LENGTH_1",
+	"ZODIAC_LENGTH_2",
+	"ZODIAC_FLAGS_1",
+	"ZODIAC_FLAGS_2",
+	"ZODIAC_HSUM_1",
+	"ZODIAC_PAYLOAD",
+	"ZODIAC_RECOGNIZED",
+	"EVERMORE_LEADER_1",
+	"EVERMORE_LEADER_2",
+	"EVERMORE_LENGTH",
+	"EVERMORE_HEADER_DLE",
+	"EVERMORE_PAYLOAD",
+	"EVERMORE_DELIVERED",
+	"EVERMORE_SUM_DLE",
+	"EVERMORE_TRAILER_1",
+	"EVERMORE_RECOGNIZED",
+	"ITALK_LEADER_1",
+	"ITALK_LEADER_2",
+	"ITALK_LENGTH_1",
+	"ITALK_LENGTH_2",
+	"ITALK_DELIVERED",
+	"ITALK_TRAILER_1",
+	"ITALK_RECOGNIZED",
+	"TSIP_LEADER",
+	"TSIP_PAYLOAD",
+	"TSIP_DLE",
+	"TSIP_RECOGNIZED",
+	};
+	/*%end%*/
 	nexstate(session, c);
 	if (isprint(c))
-	    gpsd_report(7, "Character '%c', new state: %d\n",c,session->packet_state);
+	    gpsd_report(7, "Character '%c', new state: %d\n",c,state_table[session->packet_state]);
 	else
-	    gpsd_report(7, "Character 0x%02x, new state: %d\n",c,session->packet_state);
+	    gpsd_report(7, "Character 0x%02x, new state: %d\n",c,state_table[session->packet_state]);
 	if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);
 #ifdef NMEA_ENABLE

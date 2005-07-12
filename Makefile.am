@@ -175,7 +175,8 @@ EXTRA_DIST = \
 	valgrind-audit \
 	valgrind-suppressions \
 	driver_proto.c \
-	logextract
+	logextract \
+	statetable.el
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
