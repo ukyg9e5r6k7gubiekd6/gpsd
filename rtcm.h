@@ -1,25 +1,16 @@
-/******************************************************************************
-*									      *
-*	File:     rtcm.h						      *
-*	Author:   Wolfgang Rupprecht <wolfgang@capsicum.wsrcc.com>	      *
-*	Created:  Sun Jan 24 16:47:57 PST 1999				      *
-*	Contents: rtcm sc104 message format				      *
-*									      *
-*	Copyright (c) 1999 Wolfgang Rupprecht.				      *
-*	All rights reserved.						      *
-*									      *
-*	$Id: rtcmmsg.h,v 1.1 2000/02/28 08:08:32 wolfgang Exp $
-******************************************************************************/
-
 /*
+ * Structures for interpreting words in an RTCM-104 message (after
+ * parity checking and removing inversion).
+ *
  * The rtcm words are 30-bit words.  We will lay them into memory into
  * 30-bit (low-end justified) chunks.  To write them out we will write
  * 5 magnavox-format bytes where the low 6-bits of the byte are 6-bits
  * of the 30-word msg.
+ *
+ * This code was originally by Wolfgang Rupprecht.
  */
 
-
-typedef unsigned int RTCMWORD;
+typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
