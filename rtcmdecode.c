@@ -95,40 +95,6 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
     ctx->bufindex = 0;
 }
 
-static void process_word(struct rtcm_ctx * ctx, RTCMWORD r)
-{
-    struct rtcm_msghdr  *msghdr = (struct rtcm_msghdr *) ctx->buf;
-
-    /*
-     * Guard against a buffer overflow attack.  Just wait for
-     * the next PREAMBLE_PATTERN and go on from there. 
-     */
-    if (ctx->bufindex >= RTCM_CTX_MAX_MSGSZ){
-	ctx->bufindex = 0;
-	return;
-    }
-
-    ctx->buf[ctx->bufindex] = r;
-
-    if ((ctx->bufindex == 0) &&
-	(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
-	if (verbose)
-	    fprintf(stderr, "word 0 not a preamble- punting\n");
-	return;
-    }
-    ctx->bufindex++;
-    /* rtcm_print_msg(msghdr); */
-
-    if (ctx->bufindex > 2) {	/* do we have the length yet? */
-	if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
-	    rtcm_print_msg(msghdr);
-	    /* do other processing here */
-	    ctx->bufindex = 0;
-	    bzero((char *)ctx->buf, (int)sizeof(ctx->buf));	/* XXX debug */
-	}
-    }
-}
-
 void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 {
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
@@ -192,7 +158,38 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 		    fprintf(stderr,
 			    "processing word %u (offset %d)\n",
 			    ctx->bufindex, ctx->curr_offset);
-		process_word(ctx, ctx->curr_word);
+		{
+		    struct rtcm_msghdr  *msghdr = (struct rtcm_msghdr *) ctx->buf;
+
+		    /*
+		     * Guard against a buffer overflow attack.  Just wait for
+		     * the next PREAMBLE_PATTERN and go on from there. 
+		     */
+		    if (ctx->bufindex >= RTCM_CTX_MAX_MSGSZ){
+			ctx->bufindex = 0;
+			return;
+		    }
+
+		    ctx->buf[ctx->bufindex] = ctx->curr_word;
+
+		    if ((ctx->bufindex == 0) &&
+			(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
+			if (verbose)
+			    fprintf(stderr, "word 0 not a preamble- punting\n");
+			return;
+		    }
+		    ctx->bufindex++;
+		    /* rtcm_print_msg(msghdr); */
+
+		    if (ctx->bufindex > 2) {	/* do we have the length yet? */
+			if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
+			    rtcm_print_msg(msghdr);
+			    /* do other processing here */
+			    ctx->bufindex = 0;
+			    bzero((char *)ctx->buf, (int)sizeof(ctx->buf));	/* XXX debug */
+			}
+		    }
+		}
 		ctx->curr_word <<= 30;	/* preserve the 2 low bits */
 		ctx->curr_offset += 30;
 		if (ctx->curr_offset > 0) {
