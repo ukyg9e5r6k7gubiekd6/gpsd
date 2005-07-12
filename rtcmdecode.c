@@ -6,16 +6,16 @@
 
 #include "rtcm.h"
 
-#define P_30_MASK	0x40000000
+#define P_30_MASK	0x40000000u
 
-#define	PARITY_25	0xbb1f3480
-#define	PARITY_26	0x5d8f9a40
-#define	PARITY_27	0xaec7cd00
-#define	PARITY_28	0x5763e680
-#define	PARITY_29	0x6bb1f340
-#define	PARITY_30	0x8b7a89c0
+#define	PARITY_25	0xbb1f3480u
+#define	PARITY_26	0x5d8f9a40u
+#define	PARITY_27	0xaec7cd00u
+#define	PARITY_28	0x5763e680u
+#define	PARITY_29	0x6bb1f340u
+#define	PARITY_30	0x8b7a89c0u
 
-#define W_DATA_MASK	0x3fffffc0
+#define W_DATA_MASK	0x3fffffc0u
 
 typedef unsigned char uchar;
 
@@ -75,22 +75,22 @@ static uint rtcmparity(RTCMWORD th)
 
     t = th & PARITY_25;
     p = parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-	parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)];
+	parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff];
     t = th & PARITY_26;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
+		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     t = th & PARITY_27;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
+		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     t = th & PARITY_28;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
+		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     t = th & PARITY_29;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
+		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     t = th & PARITY_30;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
-		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
+		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
 
     printf("parity %u\n", p);
     return (p);
