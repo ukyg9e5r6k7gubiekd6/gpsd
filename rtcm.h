@@ -37,15 +37,15 @@ typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
 struct rtcm_msghw1 {			/* header word 1 */
     uint            parity:6;
-    uint            refstaid:10;
-    uint            msgtype:6;
-    uint            preamble:8;	/* 01100110 */
+    uint            refstaid:10;	/* reference station ID */
+    uint            msgtype:6;		/* RTCM message type */
+    uint            preamble:8;		/* fixed at 01100110 */
     uint            _pad:2;
 };
 
 struct rtcm_msghw2 {			/* header word 2 */
     uint            parity:6;
-    uint            stathlth:3;
+    uint            stathlth:3;		/* station health */
     uint            frmlen:5;
     uint            sqnum:3;
     uint            zcnt:13;
@@ -55,7 +55,7 @@ struct rtcm_msghw2 {			/* header word 2 */
 struct rtcm_msg1w3 {			/* msg 1 word 3 */
     uint            parity:6;
     int             pc1:16;
-    uint            satident1:5;
+    uint            satident1:5;	/* satellite ID */
     uint            udre1:2;
     uint            scale1:1;
     uint            _pad:2;
@@ -63,7 +63,7 @@ struct rtcm_msg1w3 {			/* msg 1 word 3 */
 
 struct rtcm_msg1w4 {			/* msg 1 word 4 */
     uint            parity:6;
-    uint            satident2:5;
+    uint            satident2:5;	/* satellite ID */
     uint            udre2:2;
     uint            scale2:1;
     uint            issuedata1:8;
@@ -82,7 +82,7 @@ struct rtcm_msg1w5 {			/* msg 1 word 5 */
 struct rtcm_msg1w6 {			/* msg 1 word 6 */
     uint            parity:6;
     int             pc3_h:8;
-    uint            satident3:5;
+    uint            satident3:5;	/* satellite ID */
     uint            udre3:2;
     uint            scale3:1;
     uint            issuedata2:8;
@@ -93,7 +93,7 @@ struct rtcm_msg1w7 {			/* msg 1 word 7 */
     uint            parity:6;
     uint            issuedata3:8;
     int             rangerate3:8;
-    uint            pc3_l:8;	/* NOTE: uint for low byte */
+    uint            pc3_l:8;		/* NOTE: uint for low byte */
     uint            _pad:2;
 };
 
@@ -118,7 +118,7 @@ struct rtcm_msg1 {
     struct rtcm_msg1w6   w11;
     struct rtcm_msg1w7   w12;
 
-    struct rtcm_msg1w3   w13;	/* clump #2 of 5-corrections each */
+    struct rtcm_msg1w3   w13;		/* clump #2 of 5-corrections each */
     struct rtcm_msg1w4   w14;
     struct rtcm_msg1w5   w15;
     struct rtcm_msg1w6   w16;
@@ -134,11 +134,11 @@ struct rtcm_ctx {
     int             curr_offset;
     RTCMWORD        curr_word;
     RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
-    unsigned int            bufindex;
+    unsigned int    bufindex;
 };
 
-void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
-void            rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
-void            rtcm_print_msg(struct rtcm_msghdr * m);
+void rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
+void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
+void rtcm_print_msg(struct rtcm_msghdr * m);
 
 /* end */

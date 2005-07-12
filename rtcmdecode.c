@@ -29,6 +29,14 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 }
 #endif /* TESTMAIN */
 
+#define MAG_SHIFT 6u
+#define MAG_TAG_DATA (1 << MAG_SHIFT)
+#define MAG_TAG_MASK (3 << MAG_SHIFT)
+
+#define PREAMBLE_PATTERN 0x66
+#define PREAMBLE_SHIFT 22
+#define PREAMBLE_MASK (0xFF << PREAMBLE_SHIFT)
+
 #define W_DATA_MASK	0x3fffffc0u
 
 /*@ +charint @*/
