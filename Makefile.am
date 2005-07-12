@@ -16,7 +16,7 @@ INCLUDES = $(DBUS_CFLAGS)
 endif
 
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
-check_PROGRAMS = gpsmm_test bits
+check_PROGRAMS = gpsmm_test bits rtcmdecode
 bin_SCRIPTS = gpsprof gpsfake 
 
 #
@@ -55,6 +55,11 @@ gpsd_SOURCES = \
 	gpsd.c
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
+#
+# Build rtcmdecode
+#
+rtcmdecode_SOURCES = rtcmdecode,c
+rtcmdecode_CFLAGS = -O1
 
 #
 # Build sirfmon
@@ -202,6 +207,3 @@ splint:
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
 	-splint bits.c
-
-rtcmdecode:
-	cc  -o rtcmdecode rtcmdecode.c
