@@ -204,25 +204,12 @@ splint:
 	-splint bits.c
 
 OPT = -fthread-jumps  \
-          -fcrossjumping  \
-          -foptimize-sibling-calls  \
-          -fcse-follow-jumps  -fcse-skip-blocks  \
-          -fgcse  -fgcse-lm   \
-          -fexpensive-optimizations  \
-          -fstrength-reduce  \
           -frerun-cse-after-loop  -frerun-loop-opt  \
-          -fcaller-saves  \
           -fpeephole2  \
           -fschedule-insns  -fschedule-insns2  \
           -fsched-interblock  -fsched-spec  \
-          -fregmove  \
-          -fstrict-aliasing  \
-          -fdelete-null-pointer-checks  \
-          -freorder-blocks  -freorder-functions  \
           -funit-at-a-time  \
-          -falign-functions  -falign-jumps  \
-          -falign-loops  \
 	  -falign-labels
 
 rtcmdecode: rtcmdecode.c rtcm.c rtcm.h
-	cc -O2 $(OPT) -DTESTMAIN rtcmdecode.c rtcm.c -o rtcmdecode
+	cc -O2 $(OPT) rtcmdecode.c rtcm.c -o rtcmdecode
