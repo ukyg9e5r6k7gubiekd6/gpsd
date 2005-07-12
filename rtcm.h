@@ -21,7 +21,7 @@
 
 typedef unsigned int RTCMWORD;
 
-#define MAG_SHIFT 6
+#define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
 #define MAG_TAG_MASK (3 << MAG_SHIFT)
 
@@ -44,7 +44,7 @@ typedef unsigned int RTCMWORD;
 #define CNR_OFFSET	24	/* dB */
 #define TU_SCALE	5	/* minutes */
 
-struct msghw1 {			/* header word 1 */
+struct rtcm_msghw1 {			/* header word 1 */
     uint            parity:6;
     uint            refstaid:10;
     uint            msgtype:6;
@@ -52,7 +52,7 @@ struct msghw1 {			/* header word 1 */
     uint            _pad:2;
 };
 
-struct msghw2 {			/* header word 2 */
+struct rtcm_msghw2 {			/* header word 2 */
     uint            parity:6;
     uint            stathlth:3;
     uint            frmlen:5;
@@ -61,7 +61,7 @@ struct msghw2 {			/* header word 2 */
     uint            _pad:2;
 };
 
-struct msg1w3 {			/* msg 1 word 3 */
+struct rtcm_msg1w3 {			/* msg 1 word 3 */
     uint            parity:6;
     int             pc1:16;
     uint            satident1:5;
@@ -70,7 +70,7 @@ struct msg1w3 {			/* msg 1 word 3 */
     uint            _pad:2;
 };
 
-struct msg1w4 {			/* msg 1 word 4 */
+struct rtcm_msg1w4 {			/* msg 1 word 4 */
     uint            parity:6;
     uint            satident2:5;
     uint            udre2:2;
@@ -80,7 +80,7 @@ struct msg1w4 {			/* msg 1 word 4 */
     uint            _pad:2;
 };
 
-struct msg1w5 {			/* msg 1 word 5 */
+struct rtcm_msg1w5 {			/* msg 1 word 5 */
     uint            parity:6;
     int             rangerate2:8;
     int             pc2:16;
@@ -88,7 +88,7 @@ struct msg1w5 {			/* msg 1 word 5 */
 };
 
 
-struct msg1w6 {			/* msg 1 word 6 */
+struct rtcm_msg1w6 {			/* msg 1 word 6 */
     uint            parity:6;
     int             pc3_h:8;
     uint            satident3:5;
@@ -98,7 +98,7 @@ struct msg1w6 {			/* msg 1 word 6 */
     uint            _pad:2;
 };
 
-struct msg1w7 {			/* msg 1 word 7 */
+struct rtcm_msg1w7 {			/* msg 1 word 7 */
     uint            parity:6;
     uint            issuedata3:8;
     int             rangerate3:8;
@@ -106,32 +106,32 @@ struct msg1w7 {			/* msg 1 word 7 */
     uint            _pad:2;
 };
 
-struct msghdr {
-    struct msghw1   w1;
-    struct msghw2   w2;
+struct rtcm_msghdr {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
 };
 
-struct msg1 {
-    struct msghw1   w1;
-    struct msghw2   w2;
+struct rtcm_msg1 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
 
-    struct msg1w3   w3;		/* clump #1 of 5-corrections each */
-    struct msg1w4   w4;
-    struct msg1w5   w5;
-    struct msg1w6   w6;
-    struct msg1w7   w7;
+    struct rtcm_msg1w3   w3;		/* clump #1 of 5-corrections each */
+    struct rtcm_msg1w4   w4;
+    struct rtcm_msg1w5   w5;
+    struct rtcm_msg1w6   w6;
+    struct rtcm_msg1w7   w7;
 
-    struct msg1w3   w8;		/* clump #2 of 5-corrections each */
-    struct msg1w4   w9;
-    struct msg1w5   w10;
-    struct msg1w6   w11;
-    struct msg1w7   w12;
+    struct rtcm_msg1w3   w8;		/* clump #2 of 5-corrections each */
+    struct rtcm_msg1w4   w9;
+    struct rtcm_msg1w5   w10;
+    struct rtcm_msg1w6   w11;
+    struct rtcm_msg1w7   w12;
 
-    struct msg1w3   w13;	/* clump #2 of 5-corrections each */
-    struct msg1w4   w14;
-    struct msg1w5   w15;
-    struct msg1w6   w16;
-    struct msg1w7   w17;
+    struct rtcm_msg1w3   w13;	/* clump #2 of 5-corrections each */
+    struct rtcm_msg1w4   w14;
+    struct rtcm_msg1w5   w15;
+    struct rtcm_msg1w6   w16;
+    struct rtcm_msg1w7   w17;
 };
 
 /* end */

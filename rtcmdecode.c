@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
+#include <stdbool.h>
 
 #include "rtcm.h"
 
@@ -16,29 +17,26 @@
 
 #define W_DATA_MASK	0x3fffffc0
 
-uint            rtcmparity(RTCMWORD  w);
-uint            rtcmparityok(RTCMWORD w);
-
 typedef unsigned char uchar;
 
 #define RTCM_CTX_MAX_MSGSZ	128
 
 struct rtcm_ctx {
-    uchar           locked:1;
+    bool            locked;
     int             curr_offset;
     RTCMWORD        curr_word;
     RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
-    int             bufindex;
+    uint            bufindex;
 };
 
-void            rtcm_init(struct rtcm_ctx * ctx);
-void            rtcm_decode(struct rtcm_ctx * ctx, int c);
-void            process_word(struct rtcm_ctx * ctx, RTCMWORD r);
-void            print_msg(struct msghdr * m);
+void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
+void            rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
+void            print_msg(struct rtcm_msghdr * m);
 
-int             verbose = 0;
+static int             verbose = 0;
 
-unsigned char   parity_array[] = {
+/*@ +charint @*/
+static unsigned char   parity_array[] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -57,15 +55,15 @@ unsigned char   parity_array[] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0
 };
 
-unsigned char   reverse_bits[] = {
+static unsigned int reverse_bits[] = {
     0, 32, 16, 48, 8, 40, 24, 56, 4, 36, 20, 52, 12, 44, 28, 60,
     2, 34, 18, 50, 10, 42, 26, 58, 6, 38, 22, 54, 14, 46, 30, 62,
     1, 33, 17, 49, 9, 41, 25, 57, 5, 37, 21, 53, 13, 45, 29, 61,
     3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 55, 15, 47, 31, 63
 };
+/*@ -charint @*/
 
-uint
-rtcmparity(RTCMWORD th)
+static uint rtcmparity(RTCMWORD th)
 {
     RTCMWORD        t;
     uint            p;
@@ -94,145 +92,27 @@ rtcmparity(RTCMWORD th)
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
 		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24)]);
 
+    printf("parity %u\n", p);
     return (p);
 }
 
 
-uint
-rtcmparityok(RTCMWORD w)
+static bool rtcmparityok(RTCMWORD w)
 {
     return (rtcmparity(w) == (w & 0x3f));
 }
 
-int
-main(int argc,
-     char **argv)
-{
-    int             c;
-    struct rtcm_ctx ctxbuf,
-                   *ctx = &ctxbuf;
-
-    while ((c = getopt(argc, argv, "v:")) != EOF) {
-	switch (c) {
-	case 'v':		/* verbose */
-	    verbose = atoi(optarg);
-	    break;
-
-	case '?':
-	default:
-	    /* usage(); */
-	    break;
-	}
-    }
-    argc -= optind;
-    argv += optind;
-
-    rtcm_init(ctx);
-
-    while ((c = getchar()) != EOF) {
-	rtcm_decode(ctx, c);
-    }
-    exit(0);
-}
-
-
-void
-rtcm_init(struct rtcm_ctx * ctx)
+void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 {
     ctx->curr_word = 0;
     ctx->curr_offset = 24;	/* first word */
-    ctx->locked = 0;
+    ctx->locked = false;
     ctx->bufindex = 0;
 }
 
-void
-rtcm_decode(struct rtcm_ctx * ctx,
-	    int c)
+static void process_word(struct rtcm_ctx * ctx, RTCMWORD r)
 {
-    if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	return;
-    }
-    c = reverse_bits[c & 0x3f];
-
-    if (verbose)
-	putc('.', stderr);
-
-    if (!ctx->locked) {
-	ctx->curr_offset = -5;
-	ctx->bufindex = 0;
-
-	while (ctx->curr_offset <= 0) {
-	    /* g_message("syncing"); */
-	    ctx->curr_word <<= 1;
-	    if (ctx->curr_offset > 0) {
-		ctx->curr_word |= c << ctx->curr_offset;
-	    } else {
-		ctx->curr_word |= c >> -(ctx->curr_offset);
-	    }
-	    if (((struct msghw1 *) & ctx->curr_word)->preamble ==
-		PREAMBLE_PATTERN) {
-		if (rtcmparityok(ctx->curr_word)) {
-		    putc('\n', stderr);
-		    fprintf(stderr, "preamble ok, parity ok -- locked\n");
-		    ctx->locked = 1;
-		    /* ctx->curr_offset;  XXX - testing */
-		    break;
-		}
-		putc('\n', stderr);
-		fprintf(stderr, "preamble ok, parity fail\n");
-	    }
-	    ctx->curr_offset++;
-	}			/* end while */
-    }
-    if (ctx->locked) {
-	if (ctx->curr_offset > 0) {
-	    ctx->curr_word |= c << ctx->curr_offset;
-	} else {
-	    ctx->curr_word |= c >> -(ctx->curr_offset);
-	}
-
-	if (ctx->curr_offset <= 0) {
-	    /* weird-assed inversion */
-	    if (ctx->curr_word & P_30_MASK)
-		ctx->curr_word ^= W_DATA_MASK;
-
-	    if (rtcmparityok(ctx->curr_word)) {
-		if (((struct msghw1 *) & ctx->curr_word)->preamble ==
-		    PREAMBLE_PATTERN) {
-		    if (verbose)
-			fprintf(stderr, 
-				"Preamble spotted (index: %d)",
-				ctx->bufindex);
-		    ctx->bufindex = 0;
-		}
-		if (verbose)
-		    fprintf(stderr,
-			    "processing word %d (offset %d)\n",
-			    ctx->bufindex, ctx->curr_offset);
-		process_word(ctx, ctx->curr_word);
-		ctx->curr_word <<= 30;	/* preserve the 2 low bits */
-		ctx->curr_offset += 30;
-		if (ctx->curr_offset > 0) {
-		    ctx->curr_word |= c << ctx->curr_offset;
-		} else {
-		    ctx->curr_word |= c >> -(ctx->curr_offset);
-		}
-	    } else {
-		putc('\n', stderr);
-		fprintf(stderr, "Parity failure, lost lock\n");
-		ctx->locked = 0;
-	    }
-	}
-	ctx->curr_offset -= 6;
-	/* g_message("residual %d", ctx->curr_offset); */
-    }
-}
-
-void
-process_word(struct rtcm_ctx * ctx,
-	     RTCMWORD r)
-{
-    struct msghdr  *msghdr = (struct msghdr *) ctx->buf;
+    struct rtcm_msghdr  *msghdr = (struct rtcm_msghdr *) ctx->buf;
 
     /*
      * Guard against a buffer overflow attack.  Just wait for
@@ -259,18 +139,98 @@ process_word(struct rtcm_ctx * ctx,
 	    print_msg(msghdr);
 	    /* do other processing here */
 	    ctx->bufindex = 0;
-	    bzero(ctx->buf, sizeof(ctx->buf));	/* XXX debug */
+	    bzero((char *)ctx->buf, (int)sizeof(ctx->buf));	/* XXX debug */
 	}
     }
 }
 
-void
-print_msg(struct msghdr * msghdr)
+void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 {
-    int             len = msghdr->w2.frmlen;
+    if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
+	return;
+    }
+    c = reverse_bits[c & 0x3f];
+
+    if (verbose)
+	(void)putc('.', stderr);
+
+    if (!ctx->locked) {
+	ctx->curr_offset = -5;
+	ctx->bufindex = 0;
+
+	while (ctx->curr_offset <= 0) {
+	    /* g_message("syncing"); */
+	    ctx->curr_word <<= 1;
+	    if (ctx->curr_offset > 0) {
+		ctx->curr_word |= c << ctx->curr_offset;
+	    } else {
+		ctx->curr_word |= c >> -(ctx->curr_offset);
+	    }
+	    if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
+		PREAMBLE_PATTERN) {
+		if (rtcmparityok(ctx->curr_word)) {
+		    (void)putc('\n', stderr);
+		    fprintf(stderr, "preamble ok, parity ok -- locked\n");
+		    ctx->locked = true;
+		    /* ctx->curr_offset;  XXX - testing */
+		    break;
+		}
+		(void)putc('\n', stderr);
+		fprintf(stderr, "preamble ok, parity fail\n");
+	    }
+	    ctx->curr_offset++;
+	}			/* end while */
+    }
+    if (ctx->locked) {
+	if (ctx->curr_offset > 0) {
+	    ctx->curr_word |= c << ctx->curr_offset;
+	} else {
+	    ctx->curr_word |= c >> -(ctx->curr_offset);
+	}
+
+	if (ctx->curr_offset <= 0) {
+	    /* weird-assed inversion */
+	    if (ctx->curr_word & P_30_MASK)
+		ctx->curr_word ^= W_DATA_MASK;
+
+	    if (rtcmparityok(ctx->curr_word)) {
+		if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
+		    PREAMBLE_PATTERN) {
+		    if (verbose)
+			fprintf(stderr, 
+				"Preamble spotted (index: %u)",
+				ctx->bufindex);
+		    ctx->bufindex = 0;
+		}
+		if (verbose)
+		    fprintf(stderr,
+			    "processing word %u (offset %d)\n",
+			    ctx->bufindex, ctx->curr_offset);
+		process_word(ctx, ctx->curr_word);
+		ctx->curr_word <<= 30;	/* preserve the 2 low bits */
+		ctx->curr_offset += 30;
+		if (ctx->curr_offset > 0) {
+		    ctx->curr_word |= c << ctx->curr_offset;
+		} else {
+		    ctx->curr_word |= c >> -(ctx->curr_offset);
+		}
+	    } else {
+		(void)putc('\n', stderr);
+		fprintf(stderr, "Parity failure, lost lock\n");
+		ctx->locked = false;
+	    }
+	}
+	ctx->curr_offset -= 6;
+	/* g_message("residual %d", ctx->curr_offset); */
+    }
+}
+
+void print_msg(struct rtcm_msghdr *msghdr)
+{
+    int             len = (int)msghdr->w2.frmlen;
     double          zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
 
-    printf("H\t%d\t%d\t%0.1f\t%d\t%d\t%d\n",
+    printf("H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
 	   msghdr->w1.msgtype,
 	   msghdr->w1.refstaid,
 	   zcount,
@@ -281,11 +241,11 @@ print_msg(struct msghdr * msghdr)
     case 1:
     case 9:
 	{
-	    struct msg1    *m = (struct msg1 *) msghdr;
+	    struct rtcm_msg1    *m = (struct rtcm_msg1 *) msghdr;
 
 	    while (len >= 0) {
 		if (len >= 2)
-		    printf("S\t%d\t%d\t%d\t%0.1f\t%0.3f\t%0.3f\n",
+		    printf("S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w3.satident1,
 			   m->w3.udre1,
 			   m->w4.issuedata1,
@@ -294,7 +254,7 @@ print_msg(struct msghdr * msghdr)
 			   m->w4.rangerate1 * (m->w3.scale1 ?
 					       RRLARGE : RRSMALL));
 		if (len >= 4)
-		    printf("S\t%d\t%d\t%d\t%0.1f\t%0.3f\t%0.3f\n",
+		    printf("S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w4.satident2,
 			   m->w4.udre2,
 			   m->w6.issuedata2,
@@ -303,7 +263,7 @@ print_msg(struct msghdr * msghdr)
 			   m->w5.rangerate2 * (m->w4.scale2 ?
 					       RRLARGE : RRSMALL));
 		if (len >= 5)
-		    printf("S\t%d\t%d\t%d\t%0.1f\t%0.3f\t%0.3f\n",
+		    printf("S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w6.satident3,
 			   m->w6.udre3,
 			   m->w7.issuedata3,
@@ -313,7 +273,7 @@ print_msg(struct msghdr * msghdr)
 			   m->w7.rangerate3 * (m->w6.scale3 ?
 					       RRLARGE : RRSMALL));
 		len -= 5;
-		m = (struct msg1 *) (((RTCMWORD *) m) + 5);
+		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
 	    }
 	}
 	break;
@@ -321,6 +281,35 @@ print_msg(struct msghdr * msghdr)
 	break;
     }
     /* g_message(""); */
+}
+
+int main(int argc, char **argv)
+{
+    int             c;
+    struct rtcm_ctx ctxbuf,
+                   *ctx = &ctxbuf;
+
+    while ((c = getopt(argc, argv, "v:")) != EOF) {
+	switch (c) {
+	case 'v':		/* verbose */
+	    verbose = atoi(optarg);
+	    break;
+
+	case '?':
+	default:
+	    /* usage(); */
+	    break;
+	}
+    }
+    argc -= optind;
+    argv += optind;
+
+    rtcm_init(ctx);
+
+    while ((c = getchar()) != EOF) {
+	rtcm_decode(ctx, (unsigned int)c);
+    }
+    exit(0);
 }
 
 /* end */
