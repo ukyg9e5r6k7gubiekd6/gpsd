@@ -15,8 +15,8 @@ AC_STDC_HEADERS
 AC_C_CONST
 
 if eval "test x$GCC = xyes"; then
-	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -W -D_GNU_SOURCE"
-	dnl -Wcast-qual
+	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE"
+	dnl -Wcast-qual -W
 fi
 
 AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
