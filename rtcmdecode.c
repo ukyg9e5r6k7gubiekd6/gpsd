@@ -17,7 +17,7 @@
 
 #define W_DATA_MASK	0x3fffffc0u
 
-typedef unsigned char uchar;
+typedef /*@unsignedintegraltype@*/ unsigned char uchar;
 
 #define RTCM_CTX_MAX_MSGSZ	128
 
@@ -26,7 +26,7 @@ struct rtcm_ctx {
     int             curr_offset;
     RTCMWORD        curr_word;
     RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
-    uint            bufindex;
+    unsigned int            bufindex;
 };
 
 void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
@@ -63,16 +63,17 @@ static unsigned int reverse_bits[] = {
 };
 /*@ -charint @*/
 
-static uint rtcmparity(RTCMWORD th)
+static unsigned int rtcmparity(RTCMWORD th)
 {
     RTCMWORD        t;
-    uint            p;
+    unsigned int    p;
 
     /*
     if (th & P_30_MASK)
 	th ^= W_DATA_MASK;
     */
 
+    /*@ +charint @*/
     t = th & PARITY_25;
     p = parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
 	parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff];
@@ -91,6 +92,7 @@ static uint rtcmparity(RTCMWORD th)
     t = th & PARITY_30;
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
 		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
+    /*@ -charint @*/
 
     printf("parity %u\n", p);
     return (p);
@@ -154,12 +156,13 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
     if (verbose)
 	(void)putc('.', stderr);
 
+    /*@ -shiftnegative @*/
     if (!ctx->locked) {
 	ctx->curr_offset = -5;
 	ctx->bufindex = 0;
 
 	while (ctx->curr_offset <= 0) {
-	    /* g_message("syncing"); */
+	    /* complain("syncing"); */
 	    ctx->curr_word <<= 1;
 	    if (ctx->curr_offset > 0) {
 		ctx->curr_word |= c << ctx->curr_offset;
@@ -223,6 +226,7 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	ctx->curr_offset -= 6;
 	/* g_message("residual %d", ctx->curr_offset); */
     }
+    /*@ +shiftnegative @*/
 }
 
 void print_msg(struct rtcm_msghdr *msghdr)
@@ -262,6 +266,8 @@ void print_msg(struct rtcm_msghdr *msghdr)
 			   m->w5.pc2 * (m->w4.scale2 ? PCLARGE : PCSMALL),
 			   m->w5.rangerate2 * (m->w4.scale2 ?
 					       RRLARGE : RRSMALL));
+		
+		/*@ -shiftimplementation @*/
 		if (len >= 5)
 		    printf("S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w6.satident3,
@@ -272,6 +278,7 @@ void print_msg(struct rtcm_msghdr *msghdr)
 			   (m->w6.scale3 ? PCLARGE : PCSMALL),
 			   m->w7.rangerate3 * (m->w6.scale3 ?
 					       RRLARGE : RRSMALL));
+		/*@ +shiftimplementation @*/
 		len -= 5;
 		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
 	    }
