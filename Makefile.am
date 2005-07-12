@@ -225,4 +225,4 @@ OPT = -fthread-jumps  \
 	  -falign-labels
 
 rtcmdecode: rtcmdecode.c rtcm.h
-	cc -O1 $(OPT) -DTESTMAIN rtcmdecode.c -o rtcmdecode
+	cc -O2 $(OPT) -DTESTMAIN rtcmdecode.c -o rtcmdecode

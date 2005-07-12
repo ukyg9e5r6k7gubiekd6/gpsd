@@ -111,10 +111,23 @@ static unsigned int rtcmparity(RTCMWORD th)
 }
 
 
+#define rtcmparityok(w)	(rtcmparity(w) == ((w) & 0x3f))
+
+#if 0
+/* 
+ * Defining the above as a function triggers an optimizer bug in gcc 3.4.2.
+ * The symptom is that parity computation is screwed up and the decoder
+ * never achieves sync lock.  Something steps on the argument to 
+ * rtcmparity(); the lossage appears to be related to the compiler's 
+ * attempt to fold the rtcmparity() call into rtcmparityok() in some
+ * tail-recursion-like manner.  This happens under -O2, but not -O1, on
+ * both i386 and amd64. gcc 4.0 does not manifest the bug.
+ */
 static bool rtcmparityok(RTCMWORD w)
 {
     return (rtcmparity(w) == (w & 0x3f));
 }
+#endif
 
 void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 {
@@ -237,7 +250,7 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 }
 /*@ +usereleased +compdef @*/
 
-#ifdef __UNUSED __
+#ifdef __UNUSED__
 void rtcm_output_mag(RTCMWORD * ip)
 /* ship an RTCM message to standard output in Magnavox format */
 {
