@@ -1,12 +1,33 @@
-#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
 #include "rtcm.h"
+#include "gpsd.h"
 
-static int             verbose = 0;
+#ifdef TESTMAIN
+#include <stdio.h>
+#include <stdarg.h>
+
+static int verbose = 5;
+
+void gpsd_report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+    if (errlevel <= verbose) {
+	char buf[BUFSIZ];
+	va_list ap;
+
+	buf[0] = '\0';
+	va_start(ap, fmt) ;
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
+
+	(void)fputs(buf, stderr);
+    }
+}
+#endif /* TESTMAIN */
 
 #define W_DATA_MASK	0x3fffffc0u
 
@@ -77,7 +98,7 @@ static unsigned int rtcmparity(RTCMWORD th)
 		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     /*@ -charint @*/
 
-    printf("parity %u\n", p);
+    gpsd_report(6, "parity %u\n", p);
     return (p);
 }
 
@@ -102,16 +123,13 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
     }
     c = reverse_bits[c & 0x3f];
 
-    if (verbose)
-	(void)putc('.', stderr);
-
     /*@ -shiftnegative @*/
     if (!ctx->locked) {
 	ctx->curr_offset = -5;
 	ctx->bufindex = 0;
 
 	while (ctx->curr_offset <= 0) {
-	    /* complain("syncing"); */
+	    gpsd_report(7, "syncing");
 	    ctx->curr_word <<= 1;
 	    if (ctx->curr_offset > 0) {
 		ctx->curr_word |= c << ctx->curr_offset;
@@ -121,14 +139,12 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	    if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
 		PREAMBLE_PATTERN) {
 		if (rtcmparityok(ctx->curr_word)) {
-		    (void)putc('\n', stderr);
-		    fprintf(stderr, "preamble ok, parity ok -- locked\n");
+		    gpsd_report(5, "preamble ok, parity ok -- locked\n");
 		    ctx->locked = true;
 		    /* ctx->curr_offset;  XXX - testing */
 		    break;
 		}
-		(void)putc('\n', stderr);
-		fprintf(stderr, "preamble ok, parity fail\n");
+		gpsd_report(5, "preamble ok, parity fail\n");
 	    }
 	    ctx->curr_offset++;
 	}			/* end while */
@@ -148,14 +164,12 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	    if (rtcmparityok(ctx->curr_word)) {
 		if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
 		    PREAMBLE_PATTERN) {
-		    if (verbose)
-			fprintf(stderr, 
+		    gpsd_report(6, 
 				"Preamble spotted (index: %u)",
 				ctx->bufindex);
 		    ctx->bufindex = 0;
 		}
-		if (verbose)
-		    fprintf(stderr,
+		gpsd_report(6,
 			    "processing word %u (offset %d)\n",
 			    ctx->bufindex, ctx->curr_offset);
 		{
@@ -174,8 +188,7 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 
 		    if ((ctx->bufindex == 0) &&
 			(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
-			if (verbose)
-			    fprintf(stderr, "word 0 not a preamble- punting\n");
+			gpsd_report(6, "word 0 not a preamble- punting\n");
 			return;
 		    }
 		    ctx->bufindex++;
@@ -198,13 +211,12 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 		    ctx->curr_word |= c >> -(ctx->curr_offset);
 		}
 	    } else {
-		(void)putc('\n', stderr);
-		fprintf(stderr, "Parity failure, lost lock\n");
+		gpsd_report(5, "Parity failure, lost lock\n");
 		ctx->locked = false;
 	    }
 	}
 	ctx->curr_offset -= 6;
-	/* complain("residual %d", ctx->curr_offset); */
+	gpsd_report(7, "residual %d", ctx->curr_offset);
     }
     /*@ +shiftnegative @*/
 }
@@ -279,7 +291,7 @@ int main(int argc, char **argv)
     while ((c = getopt(argc, argv, "v:")) != EOF) {
 	switch (c) {
 	case 'v':		/* verbose */
-	    verbose = atoi(optarg);
+	    verbose = 5 + atoi(optarg);
 	    break;
 
 	case '?':
