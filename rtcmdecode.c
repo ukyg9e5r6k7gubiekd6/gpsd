@@ -6,17 +6,6 @@
 
 #include "rtcm.h"
 
-#define P_30_MASK	0x40000000u
-
-#define	PARITY_25	0xbb1f3480u
-#define	PARITY_26	0x5d8f9a40u
-#define	PARITY_27	0xaec7cd00u
-#define	PARITY_28	0x5763e680u
-#define	PARITY_29	0x6bb1f340u
-#define	PARITY_30	0x8b7a89c0u
-
-#define W_DATA_MASK	0x3fffffc0u
-
 typedef /*@unsignedintegraltype@*/ unsigned char uchar;
 
 #define RTCM_CTX_MAX_MSGSZ	128
@@ -28,6 +17,8 @@ struct rtcm_ctx {
     RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
     unsigned int            bufindex;
 };
+
+#define W_DATA_MASK	0x3fffffc0u
 
 void            rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
 void            rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
@@ -65,6 +56,14 @@ static unsigned int reverse_bits[] = {
 
 static unsigned int rtcmparity(RTCMWORD th)
 {
+#define P_30_MASK	0x40000000u
+
+#define	PARITY_25	0xbb1f3480u
+#define	PARITY_26	0x5d8f9a40u
+#define	PARITY_27	0xaec7cd00u
+#define	PARITY_28	0x5763e680u
+#define	PARITY_29	0x6bb1f340u
+#define	PARITY_30	0x8b7a89c0u
     RTCMWORD        t;
     unsigned int    p;
 
@@ -224,7 +223,7 @@ void rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 	    }
 	}
 	ctx->curr_offset -= 6;
-	/* g_message("residual %d", ctx->curr_offset); */
+	/* complain("residual %d", ctx->curr_offset); */
     }
     /*@ +shiftnegative @*/
 }
@@ -287,7 +286,7 @@ void print_msg(struct rtcm_msghdr *msghdr)
     default:
 	break;
     }
-    /* g_message(""); */
+    /* complain(""); */
 }
 
 int main(int argc, char **argv)
