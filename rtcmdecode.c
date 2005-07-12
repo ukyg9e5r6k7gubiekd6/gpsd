@@ -237,8 +237,41 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 }
 /*@ +usereleased +compdef @*/
 
+#ifdef __UNUSED __
+void rtcm_output_mag(RTCMWORD * ip)
+/* ship an RTCM message to standard output in Magnavox format */
+{
+    static RTCMWORD w = 0;
+    int             len;
+    static uint     sqnum = 0;
+
+    len = ((struct rtcm_msghdr *) ip)->w2.frmlen + 2;
+    ((struct rtcm_msghdr *) ip)->w2.sqnum = sqnum++;
+    sqnum &= 0x7;
+
+    while (len-- > 0) {
+	w <<= 30;
+	w |= *ip++ & W_DATA_MASK;
+
+	w |= rtcmparity(w);
+
+	/* weird-assed inversion */
+	if (w & P_30_MASK)
+	    w ^= W_DATA_MASK;
+
+	/* msb first */
+	putchar(MAG_TAG_DATA | reverse_bits[(w >> 24) & 0x3f]);
+	putchar(MAG_TAG_DATA | reverse_bits[(w >> 18) & 0x3f]);
+	putchar(MAG_TAG_DATA | reverse_bits[(w >> 12) & 0x3f]);
+	putchar(MAG_TAG_DATA | reverse_bits[(w >> 6) & 0x3f]);
+	putchar(MAG_TAG_DATA | reverse_bits[(w) & 0x3f]);
+    }
+}
+#endif /* UNUSED */
+
 #ifdef TESTMAIN
 void rtcm_print_msg(struct rtcm_msghdr *msghdr)
+/* dump the contents of a parsed RTCM104 message */
 {
     int             len = (int)msghdr->w2.frmlen;
     double          zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
