@@ -291,6 +291,7 @@ else
 fi
 
 dnl check for DBUS
+ac_dbus=no
 AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
 if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
    # Found dbus library, check for required versions and enable it
