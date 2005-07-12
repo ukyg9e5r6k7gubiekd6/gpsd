@@ -12,14 +12,6 @@
 
 typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
-#define MAG_SHIFT 6u
-#define MAG_TAG_DATA (1 << MAG_SHIFT)
-#define MAG_TAG_MASK (3 << MAG_SHIFT)
-
-#define PREAMBLE_PATTERN 0x66
-#define PREAMBLE_SHIFT 22
-#define PREAMBLE_MASK (0xFF << PREAMBLE_SHIFT)
-
 #define	ZCOUNT_SCALE	0.6	/* sec */
 #define	PCSMALL		0.02	/* metres */
 #define	PCLARGE		0.32	/* metres */
