@@ -16,8 +16,9 @@ INCLUDES = $(DBUS_CFLAGS)
 endif
 
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
-check_PROGRAMS = gpsmm_test bits
 bin_SCRIPTS = gpsprof gpsfake 
+sbin_PROGRAMS = gpsd
+check_PROGRAMS = gpsmm_test bits # rtcmdecode
 
 #
 # Build xgps
@@ -39,16 +40,8 @@ xgpsspeed_SOURCES = \
 xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build gpsmm_test
-#
-gpsmm_test_SOURCES = \
-	gpsmm_test.cpp
-gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
-
-#
 # Build gpsd
 #
-sbin_PROGRAMS = gpsd
 gpsd_SOURCES = \
 	gpsd_dbus.h \
 	gpsd_dbus.c \
@@ -91,6 +84,13 @@ libgps_c_sources = \
 
 libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
+
+#
+# Build gpsmm_test
+#
+gpsmm_test_SOURCES = \
+	gpsmm_test.cpp
+gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
 # Create Manpages
@@ -203,7 +203,7 @@ splint:
 	@echo "Running splint on bits test harness..."
 	-splint bits.c
 
-OPT = -fschedule-insns
-
+# This produces a good decoder, but (at least under gcc 3.4.3)
+# removing -fschedule-insns breaks the generated code.
 rtcmdecode: rtcmdecode.c rtcm.c rtcm.h
-	cc -O2 $(OPT) rtcmdecode.c rtcm.c -o rtcmdecode
+	cc -O2 -fschedule-insns rtcmdecode.c rtcm.c -o rtcmdecode
