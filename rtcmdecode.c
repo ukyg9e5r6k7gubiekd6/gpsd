@@ -124,7 +124,8 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
     ctx->bufindex = 0;
 }
 
-struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
+/*@ -usereleased -compdef @*/
+/*@null@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 {
     struct rtcm_msghdr *res;
 
@@ -234,6 +235,7 @@ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
     /* never achieved lock */
     return RTCM_NO_SYNC;
 }
+/*@ +usereleased +compdef @*/
 
 #ifdef TESTMAIN
 void rtcm_print_msg(struct rtcm_msghdr *msghdr)

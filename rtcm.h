@@ -132,8 +132,8 @@ struct rtcm_ctx {
 #define RTCM_NO_SYNC	(struct rtcm_msghdr *)0
 #define RTCM_SYNC	(struct rtcm_msghdr *)-1
 
-void rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
-struct rtcm_msghdr * rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
-void rtcm_print_msg(struct rtcm_msghdr * m);
+extern void rtcm_init(/*@out@*/struct rtcm_ctx * ctx);
+extern /*@null@*/ struct rtcm_msghdr * rtcm_decode(struct rtcm_ctx * ctx, unsigned int c);
+extern void rtcm_print_msg(struct rtcm_msghdr * m);
 
 /* end */
