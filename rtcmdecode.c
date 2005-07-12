@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "rtcm.h"
 #include "gpsd.h"
+#include "rtcm.h"
 
 #include <stdio.h>
 #include <stdarg.h>

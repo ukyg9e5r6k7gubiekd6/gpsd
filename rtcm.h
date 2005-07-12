@@ -119,13 +119,11 @@ struct rtcm_msg1 {
 
 typedef /*@unsignedintegraltype@*/ unsigned char uchar;
 
-#define RTCM_CTX_MAX_MSGSZ	128
-
 struct rtcm_ctx {
     bool            locked;
     int             curr_offset;
     RTCMWORD        curr_word;
-    RTCMWORD        buf[RTCM_CTX_MAX_MSGSZ];
+    RTCMWORD        buf[RTCM_WORDS_MAX];
     unsigned int    bufindex;
 };
 

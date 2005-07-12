@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "rtcm.h"
 #include "gpsd.h"
+#include "rtcm.h"
 
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
@@ -182,7 +182,7 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next PREAMBLE_PATTERN and go on from there. 
 		     */
-		    if (ctx->bufindex >= RTCM_CTX_MAX_MSGSZ){
+		    if (ctx->bufindex >= RTCM_WORDS_MAX){
 			ctx->bufindex = 0;
 			return RTCM_NO_SYNC;
 		    }

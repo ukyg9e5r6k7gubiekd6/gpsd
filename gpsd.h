@@ -43,7 +43,8 @@
  * maximum number of data words allowed by the format is 31, so that
  * the longest possible message will have a total of 33 words."
  */
-#define RTCM_MAX	33*sizeof(int32_t)
+#define RTCM_WORDS_MAX	33
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(int32_t))
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
