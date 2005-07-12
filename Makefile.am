@@ -203,13 +203,7 @@ splint:
 	@echo "Running splint on bits test harness..."
 	-splint bits.c
 
-OPT = -fthread-jumps  \
-          -frerun-cse-after-loop  -frerun-loop-opt  \
-          -fpeephole2  \
-          -fschedule-insns  -fschedule-insns2  \
-          -fsched-interblock  -fsched-spec  \
-          -funit-at-a-time  \
-	  -falign-labels
+OPT = -fschedule-insns
 
 rtcmdecode: rtcmdecode.c rtcm.c rtcm.h
 	cc -O2 $(OPT) rtcmdecode.c rtcm.c -o rtcmdecode
