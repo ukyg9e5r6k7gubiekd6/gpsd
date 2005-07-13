@@ -306,14 +306,10 @@ class TestSession:
         if now != self.fd_set:
             self.progress("File descriptors: %s\n" % now)
             self.fd_set = now
-    def gps_add(self, name, speed=4800, pred=None):
+    def gps_add(self, logfile, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."
-        self.progress("gpsfake: gps_add(%s, %d)\n" % (name, speed))
-        if name not in self.fakegpslist:
-            if not name.endswith(".log"):
-                logfile = name + ".log"
-            else:
-                logfile = name
+        self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
+        if logfile not in self.fakegpslist:
             newgps = FakeGPS(logfile, speed=speed)
             if pred:
                 newgps.go_predicate = pred
