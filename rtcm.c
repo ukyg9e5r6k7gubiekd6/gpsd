@@ -174,12 +174,12 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 	    if (rtcmparityok(ctx->curr_word)) {
 		if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
 		    PREAMBLE_PATTERN) {
-		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				"Preamble spotted (index: %u)",
+		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
+				"Preamble spotted (index: %u)\n",
 				ctx->bufindex);
 		    ctx->bufindex = 0;
 		}
-		gpsd_report(RTCM_ERRLEVEL_BASE+1,
+		gpsd_report(RTCM_ERRLEVEL_BASE+2,
 			    "processing word %u (offset %d)\n",
 			    ctx->bufindex, ctx->curr_offset);
 		{
