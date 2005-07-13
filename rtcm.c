@@ -99,6 +99,11 @@ static unsigned int rtcmparity(RTCMWORD th)
  * attempt to fold the rtcmparity() call into rtcmparityok() in some
  * tail-recursion-like manner.  This happens under -O2, but not -O1, on
  * both i386 and amd64. gcc 4.0 does not manifest the bug.
+ *
+ * And the fun doesn't stop there! It turns out that even with this fix, bare
+ * -O2 generates bad code.  It takes "-O2 -fschedule-insns" to generate good
+ * code under 3.4.[23]...which is weird because -O2 is supposed to *imply*
+ * -fschedule-insns.
  */
 static bool rtcmparityok(RTCMWORD w)
 {
