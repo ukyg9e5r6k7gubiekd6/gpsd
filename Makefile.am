@@ -190,16 +190,6 @@ EXTRA_DIST = \
 libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
 
-# Regression-test the daemon
-# This requires gcc4; there's been some change in the math libraries since
-# gcc3 that affects the low-order digits of the track field in the O response.
-testregress:
-	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
-
-# Build the regression tests
-makeregress:
-	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
-
 # Report splint warnings
 splint:
 	@echo "Running splint on daemon and libraries..."
@@ -211,4 +201,29 @@ splint:
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
-	-splint bits.c
+	-splint bits.c @echo "Running splint on rtcmdecode..."
+	-splint rtcmdecode.c
+
+#
+# Regression tests begin here
+#
+
+# Regression-test the daemon
+# This requires gcc4; there's been some change in the math libraries since
+# gcc3 that affects the low-order digits of the track field in the O response.
+gps-regress:
+	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+
+# Build the regression tests for the daeomon
+gps-makeregress:
+	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
+
+# Regression-test the RTCM decoder
+rtcm-regress:
+	@for f in test/*.rtcm; do rtcmdecode <$${f} >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+
+# Rebuild the RTCM regression tests
+rtcm-makeregress:
+	@for f in test/*.rtcm; do rtcmdecode <$${f} >$${f}.chk; done
+
+testregress: gps-regress rtcm-regress

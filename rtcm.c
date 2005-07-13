@@ -1,3 +1,49 @@
+/*****************************************************************************
+
+This is a decoder for RTCM-104, an obscure and complicated serial
+protocol used for broadcasting pseudorange corrections from
+differential-GPS reference stations.  The applicable
+standard is
+
+RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL NAVSTAR GPS SERVICE,
+RTCM PAPER 194-93/SC 104-STD
+
+Ordering instructions are accessible from <http://www.rtcm.org/>
+under "Publications".
+
+This decoder is incomplete. It handles only messages of type 1 and 9.
+
+The code was originally by Wolfgang Rupprecht.  You are not expected
+to understand it. Here are his rather cryptic notes:
+
+1) trim and  bitflip the input.
+
+While syncing the msb of the input gets shifted into lsb of the
+assembled word.  
+    word <<= 1, or in input >> 5 
+    word <<= 1, or in input >> 4
+    word <<= 1, or in input >> 3
+    word <<= 1, or in input >> 2 
+    word <<= 1, or in input >> 1 
+    word <<= 1, or in input
+
+At one point it should sync-lock.
+
+----
+
+Shift 6 bytes of rtcm data in as such:
+
+---> (trim-bits-to-5-bits) ---> (end-for-end-bit-flip) ---> 
+
+---> shift-into-30-bit-shift-register
+              |||||||||||||||||||||||
+	      detector-for-preamble
+              |||||||||||||||||||||||
+              detector-for-parity
+              |||||||||||||||||||||||
+
+*****************************************************************************/
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
