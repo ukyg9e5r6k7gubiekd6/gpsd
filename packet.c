@@ -232,15 +232,26 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	}
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
+	/*
+	 * Fall through to trying to recognize RTCM104 packets.
+	 * RTCM104 has its own state machine; we crank it here.
+	 */
+	/*@ -casebreak @*/
+    case RTCM_SYNC_STATE:
+	/*@ -casebreak @*/
+    case RTCM_RECOGNIZED:
 	rtcm_state = rtcm_decode(&session->rtcm, c);
 	if (rtcm_state == RTCM_NO_SYNC)
 	    session->packet_state = GROUND_STATE;
 	else if (rtcm_state == RTCM_SYNC)
 	    session->packet_state = RTCM_SYNC_STATE;
-	else
+	else {
 	    session->packet_state = RTCM_RECOGNIZED;
+	    session->packet_type = RTCM_PACKET;
+	}
 #endif /* RTCM104_ENABLE */
 	break;
+	/*@ +casebreak @*/
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
@@ -603,8 +614,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
-#ifdef RTCM104_ENABLE
-#endif /* RTCM104_ENABLE */
     }
 /*@ -charint */
 }

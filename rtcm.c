@@ -119,7 +119,7 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 }
 
 /*@ -usereleased -compdef @*/
-/*@null@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
+/*@null@*//*@observer@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
 {
     struct rtcm_msghdr *res;
 
