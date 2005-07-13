@@ -11,7 +11,7 @@
 
 extern struct gps_type_t zodiac_binary;
 
-#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLL) || defined(EVERMORE_ENABLE) 
+#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLL) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
@@ -392,7 +392,7 @@ static struct gps_type_t itrax = {
     itrax_initializer,		/* initialize */
     packet_get,			/* how to get a packet */
     nmea_parse_input,		/* how to interpret a packet */
-    pass_rtcm,			/* write RTCM data straight */
+    NULL,			/* iTrax doesn't support DGPS/WAAS/EGNOS */
     itrax_speed,		/* no speed switcher */
     NULL,			/* no mode switcher */
     itrax_rate,			/* there's a sample-rate switcher */
