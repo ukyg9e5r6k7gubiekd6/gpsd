@@ -480,6 +480,20 @@ strings live in vendor-specific namespaces (PSRF for SiRF, PGRM for
 Garmin, etc.)  your initializing control string will almost certainly
 be ignored by anything not specifically watching for it.
 
+*** Initializing time and date
+
+Some mode-changing commands have time field that initializes the GPS
+clock.  If the designers were smart, they included a control bit that
+allows the GPS to retain its clock value (and previous fix, if any)
+and for you to leave those fields empty (sometimes this is called "hot
+start").
+
+If the GPS-Week/TOW fields are required, as on the Evermore chip,
+don't just zero them.  GPSes do eventually converge on the correct
+time when they've exchanged handshakes with enough satellites, but the
+time required for convergence is proportional to how far off the
+initial value is.  So make a point of getting the GPS week right.
+
 *** How drivers are invoked
 
 Drivers are invoked in one of three ways: (1) when the NMEA driver

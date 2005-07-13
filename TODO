@@ -23,6 +23,42 @@ otherwise do something nasty to the serial I/O layer.
 
 The default build has ENABLE_PPS off until we figure this one out.
 
+*** First packet from each device may be getting junked
+
+Rob Janssen reports
+> As the code is now (and has been as long as I have been hacking drivers)
+> the first packet received is junked somewhere before the parser is called.
+
+*** First P command to a device always returns ?
+
+To understand what's going on, you need to know that gpsd does not
+immediately assign a client a GPS from its pool of known devices when
+the client connects.  Rather, it waits until the client issues a
+command that requires GPS information.
+
+The reason for this goes back to when I added multi-device support in 2.21, 
+I realized then that what the client might want to do is list available
+GPSes (with K) and choose one (with F).  There is also at least one other
+command, L, that doesn't require a GPS.  And in general, waiting until 
+a GPS is really needed to wake one up is a good idea -- saves power,
+which can be important because GPS-equipped computers are more than
+likely running off a battery.
+
+So I deferred binding the device.  Your first P command triggers the
+action of binding a GPS to your channel, but *at that time* no GPS is
+yet bound.  The GPS doesn't have a fix, so you get ?.  But by the time
+of your *next* request gpsd has polled the daemon and has a fix.
+
+I hadn't noticed that deferring binding guaranteed a first P response
+of ? previously because the test clients all use watcher mode.  In
+watcher mode you get 'O' updates whenever the GPS ships a recognized
+sentence.  The old-style individual requests are obsolete, really.
+
+I'm divided in my mind whether to fix this bug or document it.  I suppose
+I could make the device-binding logic do an immediate poll of the
+device it binds.  That would complicate the code some.  Not sure
+it's worth it.
+
 ** Bugs gpsd tickles in other software
 
 *** A long-running xgps may induce a memory leak in the X server
