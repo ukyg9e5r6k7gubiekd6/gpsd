@@ -16,6 +16,7 @@ This decoder is incomplete. It handles only messages of type 1 and 9.
 The code was originally by Wolfgang Rupprecht.  You are not expected
 to understand it. Here are his rather cryptic notes:
 
+--------------------------------------------------------------------------
 1) trim and  bitflip the input.
 
 While syncing the msb of the input gets shifted into lsb of the
@@ -41,6 +42,25 @@ Shift 6 bytes of rtcm data in as such:
               |||||||||||||||||||||||
               detector-for-parity
               |||||||||||||||||||||||
+--------------------------------------------------------------------------
+
+Wolfgang's decoder was loosely based on one written by John Sanger
+in 1999 (in particular it uses Sanger's dump format).  Here are John 
+Sanger's original notes:
+
+--------------------------------------------------------------------------
+The RTCM decoder prints a legible representation of the input data.
+The RTCM SC-104 specification is copyrighted, so I cannot
+quote it - in fact, I have never read it! Most of the information
+used to develop the decoder came from publication ITU-R M.823.
+This is a specification of the data transmitted from LF DGPS
+beacons in the 300kHz band. M.823 contains most of those parts of
+RTCM SC-104 directly relevant to the air interface (there
+are one or two annoying and vital omissions!). Information
+about the serial interface format was gleaned from studying
+the output of a beacon receiver test program made available on
+Starlink's website.
+--------------------------------------------------------------------------
 
 *****************************************************************************/
 

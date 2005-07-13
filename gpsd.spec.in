@@ -108,6 +108,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %files -n gpsd-devel
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING HACKING TODO
+%attr(755, root, root) %{_bindir}/gpsfake
+%attr(755, root, root) %{_bindir}/rtcmdecode
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
@@ -116,6 +118,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
+%{_mandir}/man1/rtcmdecode.1*
+%{_mandir}/man1/rtcm.5*
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gpsfake.py*
 
@@ -132,7 +136,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 - Added Evermore binary support, untested.  Added Sony CXD2951 support,
   also untested.  All error estimates are now nailed to 95% confidence
   interval. DBUS support is autodetected and no longer needs to be
-  configured.  Added iTrax NMEA support, untested.
+  configured.  Added iTrax NMEA support, untested.  Added rtcmdecode
+  and its documentation.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.

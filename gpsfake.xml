@@ -48,7 +48,7 @@ ignored.</para>
 
 <para>The <application>gpsd</application> instance is run in
 foreground.  The thread sending fake GPS data to the daemon 
-uis run in background.</para>
+is run in background.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>

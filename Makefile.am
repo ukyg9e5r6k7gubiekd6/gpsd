@@ -111,7 +111,9 @@ man_MANS = \
 	libgpsd.3 \
 	gpsprof.1 \
 	gpsfake.1 \
-	sirfmon.1
+	sirfmon.1 \
+	rtcmdecode.1 \
+	rtcm.5
 
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
@@ -136,6 +138,12 @@ gpsfake.1: gpsfake.xml
 
 sirfmon.1: sirfmon.xml
 	-$(XMLTO) man sirfmon.xml
+
+rtcmdecode.1: rtcmdecode.xml
+	-$(XMLTO) man rtcmdecode.xml
+
+rtcm.5: rtcm.xml
+	-$(XMLTO) man rtcm.xml
 
 #
 # Do a release with a tar.gz and a tar.bz2
@@ -169,6 +177,8 @@ EXTRA_DIST = \
 	gpsprof.xml \
 	gpsfake.xml \
 	sirfmon.xml \
+	rtcmdecode.xml \
+	rtcm.xml \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
