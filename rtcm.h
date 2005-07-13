@@ -145,6 +145,8 @@ struct rtcm_ctx {
 #define RTCM_NO_SYNC	(struct rtcm_msghdr *)0
 #define RTCM_SYNC	(struct rtcm_msghdr *)-1
 
+#define RTCM_ERRLEVEL_BASE	5
+
 extern void rtcm_init(/*@out@*/struct rtcm_ctx *);
 extern /*@null@*//*@observer@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx *, unsigned int);
 extern void rtcm_dump(struct rtcm_msghdr *, char[], size_t);

@@ -83,7 +83,7 @@ static unsigned int rtcmparity(RTCMWORD th)
 		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     /*@ -charint @*/
 
-    gpsd_report(6, "parity %u\n", p);
+    gpsd_report(RTCM_ERRLEVEL_BASE+2, "parity %u\n", p);
     return (p);
 }
 
@@ -135,7 +135,7 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 	ctx->bufindex = 0;
 
 	while (ctx->curr_offset <= 0) {
-	    gpsd_report(7, "syncing");
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing");
 	    ctx->curr_word <<= 1;
 	    if (ctx->curr_offset > 0) {
 		ctx->curr_word |= c << ctx->curr_offset;
@@ -145,12 +145,14 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 	    if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
 		PREAMBLE_PATTERN) {
 		if (rtcmparityok(ctx->curr_word)) {
-		    gpsd_report(5, "preamble ok, parity ok -- locked\n");
+		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				"preamble ok, parity ok -- locked\n");
 		    ctx->locked = true;
 		    /* ctx->curr_offset;  XXX - testing */
 		    break;
 		}
-		gpsd_report(5, "preamble ok, parity fail\n");
+		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+			    "preamble ok, parity fail\n");
 	    }
 	    ctx->curr_offset++;
 	}			/* end while */
@@ -172,12 +174,12 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 	    if (rtcmparityok(ctx->curr_word)) {
 		if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
 		    PREAMBLE_PATTERN) {
-		    gpsd_report(6, 
+		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"Preamble spotted (index: %u)",
 				ctx->bufindex);
 		    ctx->bufindex = 0;
 		}
-		gpsd_report(6,
+		gpsd_report(RTCM_ERRLEVEL_BASE+1,
 			    "processing word %u (offset %d)\n",
 			    ctx->bufindex, ctx->curr_offset);
 		{
@@ -196,7 +198,8 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 
 		    if ((ctx->bufindex == 0) &&
 			(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
-			gpsd_report(6, "word 0 not a preamble- punting\n");
+			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				    "word 0 not a preamble- punting\n");
 			return RTCM_NO_SYNC;
 		    }
 		    ctx->bufindex++;
@@ -217,12 +220,13 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 		    ctx->curr_word |= c >> -(ctx->curr_offset);
 		}
 	    } else {
-		gpsd_report(5, "Parity failure, lost lock\n");
+		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
+			    "parity failure, lost lock\n");
 		ctx->locked = false;
 	    }
 	}
 	ctx->curr_offset -= 6;
-	gpsd_report(7, "residual %d", ctx->curr_offset);
+	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d", ctx->curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/

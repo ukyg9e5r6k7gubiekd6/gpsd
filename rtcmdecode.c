@@ -7,7 +7,7 @@
 
 #include "gpsd.h"
 
-static int verbose = 5;
+static int verbose = RTCM_ERRLEVEL_BASE;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -16,7 +16,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	char buf[BUFSIZ];
 	va_list ap;
 
-	buf[0] = '\0';
+	strcpy(buf, "rtcmdecode: ");
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     while ((c = getopt(argc, argv, "v:")) != EOF) {
 	switch (c) {
 	case 'v':		/* verbose */
-	    verbose = 5 + atoi(optarg);
+	    verbose = RTCM_ERRLEVEL_BASE + atoi(optarg);
 	    break;
 
 	case '?':
@@ -59,4 +59,4 @@ int main(int argc, char **argv)
     exit(0);
 }
 
-/* end */
+/* rtcmdecode.c ends here */
