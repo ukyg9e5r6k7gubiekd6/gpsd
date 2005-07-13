@@ -163,6 +163,13 @@ double gpstime_to_unix(int week, double tow)
     return fixtime;
 }
 
+void unix_to_gpstime(double unixtime, int *week, double *tow)
+{
+    unixtime -= GPS_EPOCH;
+    *week = (int)(unixtime / SECS_PER_WEEK);
+    *tow = fmod(unixtime, SECS_PER_WEEK);
+}
+
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 
 static double CalcRad(double lat)
