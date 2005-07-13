@@ -60,10 +60,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 
     /* necessary in case we start reading in the middle of a GPGSV sequence */
     gpsd_zero_satellites(&session->gpsdata);
-
-#ifdef RTCM104_ENABLE
-    rtcm_init(&session->rtcm);
-#endif /* RTCM104_ENABLE */
 }
 
 void gpsd_deactivate(struct gps_device_t *session)
@@ -542,7 +538,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_recv_time = timestamp();
 
 	/* Get data from current packet into the newdata structure */
-	received = session->device_type->parse_packet(session);
+	if (session->device_type->parse_packet)
+	    received = session->device_type->parse_packet(session);
+	else
+	    received = 0;	/* it was all done in the packet getter */
 
 	/* Clear fix data at start of cycle */
 	if ((received & CYCLE_START_SET)!=0) {

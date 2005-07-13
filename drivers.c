@@ -404,6 +404,37 @@ static struct gps_type_t itrax = {
 #endif /* ITRAX_ENABLE */
 #endif /* NMEA_ENABLE */
 
+#ifdef RTCM104_ENABLE
+/**************************************************************************
+ *
+ * This stub driver for RTCM-104 simply accepts incomping packets.
+ * The packet getter does all the work; the unpacked packets end up
+ * in structures in private storage.
+ *
+ **************************************************************************/
+
+static void rtcm104_initializer(struct gps_device_t *session)
+{
+    rtcm_init(&session->rtcm);
+}
+
+static struct gps_type_t rtcm104 = {
+    "RTCM104",		/* full name of type */
+    NULL,		/* no recognition string */
+    NULL,		/* no probe */
+    rtcm104_initializer,/* initialize the packet engine */
+    packet_get,		/* how to get a packet */
+    NULL,		/* packet getter does all the parsing */
+    NULL,		/* don't send RTCM data,  */
+    NULL,		/* no speed switcher */
+    NULL,		/* no mode switcher */
+    NULL,		/* no sample-rate switcher */
+    -1,			/* not relevant, no rate switch */
+    NULL,		/* no wrapup code */
+    1,			/* updates every second */
+};
+#endif /* RTCM104_ENABLE */
+
 extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary;
 
@@ -444,6 +475,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ITALK_ENABLE
     &italk_binary, 
 #endif /* ITALK_ENABLE */
+#ifdef RTCM104_ENABLE
+    &rtcm104, 
+#endif /* RTCM104_ENABLE */
     NULL,
 };
 /*@ +nullassign @*/
