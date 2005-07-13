@@ -15,10 +15,10 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
-bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
+bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = gpsmm_test bits rtcmdecode
+check_PROGRAMS = gpsmm_test bits 
 
 #
 # Build xgps
@@ -149,7 +149,7 @@ release: distdir
 	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
 	-rm -rf $(distdir)
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h 
+include_HEADERS = gps.h gpsd.h rtcm.h libgpsmm.h 
 
 # Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \
@@ -191,6 +191,8 @@ libgps: libgps.c .libs/libgps.a
 	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
 
 # Regression-test the daemon
+# This requires gcc4; there's been some change in the math libraries since
+# gcc3 that affects the low-order digits of the track field in the O response.
 testregress:
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 

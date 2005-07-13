@@ -173,19 +173,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for Evermore support
-AC_ARG_ENABLE(evermore,
-  AC_HELP_STRING([--disable-evermore],
-                 [disable Evermore binary support]),
-  [ac_fv18=$enableval], [ac_evermore=yes])
-AC_MSG_CHECKING([for Evermore support])
-if test x"$ac_evermore" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([EVERMORE_ENABLE], 1, [Evermore binary support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl check for Tripmate support
 AC_ARG_ENABLE(tripmate,
   AC_HELP_STRING([--disable-tripmate],
@@ -247,6 +234,32 @@ AC_MSG_CHECKING([for Garmin support])
 if test x"$ac_garmin" = "xyes"; then
     AC_MSG_RESULT([yes])
 	AC_DEFINE([GARMIN_ENABLE], 1, [Garmin support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for Evermore support
+AC_ARG_ENABLE(evermore,
+  AC_HELP_STRING([--disable-evermore],
+                 [disable Evermore binary support]),
+  [ac_fv18=$enableval], [ac_evermore=yes])
+AC_MSG_CHECKING([for Evermore support])
+if test x"$ac_evermore" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([EVERMORE_ENABLE], 1, [Evermore binary support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for RTCM104 support
+AC_ARG_ENABLE(rtcm104,
+  AC_HELP_STRING([--disable-rtcm104],
+                 [disable rtcm104 support]),
+  [ac_rtcm104=$enableval], [ac_rtcm104=yes])
+AC_MSG_CHECKING([for rtcm104 support])
+if test x"$ac_rtcm104" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([RTCM104_ENABLE], 1, [rtcm104 binary support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -334,6 +347,7 @@ echo "iTrax                   : $ac_itrax"
 echo "iTalk                   : $ac_italk"
 echo "Garmin                  : $ac_garmin"
 echo "Evermore                : $ac_evermore"
+echo "RTCM104 support         : $ac_rtcm104"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo "Enable shared libraries : $enable_shared"

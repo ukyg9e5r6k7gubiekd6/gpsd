@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include "gpsd.h"
-#include "rtcm.h"
-
 #include <stdio.h>
 #include <stdarg.h>
+
+#include "gpsd.h"
 
 static int verbose = 5;
 
@@ -26,6 +24,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)fputs(buf, stderr);
     }
 }
+
 void rtcm_print_msg(struct rtcm_msghdr *msghdr)
 /* dump the contents of a parsed RTCM104 message */
 {

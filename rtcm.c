@@ -4,7 +4,6 @@
 #include <stdbool.h>
 
 #include "gpsd.h"
-#include "rtcm.h"
 
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)

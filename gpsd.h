@@ -7,6 +7,7 @@
 #include <termios.h>
 #include "config.h"
 #include "gps.h"
+#include "rtcm.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE
@@ -30,21 +31,7 @@
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
-/*  
- * From the RCTM104 standard:
- *
- * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
- * transmission rate provides a convenient timing capability where the
- * times of word boundaries are a rational multiple of 0.6 seconds."
- *
- * "Each frame is N+2 words long, where N is the number of message data
- * words. For example, a filler message (type 6 or 34) with no message
- * data will have N=0, and will consist only of two header words. The
- * maximum number of data words allowed by the format is 31, so that
- * the longest possible message will have a total of 33 words."
- */
-#define RTCM_WORDS_MAX	33
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(int32_t))
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(RTCMWORD))
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
@@ -200,6 +187,9 @@ struct gps_device_t {
 	    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
+#ifdef RTCM104_ENABLE
+	struct rtcm_ctx	rtcm;
+#endif /* RTCM104_ENABLE */
     };
 #endif /* BINARY_ENABLE */
 };

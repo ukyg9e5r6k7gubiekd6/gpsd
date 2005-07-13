@@ -1,14 +1,16 @@
 /*
  * Structures for interpreting words in an RTCM-104 message (after
- * parity checking and removing inversion).
+ * parity checking and removing inversion). RTCM104 is an obscure and
+ * complicated serial protocol used for broadcasting pseudorange
+ * corrections from differential-GPS reference stations. This header
+ * is part of the GPSD package: see <http://gpsd.berlios.de> for more.
  *
- * The rtcm words are 30-bit words.  We will lay them into memory into
+ * The RTCM words are 30-bit words.  We will lay them into memory into
  * 30-bit (low-end justified) chunks.  To write them out we will write
- * 5 magnavox-format bytes where the low 6-bits of the byte are 6-bits
+ * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
  * of the 30-word msg.
- *
- * This code was originally by Wolfgang Rupprecht.
  */
+
 
 typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
@@ -117,7 +119,20 @@ struct rtcm_msg1 {
     struct rtcm_msg1w7   w17;
 };
 
-typedef /*@unsignedintegraltype@*/ unsigned char uchar;
+/*  
+ * From the RCTM104 standard:
+ *
+ * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
+ * transmission rate provides a convenient timing capability where the
+ * times of word boundaries are a rational multiple of 0.6 seconds."
+ *
+ * "Each frame is N+2 words long, where N is the number of message data
+ * words. For example, a filler message (type 6 or 34) with no message
+ * data will have N=0, and will consist only of two header words. The
+ * maximum number of data words allowed by the format is 31, so that
+ * the longest possible message will have a total of 33 words."
+ */
+#define RTCM_WORDS_MAX	33
 
 struct rtcm_ctx {
     bool            locked;

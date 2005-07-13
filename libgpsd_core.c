@@ -60,6 +60,10 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 
     /* necessary in case we start reading in the middle of a GPGSV sequence */
     gpsd_zero_satellites(&session->gpsdata);
+
+#ifdef RTCM104_ENABLE
+    rtcm_init(&session->rtcm);
+#endif /* RTCM104_ENABLE */
 }
 
 void gpsd_deactivate(struct gps_device_t *session)

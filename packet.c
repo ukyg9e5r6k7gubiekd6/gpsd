@@ -146,12 +146,8 @@ enum {
 #ifdef EVERMORE_ENABLE
    EVERMORE_LEADER_1,	/* a DLE after having seen Evermore data */
    EVERMORE_LEADER_2,	/* seen opening STX of Evermore packet */
-   EVERMORE_LENGTH,	/* seen 1-byte packet length */
-   EVERMORE_HEADER_DLE,	/* 1-byte packet length was DLE */
    EVERMORE_PAYLOAD,	/* in payload part of Evermore packet */
-   EVERMORE_DELIVERED,	/* got to end of payload, looking for checksum */
-   EVERMORE_SUM_DLE,	/* in payload part of Evermore packet */
-   EVERMORE_TRAILER_1,	/* looking for first byte of Evermore trailer */ 
+   EVERMORE_PAYLOAD_DLE,	/* DLE in payload part of Evermore packet */
    EVERMORE_RECOGNIZED,	/* found end of Evermore packet */
 #endif /* EVERMORE_ENABLE */
 
@@ -177,10 +173,18 @@ enum {
    TSIP_DLE,		/* we've seen a DLE in TSIP payload */
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
 #endif /* TSIP_ENABLE */
+
+#ifdef RTCM104_ENABLE
+   RTCM_SYNC_STATE,	/* we have sync lock */
+   RTCM_RECOGNIZED,	/* we have an RTCM packet */
+#endif /* RTCM104_ENABLE */
 };
 
 static void nexstate(struct gps_device_t *session, unsigned char c)
 {
+#ifdef RTCM104_ENABLE
+    struct rtcm_msghdr *rtcm_state;
+#endif /* RTCM104_ENABLE */
 /*@ +charint */
     switch(session->packet_state)
     {
@@ -227,6 +231,15 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif /* ITALK_ENABLE */
+#ifdef RTCM104_ENABLE
+	rtcm_state = rtcm_decode(&session->rtcm, c);
+	if (rtcm_state == RTCM_NO_SYNC)
+	    session->packet_state = GROUND_STATE;
+	else if (rtcm_state == RTCM_SYNC)
+	    session->packet_state = RTCM_SYNC_STATE;
+	else
+	    session->packet_state = RTCM_RECOGNIZED;
+#endif /* RTCM104_ENABLE */
 	break;
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
@@ -307,7 +320,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = NMEA_RECOGNIZED;
 	else
 	    session->packet_state = GROUND_STATE;
-	break; 
+	break;
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
@@ -489,38 +502,24 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     case EVERMORE_LEADER_2:
 	session->packet_length = (size_t)c;
 	if (c == 0x10)
-	    session->packet_state = EVERMORE_HEADER_DLE;
+	    session->packet_state = EVERMORE_PAYLOAD_DLE;
 	else
 	    session->packet_state = EVERMORE_PAYLOAD;
 	break;
-    case EVERMORE_HEADER_DLE:
-	if (c == 0x10)
-	    session->packet_state = EVERMORE_LENGTH;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
     case EVERMORE_PAYLOAD:
-	if (--session->packet_length == 0)
-	    session->packet_state = EVERMORE_DELIVERED;
-	break;
-    case EVERMORE_DELIVERED:
 	if (c == 0x10)
-	    session->packet_state = EVERMORE_SUM_DLE;
-	else
-	    session->packet_state = EVERMORE_TRAILER_1;
-	break;
-    case EVERMORE_SUM_DLE:
-	if (c == 0x10)
-	    session->packet_state = EVERMORE_TRAILER_1;
-	else
+	    session->packet_state = EVERMORE_PAYLOAD_DLE;
+	else if (--session->packet_length == 0)
 	    session->packet_state = GROUND_STATE;
 	break;
-    case EVERMORE_TRAILER_1:
-	if (c == 0x03)
-	    session->packet_state = EVERMORE_RECOGNIZED;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
+    case EVERMORE_PAYLOAD_DLE:
+        switch (c) {
+           case 0x10: session->packet_state = EVERMORE_PAYLOAD; break;
+           case 0x02: session->packet_state = EVERMORE_LEADER_2; break;
+           case 0x03: session->packet_state = EVERMORE_RECOGNIZED; break;
+           default: session->packet_state = GROUND_STATE;
+        }
+    break;
     case EVERMORE_RECOGNIZED:
         if (c == 0x10)
 	    session->packet_state = EVERMORE_LEADER_1;
@@ -604,6 +603,8 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
+#ifdef RTCM104_ENABLE
+#endif /* RTCM104_ENABLE */
     }
 /*@ -charint */
 }
@@ -614,13 +615,20 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
 {
     static unsigned char buf[BUFSIZ];
     unsigned char *cp, *tp = buf;
-    for (cp = base; cp < end; cp++)
+    for (cp = base; cp < end; cp++) {
+	    /*
 	if (isgraph(*cp)) {
 	    *tp++ = *cp;
 	}else {
 	    (void)snprintf(tp, sizeof(buf)-(tp-buf), "\\x%02x", *cp);
 	    tp += 4;
 	}
+	*/
+
+	    (void)snprintf(tp, sizeof(buf)-(tp-buf), " %02X", *cp);
+	    tp += 3;
+    }
+
     *tp = '\0';
     return buf;
 }
@@ -636,9 +644,9 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 	session->outbuffer[packetlen] = '\0';
 	session->packet_type = packet_type;
 #ifdef STATE_DEBUG
-	gpsd_report(6, "Packet type %d accepted %d = %s\n", 
+	gpsd_report(6, "Packet type %d accepted %d = %s\n",
 		packet_type, packetlen,
-		buffer_dump(session->outbuffer, 
+		buffer_dump(session->outbuffer,
 			    session->outbuffer+session->outbuflen));
 #endif /* STATE_DEBUG */
     } else {
@@ -648,18 +656,18 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 }
 
 static void packet_discard(struct gps_device_t *session)
-/* shift the input buffer to discard all data up to current input pointer */ 
+/* shift the input buffer to discard all data up to current input pointer */
 {
     size_t discard = session->inbufptr - session->inbuffer;
     size_t remaining = session->inbuflen - discard;
-    session->inbufptr = memmove(session->inbuffer, 
-				session->inbufptr, 
+    session->inbufptr = memmove(session->inbuffer,
+				session->inbufptr,
 				remaining);
     session->inbuflen = remaining;
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n", 
-		discard, remaining, 
-		buffer_dump(session->inbuffer, 
+    gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n",
+		discard, remaining,
+		buffer_dump(session->inbuffer,
 			    session->inbuffer + session->inbuflen));
 #endif /* STATE_DEBUG */
 }
@@ -672,7 +680,7 @@ static void character_discard(struct gps_device_t *session)
 #ifdef STATE_DEBUG
     gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
 		session->inbuflen,
-		buffer_dump(session->inbuffer, 
+		buffer_dump(session->inbuffer,
 			    session->inbuffer + session->inbuflen));
 #endif /* STATE_DEBUG */
 }
@@ -689,7 +697,7 @@ ssize_t packet_get(struct gps_device_t *session)
     int newdata;
 #ifndef TESTMAIN
     /*@ -modobserver @*/
-    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr, 
+    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr,
 			sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer));
     /*@ +modobserver @*/
 #else
@@ -702,10 +710,10 @@ ssize_t packet_get(struct gps_device_t *session)
 	return 0;
 
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n", 
+    gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n",
 		newdata,
 		session->inbufptr-session->inbuffer,
-		session->inbuflen+newdata, 
+		session->inbuflen+newdata,
 		buffer_dump(session->inbufptr, session->inbufptr + newdata));
 #endif /* STATE_DEBUG */
 
@@ -715,7 +723,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	/*@ -modobserver @*/
 	unsigned char c = *session->inbufptr++;
 	/*@ +modobserver @*/
-	/* to regenerate this table, see  statetable.el */	
+	/* to regenerate this table, see  statetable.el */
 	/*%start%*/
 	char *state_table[] = {
 	"GROUND_STATE",
@@ -759,12 +767,8 @@ ssize_t packet_get(struct gps_device_t *session)
 	"ZODIAC_RECOGNIZED",
 	"EVERMORE_LEADER_1",
 	"EVERMORE_LEADER_2",
-	"EVERMORE_LENGTH",
-	"EVERMORE_HEADER_DLE",
 	"EVERMORE_PAYLOAD",
-	"EVERMORE_DELIVERED",
-	"EVERMORE_SUM_DLE",
-	"EVERMORE_TRAILER_1",
+	"EVERMORE_PAYLOAD_DLE",
 	"EVERMORE_RECOGNIZED",
 	"ITALK_LEADER_1",
 	"ITALK_LEADER_2",
@@ -777,14 +781,15 @@ ssize_t packet_get(struct gps_device_t *session)
 	"TSIP_PAYLOAD",
 	"TSIP_DLE",
 	"TSIP_RECOGNIZED",
+	"RTM_SYNC_STATE",
+	"RTM_RECOGBIZED",
 	};
 	/*%end%*/
 	nexstate(session, c);
-	if (isprint(c))
-	    gpsd_report(7, "Character '%c', new state: %d\n",c,state_table[session->packet_state]);
-	else
-	    gpsd_report(7, "Character 0x%02x, new state: %d\n",c,state_table[session->packet_state]);
-	if (session->packet_state == GROUND_STATE) {
+	gpsd_report(7, "Character '%c' [%02X], new state: %s\n",
+			(isprint(c)?c:'.'), c, state_table[session->packet_state]);
+
+    if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);
 #ifdef NMEA_ENABLE
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
@@ -838,29 +843,53 @@ ssize_t packet_get(struct gps_device_t *session)
 		packet_accept(session, ZODIAC_PACKET);
 	    } else {
 		gpsd_report(4,
-		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n", 
+		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n",
 			sum, len, getword(5 + len));
 		session->packet_state = GROUND_STATE;
 	    }
 	    packet_discard(session);
 #endif /* ZODIAC_ENABLE */
-#ifdef EVERMORE_ENABLED
+#ifdef EVERMORE_ENABLE
 	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
-	    unsigned char *trailer = session->inbufptr-2;
-	    unsigned int checksum;
-	    unsigned int n, crc = 0;
-	    bool dle_in_leader = session->inbuffer[2] == 0x10;
-	    if (*trailer == 0x10)
-		checkum = *--trailer;
-	    else
-		checkum = *trailer;
-	    for (n = 3 + dle_in_leader ? 1 : 0; 
-		 n < (unsigned)(trailer - session->inbuffer); 
-		 n++)
-		crc += (int)session->inbuffer[n];
-	    crc %= 256;
-	    if (checksum == crc)
-		packet_accept(session, EVERMORE_PACKET);
+	    unsigned int n, crc, checksum, len;
+        bool ok = false;
+
+        n = 0;
+	/*@ +charint */
+        do {
+           if (session->inbuffer[n++] != 0x10) break;
+           if (session->inbuffer[n++] != 0x02) break;
+           len = session->inbuffer[n++];
+           if (len == 0x10) {
+              if (session->inbuffer[n++] != 0x10) break;
+           }
+           len -= 2;
+           crc = 0;
+           for (; len > 0; len--) {
+              crc += session->inbuffer[n];
+              if (session->inbuffer[n++] == 0x10) {
+                 if (session->inbuffer[n++] != 0x10) break;
+              }
+           }
+           if (len > 0) break;
+           checksum = session->inbuffer[n++];
+           if (checksum == 0x10) {
+              if (session->inbuffer[n++] != 0x10) break;
+           }
+           if (session->inbuffer[n++] != 0x10) break;
+           if (session->inbuffer[n++] != 0x03) break;
+           crc &= 0xff;
+
+           if (crc != checksum) {
+              gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", crc, checksum);
+              break;
+           }
+           ok = true;
+        } while (0);
+	/*@ +charint */
+
+        if (ok)
+        packet_accept(session, EVERMORE_PACKET);
 	    else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
@@ -882,7 +911,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	    packet_discard(session);
 #endif /* ITALK_ENABLE */
 	}
-    }
+    } /* while */
 
     return (ssize_t)session->outbuflen;
 }
