@@ -18,7 +18,7 @@ endif
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon 
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = gpsmm_test bits # rtcmdecode
+check_PROGRAMS = gpsmm_test bits rtcmdecode
 
 #
 # Build xgps
@@ -55,6 +55,12 @@ sirfmon_SOURCES = sirfmon.c
 sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
+# Build rtcmdecode
+#
+rtcmdecode_SOURCES = rtcmdecode.c
+rtcmdecode_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+
+#
 # Build shared libraries
 #
 libgps_la_LDFLAGS = -version-number 15:0:0
@@ -79,6 +85,8 @@ libgps_c_sources = \
 	dgpsip.c \
 	sirf.c \
 	report.c \
+	rtcm.c \
+	rtcm.h \
 	bits.h \
 	timebase.h
 
@@ -202,8 +210,3 @@ splint:
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
 	-splint bits.c
-
-# This produces a good decoder, but (at least under gcc 3.4.3)
-# removing -fschedule-insns breaks the generated code.
-rtcmdecode: rtcmdecode.c rtcm.c rtcm.h
-	cc -O2 -fschedule-insns rtcmdecode.c rtcm.c -o rtcmdecode

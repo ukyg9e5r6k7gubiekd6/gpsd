@@ -7,7 +7,7 @@ Group: System Environment/Daemons
 Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
-BuildRequires: ncurses-devel
+BuildRequires: ncurses-devel gcc4
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 
@@ -58,9 +58,10 @@ to dump the package version and exit. Additionally, it accepts -rv
 %setup -q
 
 %build
-#./autogen.sh
+#CC=gcc4 ./autogen.sh
 %configure
-make %{?_smp_mflags}
+# Requires gcc4 to compile the RTCM104 support correctly.
+CC=gcc4 make -e %{?_smp_mflags}
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"

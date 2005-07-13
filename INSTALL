@@ -40,6 +40,12 @@ To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Mac OS X users may
 need to do "./autogen.sh --x-includes=/usr/X11R6/include"
 
+Note: if you are going to use the RTCM-104 support, you should compile
+with gcc4; if you don't have it installed as your default 
+compiler, do this by specifying CC=gcc4 before the autogen.sh
+command.  The rtcm.c file confuses the gcc-3.4.[23] optimizer
+at -O2 level, making it generate incorrect code.
+
 Then run make: libgps.so, gpsd, xgps, and xgpsspeed will be
 built. Copy the app-defaults files xgps.ad and xgpsspeed.ad to your
 home directory or to the system-wide X app-defaults directory.
