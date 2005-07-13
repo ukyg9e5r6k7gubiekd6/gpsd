@@ -304,10 +304,10 @@ driver.
 static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 {
   // Find all NECESSARY 2x2 subdeterminants
-  //double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
-  //double Det2_12_02 = mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0];
+  double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
+  double Det2_12_02 = mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0];
   //double Det2_12_03 = mat[1][0]*mat[2][3] - mat[1][3]*mat[2][0];
-  //double Det2_12_12 = mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1];
+  double Det2_12_12 = mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1];
   //double Det2_12_13 = mat[1][1]*mat[2][3] - mat[1][3]*mat[2][1];
   //double Det2_12_23 = mat[1][2]*mat[2][3] - mat[1][3]*mat[2][2];
   double Det2_13_01 = mat[1][0]*mat[3][1] - mat[1][1]*mat[3][0];
@@ -324,8 +324,8 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
   double Det2_23_23 = mat[2][2]*mat[3][3] - mat[2][3]*mat[3][2];
 
   // Find all NECESSARY 3x3 subdeterminants
-  //double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02 
-  //				+ mat[0][2]*Det2_12_01;
+  double Det3_012_012 = mat[0][0]*Det2_12_12 - mat[0][1]*Det2_12_02 
+  				+ mat[0][2]*Det2_12_01;
   //double Det3_012_013 = mat[0][0]*Det2_12_13 - mat[0][1]*Det2_12_03 
   //				+ mat[0][3]*Det2_12_01;
   //double Det3_012_023 = mat[0][0]*Det2_12_23 - mat[0][2]*Det2_12_03
@@ -386,7 +386,7 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
   //inverse[3][0] = -Det3_123_012 / det;
   //inverse[3][1] =  Det3_023_012 / det;
   //inverse[3][2] = -Det3_013_012 / det;
-  //inverse[3][3] =  Det3_012_012 / det;
+  inverse[3][3] =  Det3_012_012 / det;
 
   return 1;
 }  
