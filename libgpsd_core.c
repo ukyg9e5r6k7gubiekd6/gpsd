@@ -475,30 +475,43 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    gpsd_report(3, 
 			"packet sniff finds type %d\n", 
 			session->packet_type);
+	    switch (session->packet_type) {
 #ifdef SIRFII_ENABLE
-	    if (session->packet_type == SIRF_PACKET)
+	    case SIRF_PACKET:
 		(void)gpsd_switch_driver(session, "SiRF-II binary");
+		break;
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
-	    else if (session->packet_type == TSIP_PACKET)
+	    case TSIP_PACKET:
 		(void)gpsd_switch_driver(session, "Trimble TSIP");
+		break;
 #endif /* TSIP_ENABLE */
 #ifdef NMEA_ENABLE
-	    else if (session->packet_type == NMEA_PACKET)
+	    case NMEA_PACKET:
 		(void)gpsd_switch_driver(session, "Generic NMEA");
+		break;
 #endif /* NMEA_ENABLE */
 #ifdef ZODIAC_ENABLE
-	    else if (session->packet_type == ZODIAC_PACKET)
+	    case ZODIAC_PACKET:
 		(void)gpsd_switch_driver(session, "Zodiac binary");
+		break;
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
-	    else if (session->packet_type == EVERMORE_PACKET)
+	    case EVERMORE_PACKET:
 		(void)gpsd_switch_driver(session, "Evermore binary");
+		break;
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
-	    else if (session->packet_type == ITALK_PACKET)
+	    case ITALK_PACKET:
 		(void)gpsd_switch_driver(session, "iTalk binary");
+		break;
 #endif /* ITALK_ENABLE */
+#ifdef RTCM104_ENABLE
+	    case RTCM_PACKET:
+		(void)gpsd_switch_driver(session, "RTCM104");
+		break;
+#endif /* RTCM104_ENABLE */
+	}
 	    session->gpsdata.d_xmit_time = timestamp();
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;
