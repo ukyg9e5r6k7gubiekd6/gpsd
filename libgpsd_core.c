@@ -585,6 +585,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';
+#ifdef RTCM104
+	    if (session->packet_type == RTCM_PACKET)
+		rtcm_dump(session, 
+			  buf2+strlen(buf2), 
+			  (sizeof(buf2)-strlen(buf2)));
+#endif /* RTCM104 */
 	    if ((session->gpsdata.set & LATLON_SET) != 0)
 		gpsd_binary_fix_dump(session, 
 				     buf2+strlen(buf2), 
