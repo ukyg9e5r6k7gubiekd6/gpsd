@@ -180,6 +180,40 @@ exact change in question.</p></li>
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
 
+
+<h1>The first A,E,O,P,T,U, or V command to a device always returns ?</h1>
+
+<p>To understand what's going on, you need to know that
+<code>gpsd</code> does not immediately assign a client a GPS from its
+pool of known devices when the client connects.  Rather, it waits
+until the client issues a command that requires GPS information.</p>
+
+<p>The reason for this goes back to when multi-device support was
+added in 2.21.  In a multi-device world, what the client might want to
+do is list available GPSes (with K) and choose one (with F).  There is
+also at least one other command, L, that doesn't require a GPS.  And
+in general, waiting until a GPS is really needed to wake one up is a
+good idea &mdash; it saves power, which can be important because
+GPS-equipped computers are more than likely running off a battery.</p>
+
+<p>So <code>gpsd</code> now defers binding the device.  Your first
+request for fix data triggers the action of binding a GPS to your
+channel, but <em>at that time</em> no GPS is yet bound.  The GPS
+doesn't have a fix, so you get ?.  But by the time of your
+<em>next</em> request <code>gpsd</code> has polled the daemon and has
+a fix.</p>
+
+<p>Generally only human beings testing <code>gpsd</code> via telnet/ssh
+ever notice this bug.  <code>gpsd</code>-using applications poll the
+daemon repeatedly; the delay before the second response comes in
+normally is not noticeable.</p>
+
+<p>We haven't fixed this because the test clients all use watcher mode.  In
+watcher mode, you get 'O' updates whenever the GPS ships a recognized
+sentence.  The old-style individual requests are obsolete, really.
+You should fix your application to use atcher mode &mdash; or better
+yet, the libgps client library.</p>
+
 <h2>Have wildly fluctuating speed?  Try static navigation</h2>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
