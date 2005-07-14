@@ -185,15 +185,17 @@ even) and stop bits (1 or 2).  The command "B=%d" sets the baud rate,
 not changing parity or stop bits; watch the response, because it is
 possible for this to fail if the GPS does not support a
 speed-switching command.  In case of failure, the daemon and GPS will
-continue to communicate at the old speed.</para></listitem>
+continue to communicate at the old speed.  The B= form is rejected
+if more than one client is attached to the channel.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>c</term>
 <listitem>
-<para>If the driver has the capability to change sampling
-rate the command "C=%f" does so, setting a new cycle time
-in seconds.</para>
+<para>If the driver has the capability to change sampling rate the
+command "C=%f" does so, setting a new cycle time in seconds. The "C="
+form is rejected if more than one client is attached to the
+channel.</para>
 
 <para>If the driver has the capability to change sampling rate, this
 command always returns "C=%f %f" giving the current cycle time in
@@ -306,7 +308,8 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 reports the mode as "N=%d"; N=0 means NMEA mode and N=1 means
 alternate mode (binary if it has one, for SiRF and Evermore chipsets
 in particular).  With argument, set the mode if possible; the new mode
-will be reported in the response.</para></listitem>
+will be reported in the response. The "N=" form is rejected if more
+than one client is attached to the channel.</para></listitem>
 </varlistentry>
 
 <varlistentry>

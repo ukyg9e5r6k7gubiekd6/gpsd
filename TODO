@@ -59,15 +59,12 @@ I could make the device-binding logic do an immediate poll of the
 device it binds.  That would complicate the code some.  Not sure
 it's worth it.
 
-*** B=, C=, and N= commands raise multi-session issues
+*** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
-The B=, C=, and N= commands raise issues in the presence of multiple
-sessions.  They could be used for subtle form of DoS attacks by a hostile
-client on other clients of the same GPS.  
-
-Simple solution: allow them only when the device's client count is
-one.  This means that the worst a hostile client can do is prevent
-you from changing the current settings.
+There's a report that RoyalTek support broke between 2.25 and 2.28 by
+David Mandala <davidm@them.com>.  His workaround is to condition out
+SiRF-II support; it works OK in NMEA mode.  He has undertaken to
+pin down the SVN revision that broke things after OLS.
 
 ** Bugs gpsd tickles in other software
 
@@ -117,9 +114,17 @@ system("free t") at the end of each handle_input() call.
 
 *** SiRF firmware uploader
 
-Chris Kuethe appears to be well along on this.  It is not yet 
+Chris Kuethe has shipped a 0.0 alpha version.  This needs to
+be integrated with the rest of the distro. It is not yet 
 resolved whether SiRF Technology will allow us to ship the 
-binary loader code needed to do it.
+binary loader code needed to actually use it.
+
+*** RINEX-format dumping of raw satellite data
+
+It would be useful to be able to extract RINEX-format data from any
+GPS device that can report pseudoranges etc.  This belongs in the
+daemon because the device drivers are already doing the
+packet-cracking needed to get the data off the chips.
 
 *** Decide what to do about RTCM support.
 

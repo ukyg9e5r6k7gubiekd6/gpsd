@@ -6,7 +6,7 @@ webdir=esr@shell.berlios.de:/home/groups/gpsd/htdocs
 makeversion=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
 
 version=${1:-$makeversion}
-echo "Uploading version $version"
+echo "Uploading version $version of gpsd web documents"
 
 sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
 

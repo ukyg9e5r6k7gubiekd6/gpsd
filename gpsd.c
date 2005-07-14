@@ -454,6 +454,21 @@ static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
     /*@ +temptrans +mayaliasunique @*/
 }
 
+static bool privileged_user(struct subscriber_t *who)
+/* is this user privileged to change the GPS's behavior? */
+{
+    struct subscriber_t *sub;
+    int subscribercount = 0;
+
+    /* grant user privilege if he's the only one on the channel */
+    for (sub = subscribers; 
+	 	sub < subscribers + sizeof(subscribers)/sizeof(subscribers[0]);
+	 	sub++)
+	if (sub->device == who->device)
+	    subscribercount++;
+    return (subscribercount == 1);
+}
+
 static int handle_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
@@ -477,7 +492,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",A=?");
 	    break;
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
-	    if (assign_channel(whoami) && whoami->device->device_type!=NULL && *p=='=') {
+	    if (assign_channel(whoami) && whoami->device->device_type!=NULL && *p=='=' && privileged_user(whoami)) {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 		if (whoami->device->device_type->speed_switcher)
@@ -519,20 +534,19 @@ static int handle_request(int cfd, char *buf, int buflen)
 	    else {
 		struct gps_type_t *dev = whoami->device->device_type;
 		double mincycle = (dev->cycle_chars * 10.0) / whoami->device->gpsdata.baudrate;
-		if (*p == '=') {
+		if (*p == '=' && privileged_user(whoami)) {
 		    double cycle = strtod(++p, &p);
 		    if (cycle >= mincycle)
 			if (dev->rate_switcher != NULL)
 			    if (dev->rate_switcher(whoami->device, cycle))
 				dev->cycle = cycle;
-		    if (dev->rate_switcher == NULL)
-			(void)snprintf(phrase, sizeof(phrase), ",C=%.2f", 
-				       dev->cycle);
-		    else
-			(void)snprintf(
-			    phrase, sizeof(phrase), ",C=%.2f %.2f",
-			    dev->cycle, mincycle);
 		}
+		if (dev->rate_switcher == NULL)
+		    (void)snprintf(phrase, sizeof(phrase), 
+				   ",C=%.2f", dev->cycle);
+		else
+		    (void)snprintf(phrase, sizeof(phrase), 
+				   ",C=%.2f %.2f", dev->cycle, mincycle);
 	    }
 	    break;
 	case 'D':
@@ -602,7 +616,7 @@ static int handle_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		(void)strcpy(phrase, ",N=0");
-	    else {
+	    else if (privileged_user(whoami)) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
 		    whoami->device->device_type->mode_switcher(whoami->device, 1);
