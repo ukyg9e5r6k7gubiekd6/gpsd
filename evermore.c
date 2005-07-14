@@ -73,6 +73,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 {
     unsigned char buf2[MAX_PACKET_LENGTH*3+2], *cp, *tp;
     size_t i;
+    unsigned char datalen;
     int used, visible;
     double version;
 
@@ -86,19 +87,21 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		       sizeof(buf2)-strlen((char*)buf2),
 		       "%02x", (unsigned int)buf[i]);
     strcat((char*)buf2, "\n");
-    gpsd_report(5, "raw Evermore packet type 0x%02x length %d: %s\n", buf[0], len, buf2);
 
     /* time to unstuff it and discard the header and footer */
     cp = buf + 2;
     tp = buf2;
-    if (*cp == 0x10)
-	cp++;
-    len = (size_t)*cp;
-    ++cp;
-    for (i = 0; i < len; i++) {
-	*tp = cp[i];
-	if (*tp == 0x10)
-	    ++i;
+    if (*cp == 0x10) cp++;
+    datalen = (size_t)*cp++;
+    
+    gpsd_report(5, "raw Evermore packet type 0x%02x length %d: %s\n", *cp, len, buf2);
+
+    datalen -= 2;
+
+    for (i = 0; i < datalen; i++) {
+	*tp = *cp++;
+	if (*tp == 0x10) cp++;
+	tp++;
     }
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
@@ -205,7 +208,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     default:
 	buf[0] = '\0';
-	for (i = 0; i < len; i++)
+	for (i = 0; i < datalen; i++)
 	    (void)snprintf((char*)buf+strlen((char*)buf), 
 			   sizeof(buf)-strlen((char*)buf),
 			   "%02x", (unsigned int)buf2[i]);
@@ -233,13 +236,42 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+/* configure various EverMore settings to default */
+/* TODO: Datumnn ID set to 1 (WGS-84), msg 0x80 */
+static bool evermore_default(struct gps_device_t *session, bool mode)
+{
+    unsigned char tmp8;
+    bool ok = true;
+    /*@ +charint @*/
+    unsigned char msg1[] = {0x86,	/*  0: msg ID */
+	    		    5};         /*  Elevation Mask, degree 0..89 */
+   
+    unsigned char msg2[] = {0x87,       /*  0: msg ID */
+	    		    1,          /*  1: DOP mask, GDOP(0), auto(1), PDOP(2), HDOP(3), no mask(4) */
+			    20,         /*  2: GDOP, 1..99 */
+			    15,         /*  3: PDOP, 1..99 */
+			    8};         /*  4: HDOP, 1..99 */
+
+   unsigned char msg3[] = {0x89,	/*  0: msg ID */
+	    		   0,           /*  1: operation mode, normal(0), power save(1), 1PPS(2) */
+                           1,           /*  2: navigation update rate, 1/Hz, 1..10 */
+                           4};          /*  3: RF/GPSBBP On time, 160ms(0), 220(1), 280(2), 340(3), 440(4) */
+
+    ok |= evermore_write(session->gpsdata.gps_fd, msg1, sizeof(msg1));
+    ok |= evermore_write(session->gpsdata.gps_fd, msg2, sizeof(msg2));
+    ok |= evermore_write(session->gpsdata.gps_fd, msg3, sizeof(msg3));
+    /*@ +charint @*/
+    return ok;
+}
+
+
 static bool evermore_set_mode(struct gps_device_t *session, 
 			      speed_t speed, bool mode)
 {
     unsigned char tmp8;
     /*@ +charint @*/
     unsigned char msg[] = {0x80,		/*  0: msg ID */
-			   0x00, 0x00,		/*  1: GPS week */
+			   0x33, 0x05,		/*  1: GPS week; when 0 is here, we finish with year 1985 */
 			   0x00, 0x00, 0x00, 0x00,	/*  3: GPS TOW */
 			   0x00, 0x00,		/*  7: Latitude */
 			   0x00, 0x00,		/*  9: Longitude */

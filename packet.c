@@ -526,7 +526,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     case EVERMORE_PAYLOAD_DLE:
         switch (c) {
            case 0x10: session->packet_state = EVERMORE_PAYLOAD; break;
-           case 0x02: session->packet_state = EVERMORE_LEADER_2; break;
            case 0x03: session->packet_state = EVERMORE_RECOGNIZED; break;
            default: session->packet_state = GROUND_STATE;
         }
@@ -902,7 +901,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	    else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
-#endif /* EVERMORE_ENABLED */
+#endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
 	} else if (session->packet_state == ITALK_RECOGNIZED) {
 	    u_int16_t len, n, sum;
