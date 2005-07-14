@@ -308,7 +308,7 @@ void rtcm_dump(struct rtcm_msghdr *msghdr, char buf[], size_t buflen)
     int             len = (int)msghdr->w2.frmlen;
     double          zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
 
-    snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
+    (void)snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
 	   msghdr->w1.msgtype,
 	   msghdr->w1.refstaid,
 	   zcount,
@@ -323,7 +323,7 @@ void rtcm_dump(struct rtcm_msghdr *msghdr, char buf[], size_t buflen)
 
 	    while (len >= 0) {
 		if (len >= 2)
-		    printf(buf + strlen(buf), len - strlen(buf),
+		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w3.satident1,
 			   m->w3.udre1,
@@ -333,7 +333,7 @@ void rtcm_dump(struct rtcm_msghdr *msghdr, char buf[], size_t buflen)
 			   m->w4.rangerate1 * (m->w3.scale1 ?
 					       RRLARGE : RRSMALL));
 		if (len >= 4)
-		    snprintf(buf + strlen(buf), len - strlen(buf),
+		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w4.satident2,
 			   m->w4.udre2,
@@ -345,7 +345,7 @@ void rtcm_dump(struct rtcm_msghdr *msghdr, char buf[], size_t buflen)
 		
 		/*@ -shiftimplementation @*/
 		if (len >= 5)
-		    snprintf(buf + strlen(buf), len - strlen(buf),
+		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   m->w6.satident3,
 			   m->w6.udre3,

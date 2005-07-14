@@ -154,6 +154,32 @@ initialization of a gps session object; the other calls are methods of
 that object, and have the same names as the corresponding C functions.
 Resources within the session object will be properly released when it
 is garbage-collected.</para>
+</refsect1>
+
+<refsect1 id='example'><title>CODE EXAMPLE</title>
+
+<para>The following is an excerpted and simplified version of the
+libgps interface code from
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The function <function>handle_input()</function> is a trivial pies of
+code that calls gps_poll(gpsdata).
+</para>
+
+<programlisting>
+    gpsdata = gps_open(server, port);
+
+    build_gui(toplevel);
+
+    gps_set_raw_hook(gpsdata, update_panel);
+	
+    (void)gps_query(gpsdata, "w+x\n");
+
+    (void)XtAppAddInput(app, gpsdata->gps_fd, 
+		  (XtPointer)XtInputReadMask, handle_input, NULL);
+    (void)XtAppMainLoop(app);
+
+    (void)gps_close(gpsdata);
+</programlisting>
 
 </refsect1>
 

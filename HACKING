@@ -503,8 +503,10 @@ packet state machine in packet.c recognizes a special packet type, or
 
 Each driver may have a trigger string that the NMEA interpreter
 watches for.  When that string is recognized at the start of a 
-line, the interpreter switches to its driver.  The new driver 
-initializer method is called immediately. 
+line, the interpreter switches to its driver.  
+
+When a driver switch takes place, the old driver's wrapup method is
+called.  Then the new driver's initializer method is called.
 
 A good thing to send from the NMEA initializer is probe strings.  These are
 strings which should elicit an identifying response from the GPS that

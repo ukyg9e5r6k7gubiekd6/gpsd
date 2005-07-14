@@ -92,13 +92,13 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     cp = buf + 2;
     tp = buf2;
     if (*cp == 0x10) cp++;
-    datalen = (size_t)*cp++;
+    datalen = (unsigned char)*cp++;
     
     gpsd_report(5, "raw Evermore packet type 0x%02x length %d: %s\n", *cp, len, buf2);
 
     datalen -= 2;
 
-    for (i = 0; i < datalen; i++) {
+    for (i = 0; i < (size_t)datalen; i++) {
 	*tp = *cp++;
 	if (*tp == 0x10) cp++;
 	tp++;
@@ -208,7 +208,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     default:
 	buf[0] = '\0';
-	for (i = 0; i < datalen; i++)
+	for (i = 0; i < (size_t)datalen; i++)
 	    (void)snprintf((char*)buf+strlen((char*)buf), 
 			   sizeof(buf)-strlen((char*)buf),
 			   "%02x", (unsigned int)buf2[i]);
@@ -240,7 +240,6 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 /* TODO: Datumnn ID set to 1 (WGS-84), msg 0x80 */
 static bool evermore_default(struct gps_device_t *session, bool mode)
 {
-    unsigned char tmp8;
     bool ok = true;
     /*@ +charint @*/
     unsigned char msg1[] = {0x86,	/*  0: msg ID */

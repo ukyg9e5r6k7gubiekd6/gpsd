@@ -78,6 +78,11 @@ altitude units for display; follow the keyword with 'meters' or
 'feet'.  The default is feet.  This option can also be set as the X
 resource 'altunits'.</para>
 
+<para>There is a known bug in <application>xgps</application>; it
+assumes the default font size is no more than 18 pixels.  If this
+is not the case, the satellite data display will show fewer than
+12 satellites.</para>
+
 </refsect2>
 <refsect2><title>xgpsspeed</title>
 

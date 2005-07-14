@@ -21,10 +21,13 @@
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
+
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
+	    if (session->device_type != NULL && session->device_type->wrapup != NULL)
+		session->device_type->wrapup(session);
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->initializer)
 		session->device_type->initializer(session);

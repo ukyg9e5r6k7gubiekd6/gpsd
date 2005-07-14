@@ -41,15 +41,64 @@ GPSD Frequently Asked Questions
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 
+<p>When you have a problem with gpsd, here are some steps you can take to
+gelp us resolve the bug as quickly as possible.</p>
+
+<h2>Read this whole FAQ first</h2>
+
 <p>First, read this whole FAQ before reporting apparent misbehavior as a
 bug.  You may find a solution here.</p>
 
-<p>Second, make sure it is a real gpsd bug and not a problem with
+<h2>Make sure it's not a problem in your client software</h2>
+
+<p>Make sure it is a real gpsd bug and not a problem with
 your client software.  A good way to do this is to run your client and
 the gpsd test client (xgps) side by side.  If xgps seems to report
 good numbers but your client does not, you have a client problem.
 If xgps reports the same sort of bad numbers as your client, you
 have a real gpsd bug.</p>
+
+<h2>Check the latest version of <code>gpsd</code> for the bug.</h2>
+
+<p>If you are using an old version of <code>gpsd</code>, it is
+possible your bug has already been fixed.  Download the latest public
+version from the <a
+href='http://developer.berlios.de/projects/gpsd/'>project page</a> and
+test it.  To be really helpful, check out the <a
+href='ttp://developer.berlios.de/svn/?group_id=2116'>Subversion
+head</a> and test that.  We don't mind getting bug reports that say 
+"I saw version foo had the following bug, but you've fixed it."</p>
+
+<h2>Capture a log that triggers the problem</h2>
+
+<p>If we can reproduce your gpsd problem, we can usually fix it very
+rapidly.  If we can't reproduce it, you might get lucky or you might
+not &mdash; and we try hard, but all too often the result is 'not'.</p>
+
+<p>Therefore the most important step you can take is to capture a log
+of some GPS output that reproduces the bug.  If you're using a SiRF
+chip, the 'l' command of sirfmon will help you.  If you're using
+a GPS that emits NMEA, telnetting to port 2947 and enabling raw
+mode will do the trick.  For non-SiRF binary protocols, you will
+have to cat direct from the serial device into a file.</p>
+
+<h2>Trim the log that reproduces the problem</h2>
+
+<p>Your next step should be to feed the log you just captured to a
+<code>gpsd</code> instance through <code>gpsfake</code> to verify that
+the log does in fact reproduce the bug.</p>
+
+<p>Once you have the log, trim it to the smallest span of data that
+reproduces the bug.  A systematic way to do this is to cut the log in
+half at the middle and test each half.  If one half doesn't reproduce
+the bug but the other does, throw away the half that doesn't.  Repeat
+this procedure on each half that tickles the bug until you can't make
+it any smaller.  Then send us that.</p>
+
+<p>If possible, use the -l option of gpsfake to pin down the sentence
+or packet that produces the bug, and tell us that.</p>
+
+<h2>Look at gpsd log output to see if it gives you a clue</h2>
 
 <p>You may get a better handle on your problem by running gpsd in
 foreground (-N option) with the -D option set to a high level (-D 4 is
@@ -57,35 +106,16 @@ often good).  If the transcript has anything that looks like a clue
 in it, send it along with your bug report.  When in doubt about
 whether it holds a clue, send it.</p>
 
-<p>If we can reproduce your gpsd problem, we can usually fix it very
-rapidly.  If we can't reproduce it, you might get lucky or you might
-not &mdash; and we try hard, but all too often the result is 'not'.</p>
+<p>One of the things this should tell you, if the chip reports it at
+all, is the firmware version.  You will want that for your report.</p>
 
-<p>Therefore your third step should always be to try to capture a log
-of some GPS output that reproduces the bug.  If you're using a SiRF
-chip, the 'l' command of sirfmon will help you.  If you're using
-a GPS that emits NMEA, telnetting to port 2947 and enabling raw
-mode will do the trick.  For non-SiRF binary protocols, you will
-have to cat direct from the serial device into a file.</p>
+<h2>If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h2>
 
-<p>Your fourth step should be to feed the log you just captured to a
-gpsd instance through gpsfake to verify that the log does in fact
-reproduce the bug.</p>
+<p>If you're using a SiRF, Evermore, or iTalk GPS in binary mode
+(which you can tell from the -D 4 output), switch back to NMEA mode
+using the N command and see if the bug still reproduces.</p>
 
-<p>Once you have the log, trim it to the smallest span of data that
-reproduces the bug.  A systematic way to do this is to cut the log in
-half at the middle and test each half.  If one half doesn't reproduce
-the bug but the other does, throw away the half that doesn't.  Repeat
-this procedure on the half that tickles the bug until you can't make
-it any smaller.  Then send us that.</p>
-
-<p>If possible, use the -l option of gpsfake to pin down the line of
-NMEA or packet of SiRF that produces the bug and tell us that.</p>
-
-<p>If you're using a SiRF-based GPS (which you can tell from the -D 4
-output), switch back to NMEA mode using the N command and see if the
-bug still reproduces.  Also try switching on static navigation mode 
-using the 'c' command in sirfmon.</p>
+<h2>If your bug core-dumps gpsd, send us a stack trace.</h2>
 
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
@@ -93,9 +123,68 @@ has core-dumped, try to use gdb or whatever your local symbolic
 debugger is to generate a stack trace of the crash, and send us
 that.</p>
 
+<h2>Try to determine what release introduced the bug</h2>
+
+<p>If you have upgraded from a previous version of <code>gpsd</code>,
+and the upgrade broke something that was working previously, the
+most useful thing you can do is pin down the release in which the
+bug was introduced.</p>
+
+<p>How efficiently you can do this depends on whether or not you have
+a client for the Subversion version control system.  If you don't, all
+you can do is download and test named releases.  If you do, you can
+pin down the exact change that introduced the bug.  The latter is
+far more helpful to us and will get your bug fixed faster, so we'll
+describe that procedure here.</p>
+
+<ol>
+<li><p>Follow <a
+href='http://developer.berlios.de/svn/?group_id=2116'>these
+instructions</a> to check out a copy of the software.</p></li>
+
+<li><p>Do "svn log *" in the top-level directory of the checked-out tree.
+Save the results.  This is your map of dates to revision levels.</p></li>
+
+<li><p>Determine the revision levels of the first known bad release
+and the last known good release.  You can do this by looking for the
+release dates from gpsd.spec in the log output. Note: pick the
+<em>first</em> revision matching the known-good date and the <em>last</em>
+revision matching the known-bad date.</p></li>
+
+<li><p>Use the -r option of svn up to check out the revision level in
+the middle of that range.  Thus, if the last known good release was
+2502 and the known bad one is 2760, check out release (2760 + 2502) /
+2 = 2631.  The command you want would be "svn -r 2631 up" in this
+case.</p></li>
+
+<li><p>Build and test the revision.  Whether it works or not, you will
+eliminate half the range.  If it works, you know the bug was introduced
+somewhere in the upper half range.  If it doesn't, the bug was introduced
+in the lower half.</p></li>
+
+<li><p>Do the same test on the half-range where the error was introduced;
+e.g. check out the middle version, test that, and narrow the range by another
+factor of 2.</p></li>
+
+<li><p>Repeat this procedure until you know the exact revision that
+introduced your bug.  This will happen very quickly, as the number of
+tests required will be the log to the base 2 of the number of
+revisions in your original span.  Even if there are (say) 500
+revisions in the span you should only require 9 tests to nail down the
+exact change in question.</p></li>
+</ol>
+
+<h2>Include the vendor, mode, and firmware version in your report.</h2>
+
 <p>Always include with your bug report the GPS vendor and model.  If
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
+
+<h2>Have wildly fluctuating speed?  Try static navigation</h2>
+
+<p>If your problem is wildly fluctuating speed reports on a SiRF,
+switching on static navigation mode using the 'c' command in
+sirfmon.</p>
 
 <h1 id='flicker'>The date and other fields in <code>xgps</code> flicker 
 to "n/a" part of the time even when there's a fix.</h1>

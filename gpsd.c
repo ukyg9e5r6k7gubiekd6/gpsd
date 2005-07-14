@@ -146,11 +146,11 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	va_end(ap);
 
 	buf2[0] = '\0';
-	for (sp = buf; *sp; sp++)
-	    if (isprint(*sp) || isspace(*sp) && (sp[1]=='\0' || sp[2]=='\0'))
-		(void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	for (sp = buf; *sp != '\0'; sp++)
+	    if (isprint(*sp) || (isspace(*sp) && (sp[1]=='\0' || sp[2]=='\0')))
+		(void)snprintf(buf2+strlen(buf2), 2, "%c", *sp);
 	    else
-		(void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x", *sp);
+		(void)snprintf(buf2+strlen(buf2), 6, "\\x%02x", (unsigned)*sp);
 
 	if (in_background)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);

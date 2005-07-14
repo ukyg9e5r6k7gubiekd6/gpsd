@@ -21,6 +21,17 @@
 #include "gps.h"
 #include "display.h"
 
+/* 
+ * Widget and window sizes.
+ */
+#define MAX_FONTSIZE	18		/* maximum fontsize we handle*/
+#define MAX_CHANNELS	12		/* count of channels to display */
+#define ROOT_SIZE	"700x570"	/* size of entire xgps display */
+/* height of satellite-data display */
+#define SATDATA_HEIGHT	MAX_FONTSIZE*(MAX_CHANNELS+1)
+#define LEFTSIDE_WIDTH	205		/* width of data-display side */
+#define SATDIAG_SIZE	400		/* size of satellite diagram */
+
 static Widget toplevel, form, left, right, quitbutton;
 static Widget satellite_list, satellite_diagram, status;
 static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
@@ -85,7 +96,7 @@ static void build_gui(Widget toplevel)
 
     /*@ -immediatetrans -usedef @*/
     /* the root application window */
-    XtSetArg(args[0], XmNgeometry, "700x570");
+    XtSetArg(args[0], XmNgeometry, ROOT_SIZE);
     XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[2], XmNallowShellResize, False);
     XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
@@ -121,19 +132,16 @@ static void build_gui(Widget toplevel)
 				     XmNtopWidget, left,
 				     NULL);
     /* satellite location and SNR data panel */
-#define FRAMEHEIGHT	234
-#define LEFTSIDE_WIDTH	205
     satellite_list =
       XtVaCreateManagedWidget("satellite_list", xmListWidgetClass, left,
 			      XmNbackground, get_pixel(toplevel, "snow"),
-			      XmNheight, FRAMEHEIGHT,
+			      XmNheight, SATDATA_HEIGHT,
 			      XmNwidth, LEFTSIDE_WIDTH,
 			      XmNlistSizePolicy, XmCONSTANT,
 			      XmNhighlightThickness, 0,
 			      XmNlistSpacing, 4,
 			      NULL);
     /* the satellite diagram */
-#define SATDIAG_SIZE	400
     satellite_diagram = 
       XtVaCreateManagedWidget("satellite_diagram",
 			      xmDrawingAreaWidgetClass, right, 
