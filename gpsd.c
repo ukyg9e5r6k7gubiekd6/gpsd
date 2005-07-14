@@ -134,7 +134,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     if (errlevel <= debuglevel) {
-	char buf[BUFSIZ];
+	char buf[BUFSIZ], buf2[BUFSIZ], *sp;
 	va_list ap;
 
 #if defined(PPS_ENABLE)
@@ -145,10 +145,17 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
+	buf2[0] = '\0';
+	for (sp = buf; *sp; sp++)
+	    if (isprint(*sp) || isspace(*sp) && (sp[1]=='\0' || sp[2]=='\0'))
+		(void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	    else
+		(void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x", *sp);
+
 	if (in_background)
-	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf);
+	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
 	else
-	    (void)fputs(buf, stderr);
+	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
 	(void)pthread_mutex_unlock(&report_mutex);
 #endif /* PPS_ENABLE */
