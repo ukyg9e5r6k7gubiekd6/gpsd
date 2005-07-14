@@ -98,7 +98,7 @@ it any smaller.  Then send us that.</p>
 <p>If possible, use the -l option of gpsfake to pin down the sentence
 or packet that produces the bug, and tell us that.</p>
 
-<h2>Look at gpsd log output to see if it gives you a clue</h2>
+<h2>Look at <code>gpsd</code> log output to see if it gives you a clue</h2>
 
 <p>You may get a better handle on your problem by running gpsd in
 foreground (-N option) with the -D option set to a high level (-D 4 is
@@ -303,7 +303,7 @@ a special value such as 0.0.  Interpretation of the different NMEA
 status fields is a black art.</p>
 
 <p>It is all too easy to write an NMEA parser that works well on one
-variant but breaks on anither, delivering subtly incorrect results or
+variant but breaks on another, delivering subtly incorrect results or
 even crashing your application.  Because <code>gpsd</code> specializes
 in the job, we collect knowledge on all variants and do parsing that
 is much less likely to get tripped up.</p>
@@ -374,3 +374,8 @@ seconds.</p>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
 </html>
+<!--
+Local Variables:
+compile-command: "(scp faq.html shell.berlios.de:/home/groups/gpsd/htdocs)"
+End:
+-->

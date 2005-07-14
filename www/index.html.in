@@ -49,7 +49,7 @@ be queried on TCP port 2947 of the host computer.  With
 navigational and wardriving software) can share access to GPSes
 without contention or loss of data. Also, gpsd responds to queries
 with a format that is substantially easier to parse than the NMEA 0183
-emitted by most GPSes.  The <code>gpsd</code> distribution includes
+emitted by most GPSes.  The <code>gpsd</code> distribution includes a
 linkable C service library, a C++ wrapper class, and a Python module
 that developers of <code>gpsd</code>-aware applications can use to
 encapsulate all communication with <code>gpsd</code>.</para>
@@ -162,11 +162,13 @@ and fix latency.</dd>
 <dt><a href="sirfmon.html">sirfmon.1</a></dt>
 <dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
 
+<!--
 <dt><a href="rtcmdecode.html">rtcmdecode.1</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM104 decoder.</dd>
 
 <dt><a href="rtcm.html">rtcm.5</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM104 decoder dump format.</dd>
+-->
 </dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>
