@@ -1244,7 +1244,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    /* pass the current DGPSIP coorection to the GPS if new */
+	    /* pass the current DGPSIP correction to the GPS if new */
 	    dgpsip_relay(channel);
 
 	    /* get data from the device */
