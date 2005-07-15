@@ -16,6 +16,8 @@
 
 #include "cskprog.h"
 
+#include <netinet/in.h>	/* for htonl() under Linux */
+
 int
 serialSpeed(int pfd, struct termios *term, int speed){
 	int rv;
@@ -31,15 +33,19 @@ serialSpeed(int pfd, struct termios *term, int speed){
 	case 38400:
 		speed = B38400;
 		break;
+#ifdef B28800
 	case 28800:
 		speed = B28800;
 		break;
+#endif
 	case 19200:
 		speed = B19200;
 		break;
+#ifdef B14400
 	case 14400:
 		speed = B14400;
 		break;
+#endif
 	case 9600:
 		speed = B9600;
 		break;
@@ -96,7 +102,12 @@ serialConfig(int pfd, struct termios *term, int speed){
 	term->c_cflag &=~ (CSIZE | CSTOPB);
 	/* No flow control */
 	term->c_iflag &=~ (IXON | IXOFF);
+#if defined(CCTS_OFLOW) && defined(CRTS_IFLOW) && defined(MDMBUF)
 	term->c_oflag &=~ (CCTS_OFLOW | CRTS_IFLOW | MDMBUF);
+#endif
+#if defined(CRTSCTS)
+	term->c_oflag &=~ (CRTSCTS);
+#endif
 
 	/* we'd like to read back at least 2 characters in .2sec */
 	term->c_cc[VMIN] = 2;
