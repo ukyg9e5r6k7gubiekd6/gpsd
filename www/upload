@@ -19,7 +19,9 @@ xmlto xhtml-nochunks ../gpsprof.xml
 xmlto xhtml-nochunks ../gpsfake.xml
 xmlto xhtml-nochunks ../sirfmon.xml
 xmlto xhtml-nochunks ../rtcmdecode.xml
+xmlto xhtml-nochunks ../gpsflash.xml
 xmlto xhtml-nochunks ../rtcm.xml
+xmlto xhtml-nochunks ../srec.xml
 xmlto xhtml-nochunks replacing-nmea.xml
 (cd performance; xmlto xhtml-nochunks performance.xml)
 # Doesn't upload PDFs or GIFs -- they aren't expected to change frequently

@@ -166,6 +166,9 @@ and fix latency.</dd>
 <dt><a href="rtcmdecode.html">rtcmdecode.1</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM104 decoder.</dd>
 
+<dt><a href="gpsflash.html">gpsflash(1)</a></dt>
+<dd>The <code>src</code> GPS firmware uploader..</dd>
+
 <dt><a href="rtcm.html">rtcm.5</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM104 decoder dump format.</dd>
 
