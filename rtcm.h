@@ -149,6 +149,6 @@ struct rtcm_ctx {
 
 extern void rtcm_init(/*@out@*/struct rtcm_ctx *);
 extern /*@null@*//*@observer@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx *, unsigned int);
-extern void rtcm_dump(struct rtcm_msghdr *, char[], size_t);
+extern void rtcm_dump(struct rtcm_msghdr *, /*@out@*/char[], size_t);
 
 /* end */

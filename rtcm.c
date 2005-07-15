@@ -302,7 +302,7 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 }
 /*@ +usereleased +compdef @*/
 
-void rtcm_dump(struct rtcm_msghdr *msghdr, char buf[], size_t buflen)
+void rtcm_dump(struct rtcm_msghdr *msghdr, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     int             len = (int)msghdr->w2.frmlen;

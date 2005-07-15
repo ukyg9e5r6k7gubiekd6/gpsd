@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	res = rtcm_decode(ctx, (unsigned int)c);
 	if (res != RTCM_NO_SYNC && res != RTCM_SYNC) {
 	    rtcm_dump(res, buf, sizeof(buf));
-	    fputs(buf, stdout);
+	    (void)fputs(buf, stdout);
 	}
     }
     exit(0);
