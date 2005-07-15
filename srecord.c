@@ -24,7 +24,7 @@
  * 	S0: Comments
  * 	S3: Memory Loadable Data, 4byte address
  * 	S5: Count of S1, S2 and S3 Records
- * 	S7: starting execution address intrepreted as a 4-byte address 
+ * 	S7: starting execution address interpreted as a 4-byte address 
  */
 #define MAX_BYTES_PER_RECORD	16
 
