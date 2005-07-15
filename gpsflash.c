@@ -63,8 +63,10 @@ main(int argc, char **argv){
 	/* nasty little trick to hopefully make people read the manual */
 	if (  ((warning = getenv("I_READ_THE_README")) == NULL) ||
 	      (strcmp(warning, "why oh why didn't i take the blue pill") == 0 )){
-		fprintf(stderr, "RTFM, luser!\n");
-		unlink(progname);
+		printf("\nThis program rewrites your receiver's flash ROM.\n");
+		printf("If done improperly this will permanently ruin your\n");
+		printf("receiver. We insist you read the gpsflash manpage\n");
+		printf("before you break something.\n\n");
 		exit(1);
 	}
 
