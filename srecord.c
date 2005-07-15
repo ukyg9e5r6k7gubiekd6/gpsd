@@ -35,29 +35,30 @@
  * bytes are read from bbuf and a ready-to-go srecord is placed in sbuf
  */
 int
-bin2srec(int type, int offset, int num, unsigned char *bbuf, unsigned char *sbuf){
+bin2srec(unsigned int type, unsigned int offset, unsigned int num, unsigned char *bbuf, unsigned char *sbuf){
 	unsigned char abuf[MAX_BYTES_PER_RECORD*2 + 2], sum;
-	int len;
+	size_t len;
 
 	if ((num < 1) || (num > MAX_BYTES_PER_RECORD))
 		return -1;
 
-	len = 4 + num + 1;
+	len = (size_t)(4 + num + 1);
 	memset(abuf, 0, sizeof(abuf));
-	hexdump(num, bbuf, abuf);
-	sum = sr_sum(len, offset, bbuf);
-	snprintf((char *)sbuf, MAX_BYTES_PER_RECORD*2 + 17, 
-		 "S%d%02X%08X%s%02X\r\n", type, len, offset, abuf, sum);
+	hexdump((size_t)num, bbuf, abuf);
+	sum = sr_sum((unsigned int)len, offset, bbuf);
+	(void)snprintf((char *)sbuf, MAX_BYTES_PER_RECORD*2 + 17, 
+		 "S%u%02X%08X%s%02X\r\n", 
+		 type, (unsigned)len, offset, (char *)abuf, (unsigned)sum);
 	return 0;
 }
 
 int
-srec_hdr(int num, unsigned char *bbuf, unsigned char *sbuf){
+srec_hdr(unsigned int num, unsigned char *bbuf, unsigned char *sbuf){
 	return bin2srec(0, 0, num, bbuf, sbuf);
 }
 
 int
-srec_fin(int num, unsigned char *sbuf){
+srec_fin(unsigned int num, unsigned char *sbuf){
 	unsigned char bbuf[4], sum;
 
 	memset(bbuf, 0, 4);
@@ -65,27 +66,28 @@ srec_fin(int num, unsigned char *sbuf){
 	bbuf[0] = (unsigned char)(num & 0xff);
 	bbuf[1] = (unsigned char)((num >> 8) & 0xff);
 	sum = sr_sum(3, 0, bbuf);
-	snprintf((char *)sbuf, 13, "S503%04X%02X\r\n", num, sum);
+	(void)snprintf((char *)sbuf, 13, "S503%04X%02X\r\n", num, (unsigned)sum);
 	return 0;
 }
 
 
 void
-hexdump(int j, unsigned char *bbuf, unsigned char *abuf){
-	int i;
+hexdump(size_t len, unsigned char *bbuf, unsigned char *abuf){
+	size_t i;
 
 	memset(abuf, 0, MAX_BYTES_PER_RECORD*2 + 2);
-	if (j > 32)
-		j = 32;
+	if (len > MAX_BYTES_PER_RECORD*2)
+		len = MAX_BYTES_PER_RECORD*2;
 
-	for(i = 0; i < j; i++){
+	for(i = 0; i < len; i++){
 		abuf[i*2] = hc((bbuf[i] &0xf0) >> 4);
 		abuf[i*2+1] = hc(bbuf[i] &0x0f);
 	}
 }
 
-char
-hc(char x){
+/*@ -type @*/
+unsigned char
+hc(unsigned char x){
 	switch(x){
 	case 15:
 	case 14:
@@ -94,7 +96,6 @@ hc(char x){
 	case 11:
 	case 10:
 		return ('A' + x - 10);
-		break;
 	case 9:
 	case 8:
 	case 7:
@@ -106,16 +107,15 @@ hc(char x){
 	case 1:
 	case 0:
 		return ('0' + x);
-		break;
 
 	default:
 		return '0';
-		break;
 	}
 }
+/*@ -type @*/
 
 unsigned char
-sr_sum(int count, int addr, unsigned char *bbuf){
+sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf){
 	int i, j;
 	unsigned char k, sum = 0;
 
