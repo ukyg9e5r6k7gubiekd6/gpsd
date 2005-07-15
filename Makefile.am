@@ -224,7 +224,10 @@ splint:
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
 	-splint bits.c @echo "Running splint on rtcmdecode..."
+	@echo "Running splint on rtcmdecode..."
 	-splint rtcmdecode.c
+	@echo "Running splint on gpsflash..."
+	-splint gpsflash.c
 
 #
 # Regression tests begin here
