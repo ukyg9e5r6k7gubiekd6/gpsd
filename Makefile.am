@@ -18,7 +18,7 @@ endif
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = gpsmm_test bits 
+check_PROGRAMS = gpsmm_test bits cskprog
 
 #
 # Build xgps
@@ -59,6 +59,12 @@ sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 #
 rtcmdecode_SOURCES = rtcmdecode.c
 rtcmdecode_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+
+#
+# Build cskprog
+#
+cskprog_SOURCES = cskprog.c cskprog.h srecord.c utils.c
+cskprog_LDADD = $(LIBM) libgps.la -lm
 
 #
 # Build shared libraries
