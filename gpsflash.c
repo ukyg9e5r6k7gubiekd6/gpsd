@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cskprog.h"
+#include "gpsflash.h"
 
 char *progname;
 

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _CSKPROG_H_
-#define _CSKPROG_H_
+#ifndef _GPSFLASH_H_
+#define _GPSFLASH_H_
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -89,4 +89,4 @@ int		srec_fin(int, unsigned char *);
 char hc(char);
 
 
-#endif /* _CSKPROG_H_ */
+#endif /* _GPSFLASH_H_ */
