@@ -74,7 +74,7 @@ sirfSendLoader(int pfd, struct termios *term, char *loader, int ls){
 	serialSpeed(pfd, term, speed);
 
 	/* ship the actual data */
-	return binary_send(pfd, msg, ls+10);
+	return binary_send(pfd, (char *)msg, ls+10);
 }
 
 static int
