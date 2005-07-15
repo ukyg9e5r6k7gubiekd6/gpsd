@@ -49,7 +49,7 @@ firmware image is compatible with your GPS.  EXPERIMENT AT YOUR OWN
 RISK.</para>
 
 <para>This loader will only work with firmware images in S-record
-format, which is the form SiRF normally distributes then in.  If you
+format, which is the form SiRF normally distributes them in.  If you
 get a binary firmware image from somewhere, you can use
 <citerefentry><refentrytitle>objdump</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 from the GNU binutils to convert it to S-records.</para>
