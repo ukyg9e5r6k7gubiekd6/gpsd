@@ -22,29 +22,32 @@ static unsigned char	nmea_checksum(unsigned char *);
 
 static int
 sirfSendUpdateCmd(int pfd){
-    int status;
+	int status;
+	/*@ +charint @*/
 	unsigned char msg[] =	{0xa0,0xa2,	/* header */
 				0x00,0x01,	/* message length */
 				0x94,		/* 0x94: firmware update */
 				0x00,0x00,	/* checksum */
 				0xb0,0xb3};	/* trailer */
+	/*@ -charint @*/
 	status = sirfWrite(pfd, msg);
 	/* wait a moment for the receiver to switch to boot rom */
-	sleep(2);
+	(void)sleep(2);
 	return status;
 }
 
 static int
-sirfSendLoader(int pfd, struct termios *term, char *loader, int ls){
+sirfSendLoader(int pfd, struct termios *term, char *loader, size_t ls){
 	unsigned int x;
 	int r, speed = 38400;
-	unsigned char boost[] = {'S', BOOST_38400};
+	/*@i@*/unsigned char boost[] = {'S', BOOST_38400};
 	unsigned char *msg;
 
 	if((msg = malloc(ls+10)) == NULL){
 		return -1; /* oops. bail out */
 	}
 
+	/*@ +charint @*/
 #ifdef B115200
 	speed = 115200;
 	boost[1] = BOOST_115200;
@@ -54,8 +57,9 @@ sirfSendLoader(int pfd, struct termios *term, char *loader, int ls){
 	boost[1] = BOOST_57600;
 #endif
 #endif
+	/*@ -charint @*/
 
-	x = htonl((unsigned int)ls);
+	x = (unsigned)htonl(ls);
 	msg[0] = 'S';
 	msg[1] = (unsigned char)0;
 	memcpy(msg+2, &x, 4); /* length */
@@ -63,25 +67,32 @@ sirfSendLoader(int pfd, struct termios *term, char *loader, int ls){
 	memset(msg+6+ls, 0, 4); /* reset vector */
 	
 	/* send the command to jack up the speed */
-	if((r = write(pfd, boost, 2)) != 2)
+	if((r = (int)write(pfd, boost, 2)) != 2) {
+		free(msg);
 		return -1; /* oops. bail out */
+	}
 
 	/* wait for the serial speed change to take effect */
-	tcdrain(pfd);
-	usleep(1000);
+	(void)tcdrain(pfd);
+	(void)usleep(1000);
 
 	/* now set up the serial port at this higher speed */
-	serialSpeed(pfd, term, speed);
+	(void)serialSpeed(pfd, term, speed);
 
 	/* ship the actual data */
-	return binary_send(pfd, (char *)msg, ls+10);
+	r = binary_send(pfd, (char *)msg, ls+10);
+	free(msg);
+	return r;
 }
 
 static int
-sirfSetProto(int pfd, struct termios *term, int speed, int proto){
-	int l, r, i;
+sirfSetProto(int pfd, struct termios *term, int speed, unsigned int proto){
+	int i;
+	ssize_t r;
+	size_t len;
 	int spd[8] = {115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800};
-	unsigned char *nmea, *tmp;
+	unsigned char nmea[32], tmp[32];
+	/*@ +charint @*/
 	unsigned char sirf[] =	{0xa0,0xa2,	/* header */
 				0x00,0x01,	/* message length */
 				0xa5,		/* message 0xa5: UART config */
@@ -91,53 +102,46 @@ sirfSetProto(int pfd, struct termios *term, int speed, int proto){
 				0xff,0,0, 0,0,0,0, 0,0,0, 0,0, /* port 3 */
 				0x00,0x00,	/* checksum */
 				0xb0,0xb3};	/* trailer */
-
+	/*@ -charint @*/
 
 	if (serialConfig(pfd, term, 38400) == -1)
-	    return -1;
-
-	if((nmea = malloc(32)) == NULL)
 		return -1;
 
-	if((tmp = malloc(32)) == NULL)
-		return -1;
+	memset(nmea, 0, 32);
+	memset(tmp, 0, 32);
+	(void)snprintf((char *)tmp, 31,"PSRF100,%u,%u,8,1,0", (unsigned)speed, proto);
+	(void)snprintf((char *)nmea, 31,"%s%s*%02x", "$", (char *)tmp, (unsigned)nmea_checksum(tmp));
+	len = strlen((char *)nmea);
 
-	bzero(nmea, 32);
-	bzero(tmp, 32);
-	snprintf((char *)tmp, 31,"PSRF100,%u,%u,8,1,0", speed, proto);
-	snprintf((char *)nmea, 31,"%s%s*%02x", "$", tmp, nmea_checksum(tmp));
-	l = strlen((char *)nmea);
-
-	sirf[7] = sirf[6] = (char)proto;
-	i = htonl(speed); /* borrow "i" to put speed into proper byte order */
-	bcopy(&i, sirf+8, 4);
+	sirf[7] = sirf[6] = (unsigned char)proto;
+	/*@i@*/i = htonl(speed); /* borrow "i" to put speed into proper byte order */
+	/*@i@*/bcopy(&i, sirf+8, 4);
 
 	/* send at whatever baud we're currently using */
-	sirfWrite(pfd, sirf);
-	if ((r = write(pfd, nmea, l)) != r)
+	(void)sirfWrite(pfd, sirf);
+	if ((r = write(pfd, nmea, len)) != (ssize_t)sizeof(sirf))
 		return -1;
-	
-	tcdrain(pfd);
+	(void)tcdrain(pfd);
 
 	/* now spam the receiver with the config messages */
 	for(i = 0; i < 8; i++){
-		serialSpeed(pfd, term, spd[i]);
-		sirfWrite(pfd, sirf);
-		write(pfd, nmea, l);
-		tcdrain(pfd);
-		usleep(100000);
+		(void)serialSpeed(pfd, term, spd[i]);
+		(void)sirfWrite(pfd, sirf);
+		(void)write(pfd, nmea, len);
+		(void)tcdrain(pfd);
+		(void)usleep(100000);
 	}
 
-	serialSpeed(pfd, term, speed);
-	tcflush(pfd, TCIOFLUSH);
+	(void)serialSpeed(pfd, term, speed);
+	(void)tcflush(pfd, TCIOFLUSH);
 
 	return 0;
 }
 
 static unsigned char
 nmea_checksum(unsigned char *s){
-	unsigned char c, r = 0;
-	while ((c = *s++))
+	/*@i1@*/unsigned char c, r = 0;
+	while ((c = *s++) != (unsigned char)'\0')
 		r += c;
 
 	return r;
@@ -161,7 +165,7 @@ sirfWrite(int fd, unsigned char *msg) {
 	msg[len + 5] = (unsigned char)( crc & 0x00ff);
 
 	errno = 0;
-	if (write(fd, msg, len+8) != (len+8))
+	if (write(fd, msg, len+8) != (ssize_t)(len+8))
 		return -1;
 
 	(void)tcdrain(fd);
@@ -177,13 +181,13 @@ static int sirfPortSetup(int fd, struct termios *term)
 static int wait2seconds(int fd)
 {
     /* again we wait, this time for our uploaded code to start running */
-    return sleep(2);
+    return (int)sleep(2);
 }
 
 static int wait5seconds(int fd)
 {
     /* wait for firmware upload to settle in */
-    return sleep(5);
+    return (int)sleep(5);
 }
 
 static int sirfPortWrapup(int fd, struct termios *term)
