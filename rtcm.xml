@@ -6,7 +6,7 @@
 <refmeta>
 <refentrytitle>rtcm</refentrytitle>
 <manvolnum>5</manvolnum>
-<refmiscinfo class='date'>12 Feb 2005</refmiscinfo>
+<refmiscinfo class='date'>12 Jul 2005</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>rtcm</refname>
@@ -168,10 +168,10 @@ correction data.</para>
 values:</para>
 
 <literallayout>
-0	1-sigma error &lt;= 1m
-1		"     &lt;= 4m
-2		"     &lt;= 8m
-3		"     &gt;  8m
+0	1-sigma error	&lt;= 1m
+1	1-sigma error	&lt;= 4m
+2	1-sigma error	&lt;= 8m
+3	1-sigma error	&gt;  8m
 </literallayout>
 
 <para>&lt;iod&gt; is Issue of Data, matching the IOD for the current ephemeris
@@ -374,7 +374,7 @@ serial data stream which is a word boundary.
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsect1>
 

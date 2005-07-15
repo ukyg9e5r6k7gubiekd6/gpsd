@@ -96,13 +96,9 @@ GPS device that can report pseudoranges etc.  This belongs in the
 daemon because the device drivers are already doing the
 packet-cracking needed to get the data off the chips.
 
-*** Decide what to do about RTCM support.
+*** RTCM support.
 
-With WAAS and EGNOS delivering differential-GPS corrections in-band 
-to most modern GPSes (and, in particular, to SiRF GPSses) there may
-no longer be any point to supporting out-of-band RTCM104 and DGPSIP.
-
-If there is still a point to this, here is the elegant way to do it:
+We have an RTCM packet decoder.  Here's the plan for the rest of it:
 
 1) Add code to packet.c that can recognize RTCM104 data packets.  This
    would be the hard part -- that format is *nasty*.
@@ -124,9 +120,6 @@ If there is still a point to this, here is the elegant way to do it:
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.
-
-6) Write a rtcmmon equivalent to sirfmon that disassembles and dumps
-   RTCM packets.
 
 *** Do the research to figure out just what is going on with status bits
 

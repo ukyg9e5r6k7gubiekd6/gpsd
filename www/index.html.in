@@ -168,6 +168,9 @@ and fix latency.</dd>
 
 <dt><a href="rtcm.html">rtcm.5</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM104 decoder dump format.</dd>
+
+<dt><a href="srec.html">srec.5</a></dt>
+<dd>The <code>src</code> Motorola S-record and file format.</dd>
 -->
 </dl>
 
