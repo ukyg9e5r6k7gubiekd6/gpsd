@@ -13,56 +13,54 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <stdio.h>
+#include <string.h>
 
-#ifdef _SRECORD_
-#include "cskprog.h"
+#include "gpsd.h"
 
 /*
- * http://www.amelek.gda.pl/avr/uisp/srecord.htm
+ * See srec(5) for a description of this format.  
+ * We read and write 4-byte addresses.
  * 	S0: Comments
  * 	S3: Memory Loadable Data, 4byte address
  * 	S5: Count of S1, S2 and S3 Records
- * 	S7: starting execution address intrepreted as a 4byte address 
+ * 	S7: starting execution address intrepreted as a 4-byte address 
  */
+#define MAX_BYTES_PER_RECORD	16
 
 /*
- * bin2srec: turn a chunk of binary into an srecord file
+ * bin2srec: turn a chunk of binary into an S-record
  * offset: used to specify load address
- * num: up to 16 bytes can be encoded at one time
+ * num: up to MAX_BYTES_PER_RECORD bytes can be encoded at one time
  * bytes are read from bbuf and a ready-to-go srecord is placed in sbuf
  */
 int
-bin2srec(int offset, int num, unsigned char *bbuf, unsigned char *sbuf){
-	unsigned char abuf[34], sum;
+bin2srec(int type, int offset, int num, unsigned char *bbuf, unsigned char *sbuf){
+	unsigned char abuf[MAX_BYTES_PER_RECORD*2 + 2], sum;
 	int len;
 
-	if ((num < 1) || (num > 16))
+	if ((num < 1) || (num > MAX_BYTES_PER_RECORD))
 		return -1;
 
 	len = 4 + num + 1;
-	bzero(abuf, 34);
-	bzero(sbuf, 64);
+	memset(abuf, 0, sizeof(abuf));
 	hexdump(num, bbuf, abuf);
 	sum = sr_sum(len, offset, bbuf);
-	snprintf((char *)sbuf, 49, "S3%02X%08X%s%02X\r\n", len, offset, abuf, sum);
+	snprintf((char *)sbuf, MAX_BYTES_PER_RECORD*2 + 17, 
+		 "S%d%02X%08X%s%02X\r\n", type, len, offset, abuf, sum);
 	return 0;
 }
 
 int
-srec_hdr(unsigned char *sbuf){
-	/* dlgsp2.bin looks for this header */
-	unsigned char hdr[] = "S00600004844521B\r\n";
-	bzero(sbuf, 64);
-	snprintf((char *)sbuf, 19, "%s", hdr);
-	return 0;
+srec_hdr(int num, unsigned char *bbuf, unsigned char *sbuf){
+	return bin2srec(0, 0, num, bbuf, sbuf);
 }
 
 int
 srec_fin(int num, unsigned char *sbuf){
 	unsigned char bbuf[4], sum;
 
-	bzero(bbuf, 4);
-	bzero(sbuf, 64);
+	memset(bbuf, 0, 4);
 
 	bbuf[0] = (unsigned char)(num & 0xff);
 	bbuf[1] = (unsigned char)((num >> 8) & 0xff);
@@ -76,7 +74,7 @@ void
 hexdump(int j, unsigned char *bbuf, unsigned char *abuf){
 	int i;
 
-	bzero(abuf, 34);
+	memset(abuf, 0, MAX_BYTES_PER_RECORD*2 + 2);
 	if (j > 32)
 		j = 32;
 
@@ -133,7 +131,3 @@ sr_sum(int count, int addr, unsigned char *bbuf){
 	}
 	return ~sum;
 }
-
-#else
-extern int errno;
-#endif

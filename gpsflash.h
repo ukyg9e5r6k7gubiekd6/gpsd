@@ -66,7 +66,7 @@
 #define WRBLK 128
 
 /* Prototypes */
-/* sirfflash.c */
+/* gpsflash.c */
 int		main(int, char **);
 void		usage(void);
 
@@ -79,14 +79,5 @@ int		sirfSendLoader(int, struct termios *, char *, int);
 int		sirfSendFirmware(int, char *, int);
 int		sirfWrite(int, unsigned char *);
 unsigned char	nmea_checksum(unsigned char *);
-
-/* srecord.c */
-void		hexdump(int , unsigned char *, unsigned char *);
-unsigned char	sr_sum(int, int, unsigned char *);
-int		bin2srec(int, int, unsigned char *, unsigned char *);
-int		srec_hdr(unsigned char *);
-int		srec_fin(int, unsigned char *);
-char hc(char);
-
 
 #endif /* _GPSFLASH_H_ */

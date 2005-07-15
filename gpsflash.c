@@ -189,3 +189,7 @@ usage(void){
 	exit(1);
 }
 
+/*
+	dlgsp2.bin looks for this header
+	unsigned char hdr[] = "S00600004844521B\r\n";
+*/

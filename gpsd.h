@@ -243,6 +243,14 @@ extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double);
 extern gps_mask_t dop(struct gps_data_t *);
 
+/* srecord.c */
+extern void hexdump(int , unsigned char *, unsigned char *);
+extern unsigned char sr_sum(int, int, unsigned char *);
+extern int bin2srec(int, int, int, unsigned char *, unsigned char *);
+extern int srec_hdr(int num, unsigned char *bbuf, unsigned char *sbuf);
+extern int srec_fin(int, unsigned char *);
+extern char hc(char);
+
 /* External interface */
 extern void gpsd_init(struct gps_device_t *, 
 			     struct gps_context_t *, char *device);
