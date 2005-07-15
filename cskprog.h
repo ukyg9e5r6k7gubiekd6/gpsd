@@ -20,6 +20,9 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+
+#include <netinet/in.h>	/* for htonl() under Linux */
+
 #include <ctype.h>
 #include <err.h>
 #include <errno.h>

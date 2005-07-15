@@ -16,8 +16,6 @@
 
 #include "cskprog.h"
 
-#include <netinet/in.h>	/* for htonl() under Linux */
-
 int
 serialSpeed(int pfd, struct termios *term, int speed){
 	int rv;
