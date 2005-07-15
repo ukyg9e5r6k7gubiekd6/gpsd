@@ -108,6 +108,13 @@ gpsmm_test_SOURCES = \
 gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
 
 #
+# Build bits
+#
+bits_SOURCES = \
+	bits.c
+bits_LDADD = $(LIBC) $(LIBSOCKET) libgps.la
+
+#
 # Create Manpages
 #
 man_MANS = \
@@ -223,11 +230,11 @@ splint:
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on bits test harness..."
-	-splint bits.c @echo "Running splint on rtcmdecode..."
+	-splint $(bits_SOURCES)
 	@echo "Running splint on rtcmdecode..."
-	-splint rtcmdecode.c
+	-splint -exportlocal rtcmdecode.c
 	@echo "Running splint on gpsflash..."
-	-splint gpsflash.c
+	-splint $(gpsflash_SOURCES)
 
 #
 # Regression tests begin here
