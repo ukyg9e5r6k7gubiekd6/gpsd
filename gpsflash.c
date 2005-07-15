@@ -138,6 +138,10 @@ main(int argc, char **argv){
 	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1)
 		err(1, "open(%s)", port);
 
+	/* call serialConfig to set control lines and termios bits */
+	if(serialConfig(pfd, term, 38400) == -1)
+		err(1, "serialConfig()");
+
 	/* the firware upload defaults to 38k4, so lets go there */
 	if(sirfSetProto(pfd, term, PROTO_SIRF, 38400) == -1)
 		err(1, "sirfSetProto()");
