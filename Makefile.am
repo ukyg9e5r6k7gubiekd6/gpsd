@@ -63,7 +63,7 @@ rtcmdecode_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 #
 # Build gpsflash
 #
-gpsflash_SOURCES = gpsflash.c gpsflash.h utils.c
+gpsflash_SOURCES = gpsflash.c gpsflash.h sirfflash.c
 gpsflash_LDADD = $(LIBM) libgps.la -lm
 
 #
