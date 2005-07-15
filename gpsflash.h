@@ -33,51 +33,25 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdbool.h>
 
-/*
- * I can't imagine a GPS firmware less than 256KB / 2Mbit. The latest build
- * that I have (2.3.2) is 296KB. So 256KB is probably low enough to allow
- * really old firmwares to load.
- *
- * As far as I know, USB receivers have 512KB / 4Mbit of flash. Application
- * note APNT00016 (Alternate Flash Programming Algorithms) says that the S2AR
- * reference design supports 4, 8 or 16 Mbit flash memories, but with current
- * firmwares not even using 60% of a 4Mbit flash on a commercial receiver,
- * I'm not going to stress over loading huge images. The define below is
- * 524288 bytes, but that blows up nearly 3 times as S-records.
- * 928K srec -> 296K binary
- */
-#define MIN_FW_SIZE 262144
-#define MAX_FW_SIZE 1572864
+struct flashloader_t {
+    const char *flashloader;
+    int min_loader_size, max_loader_size;
+    int min_firmware_size, max_firmware_size;
+    int (*port_setup)(int fd, struct termios *term);
+    int (*stage1_command)(int fd);
+    int (*loader_send)(int pfd, struct termios *term, char *loader, int ls);
+    int (*stage2_command)(int fd);
+    int (*firmware_send)(int pfd, char *loader, int ls);
+    int (*stage3_command)(int fd);
+    int (*port_wrapup)(int fd, struct termios *term);
+};
+extern struct flashloader_t sirf_type;
 
-/* a reasonable loader is probably 15K - 20K */
-#define MIN_LD_SIZE 15440
-#define MAX_LD_SIZE 20480
-
-/* From the SiRF protocol manual... may as well be consistent */
-#define PROTO_SIRF 0
-#define PROTO_NMEA 1
-
-#define BOOST_38400 0
-#define BOOST_57600 1
-#define BOOST_115200 2
-
-/* block size when writing to the serial port. related to FIFO size */
-#define WRBLK 128
-
-/* Prototypes */
-/* gpsflash.c */
-int		main(int, char **);
-void		usage(void);
-
-/* utils.c */
-int		serialConfig(int, struct termios *, int);
-int		serialSpeed(int, struct termios *, int);
-int		sirfSetProto(int, struct termios *, int, int);
-int		sirfSendUpdateCmd(int);
-int		sirfSendLoader(int, struct termios *, char *, int);
-int		sirfSendFirmware(int, char *, int);
-int		sirfWrite(int, unsigned char *);
-unsigned char	nmea_checksum(unsigned char *);
+int serialConfig(int, struct termios *, int);
+int serialSpeed(int, struct termios *, int);
+int srecord_send(int pfd, char *fw, size_t len);
+int binary_send(int pfd, char *data, size_t ls);
 
 #endif /* _GPSFLASH_H_ */
