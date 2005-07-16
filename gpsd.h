@@ -31,7 +31,32 @@
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
+/*  
+ * From the RCTM104 standard:
+ *
+ * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
+ * transmission rate provides a convenient timing capability where the
+ * times of word boundaries are a rational multiple of 0.6 seconds."
+ *
+ * "Each frame is N+2 words long, where N is the number of message data
+ * words. For example, a filler message (type 6 or 34) with no message
+ * data will have N=0, and will consist only of two header words. The
+ * maximum number of data words allowed by the format is 31, so that
+ * the longest possible message will have a total of 33 words."
+ */
+#define RTCM_WORDS_MAX	33
+
+#define MAXCORRECTIONS	15	/* max correction count in type 1 or 9 */
+
+enum rtcmstat_t {
+    RTCM_NO_SYNC, RTCM_SYNC, RTCM_STRUCTURE,
+};
+
+#define RTCM_ERRLEVEL_BASE	5
+
 #define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(RTCMWORD))
+
+typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
@@ -189,7 +214,33 @@ struct gps_device_t {
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
 #ifdef RTCM104_ENABLE
-	struct rtcm_t	rtcm;
+	struct {
+	    /* header contents */
+	    unsigned type;	/* RTCM message type */
+	    unsigned length;	/* length (words) */
+	    double   zcount;	/* time within hour -- GPS time, no leap seconds */
+	    unsigned refstaid;	/* reference station ID */
+	    unsigned seqnum;	/* nessage sequence number (modulo 8) */
+	    unsigned stathlth;	/* station health */
+
+	    /* message data in decoded form */
+	    union {
+		struct {		/* data for messages 1 and 9 */
+		    unsigned satident;	/* satellite ID */
+		    unsigned udre;	/* user differential range error */
+		    unsigned issuedata;	/* issue of data */
+		    double rangerr;	/* range error */
+		    double rangerate;	/* range error rate */
+		} ranges[MAXCORRECTIONS];
+	    };
+
+	    /* this is the decoding context */
+	    bool            locked;
+	    int             curr_offset;
+	    RTCMWORD        curr_word;
+	    RTCMWORD        buf[RTCM_WORDS_MAX];
+	    unsigned int    bufindex;
+	} rtcm;
 #endif /* RTCM104_ENABLE */
     };
 #endif /* BINARY_ENABLE */
@@ -238,6 +289,10 @@ extern int ntpshm_alloc(struct gps_context_t *context);
 extern bool ntpshm_free(struct gps_context_t *context, int segment);
 extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
+
+extern void rtcm_init(/*@out@*/struct gps_device_t *);
+extern enum rtcmstat_t rtcm_decode(struct gps_device_t *, unsigned int);
+extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 

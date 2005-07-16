@@ -217,7 +217,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
     case RTCM_SYNC_STATE:
 	/*@ -casebreak @*/
     case RTCM_RECOGNIZED:
-	rtcm_state = rtcm_decode(&session->rtcm, c);
+	rtcm_state = rtcm_decode(session, c);
 	if (rtcm_state == RTCM_NO_SYNC)
 	    session->packet_state = GROUND_STATE;
 	else if (rtcm_state == RTCM_SYNC)

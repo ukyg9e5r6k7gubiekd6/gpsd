@@ -28,7 +28,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 int main(int argc, char **argv)
 {
     int             c;
-    struct rtcm_t ctxbuf;
+    struct gps_device_t device;
     enum rtcmstat_t res;
     char buf[BUFSIZ];
 
@@ -47,12 +47,12 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    rtcm_init(&ctxbuf);
+    rtcm_init(&device);
 
     while ((c = getchar()) != EOF) {
-	res = rtcm_decode(&ctxbuf, (unsigned int)c);
+	res = rtcm_decode(&device, (unsigned int)c);
 	if (res == RTCM_STRUCTURE) {
-	    rtcm_dump(&ctxbuf, buf, sizeof(buf));
+	    rtcm_dump(&device, buf, sizeof(buf));
 	    (void)fputs(buf, stdout);
 	}
     }

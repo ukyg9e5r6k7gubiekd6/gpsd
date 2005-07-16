@@ -180,12 +180,12 @@ static bool rtcmparityok(RTCMWORD w)
 }
 #endif
 
-void rtcm_init(/*@out@*/struct rtcm_t *ctx)
+void rtcm_init(/*@out@*/struct gps_device_t *session)
 {
-    ctx->curr_word = 0;
-    ctx->curr_offset = 24;	/* first word */
-    ctx->locked = false;
-    ctx->bufindex = 0;
+    session->rtcm.curr_word = 0;
+    session->rtcm.curr_offset = 24;	/* first word */
+    session->rtcm.locked = false;
+    session->rtcm.bufindex = 0;
 }
 
 /*
@@ -297,25 +297,25 @@ struct rtcm_msg1 {
     struct rtcm_msg1w7   w17;
 };
 
-static void unpack(struct rtcm_t *ctx)
+static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
 {
     int n, len;
     struct rtcm_msghdr  *msghdr;
 
     /* someday we'll do big-endian correction here */
-    msghdr = (struct rtcm_msghdr *)ctx->buf;
-    ctx->type = msghdr->w1.msgtype;
-    ctx->length = msghdr->w2.frmlen;
-    ctx->zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
-    ctx->refstaid = msghdr->w1.refstaid;
-    ctx->seqnum = msghdr->w2.sqnum;
-    ctx->stathlth = msghdr->w2.stathlth;
+    msghdr = (struct rtcm_msghdr *)session->rtcm.buf;
+    session->rtcm.type = msghdr->w1.msgtype;
+    session->rtcm.length = msghdr->w2.frmlen;
+    session->rtcm.zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
+    session->rtcm.refstaid = msghdr->w1.refstaid;
+    session->rtcm.seqnum = msghdr->w2.sqnum;
+    session->rtcm.stathlth = msghdr->w2.stathlth;
 
-    memset(ctx->ranges, 0, sizeof(ctx->ranges));
-    len = (int)ctx->length;
+    memset(session->rtcm.ranges, 0, sizeof(session->rtcm.ranges));
+    len = (int)session->rtcm.length;
     n = 0;
-    switch (ctx->type) {
+    switch (session->rtcm.type) {
     case 1:
     case 9:
 	{
@@ -323,33 +323,33 @@ static void unpack(struct rtcm_t *ctx)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    ctx->ranges[n].satident   = m->w3.satident1;
-		    ctx->ranges[n].udre       = m->w3.udre1;
-		    ctx->ranges[n].issuedata  = m->w4.issuedata1;
-		    ctx->ranges[n].rangerr    = m->w3.pc1 * 
+		    session->rtcm.ranges[n].satident   = m->w3.satident1;
+		    session->rtcm.ranges[n].udre       = m->w3.udre1;
+		    session->rtcm.ranges[n].issuedata  = m->w4.issuedata1;
+		    session->rtcm.ranges[n].rangerr    = m->w3.pc1 * 
 			(m->w3.scale1 ? PCLARGE : PCSMALL);
-		    ctx->ranges[n].rangerate  = m->w4.rangerate1 * 
+		    session->rtcm.ranges[n].rangerate  = m->w4.rangerate1 * 
 					(m->w3.scale1 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 4) {
-		    ctx->ranges[n].satident   = m->w4.satident2;
-		    ctx->ranges[n].udre       = m->w4.udre2;
-		    ctx->ranges[n].issuedata  = m->w6.issuedata2;
-		    ctx->ranges[n].rangerr    = m->w5.pc2 * 
+		    session->rtcm.ranges[n].satident   = m->w4.satident2;
+		    session->rtcm.ranges[n].udre       = m->w4.udre2;
+		    session->rtcm.ranges[n].issuedata  = m->w6.issuedata2;
+		    session->rtcm.ranges[n].rangerr    = m->w5.pc2 * 
 			(m->w4.scale2 ? PCLARGE : PCSMALL);
-		    ctx->ranges[n].rangerate  = m->w5.rangerate2 * 
+		    session->rtcm.ranges[n].rangerate  = m->w5.rangerate2 * 
 			(m->w4.scale2 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 5) {
-		    ctx->ranges[n].satident    = m->w6.satident3;
-		    ctx->ranges[n].udre        = m->w6.udre3;
-		    ctx->ranges[n].issuedata   = m->w7.issuedata3;
+		    session->rtcm.ranges[n].satident    = m->w6.satident3;
+		    session->rtcm.ranges[n].udre        = m->w6.udre3;
+		    session->rtcm.ranges[n].issuedata   = m->w7.issuedata3;
 		    /*@ -shiftimplementation @*/
-		    ctx->ranges[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
+		    session->rtcm.ranges[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
 					(m->w6.scale3 ? PCLARGE : PCSMALL);
-		    ctx->ranges[n].rangerate   = m->w7.rangerate3 * 
+		    session->rtcm.ranges[n].rangerate   = m->w7.rangerate3 * 
 					(m->w6.scale3 ? RRLARGE : RRSMALL);
 		    /*@ +shiftimplementation @*/
 		    n++;
@@ -365,7 +365,7 @@ static void unpack(struct rtcm_t *ctx)
 }
 
 /*@ -usereleased -compdef @*/
-enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
+enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 {
     enum rtcmstat_t res;
 
@@ -375,105 +375,105 @@ enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
     c = reverse_bits[c & 0x3f];
 
     /*@ -shiftnegative @*/
-    if (!ctx->locked) {
-	ctx->curr_offset = -5;
-	ctx->bufindex = 0;
+    if (!session->rtcm.locked) {
+	session->rtcm.curr_offset = -5;
+	session->rtcm.bufindex = 0;
 
-	while (ctx->curr_offset <= 0) {
+	while (session->rtcm.curr_offset <= 0) {
 	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing");
-	    ctx->curr_word <<= 1;
-	    if (ctx->curr_offset > 0) {
-		ctx->curr_word |= c << ctx->curr_offset;
+	    session->rtcm.curr_word <<= 1;
+	    if (session->rtcm.curr_offset > 0) {
+		session->rtcm.curr_word |= c << session->rtcm.curr_offset;
 	    } else {
-		ctx->curr_word |= c >> -(ctx->curr_offset);
+		session->rtcm.curr_word |= c >> -(session->rtcm.curr_offset);
 	    }
-	    if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
+	    if (((struct rtcm_msghw1 *) & session->rtcm.curr_word)->preamble ==
 		PREAMBLE_PATTERN) {
-		if (rtcmparityok(ctx->curr_word)) {
+		if (rtcmparityok(session->rtcm.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"preamble ok, parity ok -- locked\n");
-		    ctx->locked = true;
-		    /* ctx->curr_offset;  XXX - testing */
+		    session->rtcm.locked = true;
+		    /* session->rtcm.curr_offset;  XXX - testing */
 		    break;
 		}
 		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 			    "preamble ok, parity fail\n");
 	    }
-	    ctx->curr_offset++;
+	    session->rtcm.curr_offset++;
 	}			/* end while */
     }
-    if (ctx->locked) {
+    if (session->rtcm.locked) {
 	res = RTCM_SYNC;
 
-	if (ctx->curr_offset > 0) {
-	    ctx->curr_word |= c << ctx->curr_offset;
+	if (session->rtcm.curr_offset > 0) {
+	    session->rtcm.curr_word |= c << session->rtcm.curr_offset;
 	} else {
-	    ctx->curr_word |= c >> -(ctx->curr_offset);
+	    session->rtcm.curr_word |= c >> -(session->rtcm.curr_offset);
 	}
 
-	if (ctx->curr_offset <= 0) {
+	if (session->rtcm.curr_offset <= 0) {
 	    /* weird-assed inversion */
-	    if (ctx->curr_word & P_30_MASK)
-		ctx->curr_word ^= W_DATA_MASK;
+	    if (session->rtcm.curr_word & P_30_MASK)
+		session->rtcm.curr_word ^= W_DATA_MASK;
 
-	    if (rtcmparityok(ctx->curr_word)) {
-		if (((struct rtcm_msghw1 *) & ctx->curr_word)->preamble ==
+	    if (rtcmparityok(session->rtcm.curr_word)) {
+		if (((struct rtcm_msghw1 *) & session->rtcm.curr_word)->preamble ==
 		    PREAMBLE_PATTERN) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
 				"Preamble spotted (index: %u)\n",
-				ctx->bufindex);
-		    ctx->bufindex = 0;
+				session->rtcm.bufindex);
+		    session->rtcm.bufindex = 0;
 		}
 		gpsd_report(RTCM_ERRLEVEL_BASE+2,
 			    "processing word %u (offset %d)\n",
-			    ctx->bufindex, ctx->curr_offset);
+			    session->rtcm.bufindex, session->rtcm.curr_offset);
 		{
-		    struct rtcm_msghdr  *msghdr = (struct rtcm_msghdr *) ctx->buf;
+		    struct rtcm_msghdr  *msghdr = (struct rtcm_msghdr *) session->rtcm.buf;
 
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next PREAMBLE_PATTERN and go on from there. 
 		     */
-		    if (ctx->bufindex >= RTCM_WORDS_MAX){
-			ctx->bufindex = 0;
+		    if (session->rtcm.bufindex >= RTCM_WORDS_MAX){
+			session->rtcm.bufindex = 0;
 			return RTCM_NO_SYNC;
 		    }
 
-		    ctx->buf[ctx->bufindex] = ctx->curr_word;
+		    session->rtcm.buf[session->rtcm.bufindex] = session->rtcm.curr_word;
 
-		    if ((ctx->bufindex == 0) &&
+		    if ((session->rtcm.bufindex == 0) &&
 			(msghdr->w1.preamble != PREAMBLE_PATTERN)) {
 			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				    "word 0 not a preamble- punting\n");
 			return RTCM_NO_SYNC;
 		    }
-		    ctx->bufindex++;
+		    session->rtcm.bufindex++;
 		    /* rtcm_print_msg(msghdr); */
 
-		    if (ctx->bufindex > 2) {	/* do we have the length yet? */
-			if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
+		    if (session->rtcm.bufindex > 2) {	/* do we have the length yet? */
+			if (session->rtcm.bufindex >= msghdr->w2.frmlen + 2) {
 			    /* jackpot, we have an RTCM packet*/
 			    res = RTCM_STRUCTURE;
-			    ctx->bufindex = 0;
-			    unpack(ctx);
+			    session->rtcm.bufindex = 0;
+			    unpack(session);
 			}
 		    }
 		}
-		ctx->curr_word <<= 30;	/* preserve the 2 low bits */
-		ctx->curr_offset += 30;
-		if (ctx->curr_offset > 0) {
-		    ctx->curr_word |= c << ctx->curr_offset;
+		session->rtcm.curr_word <<= 30;	/* preserve the 2 low bits */
+		session->rtcm.curr_offset += 30;
+		if (session->rtcm.curr_offset > 0) {
+		    session->rtcm.curr_word |= c << session->rtcm.curr_offset;
 		} else {
-		    ctx->curr_word |= c >> -(ctx->curr_offset);
+		    session->rtcm.curr_word |= c >> -(session->rtcm.curr_offset);
 		}
 	    } else {
 		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
 			    "parity failure, lost lock\n");
-		ctx->locked = false;
+		session->rtcm.locked = false;
 	    }
 	}
-	ctx->curr_offset -= 6;
-	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d", ctx->curr_offset);
+	session->rtcm.curr_offset -= 6;
+	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d", session->rtcm.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
@@ -483,32 +483,32 @@ enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
 }
 /*@ +usereleased +compdef @*/
 
-void rtcm_dump(struct rtcm_t *rtcmp, /*@out@*/char buf[], size_t buflen)
+void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     int             i;
 
     (void)snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
-	   rtcmp->type,
-	   rtcmp->refstaid,
-	   rtcmp->zcount,
-	   rtcmp->seqnum,
-	   rtcmp->length,
-	   rtcmp->stathlth);
+	   session->rtcm.type,
+	   session->rtcm.refstaid,
+	   session->rtcm.zcount,
+	   session->rtcm.seqnum,
+	   session->rtcm.length,
+	   session->rtcm.stathlth);
 
-    switch (rtcmp->type) {
+    switch (session->rtcm.type) {
     case 1:
     case 9:
 	for (i = 0; i < MAXCORRECTIONS; i++)
-	    if (rtcmp->ranges[i].satident != 0)
+	    if (session->rtcm.ranges[i].satident != 0)
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			       rtcmp->ranges[i].satident,
-			       rtcmp->ranges[i].udre,
-			       rtcmp->ranges[i].issuedata,
-			       rtcmp->zcount,
-			       rtcmp->ranges[i].rangerr,
-			       rtcmp->ranges[i].rangerate);
+			       session->rtcm.ranges[i].satident,
+			       session->rtcm.ranges[i].udre,
+			       session->rtcm.ranges[i].issuedata,
+			       session->rtcm.zcount,
+			       session->rtcm.ranges[i].rangerr,
+			       session->rtcm.ranges[i].rangerate);
 	break;
     default:
 	break;

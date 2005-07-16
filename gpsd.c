@@ -1294,7 +1294,7 @@ int main(int argc, char *argv[])
 		    if (channel->packet_type == RTCM_PACKET) {
 			char buf[BUFSIZ];
 
-			rtcm_dump(&channel->rtcm, buf, sizeof(buf));
+			rtcm_dump(channel, buf, sizeof(buf));
 			(void)throttled_write(cfd, buf, (ssize_t)strlen(buf));
 			break;
 		    }

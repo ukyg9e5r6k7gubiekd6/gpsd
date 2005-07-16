@@ -413,7 +413,7 @@ static struct gps_type_t itrax = {
 
 static void rtcm104_initializer(struct gps_device_t *session)
 {
-    rtcm_init(&session->rtcm);
+    rtcm_init(session);
 }
 
 static struct gps_type_t rtcm104 = {
