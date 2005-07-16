@@ -7,7 +7,6 @@
 #include <termios.h>
 #include "config.h"
 #include "gps.h"
-#include "rtcm.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE

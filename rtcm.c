@@ -189,7 +189,13 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
 }
 
 /*
- *  Here are the constants and structures used for decoding
+ * Structures for interpreting words in an RTCM-104 message (after
+ * parity checking and removing inversion).
+ *
+ * The RTCM words are 30-bit words.  We will lay them into memory into
+ * 30-bit (low-end justified) chunks.  To write them out we will write
+ * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
+ * of the 30-word msg.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
