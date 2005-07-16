@@ -104,19 +104,19 @@ static void nmea_initializer(struct gps_device_t *session)
 }
 
 static struct gps_type_t nmea = {
-    "Generic NMEA",	/* full name of type */
-    NULL,		/* no recognition string, it's the default */
-    NULL,		/* no probe */
-    nmea_initializer,	/* probe for SiRF II and other special types */
-    packet_get,		/* how to get a packet */
-    nmea_parse_input,	/* how to interpret a packet */
-    pass_rtcm,		/* write RTCM data straight */
-    NULL,		/* no speed switcher */
-    NULL,		/* no mode switcher */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* not relevant, no rate switch */
-    NULL,		/* no wrapup */
-    1,			/* updates every second */
+    .typename       = "Generic NMEA",	/* full name of type */
+    .trigger        = NULL,		/* it's the default */
+    .probe          = NULL,		/* no probe */
+    .initializer    = nmea_initializer,	/* probe for special types */
+    .get_packet     = packet_get,		/* use generic packet getter */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
 };
 
 #if FV18_ENABLE
@@ -127,19 +127,19 @@ static struct gps_type_t nmea = {
  **************************************************************************/
 
 static struct gps_type_t fv18 = {
-    "San Jose Navigation FV18",		/* full name of type */
-    FV18_PROBE,		/* this device should echo the probe string */
-    NULL,		/* no probe */
-    NULL,		/* to be sent unconditionally */
-    packet_get,		/* how to get a packet */
-    nmea_parse_input,	/* how to interpret a packet */
-    pass_rtcm,	/* write RTCM data straight */
-    NULL,		/* no speed switcher */
-    NULL,		/* no mode switcher */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* not relevant, no rate switch */
-    NULL,		/* no wrapup */
-    1,			/* updates every second */
+    .typename       = "San Jose Navigation FV18",	/* full name of type */
+    .trigger        = FV18_PROBE,	/* FV18s should echo the probe */
+    .probe          = NULL,		/* mo probe */
+    .initializer    = NULL,		/* to be sent unconditionally */
+    .get_packet     = packet_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
 };
 #endif /* FV18_ENABLE */
 
@@ -186,23 +186,23 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 }
 
 static struct gps_type_t sirfII_nmea = {
-    "SiRF-II NMEA",	/* full name of type */
+    .typename  = "SiRF-II NMEA",	/* full name of type */
 #ifndef SIRFII_ENABLE
-    "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    .trigger   = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
 #else
-    NULL,		/* no initialization */
+    .trigger   = NULL,			/* let the binary driver have it */
 #endif /* SIRFII_ENABLE */
-    NULL,		/* no probe */
-    sirf_initializer,	/* turn off debugging messages */
-    packet_get,		/* how to get a packet */
-    nmea_parse_input,	/* how to interpret a packet */
-    pass_rtcm,	/* write RTCM data straight */
-    sirf_speed,		/* we can change speeds */
-    sirf_mode,		/* there's a mode switch */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* cycle char count not relevant, no rate switch */
-    NULL,		/* no wrapup */
-    1,			/* updates every second */
+    .probe     = NULL,			/* no probe */
+    .initializer   = sirf_initializer,	/* turn off debugging messages */
+    .get_packet    = packet_get,	/* how to get a packet */
+    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer   = pass_rtcm,		/* write RTCM data straight */
+    .speed_switcher= sirf_speed,	/* we can change speeds */
+    .mode_switcher = sirf_mode,		/* there's a mode switch */
+    .rate_switcher = NULL,		/* no sample-rate switcher */
+    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
 };
 
 #if TRIPMATE_ENABLE
@@ -229,19 +229,19 @@ static void tripmate_initializer(struct gps_device_t *session)
 }
 
 static struct gps_type_t tripmate = {
-    "Delorme TripMate",		/* full name of type */
-    "ASTRAL",			/* tells us to switch */
-    NULL,			/* no probe */
-    tripmate_initializer,	/* wants to see lat/long for faster fix */
-    packet_get,			/* how to get a packet */
-    nmea_parse_input,		/* how to interpret a packet */
-    pass_rtcm,			/* send RTCM data straight */
-    NULL,			/* no speed switcher */
-    NULL,			/* no mode switcher */
-    NULL,			/* no sample-rate switcher */
-    -1,				/* not relevant, no rate switch */
-    NULL,			/* no wrapup */
-    1,				/* updates every second */
+    .typename      = "Delorme TripMate",	/* full name of type */
+    .trigger       ="ASTRAL",			/* tells us to switch */
+    .probe         = NULL,			/* no probe */
+    .initializer   = tripmate_initializer,	/* send unconfitionally */
+    .get_packet    = packet_get,		/* how to get a packet */
+    .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
+    .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
+    .speed_switcher= NULL,			/* no speed switcher */
+    .mode_switcher = NULL,			/* no mode switcher */
+    .rate_switcher = NULL,			/* no sample-rate switcher */
+    .cycle_chars   = -1,			/* no rate switch */
+    .wrapup         = NULL,			/* no wrapup */
+    .cycle          = 1,			/* updates every second */
 };
 #endif /* TRIPMATE_ENABLE */
 
@@ -277,19 +277,19 @@ static void earthmate_initializer(struct gps_device_t *session)
 
 /*@ -redef @*/
 static struct gps_type_t earthmate = {
-    "Delorme EarthMate (pre-2003, Zodiac chipset)",	/* full name of type */
-    "EARTHA",			/* tells us to switch to Earthmate */
-    NULL,			/* no probe */
-    earthmate_initializer,	/* switch us to Zodiac mode */
-    packet_get,			/* how to get a packet */
-    nmea_parse_input,		/* how to interpret a packet */
-    NULL,			/* don't send RTCM data */
-    NULL,			/* no speed switcher */
-    NULL,			/* no mode switcher */
-    NULL,			/* no sample-rate switcher */
-    -1,				/* not relevant, no rate switch */
-    NULL,			/* no wrapup code */
-    1,				/* updates every second */
+    .typename      = "Delorme EarthMate (pre-2003, Zodiac chipset)",
+    .trigger       = "EARTHA",			/* Earthmate trigger string */
+    .probe         = NULL,			/* no probe */
+    .initializer   = earthmate_initializer,	/* switch us to Zodiac mode */
+    .get_packet    = packet_get,		/* how to get a packet */
+    .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
+    .rtcm_writer   = NULL,			/* don't send RTCM data */
+    .speed_switcher= NULL,			/* no speed switcher */
+    .mode_switcher = NULL,			/* no mode switcher */
+    .rate_switcher = NULL,			/* no sample-rate switcher */
+    .cycle_chars   = -1,			/* no rate switch */
+    .wrapup         = NULL,			/* no wrapup code */
+    .cycle          = 1,			/* updates every second */
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
@@ -386,19 +386,19 @@ static void itrax_wrap(struct gps_device_t *session)
 
 /*@ -redef @*/
 static struct gps_type_t itrax = {
-    "iTrax",			/* full name of type */
-    "$PFST,OK",			/* tells us to switch to Itrax */
-    NULL,			/* no probe */
-    itrax_initializer,		/* initialize */
-    packet_get,			/* how to get a packet */
-    nmea_parse_input,		/* how to interpret a packet */
-    NULL,			/* iTrax doesn't support DGPS/WAAS/EGNOS */
-    itrax_speed,		/* no speed switcher */
-    NULL,			/* no mode switcher */
-    itrax_rate,			/* there's a sample-rate switcher */
-    438,			/* not relevant, no rate switch */
-    itrax_wrap,			/* sleep the receiver */
-    1,				/* updates every second */
+    .typename      = "iTrax",		/* full name of type */
+    .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
+    .probe         = NULL,		/* no probe */
+    .initializer   = itrax_initializer,	/* initialize */
+    .get_packet    = packet_get,	/* how to get a packet */
+    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
+    .speed_switcher= itrax_speed,	/* no speed switcher */
+    .mode_switcher = NULL,		/* no mode switcher */
+    .rate_switcher = itrax_rate,	/* there's a sample-rate switcher */
+    .cycle_chars   = 438,		/* not relevant, no rate switch */
+    .wrapup         = itrax_wrap,	/* sleep the receiver */
+    .cycle          = 1,		/* updates every second */
 };
 /*@ -redef @*/
 #endif /* ITRAX_ENABLE */
@@ -417,19 +417,19 @@ static void rtcm104_initializer(struct gps_device_t *session)
 }
 
 static struct gps_type_t rtcm104 = {
-    "RTCM104",		/* full name of type */
-    NULL,		/* no recognition string */
-    NULL,		/* no probe */
-    rtcm104_initializer,/* initialize the packet engine */
-    packet_get,		/* how to get a packet */
-    NULL,		/* packet getter does all the parsing */
-    NULL,		/* don't send RTCM data,  */
-    NULL,		/* no speed switcher */
-    NULL,		/* no mode switcher */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* not relevant, no rate switch */
-    NULL,		/* no wrapup code */
-    1,			/* updates every second */
+    .typename      = "RTCM104",		/* full name of type */
+    .trigger       = NULL,		/* no recognition string */
+    .probe         = NULL,		/* no probe */
+    .initializer   = rtcm104_initializer,	/* initialize packet engine */
+    .get_packet    = packet_get,	/* how to get a packet */
+    .parse_packet  = NULL,		/* packet getter does the parsing */
+    .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .speed_switcher= NULL,		/* no speed switcher */
+    .mode_switcher = NULL,		/* no mode switcher */
+    .rate_switcher = NULL,		/* no sample-rate switcher */
+    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup code */
+    .cycle          = 1,		/* updates every second */
 };
 #endif /* RTCM104_ENABLE */
 

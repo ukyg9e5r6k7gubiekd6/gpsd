@@ -754,18 +754,18 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
-    "SiRF-II binary",		/* full name of type */
-    "$Ack Input105.",		/* expected response to SiRF PSRF105 */
-    NULL,			/* no probe */
-    sirfbin_initializer,	/* initialize the device */
-    packet_get,			/* how to grab a packet */
-    sirfbin_parse_input,	/* read and parse message packets */
-    pass_rtcm,			/* send RTCM data straight */
-    sirfbin_speed,		/* we can change baud rate */
-    sirfbin_mode,		/* there's a mode switcher */
-    NULL,			/* no sample-rate switcher */
-    -1,				/* not relevant, no rate switch */
-    NULL,			/* caller needs to supply a close hook */
-    1,				/* updates every second */
+    .typename       = "SiRF-II binary",	/* full name of type */
+    .trigger        = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    .probe          = NULL,		/* no probe */
+    .initializer    = sirfbin_initializer,/* initialize the device */
+    .get_packet     = packet_get,	/* use the generic packet getter */
+    .parse_packet   = sirfbin_parse_input,/* parse message packets */
+    .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+    .speed_switcher = sirfbin_speed,	/* we can change baud rate */
+    .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no close hook */
+    .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(SIRFII_ENABLE) && defined(BINARY_ENABLE) */

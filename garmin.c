@@ -838,19 +838,19 @@ static gps_mask_t garmin_parse_input(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t garmin_binary =
 {
-    "Garmin binary",	/* full name of type */
-    NULL,		/* only switched to by some other driver */
-    garmin_probe,	/* how to detect this at startup time */
-    garmin_init,	/* initialize the device */
-    garmin_get_packet,	/* how to grab a packet */
-    garmin_parse_input,	/* read and parse message packets */
-    NULL,		/* send DGPS correction */
-    NULL,		/* no speed switcher */
-    NULL,		/* no mode switcher */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* not relevant, no rate switch */
-    NULL,		/* caller needs to supply a close hook */
-    1,			/* updates every second */
+    .typename       = "Garmin binary",	/* full name of type */
+    .trigger        = NULL,		/* no trigger, it has a probe */
+    .probe          = garmin_probe,	/* how to detect at startup time */
+    .initializer    = garmin_init,	/* initialize the device */
+    .get_packet     = garmin_get_packet,/* how to grab a packet */
+    .parse_packet   = garmin_parse_input,	/* parse message packets */
+    .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no close hook */
+    .cycle          = 1,		/* updates every second */
 };
 
 #endif /* GARMIN_ENABLE */

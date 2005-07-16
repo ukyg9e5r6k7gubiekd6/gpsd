@@ -385,19 +385,19 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t zodiac_binary =
 {
-    "Zodiac binary",	/* full name of type */
-    NULL,		/* no probe */
-    NULL,		/* only switched to by some other driver */
-    NULL,		/* no initialization */
-    packet_get,		/* how to get a packet */
-    zodiac_analyze,	/* read and parse message packets */
-    zodiac_send_rtcm,	/* send DGPS correction */
-    zodiac_speed_switch,/* we can change baud rate */
-    NULL,		/* no mode switcher */
-    NULL,		/* no sample-rate switcher */
-    -1,			/* not relevant, no rate switch */
-    NULL,		/* caller needs to supply a close hook */
-    1,			/* updates every second */
+    .typename       = "Zodiac binary",	/* full name of type */
+    .trigger        = NULL,		/* no trigger */
+    .probe          = NULL,		/* no probe */
+    .initializer    = NULL,		/* no initialization */
+    .get_packet     = packet_get,	/* use the generic packet getter */
+    .parse_packet   = zodiac_analyze,	/* parse message packets */
+    .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
+    .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* caller might supply a close hook */
+    .cycle          = 1,		/* updates every second */
 };
 
 #endif /* ZODIAC_ENABLE */

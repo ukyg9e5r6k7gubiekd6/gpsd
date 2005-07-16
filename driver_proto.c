@@ -132,18 +132,18 @@ static void proto_initializer(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t proto_binary =
 {
-    "Prototype driver",	/* full name of type */
-    NULL,		/* recognize the type */
-    NULL,		/* no probe */
-    proto_initializer,	/* initialize the device */
-    packet_get,		/* how to grab a packet */
-    proto_parse_input,	/* read and parse message packets */
-    pass_rtcm,	/* send RTCM data straight */
-    proto_speed,	/* we can change baud rates */
-    proto_mode,		/* there is a mode switcher */
-    NULL,		/* no rate switcher */
-    -1,			/* not relevant, no rate switcher,
-    NULL,		/* caller needs to supply a close hook */
-    1,			/* updates every second */
+    .typename       = "Prototype driver",	/* full name of type */
+    .trigger        = NULL,		/* recognize the type */
+    .probe          = NULL,		/* no probe */
+    .initializer    = proto_initializer,/* initialize the device */
+    .get_packet     = packet_get,	/* use generic packet getter */
+    .parse_packet   = proto_parse_input,/* parse message packets */
+    .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
+    .speed_switcher = proto_speed,	/* we can change baud rates */
+    .mode_switcher  = proto_mode,	/* there is a mode switcher */
+    .rate_switcher  = NULL,		/* no rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switcher */
+    .wrapup         = NULL,		/* no close hook */
+    .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(PROTO_ENABLE) && defined(BINARY_ENABLE) */

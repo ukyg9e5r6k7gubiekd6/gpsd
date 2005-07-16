@@ -327,18 +327,18 @@ static void evermore_close(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
-    "Evermore binary",		/* full name of type */
-    "$PEMT,100,05.",		/* recognize the type */
-    NULL,			/* no probe */
-    evermore_initializer,	/* initialize the device */
-    packet_get,			/* how to grab a packet */
-    evermore_parse_input,	/* read and parse message packets */
-    pass_rtcm,			/* send RTCM data straight */
-    evermore_speed,		/* we can change baud rates */
-    evermore_mode,		/* there is a mode switcher */
-    NULL,			/* no sample-rate switcher */
-    -1,				/* not relevant, no rate switch */
-    evermore_close,		/* caller needs to supply a close hook */
-    1,				/* updates every second */
+    .typename       = "Evermore binary",	/* full name of type */
+    .trigger        = "$PEMT,100,05.",		/* recognize the type */
+    .probe          = NULL,			/* no probe */
+    .initializer    = evermore_initializer,	/* initialize the device */
+    .get_packet     = packet_get,		/* use generic one */
+    .parse_packet   = evermore_parse_input,	/* parse message packets */
+    .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
+    .speed_switcher = evermore_speed,		/* we can change baud rates */
+    .mode_switcher  = evermore_mode,		/* there is a mode switcher */
+    .rate_switcher  = NULL,			/* no sample-rate switcher */
+    .cycle_chars    = -1,			/* ignore, no rate switch */
+    .wrapup         = evermore_close,		/* return to NMEA */
+    .cycle          = 1,			/* updates every second */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */

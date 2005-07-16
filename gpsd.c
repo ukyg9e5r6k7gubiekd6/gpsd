@@ -78,14 +78,21 @@ static int debuglevel;
 static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
-static struct gps_context_t context = {0, 
-				       false, 0, -1, 0, {'\0'}, 0,
-				       LEAP_SECONDS, CENTURY_BASE, 
+static struct gps_context_t context = {
+    .valid        = 0, 
+    .sentdgps     = false, 
+    .fixcnt       = 0, 
+    .dsock        = -1, 
+    .rtcmbytes    = 0, 
+    .rtcmbuf      = {'\0'}, 
+    .rtcmtime     = 0,
+    .leap_seconds = LEAP_SECONDS, 
+    .century      = CENTURY_BASE, 
 #ifdef NTPSHM_ENABLE
-				       {0},
-				       {0},
+    .shmTime      = {0},
+    .shmTimeInuse = {0},
 # ifdef PPS_ENABLE
-					0,
+    .shmTimePPS   = false,
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };
@@ -1290,15 +1297,6 @@ int main(int argc, char *argv[])
 		if (subscribers[cfd].watcher) {
 		    char cmds[4] = ""; 
 		    channel->poll_times[cfd] = timestamp();
-#ifdef RTCM104_ENABLE
-		    if (channel->packet_type == RTCM_PACKET) {
-			char buf[BUFSIZ];
-
-			rtcm_dump(channel, buf, sizeof(buf));
-			(void)throttled_write(cfd, buf, (ssize_t)strlen(buf));
-			break;
-		    }
-#endif /* RTCM104_ENABLE */
 		    if (changed &~ ONLINE_SET) {
 			if (changed & (LATLON_SET | MODE_SET))
 			    (void)strcat(cmds, "o");
