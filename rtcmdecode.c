@@ -20,8 +20,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
-
-	//	(void)fputs(buf, stderr);
 	(void)fputs(buf, stdout);
     }
 }
@@ -41,8 +39,8 @@ int main(int argc, char **argv)
 
 	case '?':
 	default:
-	    /* usage(); */
-	    break;
+	    fputs("rtcmdecode [-v]\n", stderr);
+	    exit(1);
 	}
     }
     argc -= optind;
