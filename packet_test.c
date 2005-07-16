@@ -10,7 +10,6 @@
 #include "gpsd.h"
 
 static int verbose = 0;
-static int waiting;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -31,13 +30,13 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 int main(int argc, char *argv[])
 {
     struct map {
-	char		*legend;
-	unsigned char	test[MAX_PACKET_LENGTH+1];
-	int		testlen;
-	int		garbage_offset;
-	int		type;
-	int		initstate;
+	char	*legend;
+	char	test[MAX_PACKET_LENGTH+1];
+	size_t	testlen;
+	int	garbage_offset;
+	int	type;
     };
+    /*@ -initallelements +charint -usedef @*/
     struct map tests[] = {
 	/* NMEA tests */
 	{
@@ -145,10 +144,11 @@ int main(int argc, char *argv[])
 	    ZODIAC_PACKET,
 	},
     };
+    /*@ +initallelements -charint +usedef @*/
 
     struct map *mp;
     struct gps_device_t state;
-    int st;
+    ssize_t st;
 
     if (argc > 1)
 	verbose = atoi(argv[1]); 
@@ -157,12 +157,11 @@ int main(int argc, char *argv[])
 	state.packet_type = BAD_PACKET;
 	state.packet_state = 0;
 	state.inbuflen = 0;
-	memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
-	gpsd_report(2, "%s starts with state %d\n", mp->legend, mp->initstate);
-	waiting = mp->testlen;
-	st = packet_parse(&state, waiting);
+	/*@i@*/memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
+	/*@ -compdef -uniondef -usedef @*/
+	st = packet_parse(&state, mp->testlen);
 	if (state.packet_type != mp->type)
-	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, st);
+	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, (int)st);
 	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen))
 	    printf("%s test FAILED (data garbled).\n", mp->legend);
 	else
@@ -184,6 +183,7 @@ int main(int argc, char *argv[])
 	}
 	(void)putchar('\n');
 #endif /* DUMPIT */
+	/*@ +compdef +uniondef +usedef @*/
     }
 
     exit(0);

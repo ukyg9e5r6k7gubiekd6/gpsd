@@ -109,7 +109,7 @@ gpsmm_test_LDADD = $(LIBC) libgps.la -lm
 #
 # Build bits_test tester
 #
-bits_test_SOURCES = bits.c
+bits_test_SOURCES = bits_test.c
 bits_test_LDADD = $(LIBC) libgps.la
 
 #
@@ -255,6 +255,7 @@ splint:
 # apparently increases the accuracy of computation in a way that
 # that affects the low-order digits of the track field in the O response.
 gps-regress:
+	@echo "Testing the daemon..."
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Build the regression tests for the daeomon
@@ -263,10 +264,21 @@ gps-makeregress:
 
 # Regression-test the RTCM decoder
 rtcm-regress: rtcmdecode
+	@echo "Testing RTCM decoding..."
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Rebuild the RTCM regression tests
 rtcm-makeregress: rtcmdecode
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >$${f}.chk; done
 
-testregress: gps-regress rtcm-regress
+# Regression-test the packet getter
+packet-regress: packet_test
+	@echo "Testing detection of invalid packets..."
+	packet_test | diff -u test/packet.test.chk -
+
+# Rebuild the packet-getter regression test
+packet-makeregress: packet_test
+	packet_test >test/packet.test.chk
+
+testregress: gps-regress rtcm-regress packet-regress
+	@echo "Rgressions complete."

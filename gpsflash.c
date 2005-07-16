@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  */
+#include "gpsd.h"
 #include "gpsflash.h"
 
 /* block size when writing to the serial port. related to FIFO size */
@@ -13,7 +14,6 @@ static char *progname;
 static void
 usage(void){
 	fprintf(stderr, "Usage: %s [-v] [-l <loader_file>] -p <tty> -f <firmware_file>\n", progname);
-	exit(1);
 }
 
 int
@@ -155,7 +155,7 @@ r0:		if((r = write(pfd, msg+nbx, nbs)) == -1){
 				nbx += r; /* number bytes sent */
 				goto r0;
 			} else {
-			        free(msg);
+			        (void)free(msg);
 				return -1; /* oops. bail out */
 			}
 		}
@@ -164,7 +164,7 @@ r0:		if((r = write(pfd, msg+nbx, nbs)) == -1){
 	}
 	/*@ +compdef @*/
 
-	free(msg);
+	(void)free(msg);
 	return 0;
 }
 
@@ -205,7 +205,7 @@ srecord_send(int pfd, char *data, size_t len){
 				printf ("%6d\n", i);
 
 			(void)tcflush(pfd, TCIFLUSH);
-			if((r = (int)write(pfd, sendbuf, tl+2)) != tl+2)
+			if((r = (int)write(pfd, sendbuf, tl+2)) != (int)tl+2)
 				return -1; /* oops. bail out */
 
 			(void)tcdrain(pfd);
@@ -224,7 +224,7 @@ main(int argc, char **argv){
 
 	int ch;
 	int lfd, ffd, pfd;
-	int ls,  fs;
+	size_t ls,  fs;
 	bool fflag = false, lflag = false, pflag = false;
 	struct stat sb;
 	struct flashloader_t *gpstype = &sirf_type;
@@ -232,7 +232,7 @@ main(int argc, char **argv){
 	char *lname = (char *)sirf_type.flashloader;
 	char *port = NULL;
 	char *warning;
-	struct termios *term;
+	struct termios term;
 	sigset_t sigset;
 
 	char *firmware = NULL;
@@ -256,6 +256,7 @@ main(int argc, char **argv){
 			break;
 		default:
 			usage();
+			exit(0);
 			/* NOTREACHED */
 		}
 
@@ -273,81 +274,115 @@ main(int argc, char **argv){
 	}
 
 	/* make sure we have meaningful flags */
-	if (!(fflag && pflag))
+	if (!(fflag && pflag) || fname == NULL || port == NULL) {
 		usage();
+		return 1;
+	}
 	
 	/* Open the loader file */
-	if((lfd = open(lname, O_RDONLY, 0444)) == -1)
-		err(1, "open(%s)", lname);
+	if((lfd = open(lname, O_RDONLY, 0444)) == -1) {
+		gpsd_report(0, "open(%s)\n", lname);
+		return 1;
+	}
 
 	/* fstat() its file descriptor. Need the size, and avoid races */
-	if(fstat(lfd, &sb) == -1)
-		err(1, "fstat(%s)", lname);
+	if(fstat(lfd, &sb) == -1) {
+		gpsd_report(0, "fstat(%s)\n", lname);
+		return 1;
+	}
 
 	/* minimal sanity check on loader size. also prevents bad malloc() */
-	ls = (int)sb.st_size;
+	ls = (size_t)sb.st_size;
 	if ((ls < gpstype->min_loader_size)||(ls > gpstype->max_loader_size)){
-		fprintf(stderr, "preposterous loader size: %d\n", ls);
+		gpsd_report(0, "preposterous loader size: %d\n", ls);
 		return 1;
 	}
 
 	/* malloc a loader buffer */
-	if ((loader = malloc(ls)) == NULL)
-		err(1, "malloc(%d)", ls);
+	if ((loader = malloc(ls)) == NULL) {
+		gpsd_report(0, "malloc(%d)\n", ls);
+		return 1;
+	}
 
-	if ((read(lfd, loader, ls)) != ls)
-		err(1, "read(%d)", ls);
+	if (read(lfd, loader, ls) != (ssize_t)ls) {
+		(void)free(loader);
+		gpsd_report(0, "read(%d)\n", ls);
+		return 1;
+	}
 
 	/* don't care if close fails - kernel will force close on exit() */
-	close(lfd);
+	(void)close(lfd);
 
 	/* Open the firmware image file */
-	if((ffd = open(fname, O_RDONLY, 0444)) == -1)
-		err(1, "open(%s)", fname);
-
-	/* fstat() its file descriptor. Need the size, and avoid races */
-	if(fstat(ffd, &sb) == -1)
-		err(1, "fstat(%s)", fname);
+	if((ffd = open(fname, O_RDONLY, 0444)) == -1) {
+		(void)free(loader);
+		gpsd_report(0, "open(%s)]n", fname);
+		return 1;
+	}
+	if(fstat(ffd, &sb) == -1) {
+		(void)free(loader);
+		gpsd_report(0, "fstat(%s)\n", fname);
+		return 1;
+	}
 
 	/* minimal sanity check on firmware size. also prevents bad malloc() */
-	fs = (int)sb.st_size;
+	fs = (size_t)sb.st_size;
 	if ((fs < gpstype->min_firmware_size) || (fs > gpstype->max_firmware_size)){
-		fprintf(stderr, "preposterous firmware size: %d\n", fs);
+		(void)free(loader);
+		gpsd_report(1, "preposterous firmware size: %d\n", fs);
 		return 1;
 	}
 
 	/* malloc an image buffer */
-	if ((firmware = malloc(fs+1)) == NULL)
-		err(1, "malloc(%d)", fs);
+	if ((firmware = malloc(fs+1)) == NULL) {
+		(void)free(loader);
+		gpsd_report(0, "malloc(%u)\n", (unsigned)fs);
+		return 1;
+	}
 
-	if ((read(ffd, firmware, fs)) != fs)
-		err(1, "read(%d)", fs);
+	if (read(ffd, firmware, fs) != (ssize_t)fs) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "read(%u)\n", (unsigned)fs);
+		return 1;
+	}
 
 	firmware[fs] = '\0';
 
 	/* don't care if close fails - kernel will force close on exit() */
-	close(ffd);
+	(void)close(ffd);
 
 	/* did we just read some S-records? */
 	if (!((firmware[0] == 'S') && ((firmware[1] >= '0') && (firmware[1] <= '9')))){ /* srec? */
-		fprintf(stderr, "%s: not an S-record file\n", fname);
-		return(1);
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "%s: not an S-record file\n", fname);
+		return 1;
 	}
 
-	/* malloc a loader buffer */
-	if ((term = malloc(sizeof(struct termios))) == NULL)
-		err(1, "malloc(%d)", sizeof(struct termios));
-
 	/* Open the serial port, blocking is OK */
-	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1)
-		err(1, "open(%s)", port);
+	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "open(%s)\n", port);
+		return 1;
+	}
 
 	/* call serialConfig to set control lines and termios bits */
-	if(serialConfig(pfd, term, 38400) == -1)
-		err(1, "serialConfig()");
+	memset(&term, 0, sizeof(term));
+	if(serialConfig(pfd, &term, 38400) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "serialConfig()\n");
+		return 1;
+	}
 
-	if(gpstype->port_setup(pfd, term) == -1)
-		err(1, "port_setup()");
+	if(gpstype->port_setup(pfd, &term) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "port_setup()\n");
+		return 1;
+	}
 
 	/* once we get here, we are uninterruptable. handle signals */
 	(void)sigemptyset(&sigset);
@@ -358,35 +393,61 @@ main(int argc, char **argv){
 	(void)sigaddset(&sigset, SIGSTOP);
 	(void)sigaddset(&sigset, SIGKILL);
 
-	if(sigprocmask(SIG_BLOCK, &sigset, NULL) == -1)
-		err(1,"sigprocmask");
+	if(sigprocmask(SIG_BLOCK, &sigset, NULL) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0,"sigprocmask\n");
+		return 1;
+	}
 
 	/* send the command to begin the update */
-	if(gpstype->stage1_command && (gpstype->stage1_command(pfd) == -1))
-	    err(1, "Stage 1 update command");
+	if(gpstype->stage1_command!=NULL && (gpstype->stage1_command(pfd) == -1)) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "Stage 1 update command\n");
+		return 1;
+	}
 
 	/* send the bootstrap/flash programmer */
-	if(gpstype->loader_send(pfd, term, loader, ls) == -1)
-		err(1, "Loader send");
+	if(gpstype->loader_send(pfd, &term, loader, ls) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "Loader send\n");
+		return 1;
+	}
+	(void)free(loader);
 
 	/* send any command needed to demarcate the two loads */
-	if(gpstype->stage2_command && (gpstype->stage2_command(pfd) == -1))
-	    err(1, "Stage 2 update command");
+	if(gpstype->stage2_command!=NULL && (gpstype->stage2_command(pfd) == -1)) {
+	    (void)free(firmware);
+	    gpsd_report(0, "Stage 2 update command\n");
+	    return 1;
+	}
 
 	/* and now, poke the actual firmware over */
-	if(gpstype->firmware_send(pfd, firmware, fs) == -1)
-		err(1, "Firmware send");
+	if(gpstype->firmware_send(pfd, firmware, fs) == -1) {
+	    (void)free(firmware);
+	    gpsd_report(0, "Firmware send\n");
+	    return 1;
+	}
+	(void)free(firmware);
 
 	/* send any command needed to finish the firmware load */
-	if(gpstype->stage3_command && (gpstype->stage3_command(pfd) == -1))
-	    err(1, "Stage 3 update command");
+	if(gpstype->stage3_command!=NULL && (gpstype->stage3_command(pfd) == -1)) {
+	    gpsd_report(0, "Stage 3 update command\n");
+	    return 1;
+	}
 
-	if(sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1)
-		err(1,"sigprocmask");
+	if(sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1) {
+		gpsd_report(0,"sigprocmask\n");
+		return 1;
+	}
 
 	/* type-defined wrapup, take our tty to GPS's post-flash settings */
-	if(gpstype->port_wrapup(pfd, term) == -1)
-		err(1, "port_wrapup()");
+	if(gpstype->port_wrapup(pfd, &term) == -1) {
+		gpsd_report(0, "port_wrapup()\n");
+		return 1;
+	}
 
 	/* return() from main(), to take advantage of SSP compilers */
 	return 0;

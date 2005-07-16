@@ -37,13 +37,13 @@
 
 struct flashloader_t {
     const char *flashloader;
-    int min_loader_size, max_loader_size;
-    int min_firmware_size, max_firmware_size;
+    size_t min_loader_size, max_loader_size;
+    size_t min_firmware_size, max_firmware_size;
     int (*port_setup)(int fd, struct termios *term);
     int (*stage1_command)(int fd);
-    int (*loader_send)(int pfd, struct termios *term, char *loader, int ls);
+    int (*loader_send)(int pfd, struct termios *term, char *loader, size_t ls);
     int (*stage2_command)(int fd);
-    int (*firmware_send)(int pfd, char *loader, int ls);
+    int (*firmware_send)(int pfd, char *loader, size_t ls);
     int (*stage3_command)(int fd);
     int (*port_wrapup)(int fd, struct termios *term);
 };
