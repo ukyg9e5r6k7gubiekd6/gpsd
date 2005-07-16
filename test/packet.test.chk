@@ -8,3 +8,4 @@ SiRF WAAS version ID with 3 chars of leading garbage test succeeded.
 SiRF WAAS version ID with wrong checksum test succeeded.
 SiRF WAAS version ID with bad length test succeeded.
 Zodiac binary 1000 Geodetic Status Output Message test succeeded.
+EverMore status packet test succeeded.

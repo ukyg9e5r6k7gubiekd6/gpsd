@@ -143,6 +143,17 @@ int main(int argc, char *argv[])
 	    0,
 	    ZODIAC_PACKET,
 	},
+        /* EverMore tests */                         
+	{                                            
+		"EverMore status packet",                
+	    {                                        
+		0x10, 0x02, 0x0D, 0x20, 0xE1, 0x00, 0x00, 0x00,
+		0x0A, 0x00, 0x1E, 0x00, 0x32, 0x00, 0x5b, 0x10,
+		0x03},                               
+	    17,                                      
+	    0,                                       
+	    EVERMORE_PACKET,                         
+	},                                           
     };
     /*@ +initallelements -charint +usedef @*/
 

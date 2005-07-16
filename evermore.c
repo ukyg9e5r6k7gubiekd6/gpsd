@@ -5,6 +5,7 @@
  * But we'll get atomic position reports from it, which is good.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -263,7 +264,6 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
     return ok;
 }
 
-
 static bool evermore_set_mode(struct gps_device_t *session, 
 			      speed_t speed, bool mode)
 {
@@ -316,6 +316,26 @@ static void evermore_initializer(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET)
 	(void)evermore_set_mode(session, session->gpsdata.baudrate, true);
+}
+
+static void evermore_probe(struct gps_device_t *session)
+/* send a binary message to probe for EverMore GPS */
+/*
+ * There is a way to probe for EverMore chipset. When binary message 0x81 is sent:
+ * 10 02 04 81 13 94 10 03
+ *
+ * EverMore will reply with something like this:
+ * *10 *02 *0D *20 E1 00 00 *00 0A 00 1E 00 32 00 5B *10 *03
+ * bytes marked with * are fixed
+ * Message in reply is information about logging configuration of GPS
+ * */
+{
+   unsigned char msg[] = {0x81, 	/*  0: msg ID */
+	    		  0x13};        /*  1: LogRead = 0x13 */
+
+   bool ok;
+   ok = evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
+   return;
 }
 
 static void evermore_close(struct gps_device_t *session)
