@@ -110,6 +110,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %doc README INSTALL COPYING HACKING TODO
 %attr(755, root, root) %{_bindir}/gpsfake
 %attr(755, root, root) %{_bindir}/rtcmdecode
+%attr(755, root, root) %{_bindir}/gpsflash
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
