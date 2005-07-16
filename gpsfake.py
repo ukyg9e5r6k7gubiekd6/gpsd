@@ -49,6 +49,12 @@ or SIGTERM signals, ensure that they call the TestSession.killall()
 method; otherwise your code will fail to clean up after itself when
 interrupted.
 
+Each FakeGPS instance tries to packetize the data from the logfile it
+is initialized with.  It looks for packet headers asociated with common
+packet types such as NMEA, SiRF, and Zodiac.  Additioonally, the Type
+header in a logfile can be used to force the packet type, notably to RTCM
+which is fed to the daemon character by character,
+
 There are some limitations.  Trying to run more than one instance of
 TestSession concurrently will fail as the daemon instances contend for
 port 2947.  Due to indeterminacy in thread timings, it is not guaranteed
@@ -74,12 +80,16 @@ class TestLoad:
     def __init__(self, logfp):
         self.sentences = []	# This and .packtype are the interesting bits
         self.logfp = logfp
-        self.logfile = logfp.name 
+        self.logfile = logfp.name
+        self.type = None
         # Skip the comment header
         while True:
             first = logfp.read(1)
             if first == "#":
-                logfp.readline()
+                line = logfp.readline()
+                if line.strip().startswith("Type:"):
+                    if line.find("RTCM") > -1:
+                        self.type = "RTCM"
             else:
                 logfp.seek(-1, 1)	# Must be a real file, not stdin
                 break
@@ -104,6 +114,10 @@ class TestLoad:
             self.packtype = "SiRF-II binary"
             self.legend = "gpsfake: packet %d"
             self.textual = False
+        if self.type == "RTCM":
+            self.packtype = "RTCM"
+            self.legend = None
+            self.textual = False
         else:
             print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
             self.sentences = None
@@ -112,6 +126,8 @@ class TestLoad:
         first = self.logfp.read(1)
         if not first:
             return None
+        elif self.type == "RTCM":
+            return first
         elif first == '$':					# NMEA packet
             return "$" + self.logfp.readline()
         second = self.logfp.read(1)

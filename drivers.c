@@ -407,9 +407,7 @@ static struct gps_type_t itrax = {
 #ifdef RTCM104_ENABLE
 /**************************************************************************
  *
- * This stub driver for RTCM-104 simply accepts incomping packets.
- * The packet getter does all the work; the unpacked packets end up
- * in structures in private storage.
+ * RTCM-104, used for broadcasting DGPS corrections and by DGPS radios
  *
  **************************************************************************/
 

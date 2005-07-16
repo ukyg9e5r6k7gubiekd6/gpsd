@@ -80,7 +80,7 @@ def fakehook(linenumber, fakegps):
         if not pipe:
             sys.stderr.write("gpsfake: log cycle begins.\n")
     time.sleep(cycle)
-    if linedump:
+    if linedump and fakegps.testload.legend:
         if fakegps.testload.textual:
             ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
         else:

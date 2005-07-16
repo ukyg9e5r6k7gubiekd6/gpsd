@@ -644,6 +644,9 @@ additional # comments (not containing a colon) after these headers.
 The test machinery that interprets the headers will ignore these and
 any empty comment lines.
 
+See the header comment of the gpsfake.py module for more about the
+logfile format.
+
 An ideal log file would include an initial portion during which the
 GPS has no fix, a portion during which it has a fix but is stationary,
 and a portion during which it is moving.
