@@ -213,6 +213,8 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
 #define CNR_OFFSET	24	/* dB */
 #define TU_SCALE	5	/* minutes */
 
+/* msg header - all msgs */
+
 struct rtcm_msghw1 {			/* header word 1 */
     uint            parity:6;
     uint            refstaid:10;	/* reference station ID */
@@ -229,6 +231,13 @@ struct rtcm_msghw2 {			/* header word 2 */
     uint            zcnt:13;
     uint            _pad:2;
 };
+
+struct rtcm_msghdr {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+};
+
+/* msg 1 - differential gps corrections */
 
 struct rtcm_msg1w3 {			/* msg 1 word 3 */
     uint            parity:6;
@@ -275,11 +284,6 @@ struct rtcm_msg1w7 {			/* msg 1 word 7 */
     uint            _pad:2;
 };
 
-struct rtcm_msghdr {
-    struct rtcm_msghw1   w1;
-    struct rtcm_msghw2   w2;
-};
-
 struct rtcm_msg1 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
@@ -301,6 +305,201 @@ struct rtcm_msg1 {
     struct rtcm_msg1w5   w15;
     struct rtcm_msg1w6   w16;
     struct rtcm_msg1w7   w17;
+};
+
+/* msg 3 - reference station parameters */
+
+struct rtcm_msg3w3 {
+    uint            parity:6;
+    uint	    x_h:24;
+    uint            _pad:2;
+};
+
+struct rtcm_msg3w4 {
+    uint            parity:6;
+    uint	    y_h:16;
+    uint	    x_l:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg3w5 {
+    uint            parity:6;
+    uint	    z_h:8;
+    uint	    y_l:16;
+    uint            _pad:2;
+};
+
+struct rtcm_msg3w6 {
+    uint            parity:6;
+    uint	    z_l:24;
+    uint            _pad:2;
+};
+
+struct rtcm_msg3 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg3w3   w3;
+    struct rtcm_msg3w4   w4;
+    struct rtcm_msg3w5   w5;
+    struct rtcm_msg3w6   w6;
+};
+
+/* msg 4 - reference station datum */
+
+struct rtcm_msg4w3 {
+    uint            parity:6;
+    uint	    datum_alpha_char2:8;
+    uint	    datum_alpha_char1:8;
+    uint	    spare:4;
+    uint	    dat:1;
+    uint	    dgnss:3;
+    uint            _pad:2;
+};
+
+struct rtcm_msg4w4 {
+    uint            parity:6;
+    uint	    datum_sub_div_char2:8;
+    uint	    datum_sub_div_char1:8;
+    uint	    datum_sub_div_char3:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg4w5 {
+    uint            parity:6;
+    uint	    dy_h:8;
+    uint	    dx:16;
+    uint            _pad:2;
+};
+
+struct rtcm_msg4w6 {
+    uint            parity:6;
+    uint	    dz:24;
+    uint	    dy_l:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg4 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg4w3   w3;
+    struct rtcm_msg4w4   w4;
+    struct rtcm_msg4w5   w5;		/* optional */
+    struct rtcm_msg4w6   w6;		/* optional */
+};
+
+/* msg 5 - constellation health */
+
+struct rtcm_msg5w3 {
+    uint            parity:6;
+    uint	    unassigned:2;
+    uint	    time_unhealthy:4;
+    uint	    loss_warn:1;
+    uint	    new_nav_data:1;
+    uint	    health_enable:1;
+    uint	    cn0:5;
+    uint	    data_health:3;
+    uint	    issue_of_data_link:1;
+    uint	    sat_id:5;
+    uint	    reserved:1;
+    uint            _pad:2;
+};
+
+struct rtcm_msg5 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg5w3   w3;
+};
+
+/* msg 6 */
+
+struct rtcm_msg6 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+};
+
+/* msg 7 - beacon almanac */
+
+struct rtcm_msg7w3 {
+    uint            parity:6;
+    int	    	    lon_h:8;
+    int	            lat:16;
+    uint            _pad:2;
+};
+
+struct rtcm_msg7w4 {
+    uint            parity:6;
+    uint	    freq_h:6;
+    uint	    range:10;
+    uint	    lon_l:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg7w5 {
+    uint            parity:6;
+    uint	    encoding:1;
+    uint	    sync_type:1;
+    uint	    mod_mode:1;
+    uint	    bit_rate:3;
+    uint	    station_id:9;
+    uint	    health:3;
+    uint	    freq_l:6;
+    uint            _pad:2;
+};
+
+struct rtcm_msg7 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg7w3   w3;
+    struct rtcm_msg7w4   w4;
+    struct rtcm_msg7w5   w5;
+
+    struct rtcm_msg7w3   w6;		/* optional 1 */
+    struct rtcm_msg7w4   w7;
+    struct rtcm_msg7w5   w8;
+
+    struct rtcm_msg7w3   w9;		/* optional 2 ... */
+    struct rtcm_msg7w4   w10;
+    struct rtcm_msg7w5   w11;
+};
+
+/* msg 16 - text msg */
+
+struct rtcm_msg16w3 {
+    uint            parity:6;
+    uint	    byte3:8;
+    uint	    byte2:8;
+    uint	    byte1:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg16 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg16w3   w3;
+    struct rtcm_msg16w3   w4;	/* optional */
+    struct rtcm_msg16w3   w5;	/* optional */
+
+    struct rtcm_msg16w3   w6;	/* optional */
+    struct rtcm_msg16w3   w7;	/* optional */
+    struct rtcm_msg16w3   w8;	/* optional */
+
+    struct rtcm_msg16w3   w9;	/* optional */
+    struct rtcm_msg16w3   w10;	/* optional */
+    struct rtcm_msg16w3   w11;	/* optional ... */
+};
+
+/* msg unknown */
+
+struct rtcm_msgunk {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    uint            w3;
 };
 
 static void unpack(struct gps_device_t *session)
@@ -423,6 +622,11 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 		session->rtcm.curr_word ^= W_DATA_MASK;
 
 	    if (rtcmparityok(session->rtcm.curr_word)) {
+#if 0
+		/*
+		 * Don't clobber the buffer just because we spot
+		 * another preamble pattern in the data stream. -wsr
+		 */
 		if (((struct rtcm_msghw1 *) & session->rtcm.curr_word)->preamble ==
 		    PREAMBLE_PATTERN) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
@@ -430,6 +634,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 				session->rtcm.bufindex);
 		    session->rtcm.bufindex = 0;
 		}
+#endif
 		gpsd_report(RTCM_ERRLEVEL_BASE+2,
 			    "processing word %u (offset %d)\n",
 			    session->rtcm.bufindex, session->rtcm.curr_offset);
@@ -442,6 +647,8 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 		     */
 		    if (session->rtcm.bufindex >= RTCM_WORDS_MAX){
 			session->rtcm.bufindex = 0;
+			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				    "RTCM buffer overflowing -- resetting\n");
 			return RTCM_NO_SYNC;
 		    }
 
@@ -456,7 +663,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 		    session->rtcm.bufindex++;
 		    /* rtcm_print_msg(msghdr); */
 
-		    if (session->rtcm.bufindex > 2) {	/* do we have the length yet? */
+		    if (session->rtcm.bufindex >= 2) {	/* do we have the length yet? */
 			if (session->rtcm.bufindex >= msghdr->w2.frmlen + 2) {
 			    /* jackpot, we have an RTCM packet*/
 			    res = RTCM_STRUCTURE;
@@ -516,6 +723,142 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 			       session->rtcm.ranges[i].rangerr,
 			       session->rtcm.ranges[i].rangerate);
 	break;
+
+#if 0				/* I was too slow in getting these in. -wsr */
+
+    case 3:
+	{
+	    struct msg3    *m = (struct msg3 *) msghdr;
+
+	    if (len >= 4) {
+		printf("R\t%.2f\t%.2f\t%.2f\n",
+		       ((m->w3.x_h << 8) | (m->w4.x_l)) * XYZ_SCALE,
+		       ((m->w4.y_h << 16) | (m->w5.y_l)) * XYZ_SCALE,
+		       ((m->w5.z_h << 24) | (m->w6.z_l)) * XYZ_SCALE);
+	    }
+	}
+	break;
+
+    case 4:
+	{
+	    struct msg4    *m = (struct msg4 *) msghdr;
+
+	    if (len >= 2){
+		printf("D\t%s\t%1d\t",
+		       (m->w3.dgnss==0)?"GPS":((m->w3.dgnss==1)?
+					       "GLONASS":"???"),
+		       m->w3.dat);
+		if (m->w3.datum_alpha_char1){
+		    putchar (m->w3.datum_alpha_char1);
+		}
+		if (m->w3.datum_alpha_char2){
+		    putchar (m->w3.datum_alpha_char2);
+		}
+		if (m->w4.datum_sub_div_char1){
+		    putchar (m->w4.datum_sub_div_char1);
+		}
+		if (m->w4.datum_sub_div_char2){
+		    putchar (m->w4.datum_sub_div_char2);
+		}
+		if (m->w4.datum_sub_div_char3){
+		    putchar (m->w4.datum_sub_div_char3);
+		}
+		if (len >= 4){
+		    printf("\t%.1f\t%.1f\t%.1f",
+			   m->w5.dx * DXYZ_SCALE,
+			   ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE,
+			   m->w6.dz * DXYZ_SCALE);
+		}
+		printf("\n");
+	    }
+
+
+	}
+	break;
+
+    case 5:
+	{
+	    struct msg5    *m = (struct msg5 *) msghdr;
+	    while (len >= 1){
+	        printf("C\t%2d\t%1d  %1d\t%2d\t%1d  %1d  %1d\t%2d\n",
+		       m->w3.sat_id,
+		       m->w3.issue_of_data_link,
+		       m->w3.data_health,
+		       (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1),
+		       m->w3.health_enable,
+		       m->w3.new_nav_data,
+		       m->w3.loss_warn,
+		       m->w3.time_unhealthy*TU_SCALE);
+		len--;
+		m = (struct msg5 *) (((RTCMWORD *) m) + 1);
+	    }
+	}
+	break;
+
+    case 6: 			/* NOP msg */
+	printf("N\n");
+	break;
+
+    case 7:
+	{
+	    struct msg7    *m = (struct msg7 *) msghdr;
+	    int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
+
+	    while (len >= 3) {
+		printf("A\t%.4f\t%.4f\t%d\t%.1f\t%d\t%d\t%d\n",
+		       m->w3.lat * LA_SCALE,
+		       ((m->w3.lon_h << 8) | m->w4.lon_l) * LO_SCALE,
+		       m->w4.range,
+		       (((m->w4.freq_h << 6) | m->w5.freq_l)
+			* FREQ_SCALE) + FREQ_OFFSET,
+		       m->w5.health,
+		       m->w5.station_id,
+		       tx_speed[m->w5.bit_rate]);
+		len -= 3;
+		m = (struct msg7 *) (((RTCMWORD *) m) + 3);
+	    }
+	}
+	break;
+
+    case 16:
+	{
+	    struct msg16    *m = (struct msg16 *) msghdr;
+
+	    printf("T\t\"");	/* Note: text is now quoted in the output */
+	    while (len >= 1){
+		if (!m->w3.byte1) {
+		    break;
+		}
+		putchar (m->w3.byte1);
+		if (!m->w3.byte2) {
+		    break;
+		}
+		putchar (m->w3.byte2);
+		if (!m->w3.byte3) {
+		    break;
+		}
+		putchar (m->w3.byte3);
+		len--;
+		m = (struct msg16 *) (((RTCMWORD *) m) + 1);
+	    }
+	    printf("\"\n");
+	}
+	break;
+
+    default:
+	{
+	    struct msgunk    *m = (struct msgunk *) msghdr;
+
+	    printf ("U\t*** Unknown msg type! (len %d) ***\n", len);
+	    while (len >= 1){
+		printf ("U\t0x%08x\n", m->w3);
+		len--;
+		m = (struct msgunk *) (((RTCMWORD *) m) + 1);
+	    }
+	}
+	break;
+#endif
+
     default:
 	break;
     }

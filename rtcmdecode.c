@@ -21,7 +21,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 
-	(void)fputs(buf, stderr);
+	//	(void)fputs(buf, stderr);
+	(void)fputs(buf, stdout);
     }
 }
 
