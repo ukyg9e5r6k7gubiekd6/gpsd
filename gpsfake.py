@@ -114,7 +114,7 @@ class TestLoad:
             self.packtype = "SiRF-II binary"
             self.legend = "gpsfake: packet %d"
             self.textual = False
-        if self.type == "RTCM":
+        elif self.type == "RTCM":
             self.packtype = "RTCM"
             self.legend = None
             self.textual = False
