@@ -564,6 +564,17 @@ static void unpack(struct gps_device_t *session)
 	    }
 	}
 	break;
+    case 3:
+        {
+	    struct rtcm_msg3    *m = (struct rtcm_msg3 *)msghdr;
+
+	    if (len >= 4) {
+		session->rtcm.ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
+		session->rtcm.ecef.y = ((m->w4.y_h<<16)|(m->w5.y_l))*XYZ_SCALE;
+		session->rtcm.ecef.z = ((m->w5.z_h<<24)|(m->w6.z_l))*XYZ_SCALE;
+	    }
+	}
+	break;
     default:
 	break;
     }
@@ -727,16 +738,10 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 #if 0				/* I was too slow in getting these in. -wsr */
 
     case 3:
-	{
-	    struct msg3    *m = (struct msg3 *) msghdr;
-
-	    if (len >= 4) {
-		printf("R\t%.2f\t%.2f\t%.2f\n",
-		       ((m->w3.x_h << 8) | (m->w4.x_l)) * XYZ_SCALE,
-		       ((m->w4.y_h << 16) | (m->w5.y_l)) * XYZ_SCALE,
-		       ((m->w5.z_h << 24) | (m->w6.z_l)) * XYZ_SCALE);
-	    }
-	}
+	printf("R\t%.2f\t%.2f\t%.2f\n",
+	       session->rtcm.ecef.x, 
+	       session->rctm.ecef.y,
+	       session->rtcm.ecef.z);
 	break;
 
     case 4:
