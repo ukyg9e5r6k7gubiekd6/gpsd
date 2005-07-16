@@ -925,16 +925,16 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 ssize_t packet_get(struct gps_device_t *session)
 /* grab a packet; returns ether BAD_PACKET or the length */
 {
-    int newdata;
+    ssize_t newdata;
     /*@ -modobserver @*/
-    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr,
+    newdata = read(session->gpsdata.gps_fd, session->inbufptr,
 			sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer));
     /*@ +modobserver @*/
     if (newdata < 0 && errno != EAGAIN)
 	return BAD_PACKET;
     else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
 	return 0;
-    return packet_parse(session, newdata);
+    return packet_parse(session, (size_t)newdata);
 }
 
 void packet_reset(struct gps_device_t *session)

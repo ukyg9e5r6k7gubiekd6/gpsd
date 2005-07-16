@@ -171,7 +171,8 @@ r0:		if((r = write(pfd, msg+nbx, nbs)) == -1){
 
 int
 srecord_send(int pfd, char *data, size_t len){
-	int l, r, i;
+	int r, i;
+	size_t tl;
 	char sendbuf[85], recvbuf[8];
 
 	/* srecord loading is interactive. send line, get reply */
@@ -186,25 +187,25 @@ srecord_send(int pfd, char *data, size_t len){
 			if((r = sscanf(data, "%80s", sendbuf)) == EOF)
 				return 0;
 
-			l = strlen(sendbuf);
-			if ((l < 1) || (l > 80))
+			tl = strlen(sendbuf);
+			if ((tl < 1) || (tl > 80))
 				return -1;
 
-			data += l;
-			len -= l;
+			data += tl;
+			len -= tl;
 
 			while((data[0] != 'S') && (data[0] != '\0'))
 				data++;
 
-			sendbuf[l] = '\r';
-			sendbuf[l+1] = '\n';
-			l += 2;
+			sendbuf[tl] = '\r';
+			sendbuf[tl+1] = '\n';
+			tl += 2;
 
 			if ((++i % 1000) == 0)
 				printf ("%6d\n", i);
 
 			(void)tcflush(pfd, TCIFLUSH);
-			if((r = (int)write(pfd, sendbuf, (size_t)(l+2))) != l+2)
+			if((r = (int)write(pfd, sendbuf, tl+2)) != tl+2)
 				return -1; /* oops. bail out */
 
 			(void)tcdrain(pfd);

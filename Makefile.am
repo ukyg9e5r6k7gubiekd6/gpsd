@@ -18,7 +18,7 @@ endif
 bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode gpsflash
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = bits gpsmm_test packet_test
+check_PROGRAMS = bits_test gpsmm_test packet_test
 
 #
 # Build xgps
@@ -107,10 +107,10 @@ gpsmm_test_SOURCES = gpsmm_test.cpp
 gpsmm_test_LDADD = $(LIBC) libgps.la -lm
 
 #
-# Build bits tester
+# Build bits_test tester
 #
-bits_SOURCES = bits.c
-bits_LDADD = $(LIBC) libgps.la
+bits_test_SOURCES = bits.c
+bits_test_LDADD = $(LIBC) libgps.la
 
 #
 # Build packets tester
@@ -237,12 +237,14 @@ splint:
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
-	@echo "Running splint on bits test harness..."
-	-splint $(bits_SOURCES)
 	@echo "Running splint on rtcmdecode..."
 	-splint -exportlocal rtcmdecode.c
 	@echo "Running splint on gpsflash..."
 	-splint $(gpsflash_SOURCES)
+	@echo "Running splint on bits_test test harness..."
+	-splint $(bits_test_SOURCES)
+	@echo "Running splint on packet_test test harness..."
+	-splint $(packet_test_SOURCES)
 
 #
 # Regression tests begin here

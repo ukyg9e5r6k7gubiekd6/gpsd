@@ -303,14 +303,14 @@ static void unpack(struct rtcm_t *ctx)
     /* someday we'll do big-endian correction here */
     msghdr = (struct rtcm_msghdr *)ctx->buf;
     ctx->type = msghdr->w1.msgtype;
-    ctx->length = (int)msghdr->w2.frmlen;
+    ctx->length = msghdr->w2.frmlen;
     ctx->zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
     ctx->refstaid = msghdr->w1.refstaid;
     ctx->seqnum = msghdr->w2.sqnum;
     ctx->stathlth = msghdr->w2.stathlth;
 
     memset(ctx->ranges, 0, sizeof(ctx->ranges));
-    len = ctx->length;
+    len = (int)ctx->length;
     n = 0;
     switch (ctx->type) {
     case 1:
@@ -362,7 +362,7 @@ static void unpack(struct rtcm_t *ctx)
 }
 
 /*@ -usereleased -compdef @*/
-/*@null@*//*@observer@*/ enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
+enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
 {
     enum rtcmstat_t res;
 
