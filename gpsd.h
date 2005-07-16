@@ -231,6 +231,9 @@ struct gps_device_t {
 		    double rangerr;	/* range error */
 		    double rangerate;	/* range error rate */
 		} ranges[MAXCORRECTIONS];
+		struct {		/* data for type 3 messages */
+		    double x, y, z;
+		} ecef;
 	    };
 
 	    /* this is the decoding context */
