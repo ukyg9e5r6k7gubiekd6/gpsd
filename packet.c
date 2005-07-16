@@ -183,7 +183,7 @@ enum {
 static void nexstate(struct gps_device_t *session, unsigned char c)
 {
 #ifdef RTCM104_ENABLE
-    struct rtcm_msghdr *rtcm_state;
+    enum rtcmstat_t rtcm_state;
 #endif /* RTCM104_ENABLE */
 /*@ +charint */
     switch(session->packet_state)

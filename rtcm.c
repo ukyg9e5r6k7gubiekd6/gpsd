@@ -177,7 +177,7 @@ static bool rtcmparityok(RTCMWORD w)
 }
 #endif
 
-void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
+void rtcm_init(/*@out@*/struct rtcm_t *ctx)
 {
     ctx->curr_word = 0;
     ctx->curr_offset = 24;	/* first word */
@@ -185,10 +185,186 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
     ctx->bufindex = 0;
 }
 
-/*@ -usereleased -compdef @*/
-/*@null@*//*@observer@*/ struct rtcm_msghdr *rtcm_decode(struct rtcm_ctx * ctx, unsigned int c)
+/*
+ *  Here are the constants and structures used for decoding
+ */
+
+#define	ZCOUNT_SCALE	0.6	/* sec */
+#define	PCSMALL		0.02	/* metres */
+#define	PCLARGE		0.32	/* metres */
+#define	RRSMALL		0.002	/* metres/sec */
+#define	RRLARGE		0.032	/* metres/sec */
+
+#define XYZ_SCALE	0.01	/* metres */
+#define DXYZ_SCALE	0.1	/* metres */
+#define	LA_SCALE	90.0/32767.0	/* degrees */
+#define	LO_SCALE	180.0/32767.0	/* degrees */
+#define	FREQ_SCALE	0.1	/* kHz */
+#define	FREQ_OFFSET	190.0	/* kHz */
+#define CNR_OFFSET	24	/* dB */
+#define TU_SCALE	5	/* minutes */
+
+struct rtcm_msghw1 {			/* header word 1 */
+    uint            parity:6;
+    uint            refstaid:10;	/* reference station ID */
+    uint            msgtype:6;		/* RTCM message type */
+    uint            preamble:8;		/* fixed at 01100110 */
+    uint            _pad:2;
+};
+
+struct rtcm_msghw2 {			/* header word 2 */
+    uint            parity:6;
+    uint            stathlth:3;		/* station health */
+    uint            frmlen:5;
+    uint            sqnum:3;
+    uint            zcnt:13;
+    uint            _pad:2;
+};
+
+struct rtcm_msg1w3 {			/* msg 1 word 3 */
+    uint            parity:6;
+    int             pc1:16;
+    uint            satident1:5;	/* satellite ID */
+    uint            udre1:2;
+    uint            scale1:1;
+    uint            _pad:2;
+};
+
+struct rtcm_msg1w4 {			/* msg 1 word 4 */
+    uint            parity:6;
+    uint            satident2:5;	/* satellite ID */
+    uint            udre2:2;
+    uint            scale2:1;
+    uint            issuedata1:8;
+    int             rangerate1:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg1w5 {			/* msg 1 word 5 */
+    uint            parity:6;
+    int             rangerate2:8;
+    int             pc2:16;
+    uint            _pad:2;
+};
+
+
+struct rtcm_msg1w6 {			/* msg 1 word 6 */
+    uint            parity:6;
+    int             pc3_h:8;
+    uint            satident3:5;	/* satellite ID */
+    uint            udre3:2;
+    uint            scale3:1;
+    uint            issuedata2:8;
+    uint            _pad:2;
+};
+
+struct rtcm_msg1w7 {			/* msg 1 word 7 */
+    uint            parity:6;
+    uint            issuedata3:8;
+    int             rangerate3:8;
+    uint            pc3_l:8;		/* NOTE: uint for low byte */
+    uint            _pad:2;
+};
+
+struct rtcm_msghdr {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+};
+
+struct rtcm_msg1 {
+    struct rtcm_msghw1   w1;
+    struct rtcm_msghw2   w2;
+
+    struct rtcm_msg1w3   w3;		/* clump #1 of 5-corrections each */
+    struct rtcm_msg1w4   w4;
+    struct rtcm_msg1w5   w5;
+    struct rtcm_msg1w6   w6;
+    struct rtcm_msg1w7   w7;
+
+    struct rtcm_msg1w3   w8;		/* clump #2 of 5-corrections each */
+    struct rtcm_msg1w4   w9;
+    struct rtcm_msg1w5   w10;
+    struct rtcm_msg1w6   w11;
+    struct rtcm_msg1w7   w12;
+
+    struct rtcm_msg1w3   w13;		/* clump #3 of 5-corrections each */
+    struct rtcm_msg1w4   w14;
+    struct rtcm_msg1w5   w15;
+    struct rtcm_msg1w6   w16;
+    struct rtcm_msg1w7   w17;
+};
+
+static void unpack(struct rtcm_t *ctx)
+/* break out the raw bits into the content fields */
 {
-    struct rtcm_msghdr *res;
+    int n, len;
+    struct rtcm_msghdr  *msghdr;
+
+    /* someday we'll do big-endian correction here */
+    msghdr = (struct rtcm_msghdr *)ctx->buf;
+    ctx->type = msghdr->w1.msgtype;
+    ctx->length = (int)msghdr->w2.frmlen;
+    ctx->zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
+    ctx->refstaid = msghdr->w1.refstaid;
+    ctx->seqnum = msghdr->w2.sqnum;
+    ctx->stathlth = msghdr->w2.stathlth;
+
+    memset(ctx->ranges, 0, sizeof(ctx->ranges));
+    len = ctx->length;
+    n = 0;
+    switch (ctx->type) {
+    case 1:
+    case 9:
+	{
+	    struct rtcm_msg1    *m = (struct rtcm_msg1 *) msghdr;
+
+	    while (len >= 0) {
+		if (len >= 2) {
+		    ctx->ranges[n].satident   = m->w3.satident1;
+		    ctx->ranges[n].udre       = m->w3.udre1;
+		    ctx->ranges[n].issuedata  = m->w4.issuedata1;
+		    ctx->ranges[n].rangerr    = m->w3.pc1 * 
+			(m->w3.scale1 ? PCLARGE : PCSMALL);
+		    ctx->ranges[n].rangerate  = m->w4.rangerate1 * 
+					(m->w3.scale1 ? RRLARGE : RRSMALL);
+		    n++;
+		}
+		if (len >= 4) {
+		    ctx->ranges[n].satident   = m->w4.satident2;
+		    ctx->ranges[n].udre       = m->w4.udre2;
+		    ctx->ranges[n].issuedata  = m->w6.issuedata2;
+		    ctx->ranges[n].rangerr    = m->w5.pc2 * 
+			(m->w4.scale2 ? PCLARGE : PCSMALL);
+		    ctx->ranges[n].rangerate  = m->w5.rangerate2 * 
+			(m->w4.scale2 ? RRLARGE : RRSMALL);
+		    n++;
+		}
+		if (len >= 5) {
+		    ctx->ranges[n].satident    = m->w6.satident3;
+		    ctx->ranges[n].udre        = m->w6.udre3;
+		    ctx->ranges[n].issuedata   = m->w7.issuedata3;
+		    /*@ -shiftimplementation @*/
+		    ctx->ranges[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
+					(m->w6.scale3 ? PCLARGE : PCSMALL);
+		    ctx->ranges[n].rangerate   = m->w7.rangerate3 * 
+					(m->w6.scale3 ? RRLARGE : RRSMALL);
+		    /*@ +shiftimplementation @*/
+		    n++;
+		}
+		len -= 5;
+		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
+	    }
+	}
+	break;
+    default:
+	break;
+    }
+}
+
+/*@ -usereleased -compdef @*/
+/*@null@*//*@observer@*/ enum rtcmstat_t rtcm_decode(struct rtcm_t *ctx, unsigned int c)
+{
+    enum rtcmstat_t res;
 
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
 	return RTCM_NO_SYNC;
@@ -273,8 +449,10 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 
 		    if (ctx->bufindex > 2) {	/* do we have the length yet? */
 			if (ctx->bufindex >= msghdr->w2.frmlen + 2) {
-			    res = msghdr;
+			    /* jackpot, we have an RTCM packet*/
+			    res = RTCM_STRUCTURE;
 			    ctx->bufindex = 0;
+			    unpack(ctx);
 			}
 		    }
 		}
@@ -302,68 +480,37 @@ void rtcm_init(/*@out@*/struct rtcm_ctx * ctx)
 }
 /*@ +usereleased +compdef @*/
 
-void rtcm_dump(struct rtcm_msghdr *msghdr, /*@out@*/char buf[], size_t buflen)
+void rtcm_dump(struct rtcm_t *rtcmp, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
-    int             len = (int)msghdr->w2.frmlen;
-    double          zcount = msghdr->w2.zcnt * ZCOUNT_SCALE;
+    int             i;
 
     (void)snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
-	   msghdr->w1.msgtype,
-	   msghdr->w1.refstaid,
-	   zcount,
-	   msghdr->w2.sqnum,
-	   msghdr->w2.frmlen,
-	   msghdr->w2.stathlth);
-    switch (msghdr->w1.msgtype) {
+	   rtcmp->type,
+	   rtcmp->refstaid,
+	   rtcmp->zcount,
+	   rtcmp->seqnum,
+	   rtcmp->length,
+	   rtcmp->stathlth);
+
+    switch (rtcmp->type) {
     case 1:
     case 9:
-	{
-	    struct rtcm_msg1    *m = (struct rtcm_msg1 *) msghdr;
-
-	    while (len >= 0) {
-		if (len >= 2)
-		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
-			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			   m->w3.satident1,
-			   m->w3.udre1,
-			   m->w4.issuedata1,
-			   zcount,
-			   m->w3.pc1 * (m->w3.scale1 ? PCLARGE : PCSMALL),
-			   m->w4.rangerate1 * (m->w3.scale1 ?
-					       RRLARGE : RRSMALL));
-		if (len >= 4)
-		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
-			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			   m->w4.satident2,
-			   m->w4.udre2,
-			   m->w6.issuedata2,
-			   zcount,
-			   m->w5.pc2 * (m->w4.scale2 ? PCLARGE : PCSMALL),
-			   m->w5.rangerate2 * (m->w4.scale2 ?
-					       RRLARGE : RRSMALL));
-		
-		/*@ -shiftimplementation @*/
-		if (len >= 5)
-		    (void)snprintf(buf + strlen(buf), len - strlen(buf),
-			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			   m->w6.satident3,
-			   m->w6.udre3,
-			   m->w7.issuedata3,
-			   zcount,
-			   ((m->w6.pc3_h << 8) | (m->w7.pc3_l)) *
-			   (m->w6.scale3 ? PCLARGE : PCSMALL),
-			   m->w7.rangerate3 * (m->w6.scale3 ?
-					       RRLARGE : RRSMALL));
-		/*@ +shiftimplementation @*/
-		len -= 5;
-		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
-	    }
-	}
+	for (i = 0; i < MAXCORRECTIONS; i++)
+	    if (rtcmp->ranges[i].satident != 0)
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
+			       rtcmp->ranges[i].satident,
+			       rtcmp->ranges[i].udre,
+			       rtcmp->ranges[i].issuedata,
+			       rtcmp->zcount,
+			       rtcmp->ranges[i].rangerr,
+			       rtcmp->ranges[i].rangerate);
 	break;
     default:
 	break;
     }
+
 }
 
 #ifdef __UNUSED__

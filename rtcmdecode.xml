@@ -73,11 +73,17 @@ Service</citetitle> RTCM Paper 194-93/SC 104-STD.</para>
 Maritime Services</ulink> under "Publications".</para>
 
 </refsect1>
+<refsect1 id='bugs'><title>BUGS</title> 
+
+<para>This code will fail horribly on a non-little-endian machine.  </para>
+
+</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This is a somewhat
-hacked version of code originally written by Wolfgang Rupprecht.
-There is a project page for <application>gpsd</application> <ulink
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This is a
+somewhat hacked version of an RTCM decoder originally written by
+Wolfgang Rupprecht.  There is a project page for
+<application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 
 </refsect1>

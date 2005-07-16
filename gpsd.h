@@ -189,7 +189,7 @@ struct gps_device_t {
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
 #ifdef RTCM104_ENABLE
-	struct rtcm_ctx	rtcm;
+	struct rtcm_t	rtcm;
 #endif /* RTCM104_ENABLE */
     };
 #endif /* BINARY_ENABLE */

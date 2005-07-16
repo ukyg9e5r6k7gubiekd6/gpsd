@@ -28,8 +28,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 int main(int argc, char **argv)
 {
     int             c;
-    struct rtcm_ctx ctxbuf, *ctx = &ctxbuf;
-    struct rtcm_msghdr *res;
+    struct rtcm_t ctxbuf;
+    enum rtcmstat_t res;
     char buf[BUFSIZ];
 
     while ((c = getopt(argc, argv, "v:")) != EOF) {
@@ -47,12 +47,12 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    rtcm_init(ctx);
+    rtcm_init(&ctxbuf);
 
     while ((c = getchar()) != EOF) {
-	res = rtcm_decode(ctx, (unsigned int)c);
-	if (res != RTCM_NO_SYNC && res != RTCM_SYNC) {
-	    rtcm_dump(res, buf, sizeof(buf));
+	res = rtcm_decode(&ctxbuf, (unsigned int)c);
+	if (res == RTCM_STRUCTURE) {
+	    rtcm_dump(&ctxbuf, buf, sizeof(buf));
 	    (void)fputs(buf, stdout);
 	}
     }

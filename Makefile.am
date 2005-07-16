@@ -251,11 +251,11 @@ gps-makeregress:
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
 # Regression-test the RTCM decoder
-rtcm-regress:
+rtcm-regress: rtcmdecode
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Rebuild the RTCM regression tests
-rtcm-makeregress:
+rtcm-makeregress: rtcmdecode
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >$${f}.chk; done
 
 testregress: gps-regress rtcm-regress
