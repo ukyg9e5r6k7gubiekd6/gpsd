@@ -119,7 +119,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
 %{_mandir}/man1/rtcmdecode.1*
+%{_mandir}/man1/gpsflash.1*
 %{_mandir}/man1/rtcm.5*
+%{_mandir}/man1/srec.5*
 %attr(755, root, root) %{_bindir}/gpsfake
 %{_libdir}/python*/site-packages/gpsfake.py*
 
@@ -137,7 +139,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   also untested.  All error estimates are now nailed to 95% confidence
   interval. DBUS support is autodetected and no longer needs to be
   configured.  Added iTrax NMEA support, untested.  Added rtcmdecode
-  and its documentation.
+  and its documentation.  Added dangerous alpha version of gpsflash.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.

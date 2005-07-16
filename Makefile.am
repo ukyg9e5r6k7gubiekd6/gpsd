@@ -254,12 +254,12 @@ splint:
 # This requires gcc4; the use of the math coprocessor's on-board trig functions
 # apparently increases the accuracy of computation in a way that
 # that affects the low-order digits of the track field in the O response.
-gps-regress:
+gps-regress: gpsd
 	@echo "Testing the daemon..."
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Build the regression tests for the daeomon
-gps-makeregress:
+gps-makeregress: gpsd
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
 # Regression-test the RTCM decoder
@@ -274,7 +274,7 @@ rtcm-makeregress: rtcmdecode
 # Regression-test the packet getter
 packet-regress: packet_test
 	@echo "Testing detection of invalid packets..."
-	packet_test | diff -u test/packet.test.chk -
+	@packet_test | diff -u test/packet.test.chk -
 
 # Rebuild the packet-getter regression test
 packet-makeregress: packet_test
