@@ -212,6 +212,7 @@ extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t)
 
 extern void packet_reset(struct gps_device_t *);
 extern void packet_pushback(struct gps_device_t *);
+extern ssize_t packet_parse(struct gps_device_t *, size_t);
 extern ssize_t packet_get(struct gps_device_t *);
 extern int packet_sniff(struct gps_device_t *);
 

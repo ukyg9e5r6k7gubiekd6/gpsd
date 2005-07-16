@@ -32,29 +32,6 @@ distinguish them from baud barf.
 #include "config.h"
 #include "gpsd.h"
 
-#ifdef TESTMAIN
-#include <stdarg.h>
-
-static int verbose = 0;
-static int waiting;
-
-void gpsd_report(int errlevel, const char *fmt, ... )
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    if (errlevel <= verbose) {
-	char buf[BUFSIZ];
-	va_list ap;
-
-	buf[0] = '\0';
-	va_start(ap, fmt) ;
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
-	va_end(ap);
-
-	(void)fputs(buf, stderr);
-    }
-}
-#endif /* TESTMAIN */
-
 /* 
  * The packet-recognition state machine.  It can be fooled by garbage
  * that looks like the head of a binary packet followed by a NMEA
@@ -699,24 +676,9 @@ static void character_discard(struct gps_device_t *session)
 #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 
 
-ssize_t packet_get(struct gps_device_t *session)
+ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 /* grab a packet; returns ether BAD_PACKET or the length */
 {
-    int newdata;
-#ifndef TESTMAIN
-    /*@ -modobserver @*/
-    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr,
-			sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer));
-    /*@ +modobserver @*/
-#else
-    newdata = waiting;
-#endif /* TESTMAIN */
-
-    if (newdata < 0 && errno != EAGAIN)
-	return BAD_PACKET;
-    else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
-	return 0;
-
 #ifdef STATE_DEBUG
     gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n",
 		newdata,
@@ -732,66 +694,101 @@ ssize_t packet_get(struct gps_device_t *session)
 	unsigned char c = *session->inbufptr++;
 	/*@ +modobserver @*/
 	/* to regenerate this table, see  statetable.el */
-	/*%start%*/
-	char *state_table[] = {
-	"GROUND_STATE",
-	"NMEA_DOLLAR",
-	"NMEA_PUB_LEAD",
-	"NMEA_LEADER_END",
-	"NMEA_CR",
-	"NMEA_RECOGNIZED",
-	"SIRF_ACK_LEAD_1",
-	"SIRF_ACK_LEAD_2",
-	"SEATALK_LEAD_1",
-	"DLE_LEADER",
-	"ASTRAL_1",
-	"ASTRAL_2",
-	"ASTRAL_3",
-	"ASTRAL_4",
-	"ASTRAL_5",
-	"EARTHA_1",
-	"EARTHA_2",
-	"EARTHA_3",
-	"EARTHA_4",
-	"EARTHA_5",
-	"SIRF_LEADER_1",
-	"SIRF_LEADER_2",
-	"SIRF_LENGTH_1",
-	"SIRF_PAYLOAD",
-	"SIRF_DELIVERED",
-	"SIRF_TRAILER_1",
-	"SIRF_RECOGNIZED",
-	"ZODIAC_EXPECTED",
-	"ZODIAC_LEADER_1",
-	"ZODIAC_LEADER_2",
-	"ZODIAC_ID_1",
-	"ZODIAC_ID_2",
-	"ZODIAC_LENGTH_1",
-	"ZODIAC_LENGTH_2",
-	"ZODIAC_FLAGS_1",
-	"ZODIAC_FLAGS_2",
-	"ZODIAC_HSUM_1",
-	"ZODIAC_PAYLOAD",
-	"ZODIAC_RECOGNIZED",
-	"EVERMORE_LEADER_1",
-	"EVERMORE_LEADER_2",
-	"EVERMORE_PAYLOAD",
-	"EVERMORE_PAYLOAD_DLE",
-	"EVERMORE_RECOGNIZED",
-	"ITALK_LEADER_1",
-	"ITALK_LEADER_2",
-	"ITALK_LENGTH_1",
-	"ITALK_LENGTH_2",
-	"ITALK_DELIVERED",
-	"ITALK_TRAILER_1",
-	"ITALK_RECOGNIZED",
-	"TSIP_LEADER",
-	"TSIP_PAYLOAD",
-	"TSIP_DLE",
-	"TSIP_RECOGNIZED",
-	"RTM_SYNC_STATE",
-	"RTM_RECOGBIZED",
-	};
+	/*%start%*/char *state_table[] = {
+   "GROUND_STATE",	/* we don't know what packet type to expect */
+
+#ifdef NMEA_ENABLE
+   "NMEA_DOLLAR",		/* we've seen first character of NMEA leader */
+   "NMEA_PUB_LEAD",	/* seen second character of NMEA G leader */
+   "NMEA_LEADER_END",	/* seen end char of NMEA leader, in body */
+   "NMEA_CR",	   	/* seen terminating \r of NMEA packet */
+   "NMEA_RECOGNIZED",	/* saw trailing \n of NMEA packet */
+
+   "SIRF_ACK_LEAD_1",	/* seen A of possible SiRF Ack */
+   "SIRF_ACK_LEAD_2",	/* seen c of possible SiRF Ack */
+
+   "SEATALK_LEAD_1",	/* SeaTalk/Garmin packet leader 'I' */
+#endif /* NMEA_ENABLE */
+
+   "DLE_LEADER",		/* we've seen the TSIP/Evermore leader (DLE) */
+
+#ifdef TRIPMATE_ENABLE
+   "ASTRAL_1",		/* ASTRAL leader A */
+   "ASTRAL_2",	 	/* ASTRAL leader S */
+   "ASTRAL_3",		/* ASTRAL leader T */
+   "ASTRAL_4",		/* ASTRAL leader R */
+   "ASTRAL_5",		/* ASTRAL leader A */
+#endif /* TRIPMATE_ENABLE */
+
+#ifdef EARTHMATE_ENABLE
+   "EARTHA_1",		/* EARTHA leader E */
+   "EARTHA_2",		/* EARTHA leader A */
+   "EARTHA_3",		/* EARTHA leader R */
+   "EARTHA_4",		/* EARTHA leader T */
+   "EARTHA_5",		/* EARTHA leader H */
+#endif /* EARTHMATE_ENABLE */
+
+#ifdef SIRFII_ENABLE
+   "SIRF_LEADER_1",	/* we've seen first character of SiRF leader */
+   "SIRF_LEADER_2",	/* seen second character of SiRF leader */
+   "SIRF_LENGTH_1",	/* seen first byte of SiRF length */
+   "SIRF_PAYLOAD",	/* we're in a SiRF payload part */
+   "SIRF_DELIVERED",	/* saw last byte of SiRF payload/checksum */
+   "SIRF_TRAILER_1",	/* saw first byte of SiRF trailer */ 
+   "SIRF_RECOGNIZED",	/* saw second byte of SiRF trailer */
+#endif /* SIRFII_ENABLE */
+
+#ifdef ZODIAC_ENABLE
+   "ZODIAC_EXPECTED",	/* expecting Zodiac packet */
+   "ZODIAC_LEADER_1",	/* saw leading 0xff */
+   "ZODIAC_LEADER_2",	/* saw leading 0x81 */
+   "ZODIAC_ID_1", 	/* saw first byte of ID */
+   "ZODIAC_ID_2", 	/* saw second byte of ID */
+   "ZODIAC_LENGTH_1",	/* saw first byte of Zodiac packet length */
+   "ZODIAC_LENGTH_2",	/* saw second byte of Zodiac packet length */
+   "ZODIAC_FLAGS_1", 	/* saw first byte of FLAGS */
+   "ZODIAC_FLAGS_2", 	/* saw second byte of FLAGS */
+   "ZODIAC_HSUM_1", 	/* saw first byte of Header sum */
+   "ZODIAC_PAYLOAD",	/* we're in a Zodiac payload */
+   "ZODIAC_RECOGNIZED",	/* found end of the Zodiac packet */
+#endif /* ZODIAC_ENABLE */
+
+#ifdef EVERMORE_ENABLE
+   "EVERMORE_LEADER_1",	/* a DLE after having seen Evermore data */
+   "EVERMORE_LEADER_2",	/* seen opening STX of Evermore packet */
+   "EVERMORE_PAYLOAD",	/* in payload part of Evermore packet */
+   "EVERMORE_PAYLOAD_DLE",	/* DLE in payload part of Evermore packet */
+   "EVERMORE_RECOGNIZED",	/* found end of Evermore packet */
+#endif /* EVERMORE_ENABLE */
+
+#ifdef ITALK_ENABLE
+   "ITALK_LEADER_1",	/* saw leading < of iTalk packet */
+   "ITALK_LEADER_2",	/* saw leading * of iTalk packet */
+   "ITALK_LENGTH_1",	/* saw MSB of packet length */
+   "ITALK_LENGTH_2",	/* saw LSB of packet length */
+   "ITALK_DELIVERED",	/* seen end of payload */
+   "ITALK_TRAILER_1",	/* saw iTalk trailer byte */
+   "ITALK_RECOGNIZED",	/* found end of the iTalk packet */
+#endif /* ITALK_ENABLE */
+
+/*
+ * Packet formats without checksums start here.  We list them last so
+ * that if a format with a conflicting structure *and* a checksum can
+ * be recognized, that will be preferred.
+ */
+
+#ifdef TSIP_ENABLE
+   "TSIP_LEADER",		/* a DLE after having seen TSIP data */
+   "TSIP_PAYLOAD",	/* we're in TSIP payload */
+   "TSIP_DLE",		/* we've seen a DLE in TSIP payload */
+   "TSIP_RECOGNIZED",	/* found end of the TSIP packet */
+#endif /* TSIP_ENABLE */
+
+#ifdef RTCM104_ENABLE
+   "RTCM_SYNC_STATE",	/* we have sync lock */
+   "RTCM_RECOGNIZED",	/* we have an RTCM packet */
+#endif /* RTCM104_ENABLE */
+};
 	/*%end%*/
 	nexstate(session, c);
 	gpsd_report(7, "Character '%c' [%02X], new state: %s\n",
@@ -925,6 +922,21 @@ ssize_t packet_get(struct gps_device_t *session)
 }
 #undef getword
 
+ssize_t packet_get(struct gps_device_t *session)
+/* grab a packet; returns ether BAD_PACKET or the length */
+{
+    int newdata;
+    /*@ -modobserver @*/
+    newdata = (int)read(session->gpsdata.gps_fd, session->inbufptr,
+			sizeof(session->inbuffer)-(session->inbufptr-session->inbuffer));
+    /*@ +modobserver @*/
+    if (newdata < 0 && errno != EAGAIN)
+	return BAD_PACKET;
+    else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
+	return 0;
+    return packet_parse(session, newdata);
+}
+
 void packet_reset(struct gps_device_t *session)
 /* return the packet machine to the ground state */
 {
@@ -950,177 +962,3 @@ void packet_pushback(struct gps_device_t *session)
     }
 }
 #endif /* __UNUSED */
-
-#ifdef TESTMAIN
-/* To build a test main, compile with cc -DTESTMAIN -g packet.c -o packet */
-
-int main(int argc, char *argv[])
-{
-    struct map {
-	char		*legend;
-	unsigned char	test[MAX_PACKET_LENGTH+1];
-	int		testlen;
-	int		garbage_offset;
-	int		type;
-	int		initstate;
-    };
-    struct map tests[] = {
-	/* NMEA tests */
-	{
-	    "NMEA packet with checksum (1)",
-	    "$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
-	    36,
-	    0,
-	    NMEA_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "NMEA packet with checksum (2)",
-	    "$GPGGA,110534.994,4002.1425,N,07531.2585,W,0,00,50.0,172.7,M,-33.8,M,0.0,0000*7A\r\n",
-	    82,
-	    0,
-	    NMEA_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "NMEA packet with checksum and 4 chars of leading garbage",
-	    "\xff\xbf\x00\xbf$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
-	    40,
-	    4,
-	    NMEA_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "NMEA packet without checksum",
-	    "$PSRF105,1\r\n",
-	    12,
-	    0,
-	    NMEA_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "NMEA packet with wrong checksum",
-	    "$GPVTG,308.74,T,,M,0.00,N,0.0,K*28\r\n",
-	    36,
-	    0,
-	    BAD_PACKET,
-	    GROUND_STATE,
-	},
-	/* SiRF tests */
-	{
-	    "SiRF WAAS version ID",
-	    {
-		0xA0, 0xA2, 0x00, 0x15, 
-		0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
-		0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
-		0x4D, 0x00, 0x00, 0x00, 0x00,
-		0x03, 0x82, 0xB0, 0xB3},
-	    29,
-	    0,
-	    SIRF_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "SiRF WAAS version ID with 3 chars of leading garbage",
-	    {
-		0xff, 0x00, 0xff,
-		0xA0, 0xA2, 0x00, 0x15, 
-		0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
-		0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
-		0x4D, 0x00, 0x00, 0x00, 0x00,
-		0x03, 0x82, 0xB0, 0xB3},
-	    32,
-	    3,
-	    SIRF_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "SiRF WAAS version ID with wrong checksum",
-	    {
-		0xA0, 0xA2, 0x00, 0x15, 
-		0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
-		0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
-		0x4D, 0x00, 0x00, 0x00, 0x00,
-		0x03, 0x00, 0xB0, 0xB3},
-	    29,
-	    0,
-	    BAD_PACKET,
-	    GROUND_STATE,
-	},
-	{
-	    "SiRF WAAS version ID with bad length",
-	    {
-		0xA0, 0xA2, 0xff, 0x15, 
-		0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
-		0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
-		0x4D, 0x00, 0x00, 0x00, 0x00,
-		0x03, 0x82, 0xB0, 0xB3},
-	    29,
-	    0,
-	    BAD_PACKET,
-	    GROUND_STATE,
-	},
-	/* Zodiac tests */
-	{
-	    "Zodiac binary 1000 Geodetic Status Output Message",
-	    {
-		0xff, 0x81, 0xe8, 0x03, 0x31, 0x00, 0x00, 0x00, 0xe8, 0x79, 
-		0x74, 0x0e, 0x00, 0x00, 0x24, 0x00, 0x24, 0x00, 0x04, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x03, 0x23, 0x00, 
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x06, 0x00, 
-		0xcd, 0x07, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x7b, 0x0d, 
-		0x00, 0x00, 0x12, 0x6b, 0xa7, 0x04, 0x41, 0x75, 0x32, 0xf8, 
-		0x03, 0x1f, 0x00, 0x00, 0xe6, 0xf2, 0x00, 0x00, 0x00, 0x00, 
-		0x00, 0x00, 0x11, 0xf6, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x40, 
-		0xd9, 0x12, 0x90, 0xd0, 0x03, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
-		0x10, 0x27, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
-		0x00, 0x00, 0x00, 0x00, 0xe0, 0x93, 0x04, 0x00, 0x04, 0xaa},
-	    110,
-	    0,
-	    ZODIAC_PACKET,
-	    ZODIAC_EXPECTED,
-	},
-    };
-
-    struct map *mp;
-    struct gps_device_t state;
-    int st;
-    unsigned char *cp;
-
-    if (argc > 1)
-	verbose = atoi(argv[1]); 
-
-    for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) {
-	state.packet_type = BAD_PACKET;
-	state.packet_state = mp->initstate;
-	state.inbuflen = 0;
-	memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
-	gpsd_report(2, "%s starts with state %d\n", mp->legend, mp->initstate);
-	waiting = mp->testlen;
-	st = packet_get(&state);
-	if (state.packet_type != mp->type)
-	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, st);
-	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen))
-	    printf("%s test FAILED (data garbled).\n", mp->legend);
-	else
-	    printf("%s test succeeded.\n", mp->legend);
-#ifdef DUMPIT
-	for (cp = state.outbuffer; 
-	     cp < state.outbuffer + state.outbuflen; 
-	     cp++) {
-	    if (st != NMEA_PACKET)
-		(void)printf(" 0x%02x", *cp);
-	    else if (*cp == '\r')
-		(void)fputs("\\r", stdout);
-	    else if (*cp == '\n')
-		(void)fputs("\\n", stdout);
-	    else if (isprint(*cp))
-		(void)putchar(*cp);
-	    else
-		(void)printf("\\x%02x", *cp);
-	}
-	(void)putchar('\n');
-#endif /* DUMPIT */
-    }
-}
-#endif /* TESTMAIN */

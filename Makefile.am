@@ -15,10 +15,10 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
-bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode
+bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode gpsflash
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = gpsmm_test bits gpsflash
+check_PROGRAMS = bits gpsmm_test packet_test
 
 #
 # Build xgps
@@ -103,16 +103,20 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 # Build gpsmm_test
 #
-gpsmm_test_SOURCES = \
-	gpsmm_test.cpp
-gpsmm_test_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm
+gpsmm_test_SOURCES = gpsmm_test.cpp
+gpsmm_test_LDADD = $(LIBC) libgps.la -lm
 
 #
-# Build bits
+# Build bits tester
 #
-bits_SOURCES = \
-	bits.c
-bits_LDADD = $(LIBC) $(LIBSOCKET) libgps.la
+bits_SOURCES = bits.c
+bits_LDADD = $(LIBC) libgps.la
+
+#
+# Build packets tester
+#
+packet_test_SOURCES = packet_test.c
+packet_test_LDADD = $(LIBC) libgps.la
 
 #
 # Create Manpages
@@ -163,6 +167,9 @@ rtcm.5: rtcm.xml
 srec.5: srec.xml
 	-$(XMLTO) man srec.xml
 
+gpsflash.1: gpsflash.xml
+	-$(XMLTO) man gpsflash.xml
+
 #
 # Do a release with a tar.gz and a tar.bz2
 #
@@ -198,6 +205,7 @@ EXTRA_DIST = \
 	rtcmdecode.xml \
 	rtcm.xml \
 	srec.xml \
+	gpsflash.xml \
 	$(man_MANS) \
 	xgps.ad \
 	xgpsspeed.ad \
@@ -241,8 +249,9 @@ splint:
 #
 
 # Regression-test the daemon
-# This requires gcc4; there's been some change in the math libraries since
-# gcc3 that affects the low-order digits of the track field in the O response.
+# This requires gcc4; the use of the math coprocessor's on-board trig functions
+# apparently increases the accuracy of computation in a way that
+# that affects the low-order digits of the track field in the O response.
 gps-regress:
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
