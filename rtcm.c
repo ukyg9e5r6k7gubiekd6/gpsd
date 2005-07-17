@@ -443,8 +443,16 @@ struct rtcm_msg7w5 {
     uint	    sync_type:1;
     uint	    mod_mode:1;
     uint	    bit_rate:3;
-    uint	    station_id:9;
-    uint	    health:3;
+
+    /*
+     * ITU-R M.823-2 page 9 and RTCM-SC104 v2.1 pages 4-21 and 4-22
+     * are in conflict over the next two field sizes.  ITU says 9+3,
+     * RTCM says 10+2.  The latter correctly decodes the USCG station
+     * id's so I'll use that one here. -wsr
+     */
+
+    uint	    station_id:10;
+    uint	    health:2;
     uint	    freq_l:6;
     uint            _pad:2;
 };
