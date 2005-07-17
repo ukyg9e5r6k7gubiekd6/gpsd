@@ -215,6 +215,8 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
 
 /* msg header - all msgs */
 
+#pragma pack(1)
+
 struct rtcm_msghw1 {			/* header word 1 */
     uint            parity:6;
     uint            refstaid:10;	/* reference station ID */
@@ -501,15 +503,6 @@ struct rtcm_msg16 {
     struct rtcm_msg16w3   w11;	/* optional ... */
 };
 
-/* msg unknown */
-
-struct rtcm_msgunk {
-    struct rtcm_msghw1   w1;
-    struct rtcm_msghw2   w2;
-
-    uint            w3;
-};
-
 static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
 {
@@ -682,8 +675,6 @@ static void unpack(struct gps_device_t *session)
 	    session->rtcm.message[n++] = '\0';
 	}
 	break;
-    default:
-	break;
     }
 }
 
@@ -841,14 +832,12 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 			   session->rtcm.ranges.sat[n].rangerate);
 	break;
 
-#if 0				/* I was too slow in getting these in. -wsr */
-
     case 3:
 	if (session->rtcm.ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "R\t%.2f\t%.2f\t%.2f\n",
 			   session->rtcm.ecef.x, 
-			   session->rctm.ecef.y,
+			   session->rtcm.ecef.y,
 			   session->rtcm.ecef.z);
 	break;
 
@@ -869,15 +858,15 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     case 5:
 	for (n = 0; n < session->rtcm.conhealth.nentries; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "C\t%2d\t%1d  %1d\t%2d\t%1d  %1d  %1d\t%2d\n",
-			   session->rtcm.conhealth.sat[n].satident,
-			   session->rtcm.conhealth.sat[n].iodl,
+			   "C\t%2u\t%1u  %1u\t%2u\t%1u  %1u  %1u\t%2u\n",
+			   session->rtcm.conhealth.sat[n].ident,
+			   (unsigned)session->rtcm.conhealth.sat[n].iodl,
+			   (unsigned)session->rtcm.conhealth.sat[n].health,
 			   session->rtcm.conhealth.sat[n].snr,
-			   session->rtcm.conhealth.sat[n].health_en,
-			   session->rtcm.conhealth.sat[n].new_data,
-			   session->rtcm.conhealth.sat[n].los_warn,
+			   (unsigned)session->rtcm.conhealth.sat[n].health_en,
+			   (unsigned)session->rtcm.conhealth.sat[n].new_data,
+			   (unsigned)session->rtcm.conhealth.sat[n].los_warning,
 			   session->rtcm.conhealth.sat[n].tou);
-	}
 	break;
 
     case 6: 			/* NOP msg */
@@ -887,33 +876,19 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     case 7:
 	for (n = 0; n < session->rtcm.almanac.nentries; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "A\t%.4f\t%.4f\t%d\t%.1f\t%d\t%d\t%d\n",
-			   session->rtcm.almanac.station[n].latitude.
-			   session->rtcm.almanac.station[n].longitude.
-			   session->rtcm.almanac.station[n].range.
-			   session->rtcm.almanac.station[n].frequency.
-			   session->rtcm.almanac.station[n].health.
-			   session->rtcm.almanac.station[n].station_id.
+			   "A\t%.4f\t%.4f\t%u\t%.1f\t%u\t%u\t%u\n",
+			   session->rtcm.almanac.station[n].latitude,
+			   session->rtcm.almanac.station[n].longitude,
+			   session->rtcm.almanac.station[n].range,
+			   session->rtcm.almanac.station[n].frequency,
+			   session->rtcm.almanac.station[n].health,
+			   session->rtcm.almanac.station[n].station_id,
 			   session->rtcm.almanac.station[n].bitrate);
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "T \"%s\"\n", session->rtcm.message);
 	break;
-
-    default:
-	{
-	    struct msgunk    *m = (struct msgunk *) msghdr;
-
-	    printf ("U\t*** Unknown msg type! (len %d) ***\n", len);
-	    while (len >= 1){
-		printf ("U\t0x%08x\n", m->w3);
-		len--;
-		m = (struct msgunk *) (((RTCMWORD *) m) + 1);
-	    }
-	}
-	break;
-#endif
 
     default:
 	break;

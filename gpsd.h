@@ -252,7 +252,7 @@ struct gps_device_t {
 			unsigned ident;		/* satellite ID */
 			bool iodl;		/* issue of data */
 			bool health;		/* is satellite healthy? */
-			int snr;		/* signal-to-noise ratio, dB */
+			unsigned int snr;	/* signal-to-noise ratio, dB */
 			bool health_en;		/* health enabled */
 			bool new_data;		/* new data? */
 			bool los_warning;	/* line-of-sight warning */
@@ -264,7 +264,7 @@ struct gps_device_t {
 		    struct {
 			double latitude, longitude;	/* location */
 			unsigned int range;		/* range in km */
-			double frequency;	/* broadcast freq */
+			double frequency;		/* broadcast freq */
 			unsigned int health;		/* station health */
 			unsigned int station_id;
 			unsigned int bitrate;
