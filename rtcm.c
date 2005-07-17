@@ -513,7 +513,8 @@ struct rtcm_msgunk {
 static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
 {
-    int n, len;
+    int len;
+    unsigned int n;
     struct rtcm_msghdr  *msghdr;
 
     /* someday we'll do big-endian correction here */
@@ -593,19 +594,19 @@ static void unpack(struct gps_device_t *session)
 		    		((m->w3.dgnss==1) ? glonass : unknown);
 		session->rtcm.reference.sense = (m->w3.dat != 0) ? global : local;
 		if (m->w3.datum_alpha_char1){
-		    session->rtcm.reference.datum[n++] = (m->w3.datum_alpha_char1);
+		    session->rtcm.reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
 		}
 		if (m->w3.datum_alpha_char2){
-		    session->rtcm.reference.datum[n++] = (m->w3.datum_alpha_char2);
+		    session->rtcm.reference.datum[n++] = (char)(m->w3.datum_alpha_char2);
 		}
 		if (m->w4.datum_sub_div_char1){
-		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char1);
+		    session->rtcm.reference.datum[n++] = (char)(m->w4.datum_sub_div_char1);
 		}
 		if (m->w4.datum_sub_div_char2){
-		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char2);
+		    session->rtcm.reference.datum[n++] = (char)(m->w4.datum_sub_div_char2);
 		}
 		if (m->w4.datum_sub_div_char3){
-		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char3);
+		    session->rtcm.reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
 		}
 		session->rtcm.reference.datum[n++] = '\0';
 		if (len >= 4) {
@@ -613,7 +614,7 @@ static void unpack(struct gps_device_t *session)
 		    session->rtcm.reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
 		    session->rtcm.reference.dz = m->w6.dz * DXYZ_SCALE;
 		} else 
-		    session->rtcm.reference.sense = unknown;
+		    session->rtcm.reference.sense = invalid;
 	    }
 	}
 	break;
@@ -624,7 +625,7 @@ static void unpack(struct gps_device_t *session)
 		session->rtcm.conhealth.sat[n].ident = m->w3.sat_id;
 		session->rtcm.conhealth.sat[n].iodl = m->w3.issue_of_data_link!=0;
 		session->rtcm.conhealth.sat[n].health = m->w3.data_health!=0;
-		session->rtcm.conhealth.sat[n].snr = (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1);
+		/*@i@*/session->rtcm.conhealth.sat[n].snr = (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1);
 		session->rtcm.conhealth.sat[n].health_en = m->w3.health_enable!=0;
 		session->rtcm.conhealth.sat[n].new_data = m->w3.new_nav_data!=0;
 		session->rtcm.conhealth.sat[n].los_warning = m->w3.loss_warn!=0;
@@ -639,7 +640,7 @@ static void unpack(struct gps_device_t *session)
     case 7:
 	{
 	    struct rtcm_msg7    *m = (struct rtcm_msg7 *) msghdr;
-	    int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
+	    unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 	    while (len >= 3) {
 		session->rtcm.almanac.station[n].latitude = m->w3.lat * LA_SCALE;
@@ -791,7 +792,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
-    int             i;
+    unsigned int n;
 
     (void)snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
 	   session->rtcm.type,
@@ -804,15 +805,15 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     switch (session->rtcm.type) {
     case 1:
     case 9:
-	for (i = 0; i < session->rtcm.ranges.nentries; i++)
+	for (n = 0; n < session->rtcm.ranges.nentries; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			   session->rtcm.ranges.sat[i].ident,
-			   session->rtcm.ranges.sat[i].udre,
-			   session->rtcm.ranges.sat[i].issuedata,
+			   session->rtcm.ranges.sat[n].ident,
+			   session->rtcm.ranges.sat[n].udre,
+			   session->rtcm.ranges.sat[n].issuedata,
 			   session->rtcm.zcount,
-			   session->rtcm.ranges.sat[i].rangerr,
-			   session->rtcm.ranges.sat[i].rangerate);
+			   session->rtcm.ranges.sat[n].rangerr,
+			   session->rtcm.ranges.sat[n].rangerate);
 	break;
 
 #if 0				/* I was too slow in getting these in. -wsr */
