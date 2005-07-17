@@ -11,10 +11,10 @@ RTCM PAPER 194-93/SC 104-STD
 Ordering instructions are accessible from <http://www.rtcm.org/>
 under "Publications".
 
-This decoder is incomplete. It handles only messages of type 1 and 9.
-
-The code was originally by Wolfgang Rupprecht.  You are not expected
-to understand it. Here are his rather cryptic notes:
+The code was originally by Wolfgang Rupprecht.  ESR severely hacked
+it, with Wolfgang's help, in order to separate message analysis from
+message dumping.  You are not expected to understand any of it. Here
+are Wolfgang's original rather cryptic notes on the decoder stage:
 
 --------------------------------------------------------------------------
 1) trim and  bitflip the input.
@@ -44,9 +44,9 @@ Shift 6 bytes of rtcm data in as such:
               |||||||||||||||||||||||
 --------------------------------------------------------------------------
 
-Wolfgang's decoder was loosely based on one written by John Sanger
-in 1999 (in particular it uses Sanger's dump format).  Here are John 
-Sanger's original notes:
+Wolfgang's decoder was loosely based on one written by John Sanger in
+1999 (in particular the dump function emits Sanger's dump format).
+Here are John Sanger's original notes:
 
 --------------------------------------------------------------------------
 The RTCM decoder prints a legible representation of the input data.
@@ -158,6 +158,8 @@ static unsigned int rtcmparity(RTCMWORD th)
 
 #if 0
 /* 
+ * ESR found a doozy of a bug...
+ *
  * Defining the above as a function triggers an optimizer bug in gcc 3.4.2.
  * The symptom is that parity computation is screwed up and the decoder
  * never achieves sync lock.  Something steps on the argument to 
@@ -172,7 +174,7 @@ static unsigned int rtcmparity(RTCMWORD th)
  * code under 3.4.[23]...which is weird because -O2 is supposed to *imply*
  * -fschedule-insns.
  *
- *  gcc 4.0 does not manifest the bug.
+ *  gcc 4.0 does not manifest these bugs.
  */
 static bool rtcmparityok(RTCMWORD w)
 {
