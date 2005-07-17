@@ -303,32 +303,51 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for DBUS
-ac_dbus=no
-AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
-if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
-   # Found dbus library, check for required versions and enable it
-
-   AC_MSG_CHECKING([for DBUS support])
-   PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
-      [ac_dbus=yes],[ac_dbus=no])
-   AC_MSG_RESULT([$ac_dbus])
-   AC_SUBST(DBUS_CFLAGS)
-   AC_SUBST(DBUS_LIBS)
-
-   if test x"ac_dbus" = x"yes" ; then
-      AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
-   fi
-
-   # Check for glib and dbus-glib, used by gpxlogger
-   PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
-   AC_SUBST(GLIB_CFLAGS)
-   AC_SUBST(GLIB_LIBS)
-
-   PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
-   AC_SUBST(DBUS_GLIB_CFLAGS)
-   AC_SUBST(DBUS_GLIB_LIBS)
+dnl Manually configure DBUD until we figure out a 
+dnl distro-independent was to check for both libraries and headers
+AC_ARG_ENABLE(dbus,
+    AC_HELP_STRING([--enable-dbus],
+                [enable DBUS support]),
+    [ac_dbus=$enableval], [ac_dbus=no])
+AC_MSG_CHECKING([for DBUS support])
+if test x"$ac_dbus" == "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
+    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
+    AC_SUBST(DBUS_CFLAGS)
+    AC_SUBST(DBUS_LIBS)
+else
+    AC_MSG_RESULT([no])
 fi
+
+dnl Automatic check for DBUS.
+dnl It's broken -- leads to bad compiles on systems with DBUS libraies
+dnl but mo DBUS headers.
+dnl ac_dbus=no
+dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
+dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
+dnl    # Found dbus library, check for required versions and enable it
+dnl 
+dnl    AC_MSG_CHECKING([for DBUS support])
+dnl    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
+dnl       [ac_dbus=yes],[ac_dbus=no])
+dnl    AC_MSG_RESULT([$ac_dbus])
+dnl    AC_SUBST(DBUS_CFLAGS)
+dnl    AC_SUBST(DBUS_LIBS)
+dnl 
+dnl    if test x"ac_dbus" = x"yes" ; then
+dnl       AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
+dnl    fi
+dnl 
+dnl    # Check for glib and dbus-glib, used by gpxlogger
+dnl    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
+dnl    AC_SUBST(GLIB_CFLAGS)
+dnl    AC_SUBST(GLIB_LIBS)
+dnl 
+dnl    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
+dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
+dnl    AC_SUBST(DBUS_GLIB_LIBS)
+dnl fi
 AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
 AC_OUTPUT(Makefile contrib/Makefile gpsd.spec)
