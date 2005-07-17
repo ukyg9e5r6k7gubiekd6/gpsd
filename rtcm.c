@@ -11,6 +11,11 @@ RTCM PAPER 194-93/SC 104-STD
 Ordering instructions are accessible from <http://www.rtcm.org/>
 under "Publications".
 
+Also applicable is ITU-R M.823: "Technical characteristics of
+differential transmissions for global navigation satellite systems
+from maritime radio beacons in the frequency band 283.5 - 315 kHz in
+region 1 and 285 - 325 kHz in regions 2 & 3."
+
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from
 message dumping.  You are not expected to understand any of it. Here
@@ -617,14 +622,15 @@ static void unpack(struct gps_device_t *session)
         {
 	    struct rtcm_msg5    *m = (struct rtcm_msg5 *)msghdr;
 	    while (len >= 1) {
-		session->rtcm.conhealth.sat[n].ident = m->w3.sat_id;
-		session->rtcm.conhealth.sat[n].iodl = m->w3.issue_of_data_link!=0;
-		session->rtcm.conhealth.sat[n].health = m->w3.data_health!=0;
-		/*@i@*/session->rtcm.conhealth.sat[n].snr = (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1);
-		session->rtcm.conhealth.sat[n].health_en = m->w3.health_enable!=0;
-		session->rtcm.conhealth.sat[n].new_data = m->w3.new_nav_data!=0;
-		session->rtcm.conhealth.sat[n].los_warning = m->w3.loss_warn!=0;
-		session->rtcm.conhealth.sat[n].tou = m->w3.time_unhealthy*TU_SCALE;
+		struct consat_t *csp = &session->rtcm.conhealth.sat[n];
+		csp->ident = m->w3.sat_id;
+		csp->iodl = m->w3.issue_of_data_link!=0;
+		csp->health = m->w3.data_health!=0;
+		/*@i@*/csp->snr = (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1);
+		csp->health_en = m->w3.health_enable!=0;
+		csp->new_data = m->w3.new_nav_data!=0;
+		csp->los_warning = m->w3.loss_warn!=0;
+		csp->tou = m->w3.time_unhealthy*TU_SCALE;
 		len--;
 		n++;
 		m = (struct rtcm_msg5 *) (((RTCMWORD *) m) + 1);
@@ -639,7 +645,7 @@ static void unpack(struct gps_device_t *session)
 
 	    while (len >= 3) {
 		session->rtcm.almanac.station[n].latitude = m->w3.lat * LA_SCALE;
-		session->rtcm.almanac.station[n].longitude = ((m->w3.lon_h << 8) | m->w4.lon_l) * LO_SCALE;
+		/*@i@*/session->rtcm.almanac.station[n].longitude = ((m->w3.lon_h << 8) | m->w4.lon_l) * LO_SCALE;
 		session->rtcm.almanac.station[n].range = m->w4.range;
 		session->rtcm.almanac.station[n].frequency = (((m->w4.freq_h << 6) | m->w5.freq_l) * FREQ_SCALE) + FREQ_OFFSET;
 		session->rtcm.almanac.station[n].health = m->w5.health;
@@ -823,15 +829,17 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     switch (session->rtcm.type) {
     case 1:
     case 9:
-	for (n = 0; n < session->rtcm.ranges.nentries; n++)
+	for (n = 0; n < session->rtcm.ranges.nentries; n++) {
+	    struct rangesat_t *rsp = &session->rtcm.ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			   session->rtcm.ranges.sat[n].ident,
-			   session->rtcm.ranges.sat[n].udre,
-			   session->rtcm.ranges.sat[n].issuedata,
+			   rsp->ident,
+			   rsp->udre,
+			   rsp->issuedata,
 			   session->rtcm.zcount,
-			   session->rtcm.ranges.sat[n].rangerr,
-			   session->rtcm.ranges.sat[n].rangerate);
+			   rsp->rangerr,
+			   rsp->rangerate);
+	}
 	break;
 
     case 3:
@@ -858,17 +866,19 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 5:
-	for (n = 0; n < session->rtcm.conhealth.nentries; n++)
+	for (n = 0; n < session->rtcm.conhealth.nentries; n++) {
+	    struct consat_t *csp = &session->rtcm.conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "C\t%2u\t%1u  %1u\t%2u\t%1u  %1u  %1u\t%2u\n",
-			   session->rtcm.conhealth.sat[n].ident,
-			   (unsigned)session->rtcm.conhealth.sat[n].iodl,
-			   (unsigned)session->rtcm.conhealth.sat[n].health,
-			   session->rtcm.conhealth.sat[n].snr,
-			   (unsigned)session->rtcm.conhealth.sat[n].health_en,
-			   (unsigned)session->rtcm.conhealth.sat[n].new_data,
-			   (unsigned)session->rtcm.conhealth.sat[n].los_warning,
-			   session->rtcm.conhealth.sat[n].tou);
+			   csp->ident,
+			   (unsigned)csp->iodl,
+			   (unsigned)csp->health,
+			   csp->snr,
+			   (unsigned)csp->health_en,
+			   (unsigned)csp->new_data,
+			   (unsigned)csp->los_warning,
+			   csp->tou);
+	}
 	break;
 
     case 6: 			/* NOP msg */
@@ -876,16 +886,18 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 7:
-	for (n = 0; n < session->rtcm.almanac.nentries; n++)
+	for (n = 0; n < session->rtcm.almanac.nentries; n++) {
+	    struct station_t *ssp = &session->rtcm.almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "A\t%.4f\t%.4f\t%u\t%.1f\t%u\t%u\t%u\n",
-			   session->rtcm.almanac.station[n].latitude,
-			   session->rtcm.almanac.station[n].longitude,
-			   session->rtcm.almanac.station[n].range,
-			   session->rtcm.almanac.station[n].frequency,
-			   session->rtcm.almanac.station[n].health,
-			   session->rtcm.almanac.station[n].station_id,
-			   session->rtcm.almanac.station[n].bitrate);
+			   ssp->latitude,
+			   ssp->longitude,
+			   ssp->range,
+			   ssp->frequency,
+			   ssp->health,
+			   ssp->station_id,
+			   ssp->bitrate);
+	}
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

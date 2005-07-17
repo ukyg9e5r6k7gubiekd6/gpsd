@@ -117,9 +117,9 @@ LF transmitters also have (different) id numbers.</para>
 <para>&lt;modified z_count&gt; is the reference time of the corrections in the
 message in seconds within the current hour. Note that it is
 the current hour in GPS time, which is several seconds ahead of
-UTC (13 in 1999).</para>
+UTC (13 in 1999-2005).</para>
 
-<para>&lt;sequence no&gt; is a number which increments, modulo 8 for each
+<para>&lt;sequence no&gt; is a number which increments, modulo 8, for each
 message transmitted.</para>
 
 <para>&lt;message length&gt; is the number of words after the header that
@@ -174,7 +174,7 @@ values:</para>
 3	1-sigma error	&gt;  8m
 </literallayout>
 
-<para>&lt;iod&gt; is Issue of Data, matching the IOD for the current ephemeris
+<para>&lt;iod&gt; is Issue Of Data, matching the IOD for the current ephemeris
 of this satellite, as transmitted by the satellite.</para>
 
 <para>&lt;modified z_count&gt; is just a copy of the same field from

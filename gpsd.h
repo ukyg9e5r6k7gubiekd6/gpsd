@@ -227,7 +227,7 @@ struct gps_device_t {
 	    union {
 		struct {
 		    unsigned int nentries;
-		    struct {			/* data from messages 1 & 9 */
+		    struct rangesat_t {		/* data from messages 1 & 9 */
 			unsigned ident;		/* satellite ID */
 			unsigned udre;		/* user diff. range error */
 			unsigned issuedata;	/* issue of data */
@@ -248,7 +248,7 @@ struct gps_device_t {
 		} reference;
 		struct {		/* data from type 5 messages */
 		    unsigned int nentries;
-		    struct {
+		    struct consat_t {
 			unsigned ident;		/* satellite ID */
 			bool iodl;		/* issue of data */
 			bool health;		/* is satellite healthy? */
@@ -261,7 +261,7 @@ struct gps_device_t {
 		} conhealth;
 		struct {		/* data from type 7 messages */
 		    unsigned int nentries;
-		    struct {
+		    struct station_t {
 			double latitude, longitude;	/* location */
 			unsigned int range;		/* range in km */
 			double frequency;		/* broadcast freq */
