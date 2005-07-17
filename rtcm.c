@@ -517,7 +517,6 @@ static void unpack(struct gps_device_t *session)
     session->rtcm.seqnum = msghdr->w2.sqnum;
     session->rtcm.stathlth = msghdr->w2.stathlth;
 
-    memset(session->rtcm.ranges, 0, sizeof(session->rtcm.ranges));
     len = (int)session->rtcm.length;
     n = 0;
     switch (session->rtcm.type) {
@@ -528,33 +527,33 @@ static void unpack(struct gps_device_t *session)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    session->rtcm.ranges[n].satident   = m->w3.satident1;
-		    session->rtcm.ranges[n].udre       = m->w3.udre1;
-		    session->rtcm.ranges[n].issuedata  = m->w4.issuedata1;
-		    session->rtcm.ranges[n].rangerr    = m->w3.pc1 * 
+		    session->rtcm.ranges.sat[n].ident      = m->w3.satident1;
+		    session->rtcm.ranges.sat[n].udre       = m->w3.udre1;
+		    session->rtcm.ranges.sat[n].issuedata  = m->w4.issuedata1;
+		    session->rtcm.ranges.sat[n].rangerr    = m->w3.pc1 * 
 			(m->w3.scale1 ? PCLARGE : PCSMALL);
-		    session->rtcm.ranges[n].rangerate  = m->w4.rangerate1 * 
+		    session->rtcm.ranges.sat[n].rangerate  = m->w4.rangerate1 * 
 					(m->w3.scale1 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 4) {
-		    session->rtcm.ranges[n].satident   = m->w4.satident2;
-		    session->rtcm.ranges[n].udre       = m->w4.udre2;
-		    session->rtcm.ranges[n].issuedata  = m->w6.issuedata2;
-		    session->rtcm.ranges[n].rangerr    = m->w5.pc2 * 
+		    session->rtcm.ranges.sat[n].ident      = m->w4.satident2;
+		    session->rtcm.ranges.sat[n].udre       = m->w4.udre2;
+		    session->rtcm.ranges.sat[n].issuedata  = m->w6.issuedata2;
+		    session->rtcm.ranges.sat[n].rangerr    = m->w5.pc2 * 
 			(m->w4.scale2 ? PCLARGE : PCSMALL);
-		    session->rtcm.ranges[n].rangerate  = m->w5.rangerate2 * 
+		    session->rtcm.ranges.sat[n].rangerate  = m->w5.rangerate2 * 
 			(m->w4.scale2 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 5) {
-		    session->rtcm.ranges[n].satident    = m->w6.satident3;
-		    session->rtcm.ranges[n].udre        = m->w6.udre3;
-		    session->rtcm.ranges[n].issuedata   = m->w7.issuedata3;
+		    session->rtcm.ranges.sat[n].ident       = m->w6.satident3;
+		    session->rtcm.ranges.sat[n].udre        = m->w6.udre3;
+		    session->rtcm.ranges.sat[n].issuedata   = m->w7.issuedata3;
 		    /*@ -shiftimplementation @*/
-		    session->rtcm.ranges[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
+		    session->rtcm.ranges.sat[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
 					(m->w6.scale3 ? PCLARGE : PCSMALL);
-		    session->rtcm.ranges[n].rangerate   = m->w7.rangerate3 * 
+		    session->rtcm.ranges.sat[n].rangerate   = m->w7.rangerate3 * 
 					(m->w6.scale3 ? RRLARGE : RRSMALL);
 		    /*@ +shiftimplementation @*/
 		    n++;
@@ -562,17 +561,70 @@ static void unpack(struct gps_device_t *session)
 		len -= 5;
 		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
 	    }
+	    session->rtcm.ranges.nentries = n;
 	}
 	break;
     case 3:
         {
 	    struct rtcm_msg3    *m = (struct rtcm_msg3 *)msghdr;
 
-	    if (len >= 4) {
+	    if ((session->rtcm.ecef.valid = len >= 4)) {
 		session->rtcm.ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
 		session->rtcm.ecef.y = ((m->w4.y_h<<16)|(m->w5.y_l))*XYZ_SCALE;
 		session->rtcm.ecef.z = ((m->w5.z_h<<24)|(m->w6.z_l))*XYZ_SCALE;
 	    }
+	}
+	break;
+    case 4:
+	{
+	    struct rtcm_msg4    *m = (struct rtcm_msg4 *) msghdr;
+ 
+	    if ((session->rtcm.reference.valid = len >= 2)){
+		session->rtcm.reference.system =
+			(m->w3.dgnss==0) ? gps :
+		    		((m->w3.dgnss==1) ? glonass : unknown);
+		session->rtcm.reference.sense = (m->w3.dat != 0) ? global : local;
+		if (m->w3.datum_alpha_char1){
+		    session->rtcm.reference.datum[n++] = (m->w3.datum_alpha_char1);
+		}
+		if (m->w3.datum_alpha_char2){
+		    session->rtcm.reference.datum[n++] = (m->w3.datum_alpha_char2);
+		}
+		if (m->w4.datum_sub_div_char1){
+		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char1);
+		}
+		if (m->w4.datum_sub_div_char2){
+		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char2);
+		}
+		if (m->w4.datum_sub_div_char3){
+		    session->rtcm.reference.datum[n++] = (m->w4.datum_sub_div_char3);
+		}
+		session->rtcm.reference.datum[n++] = '\0';
+		if (len >= 4) {
+		    session->rtcm.reference.dx = m->w5.dx * DXYZ_SCALE;
+		    session->rtcm.reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
+		    session->rtcm.reference.dz = m->w6.dz * DXYZ_SCALE;
+		} else 
+		    session->rtcm.reference.sense = unknown;
+	    }
+	}
+	break;
+    case 5:
+        {
+	    struct rtcm_msg5    *m = (struct rtcm_msg5 *)msghdr;
+	    while (len >= 1) {
+		session->rtcm.conhealth.sat[n].ident = m->w3.sat_id;
+		session->rtcm.conhealth.sat[n].iodl = m->w3.issue_of_data_link!=0;
+		session->rtcm.conhealth.sat[n].health = m->w3.data_health!=0;
+		session->rtcm.conhealth.sat[n].snr = (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1);
+		session->rtcm.conhealth.sat[n].health_en = m->w3.health_enable!=0;
+		session->rtcm.conhealth.sat[n].new_data = m->w3.new_nav_data!=0;
+		session->rtcm.conhealth.sat[n].los_warning = m->w3.loss_warn!=0;
+		session->rtcm.conhealth.sat[n].tou = m->w3.time_unhealthy*TU_SCALE;
+		len--;
+		m = (struct rtcm_msg5 *) (((RTCMWORD *) m) + 1);
+	    }
+	    session->rtcm.conhealth.nentries = n;
 	}
 	break;
     default:
@@ -723,85 +775,58 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     switch (session->rtcm.type) {
     case 1:
     case 9:
-	for (i = 0; i < MAXCORRECTIONS; i++)
-	    if (session->rtcm.ranges[i].satident != 0)
-		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
-			       session->rtcm.ranges[i].satident,
-			       session->rtcm.ranges[i].udre,
-			       session->rtcm.ranges[i].issuedata,
-			       session->rtcm.zcount,
-			       session->rtcm.ranges[i].rangerr,
-			       session->rtcm.ranges[i].rangerate);
+	for (i = 0; i < session->rtcm.ranges.nentries; i++)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
+			   session->rtcm.ranges.sat[i].ident,
+			   session->rtcm.ranges.sat[i].udre,
+			   session->rtcm.ranges.sat[i].issuedata,
+			   session->rtcm.zcount,
+			   session->rtcm.ranges.sat[i].rangerr,
+			   session->rtcm.ranges.sat[i].rangerate);
 	break;
 
 #if 0				/* I was too slow in getting these in. -wsr */
 
     case 3:
-	printf("R\t%.2f\t%.2f\t%.2f\n",
-	       session->rtcm.ecef.x, 
-	       session->rctm.ecef.y,
-	       session->rtcm.ecef.z);
+	if (session->rtcm.ecef.valid)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "R\t%.2f\t%.2f\t%.2f\n",
+			   session->rtcm.ecef.x, 
+			   session->rctm.ecef.y,
+			   session->rtcm.ecef.z);
 	break;
 
     case 4:
-	{
-	    struct msg4    *m = (struct msg4 *) msghdr;
-
-	    if (len >= 2){
-		printf("D\t%s\t%1d\t",
-		       (m->w3.dgnss==0)?"GPS":((m->w3.dgnss==1)?
-					       "GLONASS":"???"),
-		       m->w3.dat);
-		if (m->w3.datum_alpha_char1){
-		    putchar (m->w3.datum_alpha_char1);
-		}
-		if (m->w3.datum_alpha_char2){
-		    putchar (m->w3.datum_alpha_char2);
-		}
-		if (m->w4.datum_sub_div_char1){
-		    putchar (m->w4.datum_sub_div_char1);
-		}
-		if (m->w4.datum_sub_div_char2){
-		    putchar (m->w4.datum_sub_div_char2);
-		}
-		if (m->w4.datum_sub_div_char3){
-		    putchar (m->w4.datum_sub_div_char3);
-		}
-		if (len >= 4){
-		    printf("\t%.1f\t%.1f\t%.1f",
-			   m->w5.dx * DXYZ_SCALE,
-			   ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE,
-			   m->w6.dz * DXYZ_SCALE);
-		}
-		printf("\n");
-	    }
-
-
-	}
+	if (session->rtcm.reference.valid)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "D\t%s\t%1d\t%s\t%.1f\t%.1f\t%.1f\n",
+			   (session->rtcm.reference.system==gps) ? "GPS"
+			   : ((session->rtcm.reference.system==glonass) ? "GLONASS"
+			      : "UNKNOWN"),
+			   session->rtcm.reference.sense,
+			   session->rtcm.reference.datum,
+			   session->rtcm.reference.dx,
+			   session->rtcm.reference.dy,
+			   session->rtcm.reference.dz);
 	break;
 
     case 5:
-	{
-	    struct msg5    *m = (struct msg5 *) msghdr;
-	    while (len >= 1){
-	        printf("C\t%2d\t%1d  %1d\t%2d\t%1d  %1d  %1d\t%2d\n",
-		       m->w3.sat_id,
-		       m->w3.issue_of_data_link,
-		       m->w3.data_health,
-		       (m->w3.cn0?(m->w3.cn0+CNR_OFFSET):-1),
-		       m->w3.health_enable,
-		       m->w3.new_nav_data,
-		       m->w3.loss_warn,
-		       m->w3.time_unhealthy*TU_SCALE);
-		len--;
-		m = (struct msg5 *) (((RTCMWORD *) m) + 1);
-	    }
+	for (n = 0; n < session->rtcm.conhealth.nentries; n++)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "C\t%2d\t%1d  %1d\t%2d\t%1d  %1d  %1d\t%2d\n",
+			   session->rtcm.conhealth.sat[n].satident,
+			   session->rtcm.conhealth.sat[n].iodl,
+			   session->rtcm.conhealth.sat[n].snr,
+			   session->rtcm.conhealth.sat[n].health_en,
+			   session->rtcm.conhealth.sat[n].new_data,
+			   session->rtcm.conhealth.sat[n].los_warn,
+			   session->rtcm.conhealth.sat[n].tou);
 	}
 	break;
 
     case 6: 			/* NOP msg */
-	printf("N\n");
+	strcat(buf, "N\n");
 	break;
 
     case 7:
