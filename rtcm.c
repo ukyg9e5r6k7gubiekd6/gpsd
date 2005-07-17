@@ -630,9 +630,30 @@ static void unpack(struct gps_device_t *session)
 		session->rtcm.conhealth.sat[n].los_warning = m->w3.loss_warn!=0;
 		session->rtcm.conhealth.sat[n].tou = m->w3.time_unhealthy*TU_SCALE;
 		len--;
+		n++;
 		m = (struct rtcm_msg5 *) (((RTCMWORD *) m) + 1);
 	    }
 	    session->rtcm.conhealth.nentries = n;
+	}
+	break;
+    case 7:
+	{
+	    struct rtcm_msg7    *m = (struct rtcm_msg7 *) msghdr;
+	    int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
+
+	    while (len >= 3) {
+		session->rtcm.almanac.station[n].latitude = m->w3.lat * LA_SCALE;
+		session->rtcm.almanac.station[n].longitude = ((m->w3.lon_h << 8) | m->w4.lon_l) * LO_SCALE;
+		session->rtcm.almanac.station[n].range = m->w4.range;
+		session->rtcm.almanac.station[n].frequency = (((m->w4.freq_h << 6) | m->w5.freq_l) * FREQ_SCALE) + FREQ_OFFSET;
+		session->rtcm.almanac.station[n].health = m->w5.health;
+		session->rtcm.almanac.station[n].station_id = m->w5.station_id,
+		session->rtcm.almanac.station[n].bitrate = tx_speed[m->w5.bit_rate];
+		len -= 3;
+		n++;
+		m = (struct rtcm_msg7 *) (((RTCMWORD *) m) + 3);
+	    }
+	    session->rtcm.almanac.nentries = n;
 	}
 	break;
     default:
@@ -838,24 +859,16 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 7:
-	{
-	    struct msg7    *m = (struct msg7 *) msghdr;
-	    int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
-
-	    while (len >= 3) {
+	for (n = 0; n < session->rtcm.almanac.nentries; n++)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		printf("A\t%.4f\t%.4f\t%d\t%.1f\t%d\t%d\t%d\n",
-		       m->w3.lat * LA_SCALE,
-		       ((m->w3.lon_h << 8) | m->w4.lon_l) * LO_SCALE,
-		       m->w4.range,
-		       (((m->w4.freq_h << 6) | m->w5.freq_l)
-			* FREQ_SCALE) + FREQ_OFFSET,
-		       m->w5.health,
-		       m->w5.station_id,
-		       tx_speed[m->w5.bit_rate]);
-		len -= 3;
-		m = (struct msg7 *) (((RTCMWORD *) m) + 3);
-	    }
-	}
+		       session->rtcm.almanac.station[n].latitude.
+		       session->rtcm.almanac.station[n].longitude.
+		       session->rtcm.almanac.station[n].range.
+		       session->rtcm.almanac.station[n].frequency.
+		       session->rtcm.almanac.station[n].health.
+		       session->rtcm.almanac.station[n].station_id.
+		       session->rtcm.almanac.station[n].bitrate);
 	break;
 
     case 16:
