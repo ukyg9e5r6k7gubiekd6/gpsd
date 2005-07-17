@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 
 	case '?':
 	default:
-	    fputs("rtcmdecode [-v]\n", stderr);
+	    (void)fputs("rtcmdecode [-v]\n", stderr);
 	    exit(1);
 	}
     }

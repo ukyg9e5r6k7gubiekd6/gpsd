@@ -37,11 +37,6 @@ to examine RTCM feeds from DGPSIP servers.</para>
 these lines go to standard output. As well as data the decoder also
 prints decoder status messages to standard error, as necessary.</para>
 
-<para>This decoder is incomplete. Presently it handles only messages
-of type 1 and 9, emitting only H and S lines.  The set of messages
-handled and the invocation options of this command may change in the
-future.</para>
-
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 

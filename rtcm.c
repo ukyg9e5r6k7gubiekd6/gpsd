@@ -657,6 +657,31 @@ static void unpack(struct gps_device_t *session)
 	    session->rtcm.almanac.nentries = n;
 	}
 	break;
+    case 16:
+	{
+	    struct rtcm_msg16    *m = (struct rtcm_msg16 *) msghdr;
+
+	    /*@ -boolops @*/
+	    while (len >= 1){
+		if (!m->w3.byte1) {
+		    break;
+		}
+		session->rtcm.message[n++] = (char)(m->w3.byte1);
+		if (!m->w3.byte2) {
+		    break;
+		}
+		session->rtcm.message[n++] = (char)(m->w3.byte2);
+		if (!m->w3.byte3) {
+		    break;
+		}
+		session->rtcm.message[n++] = (char)(m->w3.byte3);
+		len--;
+		m = (struct rtcm_msg16 *) (((RTCMWORD *) m) + 1);
+	    }
+	    /*@ +boolops @*/
+	    session->rtcm.message[n++] = '\0';
+	}
+	break;
     default:
 	break;
     }
@@ -862,39 +887,18 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
     case 7:
 	for (n = 0; n < session->rtcm.almanac.nentries; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		printf("A\t%.4f\t%.4f\t%d\t%.1f\t%d\t%d\t%d\n",
-		       session->rtcm.almanac.station[n].latitude.
-		       session->rtcm.almanac.station[n].longitude.
-		       session->rtcm.almanac.station[n].range.
-		       session->rtcm.almanac.station[n].frequency.
-		       session->rtcm.almanac.station[n].health.
-		       session->rtcm.almanac.station[n].station_id.
-		       session->rtcm.almanac.station[n].bitrate);
+			   "A\t%.4f\t%.4f\t%d\t%.1f\t%d\t%d\t%d\n",
+			   session->rtcm.almanac.station[n].latitude.
+			   session->rtcm.almanac.station[n].longitude.
+			   session->rtcm.almanac.station[n].range.
+			   session->rtcm.almanac.station[n].frequency.
+			   session->rtcm.almanac.station[n].health.
+			   session->rtcm.almanac.station[n].station_id.
+			   session->rtcm.almanac.station[n].bitrate);
 	break;
-
     case 16:
-	{
-	    struct msg16    *m = (struct msg16 *) msghdr;
-
-	    printf("T\t\"");	/* Note: text is now quoted in the output */
-	    while (len >= 1){
-		if (!m->w3.byte1) {
-		    break;
-		}
-		putchar (m->w3.byte1);
-		if (!m->w3.byte2) {
-		    break;
-		}
-		putchar (m->w3.byte2);
-		if (!m->w3.byte3) {
-		    break;
-		}
-		putchar (m->w3.byte3);
-		len--;
-		m = (struct msg16 *) (((RTCMWORD *) m) + 1);
-	    }
-	    printf("\"\n");
-	}
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "T \"%s\"\n", session->rtcm.message);
 	break;
 
     default:

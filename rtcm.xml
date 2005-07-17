@@ -252,7 +252,7 @@ for each satellite.</para>
 <para>Here is the format:</para>
 
 <literallayout>
-C &lt;sat&gt; &lt;iodl&gt; &lt;health&gt; &lt;cnr&gt; &lt;hlth en&gt; &lt;new data&gt; &lt;los warning&gt;
+C &lt;sat&gt; &lt;iodl&gt; &lt;health&gt; &lt;snr&gt; &lt;hlth en&gt; &lt;new data&gt; &lt;los warning&gt;
   &lt;time to unhealthy&gt;
 </literallayout>
 
@@ -270,7 +270,7 @@ satellite information in an accompanying type 1 or type 9 message.</para>
 <para>&lt;health&gt; 0 indicates that the satellite is healthy. Any other value
 indicates a problem (coding is not known).</para>
 
-<para>&lt;cnr&gt; gives the carrier/noise ratio of the received signal in the
+<para>&lt;snr&gt; gives the carrier/noise ratio of the received signal in the
 range 25 to 55 dB(Hz).</para>
 
 <para>&lt;health en&gt; is 1 bit. If set to 1 it indicates that the
