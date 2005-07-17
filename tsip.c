@@ -55,7 +55,9 @@ static void tsip_initializer(struct gps_device_t *session)
 {
     unsigned char buf[100];
 
-    /* TSIP is ODD parity 1 stopbit, change it */
+    /* TSIP is ODD parity 1 stopbit, save original values and change it */
+    session->tsip.parity = session->gpsdata.parity;
+    session->tsip.stopbits = session->gpsdata.stopbits;
     gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
 
     /* I/O Options */
@@ -77,6 +79,17 @@ static void tsip_initializer(struct gps_device_t *session)
     /* Request Current Datum Values */
     putbyte(buf,0,0x15);
     (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 1);
+
+    /* Request Navigation Configuration */
+    putbyte(buf,0,0x03);
+    (void)tsip_write(session->gpsdata.gps_fd, 0xbb, buf, 1);
+}
+
+static void tsip_wrapup(struct gps_device_t *session)
+{
+    /* restore saved parity and stopbits when leaving TSIP mode */
+    gpsd_set_speed(session, session->gpsdata.baudrate,
+			session->tsip.parity, session->tsip.stopbits);
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
@@ -103,7 +116,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
-    u_int8_t u1,u2,u3,u4;
+    u_int8_t u1,u2,u3,u4,u5;
     int16_t s1,s2,s3,s4;
     int32_t sl1,sl2,sl3;
     u_int32_t ul1,ul2;
@@ -599,6 +612,20 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",u1);
 	}
 	break;
+    case 0xbb:		/* Navigation Configuration */
+	if (len != 40)
+	    break;
+	u1 = getub(buf,0);			/* Subcode */
+	u2 = getub(buf,1);			/* Operating Dimension */
+	u3 = getub(buf,2);			/* DGPS Mode */
+	u4 = getub(buf,3);			/* Dynamics Code */
+	f1 = getf(buf,5);			/* Elevation Mask */
+	f2 = getf(buf,9);			/* AMU Mask */
+	f3 = getf(buf,13);			/* DOP Mask */
+	f4 = getf(buf,17);			/* DOP Switch */
+	u5 = getub(buf,21);			/* DGPS Age Limit */
+	gpsd_report(4, "Navigation Configuration %u %u %u %u %f %f %f %f %u\n",u1,u2,u3,u4,f1,f2,f3,f4,u5);
+	break;
     default:
 	gpsd_report(4,"Unhandled TSIP packet type 0x%02x\n",id);
 	break;
@@ -643,7 +670,7 @@ struct gps_type_t tsip_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switcher */
-    .wrapup         = NULL,		/* no close hook */
+    .wrapup         = tsip_wrapup,	/* restore comms parameters */
     .cycle          = 1,		/* updates every second */
 };
 
