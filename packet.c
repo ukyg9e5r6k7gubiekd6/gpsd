@@ -44,7 +44,7 @@ distinguish them from baud barf.
  * that recognizes a leader of the same packet type rather than
  * dropping back to ground state -- this for example will prevent
  * the state machine from hopping between recognizing TSIP and
- * Evermore packets that both start with a DLE.
+ * EverMore packets that both start with a DLE.
  *
  * Error handling is brutally simple; any time we see an unexpected
  * character, go to GROUND_STATE and reset the machine (except that a
@@ -77,7 +77,7 @@ enum {
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
 #endif /* NMEA_ENABLE */
 
-   DLE_LEADER,		/* we've seen the TSIP/Evermore leader (DLE) */
+   DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */
 
 #ifdef TRIPMATE_ENABLE
    ASTRAL_1,		/* ASTRAL leader A */
@@ -121,11 +121,11 @@ enum {
 #endif /* ZODIAC_ENABLE */
 
 #ifdef EVERMORE_ENABLE
-   EVERMORE_LEADER_1,	/* a DLE after having seen Evermore data */
-   EVERMORE_LEADER_2,	/* seen opening STX of Evermore packet */
-   EVERMORE_PAYLOAD,	/* in payload part of Evermore packet */
-   EVERMORE_PAYLOAD_DLE,	/* DLE in payload part of Evermore packet */
-   EVERMORE_RECOGNIZED,	/* found end of Evermore packet */
+   EVERMORE_LEADER_1,	/* a DLE after having seen EverMore data */
+   EVERMORE_LEADER_2,	/* seen opening STX of EverMore packet */
+   EVERMORE_PAYLOAD,	/* in payload part of EverMore packet */
+   EVERMORE_PAYLOAD_DLE,	/* DLE in payload part of EverMore packet */
+   EVERMORE_RECOGNIZED,	/* found end of EverMore packet */
 #endif /* EVERMORE_ENABLE */
 
 #ifdef ITALK_ENABLE
@@ -583,7 +583,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    /*
 	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
 	     * checksummed, so false positives are easy.  We might be
-	     * looking at another DLE-stuffed protocol like Evermore.
+	     * looking at another DLE-stuffed protocol like EverMore.
 	     */
 	    session->packet_state = DLE_LEADER;
 	else
@@ -710,7 +710,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
    "SEATALK_LEAD_1",	/* SeaTalk/Garmin packet leader 'I' */
 #endif /* NMEA_ENABLE */
 
-   "DLE_LEADER",		/* we've seen the TSIP/Evermore leader (DLE) */
+   "DLE_LEADER",		/* we've seen the TSIP/EverMore leader (DLE) */
 
 #ifdef TRIPMATE_ENABLE
    "ASTRAL_1",		/* ASTRAL leader A */
@@ -754,11 +754,11 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 #endif /* ZODIAC_ENABLE */
 
 #ifdef EVERMORE_ENABLE
-   "EVERMORE_LEADER_1",	/* a DLE after having seen Evermore data */
-   "EVERMORE_LEADER_2",	/* seen opening STX of Evermore packet */
-   "EVERMORE_PAYLOAD",	/* in payload part of Evermore packet */
-   "EVERMORE_PAYLOAD_DLE",	/* DLE in payload part of Evermore packet */
-   "EVERMORE_RECOGNIZED",	/* found end of Evermore packet */
+   "EVERMORE_LEADER_1",	/* a DLE after having seen EverMore data */
+   "EVERMORE_LEADER_2",	/* seen opening STX of EverMore packet */
+   "EVERMORE_PAYLOAD",	/* in payload part of EverMore packet */
+   "EVERMORE_PAYLOAD_DLE",	/* DLE in payload part of EverMore packet */
+   "EVERMORE_RECOGNIZED",	/* found end of EverMore packet */
 #endif /* EVERMORE_ENABLE */
 
 #ifdef ITALK_ENABLE

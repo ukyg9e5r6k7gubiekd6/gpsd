@@ -36,7 +36,7 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 #endif /* SIRFII_ENABLE */
     } else if (session->packet_type == EVERMORE_PACKET) {
-	gpsd_report(2, "Evermore packet seen when NMEA expected.\n");
+	gpsd_report(2, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
 	return evermore_parse(session, session->outbuffer, session->outbuflen);
 #else
@@ -97,7 +97,7 @@ static void nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PFST");
 #endif /* ITRAX_ENABLE */
 #ifdef EVERMORE_ENABLE
-    /* probe for Evermore by trying to read the LogConfig */
+    /* probe for EverMore by trying to read the LogConfig */
     (void)nmea_send(session->gpsdata.gps_fd,
 		    "\x10\x02\x04\x81\x13\x94\x10\x03");
 #endif /* EVERMORE_ENABLE */

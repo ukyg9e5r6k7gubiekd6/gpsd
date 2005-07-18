@@ -17,7 +17,7 @@ extern "C" {
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
 #define NMEA_CHANNELS	12	/* max channels allowed in NMEA format */
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
-#define EVERMORE_CHANNELS 12	/* max channels allowed in Evermore format */
+#define EVERMORE_CHANNELS 12	/* max channels allowed in EverMore format */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.

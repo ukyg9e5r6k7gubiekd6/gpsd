@@ -1,5 +1,5 @@
 /*
- * This is the gpsd driver for Evermore GPSes operating in binary mode.
+ * This is the gpsd driver for EverMore GPSes operating in binary mode.
  *
  * About the only thing this gives us that NMEA won't is TDOP.
  * But we'll get atomic position reports from it, which is good.
@@ -23,8 +23,22 @@
 #define GET_ORIGIN 1
 #include "bits.h"
 
+static char *evermore_hexdump(void *binbuf, size_t binbuflen, char *hexbuf)
+{
+	size_t i;
+	size_t len = (binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen;
+	char *ibuf = (char *)binbuf;
+        memset(hexbuf, 0, 3 * len + 1);	
+
+        for (i = 0; i < len; i++) {
+	      (void)sprintf(hexbuf + (3 * i), "%02x ", (unsigned char)ibuf[i]);
+	}
+	return hexbuf;
+}
+
 /*@ +charint -usedef -compdef @*/
-static bool evermore_write(int fd, unsigned char *msg, size_t msglen) {
+static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
+{
    unsigned int       crc;
    size_t    i, len;
    unsigned char stuffed[MAX_PACKET_LENGTH], buf[MAX_PACKET_LENGTH*3+1], *cp;
@@ -59,11 +73,8 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen) {
    len = (size_t)(cp - stuffed);
 
    /* we may need to dump the message */
-   buf[0] = '\0';
-   for (i = 0; i < len; i++)
-       (void)snprintf((char*)buf+strlen((char *)buf),sizeof((char*)buf)-strlen((char*)buf),
-		      " %02x", stuffed[i]);
-   gpsd_report(4, "writing Evermore control type %02x:%s\n", msg[0], buf);
+   evermore_hexdump(stuffed, len, (char *)buf);
+   gpsd_report(4, "writing EverMore control type %02x:%s\n", msg[0], buf);
    ok = (write(fd, stuffed, len) == (ssize_t)len);
    (void)tcdrain(fd);
    return(ok);
@@ -73,30 +84,26 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen) {
 /*@ +charint @*/
 gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned char buf2[MAX_PACKET_LENGTH*3+2], *cp, *tp;
+    unsigned char buf2[MAX_PACKET_LENGTH], *cp, *tp;
+    unsigned char hexbuf[MAX_PACKET_LENGTH*3+2];
     size_t i;
     unsigned char datalen;
-    int used, visible;
+    unsigned int used, visible;
     double version;
 
     if (len == 0)
 	return 0;
-
-    /* we may need to dump the raw packet */
-    buf2[0] = '\0';
-    for (i = 0; i < len; i++)
-	(void)snprintf((char*)buf2+strlen((char*)buf2), 
-		       sizeof(buf2)-strlen((char*)buf2),
-		       "%02x", (unsigned int)buf[i]);
-    strcat((char*)buf2, "\n");
 
     /* time to unstuff it and discard the header and footer */
     cp = buf + 2;
     tp = buf2;
     if (*cp == 0x10) cp++;
     datalen = (unsigned char)*cp++;
-    
-    gpsd_report(5, "raw Evermore packet type 0x%02x length %d: %s\n", *cp, len, buf2);
+   
+    /* DEBUG
+    evermore_hexdump(buf, len, hexbuf);
+    gpsd_report(5, "raw EverMore packet type 0x%02x length %d: %s\n", *cp, len, hexbuf);
+    */
 
     datalen -= 2;
 
@@ -105,6 +112,9 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	if (*tp == 0x10) cp++;
 	tp++;
     }
+    
+    evermore_hexdump(buf2, datalen, (char *)hexbuf);
+    gpsd_report(5, "EverMore packet type 0x%02x length %d: %s\n", buf2[0], datalen, hexbuf);
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "EID%d",(int)buf2[0]);
@@ -113,12 +123,12 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     {
     case 0x02:	/* Navigation Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	ecef_to_wgs84fix(&session->gpsdata, 
 			 getsl(buf2, 8)*1.0, getsl(buf2, 12)*1.0, getsl(buf2, 16)*1.0,
 			 getsw(buf2, 20)/10.0, getsw(buf2, 22)/10.0, getsw(buf2, 24)/10.0);
-	used = getub(buf2, 26) & 0x03;
-	//visible = getub(buf2, 26) & 0xb0;
+	used = getub(buf2, 26) & 0x0f;
+	visible = (getub(buf2, 26) & 0xf0) >> 4;
 	version = getuw(buf2, 27)/100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
@@ -127,15 +137,16 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    session->gpsdata.newdata.mode = MODE_2D;
 	else
 	    session->gpsdata.newdata.mode = MODE_3D;
-	gpsd_report(4, "NDO 0x02: version %f mode=%d, status=%d\n",
+	gpsd_report(4, "NDO 0x02: version %3.2f mode=%d, status=%d\n",
 		    version,
 		    session->gpsdata.newdata.mode,
 		    session->gpsdata.status);
+	gpsd_report(4, "NDO 0x02: version %d %04x %02x\n", getuw(buf2, 27), getuw(buf2, 27), getub(buf2, 27));
 	return TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
 
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	session->gpsdata.gdop = (double)getub(buf2, 8)/0.1;
 	session->gpsdata.pdop = (double)getub(buf2, 9)/0.1;
 	session->gpsdata.hdop = (double)getub(buf2, 10)/0.1;
@@ -168,7 +179,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x06:	/* Channel Status Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	session->gpsdata.satellites = (int)getub(buf2, 8);
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
@@ -199,22 +210,19 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	return TIME_SET | SATELLITE_SET | USED_SET;
 
     case 0x08:	/* Measurement Data Output */
+	session->gpsdata.newdata.time = session->gpsdata.sentence_time
+	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	session->context->leap_seconds = (int)getuw(buf2, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
-	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
 	gpsd_report(4, "MDO 0x04: visible=%d\n", visible);
 	return TIME_SET;
 
     default:
-	buf[0] = '\0';
-	for (i = 0; i < (size_t)datalen; i++)
-	    (void)snprintf((char*)buf+strlen((char*)buf), 
-			   sizeof(buf)-strlen((char*)buf),
-			   "%02x", (unsigned int)buf2[i]);
-	gpsd_report(3, "unknown Evermore packet id %d length %d: %s\n", buf2[0], len, buf);
+	gpsd_report(3, "ID: 0x%02x\n", getub(buf2, 0));
+	evermore_hexdump(buf2, datalen, (char *)hexbuf);
+	gpsd_report(3, "unknown EverMore packet id 0x%02x length %d: %s\n", buf2[0], datalen, hexbuf);
 	return 0;
     }
 }
@@ -290,7 +298,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     }
     msg[17] = tmp8;
     if (mode) {
-        gpsd_report(1, "Switching chip mode to Evermore binary.\n");
+        gpsd_report(1, "Switching chip mode to EverMore binary.\n");
 	msg[16] |= 0x80;  /* binary mode */
     }
     return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
@@ -348,7 +356,7 @@ static void evermore_close(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
-    .typename       = "Evermore binary",	/* full name of type */
+    .typename       = "EverMore binary",	/* full name of type */
     .trigger        = "$PEMT,100,05.",		/* recognize the type */
     .probe          = NULL,			/* no probe */
     .initializer    = evermore_initializer,	/* initialize the device */

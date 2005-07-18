@@ -497,7 +497,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
 	    case EVERMORE_PACKET:
-		(void)gpsd_switch_driver(session, "Evermore binary");
+		(void)gpsd_switch_driver(session, "EverMore binary");
 		break;
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
