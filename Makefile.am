@@ -6,7 +6,7 @@ SUBDIRS = contrib
 # Build stuff depending on Motif
 #
 if HAVE_MOTIF
-BUILD_PROGS = xgps xgpsspeed
+MOTIF_PROGS = xgps xgpsspeed
 endif
 
 XMLTO = xmlto
@@ -15,7 +15,7 @@ if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
 endif
 
-bin_PROGRAMS = $(BUILD_PROGS) sirfmon rtcmdecode gpsflash
+bin_PROGRAMS = $(MOTIF_PROGS) sirfmon rtcmdecode gpsflash
 bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test

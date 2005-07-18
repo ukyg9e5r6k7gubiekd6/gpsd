@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <math.h>
 #include "gpsd.h"
+
+#define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
 #ifdef ZODIAC_ENABLE

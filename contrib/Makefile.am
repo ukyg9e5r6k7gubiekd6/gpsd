@@ -1,4 +1,8 @@
-bin_PROGRAMS = gpxlogger gpspipe
+#if HAVE_DBUS
+DBUS_PROGS = gpxlogger
+#endif
+
+check_PROGRAMS = $(DBUS_PROGS) gpspipe
 
 INCLUDES = \
        $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE     \
