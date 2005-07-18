@@ -222,10 +222,8 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	else if (rtcm_state == RTCM_SYNC)
 	    session->packet_state = RTCM_SYNC_STATE;
-	else {
+	else
 	    session->packet_state = RTCM_RECOGNIZED;
-	    session->packet_type = RTCM_PACKET;
-	}
 #endif /* RTCM104_ENABLE */
 	break;
 	/*@ +casebreak @*/
@@ -794,8 +792,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	gpsd_report(7, "Character '%c' [%02X], new state: %s\n",
 			(isprint(c)?c:'.'), c, state_table[session->packet_state]);
 
-    if (session->packet_state == GROUND_STATE) {
-	    character_discard(session);
+	if (session->packet_state == GROUND_STATE) {
+		character_discard(session);
 #ifdef NMEA_ENABLE
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
@@ -857,44 +855,44 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 #ifdef EVERMORE_ENABLE
 	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
-        bool ok = false;
+	    bool ok = false;
 
-        n = 0;
-	/*@ +charint */
-        do {
-           if (session->inbuffer[n++] != 0x10) break;
-           if (session->inbuffer[n++] != 0x02) break;
-           len = session->inbuffer[n++];
-           if (len == 0x10) {
-              if (session->inbuffer[n++] != 0x10) break;
-           }
-           len -= 2;
-           crc = 0;
-           for (; len > 0; len--) {
-              crc += session->inbuffer[n];
-              if (session->inbuffer[n++] == 0x10) {
-                 if (session->inbuffer[n++] != 0x10) break;
-              }
-           }
-           if (len > 0) break;
-           checksum = session->inbuffer[n++];
-           if (checksum == 0x10) {
-              if (session->inbuffer[n++] != 0x10) break;
-           }
-           if (session->inbuffer[n++] != 0x10) break;
-           if (session->inbuffer[n++] != 0x03) break;
-           crc &= 0xff;
+	    n = 0;
+	    /*@ +charint */
+	    do {
+	       if (session->inbuffer[n++] != 0x10) break;
+	       if (session->inbuffer[n++] != 0x02) break;
+	       len = session->inbuffer[n++];
+	       if (len == 0x10) {
+		  if (session->inbuffer[n++] != 0x10) break;
+	       }
+	       len -= 2;
+	       crc = 0;
+	       for (; len > 0; len--) {
+		  crc += session->inbuffer[n];
+		  if (session->inbuffer[n++] == 0x10) {
+		     if (session->inbuffer[n++] != 0x10) break;
+		  }
+	       }
+	       if (len > 0) break;
+	       checksum = session->inbuffer[n++];
+	       if (checksum == 0x10) {
+		  if (session->inbuffer[n++] != 0x10) break;
+	       }
+	       if (session->inbuffer[n++] != 0x10) break;
+	       if (session->inbuffer[n++] != 0x03) break;
+	       crc &= 0xff;
 
-           if (crc != checksum) {
-              gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", crc, checksum);
-              break;
-           }
-           ok = true;
-        } while (0);
-	/*@ +charint */
+	       if (crc != checksum) {
+		  gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", crc, checksum);
+		  break;
+	       }
+	       ok = true;
+	    } while (0);
+	    /*@ +charint */
 
-        if (ok)
-        packet_accept(session, EVERMORE_PACKET);
+	    if (ok)
+	    packet_accept(session, EVERMORE_PACKET);
 	    else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
@@ -913,6 +911,15 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		packet_accept(session, ITALK_PACKET);
 	    } else
 		session->packet_state = GROUND_STATE;
+	    packet_discard(session);
+#endif /* ITALK_ENABLE */
+#ifdef RTCM_ENABLE
+	} else if (session->packet_state == RTCM_RECOGNIZED) {
+	    /*
+	     * RTCM packets don't have checksums.  The six bits of parity 
+	     * per word and the preamble better be good enough.
+	     */
+	    packet_accept(session, RTCM_PACKET);
 	    packet_discard(session);
 #endif /* ITALK_ENABLE */
 	}
