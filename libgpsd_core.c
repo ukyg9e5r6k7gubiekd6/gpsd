@@ -636,3 +636,16 @@ void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
     out->satellites = 0;
 }
 
+char *gpsd_hexdump(void *binbuf, size_t binbuflen)
+{
+    static char hexbuf[MAX_PACKET_LENGTH*2+1];
+    size_t i;
+    size_t len = (binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen;
+    char *ibuf = (char *)binbuf;
+    memset(hexbuf, 0, 3 * len + 1);
+
+    for (i = 0; i < len; i++) {
+	(void)sprintf(hexbuf + (3 * i), "%02x", (unsigned char)ibuf[i]);
+    }
+    return hexbuf;
+}

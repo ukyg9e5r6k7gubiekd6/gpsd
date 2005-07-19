@@ -20,21 +20,14 @@
 
 /*@ +charint -usedef -compdef @*/
 static bool proto_write(int fd, unsigned char *msg, size_t msglen) {
-   unsigned int       crc;
-   size_t    i;
-   unsigned char buf[MAX_PACKET_LENGTH*3+1], *cp;
    bool      ok;
 
    /* CONSTRUCT THE MESSAGE */
 
    /* we may need to dump the message */
-   buf[0] = '\0';
-   for (i = 0; i < msglen; i++)
-       (void)snprintf((char*)buf+strlen((char *)buf),sizeof((char*)buf)-strlen((char*)buf),
-		      " %02x", msg[i]);
-   len = (size_t)strlen((char *)buf);
-   gpsd_report(4, "writing proto control type %02x:%s\n", msg[0], buf);
-   ok = (write(fd, buf, len) == (ssize_t)len);
+   gpsd_report(4, "writing proto control type %02x:%s\n", 
+	       msg[0], gpsd_hexdump(msg, msglen));
+   ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
    return(ok);
 }
@@ -43,7 +36,6 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen) {
 /*@ +charint @*/
 gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned char buf2[MAX_PACKET_LENGTH*3+2], *cp, *tp;
     size_t i;
     int used, visible;
     double version;
@@ -52,28 +44,17 @@ gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t 
 	return 0;
 
     /* we may need to dump the raw packet */
-    buf2[0] = '\0';
-    for (i = 0; i < len; i++)
-	(void)snprintf((char*)buf2+strlen((char*)buf2), 
-		       sizeof(buf2)-strlen((char*)buf2),
-		       "%02x", (unsigned int)buf[i]);
-    strcat((char*)buf2, "\n");
     gpsd_report(5, "raw proto packet type 0x%02x length %d: %s\n", buf[0], len, buf2);
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "PROTO%d",(int)buf2[0]);
+		   "PROTO%d",(int)buf[0]);
 
-    switch (getub(buf2, 0))
+    switch (getub(buf, 0))
     {
 	/* DISPATCH ON FIRST BYTE OF PAYLOAD */
 
     default:
-	buf[0] = '\0';
-	for (i = 0; i < len; i++)
-	    (void)snprintf((char*)buf+strlen((char*)buf), 
-			   sizeof(buf)-strlen((char*)buf),
-			   "%02x", (unsigned int)buf2[i]);
-	gpsd_report(3, "unknown Proto packet id %d length %d: %s\n", buf2[0], len, buf);
+	gpsd_report(3, "unknown Proto packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
 }

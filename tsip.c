@@ -18,15 +18,9 @@
 
 static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
 {
-    int i;
     char buf2[BUFSIZ];
 
-    buf2[0] = '\0';
-    for (i = 0; i < len; i++)
-	(void)snprintf(buf2+strlen(buf2), 
-		       sizeof(buf2)-strlen(buf2), 
-		       "%02x", (unsigned)buf[i]);
-    gpsd_report(5, "Sent TSIP packet id 0x%02x: %s\n",id,buf2);
+    gpsd_report(5, "Sent TSIP packet id 0x%02x: %s\n",id,gpsd_hexdump(buf,len));
 
     /*@ +charint @*/
     buf2[0] = '\x10';

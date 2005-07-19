@@ -147,15 +147,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     if (len == 0)
 	return 0;
 
-    buf2[0] = '\0';
-    for (i = 0; i < (int)len; i++)
-	(void)snprintf(buf2+strlen(buf2), 
-		       sizeof(buf2)-strlen(buf2),
-		       "%02x", (unsigned int)buf[i]);
-    strcat(buf2, "\n");
     buf += 4;
     len -= 8;
-    gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,buf2);
+    gpsd_report(5, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,
+		gpsd_hexdump(buf, len));
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
 
@@ -669,12 +664,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     default:
-	buf2[0] = '\0';
-	for (i = 0; i < (int)len; i++)
-	    (void)snprintf(buf2+strlen(buf2), 
-			   sizeof(buf2)-strlen(buf2),
-			   "%02x", (unsigned int)buf[i]);
-	gpsd_report(3, "Unknown SiRF packet id %d length %d: %s\n", buf[0], len, buf2);
+	gpsd_report(3, "Unknown SiRF packet id %d length %d: %s\n", 
+		    buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
 
