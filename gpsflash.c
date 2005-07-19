@@ -134,11 +134,16 @@ binary_send(int pfd, char *data, size_t ls){
 	unsigned char *msg;
 	size_t nbr, nbs, nbx;
 	ssize_t r;
+	static int count;
+	double start = timestamp();
 
 	/*@ -compdef @*/
 	if((msg = malloc(ls+10)) == NULL){
 		return -1; /* oops. bail out */
 	}
+
+	fprintf(stderr, "gpsflash: transferring binary... \010");
+	count = 0;
 
 	nbr = ls+10; nbs = WRBLK ; nbx = 0;
 	while(nbr){
@@ -161,8 +166,13 @@ r0:		if((r = write(pfd, msg+nbx, nbs)) == -1){
 		}
 		nbr -= r;
 		nbx += r;
+
+		(void)fputc("-/|\\"[count % 4], stderr);
+		(void)fputc('\010', stderr);
 	}
 	/*@ +compdef @*/
+
+	(void)fprintf(stderr, "...done (%2.2f sec).\n", timestamp()-start);
 
 	(void)free(msg);
 	return 0;
@@ -298,6 +308,8 @@ main(int argc, char **argv){
 		return 1;
 	}
 
+	gpsd_report(1, "passed sanity checks...\n");
+
 	/* malloc a loader buffer */
 	if ((loader = malloc(ls)) == NULL) {
 		gpsd_report(0, "malloc(%d)\n", ls);
@@ -312,6 +324,8 @@ main(int argc, char **argv){
 
 	/* don't care if close fails - kernel will force close on exit() */
 	(void)close(lfd);
+
+	gpsd_report(1, "loader read in...\n");
 
 	/* Open the firmware image file */
 	if((ffd = open(fname, O_RDONLY, 0444)) == -1) {
@@ -352,6 +366,8 @@ main(int argc, char **argv){
 	/* don't care if close fails - kernel will force close on exit() */
 	(void)close(ffd);
 
+	gpsd_report(1, "firmware read in...\n");
+
 	/* did we just read some S-records? */
 	if (!((firmware[0] == 'S') && ((firmware[1] >= '0') && (firmware[1] <= '9')))){ /* srec? */
 		(void)free(loader);
@@ -384,6 +400,8 @@ main(int argc, char **argv){
 		return 1;
 	}
 
+	gpsd_report(1, "port set up, blocking signals now...\n");
+
 	/* once we get here, we are uninterruptable. handle signals */
 	(void)sigemptyset(&sigset);
 	(void)sigaddset(&sigset, SIGINT);
@@ -408,6 +426,8 @@ main(int argc, char **argv){
 		return 1;
 	}
 
+	gpsd_report(1, "sending loader...\n");
+
 	/* send the bootstrap/flash programmer */
 	if(gpstype->loader_send(pfd, &term, loader, ls) == -1) {
 		(void)free(loader);
@@ -417,12 +437,16 @@ main(int argc, char **argv){
 	}
 	(void)free(loader);
 
+	gpsd_report(1, "initializing firmware load...\n");
+
 	/* send any command needed to demarcate the two loads */
 	if(gpstype->stage2_command!=NULL && (gpstype->stage2_command(pfd) == -1)) {
 	    (void)free(firmware);
 	    gpsd_report(0, "Stage 2 update command\n");
 	    return 1;
 	}
+
+	gpsd_report(1, "performing firmware load...\n");
 
 	/* and now, poke the actual firmware over */
 	if(gpstype->firmware_send(pfd, firmware, fs) == -1) {
@@ -432,11 +456,15 @@ main(int argc, char **argv){
 	}
 	(void)free(firmware);
 
+	gpsd_report(1, "finishing firmware load...\n");
+
 	/* send any command needed to finish the firmware load */
 	if(gpstype->stage3_command!=NULL && (gpstype->stage3_command(pfd) == -1)) {
 	    gpsd_report(0, "Stage 3 update command\n");
 	    return 1;
 	}
+
+	gpsd_report(1, "unblocking signals...\n");
 
 	if(sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1) {
 		gpsd_report(0,"sigprocmask\n");
@@ -448,6 +476,8 @@ main(int argc, char **argv){
 		gpsd_report(0, "port_wrapup()\n");
 		return 1;
 	}
+
+	gpsd_report(1, "finished.\n");
 
 	/* return() from main(), to take advantage of SSP compilers */
 	return 0;

@@ -72,8 +72,7 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
 gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned char buf2[MAX_PACKET_LENGTH], *cp, *tp;
-    size_t i;
-    unsigned char datalen;
+    size_t i, datalen;
     unsigned int used, visible, satcnt;
     double version;
 
@@ -84,7 +83,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     cp = buf + 2;
     tp = buf2;
     if (*cp == 0x10) cp++;
-    datalen = (unsigned char)*cp++;
+    datalen = (size_t)*cp++;
    
     gpsd_report(7, "raw EverMore packet type 0x%02x length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
 
@@ -95,8 +94,10 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	if (*tp == 0x10) cp++;
 	tp++;
     }
-    
+
+    /*@ -usedef -compdef @*/
     gpsd_report(5, "EverMore packet type 0x%02x length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
+    /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "EID%d",(int)buf2[0]);
@@ -105,7 +106,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     {
     case 0x02:	/* Navigation Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
+	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	ecef_to_wgs84fix(&session->gpsdata, 
 			 getsl(buf2, 8)*1.0, getsl(buf2, 12)*1.0, getsl(buf2, 16)*1.0,
 			 getsw(buf2, 20)/10.0, getsw(buf2, 22)/10.0, getsw(buf2, 24)/10.0);
@@ -129,7 +130,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
+	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->gpsdata.gdop = (double)getub(buf2, 8)*0.1;
 	session->gpsdata.pdop = (double)getub(buf2, 9)*0.1;
 	session->gpsdata.hdop = (double)getub(buf2, 10)*0.1;
@@ -162,7 +163,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x06:	/* Channel Status Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
+	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->gpsdata.satellites = (int)getub(buf2, 8);
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
@@ -198,7 +199,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    satcnt++;
 		
 	}
-	session->gpsdata.satellites = satcnt;
+	session->gpsdata.satellites = (int)satcnt;
 	/* that's all the information in this packet */
 	gpsd_report(4, "CSO 0x04: %d satellites used\n", 
 		    session->gpsdata.satellites_used);
@@ -206,7 +207,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x08:	/* Measurement Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
+	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->context->leap_seconds = (int)getuw(buf2, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
 	visible = getub(buf2, 10);
@@ -292,7 +293,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     default: return false;
     }
     msg[17] = tmp8;
-    session->gpsdata.baudrate = speed;
+    session->gpsdata.baudrate = (unsigned int)speed;
     if (mode) {
         gpsd_report(1, "Switching chip mode to EverMore binary.\n");
 	msg[16] |= 0x80;  /* binary mode */

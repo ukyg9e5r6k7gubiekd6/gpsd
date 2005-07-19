@@ -5,22 +5,22 @@
 #include <string.h>
 #include "bits.h"
 
+/*@ -duplicatequals -formattype */
 typedef unsigned long long ubig;
 
-unsigned char buf[80];
-union int_float i_f;
-union long_double l_d;
-char sb1,sb2;
-unsigned char ub1,ub2;
-short sw1,sw2;
-unsigned short uw1,uw2;
-int sl1,sl2;
-unsigned int ul1,ul2;
-long long sL1,sL2;
-unsigned long long uL1,uL2;
-float f1;
-double d1;
-
+static unsigned char buf[80];
+static union int_float i_f;
+static union long_double l_d;
+static char sb1,sb2;
+static unsigned char ub1,ub2;
+static short sw1,sw2;
+static unsigned short uw1,uw2;
+static int sl1,sl2;
+static unsigned int ul1,ul2;
+static long long sL1,sL2;
+static unsigned long long uL1,uL2;
+static float f1;
+static double d1;
 
 static void dumpall(void)
 {

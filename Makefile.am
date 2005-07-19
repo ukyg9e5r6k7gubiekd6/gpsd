@@ -92,7 +92,6 @@ libgps_c_sources = \
 	sirf.c \
 	report.c \
 	rtcm.c \
-	rtcm.h \
 	srecord.c \
 	bits.h \
 	timebase.h

@@ -4,9 +4,49 @@
  * If we ever compose our own S-records, dlgsp2.bin looks for this header
  * unsigned char hdr[] = "S00600004844521B\r\n";
  *
+ * Here's what Carl Carter at SiRF told us when he sent us informattion
+ * on how to build one of these:
+ *
+ * --------------------------------------------------------------------------
+ * Regarding programming the flash, I will attach 2 things for you -- a
+ * program called SiRFProg, the source for an older flash programming
+ * utility, and a description of the ROM operation.  Note that while the
+ * ROM description document is for SiRFstarIII, the interface applies to
+ * SiRFstarII systems like you are using.  Here is a little guide to how
+ * things work:
+ * 
+ * 1.  The receiver is put into "internal boot" mode -- this means that it
+ * is running off the code contained in the internal ROM rather than the
+ * external flash.  You do this by either putting a pull-up resistor on
+ * data line 0 and cycling power or by giving a message ID 148.
+ * 2.  The internal ROM provides a very primitive boot loader that permits
+ * you to load a program into RAM and then switch to it.
+ * 3.  The program in RAM is used to handle the erasing and programming
+ * chores, so theoretically you could create any program of your own
+ * choosing to handle things.  SiRFProg gives you an example of how to do
+ * it using Motorola S record files as the programming source.  The program
+ * that resides on the programming host handles sending down the RAM
+ * program, then communicating with it to transfer the data to program.
+ * 4.  Once the programming is complete, you transfer to it by switching to
+ * "external boot" mode -- generally this requires a pull-down resistor on
+ * data line 0 and either a power cycle or toggling the reset line low then
+ * back high.  There is no command that does this.
+ * 
+ * Our standard utility operates much faster than SiRFProg by using a
+ * couple tricks.  One, it transfers a binary image rather than S records
+ * (which are ASCII and about 3x the size of the image).  Two, it
+ * compresses the binary image using some standard compression algorithm.
+ * Three, when transferring the file we boost the port baud rate.  Normally
+ * we use 115200 baud as that is all the drivers in most receivers handle.
+ * But when supported, we can boost up to 900 kbaud.  Programming at 38400
+ * takes a couple minutes.  At 115200 it takes usually under 30 seconds.
+ * At 900 k it takes about 6 seconds.
+ * --------------------------------------------------------------------------
+ *
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  */
 
+#include "gpsd.h"
 #include "gpsflash.h"
 
 /* From the SiRF protocol manual... may as well be consistent */
@@ -181,12 +221,14 @@ static int sirfPortSetup(int fd, struct termios *term)
 static int wait2seconds(int fd)
 {
     /* again we wait, this time for our uploaded code to start running */
+    gpsd_report(1, "waiting 2 seconds...\n");
     return (int)sleep(2);
 }
 
 static int wait5seconds(int fd)
 {
     /* wait for firmware upload to settle in */
+    gpsd_report(1, "waiting 5 seconds...\n");
     return (int)sleep(5);
 }
 

@@ -16,7 +16,7 @@
 
 #ifdef TSIP_ENABLE
 
-static int tsip_write(int fd, unsigned int id, unsigned char *buf, int len)
+static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 {
     char buf2[BUFSIZ];
 
@@ -82,8 +82,10 @@ static void tsip_initializer(struct gps_device_t *session)
 static void tsip_wrapup(struct gps_device_t *session)
 {
     /* restore saved parity and stopbits when leaving TSIP mode */
-    gpsd_set_speed(session, session->gpsdata.baudrate,
-			session->tsip.parity, session->tsip.stopbits);
+    gpsd_set_speed(session, 
+		   session->gpsdata.baudrate,
+		   (unsigned char)session->tsip.parity, 
+		   session->tsip.stopbits);
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
