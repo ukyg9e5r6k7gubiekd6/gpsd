@@ -30,33 +30,11 @@
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
-/*  
- * From the RCTM104 standard:
- *
- * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
- * transmission rate provides a convenient timing capability where the
- * times of word boundaries are a rational multiple of 0.6 seconds."
- *
- * "Each frame is N+2 words long, where N is the number of message data
- * words. For example, a filler message (type 6 or 34) with no message
- * data will have N=0, and will consist only of two header words. The
- * maximum number of data words allowed by the format is 31, so that
- * the longest possible message will have a total of 33 words."
- */
-#define RTCM_WORDS_MAX	33
-#define MAXCORRECTIONS	15	/* max correction count in type 1 or 9 */
-#define MAXHEALTH	1	
-#define MAXSTATIONS	3	/* maximum stations in almanac, type 5 */
-
 enum rtcmstat_t {
     RTCM_NO_SYNC, RTCM_SYNC, RTCM_STRUCTURE,
 };
 
 #define RTCM_ERRLEVEL_BASE	5
-
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(RTCMWORD))
-
-typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
@@ -215,67 +193,7 @@ struct gps_device_t {
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
 #ifdef RTCM104_ENABLE
-	struct {
-	    /* header contents */
-	    unsigned type;	/* RTCM message type */
-	    unsigned length;	/* length (words) */
-	    double   zcount;	/* time within hour: GPS time, no leap secs */
-	    unsigned refstaid;	/* reference station ID */
-	    unsigned seqnum;	/* nessage sequence number (modulo 8) */
-	    unsigned stathlth;	/* station health */
-
-	    /* message data in decoded form */
-	    union {
-		struct {
-		    unsigned int nentries;
-		    struct rangesat_t {		/* data from messages 1 & 9 */
-			unsigned ident;		/* satellite ID */
-			unsigned udre;		/* user diff. range error */
-			unsigned issuedata;	/* issue of data */
-			double rangerr;		/* range error */
-			double rangerate;	/* range error rate */
-		    } sat[MAXCORRECTIONS];
-		} ranges;
-		struct {		/* data for type 3 messages */
-		    bool valid;		/* is message well-formed? */
-		    double x, y, z;
-		} ecef;
-		struct {		/* data from type 4 messages */
-		    bool valid;		/* is message well-formed? */
-		    enum {gps, glonass, unknown} system;
-		    enum {local, global, invalid} sense;
-		    char datum[6];
-		    double dx, dy, dz;
-		} reference;
-		struct {		/* data from type 5 messages */
-		    unsigned int nentries;
-		    struct consat_t {
-			unsigned ident;		/* satellite ID */
-			bool iodl;		/* issue of data */
-			bool health;		/* is satellite healthy? */
-			unsigned int snr;	/* signal-to-noise ratio, dB */
-			bool health_en;		/* health enabled */
-			bool new_data;		/* new data? */
-			bool los_warning;	/* line-of-sight warning */
-			unsigned int tou;	/* time to unhealth, seconds */
-		    } sat[MAXHEALTH];
-		} conhealth;
-		struct {		/* data from type 7 messages */
-		    unsigned int nentries;
-		    struct station_t {
-			double latitude, longitude;	/* location */
-			unsigned int range;		/* range in km */
-			double frequency;		/* broadcast freq */
-			unsigned int health;		/* station health */
-			unsigned int station_id;
-			unsigned int bitrate;
-		    } station[MAXSTATIONS];
-		} almanac;
-		/* data from type 16 messages */
-		char message[RTCM_WORDS_MAX * sizeof(u_int32_t)];
-	    };
-
-	    /* this is the decoding context */
+	struct { 
 	    bool            locked;
 	    int             curr_offset;
 	    RTCMWORD        curr_word;

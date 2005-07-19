@@ -66,6 +66,89 @@ struct gps_fix_t {
     double epc;		/* Vertical speed uncertainty */
 };
 
+/*  
+ * From the RCTM104 standard:
+ *
+ * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
+ * transmission rate provides a convenient timing capability where the
+ * times of word boundaries are a rational multiple of 0.6 seconds."
+ *
+ * "Each frame is N+2 words long, where N is the number of message data
+ * words. For example, a filler message (type 6 or 34) with no message
+ * data will have N=0, and will consist only of two header words. The
+ * maximum number of data words allowed by the format is 31, so that
+ * the longest possible message will have a total of 33 words."
+ */
+#define RTCM_WORDS_MAX	33
+#define MAXCORRECTIONS	15	/* max correction count in type 1 or 9 */
+#define MAXHEALTH	1	
+#define MAXSTATIONS	3	/* maximum stations in almanac, type 5 */
+
+typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
+
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(RTCMWORD))
+
+struct rtcm_t {
+    /* header contents */
+    unsigned type;	/* RTCM message type */
+    unsigned length;	/* length (words) */
+    double   zcount;	/* time within hour: GPS time, no leap secs */
+    unsigned refstaid;	/* reference station ID */
+    unsigned seqnum;	/* nessage sequence number (modulo 8) */
+    unsigned stathlth;	/* station health */
+
+    /* message data in decoded form */
+    union {
+	struct {
+	    unsigned int nentries;
+	    struct rangesat_t {		/* data from messages 1 & 9 */
+		unsigned ident;		/* satellite ID */
+		unsigned udre;		/* user diff. range error */
+		unsigned issuedata;	/* issue of data */
+		double rangerr;		/* range error */
+		double rangerate;	/* range error rate */
+	    } sat[MAXCORRECTIONS];
+	} ranges;
+	struct {		/* data for type 3 messages */
+	    bool valid;		/* is message well-formed? */
+	    double x, y, z;
+	} ecef;
+	struct {		/* data from type 4 messages */
+	    bool valid;		/* is message well-formed? */
+	    enum {gps, glonass, unknown} system;
+	    enum {local, global, invalid} sense;
+	    char datum[6];
+	    double dx, dy, dz;
+	} reference;
+	struct {		/* data from type 5 messages */
+	    unsigned int nentries;
+	    struct consat_t {
+		unsigned ident;		/* satellite ID */
+		bool iodl;		/* issue of data */
+		bool health;		/* is satellite healthy? */
+		unsigned int snr;	/* signal-to-noise ratio, dB */
+		bool health_en;		/* health enabled */
+		bool new_data;		/* new data? */
+		bool los_warning;	/* line-of-sight warning */
+		unsigned int tou;	/* time to unhealth, seconds */
+	    } sat[MAXHEALTH];
+	} conhealth;
+	struct {		/* data from type 7 messages */
+	    unsigned int nentries;
+	    struct station_t {
+		double latitude, longitude;	/* location */
+		unsigned int range;		/* range in km */
+		double frequency;		/* broadcast freq */
+		unsigned int health;		/* station health */
+		unsigned int station_id;	/* of the transmitter */
+		unsigned int bitrate;		/* of station transmissions */
+	    } station[MAXSTATIONS];
+	} almanac;
+	/* data from type 16 messages */
+	char message[RTCM_MAX];
+    };
+};
+
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
 
 struct gps_data_t {
@@ -100,6 +183,7 @@ struct gps_data_t {
 #define ERROR_SET	0x04000000u
 #define CYCLE_START_SET	0x08000000u
 #define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
+#define RTCM_SET	0x10000000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
@@ -141,6 +225,9 @@ struct gps_data_t {
     char	*gps_id;	/* only valid if non-null. */
     unsigned int baudrate, parity, stopbits;	/* RS232 link parameters */
     unsigned int driver_mode;	/* whether driver is in native mode or not */
+
+    /* RTCM-104 data */
+    struct rtcm_t	rtcm;
     
     /* device list */
     int ndevices;		/* count of available devices */
