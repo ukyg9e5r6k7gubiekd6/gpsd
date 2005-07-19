@@ -416,13 +416,22 @@ static void rtcm104_initializer(struct gps_device_t *session)
     rtcm_init(session);
 }
 
+static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
+{
+    gpsd_report(5, "RTCM packet type 0x%02x length %d words: %s\n", 
+		session->gpsdata.rtcm.type,
+		session->gpsdata.rtcm.length+2,
+		gpsd_hexdump(session->rtcm.buf, (session->gpsdata.rtcm.length+2)*sizeof(rtcmword_t)));
+    return RTCM_SET;
+}
+
 static struct gps_type_t rtcm104 = {
     .typename      = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .probe         = NULL,		/* no probe */
     .initializer   = rtcm104_initializer,	/* initialize packet engine */
     .get_packet    = packet_get,	/* how to get a packet */
-    .parse_packet  = NULL,		/* packet getter does the parsing */
+    .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */

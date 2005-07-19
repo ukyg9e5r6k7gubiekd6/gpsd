@@ -84,9 +84,9 @@ struct gps_fix_t {
 #define MAXHEALTH	1	
 #define MAXSTATIONS	3	/* maximum stations in almanac, type 5 */
 
-typedef /*@unsignedintegraltype@*/ unsigned int RTCMWORD;
+typedef /*@unsignedintegraltype@*/ unsigned int rtcmword_t;
 
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(RTCMWORD))
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(rtcmword_t))
 
 struct rtcm_t {
     /* header contents */

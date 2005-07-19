@@ -115,7 +115,7 @@ static unsigned int reverse_bits[] = {
 };
 /*@ -charint @*/
 
-static unsigned int rtcmparity(RTCMWORD th)
+static unsigned int rtcmparity(rtcmword_t th)
 {
 #define P_30_MASK	0x40000000u
 
@@ -125,7 +125,7 @@ static unsigned int rtcmparity(RTCMWORD th)
 #define	PARITY_28	0x5763e680u
 #define	PARITY_29	0x6bb1f340u
 #define	PARITY_30	0x8b7a89c0u
-    RTCMWORD        t;
+    rtcmword_t        t;
     unsigned int    p;
 
     /*
@@ -181,7 +181,7 @@ static unsigned int rtcmparity(RTCMWORD th)
  *
  *  gcc 4.0 does not manifest these bugs.
  */
-static bool rtcmparityok(RTCMWORD w)
+static bool rtcmparityok(rtcmword_t w)
 {
     return (rtcmparity(w) == (w & 0x3f));
 }
@@ -569,7 +569,7 @@ static void unpack(struct gps_device_t *session)
 		    n++;
 		}
 		len -= 5;
-		m = (struct rtcm_msg1 *) (((RTCMWORD *) m) + 5);
+		m = (struct rtcm_msg1 *) (((rtcmword_t *) m) + 5);
 	    }
 	    tp->ranges.nentries = n;
 	}
@@ -634,7 +634,7 @@ static void unpack(struct gps_device_t *session)
 		csp->tou = m->w3.time_unhealthy*TU_SCALE;
 		len--;
 		n++;
-		m = (struct rtcm_msg5 *) (((RTCMWORD *) m) + 1);
+		m = (struct rtcm_msg5 *) (((rtcmword_t *) m) + 1);
 	    }
 	    tp->conhealth.nentries = n;
 	}
@@ -654,7 +654,7 @@ static void unpack(struct gps_device_t *session)
 		tp->almanac.station[n].bitrate = tx_speed[m->w5.bit_rate];
 		len -= 3;
 		n++;
-		m = (struct rtcm_msg7 *) (((RTCMWORD *) m) + 3);
+		m = (struct rtcm_msg7 *) (((rtcmword_t *) m) + 3);
 	    }
 	    tp->almanac.nentries = n;
 	}
@@ -678,7 +678,7 @@ static void unpack(struct gps_device_t *session)
 		}
 		tp->message[n++] = (char)(m->w3.byte3);
 		len--;
-		m = (struct rtcm_msg16 *) (((RTCMWORD *) m) + 1);
+		m = (struct rtcm_msg16 *) (((rtcmword_t *) m) + 1);
 	    }
 	    /*@ +boolops @*/
 	    tp->message[n++] = '\0';
@@ -912,10 +912,10 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 }
 
 #ifdef __UNUSED__
-void rtcm_output_mag(RTCMWORD * ip)
+void rtcm_output_mag(rtcmword_t * ip)
 /* ship an RTCM message to standard output in Magnavox format */
 {
-    static RTCMWORD w = 0;
+    static rtcmword_t w = 0;
     int             len;
     static uint     sqnum = 0;
 

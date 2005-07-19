@@ -196,8 +196,8 @@ struct gps_device_t {
 	struct { 
 	    bool            locked;
 	    int             curr_offset;
-	    RTCMWORD        curr_word;
-	    RTCMWORD        buf[RTCM_WORDS_MAX];
+	    rtcmword_t      curr_word;
+	    rtcmword_t      buf[RTCM_WORDS_MAX];
 	    unsigned int    bufindex;
 	} rtcm;
 #endif /* RTCM104_ENABLE */
