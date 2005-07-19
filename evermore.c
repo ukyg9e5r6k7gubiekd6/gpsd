@@ -60,7 +60,7 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
    len = (size_t)(cp - stuffed);
 
    /* we may need to dump the message */
-   gpsd_report(4, "writing EverMore control type %02x:%s\n", msg[0], 
+   gpsd_report(4, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	       gpsd_hexdump(stuffed, len));
    ok = (write(fd, stuffed, len) == (ssize_t)len);
    (void)tcdrain(fd);
@@ -86,9 +86,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     if (*cp == 0x10) cp++;
     datalen = (unsigned char)*cp++;
    
-    /* DEBUG
-    gpsd_report(5, "raw EverMore packet type 0x%02x length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
-    */
+    gpsd_report(7, "raw EverMore packet type 0x%02x length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
 
     datalen -= 2;
 
@@ -208,12 +206,13 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x08:	/* Measurement Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
-	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix(getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->context->leap_seconds = (int)getuw(buf2, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
-	gpsd_report(4, "MDO 0x04: visible=%d\n", visible);
+	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
+	gpsd_report(4, "MDO 0x04:\n");
 	return TIME_SET;
 
     default:
