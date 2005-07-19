@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  */
+#include <stdarg.h>
 #include "gpsd.h"
 #include "gpsflash.h"
 
@@ -10,6 +11,20 @@
 #define WRBLK 128
 
 static char *progname;
+
+void gpsd_report(int errlevel, const char *fmt, ... )
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+	char buf[BUFSIZ];
+	va_list ap;
+
+	strcpy(buf, progname);
+	strcat(buf, ": ");
+	va_start(ap, fmt) ;
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+	va_end(ap);
+	(void)fputs(buf, stdout);
+}
 
 static void
 usage(void){
@@ -169,6 +184,7 @@ r0:		if((r = write(pfd, msg+nbx, nbs)) == -1){
 
 		(void)fputc("-/|\\"[count % 4], stderr);
 		(void)fputc('\010', stderr);
+		(void)fflush(stdout);
 	}
 	/*@ +compdef @*/
 
@@ -184,9 +200,14 @@ srecord_send(int pfd, char *data, size_t len){
 	int r, i;
 	size_t tl;
 	char sendbuf[85], recvbuf[8];
+	static int count;
+	double start = timestamp();
 
 	/* srecord loading is interactive. send line, get reply */
 	/* when sending S-records, check for SA/S5 or SE */
+
+	fprintf(stderr, "gpsflash: transferring S-records... \010");
+	count = 0;
 
 	memset(recvbuf, 0, 8);
 	i = 0;
@@ -225,7 +246,13 @@ srecord_send(int pfd, char *data, size_t len){
 			if (!((recvbuf[0] == 'S') && ((recvbuf[1] == 'A') || (recvbuf[1] == '5'))))
 				return -1; /* oops. bail out */
 		}
+
+		(void)fputc("-/|\\"[count % 4], stderr);
+		(void)fputc('\010', stderr);
+		(void)fflush(stdout);
 	}
+
+	(void)fprintf(stderr, "...done (%2.2f sec).\n", timestamp()-start);
 	return 0;
 }
 

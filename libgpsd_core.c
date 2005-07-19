@@ -470,10 +470,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	packet_length = session->device_type->get_packet(session);
     else {
 	packet_length = packet_get(session);
+	gpsd_report(3, 
+		    "packet sniff finds type %d\n", 
+		    session->packet_type);
 	if (session->packet_type != BAD_PACKET) {
-	    gpsd_report(3, 
-			"packet sniff finds type %d\n", 
-			session->packet_type);
 	    switch (session->packet_type) {
 #ifdef SIRFII_ENABLE
 	    case SIRF_PACKET:

@@ -48,7 +48,7 @@ don't ask us for copies.</para>
 firmware image is compatible with your GPS.  EXPERIMENT AT YOUR OWN
 RISK.</para>
 
-<para>This loader will only work with firmware images in S-record
+<para>This program will only work with firmware images in S-record
 format, which is the form SiRF normally distributes them in.  If you
 get a binary firmware image from somewhere, you can use
 <citerefentry><refentrytitle>objdump</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
@@ -59,6 +59,8 @@ could very well break your receiver permanently, and if it does, it's
 no one's fault but your own. For this program to operate, you must set
 an environment variable called I_READ_THE_WARNING with the value "why
 oh why didn't i take the blue pill".</para>
+
+<para>This program emits progress messages to standard output.</para>
 
 <para>The GPS will be reset to 4800bps NMEA after flash.</para>
 

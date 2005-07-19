@@ -124,7 +124,7 @@ enum {
    EVERMORE_LEADER_1,	/* a DLE after having seen EverMore data */
    EVERMORE_LEADER_2,	/* seen opening STX of EverMore packet */
    EVERMORE_PAYLOAD,	/* in payload part of EverMore packet */
-   EVERMORE_PAYLOAD_DLE,	/* DLE in payload part of EverMore packet */
+   EVERMORE_PAYLOAD_DLE,/* DLE in payload part of EverMore packet */
    EVERMORE_RECOGNIZED,	/* found end of EverMore packet */
 #endif /* EVERMORE_ENABLE */
 
@@ -592,8 +592,10 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 /*@ -charint */
 }
 
+#define STATE_DEBUG
+
 #ifdef STATE_DEBUG
-static char *buffer_dump(unsigned char *base, unsigned char *end)
+static unsigned char *buffer_dump(unsigned char *base, unsigned char *end)
 /* dump the state of a specified buffer */
 {
     static unsigned char buf[BUFSIZ];
@@ -608,11 +610,11 @@ static char *buffer_dump(unsigned char *base, unsigned char *end)
 	}
 	*/
 
-	    (void)snprintf(tp, sizeof(buf)-(tp-buf), " %02X", *cp);
-	    tp += 3;
+	(void)snprintf((char *)tp, sizeof(buf)-(tp-buf), " %02X", *cp);
+	tp += 3;
     }
 
-    *tp = '\0';
+    *tp = 0;
     return buf;
 }
 #endif /* STATE_DEBUG */
