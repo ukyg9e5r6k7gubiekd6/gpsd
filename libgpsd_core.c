@@ -466,10 +466,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_xmit_time = timestamp();
 
     /* can we get a full packet from the device? */
-    if (session->device_type)
+    if (session->device_type) {
 	packet_length = session->device_type->get_packet(session);
-    else {
+	session->gpsdata.d_xmit_time = timestamp();
+    } else {
 	packet_length = packet_get(session);
+	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(3, 
 		    "packet sniff finds type %d\n", 
 		    session->packet_type);
@@ -510,8 +512,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "RTCM104");
 		break;
 #endif /* RTCM104_ENABLE */
-	}
-	    session->gpsdata.d_xmit_time = timestamp();
+	    }
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;
     }
