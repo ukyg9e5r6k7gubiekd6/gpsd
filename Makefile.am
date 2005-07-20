@@ -280,4 +280,4 @@ packet-makeregress: packet_test
 	packet_test >test/packet.test.chk
 
 testregress: gps-regress rtcm-regress packet-regress
-	@echo "Rgressions complete."
+	@echo "Regressions complete."

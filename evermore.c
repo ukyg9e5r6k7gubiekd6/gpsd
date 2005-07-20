@@ -206,11 +206,12 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	return TIME_SET | SATELLITE_SET | USED_SET;
 
     case 0x08:	/* Measurement Data Output */
+	// clock offset is a manufacturer diagnostic
+	// (int)getuw(buf2, 8);  /* clock offset, 29000..29850 ?? */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
-	session->context->leap_seconds = (int)getuw(buf2, 8);
-	session->context->valid |= LEAP_SECOND_VALID;
 	visible = getub(buf2, 10);
+	gpsd_report(5, "TIME: %04x %d %d\n", getuw(buf2, 8), getuw(buf2, 8), session->context->leap_seconds); /* debug */
 	/* FIXME: read full statellite status for each channel */
 	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(4, "MDO 0x04:\n");

@@ -643,7 +643,7 @@ char /*@ observer @*/ *gpsd_hexdump(void *binbuf, size_t binbuflen)
     size_t i;
     size_t len = (size_t)((binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
     char *ibuf = (char *)binbuf;
-    memset(hexbuf, 0, 3 * len + 1);
+    memset(hexbuf, 0, sizeof(hexbuf));
 
     for (i = 0; i < len; i++) {
 	(void)snprintf(hexbuf + (2 * i), 3, "%02x", (unsigned int)(ibuf[i]&0xff));
