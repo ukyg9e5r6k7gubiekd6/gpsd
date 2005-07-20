@@ -31,6 +31,23 @@ Commission for Maritime Services</ulink> under "Publications".</para>
 </refsect1>
 <refsect1 id='wire-format'><title>RTCM WIRE FORMAT</title>
 
+<para>Differential-GPS correction stations consist of a GPS reference
+receiver coupled to a low frequency (LF) transmitter.  The GPS
+reference receiver is a survey-grade GPS that does GPS carrier
+tracking and can work out its own position to a few millimeters.  It
+generates range and range-rate corrections and encodes them into
+RTCM104. It ships the RTCM104 to the LF transmitter over serial rs-232
+signal at 100 baud or 200 baud depending on the requirements of the
+transmitter.</para>
+
+<para>The LF transmitter broadcasts the the approximately 300khz radio
+signal that differential-GPS radio receivers pick up.  Transmitters
+that are meant to have a higher range will need to transmit at the
+slower rate.  The higher the data rate the harder it will be for the
+remote radio receiver to receive with a good signal-to-noise ration.
+(Higher data rate signals can't be averaged over as long a time frame,
+hence they appear noisier.)</para>
+
 <para>An RTCM message consists of a sequence of 30-bit words. The 24
 most significant bits are data and the six least significant bits are
 parity. The parity algorithm used is the same as that used on GPS
@@ -125,10 +142,12 @@ message transmitted.</para>
 <para>&lt;message length&gt; is the number of words after the header that
 comprise the message.</para>
 
-<para>&lt;station health&gt; indicates the health of the beacon as a reference
-source. 6 means the transmission is unmonitored. 7 means the
-station is not working properly. Other values are defined by the
-beacon operator.</para>
+<para>&lt;station health&gt; indicates the health of the beacon as a
+reference source.  Any nonzero value means the satellite is probably
+transmitting bad data and should not be used in a fix. 6 means the
+transmission is unmonitored. 7 means the station is not working
+properly. Other values are defined by the beacon operator.
+</para>
 
 <para>If the message contains a parity error after the header but before
 the end of the message, then the extra fields [T &lt;useful length&gt;]
@@ -174,8 +193,11 @@ values:</para>
 3	1-sigma error	&gt;  8m
 </literallayout>
 
-<para>&lt;iod&gt; is Issue Of Data, matching the IOD for the current ephemeris
-of this satellite, as transmitted by the satellite.</para>
+<para>&lt;iod&gt; is Issue Of Data, matching the IOD for the current
+ephemeris of this satellite, as transmitted by the satellite.  The IOD
+is a unique tag that identifies the ephemeris; the GPS using the DGPS
+correction and the DGPS generating the data must use the same orbital
+positions for the satellite.</para>
 
 <para>&lt;modified z_count&gt; is just a copy of the same field from
 the header.</para>
@@ -308,8 +330,25 @@ is an almanac.  North and East are positive.</para>
 
 <para>&lt;frequency&gt; is the broadcast frequency in kHz.</para>
 
-<para>&lt;health&gt; has the same meaning as in the header, but it indicates
-the health of the station for which this is an almanac.</para>
+<para>&lt;health&gt; is the health of the station for which this is an
+almanac. If it is non-zero, the station is issuing suspect data and
+should not be used for fixes.  The ITU and RTCM104 standards differ
+about the mode detailed interpretation of
+the &lt;health&gt; field and even about its bit width.
+<!--
+From itu p.9 just under the type7 msg figure:
+ 
+    *** Radiobeacon health:
+                  00     (0) Radiobeacon operation normal
+                  01     (1) No integrity monitor operating
+                  10     (2) No information available
+                  11     (3) Do not use this radiobeacon
+RTCM104, in the other hand, makes it 3 bits wide.
+
+The Sager documentation said health has the same meaning as in the header.
+but this cannot be true unless the field is 3 bits wide.
+-->
+</para>
 
 <para>&lt;station id&gt; is the id of the transmitter. This is not the same
 as the reference id in the header, the latter being the id of

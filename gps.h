@@ -12,6 +12,7 @@ extern "C" {
 #include <sys/time.h>
 #include <limits.h>
 #include <time.h>
+#include <signal.h>
 
 #define MAXTAGLEN	6	/* maximum length of sentence tag name */
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */

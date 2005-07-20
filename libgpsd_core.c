@@ -651,10 +651,12 @@ char /*@ observer @*/ *gpsd_hexdump(void *binbuf, size_t binbuflen)
     return hexbuf;
 }
 
+#ifdef BINARY_ENABLE
+/*@ -usedef @*/
 void gpsd_interpret_subframe(struct gps_device_t *session,
 			     unsigned int chan, 
 			     unsigned int svid, 
-			     unsigned int word[10])
+			     unsigned int words[])
 /* extract leap-second from RTCM-104 subframe data */
 {
     /*
@@ -681,7 +683,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * changes 1 second every few years. Maybe."
      */
     int i;
-    unsigned int pageid, subframe, leap, words[10];
+    unsigned int pageid, subframe, leap;
     gpsd_report(4, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
 		chan, svid, 
 		words[0], words[1], words[2], words[3], words[4], 
@@ -763,3 +765,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
 	session->context->valid |= LEAP_SECOND_VALID;
     }
 }
+/*@ +usedef @*/
+#endif /* BINARY_ENABLE */
+

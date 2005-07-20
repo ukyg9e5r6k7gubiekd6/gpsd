@@ -199,6 +199,10 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
  * Structures for interpreting words in an RTCM-104 message (after
  * parity checking and removing inversion).
  *
+ * The RTCM standard is less explicit than it should be about signed-integer
+ * representations.  Two's compliment is specified for prc and rrc (msg1wX),
+ * but not everywhere.
+ *
  * The RTCM words are 30-bit words.  We will lay them into memory into
  * 30-bit (low-end justified) chunks.  To write them out we will write
  * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
@@ -874,6 +878,7 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	for (n = 0; n < session->gpsdata.rtcm.conhealth.nentries; n++) {
 	    struct consat_t *csp = &session->gpsdata.rtcm.conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   /* FIXME: turn these spaces to tabs someday */
 			   "C\t%2u\t%1u  %1u\t%2u\t%1u  %1u  %1u\t%2u\n",
 			   csp->ident,
 			   (unsigned)csp->iodl,

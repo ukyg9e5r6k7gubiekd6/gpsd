@@ -207,7 +207,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 
     case 0x08:	/* Measurement Data Output */
 	// clock offset is a manufacturer diagnostic
-	// (int)getuw(buf2, 8);  /* clock offset, 29000..29850 ?? */
+	// (int)getuw(buf2, 8);  clock offset, 29000..29850 ??
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
