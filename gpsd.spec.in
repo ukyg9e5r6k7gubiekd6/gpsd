@@ -135,11 +135,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 
 %changelog
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Added Evermore binary support, untested.  Added Sony CXD2951 support,
-  also untested.  All error estimates are now nailed to 95% confidence
-  interval. DBUS support is autodetected and no longer needs to be
-  configured.  Added iTrax NMEA support, untested.  Added rtcmdecode
-  and its documentation.  Added dangerous alpha version of gpsflash.
+- Added Sony CXD2951 support, also untested.  All error estimates are
+  now nailed to 95% confidence interval.  Added rtcmdecode and its
+  documentation.  Added dangerous alpha version of gpsflash.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.

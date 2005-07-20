@@ -3,6 +3,8 @@
  *
  * About the only thing this gives us that NMEA won't is TDOP.
  * But we'll get atomic position reports from it, which is good.
+ *
+ * The vendor site is <http://www.emt.com.tw>.
  */
 
 

@@ -86,6 +86,7 @@ libgps_c_sources = \
 	ntpshm.c \
 	libgps.c \
 	packet.c \
+	packet_states.h \
 	gpsutils.c \
 	geoid.c \
 	dgpsip.c \
@@ -95,6 +96,9 @@ libgps_c_sources = \
 	srecord.c \
 	bits.h \
 	timebase.h
+
+packet_names.h: packet_states.h
+	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' <packet_states.h >packet_names.h
 
 libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
