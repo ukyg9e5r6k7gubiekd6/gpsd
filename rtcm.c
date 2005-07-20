@@ -693,7 +693,9 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
     enum rtcmstat_t res;
 
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	return RTCM_NO_SYNC;
+	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+		    "word tag not correct, skipping\n");
+	return RTCM_SKIP;
     }
     c = reverse_bits[c & 0x3f];
 
@@ -703,7 +705,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	session->rtcm.bufindex = 0;
 
 	while (session->rtcm.curr_offset <= 0) {
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing");
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing\n");
 	    session->rtcm.curr_word <<= 1;
 	    if (session->rtcm.curr_offset > 0) {
 		session->rtcm.curr_word |= c << session->rtcm.curr_offset;
@@ -804,12 +806,14 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	    }
 	}
 	session->rtcm.curr_offset -= 6;
-	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d", session->rtcm.curr_offset);
+	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->rtcm.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
 
     /* never achieved lock */
+    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+		"lock never achieved\n");
     return RTCM_NO_SYNC;
 }
 /*@ +usereleased +compdef @*/

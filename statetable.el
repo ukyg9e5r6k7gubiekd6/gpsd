@@ -1,5 +1,6 @@
 (defun statetable-regen ()
   "Turn the packet-getter's enum list into a string array."
+  (interactive)
   (goto-char (point-min))
   (re-search-forward "enum \\({[^}]*};\\)")
   (let ((enums (buffer-substring (match-beginning 1) (match-end 1))))

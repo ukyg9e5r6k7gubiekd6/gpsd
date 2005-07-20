@@ -153,6 +153,7 @@ enum {
 
 #ifdef RTCM104_ENABLE
    RTCM_SYNC_STATE,	/* we have sync lock */
+   RTCM_SKIP_STATE,	/* we have sync lock, but this character is bad */
    RTCM_RECOGNIZED,	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
 };
@@ -216,12 +217,16 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	/*@ -casebreak @*/
     case RTCM_SYNC_STATE:
 	/*@ -casebreak @*/
+    case RTCM_SKIP_STATE:
+	/*@ -casebreak @*/
     case RTCM_RECOGNIZED:
 	rtcm_state = rtcm_decode(session, c);
 	if (rtcm_state == RTCM_NO_SYNC)
 	    session->packet_state = GROUND_STATE;
 	else if (rtcm_state == RTCM_SYNC)
 	    session->packet_state = RTCM_SYNC_STATE;
+	else if (rtcm_state == RTCM_SKIP)
+	    session->packet_state = RTCM_SKIP_STATE;
 	else
 	    session->packet_state = RTCM_RECOGNIZED;
 #endif /* RTCM104_ENABLE */
@@ -595,7 +600,7 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 #define STATE_DEBUG
 
 #ifdef STATE_DEBUG
-static unsigned char *buffer_dump(unsigned char *base, unsigned char *end)
+static /*@ observer @*/ unsigned char *buffer_dump(unsigned char *base, unsigned char *end)
 /* dump the state of a specified buffer */
 {
     static unsigned char buf[BUFSIZ];
@@ -610,11 +615,11 @@ static unsigned char *buffer_dump(unsigned char *base, unsigned char *end)
 	}
 	*/
 
-	(void)snprintf((char *)tp, sizeof(buf)-(tp-buf), " %02X", *cp);
+	(void)snprintf((char *)tp, sizeof(buf)-(tp-buf), " %02X", (unsigned int)*cp);
 	tp += 3;
     }
 
-    *tp = 0;
+    *tp = (unsigned char)0;
     return buf;
 }
 #endif /* STATE_DEBUG */
@@ -757,7 +762,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
    "EVERMORE_LEADER_1",	/* a DLE after having seen EverMore data */
    "EVERMORE_LEADER_2",	/* seen opening STX of EverMore packet */
    "EVERMORE_PAYLOAD",	/* in payload part of EverMore packet */
-   "EVERMORE_PAYLOAD_DLE",	/* DLE in payload part of EverMore packet */
+   "EVERMORE_PAYLOAD_DLE",/* DLE in payload part of EverMore packet */
    "EVERMORE_RECOGNIZED",	/* found end of EverMore packet */
 #endif /* EVERMORE_ENABLE */
 
@@ -786,13 +791,17 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 
 #ifdef RTCM104_ENABLE
    "RTCM_SYNC_STATE",	/* we have sync lock */
+   "RTCM_SKIP_STATE",	/* we have sync lock, but this character is bad */
    "RTCM_RECOGNIZED",	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
 };
 	/*%end%*/
 	nexstate(session, c);
-	gpsd_report(7, "Character '%c' [%02X], new state: %s\n",
-			(isprint(c)?c:'.'), c, state_table[session->packet_state]);
+	gpsd_report(7, "%08ld: character '%c' [%02X], new state: %s\n",
+		    session->counter, 
+		    (isprint(c)?c:'.'), 
+		    c, 
+		    state_table[session->packet_state]);
 
 	if (session->packet_state == GROUND_STATE) {
 		character_discard(session);

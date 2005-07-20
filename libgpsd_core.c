@@ -542,7 +542,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_recv_time = timestamp();
 
 	/* Get data from current packet into the newdata structure */
-	if (session->device_type->parse_packet)
+	if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 	    received = session->device_type->parse_packet(session);
 	else
 	    received = 0;	/* it was all done in the packet getter */
