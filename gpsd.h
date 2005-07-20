@@ -290,8 +290,10 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 extern float roundf(float x);
 #endif /* S_SPLINT_S */
 
-/* BSD port hack */ 
-#define rint(x)	round(x)
-#define rintf(x) roundf(x)
+/* some OSes don't have round(). fake it if need be */
+#ifndef HAVE_ROUND
+#define	round(x) ((double)rint(x))
+#define roundf(x) ((float)rintf(x))
+#endif /* !HAVE_ROUND */
 
 #endif /* _gpsd_h_ */
