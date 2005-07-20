@@ -13,6 +13,9 @@ extern "C" {
 #include <limits.h>
 #include <time.h>
 #include <signal.h>
+#ifndef S_SPLINT_S
+#include <pthread.h>	/* pacifies OpenBSD's compiler */
+#endif
 
 #define MAXTAGLEN	6	/* maximum length of sentence tag name */
 #define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
