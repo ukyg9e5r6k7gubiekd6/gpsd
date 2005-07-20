@@ -21,6 +21,8 @@ fi
 
 AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
 
+AC_CHECK_FUNCS(round, roundf)
+
 AC_HEADER_TIME
 AC_STRUCT_TIMEZONE
 
