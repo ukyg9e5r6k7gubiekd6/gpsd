@@ -241,6 +241,8 @@ extern speed_t gpsd_get_speed(struct termios *);
 extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
+extern void gpsd_interpret_subframe(struct gps_device_t *,
+				    unsigned int, unsigned int, unsigned int[10]);
 extern /*@ observer @*/ char *gpsd_hexdump(void *, size_t);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
