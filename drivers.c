@@ -411,11 +411,6 @@ static struct gps_type_t itrax = {
  *
  **************************************************************************/
 
-static void rtcm104_initializer(struct gps_device_t *session)
-{
-    rtcm_init(session);
-}
-
 static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 {
     gpsd_report(5, "RTCM packet type 0x%02x length %d words: %s\n", 
@@ -429,7 +424,7 @@ static struct gps_type_t rtcm104 = {
     .typename      = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .probe         = NULL,		/* no probe */
-    .initializer   = rtcm104_initializer,	/* initialize packet engine */
+    .initializer   = NULL,		/* no initializer */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */

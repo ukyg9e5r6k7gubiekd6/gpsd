@@ -192,7 +192,11 @@ struct gps_device_t {
 	    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
-#ifdef RTCM104_ENABLE
+	/*
+	 * This is not conditionalized on RTCM104_ENABLE because we need to
+	 * be able to build rtcmdecode even when RTCM support is not
+	 * configured in the daemon.  It doesn't take up extra space
+	 */
 	struct { 
 	    bool            locked;
 	    int             curr_offset;
@@ -200,7 +204,6 @@ struct gps_device_t {
 	    rtcmword_t      buf[RTCM_WORDS_MAX];
 	    unsigned int    bufindex;
 	} rtcm;
-#endif /* RTCM104_ENABLE */
     };
 #endif /* BINARY_ENABLE */
 };

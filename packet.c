@@ -65,11 +65,8 @@ enum {
 #include "packet_states.h"
 };
 
-static void nexstate(struct gps_device_t *session, unsigned char c)
+static void nextstate(struct gps_device_t *session, unsigned char c)
 {
-#ifdef RTCM104_ENABLE
-    enum rtcmstat_t rtcm_state;
-#endif /* RTCM104_ENABLE */
 /*@ +charint */
     switch(session->packet_state)
     {
@@ -116,27 +113,6 @@ static void nexstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif /* ITALK_ENABLE */
-#ifdef RTCM104_ENABLE
-	/*
-	 * Fall through to trying to recognize RTCM104 packets.
-	 * RTCM104 has its own state machine; we crank it here.
-	 */
-	/*@ -casebreak @*/
-    case RTCM_SYNC_STATE:
-	/*@ -casebreak @*/
-    case RTCM_SKIP_STATE:
-	/*@ -casebreak @*/
-    case RTCM_RECOGNIZED:
-	rtcm_state = rtcm_decode(session, c);
-	if (rtcm_state == RTCM_NO_SYNC)
-	    session->packet_state = GROUND_STATE;
-	else if (rtcm_state == RTCM_SYNC)
-	    session->packet_state = RTCM_SYNC_STATE;
-	else if (rtcm_state == RTCM_SKIP)
-	    session->packet_state = RTCM_SKIP_STATE;
-	else
-	    session->packet_state = RTCM_RECOGNIZED;
-#endif /* RTCM104_ENABLE */
 	break;
 	/*@ +casebreak @*/
 #ifdef NMEA_ENABLE
@@ -605,11 +581,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	/*@ -modobserver @*/
 	unsigned char c = *session->inbufptr++;
 	/*@ +modobserver @*/
-	/* to regenerate this table, see  statetable.el */
-	/*%start%*/char *state_table[] = {
+	char *state_table[] = {
 #include "packet_names.h"
 	};
-	nexstate(session, c);
+	nextstate(session, c);
 	gpsd_report(7, "%08ld: character '%c' [%02X], new state: %s\n",
 		    session->counter, 
 		    (isprint(c)?c:'.'), 
