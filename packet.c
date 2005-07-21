@@ -750,6 +750,9 @@ void packet_reset(struct gps_device_t *session)
     session->packet_state = GROUND_STATE;
     session->inbuflen = 0;
     session->inbufptr = session->inbuffer;
+#ifdef RTCM104_ENABLE
+    rtcm_init(session);
+#endif /* RTCM104_ENABLE */
 }
 
 #ifdef __UNUSED__
