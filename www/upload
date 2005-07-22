@@ -24,5 +24,4 @@ xmlto xhtml-nochunks ../rtcm.xml
 xmlto xhtml-nochunks ../srec.xml
 xmlto xhtml-nochunks replacing-nmea.xml
 (cd performance; xmlto xhtml-nochunks performance.xml)
-# Doesn't upload PDFs or GIFs -- they aren't expected to change frequently
-scp *.html *.png performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
+scp *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
