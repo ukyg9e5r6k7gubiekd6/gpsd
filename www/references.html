@@ -13,7 +13,7 @@
 
 <div id="Menu">
     <img src="gpsd-logo-small.png"/><br />
-    <a href="index.html">Home<br/>
+    <a href="index.html">Home</a><br/>
     <a href="index.html#news">News</a><br/>
     <a href="index.html#downloads">Downloads</a><br/>
     <a href="index.html#mailing-lists">Mailing lists</a><br/>
@@ -22,8 +22,7 @@
     <a href="xgps-sample.html">Screenshots</a><br/>
     <a href="index.html#recipes">Recipes</a><br/>
     <a href="index.html#others">Other GPSDs</a><br/>
-    <a href="hardware.html">Hardware</a><br/>
-    References<br/>
+    <a href="hardware.html">Hardware References</a><br/>
     <a href="history.html">History</a><br/>
 
     <a href='http://www.catb.org/hacker-emblem/'>
@@ -66,9 +65,17 @@ unless you are trying to make sense of the raw 50BPS subframe
 data.  Be warned: this specification is complex and nasty.</dd>
 
 <dt><a
-href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=E&amp;parent=R-REC-M.823-2-199710-I'>ITU-R M.823-2</a></dt> 
+href='https://ssl29.pair.com/dmarkle/puborder.php?show=3'>RTCM Recommended
+Standards for Differential GNSS</a></dt> 
+<dd>This is the official RTCM SC-104 standard. Much like the NMEA standard
+this is proprietary, and probably protected by rabid lawyers. At least one
+of the GPSD project members has purchased an official copy of this standard,
+so we do have full details of the message format.</dd>
+
+<dt><a
+href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=e&amp;parent=r-rec-m.823-2-199710-i'>itu-r m.823-2</a></dt> 
 <dd>This specification documents some of the murky depths of
-RTCM-104, the specification used for broadcating differential-GPS 
+rtcm-104, the specification used for broadcating differential-gps 
 corrections. Unfortunately, its distribution terms are also evil.</dd>
 
 </dl>
@@ -98,8 +105,10 @@ binary mode.</dd>
 <dt><a
 href='http://www.linkwave.co.uk/assets/GPS.G2-X-01003-E1.pdf'>TIM GPS
 Receiver Maco-Component(offsite link)</a></dt>
-<dd> Describes the SiRFstar-I chipset used by uBlox and some others.
-<code>gpsd</code> supports it.  It's obsolete.</dd>
+<dd> Describes the SiRFstarII chipset used by uBlox and some others.
+<code>gpsd</code> supports it. While obsolete, this file documents certain
+aspects of the protocol that SiRF has removed from current versions of the
+protocol documentation.</dd>
 
 <dt><a
 href='http://www.garmin.com/manuals/GPS17N_GPS16_17NSeriesTechnicalSpecification.pdf'>
@@ -167,6 +176,6 @@ geodetic coordinates.</dd>
 
 <!--
 Local Variables:
-compile-command: "(scp bibiography.html esr@shell.berlios.de:/home/groups/gpsd/htdocs)"
+compile-command: "(scp references.html esr@shell.berlios.de:/home/groups/gpsd/htdocs)"
 End:
 -->
