@@ -643,19 +643,19 @@ static void unpack(struct gps_device_t *session)
 			(unsigned3(m->w3.dgnss)==0) ? gps :
 		    		((unsigned3(m->w3.dgnss)==1) ? glonass : unknown);
 		tp->reference.sense = (m->w3.dat != 0) ? global : local;
-		if (unsigned8(m->w3.datum_alpha_char1)){
+		if (m->w3.datum_alpha_char1){
 		    tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char1));
 		}
-		if (unsigned8(m->w3.datum_alpha_char2)){
+		if (m->w3.datum_alpha_char2){
 		    tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char2));
 		}
-		if (unsigned8(m->w4.datum_sub_div_char1)){
+		if (m->w4.datum_sub_div_char1){
 		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char1));
 		}
-		if (unsigned8(m->w4.datum_sub_div_char2)){
+		if (m->w4.datum_sub_div_char2){
 		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char2));
 		}
-		if (unsigned8(m->w4.datum_sub_div_char3)){
+		if (m->w4.datum_sub_div_char3){
 		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char3));
 		}
 		tp->reference.datum[n++] = '\0';
@@ -714,15 +714,15 @@ static void unpack(struct gps_device_t *session)
 
 	    /*@ -boolops @*/
 	    while (len >= 1){
-		if (!unsigned8(m->w3.byte1)) {
+		if (!m->w3.byte1) {
 		    break;
 		}
 		tp->message[n++] = (char)(unsigned8(m->w3.byte1));
-		if (!unsigned8(m->w3.byte2)) {
+		if (!m->w3.byte2) {
 		    break;
 		}
 		tp->message[n++] = (char)(unsigned8(m->w3.byte2));
-		if (!unsigned8(m->w3.byte3)) {
+		if (!m->w3.byte3) {
 		    break;
 		}
 		tp->message[n++] = (char)(unsigned8(m->w3.byte3));
@@ -735,6 +735,187 @@ static void unpack(struct gps_device_t *session)
 	break;
     }
 }
+
+#ifdef __UNUSED__
+static void repack(struct gps_device_t *session)
+/* repack the content fields into the raw bits */
+{
+    int len;
+    unsigned int n;
+    struct rtcm_msghdr  *msghdr;
+    struct rtcm_t *tp = &session->gpsdata.rtcm;
+
+    msghdr = (struct rtcm_msghdr *)session->rtcm.buf;
+    msghdr->w1.msgtype = unsigned6(tp->type);
+    msghdr->w2.frmlen = unsigned5(tp->length);
+    msghdr->w2.zcnt = unsigned13(tp->zcount / ZCOUNT_SCALE);
+    msghdr->w1.refstaid = unsigned10(tp->refstaid);
+    msghdr->w2.sqnum = unsigned3(tp->seqnum);
+    msghdr->w2.stathlth = unsigned3(tp->stathlth);
+
+    len = (int)tp->length;
+    n = 0;
+    switch (tp->type) {
+    case 1:
+    case 9:
+	{
+	    struct rtcm_msg1    *m = (struct rtcm_msg1 *) msghdr;
+
+	    while (len >= 0) {
+		if (len >= 2) {
+		    m->w3.satident1 = unsigned5(tp->ranges.sat[n].ident);
+		    m->w3.udre1 = unsigned2(tp->ranges.sat[n].udre);
+		    m->w4.issuedata1 = unsigned8(tp->ranges.sat[n].issuedata);
+		    //tp->ranges.sat[n].rangerr    = signed16(m->w3.pc1) * 
+		    //	(m->w3.scale1 ? PCLARGE : PCSMALL);
+		    //tp->ranges.sat[n].rangerate  = signed8(m->w4.rangerate1) * 
+		    //		(m->w3.scale1 ? RRLARGE : RRSMALL);
+		    n++;
+		}
+		if (len >= 4) {
+		    m->w4.satident2 = unsigned5(tp->ranges.sat[n].ident);
+		    m->w4.udre2 = unsigned2(tp->ranges.sat[n].udre);
+		    m->w6.issuedata2 = unsigned8(tp->ranges.sat[n].issuedata);
+		    //tp->ranges.sat[n].rangerr    = signed16(m->w5.pc2) * 
+		    //   (m->w4.scale2 ? PCLARGE : PCSMALL);
+		    //tp->ranges.sat[n].rangerate  = signed8(m->w5.rangerate2) * 
+		    //	(m->w4.scale2 ? RRLARGE : RRSMALL);
+		    n++;
+		}
+		if (len >= 5) {
+		    m->w6.satident3 = unsigned5(tp->ranges.sat[n].ident);
+		    m->w6.udre3 = unsigned2(tp->ranges.sat[n].udre);
+		    m->w7.issuedata3 = unsigned8(tp->ranges.sat[n].issuedata);
+		    // tp->ranges.sat[n].rangerr     = ((signed8(m->w6.pc3_h)<<8)|(unsigned8(m->w7.pc3_l))) *
+		    //		(m->w6.scale3 ? PCLARGE : PCSMALL);
+		    //tp->ranges.sat[n].rangerate   = signed8(m->w7.rangerate3) * 
+		    //			(m->w6.scale3 ? RRLARGE : RRSMALL);
+		    n++;
+		}
+		len -= 5;
+		m = (struct rtcm_msg1 *) (((rtcmword_t *) m) + 5);
+	    }
+	    tp->ranges.nentries = n;
+	}
+	break;
+    case 3:
+	if (tp->ecef.valid) {
+	    struct rtcm_msg3    *m = (struct rtcm_msg3 *)msghdr;
+	    unsigned x = (unsigned)(tp->ecef.x / XYZ_SCALE);
+	    unsigned y = (unsigned)(tp->ecef.y / XYZ_SCALE);
+	    unsigned z = (unsigned)(tp->ecef.z / XYZ_SCALE);
+
+	    m->w4.x_l = unsigned8(x & 0xff);
+	    m->w3.x_h = unsigned24(x >> 8);
+	    m->w5.y_l = unsigned8(y & 0xff);
+	    m->w4.y_h = unsigned24(y >> 8);
+	    m->w6.z_l = unsigned8(z & 0xff);
+	    m->w5.z_h = unsigned24(z >> 8);
+	}
+	break;
+    case 4:
+	{
+	    struct rtcm_msg4    *m = (struct rtcm_msg4 *) msghdr;
+ 
+	    if (tp->reference.valid) {
+		m->w3.dgnss = tp->reference.system;
+		m->w3.dat = (tp->reference.sense == global);
+		if (tp->reference.datum[0])
+		    m->w3.datum_alpha_char1 = unsigned8(tp->reference.datum[0]);
+		else
+		    m->w3.datum_alpha_char1 = 0;
+		if (tp->reference.datum[1])
+		    m->w3.datum_alpha_char2 = unsigned8(tp->reference.datum[1]);
+		else
+		    m->w3.datum_alpha_char2 = 0;
+		if (tp->reference.datum[2])
+		    m->w4.datum_sub_div_char1=unsigned8(tp->reference.datum[2]);
+		else
+		    m->w4.datum_sub_div_char1 = 0;
+		if (tp->reference.datum[3])
+		    m->w4.datum_sub_div_char2=unsigned8(tp->reference.datum[3]);
+		else
+		    m->w4.datum_sub_div_char2 = 0;
+		if (tp->reference.datum[4])
+		    m->w4.datum_sub_div_char3=unsigned8(tp->reference.datum[4]);
+		else
+		    m->w4.datum_sub_div_char3 = 0;
+		if (tp->reference.system != invalid) {
+		    m->w5.dx = unsigned16(tp->reference.dx / DXYZ_SCALE);
+		    //tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
+		    m->w6.dz = unsigned24(tp->reference.dz / DXYZ_SCALE);
+		}
+	    }
+	}
+	break;
+    case 5:
+        {
+	    struct rtcm_msg5    *m = (struct rtcm_msg5 *)msghdr;
+	    while (len >= 1) {
+		struct consat_t *csp = &tp->conhealth.sat[n];
+		m->w3.sat_id = unsigned5(csp->ident);
+		m->w3.issue_of_data_link = csp->iodl !=0;
+		m->w3.data_health = unsigned3(csp->health) !=0;
+		//csp->snr = (unsigned5(m->w3.cn0)?(m->w3.cn0+CNR_OFFSET):-1);
+		//csp->health_en = unsigned2(m->w3.health_enable)!=0;
+		//csp->new_data = m->w3.new_nav_data!=0;
+		//csp->los_warning = m->w3.loss_warn!=0;
+		//csp->tou = unsigned4(m->w3.time_unhealthy)*TU_SCALE;
+		len--;
+		n++;
+		m = (struct rtcm_msg5 *) (((rtcmword_t *) m) + 1);
+	    }
+	}
+	break;
+    case 7:
+	{
+	    struct rtcm_msg7    *m = (struct rtcm_msg7 *) msghdr;
+	    //unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
+
+	    while (len >= 3) {
+		//tp->almanac.station[n].latitude = signed16(m->w3.lat) * LA_SCALE;
+		//tp->almanac.station[n].longitude = ((signed8(m->w3.lon_h) << 8) | unsigned8(m->w4.lon_l)) * LO_SCALE;
+		m->w4.range = unsigned10(tp->almanac.station[n].range);
+		//tp->almanac.station[n].frequency = (((unsigned6(m->w4.freq_h) << 6) | unsigned6(m->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
+		m->w5.health = unsigned2(tp->almanac.station[n].health);
+		//tp->almanac.station[n].station_id = unsigned10(m->w5.station_id),
+		//tp->almanac.station[n].bitrate = tx_speed[unsigned3(m->w5.bit_rate)];
+		len -= 3;
+		n++;
+		m = (struct rtcm_msg7 *) (((rtcmword_t *) m) + 3);
+	    }
+	    tp->almanac.nentries = n;
+	}
+	break;
+    case 16:
+	{
+	    struct rtcm_msg16    *m = (struct rtcm_msg16 *) msghdr;
+
+	    /*@ -boolops @*/
+	    while (len >= 1){
+		if (!tp->message[n]) {
+		    break;
+		}
+		m->w3.byte1 = unsigned8(tp->message[n++]);
+		if (!tp->message[n]) {
+		    break;
+		}
+		m->w3.byte2 = unsigned8(tp->message[n++]);
+		if (!tp->message[n]) {
+		    break;
+		}
+		m->w3.byte3 = unsigned8(tp->message[n++]);
+		len--;
+		m = (struct rtcm_msg16 *) (((rtcmword_t *) m) + 1);
+	    }
+	    /*@ +boolops @*/
+	}
+	break;
+    }
+
+    /* FIXME: must compute parity and inversion here */
+}
+#endif /* __UNUSED__ */
 
 /*@ -usereleased -compdef @*/
 enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
