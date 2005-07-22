@@ -424,7 +424,7 @@ struct rtcm_msg5 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
 
-    struct rtcm_msg5w3   w3;
+    struct rtcm_msg5w3   health[MAXHEALTH];
 };
 
 /* msg 6 */
@@ -671,21 +671,19 @@ static void unpack(struct gps_device_t *session)
     case 5:
         {
 	    struct rtcm_msg5    *m = (struct rtcm_msg5 *)msghdr;
-	    while (len >= 1) {
+	    for (n = 0; n < len; n++) {
 		struct consat_t *csp = &tp->conhealth.sat[n];
-		csp->ident = unsigned5(m->w3.sat_id);
-		csp->iodl = m->w3.issue_of_data_link!=0;
-		csp->health = unsigned3(m->w3.data_health);
-		/*@i@*/csp->snr = (unsigned5(m->w3.cn0)?(m->w3.cn0+CNR_OFFSET):-1);
-		csp->health_en = unsigned2(m->w3.health_enable);
-		csp->new_data = m->w3.new_nav_data!=0;
-		csp->los_warning = m->w3.loss_warn!=0;
-		csp->tou = unsigned4(m->w3.time_unhealthy)*TU_SCALE;
-		len--;
-		n++;
-		m = (struct rtcm_msg5 *) (((rtcmword_t *) m) + 1);
+
+		csp->ident = unsigned5(m->health[n].sat_id);
+		csp->iodl = m->health[n].issue_of_data_link!=0;
+		csp->health = unsigned3(m->health[n].data_health);
+		/*@i@*/csp->snr = (m->health[n].cn0?(m->health[n].cn0+CNR_OFFSET):SNR_BAD);
+		csp->health_en = unsigned2(m->health[n].health_enable);
+		csp->new_data = m->health[n].new_nav_data!=0;
+		csp->los_warning = m->health[n].loss_warn!=0;
+		csp->tou = unsigned4(m->health[n].time_unhealthy)*TU_SCALE;
 	    }
-	    tp->conhealth.nentries = n;
+	    tp->conhealth.nentries = len;
 	}
 	break;
     case 7:
@@ -745,7 +743,9 @@ static void repack(struct gps_device_t *session)
     struct rtcm_msghdr  *msghdr;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
 
+    memset(session->rtcm.buf, 0, sizeof(session->rtcm.buf));
     msghdr = (struct rtcm_msghdr *)session->rtcm.buf;
+
     msghdr->w1.msgtype = unsigned6(tp->type);
     msghdr->w2.frmlen = unsigned5(tp->length);
     msghdr->w2.zcnt = unsigned13(tp->zcount / ZCOUNT_SCALE);
@@ -854,15 +854,14 @@ static void repack(struct gps_device_t *session)
 	    for (n = 0; n < len; n++) {
 		struct consat_t *csp = &tp->conhealth.sat[n];
 
-		m = (struct rtcm_msg5 *) (((rtcmword_t *) m) + n);
-		m->w3.sat_id = unsigned5(csp->ident);
-		m->w3.issue_of_data_link = csp->iodl !=0;
-		m->w3.data_health = unsigned3(csp->health);
-		//csp->snr = (unsigned5(m->w3.cn0)?(m->w3.cn0+CNR_OFFSET):-1);
-		m->w3.health_enable = unsigned2(csp->health_en);
-		m->w3.new_nav_data = csp->new_data != 0;
-		m->w3.loss_warn = csp->los_warning != 0;
-		m->w3.time_unhealthy = unsigned4(tp->tou / TU_SCALE);
+		m->health[n].sat_id = unsigned5(csp->ident);
+		m->health[n].issue_of_data_link = csp->iodl !=0;
+		m->health[n].data_health = unsigned3(csp->health);
+		m->health[n].cn0 = (csp->snr == SNR_BAD) ? 0 : csp->snr - CNR_OFFSET;
+		m->health[n].health_enable = unsigned2(csp->health_en);
+		m->health[n].new_nav_data = csp->new_data != 0;
+		m->health[n].loss_warn = csp->los_warning != 0;
+		m->health[n].time_unhealthy = unsigned4(csp->tou / TU_SCALE);
 	    }
 	}
 	break;
