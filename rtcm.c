@@ -388,7 +388,6 @@ struct rtcm_msg4 {
 
 /* msg 5 - constellation health */
 
-
 struct rtcm_msg5 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
@@ -417,84 +416,58 @@ struct rtcm_msg6 {
 
 /* msg 7 - beacon almanac */
 
-struct rtcm_msg7w3 {
-    uint            parity:6;
-    int	    	    lon_h:8;
-    int	            lat:16;
-    uint            _pad:2;
-};
-
-struct rtcm_msg7w4 {
-    uint            parity:6;
-    uint	    freq_h:6;
-    uint	    range:10;
-    uint	    lon_l:8;
-    uint            _pad:2;
-};
-
-struct rtcm_msg7w5 {
-    uint            parity:6;
-    uint	    encoding:1;
-    uint	    sync_type:1;
-    uint	    mod_mode:1;
-    uint	    bit_rate:3;
-
-    /*
-     * ITU-R M.823-2 page 9 and RTCM-SC104 v2.1 pages 4-21 and 4-22
-     * are in conflict over the next two field sizes.  ITU says 9+3,
-     * RTCM says 10+2.  The latter correctly decodes the USCG station
-     * id's so I'll use that one here. -wsr
-     */
-
-    uint	    station_id:10;
-    uint	    health:2;
-    uint	    freq_l:6;
-    uint            _pad:2;
-};
-
 struct rtcm_msg7 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
-
-    struct rtcm_msg7w3   w3;
-    struct rtcm_msg7w4   w4;
-    struct rtcm_msg7w5   w5;
-
-    struct rtcm_msg7w3   w6;		/* optional 1 */
-    struct rtcm_msg7w4   w7;
-    struct rtcm_msg7w5   w8;
-
-    struct rtcm_msg7w3   w9;		/* optional 2 ... */
-    struct rtcm_msg7w4   w10;
-    struct rtcm_msg7w5   w11;
+    struct b_station_t {
+	struct {
+	    uint            parity:6;
+	    int	    	    lon_h:8;
+	    int	            lat:16;
+	    uint            _pad:2;
+	} w3;
+	struct {
+	    uint            parity:6;
+	    uint	    freq_h:6;
+	    uint	    range:10;
+	    uint	    lon_l:8;
+	    uint            _pad:2;
+	} w4;
+	struct {
+	    uint            parity:6;
+	    uint	    encoding:1;
+	    uint	    sync_type:1;
+	    uint	    mod_mode:1;
+	    uint	    bit_rate:3;
+	    /*
+	     * ITU-R M.823-2 page 9 and RTCM-SC104 v2.1 pages 4-21 and 4-22
+	     * are in conflict over the next two field sizes.  ITU says 9+3,
+	     * RTCM says 10+2.  The latter correctly decodes the USCG station
+	     * id's so I'll use that one here. -wsr
+	     */
+	    uint	    station_id:10;
+	    uint	    health:2;
+	    uint	    freq_l:6;
+	    uint            _pad:2;
+	} w5;
+    } almanac[(RTCM_WORDS_MAX - 2)/3];
 };
 
 /* msg 16 - text msg */
 
-struct rtcm_msg16w3 {
-    uint            parity:6;
-    uint	    byte3:8;
-    uint	    byte2:8;
-    uint	    byte1:8;
-    uint            _pad:2;
-};
-
 struct rtcm_msg16 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
-
-    struct rtcm_msg16w3   w3;
-    struct rtcm_msg16w3   w4;	/* optional */
-    struct rtcm_msg16w3   w5;	/* optional */
-
-    struct rtcm_msg16w3   w6;	/* optional */
-    struct rtcm_msg16w3   w7;	/* optional */
-    struct rtcm_msg16w3   w8;	/* optional */
-
-    struct rtcm_msg16w3   w9;	/* optional */
-    struct rtcm_msg16w3   w10;	/* optional */
-    struct rtcm_msg16w3   w11;	/* optional ... */
+    struct {
+	uint        parity:6;
+	uint	    byte3:8;
+	uint	    byte2:8;
+	uint	    byte1:8;
+	uint        _pad:2;
+    } txt[RTCM_WORDS_MAX-2];
 };
+
+static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 /* placeholders for field inversion macros */
@@ -545,7 +518,7 @@ static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
 {
     int len;
-    unsigned int n;
+    unsigned int n, w;
     struct rtcm_msghdr  *msghdr;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
 
@@ -670,19 +643,19 @@ static void unpack(struct gps_device_t *session)
     case 7:
 	{
 	    struct rtcm_msg7    *m = (struct rtcm_msg7 *) msghdr;
-	    unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
-	    while (len >= 3) {
-		tp->almanac.station[n].latitude = signed16(m->w3.lat) * LA_SCALE;
-		/*@i@*/tp->almanac.station[n].longitude = ((signed8(m->w3.lon_h) << 8) | unsigned8(m->w4.lon_l)) * LO_SCALE;
-		tp->almanac.station[n].range = unsigned10(m->w4.range);
-		tp->almanac.station[n].frequency = (((unsigned6(m->w4.freq_h) << 6) | unsigned6(m->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
-		tp->almanac.station[n].health = unsigned2(m->w5.health);
-		tp->almanac.station[n].station_id = unsigned10(m->w5.station_id),
-		tp->almanac.station[n].bitrate = tx_speed[unsigned3(m->w5.bit_rate)];
-		len -= 3;
+	    for (w = 0; w < len; w++) {
+		struct station_t *np = &tp->almanac.station[n];
+		struct b_station_t *mp = &m->almanac[w];
+
+		np->latitude = signed16(mp->w3.lat) * LA_SCALE;
+		/*@i@*/np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
+		np->range = unsigned10(mp->w4.range);
+		np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
+		np->health = unsigned2(mp->w5.health);
+		np->station_id = unsigned10(mp->w5.station_id),
+		np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 		n++;
-		m = (struct rtcm_msg7 *) (((rtcmword_t *) m) + 3);
 	    }
 	    tp->almanac.nentries = n;
 	}
@@ -692,21 +665,20 @@ static void unpack(struct gps_device_t *session)
 	    struct rtcm_msg16    *m = (struct rtcm_msg16 *) msghdr;
 
 	    /*@ -boolops @*/
-	    while (len >= 1){
-		if (!m->w3.byte1) {
+	    for (w = 0; w < len; w++){
+		if (!m->txt[w].byte1) {
 		    break;
 		}
-		tp->message[n++] = (char)(unsigned8(m->w3.byte1));
-		if (!m->w3.byte2) {
+		tp->message[n++] = (char)(unsigned8(m->txt[w].byte1));
+		if (!m->txt[w].byte2) {
 		    break;
 		}
-		tp->message[n++] = (char)(unsigned8(m->w3.byte2));
-		if (!m->w3.byte3) {
+		tp->message[n++] = (char)(unsigned8(m->txt[w].byte2));
+		if (!m->txt[w].byte3) {
 		    break;
 		}
-		tp->message[n++] = (char)(unsigned8(m->w3.byte3));
+		tp->message[n++] = (char)(unsigned8(m->txt[w].byte3));
 		len--;
-		m = (struct rtcm_msg16 *) (((rtcmword_t *) m) + 1);
 	    }
 	    /*@ +boolops @*/
 	    tp->message[n++] = '\0';
@@ -715,12 +687,11 @@ static void unpack(struct gps_device_t *session)
     }
 }
 
-#ifdef __UNUSED__
 static void repack(struct gps_device_t *session)
 /* repack the content fields into the raw bits */
 {
     int len;
-    unsigned int n;
+    unsigned int n, w;
     struct rtcm_msghdr  *msghdr;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
 
@@ -849,19 +820,18 @@ static void repack(struct gps_device_t *session)
     case 7:
 	{
 	    struct rtcm_msg7    *m = (struct rtcm_msg7 *) msghdr;
-	    //unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
-	    while (len >= 3) {
-		//tp->almanac.station[n].latitude = signed16(m->w3.lat) * LA_SCALE;
-		//tp->almanac.station[n].longitude = ((signed8(m->w3.lon_h) << 8) | unsigned8(m->w4.lon_l)) * LO_SCALE;
-		m->w4.range = unsigned10(tp->almanac.station[n].range);
-		//tp->almanac.station[n].frequency = (((unsigned6(m->w4.freq_h) << 6) | unsigned6(m->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
-		m->w5.health = unsigned2(tp->almanac.station[n].health);
-		//tp->almanac.station[n].station_id = unsigned10(m->w5.station_id),
-		//tp->almanac.station[n].bitrate = tx_speed[unsigned3(m->w5.bit_rate)];
-		len -= 3;
-		n++;
-		m = (struct rtcm_msg7 *) (((rtcmword_t *) m) + 3);
+	    for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
+		struct station_t *np = &tp->almanac.station[n];
+		struct b_station_t *mp = &m->almanac[w];
+
+		//np->latitude = signed16(mp->w3.lat) * LA_SCALE;
+		//np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
+		mp->w4.range = unsigned10(np->range);
+		//np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
+		mp->w5.health = unsigned2(np->health);
+		//np->station_id = unsigned10(mp->w5.station_id),
+		//np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 	    }
 	    tp->almanac.nentries = n;
 	}
@@ -871,21 +841,19 @@ static void repack(struct gps_device_t *session)
 	    struct rtcm_msg16    *m = (struct rtcm_msg16 *) msghdr;
 
 	    /*@ -boolops @*/
-	    while (len >= 1){
+	    for (w = 0; w < RTCM_WORDS_MAX - 2; w++){
 		if (!tp->message[n]) {
 		    break;
 		}
-		m->w3.byte1 = unsigned8(tp->message[n++]);
+		m->txt[w].byte1 = unsigned8(tp->message[n++]);
 		if (!tp->message[n]) {
 		    break;
 		}
-		m->w3.byte2 = unsigned8(tp->message[n++]);
+		m->txt[w].byte2 = unsigned8(tp->message[n++]);
 		if (!tp->message[n]) {
 		    break;
 		}
-		m->w3.byte3 = unsigned8(tp->message[n++]);
-		len--;
-		m = (struct rtcm_msg16 *) (((rtcmword_t *) m) + 1);
+		m->txt[w].byte3 = unsigned8(tp->message[n++]);
 	    }
 	    /*@ +boolops @*/
 	}
@@ -894,6 +862,7 @@ static void repack(struct gps_device_t *session)
 
     /* FIXME: must compute parity and inversion here */
 }
+#ifdef __UNUSED__
 #endif /* __UNUSED__ */
 
 /*@ -usereleased -compdef @*/
