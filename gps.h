@@ -131,9 +131,13 @@ struct rtcm_t {
 	    struct consat_t {
 		unsigned ident;		/* satellite ID */
 		bool iodl;		/* issue of data */
-		bool health;		/* is satellite healthy? */
+		unsigned int health;	/* is satellite healthy? */
+#define HEALTH_NORMAL		(0)	/* Radiobeacon operation normal */
+#define HEALTH_UNMONITORED	(1)	/* No integrity monitor operating */
+#define HEALTH_NOINFO		(2)	/* No information available */
+#define HEALTH_DONOTUSE		(3)	/* Do not use this radiobeacon */
 		unsigned int snr;	/* signal-to-noise ratio, dB */
-		bool health_en;		/* health enabled */
+		unsigned int health_en;	/* health enabled */
 		bool new_data;		/* new data? */
 		bool los_warning;	/* line-of-sight warning */
 		unsigned int tou;	/* time to unhealth, seconds */
