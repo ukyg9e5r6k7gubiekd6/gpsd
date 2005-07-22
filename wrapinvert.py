@@ -1,13 +1,14 @@
 #!/usr/bin/python
 #
 # Wrap bitfield references in rtcm.c in inversion macros.
+# FIXME: should be enhanced to replace macros already present
 
 import sys, re, getopt
 
 state = 0
 ids = {}
 
-refmatch = "[a-z_]*->w[0-9]+\.%s"	# Match a bitfield reference
+refmatch = "[a-z_]*->w[0-9]+\.%s(?![a-z_])"	# Match a bitfield reference
 
 (options, arguments) = getopt.getopt(sys.argv[1:], "l")
 list = False;
@@ -64,6 +65,7 @@ while True:
     # Do the actual substitutions
     for key in keys:
         m = re.compile(refmatch % key).search(line)
+        #sys.stderr.write("Looking for: %s\n" % refmatch % key)
         if m:
             line = line[:m.start(0)] + ids[key] + "(" + m.group(0) + ")" + line[m.end(0):]
     if not list:
