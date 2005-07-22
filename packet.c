@@ -482,31 +482,6 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 
 #define STATE_DEBUG
 
-#ifdef STATE_DEBUG
-static /*@ observer @*/ unsigned char *buffer_dump(unsigned char *base, unsigned char *end)
-/* dump the state of a specified buffer */
-{
-    static unsigned char buf[BUFSIZ];
-    unsigned char *cp, *tp = buf;
-    for (cp = base; cp < end; cp++) {
-	    /*
-	if (isgraph(*cp)) {
-	    *tp++ = *cp;
-	}else {
-	    (void)snprintf(tp, sizeof(buf)-(tp-buf), "\\x%02x", *cp);
-	    tp += 4;
-	}
-	*/
-
-	(void)snprintf((char *)tp, sizeof(buf)-(tp-buf), " %02X", (unsigned int)*cp);
-	tp += 3;
-    }
-
-    *tp = (unsigned char)0;
-    return buf;
-}
-#endif /* STATE_DEBUG */
-
 static void packet_accept(struct gps_device_t *session, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
@@ -519,8 +494,7 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 #ifdef STATE_DEBUG
 	gpsd_report(6, "Packet type %d accepted %d = %s\n",
 		packet_type, packetlen,
-		buffer_dump(session->outbuffer,
-			    session->outbuffer+session->outbuflen));
+		gpsd_hexdump(session->outbuffer, session->outbuflen));
 #endif /* STATE_DEBUG */
     } else {
 	gpsd_report(1, "Rejected too long packet type %d len %d\n",
@@ -540,8 +514,7 @@ static void packet_discard(struct gps_device_t *session)
 #ifdef STATE_DEBUG
     gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n",
 		discard, remaining,
-		buffer_dump(session->inbuffer,
-			    session->inbuffer + session->inbuflen));
+		gpsd_hexdump(session->inbuffer, session->inbuflen));
 #endif /* STATE_DEBUG */
 }
 
@@ -553,8 +526,7 @@ static void character_discard(struct gps_device_t *session)
 #ifdef STATE_DEBUG
     gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
 		session->inbuflen,
-		buffer_dump(session->inbuffer,
-			    session->inbuffer + session->inbuflen));
+		gpsd_hexdump(session->inbuffer, session->inbuflen));
 #endif /* STATE_DEBUG */
 }
 
@@ -572,7 +544,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		newdata,
 		session->inbufptr-session->inbuffer,
 		session->inbuflen+newdata,
-		buffer_dump(session->inbufptr, session->inbufptr + newdata));
+		gpsd_hexdump(session->inbufptr, newdata));
 #endif /* STATE_DEBUG */
 
     session->outbuflen = 0;
@@ -585,7 +557,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 #include "packet_names.h"
 	};
 	nextstate(session, c);
-	gpsd_report(7, "%08ld: character '%c' [%02X], new state: %s\n",
+	gpsd_report(7, "%08ld: character '%c' [%02x], new state: %s\n",
 		    session->counter, 
 		    (isprint(c)?c:'.'), 
 		    c, 
