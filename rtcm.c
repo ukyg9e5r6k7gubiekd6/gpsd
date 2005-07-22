@@ -323,108 +323,89 @@ struct rtcm_msg1 {
 
 /* msg 3 - reference station parameters */
 
-struct rtcm_msg3w3 {
-    uint            parity:6;
-    uint	    x_h:24;
-    uint            _pad:2;
-};
-
-struct rtcm_msg3w4 {
-    uint            parity:6;
-    uint	    y_h:16;
-    uint	    x_l:8;
-    uint            _pad:2;
-};
-
-struct rtcm_msg3w5 {
-    uint            parity:6;
-    uint	    z_h:8;
-    uint	    y_l:16;
-    uint            _pad:2;
-};
-
-struct rtcm_msg3w6 {
-    uint            parity:6;
-    uint	    z_l:24;
-    uint            _pad:2;
-};
-
 struct rtcm_msg3 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
+    struct {
+	uint        parity:6;
+	uint	    x_h:24;
+	uint        _pad:2;
+    } w3;
+    struct {
+	uint        parity:6;
+	uint	    y_h:16;
+	uint	    x_l:8;
+	uint        _pad:2;
+    } w4;
+    struct {
+	uint        parity:6;
+	uint	    z_h:8;
+	uint	    y_l:16;
+	uint        _pad:2;
+    } w5;
 
-    struct rtcm_msg3w3   w3;
-    struct rtcm_msg3w4   w4;
-    struct rtcm_msg3w5   w5;
-    struct rtcm_msg3w6   w6;
+    struct {
+	uint        parity:6;
+	uint	    z_l:24;
+	uint        _pad:2;
+    } w6;
 };
 
 /* msg 4 - reference station datum */
 
-struct rtcm_msg4w3 {
-    uint            parity:6;
-    uint	    datum_alpha_char2:8;
-    uint	    datum_alpha_char1:8;
-    uint	    spare:4;
-    uint	    dat:1;
-    uint	    dgnss:3;
-    uint            _pad:2;
-};
-
-struct rtcm_msg4w4 {
-    uint            parity:6;
-    uint	    datum_sub_div_char2:8;
-    uint	    datum_sub_div_char1:8;
-    uint	    datum_sub_div_char3:8;
-    uint            _pad:2;
-};
-
-struct rtcm_msg4w5 {
-    uint            parity:6;
-    uint	    dy_h:8;
-    uint	    dx:16;
-    uint            _pad:2;
-};
-
-struct rtcm_msg4w6 {
-    uint            parity:6;
-    uint	    dz:24;
-    uint	    dy_l:8;
-    uint            _pad:2;
-};
-
 struct rtcm_msg4 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
-
-    struct rtcm_msg4w3   w3;
-    struct rtcm_msg4w4   w4;
-    struct rtcm_msg4w5   w5;		/* optional */
-    struct rtcm_msg4w6   w6;		/* optional */
+    struct {
+	uint        parity:6;
+	uint	    datum_alpha_char2:8;
+	uint	    datum_alpha_char1:8;
+	uint	    spare:4;
+	uint	    dat:1;
+	uint	    dgnss:3;
+	uint        _pad:2;
+    } w3;
+    struct {
+	uint        parity:6;
+	uint	    datum_sub_div_char2:8;
+	uint	    datum_sub_div_char1:8;
+	uint	    datum_sub_div_char3:8;
+	uint        _pad:2;
+    } w4;
+    struct {
+	uint        parity:6;
+	uint	    dy_h:8;
+	uint	    dx:16;
+	uint        _pad:2;
+    } w5;
+    struct {
+	uint        parity:6;
+	uint	    dz:24;
+	uint	    dy_l:8;
+	uint        _pad:2;
+    } w6;
 };
 
 /* msg 5 - constellation health */
 
-struct rtcm_msg5w3 {
-    uint            parity:6;
-    uint	    unassigned:2;
-    uint	    time_unhealthy:4;
-    uint	    loss_warn:1;
-    uint	    new_nav_data:1;
-    uint	    health_enable:1;
-    uint	    cn0:5;
-    uint	    data_health:3;
-    uint	    issue_of_data_link:1;
-    uint	    sat_id:5;
-    uint	    reserved:1;
-    uint            _pad:2;
-};
 
 struct rtcm_msg5 {
     struct rtcm_msghw1   w1;
     struct rtcm_msghw2   w2;
-
-    struct rtcm_msg5w3   health[MAXHEALTH];
+    struct {
+	uint        parity:6;
+	uint	    unassigned:2;
+	uint	    time_unhealthy:4;
+	uint	    loss_warn:1;
+	uint	    new_nav_data:1;
+	uint	    health_enable:1;
+	uint	    cn0:5;
+	uint	    data_health:3;
+	uint	    issue_of_data_link:1;
+	uint	    sat_id:5;
+	uint	    reserved:1;
+	uint        _pad:2;
+    } health[MAXHEALTH];
 };
 
 /* msg 6 */
