@@ -652,6 +652,25 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     return mask;
 }
 
+static gps_mask_t tsip_parse_input(struct gps_device_t *session)
+{
+    gps_mask_t st;
+
+    if (session->packet_type == TSIP_PACKET){
+	st = tsip_analyze(session);
+	session->gpsdata.driver_mode = 1;
+	return st;
+#ifdef EVERMORE_ENABLE
+    } else if (session->packet_type == EVERMORE_PACKET) {
+	(void)gpsd_switch_driver(session, "EverMore binary");
+	st = evermore_parse(session, session->outbuffer, session->outbuflen);
+	session->gpsdata.driver_mode = 0;
+	return st;
+#endif /* EVERMORE_ENABLE */
+    } else
+	return 0;
+}
+
 /* this is everything we export */
 struct gps_type_t tsip_binary =
 {
@@ -660,7 +679,7 @@ struct gps_type_t tsip_binary =
     .probe          = NULL,		/* no probe */
     .initializer    = tsip_initializer,	/* initialization */
     .get_packet     = packet_get,	/* use the generic packet getter */
-    .parse_packet   = tsip_analyze,	/* parse message packets */
+    .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
     .speed_switcher = tsip_speed_switch,/* change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
