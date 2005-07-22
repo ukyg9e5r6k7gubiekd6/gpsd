@@ -517,21 +517,32 @@ struct rtcm_msg16 {
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 /* placeholders for field inversion macros */
-#define signed16(x)     x
 #define signed8(x)      x
-#define unsigned10(x)   x
-#define unsigned13(x)   x
-#define unsigned16(x)   x
+#define signed16(x)     x
 #define unsigned2(x)    x
-#define unsigned24(x)   x
 #define unsigned3(x)    x
 #define unsigned4(x)    x
 #define unsigned5(x)    x
 #define unsigned6(x)    x
 #define unsigned8(x)    x
+#define unsigned10(x)   x
+#define unsigned13(x)   x
+#define unsigned16(x)   x
+#define unsigned24(x)   x
 #else
 
-/* FIXME: write and test equivalents of above macros in terms of bitreverse */
+#define signed16(x)     (int16_t)bitreverse(x, 16)
+#define signed8(x)      (int8_t)bitreverse(x, 8)
+#define unsigned2(x)    bitreverse(x, 2)
+#define unsigned3(x)    bitreverse(x, 3)
+#define unsigned4(x)    bitreverse(x, 4)
+#define unsigned5(x)    bitreverse(x, 5)
+#define unsigned6(x)    bitreverse(x, 6)
+#define unsigned8(x)    bitreverse(x, 8)
+#define unsigned10(x)   bitreverse(x, 10)
+#define unsigned13(x)   bitreverse(x, 13)
+#define unsigned16(x)   bitreverse(x, 16)
+#define unsigned24(x)   bitreverse(x, 24)
 
 static unsigned bitreverse(unsigned x, unsigned w)
 {
