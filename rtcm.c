@@ -203,11 +203,6 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
  * The RTCM standard is less explicit than it should be about signed-integer
  * representations.  Two's compliment is specified for prc and rrc (msg1wX),
  * but not everywhere.
- *
- * The RTCM words are 30-bit words.  We will lay them into memory into
- * 30-bit (low-end justified) chunks.  To write them out we will write
- * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
- * of the 30-word msg.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
@@ -581,7 +576,7 @@ static void unpack(struct gps_device_t *session)
     case 5:
         {
 	    struct rtcm_msg5    *m = &msg->type5;
-	    for (n = 0; n < len; n++) {
+	    for (n = 0; n < (unsigned)len; n++) {
 		struct consat_t *csp = &tp->conhealth.sat[n];
 
 		csp->ident = unsigned5(m->health[n].sat_id);
@@ -593,11 +588,11 @@ static void unpack(struct gps_device_t *session)
 		csp->los_warning = m->health[n].loss_warn!=0;
 		csp->tou = unsigned4(m->health[n].time_unhealthy)*TU_SCALE;
 	    }
-	    tp->conhealth.nentries = len;
+	    tp->conhealth.nentries = n;
 	}
 	break;
     case 7:
-	for (w = 0; w < len; w++) {
+	for (w = 0; w < (unsigned)len; w++) {
 	    struct station_t *np = &tp->almanac.station[n];
 	    struct b_station_t *mp = &msg->type7.almanac[w];
 
@@ -614,7 +609,7 @@ static void unpack(struct gps_device_t *session)
 	break;
     case 16:
 	/*@ -boolops @*/
-	for (w = 0; w < len; w++){
+	for (w = 0; w < (unsigned)len; w++){
 	    if (!msg->type16.txt[w].byte1) {
 		break;
 	    }
@@ -635,6 +630,7 @@ static void unpack(struct gps_device_t *session)
     }
 }
 
+#ifdef __UNUSED__
 static void repack(struct gps_device_t *session)
 /* repack the content fields into the raw bits */
 {
@@ -804,7 +800,6 @@ static void repack(struct gps_device_t *session)
 
     /* FIXME: must compute parity and inversion here */
 }
-#ifdef __UNUSED__
 #endif /* __UNUSED__ */
 
 /*@ -usereleased -compdef @*/
@@ -1037,6 +1032,12 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 }
 
 #ifdef __UNUSED__
+/*
+ * The RTCM words are 30-bit words.  We will lay them into memory into
+ * 30-bit (low-end justified) chunks.  To write them out we will write
+ * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
+ * of the 30-word msg.
+ */
 void rtcm_output_mag(rtcmword_t * ip)
 /* ship an RTCM message to standard output in Magnavox format */
 {
