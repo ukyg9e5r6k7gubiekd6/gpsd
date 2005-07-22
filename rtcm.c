@@ -568,7 +568,6 @@ static void unpack(struct gps_device_t *session)
     struct rtcm_msghdr  *msghdr;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
 
-    /* someday we'll do big-endian correction here */
     msghdr = (struct rtcm_msghdr *)session->rtcm.buf;
     tp->type = unsigned6(msghdr->w1.msgtype);
     tp->length = unsigned5(msghdr->w2.frmlen);
