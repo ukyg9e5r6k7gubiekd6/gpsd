@@ -77,6 +77,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     size_t i, datalen;
     unsigned int used, visible, satcnt;
     double version;
+    gps_mask_t mask = 0;
 
     if (len == 0)
 	return 0;
@@ -120,15 +121,18 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    session->gpsdata.newdata.mode = MODE_NO_FIX;
 	else if (used == 3)
 	    session->gpsdata.newdata.mode = MODE_2D;
-	else
+	else {
 	    session->gpsdata.newdata.mode = MODE_3D;
+	    mask |= ALTITUDE_SET | CLIMB_SET;
+	}
 	gpsd_report(4, "NDO 0x02: version %3.2f, mode=%d, status=%d, visible=%d, used=%d\n",
 		    version,
 		    session->gpsdata.newdata.mode,
 		    session->gpsdata.status,
 		    visible,
 		    used);
-	return TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
+	return mask;
 
     case 0x04:	/* DOP Data Output */
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
@@ -213,7 +217,6 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	session->gpsdata.newdata.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
-	gpsd_report(5, "TIME: %04x %d %d\n", getuw(buf2, 8), getuw(buf2, 8), session->context->leap_seconds); /* debug */
 	/* FIXME: read full statellite status for each channel */
 	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(4, "MDO 0x04:\n");

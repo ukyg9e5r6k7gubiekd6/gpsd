@@ -18,6 +18,10 @@
  * accelerometer inputs to the chip to allow it to continue 
  * to navigate in the absence of satellite information, and 
  * to improve fixes when you do have satellites.)"
+ *
+ * "[When we need RINEX data, we can get it from] SiRF Message #5.
+ *  If it's no longer implemented on your receiver, messages
+ * 7, 28, 29 and 30 will give you the same information."
  */
 
 #include <stdio.h>
