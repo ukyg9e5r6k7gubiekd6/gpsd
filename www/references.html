@@ -38,24 +38,33 @@
 <p>This page lists both onsite and offsite resources for programmers
 trying to understand GPS technology.</p>
 
+<p>In the descriptions below, the adjective "evil" applied to the
+distribution terms of a standard or technical specfication means that
+(a) it is not available for free download, and (b) it cannot legally
+be redistributed.  The phrase "extremely evil" means that attack
+lawyers for the document publisher have been known to threaten people
+who quote it on the Web.</p>
+
 <h1>GPS standards</h1>
 
 <dl>
+<dt><a href='http://www.nmea.org/pub/0183/'>NMEA 0183</a></dt>
+<dd>This is the official standard from the National Maritime
+Electronics Association describing how GPSes are supposed to
+report to computers over a serial or USB link.  The distribution terms
+are extremely evil.  Consequently, nobody on the GPSD project has ever
+looked at it.</dd>
+
 <dt><a href='NMEA.txt'>NMEA sentences</a></dt>
-<dd>The NMEA 0183 standard describing how GPSes are supposed to report
-to computers is proprietary.  The GPSD project has collected fairly
-comprehensive information on the contents of that standard from
-various Web sources.  This is the collection.</dd>
+<dd>Because the NMEA 0183 standard itself is evil, the GPSD project has
+collated comprehensive information on the prescriptions of that
+standard from various Web resources written by people who have read it
+and/or studied the behavior of GPSes claiming to conform to it.  This
+is the result.</dd>
 
 <dt><a href="http://www.gpsinformation.org/dale/nmea.htm">NMEA data</a></dt>
 <dd>This is one of the sources for the above. Includes some 
-information on vendor-specific quirks that we son't.</dd>
-
-<dt><a href='http://www.nmea.org/pub/0183/'>NMEA 0183</a></dt>
-<dd>This is the actual standard.  The distribution terms are evil,
-e.g. it's proprietary and expensive and NMEA's attack lawyers have been
-known to threaten people who quote it directly.  Consequently, nobody
-on the GPSD project has ever looked at it.</dd>
+information on vendor-specific quirks that we don't.</dd>
 
 <dt><a href='IS-GPS-200D.pdf'>Navstar Global Positioning Interface
 Specification</a></dt>
@@ -67,13 +76,13 @@ data.  Be warned: this specification is complex and nasty.</dd>
 <dt><a
 href='https://ssl29.pair.com/dmarkle/puborder.php?show=3'>RTCM Recommended
 Standards for Differential GNSS</a></dt> 
-<dd>This is the official RTCM SC-104 standard. Much like the NMEA standard
-this is proprietary, and probably protected by rabid lawyers. At least one
-of the GPSD project members has purchased an official copy of this standard,
+<dd>This is the official RTCM SC-104 standard. The distribution terms
+are evil, and probably as with NMEA 0183 enforced by rabid lawyers. At
+least one of the GPSD project members has purchased an official copy,
 so we do have full details of the message format.</dd>
 
 <dt><a
-href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=e&amp;parent=r-rec-m.823-2-199710-i'>itu-r m.823-2</a></dt> 
+href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=e&amp;parent=r-rec-m.823-2-199710-i'>ITU-R M.823-2</a></dt> 
 <dd>This specification documents some of the murky depths of
 rtcm-104, the specification used for broadcating differential-gps 
 corrections. Unfortunately, its distribution terms are also evil.</dd>
@@ -86,7 +95,8 @@ corrections. Unfortunately, its distribution terms are also evil.</dd>
 NMEA extensions or their own more tightly-designed reporting formats.
 This is a collection of descriptions of them.  Many of these have
 already been used in the implementation of <code>gpsd</code>; others
-may be used in the future.</p>
+may be used in the future.  Some are theoretically evil, but in
+practice the vendors don't care.</p>
 
 <dl>
 <dt><a href='sirf_binary.pdf'>SiRF Binary Protocol Reference Manual</a></dt>
