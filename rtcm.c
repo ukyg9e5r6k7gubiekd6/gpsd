@@ -351,7 +351,7 @@ struct rtcm_msg_t {
 
 	/* msg 5 - constellation health */
 	struct rtcm_msg5 {
-	    struct {
+	    struct b_health_t {
 		uint        parity:6;
 		uint	    unassigned:2;
 		uint	    time_unhealthy:4;
@@ -540,56 +540,52 @@ static void unpack(struct gps_device_t *session)
 	}
 	break;
     case 4:
-	{
+	if ((tp->reference.valid = len >= 2)){
 	    struct rtcm_msg4    *m = &msg->type4;
- 
-	    if ((tp->reference.valid = len >= 2)){
-		tp->reference.system =
-			(unsigned3(m->w3.dgnss)==0) ? gps :
-		    		((unsigned3(m->w3.dgnss)==1) ? glonass : unknown);
-		tp->reference.sense = (m->w3.dat != 0) ? global : local;
-		if (m->w3.datum_alpha_char1){
-		    tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char1));
-		}
-		if (m->w3.datum_alpha_char2){
-		    tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char2));
-		}
-		if (m->w4.datum_sub_div_char1){
-		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char1));
-		}
-		if (m->w4.datum_sub_div_char2){
-		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char2));
-		}
-		if (m->w4.datum_sub_div_char3){
-		    tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char3));
-		}
-		tp->reference.datum[n++] = '\0';
-		if (len >= 4) {
-		    tp->reference.dx = unsigned16(m->w5.dx) * DXYZ_SCALE;
-		    tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
-		    tp->reference.dz = unsigned24(m->w6.dz) * DXYZ_SCALE;
-		} else 
-		    tp->reference.sense = invalid;
+
+	    tp->reference.system =
+		    (unsigned3(m->w3.dgnss)==0) ? gps :
+			    ((unsigned3(m->w3.dgnss)==1) ? glonass : unknown);
+	    tp->reference.sense = (m->w3.dat != 0) ? global : local;
+	    if (m->w3.datum_alpha_char1){
+		tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char1));
 	    }
+	    if (m->w3.datum_alpha_char2){
+		tp->reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char2));
+	    }
+	    if (m->w4.datum_sub_div_char1){
+		tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char1));
+	    }
+	    if (m->w4.datum_sub_div_char2){
+		tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char2));
+	    }
+	    if (m->w4.datum_sub_div_char3){
+		tp->reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char3));
+	    }
+	    tp->reference.datum[n++] = '\0';
+	    if (len >= 4) {
+		tp->reference.dx = unsigned16(m->w5.dx) * DXYZ_SCALE;
+		tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
+		tp->reference.dz = unsigned24(m->w6.dz) * DXYZ_SCALE;
+	    } else 
+		tp->reference.sense = invalid;
 	}
 	break;
     case 5:
-        {
-	    struct rtcm_msg5    *m = &msg->type5;
-	    for (n = 0; n < (unsigned)len; n++) {
-		struct consat_t *csp = &tp->conhealth.sat[n];
+	for (n = 0; n < (unsigned)len; n++) {
+	    struct consat_t *csp = &tp->conhealth.sat[n];
+	    struct b_health_t *m = &msg->type5.health[n];
 
-		csp->ident = unsigned5(m->health[n].sat_id);
-		csp->iodl = m->health[n].issue_of_data_link!=0;
-		csp->health = unsigned3(m->health[n].data_health);
-		/*@i@*/csp->snr = (m->health[n].cn0?(m->health[n].cn0+CNR_OFFSET):SNR_BAD);
-		csp->health_en = unsigned2(m->health[n].health_enable);
-		csp->new_data = m->health[n].new_nav_data!=0;
-		csp->los_warning = m->health[n].loss_warn!=0;
-		csp->tou = unsigned4(m->health[n].time_unhealthy)*TU_SCALE;
-	    }
-	    tp->conhealth.nentries = n;
+	    csp->ident = unsigned5(m->sat_id);
+	    csp->iodl = m->issue_of_data_link!=0;
+	    csp->health = unsigned3(m->data_health);
+	    /*@i@*/csp->snr = (m->cn0?(m->cn0+CNR_OFFSET):SNR_BAD);
+	    csp->health_en = unsigned2(m->health_enable);
+	    csp->new_data = m->new_nav_data!=0;
+	    csp->los_warning = m->loss_warn!=0;
+	    csp->tou = unsigned4(m->time_unhealthy)*TU_SCALE;
 	}
+	tp->conhealth.nentries = n;
 	break;
     case 7:
 	for (w = 0; w < (unsigned)len; w++) {
@@ -708,75 +704,67 @@ static void repack(struct gps_device_t *session)
 	}
 	break;
     case 4:
-	{
+	if (tp->reference.valid) {
 	    struct rtcm_msg4    *m = &msg->type4;
- 
-	    if (tp->reference.valid) {
-		m->w3.dgnss = tp->reference.system;
-		m->w3.dat = (tp->reference.sense == global);
-		if (tp->reference.datum[0])
-		    m->w3.datum_alpha_char1 = unsigned8(tp->reference.datum[0]);
-		else
-		    m->w3.datum_alpha_char1 = 0;
-		if (tp->reference.datum[1])
-		    m->w3.datum_alpha_char2 = unsigned8(tp->reference.datum[1]);
-		else
-		    m->w3.datum_alpha_char2 = 0;
-		if (tp->reference.datum[2])
-		    m->w4.datum_sub_div_char1=unsigned8(tp->reference.datum[2]);
-		else
-		    m->w4.datum_sub_div_char1 = 0;
-		if (tp->reference.datum[3])
-		    m->w4.datum_sub_div_char2=unsigned8(tp->reference.datum[3]);
-		else
-		    m->w4.datum_sub_div_char2 = 0;
-		if (tp->reference.datum[4])
-		    m->w4.datum_sub_div_char3=unsigned8(tp->reference.datum[4]);
-		else
-		    m->w4.datum_sub_div_char3 = 0;
-		if (tp->reference.system != invalid) {
-		    m->w5.dx = unsigned16(tp->reference.dx / DXYZ_SCALE);
-		    //tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
-		    m->w6.dz = unsigned24(tp->reference.dz / DXYZ_SCALE);
-		}
+
+	    m->w3.dgnss = tp->reference.system;
+	    m->w3.dat = (tp->reference.sense == global);
+	    if (tp->reference.datum[0])
+		m->w3.datum_alpha_char1 = unsigned8(tp->reference.datum[0]);
+	    else
+		m->w3.datum_alpha_char1 = 0;
+	    if (tp->reference.datum[1])
+		m->w3.datum_alpha_char2 = unsigned8(tp->reference.datum[1]);
+	    else
+		m->w3.datum_alpha_char2 = 0;
+	    if (tp->reference.datum[2])
+		m->w4.datum_sub_div_char1 = unsigned8(tp->reference.datum[2]);
+	    else
+		m->w4.datum_sub_div_char1 = 0;
+	    if (tp->reference.datum[3])
+		m->w4.datum_sub_div_char2 = unsigned8(tp->reference.datum[3]);
+	    else
+		m->w4.datum_sub_div_char2 = 0;
+	    if (tp->reference.datum[4])
+		m->w4.datum_sub_div_char3 = unsigned8(tp->reference.datum[4]);
+	    else
+		m->w4.datum_sub_div_char3 = 0;
+	    if (tp->reference.system != invalid) {
+		m->w5.dx = unsigned16(tp->reference.dx / DXYZ_SCALE);
+		//tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
+		m->w6.dz = unsigned24(tp->reference.dz / DXYZ_SCALE);
 	    }
 	}
 	break;
     case 5:
-        {
-	    struct rtcm_msg5    *m = &msg->type5;
-	    for (n = 0; n < len; n++) {
-		struct consat_t *csp = &tp->conhealth.sat[n];
+	for (n = 0; n < len; n++) {
+	    struct consat_t *csp = &tp->conhealth.sat[n];
+	    struct b_health_t *m = &msg->type5.health[n];
 
-		m->health[n].sat_id = unsigned5(csp->ident);
-		m->health[n].issue_of_data_link = csp->iodl !=0;
-		m->health[n].data_health = unsigned3(csp->health);
-		m->health[n].cn0 = (csp->snr == SNR_BAD) ? 0 : csp->snr - CNR_OFFSET;
-		m->health[n].health_enable = unsigned2(csp->health_en);
-		m->health[n].new_nav_data = csp->new_data != 0;
-		m->health[n].loss_warn = csp->los_warning != 0;
-		m->health[n].time_unhealthy = unsigned4(csp->tou / TU_SCALE);
-	    }
+	    m->sat_id = unsigned5(csp->ident);
+	    m->issue_of_data_link = csp->iodl !=0;
+	    m->data_health = unsigned3(csp->health);
+	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : csp->snr - CNR_OFFSET;
+	    m->health_enable = unsigned2(csp->health_en);
+	    m->new_nav_data = csp->new_data != 0;
+	    m->loss_warn = csp->los_warning != 0;
+	    m->time_unhealthy = unsigned4(csp->tou / TU_SCALE);
 	}
 	break;
     case 7:
-	{
-	    struct rtcm_msg7    *m = &msg->type7;
+	for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
+	    struct station_t *np = &tp->almanac.station[n];
+	    struct b_station_t *mp = msg->type7.almanac[w];
 
-	    for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
-		struct station_t *np = &tp->almanac.station[n];
-		struct b_station_t *mp = &m->almanac[w];
-
-		//np->latitude = signed16(mp->w3.lat) * LA_SCALE;
-		//np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
-		mp->w4.range = unsigned10(np->range);
-		//np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
-		mp->w5.health = unsigned2(np->health);
-		//np->station_id = unsigned10(mp->w5.station_id),
-		//np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
-	    }
-	    tp->almanac.nentries = n;
+	    //np->latitude = signed16(mp->w3.lat) * LA_SCALE;
+	    //np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
+	    mp->w4.range = unsigned10(np->range);
+	    //np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
+	    mp->w5.health = unsigned2(np->health);
+	    //np->station_id = unsigned10(mp->w5.station_id),
+	    //np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 	}
+	tp->almanac.nentries = n;
 	break;
     case 16:
 	/*@ -boolops @*/
