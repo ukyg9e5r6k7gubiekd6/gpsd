@@ -380,6 +380,33 @@ T	THLS TRIAL SERVICE
 
 <para>This just indicates a null message. There are no fields.</para>
 </refsect2>
+<refsect2><title>Unknown message (U)</title>
+<!-- The Sager decoder didn't have this -->
+
+<para>This is used to dump message words in hexadecimal when the
+message type field doesn't match any of the known ones.</para>
+
+<para>Here is the format:</para>
+
+<literallayout>
+U &lt;hex-literal&gt;
+</literallayout>
+
+<para>Here is an example:</para>
+
+<informalexample><literallayout>
+U	0x76423055
+</literallayout></informalexample>
+
+<para>The &lt;hex-literal&gt; will represent 32 bits of information,
+after parity checks and inversion.  The high two bits should be
+ignored.</para>
+
+</refsect2>
+<refsect2><title>Null (N)</title>
+
+<para>This just indicates a null message. There are no fields.</para>
+</refsect2>
 
 <!--
 Decoder Status Messages (M)
@@ -419,7 +446,7 @@ serial data stream which is a word boundary.
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Much of this text was written by John Sager
+<para>Much of this text was originally written by John Sager
 <email>john.sager@btinternet.com</email> in association with his RTCM
 decoder. Other material comes from the GPSD project.  There is a
 project page for <application>gpsd</application> <ulink

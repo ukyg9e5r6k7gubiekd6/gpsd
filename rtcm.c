@@ -416,6 +416,9 @@ struct rtcm_msg_t {
 		uint        _pad:2;
 	    } txt[RTCM_WORDS_MAX-2];
 	} type16;
+
+	/* unknown message */
+	rtcmword_t	rtcm_msgunk[RTCM_WORDS_MAX-2];
     };
 };
 
@@ -622,6 +625,9 @@ static void unpack(struct gps_device_t *session)
 	}
 	/*@ +boolops @*/
 	tp->message[n++] = '\0';
+	break;
+    default:
+	memcpy(tp->words, msg->rtcm_msgunk, (RTCM_WORDS_MAX-2)*sizeof(rtcmword_t));
 	break;
     }
 }
@@ -1014,6 +1020,9 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     default:
+	for (n = 0; n < session->gpsdata.rtcm.length; n++)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "U 0x%08x\n", session->gpsdata.rtcm.words[n]);
 	break;
     }
 

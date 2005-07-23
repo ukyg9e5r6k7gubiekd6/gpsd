@@ -38,6 +38,8 @@ enum rtcmstat_t {
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(rtcmword_t))
+
 struct gps_context_t {
     int valid;				/* member validity flags */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */

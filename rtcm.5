@@ -361,6 +361,39 @@ T	THLS TRIAL SERVICE
 .PP
 This just indicates a null message\&. There are no fields\&.
 
+.SS "Unknown message (U)"
+
+.PP
+This is used to dump message words in hexadecimal when the message type field doesn't match any of the known ones\&.
+
+.PP
+Here is the format:
+
+.nf
+
+U <hex\-literal>
+
+.fi
+
+.PP
+Here is an example:
+
+.IP
+
+.nf
+
+U	0x76423055
+
+.fi
+
+.PP
+The <hex\-literal> will represent 32 bits of information, after parity checks and inversion\&. The high two bits should be ignored\&.
+
+.SS "Null (N)"
+
+.PP
+This just indicates a null message\&. There are no fields\&.
+
 .SH "SEE ALSO"
 
 .PP
@@ -369,5 +402,5 @@ This just indicates a null message\&. There are no fields\&.
 .SH "AUTHOR"
 
 .PP
-Much of this text was written by John Sager <john\&.sager@btinternet\&.com> in association with his RTCM decoder\&. Other material comes from the GPSD project\&. There is a project page for gpsd  here: \fIhttp://gpsd.berlios.de/\fR\&.
+Much of this text was originally written by John Sager <john\&.sager@btinternet\&.com> in association with his RTCM decoder\&. Other material comes from the GPSD project\&. There is a project page for gpsd  here: \fIhttp://gpsd.berlios.de/\fR\&.
 

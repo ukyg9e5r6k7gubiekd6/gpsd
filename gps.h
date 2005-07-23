@@ -84,15 +84,13 @@ struct gps_fix_t {
  * the longest possible message will have a total of 33 words."
  */
 #define RTCM_WORDS_MAX	33
-#define MAXCORRECTIONS	15	/* max correction count in type 1 or 9 */
+#define MAXCORRECTIONS	18	/* max correction count in type 1 or 9 */
 #define MAXSTATIONS	3	/* maximum stations in almanac, type 5 */
-/* RTCM104 doesn't specfy this, so give it the largest reasonable value */
-#define MAXHEALTH	MAXCORRECTIONS	
+/* RTCM104 doesn't specify this, so give it the largest reasonable value */
+#define MAXHEALTH	(RTCM_WORDS_MAX-2)	
 
 
 typedef /*@unsignedintegraltype@*/ unsigned int rtcmword_t;
-
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(rtcmword_t))
 
 struct rtcm_t {
     /* header contents */
@@ -156,7 +154,9 @@ struct rtcm_t {
 	    } station[MAXSTATIONS];
 	} almanac;
 	/* data from type 16 messages */
-	char message[RTCM_MAX];
+	char message[(RTCM_WORDS_MAX-2) * sizeof(rtcmword_t)];
+	/* data from messages of unknown type */
+	rtcmword_t	words[RTCM_WORDS_MAX-2];
     };
 };
 
