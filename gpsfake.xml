@@ -19,6 +19,7 @@
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-b</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
+      <arg choice='opt'>-i</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
@@ -62,6 +63,11 @@ seconds. Fractional values of seconds are legal.</para>
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is
 textual (e.g. NMEA, the text is dumped as well).</para>
+
+<para>The -i option is for single-stepping through logfiles.  It dumps
+the line or packet number (and the sentence if the protocol is
+textual) followed by "? ".  Only when the user keys Enter is the line
+actually fed to <application>gpsd</application>.</para>
 
 <para>The -m option specifies a monitor program inside which the
 daemon should be run.  This option is intended to be used with
