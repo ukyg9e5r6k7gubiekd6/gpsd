@@ -635,10 +635,11 @@ static void unpack(struct gps_device_t *session)
     }
 }
 
+#ifdef __UNUSED__
 static void repack(struct gps_device_t *session)
 /* repack the content fields into the raw bits */
 {
-    int len;
+    int len, sval;
     unsigned int n, w;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
     struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->rtcm.buf;
@@ -683,8 +684,11 @@ static void repack(struct gps_device_t *session)
 		    m->w6.udre3 = unsigned2(tp->ranges.sat[n].udre);
 		    m->w7.issuedata3 = unsigned8(tp->ranges.sat[n].issuedata);
 		    m->w6.scale3 = (unsigned)tp->ranges.sat[n].largescale;
-		    // tp->ranges.sat[n].rangerr     = ((signed8(m->w6.pc3_h)<<8)|(unsigned8(m->w7.pc3_l))) *
-		    //		(m->w6.scale3 ? PCLARGE : PCSMALL);
+		    sval = (int)(tp->ranges.sat[n].rangerr / (m->w6.scale3 ? PCLARGE : PCSMALL));
+		    /*@ -shiftimplementation @*/
+		    m->w6.pc3_h = signed8(sval >> 8);
+		    /*@ +shiftimplementation @*/
+		    m->w7.pc3_l = unsigned8((unsigned)sval & 0xff);
 		    m->w7.rangerate3 = (int)(signed8(tp->ranges.sat[n].rangerate) / (m->w6.scale3 ? RRLARGE : RRSMALL));
 		    n++;
 		}
@@ -796,7 +800,6 @@ static void repack(struct gps_device_t *session)
 
     /* FIXME: must compute parity and inversion here */
 }
-#ifdef __UNUSED__
 #endif /* __UNUSED__ */
 
 /*@ -usereleased -compdef @*/
