@@ -109,6 +109,7 @@ struct rtcm_t {
 		unsigned ident;		/* satellite ID */
 		unsigned udre;		/* user diff. range error */
 		unsigned issuedata;	/* issue of data */
+		bool largescale;
 		double rangerr;		/* range error */
 		double rangerate;	/* range error rate */
 	    } sat[MAXCORRECTIONS];
@@ -134,7 +135,7 @@ struct rtcm_t {
 #define HEALTH_UNMONITORED	(1)	/* No integrity monitor operating */
 #define HEALTH_NOINFO		(2)	/* No information available */
 #define HEALTH_DONOTUSE		(3)	/* Do not use this radiobeacon */
-		unsigned int snr;	/* signal-to-noise ratio, dB */
+	       int snr;			/* signal-to-noise ratio, dB */
 #define SNR_BAD	-1			/* not reported */
 		unsigned int health_en;	/* health enabled */
 		bool new_data;		/* new data? */

@@ -61,7 +61,7 @@ void dgpsip_relay(struct gps_device_t *session)
     if (session->gpsdata.gps_fd !=-1 
 	&& session->context->rtcmbytes > -1
 	&& session->rtcmtime < session->context->rtcmtime
-	&& session->device_type->rtcm_writer) {
+	&& session->device_type->rtcm_writer != NULL) {
 	if (session->device_type->rtcm_writer(session, 
 					      session->context->rtcmbuf, 
 					      (size_t)session->context->rtcmbytes) == 0)

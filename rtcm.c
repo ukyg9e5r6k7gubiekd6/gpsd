@@ -213,8 +213,8 @@ void rtcm_init(/*@out@*/struct gps_device_t *session)
 
 #define XYZ_SCALE	0.01	/* meters */
 #define DXYZ_SCALE	0.1	/* meters */
-#define	LA_SCALE	90.0/32767.0	/* degrees */
-#define	LO_SCALE	180.0/32767.0	/* degrees */
+#define	LA_SCALE	(90.0/32767.0)	/* degrees */
+#define	LO_SCALE	(180.0/32767.0)	/* degrees */
 #define	FREQ_SCALE	0.1	/* kHz */
 #define	FREQ_OFFSET	190.0	/* kHz */
 #define CNR_OFFSET	24	/* dB */
@@ -497,6 +497,7 @@ static void unpack(struct gps_device_t *session)
 		    tp->ranges.sat[n].ident      = unsigned5(m->w3.satident1);
 		    tp->ranges.sat[n].udre       = unsigned2(m->w3.udre1);
 		    tp->ranges.sat[n].issuedata  = unsigned8(m->w4.issuedata1);
+		    tp->ranges.sat[n].largescale = (bool)m->w3.scale1;
 		    tp->ranges.sat[n].rangerr    = signed16(m->w3.pc1) * 
 			(m->w3.scale1 ? PCLARGE : PCSMALL);
 		    tp->ranges.sat[n].rangerate  = signed8(m->w4.rangerate1) * 
@@ -507,6 +508,7 @@ static void unpack(struct gps_device_t *session)
 		    tp->ranges.sat[n].ident      = unsigned5(m->w4.satident2);
 		    tp->ranges.sat[n].udre       = unsigned2(m->w4.udre2);
 		    tp->ranges.sat[n].issuedata  = unsigned8(m->w6.issuedata2);
+		    tp->ranges.sat[n].largescale = (bool)m->w4.scale2;
 		    tp->ranges.sat[n].rangerr    = signed16(m->w5.pc2) * 
 			(m->w4.scale2 ? PCLARGE : PCSMALL);
 		    tp->ranges.sat[n].rangerate  = signed8(m->w5.rangerate2) * 
@@ -517,6 +519,7 @@ static void unpack(struct gps_device_t *session)
 		    tp->ranges.sat[n].ident       = unsigned5(m->w6.satident3);
 		    tp->ranges.sat[n].udre        = unsigned2(m->w6.udre3);
 		    tp->ranges.sat[n].issuedata   = unsigned8(m->w7.issuedata3);
+		    tp->ranges.sat[n].largescale = (bool)m->w6.scale3;
 		    /*@ -shiftimplementation @*/
 		    tp->ranges.sat[n].rangerr     = ((signed8(m->w6.pc3_h)<<8)|(unsigned8(m->w7.pc3_l))) *
 					(m->w6.scale3 ? PCLARGE : PCSMALL);
@@ -632,7 +635,6 @@ static void unpack(struct gps_device_t *session)
     }
 }
 
-#ifdef __UNUSED__
 static void repack(struct gps_device_t *session)
 /* repack the content fields into the raw bits */
 {
@@ -644,7 +646,7 @@ static void repack(struct gps_device_t *session)
     memset(session->rtcm.buf, 0, sizeof(session->rtcm.buf));
     msg->w1.msgtype = unsigned6(tp->type);
     msg->w2.frmlen = unsigned5(tp->length);
-    msg->w2.zcnt = unsigned13(tp->zcount / ZCOUNT_SCALE);
+    msg->w2.zcnt = unsigned13((unsigned)(tp->zcount / ZCOUNT_SCALE));
     msg->w1.refstaid = unsigned10(tp->refstaid);
     msg->w2.sqnum = unsigned3(tp->seqnum);
     msg->w2.stathlth = unsigned3(tp->stathlth);
@@ -662,30 +664,28 @@ static void repack(struct gps_device_t *session)
 		    m->w3.satident1 = unsigned5(tp->ranges.sat[n].ident);
 		    m->w3.udre1 = unsigned2(tp->ranges.sat[n].udre);
 		    m->w4.issuedata1 = unsigned8(tp->ranges.sat[n].issuedata);
-		    //tp->ranges.sat[n].rangerr    = signed16(m->w3.pc1) * 
-		    //	(m->w3.scale1 ? PCLARGE : PCSMALL);
-		    //tp->ranges.sat[n].rangerate  = signed8(m->w4.rangerate1) * 
-		    //		(m->w3.scale1 ? RRLARGE : RRSMALL);
+		    m->w3.scale1 = (unsigned)tp->ranges.sat[n].largescale;
+		    m->w3.pc1 = (int)(signed16(tp->ranges.sat[n].rangerr) / (m->w3.scale1 ? PCLARGE : PCSMALL));
+		    m->w4.rangerate1 = (int)(signed8(tp->ranges.sat[n].rangerate) / (m->w3.scale1 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 4) {
 		    m->w4.satident2 = unsigned5(tp->ranges.sat[n].ident);
 		    m->w4.udre2 = unsigned2(tp->ranges.sat[n].udre);
 		    m->w6.issuedata2 = unsigned8(tp->ranges.sat[n].issuedata);
-		    //tp->ranges.sat[n].rangerr    = signed16(m->w5.pc2) * 
-		    //   (m->w4.scale2 ? PCLARGE : PCSMALL);
-		    //tp->ranges.sat[n].rangerate  = signed8(m->w5.rangerate2) * 
-		    //	(m->w4.scale2 ? RRLARGE : RRSMALL);
+		    m->w4.scale2 = (unsigned)tp->ranges.sat[n].largescale;
+		    m->w5.pc2 = (int)(signed16(tp->ranges.sat[n].rangerr) / (m->w4.scale2 ? PCLARGE : PCSMALL));
+		    m->w5.rangerate2 = (int)(signed8(tp->ranges.sat[n].rangerate) / (m->w4.scale2 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 5) {
 		    m->w6.satident3 = unsigned5(tp->ranges.sat[n].ident);
 		    m->w6.udre3 = unsigned2(tp->ranges.sat[n].udre);
 		    m->w7.issuedata3 = unsigned8(tp->ranges.sat[n].issuedata);
+		    m->w6.scale3 = (unsigned)tp->ranges.sat[n].largescale;
 		    // tp->ranges.sat[n].rangerr     = ((signed8(m->w6.pc3_h)<<8)|(unsigned8(m->w7.pc3_l))) *
 		    //		(m->w6.scale3 ? PCLARGE : PCSMALL);
-		    //tp->ranges.sat[n].rangerate   = signed8(m->w7.rangerate3) * 
-		    //			(m->w6.scale3 ? RRLARGE : RRSMALL);
+		    m->w7.rangerate3 = (int)(signed8(tp->ranges.sat[n].rangerate) / (m->w6.scale3 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		len -= 5;
@@ -714,7 +714,8 @@ static void repack(struct gps_device_t *session)
 	    struct rtcm_msg4    *m = &msg->type4;
 
 	    m->w3.dgnss = tp->reference.system;
-	    m->w3.dat = (tp->reference.sense == global);
+	    m->w3.dat = (unsigned)(tp->reference.sense == global);
+	    /*@ -predboolothers -type @*/
 	    if (tp->reference.datum[0])
 		m->w3.datum_alpha_char1 = unsigned8(tp->reference.datum[0]);
 	    else
@@ -735,39 +736,40 @@ static void repack(struct gps_device_t *session)
 		m->w4.datum_sub_div_char3 = unsigned8(tp->reference.datum[4]);
 	    else
 		m->w4.datum_sub_div_char3 = 0;
-	    if (tp->reference.system != invalid) {
-		m->w5.dx = unsigned16(tp->reference.dx / DXYZ_SCALE);
+	    /*@ +predboolothers +type @*/
+	    if (tp->reference.system != unknown) {
+		m->w5.dx = unsigned16((uint)(tp->reference.dx / DXYZ_SCALE));
 		//tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
-		m->w6.dz = unsigned24(tp->reference.dz / DXYZ_SCALE);
+		m->w6.dz = unsigned24((uint)(tp->reference.dz / DXYZ_SCALE));
 	    }
 	}
 	break;
     case 5:
-	for (n = 0; n < len; n++) {
+	for (n = 0; n < (unsigned)len; n++) {
 	    struct consat_t *csp = &tp->conhealth.sat[n];
 	    struct b_health_t *m = &msg->type5.health[n];
 
 	    m->sat_id = unsigned5(csp->ident);
-	    m->issue_of_data_link = csp->iodl !=0;
+	    m->issue_of_data_link = (unsigned)csp->iodl;
 	    m->data_health = unsigned3(csp->health);
-	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : csp->snr - CNR_OFFSET;
+	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : (unsigned)csp->snr - CNR_OFFSET;
 	    m->health_enable = unsigned2(csp->health_en);
-	    m->new_nav_data = csp->new_data != 0;
-	    m->loss_warn = csp->los_warning != 0;
-	    m->time_unhealthy = unsigned4(csp->tou / TU_SCALE);
+	    m->new_nav_data = (unsigned)csp->new_data;
+	    m->loss_warn = (unsigned)csp->los_warning;
+	    m->time_unhealthy = unsigned4((unsigned)(csp->tou / TU_SCALE));
 	}
 	break;
     case 7:
 	for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
 	    struct station_t *np = &tp->almanac.station[n];
-	    struct b_station_t *mp = msg->type7.almanac[w];
+	    struct b_station_t *mp = &msg->type7.almanac[w];
 
-	    //np->latitude = signed16(mp->w3.lat) * LA_SCALE;
+	    mp->w3.lat = signed16((int)(np->latitude / LA_SCALE));
 	    //np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
 	    mp->w4.range = unsigned10(np->range);
 	    //np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
 	    mp->w5.health = unsigned2(np->health);
-	    //np->station_id = unsigned10(mp->w5.station_id),
+	    mp->w5.station_id = unsigned10(np->station_id);
 	    //np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 	}
 	tp->almanac.nentries = n;
@@ -778,15 +780,15 @@ static void repack(struct gps_device_t *session)
 	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->type16.txt[w].byte1 = unsigned8(tp->message[n++]);
+	    msg->type16.txt[w].byte1 = unsigned8((unsigned)tp->message[n++]);
 	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->type16.txt[w].byte2 = unsigned8(tp->message[n++]);
+	    msg->type16.txt[w].byte2 = unsigned8((unsigned)tp->message[n++]);
 	    if (!tp->message[n]) {
 		break;
 	    }
-	    msg->type16.txt[w].byte3 = unsigned8(tp->message[n++]);
+	    msg->type16.txt[w].byte3 = unsigned8((unsigned)tp->message[n++]);
 	}
 	/*@ +boolops @*/
 	break;
@@ -794,6 +796,7 @@ static void repack(struct gps_device_t *session)
 
     /* FIXME: must compute parity and inversion here */
 }
+#ifdef __UNUSED__
 #endif /* __UNUSED__ */
 
 /*@ -usereleased -compdef @*/
@@ -984,7 +987,7 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	    struct consat_t *csp = &session->gpsdata.rtcm.conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   /* FIXME: turn these spaces to tabs someday */
-			   "C\t%2u\t%1u  %1u\t%2u\t%1u  %1u  %1u\t%2u\n",
+			   "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
 			   csp->ident,
 			   (unsigned)csp->iodl,
 			   (unsigned)csp->health,

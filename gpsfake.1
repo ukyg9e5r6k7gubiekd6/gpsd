@@ -24,7 +24,7 @@ gpsfake \- test harness for gpsd, simulating a GPS
 .ad l
 .hy 0
 .HP 8
-\fBgpsfake\fR [\-h] [\-b] [\-c\ \fIinterval\fR] [\-D\ \fIdebuglevel\fR] [\-l] [\-m\ \fImonitor\fR] [\-o\ \fIoptions\fR] [\-p] [\-s\ \fIspeed\fR] [\fIlogfile\fR]
+\fBgpsfake\fR [\-h] [\-b] [\-c\ \fIinterval\fR] [\-i] [\-D\ \fIdebuglevel\fR] [\-l] [\-m\ \fImonitor\fR] [\-o\ \fIoptions\fR] [\-p] [\-s\ \fIspeed\fR] [\fIlogfile\fR]
 .ad
 .hy
 
@@ -52,6 +52,9 @@ The \-c option sets the delay between sentences in seconds\&. Fractional values 
 
 .PP
 The \-l option makes the program dump a line or packet number just before each sentence is fed to the daemon\&. If the sentence is textual (e\&.g\&. NMEA, the text is dumped as well)\&.
+
+.PP
+The \-i option is for single\-stepping through logfiles\&. It dumps the line or packet number (and the sentence if the protocol is textual) followed by "? "\&. Only when the user keys Enter is the line actually fed to gpsd\&.
 
 .PP
 The \-m option specifies a monitor program inside which the daemon should be run\&. This option is intended to be used with \fBvalgrind\fR(1), \fBgdb\fR(1) and similar programs\&.
