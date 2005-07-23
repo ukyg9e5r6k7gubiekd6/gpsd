@@ -18,8 +18,13 @@ region 1 and 285 - 325 kHz in regions 2 & 3."
 
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from
-message dumping.  You are not expected to understand any of it. Here
-are Wolfgang's original rather cryptic notes on the decoder stage:
+message dumping (he also added support for big-endian machines and
+repacking).  You are not expected to understand any of it. 
+
+However, in case you think you need to, this decoder is divided into
+two layers.  The lower one just handles synchronizing with the
+incoming bitstream and parity checking, Here are Wolfgang's original
+rather cryptic notes on the lower level:
 
 --------------------------------------------------------------------------
 1) trim and  bitflip the input.
@@ -48,6 +53,13 @@ Shift 6 bytes of rtcm data in as such:
               detector-for-parity
               |||||||||||||||||||||||
 --------------------------------------------------------------------------
+
+The lower layer's job is done when it has assembled a message of up to
+33 words of clean parity-checked data.  At this point the upper layer
+takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
+are used to extract pieces of it (which, if you're on a big-endian machine
+may need to be swapped end-for-end).  Those pieces are copied and (where
+necessary) reassembled into a struct rtcm_t.
 
 Wolfgang's decoder was loosely based on one written by John Sanger in
 1999 (in particular the dump function emits Sanger's dump format).

@@ -12,7 +12,7 @@ monitor like valgrind or gdb.  Here are some particularly useful possibilities:
 valgrind --tool=memcheck --gen-suppressions=yes --leak-check=yes
     Run under Valgrind, checking for malloc errors and memory leaks.
 
-xterm -e gdb -tui
+xterm -e gdb -tui --args
     Run under gdb, controlled from a new xterm.
 
 You can use the options argument to pass in daemon options; normally you will
