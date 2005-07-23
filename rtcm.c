@@ -636,11 +636,11 @@ static void unpack(struct gps_device_t *session)
 }
 
 #ifdef __UNUSED__
-static void repack(struct gps_device_t *session)
+static bool repack(struct gps_device_t *session)
 /* repack the content fields into the raw bits */
 {
     int len, sval;
-    unsigned int n, w;
+    unsigned int n, w, uval;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
     struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->rtcm.buf;
 
@@ -743,7 +743,9 @@ static void repack(struct gps_device_t *session)
 	    /*@ +predboolothers +type @*/
 	    if (tp->reference.system != unknown) {
 		m->w5.dx = unsigned16((uint)(tp->reference.dx / DXYZ_SCALE));
-		//tp->reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
+		uval = (uint)(tp->reference.dy / DXYZ_SCALE);
+		m->w5.dy_h = unsigned8(uval >> 8);
+		m->w6.dy_l = unsigned8(uval & 0xff);
 		m->w6.dz = unsigned24((uint)(tp->reference.dz / DXYZ_SCALE));
 	    }
 	}
@@ -769,12 +771,25 @@ static void repack(struct gps_device_t *session)
 	    struct b_station_t *mp = &msg->type7.almanac[w];
 
 	    mp->w3.lat = signed16((int)(np->latitude / LA_SCALE));
-	    //np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
+	    sval = (int)(np->longitude / LO_SCALE);
+	    /*@ -shiftimplementation @*/
+	    mp->w3.lon_h = signed8(sval >> 8);
+	    /*@ +shiftimplementation @*/
+	    mp->w4.lon_l = unsigned8((unsigned)sval & 0xff);
 	    mp->w4.range = unsigned10(np->range);
-	    //np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
+	    uval = (unsigned)((np->frequency / FREQ_SCALE) - FREQ_OFFSET);
+	    mp->w4.freq_h = unsigned6(uval >> 6);
+	    mp->w5.freq_l = unsigned6(uval % 0x3f);
 	    mp->w5.health = unsigned2(np->health);
 	    mp->w5.station_id = unsigned10(np->station_id);
-	    //np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
+	    mp->w5.bit_rate = 0;
+	    for (uval = 0; uval < (unsigned)(sizeof(tx_speed)/sizeof(tx_speed[0])); uval++)
+		if (tx_speed[uval] == np->bitrate) {
+		    mp->w5.bit_rate = uval;
+		    break;
+		}
+	    if (mp->w5.bit_rate == 0)
+		return false;
 	}
 	tp->almanac.nentries = n;
 	break;
@@ -799,6 +814,7 @@ static void repack(struct gps_device_t *session)
     }
 
     /* FIXME: must compute parity and inversion here */
+    return true;
 }
 #endif /* __UNUSED__ */
 
