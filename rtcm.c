@@ -619,7 +619,7 @@ static void unpack(struct gps_device_t *session)
 	    np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 	    n++;
 	}
-	tp->almanac.nentries = n;
+	tp->almanac.nentries = len/3;
 	break;
     case 16:
 	/*@ -boolops @*/
