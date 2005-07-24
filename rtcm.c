@@ -830,6 +830,8 @@ static bool repack(struct gps_device_t *session)
 }
 #endif /* __UNUSED__ */
 
+#define PREAMBLE_MATCH(x) (((struct rtcm_msghw1 *) & (x))->preamble==PREAMBLE_PATTERN)
+
 /*@ -usereleased -compdef @*/
 enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 {
@@ -855,8 +857,8 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	    } else {
 		session->rtcm.curr_word |= c >> -(session->rtcm.curr_offset);
 	    }
-	    if (((struct rtcm_msghw1 *) & session->rtcm.curr_word)->preamble ==
-		PREAMBLE_PATTERN) {
+
+	    if (PREAMBLE_MATCH(session->rtcm.curr_word)) {
 		if (rtcmparityok(session->rtcm.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"preamble ok, parity ok -- locked\n");
@@ -890,8 +892,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 		 * Don't clobber the buffer just because we spot
 		 * another preamble pattern in the data stream. -wsr
 		 */
-		if (((struct rtcm_msghw1 *) & session->rtcm.curr_word)->preamble ==
-		    PREAMBLE_PATTERN) {
+		if (PREAMBLE_MATCH(session->rtcm.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
 				"Preamble spotted (index: %u)\n",
 				session->rtcm.bufindex);
