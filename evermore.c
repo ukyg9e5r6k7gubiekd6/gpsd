@@ -1,12 +1,61 @@
 /*
  * This is the gpsd driver for EverMore GPSes operating in binary mode.
- *
  * About the only thing this gives us that NMEA won't is TDOP.
  * But we'll get atomic position reports from it, which is good.
  *
  * The vendor site is <http://www.emt.com.tw>.
+ *
+ * This driver was written by Petr Slansky based on a framework by Eric S. 
+ * Raymond.  The following remarks are by Petr Slansky.
+ *
+ * Snooping on the serial the communication between a Windows program and
+ * an Evermore chipset reveals some messages not described in the vendor
+ * documentation (Issue C of Aug 2002):
+ *
+ * 10 02 06 84 00 00 00 84 10 03	switch to binary mode (84 00 00 00)
+ * 10 02 06 84 01 00 00 85 10 03	switch to NMEA mode (84 01 00 00)
+ *
+ * These don't entail a reset as the 0x80 message does.
+ *
+ * The chip sometimes sends vendor extension messages with the prefix
+ * $PEMT.  After reset, it sends a $PEMT,100 message describing the
+ * chip's configuration.  Here is a sample:
+ *
+ * $PEMT,100,05.42g,100303,180,05,1,20,15,08,0,0,2,1*5A
+ * 100 - message type
+ * 05.42g - firmware version
+ * 100303 - date of firmware release
+ * 180 -  datumn ID; 001 is WGT-84
+ * 05 - Elevation mask
+ * 1 - DOP mode (1 is auto DOP mask)
+ * 20 - GDOP mode
+ * 15 - PDOP
+ * 08 - HDOP
+ * 0 - Normal mode, without 1PPS
+ * 0 - ??
+ * 2 - ??
+ * 1 - ??
+ *
+ * With message 0x8e it is possible to define how often each NMEA
+ * message is sent (0-255 seconds). It is possible with message 0x8e
+ * to activate PEMT messages that have information about time,
+ * position, velocity and HDOP.
+ * 
+ * $PEMT,101,1,03,21.0,230705190757,5004.6612,N,01425.1359,E,00269,045,0000*24
+ * 101 - message type
+ * 1 - (1 or 2) I guess that this is lag that position is valid
+ * 03 - number of used satelites
+ * 21.0 - HDOP
+ * 230705190757 - date and time, UTC
+ * 5004.6612,N - Latitude (degree)
+ * 01425.1359,E - Longitude (degree)
+ * 00269 - Altitude (m)
+ * 045 - heading (degrees from true north)
+ * 0000 - ?? could be speed over ground
+ * 
+ * There is one more message, 0x85, some kind of initialisation, I don't
+ * understand the 0x85 message in detail.
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>
