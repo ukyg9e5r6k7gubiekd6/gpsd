@@ -128,7 +128,7 @@ static unsigned int reverse_bits[] = {
 };
 /*@ -charint @*/
 
-static unsigned int rtcmparity(isgps30bits_t th)
+static unsigned int isgpsparity(isgps30bits_t th)
 {
 #define P_30_MASK	0x40000000u
 
@@ -172,7 +172,7 @@ static unsigned int rtcmparity(isgps30bits_t th)
 }
 
 
-#define rtcmparityok(w)	(rtcmparity(w) == ((w) & 0x3f))
+#define isgpsparityok(w)	(isgpsparity(w) == ((w) & 0x3f))
 
 #if 0
 /* 
@@ -181,8 +181,8 @@ static unsigned int rtcmparity(isgps30bits_t th)
  * Defining the above as a function triggers an optimizer bug in gcc 3.4.2.
  * The symptom is that parity computation is screwed up and the decoder
  * never achieves sync lock.  Something steps on the argument to 
- * rtcmparity(); the lossage appears to be related to the compiler's 
- * attempt to fold the rtcmparity() call into rtcmparityok() in some
+ * isgpsparity(); the lossage appears to be related to the compiler's 
+ * attempt to fold the isgpsparity() call into isgpsparityok() in some
  * tail-recursion-like manner.  This happens under -O2, but not -O1, on
  * both i386 and amd64.  Disabling all of the individual -O2 suboptions
  * does *not* fix it.
@@ -194,9 +194,9 @@ static unsigned int rtcmparity(isgps30bits_t th)
  *
  *  gcc 4.0 does not manifest these bugs.
  */
-static bool rtcmparityok(isgps30bits_t w)
+static bool isgpsparityok(isgps30bits_t w)
 {
-    return (rtcmparity(w) == (w & 0x3f));
+    return (isgpsparity(w) == (w & 0x3f));
 }
 #endif
 
@@ -859,7 +859,7 @@ enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	    }
 
 	    if (PREAMBLE_MATCH(session->isgps.curr_word)) {
-		if (rtcmparityok(session->isgps.curr_word)) {
+		if (isgpsparityok(session->isgps.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"preamble ok, parity ok -- locked\n");
 		    session->isgps.locked = true;
@@ -886,7 +886,7 @@ enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	    if (session->isgps.curr_word & P_30_MASK)
 		session->isgps.curr_word ^= W_DATA_MASK;
 
-	    if (rtcmparityok(session->isgps.curr_word)) {
+	    if (isgpsparityok(session->isgps.curr_word)) {
 #if 0
 		/*
 		 * Don't clobber the buffer just because we spot
@@ -925,7 +925,6 @@ enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 			return ISGPS_NO_SYNC;
 		    }
 		    session->isgps.bufindex++;
-		    /* rtcm_print_msg(msg); */
 
 		    if (session->isgps.bufindex >= 2) {	/* do we have the length yet? */
 			if (session->isgps.bufindex >= msg->w2.frmlen + 2) {
