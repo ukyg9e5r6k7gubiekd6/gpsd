@@ -200,7 +200,7 @@ static bool rtcmparityok(isgps30bits_t w)
 }
 #endif
 
-void rtcm_init(/*@out@*/struct gps_device_t *session)
+void isgps_init(/*@out@*/struct gps_device_t *session)
 {
     session->isgps.curr_word = 0;
     session->isgps.curr_offset = 24;	/* first word */
@@ -833,14 +833,14 @@ static bool repack(struct gps_device_t *session)
 #define PREAMBLE_MATCH(x) (((struct rtcm_msghw1 *) & (x))->preamble==PREAMBLE_PATTERN)
 
 /*@ -usereleased -compdef @*/
-enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
+enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 {
-    enum rtcmstat_t res;
+    enum isgpsstat_t res;
 
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
 	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 		    "word tag not correct, skipping\n");
-	return RTCM_SKIP;
+	return ISGPS_SKIP;
     }
     c = reverse_bits[c & 0x3f];
 
@@ -873,7 +873,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 	}			/* end while */
     }
     if (session->isgps.locked) {
-	res = RTCM_SYNC;
+	res = ISGPS_SYNC;
 
 	if (session->isgps.curr_offset > 0) {
 	    session->isgps.curr_word |= c << session->isgps.curr_offset;
@@ -913,7 +913,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 			session->isgps.bufindex = 0;
 			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				    "RTCM buffer overflowing -- resetting\n");
-			return RTCM_NO_SYNC;
+			return ISGPS_NO_SYNC;
 		    }
 
 		    session->isgps.buf[session->isgps.bufindex] = session->isgps.curr_word;
@@ -922,7 +922,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 			(msg->w1.preamble != PREAMBLE_PATTERN)) {
 			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				    "word 0 not a preamble- punting\n");
-			return RTCM_NO_SYNC;
+			return ISGPS_NO_SYNC;
 		    }
 		    session->isgps.bufindex++;
 		    /* rtcm_print_msg(msg); */
@@ -930,7 +930,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 		    if (session->isgps.bufindex >= 2) {	/* do we have the length yet? */
 			if (session->isgps.bufindex >= msg->w2.frmlen + 2) {
 			    /* jackpot, we have an RTCM packet*/
-			    res = RTCM_STRUCTURE;
+			    res = ISGPS_MESSAGE;
 			    session->isgps.bufindex = 0;
 			    unpack(session);
 			}
@@ -958,7 +958,7 @@ enum rtcmstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
     /* never achieved lock */
     gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 		"lock never achieved\n");
-    return RTCM_NO_SYNC;
+    return ISGPS_NO_SYNC;
 }
 /*@ +usereleased +compdef @*/
 

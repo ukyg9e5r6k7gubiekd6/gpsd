@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 {
     int             c;
     struct gps_device_t device;
-    enum rtcmstat_t res;
+    enum isgpsstat_t res;
     off_t count;
     char buf[BUFSIZ];
     bool striplines = false;
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 	(void)ungetc(c, stdin);
     }
 
-    rtcm_init(&device);
+    isgps_init(&device);
 
     count = 0;
     while ((c = getchar()) != EOF) {
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 	if (verbose >= RTCM_ERRLEVEL_BASE + 3) 
 	    printf("%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
-	if (res == RTCM_STRUCTURE) {
+	if (res == ISGPS_MESSAGE) {
 	    rtcm_dump(&device, buf, sizeof(buf));
 	    (void)fputs(buf, stdout);
 	}
