@@ -4,6 +4,121 @@ will unfold them again.
 
 If you're looking for things to hack on, first see the TODO file.
 
+** Goals and philosophy of the project
+
+If the GPSD project ever needs a slogan, it will be "Hide the ugliness!"
+GPS technology works, but is baroque, ugly and poorly documented.  Our
+job is to know the grotty details so nobody else has to.
+
+*** Audience and supported hardware
+
+Our paradigm user, the one we have in mind when making design choices,
+is running navigational or wardriving software on a Linux laptop or
+PDA. Some of our developers are actively interested in supporting
+GPS-with-SBC (Single-Board-Computer) hardware such as is used in
+balloon telemetry, marine navigation, and aviation.  
+
+These two use cases have similar issues in areas like client
+interfaces and power/duty-cycle management.  The one place where
+they differ substantially is that in the SBC case we generally
+know in advance what devices will be connected and when.  Thus, by
+designing for the less predictable laptop/PDA environment, we
+cover both. It is not by accident that the source code can be built 
+with support for only any single GPS type compiled in.
+
+While we will support survey-grade GPSes when and if we have that
+hardware for testing, our focus will probably remain on inexpensive
+and readily-available consumer-grade GPS hardware.
+
+*** The time and location service
+
+The primary aim of the GPSD project is to support a simple
+time-and-location service for users and their geographically-aware
+applications.
+
+A GPS is a device for delivering fourteen numbers: x, y, z, t, vx, vy, vz,
+and error estimates for each of these seven coordinates.  The gpsd daemon's
+job is to deliver these numbers to user applications with minimum fuss.
+
+'Minimum fuss' means that the only action the user should have to take
+to enable location service is to plug in a GPS.  The gpsd daemon, and its
+associated hotplug scripts or local equivalent, is responsible for
+automatically configuring itself. That includes autobauding,
+handshaking with the device, determining the correct mode or protocol
+to use, and issuing any device-specific initializations required.
+
+Features (such as GPS type or serial-parameter switches) that would
+require the user to perform administrative actions to enable location
+service will be rejected.  GPSes that cannot be autoconfigured will
+not be supported.  99% of the GPS hardware on the market in 2005 is
+autoconfigurable, and the design direction of GPS chipsets is such
+that this percentage will rise rather than fall; we deliberately
+choose simplicity of interface and zero administration over 100%
+coverage.
+
+Here is a concrete example of how this principle applies.  At least
+one very low-end GPS chipset does not deliver correct checksums on the
+packets it ships to a host unless it has a fix.  Typically, GPSes do
+not have a fix when they are plugged in, at the time gpsd must
+recognize and autoconfigure the device.  Thus, supporting this chipset
+would require that we either (a) disable packet integrity checking in
+the autoconfiguration code, making detection of other more
+well-behaved devices unreliable, or (b) add an invocation switch to
+disable packet integrity checking for that chipset alone.  We refuse
+to do either, and do not support this chipset.
+
+*** The testing and tuning tools
+
+Another principal goal of the GPSD software is that it be able to
+demonstrate its own correctness, give technical users good tools for
+measuring GPS accuracy and diagnosis of GPS idiosyncrasies, and
+provide a test framework for gpsd-using applications.
+
+Accordingly, we support the gpsfake tool that simulates a GPS using
+recorded or synthetic log data.  We support gpsprof, which collects
+accuracy and latency statistics on GPSes and the GPS+gpsd combination.
+And we include a comprehensive regression-test suite with the package.
+These tools are not accidents, they are essential to ensure that the
+basic GPS-monitoring code is not merely correct but *demonstrably*
+correct.
+
+We support a tool, sirfmon, which is a low-level packet monitor and
+diagnostic tool for the chipset with 80% market share.  sirfmon is
+capable of tuning some device-specific control settings such as the
+SiRF static-navigation mode.  A future direction of the project is to
+support diagnostic monitoring and tuning for other chipsets.
+
+*** The upgrading tools
+
+A secondary aim of the GPSD project is to support GPS firmware
+upgrades under open-source operating systems, freeing GPS users from
+reliance on closed-source vendor tools and closed-source operating
+systems.
+
+We have made a first step in that direction with the initial alpha
+version of gpsflash, currently supporting SiRF chips only.  A future
+direction of the project is to have gpsflash support firmare upgrades 
+for other chipsets.
+
+*** The GPS/GNSS monitoring tools
+
+Another secondary goal of the project is to provide open-source tools
+for diagnostic monitoring and accuracy profiling not just of
+individual GPSes but of the GPS/GNSS network itself. The protocols
+(such as IS-GPS-200 for satellite downlink and RCTM104 for
+differential-GPS corrections) are notoriously poorly documented, and
+open-source tools for interpreting them have in the past been hard
+to find and only sporadically maintained.
+
+We aim to remedy this.  Our design goal is to provide lossless
+translators between these protocols and readable, documented
+text-stream formats.  
+
+We currently provide a tool for decoding RTCM104 reports on satellite
+health, almanacs, and pseudorange information from differential-GPS
+radios and reference stations.  A future direction of the project is
+to support an RTCM encoder; also to support DGPSIP service via gpsd.
+
 ** Contribution guidelines
 
 *** Send patches in diff -u or -c format
