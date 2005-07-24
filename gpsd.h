@@ -38,7 +38,7 @@ enum rtcmstat_t {
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(rtcmword_t))
+#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
 
 struct gps_context_t {
     int valid;				/* member validity flags */
@@ -197,15 +197,15 @@ struct gps_device_t {
 	/*
 	 * This is not conditionalized on RTCM104_ENABLE because we need to
 	 * be able to build rtcmdecode even when RTCM support is not
-	 * configured in the daemon.  It doesn't take up extra space
+	 * configured in the daemon.  It doesn't take up extra space.
 	 */
 	struct { 
 	    bool            locked;
 	    int             curr_offset;
-	    rtcmword_t      curr_word;
-	    rtcmword_t      buf[RTCM_WORDS_MAX];
+	    isgps30bits_t   curr_word;
+	    isgps30bits_t   buf[RTCM_WORDS_MAX];
 	    unsigned int    bufindex;
-	} rtcm;
+	} isgps;
     };
 #endif /* BINARY_ENABLE */
 };

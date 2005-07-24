@@ -89,8 +89,8 @@ struct gps_fix_t {
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
 #define MAXHEALTH	(RTCM_WORDS_MAX-2)	
 
-
-typedef /*@unsignedintegraltype@*/ unsigned int rtcmword_t;
+/* nominally 30-bit word */
+typedef /*@unsignedintegraltype@*/ unsigned int isgps30bits_t;
 
 struct rtcm_t {
     /* header contents */
@@ -155,9 +155,9 @@ struct rtcm_t {
 	    } station[MAXSTATIONS];
 	} almanac;
 	/* data from type 16 messages */
-	char message[(RTCM_WORDS_MAX-2) * sizeof(rtcmword_t)];
+	char message[(RTCM_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */
-	rtcmword_t	words[RTCM_WORDS_MAX-2];
+	isgps30bits_t	words[RTCM_WORDS_MAX-2];
     };
 };
 
