@@ -130,6 +130,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    session->gpsdata.newdata.mode = MODE_NO_FIX;
 	    mask |= MODE_SET;
 	}
+	/* set something nz, so it won't look like an unknown sentence */
+	mask |= ONLINE_SET;
     } else if (strcmp(field[2], "A")==0) {
 	if (count > 9) {
 	    merge_ddmmyy(field[9], session);
