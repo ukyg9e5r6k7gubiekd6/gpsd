@@ -1,30 +1,21 @@
 /*****************************************************************************
 
-This is a decoder for RTCM-104, an obscure and complicated serial
-protocol used for broadcasting pseudorange corrections from
-differential-GPS reference stations.  The applicable
-standard is
-
-RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL NAVSTAR GPS SERVICE,
-RTCM PAPER 194-93/SC 104-STD
-
-Ordering instructions are accessible from <http://www.rtcm.org/>
-under "Publications".
-
-Also applicable is ITU-R M.823: "Technical characteristics of
-differential transmissions for global navigation satellite systems
-from maritime radio beacons in the frequency band 283.5 - 315 kHz in
-region 1 and 285 - 325 kHz in regions 2 & 3."
+This is a decoder for the unnamed protocol described in IS-GPS-200,
+the Navstar GPS Interface Specification, and used as a transport layer
+for both GPS satellite downlink transmissions and the RTCM104 format
+for briodcasting differential-GPS corrections.
 
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from
-message dumping (he also added support for big-endian machines and
-repacking).  You are not expected to understand any of it. 
+message dumping and separate this lower layer from the upper layer 
+handing RTCM decoding.  You are not expected to understand any of it. 
 
-However, in case you think you need to, this decoder is divided into
-two layers.  The lower one just handles synchronizing with the
-incoming bitstream and parity checking, Here are Wolfgang's original
-rather cryptic notes on the lower level:
+This lower layer just handles synchronizing with the incoming
+bitstream and parity checking; all it does is assemble message
+packets.  It needs an upper layer to analyze the packets into
+bitfields and the assemble the bitfields into usable data.
+
+Here are Wolfgang's original rather cryptic notes on this code:
 
 --------------------------------------------------------------------------
 1) trim and bitflip the input.
@@ -60,24 +51,6 @@ takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
 are used to extract pieces of it (which, if you're on a big-endian machine
 may need to be swapped end-for-end).  Those pieces are copied and (where
 necessary) reassembled into a struct rtcm_t.
-
-Wolfgang's decoder was loosely based on one written by John Sanger in
-1999 (in particular the dump function emits Sanger's dump format).
-Here are John Sanger's original notes:
-
---------------------------------------------------------------------------
-The RTCM decoder prints a legible representation of the input data.
-The RTCM SC-104 specification is copyrighted, so I cannot
-quote it - in fact, I have never read it! Most of the information
-used to develop the decoder came from publication ITU-R M.823.
-This is a specification of the data transmitted from LF DGPS
-beacons in the 300kHz band. M.823 contains most of those parts of
-RTCM SC-104 directly relevant to the air interface (there
-are one or two annoying and vital omissions!). Information
-about the serial interface format was gleaned from studying
-the output of a beacon receiver test program made available on
-Starlink's website.
---------------------------------------------------------------------------
 
 *****************************************************************************/
 
@@ -332,3 +305,18 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 }
 /*@ +usereleased +compdef @*/
 
+#if WORDS_BIGENDIAN
+unsigned bitreverse(unsigned x, unsigned w)
+{
+    unsigned char mask = 1 << (w - 1), result = 0;
+
+    while (value) /* skip most significant bits that are zero */
+    {
+	if (value & 1) /* replace mod (machine dependency) */
+	    result |= mask;
+	mask  >>= 1;
+	value >>= 1;
+    }
+    return result;
+}
+#endif

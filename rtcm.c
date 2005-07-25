@@ -1,3 +1,53 @@
+/*****************************************************************************
+
+This is a decoder for RTCM-104, an obscure and complicated serial
+protocol used for broadcasting pseudorange corrections from
+differential-GPS reference stations.  The applicable
+standard is
+
+RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL NAVSTAR GPS SERVICE,
+RTCM PAPER 194-93/SC 104-STD
+
+Ordering instructions are accessible from <http://www.rtcm.org/>
+under "Publications".
+
+Also applicable is ITU-R M.823: "Technical characteristics of
+differential transmissions for global navigation satellite systems
+from maritime radio beacons in the frequency band 283.5 - 315 kHz in
+region 1 and 285 - 325 kHz in regions 2 & 3."
+
+The RTCM protocol uses as a transport layer the GPS satellite downlink
+protocol described in IS-GPS-200, the Navstar GPS Interface
+Specification.  This code relies on the lower-level packet-assembly
+code for that protocol in isgps.c.
+
+The lower layer's job is done when it has assembled a message of up to
+33 words of clean parity-checked data.  At this point this upper layer
+takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
+are used to extract pieces of it (which, if you're on a big-endian machine
+may need to be swapped end-for-end).  Those pieces are copied and (where
+necessary) reassembled into a struct rtcm_t.
+
+This code and the contents of isgps.c are evolved from code by Wolgang
+Rupprecht.  Wolfgang's decoder was loosely based on one written by
+John Sager in 1999 (in particular the dump function emits a close
+descendant of Sager's dump format).  Here are John Sager's original
+notes:
+
+The RTCM decoder prints a legible representation of the input data.
+The RTCM SC-104 specification is copyrighted, so I cannot
+quote it - in fact, I have never read it! Most of the information
+used to develop the decoder came from publication ITU-R M.823.
+This is a specification of the data transmitted from LF DGPS
+beacons in the 300kHz band. M.823 contains most of those parts of
+RTCM SC-104 directly relevant to the air interface (there
+are one or two annoying and vital omissions!). Information
+about the serial interface format was gleaned from studying
+the output of a beacon receiver test program made available on
+Starlink's website.
+
+*****************************************************************************/
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -233,49 +283,6 @@ struct rtcm_msg_t {
 };
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
-
-#if WORDS_BIGENDIAN
-#define signed16(x)     (int16_t)bitreverse(x, 16)
-#define signed8(x)      (int8_t)bitreverse(x, 8)
-#define unsigned2(x)    bitreverse(x, 2)
-#define unsigned3(x)    bitreverse(x, 3)
-#define unsigned4(x)    bitreverse(x, 4)
-#define unsigned5(x)    bitreverse(x, 5)
-#define unsigned6(x)    bitreverse(x, 6)
-#define unsigned8(x)    bitreverse(x, 8)
-#define unsigned10(x)   bitreverse(x, 10)
-#define unsigned13(x)   bitreverse(x, 13)
-#define unsigned16(x)   bitreverse(x, 16)
-#define unsigned24(x)   bitreverse(x, 24)
-
-static unsigned bitreverse(unsigned x, unsigned w)
-{
-       unsigned char mask = 1 << (w - 1), result = 0;
-
-       while (value) /* skip most significant bits that are zero */
-       {
-	   if (value & 1) /* replace mod (machine dependency) */
-	       result |= mask;
-	   mask  >>= 1;
-	   value >>= 1;
-       }
-       return result;
-}
-#else
-/* placeholders for field inversion macros */
-#define signed8(x)      x
-#define signed16(x)     x
-#define unsigned2(x)    x
-#define unsigned3(x)    x
-#define unsigned4(x)    x
-#define unsigned5(x)    x
-#define unsigned6(x)    x
-#define unsigned8(x)    x
-#define unsigned10(x)   x
-#define unsigned13(x)   x
-#define unsigned16(x)   x
-#define unsigned24(x)   x
-#endif
 
 static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */

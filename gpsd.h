@@ -263,8 +263,37 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 				     bool (*preamble_match)(isgps30bits_t *),
 				     bool (*length_check)(struct gps_device_t *),
 			      unsigned int c);
+extern unsigned bitreverse(unsigned x, unsigned w);
 extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
 
+/* macros for byte-order-independent bitfield extraction */
+#if WORDS_BIGENDIAN
+#define signed16(x)     (int16_t)bitreverse(x, 16)
+#define signed8(x)      (int8_t)bitreverse(x, 8)
+#define unsigned2(x)    bitreverse(x, 2)
+#define unsigned3(x)    bitreverse(x, 3)
+#define unsigned4(x)    bitreverse(x, 4)
+#define unsigned5(x)    bitreverse(x, 5)
+#define unsigned6(x)    bitreverse(x, 6)
+#define unsigned8(x)    bitreverse(x, 8)
+#define unsigned10(x)   bitreverse(x, 10)
+#define unsigned13(x)   bitreverse(x, 13)
+#define unsigned16(x)   bitreverse(x, 16)
+#define unsigned24(x)   bitreverse(x, 24)
+#else
+#define signed8(x)      x
+#define signed16(x)     x
+#define unsigned2(x)    x
+#define unsigned3(x)    x
+#define unsigned4(x)    x
+#define unsigned5(x)    x
+#define unsigned6(x)    x
+#define unsigned8(x)    x
+#define unsigned10(x)   x
+#define unsigned13(x)   x
+#define unsigned16(x)   x
+#define unsigned24(x)   x
+#endif
 
 extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
