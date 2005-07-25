@@ -91,6 +91,7 @@ libgps_c_sources = \
 	dgpsip.c \
 	sirf.c \
 	report.c \
+	isgps.c \
 	rtcm.c \
 	srecord.c \
 	bits.h \

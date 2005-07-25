@@ -33,6 +33,7 @@
 enum isgpsstat_t {
     ISGPS_NO_SYNC, ISGPS_SYNC, ISGPS_SKIP, ISGPS_MESSAGE,
 };
+#define PREAMBLE_PATTERN 0x66
 
 #define RTCM_ERRLEVEL_BASE	5
 
@@ -258,7 +259,13 @@ extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 
 extern void isgps_init(/*@out@*/struct gps_device_t *);
+enum isgpsstat_t isgps_decode(struct gps_device_t *session, 
+				     bool (*preamble_match)(isgps30bits_t *),
+				     bool (*length_check)(struct gps_device_t *),
+			      unsigned int c);
 extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
+
+
 extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
