@@ -86,10 +86,12 @@ Starlink's website.
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
-#if defined(__OpenBSD__)
-#include <sys/endian.h>
-#else
+#if defined(__linux__)
 #include <endian.h>
+#elif defined(__svr4__) /* solaris, aix?, hp/ux?, tru64? */
+#include <sys/byteorder.h>
+#else
+#include <sys/endian.h> /* bsd, OSX? */
 #endif
 
 #include "gpsd.h"
