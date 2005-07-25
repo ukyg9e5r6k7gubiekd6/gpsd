@@ -100,7 +100,7 @@ packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' <packet_states.h >packet_names.h
 
 libgps_la_SOURCES = \
-	$(libgps_c_sources) 
+	$(libgps_c_sources) \
 	libgpsmm.cpp \
 	packet_states.h \
 	packet_names.h
