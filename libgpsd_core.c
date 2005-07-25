@@ -654,8 +654,6 @@ char /*@ observer @*/ *gpsd_hexdump(void *binbuf, size_t binbuflen)
 #ifdef BINARY_ENABLE
 /*@ -usedef @*/
 void gpsd_interpret_subframe(struct gps_device_t *session,
-			     unsigned int chan, 
-			     unsigned int svid, 
 			     unsigned int words[])
 /* extract leap-second from RTCM-104 subframe data */
 {
@@ -684,8 +682,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      */
     int i;
     unsigned int pageid, subframe, leap;
-    gpsd_report(4, "50B (raw): CH=%d, SV=%d %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
-		chan, svid, 
+    gpsd_report(4, 
+		"50B (raw): %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
 		words[0], words[1], words[2], words[3], words[4], 
 		words[5], words[6], words[7], words[8], words[9]);
     /*
@@ -725,8 +723,8 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
     gpsd_report(2, "Subframe 4 SVID is %d\n", pageid);
     if (pageid == 56) {	/* magic SVID for page 18 */
 	/* once we've filtered, we can ignore the TEL and HOW words */
-	gpsd_report(2, "50B: CH=%d, SV=%d SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
-		    chan, svid, subframe,
+	gpsd_report(2, "50B: SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
+		    subframe,
 		    words[2], words[3], words[4], words[5], 
 		    words[6], words[7], words[8], words[9]);
 	leap = (words[8] & 0xff0000) >> 16;

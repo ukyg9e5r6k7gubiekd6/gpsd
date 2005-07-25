@@ -306,7 +306,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    words[7] = (unsigned int)getul(buf, 31);
 	    words[8] = (unsigned int)getul(buf, 35);
 	    words[9] = (unsigned int)getul(buf, 39);
-	    gpsd_interpret_subframe(session, chan, svid, words);
+	    gpsd_interpret_subframe(session, words);
 
 	    if (session->context->valid & LEAP_SECOND_VALID) {
 		gpsd_report(4, "Disabling subframe transmission...\n");
