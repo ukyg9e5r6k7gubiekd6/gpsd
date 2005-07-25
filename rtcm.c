@@ -86,13 +86,6 @@ Starlink's website.
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
-#if defined(__linux__)
-#include <endian.h>
-#elif defined(__svr4__) /* solaris, aix?, hp/ux?, tru64? */
-#include <sys/byteorder.h>
-#else
-#include <sys/endian.h> /* bsd, OSX? */
-#endif
 
 #include "gpsd.h"
 
@@ -442,22 +435,7 @@ struct rtcm_msg_t {
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-/* placeholders for field inversion macros */
-#define signed8(x)      x
-#define signed16(x)     x
-#define unsigned2(x)    x
-#define unsigned3(x)    x
-#define unsigned4(x)    x
-#define unsigned5(x)    x
-#define unsigned6(x)    x
-#define unsigned8(x)    x
-#define unsigned10(x)   x
-#define unsigned13(x)   x
-#define unsigned16(x)   x
-#define unsigned24(x)   x
-#else
-
+#if WORDS_BIGENDIAN
 #define signed16(x)     (int16_t)bitreverse(x, 16)
 #define signed8(x)      (int8_t)bitreverse(x, 8)
 #define unsigned2(x)    bitreverse(x, 2)
@@ -484,7 +462,20 @@ static unsigned bitreverse(unsigned x, unsigned w)
        }
        return result;
 }
-
+#else
+/* placeholders for field inversion macros */
+#define signed8(x)      x
+#define signed16(x)     x
+#define unsigned2(x)    x
+#define unsigned3(x)    x
+#define unsigned4(x)    x
+#define unsigned5(x)    x
+#define unsigned6(x)    x
+#define unsigned8(x)    x
+#define unsigned10(x)   x
+#define unsigned13(x)   x
+#define unsigned16(x)   x
+#define unsigned24(x)   x
 #endif
 
 static void unpack(struct gps_device_t *session)
@@ -625,7 +616,7 @@ static void unpack(struct gps_device_t *session)
 	    np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
 	    n++;
 	}
-	tp->almanac.nentries = len/3;
+	tp->almanac.nentries = (unsigned)(len/3);
 	break;
     case 16:
 	/*@ -boolops @*/
