@@ -305,7 +305,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl Manually configure DBUD until we figure out a 
+dnl Manually configure DBUS until we figure out a 
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
     AC_HELP_STRING([--enable-dbus],
@@ -315,7 +315,8 @@ AC_MSG_CHECKING([for DBUS support])
 if test x"$ac_dbus" == "xyes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
-    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
+    # Older versions of atotools barf and die on this.
+    #PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
     AC_SUBST(DBUS_CFLAGS)
     AC_SUBST(DBUS_LIBS)
 else
