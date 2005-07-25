@@ -207,6 +207,133 @@ void isgps_init(/*@out@*/struct gps_device_t *session)
     session->isgps.bufindex = 0;
 }
 
+/*@ -usereleased -compdef @*/
+static enum isgpsstat_t isgps_decode(struct gps_device_t *session, 
+				     bool (*preamble_match)(isgps30bits_t *),
+				     bool (*length_check)(struct gps_device_t *),
+				     unsigned int c)
+{
+    enum isgpsstat_t res;
+
+    if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
+	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+		    "word tag not correct, skipping\n");
+	return ISGPS_SKIP;
+    }
+    c = reverse_bits[c & 0x3f];
+
+    /*@ -shiftnegative @*/
+    if (!session->isgps.locked) {
+	session->isgps.curr_offset = -5;
+	session->isgps.bufindex = 0;
+
+	while (session->isgps.curr_offset <= 0) {
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing\n");
+	    session->isgps.curr_word <<= 1;
+	    if (session->isgps.curr_offset > 0) {
+		session->isgps.curr_word |= c << session->isgps.curr_offset;
+	    } else {
+		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+	    }
+
+	    if (preamble_match(&session->isgps.curr_word)) {
+		if (isgpsparityok(session->isgps.curr_word)) {
+		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				"preamble ok, parity ok -- locked\n");
+		    session->isgps.locked = true;
+		    /* session->isgps.curr_offset;  XXX - testing */
+		    break;
+		}
+		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+			    "preamble ok, parity fail\n");
+	    }
+	    session->isgps.curr_offset++;
+	}			/* end while */
+    }
+    if (session->isgps.locked) {
+	res = ISGPS_SYNC;
+
+	if (session->isgps.curr_offset > 0) {
+	    session->isgps.curr_word |= c << session->isgps.curr_offset;
+	} else {
+	    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+	}
+
+	if (session->isgps.curr_offset <= 0) {
+	    /* weird-assed inversion */
+	    if (session->isgps.curr_word & P_30_MASK)
+		session->isgps.curr_word ^= W_DATA_MASK;
+
+	    if (isgpsparityok(session->isgps.curr_word)) {
+#if 0
+		/*
+		 * Don't clobber the buffer just because we spot
+		 * another preamble pattern in the data stream. -wsr
+		 */
+		if (preamble_match(&session->isgps.curr_word)) {
+		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
+				"Preamble spotted (index: %u)\n",
+				session->isgps.bufindex);
+		    session->isgps.bufindex = 0;
+		}
+#endif
+		gpsd_report(RTCM_ERRLEVEL_BASE+2,
+			    "processing word %u (offset %d)\n",
+			    session->isgps.bufindex, session->isgps.curr_offset);
+		{
+		    /*
+		     * Guard against a buffer overflow attack.  Just wait for
+		     * the next PREAMBLE_PATTERN and go on from there. 
+		     */
+		    if (session->isgps.bufindex >= RTCM_WORDS_MAX){
+			session->isgps.bufindex = 0;
+			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				    "RTCM buffer overflowing -- resetting\n");
+			return ISGPS_NO_SYNC;
+		    }
+
+		    session->isgps.buf[session->isgps.bufindex] = session->isgps.curr_word;
+
+		    if ((session->isgps.bufindex == 0) &&
+			!preamble_match((isgps30bits_t *)session->isgps.buf)) {
+			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+				    "word 0 not a preamble- punting\n");
+			return ISGPS_NO_SYNC;
+		    }
+		    session->isgps.bufindex++;
+
+		    if (length_check(session)) {
+			/* jackpot, we have a complete packet*/
+			session->isgps.bufindex = 0;
+			res = ISGPS_MESSAGE;
+		    }
+		}
+		session->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
+		session->isgps.curr_offset += 30;
+		if (session->isgps.curr_offset > 0) {
+		    session->isgps.curr_word |= c << session->isgps.curr_offset;
+		} else {
+		    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+		}
+	    } else {
+		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
+			    "parity failure, lost lock\n");
+		session->isgps.locked = false;
+	    }
+	}
+	session->isgps.curr_offset -= 6;
+	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->isgps.curr_offset);
+	return res;
+    }
+    /*@ +shiftnegative @*/
+
+    /* never achieved lock */
+    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+		"lock never achieved\n");
+    return ISGPS_NO_SYNC;
+}
+/*@ +usereleased +compdef @*/
+
 /*
  * Structures for interpreting words in an RTCM-104 message (after
  * parity checking and removing inversion).
@@ -827,136 +954,26 @@ static bool repack(struct gps_device_t *session)
 }
 #endif /* __UNUSED__ */
 
-#define PREAMBLE_MATCH(x) (((struct rtcm_msghw1 *) & (x))->preamble==PREAMBLE_PATTERN)
+static bool preamble_match(isgps30bits_t *w)
+{
+    return (((struct rtcm_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
+}
 
-/*@ -usereleased -compdef @*/
+static bool length_check(struct gps_device_t *session)
+{
+    return session->isgps.bufindex >= 2 
+	&& session->isgps.bufindex >= ((struct rtcm_msg_t *)session->isgps.buf)->w2.frmlen + 2;
+}
+
 enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 {
-    enum isgpsstat_t res;
+    enum isgpsstat_t res = isgps_decode(session, preamble_match, length_check, c);
 
-    if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-		    "word tag not correct, skipping\n");
-	return ISGPS_SKIP;
-    }
-    c = reverse_bits[c & 0x3f];
+    if (res == ISGPS_MESSAGE)
+	unpack(session);
 
-    /*@ -shiftnegative @*/
-    if (!session->isgps.locked) {
-	session->isgps.curr_offset = -5;
-	session->isgps.bufindex = 0;
-
-	while (session->isgps.curr_offset <= 0) {
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing\n");
-	    session->isgps.curr_word <<= 1;
-	    if (session->isgps.curr_offset > 0) {
-		session->isgps.curr_word |= c << session->isgps.curr_offset;
-	    } else {
-		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
-	    }
-
-	    if (PREAMBLE_MATCH(session->isgps.curr_word)) {
-		if (isgpsparityok(session->isgps.curr_word)) {
-		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				"preamble ok, parity ok -- locked\n");
-		    session->isgps.locked = true;
-		    /* session->isgps.curr_offset;  XXX - testing */
-		    break;
-		}
-		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-			    "preamble ok, parity fail\n");
-	    }
-	    session->isgps.curr_offset++;
-	}			/* end while */
-    }
-    if (session->isgps.locked) {
-	res = ISGPS_SYNC;
-
-	if (session->isgps.curr_offset > 0) {
-	    session->isgps.curr_word |= c << session->isgps.curr_offset;
-	} else {
-	    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
-	}
-
-	if (session->isgps.curr_offset <= 0) {
-	    /* weird-assed inversion */
-	    if (session->isgps.curr_word & P_30_MASK)
-		session->isgps.curr_word ^= W_DATA_MASK;
-
-	    if (isgpsparityok(session->isgps.curr_word)) {
-#if 0
-		/*
-		 * Don't clobber the buffer just because we spot
-		 * another preamble pattern in the data stream. -wsr
-		 */
-		if (PREAMBLE_MATCH(session->isgps.curr_word)) {
-		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
-				"Preamble spotted (index: %u)\n",
-				session->isgps.bufindex);
-		    session->isgps.bufindex = 0;
-		}
-#endif
-		gpsd_report(RTCM_ERRLEVEL_BASE+2,
-			    "processing word %u (offset %d)\n",
-			    session->isgps.bufindex, session->isgps.curr_offset);
-		{
-		    struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->isgps.buf;
-
-		    /*
-		     * Guard against a buffer overflow attack.  Just wait for
-		     * the next PREAMBLE_PATTERN and go on from there. 
-		     */
-		    if (session->isgps.bufindex >= RTCM_WORDS_MAX){
-			session->isgps.bufindex = 0;
-			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				    "RTCM buffer overflowing -- resetting\n");
-			return ISGPS_NO_SYNC;
-		    }
-
-		    session->isgps.buf[session->isgps.bufindex] = session->isgps.curr_word;
-
-		    if ((session->isgps.bufindex == 0) &&
-			(msg->w1.preamble != PREAMBLE_PATTERN)) {
-			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				    "word 0 not a preamble- punting\n");
-			return ISGPS_NO_SYNC;
-		    }
-		    session->isgps.bufindex++;
-
-		    if (session->isgps.bufindex >= 2) {	/* do we have the length yet? */
-			if (session->isgps.bufindex >= msg->w2.frmlen + 2) {
-			    /* jackpot, we have an RTCM packet*/
-			    res = ISGPS_MESSAGE;
-			    session->isgps.bufindex = 0;
-			    unpack(session);
-			}
-		    }
-		}
-		session->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
-		session->isgps.curr_offset += 30;
-		if (session->isgps.curr_offset > 0) {
-		    session->isgps.curr_word |= c << session->isgps.curr_offset;
-		} else {
-		    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
-		}
-	    } else {
-		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
-			    "parity failure, lost lock\n");
-		session->isgps.locked = false;
-	    }
-	}
-	session->isgps.curr_offset -= 6;
-	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->isgps.curr_offset);
-	return res;
-    }
-    /*@ +shiftnegative @*/
-
-    /* never achieved lock */
-    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-		"lock never achieved\n");
-    return ISGPS_NO_SYNC;
+    return res;
 }
-/*@ +usereleased +compdef @*/
 
 void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
