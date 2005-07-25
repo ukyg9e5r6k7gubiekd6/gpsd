@@ -653,8 +653,7 @@ char /*@ observer @*/ *gpsd_hexdump(void *binbuf, size_t binbuflen)
 
 #ifdef BINARY_ENABLE
 /*@ -usedef @*/
-void gpsd_interpret_subframe(struct gps_device_t *session,
-			     unsigned int words[])
+void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 /* extract leap-second from RTCM-104 subframe data */
 {
     /*
@@ -670,15 +669,6 @@ void gpsd_interpret_subframe(struct gps_device_t *session,
      * To date this code has been tested only on SiRFs.  It's in the
      * core because other chipsets reporting only GPS time but with 
      * the capability to read subframe data may want it.
-     *
-     * Chris Kuethe says:
-     * "Message 8 is generated as the data is received. It is not
-     * buffered on the chip. So when you enable message 8, you'll
-     * get one subframe every 6 seconds.  Of the data received, the
-     * almanac and ephemeris are buffered and stored, so you can
-     * query them at will. Alas, the time parameters are not
-     * stored, which is really lame, as the UTC-GPS correction
-     * changes 1 second every few years. Maybe."
      */
     int i;
     unsigned int pageid, subframe, leap;

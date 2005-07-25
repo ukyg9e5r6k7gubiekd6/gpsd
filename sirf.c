@@ -292,10 +292,20 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x08:		/* subframe data -- extract leap-second from this */
+	/*
+	 * Chris Kuethe says:
+	 * "Message 8 is generated as the data is received. It is not
+	 * buffered on the chip. So when you enable message 8, you'll
+	 * get one subframe every 6 seconds.  Of the data received, the
+	 * almanac and ephemeris are buffered and stored, so you can
+	 * query them at will. Alas, the time parameters are not
+	 * stored, which is really lame, as the UTC-GPS correction
+	 * changes 1 second every few years. Maybe."
+	 */
        {
 	    unsigned int words[10];
-	    unsigned int chan = (unsigned int)getub(buf, 1);
-	    unsigned int svid = (unsigned int)getub(buf, 2);
+	    //unsigned int chan = (unsigned int)getub(buf, 1);
+	    //unsigned int svid = (unsigned int)getub(buf, 2);
 	    words[0] = (unsigned int)getul(buf, 3);
 	    words[1] = (unsigned int)getul(buf, 7);
 	    words[2] = (unsigned int)getul(buf, 11);
