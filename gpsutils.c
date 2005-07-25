@@ -163,7 +163,7 @@ double gpstime_to_unix(int week, double tow)
     return fixtime;
 }
 
-void unix_to_gpstime(double unixtime, int *week, double *tow)
+void unix_to_gpstime(double unixtime, /*@out@*/int *week, /*@out@*/double *tow)
 {
     unixtime -= GPS_EPOCH;
     *week = (int)(unixtime / SECS_PER_WEEK);

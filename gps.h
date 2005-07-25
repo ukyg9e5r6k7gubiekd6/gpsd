@@ -94,7 +94,7 @@ struct gps_fix_t {
  * used both in the GPS downlink protocol described in IS-GPS-200
  * and in the format for DGPS corrections used in RTCM-104.
  */
-typedef /*@unsignedintegraltype@*/ u_int32_t isgps30bits_t;
+typedef /*@unsignedintegraltype@*/ unsigned int isgps30bits_t;
 
 struct rtcm_t {
     /* header contents */
@@ -287,7 +287,7 @@ extern double timestamp(void);
 extern double iso8601_to_unix(char *);
 extern /*@observer@*/char *unix_to_iso8601(double t, /*@ out @*/char[], int len);
 extern double gpstime_to_unix(int, double);
-extern void unix_to_gpstime(double, int *, double *);
+extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double wgs84_separation(double, double);
 extern int gpsd_units(void);

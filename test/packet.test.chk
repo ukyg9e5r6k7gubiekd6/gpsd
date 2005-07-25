@@ -11,4 +11,5 @@ Zodiac binary 1000 Geodetic Status Output Message test succeeded.
 EverMore status packet 0x20 test succeeded.
 EverMore packet 0x04 with 0x10 0x10 sequence test succeeded.
 EverMore packet 0x04 with 0x10 0x10 sequence, some noise before packet data test succeeded.
-EverMore packet 0x04,  0x10 and some other data at the begining test succeeded.
+EverMore packet 0x04, 0x10 and some other data at the begining test succeeded.
+EverMore packet 0x04, 0x10 three times at the begining test succeeded.
