@@ -70,10 +70,9 @@ Maritime Services</ulink> under "Publications".</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS</title> 
 
-<para>This program will fail quietly, never achieving sync lock with
-the RTCM stream, on a non-little-endian machine.  The decoder logic is
-sufficiently convoluted to confuse some compiler optimizers, notably in GCC
-3.x at -O2, into generating bad code.</para>
+<para>The decoder logic is sufficiently convoluted to confuse some
+compiler optimizers, notably in GCC 3.x at -O2, into generating bad
+code.</para>
 
 </refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 

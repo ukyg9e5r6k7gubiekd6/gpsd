@@ -307,18 +307,3 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 }
 /*@ +usereleased +compdef @*/
 
-#if WORDS_BIGENDIAN
-unsigned bitreverse(unsigned x, unsigned w)
-{
-    unsigned char mask = 1 << (w - 1), result = 0;
-
-    while (value) /* skip most significant bits that are zero */
-    {
-	if (value & 1) /* replace mod (machine dependency) */
-	    result |= mask;
-	mask  >>= 1;
-	value >>= 1;
-    }
-    return result;
-}
-#endif

@@ -37,7 +37,7 @@ struct map {
 };
 
 /*@ -initallelements +charint -usedef @*/
-struct map tests[] = {
+static struct map tests[] = {
     /* NMEA tests */
     {
 	"NMEA packet with checksum (1)",
@@ -264,5 +264,5 @@ int main(int argc, char *argv[])
     else
 	for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) 
 	    failcount += packet_test(mp);
-    exit(failcount > 0);
+    exit(failcount > 0 ? 1 : 0);
 }

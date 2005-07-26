@@ -82,6 +82,12 @@ Starlink's website.
 
 #pragma pack(1)
 
+#if (BYTE_ORDER != LITTLE_ENDIAN) && (BYTE_ORDER != BIG_ENDIAN)
+# error Not litle endian and not big endian.
+#endif
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+
 struct rtcm_msg_t {
     struct rtcm_msghw1 {			/* header word 1 */
 	uint            parity:6;
@@ -282,7 +288,213 @@ struct rtcm_msg_t {
     } msg_type;
 };
 
+#endif /* LITTLE_ENDIAN */
+
+#if BYTE_ORDER == BIG_ENDIAN
+/* This struct was generated from the above using invert-bitfields.pl */
+
+#ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
+
+struct rtcm_msg_t {
+    struct rtcm_msghw1 {			/* header word 1 */
+	uint            _pad:2;
+	uint            preamble:8;		/* fixed at 01100110 */
+	uint            msgtype:6;		/* RTCM message type */
+	uint            refstaid:10;	/* reference station ID */
+	uint            parity:6;
+    } w1;
+
+    struct rtcm_msghw2 {			/* header word 2 */
+	uint            _pad:2;
+	uint            zcnt:13;
+	uint            sqnum:3;
+	uint            frmlen:5;
+	uint            stathlth:3;		/* station health */
+	uint            parity:6;
+    } w2;
+
+    union {
+	/* msg 1 - differential gps corrections */
+	struct rtcm_msg1 {
+	    struct b_correction_t {
+		struct {			/* msg 1 word 3 */
+		    uint            _pad:2;
+		    uint            scale1:1;
+		    uint            udre1:2;
+		    uint            satident1:5;	/* satellite ID */
+		    int             pc1:16;
+		    uint            parity:6;
+		} w3;
+
+		struct {			/* msg 1 word 4 */
+		    uint            _pad:2;
+		    int             rangerate1:8;
+		    uint            issuedata1:8;
+		    uint            scale2:1;
+		    uint            udre2:2;
+		    uint            satident2:5;	/* satellite ID */
+		    uint            parity:6;
+		} w4;
+
+		struct {			/* msg 1 word 5 */
+		    uint            _pad:2;
+		    int             pc2:16;
+		    int             rangerate2:8;
+		    uint            parity:6;
+		} w5;
+
+		struct {			/* msg 1 word 6 */
+		    uint            _pad:2;
+		    uint            issuedata2:8;
+		    uint            scale3:1;
+		    uint            udre3:2;
+		    uint            satident3:5;	/* satellite ID */
+		    int             pc3_h:8;
+		    uint            parity:6;
+		} w6;
+
+		struct {			/* msg 1 word 7 */
+		    uint            _pad:2;
+		    uint            pc3_l:8;		/* NOTE: uint for low byte */
+		    int             rangerate3:8;
+		    uint            issuedata3:8;
+		    uint            parity:6;
+		} w7;
+	    } corrections[(RTCM_WORDS_MAX - 2) / 5];
+	} type1;
+
+	/* msg 3 - reference station parameters */
+	struct rtcm_msg3 {
+	    struct {
+		uint        _pad:2;
+		uint	    x_h:24;
+		uint        parity:6;
+	    } w3;
+	    struct {
+		uint        _pad:2;
+		uint	    x_l:8;
+		uint	    y_h:16;
+		uint        parity:6;
+	    } w4;
+	    struct {
+		uint        _pad:2;
+		uint	    y_l:16;
+		uint	    z_h:8;
+		uint        parity:6;
+	    } w5;
+
+	    struct {
+		uint        _pad:2;
+		uint	    z_l:24;
+		uint        parity:6;
+	    } w6;
+	} type3;
+
+	/* msg 4 - reference station datum */
+	struct rtcm_msg4 {
+	    struct {
+		uint        _pad:2;
+		uint	    dgnss:3;
+		uint	    dat:1;
+		uint	    spare:4;
+		uint	    datum_alpha_char1:8;
+		uint	    datum_alpha_char2:8;
+		uint        parity:6;
+	    } w3;
+	    struct {
+		uint        _pad:2;
+		uint	    datum_sub_div_char3:8;
+		uint	    datum_sub_div_char1:8;
+		uint	    datum_sub_div_char2:8;
+		uint        parity:6;
+	    } w4;
+	    struct {
+		uint        _pad:2;
+		uint	    dx:16;
+		uint	    dy_h:8;
+		uint        parity:6;
+	    } w5;
+	    struct {
+		uint        _pad:2;
+		uint	    dy_l:8;
+		uint	    dz:24;
+		uint        parity:6;
+	    } w6;
+	} type4;
+
+	/* msg 5 - constellation health */
+	struct rtcm_msg5 {
+	    struct b_health_t {
+		uint        _pad:2;
+		uint	    reserved:1;
+		uint	    sat_id:5;
+		uint	    issue_of_data_link:1;
+		uint	    data_health:3;
+		uint	    cn0:5;
+		uint	    health_enable:1;
+		uint	    new_nav_data:1;
+		uint	    loss_warn:1;
+		uint	    time_unhealthy:4;
+		uint	    unassigned:2;
+		uint        parity:6;
+	    } health[MAXHEALTH];
+	} type5;
+
+	/* msg 6 - null message */
+
+	/* msg 7 - beacon almanac */
+	struct rtcm_msg7 {
+	    struct b_station_t {
+		struct {
+		    uint            _pad:2;
+		    int	            lat:16;
+		    int	    	    lon_h:8;
+		    uint            parity:6;
+		} w3;
+		struct {
+		    uint            _pad:2;
+		    uint	    lon_l:8;
+		    uint	    range:10;
+		    uint	    freq_h:6;
+		    uint            parity:6;
+		} w4;
+		struct {
+		    uint            _pad:2;
+		    uint	    freq_l:6;
+		    uint	    health:2;
+		    uint	    station_id:10;
+			     /* see comments in LE struct above. */
+		    uint	    bit_rate:3;
+		    uint	    mod_mode:1;
+		    uint	    sync_type:1;
+		    uint	    encoding:1;
+		    uint            parity:6;
+		} w5;
+	    } almanac[(RTCM_WORDS_MAX - 2)/3];
+	} type7;
+
+	/* msg 16 - text msg */
+	struct rtcm_msg16 {
+	    struct {
+		uint        _pad:2;
+		uint	    byte1:8;
+		uint	    byte2:8;
+		uint	    byte3:8;
+		uint        parity:6;
+	    } txt[RTCM_WORDS_MAX-2];
+	} type16;
+
+	/* unknown message */
+	isgps30bits_t	rtcm_msgunk[RTCM_WORDS_MAX-2];
+    };
+};
+
+#endif /* S_SPLINT_S */
+#endif /* BIG_ENDIAN */
+
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
+
+//(query-replace-regexp "\\(un\\)?signed[0-9]+(\\([^()]*\\))" "\\2" nil nil nil)
 
 static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
@@ -292,12 +504,12 @@ static void unpack(struct gps_device_t *session)
     struct rtcm_t *tp = &session->gpsdata.rtcm;
     struct rtcm_msg_t *msg = (struct rtcm_msg_t *)session->driver.isgps.buf;
 
-    tp->type = unsigned6(msg->w1.msgtype);
-    tp->length = unsigned5(msg->w2.frmlen);
-    tp->zcount = unsigned13(msg->w2.zcnt) * ZCOUNT_SCALE;
-    tp->refstaid = unsigned10(msg->w1.refstaid);
-    tp->seqnum = unsigned3(msg->w2.sqnum);
-    tp->stathlth = unsigned3(msg->w2.stathlth);
+    tp->type = msg->w1.msgtype;
+    tp->length = msg->w2.frmlen;
+    tp->zcount = msg->w2.zcnt * ZCOUNT_SCALE;
+    tp->refstaid = msg->w1.refstaid;
+    tp->seqnum = msg->w2.sqnum;
+    tp->stathlth = msg->w2.stathlth;
 
     len = (int)tp->length;
     n = 0;
@@ -309,36 +521,36 @@ static void unpack(struct gps_device_t *session)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    tp->msg_data.ranges.sat[n].ident      = unsigned5(m->w3.satident1);
-		    tp->msg_data.ranges.sat[n].udre       = unsigned2(m->w3.udre1);
-		    tp->msg_data.ranges.sat[n].issuedata  = unsigned8(m->w4.issuedata1);
+		    tp->msg_data.ranges.sat[n].ident      = m->w3.satident1;
+		    tp->msg_data.ranges.sat[n].udre       = m->w3.udre1;
+		    tp->msg_data.ranges.sat[n].issuedata  = m->w4.issuedata1;
 		    tp->msg_data.ranges.sat[n].largescale = (bool)m->w3.scale1;
-		    tp->msg_data.ranges.sat[n].rangerr    = signed16(m->w3.pc1) * 
+		    tp->msg_data.ranges.sat[n].rangerr    = m->w3.pc1 * 
 			(m->w3.scale1 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate  = signed8(m->w4.rangerate1) * 
+		    tp->msg_data.ranges.sat[n].rangerate  = m->w4.rangerate1 * 
 					(m->w3.scale1 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 4) {
-		    tp->msg_data.ranges.sat[n].ident      = unsigned5(m->w4.satident2);
-		    tp->msg_data.ranges.sat[n].udre       = unsigned2(m->w4.udre2);
-		    tp->msg_data.ranges.sat[n].issuedata  = unsigned8(m->w6.issuedata2);
+		    tp->msg_data.ranges.sat[n].ident      = m->w4.satident2;
+		    tp->msg_data.ranges.sat[n].udre       = m->w4.udre2;
+		    tp->msg_data.ranges.sat[n].issuedata  = m->w6.issuedata2;
 		    tp->msg_data.ranges.sat[n].largescale = (bool)m->w4.scale2;
-		    tp->msg_data.ranges.sat[n].rangerr    = signed16(m->w5.pc2) * 
+		    tp->msg_data.ranges.sat[n].rangerr    = m->w5.pc2 * 
 			(m->w4.scale2 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate  = signed8(m->w5.rangerate2) * 
+		    tp->msg_data.ranges.sat[n].rangerate  = m->w5.rangerate2 * 
 			(m->w4.scale2 ? RRLARGE : RRSMALL);
 		    n++;
 		}
 		if (len >= 5) {
-		    tp->msg_data.ranges.sat[n].ident       = unsigned5(m->w6.satident3);
-		    tp->msg_data.ranges.sat[n].udre        = unsigned2(m->w6.udre3);
-		    tp->msg_data.ranges.sat[n].issuedata   = unsigned8(m->w7.issuedata3);
+		    tp->msg_data.ranges.sat[n].ident       = m->w6.satident3;
+		    tp->msg_data.ranges.sat[n].udre        = m->w6.udre3;
+		    tp->msg_data.ranges.sat[n].issuedata   = m->w7.issuedata3;
 		    tp->msg_data.ranges.sat[n].largescale = (bool)m->w6.scale3;
 		    /*@ -shiftimplementation @*/
-		    tp->msg_data.ranges.sat[n].rangerr     = ((signed8(m->w6.pc3_h)<<8)|(unsigned8(m->w7.pc3_l))) *
+		    tp->msg_data.ranges.sat[n].rangerr     = ((m->w6.pc3_h<<8)|(m->w7.pc3_l)) *
 					(m->w6.scale3 ? PCLARGE : PCSMALL);
-		    tp->msg_data.ranges.sat[n].rangerate   = signed8(m->w7.rangerate3) * 
+		    tp->msg_data.ranges.sat[n].rangerate   = m->w7.rangerate3 * 
 					(m->w6.scale3 ? RRLARGE : RRSMALL);
 		    /*@ +shiftimplementation @*/
 		    n++;
@@ -354,9 +566,9 @@ static void unpack(struct gps_device_t *session)
 	    struct rtcm_msg3    *m = &msg->msg_type.type3;
 
 	    if ((tp->msg_data.ecef.valid = len >= 4)) {
-		tp->msg_data.ecef.x = ((unsigned24(m->w3.x_h)<<8)|(unsigned8(m->w4.x_l)))*XYZ_SCALE;
-		tp->msg_data.ecef.y = ((unsigned16(m->w4.y_h)<<16)|(unsigned16(m->w5.y_l)))*XYZ_SCALE;
-		tp->msg_data.ecef.z = ((unsigned8(m->w5.z_h)<<24)|(unsigned24(m->w6.z_l)))*XYZ_SCALE;
+		tp->msg_data.ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
+		tp->msg_data.ecef.y = ((m->w4.y_h<<16)|(m->w5.y_l))*XYZ_SCALE;
+		tp->msg_data.ecef.z = ((m->w5.z_h<<24)|(m->w6.z_l))*XYZ_SCALE;
 	    }
 	}
 	break;
@@ -365,29 +577,29 @@ static void unpack(struct gps_device_t *session)
 	    struct rtcm_msg4    *m = &msg->msg_type.type4;
 
 	    tp->msg_data.reference.system =
-		    (unsigned3(m->w3.dgnss)==0) ? gps :
-			    ((unsigned3(m->w3.dgnss)==1) ? glonass : unknown);
+		    (m->w3.dgnss==0) ? gps :
+			    ((m->w3.dgnss==1) ? glonass : unknown);
 	    tp->msg_data.reference.sense = (m->w3.dat != 0) ? global : local;
 	    if (m->w3.datum_alpha_char1){
-		tp->msg_data.reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char1));
+		tp->msg_data.reference.datum[n++] = (char)(m->w3.datum_alpha_char1);
 	    }
 	    if (m->w3.datum_alpha_char2){
-		tp->msg_data.reference.datum[n++] = (char)(unsigned8(m->w3.datum_alpha_char2));
+		tp->msg_data.reference.datum[n++] = (char)(m->w3.datum_alpha_char2);
 	    }
 	    if (m->w4.datum_sub_div_char1){
-		tp->msg_data.reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char1));
+		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char1);
 	    }
 	    if (m->w4.datum_sub_div_char2){
-		tp->msg_data.reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char2));
+		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char2);
 	    }
 	    if (m->w4.datum_sub_div_char3){
-		tp->msg_data.reference.datum[n++] = (char)(unsigned8(m->w4.datum_sub_div_char3));
+		tp->msg_data.reference.datum[n++] = (char)(m->w4.datum_sub_div_char3);
 	    }
 	    tp->msg_data.reference.datum[n++] = '\0';
 	    if (len >= 4) {
-		tp->msg_data.reference.dx = unsigned16(m->w5.dx) * DXYZ_SCALE;
-		tp->msg_data.reference.dy = ((unsigned8(m->w5.dy_h) << 8) | unsigned8(m->w6.dy_l)) * DXYZ_SCALE;
-		tp->msg_data.reference.dz = unsigned24(m->w6.dz) * DXYZ_SCALE;
+		tp->msg_data.reference.dx = m->w5.dx * DXYZ_SCALE;
+		tp->msg_data.reference.dy = ((m->w5.dy_h << 8) | m->w6.dy_l) * DXYZ_SCALE;
+		tp->msg_data.reference.dz = m->w6.dz * DXYZ_SCALE;
 	    } else 
 		tp->msg_data.reference.sense = invalid;
 	}
@@ -397,14 +609,14 @@ static void unpack(struct gps_device_t *session)
 	    struct consat_t *csp = &tp->msg_data.conhealth.sat[n];
 	    struct b_health_t *m = &msg->msg_type.type5.health[n];
 
-	    csp->ident = unsigned5(m->sat_id);
+	    csp->ident = m->sat_id;
 	    csp->iodl = m->issue_of_data_link!=0;
-	    csp->health = unsigned3(m->data_health);
+	    csp->health = m->data_health;
 	    /*@i@*/csp->snr = (m->cn0?(m->cn0+CNR_OFFSET):SNR_BAD);
-	    csp->health_en = unsigned2(m->health_enable);
+	    csp->health_en = m->health_enable;
 	    csp->new_data = m->new_nav_data!=0;
 	    csp->los_warning = m->loss_warn!=0;
-	    csp->tou = unsigned4(m->time_unhealthy)*TU_SCALE;
+	    csp->tou = m->time_unhealthy*TU_SCALE;
 	}
 	tp->msg_data.conhealth.nentries = n;
 	break;
@@ -413,13 +625,13 @@ static void unpack(struct gps_device_t *session)
 	    struct station_t *np = &tp->msg_data.almanac.station[n];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
-	    np->latitude = signed16(mp->w3.lat) * LA_SCALE;
-	    /*@i@*/np->longitude = ((signed8(mp->w3.lon_h) << 8) | unsigned8(mp->w4.lon_l)) * LO_SCALE;
-	    np->range = unsigned10(mp->w4.range);
-	    np->frequency = (((unsigned6(mp->w4.freq_h) << 6) | unsigned6(mp->w5.freq_l)) * FREQ_SCALE) + FREQ_OFFSET;
-	    np->health = unsigned2(mp->w5.health);
-	    np->station_id = unsigned10(mp->w5.station_id),
-	    np->bitrate = tx_speed[unsigned3(mp->w5.bit_rate)];
+	    np->latitude = mp->w3.lat * LA_SCALE;
+	    /*@i@*/np->longitude = ((mp->w3.lon_h << 8) | mp->w4.lon_l) * LO_SCALE;
+	    np->range = mp->w4.range;
+	    np->frequency = (((mp->w4.freq_h << 6) | mp->w5.freq_l) * FREQ_SCALE) + FREQ_OFFSET;
+	    np->health = mp->w5.health;
+	    np->station_id = mp->w5.station_id,
+	    np->bitrate = tx_speed[mp->w5.bit_rate];
 	    n++;
 	}
 	tp->msg_data.almanac.nentries = (unsigned)(len/3);
@@ -430,15 +642,15 @@ static void unpack(struct gps_device_t *session)
 	    if (!msg->msg_type.type16.txt[w].byte1) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(unsigned8(msg->msg_type.type16.txt[w].byte1));
+	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte1);
 	    if (!msg->msg_type.type16.txt[w].byte2) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(unsigned8(msg->msg_type.type16.txt[w].byte2));
+	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte2);
 	    if (!msg->msg_type.type16.txt[w].byte3) {
 		break;
 	    }
-	    tp->msg_data.message[n++] = (char)(unsigned8(msg->msg_type.type16.txt[w].byte3));
+	    tp->msg_data.message[n++] = (char)(msg->msg_type.type16.txt[w].byte3);
 	    len--;
 	}
 	/*@ +boolops @*/
@@ -460,12 +672,12 @@ static bool repack(struct gps_device_t *session)
     struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->driver.isgps.buf;
 
     memset(session->driver.isgps.buf, 0, sizeof(session->driver.isgps.buf));
-    msg->w1.msgtype = unsigned6(tp->type);
-    msg->w2.frmlen = unsigned5(tp->length);
-    msg->w2.zcnt = unsigned13((unsigned)(tp->zcount / ZCOUNT_SCALE));
-    msg->w1.refstaid = unsigned10(tp->refstaid);
-    msg->w2.sqnum = unsigned3(tp->seqnum);
-    msg->w2.stathlth = unsigned3(tp->stathlth);
+    msg->w1.msgtype = tp->type;
+    msg->w2.frmlen = tp->length;
+    msg->w2.zcnt = (unsigned)(tp->zcount / ZCOUNT_SCALE);
+    msg->w1.refstaid = tp->refstaid;
+    msg->w2.sqnum = tp->seqnum;
+    msg->w2.stathlth = tp->stathlth;
 
     len = (int)tp->length;
     n = 0;
@@ -477,34 +689,34 @@ static bool repack(struct gps_device_t *session)
 
 	    while (len >= 0) {
 		if (len >= 2) {
-		    m->w3.satident1 = unsigned5(tp->msg_data.ranges.sat[n].ident);
-		    m->w3.udre1 = unsigned2(tp->msg_data.ranges.sat[n].udre);
-		    m->w4.issuedata1 = unsigned8(tp->msg_data.ranges.sat[n].issuedata);
+		    m->w3.satident1 = tp->msg_data.ranges.sat[n].ident;
+		    m->w3.udre1 = tp->msg_data.ranges.sat[n].udre;
+		    m->w4.issuedata1 = tp->msg_data.ranges.sat[n].issuedata;
 		    m->w3.scale1 = (unsigned)tp->msg_data.ranges.sat[n].largescale;
-		    m->w3.pc1 = (int)(signed16(tp->msg_data.ranges.sat[n].rangerr) / (m->w3.scale1 ? PCLARGE : PCSMALL));
-		    m->w4.rangerate1 = (int)(signed8(tp->msg_data.ranges.sat[n].rangerate) / (m->w3.scale1 ? RRLARGE : RRSMALL));
+		    m->w3.pc1 = (int)(tp->msg_data.ranges.sat[n].rangerr / (m->w3.scale1 ? PCLARGE : PCSMALL));
+		    m->w4.rangerate1 = (int)(tp->msg_data.ranges.sat[n].rangerate / (m->w3.scale1 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 4) {
-		    m->w4.satident2 = unsigned5(tp->msg_data.ranges.sat[n].ident);
-		    m->w4.udre2 = unsigned2(tp->msg_data.ranges.sat[n].udre);
-		    m->w6.issuedata2 = unsigned8(tp->msg_data.ranges.sat[n].issuedata);
+		    m->w4.satident2 = tp->msg_data.ranges.sat[n].ident;
+		    m->w4.udre2 = tp->msg_data.ranges.sat[n].udre;
+		    m->w6.issuedata2 = tp->msg_data.ranges.sat[n].issuedata;
 		    m->w4.scale2 = (unsigned)tp->msg_data.ranges.sat[n].largescale;
-		    m->w5.pc2 = (int)(signed16(tp->msg_data.ranges.sat[n].rangerr) / (m->w4.scale2 ? PCLARGE : PCSMALL));
-		    m->w5.rangerate2 = (int)(signed8(tp->msg_data.ranges.sat[n].rangerate) / (m->w4.scale2 ? RRLARGE : RRSMALL));
+		    m->w5.pc2 = (int)(tp->msg_data.ranges.sat[n].rangerr / (m->w4.scale2 ? PCLARGE : PCSMALL));
+		    m->w5.rangerate2 = (int)(tp->msg_data.ranges.sat[n].rangerate / (m->w4.scale2 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 5) {
-		    m->w6.satident3 = unsigned5(tp->msg_data.ranges.sat[n].ident);
-		    m->w6.udre3 = unsigned2(tp->msg_data.ranges.sat[n].udre);
-		    m->w7.issuedata3 = unsigned8(tp->msg_data.ranges.sat[n].issuedata);
+		    m->w6.satident3 = tp->msg_data.ranges.sat[n].ident;
+		    m->w6.udre3 = tp->msg_data.ranges.sat[n].udre;
+		    m->w7.issuedata3 = tp->msg_data.ranges.sat[n].issuedata;
 		    m->w6.scale3 = (unsigned)tp->msg_data.ranges.sat[n].largescale;
 		    sval = (int)(tp->msg_data.ranges.sat[n].rangerr / (m->w6.scale3 ? PCLARGE : PCSMALL));
 		    /*@ -shiftimplementation @*/
-		    m->w6.pc3_h = signed8(sval >> 8);
+		    m->w6.pc3_h = sval >> 8;
 		    /*@ +shiftimplementation @*/
-		    m->w7.pc3_l = unsigned8((unsigned)sval & 0xff);
-		    m->w7.rangerate3 = (int)(signed8(tp->msg_data.ranges.sat[n].rangerate) / (m->w6.scale3 ? RRLARGE : RRSMALL));
+		    m->w7.pc3_l = (unsigned)sval & 0xff;
+		    m->w7.rangerate3 = (int)(tp->msg_data.ranges.sat[n].rangerate / (m->w6.scale3 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		len -= 5;
@@ -520,12 +732,12 @@ static bool repack(struct gps_device_t *session)
 	    unsigned y = (unsigned)(tp->msg_data.ecef.y / XYZ_SCALE);
 	    unsigned z = (unsigned)(tp->msg_data.ecef.z / XYZ_SCALE);
 
-	    m->w4.x_l = unsigned8(x & 0xff);
-	    m->w3.x_h = unsigned24(x >> 8);
-	    m->w5.y_l = unsigned8(y & 0xff);
-	    m->w4.y_h = unsigned24(y >> 8);
-	    m->w6.z_l = unsigned8(z & 0xff);
-	    m->w5.z_h = unsigned24(z >> 8);
+	    m->w4.x_l = x & 0xff;
+	    m->w3.x_h = x >> 8;
+	    m->w5.y_l = y & 0xff;
+	    m->w4.y_h = y >> 8;
+	    m->w6.z_l = z & 0xff;
+	    m->w5.z_h = z >> 8;
 	}
 	break;
     case 4:
@@ -536,32 +748,32 @@ static bool repack(struct gps_device_t *session)
 	    m->w3.dat = (unsigned)(tp->msg_data.reference.sense == global);
 	    /*@ -predboolothers -type @*/
 	    if (tp->msg_data.reference.datum[0])
-		m->w3.datum_alpha_char1 = unsigned8(tp->msg_data.reference.datum[0]);
+		m->w3.datum_alpha_char1 = tp->msg_data.reference.datum[0];
 	    else
 		m->w3.datum_alpha_char1 = 0;
 	    if (tp->msg_data.reference.datum[1])
-		m->w3.datum_alpha_char2 = unsigned8(tp->msg_data.reference.datum[1]);
+		m->w3.datum_alpha_char2 = tp->msg_data.reference.datum[1];
 	    else
 		m->w3.datum_alpha_char2 = 0;
 	    if (tp->msg_data.reference.datum[2])
-		m->w4.datum_sub_div_char1 = unsigned8(tp->msg_data.reference.datum[2]);
+		m->w4.datum_sub_div_char1 = tp->msg_data.reference.datum[2];
 	    else
 		m->w4.datum_sub_div_char1 = 0;
 	    if (tp->msg_data.reference.datum[3])
-		m->w4.datum_sub_div_char2 = unsigned8(tp->msg_data.reference.datum[3]);
+		m->w4.datum_sub_div_char2 = tp->msg_data.reference.datum[3];
 	    else
 		m->w4.datum_sub_div_char2 = 0;
 	    if (tp->msg_data.reference.datum[4])
-		m->w4.datum_sub_div_char3 = unsigned8(tp->msg_data.reference.datum[4]);
+		m->w4.datum_sub_div_char3 = tp->msg_data.reference.datum[4];
 	    else
 		m->w4.datum_sub_div_char3 = 0;
 	    /*@ +predboolothers +type @*/
 	    if (tp->msg_data.reference.system != unknown) {
-		m->w5.dx = unsigned16((uint)(tp->msg_data.reference.dx / DXYZ_SCALE));
+		m->w5.dx = (uint)(tp->msg_data.reference.dx / DXYZ_SCALE);
 		uval = (uint)(tp->msg_data.reference.dy / DXYZ_SCALE);
-		m->w5.dy_h = unsigned8(uval >> 8);
-		m->w6.dy_l = unsigned8(uval & 0xff);
-		m->w6.dz = unsigned24((uint)(tp->msg_data.reference.dz / DXYZ_SCALE));
+		m->w5.dy_h = uval >> 8;
+		m->w6.dy_l = uval & 0xff;
+		m->w6.dz = (uint)(tp->msg_data.reference.dz / DXYZ_SCALE);
 	    }
 	}
 	break;
@@ -570,14 +782,14 @@ static bool repack(struct gps_device_t *session)
 	    struct consat_t *csp = &tp->msg_data.conhealth.sat[n];
 	    struct b_health_t *m = &msg->msg_type.type5.health[n];
 
-	    m->sat_id = unsigned5(csp->ident);
+	    m->sat_id = csp->ident;
 	    m->issue_of_data_link = (unsigned)csp->iodl;
-	    m->data_health = unsigned3(csp->health);
+	    m->data_health = csp->health;
 	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : (unsigned)csp->snr - CNR_OFFSET;
-	    m->health_enable = unsigned2(csp->health_en);
+	    m->health_enable = csp->health_en;
 	    m->new_nav_data = (unsigned)csp->new_data;
 	    m->loss_warn = (unsigned)csp->los_warning;
-	    m->time_unhealthy = unsigned4((unsigned)(csp->tou / TU_SCALE));
+	    m->time_unhealthy = (unsigned)(csp->tou / TU_SCALE);
 	}
 	break;
     case 7:
@@ -585,18 +797,18 @@ static bool repack(struct gps_device_t *session)
 	    struct station_t *np = &tp->msg_data.almanac.station[n];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
-	    mp->w3.lat = signed16((int)(np->latitude / LA_SCALE));
+	    mp->w3.lat = (int)(np->latitude / LA_SCALE);
 	    sval = (int)(np->longitude / LO_SCALE);
 	    /*@ -shiftimplementation @*/
-	    mp->w3.lon_h = signed8(sval >> 8);
+	    mp->w3.lon_h = sval >> 8;
 	    /*@ +shiftimplementation @*/
-	    mp->w4.lon_l = unsigned8((unsigned)sval & 0xff);
-	    mp->w4.range = unsigned10(np->range);
+	    mp->w4.lon_l = (unsigned)sval & 0xff;
+	    mp->w4.range = np->range;
 	    uval = (unsigned)((np->frequency / FREQ_SCALE) - FREQ_OFFSET);
-	    mp->w4.freq_h = unsigned6(uval >> 6);
-	    mp->w5.freq_l = unsigned6(uval % 0x3f);
-	    mp->w5.health = unsigned2(np->health);
-	    mp->w5.station_id = unsigned10(np->station_id);
+	    mp->w4.freq_h = uval >> 6;
+	    mp->w5.freq_l = uval % 0x3f;
+	    mp->w5.health = np->health;
+	    mp->w5.station_id = np->station_id;
 	    mp->w5.bit_rate = 0;
 	    for (uval = 0; uval < (unsigned)(sizeof(tx_speed)/sizeof(tx_speed[0])); uval++)
 		if (tx_speed[uval] == np->bitrate) {
@@ -614,15 +826,15 @@ static bool repack(struct gps_device_t *session)
 	    if (!tp->msg_data.message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte1 = unsigned8((unsigned)tp->msg_data.message[n++]);
+	    msg->msg_type.type16.txt[w].byte1 = (unsigned)tp->msg_data.message[n++]);
 	    if (!tp->msg_data.message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte2 = unsigned8((unsigned)tp->msg_data.message[n++]);
+	    msg->msg_type.type16.txt[w].byte2 = (unsigned)tp->msg_data.message[n++];
 	    if (!tp->msg_data.message[n]) {
 		break;
 	    }
-	    msg->msg_type.type16.txt[w].byte3 = unsigned8((unsigned)tp->msg_data.message[n++]);
+	    msg->msg_type.type16.txt[w].byte3 = (unsigned)tp->msg_data.message[n++];
 	}
 	/*@ +boolops @*/
 	break;
