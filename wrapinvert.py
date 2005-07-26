@@ -2,6 +2,11 @@
 #
 # Wrap bitfield references in rtcm.c in inversion macros.
 # FIXME: should be enhanced to replace macros already present
+#
+# To undo the results of this transformation, do this in Emacs:
+#
+#(query-replace-regexp "\\(un\\)?signed[0-9]+(\\([^()]*\\))" "\\2" nil nil nil)
+#
 
 import sys, re, getopt
 
@@ -28,7 +33,7 @@ while True:
         state = 0
     elif line.find("static void unpack") > -1:
         state = 2
-        # Sort keys so longest IDs will be matched longest first
+        # Sort keys so IDs will be matched longest first
         keys = ids.keys()
         keys.sort(lambda x, y: len(y) - len(x) or cmp(x, y))
         sys.stderr.write(`keys` + "\n")

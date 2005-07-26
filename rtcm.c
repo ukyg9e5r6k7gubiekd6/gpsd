@@ -494,8 +494,6 @@ struct rtcm_msg_t {
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
-//(query-replace-regexp "\\(un\\)?signed[0-9]+(\\([^()]*\\))" "\\2" nil nil nil)
-
 static void unpack(struct gps_device_t *session)
 /* break out the raw bits into the content fields */
 {
