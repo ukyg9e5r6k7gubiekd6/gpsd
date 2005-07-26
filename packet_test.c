@@ -202,6 +202,7 @@ int main(int argc, char *argv[])
 
     struct map *mp;
     struct gps_device_t state;
+    int failcount = 0;
     ssize_t st;
 
     if (argc > 1)
@@ -216,9 +217,10 @@ int main(int argc, char *argv[])
 	st = packet_parse(&state, mp->testlen);
 	if (state.packet_type != mp->type)
 	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, (int)st);
-	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen))
+	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {
 	    printf("%s test FAILED (data garbled).\n", mp->legend);
-	else
+	    ++failcount;
+	} else
 	    printf("%s test succeeded.\n", mp->legend);
 #ifdef DUMPIT
 	for (cp = state.outbuffer; 
@@ -240,5 +242,5 @@ int main(int argc, char *argv[])
 	/*@ +compdef +uniondef +usedef @*/
     }
 
-    exit(0);
+    exit(failcount > 0);
 }
