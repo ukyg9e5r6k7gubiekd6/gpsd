@@ -207,7 +207,7 @@ struct gps_device_t {
 	    isgps30bits_t   buf[RTCM_WORDS_MAX];
 	    unsigned int    bufindex;
 	} isgps;
-    };
+    } driver;
 #endif /* BINARY_ENABLE */
 };
 

@@ -71,23 +71,23 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
 static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 /* sentence supplied ddmmyy, but no century part */
 {
-    if (session->nmea.date.tm_year == 0)
-	session->nmea.date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
-    session->nmea.date.tm_mon = DD(ddmmyy+2)-1;
-    session->nmea.date.tm_mday = DD(ddmmyy);
+    if (session->driver.nmea.date.tm_year == 0)
+	session->driver.nmea.date.tm_year = (CENTURY_BASE + DD(ddmmyy+4)) - 1900;
+    session->driver.nmea.date.tm_mon = DD(ddmmyy+2)-1;
+    session->driver.nmea.date.tm_mday = DD(ddmmyy);
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 /* update from a UTC time */
 {
-    int old_hour = session->nmea.date.tm_hour;
+    int old_hour = session->driver.nmea.date.tm_hour;
 
-    session->nmea.date.tm_hour = DD(hhmmss);
-	if (session->nmea.date.tm_hour < old_hour)	/* midnight wrap */ 
-	session->nmea.date.tm_mday++;
-    session->nmea.date.tm_min = DD(hhmmss+2);
-    session->nmea.date.tm_sec = DD(hhmmss+4);
-    session->nmea.subseconds = atof(hhmmss+4) - session->nmea.date.tm_sec;
+    session->driver.nmea.date.tm_hour = DD(hhmmss);
+	if (session->driver.nmea.date.tm_hour < old_hour)	/* midnight wrap */ 
+	session->driver.nmea.date.tm_mday++;
+    session->driver.nmea.date.tm_min = DD(hhmmss+2);
+    session->driver.nmea.date.tm_sec = DD(hhmmss+4);
+    session->driver.nmea.subseconds = atof(hhmmss+4) - session->driver.nmea.date.tm_sec;
 }
 
 #undef DD
@@ -137,7 +137,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    merge_ddmmyy(field[9], session);
 	    merge_hhmmss(field[1], session);
 	    mask |= TIME_SET;
-	    session->gpsdata.newdata.time = (double)mkgmtime(&session->nmea.date)+session->nmea.subseconds;
+	    session->gpsdata.newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (session->gpsdata.sentence_time != session->gpsdata.newdata.time)
 		mask |= CYCLE_START_SET;
 	    session->gpsdata.sentence_time = session->gpsdata.newdata.time;
@@ -200,11 +200,11 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 
 	mask = 0;
 	merge_hhmmss(field[5], session);
-	if (session->nmea.date.tm_year != 0) 
+	if (session->driver.nmea.date.tm_year != 0) 
 	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
-	    session->gpsdata.newdata.time = (double)mkgmtime(&session->nmea.date)+session->nmea.subseconds;
+	    session->gpsdata.newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (session->gpsdata.sentence_time != session->gpsdata.newdata.time)
 		mask |= CYCLE_START_SET;
 	    session->gpsdata.sentence_time = session->gpsdata.newdata.time;
@@ -250,11 +250,11 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	double oldfixtime = session->gpsdata.newdata.time;
 
 	merge_hhmmss(field[1], session);
-	if (session->nmea.date.tm_year == 0) 
+	if (session->driver.nmea.date.tm_year == 0) 
 	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
-	    session->gpsdata.newdata.time = (double)mkgmtime(&session->nmea.date)+session->nmea.subseconds;
+	    session->gpsdata.newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	}
 	do_lat_lon(&field[2], &session->gpsdata);
 	mask |= LATLON_SET;
@@ -355,11 +355,11 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	gpsd_zero_satellites(&session->gpsdata);
         return ERROR_SET;
     }
-    session->nmea.await = atoi(field[1]);
-    if (sscanf(field[2], "%d", &session->nmea.part) < 1) {
+    session->driver.nmea.await = atoi(field[1]);
+    if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
 	gpsd_zero_satellites(&session->gpsdata);
         return ERROR_SET;
-    } else if (session->nmea.part == 1)
+    } else if (session->driver.nmea.part == 1)
 	gpsd_zero_satellites(&session->gpsdata);
 
     for (fldnum = 4; fldnum < count; ) {
@@ -381,13 +381,13 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	if (session->gpsdata.PRN[session->gpsdata.satellites] != 0)
 	    session->gpsdata.satellites++;
     }
-    if (session->nmea.part == session->nmea.await && atoi(field[3]) != session->gpsdata.satellites)
+    if (session->driver.nmea.part == session->driver.nmea.await && atoi(field[3]) != session->gpsdata.satellites)
 	gpsd_report(0, "GPGSV field 3 value of %d != actual count %d\n",
 		    atoi(field[3]), session->gpsdata.satellites);
 
     /* not valid data until we've seen a complete set of parts */
-    if (session->nmea.part < session->nmea.await) {
-	gpsd_report(3, "Partial satellite data (%d of %d).\n", session->nmea.part, session->nmea.await);
+    if (session->driver.nmea.part < session->driver.nmea.await) {
+	gpsd_report(3, "Partial satellite data (%d of %d).\n", session->driver.nmea.part, session->driver.nmea.await);
 	return ERROR_SET;
     }
     /*
@@ -445,10 +445,10 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
       7) Checksum
      */
     merge_hhmmss(field[1], session);
-    session->nmea.date.tm_year = atoi(field[4]) - 1900;
-    session->nmea.date.tm_mon = atoi(field[3])-1;
-    session->nmea.date.tm_mday = atoi(field[2]);
-    session->gpsdata.newdata.time = (double)mkgmtime(&session->nmea.date)+session->nmea.subseconds;
+    session->driver.nmea.date.tm_year = atoi(field[4]) - 1900;
+    session->driver.nmea.date.tm_mon = atoi(field[3])-1;
+    session->driver.nmea.date.tm_mday = atoi(field[2]);
+    session->gpsdata.newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
     if (session->gpsdata.sentence_time != session->gpsdata.newdata.time)
 	mask |= CYCLE_START_SET;
     session->gpsdata.sentence_time = session->gpsdata. newdata.time;

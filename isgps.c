@@ -172,10 +172,10 @@ static bool isgpsparityok(isgps30bits_t w)
 
 void isgps_init(/*@out@*/struct gps_device_t *session)
 {
-    session->isgps.curr_word = 0;
-    session->isgps.curr_offset = 24;	/* first word */
-    session->isgps.locked = false;
-    session->isgps.bufindex = 0;
+    session->driver.isgps.curr_word = 0;
+    session->driver.isgps.curr_offset = 24;	/* first word */
+    session->driver.isgps.locked = false;
+    session->driver.isgps.bufindex = 0;
 }
 
 /*@ -usereleased -compdef @*/
@@ -196,106 +196,106 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
     c = reverse_bits[c & 0x3f];
 
     /*@ -shiftnegative @*/
-    if (!session->isgps.locked) {
-	session->isgps.curr_offset = -5;
-	session->isgps.bufindex = 0;
+    if (!session->driver.isgps.locked) {
+	session->driver.isgps.curr_offset = -5;
+	session->driver.isgps.bufindex = 0;
 
-	while (session->isgps.curr_offset <= 0) {
-	    session->isgps.curr_word <<= 1;
-	    if (session->isgps.curr_offset > 0) {
-		session->isgps.curr_word |= c << session->isgps.curr_offset;
+	while (session->driver.isgps.curr_offset <= 0) {
+	    session->driver.isgps.curr_word <<= 1;
+	    if (session->driver.isgps.curr_offset > 0) {
+		session->driver.isgps.curr_word |= c << session->driver.isgps.curr_offset;
 	    } else {
-		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+		session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 	    }
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->counter, session->isgps.curr_word);
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->counter, session->driver.isgps.curr_word);
 
-	    if (preamble_match(&session->isgps.curr_word)) {
-		if (isgpsparityok(session->isgps.curr_word)) {
+	    if (preamble_match(&session->driver.isgps.curr_word)) {
+		if (isgpsparityok(session->driver.isgps.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"preamble ok, parity ok -- locked\n");
-		    session->isgps.locked = true;
-		    /* session->isgps.curr_offset;  XXX - testing */
+		    session->driver.isgps.locked = true;
+		    /* session->driver.isgps.curr_offset;  XXX - testing */
 		    break;
 		}
 		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 			    "preamble ok, parity fail\n");
 	    }
-	    session->isgps.curr_offset++;
+	    session->driver.isgps.curr_offset++;
 	}			/* end while */
     }
-    if (session->isgps.locked) {
+    if (session->driver.isgps.locked) {
 	res = ISGPS_SYNC;
 
-	if (session->isgps.curr_offset > 0) {
-	    session->isgps.curr_word |= c << session->isgps.curr_offset;
+	if (session->driver.isgps.curr_offset > 0) {
+	    session->driver.isgps.curr_word |= c << session->driver.isgps.curr_offset;
 	} else {
-	    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+	    session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 	}
 
-	if (session->isgps.curr_offset <= 0) {
+	if (session->driver.isgps.curr_offset <= 0) {
 	    /* weird-assed inversion */
-	    if (session->isgps.curr_word & P_30_MASK)
-		session->isgps.curr_word ^= W_DATA_MASK;
+	    if (session->driver.isgps.curr_word & P_30_MASK)
+		session->driver.isgps.curr_word ^= W_DATA_MASK;
 
-	    if (isgpsparityok(session->isgps.curr_word)) {
+	    if (isgpsparityok(session->driver.isgps.curr_word)) {
 #if 0
 		/*
 		 * Don't clobber the buffer just because we spot
 		 * another preamble pattern in the data stream. -wsr
 		 */
-		if (preamble_match(&session->isgps.curr_word)) {
+		if (preamble_match(&session->driver.isgps.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
 				"Preamble spotted (index: %u)\n",
-				session->isgps.bufindex);
-		    session->isgps.bufindex = 0;
+				session->driver.isgps.bufindex);
+		    session->driver.isgps.bufindex = 0;
 		}
 #endif
 		gpsd_report(RTCM_ERRLEVEL_BASE+2,
 			    "processing word %u (offset %d)\n",
-			    session->isgps.bufindex, session->isgps.curr_offset);
+			    session->driver.isgps.bufindex, session->driver.isgps.curr_offset);
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next PREAMBLE_PATTERN and go on from there. 
 		     */
-		    if (session->isgps.bufindex >= RTCM_WORDS_MAX){
-			session->isgps.bufindex = 0;
+		    if (session->driver.isgps.bufindex >= RTCM_WORDS_MAX){
+			session->driver.isgps.bufindex = 0;
 			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				    "RTCM buffer overflowing -- resetting\n");
 			return ISGPS_NO_SYNC;
 		    }
 
-		    session->isgps.buf[session->isgps.bufindex] = session->isgps.curr_word;
+		    session->driver.isgps.buf[session->driver.isgps.bufindex] = session->driver.isgps.curr_word;
 
-		    if ((session->isgps.bufindex == 0) &&
-			!preamble_match((isgps30bits_t *)session->isgps.buf)) {
+		    if ((session->driver.isgps.bufindex == 0) &&
+			!preamble_match((isgps30bits_t *)session->driver.isgps.buf)) {
 			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				    "word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
-		    session->isgps.bufindex++;
+		    session->driver.isgps.bufindex++;
 
 		    if (length_check(session)) {
 			/* jackpot, we have a complete packet*/
-			session->isgps.bufindex = 0;
+			session->driver.isgps.bufindex = 0;
 			res = ISGPS_MESSAGE;
 		    }
 		}
-		session->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
-		session->isgps.curr_offset += 30;
-		if (session->isgps.curr_offset > 0) {
-		    session->isgps.curr_word |= c << session->isgps.curr_offset;
+		session->driver.isgps.curr_word <<= 30;	/* preserve the 2 low bits */
+		session->driver.isgps.curr_offset += 30;
+		if (session->driver.isgps.curr_offset > 0) {
+		    session->driver.isgps.curr_word |= c << session->driver.isgps.curr_offset;
 		} else {
-		    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+		    session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 		}
 	    } else {
 		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
 			    "parity failure, lost lock\n");
-		session->isgps.locked = false;
+		session->driver.isgps.locked = false;
 	    }
 	}
-	session->isgps.curr_offset -= 6;
-	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->isgps.curr_offset);
+	session->driver.isgps.curr_offset -= 6;
+	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->driver.isgps.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/

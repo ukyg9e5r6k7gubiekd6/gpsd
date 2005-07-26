@@ -50,8 +50,8 @@ static void tsip_initializer(struct gps_device_t *session)
     unsigned char buf[100];
 
     /* TSIP is ODD parity 1 stopbit, save original values and change it */
-    session->tsip.parity = session->gpsdata.parity;
-    session->tsip.stopbits = session->gpsdata.stopbits;
+    session->driver.tsip.parity = session->gpsdata.parity;
+    session->driver.tsip.stopbits = session->gpsdata.stopbits;
     gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
 
     /* I/O Options */
@@ -84,8 +84,8 @@ static void tsip_wrapup(struct gps_device_t *session)
     /* restore saved parity and stopbits when leaving TSIP mode */
     gpsd_set_speed(session, 
 		   session->gpsdata.baudrate,
-		   (unsigned char)session->tsip.parity, 
-		   session->tsip.stopbits);
+		   (unsigned char)session->driver.tsip.parity, 
+		   session->driver.tsip.stopbits);
 }
 
 static bool tsip_speed_switch(struct gps_device_t *session, unsigned int speed)
@@ -173,12 +173,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x41:		/* GPS Time */
 	if (len != 10)
 	    break;
-	session->tsip.last_41 = now;			/* keep timestamp for request */
+	session->driver.tsip.last_41 = now;			/* keep timestamp for request */
 	f1 = getf(buf,0);			/* gpstime */
 	s1 = getsw(buf,4);			/* week */
 	f2 = getf(buf,6);			/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
-	    session->tsip.gps_week = s1;
+	    session->driver.tsip.gps_week = s1;
 	    session->context->leap_seconds = (int)roundf(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 
@@ -256,9 +256,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.newdata.altitude  = getf(buf,8);
 	f1 = getf(buf,12);			/* clock bias */
 	f2 = getf(buf,16);			/* time-of-fix */
-	if (session->tsip.gps_week) {
+	if (session->driver.tsip.gps_week) {
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
-		gpstime_to_unix((int)session->tsip.gps_week, f2) - session->context->leap_seconds;
+		gpstime_to_unix((int)session->driver.tsip.gps_week, f2) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
 	gpsd_report(4, "GPS LLA %f %f %f\n",session->gpsdata.newdata.latitude,session->gpsdata.newdata.longitude,session->gpsdata.newdata.altitude);
@@ -272,7 +272,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u3 = getub(buf,2);			/* Status 2 */
 	gpsd_report(4, "Machine ID %02x %02x %02x\n",u1,u2,u3);
 #if USE_SUPERPACKET
-	if ((u3 & 0x01) != (u_int8_t)0 && !session->tsip.superpkt) {
+	if ((u3 & 0x01) != (u_int8_t)0 && !session->driver.tsip.superpkt) {
 	    gpsd_report(2, "Switching to Super Packet mode\n");
 
 	    /* set new I/O Options for Super Packet output */
@@ -281,7 +281,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    putbyte(buf,2,0x00);		/* Time: GPS */
 	    putbyte(buf,3,0x08);		/* Aux: dBHz */
 	    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
-	    session->tsip.superpkt = true;
+	    session->driver.tsip.superpkt = true;
 	}
 #endif /* USE_SUPERPACKET */
 	break;
@@ -333,7 +333,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	s1 = getsw(buf,6);			/* tsip.gps_week */
 	/*@ +charint @*/
 	if (getub(buf,0) == 0x01)		/* good current fix? */
-	    session->tsip.gps_week = s1;
+	    session->driver.tsip.gps_week = s1;
 	/*@ -charint @*/
 	gpsd_report(4, "Fix info %02x %02x %d %f\n",u1,u2,s1,f1);
 	break;
@@ -353,7 +353,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x5c:		/* Satellite Tracking Status */
 	if (len != 24)
 	    break;
-	session->tsip.last_5c = now;		/* keep timestamp for request */
+	session->driver.tsip.last_5c = now;		/* keep timestamp for request */
 	u1 = getub(buf,0);			/* PRN */
 	u2 = getub(buf,1);			/* chan */
 	u3 = getub(buf,2);			/* Acquisition flag */
@@ -385,7 +385,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	count = (int)((u1 >> 4) & 0x0f);
 	if (len != (17 + count))
 	    break;
-	session->tsip.last_6d = now;		/* keep timestamp for request */
+	session->driver.tsip.last_6d = now;		/* keep timestamp for request */
 	switch (u1 & 7)				/* dimension */
 	{
 	case 3:
@@ -469,9 +469,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->gpsdata.newdata.altitude  = getd(buf,16);
 	d1 = getd(buf,24);			/* clock bias */
 	f1 = getf(buf,32);			/* time-of-fix */
-	if (session->tsip.gps_week) {
+	if (session->driver.tsip.gps_week) {
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
-		gpstime_to_unix((int)session->tsip.gps_week, f1) - session->context->leap_seconds;
+		gpstime_to_unix((int)session->driver.tsip.gps_week, f1) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
 	gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.newdata.latitude,session->gpsdata.newdata.longitude,session->gpsdata.newdata.altitude);
@@ -548,7 +548,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->tsip.gps_week = s4;
+	    session->driver.tsip.gps_week = s4;
 	    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
 		gpstime_to_unix((int)s4, ul1 * 1e-3) - session->context->leap_seconds;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
@@ -567,7 +567,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    s3 = getsw(buf,23);			/* north velocity */
 	    s4 = getsw(buf,25);			/* up velocity */
 	    gpsd_report(4, "CSP %u %d %u %u %d %u %d %d %d %d\n",ul1,s1,u1,u2,sl1,ul2,sl3,s2,s3,s4);
-	    session->tsip.gps_week = s1;
+	    session->driver.tsip.gps_week = s1;
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
@@ -630,23 +630,23 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     /* see if it is time to send some request packets for reports that */
     /* the receiver won't send at fixed intervals */
 
-    if ((now - session->tsip.last_41) > 5) {
+    if ((now - session->driver.tsip.last_41) > 5) {
 	/* Request Current Time */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
-	session->tsip.last_41 = now;
+	session->driver.tsip.last_41 = now;
     }
 
-    if ((now - session->tsip.last_6d) > 5) {
+    if ((now - session->driver.tsip.last_6d) > 5) {
 	/* Request GPS Receiver Position Fix Mode */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x24, buf, 0);
-	session->tsip.last_6d = now;
+	session->driver.tsip.last_6d = now;
     }
 
-    if ((now - session->tsip.last_5c) >= 5) {
+    if ((now - session->driver.tsip.last_5c) >= 5) {
 	/* Request Current Satellite Tracking Status */
 	putbyte(buf,0,0x00);		/* All satellites */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x3c, buf, 1);
-	session->tsip.last_5c = now;
+	session->driver.tsip.last_5c = now;
     }
 
     return mask;

@@ -416,7 +416,7 @@ static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
     gpsd_report(5, "RTCM packet type 0x%02x length %d words: %s\n", 
 		session->gpsdata.rtcm.type,
 		session->gpsdata.rtcm.length+2,
-		gpsd_hexdump(session->isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));
+		gpsd_hexdump(session->driver.isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));
     return RTCM_SET;
 }
 

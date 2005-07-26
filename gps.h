@@ -162,7 +162,7 @@ struct rtcm_t {
 	char message[(RTCM_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */
 	isgps30bits_t	words[RTCM_WORDS_MAX-2];
-    };
+    } msg_data;
 };
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
