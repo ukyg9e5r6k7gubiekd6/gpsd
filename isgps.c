@@ -3,7 +3,7 @@
 This is a decoder for the unnamed protocol described in IS-GPS-200,
 the Navstar GPS Interface Specification, and used as a transport layer
 for both GPS satellite downlink transmissions and the RTCM104 format
-for briodcasting differential-GPS corrections.
+for broadcasting differential-GPS corrections.
 
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from

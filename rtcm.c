@@ -24,8 +24,7 @@ code for that protocol in isgps.c.
 The lower layer's job is done when it has assembled a message of up to
 33 words of clean parity-checked data.  At this point this upper layer
 takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
-are used to extract pieces of it (which, if you're on a big-endian machine
-may need to be swapped end-for-end).  Those pieces are copied and (where
+are used to extract pieces of it.  Those pieces are copied and (where
 necessary) reassembled into a struct rtcm_t.
 
 This code and the contents of isgps.c are evolved from code by Wolgang
