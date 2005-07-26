@@ -95,7 +95,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef TRIPMATE_ENABLE
         if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	    session->packet_state = ASTRAL_1;
 	    break;
@@ -104,7 +104,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef EARTHMATE_ENABLE
         if (c == 'E') {
 #ifdef RTCM104_ENABLE
-	    rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	    session->packet_state = EARTHA_1;
 	    break;
@@ -182,7 +182,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'S')
 	    session->packet_state = ASTRAL_2;
@@ -191,7 +191,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case ASTRAL_2:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'T')
 	    session->packet_state = ASTRAL_3;
@@ -200,7 +200,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case ASTRAL_3:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'R')
 	    session->packet_state = ASTRAL_5;
@@ -209,7 +209,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case ASTRAL_4:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = ASTRAL_2;
@@ -218,7 +218,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case ASTRAL_5:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'L')
 	    session->packet_state = NMEA_RECOGNIZED;
@@ -229,7 +229,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = EARTHA_2;
@@ -238,7 +238,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EARTHA_2:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'R')
 	    session->packet_state = EARTHA_3;
@@ -247,7 +247,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EARTHA_3:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'T')
 	    session->packet_state = EARTHA_4;
@@ -256,7 +256,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EARTHA_4:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'H')
 	    session->packet_state = EARTHA_5;
@@ -265,7 +265,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
     case EARTHA_5:
 #ifdef RTCM104_ENABLE
-	rtcm_decode(session, c);
+	(void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = NMEA_RECOGNIZED;
