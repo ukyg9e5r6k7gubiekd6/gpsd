@@ -27,15 +27,57 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
+struct map {
+    char	*legend;
+    char	test[MAX_PACKET_LENGTH+1];
+    size_t	testlen;
+    int	garbage_offset;
+    int	type;
+};
+
+static int packet_test(struct map *mp)
+{
+    struct gps_device_t state;
+    ssize_t st;
+    int failure = 0;
+
+    state.packet_type = BAD_PACKET;
+    state.packet_state = 0;
+    state.inbuflen = 0;
+    /*@i@*/memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
+    /*@ -compdef -uniondef -usedef @*/
+    st = packet_parse(&state, mp->testlen);
+    if (state.packet_type != mp->type)
+	printf("%s test FAILED (packet type %d wrong).\n", mp->legend, (int)st);
+    else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {
+	printf("%s test FAILED (data garbled).\n", mp->legend);
+	++failure;
+    } else
+	printf("%s test succeeded.\n", mp->legend);
+#ifdef DUMPIT
+    for (cp = state.outbuffer; 
+	 cp < state.outbuffer + state.outbuflen; 
+	 cp++) {
+	if (st != NMEA_PACKET)
+	    (void)printf(" 0x%02x", *cp);
+	else if (*cp == '\r')
+	    (void)fputs("\\r", stdout);
+	else if (*cp == '\n')
+	    (void)fputs("\\n", stdout);
+	else if (isprint(*cp))
+	    (void)putchar(*cp);
+	else
+	    (void)printf("\\x%02x", *cp);
+    }
+    (void)putchar('\n');
+#endif /* DUMPIT */
+    /*@ +compdef +uniondef +usedef @*/
+
+    return failure;
+}
+
 int main(int argc, char *argv[])
 {
-    struct map {
-	char	*legend;
-	char	test[MAX_PACKET_LENGTH+1];
-	size_t	testlen;
-	int	garbage_offset;
-	int	type;
-    };
     /*@ -initallelements +charint -usedef @*/
     struct map tests[] = {
 	/* NMEA tests */
@@ -201,46 +243,12 @@ int main(int argc, char *argv[])
     /*@ +initallelements -charint +usedef @*/
 
     struct map *mp;
-    struct gps_device_t state;
     int failcount = 0;
-    ssize_t st;
 
     if (argc > 1)
 	verbose = atoi(argv[1]); 
 
-    for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) {
-	state.packet_type = BAD_PACKET;
-	state.packet_state = 0;
-	state.inbuflen = 0;
-	/*@i@*/memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
-	/*@ -compdef -uniondef -usedef @*/
-	st = packet_parse(&state, mp->testlen);
-	if (state.packet_type != mp->type)
-	    printf("%s test FAILED (packet type %d wrong).\n", mp->legend, (int)st);
-	else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {
-	    printf("%s test FAILED (data garbled).\n", mp->legend);
-	    ++failcount;
-	} else
-	    printf("%s test succeeded.\n", mp->legend);
-#ifdef DUMPIT
-	for (cp = state.outbuffer; 
-	     cp < state.outbuffer + state.outbuflen; 
-	     cp++) {
-	    if (st != NMEA_PACKET)
-		(void)printf(" 0x%02x", *cp);
-	    else if (*cp == '\r')
-		(void)fputs("\\r", stdout);
-	    else if (*cp == '\n')
-		(void)fputs("\\n", stdout);
-	    else if (isprint(*cp))
-		(void)putchar(*cp);
-	    else
-		(void)printf("\\x%02x", *cp);
-	}
-	(void)putchar('\n');
-#endif /* DUMPIT */
-	/*@ +compdef +uniondef +usedef @*/
-    }
-
+    for (mp = tests; mp < tests + sizeof(tests)/sizeof(tests[0]); mp++) 
+	failcount += packet_test(mp);
     exit(failcount > 0);
 }
