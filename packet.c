@@ -67,6 +67,9 @@ enum {
 
 static void nextstate(struct gps_device_t *session, unsigned char c)
 {
+#ifdef RTCM104_ENABLE
+    enum isgpsstat_t	isgpsstat;    
+#endif /* RTCM104_ENABLE */
 /*@ +charint */
     switch(session->packet_state)
     {
@@ -91,12 +94,18 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
 #ifdef TRIPMATE_ENABLE
         if (c == 'A') {
+#ifdef RTCM104_ENABLE
+	    rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	    session->packet_state = ASTRAL_1;
 	    break;
 	}
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
         if (c == 'E') {
+#ifdef RTCM104_ENABLE
+	    rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	    session->packet_state = EARTHA_1;
 	    break;
 	}
@@ -113,6 +122,12 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif /* ITALK_ENABLE */
+#ifdef RTCM104_ENABLE
+	if (rtcm_decode(session, c) == ISGPS_SYNC) {
+	    session->packet_state = RTCM_SYNC_STATE;
+	    break;
+	}
+#endif /* RTCM104_ENABLE */
 	break;
 	/*@ +casebreak @*/
 #ifdef NMEA_ENABLE
@@ -166,30 +181,45 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
 #ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'S')
 	    session->packet_state = ASTRAL_2;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_2:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'T')
 	    session->packet_state = ASTRAL_3;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_3:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'R')
 	    session->packet_state = ASTRAL_5;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_4:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = ASTRAL_2;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_5:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'L')
 	    session->packet_state = NMEA_RECOGNIZED;
 	else
@@ -198,30 +228,45 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = EARTHA_2;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_2:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'R')
 	    session->packet_state = EARTHA_3;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_3:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'T')
 	    session->packet_state = EARTHA_4;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_4:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'H')
 	    session->packet_state = EARTHA_5;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_5:
+#ifdef RTCM104_ENABLE
+	rtcm_decode(session, c);
+#endif /* RTCM104_ENABLE */
 	if (c == 'A')
 	    session->packet_state = NMEA_RECOGNIZED;
 	else
@@ -476,6 +521,25 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
+#ifdef RTCM104_ENABLE
+    case RTCM_SYNC_STATE:
+    case RTCM_SKIP_STATE:
+	isgpsstat = rtcm_decode(session, c);
+	if (isgpsstat == ISGPS_MESSAGE) {
+	    session->packet_state = RTCM_RECOGNIZED;
+	    break;
+	} else if (isgpsstat == ISGPS_NO_SYNC)
+	    session->packet_state = GROUND_STATE;
+	break;
+
+    case RTCM_RECOGNIZED:
+	if (rtcm_decode(session, c) == ISGPS_SYNC) {
+	    session->packet_state = RTCM_SYNC_STATE;
+	    break;
+	} else
+	    session->packet_state = GROUND_STATE;
+	break;
+#endif /* RTCM104_ENABLE */
     }
 /*@ -charint */
 }
@@ -518,18 +582,6 @@ static void packet_discard(struct gps_device_t *session)
 #endif /* STATE_DEBUG */
 }
 
-static void character_discard(struct gps_device_t *session)
-/* shift the input buffer to discard one character and reread data */
-{
-    memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
-    session->inbufptr = session->inbuffer;
-#ifdef STATE_DEBUG
-    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
-		session->inbuflen,
-		gpsd_hexdump(session->inbuffer, session->inbuflen));
-#endif /* STATE_DEBUG */
-}
-
 /* entry points begin here */
 
 /* get 0-origin big-endian words relative to start of packet buffer */
@@ -564,7 +616,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		    state_table[session->packet_state]);
 
 	if (session->packet_state == GROUND_STATE) {
-		character_discard(session);
+	    packet_discard(session);
 #ifdef NMEA_ENABLE
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
@@ -663,7 +715,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	    /*@ +charint */
 
 	    if (ok)
-	    packet_accept(session, EVERMORE_PACKET);
+		packet_accept(session, EVERMORE_PACKET);
 	    else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
@@ -684,15 +736,16 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
 #endif /* ITALK_ENABLE */
-#ifdef RTCM_ENABLE
+#ifdef RTCM104_ENABLE
 	} else if (session->packet_state == RTCM_RECOGNIZED) {
 	    /*
 	     * RTCM packets don't have checksums.  The six bits of parity 
 	     * per word and the preamble better be good enough.
 	     */
 	    packet_accept(session, RTCM_PACKET);
+	    session->packet_state = RTCM_SYNC_STATE;
 	    packet_discard(session);
-#endif /* ITALK_ENABLE */
+#endif /* RTCM104_ENABLE */
 	}
     } /* while */
 
@@ -726,6 +779,18 @@ void packet_reset(struct gps_device_t *session)
 }
 
 #ifdef __UNUSED__
+static void character_discard(struct gps_device_t *session)
+/* shift the input buffer to discard one character and reread data */
+{
+    memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
+    session->inbufptr = session->inbuffer;
+#ifdef STATE_DEBUG
+    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
+		session->inbuflen,
+		gpsd_hexdump(session->inbuffer, session->inbuflen));
+#endif /* STATE_DEBUG */
+}
+
 void packet_pushback(struct gps_device_t *session)
 /* push back the last packet grabbed */
 {

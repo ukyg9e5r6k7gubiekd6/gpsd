@@ -186,11 +186,13 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 {
     enum isgpsstat_t res;
 
+    /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
 	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 		    "word tag not correct, skipping\n");
 	return ISGPS_SKIP;
     }
+
     c = reverse_bits[c & 0x3f];
 
     /*@ -shiftnegative @*/
@@ -199,13 +201,13 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 	session->isgps.bufindex = 0;
 
 	while (session->isgps.curr_offset <= 0) {
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing\n");
 	    session->isgps.curr_word <<= 1;
 	    if (session->isgps.curr_offset > 0) {
 		session->isgps.curr_word |= c << session->isgps.curr_offset;
 	    } else {
 		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
 	    }
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->counter, session->isgps.curr_word);
 
 	    if (preamble_match(&session->isgps.curr_word)) {
 		if (isgpsparityok(session->isgps.curr_word)) {
