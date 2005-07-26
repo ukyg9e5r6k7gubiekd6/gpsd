@@ -181,95 +181,95 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	break;
 #ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
+	if (c == 'S') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'S')
 	    session->packet_state = ASTRAL_2;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_2:
+	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'T')
 	    session->packet_state = ASTRAL_3;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_3:
+	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'R')
 	    session->packet_state = ASTRAL_5;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_4:
+	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'A')
 	    session->packet_state = ASTRAL_2;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ASTRAL_5:
+	if (c == 'L') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'L')
 	    session->packet_state = NMEA_RECOGNIZED;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
+	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'A')
 	    session->packet_state = EARTHA_2;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_2:
+	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'R')
 	    session->packet_state = EARTHA_3;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_3:
+	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'T')
 	    session->packet_state = EARTHA_4;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_4:
+	if (c == 'H') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'H')
 	    session->packet_state = EARTHA_5;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EARTHA_5:
+	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	(void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
-	if (c == 'A')
 	    session->packet_state = NMEA_RECOGNIZED;
-	else
+	} else
 	    session->packet_state = GROUND_STATE;
 	break; 
 #endif /* EARTHMATE_ENABLE */
