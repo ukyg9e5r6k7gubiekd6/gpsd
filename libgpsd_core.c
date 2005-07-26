@@ -461,17 +461,17 @@ static void apply_error_model(struct gps_device_t *session)
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
-    ssize_t packet_length;
+    ssize_t newdata;
 
     if (session->inbuflen==0)
 	session->gpsdata.d_xmit_time = timestamp();
 
     /* can we get a full packet from the device? */
     if (session->device_type) {
-	packet_length = session->device_type->get_packet(session);
+	newdata = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
     } else {
-	packet_length = packet_get(session);
+	newdata = packet_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(3, 
 		    "packet sniff finds type %d\n", 
@@ -519,16 +519,19 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(7, "GPS sent %d characters\n", packet_length);
-    if (packet_length == BAD_PACKET)
+    gpsd_report(7, "GPS sent %d new characters\n", newdata);
+    if (newdata == -1)	{		/* read error */
+	session->gpsdata.online = 0;
 	return 0;
-    else if (packet_length == 0) {
+    } else if (newdata == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
-    } else {
+    } else if (session->outbuflen == 0)	/* got new data, but no packet */
+	    return ONLINE_SET;
+    else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
@@ -536,7 +539,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata, 
 				      (char *)session->outbuffer,
-				      (size_t)packet_length, 2);
+				      (size_t)newdata, 2);
 	/*@ -nullstate @*/
 	session->gpsdata.sentence_time = NAN;
 	session->gpsdata.sentence_length = session->outbuflen;
@@ -590,7 +593,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	    buf2[0] = '\0';
 #ifdef RTCM104_ENABLE
-	    if (session->packet_type == RTCM_PACKET)
+	    if ((session->gpsdata.set & RTCM_SET) != 0)
 		rtcm_dump(session, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));

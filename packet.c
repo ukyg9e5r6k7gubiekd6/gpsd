@@ -763,7 +763,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	}
     } /* while */
 
-    return (ssize_t)session->outbuflen;
+    return (ssize_t)newdata;
 }
 #undef getword
 
