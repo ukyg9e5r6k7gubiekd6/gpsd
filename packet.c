@@ -582,6 +582,19 @@ static void packet_discard(struct gps_device_t *session)
 #endif /* STATE_DEBUG */
 }
 
+static void character_discard(struct gps_device_t *session)
+/* shift the input buffer to discard one character and reread data */
+{
+    memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
+    session->inbufptr = session->inbuffer;
+#ifdef STATE_DEBUG
+    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
+		session->inbuflen,
+		gpsd_hexdump(session->inbuffer, session->inbuflen));
+#endif /* STATE_DEBUG */
+}
+
+
 /* entry points begin here */
 
 /* get 0-origin big-endian words relative to start of packet buffer */
@@ -616,7 +629,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		    state_table[session->packet_state]);
 
 	if (session->packet_state == GROUND_STATE) {
-	    packet_discard(session);
+	    character_discard(session);
 #ifdef NMEA_ENABLE
 	} else if (session->packet_state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
@@ -779,18 +792,6 @@ void packet_reset(struct gps_device_t *session)
 }
 
 #ifdef __UNUSED__
-static void character_discard(struct gps_device_t *session)
-/* shift the input buffer to discard one character and reread data */
-{
-    memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
-    session->inbufptr = session->inbuffer;
-#ifdef STATE_DEBUG
-    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
-		session->inbuflen,
-		gpsd_hexdump(session->inbuffer, session->inbuflen));
-#endif /* STATE_DEBUG */
-}
-
 void packet_pushback(struct gps_device_t *session)
 /* push back the last packet grabbed */
 {
