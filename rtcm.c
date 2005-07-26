@@ -82,11 +82,7 @@ Starlink's website.
 
 #pragma pack(1)
 
-#if (BYTE_ORDER != LITTLE_ENDIAN) && (BYTE_ORDER != BIG_ENDIAN)
-# error Not litle endian and not big endian.
-#endif
-
-#if BYTE_ORDER == LITTLE_ENDIAN
+#ifndef WORDS_BIG_ENDIAN	/* little-endian, like x86 */
 
 struct rtcm_msg_t {
     struct rtcm_msghw1 {			/* header word 1 */
@@ -290,9 +286,8 @@ struct rtcm_msg_t {
 
 #endif /* LITTLE_ENDIAN */
 
-#if BYTE_ORDER == BIG_ENDIAN
+#if WORDS_BIG_ENDIAN
 /* This struct was generated from the above using invert-bitfields.pl */
-
 #ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
 
 struct rtcm_msg_t {

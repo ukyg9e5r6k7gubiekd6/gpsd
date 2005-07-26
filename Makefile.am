@@ -229,7 +229,7 @@ EXTRA_DIST = \
 	valgrind-suppressions \
 	driver_proto.c \
 	logextract \
-	statetable.el
+	invert-bitfields.pl
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
