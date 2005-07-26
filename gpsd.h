@@ -124,7 +124,8 @@ struct gps_device_t {
     unsigned /*@observer@*/char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
     size_t outbuflen;
-    unsigned long counter;
+    unsigned long char_counter;		/* count characters processed */
+    unsigned long retry_counter;	/* count sniff retries */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE
     int shmTime;

@@ -623,10 +623,11 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	};
 	nextstate(session, c);
 	gpsd_report(7, "%08ld: character '%c' [%02x], new state: %s\n",
-		    session->counter, 
+		    session->char_counter, 
 		    (isprint(c)?c:'.'), 
 		    c, 
 		    state_table[session->packet_state]);
+	session->char_counter++;
 
 	if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);

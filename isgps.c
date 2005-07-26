@@ -207,7 +207,7 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 	    } else {
 		session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 	    }
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->counter, session->driver.isgps.curr_word);
+	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->char_counter, session->driver.isgps.curr_word);
 
 	    if (preamble_match(&session->driver.isgps.curr_word)) {
 		if (isgpsparityok(session->driver.isgps.curr_word)) {

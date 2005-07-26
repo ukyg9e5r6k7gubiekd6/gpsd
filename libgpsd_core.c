@@ -155,7 +155,8 @@ int gpsd_activate(struct gps_device_t *session)
 #ifdef SIRFII_ENABLE
 	session->driver.sirf.satcounter = 0;
 #endif /* SIRFII_ENABLE */
-	session->counter = 0;
+	session->char_counter = 0;
+	session->retry_counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
@@ -564,8 +565,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
 	session->gpsdata.set = ONLINE_SET | dopmask | received;
 
-	/* count all packets and good fixes */
-	session->counter++;
+	/* count good fixes */
 	if (session->gpsdata.status > STATUS_NO_FIX) 
 	    session->context->fixcnt++;
 

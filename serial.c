@@ -142,7 +142,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->ttyset.c_cflag |= CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 
-	session->counter = session->baudindex = 0;
+	session->baudindex = 0;
 	gpsd_set_speed(session, 
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
@@ -163,8 +163,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
-    if (session->counter++ >= SNIFF_RETRIES) {
-	session->counter = 0;
+    if (session->retry_counter++ >= SNIFF_RETRIES) {
+	session->retry_counter = 0;
 	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.stopbits++ >= 2)
