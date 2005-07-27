@@ -81,7 +81,7 @@ Starlink's website.
 
 #pragma pack(1)
 
-#ifndef WORDS_BIG_ENDIAN	/* little-endian, like x86 */
+#ifndef WORDS_BIGENDIAN	/* little-endian, like x86 */
 
 struct rtcm_msg_t {
     struct rtcm_msghw1 {			/* header word 1 */
@@ -285,7 +285,7 @@ struct rtcm_msg_t {
 
 #endif /* LITTLE_ENDIAN */
 
-#if WORDS_BIG_ENDIAN
+#if WORDS_BIGENDIAN
 /* This struct was generated from the above using invert-bitfields.pl */
 #ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
 
@@ -484,7 +484,7 @@ struct rtcm_msg_t {
 };
 
 #endif /* S_SPLINT_S */
-#endif /* BIG_ENDIAN */
+#endif /* BIG ENDIAN */
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
