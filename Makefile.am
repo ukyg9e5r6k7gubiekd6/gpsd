@@ -139,7 +139,7 @@ man_MANS = \
 	gpsfake.1 \
 	sirfmon.1 \
 	rtcmdecode.1 \
-	rtcm.5 \
+	rtcm-104.5 \
 	srec.5
 
 gpsd.8: gpsd.xml
@@ -169,8 +169,8 @@ sirfmon.1: sirfmon.xml
 rtcmdecode.1: rtcmdecode.xml
 	-$(XMLTO) man rtcmdecode.xml
 
-rtcm.5: rtcm.xml
-	-$(XMLTO) man rtcm.xml
+rtcm-104.5: rtcm-104.xml
+	-$(XMLTO) man rtcm-104.xml
 
 srec.5: srec.xml
 	-$(XMLTO) man srec.xml
@@ -211,7 +211,7 @@ EXTRA_DIST = \
 	gpsfake.xml \
 	sirfmon.xml \
 	rtcmdecode.xml \
-	rtcm.xml \
+	rtcm-104.xml \
 	srec.xml \
 	gpsflash.xml \
 	$(man_MANS) \
