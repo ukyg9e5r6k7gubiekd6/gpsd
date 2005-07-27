@@ -20,7 +20,7 @@ xmlto xhtml-nochunks ../gpsfake.xml
 xmlto xhtml-nochunks ../sirfmon.xml
 xmlto xhtml-nochunks ../rtcmdecode.xml
 xmlto xhtml-nochunks ../gpsflash.xml
-xmlto xhtml-nochunks ../rtcm104.xml
+xmlto xhtml-nochunks ../rtcm-104.xml
 xmlto xhtml-nochunks ../srec.xml
 xmlto xhtml-nochunks replacing-nmea.xml
 (cd performance; xmlto xhtml-nochunks performance.xml)
