@@ -299,7 +299,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
     return mask;
 }
 
-static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_device_t *session)
+static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
     /*
@@ -316,7 +316,17 @@ static gps_mask_t processGPGSA(int c UNUSED, char *field[], struct gps_device_t 
      */
     gps_mask_t mask;
     int i;
-    
+
+    /*
+     * One chipset called the i.Trek M3 issues GPGSA lines that look like
+     * this: "$GPGSA,A,1,,,,*32" when it has no fix.  This is broken
+     * in at least two ways: it's got the wrong number of fields, and
+     * it claims to be a valid sentence (A flag) when it isn't.
+     * Alarmingly, it's possible this error may be generic to SiRF-IIIs.
+     */
+    if (count < 17)
+	return ONLINE_SET;
+
     session->gpsdata.newdata.mode = atoi(field[2]);
     mask = MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", session->gpsdata.newdata.mode);
