@@ -480,8 +480,8 @@ struct rtcm_msg_t {
 
 	/* unknown message */
 	isgps30bits_t	rtcm_msgunk[RTCM_WORDS_MAX-2];
-    };
-} msg_type;
+    } msg_type;
+};
 
 #endif /* S_SPLINT_S */
 #endif /* BIG ENDIAN */
