@@ -959,6 +959,128 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 
 }
 
+int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
+{
+    int fldcount, v;
+    char buf[BUFSIZ];
+    unsigned n;
+
+    fldcount = fscanf(fp, "H\t%u\t%u\t%1lf\t%u\t%u\t%u\n",
+		    &rtcmp->type,
+		    &rtcmp->refstaid,
+		    &rtcmp->zcount,
+		    &rtcmp->seqnum,
+		    &rtcmp->length,
+		    &rtcmp->stathlth);
+    if (fldcount != 6)
+	return -1;
+
+    switch (rtcmp->type) {
+    case 1:
+    case 9:
+	for (n = 0; n < rtcmp->length/3; n++) {
+	    struct rangesat_t *rsp = &rtcmp->msg_data.ranges.sat[n];
+	    /* we ignore the third (zcount) field, it's in the parent */
+	    fldcount = fscanf(fp,
+			      "S\t%u\t%u\t%u\t%*f\t%lf\t%lf\n",
+			      &rsp->ident,
+			      &rsp->udre,
+			      &rsp->issuedata,
+			      &rsp->rangerr,
+			      &rsp->rangerate);
+	    if (fldcount != 5)
+		return (int)rtcmp->type;
+	}
+	break;
+
+    case 3:
+	fldcount = fscanf(fp,
+			  "R\t%lf\t%lf\t%lf\n",
+			  &rtcmp->msg_data.ecef.x, 
+			  &rtcmp->msg_data.ecef.y,
+			  &rtcmp->msg_data.ecef.z);
+	if (fldcount == 3)
+	    rtcmp->msg_data.ecef.valid = true;
+	else
+	    return 3;
+	break;
+
+    case 4:
+	fldcount = fscanf(fp,
+			   "D\t%s\t%1d\t%s\t%lf\t%lf\t%lf\n",
+			  buf,
+			  &v,
+			  (char *)&rtcmp->msg_data.reference.datum,
+			  &rtcmp->msg_data.reference.dx,
+			  &rtcmp->msg_data.reference.dy,
+			  &rtcmp->msg_data.reference.dz);
+	if (fldcount != 6)
+	    return 4;
+	if (strcmp(buf, "GPS") == 0)
+	    rtcmp->msg_data.reference.system = gps;
+	else if (strcmp(buf, "GLONASS") == 0)
+	    rtcmp->msg_data.reference.system = glonass;
+	else
+	    rtcmp->msg_data.reference.system = unknown;
+	rtcmp->msg_data.reference.sense = (int)v;
+	rtcmp->msg_data.reference.valid = true;
+	break;
+
+    case 5:
+	for (n = 0; n < rtcmp->length; n++) {
+	    struct consat_t *csp = &rtcmp->msg_data.conhealth.sat[n];
+	    fldcount = fscanf(fp,
+			   /* FIXME: turn these spaces to tabs someday */
+			   "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
+			   &csp->ident,
+			   (unsigned int *)&csp->iodl,
+			   &csp->health,
+			   &csp->snr,
+			   &csp->health_en,
+			   (unsigned int *)&csp->new_data,
+			   (unsigned int *)&csp->los_warning,
+			   &csp->tou);
+	    if (fldcount != 8)
+		return 5;
+	}
+	break;
+
+    case 6: 			/* NOP msg */
+	break;
+
+    case 7:
+	for (n = 0; n < rtcmp->length/3; n++) {
+	    struct station_t *ssp = &rtcmp->msg_data.almanac.station[n];
+	    fldcount = fscanf(fp,
+			      "A\t%lf\t%lf\t%u\t%lf\t%u\t%u\t%u\n",
+			      &ssp->latitude,
+			      &ssp->longitude,
+			      &ssp->range,
+			      &ssp->frequency,
+			      &ssp->health,
+			      &ssp->station_id,
+			      &ssp->bitrate);
+	    if (fldcount != 7)
+		return 7;
+	}
+	break;
+    case 16:
+	    fldcount = fscanf(fp,
+			      "T \"%[^\"]\"\n", rtcmp->msg_data.message);
+	    if (fldcount != 1)
+		return 16;
+	break;
+
+    default:
+	for (n = 0; n < rtcmp->length; n++)
+	    if (fscanf(fp, "U 0x%08x\n", (int *)&rtcmp->msg_data.words[n]) != 1)
+		return (int)rtcmp->type;
+	break;
+    }
+
+    return 0;
+}
+
 #ifdef __UNUSED__
 /*
  * The RTCM words are 30-bit words.  We will lay them into memory into

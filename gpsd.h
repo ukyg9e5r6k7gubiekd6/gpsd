@@ -4,6 +4,7 @@
 /* gpsd.h -- fundamental types and structures for the GPS daemon */
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <termios.h>
 #include "config.h"
 #include "gps.h"
@@ -267,6 +268,7 @@ extern unsigned bitreverse(unsigned x, unsigned w);
 extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
 
 extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 

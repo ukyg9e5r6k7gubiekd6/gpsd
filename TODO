@@ -82,6 +82,8 @@ Chris Kuethe has shipped a 0.0 alpha version.  It is not yet
 resolved whether SiRF Technology will allow us to ship the 
 binary loader code needed to actually use it.
 
+The uploader needs a query-GPS-version method.
+
 *** RINEX-format dumping of raw satellite data
 
 It would be useful to be able to extract RINEX-format data from any
