@@ -58,7 +58,8 @@ is run in background.</para>
 on standard error.  At termination, it reports elaped time.</para>
 
 <para>The -c option sets the delay between sentences in
-seconds. Fractional values of seconds are legal.</para>
+seconds. Fractional values of seconds are legal.  The default is zero
+(no delay).</para>
 
 <para>The -l option makes the program dump a line or packet number just
 before each sentence is fed to the daemon. If the sentence is

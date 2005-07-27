@@ -41,7 +41,7 @@ class Baton:
 
 (options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:ps:")
 progress = False
-cycle = 1
+cycle = 0
 monitor = ""
 speed = 4800
 linedump = False

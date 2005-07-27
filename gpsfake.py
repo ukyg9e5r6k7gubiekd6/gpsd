@@ -150,7 +150,7 @@ class TestLoad:
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp, speed=4800):
-        self.go_predicate = lambda i, s: time.sleep(0.2) or True
+        self.go_predicate = lambda: True
         self.readers = 0
         self.thread = None
         self.index = 0
