@@ -20,7 +20,8 @@
   <command>gpsd</command>  
       <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
-      <arg choice='opt'>-R <replaceable>rtcm-listener-port</replaceable></arg>
+      <!-- arg choice='opt'>-R
+      <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-d <replaceable>DGPSIP-server</replaceable></arg>
       <arg choice='opt'>-n </arg>      
@@ -72,9 +73,9 @@ hunt for one.-->
 See <xref linkend='accuracy'/> and <xref
 linkend='files'/> for discussion.</para>
 
-<para><application>gpsd</application> may itself serve DGPSIP data
+<!-- para><application>gpsd</application> may itself serve DGPSIP data
 from an attached RTCM-104 source to other instances of
-<application>gpsd</application> connecting on port 2101.</para>
+<application>gpsd</application> connecting on port 2101.</para -->
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -97,12 +98,12 @@ this will be created as a Unix-domain socket to which you can write
 commands that edit the daemon's internal device list.</para>
 </listitem>
 </varlistentry>
-<varlistentry>
+<!-- varlistentry>
 <term>-R</term>
 <listitem><para>Set TCP/IP port on which to listen for DGPSIP clients
 (default is 2101). The option -R 0 will disable serving DGPSIP
 clients.</para></listitem>
-</varlistentry>
+</varlistentry -->
 <varlistentry>
 <term>-S</term>
 <listitem><para>Set TCP/IP port on which to listen for GPSD clients 
@@ -113,9 +114,9 @@ clients.</para></listitem>
 <listitem>
 <para>Query a specific differential-GPS (DGPSIP) server.  If a suffix of the
 server name begins with ":" it is interpreted as a port number,
-overriding the default IANA-assigned port of 2101. If this
+overriding the default IANA-assigned port of 2101. <!-- If this
 option is not given, <application>gpsd</application> will hunt 
-for a DGPSIP server.</para>
+for a DGPSIP server. --></para>
 </listitem>
 </varlistentry>
 <varlistentry>

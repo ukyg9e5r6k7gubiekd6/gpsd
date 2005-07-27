@@ -106,6 +106,8 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 
 3) Make RTCM encoding work with an 'invert' option to rtcmdecode.
 
+4) Generate and broadcast RTCM corrections from an attached device.
+
 *** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the
