@@ -113,7 +113,6 @@ struct rtcm_t {
 		unsigned ident;		/* satellite ID */
 		unsigned udre;		/* user diff. range error */
 		unsigned issuedata;	/* issue of data */
-		bool largescale;
 		double rangerr;		/* range error */
 		double rangerate;	/* range error rate */
 	    } sat[MAXCORRECTIONS];
