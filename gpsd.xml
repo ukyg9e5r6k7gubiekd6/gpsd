@@ -38,8 +38,8 @@
 
 <para><application>gpsd</application> is a monitor daemon that watches
 a TCP/IP port (2947 by default), waiting for applications to request
-location information from GPS devices attached to the host machine.
-Each GPS is expected to be direct-connected to the host via a USB or
+information from GPSes or differential-GPS radios attached to the host machine.
+Each GPS or radio is expected to be direct-connected to the host via a USB or
 RS232C serial port.  The port may be specified to
 <application>gpsd</application> at startup, or it may be set via a
 command shipped down a local control socket (e.g. by a USB hotplug
@@ -61,9 +61,11 @@ usage, or increased accuracy on the San Jose Navigation FV18, the Sony
 CXD2951, the uBlox, and the Motorola OnCore GT+.</para>
 
 <para><application>gpsd</application> can use differential-GPS
-corrections from a ground station running a DGPSIP server that reports
-RTCM-S104 data; this will improve user error by roughly a factor of
-four.  
+corrections from a DGPS radio or over the net, from a ground station running a
+DGPSIP server that reports RTCM-S104 data; this will improve user
+error by roughly a factor of four.  When <application>gpsd</application>
+opens a serial device emitting RTCM-104, it automatically recognizes
+this and uses the device as a correction source for all connected GPSes.
 <!-- If no server is specified, <application>gpsd</application> will 
 hunt for one.-->
 See <xref linkend='accuracy'/> and <xref
@@ -435,14 +437,18 @@ only the first three DOP numbers, omitting time DOP and total DOP.</para>
 <varlistentry>
 <term>r</term>
 <listitem><para>Sets or toggles 'raw' mode. Return "R=0" or "R=1" or
-"R=2". In raw mode you read the NMEA data stream from the
+"R=2". In raw mode you read the NMEA data stream from each
 GPS. (Non-NMEA GPSes get their communication format translated to NMEA
-on the fly.)  The command 'r' immediately followed by the digit '1' or
-the plus sign '+' sets raw mode.  The command 'r' immediately followed
-by the digit '2' sets super-raw mode; for non-NMEA (binary) GPSes this
-dumps the raw binary packet.  The command 'r' followed by the digit '0' or
-the minus sign '-' clears raw mode.  The command 'r' with neither
-suffix toggles raw mode.</para>
+on the fly.)  If the device is a source of RTCM-104 corrections, the
+corrections are dumped in the textual format described in
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
+
+<para>The command 'r' immediately followed by the digit '1' or the
+plus sign '+' sets raw mode.  The command 'r' immediately followed by
+the digit '2' sets super-raw mode; for non-NMEA (binary) GPSes or
+RTCM-104 sources this dumps the raw binary packet.  The command 'r'
+followed by the digit '0' or the minus sign '-' clears raw mode.  The
+command 'r' with neither suffix toggles raw mode.</para>
 
 <para>Note: older versions of <application>gpsd</application> did not
 support super-raw mode.</para>
@@ -864,7 +870,8 @@ standard.</para>
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 </para>
 </refsect1>
 

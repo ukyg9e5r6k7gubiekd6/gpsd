@@ -75,6 +75,17 @@ compiler optimizers, notably in GCC 3.x at -O2, into generating bad
 code.</para>
 
 </refsect1>
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>xgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rtcm104</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+</para>
+</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  This is a

@@ -2,14 +2,14 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='rtcm.5'>
+<refentry id='rtcm104.5'>
 <refmeta>
-<refentrytitle>rtcm</refentrytitle>
+<refentrytitle>rtcm-104</refentrytitle>
 <manvolnum>5</manvolnum>
 <refmiscinfo class='date'>12 Jul 2005</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>rtcm</refname>
+<refname>rtcm-104</refname>
 <refpurpose>RTCM-104 dump format emitted by GPSD tools</refpurpose>
 </refnamediv>
 
@@ -48,10 +48,10 @@ remote radio receiver to receive with a good signal-to-noise ration.
 (Higher data rate signals can't be averaged over as long a time frame,
 hence they appear noisier.)</para>
 
-<para>An RTCM message consists of a sequence of 30-bit words. The 24
-most significant bits are data and the six least significant bits are
-parity. The parity algorithm used is the same as that used on GPS
-satellite downlinks.</para>
+<para>An RTCM message consists of a sequence of up to 33 30-bit
+words. The 24 most significant bits of each word are data and the six
+least significant bits are parity. The parity algorithm used is the
+same as that used on GPS satellite downlinks.</para>
 
 <para>Each message consists of two header words followed by zero or
 more data words, depending upon message type.</para>

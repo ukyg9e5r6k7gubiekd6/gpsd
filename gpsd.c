@@ -998,6 +998,9 @@ int main(int argc, char *argv[])
     bool go_background = true;
     struct timeval tv;
     // extern char *optarg;
+#ifdef RTCM104_ENABLED
+    struct gps_device_t *gps;
+#endif /* RTCM104_ENABLED */
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:v")) != -1) {
@@ -1281,12 +1284,22 @@ int main(int argc, char *argv[])
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
-		} if ((changed & ONLINE_SET) == 0) {
+		} 
+		if ((changed & ONLINE_SET) == 0) {
 		    gpsd_report(3, "GPS is offline\n");
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
+#ifdef RTCM104_ENABLED
+		/* copy each RTCM-104 correction to all GPSes */
+		if ((changed & RTCM_SET) == 0) {
+		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    for (gps = channels; gps < channels + MAXDEVICES; gps++)
+			if (gps->device_type && gps->device_type.rtcm_writer)
+			    gps->device_type.rtcm_writer(gps, session->outbuffer, session->outbuflen);
+		}
+#endif /* RTCM104_ENABLED */
 	    }
 
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {

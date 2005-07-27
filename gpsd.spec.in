@@ -137,7 +137,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Added Sony CXD2951 support, also untested.  All error estimates are
   now nailed to 95% confidence interval.  Added rtcmdecode and its
-  documentation.  Added dangerous alpha version of gpsflash.
+  documentation; also, gpsd can now accept serial devices emitting 
+  RTCM104 and display differential-GPS data in a readable format.  Added 
+  dangerous alpha version of gpsflash.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.
