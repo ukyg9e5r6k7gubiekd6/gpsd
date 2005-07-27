@@ -286,6 +286,9 @@ static struct subscriber_t {
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
+#ifdef RTCM104_ENABLE
+    bool rtcm;				/* is RTCM what he actually wants? */
+#endif /* RTCM104_ENABLE */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
@@ -408,7 +411,11 @@ static bool assign_channel(struct subscriber_t *user)
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
-		if (user->device == NULL || channel->gpsdata.sentence_time >= most_recent) {
+		if ((user->device == NULL || channel->gpsdata.sentence_time >= most_recent)
+#ifdef RTCM104_ENABLE
+		    && (user->rtcm == (channel->packet_type == RTCM_PACKET))
+#endif /* RTCM104_ENABLE */
+		    ) {
 		    user->device = channel;
 		    most_recent = channel->gpsdata.sentence_time;
 		}
@@ -442,6 +449,14 @@ static bool assign_channel(struct subscriber_t *user)
 }
 /*@ +branchstate +usedef +globstate @*/
 
+#ifdef RTCM104_ENABLE
+static int handle_dgpsip_request(int cfd UNUSED, char *buf UNUSED, int buflen UNUSED)
+/* interpret a client request; cfd is the socket back to the client */
+{
+    return 0;	/* not actually interpreting these yet */
+}
+#endif /* RTCM104_ENABLE */
+
 static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
 {
@@ -473,7 +488,7 @@ static bool privileged_user(struct subscriber_t *who)
     return (subscribercount == 1);
 }
 
-static int handle_request(int cfd, char *buf, int buflen)
+static int handle_gpsd_request(int cfd, char *buf, int buflen)
 /* interpret a client request; cfd is the socket back to the client */
 {
     char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
@@ -989,7 +1004,11 @@ int main(int argc, char *argv[])
     static int st, csock = -1;
     static gps_mask_t changed;
     static char *dgpsserver = NULL;
-    static char *service = NULL; 
+    static char *gpsd_service = NULL; 
+#ifdef RTCM104_ENABLE
+    static char *rtcm_service = NULL; 
+    static int nsock, rsock = -1;
+#endif /* RTCM104_ENABLE */
     static char *control_socket = NULL;
     struct gps_device_t *device, *channel;
     struct sockaddr_in fsin;
@@ -1003,7 +1022,11 @@ int main(int argc, char *argv[])
 #endif /* RTCM104_ENABLED */
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:v")) != -1) {
+    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:v"
+#ifdef RTCM104_ENABLE
+			    "R:"
+#endif /* RTCM104_ENABLE */
+		)) != -1) {
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
@@ -1014,8 +1037,13 @@ int main(int argc, char *argv[])
 	case 'N':
 	    go_background = false;
 	    break;
+#ifdef RTCM104_ENABLE
+	case 'R':
+	    rtcm_service = optarg;
+	    break;
+#endif /* RTCM104_ENABLE */
 	case 'S':
-	    service = optarg;
+	    gpsd_service = optarg;
 	    break;
 	case 'd':
 	    dgpsserver = optarg;
@@ -1077,14 +1105,25 @@ int main(int argc, char *argv[])
     openlog("gpsd", LOG_PID, LOG_USER);
     gpsd_report(1, "launching (Version %s)\n", VERSION);
     /*@ -observertrans @*/
-    if (!service)
-	service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
+    if (!gpsd_service)
+	gpsd_service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     /*@ +observertrans @*/
-    if ((msock = passivesock(service, "tcp", QLEN)) < 0) {
+    if ((msock = passivesock(gpsd_service, "tcp", QLEN)) < 0) {
 	gpsd_report(0,"command socket create failed, netlib error %d\n",msock);
 	exit(2);
     }
-    gpsd_report(1, "listening on port %s\n", service);
+    gpsd_report(1, "listening on port %s\n", gpsd_service);
+#ifdef RTCM104_ENABLE
+    /*@ -observertrans @*/
+    if (!rtcm_service)
+	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
+    /*@ +observertrans @*/
+    if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) < 0) {
+	gpsd_report(0,"rtcm socket create failed, netlib error %d\n",nsock);
+	exit(2);
+    }
+    gpsd_report(1, "listening on port %s\n", rtcm_service);
+#endif /* RTCM104_ENABLE */
 
     if (dgpsserver) {
         int dsock = dgpsip_open(&context, dgpsserver);
@@ -1161,6 +1200,9 @@ int main(int argc, char *argv[])
     (void)signal(SIGPIPE, SIG_IGN);
 
     FD_SET(msock, &all_fds);
+#ifdef RTCM104_ENABLE
+    FD_SET(nsock, &all_fds);
+#endif /* RTCM104_ENABLE */
     FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
@@ -1221,9 +1263,35 @@ int main(int argc, char *argv[])
 		FD_SET(ssock, &all_fds);
 		subscribers[ssock].active = timestamp();
 		subscribers[ssock].tied = false;
+#ifdef RTCM104_ENABLE
+		subscribers[ssock].rtcm = false;
+#endif /* RTCM104_ENABLE */
 	    }
 	    FD_CLR(msock, &rfds);
 	}
+
+#ifdef RTCM104_ENABLE
+	/* also to RTCM client connections */
+	if (FD_ISSET(nsock, &rfds)) {
+	    socklen_t alen = (socklen_t)sizeof(fsin);
+	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
+
+	    if (rsock < 0)
+		gpsd_report(0, "accept: %s\n", strerror(errno));
+	    else {
+		int opts = fcntl(rsock, F_GETFL);
+
+		if (opts >= 0)
+		    (void)fcntl(rsock, F_SETFL, opts | O_NONBLOCK);
+		gpsd_report(3, "client connect on %d\n", rsock);
+		FD_SET(ssock, &all_fds);
+		subscribers[rsock].active = true;
+		subscribers[rsock].tied = false;
+		subscribers[rsock].rtcm = true;
+	    }
+	    FD_CLR(nsock, &rfds);
+	}
+#endif /* RTCM104_ENABLE */
 
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
@@ -1316,7 +1384,7 @@ int main(int argc, char *argv[])
 			    (void)strcat(cmds, "$");
 		    }
 		    if (cmds[0] != '\0')
-			(void)handle_request(cfd, cmds, (int)strlen(cmds));
+			(void)handle_gpsd_request(cfd, cmds, (int)strlen(cmds));
 		}
 	    }
 #if DBUS_ENABLE
@@ -1354,17 +1422,23 @@ int main(int argc, char *argv[])
 		if ((buflen = (int)read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
 		} else {
-		    double now = timestamp();
-
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client: %s", buf);
 
-		    if (subscribers[cfd].device)
-			subscribers[cfd].device->poll_times[cfd] = now;
-		    if (handle_request(cfd, buf, buflen) < 0)
-			detach_client(cfd);
-		    else
-			subscribers[cfd].active = now;
+#ifdef RTCM104_ENABLE
+		    if (subscribers[cfd].rtcm) {
+			if (handle_dgpsip_request(cfd, buf, buflen) < 0)
+			    detach_client(cfd);
+		    } else
+#endif /* RTCM104_ENABLE */
+		    {
+			if (subscribers[cfd].device)
+			    subscribers[cfd].device->poll_times[cfd] = timestamp();
+			if (handle_gpsd_request(cfd, buf, buflen) < 0)
+			    detach_client(cfd);
+		    }
+
+
 		}
 	    } else if (subscribers[cfd].device == NULL && timestamp() - subscribers[cfd].active > ASSIGNMENT_TIMEOUT) {
 		gpsd_report(1, "client timed out before assignment request.\n");

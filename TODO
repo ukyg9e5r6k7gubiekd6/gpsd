@@ -93,19 +93,15 @@ packet-cracking needed to get the data off the chips.
 
 We have an RTCM packet decoder.  Here's the plan for the rest of it:
 
-1) When there are attached RTCM104 sources, tell the daemon to serve
-   these packets on port 2101.  At this point we will have replaced
-   dgpsip's server function.
+1) Make the client library able to read RTCM data served from the daemon.
 
-2) Make the client library able to read RTCM data served from the daemon.
-
-3) Get rid of the -d option by hacking open_device() so that when it
+2) Get rid of the -d option by hacking open_device() so that when it
    sees a command-line option of the form server:port (with no
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.
 
-4) Make RTCM encoding work with an 'invert' option to rtcmdecode.
+3) Make RTCM encoding work with an 'invert' option to rtcmdecode.
 
 *** Do the research to figure out just what is going on with status bits
 
