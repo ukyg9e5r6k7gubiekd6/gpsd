@@ -26,7 +26,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
-static void decode(void)
+static void decode(FILE *fpin, FILE *fpout)
+/* RTCM-104 bits on fpin to dump format on fpout */
 {
     int             c;
     struct gps_device_t device;
@@ -37,14 +38,35 @@ static void decode(void)
     isgps_init(&device);
 
     count = 0;
-    while ((c = getchar()) != EOF) {
+    while ((c = fgetc(fpin)) != EOF) {
 	res = rtcm_decode(&device, (unsigned int)c);
 	if (verbose >= RTCM_ERRLEVEL_BASE + 3) 
-	    printf("%08lu: '%c' [%02x] -> %d\n", 
+	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
 	    rtcm_dump(&device, buf, sizeof(buf));
-	    (void)fputs(buf, stdout);
+	    (void)fputs(buf, fpout);
+	}
+    }
+}
+
+static void passthrough(FILE *fpin, FILE *fpout)
+/* dump format on stdin to dump format on stdout (self-inversion test) */
+{
+    char buf[BUFSIZ];
+    struct gps_device_t rtcmdata;
+
+    while (fgets(buf, sizeof(buf), fpin) != NULL) {
+	int status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
+
+	/* repack/unpack goes here */
+
+	if (status == 0) {
+	    (void)rtcm_dump(&rtcmdata, buf, sizeof(buf));
+	    (void)fputs(buf, fpout);
+	} else {
+	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
+	    exit(1);
 	}
     }
 }
@@ -54,11 +76,16 @@ int main(int argc, char **argv)
     char buf[BUFSIZ];
     int c;
     bool striphdr = false;
+    bool pass = false;
 
-    while ((c = getopt(argc, argv, "hv:")) != EOF) {
+    while ((c = getopt(argc, argv, "hpv:")) != EOF) {
 	switch (c) {
-	case 'h':
+	case 'h':	/* not documented, used for debugging */
 	    striphdr = true;
+	    break;
+
+	case 'p':	/* not documented, used for debugging */
+	    pass = true;
 	    break;
 
 	case 'v':		/* verbose */
@@ -81,7 +108,10 @@ int main(int argc, char **argv)
 	(void)ungetc(c, stdin);
     }
 
-    decode();
+    if (pass)
+	passthrough(stdin, stdout);
+    else
+	decode(stdin, stdout);
     exit(0);
 }
 

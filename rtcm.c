@@ -957,29 +957,30 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 
 }
 
-int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
+int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 {
     int fldcount, v;
-    char buf[BUFSIZ];
     unsigned n;
 
-    fldcount = fscanf(fp, "H\t%u\t%u\t%1lf\t%u\t%u\t%u\n",
-		    &rtcmp->type,
-		    &rtcmp->refstaid,
-		    &rtcmp->zcount,
-		    &rtcmp->seqnum,
-		    &rtcmp->length,
-		    &rtcmp->stathlth);
-    if (fldcount != 6)
-	return -1;
-
     switch (rtcmp->type) {
+    case 0:
+	fldcount = sscanf(buf, "H\t%u\t%u\t%1lf\t%u\t%u\t%u\n",
+			&rtcmp->type,
+			&rtcmp->refstaid,
+			&rtcmp->zcount,
+			&rtcmp->seqnum,
+			&rtcmp->length,
+			&rtcmp->stathlth);
+	if (fldcount != 6)
+	    return -1;
+	break;
+
     case 1:
     case 9:
-	for (n = 0; n < rtcmp->length/3; n++) {
-	    struct rangesat_t *rsp = &rtcmp->msg_data.ranges.sat[n];
+	{
+	    struct rangesat_t *rsp = &rtcmp->msg_data.ranges.sat[rtcmp->msg_data.ranges.nentries++];
 	    /* we ignore the third (zcount) field, it's in the parent */
-	    fldcount = fscanf(fp,
+	    fldcount = sscanf(buf,
 			      "S\t%u\t%u\t%u\t%*f\t%lf\t%lf\n",
 			      &rsp->ident,
 			      &rsp->udre,
@@ -992,7 +993,7 @@ int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
 	break;
 
     case 3:
-	fldcount = fscanf(fp,
+	fldcount = sscanf(buf,
 			  "R\t%lf\t%lf\t%lf\n",
 			  &rtcmp->msg_data.ecef.x, 
 			  &rtcmp->msg_data.ecef.y,
@@ -1004,7 +1005,7 @@ int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
 	break;
 
     case 4:
-	fldcount = fscanf(fp,
+	fldcount = sscanf(buf,
 			   "D\t%s\t%1d\t%s\t%lf\t%lf\t%lf\n",
 			  buf,
 			  &v,
@@ -1025,19 +1026,20 @@ int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
 	break;
 
     case 5:
-	for (n = 0; n < rtcmp->length; n++) {
-	    struct consat_t *csp = &rtcmp->msg_data.conhealth.sat[n];
-	    fldcount = fscanf(fp,
-			   /* FIXME: turn these spaces to tabs someday */
-			   "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
-			   &csp->ident,
-			   (unsigned int *)&csp->iodl,
-			   &csp->health,
-			   &csp->snr,
-			   &csp->health_en,
-			   (unsigned int *)&csp->new_data,
-			   (unsigned int *)&csp->los_warning,
-			   &csp->tou);
+	{
+	    struct consat_t *csp = &rtcmp->msg_data.conhealth.sat[rtcmp->msg_data.conhealth.nentries++];
+
+	    fldcount = sscanf(buf,
+			      /* FIXME: turn these spaces to tabs someday */
+			      "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
+			      &csp->ident,
+			      (unsigned int *)&csp->iodl,
+			      &csp->health,
+			      &csp->snr,
+			      &csp->health_en,
+			      (unsigned int *)&csp->new_data,
+			      (unsigned int *)&csp->los_warning,
+			      &csp->tou);
 	    if (fldcount != 8)
 		return 5;
 	}
@@ -1047,9 +1049,9 @@ int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
 	break;
 
     case 7:
-	for (n = 0; n < rtcmp->length/3; n++) {
-	    struct station_t *ssp = &rtcmp->msg_data.almanac.station[n];
-	    fldcount = fscanf(fp,
+	{
+	    struct station_t *ssp = &rtcmp->msg_data.almanac.station[rtcmp->msg_data.almanac.nentries++];
+	    fldcount = sscanf(buf,
 			      "A\t%lf\t%lf\t%u\t%lf\t%u\t%u\t%u\n",
 			      &ssp->latitude,
 			      &ssp->longitude,
@@ -1063,15 +1065,18 @@ int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp)
 	}
 	break;
     case 16:
-	    fldcount = fscanf(fp,
-			      "T \"%[^\"]\"\n", rtcmp->msg_data.message);
-	    if (fldcount != 1)
-		return 16;
+	fldcount = sscanf(buf, "T \"%[^\"]\"\n", rtcmp->msg_data.message);
+	if (fldcount != 1)
+	    return 16;
 	break;
 
     default:
-	for (n = 0; n < rtcmp->length; n++)
-	    if (fscanf(fp, "U 0x%08x\n", (int *)&rtcmp->msg_data.words[n]) != 1)
+	for (n = 0; n < sizeof(rtcmp->msg_data.words)/sizeof(rtcmp->msg_data.words[0]); n++)
+		 if (rtcmp->msg_data.words[n] == 0)
+		     break;
+	    if (sscanf(buf, "U 0x%08x\n", &v) == 1)
+		rtcmp->msg_data.words[n] = (isgps30bits_t)v;
+	    else
 		return (int)rtcmp->type;
 	break;
     }

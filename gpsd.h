@@ -268,9 +268,9 @@ extern unsigned bitreverse(unsigned x, unsigned w);
 extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
 
 extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
-extern int rtcm_undump(FILE *fp, /*@out@*/struct rtcm_t *rtcmp);
-extern void rtcm_unpack(struct gps_device_t *session);
-extern bool rtcm_repack(struct gps_device_t *session);
+extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
+extern void rtcm_unpack(struct gps_device_t *);
+extern bool rtcm_repack(struct gps_device_t *);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 
