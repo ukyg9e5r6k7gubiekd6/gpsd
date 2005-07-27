@@ -412,7 +412,7 @@ static bool assign_channel(struct subscriber_t *user)
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
 		if ((user->device == NULL || channel->gpsdata.sentence_time >= most_recent)
-#ifdef RTCM104_ENABLE
+#ifdef __UNUSED__
 		    && (user->rtcm == (channel->packet_type == RTCM_PACKET))
 #endif /* RTCM104_ENABLE */
 		    ) {
