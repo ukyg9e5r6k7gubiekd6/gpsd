@@ -26,19 +26,39 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
-int main(int argc, char **argv)
+static void decode(void)
 {
     int             c;
     struct gps_device_t device;
     enum isgpsstat_t res;
     off_t count;
     char buf[BUFSIZ];
-    bool striplines = false;
 
-    while ((c = getopt(argc, argv, "bv:")) != EOF) {
+    isgps_init(&device);
+
+    count = 0;
+    while ((c = getchar()) != EOF) {
+	res = rtcm_decode(&device, (unsigned int)c);
+	if (verbose >= RTCM_ERRLEVEL_BASE + 3) 
+	    printf("%08lu: '%c' [%02x] -> %d\n", 
+		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
+	if (res == ISGPS_MESSAGE) {
+	    rtcm_dump(&device, buf, sizeof(buf));
+	    (void)fputs(buf, stdout);
+	}
+    }
+}
+
+int main(int argc, char **argv)
+{
+    char buf[BUFSIZ];
+    int c;
+    bool striphdr = false;
+
+    while ((c = getopt(argc, argv, "hv:")) != EOF) {
 	switch (c) {
-	case 'b':
-	    striplines = true;
+	case 'h':
+	    striphdr = true;
 	    break;
 
 	case 'v':		/* verbose */
@@ -55,25 +75,13 @@ int main(int argc, char **argv)
     argv += optind;
 
     /* strip lines with leading # */
-    if (striplines) {
+    if (striphdr) {
 	while ((c = getchar()) == '#')
 	    (void)fgets(buf, (int)sizeof(buf), stdin);
 	(void)ungetc(c, stdin);
     }
 
-    isgps_init(&device);
-
-    count = 0;
-    while ((c = getchar()) != EOF) {
-	res = rtcm_decode(&device, (unsigned int)c);
-	if (verbose >= RTCM_ERRLEVEL_BASE + 3) 
-	    printf("%08lu: '%c' [%02x] -> %d\n", 
-		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
-	if (res == ISGPS_MESSAGE) {
-	    rtcm_dump(&device, buf, sizeof(buf));
-	    (void)fputs(buf, stdout);
-	}
-    }
+    decode();
     exit(0);
 }
 
