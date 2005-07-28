@@ -70,6 +70,9 @@ Starlink's website.
 #define	RRSMALL		0.002	/* meters/sec */
 #define	RRLARGE		0.032	/* meters/sec */
 
+#define MAXPCSMALL     (0x7FFF * PCSMALL)  /* 16-bits signed */
+#define MAXRRSMALL     (0x7F   * RRSMALL)  /*  8-bits signed */
+
 #define XYZ_SCALE	0.01	/* meters */
 #define DXYZ_SCALE	0.1	/* meters */
 #define	LA_SCALE	(90.0/32767.0)	/* degrees */
@@ -681,7 +684,10 @@ bool rtcm_repack(struct gps_device_t *session)
 		    m->w3.satident1 = ssp->ident;
 		    m->w3.udre1 = ssp->udre;
 		    m->w4.issuedata1 = ssp->issuedata;
-		    m->w3.scale1 = (unsigned)(ssp->rangerr > PCLARGE);
+		    m->w3.scale1 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
+					      (ssp->rangerr < (-MAXPCSMALL)) ||
+					      (ssp->rangerate > MAXRRSMALL) ||
+					      (ssp->rangerate < (-MAXRRSMALL)));
 		    m->w3.pc1 = (int)(ssp->rangerr / (m->w3.scale1 ? PCLARGE : PCSMALL));
 		    m->w4.rangerate1 = (int)(ssp->rangerate / (m->w3.scale1 ? RRLARGE : RRSMALL));
 		    n++;
@@ -691,7 +697,10 @@ bool rtcm_repack(struct gps_device_t *session)
 		    m->w4.satident2 = ssp->ident;
 		    m->w4.udre2 = ssp->udre;
 		    m->w6.issuedata2 = ssp->issuedata;
-		    m->w4.scale2 = (unsigned)(ssp->rangerr > PCLARGE);
+		    m->w4.scale2 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
+					      (ssp->rangerr < (-MAXPCSMALL)) ||
+					      (ssp->rangerate > MAXRRSMALL) ||
+					      (ssp->rangerate < (-MAXRRSMALL)));
 		    m->w5.pc2 = (int)(ssp->rangerr / (m->w4.scale2 ? PCLARGE : PCSMALL));
 		    m->w5.rangerate2 = (int)(ssp->rangerate / (m->w4.scale2 ? RRLARGE : RRSMALL));
 		    n++;
@@ -701,7 +710,12 @@ bool rtcm_repack(struct gps_device_t *session)
 		    m->w6.satident3 = ssp->ident;
 		    m->w6.udre3 = ssp->udre;
 		    m->w7.issuedata3 = ssp->issuedata;
-		    m->w6.scale3 = (unsigned)(ssp->rangerr > PCLARGE);
+		    m->w6.scale3 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
+			(ssp->rangerr < (-MAXPCSMALL)));
+		    m->w6.scale3 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
+					      (ssp->rangerr < (-MAXPCSMALL)) ||
+					      (ssp->rangerate > MAXRRSMALL) ||
+					      (ssp->rangerate < (-MAXRRSMALL)));
 		    sval = (int)(ssp->rangerr / (m->w6.scale3 ? PCLARGE : PCSMALL));
 		    /*@ -shiftimplementation @*/
 		    m->w6.pc3_h = sval >> 8;
