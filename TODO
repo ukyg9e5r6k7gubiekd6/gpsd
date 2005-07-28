@@ -98,9 +98,7 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 
 1) Extend the test framework so we can verify RTCM service.
 
-2) Make the client library able to read RTCM data served from the daemon.
-
-3) Get rid of the -d option by hacking open_device() so that when it
+2) Get rid of the -d option by hacking open_device() so that when it
    sees a command-line option of the form server:port (with no
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line

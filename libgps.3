@@ -46,6 +46,8 @@ void\ \fBgps_close\fR\ (struct\ gps_data_t\ *\fIgpsdata\fR);
 void\ \fBgps_set_callback\fR\ (struct\ gps_data_t\ *\fIgpsdata\fR, void\ (*\fIcallback\fR)(struct\ gps_data_t\ *sentence,\ char\ *buf), pthread_t\ *\fIhandler\fR);
 .HP 23
 void\ \fBgps_del_callback\fR\ (struct\ gps_data_t\ *\fIgpsdata\fR, pthread\ *\fIhandler\fR);
+.HP 18
+void\ \fBrtcm_unpack\fR\ (struct\ rtcm_t\ *\fIrtcmp\fR, char\ *\fIbuf\fR);
 
 
 
@@ -96,6 +98,9 @@ Calling \fBgpsd_open()\fR initializes a GPS\-data structure to hold the data col
 
 .PP
 Consult \fIgps\&.h\fR to learn more about the data members and associated timestamps\&. Note that information will accumulate in the session structure over time, and the 'valid' field is not automatically zeroed by each poll\&. It is up to the client to zero that field when appropriate and to keep an eye on the fix and sentence timestamps\&.
+
+.PP
+The \fBrtcm_unpack()\fR will be useful when you are connected to an RTCM\-104 source in raw mode\&. Use it as part of a raw hook, calling it with the address of the struct rtcm_t element of your session structure buffer as first argument and the buffer as the second\&. It will unpack a line of RTCM data into the structure\&. This function returns 0 when it has read the last line of an RTCM\-104 message, a positive int when it expects more dump lines, and a negative int on parse failure\&. You must zero out the struct rtcm_t each time before this function is called on a new header (H) line, as it relies on the message type field being initially zero and uses it to track what kind of following line is expected\&.
 
 .PP
 The Python implementation supports the same facilities as the C library\&. \fBgps_open()\fR is replaced by the initialization of a gps session object; the other calls are methods of that object, and have the same names as the corresponding C functions\&. Resources within the session object will be properly released when it is garbage\-collected\&.
