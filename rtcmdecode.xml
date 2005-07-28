@@ -16,6 +16,8 @@
 
 <cmdsynopsis>
   <command>rtcmdecode</command>  
+      <arg choice='opt'>-d</arg>
+      <arg choice='opt'>-e</arg>
       <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -40,6 +42,16 @@ prints decoder status messages to standard error, as necessary.</para>
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
+<para>The -d option tells the program to decode RTCM-104 presented on
+standard input to a text dump in the format of
+<citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry> 
+on standard output. This is the default behavior.</para>
+
+<para>The -e option option tells the program to encode a text dump in
+the format of
+<citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+to standard output.</para>
+
 <para>The -v option sets a verbosity level.  It is mainly of interest
 to developers.</para>
 
@@ -55,7 +67,15 @@ Service</citetitle> RTCM Paper 194-93/SC 104-STD.</para>
 Maritime Services</ulink> under "Publications".</para>
 
 </refsect1>
-<refsect1 id='bugs'><title>BUGS</title> 
+<refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
+
+<para>RTCM-104 represents floating-point quantities as an integer
+multiple of a fixed scale factor.  Editing an RTCM-104 dump can
+produce numbers that are not an integer multiple of the scale factor
+for their field.  If you do this, the value actually packed into 
+binary RTCM-104 will be rounded down to the nearest scale unit, 
+and dumping will show slightly different numbers than those you 
+entered.</para>
 
 <para>The decoder logic is sufficiently convoluted to confuse some
 compiler optimizers, notably in GCC 3.x at -O2, into generating bad

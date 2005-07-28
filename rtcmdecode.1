@@ -24,7 +24,7 @@ rtcmdecode \- decode RTCM104 streams into a readable format
 .ad l
 .hy 0
 .HP 11
-\fBrtcmdecode\fR [\-v\ \fIdebuglevel\fR]
+\fBrtcmdecode\fR [\-d] [\-e] [\-v\ \fIdebuglevel\fR]
 .ad
 .hy
 
@@ -42,6 +42,12 @@ The decoder dump format is described in \fBrtcm\fR(5); these lines go to standar
 .SH "OPTIONS"
 
 .PP
+The \-d option tells the program to decode RTCM\-104 presented on standard input to a text dump in the format of \fBrtcm\-104\fR(5) on standard output\&. This is the default behavior\&.
+
+.PP
+The \-e option option tells the program to encode a text dump in the format of \fBrtcm\-104\fR(5) to standard output\&.
+
+.PP
 The \-v option sets a verbosity level\&. It is mainly of interest to developers\&.
 
 .SH "APPLICABLE STANDARDS"
@@ -52,7 +58,10 @@ The applicable standard is RTCM Recommended Standards for Differential NAVSTAR G
 .PP
 Ordering instructions are accessible from the website of the Radio Technical Commission for Maritime Services: \fIhttp://www.rtcm.org/\fR under "Publications"\&.
 
-.SH "BUGS"
+.SH "BUGS AND LIMITATIONS"
+
+.PP
+RTCM\-104 represents floating\-point quantities as an integer multiple of a fixed scale factor\&. Editing an RTCM\-104 dump can produce numbers that are not an integer multiple of the scale factor for their field\&. If you do this, the value actually packed into binary RTCM\-104 will be rounded down to the nearest scale unit, and dumping will show slightly different numbers than those you entered\&.
 
 .PP
 The decoder logic is sufficiently convoluted to confuse some compiler optimizers, notably in GCC 3\&.x at \-O2, into generating bad code\&.

@@ -26,10 +26,11 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
+/*@ -compdestroy @*/
 static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
-     int             c;
+    int             c;
     struct gps_device_t device;
     enum isgpsstat_t res;
     off_t count;
@@ -49,14 +50,16 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
     }
 }
+/*@ +compdestroy @*/
 
-static void passthrough(FILE *fpin, FILE *fpout)
+/*@ -compdestroy @*/
+static void pass(FILE *fpin, FILE *fpout)
 /* dump format on stdin to dump format on stdout (self-inversion test) */
 {
     char buf[BUFSIZ];
-    struct gps_device_t rtcmdata;
+    struct gps_device_t session;
 
-    memset(&rtcmdata, 0, sizeof(rtcmdata));
+    memset(&session, 0, sizeof(session));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 
@@ -66,36 +69,72 @@ static void passthrough(FILE *fpin, FILE *fpout)
 	    continue;
 	}
 
-	status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
+	status = rtcm_undump(&session.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    (void)rtcm_repack(&rtcmdata);
-	    (void)rtcm_unpack(&rtcmdata);
-	    (void)rtcm_dump(&rtcmdata, buf, sizeof(buf));
+	    (void)rtcm_repack(&session);
+	    (void)rtcm_unpack(&session);
+	    (void)rtcm_dump(&session, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
-	    memset(&rtcmdata, 0, sizeof(rtcmdata));
+	    memset(&session, 0, sizeof(session));
 	} else if (status < 0) {
 	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
 	    exit(1);
 	}
     }
 }
+/*@ +compdestroy @*/
+
+/*@ -compdestroy @*/
+static void encode(FILE *fpin, FILE *fpout)
+/* dump format on fpin to RTCM-104 on fpout */
+{
+    char buf[BUFSIZ];
+    struct gps_device_t session;
+
+    memset(&session, 0, sizeof(session));
+    while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
+	int status;
+
+	status = rtcm_undump(&session.gpsdata.rtcm, buf);
+
+	if (status == 0) {
+	    (void)rtcm_repack(&session);
+	    (void)fwrite(session.driver.isgps.buf, 
+			 sizeof(isgps30bits_t), 
+			 (size_t)session.gpsdata.rtcm.length, fpout);
+	    memset(&session, 0, sizeof(session));
+	} else if (status < 0) {
+	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
+	    exit(1);
+	}
+    }
+}
+/*@ +compdestroy @*/
 
 int main(int argc, char **argv)
 {
     char buf[BUFSIZ];
     int c;
     bool striphdr = false;
-    bool pass = false;
+    enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "hpv:")) != EOF) {
+    while ((c = getopt(argc, argv, "dehpv:")) != EOF) {
 	switch (c) {
+	case 'd':	/* not documented, used for debugging */
+	    mode = dodecode;
+	    break;
+
+	case 'e':	/* not documented, used for debugging */
+	    mode = doencode;
+	    break;
+
 	case 'h':	/* not documented, used for debugging */
 	    striphdr = true;
 	    break;
 
 	case 'p':	/* not documented, used for debugging */
-	    pass = true;
+	    mode = passthrough;
 	    break;
 
 	case 'v':		/* verbose */
@@ -118,8 +157,10 @@ int main(int argc, char **argv)
 	(void)ungetc(c, stdin);
     }
 
-    if (pass)
-	passthrough(stdin, stdout);
+    if (mode == passthrough)
+	pass(stdin, stdout);
+    else if (mode == doencode)
+	encode(stdin, stdout);
     else
 	decode(stdin, stdout);
     exit(0);
