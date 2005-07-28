@@ -188,17 +188,18 @@ struct gps_data_t {
 #define VERR_SET	0x00010000u
 #define PERR_SET	0x00020000u
 #define SATELLITE_SET	0x00040000u
-#define USED_SET	0x00080000u
-#define SPEEDERR_SET	0x00100000u
-#define TRACKERR_SET	0x00200000u
-#define CLIMBERR_SET	0x00400000u
-#define DEVICE_SET	0x00800000u
-#define DEVICELIST_SET	0x01000000u
-#define DEVICEID_SET	0x02000000u
-#define ERROR_SET	0x04000000u
-#define CYCLE_START_SET	0x08000000u
+#define PSEUDORANGE_SET	0x00080000u
+#define USED_SET	0x00100000u
+#define SPEEDERR_SET	0x00200000u
+#define TRACKERR_SET	0x00400000u
+#define CLIMBERR_SET	0x00800000u
+#define DEVICE_SET	0x01000000u
+#define DEVICELIST_SET	0x02000000u
+#define DEVICEID_SET	0x04000000u
+#define ERROR_SET	0x08000000u
+#define CYCLE_START_SET	0x10000000u
+#define RTCM_SET	0x20000000u
 #define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
-#define RTCM_SET	0x10000000u
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this flag when sentences
@@ -234,6 +235,21 @@ struct gps_data_t {
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
     int ss[MAXCHANNELS];	/* signal strength */
+
+#if 0	/* not yet used or filled in */
+    /* measurement data */
+    double pseudorange[MAXCHANNELS];	/* meters */
+    double deltarange[MAXCHANNELS];	/* meters/sec */
+    double doppler[MAXCHANNELS];	/* Hz */
+    unsigned satstat[MAXCHANNELS];	/* tracking status */
+#define SAT_ACQUIRED	0x01		/* satellite acquired */
+#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
+#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
+#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
+#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
+#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
+#define SAT_FIX_USED	0x40		/* used for position fix */
+#endif
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */
