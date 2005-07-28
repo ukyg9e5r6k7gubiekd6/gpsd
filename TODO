@@ -102,11 +102,7 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.
 
-3) Make RTCM encoding work with an 'invert' option to rtcmdecode.
-   This is almost working now, there's some funky problem with
-   floating-point loss of precision in the way.
-
-4) Generate and broadcast RTCM corrections from an attached device?
+3) Generate and broadcast RTCM corrections from an attached device?
    Might not be possible -- appears to need nanosecond timing.
 
 *** Do the research to figure out just what is going on with status bits

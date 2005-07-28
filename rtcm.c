@@ -52,6 +52,7 @@ Starlink's website.
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <math.h> 		/* for round() */
 
 #include "gpsd.h"
 
@@ -665,7 +666,7 @@ bool rtcm_repack(struct gps_device_t *session)
     memset(session->driver.isgps.buf, 0, sizeof(session->driver.isgps.buf));
     msg->w1.msgtype = tp->type;
     msg->w2.frmlen = tp->length;
-    msg->w2.zcnt = (unsigned)(tp->zcount / ZCOUNT_SCALE);
+    msg->w2.zcnt = (unsigned) round(tp->zcount / ZCOUNT_SCALE);
     msg->w1.refstaid = tp->refstaid;
     msg->w2.sqnum = tp->seqnum;
     msg->w2.stathlth = tp->stathlth;
@@ -673,7 +674,7 @@ bool rtcm_repack(struct gps_device_t *session)
     len = (int)tp->length;
     n = 0;
     switch (tp->type) {
-    case 1:
+    case 1:	/* S */
     case 9:
 	{
 	    struct b_correction_t    *m = &msg->msg_type.type1.corrections[0];
@@ -688,8 +689,8 @@ bool rtcm_repack(struct gps_device_t *session)
 					      (ssp->rangerr < (-MAXPCSMALL)) ||
 					      (ssp->rangerate > MAXRRSMALL) ||
 					      (ssp->rangerate < (-MAXRRSMALL)));
-		    m->w3.pc1 = (int)(ssp->rangerr / (m->w3.scale1 ? PCLARGE : PCSMALL));
-		    m->w4.rangerate1 = (int)(ssp->rangerate / (m->w3.scale1 ? RRLARGE : RRSMALL));
+		    m->w3.pc1 = (int) round(ssp->rangerr / (m->w3.scale1 ? PCLARGE : PCSMALL));
+		    m->w4.rangerate1 = (int) round(ssp->rangerate / (m->w3.scale1 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 4) {
@@ -701,8 +702,8 @@ bool rtcm_repack(struct gps_device_t *session)
 					      (ssp->rangerr < (-MAXPCSMALL)) ||
 					      (ssp->rangerate > MAXRRSMALL) ||
 					      (ssp->rangerate < (-MAXRRSMALL)));
-		    m->w5.pc2 = (int)(ssp->rangerr / (m->w4.scale2 ? PCLARGE : PCSMALL));
-		    m->w5.rangerate2 = (int)(ssp->rangerate / (m->w4.scale2 ? RRLARGE : RRSMALL));
+		    m->w5.pc2 = (int) round(ssp->rangerr / (m->w4.scale2 ? PCLARGE : PCSMALL));
+		    m->w5.rangerate2 = (int) round(ssp->rangerate / (m->w4.scale2 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		if (len >= 5) {
@@ -716,12 +717,12 @@ bool rtcm_repack(struct gps_device_t *session)
 					      (ssp->rangerr < (-MAXPCSMALL)) ||
 					      (ssp->rangerate > MAXRRSMALL) ||
 					      (ssp->rangerate < (-MAXRRSMALL)));
-		    sval = (int)(ssp->rangerr / (m->w6.scale3 ? PCLARGE : PCSMALL));
+		    sval = (int) round(ssp->rangerr / (m->w6.scale3 ? PCLARGE : PCSMALL));
 		    /*@ -shiftimplementation @*/
 		    m->w6.pc3_h = sval >> 8;
 		    /*@ +shiftimplementation @*/
 		    m->w7.pc3_l = (unsigned)sval & 0xff;
-		    m->w7.rangerate3 = (int)(ssp->rangerate / (m->w6.scale3 ? RRLARGE : RRSMALL));
+		    m->w7.rangerate3 = (int) round(ssp->rangerate / (m->w6.scale3 ? RRLARGE : RRSMALL));
 		    n++;
 		}
 		len -= 5;
@@ -730,7 +731,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	    tp->msg_data.ranges.nentries = n;
 	}
 	break;
-    case 3:
+    case 3:	/* R */
 	if (tp->msg_data.ecef.valid) {
 	    struct rtcm_msg3    *m = &msg->msg_type.type3;
 	    unsigned x = (unsigned)(tp->msg_data.ecef.x / XYZ_SCALE);
@@ -745,7 +746,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	    m->w5.z_h = z >> 24;
 	}
 	break;
-    case 4:
+    case 4:	/* D */
 	if (tp->msg_data.reference.valid) {
 	    struct rtcm_msg4    *m = &msg->msg_type.type4;
 
@@ -774,15 +775,15 @@ bool rtcm_repack(struct gps_device_t *session)
 		m->w4.datum_sub_div_char3 = 0;
 	    /*@ +predboolothers +type @*/
 	    if (tp->msg_data.reference.system != unknown) {
-		m->w5.dx = (uint)(tp->msg_data.reference.dx / DXYZ_SCALE);
-		uval = (uint)(tp->msg_data.reference.dy / DXYZ_SCALE);
+		m->w5.dx = (uint)round(tp->msg_data.reference.dx / DXYZ_SCALE);
+		uval = (uint)round(tp->msg_data.reference.dy / DXYZ_SCALE);
 		m->w5.dy_h = uval >> 8;
 		m->w6.dy_l = uval & 0xff;
-		m->w6.dz = (uint)(tp->msg_data.reference.dz / DXYZ_SCALE);
+		m->w6.dz = (uint)round(tp->msg_data.reference.dz / DXYZ_SCALE);
 	    }
 	}
 	break;
-    case 5:
+    case 5:	/* C */
 	for (n = 0; n < (unsigned)len; n++) {
 	    struct consat_t *csp = &tp->msg_data.conhealth.sat[n];
 	    struct b_health_t *m = &msg->msg_type.type5.health[n];
@@ -797,21 +798,21 @@ bool rtcm_repack(struct gps_device_t *session)
 	    m->time_unhealthy = (unsigned)(csp->tou / TU_SCALE);
 	}
 	break;
-    case 7:
+    case 7:	/* A */
 	for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
 	    struct station_t *np = &tp->msg_data.almanac.station[n++];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
-	    mp->w3.lat = (int)(np->latitude / LA_SCALE);
-	    sval = (int)(np->longitude / LO_SCALE);
+	    mp->w3.lat = (int) round(np->latitude / LA_SCALE);
+	    sval = (int) round(np->longitude / LO_SCALE);
 	    /*@ -shiftimplementation @*/
 	    mp->w3.lon_h = sval >> 8;
 	    /*@ +shiftimplementation @*/
 	    mp->w4.lon_l = (unsigned)sval & 0xff;
 	    mp->w4.range = np->range;
-	    uval = (unsigned)(((np->frequency-FREQ_OFFSET) / FREQ_SCALE));
+	    uval = (unsigned) round(((np->frequency-FREQ_OFFSET) / FREQ_SCALE));
 	    mp->w4.freq_h = uval >> 6;
-	    mp->w5.freq_l = uval % 0x3f;
+	    mp->w5.freq_l = uval & 0x3f;
 	    mp->w5.health = np->health;
 	    mp->w5.station_id = np->station_id;
 	    mp->w5.bit_rate = 0;
@@ -825,7 +826,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	}
 	tp->msg_data.almanac.nentries = n;
 	break;
-    case 16:
+    case 16:	/* T */
 	/*@ -boolops @*/
 	for (w = 0; w < RTCM_WORDS_MAX - 2; w++){
 	    if (!tp->msg_data.message[n]) {
@@ -845,7 +846,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	/*@ +boolops @*/
 	break;
 
-    default:
+    default:	/* U */
 	memcpy(msg->msg_type.rtcm_msgunk, tp->msg_data.words, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
