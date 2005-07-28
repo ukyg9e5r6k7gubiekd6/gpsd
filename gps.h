@@ -85,7 +85,7 @@ struct gps_fix_t {
  */
 #define RTCM_WORDS_MAX	33
 #define MAXCORRECTIONS	18	/* max correction count in type 1 or 9 */
-#define MAXSTATIONS	3	/* maximum stations in almanac, type 5 */
+#define MAXSTATIONS	10	/* maximum stations in almanac, type 5 */
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
 #define MAXHEALTH	(RTCM_WORDS_MAX-2)	
 

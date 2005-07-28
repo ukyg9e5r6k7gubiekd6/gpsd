@@ -288,5 +288,12 @@ packet-regress: packet_test
 packet-makeregress: packet_test
 	packet_test >test/packet.test.chk
 
-testregress: gps-regress rtcm-regress packet-regress
+# Test RTCM encoding
+undump-regress: rtcmdecode
+	@echo "Testing RTCM encoding..."
+	@rtcmdecode -p <test/undump.sample >/tmp/undump.test
+	@diff -u test/undump.sample /tmp/undump.test
+	@rm /tmp/undump.test
+
+testregress: gps-regress rtcm-regress packet-regress undump-regress
 	@echo "Regressions complete."

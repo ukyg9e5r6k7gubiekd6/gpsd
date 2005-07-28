@@ -725,10 +725,10 @@ bool rtcm_repack(struct gps_device_t *session)
 
 	    m->w4.x_l = x & 0xff;
 	    m->w3.x_h = x >> 8;
-	    m->w5.y_l = y & 0xff;
-	    m->w4.y_h = y >> 8;
-	    m->w6.z_l = z & 0xff;
-	    m->w5.z_h = z >> 8;
+	    m->w5.y_l = y & 0xffff;
+	    m->w4.y_h = y >> 16;
+	    m->w6.z_l = z & 0xffffff;
+	    m->w5.z_h = z >> 24;
 	}
 	break;
     case 4:
@@ -776,7 +776,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	    m->sat_id = csp->ident;
 	    m->issue_of_data_link = (unsigned)csp->iodl;
 	    m->data_health = csp->health;
-	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : (unsigned)csp->snr - CNR_OFFSET;
+	    m->cn0 = (csp->snr == SNR_BAD) ? 0 : (unsigned)csp->snr-CNR_OFFSET;
 	    m->health_enable = csp->health_en;
 	    m->new_nav_data = (unsigned)csp->new_data;
 	    m->loss_warn = (unsigned)csp->los_warning;
@@ -785,7 +785,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	break;
     case 7:
 	for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
-	    struct station_t *np = &tp->msg_data.almanac.station[n];
+	    struct station_t *np = &tp->msg_data.almanac.station[n++];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
 	    mp->w3.lat = (int)(np->latitude / LA_SCALE);
@@ -795,7 +795,7 @@ bool rtcm_repack(struct gps_device_t *session)
 	    /*@ +shiftimplementation @*/
 	    mp->w4.lon_l = (unsigned)sval & 0xff;
 	    mp->w4.range = np->range;
-	    uval = (unsigned)((np->frequency / FREQ_SCALE) - FREQ_OFFSET);
+	    uval = (unsigned)(((np->frequency-FREQ_OFFSET) / FREQ_SCALE));
 	    mp->w4.freq_h = uval >> 6;
 	    mp->w5.freq_l = uval % 0x3f;
 	    mp->w5.health = np->health;
@@ -912,8 +912,7 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	for (n = 0; n < session->gpsdata.rtcm.msg_data.conhealth.nentries; n++) {
 	    struct consat_t *csp = &session->gpsdata.rtcm.msg_data.conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   /* FIXME: turn these spaces to tabs someday */
-			   "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
+			   "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
 			   csp->ident,
 			   (unsigned)csp->iodl,
 			   (unsigned)csp->health,
@@ -945,26 +944,29 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "T \"%s\"\n", session->gpsdata.rtcm.msg_data.message);
+		       "T\t\"%s\"\n", session->gpsdata.rtcm.msg_data.message);
 	break;
 
     default:
 	for (n = 0; n < session->gpsdata.rtcm.length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "U 0x%08x\n", session->gpsdata.rtcm.msg_data.words[n]);
+			   "U\t0x%08x\n", session->gpsdata.rtcm.msg_data.words[n]);
 	break;
     }
 
 }
 
 int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
+/* merge a line of data into an RTCM structure, return 0 if done */
 {
     int fldcount, v;
     unsigned n;
+    char buf2[BUFSIZ];
 
+    /*@ -usedef @*/
     switch (rtcmp->type) {
     case 0:
-	fldcount = sscanf(buf, "H\t%u\t%u\t%1lf\t%u\t%u\t%u\n",
+	fldcount = sscanf(buf, "H\t%u\t%u\t%lf\t%u\t%u\t%u\n",
 			&rtcmp->type,
 			&rtcmp->refstaid,
 			&rtcmp->zcount,
@@ -973,7 +975,9 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 			&rtcmp->stathlth);
 	if (fldcount != 6)
 	    return -1;
-	break;
+	else
+	    return 1;
+	//break;
 
     case 1:
     case 9:
@@ -987,10 +991,14 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 			      &rsp->issuedata,
 			      &rsp->rangerr,
 			      &rsp->rangerate);
-	    if (fldcount != 5)
-		return (int)rtcmp->type;
+	    if (fldcount != 5 || (rtcmp->type != 1 && rtcmp->type != 9))
+		return (int)(-rtcmp->type-1);
+	    else if (rtcmp->msg_data.ranges.nentries != rtcmp->length*3/5)
+		return (int)(rtcmp->type+1);
+	    else
+		return 0;
 	}
-	break;
+	//break;
 
     case 3:
 	fldcount = sscanf(buf,
@@ -998,40 +1006,44 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 			  &rtcmp->msg_data.ecef.x, 
 			  &rtcmp->msg_data.ecef.y,
 			  &rtcmp->msg_data.ecef.z);
-	if (fldcount == 3)
+	if (fldcount != 3 || rtcmp->type != 3)
+	    return -4;
+	else {
 	    rtcmp->msg_data.ecef.valid = true;
-	else
-	    return 3;
-	break;
+	    return 0;
+	}
+	//break;
 
     case 4:
 	fldcount = sscanf(buf,
 			   "D\t%s\t%1d\t%s\t%lf\t%lf\t%lf\n",
-			  buf,
+			  buf2,
 			  &v,
 			  (char *)&rtcmp->msg_data.reference.datum,
 			  &rtcmp->msg_data.reference.dx,
 			  &rtcmp->msg_data.reference.dy,
 			  &rtcmp->msg_data.reference.dz);
-	if (fldcount != 6)
-	    return 4;
-	if (strcmp(buf, "GPS") == 0)
-	    rtcmp->msg_data.reference.system = gps;
-	else if (strcmp(buf, "GLONASS") == 0)
-	    rtcmp->msg_data.reference.system = glonass;
-	else
-	    rtcmp->msg_data.reference.system = unknown;
-	rtcmp->msg_data.reference.sense = (int)v;
-	rtcmp->msg_data.reference.valid = true;
-	break;
+	if (fldcount != 6 || rtcmp->type != 4)
+	    return -5;
+	else {
+	    if (strcmp(buf2, "GPS") == 0)
+		rtcmp->msg_data.reference.system = gps;
+	    else if (strcmp(buf2, "GLONASS") == 0)
+		rtcmp->msg_data.reference.system = glonass;
+	    else
+		rtcmp->msg_data.reference.system = unknown;
+	    rtcmp->msg_data.reference.sense = (v == 1) ? global : ((v == 0) ? local : invalid);
+	    rtcmp->msg_data.reference.valid = true;
+	    return 0;
+	}
+	//break;
 
     case 5:
 	{
 	    struct consat_t *csp = &rtcmp->msg_data.conhealth.sat[rtcmp->msg_data.conhealth.nentries++];
 
 	    fldcount = sscanf(buf,
-			      /* FIXME: turn these spaces to tabs someday */
-			      "C\t%2u\t%1u  %1u\t%2d\t%1u  %1u  %1u\t%2u\n",
+			      "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
 			      &csp->ident,
 			      (unsigned int *)&csp->iodl,
 			      &csp->health,
@@ -1040,13 +1052,21 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 			      (unsigned int *)&csp->new_data,
 			      (unsigned int *)&csp->los_warning,
 			      &csp->tou);
-	    if (fldcount != 8)
-		return 5;
+	    if (fldcount != 8 || rtcmp->type != 5)
+		return -6;
+	    else if (rtcmp->msg_data.conhealth.nentries < rtcmp->length)
+		return 6;
+	    else
+		return 0;
 	}
-	break;
+	//break;
 
     case 6: 			/* NOP msg */
-	break;
+	if (buf[0] != 'N')
+	    return -7;
+	else
+	    return 0;
+	//break;
 
     case 7:
 	{
@@ -1060,28 +1080,40 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 			      &ssp->health,
 			      &ssp->station_id,
 			      &ssp->bitrate);
-	    if (fldcount != 7)
-		return 7;
+	    if (fldcount != 7 || rtcmp->type != 7)
+		return 8;
+	    else if (rtcmp->msg_data.almanac.nentries < rtcmp->length/3)
+		return 8;
+	    else
+		return 0;
 	}
-	break;
+	//break;
+
     case 16:
-	fldcount = sscanf(buf, "T \"%[^\"]\"\n", rtcmp->msg_data.message);
+	fldcount = sscanf(buf, "T\t\"%[^\"]\"\n", rtcmp->msg_data.message);
 	if (fldcount != 1)
 	    return 16;
-	break;
+	else
+	    return 0;
+	//break;
 
     default:
-	for (n = 0; n < sizeof(rtcmp->msg_data.words)/sizeof(rtcmp->msg_data.words[0]); n++)
-		 if (rtcmp->msg_data.words[n] == 0)
-		     break;
-	    if (sscanf(buf, "U 0x%08x\n", &v) == 1)
-		rtcmp->msg_data.words[n] = (isgps30bits_t)v;
+	for (n = 0; n < (unsigned)(sizeof(rtcmp->msg_data.words)/sizeof(rtcmp->msg_data.words[0])); n++)
+	    if (rtcmp->msg_data.words[n] == 0)
+		break;
+	fldcount = sscanf(buf, "U\t0x%08x\n", &v);
+	if (fldcount != 1)
+	    return (int)(-rtcmp->type-1);
+	else {
+	    rtcmp->msg_data.words[n] = (isgps30bits_t)v;
+	    if (n == rtcmp->length-1)
+		return 0;
 	    else
-		return (int)rtcmp->type;
-	break;
+		return (int)(rtcmp->type+1);
+	}
+	//break;
     }
-
-    return 0;
+    /*@ +usedef @*/
 }
 
 #ifdef __UNUSED__

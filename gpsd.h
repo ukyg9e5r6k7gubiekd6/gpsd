@@ -202,7 +202,8 @@ struct gps_device_t {
 	 * be able to build rtcmdecode even when RTCM support is not
 	 * configured in the daemon.  It doesn't take up extra space.
 	 */
-	struct { 
+	struct {
+	    /* ISGPS200 decodng */
 	    bool            locked;
 	    int             curr_offset;
 	    isgps30bits_t   curr_word;

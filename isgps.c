@@ -98,7 +98,7 @@ static unsigned int reverse_bits[] = {
 };
 /*@ -charint @*/
 
-static unsigned int isgpsparity(isgps30bits_t th)
+static unsigned int isgps_parity(isgps30bits_t th)
 {
 #define P_30_MASK	0x40000000u
 
@@ -142,7 +142,7 @@ static unsigned int isgpsparity(isgps30bits_t th)
 }
 
 
-#define isgpsparityok(w)	(isgpsparity(w) == ((w) & 0x3f))
+#define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
 
 #if 0
 /* 
@@ -152,7 +152,7 @@ static unsigned int isgpsparity(isgps30bits_t th)
  * The symptom is that parity computation is screwed up and the decoder
  * never achieves sync lock.  Something steps on the argument to 
  * isgpsparity(); the lossage appears to be related to the compiler's 
- * attempt to fold the isgpsparity() call into isgpsparityok() in some
+ * attempt to fold the isgps_parity() call into isgps_parityok() in some
  * tail-recursion-like manner.  This happens under -O2, but not -O1, on
  * both i386 and amd64.  Disabling all of the individual -O2 suboptions
  * does *not* fix it.
@@ -164,7 +164,7 @@ static unsigned int isgpsparity(isgps30bits_t th)
  *
  *  gcc 4.0 does not manifest these bugs.
  */
-static bool isgpsparityok(isgps30bits_t w)
+static bool isgps_parityok(isgps30bits_t w)
 {
     return (isgpsparity(w) == (w & 0x3f));
 }
@@ -210,7 +210,7 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->char_counter, session->driver.isgps.curr_word);
 
 	    if (preamble_match(&session->driver.isgps.curr_word)) {
-		if (isgpsparityok(session->driver.isgps.curr_word)) {
+		if (isgps_parityok(session->driver.isgps.curr_word)) {
 		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
 				"preamble ok, parity ok -- locked\n");
 		    session->driver.isgps.locked = true;
@@ -237,7 +237,7 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 	    if (session->driver.isgps.curr_word & P_30_MASK)
 		session->driver.isgps.curr_word ^= W_DATA_MASK;
 
-	    if (isgpsparityok(session->driver.isgps.curr_word)) {
+	    if (isgps_parityok(session->driver.isgps.curr_word)) {
 #if 0
 		/*
 		 * Don't clobber the buffer just because we spot

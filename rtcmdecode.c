@@ -56,15 +56,25 @@ static void passthrough(FILE *fpin, FILE *fpout)
     char buf[BUFSIZ];
     struct gps_device_t rtcmdata;
 
+    memset(&rtcmdata, 0, sizeof(rtcmdata));
     while (fgets(buf, sizeof(buf), fpin) != NULL) {
-	int status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
+	int status;
 
-	/* repack/unpack goes here */
+	/* pass through comment lines without interpreting */
+	if (buf[0] == '#') {
+	    (void)fputs(buf, fpout);
+	    continue;
+	}
+
+	status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
 
 	if (status == 0) {
+	    //rtcm_repack(&rtcmdata);
+	    //rtcm_unpack(&rtcmdata);
 	    (void)rtcm_dump(&rtcmdata, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
-	} else {
+	    memset(&rtcmdata, 0, sizeof(rtcmdata));
+	} else if (status < 0) {
 	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
 	    exit(1);
 	}
