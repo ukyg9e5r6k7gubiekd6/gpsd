@@ -69,8 +69,8 @@ static void passthrough(FILE *fpin, FILE *fpout)
 	status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    //rtcm_repack(&rtcmdata);
-	    //rtcm_unpack(&rtcmdata);
+	    rtcm_repack(&rtcmdata);
+	    rtcm_unpack(&rtcmdata);
 	    (void)rtcm_dump(&rtcmdata, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	    memset(&rtcmdata, 0, sizeof(rtcmdata));

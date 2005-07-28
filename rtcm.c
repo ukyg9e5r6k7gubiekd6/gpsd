@@ -644,8 +644,9 @@ void rtcm_unpack(struct gps_device_t *session)
 	/*@ +boolops @*/
 	tp->msg_data.message[n++] = '\0';
 	break;
+
     default:
-	memcpy(msg->msg_type.rtcm_msgunk, tp->msg_data.words, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
+	memcpy(tp->msg_data.words, msg->msg_type.rtcm_msgunk, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 }
@@ -828,6 +829,10 @@ bool rtcm_repack(struct gps_device_t *session)
 	}
 	msg->w2.frmlen = w+1;
 	/*@ +boolops @*/
+	break;
+
+    default:
+	memcpy(msg->msg_type.rtcm_msgunk, tp->msg_data.words, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 
