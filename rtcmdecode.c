@@ -29,7 +29,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
-    int             c;
+     int             c;
     struct gps_device_t device;
     enum isgpsstat_t res;
     off_t count;
@@ -57,7 +57,7 @@ static void passthrough(FILE *fpin, FILE *fpout)
     struct gps_device_t rtcmdata;
 
     memset(&rtcmdata, 0, sizeof(rtcmdata));
-    while (fgets(buf, sizeof(buf), fpin) != NULL) {
+    while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 
 	/* pass through comment lines without interpreting */
@@ -69,8 +69,8 @@ static void passthrough(FILE *fpin, FILE *fpout)
 	status = rtcm_undump(&rtcmdata.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    rtcm_repack(&rtcmdata);
-	    rtcm_unpack(&rtcmdata);
+	    (void)rtcm_repack(&rtcmdata);
+	    (void)rtcm_unpack(&rtcmdata);
 	    (void)rtcm_dump(&rtcmdata, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	    memset(&rtcmdata, 0, sizeof(rtcmdata));

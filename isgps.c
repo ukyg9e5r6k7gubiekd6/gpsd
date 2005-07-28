@@ -98,7 +98,7 @@ static unsigned int reverse_bits[] = {
 };
 /*@ -charint @*/
 
-static unsigned int isgps_parity(isgps30bits_t th)
+unsigned int isgps_parity(isgps30bits_t th)
 {
 #define P_30_MASK	0x40000000u
 

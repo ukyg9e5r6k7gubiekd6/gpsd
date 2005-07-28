@@ -662,6 +662,7 @@ bool rtcm_repack(struct gps_device_t *session)
     unsigned int n, w, uval;
     struct rtcm_t *tp = &session->gpsdata.rtcm;
     struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->driver.isgps.buf;
+    struct rtcm_msghw1 *wp  = (struct rtcm_msghw1 *)session->driver.isgps.buf;
 
     memset(session->driver.isgps.buf, 0, sizeof(session->driver.isgps.buf));
     msg->w1.msgtype = tp->type;
@@ -712,8 +713,6 @@ bool rtcm_repack(struct gps_device_t *session)
 		    m->w6.udre3 = ssp->udre;
 		    m->w7.issuedata3 = ssp->issuedata;
 		    m->w6.scale3 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
-			(ssp->rangerr < (-MAXPCSMALL)));
-		    m->w6.scale3 = (unsigned)((ssp->rangerr > MAXPCSMALL) ||
 					      (ssp->rangerr < (-MAXPCSMALL)) ||
 					      (ssp->rangerate > MAXRRSMALL) ||
 					      (ssp->rangerate < (-MAXRRSMALL)));
@@ -734,9 +733,9 @@ bool rtcm_repack(struct gps_device_t *session)
     case 3:	/* R */
 	if (tp->msg_data.ecef.valid) {
 	    struct rtcm_msg3    *m = &msg->msg_type.type3;
-	    unsigned x = (unsigned)(tp->msg_data.ecef.x / XYZ_SCALE);
-	    unsigned y = (unsigned)(tp->msg_data.ecef.y / XYZ_SCALE);
-	    unsigned z = (unsigned)(tp->msg_data.ecef.z / XYZ_SCALE);
+	    unsigned x = (unsigned) round(tp->msg_data.ecef.x / XYZ_SCALE);
+	    unsigned y = (unsigned) round(tp->msg_data.ecef.y / XYZ_SCALE);
+	    unsigned z = (unsigned) round(tp->msg_data.ecef.z / XYZ_SCALE);
 
 	    m->w4.x_l = x & 0xff;
 	    m->w3.x_h = x >> 8;
@@ -851,7 +850,11 @@ bool rtcm_repack(struct gps_device_t *session)
 	break;
     }
 
-    /* FIXME: must compute parity and inversion here */
+    /* compute parity for each word in the message */
+    for (w = 0; w < tp->length; w++)
+	wp[w].parity = isgps_parity(session->driver.isgps.buf[w]);
+
+    /* FIXME: must do inversion here */
     return true;
 }
 

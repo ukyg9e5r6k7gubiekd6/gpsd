@@ -1364,8 +1364,8 @@ int main(int argc, char *argv[])
 		if ((changed & RTCM_SET) != 0) {
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    for (gps = channels; gps < channels + MAXDEVICES; gps++)
-			if (gps->device_type && gps->device_type->rtcm_writer)
-			    gps->device_type->rtcm_writer(gps, (char *)channel->outbuffer, channel->outbuflen);
+			if (gps->device_type != NULL && gps->device_type->rtcm_writer != NULL)
+			    (void)gps->device_type->rtcm_writer(gps, (char *)channel->outbuffer, channel->outbuflen);
 		}
 #endif /* RTCM104_ENABLE */
 	    }

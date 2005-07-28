@@ -262,10 +262,10 @@ extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 
 extern void isgps_init(/*@out@*/struct gps_device_t *);
 enum isgpsstat_t isgps_decode(struct gps_device_t *session, 
-				     bool (*preamble_match)(isgps30bits_t *),
-				     bool (*length_check)(struct gps_device_t *),
+			      bool (*preamble_match)(isgps30bits_t *),
+			      bool (*length_check)(struct gps_device_t *),
 			      unsigned int c);
-extern unsigned bitreverse(unsigned x, unsigned w);
+extern unsigned int isgps_parity(isgps30bits_t th);
 extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
 
 extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
