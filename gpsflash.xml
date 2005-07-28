@@ -16,8 +16,8 @@
 
 <cmdsynopsis>
   <command>gpsflash</command>  
-      <arg choice='opt'>-v</arg>
       <arg choice='opt'>-l <replaceable>loader-file</replaceable></arg>
+      <arg choice='opt'>-n</arg>
       <arg choice='plain'>-p <replaceable>tty</replaceable></arg>
       <arg choice='plain'>-f <replaceable>firmware-file</replaceable></arg>
 </cmdsynopsis>
@@ -38,6 +38,14 @@ flashloader. The flashloader then accepts S-records from the serial
 or USB port until it sees a termination record, at which point it
 writes the new firmware into the GPS's non-volatile memory
 and reboots the chip into the new firmware.</para>
+
+<para>The -l option specifies the flashoader binary.  The -p option
+specifies the serial device to which the GPS is connected.  The -f
+option specifies the firmware image file.</para>  
+
+<para>If the -n option is specified, the program will probe the
+GPS to try to determine its type and whether the upload is
+compatible, but not actually perform the upload.</para>
 
 <para>You will need to obtain your own copy of
 <filename>dlgsp2.bin</filename> and your own firmware image.  The GPSD

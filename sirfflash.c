@@ -218,6 +218,12 @@ static int sirfPortSetup(int fd, struct termios *term)
     return sirfSetProto(fd, term, PROTO_SIRF, 38400);
 }
 
+static int sirfVersionCheck(int fd)
+{
+    /* FIXME: actually check new firmware version against old */
+    return 0;
+}
+
 static int wait2seconds(int fd)
 {
     /* again we wait, this time for our uploaded code to start running */
@@ -264,6 +270,7 @@ struct flashloader_t sirf_type = {
 
     /* the command methods */
     .port_setup = sirfPortSetup,	/* before signal blocking */
+    .version_check = sirfVersionCheck,
     .stage1_command = sirfSendUpdateCmd,
     .loader_send  = sirfSendLoader,
     .stage2_command = wait2seconds,

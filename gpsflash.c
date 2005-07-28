@@ -262,7 +262,7 @@ main(int argc, char **argv){
 	int ch;
 	int lfd, ffd, pfd;
 	size_t ls,  fs;
-	bool fflag = false, lflag = false, pflag = false;
+	bool fflag = false, lflag = false, pflag = false, nflag = false;
 	struct stat sb;
 	struct flashloader_t *gpstype = &sirf_type;
 	char *fname = NULL;
@@ -277,7 +277,7 @@ main(int argc, char **argv){
 
 	progname = argv[0];
 
-	while ((ch = getopt(argc, argv, "f:l:p:")) != -1)
+	while ((ch = getopt(argc, argv, "f:l:np:")) != -1)
 		switch (ch) {
 		case 'f':
 			fname = optarg;
@@ -286,6 +286,9 @@ main(int argc, char **argv){
 		case 'l':
 			lname = optarg;
 			lflag = true;
+			break;
+		case 'n':
+			nflag = true;
 			break;
 		case 'p':
 			port = optarg;
@@ -301,8 +304,8 @@ main(int argc, char **argv){
 	argv += optind;
 
 	/* nasty little trick to hopefully make people read the manual */
-	if (  ((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
-	      (strcmp(warning, "why oh why didn't i take the blue pill") == 0 )){
+	if (!nflag && (((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
+	      (strcmp(warning, "why oh why didn't i take the blue pill") == 0 ))){
 		printf("\nThis program rewrites your receiver's flash ROM.\n");
 		printf("If done improperly this will permanently ruin your\n");
 		printf("receiver. We insist you read the gpsflash manpage\n");
@@ -381,6 +384,7 @@ main(int argc, char **argv){
 		return 1;
 	}
 
+	/* get the firmware */
 	if (read(ffd, firmware, fs) != (ssize_t)fs) {
 		(void)free(loader);
 		(void)free(firmware);
@@ -427,7 +431,23 @@ main(int argc, char **argv){
 		return 1;
 	}
 
-	gpsd_report(1, "port set up, blocking signals now...\n");
+	gpsd_report(1, "port set up...\n");
+
+	if(gpstype->version_check(pfd) == -1) {
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "version_check()\n");
+		return 1;
+	}
+
+	gpsd_report(1, "version checked...\n");
+
+	if (nflag) {
+	    gpsd_report(1, "probe finished.\n");
+	    exit(0);
+	}
+
+	gpsd_report(1, "blocking signals...\n");
 
 	/* once we get here, we are uninterruptable. handle signals */
 	(void)sigemptyset(&sigset);
