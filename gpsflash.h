@@ -36,11 +36,13 @@
 #include <stdbool.h>
 
 struct flashloader_t {
+    const char *name;
     const char *flashloader;
     size_t min_loader_size, max_loader_size;
     size_t min_firmware_size, max_firmware_size;
+    int (*probe)(int fd, char **version);
     int (*port_setup)(int fd, struct termios *term);
-    int (*version_check)(int fd);
+    int (*version_check)(int fd, const char *);
     int (*stage1_command)(int fd);
     int (*loader_send)(int pfd, struct termios *term, char *loader, size_t ls);
     int (*stage2_command)(int fd);
@@ -54,5 +56,6 @@ int serialConfig(int, struct termios *, int);
 int serialSpeed(int, struct termios *, int);
 int srecord_send(int pfd, char *fw, size_t len);
 int binary_send(int pfd, char *data, size_t ls);
+bool expect(int pfd, const char *str, size_t len, time_t timeout);
 
 #endif /* _GPSFLASH_H_ */

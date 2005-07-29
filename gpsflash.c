@@ -11,10 +11,12 @@
 #define WRBLK 128
 
 static char *progname;
+static int verbosity = 0;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
+    if (errlevel <= verbosity) {
 	char buf[BUFSIZ];
 	va_list ap;
 
@@ -24,11 +26,12 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
 	(void)fputs(buf, stdout);
+    }
 }
 
 static void
 usage(void){
-	fprintf(stderr, "Usage: %s [-n] [-l <loader_file>] -f <firmware_file> {<tty>}\n", progname);
+    fprintf(stderr, "Usage: %s [-v d] [-n] [-l <loader_file>] -f <firmware_file> {<tty>}\n", progname);
 }
 
 int
@@ -256,6 +259,37 @@ srecord_send(int pfd, char *data, size_t len){
 	return 0;
 }
 
+bool 
+expect(int pfd, const char *str, size_t len, time_t timeout)
+/* keep reading till we see a specified expect string or time out */
+{
+    int got = 0;
+    char ch;
+    double start = timestamp();
+
+    gpsd_report(1, "expect(%s, %d)\n", 
+		gpsd_hexdump((char *)str, len),
+		timeout);
+
+    for (;;) {
+	if (read(pfd, &ch, 1) != 1)
+	    return false;		/* I/O failed */
+	gpsd_report(5, "I see %d: %02x\n", got, (unsigned)(ch & 0xff));
+	if (timestamp() - start > timeout)
+	    return false;		/* we're timed out */
+	else if (got == len)
+	    return true;		/* we're done */
+	else if (ch == str[got])
+	    got++;			/* match continues */
+	else
+	    got = 0;			/* match fails, retry */
+    }
+}
+
+
+/* add new types by adding pointers to their driver blocks to this list */
+static struct flashloader_t *types[] = {&sirf_type, NULL};
+
 int
 main(int argc, char **argv){
 
@@ -264,20 +298,20 @@ main(int argc, char **argv){
 	size_t ls,  fs;
 	bool fflag = false, lflag = false, nflag = false;
 	struct stat sb;
-	struct flashloader_t *gpstype = &sirf_type;
+	struct flashloader_t *gpstype, **gp;
 	char *fname = NULL;
-	char *lname = (char *)sirf_type.flashloader;
+	char *lname = NULL;
 	char *port = NULL;
 	char *warning;
 	struct termios term;
 	sigset_t sigset;
-
 	char *firmware = NULL;
 	char *loader = NULL;
+	char *version = NULL;
 
 	progname = argv[0];
 
-	while ((ch = getopt(argc, argv, "f:l:n")) != -1)
+	while ((ch = getopt(argc, argv, "f:l:nv:")) != -1)
 		switch (ch) {
 		case 'f':
 			fname = optarg;
@@ -289,6 +323,9 @@ main(int argc, char **argv){
 			break;
 		case 'n':
 			nflag = true;
+			break;
+		case 'v':
+			verbosity = atoi(optarg);
 			break;
 		default:
 			usage();
@@ -330,22 +367,26 @@ main(int argc, char **argv){
 		return 1;
 	}
 
-	/* call serialConfig to set control lines and termios bits */
-	memset(&term, 0, sizeof(term));
-	if(serialConfig(pfd, &term, 38400) == -1) {
-		gpsd_report(0, "serialConfig()\n");
-		return 1;
+	/* try to get an identification string out of the firmware */
+	gpstype = NULL;
+	for (gp = types; *gp; gp++) {
+	    gpstype = *gp;
+	    gpsd_report(0, "probing for %s\n", gpstype->name);
+	    if (gpstype->probe(pfd, &version) == 0)
+		break;
+	}
+	if (gpstype == NULL || version == NULL) {
+	    gpsd_report(0, "not a known GPS type\n");
+	    return 1;
 	}
 
-	/* there may be a type-specific setup method */
-	if(gpstype->port_setup(pfd, &term) == -1) {
-		gpsd_report(0, "port_setup()\n");
-		return 1;
-	}
+	/* OK, we have a known type */
+	gpsd_report(0, "GPS returned version string '%s'\n", version);
+	if (lname != NULL)
+	    lname = (char *)gpstype->flashloader;
 
-	gpsd_report(1, "port set up...\n");
-
-	if(gpstype->version_check(pfd) == -1) {
+	gpsd_report(0, "GPS identified as type '%s'\n", gpstype->name);
+	if(gpstype->version_check(pfd, version) == -1) {
 		gpsd_report(0, "version_check()\n");
 		return 1;
 	}
@@ -354,9 +395,17 @@ main(int argc, char **argv){
 
 	if (nflag) {
 	    gpsd_report(1, "probe finished.\n");
-	    exit(0);
+	    return 0;
 	}
 
+	/* there may be a type-specific setup method */
+	memset(&term, 0, sizeof(term));
+	if(gpstype->port_setup(pfd, &term) == -1) {
+		gpsd_report(0, "port_setup()\n");
+		return 1;
+	}
+
+	gpsd_report(1, "port set up...\n");
 
 	/* Open the loader file */
 	if((lfd = open(lname, O_RDONLY, 0444)) == -1) {

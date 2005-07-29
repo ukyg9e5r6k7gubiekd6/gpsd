@@ -212,13 +212,53 @@ sirfWrite(int fd, unsigned char *msg) {
 	return 0;
 }
 
+static int sirfProbe(int fd, char **version)
+/* try to elicit a return packet with the firmware version in it */
+{
+    unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
+				    0x84, 0x00,
+				    0x00, 0x84, 0xb0, 0xb3};
+    char buf[MAX_PACKET_LENGTH];
+    int status, want;
+
+    gpsd_report(4, "probing with %s\n", 
+		gpsd_hexdump(versionprobe, sizeof(versionprobe)));
+    if ((status = write(fd, versionprobe, sizeof(versionprobe))) != 10)
+	return status;
+    /*
+     * Older SiRF chips had a 21-character version message.  Newer 
+     * ones (GSW 2.3.2 or later) have an 81-character version message.
+     * Accept either.
+     */
+    want = 0;
+    if (expect(fd,"\xa0\xa2\x00\x15\x06", 5, 5))
+	want = 21;
+    else if (expect(fd,"\xa0\xa2\x00\x51\x06", 5, 5)) 
+	want = 81;
+
+    if (want) {
+	int len;
+	for (len = 0; len < want; len += status) {
+	    status = read(fd, buf+len, sizeof(buf));
+	    if (status == -1)
+		return -1;
+	}
+	gpsd_report(4, "%d bytes = %s\n", len, gpsd_hexdump(buf, len));
+	*version = strdup(buf);
+	return 0;
+    } else {
+	*version = NULL;
+	return -1;
+    }
+}
+
 static int sirfPortSetup(int fd, struct termios *term)
 {
     /* the firware upload defaults to 38k4, so let's go there */
     return sirfSetProto(fd, term, PROTO_SIRF, 38400);
 }
 
-static int sirfVersionCheck(int fd)
+static int sirfVersionCheck(int fd, const char *version)
 {
     /* FIXME: actually check new firmware version against old */
     return 0;
@@ -245,6 +285,8 @@ static int sirfPortWrapup(int fd, struct termios *term)
 }
 
 struct flashloader_t sirf_type = {
+    .name = "SiRF binary",
+
     /* name of default flashloader */
     .flashloader = "dlgsp2.bin",
     /*
@@ -269,6 +311,7 @@ struct flashloader_t sirf_type = {
     .max_loader_size = 20480,
 
     /* the command methods */
+    .probe = sirfProbe,
     .port_setup = sirfPortSetup,	/* before signal blocking */
     .version_check = sirfVersionCheck,
     .stage1_command = sirfSendUpdateCmd,
