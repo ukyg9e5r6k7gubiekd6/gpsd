@@ -38,6 +38,8 @@ static gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else if (session->packet_type == EVERMORE_PACKET) {
 	gpsd_report(2, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
+	/* we might never see a $PEMT, have this as a backstop */
+	(void)gpsd_switch_driver(session, "EverMore binary");
 	return evermore_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;

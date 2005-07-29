@@ -22,6 +22,11 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
 
+    /* make it idempotent */
+    if (session->device_type != NULL && 
+		strcmp(session->device_type->typename, typename) == 0)
+	return 0;
+
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {

@@ -98,15 +98,26 @@ packet-cracking needed to get the data off the chips.
 We have an RTCM packet decoder, and untested scratch code to serve
 RTCM packets to port 2101.  Here's the plan for the rest of it:
 
-1) Extend the test framework so we can verify RTCM service.
+1) Inversion needs to be done somewhere in the encoding logic.
 
-2) Get rid of the -d option by hacking open_device() so that when it
+2) Wolfgang's decoder-hardening patches.
+
+3) Test productions.  I have one that tests dumping and one that uses   
+   passthrough mode to test that pack() and repack() are inverse.  We
+   should have an undumping torture test.
+
+4) What about rtcm_output_mag() anyway?  Should that be made
+   available as an output mode of rtcmdecode and documented?
+
+5) Extend the test framework so we can verify RTCM service.
+
+6) Get rid of the -d option by hacking open_device() so that when it
    sees a command-line option of the form server:port (with no
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.
 
-3) Generate and broadcast RTCM corrections from an attached device?
+7) Generate and broadcast RTCM corrections from an attached device?
    Might not be possible -- appears to need nanosecond timing.
 
 *** Do the research to figure out just what is going on with status bits
