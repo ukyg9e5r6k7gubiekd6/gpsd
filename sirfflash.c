@@ -258,9 +258,14 @@ static int sirfPortSetup(int fd, struct termios *term)
     return sirfSetProto(fd, term, PROTO_SIRF, 38400);
 }
 
-static int sirfVersionCheck(int fd, const char *version)
+static int sirfVersionCheck(int fd, const char *version,
+			    const char *loader, size_t ls,
+			    const char *firmware, size_t fs)
 {
-    /* FIXME: actually check new firmware version against old */
+    /*
+     * This implies that any SiRF loader and firmware image is good for 
+     * any SiRF chip.  We really want to do more checking here...
+     */
     return 0;
 }
 

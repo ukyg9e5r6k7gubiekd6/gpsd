@@ -381,17 +381,9 @@ main(int argc, char **argv){
 	}
 
 	/* OK, we have a known type */
-	gpsd_report(0, "GPS returned version string '%s'\n", version);
+	gpsd_report(0, "GPS is %s, version '%s'.\n", gpstype->name, version);
 	if (lname != NULL)
 	    lname = (char *)gpstype->flashloader;
-
-	gpsd_report(0, "GPS identified as type '%s'\n", gpstype->name);
-	if(gpstype->version_check(pfd, version) == -1) {
-		gpsd_report(0, "version_check()\n");
-		return 1;
-	}
-
-	gpsd_report(1, "version checked...\n");
 
 	if (nflag) {
 	    gpsd_report(1, "probe finished.\n");
@@ -496,6 +488,15 @@ main(int argc, char **argv){
 	    return 1;
 	}
 	/*@ +nullpass @*/
+
+	if(gpstype->version_check(pfd, version, loader, ls, firmware, fs)==-1){
+		(void)free(loader);
+		(void)free(firmware);
+		gpsd_report(0, "version_check()\n");
+		return 1;
+	}
+
+	gpsd_report(1, "version checked...\n");
 
 	gpsd_report(1, "blocking signals...\n");
 

@@ -42,7 +42,9 @@ struct flashloader_t {
     size_t min_firmware_size, max_firmware_size;
     int (*probe)(int fd, char **version);
     int (*port_setup)(int fd, struct termios *term);
-    int (*version_check)(int fd, const char *);
+    int (*version_check)(int fd, const char *, 
+			 const char *, size_t, 
+			 const char *, size_t);
     int (*stage1_command)(int fd);
     int (*loader_send)(int pfd, struct termios *term, char *loader, size_t ls);
     int (*stage2_command)(int fd);
