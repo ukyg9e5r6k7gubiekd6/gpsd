@@ -105,7 +105,7 @@ struct dgps_server_t {
 
 static int srvcmp(const void *s, const void *t)
 {
-    return (int)(((struct dgps_server_t *)s)->dist - ((struct dgps_server_t *)t)->dist);
+    return (int)(((const struct dgps_server_t *)s)->dist - ((const struct dgps_server_t *)t)->dist); /* fixes: warning: cast discards qualifiers from pointer target type */
 }
 
 void dgpsip_autoconnect(struct gps_context_t *context,
