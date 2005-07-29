@@ -39,7 +39,7 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:ps:")
+(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:")
 progress = False
 cycle = 0
 monitor = ""
@@ -47,6 +47,7 @@ speed = 4800
 linedump = False
 pipe = False
 promptme = False
+init = "w+r+"
 doptions = ""
 for (switch, val) in options:
     if (switch == '-b'):
@@ -68,6 +69,8 @@ for (switch, val) in options:
     elif (switch == '-p'):
         pipe = True
         cycle = 0.05
+    elif (switch == '-r'):
+        init = val
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-h'):
@@ -118,7 +121,7 @@ try:
         sys.stderr.write("gpsfake: can't open pty.\n")
         raise SystemExit, 1
 
-    test.client_add("w+r+\n")
+    test.client_add(init + "\n")
 finally:
     test.cleanup();
 

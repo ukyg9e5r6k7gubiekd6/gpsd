@@ -25,6 +25,7 @@
       <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
+      <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
@@ -83,6 +84,9 @@ to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
 <para>The -p option dumps the NMEA and GPSD notifications generated
 by the log to standard output.  The logfile is interpreted once
 only.  (This option is intended to facilitate regression testing.)</para>
+
+<para>The -r option specifies an initialization comand to use.  
+The defaylt is "w+r+"; "r=2" might be another interesting value.</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>
