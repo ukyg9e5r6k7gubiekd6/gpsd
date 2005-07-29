@@ -16,7 +16,7 @@ INCLUDES = $(DBUS_CFLAGS)
 endif
 
 bin_PROGRAMS = $(MOTIF_PROGS) sirfmon rtcmdecode gpsflash
-bin_SCRIPTS = gpsprof gpsfake 
+dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 
@@ -100,12 +100,8 @@ libgps_c_sources = \
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' <packet_states.h >packet_names.h
 
-libgps_la_SOURCES = \
-	$(libgps_c_sources) \
-	libgpsmm.cpp \
-	packet_states.h \
-	packet_names.h
-
+libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp packet_states.h
+nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
@@ -178,21 +174,8 @@ srec.5: srec.xml
 gpsflash.1: gpsflash.xml
 	-$(XMLTO) man gpsflash.xml
 
-#
-# Do a release with a tar.gz and a tar.bz2
-#
-release: distdir
-	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP_ENV) $(AMTAR)$(TAR) chozf $(distdir).tar.gz $(distdir)
-	rm -f $(distdir)/gpsd.spec
-	sed '/^Source:/s/\.tar\.gz$$/\.tar\.bz2/' gpsd.spec \
-		> $(distdir)/gpsd.spec
-	BZIP2=$(BZIP2_ENV) $(AMTAR)$(TAR) --bzip2 -chof $(distdir).tar.bz2 $(distdir)
-	-rm -rf $(distdir)
-
 include_HEADERS = gps.h gpsd.h libgpsmm.h 
 
-# Automake is buggy and doesn't automatically include bin_SCRIPTS in dist
 EXTRA_DIST = \
 	autogen.sh \
 	README \
@@ -221,8 +204,6 @@ EXTRA_DIST = \
 	gpsd.spec \
 	gps.py \
 	gpsfake.py \
-	gpsprof \
-	gpsfake \
 	gpsd.hotplug \
 	gpsd.usermap \
 	valgrind-audit \
@@ -230,6 +211,8 @@ EXTRA_DIST = \
 	driver_proto.c \
 	logextract \
 	invert-bitfields.pl
+
+CLEANFILES = packet_names.h
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
