@@ -147,6 +147,7 @@ static int nmea_send(int fd, const char *fmt, ... )
     if (status == strlen(buf)) {
 	return (int)status;
     } else {
+	perror("SiRF write");
 	return -1;
     }
 }
@@ -978,7 +979,8 @@ int main (int argc, char **argv)
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	devicefd = controlfd = serial_initialize(device = arg);
+	devicefd = serial_initialize(device = arg);
+	controlfd = dup(devicefd);
 	serial = true;
     }
     /*@ +boolops */
