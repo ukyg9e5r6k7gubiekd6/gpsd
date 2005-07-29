@@ -215,7 +215,7 @@ sentence.  The old-style individual requests are obsolete, really.
 You should fix your application to use atcher mode &mdash; or better
 yet, the libgps client library.</p>
 
-<h2>Have wildly fluctuating speed?  Try static navigation</h2>
+<h1>Have wildly fluctuating speed?  Try static navigation</h2>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
 switching on static navigation mode using the 'c' command in
@@ -252,6 +252,14 @@ cycle, at which time the buffered data is by definition obsolete.</p>
 gaps, to do policy.  What you're seeing as a bug only looks like one
 because <code>xgps</code>, as is proper for a test client, has as
 little policy as possible.</p>
+
+<h1 id='kismet'>Flaky results when I try to use <code>gpsd</code> with Kismet</h1>
+
+<p>Kismet's interface was designed for a much older version of 
+<code>gpsd</code>, and tends to fight with the autobauding code in the
+newer versions.  The Kismet maintainer has promised to fix this.  Until
+he does, the workaround is to start <code>gpsd</code> and make sure
+it has synced up to a GPS befor running Kismet.</p>
 
 <h1 id='lockup'>My <code>gpsd</code> sometimes stops responding overnight</h1>
 
