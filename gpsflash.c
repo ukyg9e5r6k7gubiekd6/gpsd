@@ -28,7 +28,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void
 usage(void){
-	fprintf(stderr, "Usage: %s [-v] [-l <loader_file>] -p <tty> -f <firmware_file>\n", progname);
+	fprintf(stderr, "Usage: %s [-n] [-l <loader_file>] -f <firmware_file> {<tty>}\n", progname);
 }
 
 int
@@ -262,7 +262,7 @@ main(int argc, char **argv){
 	int ch;
 	int lfd, ffd, pfd;
 	size_t ls,  fs;
-	bool fflag = false, lflag = false, pflag = false, nflag = false;
+	bool fflag = false, lflag = false, nflag = false;
 	struct stat sb;
 	struct flashloader_t *gpstype = &sirf_type;
 	char *fname = NULL;
@@ -277,7 +277,7 @@ main(int argc, char **argv){
 
 	progname = argv[0];
 
-	while ((ch = getopt(argc, argv, "f:l:np:")) != -1)
+	while ((ch = getopt(argc, argv, "f:l:n")) != -1)
 		switch (ch) {
 		case 'f':
 			fname = optarg;
@@ -290,10 +290,6 @@ main(int argc, char **argv){
 		case 'n':
 			nflag = true;
 			break;
-		case 'p':
-			port = optarg;
-			pflag = true;
-			break;
 		default:
 			usage();
 			exit(0);
@@ -303,53 +299,96 @@ main(int argc, char **argv){
 	argc -= optind;
 	argv += optind;
 
-	/* nasty little trick to hopefully make people read the manual */
-	if (!nflag && (((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
-	      (strcmp(warning, "why oh why didn't i take the blue pill") == 0 ))){
+	/* there is exactly one required argument, a tty device */
+	if (argc == 1) 
+	    port = argv[0];
+	else {
+	    usage();
+	    exit(0);
+	}
+
+	if (!nflag) {
+	    if ((((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
+		 (strcmp(warning, "why oh why didn't i take the blue pill") == 0 ))){
 		printf("\nThis program rewrites your receiver's flash ROM.\n");
 		printf("If done improperly this will permanently ruin your\n");
 		printf("receiver. We insist you read the gpsflash manpage\n");
 		printf("before you break something.\n\n");
 		exit(1);
-	}
+	    }
 
-	/* make sure we have meaningful flags */
-	if (!(fflag && pflag) || fname == NULL || port == NULL) {
+	    /* make sure we have meaningful flags */
+	    if (!fflag || fname == NULL) {
 		usage();
 		return 1;
+	    }
 	}
-	
+
+	/* Open the serial port, blocking is OK */
+	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1) {
+		gpsd_report(0, "open(%s)\n", port);
+		return 1;
+	}
+
+	/* call serialConfig to set control lines and termios bits */
+	memset(&term, 0, sizeof(term));
+	if(serialConfig(pfd, &term, 38400) == -1) {
+		gpsd_report(0, "serialConfig()\n");
+		return 1;
+	}
+
+	/* there may be a type-specific setup method */
+	if(gpstype->port_setup(pfd, &term) == -1) {
+		gpsd_report(0, "port_setup()\n");
+		return 1;
+	}
+
+	gpsd_report(1, "port set up...\n");
+
+	if(gpstype->version_check(pfd) == -1) {
+		gpsd_report(0, "version_check()\n");
+		return 1;
+	}
+
+	gpsd_report(1, "version checked...\n");
+
+	if (nflag) {
+	    gpsd_report(1, "probe finished.\n");
+	    exit(0);
+	}
+
+
 	/* Open the loader file */
 	if((lfd = open(lname, O_RDONLY, 0444)) == -1) {
-		gpsd_report(0, "open(%s)\n", lname);
-		return 1;
+	    gpsd_report(0, "open(%s)\n", lname);
+	    return 1;
 	}
 
 	/* fstat() its file descriptor. Need the size, and avoid races */
 	if(fstat(lfd, &sb) == -1) {
-		gpsd_report(0, "fstat(%s)\n", lname);
-		return 1;
+	    gpsd_report(0, "fstat(%s)\n", lname);
+	    return 1;
 	}
 
 	/* minimal sanity check on loader size. also prevents bad malloc() */
 	ls = (size_t)sb.st_size;
 	if ((ls < gpstype->min_loader_size)||(ls > gpstype->max_loader_size)){
-		gpsd_report(0, "preposterous loader size: %d\n", ls);
-		return 1;
+	    gpsd_report(0, "preposterous loader size: %d\n", ls);
+	    return 1;
 	}
 
 	gpsd_report(1, "passed sanity checks...\n");
 
 	/* malloc a loader buffer */
 	if ((loader = malloc(ls)) == NULL) {
-		gpsd_report(0, "malloc(%d)\n", ls);
-		return 1;
+	    gpsd_report(0, "malloc(%d)\n", ls);
+	    return 1;
 	}
 
 	if (read(lfd, loader, ls) != (ssize_t)ls) {
-		(void)free(loader);
-		gpsd_report(0, "read(%d)\n", ls);
-		return 1;
+	    (void)free(loader);
+	    gpsd_report(0, "read(%d)\n", ls);
+	    return 1;
 	}
 
 	/* don't care if close fails - kernel will force close on exit() */
@@ -358,38 +397,39 @@ main(int argc, char **argv){
 	gpsd_report(1, "loader read in...\n");
 
 	/* Open the firmware image file */
+	/*@ -nullpass @*/
 	if((ffd = open(fname, O_RDONLY, 0444)) == -1) {
-		(void)free(loader);
-		gpsd_report(0, "open(%s)]n", fname);
-		return 1;
+	    (void)free(loader);
+	    gpsd_report(0, "open(%s)]n", fname);
+	    return 1;
 	}
 	if(fstat(ffd, &sb) == -1) {
-		(void)free(loader);
-		gpsd_report(0, "fstat(%s)\n", fname);
-		return 1;
+	    (void)free(loader);
+	    gpsd_report(0, "fstat(%s)\n", fname);
+	    return 1;
 	}
 
 	/* minimal sanity check on firmware size. also prevents bad malloc() */
 	fs = (size_t)sb.st_size;
 	if ((fs < gpstype->min_firmware_size) || (fs > gpstype->max_firmware_size)){
-		(void)free(loader);
-		gpsd_report(1, "preposterous firmware size: %d\n", fs);
-		return 1;
+	    (void)free(loader);
+	    gpsd_report(1, "preposterous firmware size: %d\n", fs);
+	    return 1;
 	}
 
 	/* malloc an image buffer */
 	if ((firmware = malloc(fs+1)) == NULL) {
-		(void)free(loader);
-		gpsd_report(0, "malloc(%u)\n", (unsigned)fs);
-		return 1;
+	    (void)free(loader);
+	    gpsd_report(0, "malloc(%u)\n", (unsigned)fs);
+	    return 1;
 	}
 
 	/* get the firmware */
 	if (read(ffd, firmware, fs) != (ssize_t)fs) {
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "read(%u)\n", (unsigned)fs);
-		return 1;
+	    (void)free(loader);
+	    (void)free(firmware);
+	    gpsd_report(0, "read(%u)\n", (unsigned)fs);
+	    return 1;
 	}
 
 	firmware[fs] = '\0';
@@ -401,51 +441,12 @@ main(int argc, char **argv){
 
 	/* did we just read some S-records? */
 	if (!((firmware[0] == 'S') && ((firmware[1] >= '0') && (firmware[1] <= '9')))){ /* srec? */
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "%s: not an S-record file\n", fname);
-		return 1;
+	    (void)free(loader);
+	    (void)free(firmware);
+	    gpsd_report(0, "%s: not an S-record file\n", fname);
+	    return 1;
 	}
-
-	/* Open the serial port, blocking is OK */
-	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1) {
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "open(%s)\n", port);
-		return 1;
-	}
-
-	/* call serialConfig to set control lines and termios bits */
-	memset(&term, 0, sizeof(term));
-	if(serialConfig(pfd, &term, 38400) == -1) {
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "serialConfig()\n");
-		return 1;
-	}
-
-	if(gpstype->port_setup(pfd, &term) == -1) {
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "port_setup()\n");
-		return 1;
-	}
-
-	gpsd_report(1, "port set up...\n");
-
-	if(gpstype->version_check(pfd) == -1) {
-		(void)free(loader);
-		(void)free(firmware);
-		gpsd_report(0, "version_check()\n");
-		return 1;
-	}
-
-	gpsd_report(1, "version checked...\n");
-
-	if (nflag) {
-	    gpsd_report(1, "probe finished.\n");
-	    exit(0);
-	}
+	/*@ +nullpass @*/
 
 	gpsd_report(1, "blocking signals...\n");
 
