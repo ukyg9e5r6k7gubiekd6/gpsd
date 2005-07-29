@@ -544,7 +544,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata, 
 				      (char *)session->outbuffer,
-				      (size_t)newdata, 2);
+				      (size_t)session->outbuflen, 2);
 	/*@ -nullstate @*/
 	session->gpsdata.sentence_time = NAN;
 	session->gpsdata.sentence_length = session->outbuflen;
