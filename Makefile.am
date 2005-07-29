@@ -210,6 +210,7 @@ EXTRA_DIST = \
 	valgrind-suppressions \
 	driver_proto.c \
 	logextract \
+	striplog \
 	invert-bitfields.pl
 
 CLEANFILES = packet_names.h
@@ -249,20 +250,27 @@ gps-regress: gpsd
 	@echo "Testing the daemon..."
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
-# Build the regression tests for the daeomon
+# Test that super-raw mode works. Compare each logfile against itself 
+# dumped through the daemon running in R=2 mode.  (This test is not
+# included in the normal regressions.)
+raw-regress:
+	@echo "Testing super-raw mode..."
+	@for f in test/*.log; do gpsfake -b -p -r "r=2" $${f} | striplog -1 >test/test1.chk; striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
+
+# Build the regression tests for the daemon.
 gps-makeregress: gpsd
 	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
-# Regression-test the RTCM decoder
+# Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
 	@echo "Testing RTCM decoding..."
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
-# Rebuild the RTCM regression tests
+# Rebuild the RTCM regression tests.
 rtcm-makeregress: rtcmdecode
 	@for f in test/*.rtcm; do rtcmdecode <$${f} >$${f}.chk; done
 
-# Regression-test the packet getter
+# Regression-test the packet getter.
 packet-regress: packet_test
 	@echo "Testing detection of invalid packets..."
 	@packet_test | diff -u test/packet.test.chk -
@@ -271,7 +279,7 @@ packet-regress: packet_test
 packet-makeregress: packet_test
 	packet_test >test/packet.test.chk
 
-# Test RTCM encoding
+# Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
 	@echo "Testing RTCM encoding..."
 	@rtcmdecode -p <test/undump.sample >/tmp/undump.test

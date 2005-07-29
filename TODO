@@ -30,10 +30,6 @@ David Mandala <davidm@them.com>.  His workaround is to condition out
 SiRF-II support; it works OK in NMEA mode.  He has undertaken to
 pin down the SVN revision that broke things after OLS.
 
-*** R=2 is broken.
-
-Rob Janssen reports R=2 support is broken.
-
 ** Bugs gpsd tickles in other software
 
 *** A long-running xgps may induce a memory leak in the X server
@@ -109,15 +105,17 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 4) What about rtcm_output_mag() anyway?  Should that be made
    available as an output mode of rtcmdecode and documented?
 
-5) Extend the test framework so we can verify RTCM service.
+5) Python libraries must grok RTCM dump format.
 
-6) Get rid of the -d option by hacking open_device() so that when it
+6) Extend the test framework so we can verify RTCM service.
+
+7) Get rid of the -d option by hacking open_device() so that when it
    sees a command-line option of the form server:port (with no
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.
 
-7) Generate and broadcast RTCM corrections from an attached device?
+8) Generate and broadcast RTCM corrections from an attached device?
    Might not be possible -- appears to need nanosecond timing.
 
 *** Do the research to figure out just what is going on with status bits
