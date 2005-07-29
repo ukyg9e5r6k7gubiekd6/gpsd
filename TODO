@@ -30,6 +30,10 @@ David Mandala <davidm@them.com>.  His workaround is to condition out
 SiRF-II support; it works OK in NMEA mode.  He has undertaken to
 pin down the SVN revision that broke things after OLS.
 
+*** R=2 is broken.
+
+Rob Janssen reports R=2 support is broken.
+
 ** Bugs gpsd tickles in other software
 
 *** A long-running xgps may induce a memory leak in the X server

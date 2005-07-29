@@ -41,7 +41,8 @@
  * 1 - DOP mode (1 is auto DOP mask); see message 0x87
  * 20 - GDOP; see message 0x87
  * 15 - PDOP
- * 08 * 0 - Normal mode, without 1PPS
+ * 08 - HDOP
+ * 0 - Normal mode, without 1PPS
  * 0 - ??
  * 2 - ??
  * 1 - ??
@@ -286,9 +287,12 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(4, "MDO 0x04:\n");
 	return TIME_SET;
+    
+    case 0x20:	/* LogConfig Info, used as a probe for EverMore */
+	gpsd_report(3, "LogConfig EverMore packet length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
+	return ONLINE_SET;
 
     default:
-	gpsd_report(3, "ID: 0x%02x\n", getub(buf2, 0));
 	gpsd_report(3, "unknown EverMore packet id 0x%02x length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
 	return 0;
     }
