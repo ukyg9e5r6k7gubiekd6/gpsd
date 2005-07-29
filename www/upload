@@ -24,4 +24,4 @@ xmlto xhtml-nochunks ../rtcm-104.xml
 xmlto xhtml-nochunks ../srec.xml
 xmlto xhtml-nochunks replacing-nmea.xml
 (cd performance; xmlto xhtml-nochunks performance.xml)
-scp *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
+scp start-kismet *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
