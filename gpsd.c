@@ -631,7 +631,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->device->gpsdata.fix.mode);
 	    break;
 	case 'N':
-	    if (!assign_channel(whoami))
+	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
 		(void)strcpy(phrase, ",N=?");
 	    else if (!whoami->device->device_type->mode_switcher)
 		(void)strcpy(phrase, ",N=0");
