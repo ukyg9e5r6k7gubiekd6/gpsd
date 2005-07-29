@@ -574,7 +574,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)unix_to_iso8601(whoami->device->gpsdata.fix.time, 
 				phrase+3, (int)(sizeof(phrase)-3));
 	    else
-		(void)strcpy(phrase, "?");
+		(void)strcat(phrase, "?");
 	    break;
 	case 'E':
 	    (void)strcpy(phrase, ",E=?");
