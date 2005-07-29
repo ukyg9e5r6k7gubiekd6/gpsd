@@ -664,7 +664,7 @@ static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 static unsigned int hunt_open(unsigned int *pstopbits)
 {
     unsigned int trystopbits;
-    int st, retries;
+    int st;
     /*
      * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -677,16 +677,15 @@ static unsigned int hunt_open(unsigned int *pstopbits)
 
     for (trystopbits = 1; trystopbits <= 2; trystopbits++) {
 	*pstopbits = trystopbits;
-	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-	    for (retries = 10; retries; retries--) {
-		if ((st = set_speed(*ip, trystopbits)) == SIRF_PACKET)
-		    return get_speed(&ttyset);
-		else if (st == NMEA_PACKET) {
-		    (void)fprintf(stderr, "Switching to SiRF mode...\n");
-		    (void)nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
-		    (void)usleep(10000);
-		}
+	for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++) {
+	    if ((st = set_speed(*ip, trystopbits)) == SIRF_PACKET)
+		return get_speed(&ttyset);
+	    else if (st == NMEA_PACKET) {
+		(void)fprintf(stderr, "Switching to SiRF mode...\n");
+		(void)nmea_send(controlfd,"$PSRF100,0,%d,8,1,0", *ip);
+		return *ip;
 	    }
+	}
     }
     return 0;
 }
