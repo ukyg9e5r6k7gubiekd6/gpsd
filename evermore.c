@@ -96,7 +96,7 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
 {
    unsigned int       crc;
    size_t    i, len;
-   unsigned char stuffed[MAX_PACKET_LENGTH], *cp;
+   unsigned char stuffed[MAX_PACKET_LENGTH*2], *cp;
    bool      ok;
 
    /* prepare a DLE-stuffed copy of the message */

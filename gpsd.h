@@ -100,6 +100,16 @@ struct gps_type_t {
  */
 #define MAX_PACKET_LENGTH	196	/* 188 + 8 */
 
+/*
+ * We used to define the inbut buffer length as MAX_PACKET_LENGTH*2+1.
+ * However, as it turns out, this isn't enough.  We've had a report
+ * from one user with a GPS that reports at 20Hz that "sometimes a
+ * long/slow context switch will cause the next read from the serial
+ * device to be very big. I sometimes see a read of 250 characters or
+ * more."
+ */
+#define INPUT_BUFFER_LENGTH	1024
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
@@ -120,7 +130,7 @@ struct gps_device_t {
     unsigned int baudindex;
     unsigned int packet_state;
     size_t packet_length;
-    unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
+    unsigned char inbuffer[INPUT_BUFFER_LENGTH];
     size_t inbuflen;
     unsigned /*@observer@*/char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
