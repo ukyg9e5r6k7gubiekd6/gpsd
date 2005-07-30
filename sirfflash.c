@@ -212,19 +212,22 @@ sirfWrite(int fd, unsigned char *msg) {
 	return 0;
 }
 
+/*@ -nullstate @*/
 static int sirfProbe(int fd, char **version)
 /* try to elicit a return packet with the firmware version in it */
 {
+    /*@ +charint @*/
     unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
 				    0x84, 0x00,
 				    0x00, 0x84, 0xb0, 0xb3};
+    /*@ -charint @*/
     char buf[MAX_PACKET_LENGTH];
-    int status, want;
+    ssize_t status, want;
 
     gpsd_report(4, "probing with %s\n", 
 		gpsd_hexdump(versionprobe, sizeof(versionprobe)));
     if ((status = write(fd, versionprobe, sizeof(versionprobe))) != 10)
-	return status;
+	return -1;
     /*
      * Older SiRF chips had a 21-character version message.  Newer 
      * ones (GSW 2.3.2 or later) have an 81-character version message.
@@ -237,13 +240,14 @@ static int sirfProbe(int fd, char **version)
 	want = 81;
 
     if (want) {
-	int len;
+	ssize_t len;
+	memset(buf, 0, sizeof(buf));
 	for (len = 0; len < want; len += status) {
 	    status = read(fd, buf+len, sizeof(buf));
 	    if (status == -1)
 		return -1;
 	}
-	gpsd_report(4, "%d bytes = %s\n", len, gpsd_hexdump(buf, len));
+	gpsd_report(4, "%d bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
 	*version = strdup(buf);
 	return 0;
     } else {
@@ -251,6 +255,7 @@ static int sirfProbe(int fd, char **version)
 	return -1;
     }
 }
+/*@ +nullstate @*/
 
 static int sirfPortSetup(int fd, struct termios *term)
 {

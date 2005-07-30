@@ -472,6 +472,7 @@ static void evermore_initializer(struct gps_device_t *session)
     (void)evermore_default(session, 0);
 }
 
+#ifdef __UNUSED__
 static void evermore_probe(struct gps_device_t *session)
 /* send a binary message to probe for EverMore GPS */
 /*
@@ -493,14 +494,16 @@ static void evermore_probe(struct gps_device_t *session)
    ok = evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
    return;
 }
+#endif /* __UNUSED__ */
 
+#ifdef __UNUSED__
 static void evermore_close(struct gps_device_t *session)
 /* set GPS to NMEA, 4800, GGA, GSA, GSV, RMC (default) */ 
-{
-	
+{	
 	gpsd_report(5, "evermore_close call\n");
 	(void)evermore_set_mode(session, 4800, false);
 }
+#endif /* __UNUSED__ */
 
 /* this is everything we export */
 struct gps_type_t evermore_binary =

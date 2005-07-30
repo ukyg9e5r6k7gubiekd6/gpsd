@@ -263,7 +263,7 @@ bool
 expect(int pfd, const char *str, size_t len, time_t timeout)
 /* keep reading till we see a specified expect string or time out */
 {
-    int got = 0;
+    size_t got = 0;
     char ch;
     double start = timestamp();
 
@@ -275,7 +275,7 @@ expect(int pfd, const char *str, size_t len, time_t timeout)
 	if (read(pfd, &ch, 1) != 1)
 	    return false;		/* I/O failed */
 	gpsd_report(5, "I see %d: %02x\n", got, (unsigned)(ch & 0xff));
-	if (timestamp() - start > timeout)
+	if (timestamp() - start > (double)timeout)
 	    return false;		/* we're timed out */
 	else if (got == len)
 	    return true;		/* we're done */
@@ -288,7 +288,9 @@ expect(int pfd, const char *str, size_t len, time_t timeout)
 
 
 /* add new types by adding pointers to their driver blocks to this list */
+/*@ -nullassign @*/
 static struct flashloader_t *types[] = {&sirf_type, NULL};
+/*@ +nullassign @*/
 
 int
 main(int argc, char **argv){
@@ -383,7 +385,7 @@ main(int argc, char **argv){
 
 	/* OK, we have a known type */
 	gpsd_report(0, "GPS is %s, version '%s'.\n", gpstype->name, version);
-	if (lname != NULL)
+	if (lname == NULL)
 	    lname = (char *)gpstype->flashloader;
 
 	if (nflag) {
