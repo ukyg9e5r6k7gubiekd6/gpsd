@@ -656,7 +656,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	}
 	/*@ -charint @*/
     }
-
+    
     return NO_PACKET;
 }
 
@@ -691,20 +691,18 @@ static unsigned int hunt_open(unsigned int *pstopbits)
     return 0;
 }
 
-static int serial_initialize(char *device)
+static void serial_initialize(char *device)
 {
-    if ((devicefd = open(device,O_RDWR)) < 0) {
+    if ((controlfd = devicefd = open(device,O_RDWR)) < 0) {
 	perror(device);
 	exit(1);
     }
-    
+
     /* Save original terminal parameters */
     if (tcgetattr(devicefd, &ttyset) != 0 || (bps = hunt_open(&stopbits))==0) {
 	(void)fputs("Can't sync up with device!\n", stderr);
 	exit(1);
     }
-
-    return devicefd;
 }
 
 
@@ -922,13 +920,16 @@ int main (int argc, char **argv)
 
     gmt_offset = (int)tzoffset();
 
-    while ((option = getopt(argc, argv, "hvF:")) != -1) {
+    while ((option = getopt(argc, argv, "F:vh")) != -1) {
 	switch (option) {
+	case 'F':
+	    controlsock = optarg;
+	    break;
 	case 'v':
 	    (void)printf("sirfmon %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:
-	    (void)fputs("usage:  sirfmon [-?hv] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  sirfmon [-?hv] [-F controlsock] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
@@ -979,8 +980,7 @@ int main (int argc, char **argv)
 	/*@ +compdef @*/
 	serial = false;
     } else {
-	devicefd = serial_initialize(device = arg);
-	controlfd = dup(devicefd);
+	serial_initialize(device = arg);
 	serial = true;
     }
     /*@ +boolops */
