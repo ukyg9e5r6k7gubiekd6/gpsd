@@ -386,7 +386,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	 * Incrementing this unconditionally falls afoul of chipsets like 
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the
 	 * last sentence in a GPGSV set if the number of satellites is not
-	 * a multiiple of 4.
+	 * a multiple of 4.
 	 */
 	if (session->gpsdata.PRN[session->gpsdata.satellites] != 0)
 	    session->gpsdata.satellites++;
