@@ -25,8 +25,9 @@
  *
  * These don't entail a reset as the 0x80 message does.
  *
- * Message described as 0x89 in the manual is message 0x8f in the real (manual error?).
- * Message 0x89 is used to switch baud rate without reset.
+ * Message described as 0x89 in the manual is message 0x8f in the
+ * actual command set (manual error?).  Message 0x89 is used to switch
+ * baud rate without reset.
  * 
  * The chip sometimes sends vendor extension messages with the prefix
  * $PEMT,100. After reset, it sends a $PEMT,100 message describing the
@@ -49,7 +50,8 @@
  * 
  * Message $PEMT,100 could be forced with message 0x85:
  * 10 02 12 85 00 00 00 00 00 01 01 00 00 00 00 00 00 00 00 87 10 03
- * This is some kind of initialisation but I don't understand the 0x85 message in detail.
+ * This is some kind of initialisation but I don't understand the 0x85 
+ * message in detail.
  * 
  * With message 0x8e it is possible to define how often each NMEA
  * message is sent (0-255 seconds). It is possible with message 0x8e
@@ -68,7 +70,8 @@
  * 045 - heading (degrees from true north)
  * 0000 - ?? could be speed over ground
  * 
- * This is an exampe of 0x8e message that activates all NMEA sentences with 1s period:
+ * This is an exampe of an 0x8e message that activates all NMEA sentences 
+ * with 1s period:
  * 10 02 12 8E 7F 01 01 01 01 01 01 01 01 00 00 00 00 00 00 15 10 03
  *
  */
