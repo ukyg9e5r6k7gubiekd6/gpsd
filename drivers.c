@@ -100,8 +100,8 @@ static void nmea_initializer(struct gps_device_t *session)
 #endif /* ITRAX_ENABLE */
 #ifdef EVERMORE_ENABLE
     /* probe for EverMore by trying to read the LogConfig */
-    (void)nmea_send(session->gpsdata.gps_fd,
-		    "\x10\x02\x04\x81\x13\x94\x10\x03");
+    (void)write(session->gpsdata.gps_fd,
+		    "\x10\x02\x04\x81\x13\x94\x10\x03", 8);
 #endif /* EVERMORE_ENABLE */
 }
 
