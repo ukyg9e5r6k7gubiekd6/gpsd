@@ -920,6 +920,7 @@ int main (int argc, char **argv)
 
     gmt_offset = (int)tzoffset();
 
+    /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "F:vh")) != -1) {
 	switch (option) {
 	case 'F':
@@ -933,6 +934,7 @@ int main (int argc, char **argv)
 	    exit(1);
 	}
     }
+    /*@ +branchstate @*/
     /*@ -nullpass -branchstate @*/
     if (optind < argc) {
 	arg = strdup(argv[optind]);
