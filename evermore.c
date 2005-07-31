@@ -23,7 +23,12 @@
  * 10 02 06 8D 00 01 00 8E 10 03        switch to datum ID 001 (WGS-84)
  * 10 02 06 8D 00 D8 00 65 10 03        switch to datum ID 217 (WGS-72)
  *
- * These don't entail a reset as the 0x80 message does.
+ * These don't entail a reset of GPS as the 0x80 message does.
+ * 
+ * 10 02 04 38 85 bd 10 03     answer from GPS to 0x85 message; Like OK?
+ * 10 02 04 38 8d c5 10 03     answer from GPS to 0x8d message; Like OK?
+ * 10 02 04 38 8e c6 10 03     answer from GPS to 0x8e message; Like OK?
+ * 10 02 04 38 8f c7 10 03     answer from GPS to 0x8f message; Like OK?
  *
  * Message described as 0x89 in the manual is message 0x8f in the
  * actual command set (manual error?).  Message 0x89 is used to switch
@@ -50,7 +55,7 @@
  * 
  * Message $PEMT,100 could be forced with message 0x85:
  * 10 02 12 85 00 00 00 00 00 01 01 00 00 00 00 00 00 00 00 87 10 03
- * This is some kind of initialisation but I don't understand the 0x85 
+ * This is some kind of initialisation but I don't understand the 0x85
  * message in detail.
  * 
  * With message 0x8e it is possible to define how often each NMEA
@@ -73,6 +78,23 @@
  * This is an exampe of an 0x8e message that activates all NMEA sentences 
  * with 1s period:
  * 10 02 12 8E 7F 01 01 01 01 01 01 01 01 00 00 00 00 00 00 15 10 03
+ * 
+ *
+ * There is a way to probe for EverMore chipset. When binary message 0x81 is sent:
+ * 10 02 04 81 13 94 10 03
+ *
+ * EverMore will reply with message like this:
+ * *10 *02 *0D *20 E1 00 00 *00 0A 00 1E 00 32 00 5B *10 *03
+ * bytes marked with * are fixed
+ * Message in reply is information about logging configuration of GPS
+ *
+ * Other way to probe for EverMore chipset is to send one of messages 
+ * 0x85, 0x8d, 0x8e or 0x8f and check for reply.
+ * Reply message from EverMore GPS looks like this:
+ * *10 *02 *04 *38 8d c5 *10 *03
+ * 8d indicates that message 0x8d was sent;
+ * c5 is EverMore checksum
+ * other bytes are fixed
  *
  */
 
@@ -157,7 +179,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     if (*cp == 0x10) cp++;
     datalen = (size_t)*cp++;
    
-    gpsd_report(7, "raw EverMore packet type 0x%02x length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
+    gpsd_report(7, "raw EverMore packet type 0x%02x, length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
 
     datalen -= 2;
 
@@ -168,7 +190,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     }
 
     /*@ -usedef -compdef @*/
-    gpsd_report(5, "EverMore packet type 0x%02x length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
+    gpsd_report(6, "EverMore packet type 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
@@ -291,12 +313,16 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	gpsd_report(4, "MDO 0x04:\n");
 	return TIME_SET;
     
-    case 0x20:	/* LogConfig Info, used as a probe for EverMore */
-	gpsd_report(3, "LogConfig EverMore packet length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
+    case 0x20:	/* LogConfig Info, could be used as a probe for EverMore GPS */
+	gpsd_report(3, "LogConfig EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
+	return ONLINE_SET;
+
+    case 0x22:	/* LogData */
+	gpsd_report(3, "LogData EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
 	return ONLINE_SET;
 
     default:
-	gpsd_report(3, "unknown EverMore packet id 0x%02x length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
+	gpsd_report(3, "unknown EverMore packet id 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
 	return 0;
     }
 }
@@ -329,7 +355,7 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
 	    0x86,	/*  0: msg ID */
 	    5,          /*  1: elevation Mask, degree 0..89 */
     };
-   
+
     unsigned char msg2[] = {
 	    0x87,       /*  0: msg ID */
 	    1,          /*  1: DOP mask, GDOP(0), auto(1), PDOP(2), HDOP(3), no mask(4) */
@@ -344,7 +370,7 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
 	    1,          /*  2: navigation update rate, 1/Hz, 1..10 */
 	    0,          /*  3: RF/GPSBBP On time, 160ms(0), 220(1), 280(2), 340(3), 440(4) */
     };
-    
+
     unsigned char msg4[] = {
 	    0x8e,	/*  0: msg ID */
 	    0x1d,       /*  1: NMEA sentence mask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
@@ -375,13 +401,13 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
     return ok;
 }
 
-static bool evermore_set_mode(struct gps_device_t *session, 
+static bool evermore_set_mode(struct gps_device_t *session,
 			      speed_t speed, bool mode)
 {
     u_int8_t tmp8;
     double tow;
     int week;
-    
+
     /*@ +charint @*/
     unsigned char msg[] = {
 	    0x80,		        /*  0: msg ID */
@@ -412,7 +438,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     unix_to_gpstime(timestamp(), &week, &tow);
     putword(msg, 1, (unsigned int) week);
     putlong(msg, 3, (unsigned long) tow);
-    
+
     return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
     /*@ +charint @*/
 }
@@ -441,7 +467,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
     }
     msg[2] = tmp8;
     return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
-	    
+
 #endif
 }
 
@@ -449,7 +475,7 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 {
     unsigned char msg[] = {
 	    0x84,    /* 0: msg ID */
-	    0x01,    /* 1: mode, binary(0), nmea(1) */
+	    0x01,    /* 1: mode; binary(0), nmea(1) */
 	    0x00,    /* 2: ?? */
 	    0x00,    /* 3: ?? */
     };
@@ -509,7 +535,8 @@ static void evermore_close(struct gps_device_t *session)
 struct gps_type_t evermore_binary =
 {
     .typename       = "EverMore binary",	/* full name of type */
-    .trigger        = "$PEMT,100,05.",		/* recognize the type */
+    //.trigger        = "$PEMT,100,05.",		/* recognize the type */
+    .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03",
     .probe          = NULL,			/* no probe */
     .initializer    = evermore_initializer,	/* initialize the device */
     .get_packet     = packet_get,		/* use generic one */
