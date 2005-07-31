@@ -130,7 +130,7 @@ struct gps_device_t {
     unsigned int baudindex;
     unsigned int packet_state;
     size_t packet_length;
-    unsigned char inbuffer[INPUT_BUFFER_LENGTH];
+    unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
     size_t inbuflen;
     unsigned /*@observer@*/char *inbufptr;
     unsigned char outbuffer[MAX_PACKET_LENGTH+1];
