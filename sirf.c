@@ -706,6 +706,7 @@ struct gps_type_t sirf_binary =
 {
     .typename       = "SiRF-II binary",	/* full name of type */
     .trigger        = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,		/* no probe */
     .initializer    = sirfbin_initializer,/* initialize the device */
     .get_packet     = packet_get,	/* use the generic packet getter */

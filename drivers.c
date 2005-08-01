@@ -26,7 +26,7 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
  *
  **************************************************************************/
 
-static gps_mask_t nmea_parse_input(struct gps_device_t *session)
+gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
@@ -108,6 +108,7 @@ static void nmea_initializer(struct gps_device_t *session)
 static struct gps_type_t nmea = {
     .typename       = "Generic NMEA",	/* full name of type */
     .trigger        = NULL,		/* it's the default */
+    .channels       = 12,		/* consumer-grade GPS */
     .probe          = NULL,		/* no probe */
     .initializer    = nmea_initializer,	/* probe for special types */
     .get_packet     = packet_get,		/* use generic packet getter */
@@ -131,6 +132,7 @@ static struct gps_type_t nmea = {
 static struct gps_type_t fv18 = {
     .typename       = "San Jose Navigation FV18",	/* full name of type */
     .trigger        = FV18_PROBE,	/* FV18s should echo the probe */
+    .channels       = 12,		/* consumer-grade GPS */
     .probe          = NULL,		/* mo probe */
     .initializer    = NULL,		/* to be sent unconditionally */
     .get_packet     = packet_get,	/* how to get a packet */
@@ -188,13 +190,14 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 }
 
 static struct gps_type_t sirfII_nmea = {
-    .typename  = "SiRF-II NMEA",	/* full name of type */
+    .typename      = "SiRF-II NMEA",	/* full name of type */
 #ifndef SIRFII_ENABLE
-    .trigger   = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
+    .trigger       = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
 #else
-    .trigger   = NULL,			/* let the binary driver have it */
+    .trigger       = NULL,		/* let the binary driver have it */
 #endif /* SIRFII_ENABLE */
-    .probe     = NULL,			/* no probe */
+    .channels      = 12,		/* consumer-grade GPS */
+    .probe         = NULL,		/* no probe */
     .initializer   = sirf_initializer,	/* turn off debugging messages */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
@@ -233,6 +236,7 @@ static void tripmate_initializer(struct gps_device_t *session)
 static struct gps_type_t tripmate = {
     .typename      = "Delorme TripMate",	/* full name of type */
     .trigger       ="ASTRAL",			/* tells us to switch */
+    .channels      = 12,			/* consumer-grade GPS */
     .probe         = NULL,			/* no probe */
     .initializer   = tripmate_initializer,	/* send unconfitionally */
     .get_packet    = packet_get,		/* how to get a packet */
@@ -281,6 +285,7 @@ static void earthmate_initializer(struct gps_device_t *session)
 static struct gps_type_t earthmate = {
     .typename      = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .trigger       = "EARTHA",			/* Earthmate trigger string */
+    .channels      = 12,			/* consumer-grade GPS */
     .probe         = NULL,			/* no probe */
     .initializer   = earthmate_initializer,	/* switch us to Zodiac mode */
     .get_packet    = packet_get,		/* how to get a packet */
@@ -295,6 +300,7 @@ static struct gps_type_t earthmate = {
 };
 /*@ -redef @*/
 #endif /* EARTHMATE_ENABLE */
+
 
 #ifdef ITRAX_ENABLE
 /**************************************************************************
@@ -390,6 +396,7 @@ static void itrax_wrap(struct gps_device_t *session)
 static struct gps_type_t itrax = {
     .typename      = "iTrax",		/* full name of type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
+    .channels      = 12,		/* consumer-grade GPS */
     .probe         = NULL,		/* no probe */
     .initializer   = itrax_initializer,	/* initialize */
     .get_packet    = packet_get,	/* how to get a packet */
@@ -425,6 +432,7 @@ static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 static struct gps_type_t rtcm104 = {
     .typename      = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
+    .channels      = 12,		/* consumer-grade GPS */
     .probe         = NULL,		/* no probe */
     .initializer   = NULL,		/* no initializer */
     .get_packet    = packet_get,	/* how to get a packet */
@@ -440,7 +448,7 @@ static struct gps_type_t rtcm104 = {
 #endif /* RTCM104_ENABLE */
 
 extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
-extern struct gps_type_t evermore_binary, italk_binary;
+extern struct gps_type_t evermore_binary, italk_binary, trueNorth;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
@@ -472,6 +480,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary, 
+#endif /* TSIP_ENABLE */
+#ifdef TNT_ENABLE
+    &trueNorth,
 #endif /* TSIP_ENABLE */
 #ifdef EVERMORE_ENABLE
     &evermore_binary, 

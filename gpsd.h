@@ -70,6 +70,7 @@ struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *typename;
     /*@observer@*//*@null@*/char *trigger;
+    int channels;
     /*@null@*/bool (*probe)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
@@ -230,6 +231,7 @@ struct gps_device_t {
 extern struct gps_type_t **gpsd_drivers;
 
 /* GPS library internal prototypes */
+extern gps_mask_t nmea_parse_input(struct gps_device_t *);
 extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
@@ -238,7 +240,6 @@ ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
-
 extern void packet_reset(struct gps_device_t *);
 extern void packet_pushback(struct gps_device_t *);
 extern ssize_t packet_parse(struct gps_device_t *, size_t);

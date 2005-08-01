@@ -56,6 +56,10 @@
    ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
 #endif /* ZODIAC_ENABLE */
 
+#ifdef TNT_ENABLE
+   TNT_LEADER,          /* saw True North status leader '@' */
+#endif
+
 #ifdef EVERMORE_ENABLE
    EVERMORE_LEADER_1,	/* a DLE after having seen EverMore data */
    EVERMORE_LEADER_2,	/* seen opening STX of EverMore packet */

@@ -17,11 +17,9 @@ extern "C" {
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
 
-#define MAXTAGLEN	6	/* maximum length of sentence tag name */
-#define MAXCHANNELS	12	/* maximum GPS channels (*not* satellites!) */
-#define NMEA_CHANNELS	12	/* max channels allowed in NMEA format */
+#define MAXTAGLEN	8	/* maximum length of sentence tag name */
+#define MAXCHANNELS	14	/* maximum GPS channels (*not* satellites!) */
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
-#define EVERMORE_CHANNELS 12	/* max channels allowed in EverMore format */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
@@ -68,6 +66,9 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
+    double pitch;       /* Pitch angle in degrees */
+    double roll;        /* Roll angle in degrees */
+    double dip;         /* Dip angle in degrees */
 };
 
 /*  
@@ -250,6 +251,12 @@ struct gps_data_t {
 #define SAT_EPHEMERIS	0x20		/* ephemeris collected */
 #define SAT_FIX_USED	0x40		/* used for position fix */
 #endif
+
+    /* compass status */
+    char headingStatus;
+    char pitchStatus;
+    char rollStatus;
+    double horzField;   /* Magnitude of horizontal magnetic field */
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */

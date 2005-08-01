@@ -240,6 +240,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for True North support
+AC_ARG_ENABLE(tnt,
+  AC_HELP_STRING([--enable-tnt],
+                 [enable True North Technologies support]),
+  [ac_tnt=$enableval], [ac_tnt=no])
+AC_MSG_CHECKING([for True North support])
+if test x"$ac_tnt" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([TNT_ENABLE], 1, [True North Technologies support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Evermore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
@@ -368,6 +381,7 @@ echo "Earthmate               : $ac_earthmate"
 echo "iTrax                   : $ac_itrax"
 echo "iTalk                   : $ac_italk"
 echo "Garmin                  : $ac_garmin"
+echo "True North              : $ac_tnt"
 echo "Evermore                : $ac_evermore"
 echo "RTCM104 support         : $ac_rtcm104"
 echo "NTP SHM                 : $ac_ntpshm"

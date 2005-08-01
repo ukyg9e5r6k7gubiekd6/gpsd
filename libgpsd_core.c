@@ -328,7 +328,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     (void)snprintf(bufp, len-strlen(bufp),
 		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
     j = 0;
-    for (i = 0; i < NMEA_CHANNELS; i++) {
+    for (i = 0; i < session->device_type->channels; i++) {
 	if (session->gpsdata.used[i]) {
 	    bufp += strlen(bufp);
 	    (void)snprintf(bufp, len-strlen(bufp),
@@ -336,7 +336,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    j++;
 	}
     }
-    for (i = j; i < NMEA_CHANNELS; i++) {
+    for (i = j; i < session->device_type->channels; i++) {
 	bufp += strlen(bufp);
 	(void)strcpy(bufp, ",");
     }

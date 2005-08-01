@@ -73,13 +73,20 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 /*@ +charint */
     switch(session->packet_state)
     {
-#ifdef NMEA_ENABLE
     case GROUND_STATE:
+#ifdef NMEA_ENABLE
 	if (c == '$') {
 	    session->packet_state = NMEA_DOLLAR;
 	    break;
 	}
 #endif /* NMEA_ENABLE */
+
+#ifdef TNT_ENABLE
+        if (c == '@') {
+	    session->packet_state = TNT_LEADER;
+	    break;
+	}
+#endif
 #ifdef SIRFII_ENABLE
         if (c == 0xa0) {
 	    session->packet_state = SIRF_LEADER_1;
@@ -149,6 +156,11 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
+#ifdef TNT_ENABLE
+    case TNT_LEADER:
+          session->packet_state = NMEA_LEADER_END;
+        break;
+#endif
     case NMEA_LEADER_END:
 	if (c == '\r')
 	    session->packet_state = NMEA_CR;

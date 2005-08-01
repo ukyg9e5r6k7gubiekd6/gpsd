@@ -116,6 +116,8 @@
 #define PUT_ORIGIN 0
 #include "bits.h"
 
+#define EVERMORE_CHANNELS	12
+
 /*@ +charint -usedef -compdef @*/
 static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
 {
@@ -268,7 +270,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		gpsd_report(4, "Warning: EverMore packet has information about %d satellites!\n",
 				session->gpsdata.satellites);
 	}
-	if (session->gpsdata.satellites > MAXCHANNELS) session->gpsdata.satellites = MAXCHANNELS;
+	if (session->gpsdata.satellites > EVERMORE_CHANNELS) session->gpsdata.satellites = EVERMORE_CHANNELS;
 	satcnt = 0;
 	for (i = 0; i < (size_t)session->gpsdata.satellites; i++) {
 	    int prn;
@@ -537,6 +539,7 @@ struct gps_type_t evermore_binary =
     .typename       = "EverMore binary",	/* full name of type */
     //.trigger        = "$PEMT,100,05.",		/* recognize the type */
     .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03",
+    .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,			/* no probe */
     .initializer    = evermore_initializer,	/* initialize the device */
     .get_packet     = packet_get,		/* use generic one */

@@ -408,7 +408,7 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 
 #ifdef __UNUSED__
     gpsd_report(0, "Satellite picture:\n");
-    for (k = 0; k < MAXCHANNELS; k++) {
+    for (k = 0; k < gpsdata->device_type.channels; k++) {
 	if (gpsdata->used[k])
 	    gpsd_report(0, "az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);

@@ -15,6 +15,7 @@
 #define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
 
 #ifdef TSIP_ENABLE
+#define TSIP_CHANNELS	12
 
 static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 {
@@ -233,7 +234,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    u1 = getub(buf,5*i + 1);
 	    if ((f1 = getf(buf,5*i + 2)) < 0)
 		f1 = 0.0;
-	    for (j = 0; j < MAXCHANNELS; j++)
+	    for (j = 0; j < TSIP_CHANNELS; j++)
 		if (session->gpsdata.PRN[j] == (int)u1) {
 		    session->gpsdata.ss[j] = (int)roundf(f1);
 		    break;
@@ -364,7 +365,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	d2 = getf(buf,16) * RAD_2_DEG;		/* Azimuth */
 	i = (int)(u2 >> 3);			/* channel number */
 	gpsd_report(4, "Satellite Tracking Status %d: %2d 0x%02x %d %d %.1f %f %.1f %.1f\n",i,u1,u2,u3,u4,f1,f2,d1,d2);
-	if (i < MAXCHANNELS) {
+	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
 		session->gpsdata.PRN[i] = (int)u1;
 		session->gpsdata.ss[i] = (int)roundf(f1);
@@ -676,6 +677,7 @@ struct gps_type_t tsip_binary =
 {
     .typename       = "Trimble TSIP",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
+    .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,		/* no probe */
     .initializer    = tsip_initializer,	/* initialization */
     .get_packet     = packet_get,	/* use the generic packet getter */

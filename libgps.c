@@ -257,7 +257,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			char eph[20], epv[20], track[20],speed[20], climb[20];
 			char epd[20], eps[20], epc[20];
 			int st = sscanf(sp+2, 
-			       "%6s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
+			       "%8s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
 				tag, &nf.time, &nf.ept, 
 				&nf.latitude, &nf.longitude,
 			        alt, eph, epv, track, speed, climb,
@@ -289,7 +289,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->set |= SPEEDERR_SET;
 			    if (isnan(nf.epc)==0)
 				gpsdata->set |= CLIMBERR_SET;
-
+			    nf.pitch = nf.roll = nf.dip = NAN;
 			    gpsdata->fix = nf;
 			    (void)strcpy(gpsdata->tag, tag);
 			    gpsdata->set = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;

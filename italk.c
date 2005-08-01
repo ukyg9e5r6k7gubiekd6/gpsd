@@ -110,6 +110,7 @@ struct gps_type_t italk_binary =
 {
     .typename       = "iTalk binary",	/* full name of type */
     .trigger        = NULL,		/* recognize the type */
+    .channels       = 12,		/* consumer-grade GPS */
     .probe          = NULL,		/* no probe */
     .initializer    = italk_initializer,/* initialize the device */
     .get_packet     = packet_get,	/* use generic packet grabber */

@@ -95,6 +95,7 @@ libgps_c_sources = \
 	rtcm.c \
 	srecord.c \
 	bits.h \
+	trueNorth.c \
 	timebase.h
 
 packet_names.h: packet_states.h

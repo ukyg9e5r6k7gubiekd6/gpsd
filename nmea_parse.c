@@ -99,21 +99,21 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
  **************************************************************************/
 
 static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *session)
-/* Recommend Minimum Specific GPS/TRANSIT Data */
+/* Recommend Minimum Course Specific GPS/TRANSIT Data */
 {
     /*
         RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
            225446.33    Time of fix 22:54:46 UTC
-           A            Navigation receiver warning A = OK, V = warning
+           A            Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
            4916.45,N    Latitude 49 deg. 16.45 min North
            12311.12,W   Longitude 123 deg. 11.12 min West
            000.5        Speed over ground, Knots
-           054.7        Course Made Good, True
+           054.7        Course Made Good, True north
            191194       Date of fix  19 November 1994
            020.3,E      Magnetic variation 20.3 deg East
 	   A            FAA mode indicator (NMEA 2.3 and later)
                         A=autonomous, D=differential, E=Estimated,
-                        N=not valid, S=Simulator
+                        N=not valid, S=Simulator, M=Manual input mode
            *68          mandatory nmea_checksum
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
@@ -231,7 +231,10 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
            123519       Fix taken at 12:35:19 UTC
            4807.038,N   Latitude 48 deg 07.038' N
            01131.324,E  Longitude 11 deg 31.324' E
-           1            Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix
+           1            Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
+	   		3=PPS (Precise Position Service),
+			4=RTK (Real Time Kinematic) with fixed integers,
+			5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
            08           Number of satellites being tracked
            0.9          Horizontal dilution of position
            545.4,M      Altitude, Metres above mean sea level
@@ -330,12 +333,12 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     session->gpsdata.newdata.mode = atoi(field[2]);
     mask = MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", session->gpsdata.newdata.mode);
-    session->gpsdata.pdop = atof(field[15]);
-    session->gpsdata.hdop = atof(field[16]);
-    session->gpsdata.vdop = atof(field[17]);
+    session->gpsdata.pdop = atof(field[session->device_type->channels+3]);
+    session->gpsdata.hdop = atof(field[session->device_type->channels+4]);
+    session->gpsdata.vdop = atof(field[session->device_type->channels+5]);
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
-    for (i = 0; i < NMEA_CHANNELS; i++) {
+    for (i = 0; i < session->device_type->channels; i++) {
         int prn = atoi(field[i+3]);
         if (prn > 0)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
@@ -373,7 +376,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	gpsd_zero_satellites(&session->gpsdata);
 
     for (fldnum = 4; fldnum < count; ) {
-	if (session->gpsdata.satellites >= NMEA_CHANNELS) {
+	if (session->gpsdata.satellites >= session->device_type->channels) {
 	    gpsd_report(0, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
@@ -465,6 +468,61 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     return mask;
 }
 
+#ifdef TNT_ENABLE
+static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t *session)
+{
+    /*
+     * Proprietary sentence for True North Technologies Magnetic Compass.
+     * This may also apply to some Honeywell units since they may have been
+     * designed by True North.
+
+        HTM,x.x,a,x.x,a,x.x,a,x.x,x.x*hh<cr><lf>
+	Fields in order:
+	1. True heading in degrees
+	2. magnetometer status character:
+		C = magnetometer calibration alarm
+		L = low alarm
+		M = low warning
+		N = normal
+		O = high warning
+		P = high alarm
+		V = magnetometer voltage level alarm
+	3. pitch angle
+	4. pitch status character - see field 2 above
+	5. roll angle
+	6. roll status character - see field 2 above
+	7. dip angle
+	8. relative magnitude horizontal component of earth's magnetic field
+	*hh          mandatory nmea_checksum
+     */
+    gps_mask_t mask;
+    mask = ONLINE_SET;
+
+    //gpsd_zero_satellites(&session->gpsdata);
+
+    session->gpsdata.fix.time = timestamp();
+    session->gpsdata.newdata.track = atof(field[1]);
+    session->gpsdata.headingStatus = *field[2];
+    mask |= (TRACK_SET | MODE_SET);
+    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
+    //session->gpsdata.newdata.mode = MODE_2D;
+    session->gpsdata.newdata.mode = MODE_2D;
+    //session->gpsdata.newdata.mode = MODE_NO_FIX;
+
+    session->gpsdata.newdata.pitch = atof(field[3]);
+    session->gpsdata.pitchStatus = *field[4];
+
+    session->gpsdata.newdata.roll = atof(field[5]);
+    session->gpsdata.rollStatus = *field[6];
+
+    session->gpsdata.newdata.dip = atof(field[7]);
+    session->gpsdata.horzField = atof(field[8]);
+
+    //gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.fix.headingStatus);
+    return mask;
+}
+#endif /* TNT_ENABLE */
+
 #ifdef __UNUSED__
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
@@ -502,6 +560,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"GSV", 	processGPGSV},
 	{"ZDA", 	processGPZDA},
 	{"PGRME",	processPGRME},
+#ifdef TNT_ENABLE
+	{"PTNTHTM",	processTNTHTM},
+#endif /* TNT_ENABLE */
     };
     unsigned char buf[NMEA_MAX+1];
 

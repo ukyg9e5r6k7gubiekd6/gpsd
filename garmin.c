@@ -840,6 +840,7 @@ struct gps_type_t garmin_binary =
 {
     .typename       = "Garmin binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
+    .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe          = garmin_probe,	/* how to detect at startup time */
     .initializer    = garmin_init,	/* initialize the device */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
