@@ -75,7 +75,6 @@ void gpsd_deactivate(struct gps_device_t *session)
 {
     gpsd_report(1, "closing GPS=%s (%d)\n", 
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
-    (void)gpsd_close(session);
 #ifdef NTPSHM_ENABLE
     (void)ntpshm_free(session->context, session->shmTime);
     session->shmTime = -1;
@@ -86,6 +85,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 #endif /* NTPSHM_ENABLE */
     if (session->device_type != NULL && session->device_type->wrapup != NULL)
 	session->device_type->wrapup(session);
+    (void)gpsd_close(session);
 }
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
