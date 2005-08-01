@@ -1219,6 +1219,7 @@ int main(int argc, char *argv[])
     for (;;) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 
+	gpsd_report(7, "select waits\n");
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
 	 * actually matter here since select returns whenever one of
@@ -1362,7 +1363,6 @@ int main(int argc, char *argv[])
 #ifdef RTCM104_ENABLE
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM_SET) != 0) {
-		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    for (gps = channels; gps < channels + MAXDEVICES; gps++)
 			if (gps->device_type != NULL && gps->device_type->rtcm_writer != NULL)
 			    (void)gps->device_type->rtcm_writer(gps, (char *)channel->outbuffer, channel->outbuflen);
