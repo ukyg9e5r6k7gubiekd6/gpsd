@@ -254,6 +254,7 @@ extern void dgpsip_autoconnect(struct gps_context_t *,
 			       double, double, const char *);
 
 extern int gpsd_open(struct gps_device_t *);
+extern bool gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, unsigned char, unsigned int);
@@ -262,7 +263,7 @@ extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
 extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
-extern /*@ observer @*/ char *gpsd_hexdump(void *, size_t);
+extern /*@ observer @*/ char *gpsd_hexdump(const void *, size_t);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *, bool);

@@ -645,7 +645,7 @@ void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
     out->satellites = 0;
 }
 
-char /*@ observer @*/ *gpsd_hexdump(void *binbuf, size_t binbuflen)
+char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
 {
     static char hexbuf[MAX_PACKET_LENGTH*2+1];
     size_t i;

@@ -119,7 +119,7 @@
 #define EVERMORE_CHANNELS	12
 
 /*@ +charint -usedef -compdef @*/
-static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
+static bool evermore_write(struct gps_device_t *session, unsigned char *msg, size_t msglen)
 {
    unsigned int       crc;
    size_t    i, len;
@@ -157,9 +157,8 @@ static bool evermore_write(int fd, unsigned char *msg, size_t msglen)
    /* we may need to dump the message */
    gpsd_report(4, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	       gpsd_hexdump(stuffed, len));
-   ok = (write(fd, stuffed, len) == (ssize_t)len);
-   (void)tcdrain(fd);
-   return(ok);
+   ok = gpsd_write(session, msg, len);
+   return ok;
 }
 /*@ -charint +usedef +compdef @*/
 
@@ -336,12 +335,12 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 
     if (session->packet_type == EVERMORE_PACKET){
 	st = evermore_parse(session, session->outbuffer, session->outbuflen);
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;  /* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet_type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->outbuffer, session);
-	session->gpsdata.driver_mode = 0;
+	session->gpsdata.driver_mode = 0;  /* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -349,16 +348,16 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 }
 
 /* configure various EverMore settings to default */
-static bool evermore_default(struct gps_device_t *session, bool mode)
+static bool evermore_default(struct gps_device_t *session, int mode)
 {
     bool ok = true;
     /*@ +charint @*/
-    unsigned char msg1[] = {
+    unsigned char msg86[] = {
 	    0x86,	/*  0: msg ID */
 	    5,          /*  1: elevation Mask, degree 0..89 */
     };
 
-    unsigned char msg2[] = {
+    unsigned char msg87[] = {
 	    0x87,       /*  0: msg ID */
 	    1,          /*  1: DOP mask, GDOP(0), auto(1), PDOP(2), HDOP(3), no mask(4) */
 	    20,         /*  2: GDOP, 1..99 */
@@ -366,16 +365,17 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
 	    8,          /*  4: HDOP, 1..99 */
     };
 
-    unsigned char msg3[] = {
+#ifdef __UNUSED__
+    unsigned char msg8f[] = {
 	    0x8f,	/*  0: msg ID */
 	    0,          /*  1: operation mode, normal(0), power save(1), 1PPS(2) */
 	    1,          /*  2: navigation update rate, 1/Hz, 1..10 */
 	    0,          /*  3: RF/GPSBBP On time, 160ms(0), 220(1), 280(2), 340(3), 440(4) */
     };
 
-    unsigned char msg4[] = {
+    unsigned char msg8e[] = {
 	    0x8e,	/*  0: msg ID */
-	    0x1d,       /*  1: NMEA sentence mask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
+	    0x1d,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
 	    0x01,       /*  2: nmea checksum no(0), yes(1) */
 	    1,          /*  3: GPGGA, interval 0-255s */
 	    0,          /*  4: GPGLL, interval 0-255s */
@@ -386,19 +386,35 @@ static bool evermore_default(struct gps_device_t *session, bool mode)
 	    0,          /*  9: PEMT,101, interval 0-255s */
 	    0, 0, 0, 0, 0, 0, /* 10: ?? */
     };
-    
-    unsigned char msg5[] = {
+
+    unsigned char msg8d[] = {
 	    0x8d,       /*  0: msg ID */
-	    0x00,       /*  1: ?? */
+	    0x00,       /*  1: 0 (hi byte of datum ID) */
 	    0x01,       /*  2: datum ID, 1 is WGS-84 */
 	    0x00,       /*  3: ?? */
     };
+#endif /* __UNUSED__ */
 
-    ok |= evermore_write(session->gpsdata.gps_fd, msg1, sizeof(msg1));
-    ok |= evermore_write(session->gpsdata.gps_fd, msg2, sizeof(msg2));
-    ok |= evermore_write(session->gpsdata.gps_fd, msg3, sizeof(msg3));
-    ok |= evermore_write(session->gpsdata.gps_fd, msg4, sizeof(msg4));
-    ok |= evermore_write(session->gpsdata.gps_fd, msg5, sizeof(msg5));
+    unsigned char msg84[] = {
+	    0x84,    /* 0: msg ID */
+	    0x01,    /* 1: mode; binary(0), nmea(1) */
+	    0x00,    /* 2: ?? */
+	    0x00,    /* 3: ?? */
+    };
+
+    gpsd_report(5, "evermore_default call(%d)\n", mode);
+    ok &= evermore_write(session, msg86, sizeof(msg86));
+    ok &= evermore_write(session, msg87, sizeof(msg87));
+#ifdef __UNUSED__
+    ok &= evermore_write(session, msg8f, sizeof(msg8f));
+    ok &= evermore_write(session, msg8e, sizeof(msg8e));
+    ok &= evermore_write(session, msg8d, sizeof(msg8d));
+#endif /* __UNUSED__ */
+    if (mode == 1) {
+       gpsd_report(1, "Switching chip mode to EverMore binary.\n");
+       msg84[1] = 0;  /* binary mode */
+    }
+    ok &= evermore_write(session, msg84, sizeof(msg84));
     /*@ +charint @*/
     return ok;
 }
@@ -420,7 +436,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
 	    0x00, 0x00,			/* 11: Altitude */
 	    0x00, 0x00,			/* 13: Datum ID WGS84 */
 	    0x01,			/* 15: hot start */
-	    0x5d,			/* 16: cksum(6) + bin(7) + GGA(0) + GSA(2) + GSV(3) + RMC(4) */
+	    0x5d,			/* 16: bitmask; cksum(6), bin(7), GGA(0), GSA(2), GSV(3), RMC(4) */
 	    0,				/* 17: baud rate */
     };
     switch (speed) {
@@ -441,7 +457,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     putword(msg, 1, (unsigned int) week);
     putlong(msg, 3, (unsigned long) tow);
 
-    return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
+    return evermore_write(session, msg, sizeof(msg));
     /*@ +charint @*/
 }
 
@@ -468,26 +484,22 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 	    default: return false;
     }
     msg[2] = tmp8;
-    return evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
+    return evermore_write(session, msg, sizeof(msg));
 
 #endif
 }
 
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
-    unsigned char msg[] = {
-	    0x84,    /* 0: msg ID */
-	    0x01,    /* 1: mode; binary(0), nmea(1) */
-	    0x00,    /* 2: ?? */
-	    0x00,    /* 3: ?? */
-    };
-    gpsd_report(5, "evermore_set_mode call (%d)\n", mode);
+    gpsd_report(5, "evermore_mode call (%d)\n", mode);
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "Generic NMEA");
 	// (void)evermore_set_mode(session, session->gpsdata.baudrate, false);
 	(void)evermore_default(session, 0);
-	(void)evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg)); /* switch to NMEA mode */
 	session->gpsdata.driver_mode = 0;
+    } else {
+	(void)evermore_default(session, 1);
+	session->gpsdata.driver_mode = 1;
     }
 }
 
@@ -519,7 +531,7 @@ static void evermore_probe(struct gps_device_t *session)
    };
    bool ok;
    gpsd_report(5, "evermore_probe call\n");
-   ok = evermore_write(session->gpsdata.gps_fd, msg, sizeof(msg));
+   ok = evermore_write(session, msg, sizeof(msg));
    return;
 }
 #endif /* __UNUSED__ */
@@ -537,7 +549,7 @@ static void evermore_close(struct gps_device_t *session)
 struct gps_type_t evermore_binary =
 {
     .typename       = "EverMore binary",	/* full name of type */
-    //.trigger        = "$PEMT,100,05.",		/* recognize the type */
+    //.trigger        = "$PEMT,100,05.",	recognize the type */
     .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03",
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,			/* no probe */

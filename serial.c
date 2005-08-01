@@ -149,6 +149,19 @@ int gpsd_open(struct gps_device_t *session)
     return session->gpsdata.gps_fd;
 }
 
+bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
+{
+     ssize_t status;
+     bool ok;
+     status = write(session->gpsdata.gps_fd, buf, len);	
+     ok = (status == (ssize_t)len);
+     (void)tcdrain(session->gpsdata.gps_fd);
+     /* code that will check for data could be add here to print buffer as text or hex */
+     /* no test here now, always print as hex */
+     gpsd_report(5, "=> GPS: %s%s\n", gpsd_hexdump(buf, len), ok?"":" FAILED");
+     return ok;
+}
+
 /*
  * This constant controls how long the packet sniffer will spend looking
  * for a packet leader before it gives up.  It *must* be larger than
