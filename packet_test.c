@@ -32,102 +32,102 @@ struct map {
     char	*legend;
     char	test[MAX_PACKET_LENGTH+1];
     size_t	testlen;
-    int	garbage_offset;
-    int	type;
+    int 	garbage_offset;
+    int 	type;
 };
 
 /*@ -initallelements +charint -usedef @*/
 static struct map tests[] = {
     /* NMEA tests */
     {
-	"NMEA packet with checksum (1)",
-	"$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
-	36,
+	.legend = "NMEA packet with checksum (1)",
+	.test = "$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
+	.testlen = 36,
 	0,
 	NMEA_PACKET,
     },
     {
-	"NMEA packet with checksum (2)",
-	"$GPGGA,110534.994,4002.1425,N,07531.2585,W,0,00,50.0,172.7,M,-33.8,M,0.0,0000*7A\r\n",
-	82,
-	0,
-	NMEA_PACKET,
+	.legend = "NMEA packet with checksum (2)",
+	.test = "$GPGGA,110534.994,4002.1425,N,07531.2585,W,0,00,50.0,172.7,M,-33.8,M,0.0,0000*7A\r\n",
+	.testlen = 82,
+	.garbage_offset = 0,
+	.type = NMEA_PACKET,
     },
     {
-	"NMEA packet with checksum and 4 chars of leading garbage",
-	"\xff\xbf\x00\xbf$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
-	40,
-	4,
-	NMEA_PACKET,
+	.legend = "NMEA packet with checksum and 4 chars of leading garbage",
+	.test = "\xff\xbf\x00\xbf$GPVTG,308.74,T,,M,0.00,N,0.0,K*68\r\n",
+	.testlen = 40,
+	.garbage_offset = 4,
+	.type = NMEA_PACKET,
     },
     {
-	"NMEA packet without checksum",
-	"$PSRF105,1\r\n",
-	12,
-	0,
-	NMEA_PACKET,
+	.legend = "NMEA packet without checksum",
+	.test = "$PSRF105,1\r\n",
+	.testlen = 12,
+	.garbage_offset = 0,
+	.type = NMEA_PACKET,
     },
     {
-	"NMEA packet with wrong checksum",
-	"$GPVTG,308.74,T,,M,0.00,N,0.0,K*28\r\n",
-	36,
-	0,
-	BAD_PACKET,
+	.legend = "NMEA packet with wrong checksum",
+	.test = "$GPVTG,308.74,T,,M,0.00,N,0.0,K*28\r\n",
+	.testlen = 36,
+	.garbage_offset = 0,
+	.type = BAD_PACKET,
     },
     /* SiRF tests */
     {
-	"SiRF WAAS version ID",
-	{
+	.legend = "SiRF WAAS version ID",
+	.test = {
 	    0xA0, 0xA2, 0x00, 0x15, 
 	    0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
 	    0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
 	    0x4D, 0x00, 0x00, 0x00, 0x00,
 	    0x03, 0x82, 0xB0, 0xB3},
-	29,
-	0,
-	SIRF_PACKET,
+	.testlen = 29,
+	.garbage_offset = 0,
+	.type = SIRF_PACKET,
     },
     {
-	"SiRF WAAS version ID with 3 chars of leading garbage",
-	{
+	.legend = "SiRF WAAS version ID with 3 chars of leading garbage",
+	.test = {
 	    0xff, 0x00, 0xff,
 	    0xA0, 0xA2, 0x00, 0x15, 
 	    0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
 	    0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
 	    0x4D, 0x00, 0x00, 0x00, 0x00,
 	    0x03, 0x82, 0xB0, 0xB3},
-	32,
-	3,
-	SIRF_PACKET,
+	.testlen = 32,
+	.garbage_offset = 3,
+	.type = SIRF_PACKET,
     },
     {
-	"SiRF WAAS version ID with wrong checksum",
-	{
+	.legend = "SiRF WAAS version ID with wrong checksum",
+	.test = {
 	    0xA0, 0xA2, 0x00, 0x15, 
 	    0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
 	    0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
 	    0x4D, 0x00, 0x00, 0x00, 0x00,
 	    0x03, 0x00, 0xB0, 0xB3},
-	29,
-	0,
-	BAD_PACKET,
+	.testlen = 29,
+	.garbage_offset = 0,
+	.type = BAD_PACKET,
     },
     {
-	"SiRF WAAS version ID with bad length",
-	{
+	.legend = "SiRF WAAS version ID with bad length",
+	.test = {
 	    0xA0, 0xA2, 0xff, 0x15, 
 	    0x06, 0x06, 0x31, 0x2E, 0x32, 0x2E, 0x30, 0x44, 
 	    0x4B, 0x49, 0x54, 0x31, 0x31, 0x39, 0x20, 0x53, 
 	    0x4D, 0x00, 0x00, 0x00, 0x00,
 	    0x03, 0x82, 0xB0, 0xB3},
-	29,
-	0,
-	BAD_PACKET,
+	.testlen = 29,
+	.garbage_offset = 0,
+	.type = BAD_PACKET,
     },
     /* Zodiac tests */
     {
-	"Zodiac binary 1000 Geodetic Status Output Message",
-	{
+	.legend = "Zodiac binary 1000 Geodetic Status Output Message",
+	.test = {
 	    0xff, 0x81, 0xe8, 0x03, 0x31, 0x00, 0x00, 0x00, 0xe8, 0x79, 
 	    0x74, 0x0e, 0x00, 0x00, 0x24, 0x00, 0x24, 0x00, 0x04, 0x00, 
 	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x03, 0x23, 0x00, 
@@ -139,63 +139,63 @@ static struct map tests[] = {
 	    0xd9, 0x12, 0x90, 0xd0, 0x03, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
 	    0x10, 0x27, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa3, 0xe1, 0x11, 
 	    0x00, 0x00, 0x00, 0x00, 0xe0, 0x93, 0x04, 0x00, 0x04, 0xaa},
-	110,
-	0,
-	ZODIAC_PACKET,
+	.testlen = 110,
+	.garbage_offset = 0,
+	.type = ZODIAC_PACKET,
     },
     /* EverMore tests */                         
-    {                                            
-	"EverMore status packet 0x20",                
-	{                                        
+    {
+	.legend = "EverMore status packet 0x20",                
+	.test = {                                        
 	    0x10, 0x02, 0x0D, 0x20, 0xE1, 0x00, 0x00, 0x00,
 	    0x0A, 0x00, 0x1E, 0x00, 0x32, 0x00, 0x5b, 0x10,
 	    0x03},                               
-	17,                                      
-	0,                                       
-	EVERMORE_PACKET,                         
+	.testlen = 17,
+	.garbage_offset = 0,
+	.type = EVERMORE_PACKET,                         
     },                                           
     {
-	"EverMore packet 0x04 with 0x10 0x10 sequence",
-	 {
+	.legend = "EverMore packet 0x04 with 0x10 0x10 sequence",
+	.test = {
 	    0x10, 0x02, 0x0f, 0x04, 0x00, 0x00, 0x10, 0x10,
 	    0xa7, 0x13, 0x03, 0x2c, 0x26, 0x24, 0x0a, 0x17,
 	    0x00, 0x68, 0x10, 0x03},
-	20,
-	0,                                       
-	EVERMORE_PACKET,                         
+	.testlen = 20,
+	.garbage_offset = 0,
+	.type = EVERMORE_PACKET,                         
     },
     {
-	"EverMore packet 0x04 with 0x10 0x10 sequence, some noise before packet data",
-	 {
+	.legend = "EverMore packet 0x04 with 0x10 0x10 sequence, some noise before packet data",
+	 .test = {
 	    0x10, 0x03, 0xff, 0x10, 0x02, 0x0f, 0x04, 0x00,
 	    0x00, 0x10, 0x10, 0xa7, 0x13, 0x03, 0x2c, 0x26,
 	    0x24, 0x0a, 0x17, 0x00, 0x68, 0x10, 0x03},
-	23,
-	3,                                       
-	EVERMORE_PACKET,                         
+	.testlen = 23,
+	.garbage_offset = 3,                                       
+	.type = EVERMORE_PACKET,                         
     },
     {
-	"EverMore packet 0x04, 0x10 and some other data at the begining",
-	 {
+	.legend = "EverMore packet 0x04, 0x10 and some other data at the beginning",
+	.test = {
 	    0x10, 0x12, 0x10, 0x03, 0xff, 0x10, 0x02, 0x0f,
 	    0x04, 0x00, 0x00, 0x10, 0x10, 0xa7, 0x13, 0x03,
 	    0x2c, 0x26, 0x24, 0x0a, 0x17, 0x00, 0x68, 0x10,
 	    0x03},
-	25,
-	5,                                       
-	EVERMORE_PACKET,                         
+	.testlen = 25,
+	.garbage_offset = 5,                                       
+	.type = EVERMORE_PACKET,                         
     },
     {
-	"EverMore packet 0x04, 0x10 three times at the begining",
-	 {
+	.legend = "EverMore packet 0x04, 0x10 three times at the beginning",
+	.test = {
 	    0x10, 0x10, 0x10, 0x29, 0x01, 0x0B, 0x00, 0x01, 
 	    0x23, 0x0A, 0x16, 0x22, 0xe0, 0x10, 0x03, 0xff,
 	    0x10, 0x02, 0x0f, 0x04, 0x00, 0x00, 0x10, 0x10,
 	    0xa7, 0x13, 0x03, 0x2c, 0x26, 0x24, 0x0a, 0x17,
 	    0x00, 0x68, 0x10, 0x03},
-	36,
-	16,                                       
-	EVERMORE_PACKET,                         
+	.testlen = 36,
+	.garbage_offset = 16,
+	.type = EVERMORE_PACKET,                         
     },
 };
 /*@ +initallelements -charint +usedef @*/
@@ -213,12 +213,12 @@ static int packet_test(struct map *mp)
     /*@ -compdef -uniondef -usedef @*/
     st = packet_process(&state, mp->testlen);
     if (state.packet_type != mp->type)
-	printf("%s test FAILED (packet type %d wrong).\n", mp->legend, (int)st);
+	printf("%2d: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, state.packet_type);
     else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {
-	printf("%s test FAILED (data garbled).\n", mp->legend);
+	printf("%2d: %s test FAILED (data garbled).\n", mp-tests+1, mp->legend);
 	++failure;
     } else
-	printf("%s test succeeded.\n", mp->legend);
+	printf("%2d: %s test succeeded.\n", mp-tests+1, mp->legend);
 #ifdef DUMPIT
     for (cp = state.outbuffer; 
 	 cp < state.outbuffer + state.outbuflen; 
