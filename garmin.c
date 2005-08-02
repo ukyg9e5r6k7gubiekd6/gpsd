@@ -91,6 +91,11 @@
 #define GARMIN_PKTID_L001_RECORDS        27
 #define GARMIN_PKTID_L001_WPT_DATA       35
 
+#define	CMND_ABORT			 0
+#define	CMND_START_PVT_DATA		 49
+#define	CMND_STOP_PVT_DATA		 50
+#define	CMND_START_RM_DATA		 110
+
 #define MAX_BUFFER_SIZE 4096
 
 #define GARMIN_CHANNELS	12
@@ -237,9 +242,9 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Transport, Start Session req\n");
 	    break;
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_RESP:
-	    unit_id = get_short(&pkt->mData.uchars[0]);
-	    gpsd_report(3, "Transport, Start Session resp, unit: %d\n"
-		, unit_id);
+	    mode = get_int(&pkt->mData.uchars[0]);
+	    gpsd_report(3, "Transport, Start Session resp, unit: 0x%x\n"
+		, mode);
 	    break;
 	default:
 	    gpsd_report(3, "Transport, Packet: Type %d %d %d, ID: %d, Sz: %d\n"
@@ -256,14 +261,17 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	case GARMIN_PKTID_L001_COMMAND_DATA:
 	    prod_id = get_short(&pkt->mData.uchars[0]);
             switch ( prod_id ) {
-	    case 0:
+	    case CMND_ABORT:
 		msg = "Abort current xfer";
 	  	break;
-	    case 49:
+	    case CMND_START_PVT_DATA:
 		msg = "Start Xmit PVT data";
 	  	break;
-	    case 50:
+	    case CMND_STOP_PVT_DATA:
 		msg = "Stop Xmit PVT data";
+	  	break;
+	    case CMND_START_RM_DATA:
+		msg = "Start RMD data";
 	  	break;
 	    default:
 		sprintf( buf, "Unknown: %d", prod_id);
@@ -754,8 +762,6 @@ static bool garmin_probe(struct gps_device_t *session)
 	    gpsd_report(3, "Got packet waiting for START_SESSION\n");
 	    (void)PrintPacket(session, thePacket);
 
-/*
-*/
 	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
 	        && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
 		    == thePacket->mPacketId) ) {
@@ -841,6 +847,8 @@ static void garmin_init(struct gps_device_t *session)
 
 	gpsd_report(5, "to garmin_probe()\n");
 	ret = garmin_probe( session );
+        /* FIXME - what if return code was bad */
+        /* FIXME - return code is always bad */
 	gpsd_report(3, "from garmin_probe() = %d\n", (int)ret);
 
 	// turn on PVT data 49
@@ -849,7 +857,7 @@ static void garmin_init(struct gps_device_t *session)
 	set_int(buffer, GARMIN_LAYERID_APPL);
 	set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
 	set_int(buffer+8, 2); // data length 2
-	set_int(buffer+12, 49); //  49, CMND_START_PVT_DATA
+	set_int(buffer+12, CMND_START_PVT_DATA);
 
 	SendPacket(session,  thePacket);
 
@@ -857,9 +865,17 @@ static void garmin_init(struct gps_device_t *session)
 	//set_int(buffer, GARMIN_LAYERID_APPL);
 	//set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
 	//set_int(buffer+8, 2); // data length 2
-	//set_int(buffer+12, 110); // 110, CMND_START_ Rcv Measurement Data
+	//set_int(buffer+12, CMND_START_RM_DATA);
 
 	//SendPacket(session,  thePacket);
+}
+
+static void garmin_close(struct gps_device_t *session) 
+{
+    /* FIXME -- do we need to put the garmin to sleep?  or is closing the port
+       sufficient? */
+    gpsd_report(3, "garmin_close()\n");
+    return;
 }
 
 static ssize_t garmin_get_packet(struct gps_device_t *session) 
@@ -888,7 +904,7 @@ struct gps_type_t garmin_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-    .wrapup         = NULL,		/* no close hook */
+    .wrapup         = garmin_close,	/* close hook */
     .cycle          = 1,		/* updates every second */
 };
 
