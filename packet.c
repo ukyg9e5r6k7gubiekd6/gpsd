@@ -583,10 +583,10 @@ static void packet_discard(struct gps_device_t *session)
 {
     size_t discard = session->inbufptr - session->inbuffer;
     size_t remaining = session->inbuflen - discard;
-    session->inbufptr = memmove(session->inbuffer,
-				session->inbufptr,
-				remaining);
+
+    memmove(session->inbuffer, session->inbufptr, remaining);
     session->inbuflen = remaining;
+    session->inbufptr = session->inbuffer + remaining;
 #ifdef STATE_DEBUG
     gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n",
 		discard, remaining,
