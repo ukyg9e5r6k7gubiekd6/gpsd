@@ -656,11 +656,14 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
 				&& toupper(csum[1])==toupper(trailer[2]));
 	    }
-	    if (checksum_ok)
+	    if (checksum_ok) {
 		packet_accept(session, NMEA_PACKET);
-	    else
+		packet_discard(session);
+		break;
+	    } else {
 		session->packet_state = GROUND_STATE;
-	    packet_discard(session);
+		packet_discard(session);
+	    }
 #endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
@@ -670,19 +673,25 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 	    for (n = 4; n < (unsigned)(trailer - session->inbuffer); n++)
 		crc += (int)session->inbuffer[n];
 	    crc &= 0x7fff;
-	    if (checksum == crc)
+	    if (checksum == crc) {
 		packet_accept(session, SIRF_PACKET);
-	    else
+		packet_discard(session);
+		break;
+	    } else {
 		session->packet_state = GROUND_STATE;
-	    packet_discard(session);
+		packet_discard(session);
+	    }
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
-	    if ((session->inbufptr - session->inbuffer) >= 4)
+	    if ((session->inbufptr - session->inbuffer) >= 4) {
 		packet_accept(session, TSIP_PACKET);
-	    else
+		packet_discard(session);
+		break;
+	    } else {
 		session->packet_state = GROUND_STATE;
-	    packet_discard(session);
+		packet_discard(session);
+	    }
 #endif /* TSIP_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
@@ -693,13 +702,15 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 	    sum *= -1;
 	    if (len == 0 || sum == getword(5 + len)) {
 		packet_accept(session, ZODIAC_PACKET);
+		packet_discard(session);
+		break;
 	    } else {
 		gpsd_report(4,
 		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n",
 			sum, len, getword(5 + len));
 		session->packet_state = GROUND_STATE;
+		packet_discard(session);
 	    }
-	    packet_discard(session);
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
 	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
@@ -740,11 +751,14 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 	    } while (0);
 	    /*@ +charint */
 
-	    if (ok)
+	    if (ok) {
 		packet_accept(session, EVERMORE_PACKET);
-	    else
+		packet_discard(session);
+		break;
+	    } else {
 		session->packet_state = GROUND_STATE;
-	    packet_discard(session);
+		packet_discard(session);
+	    }
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
 	} else if (session->packet_state == ITALK_RECOGNIZED) {
@@ -758,9 +772,12 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 		sum += getword(9 + n);
 	    if (len == 0 || sum == (u_int16_t)getword(len+1)) {
 		packet_accept(session, ITALK_PACKET);
-	    } else
+		packet_discard(session);
+		break;
+	    } else {
 		session->packet_state = GROUND_STATE;
-	    packet_discard(session);
+		packet_discard(session);
+	    }
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
 	} else if (session->packet_state == RTCM_RECOGNIZED) {
@@ -771,6 +788,7 @@ ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 	    packet_accept(session, RTCM_PACKET);
 	    session->packet_state = RTCM_SYNC_STATE;
 	    packet_discard(session);
+	    break;
 #endif /* RTCM104_ENABLE */
 	}
     } /* while */

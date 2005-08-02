@@ -216,7 +216,6 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     unsigned int mode = 0;
     unsigned short prod_id = 0;
     unsigned short ver = 0;
-    unsigned short unit_id = 0;
     unsigned int veri = 0;
     time_t time_l = 0;
     unsigned int serial;
