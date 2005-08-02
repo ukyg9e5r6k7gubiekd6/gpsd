@@ -157,7 +157,7 @@ static bool tnt_probe(struct gps_device_t *session)
 struct gps_type_t trueNorth = {
     .typename       = "True North",	/* full name of type */
     .trigger        = " TNT1500",
-    .channels       = 14,		/* not a consumer-grade GPS */
+    .channels       = 0,		/* not an actual GPS at all */
     .probe          = tnt_probe,	/* probe by sending ID query */
     .initializer    = tnt_initializer,	/* probe for True North Digital Compass */
     .get_packet     = packet_get,		/* how to get a packet */

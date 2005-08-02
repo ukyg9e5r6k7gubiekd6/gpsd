@@ -613,7 +613,7 @@ static void character_discard(struct gps_device_t *session)
 #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 
 
-ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
+ssize_t packet_process(struct gps_device_t *session, size_t newdata)
 /* grab a packet; returns ether BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
@@ -791,7 +791,7 @@ ssize_t packet_get(struct gps_device_t *session)
 	return BAD_PACKET;
     else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
 	return 0;
-    return packet_parse(session, (size_t)newdata);
+    return packet_process(session, (size_t)newdata);
 }
 
 void packet_reset(struct gps_device_t *session)
