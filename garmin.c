@@ -208,16 +208,19 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     gps_mask_t mask = 0;
     int maj_ver;
     int min_ver;
-    unsigned int mode;
-    unsigned short prod_id;
-    unsigned short ver;
-    unsigned int veri;
+    unsigned int mode = 0;
+    unsigned short prod_id = 0;
+    unsigned short ver = 0;
+    unsigned short unit_id = 0;
+    unsigned int veri = 0;
     time_t time_l = 0;
     unsigned int serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
     int i = 0, j = 0;
     double track;
+    char *msg = NULL;
+    char buf[40] = "";
 
     gpsd_report(3, "PrintPacket()\n");
     if ( 4096 < pkt->mDataSize) {
@@ -234,7 +237,9 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Transport, Start Session req\n");
 	    break;
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_RESP:
-	    gpsd_report(3, "Transport, Start Session resp\n");
+	    unit_id = get_short(&pkt->mData.uchars[0]);
+	    gpsd_report(3, "Transport, Start Session resp, unit: %d\n"
+		, unit_id);
 	    break;
 	default:
 	    gpsd_report(3, "Transport, Packet: Type %d %d %d, ID: %d, Sz: %d\n"
@@ -248,6 +253,25 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	break;
     case GARMIN_LAYERID_APPL:
 	switch( pkt->mPacketId ) {
+	case GARMIN_PKTID_L001_COMMAND_DATA:
+	    prod_id = get_short(&pkt->mData.uchars[0]);
+            switch ( prod_id ) {
+	    case 0:
+		msg = "Abort current xfer";
+	  	break;
+	    case 49:
+		msg = "Start Xmit PVT data";
+	  	break;
+	    case 50:
+		msg = "Stop Xmit PVT data";
+	  	break;
+	    default:
+		sprintf( buf, "Unknown: %d", prod_id);
+		msg = buf;
+	        break;
+            }
+	    gpsd_report(3, "Appl, Command Data: %s\n", msg);
+	    break;
 	case GARMIN_PKTID_PRODUCT_RQST:
 	    gpsd_report(3, "Appl, Product Data req\n");
 	    break;
@@ -413,7 +437,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
             // this packet is never requested, it just comes, in some case
             // after a GARMIN_PKTID_PRODUCT_RQST 
-	    gpsd_report(3, "Appl, Product Capability: %d\n", pkt->mDataSize);
+	    gpsd_report(3, "Appl, Product Capability, sz: %d\n", pkt->mDataSize);
             for ( i = 0; i < (int)pkt->mDataSize ; i += 3 ) {
 		    gpsd_report(3, "  %c%03d\n", pkt->mData.chars[i]
 			, get_short( &(pkt->mData.uchars[i+1])) );
@@ -429,6 +453,10 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     case 75:
 	// private
 	switch( pkt->mPacketId ) {
+	case PRIV_PKTID_SET_MODE:
+	    prod_id = get_int(&pkt->mData.uchars[0]);
+	    gpsd_report(3, "Private, Set Mode: %d\n", prod_id);
+	    break;
 	case PRIV_PKTID_INFO_REQ:
 	    gpsd_report(3, "Private, ID: Info Req\n");
 	    break;
@@ -517,6 +545,7 @@ static int GetPacket (struct gps_device_t *session )
     memset( session->driver.garmin.Buffer, 0, sizeof(Packet_t));
     memset( &delay, 0, sizeof(delay));
     session->driver.garmin.BufferLen = 0;
+    session->outbuflen = 0;
 
     gpsd_report(4, "GetPacket()\n");
 
@@ -571,6 +600,7 @@ static int GetPacket (struct gps_device_t *session )
     }
 
     gpsd_report(5, "GotPacket() sz=%d \n", session->driver.garmin.BufferLen);
+    session->outbuflen = session->driver.garmin.BufferLen;
     return 0;
 }
 
@@ -644,13 +674,13 @@ static bool garmin_probe(struct gps_device_t *session)
 
     SendPacket(session,  thePacket);
 
-    // get and print the driver Version info
+    /* get and print the driver Version info */
 
     FD_ZERO(&fds); 
     FD_SET(session->gpsdata.gps_fd, &fds);
 
-    // Wait, nicely, until the device returns the Version info
-    // Toss any other packets, up to 4
+    /* Wait, nicely, until the device returns the Version info
+     * Toss any other packets, up to 4 */
     ok = 0;
     memset( &tv,0,sizeof(tv));
     for( i = 0 ; i < 4 ; i++ ) {
@@ -664,7 +694,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return false;
 	} else if ( sel_ret == 0 ) {
-	    gpsd_report(3, "garmin_probe() timeout\n");
+	    gpsd_report(3, "garmin_probe() timeout, INFO_REQ\n");
 	    // restore old terminal settings
             (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
@@ -688,7 +718,10 @@ static bool garmin_probe(struct gps_device_t *session)
 		, &session->ttyset_old);
 	return false;
     }
-    // Tell the device that we are starting a session.
+    /* depending on the GARMIN version, the device may spontaneously
+       return the Product Capability here */
+
+    /* Tell the device that we are starting a session. */
     gpsd_report(3, "Send Garmin Start Session\n");
 
     set_int(buffer, GARMIN_LAYERID_TRANSPORT);
@@ -697,8 +730,8 @@ static bool garmin_probe(struct gps_device_t *session)
 
     SendPacket(session,  thePacket);
 
-    // Wait until the device is ready to the start the session
-    // Toss any other packets, up to 4
+    /* Wait until the device is ready to the start the session
+     * Toss any other packets, up to 4 */
     ok = 0;
     for( i = 0 ; i < 4 ; i++ ) {
         memcpy((char *)&rfds, (char *)&fds, sizeof(rfds));
@@ -711,15 +744,18 @@ static bool garmin_probe(struct gps_device_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return(0);
 	} else if ( sel_ret == 0 ) {
-	    gpsd_report(3, "garmin_probe() timeout\n");
+	    gpsd_report(3, "garmin_probe() timeout, START_SESSION\n");
 	    // restore old terminal settings
             (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
 	    return(0);
         }
 	if ( 0 == GetPacket( session ) ) {
+	    gpsd_report(3, "Got packet waiting for START_SESSION\n");
 	    (void)PrintPacket(session, thePacket);
 
+/*
+*/
 	    if( (GARMIN_LAYERID_TRANSPORT == thePacket->mPacketType)
 	        && (GARMIN_PKTID_TRANSPORT_START_SESSION_RESP
 		    == thePacket->mPacketId) ) {
@@ -728,6 +764,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	    }
 	}
     }
+
     if ( 0 == ok ) {
 	gpsd_report(2, "Garmin driver never answered to START_SESSION.\n");
 	// restore old terminal settings
@@ -759,7 +796,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	    gpsd_report(0, "select: %s\n", strerror(errno));
 	    return false;
 	} else if ( sel_ret == 0 ) {
-	    gpsd_report(3, "garmin_probe() timeout\n");
+	    gpsd_report(3, "garmin_probe() timeout, PRODUCT_DATA\n");
 	    // restore old terminal settings
             (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
 		, &session->ttyset_old);
@@ -832,6 +869,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
 
 static gps_mask_t garmin_parse_input(struct gps_device_t *session)
 {
+    gpsd_report(5, "garmin_parse_input()\n");
     return PrintPacket(session, (Packet_t*)session->driver.garmin.Buffer);
 }
 

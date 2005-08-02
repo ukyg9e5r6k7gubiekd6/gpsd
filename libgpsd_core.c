@@ -534,9 +534,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    return 0;
 	} else
 	    return ONLINE_SET;
-    } else if (session->outbuflen == 0)	/* got new data, but no packet */
+    } else if (session->outbuflen == 0) {   /* got new data, but no packet */
+	    gpsd_report(8, "New data, not yet a packet\n");
 	    return ONLINE_SET;
-    else {
+    } else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
