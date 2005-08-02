@@ -44,7 +44,7 @@ class spaceplot:
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
     def gather(self, session):
         # Include altitude, not used here, for 3D plot experiments.
-        # Watch out for the ALTITUDE_NOT_VALID value from gps.py.
+        # Watch out for the NaN value from gps.py.
         self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
         return True
     def header(self, session):
@@ -76,13 +76,13 @@ class spaceplot:
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
-            if alt > gps.ALTITUDE_NOT_VALID:
+            if not gps.isnan(alt):
                     alt_sum += alt
                     alt_num += 1
             if lon > lon_max :
                     lon_max = lon
         if alt_num == 0:
-            alt_avg = gps.ALTITUDE_NOT_VALID
+            alt_avg = gps.NaN
         else:
             alt_avg = alt_sum / alt_num
         if self.centroid[0] < 0:
@@ -106,7 +106,7 @@ class spaceplot:
         fmt += 'set xlabel "Meters east from %s"\n' % lonstring
         fmt += 'set ylabel "Meters north from %s"\n' % latstring
         fmt += 'set border 15\n'
-        if alt_avg != gps.ALTITUDE_NOT_VALID:
+        if not gps.isnan(alt_avg):
             fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
             fmt += 'set ytics nomirror\n'
             fmt += 'set y2tics\n'
@@ -120,13 +120,13 @@ class spaceplot:
         fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
         fmt += 'plot cx(t, cep),cy(t, cep) title "CEP (50%%) = %f meters",  ' % (cep_meters)
         fmt += ' "-" using 1:2 with points ls 3 title "%d GPS fixes" ' % (len(self.fixes))
-        if alt_avg != gps.ALTITUDE_NOT_VALID:
-            fmt += ', "-" using ( %f ):($5 > %d ? $5 - %f : 1/0) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % (lon_max + 1, gps.ALTITUDE_NOT_VALID, alt_avg, alt_num, alt_avg)
+        if not gps.isnan(alt_avg):
+            fmt += ', "-" using ( %f ):($5 != NaN ? $5 - %f : Inf) axes x1y2 with points ls 2 title " %d Altitude fixes, Average = %f" \n' % (lon_max +1, alt_avg, alt_num, alt_avg)
         else:
             fmt += "\n"
         fmt += self.header(session)
         fmt += self.data(session)
-        if alt_avg != gps.ALTITUDE_NOT_VALID:
+        if not gps.isnan(alt_avg):
             fmt += "e\n" + self.data(session)
         return fmt
 
@@ -193,7 +193,7 @@ class rawplot:
             else:
                 e1 = 0
             res += "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
-                % (timings.tag,
+                % (timings.sentence_tag,
                    timings.sentence_length,
                    e1, 
                    timings.d_recv_time,
@@ -233,8 +233,8 @@ class splitplot:
         self.stats = []
     def gather(self, session):
         self.stats.append(copy.copy(session.timings))
-        if session.timings.tag not in self.sentences:
-            self.sentences.append(session.timings.tag)
+        if session.timings.sentence_tag not in self.sentences:
+            self.sentences.append(session.timings.sentence_tag)
         return True
     def header(self, session):
         res = "# Split latency data, %s, %s, %dN%d, cycle %ds\n#" % \
@@ -257,7 +257,7 @@ class splitplot:
             else:
                 e1 = 0
             for s in splitplot.sentences:
-                if s == timings.tag:
+                if s == timings.sentence_tag:
                     res += "%2.6f\t" % e1
                 else:
                     res += "-       \t"
@@ -269,7 +269,7 @@ class splitplot:
                         timings.c_recv_time,
                         timings.c_decode_time,
                         timings.sentence_length,
-                        timings.tag)
+                        timings.sentence_tag)
         return res
     def plot(self, title, session):
         fixed = '''
@@ -320,16 +320,16 @@ class cycle:
         last_seen = {}
         for timing in self.stats:
             # Throw out everything but the leader in each GSV group
-            if timing.tag[-3:] == "GSV" and last_command[-3:] == "GSV":
+            if timing.sentence_tag[-3:] == "GSV" and last_command[-3:] == "GSV":
                 continue
-            last_command = timing.tag
+            last_command = timing.sentence_tag
             # Record timings
             received = timing.d_received()
-            if not timing.tag in intervals:
-                intervals[timing.tag] = []
-            if timing.tag in last_seen:
-                intervals[timing.tag].append(roundoff(received - last_seen[timing.tag])) 
-            last_seen[timing.tag] = received
+            if not timing.sentence_tag in intervals:
+                intervals[timing.sentence_tag] = []
+            if timing.sentence_tag in last_seen:
+                intervals[timing.sentence_tag].append(roundoff(received - last_seen[timing.sentence_tag])) 
+            last_seen[timing.sentence_tag] = received
 
         # Step three: get command frequencies and the basic send cycle time
         frequencies = {}
@@ -398,12 +398,12 @@ def plotframe(await, fname, speed, threshold, title):
         sys.exit(1)
     try:
         if speed:
-            session.query("b=%d" % speed)
+            session.query("b=%d\n" % speed)
             if session.baudrate != speed:
                 sys.stderr.write("gpsprof: baud rate change failed.\n")
-        session.query("w+bci")
+        session.query("w+bci\n")
         if formatter not in (spaceplot, uninstrumented):
-            session.query("z+")
+            session.query("z+\n")
         #session.set_raw_hook(lambda x: sys.stderr.write(`x`+"\n"))
         baton = Baton("gpsprof: looking for fix", "done")
         countdown = await
@@ -426,7 +426,7 @@ def plotframe(await, fname, speed, threshold, title):
                 countdown -= 1
         baton.end()
     finally:
-        session.query("w-z-")
+        session.query("w-z-\n")
     command = plotter.plot(title, session)
     del session
     return command
