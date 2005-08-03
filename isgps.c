@@ -137,7 +137,7 @@ unsigned int isgps_parity(isgps30bits_t th)
 		  parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff]);
     /*@ -charint @*/
 
-    gpsd_report(RTCM_ERRLEVEL_BASE+2, "parity %u\n", p);
+    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS parity %u\n", p);
     return (p);
 }
 
@@ -182,14 +182,15 @@ void isgps_init(/*@out@*/struct gps_device_t *session)
 enum isgpsstat_t isgps_decode(struct gps_device_t *session, 
 				     bool (*preamble_match)(isgps30bits_t *),
 				     bool (*length_check)(struct gps_device_t *),
+			      size_t maxlen,
 				     unsigned int c)
 {
     enum isgpsstat_t res;
 
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-		    "word tag not correct, skipping\n");
+	gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+		    "ISGPS word tag not correct, skipping\n");
 	return ISGPS_SKIP;
     }
 
@@ -207,18 +208,18 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 	    } else {
 		session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 	    }
-	    gpsd_report(RTCM_ERRLEVEL_BASE+2, "syncing at byte %d: %0x%08x\n", session->char_counter, session->driver.isgps.curr_word);
+	    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS syncing at byte %d: %0x%08x\n", session->char_counter, session->driver.isgps.curr_word);
 
 	    if (preamble_match(&session->driver.isgps.curr_word)) {
 		if (isgps_parityok(session->driver.isgps.curr_word)) {
-		    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				"preamble ok, parity ok -- locked\n");
+		    gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+				"ISGPS preamble ok, parity ok -- locked\n");
 		    session->driver.isgps.locked = true;
 		    /* session->driver.isgps.curr_offset;  XXX - testing */
 		    break;
 		}
-		gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-			    "preamble ok, parity fail\n");
+		gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+			    "ISGPS preamble ok, parity fail\n");
 	    }
 	    session->driver.isgps.curr_offset++;
 	}			/* end while */
@@ -244,24 +245,24 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 		 * another preamble pattern in the data stream. -wsr
 		 */
 		if (preamble_match(&session->driver.isgps.curr_word)) {
-		    gpsd_report(RTCM_ERRLEVEL_BASE+2, 
-				"Preamble spotted (index: %u)\n",
+		    gpsd_report(ISGPS_ERRLEVEL_BASE+2, 
+				"ISGPS preamble spotted (index: %u)\n",
 				session->driver.isgps.bufindex);
 		    session->driver.isgps.bufindex = 0;
 		}
 #endif
-		gpsd_report(RTCM_ERRLEVEL_BASE+2,
-			    "processing word %u (offset %d)\n",
+		gpsd_report(ISGPS_ERRLEVEL_BASE+2,
+			    "ISGPS processing word %u (offset %d)\n",
 			    session->driver.isgps.bufindex, session->driver.isgps.curr_offset);
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next PREAMBLE_PATTERN and go on from there. 
 		     */
-		    if (session->driver.isgps.bufindex >= RTCM_WORDS_MAX){
+		    if (session->driver.isgps.bufindex >= (unsigned)maxlen){
 			session->driver.isgps.bufindex = 0;
-			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				    "RTCM buffer overflowing -- resetting\n");
+			gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+				    "ISGPS buffer overflowing -- resetting\n");
 			return ISGPS_NO_SYNC;
 		    }
 
@@ -269,8 +270,8 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 
 		    if ((session->driver.isgps.bufindex == 0) &&
 			!preamble_match((isgps30bits_t *)session->driver.isgps.buf)) {
-			gpsd_report(RTCM_ERRLEVEL_BASE+1, 
-				    "word 0 not a preamble- punting\n");
+			gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+				    "ISGPS word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
 		    session->driver.isgps.bufindex++;
@@ -289,19 +290,19 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 		    session->driver.isgps.curr_word |= c >> -(session->driver.isgps.curr_offset);
 		}
 	    } else {
-		gpsd_report(RTCM_ERRLEVEL_BASE+0, 
-			    "parity failure, lost lock\n");
+		gpsd_report(ISGPS_ERRLEVEL_BASE+0, 
+			    "ISGPS parity failure, lost lock\n");
 		session->driver.isgps.locked = false;
 	    }
 	}
 	session->driver.isgps.curr_offset -= 6;
-	gpsd_report(RTCM_ERRLEVEL_BASE+2, "residual %d\n", session->driver.isgps.curr_offset);
+	gpsd_report(ISGPS_ERRLEVEL_BASE+2, "residual %d\n", session->driver.isgps.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
 
     /* never achieved lock */
-    gpsd_report(RTCM_ERRLEVEL_BASE+1, 
+    gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
 		"lock never achieved\n");
     return ISGPS_NO_SYNC;
 }

@@ -541,7 +541,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    if (whoami->device) {
 		if ( whoami->device->gpsdata.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
-			whoami->device->gpsdata.parity = 'N';
+			whoami->device->gpsdata.parity = (unsigned)'N';
 		}
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %d %c %u", 
 		    (int)gpsd_get_speed(&whoami->device->ttyset),

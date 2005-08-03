@@ -9,7 +9,7 @@
 
 #include "gpsd.h"
 
-static int verbose = RTCM_ERRLEVEL_BASE;
+static int verbose = ISGPS_ERRLEVEL_BASE;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -41,7 +41,7 @@ static void decode(FILE *fpin, FILE *fpout)
     count = 0;
     while ((c = fgetc(fpin)) != EOF) {
 	res = rtcm_decode(&device, (unsigned int)c);
-	if (verbose >= RTCM_ERRLEVEL_BASE + 3) 
+	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
 	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 	    break;
 
 	case 'v':		/* verbose */
-	    verbose = RTCM_ERRLEVEL_BASE + atoi(optarg);
+	    verbose = ISGPS_ERRLEVEL_BASE + atoi(optarg);
 	    break;
 
 	case '?':

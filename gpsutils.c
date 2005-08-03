@@ -100,7 +100,7 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     double usec;
     struct tm tm;
 
-    dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    /*@i1@*/dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
     if (*dp == '.')
 	usec = strtod(dp, NULL);
     else

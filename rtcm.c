@@ -871,8 +871,11 @@ static bool length_check(struct gps_device_t *session)
 
 enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 {
-    enum isgpsstat_t res = isgps_decode(session, preamble_match, length_check, c);
-
+    enum isgpsstat_t res = isgps_decode(session, 
+					preamble_match, 
+					length_check, 
+					RTCM_WORDS_MAX, 
+					c);
     if (res == ISGPS_MESSAGE)
 	rtcm_unpack(session);
 

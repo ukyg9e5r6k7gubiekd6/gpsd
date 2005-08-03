@@ -207,6 +207,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt );
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket );
 static int GetPacket (struct gps_device_t *session );
 
+/*@ -branchstate @*/
 // For debugging, decodes and prints some known packets.
 static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 {
@@ -273,7 +274,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		msg = "Start RMD data";
 	  	break;
 	    default:
-		sprintf( buf, "Unknown: %d", prod_id);
+		(void)snprintf(buf, sizeof(buf), "Unknown: %u", prod_id);
 		msg = buf;
 	        break;
             }
@@ -461,7 +462,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	// private
 	switch( pkt->mPacketId ) {
 	case PRIV_PKTID_SET_MODE:
-	    prod_id = get_int(&pkt->mData.uchars[0]);
+	    prod_id = (unsigned short)get_int(&pkt->mData.uchars[0]);
 	    gpsd_report(3, "Private, Set Mode: %d\n", prod_id);
 	    break;
 	case PRIV_PKTID_INFO_REQ:
@@ -496,6 +497,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 
     return mask;
 }
+/*@ +branchstate @*/
 
 //-----------------------------------------------------------------------------
 // send a packet in GarminUSB format
