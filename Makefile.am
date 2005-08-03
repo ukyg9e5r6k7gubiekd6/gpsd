@@ -13,9 +13,10 @@ XMLTO = xmlto
 
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS)
+DBUSPROGS = gpxlogger
 endif
 
-bin_PROGRAMS = $(MOTIF_PROGS) sirfmon rtcmdecode gpsflash
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpsflash
 dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
@@ -135,6 +136,7 @@ man_MANS = \
 	gpsprof.1 \
 	gpsfake.1 \
 	sirfmon.1 \
+	gpxlogger.1 \
 	rtcmdecode.1 \
 	rtcm-104.5 \
 	srec.5
@@ -162,6 +164,9 @@ gpsfake.1: gpsfake.xml
 
 sirfmon.1: sirfmon.xml
 	-$(XMLTO) man sirfmon.xml
+
+gpxlogger.1: gpxlogger.xml
+	-$(XMLTO) man gpxlogger.xml
 
 rtcmdecode.1: rtcmdecode.xml
 	-$(XMLTO) man rtcmdecode.xml
@@ -194,6 +199,7 @@ EXTRA_DIST = \
 	gpsprof.xml \
 	gpsfake.xml \
 	sirfmon.xml \
+	gpxlogger.xml \
 	rtcmdecode.xml \
 	rtcm-104.xml \
 	srec.xml \
