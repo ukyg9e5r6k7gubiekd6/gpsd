@@ -538,14 +538,19 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 				whoami->device->gpsdata.stopbits);
 		    }
 	    }
-	    if (whoami->device)
+	    if (whoami->device) {
+		if ( whoami->device->gpsdata.parity == 0 ) {
+			/* zero parity breaks the next snprintf */
+			whoami->device->gpsdata.parity = 'N';
+		}
 		(void)snprintf(phrase, sizeof(phrase), ",B=%d %d %c %u", 
 		    (int)gpsd_get_speed(&whoami->device->ttyset),
 			9 - whoami->device->gpsdata.stopbits, 
 			(int)whoami->device->gpsdata.parity,
 			whoami->device->gpsdata.stopbits);
-	    else
+	    } else {
 		(void)strcpy(phrase, ",B=?");
+	    }
 	    break;
 	case 'C':
 	    if (!assign_channel(whoami) || whoami->device->device_type==NULL)
