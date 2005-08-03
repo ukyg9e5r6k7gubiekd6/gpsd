@@ -302,28 +302,6 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
     return mask;
 }
 
-static gps_mask_t processGPVTG(int c UNUSED, char *field[], struct gps_device_t *session)
-/* Track Made Good and Ground Speed */
-{
-    /*
-	This is mostly a placeholder to quell "unknown sentence" logs
-
-        VTG,180.0,170.0,10.0,18.0,A, *42
-           180.0	True course over ground, 000 or 000.0
-           171.1	Magnetic course over ground, 000 or 000.0
-	   10.0		Speed over ground in knots, 0.0 or 0.00
-	   18.0		Speed over ground in kilometers/hr, 0.0 or 0.00,
-	   A            Only in NMEA 2.3, A=Autonomous, D=Differential, 
-			E=estimated, N=Data not Valid
-
-    */
-    gps_mask_t mask;
-
-    gpsd_report(3, "GPVTG\n");
-    mask = 0;
-    return mask;
-}
-
 static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
@@ -580,7 +558,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"GLL", 	processGPGLL},
 	{"GSA", 	processGPGSA},
 	{"GSV", 	processGPGSV},
-	{"VTG", 	processGPVTG},
+	{"VTG", 	NULL},		/* ignore this */
 	{"ZDA", 	processGPZDA},
 	{"PGRME",	processPGRME},
 #ifdef TNT_ENABLE
@@ -620,6 +598,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
         if (strcmp(nmea_phrase[i].name, s) == 0) {
+	    retval = 0;		/* unknown sentence */
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
