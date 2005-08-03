@@ -218,26 +218,41 @@ Jr. &lt;rmarosko&#x40;wirelessfrontier.net&gt; and Amaury Jacquot
 <tr>
 <td>
 <a href='http://www.garmin.com/manuals/GPS18_TechnicalSpecification.pdf'>
-Garmin GPS-18</a></td>
+Garmin GPS-18 USB</a></td>
 <td>Good</td>
 <td>Garmin</td>
-<td>USB & RS-232</td>
+<td>USB</td>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
 <td>2.5</td>
-<td>?</td>
+<td>N/A</td>
 <td>
-GPGSV,<br />GPRMC,<br />GPGGA,<br />GPGSA,<br />GPGLL
+Garmin binary data only, no NMEA.
 </td>
 <td>
-The USB version rquires -T g and the Linux kernel garmin_usb driver;
-the RS232 version emits NMEA and is found by normal autoconfiguration.
-DOP (Dilution of Precision) information is not available (Garmin protocol 
-includes EPE only); thus the USB version can plug in EPE information,
-but the RS232 version omits the DOP fields entirely.
-DGPS information in GPGGA sentence is not returned.
-Speed and course over ground are calculated from the north/east
-velocity  and may not be accurate.  Magnetic variation information 
-is not available. Garmin uses a nonstandard 16-bit SNR scale.
+The USB version requires the Linux kernel garmin_usb driver; DOP
+(Dilution of Precision) information is not available (Garmin protocol
+includes EPE only); gpsd uses EPE to approximate DOP. Magnetic variation
+information is not available. Garmin uses a nonstandard 16-bit SNR
+scale.  WAAS.
+</td>
+</tr>
+<tr>
+<td>
+<a href='http://www.garmin.com/manuals/GPS18_TechnicalSpecification.pdf'>
+Garmin GPS-18 (all but USB)</a></td>
+<td>Good</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td><a href='http://www.garmin.com/'>Garmin</a></td>
+<td>2.5</td>
+<td>2.0 and 2.3</td>
+<td>
+GPALM,<br /> GPGGA,<br /> GPGLL,<br /> GPGSA,<br /> GPGSV,<br /> GPRMC,<br /> 
+GPVTG,<br /> PGRMB,<br /> PGRME,<br /> PGRMF,<br /> PGRMT,<br /> PGRMV
+</td>
+<td>
+The RS232 versions emit NMEA and are found by normal autoconfiguration.
+GPS-18 LVC and GPS-18 LVC/5m have PPS outputs. WAAS.
 </td>
 </tr>
 <tr>
