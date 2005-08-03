@@ -87,6 +87,8 @@ static void nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
+    /* probe for Garmin serial GPS */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
     /* enable GPGSA on Garmin serial GPS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GSA,1");
 #endif /* NMEA_ENABLE */
@@ -113,6 +115,23 @@ static struct gps_type_t nmea = {
     .get_packet     = packet_get,		/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
+};
+
+static struct gps_type_t garmin = {
+    .typename       = "Garmin Serial",	/* full name of type */
+    .trigger        = "$PGRMC",		/* Garmin private */
+    .channels       = 12,		/* consumer-grade GPS */
+    .probe          = NULL,		/* no probe */
+    .initializer    = nmea_initializer,	/* probe for special types */
+    .get_packet     = packet_get,	/* use generic packet getter */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
@@ -457,6 +476,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &sirfII_nmea,
 #if FV18_ENABLE
     &fv18,
+    &garmin,
 #endif /* FV18_ENABLE */
 #if TRIPMATE_ENABLE
     &tripmate,

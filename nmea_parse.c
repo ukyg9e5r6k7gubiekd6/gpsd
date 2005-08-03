@@ -558,9 +558,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"GLL", 	processGPGLL},
 	{"GSA", 	processGPGSA},
 	{"GSV", 	processGPGSV},
-	{"VTG", 	NULL},		/* ignore this */
+	{"VTG", 	NULL},		/* ignore Velocity Track made Good */
 	{"ZDA", 	processGPZDA},
+	{"PGRMC",	NULL},		/* ignore Garmin Sensor Config */
 	{"PGRME",	processPGRME},
+	{"PGRMI",	NULL},		/* ignore Garmin Sensor Init */
+	{"PGRMO",	NULL},		/* ignore Garmin Sentence Enable */
 #ifdef TNT_ENABLE
 	{"PTNTHTM",	processTNTHTM},
 #endif /* TNT_ENABLE */
