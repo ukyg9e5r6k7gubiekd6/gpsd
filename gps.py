@@ -9,8 +9,15 @@ from math import *
 # PEP 75 (http://python.fyxm.net/peps/pep-0754.html).
 # This includes at least versions up to 2.3.4.
 PosInf = 1e300000
-NaN = PosInf/PosInf
-def isnan(x): return x == NaN
+# NaN = PosInf/PosInf
+# IEEE754 says NaN == NaN is always false!
+# so this is wrong: 
+#    def isnan(x): return x == NaN
+
+# so let's use PosInf as a proxy
+# this is not mathmetically correct but good enough for altitude
+NaN = PosInf
+def isnan(x): return x > 1e300000
 
 ONLINE_SET	= 0x00000001
 TIME_SET	= 0x00000002
