@@ -88,7 +88,7 @@ static void nmea_initializer(struct gps_device_t *session)
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
     /* enable GPGSA on Garmin serial GPS */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRM0,GSA,1");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GSA,1");
 #endif /* NMEA_ENABLE */
 #ifdef SIRFII_ENABLE
     /* probe for SiRF-II */
