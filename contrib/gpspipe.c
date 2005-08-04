@@ -38,15 +38,20 @@
 #include <stdlib.h>
 #include "../gpsd.h"
 
+
+#define GPSPIPE_VER "0.1"
+
 static void usage(const char *prog) {
 	fprintf(stderr, "%s: connect to local gpsd and dump data to stdout\n\n"
+	        "   Version %s\n\n"
 		"-h show this help\n"
 		"-r Dump raw NMEA\n"
-	        "-w Dump gpsd native data\n\n"
-	        "-t time stamp the data\n\n"
-	        "-n [count] exit after count packets\n\n"
+	        "-w Dump gpsd native data\n"
+	        "-t time stamp the data\n"
+	        "-n [count] exit after count packets\n"
+	        "-V print version and exit\n\n"
 	        "You must specify one, or both, of -r/-w\n",
-		prog);
+		prog, GPSPIPE_VER);
 }
 
 int main( int argc, char **argv) {
@@ -64,7 +69,7 @@ int main( int argc, char **argv) {
 	extern char *optarg;
 
 
-	while ((option = getopt(argc, argv, "?hrwtn:")) != -1) {
+	while ((option = getopt(argc, argv, "?hrwtVn:")) != -1) {
 		switch (option) {
 		case 'n':
 			count = strtol(optarg, 0, 0);
@@ -78,6 +83,10 @@ int main( int argc, char **argv) {
 		case 'w':
 			dump_gpsd = 1;
 			break;
+		case 'V':
+			fprintf(stderr, "%s: Version %s\n", argv[0]
+				, GPSPIPE_VER);
+			exit(0);
 		case '?':
 		case 'h':
 		default:
