@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+                   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='gpxlogger1'>
+<refentryinfo><date>3 Aug 2005</date></refentryinfo>
+<refmeta>
+<refentrytitle>gpxlogger</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='date'>0.0.1</refmiscinfo>
+<refmiscinfo class='source'>Amaury Jacquot</refmiscinfo>
+<refmiscinfo class='manual'>GPS tools</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gpxlogger</refname>
+<refpurpose>logs GPS tracks to GPX files</refpurpose>
+</refnamediv>
+<!-- body begins here -->
+
+<refsect1 id='syntax'><title>SYNTAX</title>
+<para>gpxlogger &lt;<emphasis remap='I'>filename</emphasis>&gt;</para>
+</refsect1>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para>This program listens to DBUS broadcasts from gpsd (org.gpsd.fix)
+and logs each fix to a GPX file as they arrive in an XML format.</para>
+
+<para>The logfile may be composed of multiple tracks, a new track is
+created if there's no fix for 5 seconds.</para>
+
+<para>The program also writes start and end messages to syslog.</para>
+</refsect1>
+
+<refsect1 id='files'><title>FILES</title>
+<para><filename>/var/log</filename></para> 
+</refsect1>
+
+<refsect1 id='examples'><title>EXAMPLES</title>
+<para>To run this program the standard way type:</para>
+
+<para>gpxlogger /gpslogs/2005-08-03.12:21:00.gpx</para>
+</refsect1>
+
+<refsect1 id='authors'><title>AUTHORS</title>
+<para>Amaury Jacquot &lt;sxpert@esitcom.org&gt;, 
+Petter Reinholdtsen &lt;pere@hungry.com&gt;</para>
+ 
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para><citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry></para>
+</refsect1>
+</refentry>
+
