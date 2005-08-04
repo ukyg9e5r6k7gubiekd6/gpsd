@@ -57,12 +57,9 @@
 #define BOOST_57600 1
 #define BOOST_115200 2
 
-static int		sirfWrite(int, unsigned char *);
-static unsigned char	nmea_checksum(unsigned char *);
-
 static int
 sirfSendUpdateCmd(int pfd){
-	int status;
+	bool status;
 	/*@ +charint @*/
 	unsigned char msg[] =	{0xa0,0xa2,	/* header */
 				0x00,0x01,	/* message length */
@@ -70,10 +67,10 @@ sirfSendUpdateCmd(int pfd){
 				0x00,0x00,	/* checksum */
 				0xb0,0xb3};	/* trailer */
 	/*@ -charint @*/
-	status = sirfWrite(pfd, msg);
+	status = sirf_write(pfd, msg);
 	/* wait a moment for the receiver to switch to boot rom */
 	(void)sleep(2);
-	return status;
+	return status ? 0 : -1;
 }
 
 static int
@@ -126,15 +123,12 @@ sirfSendLoader(int pfd, struct termios *term, char *loader, size_t ls){
 }
 
 static int
-sirfSetProto(int pfd, struct termios *term, int speed, unsigned int proto){
+sirfSetProto(int pfd, struct termios *term, unsigned int speed, unsigned int proto){
 	int i;
-	ssize_t r;
-	size_t len;
 	int spd[8] = {115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800};
-	unsigned char nmea[32], tmp[32];
 	/*@ +charint @*/
 	unsigned char sirf[] =	{0xa0,0xa2,	/* header */
-				0x00,0x01,	/* message length */
+				0x00,0x31,	/* message length */
 				0xa5,		/* message 0xa5: UART config */
 				0x00,0,0, 0,0,0,0, 8,1,0, 0,0, /* port 0 */
 				0xff,0,0, 0,0,0,0, 0,0,0, 0,0, /* port 1 */
@@ -147,68 +141,26 @@ sirfSetProto(int pfd, struct termios *term, int speed, unsigned int proto){
 	if (serialConfig(pfd, term, 38400) == -1)
 		return -1;
 
-	memset(nmea, 0, 32);
-	memset(tmp, 0, 32);
-	(void)snprintf((char *)tmp, 31,"PSRF100,%u,%u,8,1,0", (unsigned)speed, proto);
-	(void)snprintf((char *)nmea, 31,"%s%s*%02x", "$", (char *)tmp, (unsigned)nmea_checksum(tmp));
-	len = strlen((char *)nmea);
-
 	sirf[7] = sirf[6] = (unsigned char)proto;
 	/*@i@*/i = htonl(speed); /* borrow "i" to put speed into proper byte order */
 	/*@i@*/bcopy(&i, sirf+8, 4);
 
 	/* send at whatever baud we're currently using */
-	(void)sirfWrite(pfd, sirf);
-	if ((r = write(pfd, nmea, len)) != (ssize_t)sizeof(sirf))
-		return -1;
-	(void)tcdrain(pfd);
+	(void)sirf_write(pfd, sirf);
+	(void)nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
 
 	/* now spam the receiver with the config messages */
-	for(i = 0; i < 8; i++){
+	for(i = 0; i < (int)(sizeof(spd)/sizeof(spd[0])); i++) {
 		(void)serialSpeed(pfd, term, spd[i]);
-		(void)sirfWrite(pfd, sirf);
-		(void)write(pfd, nmea, len);
+		(void)sirf_write(pfd, sirf);
+		(void)nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
 		(void)tcdrain(pfd);
 		(void)usleep(100000);
 	}
 
-	(void)serialSpeed(pfd, term, speed);
+	(void)serialSpeed(pfd, term, (int)speed);
 	(void)tcflush(pfd, TCIOFLUSH);
 
-	return 0;
-}
-
-static unsigned char
-nmea_checksum(unsigned char *s){
-	/*@i1@*/unsigned char c, r = 0;
-	while ((c = *s++) != (unsigned char)'\0')
-		r += c;
-
-	return r;
-}
-
-static int
-sirfWrite(int fd, unsigned char *msg) {
-	unsigned int crc;
-	size_t i, len;
-
-	len = (size_t)((msg[2] << 8) | msg[3]);
-
-	/* calculate CRC */
-	crc = 0;
-	for (i = 0; i < len; i++)
-	crc += (int)msg[4 + i];
-	crc &= 0x7fff;
-
-	/* enter CRC after payload */
-	msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
-	msg[len + 5] = (unsigned char)( crc & 0x00ff);
-
-	errno = 0;
-	if (write(fd, msg, len+8) != (ssize_t)(len+8))
-		return -1;
-
-	(void)tcdrain(fd);
 	return 0;
 }
 

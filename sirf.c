@@ -41,7 +41,7 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-static bool sirf_write(int fd, unsigned char *msg) {
+bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
    size_t    i, len;
    char	     buf[MAX_PACKET_LENGTH*2];

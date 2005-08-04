@@ -26,8 +26,6 @@
  *          for output.  Then programs that expect to connect to a raw GPS
  *          device could conenct to that.
  *
- *      man pages
- *      use autoconf to create configure, Makefile, etc.
  */
 
 #include <errno.h>
@@ -36,7 +34,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../gpsd.h"
+#include <stdbool.h>
+#include "gpsd.h"
 
 
 #define GPSPIPE_VER "0.1"
@@ -60,13 +59,13 @@ int main( int argc, char **argv) {
         char buf[4096];
 	char *cstr = NULL;
         ssize_t wrote = 0;
-        int dump_nmea = 0;
-        int dump_gpsd = 0;
-        int timestamp = 0;
-	int new_line = 1;
+        bool dump_nmea = false;
+        bool dump_gpsd = false;
+        bool timestamp = false;
+	bool new_line = true;
 	long count = -1;
-	char option;
-	extern char *optarg;
+	int option;
+	//extern char *optarg;
 
 
 	while ((option = getopt(argc, argv, "?hrwtVn:")) != -1) {
@@ -75,13 +74,13 @@ int main( int argc, char **argv) {
 			count = strtol(optarg, 0, 0);
 			break;
 		case 'r':
-			dump_nmea = 1;
+			dump_nmea = true;
 			break;
 		case 't':
-			timestamp = 1;
+			timestamp = true;
 			break;
 		case 'w':
-			dump_gpsd = 1;
+			dump_gpsd = true;
 			break;
 		case 'V':
 			fprintf(stderr, "%s: Version %s\n", argv[0]
@@ -124,7 +123,7 @@ int main( int argc, char **argv) {
 		int i = 0;
 		int readbytes = 0;
 
-		readbytes = read( s, buf, sizeof(buf));
+		readbytes = (int)read( s, buf, sizeof(buf));
 		if ( readbytes > 0 ) {
 		    for ( i = 0 ; i < readbytes ; i++ ) {
 			char c = buf[i];
@@ -148,8 +147,8 @@ int main( int argc, char **argv) {
 				exit (1);
 			}
 		
-			if ( '\n' == c ) {
-			    new_line = 1;
+			if ( c == '\n' ) {
+			    new_line = true;
 			    /* flush after eveery good line */
 			    if (  fflush( stdout ) ) {
 				fprintf( stderr, "%s: fflush Error, %s(%d)\n"
@@ -173,5 +172,5 @@ int main( int argc, char **argv) {
 			exit(1);
 		}
 	}
-	exit(0);
+	//exit(0);
 }

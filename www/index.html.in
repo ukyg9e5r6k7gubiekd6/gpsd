@@ -166,6 +166,10 @@ and fix latency.</dd>
 <dt><a href="gpxlogger.html">gpxlogger.1</a></dt>
 <dd>Demonstration DBUS client; writes log files in an XML format.</dd>
 
+<dt><a href="gpspipe.html">gpspipe.1</a></dt> <dd>A simple client that
+captures GPS output and/or <code>gpsd</code> reports and sends it to
+standard output.</dd>
+
 <!--
 <dt><a href="rtcmdecode.html">rtcmdecode.1</a></dt>
 <dd>The <code>rtcmdecode</code> RTCM-104 decoder.</dd>

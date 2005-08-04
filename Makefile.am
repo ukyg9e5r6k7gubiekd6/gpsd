@@ -16,7 +16,7 @@ INCLUDES = $(DBUS_CFLAGS)
 DBUSPROGS = gpxlogger
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpsflash
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpspipe gpsflash
 dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
@@ -48,6 +48,13 @@ gpsd_SOURCES = \
 	gpsd_dbus.c \
 	gpsd.c
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
+
+#
+# Build gpspipe
+#
+gpspipe_SOURCES = \
+	gpspipe.c
+gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
 
 #
 # Build sirfmon
@@ -137,6 +144,7 @@ man_MANS = \
 	gpsfake.1 \
 	sirfmon.1 \
 	gpxlogger.1 \
+	gpspipe.1 \
 	rtcmdecode.1 \
 	rtcm-104.5 \
 	srec.5
@@ -167,6 +175,9 @@ sirfmon.1: sirfmon.xml
 
 gpxlogger.1: gpxlogger.xml
 	-$(XMLTO) man gpxlogger.xml
+
+gpspipe.1: gpspipe.xml
+	-$(XMLTO) man gpspipe.xml
 
 rtcmdecode.1: rtcmdecode.xml
 	-$(XMLTO) man rtcmdecode.xml
@@ -200,6 +211,7 @@ EXTRA_DIST = \
 	gpsfake.xml \
 	sirfmon.xml \
 	gpxlogger.xml \
+	gpspipe.xml \
 	rtcmdecode.xml \
 	rtcm-104.xml \
 	srec.xml \
@@ -236,6 +248,8 @@ splint:
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
+	@echo "Running splint on gpspipe..."
+	-splint $(gpspipe_SOURCES)
 	@echo "Running splint on rtcmdecode..."
 	-splint -exportlocal rtcmdecode.c
 	@echo "Running splint on gpsflash..."

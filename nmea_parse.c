@@ -601,12 +601,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
         if (strcmp(nmea_phrase[i].name, s) == 0) {
-	    retval = 0;		/* unknown sentence */
 	    if (nmea_phrase[i].decoder) {
 		retval = (nmea_phrase[i].decoder)(count, field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
 		session->gpsdata.sentence_length = strlen(sentence);
-	    }
+	    } else
+		retval = ONLINE_SET;		/* unknown sentence */
 	    break;
 	}
     }

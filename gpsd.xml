@@ -694,7 +694,7 @@ notfications:</para>
 
 <programlisting>
 server 127.127.28.0 minpoll 4 maxpoll 4
-fudge 127.127.28.0 time1 0.035 refid GPS
+fudge 127.127.28.0 time1 0.420 refid GPS
 
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
 fudge 127.127.28.1 refid GPS1

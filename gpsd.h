@@ -299,7 +299,10 @@ extern int srec_hdr(unsigned int, unsigned char *, unsigned char *);
 extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
 
-/* External interface */
+/* exported bits for the GPS flasher */
+bool sirf_write(int fd, unsigned char *msg);
+
+/* application interface */
 extern void gpsd_init(struct gps_device_t *, struct gps_context_t *, char *);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
