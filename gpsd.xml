@@ -713,7 +713,7 @@ read the timestamp posted by <application>gpsd</application> every 16
 seconds and send it to unit 0.  The number after the parameter time1
 is an offset in seconds.  You can use it to adjust out some of the
 fixed delays in the system.  0.035 is a good starting value for the
-Garmin.</para>
+Garmin GPS-18/USB, 0.420 for the Garmin GPS-18/LVC.</para>
 
 <para>After restarting ntpd, a line similar to the one below should
 appear in the output of the command "ntpq -p" (after allowing a couple
@@ -725,22 +725,31 @@ remote           refid      st t when poll reach  delay    offset  jitter
 +SHM(0)          .GPS.      0 l   13   16  377    0.000    0.885   0.882
 </screen>
 
-<para>When the value under "reach" remains zero, check that gpsd is running and
-some application is connected to it.  Make sure the receiver is locked on
-to at least one satellite, and the receiver is in SiRF-II or Garmin binary 
-mode.  When the SHM(0) line does not appear at all, check the system logs for 
-error messages from ntpd.</para>
- 
+<para>If you are running PPS then it will look like this:</para>
+
+<screen> 
+remote           refid      st t when poll reach  delay    offset  jitter
+=========================================================================
+-SHM(0)          .GPS.      0 l   13   16  377    0.000    0.885   0.882
+*SHM(1)          .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
+</screen>
+
+<para>When the value under "reach" remains zero, check that gpsd is
+running; and some application is connected to it or the '-n' option was
+used.  Make sure the receiver is locked on to at least one satellite,
+and the receiver is in SiRF-II, Garmin binary or NMEA/PPS mode.  Plain
+NMEA will also drive ntpd, but the accuracy as bad as one second.  When
+the SHM(0) line does not appear at all, check the system logs for error
+messages from ntpd.</para>
+
 <para>When no other reference clocks appear in the NTP configuration,
-the system clock will lock onto the GPS clock.
-When you have
-previously used <application>ntpd</application>, and other reference
-clocks appear in your configuration, there may be a fixed offset
-between the GPS clock and other clocks.  The
-<application>gpsd</application> developers would like to receive
-information about the offsets observed by users for each type of
-receiver.  Please send us the output of the "ntpq -p" command and the
-make and type of receiver.</para>
+the system clock will lock onto the GPS clock.  When you have previously
+used <application>ntpd</application>, and other reference clocks appear
+in your configuration, there may be a fixed offset between the GPS clock
+and other clocks.  The <application>gpsd</application> developers would
+like to receive information about the offsets observed by users for each
+type of receiver.  Please send us the output of the "ntpq -p" command
+and the make and type of receiver.</para>
 
 </refsect1>
 <refsect1 id='dbus'><title>USE WITH D-BUS</title> 
