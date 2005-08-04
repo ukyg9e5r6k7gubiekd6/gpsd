@@ -175,7 +175,7 @@ sub parse_line{
 	$GPS{'time'} = int ($w[0]);
 	$GPS{'lat'} = $w[2];
 	$GPS{'lon'} = $w[3];
-	$GPS{'alt'} = $w[4];
+	$GPS{'alt'} = $w[4]; delete($GPS{'alt'}) if ($GPS{'alt'} =~ /\D/);
 	return(1);
 }
 
@@ -190,11 +190,19 @@ sub write_gpx{
  		$lt = $GPS{'time'};
  		printf $out ("   <trkpt lat=\"%f\" ", $GPS{'lat'});
  		printf $out ("lon=\"%f\">\n", $GPS{'lon'});
+
+		# if we know our fix quality, then print it.
  		printf $out ("    <fix>%s</fix>\n", $GPS{'mode'}) if ($GPS{'fq'});
- 		printf $out ("    <ele>%.2f</ele>\n", $GPS{'alt'}) if ($GPS{'fq'} > 2);
+
+		# if we have a 3d or dgps solution, then print altitude
+ 		printf $out ("    <ele>%.2f</ele>\n", $GPS{'alt'}) if (($GPS{'fq'} > 2) && defined($GPS{'alt'}));
+
+		# GPX allows us to give some other indicators of fix quality
  		printf $out ("    <hdop>%s</hdop>\n", $GPS{'hdop'}) if (defined($GPS{'hdop'}));
  		printf $out ("    <vdop>%s</vdop>\n", $GPS{'vdop'}) if (defined($GPS{'vdop'}));
- 		printf $out ("    <sat>%s</sat>\n", $GPS{'sat'}) if (defined($GPS{'sat'}));
+ 		printf $out ("    <sat>%s</sat>\n", $GPS{'sat'}) if (defined($GPS{'sat'}) && $GPS{'sat'});
+
+		# and finally, note what time this fix was made
 		@t = gmtime($GPS{'time'});
 		$t[5]+=1900; $t[4]++;
  		printf $out ("    <time>%04d-%02d-%02dT", $t[5], $t[4], $t[3]);
@@ -207,7 +215,7 @@ sub write_gpx{
 }
 
 sub check_options{
-# sanitize the host
+# sanitize the server
 	$opt{'s'} = '127.0.0.1' unless (defined($opt{'s'}));
 	$opt{'s'} =~ /([0-9a-zA-Z\.-]+)/; $opt{'s'} = $1;
 	$opt{'s'} = '127.0.0.1' unless ($opt{'s'});
