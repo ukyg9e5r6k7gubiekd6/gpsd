@@ -224,7 +224,7 @@ There isn't any evidence that Motorola ever made use of the header information w
 The Unix manual page on S\-records is the only place that a 78\-byte limit on total record length or 64\-byte limit on data length is documented\&. These values shouldn't be trusted for the general case\&.
 .TP
 \(bu
-The count field can have values in the range of 0x3 (2 bytes of address + 1 byte checksum = 3, a not very useful record) to 0xff; this is the count of remaining character pairs, including checksum\&.
+The count field can have values in the range of 0x3 (2 bytes of address + 1 byte checksum = 3, a not very useful record) to 0xff; this is the count of remaining character \fIpairs\fR, including checksum\&.
 .TP
 \(bu
 If you write code to convert S\-Records, you should always assume that a record can be as long as 514 (decimal) characters in length (255 * 2 = 510, plus 4 characters for the type and count fields), plus any terminating character(s)\&. That is, in establishing an input buffer in C, you would declare it to be an array of 515 chars, thus leaving room for the terminating null character\&.
