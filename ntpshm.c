@@ -21,7 +21,7 @@
 #include <sys/shm.h>
 
 #define PPS_MAX_OFFSET	100000		/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	400000		/* microseconds for lost lock */
+#define PUT_MAX_OFFSET	500000		/* microseconds for lost lock */
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0		/* SHM driver unit number (0..3) */
@@ -145,6 +145,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     time_t seconds;
     double offset;
+    long l_offset;
 
     if (session->shmTime < 0 || session->shmTimeP < 0 ||
 	(shmTime = session->context->shmTime[session->shmTime]) == NULL ||
@@ -153,11 +154,15 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     /* check if received time messages are within locking range */
 
+    l_offset = shmTime->receiveTimeStampSec - shmTime->clockTimeStampSec;
+    l_offset *= 1000000;
+    l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
     /*@ +ignorequals */
-    if (abs((shmTime->receiveTimeStampSec-shmTime->clockTimeStampSec)*1000000 +
-	     shmTime->receiveTimeStampUSec-shmTime->clockTimeStampUSec)
-	    > PUT_MAX_OFFSET)
+    if (labs( l_offset ) > PUT_MAX_OFFSET) {
+        gpsd_report(5, "ntpshm_pps: not in locking range: %ld\n"
+		, (long)l_offset);
 	return -1;
+    }
     /*@ -ignorequals */
 
     if (tv->tv_usec < PPS_MAX_OFFSET) {
