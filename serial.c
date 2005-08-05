@@ -174,7 +174,7 @@ bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
  * MAX_PACKET_LENGTH or we risk never syncing up at all.  Large values
  * will produce annoying startup lag.
  */
-#define SNIFF_RETRIES	200
+#define SNIFF_RETRIES	256
 
 bool gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
