@@ -54,7 +54,7 @@ while (1){
 
 	print $sock "MSQO\n";
 	while (defined( $line = <$sock> )){
-		chomp $line;
+		$line =~ s/\s*$//gism;
 		if( parse_line()){
 			write_gpx();
 
@@ -193,7 +193,6 @@ sub write_gpx{
  		track_start() unless ($tk);
 
  		$lt = $GPS{'time'};
- 		printf $out ("   <!-- %s -->\n", $line);
  		printf $out ("   <trkpt lat=\"%f\" ", $GPS{'lat'});
  		printf $out ("lon=\"%f\">\n", $GPS{'lon'});
 
