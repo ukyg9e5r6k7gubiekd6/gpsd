@@ -102,6 +102,12 @@ int gpsd_open(struct gps_device_t *session)
 	return -1;
     }
 
+    if (session->saved_baud != -1) {
+        (void)cfsetspeed(&session->ttyset, (speed_t)session->saved_baud);
+	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
+	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
+    }
+
     session->packet_type = BAD_PACKET;
     if (isatty(session->gpsdata.gps_fd)!=0) {
 #ifdef NON_NMEA_ENABLE

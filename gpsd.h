@@ -129,6 +129,7 @@ struct gps_device_t {
 #define ITALK_PACKET	5
 #define RTCM_PACKET	6
     unsigned int baudindex;
+    int saved_baud;
     unsigned int packet_state;
     size_t packet_length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];

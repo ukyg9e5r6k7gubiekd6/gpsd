@@ -383,8 +383,10 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name,
     struct gps_device_t *chp;
 
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
-	if (!allocated_channel(chp))
+	if (!allocated_channel(chp)){
+            chp->saved_baud = -1;
 	    goto found;
+        }
     return NULL;
 found:
     gpsd_init(chp, &context, device_name);
