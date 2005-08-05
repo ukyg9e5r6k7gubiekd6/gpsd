@@ -43,36 +43,36 @@ write_header();
 $SIG{'TERM'} = $SIG{'QUIT'} = $SIG{'HUP'} = $SIG{'INT'} = \&cleanup;
 
 while (1){
-#connect
-print "Connecting to $opt{'s'}:$opt{'p'}" if ($opt{'v'});
-$sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
-			PeerPort => $opt{'p'},
-			Proto    => "tcp",
-			Type     => SOCK_STREAM)
-	or die "\nCouldn't connect to $opt{'s'}:$opt{'p'} - $@\n";
-print " OK!\n" if ($opt{'v'});
+	#connect
+	print "Connecting to $opt{'s'}:$opt{'p'}" if ($opt{'v'});
+	$sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
+				PeerPort => $opt{'p'},
+				Proto    => "tcp",
+				Type     => SOCK_STREAM)
+		or die "\nCouldn't connect to $opt{'s'}:$opt{'p'} - $@\n";
+	print " OK!\n" if ($opt{'v'});
 
-print $sock "MSQO\n";
-while (defined( $line = <$sock> )){
-	chomp $line;
-	if( parse_line()){
-		write_gpx();
+	print $sock "MSQO\n";
+	while (defined( $line = <$sock> )){
+		chomp $line;
+		if( parse_line()){
+			write_gpx();
 
-		# foofy eyecandy. print a dot for each line in verbose mode
-		if ($opt{'v'}){
-			$i++; $j++;
-			print '.';
-			if ($i == 50){
-				printf (" %8d\n", $j);
-				$i = 0;
-			} else {
-				print ' ' if ($i % 5 == 0);
+			# foofy eyecandy. print a dot for each line in verbose mode
+			if ($opt{'v'}){
+				$i++; $j++;
+				print '.';
+				if ($i == 50){
+					printf (" %8d\n", $j);
+					$i = 0;
+				} else {
+					print ' ' if ($i % 5 == 0);
+				}
 			}
 		}
+		sleep($opt{'i'});
+		print $sock "MSQO\n";
 	}
-	sleep($opt{'i'});
-	print $sock "MSQO\n";
-}
 sleep(1);
 }
 cleanup("PIPE");
