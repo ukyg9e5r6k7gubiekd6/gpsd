@@ -1360,8 +1360,10 @@ int main(int argc, char *argv[])
 		    gpsd_deactivate(channel);
 		} 
 		if ((changed & ONLINE_SET) == 0) {
+/*
 		    gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
 				timestamp() - channel->gpsdata.online);
+*/
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
