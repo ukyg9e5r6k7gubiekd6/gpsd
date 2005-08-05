@@ -27,7 +27,7 @@ my $author = 'Chris Kuethe (chris.kuethe@gmail.com)';
 my $copyright = 'ISC (BSD) License';
 
 # state variables
-my ($sock, $out, %opt, %GPS);
+my ($sock, $out, %opt, $line, %GPS);
 # accumulators, buffers, registers, ...
 my ($i, $j, $lt, $tk, $tm);
 
@@ -52,9 +52,9 @@ write_header();
 $SIG{'TERM'} = $SIG{'QUIT'} = $SIG{'HUP'} = $SIG{'INT'} = \&cleanup;
 
 print $sock "MSQO\n";
-while (defined( $_ = <$sock> )){
-	chomp;
-	if( parse_line($_)){
+while (defined( $line = <$sock> )){
+	chomp $line;
+	if( parse_line()){
 		write_gpx();
 
 		# foofy eyecandy. print a dot for each line in verbose mode
@@ -114,6 +114,7 @@ sub write_header{
   <author>$author</author>
   <copyright>$copyright</copyright>
  </metadata>
+
 EOF
 }
 
@@ -135,25 +136,25 @@ sub track_start{
 sub track_end{
 	return unless ($tk);
 	print $out "  </trkseg>\n";
-	print $out " </trk>\n";
+	print $out " </trk>\n\n";
  	$tk = 0;
 }
 
 sub parse_line{
 	%GPS = ();
-	my ($junk, $m, $s, $q, $o) = split(/,/, $_[0]);
+	my ($junk, $m, $s, $q, $o) = split(/,/, $line);
 
 	# extract fix quality and status
-	if ($m =~/(\d)/){
+	if ($m =~/M=(\d)/){
 		$m = $1; $m = 0 if (($m < 0) || ($m > 3));
+		return (0) if ($m == 1);
 		$GPS{'mode'} = ('none', 'none', '2d', '3d')[$m];
 		$GPS{'fq'} = $m;
-		return (0) if ($m == 1);
 	} else {
 		$GPS{'mode'} = 'none';
 	}
 
-	if ($s =~/(\d)/){
+	if ($s =~/S=(\d)/){
 		if ($1 == 2){
 			$GPS{'mode'} = 'dgps';
 			$GPS{'fq'} = 4;
@@ -161,12 +162,14 @@ sub parse_line{
 	}
 
 	if ($q =~/Q=(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/){
-		$GPS{'sat'}  = $1;
-		$GPS{'sdop'} = $2; delete($GPS{'sdop'}) if ($GPS{'sdop'} eq 'NaN');
-		$GPS{'hdop'} = $3; delete($GPS{'hdop'}) if ($GPS{'hdop'} eq 'NaN');
-		$GPS{'vdop'} = $4; delete($GPS{'vdop'}) if ($GPS{'vdop'} eq 'NaN');
-		$GPS{'tdop'} = $5; delete($GPS{'tdop'}) if ($GPS{'tdop'} eq 'NaN');
-		$GPS{'gdop'} = $6; delete($GPS{'gdop'}) if ($GPS{'gdop'} eq 'NaN');
+		$GPS{'sat'}  = $1; $GPS{'sdop'} = $2;
+		$GPS{'hdop'} = $3; $GPS{'vdop'} = $4;
+		$GPS{'tdop'} = $5; $GPS{'gdop'} = $6;
+		delete($GPS{'sdop'}) if ($GPS{'sdop'} =~ /[^0-9\.]/);
+		delete($GPS{'hdop'}) if ($GPS{'hdop'} =~ /[^0-9\.]/);
+		delete($GPS{'vdop'}) if ($GPS{'vdop'} =~ /[^0-9\.]/);
+		delete($GPS{'tdop'}) if ($GPS{'tdop'} =~ /[^0-9\.]/);
+		delete($GPS{'gdop'}) if ($GPS{'gdop'} =~ /[^0-9\.]/);
 	}
 
 
@@ -188,6 +191,7 @@ sub write_gpx{
  		track_start() unless ($tk);
 
  		$lt = $GPS{'time'};
+ 		printf $out ("   <!-- %s -->\n", $line);
  		printf $out ("   <trkpt lat=\"%f\" ", $GPS{'lat'});
  		printf $out ("lon=\"%f\">\n", $GPS{'lon'});
 
@@ -200,7 +204,7 @@ sub write_gpx{
 		# GPX allows us to give some other indicators of fix quality
  		printf $out ("    <hdop>%s</hdop>\n", $GPS{'hdop'}) if (defined($GPS{'hdop'}));
  		printf $out ("    <vdop>%s</vdop>\n", $GPS{'vdop'}) if (defined($GPS{'vdop'}));
- 		printf $out ("    <sat>%s</sat>\n", $GPS{'sat'}) if (defined($GPS{'sat'}) && $GPS{'sat'});
+ 		printf $out ("    <sat>%s</sat>\n",   $GPS{'sat'} ) if (defined($GPS{'sat'} ));
 
 		# and finally, note what time this fix was made
 		@t = gmtime($GPS{'time'});
