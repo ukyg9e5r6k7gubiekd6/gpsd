@@ -29,7 +29,7 @@ my $copyright = 'ISC (BSD) License';
 # state variables
 my ($sock, $out, %opt, $line, %GPS);
 # accumulators, buffers, registers, ...
-my ($i, $j, $lt, $tk, $tm);
+my ($i, $j, $k, $lt, $tk, $tm);
 
 # do all that getopt stuff. option validation moved into a subroutine
 getopts ("hi:p:s:vw:", \%opt);
@@ -69,8 +69,15 @@ while (1){
 					print ' ' if ($i % 5 == 0);
 				}
 			}
+			sleep($opt{'i'});
+		} else {
+			track_end();
+			if ($opt{'v'}){
+				spinner($k++);
+			} else {
+				sleep($opt{'i'});
+			}
 		}
-		sleep($opt{'i'});
 		print $sock "MSQO\n";
 	}
 sleep(1);
@@ -250,4 +257,10 @@ sub check_options{
 	$opt{'w'} = '/dev/stdout' unless (defined($opt{'w'}));
 	$opt{'w'} =~ /([\w\s_,\+\-\.\/]+)/; $opt{'w'} = $1;
 	$opt{'w'} = '/dev/stdout' unless (length($opt{'w'}));
+}
+
+sub spinner {
+	print substr('-\|/', ($_[0]) % 4, 1);
+	sleep($opt{'i'});
+	print '';
 }
