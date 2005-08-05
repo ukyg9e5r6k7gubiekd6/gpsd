@@ -36,6 +36,13 @@ getopts ("hi:p:s:vw:", \%opt);
 usage() if (defined($opt{'h'}));
 check_options();
 
+open($out, ">" . $opt{'w'}) or die "Can't open $opt{'w'}: $!\n";
+select((select($out), $| = 1)[0]);
+write_header();
+
+$SIG{'TERM'} = $SIG{'QUIT'} = $SIG{'HUP'} = $SIG{'INT'} = \&cleanup;
+
+while (1){
 #connect
 print "Connecting to $opt{'s'}:$opt{'p'}" if ($opt{'v'});
 $sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
@@ -44,12 +51,6 @@ $sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
 			Type     => SOCK_STREAM)
 	or die "\nCouldn't connect to $opt{'s'}:$opt{'p'} - $@\n";
 print " OK!\n" if ($opt{'v'});
-
-open($out, ">" . $opt{'w'}) or die "Can't open $opt{'w'}: $!\n";
-select((select($out), $| = 1)[0]);
-write_header();
-
-$SIG{'TERM'} = $SIG{'QUIT'} = $SIG{'HUP'} = $SIG{'INT'} = \&cleanup;
 
 print $sock "MSQO\n";
 while (defined( $line = <$sock> )){
@@ -72,7 +73,8 @@ while (defined( $line = <$sock> )){
 	sleep($opt{'i'});
 	print $sock "MSQO\n";
 }
-
+sleep(1);
+}
 cleanup("PIPE");
 
 ###########################################################################
