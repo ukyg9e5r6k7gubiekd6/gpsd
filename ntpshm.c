@@ -118,7 +118,6 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     struct shmTime *shmTime = NULL;
     struct timeval tv;
     double seconds,microseconds;
-    double offset;
 
     if (session->shmTime < 0 ||
 	(shmTime = session->context->shmTime[session->shmTime]) == NULL)
@@ -127,18 +126,18 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     (void)gettimeofday(&tv,NULL);
     microseconds = 1000000.0 * modf(fixtime,&seconds);
 
-    offset = fabs(fixtime - (tv.tv_sec + (tv.tv_usec / 1000000.0)));
-
     shmTime->count++;
     shmTime->clockTimeStampSec = (time_t)seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->receiveTimeStampSec = (time_t)tv.tv_sec;
     shmTime->receiveTimeStampUSec = tv.tv_usec;
-    shmTime->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
+    /* setting the precision here does not seem to help anything, too
+       hard to calculate properly anyway.  Let ntpd figure it out.
+       Any NMEA will be about -1 or -2. 
+       Garmin GPS-18/USB is around -6 or -7.
+    */
     shmTime->count++;
     shmTime->valid = 1;
-
-    gpsd_report(5, "ntpshm_put: precision %d\n",shmTime->precision);
 
     return 1;
 }
@@ -164,7 +163,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     l_offset *= 1000000;
     l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
     /*@ +ignorequals */
-    if (labs( l_offset ) > PUT_MAX_OFFSET) {
+ZZ    if (labs( l_offset ) > PUT_MAX_OFFSET) {
         gpsd_report(5, "ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
