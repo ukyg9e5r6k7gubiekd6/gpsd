@@ -163,7 +163,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     l_offset *= 1000000;
     l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
     /*@ +ignorequals */
-ZZ    if (labs( l_offset ) > PUT_MAX_OFFSET) {
+    if (labs( l_offset ) > PUT_MAX_OFFSET) {
         gpsd_report(5, "ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
