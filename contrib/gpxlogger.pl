@@ -29,7 +29,7 @@ my $copyright = 'ISC (BSD) License';
 # state variables
 my ($sock, $out, %opt, $line, %GPS);
 # accumulators, buffers, registers, ...
-my ($i, $j, $k, $lt, $tk, $tm);
+my ($i, $j, $k, $lt, $tk);
 
 # do all that getopt stuff. option validation moved into a subroutine
 getopts ("hi:p:s:vw:", \%opt);
@@ -240,10 +240,6 @@ sub check_options{
 	$opt{'i'} = 5 unless (defined($opt{'i'}));
 	$opt{'i'} =~ /([0-9]+)/; $opt{'i'} = $1;
 	$opt{'i'} = 5 unless ($opt{'i'} > 0);
-
-# maximum clock jump
-	$tm = 2 * $opt{'i'};
-	$tm = 5 if ($tm < 5);
 
 #verbosity
 	if (defined($opt{'v'})){
