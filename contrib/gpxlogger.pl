@@ -155,9 +155,9 @@ sub parse_line{
 
 	# extract fix quality and status
 	if ($m =~/M=(\d)/){
-		$m = $1; $m = 0 if (($m < 0) || ($m > 3));
+		$m = $1; $m = 1 if (($m < 0) || ($m > 4));
 		return (0) if ($m == 1);
-		$GPS{'mode'} = ('none', 'none', '2d', '3d')[$m];
+		$GPS{'mode'} = ('none', 'none', '2d', '3d', 'pps')[$m];
 		$GPS{'fq'} = $m;
 	} else {
 		$GPS{'mode'} = 'none';
@@ -166,7 +166,7 @@ sub parse_line{
 	if ($s =~/S=(\d)/){
 		if ($1 == 2){
 			$GPS{'mode'} = 'dgps';
-			$GPS{'fq'} = 4;
+			$GPS{'fq'} = 5;
 		}
 	}
 
@@ -196,7 +196,6 @@ sub write_gpx{
 	return unless (defined($out));
 
  	if (($GPS{'time'} != $lt ) && ($GPS{'mode'} ne 'none')) {
- 		track_end() if (abs($GPS{'time'} - $lt) > $tm);
  		track_start() unless ($tk);
 
  		$lt = $GPS{'time'};
