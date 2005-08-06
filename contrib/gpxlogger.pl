@@ -45,14 +45,21 @@ $SIG{'TERM'} = $SIG{'QUIT'} = $SIG{'HUP'} = $SIG{'INT'} = \&cleanup;
 while (1){
 	#connect
 	print "Connecting to $opt{'s'}:$opt{'p'}" if ($opt{'v'});
-	$sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
+loop:	$sock = IO::Socket::INET->new(PeerAddr => $opt{'s'},
 				PeerPort => $opt{'p'},
 				Proto    => "tcp",
-				Type     => SOCK_STREAM)
-		or die "\nCouldn't connect to $opt{'s'}:$opt{'p'} - $@\n";
-	print " OK!\n" if ($opt{'v'});
+				Type     => SOCK_STREAM);
 
-	print $sock "MSQO\n";
+	unless ($sock){
+		print "\nCouldn't connect to $opt{'s'}:$opt{'p'}\n$@\n";
+		print "retrying in 10 seconds.\n";
+		sleep 10;
+		goto loop;
+	}
+
+	print " Connected!\n" if ($opt{'v'});
+
+	print $sock "SPAMQO\n";
 	while (defined( $line = <$sock> )){
 		$line =~ s/\s*$//gism;
 		if( parse_line()){
@@ -71,14 +78,13 @@ while (1){
 			}
 			sleep($opt{'i'});
 		} else {
-			track_end();
 			if ($opt{'v'}){
 				spinner($k++);
 			} else {
 				sleep($opt{'i'});
 			}
 		}
-		print $sock "MSQO\n";
+		print $sock "SPAMQO\n";
 	}
 sleep(1);
 }
@@ -109,7 +115,7 @@ sub cleanup{
 
 sub write_header{
 	return unless (defined($out));
-	$tk = $lt = 0;
+	$tk = 0;
 
 	print $out <<EOF;
 <?xml version="1.0" encoding="utf-8"?>
@@ -137,6 +143,7 @@ sub write_footer{
 
 sub track_start{
 	return if ($tk);
+	print $out "<!-- track start -->\n";
 	print $out " <trk>\n";
 	print $out "  <trkseg>\n";
  	$tk = 1;
@@ -145,84 +152,79 @@ sub track_start{
 sub track_end{
 	return unless ($tk);
 	print $out "  </trkseg>\n";
-	print $out " </trk>\n\n";
+	print $out " </trk>\n";
+	print $out "<!-- track end -->\n\n";
  	$tk = 0;
 }
 
 sub parse_line{
 	%GPS = ();
-	my ($junk, $m, $s, $q, $o) = split(/,/, $line);
 
 	# extract fix quality and status
-	if ($m =~/M=(\d)/){
-		$m = $1; $m = 1 if (($m < 0) || ($m > 4));
-		return (0) if ($m == 1);
-		$GPS{'mode'} = ('none', 'none', '2d', '3d', 'pps')[$m];
-		$GPS{'fq'} = $m;
-	} else {
-		$GPS{'mode'} = 'none';
+	$GPS{'fix'}  = 'none';
+	if ($line =~ /M=(\d),/){
+		$GPS{'fix'}  = "2d" if ($1 == 2);
+		$GPS{'fix'}  = "3d" if ($1 == 3);
+		$GPS{'fix'}  = "pps" if ($1 == 4);
 	}
 
-	if ($s =~/S=(\d)/){
-		if ($1 == 2){
-			$GPS{'mode'} = 'dgps';
-			$GPS{'fq'} = 5;
-		}
+	if ($line =~ /S=2,/){
+		$GPS{'fix'} = 'dgps';
 	}
 
-	if ($q =~/Q=(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/){
-		$GPS{'sat'}  = $1; $GPS{'sdop'} = $2;
+	if ($line =~ /P=([0-9\.-]+) ([0-9\.-]+)/){
+		$GPS{'lat'} = $1; $GPS{'lon'} = $2;
+	}
+
+	$GPS{'alt'}  = $1 if $line =~ /A=([0-9\.-]+)/; 
+
+	if ($line =~ /Q=(\d+) (\S+) (\S+) (\S+)/){
+		$GPS{'sat'}  = $1; $GPS{'gdop'} = $2;
 		$GPS{'hdop'} = $3; $GPS{'vdop'} = $4;
-		$GPS{'tdop'} = $5; $GPS{'gdop'} = $6;
-		delete($GPS{'sdop'}) if ($GPS{'sdop'} =~ /[^0-9\.]/);
 		delete($GPS{'hdop'}) if ($GPS{'hdop'} =~ /[^0-9\.]/);
 		delete($GPS{'vdop'}) if ($GPS{'vdop'} =~ /[^0-9\.]/);
-		delete($GPS{'tdop'}) if ($GPS{'tdop'} =~ /[^0-9\.]/);
-		delete($GPS{'gdop'}) if ($GPS{'gdop'} =~ /[^0-9\.]/);
 	}
 
+	if ($line =~ /(O=[^\?].+)/){
+		my @w = split(/\s+/, $1);
+		$GPS{'time'} = int ($w[1]);
+		$GPS{'lat'} = $w[3] unless (defined($GPS{'lat'}));
+		$GPS{'lon'} = $w[4] unless (defined($GPS{'lon'}));
+		$GPS{'alt'} = $w[5] unless (defined($GPS{'alt'}));
+	}
 
-	return 0 if ($o =~ /O=\?/i);
-	my @w = split(/\s+/, $o); shift @w;
-	$GPS{'time'} = int ($w[0]);
-	$GPS{'lat'} = $w[2];
-	$GPS{'lon'} = $w[3];
-	$GPS{'alt'} = $w[4]; delete($GPS{'alt'}) if ($GPS{'alt'} =~ /\D/);
-	return(1);
+	delete($GPS{'alt'}) if ($GPS{'fix'} eq '2d');
+
+	if (defined($GPS{'lat'}) && defined($GPS{'lon'}) && ($GPS{'fix'} ne 'none')){
+ 		track_start() unless ($tk);
+		return(1);
+	} else {
+ 		track_end() if ($tk);
+		return(0);
+	}
 }
 
 sub write_gpx{
-	my @t;
-	return unless (defined($out));
+ 	printf $out ("   <trkpt lat=\"%f\" ", $GPS{'lat'});
+ 	printf $out ("lon=\"%f\">\n", $GPS{'lon'});
 
- 	if (($GPS{'time'} != $lt ) && ($GPS{'mode'} ne 'none')) {
- 		track_start() unless ($tk);
+	# if we know our fix quality, then print it.
+ 	printf $out ("    <fix>%s</fix>\n", $GPS{'fix'});
 
- 		$lt = $GPS{'time'};
- 		printf $out ("   <trkpt lat=\"%f\" ", $GPS{'lat'});
- 		printf $out ("lon=\"%f\">\n", $GPS{'lon'});
+	# if we have a 3d or dgps solution, then print altitude
+ 	printf $out ("    <ele>%.2f</ele>\n", $GPS{'alt'}) if (defined($GPS{'alt'}));
 
-		# if we know our fix quality, then print it.
- 		printf $out ("    <fix>%s</fix>\n", $GPS{'mode'}) if ($GPS{'fq'});
+	# GPX allows us to give some other indicators of fix quality
+ 	printf $out ("    <hdop>%s</hdop>\n", $GPS{'hdop'}) if (defined($GPS{'hdop'}));
+ 	printf $out ("    <vdop>%s</vdop>\n", $GPS{'vdop'}) if (defined($GPS{'vdop'}));
+	printf $out ("    <sat>%s</sat>\n",   $GPS{'sat'} ) if (defined($GPS{'sat'} ));
 
-		# if we have a 3d or dgps solution, then print altitude
- 		printf $out ("    <ele>%.2f</ele>\n", $GPS{'alt'}) if (($GPS{'fq'} > 2) && defined($GPS{'alt'}));
-
-		# GPX allows us to give some other indicators of fix quality
- 		printf $out ("    <hdop>%s</hdop>\n", $GPS{'hdop'}) if (defined($GPS{'hdop'}));
- 		printf $out ("    <vdop>%s</vdop>\n", $GPS{'vdop'}) if (defined($GPS{'vdop'}));
- 		printf $out ("    <sat>%s</sat>\n",   $GPS{'sat'} ) if (defined($GPS{'sat'} ));
-
-		# and finally, note what time this fix was made
-		@t = gmtime($GPS{'time'});
-		$t[5]+=1900; $t[4]++;
- 		printf $out ("    <time>%04d-%02d-%02dT", $t[5], $t[4], $t[3]);
- 		printf $out ("%02d:%02d:%02dZ</time>\n", $t[2], $t[1], $t[0]);
- 		print  $out "   </trkpt>\n";
-
-# print '=' x 75 . "\n"; foreach (sort keys %GPS){ printf("%s -> %s\n", $_, $GPS{$_}); }
-
-	}
+	# and finally, note what time this fix was made
+	my @t = gmtime($GPS{'time'});
+	$t[5]+=1900; $t[4]++;
+ 	printf $out ("    <time>%04d-%02d-%02dT", $t[5], $t[4], $t[3]);
+ 	printf $out ("%02d:%02d:%02dZ</time>\n", $t[2], $t[1], $t[0]);
+	print  $out "   </trkpt>\n";
 }
 
 sub check_options{
