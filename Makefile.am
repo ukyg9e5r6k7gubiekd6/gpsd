@@ -106,6 +106,7 @@ libgps_c_sources = \
 	truenorth.c \
 	timebase.h
 
+BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' <packet_states.h >packet_names.h
 
