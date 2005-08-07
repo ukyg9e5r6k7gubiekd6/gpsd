@@ -210,7 +210,7 @@ static int packet_test(struct map *mp)
     state.inbuflen = 0;
     /*@i@*/memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
     /*@ -compdef -uniondef -usedef @*/
-    st = packet_process(&state, mp->testlen);
+    st = packet_parse(&state, mp->testlen);
     if (state.packet_type != mp->type)
 	printf("%2d: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, state.packet_type);
     else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {

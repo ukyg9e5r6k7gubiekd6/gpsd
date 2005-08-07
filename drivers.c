@@ -67,7 +67,8 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
 	if ((st & TIME_SET) != 0)
 	    /* this magic number is derived from observation */
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.675);
+	    //(void)ntpshm_put(session, session->gpsdata.fix.time + 0.675);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 	return st;
     } else
