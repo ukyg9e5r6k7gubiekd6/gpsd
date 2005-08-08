@@ -493,6 +493,45 @@ It's bundled with Microsoft Streets and Trips.
 </td>
 </tr>
 
+<tr>
+<td><a href='http://www.transystem.com.tw/p-gps-gmouse_m.htm'>iGPS-M</a></td>
+<td>Good</td>
+<td><a href='http://www.bona.com.tw:8080/product/GPS-USB.htm'>BONA Computech</a></td>
+<td>USB</td>
+<td>uNav+PL2303</td>
+<td>2.28</td>
+<td>3.0</td>
+<td>GPGGA,<br />GPGLL,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG</td>
+<td>
+Reported by Romain Goyet &lt;r.goyet&#x40;gmail.com&gt;. He says <i>by the
+way, I just wanted to let you know about the "iGPS-M". It's manufactured by
+"BONA computech" (http://www.bona.com.tw), it's really cheap (I got mine for
+67 Euros in Paris). It's 100% compatible with Linux using gpsd : I just had
+to compile the usb-serial module called Pl-2303, and here I was.</i>
+The chipset manufacturer's webpage is <a
+href='http://www.unav-micro.com/chipsets.htm'>here</a>.
+</td>
+</tr>
+
+<tr>
+<td><a href='http://www.usglobalsat.com/item.asp?itemid=60&catid=17'>BU-353</a></td>
+<td>Good</td>
+<td><a href='http://www.usglobalsat.com/'>USGlobalSat</a></td>
+<td>USB</td>
+<td>SiRFstarIII+PL2303</td>
+<td>pre-2.29</td>
+<td>2.3</td>
+<td>GPGGA,<br />GPGSA,<br />GPGSV,<br />GPRMC,<br />GPVTG,<br />GPGLL</td>
+<td>
+Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;. This receiver,
+or at least the firmware it ships with does not support PPS timing output,
+nor does it support WAAS - something born out by the claimed 10m positioning
+accuracy. No doubt these will be addressed in future revisions of firmware.
+The increased sensitivity is nice, but the lack of WAAS and PPS could be
+show-stoppers for various applications.
+</td>
+</tr>
+
 <!--
 <tr>
 <td>name, link to technical reference</td>

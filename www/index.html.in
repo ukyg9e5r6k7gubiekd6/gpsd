@@ -69,7 +69,8 @@ presently use <code>gpsd</code> include <a
 href="http://www.pygps.org">pyGPS</a>, <a
 href="http://www.kismetwireless.net/">Kismet</a>, <a
 href="http://www.gpsdrive.cc/">GPSdrive</a>, <a
-href="http://qpegps.sourceforge.net/">gpeGPS</a>, and
+href="http://qpegps.sourceforge.net/">gpeGPS</a>, <a
+href="http://www.gnustep.it/enrico/position/">position</a> and
 <a href="http://roadmap.digitalomaha.net/index.html">roadmap</a>.</p>
 
 <p>Under Linux, gpsd normally runs with zero configuration.  The RPM
