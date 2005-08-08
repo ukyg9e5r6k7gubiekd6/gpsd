@@ -193,7 +193,7 @@ sub parse_line{
 		$GPS{'alt'} = $w[5] unless (defined($GPS{'alt'}));
 	}
 
-	delete($GPS{'alt'}) if ($GPS{'fix'} eq '2d');
+	delete($GPS{'alt'}) if (defined($GPS{'alt'}) && (($GPS{'fix'} eq '2d') || ($GPS{'alt'} =~ /[^0-9\.]/)));
 
 	if (defined($GPS{'lat'}) && defined($GPS{'lon'}) && ($GPS{'fix'} ne 'none')){
  		track_start() unless ($tk);
