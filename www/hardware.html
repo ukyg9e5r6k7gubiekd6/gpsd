@@ -535,6 +535,28 @@ show-stoppers for various applications.
 </td>
 </tr>
 
+<tr>
+<td><a href='http://www.cpit.com/en/GP-27.html'>GP-27</a></td>
+<td>Excellent</td>
+<td><a href='http://www.cpit.com/'>Central Pacific</a></td>
+<td>Bluetooth</td>
+<td>Nemerix</td>
+<td>pre-2.29</td>
+<td>3.01</td>
+<td>GPGGA,<br />GPGLL,<br />GPGSA,<br />GPRMC,<br />GPZDA,<br />GPVTG,<br />PNMRX300*,<br />PNMRX301*,<br />PNMRX302*,<br />PNMRX303*,<br />PNMRX304*,<br />PNMRX603</td>
+<td> Reported by Tobias Minich &lt;belgabor&#x40;gmx.de&gt; <ul>
+<li>The marked (*) sentences are only sent on change or by request</li>
+<li>Several sentences can be sent to the device to change settings or
+request information. DO NOT USE THE PNMRX100 SENTENCE TO CHANGE THE BAUD
+RATE! This is not supported by the bluetooth chip on the device.</li>
+<li>Settings are saved in flash powered by a backup battery and persistent
+over connections and when you turn it off.</li>
+<li>The syntax of the PNMRX303 message and part 4 of the PNMRX603 message
+may differ from the syntax found in several documents on the net.</li>
+</ul>
+</td>
+</tr>
+
 <!--
 <tr>
 <td>name, link to technical reference</td>
