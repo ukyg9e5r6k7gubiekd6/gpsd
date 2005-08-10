@@ -29,8 +29,8 @@
     <a href="references.html">References</a><br/>
     <a href="history.html">History</a><br/>
 
-    <a href='http://www.catb.org/hacker-emblem/'>
-    <img src='http://www.catb.org/hacker-emblem/glider.png'
+    <a href='http://www.catb.org/hacker-emblem/'><img
+    src='http://www.catb.org/hacker-emblem/glider.png'
     alt='hacker emblem' /></a><br />
 
     <a href="http://validator.w3.org/check/referer"><img
@@ -92,7 +92,7 @@ family.  We'll support proprietary Unixes and hybrids like Mac OS X if
 it's not too much work (and it usually isn't).</p>
 
 <p>See the <a href='faq.html'>FAQ</a> for information on how to report
-bugs.</a>
+bugs.</p>
 
 <h1 id='news'>News</h1>
 
@@ -118,20 +118,20 @@ href='http://developer.berlios.de/projects/gpsd/'>here on berlios.de</a>.</p>
 <ul>
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
-is for release announcements and project news.</p></li>
+is for release announcements and project news.</li>
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
 is for questions and technical support on <code>gpsd</code>, including support
-for application builders using <code>gpsd</code> as a component.</p></li>
+for application builders using <code>gpsd</code> as a component.</li>
 
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
-is for <code>gpsd</code> developers.</p></li>
+is for <code>gpsd</code> developers.</li>
 
 <li><a
 href="https://lists.berlios.de/mailman/listinfo/gpsd-commit-watch">gpsd-commit-watch</a>
 sends automatic broadcast notifications of commits to the <code>gpsd</code>
-repository.</p></li>
+repository.</li>
 </ul>
 
 <h1 id='documentation'>Documentation</h1>
@@ -146,7 +146,7 @@ repository.</p></li>
 <dd>The <code>gpsd</code> test clients.</dd>
 
 <dt><a href="libgps.html">libgps.3</a></dt>
-<dd>An interface library that manages communication with the daemon.</dt>
+<dd>An interface library that manages communication with the daemon.</dd>
 
 <dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
 <dd>C++ class wrapper for the libgps C binding.</dd>

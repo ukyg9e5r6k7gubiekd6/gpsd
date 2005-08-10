@@ -16,7 +16,7 @@ GPSD Frequently Asked Questions
 
 <div id="Menu">
     <img src="gpsd-logo-small.png"/><br />
-    <a href="index.html">Home<br/>
+    <a href="index.html">Home</a><br/>
     <a href="index.html#news">News</a><br/>
     <a href="index.html#downloads">Downloads</a><br/>
     <a href="index.html#mailing-lists">Mailing lists</a><br/>
@@ -182,7 +182,7 @@ your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
 
 
-<h1>The first A,E,O,P,T,U, or V command to a device always returns ?</h1>
+<h2>The first A,E,O,P,T,U, or V command to a device always returns ?</h2>
 
 <p>To understand what's going on, you need to know that
 <code>gpsd</code> does not immediately assign a client a GPS from its
@@ -215,14 +215,14 @@ sentence.  The old-style individual requests are obsolete, really.
 You should fix your application to use atcher mode &mdash; or better
 yet, the libgps client library.</p>
 
-<h1>Have wildly fluctuating speed?  Try static navigation</h2>
+<h2>Have wildly fluctuating speed?  Try static navigation</h2>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
 switching on static navigation mode using the 'c' command in
 sirfmon.</p>
 
-<h1 id='flicker'>The date and other fields in <code>xgps</code> flicker 
-to "n/a" part of the time even when there's a fix.</h1>
+<h2 id='flicker'>The date and other fields in <code>xgps</code> flicker 
+to "n/a" part of the time even when there's a fix.</h2>
 
 <p>The sentence or packet your GPS uses to report satellite
 bearing/elevation has no timestamp. The <code>xgps</code>
@@ -301,7 +301,7 @@ by allocation of many buffers for reading files, and by accumulation
 of many dirty buffers that still have to be written.  At some point,
 programs like gpsd (but also all interactive programs and the X
 display manager) come to a complete standstill while the system is
-swapping like mad."</p></p>
+swapping like mad."</p>
 
 <p>If Rob's analysis is correct, <code>gpsd</code> is a canary in a
 coal mine.  If your <code>gpsd</code> locks up after a long period of
@@ -425,10 +425,10 @@ No more U.S.-centric date-format assumptions!  Also, as previously
 noted, the seconds part may have one or more digits of decimal fractional
 seconds.</p>
 
-</body>
 </div>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+</body>
 </html>
 <!--
 Local Variables:
