@@ -41,16 +41,16 @@ GPSD Frequently Asked Questions
 <div id="Content">
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
-
+<blockquote>
 <p>When you have a problem with gpsd, here are some steps you can take to
 gelp us resolve the bug as quickly as possible.</p>
 
-<h2>Read this whole FAQ first</h2>
+<h3>Read this whole FAQ first</h3>
 
 <p>First, read this whole FAQ before reporting apparent misbehavior as a
 bug.  You may find a solution here.</p>
 
-<h2>Make sure it's not a problem in your client software</h2>
+<h3>Make sure it's not a problem in your client software</h3>
 
 <p>Make sure it is a real gpsd bug and not a problem with
 your client software.  A good way to do this is to run your client and
@@ -59,7 +59,7 @@ good numbers but your client does not, you have a client problem.
 If xgps reports the same sort of bad numbers as your client, you
 have a real gpsd bug.</p>
 
-<h2>Check the latest version of <code>gpsd</code> for the bug.</h2>
+<h3>Check the latest version of <code>gpsd</code> for the bug.</h3>
 
 <p>If you are using an old version of <code>gpsd</code>, it is
 possible your bug has already been fixed.  Download the latest public
@@ -70,7 +70,7 @@ href='ttp://developer.berlios.de/svn/?group_id=2116'>Subversion
 head</a> and test that.  We don't mind getting bug reports that say 
 "I saw version foo had the following bug, but you've fixed it."</p>
 
-<h2>Capture a log that triggers the problem</h2>
+<h3>Capture a log that triggers the problem</h3>
 
 <p>If we can reproduce your gpsd problem, we can usually fix it very
 rapidly.  If we can't reproduce it, you might get lucky or you might
@@ -83,7 +83,7 @@ a GPS that emits NMEA, telnetting to port 2947 and enabling raw
 mode will do the trick.  For non-SiRF binary protocols, you will
 have to cat direct from the serial device into a file.</p>
 
-<h2>Trim the log that reproduces the problem</h2>
+<h3>Trim the log that reproduces the problem</h3>
 
 <p>Your next step should be to feed the log you just captured to a
 <code>gpsd</code> instance through <code>gpsfake</code> to verify that
@@ -99,7 +99,7 @@ it any smaller.  Then send us that.</p>
 <p>If possible, use the -l option of gpsfake to pin down the sentence
 or packet that produces the bug, and tell us that.</p>
 
-<h2>Look at <code>gpsd</code> log output to see if it gives you a clue</h2>
+<h3>Look at <code>gpsd</code> log output to see if it gives you a clue</h3>
 
 <p>You may get a better handle on your problem by running gpsd in
 foreground (-N option) with the -D option set to a high level (-D 4 is
@@ -110,13 +110,13 @@ whether it holds a clue, send it.</p>
 <p>One of the things this should tell you, if the chip reports it at
 all, is the firmware version.  You will want that for your report.</p>
 
-<h2>If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h2>
+<h3>If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h3>
 
 <p>If you're using a SiRF, Evermore, or iTalk GPS in binary mode
 (which you can tell from the -D 4 output), switch back to NMEA mode
 using the N command and see if the bug still reproduces.</p>
 
-<h2>If your bug core-dumps gpsd, send us a stack trace.</h2>
+<h3>If your bug core-dumps gpsd, send us a stack trace.</h3>
 
 <p>Though it happens seldom, badly-formed NMEA from a device with poor
 standards compliance has been known to core-dump gpsd.  If your gpsd
@@ -124,7 +124,7 @@ has core-dumped, try to use gdb or whatever your local symbolic
 debugger is to generate a stack trace of the crash, and send us
 that.</p>
 
-<h2>Try to determine what release introduced the bug</h2>
+<h3>Try to determine what release introduced the bug</h3>
 
 <p>If you have upgraded from a previous version of <code>gpsd</code>,
 and the upgrade broke something that was working previously, the
@@ -175,14 +175,14 @@ revisions in the span you should only require 9 tests to nail down the
 exact change in question.</p></li>
 </ol>
 
-<h2>Include the vendor, mode, and firmware version in your report.</h2>
+<h3>Include the vendor, mode, and firmware version in your report.</h3>
 
 <p>Always include with your bug report the GPS vendor and model.  If
 your GPS is SiRF-based, include the firmware version as well.  You can
 find out what that is by running at the daemon at -D 4.</p>
+</blockquote>
 
-
-<h2>The first A,E,O,P,T,U, or V command to a device always returns ?</h2>
+<h1>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
 
 <p>To understand what's going on, you need to know that
 <code>gpsd</code> does not immediately assign a client a GPS from its
@@ -215,14 +215,22 @@ sentence.  The old-style individual requests are obsolete, really.
 You should fix your application to use watcher mode &mdash; or better
 yet, the libgps client library.</p>
 
-<h2>Have wildly fluctuating speed?  Try static navigation</h2>
+<h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
-<p>If your problem is wildly fluctuating speed reports on a SiRF,
-switching on static navigation mode using the 'c' command in
-sirfmon.</p>
+<p>If your problem is wildly fluctuating speed reports on a SiRF, switching
+on static navigation mode using the 'c' command in sirfmon. Static navigation
+mode will freeze your position if your speed is below 1.2 m/s for three
+seconds, and will begin updating your position again when speed exceeds 1.4
+m/s. This prevents multipath, weak signals, poor constellation geometry from
+dragging your solutions around too much. Other receivers may suffer the same
+problem and may have a similar solution.</p>
 
-<h2 id='flicker'>The date and other fields in <code>xgps</code> flicker 
-to "n/a" part of the time even when there's a fix.</h2>
+<h1 id='gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</h1>
+
+<p>This is a gpsdrive bug, as you can verify by running xgps alongside it.</p>
+
+<h1 id='flicker'>Why do the date and other fields in <code>xgps</code> flicker 
+to "n/a" part of the time even when there's a fix?</h1>
 
 <p>The sentence or packet your GPS uses to report satellite
 bearing/elevation has no timestamp. The <code>xgps</code>
@@ -253,7 +261,7 @@ gaps, to do policy.  What you're seeing as a bug only looks like one
 because <code>xgps</code>, as is proper for a test client, has as
 little policy as possible.</p>
 
-<h1 id='kismet'>Flaky results when I try to use <code>gpsd</code> with Kismet</h1>
+<h1 id='kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</h1>
 
 <p>Kismet's interface was designed for a much older version of 
 <code>gpsd</code>, and tends to fight with the autobauding code in the
@@ -264,15 +272,11 @@ it has synced up to a GPS before running Kismet.</p>
 <p>You can <a href='start-kismet'>download a shellscript</a> that does
 this.</p>
 
-<h1 id='bluetooth'>I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device</h1>
+<h1 id='bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</h1>
 
 <p>The Bluetooth stack returns 0 for a read from a missing device,
 rather than -1, and doesn't set errno.  This is wrong and needs to be
 fixed at OS level.</p>
-
-<h1 id='gpsdrive'>Implausibly low speeds when using gpsdrive</h1>
-
-<p>This is a gpsdrive bug, as you can verify by running xgps alongside it.</p>
 
 <h1 id='lockup'>My <code>gpsd</code> sometimes stops responding overnight</h1>
 
@@ -312,7 +316,7 @@ brought on by lots of I/O activity.</p>
 <p>Another thing to try is running <code>gpsd</code> under Valgrind overnight 
 and seeing if it reports any leaks.</p>
 
-<h1 id='why_migrate'>Why this version of <code>gpsd</code>?</h1>
+<h1 id='why_migrate'>Why use this version of <code>gpsd</code>?</h1>
 
 <p>If you have written a <code>gpsd</code>-aware application using one
 of the old 1.x versions, or a fork such as ngpsd or tgpsd, here are
@@ -345,8 +349,7 @@ static-checked using <a href='http://www.splint.org'>splint</a>, and
 is regression-tested before every release.</li>
 </ol>
 
-<h1 id='accuracy'>Why use <code>gpsd</code> protocol rather than
-parsing raw NMEA?</h1>
+<h1 id='why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</h1>
 
 <p>Some applications that use <code>gpsd</code> start raw mode with
 the 'r' command and parse the NMEA directly.  This is not a good idea.</p>
@@ -370,8 +373,7 @@ in meters is the most obvious example; climb/sink is another.  When a GPS
 doesn't supply these, <code>gpsd</code> can fill them in using the
 same sorts of computation that more capable GPSes use.</p>
 
-<h1 id='accuracy'>How should  I interface my application with 
-<code>gpsd</code>?</h1>
+<h1 id='interfacing'>How should  I interface my application with <code>gpsd</code>?</h1>
 
 <p>The <code>gpsd</code> package provides two ways for C code to get
 data from a GPS.  Both go through the libgps.a library, which supports
@@ -399,8 +401,7 @@ build from source that conditions out all but one of the drivers.</p>
 <p>For Python programmers, there is a gps.py module the high-level
 interface.  It exports a class that encapsulates a GPS session.</p>
 
-<h1 id='changes'>How has the <code>gpsd</code> interface changed since
-1.x?</h1>
+<h1 id='changes'>How has the <code>gpsd</code> interface changed since 1.x?</h1>
 
 <p>There are three minor incompatibilities with <code>gpsd</code> 1.x:</p>
 
