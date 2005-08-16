@@ -17,7 +17,7 @@
 /*
   Jeff Francis
   jeff@gritch.org
-  $Id: gpsdspewcurses.c,v 1.11 2005/08/16 20:32:27 jfrancis Exp $
+  $Id$
 
   Kind of a curses version of xgps for use with gpsd.
 */
@@ -371,10 +371,13 @@ int main(int argc, char *argv[])
   char *err_str = NULL;
 
   /* Process the options.  Print help if requested. */
-  while ((option = getopt(argc, argv, "h")) != -1) {
+  while ((option = getopt(argc, argv, "hv")) != -1) {
     switch (option) {
+    case 'v':
+      (void)fprintf(stderr, "SVN ID: $Id$ \n");
+      exit(0);
     case 'h': default:
-      (void)fprintf(stderr, "Usage: %s [-h] [server[:port:[device]]]\n", argv[0]);
+      (void)fprintf(stderr, "Usage: %s [-h] [-v] [server[:port:[device]]]\n", argv[0]);
       exit(1);
     }
   }
