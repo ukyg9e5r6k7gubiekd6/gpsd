@@ -370,14 +370,11 @@ int main(int argc, char *argv[])
   char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
   char *err_str = NULL;
 
-  /* Process the options.  Print help or version, if requested. */
-  while ((option = getopt(argc, argv, "hv")) != -1) {
+  /* Process the options.  Print help if requested. */
+  while ((option = getopt(argc, argv, "h")) != -1) {
     switch (option) {
-    case 'v':
-      (void)printf("thing $Id: gpsdspewcurses.c,v 1.11 2005/08/16 20:32:27 jfrancis Exp $\n");
-      exit(0);
     case 'h': default:
-      (void)fputs("usage:  thing [-hv] [server[:port:[device]]]\n", stderr);
+      (void)fprintf(stderr, "Usage: %s [-h] [server[:port:[device]]]\n", argv[0]);
       exit(1);
     }
   }
