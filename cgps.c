@@ -51,7 +51,7 @@ static char *altunits = "ft";
 static char *speedunits = "mph";
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
-static void die(sig UNUSED) 
+static void die(int sig UNUSED) 
 {
     /* Ignore signals. */
     (void)signal(SIGINT,SIG_IGN);

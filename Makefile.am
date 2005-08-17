@@ -1,6 +1,6 @@
 # Automake description for gpsd
 
-SUBDIRS = contrib
+#SUBDIRS = contrib
 
 #
 # Build stuff depending on Motif
