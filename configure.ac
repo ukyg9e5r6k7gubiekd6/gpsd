@@ -329,9 +329,12 @@ if test x"$ac_dbus" == "xyes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
     # Older versions of atotools barf and die on this.
-    #PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
+    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
     AC_SUBST(DBUS_CFLAGS)
     AC_SUBST(DBUS_LIBS)
+    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22 )
+    AC_SUBST(DBUS_GLIB_CFLAGS)
+    AC_SUBST(DBUS_GLIB_LIBS)
 else
     AC_MSG_RESULT([no])
 fi

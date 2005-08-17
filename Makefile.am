@@ -12,8 +12,9 @@ endif
 XMLTO = xmlto
 
 if HAVE_DBUS
-INCLUDES = $(DBUS_CFLAGS)
+INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 DBUSPROGS = gpxlogger
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS)
 endif
 
 bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpspipe gpsflash
