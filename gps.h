@@ -299,6 +299,9 @@ void gps_set_raw_hook(struct gps_data_t *gpsdata, void (*hook)(struct gps_data_t
 int gps_set_callback(struct gps_data_t *gpsdata, void (*callback)(struct gps_data_t *sentence, char *buf, size_t len, int level), pthread_t *handler);
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 
+enum unit {unspecified, imperial, nautical, metric};
+enum unit gpsd_units(void);
+
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
 			  gps_mask_t,
@@ -312,7 +315,6 @@ extern double gpstime_to_unix(int, double);
 extern void unix_to_gpstime(double, /*@out@*/int *, /*@out@*/double *);
 extern double earth_distance(double, double, double, double);
 extern double wgs84_separation(double, double);
-extern int gpsd_units(void);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

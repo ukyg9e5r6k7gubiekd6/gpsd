@@ -121,6 +121,27 @@ is miles per hour.   This option can also be set as the X resource
 satellite display and able to run on a serial terminal or
 terminal emulator.</para>
 
+<para>Rather than use X resources to detemine which units to use, 
+<application>cgps</application> looks at variables in its environment.
+Here are the variables and values it checks:</para>
+
+<screen>
+    GPSD_UNITS one of: 
+              imperial   = miles/feet
+              nautical   = knots/feet
+              metric     = km/meters
+    LC_MEASUREMENT
+	      en_US      = miles/feet
+              C          = miles/feet
+              POSIX      = miles/feet
+              [other]    = km/meters
+    LANG
+	      en_US      = miles/feet
+              C          = miles/feet
+              POSIX      = miles/feet
+              [other]    = km/meters
+</screen>
+
 </refsect2>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>

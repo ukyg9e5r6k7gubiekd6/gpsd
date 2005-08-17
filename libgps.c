@@ -14,7 +14,6 @@
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
 
-#ifdef __UNUSED__
 /* 
  * check the environment to determine proper GPS units
  *
@@ -43,19 +42,19 @@ extern char *strtok_r(char *, const char *, char **);
  *
  * if none found then return compiled in default
  */
-int gpsd_units(void)
+enum unit gpsd_units(void)
 {
 	char *envu = NULL;
 
  	if ((envu = getenv("GPSD_UNITS")) && *envu) {
 		if (strcasecmp(envu, "imperial")) {
-			return 0;
+			return imperial;
 		}
 		if (strcasecmp(envu, "nautical")) {
-			return 1;
+			return nautical;
 		}
 		if (strcasecmp(envu, "metric")) {
-			return 2;
+			return metric;
 		}
 		/* unrecognized, ignore it */
 	}
@@ -64,15 +63,14 @@ int gpsd_units(void)
 		if (   strstr(envu, "_US") 
 		    || strcasecmp(envu, "C")
 		    || strcasecmp(envu, "POSIX")) {
-			return 0;
+			return imperial;
 		}
 		/* Other, must be metric */
-		return 2;
+		return metric;
 	}
 	/* TODO: allow a compile time default here */
-	return 0;
+	return unspecified;
 }
-#endif /* __UNUSED__ */
 
 struct gps_data_t *gps_open(const char *host, const char *port)
 /* open a connection to a gpsd daemon */
