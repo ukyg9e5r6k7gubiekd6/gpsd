@@ -46,7 +46,7 @@ enum unit gpsd_units(void)
 {
 	char *envu = NULL;
 
- 	if ((envu = getenv("GPSD_UNITS")) && *envu) {
+ 	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != NULL) {
 		if (strcasecmp(envu, "imperial")) {
 			return imperial;
 		}
@@ -58,11 +58,11 @@ enum unit gpsd_units(void)
 		}
 		/* unrecognized, ignore it */
 	}
- 	if (((envu = getenv("LC_MEASUREMENT")) && *envu) 
- 	    || ((envu = getenv("LANG")) && *envu)) {
-		if (   strstr(envu, "_US") 
-		    || strcasecmp(envu, "C")
-		    || strcasecmp(envu, "POSIX")) {
+ 	if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu !=NULL) 
+ 	    || ((envu = getenv("LANG")) != NULL && *envu != NULL)) {
+		if (strstr(envu, "_US")!=0 
+		    || strcasecmp(envu, "C")!=0
+		    || strcasecmp(envu, "POSIX")!=0) {
 			return imperial;
 		}
 		/* Other, must be metric */

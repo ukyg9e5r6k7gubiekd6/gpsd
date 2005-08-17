@@ -252,6 +252,8 @@ splint:
 	-splint -redef $(gpsd_SOURCES) $(libgps_c_sources)
 	@echo "Running splint on xgps..."
 	-splint -exportlocal $(xgps_SOURCES)
+	@echo "Running splint on cgps..."
+	-splint -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on sirfmon..."
