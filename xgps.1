@@ -17,9 +17,9 @@
 .el .ne 3
 .IP "\\$1" \\$2
 ..
-.TH "GPSD" 1 "" "" ""
+.TH "XGPS" 1 "" "" ""
 .SH NAME
-xgps, xgpsspeed \- test clients for gpsd
+xgps, xgpsspeed, cgps \- test clients for gpsd
 .SH "SYNOPSIS"
 .ad l
 .hy 0
@@ -31,6 +31,12 @@ xgps, xgpsspeed \- test clients for gpsd
 .hy 0
 .HP 10
 \fBxgpsspeed\fR [\-rv] [\fIX\-options\fR] [\-h] [\-v] [\-nc\ \fIX\-color\fR] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+.ad
+.hy
+.ad l
+.hy 0
+.HP 5
+\fBcgps\fR [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .ad
 .hy
 
@@ -63,6 +69,11 @@ xgpsspeed is a speedometer that uses position information from the GPS\&. It acc
 
 .PP
 The \-speedunits option can be used to set the speed units for display; follow the keyword with knots for nautical miles per hour, kph for kilometres per hour, or mph for miles per hour\&. The default is miles per hour\&. This option can also be set as the X resource 'speedunits'\&.
+
+.SS "cgps"
+
+.PP
+cgps is a client resembling xgps, but without the pictorial satellite display and able to run on a serial terminal or terminal emulator\&.
 
 .SH "SEE ALSO"
 

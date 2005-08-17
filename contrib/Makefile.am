@@ -14,7 +14,3 @@ gpxlogger_LDADD = \
 
 gpxlogger_SOURCES = \
        gpxlogger.c
-
-# This is not really good.  We should have a dependency on this file
-gpspipe_LDADD = \
-       ../netlib.o

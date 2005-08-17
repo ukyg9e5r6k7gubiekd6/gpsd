@@ -54,6 +54,8 @@ It accepts an -h option and optional argument as for gps, or a -v option
 to dump the package version and exit. Additionally, it accepts -rv
 (reverse video) and -nc (needle color) options.
 
+cgps resembles xgps, but without the pictorial satellite display.  It
+can run on a serial terminal or terminal emulator.
 %prep
 %setup -q
 
@@ -129,6 +131,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
+%attr(755, root, root) %{_bindir}/cgps
 %{_mandir}/man1/xgps.1*
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed

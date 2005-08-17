@@ -4,13 +4,14 @@
    "docbook/docbookx.dtd">
 <refentry id='xgps.1'>
 <refmeta>
-<refentrytitle>gpsd</refentrytitle>
+<refentrytitle>xgps</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname>xgps</refname>
 <refname>xgpsspeed</refname>
+<refname>cgps</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
@@ -38,6 +39,20 @@
       choice='opt'>-nc <replaceable>X-color</replaceable></arg> <arg
       choice='opt'>-speedunits <group
       choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
+      <group>
+	<replaceable>server</replaceable>
+	  <group> 
+	    <replaceable>:port</replaceable> 
+	      <group><replaceable>:device</replaceable></group>
+	  </group>
+      </group>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>cgps</command>  
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
+      <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -97,6 +112,14 @@ display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
 is miles per hour.   This option can also be set as the X resource 
 'speedunits'.</para>
+
+</refsect2>
+<refsect2><title>cgps</title>
+
+<para><application>cgps</application> is a client resembling 
+<application>xgps</application>, but without the pictorial 
+satellite display and able to run on a serial terminal or
+terminal emulator.</para>
 
 </refsect2>
 </refsect1>

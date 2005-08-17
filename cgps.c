@@ -47,7 +47,7 @@ static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
-static void die() {
+static void die(void) {
 
   /* Ignore signals. */
   signal(SIGINT,SIG_IGN);
