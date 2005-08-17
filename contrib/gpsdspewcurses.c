@@ -22,11 +22,6 @@
   Kind of a curses version of xgps for use with gpsd.
 */
 
-
-/* Do ya want curses, or just straight text? */
-#define WITH_CURSES yep
-/* #undef WITH_CURSES */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,10 +30,8 @@
 #include <math.h>
 #include <errno.h>
 
-#ifdef WITH_CURSES
 #include <ncurses.h>                                                         
 #include <signal.h>
-#endif
 
 #include "gps.h"
 
@@ -53,7 +46,6 @@ static struct gps_data_t *gpsdata;
 static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 
-#ifdef WITH_CURSES
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die() {
 
@@ -76,7 +68,6 @@ static void die() {
   /* Bye! */
   exit(0);
 }
-#endif
 
 /* This gets called once for each new sentence. */
 static void update_panel(struct gps_data_t *gpsdata, 
@@ -91,7 +82,6 @@ static void update_panel(struct gps_data_t *gpsdata,
   float altunits=METERS_TO_FEET;
   float speedunits=MPS_TO_MPH;
 
-#ifdef WITH_CURSES
   /* Do the initial field label setup. */
   move(0,5);
   printw("Time:");
@@ -117,229 +107,126 @@ static void update_panel(struct gps_data_t *gpsdata,
   printw("Change:");
   move(0,45);
   printw("PRN:   Elev:  Azim:  SNR:  Used:");
-#endif
 
-#ifndef WITH_CURSES
-  printf("PRN:   Elev:  Azim:  SNR:  Used:\n");
-#endif
 
   /* This is for the satellite status display.  Lifted almost verbatim
      from xgps.c. */
   if (gpsdata->satellites) {
     for (i = 0; i < MAXCHANNELS; i++) {
       if (i < (unsigned int)gpsdata->satellites) {
-#ifdef WITH_CURSES
 	move(i+1,45);
 	printw(" %3d    %02d    %03d    %02d      %c    ",
 	       gpsdata->PRN[i],
 	       gpsdata->elevation[i], gpsdata->azimuth[i], 
 	       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
-#else
-	printf(" %3d    %02d    %03d    %02d      %c\n",
-	       gpsdata->PRN[i],
-	       gpsdata->elevation[i], gpsdata->azimuth[i], 
-	       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
-#endif
       } else {
-#ifdef WITH_CURSES
 	move(i+1,45);
 	printw("                                          ");
-#else
-	printf("                  \n");
-#endif
       }
     }
   }
   
 /* TODO: Make this work. */
   if (isnan(gpsdata->fix.time)==0) {
-#ifdef WITH_CURSES
     move(0,17);
     printw("%s",unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s)));
-#else
-    printf("%s\n",unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s)));
-#endif
   } else {
-#ifdef WITH_CURSES
     move(0,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the latitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
-#ifdef WITH_CURSES
     move(1,17);
     printw("%lf %c     ", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-#else
-    printf("lat:  %lf %c\n", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-#endif
   } else {
-#ifdef WITH_CURSES
     move(1,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the longitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
-#ifdef WITH_CURSES
     move(2,17);
     printw("%lf %c     ", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-#else
-    printf("lon:  %lf %c\n", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-#endif
   } else {
-#ifdef WITH_CURSES
     move(2,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the altitude. */
   if (gpsdata->fix.mode == MODE_3D) {
-#ifdef WITH_CURSES
     move(3,17);
     printw("%.1f ft     ",gpsdata->fix.altitude*altunits);
-#else
-    printf("alt:  %f ft\n",gpsdata->fix.altitude*altunits);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(3,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the speed */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
-#ifdef WITH_CURSES
     move(4,17);
     printw("%.1f mph     ", gpsdata->fix.speed*speedunits);
-#else
-    printf("spd:  %f mph\n", gpsdata->fix.speed*speedunits);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(4,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the heading. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
-#ifdef WITH_CURSES
     move(5,17);
     printw("%.1f degrees     \n", gpsdata->fix.track);
-#else
-    printf("crs:  %f degrees\n", gpsdata->fix.track);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(5,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the estimated horizontal position error. */
   if (isnan(gpsdata->fix.eph)==0) {
-#ifdef WITH_CURSES
     move(6,17);
     printw("%d ft     ", (int) (gpsdata->fix.eph * altunits));
-#else
-    printf("alterr:  %f\n", gpsdata->fix.eph * altunits);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(6,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the estimated vertical position error. */
   if (isnan(gpsdata->fix.epv)==0) {
-#ifdef WITH_CURSES
     move(7,17);
     printw("%d ft     ", (int)(gpsdata->fix.epv * altunits));
-#else
-    printf("poserr:  %f\n", gpsdata->fix.epv * altunits);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(7,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
 
   /* Fill in the rate of climb. */
   /* TODO: Units are probably wrong. */
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
-#ifdef WITH_CURSES
     move(8,17);
     printw("%.1f ft/min     ", gpsdata->fix.climb * METERS_TO_FEET * 60);
-#else
-    printf("cli:  %f ft/min\n", gpsdata->fix.climb * METERS_TO_FEET * 60);
-#endif
   } else {
-#ifdef WITH_CURSES
     move(8,17);
     printw("n/a         ");
-#else
-    printf("n/a\n");
-#endif
   }
   
   /* Fill in the GPS status */
   if (gpsdata->online == 0) {
     newstate = 0;
-#ifdef WITH_CURSES
     move(9,17);
     printw("OFFLINE          ");
-#else
-    printf("OFFLINE\n");
-#endif
   } else {
     newstate = gpsdata->fix.mode;
     switch (gpsdata->fix.mode) {
     case MODE_2D:
-#ifdef WITH_CURSES
       move(9,17);
       printw("2D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-#else
-      printf("2D %sFIX\n",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-#endif
       break;
     case MODE_3D:
-#ifdef WITH_CURSES
       move(9,17);
       printw("3D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-#else
-      printf("3D %sFIX\n",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-#endif
       break;
     default:
-#ifdef WITH_CURSES
       move(9,17);
       printw("NO FIX               ");
-#else
-      printf("NO FIX\n");
-#endif
       break;
     }
   }
@@ -349,19 +236,11 @@ static void update_panel(struct gps_data_t *gpsdata,
     timer = time(NULL);
     state = newstate;
   }
-#ifdef WITH_CURSES
   move(10,17);
   printw("(%d secs)          ", (int) (time(NULL) - timer));
-#else
-  printf("(%d secs)\n", (int) (time(NULL) - timer));
-#endif
 
   /* Update the screen. */
-#ifdef WITH_CURSES
   refresh();
-#else
-  printf("\n");
-#endif
 }
 
 int main(int argc, char *argv[])
@@ -428,12 +307,10 @@ int main(int argc, char *argv[])
   timer = time(NULL);
 
   /* Set up the curses screen (if using curses). */
-#ifdef WITH_CURSES
   initscr();
   raw();
   noecho();
   /* signal(SIGINT,die); */
-#endif
 
   /* Here's where updates go. */
   gps_set_raw_hook(gpsdata, update_panel);
@@ -461,15 +338,6 @@ int main(int argc, char *argv[])
     sleep(1);
   }
 
-#ifdef WITH_CURSES
   die();
-#else
-  /* We're done talking to gpsd. */
-  (void)gps_close(gpsdata);
-  if (arg != NULL)
-    (void)free(arg);
-
-  return 0;
-#endif
 }
 
