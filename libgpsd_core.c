@@ -32,7 +32,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
             if (session->saved_baud == -1)
-                session->saved_baud = cfgetispeed(&session->ttyset);
+                session->saved_baud = (int)cfgetispeed(&session->ttyset);
 	    if (session->device_type != NULL && session->device_type->wrapup != NULL)
 		session->device_type->wrapup(session);
 	    /*@i@*/session->device_type = *dp;

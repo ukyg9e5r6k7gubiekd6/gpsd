@@ -684,7 +684,19 @@ static void sirfbin_initializer(struct gps_device_t *session)
 				  0x00,		/* disable dead reckoning */
 				  0x01,		/* enable track smoothing */
 				 0x00, 0x00, 0xb0, 0xb3};
+	unsigned char requestecef[] = {0xa0, 0xa2, 0x00, 0x08,
+				       0xa6, 0x00, 0x02, 0x01,
+				       0x00, 0x00, 0x00, 0x00,
+				       0x00, 0x00, 0xb0, 0xb3};
+	unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08, 
+					  0xa6, 0x00, 0x04, 0x03,
+					  0x00, 0x00, 0x00, 0x00,
+					  0x00, 0x00, 0xb0, 0xb3};
 	/*@ -charint @*/
+	gpsd_report(4, "Requesting periodic ecef reports...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, requestecef);
+	gpsd_report(4, "Requesting periodic tracker reports...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, requesttracker);
 	gpsd_report(4, "Setting DGPS control to use SBAS...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, dgpscontrol);
 	gpsd_report(4, "Setting SBAS to auto/integrity mode...\n");

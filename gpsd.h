@@ -147,7 +147,6 @@ struct gps_device_t {
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     struct gps_fix_t lastfix;	/* use to compute uncertainties */
-#ifdef BINARY_ENABLE
     double mag_var;		/* Magnetic variation in degrees */  
     /*
      * The rest of this structure is driver-specific private storage.
@@ -163,6 +162,7 @@ struct gps_device_t {
 	    double subseconds;
 	} nmea;
 #endif /* NMEA_ENABLE */
+#ifdef BINARY_ENABLE
 #ifdef SIRFII_ENABLE
 	struct {
 	    unsigned int driverstate;	/* for private use */
@@ -222,8 +222,8 @@ struct gps_device_t {
 	    isgps30bits_t   buf[RTCM_WORDS_MAX];
 	    unsigned int    bufindex;
 	} isgps;
-    } driver;
 #endif /* BINARY_ENABLE */
+    } driver;
 };
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
