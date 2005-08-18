@@ -29,6 +29,8 @@
 #include <unistd.h>
 #include <math.h>
 #include <errno.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 
 #include <ncurses.h>                                                         
 #include <signal.h>
@@ -250,6 +252,12 @@ int main(int argc, char *argv[])
     char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *err_str = NULL;
 
+    struct timeval timeout;
+    fd_set rfds;
+    int data;
+
+		
+
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
@@ -327,7 +335,7 @@ int main(int argc, char *argv[])
 	default:             	err_str = "Unknown"; break;
 	}
 	(void)fprintf( stderr, 
-		       "xgps: no gpsd running or network error: %d, %s\n", 
+		       "cgps: no gpsd running or network error: %d, %s\n", 
 		       errno, err_str);
 	exit(2);
     }
@@ -360,14 +368,34 @@ int main(int argc, char *argv[])
     /* Request "w+x" data from gpsd. */
     (void)gps_query(gpsdata, "w+x\n");
 
-    /* Loop and poll once per second (this could be less than optimal
-       for a receiver that updates > 1hz, or for a user using a *really*
-       slow ancient serial terminal). */
-    for(;;) {
-	(void)gps_poll(gpsdata);
-	(void)sleep(1);
-    }
+    /* accept connections */
+    (void)listen(gpsdata->gps_fd, 5);
 
-    //die();
+    for (;;) { /* heart of the client */
+    
+        /* watch to see when it has input */
+        FD_ZERO(&rfds);
+        FD_SET(gpsdata->gps_fd, &rfds);
+
+	/* wait up to five seconds. */
+	timeout.tv_sec = 5;
+	timeout.tv_usec = 0;
+																
+	/* check if we have new information */
+	data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
+	
+	if (data == -1) {
+	    fprintf( stderr, "cgps: Socket error\n");
+	    exit(2);
+	}
+	else if( data ) {
+	    /* code that calls gps_poll(gpsdata) */
+	    (void)gps_poll(gpsdata);
+	}
+	else {
+	    fprintf(stderr, "cgps: No data\n");
+	}
+    }
+    //die(0);
 }
 
