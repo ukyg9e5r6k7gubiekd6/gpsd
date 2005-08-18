@@ -95,6 +95,9 @@ Rather than use X resources to detemine which units to use, cgps looks at variab
               POSIX      = miles/feet
               [other]    = km/meters
 
+.PP
+cgps terminates when you send it a SIGHUP or SIGINT; given default terminal settings this will happen when you type Ctl\-C at it\&. It will also terminate on 'q'
+
 .SH "SEE ALSO"
 
 .PP

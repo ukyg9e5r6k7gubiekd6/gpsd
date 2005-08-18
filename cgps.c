@@ -57,6 +57,7 @@ static void die(int sig UNUSED)
 {
     /* Ignore signals. */
     (void)signal(SIGINT,SIG_IGN);
+    (void)signal(SIGHUP,SIG_IGN);
 
     /* Move the cursor to the bottom left corner. */
     (void)mvcur(0,COLS-1,LINES-1,0);
@@ -349,6 +350,7 @@ int main(int argc, char *argv[])
     (void)noecho();
     (void)nodelay(stdscr,(bool)TRUE);
     (void)signal(SIGINT,die);
+    (void)signal(SIGHUP,die);
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_panel);

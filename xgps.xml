@@ -142,6 +142,10 @@ Here are the variables and values it checks:</para>
               [other]    = km/meters
 </screen>
 
+<para><application>cgps</application> terminates when you send it a
+SIGHUP or SIGINT; given default terminal settings this will happen
+when you type Ctl-C at it.  It will also terminate on 'q'</para>
+
 </refsect2>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
