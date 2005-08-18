@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
     int option;
     char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *err_str = NULL;
-    char c;
+    int c;
 
     struct timeval timeout;
     fd_set rfds;
@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
     /* Set up the curses screen (if using curses). */
     (void)initscr();
     (void)noecho();
-    (void)nodelay(stdscr,TRUE);
+    (void)nodelay(stdscr,(bool)TRUE);
     (void)signal(SIGINT,die);
 
     /* Here's where updates go. */
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
         
         /* Quit if 'q'. */
         if(c=='q') {
-          die(NULL);
+          die(0);
         }
 
     }
