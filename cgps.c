@@ -63,7 +63,6 @@ static void die(int sig UNUSED)
 
     /* Put input attributes back the way they were. */
     (void)echo();
-    (void)noraw();
 
     /* Done with curses. */
     (void)endwin();
@@ -251,6 +250,7 @@ int main(int argc, char *argv[])
     int option;
     char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
     char *err_str = NULL;
+    char c;
 
     struct timeval timeout;
     fd_set rfds;
@@ -346,8 +346,8 @@ int main(int argc, char *argv[])
 
     /* Set up the curses screen (if using curses). */
     (void)initscr();
-    (void)raw();
     (void)noecho();
+    (void)nodelay(stdscr,TRUE);
     (void)signal(SIGINT,die);
 
     /* Here's where updates go. */
@@ -396,6 +396,14 @@ int main(int argc, char *argv[])
 	    fprintf(stderr, "cgps: No data\n");
 	}
     }
-    //die(0);
+ 
+    /* Check for user input. */
+    c=getch();
+
+    /* Quit if 'q'. */
+    if(c=='q') {
+      die(NULL);
+    }
+ 
 }
 
