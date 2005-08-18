@@ -395,14 +395,15 @@ int main(int argc, char *argv[])
 	else {
 	    fprintf(stderr, "cgps: No data\n");
 	}
-    }
- 
-    /* Check for user input. */
-    c=getch();
 
-    /* Quit if 'q'. */
-    if(c=='q') {
-      die(NULL);
+        /* Check for user input. */
+        c=getch();
+        
+        /* Quit if 'q'. */
+        if(c=='q') {
+          die(NULL);
+        }
+
     }
  
 }
