@@ -177,7 +177,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* Fill in the heading. */
     if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
 	(void)move(5,17);
-	(void)printw("%.1f degrees     \n", gpsdata->fix.track);
+	(void)printw("%.1f degrees     ", gpsdata->fix.track);
     } else {
 	(void)move(5,17);
 	(void)printw("n/a         ");
