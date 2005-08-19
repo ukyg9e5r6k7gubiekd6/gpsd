@@ -21,6 +21,10 @@
       <arg choice='opt'>-r</arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-w</arg>
+      <group>
+	<replaceable>server</replaceable>
+	  <group><replaceable>:port</replaceable></group>
+      </group>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -41,6 +45,9 @@ to the local <application>gpsd</application> without causing problems.</para>
 <application>gpsd</application> sentences.  Each line can be optionally
 time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
+
+<para>An optional argument may specify a server to get data from; a
+colon-separated suffix is taken as a port number.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -71,7 +78,7 @@ standard output.  The exit.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title>
 
-<para>Gary E. Miller<email>gem@rellim.com</email>.  There is a
+<para>Gary E. Miller <email>gem@rellim.com</email>.  There is a
 project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 
