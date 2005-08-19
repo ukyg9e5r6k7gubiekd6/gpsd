@@ -144,12 +144,12 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 - Added Sony CXD2951 support, untested.  All error estimates are
   now nailed to 95% confidence interval.  Added rtcmdecode and its
   documentation; also, gpsd can now monitor serial devices emitting 
-  RTCM104 and display differential-GPS data in a readable format; also,
-  gpsd can now serve RTCM104 on port 2101.  Added dangerous alpha version 
-  of gpsflash.  Work around a nasty bug in the i.Trek M3's firmware.
-  Added support for True North Technologies Revolution 2X Digital compass.
-  Added the gpxlogger client for systems with DBUS support and the
-  gpspipe and cgps clients for general use.
+  RTCM104 and display differential-GPS data in a readable format.  
+  Added dangerous alpha version of gpsflash.  Work around a nasty bug 
+  in SiRFStar III firmware version < 3.1.1.  Added support for True 
+  North Technologies Revolution 2X Digital compass.  Added the 
+  gpxlogger client for systems with DBUS support and the gpspipe 
+  and cgps clients for general use.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.
