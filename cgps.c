@@ -370,9 +370,6 @@ int main(int argc, char *argv[])
     /* Request "w+x" data from gpsd. */
     (void)gps_query(gpsdata, "w+x\n");
 
-    /* accept connections */
-    (void)listen(gpsdata->gps_fd, 5);
-
     for (;;) { /* heart of the client */
     
         /* watch to see when it has input */
