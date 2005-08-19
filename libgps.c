@@ -20,9 +20,10 @@ extern char *strtok_r(char *, const char *, char **);
  * clients should only call this if no user preference on the command line or
  * Xresources
  *
- * return 0 - Use miles/feet
- *        1 - Use knots/feet
- *        2 - Use km/meters
+ * return imperial    - Use miles/feet
+ *        nautical    - Use knots/feet
+ *        metric      - Use km/meters
+ *        unspecified - use compiled default
  * 
  * In order check these environment vars:
  *    GPSD_UNITS one of: 
@@ -47,13 +48,13 @@ enum unit gpsd_units(void)
 	char *envu = NULL;
 
  	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
-		if (strcasecmp(envu, "imperial")) {
+		if (0 == strcasecmp(envu, "imperial")) {
 			return imperial;
 		}
-		if (strcasecmp(envu, "nautical")) {
+		if (0 == strcasecmp(envu, "nautical")) {
 			return nautical;
 		}
-		if (strcasecmp(envu, "metric")) {
+		if (0 == strcasecmp(envu, "metric")) {
 			return metric;
 		}
 		/* unrecognized, ignore it */

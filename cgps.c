@@ -186,7 +186,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* Fill in the estimated horizontal position error. */
     if (isnan(gpsdata->fix.eph)==0) {
 	(void)move(6,17);
-	(void)printw("%d ft     ", (int) (gpsdata->fix.eph * altfactor));
+	(void)printw("%d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
     } else {
 	(void)move(6,17);
 	(void)printw("n/a         ");
@@ -195,17 +195,17 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* Fill in the estimated vertical position error. */
     if (isnan(gpsdata->fix.epv)==0) {
 	(void)move(7,17);
-	(void)printw("%d ft     ", (int)(gpsdata->fix.epv * altfactor));
+	(void)printw("%d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
     } else {
 	(void)move(7,17);
 	(void)printw("n/a         ");
     }
 
     /* Fill in the rate of climb. */
-    /* TODO: Factor are probably wrong. */
     if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
 	(void)move(8,17);
-	(void)printw("%.1f ft/min     ", gpsdata->fix.climb * METERS_TO_FEET * 60);
+	(void)printw("%.1f %s/min     "
+	    , gpsdata->fix.climb * altfactor * 60, altunits);
     } else {
 	(void)move(8,17);
 	(void)printw("n/a         ");
