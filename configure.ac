@@ -1,5 +1,5 @@
 AC_INIT
-AM_INIT_AUTOMAKE(gpsd, 2.28)
+AM_INIT_AUTOMAKE(gpsd, 2.29)
 AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(config.h)
 AC_LANG([C])
@@ -330,9 +330,12 @@ if test x"$ac_dbus" == "xyes"; then
     AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
     # Older versions of autotools barf and die on this.
     #PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4 )
+    DBUS_CFLAGS=`pkg-config --cflags dbus-glib-1`
+    DBUS_LIBS=`pkg-config --libs dbus-1`
     AC_SUBST(DBUS_CFLAGS)
     AC_SUBST(DBUS_LIBS)
     #PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22 )
+    DBUS_GLIB_LIBS=`pkg-config --libs dbus-glib-1`
     AC_SUBST(DBUS_GLIB_CFLAGS)
     AC_SUBST(DBUS_GLIB_LIBS)
 else
@@ -341,7 +344,7 @@ fi
 
 dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
-dnl but mo DBUS headers.
+dnl but no DBUS headers.
 dnl ac_dbus=no
 dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
 dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
