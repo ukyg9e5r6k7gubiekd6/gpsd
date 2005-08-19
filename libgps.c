@@ -61,9 +61,9 @@ enum unit gpsd_units(void)
 	}
  	if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu != '\0') 
  	    || ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
-		if (strstr(envu, "_US")!=0 
-		    || strcasecmp(envu, "C")!=0
-		    || strcasecmp(envu, "POSIX")!=0) {
+		if (strcasecmp(envu, "en_US")==0 
+		    || strcasecmp(envu, "C")==0
+		    || strcasecmp(envu, "POSIX")==0) {
 			return imperial;
 		}
 		/* Other, must be metric */
