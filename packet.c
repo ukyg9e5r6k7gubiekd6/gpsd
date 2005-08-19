@@ -791,12 +791,20 @@ ssize_t packet_get(struct gps_device_t *session)
 {
     ssize_t newdata;
     /*@ -modobserver @*/
+loop:
     newdata = read(session->gpsdata.gps_fd, session->inbuffer+session->inbuflen,
 			sizeof(session->inbuffer)-(session->inbuflen));
     /*@ +modobserver @*/
-    if (newdata < 0 && errno != EAGAIN)
-	return BAD_PACKET;
-    else if (newdata == 0 || (newdata < 0 && errno == EAGAIN))
+    if (newdata == -1){ /*newdata == -1 && errno = (EAGAIN || EINTR) */
+        if ((errno == EAGAIN) || (errno == EINTR)) {
+	    usleep(10000);
+	    goto loop;
+        } else {
+	    return BAD_PACKET;
+        }
+    }
+
+    if (newdata == 0)
 	return 0;
     return packet_parse(session, (size_t)newdata);
 }
