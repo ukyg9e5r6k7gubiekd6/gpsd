@@ -63,7 +63,7 @@ can run on a serial terminal or terminal emulator.
 #CC=gcc4 ./autogen.sh
 %configure
 # Requires gcc4 to compile the RTCM104 support correctly.
-CC=gcc4 make -e %{?_smp_mflags}
+CC=gcc4 make -e CFLAGS=-D_GNU_SOURCE %{?_smp_mflags}
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -113,31 +113,34 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %attr(755, root, root) %{_bindir}/gpsfake
 %attr(755, root, root) %{_bindir}/rtcmdecode
 %attr(755, root, root) %{_bindir}/gpsflash
+%{_libdir}/python*/site-packages/gpsfake.py*
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
 %{_mandir}/man1/gpsfake.1*
+%{_mandir}/man1/rtcmdecode.1*
+%{_mandir}/man1/gpsflash.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
-%{_mandir}/man1/rtcmdecode.1*
-%{_mandir}/man1/gpsflash.1*
-%{_mandir}/man1/rtcm.5*
-%{_mandir}/man1/srec.5*
-%attr(755, root, root) %{_bindir}/gpsfake
-%{_libdir}/python*/site-packages/gpsfake.py*
+%{_mandir}/man5/rtcm-104.5*
+%{_mandir}/man5/srec.5*
 
 %files -n gpsd-clients
 %defattr(-,root,root,-)
 %attr(755, root, root) %{_bindir}/xgps
 %attr(755, root, root) %{_bindir}/xgpsspeed
 %attr(755, root, root) %{_bindir}/cgps
+%attr(755, root, root) %{_bindir}/gpspipe
+#%attr(755, root, root) %{_bindir}/gpxlogger
 %{_mandir}/man1/xgps.1*
+%{_mandir}/man1/gpspipe.1*
+%{_mandir}/man1/gpxlogger.1*
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Fri Aug 19 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.29-1
 - Added Sony CXD2951 support, untested.  All error estimates are
   now nailed to 95% confidence interval.  Added rtcmdecode and its
   documentation; also, gpsd can now monitor serial devices emitting 
@@ -146,7 +149,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   of gpsflash.  Work around a nasty bug in the i.Trek M3's firmware.
   Added support for True North Technologies Revolution 2X Digital compass.
   Added the gpxlogger client for systems with DBUS support and the
-  gpspipe client for general use.
+  gpspipe and cgps clients for general use.
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
 - The 2.27 source tarball somehow got truncated on upload.

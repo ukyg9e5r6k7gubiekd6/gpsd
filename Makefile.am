@@ -154,6 +154,7 @@ man_MANS = \
 	gpxlogger.1 \
 	gpspipe.1 \
 	rtcmdecode.1 \
+	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
 

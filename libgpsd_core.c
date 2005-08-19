@@ -11,12 +11,12 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "config.h"
+#include "gpsd.h"
+
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #include <pthread.h>
 #endif
 
-#include "gpsd.h"
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
