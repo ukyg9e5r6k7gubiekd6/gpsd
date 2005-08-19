@@ -14,6 +14,7 @@ XMLTO = xmlto
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 DBUSPROGS = gpxlogger
+DBUSPAGES = gpxlogger.1
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS)
 endif
 
@@ -151,7 +152,7 @@ man_MANS = \
 	gpsprof.1 \
 	gpsfake.1 \
 	sirfmon.1 \
-	gpxlogger.1 \
+	$(DBUSPAGES) \
 	gpspipe.1 \
 	rtcmdecode.1 \
 	gpsflash.1 \

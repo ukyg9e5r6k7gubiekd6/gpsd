@@ -135,7 +135,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 #%attr(755, root, root) %{_bindir}/gpxlogger
 %{_mandir}/man1/xgps.1*
 %{_mandir}/man1/gpspipe.1*
-%{_mandir}/man1/gpxlogger.1*
+#%{_mandir}/man1/gpxlogger.1*
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
