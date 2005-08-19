@@ -372,7 +372,7 @@ dnl    AC_SUBST(DBUS_GLIB_LIBS)
 dnl fi
 AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
-AC_OUTPUT(Makefile contrib/Makefile gpsd.spec)
+AC_OUTPUT(Makefile gpsd.spec)
 
 dnl Output the configuration summary
 echo ""
