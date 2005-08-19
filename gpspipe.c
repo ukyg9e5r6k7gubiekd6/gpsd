@@ -26,6 +26,7 @@
  *          for output.  Then programs that expect to connect to a raw GPS
  *          device could conenct to that.
  *
+  $Id$
  */
 
 #include <errno.h>
@@ -38,19 +39,17 @@
 #include "gpsd.h"
 
 
-#define GPSPIPE_VER "0.1"
-
 static void usage(const char *prog) {
-	fprintf(stderr, "%s: connect to local gpsd and dump data to stdout\n\n"
-	        "   Version %s\n\n"
+	fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port]]\n\n"
+	        "SVN ID: $Id$ \n"
 		"-h show this help\n"
 		"-r Dump raw NMEA\n"
 	        "-w Dump gpsd native data\n"
 	        "-t time stamp the data\n"
 	        "-n [count] exit after count packets\n"
 	        "-V print version and exit\n\n"
-	        "You must specify one, or both, of -r/-w\n",
-		prog, GPSPIPE_VER);
+	        "You must specify one, or both, of -r/-w\n"
+		);
 }
 
 int main( int argc, char **argv) {
@@ -65,6 +64,8 @@ int main( int argc, char **argv) {
 	bool new_line = true;
 	long count = -1;
 	int option;
+        char *arg = NULL, *colon1, *colon2, *device = NULL; 
+        char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
 	//extern char *optarg;
 
 
@@ -83,8 +84,7 @@ int main( int argc, char **argv) {
 			dump_gpsd = true;
 			break;
 		case 'V':
-			fprintf(stderr, "%s: Version %s\n", argv[0]
-				, GPSPIPE_VER);
+	                (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
 			exit(0);
 		case '?':
 		case 'h':
@@ -105,10 +105,37 @@ int main( int argc, char **argv) {
 		usage( argv[0] );
 		exit(1);
 	}
-	s = netlib_connectsock( "127.0.0.1", "2947", "tcp");
+	/* Grok the server, port, and device. */
+	/*@ -branchstate @*/
+	if (optind < argc) {
+		arg = strdup(argv[optind]);
+		/*@i@*/colon1 = strchr(arg, ':');
+		server = arg;
+		if (colon1 != NULL) {
+			if (colon1 == arg) {
+				server = NULL;
+			} else {
+				*colon1 = '\0';
+			}
+			port = colon1 + 1;
+			colon2 = strchr(port, ':');
+			if (colon2 != NULL) {
+				if (colon2 == port) {
+					port = NULL;
+				} else {
+					*colon2 = '\0';
+				}
+				device = colon2 + 1;
+			}
+		}
+		colon1 = colon2 = NULL;
+	}
+	/*@ +branchstate @*/
+
+	s = netlib_connectsock( server, port, "tcp");
 	if ( s < 0 ) {
-		fprintf( stderr, "%s: could not connect to gpsd, %s(%d)\n"
-			, argv[0] , strerror(errno), errno);
+		fprintf( stderr, "%s: could not connect to gpsd %s:%s, %s(%d)\n"
+			, argv[0] , server, port, strerror(errno), errno);
 		exit (1);
 	}
 
