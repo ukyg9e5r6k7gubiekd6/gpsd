@@ -39,7 +39,7 @@
 #include "gpsd.h"
 
 
-static void usage(const char *prog) {
+static void usage() {
 	fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port]]\n\n"
 	        "SVN ID: $Id$ \n"
 		"-h show this help\n"
@@ -89,7 +89,7 @@ int main( int argc, char **argv) {
 		case '?':
 		case 'h':
 		default:
-			usage( argv[0] );
+			usage( );
 			exit(1);
 		}
 	}
@@ -102,7 +102,7 @@ int main( int argc, char **argv) {
 	} else if ( dump_gpsd ) {
 		cstr = "w\n";
 	} else {
-		usage( argv[0] );
+		usage( );
 		exit(1);
 	}
 	/* Grok the server, port, and device. */
