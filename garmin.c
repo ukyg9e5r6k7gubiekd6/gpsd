@@ -417,9 +417,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			    , sats->azmth
 			    , sats->status);
 
-		// busted??
-// FIXME!! need to elimate sats over 32
-		if ( (32 < (int)sats->svid) || (0 == (int)sats->svid) ) {
+		if ( 255 == (int)sats->svid ) {
 		    // Garmin uses 255 for empty
 		    // gpsd uses 0 for empty
 		    continue;
