@@ -15,7 +15,7 @@
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsfake</command>
+  <command>gpspipe</command>
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-n <replaceable>count</replaceable></arg>
       <arg choice='opt'>-r</arg>
