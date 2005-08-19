@@ -49,6 +49,8 @@
 #include "gpsd.h"
 #include "gpsflash.h"
 
+#if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
+
 /* From the SiRF protocol manual... may as well be consistent */
 #define PROTO_SIRF 0
 #define PROTO_NMEA 1
@@ -283,3 +285,4 @@ struct flashloader_t sirf_type = {
     .stage3_command = wait5seconds,
     .port_wrapup = sirfPortWrapup,	/* after signals unblock */
 };
+#endif /* defined(SIRFII_ENABLE) && defined(BINARY_ENABLE) */
