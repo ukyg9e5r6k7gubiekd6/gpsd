@@ -124,7 +124,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 		       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
 	    } else {
 		(void)move(i+1,45);
-		(void)printw("                                          ");
+		(void)printw("                                  ");
 	    }
 	}
     }
