@@ -52,6 +52,8 @@ static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
 
+static WINDOW *datawin, *satellites, *messages;
+
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
 {
@@ -83,153 +85,120 @@ static void update_panel(struct gps_data_t *gpsdata,
 {
     int i;
     int newstate;
-    char s[128];
 
     /* Do the initial field label setup. */
-    (void)move(0,5);
-    (void)printw("Time:");
-    (void)move(1,5);
-    (void)printw("Latitude:");
-    (void)move(2,5);
-    (void)printw("Longitude:");
-    (void)move(3,5);
-    (void)printw("Altitude:");
-    (void)move(4,5);
-    (void)printw("Speed:");
-    (void)move(5,5);
-    (void)printw("Heading:");
-    (void)move(6,5);
-    (void)printw("HPE:");
-    (void)move(7,5);
-    (void)printw("VPE:");
-    (void)move(8,5);
-    (void)printw("Climb:");
-    (void)move(9,5);
-    (void)printw("Status:");
-    (void)move(10,5);
-    (void)printw("Change:");
-    (void)move(0,45);
-    (void)printw("PRN:   Elev:  Azim:  SNR:  Used:");
-
+    (void)mvwprintw(datawin, 1,5, "Time:");
+    (void)mvwprintw(datawin, 2,5, "Latitude:");
+    (void)mvwprintw(datawin, 3,5, "Longitude:");
+    (void)mvwprintw(datawin, 4,5, "Altitude:");
+    (void)mvwprintw(datawin, 5,5, "Speed:");
+    (void)mvwprintw(datawin, 6,5, "Heading:");
+    (void)mvwprintw(datawin, 7,5, "HPE:");
+    (void)mvwprintw(datawin, 8,5, "VPE:");
+    (void)mvwprintw(datawin, 9,5, "Climb:");
+    (void)mvwprintw(datawin, 10,5, "Status:");
+    (void)mvwprintw(datawin, 11,5, "Change:");
+    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
+    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
 
     /* This is for the satellite status display.  Lifted almost verbatim
        from xgps.c. */
     if (gpsdata->satellites) {
 	for (i = 0; i < MAXCHANNELS; i++) {
+	    (void)wmove(satellites, i+2, 1);
 	    if (i < gpsdata->satellites) {
-		(void)move(i+1,45);
 		(void)printw(" %3d    %02d    %03d    %02d      %c    ",
 		       gpsdata->PRN[i],
 		       gpsdata->elevation[i], gpsdata->azimuth[i], 
 		       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
 	    } else {
-		(void)move(i+1,45);
 		(void)printw("                                  ");
 	    }
 	}
     }
   
-/* TODO: Make this work. */
+    /* TODO: Make this work. */
+    (void)wmove(datawin, 1,17);
     if (isnan(gpsdata->fix.time)==0) {
-	(void)move(0,17);
-	(void)printw("%s",unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s)));
-    } else {
-	(void)move(0,17);
-	(void)printw("n/a         ");
-    }
+	char s[128];
+	(void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s)));
+    } else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the latitude. */
-    if (gpsdata->fix.mode >= MODE_2D) {
-	(void)move(1,17);
-	(void)printw("%lf %c     ", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-    } else {
-	(void)move(1,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 2,17);
+    if (gpsdata->fix.mode >= MODE_2D)
+	(void)wprintw(datawin,"%lf %c     ", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the longitude. */
-    if (gpsdata->fix.mode >= MODE_2D) {
-	(void)move(2,17);
-	(void)printw("%lf %c     ", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-    } else {
-	(void)move(2,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 3,17);
+    if (gpsdata->fix.mode >= MODE_2D)
+	(void)wprintw(datawin,"%lf %c     ", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the altitude. */
-    if (gpsdata->fix.mode == MODE_3D) {
-	(void)move(3,17);
-	(void)printw("%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
-    } else {
-	(void)move(3,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 4,17);
+    if (gpsdata->fix.mode == MODE_3D)
+	(void)wprintw(datawin,"%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the speed */
-    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
-	(void)move(4,17);
-	(void)printw("%.1f %s     ", gpsdata->fix.speed*speedfactor, speedunits);
-    } else {
-	(void)move(4,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 5,17);
+    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
+	(void)wprintw(datawin,"%.1f %s     ", gpsdata->fix.speed*speedfactor, speedunits);
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the heading. */
-    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
-	(void)move(5,17);
-	(void)printw("%.1f degrees     ", gpsdata->fix.track);
-    } else {
-	(void)move(5,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 6,17);
+    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
+	(void)wprintw(datawin,"%.1f degrees     ", gpsdata->fix.track);
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the estimated horizontal position error. */
-    if (isnan(gpsdata->fix.eph)==0) {
-	(void)move(6,17);
-	(void)printw("%d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
-    } else {
-	(void)move(6,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 7,17);
+    if (isnan(gpsdata->fix.eph)==0)
+	(void)wprintw(datawin,"%d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the estimated vertical position error. */
-    if (isnan(gpsdata->fix.epv)==0) {
-	(void)move(7,17);
-	(void)printw("%d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
-    } else {
-	(void)move(7,17);
-	(void)printw("n/a         ");
-    }
+    (void)wmove(datawin, 8,17);
+    if (isnan(gpsdata->fix.epv)==0)
+	(void)wprintw(datawin,"%d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
+    else
+	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the rate of climb. */
-    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
-	(void)move(8,17);
-	(void)printw("%.1f %s/min     "
+    (void)wmove(datawin, 9,17);
+    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
+	(void)wprintw(datawin,"%.1f %s/min     "
 	    , gpsdata->fix.climb * altfactor * 60, altunits);
-    } else {
-	(void)move(8,17);
-	(void)printw("n/a         ");
-    }
+    else
+	(void)wprintw(datawin,"n/a         ");
   
     /* Fill in the GPS status */
+    (void)wmove(datawin, 10,17);
     if (gpsdata->online == 0) {
 	newstate = 0;
-	(void)move(9,17);
-	(void)printw("OFFLINE          ");
+	(void)wprintw(datawin,"OFFLINE          ");
     } else {
 	newstate = gpsdata->fix.mode;
 	switch (gpsdata->fix.mode) {
 	case MODE_2D:
-	    (void)move(9,17);
-	    (void)printw("2D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    (void)wprintw(datawin,"2D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	case MODE_3D:
-	    (void)move(9,17);
-	    (void)printw("3D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+	    (void)wprintw(datawin,"3D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
 	    break;
 	default:
-	    (void)move(9,17);
-	    (void)printw("NO FIX               ");
+	    (void)wprintw(datawin,"NO FIX               ");
 	    break;
 	}
     }
@@ -239,15 +208,15 @@ static void update_panel(struct gps_data_t *gpsdata,
 	timer = time(NULL);
 	state = newstate;
     }
-    (void)move(10,17);
-    (void)printw("(%d secs)          ", (int) (time(NULL) - timer));
+    (void)wmove(datawin, 11,17);
+    (void)wprintw(datawin,"(%d secs)          ", (int) (time(NULL) - timer));
 
-    (void)move(11,0);
-    (void)clrtobot();
-    (void)addstr(message);
+    (void)wprintw(messages, "%s\n", message);
 
     /* Update the screen. */
-    (void)refresh();
+    (void)wrefresh(datawin);
+    (void)wrefresh(satellites);
+    (void)wrefresh(messages);
 }
 
 int main(int argc, char *argv[])
@@ -260,8 +229,6 @@ int main(int argc, char *argv[])
     struct timeval timeout;
     fd_set rfds;
     int data;
-
-		
 
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "hv")) != -1) {
@@ -356,6 +323,12 @@ int main(int argc, char *argv[])
     (void)signal(SIGINT,die);
     (void)signal(SIGHUP,die);
 
+    datawin    = newwin(13, 45, 0, 0);
+    satellites = newwin(13, 35, 0, 45);
+    messages   = newwin(0,  0,  13, 0);
+    (void)scrollok(messages, true);
+    (void)wsetscrreg(messages, 0, LINES-21);
+
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_panel);
 
@@ -383,12 +356,12 @@ int main(int argc, char *argv[])
 	/* wait up to five seconds. */
 	timeout.tv_sec = 5;
 	timeout.tv_usec = 0;
-																
+
 	/* check if we have new information */
 	data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
 	
 	if (data == -1) {
-	    fprintf( stderr, "cgps: Socket error\n");
+	    fprintf( stderr, "cgps: socket error\n");
 	    exit(2);
 	}
 	else if( data ) {
