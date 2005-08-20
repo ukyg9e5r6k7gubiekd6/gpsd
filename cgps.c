@@ -78,7 +78,7 @@ static void die(int sig UNUSED)
 /* This gets called once for each new sentence. */
 static void update_panel(struct gps_data_t *gpsdata, 
 			 char *message,
-			 size_t len UNUSED, 
+			 size_t len, 
 			 int level UNUSED)
 {
     int i;
@@ -241,6 +241,10 @@ static void update_panel(struct gps_data_t *gpsdata,
     }
     (void)move(10,17);
     (void)printw("(%d secs)          ", (int) (time(NULL) - timer));
+
+    (void)move(11,0);
+    (void)clrtobot();
+    (void)addstr(message);
 
     /* Update the screen. */
     (void)refresh();
