@@ -319,7 +319,6 @@ int main(int argc, char *argv[])
     /* Set up the curses screen (if using curses). */
     (void)initscr();
     (void)noecho();
-    (void)nodelay(stdscr,(bool)TRUE);
     (void)signal(SIGINT,die);
     (void)signal(SIGHUP,die);
 
@@ -327,7 +326,8 @@ int main(int argc, char *argv[])
     satellites = newwin(13, 35, 0, 45);
     messages   = newwin(0,  0,  13, 0);
     (void)scrollok(messages, true);
-    (void)wsetscrreg(messages, 0, LINES-21);
+    (void)wsetscrreg(messages, 0, LINES-13);
+    (void)nodelay(messages,(bool)TRUE);
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_panel);
@@ -373,7 +373,7 @@ int main(int argc, char *argv[])
 	}
 
         /* Check for user input. */
-        c=getch();
+        c=wgetch(messages);
         
         /* Quit if 'q'. */
         if(c=='q') {
