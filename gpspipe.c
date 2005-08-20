@@ -39,7 +39,7 @@
 #include "gpsd.h"
 
 
-static void usage() {
+static void usage(void) {
 	fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port]]\n\n"
 	        "SVN ID: $Id$ \n"
 		"-h show this help\n"
