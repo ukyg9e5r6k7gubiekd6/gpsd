@@ -117,15 +117,15 @@ href='http://developer.berlios.de/projects/gpsd/'>here on berlios.de</a>.</p>
 
 <ul>
 <li><a
-href="https://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
+href="http://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
 is for release announcements and project news.</li>
 <li><a
-href="https://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
+href="http://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
 is for questions and technical support on <code>gpsd</code>, including support
 for application builders using <code>gpsd</code> as a component.</li>
 
 <li><a
-href="https://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
+href="http://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
 is for <code>gpsd</code> developers.</li>
 
 <li><a
