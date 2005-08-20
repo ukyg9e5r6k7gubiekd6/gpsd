@@ -755,19 +755,21 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",P=?");
 	    break;
 	case 'Q':
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
 	    if (assign_channel(whoami) && 
 		(isnan(whoami->device->gpsdata.pdop)==0
 		 || isnan(whoami->device->gpsdata.hdop)==0
 		 || isnan(whoami->device->gpsdata.vdop)==0))
 		(void)snprintf(phrase, sizeof(phrase), ",Q=%d %.2f %.2f %.2f %.2f %.2f",
 			whoami->device->gpsdata.satellites_used, 
-			whoami->device->gpsdata.pdop, 
-			whoami->device->gpsdata.hdop, 
-			whoami->device->gpsdata.vdop,
-			whoami->device->gpsdata.tdop,
-			whoami->device->gpsdata.gdop);
+			ZEROIZE(whoami->device->gpsdata.pdop), 
+			ZEROIZE(whoami->device->gpsdata.hdop), 
+			ZEROIZE(whoami->device->gpsdata.vdop),
+			ZEROIZE(whoami->device->gpsdata.tdop),
+			ZEROIZE(whoami->device->gpsdata.gdop));
 	    else
 		(void)strcpy(phrase, ",Q=?");
+#undef ZEROIZE
 	    break;
 	case 'R':
 	    if (*p == '=') ++p;
