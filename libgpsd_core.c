@@ -658,7 +658,7 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     static char hexbuf[MAX_PACKET_LENGTH*2+1];
     size_t i;
     size_t len = (size_t)((binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
-    char *ibuf = (char *)binbuf;
+    const char *ibuf = (const char *)binbuf;
     memset(hexbuf, 0, sizeof(hexbuf));
 
     for (i = 0; i < len; i++) {

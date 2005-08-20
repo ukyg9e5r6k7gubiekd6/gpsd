@@ -132,12 +132,14 @@ int main( int argc, char **argv) {
 	}
 	/*@ +branchstate @*/
 
+	/*@ -nullpass @*/
 	s = netlib_connectsock( server, port, "tcp");
 	if ( s < 0 ) {
 		fprintf( stderr, "%s: could not connect to gpsd %s:%s, %s(%d)\n"
 			, argv[0] , server, port, strerror(errno), errno);
 		exit (1);
 	}
+	/*@ +nullpass @*/
 
 	wrote = write( s, cstr, strlen(cstr) );
 	if ( (ssize_t)strlen(cstr) != wrote ) {

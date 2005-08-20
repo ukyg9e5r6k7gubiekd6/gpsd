@@ -306,15 +306,17 @@ int main(int argc, char *argv[])
     (void)signal(SIGINT,die);
     (void)signal(SIGHUP,die);
 
+    /*@ -onlytrans @*/
     datawin    = newwin(13, 45, 1, 0);
     satellites = newwin(13, 35, 1, 45);
     messages   = newwin(0,  0,  14, 0);
+    /*@ +onlytrans @*/
     (void)scrollok(messages, true);
     (void)wsetscrreg(messages, 0, LINES-13);
     (void)nodelay(messages,(bool)TRUE);
 
-    mvprintw(0, 31, "cgps test client");
-    refresh();
+    (void)mvprintw(0, 31, "cgps test client");
+    (void)refresh();
 
     /* Do the initial field label setup. */
     (void)mvwprintw(datawin, 1,5, "Time:");

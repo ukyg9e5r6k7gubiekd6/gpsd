@@ -217,9 +217,9 @@ static int sirfPortSetup(int fd, struct termios *term)
     return sirfSetProto(fd, term, PROTO_SIRF, 38400);
 }
 
-static int sirfVersionCheck(int fd, const char *version,
-			    const char *loader, size_t ls,
-			    const char *firmware, size_t fs)
+static int sirfVersionCheck(int fd, const char *version UNUSED,
+			    const char *loader, size_t ls UNUSED,
+			    const char *firmware, size_t fs UNUSED)
 {
     /*
      * This implies that any SiRF loader and firmware image is good for 
@@ -228,14 +228,14 @@ static int sirfVersionCheck(int fd, const char *version,
     return 0;
 }
 
-static int wait2seconds(int fd)
+static int wait2seconds(int fd UNUSED)
 {
     /* again we wait, this time for our uploaded code to start running */
     gpsd_report(1, "waiting 2 seconds...\n");
     return (int)sleep(2);
 }
 
-static int wait5seconds(int fd)
+static int wait5seconds(int fd UNUSED)
 {
     /* wait for firmware upload to settle in */
     gpsd_report(1, "waiting 5 seconds...\n");

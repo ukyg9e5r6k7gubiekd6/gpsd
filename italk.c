@@ -72,8 +72,8 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static bool italk_set_mode(struct gps_device_t *session, 
-			      speed_t speed, bool mode)
+static bool italk_set_mode(struct gps_device_t *session UNUSED, 
+			      speed_t speed UNUSED, bool mode UNUSED)
 {
     /*@ +charint @*/
     unsigned char msg[] = {0,};

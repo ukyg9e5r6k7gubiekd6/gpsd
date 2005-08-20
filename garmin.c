@@ -869,7 +869,7 @@ static void garmin_init(struct gps_device_t *session)
 	//SendPacket(session,  thePacket);
 }
 
-static void garmin_close(struct gps_device_t *session) 
+static void garmin_close(struct gps_device_t *session UNUSED) 
 {
     /* FIXME -- do we need to put the garmin to sleep?  or is closing the port
        sufficient? */

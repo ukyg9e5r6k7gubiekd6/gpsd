@@ -866,7 +866,7 @@ static bool preamble_match(isgps30bits_t *w)
 static bool length_check(struct gps_device_t *session)
 {
     return session->driver.isgps.bufindex >= 2 
-	&& session->driver.isgps.bufindex >= ((struct rtcm_msg_t *)session->driver.isgps.buf)->w2.frmlen + 2;
+	&& session->driver.isgps.bufindex >= ((struct rtcm_msg_t *)session->driver.isgps.buf)->w2.frmlen + 2u;
 }
 
 enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
