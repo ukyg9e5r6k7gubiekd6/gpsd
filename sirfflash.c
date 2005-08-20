@@ -63,7 +63,8 @@ static int
 sirfSendUpdateCmd(int pfd){
 	bool status;
 	/*@ +charint @*/
-	unsigned char msg[] =	{0xa0,0xa2,	/* header */
+	static unsigned char msg[] =	{
+	    			0xa0,0xa2,	/* header */
 				0x00,0x01,	/* message length */
 				0x94,		/* 0x94: firmware update */
 				0x00,0x00,	/* checksum */
@@ -129,7 +130,8 @@ sirfSetProto(int pfd, struct termios *term, unsigned int speed, unsigned int pro
 	int i;
 	int spd[8] = {115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800};
 	/*@ +charint @*/
-	unsigned char sirf[] =	{0xa0,0xa2,	/* header */
+	static unsigned char sirf[] =	{
+				0xa0,0xa2,	/* header */
 				0x00,0x31,	/* message length */
 				0xa5,		/* message 0xa5: UART config */
 				0x00,0,0, 0,0,0,0, 8,1,0, 0,0, /* port 0 */
@@ -171,7 +173,8 @@ static int sirfProbe(int fd, char **version)
 /* try to elicit a return packet with the firmware version in it */
 {
     /*@ +charint @*/
-    unsigned char versionprobe[] = {0xa0, 0xa2, 0x00, 0x02,
+    static unsigned char versionprobe[] = {
+				    0xa0, 0xa2, 0x00, 0x02,
 				    0x84, 0x00,
 				    0x00, 0x84, 0xb0, 0xb3};
     /*@ -charint @*/

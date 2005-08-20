@@ -73,7 +73,7 @@ static bool sirf_speed(int ttyfd, speed_t speed)
 /* change speed in binary mode */
 {
     /*@ +charint @*/
-   unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
+   static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
                      0x86, 
                      0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
 		     0x08,			/* 8 data bits */
@@ -92,7 +92,7 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 /* switch from binary to NMEA at specified baud */
 {
     /*@ +charint @*/
-   unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x18,
+   static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x18,
                      0x81, 0x02,
                      0x01, 0x01, /* GGA */
                      0x00, 0x00, /* suppress GLL */
