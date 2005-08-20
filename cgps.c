@@ -86,22 +86,6 @@ static void update_panel(struct gps_data_t *gpsdata,
     int i;
     int newstate;
 
-    /* Do the initial field label setup. */
-    (void)mvwprintw(datawin, 1,5, "Time:");
-    (void)mvwprintw(datawin, 2,5, "Latitude:");
-    (void)mvwprintw(datawin, 3,5, "Longitude:");
-    (void)mvwprintw(datawin, 4,5, "Altitude:");
-    (void)mvwprintw(datawin, 5,5, "Speed:");
-    (void)mvwprintw(datawin, 6,5, "Heading:");
-    (void)mvwprintw(datawin, 7,5, "HPE:");
-    (void)mvwprintw(datawin, 8,5, "VPE:");
-    (void)mvwprintw(datawin, 9,5, "Climb:");
-    (void)mvwprintw(datawin, 10,5, "Status:");
-    (void)mvwprintw(datawin, 11,5, "Change:");
-    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
-    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
-    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
-
     /* This is for the satellite status display.  Lifted almost verbatim
        from xgps.c. */
     if (gpsdata->satellites) {
@@ -209,7 +193,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	state = newstate;
     }
     (void)wmove(datawin, 11,17);
-    (void)wprintw(datawin,"(%d secs)          ", (int) (time(NULL) - timer));
+    (void)wprintw(datawin,"%d secs          ", (int) (time(NULL) - timer));
 
     (void)wprintw(messages, "%s\n", message);
 
@@ -322,12 +306,32 @@ int main(int argc, char *argv[])
     (void)signal(SIGINT,die);
     (void)signal(SIGHUP,die);
 
-    datawin    = newwin(13, 45, 0, 0);
-    satellites = newwin(13, 35, 0, 45);
-    messages   = newwin(0,  0,  13, 0);
+    datawin    = newwin(13, 45, 1, 0);
+    satellites = newwin(13, 35, 1, 45);
+    messages   = newwin(0,  0,  14, 0);
     (void)scrollok(messages, true);
     (void)wsetscrreg(messages, 0, LINES-13);
     (void)nodelay(messages,(bool)TRUE);
+
+    mvprintw(0, 31, "cgps test client");
+    refresh();
+
+    /* Do the initial field label setup. */
+    (void)mvwprintw(datawin, 1,5, "Time:");
+    (void)mvwprintw(datawin, 2,5, "Latitude:");
+    (void)mvwprintw(datawin, 3,5, "Longitude:");
+    (void)mvwprintw(datawin, 4,5, "Altitude:");
+    (void)mvwprintw(datawin, 5,5, "Speed:");
+    (void)mvwprintw(datawin, 6,5, "Heading:");
+    (void)mvwprintw(datawin, 7,5, "HPE:");
+    (void)mvwprintw(datawin, 8,5, "VPE:");
+    (void)mvwprintw(datawin, 9,5, "Climb:");
+    (void)mvwprintw(datawin, 10,5, "Status:");
+    (void)mvwprintw(datawin, 11,5, "Change:");
+    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
+    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
+
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_panel);
