@@ -52,7 +52,7 @@ static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
 
-static WINDOW *datawin, *satellites, *messages;
+static WINDOW *datawin, *satellites, *messages, *command;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
@@ -89,15 +89,15 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* This is for the satellite status display.  Lifted almost verbatim
        from xgps.c. */
     if (gpsdata->satellites) {
-	for (i = 0; i < MAXCHANNELS; i++) {
+      for (i = 0; i < (MAXCHANNELS - 2); i++) {
 	    (void)wmove(satellites, i+2, 1);
 	    if (i < gpsdata->satellites) {
-		(void)printw(" %3d    %02d    %03d    %02d      %c    ",
+	      (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
 		       gpsdata->PRN[i],
 		       gpsdata->elevation[i], gpsdata->azimuth[i], 
 		       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');
 	    } else {
-		(void)printw("                                  ");
+	      (void)wprintw(satellites,"                              ");
 	    }
 	}
     }
@@ -201,6 +201,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     (void)wrefresh(datawin);
     (void)wrefresh(satellites);
     (void)wrefresh(messages);
+    (void)wrefresh(command);
 }
 
 int main(int argc, char *argv[])
@@ -307,15 +308,16 @@ int main(int argc, char *argv[])
     (void)signal(SIGHUP,die);
 
     /*@ -onlytrans @*/
-    datawin    = newwin(13, 45, 1, 0);
-    satellites = newwin(13, 35, 1, 45);
-    messages   = newwin(0,  0,  14, 0);
+    datawin    = newwin(15, 45, 1, 0);
+    satellites = newwin(15, 35, 1, 45);
+    command    = newwin(3,  45,  16, 0);
+    messages   = newwin(0,  0,  19, 0);
     /*@ +onlytrans @*/
     (void)scrollok(messages, true);
     (void)wsetscrreg(messages, 0, LINES-13);
     (void)nodelay(messages,(bool)TRUE);
 
-    (void)mvprintw(0, 31, "cgps test client");
+    (void)mvprintw(0, 31, "CGPS Test Client");
     (void)refresh();
 
     /* Do the initial field label setup. */
@@ -333,6 +335,8 @@ int main(int argc, char *argv[])
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)mvwprintw(command, 1,1, "Command:  ");
+    (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
 
 
     /* Here's where updates go. */
