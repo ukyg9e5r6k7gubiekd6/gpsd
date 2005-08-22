@@ -398,6 +398,25 @@ found:
 }
 /*@ +globstate @*/
 
+static bool allocation_policy(struct gps_device_t *channel,
+			      struct subscriber_t *user,
+			      time_t most_recent)
+{
+#ifdef __UNUSED__
+    /* only allocate devices that we know the packet type of */
+    if (channel->packet_type == BAD_PACKET)
+	return false;
+#endif /* __UNUSED__ */
+    /* maybe we have already bound a more recently active device */
+    if (user->device!=NULL && channel->gpsdata.sentence_time < most_recent)
+	return false;
+#ifdef RTCM104_SERVICE
+    if (user->rtcm == (channel->packet_type == RTCM_PACKET))
+	return false;
+#endif /* RTCM104_SERVICE */
+    return true;
+}
+
 /*@ -branchstate -usedef -globstate @*/
 static bool assign_channel(struct subscriber_t *user)
 {
@@ -406,14 +425,11 @@ static bool assign_channel(struct subscriber_t *user)
 	double most_recent = 0;
 	struct gps_device_t *channel;
 
+	gpsd_report(4, "assigning a channel...\n");
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
-		if ((user->device == NULL || channel->gpsdata.sentence_time >= most_recent)
-#ifdef RTCM104_SERVICE
- 		    && (user->rtcm == (channel->packet_type == RTCM_PACKET))
-#endif /* RTCM104_SERVICE */
-		    ) {
+		if (allocation_policy(channel, user, most_recent)) {
 		    user->device = channel;
 		    most_recent = channel->gpsdata.sentence_time;
 		}
