@@ -376,8 +376,7 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
     return NULL;
 }
 
-static /*@null@*/ struct gps_device_t *open_device(char *device_name, 
-						   bool nowait)
+static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 /* open and initialize a new channel block */
 {
     struct gps_device_t *chp;
@@ -391,13 +390,10 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name,
 found:
     gpsd_init(chp, &context, device_name);
     chp->gpsdata.raw_hook = raw_hook;
-    if (nowait) {
-	if (gpsd_activate(chp) < 0) {
-	    return NULL;
-	}
-	FD_SET(chp->gpsdata.gps_fd, &all_fds);
+    if (gpsd_activate(chp) < 0) {
+	return NULL;
     }
-
+    FD_SET(chp->gpsdata.gps_fd, &all_fds);
     return chp;
 }
 /*@ +globstate @*/
@@ -415,7 +411,7 @@ static bool assign_channel(struct subscriber_t *user)
 	    if (allocated_channel(channel)) {
 		if ((user->device == NULL || channel->gpsdata.sentence_time >= most_recent)
 #ifdef RTCM104_SERVICE
-		    && (user->rtcm == (channel->packet_type == RTCM_PACKET))
+ 		    && (user->rtcm == (channel->packet_type == RTCM_PACKET))
 #endif /* RTCM104_SERVICE */
 		    ) {
 		    user->device = channel;
@@ -980,7 +976,7 @@ static void handle_control(int sfd, char *buf)
 	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
 	else {
 	    gpsd_report(1,"<= control(%d): adding %s \n", sfd, stash);
-	    if (open_device(stash, true))
+	    if (open_device(stash))
 		(void)write(sfd, "OK\n", 3);
 	    else
 		(void)write(sfd, "ERROR\n", 6);
@@ -1219,7 +1215,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) { 
-	device = open_device(argv[i], nowait);
+	device = open_device(argv[i]);
 	if (!device) {
 	    gpsd_report(0, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
@@ -1341,15 +1337,6 @@ int main(int argc, char *argv[])
 	    if (!allocated_channel(channel))
 		continue;
 
-	    /* we may need to force the GPS open */
-	    if (nowait && channel->gpsdata.gps_fd == -1) {
-		gpsd_deactivate(channel);
-		if (gpsd_activate(channel) >= 0) {
-		    FD_SET(channel->gpsdata.gps_fd, &all_fds);
-		    notify_watchers(channel, "GPSD,X=%f\r\n", timestamp());
-		}
-	    }
-
 	    /* pass the current DGPSIP correction to the GPS if new */
 	    if (channel->device_type)
 		dgpsip_relay(channel);
@@ -1462,21 +1449,31 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-	/* close devices with no remaining subscribers */
-	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    if (allocated_channel(channel)) {
-		bool need_gps = false;
+	/*
+	 * Close devices with an identified packet type but no remaining 
+	 * subscribers.  The reason the test has this particular form is 
+	 * so that, immediately after device open, we'll keep reading 
+	 * packets until a type is identified even though there are no
+	 * subscribers yet.  We need this to happen so that subscribers 
+	 * can later choose a device by packet type.
+	 */
+	if (!nowait)
+	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
+		if (allocated_channel(channel)) {
+		    if (channel->packet_type != BAD_PACKET) {
+			bool need_gps = false;
 
-		for (cfd = 0; cfd < FD_SETSIZE; cfd++)
-		    if (subscribers[cfd].device == channel)
-			need_gps = true;
+			for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+			    if (subscribers[cfd].device == channel)
+				need_gps = true;
 
-		if (!nowait && !need_gps && channel->gpsdata.gps_fd > -1) {
-		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-		    gpsd_deactivate(channel);
+			if (!need_gps && channel->gpsdata.gps_fd > -1) {
+			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+			    gpsd_deactivate(channel);
+			}
+		    }
 		}
 	    }
-	}
     }
 
     if (control_socket)
