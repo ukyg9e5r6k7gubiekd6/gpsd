@@ -77,6 +77,7 @@ static void die(int sig UNUSED)
     exit(0);
 }
 
+
 /* This gets called once for each new sentence. */
 static void update_panel(struct gps_data_t *gpsdata, 
 			 char *message,
@@ -85,6 +86,9 @@ static void update_panel(struct gps_data_t *gpsdata,
 {
     int i;
     int newstate;
+    char *s;
+    enum deg_str_type deg_type = deg_ddmmss;
+    //enum deg_str_type deg_type = deg_dd;
 
     /* This is for the satellite status display.  Lifted almost verbatim
        from xgps.c. */
@@ -112,16 +116,18 @@ static void update_panel(struct gps_data_t *gpsdata,
 
     /* Fill in the latitude. */
     (void)wmove(datawin, 2,17);
-    if (gpsdata->fix.mode >= MODE_2D)
-	(void)wprintw(datawin,"%lf %c     ", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-    else
+    if (gpsdata->fix.mode >= MODE_2D) {
+        s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
+	(void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    } else
 	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the longitude. */
     (void)wmove(datawin, 3,17);
-    if (gpsdata->fix.mode >= MODE_2D)
-	(void)wprintw(datawin,"%lf %c     ", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-    else
+    if (gpsdata->fix.mode >= MODE_2D) {
+        s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
+	(void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    } else
 	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the altitude. */

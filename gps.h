@@ -301,6 +301,8 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler);
 
 enum unit {unspecified, imperial, nautical, metric};
 enum unit gpsd_units(void);
+enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };
+extern char *deg_to_str( enum deg_str_type type,  double f);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
