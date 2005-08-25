@@ -78,6 +78,8 @@ static void die(int sig UNUSED)
 }
 
 
+static enum deg_str_type deg_type = deg_dd;
+
 /* This gets called once for each new sentence. */
 static void update_panel(struct gps_data_t *gpsdata, 
 			 char *message,
@@ -87,8 +89,6 @@ static void update_panel(struct gps_data_t *gpsdata,
     int i;
     int newstate;
     char *s;
-    enum deg_str_type deg_type = deg_ddmmss;
-    //enum deg_str_type deg_type = deg_dd;
 
     /* This is for the satellite status display.  Lifted almost verbatim
        from xgps.c. */
@@ -210,6 +210,22 @@ static void update_panel(struct gps_data_t *gpsdata,
     (void)wrefresh(command);
 }
 
+static void usage( char *prog) 
+{
+	    (void)fprintf(stderr, 
+"Usage: %s [-h] [-v] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
+"  -h          Show this help, then exit\n"
+"  -v          Show version, then exit\n"
+"  -V          Show version, then exit\n"
+"  -l {d|m|s}  Select lat/lon format\n"
+"                d = DD.dddddd\n"
+"                m = DD MM.mmmm'\n"
+"                s = DD MM' SS.sss\"\n"
+                , prog);
+
+	    exit(1);
+}
+
 int main(int argc, char *argv[])
 {
     int option;
@@ -222,14 +238,31 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hv")) != -1) {
+    while ((option = getopt(argc, argv, "hvl:")) != -1) {
 	switch (option) {
 	case 'v':
+	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 	    exit(0);
 	case 'h': default:
-	    (void)fprintf(stderr, "Usage: %s [-h] [-v] [server[:port:[device]]]\n", argv[0]);
-	    exit(1);
+	    usage( argv[0] );
+	    break;
+	case 'l':
+	    switch ( optarg[0] ) {
+	    case 'd':
+		    deg_type = deg_dd;
+		    break;
+	    case 'm':
+		    deg_type = deg_ddmm;
+		    break;
+	    case 's':
+		    deg_type = deg_ddmmss;
+		    break;
+            default:
+		    (void)fprintf(stderr, "Unknown -l argument: %c\n", optarg);
+	            usage( argv[0] );
+		    break;
+            }
 	}
     }
 
