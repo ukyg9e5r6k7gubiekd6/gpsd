@@ -40,7 +40,7 @@ char *deg_to_str( enum deg_str_type type,  double f)
 
 	if ( deg_dd == type ) {
 		/* DD.dddddd */
-		(void)sprintf( str, "%3d.%06d", deg, frac_deg );
+		(void)sprintf( str, "%3d.%06ld", deg, frac_deg );
 		return str;
 	}
 	fsec = modf( fmin * 60, &fmin);

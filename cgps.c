@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 		    deg_type = deg_ddmmss;
 		    break;
             default:
-		    (void)fprintf(stderr, "Unknown -l argument: %c\n", optarg);
+		    (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
 	            usage( argv[0] );
 		    break;
             }
