@@ -112,10 +112,10 @@ try:
     try:
         test.gps_add(logfile, speed=speed, pred=fakehook)
     except gpsfake.PacketError, e:
-        sys.stderr.write("gsfake: " + e.msg + "\n")
+        sys.stderr.write("gpsfake: " + e.msg + "\n")
         raise SystemExit, 1
-    except IOError:
-        sys.stderr.write("gsfake: no such file as %s or file unreadable\n"%logfile)
+    except IOError, e:
+        sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
         raise SystemExit, 1
     except OSError:
         sys.stderr.write("gpsfake: can't open pty.\n")
