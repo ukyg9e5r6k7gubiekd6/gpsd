@@ -36,7 +36,64 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <fcntl.h>
+#include <termios.h>
 #include "gpsd.h"
+
+
+/* NMEA-0183 standard baud rate */
+#define BAUDRATE B4800
+
+/* POSIX compliant source */
+#define _POSIX_SOURCE 1
+
+/* Serial port vars */
+struct termios oldtio,newtio;
+int fd;
+#define SERBUF 255
+char serbuf[SERBUF];
+
+/* open the serial port and set it up */
+static int open_serial(char* device) {
+
+	/*  Open modem device for reading and writing and not as controlling
+	 *  tty. */
+	if((fd = open(device, O_RDWR|O_NOCTTY)) < 0) {
+		fprintf(stderr,"Error opening serial port\n");
+		exit(1);
+	}
+
+	/* Save current serial port settings for later */
+	if ( tcgetattr(fd, &oldtio) != 0 ) {
+		fprintf(stderr,"Error reading serial port settings\n");
+		exit(1);
+	}
+
+	/* Clear struct for new port settings. */
+	bzero(&newtio, sizeof(newtio));
+
+	/* make it raw */
+	(void)cfmakeraw(&newtio);
+	/* set speed */
+	(void)cfsetospeed(&newtio, BAUDRATE);
+	 
+	/* Clear the modem line and activate the settings for the port. */
+	tcflush(fd,TCIFLUSH);
+	if ( tcsetattr(fd,TCSANOW,&newtio) != 0 ) {
+		fprintf(stderr,"Error setting serial port settings\n");
+		exit(1);
+	}
+
+	return(fd);
+}
+
+
+/* Send a string to the serial port. */
+static int send_string(char *buf, int len) {
+
+	/* Send the string and  Return the result. */
+	return ( write(fd, buf, len ) );
+}
 
 
 static void usage(void) {
@@ -46,6 +103,7 @@ static void usage(void) {
 		"-r Dump raw NMEA\n"
 	        "-w Dump gpsd native data\n"
 	        "-t time stamp the data\n"
+		"-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r')\n"
 	        "-n [count] exit after count packets\n"
 	        "-V print version and exit\n\n"
 	        "You must specify one, or both, of -r/-w\n"
@@ -68,8 +126,10 @@ int main( int argc, char **argv) {
         char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
 	//extern char *optarg;
 
+	char *serialport = NULL;
+	int serial_flag = false;
 
-	while ((option = getopt(argc, argv, "?hrwtVn:")) != -1) {
+	while ((option = getopt(argc, argv, "?hrwtVn:s:")) != -1) {
 		switch (option) {
 		case 'n':
 			count = strtol(optarg, 0, 0);
@@ -86,6 +146,10 @@ int main( int argc, char **argv) {
 		case 'V':
 	                (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
 			exit(0);
+		case 's':
+		        serialport = optarg;
+		        serial_flag = true;
+		        break;
 		case '?':
 		case 'h':
 		default:
@@ -93,6 +157,12 @@ int main( int argc, char **argv) {
 			exit(1);
 		}
 	}
+
+	if( serial_flag && !dump_nmea ) {
+	  fprintf(stderr,"Use of '-s' requires '-r'\n");
+	  exit(1);
+	}
+
 	if ( dump_nmea ) {
 		if ( dump_gpsd ) {
 			cstr = "rw\n";
@@ -132,6 +202,11 @@ int main( int argc, char **argv) {
 	}
 	/*@ +branchstate @*/
 
+	/* Open the serial port and set it up. */
+	if(serial_flag) {
+	  open_serial(serialport);
+	}
+
 	/*@ -nullpass @*/
 	s = netlib_connectsock( server, port, "tcp");
 	if ( s < 0 ) {
@@ -150,12 +225,16 @@ int main( int argc, char **argv) {
 
 	for(;;) {
 		int i = 0;
+		int j = 0;
 		int readbytes = 0;
 
 		readbytes = (int)read( s, buf, sizeof(buf));
 		if ( readbytes > 0 ) {
 		    for ( i = 0 ; i < readbytes ; i++ ) {
 			char c = buf[i];
+			if( j < (SERBUF - 1) ) {
+				serbuf[j++] = buf[i];
+			}
 			if ( new_line && timestamp ) {
 				time_t now = time(NULL);
 
@@ -175,10 +254,22 @@ int main( int argc, char **argv) {
 					, strerror(errno), errno);
 				exit (1);
 			}
+
 		
 			if ( c == '\n' ) {
+
+			    if( serial_flag ) {
+			      if ( -1 == send_string( serbuf, j )) {
+			        fprintf( stderr, "%s: Serial port write Error, %s(%d)\n"
+				       , argv[0]
+				       , strerror(errno), errno);
+			        exit (1);
+			      }
+			      j = 0;
+			    }
+
 			    new_line = true;
-			    /* flush after eveery good line */
+			    /* flush after every good line */
 			    if (  fflush( stdout ) ) {
 				fprintf( stderr, "%s: fflush Error, %s(%d)\n"
 					, argv[0]
@@ -201,5 +292,14 @@ int main( int argc, char **argv) {
 			exit(1);
 		}
 	}
-	//exit(0);
+
+	if( serial_flag ) {
+		/* Restore the old serial port settings. */
+		if ( tcsetattr(fd, TCSANOW, &oldtio) != 0 ) {
+			fprintf(stderr, "Error restoring serial port settings\n");
+			exit(1);
+		}
+	}
+	exit(0);
+  
 }
