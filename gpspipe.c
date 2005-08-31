@@ -20,11 +20,6 @@
  * just needs to be linked to netlib like this:
  *	gcc gpspipe.c ../netlib.c -o gpspipe
  *
- * TODO
- *      add "-p [device]" 
- *          This would force gpspipe to create a bidirectional pipe device
- *          for output.  Then programs that expect to connect to a raw GPS
- *          device could conenct to that.
  *
   $Id$
  */
