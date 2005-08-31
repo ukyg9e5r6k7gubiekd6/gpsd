@@ -324,11 +324,11 @@ static ssize_t throttled_write(int cfd, char *buf, ssize_t len)
     if ((status = write(cfd, buf, (size_t)len)) > -1)
 	return status;
     if (errno == EBADF)
-	gpsd_report(3, "Client on %d has vanished.\n", cfd);
+	gpsd_report(3, "client(%d) has vanished.\n", cfd);
     else if (errno == EWOULDBLOCK && timestamp() - subscribers[cfd].active > NOREAD_TIMEOUT)
-	gpsd_report(3, "Client on %d timed out.\n", cfd);
+	gpsd_report(3, "client(%d) timed out.\n", cfd);
     else
-	gpsd_report(3, "Client write to %d: %s\n", cfd, strerror(errno));
+	gpsd_report(3, "client(%d) write: %s\n", cfd, strerror(errno));
     detach_client(cfd);
     return status;
 }
@@ -425,7 +425,7 @@ static bool assign_channel(struct subscriber_t *user)
 	double most_recent = 0;
 	struct gps_device_t *channel;
 
-	gpsd_report(4, "assigning a channel...\n");
+	gpsd_report(4, "client(%d): assigning channel...\n", user-subscribers);
 	/* ...connect him to the most recently active device */
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
@@ -437,7 +437,7 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     if (user->device == NULL) {
-	gpsd_report(1, "channel assignment failed.\n");
+	gpsd_report(1, "client(%d): channel assignment failed.\n", user-subscribers);
 	return false;
     }
 
@@ -788,28 +788,28 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    if (*p == '2') {
 		(void)assign_channel(whoami);
 		subscribers[cfd].raw = 2;
-		gpsd_report(3, "%d turned on super-raw mode\n", cfd);
+		gpsd_report(3, "client(%d) turned on super-raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=2");
 		p++;
 	    } else if (*p == '1' || *p == '+') {
 		(void)assign_channel(whoami);
 		subscribers[cfd].raw = 1;
-		gpsd_report(3, "%d turned on raw mode\n", cfd);
+		gpsd_report(3, "client(%d) turned on raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		subscribers[cfd].raw = 0;
-		gpsd_report(3, "%d turned off raw mode\n", cfd);
+		gpsd_report(3, "client(%d) turned off raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 		p++;
 	    } else if (subscribers[cfd].raw) {
 		subscribers[cfd].raw = 0;
-		gpsd_report(3, "%d turned off raw mode\n", cfd);
+		gpsd_report(3, "client(%d) turned off raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=0");
 	    } else {
 		(void)assign_channel(whoami);
 		subscribers[cfd].raw = 1;
-		gpsd_report(3, "%d turned on raw mode\n", cfd);
+		gpsd_report(3, "client(%d) turned on raw mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",R=1");
 	    }
 	    break;
@@ -854,7 +854,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    } else {
 		subscribers[cfd].watcher = true;
 		(void)assign_channel(whoami);
-		gpsd_report(3, "%d turned on watching\n", cfd);
+		gpsd_report(3, "client(%d) turned on watching\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",W=1");
 	    }
 	    break;
@@ -914,17 +914,17 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		p++;		
 	    } else if (*p == '1' || *p == '+') {
 		whoami->device->gpsdata.profiling = true;
-		gpsd_report(3, "%d turned on profiling mode\n", cfd);
+		gpsd_report(3, "client(%d) turned on profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=1");
 		p++;
 	    } else if (*p == '0' || *p == '-') {
 		whoami->device->gpsdata.profiling = false;
-		gpsd_report(3, "%d turned off profiling mode\n", cfd);
+		gpsd_report(3, "client(%d) turned off profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=0");
 		p++;
 	    } else {
 		whoami->device->gpsdata.profiling = !whoami->device->gpsdata.profiling;
-		gpsd_report(3, "%d toggled profiling mode\n", cfd);
+		gpsd_report(3, "client(%d) toggled profiling mode\n", cfd);
 		(void)snprintf(phrase, sizeof(phrase), ",Z=%d",
 			       (int)whoami->device->gpsdata.profiling);
 	    }
@@ -1434,7 +1434,7 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		int buflen;
 
-		gpsd_report(3, "checking %d\n", cfd);
+		gpsd_report(3, "checking client %d\n", cfd);
 		if ((buflen = (int)read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
 		} else {
