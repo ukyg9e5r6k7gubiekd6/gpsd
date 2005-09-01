@@ -43,10 +43,10 @@
 #define _POSIX_SOURCE 1
 
 /* Serial port vars */
-struct termios oldtio,newtio;
-int fd;
+static struct termios oldtio,newtio;
+static int fd;
 #define SERBUF 255
-char serbuf[SERBUF];
+static char serbuf[SERBUF];
 
 /* open the serial port and set it up */
 static int open_serial(char* device) {
@@ -65,17 +65,17 @@ static int open_serial(char* device) {
 	}
 
 	/* Clear struct for new port settings. */
-	bzero(&newtio, sizeof(newtio));
+	/*@i@*/bzero(&newtio, sizeof(newtio));
 
 	/* make it raw */
 	(void)cfmakeraw(&newtio);
 	/* set speed */
-	(void)cfsetospeed(&newtio, BAUDRATE);
+	/*@i@*/(void)cfsetospeed(&newtio, BAUDRATE);
 	 
 	/* Clear the modem line and activate the settings for the port. */
-	tcflush(fd,TCIFLUSH);
+	(void)tcflush(fd,TCIFLUSH);
 	if ( tcsetattr(fd,TCSANOW,&newtio) != 0 ) {
-		fprintf(stderr,"Error setting serial port settings\n");
+		(void)fprintf(stderr,"Error setting serial port settings\n");
 		exit(1);
 	}
 
@@ -84,10 +84,10 @@ static int open_serial(char* device) {
 
 
 /* Send a string to the serial port. */
-static int send_string(char *buf, int len) {
+static int send_string(char *buf, size_t len) {
 
 	/* Send the string and  Return the result. */
-	return ( write(fd, buf, len ) );
+	return ((int)write(fd, buf, len ) );
 }
 
 
@@ -122,7 +122,6 @@ int main( int argc, char **argv) {
 	//extern char *optarg;
 
 	char *serialport = NULL;
-	int serial_flag = false;
 
 	while ((option = getopt(argc, argv, "?hrwtVn:s:")) != -1) {
 		switch (option) {
@@ -143,7 +142,6 @@ int main( int argc, char **argv) {
 			exit(0);
 		case 's':
 		        serialport = optarg;
-		        serial_flag = true;
 		        break;
 		case '?':
 		case 'h':
@@ -153,7 +151,7 @@ int main( int argc, char **argv) {
 		}
 	}
 
-	if( serial_flag && !dump_nmea ) {
+	if( serialport != NULL && !dump_nmea ) {
 	  fprintf(stderr,"Use of '-s' requires '-r'\n");
 	  exit(1);
 	}
@@ -198,8 +196,8 @@ int main( int argc, char **argv) {
 	/*@ +branchstate @*/
 
 	/* Open the serial port and set it up. */
-	if(serial_flag) {
-	  open_serial(serialport);
+	if(serialport) {
+	    (int)open_serial(serialport);
 	}
 
 	/*@ -nullpass @*/
@@ -253,8 +251,8 @@ int main( int argc, char **argv) {
 		
 			if ( c == '\n' ) {
 
-			    if( serial_flag ) {
-			      if ( -1 == send_string( serbuf, j )) {
+			    if( serialport != NULL) {
+			      if ( -1 == send_string( serbuf, (size_t)j )) {
 			        fprintf( stderr, "%s: Serial port write Error, %s(%d)\n"
 				       , argv[0]
 				       , strerror(errno), errno);
@@ -288,13 +286,15 @@ int main( int argc, char **argv) {
 		}
 	}
 
-	if( serial_flag ) {
+#ifdef __UNUSED__
+	if( serialport != NULL ) {
 		/* Restore the old serial port settings. */
 		if ( tcsetattr(fd, TCSANOW, &oldtio) != 0 ) {
 			fprintf(stderr, "Error restoring serial port settings\n");
 			exit(1);
 		}
 	}
+
 	exit(0);
-  
+#endif /* __UNUSED__ */  
 }

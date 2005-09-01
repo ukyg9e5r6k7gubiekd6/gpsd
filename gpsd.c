@@ -400,7 +400,7 @@ found:
 
 static bool allocation_policy(struct gps_device_t *channel,
 			      struct subscriber_t *user,
-			      time_t most_recent)
+			      double most_recent)
 {
 #ifdef __UNUSED__
     /* only allocate devices that we know the packet type of */
@@ -1140,7 +1140,7 @@ int main(int argc, char *argv[])
 	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
     /*@ +observertrans @*/
     if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) < 0) {
-	gpsd_report(0,"rtcm socket create failed, netlib error %d\n",nsock);
+	gpsd_report(0,"RTCM104 socket create failed, netlib error %d\n",nsock);
 	exit(2);
     }
     gpsd_report(1, "listening on port %s\n", rtcm_service);
@@ -1434,12 +1434,12 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		int buflen;
 
-		gpsd_report(3, "checking client %d\n", cfd);
+		gpsd_report(3, "checking client(%d)\n", cfd);
 		if ((buflen = (int)read(cfd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(cfd);
 		} else {
 		    buf[buflen] = '\0';
-		    gpsd_report(1, "<= client: %s", buf);
+		    gpsd_report(1, "<= client(%d): %s", cfd, buf);
 
 #ifdef RTCM104_SERVICE
 		    if (subscribers[cfd].rtcm) {
@@ -1453,14 +1453,12 @@ int main(int argc, char *argv[])
 			if (handle_gpsd_request(cfd, buf, buflen) < 0)
 			    detach_client(cfd);
 		    }
-
-
 		}
 	    } else if (subscribers[cfd].device == NULL && timestamp() - subscribers[cfd].active > ASSIGNMENT_TIMEOUT) {
-		gpsd_report(1, "client timed out before assignment request.\n");
+		gpsd_report(1, "client(%d) timed out before assignment request.\n", cfd);
 		detach_client(cfd);
 	    } else if (subscribers[cfd].device != NULL && !(subscribers[cfd].watcher || subscribers[cfd].raw>0) && timestamp() - subscribers[cfd].active > POLLER_TIMEOUT) {
-		gpsd_report(1, "client timed out on command wait.\n");
+		gpsd_report(1, "client(%d) timed out on command wait.\n", cfd);
 		detach_client(cfd);
 	    }
 	}

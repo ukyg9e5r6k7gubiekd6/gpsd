@@ -22,44 +22,43 @@ extern char *strtok_r(char *, const char *, char **);
  *      deg_ddmmss : return DD MM' SS.sss"
  *
  */
-char *deg_to_str( enum deg_str_type type,  double f) 
+/*@observer@*/char *deg_to_str( enum deg_str_type type,  double f) 
 {
-	static char str[40];
-	int dsec, sec, deg, min;
-        long frac_deg;
-	double fdsec, fsec, fdeg, fmin;
+    static char str[40];
+    int dsec, sec, deg, min;
+    long frac_deg;
+    double fdsec, fsec, fdeg, fmin;
 
-	if ( f < 0 || f > 360 ) {
-		strcpy( str, "nan");
-		return str;
-	}
-
-	fmin = modf( f, &fdeg);
-	deg = (int)fdeg;
-        frac_deg = (long)(fmin * 1000000);
-
-	if ( deg_dd == type ) {
-		/* DD.dddddd */
-		(void)sprintf( str, "%3d.%06ld", deg, frac_deg );
-		return str;
-	}
-	fsec = modf( fmin * 60, &fmin);
-	min = (int)fmin;
-	sec = (int)(fsec * 10000.0);
-
-	if ( deg_ddmm == type ) {
-		/* DD MM.mmmm */
-		(void)sprintf( str, "%3d %02d.%04d'", deg, min, sec);
-		return str;
-	}
-	/* else DD MM SS.sss */
-	fdsec = modf( fsec * 60, &fsec);
-	sec = (int)fsec;
-	dsec = (int)(fdsec * 1000.0);
-	(void)sprintf( str, "%3d %02d' %02d.%03d\"", deg, min, sec, dsec);
-
+    if ( f < 0 || f > 360 ) {
+	strcpy( str, "nan");
 	return str;
+    }
 
+    fmin = modf( f, &fdeg);
+    deg = (int)fdeg;
+    frac_deg = (long)(fmin * 1000000);
+
+    if ( deg_dd == type ) {
+	/* DD.dddddd */
+	(void)snprintf(str, sizeof(str), "%3d.%06ld", deg,frac_deg);
+	return str;
+    }
+    fsec = modf( fmin * 60, &fmin);
+    min = (int)fmin;
+    sec = (int)(fsec * 10000.0);
+
+    if ( deg_ddmm == type ) {
+	/* DD MM.mmmm */
+	(void)snprintf(str,sizeof(str), "%3d %02d.%04d'", deg,min,sec);
+	return str;
+    }
+    /* else DD MM SS.sss */
+    fdsec = modf( fsec * 60, &fsec);
+    sec = (int)fsec;
+    dsec = (int)(fdsec * 1000.0);
+    (void)snprintf(str,sizeof(str), "%3d %02d' %02d.%03d\"", deg,min,sec,dsec);
+
+    return str;
 }
 
 /* 

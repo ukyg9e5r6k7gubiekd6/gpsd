@@ -109,8 +109,8 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* TODO: Make this work. */
     (void)wmove(datawin, 1,17);
     if (isnan(gpsdata->fix.time)==0) {
-	char s[128];
-	(void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s)));
+	char scr[128];
+	(void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
     } else
 	(void)wprintw(datawin,"n/a         ");
 
