@@ -19,6 +19,7 @@
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-n <replaceable>count</replaceable></arg>
       <arg choice='opt'>-r</arg>
+      <arg choice='opt'>-s <replaceable>serial-device</replaceable></arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-w</arg>
       <group>
@@ -56,6 +57,9 @@ colon-separated suffix is taken as a port number.</para>
 a usage message and exit.</para>
 
 <para>-r causes raw NMEA sentences to be output.</para>
+
+<para>-s option causes the collected data to be written to the
+specified serial device.</para>
 
 <para>-w causes native <application>gpsd</application>sentences to be
 output.</para>
