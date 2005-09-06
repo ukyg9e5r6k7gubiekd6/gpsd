@@ -23,6 +23,7 @@
       <arg choice='opt'>-v </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
+      <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -53,6 +54,7 @@
       <arg choice='opt'>-v </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
+      <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -92,6 +94,11 @@ the X resource 'speedunits'.</para>
 altitude units for display; follow the keyword with 'meters' or
 'feet'.  The default is feet.  This option can also be set as the X
 resource 'altunits'.</para>
+
+<para> The <option>-l</option> option sets the format of latitude and 
+longitude reports.  The value 'd' produces decimal degrees and is the
+default.  The value 'm' produces degrees and decimal minutes.  The
+value 's' produces degrees, minutes, and decimal seconds.</para>
 
 <para>There is a known bug in <application>xgps</application>; it
 assumes the default font size is no more than 18 pixels.  If this

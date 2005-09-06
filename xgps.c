@@ -246,6 +246,7 @@ static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
 static XtAppContext app;
 static XtIntervalId timeout;
+static enum deg_str_type deg_type = deg_dd;
 
 static void handle_input(XtPointer client_data UNUSED, int *source UNUSED,
 			 XtInputId *id UNUSED)
@@ -264,7 +265,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     unsigned int i;
     int newstate;
     XmString string[MAXCHANNELS+1];
-    char s[128], *sp;
+    char s[128], *latlon, *sp;
 
     if (message[0] != '\0')
 	while (isspace(*(sp = message + strlen(message) - 1)))
@@ -294,14 +295,16 @@ static void update_panel(struct gps_data_t *gpsdata,
     else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_1, s);
-    if (gpsdata->fix.mode >= MODE_2D)
-	(void)snprintf(s, sizeof(s), "%lf %c", fabs(gpsdata->fix.latitude), (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-    else
+    if (gpsdata->fix.mode >= MODE_2D) {
+        latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
+	(void)snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    } else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_2, s);
-    if (gpsdata->fix.mode >= MODE_2D)
-	(void)snprintf(s, sizeof(s), "%lf %c", fabs(gpsdata->fix.longitude), (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-    else
+    if (gpsdata->fix.mode >= MODE_2D) {
+        latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
+	(void)snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    } else
 	(void)strcpy(s, "n/a");
     XmTextFieldSetString(text_3, s);
     if (gpsdata->fix.mode == MODE_3D)
@@ -418,13 +421,28 @@ speedunits_ok:;
     (void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
 altunits_ok:;
 
-    while ((option = getopt(argc, argv, "hv")) != -1) {
+    while ((option = getopt(argc, argv, "hl:v")) != -1) {
 	switch (option) {
 	case 'v':
 	    (void)printf("xgps %s\n", VERSION);
 	    exit(0);
+	case 'l':
+	    switch ( optarg[0] ) {
+	    case 'd':
+		deg_type = deg_dd;
+		continue;
+	    case 'm':
+		deg_type = deg_ddmm;
+		continue;
+	    case 's':
+		deg_type = deg_ddmmss;
+		continue;
+            default:
+		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
+		/*@ -casebreak @*/
+	    }
 	case 'h': default:
-	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }

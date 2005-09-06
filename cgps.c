@@ -244,25 +244,24 @@ int main(int argc, char *argv[])
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 	    exit(0);
-	case 'h': default:
-	    usage( argv[0] );
-	    break;
 	case 'l':
 	    switch ( optarg[0] ) {
 	    case 'd':
 		    deg_type = deg_dd;
-		    break;
+		    continue;
 	    case 'm':
 		    deg_type = deg_ddmm;
-		    break;
+		    continue;
 	    case 's':
 		    deg_type = deg_ddmmss;
-		    break;
+		    continue;
             default:
 		    (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-	            usage( argv[0] );
-		    break;
+		    /*@ -casebreak @*/
             }
+	case 'h': default:
+	    usage(argv[0]);
+	    break;
 	}
     }
 

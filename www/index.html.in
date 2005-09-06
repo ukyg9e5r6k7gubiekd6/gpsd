@@ -219,6 +219,8 @@ script</a>.</p>
 <p>You can find Debian-stable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
+<p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
+
 <p>The penguin-with-satellites logo is a hacked version of one I found
 <a
 href='http://www.gfz-potsdam.de/pb1/staff/gbeyerle/opengps/'>here</a>.

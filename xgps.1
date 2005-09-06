@@ -24,7 +24,7 @@ xgps, xgpsspeed, cgps \- test clients for gpsd
 .ad l
 .hy 0
 .HP 5
-\fBxgps\fR [\fIX\-options\fR] [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBxgps\fR [\fIX\-options\fR] [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .ad
 .hy
 .ad l
@@ -36,7 +36,7 @@ xgps, xgpsspeed, cgps \- test clients for gpsd
 .ad l
 .hy 0
 .HP 5
-\fBcgps\fR [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBcgps\fR [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .ad
 .hy
 
@@ -58,6 +58,9 @@ The \fB\-speedunits\fR option can be used to set the speed units for display; fo
 
 .PP
 The \fB\-altunits\fR option can be used to set the altitude units for display; follow the keyword with 'meters' or 'feet'\&. The default is feet\&. This option can also be set as the X resource 'altunits'\&.
+
+.PP
+The \fB\-l\fR option sets the format of latitude and longitude reports\&. The value 'd' produces decimal degrees and is the default\&. The value 'm' produces degrees and decimal minutes\&. The value 's' produces degrees, minutes, and decimal seconds\&.
 
 .PP
 There is a known bug in xgps; it assumes the default font size is no more than 18 pixels\&. If this is not the case, the satellite data display will show fewer than 12 satellites\&.
