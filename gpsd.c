@@ -1383,10 +1383,10 @@ int main(int argc, char *argv[])
 
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    if (!allocated_channel(channel) && !syncing(channel))
+	    if (!allocated_channel(channel))
 		continue;
 
-	    gpsd_report(1, "%d passed guards: %d\n", channel->gpsdata.gps_fd, FD_ISSET(channel->gpsdata.gps_fd, &rfds));
+	    gpsd_report(4, "%d passed guards: %d\n", channel->gpsdata.gps_fd, FD_ISSET(channel->gpsdata.gps_fd, &rfds));
 
 	    /* pass the current DGPSIP correction to the GPS if new */
 	    if (channel->device_type)
