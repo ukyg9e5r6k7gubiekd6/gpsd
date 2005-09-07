@@ -3,10 +3,10 @@
 # gpsfake -- test harness for gpsd
 #
 # Simulates a GPS, playing back a logfile
-# Most of the logic for this now lives in gosfake.py,
+# Most of the logic for this now lives in gpsfake.py,
 # factored out so we can write other test programs with it.
 
-import sys, os, signal, time, getopt
+import sys, os, signal, time, getopt, socket
 import gpsfake
 
 class Baton:
@@ -121,7 +121,11 @@ try:
         sys.stderr.write("gpsfake: can't open pty.\n")
         raise SystemExit, 1
 
-    test.client_add(init + "\n")
+    try:
+        test.client_add(init + "\n")
+    except socket.error:
+        sys.stderr.write("gpsfake: socket error %s.\n", msg)
+        raise SystemExit, 1
 finally:
     test.cleanup();
 
