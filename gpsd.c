@@ -269,6 +269,8 @@ static int filesock(char *filename)
     return sock;
 }
 
+// #define DEFER_ON_SYNC
+
 /*
  * Multi-session support requires us to have two arrays, one of GPS 
  * devices currently available and one of client sessions.  The number
@@ -448,11 +450,16 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     /* and open that device */
-    if (user->device->gpsdata.gps_fd == -1) {
+    if (user->device->gpsdata.gps_fd != -1) 
+	gpsd_report(1,"client(%d): channel %d already active.\n",
+		    user-subscribers, user->device->gpsdata.gps_fd);
+    else {
 	gpsd_deactivate(user->device);
-	if (gpsd_activate(user->device) < 0) 
+	if (gpsd_activate(user->device) < 0) {
+	    
+	    gpsd_report(1, "client(%d): channel activation failed.\n", user-subscribers);
 	    return false;
-	else {
+	} else {
 	    gpsd_report(4, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    if (user->watcher && !user->tied) {
@@ -1371,7 +1378,7 @@ int main(int argc, char *argv[])
 	    if (syncing(channel))
 		half_open++;
 	if (half_open)
-	    gpsd_report(4, "%d device(s) half open\n", half_open);
+	    gpsd_report(4, "%d device(s) being probed\n", half_open);
 #endif /* DEFER_ON_SYNC */
 
 	/* poll all active devices */
