@@ -268,6 +268,8 @@ class DaemonInstance:
             return False
     def fd_set(self):
         "Return the set of file descriptors currently opened by the daemon."
+        if self.pid == None:
+            return []
         fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
         # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
         return filter(lambda x: x < 1000, fds)
