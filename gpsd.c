@@ -280,6 +280,7 @@ static int filesock(char *filename)
 static struct gps_device_t channels[MAXDEVICES];
 #define allocated_channel(chp)	((chp)->gpsdata.gps_device[0] != '\0')
 #define free_channel(chp)	(chp)->gpsdata.gps_device[0] = '\0'
+#define syncing(chp)	(chp->gpsdata.gps_fd>-1&& chp->packet_type==BAD_PACKET)
 
 static struct subscriber_t {
     double active;			/* when subscriber signed on */
@@ -290,11 +291,15 @@ static struct subscriber_t {
     bool rtcm;				/* is RTCM what he actually wants? */
 #endif /* RTCM104_SERVICE */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
+#ifdef DEFER_ON_SYNC
+    char pushback[NMEA_MAX+1];		/* command pushback */
+#endif /* DEFER_ON_SYNC */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
 static void detach_client(int cfd)
 {
     (void)close(cfd);
+    gpsd_report(4, "detaching %d in detach_client\n", cfd);
     FD_CLR(cfd, &all_fds);
     subscribers[cfd].raw = 0;
     subscribers[cfd].watcher = false;
@@ -393,6 +398,7 @@ found:
     if (gpsd_activate(chp) < 0) {
 	return NULL;
     }
+    gpsd_report(4, "flagging descriptor %d in open_device\n", chp->gpsdata.gps_fd);
     FD_SET(chp->gpsdata.gps_fd, &all_fds);
     return chp;
 }
@@ -447,6 +453,7 @@ static bool assign_channel(struct subscriber_t *user)
 	if (gpsd_activate(user->device) < 0) 
 	    return false;
 	else {
+	    gpsd_report(4, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    if (user->watcher && !user->tied) {
 		(void)write(user-subscribers, "F=", 2);
@@ -1035,6 +1042,9 @@ int main(int argc, char *argv[])
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
+#ifdef DEFER_ON_SYNC
+    int half_open;
+#endif /* DEFER_ON_SYNC */
     bool go_background = true;
     struct timeval tv;
     // extern char *optarg;
@@ -1256,17 +1266,23 @@ int main(int argc, char *argv[])
 	}
 	/*@ +usedef @*/
 
-#ifdef __UNUSED__
 	{
 	    char dbuf[BUFSIZ];
 	    dbuf[0] = '\0';
+	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+		if (FD_ISSET(cfd, &all_fds))
+		    (void)snprintf(dbuf + strlen(dbuf), 
+				   sizeof(dbuf)-strlen(dbuf),
+				   " %d", cfd);
+	    strcat(dbuf, "} -> {");
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (FD_ISSET(cfd, &rfds))
 		    (void)snprintf(dbuf + strlen(dbuf), 
 				   sizeof(dbuf)-strlen(dbuf),
 				   " %d", cfd);
-	    gpsd_report(4, "New input on these descriptors: %s\n", dbuf);
+	    gpsd_report(4, "Polling descriptor set: {%s}\n", dbuf);
 	}
+#ifdef __UNUSED__
 #endif /* UNUSED */
 
 	/* always be open to new client connections */
@@ -1348,10 +1364,22 @@ int main(int argc, char *argv[])
 		FD_CLR(cfd, &control_fds);
 	    }
 
+#ifdef DEFER_ON_SYNC
+	/* count partly-open devices, later we'll use this to defer commands */
+	half_open = 0;
+	for (channel = channels; channel < channels + MAXDEVICES; channel++)
+	    if (syncing(channel))
+		half_open++;
+	if (half_open)
+	    gpsd_report(4, "%d device(s) half open\n", half_open);
+#endif /* DEFER_ON_SYNC */
+
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
-	    if (!allocated_channel(channel))
+	    if (!allocated_channel(channel) && !syncing(channel))
 		continue;
+
+	    gpsd_report(1, "%d passed guards: %d\n", channel->gpsdata.gps_fd, FD_ISSET(channel->gpsdata.gps_fd, &rfds));
 
 	    /* pass the current DGPSIP correction to the GPS if new */
 	    if (channel->device_type)
@@ -1361,6 +1389,7 @@ int main(int argc, char *argv[])
 	    changed = 0;
 	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
 	    {
+		gpsd_report(4, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
@@ -1430,7 +1459,16 @@ int main(int argc, char *argv[])
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
 	    if (subscribers[cfd].active == 0) 
 		continue;
-	    else if (FD_ISSET(cfd, &rfds)) {
+
+#ifdef DEFER_ON_SYNC
+	    if (subscribers[cfd].pushback[0] && half_open == 0) {
+		gpsd_report(1, "from client %d pushback: %s", cfd, subscribers[cfd].pushback);
+		(void)handle_gpsd_request(cfd, subscribers[cfd].pushback, (int)strlen(subscribers[cfd].pushback));
+		subscribers[cfd].pushback[0] = '\0';
+	    }
+#endif /* DEFER_ON_SYNC */
+
+	    if (FD_ISSET(cfd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
 
@@ -1441,6 +1479,12 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client(%d): %s", cfd, buf);
 
+#ifdef DEFER_ON_SYNC
+		    if (subscribers[cfd].device == NULL && half_open > 0) {
+		    	strncpy(subscribers[cfd].pushback, buf, NMEA_MAX);
+		    	gpsd_report(4, "deferring client %d command\n", cfd);
+		    } else
+#endif /* DEFER_ON_SYNC */
 #ifdef RTCM104_SERVICE
 		    if (subscribers[cfd].rtcm) {
 			if (handle_dgpsip_request(cfd, buf, buflen) < 0)
@@ -1482,6 +1526,7 @@ int main(int argc, char *argv[])
 				need_gps = true;
 
 			if (!need_gps && channel->gpsdata.gps_fd > -1) {
+			    gpsd_report(4, "unflagging descriptor %d in open_device\n", channel->gpsdata.gps_fd);
 			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 			    gpsd_deactivate(channel);
 			}
