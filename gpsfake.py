@@ -347,23 +347,22 @@ class TestSession:
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
         newclient = gps.gps()
-        newclient.id = self.client_id+1 
         self.clients.append(newclient)
         newclient.query("of\n")
         time.sleep(1)	# Avoid mysterious "connection reset by peer"
         if not newclient.device:
+            newclient.id = None
             self.progress("gpsd: returned no device for client open.\n")
-            self.sanity_check()
-            return None
         else:
+            newclient.id = self.client_id + 1 
             self.client_id += 1
             self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
             self.fakegpslist[newclient.device].start(thread=True)
             newclient.set_thread_hook(lambda x: self.reporter(x))
             if commands:
                 newclient.query(commands)
-            self.sanity_check()
-            return newclient.id
+        self.sanity_check()
+        return newclient.id
     def client_query(self, id, commands):
         "Ship a command down a client channel, accept a response."
         self.progress("gpsfake: client_query(%d, %s)\n" % (id, `commands`))
