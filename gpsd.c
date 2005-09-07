@@ -1487,9 +1487,10 @@ int main(int argc, char *argv[])
 		    gpsd_report(1, "<= client(%d): %s", cfd, buf);
 
 #ifdef DEFER_ON_SYNC
-		    if (subscribers[cfd].device == NULL && half_open > 0) {
+		    if (subscribers[cfd].device == NULL && half_open > 0 && assign_channel(&subscribers[cfd])) {
 		    	strncpy(subscribers[cfd].pushback, buf, NMEA_MAX);
 		    	gpsd_report(4, "deferring client %d command\n", cfd);
+			handle_gpsd_request(cfd, "f", 2);
 		    } else
 #endif /* DEFER_ON_SYNC */
 #ifdef RTCM104_SERVICE
