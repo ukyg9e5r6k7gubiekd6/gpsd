@@ -348,6 +348,9 @@ class TestSession:
         self.progress("gpsfake: client_add()\n")
         newclient = gps.gps()
         self.clients.append(newclient)
+        # This is necessary.  We need to know what fake GPS the client
+        # is attached to in order to start the right one just before
+        # issuing commands.  Only the daemon can tell us this.
         newclient.query("of\n")
         time.sleep(1)	# Avoid mysterious "connection reset by peer"
         if not newclient.device:
