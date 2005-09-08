@@ -978,6 +978,47 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
     return (int)throttled_write(cfd, reply, (ssize_t)strlen(reply));
 }
 
+#ifdef DEFER_ON_SYNC
+static int handle_gpsd_request2(int cfd, char *buf, int buflen)
+{
+    char reply[BUFSIZ], phrase[BUFSIZ], *p, *stash;
+    struct subscriber_t *whoami = subscribers + cfd;
+    struct gps_device_t *newchan;
+
+    (void)strcpy(reply, "GPSD");
+    p = buf;
+    while (*p != '\0' && p - buf < buflen) {
+	phrase[0] = '\0';
+	switch (toupper(*p++)) {
+	case 'F':
+	    /*@ -branchstate @*/
+	    if (*p == '=') {
+		p = snarfline(++p, &stash);
+		gpsd_report(1,"<= client(%d): switching to %s\n",cfd,stash);
+		if ((newchan = find_device(stash))) {
+		    /*@i@*/whoami->device = newchan;
+		    whoami->tied = true;
+		}
+	    }
+	    /*@ +branchstate @*/
+	    if (whoami->device != NULL)
+		(void)snprintf(phrase, sizeof(phrase), ",F=%s", 
+			 whoami->device->gpsdata.gps_device);
+	    else
+		(void)strcpy(phrase, ",F=?");
+	    break;
+	}
+	if (strlen(reply) + strlen(phrase) < sizeof(reply) - 1)
+	    (void)strcat(reply, phrase);
+	else
+	    return -1;	/* Buffer would overflow.  Just return an error */
+    }
+    (void)strcat(reply, "\r\n");
+
+    return (int)throttled_write(cfd, reply, (ssize_t)strlen(reply));
+}
+#endif /* DEFER_ON_SYNC */
+
 static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
 {
@@ -1490,7 +1531,7 @@ int main(int argc, char *argv[])
 		    if (subscribers[cfd].device == NULL && half_open > 0 && assign_channel(&subscribers[cfd])) {
 		    	strncpy(subscribers[cfd].pushback, buf, NMEA_MAX);
 		    	gpsd_report(4, "deferring client %d command\n", cfd);
-			handle_gpsd_request(cfd, "f", 2);
+			handle_gpsd_request2(cfd, "f", 2);
 		    } else
 #endif /* DEFER_ON_SYNC */
 #ifdef RTCM104_SERVICE
