@@ -1490,9 +1490,6 @@ int main(int argc, char *argv[])
 		    if (subscribers[cfd].device == NULL && half_open > 0 && assign_channel(&subscribers[cfd])) {
 		    	strncpy(subscribers[cfd].pushback, buf, NMEA_MAX);
 		    	gpsd_report(4, "deferring client %d command\n", cfd);
-			(void)snprintf(buf, sizeof(buf), "GPSD,F=%s\r\n", 
-				       subscribers[cfd].device->gpsdata.gps_device);
-			(void)throttled_write(cfd, buf, (ssize_t)strlen(buf));
 		    } else
 #endif /* DEFER_ON_SYNC */
 #ifdef RTCM104_SERVICE

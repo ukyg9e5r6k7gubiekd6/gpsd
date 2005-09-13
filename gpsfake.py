@@ -335,6 +335,7 @@ class TestSession:
                 newgps.go_predicate = self.default_predicate
             self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
+        self.fakegpslist[newgps.slave].start(thread=True)
         self.sanity_check()
         return newgps.slave
     def gps_remove(self, name):
@@ -348,22 +349,12 @@ class TestSession:
         self.progress("gpsfake: client_add()\n")
         newclient = gps.gps()
         self.clients.append(newclient)
-        # This is necessary.  We need to know what fake GPS the client
-        # is attached to in order to start the right one just before
-        # issuing commands.  Only the daemon can tell us this.
-        newclient.query("of\n")
-        time.sleep(1)	# Avoid mysterious "connection reset by peer"
-        if not newclient.device:
-            newclient.id = None
-            self.progress("gpsd: returned no device for client open.\n")
-        else:
-            newclient.id = self.client_id + 1 
-            self.client_id += 1
-            self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
-            self.fakegpslist[newclient.device].start(thread=True)
-            newclient.set_thread_hook(lambda x: self.reporter(x))
-            if commands:
-                newclient.query(commands)
+        newclient.id = self.client_id + 1 
+        self.client_id += 1
+        self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
+        newclient.set_thread_hook(lambda x: self.reporter(x))
+        if commands:
+            newclient.query(commands)
         self.sanity_check()
         return newclient.id
     def client_query(self, id, commands):
