@@ -830,6 +830,7 @@ void packet_pushback(struct gps_device_t *session)
 		session->outbuffer,
 		session->outbuflen);
 	session->inbuflen += session->outbuflen;
+	session->inbufptr += session->outbuflen;
 	session->outbuflen = 0;
     }
 }
