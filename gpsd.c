@@ -1273,6 +1273,7 @@ int main(int argc, char *argv[])
 	}
 	/*@ +usedef @*/
 
+#ifdef __UNUSED__
 	{
 	    char dbuf[BUFSIZ];
 	    dbuf[0] = '\0';
@@ -1289,7 +1290,6 @@ int main(int argc, char *argv[])
 				   " %d", cfd);
 	    gpsd_report(4, "Polling descriptor set: {%s}\n", dbuf);
 	}
-#ifdef __UNUSED__
 #endif /* UNUSED */
 
 	/* always be open to new client connections */
@@ -1386,8 +1386,6 @@ int main(int argc, char *argv[])
 	    if (!allocated_channel(channel))
 		continue;
 
-	    gpsd_report(4, "%d passed guards: %d\n", channel->gpsdata.gps_fd, FD_ISSET(channel->gpsdata.gps_fd, &rfds));
-
 	    /* pass the current DGPSIP correction to the GPS if new */
 	    if (channel->device_type)
 		dgpsip_relay(channel);
@@ -1396,7 +1394,7 @@ int main(int argc, char *argv[])
 	    changed = 0;
 	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
 	    {
-		gpsd_report(4, "polling %d\n", channel->gpsdata.gps_fd);
+		gpsd_report(5, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
@@ -1470,6 +1468,7 @@ int main(int argc, char *argv[])
 #ifdef DEFER_ON_SYNC
 	    if (subscribers[cfd].pushback[0] && half_open == 0) {
 		gpsd_report(1, "from client %d pushback: %s", cfd, subscribers[cfd].pushback);
+		packet_pushback(subscribers[cfd].device);
 		(void)handle_gpsd_request(cfd, subscribers[cfd].pushback, (int)strlen(subscribers[cfd].pushback));
 		subscribers[cfd].pushback[0] = '\0';
 	    }
