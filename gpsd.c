@@ -269,8 +269,6 @@ static int filesock(char *filename)
     return sock;
 }
 
-// #define DEFER_ON_SYNC
-
 /*
  * Multi-session support requires us to have two arrays, one of GPS 
  * devices currently available and one of client sessions.  The number
@@ -293,9 +291,6 @@ static struct subscriber_t {
     bool rtcm;				/* is RTCM what he actually wants? */
 #endif /* RTCM104_SERVICE */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
-#ifdef DEFER_ON_SYNC
-    char pushback[NMEA_MAX+1];		/* command pushback */
-#endif /* DEFER_ON_SYNC */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
 static void detach_client(int cfd)
@@ -1049,9 +1044,6 @@ int main(int argc, char *argv[])
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
-#ifdef DEFER_ON_SYNC
-    int half_open;
-#endif /* DEFER_ON_SYNC */
     bool go_background = true;
     struct timeval tv;
     // extern char *optarg;
@@ -1371,16 +1363,6 @@ int main(int argc, char *argv[])
 		FD_CLR(cfd, &control_fds);
 	    }
 
-#ifdef DEFER_ON_SYNC
-	/* count partly-open devices, later we'll use this to defer commands */
-	half_open = 0;
-	for (channel = channels; channel < channels + MAXDEVICES; channel++)
-	    if (syncing(channel))
-		half_open++;
-	if (half_open)
-	    gpsd_report(4, "%d device(s) being probed\n", half_open);
-#endif /* DEFER_ON_SYNC */
-
 	/* poll all active devices */
 	for (channel = channels; channel < channels + MAXDEVICES; channel++) {
 	    if (!allocated_channel(channel))
@@ -1465,15 +1447,6 @@ int main(int argc, char *argv[])
 	    if (subscribers[cfd].active == 0) 
 		continue;
 
-#ifdef DEFER_ON_SYNC
-	    if (subscribers[cfd].pushback[0] && half_open == 0) {
-		gpsd_report(1, "from client %d pushback: %s", cfd, subscribers[cfd].pushback);
-		packet_pushback(subscribers[cfd].device);
-		(void)handle_gpsd_request(cfd, subscribers[cfd].pushback, (int)strlen(subscribers[cfd].pushback));
-		subscribers[cfd].pushback[0] = '\0';
-	    }
-#endif /* DEFER_ON_SYNC */
-
 	    if (FD_ISSET(cfd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
@@ -1485,12 +1458,6 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client(%d): %s", cfd, buf);
 
-#ifdef DEFER_ON_SYNC
-		    if (subscribers[cfd].device == NULL && half_open > 0 && assign_channel(&subscribers[cfd])) {
-		    	strncpy(subscribers[cfd].pushback, buf, NMEA_MAX);
-		    	gpsd_report(4, "deferring client %d command\n", cfd);
-		    } else
-#endif /* DEFER_ON_SYNC */
 #ifdef RTCM104_SERVICE
 		    if (subscribers[cfd].rtcm) {
 			if (handle_dgpsip_request(cfd, buf, buflen) < 0)
