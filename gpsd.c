@@ -287,9 +287,7 @@ static struct subscriber_t {
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
-#ifdef RTCM104_SERVICE
-    bool rtcm;				/* is RTCM what he actually wants? */
-#endif /* RTCM104_SERVICE */
+    enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
@@ -413,10 +411,17 @@ static bool allocation_policy(struct gps_device_t *channel,
     /* maybe we have already bound a more recently active device */
     if (user->device!=NULL && channel->gpsdata.sentence_time < most_recent)
 	return false;
-#ifdef RTCM104_SERVICE
-    if (user->rtcm == (channel->packet_type == RTCM_PACKET))
+    gpsd_report(1, "User requires %d, channel type is %d\n", user->requires, channel->packet_type);
+    /* we might have type constraints */
+    if (user->requires == ANY)
+	return true;
+    else if (user->requires==RTCM104 && (channel->packet_type==RTCM_PACKET))
+	return true;
+    else if (user->requires == GPS 
+	     && (channel->packet_type!=RTCM_PACKET) && (channel->packet_type!=BAD_PACKET))
+	return true;
+    else
 	return false;
-#endif /* RTCM104_SERVICE */
     return true;
 }
 
@@ -629,6 +634,25 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)strcpy(phrase, ",F=?");
 	    break;
+	case 'G':
+	    if (*p == '=') {
+		gpsd_report(1,"<= client(%d): requesting data type %s\n",cfd,++p);
+		if (strncasecmp(p, "rtcm104", 7) == 0)
+		    whoami->requires = RTCM104;
+		else if (strncasecmp(p, "gps", 3) == 0)
+		    whoami->requires = GPS;
+		else
+		    whoami->requires = ANY;
+		p += strcspn(p, ",\r\n");
+	    }
+	    (void)assign_channel(whoami);
+	    if (whoami->device==NULL||whoami->device->packet_type==BAD_PACKET)
+		(void)strcpy(phrase, ",G=?");
+	    else if (whoami->device->packet_type == RTCM_PACKET)
+		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104");
+	    else
+		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
+	    break;
 	case 'I':
 	    if (assign_channel(whoami) && whoami->device->device_type!=NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
@@ -650,7 +674,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
-	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefiklmnopqrstuvwxyz");	//ghj
+	    (void)snprintf(phrase, sizeof(phrase), ",L=2 " VERSION " abcdefgiklmnopqrstuvwxyz");	//hj
 	    break;
 	case 'M':
 	    if (!assign_channel(whoami) && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
@@ -1300,9 +1324,7 @@ int main(int argc, char *argv[])
 		FD_SET(ssock, &all_fds);
 		subscribers[ssock].active = timestamp();
 		subscribers[ssock].tied = false;
-#ifdef RTCM104_SERVICE
-		subscribers[ssock].rtcm = false;
-#endif /* RTCM104_SERVICE */
+		subscribers[ssock].requires = ANY;
 	    }
 	    FD_CLR(msock, &rfds);
 	}
@@ -1324,7 +1346,7 @@ int main(int argc, char *argv[])
 		FD_SET(ssock, &all_fds);
 		subscribers[rsock].active = true;
 		subscribers[rsock].tied = false;
-		subscribers[rsock].rtcm = true;
+		subscribers[rsock].requires = RTCM104;
 	    }
 	    FD_CLR(nsock, &rfds);
 	}

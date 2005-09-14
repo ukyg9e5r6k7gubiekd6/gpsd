@@ -140,10 +140,11 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Sat Aug 20 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Prevent core dump on -d option.  The .log option is no longer required for
   test loads.  cgps and xgps now have configurable latitude/longitude formats 
-  via the -l option.
+  via the -l option.  Introduced new 'g' command that allows clients to
+  specify whether they want GPS or RTCM104 information.
 
 * Fri Aug 19 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.29-1
 - Added Sony CXD2951 support, untested.  All error estimates are
