@@ -54,6 +54,8 @@ static char *speedunits = "mph";
 
 static WINDOW *datawin, *satellites, *messages, *command;
 
+int silent_flag=0;
+
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
 {
@@ -112,7 +114,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	char scr[128];
 	(void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
     } else
-	(void)wprintw(datawin,"n/a         ");
+      (void)wprintw(datawin,"n/a         ");
 
     /* Fill in the latitude. */
     (void)wmove(datawin, 2,17);
@@ -201,7 +203,10 @@ static void update_panel(struct gps_data_t *gpsdata,
     (void)wmove(datawin, 11,17);
     (void)wprintw(datawin,"%d secs          ", (int) (time(NULL) - timer));
 
-    (void)wprintw(messages, "%s\n", message);
+    /* Be quiet if the user requests silence. */
+    if(silent_flag==0) {
+      (void)wprintw(messages, "%s\n", message);
+    }
 
     /* Update the screen. */
     (void)wrefresh(datawin);
@@ -217,6 +222,7 @@ static void usage( char *prog)
 "  -h          Show this help, then exit\n"
 "  -v          Show version, then exit\n"
 "  -V          Show version, then exit\n"
+"  -s          Be silent (don't print raw dgps data)\n"
 "  -l {d|m|s}  Select lat/lon format\n"
 "                d = DD.dddddd\n"
 "                m = DD MM.mmmm'\n"
@@ -238,8 +244,11 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hvl:")) != -1) {
+    while ((option = getopt(argc, argv, "hvl:s")) != -1) {
 	switch (option) {
+	case 's':
+	  silent_flag=1;
+	  break;
 	case 'v':
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
@@ -414,7 +423,7 @@ int main(int argc, char *argv[])
 	}
 	else if( data ) {
 	    /* code that calls gps_poll(gpsdata) */
-	    (void)gps_poll(gpsdata);
+	  (void)gps_poll(gpsdata);
 	}
 	else {
 	    fprintf(stderr, "cgps: No data\n");
@@ -423,10 +432,29 @@ int main(int argc, char *argv[])
         /* Check for user input. */
         c=wgetch(messages);
         
-        /* Quit if 'q'. */
-        if(c=='q') {
-          die(0);
-        }
+	switch ( c ) {
+	  /* Quit */
+	case 'q':
+	  die(0);
+	  break;
+
+	  /* Toggle spewage of raw gpsd data. */
+	case 's':
+	  if(silent_flag==0) {
+	    silent_flag=1;
+	  } else {
+	    silent_flag=0;
+	  }
+	  break;
+
+	  /* Clear the spewage area. */
+	case 'c':
+	  werase(messages);
+	  break;
+
+	default:
+	  break;
+	}
 
     }
  
