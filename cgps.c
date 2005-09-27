@@ -52,9 +52,10 @@ static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
 
-static WINDOW *datawin, *satellites, *messages, *command;
+static WINDOW *datawin, *satellites, *messages, *command, *status;
 
 int silent_flag=0;
+int ops_flag=0;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
@@ -108,7 +109,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	}
     }
   
-    /* TODO: Make this work. */
+  /* Print time/date. */
     (void)wmove(datawin, 1,17);
     if (isnan(gpsdata->fix.time)==0) {
 	char scr[128];
@@ -153,63 +154,86 @@ static void update_panel(struct gps_data_t *gpsdata,
     else
 	(void)wprintw(datawin,"n/a         ");
 
-    /* Fill in the estimated horizontal position error. */
+  /* Fill in the rate of climb. */
     (void)wmove(datawin, 7,17);
+  if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
+    (void)wprintw(datawin,"%.1f %s/min     "
+		  , gpsdata->fix.climb * altfactor * 60, altunits);
+  else
+    (void)wprintw(datawin,"n/a         ");
+  
+  /* Fill in the estimated horizontal position error. */
+  (void)wmove(datawin, 9,22);
     if (isnan(gpsdata->fix.eph)==0)
-	(void)wprintw(datawin,"%d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
+    (void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
     else
 	(void)wprintw(datawin,"n/a         ");
 
     /* Fill in the estimated vertical position error. */
-    (void)wmove(datawin, 8,17);
+  (void)wmove(datawin, 10,22);
     if (isnan(gpsdata->fix.epv)==0)
-	(void)wprintw(datawin,"%d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
+    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
     else
 	(void)wprintw(datawin,"n/a         ");
 
-    /* Fill in the rate of climb. */
-    (void)wmove(datawin, 9,17);
-    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
-	(void)wprintw(datawin,"%.1f %s/min     "
-	    , gpsdata->fix.climb * altfactor * 60, altunits);
+  /* Fill in the estimated track error. */
+  (void)wmove(datawin, 11,22);
+  if (isnan(gpsdata->fix.epd)==0)
+    (void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
     else
 	(void)wprintw(datawin,"n/a         ");
   
-    /* Fill in the GPS status */
-    (void)wmove(datawin, 10,17);
+  /* Fill in the estimated speed error. */
+  (void)wmove(datawin, 12,22);
+  if (isnan(gpsdata->fix.eps)==0)
+    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
+  else
+    (void)wprintw(datawin,"n/a            ");
+
+  /* Fill in the GPS status and the time since the last state change. */
+  (void)wmove(status, 1,10);
     if (gpsdata->online == 0) {
 	newstate = 0;
-	(void)wprintw(datawin,"OFFLINE          ");
+    (void)wprintw(status,"OFFLINE          ");
     } else {
 	newstate = gpsdata->fix.mode;
 	switch (gpsdata->fix.mode) {
 	case MODE_2D:
-	    (void)wprintw(datawin,"2D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+      (void)wprintw(status,"2D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - timer));
 	    break;
 	case MODE_3D:
-	    (void)wprintw(datawin,"3D %sFIX     ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+      (void)wprintw(status,"3D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - timer));
 	    break;
 	default:
-	    (void)wprintw(datawin,"NO FIX               ");
+      (void)wprintw(status,"NO FIX (%d secs)     ", (int) (time(NULL) - timer));
 	    break;
 	}
     }
-
-    /* Fill in the time since the last state change. */
-    if (newstate != state) {
-	timer = time(NULL);
-	state = newstate;
-    }
-    (void)wmove(datawin, 11,17);
-    (void)wprintw(datawin,"%d secs          ", (int) (time(NULL) - timer));
 
     /* Be quiet if the user requests silence. */
     if(silent_flag==0) {
       (void)wprintw(messages, "%s\n", message);
     }
 
-    /* Update the screen. */
+  /* Update the screen.  This is admittedly not an optimal hack, and
+     is for fixing the screen flashing when using NMEA data sources.
+     We're watching for a GPGSA sentence in order to refresh the data
+     window.  There is a small race condition here (ie, data
+     structures can update before the refresh happens), but this
+     rarely happens, and it doesn't matter much if it does (ie, can't
+     corrupt anything important).  There's probably a cleaner way to
+     do this, but it's better than the annoying flashing. */
+  if((ops_flag==0) || (strstr(message,"GSA")!=NULL)) {
     (void)wrefresh(datawin);
+
+    /* Reset the timer if the state has changed. */
+    if (newstate != state) {
+      timer = time(NULL);
+      state = newstate;
+    }
+  }
+
+  (void)wrefresh(status);
     (void)wrefresh(satellites);
     (void)wrefresh(messages);
     (void)wrefresh(command);
@@ -218,15 +242,16 @@ static void update_panel(struct gps_data_t *gpsdata,
 static void usage( char *prog) 
 {
 	    (void)fprintf(stderr, 
-"Usage: %s [-h] [-v] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
-"  -h          Show this help, then exit\n"
-"  -v          Show version, then exit\n"
-"  -V          Show version, then exit\n"
-"  -s          Be silent (don't print raw dgps data)\n"
-"  -l {d|m|s}  Select lat/lon format\n"
-"                d = DD.dddddd\n"
-"                m = DD MM.mmmm'\n"
-"                s = DD MM' SS.sss\"\n"
+		"Usage: %s [-h] [-v] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
+		"  -h          Show this help, then exit\n"
+		"  -v          Show version, then exit\n"
+		"  -V          Show version, then exit\n"
+		"  -s          Be silent (don't print raw dgps data)\n"
+		"  -o          Fix screen flash for NMEA (experimental)\n"
+		"  -l {d|m|s}  Select lat/lon format\n"
+		"                d = DD.dddddd\n"
+		"                m = DD MM.mmmm'\n"
+		"                s = DD MM' SS.sss\"\n"
                 , prog);
 
 	    exit(1);
@@ -244,8 +269,11 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "hvl:s")) != -1) {
+  while ((option = getopt(argc, argv, "hvl:so")) != -1) {
 	switch (option) {
+    case 'o':
+      ops_flag=1;
+      break;
 	case 's':
 	  silent_flag=1;
 	  break;
@@ -358,6 +386,7 @@ int main(int argc, char *argv[])
     datawin    = newwin(15, 45, 1, 0);
     satellites = newwin(15, 35, 1, 45);
     command    = newwin(3,  45,  16, 0);
+  status     = newwin(3,  35,  16, 45);
     messages   = newwin(0,  0,  19, 0);
     /*@ +onlytrans @*/
     (void)scrollok(messages, true);
@@ -374,16 +403,18 @@ int main(int argc, char *argv[])
     (void)mvwprintw(datawin, 4,5, "Altitude:");
     (void)mvwprintw(datawin, 5,5, "Speed:");
     (void)mvwprintw(datawin, 6,5, "Heading:");
-    (void)mvwprintw(datawin, 7,5, "HPE:");
-    (void)mvwprintw(datawin, 8,5, "VPE:");
-    (void)mvwprintw(datawin, 9,5, "Climb:");
-    (void)mvwprintw(datawin, 10,5, "Status:");
-    (void)mvwprintw(datawin, 11,5, "Change:");
+  (void)mvwprintw(datawin, 7,5, "Climb:");
+  (void)mvwprintw(datawin, 9,5, "Horizontal Err:");
+  (void)mvwprintw(datawin, 10,5, "Vertical Err:");
+  (void)mvwprintw(datawin, 11,5, "Course Err:");
+  (void)mvwprintw(datawin, 12,5, "Speed Err:");
+  (void)mvwprintw(status, 1,1, "Status:");
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(command, 1,1, "Command:  ");
     (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
+  (void)wborder(status, 0, 0, 0, 0, 0, 0, 0, 0);
 
 
     /* Here's where updates go. */
@@ -438,6 +469,15 @@ int main(int argc, char *argv[])
 	  die(0);
 	  break;
 
+      /* Toggle "once per second" update. */
+    case 'o':
+      if(ops_flag==0) {
+	ops_flag=1;
+      } else {
+	ops_flag=0;
+      }
+      break;
+
 	  /* Toggle spewage of raw gpsd data. */
 	case 's':
 	  if(silent_flag==0) {
@@ -459,4 +499,3 @@ int main(int argc, char *argv[])
     }
  
 }
-
