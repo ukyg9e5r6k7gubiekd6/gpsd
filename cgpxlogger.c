@@ -37,7 +37,7 @@
 #define BS 512
 
 #define NUM 8
-char *poll = "SPAMQTVD\n";
+char *poll = "SPAMDQTV\n";
 char *host = "127.0.0.1";
 unsigned int want_exit = 0;
 unsigned short port = 2947;
@@ -194,7 +194,7 @@ void dnserr(){
 void bye(int signum){ want_exit = signum; }
 
 void process(char *buf){
-	char *answers[NUM + 1], **ap;
+	char *answers[NUM + 2], **ap;
 	int i, j;
 	char c, junk1[32], junk2[32];
 
@@ -206,8 +206,12 @@ void process(char *buf){
 	if((buf[i - 1] == '\r') || (buf[i - 1] == '\n'))
 		buf[i - 1] = '\0';
 
+	i = strlen(buf);
+	if((buf[i - 1] == '\r') || (buf[i - 1] == '\n'))
+		buf[i - 1] = '\0';
+
 	/* tokenize the string at the commas */
- 	for (ap = answers; ap < &answers[NUM] &&
+ 	for (ap = answers; ap < &answers[NUM+1] &&
  		(*ap = strsep(&buf, ",")) != NULL;) {
  		if (**ap != '\0')
  			ap++;
@@ -216,7 +220,7 @@ void process(char *buf){
 
 	bzero( &gps_ctx, sizeof(gps_ctx));
 	/* do stuff with each of the strings */
-	for(i = 0; i < NUM ; i++){
+	for(i = 0; i < NUM+1 ; i++){
 		c = answers[i][0];
 		switch(c){
 		case 'S':
@@ -258,28 +262,37 @@ void write_record(){
 	track_start();
 	printf("      <trkpt lat=\"%.6f\" ", gps_ctx.latitude );
 	printf("lon=\"%.6f\">\n", gps_ctx.longitude );
-	if ((gps_ctx.status >= 2) && (gps_ctx.mode >= 3)){
-		if (gps_ctx.mode == 4) {
+
+	if ((gps_ctx.status >= 2) && (gps_ctx.mode >= 3)){ /* dgps or pps */
+		if (gps_ctx.mode == 4) { /* military pps */
 			printf("        <fix>pps</fix>\n");
-		} else {
+		} else { /* civilian dgps or sbas */
 			printf("        <fix>dgps</fix>\n");
 		}
-	} else {
+	} else { /* no dgps or pps */
 		if (gps_ctx.mode == 3) {
 			printf("        <fix>3d</fix>\n");
 		} else if (gps_ctx.mode == 2) {
 			printf("        <fix>2d</fix>\n");
 		} else if (gps_ctx.mode == 1) {
 			printf("        <fix>none</fix>\n");
-		}
+		} /* don't print anything if no fix indicator */
 	}
 
+	/* print altitude if we have a fix and it's 3d of some sort */
 	if ((gps_ctx.mode >= 3) && (gps_ctx.status >= 1))
 		printf("        <ele>%.2f</ele>\n", gps_ctx.altitude);
 
-	printf("        <hdop>%.1f</hdop>\n", gps_ctx.hdop);
-	printf("        <sat>%d</sat>\n", gps_ctx.svs);
-	printf("        <time>%s</time>\n", gps_ctx.time);
+	/* SiRF reports HDOP in 0.2 steps and the lowest I've seen is 0.6 */
+	if (gps_ctx.svs >= 0.2)
+		printf("        <hdop>%.1f</hdop>\n", gps_ctx.hdop);
+
+	/* print # satellites used in fix, if reasonable to do so */
+	if ((gps_ctx.svs > 0) && (gps_ctx.mode >= 2))
+		printf("        <sat>%d</sat>\n", gps_ctx.svs);
+
+//	if (strlen(gps_ctx.time)) /* plausible timestamp */
+		printf("        <time>%s</time>\n", gps_ctx.time);
 	printf("      </trkpt>\n");
 	fflush(stdout);
 }
