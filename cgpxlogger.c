@@ -144,9 +144,6 @@ main(int argc, char **argv){
 	FD_ZERO(&fds);
 	FD_SET(fd, &fds);
 
-	tv.tv_usec = 250000;
-	tv.tv_sec = 0;
-
 	signal(SIGINT, bye);
 	signal(SIGTERM, bye);
 	signal(SIGQUIT, bye);
@@ -165,7 +162,11 @@ main(int argc, char **argv){
 		}
 
 		write(fd, poll, l);
+
+		tv.tv_usec = 250000;
+		tv.tv_sec = 0;
 		select(fd + 1, &fds, NULL, NULL, &tv);
+
 		bzero(buf, BS);
 		if ((rl = read(fd, buf, BS - 1)) != -1){
 			process(buf);
