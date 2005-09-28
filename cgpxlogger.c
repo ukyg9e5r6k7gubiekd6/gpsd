@@ -196,7 +196,7 @@ void bye(int signum){ want_exit = signum; }
 void process(char *buf){
 	char *answers[NUM + 2], **ap;
 	int i, j;
-	char c, junk1[32], junk2[32];
+	char c, junk1[16], junk2[16];
 
 	if (strncmp("GPSD,", buf, 5) != 0)
 		return; /* lines should start with "GPSD," */
@@ -228,9 +228,9 @@ void process(char *buf){
 			gps_ctx.status = j;
 			break;
 		case 'P':
-			bzero( &junk1, 32);
-			bzero( &junk2, 32);
-			sscanf(answers[i], "P=%s %s", (char *)&junk1, (char *)&junk2);
+			bzero( &junk1, 16);
+			bzero( &junk2, 16);
+			sscanf(answers[i], "P=%12s %12s", (char *)&junk1, (char *)&junk2);
 			gps_ctx.latitude = atof((char *)&junk1); gps_ctx.longitude = atof((char *)&junk2);
 			break;
 		case 'A':
