@@ -18,7 +18,7 @@ DBUSPAGES = gpxlogger.1
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS)
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpspipe gpsflash cgps
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpspipe gpsflash cgps cgpxlogger
 dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
@@ -47,6 +47,12 @@ xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) 
 #
 cgps_SOURCES = cgps.c
 cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) -lncurses libgps.la -lm $(LIBPTHREAD)
+
+#
+# Build cgpxlogger
+#
+cgpxlogger_SOURCES = cgpxlogger.c
+cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) -lncurses
 
 #
 # Build gpsd
