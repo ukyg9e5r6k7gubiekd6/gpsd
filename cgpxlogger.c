@@ -196,7 +196,7 @@ void bye(int signum){ want_exit = signum; }
 void process(char *buf){
 	char *answers[NUM + 2], **ap;
 	int i, j;
-	char c, junk1[16], junk2[16];
+	char c;
 
 	if (strncmp("GPSD,", buf, 5) != 0)
 		return; /* lines should start with "GPSD," */
@@ -228,10 +228,7 @@ void process(char *buf){
 			gps_ctx.status = j;
 			break;
 		case 'P':
-			bzero( &junk1, 16);
-			bzero( &junk2, 16);
-			sscanf(answers[i], "P=%12s %12s", (char *)&junk1, (char *)&junk2);
-			gps_ctx.latitude = atof((char *)&junk1); gps_ctx.longitude = atof((char *)&junk2);
+			sscanf(answers[i], "P=%lf %lf", &gps_ctx.latitude, &gps_ctx.longitude);
 			break;
 		case 'A':
 			sscanf(answers[i], "A=%f", &gps_ctx.altitude);
@@ -291,7 +288,7 @@ void write_record(){
 	if ((gps_ctx.svs > 0) && (gps_ctx.mode >= 2))
 		printf("        <sat>%d</sat>\n", gps_ctx.svs);
 
-//	if (strlen(gps_ctx.time)) /* plausible timestamp */
+	if (strlen(gps_ctx.time)) /* plausible timestamp */
 		printf("        <time>%s</time>\n", gps_ctx.time);
 	printf("      </trkpt>\n");
 	fflush(stdout);
