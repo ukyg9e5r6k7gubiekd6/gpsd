@@ -97,8 +97,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 int gpsd_open(struct gps_device_t *session)
 {
     gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
-    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_N
-ONBLOCK|O_NOCTTY)) < 0) {
+    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NONBLOCK|O_NOCTTY)) < 0) {
 	gpsd_report(1, "device open failed: %s\n", strerror(errno));
 	return -1;
     }
