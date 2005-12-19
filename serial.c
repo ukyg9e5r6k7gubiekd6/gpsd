@@ -17,6 +17,19 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
+#if defined(__CYGWIN__)
+/* Workaround for Cygwin, which is missing cfmakeraw */
+/* Pasted from man page; added in serial.c arbitrarily */
+void cfmakeraw(struct termios *termios_p)
+{
+    termios_p->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+    termios_p->c_oflag &= ~OPOST;
+    termios_p->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+    termios_p->c_cflag &= ~(CSIZE|PARENB);
+    termios_p->c_cflag |= CS8;
+}
+#endif /* defined(__CYGWIN__) */
+
 speed_t gpsd_get_speed(struct termios* ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
@@ -103,7 +116,8 @@ int gpsd_open(struct gps_device_t *session)
     }
 
     if (session->saved_baud != -1) {
-        /*@i@*/(void)cfsetspeed(&session->ttyset, (speed_t)session->saved_baud);
+        /*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
+        /*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
@@ -215,3 +229,4 @@ void gpsd_close(struct gps_device_t *session)
 	session->gpsdata.gps_fd = -1;
     }
 }
+

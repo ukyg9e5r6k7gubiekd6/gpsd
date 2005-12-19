@@ -282,7 +282,7 @@ splint:
 #
 
 # Regression-test the daemon
-# This requires gcc4; the use of the math coprocessor's on-board trig functions
+# This requires gcc4; use of the math coprocessor's on-board trig functions
 # apparently increases the accuracy of computation in a way that
 # that affects the low-order digits of the track field in the O response.
 gps-regress: gpsd

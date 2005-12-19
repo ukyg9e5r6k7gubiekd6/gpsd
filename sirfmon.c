@@ -29,6 +29,10 @@
 #include <math.h>
 #include <ctype.h>
 #include <unistd.h>
+/* Cygwin has only _timezone and not timezone unless the following is set */
+#if defined(__CYGWIN__)
+#define timezonevar
+#endif /* defined(__CYGWIN__) */
 #include <time.h>
 #include <termios.h>
 #include <fcntl.h>	/* for O_RDWR */

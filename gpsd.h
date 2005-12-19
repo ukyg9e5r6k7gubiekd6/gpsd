@@ -329,12 +329,16 @@ extern float roundf(float x);
 #define roundf(x) ((float)rintf(x))
 #endif /* !HAVE_ROUND */
 
-/* OpenBSD and FreeBSD don't seem to have NAN, NetBSD does, others? */
+/* OpenBSD and FreeBSD and Cygwin don't seem to have NAN, NetBSD does, others? */
 /* XXX test for this in configure? */
-#if defined(__OpenBSD__) || defined(__FreeBSD__)
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__CYGWIN__)
 #ifndef NAN
 #define NAN (0.0/0.0)
 #endif /* !NAN */
 #endif /* list of Operating Systems */
 
+/* Cygwin, in addition to NAN, doesn't have cfmakeraw */
+#if defined(__CYGWIN__)
+void cfmakeraw(struct termios *);
+#endif /* defined(__CYGWIN__) */
 #endif /* _gpsd_h_ */
