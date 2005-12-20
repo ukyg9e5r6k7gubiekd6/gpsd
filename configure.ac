@@ -257,7 +257,7 @@ dnl check for Evermore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
                  [disable Evermore binary support]),
-  [ac_fv18=$enableval], [ac_evermore=yes])
+  [ac_evermore=$enableval], [ac_evermore=yes])
 AC_MSG_CHECKING([for Evermore support])
 if test x"$ac_evermore" = "xyes"; then
     AC_MSG_RESULT([yes])
@@ -278,6 +278,8 @@ if test x"$ac_rtcm104" = "xyes"; then
 else
   AC_MSG_RESULT([no])
 fi
+
+AM_CONDITIONAL([HAVE_RTCM104], [test "$ac_rtcm104" = "yes"])
 
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,

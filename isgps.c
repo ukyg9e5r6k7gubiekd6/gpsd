@@ -61,6 +61,8 @@ necessary) reassembled into a struct rtcm_t.
 
 #include "gpsd.h"
 
+#ifdef BINARY_ENABLE
+
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
 #define MAG_TAG_MASK (3 << MAG_SHIFT)
@@ -308,3 +310,4 @@ enum isgpsstat_t isgps_decode(struct gps_device_t *session,
 }
 /*@ +usereleased +compdef @*/
 
+#endif /* BINARY_ENABLE */

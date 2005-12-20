@@ -56,6 +56,8 @@ Starlink's website.
 
 #include "gpsd.h"
 
+#ifdef RTCM104_ENABLE
+
 /*
  * Structures for interpreting words in an RTCM-104 message (after
  * parity checking and removing inversion).
@@ -1179,3 +1181,5 @@ void rtcm_output_mag(isgps30bits_t * ip)
     }
 }
 #endif /* UNUSED */
+
+#endif /* RTCM104_ENABLE */

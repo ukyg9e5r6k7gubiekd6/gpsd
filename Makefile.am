@@ -18,7 +18,12 @@ DBUSPAGES = gpxlogger.1
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS)
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) sirfmon rtcmdecode gpspipe gpsflash cgps cgpxlogger
+if HAVE_RTCM104
+RTCM104PROGS = rtcmdecode
+RTCM104PAGES = rtcmdecode.1
+endif
+
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) sirfmon gpspipe gpsflash cgps cgpxlogger
 dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
@@ -159,8 +164,8 @@ man_MANS = \
 	gpsfake.1 \
 	sirfmon.1 \
 	$(DBUSPAGES) \
+	$(RTCM104PAGES) \
 	gpspipe.1 \
-	rtcmdecode.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
