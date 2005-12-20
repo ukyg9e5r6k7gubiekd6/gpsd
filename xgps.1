@@ -36,7 +36,7 @@ xgps, xgpsspeed, cgps \- test clients for gpsd
 .ad l
 .hy 0
 .HP 5
-\fBcgps\fR [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBcgps\fR [\-h] [\-s] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .ad
 .hy
 
@@ -77,6 +77,9 @@ The \-speedunits option can be used to set the speed units for display; follow t
 
 .PP
 cgps is a client resembling xgps, but without the pictorial satellite display and able to run on a serial terminal or terminal emulator\&.
+
+.PP
+The \fB\-s\fR option prevents cgps from printing the raw data\&. This display can also be toggled with the s command\&.
 
 .PP
 Rather than use X resources to detemine which units to use, cgps looks at variables in its environment\&. Here are the variables and values it checks:

@@ -203,7 +203,7 @@ list of NMEA sentences</a>.</p>
 <dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
 it.</dd>
 
-<dt><a href="performance/performance.html">Where's the Latency?  Performance analysis of GPSes and GPSD</a></dt>
+<dt><a href="performance.html">Where's the Latency?  Performance analysis of GPSes and GPSD</a></dt>
 <dd>An analysis of latency in the GPS/GPSD system. Has implications for the 
 design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 </dl>

@@ -141,7 +141,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 
 %changelog
 * Mon Dec 19 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Now builds and runs under Cygwin.
+- Now builds and runs under Cygwin.  Correct the speed units in synthetic 
+  NMEA.
 
 * Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
 - Prevent core dump on -d option.  The .log option is no longer required for
