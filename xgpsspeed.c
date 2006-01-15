@@ -9,6 +9,7 @@
 #include <X11/Shell.h>
 #include <X11/Xaw/Label.h>
 #include <X11/Xaw/Paned.h>
+#include <Xm/Xm.h>
 #include <Xm/XmStrDefs.h>
 #include <Tachometer.h>
 
