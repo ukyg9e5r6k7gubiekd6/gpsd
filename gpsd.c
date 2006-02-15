@@ -259,8 +259,7 @@ static int filesock(char *filename)
     }
     (void)strcpy(addr.sun_path, filename);
     /*@i1@*/addr.sun_family = AF_UNIX;
-    (void)bind(sock, (struct sockaddr *) &addr, 
-	 (int)(strlen(addr.sun_path) + sizeof (addr.sun_family)));
+    (void)bind(sock, (struct sockaddr *) &addr,  sizeof (addr));
     if (listen(sock, QLEN) < 0) {
 	gpsd_report(0, "can't listen on local socket %s\n", filename);
 	return -1;
