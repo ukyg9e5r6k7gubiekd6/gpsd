@@ -36,7 +36,12 @@ static Widget toplevel;
 static void update_display(struct gps_data_t *gpsdata, 
 			   char *buf UNUSED, size_t len UNUSED, int level UNUSED)
 {
-    (void)TachometerSetValue(tacho, (int)rint(gpsdata->fix.speed*speedfactor));
+    int temp_int = (int)rint(gpsdata->fix.speed * speedfactor);
+
+    if (temp_int < 0) temp_int = 0;
+    else if (temp_int > 100) temp_int = 100;
+
+    (void)TachometerSetValue(tacho, temp_int);
 }
 
 static void handle_input(XtPointer client_data UNUSED,
@@ -88,7 +93,7 @@ int main(int argc, char **argv)
     if (strcmp(speedunits, "kph")==0) 
 	speedfactor = MPS_TO_KPH;
     else if (strcmp(speedunits, "knots")==0)
-	speedfactor = 1/MPS_TO_KNOTS;
+	speedfactor = MPS_TO_KNOTS;
 
     while ((option = getopt(argc, argv, "hv")) != -1) {
 	switch (option) {
@@ -140,10 +145,13 @@ int main(int argc, char **argv)
     (void)XtCreateManagedWidget("title", labelWidgetClass, base, args, 1);
 
     /**** Label widget ****/
-    if (speedfactor == KNOTS_TO_MPH)
+    if (speedfactor == MPS_TO_MPH)
         (void)XtSetArg(args[0], XtNlabel, "Miles per Hour");
-    else
+    else if (speedfactor == MPS_TO_KPH)
         (void)XtSetArg(args[0], XtNlabel, "Km per Hour");
+    else 
+        (void)XtSetArg(args[0], XtNlabel, "Knots");
+
     /*@ +immediatetrans +usedef +observertrans +statictrans @*/
     (void)XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
