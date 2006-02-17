@@ -167,6 +167,9 @@ and fix latency.</dd>
 <dt><a href="gpxlogger.html">gpxlogger.1</a></dt>
 <dd>Demonstration DBUS client; writes log files in an XML format.</dd>
 
+<dt><a href="cgpxlogger.html">cgpxlogger.1</a></dt>
+<dd>Captures fixes from a gpsd instance and emits them in XML format.</dd>
+
 <dt><a href="gpspipe.html">gpspipe.1</a></dt> <dd>A simple client that
 captures GPS output and/or <code>gpsd</code> reports and sends it to
 standard output.</dd>
@@ -220,6 +223,10 @@ script</a>.</p>
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
+
+<p>There's a <a
+href='http://twiki.davisnetworks.com/bin/view/Main/GpsApplications'>Wiki
+page</a> devoted to gpsd helper applications.</p>
 
 <p>The penguin-with-satellites logo is a hacked version of one I found
 <a

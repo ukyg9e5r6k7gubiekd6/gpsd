@@ -79,8 +79,7 @@
  * with 1s period:
  * 10 02 12 8E 7F 01 01 01 01 01 01 01 01 00 00 00 00 00 00 15 10 03
  * 
- *
- * There is a way to probe for EverMore chipset. When binary message 0x81 is sent:
+ * There is a way to probe for this chipset. When binary message 0x81 is sent:
  * 10 02 04 81 13 94 10 03
  *
  * EverMore will reply with message like this:
@@ -88,13 +87,12 @@
  * bytes marked with * are fixed
  * Message in reply is information about logging configuration of GPS
  *
- * Other way to probe for EverMore chipset is to send one of messages 
- * 0x85, 0x8d, 0x8e or 0x8f and check for reply.
- * Reply message from EverMore GPS looks like this:
+ * Another way to detect the EverMore chipset is to send one of the messages 
+ * 0x85, 0x8d, 0x8e or 0x8f and check for a reply.
+ * The reply message from an EverMore GPS will look like this:
  * *10 *02 *04 *38 8d c5 *10 *03
  * 8d indicates that message 0x8d was sent;
- * c5 is EverMore checksum
- * other bytes are fixed
+ * c5 is EverMore checksum, other bytes are fixed
  *
  */
 

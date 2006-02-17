@@ -14,7 +14,7 @@ XMLTO = xmlto
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 DBUSPROGS = gpxlogger
-DBUSPAGES = gpxlogger.1
+DBUSPAGES = gpxlogger.1 
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS)
 endif
 
@@ -164,6 +164,7 @@ man_MANS = \
 	gpsfake.1 \
 	sirfmon.1 \
 	$(DBUSPAGES) \
+	cgpxlogger.1 \
 	$(RTCM104PAGES) \
 	gpspipe.1 \
 	gpsflash.1 \
@@ -196,6 +197,9 @@ sirfmon.1: sirfmon.xml
 
 gpxlogger.1: gpxlogger.xml
 	-$(XMLTO) man gpxlogger.xml
+
+cgpxlogger.1: cgpxlogger.xml
+	-$(XMLTO) man cgpxlogger.xml
 
 gpspipe.1: gpspipe.xml
 	-$(XMLTO) man gpspipe.xml
@@ -232,6 +236,7 @@ EXTRA_DIST = \
 	gpsfake.xml \
 	sirfmon.xml \
 	gpxlogger.xml \
+	cgpxlogger.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
 	rtcm-104.xml \
