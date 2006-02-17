@@ -25,10 +25,9 @@
  * Widget and window sizes.
  */
 #define MAX_FONTSIZE	18		/* maximum fontsize we handle*/
-#define MAX_CHANNELS	12		/* count of channels to display */
 #define ROOT_SIZE	"700x570"	/* size of entire xgps display */
 /* height of satellite-data display */
-#define SATDATA_HEIGHT	MAX_FONTSIZE*(MAX_CHANNELS+1)
+#define SATDATA_HEIGHT	MAX_FONTSIZE*(MAXCHANNELS+1)
 #define LEFTSIDE_WIDTH	205		/* width of data-display side */
 #define SATDIAG_SIZE	400		/* size of satellite diagram */
 

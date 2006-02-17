@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
 
 	  /* Clear the spewage area. */
 	case 'c':
-	  werase(messages);
+	    (void)werase(messages);
 	  break;
 
 	default:

@@ -27,7 +27,7 @@ void send_dbus_fix(struct gps_device_t* channel) {
     struct gps_data_t*	gpsdata;
     struct gps_fix_t*	gpsfix;
     DBusMessage*	message;
-    DBusMessageIter	iter;
+    /*DBusMessageIter	iter;*/
     dbus_uint32_t	serial; /* collected, but not used */
 
     /* if the connection is non existent, return without doing anything */
@@ -40,24 +40,25 @@ void send_dbus_fix(struct gps_device_t* channel) {
 		    "/org/gpsd",
 		    "org.gpsd",
 		    "fix");
-    dbus_message_iter_init(message, &iter);
 
     /* add the interesting information to the message */
-    dbus_message_iter_append_double(&iter, gpsfix->time);
-    dbus_message_iter_append_int32(&iter, gpsfix->mode);
-    dbus_message_iter_append_double(&iter, gpsfix->ept);
-    dbus_message_iter_append_double(&iter, gpsfix->latitude);
-    dbus_message_iter_append_double(&iter, gpsfix->longitude);
-    dbus_message_iter_append_double(&iter, gpsfix->eph);
-    dbus_message_iter_append_double(&iter, gpsfix->altitude);
-    dbus_message_iter_append_double(&iter, gpsfix->epv);
-    dbus_message_iter_append_double(&iter, gpsfix->track);
-    dbus_message_iter_append_double(&iter, gpsfix->epd);
-    dbus_message_iter_append_double(&iter, gpsfix->speed);
-    dbus_message_iter_append_double(&iter, gpsfix->eps);
-    dbus_message_iter_append_double(&iter, gpsfix->climb);
-    dbus_message_iter_append_double(&iter, gpsfix->epc);
-
+    dbus_message_append_args (message,
+		    	      DBUS_TYPE_DOUBLE, &(gpsfix->time),
+			      DBUS_TYPE_INT32,	&(gpsfix->mode),
+			      DBUS_TYPE_DOUBLE,	&(gpsfix->ept),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->latitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->longitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->eph),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->altitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epv),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->track),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epd),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->speed),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->eps),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->climb),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epc),
+			      DBUS_TYPE_INVALID);
+    
     dbus_message_set_no_reply(message, TRUE);
 
     /* message is complete time to send it */

@@ -4,7 +4,7 @@
 #ifndef _gpsd_dbus_h_
 #define _gpsd_dbus_h_
 
-#define DBUS_API_SUBJECT_TO_CHANGE
+//#define DBUS_API_SUBJECT_TO_CHANGE
 #include <dbus/dbus.h>
 #include <gpsd.h>
 

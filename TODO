@@ -118,13 +118,6 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 8) Generate and broadcast RTCM corrections from an attached device?
    Might not be possible -- appears to need nanosecond timing.
 
-*** Translate contrib/gpxlogger.pl to Python
-
-gpxlogger.pl is now clearly superior to the C version.
-Somebody should translate it to Python so we can put it 
-in the main directory without adding yet another runtime 
-dependency to the project.
-
 *** Do the research to figure out just what is going on with status bits
 
 NMEA actually has *four* kinds of validity bits: Mode, Status, the

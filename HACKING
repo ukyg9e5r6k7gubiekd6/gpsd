@@ -479,9 +479,9 @@ is so you can use it to set the system clock.
 *** Hotplug interface problems
 
 The hotplug interface works pretty nicely for telling gpsd which
-device to look at, at least on my FC3 Linux machines.  The fly in the
-ointment is that I'm using a deprecated version of the interface, the
-old-style /etc/hotplug version with usermap files.
+device to look at, at least on my FC3 and FC4 Linux machines.  The fly
+in the ointment is that I'm using a deprecated version of the
+interface, the old-style /etc/hotplug version with usermap files.
 
 It is unlikely this interface will be dropped by distro makers any
 time soon, because it's supporting a bunch of popular USB cameras.

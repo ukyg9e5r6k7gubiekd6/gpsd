@@ -5,7 +5,9 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/time.h>
-#include <pthread.h>
+#ifndef S_SPLINT_S
+#include <pthread.h>	/* pacifies OpenBSD's compiler */
+#endif
 #include <math.h>
 
 #include "gpsd.h"

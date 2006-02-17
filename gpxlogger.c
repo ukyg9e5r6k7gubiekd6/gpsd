@@ -19,6 +19,7 @@ static char *author = "Amaury Jacquot";
 static char *copyright = "GPL v 2.0";
 
 static int intrack = 0;
+static int first = 1;
 static time_t tracklimit = 5; /* seconds */
 
 static struct {
@@ -55,45 +56,30 @@ static void print_gpx_trk_end (void) {
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 	DBusMessageIter	iter;
+	DBusError	error;
 	double		temp_time;
-	
-	if (!dbus_message_iter_init (message, &iter)) {
-		/* we have a problem */
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-	}
 
-	/* this should be smarter :D */
-	temp_time		= dbus_message_iter_get_double (&iter);
+	dbus_error_init (&error);
+
+	dbus_message_get_args (message,
+			       &error,
+			       DBUS_TYPE_DOUBLE, &temp_time,
+			       DBUS_TYPE_INT32,	 &gpsfix.mode,
+			       DBUS_TYPE_DOUBLE, &gpsfix.ept,
+			       DBUS_TYPE_DOUBLE, &gpsfix.latitude,
+			       DBUS_TYPE_DOUBLE, &gpsfix.longitude,
+			       DBUS_TYPE_DOUBLE, &gpsfix.eph,
+			       DBUS_TYPE_DOUBLE, &gpsfix.altitude,
+			       DBUS_TYPE_DOUBLE, &gpsfix.epv,
+			       DBUS_TYPE_DOUBLE, &gpsfix.track,
+			       DBUS_TYPE_DOUBLE, &gpsfix.epd,
+			       DBUS_TYPE_DOUBLE, &gpsfix.speed,
+			       DBUS_TYPE_DOUBLE, &gpsfix.eps,
+			       DBUS_TYPE_DOUBLE, &gpsfix.climb,
+			       DBUS_TYPE_DOUBLE, &gpsfix.epc,
+			       DBUS_TYPE_INVALID);
 	gpsfix.time = floor(temp_time);
-	dbus_message_iter_next (&iter);
-	gpsfix.mode		= dbus_message_iter_get_int32 (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.ept		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.latitude		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.longitude	= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.eph		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.altitude		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.epv		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.track		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.epd		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.speed		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.eps		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.climb		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	gpsfix.epc		= dbus_message_iter_get_double (&iter);
-	dbus_message_iter_next (&iter);
-	//gpsfix.separation	= dbus_message_iter_get_double (&iter);
-
+	
 	/* 
 	 * we have a fix there - log the point
 	 */
@@ -105,7 +91,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 		 * backwards in time.  The clock sometimes jump
 		 * backward when gpsd is submitting junk on the
 		 * dbus. */
-		if (fabs(gpsfix.time - gpsfix.old_time) > tracklimit) {
+		if (fabs(gpsfix.time - gpsfix.old_time) > tracklimit && !first) {
 			print_gpx_trk_end();
 			intrack = 0;
 		}
@@ -113,6 +99,8 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 		if (!intrack) {
 			print_gpx_trk_start();
 			intrack = 1;
+			if (first)
+			    first = 0;
 		}
 		
 		gpsfix.old_time = gpsfix.time;

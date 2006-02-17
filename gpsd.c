@@ -259,7 +259,7 @@ static int filesock(char *filename)
     }
     (void)strcpy(addr.sun_path, filename);
     /*@i1@*/addr.sun_family = AF_UNIX;
-    (void)bind(sock, (struct sockaddr *) &addr,  sizeof (addr));
+    (void)bind(sock, (struct sockaddr *) &addr,  (int)sizeof(addr));
     if (listen(sock, QLEN) < 0) {
 	gpsd_report(0, "can't listen on local socket %s\n", filename);
 	return -1;
@@ -421,7 +421,6 @@ static bool allocation_policy(struct gps_device_t *channel,
 	return true;
     else
 	return false;
-    return true;
 }
 
 /*@ -branchstate -usedef -globstate @*/

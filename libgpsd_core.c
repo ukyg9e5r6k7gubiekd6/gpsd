@@ -14,7 +14,9 @@
 #include "gpsd.h"
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-#include <pthread.h>
+#ifndef S_SPLINT_S
+#include <pthread.h>	/* pacifies OpenBSD's compiler */
+#endif
 #endif
 
 

@@ -7,7 +7,7 @@ Group: System Environment/Daemons
 Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
-BuildRequires: ncurses-devel gcc4
+BuildRequires: ncurses-devel gcc
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 
@@ -60,10 +60,9 @@ can run on a serial terminal or terminal emulator.
 %setup -q
 
 %build
-#CC=gcc4 ./autogen.sh
+./autogen.sh
 %configure
-# Requires gcc4 to compile the RTCM104 support correctly.
-CC=gcc4 make -e CFLAGS=-D_GNU_SOURCE %{?_smp_mflags}
+make -e CFLAGS=-D_GNU_SOURCE %{?_smp_mflags}
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -145,7 +144,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 * Thu Dec 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.31-1
 - Now builds and runs under Cygwin.  Correct the speed units in synthetic 
   NMEA.  Slightly better time handling under NMEA.  Daemon now builds with
-  all but NMEA disabled.  This is a minor point release.
+  all but NMEA disabled.  Update the leap-second offset.  Fix bad unit 
+  conversion in V output. Upgrade to DBUS 0.60 conformance.
 
 * Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.30-1
 - Prevent core dump on -d option.  The .log option is no longer required for
