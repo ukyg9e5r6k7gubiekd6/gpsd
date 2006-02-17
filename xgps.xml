@@ -133,7 +133,7 @@ terminal emulator.</para>
 from printing the raw data. This display can also be toggled with the s
 command.</para>
 
-<para>Rather than use X resources to detemine which units to use, 
+<para>Rather than use X resources to determine which units to use, 
 <application>cgps</application> looks at variables in its environment.
 Here are the variables and values it checks:</para>
 

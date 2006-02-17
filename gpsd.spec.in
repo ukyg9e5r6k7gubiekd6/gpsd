@@ -145,7 +145,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 - Now builds and runs under Cygwin.  Correct the speed units in synthetic 
   NMEA.  Slightly better time handling under NMEA.  Daemon now builds with
   all but NMEA disabled.  Update the leap-second offset.  Fix bad unit 
-  conversion in V output. Upgrade to DBUS 0.60 conformance.
+  conversion in V output. cgpxlogger introduced.  Upgrade gpxlogger 
+  to DBUS 0.60 conformance.
 
 * Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.30-1
 - Prevent core dump on -d option.  The .log option is no longer required for

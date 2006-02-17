@@ -86,7 +86,7 @@ by the log to standard output.  The logfile is interpreted once
 only.  (This option is intended to facilitate regression testing.)</para>
 
 <para>The -r option specifies an initialization comand to use.  
-The defaylt is "w+r+"; "r=2" might be another interesting value.</para>
+The default is "w+r+"; "r=2" might be another interesting value.</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>

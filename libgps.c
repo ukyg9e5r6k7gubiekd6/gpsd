@@ -66,8 +66,8 @@ extern char *strtok_r(char *, const char *, char **);
 /* 
  * check the environment to determine proper GPS units
  *
- * clients should only call this if no user preference on the command line or
- * Xresources
+ * clients should only call this if no user preference is specified on 
+ * the command line or via X resources.
  *
  * return imperial    - Use miles/feet
  *        nautical    - Use knots/feet
