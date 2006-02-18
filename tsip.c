@@ -3,7 +3,6 @@
  * by Rob Janssen, PE1CHL.
  */
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
@@ -221,8 +220,19 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x46:		/* Health of Receiver */
 	if (len != 2)
 	    break;
+	session->driver.tsip.last_46 = now;
 	u1 = getub(buf,0);			/* Status code */
 	u2 = getub(buf,1);			/* Antenna/Battery */
+        if (u1) {
+            session->gpsdata.status = STATUS_NO_FIX;
+	    mask |= STATUS_SET;
+        }
+	else {
+	    if (session->gpsdata.status < STATUS_FIX) {
+                session->gpsdata.status = STATUS_FIX;
+                mask |= STATUS_SET;
+            }
+        }
 	gpsd_report(4, "Receiver health %02x %02x\n",u1,u2);
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
@@ -318,7 +328,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f5 = getf(buf,16);			/* time-of-fix */
 	session->gpsdata.newdata.climb = f3;
 	/*@ -evalorder @*/
-	session->gpsdata.newdata.speed = sqrt(pow(f2,2) + pow(f1,2));
+	session->gpsdata.newdata.speed = sqrt(pow(f2,2) + pow(f1,2)) * MPS_TO_KNOTS;
 	/*@ +evalorder @*/
 	if ((session->gpsdata.newdata.track = atan2(f1,f2) * RAD_2_DEG) < 0)
 	    session->gpsdata.newdata.track += 360.0;
@@ -390,15 +400,15 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	switch (u1 & 7)				/* dimension */
 	{
 	case 3:
-	    session->gpsdata.status = STATUS_FIX;
+	    //session->gpsdata.status = STATUS_FIX;
 	    session->gpsdata.newdata.mode = MODE_2D;
 	    break;
 	case 4:
-	    session->gpsdata.status = STATUS_FIX;
+	    //session->gpsdata.status = STATUS_FIX;
 	    session->gpsdata.newdata.mode = MODE_3D;
 	    break;
 	default:
-	    session->gpsdata.status = STATUS_NO_FIX;
+	    //session->gpsdata.status = STATUS_NO_FIX;
 	    session->gpsdata.newdata.mode = MODE_NO_FIX;
 	    break;
 	}
@@ -524,7 +534,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    d2 = s2 * d5;			/* north velocity m/s */
 	    session->gpsdata.newdata.climb = s3 * d5; /* up velocity m/s */
 	    /*@ -evalorder @*/
-	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2));
+	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2)) * MPS_TO_KNOTS;
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.newdata.track += 360.0;
@@ -599,7 +609,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    d2 = s3 * d5;			/* north velocity m/s */
 	    session->gpsdata.newdata.climb = s4 * d5; /* up velocity m/s */
 	    /*@ -evalorder @*/
-	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2));
+	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2)) * MPS_TO_KNOTS;
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.newdata.track += 360.0;
@@ -648,6 +658,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	putbyte(buf,0,0x00);		/* All satellites */
 	(void)tsip_write(session->gpsdata.gps_fd, 0x3c, buf, 1);
 	session->driver.tsip.last_5c = now;
+    }
+
+    if ((now - session->driver.tsip.last_46) > 5) {
+        /* Request Health of Receiver */
+        (void)tsip_write(session->gpsdata.gps_fd, 0x26, buf, 0);
+        session->driver.tsip.last_46 = now;
     }
 
     return mask;

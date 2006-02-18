@@ -4,16 +4,6 @@ will unfold them again.
 
 ** Bugs in gpsd and its clients:
 
-*** EPH and EPV reports are zeroed too often in the TSIP driver 
-
-There is some bad interaction between the policy code in
-libgpsd_core.c and the TSIP driver that we haven't figured out.
-
-This may be a symptom of more general problems in data management
-on devices that ship several sentences of fix and related data
-per cycle.  It does not affect devices speaking SiRF or Zodiac or 
-Garmin-binary protocol.
-
 *** PPS code is flaky, possibly due to a pthreads bug
 
 Some code attempting to terminate the PPS-monitoring thread when there
@@ -27,8 +17,8 @@ The default build has ENABLE_PPS off until we figure this one out.
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
 David Mandala <davidm@them.com>.  His workaround is to condition out
-SiRF-II support; it works OK in NMEA mode.  He has undertaken to
-pin down the SVN revision that broke things after OLS.
+SiRF-II support; it works OK in NMEA mode.  The Royaltek died in an
+accident, so we're stuck until someone else can test this.
 
 *** Axiom Sandpiper II OEM NMEA GPS Module gets mistaken for an FV-18
 
@@ -168,7 +158,7 @@ an elevation test.
 
 gpsd relies on the GPS to periodically send PVT reports to it.
 
-Most GPSes send PVT reports once a second.  No GPS I am aware of
+Most GPSes send PVT reports once a second.  No NMEA GPS I've ever seen
 allows you to set a cycle time of less than a second.  This is because
 at 4800bps, a full PVT report takes just under one second in NMEA.
 
@@ -183,6 +173,9 @@ a second, and a SiRF one maybe 18 times a second.
 
 Is this worth doing?  Maybe.  It would reduce fix latency, possibly
 to good effect if your GPS is in motion.  Opinions?  Calculations?
+
+Gary Miller reports that the Garmin GPS 18 LVC-5m and the GPS 18-5Hz
+both report 5 times a second, but he doesn't have either to test.
 
 *** Set the system time zone from latitude/longitude
 

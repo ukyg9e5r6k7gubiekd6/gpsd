@@ -187,6 +187,7 @@ struct gps_device_t {
 	    time_t last_41;		/* Timestamps for packet requests */
 	    time_t last_5c;
 	    time_t last_6d;
+	    time_t last_46;
 	    unsigned int parity, stopbits; /* saved RS232 link parameters */
 	} tsip;
 #endif /* TSIP_ENABLE */
