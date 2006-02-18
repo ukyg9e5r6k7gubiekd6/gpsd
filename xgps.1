@@ -24,7 +24,7 @@ xgps, xgpsspeed, cgps \- test clients for gpsd
 .ad l
 .hy 0
 .HP 5
-\fBxgps\fR [\fIX\-options\fR] [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBxgps\fR [\fIX\-options\fR] [\-h] [\-v] [\-speedunits\ {\fBmph\fR\ |\ \fBkph\fR\ |\ \fBknots\fR}] [\-altunits\ {\fBfeet\fR\ |\ \fBmeters\fR}] [\-l\ [\fBd\fR\ |\ \fBm\fR\ |\ \fBs\fR]] [\-s\ \fIsmoothing\fR] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .ad
 .hy
 .ad l
@@ -61,6 +61,9 @@ The \fB\-altunits\fR option can be used to set the altitude units for display; f
 
 .PP
 The \fB\-l\fR option sets the format of latitude and longitude reports\&. The value 'd' produces decimal degrees and is the default\&. The value 'm' produces degrees and decimal minutes\&. The value 's' produces degrees, minutes, and decimal seconds\&.
+
+.PP
+The \fB\-s\fR option sets the number of received sentences to process after any fix is received before blanking any field\&. By default it is set to 4, which prevents annoying display flicker on NMEA devices that send several difference sentence types per update cycle, only one of which is a true fix\&. Set this option to zero to disable smoothing and see each update exactly as it is sent\&.
 
 .PP
 There is a known bug in xgps; it assumes the default font size is no more than 18 pixels\&. If this is not the case, the satellite data display will show fewer than 12 satellites\&.

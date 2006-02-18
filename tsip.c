@@ -223,7 +223,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->driver.tsip.last_46 = now;
 	u1 = getub(buf,0);			/* Status code */
 	u2 = getub(buf,1);			/* Antenna/Battery */
-        if (u1) {
+        if (u1 != (uchar)0) {
             session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
         }

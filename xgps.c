@@ -156,18 +156,18 @@ static void build_gui(Widget toplevel)
     /*@ -immediatetrans @*/
     XtSetArg(args[0], XmNorientation, XmHORIZONTAL);
     /*@ +immediatetrans @*/
-    rowColumn_11 = XtCreateManagedWidget("time", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_11 = XtCreateManagedWidget("time     ", xmRowColumnWidgetClass, left, args, 1);
 
-    rowColumn_12 = XtCreateManagedWidget("latitude", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_12 = XtCreateManagedWidget("latitude ", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_13 = XtCreateManagedWidget("longitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_14 = XtCreateManagedWidget("altitude", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_15 = XtCreateManagedWidget("speed", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_16 = XtCreateManagedWidget("track", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_17 = XtCreateManagedWidget("eph", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_18 = XtCreateManagedWidget("epv", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_19 = XtCreateManagedWidget("climb", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_20 = XtCreateManagedWidget("status", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_21 = XtCreateManagedWidget("quit", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_14 = XtCreateManagedWidget("altitude ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_15 = XtCreateManagedWidget("speed    ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_16 = XtCreateManagedWidget("track    ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_17 = XtCreateManagedWidget("eph      ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_18 = XtCreateManagedWidget("epv      ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_19 = XtCreateManagedWidget("climb    ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_20 = XtCreateManagedWidget("status   ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_21 = XtCreateManagedWidget("quit     ", xmRowColumnWidgetClass, left, args, 1);
 
     label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
     label_2 = XtCreateManagedWidget("Latitude ", xmLabelWidgetClass, rowColumn_12, args, 0);
@@ -243,6 +243,7 @@ static void handle_time_out(XtPointer client_data UNUSED,
 static struct gps_data_t *gpsdata;
 static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
+static int smoothing = 4;	/* # of transmitted sentences to smooth across */
 static XtAppContext app;
 static XtIntervalId timeout;
 static enum deg_str_type deg_type = deg_dd;
@@ -261,8 +262,9 @@ static void update_panel(struct gps_data_t *gpsdata,
 			 size_t len UNUSED, int level UNUSED)
 /* runs on each sentence */
 {
+    static int lfok = 0;
     unsigned int i;
-    int newstate;
+    int newstate, newtxt;
     XmString string[MAXCHANNELS+1];
     char s[128], *latlon, *sp;
 
@@ -289,159 +291,176 @@ static void update_panel(struct gps_data_t *gpsdata,
 	    XmStringFree(string[i]);
     }
     /* here are the value fields */
-    if (isnan(gpsdata->fix.time)==0)
-	(void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_1, s);
-    if (gpsdata->fix.mode >= MODE_2D) {
-        latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
-	(void)snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
-    } else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_2, s);
-    if (gpsdata->fix.mode >= MODE_2D) {
-        latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
-	(void)snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
-    } else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_3, s);
-    if (gpsdata->fix.mode == MODE_3D)
-	(void)snprintf(s, sizeof(s), "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_4, s);
-    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_5, s);
-    if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-	(void)snprintf(s, sizeof(s), "%f degrees", gpsdata->fix.track);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_6, s);
-    if (isnan(gpsdata->fix.eph)==0)
-	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_7, s);
-    if (isnan(gpsdata->fix.epv)==0)
-	(void)snprintf(s, sizeof(s), "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_8, s);
-    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
-	(void)snprintf(s, sizeof(s), "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
-    else
-	(void)strcpy(s, "n/a");
-    XmTextFieldSetString(text_9, s);
-
-    if (gpsdata->online == 0) {
-	newstate = 0;
-	(void)snprintf(s, sizeof(s), "OFFLINE");
-    } else {
-	newstate = gpsdata->fix.mode;
-	switch (gpsdata->fix.mode) {
-	case MODE_2D:
-	    (void)snprintf(s, sizeof(s), "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-	    break;
-	case MODE_3D:
-	    (void)snprintf(s, sizeof(s), "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
-	    break;
-	default:
-	    (void)snprintf(s, sizeof(s), "NO FIX");
-	    break;
+    if (isnan(gpsdata->fix.time)==0) {
+	    (void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
+	    newtxt = 1;
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
 	}
-    }
-    if (newstate != state) {
-	timer = time(NULL);
-	state = newstate;
-    }
-    (void)snprintf(s+strlen(s), sizeof(s)-strlen(s),
-		   " (%d secs)", (int) (time(NULL) - timer));
-    XmTextFieldSetString(text_10, s);
-    draw_graphics(gpsdata);
+	if (newtxt != 0) XmTextFieldSetString(text_1, s);
+	if (gpsdata->fix.mode >= MODE_2D) {
+	    latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
+	    newtxt = snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_2, s);
+	if (gpsdata->fix.mode >= MODE_2D) {
+	    latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
+	    newtxt = snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_3, s);
+	if (gpsdata->fix.mode == MODE_3D) {
+	    newtxt = snprintf(s, sizeof(s), "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_4, s);
+	if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
+	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_5, s);
+	if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
+	    newtxt = snprintf(s, sizeof(s), "%f degrees", gpsdata->fix.track);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_6, s);
+	if (isnan(gpsdata->fix.eph)==0) {
+	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_7, s);
+	if (isnan(gpsdata->fix.epv)==0) {
+	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_8, s);
+	if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
+	    newtxt = snprintf(s, sizeof(s), "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
+	} else {
+	    newtxt = (lfok>0) ? 0 : ((void)strcpy(s, "n/a"), 1);
+	}
+	if (newtxt != 0) XmTextFieldSetString(text_9, s);
 
-    XtRemoveTimeOut(timeout);
-    timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
-}
-
-static char *get_resource(Widget w, char *name, char *default_value)
-{
-  XtResource xtr;
-  char *value = NULL;
-
-  /*@ -observertrans -statictrans -immediatetrans -compdestroy @*/
-  xtr.resource_name = name;
-  xtr.resource_class = "AnyClass";
-  xtr.resource_type = XmRString;
-  xtr.resource_size = (Cardinal)sizeof(String);
-  xtr.resource_offset = 0;
-  xtr.default_type = XmRImmediate;
-  xtr.default_addr = default_value;
-  XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
-  if (value) return value;
-  /*@ +observertrans +statictrans +immediatetrans +compdestroy @*/
-  /*@i@*/return default_value;
-}
-
-/*@ -mustfreefresh @*/
-int main(int argc, char *argv[])
-{
-    int option;
-    char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
-    char *su, *au;
-    char *err_str = NULL;
-
-    /*@ -onlytrans */
-    toplevel = XtVaAppInitialize(&app, "xgps", 
-			       options, XtNumber(options), 
-			       &argc,argv, fallback_resources,NULL);
-
-    /*@ +onlytrans */
-    su = get_resource(toplevel, "speedunits", "mph");
-    for (speedunits = speedtable; 
-	 speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
-	 speedunits++)
-	if (strcmp(speedunits->legend, su) == 0)
-	    goto speedunits_ok;
-    speedunits = speedtable;
-    (void)fprintf(stderr, "xgps: unknown speed unit, defaulting to %s\n", speedunits->legend);
-speedunits_ok:;
-
-    au = get_resource(toplevel, "altunits",   "feet");
-    for (altunits = alttable; 
-	 altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
-	 altunits++)
-	if (strcmp(altunits->legend, au) == 0)
-	    goto altunits_ok;
-    altunits = alttable;
-    (void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
-altunits_ok:;
-
-    while ((option = getopt(argc, argv, "hl:v")) != -1) {
-	switch (option) {
-	case 'v':
-	    (void)printf("xgps %s\n", VERSION);
-	    exit(0);
-	case 'l':
-	    switch ( optarg[0] ) {
-	    case 'd':
-		deg_type = deg_dd;
-		continue;
-	    case 'm':
-		deg_type = deg_ddmm;
-		continue;
-	    case 's':
-		deg_type = deg_ddmmss;
-		continue;
-            default:
-		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-		/*@ -casebreak @*/
+	if (gpsdata->online == 0) {
+	    newstate = 0;
+	    (void)snprintf(s, sizeof(s), "OFFLINE");
+	    lfok = 0;
+	} else {
+	    newstate = gpsdata->fix.mode;
+	    switch (gpsdata->fix.mode) {
+	    case MODE_2D:
+		(void)snprintf(s, sizeof(s), "2D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+		if (lfok>0) lfok--;
+		break;
+	    case MODE_3D:
+		(void)snprintf(s, sizeof(s), "3D %sFIX",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"");
+		lfok = smoothing;
+		break;
+	    default:
+		(void)snprintf(s, sizeof(s), "NO FIX");
+		lfok = 0;
+		break;
 	    }
+	}
+	if (newstate != state) {
+	    timer = time(NULL);
+	    state = newstate;
+	}
+	(void)snprintf(s+strlen(s), sizeof(s)-strlen(s),
+		       " (%d secs)", (int) (time(NULL) - timer));
+	XmTextFieldSetString(text_10, s);
+	draw_graphics(gpsdata);
+
+	XtRemoveTimeOut(timeout);
+	timeout = XtAppAddTimeOut(app, 2000, handle_time_out, NULL);
+    }
+
+    static char *get_resource(Widget w, char *name, char *default_value)
+    {
+      XtResource xtr;
+      char *value = NULL;
+
+      /*@ -observertrans -statictrans -immediatetrans -compdestroy @*/
+      xtr.resource_name = name;
+      xtr.resource_class = "AnyClass";
+      xtr.resource_type = XmRString;
+      xtr.resource_size = (Cardinal)sizeof(String);
+      xtr.resource_offset = 0;
+      xtr.default_type = XmRImmediate;
+      xtr.default_addr = default_value;
+      XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
+      if (value) return value;
+      /*@ +observertrans +statictrans +immediatetrans +compdestroy @*/
+      /*@i@*/return default_value;
+    }
+
+    /*@ -mustfreefresh @*/
+    int main(int argc, char *argv[])
+    {
+	int option;
+	char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
+	char *su, *au;
+	char *err_str = NULL;
+
+	/*@ -onlytrans */
+	toplevel = XtVaAppInitialize(&app, "xgps", 
+				   options, XtNumber(options), 
+				   &argc,argv, fallback_resources,NULL);
+
+	/*@ +onlytrans */
+	su = get_resource(toplevel, "speedunits", "mph");
+	for (speedunits = speedtable; 
+	     speedunits < speedtable + sizeof(speedtable)/sizeof(speedtable[0]);
+	     speedunits++)
+	    if (strcmp(speedunits->legend, su) == 0)
+		goto speedunits_ok;
+	speedunits = speedtable;
+	(void)fprintf(stderr, "xgps: unknown speed unit, defaulting to %s\n", speedunits->legend);
+    speedunits_ok:;
+
+	au = get_resource(toplevel, "altunits",   "feet");
+	for (altunits = alttable; 
+	     altunits < alttable + sizeof(alttable)/sizeof(alttable[0]);
+	     altunits++)
+	    if (strcmp(altunits->legend, au) == 0)
+		goto altunits_ok;
+	altunits = alttable;
+	(void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
+    altunits_ok:;
+
+	while ((option = getopt(argc, argv, "hl:s:v")) != -1) {
+	    switch (option) {
+	    case 'v':
+		(void)printf("xgps %s\n", VERSION);
+		exit(0);
+	    case 'l':
+		switch ( optarg[0] ) {
+		case 'd':
+		    deg_type = deg_dd;
+		    continue;
+		case 'm':
+		    deg_type = deg_ddmm;
+		    continue;
+		case 's':
+		    deg_type = deg_ddmmss;
+		    continue;
+		default:
+		    (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
+		    /*@ -casebreak @*/
+		}
+	case 's':
+	    smoothing = atoi(optarg);
+	    break;
 	case 'h': default:
-	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [-s smoothing] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
