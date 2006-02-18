@@ -7,7 +7,7 @@ DESCRIPTION:
 
 Initial conditions of the problem:
 
-1. We have a file descriptor open for (possibly non-blockin) read. The device 
+1. We have a file descriptor open for (possibly non-blocking) read. The device 
    on the other end is sending packets at us.  
 
 2. It may require more than one read to gather a packet.  Reads may span packet
