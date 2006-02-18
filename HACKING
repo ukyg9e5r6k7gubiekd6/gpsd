@@ -23,12 +23,13 @@ interfaces and power/duty-cycle management.  The one place where
 they differ substantially is that in the SBC case we generally
 know in advance what devices will be connected and when.  Thus, by
 designing for the less predictable laptop/PDA environment, we
-cover both. It is not by accident that the source code can be built 
+cover both.  But it is not by accident that the source code can be built 
 with support for only any single GPS type compiled in.
 
 While we will support survey-grade GPSes when and if we have that
 hardware for testing, our focus will probably remain on inexpensive
-and readily-available consumer-grade GPS hardware.
+and readily-available consumer-grade GPS hardware, especially GPS
+mice.
 
 *** The time and location service
 
