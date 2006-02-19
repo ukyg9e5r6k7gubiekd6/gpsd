@@ -25,7 +25,6 @@
  * Widget and window sizes.
  */
 #define MAX_FONTSIZE	18		/* maximum fontsize we handle*/
-#define ROOT_SIZE	"700x570"	/* size of entire xgps display */
 /* height of satellite-data display */
 #define SATDATA_HEIGHT	MAX_FONTSIZE*(MAXCHANNELS+1)
 #define LEFTSIDE_WIDTH	205		/* width of data-display side */
@@ -95,14 +94,15 @@ static void build_gui(Widget toplevel)
 
     /*@ -immediatetrans -usedef @*/
     /* the root application window */
-    XtSetArg(args[0], XmNgeometry, ROOT_SIZE);
-    XtSetArg(args[1], XmNresizePolicy, XmRESIZE_NONE);
-    XtSetArg(args[2], XmNallowShellResize, False);
-    XtSetArg(args[3], XmNdeleteResponse, XmDO_NOTHING);
-    XtSetArg(args[4], XmNmwmFunctions,
+    XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 20);
+    XtSetArg(args[0], XmNheight, SATDATA_HEIGHT + 18*MAX_FONTSIZE);
+    XtSetArg(args[2], XmNresizePolicy, XmRESIZE_NONE);
+    XtSetArg(args[3], XmNallowShellResize, False);
+    XtSetArg(args[4], XmNdeleteResponse, XmDO_NOTHING);
+    XtSetArg(args[5], XmNmwmFunctions,
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
     /*@ +immediatetrans +usedef @*/
-    XtSetValues(toplevel, args, 5);
+    XtSetValues(toplevel, args, 6);
 
     /*@ -onlytrans @*/
     /* a form to assist with geometry negotiation */
