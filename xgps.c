@@ -95,7 +95,7 @@ static void build_gui(Widget toplevel)
     /*@ -immediatetrans -usedef @*/
     /* the root application window */
     XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 20);
-    XtSetArg(args[0], XmNheight, SATDATA_HEIGHT + 18*MAX_FONTSIZE);
+    XtSetArg(args[1], XmNheight, SATDATA_HEIGHT + 18*MAX_FONTSIZE);
     XtSetArg(args[2], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[3], XmNallowShellResize, False);
     XtSetArg(args[4], XmNdeleteResponse, XmDO_NOTHING);
