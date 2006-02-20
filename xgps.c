@@ -96,6 +96,7 @@ static void build_gui(Widget toplevel)
     /* the root application window */
     XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 26);
     XtSetArg(args[1], XmNheight, SATDATA_HEIGHT + 14*MAX_FONTSIZE + 12);
+#ifdef __UNUSED__
     XtSetArg(args[2], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[3], XmNallowShellResize, False);
     XtSetArg(args[4], XmNdeleteResponse, XmDO_NOTHING);
@@ -103,6 +104,10 @@ static void build_gui(Widget toplevel)
 	     MWM_FUNC_RESIZE | MWM_FUNC_MOVE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE);
     /*@ +immediatetrans +usedef @*/
     XtSetValues(toplevel, args, 6);
+#else
+    /*@ +immediatetrans +usedef @*/
+    XtSetValues(toplevel, args, 2);
+#endif /* __UNUSED__ */
 
     /*@ -onlytrans @*/
     /* a form to assist with geometry negotiation */
