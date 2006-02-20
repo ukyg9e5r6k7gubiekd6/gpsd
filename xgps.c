@@ -30,7 +30,10 @@
 #define LEFTSIDE_WIDTH	205		/* width of data-display side */
 #define SATDIAG_SIZE	400		/* size of satellite diagram */
 
-static Widget toplevel, form, left, right, quitbutton;
+static Widget toplevel, form, left, right;
+#ifdef EXPLICIT_QUIT
+static Widget quitbutton;
+#endif /* EXPLICIT_QUIT */
 static Widget satellite_list, satellite_diagram, status;
 static Widget rowColumn_11, rowColumn_12, rowColumn_13, rowColumn_14;
 static Widget rowColumn_15, rowColumn_16, rowColumn_17, rowColumn_18;
@@ -213,9 +216,11 @@ static void build_gui(Widget toplevel)
     text_10 = XtCreateManagedWidget("text_10", xmTextFieldWidgetClass,
 				   rowColumn_20, args, 6);
 
+#ifdef EXPLICIT_QUIT
     quitbutton = XtCreateManagedWidget("            Quit            ",
 			 xmPushButtonWidgetClass, rowColumn_20, args, 0);
     /*@i@*/XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
+#endif /* EXPLICIT_QUIT */
 
     XtRealizeWidget(toplevel);
     delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
