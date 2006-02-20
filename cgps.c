@@ -181,7 +181,7 @@ static void update_panel(struct gps_data_t *gpsdata,
   if (isnan(gpsdata->fix.epd)==0)
     (void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
     else
-	(void)wprintw(datawin,"n/a         ");
+	(void)wprintw(datawin,"n/a          ");
   
   /* Fill in the estimated speed error. */
   (void)wmove(datawin, 12,22);
