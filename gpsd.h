@@ -160,6 +160,9 @@ struct gps_device_t {
 	    int part, await;		/* for tracking GSV parts */
 	    struct tm date;
 	    double subseconds;
+# ifdef NTPSHM_ENABLE
+         double last_fixtime;		/* so updates happen once */
+# endif /* NTPSHM_ENABLE */
 	} nmea;
 #endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE

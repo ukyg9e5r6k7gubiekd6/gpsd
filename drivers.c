@@ -65,9 +65,13 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    gpsd_report(1, "unknown sentence: \"%s\"\n", session->outbuffer);
 	}
 #ifdef NTPSHM_ENABLE
-	if ((st & TIME_SET) != 0)
-	    /* this magic number is derived from observation */
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.675);
+	/* this magic number is derived from observation */
+     if ((st & TIME_SET) != 0 &&
+         (session->gpsdata.fix.time != session->driver.nmea.last_fixtime)) {
+             /* this magic number is derived from observation */
+             (void)ntpshm_put(session, session->gpsdata.fix.time + 0.675);
+             session->driver.nmea.last_fixtime = session->gpsdata.fix.time;
+     }
 #endif /* NTPSHM_ENABLE */
 	return st;
     } else
