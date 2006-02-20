@@ -278,8 +278,8 @@ static void update_panel(struct gps_data_t *gpsdata,
     XmTextFieldSetString(status, message);
     /* This is for the satellite status display */
     if (gpsdata->satellites) {
+	string[0] = XmStringCreateSimple("PRN:   Elev:  Azim:  SNR:  Used:");
 	for (i = 0; i < MAXCHANNELS; i++) {
-	    string[0] = XmStringCreateSimple("PRN:   Elev:  Azim:  SNR:  Used:");
 	    if (i < (unsigned int)gpsdata->satellites) {
 		(void)snprintf(s, sizeof(s),  
 			       " %3d    %02d    %03d    %02d      %c", 
