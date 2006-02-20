@@ -253,7 +253,8 @@ void process(char *buf){
 		default: /* no-op */ ;
 		}
 	}
-	write_record();
+	if ((gps_ctx.mode > 1) && (gps_ctx.status > 0))
+		write_record();
 }
 
 void write_record(){
