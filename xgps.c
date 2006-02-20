@@ -94,8 +94,8 @@ static void build_gui(Widget toplevel)
 
     /*@ -immediatetrans -usedef @*/
     /* the root application window */
-    XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 20);
-    XtSetArg(args[1], XmNheight, SATDATA_HEIGHT + 18*MAX_FONTSIZE);
+    XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 26);
+    XtSetArg(args[1], XmNheight, SATDATA_HEIGHT + 13*MAX_FONTSIZE + 12);
     XtSetArg(args[2], XmNresizePolicy, XmRESIZE_NONE);
     XtSetArg(args[3], XmNallowShellResize, False);
     XtSetArg(args[4], XmNdeleteResponse, XmDO_NOTHING);
@@ -119,12 +119,12 @@ static void build_gui(Widget toplevel)
 				    XmNtopAttachment, XmATTACH_FORM,
 				    NULL);
     /* the application status bar */
-    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form,
+    status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, right,
 				     XmNcursorPositionVisible, False,
 				     XmNeditable, False,
 				     XmNmarginHeight, 1,
 				     XmNhighlightThickness, 0,
-				     XmNshadowThickness, 1,
+				     XmNshadowThickness, 2,
 				     XmNleftAttachment, XmATTACH_FORM,
 				     XmNrightAttachment, XmATTACH_FORM,
 				     XmNtopAttachment, XmATTACH_WIDGET,
@@ -145,7 +145,7 @@ static void build_gui(Widget toplevel)
       XtVaCreateManagedWidget("satellite_diagram",
 			      xmDrawingAreaWidgetClass, right, 
 			      XmNbackground, get_pixel(toplevel, "snow"),
-			      XmNheight, SATDIAG_SIZE, XmNwidth, SATDIAG_SIZE,
+			      XmNheight, SATDIAG_SIZE+24, XmNwidth, SATDIAG_SIZE,
 			      NULL);
     gcv.foreground = BlackPixelOfScreen(XtScreen(satellite_diagram));
     gc = XCreateGC(XtDisplay(satellite_diagram),
@@ -166,8 +166,8 @@ static void build_gui(Widget toplevel)
     rowColumn_17 = XtCreateManagedWidget("eph      ", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_18 = XtCreateManagedWidget("epv      ", xmRowColumnWidgetClass, left, args, 1);
     rowColumn_19 = XtCreateManagedWidget("climb    ", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_20 = XtCreateManagedWidget("status   ", xmRowColumnWidgetClass, left, args, 1);
-    rowColumn_21 = XtCreateManagedWidget("quit     ", xmRowColumnWidgetClass, left, args, 1);
+    rowColumn_20 = XtCreateManagedWidget("status   ", xmRowColumnWidgetClass, right, args, 1);
+    rowColumn_21 = XtCreateManagedWidget("quit     ", xmRowColumnWidgetClass, right, args, 1);
 
     label_1 = XtCreateManagedWidget("Time     ", xmLabelWidgetClass, rowColumn_11, args, 0);
     label_2 = XtCreateManagedWidget("Latitude ", xmLabelWidgetClass, rowColumn_12, args, 0);
@@ -209,7 +209,7 @@ static void build_gui(Widget toplevel)
     text_10 = XtCreateManagedWidget("text_10", xmTextFieldWidgetClass,
 				   rowColumn_20, args, 6);
 
-    quitbutton = XtCreateManagedWidget("Quit",
+    quitbutton = XtCreateManagedWidget("             Quit              ",
 			 xmPushButtonWidgetClass, rowColumn_21, args, 0);
     /*@i@*/XtAddCallback(quitbutton, XmNactivateCallback, (XtPointer)quit_cb, NULL);
 
