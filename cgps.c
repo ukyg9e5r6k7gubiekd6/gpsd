@@ -456,9 +456,6 @@ int main(int argc, char *argv[])
 	    /* code that calls gps_poll(gpsdata) */
 	  (void)gps_poll(gpsdata);
 	}
-	else {
-	    fprintf(stderr, "cgps: No data\n");
-	}
 
         /* Check for user input. */
         c=wgetch(messages);
