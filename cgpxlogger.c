@@ -151,7 +151,6 @@ main(int argc, char **argv){
 
 	header();
 	for(;;){
-		track_start();
 		if (want_exit){
 			footer();
 			fprintf(stderr, "Exiting on signal %d!\n", want_exit);
@@ -173,8 +172,9 @@ main(int argc, char **argv){
 		} else {
 			if ((errno != EINTR) && (errno != EAGAIN)){
 				/* ignore EINTR and EAGAIN */
-				perror(NULL);
-				exit(1);
+				want_exit = SIGPIPE;
+				sl = 1;
+				fprintf(stderr,"%s\n", strerror(errno));
 			}
 		}
 		sleep(sl);
@@ -255,6 +255,8 @@ void process(char *buf){
 	}
 	if ((gps_ctx.mode > 1) && (gps_ctx.status > 0))
 		write_record();
+	else
+		track_end();
 }
 
 void write_record(){
