@@ -282,7 +282,7 @@ static struct gps_device_t channels[MAXDEVICES];
 #define syncing(chp)	(chp->gpsdata.gps_fd>-1&& chp->packet_type==BAD_PACKET)
 
 static struct subscriber_t {
-    double active;			/* when subscriber signed on */
+    double active;			/* when subscriber last polled for data */
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
@@ -1485,8 +1485,15 @@ int main(int argc, char *argv[])
 		    } else
 #endif /* RTCM104_SERVICE */
 		    {
-			if (subscribers[cfd].device)
-			    subscribers[cfd].device->poll_times[cfd] = timestamp();
+			if (subscribers[cfd].device){
+		            /*
+			     * when a command comes in, to update .active to
+			     * timestamp() so we don't close the connection
+			     * after POLLER_TIMEOUT seconds. This makes
+			     * POLLER_TIMEOUT useful.
+			     */
+			    subscribers[cfd].active = subscribers[cfd].device->poll_times[cfd] = timestamp();
+                        }
 			if (handle_gpsd_request(cfd, buf, buflen) < 0)
 			    detach_client(cfd);
 		    }
