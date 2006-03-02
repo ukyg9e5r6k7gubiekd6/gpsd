@@ -122,7 +122,7 @@ cgps terminates when you send it a SIGHUP or SIGINT; given default terminal sett
 .SS "cgpxlogger"
 
 .PP
-This program connects to gpsd, polls for location, and logs each fix to stdout in GPX (XML) format\&.
+This program connects to gpsd, polls for location, and logs each fix to standard output in GPX (XML) format\&.
 
 .PP
 The program also writes start and end messages to syslog\&.
@@ -133,7 +133,7 @@ The program also writes start and end messages to syslog\&.
 This program listens to DBUS broadcasts from gpsd (org\&.gpsd\&.fix) and logs each fix to standard output as they arrive in an XML format\&.
 
 .PP
-The logfile may be composed of multiple tracks\&. A new track is created if there's no fix for 5 seconds\&.
+The output may be composed of multiple tracks\&. A new track is created if there's no fix for 5 seconds\&.
 
 .PP
 The program also writes start and end messages to syslog\&.
