@@ -2,9 +2,9 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='xgps.1'>
+<refentry id='gps.1'>
 <refmeta>
-<refentrytitle>xgps</refentrytitle>
+<refentrytitle>gps</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
 </refmeta>

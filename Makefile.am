@@ -155,7 +155,7 @@ packet_test_LDADD = $(LIBC) libgps.la -lm
 #
 man_MANS = \
 	gpsd.8 \
-	xgps.1 \
+	gps.1 \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
@@ -171,8 +171,8 @@ man_MANS = \
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
 
-xgps.1 xgpsspeed.1: xgps.xml
-	-$(XMLTO) man xgps.xml
+gps.1 xgpsspeed.1: gps.xml
+	-$(XMLTO) man gps.xml
 
 libgps.3: libgps.xml
 	-$(XMLTO) man libgps.xml
@@ -219,7 +219,7 @@ EXTRA_DIST = \
 	AUTHORS \
 	dgpsip-servers \
 	gpsd.xml \
-	xgps.xml \
+	gps.xml \
 	libgpsd.xml \
 	libgps.xml \
 	libgpsmm.xml \

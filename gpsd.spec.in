@@ -133,10 +133,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %attr(755, root, root) %{_bindir}/gpspipe
 %attr(755, root, root) %{_bindir}/cgpxlogger
 #%attr(755, root, root) %{_bindir}/gpxlogger
-%{_mandir}/man1/xgps.1*
+%{_mandir}/man1/gps.1*
 %{_mandir}/man1/gpspipe.1*
-%{_mandir}/man1/cgpxlogger.1*
-#%{_mandir}/man1/gpxlogger.1*
 %{_libdir}/X11/app-defaults/xgps
 %{_libdir}/X11/app-defaults/xgpsspeed
 
@@ -144,7 +142,8 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 * Mon Feb 20 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
 - Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix
   to cope with Antares uBlox by Andreas Stricker.  Minor fix to
-  cgpxlogger.
+  cgpxlogger.  Merge cgpxlogger and gpxlogger documentation onto
+  the xgps(1) manual page and rename it gps(1).
 
 * Fri Feb 17 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.31-1
 - Now builds and runs under Cygwin.  Correct the speed units in synthetic 

@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
     datawin    = newwin(15, 45, 1, 0);
     satellites = newwin(15, 35, 1, 45);
     command    = newwin(3,  45,  16, 0);
-  status     = newwin(3,  35,  16, 45);
+    status     = newwin(3,  35,  16, 45);
     messages   = newwin(0,  0,  19, 0);
     /*@ +onlytrans @*/
     (void)scrollok(messages, true);
@@ -403,19 +403,18 @@ int main(int argc, char *argv[])
     (void)mvwprintw(datawin, 4,5, "Altitude:");
     (void)mvwprintw(datawin, 5,5, "Speed:");
     (void)mvwprintw(datawin, 6,5, "Heading:");
-  (void)mvwprintw(datawin, 7,5, "Climb:");
-  (void)mvwprintw(datawin, 9,5, "Horizontal Err:");
-  (void)mvwprintw(datawin, 10,5, "Vertical Err:");
-  (void)mvwprintw(datawin, 11,5, "Course Err:");
-  (void)mvwprintw(datawin, 12,5, "Speed Err:");
-  (void)mvwprintw(status, 1,1, "Status:");
+    (void)mvwprintw(datawin, 7,5, "Climb:");
+    (void)mvwprintw(datawin, 9,5, "Horizontal Err:");
+    (void)mvwprintw(datawin, 10,5, "Vertical Err:");
+    (void)mvwprintw(datawin, 11,5, "Course Err:");
+    (void)mvwprintw(datawin, 12,5, "Speed Err:");
+    (void)mvwprintw(status, 1,1, "Status:");
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(command, 1,1, "Command:  ");
     (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
-  (void)wborder(status, 0, 0, 0, 0, 0, 0, 0, 0);
-
+    (void)wborder(status, 0, 0, 0, 0, 0, 0, 0, 0);
 
     /* Here's where updates go. */
     gps_set_raw_hook(gpsdata, update_panel);
@@ -466,14 +465,14 @@ int main(int argc, char *argv[])
 	  die(0);
 	  break;
 
-      /* Toggle "once per second" update. */
-    case 'o':
-      if(ops_flag==0) {
-	ops_flag=1;
-      } else {
-	ops_flag=0;
-      }
-      break;
+	  /* Toggle "once per second" update. */
+	case 'o':
+	  if(ops_flag==0) {
+	    ops_flag=1;
+	  } else {
+	    ops_flag=0;
+	  }
+        break;
 
 	  /* Toggle spewage of raw gpsd data. */
 	case 's':
