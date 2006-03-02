@@ -12,6 +12,7 @@
 <refname>xgps</refname>
 <refname>xgpsspeed</refname>
 <refname>cgps</refname>
+<refname>gpxlogger</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
@@ -65,7 +66,16 @@
 	  </group>
       </group>
 </cmdsynopsis>
-
+<cmdsynopsis>
+  <command>gpxlogger</command> <arg><replaceable>logfile</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>cgpxlogger</command>  
+      <arg choice='opt'>-s <replaceable>gpsd-server</replaceable></arg>
+      <arg choice='opt'>-p <replaceable>gpsd-port</replaceable></arg>
+      <arg choice='opt'>-i <replaceable>poll-interval</replaceable></arg>
+      <arg choice='opt'>-h </arg>
+</cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
@@ -167,6 +177,25 @@ SIGHUP or SIGINT; given default terminal settings this will happen
 when you type Ctl-C at it.  It will also terminate on 'q'</para>
 
 </refsect2>
+<refsect2><title>cgpxlogger</title>
+
+<para>This program connects to gpsd, polls for location, and logs
+each fix to stdout in GPX (XML) format.</para>
+
+<para>The program also writes start and end messages to syslog.</para>
+
+</refsect2>
+<refsect2><title>gpxlogger</title>
+
+<para>This program listens to DBUS broadcasts from gpsd (org.gpsd.fix)
+and logs each fix to a GPX file as they arrive in an XML format.</para>
+
+<para>The logfile may be composed of multiple tracks. A new track is
+created if there's no fix for 5 seconds.</para>
+
+<para>The program also writes start and end messages to syslog.</para>
+
+</refsect2>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
@@ -180,11 +209,16 @@ when you type Ctl-C at it.  It will also terminate on 'q'</para>
 
 <refsect1 id='maintainer'><title>AUTHORS</title> 
 
-<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
-This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
+<para>
+Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond(xgps). 
+Jeff Francis (cgps). Amaury Jacquot <email>sxpert@esitcom.org</email>
+&amp; Petter Reinholdtsen <email>pere@hungry.com</email> (gpxlogger).
+Chris Kuethe <email>chris.kuethe@gmail.com</email> (cgpxlogger).
+</para>
+
+<para>This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
 There is a project page, with <application>xgps</application>
-screenshots, <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+screenshots, at <ulink url="http://gpsd.berlios.de/">berlios.de</ulink>.</para>
 
 </refsect1>
 

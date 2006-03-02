@@ -331,7 +331,15 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
 	return ONLINE_SET;
 
     session->gpsdata.newdata.mode = atoi(field[2]);
-    mask = MODE_SET;
+    /*
+     * The first arm of this conditional ignores dead-reckoning
+     * fixes from an Antaris chipset. which returns E in field 2
+     * for a dead-reckoning estimate.  Fix by Andreas Stricker.
+     */
+    if (session->gpsdata.newdata.mode == 0 && field[2][0] == 'E')
+        mask = 0;
+    else
+        mask = MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", session->gpsdata.newdata.mode);
     session->gpsdata.pdop = atof(field[session->device_type->channels+3]);
     session->gpsdata.hdop = atof(field[session->device_type->channels+4]);

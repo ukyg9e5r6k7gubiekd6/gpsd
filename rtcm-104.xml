@@ -134,7 +134,7 @@ LF transmitters also have (different) id numbers.</para>
 <para>&lt;modified z_count&gt; is the reference time of the corrections in the
 message in seconds within the current hour. Note that it is
 the current hour in GPS time, which is several seconds ahead of
-UTC (13 in 1999-2005).</para>
+UTC (14 as of January 2006).</para>
 
 <para>&lt;sequence no&gt; is a number which increments, modulo 8, for each
 message transmitted.</para>
@@ -202,12 +202,12 @@ positions for the satellite.</para>
 <para>&lt;modified z_count&gt; is just a copy of the same field from
 the header.</para>
 
-<para>&lt;range error&gt; is the pseudorange error in metres for this satellite
+<para>&lt;range error&gt; is the pseudorange error in meters for this satellite
 as measured by the beacon reference receiver at the epoch indicated
 by &lt;modified z_count&gt;</para>
 
 <para>&lt;range error rate&gt; is the rate of change of pseudorange error in
-metres/sec for this satellite as measured by the beacon reference
+meters/sec for this satellite as measured by the beacon reference
 receiver at the epoch indicated by &lt;modified z_count&gt;. This is
 used to calculate pseudorange errors at other epochs, if
 required by the GPS receiver.</para>
@@ -227,7 +227,7 @@ R &lt;X-coordinate&gt; &lt;Y-coordinate&gt; &lt;Z-coordinate&gt;
 R	3746729.40	-5086.23	5144450.67
 </literallayout></informalexample>
 
-<para>The coordinates are the position of the station, in metres to two
+<para>The coordinates are the position of the station, in meters to two
 decimal places, in Earth Centred Earth Fixed coordinates.
 These are usually referred to the WGS84 reference frame, but may
 be referred to NAD83 in the US (essentially identical to WGS84 for

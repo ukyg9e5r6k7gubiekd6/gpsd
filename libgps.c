@@ -298,6 +298,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		case 'O':
 		    if (sp[2] == '?') {
 			gpsdata->set = MODE_SET | STATUS_SET;
+			gpsdata->status = STATUS_NO_FIX;
 			gps_clear_fix(&gpsdata->fix);
 		    } else {
 			struct gps_fix_t nf;
@@ -341,6 +342,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->fix = nf;
 			    (void)strcpy(gpsdata->tag, tag);
 			    gpsdata->set = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
+			    gpsdata->status = STATUS_FIX;
+			    gpsdata->set |= STATUS_SET;
 			}
 		    }
 		    break;
@@ -453,7 +456,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case '$':
 		    /*@ +matchanyintegral @*/
-		    (void)sscanf(sp, "$=%s %u %lf %lf %lf %lf %lf %lf", 
+		    (void)sscanf(sp, "$=%s %ld %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
 			   &gpsdata->fix.time, 

@@ -141,8 +141,10 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Mon Feb 20 2006 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
-- Geoffrey Crew's cleanup of the xgps layout.
+* Mon Feb 20 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
+- Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix
+  to cope with Antares uBlox by Andreas Stricker.  Minor fix to
+  cgpxlogger.
 
 * Fri Feb 17 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.31-1
 - Now builds and runs under Cygwin.  Correct the speed units in synthetic 

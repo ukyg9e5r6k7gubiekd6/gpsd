@@ -43,7 +43,6 @@ unsigned int want_exit = 0;
 unsigned short port = 2947;
 unsigned int sl = 5;
 
-extern int h_errno;
 char *progname;
 
 void process(char *);

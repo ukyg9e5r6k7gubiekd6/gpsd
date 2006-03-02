@@ -17,9 +17,9 @@
 .el .ne 3
 .IP "\\$1" \\$2
 ..
-.TH "RTCM" 5 "" "" ""
+.TH "RTCM-104" 5 "" "" ""
 .SH NAME
-rtcm \- RTCM-104 dump format emitted by GPSD tools
+rtcm-104 \- RTCM-104 dump format emitted by GPSD tools
 .SH "OVERVIEW"
 
 .PP
@@ -37,7 +37,7 @@ Differential\-GPS correction stations consist of a GPS reference receiver couple
 The LF transmitter broadcasts the the approximately 300khz radio signal that differential\-GPS radio receivers pick up\&. Transmitters that are meant to have a higher range will need to transmit at the slower rate\&. The higher the data rate the harder it will be for the remote radio receiver to receive with a good signal\-to\-noise ration\&. (Higher data rate signals can't be averaged over as long a time frame, hence they appear noisier\&.)
 
 .PP
-An RTCM message consists of a sequence of 30\-bit words\&. The 24 most significant bits are data and the six least significant bits are parity\&. The parity algorithm used is the same as that used on GPS satellite downlinks\&.
+An RTCM message consists of a sequence of up to 33 30\-bit words\&. The 24 most significant bits of each word are data and the six least significant bits are parity\&. The parity algorithm used is the same as that used on GPS satellite downlinks\&.
 
 .PP
 Each message consists of two header words followed by zero or more data words, depending upon message type\&.
@@ -106,7 +106,7 @@ special message -- a text message from the beacon operator\&.
 <reference station id> is the id of the GPS reference receiver\&. The LF transmitters also have (different) id numbers\&.
 
 .PP
-<modified z_count> is the reference time of the corrections in the message in seconds within the current hour\&. Note that it is the current hour in GPS time, which is several seconds ahead of UTC (13 in 1999\-2005)\&.
+<modified z_count> is the reference time of the corrections in the message in seconds within the current hour\&. Note that it is the current hour in GPS time, which is several seconds ahead of UTC (14 as of January 2006)\&.
 
 .PP
 <sequence no> is a number which increments, modulo 8, for each message transmitted\&.
@@ -179,10 +179,10 @@ S	7	0	199	331\&.8	\-12\&.160	0\&.288
 <modified z_count> is just a copy of the same field from the header\&.
 
 .PP
-<range error> is the pseudorange error in metres for this satellite as measured by the beacon reference receiver at the epoch indicated by <modified z_count>
+<range error> is the pseudorange error in meters for this satellite as measured by the beacon reference receiver at the epoch indicated by <modified z_count>
 
 .PP
-<range error rate> is the rate of change of pseudorange error in metres/sec for this satellite as measured by the beacon reference receiver at the epoch indicated by <modified z_count>\&. This is used to calculate pseudorange errors at other epochs, if required by the GPS receiver\&.
+<range error rate> is the rate of change of pseudorange error in meters/sec for this satellite as measured by the beacon reference receiver at the epoch indicated by <modified z_count>\&. This is used to calculate pseudorange errors at other epochs, if required by the GPS receiver\&.
 
 .SS "Reference Station Parameters (R)"
 
@@ -207,7 +207,7 @@ R	3746729\&.40	\-5086\&.23	5144450\&.67
 .fi
 
 .PP
-The coordinates are the position of the station, in metres to two decimal places, in Earth Centred Earth Fixed coordinates\&. These are usually referred to the WGS84 reference frame, but may be referred to NAD83 in the US (essentially identical to WGS84 for all except geodesists), or to some other reference frame in other parts of the world\&.
+The coordinates are the position of the station, in meters to two decimal places, in Earth Centred Earth Fixed coordinates\&. These are usually referred to the WGS84 reference frame, but may be referred to NAD83 in the US (essentially identical to WGS84 for all except geodesists), or to some other reference frame in other parts of the world\&.
 
 .SS "Datum (D)"
 
