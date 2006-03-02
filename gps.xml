@@ -180,7 +180,7 @@ when you type Ctl-C at it.  It will also terminate on 'q'</para>
 <refsect2><title>cgpxlogger</title>
 
 <para>This program connects to gpsd, polls for location, and logs
-each fix to stdout in GPX (XML) format.</para>
+each fix to standard output in GPX (XML) format.</para>
 
 <para>The program also writes start and end messages to syslog.</para>
 
@@ -188,9 +188,9 @@ each fix to stdout in GPX (XML) format.</para>
 <refsect2><title>gpxlogger</title>
 
 <para>This program listens to DBUS broadcasts from gpsd (org.gpsd.fix)
-and logs each fix to a GPX file as they arrive in an XML format.</para>
+and logs each fix to standard output as they arrive in an XML format.</para>
 
-<para>The logfile may be composed of multiple tracks. A new track is
+<para>The output may be composed of multiple tracks. A new track is
 created if there's no fix for 5 seconds.</para>
 
 <para>The program also writes start and end messages to syslog.</para>

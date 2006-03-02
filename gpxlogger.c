@@ -13,7 +13,6 @@
 #include <glib/gprintf.h>
 
 DBusConnection* connection;
-FILE* gpxfile;
 
 static char *author = "Amaury Jacquot";
 static char *copyright = "GPL v 2.0";
@@ -43,15 +42,15 @@ static struct {
 
 
 static void print_gpx_trk_start (void) {
-	fprintf (gpxfile, " <trk>\n");
-	fprintf (gpxfile, "  <trkseg>\n");
-	fflush (gpxfile);
+	fprintf (stdout, " <trk>\n");
+	fprintf (stdout, "  <trkseg>\n");
+	fflush (stdout);
 }
 
 static void print_gpx_trk_end (void) {
-	fprintf (gpxfile, "  </trkseg>\n");
-	fprintf (gpxfile, " </trk>\n");
-	fflush (gpxfile);
+	fprintf (stdout, "  </trkseg>\n");
+	fprintf (stdout, " </trk>\n");
+	fflush (stdout);
 }
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
@@ -83,7 +82,7 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 	/* 
 	 * we have a fix there - log the point
 	 */
-	if (gpxfile&&(gpsfix.time!=gpsfix.old_time)&&gpsfix.mode>1) {
+	if ((gpsfix.time!=gpsfix.old_time)&&gpsfix.mode>1) {
 		struct tm 	time;
 
 		/* Make new track if the jump in time is above
@@ -104,44 +103,42 @@ static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
 		}
 		
 		gpsfix.old_time = gpsfix.time;
-		fprintf (gpxfile, "   <trkpt lat=\"%f\" lon=\"%f\">\n", gpsfix.latitude, gpsfix.longitude);
-		fprintf (gpxfile, "    <ele>%f</ele>\n", gpsfix.altitude);
+		fprintf (stdout, "   <trkpt lat=\"%f\" lon=\"%f\">\n", gpsfix.latitude, gpsfix.longitude);
+		fprintf (stdout, "    <ele>%f</ele>\n", gpsfix.altitude);
 		gmtime_r (&(gpsfix.time), &time);
-		fprintf (gpxfile, "    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
+		fprintf (stdout, "    <time>%04d-%02d-%02dT%02d:%02d:%02dZ</time>\n",
 				time.tm_year+1900, time.tm_mon+1, time.tm_mday,
 				time.tm_hour, time.tm_min, time.tm_sec);
 		if (gpsfix.mode==1)
-			fprintf (gpxfile, "    <fix>none</fix>\n");
+			fprintf (stdout, "    <fix>none</fix>\n");
 		else
-			fprintf (gpxfile, "    <fix>%dd</fix>\n", gpsfix.mode);
-		fprintf (gpxfile, "   </trkpt>\n");
-		fflush (gpxfile);
+			fprintf (stdout, "    <fix>%dd</fix>\n", gpsfix.mode);
+		fprintf (stdout, "   </trkpt>\n");
+		fflush (stdout);
 	}
 	return DBUS_HANDLER_RESULT_HANDLED;
 }
 
 static void print_gpx_header (void) {
-	if (!gpxfile) return;
-
-	fprintf (gpxfile, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	fprintf (gpxfile, "<gpx version=\"1.1\" creator=\"navsys logger\"\n");
-	fprintf (gpxfile, "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-	fprintf (gpxfile, "        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
-	fprintf (gpxfile, "        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
-	fprintf (gpxfile, "        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
-	fprintf (gpxfile, " <metadata>\n");
-	fprintf (gpxfile, "  <name>NavSys GPS logger dump</name>\n");
-	fprintf (gpxfile, "  <author>%s</author>\n", author);
-	fprintf (gpxfile, "  <copyright>%s</copyright>\n", copyright);
-	fprintf (gpxfile, " </metadata>\n");
-	fflush (gpxfile);
+	fprintf (stdout, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	fprintf (stdout, "<gpx version=\"1.1\" creator=\"navsys logger\"\n");
+	fprintf (stdout, "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
+	fprintf (stdout, "        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
+	fprintf (stdout, "        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
+	fprintf (stdout, "        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
+	fprintf (stdout, " <metadata>\n");
+	fprintf (stdout, "  <name>NavSys GPS logger dump</name>\n");
+	fprintf (stdout, "  <author>%s</author>\n", author);
+	fprintf (stdout, "  <copyright>%s</copyright>\n", copyright);
+	fprintf (stdout, " </metadata>\n");
+	fflush (stdout);
 }
 
 static void print_gpx_footer (void) {
 	if (intrack)
 		print_gpx_trk_end();
-	fprintf (gpxfile, "</gpx>\n");
-	fclose (gpxfile);
+	fprintf (stdout, "</gpx>\n");
+	fclose (stdout);
 }
 
 static void quit_handler (int signum) {
@@ -189,11 +186,6 @@ int main (int argc, char** argv) {
 		return 1;
 	}
 	
-	gpxfile = fopen (argv[1],"w");
-	if (!gpxfile) {
-		syslog (LOG_CRIT, "Unable to open destination file %s", argv[1]);
-		return 2;
-	}
 	print_gpx_header ();
 	
 	mainloop = g_main_loop_new (NULL, FALSE);

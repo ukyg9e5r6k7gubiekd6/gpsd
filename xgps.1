@@ -17,7 +17,7 @@
 .el .ne 3
 .IP "\\$1" \\$2
 ..
-.TH "XGPS" 1 "" "" ""
+.TH "GPS" 1 "" "" ""
 .SH NAME
 xgps, xgpsspeed, cgps, gpxlogger \- test clients for gpsd
 .SH "SYNOPSIS"
@@ -130,7 +130,7 @@ The program also writes start and end messages to syslog\&.
 .SS "gpxlogger"
 
 .PP
-This program listens to DBUS broadcasts from gpsd (org\&.gpsd\&.fix) and logs each fix to a GPX file as they arrive in an XML format\&.
+This program listens to DBUS broadcasts from gpsd (org\&.gpsd\&.fix) and logs each fix to standard output as they arrive in an XML format\&.
 
 .PP
 The logfile may be composed of multiple tracks\&. A new track is created if there's no fix for 5 seconds\&.

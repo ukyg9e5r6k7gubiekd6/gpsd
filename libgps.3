@@ -73,7 +73,7 @@ del session
 .SH "DESCRIPTION"
 
 .PP
-libgps is a service library which supports querying GPS devices; link it with the linker option \-lgps\&. There are two interfaces supported in it; one high\-level interface that goes through \fBgpsd\fR(1) and is intended for concurrent use by several applications, and one low\-level interface that speaks directly with the serial or USB device to which the GPS is attached\&. This page describes the high\-level interface that is safe for multiple applications to use simultaneously; it is probably the one you want\&. The low\-level interface is documented at \fBlibgps\fR(3)\&.
+\fIlibgps\fR is a service library which supports querying GPS devices; link it with the linker option \-lgps\&. There are two interfaces supported in it; one high\-level interface that goes through \fBgpsd\fR(1) and is intended for concurrent use by several applications, and one low\-level interface that speaks directly with the serial or USB device to which the GPS is attached\&. This page describes the high\-level interface that is safe for multiple applications to use simultaneously; it is probably the one you want\&. The low\-level interface is documented at \fBlibgps\fR(3)\&.
 
 .PP
 Calling \fBgpsd_open()\fR initializes a GPS\-data structure to hold the data collected by the GPS, and returns a socket attached to \fBgpsd\fR(1)\&. \fBgpsd_open()\fR returns NULL on errors\&. errno is set depending on the error returned from the the socket layer; see \fIgps\&.h\fR for values and explanations\&.
@@ -108,7 +108,7 @@ The Python implementation supports the same facilities as the C library\&. \fBgp
 .SH "CODE EXAMPLE"
 
 .PP
-The following is an excerpted and simplified version of the libgps interface code from \fBxgps\fR(1)\&. The function \fBhandle_input()\fR is a trivial pies of code that calls gps_poll(gpsdata)\&.
+The following is an excerpted and simplified version of the libgps interface code from \fBgps\fR(1)\&. The function \fBhandle_input()\fR is a trivial pies of code that calls gps_poll(gpsdata)\&.
 
 .nf
 
@@ -131,7 +131,7 @@ The following is an excerpted and simplified version of the libgps interface cod
 .SH "SEE ALSO"
 
 .PP
- \fBgpsd\fR(8), \fBxgps\fR(1), \fBlibgps\fR(3)\&. \fBlibgpsmm\fR(3)\&.
+ \fBgpsd\fR(8), \fBgps\fR(1), \fBlibgps\fR(3)\&. \fBlibgpsmm\fR(3)\&.
 
 .SH "AUTHOR"
 

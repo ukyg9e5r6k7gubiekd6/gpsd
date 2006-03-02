@@ -51,7 +51,7 @@ void\ \fBgpsd_report\fR\ (int\ \fId\fR, const\ char\ *\ \fIfmt\fR, \fI\&.\&.\&.\
 .SH "DESCRIPTION"
 
 .PP
-libgps is a service library which supports querying GPS devices; link it with the linker option \-lgps\&. There are two interfaces supported in it; one high\-level interface that goes through \fBgpsd\fR(1) and is intended for concurrent use by several applications, and one low\-level interface that speaks directly with the serial or USB device to which the GPS is attached\&. This page describes the low\-level interface, which \fBgpsd\fR(1) itself uses\&. See \fBgpsd\fR(3) for a description of the high\-level interface, which is almost certainly what you want\&.
+\fIlibgps\fR is a service library which supports querying GPS devices; link it with the linker option \-lgps\&. There are two interfaces supported in it; one high\-level interface that goes through \fBgpsd\fR(1) and is intended for concurrent use by several applications, and one low\-level interface that speaks directly with the serial or USB device to which the GPS is attached\&. This page describes the low\-level interface, which \fBgpsd\fR(1) itself uses\&. See \fBgpsd\fR(3) for a description of the high\-level interface, which is almost certainly what you want\&.
 
 .PP
 Calling \fBgpsd_init()\fR initializes a session structure to hold the data collected by the GPS\&.
@@ -100,7 +100,7 @@ Writes to the context structure members are not guarded by a mutex\&.
 .SH "SEE ALSO"
 
 .PP
- \fBgpsd\fR(8), \fBxgps\fR(1), \fBlibgpsd\fR(3)\&.
+ \fBgpsd\fR(8), \fBgps\fR(1), \fBlibgpsd\fR(3)\&.
 
 .SH "AUTHOR"
 
