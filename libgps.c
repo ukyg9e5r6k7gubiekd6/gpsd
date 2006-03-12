@@ -341,7 +341,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    nf.pitch = nf.roll = nf.dip = NAN;
 			    gpsdata->fix = nf;
 			    (void)strcpy(gpsdata->tag, tag);
-			    gpsdata->set = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
+			    gpsdata->set |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			    gpsdata->status = STATUS_FIX;
 			    gpsdata->set |= STATUS_SET;
 			}
