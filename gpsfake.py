@@ -85,13 +85,13 @@ class TestLoad:
         # Skip the comment header
         while True:
             first = logfp.read(1)
+            self.first = first;
             if first == "#":
                 line = logfp.readline()
                 if line.strip().startswith("Type:"):
                     if line.find("RTCM") > -1:
                         self.type = "RTCM"
             else:
-                logfp.seek(-1, 1)	# Must be a real file, not stdin
                 break
         # Grab the packets
         while True:
@@ -123,7 +123,11 @@ class TestLoad:
             self.sentences = None
     def packet_get(self):
         "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
-        first = self.logfp.read(1)
+        if self.first == '':
+            first = self.logfp.read(1)
+        else:
+            first=self.first
+            self.first=''
         if not first:
             return None
         elif self.type == "RTCM":
