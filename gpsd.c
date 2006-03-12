@@ -168,14 +168,18 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    (void)printf("usage: gpsd [-d dgpsip-server] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
+    (void)printf("usage: gpsd [-n] [-N] [-d dgpsip-server] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
+  -n                            = don't wait for client connects to poll GPS\n\
+  -N                            = don't go into background\n\
   -d host[:port]         	= set DGPS server \n\
   -F sockfile                   = specift control socket location\n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
   -S integer (default %s)	= set port for daemon \n\
-  -h                     	= help message \n",
+  -h                     	= help message \n\
+  -v                            = emit version and exit.\n",
+
 	   DEFAULT_GPSD_PORT);
 }
 
