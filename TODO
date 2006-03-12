@@ -4,15 +4,6 @@ will unfold them again.
 
 ** Bugs in gpsd and its clients:
 
-*** PPS code is flaky, possibly due to a pthreads bug
-
-Some code attempting to terminate the PPS-monitoring thread when there
-is no DCD (e.g., on a USB device) seems to have tickled some kind of
-bug in pthreads -- termination seems to close the GPS device or
-otherwise do something nasty to the serial I/O layer.  
-
-The default build has ENABLE_PPS off until we figure this one out.
-
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
