@@ -77,7 +77,7 @@ output.</para>
 <refsect1 id='exampletitle'><title>EXAMPLE</title> 
 <para>When <application>gpsd is running</application> <command>gpspipe
 -r -n 100</command> will send one hundred raw NMEA sentences to
-standard output.  The exit.</para>
+standard output, then exit.</para>
 </refsect1>
 
 <refsect1 id='maintainer'><title>AUTHOR</title>
