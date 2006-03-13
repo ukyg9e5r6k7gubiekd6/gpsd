@@ -82,7 +82,7 @@ main(int argc, char **argv){
 	fd_set fds;
 
 	progname = argv[0];
-	while ((ch = getopt(argc, argv, "hi:s:p:")) != -1){
+	while ((ch = getopt(argc, argv, "hVi:s:p:")) != -1){
 	switch (ch) {
 	case 'i':
 		sl = (unsigned int)atoi(optarg);
@@ -97,6 +97,9 @@ main(int argc, char **argv){
 	case 'p':
 		port = (unsigned short)atoi(optarg);
 		break;
+	case 'V':
+		(void)fprintf(stderr, "SVN ID: $Id: cgpxlogger.c$ \n");
+		exit(0);
 	default:
 		usage();
 		/* NOTREACHED */

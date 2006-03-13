@@ -445,9 +445,9 @@ static void update_panel(struct gps_data_t *gpsdata,
 	(void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
     altunits_ok:;
 
-	while ((option = getopt(argc, argv, "hl:s:v")) != -1) {
+	while ((option = getopt(argc, argv, "hl:s:V")) != -1) {
 	    switch (option) {
-	    case 'v':
+	    case 'V':
 		(void)printf("xgps %s\n", VERSION);
 		exit(0);
 	    case 'l':

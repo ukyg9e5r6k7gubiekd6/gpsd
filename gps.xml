@@ -21,7 +21,7 @@
   <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
@@ -38,7 +38,7 @@
   <command>xgpsspeed</command> <arg choice='opt'>-rv</arg> 
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg> 
-      <arg choice='opt'>-v </arg> <arg
+      <arg choice='opt'>-V </arg> <arg
       choice='opt'>-nc <replaceable>X-color</replaceable></arg> <arg
       choice='opt'>-speedunits <group
       choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
@@ -54,7 +54,7 @@
   <command>cgps</command>  
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-s </arg>
-      <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
@@ -88,7 +88,7 @@ current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.</para>
 
 <para><application>xgps</application> accepts an -h option as for
-<application>gpsd</application>, or a -v option to dump the package
+<application>gpsd</application>, or a -V option to dump the package
 version and exit.</para>
 
 <para>An optional argument may specify a server to get data from; a
@@ -129,7 +129,7 @@ is not the case, the satellite data display will show fewer than
 
 <para><application>xgpsspeed</application> is a speedometer that uses
 position information from the GPS. It accepts an -h option and
-optional argument as for <application>gps</application>, or a -v
+optional argument as for <application>gps</application>, or a -V
 option to dump the package version and exit.  Additionally, it accepts
 -rv (reverse video) and -nc (needle color) options.</para>
 

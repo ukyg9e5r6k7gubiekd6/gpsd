@@ -95,13 +95,13 @@ int main(int argc, char **argv)
     else if (strcmp(speedunits, "knots")==0)
 	speedfactor = MPS_TO_KNOTS;
 
-    while ((option = getopt(argc, argv, "hv")) != -1) {
+    while ((option = getopt(argc, argv, "hV")) != -1) {
 	switch (option) {
-	case 'v':
+	case 'V':
 	    (void)printf("xgpsspeed %s\n", VERSION);
 	    exit(0);
 	case 'h': default:
-	    (void)fputs("usage: gps [-h] [-v] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
+	    (void)fputs("usage: gps [-h] [-V] [-rv] [-nc] [-needlecolor] [-speedunits {mph,kph,knots}] [server[:port]]\n", stderr);
 	    exit(1);
 	}
     }

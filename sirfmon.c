@@ -925,12 +925,12 @@ int main (int argc, char **argv)
     gmt_offset = (int)tzoffset();
 
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "F:vh")) != -1) {
+    while ((option = getopt(argc, argv, "F:Vh")) != -1) {
 	switch (option) {
 	case 'F':
 	    controlsock = optarg;
 	    break;
-	case 'v':
+	case 'V':
 	    (void)printf("sirfmon %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?': default:

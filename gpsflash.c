@@ -320,7 +320,7 @@ main(int argc, char **argv){
 
 	progname = argv[0];
 
-	while ((ch = getopt(argc, argv, "f:l:nv:")) != -1)
+	while ((ch = getopt(argc, argv, "f:l:nVv:")) != -1)
 		switch (ch) {
 		case 'f':
 			fname = optarg;
@@ -336,6 +336,9 @@ main(int argc, char **argv){
 		case 'v':
 			verbosity = atoi(optarg);
 			break;
+		case 'V':
+			(void)fprintf(stderr, "SVN ID: $$ \n");
+			exit(0);
 		default:
 			usage();
 			exit(0);

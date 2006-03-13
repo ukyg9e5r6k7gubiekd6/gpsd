@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
     int data;
 
     /* Process the options.  Print help if requested. */
-  while ((option = getopt(argc, argv, "hvl:so")) != -1) {
+  while ((option = getopt(argc, argv, "hVl:so")) != -1) {
 	switch (option) {
     case 'o':
       ops_flag=1;
@@ -277,7 +277,6 @@ int main(int argc, char *argv[])
 	case 's':
 	  silent_flag=1;
 	  break;
-	case 'v':
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 	    exit(0);

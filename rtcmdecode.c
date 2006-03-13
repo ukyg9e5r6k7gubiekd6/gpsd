@@ -119,7 +119,7 @@ int main(int argc, char **argv)
     bool striphdr = false;
     enum {doencode, dodecode, passthrough} mode = dodecode;
 
-    while ((c = getopt(argc, argv, "dehpv:")) != EOF) {
+    while ((c = getopt(argc, argv, "dehpVv:")) != EOF) {
 	switch (c) {
 	case 'd':	/* not documented, used for debugging */
 	    mode = dodecode;
@@ -140,7 +140,9 @@ int main(int argc, char **argv)
 	case 'v':		/* verbose */
 	    verbose = ISGPS_ERRLEVEL_BASE + atoi(optarg);
 	    break;
-
+	case 'V':
+	    (void)fprintf(stderr, "SVN ID: $Id: cgps.c 3255 2006-03-02 13:01:15Z esr $ \n");
+	    exit(0);
 	case '?':
 	default:
 	    (void)fputs("rtcmdecode [-v]\n", stderr);
