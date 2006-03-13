@@ -178,7 +178,7 @@ static void usage(void)
   -D integer (default 0)  	= set debug level \n\
   -S integer (default %s)	= set port for daemon \n\
   -h                     	= help message \n\
-  -v                            = emit version and exit.\n",
+  -V                            = emit version and exit.\n",
 
 	   DEFAULT_GPSD_PORT);
 }
@@ -1078,7 +1078,7 @@ int main(int argc, char *argv[])
 #endif /* RTCM104_ENABLE */
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:v"
+    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1114,7 +1114,7 @@ int main(int argc, char *argv[])
 	case 'P':
 	    pid_file = optarg;
 	    break;
-	case 'v':
+	case 'V':
 	    (void)printf("gpsd %s\n", VERSION);
 	    exit(0);
 	case 'h': case '?':

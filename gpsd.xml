@@ -29,7 +29,7 @@
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-V </arg>
       <arg rep='repeat'>
            <group><replaceable>GPS-devicename</replaceable></group>
       </arg>
@@ -157,7 +157,7 @@ to standard error.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>-v</term>
+<term>-V</term>
 <listitem>
 <para>Dump version and exit.</para>
 </listitem>
