@@ -75,7 +75,7 @@ href="http://www.gnustep.it/enrico/position/">position</a> and
 
 <p>Under Linux, gpsd normally runs with zero configuration.  The RPM
 installs hotplug scripts that do the right thing when a USB device
-goes active, launching <code>gpsd</code> if needed and telling it
+goes active, launching <code>gpsd</code> if needed and telling
 <code>gpsd</code> which device to read data from.  Then,
 <code>gpsd</code> deduces a baud rate and GPS type by looking at the
 data stream.</p>

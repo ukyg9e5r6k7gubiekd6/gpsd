@@ -139,9 +139,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Mon Feb 20 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
+* Sun Mar 12 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
 - Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix
-  to cope with Antares uBlox by Andreas Stricker.  Minor fix to
+  to cope with Antares uBlox by Andreas Stricker.  Minor fix to libgps
   cgpxlogger.  Merge cgpxlogger and gpxlogger documentation onto
   the xgps(1) manual page and rename it gps(1).
 
