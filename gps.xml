@@ -9,10 +9,11 @@
 <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
+<refname>gps</refname>
 <refname>xgps</refname>
 <refname>xgpsspeed</refname>
 <refname>cgps</refname>
-<refname>gpxlogger</refname>
+<refname>cgpxlogger</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>

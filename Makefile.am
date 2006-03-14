@@ -155,6 +155,7 @@ packet_test_LDADD = $(LIBC) libgps.la -lm
 #
 man_MANS = \
 	gpsd.8 \
+	gps.1 \
 	xgps.1 \
 	xgpsspeed.1 \
 	cgps.1 \
@@ -174,7 +175,7 @@ man_MANS = \
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
 
-xgps.1 xgpsspeed.1 cgps.1 cgpxlogger.1: gps.xml
+gps.1 xgps.1 xgpsspeed.1 cgps.1 cgpxlogger.1: gps.xml
 	-$(XMLTO) man gps.xml
 
 libgps.3: libgps.xml
