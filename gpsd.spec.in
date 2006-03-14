@@ -139,6 +139,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Tue Mar 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+- Fix bad unit conversion in V output.  Clean up some man-page messes.
+
 * Sun Mar 12 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
 - Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix
   to cope with Antares uBlox by Andreas Stricker.  Minor fix to libgps
@@ -146,11 +149,11 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   the xgps(1) manual page and rename it gps(1).
 
 * Fri Feb 17 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.31-1
-- Now builds and runs under Cygwin.  Correct the speed units in synthetic 
-  NMEA.  Slightly better time handling under NMEA.  Daemon now builds with
-  all but NMEA disabled.  Update the leap-second offset.  Fix bad unit 
-  conversion in V output. cgpxlogger introduced.  Upgrade gpxlogger 
-  to DBUS 0.60 conformance.  Jason von Nieda's patch may fix the chronic TSIP
+- Now builds and runs under Cygwin.  Correct the speed units in
+  synthetic NMEA.  Slightly better time handling under NMEA.  Daemon
+  now builds with all but NMEA disabled.  Update the leap-second
+  offset. cgpxlogger introduced.  Upgrade gpxlogger to DBUS 0.60
+  conformance.  Jason von Nieda's patch may fix the chronic TSIP
   driver problems.
 
 * Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.30-1
