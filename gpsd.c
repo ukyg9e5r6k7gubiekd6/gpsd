@@ -241,6 +241,9 @@ static int passivesock(char *service, char *protocol, int qlen)
     }
     if (bind(s, (struct sockaddr *) &sin, (int)sizeof(sin)) < 0) {
 	gpsd_report(0, "Can't bind to port %s\n", service);
+        if (errno == EADDRINUSE) {
+                gpsd_report(0, "Maybe gpsd is already running!\n");
+        }
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
