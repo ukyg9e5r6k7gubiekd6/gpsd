@@ -11,7 +11,7 @@
 
 extern struct gps_type_t zodiac_binary;
 
-#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLL) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
+#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
