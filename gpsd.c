@@ -173,7 +173,7 @@ static void usage(void)
   -n                            = don't wait for client connects to poll GPS\n\
   -N                            = don't go into background\n\
   -d host[:port]         	= set DGPS server \n\
-  -F sockfile                   = specift control socket location\n\
+  -F sockfile                   = specify control socket location\n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
   -S integer (default %s)	= set port for daemon \n\
