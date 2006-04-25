@@ -968,7 +968,9 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    }
 	    break;
         case '$':
-	    if (whoami->device->gpsdata.sentence_time!=0)
+	    if (!assign_channel(whoami))
+		(void)strcpy(phrase, ",$=?");
+	    else if (whoami->device->gpsdata.sentence_time!=0)
 		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %f %f %f %f %f %f",
 			whoami->device->gpsdata.tag,
 			(int)whoami->device->gpsdata.sentence_length,
