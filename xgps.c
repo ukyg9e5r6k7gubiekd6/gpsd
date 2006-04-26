@@ -469,7 +469,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	    smoothing = atoi(optarg);
 	    break;
 	case 'h': default:
-	    (void)fputs("usage:  xgps [-hv] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [-s smoothing] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  xgps [-hV] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [-s smoothing] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
