@@ -320,6 +320,20 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for port speed fixed at compile-time
+AC_ARG_ENABLE(fixed-port-speed,
+  AC_HELP_STRING([--enable-fixed-port-speed],
+                 [compile with fixed serial port speed]),
+  [ac_baud=$enableval], [ac_baud=no])
+AC_MSG_CHECKING([for fixed port speed])
+if test x"$ac_baud" != "xno"; then
+    AC_MSG_RESULT([$ac_baud])
+	AC_DEFINE_UNQUOTED([FIXED_PORT_SPEED], $ac_baud, [Fixed port speed])
+	FIXED_PORT_SPEED="-DSPEEDFLAGS=$ac_baud"
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl Manually configure DBUS until we figure out a 
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
@@ -395,6 +409,7 @@ echo "Evermore                : $ac_evermore"
 echo "RTCM104 support         : $ac_rtcm104"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
+echo "Fixed port speed        : $ac_baud"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
 echo "------------------------------------------"

@@ -115,6 +115,10 @@ int gpsd_open(struct gps_device_t *session)
 	return -1;
     }
 
+#ifdef FIXED_PORT_SPEED
+    session->saved_baud = FIXED_PORT_SPEED;
+#endif
+
     if (session->saved_baud != -1) {
         /*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
         /*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
@@ -193,6 +197,11 @@ bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
 bool gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
+#ifdef FIXED_PORT_SPEED
+#warning using fixed port speed
+    gpsd_set_speed(session, FIXED_PORT_SPEED, 'N', 1);
+    return false;	/* done */
+#else /* FIXED_PORT_SPEED not defined */
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
@@ -209,6 +218,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
     }
 
     return true;	/* keep hunting */
+#endif /* FIXED_PORT_SPEED defined */
+
 }
 
 void gpsd_close(struct gps_device_t *session)
