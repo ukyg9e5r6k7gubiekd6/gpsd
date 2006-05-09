@@ -404,6 +404,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		        gpsdata->fix.speed = NAN;
 		    } else {
 		        (void)sscanf(sp, "V=%lf", &gpsdata->fix.speed);
+			/* V reply is in kt, fix.speed is in metres/sec */
+			gpsdata->fix.speed = gpsdata->fix.speed / MPS_TO_KNOTS;
 		        gpsdata->set |= SPEED_SET;
 		    }
 		    break;
