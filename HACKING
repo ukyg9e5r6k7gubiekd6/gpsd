@@ -796,6 +796,43 @@ a maximum character length so the daemon framework code will
 be able to compute when a sample-rate change will work.  If
 you have to estimate this number, err on the high side.
 
+** The buffering problem
+
+Rob Janssen writes:
+> With "buffering", one could collect all data from a single fix (sent in
+> multiple messages from the receiver) in a single unit, and present it to
+> the clients (or make available for polling) as a consistent set.  So
+> position, velocity, error information etc all comes from a single fix.
+> Maybe it would be better called "double buffering" as there is one buffer
+> that holds a valid dataset for the clients, and one that is collecting the
+> next dataset from the receiver messages.
+> 
+> This is not the same as the buffer we have now, because that is updated
+> incrementally.  when it is not cleared at start of cycle it may hold a
+> position from one fix, and velocity from the previous fix, for example. 
+> (depending on the protocol in use, and the way it splits the data into
+> different message types)
+> 
+> As mentioned before, there are (at least) these issues with double buffering:
+> - it introduces a delay between what the receiver sends and what the
+> client sees
+> - it is difficult to know when you have collected all data the receiver
+> will send for this fix, especially when you want the abovementioned delay
+> to be small
+> - the cycletime may be different for each message type, so not all cycles
+> contain all data.  the decision whether to keep old data from previous
+> fixes needs to be made, including the issue of what to do when certain
+> data is no longer received (invalidate or keep last received value
+> forever).
+> 
+> A double-buffering mechanism in fact implemented in gpsd, but only between
+> the driver and the main fix buffer.  When gps_merge_fix is not called for
+> every message, and the message flags are somehow collected until the end
+> of the cycle, we would have the required buffer.  This is, however, not
+> easy to implement.
+
+
+
 ** Blind alleys
 
 Things we've considered doing and rejected.

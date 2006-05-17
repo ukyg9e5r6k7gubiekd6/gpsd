@@ -255,7 +255,7 @@ CLEANFILES = packet_names.h
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
-	$(CC) -o libgps -lm -DTESTMAIN -g libgps.c .libs/libgps.a
+	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
 
 # Report splint warnings
 splint:

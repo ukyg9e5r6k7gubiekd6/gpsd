@@ -19,6 +19,28 @@ GPSD.  David sent ESR one of these, it's somewhere in his piles of
 stuff, testing will get done when it surfaces.  More on the Sandpiper
 at <http://www.allsurplus.net/Axiom/>.
 
+*** Garmin binary support fails on x86_64
+
+Member sizes in the packed binary structure Packet_t are wrong.
+
+** Bugs exposed by gpsd in other software
+
+*** Multiple definitions of symbol _gpsd_report
+
+Some people building gpsd get 'multiple definitions of symbol _gpsd_report'
+as a warning.  This seems to be a result of two bugs in libtool, one
+of which makes the other on i386. gpsd_report() is indeed multiply
+defined, the problem is that libtool generates libgps.o where it 
+should generate -lgps and *all* instances (rather than just the first
+to be incorporated by other linkage demands) are linked in.
+
+*** The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy
+
+xgps appears to tickle a bug (described at http://bugs.motifzone.net/ as
+bugs 1330 and 1331) in OpenMotif.  This bug has been marked FIXED, so
+the next release of OpenMotif will probably fix it.  Until then, we
+suggest you drop back to an OpenMotif stable version like 2.2.2.
+
 ** To do:
 
 *** SiRF firmware uploader
@@ -100,6 +122,28 @@ supposed to indicate a valid fix that has a DOP too high or fails
 an elevation test.
 
 ** Future features (?)
+
+*** Audio cues in the client when the fix status changes
+
+Calum writes:
+>Is it possible to add functionality ( with a switch to enable it to
+>avoid annoying those that don't want it) so that beeps indicate NO
+>FIX, FIX, and OFFLINE status changes?
+>
+>For example - I run cgps and my laptop battery doesn't always supply
+>my PS2 port-powered GPS device with enough power, and it goes into
+>OFFLINE mode. As I can't drive, and check my laptop all the time, if
+>it emitted 5 1 second beeps when it went OFFLINE, it would be a handy alert.
+>
+>Similarly, a PCMCIA "eject" 2 beeps for NO FIX, and a PCMCIA "happy" 2
+>beeps when it gets a fix again?
+>
+>Or something like that.
+
+This is a good idea for supporting hands-free operation, e.g. while driving.
+
+It would be an easy first project for somebody who wants to get into
+the client code.
 
 *** Subsecond polling
 

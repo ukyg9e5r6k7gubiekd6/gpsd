@@ -248,11 +248,11 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case 'I':
 		    /*@ -mustfreeonly */
-		    if (sp[2] == '?') 
+		    if (gpsdata->gps_id)
+			free(gpsdata->gps_id);
+		    if (sp[2] == '?')
 			gpsdata->gps_id = NULL;
 		    else {
-			if (gpsdata->gps_id)
-			    free(gpsdata->gps_id);
 			gpsdata->gps_id = strdup(sp+2);
 			gpsdata->set |= DEVICEID_SET;
 		    }
@@ -274,7 +274,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
 			/*@ -nullstate @*/
-			gpsdata->devicelist[i=0] = strtok_r(sp+2, " \r\n", &ns);
+			gpsdata->devicelist[i=0] = strdup(strtok_r(sp+2, " \r\n", &ns));
 			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
 			    gpsdata->devicelist[++i] = strdup(sp);
 			/*@ +nullstate @*/
@@ -459,7 +459,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    break;
 		case '$':
 		    /*@ +matchanyintegral @*/
-		    (void)sscanf(sp, "$=%s %ld %lf %lf %lf %lf %lf %lf", 
+		    (void)sscanf(sp, "$=%s %zd %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
 			   &gpsdata->fix.time, 
@@ -575,7 +575,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
  * A simple command-line exerciser for the library.
  * Not really useful for anything but debugging.
  */
-void data_dump(struct gps_data_t *collect, time_t now)
+static void data_dump(struct gps_data_t *collect, time_t now)
 {
     char *status_values[] = {"NO_FIX", "FIX", "DGPS_FIX"};
     char *mode_values[] = {"", "NO_FIX", "MODE_2D", "MODE_3D"};
@@ -623,18 +623,18 @@ void data_dump(struct gps_data_t *collect, time_t now)
 	
 }
 
-static void dumpline(struct gps_data_t *ud UNUSED, char *buf)
+static void dumpline(struct gps_data_t *ud UNUSED, char *buf,
+		     size_t ulen UNUSED, int level UNUSED)
 {
     puts(buf);
 }
 
 #include <getopt.h>
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     struct gps_data_t *collect;
-    char buf[BUFSIZ], *device = NULL;
-    int option;
+    char buf[BUFSIZ];
 
     collect = gps_open(NULL, 0);
     gps_set_raw_hook(collect, dumpline);
@@ -663,6 +663,7 @@ main(int argc, char *argv[])
     }
 
     (void)gps_close(collect);
+    return 0;
 }
 
 #endif /* TESTMAIN */

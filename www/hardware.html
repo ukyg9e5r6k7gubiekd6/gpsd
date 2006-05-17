@@ -599,7 +599,7 @@ PRWIZCH</td>
 and longitude initialization.</td>
 <!-- End Delorme Tripmate -->
 
-<!-- End Magellan EC-10X -->
+<!-- Begin Magellan EC-10X -->
 <tr>
 <td>Magellan EC-10X</td>
 <td>Good</td>
@@ -810,10 +810,92 @@ GPVTG<br/>
 GPGSV<br/>
 </td>
 <td>
-notes and submitter name
+Sends 'E' in second field of GSA record, not an NMEA value.
+Actually sends '6' in the GGA status record for dead-reckoning fixes.
+Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
 </td>
 </tr>
 <!-- End uBlox Antaris -->
+
+<!-- Begin Adapt AD-500 -->
+<tr>
+<td><a href='http://adapt-mobile.bosqom.com/default.php?page_ID=3&spage_ID=1'>Adapt AD-500</a></td>
+<td>Good</td>
+<td>?</td>
+<td>Bluetooth</td>
+<td><a href='http://www.adapt-mobile.com'>Adapt</a></td>
+<td>2.32</td>
+<td>?</td>
+<td>
+GPGGA<br/>
+GPGSA<br/>
+GPRMC<br/>
+GPVTG<br/>
+GPGSV<br/>
+</td>
+<td>
+Submitted by Dennis van Zuijlekom &lt;tmib&#x40;xs4all.nl&gt;.
+</td>
+</tr>
+<!-- End Adapt AD-500 -->
+
+<!-- Begin Navman Jupiter 20 -->
+<tr>
+<td>
+<a href='ttp://www.navman.com/Navman/Templates/productinformation____15665.aspx'>Navman Jupiter 20</a>
+</td>
+<td>Good</td>
+<td>Jupiter 20 Chipset with firmware from Jupiter 21</td>
+<td>RS232</td>
+<td><a href='http://www.navman.com/'>Navman</a></td>
+<td>2.32</td>
+<td>?</td>
+<td>
+GPGGA<br/>
+GPGSA<br/>
+GPRMC<br/>
+GPGSV<br/>
+PTTK<br/>
+</td>
+<td>
+Not a complete GPS, but a chipset. It's running with an external
+gyro on a our self-developed board. The device is configured to 
+send NMEA by default. But gpsd spots that it supports SiRF-II 
+and changes to this protocol. But I can change the mode back to NMEA
+with 'n'; both protocols work.  Submitted by
+Andreas Stricker &lt;andreas.stricker&#x40;fela.ch&gt;
+</td>
+</tr>
+<!-- End Navman Jupiter 20 -->
+
+
+<!--  Begin eXplorist 210 -->
+<tr>
+<td>
+<a href='http://www.magellangps.com/en/products/product.asp?PRODID=1114'>eXplorist 210</a></td>
+<td>Good</td>
+<td>Unknown</td>
+<td>USB</td>
+<td><a href='http://www.magellangps.com'>Magellan</a></td>
+<td>2.32</td>
+<td>2.1</td>
+<td>
+GPGGA<br/>
+GPGSA<br/>
+GPRMC<br/>
+GPGSV<br/>
+GPGLL<br/>
+</td>
+<td>
+USB has 3 modes &mdash;
+NMEA data comm (3 submodes): outputs GPS data (creates /dev/ttyACM0),
+USB file transfer: transfer files (creates /dev/sdX and /dev/sdX1), or
+Power Only: use USB only for electrical power.
+The APA and XTE extensions choke gpsd.
+Submitted by paul van den berg &lt;paulberg&#x40;wanadoo.nl&gt;
+</td>
+</tr>
+<!-- End eXplorist 210 -->
 
 
 <!--
@@ -826,12 +908,8 @@ notes and submitter name
 <td>vendor, with link to site</td>
 <td>gpsd version used for testing</td>
 <td>NMEA version it emits</td>
-<td>list of sentennces it emits</td>
-<td>
-Sends 'E' in second field of GSA record, not an NMEA value.
-Actually sends '6' in the GGA status record for dead-reckoning fixes.
-Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
-</td>
+<td>list of sentences it emits</td>
+<td>notes</td>
 </tr>
 -->
 

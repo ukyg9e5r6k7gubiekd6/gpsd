@@ -202,7 +202,7 @@ static bool have_fix(struct gps_device_t *device)
     }
     VALIDATION_COMPLAINT(3, "GPS has no fix");
     return false;
-#undef VALIDATION_CONSTRAINT
+#undef VALIDATION_COMPLAINT
 }
 
 static int passivesock(char *service, char *protocol, int qlen)
@@ -973,7 +973,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    if (!assign_channel(whoami))
 		(void)strcpy(phrase, ",$=?");
 	    else if (whoami->device->gpsdata.sentence_time!=0)
-		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %f %f %f %f %f %f",
+		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d %lf %lf %lf %lf %lf %lf",
 			whoami->device->gpsdata.tag,
 			(int)whoami->device->gpsdata.sentence_length,
 			whoami->device->gpsdata.sentence_time,
@@ -983,7 +983,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 			whoami->device->poll_times[cfd] - whoami->device->gpsdata.sentence_time,
 			timestamp() - whoami->device->gpsdata.sentence_time);
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d 0 %f %f %f %f %f",
+		(void)snprintf(phrase, sizeof(phrase), ",$=%s %d 0 %lf %lf %lf %lf %lf",
 			whoami->device->gpsdata.tag,
 			(int)whoami->device->gpsdata.sentence_length,
 			whoami->device->gpsdata.d_xmit_time,
@@ -1070,7 +1070,7 @@ int main(int argc, char *argv[])
     static char *gpsd_service = NULL; 
 #ifdef RTCM104_SERVICE
     static char *rtcm_service = NULL; 
-    static int nsock, rsock = -1;
+    static int nsock;
 #endif /* RTCM104_SERVICE */
     static char *control_socket = NULL;
     struct gps_device_t *device, *channel;
@@ -1344,18 +1344,18 @@ int main(int argc, char *argv[])
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
 
-	    if (rsock < 0)
+	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
 	    else {
-		int opts = fcntl(rsock, F_GETFL);
+		int opts = fcntl(ssock, F_GETFL);
 
 		if (opts >= 0)
-		    (void)fcntl(rsock, F_SETFL, opts | O_NONBLOCK);
-		gpsd_report(3, "client connect on %d\n", rsock);
+		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
+		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
-		subscribers[rsock].active = true;
-		subscribers[rsock].tied = false;
-		subscribers[rsock].requires = RTCM104;
+		subscribers[ssock].active = true;
+		subscribers[ssock].tied = false;
+		subscribers[ssock].requires = RTCM104;
 	    }
 	    FD_CLR(nsock, &rfds);
 	}
@@ -1494,7 +1494,8 @@ int main(int argc, char *argv[])
 		    gpsd_report(1, "<= client(%d): %s", cfd, buf);
 
 #ifdef RTCM104_SERVICE
-		    if (subscribers[cfd].rtcm) {
+		    if (subscribers[cfd].requires==RTCM104
+			|| subscribers[cfd].requires==ANY) {
 			if (handle_dgpsip_request(cfd, buf, buflen) < 0)
 			    detach_client(cfd);
 		    } else
