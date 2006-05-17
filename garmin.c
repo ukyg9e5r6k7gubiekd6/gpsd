@@ -191,12 +191,15 @@ static inline void set_int32(uint8_t *buf, uint32_t value)
 static inline uint16_t get_uint16(const uint8_t *buf)
 {
         return  (uint16_t)(0xFF & buf[0]) 
-		| (uint16_t)((0xFF & buf[1]) << 8);
+		| ((uint16_t)(0xFF & buf[1]) << 8);
 }
 
 static inline uint32_t get_int32(const uint8_t *buf)
 {
-        return  (uint32_t)(0xFF & buf[0]) | ((0xFF & buf[1]) << 8) | ((0xFF & buf[2]) << 16) | ((0xFF & buf[3]) << 24);
+        return  (uint32_t)(0xFF & buf[0]) 
+		| ((uint32_t)(0xFF & buf[1]) << 8) 
+		| ((uint32_t)(0xFF & buf[2]) << 16) 
+		| ((uint32_t)(0xFF & buf[3]) << 24);
 }
 
 // convert radians to degrees
@@ -275,7 +278,8 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		msg = "Start RMD data";
 	  	break;
 	    default:
-		(void)snprintf(buf, sizeof(buf), "Unknown: %u", prod_id);
+		(void)snprintf(buf, sizeof(buf), "Unknown: %u", 
+			(unsigned int)prod_id);
 		msg = buf;
 	        break;
             }
@@ -287,8 +291,8 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	case GARMIN_PKTID_PRODUCT_DATA:
 	    prod_id = get_uint16(&pkt->mData.uchars[0]);
 	    ver = get_uint16(&pkt->mData.uchars[2]);
-	    maj_ver = ver / 100;
-	    min_ver = ver - (maj_ver * 100);
+	    maj_ver = (int)(ver / 100);
+	    min_ver = (int)(ver - (maj_ver * 100));
 	    gpsd_report(3, "Appl, Product Data, sz: %d\n"
 			, pkt->mDataSize);
 	    gpsd_report(1, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
@@ -564,7 +568,7 @@ static int GetPacket (struct gps_device_t *session )
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
 	ssize_t theBytesReturned = 0;
-	uint8_t *buf = session->driver.garmin.Buffer;
+	uint8_t *buf = (uint8_t *)session->driver.garmin.Buffer;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
 		, buf + session->driver.garmin.BufferLen
@@ -661,7 +665,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	return false;
     }
 
-    buffer = session->driver.garmin.Buffer;
+    buffer = (uint8_t *)session->driver.garmin.Buffer;
     thePacket = (Packet_t*)buffer;
 
     // set Mode 0
@@ -841,7 +845,7 @@ static bool garmin_probe(struct gps_device_t *session)
  */
 static void garmin_init(struct gps_device_t *session)
 {
-	uint8_t *buffer = session->driver.garmin.Buffer;
+	uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	bool ret;
 
