@@ -198,7 +198,6 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
 #ifdef FIXED_PORT_SPEED
-#warning using fixed port speed
     gpsd_set_speed(session, FIXED_PORT_SPEED, 'N', 1);
     return false;	/* done */
 #else /* FIXED_PORT_SPEED not defined */
