@@ -45,6 +45,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
@@ -163,15 +164,15 @@ typedef struct {
 
 // This is the packet format to/from the Garmin USB
 typedef struct {
-    unsigned char  mPacketType;
-    unsigned char  mReserved1;
-    unsigned short mReserved2;
-    unsigned short mPacketId;
-    unsigned short mReserved3;
-    unsigned long  mDataSize;
+    uint8_t  mPacketType;
+    uint8_t  mReserved1;
+    uint16_t mReserved2;
+    uint16_t mPacketId;
+    uint16_t mReserved3;
+    uint32_t  mDataSize;
     union {
-	    char chars[MAX_BUFFER_SIZE];
-	    unsigned char uchars[MAX_BUFFER_SIZE];
+	    int8_t chars[MAX_BUFFER_SIZE];
+	    uint8_t uchars[MAX_BUFFER_SIZE];
             cpo_pvt_data pvt;
             cpo_sat_data sats;
     } mData;
