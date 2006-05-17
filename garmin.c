@@ -110,11 +110,11 @@
 #pragma pack(1)
 // This is the data format of the satellite data from the garmin USB
 typedef struct {
-	unsigned char  svid;
-	unsigned short snr; // 0 - 0xffff
-	unsigned char  elev;
-	unsigned short azmth;
-	unsigned char  status; // bit 0, has ephemeris, 1, has diff correction
+	uint8_t  svid;
+	uint16_t snr; // 0 - 0xffff
+	uint8_t  elev;
+	uint16_t azmth;
+	uint8_t  status; // bit 0, has ephemeris, 1, has diff correction
                                // bit 2 used in solution
 			       // bit 3??
 } cpo_sat_data;
@@ -126,7 +126,7 @@ typedef struct {
 	float epe;  /* estimated position error, 2 sigma (meters)  */
 	float eph;  /* epe, but horizontal only (meters) */
 	float epv;  /* epe but vertical only (meters ) */
-	short	fix; /* 0 - failed integrity check
+	int16_t	fix; /* 0 - failed integrity check
                       * 1 - invalid or unavailable fix
                       * 2 - 2D
                       * 3 - 3D
@@ -140,24 +140,24 @@ typedef struct {
 	float	lat_vel; /* velocity north (meters/second) */
 	float	alt_vel; /* velocity up (meters/sec) */
 	float	msl_hght; /* height of WGS 84 above MSL (meters) */
-	short	leap_sec; /* diff between GPS and UTC (seconds) */
-	long	grmn_days;
+	int16_t	leap_sec; /* diff between GPS and UTC (seconds) */
+	int32_t	grmn_days;
 } cpo_pvt_data;
 
 #ifdef __UNUSED__
 typedef struct {
-	unsigned long cycles;
+	uint32_t cycles;
 	double	 pr;
-	unsigned short phase;
-	char slp_dtct;
-	unsigned char snr_dbhz;
-	char  svid;
-	char valid;
+	uint16_t phase;
+	int8_t slp_dtct;
+	uint8_t snr_dbhz;
+	int8_t  svid;
+	int8_t valid;
 } cpo_rcv_sv_data;
 
 typedef struct {
 	double rcvr_tow;
-	short	rcvr_wn;
+	int16_t	rcvr_wn;
 	cpo_rcv_sv_data sv[GARMIN_CHANNELS];
 } cpo_rcv_data;
 #endif /* __UNUSED__ */
