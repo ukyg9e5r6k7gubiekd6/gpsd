@@ -284,7 +284,9 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	if (strstr((char *)(buf+1), "ES"))
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
+	#ifdef NTPSHM_ENABLE
 	session->driver.sirf.time_seen = 0;
+	#endif
 	if ((session->context->valid & LEAP_SECOND_VALID)==0) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
