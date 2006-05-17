@@ -61,8 +61,8 @@
 
 #ifdef GARMIN_ENABLE
 
-#define GARMIN_LAYERID_TRANSPORT (unsigned char)  0
-#define GARMIN_LAYERID_APPL      (unsigned int) 20
+#define GARMIN_LAYERID_TRANSPORT (uint8_t)  0
+#define GARMIN_LAYERID_APPL      (uint32_t) 20
 // Linux Garmin USB driver layer-id to use for some control mechanisms
 #define GARMIN_LAYERID_PRIVATE  0x01106E4B
 
@@ -180,23 +180,23 @@ typedef struct {
 
 // useful funcs to read/write ints, only tested on Intel byte order
 //  floats and doubles are Intel order only...
-static inline void set_int(unsigned char *buf, unsigned int value)
+static inline void set_int32(uint8_t *buf, uint32_t value)
 {
-        buf[0] = (unsigned char)(0x0FF & value);
-        buf[1] = (unsigned char)(0x0FF & (value >> 8));
-        buf[2] = (unsigned char)(0x0FF & (value >> 16));
-        buf[3] = (unsigned char)(0x0FF & (value >> 24));
+        buf[0] = (uint8_t)(0x0FF & value);
+        buf[1] = (uint8_t)(0x0FF & (value >> 8));
+        buf[2] = (uint8_t)(0x0FF & (value >> 16));
+        buf[3] = (uint8_t)(0x0FF & (value >> 24));
 }
 
-static inline unsigned short get_short(const unsigned char *buf)
+static inline uint16_t get_uint16(const uint8_t *buf)
 {
-        return  (unsigned short)(0xFF & buf[0]) 
-		| (unsigned short)((0xFF & buf[1]) << 8);
+        return  (uint16_t)(0xFF & buf[0]) 
+		| (uint16_t)((0xFF & buf[1]) << 8);
 }
 
-static inline unsigned int get_int(const unsigned char *buf)
+static inline uint32_t get_int32(const uint8_t *buf)
 {
-        return  (unsigned int)(0xFF & buf[0]) | ((0xFF & buf[1]) << 8) | ((0xFF & buf[2]) << 16) | ((0xFF & buf[3]) << 24);
+        return  (uint32_t)(0xFF & buf[0]) | ((0xFF & buf[1]) << 8) | ((0xFF & buf[2]) << 16) | ((0xFF & buf[3]) << 24);
 }
 
 // convert radians to degrees
@@ -215,12 +215,12 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     gps_mask_t mask = 0;
     int maj_ver;
     int min_ver;
-    unsigned int mode = 0;
-    unsigned short prod_id = 0;
-    unsigned short ver = 0;
-    unsigned int veri = 0;
+    uint32_t mode = 0;
+    uint16_t prod_id = 0;
+    uint16_t ver = 0;
+    uint32_t veri = 0;
     time_t time_l = 0;
-    unsigned int serial;
+    uint32_t serial;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
     int i = 0, j = 0;
@@ -243,7 +243,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Transport, Start Session req\n");
 	    break;
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_RESP:
-	    mode = get_int(&pkt->mData.uchars[0]);
+	    mode = get_int32(&pkt->mData.uchars[0]);
 	    gpsd_report(3, "Transport, Start Session resp, unit: 0x%x\n"
 		, mode);
 	    break;
@@ -260,7 +260,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     case GARMIN_LAYERID_APPL:
 	switch( pkt->mPacketId ) {
 	case GARMIN_PKTID_L001_COMMAND_DATA:
-	    prod_id = get_short(&pkt->mData.uchars[0]);
+	    prod_id = get_uint16(&pkt->mData.uchars[0]);
             switch ( prod_id ) {
 	    case CMND_ABORT:
 		msg = "Abort current xfer";
@@ -285,8 +285,8 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Appl, Product Data req\n");
 	    break;
 	case GARMIN_PKTID_PRODUCT_DATA:
-	    prod_id = get_short(&pkt->mData.uchars[0]);
-	    ver = get_short(&pkt->mData.uchars[2]);
+	    prod_id = get_uint16(&pkt->mData.uchars[0]);
+	    ver = get_uint16(&pkt->mData.uchars[2]);
 	    maj_ver = ver / 100;
 	    min_ver = ver - (maj_ver * 100);
 	    gpsd_report(3, "Appl, Product Data, sz: %d\n"
@@ -431,7 +431,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		// garmin 0 -> 0xffff, NMEA 99 -> 0
 		session->gpsdata.ss[j]
 		    = 99 - (int)((100 *( unsigned long)sats->snr) >> 16);
-		if ( (unsigned char)0 != (sats->status & 4 ) )  {
+		if ( (uint8_t)0 != (sats->status & 4 ) )  {
 		    // used in solution?
 		    session->gpsdata.used[session->gpsdata.satellites_used++]
 			= (int)sats->svid;
@@ -447,7 +447,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    gpsd_report(3, "Appl, Product Capability, sz: %d\n", pkt->mDataSize);
             for ( i = 0; i < (int)pkt->mDataSize ; i += 3 ) {
 		    gpsd_report(3, "  %c%03d\n", pkt->mData.chars[i]
-			, get_short( &(pkt->mData.uchars[i+1])) );
+			, get_uint16( &(pkt->mData.uchars[i+1])) );
 	    }
 	    break;
 	default:
@@ -461,18 +461,18 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	// private
 	switch( pkt->mPacketId ) {
 	case PRIV_PKTID_SET_MODE:
-	    prod_id = (unsigned short)get_int(&pkt->mData.uchars[0]);
+	    prod_id = get_uint16(&pkt->mData.uchars[0]);
 	    gpsd_report(3, "Private, Set Mode: %d\n", prod_id);
 	    break;
 	case PRIV_PKTID_INFO_REQ:
 	    gpsd_report(3, "Private, ID: Info Req\n");
 	    break;
 	case PRIV_PKTID_INFO_RESP:
-	    veri = get_int(pkt->mData.uchars);
+	    veri = get_int32(pkt->mData.uchars);
 	    maj_ver = (int)(veri >> 16);
 	    min_ver = (int)(veri & 0xffff);
-	    mode = get_int(&pkt->mData.uchars[4]);
-	    serial = get_int(&pkt->mData.uchars[8]);
+	    mode = get_int32(&pkt->mData.uchars[4]);
+	    serial = get_int32(&pkt->mData.uchars[8]);
 	    gpsd_report(3, "Private, ID: Info Resp\n");
 	    gpsd_report(1, "Garmin USB Driver found, Version %d.%d, Mode: %d, GPS Serial# %u\n"
 			,  maj_ver, min_ver, mode, serial);
@@ -564,7 +564,7 @@ static int GetPacket (struct gps_device_t *session )
 	// not optimal, but given the speed and packet nature of
 	// the USB not too bad for a start
 	ssize_t theBytesReturned = 0;
-	unsigned char *buf = session->driver.garmin.Buffer;
+	uint8_t *buf = session->driver.garmin.Buffer;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
 		, buf + session->driver.garmin.BufferLen
@@ -622,7 +622,7 @@ static bool garmin_probe(struct gps_device_t *session)
 {
 
     Packet_t *thePacket = NULL;
-    unsigned char *buffer = NULL;
+    uint8_t *buffer = NULL;
     fd_set fds, rfds;
     struct timeval tv;
     int sel_ret = 0;
@@ -665,10 +665,10 @@ static bool garmin_probe(struct gps_device_t *session)
     thePacket = (Packet_t*)buffer;
 
     // set Mode 0
-    set_int(buffer, GARMIN_LAYERID_PRIVATE);
-    set_int(buffer+4, PRIV_PKTID_SET_MODE);
-    set_int(buffer+8, 4); // data length 4
-    set_int(buffer+12, 0); // mode 0
+    set_int32(buffer, GARMIN_LAYERID_PRIVATE);
+    set_int32(buffer+4, PRIV_PKTID_SET_MODE);
+    set_int32(buffer+8, 4); // data length 4
+    set_int32(buffer+12, 0); // mode 0
 
     gpsd_report(3, "Set garmin_gps driver mode = 0\n");
     SendPacket( session,  thePacket);
@@ -676,9 +676,9 @@ static bool garmin_probe(struct gps_device_t *session)
 
     // get Version info
     gpsd_report(3, "Get garmin_gps driver version\n");
-    set_int(buffer, GARMIN_LAYERID_PRIVATE);
-    set_int(buffer+4, PRIV_PKTID_INFO_REQ);
-    set_int(buffer+8, 0); // data length 0
+    set_int32(buffer, GARMIN_LAYERID_PRIVATE);
+    set_int32(buffer+4, PRIV_PKTID_INFO_REQ);
+    set_int32(buffer+8, 0); // data length 0
 
     SendPacket(session,  thePacket);
 
@@ -711,7 +711,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
 
-	    if( ( (unsigned char)75 == thePacket->mPacketType)
+	    if( ( (uint8_t)75 == thePacket->mPacketType)
 	        && (PRIV_PKTID_INFO_RESP == thePacket->mPacketId) ) {
                 ok = 1;
 	        break;
@@ -732,9 +732,9 @@ static bool garmin_probe(struct gps_device_t *session)
     /* Tell the device that we are starting a session. */
     gpsd_report(3, "Send Garmin Start Session\n");
 
-    set_int(buffer, GARMIN_LAYERID_TRANSPORT);
-    set_int(buffer+4, GARMIN_PKTID_TRANSPORT_START_SESSION_REQ);
-    set_int(buffer+8, 0); // data length 0
+    set_int32(buffer, GARMIN_LAYERID_TRANSPORT);
+    set_int32(buffer+4, GARMIN_PKTID_TRANSPORT_START_SESSION_REQ);
+    set_int32(buffer+8, 0); // data length 0
 
     SendPacket(session,  thePacket);
 
@@ -782,9 +782,9 @@ static bool garmin_probe(struct gps_device_t *session)
     // Tell the device to send product data
     gpsd_report(3, "Get Garmin Product Data\n");
 
-    set_int(buffer, GARMIN_LAYERID_APPL);
-    set_int(buffer+4, GARMIN_PKTID_PRODUCT_RQST);
-    set_int(buffer+8, 0); // data length 0
+    set_int32(buffer, GARMIN_LAYERID_APPL);
+    set_int32(buffer+4, GARMIN_PKTID_PRODUCT_RQST);
+    set_int32(buffer+8, 0); // data length 0
 
     SendPacket(session,  thePacket);
 
@@ -811,7 +811,7 @@ static bool garmin_probe(struct gps_device_t *session)
 	if ( 0 == GetPacket( session ) ) {
 	    (void)PrintPacket(session, thePacket);
 
-	    if( (GARMIN_LAYERID_APPL == (unsigned int)thePacket->mPacketType)
+	    if( (GARMIN_LAYERID_APPL == (uint32_t)thePacket->mPacketType)
 	        && ( GARMIN_PKTID_PRODUCT_DATA == thePacket->mPacketId) ) {
     		ok = 1;
 	        break;
@@ -841,7 +841,7 @@ static bool garmin_probe(struct gps_device_t *session)
  */
 static void garmin_init(struct gps_device_t *session)
 {
-	unsigned char *buffer = session->driver.garmin.Buffer;
+	uint8_t *buffer = session->driver.garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	bool ret;
 
@@ -854,18 +854,18 @@ static void garmin_init(struct gps_device_t *session)
 	// turn on PVT data 49
 	gpsd_report(3, "Set Garmin to send reports every 1 second\n");
 
-	set_int(buffer, GARMIN_LAYERID_APPL);
-	set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
-	set_int(buffer+8, 2); // data length 2
-	set_int(buffer+12, CMND_START_PVT_DATA);
+	set_int32(buffer, GARMIN_LAYERID_APPL);
+	set_int32(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+	set_int32(buffer+8, 2); // data length 2
+	set_int32(buffer+12, CMND_START_PVT_DATA);
 
 	SendPacket(session,  thePacket);
 
 	// turn on RMD data 110
-	//set_int(buffer, GARMIN_LAYERID_APPL);
-	//set_int(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
-	//set_int(buffer+8, 2); // data length 2
-	//set_int(buffer+12, CMND_START_RM_DATA);
+	//set_int32(buffer, GARMIN_LAYERID_APPL);
+	//set_int32(buffer+4, GARMIN_PKTID_L001_COMMAND_DATA);
+	//set_int32(buffer+8, 2); // data length 2
+	//set_int32(buffer+12, CMND_START_RM_DATA);
 
 	//SendPacket(session,  thePacket);
 }
