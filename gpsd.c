@@ -459,7 +459,9 @@ static bool assign_channel(struct subscriber_t *user)
 	gpsd_report(1,"client(%d): channel %d already active.\n",
 		    user-subscribers, user->device->gpsdata.gps_fd);
     else {
+#ifndef FIXED_PORT_SPEED
 	gpsd_deactivate(user->device);
+#endif
 	if (gpsd_activate(user->device) < 0) {
 	    
 	    gpsd_report(1, "client(%d): channel activation failed.\n", user-subscribers);
@@ -1409,16 +1411,20 @@ int main(int argc, char *argv[])
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
+#ifndef FIXED_PORT_SPEED
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
+#endif
 		} 
 		if ((changed & ONLINE_SET) == 0) {
 /*
 		    gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
 				timestamp() - channel->gpsdata.online);
 */
+#ifndef FIXED_PORT_SPEED
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
+#endif
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
 #ifdef RTCM104_ENABLE
@@ -1536,8 +1542,10 @@ int main(int argc, char *argv[])
 
 			if (!need_gps && channel->gpsdata.gps_fd > -1) {
 			    gpsd_report(4, "unflagging descriptor %d in open_device\n", channel->gpsdata.gps_fd);
+#ifndef FIXED_PORT_SPEED
 			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 			    gpsd_deactivate(channel);
+#endif
 			}
 		    }
 		}
