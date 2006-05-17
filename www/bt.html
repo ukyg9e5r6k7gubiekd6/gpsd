@@ -8,22 +8,25 @@
    <link rel="stylesheet" href="main.css" type="text/css"/>
    <title>Bluetooth and GPSd</title>
 </head>
+
 <body>
 
 <div id="Header">
-Blurtooth and <code>gpsd</code>
+Bluetooth and <code>gpsd</code>
 </div>
 
 <div id="Menu">
     <img src="gpsd-logo-small.png"/><br />
     <a href="index.html">Home</a><br/>
     <a href="index.html#news">News</a><br/>
+
     <a href="index.html#downloads">Downloads</a><br/>
     <a href="index.html#mailing-lists">Mailing lists</a><br/>
     <a href="index.html#documentation">Documentation</a><br/>
     <a href="xgps-sample.html">Screenshots</a><br/>
     <a href="index.html#recipes">Recipes</a><br/>
     <a href="index.html#others">Other GPSDs</a><br/>
+
     <a href="hardware.html">Hardware</a><br/>
     <a href="history.html">History</a><br/>
 
@@ -38,78 +41,121 @@ Blurtooth and <code>gpsd</code>
 
 <div id="Content">
 
-<p>Jean-Michel.Bouffard, who is at CRC in Canada says that he's using
-the Socket Bluetooth GPS receiver with gpsd.  Here are his notes.  The
-Bluetooth protocol is including a serial profile that makes the use of
-the Bluetooth GPS almost like a serial GPS.</p>
+<p>Bluetooth connections work with gpsd by leveraging rfcomm.  Rfcomm
+provides a serial port interface to a BT device and has been designed
+to allow for automated connect/disconnect operations over bluetooth.
+The steps below will allow you to use your BT GPS device automatically
+whenever it is powered on and gpsd is running.</p>
 
+<p>Note that you must be logged in as root for most of these steps.
 <ol>
-
-<li>First, the Bluez protcol stack must be installed and all the
+<li><p>First, the Bluez protcol stack must be installed.  All the
 documentation can be found on <a
-href='http://bluez.sourceforge.net/'>http://bluez.sourceforge.net/</a>.
-In my case, I installed it on a Linux PC with a BT USB dongle but I'm
-still trying to install it on my 3850 iPaq with a BT Sleeve. But once
-BT is installed, the rest is the same.
+href='http://bluez.sourceforge.net/'>http://bluez.sourceforge.net/</a>.</p></li>
+<li><p>Install bluetooth for your device with the "rfcomm" module to
+allow for serial port emulation.</p></li>
 
-<li>Install bluetooth for your device with the "rfcomm" module which is 
-the Serial profile (http://bluez.sourceforge.net/).
+<li><p>Next, load the modules:
+<pre>
+	# modprobe hci_xxx (xxx depend on your type of device)
+	# modprobe bluez
+	# modprobe l2cap
+	# modprobe rfcomm
+</pre>
+</p></li>
 
-<li>Next, load the modules :
+<li><p>If the modules have loaded successfully, type "hciconfig" and you 
+should see your BT interface listed under the "hci0" name.</p></li>
+
+<li><p>Turn on your BT GPS device and scan for remote BT devices:</li>
 <pre>
-     # modprobe hci_xxx (xxx depend on your type of device)
-     # modprobe bluez
-     # modprobe l2cap
-     # modprobe rfcomm
-</pre>
-<li>Note : you must be the root user for the next part...
-<li>If the modules have loaded successfully, type "hciconfig" and you 
-should see your BT device listed under the "hci0" name.
-<li>Create the BT serial device (To do once, it will still be there after 
-a reboot):
-<pre>
-     # mknod /dev/rfcomm0 c 216 0
-</pre>
-<li>Start your device and scan for remote BT device:
-<pre>
-     # hciconfig hci0 up
-     # hcitool scan
+	# hciconfig hci0 up
+	# hcitool scan
 </pre>
 
-<li>Write down the adress of the newly found BT GPS receiver (looks like 
-xx:xx:xx:xx:xx:xx)
+<li><p>Write down the address of your BT GPS receiver (xx:xx:xx:xx:xx:xx)</p>
 
-<li>Connect to the device:
+<li><p>Set up rfcomm.  Edit /etc/bluetooth/rfcomm.conf to reflect your BT
+GPS address and to enable binding.</p></li>
+
 <pre>
-     # hcitool cc xx:xx:xx:xx:xx:xx
-</pre>
-<li>You can chack if the connection is done by doing :
-<pre>
-     # hcitool con
-</pre>
-<li>Start the serial protocol over BT :
-<pre>
-     # rfcomm /dev/rfcomm0 xx:xx:xx:xx:xx:xx
+	#
+	# RFCOMM configuration file.
+	#
+	# $Id: rfcomm.conf,v 1.1 2002/10/07 05:58:18 maxk Exp $
+	#
+	
+	rfcomm0 {
+	        # Automatically bind the device at startup
+	        bind yes;
+	
+	        # Bluetooth address of the device
+	        device xx:xx:xx:xx:xx:xx;
+	
+	        # RFCOMM channel for the connection
+	        channel 1;
+	
+	        # Description of the connection
+	        comment "Your GPS Device Here";
+	}
 </pre>
 
-<li>After that, your BT GPS should be connected to /dev/rfcomm0 and you can 
-check by doing :
-<pre>
-     # cat /dev/rfcomm0
-</pre>
-to see the NMEA GPS output
+<li><p>Bind rfcomm0 (unless you are planning to reboot, in which case
+it will be automatically bound, but there is really no reason to
+reboot).</p></li>
 
-<li>You can then start gpsd like this:
 <pre>
-     # gpsd -p /dev/rfcomm0
+	# rfcomm bind rfcomm0
 </pre>
-to specify the path of the GPS and it will work exactly like a serial GPS
+
+<li><p>Edit /etc/init.d/gpsd so that it automatically starts up
+listening to /dev/rfcomm0</p>
+
+<pre>
+	...
+	#GPS_DEV="/dev/ttyS3"
+	GPS_DEV="/dev/rfcomm0"
+	...
+</pre>
+
+<li><p>Restart gpsd to apply the change above</p>
+<pre>
+	# killall -HUP gpsd
+</pre>
+
+<li><p>Connect to gpsd to test</p>
+<pre>
+	# telnet localhost 2947
+	# r
+</pre>
+
+<p>You should see NMEA sentences stream by.  Close telnet.</p>
+<pre>
+	# ^c
+	# e
+</pre>
 
 </ol>
 
-<p>If something is unclear, write me back and I will try to help you...</p>
+<p>At this point, your system should be configured to use gpsd with
+your BT GPS device!</p>
 
-<p>Jean-Michel Bouffard</p>
+<p>Known Issues:</p>
+<ul>
+<li><p>On system startup, gpsd starts before rfcomm0 is bound by rfcomm
+and fails (at least on some systems) - a workaround for this is to add
+a symlink to the gpsd init.d script to a later runlevel.</p></li>
+<pre>
+# cd /etc/rcS.d/
+# ln -s ../init.d/gpsd S89gpsd
+</pre>
+</ul>
+
+<p>Contributors:</p>
+<ul>
+<li><p>Jean-Michel Bouffard</p></li>
+<li><p>Joshua Layne</p></li>
+</ul>
 
 </div>
 <hr/>
