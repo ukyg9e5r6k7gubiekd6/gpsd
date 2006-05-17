@@ -174,13 +174,11 @@ struct gps_device_t {
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
 #define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
 	    unsigned long satcounter;
-#ifdef NTPSHM_ENABLE
 	    unsigned int time_seen;
 #define TIME_SEEN_GPS_1	0x01	/* Seen GPS time variant 1? */
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
-#endif /* NTPSHM_ENABLE */
 	} sirf;
 #endif /* SIRFII_ENABLE */
 #ifdef TSIP_ENABLE
