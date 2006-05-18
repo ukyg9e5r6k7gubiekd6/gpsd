@@ -798,40 +798,172 @@ you have to estimate this number, err on the high side.
 
 ** The buffering problem
 
-Rob Janssen writes:
-> With "buffering", one could collect all data from a single fix (sent in
-> multiple messages from the receiver) in a single unit, and present it to
-> the clients (or make available for polling) as a consistent set.  So
-> position, velocity, error information etc all comes from a single fix.
-> Maybe it would be better called "double buffering" as there is one buffer
-> that holds a valid dataset for the clients, and one that is collecting the
-> next dataset from the receiver messages.
-> 
-> This is not the same as the buffer we have now, because that is updated
-> incrementally.  when it is not cleared at start of cycle it may hold a
-> position from one fix, and velocity from the previous fix, for example. 
-> (depending on the protocol in use, and the way it splits the data into
-> different message types)
-> 
-> As mentioned before, there are (at least) these issues with double buffering:
-> - it introduces a delay between what the receiver sends and what the
-> client sees
-> - it is difficult to know when you have collected all data the receiver
-> will send for this fix, especially when you want the abovementioned delay
-> to be small
-> - the cycletime may be different for each message type, so not all cycles
-> contain all data.  the decision whether to keep old data from previous
-> fixes needs to be made, including the issue of what to do when certain
-> data is no longer received (invalidate or keep last received value
-> forever).
-> 
-> A double-buffering mechanism in fact implemented in gpsd, but only between
-> the driver and the main fix buffer.  When gps_merge_fix is not called for
-> every message, and the message flags are somehow collected until the end
-> of the cycle, we would have the required buffer.  This is, however, not
-> easy to implement.
+Considered in the abstract, the cleanest thing for a
+position/velocity/time oracle to return is a 14-tuple including
+position components in all four dimensions, velocity in three, and
+associated error estimates for all seven degrees of freedom.  This is
+what the O message in GPSD protocol attempts to deliver.
 
+If GPS hardware were ideally designed, we'd get exactly one report
+like this per cycle from our device. That's what we get from SiRF-II
+protocol (all PVT data is in packet type 02), with the Zodiac protocol
+(all PVT data is in the type 1000 packet), and from Garmin's
+binary-packet protocol.  These, together, account for a share of the
+GPS market that is 80% and rising in 2006.
 
+Unfortunately, many GPSes actually deliver their PVT reports as a
+collection of sentences in NMEA 0183 (or as packets in a vendor binary
+protocol less well designed than SiRF's) each of which is only a
+partial report.  Here's the most important kind of incompleteness: for
+historical reasons, NMEA splits 2-D position info and altitude into
+two different messages (GGA and GPRMC or GLL), each issued once during
+the normal 1-second send cycle.
+
+*** Mapping the design space
+
+For NMEA devices, then (and for devices speaking similary mal-designed
+vendor binary protocols) accumulating a complete PVT thus requires
+decisions about the following sorts of actions:
+
+1. What data will be buffered, and for how long.
+
+2. When the accumulated data will be shipped to the user 
+
+3. When to invalidate some or all of the buffered data.
+
+In thinking about these decisions, it's useful to consider the set of
+events on which an action like "merge new data into PVT buffer" or
+"clear the PVT data buffer" or "ship report to user" can trigger.
+
+1. On receipt of any sentence or packet from the GPS.
+
+2. On receipt of a specified sentence or packet from the GPS.
+
+3. When the timestamp of a sentence or packet differs from the 
+   last timestamp recorded.  
+
+4. When some or all of the PVT data has not been refreshed for a
+   specified number of seconds.
+
+There are hundreds, even thousands of possible sets of action-to-event
+bindings.  The "right" binding for a particular device depends not
+only on the protocol it uses but on considerations like how much time
+latency we are willing to let the buffering policy inflict on a
+report.
+
+**** Report then clear per packet
+
+Sometimes the choices are simple.  It's pretty clear that a device
+like a SiRF-II that reports all its PVT data in a single packet needs
+no buffering; it should ship to the user on receipt of that packet and
+then invalidate the PVT buffer right afterwards.  (This is a 
+"report then clear per packet" policy.)
+
+**** Buffer all, report then clear on trigger
+
+On the other hand, if (say) we knew that an NMEA GPS were always going
+to end its report cycle with GPGGA, it might make sense to buffer 
+all data until GPGGA appears, ship a report afterwards, and then
+clear the PVT buffer.  This would mean shipping just one report 
+per cycle (good) at the cost of introducing some latency into the
+reporting of data the GPS sends earlier in the cycle (bad).  (This
+would be "buffer all, report-then-clear on trigger")
+
+Here's where it gets ugly.  We don't know what the user's tolerance
+for latency is.  And, in general, we can't tell when end-of-cycle, is
+happening, because different NMEA devices ship their sentences in
+different orders.  Worse: we can't even count on all send cycles of
+the same device having the same end sentence, so the naive plan of
+waiting one cycle to see what the end sentence is won't work. Devices
+like the Garmin 48 have two different cycle sequences with different
+start and end sentences.
+
+So we can't actually trigger on end-of-cycle.  The only between-cycles
+transition we can spot more or less reliably is actually *start* of
+cycle, by looking to see when the timestamp of a sentence or packet
+differs from the last timestamp recorded (event 3 above).  This will
+be after the last end-of-cycle by some (possibly large) fraction of a
+second; in fact, waiting for start-of-cycle to report data from the
+last one is the worst possible latency hit.
+
+**** Buffer all, report on every packet, clear at start-of-cycle
+
+Another possible policy is "buffer all, report on every packet, clear
+at start-of-cycle".  This is simple and adds minimum reporting
+latency to new data, but means that O responses can issue more than once per
+second with accumulating sets of data that only sum up to a complete
+report on the last one.  
+
+Another advantage of this policy is that when applied to a device like 
+a SiRF-II or Zodiac chipset that ships only one PVT packet per cycle,
+it collapses to "report then clear per packet".
+
+Here's a disadvantage: the client display, unless its does its own
+buffering, may flicker annoyingly.  The problem is this: suppose we
+get an altitude in a GGA packet, throw an O response at the client,
+and display it.  This happens to be late in the report cycle.  Start
+of cycle clears the buffer; a GPRMC arrives with no altitude in it.
+The altitude value in the client display flickers to "not available",
+and won't be restored until the following GGA.
+
+This is the policy gpsd currently follows.
+
+**** Buffer all, report on every packet, never clear data
+
+Has all the advantages of the previous policy and avoids the flicker 
+problem.  However, it means the user will often see data that is up to one 
+cycle time stale.   If the mode changes due to the device losing 
+satellite lock, it will continue to report stale PVT data with
+only the changed mode field to indicate that it's no longer good.
+
+In the intermediate case where the device loses 3D lock but keeps
+2D lock, altitude could go bad without any indication but the mode.
+
+**** Buffer all, report on every packet, time out old data
+
+gpsd does not presently keep the sort of per-field ageing data needed 
+to track the age of different PVT fields separately.  But it does know
+how many seconds have elapsed since the last packet receipt -- it uses
+this to tell if the device has dropped offline, by looking for an age
+greater than the cycle time.
+
+When the device is returning fixes steadily, this policy will look
+exactly like "buffer all, report on every packet, never clear data",
+because every piece of data will be refreshed once per cycle.  If
+the device loses lock, the user will see that the PVT data is 
+undefined only when the timeout expires.
+
+Fine-grained timeouts using per-field aging wouldn't change this 
+picture much.  They'd mainly be useful for matching the timeout 
+on a piece of data to its "natural" lifetime -- usually 1 sec for
+PVT data and 5 sec for satellite-picture data.
+
+*** There is no perfect option
+
+Any potential data-management policy would have drawbacks for some
+devices even if it were implemented perfectly.  The more complex
+policies would have an additional problem; buffering code with
+complicated flush triggers is notoriously prone to grow bugs near its
+edge cases.
+
+Thus, gpsd has a serious, gnarly data-management problem at its core.
+This problem lurks behind many user bug reports and motivates some of
+the most difficult-to-understand code in the daemon.  And when you
+look hard at the problems posed by the variable sequences of sentences
+in NMEA devices...it gets even nastier.
+
+It's tempting to think that, if we knew the device type in advance, 
+we could write a state machine adapted to its sentence sequence that
+would do a perfect job of data management.  The trouble with this
+theory is that we'd need separate state machines for each NMEA
+dialect.  That way lies madness -- and an inability to cope gracefully
+with devices never seen before.  Since the zero-configuration design 
+goal means that we can't count on the user or administrator passing 
+device-type information to gpsd in the first place, we avoid this trap.
+
+But that means gpsd has to adapt to what it sees coming down the wire.
+At least it can use a different policy for each device driver,
+dispatching once the device type has been identified.
 
 ** Blind alleys
 
@@ -839,53 +971,10 @@ Things we've considered doing and rejected.
 
 *** Reporting fix data only once per cycle
 
-Considered in the abstract, the cleanest thing for a
-position/velocity/time oracle to return is a 14-tuple including
-position components in all four dimensions, velocity in three, and
-associated error estimates for all seven degrees of freedom.  This is
-what the O message in GPSD protocol attempts to deliver.  Ideally, we
-want exactly one report like this per cycle. That's what we get from
-SiRF protocol (all PVT data is in packet type 02) and with the Zodiac
-protocol (all PVT data is in the type 1000 packet).  These, together,
-account for a share of the GPS market that is 80% and rising in 2005.
-
-Unfortunately NMEA devices are a different story. NMEA in general,
-rather badly designed for approximating this.  For historical reasons,
-NMEA splits 2-D position info and altitude in two different messages,
-each issued once during the normal 1-second send cycle.  Some vendor
-binary protocols have similar problems.
-
-This means that gpsd may execute one of two policies.  Either it
-must issue a separate report on each sentence or packet containing PVT
-information, or it must accumulate data across an entire send cycle
-and issue a unified report at end of cycle.  Report-per-packet is
-simpler, and adds minimum reporting latency, but means that O
-responses may issue more than once per second with complementary
-sets of data that add up to a complete report.  The accumulating
-policy means there will be exactly one report per cycle and it will
-contain full PVT information, but it may have additional latency
-of up to one second.
-
-Presently gpsd implements mainly report-per-packet, accumulating data
-during the cycle and clearing it at the beginning of each cycle.
-Thus, later packet reports include buffered data from earlier ones.
-
-The reason we have not attempted a fully accumulating policy is that
-it would require gpsd to know which sentence ends the GPS send
-cycle, so as to know the one point at which to ship accumulated data
-to the client.  Which sentence this is does, in fact, vary across GPS
-types. One of gpsd's design goals, zero configuration, means that we
-can't count on the user or administrator passing gpsd this
-information; instead, gpsd must somehow be able to autodetect it.
-
-We can't even count on all send cycles of the same device having the
-same end sentence, so the naive plan of waiting one cycle to see 
-what it is won't work. Devices like the Garmin 48 have two different
-cycle sequences with different start and end sentences.
-
-With great effort and a lot of complex code, this problem might be
-overcome.  Presently, it doesn't seem like a good idea for a marginal
-improvement in reporting from 20% of GPSes.
+See the discussion of the buffering problem, above.  The "Buffer all,
+report then clear on start-of-cycle" policy would introduce an
+unpleasant amount of latency.  gpsd actually uses the "Buffer all,
+report on every packet, clear at start-of-cycle" policy.
 
 *** Allowing clients to ship arbitrary control strings to a GPS
 
