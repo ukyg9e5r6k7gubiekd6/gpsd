@@ -19,9 +19,11 @@ GPSD.  David sent ESR one of these, it's somewhere in his piles of
 stuff, testing will get done when it surfaces.  More on the Sandpiper
 at <http://www.allsurplus.net/Axiom/>.
 
-*** Garmin binary support fails on x86_64
+*** Garmin binary support failed on x86_64
 
-Member sizes in the packed binary structure Packet_t are wrong.
+Member sizes in the packed binary structure Packet_t were wrong.
+Gary Miller has attempted to fix this, but it has not yet been tested
+on a 64-bit machine.
 
 ** Bugs exposed by gpsd in other software
 
@@ -42,6 +44,21 @@ the next release of OpenMotif will probably fix it.  Until then, we
 suggest you drop back to an OpenMotif stable version like 2.2.2.
 
 ** To do:
+
+*** Stop using a compiled-in UTC-TAI offset
+
+Instead, from the hotplug script, maintain a local offset file:
+
+1. If there is no local offset file, download the current leap-second
+offset from <http://hpiers.obspm.fr/iers/bul/bulc/> or
+<ftp://maia.usno.navy.mil/ser7/tai-utc.dat> and copy it to a
+local offset file
+
+2. If there is a local offset file, consider it stale after five
+months and reload it.
+
+3. gpsd should read the local offset file when it starts up, if
+it exists.
 
 *** SiRF firmware uploader
 
@@ -167,6 +184,12 @@ to good effect if your GPS is in motion.  Opinions?  Calculations?
 
 Gary Miller reports that the Garmin GPS 18 LVC-5m and the GPS 18-5Hz
 both report 5 times a second, but he doesn't have either to test.
+
+Alas, Chris Kuethe reports:
+>At least on the SiRF 2 and 3 receivers I have, you get one fix per
+>second. I cooked up a test harness to disable as many periodic
+>messages as possible and then poll as quickly as possible, and the
+>receiver would not kick out more than one fix per second. Foo!
 
 *** Set the system time zone from latitude/longitude
 
