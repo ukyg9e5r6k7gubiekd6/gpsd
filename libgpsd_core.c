@@ -257,10 +257,11 @@ static void gpsd_binary_fix_dump(struct gps_device_t *session,
 	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
+	len -= strlen(bufp);
 	bufp += strlen(bufp);
     }
     /*@ -usedef @*/
-    (void)snprintf(bufp, len-strlen(bufp),
+    (void)snprintf(bufp, len,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 	    tm.tm_hour, 
 	    tm.tm_min, 

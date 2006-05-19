@@ -429,7 +429,7 @@ knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>
-<term>climb/sink</term>
+<term>estimated error in climb/sink</term>
 <listitem><para>Estimated error for climb/sink 
 (%f, meters/sec, 95% confidence).</para></listitem>
 </varlistentry>

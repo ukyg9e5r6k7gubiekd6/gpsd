@@ -159,16 +159,21 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     /* check if received time messages are within locking range */
 
+#ifdef S_SPLINT_S	/* avoids an internal error in splint 3.1.1 */
+    l_offset = 0;
+#else
     l_offset = shmTime->receiveTimeStampSec - shmTime->clockTimeStampSec;
+#endif
+    /*@ -ignorequals @*/
     l_offset *= 1000000;
     l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
-    /*@ +ignorequals */
+    /*@ +ignorequals @*/
     if (labs( l_offset ) > PUT_MAX_OFFSET) {
         gpsd_report(5, "ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
     }
-    /*@ -ignorequals */
+    /*@ -ignorequals @*/
 
     if (tv->tv_usec < PPS_MAX_OFFSET) {
 	seconds = (time_t)tv->tv_sec;

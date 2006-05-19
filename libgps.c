@@ -273,11 +273,11 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->devicelist = (char **)calloc(
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
-			/*@ -nullstate @*/
+			/*@ -nullstate -mustfreefresh @*/
 			gpsdata->devicelist[i=0] = strdup(strtok_r(sp+2, " \r\n", &ns));
 			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
 			    gpsdata->devicelist[++i] = strdup(sp);
-			/*@ +nullstate @*/
+			/*@ +nullstate +mustfreefresh @*/
 			/*@ +nullderef @*/
 			gpsdata->set |= DEVICELIST_SET;
 		    }
@@ -533,8 +533,10 @@ static void *poll_gpsd(void *args)
 
     /* set thread parameters */
     /*@ -compdef @*/
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
     (void)pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,&oldstate);
     (void)pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,&oldtype); /* we want to be canceled also when blocked on gps_poll() */
+    /*@ +unrecog @*/
     /*@ +compdef @*/
     gpsdata = (struct gps_data_t *) args;
     do {
@@ -558,7 +560,9 @@ int gps_set_callback(struct gps_data_t *gpsdata,
     gpsdata->thread_hook = callback;
 
     /* start the thread which will read data from gpsd */
+    /*@ -unrecog (splint has no pthread declarations as yet */
     return pthread_create(handler,NULL,poll_gpsd,(void*)gpsdata);
+    /*@ +unrecog @*/
 }
 
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)

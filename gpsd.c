@@ -142,7 +142,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	va_list ap;
 
 #if defined(PPS_ENABLE)
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
 	(void)pthread_mutex_lock(&report_mutex);
+	/* +unrecog */
 #endif /* PPS_ENABLE */
 	(void)strcpy(buf, "gpsd: ");
 	va_start(ap, fmt) ;
@@ -161,7 +163,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	else
 	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	(void)pthread_mutex_unlock(&report_mutex);
+	/* +unrecog */
 #endif /* PPS_ENABLE */
     }
 }
