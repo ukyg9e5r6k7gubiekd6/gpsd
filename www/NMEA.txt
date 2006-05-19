@@ -1617,12 +1617,63 @@ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
 
 ------------------------------------------------------------------------------
 
+Rockwell Channel Status
+
  $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
 
  Fields consist of 12 pairs of a satellite PRN followed by a 
  signal quality number in the range 0-7 (0 worst, 7 best).  
 
  Only emitted by the Zodiac (Rockwell) chipset.
+
+------------------------------------------------------------------------------
+
+PUBX 00 - uBlox Lat/Long Position Data
+
+$PUBX,00,hhmmss.ss,Latitude,N,Longitude,E,AltRef,NavStat,Hacc,Vacc,SOG,COG,Vvel,+ageC,HDOP,VDOP,TDOP,GU,RU,DR,*hh<CR><LF>
+
+Example:
+$PUBX,00,081350.00,4717.113210,N,00833.915187,E,546.589,G3,2.1,2.0,0.007,77.52,0+.007,,0.92,1.19,0.77,9,0,0*5F<CR><LF>
+
+Only emitted by uBlox Antaris chipset.
+
+------------------------------------------------------------------------------
+
+PUBX 01 - uBlox UTM Position Data
+
+The $PUBX,01 is a UTM (Universal Transverse Mercator projection) version
+of the $PUBX,00 sentence.
+
+$PUBX,01,hhmmss.ss,Easting,E,Northing,N,AltMSL,NavStat,Hacc,Vacc,SOG,COG,Vvel,ag+eC,HDOP,VDOP,TDOP,GU,RU,DR,*hh<CR><LF>
+
+Example:
+$PUBX,01,075142.00,467125.245,E,5236949.763,N,498.235,G3,2.1,1.9,0.005,85.63,0.0+00,,0.78,0.90,0.52,12,0,0*65
+
+Only emitted by uBlox Antaris chipset.
+
+------------------------------------------------------------------------------
+
+PUBX 03 - uBlox Satellite Status
+
+$PUBX,03,GT{,ID,s,AZM,EL,SN,LK},*hh<CR><LF>
+
+Example:
+$PUBX,03,11,23,-,,,45,010,29,-,,,46,013,07,-,,,42,015,08,U,067,31,42,025,10,U,19+5,33,46,026,18,U,326,08,39,026,17,-,,,32,015,26,U,306,66,48,025,27,U,073,10,36,+026,28,U,089,61,46,024,15,-,,,39,014*0D
+
+Only emitted by uBlox Antaris chipset.
+
+(There's no PUBX 02)
+
+------------------------------------------------------------------------------
+
+PUBX 04 - uBlox Time of Day and Clock Information
+
+$PUBX,04,hhmmss.ss,ddmmyy,UTC_TOW,week,reserved,Clk_B,Clk_D,PG,*hh<CR><LF>
+
+Example:
+$PUBX,04,073731.00,091202,113851.00,1196,113851.00,1930035,-2660.664,43,*3C<CR><+LF>
+
+Only emitted by uBlox Antaris chipset.
 
 ------------------------------------------------------------------------------
 
