@@ -223,7 +223,7 @@ static void build_gui(Widget toplevel)
 #endif /* EXPLICIT_QUIT */
 
     XtRealizeWidget(toplevel);
-    delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
+    delw = XmInternAtom(XtDisplay(toplevel),"WM_DELETE_WINDOW",(Boolean)False);
     /*@ -nullpass @*//* splint 3.1.1 lacks annotated prototype... */
     /*@i@*/XmAddWMProtocolCallback(toplevel, delw,
 			    (XtCallbackProc)quit_cb, (XtPointer)NULL);
