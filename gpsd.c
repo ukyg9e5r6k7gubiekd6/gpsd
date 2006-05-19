@@ -872,7 +872,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.track)==0)
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.speed)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed * MPS_TO_KNOTS);
 	    else
 		(void)strcpy(phrase, ",V=?");
