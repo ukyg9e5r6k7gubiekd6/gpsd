@@ -124,7 +124,7 @@ My first conclusion from looking at this table is that the designers
 of NMEA 0183 should be hung for galloping incompetence.  But never mind that.
 What are we to make of this mess?
 
-The fact that the FV18 sends GPMRC/GPGLL/GPGGA but not GPGSA
+The fact that the FV18 sends GPRMC/GPGLL/GPGGA but not GPGSA
 argues that GPGSA is optional.  I don't see how it can be, since it
 seems to be the only status bit that applies to altitude.  Just how are
 we supposed to know when altitude is valid if it doesn't ship GSA?  
