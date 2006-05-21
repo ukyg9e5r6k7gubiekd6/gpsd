@@ -453,8 +453,8 @@ if __name__ == '__main__':
                 title = val
             elif (switch == '-h'):
                 sys.stderr.write(\
-                    "usage: gpsprof [-h] [-r] [-m threshold] [-n samplecount] \n"
-                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-o file]\n")
+                    "usage: gpsprof [-h] [-m threshold] [-n samplecount] \n"
+                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
                 sys.exit(0)
         sys.stdout.write(plotframe(await,formatter,speed,threshold,title))
     except KeyboardInterrupt:
