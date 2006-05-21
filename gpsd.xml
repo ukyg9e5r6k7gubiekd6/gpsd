@@ -58,7 +58,7 @@ protocol used by the USB version of the Garmin 18 and other Garmin USB
 GPSes, or the binary protocol used by Evermore chipsets, or the
 extended NMEA used by iTrax. <application>gpsd</application>
 effectively hides the differences among these. It also knows about and
-uses commands that tune the GPS for lower latency, decrease bandwidth
+uses commands that tune the GPS for lower latency, decreased bandwidth
 usage, or increased accuracy on the San Jose Navigation FV18, the Sony
 CXD2951, the uBlox, and the Motorola OnCore GT+.  It can read heading
 and attitude information from the True North Technologies Revolution
@@ -182,7 +182,7 @@ other than F, K, W=0 or R=0).</para>
 <para>The request protocol for <application>gpsd</application> clients
 is very simple.  Each request normally consists of a single ASCII
 character followed by a newline.  Case of the request character is
-ignored, Each request returns a line of response text ended by a
+ignored.  Each request returns a line of response text ended by a
 CR/LF.  Requests and responses are as follows, with %f standing for a
 decimal float numeral and %d for decimal integer numeral:</para>
 
@@ -513,7 +513,7 @@ the last fix (if available).</para></listitem>
 
 <varlistentry>
 <term>w</term>
-<listitem><para>Sets or toggles 'watcher' mode (see the descroiption
+<listitem><para>Sets or toggles 'watcher' mode (see the description
 below). Return "W=0" or "W=1".The command 'w' immediately followed by
 the digit '1' or the plus sign '+' sets watcher mode.  The command 'w'
 followed by the digit '0' or the minus sign '-' clears watcher mode.
