@@ -198,11 +198,12 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 /* advance to the next hunt setting  */
 {
 #ifdef FIXED_PORT_SPEED
-    gpsd_set_speed(session, FIXED_PORT_SPEED, 'N', 1);
-    return false;	/* done */
+    /* just the one fixed port speed... */
+    static unsigned int rates[] = {FIXED_PORT_SPEED};
 #else /* FIXED_PORT_SPEED not defined */
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
+#endif /* FIXED_PORT_SPEED defined */
 
     if (session->retry_counter++ >= SNIFF_RETRIES) {
 	session->retry_counter = 0;
@@ -217,7 +218,6 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
     }
 
     return true;	/* keep hunting */
-#endif /* FIXED_PORT_SPEED defined */
 
 }
 

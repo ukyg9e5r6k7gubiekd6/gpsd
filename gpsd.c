@@ -1135,6 +1135,12 @@ int main(int argc, char *argv[])
 	}
     }
 
+#ifdef FIXED_PORT_SPEED
+    /* Asssume that if we're running with FIXED_PORT_SPEED we're some sort
+     * of embedded configuration where we don't want to wait for connect */
+    nowait = true;
+#endif
+
     if (!control_socket && optind >= argc) {
 	gpsd_report(0, "can't run with neither control socket nor devices\n");
 	exit(1);
@@ -1415,20 +1421,16 @@ int main(int argc, char *argv[])
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
-#ifndef FIXED_PORT_SPEED
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
-#endif
 		} 
 		if ((changed & ONLINE_SET) == 0) {
 /*
 		    gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
 				timestamp() - channel->gpsdata.online);
 */
-#ifndef FIXED_PORT_SPEED
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    gpsd_deactivate(channel);
-#endif
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
 #ifdef RTCM104_ENABLE
@@ -1547,10 +1549,8 @@ int main(int argc, char *argv[])
 
 			if (!need_gps && channel->gpsdata.gps_fd > -1) {
 			    gpsd_report(4, "unflagging descriptor %d in open_device\n", channel->gpsdata.gps_fd);
-#ifndef FIXED_PORT_SPEED
 			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 			    gpsd_deactivate(channel);
-#endif
 			}
 		    }
 		}
