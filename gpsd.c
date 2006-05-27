@@ -549,6 +549,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)strcpy(phrase, ",A=?");
 	    break;
+#ifndef FIXED_PORT_SPEED
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
 	    if (assign_channel(whoami) && whoami->device->device_type!=NULL && *p=='=' && privileged_user(whoami)) {
 		i = atoi(++p);
@@ -591,6 +592,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",B=?");
 	    }
 	    break;
+#endif
 	case 'C':
 	    if (!assign_channel(whoami) || whoami->device->device_type==NULL)
 		(void)strcpy(phrase, ",C=?");
