@@ -326,7 +326,7 @@ extern double wgs84_separation(double, double);
 #define KNOTS_TO_MPS	0.51444444	/* Knots to meters per second */
 #define MPS_TO_KPH	3.6		/* Meters per second to klicks/hr */
 #define MPS_TO_MPH	2.2369363	/* Meters/second to miles per hour */
-#define MPS_TO_KNOTS	1.9437		/* Meters per second to knots */
+#define MPS_TO_KNOTS	1.9438445	/* Meters per second to knots */
 /* miles and knots are both the international standard versions of the units */
 
 /* angle conversion multipliers */
