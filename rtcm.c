@@ -9,7 +9,7 @@ RTCM RECOMMENDED STANDARDS FOR DIFFERENTIAL NAVSTAR GPS SERVICE,
 RTCM PAPER 194-93/SC 104-STD
 
 Ordering instructions are accessible from <http://www.rtcm.org/>
-under "Publications".
+under "Publications".  This describes version 2.1 of the RTCM specification.
 
 Also applicable is ITU-R M.823: "Technical characteristics of
 differential transmissions for global navigation satellite systems

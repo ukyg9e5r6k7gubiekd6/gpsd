@@ -25,13 +25,26 @@ Member sizes in the packed binary structure Packet_t were wrong.
 Gary Miller has attempted to fix this, but it has not yet been tested
 on a 64-bit machine.
 
+*** True North support confuses track with heading
+
+Robin Darroch has pointed out that the support for the True North
+compass device confuses track (course over ground) with heading.
+This should probably be fixed.  However, the TNT code was sent 
+to us by a TNT user involved in the 2004 DARPA Grand Challenge 
+and therefore presumably meets actual production needs.  For
+this reason, and because separating track froom heading would 
+ripple through several places including gps.h and the client
+implementations, we're not going to try to fix this until we
+have a TNT device (or something else that makes the same
+distinction) to test with.
+
 ** Bugs exposed by gpsd in other software
 
 *** Multiple definitions of symbol _gpsd_report
 
 Some people building gpsd get 'multiple definitions of symbol _gpsd_report'
 as a warning.  This seems to be a result of two bugs in libtool, one
-of which makes the other on i386. gpsd_report() is indeed multiply
+of which masks the other on i386. gpsd_report() is indeed multiply
 defined, the problem is that libtool generates libgps.o where it 
 should generate -lgps and *all* instances (rather than just the first
 to be incorporated by other linkage demands) are linked in.

@@ -827,9 +827,12 @@ decisions about the following sorts of actions:
 
 1. What data will be buffered, and for how long.
 
-2. When the accumulated data will be shipped to the user 
+2. When the accumulated data will be shipped to the user.
 
 3. When to invalidate some or all of the buffered data.
+
+The when-to-ship question assumes watcher mode is on; if the user
+queries explicitly the when-to-ship decision is out of our hands.
 
 In thinking about these decisions, it's useful to consider the set of
 events on which an action like "merge new data into PVT buffer" or
@@ -845,19 +848,46 @@ events on which an action like "merge new data into PVT buffer" or
 4. When some or all of the PVT data has not been refreshed for a
    specified number of seconds.
 
+That latency can really matter.  If the GPS is on a car driving down
+the highway at 112kph (70mph), the 1 second delay in the buffered data
+can represent an error of 31 meters (102 feet) in reported position.
+
+In general, buffering would make it easy to retrieve the data you want
+at the time you want it, but the data would not necessarily be valid
+for time of retrieval.  Buffering makes life easier for applications that
+just want to display a position indicator, and harder for
+perfectionists that worry about precise location of moving GPSes.
+
+The policy decision about whether you want to be a "perfectionist" or
+not fundamentally belongs in the client.  This isn't to say gpsd could
+not have different buffering modes to help the client implement its
+decision, but the modes and their controls would have to be
+implemented *very* carefully.  Otherwise we'd risk imposing the wrong
+policy (or, worse, a *broken version* of a wrong policy) on half the
+client applications out there.
+
 There are hundreds, even thousands of possible sets of action-to-event
 bindings.  The "right" binding for a particular device depends not
 only on the protocol it uses but on considerations like how much time
 latency we are willing to let the buffering policy inflict on a
 report.
 
+Discussion of possible policies follows.  See also the speculation 
+later on about combining buffering with interpolation.
+
 **** Report then clear per packet
 
-Sometimes the choices are simple.  It's pretty clear that a device
-like a SiRF-II that reports all its PVT data in a single packet needs
-no buffering; it should ship to the user on receipt of that packet and
-then invalidate the PVT buffer right afterwards.  (This is a 
-"report then clear per packet" policy.)
+A device like a SiRF-II that reports all its PVT data in a single
+packet needs no buffering; it should ship to the user on receipt of
+that packet and then invalidate the PVT buffer right afterwards.
+(This is a "report then clear per packet" policy.)
+
+But triggering a buffer clear on every packet would do bad things if 
+we're in client-pull mode. We never know when a client might ask for a
+response.  Consider the case of two simultaneously connected clients,
+one sending queries and the other in watcher mode - if we clear after
+we ship the O message to the watcher, then the other client queries,
+it gets nothing in response.
 
 **** Buffer all, report then clear on trigger
 
@@ -964,6 +994,32 @@ device-type information to gpsd in the first place, we avoid this trap.
 But that means gpsd has to adapt to what it sees coming down the wire.
 At least it can use a different policy for each device driver,
 dispatching once the device type has been identified.
+
+*** Combining buffering with interpolation: a speculative design
+
+One possible choice (not let implemented in gpsd or its client
+libraries) would be to combine buffering with interpolation.  Here's a
+speculative design for a client which does its own extrapolation:
+
+Thread 1: GPS handler.  Sets watcher mode.  Each time a report is
+received, it stores that data along with the result of a call to
+gettimeofday() (so that we have microsecond precision, rather than
+just seconds from time()).  No need to double-buffer any data - just the
+latest complete O report is sufficient.  When the client receives a query
+from thread 2, it applies a differential correction to the last
+reported position, based on the last reported velocity and the
+difference between the stored gettimeofday() time and a new
+gettimeofday() call.
+
+Thread 2: main application.  Driven by whatever events you want it
+to be.  Queries thread 1 whenever it needs an accurate GPS position
+NOW.
+
+The main problem with this approach is that it would require an 
+onboard clock far more accurate than the GPS's once-per-second 
+reports.  This is a problem; in general, we can't assume that 
+a gpsd instance running in a car or boat will have access to
+ntpd or NIST radio time signals.
 
 ** Blind alleys
 
