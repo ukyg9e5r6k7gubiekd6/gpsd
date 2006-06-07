@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPSD" "8" "06/06/2006" "9 Aug 2004" "9 Aug 2004"
+.TH "GPSD" "8" "06/07/2006" "9 Aug 2004" "9 Aug 2004"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -94,7 +94,7 @@ If the driver has the capability to change sampling rate, this command always re
 .sp
 Either number may be fractional, indicating a GPS cycle shorter than a second; however, if >1 the cycle time must be a whole number. Also note that relatively few GPSes have the ability to set sub\-second cycle times; consult your hardware protocol description to make sure this works.
 .sp
-This command will return '?' at start of session, before the first full packet has been received from the GPS, because its type is not yet known. To set up conditions for a real answer, issue it after some command that reads position/velocity/time information from the device.
+This command will return '?' at start of session, before the first full packet has been received from the GPS, because the GPS type is not yet known. To set up conditions for a real answer, issue it after some command that reads position/velocity/time information from the device.
 .TP
 d
 Returns the UTC time in the ISO 8601 format, "D=yyyy\-mm\-ddThh:nmm:ss.ssZ". Digits of precision in the fractional\-seconds part will vary and may be absent.
@@ -159,7 +159,7 @@ longitude
 Longitude as in the P report (%f, degrees).
 .TP
 altitude
-Altitude as in the A report (%f, meters).
+Altitude as in the A report (%f, meters). If the mode field is not 3 this is an estimate and should be treated as unreliable.
 .TP
 horizontal error estimate
 Horizontal error estimate as in the E report (%f, meters).
@@ -180,10 +180,13 @@ estimated error in course over ground
 Error estimate for course (%f, degrees, 95% confidence).
 .TP
 estimated error in speed over ground
-Error estimate for speed (%f, meters/sec, 95% confidence). Note: older versions of the O command reported this field in knots.
+Error estimate for speed (%f, meters/sec, 95% confidence). Note: older experimental versions of the O command reported this field in knots.
 .TP
 estimated error in climb/sink
 Estimated error for climb/sink (%f, meters/sec, 95% confidence).
+.TP
+mode
+The NMEA mode (%d, ?=no mode value yet seen, 1=no fix, 2=2D, 3=3D). (This field was not reported at protocol levels 2 and lower.)
 .RE
 .TP
 p
@@ -268,6 +271,8 @@ should require no configuration or user action to find devices.
 The recommended mode for clients is watcher mode. In watcher mode
 gpsd
 ships a line of data to the client each time the GPS gets either a fix update or a satellite picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y' response. Additionally, watching clients get notifications in the form X=0 or X=%f when the online/offline status of the GPS changes.
+.PP
+Clients should be prepared for the possibility that additional fields (such as heading or roll/pitch/yaw) may be added to the O command, and not treat the occurrence of extra fields as an error. The protocol number will be incremented if and when sych fields are added.
 .PP
 Sending SIGHUP to a running
 gpsd

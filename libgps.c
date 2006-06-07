@@ -305,14 +305,14 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			struct gps_fix_t nf;
 			char tag[MAXTAGLEN+1], alt[20];
 			char eph[20], epv[20], track[20],speed[20], climb[20];
-			char epd[20], eps[20], epc[20];
+			char epd[20], eps[20], epc[20], mode[2];
 			int st = sscanf(sp+2, 
-			       "%8s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s",
+			       "%8s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s %s",
 				tag, &nf.time, &nf.ept, 
 				&nf.latitude, &nf.longitude,
 			        alt, eph, epv, track, speed, climb,
-			        epd, eps, epc);
-			if (st == 14) {
+			        epd, eps, epc, mode);
+			if (st == 15) {
 #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 			    /*@ +floatdouble @*/
 			    nf.altitude = DEFAULT(alt);
@@ -326,8 +326,11 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    nf.epc = DEFAULT(epc);
 			    /*@ -floatdouble @*/
 #undef DEFAULT
-			    nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
-			    if (nf.mode == MODE_3D)
+			    if (st >= 15)
+				nf.mode = (mode[0] == '?') ? MODE_NOT_SEEN : atoi(mode);
+			    else
+				nf.mode = (alt[0] == '?') ? MODE_2D : MODE_3D;
+			    if (alt[0] != '?')
 				gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
 			    if (isnan(nf.eph)==0)
 				gpsdata->set |= HERR_SET;
