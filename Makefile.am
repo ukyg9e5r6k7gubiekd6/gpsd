@@ -114,7 +114,9 @@ libgps_c_sources = \
 	packet.c \
 	gpsutils.c \
 	geoid.c \
+	dgnss.c \
 	dgpsip.c \
+	ntrip.c \
 	sirf.c \
 	report.c \
 	isgps.c \
@@ -122,7 +124,9 @@ libgps_c_sources = \
 	srecord.c \
 	bits.h \
 	truenorth.c \
-	timebase.h
+	timebase.h \
+	bsd-base64.c \
+	bsd-base64.h
 
 BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h

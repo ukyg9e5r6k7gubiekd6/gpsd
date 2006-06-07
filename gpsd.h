@@ -46,9 +46,11 @@ struct gps_context_t {
     int valid;				/* member validity flags */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
-    bool sentdgps;			/* have we sent a DGPSIP R report? */
+    bool sentdgps;			/* have we sent a DGPS report? */
+    enum { dgnss_none, dgnss_dgpsip, dgnss_ntrip } dgnss_service;	/* type of DGNSS service */
     int fixcnt;				/* count of good fixes seen */
-    int dsock;				/* socket to DGPS server */
+    int dsock;			        /* socket to DGPSIP server/Ntrip caster */
+    void *dgnss_privdata;		/* DGNSS service specific data */
     ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
     char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
     double rtcmtime;			/* timestamp of last RTCM104 report */ 
@@ -249,12 +251,20 @@ extern ssize_t packet_parse(struct gps_device_t *, size_t);
 extern ssize_t packet_get(struct gps_device_t *);
 extern int packet_sniff(struct gps_device_t *);
 
+extern int dgnss_open(struct gps_context_t *, char *);
+extern void dgnss_poll(struct gps_context_t *);
+extern void dgnss_report(struct gps_device_t *);
+extern void dgnss_autoconnect(struct gps_context_t *, double, double);
+extern void rtcm_relay(struct gps_device_t *);
+
 extern int dgpsip_open(struct gps_context_t *, const char *);
 extern void dgpsip_poll(struct gps_context_t *);
-extern void dgpsip_relay(struct gps_device_t *);
 extern void dgpsip_report(struct gps_device_t *);
 extern void dgpsip_autoconnect(struct gps_context_t *, 
 			       double, double, const char *);
+extern int ntrip_open(struct gps_context_t *, char *);
+extern void ntrip_poll(struct gps_context_t *);
+extern void ntrip_report(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);
 extern bool gpsd_write(struct gps_device_t *, void const *, size_t);
@@ -267,6 +277,7 @@ extern void gpsd_close(struct gps_device_t *);
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
 extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
 extern /*@ observer @*/ char *gpsd_hexdump(const void *, size_t);
+extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *, bool);

@@ -23,7 +23,7 @@
       <!-- arg choice='opt'>-R
       <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>DGPSIP-server</replaceable></arg>
+      <arg choice='opt'>-d <replaceable>DGPS-service URL</replaceable></arg>
       <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
@@ -65,15 +65,15 @@ and attitude information from the True North Technologies Revolution
 2X Digital compass.</para>
 
 <para><application>gpsd</application> can use differential-GPS
-corrections from a DGPS radio or over the net, from a ground station running a
-DGPSIP server that reports RTCM-S104 data; this will improve user
-error by roughly a factor of four.  When <application>gpsd</application>
-opens a serial device emitting RTCM-104, it automatically recognizes
-this and uses the device as a correction source for all connected GPSes.
-<!-- If no server is specified, <application>gpsd</application> will 
-hunt for one.-->
-See <xref linkend='accuracy'/> and <xref
-linkend='files'/> for discussion.</para>
+corrections from a DGPS radio or over the net, from a ground station
+running a DGPSIP server or a Ntrip broadcaster that reports RTCM-S104
+data; this will improve user error by roughly a factor of four.  When
+<application>gpsd</application> opens a serial device emitting
+RTCM-104, it automatically recognizes this and uses the device as a
+correction source for all connected GPSes.  <!-- If no server is
+specified, <application>gpsd</application> will hunt for one.--> See
+<xref linkend='accuracy'/> and <xref linkend='files'/> for
+discussion.</para>
 
 <!-- para><application>gpsd</application> may itself serve DGPSIP data
 from an attached RTCM-104 source to other instances of
@@ -114,11 +114,21 @@ clients.</para></listitem>
 <varlistentry>
 <term>-d</term>
 <listitem>
-<para>Query a specific differential-GPS (DGPSIP) server.  If a suffix of the
-server name begins with ":" it is interpreted as a port number,
-overriding the default IANA-assigned port of 2101. <!-- If this
-option is not given, <application>gpsd</application> will hunt 
-for a DGPSIP server. --></para>
+<para>Query a specific differential-GPS service (DGPSIP server or
+Ntrip broadcaster).  If the DGPS-service URL starts with "ntrip://"
+Ntrip will be used; if the URL starts with "dgpsip://", DGPSIP will be
+used.  <application>Gpsd</application> also defaults to DGPSIP if no
+protocol is defined.  For Ntrip services that require authentication,
+a prefix of the form "username:password@" can be added before the name
+of the Ntrip broadcaster.  If a suffix of the service name begins with
+":" it is interpreted as a port number, overriding the default
+IANA-assigned port of 2101.  For Ntrip service you also need to
+specify which stream to use; the stream is given in the form
+"/streamname". So, an example DGPSIP URL could be
+"dgpsip://dgpsip.example.com" and a Ntrip URL could be
+"ntrip://foo:bar@ntrip.example.com:80/example-stream". <!-- If this
+option is not given, <application>gpsd</application> will hunt for a
+DGPSIP server. --></para>
 </listitem>
 </varlistentry>
 <varlistentry>

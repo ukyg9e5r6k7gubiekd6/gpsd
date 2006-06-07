@@ -60,10 +60,6 @@
 
 #define QLEN			5
 
-/* Where to find the list of DGPS correction servers, if there is one */
-#define DGPS_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
-
-
 /*
  * The name of a tty device from which to pick up whatever the local
  * owning group for tty devices is.  Used when we drop privileges.
@@ -78,8 +74,10 @@ static jmp_buf restartbuf;
 static struct gps_context_t context = {
     .valid        = 0, 
     .sentdgps     = false, 
+    .dgnss_service  = dgnss_none,
     .fixcnt       = 0, 
     .dsock        = -1, 
+    .dgnss_privdata = NULL,
     .rtcmbytes    = 0, 
     .rtcmbuf      = {'\0'}, 
     .rtcmtime     = 0,
@@ -172,11 +170,11 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    (void)printf("usage: gpsd [-n] [-N] [-d dgpsip-server] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
+    (void)printf("usage: gpsd [-n] [-N] [-d dgnss-service] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
   -n                            = don't wait for client connects to poll GPS\n\
   -N                            = don't go into background\n\
-  -d host[:port]         	= set DGPS server \n\
+  -d [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream] = set DGPS service\n\
   -F sockfile                   = specify control socket location\n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
@@ -489,7 +487,7 @@ static bool assign_channel(struct subscriber_t *user)
 /*@ +branchstate +usedef +globstate @*/
 
 #ifdef RTCM104_SERVICE
-static int handle_dgpsip_request(int cfd UNUSED, char *buf UNUSED, int buflen UNUSED)
+static int handle_rtcm_request(int cfd UNUSED, char *buf UNUSED, int buflen UNUSED)
 /* interpret a client request; cfd is the socket back to the client */
 {
     return 0;	/* not actually interpreting these yet */
@@ -1072,7 +1070,7 @@ int main(int argc, char *argv[])
     static bool nowait = false;
     static int st, csock = -1;
     static gps_mask_t changed;
-    static char *dgpsserver = NULL;
+    static char *dgnss_service = NULL;
     static char *gpsd_service = NULL; 
 #ifdef RTCM104_SERVICE
     static char *rtcm_service = NULL; 
@@ -1115,7 +1113,7 @@ int main(int argc, char *argv[])
 	    gpsd_service = optarg;
 	    break;
 	case 'd':
-	    dgpsserver = optarg;
+	    dgnss_service = optarg;
 	    break;
 	case 'n':
 	    nowait = true;
@@ -1200,8 +1198,8 @@ int main(int argc, char *argv[])
     gpsd_report(1, "listening on port %s\n", rtcm_service);
 #endif /* RTCM104_SERVICE */
 
-    if (dgpsserver) {
-        int dsock = dgpsip_open(&context, dgpsserver);
+    if (dgnss_service) {
+	int dsock = dgnss_open(&context, dgnss_service);
 	if (dsock >= 0)
 	    FD_SET(dsock, &all_fds);
     }
@@ -1388,10 +1386,10 @@ int main(int argc, char *argv[])
 	    FD_CLR(csock, &rfds);
 	}
 
-	/* be ready for DGPSIP reports */
-	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds))
-	    dgpsip_poll(&context);
-
+	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds)) {
+	    /* be ready for DGPS reports */
+	    dgnss_poll(&context);
+	}
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
@@ -1411,9 +1409,9 @@ int main(int argc, char *argv[])
 	    if (!allocated_channel(channel))
 		continue;
 
-	    /* pass the current DGPSIP correction to the GPS if new */
+	    /* pass the current RTCM correction to the GPS if new */
 	    if (channel->device_type)
-		dgpsip_relay(channel);
+		rtcm_relay(channel);
 
 	    /* get data from the device */
 	    changed = 0;
@@ -1471,14 +1469,12 @@ int main(int argc, char *argv[])
 	}
 
 #ifdef NOT_FIXED
-	/* may be time to hunt up a DGPSIP server */
 	if (context.fixcnt > 0 && context.dsock == -1) {
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
 		if (channel->gpsdata.fix.mode > MODE_NO_FIX) {
-		    dgpsip_autoconnect(&context,
-				       channel->gpsdata.fix.latitude,
-				       channel->gpsdata.fix.longitude,
-				       DGPS_SERVER_LIST);
+		    dgnss_autoconnect(&context,
+				      channel->gpsdata.fix.latitude,
+				      channel->gpsdata.fix.longitude);
 		    break;
 		}
 	    }
@@ -1504,7 +1500,7 @@ int main(int argc, char *argv[])
 #ifdef RTCM104_SERVICE
 		    if (subscribers[cfd].requires==RTCM104
 			|| subscribers[cfd].requires==ANY) {
-			if (handle_dgpsip_request(cfd, buf, buflen) < 0)
+			if (handle_rtcm_request(cfd, buf, buflen) < 0)
 			    detach_client(cfd);
 		    } else
 #endif /* RTCM104_SERVICE */

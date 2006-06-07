@@ -213,8 +213,9 @@ static double degtodm(double a)
     return t;
 }
 
-static void gpsd_binary_fix_dump(struct gps_device_t *session, 
-				 char bufp[],size_t len)
+/*@ -mustdefine @*/
+void gpsd_position_fix_dump(struct gps_device_t *session,
+			    /*@out@*/char bufp[], size_t len)
 {
     struct tm tm;
     time_t intfixtime;
@@ -257,9 +258,18 @@ static void gpsd_binary_fix_dump(struct gps_device_t *session,
 	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
 	}
 	nmea_add_checksum(bufp);
-	len -= strlen(bufp);
-	bufp += strlen(bufp);
     }
+}
+/*@ +mustdefine @*/
+
+static void gpsd_transit_fix_dump(struct gps_device_t *session,
+				  char bufp[], size_t len)
+{
+    struct tm tm;
+    time_t intfixtime;
+
+    intfixtime = (time_t)session->gpsdata.fix.time;
+    (void)gmtime_r(&intfixtime, &tm);
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
@@ -278,6 +288,13 @@ static void gpsd_binary_fix_dump(struct gps_device_t *session,
 	    tm.tm_year % 100);
     /*@ +usedef @*/
     nmea_add_checksum(bufp);
+}
+
+static void gpsd_binary_fix_dump(struct gps_device_t *session,
+				 char bufp[], size_t len)
+{
+    gpsd_position_fix_dump(session, bufp, len);
+    gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
 }
 
 static void gpsd_binary_satellite_dump(struct gps_device_t *session, 
@@ -637,7 +654,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 	}
 
-	dgpsip_report(session);
+	dgnss_report(session);
 
 	return session->gpsdata.set;
     }

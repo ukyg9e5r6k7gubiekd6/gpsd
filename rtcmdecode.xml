@@ -32,7 +32,7 @@ written to standard output.</para>
 
 <para>You can use this tool with
 <citerefentry><refentrytitle>nc</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-to examine RTCM feeds from DGPSIP servers.</para>
+to examine RTCM feeds from DGPSIP servers or Ntrip broadcasters.</para>
 
 <para>The decoder dump format is described in
 <citerefentry><refentrytitle>rtcm</refentrytitle><manvolnum>5</manvolnum></citerefentry>;

@@ -143,10 +143,11 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Tue Mar 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - @VERSION@-1
+* Tue Jun  6 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
   Fixed buggy libgps parsing of multiple responses.  It's now possible
-  to lock gpsd to a fixed speed at compile time for embedded use.
+  to lock gpsd to a fixed speed at compile time for embedded use.  Added
+  NTRIP support, thanks to Ville Nuorvala.
 
 * Sun Mar 12 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
 - Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix

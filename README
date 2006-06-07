@@ -93,6 +93,8 @@ Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.
 
 Amaury Jacquot <sxpert@esitcom.org> added DBUS support.
 
+Ville Nuorvala <vnuorval@tcs.hut.fi> wrote the NTRIP support.
+
 We are delighted to acknowlege the assistance of Carl Carter, a field
 application engineer at SiRF.  He assisted us with the correction and
 tuning of the SiRF binary-protocol driver, shedding a good deal of 

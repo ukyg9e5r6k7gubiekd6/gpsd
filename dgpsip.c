@@ -33,6 +33,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	(void)write(context->dsock, buf, strlen(buf));
+	context->dgnss_service = dgnss_dgpsip;
     } else
 	gpsd_report(1, "can't connect to DGPS server %s, netlib error %d.\n", dgpsserver, context->dsock);
     opts = fcntl(context->dsock, F_GETFL);
@@ -52,24 +53,6 @@ void dgpsip_poll(struct gps_context_t *context)
 	    gpsd_report(1, "Read from rtcm source failed\n");
 	else
 	    context->rtcmtime = timestamp();
-    }
-}
-
-void dgpsip_relay(struct gps_device_t *session)
-/* pass a DGPSIP connection report to a session */
-{
-    if (session->gpsdata.gps_fd !=-1 
-	&& session->context->rtcmbytes > -1
-	&& session->rtcmtime < session->context->rtcmtime
-	&& session->device_type->rtcm_writer != NULL) {
-	if (session->device_type->rtcm_writer(session, 
-					      session->context->rtcmbuf, 
-					      (size_t)session->context->rtcmbytes) == 0)
-	    gpsd_report(1, "Write to rtcm sink failed\n");
-	else { 
-	    session->rtcmtime = timestamp();
-	    gpsd_report(2, "<= DGPS: %d bytes of RTCM relayed.\n", session->context->rtcmbytes);
-	}
     }
 }
 
