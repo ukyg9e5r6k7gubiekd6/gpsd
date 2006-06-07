@@ -951,9 +951,9 @@ GPSes sometimes do this, delivering data from dead-reckoning or
 interpolation when they've lost lock.  This comes up most often with
 altitude; because of the tall skinny shape of the tetrahedra defined
 by GPS range data, a GPS can lose 3D lock but still have an altitude
-guess good enough for it to deliver 2D permission.  But just because
-GPSes fudge is no good reason for gpsd to add a layer of prevarication
-on top of that.
+guess good enough for it to deliver a 2D fix with confidence.  But
+just because GPSes fudge is no good reason for gpsd to add a layer of
+prevarication on top of that.
 
 But the conclusive argument against this policy is that, while it can be
 simulated by buffering data delivered according to a clear-every-cycle 
@@ -974,9 +974,9 @@ greater than the cycle time.
 When the device is returning fixes steadily, this policy will look
 exactly like "buffer all, report on every packet, never clear data",
 because every piece of data will be refreshed once per cycle.  It will
-have the same sort of prevarication problems.  If the device loses
-lock, the user will see that the PVT data is undefined only when the
-timeout expires.
+have the same sort of prevarication problems as that policy, too.  If
+the device loses lock, the user will see that the PVT data is
+undefined only when the timeout expires.
 
 Fine-grained timeouts using per-field aging wouldn't change this 
 picture much.  They'd mainly be useful for matching the timeout 
