@@ -1578,11 +1578,11 @@ ZDL - Time and Distance to Variable Point
 
 Vendor extensions (this list is very incomplete):
 
-Garmin Estimated Error
+ PGRME - Garmin Estimated Error
 
         1  2  3  4  5  6  7
         |  |  |  |  |  |  |
-$PGRME,hhh,M,vvv,M,ttt,M*hh<CR><LF>
+ $PGRME,hhh,M,vvv,M,ttt,M*hh<CR><LF>
 
  Field Number: 
    1) Estimated horizontal position error (HPE), 
@@ -1597,11 +1597,11 @@ Example: $PGRME,15.0,M,45.0,M,25.0,M*22
 
 ------------------------------------------------------------------------------
 
-Magellan Status
+ PMGNST - Magellan Status
 
           1   2 3  4    5    6  7    8
           |   | |  |    |    |  |    |
-$PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
+ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
 
  Field Number: 
   1) Firmware version number?
@@ -1617,7 +1617,7 @@ $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
 
 ------------------------------------------------------------------------------
 
-Rockwell Channel Status
+ PRWIZCH - Rockwell Channel Status
 
  $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
 
@@ -1628,9 +1628,9 @@ Rockwell Channel Status
 
 ------------------------------------------------------------------------------
 
-PUBX 00 - uBlox Lat/Long Position Data
+ PUBX 00 - uBlox Lat/Long Position Data
 
-$PUBX,00,hhmmss.ss,Latitude,N,Longitude,E,AltRef,NavStat,Hacc,Vacc,SOG,COG,Vvel,+ageC,HDOP,VDOP,TDOP,GU,RU,DR,*hh<CR><LF>
+ $PUBX,00,hhmmss.ss,Latitude,N,Longitude,E,AltRef,NavStat,Hacc,Vacc,SOG,COG,Vvel,+ageC,HDOP,VDOP,TDOP,GU,RU,DR,*hh<CR><LF>
 
 Example:
 $PUBX,00,081350.00,4717.113210,N,00833.915187,E,546.589,G3,2.1,2.0,0.007,77.52,0+.007,,0.92,1.19,0.77,9,0,0*5F<CR><LF>
@@ -1639,7 +1639,7 @@ Only emitted by uBlox Antaris chipset.
 
 ------------------------------------------------------------------------------
 
-PUBX 01 - uBlox UTM Position Data
+ PUBX 01 - uBlox UTM Position Data
 
 The $PUBX,01 is a UTM (Universal Transverse Mercator projection) version
 of the $PUBX,00 sentence.
@@ -1653,9 +1653,9 @@ Only emitted by uBlox Antaris chipset.
 
 ------------------------------------------------------------------------------
 
-PUBX 03 - uBlox Satellite Status
+ PUBX 03 - uBlox Satellite Status
 
-$PUBX,03,GT{,ID,s,AZM,EL,SN,LK},*hh<CR><LF>
+ $PUBX,03,GT{,ID,s,AZM,EL,SN,LK},*hh<CR><LF>
 
 Example:
 $PUBX,03,11,23,-,,,45,010,29,-,,,46,013,07,-,,,42,015,08,U,067,31,42,025,10,U,19+5,33,46,026,18,U,326,08,39,026,17,-,,,32,015,26,U,306,66,48,025,27,U,073,10,36,+026,28,U,089,61,46,024,15,-,,,39,014*0D
@@ -1666,7 +1666,7 @@ Only emitted by uBlox Antaris chipset.
 
 ------------------------------------------------------------------------------
 
-PUBX 04 - uBlox Time of Day and Clock Information
+ PUBX 04 - uBlox Time of Day and Clock Information
 
 $PUBX,04,hhmmss.ss,ddmmyy,UTC_TOW,week,reserved,Clk_B,Clk_D,PG,*hh<CR><LF>
 
