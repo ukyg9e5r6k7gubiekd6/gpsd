@@ -204,7 +204,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	while (len > 0) {
 	    /* parse ENDSOURCETABLE */
 	    if (strncmp(line, NTRIP_ENDSOURCETABLE, strlen(NTRIP_ENDSOURCETABLE))==0)
-		return match ? 0 : -1;
+		goto done;
 
 	    if (!(eol = strstr(line, NTRIP_BR)))
 		break;
@@ -267,7 +267,8 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	    memcpy(buf, &buf[rlen-len], (size_t)len);
     }
 
-    return (int)len;
+done:
+    return match ? 0 : -1;
 }
 
 static int ntrip_stream_probe(const char *caster,
