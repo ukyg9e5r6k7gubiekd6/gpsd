@@ -800,14 +800,12 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
 		else
 		    (void)strcat(phrase, "        ?");
-#ifdef FOO
 		if (whoami->device->gpsdata.fix.mode > 0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %d", whoami->device->gpsdata.fix.mode);		    
 		else
 		    (void)strcat(phrase, "        ?");
-#endif /* FOO */
 	    }
 	    break;
 	case 'P':
