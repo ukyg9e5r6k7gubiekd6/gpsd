@@ -35,12 +35,7 @@ struct ntrip_stream_t {
 #define NTRIP_ICY		"ICY 200 OK"
 #define NTRIP_UNAUTH		"401 Unauthorized"
 
-/*@ -fullinitblock @*/
-static struct ntrip_stream_t ntrip_stream = {
-    .longitude = NAN,
-    .latitude  = NAN
-};
-/*@ +fullinitblock @*/
+static struct ntrip_stream_t ntrip_stream;
 
 /*@ -temptrans -mustfreefresh @*/
 static char *ntrip_field_iterate(char *start, /*@null@*/char *prev, const char *eol)
