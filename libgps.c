@@ -246,6 +246,15 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    /*@ +mustfreeonly */
 		    break;
+#ifdef HEADING_FIX
+		case 'H':
+		    if (sp[2] == '?') {
+		        gpsdata->fix.heading = NAN;
+		    } else {
+		        (void)sscanf(sp, "H=%lf", &gpsdata->fix.heading);
+		    }
+		    break;
+#endif /* HEADING_FIX */
 		case 'I':
 		    /*@ -mustfreeonly */
 		    if (gpsdata->gps_id)
@@ -342,7 +351,12 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				gpsdata->set |= SPEEDERR_SET;
 			    if (isnan(nf.epc)==0)
 				gpsdata->set |= CLIMBERR_SET;
+#ifndef HEADING_FIX
 			    nf.pitch = nf.roll = nf.dip = NAN;
+#else /* HEADING_FIX */
+			    /* there is no support for a TrueNorth source in the O command at this stage, so libgps-based clients that wish to use the heading provided by such a source must send the sequence "OH\n".  N.B. the order is important - "HO\n" will result in heading=NAN.  More work is needed to provide any support for pitch, roll and dip. */
+			    nf.pitch = nf.roll = nf.dip = nf.heading = NAN;
+#endif /* HEADING_FIX */
 			    gpsdata->fix = nf;
 			    (void)strcpy(gpsdata->tag, tag);
 			    gpsdata->set |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;

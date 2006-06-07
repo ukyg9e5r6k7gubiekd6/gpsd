@@ -66,6 +66,9 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
+#ifdef HEADING_FIX
+    double heading;     /* Heading (relative to true north) - only available from True North or comparable digital compass devices */
+#endif /* HEADING_FIX */
     double pitch;       /* Pitch angle in degrees */
     double roll;        /* Roll angle in degrees */
     double dip;         /* Dip angle in degrees */

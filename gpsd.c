@@ -664,6 +664,14 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
 	    break;
+#ifdef HEADING_FIX
+	case 'H':
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.heading)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",H=%.4f", whoami->device->gpsdata.fix.heading);
+	    else
+		(void)strcpy(phrase, ",H=?");
+	    break;
+#endif /* HEADING_FIX */
 	case 'I':
 	    if (assign_channel(whoami) && whoami->device->device_type!=NULL)
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 

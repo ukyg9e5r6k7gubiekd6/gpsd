@@ -309,6 +309,15 @@ identifying the kind of information the attached device returns.</para>
 </listitem>
 </varlistentry>
 
+<!--
+<varlistentry>
+<term>h</term>
+<listitem>
+<para>Heading, "H=%f" in degrees from true north.  Only available from True North Technologies or comparable digital compass devices (c.f. 't')</para>
+</listitem>
+</varlistentry>
+-->
+
 <varlistentry>
 <term>i</term>
 <listitem><para>Returns a text string identifying the GPS.  The string
