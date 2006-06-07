@@ -75,7 +75,7 @@ it exists.
 
 *** SiRF firmware uploader
 
-Chris Kuethe has shipped a 0.0 alpha version.  It is not yet 
+Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 
 resolved whether SiRF Technology will allow us to ship the 
 binary loader code needed to actually use it.
 
@@ -107,7 +107,7 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 6) Extend the test framework so we can verify RTCM service.
 
 7) Get rid of the -d option by hacking open_device() so that when it
-   sees a command-line option of the form server:port (with no
+   sees a command-line argument of the form server:port (with no
    embedded backslashes) it opens a socket to read from that server.
    Now any GPS-packet and RTCM data sources given on the command line
    can be remote as well as local.

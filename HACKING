@@ -96,7 +96,7 @@ upgrades under open-source operating systems, freeing GPS users from
 reliance on closed-source vendor tools and closed-source operating
 systems.
 
-We have made a first step in that direction with the initial alpha
+We have made a first step in that direction with the initial pre-alpha
 version of gpsflash, currently supporting SiRF chips only.  A future
 direction of the project is to have gpsflash support firmare upgrades 
 for other chipsets.
@@ -118,7 +118,7 @@ text-stream formats.
 We currently provide a tool for decoding RTCM104 reports on satellite
 health, almanacs, and pseudorange information from differential-GPS
 radios and reference stations.  A future direction of the project is
-to support an RTCM encoder; also to support DGPSIP service via gpsd.
+to support an RTCM104 encoder.
 
 ** Contribution guidelines
 
@@ -145,7 +145,7 @@ Before shipping a patch, you should go through the following checklist:
     patched code displays no warnings when you run 'make
     splint' (see <http://www.splint.org> for further description of 
     this tool if you don't already know about it). If you can't run
-    splint. tell us that you couldn't do it.
+    splint, tell us that you couldn't do it.
 
 If you are contributing a driver for a new GPS, please also do the
 following things:
