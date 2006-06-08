@@ -258,6 +258,9 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	else {
 	    mask |= TIME_SET;
 	    session->gpsdata.newdata.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
+	    if (session->gpsdata.sentence_time != session->gpsdata.newdata.time)
+		mask |= CYCLE_START_SET;
+	    session->gpsdata.sentence_time = session->gpsdata.newdata.time;
 	}
 	do_lat_lon(&field[2], &session->gpsdata);
 	mask |= LATLON_SET;
