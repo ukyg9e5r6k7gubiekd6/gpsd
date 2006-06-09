@@ -71,6 +71,12 @@ import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
 import gps
 
+# So we can do regression tests without stepping omn a production daemon
+# According to IANA port 12000 belongs to an IBM SNA service. Picking an
+# obsolete service seems safer than picking an unused number that IANA might
+# allocate in the future.
+fakeport = 12000
+
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -240,7 +246,7 @@ class DaemonInstance:
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, options, background=False, prefix=""):
         "Spawn a daemon instance."
-        self.spawncmd = "gpsd -N -F %s -P %s %s" % (self.control_socket, self.pidfile, options)
+        self.spawncmd = "gpsd -N -S %s -F %s -P %s %s" % (fakeport, self.control_socket, self.pidfile, options)
         if prefix:
             self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
@@ -358,7 +364,7 @@ class TestSession:
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
-        newclient = gps.gps()
+        newclient = gps.gps(port=fakeport)
         self.clients.append(newclient)
         newclient.id = self.client_id + 1 
         self.client_id += 1

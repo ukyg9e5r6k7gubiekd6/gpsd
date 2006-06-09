@@ -614,7 +614,7 @@ static void character_discard(struct gps_device_t *session)
 
 
 ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
-/* grab a packet; returns ether BAD_PACKET or the length */
+/* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
     gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n",
