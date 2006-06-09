@@ -258,12 +258,10 @@ extern void dgnss_autoconnect(struct gps_context_t *, double, double);
 extern void rtcm_relay(struct gps_device_t *);
 
 extern int dgpsip_open(struct gps_context_t *, const char *);
-extern void dgpsip_poll(struct gps_context_t *);
 extern void dgpsip_report(struct gps_device_t *);
 extern void dgpsip_autoconnect(struct gps_context_t *, 
 			       double, double, const char *);
 extern int ntrip_open(struct gps_context_t *, char *);
-extern void ntrip_poll(struct gps_context_t *);
 extern void ntrip_report(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);

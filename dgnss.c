@@ -1,6 +1,8 @@
 /* dgnss.c -- common interface to a number of Differential GNSS services */
 
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "gpsd.h"
 
@@ -33,11 +35,13 @@ int dgnss_open(struct gps_context_t *context, char *dgnss_service)
 void dgnss_poll(struct gps_context_t *context)
 /* poll the DGNSS service for a correction report */
 {
-    if (context->dgnss_service == dgnss_dgpsip)
-	dgpsip_poll(context);
-    else if (context->dgnss_service == dgnss_ntrip)
-	ntrip_poll(context);
-
+    if (context->dsock > -1) {
+	context->rtcmbytes = read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
+	if (context->rtcmbytes < 0 && errno != EAGAIN)
+	    gpsd_report(1, "Read from rtcm source failed\n");
+	else
+	    context->rtcmtime = timestamp();
+    }
 }
 
 void dgnss_report(struct gps_device_t *session)

@@ -436,18 +436,6 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 }
 /*@ +branchstate @*/
 
-void ntrip_poll(struct gps_context_t *context)
-/* poll the NTRIP server for a correction report */
-{
-    if (context->dsock > -1) {
-	context->rtcmbytes = read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
-	if (context->rtcmbytes < 0 && errno != EAGAIN)
-	    gpsd_report(1, "Read from rtcm source failed\n");
-	else
-	    context->rtcmtime = timestamp();
-    }
-}
-
 void ntrip_report(struct gps_device_t *session)
 /* may be time to ship a usage report to the Ntrip caster */
 {

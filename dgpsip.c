@@ -44,18 +44,6 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 }
 /*@ +branchstate */
 
-void dgpsip_poll(struct gps_context_t *context)
-/* poll the DGPSIP server for a correction report */
-{
-    if (context->dsock > -1) {
-	context->rtcmbytes = read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
-	if (context->rtcmbytes < 0 && errno != EAGAIN)
-	    gpsd_report(1, "Read from rtcm source failed\n");
-	else
-	    context->rtcmtime = timestamp();
-    }
-}
-
 void dgpsip_report(struct gps_device_t *session)
 /* may be time to ship a usage report to the DGPSIP server */
 {
