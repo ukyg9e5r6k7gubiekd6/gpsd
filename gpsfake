@@ -39,7 +39,7 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:")
+(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:v")
 progress = False
 cycle = 0
 monitor = ""
@@ -49,6 +49,7 @@ pipe = False
 promptme = False
 init = "w+r+"
 doptions = ""
+verbose = False
 for (switch, val) in options:
     if (switch == '-b'):
         progress = True
@@ -73,6 +74,8 @@ for (switch, val) in options:
         init = val
     elif (switch == '-s'):
         speed = int(val)
+    elif (switch == '-v'):
+        verbose = True
     elif (switch == '-h'):
         sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
         raise SystemExit,0
@@ -103,7 +106,7 @@ def fakehook(linenumber, fakegps):
 if progress:
     baton = Baton("Processing %s" % logfile, "done")
 
-test = gpsfake.TestSession(prefix=monitor, options=doptions)
+test = gpsfake.TestSession(prefix=monitor, options=doptions, verbose=verbose)
 
 if pipe:
     test.reporter = sys.stdout.write

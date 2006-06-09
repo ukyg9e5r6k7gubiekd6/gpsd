@@ -27,7 +27,7 @@ from a pty and a thread that cycles sentences into the master side
 from some specified logfile; gpsd reads the slave side.  A fake GPS is
 identified by the string naming its slave device.
 
-Test session also has methods to start and end client sessions.  Daemon
+TestSession also has methods to start and end client sessions.  Daemon
 responses to a client are fed to a hook function which, by default, discards
 them.  You can change the hook to sys.stdout.write dump responses to standard
 output (this is what the gpsfake executable does) or do something more exotic
@@ -119,7 +119,7 @@ class TestLoad:
             self.legend = None
             self.textual = False
         else:
-            print "gpsfake: unknown log type (not NMEA or SiRF) can't handle it!"
+            sys.stderr.write("gpsfake: unknown log type (not NMEA or SiRF) can't handle it!\n")
             self.sentences = None
     def packet_get(self):
         "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
@@ -153,7 +153,8 @@ class TestLoad:
 
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
-    def __init__(self, logfp, speed=4800):
+    def __init__(self, logfp, speed=4800, verbose=False):
+        self.verbose = verbose
         self.go_predicate = lambda: True
         self.readers = 0
         self.thread = None
@@ -197,7 +198,12 @@ class FakeGPS:
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
     def slave_is_open(self):
         "Is the slave device of this pty opened?"
-        return os.system("fuser -s " + self.slave) == 0
+        if self.verbose:
+            sys.stderr.write("slave_is_open() begins")
+        isopen = os.system("fuser -s " + self.slave) == 0
+        if self.verbose:
+            sys.stderr.write("slave_is_open() ends")
+        return isopen
     def __feed(self):
         "Feed the contents of the GPS log to the daemon."
         while self.readers and self.go_predicate(self.index, self):
@@ -305,8 +311,9 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPS and client threads."
-    def __init__(self, prefix=None, options=None):
+    def __init__(self, prefix=None, options=None, verbose=False):
         "Initialize the test session by launching the daemon."
+        self.verbose = verbose
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.clients = []
@@ -332,7 +339,7 @@ class TestSession:
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
-            newgps = FakeGPS(logfile, speed=speed)
+            newgps = FakeGPS(logfile, speed=speed, verbose=self.verbose)
             if pred:
                 newgps.go_predicate = pred
             elif self.default_predicate:

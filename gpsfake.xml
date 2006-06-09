@@ -27,6 +27,7 @@
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='opt'>-v</arg>
       <arg choice='opt'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -90,6 +91,9 @@ The default is "w+r+"; "r=2" might be another interesting value.</para>
 
 <para>The -s option sets the baud rate for the slave tty.  The
 default is 4800.</para>
+
+<para>The -v option enables verbose progress reports to stderr.  It
+is mainly useful for debugging gpsfake itself.</para>
 
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>

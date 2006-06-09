@@ -187,6 +187,26 @@ enough to manage that, consider whether your feature control might be
 implemented with an extension to the gpsd protocol or the
 control-socket command set.
 
+Here are three specific reasons command-line switches are evil:
+
+(1) Command-line switches are often a lazy programmer's way out of
+writing correct adaptive logic.  This is why we keep rejecting
+requests for a baud-rate switch and a GPS type switch -- the *right*
+thing is to make the packet-sniffer work better, and if we relented in
+our opposition the pressure to get that right would disappear.
+Suddenly we'd be back to end-users having to fiddle with settings the
+software ought to figure out for itself, which is unacceptable.
+
+(2) Command-line switches without corresponding protocol commands 
+pin the daemon's behavior for its entire lifespan. Why should the user
+have to fix a policy at startup time and never get to change his/her 
+mind afterwards?  Stupid design...
+
+(3) The command-line switches used for a normal gpsd startup can only
+be changed by modifying the hotplug script.  Requiring end-users to
+modify hotplug scripts (or anything else in admin space) is a crash
+landing.
+
 *** Don't use malloc!
 
 The best way to avoid having dynamic-memory allocation problems is
