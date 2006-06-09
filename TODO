@@ -73,6 +73,10 @@ months and reload it.
 3. gpsd should read the local offset file when it starts up, if
 it exists.
 
+Note: turns out this is only an issue for EverMore chips.  SiRF GPSes
+can get the offset from the PPS or subframe data; NMEA GPSes don't
+need it; and the other binary protocols supply it.
+
 *** SiRF firmware uploader
 
 Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 

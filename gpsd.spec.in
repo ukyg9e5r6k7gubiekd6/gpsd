@@ -144,7 +144,7 @@ cp gps.py gpsfake.py leapsecond.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Tue Jun  6 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
+* Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
   Fixed buggy libgps parsing of multiple responses.  It's now possible
   to lock gpsd to a fixed speed at compile time for embedded use.  Added
