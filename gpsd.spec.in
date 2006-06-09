@@ -78,7 +78,7 @@ mkdir -p "$RPM_BUILD_ROOT"%{_datadir}/gpsd
 #cp dgpsip-servers "$RPM_BUILD_ROOT"%{_datadir}/gpsd/
 PYVERSION=`python -c "import sys; print sys.version[:3]"`
 mkdir -p "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
-cp gps.py gpsfake.py leapsecond.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
+cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-packages
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -105,7 +105,7 @@ cp gps.py gpsfake.py leapsecond.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
 #%{_datadir}/gpsd/dgpsip-servers
 %{_libdir}/python*/site-packages/gps.py*
-%{_libdir}/python*/site-packages/leapsecond.py*
+#%{_libdir}/python*/site-packages/leapsecond.py*
 
 %files -n gpsd-devel
 %defattr(-,root,root,-)
