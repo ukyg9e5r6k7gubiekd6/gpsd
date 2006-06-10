@@ -206,6 +206,7 @@ class FakeGPS:
         "Is the slave device of this pty opened?"
         if self.verbose:
             sys.stderr.write("slave_is_open() begins")
+        # fuser -s would be more efficient, but is buggy in version 2.22.
         isopen = os.system("fuser " + self.slave + " > /dev/null 2>&1") == 0
         if self.verbose:
             sys.stderr.write("slave_is_open() ends")

@@ -78,6 +78,9 @@ daemon should be run.  This option is intended to be used with
 <citerefentry><refentrytitle>gdb</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 and similar programs.</para>
 
+<para>The -g option uses the monitor facility to run the gpsd within
+gpsfake under control of gdb.</para>
+
 <para>The -o option specifies options to pass to the daemon.
 Passing "-n" is often useful.  The -D option passes a -D option
 to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
