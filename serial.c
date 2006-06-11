@@ -207,7 +207,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 
     if (session->retry_counter++ >= SNIFF_RETRIES) {
 	session->retry_counter = 0;
-	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))) {
+	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))-1) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.stopbits++ >= 2)
 		return false;			/* hunt is over, no sync */
