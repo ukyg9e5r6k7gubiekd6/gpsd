@@ -328,7 +328,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f5 = getf(buf,16);			/* time-of-fix */
 	session->gpsdata.newdata.climb = f3;
 	/*@ -evalorder @*/
-	session->gpsdata.newdata.speed = sqrt(pow(f2,2) + pow(f1,2)) * MPS_TO_KNOTS;
+	session->gpsdata.newdata.speed = sqrt(pow(f2,2) + pow(f1,2));
 	/*@ +evalorder @*/
 	if ((session->gpsdata.newdata.track = atan2(f1,f2) * RAD_2_DEG) < 0)
 	    session->gpsdata.newdata.track += 360.0;
@@ -534,7 +534,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    d2 = s2 * d5;			/* north velocity m/s */
 	    session->gpsdata.newdata.climb = s3 * d5; /* up velocity m/s */
 	    /*@ -evalorder @*/
-	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2)) * MPS_TO_KNOTS;
+	    session->gpsdata.newdata.speed = sqrt(pow(d2,2) + pow(d1,2));
 	    /*@ +evalorder @*/
 	    if ((session->gpsdata.newdata.track = atan2(d1,d2) * RAD_2_DEG) < 0)
 		session->gpsdata.newdata.track += 360.0;
