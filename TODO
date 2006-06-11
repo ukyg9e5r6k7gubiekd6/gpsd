@@ -60,7 +60,11 @@ suggest you drop back to an OpenMotif stable version like 2.2.2.
 
 Michael R, Davis reports "If you read from the device at the wrong
 rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
-hard reboot." Driver flakiness may explain some failures to hunt correctly.
+hard reboot." Details are at 
+
+     http://gpsd.davisnetworks.com/bin/view/Main/FreezeBugPL2303
+
+Related driver flakiness may explain some failures to hunt correctly.
 
 *** Hangs in gpsfake may be caused by bugs or flakiness in fuser(1)
 

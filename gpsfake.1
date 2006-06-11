@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPSFAKE" "1" "06/09/2006" "12 Feb 2005" "12 Feb 2005"
+.TH "GPSFAKE" "1" "06/11/2006" "12 Feb 2005" "12 Feb 2005"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -11,7 +11,7 @@
 gpsfake \- test harness for gpsd, simulating a GPS
 .SH "SYNOPSIS"
 .HP 8
-\fBgpsfake\fR [\-h] [\-b] [\-c\ \fIinterval\fR] [\-i] [\-D\ \fIdebuglevel\fR] [\-l] [\-m\ \fImonitor\fR] [\-o\ \fIoptions\fR] [\-p] [\-r\ \fIinitcmd\fR] [\-s\ \fIspeed\fR] [\-v] [\fIlogfile\fR]
+\fBgpsfake\fR [\-h] [\-b] [\-c\ \fIinterval\fR] [\-i] [\-D\ \fIdebuglevel\fR] [\-l] [\-m\ \fImonitor\fR] [\-o\ \fIoptions\fR] [\-p] [\-r\ \fIinitcmd\fR] [\-s\ \fIspeed\fR] [\-v] \fIlogfile\fR
 .SH "DESCRIPTION"
 .PP
 gpsfake
@@ -46,6 +46,8 @@ The \-m option specifies a monitor program inside which the daemon should be run
 \fBvalgrind\fR(1),
 \fBgdb\fR(1)
 and similar programs.
+.PP
+The \-g option uses the monitor facility to run the gpsd within gpsfake under control of gdb.
 .PP
 The \-o option specifies options to pass to the daemon. Passing "\-n" is often useful. The \-D option passes a \-D option to the daemon: thus \-D 4 is shorthand for \-o "\-D 4".
 .PP

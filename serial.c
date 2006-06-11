@@ -97,6 +97,58 @@ void gpsd_set_speed(struct gps_device_t *session,
 	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return;
+
+	/*
+	 * Serious black magic begins here.  Getting this code wrong can cause
+	 * failures to lock to a correct speed, and not clean reproducible 
+	 * failures but flukey hardware- and timing-dependent ones.  So
+	 * be very sure you know what you're doing before hacking it, and
+	 * test thoroughly.
+	 *
+	 * The fundamental problem here is that serial devices take time 
+	 * to settle into a new baud rate after tcsetattr() is issued. Until
+	 * they do so, input will be arbitarily garbled.  Normally this
+	 * is not a big problem, but in our hunt loop the garbling can trash 
+	 * a long enough prefix of each sample to prevent detection of a 
+	 * packet header.  We could address the symptom by making the sample
+	 * size enough larger that subtracting the maximum length of garble
+	 * would still leave a sample longer than the maximum packet size.  
+	 * But it's better (and more efficient) to address the disease.
+	 *
+	 * In theory, one might think that not even a tcflush() call would 
+	 * be needed, with tcsetattr() delaying its return until the device
+	 * is in a good state.  For simple devices like a 14550 UART that 
+	 * have fixed response timings this may even work, if the driver
+	 * writer was smart enough to delay the return by the right number
+	 * of milliseconds after poking the device port(s).
+	 *
+	 * Problems may arise if the driver's timings are off.  Or we may
+         * be talking to a USB device like the pl2303 commonly used in GPS
+	 * mice; on these, the change will not happen immediately because
+	 * it has to be sent as a message to the external processor that 
+	 * has to act upon it, and that processor may still have buffered 
+	 * data in its own FIFO.  In this case the expected delay may be
+	 * too large and too variable (depending on the details of how the
+	 * USB device is integrated with its symbiont hardware) to be put
+	 * in the driver.
+	 *
+	 * So, somehow, we have to introduce a delay after tcsatattr() 
+	 * returns sufficient to allow *any* device to settle.  On the other
+	 * hand, a really long delay will make gpsd device registration
+	 * unpleasantly laggy.
+	 *
+	 * The classic way to address this is with a tcflush(), counting
+	 * on it to clear the device FIFO. But that call may clear only the
+	 * kernel buffers, not the device's hardware FIFO, so it may not
+	 * be sufficient by itself.
+	 *
+	 * flush followed by a 200-millisecond delay followed by flush has
+	 * been found to work reliably on the pl2303.  It is also known
+	 * from testing that a 100-millisec delay is too short, allowing
+	 * occasional failure to lock.
+	 */
+	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
+	usleep(200000);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
     gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);

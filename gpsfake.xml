@@ -28,7 +28,7 @@
       <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-v</arg>
-      <arg choice='opt'><replaceable>logfile</replaceable></arg>
+      <arg choice='plain'><replaceable>logfile</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
