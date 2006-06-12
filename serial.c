@@ -148,7 +148,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * occasional failure to lock.
 	 */
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
-	usleep(200000);
+	(void)usleep(200000);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
     gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);

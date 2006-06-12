@@ -322,7 +322,7 @@ fi
 
 dnl check for port speed fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
-  AC_HELP_STRING([--enable-fixed-port-speed],
+  AC_HELP_STRING([--enable-fixed-port-speed=nnn],
                  [compile with fixed serial port speed]),
   [ac_baud=$enableval], [ac_baud=no])
 AC_MSG_CHECKING([for fixed port speed])

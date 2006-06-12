@@ -574,7 +574,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 				      (char *)session->outbuffer,
 				      (size_t)session->outbuflen, 2);
 	/*@ -nullstate @*/
-	session->gpsdata.sentence_time = NAN;
 	session->gpsdata.sentence_length = session->outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
 
