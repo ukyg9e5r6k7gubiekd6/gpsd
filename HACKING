@@ -501,7 +501,7 @@ is so you can use it to set the system clock.
 
 The hotplug interface works pretty nicely for telling gpsd which
 device to look at, at least on my FC3/FC4/FC5 Linux machines.  The fly
-in the ointment is that I'm using a deprecated version of the
+in the ointment is that we're using a deprecated version of the
 interface, the old-style /etc/hotplug version with usermap files.
 
 It is unlikely this interface will be dropped by distro makers any

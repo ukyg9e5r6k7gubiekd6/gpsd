@@ -28,11 +28,11 @@ from some specified logfile; gpsd reads the slave side.  A fake GPS is
 identified by the string naming its slave device.
 
 TestSession also has methods to start and end client sessions.  Daemon
-responses to a client are fed to a hook function which, by default, discards
-them.  You can change the hook to sys.stdout.write dump responses to standard
-output (this is what the gpsfake executable does) or do something more exotic
-A client session is identified by a small integer that counts the number of
-client session starts.
+responses to a client are fed to a hook function which, by default,
+discards them.  You can change the hook to sys.stdout.write() to dump
+responses to standard output (this is what the gpsfake executable
+does) or do something more exotic. A client session is identified by a
+small integer that counts the number of client session starts.
 
 There are a couple of convenience methods.  TestSession.wait() does nothing,
 allowing a specified number of seconds to elapse.  TestSession.client_query()
@@ -57,7 +57,7 @@ which is fed to the daemon character by character,
 
 There are some limitations.  Trying to run more than one instance of
 TestSession concurrently will fail as the daemon instances contend for
-port 2947.  Due to indeterminacy in thread timings, it is not guaranteed
+port 12000.  Due to indeterminacy in thread timings, it is not guaranteed
 that runs with identical options will present exactly the same
 sentences to the daemon at the same times from start.
 
@@ -71,7 +71,7 @@ import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
 import gps
 
-# So we can do regression tests without stepping omn a production daemon
+# So we can do regression tests without stepping on a production daemon
 # According to IANA port 12000 belongs to an IBM SNA service. Picking an
 # obsolete service seems safer than picking an unused number that IANA might
 # allocate in the future.

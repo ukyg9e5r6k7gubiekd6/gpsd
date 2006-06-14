@@ -426,6 +426,56 @@ No more U.S.-centric date-format assumptions!  Also, as previously
 noted, the seconds part may have one or more digits of decimal fractional
 seconds.</p>
 
+<h1 id='web'>How do I get gpsd data into a web page?</h1>
+
+<p>The easy way is to use a perl CGI script that leverages
+Net::GPSD like this...</p>
+
+<code><pre>
+#!/usr/bin/perl -w
+use strict;
+use Net::GPSD;
+
+my $g=new Net::GPSD;
+my $p=$g->get;
+
+print qq{
+&lt;?xml version='1.0'?&gt;
+&lt;Report xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;items&gt;
+    &lt;Item&gt;
+      &lt;ID&gt;35643563245&lt;/ID&gt;
+      &lt;position&gt;
+        &lt;gml:Point srsDimension="2"
+srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
+          &lt;gml:pos&gt;}. $p-&gt;lat. " ". $p-&gt;lon. q{&lt;/gml:pos&gt;
+        &lt;/gml:Point&gt;
+      &lt;/position&gt;
+    &lt;/Item&gt;
+  &lt;/items&gt;
+&lt;/Report&gt;
+};
+&lt;/code&gt;
+</pre></code>
+
+<p>This will return something like:</p>
+
+<code><pre>
+&lt;?xml version='1.0'?&gt;
+&lt;Report xmlns:gml="http://www.opengis.net/gml"&gt;
+  &lt;items&gt;
+    &lt;Item&gt;
+      &lt;ID&gt;35643563245&lt;/ID&gt;
+      &lt;position&gt;
+        &lt;gml:Point srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
+          &lt;gml:pos&gt;38.865960 -77.108624&lt;/gml:pos&gt;
+        &lt;/gml:Point&gt;
+      &lt;/position&gt;
+    &lt;/Item&gt;
+  &lt;/items&gt;
+&lt;/Report&gt;
+</pre></code>
+
 </div>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
