@@ -26,6 +26,7 @@ bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) sirfmon gpspipe gpsfl
 dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
+python_PYTHON = gps.py gpsfake.py
 
 #
 # Build xgps
@@ -244,8 +245,6 @@ EXTRA_DIST = \
 	xgpsspeed.ad \
 	gpsd.spec.in \
 	gpsd.spec \
-	gps.py \
-	gpsfake.py \
 	gpsd.hotplug \
 	gpsd.usermap \
 	valgrind-audit \
