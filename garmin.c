@@ -708,7 +708,8 @@ static bool garmin_probe(struct gps_device_t *session)
 	} else if ( sel_ret == 0 ) {
 	    gpsd_report(3, "garmin_probe() timeout, INFO_REQ\n");
 	    // restore old terminal settings
-            (void)tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH
+            // TCIOFLUSH here causes gpsafake to hang, so skip that
+            (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW
 		, &session->ttyset_old);
 	    return false;
         }
