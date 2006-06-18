@@ -338,10 +338,13 @@ class TestSession:
         "Set a default go predicate for the session."
         self.default_predicate = pred
     def sanity_check(self):
-        now = self.daemon.fd_set()
-        if now != self.fd_set:
-            self.progress("File descriptors: %s\n" % now)
-            self.fd_set = now
+        try:
+            now = self.daemon.fd_set()
+            if now != self.fd_set:
+                self.progress("File descriptors: %s\n" % now)
+                self.fd_set = now
+        except:
+            self.progress("Sanity check not working -- port fd_set()\n")
     def gps_add(self, logfile, speed=4800, pred=None):
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
