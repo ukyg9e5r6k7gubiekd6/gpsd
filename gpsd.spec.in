@@ -42,7 +42,7 @@ You will need to have gpsd installed for it to work.
 %package -n gpsd-clients
 Summary: Clients for gpsd with an X interface.
 Group: Applications/System
-BuildRequires: openmotif-devel
+BuildRequires: openmotif-devel, libXaw-devel
 
 %description -n gpsd-clients
 xgps is a simple test client for gpsd with an X interface. It displays

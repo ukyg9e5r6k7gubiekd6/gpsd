@@ -193,7 +193,7 @@ int gpsd_activate(struct gps_device_t *session)
     }
 }
 
-#ifdef BINARY_ENABLE
+#if defined(BINARY_ENABLE) || defined(RTCM_ENABLE)
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 
