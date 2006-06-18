@@ -234,17 +234,16 @@ static void update_panel(struct gps_data_t *gpsdata,
   }
 
   (void)wrefresh(status);
-    (void)wrefresh(satellites);
-    (void)wrefresh(messages);
-    (void)wrefresh(command);
+  (void)wrefresh(satellites);
+  (void)wrefresh(messages);
+  (void)wrefresh(command);
 }
 
 static void usage( char *prog) 
 {
 	    (void)fprintf(stderr, 
-		"Usage: %s [-h] [-v] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
+		"Usage: %s [-h] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
 		"  -h          Show this help, then exit\n"
-		"  -v          Show version, then exit\n"
 		"  -V          Show version, then exit\n"
 		"  -s          Be silent (don't print raw dgps data)\n"
 		"  -o          Fix screen flash for NMEA (experimental)\n"
