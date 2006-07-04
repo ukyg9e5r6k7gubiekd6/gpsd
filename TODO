@@ -56,9 +56,13 @@ bugs 1330 and 1331) in OpenMotif.  This bug has been marked FIXED, so
 the next release of OpenMotif will probably fix it.  Until then, we
 suggest you drop back to an OpenMotif stable version like 2.2.2.
 
+Update (04 Jul 2006): Original reporter of problem (Charles Curley)
+reports "I just updated to openmotif.i386 2.3.0-0.1.9.3, and the problem
+has indeed gone away."
+
 *** The pl2303 driver can lock up when device is read at an unexpected speed
 
-Michael R, Davis reports "If you read from the device at the wrong
+Michael R. Davis reports "If you read from the device at the wrong
 rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
 hard reboot." Details are at 
 
