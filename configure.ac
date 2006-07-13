@@ -215,11 +215,11 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for italk support
+dnl check for iTalk support
 AC_ARG_ENABLE(italk,
-  AC_HELP_STRING([--disable-italk],
-                 [disable iTalk support]),
-  [ac_italk=$enableval], [ac_italk=yes])
+  AC_HELP_STRING([--enable-italk],
+                 [enable True North Technologies support]),
+  [ac_italk=$enableval], [ac_italk=no])
 AC_MSG_CHECKING([for iTalk support])
 if test x"$ac_italk" = "xyes"; then
     AC_MSG_RESULT([yes])

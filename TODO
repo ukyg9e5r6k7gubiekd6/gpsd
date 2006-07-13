@@ -79,6 +79,12 @@ some of which may be due to other bugs in fuser(1).  To check
 this, run it with -v and see if the hang is between the start
 and end messages from the slave_is_open() function.
 
+*** gpsd build may break on 64-bit systems running Fedora Core 5
+
+The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)
+being incompatible with the new gcc 4.1.0 on a 64-bit system. Updating
+to binutils 2.16.1 avoids it.
+
 ** To do:
 
 *** Stop using a compiled-in UTC-TAI offset
@@ -179,6 +185,11 @@ supposed to indicate a valid fix that has a DOP too high or fails
 an elevation test.
 
 ** Future features (?)
+
+*** iTalk support
+
+There's a iTalk driver, but it's an experiment written from the spec
+that hasn't been tested.  
 
 *** Audio cues in the client when the fix status changes
 

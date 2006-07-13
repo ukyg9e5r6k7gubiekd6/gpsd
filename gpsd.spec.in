@@ -144,6 +144,11 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Wed Jul 12 2006 Eric S. Raymond <esr@golux.thyrsus.com> - @VERSION@-1
+- Fix for byte-swapping of Zodiac control messages on big-endian hardware,
+  thanks to Juha Nurmela.  Disable iTalk by default and note that it needs
+  to be tested.
+
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
   Fixed buggy libgps parsing of multiple responses.  It's now possible

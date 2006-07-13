@@ -42,10 +42,11 @@ static int end_write(int fd, void *d, int len)
     char buf[BUFSIZ];
     char *p = buf;
     char *data = (char *)d;
+    size_t n = (size_t)len
 
-    while (len>0) {
+    while (n>0) {
 	*p++ = *(data+1); *p++ = *data;
-	data += 2; len -= 2;
+	data += 2; n -= 2;
     }
     return write(fd, buf, len);
 }
