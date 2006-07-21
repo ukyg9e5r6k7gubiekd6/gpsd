@@ -300,11 +300,29 @@ static struct subscriber_t {
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
 
+static void adjust_max_fd(int fd, bool on)
+/* track the largest fd currently in use */
+{
+    if (on) {
+	if (fd > maxfd)
+	    maxfd = fd;
+    } else {
+	if (fd == maxfd) {
+	    int tfd;
+
+	    for (maxfd = tfd = 0; tfd < maxfd; tfd++)
+		if (FD_ISSET(tfd, &all_fds))
+		    maxfd = tfd;
+	}
+    }
+}
+
 static void detach_client(int cfd)
 {
     (void)close(cfd);
     gpsd_report(4, "detaching %d in detach_client\n", cfd);
     FD_CLR(cfd, &all_fds);
+    adjust_max_fd(cfd, false);
     subscribers[cfd].raw = 0;
     subscribers[cfd].watcher = false;
     subscribers[cfd].active = 0;
@@ -383,23 +401,6 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
 	if (allocated_channel(chp) && strcmp(chp->gpsdata.gps_device, device_name)==0)
 	    return chp;
     return NULL;
-}
-
-static void adjust_max_fd(int fd, bool on)
-/* track the largest fd currently in use */
-{
-    if (on) {
-	if (fd > maxfd)
-	    maxfd = fd;
-    } else {
-	if (fd == maxfd) {
-	    int tfd;
-
-	    for (maxfd = tfd = 0; tfd < maxfd; tfd++)
-		if (FD_ISSET(tfd, &all_fds))
-		    maxfd = tfd;
-	}
-    }
 }
 
 static /*@null@*/ struct gps_device_t *open_device(char *device_name)
@@ -490,6 +491,7 @@ static bool assign_channel(struct subscriber_t *user)
 	} else {
 	    gpsd_report(4, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
+	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
 		(void)write(user-subscribers, "F=", 2);
 		(void)write(user-subscribers, 
@@ -1193,6 +1195,7 @@ int main(int argc, char *argv[])
 	    exit(2);
 	}
 	FD_SET(csock, &all_fds);
+	adjust_max_fd(csock, true);
 	gpsd_report(1, "control socket opened at %s\n", control_socket);
     }
 
@@ -1235,8 +1238,10 @@ int main(int argc, char *argv[])
 
     if (dgnss_service) {
 	int dsock = dgnss_open(&context, dgnss_service);
-	if (dsock >= 0)
+	if (dsock >= 0) {
 	    FD_SET(dsock, &all_fds);
+	    adjust_max_fd(dsock, true);
+	}
     }
 
 #ifdef NTPSHM_ENABLE
@@ -1308,8 +1313,10 @@ int main(int argc, char *argv[])
     (void)signal(SIGPIPE, SIG_IGN);
 
     FD_SET(msock, &all_fds);
+    adjust_max_fd(msock, true);
 #ifdef RTCM104_SERVICE
     FD_SET(nsock, &all_fds);
+    adjust_max_fd(nsock, true);
 #endif /* RTCM104_SERVICE */
     FD_ZERO(&control_fds);
 
@@ -1379,10 +1386,10 @@ int main(int argc, char *argv[])
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
+		adjust_max_fd(ssock, true);
 		subscribers[ssock].active = timestamp();
 		subscribers[ssock].tied = false;
 		subscribers[ssock].requires = ANY;
-		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(msock, &rfds);
 	}
@@ -1402,10 +1409,10 @@ int main(int argc, char *argv[])
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 		gpsd_report(3, "client connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
+		adjust_max_fd(ssock, true);
 		subscribers[ssock].active = true;
 		subscribers[ssock].tied = false;
 		subscribers[ssock].requires = RTCM104;
-		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(nsock, &rfds);
 	}
@@ -1443,6 +1450,7 @@ int main(int argc, char *argv[])
 		(void)close(cfd);
 		FD_CLR(cfd, &all_fds);
 		FD_CLR(cfd, &control_fds);
+		adjust_max_fd(cfd, false);
 	    }
 
 	/* poll all active devices */
@@ -1463,6 +1471,7 @@ int main(int argc, char *argv[])
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
 		} 
 		if ((changed & ONLINE_SET) == 0) {
@@ -1471,6 +1480,7 @@ int main(int argc, char *argv[])
 				timestamp() - channel->gpsdata.online);
 */
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
