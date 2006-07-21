@@ -371,8 +371,8 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 		+ mat[0][2]*Det3_123_013 
 		- mat[0][3]*Det3_123_012;
 
-  // ??? Should the test be made: fabs(det) <= epsilon ???
-  if (det == 0.0)
+  // Very small determinants probably reflect floating-point fuzz near zero
+  if (fabs(det) == 0.0)
       return 0;
 
   inverse[0][0] =  Det3_123_123 / det;
@@ -408,7 +408,7 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 
 #ifdef __UNUSED__
     gpsd_report(0, "Satellite picture:\n");
-    for (k = 0; k < gpsdata->device_type.channels; k++) {
+    for (k = 0; k < MAXCHANNELS; k++) {
 	if (gpsdata->used[k])
 	    gpsd_report(0, "az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);
@@ -416,7 +416,7 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 #endif /* __UNUSED__ */
 
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
-	if (gpsdata->used[k] != 0)
+	if (gpsdata->used[k] == 0)
 	    continue;
 	satpos[n][0] = sin(gpsdata->azimuth[k]*DEG_2_RAD)
 	    * cos(gpsdata->elevation[k]*DEG_2_RAD);
@@ -454,6 +454,10 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 
     if (invert(prod, inv)) {
 #ifdef __UNUSED__
+	/*
+	 * Note: this will print garbage unless all the subdeterminants
+	 * are computed in the invert() function.
+	 */
 	gpsd_report(0, "inverse:\n");
 	for (k = 0; k < 4; k++) {
 	    gpsd_report(0, "%f %f %f %f\n",
