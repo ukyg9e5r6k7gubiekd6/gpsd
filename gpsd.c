@@ -67,6 +67,7 @@
 #define PROTO_TTY "/dev/ttyS0"
 
 static fd_set all_fds;
+static int maxfd;
 static int debuglevel;
 static bool in_background = false;
 static jmp_buf restartbuf;
@@ -384,6 +385,14 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
     return NULL;
 }
 
+static void adjust_max_fd(int fd, bool on UNUSED)
+/* track the largest fd currently in use */
+{
+    if (fd > maxfd)
+	maxfd = fd;
+    /* someday, add logic here to lower the threshold when on is false */
+}
+
 static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 /* open and initialize a new channel block */
 {
@@ -403,6 +412,7 @@ found:
     }
     gpsd_report(4, "flagging descriptor %d in open_device\n", chp->gpsdata.gps_fd);
     FD_SET(chp->gpsdata.gps_fd, &all_fds);
+    adjust_max_fd(chp->gpsdata.gps_fd, true);
     return chp;
 }
 /*@ +globstate @*/
@@ -1310,11 +1320,14 @@ int main(int argc, char *argv[])
 	/* 
 	 * Poll for user commands or GPS data.  The timeout doesn't
 	 * actually matter here since select returns whenever one of
-	 * the file descriptors in the set goes ready. 
+	 * the file descriptors in the set goes ready.  The point
+	 * of tracking maxfd is to keep the set of descriptors that
+	 * select(2) has to poll here as small as possible (for
+	 * low-clock-rate SBCs and the like).
 	 */
 	/*@ -usedef @*/
 	tv.tv_sec = 1; tv.tv_usec = 0;
-	if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) < 0) {
+	if (select(maxfd+1, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(0, "select: %s\n", strerror(errno));
@@ -1358,6 +1371,7 @@ int main(int argc, char *argv[])
 		subscribers[ssock].active = timestamp();
 		subscribers[ssock].tied = false;
 		subscribers[ssock].requires = ANY;
+		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(msock, &rfds);
 	}
@@ -1380,6 +1394,7 @@ int main(int argc, char *argv[])
 		subscribers[ssock].active = true;
 		subscribers[ssock].tied = false;
 		subscribers[ssock].requires = RTCM104;
+		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(nsock, &rfds);
 	}
@@ -1396,6 +1411,7 @@ int main(int argc, char *argv[])
 		gpsd_report(3, "control socket connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);
 		FD_SET(ssock, &control_fds);
+		adjust_max_fd(ssock, true);
 	    }
 	    FD_CLR(csock, &rfds);
 	}
@@ -1560,9 +1576,10 @@ int main(int argc, char *argv[])
 				need_gps = true;
 
 			if (!need_gps && channel->gpsdata.gps_fd > -1) {
-			    gpsd_report(4, "unflagging descriptor %d in open_device\n", channel->gpsdata.gps_fd);
+			    gpsd_report(4, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
 			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 			    gpsd_deactivate(channel);
+			    adjust_max_fd(channel->gpsdata.gps_fd, false);
 			}
 		    }
 		}
