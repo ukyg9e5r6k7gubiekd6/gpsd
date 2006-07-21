@@ -34,6 +34,11 @@ distinction) to test with.
 
 ** Bugs exposed by gpsd in other software
 
+*** Distro-dependent problems with gpsd startup.
+
+See <http://bugs.gentoo.org/show_bug.cgi?id=132288>.  This shows
+up on other distributions as well, but not under Fedora Core.
+
 *** Multiple definitions of symbol _gpsd_report
 
 Some people building gpsd get 'multiple definitions of symbol _gpsd_report'
