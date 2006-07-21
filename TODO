@@ -19,12 +19,6 @@ GPSD.  David sent ESR one of these, it's somewhere in his piles of
 stuff, testing will get done when it surfaces.  More on the Sandpiper
 at <http://www.allsurplus.net/Axiom/>.
 
-*** Garmin binary support failed on x86_64
-
-Member sizes in the packed binary structure Packet_t were wrong.
-Gary Miller has attempted to fix this, but it has not yet been tested
-on a 64-bit machine.
-
 *** True North support confuses track with heading
 
 Robin Darroch has pointed out that the support for the True North
@@ -86,6 +80,11 @@ being incompatible with the new gcc 4.1.0 on a 64-bit system. Updating
 to binutils 2.16.1 avoids it.
 
 ** To do:
+
+*** Set ICANON in the NMEA driver
+
+Once we've synced up to an NMEA device, set ICANON on its fd to reduce
+the number of input events we see.  Nice efficiency hack for SBCs.
 
 *** Stop using a compiled-in UTC-TAI offset
 
