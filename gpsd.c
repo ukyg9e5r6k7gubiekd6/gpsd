@@ -385,12 +385,21 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
     return NULL;
 }
 
-static void adjust_max_fd(int fd, bool on UNUSED)
+static void adjust_max_fd(int fd, bool on)
 /* track the largest fd currently in use */
 {
-    if (fd > maxfd)
-	maxfd = fd;
-    /* someday, add logic here to lower the threshold when on is false */
+    if (on) {
+	if (fd > maxfd)
+	    maxfd = fd;
+    } else {
+	if (fd == maxfd) {
+	    int tfd;
+
+	    for (maxfd = tfd = 0; tfd < maxfd; tfd++)
+		if (FD_ISSET(tfd, &all_fds))
+		    maxfd = tfd;
+	}
+    }
 }
 
 static /*@null@*/ struct gps_device_t *open_device(char *device_name)
@@ -1045,8 +1054,10 @@ static void handle_control(int sfd, char *buf)
 	p = snarfline(buf+1, &stash);
 	gpsd_report(1,"<= control(%d): removing %s\n", sfd, stash);
 	if ((chp = find_device(stash))) {
-	    if (chp->gpsdata.gps_fd > 0)
+	    if (chp->gpsdata.gps_fd > 0) {
 		FD_CLR(chp->gpsdata.gps_fd, &all_fds);
+		adjust_max_fd(chp->gpsdata.gps_fd, false);
+	    }
 	    notify_watchers(chp, "X=0\r\n");
 	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 		if (subscribers[cfd].device == chp)
@@ -1578,8 +1589,8 @@ int main(int argc, char *argv[])
 			if (!need_gps && channel->gpsdata.gps_fd > -1) {
 			    gpsd_report(4, "unflagging descriptor %d\n", channel->gpsdata.gps_fd);
 			    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
-			    gpsd_deactivate(channel);
 			    adjust_max_fd(channel->gpsdata.gps_fd, false);
+			    gpsd_deactivate(channel);
 			}
 		    }
 		}
