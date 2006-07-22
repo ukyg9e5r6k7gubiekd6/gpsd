@@ -199,8 +199,8 @@ int gpsd_activate(struct gps_device_t *session)
  * to the client in raw mode.  They assume that (a) the public gps.h structure 
  * members are in a valid state, (b) that the private members hours, minutes, 
  * and seconds have also been filled in, (c) that if the private member
- * mag_var is nonzero it is a magnetic variation in degrees that should be
- * passed on., and (d) if the private member separation does not have the
+ * mag_var is not NAN it is a magnetic variation in degrees that should be
+ * passed on, and (d) if the private member separation does not have the
  * value NAN, it is a valid WGS84 geoidal separation in 
  * meters for the fix.
  */
