@@ -104,7 +104,7 @@ struct gps_type_t {
 #define MAX_PACKET_LENGTH	196	/* 188 + 8 */
 
 /*
- * We used to define the inbut buffer length as MAX_PACKET_LENGTH*2+1.
+ * We used to define the input buffer length as MAX_PACKET_LENGTH*2+1.
  * However, as it turns out, this isn't enough.  We've had a report
  * from one user with a GPS that reports at 20Hz that "sometimes a
  * long/slow context switch will cause the next read from the serial

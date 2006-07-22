@@ -39,7 +39,7 @@ distinction) to test with.
 See <http://bugs.gentoo.org/show_bug.cgi?id=132288>.  This shows
 up on other distributions as well, but not under Fedora Core.
 
-*** Multiple definitions of symbol _gpsd_report
+*** Multiple definitions of symbol _gpsd_report due to libtool bug
 
 Some people building gpsd get 'multiple definitions of symbol _gpsd_report'
 as a warning.  This seems to be a result of two bugs in libtool, one
@@ -50,16 +50,12 @@ to be incorporated by other linkage demands) are linked in.
 
 *** The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy
 
-xgps appears to tickle a bug (described at http://bugs.motifzone.net/ as
-bugs 1330 and 1331) in OpenMotif.  This bug has been marked FIXED, so
-the next release of OpenMotif will probably fix it.  Until then, we
-suggest you drop back to an OpenMotif stable version like 2.2.2.
+xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
+1330 and 1331 and marked FIXED, in some versions of OpenMotif.  Avoid
+by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
+stable version like 2.2.2.
 
-Update (04 Jul 2006): Original reporter of problem (Charles Curley)
-reports "I just updated to openmotif.i386 2.3.0-0.1.9.3, and the problem
-has indeed gone away."
-
-*** The pl2303 driver can lock up when device is read at an unexpected speed
+*** Linux pl2303 driver can lock up when device is read at an unexpected speed
 
 Michael R. Davis reports "If you read from the device at the wrong
 rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
@@ -188,12 +184,12 @@ an elevation test.
 *** iTalk support
 
 There's a iTalk driver, but it's an experiment written from the spec
-that hasn't been tested.  
+that hasn't been tested.  It'd not compiled in by default.
 
 *** Audio cues in the client when the fix status changes
 
 Calum writes:
->Is it possible to add functionality ( with a switch to enable it to
+>Is it possible to add functionality (with a switch to enable it to
 >avoid annoying those that don't want it) so that beeps indicate NO
 >FIX, FIX, and OFFLINE status changes?
 >
