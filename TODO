@@ -86,11 +86,6 @@ to binutils 2.16.1 avoids it.
 
 ** To do:
 
-*** Set ICANON in the NMEA driver
-
-Once we've synced up to an NMEA device, set ICANON on its fd to reduce
-the number of input events we see.  Nice efficiency hack for SBCs.
-
 *** Stop using a compiled-in UTC-TAI offset
 
 Instead, from the hotplug script, maintain a local offset file:

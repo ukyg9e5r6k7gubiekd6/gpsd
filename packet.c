@@ -787,14 +787,14 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 #undef getword
 
 ssize_t packet_get(struct gps_device_t *session)
-/* grab a packet; returns ether BAD_PACKET or the length */
+/* grab a packet; returns either BAD_PACKET or the length */
 {
     ssize_t newdata;
     /*@ -modobserver @*/
     newdata = read(session->gpsdata.gps_fd, session->inbuffer+session->inbuflen,
 			sizeof(session->inbuffer)-(session->inbuflen));
     /*@ +modobserver @*/
-    if (newdata == -1){ /*newdata == -1 && errno = (EAGAIN || EINTR) */
+    if (newdata == -1) {
         if ((errno == EAGAIN) || (errno == EINTR)) {
 	    return 0;
         } else {
