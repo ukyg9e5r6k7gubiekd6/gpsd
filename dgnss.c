@@ -12,6 +12,15 @@
 /* Where to find the list of DGPSIP correction servers, if there is one */
 #define DGPSIP_SERVER_LIST	"/usr/share/gpsd/dgpsip-servers"
 
+bool dgnss_url(char *name)
+/* is given string a valid URL for DGPS service? */
+{
+    return 
+	strncmp(name,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0
+	|| strncmp(name,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0;
+}
+
+
 /*@ -branchstate */
 int dgnss_open(struct gps_context_t *context, char *dgnss_service)
 /* open a connection to a DGNSS service */

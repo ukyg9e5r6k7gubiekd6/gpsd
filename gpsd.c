@@ -171,17 +171,19 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    (void)printf("usage: gpsd [-n] [-N] [-d dgnss-service] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
+    (void)printf("usage: gpsd [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
   -n                            = don't wait for client connects to poll GPS\n\
   -N                            = don't go into background\n\
-  -d [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream] = set DGPS service\n\
   -F sockfile                   = specify control socket location\n\
   -P pidfile              	= set file to record process ID \n\
   -D integer (default 0)  	= set debug level \n\
   -S integer (default %s)	= set port for daemon \n\
   -h                     	= help message \n\
-  -V                            = emit version and exit.\n",
+  -V                            = emit version and exit.\n\
+A device may be a local serial device for GPS input, or a URL of the form:\n\
+     [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream]\n\
+in which case it specifies an input source for DGPS or ntrip data.",
 
 	   DEFAULT_GPSD_PORT);
 }
@@ -403,11 +405,24 @@ static /*@null@*/ /*@observer@*/struct gps_device_t *find_device(char *device_na
     return NULL;
 }
 
+/*@ -statictrans @*/
 static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 /* open and initialize a new channel block */
 {
     struct gps_device_t *chp;
 
+    /* special case: source may be a URL to differential-GPS service */
+    if (dgnss_url(device_name)) {
+	int dsock = dgnss_open(&context, device_name);
+	if (dsock >= 0) {
+	    FD_SET(dsock, &all_fds);
+	    adjust_max_fd(dsock, true);
+	}
+	/* shaky, but only 0 versus nonzero is tested */
+	return &channels[0];
+    }
+
+    /* normal case: set up GPS service */
     for (chp = channels; chp < channels + MAXDEVICES; chp++)
 	if (!allocated_channel(chp)){
             chp->saved_baud = -1;
@@ -425,6 +440,7 @@ found:
     adjust_max_fd(chp->gpsdata.gps_fd, true);
     return chp;
 }
+/*@ +statictrans @*/
 /*@ +globstate @*/
 
 static bool allocation_policy(struct gps_device_t *channel,
@@ -1107,14 +1123,13 @@ int main(int argc, char *argv[])
     static bool nowait = false;
     static int st, csock = -1;
     static gps_mask_t changed;
-    static char *dgnss_service = NULL;
     static char *gpsd_service = NULL; 
 #ifdef RTCM104_SERVICE
     static char *rtcm_service = NULL; 
     static int nsock;
 #endif /* RTCM104_SERVICE */
     static char *control_socket = NULL;
-    struct gps_device_t *device, *channel;
+    struct gps_device_t *channel;
     struct sockaddr_in fsin;
     fd_set rfds, control_fds;
     int i, option, msock, cfd, dfd; 
@@ -1126,7 +1141,7 @@ int main(int argc, char *argv[])
 #endif /* RTCM104_ENABLE */
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:d:fhNnpP:V"
+    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1149,12 +1164,10 @@ int main(int argc, char *argv[])
 	case 'S':
 	    gpsd_service = optarg;
 	    break;
-	case 'd':
-	    dgnss_service = optarg;
-	    break;
 	case 'n':
 	    nowait = true;
 	    break;
+	case 'd':
 	case 'f':
 	case 'p':
 	    /* skip this option, treat following as argument */ 
@@ -1235,14 +1248,6 @@ int main(int argc, char *argv[])
     }
     gpsd_report(1, "listening on port %s\n", rtcm_service);
 #endif /* RTCM104_SERVICE */
-
-    if (dgnss_service) {
-	int dsock = dgnss_open(&context, dgnss_service);
-	if (dsock >= 0) {
-	    FD_SET(dsock, &all_fds);
-	    adjust_max_fd(dsock, true);
-	}
-    }
 
 #ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
@@ -1325,7 +1330,7 @@ int main(int argc, char *argv[])
 	context.valid |= LEAP_SECOND_VALID;
 
     for (i = optind; i < argc; i++) { 
-	device = open_device(argv[i]);
+	struct gps_device_t *device = open_device(argv[i]);
 	if (!device) {
 	    gpsd_report(0, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}

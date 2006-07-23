@@ -251,6 +251,7 @@ extern ssize_t packet_parse(struct gps_device_t *, size_t);
 extern ssize_t packet_get(struct gps_device_t *);
 extern int packet_sniff(struct gps_device_t *);
 
+extern bool dgnss_url(char *);
 extern int dgnss_open(struct gps_context_t *, char *);
 extern void dgnss_poll(struct gps_context_t *);
 extern void dgnss_report(struct gps_device_t *);
