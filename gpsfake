@@ -86,7 +86,9 @@ def fakehook(linenumber, fakegps):
     if linenumber % len(fakegps.testload.sentences) == 0:
         if pipe and linenumber > 0:
             return False
-        if not pipe:
+        if pipe:
+            baton.twirl('*')
+        else:
             sys.stderr.write("gpsfake: log cycle begins.\n")
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
@@ -126,7 +128,7 @@ try:
 
     try:
         test.client_add(init + "\n")
-    except socket.error:
+    except socket.error, msg:
         sys.stderr.write("gpsfake: socket error %s.\n", msg)
         raise SystemExit, 1
 finally:
