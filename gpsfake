@@ -40,7 +40,7 @@ class Baton:
         return
 
 try:
-    (options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:v")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:o:pr:s:v")
 except getopt.GetoptError, msg:
     print "gpsfake: " + str(msg)
     raise SystemExit, 1
@@ -51,12 +51,15 @@ monitor = ""
 speed = 4800
 linedump = False
 pipe = False
+singleshot = False
 promptme = False
 init = "w+r+"
 doptions = ""
 verbose = False
 for (switch, val) in options:
-    if (switch == '-b'):
+    if (switch == '-1'):
+        singleshot = True
+    elif (switch == '-b'):
         progress = True
     elif (switch == '-c'):
         cycle = float(val)
@@ -89,10 +92,10 @@ logfile = arguments[0]
 
 def fakehook(linenumber, fakegps):
     if linenumber % len(fakegps.testload.sentences) == 0:
-        if pipe and linenumber > 0:
+        if singleshot and linenumber > 0:
             return False
-        if pipe:
-            baton.twirl('*')
+        if progress:
+            baton.twirl('*\010')
         else:
             sys.stderr.write("gpsfake: log cycle begins.\n")
     time.sleep(cycle)

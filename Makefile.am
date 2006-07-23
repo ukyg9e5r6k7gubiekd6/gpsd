@@ -293,7 +293,7 @@ splint:
 # that affects the low-order digits of the track field in the O response.
 gps-regress: gpsd
 	@echo "Testing the daemon..."
-	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+	@for f in test/*.log; do gpsfake -1 -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
@@ -304,7 +304,7 @@ raw-regress:
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	@for f in test/*.log; do gpsfake -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
+	@for f in test/*.log; do gpsfake -1 -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode

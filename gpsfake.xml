@@ -16,6 +16,7 @@
 
 <cmdsynopsis>
   <command>gpsfake</command>  
+      <arg choice='opt'>-1</arg>
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-b</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
@@ -56,6 +57,10 @@ is run in background.</para>
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
+<para>With the -1 option, the logfile is interpreted once only rather
+than repeatedly.  This option is intended to facilitate regression
+testing.</para>
+
 <para>The -b option enables a twirling-baton progress indicator
 on standard error.  At termination, it reports elaped time.</para>
 
@@ -86,8 +91,7 @@ Passing "-n" is often useful.  The -D option passes a -D option
 to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
 
 <para>The -p option dumps the NMEA and GPSD notifications generated
-by the log to standard output.  The logfile is interpreted once
-only.  (This option is intended to facilitate regression testing.)</para>
+by the log to standard output.</para>
 
 <para>The -r option specifies an initialization comand to use.  
 The default is "w+r+"; "r=2" might be another interesting value.</para>
