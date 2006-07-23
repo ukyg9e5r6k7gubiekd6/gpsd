@@ -39,7 +39,12 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-(options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:v")
+try:
+    (options, arguments) = getopt.getopt(sys.argv[1:], "bc:D:ghilm:o:pr:s:v")
+except getopt.GetoptError, msg:
+    print "gpsfake: " + str(msg)
+    raise SystemExit, 1
+
 progress = False
 cycle = 0
 monitor = ""
