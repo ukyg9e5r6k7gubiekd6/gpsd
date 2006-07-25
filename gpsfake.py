@@ -71,12 +71,6 @@ import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
 import gps
 
-# So we can do regression tests without stepping on a production daemon
-# According to IANA port 12000 belongs to an IBM SNA service. Picking an
-# obsolete service seems safer than picking an unused number that IANA might
-# allocate in the future.
-fakeport = 12000
-
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -245,9 +239,9 @@ class DaemonInstance:
         else:
             self.control_socket = "/tmp/gpsfake-%d.sock" % os.getpid()
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
-    def spawn(self, options, background=False, prefix=""):
+    def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
-        self.spawncmd = "gpsd -N -S %s -F %s -P %s %s" % (fakeport, self.control_socket, self.pidfile, options)
+        self.spawncmd = "gpsd -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
         if prefix:
             self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
@@ -318,18 +312,22 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPS and client threads."
-    def __init__(self, prefix=None, options=None, verbose=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=False):
         "Initialize the test session by launching the daemon."
         self.verbose = verbose
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.clients = []
         self.client_id = 0
+        if port:
+            self.port = port
+        else:
+            self.port = gps.GPSD_PORT
         self.reporter = lambda x: None
         self.progress = lambda x: None
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, lambda signal, frame: self.killall())
-        self.daemon.spawn(background=True, prefix=prefix, options=options)
+        self.daemon.spawn(background=True, prefix=prefix, port=self.port, options=options)
         self.daemon.wait_pid()
         self.default_predicate = None
         self.fd_set = []
@@ -368,7 +366,7 @@ class TestSession:
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
-        newclient = gps.gps(port=fakeport)
+        newclient = gps.gps(port=self.port)
         self.clients.append(newclient)
         newclient.id = self.client_id + 1 
         self.client_id += 1

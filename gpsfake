@@ -9,6 +9,12 @@
 import sys, os, signal, time, getopt, socket
 import gpsfake
 
+# So we can do regression tests without stepping on a production daemon
+# According to IANA port 12000 belongs to an IBM SNA service. Picking an
+# obsolete service seems safer than picking an unused number that IANA might
+# allocate in the future.
+fakeport = 12000
+
 class Baton:
     "Ship progress indications to stderr."
     def __init__(self, prompt, endmsg=None):
@@ -45,6 +51,7 @@ except getopt.GetoptError, msg:
     print "gpsfake: " + str(msg)
     raise SystemExit, 1
 
+port = None
 progress = False
 cycle = 0
 monitor = ""
@@ -59,6 +66,7 @@ verbose = False
 for (switch, val) in options:
     if (switch == '-1'):
         singleshot = True
+        port = fakeport
     elif (switch == '-b'):
         progress = True
     elif (switch == '-c'):
@@ -116,7 +124,7 @@ def fakehook(linenumber, fakegps):
 if progress:
     baton = Baton("Processing %s" % logfile, "done")
 
-test = gpsfake.TestSession(prefix=monitor, options=doptions, verbose=verbose)
+test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose)
 
 if pipe:
     test.reporter = sys.stdout.write
