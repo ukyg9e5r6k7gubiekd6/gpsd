@@ -312,7 +312,7 @@ static void adjust_max_fd(int fd, bool on)
 	if (fd == maxfd) {
 	    int tfd;
 
-	    for (maxfd = tfd = 0; tfd < maxfd; tfd++)
+	    for (maxfd = tfd = 0; tfd < FD_SETSIZE; tfd++)
 		if (FD_ISSET(tfd, &all_fds))
 		    maxfd = tfd;
 	}
