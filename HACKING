@@ -515,31 +515,12 @@ add event as it should, but in the new interface the creation of
 Thus, it may not be there when gpsd goes to probe it unless I
 busy-wait in the script.
 
-Ultimately this should all be done through udev.  The problem is that at
-the current state of udev, we'd need to do it through a script that would
-fire every time a tty activates.  Because of virtual consoles firing up at
-boot time, this would introduce significant boot lag.
+There is experimental udev support in the distribution now.  Someday
+this will replace the hotplug stuff.
 
-This would be antisocial and I'm not willing to do it, so udev needs
-to grow better filtering before I'll use it.
-
-When and if udev supports HOTPLUG and ACTION keys, this will work:
-
-# The Prolific Technology 2303 (commonly in tandem with SiRF chips)
-BUS="usb" SYSFS{vendor}="067b" SYSFS{product}="2303" \
-		NAME="gps%e" \
-		HOTPLUG="/usr/bin/gps-probe"
-# FTDI 8U232AM
-BUS="usb" SYSFS{vendor}="0403" SYSFS{product}="6001" \
-		NAME="gps%e" \
-		HOTPLUG="/usr/bin/gps-probe"
-# Cypress M8/CY7C64013 (DeLorme uses these)
-BUS="usb" SYSFS{vendor}="1163" SYSFS{product}="0100" \
-		NAME="gps%e" \
-		HOTPLUG="/usr/bin/gps-probe"
-
-More generally, the hotplug code we have is Linux-specific.  OpenBSD
-(at least) features a hotplug daemon with similar capabilities.
+A more general problem: the hotplug code we have is Linux-specific.
+OpenBSD (at least) features a hotplug daemon with similar
+capabilities.  We ought to do the riht thing there as well.
 
 *** Security Issues
 
