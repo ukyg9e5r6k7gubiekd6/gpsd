@@ -359,6 +359,34 @@ else
     AC_MSG_RESULT([no])
 fi
 
+dnl check for limited maximum client fd
+AC_ARG_ENABLE(max-client-fd,
+  AC_HELP_STRING([--enable-max-client-fd=nnn],
+                 [compile with limited maximum allowed client fd]),
+  [ac_maxclientfd=$enableval], [ac_maxclientfd=no])
+AC_MSG_CHECKING([for limited max client fd])
+if test x"$ac_maxclientfd" != "xno"; then
+    AC_MSG_RESULT([$ac_maxclientfd])
+	AC_DEFINE_UNQUOTED([LIMITED_MAX_CLIENT_FD], $ac_maxclientfd, [Limited maximum client fd])
+	LIMITED_MAX_CLIENT_FD="-DLIMITED_MAX_CLIENT_FD=$ac_maxclientfd"
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl check for max number of gps devices
+AC_ARG_ENABLE(max-devices,
+  AC_HELP_STRING([--enable-max-devices=nnn],
+                 [compile with maximum allowed devices]),
+  [ac_maxdevices=$enableval], [ac_maxdevices=no])
+AC_MSG_CHECKING([for max devices])
+if test x"$ac_maxdevices" != "xno"; then
+    AC_MSG_RESULT([$ac_maxdevices])
+	AC_DEFINE_UNQUOTED([LIMITED_MAX_DEVICES], $ac_maxdevices, [Maximum gps devices])
+	LIMITED_MAX_DEVICES="-DLIMITED_MAX_DEVICES=$ac_maxdevices"
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
 dnl but no DBUS headers.
@@ -413,6 +441,8 @@ echo "NTP PPS                 : $ac_pps"
 echo "Fixed port speed        : $ac_baud"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
+echo "Limited max client fd   : $ac_maxclientfd"
+echo "Limited max devices     : $ac_maxdevices"
 echo "------------------------------------------"
 echo "Configure finished, type 'make' to build."
 

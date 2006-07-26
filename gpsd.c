@@ -281,13 +281,29 @@ static int filesock(char *filename)
 }
 
 /*
+ * This hackery is intended to support SBCs that are resource-limited
+ * and only need to support one or a few devices each.  It can avoid
+ * the space ahead of allocating thousands of unused device and user
+ * structures, which wouldn't be significant on a PC.
+ */
+#ifdef LIMITED_MAX_DEVICES
+#define MAXDEVICES	LIMITED_MAX_DEVICES
+#else
+#define MAXDEVICES	FD_SETSIZE
+#endif
+
+#ifdef LIMITED_MAX_CLIENT_FD
+#define MAXSUBSCRIBERFD LIMITED_MAX_CLIENT_FD
+#else
+#define MAXSUBSCRIBERFD	FD_SETSIZE
+#endif
+
+/*
  * Multi-session support requires us to have two arrays, one of GPS 
  * devices currently available and one of client sessions.  The number
  * of slots in each array is limited by the maximum number of client
  * sessions we can have open.
  */
-#define MAXDEVICES	FD_SETSIZE
-
 static struct gps_device_t channels[MAXDEVICES];
 #define allocated_channel(chp)	((chp)->gpsdata.gps_device[0] != '\0')
 #define free_channel(chp)	(chp)->gpsdata.gps_device[0] = '\0'
@@ -300,7 +316,7 @@ static struct subscriber_t {
     int raw;				/* is client in raw mode? */
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
-} subscribers[FD_SETSIZE];		/* indexed by client file descriptor */
+} subscribers[MAXSUBSCRIBERFD];		/* indexed by client file descriptor */
 
 static void adjust_max_fd(int fd, bool on)
 /* track the largest fd currently in use */
@@ -308,7 +324,17 @@ static void adjust_max_fd(int fd, bool on)
     if (on) {
 	if (fd > maxfd)
 	    maxfd = fd;
-    } else {
+    } 
+#if !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD)
+    /*
+     * I suspect there could be some weird interactions here if
+     * either of these were set lower than FD_SETSIZE.  We'll avoid 
+     * potential bugs by not scavenging in this case at all -- should
+     * be OK, as the use case for limiting is SBCs where the limits
+     * will be very low (typically 1) and the maximunm size of fd
+     * set to scan through correspondingly small.
+     */
+    else {
 	if (fd == maxfd) {
 	    int tfd;
 
@@ -316,6 +342,7 @@ static void adjust_max_fd(int fd, bool on)
 		if (FD_ISSET(tfd, &all_fds))
 		    maxfd = tfd;
 	}
+#endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
     }
 }
 
@@ -373,7 +400,7 @@ static void notify_watchers(struct gps_device_t *device, char *sentence, ...)
     (void)vsnprintf(buf, sizeof(buf), sentence, ap);
     va_end(ap);
 
-    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+    for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++)
 	if (subscribers[cfd].watcher != 0 && subscribers[cfd].device == device)
 	    (void)throttled_write(cfd, buf, (ssize_t)strlen(buf));
 }
@@ -384,7 +411,7 @@ static void raw_hook(struct gps_data_t *ud,
 {
     int cfd;
 
-    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+    for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++) {
 	/* copy raw NMEA sentences from GPS to clients in raw mode */
 	if (subscribers[cfd].raw == level && 
 	    subscribers[cfd].device!=NULL &&
@@ -554,9 +581,7 @@ static bool privileged_user(struct subscriber_t *who)
     int subscribercount = 0;
 
     /* grant user privilege if he's the only one on the channel */
-    for (sub = subscribers; 
-	 	sub < subscribers + sizeof(subscribers)/sizeof(subscribers[0]);
-	 	sub++)
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERFD; sub++)
 	if (sub->device == who->device)
 	    subscribercount++;
     return (subscribercount == 1);
@@ -1077,7 +1102,7 @@ static void handle_control(int sfd, char *buf)
 		adjust_max_fd(chp->gpsdata.gps_fd, false);
 	    }
 	    notify_watchers(chp, "X=0\r\n");
-	    for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+	    for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++)
 		if (subscribers[cfd].device == chp)
 		    subscribers[cfd].device = NULL;
 	    gpsd_wrap(chp);
@@ -1294,7 +1319,7 @@ int main(int argc, char *argv[])
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
-	for (dfd = 0; dfd < FD_SETSIZE; dfd++) {
+	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
 	    if (allocated_channel(&channels[dfd]))
 		(void)gpsd_wrap(&channels[dfd]);
 	}
@@ -1384,6 +1409,13 @@ int main(int argc, char *argv[])
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
+#if MAXSUBSCRIBERFD < FD_SETSIZE
+	    else if (ssock >= MAXSUBSCRIBERFD) {
+		gpsd_report(0, "accepted new client connection, but socket fd (%d) is too large!\n", ssock);
+		(void) close(ssock);
+		FD_CLR(msock, &rfds);
+	    }
+#endif /* MAXSUBSCRIBERFD < FD_SETSIZE */
 	    else {
 		int opts = fcntl(ssock, F_GETFL);
 
@@ -1407,6 +1439,13 @@ int main(int argc, char *argv[])
 
 	    if (ssock < 0)
 		gpsd_report(0, "accept: %s\n", strerror(errno));
+#if MAXSUBSCRIBERFD < FD_SETSIZE
+	    else if (ssock >= MAXSUBSCRIBERFD) {
+		gpsd_report(0, "accepted new RTCM client connection, but socket fd (%d) is too large!\n", ssock);
+		close(ssock);
+		FD_CLR(nsock, &rfds);
+	    } 
+#endif /* MAXSUBSCRIBERFD < FD_SETSIZE */
 	    else {
 		int opts = fcntl(ssock, F_GETFL);
 
@@ -1499,7 +1538,7 @@ int main(int argc, char *argv[])
 #endif /* RTCM104_ENABLE */
 	    }
 
-	    for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+	    for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++) {
 		/* some listeners may be in watcher mode */
 		if (subscribers[cfd].watcher) {
 		    char cmds[4] = ""; 
@@ -1538,7 +1577,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* accept and execute commands for all clients */
-	for (cfd = 0; cfd < FD_SETSIZE; cfd++) {
+	for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++) {
 	    if (subscribers[cfd].active == 0) 
 		continue;
 
@@ -1597,7 +1636,7 @@ int main(int argc, char *argv[])
 		    if (channel->packet_type != BAD_PACKET) {
 			bool need_gps = false;
 
-			for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+			for (cfd = 0; cfd < MAXSUBSCRIBERFD; cfd++)
 			    if (subscribers[cfd].device == channel)
 				need_gps = true;
 
