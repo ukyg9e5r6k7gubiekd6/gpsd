@@ -342,8 +342,8 @@ static void adjust_max_fd(int fd, bool on)
 		if (FD_ISSET(tfd, &all_fds))
 		    maxfd = tfd;
 	}
-#endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
     }
+#endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
 }
 
 static void detach_client(int cfd)
