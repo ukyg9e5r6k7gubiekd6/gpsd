@@ -1,0 +1,71 @@
+#! /bin/sh
+#
+#	Author: Tilman Koschnick <til@subnetz.org>.
+#
+
+### BEGIN INIT INFO
+# Provides:          gpsd
+# Required-Start:    $syslog $network
+# Required-Stop:     $syslog $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      S 1 0 6
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/gpsd
+NAME=gpsd
+DESC="GPS daemon"
+PIDFILE="/var/run/gpsd.pid"
+SELF=$(cd $(dirname $0); pwd -P)/$(basename $0)
+
+test -x $DAEMON || exit 0
+
+# include gpsd defaults
+if [ -f /etc/default/gpsd ] ; then
+	. /etc/default/gpsd
+else
+	echo "$NAME: Cannot find /etc/default/gpsd - failed."
+	exit 1
+fi
+
+set -e
+
+case "$1" in
+  start)
+	if [ "x$START_DAEMON" = "xtrue" ] ; then
+		echo -n "Starting $DESC: $NAME"
+		start-stop-daemon --start --quiet \
+			--exec $DAEMON -- $DAEMON_OPTS -P $PIDFILE $DEVICES \
+			&& echo "." \
+			|| echo " - failed."
+	else
+		echo "$NAME is configured not to start automatically at boot time."
+		echo "  To change this, modify /etc/default/gpsd."
+	fi		
+	;;
+  stop)
+	if [ "x$START_DAEMON" = "xtrue" ] ; then
+		echo -n "Stopping $DESC: $NAME"
+		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
+		echo "."
+	else
+		echo "$NAME is configured not to start automatically at boot time."
+		echo "  To change this, run 'dpkg-reconfigure gpsd'."
+	fi		
+	;;
+  reload|force-reload)
+	echo "$DESC: Resetting connection to GPS device."
+	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE
+	;;
+  restart)
+	set +e; $SELF stop; set -e
+		$SELF start
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

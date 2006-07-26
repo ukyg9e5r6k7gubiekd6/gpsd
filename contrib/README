@@ -1,0 +1,2 @@
+etc_default_gpsd  and etc_init.d_gpsd are Debian init files to be
+used when it is desired to support gpsd using a set of serial GPSes.

@@ -1,0 +1,5 @@
+# Default settings for gpsd. This file is sourced from
+# /etc/init.d/gpsd.
+START_DAEMON="false"
+DAEMON_OPTS=""
+DEVICES=""
