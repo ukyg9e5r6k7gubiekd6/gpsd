@@ -1,0 +1,9 @@
+#! /bin/sh
+
+. /lib/udev/hotplug.functions
+
+# wait for /usr & /var to be mounted
+wait_for_file /usr/bin/python && \
+wait_for_file /var/run && \
+  exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
+

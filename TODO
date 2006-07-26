@@ -51,7 +51,8 @@ to be incorporated by other linkage demands) are linked in.
 *** The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy
 
 xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
-1330 and 1331 and marked FIXED, in some versions of OpenMotif.  Avoid
+1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
+symptom is that the satellite-data window in xgps is too small.  Avoid
 by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
 stable version like 2.2.2.
 

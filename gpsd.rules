@@ -1,0 +1,30 @@
+# udev rules for gpsd
+#
+# GPSes don't have their own USB device class.  They're serial-over-USB
+# devices, so what you see is actually the ID of the serial-over-USB chip.
+# Fortunately, just two of these account for over 80% of consumer-grade
+# GPS sensors.  The gpsd.hotplug.wrapper script will tell a running gpsd
+# that it should look at the device that just went active, because it
+# might be a GPS.
+#
+# The following setup works on Debian - something similar will apply on 
+# other distributions:
+# 
+#   /etc/udev/gpsd.rules
+#   /etc/udev/rules.d/025_gpsd.rules -> ../gpsd.rules
+#   /lib/udev/gpsd.hotplug.wrapper
+#   /lib/udev/gpsd.hotplug
+# 
+# Setting the link in /etc/udev/rules.d activates the rule and determines
+# when to run it on boot (similar to init.d processing).
+
+# Prolific Technology, Inc. PL2303 Serial Port
+SUBSYSTEM=="tty", SYSFS{idVendor}=="067b", SYSFS{idProduct}=="2303", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# ATEN International Co., Ltd UC-232A Serial Port [pl2303]
+SUBSYSTEM=="tty", SYSFS{idVendor}=="0557", SYSFS{idProduct}=="2008", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# FTDI 8U232AM
+SUBSYSTEM=="tty", SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# Cypress M8/CY7C64013 (DeLorme uses these)
+SUBSYSTEM=="tty", SYSFS{idVendor}=="1163", SYSFS{idProduct}=="0100", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+# PS-360 OEM (Microsoft GPS sold with Street and Trips 2005)
+SUBSYSTEM=="tty", SYSFS{idVendor}=="067b", SYSFS{idProduct}=="aaa0", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
