@@ -39,6 +39,16 @@ distinction) to test with.
 See <http://bugs.gentoo.org/show_bug.cgi?id=132288>.  This shows
 up on other distributions as well, but not under Fedora Core.
 
+*** Compiling with --enable-max-devices=1 may trigger a gcc optimizer bug
+
+At gpsd revision level 3365, compiling with --enable-max-devices=1 has
+been observed to trigger an optimizer bug in gcc 4.1.0 20060304 (Red
+Hat 4.1.0-3).  The symptom is a for-loop termination condition not
+causing an exit, leading to a core dump.  Removing -O2 from the
+compilation flags works around the problem; upgrading to gcc 4.1.1
+20060525 (Red Hat 4.1.1-1) solves it.  Other reports indicate this
+bug was introduced sometime after gcc 4.0.2 20051125 (Red Hat 4.0.2-8).
+
 *** Multiple definitions of symbol _gpsd_report due to libtool bug
 
 Some people building gpsd get 'multiple definitions of symbol _gpsd_report'
@@ -78,29 +88,10 @@ and end messages from the slave_is_open() function.
 *** gpsd build may break on 64-bit systems running Fedora Core 5
 
 The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)
-being incompatible with the new gcc 4.1.0 on a 64-bit system. Updating
-to binutils 2.16.1 avoids it.
+being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
+binutils 2.16.1 or later avoids it.
 
 ** To do:
-
-*** Stop using a compiled-in UTC-TAI offset
-
-Instead, from the hotplug script, maintain a local offset file:
-
-1. If there is no local offset file, download the current leap-second
-offset from <http://hpiers.obspm.fr/iers/bul/bulc/> or
-<ftp://maia.usno.navy.mil/ser7/tai-utc.dat> and copy it to a
-local offset file
-
-2. If there is a local offset file, consider it stale after five
-months and reload it.
-
-3. gpsd should read the local offset file when it starts up, if
-it exists.
-
-Note: turns out this is only an issue for EverMore chips.  SiRF GPSes
-can get the offset from the PPS or subframe data; NMEA GPSes don't
-need it; and the other binary protocols supply it.
 
 *** SiRF firmware uploader
 
@@ -231,6 +222,26 @@ Alas, Chris Kuethe reports:
 >second. I cooked up a test harness to disable as many periodic
 >messages as possible and then poll as quickly as possible, and the
 >receiver would not kick out more than one fix per second. Foo!
+
+*** Stop using a compiled-in UTC-TAI offset
+
+Instead, from the hotplug script, we could maintain a local offset file:
+
+1. If there is no local offset file, download the current leap-second
+offset from <http://hpiers.obspm.fr/iers/bul/bulc/> or
+<ftp://maia.usno.navy.mil/ser7/tai-utc.dat> and copy it to a
+local offset file
+
+2. If there is a local offset file, consider it stale after five
+months and reload it.
+
+3. gpsd should read the local offset file when it starts up, if
+it exists.
+
+However, it turns out this is only an issue for EverMore chips.  SiRF GPSes
+can get the offset from the PPS or subframe data; NMEA GPSes don't
+need it; and the other binary protocols supply it.  Looks like
+it's not worth doing.
 
 *** Set the system time zone from latitude/longitude
 

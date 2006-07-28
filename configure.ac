@@ -373,7 +373,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for max number of gps devices
+dnl check for max number of GPS devices
 AC_ARG_ENABLE(max-devices,
   AC_HELP_STRING([--enable-max-devices=nnn],
                  [compile with maximum allowed devices]),

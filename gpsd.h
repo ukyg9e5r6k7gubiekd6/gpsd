@@ -31,11 +31,11 @@
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
+/* a few bits of ISGPS magic */
 enum isgpsstat_t {
     ISGPS_NO_SYNC, ISGPS_SYNC, ISGPS_SKIP, ISGPS_MESSAGE,
 };
 #define PREAMBLE_PATTERN 0x66
-
 #define ISGPS_ERRLEVEL_BASE	5
 
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
@@ -219,7 +219,7 @@ struct gps_device_t {
 	 * configured in the daemon.  It doesn't take up extra space.
 	 */
 	struct {
-	    /* ISGPS200 decodng */
+	    /* ISGPS200 decoding */
 	    bool            locked;
 	    int             curr_offset;
 	    isgps30bits_t   curr_word;
