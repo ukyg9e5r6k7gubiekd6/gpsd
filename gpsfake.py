@@ -55,21 +55,36 @@ packet types such as NMEA, SiRF, and Zodiac.  Additioonally, the Type
 header in a logfile can be used to force the packet type, notably to RTCM
 which is fed to the daemon character by character,
 
-There are some limitations.  Trying to run more than one instance of
-TestSession concurrently will fail as the daemon instances contend for
-port 12000.  Due to indeterminacy in thread timings, it is not guaranteed
-that runs with identical options will present exactly the same
-sentences to the daemon at the same times from start.
-
-This code requires that you have fuser(1) installed and executable.
-The fake-GPS threads use it to detect when their slave device has
-been opened.  It also requires that for any process ID <foo>,
-/proc/<foo>/fd lists the numbers of file descriptors opened by that process
-(in particular, this is true under Linux).
+There are some limitations. Due to indeterminacy in thread timings, it
+is not guaranteed that runs with identical options will present
+exactly the same sentences to the daemon at the same times from start.
 """
 import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket
 import gps
+
+### System-dependent code begins here
+#
+
+def proc_has_file_open(pid, file):
+    "Does the given process have the specified file open?"
+    d = "/proc/%s/fd/" % pid
+    try:
+        for fd in os.listdir(d):
+            if os.readlink(d+fd) == file:
+                return True
+    except OSError:
+        pass
+    return False
+
+def proc_fd_set(pid):
+    "Return the set of file descriptors currently opened by the process."
+    fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
+    # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
+    return filter(lambda x: x < 1000, fds)
+
+#
+### System-dependent code ends here
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
@@ -196,26 +211,28 @@ class FakeGPS:
         raw[3] = 0					# lflag
         raw[4] = raw[5] = speed
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
-    def slave_is_open(self):
-        "Is the slave device of this pty opened?"
+    def slave_is_open(self, pid):
+        "Is the slave device of this pty opened by the specified process?"
         if self.verbose:
             sys.stderr.write("slave_is_open() begins")
-        # fuser -s would be more efficient, but is buggy in version 2.22.
-        isopen = os.system("fuser " + self.slave + " > /dev/null 2>&1") == 0
+        isopen = proc_has_file_open(pid, self.slave)
         if self.verbose:
             sys.stderr.write("slave_is_open() ends")
         return isopen
     def __feed(self):
         "Feed the contents of the GPS log to the daemon."
-        while self.readers and self.go_predicate(self.index, self):
+        while self.readers and \
+                  self.daemon.is_alive() and \
+                  self.go_predicate(self.index, self):
             os.write(self.master_fd, self.testload.sentences[self.index % len(self.testload.sentences)])
             self.index += 1
-    def start(self, thread=False):
+    def start(self, daemon, thread=False):
         "Increment pseudodevice's reader count, starting it if necessary."
+        self.daemon = daemon
         self.readers += 1
         if self.readers == 1:
             self.thread = threading.Thread(target=self.__feed)
-            while not self.slave_is_open():
+            while not self.slave_is_open(daemon.pid):
                 time.sleep(0.01);
             if thread:
                 self.thread.start()	# Run asynchronously
@@ -228,6 +245,10 @@ class FakeGPS:
     def stop(self):
         "Zero pseudodevice's reader count; it will stop."
         self.readers = 0
+
+class DaemonError(exceptions.Exception):
+    def __init__(self, msg):
+        self.msg = msg
 
 class DaemonInstance:
     "Control a gpsd instance."
@@ -246,7 +267,9 @@ class DaemonInstance:
             self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
             self.spawncmd += " &"
-        os.system(self.spawncmd)
+        status = os.system(self.spawncmd)
+        if os.WIFSIGNALED(status) or os.WEXITSTATUS(status):
+            raise DaemonError("daemon exited with status %d" % status)
     def wait_pid(self):
         "Wait for the daemon, get its PID and a control-socket connection."
         while True:
@@ -277,13 +300,6 @@ class DaemonInstance:
             return True
         except OSError:
             return False
-    def fd_set(self):
-        "Return the set of file descriptors currently opened by the daemon."
-        if self.pid == None:
-            return []
-        fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
-        # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
-        return filter(lambda x: x < 1000, fds)
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
@@ -337,7 +353,7 @@ class TestSession:
         self.default_predicate = pred
     def sanity_check(self):
         try:
-            now = self.daemon.fd_set()
+            now = proc_fd_set(self.daemon.pid)
             if now != self.fd_set:
                 self.progress("File descriptors: %s\n" % now)
                 self.fd_set = now
@@ -354,7 +370,7 @@ class TestSession:
                 newgps.go_predicate = self.default_predicate
             self.fakegpslist[newgps.slave] = newgps
         self.daemon.add_device(newgps.slave)
-        self.fakegpslist[newgps.slave].start(thread=True)
+        self.fakegpslist[newgps.slave].start(self.daemon, thread=True)
         self.sanity_check()
         return newgps.slave
     def gps_remove(self, name):

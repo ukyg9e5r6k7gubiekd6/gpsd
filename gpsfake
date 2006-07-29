@@ -135,6 +135,9 @@ try:
     except gpsfake.PacketError, e:
         sys.stderr.write("gpsfake: " + e.msg + "\n")
         raise SystemExit, 1
+    except gpsfake.DaemonError, e:
+        sys.stderr.write("gpsfake: " + e.msg + "\n")
+        raise SystemExit, 1
     except IOError, e:
         sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
         raise SystemExit, 1

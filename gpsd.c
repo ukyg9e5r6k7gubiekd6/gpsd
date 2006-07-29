@@ -521,7 +521,7 @@ static bool assign_channel(struct subscriber_t *user)
 
     /* and open that device */
     if (user->device->gpsdata.gps_fd != -1) 
-	gpsd_report(1,"client(%d): channel %d already active.\n",
+	gpsd_report(5,"client(%d): channel %d already active.\n",
 		    user-subscribers, user->device->gpsdata.gps_fd);
     else {
 #ifndef FIXED_PORT_SPEED

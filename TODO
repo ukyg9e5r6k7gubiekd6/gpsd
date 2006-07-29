@@ -76,15 +76,6 @@ hard reboot." Details are at
 
 Related driver flakiness may explain some failures to hunt correctly.
 
-*** Hangs in gpsfake may be caused by bugs or flakiness in fuser(1)
-
-We have identified and worked around at least one known bug in
-fuser(1) that causes gpsfake to hang: in version 2.22, the -s 
-option was broken.  We have sporadic reports of gpsfake hangs,
-some of which may be due to other bugs in fuser(1).  To check
-this, run it with -v and see if the hang is between the start
-and end messages from the slave_is_open() function.
-
 *** gpsd build may break on 64-bit systems running Fedora Core 5
 
 The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)

@@ -24,6 +24,7 @@
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
+      <arg choice='opt'>-n</arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
@@ -86,9 +87,10 @@ and similar programs.</para>
 <para>The -g option uses the monitor facility to run the gpsd within
 gpsfake under control of gdb.</para>
 
-<para>The -o option specifies options to pass to the daemon.
-Passing "-n" is often useful.  The -D option passes a -D option
-to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
+<para>The -o option specifies options to pass to the daemon.  The -n
+option passes -n to start the daemon reading the GPS without waiting
+for a client (equivalent to -o "-n").  The -D option passes a -D
+option to the daemon: thus -D 4 is shorthand for -o "-D 4".</para>
 
 <para>The -p option dumps the NMEA and GPSD notifications generated
 by the log to standard output.</para>
