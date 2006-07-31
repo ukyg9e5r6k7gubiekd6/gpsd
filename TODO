@@ -2,6 +2,9 @@ This is the gpsd to-do list.  If you're viewing it with Emacs, try
 doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
 will unfold them again.
 
+For contribution guidelines and internals documentation, please see
+the hacking.html file in the www subdirectory or on the project website.
+
 ** Bugs in gpsd and its clients:
 
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
