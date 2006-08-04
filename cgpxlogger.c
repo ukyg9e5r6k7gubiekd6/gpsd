@@ -224,6 +224,7 @@ void process(char *buf){
 	bzero( &gps_ctx, sizeof(gps_ctx));
 	/* do stuff with each of the strings */
 	for(i = 0; i < NUM+1 ; i++){
+		j=-1;
 		c = answers[i][0];
 		switch(c){
 		case 'S':
