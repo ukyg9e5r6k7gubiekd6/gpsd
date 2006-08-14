@@ -223,7 +223,6 @@ EXTRA_DIST = \
 	README \
 	INSTALL \
 	COPYING \
-	HACKING \
 	TODO \
 	AUTHORS \
 	dgpsip-servers \
