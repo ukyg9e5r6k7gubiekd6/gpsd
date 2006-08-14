@@ -144,7 +144,7 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Wed Jul 12 2006 Eric S. Raymond <esr@golux.thyrsus.com> - @VERSION@-1
+* Mon Jul 31 2006 Eric S. Raymond <esr@golux.thyrsus.com> - 2.34-1
 - Fix for byte-swapping of Zodiac control messages on big-endian hardware.  
   Disable iTalk by default and note that it needs to be tested.  Command line
   arguments can now be DGPSIP or NTRIP URLs; -d is deprecated. Added udev

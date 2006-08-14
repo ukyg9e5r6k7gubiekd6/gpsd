@@ -44,6 +44,16 @@
 #include "timebase.h"
 
 /*
+ * Define this to eliminate a memory copy.  Disables the J command;
+ * you always get the equivalent of j=0 (clear at start of cycle).
+ * Only needed for deployments on low-power embedded systems where
+ * every cycle counts.
+ */
+#ifdef WIRED_POLICY
+#define fixbuffer	device->gpsdata.fix
+#endif /* WIRED_POLICY */
+
+/*
  * Timeout policy.  We can't rely on clients closing connections 
  * correctly, so we need timeouts to tell us when it's OK to 
  * reclaim client fds.  The assignment timeout fends off programs
@@ -315,6 +325,10 @@ static struct subscriber_t {
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
+#ifndef WIRED_POLICY
+    struct gps_fix_t fixbuffer;		/* info to report to the clint */
+    enum {changed=0, all=1} buffer_policy;	/* buffering policy */
+#endif /* WIRED_POLICY*/
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[MAXSUBSCRIBERFD];		/* indexed by client file descriptor */
 
@@ -546,6 +560,9 @@ static bool assign_channel(struct subscriber_t *user)
 	}
     }
 
+#ifndef WIRED_POLICY
+    gps_clear_fix(&user->fixbuffer);
+#endif /* WIRED_POLICY */
     return true;
 }
 /*@ +branchstate +usedef +globstate @*/
@@ -603,9 +620,9 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	case 'A':
 	    if (assign_channel(whoami) && 
 			have_fix(whoami->device) && 
-			whoami->device->gpsdata.fix.mode == MODE_3D)
+			whoami->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",A=%.3f", 
-			whoami->device->gpsdata.fix.altitude);
+			whoami->fixbuffer.altitude);
 	    else
 		(void)strcpy(phrase, ",A=?");
 	    break;
@@ -676,8 +693,8 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'D':
 	    (void)strcpy(phrase, ",D=");
-	    if (assign_channel(whoami) && isnan(whoami->device->gpsdata.fix.time)==0)
-		(void)unix_to_iso8601(whoami->device->gpsdata.fix.time, 
+	    if (assign_channel(whoami) && isnan(whoami->fixbuffer.time)==0)
+		(void)unix_to_iso8601(whoami->fixbuffer.time, 
 				phrase+3, (int)(sizeof(phrase)-3));
 	    else
 		(void)strcat(phrase, "?");
@@ -687,8 +704,8 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    if (assign_channel(whoami) && have_fix(whoami->device))
 		(void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			       whoami->device->gpsdata.epe, 
-			       whoami->device->gpsdata.fix.eph, 
-			       whoami->device->gpsdata.fix.epv);
+			       whoami->fixbuffer.eph, 
+			       whoami->fixbuffer.epv);
 	    break;
 	case 'F':
 	    /*@ -branchstate @*/
@@ -728,8 +745,8 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    break;
 #ifdef HEADING_FIX
 	case 'H':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.heading)==0)
-		(void)snprintf(phrase, sizeof(phrase), ",H=%.4f", whoami->device->gpsdata.fix.heading);
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->fixbuffer.heading)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",H=%.4f", whoami->fixbuffer.heading);
 	    else
 		(void)strcpy(phrase, ",H=?");
 	    break;
@@ -741,6 +758,28 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)strcpy(phrase, ",I=?");
 	    break;
+#ifndef WIRED_POLICY
+	case 'j':
+	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
+		(void)strcpy(phrase, ",J=?");
+	    else if (!whoami->device->device_type->mode_switcher)
+		(void)strcpy(phrase, ",J=0");
+	    else if (privileged_user(whoami)) {
+		if (*p == '=') ++p;
+		if (*p == '1' || *p == '+') {
+		    whoami->buffer_policy = changed;
+		    p++;
+		} else if (*p == '0' || *p == '-') {
+		    whoami->buffer_policy = all;
+		    p++;
+		}
+	    }
+	    if (!whoami->device)
+		(void)snprintf(phrase, sizeof(phrase), ",J=?");
+	    else
+		(void)snprintf(phrase, sizeof(phrase), ",J=%u", whoami->buffer_policy);
+	    break;
+#endif /* WIRED_POLICY */
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
 		if (allocated_channel(&channels[i]))
@@ -755,13 +794,13 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
-	    (void)snprintf(phrase, sizeof(phrase), ",L=3 " VERSION " abcdefgiklmnopqrstuvwxyz");	//hj
+	    (void)snprintf(phrase, sizeof(phrase), ",L=3 " VERSION " abcdefgijklmnopqrstuvwxyz");	//h
 	    break;
 	case 'M':
-	    if (!assign_channel(whoami) && (!whoami->device || whoami->device->gpsdata.fix.mode == MODE_NOT_SEEN))
+	    if (!assign_channel(whoami) && (!whoami->device || whoami->fixbuffer.mode == MODE_NOT_SEEN))
 		(void)strcpy(phrase, ",M=?");
 	    else
-		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->device->gpsdata.fix.mode);
+		(void)snprintf(phrase, sizeof(phrase), ",M=%d", whoami->fixbuffer.mode);
 	    break;
 	case 'N':
 	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
@@ -789,91 +828,91 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s",
 			       whoami->device->gpsdata.tag[0]!='\0' ? whoami->device->gpsdata.tag : "-");
-		if (isnan(whoami->device->gpsdata.fix.time)==0)
+		if (isnan(whoami->fixbuffer.time)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.2f",
-				   whoami->device->gpsdata.fix.time);
+				   whoami->fixbuffer.time);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.ept)==0)
+		if (isnan(whoami->fixbuffer.ept)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
-				   whoami->device->gpsdata.fix.ept);
+				   whoami->fixbuffer.ept);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.latitude)==0)
+		if (isnan(whoami->fixbuffer.latitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.6f",
-				   whoami->device->gpsdata.fix.latitude);
+				   whoami->fixbuffer.latitude);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.longitude)==0)
+		if (isnan(whoami->fixbuffer.longitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.6f",
-				   whoami->device->gpsdata.fix.longitude);
+				   whoami->fixbuffer.longitude);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.altitude)==0)
+		if (isnan(whoami->fixbuffer.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %7.2f",
-				   whoami->device->gpsdata.fix.altitude);
+				   whoami->fixbuffer.altitude);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.eph)==0)
+		if (isnan(whoami->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				  " %5.2f",  whoami->device->gpsdata.fix.eph);
+				  " %5.2f",  whoami->fixbuffer.eph);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (isnan(whoami->device->gpsdata.fix.epv)==0)
+		if (isnan(whoami->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %5.2f",  whoami->device->gpsdata.fix.epv);
+				   " %5.2f",  whoami->fixbuffer.epv);
 		else
 		    (void)strcat(phrase, "        ?");
-		if (isnan(whoami->device->gpsdata.fix.track)==0)
+		if (isnan(whoami->fixbuffer.track)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f %8.3f",
-				   whoami->device->gpsdata.fix.track, 
-				   whoami->device->gpsdata.fix.speed);
+				   whoami->fixbuffer.track, 
+				   whoami->fixbuffer.speed);
 		else
 		    (void)strcat(phrase, "             ?            ?");
-		if (isnan(whoami->device->gpsdata.fix.climb)==0)
+		if (isnan(whoami->fixbuffer.climb)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %6.3f", 
-				   whoami->device->gpsdata.fix.climb);
+				   whoami->fixbuffer.climb);
 		else
 		    (void)strcat(phrase, "          ?");
-		if (isnan(whoami->device->gpsdata.fix.epd)==0)
+		if (isnan(whoami->fixbuffer.epd)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %8.4f",
-				   whoami->device->gpsdata.fix.epd);
+				   whoami->fixbuffer.epd);
 		else
 		    (void)strcat(phrase, "             ?");
-		if (isnan(whoami->device->gpsdata.fix.eps)==0)
+		if (isnan(whoami->fixbuffer.eps)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %5.2f", whoami->device->gpsdata.fix.eps);		    
+			     " %5.2f", whoami->fixbuffer.eps);		    
 		else
 		    (void)strcat(phrase, "        ?");
-		if (isnan(whoami->device->gpsdata.fix.epc)==0)
+		if (isnan(whoami->fixbuffer.epc)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %5.2f", whoami->device->gpsdata.fix.epc);		    
+			     " %5.2f", whoami->fixbuffer.epc);		    
 		else
 		    (void)strcat(phrase, "        ?");
-		if (whoami->device->gpsdata.fix.mode > 0)
+		if (whoami->fixbuffer.mode > 0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %d", whoami->device->gpsdata.fix.mode);		    
+			     " %d", whoami->fixbuffer.mode);		    
 		else
 		    (void)strcat(phrase, "        ?");
 	    }
@@ -881,8 +920,8 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	case 'P':
 	    if (assign_channel(whoami) && have_fix(whoami->device))
 		(void)snprintf(phrase, sizeof(phrase), ",P=%.6f %.6f", 
-			whoami->device->gpsdata.fix.latitude, 
-			whoami->device->gpsdata.fix.longitude);
+			whoami->fixbuffer.latitude, 
+			whoami->fixbuffer.longitude);
 	    else
 		(void)strcpy(phrase, ",P=?");
 	    break;
@@ -940,20 +979,20 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strcpy(phrase, ",S=?");
 	    break;
 	case 'T':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.track)==0)
-		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->device->gpsdata.fix.track);
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->fixbuffer.track)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->fixbuffer.track);
 	    else
 		(void)strcpy(phrase, ",T=?");
 	    break;
 	case 'U':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->device->gpsdata.fix.mode == MODE_3D)
-		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", whoami->device->gpsdata.fix.climb);
+	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->fixbuffer.mode == MODE_3D)
+		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", whoami->fixbuffer.climb);
 	    else
 		(void)strcpy(phrase, ",U=?");
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->device->gpsdata.fix.speed)==0)
-		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->device->gpsdata.fix.speed * MPS_TO_KNOTS);
+	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->fixbuffer.speed)==0)
+		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->fixbuffer.speed * MPS_TO_KNOTS);
 	    else
 		(void)strcpy(phrase, ",V=?");
 	    break;
@@ -1517,8 +1556,7 @@ int main(int argc, char *argv[])
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
-		} 
-		if ((changed & ONLINE_SET) == 0) {
+		} else if ((changed & ONLINE_SET) == 0) {
 /*
 		    gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
 				timestamp() - channel->gpsdata.online);
@@ -1528,6 +1566,27 @@ int main(int argc, char *argv[])
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
+#ifndef WIRED_POLICY 
+		else {
+		    struct subscriber_t *sub;
+
+		    /* copy/merge channel data into subscriber fix buffers */
+		    for (sub = subscribers;
+			 sub < subscribers + MAXSUBSCRIBERFD;
+			 sub++) {
+			if (sub->device == channel) {
+			    if (sub->buffer_policy == all)
+				gps_merge_fix(&sub->fixbuffer, 
+					      FIX_SET,
+					      &sub->device->gpsdata.fix);
+			    else
+				gps_merge_fix(&sub->fixbuffer, 
+					      changed,
+					      &sub->device->gpsdata.fix);
+			}
+		    }
+		}
+#endif /* WIRED_POLICY */
 #ifdef RTCM104_ENABLE
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM_SET) != 0) {

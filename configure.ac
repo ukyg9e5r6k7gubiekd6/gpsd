@@ -335,6 +335,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl allow fixing of the buffering policy
+AC_ARG_ENABLE(wired-policy,
+  AC_HELP_STRING([--enable-wired-policy],
+                 [enable wired-in j=0 buffering policy]),
+  [ac_wired_policy=$enableval], [ac_wired_policy=no])
+AC_MSG_CHECKING([for wired-in buffer policy])
+if test x"$ac_wired_policy" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([WIRED_POLICY], 1, [wired-in buffering policy])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl Manually configure DBUS until we figure out a 
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
@@ -439,6 +452,7 @@ echo "RTCM104 support         : $ac_rtcm104"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo "Fixed port speed        : $ac_baud"
+echo "Wired buffer policy     : $ac_wired_policy"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
 echo "Limited max client fd   : $ac_maxclientfd"

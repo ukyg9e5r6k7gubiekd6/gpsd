@@ -320,7 +320,8 @@ identifying the kind of information the attached device returns.</para>
 <varlistentry>
 <term>h</term>
 <listitem>
-<para>Heading, "H=%f" in degrees from true north.  Only available from True North Technologies or comparable digital compass devices (c.f. 't')</para>
+<para>Heading, "H=%f" in degrees from true north.  Only available from
+True North Technologies or comparable digital compass devices (c.f. 't')</para>
 </listitem>
 </varlistentry>
 -->
@@ -331,6 +332,25 @@ identifying the kind of information the attached device returns.</para>
 may contain spaces and is terminated by CR-LF.  This command will
 return '?' at start of session, before the first full packet has been
 received from the GPS, because its type is not yet known.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>j</term>
+<listitem>
+<para>Get or set buffering policy; this only matters for NMEA devices
+which report fix data in several separate sentences during the poll
+cycle (and in particular it <emphasis>doesn't</emphasis> matter for
+SiRF chips).  The default (j=0) is to clear all fix data at the start
+of each poll cycle, so until the sentence that reports a given piece
+of data arrives queries will report ?.  Setting j=1 will disable this,
+retaining data from the previous cycle.  This is a per-user-channel
+bit, not a per-device one.  The j=0 setting is hyper-correct and never
+displays stale data, but may produce a jittery display; the j=1 setting
+allows stale data but smooths the display.</para>
+
+<para>(At protocol level below 3, there was no J command.  Note, this
+command is experimental and its semantics are subject to change.)</para> 
+</listitem>
 </varlistentry>
 
 <varlistentry>
