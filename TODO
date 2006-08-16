@@ -41,6 +41,8 @@ distinction) to test with.
 
 See <http://bugs.gentoo.org/show_bug.cgi?id=132288>.  This shows
 up on other distributions as well, but not under Fedora Core.
+The Gentoo problem can be fixed by creating a /var/run/usb directory;
+this fix may apply to other distributions as well.
 
 *** Compiling with --enable-max-devices=1 may trigger a gcc optimizer bug
 
