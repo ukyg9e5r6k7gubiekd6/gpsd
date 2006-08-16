@@ -350,7 +350,22 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     if (session->packet_type != ZODIAC_PACKET) {
 	gpsd_report(2, "zodiac_analyze packet type %d\n",session->packet_type);
-	return 0;
+ 	// Wrong packet type ? 
+	// Maybe find a trigger just in case it's an Earthmate
+	gpsd_report(9, "Is this a trigger: %s ?\n", (char*)session->outbuffer);
+	struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    char	*trigger = (*dp)->trigger;
+
+	    if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
+		gpsd_report(2, "found %s.\n", trigger);
+		    
+		(void)gpsd_switch_driver(session, (*dp)->typename);
+		return 0;
+	    }
+   	}
+        return 0;
     }
 
     buf[0] = '\0';
