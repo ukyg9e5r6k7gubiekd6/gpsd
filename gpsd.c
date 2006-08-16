@@ -293,18 +293,20 @@ static int filesock(char *filename)
 /*
  * This hackery is intended to support SBCs that are resource-limited
  * and only need to support one or a few devices each.  It can avoid
- * the space ahead of allocating thousands of unused device and user
+ * the space overhead of allocating thousands of unused device and user
  * structures, which wouldn't be significant on a PC.
  */
 #ifdef LIMITED_MAX_DEVICES
 #define MAXDEVICES	LIMITED_MAX_DEVICES
 #else
-#define MAXDEVICES	FD_SETSIZE
+/* we used to make this FD_SETSIZE, but that cost 14MB of wasted core! */
+#define MAXDEVICES	4
 #endif
 
 #ifdef LIMITED_MAX_CLIENT_FD
 #define MAXSUBSCRIBERFD LIMITED_MAX_CLIENT_FD
 #else
+/* subscriber structure is small enough that there's no need to limit this */ 
 #define MAXSUBSCRIBERFD	FD_SETSIZE
 #endif
 
