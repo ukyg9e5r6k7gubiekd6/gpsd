@@ -170,21 +170,15 @@ int main (int argc, char** argv) {
 	DBusError error;
 
 	/* initializes the gpsfix data structure */
-	bzero (&gpsfix, sizeof(gpsfix));
+	gps_clear_fix(&gpsfix);
 
 	/* catch all interesting signals */
 	signal (SIGTERM, quit_handler);
 	signal (SIGQUIT, quit_handler);
 	signal (SIGINT, quit_handler);
-			
-	
-	openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
-	syslog (LOG_INFO, "---------- STARTED ----------");
-	
-	if (argc<2) {
-		fprintf (stderr, "need the filename as an argument\n");
-		return 1;
-	}
+
+	//openlog ("gpxlogger", LOG_PID | LOG_NDELAY , LOG_DAEMON);
+	//syslog (LOG_INFO, "---------- STARTED ----------");
 	
 	print_gpx_header ();
 	
