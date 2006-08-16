@@ -280,6 +280,13 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef RTCM104_ENABLE
 	    (void)rtcm_decode(session, c);
 #endif /* RTCM104_ENABLE */
+	    /* 
+	     * When the Earthmate is connected, it starts to send
+	     * few Zodiac-binary frames before going into its EARTHA\r\n-loop.
+	     * Therefore the regular state machine misdetects it as straight 
+	     * Zodiac binary.  This kluge works around the problem.
+	     */
+	    (void)gpsd_switch_driver(session,"Delorme EarthMate (pre-2003, Zodiac chipset)");
 	    session->packet_state = NMEA_RECOGNIZED;
 	} else
 	    session->packet_state = GROUND_STATE;
