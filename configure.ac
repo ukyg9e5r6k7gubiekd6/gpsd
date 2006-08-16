@@ -282,6 +282,21 @@ fi
 
 AM_CONDITIONAL([HAVE_RTCM104], [test "$ac_rtcm104" = "yes"])
 
+dnl check for NTRIP support
+AC_ARG_ENABLE(ntrip,
+  AC_HELP_STRING([--disable-ntrip],
+                 [disable NTRIP support]),
+  [ac_ntrip=$enableval], [ac_ntrip=yes])
+AC_MSG_CHECKING([for NTRIP support])
+if test x"$ac_ntrip" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([NTRIP_ENABLE], 1, [NTRIP support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL([HAVE_NTRIP], [test "$ac_ntrip" = "yes"])
+
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],
@@ -449,6 +464,7 @@ echo "Garmin                  : $ac_garmin"
 echo "True North              : $ac_tnt"
 echo "Evermore                : $ac_evermore"
 echo "RTCM104 support         : $ac_rtcm104"
+echo "NTRIP support           : $ac_ntrip"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo "Fixed port speed        : $ac_baud"
