@@ -288,8 +288,9 @@ splint:
 
 # Regression-test the daemon
 # This requires gcc4; use of the math coprocessor's on-board trig functions
-# apparently increases the accuracy of computation in a way that
-# that affects the low-order digits of the track field in the O response.
+# apparently increases the accuracy of computation in a way that affects
+# the low-order digits of the track field in the O response.  Alas, it looks
+# like moving between 32- and 64-bit FPUs can also break regressions.
 gps-regress: gpsd
 	@echo "Testing the daemon..."
 	@for f in test/*.log; do gpsfake -1 -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
