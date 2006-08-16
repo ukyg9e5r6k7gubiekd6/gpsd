@@ -1153,9 +1153,10 @@ static void handle_control(int sfd, char *buf)
 	    (void)write(sfd, "ERROR\n", 6);
     } else if (buf[0] == '+') {
 	p = snarfline(buf+1, &stash);
-	if (find_device(stash))
+	if (find_device(stash)) {
 	    gpsd_report(1,"<= control(%d): %s already active \n", sfd, stash);
-	else {
+		(void)write(sfd, "ERROR\n", 6);
+	} else {
 	    gpsd_report(1,"<= control(%d): adding %s \n", sfd, stash);
 	    if (open_device(stash))
 		(void)write(sfd, "OK\n", 3);

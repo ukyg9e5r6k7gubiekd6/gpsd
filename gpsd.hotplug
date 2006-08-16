@@ -56,7 +56,7 @@ def gpsd_control(action, argument):
     return action
 
 def hotplug(action, devpath):
-    #syslog.syslog("ACTION=%s" % action)
+    #syslog.syslog("ACTION=%s DEVPATH=%s" % (action,devpath))
     if not devpath:
         syslog.syslog("No device")
     else:
@@ -88,16 +88,27 @@ def hotplug(action, devpath):
             return
 
 if __name__ == '__main__':
-    syslog.openlog('gpsd.hotplug', 0, syslog.LOG_DAEMON)
-    try: 
-        if len(sys.argv) == 1:	# Called as hotplug script
-            hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
-        else:			# Called by hand for testing
-            gpsd_control(sys.argv[1], sys.argv[2])
-    except:
-        (exc_type, exc_value, exc_traceback) = sys.exc_info()
-        syslog.syslog("gpsd.hotplug: exception %s yields %s" % (exc_type, exc_value))
-        raise exc_type, exc_value, exc_traceback
-    #syslog.syslog("gpsd.hotplug ends")
-    syslog.closelog()
+    # In recent versions of udev, the gpsd script runs in series with
+    # the task that creates the real /dev/ttyUSB0 device
+    # node. Unfortunately, the gpsd script runs BEFORE the creation of
+    # the node, and the node is not created until after you kill the
+    # gpsd script, because the gpsd script waits forever for the node
+    # to appear.
+    # 
+    # This is a race condition, and is best fixed by running the
+    # actual wait/hotplug portion in the background.
+    pid = os.fork()
+    if not pid:
+        syslog.openlog('gpsd.hotplug', 0, syslog.LOG_DAEMON)
+        try: 
+            if len(sys.argv) == 1:	# Called as hotplug script
+                hotplug(os.getenv("ACTION"), os.getenv("DEVPATH"))
+            else:			# Called by hand for testing
+                gpsd_control(sys.argv[1], sys.argv[2])
+        except:
+            (exc_type, exc_value, exc_traceback) = sys.exc_info()
+            syslog.syslog("gpsd.hotplug: exception %s yields %s" % (exc_type, exc_value))
+            raise exc_type, exc_value, exc_traceback
+        #syslog.syslog("gpsd.hotplug ends")
+        syslog.closelog()
         
