@@ -150,7 +150,9 @@ cp gps.py gpsfake.py "$RPM_BUILD_ROOT"%{_libdir}/python${PYVERSION}/site-package
   arguments can now be DGPSIP or NTRIP URLs; -d is deprecated. Added udev
   rules.  Address excessive processor and memory utilization on SBCs; it's
   now possible to configure compile-time limits on the number of devices
-  and client sessions.  Eliminate use of fuser(1) in gpsfake.
+  and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get it 
+  working with EarthMates again, this had been broken since 2.15.  Add
+  j command to enable data smoothing.
 
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
