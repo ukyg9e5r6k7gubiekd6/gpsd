@@ -218,7 +218,7 @@ fi
 dnl check for iTalk support
 AC_ARG_ENABLE(italk,
   AC_HELP_STRING([--enable-italk],
-                 [enable True North Technologies support]),
+                 [enable iTalk support]),
   [ac_italk=$enableval], [ac_italk=no])
 AC_MSG_CHECKING([for iTalk support])
 if test x"$ac_italk" = "xyes"; then
@@ -248,8 +248,10 @@ AC_ARG_ENABLE(tnt,
   [ac_tnt=$enableval], [ac_tnt=no])
 AC_MSG_CHECKING([for True North support])
 if test x"$ac_tnt" = "xyes"; then
+    ac_nmea=yes
     AC_MSG_RESULT([yes])
 	AC_DEFINE([TNT_ENABLE], 1, [True North Technologies support])
+	AC_DEFINE([NMEA_ENABLE], 1, [True North requires NMEA support])
 else
   AC_MSG_RESULT([no])
 fi
