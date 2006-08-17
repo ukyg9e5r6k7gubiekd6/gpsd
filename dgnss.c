@@ -25,8 +25,10 @@ bool dgnss_url(char *name)
 int dgnss_open(struct gps_context_t *context, char *dgnss_service)
 /* open a connection to a DGNSS service */
 {
+#ifdef NTRIP_ENABLE
     if (strncmp(dgnss_service,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0)
         return ntrip_open(context, dgnss_service + strlen(DGNSS_PROTO_NTRIP));
+#endif
 
     if (strncmp(dgnss_service,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0)
         return dgpsip_open(context, dgnss_service + strlen(DGNSS_PROTO_DGPSIP));
@@ -58,8 +60,10 @@ void dgnss_report(struct gps_device_t *session)
 {
     if (session->context->dgnss_service == dgnss_dgpsip)
 	dgpsip_report(session);
+#ifdef NTRIP_ENABLE
     else if (session->context->dgnss_service == dgnss_ntrip)
 	ntrip_report(session);
+#endif
 }
 
 void dgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
