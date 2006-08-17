@@ -137,15 +137,15 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for SiRF-II support
-AC_ARG_ENABLE(sirfII,
-  AC_HELP_STRING([--disable-sirfII],
-                 [disable SiRF-II chipset support]),
-  [ac_sirfII=$enableval], [ac_sirfII=yes])
-AC_MSG_CHECKING([for SiRF-II support])
-if test x"$ac_sirfII" = "xyes"; then
+dnl check for SiRF support
+AC_ARG_ENABLE(sirf,
+  AC_HELP_STRING([--disable-sirf],
+                 [disable SiRF chipset support]),
+  [ac_sirf=$enableval], [ac_sirf=yes])
+AC_MSG_CHECKING([for SiRF support])
+if test x"$ac_sirf" = "xyes"; then
     AC_MSG_RESULT([yes])
-	AC_DEFINE([SIRFII_ENABLE], 1, [SiRF-II chipset support])
+	AC_DEFINE([SIRF_ENABLE], 1, [SiRF chipset support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -456,7 +456,7 @@ echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
 echo "NMEA                    : $ac_nmea"
 echo "FV-18                   : $ac_fv18"
-echo "SiRF-II                 : $ac_sirfII"
+echo "SiRF                    : $ac_sirf"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"

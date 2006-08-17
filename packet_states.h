@@ -31,7 +31,7 @@
    EARTHA_5,		/* EARTHA leader H */
 #endif /* EARTHMATE_ENABLE */
 
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
    SIRF_LEADER_1,	/* we've seen first character of SiRF leader */
    SIRF_LEADER_2,	/* seen second character of SiRF leader */
    SIRF_LENGTH_1,	/* seen first byte of SiRF length */
@@ -39,7 +39,7 @@
    SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
    SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */ 
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 
 #ifdef ZODIAC_ENABLE
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */

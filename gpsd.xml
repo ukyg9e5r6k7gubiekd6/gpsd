@@ -52,16 +52,16 @@ protocol for it.</para>
 that speaks either the standard textual NMEA 0183 protocol, or the
 binary Rockwell protocol used by EarthMate and some other GPSes, the
 TSIP binary protocol used by Trimble GPSes, or the binary SiRF
-protocol used by SiRf-II and SiRF-Star chipsets, or the Garmin binary
-protocol used by the USB version of the Garmin 18 and other Garmin USB
-GPSes, or the binary protocol used by Evermore chipsets, or the
-extended NMEA used by iTrax. <application>gpsd</application>
-effectively hides the differences among these. It also knows about and
-uses commands that tune the GPS for lower latency, decreased bandwidth
-usage, or increased accuracy on the San Jose Navigation FV18, the Sony
-CXD2951, the uBlox, and the Motorola OnCore GT+.  It can read heading
-and attitude information from the True North Technologies Revolution
-2X Digital compass.</para>
+protocol used by SiRFstar chipsets, or the Garmin binary protocol used
+by the USB version of the Garmin 18 and other Garmin USB GPSes, or the
+binary protocol used by Evermore chipsets, or the extended NMEA used
+by iTrax. <application>gpsd</application> effectively hides the
+differences among these. It also knows about and uses commands that
+tune the GPS for lower latency, decreased bandwidth usage, or
+increased accuracy on the San Jose Navigation FV18, the Sony CXD2951,
+the uBlox, and the Motorola OnCore GT+.  It can read heading and
+attitude information from the True North Technologies Revolution 2X
+Digital compass.</para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
@@ -556,7 +556,7 @@ support super-raw mode.</para>
 <varlistentry>
 <term>u</term>
 <listitem><para>Current rate of climb as "U=%f" in meters per second.
-Some GPSes (non-Sirf-II based) do not report this, in that case 
+Some GPSes (not SiRF-based) do not report this, in that case 
 <application>gpsd</application> computes it using the altitude from
 the last fix (if available).</para></listitem>
 </varlistentry>
@@ -814,7 +814,7 @@ remote           refid      st t when poll reach  delay    offset  jitter
 <para>When the value under "reach" remains zero, check that gpsd is
 running; and some application is connected to it or the '-n' option was
 used.  Make sure the receiver is locked on to at least one satellite,
-and the receiver is in SiRF-II, Garmin binary or NMEA/PPS mode.  Plain
+and the receiver is in SiRF binary, Garmin binary or NMEA/PPS mode.  Plain
 NMEA will also drive ntpd, but the accuracy as bad as one second.  When
 the SHM(0) line does not appear at all, check the system logs for error
 messages from ntpd.</para>

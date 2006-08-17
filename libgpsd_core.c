@@ -164,9 +164,9 @@ int gpsd_activate(struct gps_device_t *session)
 	return -1;
     else {
 	session->gpsdata.online = timestamp();
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
 	session->driver.sirf.satcounter = 0;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 	session->char_counter = 0;
 	session->retry_counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
@@ -508,11 +508,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->packet_type);
 	if (session->packet_type != BAD_PACKET) {
 	    switch (session->packet_type) {
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
 	    case SIRF_PACKET:
-		(void)gpsd_switch_driver(session, "SiRF-II binary");
+		(void)gpsd_switch_driver(session, "SiRF binary");
 		break;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
 	    case TSIP_PACKET:
 		(void)gpsd_switch_driver(session, "Trimble TSIP");

@@ -126,7 +126,7 @@ class TestLoad:
             self.legend = "gpsfake: packet %d"
             self.textual = True
         elif self.sentences[0][0] == '\xa0':
-            self.packtype = "SiRF-II binary"
+            self.packtype = "SiRF binary"
             self.legend = "gpsfake: packet %d"
             self.textual = False
         elif self.type == "RTCM":

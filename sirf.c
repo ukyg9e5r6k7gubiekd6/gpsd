@@ -1,5 +1,5 @@
 /*
- * This is the gpsd driver for SiRF-II GPSes operating in binary mode.
+ * This is the gpsd driver for SiRF GPSes operating in binary mode.
  * It also handles uBlox, a SiRF derivative.
  *
  * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
@@ -36,7 +36,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
-#if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
@@ -114,7 +114,7 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
-	(void)gpsd_switch_driver(session, "SiRF-II NMEA");
+	(void)gpsd_switch_driver(session, "SiRF NMEA");
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;
     }
@@ -716,7 +716,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
-    .typename       = "SiRF-II binary",	/* full name of type */
+    .typename       = "SiRF binary",	/* full name of type */
     .trigger        = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,		/* no probe */
@@ -731,4 +731,4 @@ struct gps_type_t sirf_binary =
     .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */
 };
-#endif /* defined(SIRFII_ENABLE) && defined(BINARY_ENABLE) */
+#endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

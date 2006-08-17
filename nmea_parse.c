@@ -328,7 +328,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
      * this: "$GPGSA,A,1,,,,*32" when it has no fix.  This is broken
      * in at least two ways: it's got the wrong number of fields, and
      * it claims to be a valid sentence (A flag) when it isn't.
-     * Alarmingly, it's possible this error may be generic to SiRF-IIIs.
+     * Alarmingly, it's possible this error may be generic to SiRFstarIII.
      */
     if (count < 17)
 	return ONLINE_SET;
@@ -415,7 +415,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	return ERROR_SET;
     }
     /*
-     * This sanity check catches an odd behavior of SiRF-II based GPSes.
+     * This sanity check catches an odd behavior of SiRFstarII receivers.
      * When they can't see any satellites at all (like, inside a
      * building) they sometimes cough up a hairball in the form of a
      * GSV packet with all the azimuth entries 0 (but nonzero

@@ -11,7 +11,7 @@
 
 extern struct gps_type_t zodiac_binary;
 
-#if defined(NMEA_ENABLE) || defined(SIRFII_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
+#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
@@ -30,11 +30,11 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
 	return sirf_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
     } else if (session->packet_type == EVERMORE_PACKET) {
 	gpsd_report(2, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
@@ -94,10 +94,10 @@ static void nmea_initializer(struct gps_device_t *session)
     /* probe for Garmin serial GPS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
 #endif /* NMEA_ENABLE */
-#ifdef SIRFII_ENABLE
-    /* probe for SiRF-II */
+#ifdef SIRF_ENABLE
+    /* probe for SiRF */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #ifdef ITRAX_ENABLE
     /* probe for iTrax, looking for "OK" */
     (void)nmea_send(session->gpsdata.gps_fd, "$PFST");
@@ -188,7 +188,7 @@ static struct gps_type_t fv18 = {
 
 /**************************************************************************
  *
- * SiRF-II NMEA
+ * SiRF NMEA
  *
  * This NMEA -mode driver is a fallback in case the SiRF chipset has
  * firmware too old for binary to be useful, or we're not compiling in
@@ -213,7 +213,7 @@ static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int s
 }
 
 static bool sirf_speed(struct gps_device_t *session, unsigned int speed)
-/* change the baud rate, remaining in SiRF NMWA mode */
+/* change the baud rate, remaining in SiRF NMEA mode */
 {
     return sirf_switcher(session, 1, speed);
 }
@@ -222,19 +222,19 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 /* change mode to SiRF binary, speed unchanged */
 {
     if (mode == 1) {
-	(void)gpsd_switch_driver(session, "SiRF-II binary");
+	(void)gpsd_switch_driver(session, "SiRF binary");
 	session->gpsdata.driver_mode = (unsigned int)sirf_switcher(session, 0, session->gpsdata.baudrate);
     } else
 	session->gpsdata.driver_mode = 0;
 }
 
-static struct gps_type_t sirfII_nmea = {
-    .typename      = "SiRF-II NMEA",	/* full name of type */
-#ifndef SIRFII_ENABLE
+static struct gps_type_t sirf_nmea = {
+    .typename      = "SiRF NMEA",	/* full name of type */
+#ifndef SIRF_ENABLE
     .trigger       = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
 #else
     .trigger       = NULL,		/* let the binary driver have it */
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
     .channels      = 12,		/* consumer-grade GPS */
     .probe         = NULL,		/* no probe */
     .initializer   = sirf_initializer,	/* turn off debugging messages */
@@ -296,7 +296,7 @@ static struct gps_type_t tripmate = {
  * Zodiac EarthMate textual mode
  *
  * Note: This is the pre-2003 version using Zodiac binary protocol.
- * It has been replaced with a design that uses a SiRF-II chipset.
+ * It has been replaced with a design that uses a SiRF chipset.
  *
  **************************************************************************/
 
@@ -494,7 +494,7 @@ extern struct gps_type_t evermore_binary, italk_binary, trueNorth;
 static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
-    &sirfII_nmea,
+    &sirf_nmea,
 #if FV18_ENABLE
     &fv18,
     &garmin,
@@ -515,9 +515,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #if GARMIN_ENABLE
     &garmin_binary,
 #endif /* GARMIN_ENABLE */
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
     &sirf_binary, 
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary, 
 #endif /* TSIP_ENABLE */

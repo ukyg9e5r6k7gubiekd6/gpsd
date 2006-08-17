@@ -13,7 +13,7 @@
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
-#if defined(ZODIAC_ENABLE) || defined(SIRFII_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITALK_ENABLE)
+#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITALK_ENABLE)
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
@@ -168,7 +168,7 @@ struct gps_device_t {
 	} nmea;
 #endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
 	struct {
 	    unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
@@ -182,7 +182,7 @@ struct gps_device_t {
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 	} sirf;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
 	struct {
 	    int16_t gps_week;		/* Current GPS week number */

@@ -287,7 +287,7 @@ expect(int pfd, const char *str, size_t len, time_t timeout)
 }
 
 
-#if defined(SIRFII_ENABLE) && defined(BINARY_ENABLE)
+#if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 /* add new types by adding pointers to their driver blocks to this list */
 /*@ -nullassign @*/
 static struct flashloader_t *types[] = {&sirf_type, NULL};

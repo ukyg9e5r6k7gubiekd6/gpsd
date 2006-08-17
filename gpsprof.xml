@@ -146,8 +146,8 @@ multiples of the cycle time, above which reports are discarded.</para>
 is 100.</para>
 
 <para>The -s option sets the baud rate.  Note, this will only work if
-the chipset accepts a speed-change command (SiRF-II supports this
-feature).</para>
+the chipset accepts a speed-change command (SiRFstarII and SiRFstarIII
+support this feature).</para>
 
 <para>The -t option sets a text string to be included in the plot
 title.</para>

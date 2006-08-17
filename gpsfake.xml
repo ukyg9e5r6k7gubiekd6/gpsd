@@ -47,7 +47,7 @@ GPS.</para>
 privileges, and can be run concurrently with a production 
 <application>gpsd</application> instance without causing problems.</para>
 
-<para>The logfile may be of NMEA, SiRF-II packets, or Zodiac packets.
+<para>The logfile may be of NMEA, SiRF packets, or Zodiac packets.
 Leading lines beginning with # will be treated as comments and
 ignored.</para>
 

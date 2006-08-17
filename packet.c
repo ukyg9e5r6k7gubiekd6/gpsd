@@ -87,12 +87,12 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
         if (c == 0xa0) {
 	    session->packet_state = SIRF_LEADER_1;
 	    break;
 	}
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
         if (c == 0x10) {
 	    session->packet_state = DLE_LEADER;
@@ -298,7 +298,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* NMEA_ENABLE */
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
     case SIRF_LEADER_1:
 	if (c == 0xa2)
 	    session->packet_state = SIRF_LEADER_2;
@@ -338,7 +338,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
@@ -663,7 +663,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	    packet_discard(session);
             break;
 #endif /* NMEA_ENABLE */
-#ifdef SIRFII_ENABLE
+#ifdef SIRF_ENABLE
 	} else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
 	    unsigned int checksum = (unsigned)((trailer[0] << 8) | trailer[1]);
@@ -677,7 +677,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
-#endif /* SIRFII_ENABLE */
+#endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
 	    if ((session->inbufptr - session->inbuffer) >= 4)
