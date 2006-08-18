@@ -55,6 +55,9 @@ static char *speedunits = "mph";
 static WINDOW *datawin, *satellites, *messages, *command, *status;
 
 int silent_flag=0;
+#ifndef WIRED_POLICY
+int fixclear_flag=0;
+#endif /* WIRED_POLICY */
 int ops_flag=0;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
@@ -480,6 +483,19 @@ int main(int argc, char *argv[])
 	    silent_flag=0;
 	  }
 	  break;
+
+#ifndef WIRED_POLICY
+	  /* Toggle fix clear. */
+	case 'j':
+	  if(fixclear_flag==0) {
+	    fixclear_flag=1;
+	    (void)gps_query(gpsdata, "j1\n");
+	  } else {
+	    fixclear_flag=0;
+	    (void)gps_query(gpsdata, "j0\n");
+	  }
+	  break;
+#endif /* WIRED_POLICY */
 
 	  /* Clear the spewage area. */
 	case 'c':

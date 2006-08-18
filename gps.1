@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPS" "1" "06/07/2006" "9 Aug 2004" "9 Aug 2004"
+.TH "GPS" "1" "08/18/2006" "9 Aug 2004" "9 Aug 2004"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -94,6 +94,10 @@ looks at variables in its environment. Here are the variables and values it chec
 .PP
 cgps
 terminates when you send it a SIGHUP or SIGINT; given default terminal settings this will happen when you type Ctl\-C at it. It will also terminate on 'q'
+.PP
+The 'j' command toggles whether or not fix data is cleared at start of cycle; see
+\fBgpsd\fR(8)
+for discussion.
 .SS "cgpxlogger"
 .PP
 This program connects to gpsd, polls for location, and logs each fix to standard output in GPX (XML) format.

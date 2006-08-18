@@ -26,6 +26,12 @@ void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
     fixp->epd = NAN;
     fixp->eps = NAN;
     fixp->epc = NAN;
+#ifdef HEADING_FIX
+    fixp->heading = NAN;
+#endif /* HEADING_FIX */
+    fixp->pitch = NAN;
+    fixp->roll = NAN;
+    fixp->dip = NAN;
 }
 
 void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
