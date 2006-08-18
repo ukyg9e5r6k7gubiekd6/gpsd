@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
+#include <sys/ioctl.h>
 #include <sys/time.h>
 #include <stdarg.h>
 
@@ -64,6 +65,17 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #endif /* NON_NMEA_ENABLE */
 	    gpsd_report(1, "unknown sentence: \"%s\"\n", session->outbuffer);
 	}
+#ifdef NMEADISC
+	if (st & TIME_SET && session->gpsdata.ldisc == 0) {
+	    int ldisc = NMEADISC;
+
+	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
+		gpsd_report(1, "can't set nmea discipline\n");
+	    else
+		session->gpsdata.ldisc = NMEADISC;
+	}
+#endif
+
 #ifdef NTPSHM_ENABLE
 	/* this magic number is derived from observation */
      if ((st & TIME_SET) != 0 &&
