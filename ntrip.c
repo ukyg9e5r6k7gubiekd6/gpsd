@@ -394,8 +394,8 @@ int ntrip_open(struct gps_context_t *context, char *caster)
     int ret;
 
     /*@ -boolops @*/
-    if ((amp = strchr(caster, '@'))) {
-	if ((colon = strchr(caster, ':')) &&  colon < amp) { 
+    if ((amp = strchr(caster, '@')) != NULL) {
+	if ((colon = strchr(caster, ':') != NULL) &&  colon < amp) { 
 	    auth = caster;
 	    *amp = '\0';
 	    caster = amp + 1;
@@ -406,7 +406,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	}
     }
     /*@ +boolops @*/
-    if ((slash = strchr(caster, '/'))) {
+    if ((slash = strchr(caster, '/')) != NULL) {
 	*slash = '\0';
 	stream = slash + 1;
     } else {
@@ -414,7 +414,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	gpsd_report(1, "can't extract Ntrip stream from %s\n", caster);
 	return -1;
     }
-    if ((colon = strchr(caster, ':'))) {
+    if ((colon = strchr(caster, ':')) != NULL) {
 	port = colon + 1;
 	*colon = '\0';
     }
