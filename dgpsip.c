@@ -19,7 +19,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
     char *colon, *dgpsport = "rtcm-sc104";
     int opts;
 
-    if ((colon = strchr(dgpsserver, ':'))) {
+    if ((colon = strchr(dgpsserver, ':')) != NULL) {
 	dgpsport = colon+1;
 	*colon = '\0';
     }
@@ -101,7 +101,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     /*@ -usedef @*/
     while (fgets(buf, (int)sizeof(buf), sfp)) {
 	char *cp = strchr(buf, '#');
-	if (cp)
+	if (cp != NULL)
 	    *cp = '\0';
 	if (sscanf(buf,"%lf %lf %256s",&hold.lat, &hold.lon, hold.server)==3) {
 	    hold.dist = earth_distance(lat, lon, hold.lat, hold.lon);
