@@ -353,4 +353,13 @@ extern float roundf(float x);
 #if defined(__CYGWIN__)
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
+
+/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
+#ifndef HAVE_STRLCAT
+size_t strlcat(char *dst, const char *src, size_t size);
+#endif
+#ifndef HAVE_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t size);
+#endif
+
 #endif /* _gpsd_h_ */
