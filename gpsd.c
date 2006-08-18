@@ -328,7 +328,7 @@ static struct subscriber_t {
     int raw;				/* is client in raw mode? */
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
 #ifndef WIRED_POLICY
-    struct gps_fix_t fixbuffer;		/* info to report to the clint */
+    struct gps_fix_t fixbuffer;		/* info to report to the client */
     enum {changed=0, all=1} buffer_policy;	/* buffering policy */
 #endif /* WIRED_POLICY*/
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
@@ -559,12 +559,12 @@ static bool assign_channel(struct subscriber_t *user)
 		(void)write(user-subscribers, "\r\n", 2);
 	    }
 	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
+#ifndef WIRED_POLICY
+	    gps_clear_fix(&user->fixbuffer);
+#endif /* WIRED_POLICY */
 	}
     }
 
-#ifndef WIRED_POLICY
-    gps_clear_fix(&user->fixbuffer);
-#endif /* WIRED_POLICY */
     return true;
 }
 /*@ +branchstate +usedef +globstate @*/
