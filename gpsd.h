@@ -9,15 +9,6 @@
 #include "config.h"
 #include "gps.h"
 
-#if (	!defined(EARTHMATE_ENABLE) && !defined(EVERMORE_ENABLE) && \
-	!defined(FV18_ENABLE) && !defined(GARMIN_ENABLE) && \
-	!defined(ITALK_ENABLE) && !defined(ITRAX_ENABLE) && \
-	!defined(NMEA_ENABLE) && !defined(SIRF_ENABLE) && \
-	!defined(TNT_ENABLE) && !defined(TRIPMATE_ENABLE) && \
-	!defined(TSIP_ENABLE))
-#error Cannot build gpsd without any protocols enabled
-#endif
-
 /* Some internal capabilities depend on which drivers we're compiling. */
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	

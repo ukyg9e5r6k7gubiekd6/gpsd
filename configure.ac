@@ -450,8 +450,6 @@ dnl    AC_SUBST(DBUS_GLIB_LIBS)
 dnl fi
 AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
-AC_OUTPUT(Makefile gpsd.spec)
-
 dnl Output the configuration summary
 echo ""
 echo "=========================================="
@@ -479,5 +477,19 @@ echo "Enable DBUS support     : $ac_dbus"
 echo "Limited max client fd   : $ac_maxclientfd"
 echo "Limited max devices     : $ac_maxdevices"
 echo "------------------------------------------"
+
+if test	x"$ac_nmea" = "xno" -a \
+	x"$ac_fv18" = "xno" -a \
+	x"$ac_sirf" = "xno" -a \
+	x"$ac_tsip" = "xno" -a \
+	x"$ac_tripmate" = "xno" -a \
+	x"$ac_earthmate" = "xno" -a \
+	x"$ac_itrax" = "xno" -a \
+	x"$ac_italk" = "xno" -a \
+	x"$ac_garmin" = "xno" -a \
+	x"$ac_evermore" = "xno"; then
+    AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
+fi
+AC_OUTPUT(Makefile gpsd.spec)
 echo "Configure finished, type 'make' to build."
 
