@@ -275,6 +275,9 @@ AC_ARG_ENABLE(rtcm104,
                  [disable rtcm104 support]),
   [ac_rtcm104=$enableval], [ac_rtcm104=yes])
 AC_MSG_CHECKING([for rtcm104 support])
+if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_italk" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno"; then
+    ac_rtcm104=no
+fi
 if test x"$ac_rtcm104" = "xyes"; then
     AC_MSG_RESULT([yes])
 	AC_DEFINE([RTCM104_ENABLE], 1, [rtcm104 binary support])
