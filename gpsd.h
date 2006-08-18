@@ -14,7 +14,7 @@
 	!defined(ITALK_ENABLE) && !defined(ITRAX_ENABLE) && \
 	!defined(NMEA_ENABLE) && !defined(SIRF_ENABLE) && \
 	!defined(TNT_ENABLE) && !defined(TRIPMATE_ENABLE) && \
-	!defined(TSIP_ENABLE) && !defined(ZODIAC_ENABLE))
+	!defined(TSIP_ENABLE))
 #error Cannot build gpsd without any protocols enabled
 #endif
 
