@@ -1166,7 +1166,7 @@ static void handle_control(int sfd, char *buf)
     } else if (buf[0] == '!') {
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
-	if (!eq) {
+	if (eq == NULL) {
 	    gpsd_report(1,"<= control(%d): ill-formed command \n", sfd);
 	    (void)write(sfd, "ERROR\n", 3);
 	} else {
