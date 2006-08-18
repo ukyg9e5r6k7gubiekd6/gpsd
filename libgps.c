@@ -455,13 +455,15 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    PRN[j]=elevation[j]=azimuth[j]=ss[j]=used[j]=0;
 			}
 			for (j = 0, gpsdata->satellites_used = 0; j < gpsdata->satellites; j++) {
-			    sp = strchr(sp, ':') + 1;
-			    (void)sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
-			    PRN[j] = i1;
-			    elevation[j] = i2; azimuth[j] = i3;
-			    ss[j] = i4; used[j] = i5;
-			    if (i5 == 1)
-                                gpsdata->satellites_used++;
+			    if ((sp = strchr(sp, ':')) != NULL) {
+				sp++;
+				(void)sscanf(sp, "%d %d %d %d %d", &i1, &i2, &i3, &i4, &i5);
+				PRN[j] = i1;
+				elevation[j] = i2; azimuth[j] = i3;
+				ss[j] = i4; used[j] = i5;
+				if (i5 == 1)
+				    gpsdata->satellites_used++;
+			    }
 			}
 			/*@ -compdef @*/
 			memcpy(gpsdata->PRN, PRN, sizeof(PRN));
