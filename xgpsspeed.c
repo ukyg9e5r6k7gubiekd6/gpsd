@@ -174,16 +174,18 @@ int main(int argc, char **argv)
     gps_set_raw_hook(gpsdata, update_display);
 
     if (device) {
-	char *channelcmd = (char *)malloc(strlen(device)+3);
+	char *channelcmd;
+	size_t l;
+	l = strlen(device)+4;
 
-	if (channelcmd) {
-	    /*@i1@*/(void)strcpy(channelcmd, "F=");
-	    (void)strcpy(channelcmd+2, device);
+	if ((channelcmd = (char *)malloc(l)) != NULL){
+	    /*@i1@*/(void)strlcpy(channelcmd, "F=", l);
+	    (void)strlcpy(channelcmd+2, device, l);
 	    (void)gps_query(gpsdata, channelcmd);
 	    (void)free(channelcmd);
 	}
     }
-	
+
     (void)gps_query(gpsdata, "w+x\n");
 
     (void)XtAppMainLoop(app);

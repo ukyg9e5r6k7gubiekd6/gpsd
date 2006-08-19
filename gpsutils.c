@@ -132,7 +132,7 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     /*@ -aliasunique @*/
     (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
     /*@ -aliasunique @*/
-    (void)strcat(isotime, "Z");
+    (void)strlcat(isotime, "Z", 28);
     return isotime;
 }
 

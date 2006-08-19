@@ -422,11 +422,13 @@ int main(int argc, char *argv[])
 
     /* If the user requested a specific device, try to change to it. */
     if (device) {
-	char *channelcmd = (char *)malloc(strlen(device)+3);
+	char *channelcmd;
+	size_t l;
+	l = strlen(device)+4;
 
-	if (channelcmd) {
-	    /*@i@*/(void)strcpy(channelcmd, "F=");
-	    (void)strcpy(channelcmd+2, device);
+	if ((channelcmd = (char *)malloc(l)) != NULL){
+	    /*@i@*/(void)strlcpy(channelcmd, "F=", l);
+	    (void)strlcpy(channelcmd+2, device, l);
 	    (void)gps_query(gpsdata, channelcmd);
 	    (void)free(channelcmd);
 	}

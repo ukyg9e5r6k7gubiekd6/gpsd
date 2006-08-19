@@ -47,7 +47,7 @@ static void tnt_add_checksum(char *sentence)
 	p++;
     }
     *p++ = '*';
-    /*@i@*/sprintf(p, "%02X\r\n", sum);
+    /*@i@*/snprintf(p, 4, "%02X\r\n", sum);
 }
 
 static int tnt_send(int fd, const char *fmt, ... )
@@ -59,7 +59,7 @@ static int tnt_send(int fd, const char *fmt, ... )
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    strcat(buf, "*");
+    strlcat(buf, "*", BUFSIZ);
     tnt_add_checksum(buf);
     status = (int)write(fd, buf, strlen(buf));
     if (status == (int)strlen(buf)) {

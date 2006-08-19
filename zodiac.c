@@ -372,7 +372,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     for (i = 0; i < (int)session->outbuflen; i++)
 	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
 		       "%02x", (unsigned int)session->outbuffer[i]);
-    (void)strcat(buf, "\n");
+    (void)strlcat(buf, "\n", BUFSIZ);
     gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf);
 
     if (session->outbuflen < 10)

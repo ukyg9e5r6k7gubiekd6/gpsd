@@ -235,27 +235,27 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 		session->gpsdata.fix.mode,
 		session->gpsdata.satellites_used);
 	if (isnan(session->gpsdata.hdop))
-	    (void)strcat(bufp, ",");
+	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
 			   "%.2f,",session->gpsdata.hdop);
 	if (isnan(session->gpsdata.fix.altitude))
-	    (void)strcat(bufp, ",");
+	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
 			   "%.1f,M,", session->gpsdata.fix.altitude);
 	if (isnan(session->gpsdata.separation))
-	    (void)strcat(bufp, ",");
+	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
 			   "%.3f,M,", session->gpsdata.separation);
 	if (isnan(session->mag_var)) 
-	    (void)strcat(bufp, ",");
+	    (void)strlcat(bufp, ",", len);
 	else {
 	    (void)snprintf(bufp+strlen(bufp),
 			   len-strlen(bufp),
 			   "%3.2f,", fabs(session->mag_var));
-	    (void)strcat(bufp, (session->mag_var > 0) ? "E": "W");
+	    (void)strlcat(bufp, (session->mag_var > 0) ? "E": "W", len);
 	}
 	nmea_add_checksum(bufp);
     }
@@ -332,7 +332,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     if (session->packet_type == ZODIAC_PACKET && session->driver.zodiac.Zs[0] != 0) {
 	bufp += strlen(bufp);
 	bufp2 = bufp;
-	strcpy(bufp, "$PRWIZCH");
+	(void)strlcpy(bufp, "$PRWIZCH", len);
 	for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	    len -= snprintf(bufp+strlen(bufp), len,
 			  ",%02u,%X", 
@@ -363,12 +363,12 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     }
     for (i = j; i < session->device_type->channels; i++) {
 	bufp += strlen(bufp);
-	(void)strcpy(bufp, ",");
+	(void)strlcpy(bufp, ",", len);
     }
     bufp += strlen(bufp);
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
     if (session->gpsdata.fix.mode == MODE_NO_FIX)
-	(void)strcat(bufp, ",,,");
+	(void)strlcat(bufp, ",,,", len);
     else
 	(void)snprintf(bufp, len-strlen(bufp),
 		       "%.1f,%.1f,%.1f*", 

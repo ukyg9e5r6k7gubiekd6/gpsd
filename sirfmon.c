@@ -144,7 +144,7 @@ static int nmea_send(int fd, const char *fmt, ... )
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    strcat(buf, "*");
+    strlcat(buf, "*", BUFLEN);
     nmea_add_checksum(buf);
     (void)fputs(buf, stderr);		/* so user can watch the baud hunt */
     status = (size_t)write(fd, buf, strlen(buf));

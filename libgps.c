@@ -32,7 +32,7 @@ extern char *strtok_r(char *, const char *, char **);
     double fdsec, fsec, fdeg, fmin;
 
     if ( f < 0 || f > 360 ) {
-	strcpy( str, "nan");
+	strlcpy( str, "nan", 40);
 	return str;
     }
 
@@ -358,7 +358,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    nf.pitch = nf.roll = nf.dip = nf.heading = NAN;
 #endif /* HEADING_FIX */
 			    gpsdata->fix = nf;
-			    (void)strcpy(gpsdata->tag, tag);
+			    (void)strlcpy(gpsdata->tag, tag, MAXTAGLEN+1);
 			    gpsdata->set |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET;
 			    gpsdata->status = STATUS_FIX;
 			    gpsdata->set |= STATUS_SET;
@@ -770,8 +770,8 @@ int main(int argc, char *argv[])
     collect = gps_open(NULL, 0);
     gps_set_raw_hook(collect, dumpline);
     if (optind < argc) {
-	strcpy(buf, argv[optind]);
-	strcat(buf,"\n");
+	strlcpy(buf, argv[optind], BUFSIZ);
+	strlcat(buf,"\n", BUFSIZ);
 	gps_query(collect, buf);
 	data_dump(collect, time(NULL));
     } else {

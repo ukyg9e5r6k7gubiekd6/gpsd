@@ -20,8 +20,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	char buf[BUFSIZ];
 	va_list ap;
 
-	strcpy(buf, progname);
-	strcat(buf, ": ");
+	strlcpy(buf, progname, BUFSIZ);
+	strlcat(buf, ": ", BUFSIZ);
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);
