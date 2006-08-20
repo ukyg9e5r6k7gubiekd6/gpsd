@@ -11,7 +11,7 @@
 
 #define MONTHSPERYEAR	12		/* months per calendar year */
 
-void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
+void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
     fixp->time = NAN;
@@ -34,35 +34,35 @@ void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
     fixp->dip = NAN;
 }
 
-unsigned int gps_valid_fields(/*@ in @*/struct gps_fix_t *fixp)
+unsigned int gps_valid_fields(/*@in@*/struct gps_fix_t *fixp)
 {
     unsigned int valid = 0;
 
-    if (isnan(fixp->time) != 0)
+    if (isnan(fixp->time) == 0)
 	valid |= TIME_SET;
     if (fixp->mode != MODE_NOT_SEEN)
 	valid |= MODE_SET;
-    if (isnan(fixp->latitude) !=0 && isnan(fixp->longitude) !=0)
+    if (isnan(fixp->latitude) == 0 && isnan(fixp->longitude) == 0)
 	valid |= LATLON_SET;
-    if (isnan(fixp->altitude) != 0)
+    if (isnan(fixp->altitude) == 0)
 	valid |= ALTITUDE_SET;
-    if (isnan(fixp->track) != 0)
+    if (isnan(fixp->track) == 0)
 	valid |= TRACK_SET;
-    if (isnan(fixp->speed) != 0)
+    if (isnan(fixp->speed) == 0)
 	valid |= SPEED_SET;
-    if (isnan(fixp->climb) != 0)
+    if (isnan(fixp->climb) == 0)
 	valid |= CLIMB_SET;
-    if (isnan(fixp->ept) != 0)
+    if (isnan(fixp->ept) == 0)
 	valid |= TIMERR_SET;
-    if (isnan(fixp->eph) != 0)
+    if (isnan(fixp->eph) == 0)
 	valid |= HERR_SET;
-    if (isnan(fixp->epv) != 0)
+    if (isnan(fixp->epv) == 0)
 	valid |= VERR_SET;
-    if (isnan(fixp->epd) != 0)
+    if (isnan(fixp->epd) == 0)
 	valid |= TRACKERR_SET;
-    if (isnan(fixp->eps) != 0)
+    if (isnan(fixp->eps) == 0)
 	valid |= SPEEDERR_SET;
-    if (isnan(fixp->epc) != 0)
+    if (isnan(fixp->epc) == 0)
 	valid |= CLIMBERR_SET;
     return valid;
 }
