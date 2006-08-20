@@ -684,10 +684,10 @@ int nmea_send(int fd, const char *fmt, ... )
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     if (fmt[0] == '$') {
-	strlcat(buf, "*", BUFSIZ);
+	(void)strlcat(buf, "*", BUFSIZ);
 	nmea_add_checksum(buf);
     } else
-	strlcat(buf, "\r\n", BUFSIZ);
+	(void)strlcat(buf, "\r\n", BUFSIZ);
     status = (int)write(fd, buf, strlen(buf));
     if (status == (int)strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);

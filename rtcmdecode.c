@@ -18,7 +18,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	char buf[BUFSIZ];
 	va_list ap;
 
-	strlcpy(buf, "rtcmdecode: ", BUFSIZ);
+	(void)strlcpy(buf, "rtcmdecode: ", BUFSIZ);
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 	va_end(ap);

@@ -1,9 +1,10 @@
-#include "config.h"
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
+#include "config.h"
+
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */

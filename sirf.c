@@ -491,7 +491,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    /* HDOP should be available at byte 89, but in 231 it's zero. */
 	    mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET; 
 	    session->gpsdata.sentence_length = 91;
-	    strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
+	    (void)strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
 	}
 	return mask;
 

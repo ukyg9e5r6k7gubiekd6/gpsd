@@ -953,7 +953,7 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 6: 			/* NOP msg */
-	strlcat(buf, "N\n", buflen);
+	(void)strlcat(buf, "N\n", buflen);
 	break;
 
     case 7:

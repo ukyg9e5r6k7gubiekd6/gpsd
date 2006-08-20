@@ -32,7 +32,7 @@ extern char *strtok_r(char *, const char *, char **);
     double fdsec, fsec, fdeg, fmin;
 
     if ( f < 0 || f > 360 ) {
-	strlcpy( str, "nan", 40);
+	(void)strlcpy( str, "nan", 40);
 	return str;
     }
 
@@ -621,6 +621,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
  * Returns strlen(src) + MIN(siz, strlen(initial dst)).
  * If retval >= siz, truncation occurred.
  */
+/*@ -usedef -mustdefine @*/
 size_t
 strlcat(char *dst, const char *src, size_t siz)
 {
@@ -632,7 +633,7 @@ strlcat(char *dst, const char *src, size_t siz)
 	/* Find the end of dst and adjust bytes left but don't go past end */
 	while (n-- != 0 && *d != '\0')
 		d++;
-	dlen = d - dst;
+	dlen = (size_t)(d - dst);
 	n = siz - dlen;
 
 	if (n == 0)
@@ -648,6 +649,7 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));	/* count does not include NUL */
 }
+/*@ +usedef +mustdefine @*/
 #endif /* HAVE_STRLCAT */
 
 #ifndef HAVE_STRLCPY
@@ -693,11 +695,11 @@ strlcpy(char *dst, const char *src, size_t siz)
 	if (n == 0) {
 		if (siz != 0)
 			*d = '\0';		/* NUL-terminate dst */
-		while (*s++)
-			;
+		while (*s++ != '\0')
+			continue;
 	}
 
-	return(s - src - 1);	/* count does not include NUL */
+	return((size_t)(s - src - 1));	/* count does not include NUL */
 }
 #endif /* HAVE_STRLCPY */
 

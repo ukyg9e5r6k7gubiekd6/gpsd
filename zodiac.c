@@ -349,11 +349,11 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     unsigned int id = (unsigned int)((session->outbuffer[3]<<8) | session->outbuffer[2]);
 
     if (session->packet_type != ZODIAC_PACKET) {
+	struct gps_type_t **dp;
 	gpsd_report(2, "zodiac_analyze packet type %d\n",session->packet_type);
  	// Wrong packet type ? 
 	// Maybe find a trigger just in case it's an Earthmate
 	gpsd_report(9, "Is this a trigger: %s ?\n", (char*)session->outbuffer);
-	struct gps_type_t **dp;
 
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char	*trigger = (*dp)->trigger;

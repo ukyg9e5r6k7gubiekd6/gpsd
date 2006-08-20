@@ -527,7 +527,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	l = strlen(device)+4;
 
 	if ((channelcmd = (char *)malloc(l)) != NULL){
-	    /*@i1@*/(void)strlcpy(channelcmd, "F=", l);
+	    (void)strlcpy(channelcmd, "F=", l);
 	    (void)strlcpy(channelcmd+2, device, l);
 	    (void)gps_query(gpsdata, channelcmd);
 	    (void)free(channelcmd);

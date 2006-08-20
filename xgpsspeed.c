@@ -179,10 +179,12 @@ int main(int argc, char **argv)
 	l = strlen(device)+4;
 
 	if ((channelcmd = (char *)malloc(l)) != NULL){
-	    /*@i1@*/(void)strlcpy(channelcmd, "F=", l);
+	    /*@ -compdef @*/
+	    (void)strlcpy(channelcmd, "F=", l);
 	    (void)strlcpy(channelcmd+2, device, l);
 	    (void)gps_query(gpsdata, channelcmd);
 	    (void)free(channelcmd);
+	    /*@ +compdef @*/
 	}
     }
 

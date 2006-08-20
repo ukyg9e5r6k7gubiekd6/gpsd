@@ -395,7 +395,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 
     /*@ -boolops @*/
     if ((amp = strchr(caster, '@')) != NULL) {
-	if ((colon = strchr(caster, ':') != NULL) &&  colon < amp) { 
+	if (((colon = strchr(caster, ':')) != NULL) &&  colon < amp) { 
 	    auth = caster;
 	    *amp = '\0';
 	    caster = amp + 1;

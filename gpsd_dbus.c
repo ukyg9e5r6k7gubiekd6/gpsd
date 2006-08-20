@@ -1,7 +1,7 @@
+#include <stdio.h>
 #include <config.h>
 #ifdef DBUS_ENABLE
 #include <gpsd_dbus.h>
-#include <stdio.h>
 
 static DBusConnection* connection = NULL;
 
