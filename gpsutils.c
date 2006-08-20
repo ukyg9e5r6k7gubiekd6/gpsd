@@ -34,6 +34,72 @@ void gps_clear_fix(/*@ out @*/struct gps_fix_t *fixp)
     fixp->dip = NAN;
 }
 
+int gps_valid_fields(/*@ in @*/struct gps_fix_t *fixp)
+{
+    int valid = 0;
+
+    if (isnan(fixp->time) != 0)
+	valid |= TIME_SET;
+    if (fixp->mode != MODE_NOT_SEEN)
+	valid != MODE_SET;
+    if (isnan(fixp->latitude) !=0 && isnan(fixp->longitude) !=0)
+	valid != LATLON_SET;
+    if (isnan(fixp->altitude) != 0)
+	valid |= ALTITUDE_SET;
+    if (isnan(fixp->track) != 0)
+	valid |= TRACK_SET;
+    if (isnan(fixp->speed) != 0)
+	valid |= SPEED_SET;
+    if (isnan(fixp->climb) != 0)
+	valid |= CLIMB_SET;
+    if (isnan(fixp->ept) != 0)
+	valid |= TIMERR_SET;
+    if (isnan(fixp->eph) != 0)
+	valid |= HERR_SET;
+    if (isnan(fixp->epv) != 0)
+	valid |= VERR_SET;
+    if (isnan(fixp->epd) != 0)
+	valid |= TRACKERR_SET;
+    if (isnan(fixp->eps) != 0)
+	valid |= SPEEDERR_SET;
+    if (isnan(fixp->epc) != 0)
+	valid |= CLIMBERR_SET;
+    return valid;
+}
+
+char *gps_show_transfer(int transfer)
+{
+    static char showbuf[100];
+    showbuf[0] = '\0';
+    if ((transfer & TIME_SET)!=0)
+	strlcat(showbuf, "time,", sizeof(showbuf));
+    if ((transfer & LATLON_SET)!=0)
+	strlcat(showbuf, "latlon,", sizeof(showbuf));
+    if ((transfer & MODE_SET)!=0)
+	strlcat(showbuf, "mode,", sizeof(showbuf));
+    if ((transfer & ALTITUDE_SET)!=0)
+	strlcat(showbuf, "altitude,", sizeof(showbuf));
+    if ((transfer & TRACK_SET)!=0)
+	strlcat(showbuf, "track,", sizeof(showbuf));
+    if ((transfer & SPEED_SET)!=0)
+	strlcat(showbuf, "speed,", sizeof(showbuf));
+    if ((transfer & CLIMB_SET)!=0)
+	strlcat(showbuf, "climb,", sizeof(showbuf));
+    if ((transfer & TIMERR_SET)!=0)
+	strlcat(showbuf, "timerr,", sizeof(showbuf));
+    if ((transfer & HERR_SET)!=0)
+	strlcat(showbuf, "herr,", sizeof(showbuf));
+    if ((transfer & VERR_SET)!=0)
+	strlcat(showbuf, "verr,", sizeof(showbuf));
+    if ((transfer & SPEEDERR_SET)!=0)
+	strlcat(showbuf, "speederr,", sizeof(showbuf));
+    if ((transfer & CLIMBERR_SET)!=0)
+	strlcat(showbuf, "climberr,", sizeof(showbuf));
+    if (strlen(showbuf)>0)
+	showbuf[strlen(showbuf)-1] = '\0';
+    return showbuf;
+}
+
 void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 		   gps_mask_t transfer,
 		   /*@ in @*/struct gps_fix_t *from)

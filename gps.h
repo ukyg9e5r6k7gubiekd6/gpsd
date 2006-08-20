@@ -314,6 +314,8 @@ extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *, 
 			  gps_mask_t,
 			  /*@ in @*/struct gps_fix_t *);
+extern int gps_valid_fields(/*@ in @*/struct gps_fix_t *);
+extern char *gps_show_transfer(int);
 
 extern time_t mkgmtime(register struct tm *);
 extern double timestamp(void);
