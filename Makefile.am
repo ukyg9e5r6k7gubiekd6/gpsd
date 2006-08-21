@@ -14,7 +14,7 @@ XMLTO = xmlto
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
 DBUSPROGS = gpxlogger
-gpxlogger_LDADD = $(DBUS_GLIB_LIBS) -lm
+gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 endif
 
 if HAVE_RTCM104

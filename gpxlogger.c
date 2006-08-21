@@ -54,7 +54,6 @@ static void print_gpx_trk_end (void) {
 }
 
 static DBusHandlerResult handle_gps_fix (DBusMessage* message) {
-	DBusMessageIter	iter;
 	DBusError	error;
 	double		temp_time;
 
