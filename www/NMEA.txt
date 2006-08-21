@@ -750,6 +750,8 @@ Example: $GPGRS,024603.00,1,-1.8,-2.7,0.3,,,,,,,,,*6C
 
  Field Number: 
   1) Selection mode
+	       M=Manual, forced to operate in 2D or 3D
+	       A=Automatic, 3D/2D
   2) Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
   3) ID of 1st satellite used for fix
   4) ID of 2nd satellite used for fix

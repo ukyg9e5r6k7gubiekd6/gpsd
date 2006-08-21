@@ -349,7 +349,8 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     session->gpsdata.vdop = atof(field[count-1]);
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
-    for (i = 0; i < session->device_type->channels; i++) {
+    /* the magic 6 here counts the tag, two mode fields, and the DOP fields */
+    for (i = 0; i < count - 6; i++) {
         int prn = atoi(field[i+3]);
         if (prn > 0)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
