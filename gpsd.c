@@ -1556,6 +1556,9 @@ int main(int argc, char *argv[])
 	    changed = 0;
 	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
 	    {
+#ifndef WIRED_POLICY
+		gps_clear_fix(&channel->gpsdata.newdata);
+#endif /* WIRED_POLICY */
 		gpsd_report(5, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
