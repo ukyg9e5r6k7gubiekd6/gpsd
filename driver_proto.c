@@ -115,7 +115,7 @@ struct gps_type_t proto_binary =
 {
     .typename       = "Prototype driver",	/* full name of type */
     .trigger        = NULL,		/* recognize the type */
-    .channels       = 12,		/* consumer-grade GPS */
+    .channels       = 12,		/* used for dumping binary packets */
     .probe          = NULL,		/* no probe */
     .initializer    = proto_initializer,/* initialize the device */
     .get_packet     = packet_get,	/* use generic packet getter */

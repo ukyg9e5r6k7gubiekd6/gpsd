@@ -159,7 +159,7 @@ static void garmin_initializer(struct gps_device_t *session)
 static struct gps_type_t garmin = {
     .typename       = "Garmin Serial",	/* full name of type */
     .trigger        = "$PGRMC",		/* Garmin private */
-    .channels       = 12,		/* consumer-grade GPS */
+    .channels       = 12,		/* not used by this driver */
     .probe          = NULL,		/* no probe */
     .initializer    = garmin_initializer,/* probe for special types */
     .get_packet     = packet_get,	/* use generic packet getter */
@@ -183,7 +183,7 @@ static struct gps_type_t garmin = {
 static struct gps_type_t fv18 = {
     .typename       = "San Jose Navigation FV18",	/* full name of type */
     .trigger        = FV18_PROBE,	/* FV18s should echo the probe */
-    .channels       = 12,		/* consumer-grade GPS */
+    .channels       = 12,		/* not used by this driver */
     .probe          = NULL,		/* mo probe */
     .initializer    = NULL,		/* to be sent unconditionally */
     .get_packet     = packet_get,	/* how to get a packet */
@@ -247,7 +247,7 @@ static struct gps_type_t sirf_nmea = {
 #else
     .trigger       = NULL,		/* let the binary driver have it */
 #endif /* SIRF_ENABLE */
-    .channels      = 12,		/* consumer-grade GPS */
+    .channels      = 12,		/* not used by the NMEA parser */
     .probe         = NULL,		/* no probe */
     .initializer   = sirf_initializer,	/* turn off debugging messages */
     .get_packet    = packet_get,	/* how to get a packet */
@@ -336,7 +336,7 @@ static void earthmate_initializer(struct gps_device_t *session)
 static struct gps_type_t earthmate = {
     .typename      = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .trigger       = "EARTHA",			/* Earthmate trigger string */
-    .channels      = 12,			/* consumer-grade GPS */
+    .channels      = 12,			/* not used by NMEA parser */
     .probe         = NULL,			/* no probe */
     .initializer   = earthmate_initializer,	/* switch us to Zodiac mode */
     .get_packet    = packet_get,		/* how to get a packet */
@@ -483,7 +483,7 @@ static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 static struct gps_type_t rtcm104 = {
     .typename      = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
-    .channels      = 12,		/* consumer-grade GPS */
+    .channels      = 0,			/* not used */
     .probe         = NULL,		/* no probe */
     .initializer   = NULL,		/* no initializer */
     .get_packet    = packet_get,	/* how to get a packet */
