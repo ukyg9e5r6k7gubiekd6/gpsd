@@ -61,6 +61,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
+    session->gpsdata.set &=~ FIX_SET;
     session->gpsdata.hdop = NAN;
     session->gpsdata.vdop = NAN;
     session->gpsdata.pdop = NAN;
@@ -380,8 +381,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     if (finite(session->gpsdata.fix.eph)
 	|| finite(session->gpsdata.fix.epv)
 	|| finite(session->gpsdata.epe)) {
-        // output PGRME
-        // only if realistic
+        /* output PGRME only if realistic */
         (void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,%.2f,%.2f",
 	    ZEROIZE(session->gpsdata.fix.eph), 
@@ -416,6 +416,7 @@ static void apply_error_model(struct gps_device_t *session)
     double uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
 
     session->gpsdata.fix.ept = 0.005;
+    session->gpsdata.set |= TIMERR_SET;
     if ((session->gpsdata.set & HERR_SET)==0 
 	&& (session->gpsdata.set & HDOP_SET)!=0) {
 	session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
@@ -444,9 +445,8 @@ static void apply_error_model(struct gps_device_t *session)
 		double t = session->gpsdata.fix.time-session->lastfix.time;
 		double e = session->lastfix.eph + session->gpsdata.fix.eph;
 		session->gpsdata.fix.eps = e/t;
-	    }
-	    if (session->gpsdata.fix.eps != NAN)
 		session->gpsdata.set |= SPEEDERR_SET;
+	    }
 	}
 	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.epc = NAN;
@@ -456,9 +456,8 @@ static void apply_error_model(struct gps_device_t *session)
 		double e = session->lastfix.epv + session->gpsdata.fix.epv;
 		/* if vertical uncertainties are zero this will be too */
 		session->gpsdata.fix.epc = e/t;
-	    }
-	    if (isnan(session->gpsdata.fix.epc)==0)
 		session->gpsdata.set |= CLIMBERR_SET;
+	    }
 	    /*
 	     * We compute track error solely from the position of this 
 	     * fix and the last one.  The maximum track error, as seen from the
@@ -483,6 +482,7 @@ static void apply_error_model(struct gps_device_t *session)
 		    double hyp = sqrt(adj*adj + opp*opp);
 		    session->gpsdata.fix.epd = RAD_2_DEG * 2 * asin(opp / hyp);
 		}
+		session->gpsdata.set |= TRACKERR_SET;
 	    }
 	}
     }
