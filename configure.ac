@@ -367,9 +367,9 @@ fi
 
 dnl allow fixing of the buffering policy
 AC_ARG_ENABLE(wired-policy,
-  AC_HELP_STRING([--enable-wired-policy],
-                 [enable wired-in j=0 buffering policy]),
-  [ac_wired_policy=$enableval], [ac_wired_policy=no])
+  AC_HELP_STRING([--disable-wired-policy],
+                 [enable j command]),
+  [ac_wired_policy=$enableval], [ac_wired_policy=yes])
 AC_MSG_CHECKING([for wired-in buffer policy])
 if test x"$ac_wired_policy" = "xyes"; then
     AC_MSG_RESULT([yes])

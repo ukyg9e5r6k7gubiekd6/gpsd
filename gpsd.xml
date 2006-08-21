@@ -334,6 +334,7 @@ return '?' at start of session, before the first full packet has been
 received from the GPS, because its type is not yet known.</para></listitem>
 </varlistentry>
 
+<!--
 <varlistentry>
 <term>j</term>
 <listitem>
@@ -352,6 +353,7 @@ allows stale data but smooths the display.</para>
 command is experimental and its semantics are subject to change.)</para> 
 </listitem>
 </varlistentry>
+-->
 
 <varlistentry>
 <term>k</term>

@@ -559,9 +559,6 @@ static bool assign_channel(struct subscriber_t *user)
 		(void)write(user-subscribers, "\r\n", 2);
 	    }
 	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
-#ifndef WIRED_POLICY
-	    gps_clear_fix(&user->fixbuffer);
-#endif /* WIRED_POLICY */
 	}
     }
 
@@ -1202,10 +1199,12 @@ int main(int argc, char *argv[])
     int i, option, msock, cfd, dfd; 
     bool go_background = true;
     struct timeval tv;
-    // extern char *optarg;
 #ifdef RTCM104_ENABLE
     struct gps_device_t *gps;
 #endif /* RTCM104_ENABLE */
+#ifndef WIRED_POLICY
+    struct subscriber_t *sub;
+#endif /* WIRED_POLICY */
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
@@ -1358,6 +1357,11 @@ int main(int argc, char *argv[])
     }
     gpsd_report(2, "running with effective group ID %d\n", getegid());
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
+
+#ifndef WIRED_POLICY
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERFD; sub++)
+	gps_clear_fix(&sub->fixbuffer);
+#endif /* WIRED_POLICY */
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
@@ -1578,14 +1582,20 @@ int main(int argc, char *argv[])
 			 sub < subscribers + MAXSUBSCRIBERFD;
 			 sub++) {
 			if (sub->device == channel) {
+			    if ((changed & CYCLE_START_SET)!=0)
+				gps_clear_fix(&sub->fixbuffer);
+			    //printf("Before policy: %s\n", gps_show_transfer(gps_valid_fields(&sub->fixbuffer)));
 			    if (sub->buffer_policy == all)
 				gps_merge_fix(&sub->fixbuffer, 
 					      FIX_SET,
 					      &sub->device->gpsdata.fix);
-			    else
+			    else {
+				//printf("Changed: %s\n", gps_show_transfer(changed));
 				gps_merge_fix(&sub->fixbuffer, 
 					      changed,
 					      &sub->device->gpsdata.fix);
+			    }
+			    //printf("After policy: %s\n", gps_show_transfer(gps_valid_fields(&sub->fixbuffer)));
 			}
 		    }
 		}

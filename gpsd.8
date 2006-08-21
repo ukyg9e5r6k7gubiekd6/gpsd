@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPSD" "8" "08/18/2006" "9 Aug 2004" "9 Aug 2004"
+.TH "GPSD" "8" "08/21/2006" "9 Aug 2004" "9 Aug 2004"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -127,13 +127,6 @@ This command returns either '?' if no device of the specified type(s) could be a
 .TP
 i
 Returns a text string identifying the GPS. The string may contain spaces and is terminated by CR\-LF. This command will return '?' at start of session, before the first full packet has been received from the GPS, because its type is not yet known.
-.TP
-j
-Get or set buffering policy; this only matters for NMEA devices which report fix data in several separate sentences during the poll cycle (and in particular it
-\fIdoesn't\fR
-matter for SiRF chips). The default (j=0) is to clear all fix data at the start of each poll cycle, so until the sentence that reports a given piece of data arrives queries will report ?. Setting j=1 will disable this, retaining data from the previous cycle. This is a per\-user\-channel bit, not a per\-device one. The j=0 setting is hyper\-correct and never displays stale data, but may produce a jittery display; the j=1 setting allows stale data but smooths the display.
-.sp
-(At protocol level below 3, there was no J command. Note, this command is experimental and its semantics are subject to change.)
 .TP
 k
 Returns a line consisting of "K=" followed by an integer count of of all GPS devices known to

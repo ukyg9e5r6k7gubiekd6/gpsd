@@ -177,10 +177,12 @@ Here are the variables and values it checks:</para>
 SIGHUP or SIGINT; given default terminal settings this will happen
 when you type Ctl-C at it.  It will also terminate on 'q'</para>
 
+<!--
 <para>The 'j' command toggles whether or not fix data is cleared at
 start of cycle; see
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 for discussion.</para>
+-->
 
 </refsect2>
 <refsect2><title>cgpxlogger</title>
