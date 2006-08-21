@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
-#define MAXCHANNELS	14	/* maximum GPS channels (*not* satellites!) */
+#define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
 
 /* 
