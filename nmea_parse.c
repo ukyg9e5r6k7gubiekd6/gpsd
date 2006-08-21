@@ -344,9 +344,9 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     else
         mask = MODE_SET;
     gpsd_report(3, "GPGSA sets mode %d\n", session->gpsdata.newdata.mode);
-    session->gpsdata.pdop = atof(field[session->device_type->channels+3]);
-    session->gpsdata.hdop = atof(field[session->device_type->channels+4]);
-    session->gpsdata.vdop = atof(field[session->device_type->channels+5]);
+    session->gpsdata.pdop = atof(field[count-3]);
+    session->gpsdata.hdop = atof(field[count-2]);
+    session->gpsdata.vdop = atof(field[count-1]);
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     for (i = 0; i < session->device_type->channels; i++) {
