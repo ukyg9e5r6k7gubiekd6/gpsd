@@ -387,7 +387,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	gpsd_zero_satellites(&session->gpsdata);
 
     for (fldnum = 4; fldnum < count; ) {
-	if (session->gpsdata.satellites >= session->device_type->channels) {
+	if (session->gpsdata.satellites >= MAXCHANNELS) {
 	    gpsd_report(0, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
