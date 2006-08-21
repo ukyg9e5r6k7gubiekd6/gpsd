@@ -16,6 +16,7 @@ void gps_clear_fix(/*@out@*/struct gps_fix_t *fixp)
 {
     fixp->time = NAN;
     fixp->mode = MODE_NOT_SEEN;
+    fixp->latitude = fixp->longitude = NAN;
     fixp->track = NAN;
     fixp->speed = NAN;
     fixp->climb = NAN;
