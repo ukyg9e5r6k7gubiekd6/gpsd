@@ -11,6 +11,7 @@
 #include <dbus/dbus-glib.h>
 
 #include <glib/gprintf.h>
+#include "config.h"
 
 DBusConnection* connection;
 
