@@ -35,6 +35,7 @@
 #include <ncurses.h>                                                         
 #include <signal.h>
 
+#include "config.h"
 #include "gps.h"
 
 /* Macro for declaring function arguments unused. */
