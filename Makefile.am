@@ -57,7 +57,7 @@ cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) -lncurses libgps.la -lm $(LI
 # Build cgpxlogger
 #
 cgpxlogger_SOURCES = cgpxlogger.c
-cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) -lncurses
+cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET)
 
 #
 # Build gpsd
