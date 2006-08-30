@@ -61,6 +61,7 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
 	    gpsd_report(1, "shmat failed\n");
 	    return NULL;
 	}
+        gpsd_report(4, "shmat(%d,0,0) succeeded\n");
 	return p;
 	/*@ +mustfreefresh */
     }

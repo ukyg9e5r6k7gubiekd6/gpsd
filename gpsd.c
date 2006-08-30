@@ -1319,6 +1319,8 @@ int main(int argc, char *argv[])
     if (getuid() == 0) {
 	(void)nice(-10);		/* for precise timekeeping increase priority */
 	(void)ntpshm_init(&context, nowait);
+    } else {
+	gpsd_report (2, "Unable to start ntpshm.  gpsd must run as root.\n");
     }
 #endif /* NTPSHM_ENABLE */
 
