@@ -417,27 +417,19 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
      * the GPS clock, so we put the bound of the error
      * in as a constant pending getting it from each driver.
      */
-    if ((session->gpsdata.set & TIMERR_SET)==0) {
+    if ((session->gpsdata.set & TIMERR_SET)==0)
 	fix->ept = 0.005;
-	session->gpsdata.set |= TIMERR_SET;
-    }
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
 	if ((session->gpsdata.set & HERR_SET)==0 
-	    && (session->gpsdata.set & HDOP_SET)!=0) {
+	    && (session->gpsdata.set & HDOP_SET)!=0)
 	    fix->eph = session->gpsdata.hdop * uere;
-	    session->gpsdata.set |= HERR_SET;
-	}
 	if ((session->gpsdata.set & VERR_SET)==0 
-	    && (session->gpsdata.set & VDOP_SET)!=0) {
+	    && (session->gpsdata.set & VDOP_SET)!=0)
 	    fix->epv = session->gpsdata.vdop * uere;
-	    session->gpsdata.set |= VERR_SET;
-	}
 	if ((session->gpsdata.set & PERR_SET)==0
-	    && (session->gpsdata.set & PDOP_SET)!=0) {
+	    && (session->gpsdata.set & PDOP_SET)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
-	    session->gpsdata.set |= PERR_SET;
-	}
 	/*
 	 * If we have a current fix and an old fix, and the packet handler 
 	 * didn't set the speed error and climb error members itself, 
@@ -450,7 +442,6 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 		double t = fix->time-session->lastfix.time;
 		double e = session->lastfix.eph + fix->eph;
 		fix->eps = e/t;
-		session->gpsdata.set |= SPEEDERR_SET;
 	    }
 	}
 	if ((session->gpsdata.set & CLIMBERR_SET)==0 && fix->time > session->lastfix.time) {
@@ -461,7 +452,6 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 		double e = session->lastfix.epv + fix->epv;
 		/* if vertical uncertainties are zero this will be too */
 		fix->epc = e/t;
-		session->gpsdata.set |= CLIMBERR_SET;
 	    }
 	    /*
 	     * We compute track error solely from the position of this 
@@ -487,7 +477,6 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 		    double hyp = sqrt(adj*adj + opp*opp);
 		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
 		}
-		session->gpsdata.set |= TRACKERR_SET;
 	    }
 	}
     }
