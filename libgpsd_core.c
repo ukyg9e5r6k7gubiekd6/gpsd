@@ -67,6 +67,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.pdop = NAN;
     session->gpsdata.tdop = NAN;
     session->gpsdata.gdop = NAN;
+    session->gpsdata.epe = NAN;
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
@@ -403,11 +404,6 @@ static void apply_error_model(struct gps_device_t *session)
      * modeling stuff goes. Presently we don't know how to derive 
      * time error.
      *
-     * Field reports match the theoretical prediction that
-     * expected time error should be half the resolution of
-     * the GPS clock, so we put the bound of the error
-     * in as a constant pending getting it from each driver.
-     *
      * Some drivers set the position-error fields.  Only the Zodiacs 
      * report speed error.  Nobody reports track error or climb error.
      */
@@ -415,29 +411,38 @@ static void apply_error_model(struct gps_device_t *session)
 #define UERE_WITH_DGPS	2.0	/* meters, 95% confidence */
     double uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
 
-    session->gpsdata.fix.ept = 0.005;
-    session->gpsdata.set |= TIMERR_SET;
-    if ((session->gpsdata.set & HERR_SET)==0 
-	&& (session->gpsdata.set & HDOP_SET)!=0) {
-	session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
-	session->gpsdata.set |= HERR_SET;
-    }
-    if ((session->gpsdata.set & VERR_SET)==0 
-	&& (session->gpsdata.set & VDOP_SET)!=0) {
-	session->gpsdata.fix.epv = session->gpsdata.vdop * uere;
-	session->gpsdata.set |= VERR_SET;
-    }
-    if ((session->gpsdata.set & PERR_SET)==0
-	&& (session->gpsdata.set & PDOP_SET)!=0) {
-	session->gpsdata.epe = session->gpsdata.pdop * uere;
-	session->gpsdata.set |= PERR_SET;
-    }
     /*
-     * If we have a current fix and an old fix, and the packet handler 
-     * didn't set the speed error and climb error members itself, 
-     * try to compute them now.
+     * Field reports match the theoretical prediction that
+     * expected time error should be half the resolution of
+     * the GPS clock, so we put the bound of the error
+     * in as a constant pending getting it from each driver.
      */
+    if ((session->gpsdata.set & TIMERR_SET)==0) {
+	session->gpsdata.fix.ept = 0.005;
+	session->gpsdata.set |= TIMERR_SET;
+    }
+    /* Other error computations depend on having a valid fix */
     if (session->gpsdata.fix.mode >= MODE_2D) {
+	if ((session->gpsdata.set & HERR_SET)==0 
+	    && (session->gpsdata.set & HDOP_SET)!=0) {
+	    session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
+	    session->gpsdata.set |= HERR_SET;
+	}
+	if ((session->gpsdata.set & VERR_SET)==0 
+	    && (session->gpsdata.set & VDOP_SET)!=0) {
+	    session->gpsdata.fix.epv = session->gpsdata.vdop * uere;
+	    session->gpsdata.set |= VERR_SET;
+	}
+	if ((session->gpsdata.set & PERR_SET)==0
+	    && (session->gpsdata.set & PDOP_SET)!=0) {
+	    session->gpsdata.epe = session->gpsdata.pdop * uere;
+	    session->gpsdata.set |= PERR_SET;
+	}
+	/*
+	 * If we have a current fix and an old fix, and the packet handler 
+	 * didn't set the speed error and climb error members itself, 
+	 * try to compute them now.
+	 */
 	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
 	    session->gpsdata.fix.eps = NAN;
 	    if (session->lastfix.mode > MODE_NO_FIX 
