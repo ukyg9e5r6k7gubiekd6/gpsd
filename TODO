@@ -89,6 +89,14 @@ binutils 2.16.1 or later avoids it.
 
 ** To do:
 
+*** Move to lesstif
+
+FC6 will be dropping openmotif for licensing reasons, per
+<http://fedoraproject.org/wiki/RexDieter/openmotif>. Presently xgps
+uses it.  The announcement claims lesstif is in Fedora Extras,
+but this appears not to be true -- at least, yum doesn't find it.
+When it is available, we must try to move.
+
 *** SiRF firmware uploader
 
 Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 
