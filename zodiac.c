@@ -320,7 +320,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 	gpsd_report(1, "iode mismatch:%d\n", (getword(13+i) & 4096) ? 1 : 0);
     }
 #endif
-    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+    if (session->gpsdata.newdata.mode == MODE_NO_FIX)
 	session->gpsdata.status = STATUS_NO_FIX;
     else if (numcorrections == 0)
 	session->gpsdata.status = STATUS_FIX;

@@ -512,53 +512,27 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 
     //gpsd_zero_satellites(&session->gpsdata);
 
-#ifdef HEADING_FIX
-	// these fields are not handled by gps_merge_fix(), so must be written directly to the current fix structure
-#endif /* HEADING_FIX */
-    session->gpsdata.fix.time = timestamp();
-#ifndef HEADING_FIX
+    /*
+     * Heading maps to track.  
+     * Pitch maps to climb.  
+     * Roll maps to speed.
+     * Dip maps to altitude.
+     */
+    session->gpsdata.newdata.time = timestamp();
     session->gpsdata.newdata.track = atof(field[1]);
-#else /* HEADING_FIX */
-    session->gpsdata.fix.heading = atof(field[1]);
-#endif /* HEADING_FIX */
     session->gpsdata.headingStatus = *field[2];
-#ifndef HEADING_FIX
-    mask |= (TRACK_SET | MODE_SET);
-    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
-    //session->gpsdata.newdata.mode = MODE_2D;
-    session->gpsdata.newdata.mode = MODE_2D;
-    //session->gpsdata.newdata.mode = MODE_NO_FIX;
-
-    session->gpsdata.newdata.pitch = atof(field[3]);
-#else /* HEADING_FIX */
-    // this device does not provide track, mode, or status - we have to rely on other devices for that!
-//    mask |= (TRACK_SET | MODE_SET);
-//    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
-//    session->gpsdata.newdata.mode = MODE_2D;
-    
-    session->gpsdata.fix.pitch = atof(field[3]);
-#endif /* HEADING_FIX */
+    session->gpsdata.newdata.climb = atof(field[3]);
     session->gpsdata.pitchStatus = *field[4];
-
-#ifndef HEADING_FIX
-    session->gpsdata.newdata.roll = atof(field[5]);
-#else /* HEADING_FIX */
-    session->gpsdata.fix.roll = atof(field[5]);
-#endif /* HEADING_FIX */
+    session->gpsdata.newdata.speed = atof(field[5]);
     session->gpsdata.rollStatus = *field[6];
-
-#ifndef HEADING_FIX
     session->gpsdata.newdata.dip = atof(field[7]);
-#else /* HEADING_FIX */
-    session->gpsdata.fix.dip = atof(field[7]);
-#endif /* HEADING_FIX */
+    session->gpsdata.fix.altitude = atof(field[7]);
     session->gpsdata.horzField = atof(field[8]);
+    session->gpsdata.newdata.mode = MODE_2D;
+    mask |= (TRACK_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
+    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
-#ifndef HEADING_FIX
-    //gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.fix.headingStatus);
-#else /* HEADING_FIX */
-    //gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.heading, session->gpsdata.fix.headingStatus);
-#endif /* HEADING_FIX */
+    gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.fix.headingStatus);
     return mask;
 }
 #endif /* TNT_ENABLE */
