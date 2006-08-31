@@ -277,6 +277,7 @@ extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*
 extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
 extern /*@ observer @*/ char *gpsd_hexdump(const void *, size_t);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
 extern int ntpshm_init(struct gps_context_t *, bool);

@@ -396,7 +396,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 #endif /* BINARY_ENABLE */
 
 
-static void apply_error_model(struct gps_device_t *session)
+void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 /* compute errors and derived quantities */
 {
     /*
@@ -418,19 +418,19 @@ static void apply_error_model(struct gps_device_t *session)
      * in as a constant pending getting it from each driver.
      */
     if ((session->gpsdata.set & TIMERR_SET)==0) {
-	session->gpsdata.fix.ept = 0.005;
+	fix->ept = 0.005;
 	session->gpsdata.set |= TIMERR_SET;
     }
     /* Other error computations depend on having a valid fix */
-    if (session->gpsdata.fix.mode >= MODE_2D) {
+    if (fix->mode >= MODE_2D) {
 	if ((session->gpsdata.set & HERR_SET)==0 
 	    && (session->gpsdata.set & HDOP_SET)!=0) {
-	    session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
+	    fix->eph = session->gpsdata.hdop * uere;
 	    session->gpsdata.set |= HERR_SET;
 	}
 	if ((session->gpsdata.set & VERR_SET)==0 
 	    && (session->gpsdata.set & VDOP_SET)!=0) {
-	    session->gpsdata.fix.epv = session->gpsdata.vdop * uere;
+	    fix->epv = session->gpsdata.vdop * uere;
 	    session->gpsdata.set |= VERR_SET;
 	}
 	if ((session->gpsdata.set & PERR_SET)==0
@@ -443,24 +443,24 @@ static void apply_error_model(struct gps_device_t *session)
 	 * didn't set the speed error and climb error members itself, 
 	 * try to compute them now.
 	 */
-	if ((session->gpsdata.set & SPEEDERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.eps = NAN;
+	if ((session->gpsdata.set & SPEEDERR_SET)==0 && fix->time > session->lastfix.time) {
+	    fix->eps = NAN;
 	    if (session->lastfix.mode > MODE_NO_FIX 
-		&& session->gpsdata.fix.mode > MODE_NO_FIX) {
-		double t = session->gpsdata.fix.time-session->lastfix.time;
-		double e = session->lastfix.eph + session->gpsdata.fix.eph;
-		session->gpsdata.fix.eps = e/t;
+		&& fix->mode > MODE_NO_FIX) {
+		double t = fix->time-session->lastfix.time;
+		double e = session->lastfix.eph + fix->eph;
+		fix->eps = e/t;
 		session->gpsdata.set |= SPEEDERR_SET;
 	    }
 	}
-	if ((session->gpsdata.set & CLIMBERR_SET)==0 && session->gpsdata.fix.time > session->lastfix.time) {
-	    session->gpsdata.fix.epc = NAN;
+	if ((session->gpsdata.set & CLIMBERR_SET)==0 && fix->time > session->lastfix.time) {
+	    fix->epc = NAN;
 	    if (session->lastfix.mode > MODE_3D 
-		&& session->gpsdata.fix.mode > MODE_3D) {
-		double t = session->gpsdata.fix.time-session->lastfix.time;
-		double e = session->lastfix.epv + session->gpsdata.fix.epv;
+		&& fix->mode > MODE_3D) {
+		double t = fix->time-session->lastfix.time;
+		double e = session->lastfix.epv + fix->epv;
 		/* if vertical uncertainties are zero this will be too */
-		session->gpsdata.fix.epc = e/t;
+		fix->epc = e/t;
 		session->gpsdata.set |= CLIMBERR_SET;
 	    }
 	    /*
@@ -475,17 +475,17 @@ static void apply_error_model(struct gps_device_t *session)
 	     * hyp = len(AC) = len(AD). Yes, this normally leads to 
 	     * uncertainties near 180 when we're moving slowly.
 	     */
-	    session->gpsdata.fix.epd = NAN;
+	    fix->epd = NAN;
 	    if (session->lastfix.mode >= MODE_2D) {
 		double adj = earth_distance(
 		    session->lastfix.latitude,
 		    session->lastfix.longitude,
-		    session->gpsdata.fix.latitude,      
-		    session->gpsdata.fix.longitude);
+		    fix->latitude,      
+		    fix->longitude);
 		if (adj != 0) {
-		    double opp = session->gpsdata.fix.eph;
+		    double opp = fix->eph;
 		    double hyp = sqrt(adj*adj + opp*opp);
-		    session->gpsdata.fix.epd = RAD_2_DEG * 2 * asin(opp / hyp);
+		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
 		}
 		session->gpsdata.set |= TRACKERR_SET;
 	    }
@@ -610,7 +610,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->context->fixcnt++;
 
 	/* compute errors and derived quantities */
-	apply_error_model(session);
+	gpsd_error_model(session, &session->gpsdata.fix);
 
 	/* save the old fix for later uncertainty computations */
 	if (session->gpsdata.fix.mode >= MODE_2D)
