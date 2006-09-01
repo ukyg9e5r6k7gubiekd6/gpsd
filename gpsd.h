@@ -148,7 +148,6 @@ struct gps_device_t {
     int shmTimeP;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    struct gps_fix_t lastfix;	/* use to compute uncertainties */
     double mag_var;		/* Magnetic variation in degrees */  
     /*
      * The rest of this structure is driver-specific private storage.

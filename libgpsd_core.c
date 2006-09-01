@@ -180,9 +180,9 @@ int gpsd_activate(struct gps_device_t *session)
 	session->retry_counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
-	session->gpsdata.fix.mode = MODE_NOT_SEEN;
+	session->gpsdata.newdata.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.track = NAN;
+	session->gpsdata.newdata.track = NAN;
 	session->gpsdata.separation = NAN;
 #ifdef BINARY_ENABLE
 	session->mag_var = NAN;
