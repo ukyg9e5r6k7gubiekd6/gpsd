@@ -61,7 +61,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
-    session->gpsdata.set &=~ FIX_SET;
+    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
     session->gpsdata.hdop = NAN;
     session->gpsdata.vdop = NAN;
     session->gpsdata.pdop = NAN;
@@ -580,7 +580,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* Clear fix data at start of cycle */
 	if ((received & CYCLE_START_SET)!=0) {
 	    gps_clear_fix(&session->gpsdata.fix);
-	    session->gpsdata.set &=~ FIX_SET;
+	    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
+	    session->gpsdata.hdop = NAN;
+	    session->gpsdata.vdop = NAN;
+	    session->gpsdata.pdop = NAN;
+	    session->gpsdata.tdop = NAN;
+	    session->gpsdata.gdop = NAN;
+	    session->gpsdata.epe = NAN;
 	}
 	/*
 	 * Compute fix-quality data from the satellite positions.
