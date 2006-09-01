@@ -135,7 +135,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	}
 
 	/*@ +boolint @*/
-	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
+	if (session->gpsdata.newdata.mode > MODE_NO_FIX) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge.  But we
@@ -229,30 +229,30 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     struct tm tm;
     time_t intfixtime;
 
-    intfixtime = (time_t)session->gpsdata.fix.time;
+    intfixtime = (time_t)session->gpsdata.newdata.time;
     (void)gmtime_r(&intfixtime, &tm);
-    if (session->gpsdata.fix.mode > 1) {
+    if (session->gpsdata.newdata.mode > 1) {
 	(void)snprintf(bufp, len,
 		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,",
 		tm.tm_hour,
 		tm.tm_min,
 		tm.tm_sec,
-		degtodm(fabs(session->gpsdata.fix.latitude)),
-		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-		degtodm(fabs(session->gpsdata.fix.longitude)),
-		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-		session->gpsdata.fix.mode,
+		degtodm(fabs(session->gpsdata.newdata.latitude)),
+		((session->gpsdata.newdata.latitude > 0) ? 'N' : 'S'),
+		degtodm(fabs(session->gpsdata.newdata.longitude)),
+		((session->gpsdata.newdata.longitude > 0) ? 'E' : 'W'),
+		session->gpsdata.newdata.mode,
 		session->gpsdata.satellites_used);
 	if (isnan(session->gpsdata.hdop))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
 			   "%.2f,",session->gpsdata.hdop);
-	if (isnan(session->gpsdata.fix.altitude))
+	if (isnan(session->gpsdata.newdata.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.1f,M,", session->gpsdata.fix.altitude);
+			   "%.1f,M,", session->gpsdata.newdata.altitude);
 	if (isnan(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
@@ -277,7 +277,7 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     struct tm tm;
     time_t intfixtime;
 
-    intfixtime = (time_t)session->gpsdata.fix.time;
+    intfixtime = (time_t)session->gpsdata.newdata.time;
     (void)gmtime_r(&intfixtime, &tm);
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
@@ -286,12 +286,12 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	    tm.tm_min, 
 	    tm.tm_sec,
 	    session->gpsdata.status ? 'A' : 'V',
-	    degtodm(fabs(session->gpsdata.fix.latitude)),
-	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-	    degtodm(fabs(session->gpsdata.fix.longitude)),
-	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-	    session->gpsdata.fix.speed * MPS_TO_KNOTS,
-	    session->gpsdata.fix.track,
+	    degtodm(fabs(session->gpsdata.newdata.latitude)),
+	    ((session->gpsdata.newdata.latitude > 0) ? 'N' : 'S'),
+	    degtodm(fabs(session->gpsdata.newdata.longitude)),
+	    ((session->gpsdata.newdata.longitude > 0) ? 'E' : 'W'),
+	    session->gpsdata.newdata.speed * MPS_TO_KNOTS,
+	    session->gpsdata.newdata.track,
 	    tm.tm_mday,
 	    tm.tm_mon + 1,
 	    tm.tm_year % 100);
