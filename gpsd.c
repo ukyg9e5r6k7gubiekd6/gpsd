@@ -1581,20 +1581,17 @@ int main(int argc, char *argv[])
 			if (sub->device == channel) {
 			    if ((changed & CYCLE_START_SET)!=0)
 				gps_clear_fix(&sub->fixbuffer);
-			    //printf("Before policy: %s\n", gps_show_transfer(gps_valid_fields(&sub->fixbuffer)));
 			    if (sub->buffer_policy == all)
 				gps_merge_fix(&sub->fixbuffer, 
 					      FIX_SET,
 					      &sub->device->gpsdata.fix);
 			    else {
-				//printf("Changed: %s\n", gps_show_transfer(changed));
 				gps_merge_fix(&sub->fixbuffer, 
 					      changed,
 					      &sub->device->gpsdata.fix);
 			    }
-			    //printf("After policy: %s\n", gps_show_transfer(gps_valid_fields(&sub->fixbuffer)));
+			    gpsd_error_model(sub->device, &sub->fixbuffer);
 			}
-			gpsd_error_model(sub->device, &sub->fixbuffer);
 		    }
 		}
 #endif /* WIRED_POLICY */
