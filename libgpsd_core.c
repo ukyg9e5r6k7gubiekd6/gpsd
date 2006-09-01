@@ -417,26 +417,22 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
      * the GPS clock, so we put the bound of the error
      * in as a constant pending getting it from each driver.
      */
-    if ((session->gpsdata.set & TIMERR_SET)==0)
+    if (isnan(fix->ept)!=0)
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if ((session->gpsdata.set & HERR_SET)==0 
-	    && (session->gpsdata.set & HDOP_SET)!=0)
+	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
 	    fix->eph = session->gpsdata.hdop * uere;
-	if ((session->gpsdata.set & VERR_SET)==0 
-	    && (session->gpsdata.set & VDOP_SET)!=0)
+	if (isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
 	    fix->epv = session->gpsdata.vdop * uere;
-	if ((session->gpsdata.set & PERR_SET)==0
-	    && (session->gpsdata.set & PDOP_SET)!=0)
+	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.vdop)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
 	/*
 	 * If we have a current fix and an old fix, and the packet handler 
 	 * didn't set the speed error and climb error members itself, 
 	 * try to compute them now.
 	 */
-	if ((session->gpsdata.set & SPEEDERR_SET)==0 && fix->time > session->lastfix.time) {
-	    fix->eps = NAN;
+	if (isnan(fix->eps)!=0 && fix->time > session->lastfix.time) {
 	    if (session->lastfix.mode > MODE_NO_FIX 
 		&& fix->mode > MODE_NO_FIX) {
 		double t = fix->time-session->lastfix.time;
@@ -444,8 +440,7 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 		fix->eps = e/t;
 	    }
 	}
-	if ((session->gpsdata.set & CLIMBERR_SET)==0 && fix->time > session->lastfix.time) {
-	    fix->epc = NAN;
+	if (isnan(fix->epc)!=0 && fix->time > session->lastfix.time) {
 	    if (session->lastfix.mode > MODE_3D 
 		&& fix->mode > MODE_3D) {
 		double t = fix->time-session->lastfix.time;
