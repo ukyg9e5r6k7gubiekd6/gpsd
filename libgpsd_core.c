@@ -47,6 +47,20 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     /*@ +compmempass @*/
 }
 
+
+void gpsd_clear_data(struct gps_device_t *session)
+/* clear all data associated with a GPS session */
+{
+    gps_clear_fix(&session->gpsdata.fix);
+    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
+    session->gpsdata.hdop = NAN;
+    session->gpsdata.vdop = NAN;
+    session->gpsdata.pdop = NAN;
+    session->gpsdata.tdop = NAN;
+    session->gpsdata.gdop = NAN;
+    session->gpsdata.epe = NAN;
+}
+
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char *device)
 /* initialize GPS polling */
 {
@@ -60,14 +74,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +temptrans @*/
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
-    gps_clear_fix(&session->gpsdata.fix);
-    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
-    session->gpsdata.hdop = NAN;
-    session->gpsdata.vdop = NAN;
-    session->gpsdata.pdop = NAN;
-    session->gpsdata.tdop = NAN;
-    session->gpsdata.gdop = NAN;
-    session->gpsdata.epe = NAN;
+    gpsd_clear_data(session);
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
@@ -573,16 +580,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    received = 0;	/* it was all done in the packet getter */
 
 	/* Clear fix data at start of cycle */
-	if ((received & CYCLE_START_SET)!=0) {
-	    gps_clear_fix(&session->gpsdata.fix);
-	    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
-	    session->gpsdata.hdop = NAN;
-	    session->gpsdata.vdop = NAN;
-	    session->gpsdata.pdop = NAN;
-	    session->gpsdata.tdop = NAN;
-	    session->gpsdata.gdop = NAN;
-	    session->gpsdata.epe = NAN;
-	}
+	if ((received & CYCLE_START_SET)!=0)
+	    gpsd_clear_data(session);
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * This may be overridden by DOPs reported from the packet we just got.
