@@ -360,7 +360,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     char *bufp2 = bufp;
 
     (void)snprintf(bufp, len-strlen(bufp),
-		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
+		   "$GPGSA,%c,%d,", 'A', session->gpsdata.newdata.mode);
     j = 0;
     for (i = 0; i < session->device_type->channels; i++) {
 	if (session->gpsdata.used[i]) {
@@ -376,7 +376,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     }
     bufp += strlen(bufp);
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
-    if (session->gpsdata.fix.mode == MODE_NO_FIX)
+    if (session->gpsdata.newdata.mode == MODE_NO_FIX)
 	(void)strlcat(bufp, ",,,", len);
     else
 	(void)snprintf(bufp, len-strlen(bufp),
@@ -386,14 +386,14 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
-    if (finite(session->gpsdata.fix.eph)
-	|| finite(session->gpsdata.fix.epv)
+    if (finite(session->gpsdata.newdata.eph)
+	|| finite(session->gpsdata.newdata.epv)
 	|| finite(session->gpsdata.epe)) {
         /* output PGRME only if realistic */
         (void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,%.2f,%.2f",
-	    ZEROIZE(session->gpsdata.fix.eph), 
-	    ZEROIZE(session->gpsdata.fix.epv), 
+	    ZEROIZE(session->gpsdata.newdata.eph), 
+	    ZEROIZE(session->gpsdata.newdata.epv), 
 	    ZEROIZE(session->gpsdata.epe));
         nmea_add_checksum(bufp);
      }
@@ -605,9 +605,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* count good fixes */
 	if (session->gpsdata.status > STATUS_NO_FIX) 
 	    session->context->fixcnt++;
-
-	/* compute errors and derived quantities */
-	gpsd_error_model(session, &session->gpsdata.fix);
 
 	session->gpsdata.d_decode_time = timestamp();
 

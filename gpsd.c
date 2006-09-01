@@ -1552,6 +1552,9 @@ int main(int argc, char *argv[])
 	    {
 		gpsd_report(5, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
+#ifdef WIRED_POLICY
+		gpsd_error_model(channel, &channel->gpsdata.fix);
+#endif /* WIRED_POLICY */
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
@@ -1591,6 +1594,7 @@ int main(int argc, char *argv[])
 			    }
 			    //printf("After policy: %s\n", gps_show_transfer(gps_valid_fields(&sub->fixbuffer)));
 			}
+			gpsd_error_model(sub->device, &sub->fixbuffer);
 		    }
 		}
 #endif /* WIRED_POLICY */
