@@ -329,6 +329,7 @@ static struct subscriber_t {
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
 #ifndef WIRED_POLICY
     struct gps_fix_t fixbuffer;		/* info to report to the client */
+    struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {changed=0, all=1} buffer_policy;	/* buffering policy */
 #endif /* WIRED_POLICY*/
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
@@ -1353,8 +1354,10 @@ int main(int argc, char *argv[])
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
 
 #ifndef WIRED_POLICY
-    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERFD; sub++)
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERFD; sub++) {
 	gps_clear_fix(&sub->fixbuffer);
+	gps_clear_fix(&sub->oldfix);
+    }
 #endif /* WIRED_POLICY */
 
     /* user may want to re-initialize all channels */
@@ -1553,7 +1556,9 @@ int main(int argc, char *argv[])
 		gpsd_report(5, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
 #ifdef WIRED_POLICY
-		gpsd_error_model(channel, &channel->gpsdata.fix);
+		gpsd_error_model(channel, 
+				 &channel->gpsdata.fix, 
+				 &channel->lastfix);
 #endif /* WIRED_POLICY */
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
@@ -1590,7 +1595,8 @@ int main(int argc, char *argv[])
 					      changed,
 					      &sub->device->gpsdata.fix);
 			    }
-			    gpsd_error_model(sub->device, &sub->fixbuffer);
+			    gpsd_error_model(sub->device, 
+					     &sub->fixbuffer. &sub->oldfix);
 			}
 		    }
 		}

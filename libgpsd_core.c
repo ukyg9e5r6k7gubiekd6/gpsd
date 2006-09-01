@@ -403,7 +403,8 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 #endif /* BINARY_ENABLE */
 
 
-void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
+void gpsd_error_model(struct gps_device_t *session, 
+		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
 {
     /*
@@ -439,19 +440,17 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 	 * didn't set the speed error and climb error members itself, 
 	 * try to compute them now.
 	 */
-	if (isnan(fix->eps)!=0 && fix->time > session->lastfix.time) {
-	    if (session->lastfix.mode > MODE_NO_FIX 
-		&& fix->mode > MODE_NO_FIX) {
-		double t = fix->time-session->lastfix.time;
-		double e = session->lastfix.eph + fix->eph;
+	if (isnan(fix->eps)!=0 && fix->time > oldfix->time) {
+	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX) {
+		double t = fix->time-oldfix->time;
+		double e = oldfix->eph + fix->eph;
 		fix->eps = e/t;
 	    }
 	}
-	if (isnan(fix->epc)!=0 && fix->time > session->lastfix.time) {
-	    if (session->lastfix.mode > MODE_3D 
-		&& fix->mode > MODE_3D) {
-		double t = fix->time-session->lastfix.time;
-		double e = session->lastfix.epv + fix->epv;
+	if (isnan(fix->epc)!=0 && fix->time > oldfix->time) {
+	    if (oldfix->mode > MODE_3D && fix->mode > MODE_3D) {
+		double t = fix->time-oldfix->time;
+		double e = oldfix->epv + fix->epv;
 		/* if vertical uncertainties are zero this will be too */
 		fix->epc = e/t;
 	    }
@@ -468,12 +467,10 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 	     * uncertainties near 180 when we're moving slowly.
 	     */
 	    fix->epd = NAN;
-	    if (session->lastfix.mode >= MODE_2D) {
+	    if (oldfix->mode >= MODE_2D) {
 		double adj = earth_distance(
-		    session->lastfix.latitude,
-		    session->lastfix.longitude,
-		    fix->latitude,      
-		    fix->longitude);
+		    oldfix->latitude, oldfix->longitude, 
+		    fix->latitude, fix->longitude);
 		if (adj != 0) {
 		    double opp = fix->eph;
 		    double hyp = sqrt(adj*adj + opp*opp);
@@ -484,10 +481,8 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
     }
 
     /* save old fix for later error computations */
-    if (session->gpsdata.fix.mode >= MODE_2D)
-	(void)memcpy(&session->lastfix, 
-		 &session->gpsdata.fix, 
-		 sizeof(struct gps_fix_t));
+    if (fix->mode >= MODE_2D)
+	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
 }
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)
