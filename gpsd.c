@@ -44,16 +44,6 @@
 #include "timebase.h"
 
 /*
- * Define this to eliminate a memory copy.  Disables the J command;
- * you always get the equivalent of j=0 (clear at start of cycle).
- * Only needed for deployments on low-power embedded systems where
- * every cycle counts.
- */
-#ifdef WIRED_POLICY
-#define fixbuffer	device->gpsdata.fix
-#endif /* WIRED_POLICY */
-
-/*
  * Timeout policy.  We can't rely on clients closing connections 
  * correctly, so we need timeouts to tell us when it's OK to 
  * reclaim client fds.  The assignment timeout fends off programs
@@ -327,11 +317,9 @@ static struct subscriber_t {
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
-#ifndef WIRED_POLICY
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     enum {changed=0, all=1} buffer_policy;	/* buffering policy */
-#endif /* WIRED_POLICY*/
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[MAXSUBSCRIBERFD];		/* indexed by client file descriptor */
 
@@ -750,7 +738,6 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
-#ifndef WIRED_POLICY
 	case 'j':
 	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
 		(void)strlcpy(phrase, ",J=?", BUFSIZ);
@@ -771,7 +758,6 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",J=%u", whoami->buffer_policy);
 	    break;
-#endif /* WIRED_POLICY */
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
 		if (allocated_channel(&channels[i]))
@@ -1195,9 +1181,7 @@ int main(int argc, char *argv[])
 #ifdef RTCM104_ENABLE
     struct gps_device_t *gps;
 #endif /* RTCM104_ENABLE */
-#ifndef WIRED_POLICY
     struct subscriber_t *sub;
-#endif /* WIRED_POLICY */
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
@@ -1353,12 +1337,10 @@ int main(int argc, char *argv[])
     gpsd_report(2, "running with effective group ID %d\n", getegid());
     gpsd_report(2, "running with effective user ID %d\n", geteuid());
 
-#ifndef WIRED_POLICY
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERFD; sub++) {
 	gps_clear_fix(&sub->fixbuffer);
 	gps_clear_fix(&sub->oldfix);
     }
-#endif /* WIRED_POLICY */
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
@@ -1555,11 +1537,6 @@ int main(int argc, char *argv[])
 	    {
 		gpsd_report(5, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
-#ifdef WIRED_POLICY
-		gpsd_error_model(channel, 
-				 &channel->gpsdata.fix, 
-				 &channel->lastfix);
-#endif /* WIRED_POLICY */
 		if (changed == ERROR_SET) {
 		    gpsd_report(3, "packet sniffer failed to sync up\n");
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
@@ -1575,7 +1552,6 @@ int main(int argc, char *argv[])
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
-#ifndef WIRED_POLICY 
 		else {
 		    struct subscriber_t *sub;
 
@@ -1596,11 +1572,10 @@ int main(int argc, char *argv[])
 					      &sub->device->gpsdata.fix);
 			    }
 			    gpsd_error_model(sub->device, 
-					     &sub->fixbuffer. &sub->oldfix);
+					     &sub->fixbuffer, &sub->oldfix);
 			}
 		    }
 		}
-#endif /* WIRED_POLICY */
 #ifdef RTCM104_ENABLE
 		/* copy each RTCM-104 correction to all GPSes */
 		if ((changed & RTCM_SET) != 0) {

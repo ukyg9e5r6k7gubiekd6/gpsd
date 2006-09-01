@@ -365,19 +365,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl allow fixing of the buffering policy
-AC_ARG_ENABLE(wired-policy,
-  AC_HELP_STRING([--disable-wired-policy],
-                 [enable j command]),
-  [ac_wired_policy=$enableval], [ac_wired_policy=yes])
-AC_MSG_CHECKING([for wired-in buffer policy])
-if test x"$ac_wired_policy" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([WIRED_POLICY], 1, [wired-in buffering policy])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl Manually configure DBUS until we figure out a 
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
