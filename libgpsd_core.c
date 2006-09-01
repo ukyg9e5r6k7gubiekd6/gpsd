@@ -495,6 +495,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 {
     ssize_t newdata;
 
+    gps_clear_fix(&session->gpsdata.newdata);
+
     if (session->inbuflen==0)
 	session->gpsdata.d_xmit_time = timestamp();
 
