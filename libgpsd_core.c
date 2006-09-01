@@ -482,6 +482,12 @@ void gpsd_error_model(struct gps_device_t *session, struct gps_fix_t *fix)
 	    }
 	}
     }
+
+    /* save old fix for later error computations */
+    if (session->gpsdata.fix.mode >= MODE_2D)
+	(void)memcpy(&session->lastfix, 
+		 &session->gpsdata.fix, 
+		 sizeof(struct gps_fix_t));
 }
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)
@@ -600,12 +606,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* compute errors and derived quantities */
 	gpsd_error_model(session, &session->gpsdata.fix);
-
-	/* save the old fix for later uncertainty computations */
-	if (session->gpsdata.fix.mode >= MODE_2D)
-	    (void)memcpy(&session->lastfix, 
-		     &session->gpsdata.fix, 
-		     sizeof(struct gps_fix_t));
 
 	session->gpsdata.d_decode_time = timestamp();
 
