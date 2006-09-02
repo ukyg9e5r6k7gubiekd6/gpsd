@@ -319,7 +319,7 @@ static struct subscriber_t {
     enum {GPS,RTCM104,ANY} requires;	/* type of device requested */
     struct gps_fix_t fixbuffer;		/* info to report to the client */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
-    enum {changed=0, all=1} buffer_policy;	/* buffering policy */
+    enum {casoc=0, nocasoc=1} buffer_policy;	/* buffering policy */
     /*@relnull@*/struct gps_device_t *device;	/* device subscriber listens to */
 } subscribers[MAXSUBSCRIBERFD];		/* indexed by client file descriptor */
 
@@ -746,10 +746,10 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else if (privileged_user(whoami)) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
-		    whoami->buffer_policy = changed;
+		    whoami->buffer_policy = nocasoc;
 		    p++;
 		} else if (*p == '0' || *p == '-') {
-		    whoami->buffer_policy = all;
+		    whoami->buffer_policy = casoc;
 		    p++;
 		}
 	    }
@@ -1560,17 +1560,11 @@ int main(int argc, char *argv[])
 			 sub < subscribers + MAXSUBSCRIBERFD;
 			 sub++) {
 			if (sub->device == channel) {
-			    if ((changed & CYCLE_START_SET)!=0)
+			    if (sub->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
 				gps_clear_fix(&sub->fixbuffer);
-			    if (sub->buffer_policy == all)
-				gps_merge_fix(&sub->fixbuffer, 
-					      FIX_SET,
-					      &sub->device->gpsdata.fix);
-			    else {
-				gps_merge_fix(&sub->fixbuffer, 
-					      changed,
-					      &sub->device->gpsdata.fix);
-			    }
+			    gps_merge_fix(&sub->fixbuffer, 
+					  changed,
+					  &sub->device->gpsdata.fix);
 			    gpsd_error_model(sub->device, 
 					     &sub->fixbuffer, &sub->oldfix);
 			}
