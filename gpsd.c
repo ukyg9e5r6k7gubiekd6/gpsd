@@ -738,7 +738,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    else
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
-	case 'j':
+	case 'J':
 	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
 		(void)strlcpy(phrase, ",J=?", BUFSIZ);
 	    else if (!whoami->device->device_type->mode_switcher)
