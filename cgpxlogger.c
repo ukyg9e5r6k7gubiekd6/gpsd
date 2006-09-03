@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
+ * Copyright (c) 2005,2006 Chris Kuethe <chris.kuethe@gmail.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -82,7 +82,8 @@ main(int argc, char **argv){
 		if (sl < 1)
 			sl = 1;
 		if (sl >= 3600)
-			fprintf(stderr, "WARNING: polling interval is an hour or more!\n");
+			fprintf(stderr,
+			    "WARNING: polling interval is an hour or more!\n");
 		break;
 	case 'j':
 		casoc = (unsigned int)atoi(optarg);
@@ -107,16 +108,31 @@ main(int argc, char **argv){
 	if (!gpsdata) {
 		char *err_str;
 		switch (errno) {
-		case NL_NOSERVICE:	err_str = "can't get service entry"; break;
-		case NL_NOHOST:		err_str = "can't get host entry"; break;
-		case NL_NOPROTO:	err_str = "can't get protocol entry"; break;
-		case NL_NOSOCK:		err_str = "can't create socket"; break;
-		case NL_NOSOCKOPT:	err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
-		case NL_NOCONNECT:	err_str = "can't connect to host"; break;
-		default:		err_str = "Unknown"; break;
+		case NL_NOSERVICE:
+			err_str = "can't get service entry";
+			break;
+		case NL_NOHOST:
+			err_str = "can't get host entry";
+			break;
+		case NL_NOPROTO:
+			err_str = "can't get protocol entry";
+			break;
+		case NL_NOSOCK:
+			err_str = "can't create socket";
+			break;
+		case NL_NOSOCKOPT:
+			err_str = "error SETSOCKOPT SO_REUSEADDR";
+			break;
+		case NL_NOCONNECT:
+			err_str = "can't connect to host";
+			break;
+		default:
+			err_str = "Unknown";
+			break;
 		}
-		fprintf(stderr, "cgpxlogger: no gpsd running or network error: %d, %s\n",
-			errno, err_str);
+		fprintf(stderr,
+		    "cgpxlogger: no gpsd running or network error: %d, %s\n",
+		    errno, err_str);
 		exit(1);
 	}
 
@@ -157,8 +173,12 @@ main(int argc, char **argv){
 }
 
 void usage(){
-	fprintf(stderr, "Usage: %s [-h] [-s server] [-p port] [-i interval] [-j casoc]\n\t", progname);
-	fprintf(stderr, "\tdefaults to '%s -s 127.0.0.1 -p 2947 -i 5 -j 0'\n", progname);
+	fprintf(stderr,
+	    "Usage: %s [-h] [-s server] [-p port] [-i interval] [-j casoc]\n",
+	    progname);
+	fprintf(stderr,
+	    "\tdefaults to '%s -s 127.0.0.1 -p 2947 -i 5 -j 0'\n",
+	    progname);
 	exit(1);
 }
 
@@ -183,7 +203,8 @@ void write_record(struct gps_data_t *gpsdata){
 	printf("      <trkpt lat=\"%.6f\" ", gpsdata->fix.latitude );
 	printf("lon=\"%.6f\">\n", gpsdata->fix.longitude );
 
-	if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){ /* dgps or pps */
+	if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
+		/* dgps or pps */
 		if (gpsdata->fix.mode == 4) { /* military pps */
 			printf("        <fix>pps</fix>\n");
 		} else { /* civilian dgps or sbas */
@@ -211,7 +232,8 @@ void write_record(struct gps_data_t *gpsdata){
 
 	if (gpsdata->satellites_used) { /* plausible timestamp */
 		char scr[128];
-		printf("        <time>%s</time>\n", unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+		printf("        <time>%s</time>\n",
+		    unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
 	}
 	printf("      </trkpt>\n");
 	fflush(stdout);
