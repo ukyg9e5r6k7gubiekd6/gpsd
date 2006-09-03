@@ -17,11 +17,7 @@
 #include <sys/types.h>
 #include <sys/cdefs.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <sys/time.h>
-
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include <ctype.h>
 #include <err.h>
@@ -34,23 +30,24 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "gps.h"
+
 #define BS 512
 
 #define NUM 8
 char *poll = "SPAMDQTV\n";
 char *host = "127.0.0.1";
-unsigned int want_exit = 0;
-unsigned short port = 2947;
+char *port = "2947";
 unsigned int sl = 5;
+
+struct gps_data_t *gpsdata;
 
 char *progname;
 
-void process(char *);
+void process(struct gps_data_t *, char *, size_t, int);
 void usage(void);
-void dnserr(void);
 void bye(int);
-void process(char *);
-void write_record(void);
+void write_record(struct gps_data_t *gpsdata);
 void header(void);
 void footer(void);
 void track_start(void);
@@ -73,16 +70,12 @@ struct {
 
 int
 main(int argc, char **argv){
-	int ch, fd, l, rl;
-	char *buf;
-	struct in_addr addr;
-	struct sockaddr_in sa;
-	struct hostent *he;
-	struct timeval tv;
+	int ch;
 	fd_set fds;
+	int casoc = 0;
 
 	progname = argv[0];
-	while ((ch = getopt(argc, argv, "hVi:s:p:")) != -1){
+	while ((ch = getopt(argc, argv, "hVi:j:s:p:")) != -1){
 	switch (ch) {
 	case 'i':
 		sl = (unsigned int)atoi(optarg);
@@ -91,11 +84,15 @@ main(int argc, char **argv){
 		if (sl >= 3600)
 			fprintf(stderr, "WARNING: polling interval is an hour or more!\n");
 		break;
+	case 'j':
+		casoc = (unsigned int)atoi(optarg);
+		casoc = casoc ? 1 : 0;
+		break;
 	case 's':
 		host = optarg;
 		break;
 	case 'p':
-		port = (unsigned short)atoi(optarg);
+		port = optarg;
 		break;
 	case 'V':
 		(void)fprintf(stderr, "SVN ID: $Id: cgpxlogger.c$ \n");
@@ -106,45 +103,22 @@ main(int argc, char **argv){
 	}
 	}
 
-	argc -= optind;
-	argv += optind;
-
-	bzero((char *)&sa, sizeof(sa));
-	if( inet_aton(host, &addr) ){
-		bcopy(&addr, (char *)&sa.sin_addr, sizeof(addr));
-	} else {
-		he = gethostbyname(host);
-		if (he != NULL){
-			bcopy(he->h_addr_list[0], (char *)&sa.sin_addr, he->h_length);
-		} else {
-			dnserr();
-			/* NOTREACHED */
+	gpsdata = gps_open(host, port);
+	if (!gpsdata) {
+		char *err_str;
+		switch (errno) {
+		case NL_NOSERVICE:	err_str = "can't get service entry"; break;
+		case NL_NOHOST:		err_str = "can't get host entry"; break;
+		case NL_NOPROTO:	err_str = "can't get protocol entry"; break;
+		case NL_NOSOCK:		err_str = "can't create socket"; break;
+		case NL_NOSOCKOPT:	err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
+		case NL_NOCONNECT:	err_str = "can't connect to host"; break;
+		default:		err_str = "Unknown"; break;
 		}
-	}
-
-	if ((buf = malloc( BS )) == NULL){
-		perror(NULL);
+		fprintf(stderr, "cgpxlogger: no gpsd running or network error: %d, %s\n",
+			errno, err_str);
 		exit(1);
 	}
-
-	sa.sin_port= htons(port);
-	sa.sin_family = AF_INET;
-
-	if ((fd = socket(AF_INET,SOCK_STREAM,0)) == -1){
-		perror(NULL);
-		exit(1);
-	}
-
-	if (connect(fd,(struct sockaddr *)&sa,sizeof(sa)) == -1){
-		perror(NULL);
-		close(fd);
-		exit(1);
-	}
-
-	l = strlen(poll);
-
-	FD_ZERO(&fds);
-	FD_SET(fd, &fds);
 
 	signal(SIGINT, bye);
 	signal(SIGTERM, bye);
@@ -152,151 +126,93 @@ main(int argc, char **argv){
 	signal(SIGHUP, bye);
 
 	header();
-	for(;;){
-		if (want_exit){
-			footer();
-			fprintf(stderr, "Exiting on signal %d!\n", want_exit);
-			fflush(NULL);
-			shutdown(fd, SHUT_RDWR);
-			close(fd);
-			exit(0);
-		}
 
-		write(fd, poll, l);
+	if (casoc)
+		gps_query(gpsdata, "j1\n");
+
+	gps_set_raw_hook(gpsdata, process);
+
+	for(;;){
+		int data;
+		struct timeval tv;
+
+		FD_ZERO(&fds);
+		FD_SET(gpsdata->gps_fd, &fds);
+
+		gps_query(gpsdata, poll);
 
 		tv.tv_usec = 250000;
 		tv.tv_sec = 0;
-		select(fd + 1, &fds, NULL, NULL, &tv);
+		data = select(gpsdata->gps_fd + 1, &fds, NULL, NULL, &tv);
 
-		bzero(buf, BS);
-		if ((rl = read(fd, buf, BS - 1)) != -1){
-			process(buf);
-		} else {
-			if ((errno != EINTR) && (errno != EAGAIN)){
-				/* ignore EINTR and EAGAIN */
-				want_exit = SIGPIPE;
-				sl = 1;
-				fprintf(stderr,"%s\n", strerror(errno));
-			}
+		if (data < 0) {
+			fprintf(stderr,"%s\n", strerror(errno));
+			exit(2);
 		}
+		else if (data)
+			gps_poll(gpsdata);
+
 		sleep(sl);
 	}
 }
 
 void usage(){
-	fprintf(stderr, "Usage: %s [-h] [-s server] [-p port] [-i interval]\n\t", progname);
-	fprintf(stderr, "\tdefaults to '%s -s 127.0.0.1 -p 2947 -i 5'\n", progname);
+	fprintf(stderr, "Usage: %s [-h] [-s server] [-p port] [-i interval] [-j casoc]\n\t", progname);
+	fprintf(stderr, "\tdefaults to '%s -s 127.0.0.1 -p 2947 -i 5 -j 0'\n", progname);
 	exit(1);
 }
 
-void dnserr(){
-	herror(progname);
-	exit(1);
+void bye(int signum){
+	footer();
+	fprintf(stderr, "Exiting on signal %d!\n", signum);
+	gps_close(gpsdata);
+	exit(0);
 }
 
-void bye(int signum){ want_exit = signum; }
+void process(struct gps_data_t *gpsdata,
+	     char *buf, size_t len, int level){
 
-void process(char *buf){
-	char *answers[NUM + 2], **ap;
-	int i, j;
-	char c;
-
-	if (strncmp("GPSD,", buf, 5) != 0)
-		return; /* lines should start with "GPSD," */
-
-	/* nuke them pesky trailing CR & LF */
-	i = strlen(buf);
-	if((buf[i - 1] == '\r') || (buf[i - 1] == '\n'))
-		buf[i - 1] = '\0';
-
-	i = strlen(buf);
-	if((buf[i - 1] == '\r') || (buf[i - 1] == '\n'))
-		buf[i - 1] = '\0';
-
-	/* tokenize the string at the commas */
- 	for (ap = answers; ap < &answers[NUM+1] &&
- 		(*ap = strsep(&buf, ",")) != NULL;) {
- 		if (**ap != '\0')
- 			ap++;
- 	}
- 	*ap = NULL;
-
-	bzero( &gps_ctx, sizeof(gps_ctx));
-	/* do stuff with each of the strings */
-	for(i = 0; i < NUM+1 ; i++){
-		j=-1;
-		c = answers[i][0];
-		switch(c){
-		case 'S':
-			sscanf(answers[i], "S=%d", &j);
-			gps_ctx.status = j;
-			break;
-		case 'P':
-			sscanf(answers[i], "P=%lf %lf", &gps_ctx.latitude, &gps_ctx.longitude);
-			break;
-		case 'A':
-			sscanf(answers[i], "A=%f", &gps_ctx.altitude);
-			break;
-		case 'M':
-			sscanf(answers[i], "M=%d", &j);
-			gps_ctx.mode = j;
-			break;
-		case 'Q':
-			sscanf(answers[i], "Q=%hd %*s %f", &gps_ctx.svs, &gps_ctx.hdop );
-			break;
-		case 'T':
-			sscanf(answers[i], "T=%f", &gps_ctx.course);
-			break;
-		case 'V':
-			sscanf(answers[i], "V=%f", &gps_ctx.speed);
-			break;
-		case 'D':
-			sscanf(answers[i], "D=%s", (char *)&gps_ctx.time);
-			break;
-		default: /* no-op */ ;
-		}
-	}
-	if ((gps_ctx.mode > 1) && (gps_ctx.status > 0))
-		write_record();
+	if ((gpsdata->fix.mode > 1) && (gpsdata->status > 0))
+		write_record(gpsdata);
 	else
 		track_end();
 }
 
-void write_record(){
+void write_record(struct gps_data_t *gpsdata){
 	track_start();
-	printf("      <trkpt lat=\"%.6f\" ", gps_ctx.latitude );
-	printf("lon=\"%.6f\">\n", gps_ctx.longitude );
+	printf("      <trkpt lat=\"%.6f\" ", gpsdata->fix.latitude );
+	printf("lon=\"%.6f\">\n", gpsdata->fix.longitude );
 
-	if ((gps_ctx.status >= 2) && (gps_ctx.mode >= 3)){ /* dgps or pps */
-		if (gps_ctx.mode == 4) { /* military pps */
+	if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){ /* dgps or pps */
+		if (gpsdata->fix.mode == 4) { /* military pps */
 			printf("        <fix>pps</fix>\n");
 		} else { /* civilian dgps or sbas */
 			printf("        <fix>dgps</fix>\n");
 		}
 	} else { /* no dgps or pps */
-		if (gps_ctx.mode == 3) {
+		if (gpsdata->fix.mode == 3) {
 			printf("        <fix>3d</fix>\n");
-		} else if (gps_ctx.mode == 2) {
+		} else if (gpsdata->fix.mode == 2) {
 			printf("        <fix>2d</fix>\n");
-		} else if (gps_ctx.mode == 1) {
+		} else if (gpsdata->fix.mode == 1) {
 			printf("        <fix>none</fix>\n");
 		} /* don't print anything if no fix indicator */
 	}
 
 	/* print altitude if we have a fix and it's 3d of some sort */
-	if ((gps_ctx.mode >= 3) && (gps_ctx.status >= 1))
-		printf("        <ele>%.2f</ele>\n", gps_ctx.altitude);
-
-	/* SiRF reports HDOP in 0.2 steps and the lowest I've seen is 0.6 */
-	if (gps_ctx.svs >= 0.2)
-		printf("        <hdop>%.1f</hdop>\n", gps_ctx.hdop);
+	if ((gpsdata->fix.mode >= 3) && (gpsdata->status >= 1))
+		printf("        <ele>%.2f</ele>\n", gpsdata->fix.altitude);
 
 	/* print # satellites used in fix, if reasonable to do so */
-	if ((gps_ctx.svs > 0) && (gps_ctx.mode >= 2))
-		printf("        <sat>%d</sat>\n", gps_ctx.svs);
+	if (gps_ctx.mode >= 2) {
+		printf("        <hdop>%.1f</hdop>\n", gpsdata->hdop);
+		printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
+	}
 
-	if (strlen(gps_ctx.time)) /* plausible timestamp */
-		printf("        <time>%s</time>\n", gps_ctx.time);
+	if (gpsdata->satellites_used) { /* plausible timestamp */
+		char scr[128];
+		printf("        <time>%s</time>\n", unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+	}
 	printf("      </trkpt>\n");
 	fflush(stdout);
 }
