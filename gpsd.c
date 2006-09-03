@@ -361,6 +361,7 @@ static void detach_client(int cfd)
     subscribers[cfd].watcher = false;
     subscribers[cfd].active = 0;
     subscribers[cfd].device = NULL;
+    subscribers[cfd].buffer_policy = casoc;
 }
 
 static ssize_t throttled_write(int cfd, char *buf, ssize_t len)
@@ -741,8 +742,6 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	case 'J':
 	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
 		(void)strlcpy(phrase, ",J=?", BUFSIZ);
-	    else if (!whoami->device->device_type->mode_switcher)
-		(void)strlcpy(phrase, ",J=0", BUFSIZ);
 	    else if (privileged_user(whoami)) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
