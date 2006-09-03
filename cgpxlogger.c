@@ -35,7 +35,7 @@
 #define BS 512
 
 #define NUM 8
-char *poll = "SPAMDQTV\n";
+char *pollstr = "SPAMDQTV\n";
 char *host = "127.0.0.1";
 char *port = "2947";
 unsigned int sl = 5;
@@ -139,7 +139,7 @@ main(int argc, char **argv){
 		FD_ZERO(&fds);
 		FD_SET(gpsdata->gps_fd, &fds);
 
-		gps_query(gpsdata, poll);
+		gps_query(gpsdata, pollstr);
 
 		tv.tv_usec = 250000;
 		tv.tv_sec = 0;
