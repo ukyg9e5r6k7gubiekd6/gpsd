@@ -457,7 +457,8 @@ int main(int argc, char *argv[])
 	}
 	else if( data ) {
 	    /* code that calls gps_poll(gpsdata) */
-	  (void)gps_poll(gpsdata);
+	    if (gps_poll(gpsdata) != 0)
+		die(1);
 	}
 
         /* Check for user input. */
