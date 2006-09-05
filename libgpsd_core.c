@@ -481,8 +481,10 @@ void gpsd_error_model(struct gps_device_t *session,
     }
 
     /* save old fix for later error computations */
+    /*@ -mayaliasuniqe @*/
     if (fix->mode >= MODE_2D)
 	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
+    /*@ +mayaliasuniqe @*/
 }
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)

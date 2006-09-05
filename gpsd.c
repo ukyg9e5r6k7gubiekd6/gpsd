@@ -282,9 +282,10 @@ static int filesock(char *filename)
 
 /*
  * This hackery is intended to support SBCs that are resource-limited
- * and only need to support one or a few devices each.  It can avoid
- * the space overhead of allocating thousands of unused device and user
- * structures, which wouldn't be significant on a PC.
+ * and only need to support one or a few devices each.  It avoids the
+ * space overhead of allocating thousands of unused device structures.
+ * This array fills from the bottom, so as an extreme case you could
+ * reduce LIMITED_MAX_DEVICES to 1.
  */
 #ifdef LIMITED_MAX_DEVICES
 #define MAXDEVICES	LIMITED_MAX_DEVICES
@@ -293,6 +294,11 @@ static int filesock(char *filename)
 #define MAXDEVICES	4
 #endif
 
+/* 
+ * Note: stdin/stdout, logging, and the control socket may eat several
+ * file descriptors, so don't set this too low. 16 should probably be
+ * the minimum.
+ */
 #ifdef LIMITED_MAX_CLIENT_FD
 #define MAXSUBSCRIBERFD LIMITED_MAX_CLIENT_FD
 #else
@@ -1552,8 +1558,6 @@ int main(int argc, char *argv[])
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
 		else {
-		    struct subscriber_t *sub;
-
 		    /* copy/merge channel data into subscriber fix buffers */
 		    for (sub = subscribers;
 			 sub < subscribers + MAXSUBSCRIBERFD;

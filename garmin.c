@@ -573,6 +573,10 @@ static int GetPacket (struct gps_device_t *session )
 	theBytesReturned = read(session->gpsdata.gps_fd
 		, buf + session->driver.garmin.BufferLen
 		, ASYNC_DATA_SIZE);
+        if (!theBytesReturned) {
+            gpsd_report(3, "GetPacket() read returned 0\n");
+            return -1;
+        }
         if ( 0 >  theBytesReturned ) {
 	    // read error...
             // or EAGAIN, but O_NONBLOCK is never set
