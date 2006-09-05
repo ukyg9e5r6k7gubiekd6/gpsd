@@ -200,7 +200,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 
 	mask = 0;
 	merge_hhmmss(field[5], session);
-	if (session->driver.nmea.date.tm_year != 0) 
+	if (session->driver.nmea.date.tm_year == 0) 
 	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
