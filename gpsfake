@@ -148,7 +148,7 @@ try:
     try:
         test.client_add(init + "\n")
     except socket.error, msg:
-        sys.stderr.write("gpsfake: socket error %s.\n", msg)
+        sys.stderr.write("gpsfake: socket error %s.\n" % msg)
         raise SystemExit, 1
 finally:
     test.cleanup();

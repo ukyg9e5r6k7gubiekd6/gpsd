@@ -431,7 +431,8 @@ void gpsd_error_model(struct gps_device_t *session,
     if (fix->mode >= MODE_2D) {
 	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
 	    fix->eph = session->gpsdata.hdop * uere;
-	if (isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
+	if ((fix->mode >= MODE_3D) 
+	    	&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
 	    fix->epv = session->gpsdata.vdop * uere;
 	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.vdop)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
@@ -447,7 +448,8 @@ void gpsd_error_model(struct gps_device_t *session,
 		fix->eps = e/t;
 	    }
 	}
-	if (isnan(fix->epc)!=0 && fix->time > oldfix->time) {
+	if ((fix->mode >= MODE_3D) 
+	    	&& isnan(fix->epc)!=0 && fix->time > oldfix->time) {
 	    if (oldfix->mode > MODE_3D && fix->mode > MODE_3D) {
 		double t = fix->time-oldfix->time;
 		double e = oldfix->epv + fix->epv;

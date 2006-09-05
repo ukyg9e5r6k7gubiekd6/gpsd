@@ -407,7 +407,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	    session->gpsdata.satellites++;
     }
     if (session->driver.nmea.part == session->driver.nmea.await && atoi(field[3]) != session->gpsdata.satellites)
-	gpsd_report(0, "GPGSV field 3 value of %d != actual count %d\n",
+	gpsd_report(1, "GPGSV field 3 value of %d != actual count %d\n",
 		    atoi(field[3]), session->gpsdata.satellites);
 
     /* not valid data until we've seen a complete set of parts */
