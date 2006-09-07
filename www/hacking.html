@@ -785,7 +785,8 @@ See the Garmin binary driver for an example.</p>
 
 <p>Your driver should put new data from each incoming packet or sentence
 in the 'newdata' member of the GPS, and return a validity flag mask
-telling what members were updated.  There is driver-independent code
+telling what members were updated (all float members are initially set -->
+to not-a-number. as well).  There is driver-independent code
 that will be responsible for merging that new data into the existing
 fix.  To assist this, the CYCLE_START_SET flag is special.  Set this
 when the driver returns the first timestamped message containing fix
@@ -797,7 +798,7 @@ _SET macros in gps.h), suitable to be put in session->gpsdata.valid.
 The watcher-mode logic relies on these as its way of knowing what to
 publish.  Also, you must ensure that gpsdata.fix.mode is set properly to
 indicate fix validity after each message; the framework code relies on
-this.  Finally, you must set gpsdata.status to indicate wheen DGPS 
+this.  Finally, you must set gpsdata.status to indicate when DGPS 
 fixes are available, whether through RTCM or WAAS/Egnos.</p>
 
 <p>Your packet parser is also responsible for setting the tag field 
