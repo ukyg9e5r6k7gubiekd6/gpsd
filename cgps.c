@@ -55,10 +55,9 @@ static char *speedunits = "mph";
 
 static WINDOW *datawin, *satellites, *messages, *command, *status;
 
-int silent_flag=0;
-int fixclear_flag=0;
-
-int bigger;
+static int silent_flag=0;
+static int fixclear_flag=0;
+static int bigger;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
