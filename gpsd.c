@@ -188,28 +188,6 @@ in which case it specifies an input source for DGPS or ntrip data.",
 	   DEFAULT_GPSD_PORT);
 }
 
-static bool have_fix(struct gps_device_t *device)
-{
-    if (!device) {
-	gpsd_report(4, "Client has no device\n");
-	return false;
-    }
-#define VALIDATION_COMPLAINT(level, legend) \
-	gpsd_report(level, legend " (status=%d, mode=%d).\n", \
-		    device->gpsdata.status, device->gpsdata.fix.mode)
-    if ((device->gpsdata.status == STATUS_NO_FIX) != (device->gpsdata.fix.mode == MODE_NO_FIX)) {
-	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
-	return false;
-    }
-    else if (device->gpsdata.status > STATUS_NO_FIX && device->gpsdata.fix.mode != MODE_NO_FIX) {
-	VALIDATION_COMPLAINT(3, "GPS has a fix");
-	return true;
-    }
-    VALIDATION_COMPLAINT(3, "GPS has no fix");
-    return false;
-#undef VALIDATION_COMPLAINT
-}
-
 static int passivesock(char *service, char *protocol, int qlen)
 {
     struct servent *pse;
@@ -355,6 +333,28 @@ static void adjust_max_fd(int fd, bool on)
 	}
     }
 #endif /* !defined(LIMITED_MAX_DEVICES) && !defined(LIMITED_MAX_CLIENT_FD) */
+}
+
+static bool have_fix(struct subscriber_t *whoami)
+{
+    if (!whoami->device) {
+	gpsd_report(4, "Client has no device\n");
+	return false;
+    }
+#define VALIDATION_COMPLAINT(level, legend) \
+	gpsd_report(level, legend " (status=%d, mode=%d).\n", \
+		    whoami->device->gpsdata.status, whoami->fixbuffer.mode)
+    if ((whoami->device->gpsdata.status == STATUS_NO_FIX) != (whoami->fixbuffer.mode == MODE_NO_FIX)) {
+	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
+	return false;
+    }
+    else if (whoami->device->gpsdata.status > STATUS_NO_FIX && whoami->fixbuffer.mode != MODE_NO_FIX) {
+	VALIDATION_COMPLAINT(3, "GPS has a fix");
+	return true;
+    }
+    VALIDATION_COMPLAINT(3, "GPS has no fix");
+    return false;
+#undef VALIDATION_COMPLAINT
 }
 
 static void detach_client(int cfd)
@@ -613,9 +613,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	phrase[0] = '\0';
 	switch (toupper(*p++)) {
 	case 'A':
-	    if (assign_channel(whoami) && 
-			have_fix(whoami->device) && 
-			whoami->fixbuffer.mode == MODE_3D)
+	    if (assign_channel(whoami) && have_fix(whoami) && whoami->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",A=%.3f", 
 			whoami->fixbuffer.altitude);
 	    else
@@ -696,7 +694,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    break;
 	case 'E':
 	    (void)strlcpy(phrase, ",E=?", BUFSIZ);
-	    if (assign_channel(whoami) && have_fix(whoami->device))
+	    if (assign_channel(whoami) && have_fix(whoami))
 		(void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
 			       whoami->device->gpsdata.epe, 
 			       whoami->fixbuffer.eph, 
@@ -806,7 +804,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",N=%u", whoami->device->gpsdata.driver_mode);
 	    break;
 	case 'O':
-	    if (!assign_channel(whoami) || !have_fix(whoami->device))
+	    if (!assign_channel(whoami) || !have_fix(whoami))
 		(void)strlcpy(phrase, ",O=?", BUFSIZ);
 	    else {
 		(void)snprintf(phrase, sizeof(phrase), ",O=%s",
@@ -901,7 +899,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    }
 	    break;
 	case 'P':
-	    if (assign_channel(whoami) && have_fix(whoami->device))
+	    if (assign_channel(whoami) && have_fix(whoami))
 		(void)snprintf(phrase, sizeof(phrase), ",P=%.6f %.6f", 
 			whoami->fixbuffer.latitude, 
 			whoami->fixbuffer.longitude);
@@ -962,19 +960,19 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strlcpy(phrase, ",S=?", BUFSIZ);
 	    break;
 	case 'T':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->fixbuffer.track)==0)
+	    if (assign_channel(whoami) && have_fix(whoami) && isnan(whoami->fixbuffer.track)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",T=%.4f", whoami->fixbuffer.track);
 	    else
 		(void)strlcpy(phrase, ",T=?", BUFSIZ);
 	    break;
 	case 'U':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && whoami->fixbuffer.mode == MODE_3D)
+	    if (assign_channel(whoami) && have_fix(whoami) && whoami->fixbuffer.mode == MODE_3D)
 		(void)snprintf(phrase, sizeof(phrase), ",U=%.3f", whoami->fixbuffer.climb);
 	    else
 		(void)strlcpy(phrase, ",U=?", BUFSIZ);
 	    break;
 	case 'V':
-	    if (assign_channel(whoami) && have_fix(whoami->device) && isnan(whoami->fixbuffer.speed)==0)
+	    if (assign_channel(whoami) && have_fix(whoami) && isnan(whoami->fixbuffer.speed)==0)
 		(void)snprintf(phrase, sizeof(phrase), ",V=%.3f", whoami->fixbuffer.speed * MPS_TO_KNOTS);
 	    else
 		(void)strlcpy(phrase, ",V=?", BUFSIZ);
