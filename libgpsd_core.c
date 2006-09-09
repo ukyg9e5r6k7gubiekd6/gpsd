@@ -636,7 +636,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 	}
 
-	dgnss_report(session);
+	if (session->gpsdata.fix.mode == MODE_3D)
+	    dgnss_report(session);
 
 	return session->gpsdata.set;
     }
