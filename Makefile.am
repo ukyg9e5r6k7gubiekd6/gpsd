@@ -110,6 +110,7 @@ libgps_c_sources = \
 	evermore.c \
 	italk.c \
 	libgpsd_core.c \
+	subframe.c \
 	ntpshm.c \
 	libgps.c \
 	packet.c \
