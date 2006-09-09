@@ -198,7 +198,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     switch (getub(buf2, 1))
     {
     case 0x02:	/* Navigation Data Output */
-	session->gpsdata.newdata.time = session->gpsdata.sentence_time
+	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	ecef_to_wgs84fix(&session->gpsdata, 
 			 getsl(buf2, 8)*1.0, getsl(buf2, 12)*1.0, getsl(buf2, 16)*1.0,
@@ -208,16 +208,16 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	version = getuw(buf2, 27)/100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
-	    session->gpsdata.newdata.mode = MODE_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	else if (used == 3)
-	    session->gpsdata.newdata.mode = MODE_2D;
+	    session->gpsdata.fix.mode = MODE_2D;
 	else {
-	    session->gpsdata.newdata.mode = MODE_3D;
+	    session->gpsdata.fix.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
 	gpsd_report(4, "NDO 0x02: version %3.2f, mode=%d, status=%d, visible=%d, used=%d\n",
 		    version,
-		    session->gpsdata.newdata.mode,
+		    session->gpsdata.fix.mode,
 		    session->gpsdata.status,
 		    visible,
 		    used);
@@ -225,7 +225,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	return mask;
 
     case 0x04:	/* DOP Data Output */
-	session->gpsdata.newdata.time = session->gpsdata.sentence_time
+	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->gpsdata.gdop = (double)getub(buf2, 8)*0.1;
 	session->gpsdata.pdop = (double)getub(buf2, 9)*0.1;
@@ -236,29 +236,29 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	case 0:	/* no position fix */
 	case 1:	/* manual calls this "1D navigation" */
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.newdata.mode = MODE_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
 	    break;
 	case 2:	/* 2D navigation */
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.newdata.mode = MODE_2D;
+	    session->gpsdata.fix.mode = MODE_2D;
 	    break;
 	case 3:	/* 3D navigation */
 	    session->gpsdata.status = STATUS_FIX;
-	    session->gpsdata.newdata.mode = MODE_3D;
+	    session->gpsdata.fix.mode = MODE_3D;
 	    break;
 	case 4:	/* 3D navigation with DGPS */
 	    session->gpsdata.status = STATUS_DGPS_FIX;
-	    session->gpsdata.newdata.mode = MODE_3D;
+	    session->gpsdata.fix.mode = MODE_3D;
 	    break;
 	}
 	/* that's all the information in this packet */
 	gpsd_report(4, "DDO 0x04: mode=%d, status=%d\n", 
-		    session->gpsdata.newdata.mode,
+		    session->gpsdata.fix.mode,
 		    session->gpsdata.status);
 	return TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
 
     case 0x06:	/* Channel Status Output */
-	session->gpsdata.newdata.time = session->gpsdata.sentence_time
+	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	session->gpsdata.satellites = (int)getub(buf2, 8);
 	session->gpsdata.satellites_used = 0;
@@ -304,7 +304,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     case 0x08:	/* Measurement Data Output */
 	// clock offset is a manufacturer diagnostic
 	// (int)getuw(buf2, 8);  clock offset, 29000..29850 ??
-	session->gpsdata.newdata.time = session->gpsdata.sentence_time
+	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */

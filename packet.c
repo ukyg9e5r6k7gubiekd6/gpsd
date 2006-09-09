@@ -613,19 +613,19 @@ static void character_discard(struct gps_device_t *session)
 #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 
 
-ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
+ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
     gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n",
-		newdata,
+		fix,
 		session->inbuflen,
-		session->inbuflen+newdata,
-		gpsd_hexdump(session->inbufptr, newdata));
+		session->inbuflen+fix,
+		gpsd_hexdump(session->inbufptr, fix));
 #endif /* STATE_DEBUG */
 
     session->outbuflen = 0;
-    session->inbuflen += newdata;
+    session->inbuflen += fix;
     while (session->inbufptr < session->inbuffer + session->inbuflen) {
 	/*@ -modobserver @*/
 	unsigned char c = *session->inbufptr++;
@@ -782,19 +782,19 @@ ssize_t packet_parse(struct gps_device_t *session, size_t newdata)
 	}
     } /* while */
 
-    return (ssize_t)newdata;
+    return (ssize_t)fix;
 }
 #undef getword
 
 ssize_t packet_get(struct gps_device_t *session)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
-    ssize_t newdata;
+    ssize_t fix;
     /*@ -modobserver @*/
-    newdata = read(session->gpsdata.gps_fd, session->inbuffer+session->inbuflen,
+    fix = read(session->gpsdata.gps_fd, session->inbuffer+session->inbuflen,
 			sizeof(session->inbuffer)-(session->inbuflen));
     /*@ +modobserver @*/
-    if (newdata == -1) {
+    if (fix == -1) {
         if ((errno == EAGAIN) || (errno == EINTR)) {
 	    return 0;
         } else {
@@ -802,9 +802,9 @@ ssize_t packet_get(struct gps_device_t *session)
         }
     }
 
-    if (newdata == 0)
+    if (fix == 0)
 	return 0;
-    return packet_parse(session, (size_t)newdata);
+    return packet_parse(session, (size_t)fix);
 }
 
 void packet_reset(struct gps_device_t *session)

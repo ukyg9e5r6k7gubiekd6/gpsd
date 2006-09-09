@@ -1565,7 +1565,7 @@ int main(int argc, char *argv[])
 				gps_clear_fix(&sub->fixbuffer);
 			    gps_merge_fix(&sub->fixbuffer, 
 					  changed,
-					  &sub->device->gpsdata.newdata);
+					  &sub->device->gpsdata.fix);
 			    gpsd_error_model(sub->device, 
 					     &sub->fixbuffer, &sub->oldfix);
 			}

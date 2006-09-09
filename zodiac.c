@@ -144,9 +144,9 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /*@ -boolops -predboolothers @*/
     session->gpsdata.status       = (getword(10) & 0x1c) ? 0 : 1;
     if (session->gpsdata.status != 0)
-	session->gpsdata.newdata.mode = (getword(10) & 1) ? MODE_2D : MODE_3D;
+	session->gpsdata.fix.mode = (getword(10) & 1) ? MODE_2D : MODE_3D;
     else
-	session->gpsdata.newdata.mode = MODE_NO_FIX;
+	session->gpsdata.fix.mode = MODE_NO_FIX;
     /*@ +boolops -predboolothers @*/
 
     /* solution_type                 = getword(11); */
@@ -163,42 +163,42 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_sec = (int)getword(24);
     subseconds = (int)getlong(25) / 1e9;
     /*@ -compdef */
-    session->gpsdata.newdata.time = session->gpsdata.sentence_time =
+    session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
-    if (session->gpsdata.newdata.mode > MODE_NO_FIX)
-	(void)ntpshm_put(session, session->gpsdata.newdata.time + 1.1);
+    if (session->gpsdata.fix.mode > MODE_NO_FIX)
+	(void)ntpshm_put(session, session->gpsdata.fix.time + 1.1);
 #endif
     /*@ -type @*/
-    session->gpsdata.newdata.latitude  = ((long)getlong(27)) * RAD_2_DEG * 1e-8;
-    session->gpsdata.newdata.longitude = ((long)getlong(29)) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.latitude  = ((long)getlong(27)) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.longitude = ((long)getlong(29)) * RAD_2_DEG * 1e-8;
     /*
      * The Rockwell Jupiter TU30-D140 reports altitude as uncorrected height
      * above WGS84 geoid.  The Zodiac binary protocol manual does not 
      * specify whether word 31 is geodetic or WGS 84. 
      */
-    session->gpsdata.newdata.altitude  = ((long)getlong(31)) * 1e-2;
+    session->gpsdata.fix.altitude  = ((long)getlong(31)) * 1e-2;
     /*@ +type @*/
     session->gpsdata.separation    = ((short)getword(33)) * 1e-2;
-    session->gpsdata.newdata.altitude -= session->gpsdata.separation;
-    session->gpsdata.newdata.speed     = (int)getlong(34) * 1e-2;
-    session->gpsdata.newdata.track     = (int)getword(36) * RAD_2_DEG * 1e-3;
+    session->gpsdata.fix.altitude -= session->gpsdata.separation;
+    session->gpsdata.fix.speed     = (int)getlong(34) * 1e-2;
+    session->gpsdata.fix.track     = (int)getword(36) * RAD_2_DEG * 1e-3;
     session->mag_var               = ((short)getword(37)) * RAD_2_DEG * 1e-4;
-    session->gpsdata.newdata.climb     = ((short)getword(38)) * 1e-2;
+    session->gpsdata.fix.climb     = ((short)getword(38)) * 1e-2;
     /* map_datum                   = getword(39); */
     /* manual says these are 1-sigma */
-    session->gpsdata.newdata.eph       = (int)getlong(40) * 1e-2 * GPSD_CONFIDENCE;
-    session->gpsdata.newdata.epv       = (int)getlong(42) * 1e-2 * GPSD_CONFIDENCE;
-    session->gpsdata.newdata.ept       = (int)getlong(44) * 1e-2 * GPSD_CONFIDENCE;
-    session->gpsdata.newdata.eps       = (int)getword(46) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.fix.eph       = (int)getlong(40) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.fix.epv       = (int)getlong(42) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.fix.ept       = (int)getlong(44) * 1e-2 * GPSD_CONFIDENCE;
+    session->gpsdata.fix.eps       = (int)getword(46) * 1e-2 * GPSD_CONFIDENCE;
     /* clock_bias                  = (int)getlong(47) * 1e-2; */
     /* clock_bias_sd               = (int)getlong(49) * 1e-2; */
     /* clock_drift                 = (int)getlong(51) * 1e-2; */
     /* clock_drift_sd              = (int)getlong(53) * 1e-2; */
 
 #if 0
-    gpsd_report(1, "date: %lf\n", session->gpsdata.newdata.time);
+    gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
     gpsd_report(1, "  solution invalid:\n");
     gpsd_report(1, "    altitude: %d\n", (getword(10) & 1) ? 1 : 0);
     gpsd_report(1, "    no diff gps: %d\n", (getword(10) & 2) ? 1 : 0);
@@ -320,7 +320,7 @@ static void handle1005(struct gps_device_t *session UNUSED)
 	gpsd_report(1, "iode mismatch:%d\n", (getword(13+i) & 4096) ? 1 : 0);
     }
 #endif
-    if (session->gpsdata.newdata.mode == MODE_NO_FIX)
+    if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	session->gpsdata.status = STATUS_NO_FIX;
     else if (numcorrections == 0)
 	session->gpsdata.status = STATUS_FIX;

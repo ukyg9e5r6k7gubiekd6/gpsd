@@ -61,7 +61,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +temptrans @*/
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
-    gps_clear_fix(&session->gpsdata.newdata);
+    gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.set &=~ (FIX_SET | DOP_SET);
     session->gpsdata.hdop = NAN;
     session->gpsdata.vdop = NAN;
@@ -129,7 +129,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	}
 
 	/*@ +boolint @*/
-	if (session->gpsdata.newdata.mode > MODE_NO_FIX) {
+	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge.  But we
@@ -174,9 +174,9 @@ int gpsd_activate(struct gps_device_t *session)
 	session->retry_counter = 0;
 	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
-	session->gpsdata.newdata.mode = MODE_NOT_SEEN;
+	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.newdata.track = NAN;
+	session->gpsdata.fix.track = NAN;
 	session->gpsdata.separation = NAN;
 #ifdef BINARY_ENABLE
 	session->mag_var = NAN;
@@ -223,30 +223,30 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     struct tm tm;
     time_t intfixtime;
 
-    intfixtime = (time_t)session->gpsdata.newdata.time;
+    intfixtime = (time_t)session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
-    if (session->gpsdata.newdata.mode > 1) {
+    if (session->gpsdata.fix.mode > 1) {
 	(void)snprintf(bufp, len,
 		"$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,",
 		tm.tm_hour,
 		tm.tm_min,
 		tm.tm_sec,
-		degtodm(fabs(session->gpsdata.newdata.latitude)),
-		((session->gpsdata.newdata.latitude > 0) ? 'N' : 'S'),
-		degtodm(fabs(session->gpsdata.newdata.longitude)),
-		((session->gpsdata.newdata.longitude > 0) ? 'E' : 'W'),
-		session->gpsdata.newdata.mode,
+		degtodm(fabs(session->gpsdata.fix.latitude)),
+		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
+		degtodm(fabs(session->gpsdata.fix.longitude)),
+		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
+		session->gpsdata.fix.mode,
 		session->gpsdata.satellites_used);
 	if (isnan(session->gpsdata.hdop))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
 			   "%.2f,",session->gpsdata.hdop);
-	if (isnan(session->gpsdata.newdata.altitude))
+	if (isnan(session->gpsdata.fix.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.1f,M,", session->gpsdata.newdata.altitude);
+			   "%.1f,M,", session->gpsdata.fix.altitude);
 	if (isnan(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
@@ -271,7 +271,7 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     struct tm tm;
     time_t intfixtime;
 
-    intfixtime = (time_t)session->gpsdata.newdata.time;
+    intfixtime = (time_t)session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
@@ -280,12 +280,12 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	    tm.tm_min, 
 	    tm.tm_sec,
 	    session->gpsdata.status ? 'A' : 'V',
-	    degtodm(fabs(session->gpsdata.newdata.latitude)),
-	    ((session->gpsdata.newdata.latitude > 0) ? 'N' : 'S'),
-	    degtodm(fabs(session->gpsdata.newdata.longitude)),
-	    ((session->gpsdata.newdata.longitude > 0) ? 'E' : 'W'),
-	    session->gpsdata.newdata.speed * MPS_TO_KNOTS,
-	    session->gpsdata.newdata.track,
+	    degtodm(fabs(session->gpsdata.fix.latitude)),
+	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
+	    degtodm(fabs(session->gpsdata.fix.longitude)),
+	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
+	    session->gpsdata.fix.speed * MPS_TO_KNOTS,
+	    session->gpsdata.fix.track,
 	    tm.tm_mday,
 	    tm.tm_mon + 1,
 	    tm.tm_year % 100);
@@ -354,7 +354,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     char *bufp2 = bufp;
 
     (void)snprintf(bufp, len-strlen(bufp),
-		   "$GPGSA,%c,%d,", 'A', session->gpsdata.newdata.mode);
+		   "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
     j = 0;
     for (i = 0; i < session->device_type->channels; i++) {
 	if (session->gpsdata.used[i]) {
@@ -370,7 +370,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     }
     bufp += strlen(bufp);
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
-    if (session->gpsdata.newdata.mode == MODE_NO_FIX)
+    if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	(void)strlcat(bufp, ",,,", len);
     else
 	(void)snprintf(bufp, len-strlen(bufp),
@@ -380,14 +380,14 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
     bufp += strlen(bufp);
-    if (finite(session->gpsdata.newdata.eph)
-	|| finite(session->gpsdata.newdata.epv)
+    if (finite(session->gpsdata.fix.eph)
+	|| finite(session->gpsdata.fix.epv)
 	|| finite(session->gpsdata.epe)) {
         /* output PGRME only if realistic */
         (void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,%.2f,%.2f",
-	    ZEROIZE(session->gpsdata.newdata.eph), 
-	    ZEROIZE(session->gpsdata.newdata.epv), 
+	    ZEROIZE(session->gpsdata.fix.eph), 
+	    ZEROIZE(session->gpsdata.fix.epv), 
 	    ZEROIZE(session->gpsdata.epe));
         nmea_add_checksum(bufp);
      }
@@ -486,19 +486,19 @@ void gpsd_error_model(struct gps_device_t *session,
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
-    ssize_t newdata;
+    ssize_t newlen;
 
-    gps_clear_fix(&session->gpsdata.newdata);
+    gps_clear_fix(&session->gpsdata.fix);
 
     if (session->inbuflen==0)
 	session->gpsdata.d_xmit_time = timestamp();
 
     /* can we get a full packet from the device? */
     if (session->device_type) {
-	newdata = session->device_type->get_packet(session);
+	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
     } else {
-	newdata = packet_get(session);
+	newlen = packet_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(3, 
 		    "packet sniff finds type %d\n", 
@@ -546,11 +546,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(7, "GPS sent %d new characters\n", newdata);
-    if (newdata == -1)	{		/* read error */
+    gpsd_report(7, "GPS sent %d new characters\n", newlen);
+    if (newlen == -1)	{		/* read error */
 	session->gpsdata.online = 0;
 	return 0;
-    } else if (newdata == 0) {		/* no new data */
+    } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
 		gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
 			timestamp() - session->gpsdata.online);
@@ -574,7 +574,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.sentence_length = session->outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
 
-	/* Get data from current packet into the newdata structure */
+	/* Get data from current packet into the fix structure */
 	if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 	    received = session->device_type->parse_packet(session);
 	else
@@ -584,7 +584,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Compute fix-quality data from the satellite positions.
 	 * This may be overridden by DOPs reported from the packet we just got.
 	 */
-	if (session->gpsdata.newdata.mode > MODE_NO_FIX 
+	if (session->gpsdata.fix.mode > MODE_NO_FIX 
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
 		    && session->gpsdata.satellites > 0) {
 	    dopmask = dop(&session->gpsdata);
