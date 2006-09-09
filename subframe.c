@@ -1,16 +1,4 @@
 /* subframe.c -- interpret satellite subframe data. */
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-
 #include "gpsd.h"
 
 /*@ -usedef @*/
