@@ -48,19 +48,6 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 }
 
 
-void gpsd_clear_data(struct gps_device_t *session)
-/* clear all data associated with a GPS session */
-{
-    gps_clear_fix(&session->gpsdata.fix);
-    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
-    session->gpsdata.hdop = NAN;
-    session->gpsdata.vdop = NAN;
-    session->gpsdata.pdop = NAN;
-    session->gpsdata.tdop = NAN;
-    session->gpsdata.gdop = NAN;
-    session->gpsdata.epe = NAN;
-}
-
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char *device)
 /* initialize GPS polling */
 {
@@ -74,7 +61,14 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +temptrans @*/
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
-    gpsd_clear_data(session);
+    gps_clear_fix(&session->gpsdata.newdata);
+    session->gpsdata.set &=~ (FIX_SET | DOP_SET);
+    session->gpsdata.hdop = NAN;
+    session->gpsdata.vdop = NAN;
+    session->gpsdata.pdop = NAN;
+    session->gpsdata.tdop = NAN;
+    session->gpsdata.gdop = NAN;
+    session->gpsdata.epe = NAN;
 
     /* mark GPS fd closed */
     session->gpsdata.gps_fd = -1;
@@ -592,8 +586,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if (session->gpsdata.newdata.mode > MODE_NO_FIX 
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
-		    && session->gpsdata.satellites > 0)
+		    && session->gpsdata.satellites > 0) {
 	    dopmask = dop(&session->gpsdata);
+	    session->gpsdata.epe = NAN;
+	}
 	session->gpsdata.set = ONLINE_SET | dopmask | received;
 
 	/* count good fixes */
