@@ -394,6 +394,17 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 #undef ZEROIZE
 }
 
+static void gpsd_binary_dump(struct gps_device_t *session, 
+			      char bufp[], size_t len)
+{
+    if ((session->gpsdata.set & LATLON_SET) != 0)
+	gpsd_binary_fix_dump(session, bufp+strlen(bufp), len-strlen(bufp));
+    if ((session->gpsdata.set & HDOP_SET) != 0)
+	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
+    if ((session->gpsdata.set & SATELLITE_SET) != 0)
+	gpsd_binary_satellite_dump(session,bufp+strlen(bufp),len-strlen(bufp));
+}
+
 #endif /* BINARY_ENABLE */
 
 
@@ -612,21 +623,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		rtcm_dump(session, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
-	    else
 #endif /* RTCM104_ENABLE */
 #ifdef BINARY_ENABLE
-	    if ((session->gpsdata.set & LATLON_SET) != 0)
-		gpsd_binary_fix_dump(session, 
-				     buf2+strlen(buf2), 
-				     (sizeof(buf2)-strlen(buf2)));
-	    if ((session->gpsdata.set & HDOP_SET) != 0)
-		gpsd_binary_quality_dump(session,
-					 buf2 + strlen(buf2),
-					 (sizeof(buf2)-strlen(buf2)));
-	    if ((session->gpsdata.set & SATELLITE_SET) != 0)
-		gpsd_binary_satellite_dump(session,
-					 buf2 + strlen(buf2),
-					 (sizeof(buf2)-strlen(buf2)));
+	    else
+		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
 	    if (buf2[0] != '\0') {
 		gpsd_report(3, "<= GPS: %s", buf2);
