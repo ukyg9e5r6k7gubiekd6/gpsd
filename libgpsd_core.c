@@ -597,8 +597,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
 		    && session->gpsdata.satellites > 0)
 	    dopmask = dop(&session->gpsdata);
-	/* Merge in the data from the current packet. */
-	gps_merge_fix(&session->gpsdata.fix, received, &session->gpsdata.newdata);
 	session->gpsdata.set = ONLINE_SET | dopmask | received;
 
 	/* count good fixes */
