@@ -586,9 +586,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	else
 	    received = 0;	/* it was all done in the packet getter */
 
-	/* Clear fix data at start of cycle */
-	if ((received & CYCLE_START_SET)!=0)
-	    gpsd_clear_data(session);
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * This may be overridden by DOPs reported from the packet we just got.
