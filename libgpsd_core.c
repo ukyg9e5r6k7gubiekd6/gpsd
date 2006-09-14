@@ -624,11 +624,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		rtcm_dump(session, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
-	    else
+	    else {
 #endif /* RTCM104_ENABLE */
 #ifdef BINARY_ENABLE
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
+#ifdef RTCM104_ENABLE
+	    }
+#endif /* RTCM104_ENABLE */
 	    if (buf2[0] != '\0') {
 		gpsd_report(3, "<= GPS: %s", buf2);
 		if (session->gpsdata.raw_hook)
