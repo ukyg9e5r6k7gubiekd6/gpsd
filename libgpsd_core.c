@@ -624,9 +624,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		rtcm_dump(session, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
+	    else
 #endif /* RTCM104_ENABLE */
 #ifdef BINARY_ENABLE
-	    else
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
 	    if (buf2[0] != '\0') {
