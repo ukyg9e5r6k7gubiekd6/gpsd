@@ -129,7 +129,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	}
 
 	/*@ +boolint @*/
-	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
+	if ( session->context->fixcnt > 3 ) {
+	    /* Garmin doc says PPS is valid after four good fixes. */
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge.  But we
