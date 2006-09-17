@@ -7,8 +7,9 @@
  * sample code in the Linux garmin_gps driver.
  *
  * Presently this code needs the Linux garmin_gps driver and will
- * not function without it.  It also depends on the Intel byte order
- * (little-endian) so will not work on PPC or other big-endian machines
+ * not function without it.  This code has been tested and at leastt
+ * at one time is known to work on big- and little-endian CPUs and 32
+ *  and 64 bit cpu modes.
  *
  * Protocol info from:
  *	 GPS18_TechnicalSpecification.pdf
