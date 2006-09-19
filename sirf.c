@@ -403,7 +403,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	SVID                1 byte
 	Correction (cm)     2 bytes (signed short)
 
-	total               2 x 12 = 24 bytes
+	total               3 x 12 = 36 bytes
 	******************************************************************/
 	return 0;
 
