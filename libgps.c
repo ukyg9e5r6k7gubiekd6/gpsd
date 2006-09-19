@@ -246,15 +246,6 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    /*@ +mustfreeonly */
 		    break;
-#ifdef HEADING_FIX
-		case 'H':
-		    if (sp[2] == '?') {
-		        gpsdata->fix.heading = NAN;
-		    } else {
-		        (void)sscanf(sp, "H=%lf", &gpsdata->fix.heading);
-		    }
-		    break;
-#endif /* HEADING_FIX */
 		case 'I':
 		    /*@ -mustfreeonly */
 		    if (gpsdata->gps_id)
