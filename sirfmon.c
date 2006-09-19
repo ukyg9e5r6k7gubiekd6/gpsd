@@ -407,7 +407,8 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x1b:
 	/******************************************************************
 	 Not actually documented in any published materials.
-	 Here is what Chris Kuethe got from the SiRF folks:
+	 Here is what Chris Kuethe got from the SiRF folks,
+	 (plus some corrections from the GpsPaSsion forums):
 
 	Start of message
 	----------------
@@ -423,8 +424,8 @@ static void decode_sirf(unsigned char buf[], int len)
 	Receiver Freq Hz    4 bytes
 	Bit rate BPS        1 byte
 	Status bit map      1 byte    01=Signal Valid,
-				     02=Auto frequency detect
-				     04=Auto bit rate detect
+				      02=Auto frequency detect
+				      04=Auto bit rate detect
 	Signal Magnitude    4 bytes   Note: in internal units
 	Signal Strength dB  2 bytes   derived from Signal Magnitude
 	SNR  dB             2 bytes
@@ -441,14 +442,14 @@ static void decode_sirf(unsigned char buf[], int len)
 	--------------
 	Repeated 12 times (pad with 0 if less than 12 SV corrections):
 	SVID                1 byte
-	Correction (m)      1 byte
+	Correction (cm)     2 bytes (signed short)
 
-	total               2 x 12 = 24 bytes
+	total               3 x 12 = 36 bytes
 	******************************************************************/
 	display(mid27win, 1, 14, "%d (%s)", getub(buf, 1), sbasvec[(int)getub(buf, 1)]);
 	for (i = j = 0; i < 12; i++) {
 	    if (/*@i1@*/getub(buf, 16+2*i) != '\0') {
-		(void)wprintw(mid27win, "%d=%d ", getub(buf, 16+2*i), getub(buf, 16+2*i+1));
+		(void)wprintw(mid27win, "%d=%d ", getub(buf, 16+3*i), getsw(buf, 16+3*i+1));
 		j++;
 	    }
 	}
@@ -461,6 +462,15 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x1E:	/* SV State Data */
     case 0x1F:	/* NL Initialized Data */
 	subframe_enabled = true;
+	break;
+    case 0x29:	/* Geodetic Navigation Message */
+	(void)wprintw(debugwin, "GNM 0x29=");
+	break;
+    case 0x32:	/* SBAS Parameters */
+	(void)wprintw(debugwin, "SBP 0x32=");
+	break;
+    case 0x34:	/* PPS Time */
+	(void)wprintw(debugwin, "PPS 0x34=");
 	break;
 
 #ifdef __UNUSED__
