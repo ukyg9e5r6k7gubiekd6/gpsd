@@ -366,7 +366,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x1b:		/* DGPS status (undocumented) */
 	/******************************************************************
 	 Not actually documented in any published materials.
-	 Here is what Chris Kuethe got from the SiRF folks:
+	 Here is what Chris Kuethe got from the SiRF folks,
+	 (plus some corrections from the GpsPaSsion forums):
 
 	Start of message
 	----------------
@@ -382,8 +383,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	Receiver Freq Hz    4 bytes
 	Bit rate BPS        1 byte
 	Status bit map      1 byte    01=Signal Valid,
-				     02=Auto frequency detect
-				     04=Auto bit rate detect
+				      02=Auto frequency detect
+				      04=Auto bit rate detect
 	Signal Magnitude    4 bytes   Note: in internal units
 	Signal Strength dB  2 bytes   derived from Signal Magnitude
 	SNR  dB             2 bytes
@@ -400,7 +401,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	--------------
 	Repeated 12 times (pad with 0 if less than 12 SV corrections):
 	SVID                1 byte
-	Correction (m)      1 byte
+	Correction (cm)     2 bytes (signed short)
 
 	total               2 x 12 = 24 bytes
 	******************************************************************/
