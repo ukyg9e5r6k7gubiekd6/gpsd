@@ -92,7 +92,7 @@ struct gps_fix_t {
  * used both in the GPS downlink protocol described in IS-GPS-200
  * and in the format for DGPS corrections used in RTCM-104.
  */
-typedef /*@unsignedintegraltype@*/ unsigned int isgps30bits_t;
+typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 
 struct rtcm_t {
     /* header contents */
