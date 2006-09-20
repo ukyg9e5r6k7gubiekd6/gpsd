@@ -123,6 +123,7 @@ libgps_c_sources = \
 	report.c \
 	isgps.c \
 	rtcm.c \
+	rtcm.h \
 	srecord.c \
 	bits.h \
 	truenorth.c \
@@ -217,7 +218,7 @@ srec.5: srec.xml
 gpsflash.1: gpsflash.xml
 	-$(XMLTO) man gpsflash.xml
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h 
+include_HEADERS = gps.h gpsd.h libgpsmm.h rtcm.h 
 
 EXTRA_DIST = \
 	autogen.sh \
