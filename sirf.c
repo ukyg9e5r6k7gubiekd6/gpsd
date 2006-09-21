@@ -292,6 +292,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	}
 	return 0;
 
+    case 0x07:		/* Clock Status Data */
+	gpsd_report(4, "CLK 0x07\n");
+	return 0;
+
     case 0x08:		/* subframe data -- extract leap-second from this */
 	/*
 	 * Chris Kuethe says:
@@ -358,6 +362,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     	return 0;
 
     case 0x0d:		/* Visible List */
+	gpsd_report(4, "VIS 0x0d\n");
 	return 0;
 
     case 0x12:		/* OK To Send */
@@ -406,6 +411,18 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
 	total               3 x 12 = 36 bytes
 	******************************************************************/
+	return 0;
+
+    case 0x1c:		/* Navigation Library Measurement Data */
+	gpsd_report(3, "NLMD 0x1c: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
+    case 0x1e:		/* Navigation Library SV State Data */
+	gpsd_report(3, "NLSV 0x1e: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
+    case 0x1f:		/* Navigation Library Initialization Data */
+	gpsd_report(3, "NLID 0x1f: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
@@ -610,6 +627,15 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	session->driver.sirf.driverstate |= UBLOX;
 	return mask;
 
+    case 0xe1:		/* Development statistics messages */
+	buf2[0] = '\0';
+	for (i = 3; i < (int)len; i++)
+		(void)snprintf(buf2+strlen(buf2), 
+			       sizeof(buf2)-strlen(buf2),
+			       "%c", buf[i]^0xff);
+	gpsd_report(4, "DEV 0xe1: %s\n", buf2);
+	return 0;
+
     case 0xff:		/* Debug messages */
 	buf2[0] = '\0';
 	for (i = 1; i < (int)len; i++)
@@ -621,7 +647,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		(void)snprintf(buf2+strlen(buf2), 
 			       sizeof(buf2)-strlen(buf2),
 			       "\\x%02x", (unsigned int)buf[i]);
-	gpsd_report(4, "DD  0xff: %s\n", buf2);
+	gpsd_report(4, "DBG 0xff: %s\n", buf2);
 	return 0;
 
     default:
