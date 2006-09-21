@@ -1,3 +1,4 @@
+/* $Id$ */
 /* libgps.c -- client interface library for the gpsd daemon */
 #include <stdio.h>
 #include <unistd.h>

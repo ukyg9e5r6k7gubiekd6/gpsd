@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Copyright (C) 2005 Alfredo Pironti
  * See the file COPYING for license conditions

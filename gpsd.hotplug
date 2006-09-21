@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# $Id$
 # Hotplug script for gpsd by Eric S. Raymond, March 2005
 # This script is part of the gpsd distribution: see http://gpsd.berlios.de
 # Can be called like "gpsd.hotplug [add|remove] /dev/ttyUSB0" for test

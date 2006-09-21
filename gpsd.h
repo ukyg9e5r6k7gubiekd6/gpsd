@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef _gpsd_h_
 #define _gpsd_h_
 

@@ -1,3 +1,4 @@
+/* $Id$ */
 /* gpsutils.c -- code shared between low-level and high-level interfaces */
 #include <stdio.h>
 #include <unistd.h>

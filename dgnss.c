@@ -1,3 +1,4 @@
+/* $Id$ */
 /* dgnss.c -- common interface to a number of Differential GNSS services */
 
 #include <string.h>

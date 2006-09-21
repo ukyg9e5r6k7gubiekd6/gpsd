@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# $Id$
 #
 # Wrap bitfield references in rtcm.c in inversion macros.
 # FIXME: should be enhanced to replace macros already present

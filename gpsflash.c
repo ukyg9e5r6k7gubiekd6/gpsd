@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * This is the GPS-type-independent part of the gpsflash program.
  *

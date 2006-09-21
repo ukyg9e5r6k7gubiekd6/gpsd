@@ -1,3 +1,4 @@
+/* $Id$ */
 /* timebase.h -- constants that will require patching over time */
 
 /*

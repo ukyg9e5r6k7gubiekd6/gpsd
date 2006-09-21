@@ -1,3 +1,4 @@
+/* $Id$ */
 /* gps.h -- interface of the libgps library */
 
 #ifndef gps_h

@@ -1,3 +1,4 @@
+/* $Id$ */
 /* test harness for bits.h */
 
 #include <stdio.h>

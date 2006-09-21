@@ -1,3 +1,4 @@
+dnl $Id$
 AC_INIT
 AM_INIT_AUTOMAKE(gpsd, 2.34)
 AC_PREFIX_PROGRAM(gcc)

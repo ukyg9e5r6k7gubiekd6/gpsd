@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * SiRF packet monitor, originally by Rob Janssen, PE1CHL.
  * Heavily hacked by Eric S. Raymond for use with the gpsd project.

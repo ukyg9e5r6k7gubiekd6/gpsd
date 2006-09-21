@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Copyright (c) 2005 Jeff Francis <jeff@gritch.org>
  *
@@ -17,7 +18,6 @@
 /*
   Jeff Francis
   jeff@gritch.org
-  $Id$
 
   Kind of a curses version of xgps for use with gpsd.
 */

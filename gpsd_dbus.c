@@ -1,3 +1,4 @@
+/* $Id$ */
 #include <stdio.h>
 #include <config.h>
 #ifdef DBUS_ENABLE

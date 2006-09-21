@@ -1,3 +1,4 @@
+/* $Id$ */
 /* libgpsd_core.c -- direct access to GPSes on serial or USB devices. */
 #include <unistd.h>
 #include <stdlib.h>

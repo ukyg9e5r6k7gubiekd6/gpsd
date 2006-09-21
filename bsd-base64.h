@@ -1,3 +1,4 @@
+/* $Id$ */
 #ifndef _BSD_BASE64_H
 #define _BSD_BASE64_H
 

@@ -1,3 +1,4 @@
+/* $Id$ */
 /* TachometerP.h -- Tachometer widget private data */
 #ifndef _TachometerP_h
 #define _TachometerP_h

@@ -1,4 +1,5 @@
 #! /bin/sh
+# $Id$
 
 . /lib/udev/hotplug.functions
 

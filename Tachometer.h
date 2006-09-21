@@ -1,3 +1,4 @@
+/* $Id$ */
 /* Tachometer.h -- tachometer widget interface */
 #ifndef _Tachometer_h
 #define _Tachometer_h

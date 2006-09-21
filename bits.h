@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * bits.h - extract binary data from message buffer
  *

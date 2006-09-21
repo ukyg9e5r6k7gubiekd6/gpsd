@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# $Id$
 ###############################################################################
 ##									     ##
 ##	File:     invert-bitfields.pl					     ##
@@ -9,7 +10,6 @@
 ##	Copyright (c) 2005 Wolfgang S. Rupprecht.			     ##
 ##	All rights reserved.						     ##
 ##									     ##
-##	$Id: invert-bitfields.pl,v 1.1 2005/07/25 09:21:19 wolfgang Exp $
 ###############################################################################
 
 $inside    = 0;

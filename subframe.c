@@ -1,3 +1,4 @@
+/* $Id$ */
 /* subframe.c -- interpret satellite subframe data. */
 #include "gpsd.h"
 

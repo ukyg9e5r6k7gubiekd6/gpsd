@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * gpspipe
  *
@@ -20,8 +21,6 @@
  * just needs to be linked to netlib like this:
  *	gcc gpspipe.c ../netlib.c -o gpspipe
  *
- *
-  $Id$
  */
 
 #include <errno.h>

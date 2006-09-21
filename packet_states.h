@@ -1,3 +1,4 @@
+/* $Id$ */
    GROUND_STATE,	/* we don't know what packet type to expect */
 
 #ifdef NMEA_ENABLE
@@ -96,3 +97,4 @@
    RTCM_SKIP_STATE,	/* we have sync lock, but this character is bad */
    RTCM_RECOGNIZED,	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
+/* end of packet_states.h */

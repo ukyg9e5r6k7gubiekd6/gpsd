@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * This is the SiRF-dependent part of the gpsflash program.
  *

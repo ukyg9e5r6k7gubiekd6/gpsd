@@ -1,3 +1,4 @@
+/* $Id$ */
 #include <stdio.h>
 #include <stdarg.h>
 #include "gpsd.h"

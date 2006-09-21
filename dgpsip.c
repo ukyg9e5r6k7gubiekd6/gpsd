@@ -1,3 +1,4 @@
+/* $Id$ */
 /* dgpsip.c -- gather and dispatch DGPS data from DGPSIP servers */
 #include <unistd.h>
 #include <stdlib.h>

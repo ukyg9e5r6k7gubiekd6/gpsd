@@ -1,4 +1,5 @@
 # Automake description for gpsd
+# $Id$
 
 #SUBDIRS = contrib
 

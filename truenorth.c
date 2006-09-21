@@ -1,3 +1,4 @@
+/* $Id$ */
 /**
  * True North Technologies - Revolution 2X Digital compass
  *

@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Driver for the iTalk binary protocol used by FasTrax
  */

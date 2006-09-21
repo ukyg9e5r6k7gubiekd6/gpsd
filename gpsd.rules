@@ -1,4 +1,5 @@
 # udev rules for gpsd
+# $Id$
 #
 # GPSes don't have their own USB device class.  They're serial-over-USB
 # devices, so what you see is actually the ID of the serial-over-USB chip.

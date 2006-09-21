@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Handle the Garmin binary packet format supported by the USB Garmins
  * tested with the Garmin 18 and other models.  This driver is NOT for
