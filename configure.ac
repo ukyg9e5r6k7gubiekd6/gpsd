@@ -60,7 +60,7 @@ AC_CACHE_CHECK(for daylight external, mb_cv_var_daylight,
 ])
 if test $mb_cv_var_daylight = yes; then
    AC_DEFINE([HAVE_DAYLIGHT], 1,
-           [Define if you have the external `daylight' variable.])
+           [Define if you have the external 'daylight' variable.])
 fi
 
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
@@ -120,7 +120,7 @@ XM_LIBS=""
 XP_LIBS=""
 if test "$motif_includes" != "no" && test "$motif_libraries" != "no"
 then
-dnl Motif 2.1 wants `-lXp' (X11R6.3 print server)
+dnl Motif 2.1 wants '-lXp' (X11R6.3 print server)
 AC_CHECK_LIB(Xp, XpSelectInput,
 	XP_LIBS="-lXp"
 	AC_DEFINE([HAVE_XP],1,[Xp available]),,
