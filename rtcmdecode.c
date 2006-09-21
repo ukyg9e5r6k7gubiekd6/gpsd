@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 	    verbose = ISGPS_ERRLEVEL_BASE + atoi(optarg);
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "SVN ID: $Id: cgps.c 3255 2006-03-02 13:01:15Z esr $ \n");
+	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 	    exit(0);
 	case '?':
 	default:
