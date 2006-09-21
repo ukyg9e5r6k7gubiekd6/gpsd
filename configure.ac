@@ -9,10 +9,12 @@ AC_ARG_ENABLE(python,
   AC_HELP_STRING([--disable-python],
                  [disable python scripts and library bindings]),
   [try_python="$enableval"], [try_python="yes"])
+ac_python="no"
 if test x"$try_python" = xyes ; then
 AM_PATH_PYTHON
+ac_python="yes"
 fi
-AM_CONDITIONAL([HAVE_PYTHON], [test x"$try_python" = xyes])
+AM_CONDITIONAL([HAVE_PYTHON], [test x"$ac_python" = xyes])
 
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -99,6 +101,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif])
 
 dnl Check for X libraries
+ac_x="no"
 if test x"$with_x" != xno && test x"$have_x" != xdisabled
 then
 AC_CHECK_HEADERS(X11/xpm.h xpm.h)
@@ -145,6 +148,7 @@ fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
+ac_x="yes"
 else
 dnl X11 disabled
 AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
@@ -487,6 +491,8 @@ echo "NTP PPS                 : $ac_pps"
 echo "Fixed port speed        : $ac_baud"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
+echo "Enable X11 support      : $ac_x"
+echo "Enable Python support   : $ac_python"
 echo "Limited max client fd   : $ac_maxclientfd"
 echo "Limited max devices     : $ac_maxdevices"
 echo "------------------------------------------"
