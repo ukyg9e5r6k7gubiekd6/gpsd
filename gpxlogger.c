@@ -17,7 +17,7 @@
 DBusConnection* connection;
 
 static char *author = "Amaury Jacquot";
-static char *copyright = "GPL v 2.0";
+static char *copyright = "BSD or GPL v 2.0";
 
 static int intrack = 0;
 static int first = 1;
