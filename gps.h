@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <limits.h>
