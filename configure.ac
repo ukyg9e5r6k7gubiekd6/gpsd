@@ -21,7 +21,7 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -W
 fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/time.h X11/xpm.h xpm.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/time.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
@@ -91,6 +91,9 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif])
 
 dnl Check for X libraries
+if test x"$with_x" != xno && test x"$have_x" != xdisabled
+then
+AC_CHECK_HEADERS(X11/xpm.h xpm.h)
 AC_PATH_XTRA
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
@@ -134,6 +137,11 @@ fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
+else
+dnl X11 disabled
+AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
+fi
+dnl End of X11 checks
 
 dnl check for NMEA support
 AC_ARG_ENABLE(nmea,
