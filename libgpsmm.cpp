@@ -1,7 +1,10 @@
 /* $Id$ */
 /*
  * Copyright (C) 2005 Alfredo Pironti
- * See the file COPYING for license conditions
+ *
+ * This software is distributed under a BSD-style license. See the
+ * file "COPYING" for more information.
+ *
  */
 #include "libgpsmm.h"
 
