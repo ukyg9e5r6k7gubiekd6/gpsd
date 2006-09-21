@@ -4,7 +4,15 @@ AM_INIT_AUTOMAKE(gpsd, 2.34)
 AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(config.h)
 AC_LANG([C])
+
+AC_ARG_ENABLE(python,
+  AC_HELP_STRING([--disable-python],
+                 [disable python scripts and library bindings]),
+  [try_python="$enableval"], [try_python="yes"])
+if test x"$try_python" = xyes ; then
 AM_PATH_PYTHON
+fi
+AM_CONDITIONAL([HAVE_PYTHON], [test x"$try_python" = xyes])
 
 AC_PROG_LN_S
 AC_PROG_MAKE_SET

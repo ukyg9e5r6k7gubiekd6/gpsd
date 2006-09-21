@@ -24,10 +24,12 @@ RTCM104PAGES = rtcmdecode.1
 endif
 
 bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) sirfmon gpspipe gpsflash cgps cgpxlogger
-dist_bin_SCRIPTS = gpsprof gpsfake 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
+if HAVE_PYTHON
+dist_bin_SCRIPTS = gpsprof gpsfake 
 python_PYTHON = gps.py gpsfake.py
+endif
 
 #
 # Build xgps
@@ -171,14 +173,15 @@ man_MANS = \
 	libgps.3 \
 	libgpsmm.3 \
 	libgpsd.3 \
-	gpsprof.1 \
-	gpsfake.1 \
 	sirfmon.1 \
 	$(RTCM104PAGES) \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
+if HAVE_PYTHON
+man_MANS += gpsprof.1 gpsfake.1
+endif
 
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
