@@ -96,7 +96,7 @@ main(int argc, char **argv){
 		port = optarg;
 		break;
 	case 'V':
-		(void)fprintf(stderr, "SVN ID: $Id: cgpxlogger.c$ \n");
+		(void)fprintf(stderr, "SVN ID: $Id$ \n");
 		exit(0);
 	default:
 		usage();
