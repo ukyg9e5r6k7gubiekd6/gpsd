@@ -365,6 +365,14 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_report(4, "VIS 0x0d\n");
 	return 0;
 
+    case 0x0e:		/* Almanac Data */
+	gpsd_report(4, "ALM  0x0e: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
+    case 0x0f:		/* Ephemeris Data */
+	gpsd_report(4, "EPH  0x0f: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
     case 0x12:		/* OK To Send */
 	gpsd_report(4, "OTS 0x12: send indicator = %d\n",getub(buf, 1));
 	return 0;
@@ -414,15 +422,15 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x1c:		/* Navigation Library Measurement Data */
-	gpsd_report(3, "NLMD 0x1c: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(4, "NLMD 0x1c: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
     case 0x1e:		/* Navigation Library SV State Data */
-	gpsd_report(3, "NLSV 0x1e: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(4, "NLSV 0x1e: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
     case 0x1f:		/* Navigation Library Initialization Data */
-	gpsd_report(3, "NLID 0x1f: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(4, "NLID 0x1f: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
