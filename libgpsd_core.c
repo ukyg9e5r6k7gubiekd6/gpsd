@@ -387,7 +387,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	|| finite(session->gpsdata.epe)) {
         /* output PGRME only if realistic */
         (void)snprintf(bufp, len-strlen(bufp),
-	    "$PGRME,%.2f,%.2f,%.2f",
+	    "$PGRME,%.2f,M,%.2f,M,%.2f,M",
 	    ZEROIZE(session->gpsdata.fix.eph), 
 	    ZEROIZE(session->gpsdata.fix.epv), 
 	    ZEROIZE(session->gpsdata.epe));
