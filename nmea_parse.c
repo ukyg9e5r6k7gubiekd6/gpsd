@@ -450,9 +450,9 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
      * Garmin won't say, but the general belief is that these are 50% CEP.
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
      */
-    if ((toupper(field[2]) != 'M') ||
-	(toupper(field[4]) != 'M') ||
-	(toupper(field[6]) != 'M')){
+    if ((strcmp(field[2], "M")) ||
+	(strcmp(field[4], "M")) ||
+	(strcmp(field[6], "M"))){
 	    session->gpsdata.fix.eph =
 	    session->gpsdata.fix.epv =
 	    session->gpsdata.epe = 100;
@@ -575,21 +575,22 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     typedef gps_mask_t (*nmea_decoder)(int count, char *f[], struct gps_device_t *session);
     static struct {
 	char *name;
+	int nf;		/* minimum number of fields required to parse */
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"RMC", 	processGPRMC},
-	{"GGA",         processGPGGA},
-	{"GLL", 	processGPGLL},
-	{"GSA", 	processGPGSA},
-	{"GSV", 	processGPGSV},
-	{"VTG", 	NULL},		/* ignore Velocity Track made Good */
-	{"ZDA", 	processGPZDA},
-	{"PGRMC",	NULL},		/* ignore Garmin Sensor Config */
-	{"PGRME",	processPGRME},
-	{"PGRMI",	NULL},		/* ignore Garmin Sensor Init */
-	{"PGRMO",	NULL},		/* ignore Garmin Sentence Enable */
+	{"RMC", 8,	processGPRMC},
+	{"GGA", 13,	processGPGGA},
+	{"GLL", 7, 	processGPGLL},
+	{"GSA", 17,	processGPGSA},
+	{"GSV", 0,	processGPGSV},
+	{"VTG", 0, 	NULL},		/* ignore Velocity Track made Good */
+	{"ZDA", 7, 	processGPZDA},
+	{"PGRMC", 0,	NULL},		/* ignore Garmin Sensor Config */
+	{"PGRME", 7,	processPGRME},
+	{"PGRMI", 0,	NULL},		/* ignore Garmin Sensor Init */
+	{"PGRMO", 0,	NULL},		/* ignore Garmin Sentence Enable */
 #ifdef TNT_ENABLE
-	{"PTNTHTM",	processTNTHTM},
+	{"PTNTHTM", 9,	processTNTHTM},
 #endif /* TNT_ENABLE */
     };
     unsigned char buf[NMEA_MAX+1];
@@ -625,7 +626,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
         if (strcmp(nmea_phrase[i].name, s) == 0) {
-	    if (nmea_phrase[i].decoder) {
+	    if (nmea_phrase[i].decoder && (count >= nmea_phrase[i].nf)) {
 		retval = (nmea_phrase[i].decoder)(count, field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
 		session->gpsdata.sentence_length = strlen(sentence);
