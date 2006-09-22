@@ -456,7 +456,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
 	    session->gpsdata.fix.eph =
 	    session->gpsdata.fix.epv =
 	    session->gpsdata.epe = 100;
-	    return 0;
+	    return ERROR_SET;
     }
 
     session->gpsdata.fix.eph = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
