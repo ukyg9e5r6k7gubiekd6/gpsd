@@ -450,9 +450,19 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
      * Garmin won't say, but the general belief is that these are 50% CEP.
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
      */
+    if ((toupper(field[2]) != 'M') ||
+	(toupper(field[4]) != 'M') ||
+	(toupper(field[6]) != 'M')){
+	    session->gpsdata.fix.eph =
+	    session->gpsdata.fix.epv =
+	    session->gpsdata.epe = 100;
+	    return 0;
+    }
+
     session->gpsdata.fix.eph = atof(field[1]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
     session->gpsdata.fix.epv = atof(field[3]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
     session->gpsdata.epe = atof(field[5]) * (GPSD_CONFIDENCE/CEP50_SIGMA);
+
     return HERR_SET | VERR_SET | PERR_SET;
 }
 
