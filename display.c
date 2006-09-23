@@ -128,7 +128,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		     11, 11,		/* width, height */
 		     0, 360 * 64	/* angle1, angle2 */
 		);
-	    (void)snprintf(buf, sizeof(buf), "%03d", gpsdata->PRN[i]);
+	    (void)snprintf(buf, sizeof(buf), "%-3d", gpsdata->PRN[i]);
 	    set_color("Blue");
 	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 3);
 	    if (gpsdata->ss[i]) {
