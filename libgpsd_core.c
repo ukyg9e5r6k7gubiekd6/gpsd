@@ -362,7 +362,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	if (session->gpsdata.used[i]) {
 	    bufp += strlen(bufp);
 	    (void)snprintf(bufp, len-strlen(bufp),
-			   "%02d,", session->gpsdata.PRN[i]);
+			   "%02d,", session->gpsdata.used[i]);
 	    j++;
 	}
     }
