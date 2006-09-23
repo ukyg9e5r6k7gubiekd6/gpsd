@@ -159,10 +159,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
 
+    mask = 0;
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-	mask = 0;
 	session->gpsdata.satellites_used = (int)getub(buf, 28);
 	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
 	for (i = 0; i < SIRF_CHANNELS; i++)
@@ -434,7 +434,6 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
-	mask = 0;
 	if (session->driver.sirf.driverstate & SIRF_GE_232) {
 	    struct tm unpacked_date;
 	    double subseconds;
@@ -547,7 +546,6 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	 * PPS and always comes out right around the top of the
 	 * second."
 	 */
-	mask = 0;
 	gpsd_report(4, "PPS 0x34: Status = 0x%02x\n", getub(buf, 14));
 	if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
 	    struct tm unpacked_date;
