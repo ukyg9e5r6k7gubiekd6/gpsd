@@ -118,7 +118,7 @@ static void update_panel(struct gps_data_t *gpsdata,
     char scr[128];
     (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
   } else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a                    ");
 
   /* Fill in the latitude. */
   (void)wmove(datawin, 2,17);
@@ -155,7 +155,7 @@ static void update_panel(struct gps_data_t *gpsdata,
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
     (void)wprintw(datawin,"%.1f degrees     ", gpsdata->fix.track);
   else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a          ");
 
   /* Fill in the rate of climb. */
   (void)wmove(datawin, 7,17);
