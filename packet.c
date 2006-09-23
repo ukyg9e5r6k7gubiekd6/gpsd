@@ -654,8 +654,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		for (n = 1; (char *)session->inbuffer + n < trailer; n++)
 		    crc ^= session->inbuffer[n];
 		(void)snprintf(csum, sizeof(csum), "%02X", crc);
-		checksum_ok = (toupper(csum[0])==toupper(trailer[1])
-				&& toupper(csum[1])==toupper(trailer[2]));
+		checksum_ok = (csum[0]==toupper(trailer[1])
+				&& csum[1]==toupper(trailer[2]));
 	    }
 	    if (checksum_ok)
 		packet_accept(session, NMEA_PACKET);

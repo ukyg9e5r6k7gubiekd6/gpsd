@@ -559,7 +559,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
     if (correct_sum)
         *correct_sum = sum;
     (void)snprintf(csum, sizeof(csum), "%02X", sum);
-    return(toupper(csum[0])==toupper(p[0]))&&(toupper(csum[1])==toupper(p[1]));
+    return(csum[0]==toupper(p[0])) && (csum[1]==toupper(p[1]));
 }
 #endif /* __ UNUSED__ */
 
