@@ -465,6 +465,8 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    gpsdata->profiling = (sp[2] == '1');
 		    break;
 		case '$':
+		    if (gpsdata->profiling != 1)
+			break;
 		    /*@ +matchanyintegral -formatcode @*/
 		    (void)sscanf(sp, "$=%s %zd %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
