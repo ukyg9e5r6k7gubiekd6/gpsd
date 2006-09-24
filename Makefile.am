@@ -29,6 +29,7 @@ check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake 
 python_PYTHON = gps.py gpsfake.py
+PYTHONPAGES = gpsprof.1 gpsfake.1
 endif
 
 #
@@ -175,13 +176,11 @@ man_MANS = \
 	libgpsd.3 \
 	sirfmon.1 \
 	$(RTCM104PAGES) \
+	$(PYTHONPAGES) \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
-if HAVE_PYTHON
-man_MANS += gpsprof.1 gpsfake.1
-endif
 
 gpsd.8: gpsd.xml
 	-$(XMLTO) man gpsd.xml
