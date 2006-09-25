@@ -335,7 +335,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
     case 0x08:		/* 50 BPS data */
 	ch = (int)getub(buf, 1);
-	display(mid4win, ch, 27, "Y");
+	display(mid4win, ch+2, 27, "Y");
 	(void)wprintw(debugwin, "50B 0x08=");
 	subframe_enabled = true;
     	break;
