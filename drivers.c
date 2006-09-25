@@ -503,7 +503,8 @@ static struct gps_type_t rtcm104 = {
 };
 #endif /* RTCM104_ENABLE */
 
-extern struct gps_type_t garmin_binary, sirf_binary, tsip_binary;
+extern struct gps_type_t garmin_binary, garmin_binary2;
+extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary, trueNorth;
 
 /*@ -nullassign @*/
@@ -531,6 +532,7 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #endif /* ZODIAC_ENABLE */
 #if GARMIN_ENABLE
     &garmin_binary,
+    &garmin_binary2,
 #endif /* GARMIN_ENABLE */
 #ifdef SIRF_ENABLE
     &sirf_binary, 
