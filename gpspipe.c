@@ -8,6 +8,9 @@
  * This will dump the raw NMEA from gpsd to stdout
  *      gpspipe -r
  *
+ * This will dump the super-raw data (SiRF) from gpsd to stdout
+ *      gpspipe -R
+ *
  * This will dump the GPSD sentences from gpsd to stdout
  *      gpspipe -w
  *
@@ -110,6 +113,7 @@ int main( int argc, char **argv) {
         char buf[4096];
 	char *cstr = NULL;
         ssize_t wrote = 0;
+        bool dump_super_raw = false;
         bool dump_nmea = false;
         bool dump_gpsd = false;
         bool timestamp = false;
@@ -122,13 +126,16 @@ int main( int argc, char **argv) {
 
 	char *serialport = NULL;
 
-	while ((option = getopt(argc, argv, "?hrwtVn:s:")) != -1) {
+	while ((option = getopt(argc, argv, "?hrRwtVn:s:")) != -1) {
 		switch (option) {
 		case 'n':
 			count = strtol(optarg, 0, 0);
 			break;
 		case 'r':
 			dump_nmea = true;
+			break;
+		case 'R':
+			dump_super_raw = true;
 			break;
 		case 't':
 			timestamp = true;
@@ -155,7 +162,9 @@ int main( int argc, char **argv) {
 	  exit(1);
 	}
 
-	if ( dump_nmea ) {
+	if ( dump_super_raw ) {
+		cstr = "R=2\n";
+	} else if ( dump_nmea ) {
 		if ( dump_gpsd ) {
 			cstr = "rw\n";
 		} else {
