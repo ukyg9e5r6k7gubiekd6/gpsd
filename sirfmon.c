@@ -402,7 +402,6 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid19win,13, 42, "%d", getub(buf, 63));/* Response Time Max */
 	display(mid19win,14, 42, "%d", getub(buf, 64));/* Time/Accu & Duty Cycle Priority */
 #undef YESNO
-	dispmode = !dispmode;
 	break;
 
     case 0x1b:
@@ -1159,6 +1158,7 @@ int main (int argc, char **argv)
 	} else {
 	    (void)touchwin(mid19win);
 	    (void)wrefresh(mid19win);
+	    (void)redrawwin(mid19win);
 	}
 	(void)wrefresh(debugwin);
 	(void)wrefresh(cmdwin);
@@ -1186,6 +1186,7 @@ int main (int argc, char **argv)
 	    } else {
 		(void)touchwin(mid19win);
 		(void)wrefresh(mid19win);
+		(void)redrawwin(mid19win);
 	    }
 	    (void)wrefresh(mid19win);
 	    (void)wrefresh(debugwin);
@@ -1299,9 +1300,7 @@ int main (int argc, char **argv)
 		goto quit;
 
 	    case 't':				/* poll navigation params */
-		putbyte(buf, 0,0x98);
-		putbyte(buf, 1,0x00);
-		(void)sendpkt(buf, 2, device);
+		dispmode = !dispmode;
 		break;
 
 	    case 'q':
@@ -1323,6 +1322,12 @@ int main (int argc, char **argv)
 		(void)sendpkt(buf, (size_t)len, device);
 		break;
 	    }
+	}
+
+	if (dispmode && (time(NULL) % 10 == 0)){
+	    putbyte(buf, 0,0x98);
+	    putbyte(buf, 1,0x00);
+	    (void)sendpkt(buf, 2, device);
 	}
 
 	if ((len = readpkt(buf)) != EOF) {
