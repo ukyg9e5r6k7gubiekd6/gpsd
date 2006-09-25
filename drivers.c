@@ -109,6 +109,8 @@ static void nmea_initializer(struct gps_device_t *session)
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
     /* probe for Garmin serial GPS */
+    /* first turn off garmin binary 
+    (void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
 #endif /* NMEA_ENABLE */
 #ifdef SIRF_ENABLE
@@ -142,7 +144,7 @@ static struct gps_type_t nmea = {
     .cycle          = 1,		/* updates every second */
 };
 
-static void garmin_initializer(struct gps_device_t *session)
+static void garmin_nmea_initializer(struct gps_device_t *session)
 {
 #ifdef NMEA_ENABLE
     /* reset some config, AutoFix, WGS84, PPS */
@@ -159,6 +161,16 @@ static void garmin_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
 #endif /* NMEA_ENABLE */
+#if GARMIN_ENABLE && 0
+    /* try to go binary */
+    /* once a sec, binary, no averaging, NMEA 2.3, WAAS */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,2,,,,2,W,N");
+    /* reset to get into binary */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
+    /* probe for Garmin serial binary by trying to Product Data request */
+    /* DLE, PktID, Size, data (none), CHksum, DLE, ETX 
+    (void)gpsd_write(session, "\x10\xFE\x00\xf1\x10\x03", 6); */
+#endif /* GARMIN_ENABLE */
 }
 
 static struct gps_type_t garmin = {
@@ -166,7 +178,7 @@ static struct gps_type_t garmin = {
     .trigger        = "$PGRMC",		/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe          = NULL,		/* no probe */
-    .initializer    = garmin_initializer,/* probe for special types */
+    .initializer    = garmin_nmea_initializer,/* probe for special types */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
@@ -503,7 +515,7 @@ static struct gps_type_t rtcm104 = {
 };
 #endif /* RTCM104_ENABLE */
 
-extern struct gps_type_t garmin_binary, garmin_binary2;
+extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary, trueNorth;
 
@@ -531,8 +543,8 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
 #if GARMIN_ENABLE
-    &garmin_binary,
-    &garmin_binary2,
+    &garmin_usb_binary,
+    &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */
 #ifdef SIRF_ENABLE
     &sirf_binary, 

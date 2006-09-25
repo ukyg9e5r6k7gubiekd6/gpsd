@@ -131,6 +131,7 @@ struct gps_device_t {
 #define EVERMORE_PACKET	4
 #define ITALK_PACKET	5
 #define RTCM_PACKET	6
+#define GARMIN_PACKET	7
     unsigned int baudindex;
     int saved_baud;
     unsigned int packet_state;

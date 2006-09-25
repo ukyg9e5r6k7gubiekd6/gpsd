@@ -914,9 +914,9 @@ static gps_mask_t garmin_parse_input(struct gps_device_t *session)
 }
 
 /* this is everything we export */
-struct gps_type_t garmin_binary =
+struct gps_type_t garmin_usb_binary =
 {
-    .typename       = "Garmin binary",	/* full name of type */
+    .typename       = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe          = garmin_probe,	/* how to detect at startup time */
@@ -932,9 +932,9 @@ struct gps_type_t garmin_binary =
     .cycle          = 1,		/* updates every second */
 };
 
-struct gps_type_t garmin_binary2 =
+struct gps_type_t garmin_ser_binary =
 {
-    .typename       = "Garmin binary2",	/* full name of type */
+    .typename       = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe          = garmin_probe,	/* how to detect at startup time */
