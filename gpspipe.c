@@ -8,7 +8,7 @@
  * This will dump the raw NMEA from gpsd to stdout
  *      gpspipe -r
  *
- * This will dump the super-raw data (SiRF) from gpsd to stdout
+ * This will dump the super-raw data (gps binary) from gpsd to stdout
  *      gpspipe -R
  *
  * This will dump the GPSD sentences from gpsd to stdout
@@ -98,6 +98,7 @@ static void usage(void) {
 	        "SVN ID: $Id$ \n"
 		"-h show this help\n"
 		"-r Dump raw NMEA\n"
+		"-R Dump super-raw mode (gps binary)\n"
 	        "-w Dump gpsd native data\n"
 	        "-t time stamp the data\n"
 		"-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r')\n"
@@ -164,6 +165,9 @@ int main( int argc, char **argv) {
 
 	if ( dump_super_raw ) {
 		cstr = "R=2\n";
+	        /* super raw overrides NMEA and GPSD modes */
+		bool dump_nmea = false;
+		bool dump_gpsd = false;
 	} else if ( dump_nmea ) {
 		if ( dump_gpsd ) {
 			cstr = "rw\n";

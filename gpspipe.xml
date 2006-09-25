@@ -59,7 +59,7 @@ a usage message and exit.</para>
 
 <para>-r causes raw NMEA sentences to be output.</para>
 
-<para>-R causes super-raw (SiRF binary) data to be output.  This overrides
+<para>-R causes super-raw (gps binary) data to be output.  This overrides
 NMEA and gpsd output modes.</para>
 
 <para>-s option causes the collected data to be written to the
