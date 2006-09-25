@@ -608,6 +608,13 @@ developers. The format of this string is subject to change without
 notice.</para></listitem>
 </varlistentry>
 
+<varlistentry>
+<term>$</term> <listitem><para>The $ command returns daemon profiling
+information of interest to <application>gpsd</application>
+developers. The format of this string is subject to change without
+notice.</para></listitem>
+</varlistentry>
+
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
