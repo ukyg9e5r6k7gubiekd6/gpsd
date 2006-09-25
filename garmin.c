@@ -232,10 +232,11 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
     double track;
     char *msg = NULL;
     char buf[40] = "";
+    uint32_t mDataSize = get_int32( (uint8_t*)&pkt->mDataSize);
 
     gpsd_report(3, "PrintPacket()\n");
-    if ( 4096 < pkt->mDataSize) {
-	gpsd_report(3, "bogus packet, size too large=%d\n", pkt->mDataSize);
+    if ( 4096 < mDataSize) {
+	gpsd_report(3, "bogus packet, size too large=%d\n", mDataSize);
 	return 0;
     }
 
@@ -258,7 +259,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 			, pkt->mReserved1
 			, pkt->mReserved2
 			, pkt->mPacketId
-			, pkt->mDataSize);
+			, mDataSize);
 	    break;
 	}
 	break;
@@ -295,15 +296,14 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    ver = get_uint16(&pkt->mData.uchars[2]);
 	    maj_ver = (int)(ver / 100);
 	    min_ver = (int)(ver - (maj_ver * 100));
-	    gpsd_report(3, "Appl, Product Data, sz: %d\n"
-			, pkt->mDataSize);
+	    gpsd_report(3, "Appl, Product Data, sz: %d\n", mDataSize);
 	    gpsd_report(1, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
 			, prod_id, maj_ver, min_ver);
 	    gpsd_report(1, "Garmin Product Desc: %s\n"
 			, &pkt->mData.chars[4]);
 	    break;
 	case GARMIN_PKTID_PVT_DATA:
-	    gpsd_report(3, "Appl, PVT Data Sz: %d\n", pkt->mDataSize);
+	    gpsd_report(3, "Appl, PVT Data Sz: %d\n", mDataSize);
 
 	    pvt = &pkt->mData.pvt;
 
@@ -409,7 +409,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | VERR_SET | PERR_SET | CYCLE_START_SET;
 	    break;
 	case GARMIN_PKTID_SAT_DATA:
-	    gpsd_report(3, "Appl, SAT Data Sz: %d\n", pkt->mDataSize);
+	    gpsd_report(3, "Appl, SAT Data Sz: %d\n", mDataSize);
 	    sats = &pkt->mData.sats;
 
 	    session->gpsdata.satellites_used = 0;
@@ -450,8 +450,8 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	case GARMIN_PKTID_PROTOCOL_ARRAY:
             // this packet is never requested, it just comes, in some case
             // after a GARMIN_PKTID_PRODUCT_RQST 
-	    gpsd_report(3, "Appl, Product Capability, sz: %d\n", pkt->mDataSize);
-            for ( i = 0; i < (int)pkt->mDataSize ; i += 3 ) {
+	    gpsd_report(3, "Appl, Product Capability, sz: %d\n", mDataSize);
+            for ( i = 0; i < (int)mDataSize ; i += 3 ) {
 		    gpsd_report(3, "  %c%03d\n", pkt->mData.chars[i]
 			, get_uint16( &(pkt->mData.uchars[i+1])) );
 	    }
@@ -459,7 +459,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	default:
 	    gpsd_report(3, "Appl, ID: %d, Sz: %d\n"
 			, pkt->mPacketId
-			, pkt->mDataSize);
+			, mDataSize);
 	    break;
 	}
 	break;
@@ -486,7 +486,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 	default:
 	    gpsd_report(3, "Private, Packet: ID: %d, Sz: %d\n"
 			, pkt->mPacketId
-			, pkt->mDataSize);
+			, mDataSize);
 	    break;
 	}
 	break;
@@ -496,7 +496,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 		    , pkt->mReserved1
 		    , pkt->mReserved2
 		    , pkt->mPacketId
-		    , pkt->mDataSize);
+		    , mDataSize);
 	break;
     }
 
@@ -508,7 +508,7 @@ static gps_mask_t PrintPacket(struct gps_device_t *session, Packet_t *pkt)
 // send a packet in GarminUSB format
 static void SendPacket (struct gps_device_t *session, Packet_t *aPacket ) 
 {
-	size_t theBytesToWrite = (size_t)(12 + aPacket->mDataSize);
+	size_t theBytesToWrite = (size_t)(12 + get_int32((uint8_t*)&aPacket->mDataSize));
 	ssize_t theBytesReturned = 0;
 
         gpsd_report(4, "SendPacket(), writing %d bytes\n", theBytesToWrite);
@@ -571,6 +571,7 @@ static int GetPacket (struct gps_device_t *session )
 	// the USB not too bad for a start
 	ssize_t theBytesReturned = 0;
 	uint8_t *buf = (uint8_t *)session->driver.garmin.Buffer;
+	Packet_t *thePacket = (Packet_t*)buf;
 
 	theBytesReturned = read(session->gpsdata.gps_fd
 		, buf + session->driver.garmin.BufferLen
@@ -587,17 +588,31 @@ static int GetPacket (struct gps_device_t *session )
 	gpsd_report(5, "got %d bytes\n", theBytesReturned);
 
 	session->driver.garmin.BufferLen += theBytesReturned;
+	if ( 256 <=  session->driver.garmin.BufferLen ) {
+	    // really bad read error...
+	    gpsd_report(3, "GetPacket() packet too long, %ld > 255 !\n"
+		    , session->driver.garmin.BufferLen);
+	    session->driver.garmin.BufferLen = 0;
+	    break;
+	}
+	int pkt_size = 12 + get_int32((uint8_t*)&thePacket->mDataSize);
+	if ( 12 <= session->driver.garmin.BufferLen) {
+	    // have enough data to check packet size
+	    if ( session->driver.garmin.BufferLen > pkt_size) {
+	        // wrong amount of data in buffer
+	        gpsd_report(3
+		    , "GetPacket() packet size wrong! Packet: %ld, s/b %ld\n"
+		    , session->driver.garmin.BufferLen
+		    , pkt_size);
+	        session->driver.garmin.BufferLen = 0;
+	        break;
+	    }
+	}
 	if ( 64 > theBytesReturned ) {
 	    // zero length, or short, read is a flag for got the whole packet
             break;
 	}
 		
-	if ( 256 <=  session->driver.garmin.BufferLen ) {
-	    // really bad read error...
-	    session->driver.garmin.BufferLen = 0;
-	    gpsd_report(3, "GetPacket() packet too long!\n");
-	    break;
-	}
 
 	/*@ ignore @*/
 	delay.tv_sec = 0;
