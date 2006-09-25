@@ -449,7 +449,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	******************************************************************/
 	display(mid27win, 1, 14, "%d (%s)", getub(buf, 1), sbasvec[(int)getub(buf, 1)]);
 	for (i = j = 0; i < 12; i++) {
-	    if (/*@i1@*/getub(buf, 16+2*i) != '\0') {
+	    if (/*@i1@*/getub(buf, 16+3*i) != '\0') {
 		(void)wprintw(mid27win, "%d=%d ", getub(buf, 16+3*i), getsw(buf, 16+3*i+1));
 		j++;
 	    }
