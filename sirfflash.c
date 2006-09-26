@@ -192,9 +192,9 @@ static int sirfProbe(int fd, char **version)
      * Accept either.
      */
     want = 0;
-    if (expect(fd,"\xa0\xa2\x00\x15\x06", 5, 5))
+    if (expect(fd,"\xa0\xa2\x00\x15\x06", 5, 1))
 	want = 21;
-    else if (expect(fd,"\xa0\xa2\x00\x51\x06", 5, 5)) 
+    else if (expect(fd,"\xa0\xa2\x00\x51\x06", 5, 1)) 
 	want = 81;
 
     if (want) {
