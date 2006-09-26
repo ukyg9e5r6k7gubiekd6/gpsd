@@ -359,7 +359,7 @@ main(int argc, char **argv){
 
 	if (!nflag && 
 	    (((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
-	     (strcmp(warning, "why oh why didn't i take the blue pill") == 0 ))){
+	     (strcmp(warning, "why oh why didn't i take the blue pill")))){
 	    printf("\nThis program rewrites your receiver's flash ROM.\n");
 	    printf("If done improperly this will permanently ruin your\n");
 	    printf("receiver. We insist you read the gpsflash manpage\n");
