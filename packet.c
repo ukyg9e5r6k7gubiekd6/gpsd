@@ -19,9 +19,9 @@ Initial conditions of the problem:
 
 The problem: how do we recognize which kind of packet we're getting?
 
-No need to handle Garmin binary, we know that type by the fact we're connected
-to the driver.  But we need to be able to tell the others apart and 
-distinguish them from baud barf.
+No need to handle Garmin USB binary, we know that type by the fact we're 
+connected to the Garmin kernel driver.  But we need to be able to tell the 
+others apart and distinguish them from baud barf.
 
 ***************************************************************************/
 #include <ctype.h>
@@ -700,8 +700,6 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	         }
 	         for (; len > 0; len--) {
 		    chksum += session->inbuffer[n];
-		    gpsd_report(4, "Garmin char : %02x\n",
-			    session->inbuffer[n]);
 		    if (session->inbuffer[n++] == 0x10) {
 		       if (session->inbuffer[n++] != 0x10) break;
 		    }
@@ -721,12 +719,13 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    gpsd_report(4, "Garmin checksum failed: %02x != 0\n"
 			  , chksum);
 		    break;
-	         }
-	         ok = true;
+	         } else {
+	            ok = true;
+		 }
 	      } while (0);
 	      /*@ +charint */
 
-	      gpsd_report(4, "Garmin n= %02x\n", n);
+	      /* gpsd_report(4, "Garmin n= %02x\n", n); Debug */
 	      if (ok)
 		  packet_accept(session, GARMIN_PACKET);
 	      else 

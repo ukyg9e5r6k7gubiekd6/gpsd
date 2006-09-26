@@ -913,6 +913,123 @@ static gps_mask_t garmin_parse_input(struct gps_device_t *session)
     return PrintPacket(session, (Packet_t*)session->driver.garmin.Buffer);
 }
 
+/*@ +charint @*/
+gps_mask_t garmin_ser_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
+{
+    unsigned char data_buf[MAX_BUFFER_SIZE];
+    unsigned char c;
+    int i = 0;
+    int n = 0;
+    int data_index = 0;
+    int got_dle = 0;
+    unsigned char pkt_id = 0;
+    unsigned char pkt_len = 0;
+    unsigned char chksum = 0;
+
+    gpsd_report(5, "garmin_ser_parse()\n");
+    if (  6 > len ) {
+	/* WTF? */
+        /* minimum packet; <DLE> [pkt id] [length=0] [chksum] <DLE> <STX> */
+	gpsd_report(6, "Garmin serial too short: %#2x\n", len);
+	return 0;
+    }
+    /* debug */
+    for ( i = 0 ; i < (int)len ; i++ ) {
+	gpsd_report(6, "Char: %#02x\n", buf[i]);
+    }
+    
+    if ( '\x10' != buf[0] ) {
+	gpsd_report(6, "buf[0] not DLE\n", buf[0]);
+        return 0;
+    }
+    n = 1;
+    pkt_id = buf[n++];
+    chksum = pkt_id;
+    if ( '\x10' == pkt_id ) {
+        if ( '\x10' != buf[n++] ) {
+	    gpsd_report(6, "Bad pkt_id %#02x\n", pkt_id);
+	    return 0;
+        }
+    }
+
+    pkt_len = buf[n++];
+    chksum += pkt_len;
+    if ( '\x10' == pkt_len ) {
+        if ( '\x10' != buf[n++] ) {
+	    gpsd_report(6, "Bad pkt_len %#02x\n", pkt_len);
+	    return 0;
+        }
+    }
+    data_index = 0;
+    for ( i = 0; i < 256 ; i++ ) {
+
+	if ( pkt_len == data_index )  {
+		// got it all
+		break;
+	}
+        if ( len < n + i ) {
+	    gpsd_report(6, "Packet too short %#02x < %#0x\n", len, n + i);
+	    return 0;
+        }
+	c = buf[n + i];
+        if ( got_dle ) {
+	    got_dle = 0;
+            if ( '\x10' != c ) {
+	        gpsd_report(6, "Bad DLE %#02x\n", c);
+	        return 0;
+            }
+	} else {
+            chksum += c;
+	    data_buf[ data_index++ ] = c;
+            if ( '\x10' == c ) {
+		got_dle = 1;
+	    }
+	}
+    }
+    /* get checksum */
+    if ( len < n + i ) {
+        gpsd_report(6, "No checksum, Packet too short %#02x < %#0x\n"
+	    , len, n + i);
+        return 0;
+    }
+    c = buf[n + i++];
+    chksum += c;
+    /* get final DLE */
+    if ( len < n + i ) {
+        gpsd_report(6, "No final DLE, Packet too short %#02x < %#0x\n"
+	    , len, n + i);
+        return 0;
+    }
+    c = buf[n + i++];
+    if ( '\x10' != c ) {
+	gpsd_report(6, "Final DLE not DLE\n", c);
+        return 0;
+    }
+    /* get final ETX */
+    if ( len < n + i ) {
+        gpsd_report(6, "No final ETX, Packet too short %#02x < %#0x\n"
+	    , len, n + i);
+        return 0;
+    }
+    c = buf[n + i++];
+    if ( '\x03' != c ) {
+	gpsd_report(6, "Final ETX not ETX\n", c);
+        return 0;
+    }
+
+    /* debug */
+    for ( i = 0 ; i < data_index ; i++ ) {
+	gpsd_report(6, "Char: %#02x\n", data_buf[i]);
+    }
+
+    gpsd_report(4
+	, "garmin_ser_parse() Type: %#02x, Len: %#02x, chksum: %#02x\n"
+        , pkt_id, pkt_len, chksum);
+
+    return 0;
+}
+/*@ -charint @*/
+
 /* this is everything we export */
 struct gps_type_t garmin_usb_binary =
 {
@@ -937,16 +1054,16 @@ struct gps_type_t garmin_ser_binary =
     .typename       = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .probe          = garmin_probe,	/* how to detect at startup time */
-    .initializer    = garmin_init,	/* initialize the device */
-    .get_packet     = garmin_get_packet,/* how to grab a packet */
-    .parse_packet   = garmin_parse_input,	/* parse message packets */
+    .probe          = NULL,        	/* how to detect at startup time */
+    .initializer    = NULL,        	/* initialize the device */
+    .get_packet     = packet_get,       /* how to grab a packet */
+    .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-    .wrapup         = garmin_close,	/* close hook */
+    .wrapup         = NULL,	        /* close hook */
     .cycle          = 1,		/* updates every second */
 };
 

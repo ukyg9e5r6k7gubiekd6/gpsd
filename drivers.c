@@ -48,12 +48,10 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #endif /* EVERMORE_ENABLE */
     } else if (session->packet_type == GARMIN_PACKET) {
 	gpsd_report(2, "Garmin packet seen when NMEA expected.\n");
-#ifdef GARMIN_ENABLE_UNUSED
+#ifdef GARMIN_ENABLE
 	/* we might never see a trigger, have this as a backstop */
-	/*
-	(void)gpsd_switch_driver(session, "EverMore binary");
-	return evermore_parse(session, session->outbuffer, session->outbuflen);
-	*/
+	(void)gpsd_switch_driver(session, "Garmin Serial binary");
+	return garmin_ser_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;
 #endif /* GARMIN_ENABLE */
@@ -172,7 +170,7 @@ static void garmin_nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
 #endif /* NMEA_ENABLE */
-#if GARMIN_ENABLE && 0
+#if GARMIN_ENABLE 
     /* try to go binary */
     /* once a sec, binary, no averaging, NMEA 2.3, WAAS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,2,,,,2,W,N");

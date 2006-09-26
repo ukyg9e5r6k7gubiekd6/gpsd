@@ -530,7 +530,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE
 	    case GARMIN_PACKET:
-		(void)gpsd_switch_driver(session, "Garmin binary");
+		(void)gpsd_switch_driver(session, "Garmin Serial binary");
 		break;
 #endif /* GARMIN_ENABLE */
 #ifdef NMEA_ENABLE
