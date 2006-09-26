@@ -85,16 +85,19 @@
  * be recognized, that will be preferred.
  */
 
-#ifdef TSIP_ENABLE
+#if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
    TSIP_LEADER,		/* a DLE after having seen TSIP data */
    TSIP_PAYLOAD,	/* we're in TSIP payload */
    TSIP_DLE,		/* we've seen a DLE in TSIP payload */
    TSIP_RECOGNIZED,	/* found end of the TSIP packet */
-#endif /* TSIP_ENABLE */
+   GARMIN_RECOGNIZED,	/* found end of Garmin packet */
+#endif /* TSIP_ENABLE GARMIN_ENABLE */
 
 #ifdef RTCM104_ENABLE
    RTCM_SYNC_STATE,	/* we have sync lock */
    RTCM_SKIP_STATE,	/* we have sync lock, but this character is bad */
    RTCM_RECOGNIZED,	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
+
+
 /* end of packet_states.h */

@@ -94,12 +94,12 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    break;
 	}
 #endif /* SIRF_ENABLE */
-#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
+#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
         if (c == 0x10) {
 	    session->packet_state = DLE_LEADER;
 	    break;
 	}
-#endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
+#endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
         if (c == 'A') {
 #ifdef RTCM104_ENABLE
@@ -340,14 +340,15 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
 #endif /* SIRF_ENABLE */
-#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE)
+#if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
 	if (c == 0x02)
 	    session->packet_state = EVERMORE_LEADER_2;
 	else
 #endif /* EVERMORE_ENABLE */
-#ifdef TSIP_ENABLE
+#if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
+	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
 	if (c >= 0x13)
 	    session->packet_state = TSIP_PAYLOAD;
@@ -355,7 +356,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* TSIP_ENABLE */
 	    session->packet_state = GROUND_STATE;
 	break;
-#endif /* defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) */
+#endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
     case ZODIAC_RECOGNIZED:
@@ -679,15 +680,63 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    packet_discard(session);
             break;
 #endif /* SIRF_ENABLE */
-#ifdef TSIP_ENABLE
+#if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
-	    if ((session->inbufptr - session->inbuffer) >= 4)
+	    if ((session->inbufptr - session->inbuffer) >= 4) {
+#ifdef GARMIN_ENABLE
+              unsigned int n, chksum, c, len;
+	      bool ok = false;
+
+	      n = 0;
+	      /*@ +charint */
+	      do {
+
+	         if (session->inbuffer[n++] != 0x10) break;
+	         chksum = session->inbuffer[n++]; // skip pkt ID */
+	         len = session->inbuffer[n++];
+		 chksum += len;
+	         if (len == 0x10) {
+		    if (session->inbuffer[n++] != 0x10) break;
+	         }
+	         for (; len > 0; len--) {
+		    chksum += session->inbuffer[n];
+		    gpsd_report(4, "Garmin char : %02x\n",
+			    session->inbuffer[n]);
+		    if (session->inbuffer[n++] == 0x10) {
+		       if (session->inbuffer[n++] != 0x10) break;
+		    }
+	         }
+	         if (len > 0) break;
+		 /* check sum byte */
+	         c = session->inbuffer[n++];
+	         chksum += c;
+	         if (c == 0x10) {
+		    if (session->inbuffer[n++] != 0x10) break;
+	         }
+	         if (session->inbuffer[n++] != 0x10) break;
+	         if (session->inbuffer[n++] != 0x03) break;
+	         chksum &= 0xff;
+
+	         if ( chksum) {
+		    gpsd_report(4, "Garmin checksum failed: %02x != 0\n"
+			  , chksum);
+		    break;
+	         }
+	         ok = true;
+	      } while (0);
+	      /*@ +charint */
+
+	      gpsd_report(4, "Garmin n= %02x\n", n);
+	      if (ok)
+		  packet_accept(session, GARMIN_PACKET);
+	      else 
+#endif /* GARMIN_ENABLE */
 		packet_accept(session, TSIP_PACKET);
-	    else
+	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
-#endif /* TSIP_ENABLE */
+#endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
 	    short len, n, sum;
