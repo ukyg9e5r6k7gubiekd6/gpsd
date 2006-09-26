@@ -215,6 +215,7 @@ srecord_send(int pfd, char *data, size_t len){
 
 	memset(recvbuf, 0, 8);
 	i = 0;
+
 	while(strlen(data)){
 		/* grab a line of firmware, ignore line endings */
 		if ((r = (int)strlen(data))){
@@ -510,6 +511,18 @@ main(int argc, char **argv){
 		return 1;
 	}
 
+	/*
+	 * dlgps2.bin starts flashing when it sees valid srecords.
+	 * validate the entire image before we flash. shooting self
+	 * in foot is bad, mmmkay?
+	 */
+	gpsd_report(1, "validating firmware\n");
+	if (srec_check(firmware)){
+	    gpsd_report(0, "%s: corrupted firmware image\n", fname);
+	    return 1;
+	}
+	gpsd_report(1, "firmware validated\n");
+
 	gpsd_report(1, "version checked...\n");
 
 	gpsd_report(1, "blocking signals...\n");
@@ -595,3 +608,85 @@ main(int argc, char **argv){
 	return 0;
 }
 
+bool
+srec_check(char *data){
+	unsigned int i, l, n, x, y, z;
+	char buf[85];
+
+	l = 0;
+	while(strlen(data)){
+		/* grab a line of firmware, ignore line endings */
+		memset(buf,0,85);
+		l++;
+		if(sscanf(data, "%80s", buf) == EOF){
+			gpsd_report(1, "line %d read failed\n", l);
+			return 1;
+		}
+
+		n = strlen(buf);
+		if ((n < 1) || (n > 80)){
+			gpsd_report(0, "firmware line %d invalid length %d\n", l, n);
+			return 1;
+		}
+
+		/* advance to the next srecord */
+		data += n;
+		while((data[0] != 'S') && (data[0] != '\0'))
+			data++;
+
+		if (buf[0] != 'S'){
+			gpsd_report(1, "%s\n", buf);
+			gpsd_report(0, "firmware line %d doesn't begin with 'S'.\n", l);
+			return 1;
+		}
+
+		x = hex2bin(buf+2);
+		y = (n - 4)/2;
+		if (x != y){
+			gpsd_report(1, "buf: '%s'\n", buf);
+			gpsd_report(0, "firmware line %d length error: %d != %d\n", l, x, y);
+			return 1;
+		}
+
+		x = hex2bin(buf+n-2);
+		y = 0;
+		for(i = 2; i < n-2; i+=2){
+			z = hex2bin(buf+i);
+			y += z;
+		}
+		y &= 0xff; y ^= 0xff;
+		if (x != y){
+			gpsd_report(1, "buf: '%s'\n", buf);
+			gpsd_report(0, "firmware line %d checksum error: %x != %x\n", l, x, y);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int hex2bin(char *s){
+	int a, b;
+
+	a = s[0] & 0xff;
+	b = s[1] & 0xff;
+
+	if ((a >= 'a') && (a <= 'z'))
+		a = a + 10 - 'a';
+	else if ((a >= 'A') && (a <= 'Z'))
+		a = a + 10 - 'A';
+	else if ((a >= '0') && (a <= '9'))
+		a -= '0';
+	else
+		return -1;
+
+	if ((b >= 'a') && (b <= 'z'))
+		b = b + 10 - 'a';
+	else if ((b >= 'A') && (b <= 'Z'))
+		b = b + 10 - 'A';
+	else if ((b >= '0') && (b <= '9'))
+		b -= '0';
+	else
+		return -1;
+
+	return ((a<<4) + b);
+}
