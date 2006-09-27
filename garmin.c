@@ -7,10 +7,12 @@
  * This code is partly from the Garmin IOSDK and partly from the
  * sample code in the Linux garmin_gps driver.
  *
- * Presently this code needs the Linux garmin_gps driver and will
- * not function without it.  This code has been tested and at leastt
- * at one time is known to work on big- and little-endian CPUs and 32
- *  and 64 bit cpu modes.
+ * This code supports both Garmin on a serial port and USB Garmins.
+ *
+ * USB Garmins need the Linux garmin_gps driver and will not function
+ * without it.  This code has been tested and at least at one time is
+ * known to work on big- and little-endian CPUs and 32 and 64 bit cpu
+ * modes.
  *
  * Protocol info from:
  *	 GPS18_TechnicalSpecification.pdf
@@ -23,6 +25,7 @@
  * -D 3 = packet trace
  * -D 4 = packet details
  * -D 5 = more packet details
+ * -D 6 = very excessive details
  *
  * limitations:
  *

@@ -139,7 +139,8 @@ struct gps_device_t {
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
     size_t inbuflen;
     unsigned /*@observer@*/char *inbufptr;
-    unsigned char outbuffer[MAX_PACKET_LENGTH+1];
+    /* outbuffer needs to be able to hold 4 GPGSV records at once */
+    unsigned char outbuffer[MAX_PACKET_LENGTH*2+1];
     size_t outbuflen;
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */

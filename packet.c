@@ -730,7 +730,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		  packet_accept(session, GARMIN_PACKET);
 	      else 
 #endif /* GARMIN_ENABLE */
-		packet_accept(session, TSIP_PACKET);
+		  packet_accept(session, TSIP_PACKET);
 	    } else
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
