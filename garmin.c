@@ -1053,7 +1053,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session, unsigned char *buf, si
         , pkt_id, pkt_len, chksum);
 
     mask = PrintSERPacket(session, pkt_id, pkt_len, data_buf);
-    return 0;
+    return mask;
 }
 /*@ -charint @*/
 
