@@ -232,7 +232,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
 
-    gpsd_report(4, "PrintSERParse(, %#02x, %02x, )\n", pkt_id, pkt_len);
+    gpsd_report(4, "PrintSERParse(, %#02x, %#02x, )\n", pkt_id, pkt_len);
 
     switch( pkt_id ) {
     case GARMIN_PKTID_L001_COMMAND_DATA:
@@ -432,7 +432,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 		, pkt_id, pkt_len);
 	break;
     }
-    gpsd_report(3, "PrintSERParse(, %#02x, %02x, ) = %#02x\n"
+    gpsd_report(3, "PrintSERParse(, %#02x, %#02x, ) = %#02x\n"
 	, pkt_id, pkt_len, mask);
     return mask;
 }
@@ -485,7 +485,8 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t *pkt)
     case GARMIN_LAYERID_APPL:
         /* raw data transport, shared with Garmin Serial Driver */
 
-        mask = PrintSERPacket(session, pkt->mPacketId,  mDataSize, buf );
+        mask = PrintSERPacket(session, (unsigned char)pkt->mPacketId
+		,  (int)mDataSize, pkt->mData.uchars );
 
 	break;
     case 75:
@@ -587,6 +588,11 @@ static int GetPacket (struct gps_device_t *session )
     session->outbuflen = 0;
 
     gpsd_report(4, "GetPacket()\n");
+
+//delay.tv_sec = 0;
+//delay.tv_nsec = 33300000L;
+//while (nanosleep(&delay, &rem) < 0)
+//    continue;
 
     for( cnt = 0 ; cnt < 10 ; cnt++ ) {
 	// Read async data until the driver returns less than the
@@ -712,7 +718,8 @@ static bool garmin_probe(struct gps_device_t *session)
     buffer = (uint8_t *)session->driver.garmin.Buffer;
     thePacket = (Packet_t*)buffer;
 
-    // set Mode 0
+    // set Mode 1, mode 0 is broken somewhere past 2.6.14
+    // but how?
     set_int32(buffer, GARMIN_LAYERID_PRIVATE);
     set_int32(buffer+4, PRIV_PKTID_SET_MODE);
     set_int32(buffer+8, 4); // data length 4
