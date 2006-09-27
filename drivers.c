@@ -155,7 +155,7 @@ static struct gps_type_t nmea = {
 
 static void garmin_nmea_initializer(struct gps_device_t *session)
 {
-#ifdef NMEA_ENABLE
+#if defined(NMEA_ENABLE) && !defined(GARMIN_ENABLE)
     /* reset some config, AutoFix, WGS84, PPS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,4,30");
     /* once a sec, no averaging, NMEA 2.3, WAAS */
@@ -169,7 +169,7 @@ static void garmin_nmea_initializer(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSA,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
-#endif /* NMEA_ENABLE */
+#endif /* NMEA_ENABLE && !GARMIN_ENABLE */
 #if GARMIN_ENABLE 
     /* try to go binary */
     /* once a sec, binary, no averaging, NMEA 2.3, WAAS */
