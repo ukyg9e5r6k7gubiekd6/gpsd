@@ -621,8 +621,11 @@ be sent to the gps receiver, packs them into a binary representation and
 forwards them on to the device. Hex encoding is used so that both binary
 or text (NMEA) commands can be sent to the receiver. The '=' is optional:
 "|64656667" and "|=64656667" both send the string "defg" to the receiver.
-Use of this command is tantamount to connecting your receiver to an
-untrusted remote user's computer, ie. it's dangerous.</para></listitem>
+This command is similar to the ! command available over the control socket
+but | is available over the network. To mitigate against hostile remote
+users, the | command will not be honoured unless
+<application>gpsd</application> is invoked with the (intentionally
+undocumented) <term>-x</term> flag.</para></listitem>
 </varlistentry>
 
 </variablelist>

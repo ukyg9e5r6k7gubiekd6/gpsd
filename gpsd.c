@@ -70,6 +70,7 @@
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
+static int dangerous = 0;
 static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
@@ -1094,10 +1095,11 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 			timestamp() - whoami->device->gpsdata.d_xmit_time);
 	    break;
 	case '|':
-	    {
+	    if (dangerous){
 	    int r, l;
 	    char sendbuf[1024];
-
+	    if (!assign_channel(whoami))
+		break;
 	    if (*p == '=') ++p;
 	    if ((r = gpsd_hexpack(p, sendbuf, 1024)) != -1){
 		(void)snprintf(phrase, sizeof(phrase), ",|=%s",sendbuf);
@@ -1205,7 +1207,7 @@ int main(int argc, char *argv[])
     struct subscriber_t *sub;
 
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
+    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:Vx"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1242,6 +1244,9 @@ int main(int argc, char *argv[])
 	case 'V':
 	    (void)printf("gpsd %s\n", VERSION);
 	    exit(0);
+	case 'x':
+	    dangerous = 1;
+	    break;
 	case 'h': case '?':
 	default:
 	    usage();
