@@ -130,7 +130,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	    }
 	} else {
             gpsd_report(5, "pps-detect (%s) on %s changed to %d\n",
-                        ((pps_device==TIOCM_CAR) ? "DCD" : "CTS"),
+                        ((pps_device==TIOCM_CAR) ? "DCD" : "CTS"), 
+                          session->gpsdata.gps_device, state);
 	    laststate = state;
 	    unchanged = 0;
 	}
