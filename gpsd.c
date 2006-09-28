@@ -776,7 +776,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    phrase[strlen(phrase)-1] = '\0';
 	    break;
 	case 'L':
-	    (void)snprintf(phrase, sizeof(phrase), ",L=3 " VERSION " abcdefgijklmnopqrstuvwxyz|");	//h
+	    (void)snprintf(phrase, sizeof(phrase), ",L=3 " VERSION " abcdefgijklmnopqrstuvwxyz");	//h
 	    break;
 	case 'M':
 	    if (!assign_channel(whoami) && (!whoami->device || whoami->fixbuffer.mode == MODE_NOT_SEEN))
@@ -1093,23 +1093,6 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 			whoami->device->poll_times[cfd] - whoami->device->gpsdata.d_xmit_time,
 			timestamp() - whoami->device->gpsdata.d_xmit_time);
 	    break;
-	case '|':
-	    {
-	    int r, l;
-	    char sendbuf[1024];
-
-	    if (*p == '=') ++p;
-	    if ((r = gpsd_hexpack(p, sendbuf, 1024)) != -1){
-		(void)snprintf(phrase, sizeof(phrase), ",|=%s",sendbuf);
-		errno = 0;
-		l = write(whoami->device->gpsdata.gps_fd, sendbuf, r);
-		if (l != r)
-		    gpsd_report(2, "error writing to gps: %d != %d (%d)\n",
-			l, r, errno);
-	    }
-	    p += strlen(p);
-	    break;
-	    }
 	case '\r': case '\n':
 	    goto breakout;
 	}
