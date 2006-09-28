@@ -663,30 +663,3 @@ srec_check(char *data){
 	}
 	return 0;
 }
-
-int hex2bin(char *s){
-	int a, b;
-
-	a = s[0] & 0xff;
-	b = s[1] & 0xff;
-
-	if ((a >= 'a') && (a <= 'z'))
-		a = a + 10 - 'a';
-	else if ((a >= 'A') && (a <= 'Z'))
-		a = a + 10 - 'A';
-	else if ((a >= '0') && (a <= '9'))
-		a -= '0';
-	else
-		return -1;
-
-	if ((b >= 'a') && (b <= 'z'))
-		b = b + 10 - 'a';
-	else if ((b >= 'A') && (b <= 'Z'))
-		b = b + 10 - 'A';
-	else if ((b >= '0') && (b <= '9'))
-		b -= '0';
-	else
-		return -1;
-
-	return ((a<<4) + b);
-}
