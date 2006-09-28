@@ -256,7 +256,7 @@ extern int packet_sniff(struct gps_device_t *);
 
 extern bool dgnss_url(char *);
 extern int dgnss_open(struct gps_context_t *, char *);
-extern void dgnss_poll(struct gps_context_t *);
+extern int dgnss_poll(struct gps_context_t *);
 extern void dgnss_report(struct gps_device_t *);
 extern void dgnss_autoconnect(struct gps_context_t *, double, double);
 extern void rtcm_relay(struct gps_device_t *);

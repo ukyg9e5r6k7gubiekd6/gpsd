@@ -1509,7 +1509,11 @@ int main(int argc, char *argv[])
 
 	if (context.dsock >= 0 && FD_ISSET(context.dsock, &rfds)) {
 	    /* be ready for DGPS reports */
-	    dgnss_poll(&context);
+	    if (dgnss_poll(&context) == -1){
+		FD_CLR(context.dsock, &all_fds);
+		FD_CLR(context.dsock, &rfds);
+		context.dsock = -1;
+	    }
 	}
 	/* read any commands that came in over control sockets */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
