@@ -92,7 +92,7 @@ static char *verbpat[] =
 };
 /*@ +nullassign @*/
 
-static char *sbasvec[] =
+static char *dgpsvec[] =
 {
     "None",
     "SBAS",
@@ -447,7 +447,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	******************************************************************/
 	touchwin(mid27win);
 	display(mid27win, 1, 14, "                                                                                     ");
-	display(mid27win, 1, 14, "%s", sbasvec[(int)getub(buf, 1)]);
+	display(mid27win, 1, 14, "%s", dgpsvec[(int)getub(buf, 1)]);
 	for (i = j = 0; i < 12; i++) {
 	    touchwin(mid27win);
 	    if (/*@i1@*/getub(buf, 16+3*i) != '\0') {
