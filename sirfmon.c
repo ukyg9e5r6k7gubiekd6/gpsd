@@ -366,7 +366,6 @@ static void decode_sirf(unsigned char buf[], int len)
 		(void)wprintw(mid13win, "   ");
 
 	}
-	(void)wprintw(mid13win, "\n");
 	(void)wprintw(debugwin, "VL  0x0d=");
     	break;
 
@@ -446,10 +445,13 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	total               3 x 12 = 36 bytes
 	******************************************************************/
-	display(mid27win, 1, 14, "%d (%s)", getub(buf, 1), sbasvec[(int)getub(buf, 1)]);
+	touchwin(mid27win);
+	display(mid27win, 1, 14, "                                                                                     ");
+	display(mid27win, 1, 14, "%s", sbasvec[(int)getub(buf, 1)]);
 	for (i = j = 0; i < 12; i++) {
+	    touchwin(mid27win);
 	    if (/*@i1@*/getub(buf, 16+3*i) != '\0') {
-		(void)wprintw(mid27win, "%d=%d ", getub(buf, 16+3*i), getsw(buf, 16+3*i+1));
+		(void)wprintw(mid27win, "  %d=%d", getub(buf, 16+3*i), getsw(buf, 16+3*i+1));
 		j++;
 	    }
 	}
@@ -1123,7 +1125,7 @@ int main (int argc, char **argv)
 
     (void)wborder(mid27win, 0, 0, 0, 0, 0, 0, 0, 0),
     (void)wattrset(mid27win, A_BOLD);
-    display(mid27win, 1, 1, "SBAS source: ");
+    display(mid27win, 1, 1, "DGPS source: ");
     display(mid27win, 1, 31, "Corrections: ");
     display(mid27win, 3, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
