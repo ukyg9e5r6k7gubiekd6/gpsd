@@ -372,6 +372,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for PPS input on CTS line
+AC_ARG_ENABLE(pps-on-cts,
+  AC_HELP_STRING([--enable-pps-on-cts],
+                 [Enable PPS pulse on CTS rather than DCD]),
+  [ac_ppsoncts=$enableval], [ac_ppsoncts=no])
+AC_MSG_CHECKING([for PPS pulse on CTS rather than DCD])
+if test x"$ac_ppsoncts" = "xyes"; then
+    AC_MSG_RESULT([yes])
+       AC_DEFINE([PPS_ON_CTS], 1, [PPS on CTS rather than DCD])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for port speed fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
   AC_HELP_STRING([--enable-fixed-port-speed=nnn],

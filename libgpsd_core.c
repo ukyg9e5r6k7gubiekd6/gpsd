@@ -106,16 +106,22 @@ static void *gpsd_ppsmonitor(void *arg)
     int cycle,duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval tv;
     struct timeval pulse[2] = {{0,0},{0,0}};
+    int pps_device = TIOCM_CAR;
+
+#if defined(PPS_ON_CTS)
+    pps_device = TIOCM_CTS;
+#endif
+
 
     /* wait for status change on the device's carrier-detect line */
-    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
+    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
 	(void)gettimeofday(&tv,NULL);
 	/*@ +ignoresigns */
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
 	    break;
 	/*@ -ignoresigns */
 
-        state = (int)((state & TIOCM_CAR) != 0);
+        state = (int)((state & pps_device) != 0);
 
 	if (state == laststate) {
 	    if (++unchanged == 10) {
@@ -123,8 +129,8 @@ static void *gpsd_ppsmonitor(void *arg)
 		break;
 	    }
 	} else {
-	    gpsd_report(5, "carrier-detect on %s changed to %d\n", 
-			session->gpsdata.gps_device, state);
+            gpsd_report(5, "pps-detect (%s) on %s changed to %d\n",
+                        ((pps_device==TIOCM_CAR) ? "DCD" : "CTS"),
 	    laststate = state;
 	    unchanged = 0;
 	}
