@@ -615,6 +615,16 @@ developers. The format of this string is subject to change without
 notice.</para></listitem>
 </varlistentry>
 
+<varlistentry>
+<term>|</term> <listitem><para>The | command accepts hex encoded bytes to
+be sent to the gps receiver, packs them into a binary representation and
+forwards them on to the device. Hex encoding is used so that both binary
+or text (NMEA) commands can be sent to the receiver. The '=' is optional:
+"|64656667" and "|=64656667" both send the string "defg" to the receiver.
+Use of this command is tantamount to connecting your receiver to an
+untrusted remote user's computer, ie. it's dangerous.</para></listitem>
+</varlistentry>
+
 </variablelist>
 
 <para>Note that a response consisting of just ? following the =
