@@ -152,7 +152,7 @@ static int nmea_send(int fd, const char *fmt, ... )
     if (status == strlen(buf)) {
 	return (int)status;
     } else {
-	perror("SiRF write");
+	perror("nmea_send");
 	return -1;
     }
 }
