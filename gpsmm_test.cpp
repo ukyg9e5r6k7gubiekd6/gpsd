@@ -16,7 +16,7 @@
 
 using namespace std;
 
-static void callback(struct gps_data_t* p, char* buf);
+static void callback(struct gps_data_t* p, char* buf, size_t len, int level);
 
 int main(void) {
 	gpsmm gps_rec;
@@ -49,7 +49,7 @@ int main(void) {
 	return 0;
 }
 
-static void callback(struct gps_data_t* p, char* buf) {
+static void callback(struct gps_data_t* p, char* buf, size_t len, int level) {
 	
 	if (p==NULL) {
 		cout << "Error polling gpsd\n";
