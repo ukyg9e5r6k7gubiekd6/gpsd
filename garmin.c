@@ -222,7 +222,6 @@ static inline double  radtodeg( double rad) {
 
 static gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id, int pkt_len, unsigned char *buf );
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t *pkt );
-static void SendPacket (struct gps_device_t *session, Packet_t *aPacket );
 static int GetPacket (struct gps_device_t *session );
 
 gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
@@ -538,18 +537,33 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t *pkt)
 }
 /*@ +branchstate @*/
 
-//-----------------------------------------------------------------------------
-// send a packet in GarminUSB format
-static void SendPacket (struct gps_device_t *session, Packet_t *aPacket ) 
-{
-	size_t theBytesToWrite = (size_t)(12 + get_int32((uint8_t*)&aPacket->mDataSize));
-	ssize_t theBytesReturned = 0;
 
-        gpsd_report(4, "SendPacket(), writing %d bytes\n", theBytesToWrite);
-        (void)PrintUSBPacket ( session,  aPacket);
+/* build and send a packet */
+static void Build_Send_Packet( struct gps_device_t *session,
+       uint32_t layer_id, uint32_t pkt_id, uint32_t length, uint32_t data ) 
+{
+        uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
+	Packet_t *thePacket = (Packet_t*)buffer;
+	ssize_t theBytesReturned = 0;
+	ssize_t theBytesToWrite = 12 + length;
+
+	set_int32(buffer, layer_id);
+	set_int32(buffer+4, pkt_id);
+	set_int32(buffer+8, length); 
+        if ( 2 == length ) {
+		set_int16(buffer+12, data);
+        } else if ( 4 == length ) {
+		set_int32(buffer+12, data);
+	}
+
+#if 0
+        gpsd_report(4, "SendPacket(), writing %d bytes: %s\n"
+		, theBytesToWrite, gpsd_hexdump(thePacket, theBytesToWrite));
+#endif
+        (void)PrintUSBPacket ( session,  thePacket);
 
 	theBytesReturned = write( session->gpsdata.gps_fd
-		    , aPacket, theBytesToWrite);
+		    , thePacket, theBytesToWrite);
 	gpsd_report(4, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
 	// Garmin says:
@@ -565,25 +579,6 @@ static void SendPacket (struct gps_device_t *session, Packet_t *aPacket )
 		theBytesReturned = write( session->gpsdata.gps_fd
 		    , &n, 0);
 	}
-}
-
-/* build and send a packet */
-static void Build_Send_Packet( struct gps_device_t *session,
-       uint32_t layer_id, uint32_t pkt_id, uint32_t length, uint32_t data ) 
-{
-        uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
-	Packet_t *thePacket = (Packet_t*)buffer;
-
-	set_int32(buffer, layer_id);
-	set_int32(buffer+4, pkt_id);
-	set_int32(buffer+8, length); 
-        if ( 2 == length ) {
-		set_int16(buffer+12, data);
-        } else if ( 4 == length ) {
-		set_int32(buffer+12, data);
-	}
-
-	SendPacket(session,  thePacket);
 }
 
 //-----------------------------------------------------------------------------
