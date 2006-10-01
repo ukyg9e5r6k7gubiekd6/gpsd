@@ -32,49 +32,69 @@
  * 10 02 04 38 8f c7 10 03     answer from GPS to 0x8f message; Like OK?
  *
  * Message described as 0x89 in the manual is message 0x8f in the
- * actual command set (manual error?).  Message 0x89 is used to switch
- * baud rate without reset.
+ * actual command set (manual error?).
+ *
+ * Message 0x89 is used for serial port configuration.
  * 
  * The chip sometimes sends vendor extension messages with the prefix
- * $PEMT,100. After reset, it sends a $PEMT,100 message describing the
- * chip's configuration.  Here is a sample:
+ * $PEMT,100. After restart, it sends a $PEMT,100 message describing the
+ * chip's configuration. Here is a sample:
  *
  * $PEMT,100,05.42g,100303,180,05,1,20,15,08,0,0,2,1*5A
  * 100 - message type
  * 05.42g - firmware version
- * 100303 - date of firmware release
+ * 100303 - date of firmware release DDMMYY
  * 180 -  datum ID; 001 is WGS-84
- * 05 - elevation mask; see message 0x86
- * 1 - DOP mode (1 is auto DOP mask); see message 0x87
- * 20 - GDOP; see message 0x87
- * 15 - PDOP
- * 08 - HDOP
+ * 05 - default elevation mask; see message 0x86
+ * 1 - default DOP select (1 is auto DOP mask); see message 0x87
+ * 20 - default GDOP; see message 0x87
+ * 15 - default PDOP
+ * 08 - default HDOP
  * 0 - Normal mode, without 1PPS
- * 0 - ??
- * 2 - ??
- * 1 - ??
+ * 0 - default position pinning control (0 disable, 1 enable)
+ * 2 - altitude hold mode (0 disable, 1 always, 2 auto)
+ * 1 - 2/1 satellite nav mode (0,1,2,3,4)
+ *          0 disable 2/1 sat nav mode
+ *          1 hold direction (2 sat)
+ *          2 clock hold only (2 sat)
+ *          3 direction hold then clock hold (1 sat)
+ *          4 clock hold then direction hold (1 sat)
  * 
- * Message $PEMT,100 could be forced with message 0x85:
+ * Message $PEMT,100 could be forced with message 0x85 (restart):
  * 10 02 12 85 00 00 00 00 00 01 01 00 00 00 00 00 00 00 00 87 10 03
- * This is some kind of initialisation but I don't understand the 0x85
- * message in detail.
+ * 0x85 ID, Restart
+ * 0x00 restart mode (0 default, 1 hot, 2 warm, 3 cold)
+ * 0x00 test start search PRN (1-32)
+ * 0x00 UTC second (0-59)
+ * 0x00 UTC Minute (0-59)
+ * 0x00 UTC Hour (0-23)
+ * 0x01 UTC Day (1-31)
+ * 0x01 UTC Month (1-12)
+ * 0x0000 UTC year (1980+x, uint16)
+ * 0x0000 Latitude WGS-84 (+/-900, 1/10 degree, + for, int16)
+ * 0x0000 Longtitude WGS-84 (+/-1800, 1/10 degree, + for E, int16)
+ * 0x0000 Altitude WGS-84 (-1000..+18000, meters, int16)
+ * 0x87 CRC
  * 
  * With message 0x8e it is possible to define how often each NMEA
  * message is sent (0-255 seconds). It is possible with message 0x8e
  * to activate PEMT,101 messages that have information about time,
  * position, velocity and HDOP.
  * 
- * $PEMT,101,1,03,21.0,230705190757,5004.6612,N,01425.1359,E,00269,045,0000*24
- * 101 - message type
- * 1 - (1 or 2) I guess that this is flag that position is valid
- * 03 - number of used satelites
- * 21.0 - HDOP
- * 230705190757 - date and time, UTC
- * 5004.6612,N - Latitude (degree)
- * 01425.1359,E - Longitude (degree)
- * 00269 - Altitude (m)
- * 045 - heading (degrees from true north)
- * 0000 - ?? could be speed over ground
+ * $PEMT,101,1,02,00.0,300906190446,5002.5062,N,01427.6166,E,00259,000,0000*27
+ * $PEMT,101,2,06,02.1,300906185730,5002.7546,N,01426.9524,E,00323,020,0011*26
+ * 101 - message type, Compact Navigation Solution
+ * 2 - position status (1,2,3,4,5,6)
+ *      (1 invalid, 2 2D fix, 3 3D fix, 4 2D with DIFF, 5 3D with DIFF,
+ *       6 2/1 sat degrade mode) 
+ * 06 - number of used satelites
+ * 02.1 - DOP (00.0 no fix, HDOP 2D fix, PDOP 3D fix)
+ * 300906185730 - date and time, UTC ddmmyyHHMMSS (30/09/2006 18:57:30)
+ * 5002.7546,N - Latitude (degree)
+ * 01426.9524,E - Longitude (degree)
+ * 00323 - Altitude (323 metres)
+ * 020 - heading (20 degrees from true north)
+ * 0011 - speed over ground (11 metres per second); documentation says km per h
  * 
  * This is an exampe of an 0x8e message that activates all NMEA sentences 
  * with 1s period:
@@ -222,7 +242,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    session->gpsdata.status,
 		    visible,
 		    used);
-	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET | CYCLE_START_SET;
 	return mask;
 
     case 0x04:	/* DOP Data Output */
@@ -352,12 +372,12 @@ static bool evermore_default(struct gps_device_t *session, int mode)
     bool ok = true;
     /*@ +charint @*/
     unsigned char msg86[] = {
-	    0x86,	/*  0: msg ID */
+	    0x86,	/*  0: msg ID, Set Elevation Mask */
 	    5,          /*  1: elevation Mask, degree 0..89 */
     };
 
     unsigned char msg87[] = {
-	    0x87,       /*  0: msg ID */
+	    0x87,       /*  0: msg ID, Set DOP MAsk */
 	    1,          /*  1: DOP mask, GDOP(0), auto(1), PDOP(2), HDOP(3), no mask(4) */
 	    20,         /*  2: GDOP, 1..99 */
 	    15,         /*  3: PDOP, 1..99 */
@@ -366,14 +386,14 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 
 #ifdef __UNUSED__
     unsigned char msg8f[] = {
-	    0x8f,	/*  0: msg ID */
+	    0x8f,	/*  0: msg ID, Operational Mode Configuartion */
 	    0,          /*  1: operation mode, normal(0), power save(1), 1PPS(2) */
 	    1,          /*  2: navigation update rate, 1/Hz, 1..10 */
 	    0,          /*  3: RF/GPSBBP On time, 160ms(0), 220(1), 280(2), 340(3), 440(4) */
     };
 
     unsigned char msg8e[] = {
-	    0x8e,	/*  0: msg ID */
+	    0x8e,	/*  0: msg ID, NMEA Message Control */
 	    0x1d,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
 	    0x01,       /*  2: nmea checksum no(0), yes(1) */
 	    1,          /*  3: GPGGA, interval 0-255s */
@@ -383,22 +403,89 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 	    1,          /*  7: GPRMC, interval 0-255s */
 	    0,          /*  8: GPVTG, interval 0-255s */
 	    0,          /*  9: PEMT,101, interval 0-255s */
-	    0, 0, 0, 0, 0, 0, /* 10: ?? */
+	    0, 0, 0, 0, 0, 0, /* 10: reserved */
     };
 
+    unsigned char msg8e_[] = {
+	    0x8e,	/*  0: msg ID, NMEA message control */
+	    0x7f,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
+	    0x01,       /*  2: nmea checksum no(0), yes(1) */
+	    1,          /*  3: GPGGA, interval 0-255s */
+	    1,          /*  4: GPGLL, interval 0-255s */
+	    1,          /*  5: GPGSA, interval 0-255s */
+	    1,          /*  6: GPGSV, interval 0-255s */
+	    1,          /*  7: GPRMC, interval 0-255s */
+	    1,          /*  8: GPVTG, interval 0-255s */
+	    1,          /*  9: PEMT,101, interval 0-255s */
+	    0, 0, 0, 0, 0, 0, /* 10: ?? */
+    };
+    
     unsigned char msg8d[] = {
-	    0x8d,       /*  0: msg ID */
+	    0x8d,       /*  0: msg ID, select Datum */
 	    0x00,       /*  1: 0 (hi byte of datum ID) */
 	    0x01,       /*  2: datum ID, 1 is WGS-84 */
-	    0x00,       /*  3: ?? */
+	    0x00,       /*  3: datum ID, high byte; datum ID is int16 */
     };
+
+    unsigned char msg85[] = {
+	    0x85,       /*  0: msg ID, Restart */
+	    0x00,       /*  1: restart mode (0 default, 1 hot, 2 warm, 3 cold) */
+	    0x00,       /*  2: test start search PRN (1-32) */
+	    0x00,       /*  3: UTC second (0-59) */
+	    0x00,       /*  4: UTC Minute (0-59) */
+	    0x00,       /*  5: UTC Hour (0-23) */
+	    0x01,       /*  6: UTC Day (1-31) */
+	    0x01,       /*  7: UTC Month (1-12) */
+	    0x00,       /*  8: UTC year lo (1980+x, uint16) */
+	    0x00,       /*  9: UTC year hi (1980+x, uint16) */
+	    0x00,       /* 10: Lat WGS-84 lo (+/-900, 1/10 deg, + for, int16) */
+	    0x00,       /* 11: Lat WGS-84 hi (+/-900, 1/10 deg, + for, int16) */
+	    0x00,       /* 12: Lon WGS-84 lo (+/-1800, 1/10 deg, + for E, int16) */
+	    0x00,       /* 13: Lon WGS-84 hi (+/-1800, 1/10 deg, + for E, int16) */
+	    0x00,       /* 14: Alt WGS-84 lo (-1000..+18000, meters, int16) */
+	    0x00,       /* 15: Alt WGS-84 hi (-1000..+18000, meters, int16) */
+    };
+
+    unsigned char msg92[] = {
+	    0x92,       /*  0: msg ID, Position Pinning Configuration */
+	    0x00,       /*  1: position pinning control, 0 disable, 1 enable */
+	    0x00,       /*  2: reserved */
+	    0x00,       /*  3: reserved */
+    };
+    
+    unsigned char msg94[] = {
+	    0x94,       /*  0: msg ID, Differentil GPS Control */
+	    0x00,       /*  1: diff GPS control, 0 disable, 1 SBAS, 2 RTCM */
+	    0x00,       /*  2: RTCM DGPS time out, lo */
+	    0x00,       /*  3: RTCM DGPS time out, hi */
+	    0x00,       /*  4: the first SAB satellite to be searched (0-5) */
+	    0x00,       /*  5: reserved */
+	    0x00,       /*  6: reserved */
+	    0x00,       /*  7: reserved */
+    };
+    /* SBAS ID, SBAS        (PRN) *
+     *       0  WAAS POR    (134) *
+     *       1  WAAS AOR-W  (122) *
+     *       2  EGNOS AOR-E (120) *
+     *       3  EGNOS IOR   (131) *
+     *       4  MTSAT-1     (129) *
+     *       5  MTSAT-2     (137) *
+     */
+
+    unsigned char msg95[] = {
+	    0x95,    /* 0: msg ID, Reset Receiver to Defaults */
+	    0x01,    /* 1: reset ephemeris control (0 disable, 1 enable) */
+	    0x00,    /* 2: reserved */
+	    0x00,    /* 3: reserved */
+    };
+
 #endif /* __UNUSED__ */
 
     unsigned char msg84[] = {
-	    0x84,    /* 0: msg ID */
-	    0x01,    /* 1: mode; binary(0), nmea(1) */
-	    0x00,    /* 2: ?? */
-	    0x00,    /* 3: ?? */
+	    0x84,    /* 0: msg ID, Protocol Configuration */
+	    0x01,    /* 1: mode; EverMore binary(0), NMEA(1) */
+	    0x00,    /* 2: reserved */
+	    0x00,    /* 3: reserved */
     };
 
     gpsd_report(5, "evermore_default call(%d)\n", mode);
@@ -407,7 +494,9 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 #ifdef __UNUSED__
     ok &= evermore_write(session, msg8f, sizeof(msg8f));
     ok &= evermore_write(session, msg8e, sizeof(msg8e));
+    ok &= evermore_write(session, msg8e_, sizeof(msg8e_));
     ok &= evermore_write(session, msg8d, sizeof(msg8d));
+    ok &= evermore_write(session, msg85, sizeof(msg85));
 #endif /* __UNUSED__ */
     if (mode == 1) {
        gpsd_report(1, "Switching chip mode to EverMore binary.\n");
@@ -469,10 +558,10 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 #else
     unsigned char tmp8;
     unsigned char msg[] = {
-	    0x89,          /*  0: msg ID */
-	    0x01,          /*  1: ??, maybe mode: normal mode(0), power save(1), 1PPS(2) */
-	    0x00,          /*  2: baud rate; 4800(0), 9600(1), 19200(2), 38400(3) */
-	    0x00,          /*  3: ??, maybe RF/GPSBB on time; valid only for power save mode */
+	    0x89,          /*  0: msg ID, Serial Port Configuartion */
+	    0x01,          /*  1: bit 0 cfg for main serial, bit 1 cfg for DGPS port */
+	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
+	    0x00,          /*  3: baud rate for DGPS serial port; 4800(0), 9600(1), etc */
     };
     gpsd_report(5, "evermore_speed call (%d)\n", speed);
     switch (speed) {
@@ -506,9 +595,11 @@ static void evermore_initializer(struct gps_device_t *session)
 /* poll for software version in order to check for old firmware */
 {
     gpsd_report(5, "evermore_initializer call\n");
-    if (session->packet_type == NMEA_PACKET)
-	(void)evermore_set_mode(session, session->gpsdata.baudrate, true);
-    (void)evermore_default(session, 0);
+    if (session->packet_type == NMEA_PACKET) {
+	gpsd_report(5, "NMEA_PACKET packet\n");
+	/* (void)evermore_set_mode(session, session->gpsdata.baudrate, true); */
+    }
+    (void)evermore_default(session, 1); /* switch GPS to binary mode */
 }
 
 #ifdef __UNUSED__
@@ -548,8 +639,7 @@ static void evermore_close(struct gps_device_t *session)
 struct gps_type_t evermore_binary =
 {
     .typename       = "EverMore binary",	/* full name of type */
-    //.trigger        = "$PEMT,100,05.",	recognize the type */
-    .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03",
+    .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03", /* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe          = NULL,			/* no probe */
     .initializer    = evermore_initializer,	/* initialize the device */
