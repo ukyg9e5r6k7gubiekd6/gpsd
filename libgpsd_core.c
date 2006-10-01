@@ -153,8 +153,12 @@ static void *gpsd_ppsmonitor(void *arg)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
-	    if (cycle > 999000 && cycle < 1001000 && duration > 800000)
+	    if (cycle > 999000 && cycle < 1001000 && duration > 800000) {
 		(void)ntpshm_pps(session, &tv);
+            } else {
+                gpsd_report(5, "PPS pulse rejected.  cycle: %d, duration: %d\n",
+		     cycle, duration);
+	    }
 	}
 	/*@ -boolint @*/
 
