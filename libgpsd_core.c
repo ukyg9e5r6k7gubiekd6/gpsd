@@ -244,8 +244,7 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 		((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 		degtodm(fabs(session->gpsdata.fix.longitude)),
 		((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-		(session->gpsdata.fix.mode >= MODE_2D) ? STATUS_FIX : STATUS_NO_FIX,
-
+		session->gpsdata.status,
 		session->gpsdata.satellites_used);
 	if (isnan(session->gpsdata.hdop))
 	    (void)strlcat(bufp, ",", len);
