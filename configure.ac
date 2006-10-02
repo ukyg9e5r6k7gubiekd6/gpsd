@@ -456,7 +456,7 @@ AC_ARG_ENABLE(reconfigure,
   AC_HELP_STRING([--disable-reconfigure],
                  [do not allow gpsd to change device settings]),
   [ac_reconfigure=$enableval], [ac_reconfigure=yes])
-AC_MSG_CHECKING([for max devices])
+AC_MSG_CHECKING([if device reconfiguration is allowed])
 if test x"$ac_reconfigure" != "xno"; then
     AC_MSG_RESULT([$ac_reconfigure])
 	AC_DEFINE([ALLOW_RECONFIGURE], 1, [Allow gpsd to reconfigure device])
