@@ -501,6 +501,7 @@ echo "RTCM104 support         : $ac_rtcm104"
 echo "NTRIP support           : $ac_ntrip"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
+echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac  
 echo "Fixed port speed        : $ac_baud"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
