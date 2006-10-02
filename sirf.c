@@ -43,6 +43,7 @@
 #define LO(n)		((n) & 0xff)
 
 bool sirf_write(int fd, unsigned char *msg) {
+#ifdef ALLOW_RECONFIGURE
    unsigned int       crc;
    size_t    i, len;
    char	     buf[MAX_PACKET_LENGTH*2];
@@ -68,6 +69,9 @@ bool sirf_write(int fd, unsigned char *msg) {
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
    (void)tcdrain(fd);
    return(ok);
+#else
+   return -1;
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_speed(int ttyfd, speed_t speed) 
@@ -114,11 +118,13 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
+#ifdef ALLOW_RECONFIGURE
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "SiRF NMEA");
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;
     }
+#endif /* ALLOW_RECONFIGURE */
 }
 
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -129,6 +135,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     char buf2[MAX_PACKET_LENGTH*3+2];
     double fv;
     /*@ +charint @*/
+#ifdef ALLOW_RECONFIGURE
     static unsigned char enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				 0x80, 0x00, 0x00, 0x00,
 				 0x00, 0x00, 0x00, 0x00,
@@ -147,6 +154,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 				  0x00, 0x00, 0x00, 0x0C,
 				  0x00,
 				  0x00, 0x00, 0xb0, 0xb3};
+#endif /* ALLOW_RECONFIGURE */
 
     /*@ -charint @*/
     if (len == 0)
@@ -286,10 +294,12 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    gpsd_report(4, "Firmware has XTrac capability\n");
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
 	session->driver.sirf.time_seen = 0;
+#ifdef ALLOW_RECONFIGURE
 	if ((session->context->valid & LEAP_SECOND_VALID)==0) {
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
+#endif /* ALLOW_RECONFIGURE */
 	return 0;
 
     case 0x07:		/* Clock Status Data */
@@ -323,10 +333,12 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    words[9] = (unsigned int)getul(buf, 39);
 	    gpsd_interpret_subframe(session, words);
 
+#ifdef ALLOW_RECONFIGURE
 	    if (session->context->valid & LEAP_SECOND_VALID) {
 		gpsd_report(4, "Disabling subframe transmission...\n");
 		(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
+#endif /* ALLOW_RECONFIGURE */
 	}
 	break;
     case 0x09:		/* CPU Throughput */
