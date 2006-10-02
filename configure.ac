@@ -451,6 +451,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl allow gpsd to reconfigure gps receiver
+AC_ARG_ENABLE(reconfigure,
+  AC_HELP_STRING([--disable-reconfigure],
+                 [do not allow gpsd to change device settings]),
+  [ac_reconfigure=$enableval], [ac_reconfigure=yes])
+AC_MSG_CHECKING([for max devices])
+if test x"$ac_reconfigure" != "xno"; then
+    AC_MSG_RESULT([$ac_reconfigure])
+	AC_DEFINE([ALLOW_RECONFIGURE], 1, [Allow gpsd to reconfigure device])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
 dnl but no DBUS headers.
@@ -509,6 +522,7 @@ echo "Enable X11 support      : $ac_x"
 echo "Enable Python support   : $ac_python"
 echo "Limited max client fd   : $ac_maxclientfd"
 echo "Limited max devices     : $ac_maxdevices"
+echo "Allow device reconfig   : $ac_reconfigure"
 echo "------------------------------------------"
 
 if test	x"$ac_nmea" = "xno" -a \

@@ -625,6 +625,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 	    if (assign_channel(whoami) && whoami->device->device_type!=NULL && *p=='=' && privileged_user(whoami)) {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
+#ifdef ALLOW_RECONFIGURE
 		if (whoami->device->device_type->speed_switcher)
 		    if (whoami->device->device_type->speed_switcher(whoami->device, (unsigned)i)) {
 			/* 
@@ -649,6 +650,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 				whoami->device->gpsdata.stopbits);
 		    }
 	    }
+#endif /* ALLOW_RECONFIGURE */
 	    if (whoami->device) {
 		if ( whoami->device->gpsdata.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
@@ -789,6 +791,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strlcpy(phrase, ",N=?", BUFSIZ);
 	    else if (!whoami->device->device_type->mode_switcher)
 		(void)strlcpy(phrase, ",N=0", BUFSIZ);
+#ifdef ALLOW_RECONFIGURE
 	    else if (privileged_user(whoami)) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
@@ -799,6 +802,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		    p++;
 		}
 	    }
+#endif /* ALLOW_RECONFIGURE */
 	    if (!whoami->device)
 		(void)snprintf(phrase, sizeof(phrase), ",N=?");
 	    else
