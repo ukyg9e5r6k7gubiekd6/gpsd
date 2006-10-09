@@ -155,6 +155,7 @@ static struct gps_type_t nmea = {
 
 static void garmin_nmea_initializer(struct gps_device_t *session)
 {
+#ifdef ALLOW_RECONFIGURE
 #if defined(NMEA_ENABLE) && !defined(GARMIN_ENABLE_UNUSED)
     /* reset some config, AutoFix, WGS84, PPS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,4,30");
@@ -180,6 +181,7 @@ static void garmin_nmea_initializer(struct gps_device_t *session)
     /* DLE, PktID, Size, data (none), CHksum, DLE, ETX 
     (void)gpsd_write(session, "\x10\xFE\x00\x02\x10\x03", 6); */
 #endif /* GARMIN_ENABLE */
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static struct gps_type_t garmin = {
