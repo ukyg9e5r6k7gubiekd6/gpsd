@@ -46,7 +46,7 @@ logic that different from the decoder in the
 <application>gpsd</application> SiRF driver, so behaviors that show up
 in both are unlikely to be due to logic bugs in either.</para>
 
-<para><application>garmintool</application> accepts an -h option that
+<para><application>sirfmon</application> accepts an -h option that
 displays a usage message, or a -v option to dump the package
 version and exit.</para>
 
