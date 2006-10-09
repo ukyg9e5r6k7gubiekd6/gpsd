@@ -148,12 +148,21 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * that the UTC second is changing when the signal has not
 	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
+             *
+             * Some GPS instead output a square wave that is 2Hz and each
+             * edge denotes the start of a second.
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
-	    if (cycle > 999000 && cycle < 1001000 && duration > 800000) {
+	    if ( 800000 > duration) {
+		/* less then 800mS, duration too short for anything */
+	    } else if (cycle > 999000 && cycle < 1001000 ) {
+                /* looks like PPS pulse */
+		(void)ntpshm_pps(session, &tv);
+	    } else if (cycle > 1999000 && cycle < 2001000) {
+		/* looks like 2Hz square wave */
 		(void)ntpshm_pps(session, &tv);
             } else {
                 gpsd_report(5, "PPS pulse rejected.  cycle: %d, duration: %d\n",
