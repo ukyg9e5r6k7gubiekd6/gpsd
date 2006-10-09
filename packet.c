@@ -500,6 +500,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* ITALK_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
+        /* unused case */
 	if (c >= 0x13)
 	    session->packet_state = TSIP_PAYLOAD;
 	else
@@ -528,7 +529,8 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    /*
 	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
 	     * checksummed, so false positives are easy.  We might be
-	     * looking at another DLE-stuffed protocol like EverMore.
+	     * looking at another DLE-stuffed protocol like EverMore
+             * or Garmin streaming binary.
 	     */
 	    session->packet_state = DLE_LEADER;
 	else
@@ -682,19 +684,22 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	} else if (session->packet_state == TSIP_RECOGNIZED) {
-	    if ((session->inbufptr - session->inbuffer) >= 4) {
-#ifdef GARMIN_ENABLE
-              unsigned int n, chksum, c, len;
+            size_t packetlen = session->inbufptr - session->inbuffer;
+	    if ( packetlen < 5) {
+		session->packet_state = GROUND_STATE;
+            } else {
+              unsigned int n, pkt_id, chksum, c, len;
 	      bool ok = false;
-
+              
+#ifdef GARMIN_ENABLE
 	      n = 0;
 	      /*@ +charint */
 	      do {
 
 	         if (session->inbuffer[n++] != 0x10) break;
-	         chksum = session->inbuffer[n++]; // skip pkt ID */
+	         pkt_id = session->inbuffer[n++]; /* packet ID */
 	         len = session->inbuffer[n++];
-		 chksum += len;
+		 chksum = len + pkt_id;
 	         if (len == 0x10) {
 		    if (session->inbuffer[n++] != 0x10) break;
 	         }
@@ -725,14 +730,45 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	      } while (0);
 	      /*@ +charint */
 
-	      /* gpsd_report(4, "Garmin n= %02x\n", n); Debug */
+	      /* Debug
+	      gpsd_report(4, "Garmin n= %#02x\n %s\n", n,
+			gpsd_hexdump( session->inbuffer, packetlen));
+              */
 	      if (ok)
-		  packet_accept(session, GARMIN_PACKET);
+		 packet_accept(session, GARMIN_PACKET);
 	      else 
 #endif /* GARMIN_ENABLE */
-		  packet_accept(session, TSIP_PACKET);
-	    } else
-		session->packet_state = GROUND_STATE;
+              {
+                 /* check for 3 common TSIP packet types:
+		  * 0x41, GPS time, data length 10
+		  * 0x42, Single Precision Fix, data length 16
+	          * 0x43, Velocity Fix, data length 20
+                  *
+                  * <DLE>[pkt id] [data] <DLE><ETX>
+                  */
+	         n = 0;
+	         /*@ +charint */
+	         do {
+	            if (session->inbuffer[n++] != 0x10) break;
+	            pkt_id = session->inbuffer[n++]; /* packet ID */
+		    if (( 0x41 > pkt_id) || ( 0x43 < pkt_id)) break;
+	            for ( len = 0; n < packetlen; len++ ) {
+		        if (session->inbuffer[n++] == 0x10) {
+		            if (session->inbuffer[n++] != 0x10) break;
+			}
+		    }
+                    /* look for terminating ETX */
+	            if (session->inbuffer[n++] != 0x03) break;
+		    /* Debug */
+	            gpsd_report(4, "TSIP n= %#02x, len= %#02x\n", n, len); 
+		    if ( ( 0x41 == pkt_id) && ( 0x10 == len ) ) ok = true;
+		    else if ( ( 0x42 == pkt_id) && ( 0x16 == len ) ) ok = true;
+		    else if ( ( 0x43 == pkt_id) && ( 0x20 == len ) ) ok = true;
+                 } while (0);
+	         if (ok)
+		     packet_accept(session, TSIP_PACKET);
+               }
+	    }
 	    packet_discard(session);
             break;
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
