@@ -6,14 +6,18 @@
 #define __USE_POSIX199309 1
 #include <time.h> // for nanosleep()
 
-#include <stdio.h>
-#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <getopt.h>
 #include <ctype.h>
+#include <fcntl.h>
+#include <getopt.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <termios.h>
+#include <unistd.h>
 
 /* gross - globals */
 static struct termios ttyset;
@@ -23,6 +27,13 @@ static int debug_level = 0;
 #define NO_PACKET	0
 #define GARMIN_PACKET	1
 #define NMEA_PACKET	2
+
+void logit(int , char *, ...);
+void nmea_add_checksum(char *);
+int nmea_send(int , const char *, ... );
+#ifndef HAVE_STRLCAT
+     size_t strlcat(char *dst, const char *src, size_t size);
+#endif
 
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
@@ -487,4 +498,5 @@ int main( int argc, char **argv)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
 #endif
+	return 0;
 }
