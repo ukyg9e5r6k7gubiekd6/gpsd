@@ -113,10 +113,12 @@ static void nmea_initializer(struct gps_device_t *session)
      */
 #define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
     (void)nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
+#ifdef ALLOW_RECONFIGURE
     /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
     (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
+#endif /* ALLOW_RECONFIGURE */
     /* probe for Garmin serial GPS */
     /* first turn off garmin binary 
     (void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
@@ -240,8 +242,10 @@ static void sirf_initializer(struct gps_device_t *session)
 {
     /* (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0"); */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
+#ifdef ALLOW_RECONFIGURE
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
@@ -308,8 +312,10 @@ static void tripmate_initializer(struct gps_device_t *session)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     (void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
+#ifdef ALLOW_RECONFIGURE
     /* stop it sending PRWIZCH */
     (void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static struct gps_type_t tripmate = {
