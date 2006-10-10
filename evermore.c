@@ -143,7 +143,6 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    unsigned int       crc;
    size_t    i, len;
    unsigned char stuffed[MAX_PACKET_LENGTH*2], *cp;
-   bool      ok;
 
    /* prepare a DLE-stuffed copy of the message */
    cp = stuffed;
@@ -177,8 +176,7 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    gpsd_report(4, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	       gpsd_hexdump(stuffed, len));
 #ifdef ALLOW_RECONFIGURE
-   ok = gpsd_write(session, stuffed, len);
-   return ok;
+   return gpsd_write(session, stuffed, len);
 #else
    return 0;
 #endif /* ALLOW_RECONFIGURE */
