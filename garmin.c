@@ -945,8 +945,10 @@ static gps_mask_t garmin_usb_parse(struct gps_device_t *session)
 }
 
 /*@ +charint @*/
-gps_mask_t garmin_ser_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
+gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 {
+    unsigned char *buf = session->outbuffer;
+    size_t len = session->outbuflen;
     unsigned char data_buf[MAX_BUFFER_SIZE];
     unsigned char c;
     int i = 0;

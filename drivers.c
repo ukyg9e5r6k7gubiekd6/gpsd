@@ -51,7 +51,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #ifdef GARMIN_ENABLE
 	/* we might never see a trigger, have this as a backstop */
 	(void)gpsd_switch_driver(session, "Garmin Serial binary");
-	return garmin_ser_parse(session, session->outbuffer, session->outbuflen);
+	return garmin_ser_parse(session);
 #else
 	return 0;
 #endif /* GARMIN_ENABLE */

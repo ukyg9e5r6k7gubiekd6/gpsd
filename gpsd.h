@@ -247,7 +247,7 @@ ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
-extern gps_mask_t garmin_ser_parse(struct gps_device_t *, unsigned char *, size_t);
+extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
 extern void packet_reset(struct gps_device_t *);
 extern void packet_pushback(struct gps_device_t *);
 extern ssize_t packet_parse(struct gps_device_t *, size_t);
