@@ -397,7 +397,7 @@ int main( int argc, char **argv)
 			to_binary = 1;
 			break;
 		case 'V':
-	                (void)fprintf(stderr, "%s: SVN ID: $Id: $ \n", argv[0]);
+	                (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
 			exit(0);
 		case '?':
 		case 'h':
