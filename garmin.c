@@ -938,9 +938,9 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
     return (ssize_t)( 0 == GetPacket( session ) ? 1 : 0);
 }
 
-static gps_mask_t garmin_parse_input(struct gps_device_t *session)
+static gps_mask_t garmin_usb_parse(struct gps_device_t *session)
 {
-    gpsd_report(5, "garmin_parse_input()\n");
+    gpsd_report(5, "garmin_usb_parse()\n");
     return PrintUSBPacket(session, (Packet_t*)session->driver.garmin.Buffer);
 }
 
@@ -1072,7 +1072,7 @@ struct gps_type_t garmin_usb_binary =
     .probe          = garmin_probe,	/* how to detect at startup time */
     .initializer    = garmin_init,	/* initialize the device */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
-    .parse_packet   = garmin_parse_input,	/* parse message packets */
+    .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
