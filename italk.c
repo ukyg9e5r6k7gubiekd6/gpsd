@@ -26,8 +26,12 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    /* we may need to dump the message */
    gpsd_report(4, "writing italk control type %02x:%s\n", 
 	       msg[0], gpsd_hexdump(msg, msglen));
+#ifdef ALLOW_RECONFIGURE
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
+#else
+   ok = 0;
+#endif /* ALLOW_RECONFIGURE */
    return(ok);
 }
 /*@ -charint +usedef +compdef @*/
