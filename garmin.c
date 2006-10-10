@@ -440,7 +440,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 		, pkt_id, pkt_len);
 	break;
     }
-    gpsd_report(3, "PrintSERParse(, %#02x, %#02x, ) = %#02x\n"
+    gpsd_report(3, "PrintSERPacket(, %#02x, %#02x, ) = %#02x\n"
 	, pkt_id, pkt_len, mask);
     return mask;
 }
