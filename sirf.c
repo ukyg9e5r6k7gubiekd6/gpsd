@@ -93,6 +93,7 @@ static bool sirf_speed(int ttyfd, speed_t speed)
    return (sirf_write(ttyfd, msg));
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool sirf_to_nmea(int ttyfd, speed_t speed) 
 /* switch from binary to NMEA at specified baud */
 {
@@ -115,6 +116,7 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
    msg[27] = (unsigned char)LO(speed);
    return (sirf_write(ttyfd, msg));
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
