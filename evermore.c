@@ -515,6 +515,7 @@ static bool evermore_default(struct gps_device_t *session, int mode)
     return ok;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static bool evermore_set_mode(struct gps_device_t *session,
 			      speed_t speed, bool mode)
 {
@@ -556,6 +557,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     return evermore_write(session, msg, sizeof(msg));
     /*@ +charint @*/
 }
+#endif /* ALLOW_RECONFIGURE */
 
 
 static bool evermore_speed(struct gps_device_t *session, speed_t speed)
