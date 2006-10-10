@@ -399,7 +399,7 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 	    1,          /*  3: GPGGA, interval 0-255s */
 	    0,          /*  4: GPGLL, interval 0-255s */
 	    1,          /*  5: GPGSA, interval 0-255s */
-	    1,          /*  6: GPGSV, interval 0-255s */
+	    5,          /*  6: GPGSV, interval 0-255s */
 	    1,          /*  7: GPRMC, interval 0-255s */
 	    0,          /*  8: GPVTG, interval 0-255s */
 	    0,          /*  9: PEMT,101, interval 0-255s */
@@ -413,7 +413,7 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 	    1,          /*  3: GPGGA, interval 0-255s */
 	    1,          /*  4: GPGLL, interval 0-255s */
 	    1,          /*  5: GPGSA, interval 0-255s */
-	    1,          /*  6: GPGSV, interval 0-255s */
+	    5,          /*  6: GPGSV, interval 0-255s */
 	    1,          /*  7: GPRMC, interval 0-255s */
 	    1,          /*  8: GPVTG, interval 0-255s */
 	    1,          /*  9: PEMT,101, interval 0-255s */
