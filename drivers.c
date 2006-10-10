@@ -441,33 +441,46 @@ static void itrax_initializer(struct gps_device_t *session)
     fractional = modf(timestamp(), &integral);
     intfixtime = (time_t)integral;
     (void)gmtime_r(&intfixtime, &when);
+    /* XXX so what if my local clock is wrong? */
     (void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y\r\n", &when);
     (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
     buf[21] = frac[2]; buf[22] = frac[3];
     (void)literal_send(session->gpsdata.gps_fd, buf);
 
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
+#ifdef ALLOW_RECONFIGURE
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
     (void)literal_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool itrax_speed(struct gps_device_t *session, speed_t speed)
 /* change the baud rate */
 {
+#ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
+#else
+    return 0;
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool itrax_rate(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
+#ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d\r\n", rate) >= 0;
+#else
+    return 0;
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static void itrax_wrap(struct gps_device_t *session)
 /* stop navigation, this cuts the power drain */
 {
+#ifdef ALLOW_RECONFIGURE
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,0\r\n");
+#endif /* ALLOW_RECONFIGURE */
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,STOP\r\n");
 }
 
