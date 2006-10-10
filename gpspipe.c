@@ -166,8 +166,8 @@ int main( int argc, char **argv) {
 	if ( dump_super_raw ) {
 		cstr = "R=2\n";
 	        /* super raw overrides NMEA and GPSD modes */
-		bool dump_nmea = false;
-		bool dump_gpsd = false;
+		dump_nmea = false;
+		dump_gpsd = false;
 	} else if ( dump_nmea ) {
 		if ( dump_gpsd ) {
 			cstr = "rw\n";
