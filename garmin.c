@@ -240,7 +240,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
 
-    gpsd_report(4, "PrintSERParse(, %#02x, %#02x, )\n", pkt_id, pkt_len);
+    gpsd_report(4, "PrintSERPacket(, %#02x, %#02x, )\n", pkt_id, pkt_len);
 
     switch( pkt_id ) {
     case GARMIN_PKTID_L001_COMMAND_DATA:
