@@ -26,6 +26,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
     /*@ +charint @*/
     buf2[0] = '\x10';
     buf2[1] = (char)id;
+#ifdef ALLOW_RECONFIGURE
     if (write(fd,buf2,2) != 2)
 	return -1;
 
@@ -44,6 +45,9 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 	return -1;
 
     return 0;
+#else
+    return -1;
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static void tsip_initializer(struct gps_device_t *session)
