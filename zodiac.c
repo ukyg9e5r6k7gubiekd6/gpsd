@@ -71,7 +71,7 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
 #ifdef ALLOW_RECONFIGURE
 	(void)end_write(session->gpsdata.gps_fd, &h, sizeof(h));
 	(void)end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
-#endif
+#endif /* ALLOW_RECONFIGURE */
     }
 
     (void)snprintf(buf, sizeof(buf),
