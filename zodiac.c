@@ -68,8 +68,10 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
     if (session->gpsdata.gps_fd != -1) {
+#ifdef ALLOW_RECONFIGURE
 	(void)end_write(session->gpsdata.gps_fd, &h, sizeof(h));
 	(void)end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
+#endif
     }
 
     (void)snprintf(buf, sizeof(buf),
@@ -100,8 +102,12 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
     data[14] = zodiac_checksum(data, 14);
 
     zodiac_spew(session, 1330, data, 15);
+#ifdef ALLOW_RECONFIGURE
+    return true; /* it would be nice to error-check this */
+#else
+    return false;
+#endif /* ALLOW_RECONFIGURE */
 
-    return true;	/* it would be nice to error-check this */
 }
 
 static void send_rtcm(struct gps_device_t *session, 
