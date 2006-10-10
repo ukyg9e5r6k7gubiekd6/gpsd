@@ -259,7 +259,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    msg = "Start RMD data";
 	    break;
 	default:
-	    (void)snprintf(buf, sizeof(buf), "Unknown: %u", 
+	    (void)snprintf(buf, pkt_len, "Unknown: %u", 
 			(unsigned int)prod_id);
 	    msg = buf;
 	    break;
