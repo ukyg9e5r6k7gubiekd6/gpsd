@@ -236,6 +236,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
     int min_ver;
     time_t time_l = 0;
     double track;
+    char msg_buf[512] = "";
     char *msg = NULL;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
@@ -259,9 +260,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    msg = "Start RMD data";
 	    break;
 	default:
-	    (void)snprintf(buf, pkt_len, "Unknown: %u", 
+	    (void)snprintf(msg_buf, sizeof(msg_buf), "Unknown: %u", 
 			(unsigned int)prod_id);
-	    msg = buf;
+	    msg = msg_buf;
 	    break;
 	}
 	gpsd_report(3, "Appl, Command Data: %s\n", msg);
