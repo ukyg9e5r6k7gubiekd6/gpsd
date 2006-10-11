@@ -308,7 +308,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			char eph[20], epv[20], track[20],speed[20], climb[20];
 			char epd[20], eps[20], epc[20], mode[2];
 			int st = sscanf(sp+2, 
-			       "%8s %lf %lf %lf %lf %s %s %s %s %s %s %s %s %s %s",
+			       "%8s %lf %lf %lf %lf %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
 				tag, &nf.time, &nf.ept, 
 				&nf.latitude, &nf.longitude,
 			        alt, eph, epv, track, speed, climb,
@@ -428,9 +428,9 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			int PRN[MAXCHANNELS];
 			int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
 			int ss[MAXCHANNELS], used[MAXCHANNELS];
-			char tag[21], timestamp[21];
+			char tag[MAXTAGLEN+1], timestamp[21];
 
-			(void)sscanf(sp, "Y=%20s %20s %d ", 
+			(void)sscanf(sp, "Y=%8s %20s %d ", 
 			       tag, timestamp, &gpsdata->satellites);
 			(void)strncpy(gpsdata->tag, tag, MAXTAGLEN);
 			if (timestamp[0] != '?') {
@@ -468,7 +468,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    if (gpsdata->profiling != 1)
 			break;
 		    /*@ +matchanyintegral -formatcode @*/
-		    (void)sscanf(sp, "$=%s %zd %lf %lf %lf %lf %lf %lf", 
+		    (void)sscanf(sp, "$=%8s %zd %lf %lf %lf %lf %lf %lf", 
 			   gpsdata->tag,
 			   &gpsdata->sentence_length,
 			   &gpsdata->fix.time, 
