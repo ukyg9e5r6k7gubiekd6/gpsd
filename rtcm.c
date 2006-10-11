@@ -557,7 +557,7 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 {
     int fldcount, v;
     unsigned n;
-    char buf2[BUFSIZ];
+    char buf2[BUFSIZ]; /* stdio.h says BUFSIZ=1024. True everywhere? */
 
     /*@ -usedef @*/
     switch (rtcmp->type) {
@@ -612,7 +612,7 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 
     case 4:
 	fldcount = sscanf(buf,
-			   "D\t%s\t%1d\t%s\t%lf\t%lf\t%lf\n",
+			   "D\t%1023s\t%1d\t%5s\t%lf\t%lf\t%lf\n",
 			  buf2,
 			  &v,
 			  (char *)&rtcmp->msg_data.reference.datum,
