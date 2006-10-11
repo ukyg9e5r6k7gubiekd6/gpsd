@@ -318,7 +318,7 @@ gps-regress: gpsd
 # included in the normal regressions.)
 raw-regress:
 	@echo "Testing super-raw mode..."
-	@for f in test/*.log; do gpsfake -b -p -r "r=2" $${f} | striplog -1 >test/test1.chk; striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
+	@for f in test/*.log; do gpsfake -b -p -r "r=2" $${f} | ./striplog -1 >test/test1.chk; ./striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
