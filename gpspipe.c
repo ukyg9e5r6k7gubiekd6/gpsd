@@ -100,6 +100,7 @@ static void usage(void) {
 		"-r Dump raw NMEA\n"
 		"-R Dump super-raw mode (gps binary)\n"
 	        "-w Dump gpsd native data\n"
+	        "-j turn on server-side buffering\n"
 	        "-t time stamp the data\n"
 		"-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r')\n"
 	        "-n [count] exit after count packets\n"
@@ -113,10 +114,12 @@ int main( int argc, char **argv) {
 	int s = 0;
         char buf[4096];
 	char *cstr = NULL;
+	char *jstr = NULL;
         ssize_t wrote = 0;
         bool dump_super_raw = false;
         bool dump_nmea = false;
         bool dump_gpsd = false;
+        bool jitter_flag = false;
         bool timestamp = false;
 	bool new_line = true;
 	long count = -1;
@@ -127,7 +130,7 @@ int main( int argc, char **argv) {
 
 	char *serialport = NULL;
 
-	while ((option = getopt(argc, argv, "?hrRwtVn:s:")) != -1) {
+	while ((option = getopt(argc, argv, "?hrRwjtVn:s:")) != -1) {
 		switch (option) {
 		case 'n':
 			count = strtol(optarg, 0, 0);
@@ -143,6 +146,9 @@ int main( int argc, char **argv) {
 			break;
 		case 'w':
 			dump_gpsd = true;
+			break;
+		case 'j':
+			jitter_flag = true;
 			break;
 		case 'V':
 	                (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
@@ -220,6 +226,17 @@ int main( int argc, char **argv) {
 		exit (1);
 	}
 	/*@ +nullpass @*/
+
+	if ( jitter_flag ) {
+	  jstr = "j1\n";
+	  wrote = write( s, "jstr", strlen("jstr") );
+	  if ( (ssize_t)strlen("jstr") != wrote ) {
+	    fprintf( stderr, "%s: write error, %s(%d)\n", argv[0]
+		     , strerror(errno), errno);
+	    exit (1);
+	  }
+	}
+	  
 
 	wrote = write( s, cstr, strlen(cstr) );
 	if ( (ssize_t)strlen(cstr) != wrote ) {
