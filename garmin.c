@@ -313,9 +313,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	session->gpsdata.fix.eph = pvt->eph * (GPSD_CONFIDENCE/2);
 	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/2);
 
-	// convert lat/lon to knots
-	session->gpsdata.fix.speed
-	    = hypot(pvt->lon_vel, pvt->lat_vel) * 1.9438445;
+	// convert lat/lon to directionless speed
+	session->gpsdata.fix.speed = hypot(pvt->lon_vel, pvt->lat_vel);
 
 	// keep climb in meters/sec
 	session->gpsdata.fix.climb = pvt->alt_vel;
