@@ -125,8 +125,13 @@ static void tnt_initializer(struct gps_device_t *session)
 static bool tnt_probe(struct gps_device_t *session)
 {
   unsigned int *ip;
+#ifdef FIXED_PORT_SPEED
+    /* just the one fixed port speed... */
+    static unsigned int rates[] = {FIXED_PORT_SPEED};
+#else /* FIXED_PORT_SPEED not defined */
   /* The supported baud rates */
   static unsigned int rates[] = {38400, 19200, 2400, 4800, 9600 };
+#endif /* FIXED_PORT_SPEED defined */
 
   gpsd_report(1, "Probing TrueNorth Compass\n");
 
