@@ -539,7 +539,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     session->gpsdata.fix.altitude = atof(field[7]);
     session->gpsdata.horzField = atof(field[8]);
     session->gpsdata.fix.mode = MODE_2D;
-    mask |= (TRACK_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
+    mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
     session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
     gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.headingStatus);
