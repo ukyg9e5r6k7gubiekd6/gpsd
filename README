@@ -102,3 +102,6 @@ application engineer at SiRF.  He assisted us with the correction and
 tuning of the SiRF binary-protocol driver, shedding a good deal of 
 light on murky aspects of the chip's behavior.
 
+We are delighted to acknowlege the assistance of Timo Ylhainen, VP of
+Software Operations at Fastrax. He clarified a number of points about
+the iTalk protocol, helping to further development of iTalk support.
