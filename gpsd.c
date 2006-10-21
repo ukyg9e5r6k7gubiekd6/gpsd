@@ -820,87 +820,87 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 				   " %.3f",
 				   whoami->fixbuffer.time);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.ept)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.3f",
 				   whoami->fixbuffer.ept);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.latitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.6f",
 				   whoami->fixbuffer.latitude);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.longitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
 				   " %.6f",
 				   whoami->fixbuffer.longitude);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %7.2f",
+				   " %.2f",
 				   whoami->fixbuffer.altitude);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				  " %5.2f",  whoami->fixbuffer.eph);
+				  " %.2f",  whoami->fixbuffer.eph);
 		else
-		    (void)strlcat(phrase, "        ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %5.2f",  whoami->fixbuffer.epv);
+				   " %.2f",  whoami->fixbuffer.epv);
 		else
-		    (void)strlcat(phrase, "        ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.track)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %8.4f %8.3f",
+				   " %.4f %.3f",
 				   whoami->fixbuffer.track, 
 				   whoami->fixbuffer.speed);
 		else
-		    (void)strlcat(phrase, "             ?            ?", BUFSIZ);
+		    (void)strlcat(phrase, " ? ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.climb)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %6.3f", 
+				   " %.3f", 
 				   whoami->fixbuffer.climb);
 		else
-		    (void)strlcat(phrase, "          ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.epd)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %8.4f",
+				   " %.4f",
 				   whoami->fixbuffer.epd);
 		else
-		    (void)strlcat(phrase, "             ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.eps)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %5.2f", whoami->fixbuffer.eps);		    
+			     " %.2f", whoami->fixbuffer.eps);		    
 		else
-		    (void)strlcat(phrase, "        ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(whoami->fixbuffer.epc)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %5.2f", whoami->fixbuffer.epc);		    
+			     " %.2f", whoami->fixbuffer.epc);		    
 		else
-		    (void)strlcat(phrase, "        ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (whoami->fixbuffer.mode > 0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
 			     " %d", whoami->fixbuffer.mode);		    
 		else
-		    (void)strlcat(phrase, "        ?", BUFSIZ);
+		    (void)strlcat(phrase, " ?", BUFSIZ);
 	    }
 	    break;
 	case 'P':
