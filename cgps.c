@@ -122,7 +122,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 
   /* Fill in the latitude. */
   (void)wmove(datawin, 2,17);
-  if (gpsdata->fix.mode >= MODE_2D) {
+  if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.latitude)==0) {
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
   } else
@@ -130,7 +130,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 
   /* Fill in the longitude. */
   (void)wmove(datawin, 3,17);
-  if (gpsdata->fix.mode >= MODE_2D) {
+  if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.longitude)==0) {
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
   } else
@@ -138,7 +138,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 
   /* Fill in the altitude. */
   (void)wmove(datawin, 4,17);
-  if (gpsdata->fix.mode == MODE_3D)
+  if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude)==0)
     (void)wprintw(datawin,"%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
   else
     (void)wprintw(datawin,"n/a         ");
