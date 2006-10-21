@@ -307,15 +307,19 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			char tag[MAXTAGLEN+1], alt[20];
 			char eph[20], epv[20], track[20],speed[20], climb[20];
 			char epd[20], eps[20], epc[20], mode[2];
+			char timestr[20], ept[20], lat[20], lon[20];
 			int st = sscanf(sp+2, 
-			       "%8s %lf %lf %lf %lf %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
-				tag, &nf.time, &nf.ept, 
-				&nf.latitude, &nf.longitude,
+			       "%8s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
+				tag, timestr, ept, lat, lon,
 			        alt, eph, epv, track, speed, climb,
 			        epd, eps, epc, mode);
 			if (st == 15) {
 #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 			    /*@ +floatdouble @*/
+			    nf.time = DEFAULT(timestr);
+			    nf.latitude = DEFAULT(lat);
+			    nf.longitude = DEFAULT(lon);
+			    nf.ept = DEFAULT(ept);
 			    nf.altitude = DEFAULT(alt);
 			    nf.eph = DEFAULT(eph);
 			    nf.epv = DEFAULT(epv);
