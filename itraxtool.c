@@ -125,7 +125,6 @@ italk_add_checksum(char *buf, size_t len){
 
 void
 itrax_protocol_droid(int fd, struct termios *term, struct portconf *conf){
-	size_t l, r;
 	int i;
 	char buf[BUFSIZ];
 	/*
@@ -144,7 +143,6 @@ itrax_protocol_droid(int fd, struct termios *term, struct portconf *conf){
 	    (conf->new_proto == PROTO_NMEA)? "NMEA" : "ITALK",
 	    conf->new_speed);
 
-	l = strlen(buf);
 	for(i = 0; i < 5; i++){
 		tcflush(fd, TCIOFLUSH);
 		nmea_send(fd, buf);
