@@ -648,7 +648,7 @@ static int GetPacket (struct gps_device_t *session )
 	    session->driver.garmin.BufferLen = 0;
 	    break;
 	}
-	int pkt_size = 12 + get_int32((uint8_t*)&thePacket->mDataSize);
+	size_t pkt_size = 12 + get_int32((uint8_t*)&thePacket->mDataSize);
 	if ( 12 <= session->driver.garmin.BufferLen) {
 	    // have enough data to check packet size
 	    if ( session->driver.garmin.BufferLen > pkt_size) {
@@ -952,7 +952,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     unsigned char data_buf[MAX_BUFFER_SIZE];
     unsigned char c;
     int i = 0;
-    int n = 0;
+    size_t n = 0;
     int data_index = 0;
     int got_dle = 0;
     unsigned char pkt_id = 0;
