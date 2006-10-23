@@ -59,7 +59,7 @@ void usage(void);
 
 void
 itrax_reset(int fd){
-	int n;
+	int i, n;
 	char buf[BUFSIZ];
 	char resetstr[18] = {	0x3c, 0x21, /* HEADER */
 				0x7f, /* src: NODE_HOST | TASK_HOST */
@@ -90,8 +90,11 @@ itrax_reset(int fd){
 	memcpy(&resetstr, &rm, 18);
 	italk_add_checksum((char *)&rm, sizeof(rm));
 	write(fd, &rm, sizeof(rm));
-	n = write(fd, resetstr, sizeof(resetstr));
-	tcdrain(fd);
+	for (i = 0; i < 5; i++){
+		n = write(fd, resetstr, sizeof(resetstr));
+		tcdrain(fd);
+		usleep(1000);
+	}
 	read(fd, buf, BUFSIZ);
 	for(n = 0; n < BUFSIZ; n++){
 		if (0 == n%16)
