@@ -1,5 +1,41 @@
 /* $Id$ */
 
+/* 0 and 1 are responses to the <?> ping for iTalk and NMEA respectively */
+#define PROTO_ITALK 0
+#define PROTO_NMEA 1
+
+/*
+ * Assistance from Timo Ylhainen of Fastrax is acknowledged and appreciated.
+ *
+ * iTalk is a messaging system which communicates between tasks, which may
+ * be running on different devices (nodes). For our purposes (receiver
+ * configuration), we will probably be sending to the SYSTEM task.
+ */
+
+#define TASK_MASK	0x1f	/* 5 low bits of src/dst fields */
+#define NODE_MASK	0xe0	/* 3 high bits of src/dst fields */
+#define NODE_UNDEF	0x00	/* Used in message routing */
+#define NODE_ITRAX	0x20	/* The receiver */
+#define NODE_HOST	0x40	/* Software on your computer */
+#define NODE_GPSWB	0x60	/* GPSWorkbench seems to be HOST|ITRAX */
+
+/* XXX These defines will likely be replaced by an enum
+ * once I map every message to the task that sent it.
+ */
+/* System controller on the receiver */
+#define TASK_SYSTEM	0
+/* Acquisition & Tracking messages (PD) */
+#define TASK_TRACK1	2
+#define TASK_TRACK2	3
+/* Data decoding messages (PD) */
+#define TASK_DATA	4
+/* Navigation messages are sent by these tasks (PD) */
+#define TASK_NAV1	7
+#define TASK_NAV2	8
+#define TASK_NAV3	9
+/* Host controller software (PD) */
+#define TASK_HOST	31
+
 /* iTalk Message IDs - isuite.fastrax.fi/sdk/331/Protocols/PRO_MsgId.html */
 #define ITALK_ACQ_DATA		1
 #define ITALK_PRN_STATUS	2
@@ -42,6 +78,18 @@
 #define ITALK_PULL_FIX		99
 #define ITALK_MEMCTRL		112
 #define ITALK_STOP_TASK		255
+
+/* MEMCTRL */
+#define MEM_WRITE		0x0002
+#define MEM_READD		0x0003
+#define MEM_BOOT		0x0004
+#define MEM_ERASE		0x0006
+#define MEM_XTAL_CALIBRATE	0x000a
+/* BOOT flags based on isuite.fastrax.fi/sdk/331/Protocols/PRO_NMEA.html */
+#define MEM_BOOT_NORMAL		0x0000
+#define MEM_BOOT_INT_FWLOADER	0x0001
+#define MEM_BOOT_DL_FWLOADER	0x0002
+#define MEM_BOOT_RELOC_ALTFW	0x0003
 
 /* Config Parameters - isuite.fastrax.fi/sdk/331/System/SYS_Parameters.html */
 /* System parameters */
