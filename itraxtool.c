@@ -330,7 +330,7 @@ main(int argc, char **argv){
 			conf.new_proto = PROTO_NMEA;
 			break;
 		case 's':
-#if HAVE_STRTONUM
+#ifdef HAVE_STRTONUM
 			conf.new_speed = strtonum(optarg, 4800, 230400, &e);
 			if (e)
 				err(1, "%s (%s)", e, optarg);
