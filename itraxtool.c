@@ -118,7 +118,8 @@ italk_add_checksum(char *buf, size_t len){
 	n = buf[6];
 	for (k = 0; k <= n; k++){
 		sp = (unsigned short*)(buf+7+2*k);
-		w = htole16(*sp);
+		w = *sp;
+//		w = htole16(*sp);
 //		memcpy(&w, buf+7+2*k, 2);
 		tmp = (sum + 1) * (w + k);
 		sum ^= ((tmp >> 16) ^ tmp);
