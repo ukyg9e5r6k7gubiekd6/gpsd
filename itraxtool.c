@@ -125,26 +125,30 @@ italk_add_checksum(char *buf, size_t len){
 
 void
 itrax_protocol_droid(int fd, struct termios *term, struct portconf *conf){
-	int s, p;
+	size_t l, r;
+	int i;
+	char buf[BUFSIZ];
 	/*
 	 * apparently iTalk does not have a protocol switch message;
 	 * to get back to NMEA you need to reset the receiver. Foo!
 	 */
 
-	if (conf->cur_proto == PROTO_NMEA){
-		if (conf->new_proto == PROTO_NMEA)
-			nmea_send(fd, "$PFST,NMEA,,%u", conf->new_speed);
-		else
-			nmea_send(fd, "$PFST,ITALK,%u", conf->new_speed);
-	} else {
+	if (conf->cur_proto == PROTO_ITALK){
+		int s, p;
 		itrax_reset(fd); /* should put the receiver into nmea */
-		itrax_probe(fd, term, &s, &p);
 		sleep(1);
+		itrax_probe(fd, term, &s, &p);
+	}
 
-		if (conf->new_proto == PROTO_NMEA)
-			nmea_send(fd, "$PFST,NMEA,,%u", conf->new_speed);
-		else
-			nmea_send(fd, "$PFST,ITALK,%u", conf->new_speed);
+	snprintf(buf, BUFSIZ, "$PFST,%s,,%u",
+	    (conf->new_proto == PROTO_NMEA)? "NMEA" : "ITALK",
+	    conf->new_speed);
+
+	l = strlen(buf);
+	for(i = 0; i < 5; i++){
+		tcflush(fd, TCIOFLUSH);
+		nmea_send(fd, buf);
+		usleep(10000);
 	}
 }
 
@@ -159,22 +163,23 @@ itrax_probe(int fd, struct termios *term, int *speed, int *proto) {
 	int i, j, k, n;
 	int speeds[9] =
 		{4800, 9600, 14400, 28800, 38400, 57600, 115200, 230400, 0};
-	char *probe = "<?>";
+	char *probe = "\r\n<?>";
 	char buf[READLEN];
 	struct pollfd pfd[1];
 
 	i = 0;
 	while(speeds[i]){
-		bzero(buf, READLEN);
 		k = 0;
 		serialConfig(fd, term, speeds[i]);
 		*speed = speeds[i];
 		pfd[0].fd = fd;
 		pfd[0].events = POLLIN;
-probe:		tcflush(fd, TCIFLUSH);
-		write(fd, probe, 3);
+probe:		tcflush(fd, TCIOFLUSH);
+		bzero(buf, READLEN);
+		write(fd, probe, 5);
 		tcdrain(fd);
-		usleep(25000);
+		write(fd, probe, 5);
+		usleep(1000);
 		if ((n = poll(pfd, 1, -1)) > 0){
 			n = read(fd, buf, READLEN);
 			for (j = 0; j < READLEN-3; j++){
@@ -187,7 +192,7 @@ probe:		tcflush(fd, TCIFLUSH);
 					return 0;
 				}
 			}
-			if (k < 3){
+			if (k < 1){
 				k++;
 				goto probe;
 			}
@@ -217,7 +222,7 @@ serialConfig(int pfd, struct termios *term, int speed){
 	term->c_cc[VTIME] = 2;
 
 	/* apply all the funky control settings */
-	while (((rv = tcsetattr(pfd, TCSAFLUSH, term)) == -1) &&
+	while (((rv = tcsetattr(pfd, TCSADRAIN, term)) == -1) &&
 	    (errno == EINTR) && (r < 3)) {
 		/* retry up to 3 times on EINTR */
 		usleep(1000);
@@ -276,7 +281,7 @@ serialSpeed(int pfd, struct termios *term, int speed){
 	tcgetattr(pfd, term);
 	cfsetispeed(term, speed);
 	cfsetospeed(term, speed);
-	while (((rv = tcsetattr(pfd, TCSAFLUSH, term)) == -1) && \
+	while (((rv = tcsetattr(pfd, TCSADRAIN, term)) == -1) && \
 		(errno == EINTR) && (r < 3)) {
 		/* retry up to 3 times on EINTR */
 		usleep(1000);
