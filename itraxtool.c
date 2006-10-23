@@ -245,27 +245,41 @@ serialSpeed(int pfd, struct termios *term, int speed){
 	int r = 0;
 
 	switch(speed){
+#ifdef B230400
 	case 230400:
 		speed = B230400;
 		break;
+#endif
+#ifdef B115200
 	case 115200:
 		speed = B115200;
 		break;
+#endif
+#ifdef B57600
 	case 57600:
 		speed = B57600;
 		break;
+#endif
+#ifdef B38400
 	case 38400:
 		speed = B38400;
 		break;
+#endif
+#ifdef B28800
 	case 28800:
 		speed = B28800;
 		break;
+#endif
+#ifdef B19200
 	case 19200:
 		speed = B19200;
 		break;
+#endif
+#ifdef B14400
 	case 14400:
 		speed = B14400;
 		break;
+#endif
 	case 9600:
 		speed = B9600;
 		break;
@@ -334,12 +348,24 @@ main(int argc, char **argv){
 	case 0:
 	case 4800:
 	case 9600:
+#ifdef B14400
 	case 14400:
+#endif
+#ifdef B28800
 	case 28800:
+#endif
+#ifdef B38400
 	case 38400:
+#endif
+#ifdef B57600
 	case 57600:
+#endif
+#ifdef B115200
 	case 115200:
+#endif
+#ifdef B230400
 	case 230400:
+#endif
 		break;
 	default:
 		printf("bad speed %d\n", conf.new_speed);
