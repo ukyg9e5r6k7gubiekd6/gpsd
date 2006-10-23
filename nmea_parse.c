@@ -675,6 +675,7 @@ int nmea_send(int fd, const char *fmt, ... )
     } else
 	(void)strlcat(buf, "\r\n", BUFSIZ);
     status = (int)write(fd, buf, strlen(buf));
+    (void)tcdrain(fd);
     if (status == (int)strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);
 	return status;
