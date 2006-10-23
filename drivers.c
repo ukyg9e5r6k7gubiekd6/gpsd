@@ -85,20 +85,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		session->gpsdata.ldisc = NMEADISC;
 	}
 #endif
-
-#ifdef NTPSHM_ENABLE
-	/* this magic number is derived from observation */
-     if ((st & TIME_SET) != 0 &&
-         (session->gpsdata.fix.time!=session->driver.nmea.last_fixtime)) {
-             /* this magic number is derived from observation */
-             /* GPS-18/USB -> 0.100 */
-             /* GPS-18/LVC at 19200 -> 0.125 */
-             /* GPS-18/LVC at 4800 -> 0.525*/
-             /* Rob Jensen reports 0.675 */
-             (void)ntpshm_put(session, session->gpsdata.fix.time + 0.400);
-             session->driver.nmea.last_fixtime = session->gpsdata.fix.time;
-     }
-#endif /* NTPSHM_ENABLE */
 	return st;
     } else
 	return 0;

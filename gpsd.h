@@ -147,6 +147,7 @@ struct gps_device_t {
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE
     int shmTime;
+    double last_fixtime;		/* so updates happen once */
 # ifdef PPS_ENABLE
     int shmTimeP;
 # endif /* PPS_ENABLE */
@@ -164,9 +165,6 @@ struct gps_device_t {
 	    int part, await;		/* for tracking GSV parts */
 	    struct tm date;
 	    double subseconds;
-# ifdef NTPSHM_ENABLE
-         double last_fixtime;		/* so updates happen once */
-# endif /* NTPSHM_ENABLE */
 	} nmea;
 #endif /* NMEA_ENABLE */
 #ifdef BINARY_ENABLE

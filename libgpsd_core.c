@@ -618,6 +618,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	else
 	    received = 0;	/* it was all done in the packet getter */
 
+#ifdef NTPSHM_ENABLE
+	/* this magic number is derived from observation */
+	if ((received & TIME_SET) != 0 &&
+	    (session->gpsdata.fix.time!=session->last_fixtime)) {
+	    /* this magic number is derived from observation */
+	    /* GPS-18/USB -> 0.100 */
+	    /* GPS-18/LVC at 19200 -> 0.125 */
+	    /* GPS-18/LVC at 4800 -> 0.525*/
+	    /* Rob Jensen reports 0.675 */
+	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.400);
+	    session->last_fixtime = session->gpsdata.fix.time;
+	}
+#endif /* NTPSHM_ENABLE */
+
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * This may be overridden by DOPs reported from the packet we just got.
