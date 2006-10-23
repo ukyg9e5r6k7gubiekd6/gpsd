@@ -314,7 +314,9 @@ main(int argc, char **argv){
 	int fd, ch, s, p;
 	struct termios term;
 	struct portconf conf;
+#if HAVE_STRTONUM
 	const char *e;
+#endif /* HAVE_STRTONUM */
 
 	conf.new_speed = conf.new_proto = -1;
 
@@ -327,9 +329,15 @@ main(int argc, char **argv){
 			conf.new_proto = PROTO_NMEA;
 			break;
 		case 's':
+#if HAVE_STRTONUM
 			conf.new_speed = strtonum(optarg, 4800, 230400, &e);
 			if (e)
 				err(1, "%s (%s)", e, optarg);
+#else
+			conf.new_speed = atoi(optarg);
+			if (conf.new_speed < 4800 || conf.new_speed > 230400)
+				err(1, "Illegal value %d\n", conf.new_speed);
+#endif /* HAVE_STRTONUM */
 			break;
 		default:
 			usage();
