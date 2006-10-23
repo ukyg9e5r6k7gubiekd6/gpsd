@@ -315,7 +315,7 @@ main(int argc, char **argv){
 	int fd, ch, s, p;
 	struct termios term;
 	struct portconf conf;
-#if HAVE_STRTONUM
+#ifdef HAVE_STRTONUM
 	const char *e;
 #endif /* HAVE_STRTONUM */
 
