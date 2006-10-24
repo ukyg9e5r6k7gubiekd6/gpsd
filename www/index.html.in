@@ -241,8 +241,9 @@ responding to email.</p>
 
 <h1 id='others'>Other GPSDs</h1>
 
-<p>There are two Linux-based forks of <code>gpsd</code> in the wild, but
-there are plans to unfork at least one of them soon.  You can read a brief <a
+<p>There used to be three Linux-based forks of <code>gpsd</code> in the
+wild, but this GPSD project reabsorbed one and the other two are now
+defunct for unrelated reasons.  You can read a brief <a
 href="history.html">history</a> of the <code>gpsd</code> project if
 you are curious.</p>
 

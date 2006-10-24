@@ -63,7 +63,7 @@ position with respect to an imaginary ellipsoid called the "WGS 84
 geoid" which closely fits the mean sea level of Earth.)</p>
 
 <p>There are presently 28 dedicated GPS satellites, 11,000 miles up in
-high-inclination orbits so that their trajectory wraps around the
+high-inclination orbits so that each one's trajectory wraps around the
 Earth like a ball of yarn as the planet spins beneath them.  The
 inclinations are tuned to guarantee that about twelve will be visible
 at any given time from anywhere on Earth (coverage falls off a little
@@ -140,8 +140,9 @@ time and 2 meters 50% of the time.</p>
 radio signals work at the <a
 href="http://vancouver-webpages.com/pub/peter/gpsfaq.txt">GPS FAQ</a>;
 note however that their accuracy estimates are from the Selective
-Availability period and expected error has decreased quite a bit
-since (the WAAS system they talk about is now generally deployed).</p>
+Availability period and expected error has decreased quite a bit since
+(the WAAS system they talk about as a future plan is now generally
+deployed).</p>
 
 <h1 id='dgps'>DGPS, WAAS, and EGNOS</h1>
 
@@ -157,14 +158,15 @@ and adds integrity checks making it possible to detect when the
 GPS location is totally wrong.  Unlike DGPS, your GPS will generally
 use these systems automatically whenever it can see the satellites.</p>
 
-<p>WAAS/EGNOS data starts out as normal DGPS stations observing the errors.
-That data gets processed and interpolated into a grid which models
-ionospheric and tropospheric delay over the WAAS/EGNOS .  The GPSes then
-interpolate into that grid to get an estimate of lag for their current
-position. For points close to a DGPS station, raw DGPS should give better
-accuracy than WAAS/EGNOS.  For points far between any reference stations, 
-WAAS should be more accurate than software arbitrarily choosing one 
-'nearby' DGPS station or another.</p>
+<p>WAAS/EGNOS data starts out as normal DGPS stations observing the
+errors.  That data gets processed and interpolated into a grid which
+models ionospheric and tropospheric delay over the WAAS/EGNOS coverage
+area.  The GPSes then interpolate into that grid to get an estimate of
+lag for their current position. For points close to a DGPS station,
+raw DGPS should give better accuracy than WAAS/EGNOS.  For points far
+between any reference stations, WAAS should be more accurate than
+software arbitrarily choosing one 'nearby' DGPS station or
+another.</p>
 
 <p>The definitive <a href='http://gps.gov/gps/WAAS-DGPS.htm'>FAQ</a>
 says this: "On the average, WAAS and DGPS accuracy are virtually the
@@ -181,11 +183,6 @@ as the user moves away from the transmitting site."</p>
 <p>An important caveat about WAAS is that it doesn't work at sea.
 You're too far away from any DGPS ground stations for the WAAS birds
 to interpolate a good value for atmospheric display.</p>
-
-<!-- System management: 
-Lt Cdr John Schutzenhofer
-john.e.schutzenhofer@uscg.mil
-703-313-5939 -->
 
 <h1>How GPS Hardware Talks To Computers</h1>
 
@@ -395,6 +392,14 @@ the non-technical description</a></dt>
 
 <dt><a href='http://users.erols.com/dlwilson/gps.htm'>David L. Wilson's GPS Accuracy Web Page</a></dt>
 <dd>Goes in-depth on accuracy, with the math.</dd>
+
+<dt><a href='http://home-2.worldonline.nl/~samsvl/'>Sam's GPS Raw
+Data Pages</a></dt>
+<dd>A useful view of some GPS technical arcana from a programmer.
+Includes the best <a
+href='http://home-2.worldonline.nl/~samsvl/nav2eu.htm'>short
+description</a> I've seen of the GPS Navigation Message as it comes
+down from the satellite.</dd>
 
 <dt><a href='http://www.topology.org/soft/gps.html'>GPS interfaces and 
 software</a></dt>

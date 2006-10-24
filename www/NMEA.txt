@@ -78,7 +78,7 @@ are well known:
 		GP      Global Positioning System receiver
 		LC      Loran-C receiver
 		II      Integrated Instrumentation
-		IN	Integrated Nvigation
+		IN	Integrated Navigation
 		EC      Electronic Chart Display & Information System (ECDIS)
 		CD	Digital Selective Calling (DSC)
 
@@ -539,7 +539,7 @@ Example 2: $GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
 
 ------------------------------------------------------------------------------
 
- DPT - Heading - Deviation & Variation
+ DPT - Depth of Water
 
         1   2   3
         |   |   |
@@ -551,6 +551,10 @@ Example 2: $GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
      positive means distance from tansducer to water line
      negative means distance from transducer to keel
   3) Checksum
+
+This sentence was incorrectly titled "Heading - Deviation & Variation"
+in [NMEA2000].  It's documented at
+<http://www.humminbird.com/normal.asp?id=853>
 
 ------------------------------------------------------------------------------
 

@@ -39,7 +39,7 @@ others apart and distinguish them from baud barf.
  * packet; in that case it won't reset until it notices that the
  * binary trailer is not where it should be, and the NMEA packet will
  * be lost.  The reverse scenario is not possible because none of the
- * binary leader character can occur in an NMEA packet.  Caller should
+ * binary leader characters can occur in an NMEA packet.  Caller should
  * consume a packet when it sees one of the *_RECOGNIZED states.
  * It's good practice to follow the _RECOGNIZED transition with one
  * that recognizes a leader of the same packet type rather than
