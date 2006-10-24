@@ -46,7 +46,6 @@ bool sirf_write(int fd, unsigned char *msg) {
 #ifdef ALLOW_RECONFIGURE
    unsigned int       crc;
    size_t    i, len;
-   char	     buf[MAX_PACKET_LENGTH*2];
    bool      ok;
 
    len = (size_t)((msg[2] << 8) | msg[3]);
@@ -61,11 +60,7 @@ bool sirf_write(int fd, unsigned char *msg) {
    msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
    msg[len + 5] = (unsigned char)( crc & 0x00ff);
 
-   buf[0] = '\0';
-   for (i = 0; i < len+8; i++)
-       (void)snprintf(buf+strlen(buf),sizeof(buf)-strlen(buf),
-		      " %02x", (unsigned)msg[i]);
-   gpsd_report(4, "Writing SiRF control type %02x:%s\n", msg[4], buf);
+   gpsd_report(4, "Writing SiRF control type %02x:%s\n", msg[4], gpsd_hexdump(msg, len+8));
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
    (void)tcdrain(fd);
    return(ok);
