@@ -705,6 +705,7 @@ void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
 char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
 {
     static char hexbuf[MAX_PACKET_LENGTH*2+1];
+#ifndef SQUELCH_ENABLE
     size_t i;
     size_t len = (size_t)((binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
     const char *ibuf = (const char *)binbuf;
@@ -713,6 +714,9 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     for (i = 0; i < len; i++) {
 	(void)snprintf(hexbuf + (2 * i), 3, "%02x", (unsigned int)(ibuf[i]&0xff));
     }
+#else /* SQUELCH defined */
+    hexbuf[0] = '\0';
+#endif /* SQUELCH_ENABLE */
     return hexbuf;
 }
 

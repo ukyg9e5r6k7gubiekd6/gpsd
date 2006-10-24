@@ -495,6 +495,20 @@ dnl    AC_SUBST(DBUS_GLIB_LIBS)
 dnl fi
 AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 
+dnl mute logging functions?
+AC_ARG_ENABLE(squelch,
+  AC_HELP_STRING([--enable-squelch],
+                 [squelch gpsd_report and gpsd_hexdump to save cpu]),
+  [ac_squelch=$enableval], [ac_squelch=no])
+AC_MSG_CHECKING([for disabled logging])
+if test x"$ac_squelch" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([SQUELCH_ENABLE], 1, [Squelch logging and hexdumps])
+else
+  AC_MSG_RESULT([no])
+fi
+
+
 dnl Output the configuration summary
 echo ""
 echo "=========================================="
@@ -524,6 +538,7 @@ echo "Enable Python support   : $ac_python"
 echo "Limited max client fd   : $ac_maxclientfd"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
+echo "Squelch logging/hexdump : $ac_squelch"
 echo "------------------------------------------"
 
 if test	x"$ac_nmea" = "xno" -a \

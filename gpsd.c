@@ -137,6 +137,7 @@ static pthread_mutex_t report_mutex;
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
+#ifndef SQUELCH_ENABLE
     if (errlevel <= debuglevel) {
 	char buf[BUFSIZ], buf2[BUFSIZ], *sp;
 	va_list ap;
@@ -168,6 +169,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	/* +unrecog */
 #endif /* PPS_ENABLE */
     }
+#endif /* !SQUELCH_ENABLE */
 }
 
 static void usage(void)
