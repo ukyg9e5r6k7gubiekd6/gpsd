@@ -95,6 +95,7 @@ itrax_reset(int fd){
 		tcdrain(fd);
 		usleep(1000);
 	}
+	/* XXX This is Evil. it will go away when I get reset working */
 	read(fd, buf, BUFSIZ);
 	for(n = 0; n < BUFSIZ; n++){
 		if (0 == n%16)
