@@ -709,10 +709,12 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     size_t i;
     size_t len = (size_t)((binbuflen > MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
     const char *ibuf = (const char *)binbuf;
+    const char *hexchar = "0123456789abcdef";
     memset(hexbuf, 0, sizeof(hexbuf));
 
     for (i = 0; i < len; i++) {
-	(void)snprintf(hexbuf + (2 * i), 3, "%02x", (unsigned int)(ibuf[i]&0xff));
+	hexbuf[2*i] = hexchar[ ibuf[i]&0x0f ];
+	hexbuf[2*i+1] = hexchar[ (ibuf[i]&0xf0)>>4 ];
     }
 #else /* SQUELCH defined */
     hexbuf[0] = '\0';
