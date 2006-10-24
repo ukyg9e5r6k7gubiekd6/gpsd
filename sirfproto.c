@@ -93,7 +93,6 @@ sirfSetProto(int pfd, struct termios *term, unsigned int speed, unsigned int pro
 int sirf_write(int fd, unsigned char *msg) {
 	unsigned int	crc;
 	size_t	i, len;
-	char	buf[MAX_PACKET_LENGTH];
 	int	ok;
 
 	len = (size_t)((msg[2] << 8) | msg[3]);
@@ -108,10 +107,6 @@ int sirf_write(int fd, unsigned char *msg) {
 	msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
 	msg[len + 5] = (unsigned char)( crc & 0x00ff);
 
-	buf[0] = '\0';
-	for (i = 0; i < len+8; i++)
-		snprintf(buf+strlen(buf),sizeof(buf)-strlen(buf),
-		     " %02x", (unsigned)msg[i]);
 	tcflush(fd, TCIOFLUSH);
 	ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
 	tcdrain(fd);
