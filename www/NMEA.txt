@@ -68,7 +68,8 @@ ASCII, the high bit is not used.
 
 It appears there is an international standard, IEC 61162-1, published
 in 2000, that is essentially NMEA 0183.  [IEC] says "is closely
-aligned with NMEA 0183 version 2.30".
+aligned with NMEA 0183 version 2.30".  Unfortunately, it costs money
+and is not redistributable.
 
 Here are the NMEA-standard sentences.  The names are listed without the
 "talker ID", a two-character prefix that identifies the type of the 
