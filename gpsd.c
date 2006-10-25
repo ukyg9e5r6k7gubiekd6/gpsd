@@ -812,7 +812,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		if (isnan(whoami->fixbuffer.time)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",
+				   " %.3f",
 				   whoami->fixbuffer.time);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
@@ -1015,7 +1015,7 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		if (isnan(whoami->device->gpsdata.sentence_time)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f ",
+				   " %.3f ",
 				   whoami->device->gpsdata.sentence_time);
 		else
 		    (void)strlcat(phrase, " ? ", BUFSIZ);
