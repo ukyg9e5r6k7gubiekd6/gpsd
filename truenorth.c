@@ -63,6 +63,7 @@ static int tnt_send(int fd, const char *fmt, ... )
     strlcat(buf, "*", BUFSIZ);
     tnt_add_checksum(buf);
     status = (int)write(fd, buf, strlen(buf));
+    tcdrain(fd);
     if (status == (int)strlen(buf)) {
 	gpsd_report(2, "=> GPS: %s\n", buf);
 	return status;
@@ -118,8 +119,8 @@ static void tnt_initializer(struct gps_device_t *session)
    * Sending this twice seems to make it more reliable!!
    * I think it gets the input on the unit synced up.
    */
-  (void)tnt_send(session->gpsdata.gps_fd, "@BA=26"); // Start HTM packet at 2400 per minute
-  (void)tnt_send(session->gpsdata.gps_fd, "@BA=26"); // Start HTM packet at 2400 per minute
+  (void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
+  (void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
 }
 
 static bool tnt_probe(struct gps_device_t *session)
