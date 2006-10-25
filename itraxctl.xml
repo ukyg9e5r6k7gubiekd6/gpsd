@@ -2,20 +2,20 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='itraxtool.1'>
+<refentry id='itraxctl.1'>
 <refmeta>
-<refentrytitle>itraxtool</refentrytitle>
+<refentrytitle>itraxctl</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>23 Oct 2006</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>itraxtool</refname>
+<refname>itraxctl</refname>
 <refpurpose>Control the modes of an iTrax GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>itraxtool</command>  
+  <command>itraxctl</command>  
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-b </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
@@ -25,7 +25,7 @@
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>itraxtool</application> switches an iTrax GPS to NMEA
+<para><application>itraxctl</application> switches an iTrax GPS to NMEA
 or iTalk Binary mode. Port speed and protocol can be set independently of
 eachother.</para>
 
@@ -86,7 +86,7 @@ yet supported.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Gary E. Miller <email>gem@rellim.com</email>.
+<para>Chris Kuethe <email>chris.kuethe@gmail.com</email>.
 This code is part of the gpsd toolset; there is a
 project page for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para> </refsect1>

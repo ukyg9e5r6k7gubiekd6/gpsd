@@ -190,6 +190,7 @@ man_MANS = \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
 	garminctl.1 \
+	itraxctl.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
@@ -212,6 +213,9 @@ libgpsd.3: libgpsd.xml
 
 garminctl.1: garminctl.xml
 	-$(XMLTO) man garminctl.xml
+
+itraxctl.1: itraxctl.xml
+	-$(XMLTO) man itraxctl.xml
 
 gpsprof.1: gpsprof.xml
 	-$(XMLTO) man gpsprof.xml
@@ -255,6 +259,7 @@ EXTRA_DIST = \
 	gpsprof.xml \
 	gpsfake.xml \
 	garminctl.xml \
+	itraxctl.xml \
 	sirfmon.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
@@ -292,9 +297,9 @@ splint:
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on garminctl..."
-	-splint $(itraxctl_SOURCES)
-	@echo "Running splint on itraxctl..."
 	-splint $(garminctl_SOURCES)
+	@echo "Running splint on itraxctl..."
+	-splint $(itraxctl_SOURCES)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on gpspipe..."
