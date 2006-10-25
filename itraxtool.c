@@ -32,6 +32,8 @@
 #include "italk.h"
 
 #define READLEN 128
+#define MIN_SPEED 4800
+#define MAX_SPEED 230400
 
 struct portconf {
 	int cur_speed, cur_proto;
@@ -332,12 +334,12 @@ main(int argc, char **argv){
 			break;
 		case 's':
 #ifdef HAVE_STRTONUM
-			conf.new_speed = strtonum(optarg, 4800, 230400, &e);
+			conf.new_speed = strtonum(optarg, MIN_SPEED, MAX_SPEED, &e);
 			if (e)
 				err(1, "%s (%s)", e, optarg);
 #else
 			conf.new_speed = atoi(optarg);
-			if (conf.new_speed < 4800 || conf.new_speed > 230400)
+			if (conf.new_speed < MIN_SPEED || conf.new_speed > MAX_SPEED)
 				err(1, "Illegal value %d\n", conf.new_speed);
 #endif /* HAVE_STRTONUM */
 			break;
