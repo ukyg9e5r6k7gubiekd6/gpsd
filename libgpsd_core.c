@@ -405,12 +405,16 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     if (finite(session->gpsdata.fix.eph)
 	|| finite(session->gpsdata.fix.epv)
 	|| finite(session->gpsdata.epe)) {
-        /* output PGRME only if realistic */
+        /*
+	 * Output PGRME only if realistic.  Note: we're converting back to
+	 * our guess about Garmin's confidence units here, make sure this
+	 * stays consistent with the in-conversion in nmea_parse.c!
+	 */
         (void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,M,%.2f,M,%.2f,M",
-	    ZEROIZE(session->gpsdata.fix.eph), 
-	    ZEROIZE(session->gpsdata.fix.epv), 
-	    ZEROIZE(session->gpsdata.epe));
+	    ZEROIZE(session->gpsdata.fix.eph * (CEP50_SIGMA/GPSD_CONFIDENCE)), 
+	    ZEROIZE(session->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE)), 
+	    ZEROIZE(session->gpsdata.epe * (CEP50_SIGMA/GPSD_CONFIDENCE)));
         nmea_add_checksum(bufp);
      }
 #undef ZEROIZE
