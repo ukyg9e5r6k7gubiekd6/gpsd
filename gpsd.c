@@ -749,22 +749,15 @@ static int handle_gpsd_request(int cfd, char *buf, int buflen)
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
 	case 'J':
-	    if (!assign_channel(whoami) || whoami->device->device_type == NULL)
-		(void)strlcpy(phrase, ",J=?", BUFSIZ);
-	    else if (privileged_user(whoami)) {
-		if (*p == '=') ++p;
-		if (*p == '1' || *p == '+') {
-		    whoami->buffer_policy = nocasoc;
-		    p++;
-		} else if (*p == '0' || *p == '-') {
-		    whoami->buffer_policy = casoc;
-		    p++;
-		}
+	    if (*p == '=') ++p;
+	    if (*p == '1' || *p == '+') {
+		whoami->buffer_policy = nocasoc;
+		p++;
+	    } else if (*p == '0' || *p == '-') {
+		whoami->buffer_policy = casoc;
+		p++;
 	    }
-	    if (!whoami->device)
-		(void)snprintf(phrase, sizeof(phrase), ",J=?");
-	    else
-		(void)snprintf(phrase, sizeof(phrase), ",J=%u", whoami->buffer_policy);
+	    (void)snprintf(phrase, sizeof(phrase), ",J=%u", whoami->buffer_policy);
 	    break;
 	case 'K':
 	    for (j = i = 0; i < MAXDEVICES; i++)
