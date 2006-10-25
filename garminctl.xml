@@ -2,20 +2,20 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='garmintool.1'>
+<refentry id='garminctl.1'>
 <refmeta>
-<refentrytitle>garmintool</refentrytitle>
+<refentrytitle>garminctl</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>08 Oct 2006</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>garmintool</refname>
+<refname>garminctl</refname>
 <refpurpose>Control the modes of a Garmin GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>garmintool</command>  
+  <command>garminctl</command>  
       <arg choice='opt'>-? </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n </arg>
@@ -28,11 +28,11 @@
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>garmintool</application> switch a serial Garmin 
+<para><application>garminctl</application> switch a serial Garmin 
 GPS to NMEA or Garmin Binary mode.  On exit it leaves the serial
 port set to the proper baud rate. </para>
 
-<para>This tool is not for use with Garmin USB devices.  Those are
+<para>This program is not for use with Garmin USB devices.  Those are
 permanently set to Garmin Binary mode.</para>
 
 <para>You will probably need to be root to run this program, as the

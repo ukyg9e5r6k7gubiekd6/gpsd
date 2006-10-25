@@ -1,6 +1,6 @@
-/* $Id:$ */
+/* $Id$ */
 /* 
- * tool to configure Garmin Serial GPS
+ * program to configure Garmin Serial GPS, not for use with Garmin USB.
  *
  */
 
@@ -360,8 +360,8 @@ int nmea_send(int fd, const char *fmt, ... )
 }
 
 static void usage(void) {
-	fprintf(stderr, "Usage: garmintool [OPTIONS] {serial-port}\n\n"
-	        "SVN ID: $Id:$ \n"
+	fprintf(stderr, "Usage: garminctl [OPTIONS] {serial-port}\n\n"
+	        "SVN ID: $Id$ \n"
 		"-?   show this help\n"
 		"-h   show this help\n"
 		"-n   Change to NMEA mode\n"

@@ -23,7 +23,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) garmintool itraxctl sirfmon gpspipe gpsflash cgps cgpxlogger
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) garminctl itraxctl sirfmon gpspipe gpsflash cgps cgpxlogger
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
@@ -64,10 +64,10 @@ cgpxlogger_SOURCES = cgpxlogger.c
 cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build garmintool
+# Build garminctl
 #
-garmintool_SOURCES = garmintool.c
-garmintool_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+garminctl_SOURCES = garminctl.c
+garminctl_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpsd
@@ -189,7 +189,7 @@ man_MANS = \
 	sirfmon.1 \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
-	garmintool.1 \
+	garminctl.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
@@ -210,8 +210,8 @@ libgpsmm.3: libgpsmm.xml
 libgpsd.3: libgpsd.xml
 	-$(XMLTO) man libgpsd.xml
 
-garmintool.1: garmintool.xml
-	-$(XMLTO) man garmintool.xml
+garminctl.1: garminctl.xml
+	-$(XMLTO) man garminctl.xml
 
 gpsprof.1: gpsprof.xml
 	-$(XMLTO) man gpsprof.xml
@@ -254,7 +254,7 @@ EXTRA_DIST = \
 	libgpsmm.xml \
 	gpsprof.xml \
 	gpsfake.xml \
-	garmintool.xml \
+	garminctl.xml \
 	sirfmon.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
@@ -291,10 +291,10 @@ splint:
 	-splint -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
-	@echo "Running splint on garmintool..."
+	@echo "Running splint on garminctl..."
 	-splint $(itraxctl_SOURCES)
 	@echo "Running splint on itraxctl..."
-	-splint $(garmintool_SOURCES)
+	-splint $(garminctl_SOURCES)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on gpspipe..."
