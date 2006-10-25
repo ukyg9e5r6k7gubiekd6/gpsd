@@ -23,7 +23,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) garmintool itraxtool sirfmon gpspipe gpsflash cgps cgpxlogger
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) garmintool itraxctl sirfmon gpspipe gpsflash cgps cgpxlogger
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
@@ -86,10 +86,10 @@ gpspipe_SOURCES = \
 gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
 
 #
-# Build itraxtool
+# Build itraxctl
 #
-itraxtool_SOURCES = itraxtool.c
-itraxtool_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+itraxctl_SOURCES = itraxctl.c
+itraxctl_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build sirfmon
@@ -292,8 +292,8 @@ splint:
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on garmintool..."
-	-splint $(itraxtool_SOURCES)
-	@echo "Running splint on itraxtool..."
+	-splint $(itraxctl_SOURCES)
+	@echo "Running splint on itraxctl..."
 	-splint $(garmintool_SOURCES)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
