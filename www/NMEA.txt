@@ -1,8 +1,8 @@
 This is a list of NMEA 0183 sentences with field descriptions.
-It is primarily intended to help people undestand GPS reports.
+It is primarily intended to help people understand GPS reports.
 
-It may originally have been redacted from the document cited as
-[NMEA200]; see the list of sources at the end of this document.
+This list may originally have been redacted from the document cited as
+[NMEA2000]; see the list of sources at the end of this document.
 The official NMEA standard was not consulted at any point, thus this
 document is not a derivative work of that standard and is not
 controlled by the rapacious lawyers of NMEA.
@@ -17,7 +17,8 @@ information on the following topics:
 * New documentation on BWC, DTM, GBS, GRS, GST, MSK, and MSS sentences.
 * Sentence examples merged from [GIDS]
 * Sentence explanations from [GIDS] and elsewhere
-* Corrected badly mangled GPZDA description.
+* Corrected badly mangled ZDA description.
+* Corrected DPT titling
 * Common talker IDs
 
 Many of these are only emitted by high-end maritime navigation systems.
