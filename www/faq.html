@@ -111,6 +111,56 @@ whether it holds a clue, send it.</p>
 <p>One of the things this should tell you, if the chip reports it at
 all, is the firmware version.  You will want that for your report.</p>
 
+<h3 id="logformat">Annotate the log and send us a copy</h3>
+
+<p>A logfile should consist of an identifying header followed by a
+straight unencoded dump of GPS data, whether NMEA or binary. The
+header should consist of text lines beginning with # and ending with LF.
+Here is the beginning of one log file I already have:</p>
+
+<pre>
+# Name: Holux GM-210
+# Cycle-time: 1-second
+# Start-of-cycle: ?
+# Pause-noted: ?
+# Well-behaved: N
+# Submitted-by: "Patrick L. McGillan" &lt;pmcgillan&#x40;pateri.com&gt;
+# Date: 4 Apr 2005
+# Location: Osceola, Iowa, US, 41N93W
+$GPGGA,012519.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*7D
+$GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
+$GPRMC,012519.563,V,4131.7353,N,09336.8150,W,0.00,,050405,,*14
+$GPGGA,012520.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*77
+$GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
+$GPGSV,3,1,09,14,65,034,00,01,55,291,43,25,53,210,37,22,45,125,00*7E
+$GPGSV,3,2,09,30,29,096,00,11,25,294,32,05,20,056,00,18,14,127,00*73
+$GPGSV,3,3,09,15,08,176,00*4C
+$GPRMC,012520.563,V,4131.7353,N,09336.8150,W,0.00,,050405,,*1E
+$GPGGA,012521.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*76
+</pre>
+
+<p>The way to fill in the Name, Cycle-Time, Submitted-by, and Date
+headers should be pretty obvious.</p>
+
+<p>Start-of-cycle should be the name of the NMEA sentence (or, in a
+packet protocol, the numeric type ID of the packet) that is emitted
+first in each cycle.</p>
+
+<p>Pause-Noted should be Y or N as there is or is not a visible pause
+between cycles.</p>
+
+<p>Well-behaved should be Y if all sentences in the same cycle have the
+same timestamp, N otherwise.</p>
+
+<p>Please also include a Location header giving your city,
+state/province, country code, and a rough latitude/longitude.</p>
+
+<p>If you have notes or comments on the logfile or the GPS, or any
+additional information you think might be helpful, add them as
+additional # comments (not containing a colon) after these headers.
+The test machinery that interprets the headers will ignore these and
+any empty comment lines.</p>
+
 <h3>If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h3>
 
 <p>If you're using a SiRF, Evermore, or iTalk GPS in binary mode
