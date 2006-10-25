@@ -3,27 +3,33 @@
 # Upload gpsd docs
 #
 webdir=esr@shell.berlios.de:/home/groups/gpsd/htdocs
-makeversion=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
 
-version=${1:-$makeversion}
-echo "Uploading version $version of gpsd web documents"
+if [ $1 ]
+then
+    scp $* $webdir
+else
+    makeversion=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
 
-sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
+    version=${1:-$makeversion}
+    echo "Uploading version $version of gpsd web documents"
 
-xmlto xhtml-nochunks ../gpsd.xml
-xmlto xhtml-nochunks ../xgps.xml
-xmlto xhtml-nochunks ../libgps.xml
-xmlto xhtml-nochunks ../libgpsmm.xml
-xmlto xhtml-nochunks ../libgpsd.xml
-xmlto xhtml-nochunks ../gpsprof.xml
-xmlto xhtml-nochunks ../gpsfake.xml
-xmlto xhtml-nochunks ../sirfmon.xml
-xmlto xhtml-nochunks ../rtcmdecode.xml
-xmlto xhtml-nochunks ../gpxlogger.xml
-xmlto xhtml-nochunks ../gpspipe.xml
-xmlto xhtml-nochunks ../gpsflash.xml
-xmlto xhtml-nochunks ../rtcm-104.xml
-xmlto xhtml-nochunks ../srec.xml
-xmlto xhtml-nochunks replacing-nmea.xml
-(cd performance; xmlto xhtml-nochunks performance.xml)
-scp start-kismet *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
+    sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
+
+    xmlto xhtml-nochunks ../gpsd.xml
+    xmlto xhtml-nochunks ../xgps.xml
+    xmlto xhtml-nochunks ../libgps.xml
+    xmlto xhtml-nochunks ../libgpsmm.xml
+    xmlto xhtml-nochunks ../libgpsd.xml
+    xmlto xhtml-nochunks ../gpsprof.xml
+    xmlto xhtml-nochunks ../gpsfake.xml
+    xmlto xhtml-nochunks ../sirfmon.xml
+    xmlto xhtml-nochunks ../rtcmdecode.xml
+    xmlto xhtml-nochunks ../gpxlogger.xml
+    xmlto xhtml-nochunks ../gpspipe.xml
+    xmlto xhtml-nochunks ../gpsflash.xml
+    xmlto xhtml-nochunks ../rtcm-104.xml
+    xmlto xhtml-nochunks ../srec.xml
+    xmlto xhtml-nochunks replacing-nmea.xml
+    (cd performance; xmlto xhtml-nochunks performance.xml)
+    scp start-kismet *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
+fi
