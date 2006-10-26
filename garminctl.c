@@ -20,6 +20,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include "config.h"
 
 /* gross - globals */
 static struct termios ttyset;
