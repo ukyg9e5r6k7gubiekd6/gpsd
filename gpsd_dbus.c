@@ -1,6 +1,7 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdio.h>
-#include <config.h>
+#include "gpsd_config.h"
 #ifdef DBUS_ENABLE
 #include <gpsd_dbus.h>
 

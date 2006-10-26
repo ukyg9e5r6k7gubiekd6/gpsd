@@ -14,11 +14,12 @@
  *
  * Send any comments, bug reports, etc. to shutoh@isl.yamaha.JUNET
  */
+#include <sys/types.h>
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
-#include "config.h"	/* must define UNUSED */
+#include "gpsd_config.h"	/* must define UNUSED */
 
 #define D2R  0.0174532925199432957692369076848861271 /* radians = pi/180 */
 

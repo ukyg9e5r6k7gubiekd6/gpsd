@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +19,7 @@
 #include <Xm/Protocols.h>
 #include <X11/Shell.h>
 
-#include "config.h"
+#include "gpsd_config.h"
 #include "gps.h"
 #include "display.h"
 

@@ -48,6 +48,7 @@ Starlink's website.
 
 *****************************************************************************/
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +56,7 @@ Starlink's website.
 #include <stdio.h>
 #include <math.h> 		/* for round() */
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 #include "rtcm.h"
 

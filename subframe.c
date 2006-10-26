@@ -1,5 +1,7 @@
 /* $Id$ */
 /* subframe.c -- interpret satellite subframe data. */
+#include <sys/types.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 /*@ -usedef @*/

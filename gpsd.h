@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <termios.h>
-#include "config.h"
 #include "gps.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */

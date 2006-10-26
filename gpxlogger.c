@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -12,7 +13,7 @@
 #include <dbus/dbus-glib.h>
 
 #include <glib/gprintf.h>
-#include "config.h"
+#include "gpsd_config.h"
 
 DBusConnection* connection;
 

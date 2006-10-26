@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 #include <ctype.h>
 #include <time.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 #include "timebase.h"
 

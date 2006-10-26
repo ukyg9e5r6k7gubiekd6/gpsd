@@ -26,15 +26,17 @@
  *
  */
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <errno.h>
 #include <stdio.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <fcntl.h>
 #include <termios.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 

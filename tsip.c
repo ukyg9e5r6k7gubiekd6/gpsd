@@ -3,10 +3,12 @@
  * Handle the Trimble TSIP packet format
  * by Rob Janssen, PE1CHL.
  */
+#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 #include "bits.h"
 

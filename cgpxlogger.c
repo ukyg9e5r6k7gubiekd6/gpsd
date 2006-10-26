@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "gpsd_config.h"
 #include "gps.h"
 
 #define BS 512

@@ -1,6 +1,8 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )

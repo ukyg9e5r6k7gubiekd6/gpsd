@@ -2,11 +2,13 @@
 /*
  * Handle the Rockwell binary packet format supported by the old Zodiac chipset
  */
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #define LITTLE_ENDIAN_PROTOCOL

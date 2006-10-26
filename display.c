@@ -1,9 +1,10 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdio.h>
 #include <math.h>
 
+#include "gpsd_config.h"
 #include "gps.h"
-#include "config.h"
 #include "display.h"
 
 #define RM		20

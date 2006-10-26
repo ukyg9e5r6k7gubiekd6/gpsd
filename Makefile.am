@@ -241,7 +241,7 @@ srec.5: srec.xml
 gpsflash.1: gpsflash.xml
 	-$(XMLTO) man gpsflash.xml
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h rtcm.h 
+include_HEADERS = gps.h gpsd.h libgpsmm.h rtcm.h gpsd_config.h
 
 EXTRA_DIST = \
 	autogen.sh \

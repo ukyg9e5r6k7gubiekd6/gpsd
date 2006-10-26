@@ -1,14 +1,14 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <stdarg.h>
 #include <getopt.h>
-#include "config.h"
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 static int verbose = 0;

@@ -41,6 +41,7 @@
  */
 
 #define __USE_POSIX199309 1
+#include <sys/types.h>
 #include <time.h> // for nanosleep()
 
 #include <stdio.h>
@@ -52,6 +53,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#include "gpsd_config.h"
 #if defined (HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
@@ -60,7 +62,6 @@
 #include <strings.h>
 #endif
 
-#include "config.h"
 #include "gpsd.h"
 #include "gps.h"
 

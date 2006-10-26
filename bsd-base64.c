@@ -43,9 +43,6 @@
  * IF IBM IS APPRISED OF THE POSSIBILITY OF SUCH DAMAGES.
  */
 
-#include <stdlib.h>
-#include "config.h"
-
 #if !defined(HAVE_B64_NTOP) && !defined(HAVE___B64_NTOP)
 
 #include <sys/types.h>
@@ -56,9 +53,10 @@
 
 #include <ctype.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 #include <string.h>
 
+#include "gpsd_config.h"
 #include "bsd-base64.h"
 
 #define Assert(Cond) if (!(Cond)) abort()

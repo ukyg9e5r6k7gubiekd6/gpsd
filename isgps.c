@@ -55,11 +55,13 @@ necessary) reassembled into a struct rtcm_t.
 
 *****************************************************************************/
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #ifdef BINARY_ENABLE

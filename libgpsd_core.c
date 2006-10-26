@@ -1,17 +1,19 @@
 /* $Id$ */
 /* libgpsd_core.c -- direct access to GPSes on serial or USB devices. */
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <netdb.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)

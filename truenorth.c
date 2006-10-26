@@ -10,6 +10,8 @@
  * This is useful to supplement the heading provided by another GPS
  * unit. A GPS heading is unreliable at slow speed or no speed.
  */
+#include <sys/types.h>
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #ifdef TNT_ENABLE

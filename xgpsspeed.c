@@ -2,6 +2,7 @@
 /* GPS speedometer as a wrapper around an Athena widget Tachometer
  * - Derrick J Brashear <shadow@dementia.org>
  */
+#include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@
 #include <Xm/XmStrDefs.h>
 #include <Tachometer.h>
 
-#include "config.h"
+#include "gpsd_config.h"
 #include "gps.h"
 
 #include "xgpsspeed.icon"

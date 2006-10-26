@@ -1,16 +1,17 @@
 /* $Id$ */
 /* ntrip.c -- gather and dispatch DGNSS data from Ntrip broadcasters */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <netdb.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include "config.h"
+#include "gpsd_config.h"
 
 #ifdef NTRIP_ENABLE
 #include "gpsd.h"

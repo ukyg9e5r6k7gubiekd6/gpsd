@@ -1,16 +1,17 @@
 /* $Id$ */
 /* libgps.c -- client interface library for the gpsd daemon */
+#include <sys/time.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/time.h>
 #ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
 #include <math.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #ifdef S_SPLINT_S

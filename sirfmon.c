@@ -23,6 +23,7 @@
  * sirfmon is intended to be an independent sanity check on SiRF decoding,
  * so it deliberately doesn't use much of the library. 
  */
+#include <sys/types.h>
 #include <stdio.h>
 #include <curses.h>
 #include <stdlib.h>
@@ -40,7 +41,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "config.h"
+#include "gpsd_config.h"
 #include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
 
 #define PUT_ORIGIN	-4

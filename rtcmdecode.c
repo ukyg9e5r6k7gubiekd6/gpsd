@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 static int verbose = ISGPS_ERRLEVEL_BASE;

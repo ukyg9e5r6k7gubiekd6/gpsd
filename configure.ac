@@ -2,7 +2,7 @@ dnl $Id$
 AC_INIT
 AM_INIT_AUTOMAKE(gpsd, 2.34)
 AC_PREFIX_PROGRAM(gcc)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
 
 AC_ARG_ENABLE(python,

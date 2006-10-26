@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 #ifdef NTPSHM_ENABLE
 

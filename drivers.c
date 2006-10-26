@@ -1,14 +1,16 @@
 /* $Id$ */
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
 #include <stdarg.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 extern struct gps_type_t zodiac_binary;

@@ -24,13 +24,13 @@ connected to the Garmin kernel driver.  But we need to be able to tell the
 others apart and distinguish them from baud barf.
 
 ***************************************************************************/
+#include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
-#include "config.h"
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 /* 

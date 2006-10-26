@@ -1,5 +1,6 @@
 /* $Id$ */
 /* gpsutils.c -- code shared between low-level and high-level interfaces */
+#include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 #include <stdarg.h>
 #include <time.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #define MONTHSPERYEAR	12		/* months per calendar year */

@@ -5,9 +5,9 @@
  */
 
 #define __USE_POSIX199309 1
+#include <sys/types.h>
 #include <time.h> // for nanosleep()
 
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <fcntl.h>
@@ -20,7 +20,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "config.h"
+#include "gpsd_config.h"
 
 /* gross - globals */
 static struct termios ttyset;
@@ -35,7 +35,7 @@ static void logit(int , char *, ...);
 static void nmea_add_checksum(char *);
 static int nmea_send(int , const char *, ... );
 #ifndef HAVE_STRLCAT
-static size_t strlcat(char *dst, const char *src, size_t size);
+size_t strlcat(char *dst, const char *src, size_t size);
 #endif
 
 /* how many characters to look at when trying to find baud rate lock */

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "gpsd_config.h"
 #include "gpsd.h"
 
 #define DGNSS_PROTO_DGPSIP	"dgpsip://"

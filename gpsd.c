@@ -1,4 +1,8 @@
 /* $Id$ */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -11,15 +15,12 @@
 #include <stdarg.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
 #include <assert.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <math.h>
 
-#include "config.h"
+#include "gpsd_config.h"
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else
