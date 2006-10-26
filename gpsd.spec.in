@@ -149,6 +149,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get it 
   working with EarthMates again, this had been broken since 2.15.  Massive 
   string safety audit and OpenBSD port by Chris Kuethe.  J command added.
+  sirfmon renamed to sirfctl, itraxctl and garminctl added.
 
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
@@ -172,7 +173,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   driver problems.
 
 * Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.30-1
-- Prevent core dump on -d option.  The .log option is no longer required for
+- Prevent core dump on -d option.  The .log extension is no longer required for
   test loads.  cgps and xgps now have configurable latitude/longitude formats 
   via the -l option.  Introduced new 'g' command that allows clients to
   specify whether they want GPS or RTCM104 information.

@@ -27,7 +27,7 @@
 
 <para><application>itraxctl</application> switches an iTrax GPS to NMEA
 or iTalk Binary mode. Port speed and protocol can be set independently of
-eachother.</para>
+each other.</para>
 
 <para>You will probably need to be root to run this program, as the
 serial device it uses is normally privileged.</para>
