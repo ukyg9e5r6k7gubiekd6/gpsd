@@ -191,7 +191,7 @@ void bye(int signum){
 }
 
 void process(struct gps_data_t *gpsdata,
-	     char *buf, size_t len, int level){
+	     char *buf UNUSED, size_t len UNUSED, int level UNUSED){
 
 	if ((gpsdata->fix.mode > 1) && (gpsdata->status > 0))
 		write_record(gpsdata);

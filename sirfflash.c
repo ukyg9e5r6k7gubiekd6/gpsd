@@ -221,9 +221,9 @@ static int sirfPortSetup(int fd, struct termios *term)
     return sirfSetProto(fd, term, PROTO_SIRF, 38400);
 }
 
-static int sirfVersionCheck(int fd, const char *version UNUSED,
-			    const char *loader, size_t ls UNUSED,
-			    const char *firmware, size_t fs UNUSED)
+static int sirfVersionCheck(int fd UNUSED, const char *version UNUSED,
+			    const char *loader UNUSED, size_t ls UNUSED,
+			    const char *firmware UNUSED, size_t fs UNUSED)
 {
     /*
      * This implies that any SiRF loader and firmware image is good for 
