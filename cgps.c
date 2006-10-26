@@ -22,6 +22,9 @@
   Kind of a curses version of xgps for use with gpsd.
 */
 
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,8 +32,6 @@
 #include <unistd.h>
 #include <math.h>
 #include <errno.h>
-#include <sys/select.h>
-#include <sys/socket.h>
 
 #include <ncurses.h>                                                         
 #include <signal.h>
@@ -88,7 +89,7 @@ static enum deg_str_type deg_type = deg_dd;
 /* This gets called once for each new sentence. */
 static void update_panel(struct gps_data_t *gpsdata, 
                          char *message,
-                         size_t len, 
+                         size_t len UNUSED , 
                          int level UNUSED)
 {
   int i;
