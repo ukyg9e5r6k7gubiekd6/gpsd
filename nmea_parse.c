@@ -669,7 +669,11 @@ int nmea_send(int fd, const char *fmt, ... )
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
-    if (fmt[0] == '$') {
+    /* 
+     * @ is used as a private leader character by some devices,
+     * like the True North magnetic compass and the Sony CXD2951.
+     */
+    if (fmt[0] == '$' || fmt[0] == '@') {
 	(void)strlcat(buf, "*", BUFSIZ);
 	nmea_add_checksum(buf);
     } else
