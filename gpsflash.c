@@ -362,7 +362,7 @@ main(int argc, char **argv){
 
 	if (!nflag && 
 	    (((warning = getenv("I_READ_THE_WARNING")) == NULL) ||
-	     (strcmp(warning, "why oh why didn't i take the blue pill")))){
+	     (strcmp(warning, "why oh why didn't i take the blue pill")!=0))){
 	    printf("\nThis program rewrites your receiver's flash ROM.\n");
 	    printf("If done improperly this will permanently ruin your\n");
 	    printf("receiver. We insist you read the gpsflash manpage\n");
@@ -504,7 +504,6 @@ main(int argc, char **argv){
 	    gpsd_report(0, "%s: not an S-record file\n", fname);
 	    return 1;
 	}
-	/*@ +nullpass @*/
 
 	if(gpstype->version_check(pfd, version, loader, ls, firmware, fs)==-1){
 		(void)free(loader);
@@ -523,6 +522,7 @@ main(int argc, char **argv){
 	    gpsd_report(0, "%s: corrupted firmware image\n", fname);
 	    return 1;
 	}
+	/*@ +nullpass @*/
 	gpsd_report(1, "firmware validated\n");
 
 	gpsd_report(1, "version checked...\n");
@@ -622,13 +622,13 @@ srec_check(char *data){
 		l++;
 		if(sscanf(data, "%80s", buf) == EOF){
 			gpsd_report(1, "line %d read failed\n", l);
-			return 1;
+			return true;
 		}
 
 		n = strlen(buf);
 		if ((n < 1) || (n > 80)){
 			gpsd_report(0, "firmware line %d invalid length %d\n", l, n);
-			return 1;
+			return true;
 		}
 
 		/* advance to the next srecord */
@@ -639,7 +639,7 @@ srec_check(char *data){
 		if (buf[0] != 'S'){
 			gpsd_report(1, "%s\n", buf);
 			gpsd_report(0, "firmware line %d doesn't begin with 'S'.\n", l);
-			return 1;
+			return true;
 		}
 
 		x = hex2bin(buf+2);
@@ -647,7 +647,7 @@ srec_check(char *data){
 		if (x != y){
 			gpsd_report(1, "buf: '%s'\n", buf);
 			gpsd_report(0, "firmware line %d length error: %d != %d\n", l, x, y);
-			return 1;
+			return true;
 		}
 
 		x = hex2bin(buf+n-2);
@@ -660,8 +660,8 @@ srec_check(char *data){
 		if (x != y){
 			gpsd_report(1, "buf: '%s'\n", buf);
 			gpsd_report(0, "firmware line %d checksum error: %x != %x\n", l, x, y);
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
