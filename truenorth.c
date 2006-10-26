@@ -21,8 +21,8 @@
 static void tnt_wakeup(struct gps_device_t *session)
 {
     (void)nmea_send(session->gpsdata.gps_fd, "@X?");
-    //tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
-    //tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
+    //nmea_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
+    //nmea_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
     /*
      * Sending this twice seems to make it more reliable!!
      * I think it gets the input on the unit synced up.
@@ -34,7 +34,7 @@ static void tnt_wakeup(struct gps_device_t *session)
 
 struct gps_type_t trueNorth = {
     .typename       = "True North",	/* full name of type */
-    .trigger        = " TNT1500",
+    .trigger        = " TNT1500",	/* how to recognize this */
     .channels       = 0,		/* not an actual GPS at all */
     .wakeup         = tnt_wakeup,	/* wakeup by sending ID query */
     .probe          = NULL,		/* no probe */
