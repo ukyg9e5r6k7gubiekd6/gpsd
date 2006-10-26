@@ -4,26 +4,12 @@
  *
  * More info: http://www.tntc.com/
  *
- * This is a digital compass which uses magnetometers to measure
- * the strength of the earth's magnetic field. Based on these
- * measurements it provides a compass heading using NMEA
- * formatted output strings. I threw this into gpsd since it
- * already has convienient NMEA parsing support. Also because
- * I use the compass to supplement the heading provided by
- * another gps unit. A gps heading is unreliable at slow 
- * speed or no speed.
+ * This is a digital compass which uses magnetometers to measure the
+ * strength of the earth's magnetic field. Based on these measurements
+ * it provides a compass heading using NMEA formatted output strings.
+ * This is useful to supplement the heading provided by another GPS
+ * unit. A GPS heading is unreliable at slow speed or no speed.
  */
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
-#include <math.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <stdarg.h>
-
 #include "gpsd.h"
 
 #ifdef TNT_ENABLE
@@ -34,7 +20,7 @@
  */
 static void tnt_wakeup(struct gps_device_t *session)
 {
-    (void)tnt_send(session->gpsdata.gps_fd, "@X?");
+    (void)nmea_send(session->gpsdata.gps_fd, "@X?");
     //tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
     //tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
     /*
