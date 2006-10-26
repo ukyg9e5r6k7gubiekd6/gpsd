@@ -223,6 +223,8 @@ int gpsd_open(struct gps_device_t *session)
 	session->baudindex = 0;
 	gpsd_set_speed(session, 
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
+	if (session->device_type->wakeup != NULL)
+	    session->device_type->wakeup(session);
     }
     return session->gpsdata.gps_fd;
 }
@@ -269,6 +271,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	gpsd_set_speed(session, 
 		       rates[session->baudindex],
 		       'N', session->gpsdata.stopbits);
+	if (session->device_type->wakeup != NULL)
+	    session->device_type->wakeup(session);
     }
 
     return true;	/* keep hunting */

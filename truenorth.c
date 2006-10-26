@@ -29,10 +29,6 @@
 
 #ifdef TNT_ENABLE
 
-enum {
-#include "packet_states.h"
-};
-
 static void tnt_add_checksum(char *sentence)
 {
     unsigned char sum = '\0';
@@ -73,101 +69,33 @@ static int tnt_send(int fd, const char *fmt, ... )
     }
 }
 
-#define TNT_SNIFF_RETRIES       100
 /*
- * The True North compass won't start talking
- * unless you ask it to. So to identify it we
- * need to query for it's ID string.
+ * The True North compass won't start talking unless you ask it to. To
+ * wake it up, we query for its ID string just after each speed change
+ * in the autobaud hunt.  Then we send codes to start the flow of data.
  */
-static int tnt_packet_sniff(struct gps_device_t *session)
+static int tnt_wakeup(struct gps_device_t *session)
 {
-    unsigned int n, count = 0;
-
-    gpsd_report(5, "tnt_packet_sniff begins\n");
-    for (n = 0; n < TNT_SNIFF_RETRIES; n++) 
-    {
-      count = 0;
-      (void)tnt_send(session->gpsdata.gps_fd, "@X?");
-      if (ioctl(session->gpsdata.gps_fd, FIONREAD, &count) < 0)
-          return BAD_PACKET;
-      if (count == 0) {
-          //int delay = 10000000000.0 / session->gpsdata.baudrate;
-          //gpsd_report(5, "usleep(%d)\n", delay);
-          //usleep(delay);
-          gpsd_report(5, "sleep(1)\n");
-          (void)sleep(1);
-      } else if (packet_get(session) >= 0) {
-        if((session->packet_type == NMEA_PACKET)&&(session->packet_state == NMEA_RECOGNIZED))
-        {
-          gpsd_report(5, "tnt_packet_sniff returns %d\n",session->packet_type);
-          return session->packet_type;
-        }
-      }
-    }
-
-    gpsd_report(5, "tnt_packet_sniff found no packet\n");
-    return BAD_PACKET;
-}
-
-
-static void tnt_initializer(struct gps_device_t *session)
-{
-  // Send codes to start the flow of data
-  //tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
-  //tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
-  /*
-   * Sending this twice seems to make it more reliable!!
-   * I think it gets the input on the unit synced up.
-   */
-  (void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
-  (void)tnt_send(session->gpsdata.gps_fd, "@BA=15"); // Start HTM packet at 1200 per minute
-}
-
-static bool tnt_probe(struct gps_device_t *session)
-{
-  unsigned int *ip;
-#ifdef FIXED_PORT_SPEED
-    /* just the one fixed port speed... */
-    static unsigned int rates[] = {FIXED_PORT_SPEED};
-#else /* FIXED_PORT_SPEED not defined */
-  /* The supported baud rates */
-  static unsigned int rates[] = {38400, 19200, 2400, 4800, 9600 };
-#endif /* FIXED_PORT_SPEED defined */
-
-  gpsd_report(1, "Probing TrueNorth Compass\n");
-
-  /*
-   * Only block until we get at least one character, whatever the
-   * third arg of read(2) says.
-   */
-  /*@ ignore @*/
-  memset(session->ttyset.c_cc,0,sizeof(session->ttyset.c_cc));
-  session->ttyset.c_cc[VMIN] = 1;
-  /*@ end @*/
-
-  session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS);
-  session->ttyset.c_cflag |= CREAD | CLOCAL;
-  session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
-
-  session->baudindex = 0;
-  for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
-      if (ip == rates || *ip != rates[0])
-      {
-          gpsd_report(1, "hunting at speed %d\n", *ip);
-          gpsd_set_speed(session, *ip, 'N',1);
-          if (tnt_packet_sniff(session) != BAD_PACKET)
-              return true;
-      }
-  return false;
+    (void)tnt_send(session->gpsdata.gps_fd, "@X?");
+    //tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
+    //tnt_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
+    /*
+     * Sending this twice seems to make it more reliable!!
+     * I think it gets the input on the unit synced up.
+     * The intent is to start HTM packet reporting at 1200 per minute.
+     */
+    (void)tnt_send(session->gpsdata.gps_fd, "@BA=15");
+    (void)tnt_send(session->gpsdata.gps_fd, "@BA=15");
 }
 
 struct gps_type_t trueNorth = {
     .typename       = "True North",	/* full name of type */
     .trigger        = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
-    .probe          = tnt_probe,	/* probe by sending ID query */
-    .initializer    = tnt_initializer,	/* probe for True North Digital Compass */
-    .get_packet     = packet_get,		/* how to get a packet */
+    .wakeup         = tnt_wakeup,	/* wakeup by sending ID query */
+    .probe          = NULL,		/* no probe */
+    .initializer    = NULL,		/* no initializer */
+    .get_packet     = packet_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,	        /* Don't send */
     .speed_switcher = NULL,		/* no speed switcher */

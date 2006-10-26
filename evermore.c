@@ -653,6 +653,7 @@ struct gps_type_t evermore_binary =
     .typename       = "EverMore binary",	/* full name of type */
     .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03", /* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
+    .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,			/* no probe */
     .initializer    = evermore_initializer,	/* initialize the device */
     .get_packet     = packet_get,		/* use generic one */

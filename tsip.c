@@ -699,6 +699,7 @@ struct gps_type_t tsip_binary =
     .typename       = "Trimble TSIP",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
+    .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
     .initializer    = tsip_initializer,	/* initialization */
     .get_packet     = packet_get,	/* use the generic packet getter */

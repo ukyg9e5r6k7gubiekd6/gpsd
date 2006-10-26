@@ -75,6 +75,7 @@ struct gps_type_t {
     /*@observer@*//*@null@*/char *trigger;
     int channels;
     /*@null@*/bool (*probe)(struct gps_device_t *session);
+    /*@null@*/bool (*wakeup)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);

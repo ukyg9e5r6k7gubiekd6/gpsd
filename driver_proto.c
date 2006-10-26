@@ -118,6 +118,7 @@ struct gps_type_t proto_binary =
     .trigger        = NULL,		/* recognize the type */
     .channels       = 12,		/* used for dumping binary packets */
     .probe          = NULL,		/* no probe */
+    .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .initializer    = proto_initializer,/* initialize the device */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = proto_parse_input,/* parse message packets */
