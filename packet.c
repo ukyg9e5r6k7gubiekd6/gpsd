@@ -688,8 +688,9 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    if ( packetlen < 5) {
 		session->packet_state = GROUND_STATE;
             } else {
-              unsigned int n, pkt_id, chksum, c, len;
-	      bool ok = false;
+		unsigned int pkt_id, ch, chksum, len;
+		size_t n;
+		bool ok = false;
               
 #ifdef GARMIN_ENABLE
 	      n = 0;
@@ -711,9 +712,9 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	         }
 	         if (len > 0) break;
 		 /* check sum byte */
-	         c = session->inbuffer[n++];
-	         chksum += c;
-	         if (c == 0x10) {
+	         ch = session->inbuffer[n++];
+	         chksum += ch;
+	         if (ch == 0x10) {
 		    if (session->inbuffer[n++] != 0x10) break;
 	         }
 	         if (session->inbuffer[n++] != 0x10) break;

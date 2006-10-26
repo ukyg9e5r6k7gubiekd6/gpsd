@@ -53,8 +53,8 @@ int dgnss_poll(struct gps_context_t *context)
 	context->rtcmbytes = read(context->dsock, context->rtcmbuf, sizeof(context->rtcmbuf));
 	if ((context->rtcmbytes == -1 && errno != EAGAIN) ||
 	    (context->rtcmbytes == 0)) {
-	    shutdown(context->dsock, SHUT_RDWR);
-	    close(context->dsock);
+	    (void)shutdown(context->dsock, SHUT_RDWR);
+	    (void)close(context->dsock);
 	    return -1;
 	} else
 	    context->rtcmtime = timestamp();

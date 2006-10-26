@@ -715,10 +715,12 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     const char *ibuf = (const char *)binbuf;
     const char *hexchar = "0123456789abcdef";
 
+    /*@ -shiftimplementation @*/
     for (i = 0; i < len; i++) {
 	hexbuf[j++] = hexchar[ ibuf[i]&0x0f ];
 	hexbuf[j++] = hexchar[ (ibuf[i]&0xf0)>>4 ];
     }
+    /*@ +shiftimplementation @*/
     hexbuf[j] ='\0';
 #else /* SQUELCH defined */
     hexbuf[0] = '\0';
@@ -729,7 +731,7 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
 int gpsd_hexpack(char *src, char *dst, int len){
     int i, k, l;
 
-    l = strlen(src) / 2;
+    l = (int)(strlen(src) / 2);
     if ((l < 1) || (l > len))
 	return -1;
 
@@ -742,7 +744,9 @@ int gpsd_hexpack(char *src, char *dst, int len){
     return l;
 }
 
-int hex2bin(char *s){
+/*@ +charint -shiftimplementation @*/
+int hex2bin(char *s)
+{
     int a, b;
 
     a = s[0] & 0xff;
@@ -768,3 +772,4 @@ int hex2bin(char *s){
 
     return ((a<<4) + b);
 }
+/*@ -charint +shiftimplementation @*/

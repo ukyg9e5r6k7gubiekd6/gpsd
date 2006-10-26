@@ -450,9 +450,9 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
      * Garmin won't say, but the general belief is that these are 50% CEP.
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
      */
-    if ((strcmp(field[2], "M")) ||
-	(strcmp(field[4], "M")) ||
-	(strcmp(field[6], "M"))){
+    if ((strcmp(field[2], "M")!=0) ||
+	(strcmp(field[4], "M")!=0) ||
+	(strcmp(field[6], "M")!=0)){
 	    session->gpsdata.fix.eph =
 	    session->gpsdata.fix.epv =
 	    session->gpsdata.epe = 100;
@@ -626,7 +626,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
         if (strcmp(nmea_phrase[i].name, s) == 0) {
-	    if (nmea_phrase[i].decoder && (count >= nmea_phrase[i].nf)) {
+	    if (nmea_phrase[i].decoder!=NULL && (count >= nmea_phrase[i].nf)) {
 		retval = (nmea_phrase[i].decoder)(count, field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
 		session->gpsdata.sentence_length = strlen(sentence);

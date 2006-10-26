@@ -61,8 +61,10 @@ void usage(void);
 
 void
 itrax_reset(int fd){
-	int i, n;
+	int i;
+	size_t n;
 	char buf[BUFSIZ];
+	/*@+charint@*/
 	char resetstr[18] = {	0x3c, 0x21, /* HEADER */
 				0x7f, /* src: NODE_HOST | TASK_HOST */
 				0x20, /* dst: NODE_ITRAX | TASK_SYSTEM */
@@ -74,6 +76,7 @@ itrax_reset(int fd){
 				0x00, 0x00, 0x00, 0x00, /* DUMMY */
 				0x17, 0x00, /* CHECKSUM */
 				0x3e /* TRAILER */ };
+	/*@-charint@*/
 	struct resetmsg rm = {
 		.h1 = '<',
 		.h2 = '!',
@@ -90,19 +93,19 @@ itrax_reset(int fd){
 	};
 
 	memcpy(&resetstr, &rm, 18);
-	italk_add_checksum((char *)&rm, sizeof(rm));
-	write(fd, &rm, sizeof(rm));
+	(void)italk_add_checksum((char *)&rm, sizeof(rm));
+	(void)write(fd, &rm, sizeof(rm));
 	for (i = 0; i < 5; i++){
-		n = write(fd, resetstr, sizeof(resetstr));
-		tcdrain(fd);
-		usleep(1000);
+	        (void)write(fd, resetstr, sizeof(resetstr));
+		(void)tcdrain(fd);
+		(void)usleep(1000);
 	}
 	/* XXX This is Evil. it will go away when I get reset working */
-	read(fd, buf, BUFSIZ);
+	(void)read(fd, buf, BUFSIZ);
 	for(n = 0; n < BUFSIZ; n++){
 		if (0 == n%16)
-			printf("\n%04x   ", n);
-		printf("%02x ", buf[n]&0xff);
+		    printf("\n%04x   ", (unsigned int)n);
+		printf("%02x ", (unsigned int)(buf[n]&0xff));
 	}
 	printf("\n");
 }
@@ -111,7 +114,8 @@ void
 italk_add_checksum(char *buf, size_t len){
 	volatile unsigned long tmp = 0;
 	volatile unsigned short sum = 0 , w = 0, *sp;
-	int k, n;
+	/* +ignoresigns */
+	unsigned char k, n;
 /*
  * XXX this checksum routine is silly. fix it.
  * ntohs and htons are my friends
@@ -128,6 +132,7 @@ italk_add_checksum(char *buf, size_t len){
 		sum ^= ((tmp >> 16) ^ tmp);
 	}
 	buf[len-3] = sum;
+	/* -ignoresigns */
 }
 
 void

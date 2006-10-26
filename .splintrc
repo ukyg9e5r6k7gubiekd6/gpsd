@@ -20,6 +20,7 @@
 -Du_int64_t=ulong
 -Din_addr_t=int
 -Dcaddr_t=short
+-Disgps30bits_t=uint
 -DFD_SETSIZE=31
 -DB57600=010001
 -DB115200=0010011

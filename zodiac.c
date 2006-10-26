@@ -413,6 +413,7 @@ struct gps_type_t zodiac_binary =
     .typename       = "Zodiac binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
+    .wakeup         = NULL,		/* no probe on baud rate change */
     .probe          = NULL,		/* no probe */
     .initializer    = NULL,		/* no initialization */
     .get_packet     = packet_get,	/* use the generic packet getter */

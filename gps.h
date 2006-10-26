@@ -96,12 +96,14 @@ struct gps_fix_t {
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
 #define MAXHEALTH	(RTCM_WORDS_MAX-2)	
 
+#ifndef S_SPLINT_S 
 /*
  * A nominally 30-bit word (24 bits of data, 6 bits of parity)
  * used both in the GPS downlink protocol described in IS-GPS-200
  * and in the format for DGPS corrections used in RTCM-104.
  */
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
+#endif /* S_SPLINT_S */
 
 struct rtcm_t {
     /* header contents */

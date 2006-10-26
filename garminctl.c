@@ -19,6 +19,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 /* gross - globals */
 static struct termios ttyset;
@@ -29,11 +30,11 @@ static int debug_level = 0;
 #define GARMIN_PACKET	1
 #define NMEA_PACKET	2
 
-void logit(int , char *, ...);
-void nmea_add_checksum(char *);
-int nmea_send(int , const char *, ... );
+static void logit(int , char *, ...);
+static void nmea_add_checksum(char *);
+static int nmea_send(int , const char *, ... );
 #ifndef HAVE_STRLCAT
-     size_t strlcat(char *dst, const char *src, size_t size);
+static size_t strlcat(char *dst, const char *src, size_t size);
 #endif
 
 /* how many characters to look at when trying to find baud rate lock */
@@ -138,7 +139,7 @@ static int set_speed( int fd,unsigned int speed)
 {
     unsigned int	rate, count, state;
     int st;
-    unsigned char	c;
+    char	c;
 
     (void)tcflush(fd, TCIOFLUSH);	/* toss stale data */
 
@@ -270,9 +271,10 @@ static int set_speed( int fd,unsigned int speed)
 static unsigned int *ip, rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 
 /* return speed found */
-static unsigned int hunt_open(int fd, int *st)
+/*@ -mustdefine @*/
+static unsigned int hunt_open(int fd, /*@out@*/int *st)
 {
-    int speed;
+    unsigned int speed;
     /*
      * Tip from Chris Kuethe: the FTDI chip used in the Trip-Nav
      * 200 (and possibly other USB GPSes) gets completely hosed
@@ -296,8 +298,9 @@ static unsigned int hunt_open(int fd, int *st)
     }
     return 0;
 }
+/*@ +mustdefine @*/
 
-static void serial_initialize(char *device, int *fd, int *st)
+static void serial_initialize(const char *device, /*@out@*/int *fd, /*@out@*/int *st)
 {
     if ( (*fd = open(device,O_RDWR)) < 0) {
 	perror(device);
@@ -359,6 +362,17 @@ int nmea_send(int fd, const char *fmt, ... )
     }
 }
 
+static void settle(void)
+{
+    struct timespec delay, rem;
+    /*@ -type -unrecog @*/
+    memset( &delay, 0, sizeof(delay));
+    delay.tv_sec = 0;
+    delay.tv_nsec = 333000000L;
+    nanosleep(&delay, &rem);
+    /*@ +type +unrecog @*/
+}
+
 static void usage(void) {
 	fprintf(stderr, "Usage: garminctl [OPTIONS] {serial-port}\n\n"
 	        "SVN ID: $Id$ \n"
@@ -373,16 +387,16 @@ static void usage(void) {
 
 int main( int argc, char **argv)
 {
-	struct timespec delay, rem;
-	int fd;
+	int fd = 0;
 	int st;    /* packet type detected */
 	int status;
 	char *buf;
 	int option;
-	int to_nmea = 0;
-	int to_binary = 0;
+	bool to_nmea = false;
+	bool to_binary = false;
 	char *device = "";
 
+	/*@ -branchstate @*/
 	while ((option = getopt(argc, argv, "?hbnVD:")) != -1) {
 		switch (option) {
 		case 'D':
@@ -390,11 +404,11 @@ int main( int argc, char **argv)
 			break;
 		case 'n':
 			// go to NMEA mode
-			to_nmea = 1;
+			to_nmea = true;
 			break;
 		case 'b':
 			// go to Binary mode
-			to_binary = 1;
+			to_binary = true;
 			break;
 		case 'V':
 	                (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
@@ -410,7 +424,7 @@ int main( int argc, char **argv)
 	if (optind < argc) {
 		device = argv[optind];
 	}
-	if ( !device || !strlen(device) ) {
+	if ( !device || strlen(device)==0 ) {
 		logit(0, "ERROR: missing device name\n");
 		usage();
 		exit(1);
@@ -421,7 +435,7 @@ int main( int argc, char **argv)
 		usage();
 		exit(1);
 	}
-
+	/*@ +branchstate @*/
 
 	serial_initialize(device, &fd, &st);
 
@@ -440,23 +454,14 @@ int main( int argc, char **argv)
 			logit(0, "=> GPS: FAILED\n");
 			return 1;
 		}
-		// wait 33mS, essential!
-		memset( &delay, 0, sizeof(delay));
-		delay.tv_sec = 0;
-		delay.tv_nsec = 33300000L;
-		nanosleep(&delay, &rem);
+		settle(); // wait 33mS, essential!
 
 		/* once a sec, no binary, no averaging, NMEA 2.3, WAAS */
 		
-		nmea_send(fd, "$PGRMC1,1,1");
-		//nmea_send(fd, "$PGRMC1,1,1,1,,,,2,W,N");
-		nmea_send(fd, "$PGRMI,,,,,,,R");
-		// wait 333mS, essential!
-		// then figure out the new speed.
-		memset( &delay, 0, sizeof(delay));
-		delay.tv_sec = 0;
-		delay.tv_nsec = 333000000L;
-		nanosleep(&delay, &rem);
+		(void)nmea_send(fd, "$PGRMC1,1,1");
+		//(void)nmea_send(fd, "$PGRMC1,1,1,1,,,,2,W,N");
+		(void)nmea_send(fd, "$PGRMI,,,,,,,R");
+		settle();    // wait 333mS, essential!
 
 		if ( (bps = hunt_open(fd, &st))==0) {
 			logit(0, "Can't sync up with device!\n");
@@ -465,17 +470,11 @@ int main( int argc, char **argv)
 	} else if ( to_binary && st == GARMIN_PACKET ) {
 		logit(0, "GPS already in GARMIN mode\n");
 	} else if ( to_binary ) {
-		nmea_send(fd, "$PGRMC1,1,2,1,,,,2,W,N");
-		nmea_send(fd, "$PGRMI,,,,,,,R");
+		(void)nmea_send(fd, "$PGRMC1,1,2,1,,,,2,W,N");
+		(void)nmea_send(fd, "$PGRMI,,,,,,,R");
 		// garmin serial binary is 9600 only!
 		logit(0, "NOTE: Garmin binary is 9600 baud only!\n");
-		// wait 333mS, essential!
-		// then figure out the new speed.
-		memset( &delay, 0, sizeof(delay));
-		delay.tv_sec = 0;
-		delay.tv_nsec = 333000000L;
-		nanosleep(&delay, &rem);
-
+		settle();	// wait 333mS, essential!
 		if ( (bps = hunt_open(fd, &st))==0) {
 			logit(0, "Can't sync up with device!\n");
 			exit(1);

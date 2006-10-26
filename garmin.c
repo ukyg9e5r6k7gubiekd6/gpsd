@@ -245,7 +245,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 
     switch( pkt_id ) {
     case GARMIN_PKTID_L001_COMMAND_DATA:
-	prod_id = get_uint16(buf);
+	prod_id = get_uint16((uint8_t *)buf);
+	/*@ -branchstate @*/
 	switch ( prod_id ) {
 	case CMND_ABORT:
 	    msg = "Abort current xfer";
@@ -265,14 +266,15 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    msg = msg_buf;
 	    break;
 	}
+	/*@ +branchstate @*/
 	gpsd_report(3, "Appl, Command Data: %s\n", msg);
 	break;
     case GARMIN_PKTID_PRODUCT_RQST:
 	gpsd_report(3, "Appl, Product Data req\n");
 	break;
     case GARMIN_PKTID_PRODUCT_DATA:
-	prod_id = get_uint16(buf);
-	ver = get_uint16(&buf[2]);
+	prod_id = get_uint16((uint8_t *)buf);
+	ver = get_uint16((uint8_t *)&buf[2]);
 	maj_ver = (int)(ver / 100);
 	min_ver = (int)(ver - (maj_ver * 100));
 	gpsd_report(3, "Appl, Product Data, sz: %d\n", pkt_len);
@@ -432,7 +434,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	// after a GARMIN_PKTID_PRODUCT_RQST 
 	gpsd_report(3, "Appl, Product Capability, sz: %d\n", pkt_len);
 	for ( i = 0; i < pkt_len ; i += 3 ) {
-	    gpsd_report(3, "  %c%03d\n", buf[i], get_uint16( &buf[i+1] ) );
+	    gpsd_report(3, "  %c%03d\n", buf[i], get_uint16((uint8_t *)&buf[i+1] ) );
 	}
 	break;
     default:
@@ -492,9 +494,10 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t *pkt)
     case GARMIN_LAYERID_APPL:
         /* raw data transport, shared with Garmin Serial Driver */
 
-        mask = PrintSERPacket(session, (unsigned char)pkt->mPacketId
-		,  (int)mDataSize, pkt->mData.uchars );
-
+        mask = PrintSERPacket(session, 
+			      (unsigned char)pkt->mPacketId,  
+			      (int)mDataSize, 
+			      (unsigned char *)pkt->mData.uchars);
 	break;
     case 75:
 	// private, garmin USB kernel driver specific
@@ -545,7 +548,7 @@ static void Build_Send_Packet( struct gps_device_t *session,
         uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	ssize_t theBytesReturned = 0;
-	ssize_t theBytesToWrite = 12 + length;
+	ssize_t theBytesToWrite = 12 + (ssize_t)length;
 
 	set_int32(buffer, layer_id);
 	set_int32(buffer+4, pkt_id);
@@ -563,7 +566,7 @@ static void Build_Send_Packet( struct gps_device_t *session,
         (void)PrintUSBPacket ( session,  thePacket);
 
 	theBytesReturned = write( session->gpsdata.gps_fd
-		    , thePacket, theBytesToWrite);
+				  , thePacket, (size_t)theBytesToWrite);
 	gpsd_report(4, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
 	// Garmin says:
@@ -617,6 +620,7 @@ static int GetPacket (struct gps_device_t *session )
 //    continue;
 
     for( cnt = 0 ; cnt < 10 ; cnt++ ) {
+	size_t pkt_size;
 	// Read async data until the driver returns less than the
 	// max async data size, which signifies the end of a packet
 
@@ -648,7 +652,7 @@ static int GetPacket (struct gps_device_t *session )
 	    session->driver.garmin.BufferLen = 0;
 	    break;
 	}
-	size_t pkt_size = 12 + get_int32((uint8_t*)&thePacket->mDataSize);
+	pkt_size = 12 + get_int32((uint8_t*)&thePacket->mDataSize);
 	if ( 12 <= session->driver.garmin.BufferLen) {
 	    // have enough data to check packet size
 	    if ( session->driver.garmin.BufferLen > pkt_size) {
@@ -997,7 +1001,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     data_index = 0;
     for ( i = 0; i < 256 ; i++ ) {
 
-	if ( pkt_len == data_index )  {
+	if ( (int)pkt_len == data_index )  {
 		// got it all
 		break;
 	}
@@ -1052,6 +1056,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     }
 
     /* debug */
+    /*@ -usedef -compdef @*/
     for ( i = 0 ; i < data_index ; i++ ) {
 	gpsd_report(6, "Char: %#02x\n", data_buf[i]);
     }
@@ -1061,6 +1066,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
         , pkt_id, pkt_len, chksum);
 
     mask = PrintSERPacket(session, pkt_id, pkt_len, data_buf);
+    /*@ +usedef +compdef @*/
     return mask;
 }
 /*@ -charint @*/
