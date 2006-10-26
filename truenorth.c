@@ -16,11 +16,16 @@
 /*
  * The True North compass won't start talking unless you ask it to. To
  * wake it up, we query for its ID string just after each speed change
- * in the autobaud hunt.  Then we send codes to start the flow of data.
+ * in the autobaud hunt.  The initializer will send it codes to start 
+ * the flow of data.
  */
 static void tnt_wakeup(struct gps_device_t *session)
 {
     (void)nmea_send(session->gpsdata.gps_fd, "@X?");
+}
+
+static void tnt_initializer(struct gps_device_t *session)
+{
     //nmea_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
     //nmea_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
     /*
@@ -38,7 +43,7 @@ struct gps_type_t trueNorth = {
     .channels       = 0,		/* not an actual GPS at all */
     .wakeup         = tnt_wakeup,	/* wakeup by sending ID query */
     .probe          = NULL,		/* no probe */
-    .initializer    = NULL,		/* no initializer */
+    .initializer    = tnt_initializer,	/* no initializer */
     .get_packet     = packet_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,	        /* Don't send */

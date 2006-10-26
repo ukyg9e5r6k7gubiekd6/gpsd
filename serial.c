@@ -158,6 +158,21 @@ void gpsd_set_speed(struct gps_device_t *session,
     session->gpsdata.baudrate = (unsigned int)speed;
     session->gpsdata.parity = (unsigned int)parity;
     session->gpsdata.stopbits = stopbits;
+
+    /*
+     * The device might need a wakeup string before it will send data.
+     * If we don't know the device type, ship it every driver's wakeup
+     * in hopes it will respond.
+     */
+    if (isatty(session->gpsdata.gps_fd)!=0) {
+	struct gps_type_t **dp;
+	if (session->device_type == NULL)
+	    session->device_type->wakeup(session);
+	else
+	    for (dp = gpsd_drivers; *dp; dp++)
+		if ((*dp)->wakeup != NULL)
+		    (*dp)->wakeup(session);
+    }
     packet_reset(session);
 }
 
@@ -223,8 +238,6 @@ int gpsd_open(struct gps_device_t *session)
 	session->baudindex = 0;
 	gpsd_set_speed(session, 
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
-	if (session->device_type->wakeup != NULL)
-	    session->device_type->wakeup(session);
     }
     return session->gpsdata.gps_fd;
 }
@@ -271,8 +284,6 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	gpsd_set_speed(session, 
 		       rates[session->baudindex],
 		       'N', session->gpsdata.stopbits);
-	if (session->device_type->wakeup != NULL)
-	    session->device_type->wakeup(session);
     }
 
     return true;	/* keep hunting */
