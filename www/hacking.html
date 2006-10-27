@@ -102,6 +102,8 @@ source distribution.</p>
 <li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
 <li><a href="#libusb">Using libusb to do USB device discovery</a></li>
 <li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
+<li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
+<li><a href="#subsecond">Subsecond polling</a></li>
 </ol>
 </ol>
 
@@ -632,13 +634,6 @@ interface, the old-style /etc/hotplug version with usermap files.</p>
 time soon, because it's supporting a bunch of popular USB cameras.
 Still, it would be nice not to be using a deprecated interface.</p>
 
-<p>I tried moving to the new-style /etc/hotplug.d interface, but I ran
-into a nasty race condition.  My hotplug agent got woken up on a USB
-add event as it should, but in the new interface the creation of
-/dev/ttyUSB* can be delayed arbitrarily long after the wakeup event.
-Thus, it may not be there when gpsd goes to probe it unless I
-busy-wait in the script.</p>
-
 <p>There is experimental udev support in the distribution now.  Someday
 this will replace the hotplug stuff.</p>
 
@@ -1168,6 +1163,56 @@ jitter.</p>
 expert, reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.</p>
+
+<h2 id="tai-utc">Stop using a compiled-in UTC-TAI offset</h2>
+
+<p>Instead, from the hotplug script, we could maintain a local offset file:</p>
+
+<ol>
+<li>If there is no local offset file, download the current leap-second
+offset from <a href='http://hpiers.obspm.fr/iers/bul/bulc/'>IERS</a>
+or <a href="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">the U.S. Naval
+Observatory</a> and copy it to a local offset file</li>
+
+<li>If there is a local offset file, consider it stale after five
+months and reload it.</li>
+
+<li>gpsd should read the local offset file when it starts up, if
+it exists.</li>
+</ol>
+
+<p>However, it turns out this is only an issue for EverMore chips.  SiRF GPSes
+can get the offset from the PPS or subframe data; NMEA GPSes don't
+need it; and the other binary protocols supply it.  Looks like
+it's not worth doing.</p>
+
+<h2 id='subsecond'>Subsecond polling</h2>
+
+<p>gpsd relies on the GPS to periodically send PVT reports to it.  A
+few GPSes have he capability to change their cycle time so they can
+ship reports more often (gpsd 'c' command). These all send in some
+vendor-binary format; no NMEA GPS I've ever seen allows you to set a
+cycle time of less than a second, if only because at 4800bps, a full
+PVT report takes just under one second in NMEA.</p>
+
+<p>But most GPSes send PVT reports once a second. At 50km/h (31mi/h)
+that's 13.8 meters change in position between updates, about the same
+as the uncertainty of position under typical conditions.</p>
+
+<p>There is, however, a way to sample some GPSes at higher frequency.  SiRF
+chips, and some others, allow you to shut down periodic notifications
+and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
+a second, and a SiRF one maybe 18 times a second.</p>
+
+<p>Alas, Chris Kuethe reports: "At least on the SiRF 2 and 3 receivers
+I have, you get one fix per second. I cooked up a test harness to
+disable as many periodic messages as possible and then poll as quickly
+as possible, and the receiver would not kick out more than one fix per
+second. Foo!"</p>
+
+<p>So subsecond polling would be a blind alley for all SiRF devices
+and all NMEA devices. That's well over 90% of cases and renders it
+not worh doing.</p>
 </div>
 <hr/>
 <script language="JavaScript" src="datestamp.js" type='text/javascript'></script>

@@ -80,6 +80,14 @@ binutils 2.16.1 or later avoids it.
 
 ** To do:
 
+*** Integrate udev support in the RPM installation
+
+Currently gpsd includes udev support that seems to work in the source
+build, but the RPM still installs the old-style hotplug support.
+Fixing this is not urgent, as the old-style support will likely
+be retained for compatibility for a long time, but it should
+get done someday.
+
 *** SiRF firmware uploader
 
 Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 
@@ -156,8 +164,8 @@ an elevation test.
 
 *** iTalk support
 
-There's a iTalk driver, but it's an experiment written from the spec
-that hasn't been tested.  It'd not compiled in by default.
+There's an iTalk driver, but it's an experiment written from the spec
+that hasn't been tested.  It's not compiled in by default.
 
 *** Audio cues in the client when the fix status changes
 
@@ -180,55 +188,6 @@ This is a good idea for supporting hands-free operation, e.g. while driving.
 
 It would be an easy first project for somebody who wants to get into
 the client code.
-
-*** Subsecond polling
-
-gpsd relies on the GPS to periodically send PVT reports to it.
-
-Most GPSes send PVT reports once a second.  No NMEA GPS I've ever seen
-allows you to set a cycle time of less than a second.  This is because
-at 4800bps, a full PVT report takes just under one second in NMEA.
-
-At 50km/h (31mi/h) that's 13.8 meters change in position between
-updates, about the same as the uncertainty of position under typical
-conditions.
-
-There is, however, a way to sample GPSes at higher frequency.  SiRF
-chips, and some others, allow you to shut down periodic notifications
-and poll them for PVT.  At 57600bps we could poll a NMEA GPS 16 times
-a second, and a SiRF one maybe 18 times a second.
-
-Is this worth doing?  Maybe.  It would reduce fix latency, possibly
-to good effect if your GPS is in motion.  Opinions?  Calculations?
-
-Gary Miller reports that the Garmin GPS 18 LVC-5m and the GPS 18-5Hz
-both report 5 times a second, but he doesn't have either to test.
-
-Alas, Chris Kuethe reports:
->At least on the SiRF 2 and 3 receivers I have, you get one fix per
->second. I cooked up a test harness to disable as many periodic
->messages as possible and then poll as quickly as possible, and the
->receiver would not kick out more than one fix per second. Foo!
-
-*** Stop using a compiled-in UTC-TAI offset
-
-Instead, from the hotplug script, we could maintain a local offset file:
-
-1. If there is no local offset file, download the current leap-second
-offset from <http://hpiers.obspm.fr/iers/bul/bulc/> or
-<ftp://maia.usno.navy.mil/ser7/tai-utc.dat> and copy it to a
-local offset file
-
-2. If there is a local offset file, consider it stale after five
-months and reload it.
-
-3. gpsd should read the local offset file when it starts up, if
-it exists.
-
-However, it turns out this is only an issue for EverMore chips.  SiRF GPSes
-can get the offset from the PPS or subframe data; NMEA GPSes don't
-need it; and the other binary protocols supply it.  Looks like
-it's not worth doing.
 
 *** Set the system time zone from latitude/longitude
 
