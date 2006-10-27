@@ -3,9 +3,12 @@
  * bits.h - extract binary data from message buffer
  *
  * These macros extract bytes, words, longwords, floats or doubles from
- * a message that contains these items in MSB-first byte order.
- * By defining the GET_ORIGIN and PUT_ORIGIN macros, it's possible to
- * change the origin of the indexing.
+ * a message that contains these items in either MSB-first or LSB-first 
+ * byte order.  To specify which, define one of LITTLE_ENDIAN_PROTOCOL
+ * or BIG_ENDIAN_PROTOCOL before including this header.
+ * 
+ * By defining the GET_ORIGIN and PUT_ORIGIN macros before including
+ * this header, it's possible to change the origin of the indexing.
  *
  * Assumptions:
  *  char is 8 bits, short is 16 bits, int is 32 bits, long long is 64 bits,
