@@ -888,11 +888,11 @@ associated error estimates for all seven degrees of freedom.  This is
 what the O message in GPSD protocol attempts to deliver.</p>
 
 <p>If GPS hardware were ideally designed, we'd get exactly one report
-like this per cycle from our device. That's what we get from SiRF-II
-protocol (all PVT data is in packet type 02), with the Zodiac protocol
-(all PVT data is in the type 1000 packet), and from Garmin's
-binary-packet protocol.  These, together, account for a share of the
-GPS market that is 80% and rising in 2006.</p>
+like this per cycle from our device. That's what we get from the SiRF
+(packet type 02), Zodiac (packet type 1000), Garmin Binary, and iTalk
+(NAV_FIX message) protocols. Garmin and Trimble also implement full
+PVT solutions in a single line of text. These, together, account for
+a share of the GPS market that is 80% and rising in 2006.</p>
 
 <p>Unfortunately, many GPSes actually deliver their PVT reports as a
 collection of sentences in NMEA 0183 (or as packets in a vendor binary
@@ -1150,7 +1150,7 @@ dependency that gpsd doesn't now have, and bring more complexity on
 board than is probably desirable.</p>
 
 <p>We've chosen instead to rely on the local hotplug system.  That way
-gosd can concentrate solely on knowing about GPSes.</p>
+gpsd can concentrate solely on knowing about GPSes.</p>
 
 <h2 id="fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</h2>
 
