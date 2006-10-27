@@ -200,6 +200,10 @@ standard output.</dd>
 with some technical information.  We also have <a href='NMEA.txt'>a
 list of NMEA sentences</a>.</p>
 
+<p>There is a <a href="hacking.html">Hacker's Guide</a> to the project
+philosophy, design, and code internals.  You should read this if you
+want to contribute code.</p>
+
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
