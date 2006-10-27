@@ -24,19 +24,6 @@ GPSD.  David sent ESR one of these, it's somewhere in his piles of
 stuff, testing will get done when it surfaces.  More on the Sandpiper
 at <http://www.allsurplus.net/Axiom/>.
 
-*** True North support confuses track with heading
-
-Robin Darroch has pointed out that the support for the True North
-compass device confuses track (course over ground) with heading.
-This should probably be fixed.  However, the TNT code was sent 
-to us by a TNT user involved in the 2004 DARPA Grand Challenge 
-and therefore presumably meets actual production needs.  For
-this reason, and because separating track froom heading would 
-ripple through several places including gps.h and the client
-implementations, we're not going to try to fix this until we
-have a TNT device (or something else that makes the same
-distinction) to test with.
-
 ** Bugs exposed by gpsd in other software
 
 *** Distro-dependent problems with gpsd startup.
@@ -71,7 +58,8 @@ xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
 1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
 symptom is that the satellite-data window in xgps is too small.  Avoid
 by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
-stable version like 2.2.2.
+stable version like 2.2.2.  Note: OpenMotif is not shipped in Fedora
+Core 6 for licensing reasons.
 
 *** Linux pl2303 driver can lock up when device is read at an unexpected speed
 
