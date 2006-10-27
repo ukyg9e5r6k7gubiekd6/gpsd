@@ -167,12 +167,12 @@ void gpsd_set_speed(struct gps_device_t *session,
      */
     if (isatty(session->gpsdata.gps_fd)!=0) {
 	struct gps_type_t **dp;
-	if (session->device_type != NULL)
-	    session->device_type->wakeup(session);
-	else
+	if (session->device_type == NULL) {
 	    for (dp = gpsd_drivers; *dp; dp++)
 		if ((*dp)->wakeup != NULL)
 		    (*dp)->wakeup(session);
+	} else if (session->device_type->wakeup != NULL)
+	    session->device_type->wakeup(session);
     }
     packet_reset(session);
 }

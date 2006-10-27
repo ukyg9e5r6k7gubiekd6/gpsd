@@ -58,9 +58,9 @@ xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
 1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
 symptom is that the satellite-data window in xgps is too small.  Avoid
 by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
-stable version like 2.2.2.  Note: OpenMotif is not shipped in Fedora
-Core 6 for licensing reasons, but lesstif is.  For gpsd's purposes,
-lesstif is a drop-in replacement.  
+stable version like 2.2.2.  Alternatively, remove OpenMotif and
+install lesstif. For gpsd's purposes, lesstif is a completely
+compatible drop-in replacement.
 
 *** Linux pl2303 driver can lock up when device is read at an unexpected speed
 
