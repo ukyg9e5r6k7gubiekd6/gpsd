@@ -111,13 +111,20 @@ static void italk_initializer(struct gps_device_t *session)
 	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
 }
 
+static void italk_ping(struct gps_device_t *session)
+/* send a "ping". it may help us detect an itrax more quickly */
+{
+    char *ping = "<?>";
+    (void)italk_write(session->gpsdata.gps_fd, ping, 3);
+}
+
 /* this is everything we export */
 struct gps_type_t italk_binary =
 {
     .typename       = "iTalk binary",	/* full name of type */
     .trigger        = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
+    .wakeup         = italk_ping,	/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
     .initializer    = italk_initializer,/* initialize the device */
     .get_packet     = packet_get,	/* use generic packet grabber */
