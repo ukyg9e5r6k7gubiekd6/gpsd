@@ -42,7 +42,7 @@ You will need to have gpsd installed for it to work.
 %package -n gpsd-clients
 Summary: Clients for gpsd with an X interface.
 Group: Applications/System
-BuildRequires: openmotif-devel, libXaw-devel
+BuildRequires: lesstif-devel, libXaw-devel
 
 %description -n gpsd-clients
 xgps is a simple test client for gpsd with an X interface. It displays
@@ -149,7 +149,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get it 
   working with EarthMates again, this had been broken since 2.15.  Massive 
   string safety audit and OpenBSD port by Chris Kuethe.  J command added.
-  sirfmon renamed to sirfctl, itraxctl and garminctl added.
+  sirfctl, itraxctl and garminctl added.  Switched to lesstif from openmotif.
 
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.

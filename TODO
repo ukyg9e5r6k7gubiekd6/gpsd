@@ -59,7 +59,8 @@ xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
 symptom is that the satellite-data window in xgps is too small.  Avoid
 by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
 stable version like 2.2.2.  Note: OpenMotif is not shipped in Fedora
-Core 6 for licensing reasons.
+Core 6 for licensing reasons, but lesstif is.  For gpsd's purposes,
+lesstif is a drop-in replacement.  
 
 *** Linux pl2303 driver can lock up when device is read at an unexpected speed
 
@@ -78,14 +79,6 @@ being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
 binutils 2.16.1 or later avoids it.
 
 ** To do:
-
-*** Move to lesstif
-
-FC6 will be dropping openmotif for licensing reasons, per
-<http://fedoraproject.org/wiki/RexDieter/openmotif>. Presently xgps
-uses it.  The announcement claims lesstif is in Fedora Extras,
-but this appears not to be true -- at least, yum doesn't find it.
-When it is available, we must try to move.
 
 *** SiRF firmware uploader
 

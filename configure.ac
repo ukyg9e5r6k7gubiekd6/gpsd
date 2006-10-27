@@ -141,7 +141,7 @@ AC_CHECK_LIB(Xp, XpSelectInput,
 	AC_DEFINE([HAVE_XP],1,[Xp available]),,
 	${X_PRE_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
 dnl
-AC_CHECK_LIB(Xm, XmCreateOptionMenu, 
+AC_CHECK_LIB(Xm, XmInternAtom, 
 	XM_LIBS="-lXm"
 	AC_DEFINE([HAVE_MOTIF],1,[Motif available]),,
 	${X_PRE_LIBS} ${XP_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
