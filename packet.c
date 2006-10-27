@@ -461,7 +461,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
     case ITALK_LEADER_1:
-        if (c == '*')
+        if (c == '!')
 	    session->packet_state = ITALK_LEADER_2;
 	else
 	    session->packet_state = GROUND_STATE;
