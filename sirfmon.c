@@ -235,6 +235,7 @@ static void decode_sirf(unsigned char buf[], int len)
 {
     int i,j,ch,off,cn;
 
+    assert(mid27win != NULL);
     switch (buf[0])
     {
     case 0x02:		/* Measured Navigation Data */
@@ -1020,6 +1021,10 @@ int main (int argc, char **argv)
     mid19win  = newwin(17, 50,  7, 30);
     mid27win  = newwin(4,  50, 20, 30);
     cmdwin    = newwin(2,  30, 22, 0);
+    if (mid2win==NULL || mid4win==NULL || mid6win==NULL || mid9win==NULL
+	|| mid13win==NULL || mid19win==NULL || mid27win==NULL || cmdwin==NULL)
+	goto quit;
+
     debugwin  = newwin(0,   0, 24, 0);
     (void)scrollok(debugwin, true);
     (void)wsetscrreg(debugwin, 0, LINES-21);

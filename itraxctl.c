@@ -115,8 +115,8 @@ void
 italk_add_checksum(char *buf, size_t len){
 	volatile unsigned long tmp = 0;
 	volatile unsigned short sum = 0 , w = 0, *sp;
-	/* +ignoresigns */
-	unsigned char k, n;
+	/*@ +charint @*/
+	int k, n;
 /*
  * XXX this checksum routine is silly. fix it.
  * ntohs and htons are my friends
@@ -133,7 +133,7 @@ italk_add_checksum(char *buf, size_t len){
 		sum ^= ((tmp >> 16) ^ tmp);
 	}
 	buf[len-3] = sum;
-	/* -ignoresigns */
+	/*@ -charint @*/
 }
 
 void
@@ -147,19 +147,19 @@ itrax_protocol_droid(int fd, struct termios *term, struct portconf *conf){
 
 	if (conf->cur_proto == PROTO_ITALK){
 		int s, p;
-		itrax_reset(fd); /* should put the receiver into nmea */
-		sleep(1);
-		itrax_probe(fd, term, &s, &p);
+		(void)itrax_reset(fd); /* should put the receiver into nmea */
+		(void)sleep(1);
+		(void)itrax_probe(fd, term, &s, &p);
 	}
 
-	snprintf(buf, BUFSIZ, "$PFST,%s,,%u",
+	(void)snprintf(buf, BUFSIZ, "$PFST,%s,,%u",
 	    (conf->new_proto == PROTO_NMEA)? "NMEA" : "ITALK",
 	    conf->new_speed);
 
 	for(i = 0; i < 5; i++){
-		tcflush(fd, TCIOFLUSH);
-		nmea_send(fd, buf);
-		usleep(10000);
+		(void)tcflush(fd, TCIOFLUSH);
+		(void)nmea_send(fd, buf);
+		(void)usleep(10000);
 	}
 }
 
@@ -170,7 +170,7 @@ itrax_protocol_droid(int fd, struct termios *term, struct portconf *conf){
  * already set up correctly for further communication with the receiver.
  */
 int
-itrax_probe(int fd, struct termios *term, int *speed, int *proto) {
+itrax_probe(int fd, struct termios *term, /*@out@*/int *speed, /*@out@*/int *proto) {
 	int i, j, k, n;
 	int speeds[9] =
 		{4800, 9600, 14400, 28800, 38400, 57600, 115200, 230400, 0};
@@ -185,12 +185,12 @@ itrax_probe(int fd, struct termios *term, int *speed, int *proto) {
 		*speed = speeds[i];
 		pfd[0].fd = fd;
 		pfd[0].events = POLLIN;
-probe:		tcflush(fd, TCIOFLUSH);
+probe:		(void)tcflush(fd, TCIOFLUSH);
 		bzero(buf, READLEN);
-		write(fd, probe, 5);
-		tcdrain(fd);
-		write(fd, probe, 5);
-		usleep(1000);
+		(void)write(fd, probe, 5);
+		(void)tcdrain(fd);
+		(void)write(fd, probe, 5);
+		(void)usleep(1000);
 		if ((n = poll(pfd, 1, -1)) > 0){
 			n = read(fd, buf, READLEN);
 			for (j = 0; j < READLEN-3; j++){
@@ -221,8 +221,8 @@ serialConfig(int pfd, struct termios *term, int speed){
 	int r = 0;
 
 	/* get the current terminal settings */
-	tcgetattr(pfd, term);
-	cfmakeraw(term);
+	(void)tcgetattr(pfd, term);
+	(void)cfmakeraw(term);
 	term->c_cflag |= (CLOCAL | CREAD);
 	term->c_cflag &=~ (PARENB | CRTSCTS);
 	term->c_iflag = term->c_oflag = term->c_lflag = (tcflag_t) 0;
@@ -236,12 +236,12 @@ serialConfig(int pfd, struct termios *term, int speed){
 	while (((rv = tcsetattr(pfd, TCSADRAIN, term)) == -1) &&
 	    (errno == EINTR) && (r < 3)) {
 		/* retry up to 3 times on EINTR */
-		usleep(1000);
+		(void)usleep(1000);
 		r++;
 	}
 
 	if(rv == -1){
-		printf("serialConfig failed: %s\n", strerror(errno));
+	    (void)printf("serialConfig failed: %s\n", strerror(errno));
 		return -1;
 	}
 	
@@ -303,13 +303,13 @@ serialSpeed(int pfd, struct termios *term, int speed){
 	}
 
 	/* set UART speed */
-	tcgetattr(pfd, term);
-	cfsetispeed(term, speed);
-	cfsetospeed(term, speed);
+	(void)tcgetattr(pfd, term);
+	(void)cfsetispeed(term, speed);
+	(void)cfsetospeed(term, speed);
 	while (((rv = tcsetattr(pfd, TCSADRAIN, term)) == -1) && \
 		(errno == EINTR) && (r < 3)) {
 		/* retry up to 3 times on EINTR */
-		usleep(1000);
+		(void)usleep(1000);
 		r++;
 	}
 
@@ -430,7 +430,7 @@ main(int argc, char **argv){
 		    (p ? "NMEA" : "iTalk"), s);
 	}
 	
-quit:	close(fd);
+quit:	(void)close(fd);
 	return 0;
 }
 
