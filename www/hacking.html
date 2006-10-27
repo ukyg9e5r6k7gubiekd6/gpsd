@@ -96,6 +96,11 @@ source distribution.</p>
 <li><a href="#noperfect">There is no perfect option</a></li>
 <li><a href="#interpolation">Combining buffering with interpolation: a speculative design</a></li>
 </ol>
+<li><a href="#designahead">Designing Ahead</a></li>
+<ol>
+<li><a href="#nonpvt">Non-PVT Data</a></li>
+<li><a href="#protov4">Design Sketch for Version 4 Protocol</a></li>
+</ol>
 <li><a href="#blindalleys">Blind alleys</a></li>
 <ol>
 <li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
@@ -1118,6 +1123,96 @@ onboard clock far more accurate than the GPS's once-per-second
 reports.  This is a problem; in general, we can't assume that 
 a gpsd instance running in a car or boat will have access to
 ntpd or NIST radio time signals.</p>
+
+<h1 id="designahead">Designing Ahead</h1>
+
+<p>This section is preliminary design sketches for things we are 
+likely to need to do in the future.</p>
+
+<h2 id="nonpvt">Non-PVT Data</h2>
+
+<p>There are <em>lots</em> of other things a sensor wedded to a GPS
+might report that don't fit the position-velocity-time model of the O
+report.  Depth of water.  Temperature of water.  Compass heading.
+Roll.  Pitch. Yaw.  We've already had requests to handle some of these
+for NMEA-emitting devices like magnetic compasses (which report
+heading via a proprietary TNTHTM sentence) and fish finders (which
+report water depth and temperature via NMEA DPT and MTW sentences).</p>
+
+<p>To cope with this, we could either:</p>
+
+<ol>
+<li>extend the O tuple to report non-PVT kinds of information, or</li>
+<li>define a new set of requests and responses for non-PVT data.</li>
+</ol>
+
+<p>The simplest way to attack this problem would be to just start adding
+fields to the O response for each new kind of data we get asked to
+handle.  The problem with this is that we could pile up fields forever
+and end up with a monstrously long report most of the fields of
+which are always '?' and some of which are the moral equivalent of 
+"count of the nose hairs on the nearest warthog".</p>
+
+<p>There's a slightly more civilized possibility.  We could add
+optional private-use fields to the O report, the semantics of which
+would be allowed to vary by device.  So, for example, the Humminbird
+would return water depth in the first private-use field, while the TNT
+would return heading.  Clients would have to know, based on the device
+type as revealed by I, how to interpret and label the data in the
+private-use fields.</p>
+
+<p>If we go for alternative (2), the first consequence is that we
+actually have to implement a Version 4 protocol.  The existing GPSD
+protocol is about out of namespace.</p>
+
+<h2 id="protov4">Design Sketch for Version 4 Protocol</h2>
+
+<p>There are almost no more letters left in the namespace of the GPSD
+ersion 3 protocol.  At time of writing in late 2006 we can have one
+more command, 'h', and that's it.  After that, extending the set 
+will require a new command/response syntax.</p>
+
+<p>Steps towards defining a new syntax have been taken.  The senior
+developers have agreed on a new protocol with a basic sentence syntax 
+something like this:
+
+<pre>
+&lt;request&gt; ::= &lt;introducer&gt; &lt;commands&gt; &lt;newline&gt;
+
+&lt;command&gt; ::= &lt;command-id&gt;:&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
+</pre>
+
+<p>Each request shall begin with an introducer chararacter.  This is
+given as '!' here but that could change.  The purpose of the
+introducer is to inform the command parser that extended commands
+follow.  Each request shall end with a newline indication, which 
+may consist of either LF or CR-LF.</p>
+
+<p>All requests shall be composed of US-ASCII characters and shall be
+no more than 78 characters in length, exclusive of the trailing
+newline. Each request may consist of one or more semicolon-terminated
+commands. </p>
+
+<p>Each command shall begin with a command identifier.  The command
+identifier shall begin with an alphabetic character and consist of
+alphanumeric characters.  It shall be followed by a colon. The 
+52 command identifiers consisting of a single alphabetic are
+reserved equivalents of the Version 3 commands.</p>
+
+<p>The colon may be followed by zero or more comma-separated
+arguments.  Arguments may contain any US-ASCII character other
+than the introducer character, the colon, the comma, the semicolon,
+or the hash '#' character (reserved for comments).  Trailing
+zero-length arguments will be ignored; thus, in particular,
+machine-generated requests may terminate the final argument 
+with a comma without confusing gpsd's parser.</p>
+
+<p>Responses shall have the same format as requests.  The response
+to a command shall have the same identifier as the command.  As an
+exception, commands may have multi-line responses in an SMTP-like
+format not yet decided; this is to retain the 78-character line
+limit while allowing the damon to pass back more data than can
+fit on a line.</p>
 
 <h1 id="blindalleys">Blind alleys</h1>
 
