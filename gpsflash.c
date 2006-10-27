@@ -16,6 +16,8 @@
 static char *progname;
 static int verbosity = 0;
 
+static bool srec_check(const char *data);
+
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
 {
@@ -519,6 +521,8 @@ main(int argc, char **argv){
 	 */
 	gpsd_report(1, "validating firmware\n");
 	if (srec_check(firmware)){
+	    (void)free(loader);
+	    (void)free(firmware);
 	    gpsd_report(0, "%s: corrupted firmware image\n", fname);
 	    return 1;
 	}
@@ -610,9 +614,9 @@ main(int argc, char **argv){
 	return 0;
 }
 
-bool
-srec_check(char *data){
-	unsigned int i, l, n, x, y, z;
+static bool
+srec_check(const char *data){
+	int i, l, n, x, y, z;
 	char buf[85];
 
 	l = 0;
@@ -625,7 +629,7 @@ srec_check(char *data){
 			return true;
 		}
 
-		n = strlen(buf);
+		n = (int)strlen(buf);
 		if ((n < 1) || (n > 80)){
 			gpsd_report(0, "firmware line %d invalid length %d\n", l, n);
 			return true;

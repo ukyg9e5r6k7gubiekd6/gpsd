@@ -60,6 +60,5 @@ int serialSpeed(int, struct termios *, int);
 int srecord_send(int pfd, char *fw, size_t len);
 int binary_send(int pfd, char *data, size_t ls);
 bool expect(int pfd, const char *str, size_t len, time_t timeout);
-bool srec_check(char *);
 
 #endif /* _GPSFLASH_H_ */
