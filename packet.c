@@ -66,6 +66,10 @@ enum {
 #include "packet_states.h"
 };
 
+#define DLE	0x10
+#define STX	0x02
+#define ETX	0x03
+
 static void nextstate(struct gps_device_t *session, unsigned char c)
 {
 #ifdef RTCM104_ENABLE
@@ -95,7 +99,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
-        if (c == 0x10) {
+        if (c == DLE) {
 	    session->packet_state = DLE_LEADER;
 	    break;
 	}
@@ -343,7 +347,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
-	if (c == 0x02)
+	if (c == STX)
 	    session->packet_state = EVERMORE_LEADER_2;
 	else
 #endif /* EVERMORE_ENABLE */
@@ -427,33 +431,33 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
     case EVERMORE_LEADER_1:
-	if (c == 0x02)
+	if (c == STX)
 	    session->packet_state = EVERMORE_LEADER_2;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case EVERMORE_LEADER_2:
 	session->packet_length = (size_t)c;
-	if (c == 0x10)
+	if (c == DLE)
 	    session->packet_state = EVERMORE_PAYLOAD_DLE;
 	else
 	    session->packet_state = EVERMORE_PAYLOAD;
 	break;
     case EVERMORE_PAYLOAD:
-	if (c == 0x10)
+	if (c == DLE)
 	    session->packet_state = EVERMORE_PAYLOAD_DLE;
 	else if (--session->packet_length == 0)
 	    session->packet_state = GROUND_STATE;
 	break;
     case EVERMORE_PAYLOAD_DLE:
         switch (c) {
-           case 0x10: session->packet_state = EVERMORE_PAYLOAD; break;
-           case 0x03: session->packet_state = EVERMORE_RECOGNIZED; break;
+           case DLE: session->packet_state = EVERMORE_PAYLOAD; break;
+           case ETX: session->packet_state = EVERMORE_RECOGNIZED; break;
            default: session->packet_state = GROUND_STATE;
         }
     break;
     case EVERMORE_RECOGNIZED:
-        if (c == 0x10)
+        if (c == DLE)
 	    session->packet_state = EVERMORE_LEADER_1;
 	else
 	    session->packet_state = GROUND_STATE;
@@ -507,16 +511,16 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case TSIP_PAYLOAD:
-	if (c == 0x10)
+	if (c == DLE)
 	    session->packet_state = TSIP_DLE;
 	break;
     case TSIP_DLE:
 	switch (c)
 	{
-	case 0x03:
+	case ETX:
 	    session->packet_state = TSIP_RECOGNIZED;
 	    break;
-	case 0x10:
+	case DLE:
 	    session->packet_state = TSIP_PAYLOAD;
 	    break;
 	default:
@@ -525,7 +529,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	}
 	break;
     case TSIP_RECOGNIZED:
-        if (c == 0x10)
+        if (c == DLE)
 	    /*
 	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
 	     * checksummed, so false positives are easy.  We might be
@@ -690,88 +694,100 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
             } else {
 		unsigned int pkt_id, ch, chksum, len;
 		size_t n;
-		bool ok = false;
-              
 #ifdef GARMIN_ENABLE
-	      n = 0;
-	      /*@ +charint */
-	      do {
-
-	         if (session->inbuffer[n++] != 0x10) break;
-	         pkt_id = session->inbuffer[n++]; /* packet ID */
-	         len = session->inbuffer[n++];
-		 chksum = len + pkt_id;
-	         if (len == 0x10) {
-		    if (session->inbuffer[n++] != 0x10) break;
-	         }
-	         for (; len > 0; len--) {
+		n = 0;
+		/*@ +charint */
+		if (session->inbuffer[n++] != DLE) 
+		    goto not_garmin;
+		pkt_id = session->inbuffer[n++]; /* packet ID */
+		len = session->inbuffer[n++];
+		chksum = len + pkt_id;
+		if (len == DLE) {
+		    if (session->inbuffer[n++] != DLE)
+			goto not_garmin;
+		}
+		for (; len > 0; len--) {
 		    chksum += session->inbuffer[n];
-		    if (session->inbuffer[n++] == 0x10) {
-		       if (session->inbuffer[n++] != 0x10) break;
+		    if (session->inbuffer[n++] == DLE) {
+			if (session->inbuffer[n++] != DLE)
+			    goto not_garmin;
 		    }
-	         }
-	         if (len > 0) break;
-		 /* check sum byte */
-	         ch = session->inbuffer[n++];
-	         chksum += ch;
-	         if (ch == 0x10) {
-		    if (session->inbuffer[n++] != 0x10) break;
-	         }
-	         if (session->inbuffer[n++] != 0x10) break;
-	         if (session->inbuffer[n++] != 0x03) break;
-	         chksum &= 0xff;
-
-	         if ( chksum) {
-		    gpsd_report(4, "Garmin checksum failed: %02x != 0\n"
-			  , chksum);
-		    break;
-	         } else {
-	            ok = true;
-		 }
-	      } while (0);
-	      /*@ +charint */
-
-	      /* Debug
-	      gpsd_report(4, "Garmin n= %#02x\n %s\n", n,
-			gpsd_hexdump( session->inbuffer, packetlen));
-              */
-	      if (ok)
-		 packet_accept(session, GARMIN_PACKET);
-	      else 
+		}
+		if (len > 0)
+		    goto not_garmin;
+		/* check sum byte */
+		ch = session->inbuffer[n++];
+		chksum += ch;
+		if (ch == DLE) {
+		    if (session->inbuffer[n++] != DLE)
+			goto not_garmin;
+		}
+		if (session->inbuffer[n++] != DLE)
+		    goto not_garmin;
+		if (session->inbuffer[n++] != ETX) 
+		    goto not_garmin;
+		/*@ +charint */
+		chksum &= 0xff;
+		if (chksum) {
+		    gpsd_report(4,"Garmin checksum failed: %02x!=0\n",chksum);
+		    goto not_garmin;
+		}
+		/* Debug
+		   gpsd_report(4, "Garmin n= %#02x\n %s\n", n,
+		   gpsd_hexdump(session->inbuffer, packetlen));
+		*/
+		packet_accept(session, GARMIN_PACKET);
+		packet_discard(session);
+		break;
+	    not_garmin:;
 #endif /* GARMIN_ENABLE */
-              {
-                 /* check for 3 common TSIP packet types:
-		  * 0x41, GPS time, data length 10
-		  * 0x42, Single Precision Fix, data length 16
-	          * 0x43, Velocity Fix, data length 20
-                  *
-                  * <DLE>[pkt id] [data] <DLE><ETX>
-                  */
-	         n = 0;
-	         /*@ +charint */
-	         do {
-	            if (session->inbuffer[n++] != 0x10) break;
-	            pkt_id = session->inbuffer[n++]; /* packet ID */
-		    if (( 0x41 > pkt_id) || ( 0x43 < pkt_id)) break;
-	            for ( len = 0; n < packetlen; len++ ) {
-		        if (session->inbuffer[n++] == 0x10) {
-		            if (session->inbuffer[n++] != 0x10) break;
-			}
+#ifdef TSIP_ENABLE
+		/* check for 3 common TSIP packet types:
+		 * 0x41, GPS time, data length 10
+		 * 0x42, Single Precision Fix, data length 16
+		 * 0x43, Velocity Fix, data length 20
+		 *
+		 * <DLE>[pkt id] [data] <DLE><ETX>
+		 */
+		n = 0;
+		/*@ +charint */
+		if (session->inbuffer[n++] != DLE)
+		    goto not_tsip;
+		pkt_id = session->inbuffer[n++]; /* packet ID */
+		if ((0x41 > pkt_id) || (0x43 < pkt_id))
+		    goto not_tsip;
+		for ( len = 0; n < packetlen; len++ ) {
+		    if (session->inbuffer[n++] == DLE) {
+			if (session->inbuffer[n++] != DLE)
+			    goto not_tsip;
 		    }
-                    /* look for terminating ETX */
-	            if (session->inbuffer[n++] != 0x03) break;
-		    /* Debug */
-	            gpsd_report(4, "TSIP n= %#02x, len= %#02x\n", n, len); 
-		    if ( ( 0x41 == pkt_id) && ( 0x10 == len ) ) ok = true;
-		    else if ( ( 0x42 == pkt_id) && ( 0x16 == len ) ) ok = true;
-		    else if ( ( 0x43 == pkt_id) && ( 0x20 == len ) ) ok = true;
-                 } while (0);
-	         if (ok)
-		     packet_accept(session, TSIP_PACKET);
-               }
+		}
+		/* look for terminating ETX */
+		if (session->inbuffer[n++] != ETX)
+		    goto not_tsip;
+		/* Debug */
+		gpsd_report(4, "TSIP n= %#02x, len= %#02x\n", n, len); 
+		if ((0x41 == pkt_id) && (DLE == len))
+		    /* pass */;
+		else if ((0x42 == pkt_id) && (0x16 == len ))
+		    /* pass */;
+		else if ((0x43 == pkt_id) && (0x20 == len))
+		    /* pass */;
+		else
+		    goto not_tsip;
+		packet_accept(session, TSIP_PACKET);
+		packet_discard(session);
+		break;
+	    not_tsip:
+		/*
+		 * More attempts to recognize ambiguous TSIP-like
+		 * packet types could go here.
+		 */
+		session->packet_state = GROUND_STATE;
+		packet_discard(session);
+		break;
 	    }
-	    packet_discard(session);
-            break;
+#endif /* TSIP_ENABLE */
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
 	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
@@ -794,46 +810,49 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 #ifdef EVERMORE_ENABLE
 	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
-	    bool ok = false;
-
 	    n = 0;
 	    /*@ +charint */
-	    do {
-	       if (session->inbuffer[n++] != 0x10) break;
-	       if (session->inbuffer[n++] != 0x02) break;
-	       len = session->inbuffer[n++];
-	       if (len == 0x10) {
-		  if (session->inbuffer[n++] != 0x10) break;
-	       }
-	       len -= 2;
-	       crc = 0;
-	       for (; len > 0; len--) {
-		  crc += session->inbuffer[n];
-		  if (session->inbuffer[n++] == 0x10) {
-		     if (session->inbuffer[n++] != 0x10) break;
-		  }
-	       }
-	       if (len > 0) break;
-	       checksum = session->inbuffer[n++];
-	       if (checksum == 0x10) {
-		  if (session->inbuffer[n++] != 0x10) break;
-	       }
-	       if (session->inbuffer[n++] != 0x10) break;
-	       if (session->inbuffer[n++] != 0x03) break;
-	       crc &= 0xff;
-
-	       if (crc != checksum) {
-		  gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", crc, checksum);
-		  break;
-	       }
-	       ok = true;
-	    } while (0);
+	    if (session->inbuffer[n++] != DLE) 
+		goto not_evermore;
+	    if (session->inbuffer[n++] != STX)
+		goto not_evermore;
+	    len = session->inbuffer[n++];
+	    if (len == DLE) {
+		if (session->inbuffer[n++] != DLE)
+		    goto not_evermore;
+	    }
+	    len -= 2;
+	    crc = 0;
+	    for (; len > 0; len--) {
+		crc += session->inbuffer[n];
+		if (session->inbuffer[n++] == DLE) {
+		    if (session->inbuffer[n++] != DLE)
+			goto not_evermore;
+		}
+	    }
+	    if (len > 0)
+		goto not_evermore;
+	    checksum = session->inbuffer[n++];
+	    if (checksum == DLE) {
+		if (session->inbuffer[n++] != DLE)
+		    goto not_evermore;
+	    }
+	    if (session->inbuffer[n++] != DLE)
+		goto not_evermore;
+	    if (session->inbuffer[n++] != ETX)
+		goto not_evermore;
+	    crc &= 0xff;
+	    if (crc != checksum) {
+		gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", 
+			    crc, checksum);
+		goto not_evermore;
+	    }
 	    /*@ +charint */
-
-	    if (ok)
-		packet_accept(session, EVERMORE_PACKET);
-	    else
-		session->packet_state = GROUND_STATE;
+	    packet_accept(session, EVERMORE_PACKET);
+	    packet_discard(session);
+	    break;
+	not_evermore:
+	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
 #endif /* EVERMORE_ENABLE */
