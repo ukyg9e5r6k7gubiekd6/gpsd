@@ -750,7 +750,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		 * <DLE>[pkt id] [data] <DLE><ETX>
 		 */
 		n = 0;
-		/*@ +charint */
+		/*@ +charint @*/
 		if (session->inbuffer[n++] != DLE)
 		    goto not_tsip;
 		pkt_id = session->inbuffer[n++]; /* packet ID */
@@ -767,6 +767,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    goto not_tsip;
 		/* Debug */
 		gpsd_report(4, "TSIP n= %#02x, len= %#02x\n", n, len); 
+		/*@ -ifempty */
 		if ((0x41 == pkt_id) && (DLE == len))
 		    /* pass */;
 		else if ((0x42 == pkt_id) && (0x16 == len ))
@@ -775,6 +776,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    /* pass */;
 		else
 		    goto not_tsip;
+		/*@ -charint +ifempty @*/
 		packet_accept(session, TSIP_PACKET);
 		packet_discard(session);
 		break;
