@@ -459,11 +459,11 @@ all the data you can get from a GPS.  Client commands mine that
 structure and ship reports up the socket to the client.  DGPS data is
 passed through, raw, to the GPS.</p>
 
-<p>The trickiest part of the code is the handling of input sources in gpsd.c 
-itself.  It had to tolerate clients connecting and disconnecting at random
-times, and the GPS being unplugged and replugged, without leaking file 
-descriptors; also arrange for the GPS to be open when and only when clients 
-are active.</p>
+<p>The trickiest part of the code is the handling of input sources in
+gpsd.c itself.  It had to tolerate clients connecting and
+disconnecting at random times, and the GPS being unplugged and
+replugged, without leaking file descriptors; also arrange for the GPS
+to be powered up when and only when clients are active.</p>
 
 <h2 id="autoconfiguration">Autoconfiguration</h2>
 
@@ -493,7 +493,7 @@ specified.  Presently, here's how the autoconfig works.</p>
 <li>If it finds a TSIP binary packet (led with 0x10=DLE), it
    switches to the TSIP driver.  We're done.</li>
 
-<li>If it finds n iTrax binary packet (led with &lt;* ), it
+<li>If it finds an iTrax binary packet (led with &lt;* ), it
    switches to the iTrax driver.  We're done.</li>
 
 <li>If it finds EARTHA, it selects the Earthmade driver, which then
@@ -516,8 +516,8 @@ specified.  Presently, here's how the autoconfig works.</p>
    to SiRF NMEA.</li>
 </ol>
 
-<li>The outcome is that we know exactly what we're looking at, without any
-driver-type or baud rate options.</li>
+<p>The outcome is that we know exactly what we're looking at, without any
+driver-type or baud rate options.</p>
 
 <h2 id="errors">Error modeling</h2>
 
@@ -821,8 +821,8 @@ using an error model.</p>
 <p>Here's a table that explains how to convert from various
 confidence interval units you might see in vendor documentation.</p>
 
-<table>
-<th><td>sqr(alpha)</td><td>Probability</td><td>Notation</td></th>
+<table border='1'>
+<tr><td>sqr(alpha)</td><td>Probability</td><td>Notation</td></tr>
 <tr><td>1.00      </td><td>39.4%      </td><td>1-sigma or standard ellipse</td></tr>
 <tr><td>1.18      </td><td>50.0%      </td><td>Circular Error Probable (CEP)</td></tr>
 <tr><td>1.414     </td><td>63.2%      </td><td>Distance RMS (DRMS)</td></tr>
@@ -857,7 +857,7 @@ a fix but is stationary, and a portion during which it is moving.</p>
 NMEA through per cycle than the time to transmit will allow.  Here
 are the maxima to use for computation:</p>
 
-<table>
+<table border='1'>
 <tr><td>GLL       </td><td>51</td></tr>
 <tr><td>GGA       </td><td>82</td></tr>
 <tr><td>VTG       </td><td>40</td></tr>
