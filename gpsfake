@@ -46,7 +46,7 @@ class Baton:
         return
 
 try:
-    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:o:pr:s:v")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:o:pr:s:v")
 except getopt.GetoptError, msg:
     print "gpsfake: " + str(msg)
     raise SystemExit, 1
@@ -59,6 +59,7 @@ speed = 4800
 linedump = False
 pipe = False
 singleshot = False
+flicker = False
 promptme = False
 init = "w+r+"
 doptions = ""
@@ -73,6 +74,11 @@ for (switch, val) in options:
         cycle = float(val)
     elif (switch == '-D'):
         doptions += " -D " + val
+    elif (switch == '-f'):	# Undocumented option for flicker checking
+        flicker = pipe = singleshot = True
+        port = fakeport
+        cycle = 0.05
+        init = "w+"
     elif (switch == '-g'):
         monitor = "xterm -e gdb -tui --args "
     elif (switch == '-i'):
@@ -87,7 +93,10 @@ for (switch, val) in options:
         pipe = True
         cycle = 0.05
     elif (switch == '-r'):
-        init = val
+        if flicker:
+            init += val
+        else:
+            init = val
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-v'):
@@ -104,7 +113,7 @@ def fakehook(linenumber, fakegps):
             return False
         if progress:
             baton.twirl('*\010')
-        else:
+        elif not singleshot:
             sys.stderr.write("gpsfake: log cycle begins.\n")
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
@@ -126,7 +135,20 @@ if progress:
 
 test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose)
 
-if pipe:
+def flickerdigest(line):
+    if line.startswith("GPSD,Y="):
+        return
+    elif line.startswith("GPSD,O="):
+        fields = line.split()
+        (sentence, time, mode) = (fields[0],fields[1],fields[14])
+        sentence=sentence[7:]
+        sys.stdout.write("sentence=%s, time=%s, mode=%s\n" % (sentence, time, mode))
+    else:
+        sys.stdout.write(line)
+
+if flicker:
+    test.reporter = flickerdigest
+elif pipe:
     test.reporter = sys.stdout.write
 
 try:
