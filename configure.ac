@@ -424,16 +424,16 @@ else
     AC_MSG_RESULT([no])
 fi
 
-dnl check for limited maximum client fd
-AC_ARG_ENABLE(max-client-fd,
-  AC_HELP_STRING([--enable-max-client-fd=nnn],
-                 [compile with limited maximum allowed client fd]),
-  [ac_maxclientfd=$enableval], [ac_maxclientfd=no])
-AC_MSG_CHECKING([for limited max client fd])
-if test x"$ac_maxclientfd" != "xno"; then
-    AC_MSG_RESULT([$ac_maxclientfd])
-	AC_DEFINE_UNQUOTED([LIMITED_MAX_CLIENT_FD], $ac_maxclientfd, [Limited maximum client fd])
-	LIMITED_MAX_CLIENT_FD="-DLIMITED_MAX_CLIENT_FD=$ac_maxclientfd"
+dnl check for limited maximum clients
+AC_ARG_ENABLE(max-clients,
+  AC_HELP_STRING([--enable-max-clients=nnn],
+                 [compile with limited maximum clients]),
+  [ac_maxclients=$enableval], [ac_maxclients=no])
+AC_MSG_CHECKING([for limited max clients])
+if test x"$ac_maxclients" != "xno"; then
+    AC_MSG_RESULT([$ac_maxclients])
+	AC_DEFINE_UNQUOTED([LIMITED_MAX_CLIENTS], $ac_maxclients, [Limited maximum clients])
+	LIMITED_MAX_CLIENTS="-DLIMITED_MAX_CLIENTS=$ac_maxclients"
 else
   AC_MSG_RESULT([no])
 fi
@@ -535,7 +535,7 @@ echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
 echo "Enable X11 support      : $ac_x"
 echo "Enable Python support   : $ac_python"
-echo "Limited max client fd   : $ac_maxclientfd"
+echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Squelch logging/hexdump : $ac_squelch"
