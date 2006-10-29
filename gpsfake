@@ -140,9 +140,10 @@ def flickerdigest(line):
         return
     elif line.startswith("GPSD,O="):
         fields = line.split()
-        (sentence, time, mode) = (fields[0],fields[1],fields[14])
+        (sentence, time, altitude, mode) = (fields[0],fields[1],fields[5],fields[14])
         sentence=sentence[7:]
-        sys.stdout.write("sentence=%s, time=%s, mode=%s\n" % (sentence, time, mode))
+        sys.stdout.write("sentence=%s, time=%s, altitude=%s, mode=%s\n" \
+                         % (sentence, time, altitude, mode))
     else:
         sys.stdout.write(line)
 
