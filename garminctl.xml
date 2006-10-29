@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>garminctl</refname>
-<refpurpose>Control the modes of a Garmin GPS</refpurpose>
+<refpurpose>control the modes of a Garmin GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -28,7 +28,7 @@
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>garminctl</application> switch a serial Garmin 
+<para><application>garminctl</application> can switch a serial Garmin 
 GPS to NMEA or Garmin Binary mode.  On exit it leaves the serial
 port set to the proper baud rate. </para>
 
@@ -108,11 +108,19 @@ seconds, kill the program and restart.</para>
 </para>
 </refsect1>
 
+<refsect1 id='note'><title>NOTE</title> 
+
+<para>There are plans to merge this program with other
+GPS-type-specific control utilities. Similar functionality will be
+available, but name and invocation optins may be different.</para>
+
+</refsect1>
+
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Gary E. Miller <email>gem@rellim.com</email>.
 This code is part of the gpsd toolset; there is a
-project page for <application>gpsd</application> <ulink
+project website for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para> </refsect1>
 
 </refentry>

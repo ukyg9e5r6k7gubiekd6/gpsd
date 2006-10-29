@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>itraxctl</refname>
-<refpurpose>Control the modes of an iTrax GPS</refpurpose>
+<refpurpose>control the modes of an iTrax GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -84,11 +84,18 @@ yet supported.</para>
 </para>
 </refsect1>
 
+<refsect1 id='note'><title>NOTE</title> 
+
+<para>There are plans to merge this program with other
+GPS-type-specific control utilities. Similar functionality will be
+available, but name and invocation optins may be different.</para>
+
+</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Chris Kuethe <email>chris.kuethe@gmail.com</email>.
 This code is part of the gpsd toolset; there is a
-project page for <application>gpsd</application> <ulink
+project website for <application>gpsd</application> <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para> </refsect1>
 
 </refentry>
