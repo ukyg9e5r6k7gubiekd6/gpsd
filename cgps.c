@@ -39,13 +39,6 @@
 #include "gpsd_config.h"
 #include "gps.h"
 
-/* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
-#else /* not __GNUC__ */
-#  define UNUSED
-#endif
-
 static struct gps_data_t *gpsdata;
 static time_t timer;    /* time of last state change */
 static int state = 0;   /* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
