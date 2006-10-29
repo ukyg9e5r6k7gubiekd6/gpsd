@@ -659,7 +659,7 @@ changes.</para>
 <para>Clients should be prepared for the possibility that additional
 fields (such as heading or roll/pitch/yaw) may be added to the O
 command, and not treat the occurrence of extra fields as an error.
-The protocol number will be incremented if and when sych fields
+The protocol number will be incremented if and when such fields
 are added.</para>
 
 <para>Sending SIGHUP to a running <application>gpsd</application>
@@ -962,11 +962,13 @@ website</ulink> links to several documents that collect publicly
 disclosed information about the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
-sentences: RMC, GGA, GSA, GSV, ZDA.  It recognizes these with
-either the normal GP talker-ID prefix, or with the II prefix emitted
-by Seahawk Autohelm marine navigation systems, or with the IN prefix
-emitted by some Garmin units.  It recognizes one vendor extension,
-PGRME.  Note that <application>gpsd</application> returns pure decimal
+sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA.  It recognizes these
+with either the normal GP talker-ID prefix, or with the II prefix
+emitted by Seahawk Autohelm marine navigation systems, or with the IN
+prefix emitted by some Garmin units.  It recognizes one vendor
+extension, the PGRME emitted by some Garmin GPS models.</para>
+
+<para>Note that <application>gpsd</application> returns pure decimal
 degrees, not the hybrid degree/minute format described in the NMEA
 standard.</para>
 
@@ -984,9 +986,9 @@ standard.</para>
 
 <refsect1 id='maintainer'><title>AUTHORS</title> 
 
-<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond.
-This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.
-There is a project page <ulink
+<para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond,
+Chris Kuethe.  This manual page by Eric S. Raymond
+<email>esr@thyrsus.com</email>.  There is a project site at <ulink
 url="http://gpsd.berlios.de/">here</ulink>.</para>
 </refsect1>
 

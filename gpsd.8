@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPSD" "8" "09/24/2006" "9 Aug 2004" "9 Aug 2004"
+.TH "GPSD" "8" "10/29/2006" "9 Aug 2004" "9 Aug 2004"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -288,7 +288,7 @@ The recommended mode for clients is watcher mode. In watcher mode
 gpsd
 ships a line of data to the client each time the GPS gets either a fix update or a satellite picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y' response. Additionally, watching clients get notifications in the form X=0 or X=%f when the online/offline status of the GPS changes.
 .PP
-Clients should be prepared for the possibility that additional fields (such as heading or roll/pitch/yaw) may be added to the O command, and not treat the occurrence of extra fields as an error. The protocol number will be incremented if and when sych fields are added.
+Clients should be prepared for the possibility that additional fields (such as heading or roll/pitch/yaw) may be added to the O command, and not treat the occurrence of extra fields as an error. The protocol number will be incremented if and when such fields are added.
 .PP
 Sending SIGHUP to a running
 gpsd
@@ -465,7 +465,9 @@ have made a point of not looking at it. The
 links to several documents that collect publicly disclosed information about the protocol.
 .PP
 gpsd
-parses the following NMEA sentences: RMC, GGA, GSA, GSV, ZDA. It recognizes these with either the normal GP talker\-ID prefix, or with the II prefix emitted by Seahawk Autohelm marine navigation systems, or with the IN prefix emitted by some Garmin units. It recognizes one vendor extension, PGRME. Note that
+parses the following NMEA sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA. It recognizes these with either the normal GP talker\-ID prefix, or with the II prefix emitted by Seahawk Autohelm marine navigation systems, or with the IN prefix emitted by some Garmin units. It recognizes one vendor extension, the PGRME emitted by some Garmin GPS models.
+.PP
+Note that
 gpsd
 returns pure decimal degrees, not the hybrid degree/minute format described in the NMEA standard.
 .SH "SEE ALSO"
@@ -478,8 +480,8 @@ returns pure decimal degrees, not the hybrid degree/minute format described in t
 \fBrtcm\-104\fR(5).
 .SH "AUTHORS"
 .PP
-Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond. This manual page by Eric S. Raymond
-<esr@thyrsus.com>. There is a project page
+Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond, Chris Kuethe. This manual page by Eric S. Raymond
+<esr@thyrsus.com>. There is a project site at
 [2]\&\fIhere\fR.
 .SH "REFERENCES"
 .TP 3

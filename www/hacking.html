@@ -99,7 +99,7 @@ source distribution.</p>
 <li><a href="#designahead">Designing Ahead</a></li>
 <ol>
 <li><a href="#nonpvt">Non-PVT Data</a></li>
-<li><a href="#protov4">Design Sketch for Version 4 Protocol</a></li>
+<li><a href="#protov4">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</a></li>
 </ol>
 <li><a href="#blindalleys">Blind alleys</a></li>
 <ol>
@@ -1162,15 +1162,17 @@ type as revealed by I, how to interpret and label the data in the
 private-use fields.</p>
 
 <p>If we go for alternative (2), the first consequence is that we
-actually have to implement a Version 4 protocol.  The existing GPSD
+actually have to implement a next-generation protocol.  The existing GPSD
 protocol is about out of namespace.</p>
 
-<h2 id="protov4">Design Sketch for Version 4 Protocol</h2>
+<h2 id="protov4">Design Sketch for GPSD-NG, the Next-Generation GPSD Protocol</h2>
 
 <p>There are almost no more letters left in the namespace of the GPSD
 version 3 protocol.  At time of writing in late 2006 we can have one
-more command, 'h', and that's it.  After that, extending the set 
-will require a new command/response syntax.</p>
+more command, 'h', and that's it.  After that, extending the set will
+require a new command/response syntax.  Some posts in thew dev-list
+arcvhive refer to this as "Version 4", but that is a rev level we may
+or may not reach before GPSD-NG has to be implemented.</p>
 
 <p>Steps towards defining a new syntax have been taken.  The senior
 developers have agreed on a new protocol with a basic sentence syntax 
