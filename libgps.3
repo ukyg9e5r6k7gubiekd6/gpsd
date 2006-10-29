@@ -21,7 +21,7 @@ C:
 .HP 28
 \fBstruct\ gps_data_t\ *\fBgps_open\fR\fR\fB(\fR\fBchar\ *\fR\fB\fIserver\fR\fR\fB, \fR\fBchar\ *\ \fR\fB\fIport\fR\fR\fB);\fR
 .HP 14
-\fBint\ \fBgps_query\fR\fR\fB(\fR\fBstruct\ gps_data_t\ *\fR\fB\fIgpsdata\fR\fR\fB, \fR\fBchar\ *\fR\fB\fIrequests\fR\fR\fB);\fR
+\fBint\ \fBgps_query\fR\fR\fB(\fR\fBstruct\ gps_data_t\ *\fR\fB\fIgpsdata\fR\fR\fB, \fR\fBchar\ *\fR\fB\fIfmt\fR\fR\fB...\fR\fB);\fR
 .HP 22
 \fBvoid\ \fBgps_set_raw_hook\fR\fR\fB(\fR\fBstruct\ gps_data_t\ *\fR\fB\fIgpsdata\fR\fR\fB, \fR\fBvoid\ (*\fR\fB\fIhook\fR\fR\fB)(struct\ gps_data_t\ *,\ char\ *buf)\fR\fB);\fR
 .HP 13
@@ -78,8 +78,9 @@ accepts a response, or sequence of responses, from the daemon and interprets it 
 returns the validity mask of the received structure. This function does a blocking read waiting for data from the daemon; it returns 0 for success, or \-1 on a Unix\-level read error.
 .PP
 \fBgpsd_query()\fR
-writes a command to the daemon, accepts a one\-line response, and updates parts of the GPS\-data structure that correspond to data changed since the last call. The second argument must be a string containing letters from the command set documented at
-\fBgpsd\fR(1). This function returns a 0 on success, or a \-1 if there was a Unix\-level read error.
+writes a command to the daemon, accepts a one\-line response, and updates parts of the GPS\-data structure that correspond to data changed since the last call. The second argument must be a format string containing letters from the command set documented at
+\fBgpsd\fR(1). It may have % elements as for
+\fBsprintf\fR(3), which will be filled in from any following arguments. This function returns a 0 on success, or a \-1 if there was a Unix\-level read error.
 .PP
 \fBgps_set_raw_hook()\fR
 takes a function you specify and run it (synchronously) on the raw data pulled by a

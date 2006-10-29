@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <stdarg.h>
 #ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
@@ -528,10 +529,18 @@ int gps_poll(struct gps_data_t *gpsdata)
     return 0;
 }
 
-int gps_query(struct gps_data_t *gpsdata, const char *requests)
+int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 /* query a gpsd instance for new data */
 {
-    if (write(gpsdata->gps_fd, requests, strlen(requests)) <= 0)
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
+    va_end(ap);
+    if (buf[strlen(buf)-1] != '\n')
+	(void)strcat(buf, "\n");
+    if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0)
 	return -1;
     return gps_poll(gpsdata);
 }

@@ -30,7 +30,7 @@ C:
 <funcprototype>
 <funcdef>int <function>gps_query</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
-    <paramdef>char *<parameter>requests</parameter></paramdef>
+    <paramdef>char *<parameter>fmt</parameter>...</paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_set_raw_hook</function></funcdef>
@@ -117,9 +117,12 @@ read error. </para>
 <para><function>gpsd_query()</function> writes a command to the
 daemon, accepts a one-line response, and updates parts of the GPS-data
 structure that correspond to data changed since the last call.  The
-second argument must be a string containing letters from the command
+second argument must be a format string containing letters from the command
 set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It may have % elements as for 
+<citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+which will be filled in from any following arguments.
 This function returns a 0 on success, or a -1 if there was a
 Unix-level read error.</para>
 
