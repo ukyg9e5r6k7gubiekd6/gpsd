@@ -365,7 +365,7 @@ static bool have_fix(struct subscriber_t *whoami)
 #undef VALIDATION_COMPLAINT
 }
 
-static struct subscriber_t* allocate_client(void)
+static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 {
     int cfd;
     for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++) {
@@ -375,7 +375,7 @@ static struct subscriber_t* allocate_client(void)
     return NULL;
 }
 
-static void detach_client(struct subscriber_t *sub)
+static void detach_client(/*@only@*/ /*@out@*/struct subscriber_t *sub)
 {
     (void)close(sub->fd);
     gpsd_report(4, "detaching %d in detach_client\n", sub_index(sub));
@@ -1463,7 +1463,7 @@ int main(int argc, char *argv[])
 		client = allocate_client();
 		if (client == NULL) {
 		    gpsd_report(0, "No client subscriber slots available!\n");
-		    close(ssock);
+		    (void)close(ssock);
 		} else {
 			FD_SET(ssock, &all_fds);
 			adjust_max_fd(ssock, true);
