@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 	exit(2);
     }
 
-    (void)gps_query(gpsdata, "k\n");
+    (void)gps_query(gpsdata, "K\n");
     if (gpsdata->ndevices == 0) {
 	(void)fprintf(stderr, "gpsctrl: no devices connected.\n"); 
 	(void)gps_close(gpsdata);
@@ -93,32 +93,26 @@ int main(int argc, char **argv)
 	(void)gps_close(gpsdata);
 	exit(1);
     foundit:
-	(void)strcpy(buf, "F=");
-	(void)strncat(buf, device, sizeof(buf)-3);
-	(void)strcat(buf, "\n");
-	(void)gps_query(gpsdata, buf);
+	(void)gps_query(gpsdata, "F=%s", device);
     }
 
     status = 0;
     if (to_nmea) {
-	(void)gps_query(gpsdata, "n=0\n");
+	(void)gps_query(gpsdata, "N=0");
 	if (gpsdata->driver_mode != 0) {
 	    (void)fprintf(stderr, "gpsctrl: mode change failed\n");
 	    status = 1;
 	}
     }
     else if (to_binary) {
-	(void)gps_query(gpsdata, "n=1\n");
+	(void)gps_query(gpsdata, "N=1");
 	if (gpsdata->driver_mode != 1) {
 	    (void)fprintf( stderr, "gpsctrl: mode change failed\n");
 	    status = 1;
 	}
     }
     if (speed != NULL) {
-	(void)strcpy(buf, "B=");
-	(void)strncat(buf, speed, sizeof(buf)-3);
-	(void)strcat(buf, "\n");
-	(void)gps_query(gpsdata, buf);
+	(void)gps_query(gpsdata, "B=%s", speed);
 	if (atoi(speed) != (int)gpsdata->baudrate) {
 	    (void)fprintf( stderr, "gpsctrl: speed change failed\n");
 	    status = 1;
