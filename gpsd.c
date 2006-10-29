@@ -189,7 +189,7 @@ static void usage(void)
   -V                            = emit version and exit.\n\
 A device may be a local serial device for GPS input, or a URL of the form:\n\
      [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream]\n\
-in which case it specifies an input source for DGPS or ntrip data.",
+in which case it specifies an input source for DGPS or ntrip data.\n",
 
 	   DEFAULT_GPSD_PORT);
 }
