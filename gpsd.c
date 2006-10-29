@@ -666,8 +666,8 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				(unsigned char)sub->device->gpsdata.parity,
 				sub->device->gpsdata.stopbits);
 		    }
-	    }
 #endif /* ALLOW_RECONFIGURE */
+	    }
 	    if (sub->device) {
 		if ( sub->device->gpsdata.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
