@@ -432,6 +432,8 @@ class gps(gpsdata):
 
     def query(self, commands):
 	"Send a command, get back a response."
+        if not commands.endswith("\n"):
+            commands += "\n"
  	self.sockfile.write(commands)
  	self.sockfile.flush()
 	return self.poll()
