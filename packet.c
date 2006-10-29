@@ -713,8 +713,6 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 			    goto not_garmin;
 		    }
 		}
-		if (len > 0)
-		    goto not_garmin;
 		/* check sum byte */
 		ch = session->inbuffer[n++];
 		chksum += ch;
@@ -832,8 +830,6 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 			goto not_evermore;
 		}
 	    }
-	    if (len > 0)
-		goto not_evermore;
 	    checksum = session->inbuffer[n++];
 	    if (checksum == DLE) {
 		if (session->inbuffer[n++] != DLE)
