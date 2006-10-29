@@ -94,7 +94,7 @@ to which the GPS is attached. This page describes the high-level
 interface that is safe for multiple applications to use simultaneously; it
 is probably the one you want.  The low-level interface is documented
 at
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
 
 <para>Calling <function>gpsd_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
@@ -213,7 +213,7 @@ code that calls gps_poll(gpsdata).
 <refsect1 id='author'><title>AUTHOR</title>
 <para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, Thread-callback methods
 in the C binding added by Alfredo Pironti
-&lt;alfredio@users.sourceforge.net&gt;.</para>
+&lt;alfredo@users.sourceforge.net&gt;.</para>
 </refsect1>
 </refentry>
 

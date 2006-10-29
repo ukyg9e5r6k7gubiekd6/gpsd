@@ -23,7 +23,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) garminctl itraxctl sirfmon gpspipe gpsflash cgps cgpxlogger
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) gpsctrl gpspipe gpsflash cgps cgpxlogger sirfmon
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
@@ -64,32 +64,22 @@ cgpxlogger_SOURCES = cgpxlogger.c
 cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build garminctl
-#
-garminctl_SOURCES = garminctl.c
-garminctl_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
-
-#
 # Build gpsd
 #
-gpsd_SOURCES = \
-	gpsd_dbus.h \
-	gpsd_dbus.c \
-	gpsd.c
+gpsd_SOURCES = gpsd_dbus.h gpsd_dbus.c gpsd.c
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
+
+#
+# Build gpsctrl
+#
+gpsctrl_SOURCES = gpsctrl.c
+gpsctrl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpspipe
 #
-gpspipe_SOURCES = \
-	gpspipe.c
+gpspipe_SOURCES = gpspipe.c
 gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
-
-#
-# Build itraxctl
-#
-itraxctl_SOURCES = itraxctl.c
-itraxctl_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build sirfmon
@@ -189,8 +179,7 @@ man_MANS = \
 	sirfmon.1 \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
-	garminctl.1 \
-	itraxctl.1 \
+	gpsctrl.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
@@ -211,11 +200,8 @@ libgpsmm.3: libgpsmm.xml
 libgpsd.3: libgpsd.xml
 	-$(XMLTO) man libgpsd.xml
 
-garminctl.1: garminctl.xml
-	-$(XMLTO) man garminctl.xml
-
-itraxctl.1: itraxctl.xml
-	-$(XMLTO) man itraxctl.xml
+gpsctrl.1: gpsctrl.xml
+	-$(XMLTO) man gpsctrl.xml
 
 gpsprof.1: gpsprof.xml
 	-$(XMLTO) man gpsprof.xml
@@ -258,8 +244,7 @@ EXTRA_DIST = \
 	libgpsmm.xml \
 	gpsprof.xml \
 	gpsfake.xml \
-	garminctl.xml \
-	itraxctl.xml \
+	gpsctrl.xml \
 	sirfmon.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
@@ -296,10 +281,8 @@ splint:
 	-splint -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
-	@echo "Running splint on garminctl..."
-	-splint $(garminctl_SOURCES)
-	@echo "Running splint on itraxctl..."
-	-splint $(itraxctl_SOURCES)
+	@echo "Running splint on gpsctrl..."
+	-splint $(gpsctrl_SOURCES)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on gpspipe..."

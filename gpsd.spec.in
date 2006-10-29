@@ -91,6 +91,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING
 %attr(755, root, root) %{_sbindir}/gpsd
+%attr(755, root, root) %{_sbindir}/gpsctrl
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
@@ -99,6 +100,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/sirfmon.1*
+%{_mandir}/man1/gpsctrl.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
 /usr/lib/python*/site-packages/gps.py*
@@ -149,9 +151,9 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get gpsd
   working with EarthMates again, this had been broken since 2.15.  Massive 
   string safety audit and OpenBSD port by Chris Kuethe.  J command added.
-  sirfctl, itraxctl and garminctl added.  Switched to lesstif from openmotif.
-  Better auto detection of DLE-le packet protocols, notaby TSIP and Garmin
-  binary.  Fixed buggy parsing and generation of PGRME.
+  The gpsctrl tool was added.  Switched to lesstif from openmotif.
+  Better auto detection of DLE-le packet protocols, notaby TSIP and
+  Garmin binary.  Fixed buggy parsing and generation of PGRME.
 
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.
