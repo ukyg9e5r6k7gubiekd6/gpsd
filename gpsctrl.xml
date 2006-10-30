@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd">
+<refentry id='gpsctrl.1'>
+<refmeta>
+<refentrytitle>gpsctrl</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='date'>29 Oct 2006</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gpsctrl</refname>
+<refpurpose>control the modes of a Gps GPS</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>gpsctrl</command>  
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-n </arg>
+      <arg choice='opt'>-b </arg>
+      <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-V </arg>
+      <arg choice='opt'><replaceable>serial-port</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><application>gpsctrl</application> can switch a dual-mode GPS
+between NMEA and vendor-binary modes.  It can also be used to set the
+device baudrate. </para>
+
+<para>If you have only one GPS attached to your machine it is not
+necessary to specify the device; <application>gpsctrl</application> does
+its work through <application>gpsd</application>, which will locate it
+for you.</para>
+
+<para>The program accepts the following options:</para>
+<variablelist remap='TP'>
+
+<varlistentry>
+<term>-b</term>
+<listitem>
+<para>Force GPS into binary mode.  After the GPS resets itself autobaud to 
+the new speed.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-n</term>
+<listitem>
+<para>Force GPS into NMEA mode.  After the GPS resets itself autobaud to 
+its new speed.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-h</term>
+<listitem>
+<para>Display program usage and exit.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-D</term>
+<listitem>
+<para>Set level of debug messages.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-V</term>
+<listitem>
+<para>Display program version and exit.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='limitations'><title>LIMITATIONS</title> 
+
+<para><application>gpsctrl</application> is a specialized client that requires
+<application>gpsd</application> to be running.  As a future direction,
+this tool may someday be enhanced to use the low-level interface 
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+when
+<application>gpsd</application> is not running.</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title> 
+
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
+project page for <application>gpsd</application> <ulink
+url="http://gpsd.berlios.de/">here</ulink>.</para>
+</refsect1>
+</refentry>
