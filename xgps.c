@@ -431,6 +431,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
 	char *su, *au;
 	char *err_str = NULL;
+	bool jitteropt = false;
 
 	/*@ -onlytrans */
 	toplevel = XtVaAppInitialize(&app, "xgps", 
@@ -458,11 +459,14 @@ static void update_panel(struct gps_data_t *gpsdata,
 	(void)fprintf(stderr, "xgps: unknown altitude unit, defaulting to %s\n", altunits->legend);
     altunits_ok:;
 
-	while ((option = getopt(argc, argv, "hl:s:V")) != -1) {
+	while ((option = getopt(argc, argv, "hjl:s:V")) != -1) {
 	    switch (option) {
 	    case 'V':
 		(void)printf("xgps %s\n", VERSION);
 		exit(0);
+	    case 'j':
+		jitteropt = true;
+		continue;
 	    case 'l':
 		switch ( optarg[0] ) {
 		case 'd':
@@ -534,10 +538,13 @@ static void update_panel(struct gps_data_t *gpsdata,
 
     gps_set_raw_hook(gpsdata, update_panel);
 
-    if (device)
-	(void)gps_query(gpsdata, "F=%s\n", device);
+    if (jitteropt)
+	(void)gps_query(gpsdata, "J=1");
 
-    (void)gps_query(gpsdata, "w+x\n");
+    if (device)
+	(void)gps_query(gpsdata, "F=%s", device);
+
+    (void)gps_query(gpsdata, "w+x");
 
     (void)XtAppAddInput(app, gpsdata->gps_fd, 
 		  (XtPointer)XtInputReadMask, handle_input, NULL);

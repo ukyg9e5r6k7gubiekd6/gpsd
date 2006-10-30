@@ -22,6 +22,7 @@
   <command>xgps</command>  
       <arg choice='opt'><replaceable>X-options</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
@@ -54,6 +55,7 @@
 <cmdsynopsis>
   <command>cgps</command>  
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-j </arg>
       <arg choice='opt'>-s </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
@@ -108,6 +110,11 @@ altitude units for display; follow the keyword with 'meters' or
 'feet'.  The default is feet.  This option can also be set as the X
 resource 'altunits'.</para>
 
+<para>The <option>-j</option> option tells the daemon to hold fix
+data across cycles, eliminating jitter from NMEA sevices that emit
+several partial reports (see the <option>-s</option> for a client-side
+way to do something similar).</para>
+
 <para> The <option>-l</option> option sets the format of latitude and 
 longitude reports.  The value 'd' produces decimal degrees and is the
 default.  The value 'm' produces degrees and decimal minutes.  The
@@ -153,6 +160,10 @@ terminal emulator.</para>
 from printing the raw data. This display can also be toggled with the s
 command.</para>
 
+<para>The <option>-j</option> option tells the daemon not to clear
+data at start of cycle, eliminating jitter from NMEA sevices that emit
+several partial reports per cycle.</para>
+
 <para>Rather than use X resources to determine which units to use, 
 <application>cgps</application> looks at variables in its environment.
 Here are the variables and values it checks:</para>
@@ -178,12 +189,10 @@ Here are the variables and values it checks:</para>
 SIGHUP or SIGINT; given default terminal settings this will happen
 when you type Ctl-C at it.  It will also terminate on 'q'</para>
 
-<!--
 <para>The 'j' command toggles whether or not fix data is cleared at
 start of cycle; see
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 for discussion.</para>
--->
 
 </refsect2>
 <refsect2><title>cgpxlogger</title>

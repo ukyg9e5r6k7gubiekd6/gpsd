@@ -11,11 +11,11 @@
 gps, xgps, xgpsspeed, cgps, cgpxlogger \- test clients for gpsd
 .SH "SYNOPSIS"
 .HP 5
-\fBxgps\fR [\fIX\-options\fR] [\-h] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\-s\ \fIsmoothing\fR] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBxgps\fR [\fIX\-options\fR] [\-h] [\-j] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\-s\ \fIsmoothing\fR] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .HP 10
 \fBxgpsspeed\fR [\-rv] [\fIX\-options\fR] [\-h] [\-V] [\-nc\ \fIX\-color\fR] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .HP 5
-\fBcgps\fR [\-h] [\-s] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBcgps\fR [\-h] [\-j] [\-s] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .HP 10
 \fBgpxlogger\fR [\fIlogfile\fR]
 .HP 11
@@ -41,6 +41,12 @@ option can be used to set the speed units for display; follow the keyword with k
 The
 \fB\-altunits\fR
 option can be used to set the altitude units for display; follow the keyword with 'meters' or 'feet'. The default is feet. This option can also be set as the X resource 'altunits'.
+.PP
+The
+\fB\-j\fR
+option tells the daemon to hold fix data across cycles, eliminating jitter from NMEA sevices that emit several partial reports (see the
+\fB\-s\fR
+for a client\-side way to do something similar).
 .PP
 The
 \fB\-l\fR
@@ -71,6 +77,10 @@ option prevents
 cgps
 from printing the raw data. This display can also be toggled with the s command.
 .PP
+The
+\fB\-j\fR
+option tells the daemon not to clear data at start of cycle, eliminating jitter from NMEA sevices that emit several partial reports per cycle.
+.PP
 Rather than use X resources to determine which units to use,
 cgps
 looks at variables in its environment. Here are the variables and values it checks:
@@ -94,6 +104,10 @@ looks at variables in its environment. Here are the variables and values it chec
 .PP
 cgps
 terminates when you send it a SIGHUP or SIGINT; given default terminal settings this will happen when you type Ctl\-C at it. It will also terminate on 'q'
+.PP
+The 'j' command toggles whether or not fix data is cleared at start of cycle; see
+\fBgpsd\fR(8)
+for discussion.
 .SS "cgpxlogger"
 .PP
 This program connects to gpsd, polls for location, and logs each fix to standard output in GPX (XML) format.
