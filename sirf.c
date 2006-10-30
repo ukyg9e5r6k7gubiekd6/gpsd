@@ -693,8 +693,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static void sirfbin_initializer(struct gps_device_t *session)
-/* poll for software version in order to check for old firmware */
+static void sirfbin_configure(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET) {
 	gpsd_report(1, "Switching chip mode to SiRF binary.\n");
@@ -765,7 +764,8 @@ struct gps_type_t sirf_binary =
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
-    .initializer    = sirfbin_initializer,/* initialize the device */
+    .initializer    = NULL,		/* can't probe more in NMEA mode */
+    .configurator   = sirfbin_configure,/* initialize the device */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */

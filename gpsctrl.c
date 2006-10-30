@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(1, "gpsctrl: %d device found.\n");
+	gpsd_report(1, "gpsctrl: %d device(s) found.\n");
 
 	if (gpsdata->ndevices > 1) {
 	    int i;

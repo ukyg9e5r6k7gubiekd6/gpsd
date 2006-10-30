@@ -106,7 +106,11 @@ static void proto_mode(struct gps_device_t *session, int mode)
 }
 
 static void proto_initializer(struct gps_device_t *session)
-/* poll for software version in order to check for old firmware */
+{
+    /* probe for subtypes here */
+}
+
+static void proto_configurator(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET)
 	(void)proto_set_mode(session, session->gpsdata.baudrate, true);
@@ -121,6 +125,7 @@ struct gps_type_t proto_binary =
     .probe          = NULL,		/* no probe */
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .initializer    = proto_initializer,/* initialize the device */
+    .configurator   = proto_configurator,/* configure the proper sentences */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = proto_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */

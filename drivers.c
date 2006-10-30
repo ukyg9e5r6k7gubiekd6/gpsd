@@ -115,12 +115,6 @@ static void nmea_initializer(struct gps_device_t *session)
      */
 #define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
     (void)nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
-#ifdef ALLOW_RECONFIGURE
-    /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
-    (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
-    /* enable GPZDA on a Motorola Oncore GT+ */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
-#endif /* ALLOW_RECONFIGURE */
     /* probe for Garmin serial GPS */
     /* first turn off garmin binary 
     (void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
@@ -140,6 +134,14 @@ static void nmea_initializer(struct gps_device_t *session)
 #endif /* EVERMORE_ENABLE */
 }
 
+static void nmea_configurator(struct gps_device_t *session)
+{
+    /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
+    (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
+    /* enable GPZDA on a Motorola Oncore GT+ */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
+}
+
 static struct gps_type_t nmea = {
     .typename       = "Generic NMEA",	/* full name of type */
     .trigger        = NULL,		/* it's the default */
@@ -147,6 +149,7 @@ static struct gps_type_t nmea = {
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
     .initializer    = nmea_initializer,	/* probe for special types */
+    .configurator   = nmea_configurator,/* enable what we need */
     .get_packet     = packet_get,		/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
@@ -158,7 +161,7 @@ static struct gps_type_t nmea = {
     .cycle          = 1,		/* updates every second */
 };
 
-static void garmin_nmea_initializer(struct gps_device_t *session)
+static void garmin_nmea_configurator(struct gps_device_t *session)
 {
 #ifdef ALLOW_RECONFIGURE
 #if defined(NMEA_ENABLE) && !defined(GARMIN_ENABLE_UNUSED)
@@ -195,7 +198,8 @@ static struct gps_type_t garmin = {
     .channels       = 12,		/* not used by this driver */
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
-    .initializer    = garmin_nmea_initializer,/* probe for special types */
+    .initializer    = NULL,		/* no further qurying we can do */
+    .configurator   = garmin_nmea_configurator,/* probe for special types */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
@@ -245,12 +249,13 @@ static struct gps_type_t fv18 = {
 
 static void sirf_initializer(struct gps_device_t *session)
 {
-    /* (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0"); */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
-#ifdef ALLOW_RECONFIGURE
+}
+
+static void sirf_configurator(struct gps_device_t *session)
+{
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
@@ -287,7 +292,8 @@ static struct gps_type_t sirf_nmea = {
     .channels      = 12,		/* not used by the NMEA parser */
     .wakeup        = NULL,		/* no wakeup to be done before hunt */
     .probe         = NULL,		/* no probe */
-    .initializer   = sirf_initializer,	/* turn off debugging messages */
+    .initializer   = sirf_initializer,	/* probe for typpe info */
+    .configurator   = sirf_configurator,	/* turn off debuging messages */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,		/* write RTCM data straight */
@@ -318,10 +324,12 @@ static void tripmate_initializer(struct gps_device_t *session)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     (void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
-#ifdef ALLOW_RECONFIGURE
+}
+
+static void tripmate_configurator(struct gps_device_t *session)
+{
     /* stop it sending PRWIZCH */
     (void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static struct gps_type_t tripmate = {
@@ -330,7 +338,8 @@ static struct gps_type_t tripmate = {
     .channels      = 12,			/* consumer-grade GPS */
     .wakeup        = NULL,			/* no wakeup before hunt */
     .probe         = NULL,			/* no probe */
-    .initializer   = tripmate_initializer,	/* send unconfitionally */
+    .initializer   = tripmate_initializer,	/* send unconditionally */
+    .configurator   = tripmate_configurator,	/* send unconditionally */
     .get_packet    = packet_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
@@ -381,6 +390,7 @@ static struct gps_type_t earthmate = {
     .wakeup        = NULL,		/* no wakeup to be done before hunt */
     .probe         = NULL,			/* no probe */
     .initializer   = earthmate_initializer,	/* switch us to Zodiac mode */
+    .configurator  = NULL,			/* no configuration here */
     .get_packet    = packet_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
@@ -445,7 +455,7 @@ static int literal_send(int fd, const char *fmt, ... )
 }
 
 static void itrax_initializer(struct gps_device_t *session)
-/* start navigation and synchronous mode */
+/* start it reporting */
 {
     /* initialize GPS clock with current system time */ 
     struct tm when;
@@ -460,13 +470,16 @@ static void itrax_initializer(struct gps_device_t *session)
     (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
     buf[21] = frac[2]; buf[22] = frac[3];
     (void)literal_send(session->gpsdata.gps_fd, buf);
-
+    /* maybe this should be considered a reconfiguration? */
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
-#ifdef ALLOW_RECONFIGURE
+}
+
+static void itrax_configurator(struct gps_device_t *session)
+/* set synchronous mode */
+{
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
     (void)literal_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool itrax_speed(struct gps_device_t *session, speed_t speed)
@@ -506,6 +519,7 @@ static struct gps_type_t itrax = {
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe         = NULL,		/* no probe */
     .initializer   = itrax_initializer,	/* initialize */
+    .configurator  = itrax_configurator,/* set synchronous mode */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
@@ -543,6 +557,7 @@ static struct gps_type_t rtcm104 = {
     .wakeup        = NULL,		/* no wakeup to be done before hunt */
     .probe         = NULL,		/* no probe */
     .initializer   = NULL,		/* no initializer */
+    .configurator  = NULL,		/* no configurator */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */

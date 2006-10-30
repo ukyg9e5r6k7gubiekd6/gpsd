@@ -43,6 +43,10 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->initializer)
 		session->device_type->initializer(session);
+#ifdef ALLOW_RECONFIGURE
+	    if (session->device_type->configurator)
+		session->device_type->configurator(session);
+#endif /* ALLOW_RECONFIGURE */
 	    return 1;
 	}
     gpsd_report(1, "invalid GPS type \"%s\".\n", typename);

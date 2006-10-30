@@ -208,6 +208,10 @@ int gpsd_open(struct gps_device_t *session)
 		/*@i1@*/session->device_type = *dp;
 		if (session->device_type->initializer)
 		    session->device_type->initializer(session);
+#ifdef ALLOW_RECONFIGURE
+		if (session->device_type->configurator)
+		    session->device_type->configurator(session);
+#endif /* ALLOW_RECONFIGURE */
 		/*@i1@*/return session->gpsdata.gps_fd;
 	    }
  	}

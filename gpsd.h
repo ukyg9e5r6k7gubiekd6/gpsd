@@ -77,6 +77,7 @@ struct gps_type_t {
     /*@null@*/bool (*probe)(struct gps_device_t *session);
     /*@null@*/void (*wakeup)(struct gps_device_t *session);
     /*@null@*/void (*initializer)(struct gps_device_t *session);
+    /*@null@*/void (*configurator)(struct gps_device_t *session);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);

@@ -104,8 +104,7 @@ static void italk_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void italk_initializer(struct gps_device_t *session)
-/* poll for software version in order to check for old firmware */
+static void italk_configurator(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET)
 	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
@@ -126,7 +125,8 @@ struct gps_type_t italk_binary =
     .channels       = 12,		/* consumer-grade GPS */
     .wakeup         = italk_ping,	/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
-    .initializer    = italk_initializer,/* initialize the device */
+    .initializer    = NULL,		/* no initializer */
+    .configurator   = italk_configurator,/* configure the device */
     .get_packet     = packet_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */

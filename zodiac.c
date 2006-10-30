@@ -418,6 +418,7 @@ struct gps_type_t zodiac_binary =
     .wakeup         = NULL,		/* no probe on baud rate change */
     .probe          = NULL,		/* no probe */
     .initializer    = NULL,		/* no initialization */
+    .configurator   = NULL,		/* no configuration */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */

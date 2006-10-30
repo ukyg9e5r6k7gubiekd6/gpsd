@@ -52,7 +52,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 #endif /* ALLOW_RECONFIGURE */
 }
 
-static void tsip_initializer(struct gps_device_t *session)
+static void tsip_configurator(struct gps_device_t *session)
 {
     unsigned char buf[100];
 
@@ -704,7 +704,8 @@ struct gps_type_t tsip_binary =
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .wakeup         = NULL,		/* no wakeup to be done before hunt */
     .probe          = NULL,		/* no probe */
-    .initializer    = tsip_initializer,	/* initialization */
+    .initializer    = NULL,		/* no more subtype discovery */
+    .configurator   = tsip_configurator,/* initial mode sets */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
