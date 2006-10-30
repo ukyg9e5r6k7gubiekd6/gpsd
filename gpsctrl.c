@@ -165,26 +165,41 @@ int main(int argc, char **argv)
 	    gpsd_poll(&session);
 
 	status = 0;
-	if (to_nmea) {
-	    session.device_type->mode_switcher(&session, 0);
-	    if (session.gpsdata.driver_mode != 0) {
+	if (to_nmea || to_binary) {
+	    if (session.device_type->mode_switcher == NULL) {
+		(void)fprintf(stderr, 
+			  "gpsctrl: %s devices have no mode switch.\n",
+			  session.device_type->typename);
+		status = 1;
+	    }
+	    else if (to_nmea) {
+		session.device_type->mode_switcher(&session, 0);
+		if (session.gpsdata.driver_mode != 0) {
+		    (void)fprintf(stderr, "gpsctrl: mode change failed\n");
+		    status = 1;
+		}
+	    }
+	    else if (to_binary) {
+		session.device_type->mode_switcher(&session, 1);
+		if (session.gpsdata.driver_mode != 1) {
+		    (void)fprintf(stderr, "gpsctrl: mode change failed\n");
+		    status = 1;
+		}
+	    }
+	}
+	if (speed) {
+	    if (session.device_type->speed_switcher == NULL) {
+		(void)fprintf(stderr, 
+			      "gpsctrl: %s devices have no speed switch.\n",
+			      session.device_type->typename);
+		status = 1;
+	    }
+	    else if (!session.device_type->speed_switcher(&session, 
+							  (speed_t)atoi(speed))) {
 		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
 		status = 1;
 	    }
 	}
-	if (to_binary) {
-	    session.device_type->mode_switcher(&session, 1);
-	    if (session.gpsdata.driver_mode != 1) {
-		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
-		status = 1;
-	    }
-	}
-	if (speed)
-	    if (!session.device_type->speed_switcher(&session, 
-						     (speed_t)atoi(speed))) {
-		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
-		status = 1;
-	    }
 
 	gpsd_wrap(&session);
 	exit(status);

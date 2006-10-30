@@ -29,12 +29,16 @@
 
 <para><application>gpsctrl</application> can switch a dual-mode GPS
 between NMEA and vendor-binary modes.  It can also be used to set the
-device baudrate. </para>
+device baudrate.  Note:  Not all devices have these capabilities.</para>
 
-<para>If you have only one GPS attached to your machine it is not
-necessary to specify the device; <application>gpsctrl</application> does
-its work through <application>gpsd</application>, which will locate it
-for you.</para>
+<para>If you have only one GPS attached to your machine, and gpsd is
+running, it is not necessary to specify the device;
+<application>gpsctrl</application> does its work through
+<application>gpsd</application>, which will locate it for you.</para>
+
+<para>When <application>gpsd</application> is not running, the device
+specification is required, and you will almost certainly need to be
+running as root in order to have write access to the device.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -89,16 +93,6 @@ its new speed.</para>
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
-</refsect1>
-
-<refsect1 id='limitations'><title>LIMITATIONS</title> 
-
-<para><application>gpsctrl</application> is a specialized client that requires
-<application>gpsd</application> to be running.  As a future direction,
-this tool may someday be enhanced to use the low-level interface 
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-when
-<application>gpsd</application> is not running.</para>
 </refsect1>
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
