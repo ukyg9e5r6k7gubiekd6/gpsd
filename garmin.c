@@ -633,7 +633,7 @@ static void Build_Send_USB_Packet( struct gps_device_t *session,
 /* build and send a packet in serial protocol */
 /* layer_id unused */
 static void Build_Send_SER_Packet( struct gps_device_t *session,
-       uint32_t layer_id, uint32_t pkt_id, uint32_t length, uint32_t data ) 
+       uint32_t layer_id UNUSED, uint32_t pkt_id, uint32_t length, uint32_t data ) 
 {
         uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
