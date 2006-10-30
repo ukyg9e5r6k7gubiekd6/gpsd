@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * gpsctrl.c -- tweak the control settings on a GPS
  */
@@ -56,7 +57,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'h':
 	default:
-	    fprintf(stderr, "usage: gpsctrl [-b | -n] [-s speed] [-V]\n");
+	    fprintf(stderr, "usage: gpsctrl [-b | -n] [-s speed] [-V] <device>\n");
 	    break;
 	}
     }
