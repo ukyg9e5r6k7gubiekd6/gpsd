@@ -539,7 +539,7 @@ int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
-	(void)strcat(buf, "\n");
+	(void)strlcat(buf, "\n", BUFSIZ);
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0)
 	return -1;
     return gps_poll(gpsdata);
