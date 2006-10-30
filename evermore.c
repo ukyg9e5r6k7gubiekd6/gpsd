@@ -604,13 +604,11 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void evermore_initializer(struct gps_device_t *session)
-/* poll for software version in order to check for old firmware */
+static void evermore_configurator(struct gps_device_t *session)
 {
-    gpsd_report(5, "evermore_initializer call\n");
+    gpsd_report(5, "evermore_configurator call\n");
     if (session->packet_type == NMEA_PACKET) {
 	gpsd_report(5, "NMEA_PACKET packet\n");
-	/* (void)evermore_set_mode(session, session->gpsdata.baudrate, true); */
     }
     (void)evermore_default(session, 1); /* switch GPS to binary mode */
 }
@@ -656,7 +654,8 @@ struct gps_type_t evermore_binary =
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
-    .probe_subtype = evermore_initializer,	/* initialize the device */
+    .probe_subtype  = NULL,			/* no subtype probing */
+    .configurator   = evermore_configurator,	/* switch to binary */
     .get_packet     = packet_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */

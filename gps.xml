@@ -126,7 +126,7 @@ field.  By default it is set to 0, so you see each update exactly as
 it is sent.  Setting it to a higher value prevents annoying display
 flicker on NMEA devices that send several difference sentence types
 per update cycle, only one of which is a true fix. (This option is
-redundant with the GPD J request and may be removed in the future.)</para>
+redundant with the GPSD J request and may be removed in the future.)</para>
 
 <para>There is a known bug in <application>xgps</application>; it
 assumes the default font size is no more than 18 pixels.  If this

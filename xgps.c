@@ -303,6 +303,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	for (i = 0; i < (unsigned int)(sizeof(string)/sizeof(string[0])); i++)
 	    XmStringFree(string[i]);
     }
+    /*@ +boolint @*/
     /* here are the value fields */
     if (isnan(gpsdata->fix.time)==0) {
 	    (void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
@@ -368,6 +369,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	} else {
 	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
+	/*@ -boolint @*/
 	if (newtxt) 
 	    XmTextFieldSetString(text_9, s);
 

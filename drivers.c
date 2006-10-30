@@ -109,12 +109,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 static void nmea_probe_subtype(struct gps_device_t *session)
 {
 #ifdef NMEA_ENABLE
-    /*
-     * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
-     * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
-     */
-#define FV18_PROBE	"$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05"
-    (void)nmea_send(session->gpsdata.gps_fd, FV18_PROBE);
+    (void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
     /* probe for Garmin serial GPS */
     /* first turn off garmin binary 
     (void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
@@ -220,13 +215,24 @@ static struct gps_type_t garmin = {
  *
  **************************************************************************/
 
+static void fv18_configure(struct gps_device_t *session)
+{
+    /*
+     * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
+     * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
+     */
+    (void)nmea_send(session->gpsdata.gps_fd,
+		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
+}
+
 static struct gps_type_t fv18 = {
     .typename       = "San Jose Navigation FV18",	/* full name of type */
-    .trigger        = FV18_PROBE,	/* FV18s should echo the probe */
+    .trigger        = "$PFEC,GPint",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* mo probe */
-    .probe_subtype   = NULL,		/* to be sent unconditionally */
+    .probe_subtype  = NULL,		/* to be sent unconditionally */
+    .configurator   = fv18_configure,	/* change its sentence set */
     .get_packet     = packet_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */

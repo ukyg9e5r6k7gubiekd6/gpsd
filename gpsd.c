@@ -1587,6 +1587,9 @@ int main(int argc, char *argv[])
 			if (sub->device == channel) {
 			    if (sub->buffer_policy == casoc && (changed & CYCLE_START_SET)!=0)
 				gps_clear_fix(&sub->fixbuffer);
+			    /* don't downgrade mode if holding previous fix */
+			    if (sub->fixbuffer.mode > sub->device->gpsdata.fix.mode)
+				changed &=~ MODE_SET;
 			    gps_merge_fix(&sub->fixbuffer, 
 					  changed,
 					  &sub->device->gpsdata.fix);
