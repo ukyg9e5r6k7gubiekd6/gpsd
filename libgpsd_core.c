@@ -89,8 +89,8 @@ void gpsd_deactivate(struct gps_device_t *session)
     gpsd_report(1, "closing GPS=%s (%d)\n", 
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
 #ifdef NTPSHM_ENABLE
-    (void)ntpshm_free(session->context, session->shmTime);
-    session->shmTime = -1;
+    (void)ntpshm_free(session->context, session->shmindex);
+    session->shmindex = -1;
 # ifdef PPS_ENABLE
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
@@ -207,9 +207,9 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE
-	session->shmTime = ntpshm_alloc(session->context);
+	session->shmindex = ntpshm_alloc(session->context);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-	if (session->shmTime >= 0 && session->context->shmTimePPS) {
+	if (session->shmindex >= 0 && session->context->shmTimePPS) {
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
 		/*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	}

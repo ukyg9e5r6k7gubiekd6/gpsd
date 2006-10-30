@@ -146,7 +146,7 @@ struct gps_device_t {
     unsigned long retry_counter;	/* count sniff retries */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE
-    int shmTime;
+    int shmindex;
     double last_fixtime;		/* so updates happen once */
 # ifdef PPS_ENABLE
     int shmTimeP;

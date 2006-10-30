@@ -163,6 +163,8 @@ int main(int argc, char **argv)
 	/* hunt for packet type and serial parameters */
 	while (session.device_type == NULL)
 	    gpsd_poll(&session);
+	(void)fprintf(stderr, "gpsctrl: %s identified as a %s\n",
+		      device, session.device_type->typename);
 
 	status = 0;
 	if (to_nmea || to_binary) {

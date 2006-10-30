@@ -122,8 +122,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     struct timeval tv;
     double seconds,microseconds;
 
-    if (session->shmTime < 0 ||
-	(shmTime = session->context->shmTime[session->shmTime]) == NULL)
+    if (session->shmindex < 0 ||
+	(shmTime = session->context->shmTime[session->shmindex]) == NULL)
 	return 0;
 
     (void)gettimeofday(&tv,NULL);
@@ -155,9 +155,9 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     double offset;
     long l_offset;
 
-    if (session->shmTime < 0 || session->shmTimeP < 0 ||
-	(shmTime = session->context->shmTime[session->shmTime]) == NULL ||
-	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
+    if (session->shmindex < 0 || session->shmTimeP < 0 ||
+	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
+	(shmTimeP = session->context->shmTime[session->shmindex]) == NULL)
 	return 0;
 
     /* check if received time messages are within locking range */
