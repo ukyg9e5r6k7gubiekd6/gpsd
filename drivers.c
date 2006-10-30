@@ -136,10 +136,12 @@ static void nmea_probe_subtype(struct gps_device_t *session)
 
 static void nmea_configurator(struct gps_device_t *session)
 {
+#ifdef ALLOW_RECONFIGURE
     /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
     (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
     /* enable GPZDA on a Motorola Oncore GT+ */
     (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static struct gps_type_t nmea = {
@@ -254,8 +256,10 @@ static void sirf_probe_subtype(struct gps_device_t *session)
 
 static void sirf_configurator(struct gps_device_t *session)
 {
+#ifdef ALLOW_RECONFIGURE
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
@@ -328,8 +332,10 @@ static void tripmate_probe_subtype(struct gps_device_t *session)
 
 static void tripmate_configurator(struct gps_device_t *session)
 {
+#ifdef ALLOW_RECONFIGURE
     /* stop it sending PRWIZCH */
     (void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static struct gps_type_t tripmate = {
@@ -477,9 +483,11 @@ static void itrax_probe_subtype(struct gps_device_t *session)
 static void itrax_configurator(struct gps_device_t *session)
 /* set synchronous mode */
 {
+#ifdef ALLOW_RECONFIGURE
     (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
     (void)literal_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
+#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool itrax_speed(struct gps_device_t *session, speed_t speed)
@@ -488,7 +496,7 @@ static bool itrax_speed(struct gps_device_t *session, speed_t speed)
 #ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
 #else
-    return 0;
+    return false;
 #endif /* ALLOW_RECONFIGURE */
 }
 
@@ -498,7 +506,7 @@ static bool itrax_rate(struct gps_device_t *session, double rate)
 #ifdef ALLOW_RECONFIGURE
     return literal_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d\r\n", rate) >= 0;
 #else
-    return 0;
+    return false;
 #endif /* ALLOW_RECONFIGURE */
 }
 
