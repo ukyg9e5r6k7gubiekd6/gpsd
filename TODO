@@ -90,12 +90,12 @@ get done someday.
 
 *** send/expect for the NMEA driver initializer
 
-<p>We've had one report of a GPS, the Garmin GPS-10, which gpsd puts in a 
+We've had one report of a GPS, the Garmin GPS-10, which gpsd puts in a 
 bad state because the device chokes on having all of our NMEA probe strings
 shoved at it without having time to respond.  A simple send-expect
 function (ship given string, wait until specified reply arrives or time
 out) would solve this problem and might help avoid problems with other
-GPSes we haven't encountered yet.</p>
+GPSes we haven't encountered yet.
 
 *** SiRF firmware uploader
 
