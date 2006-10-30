@@ -738,6 +738,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		packet_discard(session);
 		break;
 	    not_garmin:;
+	        gpsd_report(6,"Not Garmin\n");
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
 		/* check for 3 common TSIP packet types:
