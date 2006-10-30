@@ -94,6 +94,13 @@ Fixing this is not urgent, as the old-style support will likely
 be retained for compatibility for a long time, but it should
 get done someday.
 
+*** Merge cgps and xgps
+
+cgps and xgps should merge into a single test client that honors the
+GPSD_UNITS environment variable and chooses its UI mode depending on
+whether or not it's running under X.  A good small project for someone
+who doesn't want to get into the full complexity of the daemon code.
+
 *** send/expect for the NMEA driver initializer
 
 We've had one report of a GPS, the Garmin GPS-10, which gpsd puts in a 
