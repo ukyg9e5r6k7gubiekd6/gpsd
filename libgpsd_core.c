@@ -644,11 +644,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_decode_time = timestamp();
 
 	/* also copy the sentence up to clients in raw mode */
-	if (session->packet_type == NMEA_PACKET)
-	    session->gpsdata.raw_hook(&session->gpsdata,
-				      (char *)session->outbuffer,
-				      strlen((char *)session->outbuffer), 1);
-	else {
+	if (session->packet_type == NMEA_PACKET) {
+	    if (session->gpsdata.raw_hook)
+		session->gpsdata.raw_hook(&session->gpsdata,
+					  (char *)session->outbuffer,
+					  strlen((char *)session->outbuffer),
+					  1);
+	} else {
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';

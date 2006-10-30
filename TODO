@@ -33,6 +33,12 @@ up on other distributions as well, but not under Fedora Core.
 The Gentoo problem can be fixed by creating a /var/run/usb directory;
 this fix may apply to other distributions as well.
 
+*** rtcm.c triggers an optimizer bug in some versions of gcc
+
+The rtcm.c file confuses the gcc-3.4.[23] optimizer at -O2 level,
+making it generate incorrect code.  Removing -O2 from the
+compilation flags works around the problem.
+
 *** Compiling with --enable-max-devices=1 may trigger a gcc optimizer bug
 
 At gpsd revision level 3365, compiling with --enable-max-devices=1 has

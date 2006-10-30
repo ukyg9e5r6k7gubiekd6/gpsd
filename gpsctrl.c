@@ -3,8 +3,10 @@
  * gpsctrl.c -- tweak the control settings on a GPS
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <getopt.h>
 #include <stdbool.h>
 #include <string.h>
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
+	gpsd_report(1, "gpsctrl: %d device found.\n");
 
 	if (gpsdata->ndevices > 1) {
 	    int i;
@@ -154,6 +157,7 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
 	gpsd_init(&session, &context, device);
+	gpsd_report(1, "gpsctrl: initialization passed.\n");
 	if (gpsd_activate(&session) == -1) {
 	    (void)fprintf(stderr, 
 			  "gpsd: activation of device %s failed, errno=%d\n",
@@ -161,8 +165,18 @@ int main(int argc, char **argv)
 	    exit(2);
 	}
 	/* hunt for packet type and serial parameters */
-	while (session.device_type == NULL)
-	    gpsd_poll(&session);
+	while (session.device_type == NULL) {
+	    int waiting = 0;
+	    (void)ioctl(session.gpsdata.gps_fd, FIONREAD, &waiting);
+	    if (waiting == 0) {
+		usleep(300);
+	        continue;
+	    }
+	    if (gpsd_poll(&session) == ERROR_SET) {
+		(void)fprintf(stderr, "gpsctrl: autodetection failed.\n");
+		exit(2);
+	    }
+	}
 	(void)fprintf(stderr, "gpsctrl: %s identified as a %s\n",
 		      device, session.device_type->typename);
 

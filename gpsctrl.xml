@@ -19,6 +19,7 @@
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-b </arg>
+      <arg choice='opt'>-f </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'><replaceable>serial-port</replaceable></arg>
@@ -46,7 +47,7 @@ running as root in order to have write access to the device.</para>
 <varlistentry>
 <term>-b</term>
 <listitem>
-<para>Force GPS into binary mode.  After the GPS resets itself autobaud to 
+<para>Put GPS into binary mode.  After the GPS resets itself autobaud to 
 the new speed.</para>
 </listitem>
 </varlistentry>
@@ -54,8 +55,15 @@ the new speed.</para>
 <varlistentry>
 <term>-n</term>
 <listitem>
-<para>Force GPS into NMEA mode.  After the GPS resets itself autobaud to 
+<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to 
 its new speed.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-f</term>
+<listitem>
+<para>Force low-level access (not through the daemon).</para>
 </listitem>
 </varlistentry>
 
