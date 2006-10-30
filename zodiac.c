@@ -176,7 +176,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
-    if (session->gpsdata.fix.mode > MODE_NO_FIX)
+    if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
 	(void)ntpshm_put(session, session->gpsdata.fix.time + 1.1);
 #endif
     /*@ -type @*/

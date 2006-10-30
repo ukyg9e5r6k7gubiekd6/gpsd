@@ -58,6 +58,7 @@ struct gps_context_t {
     int leap_seconds;			/* Unix seconds to UTC */
     int century;			/* for NMEA-only devices without ZDA */
 #ifdef NTPSHM_ENABLE
+    bool enable_ntpshm;
     /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
@@ -285,7 +286,7 @@ extern void gpsd_error_model(struct gps_device_t *,
 extern void gpsd_clear_data(struct gps_device_t *);
 extern int netlib_connectsock(const char *, const char *, const char *);
 
-extern int ntpshm_init(struct gps_context_t *, bool);
+extern void ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_alloc(struct gps_context_t *);
 extern bool ntpshm_free(struct gps_context_t *, int);
 extern int ntpshm_put(struct gps_device_t *, double);

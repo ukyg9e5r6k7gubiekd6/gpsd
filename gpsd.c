@@ -89,6 +89,7 @@ static struct gps_context_t context = {
     .leap_seconds = LEAP_SECONDS, 
     .century      = CENTURY_BASE, 
 #ifdef NTPSHM_ENABLE
+    .enable_ntpshm = false,
     .shmTime      = {0},
     .shmTimeInuse = {0},
 # ifdef PPS_ENABLE

@@ -379,7 +379,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    break;
 	}
 #ifdef NTPSHM_ENABLE
-	if (session->gpsdata.fix.mode > MODE_NO_FIX)
+	if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
 	    (void) ntpshm_put(session, session->gpsdata.fix.time);
 #endif /* NTPSHM_ENABLE */
 
