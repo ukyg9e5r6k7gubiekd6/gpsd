@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
   /* If the user has requested the 'j' option (buffering), make the
      request of gpsd before we continue. */
   if(fixclear_flag==1) {
-    (void)gps_query(gpsdata, "j1\n");
+    (void)gps_query(gpsdata, "j=1\n");
   }
 
   /* Update the timestamp (used to keep track of time since last state
@@ -445,20 +445,8 @@ int main(int argc, char *argv[])
   gps_set_raw_hook(gpsdata, update_panel);
 
   /* If the user requested a specific device, try to change to it. */
-  if (device) {
-    char *channelcmd;
-    size_t l;
-    l = strlen(device)+4;
-
-    if ((channelcmd = (char *)malloc(l)) != NULL){
-      /*@ -compdef @*/
-      /*@i@*/(void)strlcpy(channelcmd, "F=", l);
-      (void)strlcpy(channelcmd+2, device, l);
-      (void)gps_query(gpsdata, channelcmd);
-      (void)free(channelcmd);
-      /*@ +compdef @*/
-    }
-  }
+  if (device)
+      (void)gps_query(gpsdata, "F=%s\n", device);
 
   /* Request "w+x" data from gpsd. */
   (void)gps_query(gpsdata, "w+x\n");
@@ -508,10 +496,10 @@ int main(int argc, char *argv[])
     case 'j':
       if(fixclear_flag==0) {
         fixclear_flag=1;
-        (void)gps_query(gpsdata, "j1\n");
+        (void)gps_query(gpsdata, "j=1\n");
       } else {
         fixclear_flag=0;
-        (void)gps_query(gpsdata, "j0\n");
+        (void)gps_query(gpsdata, "j=0\n");
       }
       break;
 

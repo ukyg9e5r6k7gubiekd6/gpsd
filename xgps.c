@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <Xm/Xm.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/PushB.h>
@@ -254,7 +255,7 @@ static void handle_time_out(XtPointer client_data UNUSED,
 static struct gps_data_t *gpsdata;
 static time_t timer;	/* time of last state change */
 static int state = 0;	/* or MODE_NO_FIX=1, MODE_2D=2, MODE_3D=3 */
-static int smoothing = 4;	/* # of transmitted sentences to smooth across */
+static int smoothing = 0;	/* # of transmitted sentences to smooth across */
 static XtAppContext app;
 static XtIntervalId timeout;
 static enum deg_str_type deg_type = deg_dd;
@@ -275,7 +276,8 @@ static void update_panel(struct gps_data_t *gpsdata,
 {
     static int lfok = 0;
     unsigned int i;
-    int newstate, newtxt;
+    int newstate;
+    bool newtxt;
     XmString string[MAXCHANNELS+1];
     char s[128], *latlon, *sp;
 
@@ -304,61 +306,70 @@ static void update_panel(struct gps_data_t *gpsdata,
     /* here are the value fields */
     if (isnan(gpsdata->fix.time)==0) {
 	    (void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
-	    newtxt = 1;
+	    newtxt = true;
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_1, s);
+	if (newtxt) 
+	    XmTextFieldSetString(text_1, s);
 	if (gpsdata->fix.mode >= MODE_2D) {
 	    latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
 	    newtxt = snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_2, s);
+	if (newtxt != 0) 
+	    XmTextFieldSetString(text_2, s);
 	if (gpsdata->fix.mode >= MODE_2D) {
 	    latlon = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
 	    newtxt = snprintf(s, sizeof(s), "%s %c", latlon, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_3, s);
+	if (newtxt != 0) 
+	    XmTextFieldSetString(text_3, s);
 	if (gpsdata->fix.mode == MODE_3D) {
 	    newtxt = snprintf(s, sizeof(s), "%f %s",gpsdata->fix.altitude*altunits->factor, altunits->legend);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_4, s);
+	if (newtxt != 0)
+	    XmTextFieldSetString(text_4, s);
 	if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
 	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.speed*speedunits->factor, speedunits->legend);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_5, s);
+	if (newtxt != 0)
+	    XmTextFieldSetString(text_5, s);
 	if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0) {
 	    newtxt = snprintf(s, sizeof(s), "%f degrees", gpsdata->fix.track);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a",128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a",128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_6, s);
+	if (newtxt != 0)
+	    XmTextFieldSetString(text_6, s);
 	if (isnan(gpsdata->fix.eph)==0) {
 	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.eph * altunits->factor, altunits->legend);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_7, s);
+	if (newtxt != 0)
+	    XmTextFieldSetString(text_7, s);
 	if (isnan(gpsdata->fix.epv)==0) {
 	    newtxt = snprintf(s, sizeof(s), "%f %s", gpsdata->fix.epv * altunits->factor, altunits->legend);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_8, s);
+	if (newtxt != 0)
+	    XmTextFieldSetString(text_8, s);
 	if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0) {
 	    newtxt = snprintf(s, sizeof(s), "%f %s/sec", gpsdata->fix.climb * altunits->factor, altunits->legend);
 	} else {
-	    newtxt = (lfok>0) ? 0 : ((void)strlcpy(s, "n/a", 128), 1);
+	    newtxt = (lfok>0) ? false : ((void)strlcpy(s, "n/a", 128), true);
 	}
-	if (newtxt != 0) XmTextFieldSetString(text_9, s);
+	if (newtxt) 
+	    XmTextFieldSetString(text_9, s);
 
 	if (gpsdata->online == 0) {
 	    newstate = 0;
@@ -523,18 +534,8 @@ static void update_panel(struct gps_data_t *gpsdata,
 
     gps_set_raw_hook(gpsdata, update_panel);
 
-    if (device) {
-	char *channelcmd;
-	size_t l;
-	l = strlen(device)+4;
-
-	if ((channelcmd = (char *)malloc(l)) != NULL){
-	    (void)strlcpy(channelcmd, "F=", l);
-	    (void)strlcpy(channelcmd+2, device, l);
-	    (void)gps_query(gpsdata, channelcmd);
-	    (void)free(channelcmd);
-	}
-    }
+    if (device)
+	(void)gps_query(gpsdata, "F=%s\n", device);
 
     (void)gps_query(gpsdata, "w+x\n");
 
