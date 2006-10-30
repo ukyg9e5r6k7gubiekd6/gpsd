@@ -230,6 +230,32 @@ to support an RTCM104 encoder.</p>
 
 <h1 id="contributions">Contribution guidelines</h1>
 
+<h2 id="languages">Our languages are C and Python</h2>
+
+<p>The project implementation languages are C and Python.  The core
+libgpsd libraries (and the daemon, which is a thin wrapper around
+them) are written in C; the test and profiling tools are written in
+Python.  Code in other languages will, in general, be accepted only if
+it supplies a language binding for the libgps or libgpsd libraries
+that we don't already have.  This restriction is an attempt to keep
+our long-term maintenance problem as tractable as possible.</p>
+
+<p>We require C for anything that may have to run on an embedded
+system. Thus, the daemon and libgpsd libraries need to stay pure C.
+Anything that links direct to the core libraries should also be in C,
+because Python's alien-type facilities are still just a little too
+complex and painful to be a net win for our situation. (We know this
+may be about to change with the advent of the ctypes module in Python
+2.6 and will keep an open mind, especially to anyone who actually 
+supplies a ctypes Python wrapper for libgpsd.)</p>
+
+<p>We prefer Python anywhere we aren't required to to use C by
+technical constraints &mdash; test/profiling/logging tools, hotplug agents,
+and miscellaneous scripts.  Again, this is a long-term maintainability
+issue; there are whole classes of potential C bugs that simply don't
+exist in Python, and Python programs have a drastically lower line
+count for equivalent capability.</p>
+
 <h2 id="patches">Send patches in diff -u or -c format</h2>
 
 <p>We prefer diff -u format, but diff -c is acceptable.  Do not send
