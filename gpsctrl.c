@@ -173,17 +173,25 @@ int main(int argc, char **argv)
 		status = 1;
 	    }
 	    else if (to_nmea) {
-		session.device_type->mode_switcher(&session, 0);
-		if (session.gpsdata.driver_mode != 0) {
-		    (void)fprintf(stderr, "gpsctrl: mode change failed\n");
-		    status = 1;
+		if (session.gpsdata.driver_mode == 0)
+		    (void)fprintf(stderr, "gpsctrl: already in NMEA mode.\n");
+		else {
+		    session.device_type->mode_switcher(&session, 0);
+		    if (session.gpsdata.driver_mode != 0) {
+			(void)fprintf(stderr, "gpsctrl: mode change failed\n");
+			status = 1;
+		    }
 		}
 	    }
 	    else if (to_binary) {
-		session.device_type->mode_switcher(&session, 1);
-		if (session.gpsdata.driver_mode != 1) {
-		    (void)fprintf(stderr, "gpsctrl: mode change failed\n");
-		    status = 1;
+		if (session.gpsdata.driver_mode == 0)
+		    (void)fprintf(stderr, "gpsctrl: already in native mode.\n");
+		else {
+		    session.device_type->mode_switcher(&session, 1);
+		    if (session.gpsdata.driver_mode != 1) {
+			(void)fprintf(stderr, "gpsctrl: mode change failed\n");
+			status = 1;
+		    }
 		}
 	    }
 	}
