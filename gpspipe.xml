@@ -36,7 +36,7 @@
 to <application>gpsd</application> and output the received
 sentences to stdout.  This makes the program useful as a pipe from
 <application>gpsd</application> to another program or file.  Presently
-it only connect to <application>gpsd</application> on the localhost on
+it only connects to <application>gpsd</application> on the localhost on
 the default port (2947). </para>
 
 <para><application>gpspipe</application> does not require root
@@ -72,6 +72,9 @@ output.</para>
 
 <para>-n [count] causes [count] sentences to be output.  
 <application>gpspipe</application> will then exit gracefully.</para>
+
+<para>-j makes the program send J=1 to the daeomon, requesting
+fix hold across cycles.</para>
 
 <para>-V prints the version, then exits.</para>
 

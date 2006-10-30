@@ -116,7 +116,6 @@ int main( int argc, char **argv) {
 	int s = 0;
         char buf[4096];
 	char *cstr = NULL;
-	char *jstr = NULL;
         ssize_t wrote = 0;
         bool dump_super_raw = false;
         bool dump_nmea = false;
@@ -230,9 +229,9 @@ int main( int argc, char **argv) {
 	/*@ +nullpass @*/
 
 	if ( jitter_flag ) {
-	  jstr = "j1\n";
-	  wrote = write( s, "jstr", strlen("jstr") );
-	  if ( (ssize_t)strlen("jstr") != wrote ) {
+	  char *jstr = "j=1\n";
+	  wrote = write( s, jstr, strlen(jstr) );
+	  if ( (ssize_t)strlen(jstr) != wrote ) {
 	    fprintf( stderr, "%s: write error, %s(%d)\n", argv[0]
 		     , strerror(errno), errno);
 	    exit (1);
