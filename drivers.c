@@ -542,6 +542,61 @@ static struct gps_type_t itrax = {
 #endif /* ITRAX_ENABLE */
 #endif /* NMEA_ENABLE */
 
+#ifdef TNT_ENABLE
+/**************************************************************************
+ * True North Technologies - Revolution 2X Digital compass
+ *
+ * More info: http://www.tntc.com/
+ *
+ * This is a digital compass which uses magnetometers to measure the
+ * strength of the earth's magnetic field. Based on these measurements
+ * it provides a compass heading using NMEA formatted output strings.
+ * This is useful to supplement the heading provided by another GPS
+ * unit. A GPS heading is unreliable at slow speed or no speed.
+ *
+ **************************************************************************/
+
+static void tnt_wakeup(struct gps_device_t *session)
+{
+    /*
+     * The True North compass won't start talking unless you ask it to. To
+     * wake it up, we query for its ID string
+     */
+    (void)literal_send(session->gpsdata.gps_fd, "@X?");
+}
+
+static void tnt_configurator(struct gps_device_t *session)
+{
+    //nmea_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
+    //nmea_send(session->gpsdata.gps_fd, "@BA=8"); // Start HTM packet at 1Hz
+    /*
+     * Sending this twice seems to make it more reliable!!
+     * I think it gets the input on the unit synced up.
+     * The intent is to start HTM packet reporting at 1200 per minute.
+     */
+    (void)nmea_send(session->gpsdata.gps_fd, "@BA=15");
+    (void)nmea_send(session->gpsdata.gps_fd, "@BA=15");
+}
+
+struct gps_type_t trueNorth = {
+    .typename       = "True North",	/* full name of type */
+    .trigger        = " TNT1500",	/* how to recognize this */
+    .channels       = 0,		/* not an actual GPS at all */
+    .probe_wakeup   = tnt_wakeup,	/* wakeup by sending ID query */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = NULL,		/* no initializer */
+    .configurator   = tnt_configurator,	/* enable what we need */
+    .get_packet     = packet_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,	        /* Don't send */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no wrapup */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 20,		/* updates per second */
+};
+#endif
 #ifdef RTCM104_ENABLE
 /**************************************************************************
  *
@@ -580,7 +635,7 @@ static struct gps_type_t rtcm104 = {
 
 extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
-extern struct gps_type_t evermore_binary, italk_binary, trueNorth;
+extern struct gps_type_t evermore_binary, italk_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */

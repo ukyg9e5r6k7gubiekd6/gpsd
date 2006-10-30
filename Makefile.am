@@ -132,7 +132,6 @@ libgps_c_sources = \
 	rtcm.h \
 	srecord.c \
 	bits.h \
-	truenorth.c \
 	timebase.h \
 	bsd-base64.c \
 	bsd-base64.h
