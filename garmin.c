@@ -687,7 +687,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 
 
 /*
- * garmin_probe()
+ * garmin_detect()
  *
  * check that the garmin_gps driver is installed in the kernel
  * and that an active USB device is using it.
@@ -702,7 +702,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
  * return 0 if not
  *
  */
-static bool garmin_probe(struct gps_device_t *session)
+static bool garmin_detect(struct gps_device_t *session)
 {
 
     FILE *fp = NULL;
@@ -736,7 +736,7 @@ static bool garmin_probe(struct gps_device_t *session)
 
     /* Save original terminal parameters */
     if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
-	gpsd_report(0, "garmin_probe: error getting port attributes: %s\n",
+	gpsd_report(0, "garmin_detect: error getting port attributes: %s\n",
              strerror(errno));
 	return false;
     }
@@ -745,7 +745,7 @@ static bool garmin_probe(struct gps_device_t *session)
     (void)cfmakeraw(&session->ttyset);
 
     if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
-	gpsd_report(0, "garmin_probe: error changing port attributes: %s\n",
+	gpsd_report(0, "garmin_detect: error changing port attributes: %s\n",
              strerror(errno));
 	return false;
     }
@@ -758,7 +758,7 @@ static bool garmin_probe(struct gps_device_t *session)
     session->driver.garmin.BufferLen = 0;
 
     if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
-	gpsd_report(0, "garmin_probe: Compile error, garmin.Buffer too small.\n",
+	gpsd_report(0, "garmin_detect: Compile error, garmin.Buffer too small.\n",
              strerror(errno));
 	return false;
     }
@@ -777,23 +777,26 @@ static bool garmin_probe(struct gps_device_t *session)
     return 1;
 }
 
+static void garmin_probe_subtype(struct gps_device_t *session)
+{
+        // Tell the device to send product data
+        gpsd_report(3, "Get Garmin Product Data\n");
+        Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
+           , GARMIN_PKTID_PRODUCT_RQST, 0, 0);
+}
+
 /*
- * garmin_init()
+ * garmin_configure()
  *
- * init a garmin_gps device,
+ * configure a garmin_gps device,
  * session->gpsdata.gps_fd is assumed to already be open.
  *
  * the garmin_gps driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
  *
  */
-static void garmin_init(struct gps_device_t *session)
+static void garmin_configure(struct gps_device_t *session)
 {
-        // Tell the device to send product data
-        gpsd_report(3, "Get Garmin Product Data\n");
-        Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
-           , GARMIN_PKTID_PRODUCT_RQST, 0, 0);
-
 	// turn on PVT data 49
 	gpsd_report(3, "Set Garmin to send reports every 1 second\n");
 
@@ -1080,9 +1083,10 @@ struct gps_type_t garmin_usb_binary_old =
     .typename       = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = garmin_probe,	/* how to detect at startup time */
-    .initializer    = garmin_init,	/* initialize the device */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = garmin_detect,	/* how to detect at startup time */
+    .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
+    .configurator   = garmin_configure,	/* eable what we need */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1100,9 +1104,10 @@ struct gps_type_t garmin_usb_binary =
     .typename       = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = garmin_probe,	/* how to detect at startup time */
-    .initializer    = garmin_init,	/* initialize the device */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = garmin_detect,	/* how to detect at startup time */
+    .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
+    .configurator   = garmin_configure,	/* eable what we need */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1119,9 +1124,10 @@ struct gps_type_t garmin_ser_binary =
     .typename       = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = NULL,        	/* how to detect at startup time */
-    .initializer    = NULL,        	/* initialize the device */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,        	/* how to detect at startup time */
+    .probe_subtype  = NULL,        	/* initialize the device */
+    .configurator   = garmin_configure,	/* eable what we need */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */

@@ -106,7 +106,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static void nmea_initializer(struct gps_device_t *session)
+static void nmea_probe_subtype(struct gps_device_t *session)
 {
 #ifdef NMEA_ENABLE
     /*
@@ -146,9 +146,9 @@ static struct gps_type_t nmea = {
     .typename       = "Generic NMEA",	/* full name of type */
     .trigger        = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = NULL,		/* no probe */
-    .initializer    = nmea_initializer,	/* probe for special types */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = nmea_probe_subtype,	/* probe for special types */
     .configurator   = nmea_configurator,/* enable what we need */
     .get_packet     = packet_get,		/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
@@ -196,10 +196,10 @@ static struct gps_type_t garmin = {
     .typename       = "Garmin Serial",	/* full name of type */
     .trigger        = "$PGRMC",		/* Garmin private */
     .channels       = 12,		/* not used by this driver */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = NULL,		/* no probe */
-    .initializer    = NULL,		/* no further qurying we can do */
-    .configurator   = garmin_nmea_configurator,/* probe for special types */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype   = NULL,		/* no further querying */
+    .configurator   = garmin_nmea_configurator,/* enable what we need */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
@@ -222,9 +222,9 @@ static struct gps_type_t fv18 = {
     .typename       = "San Jose Navigation FV18",	/* full name of type */
     .trigger        = FV18_PROBE,	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe          = NULL,		/* mo probe */
-    .initializer    = NULL,		/* to be sent unconditionally */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* mo probe */
+    .probe_subtype   = NULL,		/* to be sent unconditionally */
     .get_packet     = packet_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
@@ -247,7 +247,7 @@ static struct gps_type_t fv18 = {
  *
  **************************************************************************/
 
-static void sirf_initializer(struct gps_device_t *session)
+static void sirf_probe_subtype(struct gps_device_t *session)
 {
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
 }
@@ -290,10 +290,10 @@ static struct gps_type_t sirf_nmea = {
     .trigger       = NULL,		/* let the binary driver have it */
 #endif /* SIRF_ENABLE */
     .channels      = 12,		/* not used by the NMEA parser */
-    .wakeup        = NULL,		/* no wakeup to be done before hunt */
-    .probe         = NULL,		/* no probe */
-    .initializer   = sirf_initializer,	/* probe for typpe info */
-    .configurator   = sirf_configurator,	/* turn off debuging messages */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = sirf_probe_subtype,	/* probe for typpe info */
+    .configurator  = sirf_configurator,	/* turn off debuging messages */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,		/* write RTCM data straight */
@@ -320,7 +320,7 @@ static struct gps_type_t sirf_nmea = {
  * and was replaced by the Zodiac EarthMate.
  */
 
-static void tripmate_initializer(struct gps_device_t *session)
+static void tripmate_probe_subtype(struct gps_device_t *session)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     (void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
@@ -336,10 +336,10 @@ static struct gps_type_t tripmate = {
     .typename      = "Delorme TripMate",	/* full name of type */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
-    .wakeup        = NULL,			/* no wakeup before hunt */
-    .probe         = NULL,			/* no probe */
-    .initializer   = tripmate_initializer,	/* send unconditionally */
-    .configurator   = tripmate_configurator,	/* send unconditionally */
+    .probe_wakeup  = NULL,			/* no wakeup before hunt */
+    .probe_detect  = NULL,			/* no probe */
+    .probe_subtype = tripmate_probe_subtype,	/* send unconditionally */
+    .configurator  = tripmate_configurator,	/* send unconditionally */
     .get_packet    = packet_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
@@ -373,13 +373,13 @@ static void earthmate_close(struct gps_device_t *session)
     /*@i@*/session->device_type = &earthmate;
 }
 
-static void earthmate_initializer(struct gps_device_t *session)
+static void earthmate_probe_subtype(struct gps_device_t *session)
 {
     (void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
     (void)usleep(10000);
     /*@i@*/session->device_type = &zodiac_binary;
     zodiac_binary.wrapup = earthmate_close;
-    if (zodiac_binary.initializer) zodiac_binary.initializer(session);
+    if (zodiac_binary.probe_subtype) zodiac_binary.probe_subtype(session);
 }
 
 /*@ -redef @*/
@@ -387,9 +387,9 @@ static struct gps_type_t earthmate = {
     .typename      = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
-    .wakeup        = NULL,		/* no wakeup to be done before hunt */
-    .probe         = NULL,			/* no probe */
-    .initializer   = earthmate_initializer,	/* switch us to Zodiac mode */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,			/* no probe */
+    .probe_subtype = earthmate_probe_subtype,	/* switch us to Zodiac mode */
     .configurator  = NULL,			/* no configuration here */
     .get_packet    = packet_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
@@ -454,7 +454,7 @@ static int literal_send(int fd, const char *fmt, ... )
     }
 }
 
-static void itrax_initializer(struct gps_device_t *session)
+static void itrax_probe_subtype(struct gps_device_t *session)
 /* start it reporting */
 {
     /* initialize GPS clock with current system time */ 
@@ -516,9 +516,9 @@ static struct gps_type_t itrax = {
     .typename      = "iTrax",		/* full name of type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels      = 12,		/* consumer-grade GPS */
-    .wakeup         = NULL,		/* no wakeup to be done before hunt */
-    .probe         = NULL,		/* no probe */
-    .initializer   = itrax_initializer,	/* initialize */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype  = itrax_probe_subtype,	/* initialize */
     .configurator  = itrax_configurator,/* set synchronous mode */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
@@ -554,9 +554,9 @@ static struct gps_type_t rtcm104 = {
     .typename      = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
-    .wakeup        = NULL,		/* no wakeup to be done before hunt */
-    .probe         = NULL,		/* no probe */
-    .initializer   = NULL,		/* no initializer */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = NULL,		/* no subtypes */
     .configurator  = NULL,		/* no configurator */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */

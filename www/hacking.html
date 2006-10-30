@@ -778,9 +778,10 @@ line, the interpreter switches to its driver.</p>
 <p>When a driver switch takes place, the old driver's wrapup method is
 called.  Then the new driver's initializer method is called.</p>
 
-<p>A good thing to send from the NMEA initializer is probe strings.  These are
-strings which should elicit an identifying response from the GPS that
-you can use as a trigger string for a native-mode driver.</p>
+<p>A good thing to send from the NMEA probe_subtype method is probe
+strings.  These are strings which should elicit an identifying
+response from the GPS that you can use as a trigger string for a
+native-mode driver.</p>
 
 <p>Don't worry about probe strings messing up GPSes they aren't meant for.
 In general, all GPSes have rather rigidly defined packet formats with
@@ -809,7 +810,7 @@ See the Garmin binary driver for an example.</p>
 <h3 id="reports">Where to put the data you get from the GPS</h3>
 
 <p>Your driver should put new data from each incoming packet or sentence
-in the 'newdata' member of the GPS, and return a validity flag mask
+in the 'gpsdata' member of the GPS, and return a validity flag mask
 telling what members were updated (all float members are initially set -->
 to not-a-number. as well).  There is driver-independent code
 that will be responsible for merging that new data into the existing

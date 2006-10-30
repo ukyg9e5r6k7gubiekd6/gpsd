@@ -169,10 +169,10 @@ void gpsd_set_speed(struct gps_device_t *session,
 	struct gps_type_t **dp;
 	if (session->device_type == NULL) {
 	    for (dp = gpsd_drivers; *dp; dp++)
-		if ((*dp)->wakeup != NULL)
-		    (*dp)->wakeup(session);
-	} else if (session->device_type->wakeup != NULL)
-	    session->device_type->wakeup(session);
+		if ((*dp)->probe_wakeup != NULL)
+		    (*dp)->probe_wakeup(session);
+	} else if (session->device_type->probe_wakeup != NULL)
+	    session->device_type->probe_wakeup(session);
     }
     packet_reset(session);
 }
@@ -203,11 +203,11 @@ int gpsd_open(struct gps_device_t *session)
 
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
-	    if ((*dp)->probe!=NULL && (*dp)->probe(session)!=0) {
+	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
 		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
 		/*@i1@*/session->device_type = *dp;
-		if (session->device_type->initializer)
-		    session->device_type->initializer(session);
+		if (session->device_type->probe_subtype)
+		    session->device_type->probe_subtype(session);
 #ifdef ALLOW_RECONFIGURE
 		if (session->device_type->configurator)
 		    session->device_type->configurator(session);
