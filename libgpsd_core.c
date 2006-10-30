@@ -41,10 +41,11 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    if (session->device_type != NULL && session->device_type->wrapup != NULL)
 		session->device_type->wrapup(session);
 	    /*@i@*/session->device_type = *dp;
-	    if (session->device_type->probe_subtype)
+	    if (session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session);
 #ifdef ALLOW_RECONFIGURE
-	    if (session->device_type->configurator)
+	    if (session->context->enable_reconfigure 
+			&& session->device_type->configurator != NULL)
 		session->device_type->configurator(session);
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;

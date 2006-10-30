@@ -77,23 +77,24 @@ static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
-    .valid        = 0, 
-    .sentdgps     = false, 
-    .dgnss_service  = dgnss_none,
-    .fixcnt       = 0, 
-    .dsock        = -1, 
-    .dgnss_privdata = NULL,
-    .rtcmbytes    = 0, 
-    .rtcmbuf      = {'\0'}, 
-    .rtcmtime     = 0,
-    .leap_seconds = LEAP_SECONDS, 
-    .century      = CENTURY_BASE, 
+    .enable_reconfigure = true,
+    .valid              = 0, 
+    .sentdgps           = false, 
+    .dgnss_service      = dgnss_none,
+    .fixcnt             = 0, 
+    .dsock              = -1, 
+    .dgnss_privdata     = NULL,
+    .rtcmbytes          = 0, 
+    .rtcmbuf            = {'\0'}, 
+    .rtcmtime           = 0,
+    .leap_seconds       = LEAP_SECONDS, 
+    .century            = CENTURY_BASE, 
 #ifdef NTPSHM_ENABLE
-    .enable_ntpshm = false,
-    .shmTime      = {0},
-    .shmTimeInuse = {0},
+    .enable_ntpshm      = false,
+    .shmTime            = {0},
+    .shmTimeInuse       = {0},
 # ifdef PPS_ENABLE
-    .shmTimePPS   = false,
+    .shmTimePPS         = false,
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 };

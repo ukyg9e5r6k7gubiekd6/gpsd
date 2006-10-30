@@ -43,7 +43,10 @@ enum isgpsstat_t {
 #define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
 
 struct gps_context_t {
-    int valid;				/* member validity flags */
+#ifdef ALLOW_RECONFIGURE
+    bool enable_reconfigure;		/* OK to hack GPS settings? */ 
+#endif /* ALLOW_RECONFIGURE */
+   int valid;				/* member validity flags */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPS report? */
