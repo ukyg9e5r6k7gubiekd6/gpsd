@@ -149,7 +149,7 @@ struct gps_device_t {
     size_t outbuflen;
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */
-    char subtype[32];			/* firmware version or subtype ID */
+    char subtype[64];			/* firmware version or subtype ID */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE
     int shmindex;
