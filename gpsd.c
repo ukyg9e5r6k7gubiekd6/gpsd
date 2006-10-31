@@ -531,8 +531,9 @@ static bool allocation_policy(struct gps_device_t *channel,
 /*@ -branchstate -usedef -globstate @*/
 static bool assign_channel(struct subscriber_t *user)
 {
+    bool was_unassigned = (user->device == NULL);
     /* if subscriber has no device... */
-    if (user->device == NULL) {
+    if (was_unassigned) {
 	double most_recent = 0;
 	struct gps_device_t *channel;
 
@@ -575,12 +576,20 @@ static bool assign_channel(struct subscriber_t *user)
 			    strlen(user->device->gpsdata.gps_device));
 		(void)write(user->fd, "\r\n", 2);
 	    }
-	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
-	    notify_watchers(user->device, "GPSD,I=%s\r\n", 
-			    user->device->device_type->typename);
 	}
     }
 
+    if (user->watcher && was_unassigned) {
+	char buf[BUFSIZ];
+	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s", 
+		       timestamp(), user->device->device_type->typename);
+	if (user->device->subtype[0] != '\0') {
+	    (void)strlcat(buf, " ", sizeof(buf));
+	    (void)strlcat(buf, user->device->subtype, sizeof(buf));
+	}
+	(void)strlcat(buf, "\r\n", sizeof(buf));
+	(void)write(user->fd, buf, strlen(buf));
+    }
     return true;
 }
 /*@ +branchstate +usedef +globstate @*/
