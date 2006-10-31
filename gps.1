@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPS" "1" "10/30/2006" "9 Aug 2004" "9 Aug 2004"
+.TH "GPS" "1" "10/31/2006" "9 Aug 2004" "9 Aug 2004"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -15,7 +15,7 @@ gps, xgps, xgpsspeed, cgps, cgpxlogger \- test clients for gpsd
 .HP 10
 \fBxgpsspeed\fR [\-rv] [\fIX\-options\fR] [\-h] [\-V] [\-nc\ \fIX\-color\fR] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .HP 5
-\fBcgps\fR [\-h] [\-j] [\-s] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
+\fBcgps\fR [\-h] [\-j] [\-V] [\-speedunits\ {[mph]\ [kph]\ [knots]}] [\-altunits\ {[feet]\ [meters]}] [\-l\ [[d]\ [m]\ [s]]] [\fIserver\fR [\fI:port\fR [\fI:device\fR]]]
 .HP 10
 \fBgpxlogger\fR [\fIlogfile\fR]
 .HP 11
@@ -51,10 +51,6 @@ for a client\-side way to do something similar).
 The
 \fB\-l\fR
 option sets the format of latitude and longitude reports. The value 'd' produces decimal degrees and is the default. The value 'm' produces degrees and decimal minutes. The value 's' produces degrees, minutes, and decimal seconds.
-.PP
-The
-\fB\-s\fR
-option sets the number of received sentences to process after any fix is received before blanking any field. By default it is set to 0, so you see each update exactly as it is sent. Setting it to a higher value prevents annoying display flicker on NMEA devices that send several difference sentence types per update cycle, only one of which is a true fix. (This option is redundant with the GPSD J request and may be removed in the future.)
 .PP
 There is a known bug in
 xgps; it assumes the default font size is no more than 18 pixels. If this is not the case, the satellite data display will show fewer than 12 satellites.
