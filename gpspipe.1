@@ -2,7 +2,7 @@
 .\" It was generated using the DocBook XSL Stylesheets (version 1.69.1).
 .\" Instead of manually editing it, you probably should edit the DocBook XML
 .\" source for it and then use the DocBook XSL Stylesheets to regenerate it.
-.TH "GPSPIPE" "1" "10/30/2006" "03 Aug 2005" "03 Aug 2005"
+.TH "GPSPIPE" "1" "10/31/2006" "03 Aug 2005" "03 Aug 2005"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -19,9 +19,7 @@ is a tool to connect to
 gpsd
 and output the received sentences to stdout. This makes the program useful as a pipe from
 gpsd
-to another program or file. Presently it only connects to
-gpsd
-on the localhost on the default port (2947).
+to another program or file.
 .PP
 gpspipe
 does not require root privileges, and can be run concurrently with other tools connecting to the local
@@ -32,7 +30,7 @@ The output will consist of one or both of the raw NMEA or native
 gpsd
 sentences. Each line can be optionally time stamped. There is also an option to exit gracefully after a given count of packets.
 .PP
-An optional argument may specify a server to get data from; a colon\-separated suffix is taken as a port number.
+An optional argument may specify a server to get data from; a colon\-separated suffix is taken as a port number. If omitted, it connects to localhost on the default port (2947).
 .SH "OPTIONS"
 .PP
 \-h makes
@@ -43,7 +41,11 @@ print a usage message and exit.
 .PP
 \-R causes super\-raw (gps binary) data to be output. This overrides NMEA and gpsd output modes.
 .PP
-\-s option causes the collected data to be written to the specified serial device.
+\-s option causes the collected data to be written to the specified serial device with setttings 4800 8N1. Thus
+gpspipe
+can be used with \-s and \-r options to emulate a serial port hardwired to a GPS that
+gpsd
+is managing.
 .PP
 \-w causes native
 gpsdsentences to be output.

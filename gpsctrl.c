@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 	exit(status);
     } else {
 	/* access to the daemon failed, use the low-level facilities */
-	struct gps_context_t	context;
+	static struct gps_context_t	context;	/* start it zeroed */
 	struct gps_device_t	session;
 
 	if (device == NULL) {

@@ -35,9 +35,7 @@
 <para><application>gpspipe</application> is a tool to connect
 to <application>gpsd</application> and output the received
 sentences to stdout.  This makes the program useful as a pipe from
-<application>gpsd</application> to another program or file.  Presently
-it only connects to <application>gpsd</application> on the localhost on
-the default port (2947). </para>
+<application>gpsd</application> to another program or file. </para>
 
 <para><application>gpspipe</application> does not require root
 privileges, and can be run concurrently with other tools connecting
@@ -49,7 +47,8 @@ time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
 
 <para>An optional argument may specify a server to get data from; a
-colon-separated suffix is taken as a port number.</para>
+colon-separated suffix is taken as a port number. If omitted, it
+connects to localhost on the default port (2947).</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
@@ -63,7 +62,10 @@ a usage message and exit.</para>
 NMEA and gpsd output modes.</para>
 
 <para>-s option causes the collected data to be written to the
-specified serial device.</para>
+specified serial device with setttings 4800 8N1.  Thus
+<application>gpspipe</application> can be used with -s and -r options
+to emulate a serial port hardwired to a GPS that
+<application>gpsd</application> is managing.</para>
 
 <para>-w causes native <application>gpsd</application>sentences to be
 output.</para>

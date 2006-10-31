@@ -16,11 +16,13 @@ Massimo Burcher reported that it broke somewhere between rev 3654 and
 
 ***  Mode-switcher code for Garmin binary GPSes is not tested
 
-Gary Miller just rewrote the Garmin binary support.  It requires
-a tool to switch between binary and NMEA codes.  There is experimental
-untested code to do this via gpsctrl, but it could do anything 
-including make bats fly out of your nose.  The new Garmin driver
-and gpsctrl should be much more solid in the next point release.
+Gary Miller just rewrote the Garmin binary support in a different mode
+to work around a bug in the Linux 2.16 tty layer.  The new driver
+requires a tool to switch between binary and NMEA modes.  There is
+experimental untested code to do this via gpsctrl, but it could do
+anything including make bats fly out of your nose.  The new Garmin
+driver and gpsctrl should be much more solid in the next point
+release.
 
 *** PGRMEs in generated raw-mode NMEA from SiRFs and Evermores look wrong
 
@@ -104,6 +106,11 @@ binutils 2.16.1 or later avoids it.
 
 ** To do:
 
+*** New features for xgps.
+
+Add J option checkbox.  Display GPS type.  Embed the speedometer
+widget from xgpspeed in some of the unused space.
+
 *** Integrate udev support in the RPM installation
 
 Currently gpsd includes udev support that seems to work in the source
@@ -114,10 +121,10 @@ get done someday.
 
 *** Merge cgps and xgps
 
-cgps and xgps should merge into a single test client that honors the
+Possibly cgps and xgps should merge into a single test client that honors the
 GPSD_UNITS environment variable and chooses its UI mode depending on
-whether or not it's running under X.  A good small project for someone
-who doesn't want to get into the full complexity of the daemon code.
+whether or not it's running under X.  There is controversy about this 
+proposal on the dev list.
 
 *** send/expect for the NMEA driver initializer
 
