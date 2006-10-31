@@ -761,10 +761,14 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
 	    break;
 	case 'I':
-	    if (assign_channel(sub) && sub->device->device_type!=NULL)
+	    if (assign_channel(sub) && sub->device->device_type!=NULL) {
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
 			 sub->device->device_type->typename);
-	    else
+		if (sub->device->subtype[0]) {
+		    (void)strlcat(phrase, " ", sizeof(phrase));
+		    (void)strlcat(phrase, sub->device->subtype, sizeof(phrase));
+		}
+	    } else
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
 	case 'J':

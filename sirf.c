@@ -269,6 +269,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     case 0x06:		/* Software Version String */
 	gpsd_report(4, "FV  0x06: Firmware version: %s\n", buf+1);
+	(void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
 	fv = atof((char *)(buf+1));
 	if (fv < 231) {
 	    session->driver.sirf.driverstate |= SIRF_LT_231;
