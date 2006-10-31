@@ -9,6 +9,24 @@ the hacking.html file in the www subdirectory or on the project website.
 
 ** Bugs in gpsd and its clients:
 
+*** Support for the True North magnetic compass is currently broken
+
+Massimo Burcher reported that it broke somewhere between rev 3654 and
+3722.  This should be fixed in the next point release.
+
+***  Mode-switcher code for Garmin binary GPSes is not tested
+
+Gary Miller just rewrote the Garmin binary support.  It requires
+a tool to switch between binary and NMEA codes.  There is experimental
+untested code to do this via gpsctrl, but it could do anything 
+including make bats fly out of your nose.  The new Garmin driver
+and gpsctrl should be much more solid in the next point release.
+
+*** PGRMEs in generated raw-mode NMEA from SiRFs and Evermores look wrong
+
+Petr Slansky reports that the generated PGRME has too many zero 
+values relative to the supposedly equivalent E response.
+
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
