@@ -9,6 +9,6 @@
 *epv*labelString:        EPV
 *climb*labelString:      Climb
 *status*labelString: Status   
-*quit*labelString:       Quit     
+!*quit*labelString:       Quit     
 *speedunits:             mph
 *altunits:               feet

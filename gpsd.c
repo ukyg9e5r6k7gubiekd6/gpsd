@@ -569,13 +569,15 @@ static bool assign_channel(struct subscriber_t *user)
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
-		(void)write(user->fd, "F=", 2);
+		(void)write(user->fd, "GPSD,F=", 7);
 		(void)write(user->fd, 
 			    user->device->gpsdata.gps_device,
 			    strlen(user->device->gpsdata.gps_device));
 		(void)write(user->fd, "\r\n", 2);
 	    }
 	    notify_watchers(user->device, "GPSD,X=%f\r\n", timestamp());
+	    notify_watchers(user->device, "GPSD,I=%s\r\n", 
+			    user->device->device_type->typename);
 	}
     }
 
@@ -1659,6 +1661,8 @@ int main(int argc, char *argv[])
 		if ((buflen = (int)read(sub->fd, buf, sizeof(buf) - 1)) <= 0) {
 		    detach_client(sub);
 		} else {
+		    if (buf[buflen-1] != '\n')
+			buf[buflen++] = '\n';
 		    buf[buflen] = '\0';
 		    gpsd_report(1, "<= client(%d): %s", sub_index(sub), buf);
 

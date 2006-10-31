@@ -654,7 +654,8 @@ client each time the GPS gets either a fix update or a satellite
 picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
 response.  Additionally, watching clients get notifications in the
 form X=0 or X=%f when the online/offline status of the GPS
-changes.</para>
+changes, and an I response giving the device type when the 
+user is assigned a device.</para>
 
 <para>Clients should be prepared for the possibility that additional
 fields (such as heading or roll/pitch/yaw) may be added to the O

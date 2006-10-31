@@ -108,8 +108,8 @@ binutils 2.16.1 or later avoids it.
 
 *** New features for xgps.
 
-Add J option checkbox.  Display GPS type.  Embed the speedometer
-widget from xgpspeed in some of the unused space.
+Add J option checkbox.  Maybe embed the speedometer widget from
+xgpspeed in some of the unused space and nuke xgpsspeed.
 
 *** Integrate udev support in the RPM installation
 
