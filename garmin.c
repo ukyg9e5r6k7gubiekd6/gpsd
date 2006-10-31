@@ -422,8 +422,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    gpsd_report(3, "PVT RMD Sat: %3u, cycles: %9lu, pr: %16.6f, phase: %7.3f, slp_dtct: %3s, snr: %3u, Valid: %3s\n"
 		, rmd->sv[i].svid + 1, rmd->sv[i].cycles, rmd->sv[i].pr
                 , (rmd->sv[i].phase * 360.0)/2048.0
-                , rmd->sv[i].slp_dtct ? "Yes" : "No"
-                , rmd->sv[i].snr_dbhz, rmd->sv[i].valid ? "Yes" : "No");
+                , rmd->sv[i].slp_dtct!='\0' ? "Yes" : "No"
+                , rmd->sv[i].snr_dbhz, rmd->sv[i].valid!='\0' ? "Yes" : "No");
 	}
 	break;
 
@@ -476,7 +476,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	break;
     default:
 	gpsd_report(3, "Unknown packet id: %#02x, Sz: %#02x, pkt:%s\n"
-		, pkt_id, pkt_len, gpsd_hexdump(buf, pkt_len));
+		    , pkt_id, pkt_len, gpsd_hexdump(buf, (size_t)pkt_len));
 	break;
     }
     gpsd_report(3, "PrintSERPacket(, %#02x, %#02x, ) = %#02x\n"
@@ -505,7 +505,10 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t *pkt)
 // gem
     if ( DLE == pkt->mPacketType) {
 	    gpsd_report(3, "really a SER packet!\n");
-            return PrintSERPacket ( session,  buffer[1], buffer[2], buffer + 3);
+            return PrintSERPacket ( session,  
+				    (unsigned char)buffer[1], 
+				    (int)buffer[2], 
+				    (unsigned char*)(buffer + 3));
     }
 
 // gem
@@ -638,7 +641,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
         uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	ssize_t theBytesReturned = 0;
-	ssize_t theBytesToWrite = 6 + length;
+	ssize_t theBytesToWrite = 6 + (ssize_t)length;
         uint8_t chksum = 0;
 
 	*buffer++ = (uint8_t)DLE;
@@ -675,12 +678,15 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 
 #if 1
         gpsd_report(4, "SendPacket(), writing %d bytes: %s\n"
-		, theBytesToWrite, gpsd_hexdump(thePacket, theBytesToWrite));
+		    , theBytesToWrite, gpsd_hexdump(thePacket, (size_t)theBytesToWrite));
 #endif
-        (void)PrintSERPacket ( session,  buffer[1], buffer[2], buffer + 3);
+        (void)PrintSERPacket ( session,  
+			       (unsigned char)buffer[1], 
+			       (int)buffer[2], 
+			       (unsigned char *)(buffer + 3));
 
 	theBytesReturned = write( session->gpsdata.gps_fd
-		    , thePacket, theBytesToWrite);
+				  , thePacket, (size_t)theBytesToWrite);
 	gpsd_report(4, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
 }
@@ -707,7 +713,7 @@ static bool garmin_detect(struct gps_device_t *session)
 
     FILE *fp = NULL;
     char buf[256];
-    int ok = 0;
+    bool ok = false;
 
     /* check for garmin USB serial driver -- very Linux-specific */
     if (access("/sys/module/garmin_gps", R_OK) != 0) {
@@ -720,10 +726,10 @@ static bool garmin_detect(struct gps_device_t *session)
         return false;
     }
 
-    ok = 0;
+    ok = false;
     while ( 0 < fread( buf, sizeof(buf), 1, fp ) ) {
 	if ( strstr( buf, "garmin_gps") ) {
-		ok = 1;
+		ok = true;
 		break;
 	}
     }
@@ -774,7 +780,7 @@ static bool garmin_detect(struct gps_device_t *session)
         , PRIV_PKTID_SET_MODE, 4, MODE_GARMIN_SERIAL);
     // expect no return packet !?
 
-    return 1;
+    return true;
 }
 
 static void garmin_probe_subtype(struct gps_device_t *session)
@@ -958,6 +964,47 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 }
 /*@ -charint @*/
 
+static void settle(void)
+{
+    struct timespec delay, rem;
+    /*@ -type -unrecog @*/
+    memset( &delay, 0, sizeof(delay));
+    delay.tv_sec = 0;
+    delay.tv_nsec = 333000000L;
+    nanosleep(&delay, &rem);
+    /*@ +type +unrecog @*/
+}
+
+static void garmin_switcher(struct gps_device_t *session, int mode)
+{
+#ifdef ALLOW_RECONFIGURE
+    if (mode == 0) {
+	const char *switcher = "\x10\x0A\x02\x26\x00\xCE\x10\x03";
+	int status = (int)write(session->gpsdata.gps_fd, 
+				switcher, strlen(switcher));
+	if (status == (int)strlen(switcher)) {
+	    gpsd_report(2, "=> GPS: turn off binary %02x %02x %02x... \n"
+			, switcher[0], switcher[1], switcher[2]);
+	} else {
+	    gpsd_report(0, "=> GPS: FAILED\n");
+	}
+	settle(); // wait 333mS, essential!
+
+	/* once a sec, no binary, no averaging, NMEA 2.3, WAAS */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,1");
+	//(void)nmea_send(fd, "$PGRMC1,1,1,1,,,,2,W,N");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
+	settle();    // wait 333mS, essential!
+    } else {
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
+	// garmin serial binary is 9600 only!
+	gpsd_report(0, "NOTE: Garmin binary is 9600 baud only!\n");
+	settle();	// wait 333mS, essential!
+    }
+#endif /* ALLOW_RECONFIGURE */
+}
+
 /* this is everything we export */
 #ifdef __UNUSED__
 static int GetPacket (struct gps_device_t *session );
@@ -1132,7 +1179,7 @@ struct gps_type_t garmin_ser_binary =
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
-    .mode_switcher  = NULL,		/* no mode switcher */
+    .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
     .wrapup         = NULL,	        /* close hook */
