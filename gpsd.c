@@ -377,7 +377,7 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
     return NULL;
 }
 
-static void detach_client(/*@only@*/ /*@out@*/struct subscriber_t *sub)
+static void detach_client(struct subscriber_t *sub)
 {
     (void)close(sub->fd);
     gpsd_report(4, "detaching %d in detach_client\n", sub_index(sub));
@@ -386,7 +386,7 @@ static void detach_client(/*@only@*/ /*@out@*/struct subscriber_t *sub)
     sub->raw = 0;
     sub->watcher = false;
     sub->active = 0;
-    sub->device = NULL;
+    /*@i1@*/sub->device = NULL;
     sub->buffer_policy = casoc;
     sub->fd = -1;
 }
