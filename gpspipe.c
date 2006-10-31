@@ -115,19 +115,19 @@ int main( int argc, char **argv)
 	    count = strtol(optarg, 0, 0);
 	    break;
 	case 'r':
-	    strlcat(buf, "r=1;", sizeof(buf));
+	    (void)strlcat(buf, "r=1;", sizeof(buf));
 	    break;
 	case 'R':
-	    strlcat(buf, "r=2;", sizeof(buf));
+	    (void)strlcat(buf, "r=2;", sizeof(buf));
 	    break;
 	case 't':
 	    timestamp = true;
 	    break;
 	case 'w':
-	    strlcat(buf, "w=1;", sizeof(buf));
+	    (void)strlcat(buf, "w=1;", sizeof(buf));
 	    break;
 	case 'j':
-	    strlcat(buf, "j=1;", sizeof(buf));
+	    (void)strlcat(buf, "j=1;", sizeof(buf));
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: SVN ID: $Id$ \n", argv[0]);
