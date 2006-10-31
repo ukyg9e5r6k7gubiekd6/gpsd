@@ -246,6 +246,11 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 		    visible,
 		    used);
 	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET | CYCLE_START_SET;
+	if (session->subtype[0] == '\0') {
+	    (void)snprintf(session->subtype, sizeof(session->subtype), 
+		       "%3.2f", version);
+	    mask |= DEVICEID_SET;
+	}
 	return mask;
 
     case 0x04:	/* DOP Data Output */

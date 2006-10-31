@@ -1595,6 +1595,18 @@ int main(int argc, char *argv[])
 		    notify_watchers(channel, "GPSD,X=0\r\n");
 		}
 		else {
+		    /* handle laggy response to a firmware version query*/
+		    if ((changed & DEVICEID_SET) != 0) {
+			char id[NMEA_MAX];
+			(void)snprintf(id, sizeof(id), "GPSD,I=%s", 
+				       sub->device->device_type->typename);
+			if (sub->device->subtype[0] != '\0') {
+			    (void)strlcat(id, " ", sizeof(id));
+			    (void)strlcat(id,sub->device->subtype,sizeof(id));
+			}
+			(void)strlcat(id, "\r\n", sizeof(id));
+			notify_watchers(sub->device, id);
+		    }
 		    /* copy/merge channel data into subscriber fix buffers */
 		    for (sub = subscribers;
 			 sub < subscribers + MAXSUBSCRIBERS;

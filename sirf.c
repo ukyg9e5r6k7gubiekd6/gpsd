@@ -299,7 +299,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
 #endif /* ALLOW_RECONFIGURE */
-	return 0;
+	return DEVICEID_SET;
 
     case 0x07:		/* Clock Status Data */
 	gpsd_report(4, "CLK 0x07\n");
