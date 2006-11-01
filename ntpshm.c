@@ -156,7 +156,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
     if (session->shmindex < 0 || session->shmTimeP < 0 ||
 	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
-	(shmTimeP = session->context->shmTime[session->shmindex]) == NULL)
+	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
     /* check if received time messages are within locking range */
