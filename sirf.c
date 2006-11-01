@@ -120,9 +120,10 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "SiRF NMEA");
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
-	session->gpsdata.driver_mode = 0;
-    }
+	session->gpsdata.driver_mode = 0;	/* NMEA */
+    } else
 #endif /* ALLOW_RECONFIGURE */
+	session->gpsdata.driver_mode = 1;	/* binary */
 }
 
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -686,12 +687,12 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 
     if (session->packet_type == SIRF_PACKET){
 	st = sirf_parse(session, session->outbuffer, session->outbuflen);
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet_type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->outbuffer, session);
-	session->gpsdata.driver_mode = 0;
+	session->gpsdata.driver_mode = 0;	/* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else

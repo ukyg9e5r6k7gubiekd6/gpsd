@@ -288,6 +288,7 @@ static void sirf_mode(struct gps_device_t *session, int mode)
     if (mode == 1) {
 	(void)gpsd_switch_driver(session, "SiRF binary");
 	session->gpsdata.driver_mode = (unsigned int)sirf_switcher(session, 0, session->gpsdata.baudrate);
+	session->gpsdata.driver_mode = 1;
     } else
 	session->gpsdata.driver_mode = 0;
 }

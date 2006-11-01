@@ -243,7 +243,7 @@ int main(int argc, char **argv)
 		}
 	    }
 	    else if (to_binary) {
-		if (session.gpsdata.driver_mode == 0)
+		if (session.gpsdata.driver_mode == 1)
 		    (void)fprintf(stderr, "gpsctrl: already in native mode.\n");
 		else {
 		    session.device_type->mode_switcher(&session, 1);

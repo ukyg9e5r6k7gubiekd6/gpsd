@@ -66,12 +66,12 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 
     if (session->packet_type == ITALK_PACKET){
 	st = italk_parse(session, session->outbuffer, session->outbuflen);
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet_type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->outbuffer, session);
-	session->gpsdata.driver_mode = 0;
+	session->gpsdata.driver_mode = 0;	/* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -100,8 +100,9 @@ static void italk_mode(struct gps_device_t *session, int mode)
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "Generic NMEA");
 	(void)italk_set_mode(session, session->gpsdata.baudrate, false);
-	session->gpsdata.driver_mode = 0;
-    }
+	session->gpsdata.driver_mode = 0;	/* NMEA */
+    } else
+	session->gpsdata.driver_mode = 1;	/* binary */
 }
 
 static void italk_configurator(struct gps_device_t *session)

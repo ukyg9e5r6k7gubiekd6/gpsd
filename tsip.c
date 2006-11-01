@@ -683,13 +683,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     if (session->packet_type == TSIP_PACKET){
 	st = tsip_analyze(session);
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef EVERMORE_ENABLE
     } else if (session->packet_type == EVERMORE_PACKET) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
 	st = evermore_parse(session, session->outbuffer, session->outbuflen);
-	session->gpsdata.driver_mode = 0;
+	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #endif /* EVERMORE_ENABLE */
     } else
