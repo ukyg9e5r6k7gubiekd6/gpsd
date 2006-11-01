@@ -200,7 +200,9 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
-    gpsd_report(5, "ntpshm_pps: precision %d\n",shmTimeP->precision);
+    gpsd_report(5, "ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
+	, (unsigned long)seconds, (unsigned long)tv->tv_sec
+        , (unsigned long)tv->tv_usec, shmTimeP->precision);
     return 1;
 }
 #endif /* PPS_ENABLE */

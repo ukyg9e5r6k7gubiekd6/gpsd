@@ -165,6 +165,9 @@ static void *gpsd_ppsmonitor(void *arg)
 #undef timediff
 	    if ( 800000 > duration) {
 		/* less then 800mS, duration too short for anything */
+                gpsd_report(5, 
+                     "PPS pulse rejected too short. cycle: %d, duration: %d\n",
+		     cycle, duration);
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
                 /* looks like PPS pulse */
 		(void)ntpshm_pps(session, &tv);
@@ -175,7 +178,9 @@ static void *gpsd_ppsmonitor(void *arg)
                 gpsd_report(5, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 		     cycle, duration);
 	    }
-	}
+	} else {
+                gpsd_report(5, "PPS pulse rejected. No fix.\n");
+        }
 	/*@ -boolint @*/
 
 	pulse[state] = tv;
