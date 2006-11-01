@@ -741,6 +741,20 @@ static void sirfbin_configure(struct gps_device_t *session)
 					  0xa6, 0x00, 0x04, 0x03,
 					  0x00, 0x00, 0x00, 0x00,
 					  0x00, 0x00, 0xb0, 0xb3};
+#ifdef __UNUSED__
+	/*
+	 * Might need to send this, turning off the SiRF track-smoothing mode,
+	 * to eliminate a 10-second fix latency some users have reported. See
+	 * <http://gpsd.davisnetworks.com/bin/view/Main/SirfTrackSmoothMode>
+	 * for discussion.
+	 */
+	static unsigned char smoothing_off[] = {0xa0, 0xa2, 0x00, 0x08
+						0x88, 0x00, 0x00, 0x01, 0x00, 
+						0x00, 0x00, 0x00, 0x00, 0x00, 
+						0x00, 0x05, 0x02, 0x00,
+						0x00, 0x00, 0xb0, 0xb3};
+#endif /* __UNUSED__ */
+	}
 	/*@ -charint @*/
 	gpsd_report(4, "Requesting periodic ecef reports...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, requestecef);
