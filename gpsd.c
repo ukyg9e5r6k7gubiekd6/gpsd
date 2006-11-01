@@ -1599,13 +1599,13 @@ int main(int argc, char *argv[])
 		    if ((changed & DEVICEID_SET) != 0) {
 			char id[NMEA_MAX];
 			(void)snprintf(id, sizeof(id), "GPSD,I=%s", 
-				       sub->device->device_type->typename);
-			if (sub->device->subtype[0] != '\0') {
+				       channel->device_type->typename);
+			if (channel->subtype[0] != '\0') {
 			    (void)strlcat(id, " ", sizeof(id));
-			    (void)strlcat(id,sub->device->subtype,sizeof(id));
+			    (void)strlcat(id,channel->subtype,sizeof(id));
 			}
 			(void)strlcat(id, "\r\n", sizeof(id));
-			notify_watchers(sub->device, id);
+			notify_watchers(channel, id);
 		    }
 		    /* copy/merge channel data into subscriber fix buffers */
 		    for (sub = subscribers;
