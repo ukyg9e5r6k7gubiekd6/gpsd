@@ -37,6 +37,7 @@ int main(int argc, char **argv)
     bool to_binary = false, to_nmea = false, lowlevel=false;
     struct gps_data_t *gpsdata;
 
+#define USAGE	"usage: gpsctrl [-b | -n] [-s speed] [-V] <device>\n"
     while ((option = getopt(argc, argv, "bfhns:D:V")) != -1) {
 	switch (option) {
 	case 'b':
@@ -59,13 +60,17 @@ int main(int argc, char **argv)
 	    break;
 	case 'h':
 	default:
-	    fprintf(stderr, "usage: gpsctrl [-b | -n] [-s speed] [-V] <device>\n");
+	    fprintf(stderr, USAGE);
 	    break;
 	}
     }
 
     if (optind < argc)
 	device = argv[optind];
+
+    if (!to_nmea && !to_binary && speed==NULL)
+	(void)fprintf(stderr, USAGE);
+	exit(0);
 
     if (to_nmea && to_binary) {
 	(void)fprintf(stderr, "gpsctrl: make up your mind, would you?\n");
