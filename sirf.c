@@ -436,6 +436,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_report(4, "NLMD 0x1c: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
+    case 0x1d:		/* Navigation Library DGPS Data */
+	gpsd_report(4, "NLDG 0x1d: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
     case 0x1e:		/* Navigation Library SV State Data */
 	gpsd_report(4, "NLSV 0x1e: %s\n", gpsd_hexdump(buf, len));
 	return 0;
