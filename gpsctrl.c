@@ -86,18 +86,10 @@ int main(int argc, char **argv)
     if (optind < argc)
 	device = argv[optind];
 
-    if (!to_nmea && !to_binary && speed==NULL) {
-	(void)fprintf(stderr, USAGE);
-	exit(0);
-    }
-
     if (to_nmea && to_binary) {
 	(void)fprintf(stderr, "gpsctrl: make up your mind, would you?\n");
 	exit(0);
     }
-
-    if (speed==NULL && !to_nmea && !to_binary)
-	exit(0);
 
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
@@ -145,6 +137,15 @@ int main(int argc, char **argv)
 	    exit(1);
 	foundit:
 	    (void)gps_query(gpsdata, "F=%s", device);
+	}
+
+	/* if no control operation was specified, just ID the device */
+	if (speed==NULL && !to_nmea && !to_binary) {
+	    /* the O is to force a device binding */
+	    (void)gps_query(gpsdata, "OFIB");
+	    gpsd_report(0, "gpsctrl: %s identified as %s at %d\n",
+			gpsdata->gps_device,gpsdata->gps_id,gpsdata->baudrate);
+	    exit(0);
 	}
 
 	status = 0;
@@ -198,8 +199,9 @@ int main(int argc, char **argv)
 		exit(2);
 	    }
 	}
-	gpsd_report(1, "gpsctrl: %s looks like a %s\n",
-		      device, session.device_type->typename);
+	gpsd_report(1, "gpsctrl: %s looks like a %s at %d.\n",
+		    device, session.device_type->typename, 
+		    session.gpsdata.baudrate);
 	/* 
 	 * If we've identified this as an NMEA device, we have to eat
 	 * packets for a while to see if one of our probes elicits an
@@ -220,8 +222,14 @@ int main(int argc, char **argv)
 		    break;
 	    }
 	}
-	gpsd_report(1, "gpsctrl: %s identified as a %s\n",
-		      device, session.device_type->typename);
+	gpsd_report(0, "gpsctrl: %s identified as a %s at %d.\n",
+		    device, session.device_type->typename, 
+		    session.gpsdata.baudrate);
+
+	/* if no control operation was specified, we're done */
+	if (speed==NULL && !to_nmea && !to_binary)
+	    exit(0);
+
 	/* now perform the actual control function */
 	status = 0;
 	if (to_nmea || to_binary) {
@@ -263,7 +271,7 @@ int main(int argc, char **argv)
 	    }
 	    else if (!session.device_type->speed_switcher(&session, 
 							  (speed_t)atoi(speed))) {
-		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
+		(void)fprintf(stderr, "gpsctrl: mode change failed.\n");
 		status = 1;
 	    }
 	}

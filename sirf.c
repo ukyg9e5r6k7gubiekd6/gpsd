@@ -118,9 +118,9 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
 #ifdef ALLOW_RECONFIGURE
     if (mode == 0) {
-	(void)gpsd_switch_driver(session, "SiRF NMEA");
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
+	(void)gpsd_switch_driver(session, "SiRF NMEA");
     } else
 #endif /* ALLOW_RECONFIGURE */
 	session->gpsdata.driver_mode = 1;	/* binary */

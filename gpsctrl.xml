@@ -87,8 +87,10 @@ its new speed.</para>
 <para>Display program version and exit.</para>
 </listitem>
 </varlistentry>
-
 </variablelist>
+
+<para>If no options are given, the program will display a message
+identifying the GPS type of the selected device and exit.</para>
 
 </refsect1>
 
