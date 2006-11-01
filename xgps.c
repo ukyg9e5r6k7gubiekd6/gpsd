@@ -190,7 +190,7 @@ static void build_gui(Widget toplevel)
     label_8 = XtCreateManagedWidget("EPV      ", xmLabelWidgetClass, rowColumn_18, args, 0);
     label_9 = XtCreateManagedWidget("Climb    ", xmLabelWidgetClass, rowColumn_19, args, 0);
     label_10= XtCreateManagedWidget("Status   ", xmLabelWidgetClass, rowColumn_20, args, 0);
-    label_11= XtCreateManagedWidget("GPS type:", xmLabelWidgetClass, rowColumn_21, args, 0);
+    label_11= XtCreateManagedWidget("GPS type ", xmLabelWidgetClass, rowColumn_21, args, 0);
 
     /*@ -immediatetrans @*/
     XtSetArg(args[0], XmNcursorPositionVisible, False);
