@@ -314,6 +314,18 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 
 }
 
+void gpsd_assert_sync(struct gps_device_t *session)
+/* to be called when we want to register that we've synced with a device */
+{
+    /*
+     * We've achieved first sync with the device. Remember the
+     * baudrate so we can try it first next time this device
+     * is opened.
+     */
+    if (session->saved_baud == -1)
+	session->saved_baud = (int)cfgetispeed(&session->ttyset);
+}
+
 void gpsd_close(struct gps_device_t *session)
 {
     if (session->gpsdata.gps_fd != -1) {
