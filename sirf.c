@@ -295,7 +295,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_report(4, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
 	session->driver.sirf.time_seen = 0;
 #ifdef ALLOW_RECONFIGURE
-	if (session->saved_baud >= 38400){
+	if (session->gpsdata.baudrate >= 38400){
 	    gpsd_report(4, "Enabling subframe transmission...\n");
 	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
 	}
@@ -334,7 +334,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    gpsd_interpret_subframe(session, words);
 
 #ifdef ALLOW_RECONFIGURE
-	    if (session->saved_baud < 38400){
+	    if (session->gpsdata.baudrate < 38400){
 		gpsd_report(4, "Disabling subframe transmission...\n");
 		(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
 	    }
