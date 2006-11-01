@@ -30,6 +30,24 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     }
 }
 
+static gps_mask_t get_packet(struct gps_device_t *session)
+/* try to get a well-formed packet from the GPS */
+{
+    gps_mask_t fieldmask;
+
+    for (;;) {
+	int waiting = 0;
+	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
+	if (waiting == 0) {
+	    usleep(300);
+	    continue;
+	}
+	fieldmask = gpsd_poll(session);
+	if ((fieldmask &~ ONLINE_SET)!=0)
+	    return fieldmask;
+    }
+}
+
 int main(int argc, char **argv)
 {
     int option, status;
@@ -175,20 +193,36 @@ int main(int argc, char **argv)
 	}
 	/* hunt for packet type and serial parameters */
 	while (session.device_type == NULL) {
-	    int waiting = 0;
-	    (void)ioctl(session.gpsdata.gps_fd, FIONREAD, &waiting);
-	    if (waiting == 0) {
-		usleep(300);
-	        continue;
-	    }
-	    if (gpsd_poll(&session) == ERROR_SET) {
+	    if (get_packet(&session) == ERROR_SET) {
 		(void)fprintf(stderr, "gpsctrl: autodetection failed.\n");
 		exit(2);
 	    }
 	}
-	(void)fprintf(stderr, "gpsctrl: %s identified as a %s\n",
+	gpsd_report(1, "gpsctrl: %s looks like a %s\n",
 		      device, session.device_type->typename);
-
+	/* 
+	 * If we've identified this as an NMEA device, we have to eat
+	 * packets for a while to see if one of our probes elicits an
+	 * ID response telling us that it's really a SiRF or
+	 * something.  If so, the libgpsd(3) layer will automatically
+	 * redispatch to the correct driver type.
+	 */
+#define REDIRECT_SNIFF	10
+	/*
+	 * This is the number of packets we'll look at.  Setting it
+	 * lower increases the risk that we'll miss a reply to a probe.
+	 * Setting it higher makes this tool slower and more annoying.
+	 */
+	if (strcmp(session.device_type->typename, "Generic NMEA") == 0) {
+	    int dummy;
+	    for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
+		if ((get_packet(&session) & DEVICEID_SET)!=0)
+		    break;
+	    }
+	}
+	gpsd_report(1, "gpsctrl: %s identified as a %s\n",
+		      device, session.device_type->typename);
+	/* now perform the actual control function */
 	status = 0;
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
