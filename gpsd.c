@@ -538,6 +538,7 @@ static bool assign_channel(struct subscriber_t *user)
 
 	gpsd_report(4, "client(%d): assigning channel...\n", user-subscribers);
 	/* ...connect him to the most recently active device */
+	/*@ -mustfreeonly @*/
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
 	    if (allocated_channel(channel)) {
 		if (allocation_policy(channel, user, most_recent)) {
@@ -545,6 +546,7 @@ static bool assign_channel(struct subscriber_t *user)
 		    most_recent = channel->gpsdata.sentence_time;
 		}
 	    }
+	/*@ +mustfreeonly @*/
     }
 
     if (user->device == NULL) {
@@ -581,12 +583,7 @@ static bool assign_channel(struct subscriber_t *user)
     if (user->watcher && was_unassigned) {
 	char buf[BUFSIZ];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s", 
-		       timestamp(), user->device->device_type->typename);
-	if (user->device->subtype[0] != '\0') {
-	    (void)strlcat(buf, " ", sizeof(buf));
-	    (void)strlcat(buf, user->device->subtype, sizeof(buf));
-	}
-	(void)strlcat(buf, "\r\n", sizeof(buf));
+		       timestamp(), gpsd_id(user->device));
 	(void)write(user->fd, buf, strlen(buf));
     }
     return true;
@@ -771,11 +768,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	case 'I':
 	    if (assign_channel(sub) && sub->device->device_type!=NULL) {
 		(void)snprintf(phrase, sizeof(phrase), ",I=%s", 
-			 sub->device->device_type->typename);
-		if (sub->device->subtype[0]) {
-		    (void)strlcat(phrase, " ", sizeof(phrase));
-		    (void)strlcat(phrase, sub->device->subtype, sizeof(phrase));
-		}
+			       gpsd_id(sub->device));
 	    } else
 		(void)strlcpy(phrase, ",I=?", BUFSIZ);
 	    break;
@@ -1597,6 +1590,7 @@ int main(int argc, char *argv[])
 		    /* handle laggy response to a firmware version query*/
 		    if ((changed & DEVICEID_SET) != 0) {
 			char id[NMEA_MAX];
+			assert(channel->device_type != NULL);
 			(void)snprintf(id, sizeof(id), "GPSD,I=%s", 
 				       channel->device_type->typename);
 			if (channel->subtype[0] != '\0') {

@@ -250,6 +250,18 @@ static double degtodm(double a)
     return t;
 }
 
+char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
+/* full ID of the device for reports, including subtype */
+{
+    static char buf[128];
+    (void)strlcpy(buf, session->device_type->typename, sizeof(buf));
+    if (session->subtype[0] != '\0') {
+	(void)strlcat(buf, " ", sizeof(buf));
+	(void)strlcat(buf, session->subtype, sizeof(buf));
+    }
+    return(buf);
+}
+
 /*@ -mustdefine @*/
 void gpsd_position_fix_dump(struct gps_device_t *session,
 			    /*@out@*/char bufp[], size_t len)

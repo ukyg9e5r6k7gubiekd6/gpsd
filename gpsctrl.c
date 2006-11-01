@@ -30,6 +30,7 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     }
 }
 
+/*@ -noret @*/
 static gps_mask_t get_packet(struct gps_device_t *session)
 /* try to get a well-formed packet from the GPS */
 {
@@ -37,9 +38,9 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 
     for (;;) {
 	int waiting = 0;
-	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
+	/*@i1@*/(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
 	if (waiting == 0) {
-	    usleep(300);
+	    (void)usleep(300);
 	    continue;
 	}
 	fieldmask = gpsd_poll(session);
@@ -47,13 +48,14 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	    return fieldmask;
     }
 }
+/*@ +noret @*/
 
 int main(int argc, char **argv)
 {
     int option, status;
     char *err_str, *device = NULL, *speed = NULL;
     bool to_binary = false, to_nmea = false, lowlevel=false;
-    struct gps_data_t *gpsdata;
+    struct gps_data_t *gpsdata = NULL;
 
 #define USAGE	"usage: gpsctrl [-b | -n] [-s speed] [-V] <device>\n"
     while ((option = getopt(argc, argv, "bfhns:D:V")) != -1) {
@@ -113,6 +115,7 @@ int main(int argc, char **argv)
 
     if (!lowlevel) {
 	/* OK, there's a daemon instance running.  Do things the easy way */
+	assert(gpsdata != NULL);
 	(void)gps_query(gpsdata, "K\n");
 	if (gpsdata->ndevices == 0) {
 	    (void)fprintf(stderr, "gpsctrl: no devices connected.\n"); 
@@ -178,7 +181,7 @@ int main(int argc, char **argv)
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_context_t	context;	/* start it zeroed */
-	struct gps_device_t	session;
+	static struct gps_device_t	session;	/* zero this too */
 
 	if (device == NULL) {
 	    (void)fprintf(stderr,  "gpsctrl: device must be specified for low-level access.\n");
@@ -200,8 +203,7 @@ int main(int argc, char **argv)
 	    }
 	}
 	gpsd_report(1, "gpsctrl: %s looks like a %s at %d.\n",
-		    device, session.device_type->typename, 
-		    session.gpsdata.baudrate);
+		    device, gpsd_id(&session), session.gpsdata.baudrate);
 	/* 
 	 * If we've identified this as an NMEA device, we have to eat
 	 * packets for a while to see if one of our probes elicits an
@@ -223,8 +225,7 @@ int main(int argc, char **argv)
 	    }
 	}
 	gpsd_report(0, "gpsctrl: %s identified as a %s at %d.\n",
-		    device, session.device_type->typename, 
-		    session.gpsdata.baudrate);
+		    device, gpsd_id(&session), session.gpsdata.baudrate);
 
 	/* if no control operation was specified, we're done */
 	if (speed==NULL && !to_nmea && !to_binary)
