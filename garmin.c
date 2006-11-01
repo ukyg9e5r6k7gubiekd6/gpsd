@@ -740,17 +740,7 @@ static bool garmin_detect(struct gps_device_t *session)
 	return false;
     }
 
-    /* Save original terminal parameters */
-    if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
-	gpsd_report(0, "garmin_detect: error getting port attributes: %s\n",
-             strerror(errno));
-	return false;
-    }
-    memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
-
-    (void)cfmakeraw(&session->ttyset);
-
-    if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
+    if (!gpsd_set_raw(session)) {
 	gpsd_report(0, "garmin_detect: error changing port attributes: %s\n",
              strerror(errno));
 	return false;

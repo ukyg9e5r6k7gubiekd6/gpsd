@@ -50,6 +50,24 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
     }
 }
 
+bool gpsd_set_raw(struct gps_device_t *session)
+{
+    if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
+	gpsd_report(0,"error getting port attributes: %s\n",strerror(errno));
+	return false;
+    }
+    memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
+
+    (void)cfmakeraw(&session->ttyset);
+
+    if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
+ 	gpsd_report(0,"error changing port attributes: %s\n",strerror(errno));
+ 	return false;
+    }
+
+    return true;
+}
+
 void gpsd_set_speed(struct gps_device_t *session, 
 		   speed_t speed, unsigned char parity, unsigned int stopbits)
 {

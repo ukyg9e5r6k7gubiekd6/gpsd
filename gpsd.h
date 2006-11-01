@@ -273,6 +273,7 @@ extern int ntrip_open(struct gps_context_t *, char *);
 extern void ntrip_report(struct gps_device_t *);
 
 extern int gpsd_open(struct gps_device_t *);
+extern bool gpsd_set_raw(struct gps_device_t *);
 extern bool gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
