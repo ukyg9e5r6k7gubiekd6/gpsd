@@ -754,7 +754,6 @@ static void sirfbin_configure(struct gps_device_t *session)
 						0x00, 0x05, 0x02, 0x00,
 						0x00, 0x00, 0xb0, 0xb3};
 #endif /* __UNUSED__ */
-	}
 	/*@ -charint @*/
 	gpsd_report(4, "Requesting periodic ecef reports...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, requestecef);
