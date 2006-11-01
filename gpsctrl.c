@@ -68,9 +68,10 @@ int main(int argc, char **argv)
     if (optind < argc)
 	device = argv[optind];
 
-    if (!to_nmea && !to_binary && speed==NULL)
+    if (!to_nmea && !to_binary && speed==NULL) {
 	(void)fprintf(stderr, USAGE);
 	exit(0);
+    }
 
     if (to_nmea && to_binary) {
 	(void)fprintf(stderr, "gpsctrl: make up your mind, would you?\n");
@@ -113,7 +114,7 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(1, "gpsctrl: %d device(s) found.\n");
+	gpsd_report(1, "gpsctrl: %d device(s) found.\n", gpsdata->ndevices);
 
 	if (gpsdata->ndevices > 1) {
 	    int i;
@@ -134,21 +135,24 @@ int main(int argc, char **argv)
 	    if (gpsdata->driver_mode != 0) {
 		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
 		status = 1;
-	    }
+	    } else
+		gpsd_report(1, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "N=1");
 	    if (gpsdata->driver_mode != 1) {
 		(void)fprintf( stderr, "gpsctrl: mode change failed\n");
 		status = 1;
-	    }
+	    } else
+		gpsd_report(1, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
 	}
 	if (speed != NULL) {
 	    (void)gps_query(gpsdata, "B=%s", speed);
 	    if (atoi(speed) != (int)gpsdata->baudrate) {
 		(void)fprintf( stderr, "gpsctrl: speed change failed\n");
 		status = 1;
-	    }
+	    } else
+		gpsd_report(1, "gpsctrl: speed change on %s succeeded\n", gpsdata->gps_device);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
