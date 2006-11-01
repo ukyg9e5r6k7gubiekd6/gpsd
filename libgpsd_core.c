@@ -77,8 +77,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.gdop = NAN;
     session->gpsdata.epe = NAN;
 
-    /* mark GPS fd closed */
-    session->gpsdata.gps_fd = -1;
+    /* tty-level initialization */
+    gpsd_tty_init(session);
 
     /* necessary in case we start reading in the middle of a GPGSV sequence */
     gpsd_zero_satellites(&session->gpsdata);

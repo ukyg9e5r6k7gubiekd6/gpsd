@@ -272,6 +272,7 @@ extern void dgpsip_autoconnect(struct gps_context_t *,
 extern int ntrip_open(struct gps_context_t *, char *);
 extern void ntrip_report(struct gps_device_t *);
 
+extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
 extern bool gpsd_set_raw(struct gps_device_t *);
 extern bool gpsd_write(struct gps_device_t *, void const *, size_t);

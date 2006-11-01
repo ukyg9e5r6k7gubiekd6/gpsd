@@ -20,6 +20,14 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
+void gpsd_tty_init(struct gps_device_t *session)
+/* to be called on allocating a device */
+{
+    /* mark GPS fd closed and its baud rate unknown */
+    session->gpsdata.gps_fd = -1;
+    session->saved_baud = -1;
+}
+
 #if defined(__CYGWIN__)
 /* Workaround for Cygwin, which is missing cfmakeraw */
 /* Pasted from man page; added in serial.c arbitrarily */
