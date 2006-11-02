@@ -40,7 +40,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	int waiting = 0;
 	/*@i1@*/(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
 	if (waiting == 0) {
-	    (void)usleep(300000);
+	    (void)usleep(300);
 	    continue;
 	}
 	fieldmask = gpsd_poll(session);
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 	 * voodoo programming; we don't know it will have any effect, but
 	 * GPSes are notoriously prone to timing-dependent errors.
 	 */
-	usleep(300);
+	usleep(300000);
 
 	gpsd_wrap(&session);
 	exit(status);
