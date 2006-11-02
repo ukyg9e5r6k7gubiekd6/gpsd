@@ -722,12 +722,14 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		(void)strlcat(phrase, "?", BUFSIZ);
 	    break;
 	case 'E':
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
 	    (void)strlcpy(phrase, ",E=?", BUFSIZ);
 	    if (assign_channel(sub) && have_fix(sub))
 		(void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
-			       sub->device->gpsdata.epe, 
-			       sub->fixbuffer.eph, 
-			       sub->fixbuffer.epv);
+			       ZEROIZE(sub->device->gpsdata.epe), 
+			       ZEROIZE(sub->fixbuffer.eph), 
+			       ZEROIZE(sub->fixbuffer.epv));
+#undef ZEROIZE
 	    break;
 	case 'F':
 	    /*@ -branchstate @*/
