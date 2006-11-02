@@ -865,10 +865,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    for (n = sum = 0; n < (unsigned short)(len - 9); n++)
 		sum += getword(9 + n);
 	    if (len == 0 || sum == (u_int16_t)getword(len+1)) {
-		gpsd_report(4, "italk checksum ok\n");
+		gpsd_report(LOG_RAW, "italk checksum ok\n");
 		packet_accept(session, ITALK_PACKET);
 	    } else {
-		gpsd_report(4, "italk checksum failed\n");
+		gpsd_report(LOG_RAW, "italk checksum failed\n");
 		session->packet_state = GROUND_STATE;
 	    }
 	    packet_discard(session);

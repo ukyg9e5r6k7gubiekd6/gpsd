@@ -381,7 +381,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	    char	*trigger = (*dp)->trigger;
 
 	    if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
-		gpsd_report(2, "found %s.\n", trigger);
+		gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    
 		(void)gpsd_switch_driver(session, (*dp)->typename);
 		return 0;

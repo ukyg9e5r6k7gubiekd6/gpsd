@@ -1303,7 +1303,7 @@ int main(int argc, char *argv[])
 	gpsd_service = getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
     /*@ +observertrans @*/
     if ((msock = passivesock(gpsd_service, "tcp", QLEN)) < 0) {
-	gpsd_report(0,"command socket create failed, netlib error %d\n",msock);
+	gpsd_report(LOG_ERR,"command socket create failed, netlib error %d\n",msock);
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);

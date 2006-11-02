@@ -337,7 +337,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
-	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
+	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(LOG_PROG, "MDO 0x04:\n");
 	return TIME_SET;
     
@@ -597,7 +597,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
-    gpsd_report(5, "evermore_mode call (%d)\n", mode);
+    gpsd_report(LOG_RAW, "evermore_mode call (%d)\n", mode);
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "Generic NMEA");
 	// (void)evermore_set_mode(session, session->gpsdata.baudrate, false);

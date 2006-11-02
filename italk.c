@@ -44,7 +44,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 	return 0;
 
     /* we may need to dump the raw packet */
-    gpsd_report(5, "raw italk packet type 0x%02x length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "ITALK%d",(int)buf[0]);

@@ -629,7 +629,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
 	    break;
 	default:
-	    gpsd_report(4,"Unhandled TSIP superpacket type 0x%02x\n",u1);
+	    gpsd_report(LOG_WARN,"Unhandled TSIP superpacket type 0x%02x\n",u1);
 	}
 	break;
     case 0xbb:		/* Navigation Configuration */
@@ -644,10 +644,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f3 = getf(buf,13);			/* DOP Mask */
 	f4 = getf(buf,17);			/* DOP Switch */
 	u5 = getub(buf,21);			/* DGPS Age Limit */
-	gpsd_report(4, "Navigation Configuration %u %u %u %u %f %f %f %f %u\n",u1,u2,u3,u4,f1,f2,f3,f4,u5);
+	gpsd_report(LOG_INF, "Navigation Configuration %u %u %u %u %f %f %f %f %u\n",u1,u2,u3,u4,f1,f2,f3,f4,u5);
 	break;
     default:
-	gpsd_report(4,"Unhandled TSIP packet type 0x%02x\n",id);
+	gpsd_report(LOG_WARN,"Unhandled TSIP packet type 0x%02x\n",id);
 	break;
     }
 

@@ -508,7 +508,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	    session->gpsdata.fix.time = session->gpsdata.sentence_time
 		= (double)mktime(&unpacked_date)+subseconds;
 	    /*@ +compdef */
-	    gpsd_report(5, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
+	    gpsd_report(LOG_PROG, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 #ifdef NTPSHM_ENABLE
 	    if (session->gpsdata.fix.mode > MODE_NO_FIX && unpacked_date.tm_year != 0) {
 		if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_1) == 0)
@@ -673,7 +673,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     default:
-	gpsd_report(3, "Unknown SiRF packet id %d length %d: %s\n", 
+	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %d: %s\n", 
 		    buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
@@ -702,7 +702,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 static void sirfbin_configure(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET) {
-	gpsd_report(1, "Switching chip mode to SiRF binary.\n");
+	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
 	(void)nmea_send(session->gpsdata.gps_fd, 
 		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
     }
