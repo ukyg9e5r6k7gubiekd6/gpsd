@@ -221,9 +221,12 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x45:		/* Software Version Information */
 	if (len != 10)
 	    break;
-	gpsd_report(LOG_INF, "Software versions %d.%d %02d%02d%02d %d.%d %02d%02d%02d\n",
-		getub(buf,0),getub(buf,1),getub(buf,4),getub(buf,2),getub(buf,3),
-		getub(buf,5),getub(buf,6),getub(buf,9),getub(buf,7),getub(buf,8));
+	(void)snprintf(session->subtype, sizeof(session->subtype), 
+		       "%d.%d %02d%02d%02d %d.%d %02d%02d%02d",
+		       getub(buf,0),getub(buf,1),getub(buf,4),getub(buf,2),getub(buf,3),
+		       getub(buf,5),getub(buf,6),getub(buf,9),getub(buf,7),getub(buf,8));
+	gpsd_report(LOG_INF, "Software version: %s\n", session->subtype);
+	mask |= DEVICEID_SET;
 	break;
     case 0x46:		/* Health of Receiver */
 	if (len != 2)
