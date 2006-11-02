@@ -392,7 +392,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 
     for (fldnum = 4; fldnum < count; ) {
 	if (session->gpsdata.satellites >= MAXCHANNELS) {
-	    gpsd_report(LOG_ERR, "internal error - too many satellites!\n");
+	    gpsd_report(LOG_ERROR, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
 	}
@@ -605,7 +605,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     unsigned char sum;
 
     if (!nmea_checksum(sentence+1, &sum)) {
-        gpsd_report(LOG_ERR, "Bad NMEA checksum: '%s' should be %02X\n",
+        gpsd_report(LOG_ERROR, "Bad NMEA checksum: '%s' should be %02X\n",
                    sentence, sum);
         return 0;
     }
@@ -651,7 +651,7 @@ void nmea_add_checksum(char *sentence)
     if (*p == '$') {
 	p++;
     } else {
-        gpsd_report(LOG_ERR, "Bad NMEA sentence: '%s'\n", sentence);
+        gpsd_report(LOG_ERROR, "Bad NMEA sentence: '%s'\n", sentence);
     }
     while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;

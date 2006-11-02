@@ -722,7 +722,7 @@ static bool garmin_detect(struct gps_device_t *session)
     }
     // check for a garmin_gps device in /proc
     if ( !(fp = fopen( "/proc/bus/usb/devices", "r") ) ) {
-	gpsd_report(LOG_ERR, "Can't open /proc/bus/usb/devices\n");
+	gpsd_report(LOG_ERROR, "Can't open /proc/bus/usb/devices\n");
         return false;
     }
 
@@ -741,7 +741,7 @@ static bool garmin_detect(struct gps_device_t *session)
     }
 
     if (!gpsd_set_raw(session)) {
-	gpsd_report(LOG_ERR, "garmin_detect: error changing port attributes: %s\n",
+	gpsd_report(LOG_ERROR, "garmin_detect: error changing port attributes: %s\n",
              strerror(errno));
 	return false;
     }
@@ -754,7 +754,7 @@ static bool garmin_detect(struct gps_device_t *session)
     session->driver.garmin.BufferLen = 0;
 
     if (sizeof(session->driver.garmin.Buffer) < sizeof(Packet_t)) {
-	gpsd_report(LOG_ERR, "garmin_detect: Compile error, garmin.Buffer too small.\n",
+	gpsd_report(LOG_ERROR, "garmin_detect: Compile error, garmin.Buffer too small.\n",
              strerror(errno));
 	return false;
     }
@@ -976,7 +976,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	    gpsd_report(LOG_IO, "=> GPS: turn off binary %02x %02x %02x... \n"
 			, switcher[0], switcher[1], switcher[2]);
 	} else {
-	    gpsd_report(LOG_ERR, "=> GPS: FAILED\n");
+	    gpsd_report(LOG_ERROR, "=> GPS: FAILED\n");
 	}
 	settle(); // wait 333mS, essential!
 
@@ -989,7 +989,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
 	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
 	// garmin serial binary is 9600 only!
-	gpsd_report(LOG_ERR, "NOTE: Garmin binary is 9600 baud only!\n");
+	gpsd_report(LOG_ERROR, "NOTE: Garmin binary is 9600 baud only!\n");
 	settle();	// wait 333mS, essential!
     }
 #endif /* ALLOW_RECONFIGURE */
@@ -1047,7 +1047,7 @@ static int GetPacket (struct gps_device_t *session )
         if ( 0 >  theBytesReturned ) {
 	    // read error...
             // or EAGAIN, but O_NONBLOCK is never set
-	    gpsd_report(LOG_ERR, "GetPacket() read error=%d, errno=%d\n"
+	    gpsd_report(LOG_ERROR, "GetPacket() read error=%d, errno=%d\n"
 		, theBytesReturned, errno);
 	    continue;
 	}
@@ -1060,7 +1060,7 @@ static int GetPacket (struct gps_device_t *session )
 	session->driver.garmin.BufferLen += theBytesReturned;
 	if ( 256 <=  session->driver.garmin.BufferLen ) {
 	    // really bad read error...
-	    gpsd_report(LOG_ERR, "GetPacket() packet too long, %ld > 255 !\n"
+	    gpsd_report(LOG_ERROR, "GetPacket() packet too long, %ld > 255 !\n"
 		    , session->driver.garmin.BufferLen);
 	    session->driver.garmin.BufferLen = 0;
 	    break;
@@ -1070,7 +1070,7 @@ static int GetPacket (struct gps_device_t *session )
 	    // have enough data to check packet size
 	    if ( session->driver.garmin.BufferLen > pkt_size) {
 	        // wrong amount of data in buffer
-	        gpsd_report(LOG_ERR
+	        gpsd_report(LOG_ERROR
 		    , "GetPacket() packet size wrong! Packet: %ld, s/b %ld\n"
 		    , session->driver.garmin.BufferLen
 		    , pkt_size);
@@ -1096,7 +1096,7 @@ static int GetPacket (struct gps_device_t *session )
         // gpsd_report(LOG_RAW+1, "p[%d] = %x\n", x, session->driver.garmin.Buffer[x]);
     // }
     if ( 10 <= cnt ) {
-	    gpsd_report(LOG_ERR, "GetPacket() packet too long or too slow!\n");
+	    gpsd_report(LOG_ERROR, "GetPacket() packet too long or too slow!\n");
 	    return -1;
     }
 

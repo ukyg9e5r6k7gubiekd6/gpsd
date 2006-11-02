@@ -38,7 +38,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	(void)write(context->dsock, buf, strlen(buf));
 	context->dgnss_service = dgnss_dgpsip;
     } else
-	gpsd_report(LOG_ERR, "can't connect to DGPS server %s, netlib error %d.\n", dgpsserver, context->dsock);
+	gpsd_report(LOG_ERROR, "can't connect to DGPS server %s, netlib error %d.\n", dgpsserver, context->dsock);
     opts = fcntl(context->dsock, F_GETFL);
 
     if (opts >= 0)
@@ -92,7 +92,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     FILE *sfp = fopen(serverlist, "r");
 
     if (sfp == NULL) {
-	gpsd_report(LOG_ERR, "no DGPS server list found.\n");
+	gpsd_report(LOG_ERROR, "no DGPS server list found.\n");
 	context->dsock = -2;	/* don't try this again */
 	return;
     }
@@ -125,7 +125,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     (void)fclose(sfp);
 
     if (keep[0].server[0] == '\0') {
-	gpsd_report(LOG_ERR, "no DGPS servers within %dm.\n", (int)(DGPS_THRESHOLD/1000));
+	gpsd_report(LOG_ERROR, "no DGPS servers within %dm.\n", (int)(DGPS_THRESHOLD/1000));
 	context->dsock = -2;	/* don't try this again */
 	return;
     }

@@ -40,7 +40,7 @@ int dgnss_open(struct gps_context_t *context, char *dgnss_service)
 #ifndef REQUIRE_DGNSS_PROTO
     return dgpsip_open(context, dgnss_service);
 #else
-    gpsd_report(LOG_ERR, "Unknown or unspecified DGNSS protocol for service %s\n",
+    gpsd_report(LOG_ERROR, "Unknown or unspecified DGNSS protocol for service %s\n",
 		dgnss_service);
     return -1;
 #endif
@@ -91,7 +91,7 @@ void rtcm_relay(struct gps_device_t *session)
 	if (session->device_type->rtcm_writer(session, 
 					      session->context->rtcmbuf, 
 					      (size_t)session->context->rtcmbytes) == 0)
-	    gpsd_report(LOG_ERR, "Write to rtcm sink failed\n");
+	    gpsd_report(LOG_ERROR, "Write to rtcm sink failed\n");
 	else { 
 	    session->rtcmtime = timestamp();
 	    gpsd_report(LOG_IO, "<= DGPS: %d bytes of RTCM relayed.\n", session->context->rtcmbytes);

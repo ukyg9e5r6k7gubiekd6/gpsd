@@ -49,7 +49,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
 	}
-    gpsd_report(LOG_ERR, "invalid GPS type \"%s\".\n", typename);
+    gpsd_report(LOG_ERROR, "invalid GPS type \"%s\".\n", typename);
     return 0;
     /*@ +compmempass @*/
 }

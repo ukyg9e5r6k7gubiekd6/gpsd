@@ -61,7 +61,7 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
 bool gpsd_set_raw(struct gps_device_t *session)
 {
     if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
-	gpsd_report(LOG_ERR,
+	gpsd_report(LOG_ERROR,
 		    "error getting port attributes: %s\n",strerror(errno));
 	return false;
     }
@@ -70,7 +70,7 @@ bool gpsd_set_raw(struct gps_device_t *session)
     (void)cfmakeraw(&session->ttyset);
 
     if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
- 	gpsd_report(LOG_ERR,
+ 	gpsd_report(LOG_ERROR,
 		    "error changing port attributes: %s\n",strerror(errno));
  	return false;
     }
@@ -209,7 +209,7 @@ int gpsd_open(struct gps_device_t *session)
 {
     gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NONBLOCK|O_NOCTTY)) < 0) {
-	gpsd_report(LOG_ERR, "device open failed: %s\n", strerror(errno));
+	gpsd_report(LOG_ERROR, "device open failed: %s\n", strerror(errno));
 	return -1;
     }
 

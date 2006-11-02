@@ -211,11 +211,11 @@ static int passivesock(char *service, char *protocol, int qlen)
     if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((in_port_t)pse->s_port));
     else if ((sin.sin_port = htons((in_port_t)atoi(service))) == 0) {
-	gpsd_report(LOG_ERR, "Can't get \"%s\" service entry.\n", service);
+	gpsd_report(LOG_ERROR, "Can't get \"%s\" service entry.\n", service);
 	return -1;
     }
     if ((ppe = getprotobyname(protocol)) == NULL) {
-	gpsd_report(LOG_ERR, "Can't get \"%s\" protocol entry.\n", protocol);
+	gpsd_report(LOG_ERROR, "Can't get \"%s\" protocol entry.\n", protocol);
 	return -1;
     }
     if (strcmp(protocol, "udp") == 0)
@@ -223,22 +223,22 @@ static int passivesock(char *service, char *protocol, int qlen)
     else
 	type = SOCK_STREAM;
     if ((s = socket(PF_INET, type, /*@i1@*/ppe->p_proto)) < 0) {
-	gpsd_report(LOG_ERR, "Can't create socket\n");
+	gpsd_report(LOG_ERROR, "Can't create socket\n");
 	return -1;
     }
     if (setsockopt(s,SOL_SOCKET,SO_REUSEADDR,(char *)&one,(int)sizeof(one)) == -1) {
-	gpsd_report(LOG_ERR, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	return -1;
     }
     if (bind(s, (struct sockaddr *) &sin, (int)sizeof(sin)) < 0) {
-	gpsd_report(LOG_ERR, "Can't bind to port %s\n", service);
+	gpsd_report(LOG_ERROR, "Can't bind to port %s\n", service);
         if (errno == EADDRINUSE) {
-                gpsd_report(LOG_ERR, "Maybe gpsd is already running!\n");
+                gpsd_report(LOG_ERROR, "Maybe gpsd is already running!\n");
         }
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	gpsd_report(LOG_ERR, "Can't listen on %s port%s\n", service);
+	gpsd_report(LOG_ERROR, "Can't listen on %s port%s\n", service);
 	return -1;
     }
     return s;
@@ -252,14 +252,14 @@ static int filesock(char *filename)
 
     /*@ -mayaliasunique @*/
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-	gpsd_report(LOG_ERR, "Can't create device-control socket\n");
+	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
     (void)strlcpy(addr.sun_path, filename, 104); /* from sys/un.h */
     /*@i1@*/addr.sun_family = AF_UNIX;
     (void)bind(sock, (struct sockaddr *) &addr,  (int)sizeof(addr));
     if (listen(sock, QLEN) < 0) {
-	gpsd_report(LOG_ERR, "can't listen on local socket %s\n", filename);
+	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;
     }
     /*@ +mayaliasunique @*/
@@ -550,7 +550,7 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     if (user->device == NULL) {
-	gpsd_report(LOG_ERR, "client(%d): channel assignment failed.\n", user-subscribers);
+	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n", user-subscribers);
 	return false;
     }
 
@@ -564,7 +564,7 @@ static bool assign_channel(struct subscriber_t *user)
 #endif
 	if (gpsd_activate(user->device) < 0) {
 	    
-	    gpsd_report(LOG_ERR, "client(%d): channel activation failed.\n", user-subscribers);
+	    gpsd_report(LOG_ERROR, "client(%d): channel activation failed.\n", user-subscribers);
 	    return false;
 	} else {
 	    gpsd_report(LOG_PROG, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
@@ -1262,7 +1262,7 @@ int main(int argc, char *argv[])
 #endif
 
     if (!control_socket && optind >= argc) {
-	gpsd_report(LOG_ERR, "can't run with neither control socket nor devices\n");
+	gpsd_report(LOG_ERROR, "can't run with neither control socket nor devices\n");
 	exit(1);
     }
 
@@ -1274,7 +1274,7 @@ int main(int argc, char *argv[])
     if (control_socket) {
 	(void)unlink(control_socket);
 	if ((csock = filesock(control_socket)) < 0) {
-	    gpsd_report(LOG_ERR,"control socket create failed, netlib error %d\n",csock);
+	    gpsd_report(LOG_ERROR,"control socket create failed, netlib error %d\n",csock);
 	    exit(2);
 	}
 	FD_SET(csock, &all_fds);
@@ -1292,7 +1292,7 @@ int main(int argc, char *argv[])
 	    (void)fprintf(fp, "%u\n", (unsigned int)getpid());
 	    (void)fclose(fp);
 	} else {
-	    gpsd_report(LOG_ERR, "Cannot create PID file: %s.\n", pid_file);
+	    gpsd_report(LOG_ERROR, "Cannot create PID file: %s.\n", pid_file);
 	}
     }
 
@@ -1313,7 +1313,7 @@ int main(int argc, char *argv[])
 	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
     /*@ +observertrans @*/
     if ((nsock = passivesock(rtcm_service, "tcp", QLEN)) < 0) {
-	gpsd_report(LOG_ERR,"RTCM104 socket create failed, netlib error %d\n",nsock);
+	gpsd_report(LOG_ERROR,"RTCM104 socket create failed, netlib error %d\n",nsock);
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", rtcm_service);
@@ -1355,7 +1355,7 @@ int main(int argc, char *argv[])
 	if ((optind<argc&&stat(argv[optind], &stb)==0)||stat(PROTO_TTY,&stb)==0) {
 	    gpsd_report(LOG_PROG, "changing to group %d\n", stb.st_gid);
 	    if (setgid(stb.st_gid) != 0)
-		gpsd_report(LOG_ERR, "setgid() failed, errno %s\n", strerror(errno));
+		gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n", strerror(errno));
 	}
 	pw = getpwnam("nobody");
 	if (pw)
@@ -1409,7 +1409,7 @@ int main(int argc, char *argv[])
     for (i = optind; i < argc; i++) { 
 	struct gps_device_t *device = open_device(argv[i]);
 	if (!device) {
-	    gpsd_report(LOG_ERR, "GPS device %s nonexistent or can't be read\n", argv[i]);
+	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
 	}
     }
 
@@ -1430,7 +1430,7 @@ int main(int argc, char *argv[])
 	if (select(maxfd+1, &rfds, NULL, NULL, &tv) < 0) {
 	    if (errno == EINTR)
 		continue;
-	    gpsd_report(LOG_ERR, "select: %s\n", strerror(errno));
+	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
 	    exit(2);
 	}
 	/*@ +usedef @*/
@@ -1460,7 +1460,7 @@ int main(int argc, char *argv[])
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
-		gpsd_report(LOG_ERR, "accept: %s\n", strerror(errno));
+		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		struct subscriber_t *client = NULL;
 		int opts = fcntl(ssock, F_GETFL);
@@ -1471,7 +1471,7 @@ int main(int argc, char *argv[])
 
 		client = allocate_client();
 		if (client == NULL) {
-		    gpsd_report(LOG_ERR, "No client subscriber slots available!\n");
+		    gpsd_report(LOG_ERROR, "No client subscriber slots available!\n");
 		    (void)close(ssock);
 		} else {
 			FD_SET(ssock, &all_fds);
@@ -1492,7 +1492,7 @@ int main(int argc, char *argv[])
 	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
 
 	    if (ssock < 0)
-		gpsd_report(LOG_ERR, "accept: %s\n", strerror(errno));
+		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		subscriber_t *client = NULL;
 		int opts = fcntl(ssock, F_GETFL);
@@ -1502,7 +1502,7 @@ int main(int argc, char *argv[])
 		gpsd_report(LOG_INF, "client connect on %d\n", ssock);
 		client = allocate_client();
 		if (client == NULL) {
-		    gpsd_report(LOG_ERR, "No client subscriber slots available!\n");
+		    gpsd_report(LOG_ERROR, "No client subscriber slots available!\n");
 		    close(ssock);
 		} else {
 		    FD_SET(ssock, &all_fds);
@@ -1523,7 +1523,7 @@ int main(int argc, char *argv[])
 	    /*@i1@*/int ssock = accept(csock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
-		gpsd_report(LOG_ERR, "accept: %s\n", strerror(errno));
+		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		gpsd_report(LOG_INF, "control socket connect on %d\n", ssock);
 		FD_SET(ssock, &all_fds);

@@ -382,7 +382,7 @@ main(int argc, char **argv){
 
 	/* Open the serial port, blocking is OK */
 	if((pfd = open(port, O_RDWR | O_NOCTTY , 0600)) == -1) {
-		gpsd_report(LOG_ERR, "open(%s)\n", port);
+		gpsd_report(LOG_ERROR, "open(%s)\n", port);
 		return 1;
 	}
 
@@ -395,7 +395,7 @@ main(int argc, char **argv){
 		break;
 	}
 	if (gpstype == NULL || version == NULL) {
-	    gpsd_report(LOG_ERR, "not a known GPS type\n");
+	    gpsd_report(LOG_ERROR, "not a known GPS type\n");
 	    return 1;
 	}
 
@@ -412,7 +412,7 @@ main(int argc, char **argv){
 	/* there may be a type-specific setup method */
 	memset(&term, 0, sizeof(term));
 	if(gpstype->port_setup(pfd, &term) == -1) {
-		gpsd_report(LOG_ERR, "port_setup()\n");
+		gpsd_report(LOG_ERROR, "port_setup()\n");
 		return 1;
 	}
 
@@ -420,20 +420,20 @@ main(int argc, char **argv){
 
 	/* Open the loader file */
 	if((lfd = open(lname, O_RDONLY, 0444)) == -1) {
-	    gpsd_report(LOG_ERR, "open(%s)\n", lname);
+	    gpsd_report(LOG_ERROR, "open(%s)\n", lname);
 	    return 1;
 	}
 
 	/* fstat() its file descriptor. Need the size, and avoid races */
 	if(fstat(lfd, &sb) == -1) {
-	    gpsd_report(LOG_ERR, "fstat(%s)\n", lname);
+	    gpsd_report(LOG_ERROR, "fstat(%s)\n", lname);
 	    return 1;
 	}
 
 	/* minimal sanity check on loader size. also prevents bad malloc() */
 	ls = (size_t)sb.st_size;
 	if ((ls < gpstype->min_loader_size)||(ls > gpstype->max_loader_size)){
-	    gpsd_report(LOG_ERR, "preposterous loader size: %d\n", ls);
+	    gpsd_report(LOG_ERROR, "preposterous loader size: %d\n", ls);
 	    return 1;
 	}
 
@@ -441,13 +441,13 @@ main(int argc, char **argv){
 
 	/* malloc a loader buffer */
 	if ((loader = malloc(ls)) == NULL) {
-	    gpsd_report(LOG_ERR, "malloc(%d)\n", ls);
+	    gpsd_report(LOG_ERROR, "malloc(%d)\n", ls);
 	    return 1;
 	}
 
 	if (read(lfd, loader, ls) != (ssize_t)ls) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERR, "read(%d)\n", ls);
+	    gpsd_report(LOG_ERROR, "read(%d)\n", ls);
 	    return 1;
 	}
 
@@ -460,12 +460,12 @@ main(int argc, char **argv){
 	/*@ -nullpass @*/
 	if((ffd = open(fname, O_RDONLY, 0444)) == -1) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERR, "open(%s)]n", fname);
+	    gpsd_report(LOG_ERROR, "open(%s)]n", fname);
 	    return 1;
 	}
 	if(fstat(ffd, &sb) == -1) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERR, "fstat(%s)\n", fname);
+	    gpsd_report(LOG_ERROR, "fstat(%s)\n", fname);
 	    return 1;
 	}
 
@@ -473,14 +473,14 @@ main(int argc, char **argv){
 	fs = (size_t)sb.st_size;
 	if ((fs < gpstype->min_firmware_size) || (fs > gpstype->max_firmware_size)){
 	    (void)free(loader);
-	    gpsd_report(LOG_ERR, "preposterous firmware size: %d\n", fs);
+	    gpsd_report(LOG_ERROR, "preposterous firmware size: %d\n", fs);
 	    return 1;
 	}
 
 	/* malloc an image buffer */
 	if ((firmware = malloc(fs+1)) == NULL) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERR, "malloc(%u)\n", (unsigned)fs);
+	    gpsd_report(LOG_ERROR, "malloc(%u)\n", (unsigned)fs);
 	    return 1;
 	}
 
@@ -488,7 +488,7 @@ main(int argc, char **argv){
 	if (read(ffd, firmware, fs) != (ssize_t)fs) {
 	    (void)free(loader);
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERR, "read(%u)\n", (unsigned)fs);
+	    gpsd_report(LOG_ERROR, "read(%u)\n", (unsigned)fs);
 	    return 1;
 	}
 
@@ -503,14 +503,14 @@ main(int argc, char **argv){
 	if (!((firmware[0] == 'S') && ((firmware[1] >= '0') && (firmware[1] <= '9')))){ /* srec? */
 	    (void)free(loader);
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERR, "%s: not an S-record file\n", fname);
+	    gpsd_report(LOG_ERROR, "%s: not an S-record file\n", fname);
 	    return 1;
 	}
 
 	if(gpstype->version_check(pfd, version, loader, ls, firmware, fs)==-1){
 		(void)free(loader);
 		(void)free(firmware);
-		gpsd_report(LOG_ERR, "version_check()\n");
+		gpsd_report(LOG_ERROR, "version_check()\n");
 		return 1;
 	}
 
@@ -523,7 +523,7 @@ main(int argc, char **argv){
 	if (srec_check(firmware)){
 	    (void)free(loader);
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERR, "%s: corrupted firmware image\n", fname);
+	    gpsd_report(LOG_ERROR, "%s: corrupted firmware image\n", fname);
 	    return 1;
 	}
 	/*@ +nullpass @*/
@@ -545,7 +545,7 @@ main(int argc, char **argv){
 	if(sigprocmask(SIG_BLOCK, &sigset, NULL) == -1) {
 		(void)free(loader);
 		(void)free(firmware);
-		gpsd_report(LOG_ERR,"sigprocmask\n");
+		gpsd_report(LOG_ERROR,"sigprocmask\n");
 		return 1;
 	}
 
@@ -553,7 +553,7 @@ main(int argc, char **argv){
 	if(gpstype->stage1_command!=NULL && (gpstype->stage1_command(pfd) == -1)) {
 		(void)free(loader);
 		(void)free(firmware);
-		gpsd_report(LOG_ERR, "Stage 1 update command\n");
+		gpsd_report(LOG_ERROR, "Stage 1 update command\n");
 		return 1;
 	}
 
@@ -563,7 +563,7 @@ main(int argc, char **argv){
 	if(gpstype->loader_send(pfd, &term, loader, ls) == -1) {
 		(void)free(loader);
 		(void)free(firmware);
-		gpsd_report(LOG_ERR, "Loader send\n");
+		gpsd_report(LOG_ERROR, "Loader send\n");
 		return 1;
 	}
 	(void)free(loader);
@@ -573,7 +573,7 @@ main(int argc, char **argv){
 	/* send any command needed to demarcate the two loads */
 	if(gpstype->stage2_command!=NULL && (gpstype->stage2_command(pfd) == -1)) {
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERR, "Stage 2 update command\n");
+	    gpsd_report(LOG_ERROR, "Stage 2 update command\n");
 	    return 1;
 	}
 
@@ -582,7 +582,7 @@ main(int argc, char **argv){
 	/* and now, poke the actual firmware over */
 	if(gpstype->firmware_send(pfd, firmware, fs) == -1) {
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERR, "Firmware send\n");
+	    gpsd_report(LOG_ERROR, "Firmware send\n");
 	    return 1;
 	}
 	(void)free(firmware);
@@ -591,20 +591,20 @@ main(int argc, char **argv){
 
 	/* send any command needed to finish the firmware load */
 	if(gpstype->stage3_command!=NULL && (gpstype->stage3_command(pfd) == -1)) {
-	    gpsd_report(LOG_ERR, "Stage 3 update command\n");
+	    gpsd_report(LOG_ERROR, "Stage 3 update command\n");
 	    return 1;
 	}
 
 	gpsd_report(LOG_PROG, "unblocking signals...\n");
 
 	if(sigprocmask(SIG_UNBLOCK, &sigset, NULL) == -1) {
-		gpsd_report(LOG_ERR,"sigprocmask\n");
+		gpsd_report(LOG_ERROR,"sigprocmask\n");
 		return 1;
 	}
 
 	/* type-defined wrapup, take our tty to GPS's post-flash settings */
 	if(gpstype->port_wrapup(pfd, &term) == -1) {
-		gpsd_report(LOG_ERR, "port_wrapup()\n");
+		gpsd_report(LOG_ERROR, "port_wrapup()\n");
 		return 1;
 	}
 
@@ -625,13 +625,13 @@ srec_check(const char *data){
 		memset(buf,0,85);
 		l++;
 		if(sscanf(data, "%80s", buf) == EOF){
-			gpsd_report(LOG_ERR, "line %d read failed\n", l);
+			gpsd_report(LOG_ERROR, "line %d read failed\n", l);
 			return true;
 		}
 
 		n = (int)strlen(buf);
 		if ((n < 1) || (n > 80)){
-			gpsd_report(LOG_ERR, "firmware line %d invalid length %d\n", l, n);
+			gpsd_report(LOG_ERROR, "firmware line %d invalid length %d\n", l, n);
 			return true;
 		}
 
@@ -642,7 +642,7 @@ srec_check(const char *data){
 
 		if (buf[0] != 'S'){
 			gpsd_report(LOG_INF, "%s\n", buf);
-			gpsd_report(LOG_ERR, "firmware line %d doesn't begin with 'S'.\n", l);
+			gpsd_report(LOG_ERROR, "firmware line %d doesn't begin with 'S'.\n", l);
 			return true;
 		}
 
@@ -650,7 +650,7 @@ srec_check(const char *data){
 		y = (n - 4)/2;
 		if (x != y){
 			gpsd_report(LOG_INF, "buf: '%s'\n", buf);
-			gpsd_report(LOG_ERR, "firmware line %d length error: %d != %d\n", l, x, y);
+			gpsd_report(LOG_ERROR, "firmware line %d length error: %d != %d\n", l, x, y);
 			return true;
 		}
 
@@ -663,7 +663,7 @@ srec_check(const char *data){
 		y &= 0xff; y ^= 0xff;
 		if (x != y){
 			gpsd_report(LOG_INF, "buf: '%s'\n", buf);
-			gpsd_report(LOG_ERR, "firmware line %d checksum error: %x != %x\n", l, x, y);
+			gpsd_report(LOG_ERROR, "firmware line %d checksum error: %x != %x\n", l, x, y);
 			return true;
 		}
 	}

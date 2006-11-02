@@ -82,7 +82,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    int ldisc = NMEADISC;
 
 	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
-		gpsd_report(LOG_ERR, "can't set nmea discipline\n");
+		gpsd_report(LOG_ERROR, "can't set nmea discipline\n");
 	    else
 		session->gpsdata.ldisc = NMEADISC;
 	}
@@ -575,7 +575,7 @@ static void tnt_add_checksum(char *sentence)
     if (*p == '@') {
 	p++;
     } else {
-        gpsd_report(LOG_ERR, "Bad TNT sentence: '%s'\n", sentence);
+        gpsd_report(LOG_ERROR, "Bad TNT sentence: '%s'\n", sentence);
     }
     while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;

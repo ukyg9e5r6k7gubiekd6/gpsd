@@ -222,14 +222,14 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 		if (stream!=NULL && strcmp(stream, hold.mountpoint)==0) {
 		    /* todo: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
 		    if (hold.format == fmt_unknown) {
-			gpsd_report(LOG_ERR,
+			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s format not supported\n",
 				    line);	
 			return -1;
 		    }
 		    /* todo: support encryption and compression algorithms */
 		    if (hold.compr_encryp != cmp_enc_none) {
-			gpsd_report(LOG_ERR,
+			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s compression/encryption algorithm not supported\n",
 				    line);	
 			return -1;
@@ -237,7 +237,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 		    /* todo: support digest authentication */
 		    if (hold.authentication != auth_none 
 			&& hold.authentication != auth_basic) {
-			gpsd_report(LOG_ERR,
+			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s authentication method not supported\n",
 				    line);	
 			return -1;
@@ -330,7 +330,7 @@ static int ntrip_stream_open(const char *caster,
     int opts;
 
     if (ntrip_auth_encode(stream, auth, authstr, sizeof(authstr)) < 0) {
-	gpsd_report(LOG_ERR, "User-ID and password needed for %s:%s/%s\n",
+	gpsd_report(LOG_ERROR, "User-ID and password needed for %s:%s/%s\n",
 		    caster, port, stream->mountpoint);	
 	return -1;
     }
@@ -353,19 +353,19 @@ static int ntrip_stream_open(const char *caster,
 
     /* parse 401 Unauthorized */
     if (strstr(buf, NTRIP_UNAUTH)) {
-	gpsd_report(LOG_ERR, "%s not authorized for Ntrip stream %s:%s/%s\n",
+	gpsd_report(LOG_ERROR, "%s not authorized for Ntrip stream %s:%s/%s\n",
 		    auth, caster, port, stream->mountpoint);	
 	goto close;
     }
     /* parse SOURCETABLE */
     if (strstr(buf, NTRIP_SOURCETABLE)) {
-	gpsd_report(LOG_ERR, "Broadcaster doesn't recognize Ntrip stream %s:%s/%s\n",
+	gpsd_report(LOG_ERROR, "Broadcaster doesn't recognize Ntrip stream %s:%s/%s\n",
 		    caster, port, stream->mountpoint);	
 	goto close;
     }
     /* parse ICY 200 OK */
     if (!strstr(buf, NTRIP_ICY)) {
-	gpsd_report(LOG_ERR, "Unknown reply %s from Ntrip service %s:%s/%s\n",
+	gpsd_report(LOG_ERROR, "Unknown reply %s from Ntrip service %s:%s/%s\n",
 		    buf, caster, port, stream->mountpoint);	
 	goto close;
     }
@@ -402,7 +402,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	    *amp = '\0';
 	    caster = amp + 1;
 	} else {
-	    gpsd_report(LOG_ERR, "can't extract user-ID and password from %s\n",
+	    gpsd_report(LOG_ERROR, "can't extract user-ID and password from %s\n",
 			caster);
 	    return -1;
 	}
@@ -413,7 +413,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	stream = slash + 1;
     } else {
 	/* todo: add autoconnect like in dgpsip.c */
-	gpsd_report(LOG_ERR, "can't extract Ntrip stream from %s\n", caster);
+	gpsd_report(LOG_ERROR, "can't extract Ntrip stream from %s\n", caster);
 	return -1;
     }
     if ((colon = strchr(caster, ':')) != NULL) {
@@ -426,7 +426,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	    port = DEFAULT_RTCM_PORT;
     }
     if (ntrip_stream_probe(caster, port, stream, &ntrip_stream)) {
-	gpsd_report(LOG_ERR, "unable to probe for data about stream %s:%s/%s\n",
+	gpsd_report(LOG_ERROR, "unable to probe for data about stream %s:%s/%s\n",
 		    caster, port, stream);
 	return -1;
     }
@@ -435,7 +435,7 @@ int ntrip_open(struct gps_context_t *context, char *caster)
 	gpsd_report(LOG_PROG,"connection to Ntrip broadcaster %s established.\n",
 		    caster);
     else
-	gpsd_report(LOG_ERR, "can't connect to Ntrip stream %s:%s/%s.\n",
+	gpsd_report(LOG_ERROR, "can't connect to Ntrip stream %s:%s/%s.\n",
 		    caster, port, stream);
     return ret;
 }

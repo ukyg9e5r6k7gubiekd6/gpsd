@@ -578,7 +578,7 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 		gpsd_hexdump(session->outbuffer, session->outbuflen));
 #endif /* STATE_DEBUG */
     } else {
-	gpsd_report(LOG_ERR, "Rejected too long packet type %d len %d\n",
+	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %d\n",
 		packet_type,packetlen);
     }
 }
