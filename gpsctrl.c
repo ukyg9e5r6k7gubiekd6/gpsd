@@ -277,6 +277,13 @@ int main(int argc, char **argv)
 	    }
 	}
 
+	/*
+	 * Give the device time to settle before closing it.  Alas, this is
+	 * voodoo programming; we don't know it will have any effect, but
+	 * GPSes are notoriously prone to timing-dependent errors.
+	 */
+	usleep(300);
+
 	gpsd_wrap(&session);
 	exit(status);
     }
