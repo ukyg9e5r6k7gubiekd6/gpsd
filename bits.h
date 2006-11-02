@@ -81,4 +81,5 @@ union long_double {
 		| (session->outbuffer[2*(n)-1] << 8) \
 		| (session->outbuffer[2*(n)+0] << 16) \
 		| (session->outbuffer[2*(n)+1] << 24))
-
+#define getstring(t, s, e)	\
+    (void)memcpy(t, session->outbuffer+2*(s)-2, 2*((e)-(s)+1))

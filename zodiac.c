@@ -337,6 +337,19 @@ static void handle1005(struct gps_device_t *session UNUSED)
 	session->gpsdata.status = STATUS_DGPS_FIX;
 }
 
+static gps_mask_t handle1011(struct gps_device_t *session)
+{
+    /*
+     * This is UNTESTED -- but harmless if buggy.  Added to support
+     * client querying of the ID with firmware version in 2006.
+     * The Zodiac is supposed to send one of these messages on startup.
+     */
+    getstring(session->subtype, 19, 28);	/* software version field */
+    gpsd_report(LOG_INF, "Software version: %s\n", session->subtype);
+    return DEVICEID_SET;
+}
+
+
 static void handle1108(struct gps_device_t *session)
 {
     /* ticks              = getlong(6); */
@@ -399,6 +412,8 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     case 1005:
 	handle1005(session);
 	return 0;	
+    case 1011:
+	return handle1011(session);
     case 1108:
 	handle1108(session);
 	return 0;
