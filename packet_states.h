@@ -71,11 +71,11 @@
 
 #ifdef ITALK_ENABLE
    ITALK_LEADER_1,	/* saw leading < of iTalk packet */
-   ITALK_LEADER_2,	/* saw leading * of iTalk packet */
-   ITALK_LENGTH_1,	/* saw MSB of packet length */
-   ITALK_LENGTH_2,	/* saw LSB of packet length */
+   ITALK_LEADER_2,	/* saw leading ! of iTalk packet */
+   ITALK_LENGTH,	/* saw packet length */
+   ITALK_PAYLOAD,	/* in payload part of iTalk Packet */
    ITALK_DELIVERED,	/* seen end of payload */
-   ITALK_TRAILER_1,	/* saw iTalk trailer byte */
+   ITALK_TRAILER,	/* saw iTalk trailer byte */
    ITALK_RECOGNIZED,	/* found end of the iTalk packet */
 #endif /* ITALK_ENABLE */
 

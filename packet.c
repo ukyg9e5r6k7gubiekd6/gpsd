@@ -471,32 +471,29 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    session->packet_state = GROUND_STATE;
 	break;
     case ITALK_LEADER_2:
-	session->packet_length = (size_t)(c << 8);
-	session->packet_state = ITALK_LENGTH_1;
+	session->packet_length = (size_t)(c & 0xff);
+	session->packet_state = ITALK_LENGTH;
 	break;
-    case ITALK_LENGTH_1:
-	session->packet_length += c + 1;
-	session->packet_length *= 2;	/* count is in words */
-	session->packet_state = ITALK_LENGTH_2;
+    case ITALK_LENGTH:
+	session->packet_length += 1;	/* fix number of words in payload */
+	session->packet_length *= 2;	/* convert to number of bytes */
+	session->packet_state = ITALK_PAYLOAD;
 	break;
-    case ITALK_LENGTH_2:
-	if (--session->packet_length == 0)
+    case ITALK_PAYLOAD:
+	/* lookahead for "<!" because sometimes packets are short but valid */
+	if ((c == '>') && (session->inbufptr[0] == '<') && (session->inbufptr[1] == '!'))
+	    session->packet_state = ITALK_RECOGNIZED;
+	else if (--session->packet_length == 0)
 	    session->packet_state = ITALK_DELIVERED;
 	break;
     case ITALK_DELIVERED:
 	if (c == '>')
-	    session->packet_state = ITALK_TRAILER_1;
-	else
-	    session->packet_state = GROUND_STATE;
-	break;
-    case ITALK_TRAILER_1:
-	if (c == 0xb3)
 	    session->packet_state = ITALK_RECOGNIZED;
 	else
 	    session->packet_state = GROUND_STATE;
 	break;
     case ITALK_RECOGNIZED:
-        if (c == 0xa0)
+        if (c == '<')
 	    session->packet_state = ITALK_LEADER_1;
 	else
 	    session->packet_state = GROUND_STATE;
@@ -866,9 +863,12 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    for (n = sum = 0; n < (unsigned short)(len - 9); n++)
 		sum += getword(9 + n);
 	    if (len == 0 || sum == (u_int16_t)getword(len+1)) {
+		gpsd_report(4, "italk checksum ok\n");
 		packet_accept(session, ITALK_PACKET);
-	    } else
+	    } else {
+		gpsd_report(4, "italk checksum failed\n");
 		session->packet_state = GROUND_STATE;
+	    }
 	    packet_discard(session);
             break;
 #endif /* ITALK_ENABLE */
