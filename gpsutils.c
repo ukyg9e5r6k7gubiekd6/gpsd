@@ -479,10 +479,10 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     int i, j, k, n;
 
 #ifdef __UNUSED__
-    gpsd_report(0, "Satellite picture:\n");
+    gpsd_report(LOG_INF, "Satellite picture:\n");
     for (k = 0; k < MAXCHANNELS; k++) {
 	if (gpsdata->used[k])
-	    gpsd_report(0, "az: %d el: %d  SV: %d\n",
+	    gpsd_report(LOG_INF, "az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k], gpsdata->used[k]);
     }
 #endif /* __UNUSED__ */
@@ -500,9 +500,9 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     }
 
 #ifdef __UNUSED__
-    gpsd_report(0, "Line-of-sight matrix:\n");
+    gpsd_report(LOG_INF, "Line-of-sight matrix:\n");
     for (k = 0; k < n; k++) {
-	gpsd_report(0, "%f %f %f %f\n",
+	gpsd_report(LOG_INF, "%f %f %f %f\n",
 		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
     }
 #endif /* __UNUSED__ */
@@ -517,9 +517,9 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     }
 
 #ifdef __UNUSED__
-    gpsd_report(0, "product:\n");
+    gpsd_report(LOG_INF, "product:\n");
     for (k = 0; k < 4; k++) {
-	gpsd_report(0, "%f %f %f %f\n",
+	gpsd_report(LOG_INF, "%f %f %f %f\n",
 		    prod[k][0], prod[k][1], prod[k][2], prod[k][3]);
     }
 #endif /* __UNUSED__ */
@@ -530,12 +530,12 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 	 * Note: this will print garbage unless all the subdeterminants
 	 * are computed in the invert() function.
 	 */
-	gpsd_report(0, "inverse:\n");
+	gpsd_report(LOG_RAW, "inverse:\n");
 	for (k = 0; k < 4; k++) {
-	    gpsd_report(0, "%f %f %f %f\n",
+	    gpsd_report(LOG_RAW, "%f %f %f %f\n",
 			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
 	}
-	gpsd_report(1, "HDOP: reported = %f, computed = %f\n",
+	gpsd_report(LOG_INF, "HDOP: reported = %f, computed = %f\n",
 		    gpsdata->hdop, sqrt(inv[0][0] + inv[1][1]));
 #endif /* __UNUSED__ */
     } else {

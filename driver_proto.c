@@ -27,7 +27,7 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen) {
    /* CONSTRUCT THE MESSAGE */
 
    /* we may need to dump the message */
-   gpsd_report(4, "writing proto control type %02x:%s\n", 
+   gpsd_report(LOG_IO, "writing proto control type %02x:%s\n", 
 	       msg[0], gpsd_hexdump(msg, msglen));
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
@@ -46,7 +46,7 @@ gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t 
 	return 0;
 
     /* we may need to dump the raw packet */
-    gpsd_report(5, "raw proto packet type 0x%02x length %d: %s\n", buf[0], len, buf2);
+    gpsd_report(LOG_RAW, "raw proto packet type 0x%02x length %d: %s\n", buf[0], len, buf2);
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "PROTO%d",(int)buf[0]);
@@ -56,7 +56,7 @@ gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t 
 	/* DISPATCH ON FIRST BYTE OF PAYLOAD */
 
     default:
-	gpsd_report(3, "unknown Proto packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+	gpsd_report(LOG_WARN, "unknown Proto packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
 }

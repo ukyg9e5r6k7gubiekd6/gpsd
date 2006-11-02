@@ -404,13 +404,13 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    short sum = getword(0) + getword(1) + getword(2) + getword(3);
 	    sum *= -1;
 	    if (sum != getword(4)) {
-		gpsd_report(4, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
+		gpsd_report(LOG_IO, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
 		       sum, getword(4));
 		session->packet_state = GROUND_STATE;
 		break;
 	    }
 	}
-	gpsd_report(6,"Zodiac header id=%hd len=%hd flags=%hx\n", getword(1), getword(2), getword(3));
+	gpsd_report(LOG_RAW+1,"Zodiac header id=%hd len=%hd flags=%hx\n", getword(1), getword(2), getword(3));
  #undef getword
 	if (session->packet_length == 0) {
 	    session->packet_state = ZODIAC_RECOGNIZED;
@@ -573,12 +573,12 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 	session->outbuffer[packetlen] = '\0';
 	session->packet_type = packet_type;
 #ifdef STATE_DEBUG
-	gpsd_report(6, "Packet type %d accepted %d = %s\n",
+	gpsd_report(LOG_RAW+1, "Packet type %d accepted %d = %s\n",
 		packet_type, packetlen,
 		gpsd_hexdump(session->outbuffer, session->outbuflen));
 #endif /* STATE_DEBUG */
     } else {
-	gpsd_report(1, "Rejected too long packet type %d len %d\n",
+	gpsd_report(LOG_ERR, "Rejected too long packet type %d len %d\n",
 		packet_type,packetlen);
     }
 }
@@ -593,7 +593,7 @@ static void packet_discard(struct gps_device_t *session)
 				remaining);
     session->inbuflen = remaining;
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Packet discard of %d, chars remaining is %d = %s\n",
+    gpsd_report(LOG_RAW+1, "Packet discard of %d, chars remaining is %d = %s\n",
 		discard, remaining,
 		gpsd_hexdump(session->inbuffer, session->inbuflen));
 #endif /* STATE_DEBUG */
@@ -605,7 +605,7 @@ static void character_discard(struct gps_device_t *session)
     memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
     session->inbufptr = session->inbuffer;
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Character discarded, buffer %d chars = %s\n",
+    gpsd_report(LOG_RAW+1, "Character discarded, buffer %d chars = %s\n",
 		session->inbuflen,
 		gpsd_hexdump(session->inbuffer, session->inbuflen));
 #endif /* STATE_DEBUG */
@@ -622,7 +622,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
-    gpsd_report(6, "Read %d chars to buffer offset %d (total %d): %s\n",
+    gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
 		fix,
 		session->inbuflen,
 		session->inbuflen+fix,
@@ -639,7 +639,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 #include "packet_names.h"
 	};
 	nextstate(session, c);
-	gpsd_report(7, "%08ld: character '%c' [%02x], new state: %s\n",
+	gpsd_report(LOG_RAW+2, "%08ld: character '%c' [%02x], new state: %s\n",
 		    session->char_counter, 
 		    (isprint(c)?c:'.'), 
 		    c, 
@@ -724,18 +724,19 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		/*@ +charint */
 		chksum &= 0xff;
 		if (chksum) {
-		    gpsd_report(4,"Garmin checksum failed: %02x!=0\n",chksum);
+		    gpsd_report(LOG_IO,
+				"Garmin checksum failed: %02x!=0\n",chksum);
 		    goto not_garmin;
 		}
 		/* Debug
-		   gpsd_report(4, "Garmin n= %#02x\n %s\n", n,
+		   gpsd_report(LOG_IO, "Garmin n= %#02x\n %s\n", n,
 		   gpsd_hexdump(session->inbuffer, packetlen));
 		*/
 		packet_accept(session, GARMIN_PACKET);
 		packet_discard(session);
 		break;
 	    not_garmin:;
-	        gpsd_report(6,"Not Garmin\n");
+	        gpsd_report(LOG_RAW+1,"Not Garmin\n");
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
 		/* check for 3 common TSIP packet types:
@@ -762,7 +763,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		if (session->inbuffer[n++] != ETX)
 		    goto not_tsip;
 		/* Debug */
-		gpsd_report(4, "TSIP n= %#02x, len= %#02x\n", n, len); 
+		gpsd_report(LOG_IO, "TSIP n= %#02x, len= %#02x\n", n, len); 
 		/*@ -ifempty */
 		if ((0x41 == pkt_id) && (DLE == len))
 		    /* pass */;
@@ -797,7 +798,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    if (len == 0 || sum == getword(5 + len)) {
 		packet_accept(session, ZODIAC_PACKET);
 	    } else {
-		gpsd_report(4,
+		gpsd_report(LOG_IO,
 		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n",
 			sum, len, getword(5 + len));
 		session->packet_state = GROUND_STATE;
@@ -839,7 +840,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		goto not_evermore;
 	    crc &= 0xff;
 	    if (crc != checksum) {
-		gpsd_report(4, "EverMore checksum failed: %02x != %02x\n", 
+		gpsd_report(LOG_IO, 
+			    "EverMore checksum failed: %02x != %02x\n", 
 			    crc, checksum);
 		goto not_evermore;
 	    }

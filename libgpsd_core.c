@@ -35,7 +35,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
-	    gpsd_report(3, "Selecting %s driver...\n", (*dp)->typename);
+	    gpsd_report(LOG_PROG, "Selecting %s driver...\n", (*dp)->typename);
 	    gpsd_assert_sync(session);
 	    if (session->device_type != NULL && session->device_type->wrapup != NULL)
 		session->device_type->wrapup(session);
@@ -49,7 +49,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
 	}
-    gpsd_report(1, "invalid GPS type \"%s\".\n", typename);
+    gpsd_report(LOG_ERR, "invalid GPS type \"%s\".\n", typename);
     return 0;
     /*@ +compmempass @*/
 }
@@ -90,7 +90,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-    gpsd_report(1, "closing GPS=%s (%d)\n", 
+    gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
 #ifdef NTPSHM_ENABLE
     (void)ntpshm_free(session->context, session->shmindex);
@@ -131,11 +131,11 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	if (state == laststate) {
 	    if (++unchanged == 10) {
-		gpsd_report(1, "TIOCMIWAIT returns unchanged state, ppsmonitor terminates\n");
+		gpsd_report(LOG_WARN, "TIOCMIWAIT returns unchanged state, ppsmonitor terminates\n");
 		break;
 	    }
 	} else {
-            gpsd_report(5, "pps-detect (%s) on %s changed to %d\n",
+            gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
                         ((pps_device==TIOCM_CAR) ? "DCD" : "CTS"), 
                           session->gpsdata.gps_device, state);
 	    laststate = state;
@@ -164,7 +164,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #undef timediff
 	    if ( 800000 > duration) {
 		/* less then 800mS, duration too short for anything */
-                gpsd_report(5, 
+                gpsd_report(LOG_RAW, 
                      "PPS pulse rejected too short. cycle: %d, duration: %d\n",
 		     cycle, duration);
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
@@ -174,11 +174,11 @@ static void *gpsd_ppsmonitor(void *arg)
 		/* looks like 2Hz square wave */
 		(void)ntpshm_pps(session, &tv);
             } else {
-                gpsd_report(5, "PPS pulse rejected.  cycle: %d, duration: %d\n",
+                gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 		     cycle, duration);
 	    }
 	} else {
-                gpsd_report(5, "PPS pulse rejected. No fix.\n");
+                gpsd_report(LOG_RAW, "PPS pulse rejected. No fix.\n");
         }
 	/*@ -boolint @*/
 
@@ -205,7 +205,7 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* SIRF_ENABLE */
 	session->char_counter = 0;
 	session->retry_counter = 0;
-	gpsd_report(1, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
+	gpsd_report(LOG_INF, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
@@ -561,7 +561,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {
 	newlen = packet_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	gpsd_report(3, 
+	gpsd_report(LOG_PROG, 
 		    "packet sniff finds type %d\n", 
 		    session->packet_type);
 	if (session->packet_type != BAD_PACKET) {
@@ -612,20 +612,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(7, "GPS sent %d new characters\n", newlen);
+    gpsd_report(LOG_RAW+2, "GPS sent %d new characters\n", newlen);
     if (newlen == -1)	{		/* read error */
 	session->gpsdata.online = 0;
 	return 0;
     } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-		gpsd_report(3, "GPS is offline (%lf sec since data)\n", 
+		gpsd_report(LOG_PROG, "GPS is offline (%lf sec since data)\n", 
 			timestamp() - session->gpsdata.online);
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
     } else if (session->outbuflen == 0) {   /* got new data, but no packet */
-	    gpsd_report(8, "New data, not yet a packet\n");
+	    gpsd_report(LOG_RAW+3, "New data, not yet a packet\n");
 	    return ONLINE_SET;
     } else {
 	gps_mask_t received, dopmask = 0;
@@ -689,7 +689,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 #endif /* RTCM104_ENABLE */
 	    if (buf2[0] != '\0') {
-		gpsd_report(3, "<= GPS: %s", buf2);
+		gpsd_report(LOG_IO, "<= GPS: %s", buf2);
 		if (session->gpsdata.raw_hook)
 		    session->gpsdata.raw_hook(&session->gpsdata, 
 					      buf2, strlen(buf2), 1);

@@ -174,7 +174,7 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    len = (size_t)(cp - stuffed);
 
    /* we may need to dump the message */
-   gpsd_report(4, "writing EverMore control type 0x%02x: %s\n", msg[0], 
+   gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	       gpsd_hexdump(stuffed, len));
 #ifdef ALLOW_RECONFIGURE
    return gpsd_write(session, stuffed, len);
@@ -202,7 +202,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     if (*cp == 0x10) cp++;
     datalen = (size_t)*cp++;
    
-    gpsd_report(7, "raw EverMore packet type 0x%02x, length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
+    gpsd_report(LOG_RAW, "raw EverMore packet type 0x%02x, length %d: %s\n", *cp, len, gpsd_hexdump(buf, len));
 
     datalen -= 2;
 
@@ -213,7 +213,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     }
 
     /*@ -usedef -compdef @*/
-    gpsd_report(6, "EverMore packet type 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
+    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
@@ -239,7 +239,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    session->gpsdata.fix.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
-	gpsd_report(4, "NDO 0x02: version %3.2f, mode=%d, status=%d, visible=%d, used=%d\n",
+	gpsd_report(LOG_PROG, "NDO 0x02: version %3.2f, mode=%d, status=%d, visible=%d, used=%d\n",
 		    version,
 		    session->gpsdata.fix.mode,
 		    session->gpsdata.status,
@@ -281,7 +281,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	    break;
 	}
 	/* that's all the information in this packet */
-	gpsd_report(4, "DDO 0x04: mode=%d, status=%d\n", 
+	gpsd_report(LOG_PROG, "DDO 0x04: mode=%d, status=%d\n", 
 		    session->gpsdata.fix.mode,
 		    session->gpsdata.status);
 	return TIME_SET | DOP_SET | MODE_SET | STATUS_SET;
@@ -293,7 +293,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	if (session->gpsdata.satellites > 12) {
-		gpsd_report(4, "Warning: EverMore packet has information about %d satellites!\n",
+		gpsd_report(LOG_WARN, "Warning: EverMore packet has information about %d satellites!\n",
 				session->gpsdata.satellites);
 	}
 	if (session->gpsdata.satellites > EVERMORE_CHANNELS) session->gpsdata.satellites = EVERMORE_CHANNELS;
@@ -326,7 +326,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	}
 	session->gpsdata.satellites = (int)satcnt;
 	/* that's all the information in this packet */
-	gpsd_report(4, "CSO 0x04: %d satellites used\n", 
+	gpsd_report(LOG_PROG, "CSO 0x04: %d satellites used\n", 
 		    session->gpsdata.satellites_used);
 	return TIME_SET | SATELLITE_SET | USED_SET;
 
@@ -338,19 +338,19 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
 	/* gpsd_report(4, "MDO 0x04: visible=%d\n", visible); */
-	gpsd_report(4, "MDO 0x04:\n");
+	gpsd_report(LOG_PROG, "MDO 0x04:\n");
 	return TIME_SET;
     
     case 0x20:	/* LogConfig Info, could be used as a probe for EverMore GPS */
-	gpsd_report(3, "LogConfig EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
+	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
 	return ONLINE_SET;
 
     case 0x22:	/* LogData */
-	gpsd_report(3, "LogData EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
+	gpsd_report(LOG_IO, "LogData EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
 	return ONLINE_SET;
 
     default:
-	gpsd_report(3, "unknown EverMore packet id 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
+	gpsd_report(LOG_WARN, "unknown EverMore packet id 0x%02x, length %d: %s\n", buf2[0], datalen, gpsd_hexdump(buf2, datalen));
 	return 0;
     }
 }
@@ -496,7 +496,7 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 	    0x00,    /* 3: reserved */
     };
 
-    gpsd_report(5, "evermore_default call(%d)\n", mode);
+    gpsd_report(LOG_PROG, "evermore_default call(%d)\n", mode);
     ok &= evermore_write(session, evrm_elevation_mask,
 	sizeof(evrm_elevation_mask));
     ok &= evermore_write(session, evrm_dop_mask, sizeof(evrm_dop_mask));
@@ -512,7 +512,7 @@ static bool evermore_default(struct gps_device_t *session, int mode)
     ok &= evermore_write(session, evrm_restart, sizeof(evrm_restart));
 #endif /* __UNUSED__ */
     if (mode == 1) {
-       gpsd_report(1, "Switching chip mode to EverMore binary.\n");
+       gpsd_report(LOG_PROG, "Switching chip mode to EverMore binary.\n");
        evrm_protocol_config[1] = 0;  /* binary mode */
     }
     ok &= evermore_write(session, evrm_protocol_config,
@@ -554,7 +554,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
     session->gpsdata.baudrate = (unsigned int)speed;
     //gpsd_set_speed(session, speed, 'N', 1);
     if (mode) {
-        gpsd_report(1, "Switching chip mode to EverMore binary.\n");
+        gpsd_report(LOG_PROG, "Switching chip mode to EverMore binary.\n");
 	msg[16] |= 0x80;  /* binary mode */
     }
     unix_to_gpstime(timestamp(), &week, &tow);
@@ -571,7 +571,7 @@ static bool evermore_set_mode(struct gps_device_t *session,
 static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 {
 #if 0
-    gpsd_report(5, "evermore_speed call (%d)\n", speed);
+    gpsd_report(LOG_PROG, "evermore_speed call (%d)\n", speed);
     return evermore_set_mode(session, speed, true);
 #else
     unsigned char tmp8;
@@ -581,7 +581,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
 	    0x00,          /*  3: baud rate for DGPS serial port; 4800(0), 9600(1), etc */
     };
-    gpsd_report(5, "evermore_speed call (%d)\n", speed);
+    gpsd_report(LOG_PROG, "evermore_speed call (%d)\n", speed);
     switch (speed) {
 	    case 4800:  tmp8 = 0; break;
 	    case 9600:  tmp8 = 1; break;
@@ -611,9 +611,9 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 
 static void evermore_configurator(struct gps_device_t *session)
 {
-    gpsd_report(5, "evermore_configurator call\n");
+    gpsd_report(LOG_PROG, "evermore_configurator call\n");
     if (session->packet_type == NMEA_PACKET) {
-	gpsd_report(5, "NMEA_PACKET packet\n");
+	gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
     }
     (void)evermore_default(session, 1); /* switch GPS to binary mode */
 }
@@ -636,7 +636,7 @@ static void evermore_probe(struct gps_device_t *session)
 	   0x13,        /*  1: LogRead = 0x13 */
    };
    bool ok;
-   gpsd_report(5, "evermore_probe call\n");
+   gpsd_report(LOG_PROG, "evermore_probe call\n");
    ok = evermore_write(session, msg, sizeof(msg));
    return;
 }
@@ -646,7 +646,7 @@ static void evermore_probe(struct gps_device_t *session)
 static void evermore_close(struct gps_device_t *session)
 /* set GPS to NMEA, 4800, GGA, GSA, GSV, RMC (default) */ 
 {	
-	gpsd_report(5, "evermore_close call\n");
+	gpsd_report(LOG_PROG, "evermore_close call\n");
 	(void)evermore_set_mode(session, 4800, false);
 }
 #endif /* __UNUSED__ */

@@ -33,14 +33,14 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
     if (session->packet_type == SIRF_PACKET) {
-	gpsd_report(2, "SiRF packet seen when NMEA expected.\n");
+	gpsd_report(LOG_WARN, "SiRF packet seen when NMEA expected.\n");
 #ifdef SIRF_ENABLE
 	return sirf_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;
 #endif /* SIRF_ENABLE */
     } else if (session->packet_type == EVERMORE_PACKET) {
-	gpsd_report(2, "EverMore packet seen when NMEA expected.\n");
+	gpsd_report(LOG_WARN, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
 	/* we might never see a $PEMT, have this as a backstop */
 	(void)gpsd_switch_driver(session, "EverMore binary");
@@ -49,7 +49,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 #endif /* EVERMORE_ENABLE */
     } else if (session->packet_type == GARMIN_PACKET) {
-	gpsd_report(2, "Garmin packet seen when NMEA expected.\n");
+	gpsd_report(LOG_WARN, "Garmin packet seen when NMEA expected.\n");
 #ifdef GARMIN_ENABLE
 	/* we might never see a trigger, have this as a backstop */
 	(void)gpsd_switch_driver(session, "Garmin Serial binary");
@@ -59,7 +59,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #endif /* GARMIN_ENABLE */
     } else if (session->packet_type == NMEA_PACKET) {
 	gps_mask_t st = 0;
-	gpsd_report(2, "<= GPS: %s", session->outbuffer);
+	gpsd_report(LOG_IO, "<= GPS: %s", session->outbuffer);
 	if ((st=nmea_parse((char *)session->outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
@@ -69,20 +69,20 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		char	*trigger = (*dp)->trigger;
 
 		if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
-		    gpsd_report(1, "found %s.\n", trigger);
+		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->typename);
 		    return 1;
 		}
 	    }
 #endif /* NON_NMEA_ENABLE */
-	    gpsd_report(1, "unknown sentence: \"%s\"\n", session->outbuffer);
+	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->outbuffer);
 	}
 #ifdef NMEADISC
 	if (st & TIME_SET && session->gpsdata.ldisc == 0) {
 	    int ldisc = NMEADISC;
 
 	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
-		gpsd_report(1, "can't set nmea discipline\n");
+		gpsd_report(LOG_ERR, "can't set nmea discipline\n");
 	    else
 		session->gpsdata.ldisc = NMEADISC;
 	}
@@ -459,10 +459,10 @@ static int literal_send(int fd, const char *fmt, ... )
     va_end(ap);
     status = (int)write(fd, buf, strlen(buf));
     if (status == (int)strlen(buf)) {
-	gpsd_report(2, "=> GPS: %s\n", buf);
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;
     } else {
-	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
 }
@@ -575,7 +575,7 @@ static void tnt_add_checksum(char *sentence)
     if (*p == '@') {
 	p++;
     } else {
-        gpsd_report(1, "Bad TNT sentence: '%s'\n", sentence);
+        gpsd_report(LOG_ERR, "Bad TNT sentence: '%s'\n", sentence);
     }
     while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;
@@ -599,10 +599,10 @@ static int tnt_send(int fd, const char *fmt, ... )
     status = (int)write(fd, buf, strlen(buf));
     tcdrain(fd);
     if (status == (int)strlen(buf)) {
-	gpsd_report(2, "=> GPS: %s\n", buf);
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;
     } else {
-	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
 }
@@ -617,7 +617,7 @@ static int tnt_packet_sniff(struct gps_device_t *session)
 {
     unsigned int n, count = 0;
 
-    gpsd_report(5, "tnt_packet_sniff begins\n");
+    gpsd_report(LOG_RAW, "tnt_packet_sniff begins\n");
     for (n = 0; n < TNT_SNIFF_RETRIES; n++) 
     {
       count = 0;
@@ -626,20 +626,20 @@ static int tnt_packet_sniff(struct gps_device_t *session)
           return BAD_PACKET;
       if (count == 0) {
           //int delay = 10000000000.0 / session->gpsdata.baudrate;
-          //gpsd_report(5, "usleep(%d)\n", delay);
+          //gpsd_report(LOG_RAW, "usleep(%d)\n", delay);
           //usleep(delay);
-          gpsd_report(5, "sleep(1)\n");
+          gpsd_report(LOG_RAW, "sleep(1)\n");
           (void)sleep(1);
       } else if (packet_get(session) >= 0) {
         if((session->packet_type == NMEA_PACKET)&&(session->packet_state == NMEA_RECOGNIZED))
         {
-          gpsd_report(5, "tnt_packet_sniff returns %d\n",session->packet_type);
+          gpsd_report(LOG_RAW, "tnt_packet_sniff returns %d\n",session->packet_type);
           return session->packet_type;
         }
       }
     }
 
-    gpsd_report(5, "tnt_packet_sniff found no packet\n");
+    gpsd_report(LOG_RAW, "tnt_packet_sniff found no packet\n");
     return BAD_PACKET;
 }
 
@@ -667,7 +667,7 @@ static bool tnt_probe(struct gps_device_t *session)
   static unsigned int rates[] = {38400, 19200, 2400, 4800, 9600 };
 #endif /* FIXED_PORT_SPEED defined */
 
-  gpsd_report(1, "Probing TrueNorth Compass\n");
+  gpsd_report(LOG_PROG, "Probing TrueNorth Compass\n");
 
   /*
    * Only block until we get at least one character, whatever the
@@ -686,7 +686,7 @@ static bool tnt_probe(struct gps_device_t *session)
   for (ip = rates; ip < rates + sizeof(rates)/sizeof(rates[0]); ip++)
       if (ip == rates || *ip != rates[0])
       {
-          gpsd_report(1, "hunting at speed %d\n", *ip);
+          gpsd_report(LOG_PROG, "hunting at speed %d\n", *ip);
           gpsd_set_speed(session, *ip, 'N',1);
           if (tnt_packet_sniff(session) != BAD_PACKET)
               return true;
@@ -721,7 +721,7 @@ struct gps_type_t trueNorth = {
 
 static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 {
-    gpsd_report(5, "RTCM packet type 0x%02x length %d words: %s\n", 
+    gpsd_report(LOG_RAW, "RTCM packet type 0x%02x length %d words: %s\n", 
 		session->gpsdata.rtcm.type,
 		session->gpsdata.rtcm.length+2,
 		gpsd_hexdump(session->driver.isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));

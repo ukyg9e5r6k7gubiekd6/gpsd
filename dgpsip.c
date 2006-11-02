@@ -31,14 +31,14 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 
     context->dsock = netlib_connectsock(dgpsserver, dgpsport, "tcp");
     if (context->dsock >= 0) {
-	gpsd_report(1,"connection to DGPS server %s established.\n",dgpsserver);
+	gpsd_report(LOG_PROG,"connection to DGPS server %s established.\n",dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
 	(void)write(context->dsock, buf, strlen(buf));
 	context->dgnss_service = dgnss_dgpsip;
     } else
-	gpsd_report(1, "can't connect to DGPS server %s, netlib error %d.\n", dgpsserver, context->dsock);
+	gpsd_report(LOG_ERR, "can't connect to DGPS server %s, netlib error %d.\n", dgpsserver, context->dsock);
     opts = fcntl(context->dsock, F_GETFL);
 
     if (opts >= 0)
@@ -63,7 +63,7 @@ void dgpsip_report(struct gps_device_t *session)
 			   session->gpsdata.fix.longitude, 
 			   session->gpsdata.fix.altitude);
 	    (void)write(session->context->dsock, buf, strlen(buf));
-	    gpsd_report(2, "=> dgps %s", buf);
+	    gpsd_report(LOG_IO, "=> dgps %s", buf);
 	}
     }
 }
@@ -92,7 +92,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     FILE *sfp = fopen(serverlist, "r");
 
     if (sfp == NULL) {
-	gpsd_report(1, "no DGPS server list found.\n");
+	gpsd_report(LOG_ERR, "no DGPS server list found.\n");
 	context->dsock = -2;	/* don't try this again */
 	return;
     }
@@ -125,7 +125,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     (void)fclose(sfp);
 
     if (keep[0].server[0] == '\0') {
-	gpsd_report(1, "no DGPS servers within %dm.\n", (int)(DGPS_THRESHOLD/1000));
+	gpsd_report(LOG_ERR, "no DGPS servers within %dm.\n", (int)(DGPS_THRESHOLD/1000));
 	context->dsock = -2;	/* don't try this again */
 	return;
     }
@@ -135,7 +135,7 @@ void dgpsip_autoconnect(struct gps_context_t *context,
     qsort((void *)keep, SERVER_SAMPLE, sizeof(struct dgps_server_t), srvcmp);
     for (sp = keep; sp < keep + SERVER_SAMPLE; sp++) {
 	if (sp->server[0] != '\0') {
-	    gpsd_report(2,"%s is %dkm away.\n",sp->server,(int)(sp->dist/1000));
+	    gpsd_report(LOG_INF,"%s is %dkm away.\n",sp->server,(int)(sp->dist/1000));
 	    if (dgpsip_open(context, sp->server) >= 0)
 		break;
 	}

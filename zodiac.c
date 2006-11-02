@@ -83,7 +83,7 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
 	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
 		       " %04x", dat[i]);
 
-    gpsd_report(5, "Sent Zodiac packet: %s\n",buf);
+    gpsd_report(LOG_RAW, "Sent Zodiac packet: %s\n",buf);
 }
 
 static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
@@ -207,26 +207,26 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* clock_drift_sd              = (int)getlong(53) * 1e-2; */
 
 #if 0
-    gpsd_report(1, "date: %lf\n", session->gpsdata.fix.time);
-    gpsd_report(1, "  solution invalid:\n");
-    gpsd_report(1, "    altitude: %d\n", (getword(10) & 1) ? 1 : 0);
-    gpsd_report(1, "    no diff gps: %d\n", (getword(10) & 2) ? 1 : 0);
-    gpsd_report(1, "    not enough satellites: %d\n", (getword(10) & 4) ? 1 : 0);
-    gpsd_report(1, "    exceed max EHPE: %d\n", (getword(10) & 8) ? 1 : 0);
-    gpsd_report(1, "    exceed max EVPE: %d\n", (getword(10) & 16) ? 1 : 0);
-    gpsd_report(1, "  solution type:\n");
-    gpsd_report(1, "    propagated: %d\n", (getword(11) & 1) ? 1 : 0);
-    gpsd_report(1, "    altitude: %d\n", (getword(11) & 2) ? 1 : 0);
-    gpsd_report(1, "    differential: %d\n", (getword(11) & 4) ? 1 : 0);
-    gpsd_report(1, "Number of measurements in solution: %d\n", getword(12));
-    gpsd_report(1, "Lat: %f\n", getlong(27) * RAD_2_DEG * 1e-8);
-    gpsd_report(1, "Lon: %f\n", getlong(29) * RAD_2_DEG * 1e-8);
-    gpsd_report(1, "Alt: %f\n", (double) getlong(31) * 1e-2);
-    gpsd_report(1, "Speed: %f\n", (double) getlong(34) * 1e-2 * MPS_TO_KNOTS);
-    gpsd_report(1, "Map datum: %d\n", getword(39));
-    gpsd_report(1, "Magnetic variation: %f\n", getword(37) * RAD_2_DEG * 1e-4);
-    gpsd_report(1, "Course: %f\n", getword(36) * RAD_2_DEG * 1e-4);
-    gpsd_report(1, "Separation: %f\n", getword(33) * 1e-2);
+    gpsd_report(LOG_INF, "date: %lf\n", session->gpsdata.fix.time);
+    gpsd_report(LOG_INF, "  solution invalid:\n");
+    gpsd_report(LOG_INF, "    altitude: %d\n", (getword(10) & 1) ? 1 : 0);
+    gpsd_report(LOG_INF, "    no diff gps: %d\n", (getword(10) & 2) ? 1 : 0);
+    gpsd_report(LOG_INF, "    not enough satellites: %d\n", (getword(10) & 4) ? 1 : 0);
+    gpsd_report(LOG_INF, "    exceed max EHPE: %d\n", (getword(10) & 8) ? 1 : 0);
+    gpsd_report(LOG_INF, "    exceed max EVPE: %d\n", (getword(10) & 16) ? 1 : 0);
+    gpsd_report(LOG_INF, "  solution type:\n");
+    gpsd_report(LOG_INF, "    propagated: %d\n", (getword(11) & 1) ? 1 : 0);
+    gpsd_report(LOG_INF, "    altitude: %d\n", (getword(11) & 2) ? 1 : 0);
+    gpsd_report(LOG_INF, "    differential: %d\n", (getword(11) & 4) ? 1 : 0);
+    gpsd_report(LOG_INF, "Number of measurements in solution: %d\n", getword(12));
+    gpsd_report(LOG_INF, "Lat: %f\n", getlong(27) * RAD_2_DEG * 1e-8);
+    gpsd_report(LOG_INF, "Lon: %f\n", getlong(29) * RAD_2_DEG * 1e-8);
+    gpsd_report(LOG_INF, "Alt: %f\n", (double) getlong(31) * 1e-2);
+    gpsd_report(LOG_INF, "Speed: %f\n", (double) getlong(34) * 1e-2 * MPS_TO_KNOTS);
+    gpsd_report(LOG_INF, "Map datum: %d\n", getword(39));
+    gpsd_report(LOG_INF, "Magnetic variation: %f\n", getword(37) * RAD_2_DEG * 1e-4);
+    gpsd_report(LOG_INF, "Course: %f\n", getword(36) * RAD_2_DEG * 1e-4);
+    gpsd_report(LOG_INF, "Separation: %f\n", getword(33) * 1e-2);
 #endif
 
     session->gpsdata.sentence_length = 55;
@@ -251,13 +251,13 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	session->driver.zodiac.Zs[i] = prn = (int)getword(16 + (3 * i));
 	/*@ +type @*/ 
 #if 0
-	gpsd_report(1, "Sat%02d:\n", i);
-	gpsd_report(1, " used:%d\n", (status & 1) ? 1 : 0);
-	gpsd_report(1, " eph:%d\n", (status & 2) ? 1 : 0);
-	gpsd_report(1, " val:%d\n", (status & 4) ? 1 : 0);
-	gpsd_report(1, " dgps:%d\n", (status & 8) ? 1 : 0);
-	gpsd_report(1, " PRN:%d\n", prn);
-	gpsd_report(1, " C/No:%d\n", getword(17 + (3 * i)));
+	gpsd_report(LOG_INF, "Sat%02d:\n", i);
+	gpsd_report(LOG_INF, " used:%d\n", (status & 1) ? 1 : 0);
+	gpsd_report(LOG_INF, " eph:%d\n", (status & 2) ? 1 : 0);
+	gpsd_report(LOG_INF, " val:%d\n", (status & 4) ? 1 : 0);
+	gpsd_report(LOG_INF, " dgps:%d\n", (status & 8) ? 1 : 0);
+	gpsd_report(LOG_INF, " PRN:%d\n", prn);
+	gpsd_report(LOG_INF, " C/No:%d\n", getword(17 + (3 * i)));
 #endif
 	if (status & 1)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
@@ -292,7 +292,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 		session->gpsdata.azimuth[i] += 360;
 	    session->gpsdata.elevation[i] = (int)(((short)getword(17 + (3 * i))) * RAD_2_DEG * 1e-4);
 #if 0
-	    gpsd_report(1, "Sat%02d:  PRN:%d az:%d el:%d\n", 
+	    gpsd_report(LOG_INF, "Sat%02d:  PRN:%d az:%d el:%d\n", 
 			i, getword(15+(3 * i)),getword(16+(3 * i)),getword(17+(3 * i)));
 #endif
 	} else {
@@ -312,21 +312,21 @@ static void handle1005(struct gps_device_t *session UNUSED)
 #if 0
     int i;
 
-    gpsd_report(1, "Packet: %d\n", session->driver.zodiac.sn);
-    gpsd_report(1, "Station bad: %d\n", (getword(9) & 1) ? 1 : 0);
-    gpsd_report(1, "User disabled: %d\n", (getword(9) & 2) ? 1 : 0);
-    gpsd_report(1, "Station ID: %d\n", getword(10));
-    gpsd_report(1, "Age of last correction in seconds: %d\n", getword(11));
-    gpsd_report(1, "Number of corrections: %d\n", getword(12));
+    gpsd_report(LOG_INF, "Packet: %d\n", session->driver.zodiac.sn);
+    gpsd_report(LOG_INF, "Station bad: %d\n", (getword(9) & 1) ? 1 : 0);
+    gpsd_report(LOG_INF, "User disabled: %d\n", (getword(9) & 2) ? 1 : 0);
+    gpsd_report(LOG_INF, "Station ID: %d\n", getword(10));
+    gpsd_report(LOG_INF, "Age of last correction in seconds: %d\n", getword(11));
+    gpsd_report(LOG_INF, "Number of corrections: %d\n", getword(12));
     for (i = 0; i < numcorrections; i++) {
-	gpsd_report(1, "Sat%02d:\n", getword(13+i) & 0x3f);
-	gpsd_report(1, "ephemeris:%d\n", (getword(13+i) & 64) ? 1 : 0);
-	gpsd_report(1, "rtcm corrections:%d\n", (getword(13+i) & 128) ? 1 : 0);
-	gpsd_report(1, "rtcm udre:%d\n", (getword(13+i) & 256) ? 1 : 0);
-	gpsd_report(1, "sat health:%d\n", (getword(13+i) & 512) ? 1 : 0);
-	gpsd_report(1, "rtcm sat health:%d\n", (getword(13+i) & 1024) ? 1 : 0);
-	gpsd_report(1, "corrections state:%d\n", (getword(13+i) & 2048) ? 1 : 0);
-	gpsd_report(1, "iode mismatch:%d\n", (getword(13+i) & 4096) ? 1 : 0);
+	gpsd_report(LOG_INF, "Sat%02d:\n", getword(13+i) & 0x3f);
+	gpsd_report(LOG_INF, "ephemeris:%d\n", (getword(13+i) & 64) ? 1 : 0);
+	gpsd_report(LOG_INF, "rtcm corrections:%d\n", (getword(13+i) & 128) ? 1 : 0);
+	gpsd_report(LOG_INF, "rtcm udre:%d\n", (getword(13+i) & 256) ? 1 : 0);
+	gpsd_report(LOG_INF, "sat health:%d\n", (getword(13+i) & 512) ? 1 : 0);
+	gpsd_report(LOG_INF, "rtcm sat health:%d\n", (getword(13+i) & 1024) ? 1 : 0);
+	gpsd_report(LOG_INF, "corrections state:%d\n", (getword(13+i) & 2048) ? 1 : 0);
+	gpsd_report(LOG_INF, "iode mismatch:%d\n", (getword(13+i) & 4096) ? 1 : 0);
     }
 #endif
     if (session->gpsdata.fix.mode == MODE_NO_FIX)
@@ -346,8 +346,8 @@ static void handle1108(struct gps_device_t *session)
     if ((int)(getword(19) & 3) == 3)
 	session->context->leap_seconds = (int)getword(16);
 #if 0
-    gpsd_report(1, "Leap seconds: %d.%09d\n", getword(16), getlong(17));
-    gpsd_report(1, "UTC validity: %d\n", getword(19) & 3);
+    gpsd_report(LOG_INF, "Leap seconds: %d.%09d\n", getword(16), getlong(17));
+    gpsd_report(LOG_INF, "UTC validity: %d\n", getword(19) & 3);
 #endif
 }
 
@@ -359,10 +359,10 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
     if (session->packet_type != ZODIAC_PACKET) {
 	struct gps_type_t **dp;
-	gpsd_report(2, "zodiac_analyze packet type %d\n",session->packet_type);
+	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",session->packet_type);
  	// Wrong packet type ? 
 	// Maybe find a trigger just in case it's an Earthmate
-	gpsd_report(9, "Is this a trigger: %s ?\n", (char*)session->outbuffer);
+	gpsd_report(LOG_RAW+4, "Is this a trigger: %s ?\n", (char*)session->outbuffer);
 
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char	*trigger = (*dp)->trigger;
@@ -382,7 +382,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
 		       "%02x", (unsigned int)session->outbuffer[i]);
     (void)strlcat(buf, "\n", BUFSIZ);
-    gpsd_report(5, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf);
+    gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf);
 
     if (session->outbuflen < 10)
 	return 0;

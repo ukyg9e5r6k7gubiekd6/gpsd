@@ -184,7 +184,7 @@ static int sirfProbe(int fd, char **version)
     char buf[MAX_PACKET_LENGTH];
     ssize_t status, want;
 
-    gpsd_report(4, "probing with %s\n", 
+    gpsd_report(LOG_PROG, "probing with %s\n", 
 		gpsd_hexdump(versionprobe, sizeof(versionprobe)));
     if ((status = write(fd, versionprobe, sizeof(versionprobe))) != 10)
 	return -1;
@@ -207,7 +207,7 @@ static int sirfProbe(int fd, char **version)
 	    if (status == -1)
 		return -1;
 	}
-	gpsd_report(4, "%d bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
+	gpsd_report(LOG_PROG, "%d bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
 	*version = strdup(buf);
 	return 0;
     } else {
@@ -237,14 +237,14 @@ static int sirfVersionCheck(int fd UNUSED, const char *version UNUSED,
 static int wait2seconds(int fd UNUSED)
 {
     /* again we wait, this time for our uploaded code to start running */
-    gpsd_report(1, "waiting 2 seconds...\n");
+    gpsd_report(LOG_PROG, "waiting 2 seconds...\n");
     return (int)sleep(2);
 }
 
 static int wait5seconds(int fd UNUSED)
 {
     /* wait for firmware upload to settle in */
-    gpsd_report(1, "waiting 5 seconds...\n");
+    gpsd_report(LOG_PROG, "waiting 5 seconds...\n");
     return (int)sleep(5);
 }
 

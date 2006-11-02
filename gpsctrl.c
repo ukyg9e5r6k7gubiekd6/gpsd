@@ -103,12 +103,12 @@ int main(int argc, char **argv)
 	    case NL_NOPROTO:   err_str ="can't get protocol entry"; break;
 	    case NL_NOSOCK:    err_str ="can't create socket"; break;
 	    case NL_NOSOCKOPT: err_str ="error SETSOCKOPT SO_REUSEADDR"; break;
-	    case NL_NOCONNECT: err_str ="can't connect to host"; break;
+	    case NL_NOCONNECT: err_str ="can't connect"; break;
 	    default:           err_str ="Unknown"; break;
 	    } 
 	    (void)fprintf(stderr, 
-			  "gpsctrl: no gpsd running or network error: %d, %s\n", 
-			  errno, err_str);
+			  "gpsctrl: no gpsd running or network error: %s.\n", 
+			  err_str);
 	    lowlevel = true;
 	}
     }
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 	    (void)gps_close(gpsdata);
 	    exit(1);
 	}
-	gpsd_report(1, "gpsctrl: %d device(s) found.\n", gpsdata->ndevices);
+	gpsd_report(LOG_PROG, "gpsctrl: %d device(s) found.\n", gpsdata->ndevices);
 
 	if (gpsdata->ndevices > 1) {
 	    int i;
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 	if (speed==NULL && !to_nmea && !to_binary) {
 	    /* the O is to force a device binding */
 	    (void)gps_query(gpsdata, "OFIB");
-	    gpsd_report(0, "gpsctrl: %s identified as %s at %d\n",
+	    gpsd_report(LOG_SHOUT, "gpsctrl: %s identified as %s at %d\n",
 			gpsdata->gps_device,gpsdata->gps_id,gpsdata->baudrate);
 	    exit(0);
 	}
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 		(void)fprintf(stderr, "gpsctrl: mode change failed\n");
 		status = 1;
 	    } else
-		gpsd_report(1, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "N=1");
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 		(void)fprintf( stderr, "gpsctrl: mode change failed\n");
 		status = 1;
 	    } else
-		gpsd_report(1, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctrl: mode change on %s succeeded\n", gpsdata->gps_device);
 	}
 	if (speed != NULL) {
 	    (void)gps_query(gpsdata, "B=%s", speed);
@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 		(void)fprintf( stderr, "gpsctrl: speed change failed\n");
 		status = 1;
 	    } else
-		gpsd_report(1, "gpsctrl: speed change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctrl: speed change on %s succeeded\n", gpsdata->gps_device);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
 	gpsd_init(&session, &context, device);
-	gpsd_report(1, "gpsctrl: initialization passed.\n");
+	gpsd_report(LOG_PROG, "gpsctrl: initialization passed.\n");
 	if (gpsd_activate(&session) == -1) {
 	    (void)fprintf(stderr, 
 			  "gpsd: activation of device %s failed, errno=%d\n",
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 		exit(2);
 	    }
 	}
-	gpsd_report(1, "gpsctrl: %s looks like a %s at %d.\n",
+	gpsd_report(LOG_PROG, "gpsctrl: %s looks like a %s at %d.\n",
 		    device, gpsd_id(&session), session.gpsdata.baudrate);
 	/* 
 	 * If we've identified this as an NMEA device, we have to eat
@@ -224,7 +224,7 @@ int main(int argc, char **argv)
 		    break;
 	    }
 	}
-	gpsd_report(0, "gpsctrl: %s identified as a %s at %d.\n",
+	gpsd_report(LOG_SHOUT, "gpsctrl: %s identified as a %s at %d.\n",
 		    device, gpsd_id(&session), session.gpsdata.baudrate);
 
 	/* if no control operation was specified, we're done */

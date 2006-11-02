@@ -204,7 +204,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	mask = 0;
 	merge_hhmmss(field[5], session);
 	if (session->driver.nmea.date.tm_year == 0) 
-	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	    gpsd_report(LOG_WARN, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
@@ -220,7 +220,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	    newstatus = STATUS_FIX;
 	session->gpsdata.status = newstatus;
 	mask |= STATUS_SET;
-	gpsd_report(3, "GPGLL sets status %d\n", session->gpsdata.status);
+	gpsd_report(LOG_PROG, "GPGLL sets status %d\n", session->gpsdata.status);
     }
 
     return mask;
@@ -249,7 +249,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
     gps_mask_t mask;
 
     session->gpsdata.status = atoi(field[6]);
-    gpsd_report(3, "GPGGA sets status %d\n", session->gpsdata.status);
+    gpsd_report(LOG_PROG, "GPGGA sets status %d\n", session->gpsdata.status);
     mask = STATUS_SET;
     if (session->gpsdata.status > STATUS_NO_FIX) {
 	char *altitude;
@@ -257,7 +257,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 
 	merge_hhmmss(field[1], session);
 	if (session->driver.nmea.date.tm_year == 0) 
-	    gpsd_report(1, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	    gpsd_report(LOG_WARN, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
@@ -346,7 +346,7 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
         mask = 0;
     else
         mask = MODE_SET;
-    gpsd_report(3, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
+    gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
     session->gpsdata.pdop = atof(field[count-3]);
     session->gpsdata.hdop = atof(field[count-2]);
     session->gpsdata.vdop = atof(field[count-1]);
@@ -392,7 +392,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 
     for (fldnum = 4; fldnum < count; ) {
 	if (session->gpsdata.satellites >= MAXCHANNELS) {
-	    gpsd_report(0, "internal error - too many satellites!\n");
+	    gpsd_report(LOG_ERR, "internal error - too many satellites!\n");
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
 	}
@@ -410,12 +410,12 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	    session->gpsdata.satellites++;
     }
     if (session->driver.nmea.part == session->driver.nmea.await && atoi(field[3]) != session->gpsdata.satellites)
-	gpsd_report(1, "GPGSV field 3 value of %d != actual count %d\n",
+	gpsd_report(LOG_WARN, "GPGSV field 3 value of %d != actual count %d\n",
 		    atoi(field[3]), session->gpsdata.satellites);
 
     /* not valid data until we've seen a complete set of parts */
     if (session->driver.nmea.part < session->driver.nmea.await) {
-	gpsd_report(3, "Partial satellite data (%d of %d).\n", session->driver.nmea.part, session->driver.nmea.await);
+	gpsd_report(LOG_PROG, "Partial satellite data (%d of %d).\n", session->driver.nmea.part, session->driver.nmea.await);
 	return ERROR_SET;
     }
     /*
@@ -429,11 +429,11 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     for (n = 0; n < session->gpsdata.satellites; n++)
 	if (session->gpsdata.azimuth[n] != 0)
 	    goto sane;
-    gpsd_report(3, "Satellite data no good.\n");
+    gpsd_report(LOG_WARN, "Satellite data no good.\n");
     gpsd_zero_satellites(&session->gpsdata);
     return ERROR_SET;
   sane:
-    gpsd_report(3, "Satellite data OK.\n");
+    gpsd_report(LOG_PROG, "Satellite data OK.\n");
     return SATELLITE_SET;
     }
 
@@ -544,7 +544,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
     session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
 
-    gpsd_report(5, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.headingStatus);
+    gpsd_report(LOG_RAW, "Heading %lf  %c.\n", session->gpsdata.fix.track, session->gpsdata.headingStatus);
     return mask;
 }
 #endif /* TNT_ENABLE */
@@ -605,7 +605,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     unsigned char sum;
 
     if (!nmea_checksum(sentence+1, &sum)) {
-        gpsd_report(1, "Bad NMEA checksum: '%s' should be %02X\n",
+        gpsd_report(LOG_ERR, "Bad NMEA checksum: '%s' should be %02X\n",
                    sentence, sum);
         return 0;
     }
@@ -651,7 +651,7 @@ void nmea_add_checksum(char *sentence)
     if (*p == '$') {
 	p++;
     } else {
-        gpsd_report(1, "Bad NMEA sentence: '%s'\n", sentence);
+        gpsd_report(LOG_ERR, "Bad NMEA sentence: '%s'\n", sentence);
     }
     while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;
@@ -679,10 +679,10 @@ int nmea_send(int fd, const char *fmt, ... )
     status = (int)write(fd, buf, strlen(buf));
     (void)tcdrain(fd);
     if (status == (int)strlen(buf)) {
-	gpsd_report(2, "=> GPS: %s\n", buf);
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;
     } else {
-	gpsd_report(2, "=> GPS: %s FAILED\n", buf);
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
 }

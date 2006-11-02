@@ -236,6 +236,15 @@ struct gps_device_t {
     } driver;
 };
 
+/* logging levels */
+#define LOG_ERR 	0	/* errors, display always */
+#define LOG_SHOUT	0	/* not an error but we should always see it */
+#define LOG_WARN	1	/* not errors but may indicate a problem */
+#define LOG_INF 	2	/* key informative messages */
+#define LOG_PROG	3	/* progress messages */
+#define LOG_IO  	4	/* IO to and from devices */
+#define LOG_RAW 	5	/* raw low-level I/O */
+
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
 /* here are the available GPS drivers */

@@ -24,7 +24,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
      */
     int i;
     unsigned int pageid, subframe, leap;
-    gpsd_report(4, 
+    gpsd_report(LOG_IO, 
 		"50B (raw): %08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n", 
 		words[0], words[1], words[2], words[3], words[4], 
 		words[5], words[6], words[7], words[8], words[9]);
@@ -62,10 +62,10 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
      * See page 105 for the mapping between magic SVIDs and pages.
      */
     pageid = (words[2] & 0x3F0000) >> 16;
-    gpsd_report(2, "Subframe 4 SVID is %d\n", pageid);
+    gpsd_report(LOG_PROG, "Subframe 4 SVID is %d\n", pageid);
     if (pageid == 56) {	/* magic SVID for page 18 */
 	/* once we've filtered, we can ignore the TEL and HOW words */
-	gpsd_report(2, "50B: SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
+	gpsd_report(LOG_PROG, "50B: SF=%d %06x %06x %06x %06x %06x %06x %06x %06x\n", 
 		    subframe,
 		    words[2], words[3], words[4], words[5], 
 		    words[6], words[7], words[8], words[9]);
@@ -100,7 +100,7 @@ void gpsd_interpret_subframe(struct gps_device_t *session,unsigned int words[])
 	 */
 	if (leap > 128)
 	    leap ^= 0xff;
-	gpsd_report(2, "leap-seconds is %d\n", leap);
+	gpsd_report(LOG_INF, "leap-seconds is %d\n", leap);
 	session->context->leap_seconds = (int)leap;
 	session->context->valid |= LEAP_SECOND_VALID;
     }

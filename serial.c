@@ -61,7 +61,8 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
 bool gpsd_set_raw(struct gps_device_t *session)
 {
     if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
-	gpsd_report(0,"error getting port attributes: %s\n",strerror(errno));
+	gpsd_report(LOG_ERR,
+		    "error getting port attributes: %s\n",strerror(errno));
 	return false;
     }
     memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
@@ -69,7 +70,8 @@ bool gpsd_set_raw(struct gps_device_t *session)
     (void)cfmakeraw(&session->ttyset);
 
     if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
- 	gpsd_report(0,"error changing port attributes: %s\n",strerror(errno));
+ 	gpsd_report(LOG_ERR,
+		    "error changing port attributes: %s\n",strerror(errno));
  	return false;
     }
 
@@ -180,7 +182,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	(void)usleep(200000);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
-    gpsd_report(1, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
+    gpsd_report(LOG_INF, "speed %d, %d%c%d\n", speed, 9-stopbits, parity, stopbits);
 
     session->gpsdata.baudrate = (unsigned int)speed;
     session->gpsdata.parity = (unsigned int)parity;
@@ -205,9 +207,9 @@ void gpsd_set_speed(struct gps_device_t *session,
 
 int gpsd_open(struct gps_device_t *session)
 {
-    gpsd_report(1, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
+    gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NONBLOCK|O_NOCTTY)) < 0) {
-	gpsd_report(1, "device open failed: %s\n", strerror(errno));
+	gpsd_report(LOG_ERR, "device open failed: %s\n", strerror(errno));
 	return -1;
     }
 
@@ -230,7 +232,7 @@ int gpsd_open(struct gps_device_t *session)
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
-		gpsd_report(3, "probe found %s driver...\n", (*dp)->typename);
+		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
 		/*@i1@*/session->device_type = *dp;
 		if (session->device_type->probe_subtype !=NULL)
 		    session->device_type->probe_subtype(session);
@@ -242,7 +244,7 @@ int gpsd_open(struct gps_device_t *session)
 		/*@i1@*/return session->gpsdata.gps_fd;
 	    }
  	}
-	gpsd_report(3, "no probe matched...\n");
+	gpsd_report(LOG_PROG, "no probe matched...\n");
 #endif /* NON_NMEA_ENABLE */
 
 	/* Save original terminal parameters */
@@ -281,9 +283,8 @@ bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
      status = write(session->gpsdata.gps_fd, buf, len);	
      ok = (status == (ssize_t)len);
      (void)tcdrain(session->gpsdata.gps_fd);
-     /* code that will check for data could be added here to print buffer as text or hex */
      /* no test here now, always print as hex */
-     gpsd_report(5, "=> GPS: %s%s\n", gpsd_hexdump(buf, len), ok?"":" FAILED");
+     gpsd_report(LOG_IO, "=> GPS: %s%s\n", gpsd_hexdump(buf, len), ok?"":" FAILED");
      return ok;
 }
 

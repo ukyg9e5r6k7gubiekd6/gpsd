@@ -54,16 +54,16 @@ static /*@null@*/ struct shmTime *getShmTime(int unit)
     int shmid=shmget ((key_t)(NTPD_BASE+unit), 
 		      sizeof (struct shmTime), IPC_CREAT|0644);
     if (shmid == -1) {
-	gpsd_report(1, "shmget failed\n");
+	gpsd_report(LOG_ERR, "shmget failed\n");
 	return NULL;
     } else {
 	struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
 	/*@ -mustfreefresh */
 	if ((int)(long)p == -1) {
-	    gpsd_report(1, "shmat failed\n");
+	    gpsd_report(LOG_ERR, "shmat failed\n");
 	    return NULL;
 	}
-        gpsd_report(4, "shmat(%d,0,0) succeeded\n");
+        gpsd_report(LOG_PROG, "shmat(%d,0,0) succeeded\n");
 	return p;
 	/*@ +mustfreefresh */
     }
@@ -171,7 +171,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     l_offset += shmTime->receiveTimeStampUSec - shmTime->clockTimeStampUSec;
     /*@ +ignorequals @*/
     if (labs( l_offset ) > PUT_MAX_OFFSET) {
-        gpsd_report(5, "ntpshm_pps: not in locking range: %ld\n"
+        gpsd_report(LOG_RAW, "ntpshm_pps: not in locking range: %ld\n"
 		, (long)l_offset);
 	return -1;
     }
@@ -186,7 +186,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	    offset = 1 - ((double)tv->tv_usec / 1000000.0);
 	} else {
 	    shmTimeP->precision = -1;	/* lost lock */
-	    gpsd_report(2, "ntpshm_pps: lost PPS lock\n");
+	    gpsd_report(LOG_INF, "ntpshm_pps: lost PPS lock\n");
 	    return -1;
 	}
     }
@@ -200,7 +200,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
-    gpsd_report(5, "ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
+    gpsd_report(LOG_RAW, "ntpshm_pps: clock: %lu @ %lu.%06lu, precision %d\n"
 	, (unsigned long)seconds, (unsigned long)tv->tv_sec
         , (unsigned long)tv->tv_usec, shmTimeP->precision);
     return 1;

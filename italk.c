@@ -25,7 +25,7 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    /* CONSTRUCT THE MESSAGE */
 
    /* we may need to dump the message */
-   gpsd_report(4, "writing italk control type %02x:%s\n", 
+   gpsd_report(LOG_IO, "writing italk control type %02x:%s\n", 
 	       msg[0], gpsd_hexdump(msg, msglen));
 #ifdef ALLOW_RECONFIGURE
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
@@ -54,7 +54,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 	/* DISPATCH ON FIRST BYTE OF PAYLOAD */
 
     default:
-	gpsd_report(3, "unknown iTalk packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+	gpsd_report(LOG_WARN, "unknown iTalk packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
 }
