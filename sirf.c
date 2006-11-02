@@ -385,6 +385,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	gpsd_report(LOG_PROG, "EPH  0x0f: %s\n", gpsd_hexdump(buf, len));
 	return 0;
 
+    case 0x11:		/* Differential Corrections */
+	gpsd_report(LOG_PROG, "DIFF 0x11: %s\n", gpsd_hexdump(buf, len));
+	return 0;
+
     case 0x12:		/* OK To Send */
 	gpsd_report(LOG_PROG, "OTS 0x12: send indicator = %d\n",getub(buf, 1));
 	return 0;
@@ -648,6 +652,10 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	session->gpsdata.tdop = (int)getub(buf, 38) / 5.0;
 	session->driver.sirf.driverstate |= UBLOX;
 	return mask;
+
+    case 0x80:		/* Initialize Data Source */
+	gpsd_report(LOG_PROG, "INIT 0x80: %s\n", gpsd_hexdump(buf, len));
+	return 0;
 
     case 0xe1:		/* Development statistics messages */
 	buf2[0] = '\0';
