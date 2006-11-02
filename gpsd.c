@@ -724,11 +724,22 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	case 'E':
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
 	    (void)strlcpy(phrase, ",E=?", BUFSIZ);
-	    if (assign_channel(sub) && have_fix(sub))
-		(void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
-			       ZEROIZE(sub->device->gpsdata.epe), 
-			       ZEROIZE(sub->fixbuffer.eph), 
-			       ZEROIZE(sub->fixbuffer.epv));
+	    if (assign_channel(sub) && have_fix(sub)){
+		if (finite(sub->device->gpsdata.epe) ||
+		    finite(sub->device->gpsdata.fix.eph) ||
+		    finite(sub->device->gpsdata.fix.epv))
+
+		    (void)snprintf(phrase, sizeof(phrase), ",E=%.2f %.2f %.2f", 
+			ZEROIZE(sub->device->gpsdata.epe *
+			(CEP50_SIGMA/GPSD_CONFIDENCE)), 
+			ZEROIZE(sub->device->gpsdata.fix.eph *
+			(CEP50_SIGMA/GPSD_CONFIDENCE)), 
+			ZEROIZE(sub->device->gpsdata.fix.epv *
+			(CEP50_SIGMA/GPSD_CONFIDENCE)));
+		else
+		    (void)snprintf(phrase, sizeof(phrase), ",E=?");
+	    }
+
 #undef ZEROIZE
 	    break;
 	case 'F':
