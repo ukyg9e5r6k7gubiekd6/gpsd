@@ -729,8 +729,8 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
 
     /*@ -shiftimplementation @*/
     for (i = 0; i < len; i++) {
-	hexbuf[j++] = hexchar[ ibuf[i]&0x0f ];
 	hexbuf[j++] = hexchar[ (ibuf[i]&0xf0)>>4 ];
+	hexbuf[j++] = hexchar[ ibuf[i]&0x0f ];
     }
     /*@ +shiftimplementation @*/
     hexbuf[j] ='\0';
