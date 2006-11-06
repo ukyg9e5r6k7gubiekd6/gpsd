@@ -221,6 +221,10 @@ it.</dd>
 <dt><a href="performance.html">Where's the Latency?  Performance analysis of GPSes and GPSD</a></dt>
 <dd>An analysis of latency in the GPS/GPSD system. Has implications for the 
 design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
+
+<dt><a href="writing-a-driver.html">Notes on Writing a GPSD Driver</a></dt>
+<dd>A guide for the perplexed by the author of the Jupiter-T driver.</dd>
+
 </dl>
 
 <h1 id='recipes'>Recipes and related resources</h1>

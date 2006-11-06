@@ -31,6 +31,7 @@ else
     xmlto xhtml-nochunks ../rtcm-104.xml
     xmlto xhtml-nochunks ../srec.xml
     xmlto xhtml-nochunks replacing-nmea.xml
+    xmlto xhtml-nochunks writing-a-driver.xml
     (cd performance; xmlto xhtml-nochunks performance.xml)
     scp start-kismet *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
 fi
