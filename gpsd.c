@@ -77,7 +77,9 @@ static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
+#ifdef ALLOW_RECONFIGURE
     .enable_reconfigure = true,
+#endif /* ALLOW_RECONFIGURE */
     .valid              = 0, 
     .sentdgps           = false, 
     .dgnss_service      = dgnss_none,
