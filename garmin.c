@@ -727,7 +727,7 @@ static bool garmin_detect(struct gps_device_t *session)
     }
 
     ok = false;
-    while ( 0 != fread( buf, sizeof(buf), 1, fp ) ) {
+    while ( 0 != fgets( buf, sizeof(buf), fp ) ) {
 	if ( strstr( buf, "garmin_gps") ) {
 		ok = true;
 		break;
