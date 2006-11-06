@@ -508,6 +508,43 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl Test for XSLT processor (xsltproc or xmlto)
+AC_CHECK_PROG(WITH_XSLTPROC,[xsltproc],[yes],[no])
+MANGENERATOR=
+MANTARGET=
+MANFLAGS=
+if test "x$WITH_XSLTPROC" = "xyes"; then
+    AC_MSG_CHECKING([whether xsltproc knows about docbook xsl])
+    DOCBOOK_URI='http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
+    cat >conftest.xml <<_EOF
+        <refentry id="foo.1"></refentry>
+_EOF
+    if xsltproc --nonet --noout "$DOCBOOK_URI" conftest.xml >/dev/null 2>&1; then
+        MANGENERATOR=xsltproc
+        MANTARGET="$DOCBOOK_URI"
+        MANFLAGS="--nonet"
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+    rm -f conftest.xml
+fi
+if test x"$MANGENERATOR" = x; then
+    AC_CHECK_PROG(WITH_XMLTO,[xmlto],[yes],[no])
+    if test "x$WITH_XMLTO" = "xyes"; then
+        MANGENERATOR=xmlto
+        MANTARGET=man
+        MANFLAGS=
+    else
+        AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages])
+    fi
+fi
+AM_CONDITIONAL([HAVE_XSLT_PROCESSOR],
+               [test x"$MANGENERATOR" != x])
+AC_SUBST(MANGENERATOR)
+AC_SUBST(MANTARGET)
+AC_SUBST(MANFLAGS)
+
 
 dnl Output the configuration summary
 echo ""

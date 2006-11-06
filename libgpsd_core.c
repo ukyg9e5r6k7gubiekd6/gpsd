@@ -561,7 +561,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {
 	newlen = packet_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	gpsd_report(LOG_PROG, 
+	gpsd_report(LOG_RAW, 
 		    "packet sniff finds type %d\n", 
 		    session->packet_type);
 	if (session->packet_type != BAD_PACKET) {

@@ -184,47 +184,46 @@ man_MANS = \
 	rtcm-104.5 \
 	srec.5
 
+if HAVE_XSLT_PROCESSOR
+
+.xml.1:
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+
+.xml.3:
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+
+.xml.8:
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+
 gpsd.8: gpsd.xml
-	-$(XMLTO) man gpsd.xml
 
 gps.1 xgps.1 xgpsspeed.1 cgps.1 cgpxlogger.1: gps.xml
-	-$(XMLTO) man gps.xml
 
 libgps.3: libgps.xml
-	-$(XMLTO) man libgps.xml
 
 libgpsmm.3: libgpsmm.xml
-	-$(XMLTO) man libgpsmm.xml
 
 libgpsd.3: libgpsd.xml
-	-$(XMLTO) man libgpsd.xml
 
 gpsctrl.1: gpsctrl.xml
-	-$(XMLTO) man gpsctrl.xml
 
 gpsprof.1: gpsprof.xml
-	-$(XMLTO) man gpsprof.xml
 
 gpsfake.1: gpsfake.xml
-	-$(XMLTO) man gpsfake.xml
 
 sirfmon.1: sirfmon.xml
-	-$(XMLTO) man sirfmon.xml
 
 gpspipe.1: gpspipe.xml
-	-$(XMLTO) man gpspipe.xml
 
 rtcmdecode.1: rtcmdecode.xml
-	-$(XMLTO) man rtcmdecode.xml
 
 rtcm-104.5: rtcm-104.xml
-	-$(XMLTO) man rtcm-104.xml
 
 srec.5: srec.xml
-	-$(XMLTO) man srec.xml
 
 gpsflash.1: gpsflash.xml
-	-$(XMLTO) man gpsflash.xml
+
+endif
 
 include_HEADERS = gps.h gpsd.h libgpsmm.h rtcm.h gpsd_config.h
 
