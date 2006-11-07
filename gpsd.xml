@@ -265,7 +265,7 @@ part will vary and may be absent.</para></listitem>
 level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
 them from satellite DOP using fixed figures for expected non-DGPS 
-and DGPS range errors in meters.  A value of zero for any of these
+and DGPS range errors in meters.  A value of '?' for any of these
 numbers should be taken to mean that component of DOP is not available.
 See also the 'q' command.</para>
 </listitem>
