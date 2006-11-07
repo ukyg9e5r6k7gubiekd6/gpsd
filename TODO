@@ -24,11 +24,6 @@ anything including make bats fly out of your nose.  The new Garmin
 driver and gpsctrl should be much more solid in the next point
 release.
 
-*** PGRMEs in generated raw-mode NMEA from SiRFs and Evermores look wrong
-
-Petr Slansky reports that the generated PGRME has too many zero 
-values relative to the supposedly equivalent E response.
-
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
