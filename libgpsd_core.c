@@ -41,7 +41,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 		session->device_type->wrapup(session);
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->probe_subtype != NULL)
-		session->device_type->probe_subtype(session);
+		session->device_type->probe_subtype(session, session->packet_counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (session->context->enable_reconfigure 
 			&& session->device_type->configurator != NULL)
@@ -558,6 +558,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
+	if (session->device_type->probe_subtype != 0)
+	    session->device_type->probe_subtype(session, ++session->packet_counter);
     } else {
 	newlen = packet_get(session);
 	session->gpsdata.d_xmit_time = timestamp();

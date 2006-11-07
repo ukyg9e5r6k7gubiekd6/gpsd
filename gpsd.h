@@ -79,7 +79,7 @@ struct gps_type_t {
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
-    /*@null@*/void (*probe_subtype)(struct gps_device_t *session);
+    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, int seq);
     /*@null@*/void (*configurator)(struct gps_device_t *session);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
@@ -149,6 +149,7 @@ struct gps_device_t {
     size_t outbuflen;
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */
+    unsigned packet_counter;		/* packets since last driver switch */
     char subtype[64];			/* firmware version or subtype ID */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE

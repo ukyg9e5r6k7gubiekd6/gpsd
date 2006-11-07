@@ -106,27 +106,41 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static void nmea_probe_subtype(struct gps_device_t *session)
+static void nmea_probe_subtype(struct gps_device_t *session, int seq)
 {
-#ifdef NMEA_ENABLE
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
-    /* probe for Garmin serial GPS */
-    /* first turn off garmin binary 
-    (void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
-#endif /* NMEA_ENABLE */
+    switch (seq) {
 #ifdef SIRF_ENABLE
-    /* probe for SiRF */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+    case 0:
+	/* probe for SiRF */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+	break;
 #endif /* SIRF_ENABLE */
+#ifdef NMEA_ENABLE
+    case 1:
+	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
+	break;
+    case 2:
+	/* probe for Garmin serial GPS */
+	/* first turn off garmin binary 
+	(void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
+	break;
+#endif /* NMEA_ENABLE */
 #ifdef ITRAX_ENABLE
-    /* probe for iTrax, looking for "OK" */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PFST");
+    case 3:
+	/* probe for iTrax, looking for "OK" */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
+	break;
 #endif /* ITRAX_ENABLE */
 #ifdef EVERMORE_ENABLE
-    /* probe for EverMore by trying to read the LogConfig */
-    (void)gpsd_write(session, "\x10\x02\x06\x8d\x00\x01\x00\x8e\x10\x03", 10);
+    case 4:
+	/* probe for EverMore by trying to read the LogConfig */
+	(void)gpsd_write(session, "\x10\x02\x06\x8d\x00\x01\x00\x8e\x10\x03", 10);
+	break;
 #endif /* EVERMORE_ENABLE */
+    default:
+	break;
+    }
 }
 
 static void nmea_configurator(struct gps_device_t *session)
@@ -255,9 +269,10 @@ static struct gps_type_t fv18 = {
  *
  **************************************************************************/
 
-static void sirf_probe_subtype(struct gps_device_t *session)
+static void sirf_probe_subtype(struct gps_device_t *session, int seq)
 {
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
+    if (seq == 0)
+	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
 }
 
 static void sirf_configurator(struct gps_device_t *session)
@@ -303,7 +318,7 @@ static struct gps_type_t sirf_nmea = {
     .channels      = 12,		/* not used by the NMEA parser */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
-    .probe_subtype = sirf_probe_subtype,	/* probe for typpe info */
+    .probe_subtype = sirf_probe_subtype,	/* probe for type info */
     .configurator  = sirf_configurator,	/* turn off debuging messages */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
@@ -331,10 +346,11 @@ static struct gps_type_t sirf_nmea = {
  * and was replaced by the Zodiac EarthMate.
  */
 
-static void tripmate_probe_subtype(struct gps_device_t *session)
+static void tripmate_probe_subtype(struct gps_device_t *session, int seq)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
-    (void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
+    if (seq == 0)
+	(void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
 }
 
 static void tripmate_configurator(struct gps_device_t *session)
@@ -386,13 +402,15 @@ static void earthmate_close(struct gps_device_t *session)
     /*@i@*/session->device_type = &earthmate;
 }
 
-static void earthmate_probe_subtype(struct gps_device_t *session)
+static void earthmate_probe_subtype(struct gps_device_t *session, int seq)
 {
-    (void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
-    (void)usleep(10000);
-    /*@i@*/session->device_type = &zodiac_binary;
-    zodiac_binary.wrapup = earthmate_close;
-    if (zodiac_binary.probe_subtype) zodiac_binary.probe_subtype(session);
+    if (seq == 0) {
+	(void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
+	(void)usleep(10000);
+	/*@i@*/session->device_type = &zodiac_binary;
+	zodiac_binary.wrapup = earthmate_close;
+	if (zodiac_binary.probe_subtype) zodiac_binary.probe_subtype(session, seq);
+    }
 }
 
 /*@ -redef @*/

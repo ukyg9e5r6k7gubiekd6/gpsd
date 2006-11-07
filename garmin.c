@@ -773,12 +773,14 @@ static bool garmin_detect(struct gps_device_t *session)
     return true;
 }
 
-static void garmin_probe_subtype(struct gps_device_t *session)
+static void garmin_probe_subtype(struct gps_device_t *session, int seq)
 {
+    if (seq == 0) {
         // Tell the device to send product data
         gpsd_report(LOG_PROG, "Get Garmin Product Data\n");
         Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
            , GARMIN_PKTID_PRODUCT_RQST, 0, 0);
+    }
 }
 
 /*

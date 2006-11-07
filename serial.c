@@ -235,7 +235,7 @@ int gpsd_open(struct gps_device_t *session)
 		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
 		/*@i1@*/session->device_type = *dp;
 		if (session->device_type->probe_subtype !=NULL)
-		    session->device_type->probe_subtype(session);
+		    session->device_type->probe_subtype(session, session->packet_counter = 0);
 #ifdef ALLOW_RECONFIGURE
 		if (session->context->enable_reconfigure 
 			&& session->device_type->configurator != NULL)
