@@ -17,11 +17,11 @@
 #include "gpsd.h"
 #if defined(PROTO_ENABLE) && defined(BINARY_ENABLE)
 
-#define GET_ORIGIN 1
 #include "bits.h"
 
 /*@ +charint -usedef -compdef @*/
-static bool proto_write(int fd, unsigned char *msg, size_t msglen) {
+static bool proto_write(int fd, unsigned char *msg, size_t msglen) 
+{
    bool      ok;
 
    /* CONSTRUCT THE MESSAGE */
@@ -62,7 +62,7 @@ gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t 
 }
 /*@ -charint @*/
 
-static gps_mask_t proto_parse_input(struct gps_device_t *session)
+static gps_mask_t parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
@@ -79,24 +79,13 @@ static gps_mask_t proto_parse_input(struct gps_device_t *session)
     } else
 	return 0;
 }
-static bool proto_set_mode(struct gps_device_t *session, 
-			      speed_t speed, bool mode)
+
+static bool set_speed(struct gps_device_t *session, speed_t speed)
 {
-    /*@ +charint @*/
-    unsigned char msg[] = {/* FILL ME*/};
-
-    /* HACK THE MESSAGE */
-
-    return proto_write(session->gpsdata.gps_fd, msg, sizeof(msg));
-    /*@ +charint @*/
+    /* set operating mode here */
 }
 
-static bool proto_speed(struct gps_device_t *session, speed_t speed)
-{
-    return proto_set_mode(session, speed, true);
-}
-
-static void proto_mode(struct gps_device_t *session, int mode)
+static void set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
 	(void)gpsd_switch_driver(session, "Generic NMEA");
@@ -105,12 +94,12 @@ static void proto_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void proto_initializer(struct gps_device_t *session)
+static void probe_subtype(struct gps_device_t *session)
 {
     /* probe for subtypes here */
 }
 
-static void proto_configurator(struct gps_device_t *session)
+static void configurator(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET)
 	(void)proto_set_mode(session, session->gpsdata.baudrate, true);
@@ -124,13 +113,13 @@ struct gps_type_t proto_binary =
     .channels       = 12,		/* used for dumping binary packets */
     .probe_detect   = NULL,		/* no probe */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
-    .probe_subtype  = proto_initializer,/* initialize the device */
-    .configurator   = proto_configurator,/* configure the proper sentences */
+    .probe_subtype  = probe_subtype,	/* initialize the device */
+    .configurator   = configurator,	/* configure the proper sentences */
     .get_packet     = packet_get,	/* use generic packet getter */
-    .parse_packet   = proto_parse_input,/* parse message packets */
+    .parse_packet   = parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
-    .speed_switcher = proto_speed,	/* we can change baud rates */
-    .mode_switcher  = proto_mode,	/* there is a mode switcher */
+    .speed_switcher = set_speed,	/* we can change baud rates */
+    .mode_switcher  = set_mode,		/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switcher */
     .wrapup         = NULL,		/* no close hook */
