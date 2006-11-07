@@ -26,6 +26,8 @@
     <a href="#recipes">Recipes</a><br/>
     <a href="#others">Other GPSDs</a><br/>
     <a href="hardware.html">Hardware</a><br/>
+    <a href="hall-of-shame.html">Hall of Shame</a><br/>
+    <a href="hacking.html">Hacker's Guide</a><br/>
     <a href="references.html">References</a><br/>
     <a href="history.html">History</a><br/>
 
@@ -206,6 +208,9 @@ list of NMEA sentences</a>.</p>
 <p>There is a <a href="hacking.html">Hacker's Guide</a> to the project
 philosophy, design, and code internals.  You should read this if you
 want to contribute code.</p>
+
+<p>We maintain a <a href="hall-of-shame.html">GPS Hall of Shame</a>
+that describes particularly egregious vendor blunders.</p>
 
 <h1 id='white_papers'>White Papers</h1>
 

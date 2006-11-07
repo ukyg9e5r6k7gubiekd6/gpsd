@@ -24,7 +24,9 @@ GPS Hall of Shame
     <a href="xgps-sample.html">Screenshots</a><br/>
     <a href="index.html#recipes">Recipes</a><br/>
     <a href="index.html#others">Other GPSDs</a><br/>
+    Hall of Shame</br>
     <a href="hardware.html">Hardware</a><br/>
+    <a href="hacking.html">Hacker's Guide</a><br/>
     <a href="references.html">References</a><br/>
     <a href="hardware.html">Hardware</a><br/>
     History<br/>
@@ -40,9 +42,10 @@ GPS Hall of Shame
 
 <div id="Content">
 
-<p>The GPS world is full of shoddy, poorly-documented designs.  All too
-many devices have behaviors that drive the harried maintainers of GPSD 
-to shake their heads and mutter <q>What where they <em>thinking</em></q>?</p>
+<p>The GPS world is full of shoddy, poorly-documented designs.  All
+too many devices have behaviors that drive the harried maintainers of
+<code>gpsd</code> to shake their heads and mutter <q>What where they
+<em>thinking</em></q>?</p>
 
 <p>This page goes beyond the merely ordinary and commemorates the
 really <em>special</em> blunders &mdash; bugs and design errors so
@@ -76,6 +79,14 @@ outfit that likes to tout itself as the industry leader!</li>
 data widths in the time portion of the Geodetic Navigation Information
 packet incorrectly.  If you trust them, you will extract garbage from
 good packets.</p></li>
+</ul>
+
+<h2>Design blunders</h2>
+
+<ul>
+<li><p>SiRF binary mode, which is supposed to be the vendor's 
+all-singing-all-dancing better-than-NMEA protocol, delivers HDOP but
+not PDOP or VDOP.  SiRFs in NMEA mode deliver all three.</p></li>
 </ul>
 
 </div>
