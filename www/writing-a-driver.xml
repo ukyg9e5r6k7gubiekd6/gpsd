@@ -183,14 +183,14 @@ ASCII string <quote> <filename>@@Nn</filename></quote> followed by a
 payload of 0 to approx 300 binary bytes, a single byte binary checksum
 and an ASCII CR/LF pair. This particular structure was the cause of
 some headaches in the interpretation, but it means that the important
-data is impressively dense. The first command (
-<filename>@@Bb</filename>) gives the status of all visible satellites
-(up to 12) in 92 bytes and the second command (
-<filename>@@Ea</filename>) gives all the navigational data plus
+data is impressively dense. The first command
+(<filename>@@Bb</filename>) gives the status of all visible satellites
+(up to 12) in 92 bytes and the second command
+(<filename>@@Ea</filename>) gives all the navigational data plus
 receiver status in 76 bytes.</para>
 
 <para>Once I had determined the two commands and responses that were
-needed ( a few others were needed for initialisation and
+needed (a few others were needed for initialisation and
 administration), I set about writing the decoder to fill in the
 standard data structures that <application>gpsd</application>uses. For
 this, the <filename>zodiac.c</filename>driver was very helpful as it
@@ -664,7 +664,7 @@ available. In my case, all the fields could be filled directly from
 the data shipped by the GPS in the two messages which I activated. The
 satellite status data was exactly as needed, except that the GPS
 provided data for all visible satellites whereas
-<application>gpsd</application>was interested only in those satellites
+<application>gpsd</application> was interested only in those satellites
 whose signal was usable. The navigation data was all present but some
 fields did need some massaging; for example, my GPS reports location
 data in milliArcseconds whilst <application>gpsd</application>works in
