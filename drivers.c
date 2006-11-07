@@ -108,6 +108,17 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_probe_subtype(struct gps_device_t *session, int seq)
 {
+    /*
+     * The reason for splitting these probes up by packet sequence
+     * number, interleaving them with the first few packet receives,
+     * is because many generic-NMEA devices get confused if you send
+     * too much at them in one go.  
+     *
+     * A fast response to an early probe will change drivers so the
+     * later ones won't be sent at all.  Thus, for best overall
+     * performance, order these to probe for the most popular types
+     * soonest.
+     */
     switch (seq) {
 #ifdef SIRF_ENABLE
     case 0:
@@ -117,13 +128,14 @@ static void nmea_probe_subtype(struct gps_device_t *session, int seq)
 #endif /* SIRF_ENABLE */
 #ifdef NMEA_ENABLE
     case 1:
-	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
-	break;
-    case 2:
 	/* probe for Garmin serial GPS */
 	/* first turn off garmin binary 
 	(void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
+	break;
+    case 2:
+	/* probe for the FV-18 */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
 	break;
 #endif /* NMEA_ENABLE */
 #ifdef ITRAX_ENABLE
