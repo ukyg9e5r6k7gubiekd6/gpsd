@@ -227,14 +227,18 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    }
 		    break;
 		case 'E':
-		    if (sp[2] == '?') {
-			   gpsdata->epe = NAN;
-			   gpsdata->fix.eph = NAN;
-			   gpsdata->fix.epv = NAN;
-		    } else {
-		        (void)sscanf(sp, "E=%lf %lf %lf", 
-			   &gpsdata->epe,&gpsdata->fix.eph,&gpsdata->fix.epv);
-		        gpsdata->set |= HERR_SET| VERR_SET | PERR_SET;
+		    gpsdata->epe = gpsdata->fix.eph = gpsdata->fix.epv = NAN;
+		    /* epe should always be present if eph or epv is */
+		    if (sp[2] != '?') {
+			char epe[20], eph[20], epv[20];
+		        (void)sscanf(sp, "E=%s %s %s", epe, eph, epv);
+#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+			    /*@ +floatdouble @*/
+			    gpsdata->epe = DEFAULT(epe);
+			    gpsdata->fix.eph = DEFAULT(eph);
+			    gpsdata->fix.epv = DEFAULT(epv);
+			    /*@ -floatdouble @*/
+#undef DEFAULT
 		    }
 		    break;
 		case 'F':
