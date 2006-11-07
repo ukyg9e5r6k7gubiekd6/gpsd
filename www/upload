@@ -22,7 +22,7 @@ else
     xmlto xhtml-nochunks ../libgpsd.xml
     xmlto xhtml-nochunks ../gpsprof.xml
     xmlto xhtml-nochunks ../gpsfake.xml
-    xmlto xhtml-nochunks ../gpsctrl.xml
+    xmlto xhtml-nochunks ../gpsctl.xml
     xmlto xhtml-nochunks ../sirfmon.xml
     xmlto xhtml-nochunks ../rtcmdecode.xml
     xmlto xhtml-nochunks ../gpxlogger.xml

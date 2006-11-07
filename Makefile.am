@@ -23,7 +23,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) gpsctrl gpspipe gpsflash cgps cgpxlogger sirfmon
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) gpsctl gpspipe gpsflash cgps cgpxlogger sirfmon
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
@@ -70,10 +70,10 @@ gpsd_SOURCES = gpsd_dbus.h gpsd_dbus.c gpsd.c
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
-# Build gpsctrl
+# Build gpsctl
 #
-gpsctrl_SOURCES = gpsctrl.c
-gpsctrl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
+gpsctl_SOURCES = gpsctl.c
+gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpspipe
@@ -178,7 +178,7 @@ man_MANS = \
 	sirfmon.1 \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
-	gpsctrl.1 \
+	gpsctl.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
@@ -205,7 +205,7 @@ libgpsmm.3: libgpsmm.xml
 
 libgpsd.3: libgpsd.xml
 
-gpsctrl.1: gpsctrl.xml
+gpsctl.1: gpsctl.xml
 
 gpsprof.1: gpsprof.xml
 
@@ -242,7 +242,7 @@ EXTRA_DIST = \
 	libgpsmm.xml \
 	gpsprof.xml \
 	gpsfake.xml \
-	gpsctrl.xml \
+	gpsctl.xml \
 	sirfmon.xml \
 	gpspipe.xml \
 	rtcmdecode.xml \
@@ -279,8 +279,8 @@ splint:
 	-splint -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
 	-splint -exportlocal $(xgpsspeed_c_sources)
-	@echo "Running splint on gpsctrl..."
-	-splint $(gpsctrl_SOURCES)
+	@echo "Running splint on gpsctl..."
+	-splint $(gpsctl_SOURCES)
 	@echo "Running splint on sirfmon..."
 	-splint $(sirfmon_SOURCES)
 	@echo "Running splint on gpspipe..."

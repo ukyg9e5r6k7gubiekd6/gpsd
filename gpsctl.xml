@@ -2,20 +2,20 @@
 <!DOCTYPE refentry PUBLIC 
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd">
-<refentry id='gpsctrl.1'>
+<refentry id='gpsctl.1'>
 <refmeta>
-<refentrytitle>gpsctrl</refentrytitle>
+<refentrytitle>gpsctl</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class='date'>29 Oct 2006</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>gpsctrl</refname>
+<refname>gpsctl</refname>
 <refpurpose>control the modes of a Gps GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsctrl</command>  
+  <command>gpsctl</command>  
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-b </arg>
@@ -28,13 +28,13 @@
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpsctrl</application> can switch a dual-mode GPS
+<para><application>gpsctl</application> can switch a dual-mode GPS
 between NMEA and vendor-binary modes.  It can also be used to set the
 device baudrate.  Note:  Not all devices have these capabilities.</para>
 
 <para>If you have only one GPS attached to your machine, and gpsd is
 running, it is not necessary to specify the device;
-<application>gpsctrl</application> does its work through
+<application>gpsctl</application> does its work through
 <application>gpsd</application>, which will locate it for you.</para>
 
 <para>When <application>gpsd</application> is not running, the device
