@@ -611,6 +611,19 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     }
 #endif /* __ UNUSED__ */
 
+    /*
+     * We've had reports that on the Garmin GPS-10 the device sometimes 
+     * (1:1000 or so) sends garbage packets that have a valid checksum 
+     * but are like 2 successive NMEA packets merged together in one 
+     * with some fields lost.  Usually these are much longer than the
+     * legal limit for NMEA, so we can cope by just tossing out overlong
+     * packets.  This may be a generic bug of all Garmin chipsets.
+     */
+    if (strlen(sentence) > NMEA_MAX) {
+	gpsd_report(LOG_WARN, "Overlong packet rejected.\n", buf);
+	return ONLINE_SET;
+    }
+
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
     strncpy((char *)buf, sentence, NMEA_MAX);
