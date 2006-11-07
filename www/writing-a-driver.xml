@@ -558,15 +558,16 @@ document I discuss my work to implement this function.</para>
 that wakes up the device when the main auto-baud hunt loop in
 the daemon offers a new speed to probe at.</para>
 
-<para><structfield>.probe_subtype</structfield>points to a block of code
-that determines the subtype of the device if there are several
-similar devices supported by the driver. It should store
-information about the software version in member 
-<filename>subtype</filename>of the driver data structure 
-<userinput>struct gps_device_t *session</userinput>. It should
-also configure the device for correct operation. This means
-preparation only, the wanted reports are triggered by the next
-block.</para>
+<para><structfield>.probe_subtype</structfield>points to a block of
+code that will be executed whenever the device-driver type is switched
+(with second argument 0) or whenever a full packet is received (with
+second argument being the sequence number of the packet.  It is
+normally used to send probe strings that are expected to elicit a
+later response that will reveal the subtype of the driver.  If this
+function fetches driver subtype information immediately, it should
+store information about the software version in member
+<filename>subtype</filename>of the driver data structure
+<userinput>struct gps_device_t *session</userinput>.</para>
 
 <para><structfield>.configurator</structfield>points to a block of code
 that sets up the device to deliver the correct set of sentences
