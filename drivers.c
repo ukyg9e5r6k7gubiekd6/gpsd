@@ -142,18 +142,18 @@ static void nmea_probe_subtype(struct gps_device_t *session, int seq)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
 	break;
 #endif /* NMEA_ENABLE */
-#ifdef ITRAX_ENABLE
-    case 3:
-	/* probe for iTrax, looking for "$PFST,OK" */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
-	break;
-#endif /* ITRAX_ENABLE */
 #ifdef EVERMORE_ENABLE
-    case 4:
+    case 3:
 	/* probe for EverMore by trying to read the LogConfig */
 	(void)gpsd_write(session, "\x10\x02\x06\x8d\x00\x01\x00\x8e\x10\x03", 10);
 	break;
 #endif /* EVERMORE_ENABLE */
+#ifdef ITRAX_ENABLE
+    case 4:
+	/* probe for iTrax, looking for "$PFST,OK" */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
+	break;
+#endif /* ITRAX_ENABLE */
     default:
 	break;
     }
@@ -500,24 +500,26 @@ static int literal_send(int fd, const char *fmt, ... )
     }
 }
 
-static void itrax_probe_subtype(struct gps_device_t *session)
+static void itrax_probe_subtype(struct gps_device_t *session, int seq)
 /* start it reporting */
 {
-    /* initialize GPS clock with current system time */ 
-    struct tm when;
-    double integral, fractional;
-    time_t intfixtime;
-    char buf[31], frac[6];
-    fractional = modf(timestamp(), &integral);
-    intfixtime = (time_t)integral;
-    (void)gmtime_r(&intfixtime, &when);
-    /* XXX so what if my local clock is wrong? */
-    (void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y\r\n", &when);
-    (void)snprintf(frac, sizeof(frac), "%.2f", fractional);
-    buf[21] = frac[2]; buf[22] = frac[3];
-    (void)literal_send(session->gpsdata.gps_fd, buf);
-    /* maybe this should be considered a reconfiguration? */
-    (void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
+    if (seq == 0) {
+	/* initialize GPS clock with current system time */ 
+	struct tm when;
+	double integral, fractional;
+	time_t intfixtime;
+	char buf[31], frac[6];
+	fractional = modf(timestamp(), &integral);
+	intfixtime = (time_t)integral;
+	(void)gmtime_r(&intfixtime, &when);
+	/* FIXME: so what if my local clock is wrong? */
+	(void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y\r\n", &when);
+	(void)snprintf(frac, sizeof(frac), "%.2f", fractional);
+	buf[21] = frac[2]; buf[22] = frac[3];
+	(void)literal_send(session->gpsdata.gps_fd, buf);
+	/* maybe this should be considered a reconfiguration? */
+	(void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
+    }
 }
 
 static void itrax_configurator(struct gps_device_t *session)
