@@ -129,8 +129,6 @@ static void nmea_probe_subtype(struct gps_device_t *session, int seq)
 #ifdef NMEA_ENABLE
     case 1:
 	/* probe for Garmin serial GPS */
-	/* first turn off garmin binary 
-	(void)gpsd_write(session, "\x10\x0A\x02\x26\x00\xCE\x10\x03", 8); */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
 	break;
     case 2:
