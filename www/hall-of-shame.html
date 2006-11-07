@@ -44,7 +44,7 @@ GPS Hall of Shame
 many devices have behaviors that drive the harried maintainers of GPSD 
 to shake their heads and mutter <q>What where they <em>thinking</em></q>?</p>
 
-<p>This page goes beyond the merely ordinary and commemmorates the
+<p>This page goes beyond the merely ordinary and commemorates the
 really <em>special</em> blunders &mdash; bugs and design errors so
 consumately brain-dead that the only possible responses are either
 rage or helpless laughter.</p>
@@ -53,15 +53,29 @@ rage or helpless laughter.</p>
 blunders, we hope to exert some pressure for higher quality standards
 in the future.</p>
 
+<p>Your contributions are welcome.  If you're describing a firmware
+bug, it's best if you can identify the firmware version or range of
+versions it applies to.</p>
+
+<h2>Implementation blunders</h2>
+
 <ul>
 <li>The iTrax series of GPS chips from HSNI Inc. sometimes emits
 well-formed, checksummed binary packets in which the length is incorrect.
 If you trust it and read the number of bytes it tells you to, you'll 
 land in the middle of the  next packet.</li>
 
+<li>Some Garmin chips issue a bogus length field, too.  This from the
+outfit that likes to tout itself as the industry leader!</li>
 </ul>
 
+<h2>Documentation blunders</h2>
 
+<ul>
+<li><p>Some versions of the SiRF protocol manual, including 1.4, describe the
+data widths in the time portion of the Geodetic Navigation Information
+packet incorrectly.  If you trust them, you will extract garbage from
+good packets.</p></li>
 </ul>
 
 </div>
