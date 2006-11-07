@@ -118,27 +118,33 @@ static void nmea_probe_subtype(struct gps_device_t *session, int seq)
      * later ones won't be sent at all.  Thus, for best overall
      * performance, order these to probe for the most popular types
      * soonest.
+     *
+     * Note: don't make the trigger strings identical to the probe,
+     * because some NMEA devices (notably SiRFs) will just echo 
+     * unknown strings right back at you. A useful dodge is to append
+     * a comma to the trigger, because that won't be in the response 
+     * unless there is actual following data.
      */
     switch (seq) {
 #ifdef SIRF_ENABLE
     case 0:
-	/* probe for SiRF */
+	/* probe for SiRF -- expect $Ack 105. */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
 	break;
 #endif /* SIRF_ENABLE */
 #ifdef NMEA_ENABLE
     case 1:
-	/* probe for Garmin serial GPS */
+	/* probe for Garmin serial GPS -- expect $PGRMC followed by data*/
 	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
 	break;
     case 2:
-	/* probe for the FV-18 */
+	/* probe for the FV-18 -- expect $PFEC,GPint followed by data */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
 	break;
 #endif /* NMEA_ENABLE */
 #ifdef ITRAX_ENABLE
     case 3:
-	/* probe for iTrax, looking for "OK" */
+	/* probe for iTrax, looking for "$PFST,OK" */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
 	break;
 #endif /* ITRAX_ENABLE */
@@ -215,7 +221,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session)
 
 static struct gps_type_t garmin = {
     .typename       = "Garmin Serial",	/* full name of type */
-    .trigger        = "$PGRMC",		/* Garmin private */
+    .trigger        = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
@@ -251,7 +257,7 @@ static void fv18_configure(struct gps_device_t *session)
 
 static struct gps_type_t fv18 = {
     .typename       = "San Jose Navigation FV18",	/* full name of type */
-    .trigger        = "$PFEC,GPint",	/* FV18s should echo the probe */
+    .trigger        = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* mo probe */
