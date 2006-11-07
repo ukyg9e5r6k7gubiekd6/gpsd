@@ -279,9 +279,8 @@ static struct gps_type_t fv18 = {
  *
  * SiRF NMEA
  *
- * This NMEA -mode driver is a fallback in case the SiRF chipset has
- * firmware too old for binary to be useful, or we're not compiling in
- * the SiRF binary driver at all.
+ * Mostly this is a stopover on the way to SiRF binary mode, but NMEA methods
+ * are included in case we're building without SiRF binary support.
  *
  **************************************************************************/
 
@@ -289,14 +288,6 @@ static void sirf_probe_subtype(struct gps_device_t *session, int seq)
 {
     if (seq == 0)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
-}
-
-static void sirf_configurator(struct gps_device_t *session)
-{
-#ifdef ALLOW_RECONFIGURE
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
@@ -324,13 +315,21 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = 0;
 }
 
+static void sirf_configurator(struct gps_device_t *session)
+{
+#ifdef ALLOW_RECONFIGURE
+#if defined(BINARY_ENABLE)
+    sirf_mode(session, 1);	/* throw us to SiRF binary */
+#else    
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
+    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
+#endif /* BINARY_ENABLE */
+#endif /* ALLOW_RECONFIGURE */
+}
+
 static struct gps_type_t sirf_nmea = {
     .typename      = "SiRF NMEA",	/* full name of type */
-#ifndef SIRF_ENABLE
     .trigger       = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
-#else
-    .trigger       = NULL,		/* let the binary driver have it */
-#endif /* SIRF_ENABLE */
     .channels      = 12,		/* not used by the NMEA parser */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
@@ -567,7 +566,7 @@ static struct gps_type_t itrax = {
     .channels      = 12,		/* consumer-grade GPS */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
-    .probe_subtype  = itrax_probe_subtype,	/* initialize */
+    .probe_subtype = itrax_probe_subtype,	/* initialize */
     .configurator  = itrax_configurator,/* set synchronous mode */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
