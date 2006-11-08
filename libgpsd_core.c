@@ -254,6 +254,9 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
 {
     static char buf[128];
+    if ((session == NULL) || (session->device_type == NULL) || 
+	(session->device_type->typename == NULL))
+	return "unknown,";
     (void)strlcpy(buf, session->device_type->typename, sizeof(buf));
     if (session->subtype[0] != '\0') {
 	(void)strlcat(buf, " ", sizeof(buf));
