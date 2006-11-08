@@ -175,8 +175,8 @@ and fix latency.</dd>
 <dt><a href="gpsfake.html">gpsfake.1</a></dt>
 <dd>The <code>gpsfake</code> test harness simulating a GPS.</dd>
 
-<dt><a href="gpsctrl.html">gpsctrl.1</a></dt>
-<dd>The <code>gpsctrl</code> tool for tweaking GPS settings.</dd>
+<dt><a href="gpsctl.html">gpsctl.1</a></dt>
+<dd>The <code>gpsctl</code> tool for tweaking GPS settings.</dd>
 
 <dt><a href="sirfmon.html">sirfmon.1</a></dt>
 <dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
