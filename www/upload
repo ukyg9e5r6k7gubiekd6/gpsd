@@ -16,7 +16,7 @@ else
     sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
 
     xmlto xhtml-nochunks ../gpsd.xml
-    xmlto xhtml-nochunks ../xgps.xml
+    xmlto xhtml-nochunks ../gps.xml
     xmlto xhtml-nochunks ../libgps.xml
     xmlto xhtml-nochunks ../libgpsmm.xml
     xmlto xhtml-nochunks ../libgpsd.xml
@@ -25,7 +25,6 @@ else
     xmlto xhtml-nochunks ../gpsctl.xml
     xmlto xhtml-nochunks ../sirfmon.xml
     xmlto xhtml-nochunks ../rtcmdecode.xml
-    xmlto xhtml-nochunks ../gpxlogger.xml
     xmlto xhtml-nochunks ../gpspipe.xml
     xmlto xhtml-nochunks ../gpsflash.xml
     xmlto xhtml-nochunks ../rtcm-104.xml

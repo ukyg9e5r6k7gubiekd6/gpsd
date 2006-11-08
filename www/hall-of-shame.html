@@ -62,6 +62,9 @@ versions it applies to.</p>
 
 <h2>Implementation blunders</h2>
 
+<p>These are the screwups that lead us to wonder if the GPS chipset
+vendors ever actually test their hardware.</p>
+
 <ul>
 <li>The iTalk protocol  from Fastrax Inc. sometimes emits well-formed,
 checksummed binary packets in which the length is incorrect.  If you
@@ -74,19 +77,41 @@ outfit that likes to tout itself as the industry leader!</li>
 
 <h2>Documentation blunders</h2>
 
+<p>The best evidence that the GPS industry is run by morons is the
+quality (or, rather, utter <em>lack</em> of quality) of their chipset
+documentation.  You would think they'd have figured out by now that
+good and readily available documentation, making it easy for others to
+interface to their hardware, will sell more hardware.  But no; most
+vendors make documentation difficult to get, and it rends to be both
+incomplete and vague when you get it.  A few vendors go above and
+beyond the normal stupidity...</p>
+
 <ul>
 <li><p>Some versions of the SiRF protocol manual, including 1.4, describe the
 data widths in the time portion of the Geodetic Navigation Information
 packet incorrectly.  If you trust them, you will extract garbage from
 good packets.</p></li>
+
+<li><p>The Garmin GPS chipset issues a number of important messages
+that Garmin has <em>explicitly refused</em> to document.</p></li>
 </ul>
 
 <h2>Design blunders</h2>
 
+<p>GPS chipset vendors love their proprietary binary protocols.  There is some
+excuse for this, given that the industry <q>standard</q> NMEA 0183 would
+probably have turned out better if it had been designed by chimpanzees on
+crack &mdash; but you'd think the vendors would at least make sure that
+their binary protocols are a functional superset of NMEA.  But no; in the
+laugh-one-minute, puke-the-next world of GPS chipsets, it ain't so...</p>
+
 <ul>
-<li><p>SiRF binary mode, which is supposed to be the vendor's 
-all-singing-all-dancing better-than-NMEA protocol, delivers HDOP but
-not PDOP or VDOP.  SiRFs in NMEA mode deliver all three.</p></li>
+<li><p>SiRF binary mode delivers HDOP but not PDOP or VDOP.  SiRFs in
+NMEA mode deliver all three.</p></li>
+
+<li><p>EverMore NMEA delivers UTC time.  EverMore binary protocol delivers 
+only GPS time, which has a time-varying offset from UTC &mdash; and no
+way to query the offset.</p></li>
 </ul>
 
 </div>
