@@ -607,7 +607,7 @@ GBS - GPS Satellite Fault Detection
   3) Expected error in longitude (meters)
   4) Expected error in altitude (meters)
   5) PRN of most likely failed satellite
-  6) Probability of misse detection for most likely failed satellite
+  6) Probability of missed detection for most likely failed satellite
   7) Estimate of bias in meters on most likely failed satellite
   8) Standard deviation of bias estimate
   9) Checksum
@@ -808,7 +808,7 @@ Example:
 
 Some GPS receivers may emit more than 12 quadruples (more than three
 GPGSV sentences), even though NMEA-0813 doesn't allow this.  (The
-extras might be WAAS satellites, for example) Receivers may also
+extras might be WAAS satellites, for example.) Receivers may also
 report quads for satellites they aren't tracking, in which case the
 SNR field will be null; we don't know whether this is formally allowed
 or not.
@@ -1639,7 +1639,7 @@ Example: $PGRME,15.0,M,45.0,M,25.0,M*22
  Fields consist of 12 pairs of a satellite PRN followed by a 
  signal quality number in the range 0-7 (0 worst, 7 best).  
 
- Only emitted by the Zodiac (Rockwell) chipset.
+ Only emitted by the now-obsolete Zodiac (Rockwell) chipset.
 
 ------------------------------------------------------------------------------
 
@@ -1697,7 +1697,7 @@ Sources:
 [NMEA2000]
     The NMEA 0183 protocol
     http://nmeatool.nmea2000.de/download/0183.pdf
-    Probably the origin of this document.
+    Probably the ancestor of this document.
 
 [DEPRIEST]
     "NMEA data"
