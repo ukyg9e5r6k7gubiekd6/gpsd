@@ -119,83 +119,104 @@ already been used in the implementation of <code>gpsd</code>; others
 may be used in the future.  Some are theoretically evil, but in
 practice the vendors don't care.</p>
 
+<h2>SiRF and SiRF variants</h2>
+
 <dl>
-<dt><a href='vendor-docs/sirf_binary.pdf'>SiRF Binary Protocol Reference Manual</a></dt>
+<dt><a href='vendor-docs/sirf_binary.pdf'>SiRF Binary Protocol Reference Manual</a> (revision 1.6, April 2005)</dt>
 <dd>The binary protocol for the chip used by over 80% of consumer-grade
 GPSes in 2005.</dd>
 
-<dt><a href='vendor-docs/sirf_protocol.pdf'>SiRF GPS Protocol Reference Manual</a></dt>
+<dt><a href='vendor-docs/sirf_protocol.pdf'>SiRF GPS Protocol Reference Manual</a> (revision 1.30)</dt>
 <dd>This what SiRF gives OEMs as a reference for SiRF's NMEA 0183
 extensions. Notably, it describes the commands for switching to SiRF
 binary mode.</dd>
 
-<dt><a href='vendor-docs/uBlox.pdf'>u-blox extension to SiRF binary protocol</a></dt>
-<dd>uBlox was an OEM-enhanced firmware variant of the SiRF-I chip.
-<code>gpsd</code> supports it.  It's obsolete.</dd>
-
 <dt><a
 href='http://www.linkwave.co.uk/assets/GPS.G2-X-01003-E1.pdf'>TIM GPS
-Receiver Macro-Component (offsite link)</a></dt>
+Receiver Macro-Component (offsite link)</a> (version E1, April 2003)</dt>
 <dd> Describes the SiRFstarII chipset used by uBlox and some others.
 <code>gpsd</code> supports it. While obsolete, this file documents certain
 aspects of the protocol that SiRF has removed from current versions of the
 protocol documentation.</dd>
 
+<dt><a href='vendor-docs/uBlox.pdf'>u-blox extension to SiRF binary protocol</a></dt>
+<dd>uBlox was an OEM-enhanced firmware variant of the SiRF-1 chip.
+<code>gpsd</code> supports it.  It's been rendered obsolete by the SiRF 2
+and 3 chips.</dd>
+</dl>
+
+<h2>Garmin</h2>
+
+<dl>
 <dt><a
-href='http://www.garmin.com/manuals/GPS17N_GPS16_17NSeriesTechnicalSpecification.pdf'>
-GPS 16/17 Series Technical Specification (offsite link)</a></dt>
-<dd>A manual for the 16 and 17 series of Garmin serial GPSes.  These
-don't use Garmin binary protocol, but rather an enhanced
-NMEA. <code>gpsd</code> supports it.</dd>
-
-<dt><a href='vendor-docs/zodiac.pdf'>Zodiac Serial Data Interface Specification</a></dt>
-<dd>Describes the binary protocol used by Rockwell Zodiac chipsets.
-Supported by <code>gpsd</code>.  Now obsolete.</dd>
-
-<dt><a href='vendor-docs/garmin-binary.pdf'>GARMIN GPS Interface Specification</a></dt> 
-<dd>The binary protocol used by Garmin USB GPSes. Supported by
-<code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/cxd2951-commands.pdf'>CXD2951 Communication Command Specification</a></dt>
-<dd>Describes the extension command set supported by the Sony GPS
-CXD2951 chipset. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/fastrax.pdf'>NMEA Protocol Specification for iTrax02
-Evaluation Kit</a></dt> <dd>Describes the NMEA extensions for the
-iTrax chipset used by Fastrax GPSes, including the commands to switch
-to binary iTalk mode. Not yet supported by <code>gpsd</code> but work
-is in progress.</dd>
-
-<dt><a href='vendor-docs/iTalk.pdf'>iTALK protocol specification</a></dt>
-<dd>Describes the binary protocol for the iTrax chipset used by
-Fastrax GPSes. Not yet supported by <code>gpsd</code> but work is in
-progress.</dd>
-
-<dt><a href='vendor-docs/fv-18_manual.pdf'>FV18 user manual</a></dt>
-<dd>Describes NMEA extensions supported by the San Jose Navigation
-FV-18 GPS chipset. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/GPS-210-Manual-E.pdf'>Holux GM-210 GPS Receiver User's
-Guide</a></dt>
-<dd>Describes NMEA as emitted by the Holux GM210.  This is a very
-generic NMEA GPS.   Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/Emt_GPS_User_Protocol_Rev_D.pdf'>GM-X205 GPS Receiver
-Module User's Guide</a></dt> 
-<dd>Describes the binary protocol emitted
-by EverMore GM-X205 GPS chipset. Supported by <code>gpsd</code>.</dd>
+href='http://www.garmin.com/manuals/470_GPS16_17TechnicalSpecification.pdf'>
+GPS 16/17 Series Technical Specification (offsite link)</a> (Revision C, October 2005)</dt> 
+<dd>The binary protocol used by Garmin USB GPSes. Supported by <code>gpsd</code>.</dd>
 
 <dt><a href='vendor-docs/garmin_simpletext.txt'>Garmin Simple Text Protocol</a></dt>
 <dd>Some digital cameras are alleged to use this very simple textual
 report format.  Not yet supported by <code>gpsd</code>.</dd>
+</dl>
 
-<dt><a href='vendor-docs/Lassen_iQ_Reference_Manual.pdf'>LassenTM iQ GPS Receiver System Designer Reference Manual</a></dt>
+<h2>Other Current GPSes</h2>
+
+<dl>
+<dt><a href='vendor-docs/cxd2951-commands.pdf'>CXD2951 Communication Command Specification</a> (Version 1.7, 2004)</dt>
+<dd>Describes the extension command set supported by the Sony GPS
+CXD2951 chipset. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/fastrax.pdf'>NMEA Protocol Specification for iTrax02
+Evaluation Kit</a> (2003)</dt> 
+<dd>Describes the NMEA extensions for the
+iTrax chipset used by Fastrax GPSes. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/iTalk.pdf'>iTALK protocol specification</a>
+(Rev 1.5, March 2002)</dt>
+<dd>Describes the binary protocol for the iTrax chipset used by
+Fastrax GPSes. Not yet supported by <code>gpsd</code> but work is in
+progress.</dd>
+
+<dt><a href='vendor-docs/fv-18_manual.pdf'>FV18 user manual</a> (October 2002)</dt>
+<dd>Describes NMEA extensions supported by the San Jose Navigation
+FV-18 GPS chipset. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/GPS-210-Manual-E.pdf'>Holux GM-210 GPS Receiver User's
+Guide</a> (May 2003)</dt>
+<dd>Describes NMEA as emitted by the Holux GM210.  This is a very
+generic NMEA GPS.   Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/Emt_GPS_User_Protocol_Rev_D.pdf'>GM-X205 GPS Receiver
+Module User's Guide</a> (Issue D, August 2003)</dt> 
+<dd>Describes the binary protocol emitted
+by EverMore GM-X205 GPS chipset. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/Lassen_iQ_Reference_Manual.pdf'>LassenTM iQ GPS Receiver System Designer Reference Manual</a> (Revision A, February 2005)</dt>
 <dd>Describes the TSIP binary protocol. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href='axiom/GPSMsgSpec.pdf'>Axiom GPS Receiver Message Set
-specification.</a></dt> <dd>Describes the NMEA and SiRF message
-accepted by the Axiom Sandpiper II OEM module. Dated August
-2000. Supported by <code>gpsd</code>.</dd>
+<dt><a href='vendor-docs/jupiter/'>NavMan Jupiter</a> (2005)</dt>
+<dd>Jupiters emit a variant of the obsolete Zodiac binary protocol.
+Probably supported by <code>gpsd</code>, though we have not been able
+to test with one of these yet.</dd>
+</dl>
+
+<h2>Obsolete products</h2>
+
+<dl>
+<dt><a href='vendor-docs/zodiac.pdf'>Zodiac Serial Data Interface Specification</a> (Revision 11, September 1996)</dt>
+<dd>Describes the binary protocol used by Rockwell Zodiac chipsets.
+Supported by <code>gpsd</code>.  Now obsolete.</dd>
+
+<dt><a href='axiom/'>Axiom Sandpiper II Documentation</a> (August 2000)</dt> 
+
+<dd>We have archived the most complete available documentation on the Axiom
+Sandpiper II OEM module (discontinued, vendor has gone out of
+business). Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/motorola'>Motorola Oncore Eval Kit
+documents</a> (Revision 3.2, June 1998)</dt>
+<dd>Describes Motorola's (apparently discontinued)
+OnCore GPS product. Supported by <code>gpsd</code> in NMEA mode
+only.</dd>
 </dl>
 
 <h1>Other</h1>

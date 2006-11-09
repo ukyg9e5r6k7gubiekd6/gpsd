@@ -37,4 +37,6 @@ else
 	$webdir
     scp axiom/{*.html,*.css,*.pdf,*.jpg,*.doc} $webdir/axiom
     scp vendor-docs/{*.html,*.pdf,*.jpg,*.doc,*.txt} $webdir/vendor-docs
+    scp -r vendor-docs/motorola $webdir/vendor-docs
+    scp -r vendor-docs/jupiter $webdir/vendor-docs
 fi
