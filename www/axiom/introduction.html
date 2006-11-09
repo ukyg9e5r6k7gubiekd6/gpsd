@@ -1,0 +1,102 @@
+<html>
+<head>
+<link rel="stylesheet" href="axiom.css" type="text/css" />
+<title>Description</title>
+</head>
+
+<body bgcolor="white" lang=EN-US style='tab-interval:.5in'>
+
+<div class="Section1">
+<h1>Axiom Sandpiper II</h1>
+
+<p>&nbsp;</p>
+
+<p>These pages describe the Axiom Sandpiper II GPS module.  The
+manufacturer went out of business some time between 2000 and 2006, but
+many of these are still available cheaply in 2006 via eBay and from
+electronics surplus stores.  They seem to be popular with radio
+hams.</p>
+
+<p>This is a SiRF device.  However, it doesn't come up in SiRF binary,
+nor have we ever seen it respond to the $PSRF we use as a SiRF probe.</p> 
+
+<p>&nbsp;</p>
+
+<p>The material in these pages (other than this one) was extracted
+from descriptive materials supporting an eBay auction.  Material
+specific to the auction has been removed, leaving the technical
+content, vendor spec sheets, and manuals in place.  The very bulky
+but largely content-free manual for the Windows exerciser software 
+has been omitted.</p>
+
+<h2>Interfacing to the bare module</h2>
+
+<p>These materials describe the bare OEM module.  An anonymous note
+referenced from the web page tells us the basics of interfacing to it.
+It has two rows of pins, the pin with the square pad is pin 1. The
+pins are numered as follows:</p>
+
+<listing>
+ 1  2
+ 3  4
+ 5  6
+ 7  8
+ 9  10
+11  12
+13  14
+15  16
+17  18
+19  20
+</listing>
+
+<p>The module is already RS-232 ready, no need for a level-converter chip
+(MAX-232). For a serial connection to your PC all you need to do is apply
+power(+5vdc) and wire TX,RX, and ground to your PC. Once powered up the
+receiver will output NMEA at 4800,8,n,1. If you want to you can add a
+battery backup (3.6vdc); there is a pin for this. This will allow the
+receiver to lock onto a signal within 10 seconds. On first power up don't
+expect a lock for about 90 to 120 seconds.</p>
+
+<h2>If it has an enclosure...</h2>
+
+<p>You may find your unit is enclosed in a black plastic case with a
+DB9 on a connector coming out of it and two connectors on it.  If
+so,</p>
+
+<ul>
+
+<li>The DB9 should be a regular serial port.  Here are the pin
+assignments:</p>
+
+<p>&nbsp;</p>
+
+<table border='1'>
+<tr><td>1</td><td>PPS</td></tr>
+<tr><td>2</td><td>RX</td></tr>
+<tr><td>3</td><td>TX</td></tr>
+<tr><td>4</td><td>open</td></tr>
+<tr><td>5</td><td>ground</td></tr>
+<tr><td>6</td><td>open</td></tr>
+<tr><td>7</td><td>open</td></tr>
+<tr><td>8</td><td>open</td></tr>
+<tr><td>9</td><td>open</td></tr>
+</table>
+
+<p>&nbsp;</p>
+</li>
+
+<li>The brass-colored screw connector sticking out one side is an AMPS-style
+antenna connector.</li>
+
+<li>The post-in-a-well connector on the bottom is the power
+connector. It wants regulated 5VDC, positive center.</p>
+</ul>
+
+<p>The power connector is physically and electrically compatible with
+the semi-standard 5-volt power supplies used on routers and USB hubs.  The
+2.5A power supply from a dead Linksys router seems to do nicely.</p>
+
+
+</div>
+</body>
+</html>

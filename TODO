@@ -31,14 +31,6 @@ David Mandala <davidm@them.com>.  His workaround is to condition out
 SiRF support; it works OK in NMEA mode.  The Royaltek died in an
 accident, so we're stuck until someone else can test this.
 
-*** Axiom Sandpiper II OEM NMEA GPS Module gets mistaken for an FV-18
-
-David Mandala <davidm@them.com> reported this bug.  He says it can 
-be worked around by setting the port to 4800 manually before starting
-GPSD.  David sent ESR one of these, it's somewhere in his piles of
-stuff, testing will get done when it surfaces.  More on the Sandpiper
-at <http://www.allsurplus.net/Axiom/>.
-
 ** Bugs exposed by gpsd in other software
 
 *** Distro-dependent problems with gpsd startup.
