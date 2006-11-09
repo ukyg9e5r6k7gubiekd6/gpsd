@@ -32,5 +32,8 @@ else
     xmlto xhtml-nochunks replacing-nmea.xml
     xmlto xhtml-nochunks writing-a-driver.xml
     (cd performance; xmlto xhtml-nochunks performance.xml)
-    scp start-kismet *.html *.png *.pdf *.gif performance/{*.html,*.txt,*.png} *.css *.js *.txt *.ebuild $webdir
+    scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt *.ebuild \
+	performance/{*.html,*.txt,*.png} \
+	$webdir
+    scp axiom/{*.html,*.css,*.pdf,*.jpg,*.doc} $webdir/axiom
 fi
