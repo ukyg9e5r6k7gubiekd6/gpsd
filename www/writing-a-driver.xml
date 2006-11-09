@@ -16,11 +16,11 @@
 
 <revhistory>
    <revision>
-      <revnumber>1.0</revnumber>
-      <date>5 November 2006</date>
+      <revnumber>1.1</revnumber>
+      <date>9 November 2006</date>
       <authorinitials>md</authorinitials>
       <revremark>
-	 Initial draft.
+	 Second draft.
       </revremark>
    </revision>
 </revhistory>
@@ -47,7 +47,7 @@ gpsd version 2.34 compiled from SVN revision 3783 of November 5th
 this, but the broad principles should still apply. Check what version
 you are using.</para>
 
-<para><application>gpsd</application>supports auto detection, so
+<para><application>gpsd</application> supports auto detection, so
 connect your device and try it; you may be lucky and find it is
 already supported. If you are unlucky, you have to be prepared to do a
 lot of work and research on your own.</para>
@@ -71,10 +71,10 @@ sigma).</para>
 <para>So for me, the decision whether to write a
 driver or not was already made; either write one or forget
 connecting this high quality time source to my network, as 
-<application>gpsd</application>can also use the GPS device to
+<application>gpsd</application> can also use the GPS device to
 synchronise the ntpd daemon either to the GPS data or to the
-1PPS, if it is available. A 25ns accurate input to ntpd looked
-very appealing.</para>
+1PPS, if it is available. A 25ns accurate input to <filename>
+ntpd</filename> looked very appealing.</para>
 </sect1>
 
 
@@ -86,8 +86,8 @@ can't do that, you should temporarily shelve the driver project
 and start learning to code. While I would not advise this as
 the way to go for a complete novice, you will find some good
 code to follow in the 
-<application>gpsd</application>files and there are some good clues
-in the existing drivers.</para>
+<application>gpsd</application> files and there are some good
+clues in the existing drivers.</para>
 
 <para>You will also need some understanding of what a GPS device is
 and how it works, although I guess you are likely to have this
@@ -131,9 +131,9 @@ centigrade is no joke.</para>
 <sect1><title>What is involved in the coding</title>
 
 <para>I looked long and hard at the other drivers, at the main parts
-of <application>gpsd</application>, at the test applications (like
-xgps) and at the descriptions on the
-<application>gpsd</application>web site to get a feel for what my
+of <application>gpsd</application>, at the test applications (
+<application>like xgps</application>) and at the descriptions on the
+<application>gpsd</application> web site to get a feel for what my
 driver needed to do to behave like the existing drivers. After some
 time, I concluded that for me the best way forward was to write my
 driver by modifying an existing driver.</para>
@@ -150,8 +150,8 @@ development.</para>
 
 <para>My first efforts were directed to understanding what the
 different sections of the code did (I actually hacked the
-<filename>zodiac.c</filename>driver). This took me into some of the
-other programs such as <filename>gpsd.c</filename>to see why the
+<filename>zodiac.c</filename> driver). This took me into some of the
+other programs such as <filename>gpsd.c</filename> to see why the
 driver was doing certain things and to see what the inputs to/outputs
 from the driver were. I also looked at
 <filename>driver-proto.c</filename>, as this is a skeleton which
@@ -164,14 +164,14 @@ driver.</para>
 output of the Jupiter-T is a binary protocol with variable length
 strings. None of the existing drivers spoke this language, but I could
 get some general ideas on how to handle this from drivers like
-<filename>zodiac.c</filename>and
+<filename>zodiac.c</filename> and
 <filename>evermore.c</filename>.</para>
 
 <para>I found from the manufacturer's documentation that the Jupiter-T
 produces output only when instructed, rather than spewing out a
-pre-set sequence at some pre-defined rate and so it would be possible
+set sequence at some pre-defined rate and so it would be possible
 to generate almost all the wanted data for
-<application>gpsd</application>by activating two main messages,
+<application>gpsd</application> by activating two main messages,
 <quote> <filename>@@Ea</filename></quote> and
 <quote><filename>@@Bb</filename></quote>. All the commands and
 responses in <quote>Jupiter-T-speak</quote> start with a 4 character
@@ -188,27 +188,27 @@ receiver status in 76 bytes.</para>
 <para>Once I had determined the two commands and responses that were
 needed (a few others were needed for initialisation and
 administration), I set about writing the decoder to fill in the
-standard data structures that <application>gpsd</application>uses. For
-this, the <filename>zodiac.c</filename>driver was very helpful as it
+standard data structures that <application>gpsd</application> uses. For
+this, the <filename>zodiac.c</filename> driver was very helpful as it
 had a routine <quote> <function>static gps_mask_t handle1000(struct
 gps_device_t *session)</function></quote> that did a very similar
 job.</para>
 
 <para>This brought me neatly to the first chicken/egg problem; the
-device is, as I said earlier, mute on power-up and unless you send it
+device, as I said earlier, is mute on power-up and unless you send it
 some instructions to turn on one or more messages, you will have no
 indication if it is even alive. Actually, this is not strictly true,
 as it does output a 1PPS and a 10kHz square wave on power up, but
 these are free running until satellites are acquired, and
-<application>gpsd</application>needs a data stream if it is to do
+<application>gpsd</application> needs a data stream if it is to do
 anything. If it has not discovered your GPS device, it cannot lock to
 the 1PPS that is coming in all the while.</para>
 
-<para>The <application>gpsd</application>installation instructions
+<para>The <application>gpsd</application> installation instructions
 give a clue about how to check if your device is working, but the
 method is best suited to NMEA devices or others which give real ASCII
 output. If your device outputs binary, you could mistake the output
-for garbage caused by a serial port speed/word size error. A mute
+for garbage caused by a serial port speed or word size error. A mute
 device also makes this a non-starter!</para>
 
 <para>The manufacturer's manual gives the commands to set up the
@@ -223,16 +223,16 @@ software.</para>
 Clock) written to run under Windows which can talk to several
 varieties of GPS devices and <quote>wake</quote> them in the correct
 way to generate navigation data and timing signals, displaying them in
-a nice screen, something like xgps does. This is available for a free
-evaluation download (about 30 days expiry, I believe), but I actually
-shelled out for a license as I had a continuing use for this on a
-laptop which only had Windows on it.  Information was available at the
-time of writing at <ulink
+a nice screen, something like <application>xgps</application> does.
+This is available for a free evaluation download (about 30 days expiry,
+I believe), but I actually shelled out for a license as I had a
+continuing use for this on a laptop which only had Windows on it.
+Information was available at the time of writing at <ulink
 url="http://www.cnssys.com/">www.cnssys.com</ulink>.</para>
 
 <para>With this software you can monitor the raw
-data stream and send arbitrary command to the GPS (the command
-creator includes a nice syntax verifier and CRC generator), so
+data stream and send arbitrary commands to the GPS (the command
+constructor includes a nice syntax verifier and CRC generator), so
 I was able to watch the initialisation of the device, check the
 output stream used to generate the navigation data and
 experiment with the command set.</para>
@@ -256,16 +256,16 @@ and some Linux based software, SerLook (
 <ulink url="http://serlook.sunsite.dk/">
 http://serlook.sunsite.dk/</ulink>). I had access to a 4-port
 RS-232 to USB adapter and so I could use two of the ports on
-this device with the SerLook software to monitor the send and
-receive streams of my gpsd port.</para>
+this device with special cable and the SerLook software to monitor
+the send and receive streams of my <application>gpsd</application> port.</para>
 
 <para>For sending experimental commands, I
 settled on building the wanted commands as simple files using
-KhexEdit and then sending them to the serial port with cat.
-This allowed me to experiment with the different commands and
-to swap between the three modes (Oncore/Jupiter/NMEA). This is
-crude, but I found it hard to get the right results with
-<application>minicom</application>.</para>
+<application>KhexEdit</application> and then sending them to
+the serial port with <function>cat</function>. This allowed me
+to experiment with the different commands and to swap between
+the three modes (Oncore/Jupiter/NMEA). This is crude, but I found it hard
+to get the right results with <function>minicom</function>.</para>
 
 <para>To return to the development, I liberally
 sprinkled the driver code with <quote>
@@ -287,7 +287,7 @@ the software to that configuration. If it compiles
 successfully, you can then issue a <quote>
 <command>make install</command></quote> command to
 install the driver. This last command will need to be done as 
-<command>root</command>because the daemon is designed to
+<function>root</function> because the daemon is designed to
 be invoked by root.</para>
 
 <para>The second thing is a bit more tricky, at least the first time
@@ -308,7 +308,7 @@ the initial stages, I wanted to keep things simple, so I figured out
 from the <command>./configure help</command> command what options were
 supported and what were the default settings for them. I initially
 compiled with everything except NMEA and my driver disabled. This
-keeps the code smaller and ensures that you don't trigger a wrong
+keeps the code smaller and ensures that you don't trigger the wrong
 driver.  My reasoning with leaving the NMEA active was twofold; I
 wanted to be able to check at an early stage if I could get
 <emphasis>any</emphasis> output to be understood (remember, my GPS
@@ -383,9 +383,9 @@ level</para></entry>
 </tgroup>
 </informaltable>
 
-<para>These files will cause some files to be created which also
+<para>These files will cause various files to be created which also
 inherit knowledge of your driver such as
-<filename>packet_names.h</filename>and later on you will probably need
+<filename>packet_names.h</filename> and later on you will probably need
 to modify other files like <filename>gpsfake.py</filename>, but the
 above fairly short list was all I had to handle at first. You will
 probably find something similar is necessary and if you miss one out,
@@ -396,40 +396,41 @@ message telling you where your new code is unknown.</para>
 <sect1><title>What these important files do</title>
 
 <para>The first two files only need to know simple things for
-compilation; the <quote> <filename>Makefile.am</filename></quote>
+compilation; the <quote><filename>Makefile.am</filename></quote>
 needs only to have your driver added to the list of
 <quote><filename>libgps_c_sources</filename></quote>. I simply
 duplicated one of the existing lines and substituted my driver's name
-for the original copied name. The <filename>config.ac</filename> needs
-a few lines to tell the user what compile time options are available
-for your driver and to set its default options. I again copied an
-existing entry and changed the name, making sure I set the options so
-my driver was active by default. I also, as mentioned, modified the
-other drivers to default to inactive.  You will also need to add your
-driver name to the list at the end of the file which issues a warning
-if no device drivers at all are selected at compilation time. Again, I
-copied and changed an existing entry.</para>
+for the original copied name. The <quote><filename>config.ac
+</filename></quote> needs a few lines to tell the user what compile
+time options are available for your driver and to set its default
+options. I again copied an existing entry and changed the name,
+making sure I set the options so my driver was active by default.
+I also, as mentioned, modified the other drivers to default to
+inactive.  You will also need to add your driver name to the list
+at the end of the file which issues a warning if no device drivers
+at all are selected at compilation time. Again, I copied and changed
+an existing entry.</para>
 
-<para>The <quote> <filename>drivers.c</filename></quote> file handles
+<para>The <quote><filename>drivers.c</filename></quote> file handles
 some basic stuff for the NMEA driver and tries to wake up many of the
 other drivers. It needed four small modifications to integrate my
 code. The first was a copy of an existing entry in the generic NMEA
-handler <function>nmea_parse_input</function> to generate a debug
-error if one of my packets was detected when the NMEA driver had been
-selected and switch to my driver instead. The second was a pointer to
-simple command to send a Jupiter-T specific string to the GPS at
-detection time to test if it is a Jupiter-T in <quote>
+handler <quote><function>nmea_parse_input</function></quote> to generate
+a debug error if one of my packets was detected when the NMEA driver
+had been selected and switch to my driver instead. The second was a
+pointer to simple command to send a Jupiter-T specific string to the
+GPS at detection time to test if it is a Jupiter-T in <quote>
 <function>nmea_initializer</function></quote>. If it returns the right
 answer (in my case, the manufacturer's PROM header), then the packet
 sniffer should see this and select my driver. The third was a
 (copied/modified) declaration entry in the list of structs known to
-<application>gpsd</application>which is located immediately before and
+<application>gpsd</application> which is located immediately before and
 is used by the fourth location,
 <quote>
 <userinput>*gpsd_driver_array[]</userinput></quote>, to
 give the address of the entry point table in my driver.</para>
 
-<para>The <quote> <filename>gpsd.h</filename></quote> file is a
+<para>The <quote><filename>gpsd.h</filename></quote> file is a
 conventional header file with declarations common to the whole
 application. The changes are again quite simple. There is an entry
 added to put my driver in the the list of drivers that use binary
@@ -442,8 +443,8 @@ strings from the PROM.  The largest <quote>real</quote> packet is 96
 bytes for the <quote>Report ASCII Position</quote> message. The
 largest command sent is 52 bytes for a <quote>Input Pseudorange
 Correction</quote>. The largest received/sent packets used in
-<application>gpsd</application>so far are 92 and 20 bytes
-respectively. There is a single #define in <quote>
+<application>gpsd</application> so far are 92 and 20 bytes
+respectively. There is a single <quote>#define</quote> in <quote>
 <userinput>gps_device_t</userinput></quote> for the new packet type
 that this driver needs. This is simply an entry at the end of the
 existing list. The last two changes are two <quote>extern</quote>
@@ -451,23 +452,23 @@ declarations of prototypes in <quote>
 <userinput>**gpsd_drivers</userinput></quote> that the new driver
 needs to interface to the rest of the code.</para>
 
-<para>The function of <filename>libgpsd_core.c</filename>is to provide
-some low-level entries into <application>gpsd</application>from
-external client software since these cannot directly access the GPS or
-its port when the daemon is running. The change is again quite
-small. It is just an extra entry in the <quote>
-<function>gpsd_poll</function></quote> code to include a packet switch
-to the Jupiter-T driver if the packet sniffer finds a
-matching packet.</para>
+<para>The function of <quote><filename>libgpsd_core.c</filename>
+</quote> is to provide some low-level entries into <application>
+gpsd</application> from external client software since these cannot
+directly access the GPS or its port when the daemon is running.
+The change is again quite small. It is just an extra entry in the
+<quote><function>gpsd_poll</function></quote> code to include a
+packet switch to the Jupiter-T driver if the packet sniffer finds
+a matching packet.</para>
 
 
-<para>The file <filename>packet.c</filename>is the state engine which
-scans packets as they arrive and tries to match them to an existing
-driver. Here is where our driver will be called, so the changes are a
-little larger. The driver starts at the beginning of each packet and
-tries to match, character by character, until it has determined which
-(if any) driver owns this package in routine
-<quote>
+<para>The file <quote><filename>packet.c</filename></quote> is
+the state engine which scans packets as they arrive and tries to
+match them to an existing driver. Here is where our driver will
+be called, so the changes are a little larger. The driver starts
+at the beginning of each packet and tries to match, character by
+character, until it has determined which (if any) driver owns
+this package in routine <quote>
 <function>nextstate</function></quote>. As all
 Jupiter-T packets start with <quote>
 <constant>@@</constant></quote>, this collides with the
@@ -482,8 +483,7 @@ modelled on the other drivers, but must needs be unique. The
 package is scanned byte by byte until a fully formed packet
 has been detected and then it can be parsed in the main driver.
 If it fails any of the tests, the state engine is set back to
-<quote>
-<constant>GROUND_STATE</constant></quote> and detection
+<quote><constant>GROUND_STATE</constant></quote> and detection
 starts again. The code to trigger parsing and deletion of the
 package after it has been parsed is included lower down in the
 code <quote>
@@ -491,15 +491,15 @@ code <quote>
 on existing drivers.</para>
 
 <para>The file 
-<filename>packet_states.h</filename>is simply a list of
-every state needed by every type of GPS which will produce a
-long list of unique entries (a big 
-<filename>enum</filename>list) for use in the 
-<filename>packet.c</filename>state engine. The changes here
-are limited to a small change to the TNT code, since both
-drivers share a common first character, so thus they share a
-state. There then follow the four new states that are required
-by the Jupiter-T state analysis.</para>
+<quote><filename>packet_states.h</filename></quote> is simply
+a list of every state needed by every type of GPS which will
+produce a long list of unique entries (a big 
+<filename>enum</filename> list) for use in the 
+<quote><filename>packet.c</filename></quote> state engine.
+The changes here are limited to a small change to the TNT
+code, since both drivers share a common first character,
+so thus they share a state. There then follow the four new
+states that are required by the Jupiter-T state analysis.</para>
 </sect1>
 
 <sect1><title>Writing the actual driver code</title>
@@ -513,25 +513,26 @@ hand, now have a nice list to guide you.</para>
 
 <para>The basic entry points or data values
 required of every driver are in visible in the 
-<userinput>struct gps_type_t proto_binary</userinput>in 
-<filename>drivers_proto.c</filename>. If any functions are
-not needed or not provided for your device, then the
-corresponding table entry should be a NULL or -1 (as
-appropriate). If they exist, the entry should contain the name
-of the function or the default value of the data. What follows
-is a list of each of the table entries with a short description
-of what it is expected to do or contain.</para>
+<userinput>struct gps_type_t proto_binary</userinput> in 
+<quote><filename>drivers_proto.c</filename></quote>. If
+any functions are not needed or not provided for your
+device, then the corresponding table entry should be a
+NULL or -1 (as appropriate). If they exist, the entry
+should contain the name of the function or the default
+value of the data. What follows is a list of each of
+the table entries with a short description of what it
+is expected to do or contain.</para>
 
 <para><structfield>.typename</structfield> is a simple string that
 uniquely identifies your driver. The first few characters are also
-output in some of the monitor output as generated by cgps or
-xgps.</para>
+output in some of the monitor output as generated by <filename>
+cgps</filename> or <filename>xgps</filename>.</para>
 
 <para><structfield>.trigger</structfield> is the unique string that,
-when seen, will confirm our device is present. This will be detected
-in <filename>drivers.c</filename>and will probably be the same value
-as that provoked by sending the command mentioned in
-<filename>.probe_detect</filename>below.</para>
+when seen, will confirm your device is present. This will be detected
+in <quote><filename>drivers.c</filename></quote> and will probably
+be the same value as that provoked by sending the command mentioned
+in <structfield>.probe_detect</structfield>below.</para>
 
 <para><structfield>.channels</structfield> is the number of channels your
 GPS uses. Typically this will be 12 for a consumer grade
@@ -539,14 +540,14 @@ device.</para>
 
 <para><structfield>.probe_detect</structfield> points to a block of
 code that generates a command to send to the device that will provoke
-a response if our device is present. The code should then detect and
+a response if your device is present. The code should then detect and
 recognise the response, signalling if detection was successful or
 not. Successful detection results in this driver claiming the attached
 device. It may also do some more exotic things like set the port to
 different operation modes (e.g. raw mode) from the default. If it
-makes the changes to the port permanently, it should store the
+makes changes to the port permanently, it should store the
 original settings for later restoration, probably by
-<structfield>.wrapup</structfield>mentioned below. Later in this
+<structfield>.wrapup</structfield> mentioned below. Later in this
 document I discuss my work to implement this function.</para>
 
 <para><structfield>.probe_wakeup</structfield> points to a block of code
@@ -556,13 +557,13 @@ the daemon offers a new speed to probe at.</para>
 <para><structfield>.probe_subtype</structfield> points to a block of
 code that will be executed whenever the device-driver type is switched
 (with second argument 0) or whenever a full packet is received (with
-second argument being the sequence number of the packet.  It is
+second argument being the sequence number of the packet).  It is
 normally used to send probe strings that are expected to elicit a
 later response that will reveal the subtype of the driver.  If this
 function fetches driver subtype information immediately, it should
 store information about the software version in member
-<filename>subtype</filename>of the driver data structure
-<userinput>struct gps_device_t *session</userinput>.</para>
+<quote><filename>subtype</filename></quote> of the driver data
+structure <userinput>struct gps_device_t *session</userinput>.</para>
 
 <para><structfield>.configurator</structfield> points to a block of code
 that sets up the device to deliver the correct set of sentences
@@ -595,36 +596,36 @@ to change the mode (if supported) between NMEA (mode 0) and our
 binary mode (1).</para>
 
 <para><structfield>.rate_switcher</structfield> points to a block of code
-to change the maximum number of fixes our device can generate
+to change the maximum number of fixes your device can generate
 in 1 second.</para>
 
 <para><structfield>.cycle_chars</structfield> is explained in
 <quote>Throughput computation for baud rate changes</quote> in the
 <quote>Hacker's Guide to GPSD</quote> in the general
 documentation. It's only necessary to fill this in if you have
-<filename>.rate_switcher</filename>capability</para>
+<structfield>.rate_switcher</structfield> capability</para>
 
 <para><structfield>.wrapup</structfield> points to a block of code
 which is run each time the device is to be closed. This happens when
-all clients have disconnected and the <option>-n</option>switch is not
-active. The premise is that there may be a special mode you
-initialized the device into for
-<application>gpsd</application>operation which should be turned off
+all clients have disconnected and the <quote><option>-n</option>
+</quote> switch is not active. The premise is that there may be a
+special mode you initialized the device into for
+<application>gpsd</application> operation which should be turned off
 otherwise. It allows for changing the device to a low power mode, for
 instance. This is also where you should undo any port parameter
-changes you made in <filename>.probe_detect</filename>above.</para>
+changes you made in <structfield>.probe_detect</structfield>above.</para>
 
 <para><structfield>.cycle</structfield> is a number giving the number of
-fixes per second we can get. Gets updated if we can rate-switch
-and user gives a gpsd 'C' command.</para>
+fixes per second you can get. Gets updated if you can rate-switch
+and user gives a <application>gpsd</application> 'C' command.</para>
 
 <para>The connection between some of the above was confirmed with Eric
 Raymond as follows.</para> <para>The inter-relationship between
 <structfield>.speed_switcher</structfield>,
 <structfield>.rate_switcher</structfield>,
-<structfield>.cycle_chars</structfield>and
-<structfield>.cycle</structfield>is:-</para> <para>If we can change
-baud rate ( <structfield>.speed_switcher</structfield>) and we can
+<structfield>.cycle_chars</structfield> and
+<structfield>.cycle</structfield> is:-</para> <para>If we can change
+baud rate (<structfield>.speed_switcher</structfield>) and we can
 alter the rate at which fixes are delivered
 (<structfield>.rate_switcher</structfield>), then we need to know the
 number of characters in a fix string
@@ -643,12 +644,12 @@ that I did.</para>
 
 <para>It is important not to lose sight of the aim of your driver. You
 are trying to convert the manufacturer-specific output of your GPS
-into a standard data block in <application>gpsd</application>so that a
+into a standard data block in <application>gpsd</application> so that a
 consistent set of information is available to client software
 regardless of what the original source was. In fact,
-<application>gpsd</application>will produce a nice set of NMEA output
+<application>gpsd</application> will produce a nice set of NMEA output
 from your data stream for you to look at if you wish.  This output can
-be captured and played back into <application>gpsd</application>at a
+be captured and played back into <application>gpsd</application> at a
 later date and it will be handled as though it came from a standard
 NMEA device.</para>
 
@@ -656,13 +657,11 @@ NMEA device.</para>
 position/track/speed/time/climb rate information, but we also take
 note of some secondary things like DOP/satellite status if it is
 available. In my case, all the fields could be filled directly from
-the data shipped by the GPS in the two messages which I activated. The
-satellite status data was exactly as needed, except that the GPS
-provided data for all visible satellites whereas
-<application>gpsd</application> was interested only in those satellites
-whose signal was usable. The navigation data was all present but some
-fields did need some massaging; for example, my GPS reports location
-data in milliArcseconds whilst <application>gpsd</application>works in
+the data shipped by the GPS in the two messages which I activated.
+The satellite status data contained exactly what was needed. The
+navigation data was all present but some fields did need some
+massaging; for example, my GPS reports location data in 
+milliArcseconds whilst <application>gpsd</application> works in
 degrees. All conversions were achieved by simple division by
 constants. A few of the more exotic fields such as the quality of the
 fix (2D/3D etc.)  were packed bit values in bytes or words, but these
@@ -673,8 +672,8 @@ results from just the two command/report strings that were set
 in Windows, but later on I added the capability to bring the
 device into use from a cold start through the daemon by adding
 the routines such as 
-<structfield>.probe_detect</structfield>and 
-<structfield>.trigger</structfield>along with some status
+<structfield>.probe_detect</structfield> and 
+<structfield>.trigger</structfield> along with some status
 requests.</para>
 
 <para>As I hinted earlier, I found that support code like <quote>
@@ -700,42 +699,42 @@ off&gt;</para>
 needed to be <quote>woken up</quote>,
 otherwise it would never be detected by the normal packet
 scanner. The 
-<structfield>.probe_detect</structfield>function is intended for
+<structfield>.probe_detect</structfield> function is intended for
 just such a case and allows you to seek your device and claim
 the port ahead of the normal initialisation, since a check for
 devices supporting the 
-<structfield>.probe_detect</structfield>is made at a very early
+<structfield>.probe_detect</structfield> is made at a very early
 point in the startup. The unfortunate thing is that to
-implement the function could mean getting down to the low level
+implement the function could mean getting down to low level
 programming of the tty port since you may find the normal
 operating mode capabilities may not match your device's
 requirement, even if the baud rate is correct.</para>
 
 <para>I looked at the code in 
-<filename>serial.c</filename>, 
-<filename>garmin.c</filename>and 
-<filename>sirfmon.c</filename>for inspiration and noticed
-some important things:</para>
+<quote><filename>serial.c</filename></quote>, 
+<quote><filename>garmin.c</filename></quote> and 
+<quote><filename>sirfmon.c</filename></quote> for inspiration
+and noticed some important things:</para>
 
 <itemizedlist>
 <listitem><para>You must read and preserve the existing port
 settings so that if you change anything, it can be restored
 later. This probably means you will have to implement the
-.wrapup function, but this is likely to be a reverse of the
-settings you finally arrive at in this
-function.</para></listitem>
+<structfield>.wrapup</structfield> function, but this is
+likely to be a reverse of the settings you finally arrive
+at in this function.</para></listitem>
 
 <listitem><para>You need to be aware of and understand the low level
 control settings that are needed to manipulate parameters like parity,
 stop bit number, flow control and port mode (raw/cooked). Take some
-time to read up on termios ( <userinput>man 3 termios</userinput>will
+time to read up on termios (<userinput>man 3 termios</userinput> will
 give the grisly details).</para></listitem>
 
 <listitem><para>You will probably find that you need to verify what
 delay loops are needed to allow your hardware to catch up if you
 change port settings (UART flush and other factors are described in
-detail in <filename>serial.c</filename>and you should read it
-carefully).</para></listitem>
+detail in <quote><filename>serial.c</filename></quote> and you should
+read it carefully).</para></listitem>
 </itemizedlist>
 
 <para>I also found that even this was not the whole
@@ -745,16 +744,15 @@ a settings change, I could not get it to respond cleanly to a
 found that I was missing some or all of the response message
 when operating at 9600 bps.</para>
 
-<para>The reason was that I checked the port with a
-single character sniff a maximum of 300 times (just bigger than
-the block of text being returned), which comes out at 300 * (1
-start bit + 8 data bits + 1 stop bit) = 3000 bits. This equates
-to about 312 milliseconds. This probe method is necessary
-because you are speculatively probing and the speed could be
-wrong or there may not be such a device
-present.</para>
+<para>The reason was that I check the port with a
+single character sniff routine a maximum of 300 times (just bigger
+than the block of text being returned), which comes out at 300 *
+(1 start bit + 8 data bits + 1 stop bit) = 3000 bits. This equates
+to about 312 milliseconds. This method is necessary because the
+probe is speculative and must handle cases like wrong port speed
+or the type of device being probed for is not present.</para>
 
-<para>I found in the Oncore manual that the internal
+<para>I found in the Oncore manual that the device's internal
 scheduler uses a 1 second loop time. Within this loop, the
 navigation tasks are handled first, followed by processing of
 the input commands. Any resultant output will be generated as
@@ -762,23 +760,24 @@ soon as the input buffer is processed, assuming the buffer
 holds one or more complete commands.</para>
 
 <para>If you are lucky and just finish your input as the
-buffer is ready to be scanned, you can get a result in 70
+buffer is ready to be scanned, you can get a result back in 70
 milliseconds. If you are unlucky, the most extreme delay is 2
 seconds. On average, the turnaround is 1025
 milliseconds. Unfortunately, in the probing code, we have to allow for
 the worst case, so once the code issues a command, it has then to wait
 a full 2 seconds before scanning for output.</para>
 
-<para>The only port setting which was not immediately obvious to me
-(although present in both <filename>serial.c</filename> and
-<filename>sirfmon.c</filename>) was
-<userinput>session-&gt;ttyset.c_cflag |= CREAD |
-CLOCAL;</userinput>. This is needed to enable the port and cause it to
-ignore any modem control lines. If you are using a binary protocol,
-you will also need to issue a <userinput>cfmakeraw(struct termios
-*termios_p);</userinput>to quickly set the most important flags
-correctly. I was bitten by this and found that &lt;CR/LF&gt; sequences
-were being modified to &lt;CR/CR/LF&gt; by the tty port driver.</para>
+<para>The only serial port setting which was not immediately obvious to me
+(although present in both <quote><filename>serial.c</filename></quote>
+and <quote><filename>sirfmon.c</filename></quote>) was
+<quote><userinput>session-&gt;ttyset.c_cflag |= CREAD |
+CLOCAL;</userinput></quote>. This is needed to enable the port and
+cause it to ignore any modem control lines. If you are using a binary
+protocol, you will also need to issue a <quote><userinput>cfmakeraw
+(struct termios *termios_p);</userinput></quote> to quickly set the
+most important flags correctly. I was bitten by this and found that
+&lt;CR/LF&gt; sequences were being modified to &lt;CR/CR/LF&gt; by
+the kernel's tty port driver.</para>
 </sect1>
 
 <sect1><title>Sign off</title>
