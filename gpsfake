@@ -19,7 +19,9 @@ class Baton:
     "Ship progress indications to stderr."
     def __init__(self, prompt, endmsg=None):
         self.stream = sys.stderr
-        self.stream.write(prompt + "... \010")
+        self.stream.write(prompt + "...")
+        if os.isatty(self.stream.fileno()):
+            self.stream.write(" \010")
         self.stream.flush()
         self.count = 0
         self.endmsg = endmsg
@@ -31,7 +33,7 @@ class Baton:
             return
         if ch:
             self.stream.write(ch)
-        else:
+        elif os.isatty(self.stream.fileno()):
             self.stream.write("-/|\\"[self.count % 4])
             self.stream.write("\010")
         self.count = self.count + 1
