@@ -27,30 +27,186 @@
  *     (use whatever -O level you like)
  */
 
-int main(void) {
-	float  a, b, c, d, e, f, g;
-	double A, B, C, D, E, F, G;
-	const char *reference = "3.00 5.00 7.00 11.00 12.00 132.00 38.00";
-	char try1[64], try2[64]; 
+int main( void );
+int test_single( void );
+int test_double( void );
 
-	a = 3.0; b = 5.0 ; c = 7.0; d = 11.0;
-	g = a + b * c; /* multiply and add */
-	e = b + c; /* add */
-	f = d * e; /* multiply */
-	snprintf(try1, 64,
-		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", a, b, c, d, e, f, g);
+int main(){
+	int i;
 
-	A = 3.0; B = 5.0 ; C = 7.0; D = 11.0;
-	G = A + B * C; /* multiply and add */
-	E = B + C; /* add */
-	F = D * E; /* multiply */
-	snprintf(try2, 64,
-		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", A, B, C, D, E, F, G);
+	if ((i = test_single())){
+		printf("single precision test #%d failed\n", i);
+		return i;
+	}
 
-	puts("Floating Point test - the next 3 lines should be the same");
-	puts(reference);
-	puts(try1);
-	puts(try2);
+	if ((i = test_double())){
+		printf("double precision test #%d failed\n", i);
+		return i;
+	}
 
-	return strcmp(try1, reference) || strcmp(try2, reference);
+	return 0;
+}
+
+int test_single(){
+	static float f;
+	static int i;
+
+	/* addition test */
+	f = 1.0;
+	for(i = 0; i < 10; i++)
+		f += (1<<i);
+	if (f != 1024.0)
+		return 1;
+
+	/* subtraction test */
+	f = 1024.0;
+	for(i = 0; i < 10; i++)
+		f -= (1<<i);
+	if (f != 1.0)
+		return 2;
+
+	/* multiplication test */
+	f = 1.0;
+	for(i = 1; i < 10; i++)
+		f *= i;
+	if (f != 362880.0)
+		return 3;
+
+	/* division test */
+	f = 362880.0;
+	for(i = 1; i < 10; i++)
+		f /= i;
+	if (f != 1.0)
+		return 4;
+
+	/* multiply-accumulate test */
+	f = 0.5;
+	for(i = 1; i < 1000000; i++){
+		f += 2.0;
+		f *= 0.5;
+	}
+	if (f != 2.0)
+		return 5;
+
+	/* divide-subtract test */
+	f = 2.0;
+	for(i = 1; i < 1000000; i++){
+		f /= 0.5;
+		f -= 2.0;
+	}
+	if (f != 2.0)
+		return 6;
+
+	/* add-multiply-subtract-divide test */
+	f = 1000000.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f + 1.5) * 0.5) - 1.25) / 0.5);
+	if (f != 1.0)
+		return 7;
+
+	/* multiply-add-divide-subtract test */
+	f = 1.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f * 5.0) + 3.0) / 2.0) - 3.0);
+	if (f != 1.0)
+		return 8;
+
+	/* subtract-divide-add-multiply test */
+	f = 8.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f - 5.0) / 2.0) + 2.5) * 2.0);
+	if (f != 8.0)
+		return 9;
+
+	/* divide-subtract-multiply-add test */
+	f = 42.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f / 6.0) - 5.0) * 19.75 ) + 2.5);
+	if (f != 42.0)
+		return 10;
+
+	return 0;
+}
+
+
+int test_double(){
+	static double f;
+	static int i;
+
+	/* addition test */
+	f = 1.0;
+	for(i = 0; i < 10; i++)
+		f += (1<<i);
+	if (f != 1024.0)
+		return 1;
+
+	/* subtraction test */
+	f = 1024.0;
+	for(i = 0; i < 10; i++)
+		f -= (1<<i);
+	if (f != 1.0)
+		return 2;
+
+	/* multiplication test */
+	f = 1.0;
+	for(i = 1; i < 10; i++)
+		f *= i;
+	if (f != 362880.0)
+		return 3;
+
+	/* division test */
+	f = 362880.0;
+	for(i = 1; i < 10; i++)
+		f /= i;
+	if (f != 1.0)
+		return 4;
+
+	/* multiply-accumulate test */
+	f = 0.5;
+	for(i = 1; i < 1000000; i++){
+		f += 2.0;
+		f *= 0.5;
+	}
+	if (f != 2.0)
+		return 5;
+
+	/* divide-subtract test */
+	f = 2.0;
+	for(i = 1; i < 1000000; i++){
+		f /= 0.5;
+		f -= 2.0;
+	}
+	if (f != 2.0)
+		return 6;
+
+	/* add-multiply-subtract-divide test */
+	f = 1000000.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f + 1.5) * 0.5) - 1.25) / 0.5);
+	if (f != 1.0)
+		return 7;
+
+	/* multiply-add-divide-subtract test */
+	f = 1.0;
+	for(i = 1; i < 1000000; i++){
+		f = ((((f * 5.0) + 3.0) / 2.0) - 3.0);
+	}
+	if (f != 1.0)
+		return 8;
+
+	/* subtract-divide-add-multiply test */
+	f = 8.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f - 5.0) / 2.0) + 2.5) * 2.0);
+	if (f != 8.0)
+		return 9;
+
+	/* divide-subtract-multiply-add test */
+	f = 42.0;
+	for(i = 1; i < 1000000; i++)
+		f = ((((f / 6.0) - 5.0) * 19.75 ) + 2.5);
+	if (f != 42.0)
+		return 10;
+
+	return 0;
 }
