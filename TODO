@@ -5,24 +5,49 @@ doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a
 will unfold them again.
 
 For contribution guidelines and internals documentation, please see
-the hacking.html file in the www subdirectory or on the project website.
+<http://gpsd.berlios.de/hacking.html>.
 
 ** Bugs in gpsd and its clients:
 
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcher reported that it broke somewhere between rev 3654 and
-3722.  This should be fixed in the next point release.
+3722.  We think this is a shallow bug, but we can't fix it without
+test hardware.  If TNT support is a problem for you, and you can't
+fix the driver yourself and send us the patch, contact Bill Powell 
+<bpowell@tntc.com> at True North Technologies and tell him he needs
+to send us an eval unit.
 
-***  Mode-switcher code for Garmin binary GPSes is not tested
+*** Support for Garmin USB binary in serial mode is currently broken
 
-Gary Miller just rewrote the Garmin binary support in a different mode
-to work around a bug in the Linux 2.16 tty layer.  The new driver
-requires a tool to switch between binary and NMEA modes.  There is
-experimental untested code to do this via gpsctrl, but it could do
-anything including make bats fly out of your nose.  The new Garmin
-driver and gpsctrl should be much more solid in the next point
-release.
+We rewrote the Garmin USB binary support in a different mode to
+work around a bug in the Linux 2.16 tty layer.  Unfortunately the new
+driver has some kind of bad timing interaction with the kernel
+(probably due to another kernel bug) and only works at -D6 or up.
+
+The new driver also requires a tool to switch between binary and NMEA
+modes.  There is experimental untested code to do this via gpsctl, but
+it could do anything including make bats fly out of your nose.
+
+The new Garmin driver and gpsctl should be much more solid in the next
+point release.
+
+*** PPS support is temporarily broken.
+
+It got sideswiped during the architectural changes need to implement
+the new gpsctl tool.  We should have this fixed in the next release.
+
+*** Devices based on SirFStar I chips are not properly autodetected
+
+Devices based on the now-obsolete SiRfStar I chip, like the Axiom
+Sandpiper II OEM module, are not properly detected by gpsd's 
+autoprobe logic and remain in NMEA mode rather than being switched
+to SiRF binary.  
+
+The project lead has a Sandpiper to test with, and one of our
+contributors thinks he has a way to snoop on the way SiRFDemo (SiRF's
+official device control program) does this, so we should be able to
+solve this problem.
 
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
