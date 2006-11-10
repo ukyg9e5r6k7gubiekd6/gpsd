@@ -213,12 +213,12 @@ static int packet_test(struct map *mp)
     /*@ -compdef -uniondef -usedef @*/
     st = packet_parse(&state, mp->testlen);
     if (state.packet_type != mp->type)
-	printf("%2d: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, state.packet_type);
+	printf("%2zi: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, state.packet_type);
     else if (memcmp(mp->test + mp->garbage_offset, state.outbuffer, state.outbuflen)) {
-	printf("%2d: %s test FAILED (data garbled).\n", mp-tests+1, mp->legend);
+	printf("%2zi: %s test FAILED (data garbled).\n", mp-tests+1, mp->legend);
 	++failure;
     } else
-	printf("%2d: %s test succeeded.\n", mp-tests+1, mp->legend);
+	printf("%2zi: %s test succeeded.\n", mp-tests+1, mp->legend);
 #ifdef DUMPIT
     for (cp = state.outbuffer; 
 	 cp < state.outbuffer + state.outbuflen; 
