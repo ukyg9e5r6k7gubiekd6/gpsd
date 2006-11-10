@@ -79,7 +79,7 @@ struct gps_type_t {
     int channels;
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
-    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, int seq);
+    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
     /*@null@*/void (*configurator)(struct gps_device_t *session);
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);

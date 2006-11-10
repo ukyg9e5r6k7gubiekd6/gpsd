@@ -106,7 +106,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-static void nmea_probe_subtype(struct gps_device_t *session, int seq)
+static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /*
      * The reason for splitting these probes up by packet sequence
@@ -284,7 +284,7 @@ static struct gps_type_t fv18 = {
  *
  **************************************************************************/
 
-static void sirf_probe_subtype(struct gps_device_t *session, int seq)
+static void sirf_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
@@ -361,7 +361,7 @@ static struct gps_type_t sirf_nmea = {
  * and was replaced by the Zodiac EarthMate.
  */
 
-static void tripmate_probe_subtype(struct gps_device_t *session, int seq)
+static void tripmate_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     if (seq == 0)
@@ -417,7 +417,7 @@ static void earthmate_close(struct gps_device_t *session)
     /*@i@*/session->device_type = &earthmate;
 }
 
-static void earthmate_probe_subtype(struct gps_device_t *session, int seq)
+static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0) {
 	(void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);

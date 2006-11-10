@@ -727,7 +727,7 @@ static bool garmin_detect(struct gps_device_t *session)
     }
 
     ok = false;
-    while ( 0 != fgets( buf, sizeof(buf), fp ) ) {
+    while ( 0 != fgets( buf, (int)sizeof(buf), fp ) ) {
 	if ( strstr( buf, "garmin_gps") ) {
 		ok = true;
 		break;
@@ -773,7 +773,7 @@ static bool garmin_detect(struct gps_device_t *session)
     return true;
 }
 
-static void garmin_probe_subtype(struct gps_device_t *session, int seq)
+static void garmin_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0) {
         // Tell the device to send product data

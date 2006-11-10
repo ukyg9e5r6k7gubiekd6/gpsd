@@ -210,7 +210,7 @@ static int packet_test(struct map *mp)
     state.packet_state = 0;
     state.inbuflen = 0;
     /*@i@*/memcpy(state.inbufptr = state.inbuffer, mp->test, mp->testlen);
-    /*@ -compdef -uniondef -usedef @*/
+    /*@ -compdef -uniondef -usedef -formatcode @*/
     st = packet_parse(&state, mp->testlen);
     if (state.packet_type != mp->type)
 	printf("%2zi: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, state.packet_type);
@@ -236,7 +236,7 @@ static int packet_test(struct map *mp)
     }
     (void)putchar('\n');
 #endif /* DUMPIT */
-    /*@ +compdef +uniondef +usedef @*/
+    /*@ +compdef +uniondef +usedef +formatcode @*/
 
     return failure;
 }

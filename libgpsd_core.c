@@ -561,7 +561,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	if (session->device_type->probe_subtype != 0)
+	if (session->device_type->probe_subtype != NULL)
 	    session->device_type->probe_subtype(session, ++session->packet_counter);
     } else {
 	newlen = packet_get(session);

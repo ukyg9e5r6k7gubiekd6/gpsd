@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <ncurses.h>                                                         
 #include <signal.h>
@@ -101,6 +102,7 @@ static void update_probe(struct gps_data_t *gpsdata,
     misc_timer=time(NULL);
   }
 
+  assert(message != NULL);
   if(strncmp(message,"GPSD,I=",6)==0) {
     message+=7;
     (void)strlcpy(gps_type, message, 20);
@@ -109,7 +111,7 @@ static void update_probe(struct gps_data_t *gpsdata,
     /* We make some screen layout changes depending on what we find.
        Garmin binary does not give us satellite data, for example, so
        we won't display a satellite window if we detect that. */
-    if(strstr(message,"Garmin") && strstr(message,"binary")) {
+    if(strstr(message,"Garmin")!=NULL && strstr(message,"binary")!=NULL) {
       nosats_flag=1;
     }
 
@@ -198,7 +200,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   /* This is for the satellite status display.  Lifted almost
      verbatim from xgps.c.  Note that the satellite list may be
      truncated based on available screen size.  */
-  if (gpsdata->satellites && nosats_flag==0) {
+  if (gpsdata->satellites!=0 && nosats_flag==0) {
     for (i = 0; i < (bigger + 12); i++) {
       (void)wmove(satellites, i+2, 1);
       if (i < gpsdata->satellites) {
@@ -494,7 +496,7 @@ int main(int argc, char *argv[])
     /* Sleep for one second. */
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
-    select(0,NULL,NULL,NULL,&timeout);
+    (int)select(0,NULL,NULL,NULL,&timeout);
 
     /* Give up after ten seconds. */
     if(time(NULL)-status_timer >= 10) {
