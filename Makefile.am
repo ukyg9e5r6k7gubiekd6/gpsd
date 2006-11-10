@@ -234,6 +234,7 @@ EXTRA_DIST = \
 	TODO \
 	AUTHORS \
 	dgpsip-servers \
+	floattest.c \
 	gpsd.xml \
 	gps.xml \
 	libgpsd.xml \
@@ -262,7 +263,7 @@ EXTRA_DIST = \
 	striplog \
 	invert-bitfields.pl
 
-CLEANFILES = packet_names.h
+CLEANFILES = packet_names.h floattest *.core
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
