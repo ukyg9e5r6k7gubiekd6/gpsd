@@ -119,6 +119,7 @@ dnl Check for some auxiliary X libraries we'll need
 AC_CHECK_LIB(Xt, XtToolkitInitialize, XT_LIBS="-lXt",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XT_LIBS)
+AC_CHECK_HEADER([X11/Xaw/Label.h],, motif_includes="no")
 AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XAW_LIBS)
@@ -148,7 +149,8 @@ AC_CHECK_LIB(Xm, XmInternAtom,
 fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
-AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != ""])
+AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != "" && test "$motif_includes" !
+= "no"])
 ac_x="yes"
 else
 dnl X11 disabled
