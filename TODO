@@ -23,7 +23,9 @@ to send us an eval unit.
 We rewrote the Garmin USB binary support in a different mode to
 work around a bug in the Linux 2.16 tty layer.  Unfortunately the new
 driver has some kind of bad timing interaction with the kernel
-(probably due to another kernel bug) and only works at -D6 or up.
+(probably due to another kernel bug) and only works reliably at -D6 or
+up.  Some users report no problems at all. If this were a hard error
+it would be easier to fix.
 
 The new driver also requires a tool to switch between binary and NMEA
 modes.  There is experimental untested code to do this via gpsctl, but
