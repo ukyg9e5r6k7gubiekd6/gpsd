@@ -27,25 +27,30 @@
  *     (use whatever -O level you like)
  */
 
-int main( void );
-
-int main(){
+int main(void) {
 	float  a, b, c, d, e, f, g;
 	double A, B, C, D, E, F, G;
-
-	printf("Floating Point test - the next 3 lines should be the same\n");
-	printf("3.00 5.00 7.00 11.00 12.00 132.00 38.00\n");
+	const char *reference = "3.00 5.00 7.00 11.00 12.00 132.00 38.00";
+	char try1[64], try2[64]; 
 
 	a = 3.0; b = 5.0 ; c = 7.0; d = 11.0;
 	g = a + b * c; /* multiply and add */
 	e = b + c; /* add */
 	f = d * e; /* multiply */
-	printf("%.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", a, b, c, d, e, f, g);
+	sprintf(try1, 
+		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", a, b, c, d, e, f, g);
 
 	A = 3.0; B = 5.0 ; C = 7.0; D = 11.0;
 	G = A + B * C; /* multiply and add */
 	E = B + C; /* add */
 	F = D * E; /* multiply */
-	printf("%.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", A, B, C, D, E, F, G);
-	return 0;
+	sprintf(try2, 
+		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", A, B, C, D, E, F, G);
+
+	puts("Floating Point test - the next 3 lines should be the same");
+	puts(reference);
+	puts(try1);
+	puts(try2);
+
+	return strcmp(try1, reference) || strcmp(try2, reference);
 }
