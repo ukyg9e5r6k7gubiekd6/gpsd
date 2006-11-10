@@ -1,7 +1,7 @@
 /* Originally cribbed from http://bluerobot.com/web/layouts/layout1.html
  * However, people who merge the hotlink colors are evil and should be killed, 
  * so I removed that.  Fixing font sizes in pixels is evil, too; is much as 
- * possible I has move all dimensions to be relative to the associated font 
+ * possible I have moved all dimensions to be relative to the associated font 
  * size. Finally, light grey is a great background color, but lousy for
  * foreground text on white.
  */

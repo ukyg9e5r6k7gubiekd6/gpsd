@@ -162,6 +162,7 @@ bits_test_LDADD = $(LIBC) libgps.la
 packet_test_SOURCES = packet_test.c
 packet_test_LDADD = $(LIBC) libgps.la -lm
 
+if HAVE_XSLT_PROCESSOR
 #
 # Create Manpages
 #
@@ -183,8 +184,6 @@ man_MANS = \
 	gpsflash.1 \
 	rtcm-104.5 \
 	srec.5
-
-if HAVE_XSLT_PROCESSOR
 
 .xml.1:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
