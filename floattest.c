@@ -37,14 +37,14 @@ int main(void) {
 	g = a + b * c; /* multiply and add */
 	e = b + c; /* add */
 	f = d * e; /* multiply */
-	sprintf(try1, 
+	snprintf(try1, 64,
 		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", a, b, c, d, e, f, g);
 
 	A = 3.0; B = 5.0 ; C = 7.0; D = 11.0;
 	G = A + B * C; /* multiply and add */
 	E = B + C; /* add */
 	F = D * E; /* multiply */
-	sprintf(try2, 
+	snprintf(try2, 64,
 		"%.2f %.2f %.2f %.2f %.2f %.2f %.2f", A, B, C, D, E, F, G);
 
 	puts("Floating Point test - the next 3 lines should be the same");
