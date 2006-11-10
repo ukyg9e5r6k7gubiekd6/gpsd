@@ -583,8 +583,8 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     if (user->watcher && was_unassigned) {
-	char buf[BUFSIZ];
-	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s", 
+	char buf[NMEA_MAX];
+	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n", 
 		       timestamp(), gpsd_id(user->device));
 	(void)write(user->fd, buf, strlen(buf));
     }
