@@ -139,7 +139,7 @@ Receiver Macro-Component (offsite link)</a> (version E1, April 2003)</dt>
 aspects of the protocol that SiRF has removed from current versions of the
 protocol documentation.</dd>
 
-<dt><a href='vendor-docs/uBlox.pdf'>u-blox extension to SiRF binary protocol</a></dt>
+<dt><a href='vendor-docs/uBlox.pdf'>u-blox extension to SiRF binary protocol</a> (March 2002)</dt>
 <dd>uBlox was an OEM-enhanced firmware variant of the SiRF-1 chip.
 <code>gpsd</code> supports it.  It's been rendered obsolete by the SiRF 2
 and 3 chips.</dd>
@@ -195,8 +195,12 @@ Module User's Guide</a> (Issue D, August 2003)</dt>
 <dd>Describes the binary protocol emitted
 by EverMore GM-X205 GPS chipset. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href='vendor-docs/Lassen_iQ_Reference_Manual.pdf'>LassenTM iQ GPS Receiver System Designer Reference Manual</a> (Revision A, February 2005)</dt>
+<dt><a href="vendor-docs/tsip-reference.pdf">TSIP reference<a> (Revision C, 1999)<dt>
 <dd>Describes the TSIP binary protocol. Supported by <code>gpsd</code>.</dd>
+
+<dt><a href='vendor-docs/Lassen_iQ_Reference_Manual.pdf'>LassenTM iQ GPS Receiver System Designer Reference Manual</a> (Revision A, February 2005)</dt>
+<dd>A representative modern product based on the TSIP protocol. Supported 
+by <code>gpsd</code>.</dd>
 
 <dt><a href='vendor-docs/jupiter/'>NavMan Jupiter</a> (2005)</dt>
 <dd>Jupiters emit a variant of the obsolete Zodiac binary protocol.
@@ -207,14 +211,21 @@ to test with one of these yet.</dd>
 <dd>Reference for the Hemisphere GPS from CSI Wireless.  Has both an NMEA mode 
 and a binary protocol. We have not been able to test with one of these, but the
 manual suggests <code>gpsd</code> should handle the NMEA mode just fine.</dd>
+
+<dt><a href='vendor-docs/thales-reference.pdf'>Thales A12/B12/C12 Reference Manual</a> (Revision D, 2005)</dt>
+<dd>Reference for a line of Thales GPS modules appearently designed
+for embedded vehicle and cargo tracking.  Uses a very extended dialect
+of NMEA they call the <quote>standard Ashtech command set</quote>.  We
+have not been able to test with one of these, but the manual suggests
+<code>gpsd</code> should handle the NMEA mode just fine.</dd>
 </dl>
 
 <h2>Obsolete products</h2>
 
 <dl>
 <dt><a href='vendor-docs/zodiac.pdf'>Zodiac Serial Data Interface Specification</a> (Revision 11, September 1996)</dt>
-<dd>Describes the binary protocol used by Rockwell Zodiac chipsets.
-Supported by <code>gpsd</code>.  Now obsolete.</dd>
+<dd>Describes the binary protocol used by Rockwell/Conexant Zodiac chipsets.
+Supported by <code>gpsd</code>.  Now obsolete; SiRF ate their lunch.</dd>
 
 <dt><a href='vendor-docs/axiom/'>Axiom Sandpiper II Documentation</a> (August 2000)</dt> 
 
@@ -236,7 +247,8 @@ only.</dd>
 href='vendor-docs/Missile-Applications-Condensed-Measurements.pdf'>Missile
 Applications Condensed Measurements</a></dt> <dd>An application note
 on a GPS protocol extension designed for real-time telemetry from
-ballistic missiles in flight.</dd>
+ballistic missiles in flight. The complete spec is 
+<a href="http://www.jcte.jcs.mil/RCC/manuals/264-04/264_04.pdf">here</a>.</dd>
 </dl>
 
 <h1>Other</h1>
