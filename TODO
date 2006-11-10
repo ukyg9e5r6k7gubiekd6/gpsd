@@ -133,13 +133,6 @@ Fixing this is not urgent, as the old-style support will likely
 be retained for compatibility for a long time, but it should
 get done someday.
 
-*** Integrate floattest into the configure sequence
-
-People building from source for embedded platforms should be warned
-automatically at autogen.sh time if the floating-point support in
-their toolchain is broken in ways that are likely to cause gpsd
-problems.
-
 *** Merge cgps and xgps
 
 Possibly cgps and xgps should merge into a single test client that honors the

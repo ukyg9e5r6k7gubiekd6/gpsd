@@ -26,6 +26,9 @@ AC_FUNC_ALLOCA
 AC_STDC_HEADERS
 AC_C_CONST
 
+eval "$CC $CFLAGS -o floattest floattest.c"
+./floattest
+
 if eval "test x$GCC = xyes"; then
 	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE"
 	dnl -Wcast-qual -W

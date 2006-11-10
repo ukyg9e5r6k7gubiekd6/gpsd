@@ -35,15 +35,18 @@ int main(){
 	int i;
 
 	if ((i = test_single())){
-		printf("single precision test #%d failed\n", i);
+		printf("WARNING: Single-precision "
+			"floating point math might be broken (test %d)\n", i);
 		return i;
 	}
 
 	if ((i = test_double())){
-		printf("double precision test #%d failed\n", i);
+		printf("WARNING: Double-precision "
+			"floating point math might be broken (test %d)\n", i);
 		return i;
 	}
 
+	printf("floating point math appears to work\n");
 	return 0;
 }
 
