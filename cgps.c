@@ -55,7 +55,6 @@ static int silent_flag=0;
 static int fixclear_flag=0;
 static int bigger;
 
-static int nosats_flag=0;
 static int compass_flag=0;
 static int got_gps_type=0;
 static char gps_type[20];
@@ -107,14 +106,6 @@ static void update_probe(struct gps_data_t *gpsdata,
     message+=7;
     (void)strlcpy(gps_type, message, 20);
     got_gps_type=1;
-
-    /* We make some screen layout changes depending on what we find.
-       Garmin binary does not give us satellite data, for example, so
-       we won't display a satellite window if we detect that. */
-    if(strstr(message,"Garmin")!=NULL && strstr(message,"binary")!=NULL) {
-      nosats_flag=1;
-    }
-
     /* If we're hooked to a compass, we display an entirely different
        screen and label the data much differently. */
     if(strstr(message,"True North")) {
@@ -200,7 +191,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   /* This is for the satellite status display.  Lifted almost
      verbatim from xgps.c.  Note that the satellite list may be
      truncated based on available screen size.  */
-  if (gpsdata->satellites!=0 && nosats_flag==0) {
+  if (gpsdata->satellites!=0) {
     for (i = 0; i < (bigger + 12); i++) {
       (void)wmove(satellites, i+2, 1);
       if (i < gpsdata->satellites) {
@@ -336,8 +327,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
   (void)wrefresh(datawin);
   (void)wrefresh(status);
-  if(nosats_flag==0)
-    (void)wrefresh(satellites);
+  (void)wrefresh(satellites);
   (void)wrefresh(messages);
   (void)wrefresh(command);
 }
@@ -590,30 +580,17 @@ int main(int argc, char *argv[])
     
     /*@ -onlytrans @*/
     datawin    = newwin(15+bigger, 45, 1, 0);
-    if(nosats_flag==0) 
-      satellites = newwin(15+bigger, 35, 1, 45);
-    if(nosats_flag==1) {
-      /* Stack them vertically. */
-      command    = newwin(3, 45, 19+bigger, 0);
-      status     = newwin(3, 45, 16+bigger, 0);
-      messages   = newwin(0, 0, 22+bigger, 0);
-    } else {
-      /* Do it normally. */
-      command    = newwin(3, 45, 16+bigger, 0);
-      status     = newwin(3, 35, 16+bigger, 45);
-      messages   = newwin(0, 0, 19+bigger, 0);
-    }
+    satellites = newwin(15+bigger, 35, 1, 45);
+    command    = newwin(3, 45, 16+bigger, 0);
+    status     = newwin(3, 35, 16+bigger, 45);
+    messages   = newwin(0, 0, 19+bigger, 0);
 
     /*@ +onlytrans @*/
     (void)scrollok(messages, true);
     (void)wsetscrreg(messages, 0, LINES-13);
     (void)nodelay(messages,(bool)TRUE);
     
-    if(nosats_flag==1) {
-      (void)mvprintw(0, 15, "CGPS Test Client");
-    } else {
-      (void)mvprintw(0, 31, "CGPS Test Client");
-    }
+    (void)mvprintw(0, 31, "CGPS Test Client");
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
@@ -633,10 +610,8 @@ int main(int argc, char *argv[])
     (void)mvwprintw(datawin, 12,5, "Speed Err:");
     (void)mvwprintw(status, 1,1, "Status:");
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
-    if(nosats_flag==0) {
-      (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
-      (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
-    }
+    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
+    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(command, 1,1, "Command:  ");
     (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)wborder(status, 0, 0, 0, 0, 0, 0, 0, 0);
