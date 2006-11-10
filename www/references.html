@@ -150,7 +150,12 @@ and 3 chips.</dd>
 <dl>
 <dt><a
 href='http://www.garmin.com/manuals/470_GPS16_17TechnicalSpecification.pdf'>
-GPS 16/17 Series Technical Specification (offsite link)</a> (Revision C, October 2005)</dt> 
+GPS 16/17 Series Technical Specification (offsite link)</a> (Revision C, October 2005)</dt>
+<dd>Describes the extended NMEA, with GARMIN proprietary sentences PGRMB, PGRME, PGRMF, PGRMM, PGRMT, and PGRMV (and optional GPALM sentence), emitted by the 
+Garmin GPS16 and 17. For programming purposes, effectively identical to their
+earlier reference on the Garmin 15H and 15L.</dd>
+
+ <dt><a href="vendor-docs/garmin-binary.pdf">December 1999</a></dt>
 <dd>The binary protocol used by Garmin USB GPSes. Supported by <code>gpsd</code>.</dd>
 
 <dt><a href='vendor-docs/garmin_simpletext.txt'>Garmin Simple Text Protocol</a></dt>
@@ -165,8 +170,8 @@ report format.  Not yet supported by <code>gpsd</code>.</dd>
 <dd>Describes the extension command set supported by the Sony GPS
 CXD2951 chipset. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href='vendor-docs/fastrax.pdf'>NMEA Protocol Specification for iTrax02
-Evaluation Kit</a> (2003)</dt> 
+<dt><a href='vendor-docs/fastrax-1.31.pdf'>NMEA Protocol Specification for iTrax02
+Evaluation Kit</a> (Rev 1.31, June 2003)</dt> 
 <dd>Describes the NMEA extensions for the
 iTrax chipset used by Fastrax GPSes. Supported by <code>gpsd</code>.</dd>
 
@@ -197,6 +202,11 @@ by EverMore GM-X205 GPS chipset. Supported by <code>gpsd</code>.</dd>
 <dd>Jupiters emit a variant of the obsolete Zodiac binary protocol.
 Probably supported by <code>gpsd</code>, though we have not been able
 to test with one of these yet.</dd>
+
+<dt><a href='vendor-docs/crescent-sdx-3.pdf'>Crescent Integrator's Manual</a> (November 2005)</dt>
+<dd>Reference for the Hemisphere GPS from CSI Wireless.  Has both an NMEA mode 
+and a binary protocol. We have not been able to test with one of these, but the
+manual suggests <code>gpsd</code> should handle the NMEA mode just fine.</dd>
 </dl>
 
 <h2>Obsolete products</h2>
@@ -217,6 +227,16 @@ documents</a> (Revision 3.2, June 1998)</dt>
 <dd>Describes Motorola's (apparently discontinued)
 OnCore GPS product. Supported by <code>gpsd</code> in NMEA mode
 only.</dd>
+</dl>
+
+<h2>Curiosities</h2>
+
+<dl>
+<dt><a
+href='vendor-docs/Missile-Applications-Condensed-Measurements.pdf'>Missile
+Applications Condensed Measurements</a></dt> <dd>An application note
+on a GPS protocol extension designed for real-time telemetry from
+ballistic missiles in flight.</dd>
 </dl>
 
 <h1>Other</h1>
