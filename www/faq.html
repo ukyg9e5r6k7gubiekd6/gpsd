@@ -55,6 +55,11 @@ bug.  You may find a solution here.</p>
 
 <h3>2. Make sure it's not a problem with your toolchain</h3>
 
+<p>This one applies mainly to people running on embedded systems
+rather than generic PCs or laptops.  If you are using a stock Linux or
+*BSD over an Intel or AMD processor you can safely ignore the following
+technicalia.</p>
+
 <p>Because of the heavy use of floating point numbers, <code>gpsd</code> is
 quite sensitive to toolchain errors or "compiler bugs". A number of trouble
 reports have been received indicating erroneous results on embedded platforms,
@@ -242,9 +247,12 @@ exact change in question.</p></li>
 
 <h3>12. Include the vendor, mode, and firmware version in your report.</h3>
 
-<p>Always include with your bug report the GPS vendor and model.  If
-your GPS is SiRF-based, include the firmware version as well.  You can
-find out what that is by running at the daemon at -D 4.</p>
+<p>Always include with your bug report the GPS vendor and model.  Try
+to include the firmware version as well.  This should be in your xgps
+display if your GPS device makes it available; if the ID string is too
+long to fit in that window, let the daemon run for a few minutes and
+issue an "I" command to it.  Alternatively, running the daemon at -D
+4 may reveal the version.</p>
 </blockquote>
 
 <h1>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
@@ -286,7 +294,7 @@ yet, the libgps client library.</p>
 on static navigation mode using the 'c' command in sirfmon. Static navigation
 mode will freeze your position if your speed is below 1.2 m/s for three
 seconds, and will begin updating your position again when speed exceeds 1.4
-m/s. This prevents multipath, weak signals, poor constellation geometry from
+m/s. This prevents multipath, weak signals, or poor constellation geometry from
 dragging your solutions around too much. Other receivers may suffer the same
 problem and may have a similar solution.</p>
 
@@ -412,6 +420,12 @@ be stalled by a wedged client.</li>
 <li>The code in the new version has been carefully audited for quality,
 static-checked using <a href='http://www.splint.org'>splint</a>, and
 is regression-tested before every release.</li>
+
+<li>It took us two years of hard work, but as of late 2006
+<code>gpsd</code> dominates its application niche so completely that
+every competitor we knew of in 2004 has been abandoned by its own
+maintainers in our favor.  The 1.x versions or any fork you use won't
+be getting any future maintenance.</li>
 </ol>
 
 <h1 id='why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</h1>
