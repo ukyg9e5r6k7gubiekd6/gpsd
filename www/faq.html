@@ -53,7 +53,19 @@ help us resolve the bug as quickly as possible.</p>
 <p>First, read this whole FAQ before reporting apparent misbehavior as a
 bug.  You may find a solution here.</p>
 
-<h3>2. Make sure it's not a problem in your client software</h3>
+<h3>2. Make sure it's not a problem with your toolchain</h3>
+
+<p>Because of the heavy use of floating point numbers, <code>gpsd</code> is
+quite sensitive to toolchain errors or "compiler bugs". A number of trouble
+reports have been received indicating erroneous results on embedded platforms,
+most notably ARM systems. These have all been traced back to the toolchain;
+when appropriate corrective action was taken, <code>gpsd</code> functioned
+correctly. Source code for a simple test program (<code>floattest.c</code>)
+is in the Subversion repository; if <code>gpsd</code> seems to be producing
+incorrect output, please use this tool to validate your toolchain before
+filing a bug report.</p>
+
+<h3>3. Make sure it's not a problem in your client software</h3>
 
 <p>Make sure it is a real gpsd bug and not a problem with
 your client software.  A good way to do this is to run your client and
@@ -62,7 +74,7 @@ good numbers but your client does not, you have a client problem.
 If xgps reports the same sort of bad numbers as your client, you
 have a real <code>gpsd</code> bug.</p>
 
-<h3>3. Check the latest version of <code>gpsd</code> for the bug.</h3>
+<h3>4. Check the latest version of <code>gpsd</code> for the bug.</h3>
 
 <p>If you are using an old version of <code>gpsd</code>, it is
 possible your bug has already been fixed.  Download the latest public
@@ -73,7 +85,7 @@ href='http://developer.berlios.de/svn/?group_id=2116'>Subversion
 head</a> and test that.  We don't mind getting bug reports that say 
 "I saw version foo had the following bug, but you've fixed it."</p>
 
-<h3>4. Capture a log that triggers the problem</h3>
+<h3>5. Capture a log that triggers the problem</h3>
 
 <p>If we can reproduce your gpsd problem, we can usually fix it very
 rapidly.  If we can't reproduce it, you might get lucky or you might
@@ -86,7 +98,7 @@ a GPS that emits NMEA, telnetting to port 2947 and enabling raw
 mode will do the trick.  For non-SiRF binary protocols, you will
 have to cat direct from the serial device into a file.</p>
 
-<h3>5. Trim the capture log that reproduces the problem</h3>
+<h3>6. Trim the capture log that reproduces the problem</h3>
 
 <p>Your next step should be to feed the log you just captured to a
 <code>gpsd</code> instance through <code>gpsfake</code> to verify that
@@ -102,7 +114,7 @@ it any smaller.  Then send us that.</p>
 <p>If possible, use the -l option of gpsfake to pin down the sentence
 or packet that produces the bug, and tell us that.</p>
 
-<h3>6. Look at <code>gpsd</code> log output to see if it gives you a clue</h3>
+<h3>7. Look at <code>gpsd</code> log output to see if it gives you a clue</h3>
 
 <p>You may get a better handle on your problem by running gpsd in
 foreground (-N option) with the -D option set to a high level (-D 4 is
@@ -113,7 +125,7 @@ whether it holds a clue, send it.</p>
 <p>One of the things this should tell you, if the chip reports it at
 all, is the firmware version.  You will want that for your report.</p>
 
-<h3 id="logformat">7. Annotate the capture log and send us a copy</h3>
+<h3 id="logformat">8. Annotate the capture log and send us a copy</h3>
 
 <p>A logfile should consist of an identifying header followed by a
 straight unencoded dump of GPS data, whether NMEA or binary. The
@@ -163,13 +175,13 @@ additional # comments (not containing a colon) after these headers.
 The test machinery that interprets the headers will ignore these and
 any empty comment lines.</p>
 
-<h3>8. If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h3>
+<h3>9. If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h3>
 
 <p>If you're using a SiRF, Evermore, or iTalk GPS in binary mode
 (which you can tell from the -D 4 output), switch back to NMEA mode
 using the N command and see if the bug still reproduces.</p>
 
-<h3>9. If your bug core-dumps gpsd, send us a stack trace.</h3>
+<h3>10. If your bug core-dumps gpsd, send us a stack trace.</h3>
 
 <p>Though it happens seldom (and we haven't had such a report since
 about mid-2005), badly-formed NMEA from a device with poor standards
@@ -177,7 +189,7 @@ compliance has been known to core-dump gpsd.  If your gpsd has
 core-dumped, try to use gdb or whatever your local symbolic debugger
 is to generate a stack trace of the crash, and send us that.</p>
 
-<h3>10. Try to determine what release introduced the bug</h3>
+<h3>11. Try to determine what release introduced the bug</h3>
 
 <p>If you have upgraded from a previous version of <code>gpsd</code>,
 and the upgrade broke something that was working previously, the
@@ -228,7 +240,7 @@ revisions in the span you should only require 9 tests to nail down the
 exact change in question.</p></li>
 </ol>
 
-<h3>11. Include the vendor, mode, and firmware version in your report.</h3>
+<h3>12. Include the vendor, mode, and firmware version in your report.</h3>
 
 <p>Always include with your bug report the GPS vendor and model.  If
 your GPS is SiRF-based, include the firmware version as well.  You can
