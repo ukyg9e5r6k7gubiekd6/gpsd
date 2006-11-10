@@ -23,11 +23,11 @@
  * Hard To Do(tm) on embedded systems, judging by the number of broken
  * ARM toolchains I've seen... :(
  *
- * compile with: gcc -o -O floattest floattest.c
+ * compile with: gcc -O -o floattest floattest.c
  *     (use whatever -O level you like)
  */
 
-int main();
+int main( void );
 
 int main(){
 	float  a, b, c, d, e, f, g;
