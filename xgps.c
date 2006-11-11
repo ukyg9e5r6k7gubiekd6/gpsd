@@ -60,7 +60,7 @@ struct unit_t {
     double factor;
 };
 static struct unit_t speedtable[] = {
-    {"knots",		1/KNOTS_TO_KPH},
+    {"knots",		MPS_TO_KNOTS},
     {"mph",		MPS_TO_MPH},
     {"kph",		MPS_TO_KPH},
 }, *speedunits = speedtable;
