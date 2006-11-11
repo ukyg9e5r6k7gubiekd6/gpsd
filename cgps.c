@@ -57,7 +57,7 @@ static int bigger;
 
 static int compass_flag=0;
 static int got_gps_type=0;
-static char gps_type[20];
+static char gps_type[26];
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
@@ -104,7 +104,7 @@ static void update_probe(struct gps_data_t *gpsdata,
   assert(message != NULL);
   if(strncmp(message,"GPSD,I=",6)==0) {
     message+=7;
-    (void)strlcpy(gps_type, message, 20);
+    (void)strlcpy(gps_type, message, sizeof(gps_type));
     got_gps_type=1;
     /* If we're hooked to a compass, we display an entirely different
        screen and label the data much differently. */
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
 
     /* Give up after ten seconds. */
     if(time(NULL)-status_timer >= 10) {
-      (void)strlcpy(gps_type, "unknown", 20);
+      (void)strlcpy(gps_type, "unknown", sizeof(gps_type));
       got_gps_type=1;
     }
   }
