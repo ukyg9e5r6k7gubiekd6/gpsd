@@ -55,7 +55,7 @@ lot of work and research on your own.</para>
 <para>I found that the device I wanted to use (a Navman Jupiter-T) was
 not supported in its default operation mode. The device actually
 provides two other supported modes, NMEA (exceptional support) and
-Rockwell/Conextant/Navman binary (supported by the Earthmate driver
+Rockwell/Conexant/Navman binary (supported by the Earthmate driver
 <filename>zodiac.c</filename>), I could have possibly avoided
 writing a driver by switching to one of these modes, but there was an
 overwhelming reason to use the unsupported default mode.</para>
@@ -111,7 +111,7 @@ external computing device and provide raw navigation and time data,
 but the interfaces and control language were superbly specified in a
 well written technical document of about 200 pages. In actual fact the
 document I used most was the Motorola documentation for the default
-Oncore mode, but the NMEA and Rockwell/Conextant/Navman modes were
+Oncore mode, but the NMEA and Rockwell/Conexant/Navman modes were
 equally well documented in the Navman manuals.</para>
 
 <para>You will also need to set aside some time
