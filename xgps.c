@@ -471,7 +471,7 @@ altunits_ok:;
 		/*@ -casebreak @*/
 	    }
 	case 'h': default:
-	    (void)fputs("usage:  xgps [-hV] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [-s smoothing] [server[:port:[device]]]\n", stderr);
+	    (void)fputs("usage:  xgps [-hjV] [-speedunits {mph,kph,knots}] [-altunits {ft,meters}] [-l {d|m|s}] [server[:port:[device]]]\n", stderr);
 	    exit(1);
 	}
     }
