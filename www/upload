@@ -2,41 +2,20 @@
 #
 # Upload gpsd docs
 #
-webdir=esr@shell.berlios.de:/home/groups/gpsd/htdocs
+webdir=shell.berlios.de:/home/groups/gpsd/htdocs
+
+make html	# Ensure all derived HTML is up to date.
 
 if [ $1 ]
 then
     scp $* $webdir
 else
-    makeversion=`sed <../Makefile -n -e '/^VERSION *= *\(.*\)/s//\1/p'`
-
-    version=${1:-$makeversion}
-    echo "Uploading version $version of gpsd web documents"
-
-    sed -e "/@VERSION@/s//${version}/" -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
-
-    xmlto xhtml-nochunks ../gpsd.xml
-    xmlto xhtml-nochunks ../gps.xml
-    xmlto xhtml-nochunks ../libgps.xml
-    xmlto xhtml-nochunks ../libgpsmm.xml
-    xmlto xhtml-nochunks ../libgpsd.xml
-    xmlto xhtml-nochunks ../gpsprof.xml
-    xmlto xhtml-nochunks ../gpsfake.xml
-    xmlto xhtml-nochunks ../gpsctl.xml
-    xmlto xhtml-nochunks ../sirfmon.xml
-    xmlto xhtml-nochunks ../rtcmdecode.xml
-    xmlto xhtml-nochunks ../gpspipe.xml
-    xmlto xhtml-nochunks ../gpsflash.xml
-    xmlto xhtml-nochunks ../rtcm-104.xml
-    xmlto xhtml-nochunks ../srec.xml
-    xmlto xhtml-nochunks replacing-nmea.xml
-    xmlto xhtml-nochunks writing-a-driver.xml
+    make html
     (cd performance; xmlto xhtml-nochunks performance.xml)
-    scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt *.ebuild \
+    scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt \
 	performance/{*.html,*.txt,*.png} \
 	$webdir
-    scp axiom/{*.html,*.css,*.pdf,*.jpg,*.doc} $webdir/axiom
-    scp vendor-docs/{*.html,*.pdf,*.jpg,*.doc,*.txt} $webdir/vendor-docs
-    scp -r vendor-docs/motorola $webdir/vendor-docs
-    scp -r vendor-docs/jupiter $webdir/vendor-docs
 fi
+
+# To refresh the vendor-docs directory just do this:
+# scp vendor-docs $webdir/vendor-docs

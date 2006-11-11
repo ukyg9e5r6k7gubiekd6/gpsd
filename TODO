@@ -41,7 +41,7 @@ the new gpsctl tool.  We should have this fixed in the next release.
 
 *** Devices based on SirFStar I chips are not properly autodetected
 
-Devices based on the now-obsolete SiRfStar I chip, like the Axiom
+Devices based on the now-obsolete SiRFStar I chip, like the Axiom
 Sandpiper II OEM module, are not properly detected by gpsd's 
 autoprobe logic and remain in NMEA mode rather than being switched
 to SiRF binary.  
@@ -119,6 +119,10 @@ being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
 binutils 2.16.1 or later avoids it.
 
 ** To do:
+
+*** Put the php client in the repo with installation documentation.
+
+Chris Kuethe plans to do this.
 
 *** New features for xgps.
 

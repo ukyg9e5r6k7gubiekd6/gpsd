@@ -91,7 +91,8 @@ before each release.</p>
 
 <p>No, we don't support Windows &mdash; get a better operating system.
 Our main focus is open-source Unixes &mdash; Linux, and the *BSD
-family.  We'll support proprietary Unixes and hybrids like Mac OS X if
+family.  Presently Linux and OpenBSD are directly supported.
+We'll support proprietary Unixes and hybrids like Mac OS X if
 it's not too much work (and it usually isn't).</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your 
@@ -106,10 +107,9 @@ bugs.</p>
 
 <h1 id='news'>News</h1>
 
-<p>The most recent release was @VERSION@. 
-This web page was last updated on @DATE@.
-You can browse the project's <a href='CHANGES'>change log</a>
-or <a href='TODO'>to-do list</a> here.</p>
+<p>This web page was last updated on @DATE@.  You can browse the
+project's <a href='CHANGES'>change log</a> or <a href='TODO'>to-do
+list</a> here.</p>
 
 <h1 id='downloads'>Downloads</h1>
 
@@ -214,6 +214,17 @@ want to contribute code.</p>
 <p>We maintain a <a href="hall-of-shame.html">GPS Hall of Shame</a>
 that describes particularly egregious vendor blunders.</p>
 
+<h1 id='realtime'>Real Time</h1>
+
+<p>Some of the developers hang out regularly on IRC at <a
+href="irc://irc.freenode.net#gpsd">channel #gpsd at irc.freenode.net</a>.</p>
+
+<p>Some GPSD data streams that you can look at are <a
+href="http://gpsd.rellim.com">http://gpsd.rellim.com</a>, <a
+href="http://gpsd.gritch.org">http://gpsd.mainframe.cx</a>.  You can
+also point our test clients at these hostnames to see what the clients
+do, even if you don't yet have a local GPS.</p>
+
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
@@ -239,8 +250,7 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 <p><code>gpsd</code> also works with <a href="bt.html">bluetooth
 GPS</a> receivers.</p>
 
-<p>We supply a Gentoo Linux <a href="gpsd.ebuild">ebuild
-script</a>.</p>
+<p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
 
 <p>You can find Debian-stable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
