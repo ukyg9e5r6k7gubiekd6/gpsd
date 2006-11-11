@@ -110,7 +110,7 @@ altitude units for display; follow the keyword with 'meters' or
 resource 'altunits'.</para>
 
 <para>The <option>-j</option> option tells the daemon to hold fix
-data across cycles, eliminating jitter from NMEA sevices that emit
+data across cycles, eliminating jitter from NMEA devices that emit
 several partial reports (see the <option>-s</option> for a client-side
 way to do something similar).</para>
 
@@ -152,7 +152,7 @@ from printing the raw data. This display can also be toggled with the s
 command.</para>
 
 <para>The <option>-j</option> option tells the daemon not to clear
-data at start of cycle, eliminating jitter from NMEA sevices that emit
+data at start of cycle, eliminating jitter from NMEA devices that emit
 several partial reports per cycle.</para>
 
 <para>Rather than use X resources to determine which units to use, 
