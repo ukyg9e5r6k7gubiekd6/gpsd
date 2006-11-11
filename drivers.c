@@ -500,7 +500,7 @@ static int literal_send(int fd, const char *fmt, ... )
     }
 }
 
-static void itrax_probe_subtype(struct gps_device_t *session, int seq)
+static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
 /* start it reporting */
 {
     if (seq == 0) {
@@ -678,7 +678,7 @@ static int tnt_packet_sniff(struct gps_device_t *session)
     return BAD_PACKET;
 }
 
-static void tnt_probe_subtype(struct gps_device_t *session)
+static void tnt_probe_subtype(struct gps_device_t *session, unsigned int seq UNUSED)
 {
   // Send codes to start the flow of data
   //tnt_send(session->gpsdata.gps_fd, "@BA?"); // Query current rate
