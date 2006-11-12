@@ -22,6 +22,69 @@
   Kind of a curses version of xgps for use with gpsd.
 */
 
+/* ==================================================================
+   These #defines should be modified if changing the number of fields
+   to be displayed.
+   ================================================================== */
+
+/* This defines how much overhead is contained in the 'datawin' window
+   (eg, box around the window takes two lines). */
+#define DATAWIN_OVERHEAD 2
+
+/* This defines how much overhead is contained in the 'satellites'
+   window (eg, box around the window takes two lines, plus the column
+   headers take another line). */
+#define SATWIN_OVERHEAD 3
+
+/* This is how many display fields are output in the 'datawin' window
+   when in GPS mode.  Change this value if you add or remove fields
+   from the 'datawin' window for the GPS mode. */
+#define DATAWIN_GPS_FIELDS 9
+
+/* This is how many display fields are output in the 'datawin' window
+   when in COMPASS mode.  Change this value if you add or remove fields
+   from the 'datawin' window for the COMPASS mode. */
+#define DATAWIN_COMPASS_FIELDS 6
+
+/* This is how far over in the 'datawin' window to indent the field
+   descriptions. */
+#define DATAWIN_DESC_OFFSET 5
+
+/* This is how far over in the 'datawin' window to indent the field
+   values. */
+#define DATAWIN_VALUE_OFFSET 17
+
+/* This is the width of the 'datawin' window.  It's recommended to
+   keep DATAWIN_WIDTH + SATELLITES_WIDTH <= 80 so it'll fit on a
+   "standard" 80x24 screen. */
+#define DATAWIN_WIDTH 45
+
+/* This is the width of the 'satellites' window.  It's recommended to
+   keep DATAWIN_WIDTH + SATELLITES_WIDTH <= 80 so it'll fit on a
+   "standard" 80x24 screen. */
+#define SATELLITES_WIDTH 35
+
+/* This is the title to put at the top of the screen. */
+#define TITLE "GPSD Test Client"
+
+/* ================================================================
+   You shouldn't have to modify any #define values below this line.
+   ================================================================ */
+
+/* This is the minimum size we'll accept for the 'datawin' window in
+   GPS mode. */
+#define MIN_GPS_DATAWIN_SIZE (DATAWIN_GPS_FIELDS + DATAWIN_OVERHEAD)
+
+/* This is the minimum size we'll accept for the 'datawin' window in
+   COMPASS mode. */
+#define MIN_COMPASS_DATAWIN_SIZE (DATAWIN_COMPASS_FIELDS + DATAWIN_OVERHEAD)
+
+/* This is the maximum number of satellites gpsd can track. */
+#define MAX_POSSIBLE_SATS (MAXCHANNELS - 2)
+
+/* This is the maximum size we need for the 'satellites' window. */
+#define MAX_SATWIN_SIZE (MAX_POSSIBLE_SATS + SATWIN_OVERHEAD)
+
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -34,7 +97,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <ncurses.h>                                                         
+#include <ncurses.h>
 #include <signal.h>
 
 #include "gpsd_config.h"
@@ -49,15 +112,17 @@ static float speedfactor = MPS_TO_MPH;
 static char *altunits = "ft";
 static char *speedunits = "mph";
 
-static WINDOW *datawin, *satellites, *messages, *command, *status;
+static WINDOW *datawin, *satellites, *messages;
 
+static int title_flag=0;
+static int raw_flag=0;
 static int silent_flag=0;
 static int fixclear_flag=0;
-static int bigger;
-
 static int compass_flag=0;
 static int got_gps_type=0;
 static char gps_type[26];
+static int window_length;
+static int display_sats;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
 static void die(int sig UNUSED) 
@@ -124,7 +189,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   char *s;
 
   /* Print time/date. */
-  (void)wmove(datawin, 1,17);
+  (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
     (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
@@ -132,35 +197,35 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
     (void)wprintw(datawin,"n/a                    ");
 
   /* Fill in the heading. */
-  (void)wmove(datawin, 2,17);
+  (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.track)==0) {
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.track);
   } else
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the pitch. */
-  (void)wmove(datawin, 3,17);
+  (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.climb)==0) {
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.climb);
   } else
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the roll. */
-  (void)wmove(datawin, 4,17);
+  (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.speed)==0)
     (void)wprintw(datawin,"%.1f     ",gpsdata->fix.speed);
   else
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the speed. */
-  (void)wmove(datawin, 5,17);
+  (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.altitude)==0)
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.altitude);
   else
     (void)wprintw(datawin,"n/a         ");
 
-  /* Fill in GPS type. */
-  (void)wmove(datawin, 6,17);
+  /* Fill in receiver type. */
+  (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
   if(got_gps_type==1) {
     (void)wprintw(datawin,"%s",gps_type);
   } else {
@@ -168,13 +233,14 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   }
 
   /* Be quiet if the user requests silence. */
-  if(silent_flag==0) {
+  if(silent_flag==0 && raw_flag==1) {
     (void)wprintw(messages, "%s\n", message);
   }
 
   (void)wrefresh(datawin);
-  (void)wrefresh(messages);
-  (void)wrefresh(command);
+  if(raw_flag==1) {
+    (void)wrefresh(messages);
+  }
 }
 
 
@@ -184,29 +250,58 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
                          size_t len UNUSED , 
                          int level UNUSED)
 {
-  int i;
+  int i,n,c;
   int newstate;
   char *s;
 
-  /* This is for the satellite status display.  Lifted almost
-     verbatim from xgps.c.  Note that the satellite list may be
-     truncated based on available screen size.  */
+  /* This is for the satellite status display.  Originally lifted from
+     xgps.c.  Note that the satellite list may be truncated based on
+     available screen size, or may only show satellites used for the
+     fix.  */
   if (gpsdata->satellites!=0) {
-    for (i = 0; i < (bigger + 12); i++) {
-      (void)wmove(satellites, i+2, 1);
-      if (i < gpsdata->satellites) {
-	(void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
-		      gpsdata->PRN[i],
-		      gpsdata->elevation[i], gpsdata->azimuth[i], 
-		      gpsdata->ss[i],   gpsdata->used[i] ? 'Y' : 'N');
-      } else {
-	(void)wprintw(satellites,"                              ");
+    if (display_sats >= MAX_POSSIBLE_SATS) {
+      for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
+	(void)wmove(satellites, i+2, 1);
+	if (i < gpsdata->satellites) {
+	  (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
+			gpsdata->PRN[i],
+			gpsdata->elevation[i], gpsdata->azimuth[i],
+			gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+	} else {
+	  for(c = 0; c < SATELLITES_WIDTH - 3; c++) {
+	    (void)wprintw(satellites," ");
+	  }
+	}
       }
+    } else {
+      n=0;
+      for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
+	if (n < display_sats) {
+	  (void)wmove(satellites, n+2, 1);
+	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]) || (gpsdata->satellites <= display_sats))) {
+	    n++;
+	    (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
+			  gpsdata->PRN[i],
+			  gpsdata->elevation[i], gpsdata->azimuth[i],
+			  gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+	  }
+	}
+      }
+      
+      if(n < display_sats) {
+	for(i = n; i <= display_sats; i++) {
+	  (void)wmove(satellites, i+2, 1);
+	  for(c = 0; c < SATELLITES_WIDTH - 3; c++) {
+	    (void)wprintw(satellites," ");
+	  }
+	}
+      }
+      
     }
   }
-
+  
   /* Print time/date. */
-  (void)wmove(datawin, 1,17);
+  (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
     (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
@@ -214,7 +309,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     (void)wprintw(datawin,"n/a                    ");
 
   /* Fill in the latitude. */
-  (void)wmove(datawin, 2,17);
+  (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.latitude)==0) {
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
@@ -222,7 +317,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the longitude. */
-  (void)wmove(datawin, 3,17);
+  (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.longitude)==0) {
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
@@ -230,92 +325,98 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the altitude. */
-  (void)wmove(datawin, 4,17);
+  (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude)==0)
     (void)wprintw(datawin,"%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
   else
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the speed. */
-  (void)wmove(datawin, 5,17);
+  (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
     (void)wprintw(datawin,"%.1f %s     ", gpsdata->fix.speed*speedfactor, speedunits);
   else
     (void)wprintw(datawin,"n/a         ");
 
   /* Fill in the heading. */
-  (void)wmove(datawin, 6,17);
+  (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
     (void)wprintw(datawin,"%.1f degrees     ", gpsdata->fix.track);
   else
     (void)wprintw(datawin,"n/a          ");
 
   /* Fill in the rate of climb. */
-  (void)wmove(datawin, 7,17);
+  (void)wmove(datawin, 7, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
     (void)wprintw(datawin,"%.1f %s/min     "
                   , gpsdata->fix.climb * altfactor * 60, altunits);
   else
     (void)wprintw(datawin,"n/a         ");
   
-  /* Fill in the estimated horizontal position error. */
-  (void)wmove(datawin, 9,22);
-  if (isnan(gpsdata->fix.eph)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
-  else
-    (void)wprintw(datawin,"n/a         ");
+  /* Fill in the GPS status and the time since the last state
+     change. */
+  (void)wmove(datawin, 8, DATAWIN_VALUE_OFFSET);
+  if (gpsdata->online == 0) {
+    newstate = 0;
+    (void)wprintw(datawin,"OFFLINE          ");
+  } else {
+    newstate = gpsdata->fix.mode;
+    switch (gpsdata->fix.mode) {
+    case MODE_2D:
+      (void)wprintw(datawin,"2D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      break;
+    case MODE_3D:
+      (void)wprintw(datawin,"3D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      break;
+    default:
+      (void)wprintw(datawin,"NO FIX (%d secs)     ", (int) (time(NULL) - status_timer));
+      break;
+    }
+  }
 
-  /* Fill in the estimated vertical position error. */
-  (void)wmove(datawin, 10,22);
-  if (isnan(gpsdata->fix.epv)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
-  else
-    (void)wprintw(datawin,"n/a         ");
-
-  /* Fill in the estimated track error. */
-  (void)wmove(datawin, 11,22);
-  if (isnan(gpsdata->fix.epd)==0)
-    (void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
-  else
-    (void)wprintw(datawin,"n/a          ");
-  
-  /* Fill in the estimated speed error. */
-  (void)wmove(datawin, 12,22);
-  if (isnan(gpsdata->fix.eps)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
-  else
-    (void)wprintw(datawin,"n/a            ");
-
-  /* Fill in GPS type. */
-  (void)wmove(datawin, 8,17);
+  /* Fill in the receiver type. */
+  (void)wmove(datawin, 9, DATAWIN_VALUE_OFFSET);
   if(got_gps_type==1) {
     (void)wprintw(datawin,"%s",gps_type);
   } else {
     (void)wprintw(datawin,"unknown     ");
   }
 
-  /* Fill in the GPS status and the time since the last state change. */
-  (void)wmove(status, 1,10);
-  if (gpsdata->online == 0) {
-    newstate = 0;
-    (void)wprintw(status,"OFFLINE          ");
-  } else {
-    newstate = gpsdata->fix.mode;
-    switch (gpsdata->fix.mode) {
-    case MODE_2D:
-      (void)wprintw(status,"2D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
-      break;
-    case MODE_3D:
-      (void)wprintw(status,"3D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
-      break;
-    default:
-      (void)wprintw(status,"NO FIX (%d secs)     ", (int) (time(NULL) - status_timer));
-      break;
-    }
-  }
+#ifdef BROKEN
+  /* Note: You can't just #define BROKEN, you'll have to also add four
+     to the value of DATAWIN_GPS_FIELDS to turn these on. */
+
+  /* Fill in the estimated horizontal position error. */
+  (void)wmove(datawin, 10, DATAWIN_VALUE_OFFSET + 5);
+  if (isnan(gpsdata->fix.eph)==0)
+    (void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
+  else
+    (void)wprintw(datawin,"n/a         ");
+  
+  /* Fill in the estimated vertical position error. */
+  (void)wmove(datawin, 11, DATAWIN_VALUE_OFFSET + 5);
+  if (isnan(gpsdata->fix.epv)==0)
+    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
+  else
+    (void)wprintw(datawin,"n/a         ");
+
+  /* Fill in the estimated track error. */
+  (void)wmove(datawin, 12, DATAWIN_VALUE_OFFSET + 5);
+  if (isnan(gpsdata->fix.epd)==0)
+    (void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
+  else
+    (void)wprintw(datawin,"n/a          ");
+  
+  /* Fill in the estimated speed error. */
+  (void)wmove(datawin, 13, DATAWIN_VALUE_OFFSET + 5);
+  if (isnan(gpsdata->fix.eps)==0)
+    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
+  else
+    (void)wprintw(datawin,"n/a            ");
+#endif
 
   /* Be quiet if the user requests silence. */
-  if(silent_flag==0) {
+  if(silent_flag==0 && raw_flag==1) {
     (void)wprintw(messages, "%s\n", message);
   }
 
@@ -326,10 +427,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   }
 
   (void)wrefresh(datawin);
-  (void)wrefresh(status);
   (void)wrefresh(satellites);
-  (void)wrefresh(messages);
-  (void)wrefresh(command);
+  if(raw_flag==1) {
+    (void)wrefresh(messages);
+  }
 }
 
 static void usage( char *prog) 
@@ -507,28 +608,87 @@ int main(int argc, char *argv[])
   (void)signal(SIGINT,die);
   (void)signal(SIGHUP,die);
 
-  /* See if the screen is big enough to show more than 12 sats. */
+  /* Set the window sizes per the following criteria:
+
+     1.  Set the window size to display the maximum number of
+     satellites possible, but not more than the size required to
+     display the maximum number of satellites gpsd is capable of
+     tracking (MAXCHANNELS - 2).
+
+     2.  If the screen size will not allow for the full complement of
+     satellites to be displayed, set the windows sizes smaller, but
+     not smaller than the number of lines necessary to display all of
+     the fields in the 'datawin'.  The list of displayed satellites
+     will be truncated to fit the available window size.  (TODO: If
+     the satellite list is truncated, omit the satellites not used to
+     obtain the current fix.)
+
+     3.  If the criteria in #2 is one line short of what is necessary
+     to display the 'datawin' data, drop the title at the top of the
+     screen and move everything up one line, also expanding the
+     satellite list by one.
+
+     4.  If the screen is large enough to display all possible
+     satellites (MAXCHANNELS - 2) with space still left at the bottom,
+     add a window at the bottom in which to scroll raw gpsd data.
+  */
   (void)getmaxyx(stdscr,ysize,xsize);
 
-  /* If the user's screen is too small, exit gracefully.  We do run as
-     small as 80x20, but we force the raw gpsd data scrolling flag
-     off.
-
-     TODO: Allow sizes smaller than 80x20 by dropping less useful data
-     fields and showing only certain satellites (maybe the ones
-     actually used to compute the fix?)  
-
-     TODO: Allow smaller than 80x20 for a compass display, as there
-     are far fewer fields required. */
-  if((ysize >= 20) && (ysize < 24) && (xsize >= 80)) {
-    silent_flag=1;
-  } else if((ysize < 24) || (xsize < 80)) {
-    (void)mvprintw(0, 0, "Your screen must be at least 80x20 to run cgps.");
-    /*@ -nullpass @*/
-    (void)refresh();
-    /*@ +nullpass @*/
-    (void)sleep(5);
-    die(0);
+  if(compass_flag==1) {
+    if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
+      title_flag = 0;
+      raw_flag = 0;
+      window_length = MIN_COMPASS_DATAWIN_SIZE;
+    } else if(ysize == MIN_COMPASS_DATAWIN_SIZE + 1) {
+      title_flag = 1;
+      raw_flag = 0;
+      window_length = MIN_COMPASS_DATAWIN_SIZE;
+    } else if(ysize >= MIN_COMPASS_DATAWIN_SIZE + 2) {
+      title_flag = 1;
+      raw_flag = 1;
+      window_length = MIN_COMPASS_DATAWIN_SIZE;
+    } else {
+      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_COMPASS_DATAWIN_SIZE);
+      /*@ -nullpass @*/
+      (void)refresh();
+      /*@ +nullpass @*/
+      (void)sleep(5);
+      die(0);
+    }
+  } else {
+    if(ysize == MAX_SATWIN_SIZE) {
+      title_flag = 0;
+      raw_flag = 0;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize == MAX_SATWIN_SIZE + 1) {
+      title_flag = 0;
+      raw_flag = 1;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize > MAX_SATWIN_SIZE + 2) {
+      title_flag = 1;
+      raw_flag = 1;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize > MIN_GPS_DATAWIN_SIZE) {
+      title_flag = 1;
+      raw_flag = 0;
+      window_length = ysize - title_flag - raw_flag;
+      display_sats = window_length - SATWIN_OVERHEAD - title_flag - raw_flag;
+    } else if(ysize == MIN_GPS_DATAWIN_SIZE) {
+      title_flag = 0;
+      raw_flag = 0;
+      window_length = MIN_GPS_DATAWIN_SIZE;
+      display_sats = window_length - SATWIN_OVERHEAD - 1;
+    } else {
+      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_GPS_DATAWIN_SIZE);
+      /*@ -nullpass @*/
+      (void)refresh();
+      /*@ +nullpass @*/
+      (void)sleep(5);
+      die(0);
+    }
   }
 
   /* Set up the screen for either a compass or a gps receiver. */
@@ -536,85 +696,77 @@ int main(int argc, char *argv[])
     /* We're a compass, set up accordingly. */
 
     /*@ -onlytrans @*/
-    datawin    = newwin(8, 45, 1, 0);
-    command    = newwin(3, 45, 9, 0);
-    messages   = newwin(0, 0, 12, 0);
+    datawin    = newwin(window_length, DATAWIN_WIDTH, title_flag, 0);
+    (void)nodelay(datawin,(bool)TRUE);
+    if(raw_flag==1) {
+      messages   = newwin(0, 0, title_flag + window_length, 0);
 
-    /*@ +onlytrans @*/
-    (void)scrollok(messages, true);
-    (void)wsetscrreg(messages, 0, LINES-13);
-    (void)nodelay(messages,(bool)TRUE);
-    
-    (void)mvprintw(0, 31, "CGPS Test Client");
+      /*@ +onlytrans @*/
+      (void)scrollok(messages, true);
+      (void)wsetscrreg(messages, 0, ysize - (window_length + title_flag));
+    }
+
+    if(title_flag==1) {
+      (void)mvprintw(0, ((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2), TITLE);
+    }
 
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
     
     /* Do the initial field label setup. */
-    (void)mvwprintw(datawin, 1,5, "Time:");
-    (void)mvwprintw(datawin, 2,5, "Heading:");
-    (void)mvwprintw(datawin, 3,5, "Pitch:");
-    (void)mvwprintw(datawin, 4,5, "Roll:");
-    (void)mvwprintw(datawin, 5,5, "Dip:");
-    (void)mvwprintw(datawin, 6,5, "GPS Type:");
+    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
+    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Heading:");
+    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Pitch:");
+    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Roll:");
+    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Dip:");
+    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Rcvr Type:");
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
-    (void)mvwprintw(command, 1,1, "Command:  ");
-    (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
 
   } else {
     /* We're a GPS, set up accordingly. */
 
-    /* Grow the windows based on screen size, but not more than the
-       maximum allowed number of sats.  Always leave at least four
-       lines at the bottom of the screen to scroll gpsd raw data. */
-    bigger=ysize-24;
-    
-    if(bigger<0) {
-      bigger=0;
-    }
-    
-    if(bigger > (MAXCHANNELS - 2 - 12)) {
-      bigger = MAXCHANNELS - 2 - 12;
-    }
-    
     /*@ -onlytrans @*/
-    datawin    = newwin(15+bigger, 45, 1, 0);
-    satellites = newwin(15+bigger, 35, 1, 45);
-    command    = newwin(3, 45, 16+bigger, 0);
-    status     = newwin(3, 35, 16+bigger, 45);
-    messages   = newwin(0, 0, 19+bigger, 0);
+    datawin    = newwin(window_length, DATAWIN_WIDTH, title_flag, 0);
+    satellites = newwin(window_length, SATELLITES_WIDTH, title_flag, DATAWIN_WIDTH);
+    (void)nodelay(datawin,(bool)TRUE);
+    if(raw_flag==1) {
+      messages   = newwin(ysize - (window_length + title_flag), xsize, title_flag + window_length, 0);
 
-    /*@ +onlytrans @*/
-    (void)scrollok(messages, true);
-    (void)wsetscrreg(messages, 0, LINES-13);
-    (void)nodelay(messages,(bool)TRUE);
-    
-    (void)mvprintw(0, 31, "CGPS Test Client");
+      /*@ +onlytrans @*/
+      (void)scrollok(messages, true);
+      (void)wsetscrreg(messages, 0, ysize - (window_length + title_flag));
+    }
+
+    if(title_flag==1) {
+      (void)mvprintw(0, ((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2), TITLE);
+    }
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
     
     /* Do the initial field label setup. */
-    (void)mvwprintw(datawin, 1,5, "Time:");
-    (void)mvwprintw(datawin, 2,5, "Latitude:");
-    (void)mvwprintw(datawin, 3,5, "Longitude:");
-    (void)mvwprintw(datawin, 4,5, "Altitude:");
-    (void)mvwprintw(datawin, 5,5, "Speed:");
-    (void)mvwprintw(datawin, 6,5, "Heading:");
-    (void)mvwprintw(datawin, 7,5, "Climb:");
-    (void)mvwprintw(datawin, 8,5, "GPS Type:");
-    (void)mvwprintw(datawin, 9,5, "Horizontal Err:");
-    (void)mvwprintw(datawin, 10,5, "Vertical Err:");
-    (void)mvwprintw(datawin, 11,5, "Course Err:");
-    (void)mvwprintw(datawin, 12,5, "Speed Err:");
-    (void)mvwprintw(status, 1,1, "Status:");
+    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
+    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Latitude:");
+    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Longitude:");
+    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Altitude:");
+    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Speed:");
+    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Heading:");
+    (void)mvwprintw(datawin, 7, DATAWIN_DESC_OFFSET, "Climb:");
+    (void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
+    (void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
+#ifdef BROKEN
+  /* Note: You can't just #define BROKEN, you'll have to also add four
+     to the value of DATAWIN_GPS_FIELDS to turn these on. */
+
+    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET, "Horizontal Err:");
+    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET, "Vertical Err:");
+    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
+    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
+#endif
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
-    (void)mvwprintw(command, 1,1, "Command:  ");
-    (void)wborder(command, 0, 0, 0, 0, 0, 0, 0, 0);
-    (void)wborder(status, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   /* Here's where updates go now that things are established. */
@@ -627,7 +779,8 @@ int main(int argc, char *argv[])
   /* Request "w+x" data from gpsd. */
   (void)gps_query(gpsdata, "w+x\n");
 
-  for (;;) { /* heart of the client */
+  /* heart of the client */
+  for (;;) {
     
     /* watch to see when it has input */
     FD_ZERO(&rfds);
@@ -655,7 +808,7 @@ int main(int argc, char *argv[])
      TODO: Restrict the allowed keys based on device type (ie, 'j'
      makes no sense for a True North compass).  No doubt there will be
      other examples as cgps grows more bells and whistles. */
-    c=wgetch(messages);
+    c=wgetch(datawin);
         
     switch ( c ) {
       /* Quit */
