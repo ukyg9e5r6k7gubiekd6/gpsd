@@ -191,6 +191,9 @@ man_MANS = \
 .xml.3:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
+.xml.5:
+	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
+
 .xml.8:
 	$(MANGENERATOR) $(MANFLAGS) $(MANTARGET) $<
 
