@@ -10,7 +10,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsctl</refname>
-<refpurpose>control the modes of a Gps GPS</refpurpose>
+<refpurpose>control the modes of a GPS</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -64,6 +64,13 @@ its new speed.</para>
 <term>-f</term>
 <listitem>
 <para>Force low-level access (not through the daemon).</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-s</term>
+<listitem>
+<para>Set the baud rate at which the GPS emits packets.</para>
 </listitem>
 </varlistentry>
 

@@ -541,7 +541,8 @@ if test x"$MANGENERATOR" = x; then
         MANTARGET=man
         MANFLAGS=
     else
-        AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages])
+        AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages.])
+        AC_MSG_WARN([To build man pages, install xsltproc/xsltlib or xmlto and run autogen,sh again.])
     fi
 fi
 AM_CONDITIONAL([HAVE_XSLT_PROCESSOR],

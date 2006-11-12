@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * gpsctrl.c -- tweak the control settings on a GPS
+ * gpsctl.c -- tweak the control settings on a GPS
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -53,12 +53,13 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 int main(int argc, char **argv)
 {
     int option, status;
-    char *err_str, *device = NULL, *speed = NULL;
+    char *err_str, *device = NULL, *speed = NULL, *devtype = NULL;
     bool to_binary = false, to_nmea = false, lowlevel=false;
     struct gps_data_t *gpsdata = NULL;
+    struct gps_type_t *forcetype = NULL;
 
-#define USAGE	"usage: gpsctl [-b | -n] [-s speed] [-V] <device>\n"
-    while ((option = getopt(argc, argv, "bfhns:D:V")) != -1) {
+#define USAGE	"usage: gpsctl [-b | -n] [-s speed] [-V] [-t devtype] <device>\n"
+    while ((option = getopt(argc, argv, "bfhns:t:D:V")) != -1) {
 	switch (option) {
 	case 'b':
 	    to_binary = true;
@@ -71,6 +72,9 @@ int main(int argc, char **argv)
 	    break;
 	case 's':
 	    speed = optarg;
+	    break;
+	case 't':
+	    devtype = optarg;
 	    break;
 	case 'D':
 	    debuglevel = atoi(optarg);
@@ -87,6 +91,26 @@ int main(int argc, char **argv)
 
     if (optind < argc)
 	device = argv[optind];
+
+    if (devtype) {
+	struct gps_type_t **dp;
+	int matchcount = 0;
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if (strstr((*dp)->typename, devtype) != NULL) {
+		forcetype = *dp;
+		matchcount++;
+	    }
+	}
+	if (matchcount == 0)
+	    gpsd_report(LOG_ERROR, "gpsd: no driver name matches '%s'.\n", devtype);
+	else if (matchcount == 1)
+	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->typename);
+	else {
+	    forcetype = NULL;
+	    gpsd_report(LOG_ERROR, "gpsd: %d driver names match '%s'.\n",
+			matchcount, devtype);
+	}
+    }
 
     if (to_nmea && to_binary) {
 	(void)fprintf(stderr, "gpsctl: make up your mind, would you?\n");
@@ -204,6 +228,12 @@ int main(int argc, char **argv)
 	}
 	gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
 		    device, gpsd_id(&session), session.gpsdata.baudrate);
+
+	if (forcetype && strcmp("Generic NMEA", session.device_type->typename) !=0 && strcmp(forcetype->typename, session.device_type->typename)!=0) {
+	    gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->typename, session.device_type->typename);
+	}
+
+
 	/* 
 	 * If we've identified this as an NMEA device, we have to eat
 	 * packets for a while to see if one of our probes elicits an
@@ -230,6 +260,10 @@ int main(int argc, char **argv)
 	/* if no control operation was specified, we're done */
 	if (speed==NULL && !to_nmea && !to_binary)
 	    exit(0);
+
+	/* control op specified; maybe we forced the type */
+	if (forcetype)
+	    gpsd_switch_driver(&session, forcetype->typename);
 
 	/* now perform the actual control function */
 	status = 0;
