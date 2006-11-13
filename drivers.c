@@ -361,9 +361,9 @@ static struct gps_type_t sirf_nmea = {
 static bool evermore_speed(struct gps_device_t *session, unsigned int speed)
 /* change the baud rate, remaining in SiRF NMEA mode */
 {
+	const char *emt_speedcfg;
 
         gpsd_report(LOG_PROG, "evermore_speed(%d)\n", speed);
-	const char *emt_speedcfg;
 	switch (speed) {
 	    case 4800:  emt_speedcfg = "\x10\x02\x06\x89\x01\x00\x00\x8a\x10\x03"; break;
 	    case 9600:  emt_speedcfg = "\x10\x02\x06\x89\x01\x01\x00\x8b\x10\x03"; break;
@@ -389,11 +389,11 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 
 static void evermore_configure(struct gps_device_t *session)
 {
-    gpsd_report(LOG_PROG, "evermore_configure\n");
 #ifdef ALLOW_RECONFIGURE
     /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT100(0s) */
     const char *emt_nmea_cfg = 
 	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x05\x01\x00\x00\x00\x00\x00\x00\x00\x00\x96\x10\x03";
+    gpsd_report(LOG_PROG, "evermore_configure\n");
     (void)gpsd_write(session, emt_nmea_cfg, 22);
 #endif /* ALLOW_RECONFIGUR/ */
 }

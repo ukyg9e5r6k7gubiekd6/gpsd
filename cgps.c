@@ -278,7 +278,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (n < display_sats) {
 	  (void)wmove(satellites, n+2, 1);
-	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]) || (gpsdata->satellites <= display_sats))) {
+	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]!=0) || (gpsdata->satellites <= display_sats))) {
 	    n++;
 	    (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
 			  gpsdata->PRN[i],
@@ -707,7 +707,7 @@ int main(int argc, char *argv[])
     }
 
     if(title_flag==1) {
-      (void)mvprintw(0, ((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2), TITLE);
+	(void)mvprintw(0, (int)(((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2)), TITLE);
     }
 
     /*@ -nullpass @*/
@@ -739,7 +739,7 @@ int main(int argc, char *argv[])
     }
 
     if(title_flag==1) {
-      (void)mvprintw(0, ((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2), TITLE);
+	(void)mvprintw(0, (int)(((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2)), TITLE);
     }
     /*@ -nullpass @*/
     (void)refresh();

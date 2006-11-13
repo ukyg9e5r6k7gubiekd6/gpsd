@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     if (optind < argc)
 	device = argv[optind];
 
-    if (devtype) {
+    if (devtype != NULL) {
 	struct gps_type_t **dp;
 	int matchcount = 0;
 	for (dp = gpsd_drivers; *dp; dp++) {
@@ -103,9 +103,10 @@ int main(int argc, char **argv)
 	}
 	if (matchcount == 0)
 	    gpsd_report(LOG_ERROR, "gpsd: no driver name matches '%s'.\n", devtype);
-	else if (matchcount == 1)
+	else if (matchcount == 1) {
+	    assert(forcetype != NULL);
 	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->typename);
-	else {
+	} else {
 	    forcetype = NULL;
 	    gpsd_report(LOG_ERROR, "gpsd: %d driver names match '%s'.\n",
 			matchcount, devtype);
@@ -229,7 +230,7 @@ int main(int argc, char **argv)
 	gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
 		    device, gpsd_id(&session), session.gpsdata.baudrate);
 
-	if (forcetype && strcmp("Generic NMEA", session.device_type->typename) !=0 && strcmp(forcetype->typename, session.device_type->typename)!=0) {
+	if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->typename) !=0 && strcmp(forcetype->typename, session.device_type->typename)!=0) {
 	    gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->typename, session.device_type->typename);
 	}
 
@@ -262,8 +263,8 @@ int main(int argc, char **argv)
 	    exit(0);
 
 	/* control op specified; maybe we forced the type */
-	if (forcetype)
-	    gpsd_switch_driver(&session, forcetype->typename);
+	if (forcetype != NULL)
+	    (void)gpsd_switch_driver(&session, forcetype->typename);
 
 	/* now perform the actual control function */
 	status = 0;
