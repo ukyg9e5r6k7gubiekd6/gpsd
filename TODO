@@ -129,6 +129,35 @@ Chris Kuethe plans to do this.
 Add J option checkbox.  Maybe embed the speedometer widget from
 xgpspeed in some of the unused space and nuke xgpsspeed.
 
+*** Per-driver restore of changed config settings on exit.
+
+This is a solved problem for generic NMEA, EverMore, TripMate,
+EarthMate, TNTC, Zodiac, and RTCM104 drivers (if only because they
+don't configure any device setting).
+
+The SiRF driver now restores NMEA when necessary.  We can do a perfect
+job of reverting changes during binary sessions by requesting a
+Navigation Parameters message and restoring the configuration it gives
+us on wrapup.
+
+The TSIP driver changes its per-cycle sentence inventory and thus 
+needs some state-restore logic.  This can be done; the same packet 0x35
+we use to configure it can be sent in a no-argument mode to query
+the current sentence mix for later restore.
+
+The FV18 changes its per-cycle sentence inventory to include GSAs. It
+is possible to query that inventory, though we don't have code to do
+it yet.
+
+Garmin devices are a mess.  We reconfigure those heavily, and we
+don't know if there's any way to capture their configuration state
+before we do it.
+
+The iTrax02 driver sets SYNCMODE to start navigation messages without
+checking to see if it's already on, and stops navigation methods on
+wrapup.  It also forces the set of sentences issued.  There doesn't
+seem to be any way to query these settings.
+
 *** Integrate udev support in the RPM installation
 
 Currently gpsd includes udev support that seems to work in the source
