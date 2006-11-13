@@ -52,7 +52,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 #endif /* ALLOW_RECONFIGURE */
 }
 
-static void tsip_configurator(struct gps_device_t *session)
+static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     unsigned char buf[100];
 
@@ -61,21 +61,14 @@ static void tsip_configurator(struct gps_device_t *session)
     session->driver.tsip.stopbits = session->gpsdata.stopbits;
     gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
 
-    /* I/O Options */
-    putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
-    putbyte(buf,1,0x02);		/* Velocity: ENU */
-    putbyte(buf,2,0x00);		/* Time: GPS */
-    putbyte(buf,3,0x08);		/* Aux: dBHz */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
-
     /* Request Software Versions */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x1f, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x1f, NULL, 0);
 
     /* Request Current Time */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x21, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x21, NULL, 0);
 
     /* Request GPS Systems Message */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x28, buf, 0);
+    (void)tsip_write(session->gpsdata.gps_fd, 0x28, NULL, 0);
 
     /* Request Current Datum Values */
     putbyte(buf,0,0x15);
@@ -84,6 +77,18 @@ static void tsip_configurator(struct gps_device_t *session)
     /* Request Navigation Configuration */
     putbyte(buf,0,0x03);
     (void)tsip_write(session->gpsdata.gps_fd, 0xbb, buf, 1);
+}
+
+static void tsip_configurator(struct gps_device_t *session)
+{
+    unsigned char buf[100];
+
+    /* I/O Options */
+    putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
+    putbyte(buf,1,0x02);		/* Velocity: ENU */
+    putbyte(buf,2,0x00);		/* Time: GPS */
+    putbyte(buf,3,0x08);		/* Aux: dBHz */
+    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
 }
 
 static void tsip_wrapup(struct gps_device_t *session)
@@ -709,7 +714,7 @@ struct gps_type_t tsip_binary =
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
-    .probe_subtype  = NULL,		/* no more subtype discovery */
+    .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
     .configurator   = tsip_configurator,/* initial mode sets */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
