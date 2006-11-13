@@ -57,9 +57,10 @@ int main(int argc, char **argv)
     bool to_binary = false, to_nmea = false, lowlevel=false;
     struct gps_data_t *gpsdata = NULL;
     struct gps_type_t *forcetype = NULL;
+    struct gps_type_t **dp;
 
-#define USAGE	"usage: gpsctl [-b | -n] [-s speed] [-V] [-t devtype] <device>\n"
-    while ((option = getopt(argc, argv, "bfhns:t:D:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n] [-s speed] [-V] [-t devtype] <device>\n"
+    while ((option = getopt(argc, argv, "bfhlns:t:D:V")) != -1) {
 	switch (option) {
 	case 'b':
 	    to_binary = true;
@@ -67,6 +68,10 @@ int main(int argc, char **argv)
 	case 'f':
 	    lowlevel = true;	/* force direct access to the deamon */
 	    break;
+        case 'l':
+	    for (dp = gpsd_drivers; *dp; dp++)
+		(void)puts((*dp)->typename);
+	    exit(0);
 	case 'n':
 	    to_nmea = true;
 	    break;
@@ -93,7 +98,6 @@ int main(int argc, char **argv)
 	device = argv[optind];
 
     if (devtype != NULL) {
-	struct gps_type_t **dp;
 	int matchcount = 0;
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    if (strstr((*dp)->typename, devtype) != NULL) {

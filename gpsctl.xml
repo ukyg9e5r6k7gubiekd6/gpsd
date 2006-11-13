@@ -22,7 +22,9 @@
 	<arg choice='plain'>-n</arg>
       </group>
       <arg choice='opt'>-f </arg>
+      <arg choice='opt'>-l </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='opt'>-t <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'><replaceable>serial-port</replaceable></arg>
@@ -71,9 +73,23 @@ its new speed.</para>
 </varlistentry>
 
 <varlistentry>
+<term>-l</term>
+<listitem>
+<para>List the known device types and exit..</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>-s</term>
 <listitem>
 <para>Set the baud rate at which the GPS emits packets.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-t</term>
+<listitem>
+<para>Force the device type.</para>
 </listitem>
 </varlistentry>
 
@@ -98,6 +114,23 @@ its new speed.</para>
 </listitem>
 </varlistentry>
 </variablelist>
+
+<para>The argument of the forcing option. <option>-t</option>, should be a
+string which should be contained in exactly one of the known driver
+names; for a list, do <command>gpsctl -l</command>.</para>
+
+<para>Forcing the device type behaves somewhat differently depending 
+on whether this tool, is going through the daemon or not. In high-level
+mode, if the device that daemon selects for you doesn't match the
+driver you specified, <application>gpsctl</application> exits with
+a warning.  (This may be useful in scripts.)</para>
+
+<para>In low-level mode, if the device identifies as a Generic NMEA,
+use the selected driver instead.  This will be useful if you have a
+GPS device of known type that is in NMEA mode and not responding to
+probes.  (This option was originally implemented for talking to
+SiRFStar I chips, which don't respond to the normal SiRF ID
+probe.)</para>
 
 <para>If no options are given, the program will display a message
 identifying the GPS type of the selected device and exit.</para>
