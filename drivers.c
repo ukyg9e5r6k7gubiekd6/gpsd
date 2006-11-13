@@ -42,8 +42,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
     } else if (session->packet_type == EVERMORE_PACKET) {
 	gpsd_report(LOG_WARN, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
-	/* we might never see a $PEMT, have this as a backstop */
-	(void)gpsd_switch_driver(session, "EverMore binary");
+	(void)gpsd_switch_driver(session, "EverMore NMEA");
 	return evermore_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;
@@ -145,6 +144,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef EVERMORE_ENABLE
     case 3:
 	/* probe for EverMore by trying to read the LogConfig */
+	/* as a probe try to set DATUM to WGS-84 with EverMore binary command */
 	(void)gpsd_write(session, "\x10\x02\x06\x8d\x00\x01\x00\x8e\x10\x03", 10);
 	break;
 #endif /* EVERMORE_ENABLE */
@@ -346,7 +346,78 @@ static struct gps_type_t sirf_nmea = {
     .cycle          = 1,		/* updates every second */
 };
 
-#if TRIPMATE_ENABLE
+/**************************************************************************
+ *
+ * EverMore NMEA
+ *
+ * Mostly this is a stopover on the way to EverMore binary mode, but NMEA methods
+ * are included in case we're building without EverMore binary support.
+ *
+ **************************************************************************/
+#ifdef EVERMORE_ENABLE
+
+
+static bool evermore_speed(struct gps_device_t *session, unsigned int speed)
+/* change the baud rate, remaining in SiRF NMEA mode */
+{
+
+        gpsd_report(LOG_PROG, "evermore_speed(%d)\n", speed);
+	const char *emt_speedcfg;
+	switch (speed) {
+	    case 4800:  emt_speedcfg = "\x10\x02\x06\x89\x01\x00\x00\x8a\x10\x03"; break;
+	    case 9600:  emt_speedcfg = "\x10\x02\x06\x89\x01\x01\x00\x8b\x10\x03"; break;
+	    case 19200: emt_speedcfg = "\x10\x02\x06\x89\x01\x02\x00\x8c\x10\x03"; break;
+	    case 38400: emt_speedcfg = "\x10\x02\x06\x89\x01\x03\x00\x8d\x10\x03"; break;
+	    default: return false;
+	}
+    (void)gpsd_write(session, emt_speedcfg, 10);
+    return true;
+}
+
+static void evermore_mode(struct gps_device_t *session, int mode)
+/* change mode to EverMore binary, speed unchanged */
+{
+    gpsd_report(LOG_PROG, "evermore_mode(%d)\n", mode);
+    if (mode == 1) {
+	(void)gpsd_switch_driver(session, "EverMore binary");
+	session->gpsdata.driver_mode = 1;
+    } else
+	(void)gpsd_switch_driver(session, "EverMore NMEA");
+	session->gpsdata.driver_mode = 0;
+}
+
+static void evermore_configure(struct gps_device_t *session)
+{
+    gpsd_report(LOG_PROG, "evermore_configure\n");
+#ifdef ALLOW_RECONFIGURE
+    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT100(0s) */
+    const char *emt_nmea_cfg = 
+	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x05\x01\x00\x00\x00\x00\x00\x00\x00\x00\x96\x10\x03";
+    (void)gpsd_write(session, emt_nmea_cfg, 22);
+#endif /* ALLOW_RECONFIGUR/ */
+}
+
+static struct gps_type_t evermore_nmea = {
+    .typename      = "EverMore NMEA",	/* full name of type */
+    .trigger       = "$PEMT,",		/* expected response to probe */
+    .channels      = 12,		/* not used by the NMEA parser */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = NULL,		/* probe for type info */
+    .configurator  = evermore_configure,/* turn off debuging messages */
+    .get_packet    = packet_get,	/* how to get a packet */
+    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer   = NULL,		/* write RTCM data straight */
+    .speed_switcher= evermore_speed,	/* we can change speeds */
+    .mode_switcher = evermore_mode,	/* there's a mode switch */
+    .rate_switcher = NULL,		/* no sample-rate switcher */
+    .cycle_chars   = -1,		/* not relevant, no rate switch */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
+};
+#endif
+
+#ifdef TRIPMATE_ENABLE
 /**************************************************************************
  *
  * TripMate -- extended NMEA, gets faster fix when primed with lat/long/time
@@ -817,6 +888,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef SIRF_ENABLE
     &sirf_binary, 
 #endif /* SIRF_ENABLE */
+#ifdef EVERMORE_ENABLE
+    &evermore_nmea,
+#endif /* EVERMORE_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary, 
 #endif /* TSIP_ENABLE */
