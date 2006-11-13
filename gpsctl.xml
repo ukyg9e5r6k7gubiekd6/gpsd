@@ -17,9 +17,12 @@
 <cmdsynopsis>
   <command>gpsctl</command>  
       <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-n </arg>
-      <arg choice='opt'>-b </arg>
+      <group>
+	<arg choice='plain'>-b</arg>
+	<arg choice='plain'>-n</arg>
+      </group>
       <arg choice='opt'>-f </arg>
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'><replaceable>serial-port</replaceable></arg>

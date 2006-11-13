@@ -152,8 +152,7 @@ AC_CHECK_LIB(Xm, XmInternAtom,
 fi
 AC_SUBST(XP_LIBS)
 AC_SUBST(XM_LIBS)
-AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != "" && test "$motif_includes" !
-= "no"])
+AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != "" -a "$motif_includes" != "no"])
 ac_x="yes"
 else
 dnl X11 disabled

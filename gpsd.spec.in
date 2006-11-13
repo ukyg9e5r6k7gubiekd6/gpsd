@@ -7,7 +7,7 @@ Group: System Environment/Daemons
 Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
-BuildRequires: ncurses-devel gcc xsltproc python
+BuildRequires: ncurses-devel gcc libxslt python
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 #Destinations: mailto:gpsd-announce@lists.berlios.de, mailto:gpsd-users@lists.berlios.de, mailto:gpsd-dev@lists.berlios.de
 

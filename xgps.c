@@ -185,7 +185,7 @@ static void build_gui(Widget toplevel)
     label_3 = XtCreateManagedWidget("Longitude", xmLabelWidgetClass, rowColumn_13, args, 0);
     label_4 = XtCreateManagedWidget("Altitude ", xmLabelWidgetClass, rowColumn_14, args, 0);
     label_5 = XtCreateManagedWidget("Speed    ", xmLabelWidgetClass, rowColumn_15, args, 0);
-    label_6 = XtCreateManagedWidget("Course   ", xmLabelWidgetClass, rowColumn_16, args, 0);
+    label_6 = XtCreateManagedWidget("Track    ", xmLabelWidgetClass, rowColumn_16, args, 0);
     label_7 = XtCreateManagedWidget("EPH      ", xmLabelWidgetClass, rowColumn_17, args, 0);
     label_8 = XtCreateManagedWidget("EPV      ", xmLabelWidgetClass, rowColumn_18, args, 0);
     label_9 = XtCreateManagedWidget("Climb    ", xmLabelWidgetClass, rowColumn_19, args, 0);
@@ -292,7 +292,7 @@ static void update_panel(struct gps_data_t *gpsdata,
 	for (i = 0; i < MAXCHANNELS; i++) {
 	    if (i < (unsigned int)gpsdata->satellites) {
 		(void)snprintf(s, sizeof(s),  
-			       " %3d    %02d    %03d    %02d      %c", 
+			       " %3d    %2d    %3d    %2d      %c", 
 			       gpsdata->PRN[i],
 			       gpsdata->elevation[i], gpsdata->azimuth[i], 
 			       gpsdata->ss[i],	gpsdata->used[i] ? 'Y' : 'N');

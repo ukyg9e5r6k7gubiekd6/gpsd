@@ -205,6 +205,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSA,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
+    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,PGRME,1");
 #endif /* NMEA_ENABLE && !GARMIN_ENABLE */
 #if GARMIN_ENABLE_UNUSED
     /* try to go binary */
