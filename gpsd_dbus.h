@@ -1,6 +1,6 @@
 /* $Id$ */
 #include "gpsd_config.h"
-#if DBUS_ENABLE==1
+#ifdef DBUS_ENABLE
 
 #ifndef _gpsd_dbus_h_
 #define _gpsd_dbus_h_

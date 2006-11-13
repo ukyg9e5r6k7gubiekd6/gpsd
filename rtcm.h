@@ -281,7 +281,7 @@ struct rtcm_msg_t {
 
 #endif /* LITTLE_ENDIAN */
 
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 /* This struct was generated from the above using invert-bitfields.pl */
 #ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
 

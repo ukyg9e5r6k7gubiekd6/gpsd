@@ -207,7 +207,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,PGRME,1");
 #endif /* NMEA_ENABLE && !GARMIN_ENABLE */
-#if GARMIN_ENABLE_UNUSED
+#ifdef GARMIN_ENABLE_UNUSED
     /* try to go binary */
     /* once a sec, binary, no averaging, NMEA 2.3, WAAS */
     (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
@@ -239,7 +239,7 @@ static struct gps_type_t garmin = {
     .cycle          = 1,		/* updates every second */
 };
 
-#if FV18_ENABLE
+#ifdef FV18_ENABLE
 /**************************************************************************
  *
  * FV18 -- uses 2 stop bits, needs to be told to send GSAs
@@ -294,7 +294,7 @@ static void sirf_probe_subtype(struct gps_device_t *session, unsigned int seq)
 static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
 /* switch GPS to specified mode at 8N1, optionally to binary */
 {
-    if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea,speed) < 0)
+    if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea, speed) < 0)
 	return false;
     return true;
 }
@@ -865,24 +865,24 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
     &sirf_nmea,
-#if FV18_ENABLE
+#ifdef FV18_ENABLE
     &fv18,
     &garmin,
 #endif /* FV18_ENABLE */
-#if TRIPMATE_ENABLE
+#ifdef TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
-#if EARTHMATE_ENABLE
+#ifdef EARTHMATE_ENABLE
     &earthmate, 
 #endif /* EARTHMATE_ENABLE */
-#if ITRAX_ENABLE
+#ifdef ITRAX_ENABLE
     &itrax, 
 #endif /* ITRAX_ENABLE */
 #endif /* NMEA_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
-#if GARMIN_ENABLE
+#ifdef GARMIN_ENABLE
     &garmin_usb_binary,
     &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */

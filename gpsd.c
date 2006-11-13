@@ -38,7 +38,7 @@
 #include <sys/time.h>
 #endif
 
-#if DBUS_ENABLE
+#ifdef DBUS_ENABLE
 #include <gpsd_dbus.h>
 #endif
 
@@ -1346,7 +1346,7 @@ int main(int argc, char *argv[])
     }
 #endif /* NTPSHM_ENABLE */
 
-#if DBUS_ENABLE
+#ifdef DBUS_ENABLE
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
 	/* the connection could not be started */
@@ -1663,7 +1663,7 @@ int main(int argc, char *argv[])
 			(void)handle_gpsd_request(sub, cmds, (int)strlen(cmds));
 		}
 	    }
-#if DBUS_ENABLE
+#ifdef DBUS_ENABLE
 	    if (changed &~ ONLINE_SET) {
 		    if (changed & (LATLON_SET | MODE_SET)) 
 			    send_dbus_fix (channel);
