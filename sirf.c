@@ -749,19 +749,6 @@ static void sirfbin_configure(struct gps_device_t *session)
 					  0xa6, 0x00, 0x04, 0x03,
 					  0x00, 0x00, 0x00, 0x00,
 					  0x00, 0x00, 0xb0, 0xb3};
-#ifdef __UNUSED__
-	/*
-	 * Might need to send this, turning off the SiRF track-smoothing mode,
-	 * to eliminate a 10-second fix latency some users have reported. See
-	 * <http://gpsd.davisnetworks.com/bin/view/Main/SirfTrackSmoothMode>
-	 * for discussion.
-	 */
-	static unsigned char smoothing_off[] = {0xa0, 0xa2, 0x00, 0x08
-						0x88, 0x00, 0x00, 0x01, 0x00, 
-						0x00, 0x00, 0x00, 0x00, 0x00, 
-						0x00, 0x05, 0x02, 0x00,
-						0x00, 0x00, 0xb0, 0xb3};
-#endif /* __UNUSED__ */
 	/*@ -charint @*/
 	gpsd_report(LOG_PROG, "Requesting periodic ecef reports...\n");
 	(void)sirf_write(session->gpsdata.gps_fd, requestecef);
@@ -783,6 +770,14 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
     return sirf_speed(session->gpsdata.gps_fd, speed);
 }
 
+#ifdef ALLOW_RECONFIGURE
+static void sirfbin_wrapup(struct gps_device_t *session)
+{
+    if (session->driver.sirf.back_to_nmea)
+	sirfbin_mode(session, 0);
+}
+#endif /* ALLOW_RECONFIGURE */
+
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
@@ -800,7 +795,11 @@ struct gps_type_t sirf_binary =
     .mode_switcher  = sirfbin_mode,	/* there's a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
-    .wrapup         = NULL,		/* no close hook */
+#ifdef ALLOW_RECONFIGURE
+    .wrapup         = sirfbin_wrapup,	/* might want to revert to NMEA */
+#else
+    .erapup         = NULL;		/* no close hook */
+#endif /* ALLOW_RECONFIGURE */
     .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

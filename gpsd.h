@@ -188,6 +188,9 @@ struct gps_device_t {
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
+#ifdef ALLOW_RECONFIGURE
+	    bool back_to_nmea;		/* back to NMEA on exit? */
+#endif /* ALLOW_RECONFIGURE */
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
