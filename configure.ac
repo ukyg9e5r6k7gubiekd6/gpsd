@@ -292,15 +292,15 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for Evermore support
+dnl check for EverMore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
-                 [disable Evermore binary support]),
+                 [disable EverMore binary support]),
   [ac_evermore=$enableval], [ac_evermore=yes])
-AC_MSG_CHECKING([for Evermore support])
+AC_MSG_CHECKING([for EverMore support])
 if test x"$ac_evermore" = "xyes"; then
     AC_MSG_RESULT([yes])
-	AC_DEFINE([EVERMORE_ENABLE], 1, [Evermore binary support])
+	AC_DEFINE([EVERMORE_ENABLE], 1, [EverMore binary support])
 else
   AC_MSG_RESULT([no])
 fi
@@ -566,7 +566,7 @@ echo "iTrax                   : $ac_itrax"
 echo "iTalk                   : $ac_italk"
 echo "Garmin                  : $ac_garmin"
 echo "True North              : $ac_tnt"
-echo "Evermore                : $ac_evermore"
+echo "EverMore                : $ac_evermore"
 echo "RTCM104 support         : $ac_rtcm104"
 echo "NTRIP support           : $ac_ntrip"
 echo "NTP SHM                 : $ac_ntpshm"
