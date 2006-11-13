@@ -798,7 +798,7 @@ struct gps_type_t sirf_binary =
 #ifdef ALLOW_RECONFIGURE
     .wrapup         = sirfbin_wrapup,	/* might want to revert to NMEA */
 #else
-    .erapup         = NULL;		/* no close hook */
+    .wrapup         = NULL;		/* no close hook */
 #endif /* ALLOW_RECONFIGURE */
     .cycle          = 1,		/* updates every second */
 };

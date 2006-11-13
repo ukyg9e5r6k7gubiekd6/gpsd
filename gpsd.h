@@ -204,6 +204,13 @@ struct gps_device_t {
 	    unsigned int parity, stopbits; /* saved RS232 link parameters */
 	} tsip;
 #endif /* TSIP_ENABLE */
+#ifdef EVERMORE_ENABLE
+	struct {
+#ifdef ALLOW_RECONFIGURE
+	    bool back_to_nmea;		/* back to NMEA on exit? */
+#endif /* ALLOW_RECONFIGURE */
+	} evermore;
+#endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
 	struct {
 	    unsigned char Buffer[4096+12];	/* Garmin packet buffer */
