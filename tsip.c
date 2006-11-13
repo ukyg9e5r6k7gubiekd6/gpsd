@@ -56,27 +56,29 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     unsigned char buf[100];
 
-    /* TSIP is ODD parity 1 stopbit, save original values and change it */
-    session->driver.tsip.parity = session->gpsdata.parity;
-    session->driver.tsip.stopbits = session->gpsdata.stopbits;
-    gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
+    switch (seq) {
+    case 0:
+	/* TSIP is ODD parity 1 stopbit, save original values and change it */
+	session->driver.tsip.parity = session->gpsdata.parity;
+	session->driver.tsip.stopbits = session->gpsdata.stopbits;
+	gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
+	break;
 
-    /* Request Software Versions */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x1f, NULL, 0);
-
-    /* Request Current Time */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x21, NULL, 0);
-
-    /* Request GPS Systems Message */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x28, NULL, 0);
-
-    /* Request Current Datum Values */
-    putbyte(buf,0,0x15);
-    (void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 1);
-
-    /* Request Navigation Configuration */
-    putbyte(buf,0,0x03);
-    (void)tsip_write(session->gpsdata.gps_fd, 0xbb, buf, 1);
+    case 1:
+	/* Request Software Versions */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x1f, NULL, 0);
+	/* Request Current Time */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x21, NULL, 0);
+	/* Request GPS Systems Message */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x28, NULL, 0);
+	/* Request Current Datum Values */
+	putbyte(buf,0,0x15);
+	(void)tsip_write(session->gpsdata.gps_fd, 0x8e, buf, 1);
+	/* Request Navigation Configuration */
+	putbyte(buf,0,0x03);
+	(void)tsip_write(session->gpsdata.gps_fd, 0xbb, buf, 1);
+	break;
+    }
 }
 
 static void tsip_configurator(struct gps_device_t *session)
