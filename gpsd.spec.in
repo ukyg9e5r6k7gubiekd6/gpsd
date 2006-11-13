@@ -91,7 +91,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING
 %attr(755, root, root) %{_sbindir}/gpsd
-%attr(755, root, root) %{_sbindir}/gpsctrl
+%attr(755, root, root) %{_sbindir}/gpsctl
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
@@ -100,7 +100,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/sirfmon.1*
-%{_mandir}/man1/gpsctrl.1*
+%{_mandir}/man1/gpsctl.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
 /usr/lib/python*/site-packages/gps.py*
