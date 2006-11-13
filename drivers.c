@@ -159,16 +159,6 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
-static void nmea_configurator(struct gps_device_t *session)
-{
-#ifdef ALLOW_RECONFIGURE
-    /* Sony CXD2951 chips: +GGA, -GLL, +GSA, +GSV, +RMC, -VTG, +ZDA, -PSGSA */
-    (void)nmea_send(session->gpsdata.gps_fd, "@NC10151010");
-    /* enable GPZDA on a Motorola Oncore GT+ */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PMOTG,ZDA,1");
-#endif /* ALLOW_RECONFIGURE */
-}
-
 static struct gps_type_t nmea = {
     .typename       = "Generic NMEA",	/* full name of type */
     .trigger        = NULL,		/* it's the default */
@@ -176,7 +166,7 @@ static struct gps_type_t nmea = {
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = nmea_probe_subtype,	/* probe for special types */
-    .configurator   = nmea_configurator,/* enable what we need */
+    .configurator   = NULL,		/* enable what we need */
     .get_packet     = packet_get,		/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
