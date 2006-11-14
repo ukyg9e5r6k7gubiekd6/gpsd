@@ -667,7 +667,7 @@ int main(int argc, char *argv[])
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize > MAX_SATWIN_SIZE + 2) {
-      title_flag = 1;
+      title_flag = 0;
       raw_flag = 1;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
