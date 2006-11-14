@@ -333,8 +333,8 @@ static void sirf_configurator(struct gps_device_t *session)
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
 #endif /* BINARY_ENABLE */
-#endif /* ALLOW_RECONFIGURE */
 }
+#endif /* ALLOW_RECONFIGURE */
 
 
 static struct gps_type_t sirf_nmea = {
