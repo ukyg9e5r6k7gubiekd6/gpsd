@@ -843,7 +843,7 @@ struct gps_type_t trueNorth = {
     .probe_detect   = tnt_probe,	/* probe by sending ID query */
     .probe_subtype  = tnt_probe_subtype,/* probe for True North Digital Compass */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = NULL;		/* no setting changes */
+    .configurator   = NULL,		/* no setting changes */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
