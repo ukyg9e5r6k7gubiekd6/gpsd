@@ -80,7 +80,9 @@ struct gps_type_t {
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
     /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
+#ifdef ALLOW_RECONFIGURE 
     /*@null@*/void (*configurator)(struct gps_device_t *session);
+#endif /* ALLOW_RECONFIGURE */
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
@@ -88,6 +90,9 @@ struct gps_type_t {
     /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
     /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
     int cycle_chars;
+#ifdef ALLOW_RECONFIGURE 
+    /*@null@*/void (*revert)(struct gps_device_t *session);
+#endif /* ALLOW_RECONFIGURE */
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
     double cycle;
 };
@@ -189,7 +194,7 @@ struct gps_device_t {
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 #ifdef ALLOW_RECONFIGURE
-	    bool back_to_nmea;		/* back to NMEA on exit? */
+	    bool back_to_nmea;		/* back to NMEA on revert? */
 #endif /* ALLOW_RECONFIGURE */
 	} sirf;
 #endif /* SIRF_ENABLE */
@@ -207,7 +212,7 @@ struct gps_device_t {
 #ifdef EVERMORE_ENABLE
 	struct {
 #ifdef ALLOW_RECONFIGURE
-	    bool back_to_nmea;		/* back to NMEA on exit? */
+	    bool back_to_nmea;		/* back to NMEA on revert? */
 #endif /* ALLOW_RECONFIGURE */
 	} evermore;
 #endif /* EVERMORE_ENABLE */

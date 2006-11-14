@@ -783,6 +783,7 @@ static void garmin_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 /*
  * garmin_configure()
  *
@@ -808,6 +809,7 @@ static void garmin_configure(struct gps_device_t *session)
 	      , GARMIN_PKTID_L001_COMMAND_DATA, 2, CMND_START_RM_DATA);
 #endif
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void garmin_close(struct gps_device_t *session UNUSED) 
 {
@@ -1125,7 +1127,9 @@ struct gps_type_t garmin_usb_binary_old =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = garmin_configure,	/* eable what we need */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1133,6 +1137,9 @@ struct gps_type_t garmin_usb_binary_old =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = garmin_close,	/* close hook */
     .cycle          = 1,		/* updates every second */
 };
@@ -1146,7 +1153,9 @@ struct gps_type_t garmin_usb_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = garmin_configure,	/* eable what we need */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1154,6 +1163,9 @@ struct gps_type_t garmin_usb_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = garmin_close,	/* close hook */
     .cycle          = 1,		/* updates every second */
 };
@@ -1166,7 +1178,9 @@ struct gps_type_t garmin_ser_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = garmin_configure,	/* enable what we need */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1174,6 +1188,9 @@ struct gps_type_t garmin_ser_binary =
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,	        /* close hook */
     .cycle          = 1,		/* updates every second */
 };

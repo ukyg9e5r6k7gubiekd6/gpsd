@@ -81,6 +81,7 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 static void tsip_configurator(struct gps_device_t *session)
 {
     unsigned char buf[100];
@@ -92,6 +93,7 @@ static void tsip_configurator(struct gps_device_t *session)
     putbyte(buf,3,0x08);		/* Aux: dBHz */
     (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void tsip_wrapup(struct gps_device_t *session)
 {
@@ -717,7 +719,9 @@ struct gps_type_t tsip_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = tsip_configurator,/* initial mode sets */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
@@ -725,6 +729,9 @@ struct gps_type_t tsip_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switcher */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* FIXME: revert sentence mix */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = tsip_wrapup,	/* restore comms parameters */
     .cycle          = 1,		/* updates every second */
 };

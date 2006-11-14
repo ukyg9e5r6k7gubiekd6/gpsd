@@ -106,10 +106,12 @@ static void italk_mode(struct gps_device_t *session, int mode)
 }
 
 static void italk_configurator(struct gps_device_t *session)
+#ifdef ALLOW_RECONFIGURE
 {
     if (session->packet_type == NMEA_PACKET)
 	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
@@ -127,7 +129,9 @@ struct gps_type_t italk_binary =
     .probe_wakeup   = italk_ping,	/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = italk_configurator,/* configure the device */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
@@ -135,6 +139,9 @@ struct gps_type_t italk_binary =
     .mode_switcher  = italk_mode,	/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */
 };

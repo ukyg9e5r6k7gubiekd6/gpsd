@@ -44,7 +44,6 @@
 #define LO(n)		((n) & 0xff)
 
 bool sirf_write(int fd, unsigned char *msg) {
-#ifdef ALLOW_RECONFIGURE
    unsigned int       crc;
    size_t    i, len;
    bool      ok;
@@ -65,9 +64,6 @@ bool sirf_write(int fd, unsigned char *msg) {
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
    (void)tcdrain(fd);
    return(ok);
-#else
-   return -1;
-#endif /* ALLOW_RECONFIGURE */
 }
 
 static bool sirf_speed(int ttyfd, speed_t speed) 
@@ -707,6 +703,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef ALLOW_RECONFIGURE
 static void sirfbin_configure(struct gps_device_t *session)
 {
     if (session->packet_type == NMEA_PACKET) {
@@ -764,6 +761,7 @@ static void sirfbin_configure(struct gps_device_t *session)
 	(void)sirf_write(session->gpsdata.gps_fd, modecontrol);
     }
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 {
@@ -771,7 +769,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void sirfbin_wrapup(struct gps_device_t *session)
+static void sirfbin_revert(struct gps_device_t *session)
 {
     if (session->driver.sirf.back_to_nmea)
 	sirfbin_mode(session, 0);
@@ -787,7 +785,9 @@ struct gps_type_t sirf_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = sirfbin_configure,/* initialize the device */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
@@ -796,10 +796,9 @@ struct gps_type_t sirf_binary =
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .wrapup         = sirfbin_wrapup,	/* might want to revert to NMEA */
-#else
-    .wrapup         = NULL;		/* no close hook */
+    .revert         = sirfbin_revert,	/* might want to revert to NMEA */
 #endif /* ALLOW_RECONFIGURE */
+    .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

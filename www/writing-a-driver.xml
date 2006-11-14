@@ -16,11 +16,11 @@
 
 <revhistory>
    <revision>
-      <revnumber>1.1</revnumber>
-      <date>9 November 2006</date>
+      <revnumber>1.2</revnumber>
+      <date>14 November 2006</date>
       <authorinitials>md</authorinitials>
       <revremark>
-	 Second draft.
+	 Track split of wrapup method.
       </revremark>
    </revision>
 </revhistory>
@@ -605,15 +605,23 @@ in 1 second.</para>
 documentation. It's only necessary to fill this in if you have
 <structfield>.rate_switcher</structfield> capability</para>
 
+<para><structfield>.revert</structfield> points to a block of
+code that is conditionally run each time the device is closed if
+device reconfiguration was enabled.  (Closes happen when all clients
+have disconnected and the <quote><option>-n</option> </quote> switch
+is not active.) The premise is that there may be a special mode you
+initialized the device into for <application>gpsd</application>
+operation which should be turned off otherwise. It allows for changing
+the device to a low power mode, for instance.  Any changes you made in
+the <structfield>.configurator</structfield> meethod should be undone 
+here.</para>
+
 <para><structfield>.wrapup</structfield> points to a block of code
-which is run each time the device is to be closed. This happens when
-all clients have disconnected and the <quote><option>-n</option>
-</quote> switch is not active. The premise is that there may be a
-special mode you initialized the device into for
-<application>gpsd</application> operation which should be turned off
-otherwise. It allows for changing the device to a low power mode, for
-instance. This is also where you should undo any port parameter
-changes you made in <structfield>.probe_detect</structfield>above.</para>
+which is run unconditionally each time the device is to be closed.
+(Closes happen when all clients have disconnected and the
+<quote><option>-n</option> </quote> switch is not active.) This is
+also where you should undo any port parameter changes you made in
+<structfield>.probe_detect</structfield>above.</para>
 
 <para><structfield>.cycle</structfield> is a number giving the number of
 fixes per second you can get. Gets updated if you can rate-switch

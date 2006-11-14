@@ -114,7 +114,9 @@ struct gps_type_t proto_binary =
     .probe_detect   = NULL,		/* no probe */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_subtype  = probe_subtype,	/* initialize the device */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = configurator,	/* configure the proper sentences */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* use generic packet getter */
     .parse_packet   = parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
@@ -122,6 +124,9 @@ struct gps_type_t proto_binary =
     .mode_switcher  = set_mode,		/* there is a mode switcher */
     .rate_switcher  = NULL,		/* no rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switcher */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */
 };

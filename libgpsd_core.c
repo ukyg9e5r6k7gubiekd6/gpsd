@@ -37,8 +37,15 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	if (strcmp((*dp)->typename, typename) == 0) {
 	    gpsd_report(LOG_PROG, "Selecting %s driver...\n", (*dp)->typename);
 	    gpsd_assert_sync(session);
-	    if (session->device_type != NULL && session->device_type->wrapup != NULL)
-		session->device_type->wrapup(session);
+	    if (session->device_type != NULL) {
+#ifdef ALLOW_RECONFIGURE
+		if (session->context->enable_reconfigure 
+		    && session->device_type->revert != NULL)
+		    session->device_type->revert(session);
+#endif /* ALLOW_RECONFIGURE */
+		if (session->device_type->wrapup != NULL)
+		    session->device_type->wrapup(session);
+	    }
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet_counter = 0);
@@ -100,6 +107,11 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+#ifdef ALLOW_RECONFIGURE
+    if (session->context->enable_reconfigure 
+		&& session->device_type->revert != NULL)
+	session->device_type->revert(session);
+#endif /* ALLOW_RECONFIGURE */
     if (session->device_type != NULL && session->device_type->wrapup != NULL)
 	session->device_type->wrapup(session);
     (void)gpsd_close(session);

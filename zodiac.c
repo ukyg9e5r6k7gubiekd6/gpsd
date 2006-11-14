@@ -433,7 +433,9 @@ struct gps_type_t zodiac_binary =
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no initialization */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* no configuration */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
@@ -441,6 +443,9 @@ struct gps_type_t zodiac_binary =
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no reversion hook */
+#endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* caller might supply a close hook */
     .cycle          = 1,		/* updates every second */
 };
