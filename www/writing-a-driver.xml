@@ -16,11 +16,11 @@
 
 <revhistory>
    <revision>
-      <revnumber>1.2</revnumber>
+      <revnumber>1.3</revnumber>
       <date>14 November 2006</date>
       <authorinitials>md</authorinitials>
       <revremark>
-	 Track split of wrapup method.
+	 Updated to conform to SVN 3884.
       </revremark>
    </revision>
 </revhistory>
@@ -28,7 +28,7 @@
 <abstract>
 <para>If you are thinking of writing a GPSD driver for some GPS-like
 device, these notes by a person who did it may help you decide
-whether or not it's a good idea, and if it is help you get started.</para>
+whether or not it's a good idea, and if it is, help you get started.</para>
 </abstract>
 
 </articleinfo>
@@ -42,7 +42,7 @@ supports around 40 different GPS devices, so it may be that your
 device is already supported by an existing driver.</para>
 
 <para>It may be worth noting that these notes were written against
-gpsd version 2.34 compiled from SVN revision 3783 of November 5th
+gpsd version 2.34 compiled from SVN revision 3884 of November 14th
 2006. The situation will likely have changed by the time you read
 this, but the broad principles should still apply. Check what version
 you are using.</para>
@@ -169,17 +169,16 @@ get some general ideas on how to handle this from drivers like
 
 <para>I found from the manufacturer's documentation that the Jupiter-T
 produces output only when instructed, rather than spewing out a
-set sequence at some pre-defined rate and so it would be possible
-to generate almost all the wanted data for
-<application>gpsd</application> by activating two main messages,
-<quote> <filename>@@Ea</filename></quote> and
-<quote><filename>@@Bb</filename></quote>. All the commands and
+set sequence at some pre-defined rate. All the commands and
 responses in <quote>Jupiter-T-speak</quote> start with a 4 character
 ASCII string <quote> <filename>@@Nn</filename></quote> followed by a
 payload of 0 to approx 300 binary bytes, a single byte binary checksum
-and an ASCII CR/LF pair. This particular structure was the cause of
-some headaches in the interpretation, but it means that the important
-data is impressively dense. The first command
+and an ASCII CR/LF pair. Thus it would be possible to generate all
+the wanted data for <application>gpsd</application> by activating
+two main messages, <quote> <filename>@@Bb</filename></quote> and
+<quote><filename>@@Ea</filename></quote>. This particular structure
+was the cause of some headaches in the interpretation, but it means
+that the important data is impressively dense. The first command
 (<filename>@@Bb</filename>) gives the status of all visible satellites
 (up to 12) in 92 bytes and the second command
 (<filename>@@Ea</filename>) gives all the navigational data plus
@@ -194,8 +193,8 @@ had a routine <quote> <function>static gps_mask_t handle1000(struct
 gps_device_t *session)</function></quote> that did a very similar
 job.</para>
 
-<para>This brought me neatly to the first chicken/egg problem; the
-device, as I said earlier, is mute on power-up and unless you send it
+<para>This brought me neatly to a chicken/egg problem; the device,
+as I said earlier, is mute on power-up and unless you send it
 some instructions to turn on one or more messages, you will have no
 indication if it is even alive. Actually, this is not strictly true,
 as it does output a 1PPS and a 10kHz square wave on power up, but
@@ -468,7 +467,7 @@ match them to an existing driver. Here is where our driver will
 be called, so the changes are a little larger. The driver starts
 at the beginning of each packet and tries to match, character by
 character, until it has determined which (if any) driver owns
-this package in routine <quote>
+this packet in routine <quote>
 <function>nextstate</function></quote>. As all
 Jupiter-T packets start with <quote>
 <constant>@@</constant></quote>, this collides with the
@@ -480,12 +479,12 @@ data. This checking is done in a new block of code lower down
 in <quote>
 <function>nextstate</function></quote> that was
 modelled on the other drivers, but must needs be unique. The
-package is scanned byte by byte until a fully formed packet
+packet is scanned byte by byte until a fully formed packet
 has been detected and then it can be parsed in the main driver.
 If it fails any of the tests, the state engine is set back to
 <quote><constant>GROUND_STATE</constant></quote> and detection
 starts again. The code to trigger parsing and deletion of the
-package after it has been parsed is included lower down in the
+packet after it has been parsed is included lower down in the
 code <quote>
 <function>packet_parse</function></quote> and is based
 on existing drivers.</para>
@@ -613,7 +612,7 @@ is not active.) The premise is that there may be a special mode you
 initialized the device into for <application>gpsd</application>
 operation which should be turned off otherwise. It allows for changing
 the device to a low power mode, for instance.  Any changes you made in
-the <structfield>.configurator</structfield> meethod should be undone 
+the <structfield>.configurator</structfield> method should be undone 
 here.</para>
 
 <para><structfield>.wrapup</structfield> points to a block of code
@@ -716,7 +715,12 @@ point in the startup. The unfortunate thing is that to
 implement the function could mean getting down to low level
 programming of the tty port since you may find the normal
 operating mode capabilities may not match your device's
-requirement, even if the baud rate is correct.</para>
+requirement, even if the baud rate is correct. This
+proved to be the case for me and was the single most difficult
+part of writing the driver. This, I am sure, is because it involves
+working virtually directly with the system hardware. I have documented
+this process in some detail in the hope that it may save some other
+poor soul the trials I went through.</para>
 
 <para>I looked at the code in 
 <quote><filename>serial.c</filename></quote>, 
@@ -747,45 +751,78 @@ read it carefully).</para></listitem>
 
 <para>I also found that even this was not the whole
 story, since even when I had allowed the device to catch up on
-a settings change, I could not get it to respond cleanly to a
-<quote>device identify</quote> command. I
-found that I was missing some or all of the response message
-when operating at 9600 bps.</para>
+a settings change, I could not get it to respond reliably to a
+<quote>device identify</quote> command. I found that I was
+missing some or all of the response message when operating
+at 9600 bps.</para>
 
-<para>The reason was that I check the port with a
+<para>The reason was that I originally checked the port with a
 single character sniff routine a maximum of 300 times (just bigger
 than the block of text being returned), which comes out at 300 *
-(1 start bit + 8 data bits + 1 stop bit) = 3000 bits. This equates
-to about 312 milliseconds. This method is necessary because the
-probe is speculative and must handle cases like wrong port speed
-or the type of device being probed for is not present.</para>
+(1 start bit + 8 data bits + 1 stop bit) = 3000 bits. I expected
+this would occupy about 312 milliseconds which I considered as an
+acceptable delay during the probing phase, but my understanding of
+how the serial port is accessed turned out to be faulty. This method
+was originally chosen because the probe is speculative and must handle
+cases like wrong port speed or the type of device being probed for
+is not present and should not hold up progress for too long. Don't
+forget that all installed drivers get a chance to probe, one after
+another, so the delays for each are cumulative and if no driver
+finds and claims the device, you can have many seconds of delay.</para>
 
-<para>I found in the Oncore manual that the device's internal
-scheduler uses a 1 second loop time. Within this loop, the
-navigation tasks are handled first, followed by processing of
-the input commands. Any resultant output will be generated as
-soon as the input buffer is processed, assuming the buffer
-holds one or more complete commands.</para>
+<para>When it failed to work as expected, I investigated the GPS device's
+documentation (<quote>RTFM</quote> did I hear you say!) and I found in the
+Oncore manual that the device's internal scheduler uses a 1
+second loop time. Within this loop, the navigation tasks are handled
+first, followed by processing of the input commands. Any
+resultant output will be generated as soon as the input
+buffer is processed, assuming the buffer holds one or more
+complete commands.</para>
 
 <para>If you are lucky and just finish your input as the
 buffer is ready to be scanned, you can get a result back in 70
 milliseconds. If you are unlucky, the most extreme delay is 2
-seconds. On average, the turnaround is 1025
-milliseconds. Unfortunately, in the probing code, we have to allow for
-the worst case, so once the code issues a command, it has then to wait
-a full 2 seconds before scanning for output.</para>
+seconds. On average, the turnaround is 1025 milliseconds.
+Unfortunately, in the probing code, we have to allow for the
+worst case, so once the code issues a command, it has then to
+allow a full 2 seconds before scanning for output.</para>
 
-<para>The only serial port setting which was not immediately obvious to me
-(although present in both <quote><filename>serial.c</filename></quote>
-and <quote><filename>sirfmon.c</filename></quote>) was
-<quote><userinput>session-&gt;ttyset.c_cflag |= CREAD |
+<para>When I found that my initial scanning method was not viable,
+I experimented and eventually settled on a loop using a
+<function>while</function> statement that checked
+<function>timestamp()</function> values and was set
+to time out at 2 seconds maximum duration, with an early exit on
+successfully finding the wanted data. Within the loop, I tested
+the serial port for an available character. If one was available,
+I checked it against my expected string; if one was not available,
+I looped again if the timer had not expired. If I encountered an
+error when reading the port I exited. All exits returned a
+success/fail value.</para>
+
+<para>This worked better, but still failed occasionally. I then used
+the <quote><function>gpsd_report</function></quote> to check the
+error returned and I saw that I was getting lots of <quote>EAGAIN</quote>
+errors. This suggested that the port was not able to handle all my
+read requests, so I suspected the rate of reading was too fast. Not knowing
+for sure, I trapped this particular error and applied a <function>
+usleep()</function> of a couple of milliseconds when it occurred. This was
+enough to cure the problem and I could get the detection to track
+the device's responses reliably. I saw a spread of detection timing
+between 250 milliseconds and 1.7 seconds over a large number of tests,
+so I concluded that the manufacturer's predictions were being
+satisfied.</para>
+
+<para>The only other serial port setting which was not immediately
+obvious to me (although present in both <quote><filename>serial.c
+</filename></quote> and <quote><filename>sirfmon.c</filename></quote>
+) was <quote><userinput>session-&gt;ttyset.c_cflag |= CREAD |
 CLOCAL;</userinput></quote>. This is needed to enable the port and
-cause it to ignore any modem control lines. If you are using a binary
-protocol, you will also need to issue a <quote><userinput>cfmakeraw
-(struct termios *termios_p);</userinput></quote> to quickly set the
-most important flags correctly. I was bitten by this and found that
-&lt;CR/LF&gt; sequences were being modified to &lt;CR/CR/LF&gt; by
-the kernel's tty port driver.</para>
+cause it to ignore any modem control lines. If you are using a
+binary protocol , you will also need to issue a
+<quote><userinput>cfmakeraw (struct termios *termios_p);</userinput></quote>
+to quickly set the most important flags correctly. I was bitten by
+this and found that transmitted &lt;CR/LF&gt; sequences were being modified
+to &lt;CR/CR/LF&gt; by the kernel's tty port driver.</para>
 </sect1>
 
 <sect1><title>Sign off</title>
