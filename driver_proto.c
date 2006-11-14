@@ -94,7 +94,7 @@ static void set_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void probe_subtype(struct gps_device_t *session)
+static void probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /* probe for subtypes here */
 }
