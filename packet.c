@@ -648,8 +648,9 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 
 	if (session->packet_state == GROUND_STATE) {
 	    character_discard(session);
+	}
 #ifdef NMEA_ENABLE
-	} else if (session->packet_state == NMEA_RECOGNIZED) {
+	else if (session->packet_state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
 	    char csum[3];
 	    char *trailer = (char *)session->inbufptr-5;
@@ -788,8 +789,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		session->packet_state = GROUND_STATE;
 		packet_discard(session);
 		break;
-	    }
 #endif /* TSIP_ENABLE */
+	    }
 	}
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
