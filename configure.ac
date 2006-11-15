@@ -206,8 +206,10 @@ AC_ARG_ENABLE(fv18,
   [ac_fv18=$enableval], [ac_fv18=yes])
 AC_MSG_CHECKING([for FV-18 support])
 if test x"$ac_fv18" = "xyes"; then
+    ac_nmea=yes
     AC_MSG_RESULT([yes])
 	AC_DEFINE([FV18_ENABLE], 1, [San Jose Navigation FV-18 support])
+	AC_DEFINE([NMEA_ENABLE], 1, [San Jose Navigation FV-18 requires NMEA support])
 else
   AC_MSG_RESULT([no])
 fi

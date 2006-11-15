@@ -212,7 +212,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session)
     /* probe for Garmin serial binary by trying to Product Data request */
     /* DLE, PktID, Size, data (none), CHksum, DLE, ETX 
     (void)gpsd_write(session, "\x10\xFE\x00\x02\x10\x03", 6); */
-#endif /* GARMIN_ENABLE */
+#endif /* GARMIN_ENABLE_UNUSED */
 }
 #endif /* GARMIN_ENABLE */
 #endif /* ALLOW_RECONFIGURE */
@@ -916,7 +916,6 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &sirf_nmea,
 #ifdef FV18_ENABLE
     &fv18,
-    &garmin,
 #endif /* FV18_ENABLE */
 #ifdef TRIPMATE_ENABLE
     &tripmate,
@@ -932,6 +931,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
 #ifdef GARMIN_ENABLE
+#ifdef NMEA_ENABLE
+    &garmin,
+#endif /* NMEA_ENABLE */
     &garmin_usb_binary,
     &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */
