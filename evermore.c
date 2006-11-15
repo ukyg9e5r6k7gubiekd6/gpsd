@@ -26,16 +26,11 @@
  *
  * These don't entail a reset of GPS as the 0x80 message does.
  * 
- * 10 02 04 38 85 bd 10 03     answer from GPS to 0x85 message; Like OK?
- * 10 02 04 38 8d c5 10 03     answer from GPS to 0x8d message; Like OK?
- * 10 02 04 38 8e c6 10 03     answer from GPS to 0x8e message; Like OK?
- * 10 02 04 38 8f c7 10 03     answer from GPS to 0x8f message; Like OK?
+ * 10 02 04 38 85 bd 10 03     answer from GPS to 0x85 message; ACK message
+ * 10 02 04 38 8d c5 10 03     answer from GPS to 0x8d message; ACK message
+ * 10 02 04 38 8e c6 10 03     answer from GPS to 0x8e message; ACK message
+ * 10 02 04 38 8f c7 10 03     answer from GPS to 0x8f message; ACK message
  *
- * Message described as 0x89 in the manual is message 0x8f in the
- * actual command set (manual error?).
- *
- * Message 0x89 is used for serial port configuration.
- * 
  * The chip sometimes sends vendor extension messages with the prefix
  * $PEMT,100. After restart, it sends a $PEMT,100 message describing the
  * chip's configuration. Here is a sample:
@@ -63,7 +58,7 @@
  * Message $PEMT,100 could be forced with message 0x85 (restart):
  * 10 02 12 85 00 00 00 00 00 01 01 00 00 00 00 00 00 00 00 87 10 03
  * 0x85 ID, Restart
- * 0x00 restart mode (0 default, 1 hot, 2 warm, 3 cold)
+ * 0x00 restart mode (0 default, 1 hot, 2 warm, 3 cold, 4 test)
  * 0x00 test start search PRN (1-32)
  * 0x00 UTC second (0-59)
  * 0x00 UTC Minute (0-59)
@@ -71,7 +66,7 @@
  * 0x01 UTC Day (1-31)
  * 0x01 UTC Month (1-12)
  * 0x0000 UTC year (1980+x, uint16)
- * 0x0000 Latitude WGS-84 (+/-900, 1/10 degree, + for, int16)
+ * 0x0000 Latitude WGS-84 (+/-900, 1/10 degree, + for N, int16)
  * 0x0000 Longtitude WGS-84 (+/-1800, 1/10 degree, + for E, int16)
  * 0x0000 Altitude WGS-84 (-1000..+18000, meters, int16)
  * 0x87 CRC
@@ -331,12 +326,13 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	return TIME_SET | SATELLITE_SET | USED_SET;
 
     case 0x08:	/* Measurement Data Output */
-	// clock offset is a manufacturer diagnostic
-	// (int)getuw(buf2, 8);  clock offset, 29000..29850 ??
+	/* clock offset is a manufacturer diagnostic */
+	/* (int)getuw(buf2, 8);  clock offset, 29000..29850 ?? */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time
 	    = gpstime_to_unix((int)getuw(buf2, 2), getul(buf2, 4)*0.01) - session->context->leap_seconds;
 	visible = getub(buf2, 10);
 	/* FIXME: read full statellite status for each channel */
+	/* we can get pseudo range (m), delta-range (m/s), doppler (Hz) and status for each channel */
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(LOG_PROG, "MDO 0x04:\n");
 	return TIME_SET;
@@ -411,31 +407,17 @@ static bool evermore_default(struct gps_device_t *session, int mode)
 	    1,          /*  3: GPGGA, interval 0-255s */
 	    0,          /*  4: GPGLL, interval 0-255s */
 	    1,          /*  5: GPGSA, interval 0-255s */
-	    5,          /*  6: GPGSV, interval 0-255s */
+	    1,          /*  6: GPGSV, interval 0-255s */
 	    1,          /*  7: GPRMC, interval 0-255s */
 	    0,          /*  8: GPVTG, interval 0-255s */
 	    0,          /*  9: PEMT,101, interval 0-255s */
 	    0, 0, 0, 0, 0, 0, /* 10-15: reserved */
     };
 
-    unsigned char evrm_nmeaout_config2[] = {
-	    0x8e,	/*  0: msg ID, NMEA message control */
-	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
-	    0x01,       /*  2: nmea checksum no(0), yes(1) */
-	    1,          /*  3: GPGGA, interval 0-255s */
-	    1,          /*  4: GPGLL, interval 0-255s */
-	    1,          /*  5: GPGSA, interval 0-255s */
-	    5,          /*  6: GPGSV, interval 0-255s */
-	    1,          /*  7: GPRMC, interval 0-255s */
-	    1,          /*  8: GPVTG, interval 0-255s */
-	    1,          /*  9: PEMT,101, interval 0-255s */
-	    0, 0, 0, 0, 0, 0, /* 10-15: reserved */
-    };
-    
     unsigned char evrm_select_datum[] = {
 	    0x8d,       /*  0: msg ID, select Datum */
-	    0x00,       /*  1: 0 (hi byte of datum ID) */
-	    0x01,       /*  2: datum ID, 1 is WGS-84 */
+	    0x00,       /*  1: reserved */
+	    0x01,       /*  2: datum ID, low byte; 0x0001 is for WGS-84 */
 	    0x00,       /*  3: datum ID, high byte; datum ID is int16 */
     };
 
@@ -593,18 +575,31 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
     return evermore_write(session, msg, sizeof(msg));
 }
 
+static bool evermore_protocol(struct gps_device_t *session, int protocol)
+{
+    unsigned char tmp8;
+    unsigned char evrm_protocol_config[] = {
+	    0x84,    /* 0: msg ID, Protocol Configuration */
+	    0x00,    /* 1: mode; EverMore binary(0), NMEA(1) */
+	    0x00,    /* 2: reserved */
+	    0x00,    /* 3: reserved */
+    };
+    tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
+    evrm_protocol_config[1] = tmp8;
+    return evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config));
+}
+
+
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
     gpsd_report(LOG_PROG, "evermore_mode call (%d)\n", mode);
     if (mode == 0) {
+        (void) evermore_protocol(session, 1); /* NMEA */
+	session->gpsdata.driver_mode = 0;     /* NMEA */
 	(void)gpsd_switch_driver(session, "EverMore NMEA");
-	// (void)evermore_set_mode(session, session->gpsdata.baudrate, false);
-	(void)evermore_default(session, 0);
-	session->gpsdata.driver_mode = 0;
     } else {
-	(void)evermore_default(session, 1);
 	session->driver.evermore.back_to_nmea = false;
-	session->gpsdata.driver_mode = 1;
+	session->gpsdata.driver_mode = 1;     /* binary */
     }
 }
 
@@ -624,22 +619,25 @@ static void evermore_configurator(struct gps_device_t *session)
 static void evermore_probe(struct gps_device_t *session)
 /* send a binary message to probe for EverMore GPS */
 /*
- * There is a way to probe for EverMore chipset. When binary message 0x81 is sent:
- * 10 02 04 81 13 94 10 03
+ * When binary message 0x8D is sent:
+ *   10 02 06 8D 00 01 00 8E 10 03
  *
- * EverMore will reply with something like this:
- * *10 *02 *0D *20 E1 00 00 *00 0A 00 1E 00 32 00 5B *10 *03
- * bytes marked with * are fixed
- * Message in reply is information about logging configuration of GPS
+ * EverMore will reply with this message (ACK to 8D command):
+ *   10 02 04 38 8D C5 10 03
+ *
+ * 8D EverMore command configures DATUM to WGS-84
+ *
  * */
 {
-   unsigned char msg[] = {
-	   0x81, 	/*  0: msg ID */
-	   0x13,        /*  1: LogRead = 0x13 */
+   unsigned char evrm_select_datum[] = {
+	    0x8d,       /*  0: msg ID, select Datum */
+	    0x00,       /*  1: reserved */
+	    0x01,       /*  2: datum ID, low byte; 0x0001 is for WGS-84 */
+	    0x00,       /*  3: datum ID, high byte; datum ID is int16 */
    };
    bool ok;
    gpsd_report(LOG_PROG, "evermore_probe call\n");
-   ok = evermore_write(session, msg, sizeof(msg));
+   ok = evermore_write(session, evrm_select_datum, sizeof(evrm_select_datum));
    return;
 }
 #endif /* __UNUSED__ */
@@ -648,8 +646,9 @@ static void evermore_probe(struct gps_device_t *session)
 static void evermore_revert(struct gps_device_t *session)
 {
     gpsd_report(LOG_PROG, "evermore_revert call\n");
-    if (session->driver.evermore.back_to_nmea)
-	evermore_mode(session, 0);
+    if (session->driver.evermore.back_to_nmea) {
+        (void) evermore_protocol(session, 1); /* NMEA */
+    }
 }
 #endif /* ALLOW_RECONFIGURE */
 

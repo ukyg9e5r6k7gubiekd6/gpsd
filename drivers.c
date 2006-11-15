@@ -143,9 +143,9 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
     case 3:
-	/* probe for EverMore by trying to read the LogConfig */
-	/* as a probe try to set DATUM to WGS-84 with EverMore binary command */
-	(void)gpsd_write(session, "\x10\x02\x06\x8d\x00\x01\x00\x8e\x10\x03", 10);
+	/* probe for EverMore by command to change DATUM to WGS-84 */
+	/* EverMore GPS replies with ACK packet   \x10\x02\x04\x38\x8D\xC5\x10\x03  */
+	(void)gpsd_write(session, "\x10\x02\x06\x8D\x00\x01\x00\x8E\x10\x03", 10);
 	break;
 #endif /* EVERMORE_ENABLE */
 #ifdef ITRAX_ENABLE
@@ -376,12 +376,12 @@ static struct gps_type_t sirf_nmea = {
 #ifdef EVERMORE_ENABLE
 
 
-static bool evermore_speed(struct gps_device_t *session, unsigned int speed)
+static bool evermore_n_speed(struct gps_device_t *session, unsigned int speed)
 /* change the baud rate, remaining in SiRF NMEA mode */
 {
 	const char *emt_speedcfg;
 
-        gpsd_report(LOG_PROG, "evermore_speed(%d)\n", speed);
+        gpsd_report(LOG_PROG, "evermore_n_speed(%d)\n", speed);
 	switch (speed) {
 	    case 4800:  emt_speedcfg = "\x10\x02\x06\x89\x01\x00\x00\x8a\x10\x03"; break;
 	    case 9600:  emt_speedcfg = "\x10\x02\x06\x89\x01\x01\x00\x8b\x10\x03"; break;
@@ -393,10 +393,10 @@ static bool evermore_speed(struct gps_device_t *session, unsigned int speed)
     return true;
 }
 
-static void evermore_mode(struct gps_device_t *session, int mode)
+static void evermore_n_mode(struct gps_device_t *session, int mode)
 /* change mode to EverMore binary, speed unchanged */
 {
-    gpsd_report(LOG_PROG, "evermore_mode(%d)\n", mode);
+    gpsd_report(LOG_PROG, "evermore_n_mode(%d)\n", mode);
     if (mode == 1) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
 	session->gpsdata.driver_mode = 1;
@@ -406,12 +406,23 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void evermore_configure(struct gps_device_t *session)
+static void evermore_n_configure(struct gps_device_t *session)
 {
     /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT100(0s) */
     const char *emt_nmea_cfg = 
 	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x05\x01\x00\x00\x00\x00\x00\x00\x00\x00\x96\x10\x03";
-    gpsd_report(LOG_PROG, "evermore_configure\n");
+    gpsd_report(LOG_PROG, "evermore_n_configure\n");
+    (void)gpsd_write(session, emt_nmea_cfg, 22);
+}
+#endif /* ALLOW_RECONFIGURE */
+
+#ifdef ALLOW_RECONFIGURE
+static void evermore_n_revert(struct gps_device_t *session)
+{
+    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT100(0s) */
+    const char *emt_nmea_cfg = 
+	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x92\x10\x03";
+    gpsd_report(LOG_PROG, "evermore_n_revert\n");
     (void)gpsd_write(session, emt_nmea_cfg, 22);
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -424,17 +435,17 @@ static struct gps_type_t evermore_nmea = {
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* probe for type info */
 #ifdef ALLOW_RECONFIGURE
-    .configurator  = evermore_configure,/* turn off debuging messages */
+    .configurator  = evermore_n_configure,/* turn off debuging messages */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet    = packet_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,		/* write RTCM data straight */
-    .speed_switcher= evermore_speed,	/* we can change speeds */
-    .mode_switcher = evermore_mode,	/* there's a mode switch */
+    .speed_switcher= evermore_n_speed,	/* we can change speeds */
+    .mode_switcher = evermore_n_mode,	/* there's a mode switch */
     .rate_switcher = NULL,		/* no sample-rate switcher */
     .cycle_chars   = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,		/* no setting-reversion method */
+    .revert         = evermore_n_revert,	/* no setting-reversion method */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no wrapup */
     .cycle          = 1,		/* updates every second */
