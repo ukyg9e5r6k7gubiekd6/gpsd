@@ -27,5 +27,9 @@ html: index.html $(XML:.xml=.html)
 index.html: index.html.in
 	sed -e "/@DATE@/s//`date '+%B %d, %Y'`/" <index.html.in >index.html
 
+# Re-do this and upload it when adding new manuals
+sums: 
+	sha1sum `find vendor-docs -type f -name "*.pdf" -print` >checksums
+
 clean:
 	rm -f $(XML:.xml=.html)

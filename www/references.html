@@ -119,6 +119,11 @@ already been used in the implementation of <code>gpsd</code>; others
 may be used in the future.  Some are theoretically evil, but in
 practice the vendors don't care.</p>
 
+<p>If you have access to a GPS vendor manual we don't already carry,
+please send it to us.  If it's live on the web, mailing the URL will
+be sufficient.  The names in this <a href='checksums'>SHA1 checksums
+file</a> should be a good clue which ones we already have.</p>
+
 <h2>SiRF and SiRF variants</h2>
 
 <dl>
@@ -126,7 +131,7 @@ practice the vendors don't care.</p>
 <dd>The binary protocol for the chip used by over 80% of consumer-grade
 GPSes in 2005.</dd>
 
-<dt><a href='vendor-docs/sirf_protocol.pdf'>SiRF GPS Protocol Reference Manual</a> (revision 1.30)</dt>
+<dt><a href='vendor-docs/sirf/sirf_protocol.pdf'>SiRF GPS Protocol Reference Manual</a> (revision 1.30)</dt>
 <dd>This what SiRF gives OEMs as a reference for SiRF's NMEA 0183
 extensions. Notably, it describes the commands for switching to SiRF
 binary mode.</dd>
@@ -139,11 +144,15 @@ Receiver Macro-Component (offsite link)</a> (version E1, April 2003)</dt>
 aspects of the protocol that SiRF has removed from current versions of the
 protocol documentation.</dd>
 
-<dt><a href='vendor-docs/uBlox.pdf'>u-blox extension to SiRF binary protocol</a> (March 2002)</dt>
+<dt><a href='vendor-docs/sirf/uBlox.pdf'>u-blox extension to SiRF binary protocol</a> (March 2002)</dt>
 <dd>u-blox was an OEM-enhanced firmware variant of the SiRF-1 chip.
 <code>gpsd</code> supports it.  It's been rendered obsolete by the SiRF 2
 and 3 chips.</dd>
 </dl>
+
+<p>For completeness, we carry copies of many ancient manuals for
+various SiRF-based units <a href='vendor-docs/sirf/'>here</a>.  Some of
+these document things SiRF no longer does in its reference.</p>
 
 <h2>Garmin</h2>
 
@@ -155,23 +164,33 @@ GPS 16/17 Series Technical Specification (offsite link)</a> (Revision C, October
 Garmin GPS16 and 17. For programming purposes, effectively identical to their
 earlier reference on the Garmin 15H and 15L.</dd>
 
- <dt><a href="vendor-docs/garmin-binary.pdf">GARMIN GPS Interface Specification</a> (December 1999)</dt>
+ <dt><a href="vendor-docs/garmin/garmin-binary.pdf">GARMIN GPS Interface Specification</a> (December 1999)</dt>
 <dd>The binary protocol used by Garmin USB GPSes. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href='vendor-docs/garmin_simpletext.txt'>Garmin Simple Text Protocol</a></dt>
+<dt><a href='vendor-docs/garmin/garmin_simpletext.txt'>Garmin Simple Text Protocol</a></dt>
 <dd>Some digital cameras are alleged to use this very simple textual
 report format.  Not yet supported by <code>gpsd</code>.</dd>
 </dl>
 
 <h2>Trimble</h2>
 
+<dl>
 <dt><a href="vendor-docs/trimble/tsip-reference.pdf">TSIP reference<a>
-(Revision C, 1999)<dt> <dd>Describes the TSIP binary
+(Revision C, 1999)<dt> 
+<dd>Describes the TSIP binary
 protocol. Supported by <code>gpsd</code>.</dd>
+</dl>
 
-<dt><a href='vendor-docs/trimble/Lassen_iQ_Reference_Manual.pdf'>LassenTM iQ GPS Receiver System Designer Reference Manual</a> (Revision A, February 2005)</dt>
-<dd>A representative modern product based on the TSIP protocol. Supported 
-by <code>gpsd</code>.</dd>
+<p>For completeness, we also carry the manuals for the Trimble
+<a href="trimble-ace2.pdf">Ace 2</a>,
+<a href='trimble-lassen-iq.pdf'>Lassen IQ</a>,
+<a href='trimble-lassen-pt.pdf'>Lassen PT</a>,
+<a href='trimble-lassen-sq.pdf'>Lassen SQ</a>,
+<a href='trimble-lassen-pt.pdf'>Lassen PT</a>,
+and
+<a href='trimble-lassen-iq.pdf'>SVeeEight</a>
+GPS units.  Some of these are more recent than the TSIP Reference and
+may document programming information that the does not.</p>
 
 <h2>Other Current GPSes</h2>
 
