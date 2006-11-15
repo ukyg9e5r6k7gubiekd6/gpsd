@@ -914,9 +914,15 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
     &sirf_nmea,
+#ifdef EVERMORE_ENABLE
+    &evermore_nmea,
+#endif /* EVERMORE_ENABLE */
 #ifdef FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
+#ifdef GARMIN_ENABLE
+    &garmin,
+#endif /* GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
     &tripmate,
 #endif /* TRIPMATE_ENABLE */
@@ -931,18 +937,12 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
 #ifdef GARMIN_ENABLE
-#ifdef NMEA_ENABLE
-    &garmin,
-#endif /* NMEA_ENABLE */
     &garmin_usb_binary,
     &garmin_ser_binary,
 #endif /* GARMIN_ENABLE */
 #ifdef SIRF_ENABLE
     &sirf_binary, 
 #endif /* SIRF_ENABLE */
-#ifdef EVERMORE_ENABLE
-    &evermore_nmea,
-#endif /* EVERMORE_ENABLE */
 #ifdef TSIP_ENABLE
     &tsip_binary, 
 #endif /* TSIP_ENABLE */
