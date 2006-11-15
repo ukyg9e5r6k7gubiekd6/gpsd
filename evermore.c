@@ -603,6 +603,7 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = 0;
     } else {
 	(void)evermore_default(session, 1);
+	session->driver.evermore.back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;
     }
 }

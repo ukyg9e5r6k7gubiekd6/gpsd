@@ -1587,7 +1587,7 @@ int main(int argc, char *argv[])
 	    changed = 0;
 	    if (channel->gpsdata.gps_fd >= 0 && FD_ISSET(channel->gpsdata.gps_fd, &rfds))
 	    {
-		gpsd_report(LOG_RAW, "polling %d\n", channel->gpsdata.gps_fd);
+		gpsd_report(LOG_RAW+1, "polling %d\n", channel->gpsdata.gps_fd);
 		changed = gpsd_poll(channel);
 		if (changed == ERROR_SET) {
 		    gpsd_report(LOG_WARN, "packet sniffer failed to sync up\n");

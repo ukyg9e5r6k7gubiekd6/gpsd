@@ -112,14 +112,14 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
-#ifdef ALLOW_RECONFIGURE
     if (mode == 0) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
 	(void)gpsd_switch_driver(session, "SiRF NMEA");
-    } else
-#endif /* ALLOW_RECONFIGURE */
+    } else {
+	session->driver.sirf.back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;	/* binary */
+    }
 }
 
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
