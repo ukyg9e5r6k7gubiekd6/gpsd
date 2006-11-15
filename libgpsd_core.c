@@ -725,7 +725,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    gpsd_deactivate(session);
+    if (session->gpsdata.gps_fd != -1)
+	gpsd_deactivate(session);
 }
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
