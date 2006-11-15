@@ -667,9 +667,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
+	}
 #endif /* NMEA_ENABLE */
 #ifdef SIRF_ENABLE
-	} else if (session->packet_state == SIRF_RECOGNIZED) {
+	else if (session->packet_state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
 	    unsigned int checksum = (unsigned)((trailer[0] << 8) | trailer[1]);
 	    unsigned int n, crc = 0;
@@ -682,9 +683,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
+	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
-	} else if (session->packet_state == TSIP_RECOGNIZED) {
+	else if (session->packet_state == TSIP_RECOGNIZED) {
             size_t packetlen = session->inbufptr - session->inbuffer;
 	    if ( packetlen < 5) {
 		session->packet_state = GROUND_STATE;
@@ -788,9 +790,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		break;
 	    }
 #endif /* TSIP_ENABLE */
+	}
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
-	} else if (session->packet_state == ZODIAC_RECOGNIZED) {
+	else if (session->packet_state == ZODIAC_RECOGNIZED) {
 	    short len, n, sum;
 	    len = getword(2);
 	    for (n = sum = 0; n < len; n++)
@@ -806,9 +809,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    }
 	    packet_discard(session);
             break;
+	}
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
-	} else if (session->packet_state == EVERMORE_RECOGNIZED) {
+	else if (session->packet_state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
 	    n = 0;
 	    /*@ +charint */
@@ -854,9 +858,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    session->packet_state = GROUND_STATE;
 	    packet_discard(session);
             break;
+	}
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
-	} else if (session->packet_state == ITALK_RECOGNIZED) {
+	else if (session->packet_state == ITALK_RECOGNIZED) {
 	    u_int16_t len, n, sum;
 	    len = (unsigned short)(session->packet_length / 2 - 1);
 	    /*
@@ -874,9 +879,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    }
 	    packet_discard(session);
             break;
+	}
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
-	} else if (session->packet_state == RTCM_RECOGNIZED) {
+	else if (session->packet_state == RTCM_RECOGNIZED) {
 	    /*
 	     * RTCM packets don't have checksums.  The six bits of parity 
 	     * per word and the preamble better be good enough.
@@ -885,8 +891,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    session->packet_state = RTCM_SYNC_STATE;
 	    packet_discard(session);
             break;
-#endif /* RTCM104_ENABLE */
 	}
+#endif /* RTCM104_ENABLE */
     } /* while */
 
     return (ssize_t)fix;
