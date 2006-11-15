@@ -184,6 +184,7 @@ static struct gps_type_t nmea = {
 };
 
 #ifdef ALLOW_RECONFIGURE
+#ifdef GARMIN_ENABLE
 static void garmin_nmea_configurator(struct gps_device_t *session)
 {
 #if defined(NMEA_ENABLE) && !defined(GARMIN_ENABLE_UNUSED)
@@ -213,8 +214,10 @@ static void garmin_nmea_configurator(struct gps_device_t *session)
     (void)gpsd_write(session, "\x10\xFE\x00\x02\x10\x03", 6); */
 #endif /* GARMIN_ENABLE */
 }
+#endif /* GARMIN_ENABLE */
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef GARMIN_ENABLE
 static struct gps_type_t garmin = {
     .typename       = "Garmin Serial",	/* full name of type */
     .trigger        = "$PGRMC,",	/* Garmin private */
@@ -238,6 +241,7 @@ static struct gps_type_t garmin = {
     .wrapup         = NULL,		/* no wrapup */
     .cycle          = 1,		/* updates every second */
 };
+#endif /* GARMIN_ENABLE */
 
 #ifdef FV18_ENABLE
 /**************************************************************************
