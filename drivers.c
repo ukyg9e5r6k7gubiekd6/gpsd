@@ -326,13 +326,13 @@ static void sirf_mode(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
 static void sirf_configurator(struct gps_device_t *session)
 {
-#if defined(BINARY_ENABLE)
+#if defined(BINARY_ENABLE) && defined(SIRF_ENABLE)
     sirf_mode(session, 1);	/* throw us to SiRF binary */
     session->driver.sirf.back_to_nmea = true;
 #else    
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
     (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
-#endif /* BINARY_ENABLE */
+#endif /* defined(BINARY_ENABLE) && defined(SIRF_ENABLE) */
 }
 #endif /* ALLOW_RECONFIGURE */
 
