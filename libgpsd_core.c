@@ -244,6 +244,21 @@ int gpsd_activate(struct gps_device_t *session)
     }
 }
 
+char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
+/* full ID of the device for reports, including subtype */
+{
+    static char buf[128];
+    if ((session == NULL) || (session->device_type == NULL) || 
+	(session->device_type->typename == NULL))
+	return "unknown,";
+    (void)strlcpy(buf, session->device_type->typename, sizeof(buf));
+    if (session->subtype[0] != '\0') {
+	(void)strlcat(buf, " ", sizeof(buf));
+	(void)strlcat(buf, session->subtype, sizeof(buf));
+    }
+    return(buf);
+}
+
 #if defined(BINARY_ENABLE) || defined(RTCM_ENABLE) || defined(NTRIP_ENABLE)
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
@@ -262,21 +277,6 @@ static double degtodm(double a)
     m = modf(a, &t);
     t = floor(a) * 100 + m * 60;
     return t;
-}
-
-char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
-/* full ID of the device for reports, including subtype */
-{
-    static char buf[128];
-    if ((session == NULL) || (session->device_type == NULL) || 
-	(session->device_type->typename == NULL))
-	return "unknown,";
-    (void)strlcpy(buf, session->device_type->typename, sizeof(buf));
-    if (session->subtype[0] != '\0') {
-	(void)strlcat(buf, " ", sizeof(buf));
-	(void)strlcat(buf, session->subtype, sizeof(buf));
-    }
-    return(buf);
 }
 
 /*@ -mustdefine @*/
