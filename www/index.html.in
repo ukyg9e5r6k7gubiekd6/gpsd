@@ -181,6 +181,9 @@ and fix latency.</dd>
 <dt><a href="gpsctl.html">gpsctl.1</a></dt>
 <dd>The <code>gpsctl</code> tool for tweaking GPS settings.</dd>
 
+<dt><a href="gpscat.html">gpscat.1</a></dt>
+<dd>The <code>gpscat</code> tool dumps output from a serial device.</dd>
+
 <dt><a href="sirfmon.html">sirfmon.1</a></dt>
 <dd>The <code>sirfmon</code> packet monitor for SiRF GPSes.</dd>
 

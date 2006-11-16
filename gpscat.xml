@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd">
+<refentry id='gpscat.1'>
+<refmeta>
+<refentrytitle>gpscat</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class='date'>16 Nov 2006</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gpscat</refname>
+<refpurpose>dump the output from a GPS</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>gpscat</command>  
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='plain'><replaceable>serial-port</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><application>gpscat</application> is a very simple little
+program that reads from a specified serial device (presumed to
+have a GPS attached) and dumps the output to standard output.
+Nonprintable characters are rendered as hexadecimal string escapes,
+except for CR followed by LF or LF preceded by CR.  The program
+runs forever until interrupted by ^C or other means.</para>
+
+<para>This program is useful as a sanity checker when examining a new
+device.  It can be used as a primitive NMEA logger, but beware that
+(a) interrupting it likely to cut off output in mid-sentence, and (b)
+to avoid displaying incomplete NMEA sentences right up next to shell
+prompts that often contain a $, it always emits an extra final
+linefeed.</para>
+
+<para>The program accepts the following options:</para>
+<variablelist remap='TP'>
+
+<varlistentry>
+<term>-s</term>
+<listitem>
+<para>Set the port's baud rate before reading.  Specifying -s 4800
+is frequently helpful with unknown devices.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-h</term>
+<listitem>
+<para>Display program usage and exit.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-V</term>
+<listitem>
+<para>Display program version and exit.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title> 
+
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
+project page for <application>gpsd</application> <ulink
+url="http://gpsd.berlios.de/">here</ulink>.</para>
+</refsect1>
+</refentry>

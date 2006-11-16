@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+#
+# Display GPS output.  Hexify it if necessary.
+#
+import os, sys, termios, select, getopt, curses.ascii
+
+NMEA_MAX = 82
+
+def hexdump(str):
+    dmp = ""
+    for (i, ch) in enumerate(str):
+        if curses.ascii.isprint(ord(ch)):
+            dmp += ch
+        elif ch == '\r' and i+1 < len(str) and str[i+1] == '\n':
+            dmp += ch
+        elif ch == '\n' and i-1 >= 0 and str[i-1] == '\r':
+            dmp += ch
+        else:
+            dmp += "\\x%02x" % ord(ch)
+    return dmp
+
+if __name__ == '__main__':
+    buf = ""
+    try:
+        try:
+            (options, arguments) = getopt.getopt(sys.argv[1:], "hs:V")
+        except getopt.GetoptError, msg:
+            print "gpscat: " + str(msg)
+            raise SystemExit, 1
+
+        speed = -1
+        for (switch, val) in options:
+            if switch == '-s':
+                speed = int(val)
+            elif switch == '-h':
+                sys.stderr.write("usage: gpscat [-s] serial-port\n")
+                raise SystemExit, 0
+            elif switch == '-V':
+                sys.stderr.write("gpscat at svn revision $Rev$\n")
+                raise SystemExit, 0
+
+        tty = os.open(arguments[0], os.O_RDWR)
+        if speed != -1:
+            (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(tty)
+            try:
+                ispeed = ospeed = eval("termios.B%d" % speed)
+            except AttributeError:
+                sys.stderr.write("gpscat: unknown baud rate %d\n" % speed)
+                raise SystemExit, 1
+            termios.tcsetattr(tty, termios.TCSANOW,
+                         [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
+
+        poller = select.poll()
+        poller.register(tty, select.POLLIN)
+
+        while True:
+            (fd, event) = poller.poll()[0]
+            if fd == tty and event == select.POLLIN:
+                buf += os.read(tty, NMEA_MAX)
+                if not buf.endswith("\r"):
+                    sys.stdout.write(hexdump(buf))
+                    buf = ""
+    except KeyboardInterrupt:
+        sys.stdout.write("\n")
+        raise SystemExit, 0
+
+
+

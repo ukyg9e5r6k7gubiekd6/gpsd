@@ -180,6 +180,7 @@ man_MANS = \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
 	gpsctl.1 \
+	gpscat.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \
@@ -208,6 +209,8 @@ libgpsmm.3: libgpsmm.xml
 libgpsd.3: libgpsd.xml
 
 gpsctl.1: gpsctl.xml
+
+gpscat.1: gpsctl.xml
 
 gpsprof.1: gpsprof.xml
 

@@ -109,6 +109,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %files -n gpsd-devel
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING TODO
+%attr(755, root, root) %{_bindir}/gpscat
 %attr(755, root, root) %{_bindir}/gpsfake
 %attr(755, root, root) %{_bindir}/rtcmdecode
 %attr(755, root, root) %{_bindir}/gpsflash
@@ -116,6 +117,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h
+%{_mandir}/man1/gpscat.1*
 %{_mandir}/man1/gpsfake.1*
 %{_mandir}/man1/rtcmdecode.1*
 %{_mandir}/man1/gpsflash.1*
@@ -151,7 +153,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get gpsd
   working with EarthMates again, this had been broken since 2.15.  Massive 
   string safety audit and OpenBSD port by Chris Kuethe.  J command added.
-  The gpsctl tool was added.  Switched to lesstif from openmotif.
+  The gpsctl and gpscat tools were added.  Switched to lesstif from openmotif.
   Better autodetection of DLE-led packet protocols, notably TSIP and
   Garmin binary.  Fixed buggy parsing and generation of PGRME.
 
