@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     struct gps_type_t *forcetype = NULL;
     struct gps_type_t **dp;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n] [-s speed] [-V] [-t devtype] <device>\n"
+#define USAGE	"usage: gpsctl [-l] [-b | -n] [-D n] [-s speed] [-V] [-t devtype] <device>\n"
     while ((option = getopt(argc, argv, "bfhlns:t:D:V")) != -1) {
 	switch (option) {
 	case 'b':
