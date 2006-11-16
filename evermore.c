@@ -584,7 +584,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
 	    0x00,    /* 2: reserved */
 	    0x00,    /* 3: reserved */
     };
-    tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
+    /*@i1@*/tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
     return evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config));
 }

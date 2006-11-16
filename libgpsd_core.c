@@ -97,8 +97,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
 void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
 {
-    gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
-		session->gpsdata.gps_device, session->gpsdata.gps_fd);
 #ifdef NTPSHM_ENABLE
     (void)ntpshm_free(session->context, session->shmindex);
     session->shmindex = -1;
@@ -114,6 +112,8 @@ void gpsd_deactivate(struct gps_device_t *session)
 #endif /* ALLOW_RECONFIGURE */
     if (session->device_type != NULL && session->device_type->wrapup != NULL)
 	session->device_type->wrapup(session);
+    gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
+		session->gpsdata.gps_device, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
 }
 
