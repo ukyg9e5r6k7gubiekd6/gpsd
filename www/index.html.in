@@ -5,6 +5,8 @@
    <meta name="Author" content="Remco Treffkorn">
    <meta name="Description" content="gpsd is a utility that can listen to a GPS or Loran Receiver and re-publish the positional data in a simpler format.">
    <meta name="Keywords" content="GPS, translator, GIS">
+   <!-- the following is a verification tag for Google Analytics -->
+   <meta name="verify-v1" content="kb4f3qxJPMaOltYTpJHnvbnteza1PHO4EhrRIfcq2gk=" />
    <title>GPSd &mdash; Put your GPS on the net!</title>
    <link rel="stylesheet" href="main.css" type="text/css"/>
 </head>
