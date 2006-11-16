@@ -127,9 +127,8 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     switch (seq) {
 #ifdef SIRF_ENABLE
     case 0:
-	/* probe for SiRF --. */
+	/* probe for SiRF -- SiRF-II will respond with $Ack Input105. */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF666");
 	break;
 #endif /* SIRF_ENABLE */
 #ifdef NMEA_ENABLE
