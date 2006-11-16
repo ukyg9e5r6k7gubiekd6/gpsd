@@ -1389,10 +1389,6 @@ int main(int argc, char *argv[])
 
     /* user may want to re-initialize all channels */
     if ((st = setjmp(restartbuf)) > 0) {
-	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	    if (allocated_channel(&channels[dfd]))
-		(void)gpsd_wrap(&channels[dfd]);
-	}
 	if (st == SIGHUP+1)
 	    gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
 	else if (st > 0) {
@@ -1402,6 +1398,10 @@ int main(int argc, char *argv[])
 	    if (pid_file)
 		(void)unlink(pid_file);
 	    exit(10 + st);
+	}
+	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
+	    if (allocated_channel(&channels[dfd]))
+		(void)gpsd_wrap(&channels[dfd]);
 	}
     }
 
