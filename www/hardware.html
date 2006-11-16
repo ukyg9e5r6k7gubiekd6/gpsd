@@ -27,7 +27,6 @@ which this GPS is known to have been successfully tested.</p>
 <th>Vendor</th>
 <th>Works with</th>
 <th>NMEA version</th>
-<th width="10%">Sentences</th>
 <th width="50%">Notes</th>
 </tr>
 
@@ -40,18 +39,6 @@ which this GPS is known to have been successfully tested.</p>
 <td><a href="http://www.garmin.com">Garmin</a></td>
 <td>2.3</td>
 <td>2.0</td>
-<td>GPBOD<br/>
-GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPRMB<br/>
-GPRMC<br/>
-GPRTE<br/>
-GPGSV<br/>
-GPWPL<br/>
-PGRME<br/>
-PGRMM<br/>
-PGRMZ</td>
 <td>Garmin 12XL and 45 are nearly identical and should work as well. Details
 on Garmin's proprietary protocol can be found
 <a href="http://www.garmin.com/support/commProtocol.html">here</a>.</td>
@@ -67,18 +54,6 @@ on Garmin's proprietary protocol can be found
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
 <td>2.7</td>
 <td>2.0</td>
-<td>GPBOD<br/>
-GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPGLL<br/>
-GPRMB<br/>
-GPRMC<br/>
-GPRTE<br/>
-GPWPL<br/>
-PGRME<br/>
-PGRMM<br/>
-PGRMZ</td>
 <td>Reported by Ron Marosko, Jr. &lt;rmarosko&#x40;wirelessfrontier.net&gt;
 and Amaury Jacquot &lt;sxpert@esitcom.org&gt;.<br/>
 DGPS information in GPGGA sentence is not returned. Magnetic variation
@@ -97,7 +72,6 @@ with PGRMC1.</td>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
 <td>2.5</td>
 <td>N/A</td>
-<td>Garmin binary data only, no NMEA.</td>
 <td>The USB version requires the Linux kernel garmin_usb driver; DOP
 (Dilution of Precision) information is not available (Garmin protocol
 includes EPE only); gpsd uses EPE to approximate DOP. Magnetic variation
@@ -115,18 +89,6 @@ WAAS is supported.</td>
 <td><a href='http://www.garmin.com/'>Garmin</a></td>
 <td>2.5</td>
 <td>2.0 and 2.3</td>
-<td>GPALM<br/>
-GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-PGRMB<br/>
-PGRME<br/>
-PGRMF<br/>
-PGRMT<br/>
-PGRMV</td>
 <td>The RS232 versions emit NMEA and are found by normal autoconfiguration.
 GPS-18 LVC and GPS-18 LVC/5m have PPS outputs. WAAS is supported.</td>
 </tr>
@@ -141,16 +103,6 @@ GPS-18 LVC and GPS-18 LVC/5m have PPS outputs. WAAS is supported.</td>
 <td><a href="http://www.garmin.com">Garmin</a></td>
 <td>2.13</td>
 <td>3.0</td>
-<td>GPBOD<br/>
-GPGLL<br/>
-GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMB<br/>
-GPRMC<br/>
-GPRTE<br/>
-PGRME<br/>
-PGRMZ</td>
 <td>Submitted by Jose Luis Domingo Lopez &lt;jdomingo&#x40;24x7linux.com&gt;</td>
 </tr>
 <!-- End Garmin Geko -->
@@ -164,21 +116,6 @@ PGRMZ</td>
 <td><a href="http://www.garmin.com">Garmin</a></td>
 <td>2.13</td>
 <td>?</td>
-<td>
-GPBOD<br/>
-GPBWC<br/>
-GPGGA<br/>
-GPGLL<br/>
-GPRMB<br/>
-GPRMC<br/>
-GPSD<br/>
-GPVTG<br/>
-GPXTE<br/>
-HCHDG<br/>
-PGRME<br/>
-PGRMM<br/>
-PGRMZ<br/>
-</td>
 <td>
 Sebastian Niehaus &lt;killedbythoughts&#x40;mindcrime.net&gt;
 He says it's "Software Version 3.70".
@@ -195,21 +132,6 @@ He says it's "Software Version 3.70".
 <td><a href="http://www.garmin.com">Garmin</a></td>
 <td>2.32</td>
 <td>?</td>
-<td>
-GPGLL<br/>
-GPGGA<br/>
-GPGSV<br/>
-GPGSA<br/>
-GPVTG<br/>
-GPRMC<br/>
-PGRME<br/>
-HDHDG<br/>
-GPRMB<br/>
-GPRTE<br/>
-GPBOD<br/>
-PGRMZ<br/>
-PGRMM<br/>
-</td>
 <td>Submitted by Reed Hedges &lt;reed&#x40;interreality.org&gt;</td>
 </tr>
 <!-- End Garmin eTrex -->
@@ -223,11 +145,6 @@ PGRMM<br/>
 <td><a href="http://www.haicom.com.tw/">Haicom</a></td>
 <td>2.25</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>From Denis Perchine &lt;dyp&#x40;perchine.com&gt;<br/>
 NMEA works, but SiRF binary does not. This device seems to ignore the
 $PSRF100 mode switch command. (SiRF binary may be available on the
@@ -245,12 +162,6 @@ with XTrac Firmware.</td>
 <td><a href="http://www.holux.com.tw">Holux</a></td>
 <td>2.24</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td> Reported by  Patrick L. McGillan &lt;pmcgillan&#x40;pateri.com&gt;.</td>
 </tr>
 <!-- End Holux GM-210 -->
@@ -264,11 +175,6 @@ GPVTG</td>
 <td><a href='http://www.globalsat.com.tw/english/products.php'>GlobalSat</a></td>
 <td>2.20</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>Reported by Frank Nicholas &lt;frank&#x40;nicholasfamilycentral.com&gt;.</td>
 </tr>
 <!-- End Globalsat BT-318 -->
@@ -282,11 +188,6 @@ GPVTG</td>
 <td><a href="http://www.holux.com.tw">Holux</a></td>
 <td>2.19</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>4 color LED showing: Bluetooth, Navigation Update and Battery and
 Charger Status Indication. FLASH based program memory. Firmware upgradeable
 through serial interface. Water resistant.</td>
@@ -302,10 +203,6 @@ through serial interface. Water resistant.</td>
 <td><a href='http://www.billionton.com/english/index.htm'>Billionton</a></td>
 <td>2.16</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPRMC<br/>
-GPGSA<br/>
-GPGSV</td>
 <td>Reported by Oleg Gusev &lt;oleg&#x40;crista.uni-wuppertal.de&gt;.<br/>
 Uses SiRF firmware version 220.006.000ES. Accepts WAAS Mode Disable
 (<tt>$PSRF108,00*02</tt>) and WAAS Mode Enable (<tt>$PSRF108,01*03</tt>)
@@ -322,12 +219,6 @@ controls.</td>
 <td><a href='http://www.techwayinc.com.tw/'>Techway</a></td>
 <td>2.3</td>
 <td>2.x</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>Advertises that it's waterproof.</td>
 </tr>
 <!-- End Techway TP-051 -->
@@ -341,11 +232,6 @@ GPVTG</td>
 <td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
 <td>2.24</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>SiRF firmware level 231ES (XTrac). Haicom provided a test unit. Manual
 states incorrectly that VTG is off by default.</td>
 </tr>
@@ -381,12 +267,6 @@ claims it is waterproof (1 meter), WAAS and EGNOS are supported.</td>
 <td><a href="http://www.pharosgps.com/">Pharos</a></td>
 <td>2.23</td>
 <td>2.3</td>
-<td>GPGSV<br/>
-GPRMC<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGGA<br/>
-GPVTG</td>
 <td>Reported by Robert Pouliot &lt;krynos&#x40;saturnus.com&gt;<br/>
 The Pharos comes with adaptors for SDIO, CF, USB and plain RS232. Usually
 ships with XTrac firmware. It is strongly recommended that this device not be
@@ -404,12 +284,6 @@ fail to work afterward. May come bundled with Microsoft Streets and Trips.</td>
 <td><a href="http://www.navisky.com/">NaviSky</a></td>
 <td>2.24</td>
 <td>2.x</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>Reported by Jeff Francis &lt;jeff&#x40;gritch.org&gt;<br/>
 Included with Rand McNally's horrible Windows navigation software.
 </td>
@@ -425,12 +299,6 @@ Included with Rand McNally's horrible Windows navigation software.
 <td><a href='http://www.usglobalsat.com/'>GlobalSat</a>; OEM for many</td>
 <td>2.24</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>GlobalSat provided three test units, SiRF firmware level 231ES.
 Older versions of the BU-303 had a <a href='bu_303b.html'>design
 defect</a> that made it likely to fail if subjected to vibration or
@@ -449,12 +317,6 @@ works but no test hardware.</td>
 <td><a href='http://www.usglobalsat.com/'>USGlobalSat</a> (formerly Rayming)</td>
 <td>2.16</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td> We tested a version with SiRF Firmware level 231ES. The <a
 href='http://ftdi-usb-sio.sourceforge.net/'>FTDI USB-to-serial chip</a> is
 supported only as alpha software not yet incorporated into the Linux kernel,
@@ -473,12 +335,6 @@ USB-to-serial chip.</td>
 <td><a href='http://www.delorme.com/'>DeLorme</a></td>
 <td>2.5</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPGLL<br/>
-GPVTG</td>
 <td>This is the replacement for the old Zodiac version that spoke Rockwell
 binary protocol. Some other sentences can be enabled. Requires a 2.6.10 or
 better kernel for the Cypress USB-HID support.</td>
@@ -494,12 +350,6 @@ better kernel for the Cypress USB-HID support.</td>
 <td><a href='http://www.royaltek.com/'>RoyalTek</a></td>
 <td>1.97</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSA</td>
 <td>There's an RS232 variant as well, not yet tested.</td>
 </tr>
 <!-- End Royaltek Sapphire USB -->
@@ -513,12 +363,6 @@ GPGSA</td>
 <td><a href='http://www.semsons.com/gpshardware.html'>Semsons &amp; Co.</a></td>
 <td>2.28</td>
 <td>2.20</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSA</td>
 <td>Reported by Lance Fetters &lt;ashikase&#x40;users.sourceforge.net&gt;<br/>
 This GPS emits a weirdly broken GSA sentence that crashed gpsd versions prior
 to 2.28. Serial parameters default to 38400; 8, N, 1.
@@ -536,12 +380,6 @@ May come bundled with Microsoft Streets and Trips.
 <td><a href='http://www.usglobalsat.com/'>USGlobalSat</a></td>
 <td>pre-2.29</td>
 <td>2.3</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSA</td>
 <td>Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;.<br/>
 This receiver, or at least the firmware it ships with does not support PPS
 timing output, nor does it support WAAS - something born out by the claimed
@@ -560,11 +398,6 @@ could be show-stoppers for various applications.</td>
 <td><a href='http://www.haicom.com.tw/'>Haicom</a></td>
 <td>2.6</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>Probably uses PL2303 but we have not verified this.</td>
 </tr>
 <!-- End Haicom HI-204E -->
@@ -578,9 +411,6 @@ GPVTG</td>
 <td><a href='http://www.delorme.com/'>DeLorme</a></td>
 <td>2.0</td>
 <td>2.2?</td>
-<td>GPRMC<br/>
-GPGSA<br/>
-PRWIZCH</td>
 <td>The old Zodiac version spoke Rockwell binary protocol. These models
 have been discontinued but are still common.</td>
 </tr>
@@ -591,18 +421,10 @@ have been discontinued but are still common.</td>
 <td><a href='http://www.sanav.com/gps_engine_board/fv-18.htm'>FV-18</a></td>
 <td>Good</td>
 <td>FV-18</td>
-<td>RS-232 (5V TTL)</td>
+<td>RS-232<br/>(5V TTL)</td>
 <td><a href='http://www.sanav.com/'>San Jose Navigation</a></td>
 <td>2.0</td>
 <td>2.3</td>
-<td>GPDTM<br/>
-GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPZDA</td>
 <td>Special gpsd support uses 8N2 and requests sentences that gpsd requires.
 OEM module only, not a retail version.</td>
 </tr>
@@ -617,12 +439,6 @@ OEM module only, not a retail version.</td>
 <td><a href='http://www.delorme.com/'>DeLorme</a></td>
 <td>1.97</td>
 <td>?</td>
-<td>GPGSA<br/>
-GPGGA<br/>
-GPGSV<br/>
-GPRMC<br/>
-PRWIRID<br/>
-PRWIZCH</td>
 <td> Discontinued sometime before November 1998. Takes optional latitude
 and longitude initialization.</td>
 <!-- End Delorme Tripmate -->
@@ -636,8 +452,6 @@ and longitude initialization.</td>
 <td><a href='http://www.magellangps.com'>Magellan</a></td>
 <td>2.24</td>
 <td>?</td>
-<td>GPGRMB<br/>
-GPRMC</td>
 <td>Reported by Gary E. Miller &lt;gem&#x40;rellim.com&gt;.<br/>
 It was cool in its day, now it's a dinosaur mainly good for regression
 testing. NMEA time is accurate to about 500mS.</td>
@@ -653,12 +467,6 @@ testing. NMEA time is accurate to about 500mS.</td>
 <td><a href='http://www.motorola.com/ies/GPS/products_legacy.html'>Motorola</a></td>
 <td>2.20</td>
 <td>2.2</td>
-<td>GPGGA<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPZDA</td>
 <td>Reported by Wojciech Kazubski &lt;wk&#x40;ire.pw.edu.pl&gt;.<br/>
 RTCM input, no WAAS. In binary mode can deliver differential correction for
 another Oncore GT+. Similar Motorola Oncore UT timing receiver has less
@@ -675,9 +483,7 @@ functions but better timing accuracy.</td>
 <td><a href="http://www.trimble.com/">Trimble</a></td>
 <td>2.26</td>
 <td>2.1</td>
-<td>GPGGA<br/>
-GPVTG</td>
-<td> Reported by Rob Janssen</td>
+<td> Reported by Rob Janssen.</td>
 </tr>
 <!-- End Trimble Lassen SK -->
 
@@ -690,12 +496,6 @@ GPVTG</td>
 <td><a href='http://www.magellangps.com'>Magellan</a></td>
 <td>2.21</td>
 <td>v1.5 APA, v1.5 XTE, v2.1 GSA</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-PMGNST</td>
 <td>Reported by Chris S. Newell &lt;chris&#x40;newellfamily.net&gt;</td>
 </tr>
 <!-- End Magellan Meridian Platinum -->
@@ -709,13 +509,6 @@ PMGNST</td>
 <td><a href='http://www.sanav.com/'>San Jose Navigation</a></td>
 <td>2.21</td>
 <td>2.x</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPZDA</td>
 <td>Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.<br/>
 Reports bad checksum when it doesn't have a fix.</td>
 </tr>
@@ -730,12 +523,6 @@ Reports bad checksum when it doesn't have a fix.</td>
 <td><a href='http://www.bona.com.tw:8080/product/GPS-USB.htm'>BONA Computech</a></td>
 <td>2.28</td>
 <td>3.0</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPGSV<br/>
-GPRMC<br/>
-GPVTG</td>
 <td>Reported by Romain Goyet &lt;r.goyet&#x40;gmail.com&gt;.<br/>
 The chipset manufacturer's webpage is <a href='http://www.unav-micro.com/chipsets.htm'>here</a>.</td>
 </tr>
@@ -750,20 +537,9 @@ The chipset manufacturer's webpage is <a href='http://www.unav-micro.com/chipset
 <td><a href='http://www.cpit.com/'>Central Pacific</a></td>
 <td>pre-2.29</td>
 <td>3.01</td>
-<td>GPGGA<br/>
-GPGLL<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPZDA<br/>
-GPVTG<br/>
-PNMRX300*<br/>
-PNMRX301*<br/>
-PNMRX302*<br/>
-PNMRX303*<br/>
-PNMRX304*<br/>
-PNMRX603</td>
 <td> Reported by Tobias Minich &lt;belgabor&#x40;gmx.de&gt; <ul>
-<li>The marked (*) sentences are only sent on change or by request</li>
+<li>There are proprietary PNMRX{30[0124],603} sentences that are only sent on
+change or by request</li>
 <li>Several sentences can be sent to the device to change settings or
 request information. DO NOT USE THE PNMRX100 SENTENCE TO CHANGE THE BAUD
 RATE! This is not supported by the bluetooth chip on the device.</li>
@@ -786,13 +562,6 @@ may differ from the syntax found in several documents on the net.</li>
 <td>2.20</td>
 <td>2.2</td>
 <td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSV<br/>
-</td>
-<td>
 The usb cable is a separate item to order. you can also order an
 rs232 cable or a pda cable. Submitted by Koos van den Hout,
 &gt;koos&#x40;kzdoos.xs4all.nl&gt;
@@ -810,12 +579,6 @@ rs232 cable or a pda cable. Submitted by Koos van den Hout,
 <td>2.13</td>
 <td>?</td>
 <td>
-GGA(1sec)<br/>
-GSA(5sec)<br/>
-GSV(5sec)<br/>
-RMC(1sec)<br/>
-VTG(1sec)</td>
-<td>
 Michal Panczyk &lt;mpanczyk&#x40;gmail.com&gt;
 </td>
 </tr>
@@ -830,13 +593,6 @@ Michal Panczyk &lt;mpanczyk&#x40;gmail.com&gt;
 <td><a href='http://www.u-blox.de/'>ublox</a></td>
 <td>2.13</td>
 <td>?</td>
-<td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSV<br/>
-</td>
 <td>
 Sends 'E' in second field of GSA record, not an NMEA value.
 Actually sends '6' in the GGA status record for dead-reckoning fixes.
@@ -855,13 +611,6 @@ Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
 <td>2.32</td>
 <td>?</td>
 <td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPVTG<br/>
-GPGSV<br/>
-</td>
-<td>
 Submitted by Dennis van Zuijlekom &lt;tmib&#x40;xs4all.nl&gt;.
 </td>
 </tr>
@@ -879,13 +628,6 @@ Submitted by Dennis van Zuijlekom &lt;tmib&#x40;xs4all.nl&gt;.
 <td>2.32</td>
 <td>?</td>
 <td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPGSV<br/>
-PTTK<br/>
-</td>
-<td>
 Not a complete GPS, but a chipset. It's running with an external
 gyro on a our self-developed board. The device is configured to 
 send NMEA by default. But gpsd spots that it supports SiRF-II 
@@ -895,7 +637,6 @@ Andreas Stricker &lt;andreas.stricker&#x40;fela.ch&gt;
 </td>
 </tr>
 <!-- End Navman Jupiter 20 -->
-
 
 <!--  Begin eXplorist 210 -->
 <tr>
@@ -907,13 +648,6 @@ Andreas Stricker &lt;andreas.stricker&#x40;fela.ch&gt;
 <td><a href='http://www.magellangps.com'>Magellan</a></td>
 <td>2.32</td>
 <td>2.1</td>
-<td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPGSV<br/>
-GPGLL<br/>
-</td>
 <td>
 USB has 3 modes &mdash; NMEA data comm (3 submodes): outputs GPS data
 (creates /dev/ttyACM0), USB file transfer: transfer files (creates
@@ -934,13 +668,6 @@ under &lt;NMEA Data Comm&gt;.  Submitted by paul van den berg
 <td><a href="http://www.holux.com.tw">Holux</a></td>
 <td>2.30</td>
 <td>2.2</td>
-<td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPGSV<br/>
-GPVTG<br/>
-</td>
 <td>
 Doesn't report altitude reliably.
 Optional interfaces:
@@ -965,13 +692,6 @@ Submitted by "K&eacute;vin Redon" &lt;kevredon&#x40;gmail.com&gt;
 <td>2.34</td>
 <td>?</td>
 <td>
-GPGGA<br/>
-GPGSA<br/>
-GPRMC<br/>
-GPGSV<br/>
-GPVTG<br/>
-</td>
-<td>
 The vendor is out of business, but there are lots of these still
 around in 2006.  Complete documentation for this OEM module has been
 <a href="vendor-docs/axiom/">archived here</a>.
@@ -990,15 +710,6 @@ Submitted by "Eric S. Raymond" &lt;esr&#x40;thyrsus.com&gt;
 <td>2.34</td>
 <td>3.0</td>
 <td>
-GPGGA<br/>
-GPGSA<br/>
-GPGLL<br/>
-GPRMC<br/>
-GPGSV<br/>
-GPVTG<br/>
-GPZDA<br/>
-</td>
-<td>
 iTalk support in gpsd is currently unusable, but the device functions
 well as a generic NMEA device.
 Submitted by "Chris Kuethe" &lt;chris.kuethe&#x40;gmail.com&gt;
@@ -1015,7 +726,6 @@ Submitted by "Chris Kuethe" &lt;chris.kuethe&#x40;gmail.com&gt;
 <td>vendor, with link to site</td>
 <td>gpsd version used for testing</td>
 <td>NMEA version it emits</td>
-<td>list of sentences it emits</td>
 <td>notes</td>
 </tr>
 -->
@@ -1036,7 +746,6 @@ gives a vendor and product ID, send us those numbers.)</li>
 <li>The vendor</li>
 <li>Version of gpsd you tested with</li>
 <li>NMEA version it emits, or '?' if the documentation doesn't say</li>
-<li>A list of NMEA sentences it emits</li>
 <li>Notes on the device</li>
 </ol>
 
