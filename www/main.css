@@ -4,6 +4,9 @@
  * possible I have moved all dimensions to be relative to the associated font 
  * size. Finally, light grey is a great background color, but lousy for
  * foreground text on white.
+ *
+ * The only size in here that's tied to something external is the 8.8 for
+ * the menu width.  This is sized to just fit a Google "wide skyscraper" ad.
  */
 
 body {
@@ -67,7 +70,7 @@ body>#Header {height:14px;}
 #Content {
 	/* Left margin is menu width + 3em
 	 */
-	margin:0 50px 50px 11em;
+	margin:0 50px 50px 11.8em;
 	padding:10px;
 	}
 
@@ -75,17 +78,16 @@ body>#Header {height:14px;}
 	position:absolute;
 	top:80px;
 	left:20px;
-	width:8em;
+	width:8.8em;
 	padding:0.5em;
 	background-color:#eee;
 	border:1px dashed #999;
 /* Again, the ugly brilliant hack. */
 	voice-family: "\"}\"";
 	voice-family:inherit;
-	width:8em;
 	}
 /* Again, "be nice to Opera 5". */
-body>#Menu {width:8em;}
+body>#Menu {width:8.8em;}
 
 @media print {
 	#Content {
@@ -120,3 +122,8 @@ body>#Menu {width:8em;}
 	font-size:small;
 	text-indent: 0;
 }
+/*
+Local Variables:
+compile-command: "(scp main.css esr@shell.berlios.de:/home/groups/gpsd/htdocs)"
+End:
+*/
