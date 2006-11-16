@@ -561,9 +561,6 @@ static bool assign_channel(struct subscriber_t *user)
 	gpsd_report(LOG_PROG,"client(%d): channel %d already active.\n",
 		    user-subscribers, user->device->gpsdata.gps_fd);
     else {
-#ifndef FIXED_PORT_SPEED
-	gpsd_deactivate(user->device);
-#endif
 	if (gpsd_activate(user->device) < 0) {
 	    
 	    gpsd_report(LOG_ERROR, "client(%d): channel activation failed.\n", user-subscribers);

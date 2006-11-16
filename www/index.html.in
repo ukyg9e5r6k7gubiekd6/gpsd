@@ -94,7 +94,7 @@ href="http://qpegps.sourceforge.net/">gpeGPS</a>, <a
 href="http://www.gnustep.it/enrico/position/">position</a> and
 <a href="http://roadmap.digitalomaha.net/index.html">roadmap</a>.</p>
 
-<p>Under Linux,<code>gpsd</code> normally runs with zero
+<p>Under Linux, <code>gpsd</code> normally runs with zero
 configuration.  The RPM installs hotplug scripts that do the right
 thing when a USB device goes active, launching <code>gpsd</code> if
 needed and telling <code>gpsd</code> which device to read data from.
