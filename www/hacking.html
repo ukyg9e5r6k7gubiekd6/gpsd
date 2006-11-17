@@ -185,15 +185,16 @@ choose simplicity of interface and zero administration over 100%
 coverage.</p>
 
 <p>Here is a concrete example of how this principle applies.  At least
-one very low-end GPS chipset does not deliver correct checksums on the
-packets it ships to a host unless it has a fix.  Typically, GPSes do
-not have a fix when they are plugged in, at the time gpsd must
-recognize and autoconfigure the device.  Thus, supporting this chipset
-would require that we either (a) disable packet integrity checking in
-the autoconfiguration code, making detection of other more
-well-behaved devices unreliable, or (b) add an invocation switch to
-disable packet integrity checking for that chipset alone.  We refuse
-to do either, and do not support this chipset.</p>
+one very low-end GPS chipset (the GM-38 from Tri-M Systems) does not
+deliver correct checksums on the packets it ships to a host unless it
+has a fix.  Typically, GPSes do not have a fix when they are plugged
+in, at the time gpsd must recognize and autoconfigure the device.
+Thus, supporting this chipset would require that we either (a) disable
+packet integrity checking in the autoconfiguration code, making
+detection of other more well-behaved devices unreliable, or (b) add an
+invocation switch to disable packet integrity checking for that
+chipset alone.  We refuse to do either, and do not support this
+chipset.</p>
 
 <h2 id="tuning">The testing and tuning tools</h2>
 
@@ -491,8 +492,7 @@ polling for input from one of three sources:</p>
 </ol>
 
 <p>The daemon only connects to a GPS when clients are connected to it.
-Otherwise all GPS devices are closed and the daemon is quiescent, but
-retains fix and timestamp data from the last active period.</p>
+Otherwise all GPS devices are closed and the daemon is quiescent.</p>
 
 <p>All writes to client sockets go through throttled_write().
 This code addresses two cases.  First, client has dropped the connection.
