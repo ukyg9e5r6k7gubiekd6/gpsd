@@ -60,16 +60,8 @@ speed_t gpsd_get_speed(struct termios* ttyctl)
 
 bool gpsd_set_raw(struct gps_device_t *session)
 {
-    if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0) {
-	gpsd_report(LOG_ERROR,
-		    "error getting port attributes: %s\n",strerror(errno));
-	return false;
-    }
-    memcpy(&session->ttyset,&session->ttyset_old,sizeof(session->ttyset));
-
     (void)cfmakeraw(&session->ttyset);
-
-    if (tcsetattr( session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
+    if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
  	gpsd_report(LOG_ERROR,
 		    "error changing port attributes: %s\n",strerror(errno));
  	return false;
@@ -226,27 +218,6 @@ int gpsd_open(struct gps_device_t *session)
 
     session->packet_type = BAD_PACKET;
     if (isatty(session->gpsdata.gps_fd)!=0) {
-#ifdef NON_NMEA_ENABLE
-	struct gps_type_t **dp;
-
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
-	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
-		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
-		/*@i1@*/session->device_type = *dp;
-		if (session->device_type->probe_subtype !=NULL)
-		    session->device_type->probe_subtype(session, session->packet_counter = 0);
-#ifdef ALLOW_RECONFIGURE
-		if (session->context->enable_reconfigure 
-			&& session->device_type->configurator != NULL)
-		    session->device_type->configurator(session);
-#endif /* ALLOW_RECONFIGURE */
-		/*@i1@*/return session->gpsdata.gps_fd;
-	    }
- 	}
-	gpsd_report(LOG_PROG, "no probe matched...\n");
-#endif /* NON_NMEA_ENABLE */
-
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0)
 	  return -1;

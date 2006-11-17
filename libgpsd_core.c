@@ -211,6 +211,26 @@ int gpsd_activate(struct gps_device_t *session)
     if (gpsd_open(session) < 0)
 	return -1;
     else {
+#ifdef NON_NMEA_ENABLE
+	struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
+		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
+		/*@i1@*/session->device_type = *dp;
+		if (session->device_type->probe_subtype !=NULL)
+		    session->device_type->probe_subtype(session, session->packet_counter = 0);
+#ifdef ALLOW_RECONFIGURE
+		if (session->context->enable_reconfigure 
+			&& session->device_type->configurator != NULL)
+		    session->device_type->configurator(session);
+#endif /* ALLOW_RECONFIGURE */
+		/*@i1@*/return session->gpsdata.gps_fd;
+	    }
+ 	}
+	gpsd_report(LOG_PROG, "no probe matched...\n");
+#endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
 	session->driver.sirf.satcounter = 0;
