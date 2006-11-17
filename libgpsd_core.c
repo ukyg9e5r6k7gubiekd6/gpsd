@@ -105,13 +105,6 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-#ifdef ALLOW_RECONFIGURE
-    if (session->context->enable_reconfigure 
-		&& session->device_type->revert != NULL)
-	session->device_type->revert(session);
-#endif /* ALLOW_RECONFIGURE */
-    if (session->device_type != NULL && session->device_type->wrapup != NULL)
-	session->device_type->wrapup(session);
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
@@ -745,8 +738,16 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    if (session->gpsdata.gps_fd != -1)
+    if (session->gpsdata.gps_fd != -1) {
+#ifdef ALLOW_RECONFIGURE
+	if (session->context->enable_reconfigure 
+		    && session->device_type->revert != NULL)
+	    session->device_type->revert(session);
+#endif /* ALLOW_RECONFIGURE */
+	if (session->device_type!=NULL && session->device_type->wrapup!=NULL)
+	    session->device_type->wrapup(session);
 	gpsd_deactivate(session);
+    }
 }
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)

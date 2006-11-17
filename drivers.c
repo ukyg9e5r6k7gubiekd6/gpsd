@@ -143,9 +143,9 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
     case 3:
-	/* command for EverMore to activate $PEMT,100 message */
+	/* command for EverMore to activate $PEMT,101 message */
 	/* EverMore GPS replies with ACK packet   \x10\x02\x04\x38\x8E\xC6\x10\x03  */
-	/* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT100(0s) */
+	/* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
 	(void)gpsd_write(session, 
 	    "\x10\x02\x12\x8E\x7F\x01\x01\x00\x01\x01\x01\x00\x01\x00\x00\x00\x00\x00\x00\x13\x10\x03", 22);
 	break;
@@ -417,7 +417,7 @@ static void evermore_n_mode(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
 static void evermore_n_configure(struct gps_device_t *session)
 {
-    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT100(0s) */
+    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
     const char emt_nmea_cfg[] = 
 	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x05\x01\x00\x00\x00\x00\x00\x00\x00\x00\x96\x10\x03";
     gpsd_report(LOG_PROG, "evermore_n_configure\n");
@@ -428,7 +428,7 @@ static void evermore_n_configure(struct gps_device_t *session)
 #ifdef ALLOW_RECONFIGURE
 static void evermore_n_revert(struct gps_device_t *session)
 {
-    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT100(0s) */
+    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(0s) */
     const char emt_nmea_cfg[] = 
 	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x92\x10\x03";
     gpsd_report(LOG_PROG, "evermore_n_revert\n");

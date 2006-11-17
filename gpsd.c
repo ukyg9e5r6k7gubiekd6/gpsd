@@ -1164,6 +1164,7 @@ static void handle_control(int sfd, char *buf)
 	    for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++)
 		if (subscribers[cfd].device == chp)
 		    subscribers[cfd].device = NULL;
+	    chp->gpsdata.gps_fd != -1;	/* device is already disconnected */
 	    gpsd_wrap(chp);
 	    /*@i@*/free_channel(chp);	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
@@ -1384,8 +1385,13 @@ int main(int argc, char *argv[])
 	gps_clear_fix(&sub->oldfix);
     }
 
-    /* user may want to re-initialize all channels */
+    /* daemon got termination or interrupt signal */
     if ((st = setjmp(restartbuf)) > 0) {
+	/* try to undo all device configurations */
+	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
+	    if (allocated_channel(&channels[dfd]))
+		(void)gpsd_wrap(&channels[dfd]);
+	}
 	if (st == SIGHUP+1)
 	    gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
 	else if (st > 0) {
@@ -1395,10 +1401,6 @@ int main(int argc, char *argv[])
 	    if (pid_file)
 		(void)unlink(pid_file);
 	    exit(10 + st);
-	}
-	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	    if (allocated_channel(&channels[dfd]))
-		(void)gpsd_wrap(&channels[dfd]);
 	}
     }
 
