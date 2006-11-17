@@ -45,11 +45,19 @@
    </revision>
    <revision>
       <revnumber>1.1</revnumber>
-      <date></date>
+      <date>25 April 2005</date>
       <authorinitials>esr</authorinitials>
       <revremark>
 	 Specify UTC.  Fix time-uncertainty units.  Vertical course
 	 angle changed to climb/sink rate.
+      </revremark>
+   </revision>
+   <revision>
+      <revnumber>1.2</revnumber>
+      <date>16 November 2006</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+         Added GPSVID and GPSGP, changed to mandate ISO8601 dates.
       </revremark>
    </revision>
 </revhistory>
@@ -84,7 +92,7 @@ back &mdash; a substantial advantage in developing talker and
 parser software.</para>
 
 <para>Unfortunately, the good news ends there.  The design of the
-upper layers of NMEA 0183 is patchy, klugey, and replete with the kind
+upper layers of NMEA 0183 is patchy, kludgy, and replete with the kind
 of errors that arise from growth by accretion rather than forethought.
 Here are some of the more obvious problems:</para>
 
@@ -122,7 +130,7 @@ zero-zero point in the Bay of Benin &mdash; or at sea level.  It is
 also not generally possible to distinguish between information a GPS
 is not yet reporting but will return on a good fix (such as altitude)
 from information it will never report (such as, on many units, local
-magnetic variation).  </para></listitem>
+magnetic variation).</para></listitem>
 
 <listitem><para>
 As least one messy bit in NMEA 0183 was an adaptation to machines with
@@ -191,18 +199,12 @@ GPS cannot now ship valid data for the field, or (b) the GPS will
 <listitem>
 <para>Include a full timestamp, to millisecond precision or better, with
 every sentence.  Every timestamp should be in the same standard form
-and should include a full date.</para>
-
-<para>The simplest way to do this is probably the best.  Just pick an
-epoch and represent the date/time as seconds since the epoch UTC. A
-human-readable format like ISO 8601 (yyyy-mm-ddThh:mm:ss.sss) might 
-make logfiles slightly easier to read, but would introduce more 
-decode latency.</para>
+and should include a full date with century.</para>
 </listitem>
 
 <listitem><para> 
-Report the uncertainty corresponding to a 95% confidence interval for
-each measurement field.
+Report the uncertainty corresponding to a 95% confidence interval on a
+standard normal distribution for each measurement field.
 </para></listitem>
 
 <listitem><para>
@@ -227,19 +229,20 @@ and an identifying sentence tag, followed by multiple comma-separated
 textual fields, ended by an asterisk, a CRC32 checksum, and LF/CR.
 The terminating checksum may be omitted, and listeners should accept
 this as an indication that the talker believes the transport layer to
-be reliable.  Sentences are at most 256 characters long, counting the
+be reliable. Sentences are at most 256 characters long, counting the
 trailing CR/LF.</para>
 
-<para>A field that is empty indicates that the talker does not have 
-valid information for this field.  A field consisting of a question
-mark (?) indicates that the talker will never ship valid information
-for this field.</para>
+<para>A field that is empty indicates that the talker does not have
+valid information for this field but promises to report it in the future.  A
+field consisting of a question mark (?) indicates that the talker does
+not expect to ever ship valid information for this field.</para>
 
-<para>The first field of every sentence is a full timestamp.  We
-choose an epoch of 00:00 Jan 1 1970 because it's no worse than any
-other recent date and has the advantage of being compatible with Linux
-and Unix systems.  Millisecond or better precision is required and
-time is Zulu or UTC (with leap-second correction).</para>
+<para>The first field of every sentence is a full timestamp in the
+format of the <ulink url='http://www.w3.org/TR/NOTE-datetime'>W3C
+profile of ISO 8601</ulink>: that is, yyyy-mm-ddThh:mm:ss.sssTZD,
+where TZD is a time zone designator (Z or +hh:mm or -hh:mm).
+Millisecond or better precision is required and time must have
+leap-second correction.  Zulu or UTC time is recommended.</para>
 
 <para>The core sentence of SGPS has the following layout:</para>
 
@@ -318,23 +321,23 @@ mode field is added to satisfy a U.S. regulator's requirement.</para>
 <para>Here is an example:</para>
 
 <programlisting>
-$GPTPV,1108114827.1745651,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
+$GPTPV,2005-02-11T04:40:51.231Z,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
 
-     1108114827.1745651, Time (Feb 11 04:40:51 EST 2005) in seconds since epoch
-     ?,                  Timestamp uncertainty will never be reported
-     4916.45N,           Latitude
-     123.12W,            Longitude
-     2.3,                Meters of horizontal uncertainty of position
-     70.1,               Altitude, meters above sea level
-     52,                 Uncertainty of altitude
-     0.01,               Speed, meters/sec
-     0.02,               Speed uncertainty
-     23.1,               Course over ground relative to true North
-     0.6,                Course uncertainty in degrees.
-     ,                   Climb/sink not reported
-     ,                   Climb/sink uncertainty not reported
-     A                   FAA mode indicator A (Auto).
-                         Checksum omitted.
+     2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005) 
+     ?,                         Timestamp uncertainty will never be reported
+     4916.45N,                  Latitude
+     123.12W,                   Longitude
+     2.3,                       Meters of horizontal uncertainty of position
+     70.1,                      Altitude, meters above sea level
+     52,                        Uncertainty of altitude
+     0.01,                      Speed, meters/sec
+     0.02,                      Speed uncertainty
+     23.1,                      Course over ground relative to true North
+     0.6,                       Course uncertainty in degrees.
+     ,                          Climb/sink not reported
+     ,                          Climb/sink uncertainty not reported
+     A                          FAA mode indicator A (Auto).
+                                Checksum omitted.
 </programlisting>
 
 <para>A second sentence describes GPS satellite status.</para>
@@ -378,8 +381,52 @@ last fix, suffix this field with a '!'.
 <para>Here is an example:</para>
 
 <programlisting>
-$GPSVU,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
+$GPSVU,2005-02-11T04:40:51.231Z,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
 </programlisting>
+
+<para>A third sentence identifies the device.  it is GPVID, and the
+fields are as follows:</para>
+
+<orderedlist>
+<listitem><para>
+The sentence tag is GPVID, standing for Vendor ID.  
+</para></listitem>
+
+<listitem><para>
+The first field is the required timestamp.
+</para></listitem>
+
+<listitem><para>
+The second field is the vendor name.  
+</para></listitem>
+
+<listitem><para>
+The third field is the device name or model number.  
+</para></listitem>
+
+<listitem><para>
+The fourth field is a chipset designation.  
+</para></listitem>
+
+<listitem><para>
+The fourth field may be a empty or a subtype ID, typically a firmware
+revision level.
+</para></listitem>
+</orderedlist>
+
+<para>All fields must consist of US-ASCII text not containing commas.
+The total length of the sentence must not exceed the old NMEA maximum
+of 82.</para>
+
+<para>Here is an example:</para>
+
+<programlisting>
+$GPVID,2006-11-17T12:29:37Z,Haicom,H204S,SiRF-II,231.00.00
+</programlisting>
+
+<para>Finally, SGPS-compliant receivers are required to respond to the
+requests $GPPVT, $GPVSU, and $GPVID (without arguments) with the
+corresponding report based on most recent available data.</para>
 </sect1>
 
 <sect1><title>Could This Be Adopted?</title>
@@ -394,6 +441,17 @@ trivially derived from data already computed for NMEA reports are
 (a) Climb/sink, and (b) GPSTPV uncertainty fields.  None
 of these should be difficult to derive.</para>
 
+<para>With the addition of a fourth sentence, $GPSGP, transition to the 
+new protocol would be easy.  It would have two forms:</para>
+
+<para>$GPSGP,1: directs the receiver to emit GPPVT and GPSVU
+only, if it is not already doing so.</para>
+
+<para>$GPSGP,0: directs the receiver to return to NMEA-classic mode, if
+it is capable of doing so.</para>
+
+<para>An SGPS-conformant receiver is required to respond with $GPSGP,x
+where x is 1 or 0 to indicate its new mode.</para>
 </sect1>
 </article>
 
