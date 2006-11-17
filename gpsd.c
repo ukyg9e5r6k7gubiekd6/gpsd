@@ -1164,7 +1164,7 @@ static void handle_control(int sfd, char *buf)
 	    for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++)
 		if (subscribers[cfd].device == chp)
 		    subscribers[cfd].device = NULL;
-	    chp->gpsdata.gps_fd != -1;	/* device is already disconnected */
+	    chp->gpsdata.gps_fd = -1;	/* device is already disconnected */
 	    gpsd_wrap(chp);
 	    /*@i@*/free_channel(chp);	/* modifying observer storage */
 	    (void)write(sfd, "OK\n", 3);
