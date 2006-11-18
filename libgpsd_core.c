@@ -29,8 +29,15 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 
     /* make it idempotent */
     if (session->device_type != NULL && 
-		strcmp(session->device_type->typename, typename) == 0)
+	strcmp(session->device_type->typename, typename) == 0) {
+#ifdef ALLOW_RECONFIGURE
+	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
+	if (session->context->enable_reconfigure 
+	    	&& session->device_type->configurator != NULL)
+	    session->device_type->configurator(session);
+#endif /* ALLOW_RECONFIGURE */
 	return 0;
+    }
 
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
@@ -104,6 +111,13 @@ void gpsd_deactivate(struct gps_device_t *session)
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
+#ifdef ALLOW_RECONFIGURE
+    if (session->context->enable_reconfigure 
+		&& session->device_type->revert != NULL)
+	session->device_type->revert(session);
+#endif /* ALLOW_RECONFIGURE */
+    if (session->device_type!=NULL && session->device_type->wrapup!=NULL)
+	session->device_type->wrapup(session);
 #endif /* NTPSHM_ENABLE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
@@ -738,16 +752,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    if (session->gpsdata.gps_fd != -1) {
-#ifdef ALLOW_RECONFIGURE
-	if (session->context->enable_reconfigure 
-		    && session->device_type->revert != NULL)
-	    session->device_type->revert(session);
-#endif /* ALLOW_RECONFIGURE */
-	if (session->device_type!=NULL && session->device_type->wrapup!=NULL)
-	    session->device_type->wrapup(session);
+    if (session->gpsdata.gps_fd != -1)
 	gpsd_deactivate(session);
-    }
 }
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)

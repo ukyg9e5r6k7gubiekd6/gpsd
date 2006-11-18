@@ -270,11 +270,12 @@ may be about to change with the advent of the ctypes module in Python
 supplies a ctypes Python wrapper for libgpsd.)</p>
 
 <p>We prefer Python anywhere we aren't required to to use C by
-technical constraints &mdash; test/profiling/logging tools, hotplug agents,
-and miscellaneous scripts.  Again, this is a long-term maintainability
-issue; there are whole classes of potential C bugs that simply don't
-exist in Python, and Python programs have a drastically lower line
-count for equivalent capability.</p>
+technical constraints &mdash; in particular, for
+test/profiling/logging tools, hotplug agents, and miscellaneous
+scripts.  Again, this is a long-term maintainability issue; there are
+whole classes of potential C bugs that simply don't exist in Python,
+and Python programs have a drastically lower line count for equivalent
+capability.</p>
 
 <h2 id="patches">Send patches in diff -u or -c format</h2>
 
@@ -517,12 +518,41 @@ disconnecting at random times, and the GPS being unplugged and
 replugged, without leaking file descriptors; also arrange for the GPS
 to be powered up when and only when clients are active.</p>
 
+<h2 id="initialization">Driver initialization and wrapup</h2>
+
+<p>Part of the job <code>gpsd</code> does is to minimize the amount
+of time attached GPSes are in a fully powered-up state.  So there
+is a distinction between initializing the <code>gpsd</code> internal 
+channel block structure for managing a GPS device (which we do when
+the hotplug system tells us it's available) and activating the device 
+(when a client wants data from it) which actually involves opening it
+and preparing to read data from it.  This is why
+<code>gpsd_init()</code> and <code>gpsd_activate()</code> are separate
+library entry points.</p>
+
+<p>There is also a distinction between deactivating a device (which we
+do when no users are listening to it) and finally releasing
+the <code>gpsd</code> channel block structure for managing the device
+(which typically happens either when <code>gpsd</code> terminates or
+the hotplug system tells <code>gpsd</code> that the device has been
+disconnected).  This is why <code>gpsd_deactivate()</code> and 
+<code>gpsd_wrap() are separate entry points.</code></p>
+
+<p><code>gpsd</code> has to configure some kinds of GPS devices when
+it recognizes them; <code>gpsd_activate()</code> does this by calling
+the <code>.configurator</code> method each time the device is activated.
+<code>gpsd</code> tries to clean up after itself, restoring settings
+that were chaged by the configurator method; this is done by 
+<code>gpsd_deactivate()</code>, which calls the <code>.revert</code>
+method of the driver.</p>
+
 <h2 id="autoconfiguration">Autoconfiguration</h2>
 
-<p>One of the design goals for gpsd is to be as near zero-configuration
-as possible.  Under most circumstances, it doesn't require either
-the GPS type or the serial-line parameters to connect to it to be
-specified.  Presently, here's how the autoconfig works.</p>
+<p>One of the design goals for <code>gpsd</code> is to be as near
+zero-configuration as possible.  Under most circumstances, it doesn't
+require either the GPS type or the serial-line parameters to connect
+to it to be specified.  Presently, here's how the autoconfig
+works.</p>
 
 <ol>
 <li>At each baud rate gpsd grabs packets until it sees either a
