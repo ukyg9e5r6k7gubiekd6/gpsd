@@ -30,12 +30,14 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
     /* make it idempotent */
     if (session->device_type != NULL && 
 	strcmp(session->device_type->typename, typename) == 0) {
+#if 0
 #ifdef ALLOW_RECONFIGURE
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
 	if (session->context->enable_reconfigure 
 	    	&& session->device_type->configurator != NULL)
 	    session->device_type->configurator(session);
 #endif /* ALLOW_RECONFIGURE */
+#endif
 	return 0;
     }
 
