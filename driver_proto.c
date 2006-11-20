@@ -1,5 +1,5 @@
-/* $Id$ */
-/*
+/* $Id$
+ *
  * A prototype driver.  Doesn't run, doesn't even compile.
  */
 
@@ -56,7 +56,7 @@ gps_mask_t proto_parse(struct gps_device_t *session, unsigned char *buf, size_t 
 	/* DISPATCH ON FIRST BYTE OF PAYLOAD */
 
     default:
-	gpsd_report(LOG_WARN, "unknown Proto packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+	gpsd_report(LOG_WARN, "unknown packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
 }
@@ -96,38 +96,74 @@ static void set_mode(struct gps_device_t *session, int mode)
 
 static void probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
-    /* probe for subtypes here */
+    /*
+     * Probe for subtypes here. If possible, get the software version and
+     * store it in session->subtype.  The seq values don't actually mean 
+     * anything, but conditionalizing probes on them gives the device 
+     * time to respond to each one.
+     */
+}
+
+static bool probe_detect(struct gps_device_t *session)
+{
+   /* Your testing code here */
+   if (test==satisfied)
+      return true;
+   return false;
+}
+
+static void proto_wrapup(struct gps_device_t *session)
+{
+   /*
+    * Do release actions that are independent of whether the .configurator 
+    * method ran or not.
+    */
 }
 
 static void configurator(struct gps_device_t *session)
 {
-    if (session->packet_type == NMEA_PACKET)
-	(void)proto_set_mode(session, session->gpsdata.baudrate, true);
+    /* Change sentence mix and set reporting modes as needed */
 }
 
-/* this is everything we export */
-struct gps_type_t proto_binary =
-{
-    .typename       = "Prototype driver",	/* full name of type */
-    .trigger        = NULL,		/* recognize the type */
-    .channels       = 12,		/* used for dumping binary packets */
-    .probe_detect   = NULL,		/* no probe */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
-    .probe_subtype  = probe_subtype,	/* initialize the device */
+/* This is everything we export */
+struct gps_type_t proto_binary = {
+    /* Full name of type */
+    .typename         = "Prototype driver",
+    /* Response string that identifies device */
+    .trigger          = NULL,
+    /* Number of satellite channels supported by the device */
+    .channels         = 12,
+    /* Startup-time device detector */
+    .probe_detect     = probe_detect,
+    /* Wakeup to be done before each baud hunt */
+    .probe_wakeup     = NULL,
+    /* Initialize the device and get subtype */
+    .probe_subtype    = probe_subtype,
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = configurator,	/* configure the proper sentences */
+    /* Enable what reports we need */
+    .configurator     = configurator,
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use generic packet getter */
-    .parse_packet   = parse_input,	/* parse message packets */
-    .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
-    .speed_switcher = set_speed,	/* we can change baud rates */
-    .mode_switcher  = set_mode,		/* there is a mode switcher */
-    .rate_switcher  = NULL,		/* no rate switcher */
-    .cycle_chars    = -1,		/* not relevant, no rate switcher */
+    /* Packet getter (using default routine) */
+    .get_packet       = packet_get,
+    /* Parse message packets */
+    .parse_packet     = parse_input,
+    /* RTCM handler (using default routine) */
+    .rtcm_writer      = pass_rtcm,
+    /* Speed (baudrate) switch */
+    .speed_switcher   = set_speed,
+    /* Switch to NMEA mode */
+    .mode_switcher    = set_mode,
+    /* Message delivery rate switcher */
+    .rate_switcher    = NULL,
+    /* Number of chars per report cycle */
+    .cycle_chars      = -1,
 #ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,		/* no setting-reversion method */
+    /* Undo the actions of .configurator */
+    .revert         = NULL,
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* no close hook */
-    .cycle          = 1,		/* updates every second */
+    /* Puts device back to original settings */
+    .wrapup           = proto_wrapup,
+    /* Number of updates per second */
+    .cycle            = 1
 };
 #endif /* defined(PROTO_ENABLE) && defined(BINARY_ENABLE) */
