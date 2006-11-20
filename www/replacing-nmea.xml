@@ -60,6 +60,14 @@
          Added GPSVID and GPSGP, changed to mandate ISO8601 dates.
       </revremark>
    </revision>
+   <revision>
+      <revnumber>1.3</revnumber>
+      <date></date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+         Fixed timestamp to Zulu time.  Specified signed latitude.  
+      </revremark>
+   </revision>
 </revhistory>
 
 <abstract>
@@ -239,10 +247,8 @@ not expect to ever ship valid information for this field.</para>
 
 <para>The first field of every sentence is a full timestamp in the
 format of the <ulink url='http://www.w3.org/TR/NOTE-datetime'>W3C
-profile of ISO 8601</ulink>: that is, yyyy-mm-ddThh:mm:ss.sssTZD,
-where TZD is a time zone designator (Z or +hh:mm or -hh:mm).
-Millisecond or better precision is required and time must have
-leap-second correction.  Zulu or UTC time is recommended.</para>
+profile of ISO 8601</ulink>, with the timezone required to be Zulu
+(UTC) time.</para>
 
 <para>The core sentence of SGPS has the following layout:</para>
 
@@ -260,14 +266,12 @@ The second field is the uncertainty of the timestamp in (fractional) seconds.
 </para></listitem>
 
 <listitem><para>
-The third field is latitude in degrees.  It must be suffixed with one
-of 'N' for North or 'S' for South.  Encoding must be decimal
+The third field is signed latitude in degrees. Encoding must be decimal
 degrees, not degree/minute/second.
 </para></listitem>
 
 <listitem><para>
-The fourth field is longitude in degrees.  It must be suffixed with one
-of 'E' for East or 'W' for West. Encoding must be decimal
+The fourth field is signed longitude in degrees.   Encoding must be decimal
 degrees, not degree/minute/second.
 </para></listitem>
 
@@ -325,8 +329,8 @@ $GPTPV,2005-02-11T04:40:51.231Z,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,
 
      2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005) 
      ?,                         Timestamp uncertainty will never be reported
-     4916.45N,                  Latitude
-     123.12W,                   Longitude
+     -4916.45,                  Latitude (- sign indicates longitude west)
+     123.12,                    Longitude (- sign indicates latitude south)
      2.3,                       Meters of horizontal uncertainty of position
      70.1,                      Altitude, meters above sea level
      52,                        Uncertainty of altitude
