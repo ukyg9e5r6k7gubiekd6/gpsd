@@ -85,12 +85,19 @@ static bool set_speed(struct gps_device_t *session, speed_t speed)
     /* set operating mode here */
 }
 
+static void proto_set_mode(struct gps_device_t *session, speed_t speed)
+{
+    /*
+     * Insert your actual mode switching code here.
+     */
+}
+
 static void set_mode(struct gps_device_t *session, int mode)
 {
     if (mode == 0) {
-	(void)gpsd_switch_driver(session, "Generic NMEA");
-	(void)proto_set_mode(session, session->gpsdata.baudrate, false);
+	proto_set_mode(session, session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;
+	(void)gpsd_switch_driver(session, "Generic NMEA");
     }
 }
 
@@ -112,6 +119,23 @@ static bool probe_detect(struct gps_device_t *session)
    return false;
 }
 
+static void proto_revert(struct gps_device_t *session)
+{
+   /*
+    * Reverse what the .configurator method changed.
+    */
+}
+
+static void probe_wakeup(struct gps_device_t *session)
+{
+   /*
+    * Code to make the device ready to communicate. This is
+    * run everytime we are about to try a different baud
+    * rate in the autobaud sequence. Only needed if the
+    * device is in some kind of sleeping state.
+    */
+}
+
 static void proto_wrapup(struct gps_device_t *session)
 {
    /*
@@ -125,18 +149,32 @@ static void configurator(struct gps_device_t *session)
     /* Change sentence mix and set reporting modes as needed */
 }
 
+/* The methods in this code take parameters and have */
+/* return values that conform to the requirements AT */
+/* THE TIME THE CODE WAS WRITTEN.                    */
+/*                                                   */
+/* These values may well have changed by the time    */
+/* you read this and methods could have been added   */
+/* or deleted.                                       */
+/*                                                   */
+/* The latest situation can be found by inspecting   */
+/* the contents of struct gps_type_t in gpsd.h.      */
+/*                                                   */
+/* This always contains the correct definitions that */
+/* any driver must use to compile.                   */
+
 /* This is everything we export */
 struct gps_type_t proto_binary = {
     /* Full name of type */
     .typename         = "Prototype driver",
-    /* Response string that identifies device */
+    /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
     .channels         = 12,
     /* Startup-time device detector */
     .probe_detect     = probe_detect,
     /* Wakeup to be done before each baud hunt */
-    .probe_wakeup     = NULL,
+    .probe_wakeup     = probe_wakeup,
     /* Initialize the device and get subtype */
     .probe_subtype    = probe_subtype,
 #ifdef ALLOW_RECONFIGURE
@@ -159,7 +197,7 @@ struct gps_type_t proto_binary = {
     .cycle_chars      = -1,
 #ifdef ALLOW_RECONFIGURE
     /* Undo the actions of .configurator */
-    .revert         = NULL,
+    .revert           = proto_revert,
 #endif /* ALLOW_RECONFIGURE */
     /* Puts device back to original settings */
     .wrapup           = proto_wrapup,
