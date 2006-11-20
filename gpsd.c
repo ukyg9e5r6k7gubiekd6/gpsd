@@ -493,10 +493,15 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 found:
     gpsd_init(chp, &context, device_name);
     chp->gpsdata.raw_hook = raw_hook;
-    if (gpsd_activate(chp) < 0) {
+    /* 
+     * This used to be a device_activate() call. But we're only checking 
+     * accessibility here -- we don't need full device activation, and
+     * in particular we don't need to configure the device.
+     */
+    if (gpsd_open(chp) < 0) {
 	return NULL;
     }
-    gpsd_report(LOG_PROG, "flagging descriptor %d in open_device\n", chp->gpsdata.gps_fd);
+    gpsd_report(LOG_RAW, "flagging descriptor %d in open_device\n", chp->gpsdata.gps_fd);
     FD_SET(chp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(chp->gpsdata.gps_fd, true);
     return chp;
