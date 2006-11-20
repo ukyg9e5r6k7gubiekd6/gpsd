@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 	}
 	gpsd_init(&session, &context, device);
 	gpsd_report(LOG_PROG, "gpsctl: initialization passed.\n");
-	if (gpsd_activate(&session) == -1) {
+	if (gpsd_activate(&session, false) == -1) {
 	    (void)fprintf(stderr, 
 			  "gpsd: activation of device %s failed, errno=%d\n",
 			  device, errno);

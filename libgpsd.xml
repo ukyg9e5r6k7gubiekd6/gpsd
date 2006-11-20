@@ -34,7 +34,8 @@ C:
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gpsd_activate</function></funcdef>
-    <paramdef>struct gps_device_t * <parameter>session</parameter></paramdef>
+    <paramdef>struct gps_device_t *<parameter>session</parameter></paramdef>
+    <paramdef>bool <parameter>reconfigurable</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gpsd_deactivate</function></funcdef>
@@ -97,8 +98,7 @@ of its members.</para>
 <varlistentry>
 <term><structfield>gpsd_device</structfield></term>
 <listitem>
-<para>This member should hold the path name of the device; it defaults to
-<filename>/dev/gps</filename>.</para>
+<para>This member should hold the path name of the device.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -124,7 +124,7 @@ and a rawness level.</para>
 </variablelist>
 
 <para><function>gpsd_activate()</function>
-initializes the connection to the GPS.  
+initializes the connection to the GPS. 
 <function>gpsd_deactivate()</function>
 closes the connection. These functions are provided so that
 long-running programs can release a connection when there is no

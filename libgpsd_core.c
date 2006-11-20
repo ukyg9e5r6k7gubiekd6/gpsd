@@ -31,7 +31,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	strcmp(session->device_type->typename, typename) == 0) {
 #ifdef ALLOW_RECONFIGURE
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
-	if (session->context->enable_reconfigure 
+	if (session->enable_reconfigure 
 	    	&& session->device_type->configurator != NULL)
 	    session->device_type->configurator(session);
 #endif /* ALLOW_RECONFIGURE */
@@ -45,7 +45,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    gpsd_assert_sync(session);
 	    if (session->device_type != NULL) {
 #ifdef ALLOW_RECONFIGURE
-		if (session->context->enable_reconfigure 
+		if (session->enable_reconfigure 
 		    && session->device_type->revert != NULL)
 		    session->device_type->revert(session);
 #endif /* ALLOW_RECONFIGURE */
@@ -54,10 +54,11 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    if (session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet_counter = 0);
 #ifdef ALLOW_RECONFIGURE
-	    gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->typename);
-	    if (session->context->enable_reconfigure 
-			&& session->device_type->configurator != NULL)
+	    if (session->enable_reconfigure 
+			&& session->device_type->configurator != NULL) {
+		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->typename);
 		session->device_type->configurator(session);
+	    }
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
 	}
@@ -110,7 +111,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #ifdef ALLOW_RECONFIGURE
-    if (session->context->enable_reconfigure 
+    if (session->enable_reconfigure 
 		&& session->device_type->revert != NULL)
 	session->device_type->revert(session);
 #endif /* ALLOW_RECONFIGURE */
@@ -206,7 +207,7 @@ static void *gpsd_ppsmonitor(void *arg)
 }
 #endif /* PPS_ENABLE */
 
-int gpsd_activate(struct gps_device_t *session)
+int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 /* acquire a connection to the GPS device */
 {
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
@@ -224,14 +225,6 @@ int gpsd_activate(struct gps_device_t *session)
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
 		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
 		/*@i1@*/session->device_type = *dp;
-		if (session->device_type->probe_subtype !=NULL)
-		    session->device_type->probe_subtype(session, session->packet_counter = 0);
-#ifdef ALLOW_RECONFIGURE
-		if (session->context->enable_reconfigure 
-			&& session->device_type->configurator != NULL)
-		    session->device_type->configurator(session);
-#endif /* ALLOW_RECONFIGURE */
-		/*@i1@*/return session->gpsdata.gps_fd;
 	    }
  	}
 	gpsd_report(LOG_PROG, "no probe matched...\n");
@@ -242,7 +235,7 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* SIRF_ENABLE */
 	session->char_counter = 0;
 	session->retry_counter = 0;
-	gpsd_report(LOG_INF, "gpsd_activate: opened GPS (%d)\n", session->gpsdata.gps_fd);
+	gpsd_report(LOG_INF, "gpsd_activate(%d): opened GPS (%d)\n", reconfigurable, session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
 	session->gpsdata.status = STATUS_NO_FIX;
@@ -265,8 +258,21 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
 
-	return session->gpsdata.gps_fd;
+	/* if we know the device type, probe for subtype and configure it */
+	if (session->device_type != NULL) {
+	    if (session->device_type->probe_subtype !=NULL)
+		session->device_type->probe_subtype(session, session->packet_counter = 0);
+#ifdef ALLOW_RECONFIGURE
+	    if (reconfigurable) {
+		session->enable_reconfigure = true;
+		if (session->device_type->configurator != NULL)
+		    session->device_type->configurator(session);
+	    }
+#endif /* ALLOW_RECONFIGURE */
+	}
     }
+
+    return session->gpsdata.gps_fd;
 }
 
 char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)

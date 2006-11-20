@@ -43,9 +43,6 @@ enum isgpsstat_t {
 #define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
 
 struct gps_context_t {
-#ifdef ALLOW_RECONFIGURE
-    bool enable_reconfigure;		/* OK to hack GPS settings? */ 
-#endif /* ALLOW_RECONFIGURE */
    int valid;				/* member validity flags */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
@@ -129,6 +126,9 @@ struct gps_device_t {
     struct gps_data_t gpsdata;
     /*@relnull@*/struct gps_type_t *device_type;
     struct gps_context_t	*context;
+#ifdef ALLOW_RECONFIGURE
+    bool enable_reconfigure;		/* OK to hack GPS settings? */ 
+#endif /* ALLOW_RECONFIGURE */
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
     struct termios ttyset, ttyset_old;
     /* packet-getter internals */
@@ -358,7 +358,7 @@ bool sirf_write(int fd, unsigned char *msg);
 
 /* application interface */
 extern void gpsd_init(struct gps_device_t *, struct gps_context_t *, char *);
-extern int gpsd_activate(struct gps_device_t *);
+extern int gpsd_activate(struct gps_device_t *, bool);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);

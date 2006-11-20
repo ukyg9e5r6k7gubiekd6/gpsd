@@ -77,9 +77,6 @@ static bool in_background = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
-#ifdef ALLOW_RECONFIGURE
-    .enable_reconfigure = true,
-#endif /* ALLOW_RECONFIGURE */
     .valid              = 0, 
     .sentdgps           = false, 
     .dgnss_service      = dgnss_none,
@@ -566,12 +563,12 @@ static bool assign_channel(struct subscriber_t *user)
 	gpsd_report(LOG_PROG,"client(%d): channel %d already active.\n",
 		    user-subscribers, user->device->gpsdata.gps_fd);
     else {
-	if (gpsd_activate(user->device) < 0) {
+	if (gpsd_activate(user->device, true) < 0) {
 	    
 	    gpsd_report(LOG_ERROR, "client(%d): channel activation failed.\n", user-subscribers);
 	    return false;
 	} else {
-	    gpsd_report(LOG_PROG, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
+	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
