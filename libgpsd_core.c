@@ -27,24 +27,21 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
 
-    /* make it idempotent */
     if (session->device_type != NULL && 
 	strcmp(session->device_type->typename, typename) == 0) {
-#if 0
 #ifdef ALLOW_RECONFIGURE
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
 	if (session->context->enable_reconfigure 
 	    	&& session->device_type->configurator != NULL)
 	    session->device_type->configurator(session);
 #endif /* ALLOW_RECONFIGURE */
-#endif
 	return 0;
     }
 
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->typename, typename) == 0) {
-	    gpsd_report(LOG_PROG, "Selecting %s driver...\n", (*dp)->typename);
+	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->typename);
 	    gpsd_assert_sync(session);
 	    if (session->device_type != NULL) {
 #ifdef ALLOW_RECONFIGURE
@@ -52,13 +49,12 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 		    && session->device_type->revert != NULL)
 		    session->device_type->revert(session);
 #endif /* ALLOW_RECONFIGURE */
-		if (session->device_type->wrapup != NULL)
-		    session->device_type->wrapup(session);
 	    }
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet_counter = 0);
 #ifdef ALLOW_RECONFIGURE
+	    gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->typename);
 	    if (session->context->enable_reconfigure 
 			&& session->device_type->configurator != NULL)
 		session->device_type->configurator(session);
