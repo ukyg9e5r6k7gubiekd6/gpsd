@@ -62,7 +62,7 @@
    </revision>
    <revision>
       <revnumber>1.3</revnumber>
-      <date></date>
+      <date>21 November 2006</date>
       <authorinitials>esr</authorinitials>
       <revremark>
          Fixed timestamp to Zulu time.  Specified signed latitude.  
@@ -388,7 +388,7 @@ last fix, suffix this field with a '!'.
 $GPSVU,2005-02-11T04:40:51.231Z,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00,14,25,170,00,16,57,208,39!,18,67,296,40!,19,40,246,00,22,42,067,42,24,14,311,43!,27,05,244,00
 </programlisting>
 
-<para>A third sentence identifies the device.  it is GPVID, and the
+<para>A third sentence identifies the device.  It is GPVID, and the
 fields are as follows:</para>
 
 <orderedlist>
@@ -413,7 +413,7 @@ The fourth field is a chipset designation.
 </para></listitem>
 
 <listitem><para>
-The fourth field may be a empty or a subtype ID, typically a firmware
+The fourth field may be empty or a subtype ID, typically a firmware
 revision level.
 </para></listitem>
 </orderedlist>
