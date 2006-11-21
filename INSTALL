@@ -98,5 +98,7 @@ generate a PHP status page for your GPS.  You will need php and php-gd
 installed.  To install it, copy the file 'gpsd.php' to your HTTP
 document directory.  The first time it's invoked, it will generate a
 file called 'gpsd_config.inc' containing configuration information;
-edit to taste.
+edit to taste.  Note that for the Google Maps feature work you need
+to set a valid Google API key in your config file.
+
 

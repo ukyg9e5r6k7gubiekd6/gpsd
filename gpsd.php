@@ -322,7 +322,7 @@ function write_html($resp){
 	$server = $x; $port = $y;
 
 	if ($autorefresh > 0)
-		$autorefresh = "<META HTTP-EQUIV='Refresh' CONTENT='$autorefresh'>";
+		$autorefresh = "<meta http-equiv='Refresh' content='$autorefresh'/>";
 	else
 		$autorefresh = '';
 
@@ -332,7 +332,7 @@ function write_html($resp){
 		$gmap_body = 'onload="Load()" onunload="GUnload()"';
 		$gmap_code = gen_gmap_code();
 	}
-	$cvs ='$Id: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $';
+	$svn ='$Rev$';
 	$buf = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -395,7 +395,7 @@ width="640" height="640" alt="Skyplot"></td>
 {$footer}
 
 <a href="http://gpsd.mainframe.cx/gpsd.phps">Script source</a><br>
-<font size=-2><tt>{$cvs}</tt></font><br>
+<font size=-2><tt>{$svn}</tt></font><br>
 </body>
 </body>
 
