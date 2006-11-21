@@ -598,7 +598,7 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = 0;     /* NMEA */
 	(void)gpsd_switch_driver(session, "EverMore NMEA");
     } else {
-	session->driver.evermore.back_to_nmea = false;
+	session->back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;     /* binary */
     }
 }
@@ -611,7 +611,7 @@ static void evermore_configurator(struct gps_device_t *session)
     }
 #ifdef ALLOW_RECONFIGURE
     (void)evermore_default(session, 1); /* switch GPS to binary mode */
-    session->driver.evermore.back_to_nmea = true;
+    session->back_to_nmea = true;
 #endif /* ALLOW_RECONFIGURE */
 }
 
@@ -642,16 +642,6 @@ static void evermore_probe(struct gps_device_t *session)
 }
 #endif /* __UNUSED__ */
 
-#ifdef ALLOW_RECONFIGURE
-static void evermore_revert(struct gps_device_t *session)
-{
-    gpsd_report(LOG_PROG, "evermore_revert call\n");
-    if (session->driver.evermore.back_to_nmea) {
-        (void) evermore_protocol(session, 1); /* NMEA */
-    }
-}
-#endif /* ALLOW_RECONFIGURE */
-
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
@@ -672,7 +662,7 @@ struct gps_type_t evermore_binary =
     .rate_switcher  = NULL,			/* no sample-rate switcher */
     .cycle_chars    = -1,			/* ignore, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = evermore_revert,		/* might want to revert to NMEA */
+    .revert         = NULL,			/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,			/* no wrapup method */
     .cycle          = 1,			/* updates every second */

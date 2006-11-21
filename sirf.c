@@ -117,7 +117,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 	session->gpsdata.driver_mode = 0;	/* NMEA */
 	(void)gpsd_switch_driver(session, "SiRF NMEA");
     } else {
-	session->driver.sirf.back_to_nmea = false;
+	session->back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;	/* binary */
     }
 }
@@ -768,14 +768,6 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
     return sirf_speed(session->gpsdata.gps_fd, speed);
 }
 
-#ifdef ALLOW_RECONFIGURE
-static void sirfbin_revert(struct gps_device_t *session)
-{
-    if (session->driver.sirf.back_to_nmea)
-	sirfbin_mode(session, 0);
-}
-#endif /* ALLOW_RECONFIGURE */
-
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
@@ -796,7 +788,7 @@ struct gps_type_t sirf_binary =
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = sirfbin_revert,	/* might want to revert to NMEA */
+    .revert         = NULL,		/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
     .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */

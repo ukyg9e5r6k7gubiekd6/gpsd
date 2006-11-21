@@ -165,6 +165,7 @@ struct gps_device_t {
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     double mag_var;		/* Magnetic variation in degrees */  
+    bool back_to_nmea;		/* back to NMEA on revert? */
     /*
      * The rest of this structure is driver-specific private storage.
      * Because the Garmin driver uses a long buffer, you can have
@@ -193,9 +194,6 @@ struct gps_device_t {
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
-#ifdef ALLOW_RECONFIGURE
-	    bool back_to_nmea;		/* back to NMEA on revert? */
-#endif /* ALLOW_RECONFIGURE */
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE
@@ -209,13 +207,6 @@ struct gps_device_t {
 	    unsigned int parity, stopbits; /* saved RS232 link parameters */
 	} tsip;
 #endif /* TSIP_ENABLE */
-#ifdef EVERMORE_ENABLE
-	struct {
-#ifdef ALLOW_RECONFIGURE
-	    bool back_to_nmea;		/* back to NMEA on revert? */
-#endif /* ALLOW_RECONFIGURE */
-	} evermore;
-#endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
 	struct {
 	    unsigned char Buffer[4096+12];	/* Garmin packet buffer */

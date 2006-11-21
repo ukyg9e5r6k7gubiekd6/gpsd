@@ -113,9 +113,13 @@ void gpsd_deactivate(struct gps_device_t *session)
 # endif /* PPS_ENABLE */
 #ifdef ALLOW_RECONFIGURE
     if (session->enable_reconfigure 
-		&& session->device_type->revert != NULL)
+	&& session->device_type->revert != NULL) {
 	session->device_type->revert(session);
+	session->enable_reconfigure = false;
+    }
 #endif /* ALLOW_RECONFIGURE */
+    if (session->back_to_nmea && session->device_type->mode_switcher != 0)
+	session->device_type->mode_switcher(session, 0);
     if (session->device_type!=NULL && session->device_type->wrapup!=NULL)
 	session->device_type->wrapup(session);
 #endif /* NTPSHM_ENABLE */
