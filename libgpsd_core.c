@@ -89,6 +89,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     session->gpsdata.tdop = NAN;
     session->gpsdata.gdop = NAN;
     session->gpsdata.epe = NAN;
+    session->mag_var = NAN;
 
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -207,6 +208,7 @@ static void *gpsd_ppsmonitor(void *arg)
 }
 #endif /* PPS_ENABLE */
 
+/*@ -branchstate @*/
 int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 /* acquire a connection to the GPS device */
 {
@@ -220,13 +222,15 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 #ifdef NON_NMEA_ENABLE
 	struct gps_type_t **dp;
 
+	/*@ -mustfreeonly @*/
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
 		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
-		/*@i1@*/session->device_type = *dp;
+		session->device_type = *dp;
 	    }
  	}
+	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
 #endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
@@ -274,6 +278,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 
     return session->gpsdata.gps_fd;
 }
+/*@ +branchstate @*/
 
 char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
