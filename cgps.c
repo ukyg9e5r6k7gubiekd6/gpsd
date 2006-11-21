@@ -382,38 +382,44 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     (void)wprintw(datawin,"unknown     ");
   }
 
-#ifdef BROKEN
-  /* Note: You can't just #define BROKEN, you'll have to also add four
-     to the value of DATAWIN_GPS_FIELDS to turn these on. */
+    /* Note that the following four fields are exceptions to the
+       sizing rule.  The minimum window size does not include these
+       fields, if the window is too small, they get excluded.  This
+       may or may not change if/when the output for these fields is
+       fixed and/or people request their permanance.  They're only
+       there in the first place because I arbitrarily thought they
+       sounded interesting. ;^) */
 
-  /* Fill in the estimated horizontal position error. */
-  (void)wmove(datawin, 10, DATAWIN_VALUE_OFFSET + 5);
-  if (isnan(gpsdata->fix.eph)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
-  else
-    (void)wprintw(datawin,"n/a         ");
-  
-  /* Fill in the estimated vertical position error. */
-  (void)wmove(datawin, 11, DATAWIN_VALUE_OFFSET + 5);
-  if (isnan(gpsdata->fix.epv)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
-  else
-    (void)wprintw(datawin,"n/a         ");
+    if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 
-  /* Fill in the estimated track error. */
-  (void)wmove(datawin, 12, DATAWIN_VALUE_OFFSET + 5);
-  if (isnan(gpsdata->fix.epd)==0)
-    (void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
-  else
-    (void)wprintw(datawin,"n/a          ");
-  
-  /* Fill in the estimated speed error. */
-  (void)wmove(datawin, 13, DATAWIN_VALUE_OFFSET + 5);
-  if (isnan(gpsdata->fix.eps)==0)
-    (void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
-  else
-    (void)wprintw(datawin,"n/a            ");
-#endif
+      /* Fill in the estimated horizontal position error. */
+      (void)wmove(datawin, 10, DATAWIN_VALUE_OFFSET + 5);
+      if (isnan(gpsdata->fix.eph)==0)
+	(void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
+      else
+	(void)wprintw(datawin,"n/a         ");
+      
+      /* Fill in the estimated vertical position error. */
+      (void)wmove(datawin, 11, DATAWIN_VALUE_OFFSET + 5);
+      if (isnan(gpsdata->fix.epv)==0)
+	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
+      else
+	(void)wprintw(datawin,"n/a         ");
+      
+      /* Fill in the estimated track error. */
+      (void)wmove(datawin, 12, DATAWIN_VALUE_OFFSET + 5);
+      if (isnan(gpsdata->fix.epd)==0)
+	(void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
+      else
+	(void)wprintw(datawin,"n/a          ");
+      
+      /* Fill in the estimated speed error. */
+      (void)wmove(datawin, 13, DATAWIN_VALUE_OFFSET + 5);
+      if (isnan(gpsdata->fix.eps)==0)
+	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
+      else
+	(void)wprintw(datawin,"n/a            ");
+    }
 
   /* Be quiet if the user requests silence. */
   if(silent_flag==0 && raw_flag==1) {
@@ -755,15 +761,22 @@ int main(int argc, char *argv[])
     (void)mvwprintw(datawin, 7, DATAWIN_DESC_OFFSET, "Climb:");
     (void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
     (void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
-#ifdef BROKEN
-  /* Note: You can't just #define BROKEN, you'll have to also add four
-     to the value of DATAWIN_GPS_FIELDS to turn these on. */
 
-    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET, "Horizontal Err:");
-    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET, "Vertical Err:");
-    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
-    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
-#endif
+    /* Note that the following four fields are exceptions to the
+       sizing rule.  The minimum window size does not include these
+       fields, if the window is too small, they get excluded.  This
+       may or may not change if/when the output for these fields is
+       fixed and/or people request their permanance.  They're only
+       there in the first place because I arbitrarily thought they
+       sounded interesting. ;^) */
+
+    if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
+      (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET, "Horizontal Err:");
+      (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET, "Vertical Err:");
+      (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
+      (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
+    }
+
     (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
