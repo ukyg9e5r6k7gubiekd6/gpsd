@@ -90,5 +90,13 @@ possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
 
 10. Note for systems using DBUS: gpsd includes support for shipping fixes
-as DBUS notofications, but it is not compiled in by default.  Configure 
+as DBUS notifications, but it is not compiled in by default.  Configure 
 with the option "--enable-dbus" to get it working.
+
+11. The distribution includes a PHP script that you can use to
+generate a PHP status page for your GPS.  You will need php and php-gd
+installed.  To install it, copy the file 'gpsd.php' to your HTTP
+document directory.  The first time it's invoked, it will generate a
+file called 'gpsd_config.inc' containing configuration information;
+edit to taste.
+

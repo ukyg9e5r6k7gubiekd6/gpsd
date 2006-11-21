@@ -153,9 +153,10 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
   and client sessions.  Eliminate use of fuser(1) in gpsfake.  Get gpsd
   working with EarthMates again, this had been broken since 2.15.  Massive 
   string safety audit and OpenBSD port by Chris Kuethe.  J command added.
-  The gpsctl and gpscat tools were added.  Switched to lesstif from openmotif.
-  Better autodetection of DLE-led packet protocols, notably TSIP and
-  Garmin binary.  Fixed buggy parsing and generation of PGRME.
+  The gpsctl and gpscat tools and the gpsd.phps script were added.  Switched 
+  to lesstif from openmotif.  Better autodetection of DLE-led packet 
+  protocols (notably TSIP and Garmin binary) and of SiRFStar I and III
+  devices.  Fixed buggy parsing and generation of PGRME. 
 
 * Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
 - Fix bad unit conversion in V output.  Clean up some man-page messes.

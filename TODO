@@ -108,10 +108,6 @@ binutils 2.16.1 or later avoids it.
 
 ** To do:
 
-*** Put the php client in the repo with installation documentation.
-
-Chris Kuethe plans to do this.
-
 *** New features for xgps.
 
 Add J option checkbox.  Maybe embed the speedometer widget from
