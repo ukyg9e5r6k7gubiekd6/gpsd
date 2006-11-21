@@ -1,6 +1,6 @@
 <?php
 
-#$CSK: gpsd.php,v 1.36 2006/10/31 00:04:26 ckuethe Exp $
+#$CSK: gpsd.php,v 1.38 2006/11/21 21:45:20 ckuethe Exp $
 
 # Copyright (c) 2006 Chris Kuethe <chris.kuethe@gmail.com>
 #
@@ -16,8 +16,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-global $GPS, $server, $port, $head, $blurb, $title, $autorefresh, $footer;
-global $magic;
+global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
+global $GPS, $server, $port, $magic;
 $magic = 1; # leave this set to 1
 
 if (!file_exists("gpsd_config.inc"))
@@ -25,27 +25,43 @@ if (!file_exists("gpsd_config.inc"))
 
 require_once("gpsd_config.inc");
 
-if (isset($_GET['host']))
-	if (!preg_match('/[^a-zA-Z0-9\.-]/', $_GET['host']))
-		$server = $_GET['host'];
+# sample data
+$resp = 'GPSD,S=2,P=53.527167 -113.530168,A=704.542,M=3,Q=10 1.77 0.80 0.66 0.61 1.87,Y=MID9 1158081774.000000 12:25 24 70 42 1:4 13 282 36 1:23 87 196 48 1:6 9 28 29 1:16 54 102 47 1:20 34 190 45 1:2 12 319 36 1:13 52 292 46 1:24 12 265 0 0:1 8 112 41 1:27 16 247 40 1:122 23 213 31 0:';
 
-if (isset($_GET['port']))
-	if (!preg_match('/\D/', $_GET['port']) && ($port>0) && ($port<65536))
-		$port = $_GET['port'];
+# if we're passing in a query, let's unpack and use it
+if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
+	$resp = base64_decode($_GET['imgdata']);
+	if ($resp){
+		gen_image($resp);
+		exit(0);
+	}
+} else {
+	if (isset($_GET['host']))
+		if (!preg_match('/[^a-zA-Z0-9\.-]/', $_GET['host']))
+			$server = $_GET['host'];
 
-if ($magic)
-	$sock = @fsockopen($server, $port, $errno, $errstr, 2);
-else
-	$sock = 0;
+	if (isset($_GET['port']))
+		if (!preg_match('/\D/', $_GET['port']) && ($port>0) && ($port<65536))
+			$port = $_GET['port'];
+
+	if ($magic){
+		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
+		fwrite($sock, "J=1\n");		# enable buffering
+		$resp = fread($sock, 384);
+		fwrite($sock, "SPAMQY\n");	# query once
+		$resp = fread($sock, 384);
+		fwrite($sock, "SPAMQY\n");	# and again, to merge fix
+		$resp = fread($sock, 384);
+		@fclose($sock);
+	}
+}
 
 if (isset($_GET['op']) && ($_GET['op'] == 'view')){
-	gen_image($sock);
+	gen_image($resp);
 } else {
-	parse_pvt($sock);
-	write_html();
+	parse_pvt($resp);
+	write_html($resp);
 }
-if ($magic)
-	@fclose($sock);
 
 exit(0);
 
@@ -171,27 +187,14 @@ function skyview($im, $sz, $C){
 
 }
 
-function gen_image($sock){
+function gen_image($resp){
 	global $magic;
 
 	$sz = 640;
 	if (isset($_GET['sz']) && ($_GET['sz'] == 'small'))
 		$sz = 240;
 
-	if ($magic){
-		if (!$sock)
-			die("socket failed");
-
-		fwrite($sock, "Y\n");
-
-		if (feof($sock))
-			die("read error");
-
-		$resp = fread($sock, 256);
-	} else {
-		$resp = 'GPSD,Y=MID9 1158081774.000000 12:25 24 70 42 1:4 13 282 36 1:23 87 196 48 1:6 9 28 29 1:16 54 102 47 1:20 34 190 45 1:2 12 319 36 1:13 52 292 46 1:24 12 265 0 0:1 8 112 41 1:27 16 247 40 1:122 23 213 31 0:';
-	}
-	if (!preg_match('/GPSD,Y=\S+ [0-9\.]+ (\d+):/', $resp, $m))
+	if (!preg_match('/,Y=\S+ [0-9\.]+ (\d+):/', $resp, $m))
 		die("can't parse gpsd's response");
 	$n = $m[1];	
 
@@ -234,19 +237,11 @@ function dfix($x, $y, $z){
 	return $x;
 }
 
-function parse_pvt($sock){
+function parse_pvt($resp){
 	global $GPS, $magic;
 
 	clearstate();
 
-	if ($magic && $sock){
-		fwrite($sock, "J=1,SPAMQ\n");
-		if (!feof($sock))
-			$resp = fread($sock, 128);
-	} else {
-		$resp = 'GPSD,S=2,P=53.527167 -113.530168,A=704.542,M=3,Q=10 1.77 0.80 0.66 0.61 1.87';
-	}
-	
 	if (strlen($resp)){
 		$GPS['fix']  = 'No';
 		if (preg_match('/M=(\d),/', $resp, $m)){
@@ -309,9 +304,9 @@ function parse_pvt($sock){
 	$GPS['gt'] = gmdate("r", $GPS['gt']);
 }
 
-function write_html(){
+function write_html($resp){
 	global $GPS, $server, $port, $head, $body;
-	global $blurb, $title, $autorefresh, $footer;
+	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
 
 	header("Content-type: text/html; charset=UTF-8");
 
@@ -319,6 +314,7 @@ function write_html(){
 	$lat = (float)$GPS['lat'];
 	$lon = -(float)$GPS['lon'];
 	$x = $server; $y = $port;
+	$imgdata = base64_encode($resp);
 	include("gpsd_config.inc"); # breaks things
 	$server = $x; $port = $y;
 
@@ -327,19 +323,26 @@ function write_html(){
 	else
 		$autorefresh = '';
 
-	$cvs ='$Id: gpsd.php,v 1.36 2006/10/31 00:04:26 ckuethe Exp $';
+	$gmap_head = $gmap_body = $gmap_code = '';
+	if ($googlemap){
+		$gmap_head = gen_gmap_head();
+		$gmap_body = 'onload="Load()" onunload="GUnload()"';
+		$gmap_code = gen_gmap_code();
+	}
+	$cvs ='$Id: gpsd.php,v 1.38 2006/11/21 21:45:20 ckuethe Exp $';
 	$buf = <<<EOF
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
 {$head}
+{$gmap_head}
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <META http-equiv="Content-Language" content="en,en-us">
 <TITLE>{$title} - GPSD Test Station {$GPS['loc']}</TITLE>
 {$autorefresh}
 </HEAD>
 
-<BODY {$body}>
+<BODY {$body} {$gmap_body}>
 <center>
 <table border="0">
 <tr><td align="justify">
@@ -349,7 +352,7 @@ function write_html(){
 <!-- ------------------------------------------------------------ -->
 
 <td rowspan="4" align="center" valign="top">
-<img src="?host={$server}&amp;port={$port}&amp;op=view"
+<img src="?op=view&amp;imgdata={$imgdata}"
 width="640" height="640" alt="Skyplot"></td>
 </tr>
 
@@ -380,7 +383,7 @@ width="640" height="640" alt="Skyplot"></td>
 	<tr><td>HDOP</td><td>{$GPS['hdop']}</td></tr>
 	</table>
 </tr>
-<tr><td> </td></tr>
+<tr><td><small>{$resp}</small></td></tr>
 </table>
 </center>
 
@@ -408,6 +411,8 @@ function write_config(){
 \$server = '127.0.0.1';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
+\$googlemap = 0; # set to 1 if you want to have a google map
+\$gmap_key = 'GetYourOwnGoogleKey'; # your google API key goes here
 
 ## You can read the header, footer and blurb from a file...
 # \$head = file_get_contents('/path/to/header.inc');
@@ -437,4 +442,55 @@ EOB;
 	fwrite($f, $buf);
 	fclose($f);
 }
+
+function gen_gmap_head() {
+global $gmap_key;
+return <<<EOT
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={$gmap_key}" type="text/javascript"></script>
+<script type="text/javascript">
+    <!--
+    // Create a base icon for all of our markers that specifies the shadow, icon
+    // dimensions, etc.
+function Load() {
+  if (GBrowserIsCompatible()) {
+    var map = new GMap2(document.getElementById("map"));
+    var point = new GLatLng( {$GLOBALS['lat']}, {$GLOBALS['lon']} );
+    map.setCenter( point, 14);
+    map.addControl(new GLargeMapControl());
+    map.addControl(new GMapTypeControl());
+
+    var baseIcon = new GIcon();
+    baseIcon.shadow = "http://www.google.com/mapfiles/shadow50.png";
+    baseIcon.iconSize = new GSize(20, 34);
+    baseIcon.shadowSize = new GSize(37, 34);
+    baseIcon.iconAnchor = new GPoint(9, 34);
+    baseIcon.infoWindowAnchor = new GPoint(9, 2);
+    baseIcon.infoShadowAnchor = new GPoint(18, 25);
+
+    var icon = new GIcon(baseIcon);
+    icon.image = "http://www.google.com/mapfiles/marker.png";
+    var marker = new GMarker(point, icon);
+    map.addOverlay(marker);
+  }
+}
+
+    -->
+    </script>
+EOT;
+
+}
+function gen_gmap_code() {
+return <<<EOT
+<br>
+    <div id="map" style="width: 550px; height: 400px; border:1px; border-style: solid;">
+    Loading...
+    <noscript>
+<font color="red">Sorry: you must enable javascript to view our maps.</font><br>
+    </noscript>
+</div>
+
+
+EOT;
+}
+
 ?>
