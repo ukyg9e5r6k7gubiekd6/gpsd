@@ -46,9 +46,6 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 
 	if ($magic){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
-		if (!$sock)
-			die("can't connect to gpsd.\n");
-
 		fwrite($sock, "J=1\n");		# enable buffering
 		$resp = fread($sock, 384);
 		fwrite($sock, "SPAMQY\n");	# query once
@@ -298,7 +295,7 @@ function parse_pvt($resp){
 			clearstate();
 		}
 	} else {
-		echo "$errstr ($errno)<br>\n";
+		echo "$errstr ($errno)<br/>\n";
 		$GPS['loc'] = '';
 	}
 
@@ -308,7 +305,7 @@ function parse_pvt($resp){
 }
 
 function write_html($resp){
-	global $GPS, $server, $port, $head, $body;
+    global $GPS, $sock, $server, $port, $head, $body;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
 
 	header("Content-type: text/html; charset=UTF-8");
@@ -333,7 +330,7 @@ function write_html($resp){
 		$gmap_code = gen_gmap_code();
 	}
 	$svn ='$Rev$';
-	$buf = <<<EOF
+	$part1 = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -364,17 +361,22 @@ width="640" height="640" alt="Skyplot"></td>
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
-<tt>telnet://{$server}:{$port}/</tt> and type "R".<br>
+<tt>telnet://{$server}:{$port}/</tt> and type "R".<br/>
 <form method=GET action="${_SERVER['SCRIPT_NAME']}">Use a different server:
 <input name="host" value="{$server}">:
 <input name="port" value="{$port}" size="5" maxlength="5">
 <input type=submit value="Get Position"><input type=reset></form>
-<br>
+<br/>
 </td>
 </tr>
 
 <!-- ------------------------------------------------------------ -->
+EOF;
 
+	if (!$sock)
+	    $part2 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
+	else
+	    $part2 = <<<EOF
 <tr><td align=center valign=top>
 	<table border=1>
 	<tr><td colspan=2 align=center><b>Current Information</b></td></tr>
@@ -389,19 +391,22 @@ width="640" height="640" alt="Skyplot"></td>
 	</table>
 </tr>
 <tr><td><small>{$resp}</small></td></tr>
+EOF;
+
+	$part3 = <<<EOF
 </table>
 </center>
 
 {$footer}
 
-<a href="http://gpsd.mainframe.cx/gpsd.phps">Script source</a><br>
-<font size=-2><tt>{$svn}</tt></font><br>
+This script is part of the <a href="http://gpsd.berlios.de">GPSD project</a>.<br/>
+<font size=-2><tt>{$svn}</tt></font><br/>
 </body>
 </body>
 
 EOF;
 
-print $buf;
+print $part1 . $part2 . $part3;
 
 }
 
@@ -438,7 +443,7 @@ The hardware is a
 <blink><font color="red">hardware description and link</font></blink>.
 
 This machine is maintained by
-<a href="mailto:you@example.com">Your Name Goes Here</a>.<br><br>
+<a href="mailto:you@example.com">Your Name Goes Here</a>.<br/>
 EOT;
 
 ?>
@@ -486,11 +491,11 @@ EOT;
 }
 function gen_gmap_code() {
 return <<<EOT
-<br>
+<br/>
     <div id="map" style="width: 550px; height: 400px; border:1px; border-style: solid;">
     Loading...
     <noscript>
-<font color="red">Sorry: you must enable javascript to view our maps.</font><br>
+<font color="red">Sorry: you must enable javascript to view our maps.</font><br/>
     </noscript>
 </div>
 
