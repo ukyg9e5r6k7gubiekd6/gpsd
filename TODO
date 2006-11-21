@@ -39,18 +39,6 @@ point release.
 It got sideswiped during the architectural changes need to implement
 the new gpsctl tool.  We should have this fixed in the next release.
 
-*** Devices based on SirFStar I chips are not properly autodetected
-
-Devices based on the now-obsolete SiRFStar I chip, like the Axiom
-Sandpiper II OEM module, are not properly detected by gpsd's 
-autoprobe logic and remain in NMEA mode rather than being switched
-to SiRF binary.  
-
-The project lead has a Sandpiper to test with, and one of our
-contributors thinks he has a way to snoop on the way SiRFDemo (SiRF's
-official device control program) does this, so we should be able to
-solve this problem.
-
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
