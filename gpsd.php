@@ -334,18 +334,20 @@ function write_html($resp){
 	}
 	$cvs ='$Id: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $';
 	$buf = <<<EOF
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<HTML>
-<HEAD>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
 {$head}
 {$gmap_head}
-<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<META http-equiv="Content-Language" content="en,en-us">
-<TITLE>{$title} - GPSD Test Station {$GPS['loc']}</TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Content-Language" content="en,en-us"/>
+<title>{$title} - GPSD Test Station {$GPS['loc']}</title>
 {$autorefresh}
-</HEAD>
+</head>
 
-<BODY {$body} {$gmap_body}>
+<body {$body} {$gmap_body}>
 <center>
 <table border="0">
 <tr><td align="justify">
@@ -394,8 +396,8 @@ width="640" height="640" alt="Skyplot"></td>
 
 <a href="http://gpsd.mainframe.cx/gpsd.phps">Script source</a><br>
 <font size=-2><tt>{$cvs}</tt></font><br>
-</BODY>
-</HTML>
+</body>
+</body>
 
 EOF;
 
