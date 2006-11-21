@@ -35,6 +35,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
     if (session->packet_type == SIRF_PACKET) {
 	gpsd_report(LOG_WARN, "SiRF packet seen when NMEA expected.\n");
 #ifdef SIRF_ENABLE
+	(void)gpsd_switch_driver(session, "SiRF binary");
 	return sirf_parse(session, session->outbuffer, session->outbuflen);
 #else
 	return 0;
@@ -127,8 +128,19 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     switch (seq) {
 #ifdef SIRF_ENABLE
     case 0:
-	/* probe for SiRF -- SiRF-II will respond with $Ack Input105. */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,1");
+	/* 
+	 * We used to try to probe for SiRF by issuing "$PSRF105,1"
+	 * and expecting "$Ack Input105.".  But it turns out this
+	 * only works for SiRF-IIs; SiRF-I and SiRF-III don't respond.
+	 * Thus the only reliable probe is to try to flip the SiRF into
+	 * binary mode, cluing in the library to revert it on close.
+	 */
+	(void)nmea_send(session->gpsdata.gps_fd, 
+			"$PSRF100,0,%d,%d,%d,0", 
+			session->gpsdata.baudrate,
+			9-session->gpsdata.stopbits,
+			session->gpsdata.stopbits);
+	session->back_to_nmea = true;
 	break;
 #endif /* SIRF_ENABLE */
 #ifdef NMEA_ENABLE
@@ -288,84 +300,6 @@ static struct gps_type_t fv18 = {
     .cycle          = 1,		/* updates every second */
 };
 #endif /* FV18_ENABLE */
-
-/**************************************************************************
- *
- * SiRF NMEA
- *
- * Mostly this is a stopover on the way to SiRF binary mode, but NMEA methods
- * are included in case we're building without SiRF binary support.
- *
- **************************************************************************/
-
-static void sirf_probe_subtype(struct gps_device_t *session, unsigned int seq)
-{
-    if (seq == 0)
-	(void)nmea_send(session->gpsdata.gps_fd, "$PSRF105,0");
-}
-
-static bool sirf_switcher(struct gps_device_t *session, int nmea, unsigned int speed) 
-/* switch GPS to specified mode at 8N1, optionally to binary */
-{
-    if (nmea_send(session->gpsdata.gps_fd, "$PSRF100,%d,%d,8,1,0", nmea, speed) < 0)
-	return false;
-    return true;
-}
-
-static bool sirf_speed(struct gps_device_t *session, unsigned int speed)
-/* change the baud rate, remaining in SiRF NMEA mode */
-{
-    return sirf_switcher(session, 1, speed);
-}
-
-static void sirf_mode(struct gps_device_t *session, int mode)
-/* change mode to SiRF binary, speed unchanged */
-{
-    if (mode == 1) {
-	(void)gpsd_switch_driver(session, "SiRF binary");
-	session->gpsdata.driver_mode = (unsigned int)sirf_switcher(session, 0, session->gpsdata.baudrate);
-	session->gpsdata.driver_mode = 1;
-    } else
-	session->gpsdata.driver_mode = 0;
-}
-
-#ifdef ALLOW_RECONFIGURE
-static void sirf_configurator(struct gps_device_t *session)
-{
-#if defined(BINARY_ENABLE) && defined(SIRF_ENABLE)
-    sirf_mode(session, 1);	/* throw us to SiRF binary */
-    session->back_to_nmea = true;
-#else    
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,05,00,00,01"); /* no VTG */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PSRF103,01,00,00,01"); /* no GLL */
-#endif /* defined(BINARY_ENABLE) && defined(SIRF_ENABLE) */
-}
-#endif /* ALLOW_RECONFIGURE */
-
-
-static struct gps_type_t sirf_nmea = {
-    .typename      = "SiRF NMEA",	/* full name of type */
-    .trigger       = "$Ack Input105.",	/* expected response to SiRF PSRF105 */
-    .channels      = 12,		/* not used by the NMEA parser */
-    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
-    .probe_detect  = NULL,		/* no probe */
-    .probe_subtype = sirf_probe_subtype,	/* probe for type info */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = sirf_configurator,	/* throw us to binary */
-#endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,	/* how to get a packet */
-    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
-    .rtcm_writer   = pass_rtcm,		/* write RTCM data straight */
-    .speed_switcher= sirf_speed,	/* we can change speeds */
-    .mode_switcher = sirf_mode,		/* there's a mode switch */
-    .rate_switcher = NULL,		/* no sample-rate switcher */
-    .cycle_chars   = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,		/* no setting-reversion method */
-#endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* no wrapup */
-    .cycle          = 1,		/* updates every second */
-};
 
 /**************************************************************************
  *
@@ -933,7 +867,6 @@ extern struct gps_type_t evermore_binary, italk_binary;
 static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
-    &sirf_nmea,
 #ifdef EVERMORE_ENABLE
     &evermore_nmea,
 #endif /* EVERMORE_ENABLE */

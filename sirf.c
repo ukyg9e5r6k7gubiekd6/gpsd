@@ -113,7 +113,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     if (mode == 0) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
-	(void)gpsd_switch_driver(session, "SiRF NMEA");
+	(void)gpsd_switch_driver(session, "Generic NMEA");
     } else {
 	session->back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;	/* binary */

@@ -291,9 +291,10 @@ int main(int argc, char **argv)
 		}
 	    }
 	    else if (to_binary) {
-		if (session.gpsdata.driver_mode == 1)
+		if (session.gpsdata.driver_mode == 1) {
 		    (void)fprintf(stderr, "gpsctl: already in native mode.\n");
-		else {
+		    session.back_to_nmea = false;
+		} else {
 		    session.device_type->mode_switcher(&session, 1);
 		    if (session.gpsdata.driver_mode != 1) {
 			(void)fprintf(stderr, "gpsctl: mode change failed\n");
