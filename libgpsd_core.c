@@ -249,9 +249,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.track = NAN;
 	session->gpsdata.separation = NAN;
-#ifdef BINARY_ENABLE
 	session->mag_var = NAN;
-#endif /* BINARY_ENABLE */
 
 #ifdef NTPSHM_ENABLE
 	if (session->context->enable_ntpshm)
