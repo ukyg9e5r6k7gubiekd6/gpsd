@@ -1,6 +1,6 @@
 <?php
 
-#$CSK: gpsd.php,v 1.38 2006/11/21 21:45:20 ckuethe Exp $
+#$CSK: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $
 
 # Copyright (c) 2006 Chris Kuethe <chris.kuethe@gmail.com>
 #
@@ -46,6 +46,9 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 
 	if ($magic){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
+		if (!$sock)
+			die("can't connect to gpsd.\n");
+
 		fwrite($sock, "J=1\n");		# enable buffering
 		$resp = fread($sock, 384);
 		fwrite($sock, "SPAMQY\n");	# query once
@@ -329,7 +332,7 @@ function write_html($resp){
 		$gmap_body = 'onload="Load()" onunload="GUnload()"';
 		$gmap_code = gen_gmap_code();
 	}
-	$cvs ='$Id: gpsd.php,v 1.38 2006/11/21 21:45:20 ckuethe Exp $';
+	$cvs ='$Id: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $';
 	$buf = <<<EOF
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
