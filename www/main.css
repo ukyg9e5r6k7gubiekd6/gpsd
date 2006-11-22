@@ -66,12 +66,7 @@ a:hover {background-color:#ccc;}
 	padding:0.5em;
 	background-color:#eee;
 	border:1px dashed #999;
-/* Again, the ugly brilliant hack. */
-	voice-family: "\"}\"";
-	voice-family:inherit;
 	}
-/* Again, "be nice to Opera 5". */
-body>#Menu {width:8.8em;}
 
 @media print {
 	#Content {
