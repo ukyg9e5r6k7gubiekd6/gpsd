@@ -48,24 +48,8 @@ a:hover {background-color:#ccc;}
 	border-color:black;
 	border-width:1px 0;
 	background-color:#eee;
-
-/* Here is the ugly brilliant hack that protects IE5/Win from its own
-stupidity.  Thanks to Tantek Celik for the hack and to Eric Costello
-for publicizing it.  IE5/Win incorrectly parses the "\"}"" value,
-prematurely closing the style declaration. The incorrect IE5/Win value
-is above, while the correct value is below. See
-http://glish.com/css/hacks.asp for details. */
-
-	voice-family: "\"}\"";
-	voice-family:inherit;
-	height:1ex+3px;	/* UNTESTED!  Was 14px */
+	height:1ex;
 	}
-/* I've heard this called the "be nice to Opera 5" rule. Basically, it
-feeds correct length values to user agents that exhibit the parsing
-error exploited above yet get the CSS box model right and understand
-the CSS2 parent-child selector. ALWAYS include a "be nice to Opera 5"
-rule every time you use the Tantek Celik hack (above). */
-body>#Header {height:14px;}
 
 #Content {
 	/* Left margin is menu width + 3em
