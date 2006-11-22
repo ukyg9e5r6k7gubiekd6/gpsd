@@ -294,10 +294,8 @@ function parse_pvt($resp){
 		if (preg_match('/^No/', $GPS['fix'])){
 			clearstate();
 		}
-	} else {
-		echo "$errstr ($errno)<br/>\n";
+	} else
 		$GPS['loc'] = '';
-	}
 
 	$GPS['gt'] = time();
 	$GPS['lt'] = date("r", $GPS['gt']);
@@ -305,7 +303,7 @@ function parse_pvt($resp){
 }
 
 function write_html($resp){
-    global $GPS, $sock, $server, $port, $head, $body;
+	global $GPS, $sock, $errstr, $errno, $server, $port, $head, $body;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
 
 	header("Content-type: text/html; charset=UTF-8");
@@ -342,6 +340,11 @@ function write_html($resp){
 <meta http-equiv="Content-Language" content="en,en-us"/>
 <title>{$title} - GPSD Test Station {$GPS['loc']}</title>
 {$autorefresh}
+<style>
+.warning {
+    color: #FF0000;
+ }
+</style>
 </head>
 
 <body {$body} {$gmap_body}>
@@ -495,7 +498,7 @@ return <<<EOT
     <div id="map" style="width: 550px; height: 400px; border:1px; border-style: solid;">
     Loading...
     <noscript>
-<font color="red">Sorry: you must enable javascript to view our maps.</font><br/>
+<span class='warning'>Sorry: you must enable javascript to view our maps.</span><br/>
     </noscript>
 </div>
 
