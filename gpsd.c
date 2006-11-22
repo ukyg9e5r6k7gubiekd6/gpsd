@@ -357,7 +357,7 @@ static bool have_fix(struct subscriber_t *whoami)
 	VALIDATION_COMPLAINT(3, "GPS is confused about whether it has a fix");
 	return false;
     }
-    else if (whoami->device->gpsdata.status > STATUS_NO_FIX && whoami->fixbuffer.mode != MODE_NO_FIX) {
+    else if (whoami->device->gpsdata.status > STATUS_NO_FIX && whoami->fixbuffer.mode > MODE_NO_FIX) {
 	VALIDATION_COMPLAINT(3, "GPS has a fix");
 	return true;
     }
