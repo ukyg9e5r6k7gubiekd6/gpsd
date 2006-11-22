@@ -46,11 +46,11 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 
 	if ($magic){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
-		fwrite($sock, "J=1\n");		# enable buffering
+		fwrite($sock, "J=1,W=1\n");	# watcher mode and buffering
 		$resp = fread($sock, 384);
-		fwrite($sock, "SPAMQY\n");	# query once
-		$resp = fread($sock, 384);
-		fwrite($sock, "SPAMQY\n");	# and again, to merge fix
+		$resp = fread($sock, 384);	# Wait for O
+		$resp = fread($sock, 384);	# Wait for O
+		fwrite($sock, "SPAMQY\n");	# Query what we actually want
 		$resp = fread($sock, 384);
 		@fclose($sock);
 	}
