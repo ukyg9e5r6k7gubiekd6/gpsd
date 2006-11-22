@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $GPS, $server, $port, $magic;
+global $GPS, $server, $advertise, $port, $magic;
 $magic = 1; # leave this set to 1
 
 if (!file_exists("gpsd_config.inc"))
@@ -344,6 +344,15 @@ function write_html($resp){
 .warning {
     color: #FF0000;
  }
+
+.fixed {
+    font-family: courier, fixed;
+}
+
+.administrivia {
+    font-size: small; 
+    font-family: verdana, sans-serif;
+}
 </style>
 </head>
 
@@ -358,14 +367,15 @@ function write_html($resp){
 
 <td rowspan="4" align="center" valign="top">
 <img src="?op=view&amp;imgdata={$imgdata}"
-width="640" height="640" alt="Skyplot"></td>
+width="640" height="640"/></td>
 </tr>
 
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
-<tt>telnet://{$server}:{$port}/</tt> and type "R".<br/>
-<form method=GET action="${_SERVER['SCRIPT_NAME']}">Use a different server:
+<span class="fixed">telnet://{$advertise}:{$port}/</span> and type "R".<br/>
+Use a different server:<br/>
+<form method=GET action="${_SERVER['SCRIPT_NAME']}">
 <input name="host" value="{$server}">:
 <input name="port" value="{$port}" size="5" maxlength="5">
 <input type=submit value="Get Position"><input type=reset></form>
@@ -402,8 +412,9 @@ EOF;
 
 {$footer}
 
-This script is part of the <a href="http://gpsd.berlios.de">GPSD project</a>.<br/>
-<font size=-2><tt>{$svn}</tt></font><br/>
+<hr/>
+<span class="administrivia">This script is distributed by the <a href="http://gpsd.berlios.de">GPSD project</a>.</span><br/>
+<span class="administrivia">{$svn}<br/>
 </body>
 </body>
 
@@ -422,6 +433,7 @@ function write_config(){
 <?PHP
 \$title = 'My GPS Server';
 \$server = '127.0.0.1';
+\$advertise = 'localhost';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
 \$googlemap = 0; # set to 1 if you want to have a google map
