@@ -152,7 +152,7 @@ function elevation($im, $sz, $C, $a){
 	imageArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['ltgray']);
 	$x = $sz/2 - 16;
 	$y = $sz/2 - $a;
-	imageString($im, 2, $x, $y, $b, $C['black']);
+	imageString($im, 2, $x, $y, $b, $C['ltgray']);
 }
 
 function skyview($im, $sz, $C){
@@ -160,14 +160,14 @@ function skyview($im, $sz, $C){
 	imageFilledArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['mdgray'], 0);
 	imageArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['black']);
 	$x = $sz/2 - 16; $y = $sz/2 - $a;
-	imageString($im, 2, $x, $y, "0", $C['black']);
+	imageString($im, 2, $x, $y, "0", $C['ltgray']);
 
 	$a = 85; $a = $sz * 0.95 * ($a/180);
 	imageFilledArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['white'], 0);
 	imageArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['ltgray']);
 	imageString($im, 1, $sz/2 - 6, $sz+$a, '5', $C['black']);
 	$x = $sz/2 - 16; $y = $sz/2 - $a;
-	imageString($im, 2, $x, $y, "5", $C['black']);
+	imageString($im, 2, $x, $y, "5", $C['ltgray']);
 
 	for($i = 0; $i < 180; $i += 15){
 		list($x0, $y0, $x1, $y1) = radial($i, $sz);
@@ -178,7 +178,7 @@ function skyview($im, $sz, $C){
 		elevation($im, $sz, $C, $i);
 
 	$x = $sz/2 - 16; $y = $sz/2 - 8;
-	imageString($im, 2, $x, $y, "90", $C['black']);
+	/* imageString($im, 2, $x, $y, "90", $C['ltgray']); */
 
 	imageString($im, 4, $sz/2 + 4, 2        , 'N', $C['black']);
 	imageString($im, 4, $sz/2 + 4, $sz - 16 , 'S', $C['black']);
@@ -349,6 +349,11 @@ function write_html($resp){
     font-family: courier, fixed;
 }
 
+.caption {
+    text-align: left; 
+    margin: 1ex 3em 1ex 3em; /* top right bottom left */
+}
+
 .administrivia {
     font-size: small; 
     font-family: verdana, sans-serif;
@@ -367,7 +372,12 @@ function write_html($resp){
 
 <td rowspan="4" align="center" valign="top">
 <img src="?op=view&amp;imgdata={$imgdata}"
-width="640" height="640"/></td>
+width="640" height="640"/>
+<br clear="all"/>
+<p class="caption">A filled circle means the satellite was used in
+the last fix. Green-yellow-red colors indicate signal strength in dB, 
+ green=most and red=least.  Orange indicates a WAAS/EGNOS satellite.</p>
+</td>
 </tr>
 
 <!-- ------------------------------------------------------------ -->
