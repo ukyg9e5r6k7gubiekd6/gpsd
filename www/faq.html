@@ -305,6 +305,49 @@ sentence.  The old-style individual requests are obsolete, really.
 You should fix your application to use watcher mode &mdash; or better
 yet, the libgps client library.</p>
 
+<h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
+
+<p>This is closely related to the previous item.</p>
+
+<p>The old-style query commands such as P and A are are safe to use
+with J=1 if you're polling repeatedly, but they're a dicey way to go
+if you're opening a channel to <code>gpsd</code>, doing a single-shot
+query, and then hanging up.  Even repeating the query a few times
+won't necessarily work.</p>
+
+<p>The problem is that your queries are in a race with the daemon's logic for 
+assigning and initializing a GPS.  It won't try to assign a GPS to your
+channel until the first command that demands actual device information.</p>
+
+<p>Then the race begins. The daemon will be interleaving reads of whatever
+packet fragments the GPS is shipping with reads from your client
+socket.  It is entirely possible that the rest of your commands
+will get processed before the daemon reads and processes enough GPS 
+sentences to get a fix &mdash; especially if the serial device is 
+slow and the GPS has a long initialization sequence.</p>
+
+<p>The right way to code your client is to set watcher mode and
+read a couple of O responses before trying to parse one.  That way
+the daemon paces the action, actually telling the client when it
+receives packets.</p>
+
+<p>To be certain of having full fix data, you'd need to wait for as
+many O responses as there are sentences that set fix data in the
+device's normal cycle.  For SiRFs, one read will do because normally
+only one sentence in the cycle ships fix data.  For NMEA devices you
+don't have a full fix before five reads, enough for an entire
+GPRMC/GPGGA/GPVTG/GPGLL/GPGSV cycle in whatever permutation the device
+ships it.</p>
+
+<p>In practice, three O reads will always be enough to get you
+<em>some</em> fix information &mdash; worst case is your first O came
+from a GPGSA and all you get is a mode, and then you get GPVTG, but
+you'll always get lat/lon on the next O.</p>
+
+<p>Clients that poll P or A repleatedly won't have a problem; the race
+effects will show up but be limited to noise in the first few seconds
+of samples.</p>
+
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF, switching
@@ -524,7 +567,13 @@ seconds.</p>
 
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
-<p>The easy way is to use a perl CGI script that leverages
+<p>The <code>gpsd</code> source-code distribution now includes a PHP
+script that makes this easy.  The script shows current fix data, a 
+satellite view, and can even incorporate a Google Maps display
+if you have a Google API key. Look at the end of the file INSTALL for
+instructions.</p>
+
+<p>Another way is to use a perl CGI script that leverages
 Net::GPSD like this...</p>
 
 <code><pre>
