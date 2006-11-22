@@ -367,7 +367,12 @@ function write_html($resp){
 <tr><td align="justify">
 {$blurb}
 </td>
+EOF;
 
+	if (!$sock)
+	    $part2 = "";
+	else
+	    $part2 = <<<EOF
 <!-- ------------------------------------------------------------ -->
 
 <td rowspan="4" align="center" valign="top">
@@ -397,9 +402,9 @@ Use a different server:<br/>
 EOF;
 
 	if (!$sock)
-	    $part2 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
+	    $part3 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else
-	    $part2 = <<<EOF
+	    $part3 = <<<EOF
 <tr><td align=center valign=top>
 	<table border=1>
 	<tr><td colspan=2 align=center><b>Current Information</b></td></tr>
@@ -416,7 +421,7 @@ EOF;
 <tr><td><small>{$resp}</small></td></tr>
 EOF;
 
-	$part3 = <<<EOF
+	$part4 = <<<EOF
 </table>
 </center>
 
@@ -430,7 +435,7 @@ EOF;
 
 EOF;
 
-print $part1 . $part2 . $part3;
+print $part1 . $part2 . $part3 . $part4;
 
 }
 
