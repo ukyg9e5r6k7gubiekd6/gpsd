@@ -43,8 +43,11 @@ linefeed.</para>
 <varlistentry>
 <term>-s</term>
 <listitem>
-<para>Set the port's baud rate before reading.  Specifying -s 4800
-is frequently helpful with unknown devices.</para>
+<para>Set the port's baud rate (and optionally its parity ad stop
+bits) before reading.  Argument should begin with one of the normal integer
+baud rates (300, 1200, 4800, 9600, 19200, 38400, etc.).  It may be
+followed by an optional suffix [NOE][12] to set parity (None, Even,
+Odd) and stop bits (1 or 2).</para>
 </listitem>
 </varlistentry>
 
@@ -63,6 +66,9 @@ is frequently helpful with unknown devices.</para>
 </varlistentry>
 </variablelist>
 
+<para>Specifying -s 4800N1 is frequently helpful with unknown
+devices.</para>
+
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
@@ -78,11 +84,6 @@ is frequently helpful with unknown devices.</para>
 </para>
 </refsect1>
 
-<refsect1 id='bugs'><title>BUGS</title> 
-
-<para>It is not yet possible to set parity and stop bits</para>
-
-</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a

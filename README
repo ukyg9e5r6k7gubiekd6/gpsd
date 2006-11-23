@@ -90,6 +90,7 @@ His new features include:
    * More new commands: 'I', 'U', 'E', 'B', 'Z'. See the docs.
    * Support for SiRF binary mode.
    * Support for multiple devices.
+   * Other test tools -- gpsfake, gpscat.
 
 Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.
 

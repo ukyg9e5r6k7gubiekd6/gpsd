@@ -28,9 +28,15 @@ if __name__ == '__main__':
             print "gpscat: " + str(msg)
             raise SystemExit, 1
 
-        speed = -1
+        speed = None
+        parity = None
+        stopbits = None
         for (switch, val) in options:
             if switch == '-s':
+                if val[-2] in ('N', 'E', 'O'):
+                    parity = val[-2]
+                    stopbits = int(val[-1])
+                    val = val[:-2]
                 speed = int(val)
             elif switch == '-h':
                 sys.stderr.write("usage: gpscat [-s] serial-port\n")
@@ -40,13 +46,28 @@ if __name__ == '__main__':
                 raise SystemExit, 0
 
         tty = os.open(arguments[0], os.O_RDWR)
-        if speed != -1:
+        if speed != None:
             (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(tty)
             try:
                 ispeed = ospeed = eval("termios.B%d" % speed)
             except AttributeError:
                 sys.stderr.write("gpscat: unknown baud rate %d\n" % speed)
                 raise SystemExit, 1
+            if stopbits:
+                cflag &= ~termios.CSIZE
+                cflag |= (termios.CS8, termios.CS7)[stopbits-1]
+            if parity:
+                if parity == 'N':
+                    iflag &= ~termios.PARENB
+                    iflag &= ~termios.INPCK
+                elif parity == 'O':
+                    iflag |= termios.INPCK
+                    cflag |= termios.PARENB
+                    cflag |= termios.PARODD
+                elif parity == 'E':
+                    iflag |= termios.INPCK
+                    cflag |= termios.PARENB
+                    cflag &= ~termios.PARODD
             termios.tcsetattr(tty, termios.TCSANOW,
                          [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
 
