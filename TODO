@@ -112,6 +112,29 @@ The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)
 being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
 binutils 2.16.1 or later avoids it.
 
+***  Python socket library barfs on IPV6 notation in the /etc/hosts file
+
+Robert J.Berger <rberger@ibd.com> reports:
+"Until I changed the line in /etc/hosts from:
+
+::1    localhost.localdomain   localhost
+
+to:
+
+127.0.0.1       localhost.localdomain   localhost
+
+gps.py would fail when trying to open the socket connection to the gpsd:
+
+   File "/usr/local/bin/spGps.py", line 198, in __init__
+     self.connect(host, port)
+   File "/usr/local/bin/spGps.py", line 237, in connect
+     raise socket.error, msg
+socket.error: (111, 'Connection refused')
+
+and gpsprof would fail with:
+# gpsprof | gnuplot -persist
+gpsprof: gpsd unreachable.
+
 ** To do:
 
 *** New features for xgps.
