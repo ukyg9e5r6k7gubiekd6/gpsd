@@ -285,7 +285,7 @@ class DaemonInstance:
                 self.pid = int(pidstr)
             except ValueError:
                 fp.close()
-                raise DaemonError("bad pid file, contents '%s'" % pidstr)
+                raise DaemonError("bad pid file, contents %s" % `pidstr`)
             fp.close()
             break
     def __get_control_socket(self):

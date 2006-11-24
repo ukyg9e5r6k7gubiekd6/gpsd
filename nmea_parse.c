@@ -218,6 +218,17 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	    newstatus = STATUS_DGPS_FIX;	/* differential */
 	else
 	    newstatus = STATUS_FIX;
+	/*
+	 * This is a bit dodgy.  Technically we shouldn't set the mode 
+	 * bit until we see GSA.  But it may be later in the cycle,
+	 * some devices like the FV-18 don't send it by default, and 
+	 * elsewhere in the code we want to be able to test for the 
+	 * presence of a valid fix with mode > MODE_NO_FIX.
+	 */
+	if (session->gpsdata.fix.mode < MODE_2D) {
+	    session->gpsdata.fix.mode = MODE_2D;
+	    mask |= MODE_SET;
+	}
 	session->gpsdata.status = newstatus;
 	mask |= STATUS_SET;
 	gpsd_report(LOG_PROG, "GPGLL sets status %d\n", session->gpsdata.status);
@@ -284,7 +295,17 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 
 	    session->gpsdata.fix.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
-
+	    /*
+	     * This is a bit dodgy.  Technically we shouldn't set the mode 
+	     * bit until we see GSA.  But it may be later in the cycle,
+	     * some devices like the FV-18 don't send it by default, and 
+	     * elsewhere in the code we want to be able to test for the 
+	     * presence of a valid fix with mode > MODE_NO_FIX.
+	     */
+	    if (session->gpsdata.fix.mode < MODE_3D) {
+		session->gpsdata.fix.mode = MODE_3D;
+		mask |= MODE_SET;
+	    }
 
 	    /*
 	     * Compute climb/sink in the simplest possible way.
