@@ -490,17 +490,28 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 found:
     gpsd_init(chp, &context, device_name);
     chp->gpsdata.raw_hook = raw_hook;
+#ifndef RTCM104_SERVICE
     /* 
-     * This used to be a device_activate() call. But we're only checking 
-     * accessibility here -- we don't need full device activation, and
-     * in particular we don't need to configure the device.
+     * This used to be a device_activate() call. But if all we ever
+     * look at is GPS devices, we only need to check accessibility
+     * here -- we don't need full device activation, and in particular
+     * we don't need to configure the device.
      */
-    if (gpsd_open(chp) < 0) {
+    if (gpsd_open(chp) < 0)
 	return NULL;
-    }
-    gpsd_report(LOG_RAW, "flagging descriptor %d in open_device\n", chp->gpsdata.gps_fd);
-    FD_SET(chp->gpsdata.gps_fd, &all_fds);
-    adjust_max_fd(chp->gpsdata.gps_fd, true);
+    else
+	gpsd_close(chp);
+#else
+    /*
+     * On the other hand, if we're supporting RTCM we *do* need to activate
+     * the device all the way so we'll sniff packets from it and discover 
+     * up front whether it's a GPS source or an RTCM source.  Otherwise clients
+     * trying to bind to a specific type won't know what source types are
+     * actually available.
+     */
+    if (gpsd_activate(chp, false) < 0)
+	return NULL
+#endif /* RTCM104_SERVICE */
     return chp;
 }
 /*@ +statictrans @*/
