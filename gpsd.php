@@ -369,10 +369,13 @@ function write_html($resp){
 </td>
 EOF;
 
+	if (!strlen($advertise))
+		$advertise = $server;
+
 	if (!$sock)
-	    $part2 = "";
+		$part2 = "";
 	else
-	    $part2 = <<<EOF
+		$part2 = <<<EOF
 <!-- ------------------------------------------------------------ -->
 
 <td rowspan="4" align="center" valign="top">
@@ -402,9 +405,9 @@ Use a different server:<br/>
 EOF;
 
 	if (!$sock)
-	    $part3 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
+		$part3 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else
-	    $part3 = <<<EOF
+		$part3 = <<<EOF
 <tr><td align=center valign=top>
 	<table border=1>
 	<tr><td colspan=2 align=center><b>Current Information</b></td></tr>
@@ -448,7 +451,7 @@ function write_config(){
 <?PHP
 \$title = 'My GPS Server';
 \$server = '127.0.0.1';
-\$advertise = 'localhost';
+#\$advertise = 'localhost';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
 \$googlemap = 0; # set to 1 if you want to have a google map
