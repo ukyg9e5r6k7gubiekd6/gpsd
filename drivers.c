@@ -155,9 +155,8 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
     case 3:
-	/* command for EverMore to activate $PEMT,101 message */
-	/* EverMore GPS replies with ACK packet   \x10\x02\x04\x38\x8E\xC6\x10\x03  */
-	/* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
+	/* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
+	/* EverMore will reply with: \x10\x02\x04\x38\x8E\xC6\x10\x03 */
 	(void)gpsd_write(session, 
 	    "\x10\x02\x12\x8E\x7F\x01\x01\x00\x01\x01\x01\x00\x01\x00\x00\x00\x00\x00\x00\x13\x10\x03", 22);
 	break;
@@ -300,100 +299,6 @@ static struct gps_type_t fv18 = {
     .cycle          = 1,		/* updates every second */
 };
 #endif /* FV18_ENABLE */
-
-/**************************************************************************
- *
- * EverMore NMEA
- *
- * Mostly this is a stopover on the way to EverMore binary mode, but NMEA methods
- * are included in case we're building without EverMore binary support.
- *
- **************************************************************************/
-#ifdef EVERMORE_ENABLE
-
-
-static bool evermore_n_speed(struct gps_device_t *session, unsigned int speed)
-/* change the baud rate, remaining in SiRF NMEA mode */
-{
-    u_int8_t tmp8;
-    /* template of control message to change boudrate */
-    char emt_speedcfg[] = "\x10\x02\x06\x89\x01\x00\x00\x8a\x10\x03";
-
-    gpsd_report(LOG_PROG, "evermore_n_speed(%d)\n", speed);
-    /*@-type@*/
-    switch (speed) {
-	case 4800:  tmp8 = 0; break;
-	case 9600:  tmp8 = 1; break;
-	case 19200: tmp8 = 2; break;
-	case 38400: tmp8 = 3; break;
-	default: return false;
-    }
-    emt_speedcfg[5] = tmp8;  /* serial port baudrate */
-    emt_speedcfg[7] ^= tmp8; /* CRC */
-    /*@+type@*/
-    
-    (void)gpsd_write(session, emt_speedcfg, sizeof(emt_speedcfg));
-    return true;
-}
-
-static void evermore_n_mode(struct gps_device_t *session, int mode)
-/* change mode to EverMore binary, speed unchanged */
-{
-    gpsd_report(LOG_PROG, "evermore_n_mode(%d)\n", mode);
-    if (mode == 1) {
-	(void)gpsd_switch_driver(session, "EverMore binary");
-	session->gpsdata.driver_mode = 1;
-    } else
-	(void)gpsd_switch_driver(session, "EverMore NMEA");
-	session->gpsdata.driver_mode = 0;
-}
-
-#ifdef ALLOW_RECONFIGURE
-static void evermore_n_configure(struct gps_device_t *session)
-{
-    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
-    const char emt_nmea_cfg[] = 
-	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x05\x01\x00\x00\x00\x00\x00\x00\x00\x00\x96\x10\x03";
-    gpsd_report(LOG_PROG, "evermore_n_configure\n");
-    (void)gpsd_write(session, emt_nmea_cfg, sizeof(emt_nmea_cfg));
-}
-#endif /* ALLOW_RECONFIGURE */
-
-#ifdef ALLOW_RECONFIGURE
-static void evermore_n_revert(struct gps_device_t *session)
-{
-    /* enable checksum and messages GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(0s) */
-    const char emt_nmea_cfg[] = 
-	    "\x10\x02\x12\x8E\xFF\x01\x01\x00\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x92\x10\x03";
-    gpsd_report(LOG_PROG, "evermore_n_revert\n");
-    (void)gpsd_write(session, emt_nmea_cfg, sizeof(emt_nmea_cfg));
-}
-#endif /* ALLOW_RECONFIGURE */
-
-static struct gps_type_t evermore_nmea = {
-    .typename      = "EverMore NMEA",	/* full name of type */
-    .trigger       = "$PEMT,",		/* expected response to probe */
-    .channels      = 12,		/* not used by the NMEA parser */
-    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
-    .probe_detect  = NULL,		/* no probe */
-    .probe_subtype = NULL,		/* probe for type info */
-#ifdef ALLOW_RECONFIGURE
-    .configurator  = evermore_n_configure,/* turn off debuging messages */
-#endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,	/* how to get a packet */
-    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
-    .rtcm_writer   = NULL,		/* write RTCM data straight */
-    .speed_switcher= evermore_n_speed,	/* we can change speeds */
-    .mode_switcher = evermore_n_mode,	/* there's a mode switch */
-    .rate_switcher = NULL,		/* no sample-rate switcher */
-    .cycle_chars   = -1,		/* not relevant, no rate switch */
-#ifdef ALLOW_RECONFIGURE
-    .revert         = evermore_n_revert,	/* no setting-reversion method */
-#endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* no wrapup */
-    .cycle          = 1,		/* updates every second */
-};
-#endif
 
 #ifdef TRIPMATE_ENABLE
 /**************************************************************************
@@ -867,9 +772,6 @@ extern struct gps_type_t evermore_binary, italk_binary;
 static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
-#ifdef EVERMORE_ENABLE
-    &evermore_nmea,
-#endif /* EVERMORE_ENABLE */
 #ifdef FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
