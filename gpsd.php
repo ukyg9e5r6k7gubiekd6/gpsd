@@ -387,7 +387,9 @@ the last fix. Green-yellow-red colors indicate signal strength in dB,
  green=most and red=least.  Orange indicates a WAAS/EGNOS satellite.</p>
 </td>
 </tr>
+EOF;
 
+	$part3 = <<<EOF
 <!-- ------------------------------------------------------------ -->
 
 <tr><td align="justify">To get real-time information, connect to
@@ -400,15 +402,14 @@ Use a different server:<br/>
 <br/>
 </td>
 </tr>
-
-<!-- ------------------------------------------------------------ -->
 EOF;
 
 	if (!$sock)
-		$part3 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
+		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else
-		$part3 = <<<EOF
-<tr><td align=center valign=top>
+		$part4 = <<<EOF
+<!-- ------------------------------------------------------------ -->
+        <tr><td align=center valign=top>
 	<table border=1>
 	<tr><td colspan=2 align=center><b>Current Information</b></td></tr>
 	<tr><td>Time (Local)</td><td>{$GPS['lt']}</td></tr>
@@ -424,7 +425,7 @@ EOF;
 <tr><td><small>{$resp}</small></td></tr>
 EOF;
 
-	$part4 = <<<EOF
+	$part5 = <<<EOF
 </table>
 </center>
 
@@ -438,7 +439,7 @@ EOF;
 
 EOF;
 
-print $part1 . $part2 . $part3 . $part4;
+print $part1 . $part2 . $part3 . $part4 . $part5;
 
 }
 
