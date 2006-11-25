@@ -518,7 +518,9 @@ found:
      * actually available.
      */
     if (gpsd_activate(chp, false) < 0)
-	return NULL
+	return NULL;
+	FD_SET(chp->gpsdata.gps_fd, &all_fds);
+	adjust_max_fd(chp->gpsdata.gps_fd, true);
 #endif /* RTCM104_ENABLE */
     return chp;
 }
@@ -1531,7 +1533,7 @@ int main(int argc, char *argv[])
 	    if (ssock < 0)
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
-		subscriber_t *client = NULL;
+		struct subscriber_t *client = NULL;
 		int opts = fcntl(ssock, F_GETFL);
 
 		if (opts >= 0)
