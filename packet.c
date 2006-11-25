@@ -778,10 +778,6 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		/* look for terminating ETX */
 		if ((session->inbuffer[n-1]) != ETX)
 		    goto not_tsip;
-		/* Debug */
-		gpsd_report(LOG_IO,
-		    "TSIP pkt_id = %#02x, n= %#02x, len= %#02x\n",
-		    pkt_id, n, len); 
 		/*@ -ifempty */
 		if ((0x41 == pkt_id) && (0x0c == len))
 		    /* pass */;
@@ -811,6 +807,10 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 			pkt_id, n, len); 
 		    goto not_tsip;
 		}
+		/* Debug */
+		gpsd_report(LOG_IO,
+		    "TSIP pkt_id = %#02x, n= %#02x, len= %#02x\n",
+		    pkt_id, n, len); 
 		/*@ -charint +ifempty @*/
 		packet_accept(session, TSIP_PACKET);
 		packet_discard(session);
