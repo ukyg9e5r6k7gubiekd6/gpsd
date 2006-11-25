@@ -9,12 +9,6 @@ For contribution guidelines and internals documentation, please see
 
 ** Bugs in gpsd and its clients:
 
-*** Support for Trimble TSIP is currently broken
-
-It appears that TSIP detection and parsing got broken in during the
-Garmin rewrite. This is being investigated. It will be fixed prior to
-release.
-
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcheri reported that it broke somewhere between rev 3654 and

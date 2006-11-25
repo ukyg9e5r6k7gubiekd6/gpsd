@@ -743,10 +743,19 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	        gpsd_report(LOG_RAW+1,"Not Garmin\n");
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
-		/* check for 3 common TSIP packet types:
+		/* check for some common TSIP packet types:
 		 * 0x41, GPS time, data length 10
 		 * 0x42, Single Precision Fix, data length 16
 		 * 0x43, Velocity Fix, data length 20
+		 * 0x45, Software Version Information, data length 10
+		 * 0x46, Health of Receiver, data length 2
+		 * 0x4a, LLA Position, data length 20
+		 * 0x4b, Machine Code Status, data length 3
+		 * 0x56, Velocity Fix (ENU), data length 20
+		 * 0x56, All-In-View Satellite Selection, data length 16+numSV
+		 * 0x82, Differential Position Fix Mode, data length 1
+		 * 0x83, Double Precision XYZ, data length 36
+		 * 0x84, Double Precision LLA, data length 36
 		 *
 		 * <DLE>[pkt id] [data] <DLE><ETX>
 		 */
@@ -755,25 +764,43 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		if (session->inbuffer[n++] != DLE)
 		    goto not_tsip;
 		pkt_id = session->inbuffer[n++]; /* packet ID */
-		if ((0x41 > pkt_id) || (0x43 < pkt_id))
+		if ((0x41 > pkt_id) || (0x84 < pkt_id))
 		    goto not_tsip;
 		for ( len = 0; n < packetlen; len++ ) {
 		    if (session->inbuffer[n++] == DLE) {
-			if (session->inbuffer[n++] != DLE)
+			if ((session->inbuffer[n+1] != DLE) &&
+			(session->inbuffer[n+1] != ETX)){
 			    goto not_tsip;
+			}
 		    }
 		}
 		/* look for terminating ETX */
-		if (session->inbuffer[n++] != ETX)
+		if ((session->inbuffer[n-1]) != ETX)
 		    goto not_tsip;
 		/* Debug */
-		gpsd_report(LOG_IO, "TSIP n= %#02x, len= %#02x\n", n, len); 
+		gpsd_report(LOG_IO,
+		    "TSIP pkt_id = %#02x, n= %#02x, len= %#02x\n",
+		    pkt_id, n, len); 
 		/*@ -ifempty */
-		if ((0x41 == pkt_id) && (DLE == len))
+		if ((0x41 == pkt_id) && (0x0c == len))
 		    /* pass */;
-		else if ((0x42 == pkt_id) && (0x16 == len ))
+		else if ((0x42 == pkt_id) && (0x12 == len ))
 		    /* pass */;
-		else if ((0x43 == pkt_id) && (0x20 == len))
+		else if ((0x43 == pkt_id) && (0x16 == len))
+		    /* pass */;
+		else if ((0x45 == pkt_id) && (0x0c == len))
+		    /* pass */;
+		else if ((0x46 == pkt_id) && (0x04 == len))
+		    /* pass */;
+		else if ((0x4a == pkt_id) && (0x16 == len))
+		    /* pass */;
+		else if ((0x4b == pkt_id) && (0x05 == len))
+		    /* pass */;
+		else if ((0x56 == pkt_id) && (0x16 == len))
+		    /* pass */;
+		else if ((0x6d == pkt_id) && ((0x12 <= len) && (0x1e >= len) ))
+		    /* pass */;
+		else if ((0x82 == pkt_id) && (0x03 == len))
 		    /* pass */;
 		else
 		    goto not_tsip;
