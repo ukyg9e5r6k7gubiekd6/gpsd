@@ -452,11 +452,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 			" %d",session->gpsdata.used[i] = getub(buf,17 + i));
 	/*@ -charint @*/
 
-	gpsd_report(LOG_INF, "Sat info: %d %.1f %.1f %.1f %.1f %.1f %d:%s\n",
-		session->gpsdata.fix.mode, session->gpsdata.pdop,
-		session->gpsdata.hdop, session->gpsdata.vdop,
-		session->gpsdata.tdop, session->gpsdata.gdop,
-		session->gpsdata.satellites_used,buf2);
+	gpsd_report(LOG_INF, "Sat info: mode %d, satellites used %d: %s\n",
+	    session->gpsdata.fix.mode, session->gpsdata.satellites_used,buf2);
+	gpsd_report(LOG_INF,
+	    "Sat info: DOP P=%.1f H=%.1f V=%.1f T=%.1f G=%.1f\n",
+	    session->gpsdata.pdop, session->gpsdata.hdop,
+	    session->gpsdata.vdop, session->gpsdata.tdop,
+	    session->gpsdata.gdop);
         mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET | USED_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
