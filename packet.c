@@ -808,9 +808,11 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    goto not_tsip;
 		}
 		/* Debug */
+/*
 		gpsd_report(LOG_IO,
 		    "TSIP pkt_id = %#02x, n= %#02x, len= %#02x\n",
 		    pkt_id, n, len); 
+*/
 		/*@ -charint +ifempty @*/
 		packet_accept(session, TSIP_PACKET);
 		packet_discard(session);
