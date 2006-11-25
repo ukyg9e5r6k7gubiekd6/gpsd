@@ -21,6 +21,7 @@
 
 static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 {
+#ifdef ALLOW_RECONFIGURE
     char buf2[BUFSIZ];
 
     gpsd_report(LOG_RAW, "Sent TSIP packet id 0x%02x: %s\n",id,gpsd_hexdump(buf,len));
@@ -28,7 +29,6 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
     /*@ +charint @*/
     buf2[0] = '\x10';
     buf2[1] = (char)id;
-#ifdef ALLOW_RECONFIGURE
     if (write(fd,buf2,2) != 2)
 	return -1;
 
@@ -48,6 +48,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 
     return 0;
 #else
+    gpsd_report(LOG_RAW, "Not sending TSIP packet id 0x%02x: %s\n",id,gpsd_hexdump(buf,len));
     return -1;
 #endif /* ALLOW_RECONFIGURE */
 }
