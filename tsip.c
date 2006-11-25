@@ -452,7 +452,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 			" %d",session->gpsdata.used[i] = getub(buf,17 + i));
 	/*@ -charint @*/
 
-	gpsd_report(LOG_INF, "Sat info: %d %f %f %f %f %f %d:%s\n",
+	gpsd_report(LOG_INF, "Sat info: %d %.1f %.1f %.1f %.1f %.1f %d:%s\n",
 		session->gpsdata.fix.mode, session->gpsdata.pdop,
 		session->gpsdata.hdop, session->gpsdata.vdop,
 		session->gpsdata.tdop, session->gpsdata.gdop,
