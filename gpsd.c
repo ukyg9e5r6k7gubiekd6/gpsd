@@ -74,6 +74,7 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
+static bool nowait = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
@@ -497,10 +498,17 @@ found:
      * here -- we don't need full device activation, and in particular
      * we don't need to configure the device.
      */
-    if (gpsd_open(chp) < 0)
-	return NULL;
-    else
-	gpsd_close(chp);
+    if (nowait){
+	if (gpsd_activate(chp, false) < 0)
+	    return NULL;
+	FD_SET(chp->gpsdata.gps_fd, &all_fds);
+	adjust_max_fd(chp->gpsdata.gps_fd, true);
+    } else {
+    	if (gpsd_open(chp) < 0)
+		return NULL;
+    	else
+		gpsd_close(chp);
+    }
 #else
     /*
      * On the other hand, if we're supporting RTCM we *do* need to activate
@@ -1219,7 +1227,6 @@ static void handle_control(int sfd, char *buf)
 int main(int argc, char *argv[])
 {
     static char *pid_file = NULL;
-    static bool nowait = false;
     static int st, csock = -1;
     static gps_mask_t changed;
     static char *gpsd_service = NULL; 
