@@ -201,8 +201,11 @@ int gpsd_open(struct gps_device_t *session)
 {
     gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDWR|O_NONBLOCK|O_NOCTTY)) < 0) {
-	gpsd_report(LOG_ERROR, "device open failed: %s\n", strerror(errno));
-	return -1;
+	gpsd_report(LOG_ERROR, "read-write device open failed: %s - trying read-only\n", strerror(errno));
+	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) < 0) {
+	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n", strerror(errno));
+	    return -1;
+	}
     }
 
 #ifdef FIXED_PORT_SPEED
