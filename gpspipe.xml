@@ -23,6 +23,7 @@
       <arg choice='opt'>-s <replaceable>serial-device</replaceable></arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-w</arg>
+      <arg choice='opt'>-v</arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group><replaceable>:port</replaceable></group>
@@ -77,6 +78,12 @@ output.</para>
 
 <para>-j makes the program send J=1 to the daemon, requesting
 fix hold across cycles.</para>
+
+<para>-v causes <application>gpspipe</application> to show a spinning
+activity indicator on stderr. This is useful if stdout is redirected
+into a file or a pipe. By default the spinner is advanced with every
+messages written; specifying -v more than once will double the number
+of messages required to rotate the spinner.</para>
 
 <para>-V prints the version, then exits.</para>
 

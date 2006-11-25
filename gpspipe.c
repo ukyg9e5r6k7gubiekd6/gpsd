@@ -36,6 +36,7 @@
 #include "gpsd.h"
 
 static int fd_out = 1;		/* output initially goes to standard output */ 
+static void spinner(int, int);
 
 /* NMEA-0183 standard baud rate */
 #define BAUDRATE B4800
@@ -90,6 +91,7 @@ static void usage(void)
 		  "-t Time stamp the data.\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
 		  "-n [count] exit after count packets.\n"
+		  "-v Print a little spinner.\n"
 		  "-V Print version and exit.\n\n"
 		  "You must specify one, or both, of -r/-w.\n"
 	);
@@ -104,12 +106,14 @@ int main( int argc, char **argv)
     bool new_line = true;
     long count = -1;
     int option;
+    int vflag = 0, l = 0;
+
     char *arg = NULL, *colon1, *colon2, *device = NULL; 
     char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
     char *serialport = NULL;
 
     buf[0] = '\0';
-    while ((option = getopt(argc, argv, "?hrRwjtVn:s:")) != -1) {
+    while ((option = getopt(argc, argv, "?hrRwjtvVn:s:")) != -1) {
 	switch (option) {
 	case 'n':
 	    count = strtol(optarg, 0, 0);
@@ -122,6 +126,9 @@ int main( int argc, char **argv)
 	    break;
 	case 't':
 	    timestamp = true;
+	    break;
+	case 'v':
+	    vflag++;
 	    break;
 	case 'w':
 	    (void)strlcat(buf, "w=1;", sizeof(buf));
@@ -206,6 +213,8 @@ int main( int argc, char **argv)
 	int j = 0;
 	int readbytes = 0;
 
+	if (vflag)
+	    spinner(vflag, l++);
 	readbytes = (int)read(sock, buf, sizeof(buf));
 	if (readbytes > 0) {
 	    for (i = 0 ; i < readbytes ; i++) {
@@ -274,4 +283,12 @@ int main( int argc, char **argv)
 
     exit(0);
 #endif /* __UNUSED__ */  
+}
+
+static void spinner (int v, int num) {
+    char *spin = "|/-\\";
+
+    fprintf(stderr, "%c", spin[(num/(1<<(v-1))) % 4]);
+    fflush(stderr);
+    return;
 }
