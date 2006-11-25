@@ -491,7 +491,7 @@ static /*@null@*/ struct gps_device_t *open_device(char *device_name)
 found:
     gpsd_init(chp, &context, device_name);
     chp->gpsdata.raw_hook = raw_hook;
-#ifndef RTCM104_SERVICE
+#ifndef RTCM104_ENABLE
     /* 
      * This used to be a device_activate() call. But if all we ever
      * look at is GPS devices, we only need to check accessibility
@@ -519,7 +519,7 @@ found:
      */
     if (gpsd_activate(chp, false) < 0)
 	return NULL
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
     return chp;
 }
 /*@ +statictrans @*/
@@ -610,13 +610,13 @@ static bool assign_channel(struct subscriber_t *user)
 }
 /*@ +branchstate +usedef +globstate @*/
 
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
 static int handle_rtcm_request(struct subscriber_t* sub UNUSED, char *buf UNUSED, int buflen UNUSED)
 /* interpret a client request; cfd is the socket back to the client */
 {
     return 0;	/* not actually interpreting these yet */
 }
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 
 static /*@ observer @*/ char *snarfline(char *p, /*@out@*/char **out)
 /* copy the rest of the command line, before CR-LF */
@@ -1230,10 +1230,10 @@ int main(int argc, char *argv[])
     static int st, csock = -1;
     static gps_mask_t changed;
     static char *gpsd_service = NULL; 
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
     static char *rtcm_service = NULL; 
     static int nsock;
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
     static char *control_socket = NULL;
     struct gps_device_t *channel;
     struct sockaddr_in fsin;
@@ -1248,9 +1248,9 @@ int main(int argc, char *argv[])
 
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
 			    "R:"
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 		)) != -1) {
 	switch (option) {
 	case 'D':
@@ -1262,11 +1262,11 @@ int main(int argc, char *argv[])
 	case 'N':
 	    go_background = false;
 	    break;
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
 	case 'R':
 	    rtcm_service = optarg;
 	    break;
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 	case 'S':
 	    gpsd_service = optarg;
 	    break;
@@ -1343,7 +1343,7 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
     /*@ -observertrans @*/
     if (!rtcm_service)
 	rtcm_service = getservbyname("rtcm", "tcp") ? "rtcm" : DEFAULT_RTCM_PORT;
@@ -1353,7 +1353,7 @@ int main(int argc, char *argv[])
 	exit(2);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", rtcm_service);
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 
 #ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
@@ -1433,10 +1433,10 @@ int main(int argc, char *argv[])
 
     FD_SET(msock, &all_fds);
     adjust_max_fd(msock, true);
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
     FD_SET(nsock, &all_fds);
     adjust_max_fd(nsock, true);
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
     FD_ZERO(&control_fds);
 
     /* optimization hack to defer having to read subframe data */
@@ -1522,7 +1522,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(msock, &rfds);
 	}
 
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
 	/* also to RTCM client connections */
 	if (FD_ISSET(nsock, &rfds)) {
 	    socklen_t alen = (socklen_t)sizeof(fsin);
@@ -1552,7 +1552,7 @@ int main(int argc, char *argv[])
 	    }
 	    FD_CLR(nsock, &rfds);
 	}
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
@@ -1721,13 +1721,13 @@ int main(int argc, char *argv[])
 		    buf[buflen] = '\0';
 		    gpsd_report(LOG_IO, "<= client(%d): %s", sub_index(sub), buf);
 
-#ifdef RTCM104_SERVICE
+#ifdef RTCM104_ENABLE
 		    if (sub->requires==RTCM104
 			|| sub->requires==ANY) {
 			if (handle_rtcm_request(sub, buf, buflen) < 0)
 			    detach_client(sub);
 		    } else
-#endif /* RTCM104_SERVICE */
+#endif /* RTCM104_ENABLE */
 		    {
 			if (sub->device){
 		            /*
