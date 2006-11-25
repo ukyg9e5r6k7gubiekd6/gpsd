@@ -752,7 +752,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		 * 0x4a, LLA Position, data length 20
 		 * 0x4b, Machine Code Status, data length 3
 		 * 0x56, Velocity Fix (ENU), data length 20
-		 * 0x56, All-In-View Satellite Selection, data length 16+numSV
+		 * 0x5c, Satellite Tracking Status, data length 24
+		 * 0x6d, All-In-View Satellite Selection, data length 16+numSV
 		 * 0x82, Differential Position Fix Mode, data length 1
 		 * 0x83, Double Precision XYZ, data length 36
 		 * 0x84, Double Precision LLA, data length 36
@@ -798,12 +799,18 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    /* pass */;
 		else if ((0x56 == pkt_id) && (0x16 == len))
 		    /* pass */;
+		else if ((0x5c == pkt_id) && (0x1a == len))
+		    /* pass */;
 		else if ((0x6d == pkt_id) && ((0x12 <= len) && (0x1e >= len) ))
 		    /* pass */;
 		else if ((0x82 == pkt_id) && (0x03 == len))
 		    /* pass */;
-		else
+		else {
+		    gpsd_report(LOG_IO,
+			"TSIP REJECT pkt_id = %#02x, n= %#02x, len= %#02x\n",
+			pkt_id, n, len); 
 		    goto not_tsip;
+		}
 		/*@ -charint +ifempty @*/
 		packet_accept(session, TSIP_PACKET);
 		packet_discard(session);
