@@ -288,7 +288,7 @@ int main( int argc, char **argv)
 static void spinner (int v, int num) {
     char *spin = "|/-\\";
 
-    fprintf(stderr, "\b%c", spin[(num/(1<<(v-1))) % 4]);
+    fprintf(stderr, "\010%c", spin[(num/(1<<(v-1))) % 4]);
     fflush(stderr);
     return;
 }
