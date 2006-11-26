@@ -169,7 +169,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
 		   "ID%02x", id = (unsigned)session->outbuffer[1]);
 
-    gpsd_report(LOG_RAW, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
+    gpsd_report(LOG_IO, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
     (void)time(&now);
 
     switch (id) {
