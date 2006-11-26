@@ -157,7 +157,7 @@ class TestLoad:
             fourth = self.logfp.read(1)
             length = (ord(third) << 8) | ord(fourth)
             return "\xa0\xa2" + third + fourth + self.logfp.read(length+4)
-        elif first == '\xff' and second == '\x81':
+        elif first == '\xff' and second == '\x81':		# Zodiac
             third = self.logfp.read(1)
             fourth = self.logfp.read(1)
             fifth = self.logfp.read(1)

@@ -225,10 +225,12 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
 		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
+		goto foundit;
 	    }
  	}
 	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
+    foundit:
 #endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
