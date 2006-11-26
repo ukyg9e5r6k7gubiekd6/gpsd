@@ -121,6 +121,10 @@ function azel2xy($az, $el, $sz){
 
 function splot($im, $sz, $C, $e){
 	list($sv, $az, $el, $snr, $u) = $e;
+
+	if ((0 == $sv) || (0 == $az + $el + $snr))
+		return;
+
 	$color = $C['brightgreen'];
 	if ($snr < 40)
 		$color = $C['darkgreen'];
