@@ -535,7 +535,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 
 	case 0x20:	/* Last Fix with Extra Information (binary fixed point) */
-	    if (len != 56)
+	    /* XXX CSK sez "why does my Lassen iQ output oversize packets?" */
+	    if ((len != 56) && (len != 64))
 		break;
 	    s1 = getsw(buf,2);			/* east velocity */
 	    s2 = getsw(buf,4);			/* north velocity */
@@ -591,7 +592,8 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
 	    break;
 	case 0x23:	/* Compact Super Packet */
-	    if (len != 29)
+	    /* XXX CSK sez "i don't trust this to not be oversized either." */
+	    if (len < 29)
 		break;
 	    ul1 = getul(buf,1);			/* time */
 	    s1 = getsw(buf,5);			/* tsip.gps_week */
