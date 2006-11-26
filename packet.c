@@ -765,7 +765,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		if (session->inbuffer[n++] != DLE)
 		    goto not_tsip;
 		pkt_id = session->inbuffer[n++]; /* packet ID */
-		if ((0x41 > pkt_id) || (0x84 < pkt_id))
+		if ((0x41 > pkt_id) || (0x8f < pkt_id))
 		    goto not_tsip;
 		for ( len = 0; n < packetlen; len++ ) {
 		    if (session->inbuffer[n++] == DLE) {
@@ -800,6 +800,8 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		else if ((0x6d == pkt_id) && ((0x12 <= len) && (0x1e >= len) ))
 		    /* pass */;
 		else if ((0x82 == pkt_id) && (0x03 == len))
+		    /* pass */;
+		else if ((0x8f == pkt_id))
 		    /* pass */;
 		else {
 		    gpsd_report(LOG_IO,
