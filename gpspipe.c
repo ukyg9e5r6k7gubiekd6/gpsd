@@ -36,7 +36,7 @@
 #include "gpsd.h"
 
 static int fd_out = 1;		/* output initially goes to standard output */ 
-static void spinner(int, int);
+static void spinner(unsigned int, unsigned int);
 
 /* NMEA-0183 standard baud rate */
 #define BAUDRATE B4800
@@ -106,7 +106,7 @@ int main( int argc, char **argv)
     bool new_line = true;
     long count = -1;
     int option;
-    int vflag = 0, l = 0;
+    unsigned int vflag = 0, l = 0;
 
     char *arg = NULL, *colon1, *colon2, *device = NULL; 
     char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
@@ -285,10 +285,10 @@ int main( int argc, char **argv)
 #endif /* __UNUSED__ */  
 }
 
-static void spinner (int v, int num) {
+static void spinner (unsigned int v, unsigned int num) {
     char *spin = "|/-\\";
 
-    fprintf(stderr, "\010%c", spin[(num/(1<<(v-1))) % 4]);
-    fflush(stderr);
+    (void)fprintf(stderr, "\010%c", spin[(num/(1<<(v-1))) % 4]);
+    (void)fflush(stderr);
     return;
 }
