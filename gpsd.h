@@ -194,6 +194,17 @@ struct gps_device_t {
 #define TIME_SEEN_GPS_2	0x02	/* Seen GPS time variant 2? */
 #define TIME_SEEN_UTC_1	0x04	/* Seen UTC time variant 1? */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
+#ifdef ALLOW_RECONFIGURE
+	    /* fields from Navigation Parameters message */
+	    bool nav_parameters_seen;	/* have we seen one? */
+	    unsigned char altitude_hold_mode;
+	    unsigned char altitude_hold_source;
+	    int16_t altitude_source_input;
+	    unsigned char degraded_mode;
+	    unsigned char degraded_timeout;
+	    unsigned char dr_timeout;
+	    unsigned char track_smooth_mode;
+#endif /* ALLOW_RECONFIGURE */
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef TSIP_ENABLE

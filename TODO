@@ -129,6 +129,8 @@ and gpsprof would fail with:
 # gpsprof | gnuplot -persist
 gpsprof: gpsd unreachable.
 
+This is with Python 2.4.4 under Red Hat Linux, kernel version not reported.
+
 ** To do:
 
 *** New features for xgps.
@@ -142,10 +144,10 @@ This is a solved problem for generic NMEA, EverMore, TripMate,
 EarthMate, TNTC, Zodiac, and RTCM104 drivers (if only because they
 don't configure any device setting).
 
-The SiRF driver now restores NMEA when necessary.  We can do a perfect
-job of reverting changes during binary sessions by requesting a
-Navigation Parameters message and restoring the configuration it gives
-us on wrapup.
+The SiRF driver now restores NMEA when necessary.  It also restores
+some (but not all) of the things it tweaks in binary mode -- at the
+moment, just the Navigation Parameters from message 0x13.  With more
+work, we should be able to do a full revert.
 
 The TSIP driver changes its per-cycle sentence inventory and thus 
 needs some state-restore logic.  This can be done; the same packet 0x35
