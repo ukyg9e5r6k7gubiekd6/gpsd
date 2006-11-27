@@ -565,9 +565,12 @@ store information about the software version in member
 structure <userinput>struct gps_device_t *session</userinput>.</para>
 
 <para><structfield>.configurator</structfield> points to a block of code
-that sets up the device to deliver the correct set of sentences
+that should set up the device to deliver the correct set of sentences
 to supply the parser with the data needed by 
-<filename>gpsd</filename>.</para>
+<filename>gpsd</filename>. Like the
+<structfield>.probe_subtype</structfield> method, a second sequence
+number argument allows you to intersperse your configuration sends 
+with early packet receipts.</para>
 
 <para><structfield>.get_packet</structfield> points to a block of code
 that actually gets the packets from the serial stream. You will

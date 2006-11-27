@@ -196,41 +196,56 @@ static struct gps_type_t nmea = {
     .cycle          = 1,		/* updates every second */
 };
 
-#ifdef ALLOW_RECONFIGURE
 #ifdef GARMIN_ENABLE
-static void garmin_nmea_configurator(struct gps_device_t *session)
+/**************************************************************************
+ *
+ * Garmin NMEA
+ *
+ **************************************************************************/
+
+#ifdef ALLOW_RECONFIGURE
+static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int seq)
 {
-#if defined(NMEA_ENABLE) && !defined(GARMIN_ENABLE_UNUSED)
-    /* reset some config, AutoFix, WGS84, PPS */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,4,30");
-    /* once a sec, no averaging, NMEA 2.3, WAAS */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,1,1,,,,2,W,N");
-    /* get some more config info */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1E");
-    /* turn off all output */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,,2");
-    /* enable GPGGA, GPGSA, GPGSV, GPRMC on Garmin serial GPS */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGGA,1");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSA,1");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,PGRME,1");
-#endif /* NMEA_ENABLE && !GARMIN_ENABLE */
-#ifdef GARMIN_ENABLE_UNUSED
-    /* try to go binary */
-    /* once a sec, binary, no averaging, NMEA 2.3, WAAS */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
-    /* reset to get into binary */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
-    /* probe for Garmin serial binary by trying to Product Data request */
-    /* DLE, PktID, Size, data (none), CHksum, DLE, ETX 
-    (void)gpsd_write(session, "\x10\xFE\x00\x02\x10\x03", 6); */
-#endif /* GARMIN_ENABLE_UNUSED */
+#if defined(NMEA_ENABLE)
+    /*
+     * Receivers like the Garmin GPS-10 don't handle having a lot of 
+     */
+    switch (seq) {
+    case 0:
+	/* reset some config, AutoFix, WGS84, PPS */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,4,30");
+	break;
+    case 1:
+	/* once a sec, no averaging, NMEA 2.3, WAAS */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,1,1,,,,2,W,N");
+	break;
+    case 2:
+	/* get some more config info */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1E");
+	break;
+    case 3:
+	/* turn off all output except GGA */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,,2");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGGA,1");
+	break;
+    case 4:
+	/* enable GPGGA, GPGSA, GPGSV, GPRMC on Garmin serial GPS */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSA,1");
+	break;
+    case 5:
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
+	break;
+    case 6:
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
+	break;
+    case 7:
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,PGRME,1");
+	break;
+    }
 }
-#endif /* GARMIN_ENABLE */
+#endif /* NMEA_ENABLE */
 #endif /* ALLOW_RECONFIGURE */
 
-#ifdef GARMIN_ENABLE
 static struct gps_type_t garmin = {
     .typename       = "Garmin Serial",	/* full name of type */
     .trigger        = "$PGRMC,",	/* Garmin private */
@@ -264,13 +279,14 @@ static struct gps_type_t garmin = {
  **************************************************************************/
 
 #ifdef ALLOW_RECONFIGURE
-static void fv18_configure(struct gps_device_t *session)
+static void fv18_configure(struct gps_device_t *session, unsigned int seq)
 {
     /*
      * Tell an FV18 to send GSAs so we'll know if 3D is accurate.
      * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
      */
-    (void)nmea_send(session->gpsdata.gps_fd,
+    if (seq == 0)
+	(void)nmea_send(session->gpsdata.gps_fd,
 		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -323,10 +339,11 @@ static void tripmate_probe_subtype(struct gps_device_t *session, unsigned int se
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void tripmate_configurator(struct gps_device_t *session)
+static void tripmate_configurator(struct gps_device_t *session, unsigned int seq)
 {
     /* stop it sending PRWIZCH */
-    (void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
+    if (seq == 0)
+	(void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -487,12 +504,14 @@ static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void itrax_configurator(struct gps_device_t *session)
+static void itrax_configurator(struct gps_device_t *session, int seq)
 /* set synchronous mode */
 {
-    (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
-    (void)literal_send(session->gpsdata.gps_fd, 
+    if (seq == 0) {
+	(void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
+	(void)literal_send(session->gpsdata.gps_fd, 
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
+    }
 }
 #endif /* ALLOW_RECONFIGURE */
 

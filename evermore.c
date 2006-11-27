@@ -603,16 +603,18 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
-static void evermore_configurator(struct gps_device_t *session)
+static void evermore_configurator(struct gps_device_t *session, unsigned int seq)
 {
-    gpsd_report(LOG_PROG, "evermore_configurator call\n");
-    if (session->packet_type == NMEA_PACKET) {
-	gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
-    }
+    if (seq == 0) {
+	gpsd_report(LOG_PROG, "evermore_configurator call\n");
+	if (session->packet_type == NMEA_PACKET) {
+	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
+	}
 #ifdef ALLOW_RECONFIGURE
-    (void)evermore_default(session, 1); /* switch GPS to binary mode */
-    session->back_to_nmea = true;
+	(void)evermore_default(session, 1); /* switch GPS to binary mode */
+	session->back_to_nmea = true;
 #endif /* ALLOW_RECONFIGURE */
+    }
 }
 
 #ifdef __UNUSED__

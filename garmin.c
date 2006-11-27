@@ -794,8 +794,9 @@ static void garmin_probe_subtype(struct gps_device_t *session, unsigned int seq)
  * any twiddling of that previously done is harmless.
  *
  */
-static void garmin_configure(struct gps_device_t *session)
+static void garmin_configure(struct gps_device_t *session, int unsigned seq)
 {
+    if (seq == 0) {
 	// turn on PVT data 49
 	gpsd_report(LOG_PROG, "Set Garmin to send reports every 1 second\n");
 
@@ -808,6 +809,7 @@ static void garmin_configure(struct gps_device_t *session)
         Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
 	      , GARMIN_PKTID_L001_COMMAND_DATA, 2, CMND_START_RM_DATA);
 #endif
+    }
 }
 #endif /* ALLOW_RECONFIGURE */
 

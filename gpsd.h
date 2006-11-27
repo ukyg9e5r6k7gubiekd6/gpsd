@@ -78,7 +78,7 @@ struct gps_type_t {
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
     /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
 #ifdef ALLOW_RECONFIGURE 
-    /*@null@*/void (*configurator)(struct gps_device_t *session);
+    /*@null@*/void (*configurator)(struct gps_device_t *session, unsigned int seq);
 #endif /* ALLOW_RECONFIGURE */
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);

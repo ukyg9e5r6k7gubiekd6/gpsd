@@ -702,8 +702,10 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void sirfbin_configure(struct gps_device_t *session)
+static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
 {
+    if (seq != 0)
+	return;
     if (session->packet_type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
 	(void)nmea_send(session->gpsdata.gps_fd, 

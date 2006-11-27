@@ -84,16 +84,18 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void tsip_configurator(struct gps_device_t *session)
+static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 {
-    unsigned char buf[100];
+    if (seq == 0) {
+	unsigned char buf[100];
 
-    /* I/O Options */
-    putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
-    putbyte(buf,1,0x02);		/* Velocity: ENU */
-    putbyte(buf,2,0x00);		/* Time: GPS */
-    putbyte(buf,3,0x08);		/* Aux: dBHz */
-    (void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+	/* I/O Options */
+	putbyte(buf,0,0x1e);		/* Position: DP, MSL, LLA */
+	putbyte(buf,1,0x02);		/* Velocity: ENU */
+	putbyte(buf,2,0x00);		/* Time: GPS */
+	putbyte(buf,3,0x08);		/* Aux: dBHz */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x35, buf, 4);
+    }
 }
 #endif /* ALLOW_RECONFIGURE */
 

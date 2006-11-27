@@ -144,7 +144,7 @@ static void proto_wrapup(struct gps_device_t *session)
     */
 }
 
-static void configurator(struct gps_device_t *session)
+static void configurator(struct gps_device_t *session, unsigned int seq)
 {
     /* Change sentence mix and set reporting modes as needed */
 }

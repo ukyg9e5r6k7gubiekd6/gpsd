@@ -33,7 +33,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
 	if (session->enable_reconfigure 
 	    	&& session->device_type->configurator != NULL)
-	    session->device_type->configurator(session);
+	    session->device_type->configurator(session, 0);
 #endif /* ALLOW_RECONFIGURE */
 	return 0;
     }
@@ -50,7 +50,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    if (session->enable_reconfigure 
 			&& session->device_type->configurator != NULL) {
 		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->typename);
-		session->device_type->configurator(session);
+		session->device_type->configurator(session, 0);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
@@ -111,7 +111,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 	session->enable_reconfigure = false;
     }
 #endif /* ALLOW_RECONFIGURE */
-    if (session->back_to_nmea && session->device_type->mode_switcher != 0)
+    if (session->back_to_nmea && session->device_type->mode_switcher != NULL)
 	session->device_type->mode_switcher(session, 0);
     if (session->device_type!=NULL && session->device_type->wrapup!=NULL)
 	session->device_type->wrapup(session);
@@ -267,7 +267,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	    if (reconfigurable) {
 		session->enable_reconfigure = true;
 		if (session->device_type->configurator != NULL)
-		    session->device_type->configurator(session);
+		    session->device_type->configurator(session, session->packet_counter);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	}
