@@ -798,13 +798,13 @@ static void sirfbin_revert(struct gps_device_t *session)
 			      0x00,		/* track smoothing */
 			      0x00, 0x00, 0xb0, 0xb3};
     /*@ -charint -shiftimplementation @*/
-    putbyte(moderevert, 3, session->driver.sirf.degraded_mode);
-    putword(moderevert, 6, session->driver.sirf.altitude_source_input);
-    putbyte(moderevert, 8, session->driver.sirf.altitude_hold_mode);
-    putbyte(moderevert, 9, session->driver.sirf.altitude_hold_source);
-    putbyte(moderevert, 11, session->driver.sirf.degraded_timeout);
-    putbyte(moderevert, 12, session->driver.sirf.dr_timeout);
-    putbyte(moderevert, 13, session->driver.sirf.track_smooth_mode);
+    putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
+    putword(moderevert, 10, session->driver.sirf.altitude_source_input);
+    putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
+    putbyte(moderevert, 13, session->driver.sirf.altitude_hold_source);
+    putbyte(moderevert, 15, session->driver.sirf.degraded_timeout);
+    putbyte(moderevert, 16, session->driver.sirf.dr_timeout);
+    putbyte(moderevert, 17, session->driver.sirf.track_smooth_mode);
     /*@ +shiftimplementation @*/
     gpsd_report(LOG_PROG, "Reverting navigation parameters...\n");
     (void)sirf_write(session->gpsdata.gps_fd, moderevert);

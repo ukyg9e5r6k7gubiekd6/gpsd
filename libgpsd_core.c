@@ -27,6 +27,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
     struct gps_type_t **dp;
 
+    gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", typename);
     if (session->device_type != NULL && 
 	strcmp(session->device_type->typename, typename) == 0) {
 #ifdef ALLOW_RECONFIGURE
@@ -231,6 +232,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
     foundit:
+	session->enable_reconfigure = reconfigurable;
 #endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
@@ -265,7 +267,6 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 		session->device_type->probe_subtype(session, session->packet_counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (reconfigurable) {
-		session->enable_reconfigure = true;
 		if (session->device_type->configurator != NULL)
 		    session->device_type->configurator(session, session->packet_counter);
 	    }
