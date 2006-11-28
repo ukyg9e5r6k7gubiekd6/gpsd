@@ -89,6 +89,15 @@ checksummed binary packets in which the length is incorrect.  If you
 trust it and read the number of bytes it tells you to, you'll land in
 the middle of the next packet.</li>
 
+<li>Wintec has modified the firmware on the WBT200 (and probably the
+WBT100 as well) to disable iTalk support, thus making more room in the
+flash memory for logging. This wouldn't be a problem if they had also
+disabled the protocol switch command. Users attempting to switch their
+Wintec receivers to iTalk will find their receiver is left in limbo;
+not emitting iTalk, and unable to switch back to NMEA either. A hard
+reset by removing all power sources (including onboard battery backup)
+is the only way to get the receiver to communicate again.</li>
+
 <li>Some Garmin chips issue a bogus length field, too.  This from the
 outfit that likes to tout itself as the industry leader!</li>
 </ul>
