@@ -79,12 +79,21 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #ifdef NMEADISC
 	if (st & TIME_SET && session->gpsdata.ldisc == 0) {
+	    struct tstamps tstamps;
 	    int ldisc = NMEADISC;
+
+	    tstamps.ts_set |= TIOCM_CAR;
+	    tstamps.ts_clr = 0;
 
 	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
 		gpsd_report(LOG_ERROR, "can't set nmea discipline\n");
-	    else
+	    else {
 		session->gpsdata.ldisc = NMEADISC;
+#ifdef TIOCSTSTAMP
+		if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
+		    gpsd_report(LOG_ERROR, "can't set kernel timestamping\n");
+#endif /* TIOCSTSTAMP */
+	    }
 	}
 #endif
 #ifdef NTPSHM_ENABLE
