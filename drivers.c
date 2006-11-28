@@ -79,23 +79,26 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #ifdef NMEADISC
 	if (st & TIME_SET && session->gpsdata.ldisc == 0) {
-	    struct tstamps tstamps;
 	    int ldisc = NMEADISC;
 
+#ifdef TIOCSTSTAMP
+	    struct tstamps tstamps;
 	    tstamps.ts_set |= TIOCM_CAR;
 	    tstamps.ts_clr = 0;
 
-	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
-		gpsd_report(LOG_ERROR, "can't set nmea discipline\n");
-	    else {
-		session->gpsdata.ldisc = NMEADISC;
-#ifdef TIOCSTSTAMP
-		if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
-		    gpsd_report(LOG_ERROR, "can't set kernel timestamping\n");
+	    if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
+		gpsd_report(LOG_WARN, "can't set kernel timestamping\n");
+	    else
+		gpsd_report(LOG_WARN, "activated kernel timestamping\n");
 #endif /* TIOCSTSTAMP */
+	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
+		gpsd_report(LOG_WARN, "can't set nmea discipline\n");
+	    else{
+		session->gpsdata.ldisc = NMEADISC;
+		gpsd_report(LOG_WARN, "activated nmea discipline\n");
 	    }
 	}
-#endif
+#endif /*NMEADISC */
 #ifdef NTPSHM_ENABLE
 	/* this magic number is derived from observation */
 	if (session->context->enable_ntpshm &&
