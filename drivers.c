@@ -83,7 +83,11 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 #ifdef TIOCSTSTAMP
 	    struct tstamps tstamps;
+#ifdef PPS_ON_CTS
+	    tstamps.ts_set |= TIOCM_CTS;
+#else /*!PPS_ON_CTS */
 	    tstamps.ts_set |= TIOCM_CAR;
+#endif /* PPS_ON_CTS */
 	    tstamps.ts_clr = 0;
 
 	    if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
