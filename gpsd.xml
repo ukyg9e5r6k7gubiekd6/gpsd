@@ -763,7 +763,10 @@ of every clock second on the carrier-detect lines of some serial
 GPSes; this pulse can be used to update NTP at much higher accuracy
 than message time provides.  You can determine whether your GPS emits
 this pulse by running at -D 5 and watching for carrier-detect state
-change messages in the logfile.</para>
+change messages in the logfile. On OpenBSD <application>gpsd</application>
+makes use of the nmea(4) line discipline and the tty(4) timestamping
+facilities to export PPS time via the sensors framework. OpenBSD's ntpd
+uses these sensors to adjust the hardware clock and frequency.</para>
 
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
