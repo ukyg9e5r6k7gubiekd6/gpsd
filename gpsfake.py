@@ -121,23 +121,28 @@ class TestLoad:
         # Look at the first packet to grok the GPS type
         if self.sentences[0][0] == '$':
             self.packtype = "NMEA"
-            self.legend = "gpsfake: line %d "
+            self.legend = "gpsfake: line %d: "
+            self.idoffset = None
             self.textual = True
         elif self.sentences[0][0] == '\xff':
             self.packtype = "Zodiac binary"
-            self.legend = "gpsfake: packet %d"
+            self.legend = "gpsfake: packet %d: "
+            self.idoffset = None
             self.textual = True
         elif self.sentences[0][0] == '\xa0':
             self.packtype = "SiRF binary"
-            self.legend = "gpsfake: packet %d"
+            self.legend = "gpsfake: packet %d: "
+            self.idoffset = 3
             self.textual = False
         elif self.sentences[0][0] == '\x10':
             self.packtype = "TSIP binary"
-            self.legend = "gpsfake: packet %d"
+            self.legend = "gpsfake: packet %d: "
+            self.idoffset = 1
             self.textual = False
         elif self.type == "RTCM":
             self.packtype = "RTCM"
             self.legend = None
+            self.idoffset = None
             self.textual = False
         else:
             sys.stderr.write("gpsfake: unknown log type (not NMEA or SiRF) can't handle it!\n")

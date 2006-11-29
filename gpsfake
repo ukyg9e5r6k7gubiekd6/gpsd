@@ -108,6 +108,11 @@ for (switch, val) in options:
         raise SystemExit,0
 logfile = arguments[0]
 
+def hexdump(s):
+    rep = ""
+    for c in s:
+        rep += "%02x" % ord(c)
+    return rep
 
 def fakehook(linenumber, fakegps):
     if linenumber % len(fakegps.testload.sentences) == 0:
@@ -119,10 +124,12 @@ def fakehook(linenumber, fakegps):
             sys.stderr.write("gpsfake: log cycle begins.\n")
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
-        if fakegps.testload.textual:
-            ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
-        else:
-            ml = ""
+        ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+        if not fakegps.testload.textual:
+            rep = hexdump(ml) 
+            if fakegps.testload.idoffset != None:
+                rep = ("type %02x " % ord(ml[fakegps.testload.idoffset])) + rep
+            ml = rep
         announce = fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
         if promptme:
             raw_input(announce + "? ")
