@@ -52,8 +52,8 @@ method; otherwise your code will fail to clean up after itself when
 interrupted.
 
 Each FakeGPS instance tries to packetize the data from the logfile it
-is initialized with.  It looks for packet headers asociated with common
-packet types such as NMEA, SiRF, and Zodiac.  Additioonally, the Type
+is initialized with.  It looks for packet headers associated with common
+packet types such as NMEA, SiRF, TSIP, and Zodiac.  Additionally, the Type
 header in a logfile can be used to force the packet type, notably to RTCM
 which is fed to the daemon character by character,
 
