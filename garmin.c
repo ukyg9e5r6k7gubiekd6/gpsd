@@ -639,6 +639,7 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
        uint32_t layer_id UNUSED, uint32_t pkt_id, uint32_t length, uint32_t data ) 
 {
         uint8_t *buffer = (uint8_t *)session->driver.garmin.Buffer;
+        uint8_t *buffer0 = buffer;
 	Packet_t *thePacket = (Packet_t*)buffer;
 	ssize_t theBytesReturned = 0;
 	ssize_t theBytesToWrite = 6 + (ssize_t)length;
@@ -681,9 +682,9 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 		    , theBytesToWrite, gpsd_hexdump(thePacket, (size_t)theBytesToWrite));
 #endif
         (void)PrintSERPacket ( session,  
-			       (unsigned char)buffer[1], 
-			       (int)buffer[2], 
-			       (unsigned char *)(buffer + 3));
+			       (unsigned char)buffer0[1], 
+			       (int)buffer0[2], 
+			       (unsigned char *)(buffer0 + 3));
 
 	theBytesReturned = write( session->gpsdata.gps_fd
 				  , thePacket, (size_t)theBytesToWrite);
@@ -948,13 +949,15 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 	gpsd_report(LOG_RAW+1, "Char: %#02x\n", data_buf[i]);
     }
 
-    Send_ACK();
 
     gpsd_report(LOG_IO
 	, "garmin_ser_parse() Type: %#02x, Len: %#02x, chksum: %#02x\n"
         , pkt_id, pkt_len, chksum);
 
     mask = PrintSERPacket(session, pkt_id, pkt_len, data_buf);
+
+    // sending ACK too soon might fail, so do it last
+    Send_ACK();
     /*@ +usedef +compdef @*/
     return mask;
 }
