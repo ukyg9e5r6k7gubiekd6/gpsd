@@ -31,6 +31,9 @@
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
+/* several places in the code try setuid. put our preferred username here */
+#define GPSD_USER "nobody"
+
 /* a few bits of ISGPS magic */
 enum isgpsstat_t {
     ISGPS_NO_SYNC, ISGPS_SYNC, ISGPS_SKIP, ISGPS_MESSAGE,
