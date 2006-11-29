@@ -784,19 +784,19 @@ static void garmin_probe_subtype(struct gps_device_t *session, unsigned int seq)
     }
 }
 
-#ifdef ALLOW_RECONFIGURE
 /*
- * garmin_configure()
+ * garmin_usb_configure()
  *
- * configure a garmin_gps device,
+ * configure a garmin_gps (USB) device,
  * session->gpsdata.gps_fd is assumed to already be open.
  *
  * the garmin_gps driver ignores all termios, baud rates, etc. so
  * any twiddling of that previously done is harmless.
  *
  */
-static void garmin_configure(struct gps_device_t *session, int unsigned seq)
+static void garmin_usb_configure(struct gps_device_t *session, int unsigned seq)
 {
+    gpsd_report(LOG_PROG + 1, "garmin_usb_configure()\n");
     if (seq == 0) {
 	// turn on PVT data 49
 	gpsd_report(LOG_PROG, "Set Garmin to send reports every 1 second\n");
@@ -812,7 +812,6 @@ static void garmin_configure(struct gps_device_t *session, int unsigned seq)
 #endif
     }
 }
-#endif /* ALLOW_RECONFIGURE */
 
 static void garmin_close(struct gps_device_t *session UNUSED) 
 {
@@ -1133,7 +1132,7 @@ struct gps_type_t garmin_usb_binary_old =
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_configure,	/* eable what we need */
+    .configurator   = garmin_usb_configure,	/* eable what we need */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
@@ -1158,9 +1157,8 @@ struct gps_type_t garmin_usb_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
-#ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_configure,	/* eable what we need */
-#endif /* ALLOW_RECONFIGURE */
+    /* this configurator is NOT optional */
+    .configurator   = garmin_usb_configure,	/* enable what we need */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
@@ -1184,7 +1182,7 @@ struct gps_type_t garmin_ser_binary =
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
 #ifdef ALLOW_RECONFIGURE
-    .configurator   = garmin_configure,	/* enable what we need */
+    .configurator   = NULL,	        /* enable what we need */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet     = packet_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
