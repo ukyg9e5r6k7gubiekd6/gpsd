@@ -34,11 +34,6 @@ it could do anything including make bats fly out of your nose.
 The new Garmin driver and gpsctl should be much more solid in the next
 point release.
 
-*** PPS support is temporarily broken.
-
-It got sideswiped during the architectural changes need to implement
-the new gpsctl tool.  We should have this fixed in the next release.
-
 *** There's a report that RoyalTek support broke between 2.25 and 2.28 
 
 There's a report that RoyalTek support broke between 2.25 and 2.28 by
