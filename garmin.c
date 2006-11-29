@@ -333,9 +333,12 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	session->gpsdata.separation = -pvt->msl_hght;
 
 	// Estimated position error in meters.
-	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE/2);
-	session->gpsdata.fix.eph = pvt->eph * (GPSD_CONFIDENCE/2);
-	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/2);
+	// We follow the advice at <http://gpsinformation.net/main/errors.htm>.
+	// If this assumption changes here, it should also change in 
+	// nmea_parse.c where we analyze PGRME.
+	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->gpsdata.fix.eph = pvt->eph * (GPSD_CONFIDENCE/CEP50_SIGMA);
+	session->gpsdata.fix.epv = pvt->epv * (GPSD_CONFIDENCE/CEP50_SIGMA);
 
 	// convert lat/lon to directionless speed
 	session->gpsdata.fix.speed = hypot(pvt->lon_vel, pvt->lat_vel);

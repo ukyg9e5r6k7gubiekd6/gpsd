@@ -63,7 +63,7 @@ than repeatedly.  This option is intended to facilitate regression
 testing.</para>
 
 <para>The -b option enables a twirling-baton progress indicator
-on standard error.  At termination, it reports elaped time.</para>
+on standard error.  At termination, it reports elapsed time.</para>
 
 <para>The -c option sets the delay between sentences in
 seconds. Fractional values of seconds are legal.  The default is zero
@@ -105,7 +105,7 @@ The default is "w+r+"; "r=2" might be another interesting value.</para>
 default is 4800.</para>
 
 <para>The -v option enables verbose progress reports to stderr.  It
-is mainly useful for debugging gpsfake itself.</para>
+is mainly useful for debugging <application>gpsfake</application> itself.</para>
 
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>

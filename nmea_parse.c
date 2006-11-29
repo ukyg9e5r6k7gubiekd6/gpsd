@@ -472,6 +472,8 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
      *
      * Garmin won't say, but the general belief is that these are 50% CEP.
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
+     * If this assumption changes here, it should also change in garmin.c
+     * where we scale error estimates from Garmin binary packets.
      */
     if ((strcmp(field[2], "M")!=0) ||
 	(strcmp(field[4], "M")!=0) ||
