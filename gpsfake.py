@@ -131,6 +131,10 @@ class TestLoad:
             self.packtype = "SiRF binary"
             self.legend = "gpsfake: packet %d"
             self.textual = False
+        elif self.sentences[0][0] == '\x10':
+            self.packtype = "TSIP binary"
+            self.legend = "gpsfake: packet %d"
+            self.textual = False
         elif self.type == "RTCM":
             self.packtype = "RTCM"
             self.legend = None
@@ -165,6 +169,22 @@ class TestLoad:
             id = ord(third) | (ord(fourth) << 8)
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\xff\x81" + third + fourth + fifth + sixth + self.logfp.read(2*ndata+6)
+        elif first == '\x10':					# TSIP
+            packet = first + second
+            delcnt = 0
+            while True:
+                next = self.logfp.read(1)
+                if not next:
+                    return ''
+                packet += next
+                if next == '\x10':
+                    delcnt += 1
+                elif next == '\x03':
+                    if delcnt % 2:
+                        break
+                else:
+                    delcnt = 0
+            return packet
         else:
             raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
