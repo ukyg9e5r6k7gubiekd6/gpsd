@@ -69,9 +69,12 @@ on standard error.  At termination, it reports elaped time.</para>
 seconds. Fractional values of seconds are legal.  The default is zero
 (no delay).</para>
 
-<para>The -l option makes the program dump a line or packet number just
-before each sentence is fed to the daemon. If the sentence is
-textual (e.g. NMEA, the text is dumped as well).</para>
+<para>The -l option makes the program dump a line or packet number
+just before each sentence is fed to the daemon. If the sentence is
+textual (e.g. NMEA), the text is dumped as well.  If not, the packet
+will be dumped in hexadecimal (except for RTCM packets, which aren't
+dumped at all).  This option is useful for checking that gpsfake is
+getting packet boundaries right.</para>
 
 <para>The -i option is for single-stepping through logfiles.  It dumps
 the line or packet number (and the sentence if the protocol is
