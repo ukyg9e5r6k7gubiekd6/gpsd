@@ -787,7 +787,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		    /* pass */;
 		else if ((0x45 == pkt_id) && (0x0c == len))
 		    /* pass */;
-		else if ((0x46 == pkt_id) && (0x05 == len))
+		else if ((0x46 == pkt_id) && (0x04 == len))
 		    /* pass */;
 		else if ((0x4a == pkt_id) && (0x16 == len))
 		    /* pass */;
