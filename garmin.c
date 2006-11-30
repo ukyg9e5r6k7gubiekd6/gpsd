@@ -1144,7 +1144,9 @@ struct gps_type_t garmin_usb_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
+#ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,	        /* enable what we need */
+#endif /* ALLOW_RECONFIGURE */
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
