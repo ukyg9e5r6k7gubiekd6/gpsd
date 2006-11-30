@@ -70,73 +70,73 @@ enum {
 #define STX	0x02
 #define ETX	0x03
 
-static void nextstate(struct gps_device_t *session, unsigned char c)
+static void nextstate(struct gps_packet_t *session, struct rtcm_t *rtcm, unsigned char c)
 {
 #ifdef RTCM104_ENABLE
     enum isgpsstat_t	isgpsstat;    
 #endif /* RTCM104_ENABLE */
 /*@ +charint */
-    switch(session->packet_state)
+    switch(session->state)
     {
     case GROUND_STATE:
 #ifdef NMEA_ENABLE
 	if (c == '$') {
-	    session->packet_state = NMEA_DOLLAR;
+	    session->state = NMEA_DOLLAR;
 	    break;
 	}
 #endif /* NMEA_ENABLE */
 
 #ifdef TNT_ENABLE
         if (c == '@') {
-	    session->packet_state = TNT_LEADER;
+	    session->state = TNT_LEADER;
 	    break;
 	}
 #endif
 #ifdef SIRF_ENABLE
         if (c == 0xa0) {
-	    session->packet_state = SIRF_LEADER_1;
+	    session->state = SIRF_LEADER_1;
 	    break;
 	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
         if (c == DLE) {
-	    session->packet_state = DLE_LEADER;
+	    session->state = DLE_LEADER;
 	    break;
 	}
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
         if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = ASTRAL_1;
+	    session->state = ASTRAL_1;
 	    break;
 	}
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
         if (c == 'E') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = EARTHA_1;
+	    session->state = EARTHA_1;
 	    break;
 	}
 #endif /* EARTHMATE_ENABLE */
 #ifdef ZODIAC_ENABLE
 	if (c == 0xff) {
-	    session->packet_state = ZODIAC_LEADER_1;
+	    session->state = ZODIAC_LEADER_1;
 	    break;
 	}
 #endif /* ZODIAC_ENABLE */
 #ifdef ITALK_ENABLE
 	if (c == '<') {
-	    session->packet_state = ITALK_LEADER_1;
+	    session->state = ITALK_LEADER_1;
 	    break;
 	}
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
-	if (rtcm_decode(session, c) == ISGPS_SYNC) {
-	    session->packet_state = RTCM_SYNC_STATE;
+	if (rtcm_decode(session, rtcm, c) == ISGPS_SYNC) {
+	    session->state = RTCM_SYNC_STATE;
 	    break;
 	}
 #endif /* RTCM104_ENABLE */
@@ -145,258 +145,258 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
-	    session->packet_state = NMEA_PUB_LEAD;
+	    session->state = NMEA_PUB_LEAD;
 	else if (c == 'P')	/* vendor sentence */
-	    session->packet_state = NMEA_LEADER_END;
+	    session->state = NMEA_LEADER_END;
 	else if (c =='I')	/* Seatalk */
-	    session->packet_state = SEATALK_LEAD_1;
+	    session->state = SEATALK_LEAD_1;
 	else if (c =='A')	/* SiRF Ack */
-	    session->packet_state = SIRF_ACK_LEAD_1;
+	    session->state = SIRF_ACK_LEAD_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case NMEA_PUB_LEAD:
 	if (c == 'P')
-	    session->packet_state = NMEA_LEADER_END;
+	    session->state = NMEA_LEADER_END;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #ifdef TNT_ENABLE
     case TNT_LEADER:
-          session->packet_state = NMEA_LEADER_END;
+          session->state = NMEA_LEADER_END;
         break;
 #endif
     case NMEA_LEADER_END:
 	if (c == '\r')
-	    session->packet_state = NMEA_CR;
+	    session->state = NMEA_CR;
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
-	    session->packet_state = NMEA_RECOGNIZED;
+	    session->state = NMEA_RECOGNIZED;
 	else if (c == '$')
 	    /* faster recovery from missing sentence trailers */
-	    session->packet_state = NMEA_DOLLAR;
+	    session->state = NMEA_DOLLAR;
 	else if (!isprint(c))
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case NMEA_CR:
 	if (c == '\n')
-	    session->packet_state = NMEA_RECOGNIZED;
+	    session->state = NMEA_RECOGNIZED;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case NMEA_RECOGNIZED:
 	if (c == '$')
-	    session->packet_state = NMEA_DOLLAR;
+	    session->state = NMEA_DOLLAR;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case SEATALK_LEAD_1:
 	if (c == 'I' || c == 'N')	/* II or IN are accepted */
-	    session->packet_state = NMEA_LEADER_END;
+	    session->state = NMEA_LEADER_END;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
 	if (c == 'S') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = ASTRAL_2;
+	    session->state = ASTRAL_2;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ASTRAL_2:
 	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = ASTRAL_3;
+	    session->state = ASTRAL_3;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ASTRAL_3:
 	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = ASTRAL_5;
+	    session->state = ASTRAL_5;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ASTRAL_4:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = ASTRAL_2;
+	    session->state = ASTRAL_2;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ASTRAL_5:
 	if (c == 'L') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = NMEA_RECOGNIZED;
+	    session->state = NMEA_RECOGNIZED;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = EARTHA_2;
+	    session->state = EARTHA_2;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case EARTHA_2:
 	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = EARTHA_3;
+	    session->state = EARTHA_3;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case EARTHA_3:
 	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = EARTHA_4;
+	    session->state = EARTHA_4;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case EARTHA_4:
 	if (c == 'H') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = EARTHA_5;
+	    session->state = EARTHA_5;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case EARTHA_5:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(session, c);
+	    (void)rtcm_decode(session, rtcm, c);
 #endif /* RTCM104_ENABLE */
-	    session->packet_state = NMEA_RECOGNIZED;
+	    session->state = NMEA_RECOGNIZED;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break; 
 #endif /* EARTHMATE_ENABLE */
     case SIRF_ACK_LEAD_1:
 	if (c == 'c')
-	    session->packet_state = SIRF_ACK_LEAD_2;
+	    session->state = SIRF_ACK_LEAD_2;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
    case SIRF_ACK_LEAD_2:
 	if (c == 'k')
-	    session->packet_state = NMEA_LEADER_END;
+	    session->state = NMEA_LEADER_END;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* NMEA_ENABLE */
 #ifdef SIRF_ENABLE
     case SIRF_LEADER_1:
 	if (c == 0xa2)
-	    session->packet_state = SIRF_LEADER_2;
+	    session->state = SIRF_LEADER_2;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case SIRF_LEADER_2:
-	session->packet_length = (size_t)(c << 8);
-	session->packet_state = SIRF_LENGTH_1;
+	session->length = (size_t)(c << 8);
+	session->state = SIRF_LENGTH_1;
 	break;
     case SIRF_LENGTH_1:
-	session->packet_length += c + 2;
-	if (session->packet_length <= MAX_PACKET_LENGTH)
-	    session->packet_state = SIRF_PAYLOAD;
+	session->length += c + 2;
+	if (session->length <= MAX_PACKET_LENGTH)
+	    session->state = SIRF_PAYLOAD;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case SIRF_PAYLOAD:
-	if (--session->packet_length == 0)
-	    session->packet_state = SIRF_DELIVERED;
+	if (--session->length == 0)
+	    session->state = SIRF_DELIVERED;
 	break;
     case SIRF_DELIVERED:
 	if (c == 0xb0)
-	    session->packet_state = SIRF_TRAILER_1;
+	    session->state = SIRF_TRAILER_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case SIRF_TRAILER_1:
 	if (c == 0xb3)
-	    session->packet_state = SIRF_RECOGNIZED;
+	    session->state = SIRF_RECOGNIZED;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case SIRF_RECOGNIZED:
         if (c == 0xa0)
-	    session->packet_state = SIRF_LEADER_1;
+	    session->state = SIRF_LEADER_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
 	if (c == STX)
-	    session->packet_state = EVERMORE_LEADER_2;
+	    session->state = EVERMORE_LEADER_2;
 	else
 #endif /* EVERMORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
 	if (c >= 0x13)
-	    session->packet_state = TSIP_PAYLOAD;
+	    session->state = TSIP_PAYLOAD;
 	else
 #endif /* TSIP_ENABLE */
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
     case ZODIAC_RECOGNIZED:
 	if (c == 0xff)
-	    session->packet_state = ZODIAC_LEADER_1;
+	    session->state = ZODIAC_LEADER_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ZODIAC_LEADER_1:
 	if (c == 0x81)
-	    session->packet_state = ZODIAC_LEADER_2;
+	    session->state = ZODIAC_LEADER_2;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ZODIAC_LEADER_2:
-	session->packet_state = ZODIAC_ID_1;
+	session->state = ZODIAC_ID_1;
 	break;
     case ZODIAC_ID_1:
-	session->packet_state = ZODIAC_ID_2;
+	session->state = ZODIAC_ID_2;
 	break;
     case ZODIAC_ID_2:
-	session->packet_length = (size_t)c;
-	session->packet_state = ZODIAC_LENGTH_1;
+	session->length = (size_t)c;
+	session->state = ZODIAC_LENGTH_1;
 	break;
     case ZODIAC_LENGTH_1:
-	session->packet_length += (c << 8);
-	session->packet_state = ZODIAC_LENGTH_2;
+	session->length += (c << 8);
+	session->state = ZODIAC_LENGTH_2;
 	break;
     case ZODIAC_LENGTH_2:
-	session->packet_state = ZODIAC_FLAGS_1;
+	session->state = ZODIAC_FLAGS_1;
 	break;
     case ZODIAC_FLAGS_1:
-	session->packet_state = ZODIAC_FLAGS_2;
+	session->state = ZODIAC_FLAGS_2;
 	break;
     case ZODIAC_FLAGS_2:
-	session->packet_state = ZODIAC_HSUM_1;
+	session->state = ZODIAC_HSUM_1;
 	break;
     case ZODIAC_HSUM_1:
 	{
@@ -406,122 +406,122 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	    if (sum != getword(4)) {
 		gpsd_report(LOG_IO, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
 		       sum, getword(4));
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 		break;
 	    }
 	}
 	gpsd_report(LOG_RAW+1,"Zodiac header id=%hd len=%hd flags=%hx\n", getword(1), getword(2), getword(3));
  #undef getword
-	if (session->packet_length == 0) {
-	    session->packet_state = ZODIAC_RECOGNIZED;
+	if (session->length == 0) {
+	    session->state = ZODIAC_RECOGNIZED;
 	    break;
 	}
-	session->packet_length *= 2;		/* word count to byte count */
-	session->packet_length += 2;		/* checksum */
+	session->length *= 2;		/* word count to byte count */
+	session->length += 2;		/* checksum */
 	/* 10 bytes is the length of the Zodiac header */
-	if (session->packet_length <= MAX_PACKET_LENGTH - 10)
-	    session->packet_state = ZODIAC_PAYLOAD;
+	if (session->length <= MAX_PACKET_LENGTH - 10)
+	    session->state = ZODIAC_PAYLOAD;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ZODIAC_PAYLOAD:
-	if (--session->packet_length == 0)
-	    session->packet_state = ZODIAC_RECOGNIZED;
+	if (--session->length == 0)
+	    session->state = ZODIAC_RECOGNIZED;
 	break;
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
     case EVERMORE_LEADER_1:
 	if (c == STX)
-	    session->packet_state = EVERMORE_LEADER_2;
+	    session->state = EVERMORE_LEADER_2;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case EVERMORE_LEADER_2:
-	session->packet_length = (size_t)c;
+	session->length = (size_t)c;
 	if (c == DLE)
-	    session->packet_state = EVERMORE_PAYLOAD_DLE;
+	    session->state = EVERMORE_PAYLOAD_DLE;
 	else
-	    session->packet_state = EVERMORE_PAYLOAD;
+	    session->state = EVERMORE_PAYLOAD;
 	break;
     case EVERMORE_PAYLOAD:
 	if (c == DLE)
-	    session->packet_state = EVERMORE_PAYLOAD_DLE;
-	else if (--session->packet_length == 0)
-	    session->packet_state = GROUND_STATE;
+	    session->state = EVERMORE_PAYLOAD_DLE;
+	else if (--session->length == 0)
+	    session->state = GROUND_STATE;
 	break;
     case EVERMORE_PAYLOAD_DLE:
         switch (c) {
-           case DLE: session->packet_state = EVERMORE_PAYLOAD; break;
-           case ETX: session->packet_state = EVERMORE_RECOGNIZED; break;
-           default: session->packet_state = GROUND_STATE;
+           case DLE: session->state = EVERMORE_PAYLOAD; break;
+           case ETX: session->state = EVERMORE_RECOGNIZED; break;
+           default: session->state = GROUND_STATE;
         }
     break;
     case EVERMORE_RECOGNIZED:
         if (c == DLE)
-	    session->packet_state = EVERMORE_LEADER_1;
+	    session->state = EVERMORE_LEADER_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
     case ITALK_LEADER_1:
         if (c == '!')
-	    session->packet_state = ITALK_LEADER_2;
+	    session->state = ITALK_LEADER_2;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ITALK_LEADER_2:
-	session->packet_length = (size_t)(c & 0xff);
-	session->packet_state = ITALK_LENGTH;
+	session->length = (size_t)(c & 0xff);
+	session->state = ITALK_LENGTH;
 	break;
     case ITALK_LENGTH:
-	session->packet_length += 1;	/* fix number of words in payload */
-	session->packet_length *= 2;	/* convert to number of bytes */
-	session->packet_state = ITALK_PAYLOAD;
+	session->length += 1;	/* fix number of words in payload */
+	session->length *= 2;	/* convert to number of bytes */
+	session->state = ITALK_PAYLOAD;
 	break;
     case ITALK_PAYLOAD:
 	/* lookahead for "<!" because sometimes packets are short but valid */
 	if ((c == '>') && (session->inbufptr[0] == '<') && (session->inbufptr[1] == '!'))
-	    session->packet_state = ITALK_RECOGNIZED;
-	else if (--session->packet_length == 0)
-	    session->packet_state = ITALK_DELIVERED;
+	    session->state = ITALK_RECOGNIZED;
+	else if (--session->length == 0)
+	    session->state = ITALK_DELIVERED;
 	break;
     case ITALK_DELIVERED:
 	if (c == '>')
-	    session->packet_state = ITALK_RECOGNIZED;
+	    session->state = ITALK_RECOGNIZED;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case ITALK_RECOGNIZED:
         if (c == '<')
-	    session->packet_state = ITALK_LEADER_1;
+	    session->state = ITALK_LEADER_1;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* ITALK_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
         /* unused case */
 	if (c >= 0x13)
-	    session->packet_state = TSIP_PAYLOAD;
+	    session->state = TSIP_PAYLOAD;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
     case TSIP_PAYLOAD:
 	if (c == DLE)
-	    session->packet_state = TSIP_DLE;
+	    session->state = TSIP_DLE;
 	break;
     case TSIP_DLE:
 	switch (c)
 	{
 	case ETX:
-	    session->packet_state = TSIP_RECOGNIZED;
+	    session->state = TSIP_RECOGNIZED;
 	    break;
 	case DLE:
-	    session->packet_state = TSIP_PAYLOAD;
+	    session->state = TSIP_PAYLOAD;
 	    break;
 	default:
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	    break;
 	}
 	break;
@@ -533,28 +533,28 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 	     * looking at another DLE-stuffed protocol like EverMore
              * or Garmin streaming binary.
 	     */
-	    session->packet_state = DLE_LEADER;
+	    session->state = DLE_LEADER;
 	else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
 #ifdef RTCM104_ENABLE
     case RTCM_SYNC_STATE:
     case RTCM_SKIP_STATE:
-	isgpsstat = rtcm_decode(session, c);
+	isgpsstat = rtcm_decode(session, rtcm, c);
 	if (isgpsstat == ISGPS_MESSAGE) {
-	    session->packet_state = RTCM_RECOGNIZED;
+	    session->state = RTCM_RECOGNIZED;
 	    break;
 	} else if (isgpsstat == ISGPS_NO_SYNC)
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 
     case RTCM_RECOGNIZED:
-	if (rtcm_decode(session, c) == ISGPS_SYNC) {
-	    session->packet_state = RTCM_SYNC_STATE;
+	if (rtcm_decode(session, rtcm, c) == ISGPS_SYNC) {
+	    session->state = RTCM_SYNC_STATE;
 	    break;
 	} else
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	break;
 #endif /* RTCM104_ENABLE */
     }
@@ -563,7 +563,7 @@ static void nextstate(struct gps_device_t *session, unsigned char c)
 
 #define STATE_DEBUG
 
-static void packet_accept(struct gps_device_t *session, int packet_type)
+static void packet_accept(struct gps_packet_t *session, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
     size_t packetlen = session->inbufptr-session->inbuffer;
@@ -571,7 +571,7 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
 	memcpy(session->outbuffer, session->inbuffer, packetlen);
 	session->outbuflen = packetlen;
 	session->outbuffer[packetlen] = '\0';
-	session->packet_type = packet_type;
+	session->type = packet_type;
 #ifdef STATE_DEBUG
 	gpsd_report(LOG_RAW+1, "Packet type %d accepted %d = %s\n",
 		packet_type, packetlen,
@@ -583,7 +583,7 @@ static void packet_accept(struct gps_device_t *session, int packet_type)
     }
 }
 
-static void packet_discard(struct gps_device_t *session)
+static void packet_discard(struct gps_packet_t *session)
 /* shift the input buffer to discard all data up to current input pointer */
 {
     size_t discard = session->inbufptr - session->inbuffer;
@@ -599,7 +599,7 @@ static void packet_discard(struct gps_device_t *session)
 #endif /* STATE_DEBUG */
 }
 
-static void character_discard(struct gps_device_t *session)
+static void character_discard(struct gps_packet_t *session)
 /* shift the input buffer to discard one character and reread data */
 {
     memmove(session->inbuffer, session->inbuffer+1, (size_t)--session->inbuflen);
@@ -618,7 +618,7 @@ static void character_discard(struct gps_device_t *session)
 #define getword(i) (short)(session->inbuffer[2*(i)] | (session->inbuffer[2*(i)+1] << 8))
 
 
-ssize_t packet_parse(struct gps_device_t *session, size_t fix)
+ssize_t packet_parse(struct gps_packet_t *session, struct rtcm_t *rtcm, size_t fix)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
@@ -638,19 +638,19 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	char *state_table[] = {
 #include "packet_names.h"
 	};
-	nextstate(session, c);
+	nextstate(session, rtcm, c);
 	gpsd_report(LOG_RAW+2, "%08ld: character '%c' [%02x], new state: %s\n",
 		    session->char_counter, 
 		    (isprint(c)?c:'.'), 
 		    c, 
-		    state_table[session->packet_state]);
+		    state_table[session->state]);
 	session->char_counter++;
 
-	if (session->packet_state == GROUND_STATE) {
+	if (session->state == GROUND_STATE) {
 	    character_discard(session);
 	}
 #ifdef NMEA_ENABLE
-	else if (session->packet_state == NMEA_RECOGNIZED) {
+	else if (session->state == NMEA_RECOGNIZED) {
 	    bool checksum_ok = true;
 	    char csum[3];
 	    char *trailer = (char *)session->inbufptr-5;
@@ -665,13 +665,13 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    if (checksum_ok)
 		packet_accept(session, NMEA_PACKET);
 	    else
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 	    packet_discard(session);
             break;
 	}
 #endif /* NMEA_ENABLE */
 #ifdef SIRF_ENABLE
-	else if (session->packet_state == SIRF_RECOGNIZED) {
+	else if (session->state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = session->inbufptr-4;
 	    unsigned int checksum = (unsigned)((trailer[0] << 8) | trailer[1]);
 	    unsigned int n, crc = 0;
@@ -681,16 +681,16 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    if (checksum == crc)
 		packet_accept(session, SIRF_PACKET);
 	    else
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 	    packet_discard(session);
             break;
 	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
-	else if (session->packet_state == TSIP_RECOGNIZED) {
+	else if (session->state == TSIP_RECOGNIZED) {
             size_t packetlen = session->inbufptr - session->inbuffer;
 	    if ( packetlen < 5) {
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
             } else {
 		unsigned int pkt_id, len;
 		size_t n;
@@ -824,7 +824,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		 * More attempts to recognize ambiguous TSIP-like
 		 * packet types could go here.
 		 */
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 		packet_discard(session);
 		break;
 #endif /* TSIP_ENABLE */
@@ -832,7 +832,7 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	}
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
-	else if (session->packet_state == ZODIAC_RECOGNIZED) {
+	else if (session->state == ZODIAC_RECOGNIZED) {
 	    short len, n, sum;
 	    len = getword(2);
 	    for (n = sum = 0; n < len; n++)
@@ -844,14 +844,14 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		gpsd_report(LOG_IO,
 		    "Zodiac data checksum 0x%hx over length %hd, expecting 0x%hx\n",
 			sum, len, getword(5 + len));
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 	    }
 	    packet_discard(session);
             break;
 	}
 #endif /* ZODIAC_ENABLE */
 #ifdef EVERMORE_ENABLE
-	else if (session->packet_state == EVERMORE_RECOGNIZED) {
+	else if (session->state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
 	    n = 0;
 	    /*@ +charint */
@@ -894,15 +894,15 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 	    packet_discard(session);
 	    break;
 	not_evermore:
-	    session->packet_state = GROUND_STATE;
+	    session->state = GROUND_STATE;
 	    packet_discard(session);
             break;
 	}
 #endif /* EVERMORE_ENABLE */
 #ifdef ITALK_ENABLE
-	else if (session->packet_state == ITALK_RECOGNIZED) {
+	else if (session->state == ITALK_RECOGNIZED) {
 	    u_int16_t len, n, sum;
-	    len = (unsigned short)(session->packet_length / 2 - 1);
+	    len = (unsigned short)(session->length / 2 - 1);
 	    /*
 	     * Skip first 9 words so we compute checksum only over data
 	     * portion of packet.
@@ -914,20 +914,20 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 		packet_accept(session, ITALK_PACKET);
 	    } else {
 		gpsd_report(LOG_RAW, "italk checksum failed\n");
-		session->packet_state = GROUND_STATE;
+		session->state = GROUND_STATE;
 	    }
 	    packet_discard(session);
             break;
 	}
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
-	else if (session->packet_state == RTCM_RECOGNIZED) {
+	else if (session->state == RTCM_RECOGNIZED) {
 	    /*
 	     * RTCM packets don't have checksums.  The six bits of parity 
 	     * per word and the preamble better be good enough.
 	     */
 	    packet_accept(session, RTCM_PACKET);
-	    session->packet_state = RTCM_SYNC_STATE;
+	    session->state = RTCM_SYNC_STATE;
 	    packet_discard(session);
             break;
 	}
@@ -938,12 +938,12 @@ ssize_t packet_parse(struct gps_device_t *session, size_t fix)
 }
 #undef getword
 
-ssize_t packet_get(struct gps_device_t *session)
+ssize_t packet_get(int fd, struct rtcm_t *rtcm, struct gps_packet_t *session)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
     ssize_t fix;
     /*@ -modobserver @*/
-    fix = read(session->gpsdata.gps_fd, session->inbuffer+session->inbuflen,
+    fix = read(fd, session->inbuffer+session->inbuflen,
 			sizeof(session->inbuffer)-(session->inbuflen));
     /*@ +modobserver @*/
     if (fix == -1) {
@@ -956,14 +956,14 @@ ssize_t packet_get(struct gps_device_t *session)
 
     if (fix == 0)
 	return 0;
-    return packet_parse(session, (size_t)fix);
+    return packet_parse(session, rtcm, (size_t)fix);
 }
 
-void packet_reset(struct gps_device_t *session)
+void packet_reset(struct gps_packet_t *session)
 /* return the packet machine to the ground state */
 {
-    session->packet_type = BAD_PACKET;
-    session->packet_state = GROUND_STATE;
+    session->type = BAD_PACKET;
+    session->state = GROUND_STATE;
     session->inbuflen = 0;
     session->inbufptr = session->inbuffer;
 #ifdef BINARY_ENABLE
@@ -973,7 +973,7 @@ void packet_reset(struct gps_device_t *session)
 
 
 #ifdef __UNUSED__
-void packet_pushback(struct gps_device_t *session)
+void packet_pushback(struct gps_packet_t *session)
 /* push back the last packet grabbed */
 {
     if (session->outbuflen + session->inbuflen < MAX_PACKET_LENGTH) {

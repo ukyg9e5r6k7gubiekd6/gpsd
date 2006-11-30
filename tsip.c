@@ -144,32 +144,32 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
-    if (session->packet_type != TSIP_PACKET) {
-	gpsd_report(LOG_INF, "tsip_analyze packet type %d\n",session->packet_type);
+    if (session->packet.type != TSIP_PACKET) {
+	gpsd_report(LOG_INF, "tsip_analyze packet type %d\n",session->packet.type);
 	return 0;
     }
 
     /*@ +charint @*/
-    if (session->outbuflen < 4 || session->outbuffer[0] != 0x10)
+    if (session->packet.outbuflen < 4 || session->packet.outbuffer[0] != 0x10)
 	return 0;
 
     /* remove DLE stuffing and put data part of message in buf */
 
     memset(buf, 0, sizeof(buf));
     buf2[len = 0] = '\0';
-    for (i = 2; i < (int)session->outbuflen; i++) {
-	if (session->outbuffer[i] == 0x10)
-	    if (session->outbuffer[++i] == 0x03)
+    for (i = 2; i < (int)session->packet.outbuflen; i++) {
+	if (session->packet.outbuffer[i] == 0x10)
+	    if (session->packet.outbuffer[++i] == 0x03)
 		break;
 
 	(void)snprintf(buf2+strlen(buf2), 
 		      sizeof(buf2)-strlen(buf2),
-		      "%02x", buf[len++] = session->outbuffer[i]);
+		      "%02x", buf[len++] = session->packet.outbuffer[i]);
     }
     /*@ -charint @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
-		   "ID%02x", id = (unsigned)session->outbuffer[1]);
+		   "ID%02x", id = (unsigned)session->packet.outbuffer[1]);
 
     gpsd_report(LOG_IO, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
     (void)time(&now);
@@ -703,14 +703,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet_type == TSIP_PACKET){
+    if (session->packet.type == TSIP_PACKET){
 	st = tsip_analyze(session);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef EVERMORE_ENABLE
-    } else if (session->packet_type == EVERMORE_PACKET) {
+    } else if (session->packet.type == EVERMORE_PACKET) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
-	st = evermore_parse(session, session->outbuffer, session->outbuflen);
+	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #endif /* EVERMORE_ENABLE */
@@ -730,7 +730,7 @@ struct gps_type_t tsip_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = tsip_configurator,/* initial mode sets */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use the generic packet getter */
+    .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
     .speed_switcher = tsip_speed_switch,/* change baud rate */

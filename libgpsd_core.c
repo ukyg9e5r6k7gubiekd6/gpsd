@@ -46,7 +46,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
 	    if (session->device_type->probe_subtype != NULL)
-		session->device_type->probe_subtype(session, session->packet_counter = 0);
+		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (session->enable_reconfigure 
 			&& session->device_type->configurator != NULL) {
@@ -92,7 +92,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     gpsd_zero_satellites(&session->gpsdata);
 
     /* initialize things for the packet parser */
-    packet_reset(session);
+    packet_reset(&session->packet);
 }
 
 void gpsd_deactivate(struct gps_device_t *session)
@@ -238,8 +238,8 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 #ifdef SIRF_ENABLE
 	session->driver.sirf.satcounter = 0;
 #endif /* SIRF_ENABLE */
-	session->char_counter = 0;
-	session->retry_counter = 0;
+	session->packet.char_counter = 0;
+	session->packet.retry_counter = 0;
 	gpsd_report(LOG_INF, "gpsd_activate(%d): opened GPS (%d)\n", reconfigurable, session->gpsdata.gps_fd);
 	// session->gpsdata.online = 0;
 	session->gpsdata.fix.mode = MODE_NOT_SEEN;
@@ -264,11 +264,11 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	/* if we know the device type, probe for subtype and configure it */
 	if (session->device_type != NULL) {
 	    if (session->device_type->probe_subtype !=NULL)
-		session->device_type->probe_subtype(session, session->packet_counter = 0);
+		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (reconfigurable) {
 		if (session->device_type->configurator != NULL)
-		    session->device_type->configurator(session, session->packet_counter);
+		    session->device_type->configurator(session, session->packet.counter);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	}
@@ -429,7 +429,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     }
 
 #ifdef ZODIAC_ENABLE
-    if (session->packet_type == ZODIAC_PACKET && session->driver.zodiac.Zs[0] != 0) {
+    if (session->packet.type == ZODIAC_PACKET && session->driver.zodiac.Zs[0] != 0) {
 	bufp += strlen(bufp);
 	bufp2 = bufp;
 	(void)strlcpy(bufp, "$PRWIZCH", len);
@@ -602,23 +602,23 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->gpsdata.fix);
 
-    if (session->inbuflen==0)
+    if (session->packet.inbuflen==0)
 	session->gpsdata.d_xmit_time = timestamp();
 
     /* can we get a full packet from the device? */
     if (session->device_type) {
 	newlen = session->device_type->get_packet(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	if (session->outbuflen>0 && session->device_type->probe_subtype!=NULL)
-	    session->device_type->probe_subtype(session, ++session->packet_counter);
+	if (session->packet.outbuflen>0 && session->device_type->probe_subtype!=NULL)
+	    session->device_type->probe_subtype(session, ++session->packet.counter);
     } else {
-	newlen = packet_get(session);
+	newlen = generic_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW, 
 		    "packet sniff finds type %d\n", 
-		    session->packet_type);
-	if (session->packet_type != BAD_PACKET) {
-	    switch (session->packet_type) {
+		    session->packet.type);
+	if (session->packet.type != BAD_PACKET) {
+	    switch (session->packet.type) {
 #ifdef SIRF_ENABLE
 	    case SIRF_PACKET:
 		(void)gpsd_switch_driver(session, "SiRF binary");
@@ -677,7 +677,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    return 0;
 	} else
 	    return ONLINE_SET;
-    } else if (session->outbuflen == 0) {   /* got new data, but no packet */
+    } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
 	    gpsd_report(LOG_RAW+3, "New data, not yet a packet\n");
 	    return ONLINE_SET;
     } else {
@@ -687,10 +687,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/*@ -nullstate @*/
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata, 
-				      (char *)session->outbuffer,
-				      (size_t)session->outbuflen, 2);
+				      (char *)session->packet.outbuffer,
+				      (size_t)session->packet.outbuflen, 2);
 	/*@ -nullstate @*/
-	session->gpsdata.sentence_length = session->outbuflen;
+	session->gpsdata.sentence_length = session->packet.outbuflen;
 	session->gpsdata.d_recv_time = timestamp();
 
 	/* Get data from current packet into the fix structure */
@@ -718,11 +718,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_decode_time = timestamp();
 
 	/* also copy the sentence up to clients in raw mode */
-	if (session->packet_type == NMEA_PACKET) {
+	if (session->packet.type == NMEA_PACKET) {
 	    if (session->gpsdata.raw_hook)
 		session->gpsdata.raw_hook(&session->gpsdata,
-					  (char *)session->outbuffer,
-					  strlen((char *)session->outbuffer),
+					  (char *)session->packet.outbuffer,
+					  strlen((char *)session->packet.outbuffer),
 					  1);
 	} else {
 	    char buf2[MAX_PACKET_LENGTH*3+2];
@@ -730,7 +730,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    buf2[0] = '\0';
 #ifdef RTCM104_ENABLE
 	    if ((session->gpsdata.set & RTCM_SET) != 0)
-		rtcm_dump(session, 
+		rtcm_dump(&session->gpsdata.rtcm, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
 	    else {

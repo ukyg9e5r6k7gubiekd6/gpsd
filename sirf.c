@@ -716,13 +716,14 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet_type == SIRF_PACKET){
-	st = sirf_parse(session, session->outbuffer, session->outbuflen);
+    if (session->packet.type == SIRF_PACKET){
+	st = sirf_parse(session, session->packet.outbuffer, 
+			session->packet.outbuflen);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef NMEA_ENABLE
-    } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->outbuffer, session);
+    } else if (session->packet.type == NMEA_PACKET) {
+	st = nmea_parse((char *)session->packet.outbuffer, session);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
@@ -735,7 +736,7 @@ static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
 {
     if (seq != 0)
 	return;
-    if (session->packet_type == NMEA_PACKET) {
+    if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
 	(void)nmea_send(session->gpsdata.gps_fd, 
 		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
@@ -828,7 +829,7 @@ struct gps_type_t sirf_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = sirfbin_configure,/* initialize the device */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use the generic packet getter */
+    .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */

@@ -15,6 +15,11 @@
 
 extern struct gps_type_t zodiac_binary;
 
+ssize_t generic_get(struct gps_device_t *session)
+{
+    return packet_get(session->gpsdata.gps_fd, &session->gpsdata.rtcm, &session->packet);
+}
+
 #if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
@@ -32,23 +37,23 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 
 gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
-    if (session->packet_type == SIRF_PACKET) {
+    if (session->packet.type == SIRF_PACKET) {
 	gpsd_report(LOG_WARN, "SiRF packet seen when NMEA expected.\n");
 #ifdef SIRF_ENABLE
 	(void)gpsd_switch_driver(session, "SiRF binary");
-	return sirf_parse(session, session->outbuffer, session->outbuflen);
+	return sirf_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 #else
 	return 0;
 #endif /* SIRF_ENABLE */
-    } else if (session->packet_type == EVERMORE_PACKET) {
+    } else if (session->packet.type == EVERMORE_PACKET) {
 	gpsd_report(LOG_WARN, "EverMore packet seen when NMEA expected.\n");
 #ifdef EVERMORE_ENABLE
 	(void)gpsd_switch_driver(session, "EverMore binary");
-	return evermore_parse(session, session->outbuffer, session->outbuflen);
+	return evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 #else
 	return 0;
 #endif /* EVERMORE_ENABLE */
-    } else if (session->packet_type == GARMIN_PACKET) {
+    } else if (session->packet.type == GARMIN_PACKET) {
 	gpsd_report(LOG_WARN, "Garmin packet seen when NMEA expected.\n");
 #ifdef GARMIN_ENABLE
 	/* we might never see a trigger, have this as a backstop */
@@ -57,10 +62,10 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #else
 	return 0;
 #endif /* GARMIN_ENABLE */
-    } else if (session->packet_type == NMEA_PACKET) {
+    } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;
-	gpsd_report(LOG_IO, "<= GPS: %s", session->outbuffer);
-	if ((st=nmea_parse((char *)session->outbuffer, session))==0) {
+	gpsd_report(LOG_IO, "<= GPS: %s", session->packet.outbuffer);
+	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
 
@@ -68,14 +73,14 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
-		if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
+		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->typename);
 		    return 1;
 		}
 	    }
 #endif /* NON_NMEA_ENABLE */
-	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->outbuffer);
+	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 #ifdef NMEADISC
 	if (session->gpsdata.ldisc == 0) {
@@ -212,7 +217,7 @@ static struct gps_type_t nmea = {
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* enable what we need */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,		/* use generic packet getter */
+    .get_packet     = generic_get,		/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -286,7 +291,7 @@ static struct gps_type_t garmin = {
 #ifdef ALLOW_RECONFIGURE
     .configurator   = garmin_nmea_configurator,/* enable what we need */
 #endif /*ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use generic packet getter */
+    .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -331,7 +336,7 @@ static struct gps_type_t fv18 = {
 #ifdef ALLOW_RECONFIGURE
     .configurator   = fv18_configure,	/* change its sentence set */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* how to get a packet */
+    .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -387,7 +392,7 @@ static struct gps_type_t tripmate = {
 #ifdef ALLOW_RECONFIGURE
     .configurator  = tripmate_configurator,	/* send unconditionally */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,		/* how to get a packet */
+    .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = pass_rtcm,			/* send RTCM data straight */
     .speed_switcher= NULL,			/* no speed switcher */
@@ -445,7 +450,7 @@ static struct gps_type_t earthmate = {
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,			/* no configuration here */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,		/* how to get a packet */
+    .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = nmea_parse_input,		/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
     .speed_switcher= NULL,			/* no speed switcher */
@@ -585,7 +590,7 @@ static struct gps_type_t itrax = {
 #ifdef ALLOW_RECONFIGURE
     .configurator  = itrax_configurator,/* set synchronous mode */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,	/* how to get a packet */
+    .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
     .speed_switcher= itrax_speed,	/* no speed switcher */
@@ -683,11 +688,11 @@ static int tnt_packet_sniff(struct gps_device_t *session)
           //usleep(delay);
           gpsd_report(LOG_RAW, "sleep(1)\n");
           (void)sleep(1);
-      } else if (packet_get(session) >= 0) {
-        if((session->packet_type == NMEA_PACKET)&&(session->packet_state == NMEA_RECOGNIZED))
+      } else if (generic_get(session) >= 0) {
+        if((session->packet.type == NMEA_PACKET)&&(session->packet_state == NMEA_RECOGNIZED))
         {
-          gpsd_report(LOG_RAW, "tnt_packet_sniff returns %d\n",session->packet_type);
-          return session->packet_type;
+          gpsd_report(LOG_RAW, "tnt_packet_sniff returns %d\n",session->packet.type);
+          return session->packet.type;
         }
       }
     }
@@ -757,7 +762,7 @@ struct gps_type_t trueNorth = {
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* no setting changes */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* how to get a packet */
+    .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,	        /* Don't send */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -783,7 +788,7 @@ static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
     gpsd_report(LOG_RAW, "RTCM packet type 0x%02x length %d words: %s\n", 
 		session->gpsdata.rtcm.type,
 		session->gpsdata.rtcm.length+2,
-		gpsd_hexdump(session->driver.isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));
+		gpsd_hexdump(session->packet.isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));
     return RTCM_SET;
 }
 
@@ -797,7 +802,7 @@ static struct gps_type_t rtcm104 = {
 #ifdef ALLOW_RECONFIGURE
     .configurator  = NULL,		/* no configurator */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet    = packet_get,	/* how to get a packet */
+    .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .speed_switcher= NULL,		/* no speed switcher */

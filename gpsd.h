@@ -124,6 +124,44 @@ struct gps_type_t {
  */
 #define INPUT_BUFFER_LENGTH	1024
 
+struct gps_packet_t {
+    /* packet-getter internals */
+    int	type;
+#define BAD_PACKET	-1
+#define NMEA_PACKET	0
+#define SIRF_PACKET	1
+#define ZODIAC_PACKET	2
+#define TSIP_PACKET	3
+#define EVERMORE_PACKET	4
+#define ITALK_PACKET	5
+#define RTCM_PACKET	6
+#define GARMIN_PACKET	7
+    unsigned int state;
+    size_t length;
+    unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
+    size_t inbuflen;
+    unsigned /*@observer@*/char *inbufptr;
+    /* outbuffer needs to be able to hold 4 GPGSV records at once */
+    unsigned char outbuffer[MAX_PACKET_LENGTH*2+1];
+    size_t outbuflen;
+    unsigned long char_counter;		/* count characters processed */
+    unsigned long retry_counter;	/* count sniff retries */
+    unsigned counter;			/* packets since last driver switch */
+    /*
+     * This is not conditionalized on RTCM104_ENABLE because we need to
+     * be able to build rtcmdecode even when RTCM support is not
+     * configured in the daemon.
+     */
+    struct {
+	/* ISGPS200 decoding */
+	bool            locked;
+	int             curr_offset;
+	isgps30bits_t   curr_word;
+	isgps30bits_t   buf[RTCM_WORDS_MAX];
+	unsigned int    bufindex;
+    } isgps;
+};
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
@@ -134,30 +172,9 @@ struct gps_device_t {
 #endif /* ALLOW_RECONFIGURE */
     double rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
     struct termios ttyset, ttyset_old;
-    /* packet-getter internals */
-    int	packet_type;
-#define BAD_PACKET	-1
-#define NMEA_PACKET	0
-#define SIRF_PACKET	1
-#define ZODIAC_PACKET	2
-#define TSIP_PACKET	3
-#define EVERMORE_PACKET	4
-#define ITALK_PACKET	5
-#define RTCM_PACKET	6
-#define GARMIN_PACKET	7
     unsigned int baudindex;
     int saved_baud;
-    unsigned int packet_state;
-    size_t packet_length;
-    unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
-    size_t inbuflen;
-    unsigned /*@observer@*/char *inbufptr;
-    /* outbuffer needs to be able to hold 4 GPGSV records at once */
-    unsigned char outbuffer[MAX_PACKET_LENGTH*2+1];
-    size_t outbuflen;
-    unsigned long char_counter;		/* count characters processed */
-    unsigned long retry_counter;	/* count sniff retries */
-    unsigned packet_counter;		/* packets since last driver switch */
+    struct gps_packet_t packet;
     char subtype[64];			/* firmware version or subtype ID */
     double poll_times[FD_SETSIZE];	/* last daemon poll time */
 #ifdef NTPSHM_ENABLE
@@ -240,19 +257,6 @@ struct gps_device_t {
 	    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
-	/*
-	 * This is not conditionalized on RTCM104_ENABLE because we need to
-	 * be able to build rtcmdecode even when RTCM support is not
-	 * configured in the daemon.  It doesn't take up extra space.
-	 */
-	struct {
-	    /* ISGPS200 decoding */
-	    bool            locked;
-	    int             curr_offset;
-	    isgps30bits_t   curr_word;
-	    isgps30bits_t   buf[RTCM_WORDS_MAX];
-	    unsigned int    bufindex;
-	} isgps;
 #endif /* BINARY_ENABLE */
     } driver;
 };
@@ -277,16 +281,18 @@ extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern int nmea_send(int, const char *, ... );
 extern void nmea_add_checksum(char *);
 
+ssize_t generic_get(struct gps_device_t *);
 ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
-extern void packet_reset(struct gps_device_t *);
-extern void packet_pushback(struct gps_device_t *);
-extern ssize_t packet_parse(struct gps_device_t *, size_t);
-extern ssize_t packet_get(struct gps_device_t *);
-extern int packet_sniff(struct gps_device_t *);
+
+extern void packet_reset(struct gps_packet_t *);
+extern void packet_pushback(struct gps_packet_t *);
+extern ssize_t packet_parse(struct gps_packet_t *, struct rtcm_t *, size_t);
+extern ssize_t packet_get(int, struct rtcm_t *, struct gps_packet_t *);
+extern int packet_sniff(struct gps_packet_t *);
 
 extern bool dgnss_url(char *);
 extern int dgnss_open(struct gps_context_t *, char *);
@@ -331,19 +337,21 @@ extern bool ntpshm_free(struct gps_context_t *, int);
 extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
 
-extern void isgps_init(/*@out@*/struct gps_device_t *);
-enum isgpsstat_t isgps_decode(struct gps_device_t *, 
+extern void isgps_init(/*@out@*/struct gps_packet_t *);
+enum isgpsstat_t isgps_decode(struct gps_packet_t *, 
 			      bool (*preamble_match)(isgps30bits_t *),
-			      bool (*length_check)(struct gps_device_t *),
+			      bool (*length_check)(struct gps_packet_t *),
 			      size_t,
 			      unsigned int);
 extern unsigned int isgps_parity(isgps30bits_t);
-extern enum isgpsstat_t rtcm_decode(struct gps_device_t *, unsigned int);
 
-extern void rtcm_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, 
+				    struct rtcm_t *,
+				    unsigned int);
+extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
 extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
-extern void rtcm_unpack(struct gps_device_t *);
-extern bool rtcm_repack(struct gps_device_t *);
+extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
+extern bool rtcm_repack(struct rtcm_t *, char *);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 

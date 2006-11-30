@@ -360,13 +360,13 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet_type == EVERMORE_PACKET){
-	st = evermore_parse(session, session->outbuffer, session->outbuflen);
+    if (session->packet.type == EVERMORE_PACKET){
+	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.driver_mode = 1;  /* binary */
 	return st;
 #ifdef NMEA_ENABLE
-    } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->outbuffer, session);
+    } else if (session->packet.type == NMEA_PACKET) {
+	st = nmea_parse((char *)session->packet.outbuffer, session);
 	session->gpsdata.driver_mode = 0;  /* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
@@ -607,7 +607,7 @@ static void evermore_configurator(struct gps_device_t *session, unsigned int seq
 {
     if (seq == 0) {
 	gpsd_report(LOG_PROG, "evermore_configurator call\n");
-	if (session->packet_type == NMEA_PACKET) {
+	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
 	}
 #ifdef ALLOW_RECONFIGURE
@@ -656,7 +656,7 @@ struct gps_type_t evermore_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = evermore_configurator,	/* switch to binary */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,		/* use generic one */
+    .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = evermore_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
     .speed_switcher = evermore_speed,		/* we can change baud rates */

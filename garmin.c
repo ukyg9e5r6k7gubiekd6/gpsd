@@ -830,8 +830,8 @@ static void garmin_close(struct gps_device_t *session UNUSED)
 /*@ +charint @*/
 gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 {
-    unsigned char *buf = session->outbuffer;
-    size_t len = session->outbuflen;
+    unsigned char *buf = session->packet.outbuffer;
+    size_t len = session->packet.outbuflen;
     unsigned char data_buf[MAX_BUFFER_SIZE];
     unsigned char c;
     int i = 0;
@@ -1035,7 +1035,7 @@ static int GetPacket (struct gps_device_t *session )
     memset( session->driver.garmin.Buffer, 0, sizeof(Packet_t));
     memset( &delay, 0, sizeof(delay));
     session->driver.garmin.BufferLen = 0;
-    session->outbuflen = 0;
+    session->packet.outbuflen = 0;
 
     gpsd_report(LOG_IO, "GetPacket()\n");
 
@@ -1112,7 +1112,7 @@ static int GetPacket (struct gps_device_t *session )
     }
 
     gpsd_report(LOG_RAW, "GotPacket() sz=%d \n", session->driver.garmin.BufferLen);
-    session->outbuflen = session->driver.garmin.BufferLen;
+    session->packet.outbuflen = session->driver.garmin.BufferLen;
     return 0;
 }
 static gps_mask_t garmin_usb_parse(struct gps_device_t *session)
@@ -1162,7 +1162,7 @@ struct gps_type_t garmin_usb_binary =
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
     /* this configurator is NOT optional */
     .configurator   = garmin_usb_configure,	/* enable what we need */
-    .get_packet     = packet_get,       /* how to grab a packet */
+    .get_packet     = generic_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1187,7 +1187,7 @@ struct gps_type_t garmin_ser_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,	        /* enable what we need */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,       /* how to grab a packet */
+    .get_packet     = generic_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */

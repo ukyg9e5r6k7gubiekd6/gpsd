@@ -64,13 +64,12 @@ Starlink's website.
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
-void rtcm_unpack(struct gps_device_t *session)
+void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
 /* break out the raw bits into the content fields */
 {
     int len;
     unsigned int n, w;
-    struct rtcm_t *tp = &session->gpsdata.rtcm;
-    struct rtcm_msg_t *msg = (struct rtcm_msg_t *)session->driver.isgps.buf;
+    struct rtcm_msg_t *msg = (struct rtcm_msg_t *)buf;
 
     tp->type = msg->w1.msgtype;
     tp->length = msg->w2.frmlen;
@@ -227,16 +226,14 @@ void rtcm_unpack(struct gps_device_t *session)
     }
 }
 
-bool rtcm_repack(struct gps_device_t *session)
+bool rtcm_repack(struct rtcm_t *tp, char *buf)
 /* repack the content fields into the raw bits */
 {
     int len, sval;
     unsigned int n, w, uval;
-    struct rtcm_t *tp = &session->gpsdata.rtcm;
-    struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)session->driver.isgps.buf;
-    struct rtcm_msghw1 *wp  = (struct rtcm_msghw1 *)session->driver.isgps.buf;
+    struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)buf;
+    struct rtcm_msghw1 *wp  = (struct rtcm_msghw1 *)buf;
 
-    memset(session->driver.isgps.buf, 0, sizeof(session->driver.isgps.buf));
     msg->w1.msgtype = tp->type;
     msg->w2.frmlen = tp->length;
     msg->w2.zcnt = (unsigned) round(tp->zcount / ZCOUNT_SCALE);
@@ -424,7 +421,7 @@ bool rtcm_repack(struct gps_device_t *session)
 
     /* compute parity for each word in the message */
     for (w = 0; w < tp->length; w++)
-	wp[w].parity = isgps_parity(session->driver.isgps.buf[w]);
+	wp[w].parity = isgps_parity(buf[w]);
 
     /* FIXME: must do inversion here */
     return true;
@@ -435,13 +432,15 @@ static bool preamble_match(isgps30bits_t *w)
     return (((struct rtcm_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
 }
 
-static bool length_check(struct gps_device_t *session)
+static bool length_check(struct gps_packet_t *session)
 {
-    return session->driver.isgps.bufindex >= 2 
-	&& session->driver.isgps.bufindex >= ((struct rtcm_msg_t *)session->driver.isgps.buf)->w2.frmlen + 2u;
+    return session->isgps.bufindex >= 2 
+	&& session->isgps.bufindex >= ((struct rtcm_msg_t *)session->isgps.buf)->w2.frmlen + 2u;
 }
 
-enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
+enum isgpsstat_t rtcm_decode(struct gps_packet_t *session,
+			     struct rtcm_t *rtcm, 
+			     unsigned int c)
 {
     enum isgpsstat_t res = isgps_decode(session, 
 					preamble_match, 
@@ -449,66 +448,66 @@ enum isgpsstat_t rtcm_decode(struct gps_device_t *session, unsigned int c)
 					RTCM_WORDS_MAX, 
 					c);
     if (res == ISGPS_MESSAGE)
-	rtcm_unpack(session);
+	rtcm_unpack(rtcm, (char *)session->isgps.buf);
 
     return res;
 }
 
-void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
+void rtcm_dump(struct rtcm_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     unsigned int n;
 
     (void)snprintf(buf, buflen, "H\t%u\t%u\t%0.1f\t%u\t%u\t%u\n",
-	   session->gpsdata.rtcm.type,
-	   session->gpsdata.rtcm.refstaid,
-	   session->gpsdata.rtcm.zcount,
-	   session->gpsdata.rtcm.seqnum,
-	   session->gpsdata.rtcm.length,
-	   session->gpsdata.rtcm.stathlth);
+	   rtcm->type,
+	   rtcm->refstaid,
+	   rtcm->zcount,
+	   rtcm->seqnum,
+	   rtcm->length,
+	   rtcm->stathlth);
 
-    switch (session->gpsdata.rtcm.type) {
+    switch (rtcm->type) {
     case 1:
     case 9:
-	for (n = 0; n < session->gpsdata.rtcm.msg_data.ranges.nentries; n++) {
-	    struct rangesat_t *rsp = &session->gpsdata.rtcm.msg_data.ranges.sat[n];
+	for (n = 0; n < rtcm->msg_data.ranges.nentries; n++) {
+	    struct rangesat_t *rsp = &rtcm->msg_data.ranges.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "S\t%u\t%u\t%u\t%0.1f\t%0.3f\t%0.3f\n",
 			   rsp->ident,
 			   rsp->udre,
 			   rsp->issuedata,
-			   session->gpsdata.rtcm.zcount,
+			   rtcm->zcount,
 			   rsp->rangerr,
 			   rsp->rangerate);
 	}
 	break;
 
     case 3:
-	if (session->gpsdata.rtcm.msg_data.ecef.valid)
+	if (rtcm->msg_data.ecef.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "R\t%.2f\t%.2f\t%.2f\n",
-			   session->gpsdata.rtcm.msg_data.ecef.x, 
-			   session->gpsdata.rtcm.msg_data.ecef.y,
-			   session->gpsdata.rtcm.msg_data.ecef.z);
+			   rtcm->msg_data.ecef.x, 
+			   rtcm->msg_data.ecef.y,
+			   rtcm->msg_data.ecef.z);
 	break;
 
     case 4:
-	if (session->gpsdata.rtcm.msg_data.reference.valid)
+	if (rtcm->msg_data.reference.valid)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "D\t%s\t%1d\t%s\t%.1f\t%.1f\t%.1f\n",
-			   (session->gpsdata.rtcm.msg_data.reference.system==gps) ? "GPS"
-			   : ((session->gpsdata.rtcm.msg_data.reference.system==glonass) ? "GLONASS"
+			   (rtcm->msg_data.reference.system==gps) ? "GPS"
+			   : ((rtcm->msg_data.reference.system==glonass) ? "GLONASS"
 			      : "UNKNOWN"),
-			   session->gpsdata.rtcm.msg_data.reference.sense,
-			   session->gpsdata.rtcm.msg_data.reference.datum,
-			   session->gpsdata.rtcm.msg_data.reference.dx,
-			   session->gpsdata.rtcm.msg_data.reference.dy,
-			   session->gpsdata.rtcm.msg_data.reference.dz);
+			   rtcm->msg_data.reference.sense,
+			   rtcm->msg_data.reference.datum,
+			   rtcm->msg_data.reference.dx,
+			   rtcm->msg_data.reference.dy,
+			   rtcm->msg_data.reference.dz);
 	break;
 
     case 5:
-	for (n = 0; n < session->gpsdata.rtcm.msg_data.conhealth.nentries; n++) {
-	    struct consat_t *csp = &session->gpsdata.rtcm.msg_data.conhealth.sat[n];
+	for (n = 0; n < rtcm->msg_data.conhealth.nentries; n++) {
+	    struct consat_t *csp = &rtcm->msg_data.conhealth.sat[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "C\t%2u\t%1u\t%1u\t%2d\t%1u\t%1u\t%1u\t%2u\n",
 			   csp->ident,
@@ -527,8 +526,8 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
 
     case 7:
-	for (n = 0; n < session->gpsdata.rtcm.msg_data.almanac.nentries; n++) {
-	    struct station_t *ssp = &session->gpsdata.rtcm.msg_data.almanac.station[n];
+	for (n = 0; n < rtcm->msg_data.almanac.nentries; n++) {
+	    struct station_t *ssp = &rtcm->msg_data.almanac.station[n];
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "A\t%.4f\t%.4f\t%u\t%.1f\t%u\t%u\t%u\n",
 			   ssp->latitude,
@@ -542,13 +541,13 @@ void rtcm_dump(struct gps_device_t *session, /*@out@*/char buf[], size_t buflen)
 	break;
     case 16:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "T\t\"%s\"\n", session->gpsdata.rtcm.msg_data.message);
+		       "T\t\"%s\"\n", rtcm->msg_data.message);
 	break;
 
     default:
-	for (n = 0; n < session->gpsdata.rtcm.length; n++)
+	for (n = 0; n < rtcm->length; n++)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "U\t0x%08x\n", session->gpsdata.rtcm.msg_data.words[n]);
+			   "U\t0x%08x\n", rtcm->msg_data.words[n]);
 	break;
     }
 

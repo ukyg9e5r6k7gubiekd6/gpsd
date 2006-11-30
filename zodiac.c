@@ -368,19 +368,19 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
     int i;
-    unsigned int id = (unsigned int)((session->outbuffer[3]<<8) | session->outbuffer[2]);
+    unsigned int id = (unsigned int)((session->packet.outbuffer[3]<<8) | session->packet.outbuffer[2]);
 
-    if (session->packet_type != ZODIAC_PACKET) {
+    if (session->packet.type != ZODIAC_PACKET) {
 	struct gps_type_t **dp;
-	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",session->packet_type);
+	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",session->packet.type);
  	// Wrong packet type ? 
 	// Maybe find a trigger just in case it's an Earthmate
-	gpsd_report(LOG_RAW+4, "Is this a trigger: %s ?\n", (char*)session->outbuffer);
+	gpsd_report(LOG_RAW+4, "Is this a trigger: %s ?\n", (char*)session->packet.outbuffer);
 
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char	*trigger = (*dp)->trigger;
 
-	    if (trigger!=NULL && strncmp((char *)session->outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
+	    if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    
 		(void)gpsd_switch_driver(session, (*dp)->typename);
@@ -391,13 +391,13 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     }
 
     buf[0] = '\0';
-    for (i = 0; i < (int)session->outbuflen; i++)
+    for (i = 0; i < (int)session->packet.outbuflen; i++)
 	(void)snprintf(buf+strlen(buf), sizeof(buf)-strlen(buf),
-		       "%02x", (unsigned int)session->outbuffer[i]);
+		       "%02x", (unsigned int)session->packet.outbuffer[i]);
     (void)strlcat(buf, "\n", BUFSIZ);
-    gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length %d: %s\n",id,session->outbuflen,buf);
+    gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length %d: %s\n",id,session->packet.outbuflen,buf);
 
-    if (session->outbuflen < 10)
+    if (session->packet.outbuflen < 10)
 	return 0;
 
     (void)snprintf(session->gpsdata.tag,sizeof(session->gpsdata.tag),"%u",id);
@@ -436,7 +436,7 @@ struct gps_type_t zodiac_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = NULL,		/* no configuration */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use the generic packet getter */
+    .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */

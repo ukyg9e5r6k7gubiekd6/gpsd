@@ -35,20 +35,21 @@ static void decode(FILE *fpin, FILE *fpout)
 {
     int             c;
     struct gps_device_t device;
+    struct rtcm_t rtcm;
     enum isgpsstat_t res;
     off_t count;
     char buf[BUFSIZ];
 
-    isgps_init(&device);
+    isgps_init(&device.packet);
 
     count = 0;
     while ((c = fgetc(fpin)) != EOF) {
-	res = rtcm_decode(&device, (unsigned int)c);
+	res = rtcm_decode(&device.packet, &rtcm, (unsigned int)c);
 	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
 	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
-	    rtcm_dump(&device, buf, sizeof(buf));
+	    rtcm_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
     }
@@ -75,9 +76,10 @@ static void pass(FILE *fpin, FILE *fpout)
 	status = rtcm_undump(&session.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    (void)rtcm_repack(&session);
-	    (void)rtcm_unpack(&session);
-	    (void)rtcm_dump(&session, buf, sizeof(buf));
+	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
+	    (void)rtcm_repack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)rtcm_unpack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)rtcm_dump(&session.gpsdata.rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	    memset(&session, 0, sizeof(session));
 	} else if (status < 0) {
@@ -102,8 +104,9 @@ static void encode(FILE *fpin, FILE *fpout)
 	status = rtcm_undump(&session.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    (void)rtcm_repack(&session);
-	    (void)fwrite(session.driver.isgps.buf, 
+	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
+	    (void)rtcm_repack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)fwrite(session.packet.isgps.buf, 
 			 sizeof(isgps30bits_t), 
 			 (size_t)session.gpsdata.rtcm.length, fpout);
 	    memset(&session, 0, sizeof(session));

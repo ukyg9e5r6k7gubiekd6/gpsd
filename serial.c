@@ -194,7 +194,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	} else if (session->device_type->probe_wakeup != NULL)
 	    session->device_type->probe_wakeup(session);
     }
-    packet_reset(session);
+    packet_reset(&session->packet);
 }
 
 int gpsd_open(struct gps_device_t *session)
@@ -219,7 +219,7 @@ int gpsd_open(struct gps_device_t *session)
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
 
-    session->packet_type = BAD_PACKET;
+    session->packet.type = BAD_PACKET;
     if (isatty(session->gpsdata.gps_fd)!=0) {
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd,&session->ttyset_old) != 0)
@@ -281,8 +281,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
     static unsigned int rates[] = {0, 4800, 9600, 19200, 38400, 57600};
 #endif /* FIXED_PORT_SPEED defined */
 
-    if (session->retry_counter++ >= SNIFF_RETRIES) {
-	session->retry_counter = 0;
+    if (session->packet.retry_counter++ >= SNIFF_RETRIES) {
+	session->packet.retry_counter = 0;
 	if (session->baudindex++ >= (unsigned int)(sizeof(rates)/sizeof(rates[0]))-1) {
 	    session->baudindex = 0;
 	    if (session->gpsdata.stopbits++ >= 2)

@@ -518,14 +518,14 @@ static bool allocation_policy(struct gps_device_t *channel,
     /* maybe we have already bound a more recently active device */
     if (user->device!=NULL && channel->gpsdata.sentence_time < most_recent)
 	return false;
-    gpsd_report(LOG_PROG, "User requires %d, channel type is %d\n", user->requires, channel->packet_type);
+    gpsd_report(LOG_PROG, "User requires %d, channel type is %d\n", user->requires, channel->packet.type);
     /* we might have type constraints */
     if (user->requires == ANY)
 	return true;
-    else if (user->requires==RTCM104 && (channel->packet_type==RTCM_PACKET))
+    else if (user->requires==RTCM104 && (channel->packet.type==RTCM_PACKET))
 	return true;
     else if (user->requires == GPS 
-	     && (channel->packet_type!=RTCM_PACKET) && (channel->packet_type!=BAD_PACKET))
+	     && (channel->packet.type!=RTCM_PACKET) && (channel->packet.type!=BAD_PACKET))
 	return true;
     else
 	return false;
@@ -775,9 +775,9 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		p += strcspn(p, ",\r\n");
 	    }
 	    (void)assign_channel(sub);
-	    if (sub->device==NULL||sub->device->packet_type==BAD_PACKET)
+	    if (sub->device==NULL||sub->device->packet.type==BAD_PACKET)
 		(void)strlcpy(phrase, ",G=?", BUFSIZ);
-	    else if (sub->device->packet_type == RTCM_PACKET)
+	    else if (sub->device->packet.type == RTCM_PACKET)
 		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
@@ -1743,7 +1743,7 @@ int main(int argc, char *argv[])
 	if (!nowait)
 	    for (channel=channels; channel < channels+MAXDEVICES; channel++) {
 		if (allocated_channel(channel)) {
-		    if (channel->packet_type != BAD_PACKET) {
+		    if (channel->packet.type != BAD_PACKET) {
 			bool need_gps = false;
 
 			for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++)

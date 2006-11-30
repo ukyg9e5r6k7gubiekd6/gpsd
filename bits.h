@@ -75,11 +75,11 @@ union long_double {
 
 
 /* Zodiac protocol description uses 1-origin indexing by little-endian word */
-#define getword(n)	( (session->outbuffer[2*(n)-2]) \
-		| (session->outbuffer[2*(n)-1] << 8))
-#define getlong(n)	( (session->outbuffer[2*(n)-2]) \
-		| (session->outbuffer[2*(n)-1] << 8) \
-		| (session->outbuffer[2*(n)+0] << 16) \
-		| (session->outbuffer[2*(n)+1] << 24))
+#define getword(n)	( (session->packet.outbuffer[2*(n)-2]) \
+		| (session->packet.outbuffer[2*(n)-1] << 8))
+#define getlong(n)	( (session->packet.outbuffer[2*(n)-2]) \
+		| (session->packet.outbuffer[2*(n)-1] << 8) \
+		| (session->packet.outbuffer[2*(n)+0] << 16) \
+		| (session->packet.outbuffer[2*(n)+1] << 24))
 #define getstring(t, s, e)	\
-    (void)memcpy(t, session->outbuffer+2*(s)-2, 2*((e)-(s)+1))
+    (void)memcpy(t, session->packet.outbuffer+2*(s)-2, 2*((e)-(s)+1))
