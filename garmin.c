@@ -784,23 +784,7 @@ static void garmin_probe_subtype(struct gps_device_t *session, unsigned int seq)
         gpsd_report(LOG_PROG, "Get Garmin Product Data\n");
         Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL
            , GARMIN_PKTID_PRODUCT_RQST, 0, 0);
-    }
-}
 
-/*
- * garmin_usb_configure()
- *
- * configure a garmin_gps (USB) device,
- * session->gpsdata.gps_fd is assumed to already be open.
- *
- * the garmin_gps driver ignores all termios, baud rates, etc. so
- * any twiddling of that previously done is harmless.
- *
- */
-static void garmin_usb_configure(struct gps_device_t *session, int unsigned seq)
-{
-    gpsd_report(LOG_PROG + 1, "garmin_usb_configure()\n");
-    if (seq == 0) {
 	// turn on PVT data 49
 	gpsd_report(LOG_PROG, "Set Garmin to send reports every 1 second\n");
 
@@ -1160,9 +1144,8 @@ struct gps_type_t garmin_usb_binary =
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
-    /* this configurator is NOT optional */
-    .configurator   = garmin_usb_configure,	/* enable what we need */
-    .get_packet     = generic_get,       /* how to grab a packet */
+    .configurator   = NULL,	        /* enable what we need */
+    .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
     .speed_switcher = NULL,		/* no speed switcher */
