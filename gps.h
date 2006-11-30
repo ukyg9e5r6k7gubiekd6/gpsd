@@ -242,7 +242,7 @@ struct gps_data_t {
     int PRN[MAXCHANNELS];	/* PRNs of satellite */
     int elevation[MAXCHANNELS];	/* elevation of satellite */
     int azimuth[MAXCHANNELS];	/* azimuth */
-    int ss[MAXCHANNELS];	/* signal strength */
+    int ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
 
 #if 0	/* not yet used or filled in */
     /* measurement data */

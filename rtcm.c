@@ -432,23 +432,23 @@ static bool preamble_match(isgps30bits_t *w)
     return (((struct rtcm_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
 }
 
-static bool length_check(struct gps_packet_t *session)
+static bool length_check(struct gps_packet_t *lexer)
 {
-    return session->isgps.bufindex >= 2 
-	&& session->isgps.bufindex >= ((struct rtcm_msg_t *)session->isgps.buf)->w2.frmlen + 2u;
+    return lexer->isgps.bufindex >= 2 
+	&& lexer->isgps.bufindex >= ((struct rtcm_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
 }
 
-enum isgpsstat_t rtcm_decode(struct gps_packet_t *session,
+enum isgpsstat_t rtcm_decode(struct gps_packet_t *lexer,
 			     /*@out@*/struct rtcm_t *rtcm, 
 			     unsigned int c)
 {
-    enum isgpsstat_t res = isgps_decode(session, 
+    enum isgpsstat_t res = isgps_decode(lexer, 
 					preamble_match, 
 					length_check, 
 					RTCM_WORDS_MAX, 
 					c);
     if (res == ISGPS_MESSAGE)
-	rtcm_unpack(rtcm, (char *)session->isgps.buf);
+	rtcm_unpack(rtcm, (char *)lexer->isgps.buf);
 
     return res;
 }
