@@ -131,7 +131,7 @@
 // This is the data format of the satellite data from the garmin USB
 typedef struct {
 	uint8_t  svid;
-	uint16_t snr; // 0 - 0xffff
+	int16_t snr; // 0 - 0xffff
 	uint8_t  elev;
 	uint16_t azmth;
 	uint8_t  status; // bit 0, has ephemeris, 1, has diff correction
@@ -454,10 +454,12 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    session->gpsdata.PRN[j]       = (int)sats->svid;
 	    session->gpsdata.azimuth[j]   = (int)sats->azmth;
 	    session->gpsdata.elevation[j] = (int)sats->elev;
-	    // snr units??
-	    // garmin 0 -> 0xffff, NMEA 99 -> 0
-	    session->gpsdata.ss[j]
-	        = 99 - (int)((100 *( unsigned long)sats->snr) >> 16);
+            // snr is in dB*100
+	    // known, but not seen satellites have a dB value of -1*100
+            session->gpsdata.ss[j] = (int)round((float)sats->snr / 100);
+	    if (session->gpsdata.ss[j] < 0) {
+		session->gpsdata.ss[j] = 0;
+	    }
 	    if ( (uint8_t)0 != (sats->status & 4 ) )  {
 	        // used in solution?
 	        session->gpsdata.used[session->gpsdata.satellites_used++]
