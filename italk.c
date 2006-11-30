@@ -132,7 +132,7 @@ struct gps_type_t italk_binary =
 #ifdef ALLOW_RECONFIGURE
     .configurator   = italk_configurator,/* configure the device */
 #endif /* ALLOW_RECONFIGURE */
-    .get_packet     = packet_get,	/* use generic packet grabber */
+    .get_packet     = generic_get,	/* use generic packet grabber */
     .parse_packet   = italk_parse_input,/* parse message packets */
     .rtcm_writer    = pass_rtcm,	/* send RTCM data straight */
     .speed_switcher = italk_speed,	/* we can change baud rates */

@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# Test-compile gpsd with each of every possible combination of device-driver 
+# options, excluding stub drivers we don't support yet.  This does a good
+# job of catching bugs after driver API changes.
+
+mv regress-builder.log regress-builder.log.old
+cp /dev/null regress-builder.log
+
+for a in enable disable ; do
+for b in enable disable ; do
+for c in enable disable ; do
+for d in enable disable ; do
+for e in enable disable ; do
+for f in enable disable ; do
+for g in enable disable ; do
+for h in enable disable ; do
+for i in enable disable ; do
+for j in enable disable ; do
+for k in enable disable ; do
+for l in enable disable ; do
+
+echo -n "`date` " >> regress-builder.log
+
+make -i distclean 2>&1 > /dev/null
+env	X_LIBS="" \
+	CPPFLAGS="-I/usr/local/include " \
+	LDFLAGS=" -L/usr/local/lib -g" \
+	CFLAGS="-g -O2 -W -Wall" \
+./configure --prefix=/home/gpsd --disable-shared \
+	--without-x --enable-python \
+	--disable-itrax \
+	--disable-italk \
+ 	--${a}-sirf \
+	--${b}-nmea \
+	--${c}-tsip \
+	--${d}-fv18 \
+	--${e}-tripmate \
+	--${f}-earthmate \
+	--${g}-garmin \
+	--${h}-tnt \
+	--${i}-evermore \
+	--${j}-rtcm104 \
+	--${k}-ntrip \
+	--${l}-raw 2>&1 > /dev/null
+
+if [ $? -ne 0 ] ; then
+	echo "configure FAILED: " >> regress-builder.log
+
+else
+	make 2>&1 > /dev/null
+
+	if [ $? -ne 0 ] ; then
+		echo -n "build FAILED: " >> regress-builder.log
+	else
+		echo -n "build OK: " >> regress-builder.log
+	fi
+fi
+echo ${a}-sirf ${b}-nmea ${c}-tsip ${d}-fv18 ${e}-tripmate ${f}-earthmate ${g}-garmin ${h}-tnt ${i}-evermore ${j}-rtcm104 ${k}-ntrip ${l}-raw >> regress-builder.log
+
+done
+done
+done
+done
+done
+done
+done
+done
+done
+done
+done
+done

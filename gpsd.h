@@ -346,12 +346,12 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *,
 extern unsigned int isgps_parity(isgps30bits_t);
 
 extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, 
-				    struct rtcm_t *,
+				    /*@out@*/struct rtcm_t *,
 				    unsigned int);
 extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
 extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
 extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
-extern bool rtcm_repack(struct rtcm_t *, char *);
+extern bool rtcm_repack(struct rtcm_t *, isgps30bits_t *);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 

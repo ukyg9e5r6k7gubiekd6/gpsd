@@ -182,7 +182,7 @@ struct gps_type_t proto_binary = {
     .configurator     = configurator,
 #endif /* ALLOW_RECONFIGURE */
     /* Packet getter (using default routine) */
-    .get_packet       = packet_get,
+    .get_packet       = generic_get,
     /* Parse message packets */
     .parse_packet     = parse_input,
     /* RTCM handler (using default routine) */

@@ -226,7 +226,7 @@ void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
     }
 }
 
-bool rtcm_repack(struct rtcm_t *tp, char *buf)
+bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 /* repack the content fields into the raw bits */
 {
     int len, sval;
@@ -439,7 +439,7 @@ static bool length_check(struct gps_packet_t *session)
 }
 
 enum isgpsstat_t rtcm_decode(struct gps_packet_t *session,
-			     struct rtcm_t *rtcm, 
+			     /*@out@*/struct rtcm_t *rtcm, 
 			     unsigned int c)
 {
     enum isgpsstat_t res = isgps_decode(session, 

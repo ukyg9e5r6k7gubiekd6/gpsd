@@ -77,7 +77,7 @@ static void pass(FILE *fpin, FILE *fpout)
 
 	if (status == 0) {
 	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
-	    (void)rtcm_repack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)rtcm_repack(&session.gpsdata.rtcm, session.packet.isgps.buf);
 	    (void)rtcm_unpack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
 	    (void)rtcm_dump(&session.gpsdata.rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
@@ -105,7 +105,7 @@ static void encode(FILE *fpin, FILE *fpout)
 
 	if (status == 0) {
 	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
-	    (void)rtcm_repack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)rtcm_repack(&session.gpsdata.rtcm, session.packet.isgps.buf);
 	    (void)fwrite(session.packet.isgps.buf, 
 			 sizeof(isgps30bits_t), 
 			 (size_t)session.gpsdata.rtcm.length, fpout);

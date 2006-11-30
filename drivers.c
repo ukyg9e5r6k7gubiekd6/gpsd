@@ -689,7 +689,7 @@ static int tnt_packet_sniff(struct gps_device_t *session)
           gpsd_report(LOG_RAW, "sleep(1)\n");
           (void)sleep(1);
       } else if (generic_get(session) >= 0) {
-        if((session->packet.type == NMEA_PACKET)&&(session->packet_state == NMEA_RECOGNIZED))
+        if((session->packet.type == NMEA_PACKET)&&(session->packet.state == NMEA_RECOGNIZED))
         {
           gpsd_report(LOG_RAW, "tnt_packet_sniff returns %d\n",session->packet.type);
           return session->packet.type;
