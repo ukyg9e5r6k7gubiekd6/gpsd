@@ -300,10 +300,14 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	maj_ver = (int)(ver / 100);
 	min_ver = (int)(ver - (maj_ver * 100));
 	gpsd_report(LOG_PROG, "Appl, Product Data, sz: %d\n", pkt_len);
+	(void)snprintf(session->subtype, sizeof(session->subtype),
+		       "%d: %d.%02d"
+		       , prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
 		, prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin Product Desc: %s\n"
 		, &buf[4]);
+	mask |= DEVICEID_SET;
 	break;
     case GARMIN_PKTID_PVT_DATA:
 	gpsd_report(LOG_PROG, "Appl, PVT Data Sz: %d\n", pkt_len);
