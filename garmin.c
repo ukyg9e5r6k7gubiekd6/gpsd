@@ -454,9 +454,15 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	    session->gpsdata.PRN[j]       = (int)sats->svid;
 	    session->gpsdata.azimuth[j]   = (int)sats->azmth;
 	    session->gpsdata.elevation[j] = (int)sats->elev;
+#if 0
+	    // This is what's in the Garmin product reference.
+	    session->gpsdata.ss[j] = 99 - (int)((100 *( unsigned long)sats->snr) >> 16);
+#else
+	    // This is what actually seems to work.
             // snr is in dB*100
 	    // known, but not seen satellites have a dB value of -1*100
             session->gpsdata.ss[j] = (int)round((float)sats->snr / 100);
+#endif
 	    if (session->gpsdata.ss[j] < 0) {
 		session->gpsdata.ss[j] = 0;
 	    }
