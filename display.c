@@ -117,28 +117,31 @@ void draw_graphics(struct gps_data_t *gpsdata)
 	    pol2cart((double)gpsdata->azimuth[i], 
 		     (double)gpsdata->elevation[i], 
 		     &x, &y);
-
-	    if (gpsdata->ss[i] < 20) 
-		set_color("Grey");
-	    else if (gpsdata->ss[i] < 40)
+	    if (gpsdata->ss[i] < 10) 
+		set_color("Dark Grey");
+	    else if (gpsdata->ss[i] < 30)
+		set_color("Red");
+	    else if (gpsdata->ss[i] < 35)
 		set_color("Yellow");
+	    else if (gpsdata->ss[i] < 40)
+		set_color("Green3");
 	    else
-		set_color("Green");
-	    (void)XFillArc(XtDisplay(draww), pixmap, drawGC,
-		     x - 5, y - 5,	/* x,y */
-		     11, 11,		/* width, height */
-		     0, 360 * 64	/* angle1, angle2 */
-		);
+		set_color("Green1");
+	    if (gpsdata->used[i])
+		(void)XFillArc(XtDisplay(draww), pixmap, drawGC,
+			 x - 5, y - 5,	/* x,y */
+			 11, 11,		/* width, height */
+			 0, 360 * 64	/* angle1, angle2 */
+		    );
+	    else
+		(void)XDrawArc(XtDisplay(draww), pixmap, drawGC,
+			 x - 5, y - 5,	/* x,y */
+			 11, 11,		/* width, height */
+			 0, 360 * 64	/* angle1, angle2 */
+		    );
 	    (void)snprintf(buf, sizeof(buf), "%-3d", gpsdata->PRN[i]);
-	    if(gpsdata->used[i])
-	        set_color("Blue");
-	    else
-		set_color("Grey");
-	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x, y + 17, buf, 3);
-	    if (gpsdata->ss[i]) {
-		set_color("Black");
-		(void)XDrawPoint(XtDisplay(draww), pixmap, drawGC, x, y);
-	    }
+	    set_color("Black");
+	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x,y+17, buf,3);
 		
 	}
 	(void)XCopyArea(XtDisplay(draww), pixmap, XtWindow(draww), drawGC,
