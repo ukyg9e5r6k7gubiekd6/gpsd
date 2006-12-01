@@ -766,7 +766,10 @@ this pulse by running at -D 5 and watching for carrier-detect state
 change messages in the logfile. On OpenBSD <application>gpsd</application>
 makes use of the nmea(4) line discipline and the tty(4) timestamping
 facilities to export PPS time via the sensors framework. OpenBSD's ntpd
-uses these sensors to adjust the hardware clock and frequency.</para>
+uses these sensors to adjust the hardware clock and frequency. To make
+use of this feature, <application>gpsd</application> must be started
+as root so it can activate the timestamping and line discipline; after
+attempting to set up PPS, it will relinquish root privileges.</para>
 
 <para>When <application>gpsd</application> receives a sentence with a
 timestamp, it packages the received timestamp with current local time
