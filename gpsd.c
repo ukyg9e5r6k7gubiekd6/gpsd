@@ -102,6 +102,8 @@ static struct gps_context_t context = {
 
 static void onsig(int sig)
 {
+    /* ignore whatever signal we got until we can properly reset */
+    (void)signal(sig, SIG_DFL);
     longjmp(restartbuf, sig+1);
 }
 
