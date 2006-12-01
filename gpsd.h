@@ -6,7 +6,12 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
+#ifdef HAVE_SYS_TERMIOS_H
+#include <sys/termios.h>
+#endif
 #include "gps.h"
 
 /* Some internal capabilities depend on which drivers we're compiling. */
@@ -96,14 +101,6 @@ struct gps_type_t {
     /*@null@*/void (*wrapup)(struct gps_device_t *session);
     double cycle;
 };
-
-#if defined (HAVE_SYS_TERMIOS_H)
-#include <sys/termios.h>
-#else
-#if defined (HAVE_TERMIOS_H)
-#include <termios.h>
-#endif
-#endif
 
 /*
  * The packet buffers need to be as long than the longest packet we
