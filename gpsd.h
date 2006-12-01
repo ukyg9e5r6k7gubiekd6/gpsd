@@ -2,7 +2,7 @@
 #ifndef _gpsd_h_
 #define _gpsd_h_
 
-/* gpsd.h -- fundamental types and structures for the GPS daemon */
+/* gpsd.h -- fundamental types and structures for the gpsd library */
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -25,19 +25,10 @@
 #define NON_NMEA_ENABLE	
 #endif
 
+/* First, declarations for the packet layer... */
+
 #define NMEA_MAX	82		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
-
-/* factors for converting among confidence interval units */
-#define CEP50_SIGMA	1.18
-#define DRMS_SIGMA	1.414
-#define CEP95_SIGMA	2.45
-
-/* this is where we choose the confidence level to use in reports */
-#define GPSD_CONFIDENCE	CEP95_SIGMA
-
-/* several places in the code try setuid. put our preferred username here */
-#define GPSD_USER "nobody"
 
 /* a few bits of ISGPS magic */
 enum isgpsstat_t {
@@ -46,61 +37,7 @@ enum isgpsstat_t {
 #define PREAMBLE_PATTERN 0x66
 #define ISGPS_ERRLEVEL_BASE	5
 
-#define NTPSHMSEGS	4		/* number of NTP SHM segments */
-
 #define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
-
-struct gps_context_t {
-   int valid;				/* member validity flags */
-#define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
-    /* DGPSIP status */
-    bool sentdgps;			/* have we sent a DGPS report? */
-    enum { dgnss_none, dgnss_dgpsip, dgnss_ntrip } dgnss_service;	/* type of DGNSS service */
-    int fixcnt;				/* count of good fixes seen */
-    int dsock;			        /* socket to DGPSIP server/Ntrip caster */
-    void *dgnss_privdata;		/* DGNSS service specific data */
-    ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
-    char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
-    double rtcmtime;			/* timestamp of last RTCM104 report */ 
-    /* timekeeping */
-    int leap_seconds;			/* Unix seconds to UTC */
-    int century;			/* for NMEA-only devices without ZDA */
-#ifdef NTPSHM_ENABLE
-    bool enable_ntpshm;
-    /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
-    bool shmTimeInuse[NTPSHMSEGS];
-# ifdef PPS_ENABLE
-    bool shmTimePPS;
-# endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
-};
-
-struct gps_device_t;
-
-struct gps_type_t {
-/* GPS method table, describes how to talk to a particular GPS type */
-    /*@observer@*/char *typename;
-    /*@observer@*//*@null@*/char *trigger;
-    int channels;
-    /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
-    /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
-    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
-#ifdef ALLOW_RECONFIGURE 
-    /*@null@*/void (*configurator)(struct gps_device_t *session, unsigned int seq);
-#endif /* ALLOW_RECONFIGURE */
-    /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
-    /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
-    /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
-    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
-    /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
-    /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
-    int cycle_chars;
-#ifdef ALLOW_RECONFIGURE 
-    /*@null@*/void (*revert)(struct gps_device_t *session);
-#endif /* ALLOW_RECONFIGURE */
-    /*@null@*/void (*wrapup)(struct gps_device_t *session);
-    double cycle;
-};
 
 /*
  * The packet buffers need to be as long than the longest packet we
@@ -158,6 +95,114 @@ struct gps_packet_t {
 	isgps30bits_t   buf[RTCM_WORDS_MAX];
 	unsigned int    bufindex;
     } isgps;
+};
+
+extern void packet_reset(struct gps_packet_t *);
+extern void packet_pushback(struct gps_packet_t *);
+extern ssize_t packet_parse(struct gps_packet_t *, struct rtcm_t *, size_t);
+extern ssize_t packet_get(int, struct rtcm_t *, struct gps_packet_t *);
+extern int packet_sniff(struct gps_packet_t *);
+
+extern void isgps_init(/*@out@*/struct gps_packet_t *);
+enum isgpsstat_t isgps_decode(struct gps_packet_t *, 
+			      bool (*preamble_match)(isgps30bits_t *),
+			      bool (*length_check)(struct gps_packet_t *),
+			      size_t,
+			      unsigned int);
+extern unsigned int isgps_parity(isgps30bits_t);
+
+extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, 
+				    /*@out@*/struct rtcm_t *,
+				    unsigned int);
+extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
+extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
+extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
+extern bool rtcm_repack(struct rtcm_t *, isgps30bits_t *);
+
+/* Next, declarations for the core library... */
+
+/* factors for converting among confidence interval units */
+#define CEP50_SIGMA	1.18
+#define DRMS_SIGMA	1.414
+#define CEP95_SIGMA	2.45
+
+/* this is where we choose the confidence level to use in reports */
+#define GPSD_CONFIDENCE	CEP95_SIGMA
+
+/* several places in the code try setuid. put our preferred username here */
+#define GPSD_USER "nobody"
+
+#define NTPSHMSEGS	4		/* number of NTP SHM segments */
+
+/* Some internal capabilities depend on which drivers we're compiling. */
+#ifdef EARTHMATE_ENABLE
+#define ZODIAC_ENABLE	
+#endif
+#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITALK_ENABLE)
+#define BINARY_ENABLE	
+#endif
+#if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
+#define NON_NMEA_ENABLE	
+#endif
+
+struct gps_context_t {
+   int valid;				/* member validity flags */
+#define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
+    /* DGPSIP status */
+    bool sentdgps;			/* have we sent a DGPS report? */
+    enum { dgnss_none, dgnss_dgpsip, dgnss_ntrip } dgnss_service;	/* type of DGNSS service */
+    int fixcnt;				/* count of good fixes seen */
+    int dsock;			        /* socket to DGPSIP server/Ntrip caster */
+    void *dgnss_privdata;		/* DGNSS service specific data */
+    ssize_t rtcmbytes;			/* byte count of last RTCM104 report */
+    char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
+    double rtcmtime;			/* timestamp of last RTCM104 report */ 
+    /* timekeeping */
+    int leap_seconds;			/* Unix seconds to UTC */
+    int century;			/* for NMEA-only devices without ZDA */
+#ifdef NTPSHM_ENABLE
+    bool enable_ntpshm;
+    /*@reldef@*/struct shmTime *shmTime[NTPSHMSEGS];
+    bool shmTimeInuse[NTPSHMSEGS];
+# ifdef PPS_ENABLE
+    bool shmTimePPS;
+# endif /* PPS_ENABLE */
+#endif /* NTPSHM_ENABLE */
+};
+
+struct gps_device_t;
+
+#if defined (HAVE_SYS_TERMIOS_H)
+#include <sys/termios.h>
+#else
+#if defined (HAVE_TERMIOS_H)
+#include <termios.h>
+#endif
+#endif
+
+struct gps_type_t {
+/* GPS method table, describes how to talk to a particular GPS type */
+    /*@observer@*/char *typename;
+    /*@observer@*//*@null@*/char *trigger;
+    int channels;
+    /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
+    /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
+    /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
+#ifdef ALLOW_RECONFIGURE 
+    /*@null@*/void (*configurator)(struct gps_device_t *session, unsigned int seq);
+#endif /* ALLOW_RECONFIGURE */
+    /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
+    /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
+    /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, char *rtcmbuf, size_t rtcmbytes);
+    /*@null@*/bool (*speed_switcher)(struct gps_device_t *session, speed_t speed);
+    /*@null@*/void (*mode_switcher)(struct gps_device_t *session, int mode);
+    /*@null@*/bool (*rate_switcher)(struct gps_device_t *session, double rate);
+    int cycle_chars;
+#ifdef ALLOW_RECONFIGURE 
+    /*@null@*/void (*revert)(struct gps_device_t *session);
+#endif /* ALLOW_RECONFIGURE */
+    /*@null@*/void (*wrapup)(struct gps_device_t *session);
+    double cycle;
 };
 
 struct gps_device_t {
@@ -273,7 +318,7 @@ struct gps_device_t {
 /* here are the available GPS drivers */
 extern struct gps_type_t **gpsd_drivers;
 
-/* GPS library internal prototypes */
+/* gpsd library internal prototypes */
 extern gps_mask_t nmea_parse_input(struct gps_device_t *);
 extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
 extern int nmea_send(int, const char *, ... );
@@ -285,12 +330,6 @@ ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
-
-extern void packet_reset(struct gps_packet_t *);
-extern void packet_pushback(struct gps_packet_t *);
-extern ssize_t packet_parse(struct gps_packet_t *, struct rtcm_t *, size_t);
-extern ssize_t packet_get(int, struct rtcm_t *, struct gps_packet_t *);
-extern int packet_sniff(struct gps_packet_t *);
 
 extern bool dgnss_url(char *);
 extern int dgnss_open(struct gps_context_t *, char *);
@@ -334,22 +373,6 @@ extern int ntpshm_alloc(struct gps_context_t *);
 extern bool ntpshm_free(struct gps_context_t *, int);
 extern int ntpshm_put(struct gps_device_t *, double);
 extern int ntpshm_pps(struct gps_device_t *,struct timeval *);
-
-extern void isgps_init(/*@out@*/struct gps_packet_t *);
-enum isgpsstat_t isgps_decode(struct gps_packet_t *, 
-			      bool (*preamble_match)(isgps30bits_t *),
-			      bool (*length_check)(struct gps_packet_t *),
-			      size_t,
-			      unsigned int);
-extern unsigned int isgps_parity(isgps30bits_t);
-
-extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, 
-				    /*@out@*/struct rtcm_t *,
-				    unsigned int);
-extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
-extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
-extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
-extern bool rtcm_repack(struct rtcm_t *, isgps30bits_t *);
 
 extern void ecef_to_wgs84fix(struct gps_data_t *,
 			     double, double, double, 
