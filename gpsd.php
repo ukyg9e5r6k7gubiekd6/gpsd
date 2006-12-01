@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $GPS, $server, $advertise, $port, $magic;
+global $GPS, $server, $advertise, $port, $magic, $swap_ew;
 $magic = 1; # leave this set to 1
 
 if (!file_exists("gpsd_config.inc"))
@@ -118,6 +118,7 @@ function radial($angle, $sz){
 }
 
 function azel2xy($az, $el, $sz){
+	global $swap_ew;
 	#rotate coords... 90deg W = 180deg trig
 	$az += 270;
 
@@ -131,7 +132,8 @@ function azel2xy($az, $el, $sz){
 	# and convert length/azimuth to cartesian
 	$x = sprintf("%d", (($sz * 0.5) + ($r * cos($az))));
 	$y = sprintf("%d", (($sz * 0.5) + ($r * sin($az))));
-	$x = $sz - $x;
+	if ($swap_ew == 0)
+		$x = $sz - $x;
 
 	return array($x, $y);
 }
@@ -192,6 +194,7 @@ function elevation($im, $sz, $C, $a){
 }
 
 function skyview($im, $sz, $C){
+	global $swap_ew;
 	$a = 90; $a = $sz * 0.95 * ($a/180);
 	imageFilledArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['mdgray'], 0);
 	imageArc($im, $sz/2, $sz/2, $a*2, $a*2, 0, 360, $C['black']);
@@ -218,9 +221,13 @@ function skyview($im, $sz, $C){
 
 	imageString($im, 4, $sz/2 + 4, 2        , 'N', $C['black']);
 	imageString($im, 4, $sz/2 + 4, $sz - 16 , 'S', $C['black']);
-	imageString($im, 4, 4        , $sz/2 + 4, 'E', $C['black']);
-	imageString($im, 4, $sz - 10 , $sz/2 + 4, 'W', $C['black']);
-
+	if ($swap_ew == 0){
+		imageString($im, 4, 4        , $sz/2 + 4, 'E', $C['black']);
+		imageString($im, 4, $sz - 10 , $sz/2 + 4, 'W', $C['black']);
+	} else {
+		imageString($im, 4, 4        , $sz/2 + 4, 'W', $C['black']);
+		imageString($im, 4, $sz - 10 , $sz/2 + 4, 'E', $C['black']);
+	}
 }
 
 function gen_image($resp){
@@ -495,6 +502,7 @@ function write_config(){
 \$autorefresh = 0; # number of seconds after which to refresh
 \$googlemap = 0; # set to 1 if you want to have a google map
 \$gmap_key = 'GetYourOwnGoogleKey'; # your google API key goes here
+\$swap_ew = 0; # set to 1 if you don't understand projections
 
 ## You can read the header, footer and blurb from a file...
 # \$head = file_get_contents('/path/to/header.inc');
