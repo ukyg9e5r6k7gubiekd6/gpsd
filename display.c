@@ -8,6 +8,7 @@
 #include "display.h"
 
 #define RM		20
+#define IDIAM		5	/* satekllite icon diameter */
 
 #undef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -118,7 +119,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		     (double)gpsdata->elevation[i], 
 		     &x, &y);
 	    if (gpsdata->ss[i] < 10) 
-		set_color("Dark Grey");
+		set_color("DarkGray");
 	    else if (gpsdata->ss[i] < 30)
 		set_color("Red");
 	    else if (gpsdata->ss[i] < 35)
@@ -127,18 +128,38 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		set_color("Green3");
 	    else
 		set_color("Green1");
-	    if (gpsdata->used[i])
-		(void)XFillArc(XtDisplay(draww), pixmap, drawGC,
-			 x - 5, y - 5,	/* x,y */
-			 11, 11,		/* width, height */
-			 0, 360 * 64	/* angle1, angle2 */
-		    );
-	    else
-		(void)XDrawArc(XtDisplay(draww), pixmap, drawGC,
-			 x - 5, y - 5,	/* x,y */
-			 11, 11,		/* width, height */
-			 0, 360 * 64	/* angle1, angle2 */
-		    );
+	    if (gpsdata->PRN[i] > 32) {
+		XPoint vertices[5];
+		vertices[0].x = x;
+		vertices[0].y = y-IDIAM;
+		vertices[1].x = x+IDIAM;
+		vertices[1].y = y;
+		vertices[2].x = x;
+		vertices[2].y = y+IDIAM;
+		vertices[3].x = x-IDIAM;
+		vertices[3].y = y;
+		vertices[4].x = x;
+		vertices[4].y = y-IDIAM;
+		if (gpsdata->used[i])
+		    (void)XFillPolygon(XtDisplay(draww), pixmap, drawGC,
+				       vertices, 5, Convex, CoordModeOrigin);
+		else
+		    (void)XDrawLines(XtDisplay(draww), pixmap, drawGC,
+				     vertices, 5, CoordModeOrigin);
+	    } else {
+		if (gpsdata->used[i])
+		    (void)XFillArc(XtDisplay(draww), pixmap, drawGC,
+			   x - IDIAM, y - IDIAM,	/* x,y */
+			   2*IDIAM+1, 2*IDIAM+1,	/* width, height */
+			   0, 360 * 64			/* angle1, angle2 */
+			);
+		else
+		    (void)XDrawArc(XtDisplay(draww), pixmap, drawGC,
+			   x - IDIAM, y - IDIAM,	/* x,y */
+			   2*IDIAM+1, 2*IDIAM+1,	/* width, height */
+			   0, 360 * 64			/* angle1, angle2 */
+			);
+	    }
 	    (void)snprintf(buf, sizeof(buf), "%-3d", gpsdata->PRN[i]);
 	    set_color("Black");
 	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x,y+17, buf,3);
