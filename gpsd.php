@@ -84,6 +84,23 @@ function colorsetup($im){
 	return $C;
 }
 
+function legend($im, $sz, $C){
+	$r = 30;
+	$fn = 5;
+	$x = $sz - (4*$r+7) - 2;
+	$y = $sz - $r - 3;
+
+	imageFilledRectangle($im, $x, $y, $x + 4*$r + 7, $y + $r +1, $C['dkgray']);
+	imageRectangle($im, $x+0*$r+1, $y+1, $x + 1*$r + 0, $y + $r, $C['red']);
+	imageRectangle($im, $x+1*$r+2, $y+1, $x + 2*$r + 2, $y + $r, $C['yellow']);
+	imageRectangle($im, $x+2*$r+4, $y+1, $x + 3*$r + 4, $y + $r, $C['darkgreen']);
+	imageRectangle($im, $x+4*$r+6, $y+1, $x + 3*$r + 6, $y + $r, $C['brightgreen']);
+	imageString($im, $fn, $x+3+0*$r, $y+$r/3, "<20", $C['red']);
+	imageString($im, $fn, $x+5+1*$r, $y+$r/3, "<30", $C['yellow']);
+	imageString($im, $fn, $x+7+2*$r, $y+$r/3, "<35", $C['darkgreen']);
+	imageString($im, $fn, $x+9+3*$r, $y+$r/3, ">40", $C['brightgreen']);
+}
+
 function radial($angle, $sz){
 	#turn into radians
 	$angle = deg2rad($angle);
@@ -220,6 +237,8 @@ function gen_image($resp){
 	$im = imageCreate($sz, $sz);
 	$C = colorsetup($im);
 	skyview($im, $sz, $C);
+	if ($sz > 240)
+		legend($im, $sz, $C);
 
 	$s = explode(':', $resp);
 	for($i = 1; $i <= $n; $i++){
