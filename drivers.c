@@ -37,7 +37,9 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 
 gps_mask_t nmea_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == SIRF_PACKET) {
+    if (session->packet.type == COMMENT_PACKET) {
+	return 0;
+    } else if (session->packet.type == SIRF_PACKET) {
 	gpsd_report(LOG_WARN, "SiRF packet seen when NMEA expected.\n");
 #ifdef SIRF_ENABLE
 	(void)gpsd_switch_driver(session, "SiRF binary");

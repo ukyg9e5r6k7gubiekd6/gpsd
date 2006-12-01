@@ -961,6 +961,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 }
 /*@ -charint @*/
 
+#ifdef ALLOW_RECONFIGURE
 static void settle(void)
 {
     struct timespec delay, rem;
@@ -971,6 +972,7 @@ static void settle(void)
     nanosleep(&delay, &rem);
     /*@ +type +unrecog @*/
 }
+#endif /* ALLOW_RECONFIGURE */
 
 static void garmin_switcher(struct gps_device_t *session, int mode)
 {

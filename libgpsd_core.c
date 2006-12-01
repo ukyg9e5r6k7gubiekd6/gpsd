@@ -232,7 +232,9 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	/*@ +mustfreeonly @*/
 	gpsd_report(LOG_PROG, "no probe matched...\n");
     foundit:
+#ifdef ALLOW_RECONFIGURE
 	session->enable_reconfigure = reconfigurable;
+#endif /* ALLOW_RECONFIGURE */
 #endif /* NON_NMEA_ENABLE */
 	session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
@@ -619,6 +621,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->packet.type);
 	if (session->packet.type != BAD_PACKET) {
 	    switch (session->packet.type) {
+	    case COMMENT_PACKET:
+		break;
 #ifdef SIRF_ENABLE
 	    case SIRF_PACKET:
 		(void)gpsd_switch_driver(session, "SiRF binary");
@@ -694,10 +698,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	session->gpsdata.d_recv_time = timestamp();
 
 	/* Get data from current packet into the fix structure */
-	if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
-	    received = session->device_type->parse_packet(session);
-	else
-	    received = 0;	/* it was all done in the packet getter */
+	received = 0;
+	if (session->packet.type != COMMENT_PACKET)
+	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
+		received = session->device_type->parse_packet(session);
 
 	/*
 	 * Compute fix-quality data from the satellite positions.

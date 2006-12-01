@@ -1,6 +1,9 @@
 /* $Id$ */
    GROUND_STATE,	/* we don't know what packet type to expect */
 
+   COMMENT_BODY,	/* pound comment for a test load */
+   COMMENT_RECOGNIZED,	/* comment recognized */
+
 #ifdef NMEA_ENABLE
    NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */

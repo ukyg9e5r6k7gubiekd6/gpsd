@@ -45,14 +45,15 @@ struct gps_packet_t {
     /* packet-getter internals */
     int	type;
 #define BAD_PACKET	-1
-#define NMEA_PACKET	0
-#define SIRF_PACKET	1
-#define ZODIAC_PACKET	2
-#define TSIP_PACKET	3
-#define EVERMORE_PACKET	4
-#define ITALK_PACKET	5
-#define RTCM_PACKET	6
-#define GARMIN_PACKET	7
+#define COMMENT_PACKET	0
+#define NMEA_PACKET	1
+#define SIRF_PACKET	2
+#define ZODIAC_PACKET	3
+#define TSIP_PACKET	4
+#define EVERMORE_PACKET	5
+#define ITALK_PACKET	6
+#define RTCM_PACKET	7
+#define GARMIN_PACKET	8
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];

@@ -119,7 +119,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		     (double)gpsdata->elevation[i], 
 		     &x, &y);
 	    if (gpsdata->ss[i] < 10) 
-		set_color("DarkGray");
+		set_color("Black");
 	    else if (gpsdata->ss[i] < 30)
 		set_color("Red");
 	    else if (gpsdata->ss[i] < 35)

@@ -374,8 +374,9 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-/* configure various EverMore settings to default */
+#ifdef ALLOW_RECONFIGURE
 static bool evermore_default(struct gps_device_t *session, int mode)
+/* configure various EverMore settings to default */
 {
     bool ok = true;
     /*@ +charint @*/
@@ -507,7 +508,6 @@ static bool evermore_default(struct gps_device_t *session, int mode)
     return ok;
 }
 
-#ifdef ALLOW_RECONFIGURE
 #ifdef __UNUSED__
 static bool evermore_set_mode(struct gps_device_t *session,
 			      speed_t speed, bool mode)
@@ -603,6 +603,7 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     }
 }
 
+#ifdef ALLOW_RECONFIGURE
 static void evermore_configurator(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0) {
@@ -610,12 +611,11 @@ static void evermore_configurator(struct gps_device_t *session, unsigned int seq
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
 	}
-#ifdef ALLOW_RECONFIGURE
 	(void)evermore_default(session, 1); /* switch GPS to binary mode */
 	session->back_to_nmea = true;
-#endif /* ALLOW_RECONFIGURE */
     }
 }
+#endif /* ALLOW_RECONFIGURE */
 
 #ifdef __UNUSED__
 static void evermore_probe(struct gps_device_t *session)

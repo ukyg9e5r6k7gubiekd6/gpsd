@@ -81,13 +81,16 @@ static void nextstate(struct gps_packet_t *lexer,
     switch(lexer->state)
     {
     case GROUND_STATE:
+	if (c == '#') {
+	    lexer->state = COMMENT_BODY;
+	    break;
+	}
 #ifdef NMEA_ENABLE
 	if (c == '$') {
 	    lexer->state = NMEA_DOLLAR;
 	    break;
 	}
 #endif /* NMEA_ENABLE */
-
 #ifdef TNT_ENABLE
         if (c == '@') {
 	    lexer->state = TNT_LEADER;
@@ -144,6 +147,12 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* RTCM104_ENABLE */
 	break;
 	/*@ +casebreak @*/
+    case COMMENT_BODY:
+	if (c == '\n')
+	    lexer->state = COMMENT_RECOGNIZED;
+	else if (!isprint(c))
+	    lexer->state = GROUND_STATE;
+	break;	    
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
@@ -650,6 +659,10 @@ ssize_t packet_parse(struct gps_packet_t *lexer, struct rtcm_t *rtcm, size_t fix
 
 	if (lexer->state == GROUND_STATE) {
 	    character_discard(lexer);
+	}
+	else if (lexer->state == COMMENT_RECOGNIZED) {
+	    packet_accept(lexer, COMMENT_PACKET);
+	    packet_discard(lexer);
 	}
 #ifdef NMEA_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
