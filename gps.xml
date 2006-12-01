@@ -89,6 +89,12 @@
 current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.</para>
 
+<para>In the sky view, salleties are color-coded to indicate quality
+of signal; consult the data display to the left for exact figures in
+dB. Diamond icons indicate WAAS/EGNOS satellites, circles indicate
+ordinary GPS satellites.  Filled icons were used in the last fix, 
+outline icons were not.</para>
+
 <para><application>xgps</application> accepts an -h option as for
 <application>gpsd</application>, or a -V option to dump the package
 version and exit.</para>
@@ -111,8 +117,7 @@ resource 'altunits'.</para>
 
 <para>The <option>-j</option> option tells the daemon to hold fix
 data across cycles, eliminating jitter from NMEA devices that emit
-several partial reports (see the <option>-s</option> for a client-side
-way to do something similar).</para>
+several partial reports.</para>
 
 <para> The <option>-l</option> option sets the format of latitude and 
 longitude reports.  The value 'd' produces decimal degrees and is the
