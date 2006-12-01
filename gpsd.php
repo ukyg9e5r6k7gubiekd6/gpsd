@@ -134,8 +134,6 @@ function splot($im, $sz, $C, $e){
 		$color = $C['red'];
 	if ($el<10)
 		$color = $C['blue'];
-	if ($sv > 100)
-		$color = $C['orange'];
 
 	list($x, $y) = azel2xy($el, $az, $sz);
 
@@ -147,7 +145,24 @@ function splot($im, $sz, $C, $e){
 	if ($u)
 		imageFilledArc($im, $x, $y, $r, $r, 0, 360, $color, 0);
 	else
-		imageArc($im, $x, $y, $r, $r, 0, 360, $color);
+		if ($sv > 32) {
+			imageDiamond($im, $x, $y, $r, $color);
+		} else {
+			imageArc($im, $x, $y, $r, $r, 0, 360, $color);
+		}
+}
+
+function imageDiamond($im, $x, $y, $r, $color){
+	$t = $r/2;
+	# this lunacy is because imagesetthickness doesn't seem to work
+	$vx = array ( $x+$t, $y, $x, $y+$t, $x-$t, $y, $x, $y-$t );
+	imagepolygon($im, $vx, 4, $color);
+	$t--;
+	$vx = array ( $x+$t, $y, $x, $y+$t, $x-$t, $y, $x, $y-$t );
+	imagepolygon($im, $vx, 4, $color);
+	$t--;
+	$vx = array ( $x+$t, $y, $x, $y+$t, $x-$t, $y, $x, $y-$t );
+	imagepolygon($im, $vx, 4, $color);
 }
 
 function elevation($im, $sz, $C, $a){
@@ -388,7 +403,7 @@ width="640" height="640"/>
 <br clear="all"/>
 <p class="caption">A filled circle means the satellite was used in
 the last fix. Green-yellow-red colors indicate signal strength in dB, 
- green=most and red=least.  Orange indicates a WAAS/EGNOS satellite.</p>
+ green=most and red=least.  Diamonds indicate SBAS satellites.</p>
 </td>
 </tr>
 EOF;
