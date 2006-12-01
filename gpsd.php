@@ -95,10 +95,10 @@ function legend($im, $sz, $C){
 	imageRectangle($im, $x+1*$r+2, $y+1, $x + 2*$r + 2, $y + $r, $C['yellow']);
 	imageRectangle($im, $x+2*$r+4, $y+1, $x + 3*$r + 4, $y + $r, $C['darkgreen']);
 	imageRectangle($im, $x+4*$r+6, $y+1, $x + 3*$r + 6, $y + $r, $C['brightgreen']);
-	imageString($im, $fn, $x+3+0*$r, $y+$r/3, "<20", $C['red']);
-	imageString($im, $fn, $x+5+1*$r, $y+$r/3, "<30", $C['yellow']);
-	imageString($im, $fn, $x+7+2*$r, $y+$r/3, "<35", $C['darkgreen']);
-	imageString($im, $fn, $x+9+3*$r, $y+$r/3, ">40", $C['brightgreen']);
+	imageString($im, $fn, $x+3+0*$r, $y+$r/3, "<30", $C['red']);
+	imageString($im, $fn, $x+5+1*$r, $y+$r/3, "30+", $C['yellow']);
+	imageString($im, $fn, $x+7+2*$r, $y+$r/3, "35+", $C['darkgreen']);
+	imageString($im, $fn, $x+9+3*$r, $y+$r/3, "40+", $C['brightgreen']);
 }
 
 function radial($angle, $sz){
