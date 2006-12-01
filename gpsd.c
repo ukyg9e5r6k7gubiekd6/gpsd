@@ -649,8 +649,8 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    else
 		(void)strlcpy(phrase, ",A=?", BUFSIZ);
 	    break;
-#ifndef FIXED_PORT_SPEED
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
+#ifndef FIXED_PORT_SPEED
 	    if (assign_channel(sub) && sub->device->device_type!=NULL && *p=='=' && privileged_user(sub)) {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
@@ -680,6 +680,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		    }
 #endif /* ALLOW_RECONFIGURE */
 	    }
+#endif /* FIXED_PORT_SPEED */
 	    if (sub->device) {
 		if ( sub->device->gpsdata.parity == 0 ) {
 			/* zero parity breaks the next snprintf */
@@ -694,7 +695,6 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		(void)strlcpy(phrase, ",B=?", BUFSIZ);
 	    }
 	    break;
-#endif
 	case 'C':
 	    if (!assign_channel(sub) || sub->device->device_type==NULL)
 		(void)strlcpy(phrase, ",C=?", BUFSIZ);
