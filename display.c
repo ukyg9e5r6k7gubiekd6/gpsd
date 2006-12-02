@@ -128,7 +128,8 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		set_color("Green3");
 	    else
 		set_color("Green1");
-	    if (gpsdata->PRN[i] > 32) {
+	    if (gpsdata->PRN[i] > GPS_PRNMAX) {
+		/* SBAS satellites */
 		XPoint vertices[5];
 		vertices[0].x = x;
 		vertices[0].y = y-IDIAM;
@@ -147,6 +148,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		    (void)XDrawLines(XtDisplay(draww), pixmap, drawGC,
 				     vertices, 5, CoordModeOrigin);
 	    } else {
+		/* ordinary GPS satellites */
 		if (gpsdata->used[i])
 		    (void)XFillArc(XtDisplay(draww), pixmap, drawGC,
 			   x - IDIAM, y - IDIAM,	/* x,y */

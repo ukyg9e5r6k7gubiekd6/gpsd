@@ -28,6 +28,7 @@ extern "C" {
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	20	/* maximum GPS channels (*not* satellites!) */
 #define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
+#define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 
 /* 
  * The structure describing an uncertainty volume in kinematic space.
