@@ -60,9 +60,12 @@ which is fed to the daemon character by character,
 There are some limitations. Due to indeterminacy in thread timings, it
 is not guaranteed that runs with identical options will present
 exactly the same sentences to the daemon at the same times from start.
+
+This code requires that you either be running Linux with a /proc
+filesystem or that lsof(1) be available.
 """
 import sys, os, time, signal, pty, termios
-import string, exceptions, threading, socket
+import string, exceptions, threading, socket, commands
 import gps
 
 ### System-dependent code begins here
@@ -70,20 +73,41 @@ import gps
 
 def proc_has_file_open(pid, file):
     "Does the given process have the specified file open?"
-    d = "/proc/%s/fd/" % pid
-    try:
-        for fd in os.listdir(d):
-            if os.readlink(d+fd) == file:
-                return True
-    except OSError:
-        pass
-    return False
+    if os.path.exists("/proc"):
+        # Fast, avoids loading an external utility
+        d = "/proc/%s/fd/" % pid
+        try:
+            for fd in os.listdir(d):
+                if os.readlink(d+fd) == file:
+                    return True
+        except OSError:
+            pass
+        return False
+    else:
+        # Slower, but portable to OpenBSD etc.
+        (status, output) = \
+                 commands.getstatusoutput("lsof -f -t -p %d -a %s"%(pid,file))
+        return status == 0 and output
 
 def proc_fd_set(pid):
     "Return the set of file descriptors currently opened by the process."
-    fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
-    # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
-    return filter(lambda x: x < 1000, fds)
+    if os.path.exists("/proc"):
+        # Fast, avoids loading an external utility
+        fds = map(int, os.listdir("/proc/%d/fd" % self.pid))
+        # I wish I knew what the entries above 1000 in Linux /proc/*/fd mean...
+        return filter(lambda x: x < 1000, fds)
+    else:
+        # Slower, but portable to OpenBSD etc.
+        (status, output) = \
+                 commands.getstatusoutput("lsof -F f -p %d"%pid)
+        if status != 0:
+            return []
+        # Extract the f entries
+        lst = filter(lambda s: s.startswith("f"), output.split("\n"))
+        # Strip off the f
+        lst = map(lambda s: s[1:], lst)
+        # Filter for digits
+        return map(int, filter(lambda s: s[0] in "0123456789", lst))
 
 #
 ### System-dependent code ends here
