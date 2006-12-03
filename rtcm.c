@@ -62,6 +62,8 @@ Starlink's website.
 
 #ifdef RTCM104_ENABLE
 
+#define PREAMBLE_PATTERN 0x66
+
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)

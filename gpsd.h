@@ -34,7 +34,6 @@
 enum isgpsstat_t {
     ISGPS_NO_SYNC, ISGPS_SYNC, ISGPS_SKIP, ISGPS_MESSAGE,
 };
-#define PREAMBLE_PATTERN 0x66
 #define ISGPS_ERRLEVEL_BASE	5
 
 #define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
