@@ -6,15 +6,15 @@ the Navstar GPS Interface Specification, and used as a transport layer
 for both GPS satellite downlink transmissions and the RTCM104 format
 for broadcasting differential-GPS corrections.
 
-The code was originally by Wolfgang Rupprecht.  ESR severely hacked
-it, with Wolfgang's help, in order to separate message analysis from
-message dumping and separate this lower layer from the upper layer 
-handing RTCM decoding.  You are not expected to understand any of it. 
-
 This lower layer just handles synchronizing with the incoming
 bitstream and parity checking; all it does is assemble message
 packets.  It needs an upper layer to analyze the packets into
-bitfields and the assemble the bitfields into usable data.
+bitfields and then assemble the bitfields into usable data.  
+
+The upper layer must supply a preamble_match() hook to tell our
+decoder when it has a legitimate start of packet, and a length_check()
+hook to tell it when the packet has reached the length it is supposed
+to have.
 
 Here are Wolfgang's original rather cryptic notes on this code:
 
@@ -46,12 +46,10 @@ Shift 6 bytes of RTCM data in as such:
               |||||||||||||||||||||||
 --------------------------------------------------------------------------
 
-The lower layer's job is done when it has assembled a message of up to
-33 words of clean parity-checked data.  At this point the upper layer
-takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
-are used to extract pieces of it (which, if you're on a big-endian machine
-may need to be swapped end-for-end).  Those pieces are copied and (where
-necessary) reassembled into a struct rtcm_t.
+The code was originally by Wolfgang Rupprecht.  ESR severely hacked
+it, with Wolfgang's help, in order to separate message analysis from
+message dumping and separate this lower layer from the upper layer 
+handing RTCM decoding.  You are not expected to understand any of this.
 
 *****************************************************************************/
 
@@ -64,14 +62,9 @@ necessary) reassembled into a struct rtcm_t.
 #include "gpsd_config.h"
 #include "gpsd.h"
 
-#ifdef BINARY_ENABLE
-
 #define MAG_SHIFT 6u
 #define MAG_TAG_DATA (1 << MAG_SHIFT)
 #define MAG_TAG_MASK (3 << MAG_SHIFT)
-
-#define PREAMBLE_SHIFT 22
-#define PREAMBLE_MASK (0xFF << PREAMBLE_SHIFT)
 
 #define W_DATA_MASK	0x3fffffc0u
 
@@ -262,7 +255,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
-		     * the next PREAMBLE_PATTERN and go on from there. 
+		     * the next preamble match and go on from there. 
 		     */
 		    if (session->isgps.bufindex >= (unsigned)maxlen){
 			session->isgps.bufindex = 0;
@@ -312,5 +305,3 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
     return ISGPS_NO_SYNC;
 }
 /*@ +usereleased +compdef @*/
-
-#endif /* BINARY_ENABLE */
