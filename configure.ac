@@ -413,7 +413,7 @@ AC_ARG_ENABLE(dbus,
                 [enable DBUS support]),
     [ac_dbus=$enableval], [ac_dbus=no])
 AC_MSG_CHECKING([for DBUS support])
-if test x"$ac_dbus" == "xyes"; then
+if test x"$ac_dbus" = "xyes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE([DBUS_ENABLE], 1, [DBUS support])
     # Older versions of autotools barf and die on this.
