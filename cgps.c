@@ -445,7 +445,7 @@ static void usage( char *prog)
                 "Usage: %s [-h] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
                 "  -h          Show this help, then exit\n"
                 "  -V          Show version, then exit\n"
-                "  -s          Be silent (don't print raw dgps data)\n"
+                "  -s          Be silent (don't print raw gpsd data)\n"
                 "  -l {d|m|s}  Select lat/lon format\n"
                 "                d = DD.dddddd\n"
                 "                m = DD MM.mmmm'\n"
