@@ -114,6 +114,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %attr(755, root, root) %{_bindir}/rtcmdecode
 %attr(755, root, root) %{_bindir}/gpsflash
 /usr/lib/python*/site-packages/gpsfake.py*
+/usr/lib/python*/site-packages/gpspacket.so*
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 %{_includedir}/gpsd.h

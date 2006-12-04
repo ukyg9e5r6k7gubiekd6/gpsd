@@ -147,6 +147,16 @@ nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
+# Build Python binding
+#
+PYEXTENSIONS = gpspacket.so
+
+noinst_SCRIPTS = gpspacket.so
+
+gpspacket.so: gpspacket.c libgps.la
+	python setup.py build_ext --inplace
+
+#
 # Build gpsmm_test
 #
 gpsmm_test_SOURCES = gpsmm_test.cpp
@@ -271,7 +281,7 @@ EXTRA_DIST = \
 	striplog \
 	invert-bitfields.pl
 
-CLEANFILES = packet_names.h floattest *.core
+CLEANFILES = packet_names.h floattest *.core $(PYEXTENSIONS)
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
