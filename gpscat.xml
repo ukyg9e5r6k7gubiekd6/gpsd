@@ -43,7 +43,7 @@ linefeed.</para>
 <varlistentry>
 <term>-s</term>
 <listitem>
-<para>Set the port's baud rate (and optionally its parity ad stop
+<para>Set the port's baud rate (and optionally its parity and stop
 bits) before reading.  Argument should begin with one of the normal integer
 baud rates (300, 1200, 4800, 9600, 19200, 38400, etc.).  It may be
 followed by an optional suffix [NOE][12] to set parity (None, Even,
