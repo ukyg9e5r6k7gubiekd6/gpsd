@@ -135,7 +135,8 @@ libgps_c_sources = \
 	timebase.h \
 	bsd-base64.c \
 	bsd-base64.h \
-	strl.c
+	strl.c \
+	hex.c
 
 BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h
