@@ -34,22 +34,22 @@ static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
     int             c;
-    struct gps_packet_t lexer;
+    struct gps_device_t device;
     struct rtcm_t rtcm;
     enum isgpsstat_t res;
     off_t count;
     char buf[BUFSIZ];
 
-    isgps_init(&lexer);
+    isgps_init(&device.packet);
 
     count = 0;
     while ((c = fgetc(fpin)) != EOF) {
-	res = rtcm_decode(&lexer, (unsigned int)c);
+	res = rtcm_decode(&device.packet, (unsigned int)c);
 	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
 	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
-	    rtcm_unpack(&rtcm, (char *)lexer.isgps.buf);
+	    rtcm_unpack(&rtcm, (char *)device.packet.isgps.buf);
 	    rtcm_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
@@ -62,10 +62,9 @@ static void pass(FILE *fpin, FILE *fpout)
 /* dump format on stdin to dump format on stdout (self-inversion test) */
 {
     char buf[BUFSIZ];
-    struct gps_packet_t lexer;
-    struct rtcm_t rtcm;
+    struct gps_device_t session;
 
-    memset(&lexer, 0, sizeof(lexer));
+    memset(&session, 0, sizeof(session));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 
@@ -73,16 +72,17 @@ static void pass(FILE *fpin, FILE *fpout)
 	if (buf[0] == '#') {
 	    (void)fputs(buf, fpout);
 	    continue;
-	} 
-	status = rtcm_undump(&rtcm, buf);
+	}
+
+	status = rtcm_undump(&session.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm_repack(&rtcm, lexer.isgps.buf);
-	    (void)rtcm_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    (void)rtcm_dump(&rtcm, buf, sizeof(buf));
+	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
+	    (void)rtcm_repack(&session.gpsdata.rtcm, session.packet.isgps.buf);
+	    (void)rtcm_unpack(&session.gpsdata.rtcm, (char *)session.packet.isgps.buf);
+	    (void)rtcm_dump(&session.gpsdata.rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
-	    memset(&lexer, 0, sizeof(lexer));
+	    memset(&session, 0, sizeof(session));
 	} else if (status < 0) {
 	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
 	    exit(1);
@@ -96,22 +96,21 @@ static void encode(FILE *fpin, FILE *fpout)
 /* dump format on fpin to RTCM-104 on fpout */
 {
     char buf[BUFSIZ];
-    struct gps_packet_t lexer;
-    struct rtcm_t rtcm;
+    struct gps_device_t session;
 
-    memset(&lexer, 0, sizeof(lexer));
+    memset(&session, 0, sizeof(session));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 
-	status = rtcm_undump(&rtcm, buf);
+	status = rtcm_undump(&session.gpsdata.rtcm, buf);
 
 	if (status == 0) {
-	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm_repack(&rtcm, lexer.isgps.buf);
-	    (void)fwrite(lexer.isgps.buf, 
+	    (void)memset(session.packet.isgps.buf, 0, sizeof(session.packet.isgps.buf));
+	    (void)rtcm_repack(&session.gpsdata.rtcm, session.packet.isgps.buf);
+	    (void)fwrite(session.packet.isgps.buf, 
 			 sizeof(isgps30bits_t), 
-			 (size_t)rtcm.length, fpout);
-	    memset(&lexer, 0, sizeof(lexer));
+			 (size_t)session.gpsdata.rtcm.length, fpout);
+	    memset(&session, 0, sizeof(session));
 	} else if (status < 0) {
 	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
 	    exit(1);
