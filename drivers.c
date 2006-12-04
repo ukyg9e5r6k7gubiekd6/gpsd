@@ -17,7 +17,7 @@ extern struct gps_type_t zodiac_binary;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
-    return packet_get(session->gpsdata.gps_fd, &session->gpsdata.rtcm, &session->packet);
+    return packet_get(session->gpsdata.gps_fd, &session->packet);
 }
 
 #if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
@@ -787,6 +787,7 @@ struct gps_type_t trueNorth = {
 
 static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 {
+    rtcm_unpack(&session->gpsdata.rtcm, (char *)session->packet.isgps.buf);
     gpsd_report(LOG_RAW, "RTCM packet type 0x%02x length %d words: %s\n", 
 		session->gpsdata.rtcm.type,
 		session->gpsdata.rtcm.length+2,
@@ -805,7 +806,7 @@ static struct gps_type_t rtcm104 = {
     .configurator  = NULL,		/* no configurator */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
-    .parse_packet  = rtcm104_analyze,	/* packet getter does the parsing */
+    .parse_packet  = rtcm104_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */

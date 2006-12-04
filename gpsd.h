@@ -98,8 +98,8 @@ struct gps_packet_t {
 
 extern void packet_reset(struct gps_packet_t *);
 extern void packet_pushback(struct gps_packet_t *);
-extern ssize_t packet_parse(struct gps_packet_t *, struct rtcm_t *, size_t);
-extern ssize_t packet_get(int, struct rtcm_t *, struct gps_packet_t *);
+extern ssize_t packet_parse(struct gps_packet_t *, size_t);
+extern ssize_t packet_get(int, struct gps_packet_t *);
 extern int packet_sniff(struct gps_packet_t *);
 
 extern void isgps_init(/*@out@*/struct gps_packet_t *);
@@ -110,9 +110,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *,
 			      unsigned int);
 extern unsigned int isgps_parity(isgps30bits_t);
 
-extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, 
-				    /*@out@*/struct rtcm_t *,
-				    unsigned int);
+extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, unsigned int);
 extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
 extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
 extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);

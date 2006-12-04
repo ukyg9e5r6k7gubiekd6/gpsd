@@ -44,11 +44,12 @@ static void decode(FILE *fpin, FILE *fpout)
 
     count = 0;
     while ((c = fgetc(fpin)) != EOF) {
-	res = rtcm_decode(&device.packet, &rtcm, (unsigned int)c);
+	res = rtcm_decode(&device.packet, (unsigned int)c);
 	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
 	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
+	    rtcm_unpack(&rtcm, (char *)device.packet.isgps.buf);
 	    rtcm_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}

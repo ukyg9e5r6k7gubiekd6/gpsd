@@ -71,7 +71,6 @@ enum {
 #define ETX	0x03
 
 static void nextstate(struct gps_packet_t *lexer, 
-		      struct rtcm_t *rtcm, 
 		      unsigned char c)
 {
 #ifdef RTCM104_ENABLE
@@ -112,7 +111,10 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef TRIPMATE_ENABLE
         if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = ASTRAL_1;
 	    break;
@@ -121,7 +123,10 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef EARTHMATE_ENABLE
         if (c == 'E') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = EARTHA_1;
 	    break;
@@ -140,8 +145,11 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 #endif /* ITALK_ENABLE */
 #ifdef RTCM104_ENABLE
-	if (rtcm_decode(lexer, rtcm, c) == ISGPS_SYNC) {
+	if ((isgpsstat = rtcm_decode(lexer, c)) == ISGPS_SYNC) {
 	    lexer->state = RTCM_SYNC_STATE;
+	    break;
+	} else if (isgpsstat == ISGPS_MESSAGE) {
+	    lexer->state = RTCM_RECOGNIZED;
 	    break;
 	}
 #endif /* RTCM104_ENABLE */
@@ -211,7 +219,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case ASTRAL_1:
 	if (c == 'S') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = ASTRAL_2;
 	} else
@@ -220,7 +231,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case ASTRAL_2:
 	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = ASTRAL_3;
 	} else
@@ -229,7 +243,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case ASTRAL_3:
 	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = ASTRAL_5;
 	} else
@@ -238,7 +255,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case ASTRAL_4:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = ASTRAL_2;
 	} else
@@ -247,7 +267,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case ASTRAL_5:
 	if (c == 'L') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = NMEA_RECOGNIZED;
 	} else
@@ -258,7 +281,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case EARTHA_1:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = EARTHA_2;
 	} else
@@ -267,7 +293,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case EARTHA_2:
 	if (c == 'R') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = EARTHA_3;
 	} else
@@ -276,7 +305,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case EARTHA_3:
 	if (c == 'T') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = EARTHA_4;
 	} else
@@ -285,7 +317,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case EARTHA_4:
 	if (c == 'H') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = EARTHA_5;
 	} else
@@ -294,7 +329,10 @@ static void nextstate(struct gps_packet_t *lexer,
     case EARTHA_5:
 	if (c == 'A') {
 #ifdef RTCM104_ENABLE
-	    (void)rtcm_decode(lexer, rtcm, c);
+	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM_RECOGNIZED;
+		break;
+	    }
 #endif /* RTCM104_ENABLE */
 	    lexer->state = NMEA_RECOGNIZED;
 	} else
@@ -552,8 +590,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef RTCM104_ENABLE
     case RTCM_SYNC_STATE:
     case RTCM_SKIP_STATE:
-	isgpsstat = rtcm_decode(lexer, rtcm, c);
-	if (isgpsstat == ISGPS_MESSAGE) {
+	if ((isgpsstat = rtcm_decode(lexer, c)) == ISGPS_MESSAGE) {
 	    lexer->state = RTCM_RECOGNIZED;
 	    break;
 	} else if (isgpsstat == ISGPS_NO_SYNC)
@@ -561,7 +598,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
 
     case RTCM_RECOGNIZED:
-	if (rtcm_decode(lexer, rtcm, c) == ISGPS_SYNC) {
+	if (rtcm_decode(lexer, c) == ISGPS_SYNC) {
 	    lexer->state = RTCM_SYNC_STATE;
 	    break;
 	} else
@@ -629,7 +666,7 @@ static void character_discard(struct gps_packet_t *lexer)
 #define getword(i) (short)(lexer->inbuffer[2*(i)] | (lexer->inbuffer[2*(i)+1] << 8))
 
 
-ssize_t packet_parse(struct gps_packet_t *lexer, struct rtcm_t *rtcm, size_t fix)
+ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
@@ -649,7 +686,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, struct rtcm_t *rtcm, size_t fix
 	char *state_table[] = {
 #include "packet_names.h"
 	};
-	nextstate(lexer, rtcm, c);
+	nextstate(lexer, c);
 	gpsd_report(LOG_RAW+2, "%08ld: character '%c' [%02x], new state: %s\n",
 		    lexer->char_counter, 
 		    (isprint(c)?c:'.'), 
@@ -953,7 +990,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, struct rtcm_t *rtcm, size_t fix
 }
 #undef getword
 
-ssize_t packet_get(int fd, struct rtcm_t *rtcm, struct gps_packet_t *lexer)
+ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
     ssize_t fix;
@@ -971,7 +1008,7 @@ ssize_t packet_get(int fd, struct rtcm_t *rtcm, struct gps_packet_t *lexer)
 
     if (fix == 0)
 	return 0;
-    return packet_parse(lexer, rtcm, (size_t)fix);
+    return packet_parse(lexer, (size_t)fix);
 }
 
 void packet_reset(struct gps_packet_t *lexer)

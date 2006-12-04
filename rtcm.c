@@ -440,19 +440,13 @@ static bool length_check(struct gps_packet_t *lexer)
 	&& lexer->isgps.bufindex >= ((struct rtcm_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
 }
 
-enum isgpsstat_t rtcm_decode(struct gps_packet_t *lexer,
-			     /*@out@*/struct rtcm_t *rtcm, 
-			     unsigned int c)
+enum isgpsstat_t rtcm_decode(struct gps_packet_t *lexer, unsigned int c)
 {
-    enum isgpsstat_t res = isgps_decode(lexer, 
-					preamble_match, 
-					length_check, 
-					RTCM_WORDS_MAX, 
-					c);
-    if (res == ISGPS_MESSAGE)
-	rtcm_unpack(rtcm, (char *)lexer->isgps.buf);
-
-    return res;
+    return isgps_decode(lexer, 
+			preamble_match, 
+			length_check, 
+			RTCM_WORDS_MAX, 
+			c);
 }
 
 void rtcm_dump(struct rtcm_t *rtcm, /*@out@*/char buf[], size_t buflen)

@@ -203,7 +203,6 @@ static struct map tests[] = {
 static int packet_test(struct map *mp)
 {
     struct gps_packet_t packet;
-    struct rtcm_t rtcm;
     ssize_t st;
     int failure = 0;
 
@@ -212,7 +211,7 @@ static int packet_test(struct map *mp)
     packet.inbuflen = 0;
     /*@i@*/memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
     /*@ -compdef -uniondef -usedef -formatcode @*/
-    st = packet_parse(&packet, &rtcm, mp->testlen);
+    st = packet_parse(&packet, mp->testlen);
     if (packet.type != mp->type)
 	printf("%2zi: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, packet.type);
     else if (memcmp(mp->test + mp->garbage_offset, packet.outbuffer, packet.outbuflen)) {
