@@ -215,11 +215,9 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
 4) What about rtcm_output_magnavox() anyway?  Should that be made
    available as an output mode of rtcmdecode and documented?
 
-4) Python libraries must grok RTCM dump format.
+5) Extend the test framework so we can verify RTCM service.
 
-6) Extend the test framework so we can verify RTCM service.
-
-7) Generate and broadcast RTCM corrections from an attached device?
+6) Generate and broadcast RTCM corrections from an attached device?
    Might not be possible -- appears to need nanosecond timing.
 
 *** Do the research to figure out just what is going on with status bits
