@@ -713,42 +713,15 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
     /*@ +usedef @*/
 }
 
-#ifdef __UNUSED__
-/*
- * The RTCM words are 30-bit words.  We will lay them into memory into
- * 30-bit (low-end justified) chunks.  To write them out we will write
- * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
- * of the 30-word msg.
- */
-void rtcm_output_mag(isgps30bits_t * ip)
-/* ship an RTCM message to standard output in Magnavox format */
+void rtcm_output_magnavox(isgps30bits_t *ip, FILE *fp)
+/* ship an RTCM message in the format emitted by Magnavox DGPS receivers */
 {
-    static isgps30bits_t w = 0;
-    int             len;
     static uint     sqnum = 0;
 
-    len = ((struct rtcm_msg *) ip)->w2.frmlen + 2;
-    ((struct rtcm_msg *) ip)->w2.sqnum = sqnum++;
+    ((struct rtcm_msg_t *) ip)->w2.sqnum = sqnum++;
     sqnum &= 0x7;
 
-    while (len-- > 0) {
-	w <<= 30;
-	w |= *ip++ & W_DATA_MASK;
-
-	w |= rtcmparity(w);
-
-	/* weird-assed inversion */
-	if (w & P_30_MASK)
-	    w ^= W_DATA_MASK;
-
-	/* msb first */
-	putchar(MAG_TAG_DATA | reverse_bits[(w >> 24) & 0x3f]);
-	putchar(MAG_TAG_DATA | reverse_bits[(w >> 18) & 0x3f]);
-	putchar(MAG_TAG_DATA | reverse_bits[(w >> 12) & 0x3f]);
-	putchar(MAG_TAG_DATA | reverse_bits[(w >> 6) & 0x3f]);
-	putchar(MAG_TAG_DATA | reverse_bits[(w) & 0x3f]);
-    }
+    isgps_output_magnavox(ip, ((struct rtcm_msg_t *) ip)->w2.frmlen + 2, fp);
 }
-#endif /* UNUSED */
 
 #endif /* RTCM104_ENABLE */

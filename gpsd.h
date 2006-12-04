@@ -109,12 +109,14 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *,
 			      size_t,
 			      unsigned int);
 extern unsigned int isgps_parity(isgps30bits_t);
+extern void isgps_output_magnavox(isgps30bits_t *, unsigned int, FILE *);
 
 extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, unsigned int);
 extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
 extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
 extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
 extern bool rtcm_repack(struct rtcm_t *, isgps30bits_t *);
+extern void rtcm_output_magnavox(isgps30bits_t *, FILE *);
 
 /* Next, declarations for the core library... */
 
@@ -333,7 +335,9 @@ extern int dgnss_open(struct gps_context_t *, char *);
 extern int dgnss_poll(struct gps_context_t *);
 extern void dgnss_report(struct gps_device_t *);
 extern void dgnss_autoconnect(struct gps_context_t *, double, double);
+
 extern void rtcm_relay(struct gps_device_t *);
+extern void rtcm_output_mag(isgps30bits_t *, FILE *);
 
 extern int dgpsip_open(struct gps_context_t *, const char *);
 extern void dgpsip_report(struct gps_device_t *);

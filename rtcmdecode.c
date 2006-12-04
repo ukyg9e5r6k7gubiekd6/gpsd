@@ -128,28 +128,30 @@ int main(int argc, char **argv)
 
     while ((c = getopt(argc, argv, "dehpVv:")) != EOF) {
 	switch (c) {
-	case 'd':	/* not documented, used for debugging */
+	case 'd':
 	    mode = dodecode;
 	    break;
 
-	case 'e':	/* not documented, used for debugging */
+	case 'e':
 	    mode = doencode;
 	    break;
 
-	case 'h':	/* not documented, used for debugging */
+	case 'h':
 	    striphdr = true;
 	    break;
 
-	case 'p':	/* not documented, used for debugging */
+	case 'p':	/* undocumented, used for regression-testing */
 	    mode = passthrough;
 	    break;
 
-	case 'v':		/* verbose */
+	case 'v':
 	    verbose = ISGPS_ERRLEVEL_BASE + atoi(optarg);
 	    break;
+
 	case 'V':
 	    (void)fprintf(stderr, "SVN ID: $Id$ \n");
 	    exit(0);
+
 	case '?':
 	default:
 	    (void)fputs("rtcmdecode [-v]\n", stderr);

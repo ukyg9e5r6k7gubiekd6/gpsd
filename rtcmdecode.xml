@@ -19,6 +19,7 @@
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
       <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-V</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -51,6 +52,9 @@ on standard output. This is the default behavior.</para>
 the format of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
 to standard output.</para>
+
+<para>The -V option directs the program to emit its version number,
+then exit.</para>
 
 <para>The -v option sets a verbosity level.  It is mainly of interest
 to developers.</para>
