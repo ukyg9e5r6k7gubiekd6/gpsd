@@ -306,16 +306,11 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 }
 /*@ +usereleased +compdef @*/
 
-/*
- * ISGPS data words are 30-bit words.  We will lay them into memory into
- * 30-bit (low-end justified) chunks.  To write them out we will write
- * 5 Magnavox-format bytes where the low 6-bits of the byte are 6-bits
- * of the 30-word msg.
- */
+#ifdef __UNUSED__
 void isgps_output_magnavox(isgps30bits_t *ip, unsigned int len, FILE *fp)
-/* ship an RTCM message to standard output in Magnavox format */
+/* ship an IS-GPS-200 message to standard output in Magnavox format */
 {
-    static isgps30bits_t w = 0;
+    isgps30bits_t w = 0;
 
     while (len-- > 0) {
 	w <<= 30;
@@ -327,7 +322,10 @@ void isgps_output_magnavox(isgps30bits_t *ip, unsigned int len, FILE *fp)
 	if (w & P_30_MASK)
 	    w ^= W_DATA_MASK;
 
-	/* msb first */
+	/*
+	 * Write each 30-bit IS-GPS-200 data word as 5 Magnavox-format bytes
+	 * with data in the low 6-bits of the byte.  MSB first.
+	 */
 	/*@ -type @*/
 	(void)fputc(MAG_TAG_DATA | reverse_bits[(w >> 24) & 0x3f], fp);
 	(void)fputc(MAG_TAG_DATA | reverse_bits[(w >> 18) & 0x3f], fp);
@@ -337,3 +335,4 @@ void isgps_output_magnavox(isgps30bits_t *ip, unsigned int len, FILE *fp)
 	/*@ +type @*/
     }
 }
+#endif /* __UNUSED__ */

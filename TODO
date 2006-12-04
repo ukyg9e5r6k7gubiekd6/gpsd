@@ -212,10 +212,10 @@ RTCM packets to port 2101.  Here's the plan for the rest of it:
    passthrough mode to test that pack() and repack() are inverse.  We
    should have an undumping torture test.
 
-4) What about rtcm_output_mag() anyway?  Should that be made
+4) What about rtcm_output_magnavox() anyway?  Should that be made
    available as an output mode of rtcmdecode and documented?
 
-5) Python libraries must grok RTCM dump format.
+4) Python libraries must grok RTCM dump format.
 
 6) Extend the test framework so we can verify RTCM service.
 

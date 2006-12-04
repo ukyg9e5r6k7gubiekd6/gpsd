@@ -713,6 +713,7 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
     /*@ +usedef @*/
 }
 
+#ifdef __UNUSED__
 void rtcm_output_magnavox(isgps30bits_t *ip, FILE *fp)
 /* ship an RTCM message in the format emitted by Magnavox DGPS receivers */
 {
@@ -723,5 +724,6 @@ void rtcm_output_magnavox(isgps30bits_t *ip, FILE *fp)
 
     isgps_output_magnavox(ip, ((struct rtcm_msg_t *) ip)->w2.frmlen + 2, fp);
 }
+#endif /* __UNUSED__ */
 
 #endif /* RTCM104_ENABLE */
