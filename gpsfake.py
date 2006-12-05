@@ -256,6 +256,7 @@ class FakeGPS:
         self.slave = os.ttyname(self.slave_fd)
         ttyfp = open(self.slave, "rw")
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(ttyfp.fileno())
+        cc[termios.VMIN] = 1
 	cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
 	cflag |= termios.CREAD | termios.CLOCAL
         iflag = oflag = lflag = 0
