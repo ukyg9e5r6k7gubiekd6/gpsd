@@ -290,6 +290,9 @@ class FakeGPS:
                   self.go_predicate(self.index, self):
             os.write(self.master_fd, self.testload.sentences[self.index % len(self.testload.sentences)])
             self.index += 1
+        # Voodoo programming -- try to avoid the race condition where the
+        # daemon sometimes doesn't see the last few lines of logs.
+        time.sleep(0.1)
     def start(self, daemon, thread=False):
         "Increment pseudodevice's reader count, starting it if necessary."
         self.daemon = daemon
@@ -509,6 +512,9 @@ class TestSession:
         self.progress("gpsfake: cleanup()\n")
         while self.gps_count():
             time.sleep(0.1)
+        # Voodoo programming -- try to avoid the race condition where the
+        # daemon sometimes doesn't see the last few lines of logs.
+        time.sleep(0.1)
         self.daemon.kill()
     def killall(self):
         "Kill all fake-GPS threads and the daemon."
