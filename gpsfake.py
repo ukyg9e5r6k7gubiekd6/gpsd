@@ -340,14 +340,15 @@ class DaemonInstance:
             try:
                 fp = open(self.pidfile)
             except IOError:
-                time.sleep(1)
+                time.sleep(0.5)
                 continue
             try:
+                fp.seek(0)
                 pidstr = fp.read()
                 self.pid = int(pidstr)
             except ValueError:
-                fp.close()
-                raise DaemonError("bad pid file, contents %s" % `pidstr`)
+                time.sleep(0.5)
+                continue	# Avoid race condition -- PID not yet written
             fp.close()
             break
     def __get_control_socket(self):
