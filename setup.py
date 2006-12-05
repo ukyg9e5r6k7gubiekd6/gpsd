@@ -4,4 +4,5 @@
 from distutils.core import setup, Extension
 setup(name="gpspacket", version="1.0",
       ext_modules=[Extension("gpspacket",
-                             ["gpspacket.c", "isgps.c", "rtcm.c", "strl.c", "hex.c"])])
+                             ["gpspacket.c", "packet.c",
+                              "isgps.c", "rtcm.c", "strl.c", "hex.c"])])

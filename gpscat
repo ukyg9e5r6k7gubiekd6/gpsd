@@ -3,6 +3,7 @@
 # Display GPS output.  Hexify it if necessary.
 #
 import os, sys, termios, select, getopt, curses.ascii
+import gpspacket
 
 NMEA_MAX = 82
 
@@ -23,7 +24,7 @@ if __name__ == '__main__':
     buf = ""
     try:
         try:
-            (options, arguments) = getopt.getopt(sys.argv[1:], "hs:V")
+            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:V")
         except getopt.GetoptError, msg:
             print "gpscat: " + str(msg)
             raise SystemExit, 1
@@ -31,8 +32,11 @@ if __name__ == '__main__':
         speed = None
         parity = None
         stopbits = None
+        rawmode = True
         for (switch, val) in options:
-            if switch == '-s':
+            if switch == '-p':
+                rawmode = False
+            elif switch == '-s':
                 if val[-2] in ('N', 'E', 'O'):
                     parity = val[-2]
                     stopbits = int(val[-1])
@@ -74,15 +78,23 @@ if __name__ == '__main__':
         poller = select.poll()
         poller.register(tty, select.POLLIN)
 
+        buf = ""
+        if not rawmode:
+            getter = gpspacket.new()
         while True:
             (fd, event) = poller.poll()[0]
             if fd == tty and event == select.POLLIN:
-                buf += os.read(tty, NMEA_MAX)
-                if not buf.endswith("\r"):
-                    sys.stdout.write(hexdump(buf))
-                    buf = ""
+                if rawmode:
+                    buf += os.read(tty, NMEA_MAX)
+                    if not buf.endswith("\r"):
+                        sys.stdout.write(hexdump(buf))
+                        buf = ""
+                else:
+                    (type, packet) = getter.get(tty)
+                    sys.stdout.write(`type` + ": " + hexdump(packet) + "\n")
     except KeyboardInterrupt:
-        sys.stdout.write("\n")
+        if rawmode:
+            sys.stdout.write("\n")
         raise SystemExit, 0
 
 

@@ -4,7 +4,9 @@
  */
 #include <Python.h>
 
-#include "packet.c"
+#include <stdio.h>
+#include "gpsd_config.h"
+#include "gpsd.h"
 
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* stub logger -- we should allow redirecting this */

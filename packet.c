@@ -993,22 +993,30 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
-    ssize_t fix;
+    ssize_t recvd;
+
     /*@ -modobserver @*/
-    fix = read(fd, lexer->inbuffer+lexer->inbuflen,
+    recvd = read(fd, lexer->inbuffer+lexer->inbuflen,
 			sizeof(lexer->inbuffer)-(lexer->inbuflen));
+#ifdef STATEDEBUG
+    gpsd_report(LOG_RAW+1, "%d raw bytes read: %s\n",
+		recvd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, recvd));
+#endif /* STATEDEBUG */
     /*@ +modobserver @*/
-    if (fix == -1) {
+    if (recvd == -1) {
         if ((errno == EAGAIN) || (errno == EINTR)) {
 	    return 0;
         } else {
+#ifdef STATEDEBUG
+	    gpsd_report(LOG_RAW+1, "errno: %s\n", strerror(errno));
+#endif /* STATEDEBUG */
 	    return BAD_PACKET;
         }
     }
 
-    if (fix == 0)
+    if (recvd == 0)
 	return 0;
-    return packet_parse(lexer, (size_t)fix);
+    return packet_parse(lexer, (size_t)recvd);
 }
 
 void packet_reset(struct gps_packet_t *lexer)
