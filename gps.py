@@ -390,18 +390,18 @@ class gps(gpsdata):
 		    self.online = float(data)
 		    self.valid |= ONLINE_SET
 	    elif cmd in ('Y', 'y'):
-	      satellites = data.split(":")
-	      prefix = satellites.pop(0).split()
-	      self.timings.sentence_tag = prefix.pop(0)
-	      self.timings.sentence_time = prefix.pop(0)
-	      if self.timings.sentence_time != "?":
-		  self.timings.sentence_time = float(self.timings.sentence_time)
-	      d1 = int(prefix.pop(0))
-	      newsats = []
-	      for i in range(d1):
-		newsats.append(gps.satellite(*map(int, satellites[i].split())))
-	      self.satellites = newsats
-	      self.valid |= SATELLITE_SET
+                satellites = data.split(":")
+                prefix = satellites.pop(0).split()
+                self.timings.sentence_tag = prefix.pop(0)
+                self.timings.sentence_time = prefix.pop(0)
+                if self.timings.sentence_time != "?":
+                    self.timings.sentence_time = float(self.timings.sentence_time)
+                d1 = int(prefix.pop(0))
+                newsats = []
+	        for i in range(d1):
+                    newsats.append(gps.satellite(*map(int, satellites[i].split())))
+                self.satellites = newsats
+                self.valid |= SATELLITE_SET
 	    elif cmd in ('Z', 'z'):
 		self.profiling = (data[0] == '1')
 	    elif cmd == '$':
