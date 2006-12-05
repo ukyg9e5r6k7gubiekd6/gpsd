@@ -62,7 +62,7 @@ is not guaranteed that runs with identical options will present
 exactly the same sentences to the daemon at the same times from start.
 
 This code requires that you either be running Linux with a /proc
-filesystem or that lsof(1) be available.
+filesystem or that fstat(1) be available.
 """
 import sys, os, time, signal, pty, termios
 import string, exceptions, threading, socket, commands
