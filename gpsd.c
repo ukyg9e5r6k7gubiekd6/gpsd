@@ -1062,9 +1062,13 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				   sub->device->gpsdata.sentence_time);
 		else
 		    (void)strlcat(phrase, " ? ", BUFSIZ);
+		/* insurance against flaky drivers */
+		for (i = 0; i < sub->device->gpsdata.satellites; i++)
+		    if (sub->device->gpsdata.PRN[i])
+			reported++;
 		(void)snprintf(phrase+strlen(phrase), 
 			       sizeof(phrase)-strlen(phrase),
-			       "%d:", sub->device->gpsdata.satellites);
+			       "%d:", reported);
 		for (i = 0; i < sub->device->gpsdata.satellites; i++) {
 		    used = 0;
 		    for (j = 0; j < sub->device->gpsdata.satellites_used; j++)
@@ -1080,7 +1084,6 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				      sub->device->gpsdata.elevation[i],sub->device->gpsdata.azimuth[i],
 				      sub->device->gpsdata.ss[i],
 				      used);
-			reported++;
 		    }
 		}
 		if (sub->device->gpsdata.satellites != reported)
