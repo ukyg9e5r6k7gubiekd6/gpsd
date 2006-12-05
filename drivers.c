@@ -192,7 +192,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
     case 3:
-	/* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(5s), RMC(1s), VTG(0s), PEMT101(0s) */
+	/* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(1s) */
 	/* EverMore will reply with: \x10\x02\x04\x38\x8E\xC6\x10\x03 */
 	(void)gpsd_write(session, 
 	    "\x10\x02\x12\x8E\x7F\x01\x01\x00\x01\x01\x01\x00\x01\x00\x00\x00\x00\x00\x00\x13\x10\x03", 22);

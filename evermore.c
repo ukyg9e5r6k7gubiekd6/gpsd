@@ -345,8 +345,8 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	gpsd_report(LOG_IO, "LogData EverMore packet, length %d: %s\n", datalen, gpsd_hexdump(buf2, datalen));
 	return ONLINE_SET;
 
-    case 0x38:	/* OK / ACK */
-	gpsd_report(LOG_PROG, "EverMore command %02X OK\n", getub(buf2, 2));
+    case 0x38:	/* ACK */
+	gpsd_report(LOG_PROG, "EverMore command %02X ACK\n", getub(buf2, 2));
 	return ONLINE_SET;
     
     default:
@@ -362,197 +362,17 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == EVERMORE_PACKET){
 	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	session->gpsdata.driver_mode = 1;  /* binary */
+	//session->gpsdata.driver_mode = 1;  /* binary */
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.driver_mode = 0;  /* NMEA */
+	//session->gpsdata.driver_mode = 0;  /* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
     } else
 	return 0;
 }
-
-#ifdef ALLOW_RECONFIGURE
-static bool evermore_default(struct gps_device_t *session, int mode)
-/* configure various EverMore settings to default */
-{
-    bool ok = true;
-    /*@ +charint @*/
-    unsigned char evrm_elevation_mask[] = {
-	    0x86,	/*  0: msg ID, Set Elevation Mask */
-	    5,          /*  1: elevation Mask, degree 0..89 */
-    };
-
-    unsigned char evrm_dop_mask[] = {
-	    0x87,       /*  0: msg ID, Set DOP MAsk */
-	    1,          /*  1: DOP mask, GDOP(0), auto(1), PDOP(2), HDOP(3), no mask(4) */
-	    20,         /*  2: GDOP, 1..99 */
-	    15,         /*  3: PDOP, 1..99 */
-	    8,          /*  4: HDOP, 1..99 */
-    };
-
-#ifdef __UNUSED__
-    unsigned char evrm_opmode_config[] = {
-	    0x8f,	/*  0: msg ID, Operational Mode Configuration */
-	    0,          /*  1: operation mode, normal(0), power save(1), 1PPS(2) */
-	    1,          /*  2: navigation update rate, 1/Hz, 1..10 */
-	    0,          /*  3: RF/GPSBBP On time, 160ms(0), 220(1), 280(2), 340(3), 440(4) */
-    };
-
-    unsigned char evrm_nmeaout_config[] = {
-	    0x8e,	/*  0: msg ID, NMEA Message Control */
-	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
-	    0x01,       /*  2: nmea checksum no(0), yes(1) */
-	    1,          /*  3: GPGGA, interval 0-255s */
-	    0,          /*  4: GPGLL, interval 0-255s */
-	    1,          /*  5: GPGSA, interval 0-255s */
-	    1,          /*  6: GPGSV, interval 0-255s */
-	    1,          /*  7: GPRMC, interval 0-255s */
-	    0,          /*  8: GPVTG, interval 0-255s */
-	    0,          /*  9: PEMT,101, interval 0-255s */
-	    0, 0, 0, 0, 0, 0, /* 10-15: reserved */
-    };
-
-    unsigned char evrm_select_datum[] = {
-	    0x8d,       /*  0: msg ID, select Datum */
-	    0x00,       /*  1: reserved */
-	    0x01,       /*  2: datum ID, low byte; 0x0001 is for WGS-84 */
-	    0x00,       /*  3: datum ID, high byte; datum ID is int16 */
-    };
-
-    unsigned char evrm_restart[] = {
-	    0x85,       /*  0: msg ID, Restart */
-	    0x00,       /*  1: restart mode (0 default, 1 hot, 2 warm, 3 cold) */
-	    0x00,       /*  2: test start search PRN (1-32) */
-	    0x00,       /*  3: UTC second (0-59) */
-	    0x00,       /*  4: UTC Minute (0-59) */
-	    0x00,       /*  5: UTC Hour (0-23) */
-	    0x01,       /*  6: UTC Day (1-31) */
-	    0x01,       /*  7: UTC Month (1-12) */
-	    0x00,       /*  8: UTC year lo (1980+x, uint16) */
-	    0x00,       /*  9: UTC year hi (1980+x, uint16) */
-	    0x00,       /* 10: Lat WGS-84 lo (+/-900, 1/10 deg, + for, int16) */
-	    0x00,       /* 11: Lat WGS-84 hi (+/-900, 1/10 deg, + for, int16) */
-	    0x00,       /* 12: Lon WGS-84 lo (+/-1800, 1/10 deg, + for E, int16) */
-	    0x00,       /* 13: Lon WGS-84 hi (+/-1800, 1/10 deg, + for E, int16) */
-	    0x00,       /* 14: Alt WGS-84 lo (-1000..+18000, meters, int16) */
-	    0x00,       /* 15: Alt WGS-84 hi (-1000..+18000, meters, int16) */
-    };
-
-    unsigned char evrm_position_pinning[] = {
-	    0x92,       /*  0: msg ID, Position Pinning Configuration */
-	    0x00,       /*  1: position pinning control, 0 disable, 1 enable */
-	    0x00,       /*  2: reserved */
-	    0x00,       /*  3: reserved */
-    };
-    
-    unsigned char evrm_dgps_control[] = {
-	    0x94,       /*  0: msg ID, Differentil GPS Control */
-	    0x00,       /*  1: diff GPS control, 0 disable, 1 SBAS, 2 RTCM */
-	    0x00,       /*  2: RTCM DGPS time out, lo */
-	    0x00,       /*  3: RTCM DGPS time out, hi */
-	    0x00,       /*  4: the first SAB satellite to be searched (0-5) */
-	    0x00,       /*  5: reserved */
-	    0x00,       /*  6: reserved */
-	    0x00,       /*  7: reserved */
-    };
-    /* SBAS ID, SBAS        (PRN) *
-     *       0  WAAS POR    (134) *
-     *       1  WAAS AOR-W  (122) *
-     *       2  EGNOS AOR-E (120) *
-     *       3  EGNOS IOR   (131) *
-     *       4  MTSAT-1     (129) *
-     *       5  MTSAT-2     (137) *
-     */
-
-    unsigned char msg95[] = {
-	    0x95,    /* 0: msg ID, Reset Receiver to Defaults */
-	    0x01,    /* 1: reset ephemeris control (0 disable, 1 enable) */
-	    0x00,    /* 2: reserved */
-	    0x00,    /* 3: reserved */
-    };
-
-#endif /* __UNUSED__ */
-
-    unsigned char evrm_protocol_config[] = {
-	    0x84,    /* 0: msg ID, Protocol Configuration */
-	    0x01,    /* 1: mode; EverMore binary(0), NMEA(1) */
-	    0x00,    /* 2: reserved */
-	    0x00,    /* 3: reserved */
-    };
-
-    gpsd_report(LOG_PROG, "evermore_default call(%d)\n", mode);
-    ok &= evermore_write(session, evrm_elevation_mask,
-	sizeof(evrm_elevation_mask));
-    ok &= evermore_write(session, evrm_dop_mask, sizeof(evrm_dop_mask));
-#ifdef __UNUSED__
-    ok &= evermore_write(session, evrm_opmode_config,
-	sizeof(evrm_opmode_config));
-    ok &= evermore_write(session, evrm_nmeaout_config,
-	sizeof(evrm_nmeaout_config));
-    ok &= evermore_write(session, evrm_nmeaout_config2,
-	sizeof(evrm_nmeaout_config2));
-    ok &= evermore_write(session, evrm_select_datum,
-	sizeof(evrm_select_datum));
-    ok &= evermore_write(session, evrm_restart, sizeof(evrm_restart));
-#endif /* __UNUSED__ */
-    if (mode == 1) {
-       gpsd_report(LOG_PROG, "Switching chip mode to EverMore binary.\n");
-       evrm_protocol_config[1] = 0;  /* binary mode */
-    }
-    ok &= evermore_write(session, evrm_protocol_config,
-	sizeof(evrm_protocol_config));
-    /*@ +charint @*/
-    return ok;
-}
-
-#ifdef __UNUSED__
-static bool evermore_set_mode(struct gps_device_t *session,
-			      speed_t speed, bool mode)
-{
-    u_int8_t tmp8;
-    double tow;
-    int week;
-
-    /*@ +charint @*/
-    unsigned char evrm_initialization[] = {
-	    0x80,		        /*  0: msg ID, Initialization */
-	    0x33, 0x05,	                /*  1: GPS week; when 0 is here, we finish with year 1985 */
-	    0x00, 0x00, 0x00, 0x00,	/*  3: GPS TOW */
-	    0x00, 0x00,			/*  7: Latitude */
-	    0x00, 0x00,			/*  9: Longitude */
-	    0x00, 0x00,			/* 11: Altitude */
-	    0x00, 0x00,			/* 13: Datum ID WGS84 */
-	    0x01,			/* 15: hot start */
-	    0x5d,			/* 16: bitmask; cksum(6), bin(7), GGA(0), GSA(2), GSV(3), RMC(4) */
-	    0,				/* 17: baud rate */
-    };
-    switch (speed) {
-    case 4800:  tmp8 = 0; break;
-    case 9600:  tmp8 = 1; break;
-    case 19200: tmp8 = 2; break;
-    case 38400: tmp8 = 3; break;
-    default: return false;
-    }
-    evrm_initialization[17] = tmp8;
-    session->gpsdata.baudrate = (unsigned int)speed;
-    //gpsd_set_speed(session, speed, 'N', 1);
-    if (mode) {
-        gpsd_report(LOG_PROG, "Switching chip mode to EverMore binary.\n");
-	evrm_initialization[16] |= 0x80;  /* binary mode */
-    }
-    unix_to_gpstime(timestamp(), &week, &tow);
-    putword(evrm_initialization, 1, (unsigned int) week);
-    putlong(evrm_initialization, 3, (unsigned long) tow);
-
-    return evermore_write(session, evrm_initialization, sizeof(evrm_initialization));
-    /*@ +charint @*/
-}
-#endif /* __UNUSED__ */
-#endif /* ALLOW_RECONFIGURE */
-
 
 static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 {
@@ -584,20 +404,49 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
 	    0x00,    /* 2: reserved */
 	    0x00,    /* 3: reserved */
     };
+    gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);
     /*@i1@*/tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
     return evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config));
 }
 
+static bool evermore_nmea_config(struct gps_device_t *session, int mode)
+/* mode = 0 : EverMore default */
+/* mode = 1 : gpsd best */
+/* mode = 2 : EverMore search, activate PEMT101 message */
+{
+    unsigned char tmp8;
+    unsigned char evrm_nmeaout_config[] = {
+	    0x8e,	/*  0: msg ID, NMEA Message Control */
+	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
+	    0x01,       /*  2: nmea checksum no(0), yes(1) */
+	    1,          /*  3: GPGGA, interval 0-255s */
+	    0,          /*  4: GPGLL, interval 0-255s */
+	    1,          /*  5: GPGSA, interval 0-255s */
+	    1,          /*  6: GPGSV, interval 0-255s */
+	    1,          /*  7: GPRMC, interval 0-255s */
+	    0,          /*  8: GPVTG, interval 0-255s */
+	    0,          /*  9: PEMT,101, interval 0-255s */
+	    0, 0, 0, 0, 0, 0, /* 10-15: reserved */
+    };
+    gpsd_report(LOG_PROG, "evermore_nmea_config(%d)\n", mode);
+    /*@i1@*/tmp8 = (mode == 1) ? 5 : 1;   /* NMEA GPGSV, gpsd  */
+    evrm_nmeaout_config[6] = tmp8;           /* GPGSV, 1s or 5s */
+    /*@i1@*/tmp8 = (mode == 2) ? 1 : 0;   /* NMEA PEMT101 */
+    evrm_nmeaout_config[9] = tmp8;           /* PEMT101, 1s or 0s */
+    return evermore_write(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config));
+}
 
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
-    gpsd_report(LOG_PROG, "evermore_mode call (%d)\n", mode);
+    gpsd_report(LOG_PROG, "evermore_mode(%d), %d\n", mode, 
+		    session->back_to_nmea ? 1 : 0);
     if (mode == 0) {
         (void) evermore_protocol(session, 1); /* NMEA */
 	session->gpsdata.driver_mode = 0;     /* NMEA */
-	(void)gpsd_switch_driver(session, "EverMore NMEA");
+        (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd */
     } else {
+        (void) evermore_protocol(session, 0); /* binary */
 	session->back_to_nmea = false;
 	session->gpsdata.driver_mode = 1;     /* binary */
     }
@@ -606,49 +455,41 @@ static void evermore_mode(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
 static void evermore_configurator(struct gps_device_t *session, unsigned int seq)
 {
+    gpsd_report(LOG_PROG, "evermore_configurator call(%d)\n", seq);
+    (void) evermore_nmea_config(session, 1); /* configure NMEA messages for gpsd (GPGSV every 5s) */
     if (seq == 0) {
-	gpsd_report(LOG_PROG, "evermore_configurator call\n");
-	if (session->packet.type == NMEA_PACKET) {
+        if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(LOG_WARN, "NMEA_PACKET packet\n");
-	}
-	(void)evermore_default(session, 1); /* switch GPS to binary mode */
-	session->back_to_nmea = true;
+        }
+        (void) evermore_protocol(session, 0); /* switch GPS to binary mode */
+        session->gpsdata.driver_mode = 1;     /* binary */
+        session->back_to_nmea = true;
     }
 }
 #endif /* ALLOW_RECONFIGURE */
 
-#ifdef __UNUSED__
-static void evermore_probe(struct gps_device_t *session)
-/* send a binary message to probe for EverMore GPS */
-/*
- * When binary message 0x8D is sent:
- *   10 02 06 8D 00 01 00 8E 10 03
- *
- * EverMore will reply with this message (ACK to 8D command):
- *   10 02 04 38 8D C5 10 03
- *
- * 8D EverMore command configures DATUM to WGS-84
- *
- * */
+#ifdef ALLOW_RECONFIGURE
+static void evermore_revert(struct gps_device_t *session)
 {
-   unsigned char evrm_select_datum[] = {
-	    0x8d,       /*  0: msg ID, select Datum */
-	    0x00,       /*  1: reserved */
-	    0x01,       /*  2: datum ID, low byte; 0x0001 is for WGS-84 */
-	    0x00,       /*  3: datum ID, high byte; datum ID is int16 */
-   };
-   bool ok;
-   gpsd_report(LOG_PROG, "evermore_probe call\n");
-   ok = evermore_write(session, evrm_select_datum, sizeof(evrm_select_datum));
-   return;
+    gpsd_report(LOG_PROG, "evermore_revert\n");
+    if (session->back_to_nmea) {
+        (void) evermore_protocol(session, 1); /* switch GPS to NMEA mode */
+    }
 }
-#endif /* __UNUSED__ */
+#endif /* ALLOW_RECONFIGURE */
+
+static void evermore_wrap(struct gps_device_t *session)
+{
+    gpsd_report(LOG_PROG, "evermore_wrap\n");
+    (void) evermore_nmea_config(session, 0); /* configure NMEA messages to default */
+}
+
 
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
     .typename       = "EverMore binary",	/* full name of type */
-    .trigger        = "\x10\x02\x04\x38\x8d\xc5\x10\x03", /* recognize the type */
+    .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
@@ -664,9 +505,9 @@ struct gps_type_t evermore_binary =
     .rate_switcher  = NULL,			/* no sample-rate switcher */
     .cycle_chars    = -1,			/* ignore, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,			/* no reversion code */
+    .revert         = evermore_revert,		/* reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,			/* no wrapup method */
+    .wrapup         = evermore_wrap,		/* wrapup method */
     .cycle          = 1,			/* updates every second */
 };
 #endif /* defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE) */
