@@ -116,8 +116,6 @@ void gpsd_set_speed(struct gps_device_t *session,
  	    session->ttyset.c_cflag |= PARENB | PARODD;
  	    break;
  	}
-	session->ttyset.c_cflag &=~ CSIZE;
-	session->ttyset.c_cflag |= (CSIZE & (stopbits==2 ? CS7 : CS8));
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return;
 
