@@ -153,7 +153,7 @@ serialConfig(int pfd, struct termios *term, int speed){
 }
 
 int
-binary_send(int pfd, char *data, size_t ls){
+binary_send(int pfd, char *data UNUSED , size_t ls){
 	unsigned char *msg;
 	size_t nbr, nbs, nbx;
 	ssize_t r;
