@@ -219,7 +219,9 @@ class TestLoad:
 
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
-    def __init__(self, logfp, speed=4800, verbose=False):
+    def __init__(self, logfp,
+                 speed=4800, parity='N', stopbits=1,
+                 verbose=False):
         self.verbose = verbose
         self.go_predicate = lambda: True
         self.readers = 0
@@ -253,15 +255,25 @@ class FakeGPS:
         (self.master_fd, self.slave_fd) = pty.openpty()
         self.slave = os.ttyname(self.slave_fd)
         ttyfp = open(self.slave, "rw")
-        raw = termios.tcgetattr(ttyfp.fileno())
-        raw[0] = 0					# iflag
-        raw[1] = termios.ONLCR				# oflag
-        raw[2] &= ~(termios.PARENB | termios.CRTSCTS)	# cflag
-        raw[2] |= (termios.CSIZE & termios.CS8)		# cflag
-        raw[2] |= termios.CREAD | termios.CLOCAL	# cflag
-        raw[3] = 0					# lflag
-        raw[4] = raw[5] = speed
-        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW, raw)
+        (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(ttyfp.fileno())
+	cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
+	cflag |= termios.CREAD | termios.CLOCAL
+        iflag = oflag = lflag = 0
+ 	iflag &=~ (termios.PARMRK | termios.INPCK)
+ 	cflag &=~ (termios.CSIZE | termios.CSTOPB | termios.PARENB | termios.PARODD)
+        if stopbits == 2:
+            cflag |= termios.CS7 | termios.CSTOPB
+        else:
+            cflag |= termios.CS8
+ 	if parity == 'E':
+ 	    iflag |= termios.INPCK
+ 	    cflag |= termios.PARENB
+ 	elif parity == 'O':
+ 	    iflag |= termios.INPCK
+ 	    cflag |= termios.PARENB | termios.PARODD
+        ispeed = ospeed = speed
+        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW,
+                          [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
     def slave_is_open(self, pid):
         "Is the slave device of this pty opened by the specified process?"
         if self.verbose:
