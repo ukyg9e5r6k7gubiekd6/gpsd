@@ -86,7 +86,7 @@ def proc_has_file_open(pid, file):
     else:
         # Slower, but portable to OpenBSD etc.
         (status, output) = \
-                 commands.getstatusoutput("lsof -f -t -p %d -a %s"%(pid,file))
+                 commands.getstatusoutput("fstat -p %d %s"%(pid,file))
         return status == 0 and output
 
 def proc_fd_set(pid):
@@ -99,7 +99,7 @@ def proc_fd_set(pid):
     else:
         # Slower, but portable to OpenBSD etc.
         (status, output) = \
-                 commands.getstatusoutput("lsof -F f -p %d"%pid)
+                 commands.getstatusoutput("fstat -p %d"%pid)
         if status != 0:
             return []
         # Extract the f entries
