@@ -112,7 +112,7 @@ def proc_fd_set(pid):
 #
 ### System-dependent code ends here
 
-class PacketError(exceptions.Exception):
+class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
 
@@ -123,6 +123,7 @@ class TestLoad:
         self.logfp = logfp
         self.logfile = logfp.name
         self.type = None
+        self.serial = None
         # Skip the comment header
         while True:
             first = logfp.read(1)
@@ -132,6 +133,28 @@ class TestLoad:
                 if line.strip().startswith("Type:"):
                     if line.find("RTCM") > -1:
                         self.type = "RTCM"
+                if "Serial:" in line:
+                    line = line[1:].strip()
+                    try:
+                        (xx, baud, params) = line.split()
+                        baud = int(baud)
+                        if params[0] in ('7', '8'):
+                            databits = int(params[0])
+                        else:
+                            raise ValueError
+                        if params[1] in ('N', 'O', 'E'):
+                            parity = params[1]
+                        else:
+                            raise ValueError
+                        if params[2] in ('1', '2'):
+                            stopbits = int(params[2])
+                        else:
+                            raise ValueError
+                    except ValueError, IndexError:
+                        raise TestLoadError("bad serial-parameter spec in %s"%\
+                                            logfp.name)
+                    
+                    self.serial = (baud, databits, parity, stopbits)
             else:
                 break
         # Grab the packets
@@ -217,10 +240,14 @@ class TestLoad:
         else:
             raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
 
+class PacketError(exceptions.Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp,
-                 speed=4800, parity='N', stopbits=1,
+                 speed=4800, databits=8, parity='N', stopbits=1,
                  verbose=False):
         self.verbose = verbose
         self.go_predicate = lambda: True
@@ -252,6 +279,9 @@ class FakeGPS:
         if type(logfp) == type(""):
             logfp = open(logfp, "r");            
         self.testload = TestLoad(logfp)
+        # FIXME: explicit arguments should probably override this
+        #if self.testload.serial:
+        #    (speed, databits, parity, stopbits) = self.testload.serial
         (self.master_fd, self.slave_fd) = pty.openpty()
         self.slave = os.ttyname(self.slave_fd)
         ttyfp = open(self.slave, "rw")
@@ -262,10 +292,12 @@ class FakeGPS:
         iflag = oflag = lflag = 0
  	iflag &=~ (termios.PARMRK | termios.INPCK)
  	cflag &=~ (termios.CSIZE | termios.CSTOPB | termios.PARENB | termios.PARODD)
-        if stopbits == 2:
-            cflag |= termios.CS7 | termios.CSTOPB
+        if databits == 7:
+            cflag |= termios.CS7
         else:
             cflag |= termios.CS8
+        if stopbits == 2:
+            cflag |= termios.CSTOPB
  	if parity == 'E':
  	    iflag |= termios.INPCK
  	    cflag |= termios.PARENB

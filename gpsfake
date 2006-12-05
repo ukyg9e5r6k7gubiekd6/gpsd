@@ -165,6 +165,9 @@ elif pipe:
 try:
     try:
         test.gps_add(logfile, speed=speed, pred=fakehook)
+    except gpsfake.TestLoadError, e:
+        sys.stderr.write("gpsfake: " + e.msg + "\n")
+        raise SystemExit, 1
     except gpsfake.PacketError, e:
         sys.stderr.write("gpsfake: " + e.msg + "\n")
         raise SystemExit, 1
