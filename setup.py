@@ -1,3 +1,4 @@
+# $Id$
 # Creates build/lib.linux-${arch}-${pyvers}/gpspacket.so,
 # where ${arch} is an architecture and ${pyvers} is a Python version.
 from distutils.core import setup, Extension

@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * Python binding for the packet.c module.
  */
