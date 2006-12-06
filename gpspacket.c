@@ -36,6 +36,8 @@ newGetterObject(PyObject *arg)
     self = PyObject_New(GetterObject, &Getter_Type);
     if (self == NULL)
 	return NULL;
+    memset(&self->getter, 0, sizeof(struct gps_packet_t));
+    packet_reset(&self->getter);
     return self;
 }
 
@@ -54,7 +56,7 @@ Getter_get(GetterObject *self, PyObject *args)
     int fd;
     ssize_t type;
 
-    if (!PyArg_ParseTuple(args, "i", &fd))
+    if (!PyArg_ParseTuple(args, "i:get", &fd))
         return NULL;
 
     type = packet_get(fd, &self->getter);
@@ -89,6 +91,11 @@ Getter_getattr(GetterObject *self, char *name)
     return Py_FindMethod(Getter_methods, (PyObject *)self, name);
 }
 
+PyDoc_STRVAR(Getter__doc__,
+"GPS packet getter object\n\
+\n\
+Fetch a single packet from file descriptor");
+
 static PyTypeObject Getter_Type = {
 	/* The ob_type field must be initialized in the module init function
 	 * to be portable to Windows without using C++. */
@@ -114,14 +121,14 @@ static PyTypeObject Getter_Type = {
         0,                      /*tp_setattro*/
         0,                      /*tp_as_buffer*/
         Py_TPFLAGS_DEFAULT,     /*tp_flags*/
-        0,                      /*tp_doc*/
+        Getter__doc__,          /*tp_doc*/
         0,                      /*tp_traverse*/
         0,                      /*tp_clear*/
         0,                      /*tp_richcompare*/
         0,                      /*tp_weaklistoffset*/
         0,                      /*tp_iter*/
         0,                      /*tp_iternext*/
-        0,         		/*tp_methods*/
+        Getter_methods,		/*tp_methods*/
         0,                      /*tp_members*/
         0,                      /*tp_getset*/
         0,                      /*tp_base*/
