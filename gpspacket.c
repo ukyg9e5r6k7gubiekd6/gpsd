@@ -18,8 +18,6 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     va_end(ap);
 }
 
-static PyObject *ErrorObject;
-
 typedef struct {
 	PyObject_HEAD
 	struct gps_packet_t getter;
@@ -56,7 +54,7 @@ Getter_get(GetterObject *self, PyObject *args)
     int fd;
     ssize_t type;
 
-    if (!PyArg_ParseTuple(args, "i:get", &fd))
+    if (!PyArg_ParseTuple(args, "i;missing or invalid file descriptor argument to gpspacket.get", &fd))
         return NULL;
 
     type = packet_get(fd, &self->getter);
@@ -174,23 +172,11 @@ initgpspacket(void)
 {
     PyObject *m;
 
-    /* Finalize the type object including setting type of the new type
-     * object; doing it here is required for portability to Windows 
-     * without requiring C++. */
     if (PyType_Ready(&Getter_Type) < 0)
 	return;
 
     /* Create the module and add the functions */
     m = Py_InitModule3("gpspacket", gpspacket_methods, module_doc);
-
-    /* Add some symbolic constants to the module */
-    if (ErrorObject == NULL) {
-	ErrorObject = PyErr_NewException("gpspacket.error", NULL, NULL);
-	if (ErrorObject == NULL)
-	    return;
-    }
-    Py_INCREF(ErrorObject);
-    PyModule_AddObject(m, "error", ErrorObject);
 
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
