@@ -206,12 +206,13 @@ class PacketError(exceptions.Exception):
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp,
-                 speed=4800, databits=8, parity='N', stopbits=1,
+                 speed=19200, databits=8, parity='N', stopbits=1,
                  verbose=False):
         self.verbose = verbose
         self.go_predicate = lambda: True
         self.readers = 0
         self.index = 0
+        self.speed = speed
         baudrates = {
             0: termios.B0,
             50: termios.B50,
@@ -269,6 +270,9 @@ class FakeGPS:
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
         os.write(self.master_fd, line)
+        # Delay so we won't spam the buffers in the pty layer or gpsd itself.
+        # Assumptions: 1 character is 10 bits (generous; at 8N1 it will be 9).
+        time.sleep((10.0 * len(line)) / self.speed)
         self.index += 1
 
 class DaemonError(exceptions.Exception):

@@ -188,7 +188,8 @@ class gps(gpsdata):
     def __init__(self, host="localhost", port="2947", verbose=0):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
-	self.connect(host, port)
+        self.sockfile = None
+        self.connect(host, port)
 	self.verbose = verbose
 	self.raw_hook = None
 
@@ -210,12 +211,14 @@ class gps(gpsdata):
 	#if self.debuglevel > 0: print 'connect:', (host, port)
 	msg = "getaddrinfo returns an empty list"
 	self.sock = None
+        self.sockfile = None
 	for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
 	    af, socktype, proto, canonname, sa = res
 	    try:
 		self.sock = socket.socket(af, socktype, proto)
 		#if self.debuglevel > 0: print 'connect:', (host, port)
 		self.sock.connect(sa)
+		self.sockfile = self.sock.makefile()
 	    except socket.error, msg:
 		#if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
@@ -228,9 +231,12 @@ class gps(gpsdata):
 	self.raw_hook = hook
 
     def close(self):
+        if self.sockfile:
+            self.sockfile.close()
         if self.sock:
             self.sock.close()
         self.sock = None
+        self.sockfile = None
 
     def __del__(self):
         self.close()
@@ -392,12 +398,15 @@ class gps(gpsdata):
 
     def waiting(self):
         "Return True if data is ready for the client."
-        (input, output, exceptions) = select.select((self.sock,), (),(), 0)
-        return input != []
+        if self.sockfile._rbuf:	# Ugh...relies on socket library internals.
+            return True
+        else:
+            (input, output, exceptions) = select.select((self.sock,), (),(), 0)
+            return input != []
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-	self.response = self.sock.recv(1024)
+	self.response = self.sockfile.readline()
 	if not self.response:
 	    return -1
 	if self.verbose:
