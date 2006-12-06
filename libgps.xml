@@ -134,7 +134,7 @@ structure containing parsed data, and a buffer containining the
 raw <application>gpsd</application> response.</para>
 
 <para><function>gps_set_callback()</function> takes a function you
-specify and run it asynchronously each time new data arrives from
+specify and runs it asynchronously each time new data arrives from
 <application>gpsd</application>, using POSIX threads.  For example,
 you can call gps_set_callback(gpsdata, my_function, handler) once in
 your program, and from there on your gpsdata structure will be parsed
@@ -146,7 +146,7 @@ mechanisms to avoid race conditions.</para>
 
 <para><function>gps_del_callback()</function> deregisters the callback
 function previously set with <function>gps_set_callback()</function>.
-After the invocation of this funcion no operation will be done when
+After the invocation of this function no operation will be done when
 new data arrives.</para>
 
 <para>Consult <filename>gps.h</filename> to learn more about the data members 

@@ -3,7 +3,7 @@
 #
 # gps.py -- Python interface to GPSD.
 #
-import time, calendar, math, socket, sys, thread
+import time, calendar, math, socket, sys, select
 
 # Needed in all versions of Python that don't implement
 # PEP 75 (http://python.fyxm.net/peps/pep-0754.html).
@@ -188,12 +188,9 @@ class gps(gpsdata):
     def __init__(self, host="localhost", port="2947", verbose=0):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
-	self.sockfile = None
 	self.connect(host, port)
 	self.verbose = verbose
 	self.raw_hook = None
-	self.thread_hook = None
-	self.thread_id = None
 
     def connect(self, host, port):
 	"""Connect to a host on a given port.
@@ -213,14 +210,12 @@ class gps(gpsdata):
 	#if self.debuglevel > 0: print 'connect:', (host, port)
 	msg = "getaddrinfo returns an empty list"
 	self.sock = None
-	self.sockfile = None
 	for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
 	    af, socktype, proto, canonname, sa = res
 	    try:
 		self.sock = socket.socket(af, socktype, proto)
 		#if self.debuglevel > 0: print 'connect:', (host, port)
 		self.sock.connect(sa)
-		self.sockfile = self.sock.makefile()
 	    except socket.error, msg:
 		#if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
@@ -232,24 +227,10 @@ class gps(gpsdata):
     def set_raw_hook(self, hook):
 	self.raw_hook = hook
 
-    def __thread_poll(self):
-	while True:
-	    st = self.poll()
-	    if st == -1:
-		break
-	thread.exit()
-
-    def set_thread_hook(self, hook):
-	self.thread_hook = hook
-	self.thread_id = thread.start_new_thread(self.__thread_poll, ())
-
     def close(self):
-        if self.sockfile:
-            self.sockfile.close()
         if self.sock:
             self.sock.close()
         self.sock = None
-        self.sockfile = None
 
     def __del__(self):
         self.close()
@@ -408,12 +389,15 @@ class gps(gpsdata):
 		self.timings.collect(*data.split())
 	if self.raw_hook:
 	    self.raw_hook(buf);
-	if self.thread_hook:
-	    self.thread_hook(buf);
+
+    def waiting(self):
+        "Return True if data is ready for the client."
+        (input, output, exceptions) = select.select((self.sock,), (),(), 0)
+        return input != []
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
-	self.response = self.sockfile.readline()
+	self.response = self.sock.recv(1024)
 	if not self.response:
 	    return -1
 	if self.verbose:
@@ -429,13 +413,19 @@ class gps(gpsdata):
 	    self.timings.c_recv_time -= basetime
 	return 0
 
-    def query(self, commands):
-	"Send a command, get back a response."
+    def send(self, commands):
+        "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
- 	self.sockfile.write(commands)
- 	self.sockfile.flush()
+ 	self.sock.send(commands)
+
+    def query(self, commands):
+	"Send a command, get back a response."
+        self.send(commands)
 	return self.poll()
+
+    def __repr__(self):
+        return "<gps.gps object with id %s>" % id(self)
 
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399
@@ -498,7 +488,6 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     if lat1 < lat2: dy *= -1
     if lon1 < lon2: dx *= -1
     return (dx, dy)
-
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."

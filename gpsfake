@@ -161,6 +161,7 @@ if flicker:
     test.reporter = flickerdigest
 elif pipe:
     test.reporter = sys.stdout.write
+    #test.progress = sys.stdout.write
 
 try:
     try:
@@ -183,6 +184,7 @@ try:
 
     try:
         test.client_add(init + "\n")
+        test.run()
     except socket.error, msg:
         sys.stderr.write("gpsfake: socket error %s.\n" % msg)
         raise SystemExit, 1
