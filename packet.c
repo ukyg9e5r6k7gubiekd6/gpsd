@@ -792,7 +792,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		packet_discard(lexer);
 		break;
 	    not_garmin:;
-	        gpsd_report(LOG_RAW+1,"Not Garmin\n");
+	        gpsd_report(LOG_RAW+1,"Not a Garmin packet\n");
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
 		/* check for some common TSIP packet types:
@@ -812,66 +812,53 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		 *
 		 * <DLE>[pkt id] [data] <DLE><ETX>
 		 */
-		n = 0;
 		/*@ +charint @*/
-		if (lexer->inbuffer[n++] != DLE)
+		pkt_id = lexer->inbuffer[1]; /* packet ID */
+		if ((0x41 > pkt_id) || (0x8f < pkt_id)) {
+		    gpsd_report(LOG_RAW+1, "Packet ID out of range for TSIP\n");
 		    goto not_tsip;
-		pkt_id = lexer->inbuffer[n++]; /* packet ID */
-		if ((0x41 > pkt_id) || (0x8f < pkt_id))
-		    goto not_tsip;
-		for ( len = 0; n < packetlen; len++ ) {
-		    if (lexer->inbuffer[n++] == DLE) {
-			if ((lexer->inbuffer[n+1] != DLE) &&
-			(lexer->inbuffer[n+1] != ETX)){
-			    goto not_tsip;
-			}
-		    }
 		}
-		/* look for terminating ETX */
-		if ((lexer->inbuffer[n-1]) != ETX)
-		    goto not_tsip;
 		/*@ -ifempty */
-		if ((0x41 == pkt_id) && (0x0c == len))
+		if ((0x41 == pkt_id) && (0x0c == packetlen))
 		    /* pass */;
-		else if ((0x42 == pkt_id) && (0x12 == len ))
+		else if ((0x42 == pkt_id) && (0x12 == packetlen ))
 		    /* pass */;
-		else if ((0x43 == pkt_id) && (0x16 == len))
+		else if ((0x43 == pkt_id) && (0x16 == packetlen))
 		    /* pass */;
-		else if ((0x45 == pkt_id) && (0x0c == len))
+		else if ((0x45 == pkt_id) && (0x0c == packetlen))
 		    /* pass */;
-		else if ((0x46 == pkt_id) && (0x04 == len))
+		else if ((0x46 == pkt_id) && (0x04 == packetlen))
 		    /* pass */;
-		else if ((0x4a == pkt_id) && (0x16 == len))
+		else if ((0x4a == pkt_id) && (0x16 == packetlen))
 		    /* pass */;
-		else if ((0x4b == pkt_id) && (0x05 == len))
+		else if ((0x4b == pkt_id) && (0x05 == packetlen))
 		    /* pass */;
-		else if ((0x56 == pkt_id) && (0x16 == len))
+		else if ((0x56 == pkt_id) && (0x16 == packetlen))
 		    /* pass */;
-		else if ((0x5c == pkt_id) && (0x1a == len))
+		else if ((0x5c == pkt_id) && (0x1a == packetlen))
 		    /* pass */;
-		else if ((0x6d == pkt_id) && ((0x12 <= len) && (0x1e >= len) ))
+		else if ((0x6d == pkt_id) && ((0x12 <= packetlen) && (0x1e >= packetlen) ))
 		    /* pass */;
-		else if ((0x82 == pkt_id) && (0x03 == len))
+		else if ((0x82 == pkt_id) && (0x03 == packetlen))
 		    /* pass */;
 		else if ((0x8f == pkt_id))
 		    /* pass */;
 		else {
 		    gpsd_report(LOG_IO,
-			"TSIP REJECT pkt_id = %#02x, n= %#02x, len= %#02x\n",
-			pkt_id, n, len); 
+			"TSIP REJECT pkt_id = %#02x, packetlen= %#02x\n",
+			pkt_id, packetlen); 
 		    goto not_tsip;
 		}
 		/* Debug */
-/*
-		gpsd_report(LOG_IO,
-		    "TSIP pkt_id = %#02x, n= %#02x, len= %#02x\n",
-		    pkt_id, n, len); 
-*/
+		gpsd_report(LOG_RAW,
+		    "TSIP pkt_id = %#02x, packetlen= %#02x\n",
+		    pkt_id, packetlen); 
 		/*@ -charint +ifempty @*/
 		packet_accept(lexer, TSIP_PACKET);
 		packet_discard(lexer);
 		break;
 	    not_tsip:
+	        gpsd_report(LOG_RAW+1,"Not a TSIP packet\n");
 		/*
 		 * More attempts to recognize ambiguous TSIP-like
 		 * packet types could go here.
