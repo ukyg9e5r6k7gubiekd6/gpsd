@@ -302,7 +302,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	gpsd_report(LOG_PROG, "Appl, Product Data, sz: %d\n", pkt_len);
 	(void)snprintf(session->subtype, sizeof(session->subtype),
 		       "%d: %d.%02d"
-		       , prod_id, maj_ver, min_ver);
+		       , (int)prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin Product ID: %d, SoftVer: %d.%02d\n"
 		, prod_id, maj_ver, min_ver);
 	gpsd_report(LOG_INF, "Garmin Product Desc: %s\n"

@@ -131,6 +131,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 	    if (gpsdata->PRN[i] > GPS_PRNMAX) {
 		/* SBAS satellites */
 		XPoint vertices[5];
+		/*@ -type @*/
 		vertices[0].x = x;
 		vertices[0].y = y-IDIAM;
 		vertices[1].x = x+IDIAM;
@@ -141,6 +142,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 		vertices[3].y = y;
 		vertices[4].x = x;
 		vertices[4].y = y-IDIAM;
+		/*@ +type -compdef @*/
 		if (gpsdata->used[i])
 		    (void)XFillPolygon(XtDisplay(draww), pixmap, drawGC,
 				       vertices, 5, Convex, CoordModeOrigin);
@@ -162,6 +164,7 @@ void draw_graphics(struct gps_data_t *gpsdata)
 			   0, 360 * 64			/* angle1, angle2 */
 			);
 	    }
+	    /*@ +compdef @*/
 	    (void)snprintf(buf, sizeof(buf), "%-3d", gpsdata->PRN[i]);
 	    set_color("Black");
 	    (void)XDrawString(XtDisplay(draww), pixmap, drawGC, x,y+17, buf,3);

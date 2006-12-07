@@ -362,12 +362,12 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 
     if (session->packet.type == EVERMORE_PACKET){
 	st = evermore_parse(session, session->packet.outbuffer, session->packet.outbuflen);
-	//session->gpsdata.driver_mode = 1;  /* binary */
+	//session->gpsdata.driver_mode = 1;
 	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->packet.outbuffer, session);
-	//session->gpsdata.driver_mode = 0;  /* NMEA */
+	//session->gpsdata.driver_mode = 0;
 	return st;
 #endif /* NMEA_ENABLE */
     } else
@@ -376,6 +376,7 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 
 static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 {
+    /*@ -type @*/
     unsigned char tmp8;
     unsigned char msg[] = {
 	    0x89,          /*  0: msg ID, Serial Port Configuration */
@@ -393,10 +394,12 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
     }
     msg[2] = tmp8;
     return evermore_write(session, msg, sizeof(msg));
+    /*@ +type @*/
 }
 
 static bool evermore_protocol(struct gps_device_t *session, int protocol)
 {
+    /*@ +charint */
     unsigned char tmp8;
     unsigned char evrm_protocol_config[] = {
 	    0x84,    /* 0: msg ID, Protocol Configuration */
@@ -404,6 +407,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
 	    0x00,    /* 2: reserved */
 	    0x00,    /* 3: reserved */
     };
+    /*@ -charint */
     gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);
     /*@i1@*/tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
@@ -416,6 +420,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 /* mode = 2 : EverMore search, activate PEMT101 message */
 {
     unsigned char tmp8;
+    /*@ +charint */
     unsigned char evrm_nmeaout_config[] = {
 	    0x8e,	/*  0: msg ID, NMEA Message Control */
 	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
@@ -429,6 +434,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 	    0,          /*  9: PEMT,101, interval 0-255s */
 	    0, 0, 0, 0, 0, 0, /* 10-15: reserved */
     };
+    /*@ -charint */
     gpsd_report(LOG_PROG, "evermore_nmea_config(%d)\n", mode);
     /*@i1@*/tmp8 = (mode == 1) ? 5 : 1;   /* NMEA GPGSV, gpsd  */
     evrm_nmeaout_config[6] = tmp8;           /* GPGSV, 1s or 5s */
