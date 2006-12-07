@@ -501,11 +501,11 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
     if type(s) == type(1):
-	return time.strftime(time.gmtime(s), "%Y-%m-%dT%H:%M:%S")
+	return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
     elif type(s) == type(1.0):
 	date = int(s)
 	msec = s - date
-	date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gtime(s))
+	date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
 	return date + "." + `msec`[2:]
     elif type(s) == type(""):
 	if s[-1] == "Z":
