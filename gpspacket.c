@@ -15,7 +15,7 @@ static PyObject *report_callback = NULL;
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 {
     char buf[BUFSIZ];
-    PyObject *args, *result;
+    PyObject *args;
     va_list ap;
 
     if (!report_callback)   /* no callback defined, exit early */
@@ -30,14 +30,12 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
     (void)vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
-    args = Py_BuildValue("(s)", buf);
+    args = Py_BuildValue("(is)", errlevel, buf);
     if (!args)
 	return;
 
-    result = PyObject_Call(report_callback, args, NULL);
+    PyObject_Call(report_callback, args, NULL);
     Py_DECREF(args);
-    if (!result)
-	return;
 }
 
 static PyTypeObject Getter_Type;
@@ -73,16 +71,15 @@ static PyObject *
 Getter_get(GetterObject *self, PyObject *args)
 {
     int fd;
-    ssize_t type;
 
     if (!PyArg_ParseTuple(args, "i;missing or invalid file descriptor argument to gpspacket.get", &fd))
         return NULL;
 
-    type = packet_get(fd, &self->getter);
+    packet_get(fd, &self->getter);
     if (PyErr_Occurred())
 	return NULL;
 
-    return Py_BuildValue("(i, s)", type, self->getter.outbuffer);
+    return Py_BuildValue("(i, s)", self->getter.type, self->getter.outbuffer);
 }
 
 static PyObject *
@@ -235,14 +232,6 @@ initgpspacket(void)
 
     /* Create the module and add the functions */
     m = Py_InitModule3("gpspacket", gpspacket_methods, module_doc);
-
-    if (ErrorObject == NULL) {
-	ErrorObject = PyErr_NewException("gpspacket.error", NULL, NULL);
-	if (ErrorObject == NULL)
-	    return;
-    }
-    Py_INCREF(ErrorObject);
-    PyModule_AddObject(m, "error", ErrorObject);
 
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
