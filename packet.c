@@ -700,6 +700,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	else if (lexer->state == COMMENT_RECOGNIZED) {
 	    packet_accept(lexer, COMMENT_PACKET);
 	    packet_discard(lexer);
+	    break;
 	}
 #ifdef NMEA_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
