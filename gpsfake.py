@@ -462,6 +462,12 @@ class TestSession:
         "Run the tests."
         try:
             while self.daemon:
+                # We have to read anything that gpsd might have tried
+                # to send to the GPS here -- under OpenBSD the
+                # TIOCDRAIN will hang, otherwise.
+                for device in self.runqueue:
+                    if isinstance(device, FakeGPS):
+                        device.read()
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
@@ -476,10 +482,6 @@ class TestSession:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n" % chosen.slave)
                     else:
-                        # We have to read anything that gpsd might have tried
-                        # to send to the GPS here -- under OpenBSD the
-                        # TIOCDRAIN will hang, otherwise.
-                        chosen.read()
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
                     if chosen.enqueued:
