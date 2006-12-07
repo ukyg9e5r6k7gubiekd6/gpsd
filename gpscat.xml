@@ -17,28 +17,48 @@
 <cmdsynopsis>
   <command>gpscat</command>  
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='opt'>-p</arg>
+      <arg choice='opt'>-t</arg>
       <arg choice='plain'><replaceable>serial-port</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpscat</application> is a very simple little
-program that reads from a specified serial device (presumed to
-have a GPS attached) and dumps the output to standard output.
-Nonprintable characters are rendered as hexadecimal string escapes,
-except for CR followed by LF or LF preceded by CR.  The program
-runs forever until interrupted by ^C or other means.</para>
+<para><application>gpscat</application> is a simple program for
+logging and packetizing GPS data streams.  It takes input from a
+specified file or serial device (presumed to have a GPS attached) and
+reports to standard output. The program runs until end of input or ot is
+interrupted by ^C or other means.</para>
+
+<para>In raw mode (the default) <application>gpscat</application>
+simply dumps its input to standard output.  Nonprintable characters
+are rendered as hexadecimal string escapes, except for CR followed by
+LF or LF preceded by CR.</para>
+
+<para>In packetizing mode, <application>gpscat</application> uses the
+same code as
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>'s
+packet sniffer to break the input into packets.  Packets are reported
+one per line; line breaks in the packets themselves are
+escaped.</para>
 
 <para>This program is useful as a sanity checker when examining a new
 device.  It can be used as a primitive NMEA logger, but beware that
 (a) interrupting it likely to cut off output in mid-sentence, and (b)
 to avoid displaying incomplete NMEA sentences right up next to shell
-prompts that often contain a $, it always emits an extra final
+prompts that often contain a $, raw mode always emits an extra final
 linefeed.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
+
+<varlistentry>
+<term>-p</term>
+<listitem>
+<para>Invoke packetizer mode.</para>
+</listitem>
+</varlistentry>
 
 <varlistentry>
 <term>-s</term>
@@ -48,6 +68,14 @@ bits) before reading.  Argument should begin with one of the normal integer
 baud rates (300, 1200, 4800, 9600, 19200, 38400, etc.).  It may be
 followed by an optional suffix [NOE][12] to set parity (None, Even,
 Odd) and stop bits (1 or 2).</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-t</term>
+<listitem>
+<para>Invoke packetizer mode, with the packet type reported before 
+a colon on each line.</para>
 </listitem>
 </varlistentry>
 

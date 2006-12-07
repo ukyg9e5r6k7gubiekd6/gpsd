@@ -660,11 +660,10 @@ static void character_discard(struct gps_packet_t *lexer)
 }
 
 
-/* entry points begin here */
-
 /* get 0-origin big-endian words relative to start of packet buffer */
 #define getword(i) (short)(lexer->inbuffer[2*(i)] | (lexer->inbuffer[2*(i)+1] << 8))
 
+/* entry points begin here */
 
 ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 /* grab a packet; returns either BAD_PACKET or the length */
@@ -700,6 +699,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	else if (lexer->state == COMMENT_RECOGNIZED) {
 	    packet_accept(lexer, COMMENT_PACKET);
 	    packet_discard(lexer);
+	    lexer->state = GROUND_STATE;
 	    break;
 	}
 #ifdef NMEA_ENABLE

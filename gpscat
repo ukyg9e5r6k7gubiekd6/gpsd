@@ -33,6 +33,7 @@ if __name__ == '__main__':
         parity = None
         stopbits = None
         rawmode = True
+        typeflag = False
         for (switch, val) in options:
             if switch == '-p':
                 rawmode = False
@@ -42,6 +43,9 @@ if __name__ == '__main__':
                     stopbits = int(val[-1])
                     val = val[:-2]
                 speed = int(val)
+            elif switch == 't':
+                typeflag = True
+                rawmode = False
             elif switch == '-h':
                 sys.stderr.write("usage: gpscat [-s] serial-port\n")
                 raise SystemExit, 0
@@ -91,7 +95,12 @@ if __name__ == '__main__':
                         buf = ""
                 else:
                     (type, packet) = getter.get(tty)
-                    sys.stdout.write(`type` + ": " + hexdump(packet) + "\n")
+                    if packet == '':
+                        break
+                    if typeflag:
+                        sys.stdout.write(`type` + ": " + hexdump(packet) + "\n")
+                    else:
+                        sys.stdout.write(hexdump(packet) + "\n")
     except KeyboardInterrupt:
         if rawmode:
             sys.stdout.write("\n")
