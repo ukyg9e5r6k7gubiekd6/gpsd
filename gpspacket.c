@@ -8,22 +8,44 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 
+static PyObject *ErrorObject = NULL;
+
+static PyObject *report_callback = NULL;
+
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
-/* stub logger -- we should allow redirecting this */
 {
+    char buf[BUFSIZ];
+    PyObject *args, *result;
     va_list ap;
 
+    if (!report_callback)   /* no callback defined, exit early */
+	return;	
+    
+    if (!PyCallable_Check(report_callback)) {
+	PyErr_SetString(ErrorObject, "Cannot call Python callback function");
+	return;
+    }
+
     va_start(ap, fmt);
-    (void)vfprintf(stderr, fmt, ap);
+    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
+
+    args = Py_BuildValue("(s)", buf);
+    if (!args)
+	return;
+
+    result = PyObject_Call(report_callback, args, NULL);
+    Py_DECREF(args);
+    if (!result)
+	return;
 }
+
+static PyTypeObject Getter_Type;
 
 typedef struct {
 	PyObject_HEAD
 	struct gps_packet_t getter;
 } GetterObject;
-
-static PyTypeObject Getter_Type;
 
 #define GetterObject_Check(v)	((v)->ob_type == &Getter_Type)
 
@@ -47,7 +69,6 @@ Getter_init(GetterObject *self)
     packet_reset(&self->getter);
     return 0;
 }
-
 static PyObject *
 Getter_get(GetterObject *self, PyObject *args)
 {
@@ -58,6 +79,8 @@ Getter_get(GetterObject *self, PyObject *args)
         return NULL;
 
     type = packet_get(fd, &self->getter);
+    if (PyErr_Occurred())
+	return NULL;
 
     return Py_BuildValue("(i, s)", type, self->getter.outbuffer);
 }
@@ -66,6 +89,8 @@ static PyObject *
 Getter_reset(GetterObject *self)
 {
     packet_reset(&self->getter);
+    if (PyErr_Occurred())
+	return NULL;
     return 0;
 }
 
@@ -156,11 +181,44 @@ gpspacket_new(PyObject *self, PyObject *args)
     return (PyObject *)rv;
 }
 
+PyDoc_STRVAR(register_report__doc__,
+"register_report(callback)\n\
+\n\
+callback must be a callable object expecting a string as parameter.");
+
+static PyObject *
+register_report(GetterObject *self, PyObject *args)
+{
+    PyObject *callback = NULL;
+
+    if (!PyArg_ParseTuple(args, "O:register_report", &callback))
+	return NULL;
+
+    if (!PyCallable_Check(callback)) {
+	PyErr_SetString(PyExc_TypeError, "First argument must be callable");
+	return NULL;
+    }
+
+    if (report_callback) {
+	Py_DECREF(report_callback);
+	report_callback = NULL;
+    }
+
+    report_callback = callback;
+    Py_INCREF(report_callback);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 /* List of functions defined in the module */
 
 static PyMethodDef gpspacket_methods[] = {
     {"new",		gpspacket_new,		METH_VARARGS,
      PyDoc_STR("new() -> new packet-getter object")},
+    {"register_report", (PyCFunction)register_report, METH_VARARGS,
+			register_report__doc__},
     {NULL,		NULL}		/* sentinel */
 };
 
@@ -177,6 +235,14 @@ initgpspacket(void)
 
     /* Create the module and add the functions */
     m = Py_InitModule3("gpspacket", gpspacket_methods, module_doc);
+
+    if (ErrorObject == NULL) {
+	ErrorObject = PyErr_NewException("gpspacket.error", NULL, NULL);
+	if (ErrorObject == NULL)
+	    return;
+    }
+    Py_INCREF(ErrorObject);
+    PyModule_AddObject(m, "error", ErrorObject);
 
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
