@@ -266,6 +266,9 @@ class FakeGPS:
         ispeed = ospeed = speed
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW,
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
+    def read(self):
+        "Discard control strings written by gpsd."
+        termios.tcflush(self.master_fd, termios.TCIFLUSH)
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
@@ -464,7 +467,7 @@ class TestSession:
                 if isinstance(chosen, FakeGPS):
                     # Delay a few seconds after a GPS source is exhauseted
                     # to remove it.  This should give its subscribers time
-                    # to get gpsd's response before we call cleanup 
+                    # to get gpsd's response before we call cleanup()
                     if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
                         self.remove(chosen)
                         self.progress("gpsfake: GPS %s removed\n" % chosen.slave)
@@ -473,6 +476,10 @@ class TestSession:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n" % chosen.slave)
                     else:
+                        # We have to read anything that gpsd might have tried
+                        # to send to the GPS here -- under OpenBSD the
+                        # TIOCDRAIN will hang, otherwise.
+                        chosen.read()
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
                     if chosen.enqueued:
