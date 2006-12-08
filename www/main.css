@@ -5,8 +5,9 @@
  * size. Finally, light grey is a great background color, but lousy for
  * foreground text on white.
  *
- * The only size in here that's tied to something external is the 8.8 for
- * the menu width.  This is sized to just fit a Google "wide skyscraper" ad.
+ * The only size in here that's tied to something external is the pixel size
+ * for the menu width.  This is sized to just fit a Google "wide skyscraper"
+ * ad, which is 160x600.
  */
 
 body {
@@ -52,9 +53,9 @@ a:hover {background-color:#ccc;}
 	}
 
 #Content {
-	/* Left margin is menu width + 3em
+	/* Left margin is menu width + 40 pixels
 	 */
-	margin:0 50px 50px 11.8em;
+	margin:0 50px 50px 200px;
 	padding:10px;
 	}
 
@@ -62,7 +63,7 @@ a:hover {background-color:#ccc;}
 	position:absolute;
 	top:80px;
 	left:20px;
-	width:8.8em;
+	width:160px;
 	padding:0.5em;
 	background-color:#eee;
 	border:1px dashed #999;
