@@ -565,23 +565,27 @@ void gpsd_error_model(struct gps_device_t *session,
 		fix->epc = e/t;
 	    }
 	    /*
-	     * We compute track error solely from the position of this 
-	     * fix and the last one.  The maximum track error, as seen from the
-	     * position of last fix, is the angle subtended by the two
-	     * most extreme possible error positions of the current fix.
-	     * Let the position of the old fix be A and of the new fix B.
-	     * We model the view from A as two right triangles ABC and ABD
-	     * with BC and BD both having the length of the new fix's 
-	     * estimated error.  adj = len(AB), opp = len(BC) = len(BD), 
-	     * hyp = len(AC) = len(AD). Yes, this normally leads to 
-	     * uncertainties near 180 when we're moving slowly.
+	     * We compute a track error estinate solely from the
+	     * position of this fix and the last one.  The maximum
+	     * track error, as seen from the position of last fix, is
+	     * the angle subtended by the two most extreme possible
+	     * error positions of the current fix; the expected track
+	     * error is half that.  Let the position of the old fix be
+	     * A and of the new fix B.  We model the view from A as
+	     * two right triangles ABC and ABD with BC and BD both
+	     * having the length of the new fix's estimated error.
+	     * adj = len(AB), opp = len(BC) = len(BD), hyp = len(AC) =
+	     * len(AD). This leads to spurious uncertainties
+	     * near 180 when we're moving slowly; to avoid reporting
+	     * garbage, throw back NaN if the distance from the previous
+	     * fix is less than the error estimate.
 	     */
 	    fix->epd = NAN;
 	    if (oldfix->mode >= MODE_2D) {
 		double adj = earth_distance(
 		    oldfix->latitude, oldfix->longitude, 
 		    fix->latitude, fix->longitude);
-		if (adj != 0) {
+		if (isnan(adj)==0 && adj > fix->eph) {
 		    double opp = fix->eph;
 		    double hyp = sqrt(adj*adj + opp*opp);
 		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);

@@ -282,13 +282,13 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
     double a = (x1*x2 + y1*y2 + z1*z2)/pow(CalcRad((lat1+lat2)/2),2);
     // a should be in [1, -1] but can sometimes fall outside it by
     // a very small amount due to rounding errors in the preceding
-    // calculations (this is prone to happen when the argument points
-    // are very close together).  Thus we constrain it here.
+    // calculations.  This is prone to happen when the argument points
+    // are very close together.  Return NaN so calculations trying
+    // to use this will also blow up.
     if (fabs(a) > 1) 
-	a = 1;
-    else if (a < -1) 
-	a = -1;
-    return CalcRad((lat1+lat2) / 2) * acos(a);
+	return NAN;
+    else
+	return CalcRad((lat1+lat2) / 2) * acos(a);
 }
 
 /*****************************************************************************
