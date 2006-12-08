@@ -50,6 +50,11 @@ to avoid displaying incomplete NMEA sentences right up next to shell
 prompts that often contain a $, raw mode always emits an extra final
 linefeed.</para>
 
+<para>Also, be aware that packetizing mode will produce useless
+results &mdash; probably consuming the entirety of input and appearing
+to hang &mdash; if it is fed data that is not a sequence of packets
+of one of the known types.</para>
+
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
 
