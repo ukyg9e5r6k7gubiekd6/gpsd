@@ -497,9 +497,10 @@ found:
      * Bring the device all the way so we'll sniff packets from it and
      * discover up front whether it's a GPS source or an RTCM source.
      * Otherwise clients trying to bind to a specific type won't know
-     * what source types are actually available.
+     * what source types are actually available.  If we're in nowait mode
+     * the device has to be configured now; otherwise, it can wait.
      */
-    if (gpsd_activate(chp, false) < 0)
+    if (gpsd_activate(chp, nowait) < 0)
 	return NULL;
     FD_SET(chp->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(chp->gpsdata.gps_fd, true);
