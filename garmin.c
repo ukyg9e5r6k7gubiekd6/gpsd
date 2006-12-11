@@ -951,7 +951,9 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 
     mask = PrintSERPacket(session, pkt_id, pkt_len, data_buf);
 
-    // sending ACK too soon might fail, so do it last
+    // sending ACK too soon might hang the session
+    // so send ACK last, after a pause
+    usleep(300);
     Send_ACK();
     /*@ +usedef +compdef @*/
     return mask;
