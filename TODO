@@ -135,6 +135,11 @@ This is with Python 2.4.4 under Red Hat Linux, kernel version not reported.
 
 ** To do:
 
+*** Change O output precision to %.9f for degrees and %.3f for meters
+
+This corresponds to 1mm accuracy, which is better than the horizontal
+accuracy of RTK GPS.
+
 *** New features for xgps.
 
 Add J option checkbox.  Maybe embed the speedometer widget from
