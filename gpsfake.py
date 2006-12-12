@@ -206,7 +206,7 @@ class PacketError(exceptions.Exception):
 class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp,
-                 speed=19200, databits=8, parity='N', stopbits=1,
+                 speed=4800, databits=8, parity='N', stopbits=1,
                  verbose=False):
         self.verbose = verbose
         self.go_predicate = lambda: True

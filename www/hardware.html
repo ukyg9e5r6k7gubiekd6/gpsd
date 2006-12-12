@@ -740,7 +740,7 @@ rs232 cable or a pda cable. Reported by Koos van den Hout,
 <td><a href='http://www.sanav.com/gps_engine_board/fv-18.htm'>FV-18</a></td>
 <td>Good</td>
 <td>FV-18</td>
-<td>RS-232<br/>(5V TTL)</td>
+<td>UART</td>
 <td>2.0</td>
 <td>2.3</td>
 <td>Special gpsd support uses 8N2 and requests sentences that gpsd requires.
@@ -753,7 +753,7 @@ OEM module only, not a retail product.</td>
 <td><a href='http://www.tri-m.com/products/systems/fv25.html'>FV-25</a></td>
 <td>Fair</td>
 <td>ANTARIS</td>
-<td>RS-232<br/>(5V TTL)</td>
+<td>UART</td>
 <td>2.34</td>
 <td>2.3</td>
 <td>OEM module, available in small quantities from Tri-M systems. The
@@ -798,7 +798,7 @@ Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.</td>
 <td><a href="http://www.trimble.com/lassensk2.shtml">Trimble Lassen SK</a></td>
 <td>Good</td>
 <td>Colossus RF ASIC, Scorpion DSP</td>
-<td>5V TTL</td>
+<td>UART</td>
 <td>2.26</td>
 <td>2.1</td>
 <td>Reported by Rob Janssen.</td>
@@ -820,18 +820,32 @@ Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.</td>
 
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.u-blox.de/'>u-blox</a></tr>
 
-<!-- Begin uBlox ANTARIS -->
+<!-- Begin uBlox ANTARIS lea4-4h -->
 <tr>
 <td><a href='http://www.u-blox.de/products/antaris.html'>ANTARIS</a></td>
 <td>Good</td>
 <td>ANTARIS</td>
 <td>RS-232</td>
-<td>2.13</td>
-<td>?</td>
+<td>2.33</td>
+<td>2.3</td>
 <td>
 Sends 'E' in second field of GSA record, not an NMEA value.
 Actually sends '6' in the GGA status record for dead-reckoning fixes.
-Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
+Reported by Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
+</td>
+</tr>
+<!-- End uBlox ANTARIS -->
+
+<!-- Begin uBlox ANTARIS lea4s -->
+<tr>
+<td><a href='http://www.u-blox.de/products/lea-4s.html'>ANTARIS</a></td>
+<td>Good</td>
+<td>ANTARIS</td>
+<td>1USB+2UART</td>
+<td>2.33</td>
+<td>2.3</td>
+<td>
+Reported by Ali Utku Selen <selenau@kentkart.com.tr>
 </td>
 </tr>
 <!-- End uBlox ANTARIS -->
@@ -880,7 +894,7 @@ tell us the following:</p>
 <li>The GPS and (if applicable) USB-to-serial chip it uses.  (Look at
 the output of lsusb(1), it may identify the USB-to-serial chip.  If it
 gives a vendor and product ID, send us those numbers.)</li>
-<li>The interface type (RS232, USB, CF)</li>
+<li>The interface type (RS232, USB, CF, UART (= 5V TTL RS-232))</li>
 <li>The vendor</li>
 <li>Version of gpsd you tested with</li>
 <li>NMEA version it emits, or '?' if the documentation doesn't say</li>
@@ -900,7 +914,7 @@ gives a vendor and product ID, send us those numbers.)</li>
 
 <h2>RS232 levels:</h2>
 
-<p>TTL level RS-232 uses 0v and +5v, ordinary RS-232 uses -12v to -5v
+<p>UART or TTL level RS-232 uses 0v and +5v, ordinary RS-232 uses -12v to -5v
 and +5v to +12 volts for the signal (IIRC). These are not compatible,
 and attempting to combine them can zorch your GPS.  Converters do
 exist, see Google.</p>
