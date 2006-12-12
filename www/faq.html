@@ -70,22 +70,9 @@ help us resolve the bug as quickly as possible.</p>
 <p>First, read this whole FAQ before reporting apparent misbehavior as a
 bug.  You may find a solution here.</p>
 
-<h3>2. Make sure it's not a problem with your toolchain</h3>
+<h3>2. Make sure it's not a problem with your toolchain or OS</h3>
 
-<p>This one applies mainly to people running on embedded systems
-rather than generic PCs or laptops.  If you are using a stock Linux or
-*BSD over an Intel or AMD processor you can safely ignore the following
-technicalia.</p>
-
-<p>Because of the heavy use of floating point numbers, <code>gpsd</code> is
-quite sensitive to toolchain errors or "compiler bugs". A number of trouble
-reports have been received indicating erroneous results on embedded platforms,
-most notably ARM systems. These have all been traced back to the toolchain;
-when appropriate corrective action was taken, <code>gpsd</code> functioned
-correctly. Source code for a simple test program (<code>floattest.c</code>)
-is in the Subversion repository; if <code>gpsd</code> seems to be producing
-incorrect output, please use this tool to validate your toolchain before
-filing a bug report.</p>
+<p>See our page on <a href='upstream-bugs.html'>upstream bugs</a>.</p>
 
 <h3>3. Make sure it's not a problem in your client software</h3>
 
