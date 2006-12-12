@@ -131,7 +131,17 @@ and gpsprof would fail with:
 # gpsprof | gnuplot -persist
 gpsprof: gpsd unreachable.
 
-This is with Python 2.4.4 under Red Hat Linux, kernel version not reported.
+This is with Python 2.4.4 under Red Hat Linux, kernel version 2.6.18.
+
+*** select(2) is broken under Mac OS/X
+
+When the fd set being polled includes tty devices (as opposed to
+sockets), select(2) can return 0 and shows no fd with input waiting
+even when data is in fact ready to be read from some of the devices.
+This happens often enough to screw up gpsd.
+
+Observed by Chris Kuethe under Darwin kernel 8.8.1 on an x86
+Mac mini.
 
 ** To do:
 
