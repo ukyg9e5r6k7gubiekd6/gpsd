@@ -51,6 +51,7 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 		$resp = fread($sock, 384);	# Wait for O
 		$resp = fread($sock, 384);	# Wait for O
 		fwrite($sock, "SPAMQY\n");	# Query what we actually want
+		# the O report doesn't give us satellite usage or DOP
 		$resp = fread($sock, 384);
 		@fclose($sock);
 	}
