@@ -156,7 +156,7 @@ int main( int argc, char **argv)
     }
 
     if (strstr(buf, "r=")==NULL && strstr(buf, "w=1")==NULL) {
-	(void)fprintf(stderr, "gpspipe: one of '-r' or '-w' is required.\n");
+	(void)fprintf(stderr, "gpspipe: one of '-R', '-r' or '-w' is required.\n");
 	exit(1);
     }
     /* Grok the server, port, and device. */

@@ -87,7 +87,7 @@ of messages required to rotate the spinner.</para>
 
 <para>-V prints the version, then exits.</para>
 
-<para>One or both or -r and -w must be specified.</para>
+<para>At least one of -R -r or -w must be specified.</para>
 </refsect1>
 
 <refsect1 id='exampletitle'><title>EXAMPLE</title> 
