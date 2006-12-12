@@ -19,7 +19,7 @@ Massimo Burcheri reported that it broke somewhere between rev 3654 and
 test hardware.  If TNT support is a problem for you, and you can't
 fix the driver yourself and send us the patch, contact Bill Powell 
 <bpowell@tntc.com> at True North Technologies and tell him he needs
-to send us an eval unit.
+to reverse his refusal to send us an eval unit.
 
 *** Support for Garmin USB binary in serial mode is currently broken
 
@@ -32,9 +32,9 @@ a similar issue on their USB project, so it may be a problem with
 the USB controller chip rather than the GPS hardware or firmware.)
 
 Some users report the Garmin driver only works reliably at -D6 or up.
-Some users report no problems at all.  The solution is probably to
-insert delays in the driver, but we don't know what the right set of
-delays is yet.
+Some users report no problems at all. Some delays have been inserted 
+that may solve the problem, but more reports from the field will be
+needed before we can be reasonably sure it has been solved. 
 
 The new driver also requires a tool to switch between binary and NMEA
 modes.  There is experimental untested code to do this via gpsctl, but
