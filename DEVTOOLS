@@ -22,6 +22,19 @@ Gets the current leap-second correction forom IERS and/or the USNO.
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 
 to gpsfake. (This one goes in the tarball.)
 
+** getrpm
+
+Supports remote-building RPMS on any host machine where you can do SVN
+checkouts; it will then grab them from the remote machine for you.
+You will require an account that you can ssh into on the remote
+machine.  The remote machine must have the buildrpms script from ESR's
+shipper distribution available on your search path.
+
+** putrpm 
+
+Symbiote for getrpm.  It builds current RPMs and writes them to standard
+output in a zip file.
+
 ** striplog
 
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do

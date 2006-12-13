@@ -315,6 +315,9 @@ splint:
 	@echo "Running splint on packet_test test harness..."
 	-splint $(packet_test_SOURCES)
 
+version:
+	@echo $(VERSION)
+
 #
 # Regression tests begin here
 #

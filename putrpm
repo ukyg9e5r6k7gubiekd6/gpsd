@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# putrpm -- generate RPMs from the GPSD distribution and zip them to stdout
+
+(svn up && \
+	autogen.sh && \
+	make && \
+	make dist && \
+	buildrpms gpsd-`make version`.tar.gz) 1>&2
+zip - *`make version`*rpm
+
+

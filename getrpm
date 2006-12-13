@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# This script upports remote-building RPMS on any host machine where you can 
+# do SVN checkouts.  It is intended for use by GPSD release engineers.
+#
+# You will require an account that you can ssh into on the remote
+# machine, and that account must have an initialized SVN mirror of the
+# gpsd sources set up in it.
+#
+# The magic for an svn checkout to a remote machine, which you will have
+# to do at least once before using this script. is:
+#	svn checkout http://svn.berlios.de/svnroot/repos/gpsd/trunk
+#
+# The remote machine must have the buildrpms script from
+# ESR's shipper distribution available on your search path.
+#
+# Use the first arg to sopecify the architecture you want to build for;
+# this will dispatch 
+
+arch=$1
+dir=${2:~/svn/gpsd/trunk/}
+
+case $1 in
+    i686)
+	ssh grelber.thyrsus.com 'cd $dir; putrpm' | unzip - 
+	;;
+    x86_64)
+	# The outer ssh tunnels through the thyrsus.com NAT/firewall
+	ssh grelber.thyrsus.com 'ssh snark "cd $dir; putrpm"' | unzip -
+	;;
+    *)
+	echo "$arch is not a known architecture."
+esac
+
