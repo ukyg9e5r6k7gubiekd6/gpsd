@@ -5,13 +5,13 @@ the outline headers.  Ctl-C Ctl-a will unfold them again.
 
 ** findbreakage
 
-Starting from a specified SVN revision number, this Python probram runs 
+Starting from a specified SVN revision number, this Python program runs 
 regression tests forward until something fails.  It uses a binary search, so
 convergence should be very rapid.
 
 ** hackcomment
 
-Alters the change comment attached to a sopecified SVN revision.
+Alters the change comment attached to a specified SVN revision.
 
 ** leapsecond.py
 
@@ -48,7 +48,7 @@ installed.
 
 ** www/upload
 
-Referesh the project website.  Doesn't require shipper.
+Refresh the project website.  Doesn't require shipper.
 
 
 

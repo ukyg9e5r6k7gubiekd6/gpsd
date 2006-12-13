@@ -20,6 +20,7 @@ information on the following topics:
 * Corrected badly mangled ZDA description.
 * Corrected DPT titling
 * Common talker IDs
+* Sentences TPR, HFB, TDS, ITS from [GLOBALSAT].
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -900,6 +901,23 @@ producing true heading.
 
 ------------------------------------------------------------------------------
 
+ HFB - Trawl Headrope to Footrope and Bottom
+
+         1  2  3  4 5
+         |  |  |  | |
+ $--HFB,x.x,M,y.y,M*hh<CR><LF>
+
+ Field Number: 
+  1) Distance from headrope to footrope
+  2) Meters (0-100)
+  3) Distance from headrope to bottom
+  4) Meters (0-100)
+  5) Checksum
+
+From [GLOBALSAT].
+
+------------------------------------------------------------------------------
+
  HSC - Heading Steering Command
 
         1   2 3   4  5
@@ -912,6 +930,25 @@ producing true heading.
   3) Heading Degrees, Magnetic
   4) M = Magnetic
   5) Checksum
+
+[GLOBALSAT] describes a completely different meaning for this
+sentence, having to do with water temperature sensors.  It is 
+unclear which is correct.
+
+------------------------------------------------------------------------------
+
+ ITS - Trawl Door Spread 2 Distance
+
+         1  2 3
+         |  | |
+ $--ITS,x.x,M*hh<CR><LF>
+
+ Field Number)
+  1) Second spread distance
+  2) Meters
+  3) Checksum.
+
+From [GLOBALSAT].
 
 ------------------------------------------------------------------------------
 
@@ -971,7 +1008,7 @@ producing true heading.
 
 ------------------------------------------------------------------------------
 
- MTW - Water Temperature
+ MTW - Mean Temperature of Water 
 
         1   2 3
         |   | | 
@@ -1239,6 +1276,40 @@ and produces a single output.
 
 ------------------------------------------------------------------------------
 
+ TDS - Trawl Door Spread Distance
+
+         1  2 3
+         |  | |
+ $--TDS,x.x,M*hh<CR><LF>
+
+ Field Number)
+  1) Distance between trawl doors
+  2) Meters (0-300)
+  3) Checksum.
+
+From [GLOBALSAT].
+
+------------------------------------------------------------------------------
+
+ TPR - Trawl Position Relative Vessael
+
+        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPR,x,M,y,P,z.z,M*hh,<CR><LF>
+
+ Field Number:
+  1) Horizontal range relative to target
+  2) Meters (0-4000)
+  3) Bearing to target relative to vessel heading.  Resolution is one degree.
+  4) Separator
+  5) Depth of trawl below the surface
+  6) Meters (0-2000)
+  7) Checksum
+
+From [GLOBALSAT].
+
+------------------------------------------------------------------------------
+
  TRF - TRANSIT Fix Data
                                                                     13
         1         2      3       4 5        6 7   8   9   10  11  12|
@@ -1340,6 +1411,10 @@ and produces a single output.
   8) K = Kilometers
   9) Checksum
 
+[GLOBALSAT] describes a different format in which the first three
+fields are water-temperature measurements.  It's not clear which 
+is correct.
+
 ------------------------------------------------------------------------------
 
  VLW - Distance Traveled through Water
@@ -1406,6 +1481,9 @@ Note: in some older versions of NMEA 0183, the sentence looks like this:
 The two forms can be distinguished by field 2, which will be
 the fixed text 'T' in the newer form.  The new form appears
 to have been introduced with NMEA 3.01 in 2002.
+
+Some devices, such as those described in [GLOBALSAT], leave the
+magnetic-bearing fields 3 and 4 empty.
 
 ------------------------------------------------------------------------------
 
@@ -1747,3 +1825,7 @@ Sources:
 [SEATALK]
     "SeaTalk Technical Reference"
     http://www.thomasknauf.de/seatalk.htm
+
+[GLOBALSAT]
+    "NMEA (National Marine Electronics Association) 0183 Protocol"
+    http://www.usglobalsat.com/faq_details/NMEA.htm
