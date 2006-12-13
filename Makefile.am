@@ -279,7 +279,8 @@ EXTRA_DIST = \
 	driver_proto.c \
 	logextract \
 	striplog \
-	invert-bitfields.pl
+	configure \
+	Makefile.in
 
 CLEANFILES = packet_names.h floattest *.core $(PYEXTENSIONS)
 

@@ -1,0 +1,42 @@
+This is a list of developer tools included in the SVN source tarball
+but not necessarily shipped in the tarball or binary distributions If you're
+viewing it with Emacs, you can try doing Ctl-C Ctl-t browse through
+the outline headers.  Ctl-C Ctl-a will unfold them again.
+
+** findbreakage
+
+Starting from a specified SVN revision number, this Python probram runs 
+regression tests forward until something fails.  It uses a binary search, so
+convergence should be very rapid.
+
+** hackcomment
+
+Alters the change comment attached to a sopecified SVN revision.
+
+** leapsecond.py
+
+Gets the current leap-second correction forom IERS and/or the USNO.
+
+** logextract
+
+Extract pure NMEA from an emailed gpsd error log. The output can be fed 
+to gpsfake. (This one goes in the tarball.)
+
+** striplog
+
+Strip leading comment lines from NMEA sentence logs.  gpsfake can do
+this itself now, so this script has a lot of dust on it.  (This one
+goes in the tarball.)
+
+** upload
+
+Ship a release.  Not very useful unless you have ESR's shipper tool
+installed.
+
+** www/upload
+
+Referesh the project website.  Doesn't require shipper.
+
+
+
+
