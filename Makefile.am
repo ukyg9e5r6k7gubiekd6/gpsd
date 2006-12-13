@@ -27,8 +27,8 @@ bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) gpsctl gpspipe gpsfla
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
-dist_bin_SCRIPTS = gpsprof gpsfake 
-python_PYTHON = gps.py gpsfake.py
+dist_bin_SCRIPTS = gpsprof gpsfake gpscat
+python_PYTHON = gps.py gpsfake.py gpspacket.so
 PYTHONPAGES = gpsprof.1 gpsfake.1
 endif
 
@@ -142,7 +142,7 @@ BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' <packet_states.h >packet_names.h
 
-libgps_la_SOURCES = $(libgps_c_sources) libgpsmm.cpp packet_states.h
+libgps_la_SOURCES = $(libgps_c_sources) rtcm.h gpsd_config.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
@@ -151,7 +151,7 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 PYEXTENSIONS = gpspacket.so
 
-noinst_SCRIPTS = gpspacket.so
+noinst_SCRIPTS = gpspacket.so setup.py
 
 gpspacket.so: gpspacket.c libgps.la
 	python setup.py build_ext --inplace
@@ -242,7 +242,7 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h rtcm.h gpsd_config.h
+include_HEADERS = gps.h gpsd.h libgpsmm.h 
 
 EXTRA_DIST = \
 	autogen.sh \
@@ -276,9 +276,11 @@ EXTRA_DIST = \
 	gpsd.usermap \
 	valgrind-audit \
 	valgrind-suppressions \
+	gpspacket.c \
 	driver_proto.c \
 	logextract \
 	striplog \
+	setup.py \
 	configure \
 	Makefile.in
 

@@ -91,7 +91,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %defattr(-,root,root,-)
 %doc README INSTALL COPYING
 %attr(755, root, root) %{_sbindir}/gpsd
-%attr(755, root, root) %{_sbindir}/gpsctl
+%attr(755, root, root) %{_bindir}/gpsctl
 %attr(755, root, root) %{_bindir}/gpsprof
 %attr(755, root, root) %{_bindir}/sirfmon
 %{_libdir}/libgps.la
