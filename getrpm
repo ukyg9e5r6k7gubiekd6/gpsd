@@ -28,11 +28,11 @@ echo "RPMs will be built in $dir on the remote machine." 1>&2
 case $1 in
     i386)
 	# The outer ssh tunnels through the thyrsus.com NAT/firewall
-	ssh grelber.thyrsus.com "ssh minx 'cd $dir; ./putrpm i386'" >$local
+	ssh thyrsus.com "ssh minx 'cd $dir; ./putrpm i386'" >$local
 	;;
     x86_64)
 	# The outer ssh tunnels through the thyrsus.com NAT/firewall
-	ssh grelber.thyrsus.com "ssh snark 'cd $dir; ./putrpm x86_64'" >$local
+	ssh thyrsus.com "ssh snark 'cd $dir; ./putrpm x86_64'" >$local
 	;;
     *)
 	echo "$arch is not a known architecture."
