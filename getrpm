@@ -11,8 +11,9 @@
 # to do at least once before using this script. is:
 #	svn checkout http://svn.berlios.de/svnroot/repos/gpsd/trunk
 #
-# The remote machine must have the buildrpms script from
+# The remote machine must have zip(1) and the buildrpms(1) script from
 # ESR's shipper distribution available on your search path.
+# The local machine must have unzip(1) on its search path.
 #
 # Use the first arg to specify the architecture you want to build for;
 # this will dispatch to a suitable host machine.  Use the second arg, 
@@ -39,3 +40,4 @@ case $1 in
 esac
 echo "Zipfile delivered to ${local}."
 unzip $local
+rm $local
