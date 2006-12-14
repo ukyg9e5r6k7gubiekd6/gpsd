@@ -20,7 +20,7 @@ information on the following topics:
 * Corrected badly mangled ZDA description.
 * Corrected DPT titling
 * Common talker IDs
-* Sentences TPR, HFB, TDS, ITS from [GLOBALSAT].
+* Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
 
 Many of these are only emitted by high-end maritime navigation systems.
 Most GPS sensors emit only RMC, GSA, GSV, GLL, and VTG.  Note that the
@@ -914,7 +914,7 @@ producing true heading.
   4) Meters (0-100)
   5) Checksum
 
-From [GLOBALSAT].
+From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
 
 ------------------------------------------------------------------------------
 
@@ -948,7 +948,7 @@ unclear which is correct.
   2) Meters
   3) Checksum.
 
-From [GLOBALSAT].
+From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
 
 ------------------------------------------------------------------------------
 
@@ -1018,6 +1018,9 @@ From [GLOBALSAT].
   1) Degrees
   2) Unit of Measurement, Celcius
   3) Checksum
+
+[GLOBALSAT] lists this as "Meteorological Temperature of Water",
+which is probably incorrect.
 
 ------------------------------------------------------------------------------
 
@@ -1287,11 +1290,50 @@ and produces a single output.
   2) Meters (0-300)
   3) Checksum.
 
-From [GLOBALSAT].
+From [GLOBALSAT].  Shown with a "@II" leader rather than "$GP".
 
 ------------------------------------------------------------------------------
 
- TPR - Trawl Position Relative Vessael
+ TFI - Trawl Filling Indicator
+
+        1 2 3 4
+        | | | |
+ $--TFI,x,y,z*hh<CR><LF>
+
+ Field number:
+  1) Catch sensor #1 (0 = off, 1 = on, 2 = no answer)
+  2) Catch sensor #2 (0 = off, 1 = on, 2 = no answer)
+  3) Catch sensor #3 (0 = off, 1 = on, 2 = no answer)
+
+From [GLOBALSAT].  Shown with a "@II" leader rather than "$GP".
+
+------------------------------------------------------------------------------
+
+ TPC - Trawl Position Cartesian Coordinates
+
+        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPC,x,M,y,P,z.z,M*hh,<CR><LF>
+
+ Field Number:
+  1) Horizontal distance from the vessel center line
+  2) Meters 
+  3) Horizontal distance from the transducer to the trawl along the
+     vessel center line. The value is normally positive assuming the 
+     trawl is located behind the vessel.
+  4) Meters
+  5) Depth of the trawl below the surface
+  6) Meters
+  7) Checksum
+
+From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+This entry actually merges their TPC description with another
+entry labeled (apparently incorrectly) TPT, which differs from the
+TPT shown below.
+
+------------------------------------------------------------------------------
+
+ TPR - Trawl Position Relative Vessel
 
         1 2 3 4  5  6 7
         | | | |  |  | |
@@ -1306,7 +1348,26 @@ From [GLOBALSAT].
   6) Meters (0-2000)
   7) Checksum
 
-From [GLOBALSAT].
+From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+
+------------------------------------------------------------------------------
+
+ TPT - Trawl Position True
+
+        1 2 3 4  5  6 7
+        | | | |  |  | |
+ $--TPT,x,M,y,P,z.z,M*hh,<CR><LF>
+
+ Field Number:
+  1) Horizontal range relative to target
+  2) Meters (0-4000)
+  3) True bearing to taget (ie. relative north).  Resolution is one degree.
+  4) Separator
+  5) Depth of trawl below the surface
+  6) Meters (0-2000)
+  7) Checksum
+
+From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
 
 ------------------------------------------------------------------------------
 
@@ -1343,11 +1404,11 @@ From [GLOBALSAT].
  $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a*hh<CR><LF>
 
  Field Number: 
-  1) Target Number
+  1) Target Number (0-99)
   2) Target Distance
   3) Bearing from own ship
   4) Bearing Units
-  5) Target speed
+  5) Target Speed
   6) Target Course
   7) Course Units
   8) Distance of closest-point-of-approach
@@ -1357,6 +1418,10 @@ From [GLOBALSAT].
  12) Target Status
  13) Reference Target
  14) Checksum
+
+[GLOBALSAT] gives this in a slightly different form, with 14th and
+15th fields conveying time of observation and whether target
+acquisition was automatic or manual.
 
 ------------------------------------------------------------------------------
 
