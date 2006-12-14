@@ -253,6 +253,7 @@ EXTRA_DIST = \
 	AUTHORS \
 	dgpsip-servers \
 	floattest.c \
+	gpsd.php \
 	gpsd.xml \
 	gps.xml \
 	libgpsd.xml \
