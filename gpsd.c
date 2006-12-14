@@ -1233,6 +1233,10 @@ int main(int argc, char *argv[])
 #endif /* RTCM104_SERVICE */
     struct subscriber_t *sub;
 
+#ifdef PPS_ENABLE
+    pthread_mutex_init(&report_mutex, NULL);
+#endif /* PPS_ENABLE */
+
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
 #ifdef RTCM104_SERVICE
