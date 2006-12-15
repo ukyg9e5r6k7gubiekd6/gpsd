@@ -45,6 +45,10 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#ifndef GPSD_USER
+#define GPSD_USER	"nobody"
+#endif
+
 /*
  * Timeout policy.  We can't rely on clients closing connections 
  * correctly, so we need timeouts to tell us when it's OK to 
