@@ -95,6 +95,18 @@
    NAVCOM_RECOGNIZED,	/* found end of the Navcom packet */
 #endif /* NAVCOM_ENABLE */
 
+#ifdef UBX_ENABLE
+   UBX_LEADER_1,        /* first constant leader byte found */
+   UBX_LEADER_2,        /* second constant leader byte found */
+   UBX_CLASS_ID,        /* classid read */
+   UBX_MESSAGE_ID,      /* message id read */
+   UBX_LENGTH_1,        /* first length byte read (le) */
+   UBX_LENGTH_2,        /* second length byte read (le) */
+   UBX_PAYLOAD,         /* payload eating */
+   UBX_CHECKSUM_A,      /* checksum A byte (tcp checksum) */
+   UBX_RECOGNIZED,      /* this is also UBX_CHECKSUM_B */
+#endif
+
 /*
  * Packet formats without checksums start here.  We list them last so
  * that if a format with a conflicting structure *and* a checksum can

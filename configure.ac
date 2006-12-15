@@ -307,6 +307,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for UBX support
+AC_ARG_ENABLE(ubx,
+  AC_HELP_STRING([--enable-ubx],
+                 [enable UBX Protocol support]),
+  [ac_ubx=$enableval], [ac_ubx=no])
+AC_MSG_CHECKING([for UBX support])
+if test x"$ac_ubx" = "xyes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([UBX_ENABLE], 1, [UBX Protocol support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for EverMore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
@@ -594,6 +607,7 @@ echo "iTrax                   : $ac_itrax"
 echo "iTalk                   : $ac_italk"
 echo "Navcom                  : $ac_navcom"
 echo "Garmin                  : $ac_garmin"
+echo "UBX                     : $ac_ubx"
 echo "True North              : $ac_tnt"
 echo "EverMore                : $ac_evermore"
 echo "RTCM104 support         : $ac_rtcm104"
@@ -622,6 +636,7 @@ if test	x"$ac_nmea" = "xno" -a \
 	x"$ac_italk" = "xno" -a \
 	x"$ac_navcom" = "xno" -a \
 	x"$ac_garmin" = "xno" -a \
+    x"$ac_ubx" = "xno" -a \
 	x"$ac_evermore" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi

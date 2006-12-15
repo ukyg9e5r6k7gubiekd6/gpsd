@@ -18,7 +18,7 @@
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE	
 #endif
-#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITALK_ENABLE)
+#if defined(ZODIAC_ENABLE) || defined(SIRF_ENABLE) || defined(GARMIN_ENABLE) || defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(ITALK_ENABLE) || defined(UBX_ENABLE)
 #define BINARY_ENABLE	
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
@@ -71,6 +71,7 @@ struct gps_packet_t {
 #define RTCM_PACKET	7
 #define GARMIN_PACKET	8
 #define NAVCOM_PACKET	9
+#define UBX_PACKET	10
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -297,6 +298,26 @@ struct gps_device_t {
 	    unsigned int Zv[ZODIAC_CHANNELS];	/* signal values (0-7) */
 	} zodiac;
 #endif /* ZODIAC_ENABLE */
+#ifdef UBX_ENABLE
+#if 0
+    struct {
+        /* XXX insert user fields here */
+    } ubx;
+#endif
+#endif /* UBX_ENABLE */
+	/*
+	 * This is not conditionalized on RTCM104_ENABLE because we need to
+	 * be able to build rtcmdecode even when RTCM support is not
+	 * configured in the daemon.  It doesn't take up extra space.
+	 */
+	struct {
+	    /* ISGPS200 decoding */
+	    bool            locked;
+	    int             curr_offset;
+	    isgps30bits_t   curr_word;
+	    isgps30bits_t   buf[RTCM_WORDS_MAX];
+	    unsigned int    bufindex;
+	} isgps;
 #endif /* BINARY_ENABLE */
     } driver;
 };

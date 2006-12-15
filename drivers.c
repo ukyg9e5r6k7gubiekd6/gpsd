@@ -14,6 +14,7 @@
 #include "gpsd.h"
 
 extern struct gps_type_t zodiac_binary;
+extern struct gps_type_t ubx_binary;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -860,6 +861,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NAVCOM_ENABLE
     &navcom_binary,
 #endif /* NAVCOM_ENABLE */
+#ifdef UBX_ENABLE
+    &ubx_binary,
+#endif /* UBX_ENABLE */
 #ifdef GARMIN_ENABLE
     &garmin_usb_binary,
     &garmin_ser_binary,

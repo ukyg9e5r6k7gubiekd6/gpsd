@@ -658,6 +658,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "Zodiac binary");
 		break;
 #endif /* ZODIAC_ENABLE */
+#ifdef UBX_ENABLE
+	    case UBX_PACKET:
+		(void)gpsd_switch_driver(session, "uBlox UBX");
+		break;
+#endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
  	    case NAVCOM_PACKET:
          	(void)gpsd_switch_driver(session, "Navcom binary");

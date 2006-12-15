@@ -111,6 +111,7 @@ libgps_c_sources = \
 	serial.c \
 	drivers.c \
 	zodiac.c \
+	ubx.c \
 	garmin.c \
 	tsip.c \
 	evermore.c \
@@ -243,7 +244,7 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h 
+include_HEADERS = gps.h gpsd.h libgpsmm.h ubx.h
 
 EXTRA_DIST = \
 	autogen.sh \

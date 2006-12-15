@@ -138,6 +138,12 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* ZODIAC_ENABLE */
+#ifdef UBX_ENABLE
+        if (c == 0xb5) {
+            lexer->state = UBX_LEADER_1;
+            break;
+        }
+#endif /* UBX_ENABLE */
 #ifdef ITALK_ENABLE
 	if (c == '<') {
 	    lexer->state = ITALK_LEADER_1;
@@ -542,6 +548,48 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = ZODIAC_RECOGNIZED;
 	break;
 #endif /* ZODIAC_ENABLE */
+#ifdef UBX_ENABLE
+    case UBX_LEADER_1:
+        if (c == 0x62)
+            lexer->state = UBX_LEADER_2;
+        else
+            lexer->state = GROUND_STATE;
+        break;
+    case UBX_LEADER_2:
+        lexer->state = UBX_CLASS_ID;
+        break;
+    case UBX_CLASS_ID:
+        lexer->state = UBX_MESSAGE_ID;
+        break;
+    case UBX_MESSAGE_ID:
+        lexer->length = (size_t)c;
+        lexer->state = UBX_LENGTH_1;
+        break;
+    case UBX_LENGTH_1:
+        lexer->length += (c << 8);
+	if (lexer->length <= MAX_PACKET_LENGTH)
+            lexer->state = UBX_LENGTH_2;
+	else
+	    lexer->state = GROUND_STATE;
+        break;
+    case UBX_LENGTH_2:
+        lexer->state = UBX_PAYLOAD;
+        break;
+    case UBX_PAYLOAD:
+	if (--lexer->length == 0)
+	    lexer->state = UBX_CHECKSUM_A;
+	/* else stay in payload state */
+        break;
+    case UBX_CHECKSUM_A:
+        lexer->state = UBX_RECOGNIZED;
+        break;
+    case UBX_RECOGNIZED:
+        if (c == 0xb5)
+            lexer->state = UBX_LEADER_1;
+        else
+            lexer->state = GROUND_STATE;
+        break;
+#endif /* UBX_ENABLE */
 #ifdef EVERMORE_ENABLE
     case EVERMORE_LEADER_1:
 	if (c == STX)
@@ -954,6 +1002,36 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
             break;
 	}
 #endif /* ZODIAC_ENABLE */
+#ifdef UBX_ENABLE
+	else if (lexer->state == UBX_RECOGNIZED) {
+	    /* UBX use a TCP like checksum */
+	    short n, len;
+	    unsigned char ck_a = 0;
+	    unsigned char ck_b = 0;
+	    len = lexer->inbufptr - lexer->inbuffer;
+	    gpsd_report(LOG_IO, "len: %d\n", len);
+	    for (n = 2; n < (len-2); n++) {
+		ck_a += lexer->inbuffer[n];
+		ck_b += ck_a;
+	    }
+	    if (ck_a == lexer->inbuffer[len-2] &&
+		ck_b == lexer->inbuffer[len-1])
+		packet_accept(lexer, UBX_PACKET);
+	    else {
+		gpsd_report(LOG_IO,
+		    "UBX checksum 0x%02hhx%02hhx over length %hd,"\
+		    " expecting 0x%02hhx%02hhx\n",
+			ck_a, 
+			ck_b, 
+			len, 
+			lexer->inbuffer[len-2], 
+			lexer->inbuffer[len-1]);
+		lexer->state = GROUND_STATE;
+	    }
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* UBX_ENABLE */
 #ifdef EVERMORE_ENABLE
 	else if (lexer->state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
