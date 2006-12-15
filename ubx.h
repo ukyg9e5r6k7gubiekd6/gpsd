@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 
 #define UBX_MESSAGE_BASE_SIZE 6
 #define UBX_MESSAGE_DATA_OFFSET UBX_MESSAGE_BASE_SIZE
