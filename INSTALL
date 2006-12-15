@@ -1,10 +1,10 @@
 Here are the steps for installing gpsd and verifying its performance:
 
-0. Prerequisites you will need to build the entire suite include C++,
-pthreads, and Python (used for the test tools, but not for
-the daemon itself).  Support for DBUS is optional.  The ncurses
-library is also optional; if you have it, the build will generate
-two additional test clients.
+0. Prerequisites you will need to build the entire suite include C,
+C++ and pthreads. Python is optional; it's used for the test tools, but
+not for the daemon itself.  Support for DBUS is optional.  The ncurses
+library is also optional; if you have it, the build will generate two
+additional test clients.
 
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
@@ -23,10 +23,17 @@ even after it drops root privileges.  If you are running Fedora you
 can skip this step, as the stock configuration has the right properties.
 
 gpsd requires two things: (1) that GPS devices have group write
-enabled, and (2) all of them are owned by the same group.
+enabled, and (2) all of them are owned by the same group.  It does
+not actually matter what group this is, as gpsd will determine that
+on startup by looking at a prototypical device (probably /dev/ttyS0).
+
 On a Linux with udev, check the files in /etc/udev/permissions.d to
 ensure that /dev/tty* devices are all created with the same group 
 and with 0660 permissions.
+
+When gpsd drops privileges, its default is to set uid to 'nobody'
+and group to the owning group of the prototype device.  There 
+is a configure option to change from 'nobody' to a specfied username.
 
 If your system has the Linux hotplug facility installed you can skip
 the permission-setting part; the hotplug scripts will force the
