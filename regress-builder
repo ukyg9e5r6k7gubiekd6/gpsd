@@ -1,12 +1,20 @@
 #!/bin/env python
-#
-# regress-builder 
-#
-# Test-compile gpsd with each of every possible combination of device-driver 
-# options, excluding stub drivers we don't support yet.  This does a good
-# job of catching bugs after driver API changes.
-#
-import os, sys, random, getopt
+"""
+usage: regress-builder [-r limit] [-s seed]
+
+Test-compile gpsd with each of every possible combination of device-driver 
+options, excluding stub drivers we don't support yet.  This does a good
+job of catching bugs after driver API changes.
+
+The -r option sets Monte Carlo mode (random-walk through configuration space)
+and limits the number of tests.  The -s, if given, sets a seed; the default is
+to seed from the system time.
+
+If no options are given, the script prerforms a sequential test of all
+possibilities.  This requires time on the order of 2 ** n where n is
+rgw count of options.
+"""
+import os, sys, random, getopt, time
 
 #
 # The weights are to give the driver probability mass in the Monte Carlo
@@ -30,11 +38,11 @@ driver_weights = {
 }
 driver_names = driver_weights.keys()
 driver_names.sort()
-setsize = 2 ** len(driver_weights.keys())
+cyclesize = 2 ** len(driver_weights.keys())
 
 def Sequential():
     "Generate sequential test vector for exhautive search."
-    for i in xrange(setsize):
+    for i in xrange(cyclesize):
         yield i
     return
 
@@ -44,13 +52,13 @@ def MonteCarlo(seed):
     # be relatively prime to any power of two and thus be sufficient to step
     # around the cycle hitting each number exactly once. We'd like adjacent
     # stops to have a large distance from each other.  Number theory says the
-    # best way to do this is to choose a modulus close to setsize / phi,
+    # best way to do this is to choose a modulus close to cyclesize / phi,
     # where phi is the golden ratio (1 + 5**0.5)/2.
-    modulus = int(setsize / 1.618033980)
+    modulus = int(cyclesize / 1.618033980)
     if modulus % 2 == 0:
         modulus += 1
-    for i in xrange(setsize):
-        yield (seed + i * modulus) % setsize
+    for i in xrange(cyclesize):
+        yield (seed + i * modulus) % cyclesize
     return
 
 class TestFactory:
@@ -96,7 +104,7 @@ env	X_LIBS="" \\
     def filter(self, vector):
         "Tell us whether this combination needs to be tested."
         return True	# Currently no filtering
-    def run(self, generator, limit=setsize):
+    def run(self, generator, limit=cyclesize):
         for n in generator:
             if limit == 0:
                 return
@@ -112,15 +120,16 @@ if __name__ == '__main__':
         print "regress-builder: " + str(msg)
         raise SystemExit, 1
     montecarlo = False
-    limit = setsize
-    seed = 0
+    limit = cyclesize
+    seed = int(time.time())
     for (switch, val) in options:
         if switch == '-r':
             limit = val
         elif switch == '-s':
             seed = val
     if montecarlo:
-        print "Foo!"
+        print "Monte Carlo test seeded with %d" % seed
         TestFactory().run(MonteCarlo(seed), limit)
     else:
+        print "Sequential compilation test"
         TestFactory().run(Sequential())
