@@ -85,7 +85,7 @@ AC_CHECK_LIB(m, rint, LIBM="-lm")
 AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
-AC_CHECK_LIB(pthread, main, LIBPTHREAD="-lpthread")
+AC_CHECK_LIB(pthread, main, LIBPTHREAD="-lpthread", ac_pthreads='yes', ac_pthreads='no')
 AC_SUBST(LIBPTHREAD)
 
 AH_VERBATIM([_GNU_SOURCE],
@@ -401,7 +401,7 @@ AC_ARG_ENABLE(pps,
                  [disable PPS time syncing support]),
   [ac_pps=$enableval], [ac_pps=yes])
 AC_MSG_CHECKING([for PPS time syncing support])
-if test x"$ac_pps" = "xyes"; then
+if test x"$ac_pthreads" = xyes -a x"$ac_pps" = "xyes"; then
     AC_MSG_RESULT([yes])
 	AC_DEFINE([PPS_ENABLE], 1, [PPS time syncing support])
 else
