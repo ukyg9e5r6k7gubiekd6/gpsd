@@ -616,6 +616,7 @@ echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac  
 echo "Fixed port speed        : $ac_baud"
+echo "Priv-drop user          : $ac_user"
 echo "Enable shared libraries : $enable_shared"
 echo "Enable DBUS support     : $ac_dbus"
 echo "Enable X11 support      : $ac_x"
@@ -636,7 +637,7 @@ if test	x"$ac_nmea" = "xno" -a \
 	x"$ac_italk" = "xno" -a \
 	x"$ac_navcom" = "xno" -a \
 	x"$ac_garmin" = "xno" -a \
-    x"$ac_ubx" = "xno" -a \
+	x"$ac_ubx" = "xno" -a \
 	x"$ac_evermore" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
