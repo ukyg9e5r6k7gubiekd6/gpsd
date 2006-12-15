@@ -23,13 +23,17 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) gpsctl gpspipe gpsflash cgps cgpxlogger sirfmon
+
+if HAVE_NCURSES
+CURSESPROGS = cgps sirfmon
+endif
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger 
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py gpspacket.so
-PYTHONPAGES = gpsprof.1 gpsfake.1
+PYTHONPAGES = gpsprof.1 gpsfake.1 gpscat.1
 endif
 
 #
@@ -194,7 +198,6 @@ man_MANS = \
 	$(RTCM104PAGES) \
 	$(PYTHONPAGES) \
 	gpsctl.1 \
-	gpscat.1 \
 	gpspipe.1 \
 	gpsflash.1 \
 	rtcm-104.5 \

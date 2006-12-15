@@ -160,6 +160,9 @@ AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
 fi
 dnl End of X11 checks
 
+AC_CHECK_LIB(ncurses, initscr, ac_ncurses='yes', ac_ncurses='no')
+AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_curses" = xyes])
+
 dnl check for NMEA support
 AC_ARG_ENABLE(nmea,
   AC_HELP_STRING([--disable-nmea],
@@ -627,6 +630,7 @@ echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Squelch logging/hexdump : $ac_squelch"
+echo "Build ncurses programs  : $ac_ncurses" 
 echo "------------------------------------------"
 
 if test "xdummy" = "xdummy" -a \

@@ -1,5 +1,11 @@
 Here are the steps for installing gpsd and verifying its performance:
 
+0. Prerequisites you will need to build the entire suite include C++,
+pthreads, and Python (used for the test tools, but not for
+the daemon itself).  Support for DBUS is optional.  The ncurses
+library is also optional; if you have it, the build will generate
+two additional test clients.
+
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
 
