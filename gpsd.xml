@@ -857,10 +857,10 @@ will not attempt to document this interface here.  Read the
 <para><application>gpsd</application> must start up as root in order
 to open the NTPD shared-memory segment, open its logfile, and create
 its local control socket.  Before doing any processing of GPS data, it
-tries to drop root privileges by setting its UID to "nobody" and its
-group ID to the group of the initial GPS passed on the command line
-&mdash; or, if that device doesn't exist, to the group of
-<filename>/dev/ttyS0</filename>.</para>
+tries to drop root privileges by setting its UID to "nobody" (or another
+userid as set by configure) and its group ID to the group of the initial
+GPS passed on the command line &mdash; or, if that device doesn't exist,
+to the group of <filename>/dev/ttyS0</filename>.</para>
 
 <para>Privilege-dropping is a hedge against the possibility that
 carefully crafted data, either presented from a client socket or from

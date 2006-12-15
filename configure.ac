@@ -405,6 +405,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for privilege revokation user at compile-time
+AC_ARG_ENABLE(gpsd-user,
+  AC_HELP_STRING([--enable-gpsd-user=username],
+                 [GPSD privilege revokation user]),
+  [ac_user=$enableval], [ac_user=nobody])
+AC_MSG_CHECKING([privilege revokation user])
+if test x"$ac_user" != "xnobody"; then
+    AC_MSG_RESULT([$ac_user])
+	AC_DEFINE_UNQUOTED([GPSD_USER], "$ac_user", [GPSD privilege revokation user])
+else
+  AC_MSG_RESULT([nobody])
+fi
+
 dnl check for port speed fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
   AC_HELP_STRING([--enable-fixed-port-speed=nnn],

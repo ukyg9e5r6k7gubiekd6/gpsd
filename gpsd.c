@@ -1374,17 +1374,18 @@ int main(int argc, char *argv[])
 		(void)chmod(argv[i], stb.st_mode|S_IRGRP|S_IWGRP);
 	/*
 	 * Drop privileges.  Up to now we've been running as root.  Instead,
-	 * set the user ID to 'nobody' and the group ID to the owning group 
-	 * of a prototypical TTY device.  This limits the scope of any
-	 * compromises in the code.  It requires that all GPS devices have
-	 * their group read/write permissions set.
+	 * set the user ID to 'nobody' (or whatever the --enable-gpsd-user
+	 * is) and the group ID to the owning group of a prototypical TTY
+	 * device. This limits the scope of any compromises in the code.
+	 * It requires that all GPS devices have their group read/write
+	 * permissions set.
 	 */
 	if ((optind<argc&&stat(argv[optind], &stb)==0)||stat(PROTO_TTY,&stb)==0) {
 	    gpsd_report(LOG_PROG, "changing to group %d\n", stb.st_gid);
 	    if (setgid(stb.st_gid) != 0)
 		gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n", strerror(errno));
 	}
-	pw = getpwnam("nobody");
+	pw = getpwnam( GPSD_USER );
 	if (pw)
 	    (void)seteuid(pw->pw_uid);
     }

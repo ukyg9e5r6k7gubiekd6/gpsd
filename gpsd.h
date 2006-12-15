@@ -129,9 +129,6 @@ extern void rtcm_output_magnavox(isgps30bits_t *, FILE *);
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
-/* several places in the code try setuid. put our preferred username here */
-#define GPSD_USER "nobody"
-
 #define NTPSHMSEGS	4		/* number of NTP SHM segments */
 
 /* Some internal capabilities depend on which drivers we're compiling. */
