@@ -96,11 +96,15 @@
 #include <math.h>
 #include <errno.h>
 #include <assert.h>
-
-#include <ncurses.h>
 #include <signal.h>
 
 #include "gpsd_config.h"
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif /* HAVE_NCURSES_H */
+
 #include "gps.h"
 
 static struct gps_data_t *gpsdata;

@@ -34,7 +34,7 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -W
 fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h sys/time.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
+AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h ncurses.h sys/time.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)

@@ -25,7 +25,6 @@
  */
 #include <sys/types.h>
 #include <stdio.h>
-#include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -43,6 +42,11 @@
 #include <stdbool.h>
 
 #include "gpsd_config.h"
+#ifdef HAVE_NCURSES_H
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif /* HAVE_NCURSES_H */
 #include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
 
 #define PUT_ORIGIN	-4
