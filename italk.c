@@ -64,7 +64,7 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet_type == ITALK_PACKET){
+    if (session->packet.type == ITALK_PACKET){
 	st = italk_parse(session, session->outbuffer, session->outbuflen);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
