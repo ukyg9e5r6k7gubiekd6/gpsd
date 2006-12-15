@@ -331,18 +331,18 @@ version:
 # like moving between 32- and 64-bit FPUs can also break regressions.
 gps-regress: gpsd
 	@echo "Testing the daemon..."
-	@for f in test/*.log; do gpsfake -s 57600 -1 -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+	@for f in test/*.log; do gpsfake -s 38400 -1 -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
 	@echo "Testing super-raw mode..."
-	@for f in test/*.log; do gpsfake -s 57600 -1 -b -p -r "r=2" $${f} | ./striplog -1 >test/test1.chk; ./striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
+	@for f in test/*.log; do gpsfake -s 38400 -1 -b -p -r "r=2" $${f} | ./striplog -1 >test/test1.chk; ./striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	@for f in test/*.log; do gpsfake -s 57600 -1 -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
+	@for f in test/*.log; do gpsfake -s 38400 -1 -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
