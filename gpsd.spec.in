@@ -145,7 +145,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Mon Jul 31 2006 Eric S. Raymond <esr@golux.thyrsus.com> - 2.34-1
+* Thu Dec 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.34-1
 - Fix for byte-swapping of Zodiac control messages on big-endian hardware.  
   Disable iTalk by default and note that it needs to be tested.  Command line
   arguments can now be DGPSIP or NTRIP URLs; -d is deprecated. Added udev
