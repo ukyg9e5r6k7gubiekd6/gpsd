@@ -16,10 +16,6 @@ the count of options.
 """
 import os, sys, random, getopt, time
 
-#
-# The weights are to give the driver probability mass in the Monte Carlo
-# test -- we want the most likely combinations tested earliest.
-#
 driver_names = (
     "earthmate",
     "evermore",
