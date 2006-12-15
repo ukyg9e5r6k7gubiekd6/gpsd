@@ -1,72 +1,126 @@
-#!/bin/sh
+#!/bin/env python
+#
+# regress-builder 
 #
 # Test-compile gpsd with each of every possible combination of device-driver 
 # options, excluding stub drivers we don't support yet.  This does a good
 # job of catching bugs after driver API changes.
+#
+import os, sys, random, getopt
 
-mv regress-builder.log regress-builder.log.old
-cp /dev/null regress-builder.log
+#
+# The weights are to give the driver probability mass in the Monte Carlo
+# test -- we want the most likely combinations tested earliest.
+#
+driver_weights = {
+    "earthmate" : 0.25,
+    "evermore"  : 0.50,
+    "fv18"      : 0.50,
+    "garmin"    : 0.80,
+#   "navcom"    : 0,
+    "nmea"      : 0.80,
+    "ntrip"     : 0.25,
+#   "raw"       : 0,
+    "rtcm104"   : 0.25,
+    "sirf"      : 0.80,
+    "tnt"       : 0,
+    "tripmate"  : 0.25,
+    "tsip"      : 0.50,
+#   "ubx":      : 0,
+}
+driver_names = driver_weights.keys()
+driver_names.sort()
+setsize = 2 ** len(driver_weights.keys())
 
-for a in enable disable ; do
-for b in enable disable ; do
-for c in enable disable ; do
-for d in enable disable ; do
-for e in enable disable ; do
-for f in enable disable ; do
-for g in enable disable ; do
-for h in enable disable ; do
-for i in enable disable ; do
-for j in enable disable ; do
-for k in enable disable ; do
-for l in enable disable ; do
+def Sequential():
+    "Generate sequential test vector for exhautive search."
+    for i in xrange(setsize):
+        yield i
+    return
 
-echo -n "`date` " >> regress-builder.log
+def MonteCarlo(seed):
+    "Generate a random shuffle of test vectors for Monte Carlo testing."
+    # All the magic here is in the choice of modulus.  Any odd number will
+    # be relatively prime to any power of two and thus be sufficient to step
+    # around the cycle hitting each number exactly once. We'd like adjacent
+    # stops to have a large distance from each other.  Number theory says the
+    # best way to do this is to choose a modulus close to setsize / phi,
+    # where phi is the golden ratio (1 + 5**0.5)/2.
+    modulus = int(setsize / 1.618033980)
+    if modulus % 2 == 0:
+        modulus += 1
+    for i in xrange(setsize):
+        yield (seed + i * modulus) % setsize
+    return
 
-make -i distclean 2>&1 > /dev/null
-env	X_LIBS="" \
-	CPPFLAGS="-I/usr/local/include " \
-	LDFLAGS=" -L/usr/local/lib -g" \
-	CFLAGS="-g -O2 -W -Wall" \
-./configure --prefix=/home/gpsd --disable-shared \
-	--without-x --enable-python \
-	--disable-itrax \
-	--disable-italk \
- 	--${a}-sirf \
-	--${b}-nmea \
-	--${c}-tsip \
-	--${d}-fv18 \
-	--${e}-tripmate \
-	--${f}-earthmate \
-	--${g}-garmin \
-	--${h}-tnt \
-	--${i}-evermore \
-	--${j}-rtcm104 \
-	--${k}-ntrip \
-	--${l}-raw 2>&1 > /dev/null
+class TestFactory:
+    "Manage compilation tests."
+    Preamble = '''
+env	X_LIBS="" \\
+	CPPFLAGS="-I/usr/local/include " \\
+	LDFLAGS=" -L/usr/local/lib -g" \\
+	CFLAGS="-g -O2 -W -Wall" \\
+./configure --prefix=/home/gpsd --disable-shared \\
+	--without-x --enable-python \\
+	--disable-itrax \\
+	--disable-italk \\
+'''
+    def n2v(self, n):
+        "Number to test-vector"
+        v = [0] * len(driver_weights.keys())
+        i = 0
+        while n > 0:
+            v[i] = n % 2
+            i += 1
+            n = n >> 1
+        return v
+    def test_header(self, vector):
+        hdr = ""
+        for (i, name) in enumerate(driver_names):
+            hdr += "--" + ("disable", "enable")[vector[i]] + "-" + name + " "
+        return hdr[:-1]
+    def make(self, vector):
+        if os.system("make 2>&1 > /dev/null"):
+            print "FAILED:   ", self.test_header(vector) 
+        else:
+            print "SUCCEEDED:", self.test_header(vector) 
+    def configure_build(self, vector):
+        test = TestFactory.Preamble
+        for (i, name) in enumerate(driver_names):
+            test += "        --" + ("disable", "enable")[vector[i]] + "-" + name + " \\\n"
+        test += "\n"
+        if os.system("("+ test + ") >/dev/null"):
+            print "configure FAILED"
+        else:
+            self.make(vector)
+    def filter(self, vector):
+        "Tell us whether this combination needs to be tested."
+        return True	# Currently no filtering
+    def run(self, generator, limit=setsize):
+        for n in generator:
+            if limit == 0:
+                return
+            k = self.n2v(n)
+            if k != 0:		# 0 is never valid and won't configure
+                limit -= 1
+                self.configure_build(k)
 
-if [ $? -ne 0 ] ; then
-	echo "configure FAILED: " >> regress-builder.log
-
-else
-	make 2>&1 > /dev/null
-
-	if [ $? -ne 0 ] ; then
-		echo -n "build FAILED: " >> regress-builder.log
-	else
-		echo -n "build OK: " >> regress-builder.log
-	fi
-fi
-echo ${a}-sirf ${b}-nmea ${c}-tsip ${d}-fv18 ${e}-tripmate ${f}-earthmate ${g}-garmin ${h}-tnt ${i}-evermore ${j}-rtcm104 ${k}-ntrip ${l}-raw >> regress-builder.log
-
-done
-done
-done
-done
-done
-done
-done
-done
-done
-done
-done
-done
+if __name__ == '__main__':
+    try:
+        (options, arguments) = getopt.getopt(sys.argv[1:], "n:r:")
+    except getopt.GetoptError, msg:
+        print "regress-builder: " + str(msg)
+        raise SystemExit, 1
+    montecarlo = False
+    limit = setsize
+    seed = 0
+    for (switch, val) in options:
+        if switch == '-r':
+            limit = val
+        elif switch == '-s':
+            seed = val
+    if montecarlo:
+        print "Foo!"
+        TestFactory().run(MonteCarlo(seed), limit)
+    else:
+        TestFactory().run(Sequential())
