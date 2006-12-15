@@ -128,9 +128,11 @@ if __name__ == '__main__':
     seed = int(time.time())
     for (switch, val) in options:
         if switch == '-r':
-            limit = val
+            montecarlo = True
+            limit = int(val)
         elif switch == '-s':
-            seed = val
+            montecarlo = True
+            seed = int(val)
     if montecarlo:
         print "Monte Carlo test seeded with %d" % seed
         TestFactory().run(MonteCarlo(seed), limit)
