@@ -140,6 +140,10 @@ class TestLoad:
             self.legend = "gpsfake: packet %d: "
             self.idoffset = 3
             self.textual = False
+        elif self.sentences[0][0] == '\x02':
+            self.packtype = "Navcom binary"
+            self.legend = "gpsfake: packet %d"
+            self.textual = False
         elif self.sentences[0][0] == '\x10':
             self.packtype = "TSIP binary"
             self.legend = "gpsfake: packet %d: "
@@ -180,6 +184,14 @@ class TestLoad:
             id = ord(third) | (ord(fourth) << 8)
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\xff\x81" + third + fourth + fifth + sixth + self.logfp.read(2*ndata+6)
+        elif first == '\x02' and second == '\x99':		# Navcom
+            third = self.logfp.read(1)
+	    fourth = self.logfp.read(1)
+            fifth = self.logfp.read(1)
+            sixth = self.logfp.read(1)
+            id = ord(fourth)
+            ndata = ord(fifth) | (ord(sixth) << 8)
+            return "\x02\x99\x66" + fourth + fifth + sixth + self.logfp.read(ndata-2)
         elif first == '\x10':					# TSIP
             packet = first + second
             delcnt = 0

@@ -20,7 +20,7 @@ ssize_t generic_get(struct gps_device_t *session)
     return packet_get(session->gpsdata.gps_fd, &session->packet);
 }
 
-#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE) 
+#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE)  || defined(NAVCOM_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
@@ -55,7 +55,15 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #else
 	return 0;
 #endif /* EVERMORE_ENABLE */
-    } else if (session->packet.type == GARMIN_PACKET) {
+    } else if (session->packet.type == NAVCOM_PACKET) {
+  gpsd_report(LOG_WARN, "Navcom packet seen when NMEA expected.\n");
+#ifdef NAVCOM_ENABLE
+	(void)gpsd_switch_driver(session, "Navcom binary");
+	return navcom_parse(session, session->packet.outbuffer, session->packet.outbuflen);
+#else
+	return 0;
+#endif /* NAVCOM_ENABLE */
+} else if (session->packet.type == GARMIN_PACKET) {
 	gpsd_report(LOG_WARN, "Garmin packet seen when NMEA expected.\n");
 #ifdef GARMIN_ENABLE
 	/* we might never see a trigger, have this as a backstop */
@@ -823,6 +831,7 @@ static struct gps_type_t rtcm104 = {
 extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary;
+extern struct gps_type_t navcom_binary;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
@@ -848,6 +857,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
+#ifdef NAVCOM_ENABLE
+    &navcom_binary,
+#endif /* NAVCOM_ENABLE */
 #ifdef GARMIN_ENABLE
     &garmin_usb_binary,
     &garmin_ser_binary,

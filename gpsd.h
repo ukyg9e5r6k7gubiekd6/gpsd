@@ -70,6 +70,7 @@ struct gps_packet_t {
 #define ITALK_PACKET	6
 #define RTCM_PACKET	7
 #define GARMIN_PACKET	8
+#define NAVCOM_PACKET	9
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -328,6 +329,7 @@ ssize_t pass_rtcm(struct gps_device_t *, char *, size_t);
 
 extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
+extern gps_mask_t navcom_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
 
 extern bool dgnss_url(char *);

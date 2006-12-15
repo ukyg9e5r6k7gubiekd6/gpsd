@@ -144,6 +144,12 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* ITALK_ENABLE */
+#ifdef NAVCOM_ENABLE
+	if (c == 0x02) {
+	    lexer->state = NAVCOM_LEADER_1;
+	    break;
+	}
+#endif /* NAVCOM_ENABLE */
 #ifdef RTCM104_ENABLE
 	if ((isgpsstat = rtcm_decode(lexer, c)) == ISGPS_SYNC) {
 	    lexer->state = RTCM_SYNC_STATE;
@@ -400,6 +406,64 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = EVERMORE_LEADER_2;
 	else
 #endif /* EVERMORE_ENABLE */
+#ifdef NAVCOM_ENABLE
+    case NAVCOM_LEADER_1:
+        if (c == 0x99)
+	    lexer->state = NAVCOM_LEADER_2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NAVCOM_LEADER_2:
+	if (c == 0x66)
+	    lexer->state = NAVCOM_LEADER_3;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NAVCOM_LEADER_3:
+	lexer->state = NAVCOM_ID;
+	break;
+    case NAVCOM_ID:
+	lexer->length = (size_t)c - 4;
+	lexer->state = NAVCOM_LENGTH_1;
+	break;
+    case NAVCOM_LENGTH_1:
+	lexer->length += (c << 8);
+	lexer->state = NAVCOM_LENGTH_2;
+	break;
+    case NAVCOM_LENGTH_2:
+	if (--lexer->length == 0)
+	    lexer->state = NAVCOM_PAYLOAD;
+	break;
+    case NAVCOM_PAYLOAD:
+	{
+            unsigned int n;
+            unsigned char csum = lexer->inbuffer[3];
+            for(n=4; (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1; n++)
+            csum ^= lexer->inbuffer[n];
+            if(csum != c) {
+            gpsd_report(LOG_INF, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
+                    lexer->inbuffer[3], csum, c);
+	    gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
+	                gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
+            lexer->state = GROUND_STATE;
+            break;
+            }
+	}
+	lexer->state = NAVCOM_CSUM;
+	break;
+    case NAVCOM_CSUM:
+	if (c == 0x03)
+	    lexer->state = NAVCOM_RECOGNIZED;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NAVCOM_RECOGNIZED:
+	if (c == 0x02)
+	    lexer->state = NAVCOM_LEADER_1;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+#endif /* NAVCOM_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
@@ -960,6 +1024,14 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
             break;
 	}
 #endif /* ITALK_ENABLE */
+#ifdef NAVCOM_ENABLE
+	else if (lexer->state == NAVCOM_RECOGNIZED) {
+	    /* By the time we got here we know checksum is OK */
+	    packet_accept(lexer, NAVCOM_PACKET);
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* NAVCOM_ENABLE */
 #ifdef RTCM104_ENABLE
 	else if (lexer->state == RTCM_RECOGNIZED) {
 	    /*

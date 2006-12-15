@@ -266,6 +266,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Navcom support
+AC_ARG_ENABLE(navcom,
+  AC_HELP_STRING([--disable-navcom],
+                 [disable Navcom support]),
+  [ac_navcom=$enableval], [ac_navcom=yes])
+AC_MSG_CHECKING([for Navcom support])
+if test x"$ac_navcom" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([NAVCOM_ENABLE], 1, [Navcom support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Garmin support
 AC_ARG_ENABLE(garmin,
   AC_HELP_STRING([--disable-garmin],
@@ -313,7 +326,7 @@ AC_ARG_ENABLE(rtcm104,
                  [disable rtcm104 support]),
   [ac_rtcm104=$enableval], [ac_rtcm104=yes])
 AC_MSG_CHECKING([for rtcm104 support])
-if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_italk" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno"; then
+if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_italk" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
     ac_rtcm104=no
 fi
 if test x"$ac_rtcm104" = "xyes"; then
@@ -566,6 +579,7 @@ echo "Tripmate                : $ac_tripmate"
 echo "Earthmate               : $ac_earthmate"
 echo "iTrax                   : $ac_itrax"
 echo "iTalk                   : $ac_italk"
+echo "Navcom                  : $ac_navcom"
 echo "Garmin                  : $ac_garmin"
 echo "True North              : $ac_tnt"
 echo "EverMore                : $ac_evermore"
@@ -593,6 +607,7 @@ if test	x"$ac_nmea" = "xno" -a \
 	x"$ac_earthmate" = "xno" -a \
 	x"$ac_itrax" = "xno" -a \
 	x"$ac_italk" = "xno" -a \
+	x"$ac_navcom" = "xno" -a \
 	x"$ac_garmin" = "xno" -a \
 	x"$ac_evermore" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)

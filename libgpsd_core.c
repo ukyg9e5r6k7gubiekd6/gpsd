@@ -658,6 +658,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "Zodiac binary");
 		break;
 #endif /* ZODIAC_ENABLE */
+#ifdef NAVCOM_ENABLE
+ 	    case NAVCOM_PACKET:
+         	(void)gpsd_switch_driver(session, "Navcom binary");
+         	break;
+#endif /* NAVCOM_ENABLE */
 #ifdef EVERMORE_ENABLE
 	    case EVERMORE_PACKET:
 		(void)gpsd_switch_driver(session, "EverMore binary");

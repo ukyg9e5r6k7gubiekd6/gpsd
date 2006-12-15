@@ -115,6 +115,7 @@ libgps_c_sources = \
 	tsip.c \
 	evermore.c \
 	italk.c \
+	navcom.c \
 	libgpsd_core.c \
 	subframe.c \
 	ntpshm.c \

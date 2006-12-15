@@ -82,6 +82,19 @@
    ITALK_RECOGNIZED,	/* found end of the iTalk packet */
 #endif /* ITALK_ENABLE */
 
+#ifdef NAVCOM_ENABLE
+   NAVCOM_EXPECTED,	/* expecting Navcom packet */
+   NAVCOM_LEADER_1,	/* saw leading 0x02 */
+   NAVCOM_LEADER_2,	/* saw leading 0x99 */
+   NAVCOM_LEADER_3,	/* saw leading 0x66 */
+   NAVCOM_ID,   	/* saw message ID */
+   NAVCOM_LENGTH_1,	/* saw first byte of Navcom packet length */
+   NAVCOM_LENGTH_2,	/* saw second byte of Navcom packet length */
+   NAVCOM_PAYLOAD,	/* we're in a Navcom payload */
+   NAVCOM_CSUM, 	/* saw checksum */
+   NAVCOM_RECOGNIZED,	/* found end of the Navcom packet */
+#endif /* NAVCOM_ENABLE */
+
 /*
  * Packet formats without checksums start here.  We list them last so
  * that if a format with a conflicting structure *and* a checksum can
