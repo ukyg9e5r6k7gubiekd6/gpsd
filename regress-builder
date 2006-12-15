@@ -103,15 +103,19 @@ env	X_LIBS="" \\
             self.make(vector)
     def filter(self, vector):
         "Tell us whether this combination needs to be tested."
-        return True	# Currently no filtering
+        if vector == [0] *  len(driver_names):
+            return False
+        else:
+            return True
     def run(self, generator, limit=cyclesize):
         for n in generator:
             if limit == 0:
                 return
-            k = self.n2v(n)
-            if k != 0:		# 0 is never valid and won't configure
+            vector = self.n2v(n)
+            if self.filter(vector):
+                self.configure_build(vector)
                 limit -= 1
-                self.configure_build(k)
+        return
 
 if __name__ == '__main__':
     try:
