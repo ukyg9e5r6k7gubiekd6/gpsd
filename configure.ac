@@ -629,7 +629,7 @@ echo "Allow device reconfig   : $ac_reconfigure"
 echo "Squelch logging/hexdump : $ac_squelch"
 echo "------------------------------------------"
 
-if test	
+if test "xdummy" = "xdummy" -a \
     x"$earthmate" = "xno" -a \
     x"$evermore" = "xno" -a \
     x"$fv18" = "xno" -a \
