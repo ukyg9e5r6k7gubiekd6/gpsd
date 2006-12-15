@@ -35,6 +35,11 @@ shipper distribution available on your search path.
 Symbiote for getrpm.  It builds current RPMs and writes them to standard
 output in a zip file.
 
+** regress-builder
+
+This script runs an exhaustive test on combinations of compilation options, 
+looking for ones 
+
 ** striplog
 
 Strip leading comment lines from NMEA sentence logs.  gpsfake can do

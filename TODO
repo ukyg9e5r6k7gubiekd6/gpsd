@@ -31,19 +31,6 @@ it is very likely that changes since 2.28 have fixed this bug.
 
 ** To do:
 
-*** Smarter compile testing framework
-
-Gpsd 2.34 shipped with a script to exhaustively compile test all the
-drivers to check for failures. This took approximately 27 hours to run.
-It would be nice if we could generate the appropriate config.h without
-having to run configure every time, which would cut test time in half;
-very important if we're adding new drivers. It might also be nice to do
-monte-carlo testing: generate a random configuration with 75% chance of
-having SiRF activated, 69% chance of having Garmin, 42% chance of having
-TSIP... and loop until every driver has been compiled N times. This would
-allow for reasonable coverage of compile interactions in a fraction of
-the time to to an exhaustive test.
-
 *** Fix endian/word-size sensitive code
 
 Gpsd 2.34 shows regression test failures under certain circumstances when

@@ -93,14 +93,14 @@ env	X_LIBS="" \\
         if os.system("make 2>&1 > /dev/null"):
             print "FAILED:   ", self.test_header(vector) 
         else:
-            print "SUCCEEDED:", self.test_header(vector) 
+            print "SUCCEEDED:", self.test_header(vector)
     def configure_build(self, vector):
         test = TestFactory.Preamble
         for (i, name) in enumerate(driver_names):
             test += "        --" + ("disable", "enable")[vector[i]] + "-" + name + " \\\n"
         test += "\n"
         if os.system("("+ test + ") >/dev/null"):
-            print "configure FAILED"
+            print "configure FAILED:", self.test_header(vector)
         else:
             self.make(vector)
     def filter(self, vector):
@@ -131,23 +131,24 @@ env	X_LIBS="" \\
         return True
     def run(self, generator, limit=cyclesize):
         starttime = time.time()
-        count = 0
+        included = 0
+        excluded = 0
         for n in generator:
             if limit == 0:
                 return
             vector = self.n2v(n)
             if not self.filter(vector):
                 print "EXCLUDED:", self.test_header(vector)
+                excluded += 1
             else:
                 self.configure_build(vector)
-                count += 1
+                included += 1
                 limit -= 1
         elapsed = time.time() - starttime
         hours = elapsed/3600
         minutes = (elapsed - (hours * 3600)) / 60
         seconds = elapsed - (hours * 3600) - (minutes * 60)
-        print "%d tests in %dh%dm%ds" % (count, hours, minutes, seconds)
-        return
+        print "%d tests, %d excluded, in %dh%dm%ds" % (included, excluded, hours, minutes, seconds)
 
 if __name__ == '__main__':
     try:

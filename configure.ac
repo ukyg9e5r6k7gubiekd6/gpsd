@@ -597,21 +597,23 @@ echo ""
 echo "=========================================="
 echo "$PACKAGE $VERSION"
 echo "------------------------------------------"
-echo "NMEA                    : $ac_nmea"
+dnl When you add a protocol here, don't forget the null-set check below
+echo "Earthmate               : $ac_earthmate"
+echo "EverMore                : $ac_evermore"
 echo "FV-18                   : $ac_fv18"
+echo "Garmin                  : $ac_garmin"
+echo "iTalk                   : $ac_italk"
+echo "iTrax                   : $ac_itrax"
+echo "NMEA                    : $ac_nmea"
+echo "NTRIP support           : $ac_ntrip"
+echo "Navcom                  : $ac_navcom"
+echo "RTCM104 support         : $ac_rtcm104"
 echo "SiRF                    : $ac_sirf"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
-echo "Earthmate               : $ac_earthmate"
-echo "iTrax                   : $ac_itrax"
-echo "iTalk                   : $ac_italk"
-echo "Navcom                  : $ac_navcom"
-echo "Garmin                  : $ac_garmin"
-echo "UBX                     : $ac_ubx"
 echo "True North              : $ac_tnt"
-echo "EverMore                : $ac_evermore"
-echo "RTCM104 support         : $ac_rtcm104"
-echo "NTRIP support           : $ac_ntrip"
+echo "UBX                     : $ac_ubx"
+dnl Below this line are non-protocol switches
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
 echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac  
@@ -627,18 +629,23 @@ echo "Allow device reconfig   : $ac_reconfigure"
 echo "Squelch logging/hexdump : $ac_squelch"
 echo "------------------------------------------"
 
-if test	x"$ac_nmea" = "xno" -a \
-	x"$ac_fv18" = "xno" -a \
-	x"$ac_sirf" = "xno" -a \
-	x"$ac_tsip" = "xno" -a \
-	x"$ac_tripmate" = "xno" -a \
-	x"$ac_earthmate" = "xno" -a \
-	x"$ac_itrax" = "xno" -a \
-	x"$ac_italk" = "xno" -a \
-	x"$ac_navcom" = "xno" -a \
-	x"$ac_garmin" = "xno" -a \
-	x"$ac_ubx" = "xno" -a \
-	x"$ac_evermore" = "xno"; then
+if test	
+    x"$earthmate" = "xno" -a \
+    x"$evermore" = "xno" -a \
+    x"$fv18" = "xno" -a \
+    x"$garmin" = "xno" -a \
+    x"$italk" = "xno" -a \
+    x"$itrax" = "xno" -a \
+    x"$navcom" = "xno" -a \
+    x"$nmea" = "xno" -a \
+    x"$ntrip" = "xno" -a \
+    x"$raw" = "xno" -a \
+    x"$rtcm104" = "xno" -a \
+    x"$sirf" = "xno" -a \
+    x"$tnt" = "xno" -a \
+    x"$tripmate" = "xno" -a \
+    x"$tsip" = "xno" -a \
+    x"$ubx" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
 AC_OUTPUT(Makefile gpsd.spec)
