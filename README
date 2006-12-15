@@ -13,11 +13,11 @@ gpsd is a userland daemon acting as a translator between GPS or
 Loran-C receivers and clients. gpsd listens on port 2947 for clients
 requesting position/time/velocity information.  The receivers are
 expected to generate position information in a well-known format -- as
-NMEA-0183 sentences, SiRF binary, Rockwell binary, or Garmin binary
-format.  gpsd takes this information from the GPS and translates it
-into something uniform and easier to understand for clients.  The
-distribution includes sample clients, application interface libraries,
-and test/profiling tools.
+NMEA-0183 sentences, SiRF binary, Rockwell binary, Garmin binary
+format, and other vendor binary protocols.  gpsd takes this
+information from the GPS and translates it into something uniform and
+easier to understand for clients.  The distribution includes sample
+clients, application interface libraries, and test/profiling tools.
 
 There is a project site for gpsd at <http://gpsd.berlios.de/>.
 Look there for updates, news, and project mailing lists.  See that
@@ -33,8 +33,8 @@ goal is zero configuration; users should never have to tell gpsd how
 to configure itself.  If you can't use RPM, use what you see in the
 specfile as a model.
 
-CREDITS
-=======
+1.X CREDITS
+===========
 
 Remco Treffkorn designed and originated the code.
 
@@ -54,7 +54,16 @@ for the Earthmate.
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
 writing the portion for other GPS receivers.
 
+None of these people are active in 2.X, through Remco de-lurks on the
+mailing list occasionally.
+
+2.X CREDITS
+===========
+
 Eric S. Raymond drastically rewrote this code to clean it up and extend it.
+The 2.X architecture has become significantly different and far more 
+modularized.
+
 His new features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
@@ -91,6 +100,10 @@ His new features include:
    * Support for SiRF binary mode.
    * Support for multiple devices.
    * Other test tools -- gpsfake, gpscat.
+
+Chris Kuethe <ckuethe@mail.berlios.de> maintains the OpenBSD port, shipped
+the 2.34 release, is our SiRF and low-level protocols expert, and does a 
+lot of general hacking and support.
 
 Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol.
 
