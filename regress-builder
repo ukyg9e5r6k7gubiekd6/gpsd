@@ -10,9 +10,9 @@ The -r option sets Monte Carlo mode (random-walk through configuration space)
 and limits the number of tests.  The -s, if given, sets a seed; the default is
 to seed from the system time.
 
-If no options are given, the script prerforms a sequential test of all
+If no options are given, the script performs a sequential test of all
 possibilities.  This requires time on the order of 2 ** n where n is
-rgw count of options.
+the count of options.
 """
 import os, sys, random, getopt, time
 
@@ -25,13 +25,15 @@ driver_weights = {
     "evermore"  : 0.50,
     "fv18"      : 0.50,
     "garmin"    : 0.80,
+#   "italk"     : 0,
+#   "itrax"     : 0,
 #   "navcom"    : 0,
     "nmea"      : 0.80,
     "ntrip"     : 0.25,
 #   "raw"       : 0,
     "rtcm104"   : 0.25,
     "sirf"      : 0.80,
-    "tnt"       : 0,
+#   "tnt"       : 0.25,
     "tripmate"  : 0.25,
     "tsip"      : 0.50,
 #   "ubx":      : 0,
@@ -103,18 +105,48 @@ env	X_LIBS="" \\
             self.make(vector)
     def filter(self, vector):
         "Tell us whether this combination needs to be tested."
+        # No drivers at all won't even configure
         if vector == [0] *  len(driver_names):
             return False
-        else:
-            return True
+        compiled_in = map(lambda e: e[1], filter(lambda e: e[0], zip(vector, driver_names)))
+        def on(name):
+            return name in compiled_in
+        def off(name):
+            return name not in compiled_in
+        # START OF FILTERS
+        #
+        # Some types require NMEA support and shouldn't be built without it.
+        if off("nmea") and (on("fv18") or on("earthmate") or on("tripmate")):
+            return False
+        # Earthmate, FV-18 and TripMate code scopes don't overlap.
+        if on("fv18") + on("earthmate") + on("tripmate") not in (0, 3):
+            return False
+        # SiRF has no overlapping code scopes with the DLE-led protocols
+        # (TSIP, Garmin, Evermore) but the DLE-led protocols have
+        # overlaps in the packet sniffer.
+        if on("sirf") != (on("tsip") or on("garmin") or on("evermore")):
+            return False
+        #
+        # END OF FILTERS
+        return True
     def run(self, generator, limit=cyclesize):
+        starttime = time.time()
+        count = 0
         for n in generator:
             if limit == 0:
                 return
             vector = self.n2v(n)
-            if self.filter(vector):
+            if not self.filter(vector):
+                print "EXCLUDED:", self.test_header(vector)
+            else:
                 self.configure_build(vector)
+                count += 1
                 limit -= 1
+        elapsed = time.time() - starttime
+        hours = elapsed/3600
+        minutes = (elapsed - (hours * 3600)) / 60
+        seconds = elapsed - (hours * 3600) - (minutes * 60)
+        print "%d tests in %dh%dm%ds" % (count, hours, minutes, seconds)
         return
 
 if __name__ == '__main__':
