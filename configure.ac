@@ -639,7 +639,6 @@ if test "xdummy" = "xdummy" -a \
     x"$navcom" = "xno" -a \
     x"$nmea" = "xno" -a \
     x"$ntrip" = "xno" -a \
-    x"$raw" = "xno" -a \
     x"$rtcm104" = "xno" -a \
     x"$sirf" = "xno" -a \
     x"$tnt" = "xno" -a \

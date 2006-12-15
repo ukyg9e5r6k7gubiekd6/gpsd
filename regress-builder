@@ -20,30 +20,27 @@ import os, sys, random, getopt, time
 # The weights are to give the driver probability mass in the Monte Carlo
 # test -- we want the most likely combinations tested earliest.
 #
-driver_weights = {
-    "earthmate" : 0.25,
-    "evermore"  : 0.50,
-    "fv18"      : 0.50,
-    "garmin"    : 0.80,
-#   "italk"     : 0,
-#   "itrax"     : 0,
-#   "navcom"    : 0,
-    "nmea"      : 0.80,
-    "ntrip"     : 0.25,
-#   "raw"       : 0,
-    "rtcm104"   : 0.25,
-    "sirf"      : 0.80,
-#   "tnt"       : 0.25,
-    "tripmate"  : 0.25,
-    "tsip"      : 0.50,
-#   "ubx":      : 0,
+driver_names = (
+    "earthmate",
+    "evermore",
+    "fv18",
+    "garmin",
+#   "italk",
+#   "itrax",
+#   "navcom",
+    "nmea",
+    "ntrip",
+    "rtcm104",
+    "sirf",
+#   "tnt",
+    "tripmate",
+    "tsip",
+#   "ubx",
 }
-driver_names = driver_weights.keys()
-driver_names.sort()
-cyclesize = 2 ** len(driver_weights.keys())
+cyclesize = 2 ** len(driver_names)
 
-def Sequential():
-    "Generate sequential test vector for exhautive search."
+def Sequential(,
+    "Generate sequential test vectors for exhautive search."
     for i in xrange(cyclesize):
         yield i
     return
@@ -130,6 +127,11 @@ env	X_LIBS="" \\
         # END OF FILTERS
         return True
     def run(self, generator, limit=cyclesize):
+        expect = 0
+        for i in range(cyclesize):
+            if self.filter(self.n2v(i)):
+                expect += 1
+        print "# Expect %d of %d tests." % (expect, cyclesize)
         starttime = time.time()
         included = 0
         excluded = 0
@@ -144,7 +146,7 @@ env	X_LIBS="" \\
                 self.configure_build(vector)
                 included += 1
                 limit -= 1
-        elapsed = time.time() - starttime
+        elapsed = int(time.time() - starttime)
         hours = elapsed/3600
         minutes = (elapsed - (hours * 3600)) / 60
         seconds = elapsed - (hours * 3600) - (minutes * 60)
