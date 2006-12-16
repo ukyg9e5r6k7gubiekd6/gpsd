@@ -14,7 +14,7 @@ Loran-C receivers and clients. gpsd listens on port 2947 for clients
 requesting position/time/velocity information.  The receivers are
 expected to generate position information in a well-known format -- as
 NMEA-0183 sentences, SiRF binary, Rockwell binary, Garmin binary
-format, and other vendor binary protocols.  gpsd takes this
+format, or other vendor binary protocols.  gpsd takes this
 information from the GPS and translates it into something uniform and
 easier to understand for clients.  The distribution includes sample
 clients, application interface libraries, and test/profiling tools.
