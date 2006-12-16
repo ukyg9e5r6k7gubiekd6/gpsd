@@ -1,11 +1,19 @@
 Here are the steps for installing gpsd and verifying its performance:
 
-0. Prerequisites you will need to build the entire suite include C and
-C++.  The pthreads library is optional, needed if you want support
-for PPS timekeeping on serial GPSes. Python is optional; it's used for
-the test tools, but not for the daemon itself.  Support for DBUS is
-optional.  The ncurses library is also optional; if you have it, the
-build will generate two additional test clients.
+0. The only prerequisites you will absolutely need to build the suite
+are C and C++ compilers: C for the gpsd daemon itself and its client C
+library, C++ for the C++ client-library wrapper.  Having the following
+optional components on your system will enable various additional
+capabilities and extensions:
+
+pthreads library       -> support for PPS timekeeping on serial GPSes
+DBUS                   -> gpsd will issue DBUS notifications 
+X windows + lesstif    -> two test clients depend on this
+ncurses                -> two more test clients depend on this
+Python                 -> most of the test and profiling tools are in Python
+
+The build degrades gracefully in the absence of any of these; you should
+be able to tell from configure messages which extensions you will get.
 
 1. Start by making sure you can get data from your GPS, otherwise the later
 steps will be very frustrating.  In this command
