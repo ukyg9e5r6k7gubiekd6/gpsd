@@ -42,7 +42,11 @@ You will need to have gpsd installed for it to work.
 %package -n gpsd-clients
 Summary: Clients for gpsd with an X interface.
 Group: Applications/System
-BuildRequires: lesstif-devel, libXaw-devel
+BuildRequires: lesstif-devel
+#############################################################################
+#  libXaw-devel was repackaged for FC6; on FC<6 this package is not required #
+#############################################################################
+BuildRequires: libXaw-devel
 
 %description -n gpsd-clients
 xgps is a simple test client for gpsd with an X interface. It displays
@@ -60,8 +64,15 @@ can run on a serial terminal or terminal emulator.
 %setup -q
 
 %build
+###########################################################################
+#                                                                         #
+#  Append configure options to the ./autogen.sh script command line       #
+#  Examples:                                                              #
+#      ./autogen.sh --disable-earthmate                                   #
+#      ./autogen.sh --disable-reconfigure                                 #
+#                                                                         #
+###########################################################################
 ./autogen.sh
-%configure
 make -e CFLAGS=-D_GNU_SOURCE %{?_smp_mflags}
 
 %install

@@ -247,7 +247,8 @@ gpsflash.1: gpsflash.xml
 
 endif
 
-include_HEADERS = gps.h gpsd.h libgpsmm.h ubx.h
+noinst_HEADERS = ubx.h
+include_HEADERS = gps.h gpsd.h libgpsmm.h
 
 EXTRA_DIST = \
 	autogen.sh \

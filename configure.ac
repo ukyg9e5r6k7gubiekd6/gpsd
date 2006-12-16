@@ -161,7 +161,7 @@ fi
 dnl End of X11 checks
 
 AC_CHECK_LIB(ncurses, initscr, ac_ncurses='yes', ac_ncurses='no')
-AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_curses" = xyes])
+AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = xyes])
 
 dnl check for NMEA support
 AC_ARG_ENABLE(nmea,
