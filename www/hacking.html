@@ -129,6 +129,7 @@ source distribution.</p>
 <li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
 <li><a href="#subsecond">Subsecond polling</a></li>
 </ol>
+<li><a href='#release'>Release Checklist</a>
 </ol>
 
 <h1 id="goals">Goals and philosophy of the project</h1>
@@ -1389,8 +1390,59 @@ second. Foo!"</p>
 <p>So subsecond polling would be a blind alley for all SiRF devices
 and all NMEA devices. That's well over 90% of cases and renders it
 not worth doing.</p>
+
+<h1 id='release'>Release Checklist</h1>
+
+<p>This is a reminder for release engineers preparing to ship a public
+<code>gpsd</code> version.  Release requires the following steps in
+the following order:</p>
+
+<dl>
+<dt>1. Run the full regression tests and other checks</dt>
+<dd>If it doesn't pass regressions, it isn't ready to ship. This is
+the time to run valgrind-audit and 'make splint' as well and check
+that those reports are clean.</dd>
+
+<dt>2. Issue the pre-release heads-up</dt>
+<dd>About 48 hours before release, announce that it's coming so people
+will have a day or so to get their urgent fixes in.</dd>
+
+<dt>3. Check that the version number is correct</dt>
+<dd>It may need to be modified in configure.ac, and another autogen.sh
+done.  Make sure the 'dev' suffix is gone.</dd>
+
+<dt>4. Announce on gpsd-dev</dt>
+<dd>Announce that release is imminent and commits should be held off until
+the release has been shipped and tagged.</dd>
+
+<dt>5. Update the specfile changelog</dt>
+<dd>Make sure the topmost entry in the changelog portion of
+gpsd.spec.in is up-to-date and properly timestamped.</dd>
+
+<dt>6. Call getrpms as needed</dt>
+<dd>Do this to generate RPMS for whatever architectures and distros 
+we're supporrting directly.</dd>
+
+<dt>7. Ship to Berlios</dt>
+<dd>Upload the tarball and RPMs to berlios.de</dd>
+
+<dt>8. Tag the release in SVN</dt>
+<dd>Doing 'make svn-tag' should accomplish this</dd>
+
+<dt>9. Bump the release number</dt>
+<dd>Bump the release number in configure.ac, adding a 'dev' suffix
+so tarball instances pulled from the repo will be clearly
+distinguishable from the next public release.</dd>
+
+<dt>10. Announce the release</dt>
+<dd>Announce the release, and the resumption of regular commits, on
+the mailing lists.</dd>
+
+</dl>
+
+
 </div>
-<hr/>
-<script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+<hr/> <script language="JavaScript" src="datestamp.js"
+type='text/javascript'></script>
 </body>
 </html>

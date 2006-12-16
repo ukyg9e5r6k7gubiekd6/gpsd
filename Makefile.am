@@ -324,6 +324,14 @@ splint:
 
 version:
 	@echo $(VERSION)
+#
+# This is how to tag a release for the SVN repository.
+# It requires developer access verified via ssh.
+#
+REPO=http://svn.berlios.de/svnroot/repos/gpsd
+svn-tag:
+	svn copy $(REPO)/trunk $(REPO)/tags/release-$(VERSION) \
+		-m "Tagged for external release $(VERSION)"
 
 #
 # Regression tests begin here
