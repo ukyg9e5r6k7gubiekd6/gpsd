@@ -549,6 +549,7 @@ int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
     return gps_poll(gpsdata);
 }
 
+#ifdef HAVE_LIBPTHREAD
 static void *poll_gpsd(void *args) 
 /* helper for the thread launcher */
 {
@@ -600,6 +601,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 	(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
     return res;
 }
+#endif /* HAVE_LIBPTHREAD */
 
 #ifdef TESTMAIN
 /*

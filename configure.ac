@@ -85,7 +85,9 @@ AC_CHECK_LIB(m, rint, LIBM="-lm")
 AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
-AC_CHECK_LIB(pthread, pthread_setcancelstate, LIBPTHREAD="-lpthread")
+AC_CHECK_LIB(pthread, pthread_setcancelstate, 
+	[LIBPTHREAD="-lpthread"
+	AC_DEFINE([HAVE_LIBPTHREAD], [], [pthread libraries are present])])
 AC_SUBST(LIBPTHREAD)
 
 AH_VERBATIM([_GNU_SOURCE],
