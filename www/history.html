@@ -95,11 +95,12 @@ href='http://www.navsys.org/navsys/'>NavSys</a> project.  This
 diverged from the gpsdrive fork in 2002.  The author, Amaury Jaqcquot,
 is now on the gpsd list and ngpsd has been officially retired.</p>
 
-<p>There is yet another fork of gpsd written by Thomas Hargrove and called
-<a href="http://thomashargrove.com/tgpsd/">tgpsd</a>.  It's written in
-C++.  The protocol it speaks is almost a proper subset of that of
-gpsd; it has the same PDAVMSQ commands and an 'I' command that can query
-the azimuth/elevation/signal-strength of an individual satellite.</p>
+<p>Yet another fork of gpsd was moved into C++ by Thomas Hargrove and called
+<code>tgpsd</a>. The protocol it speaks was almost a proper subset of that of
+gpsd, with PDAVMSQ commands and an 'I' command that could query
+the azimuth/elevation/signal-strength of an individual satellite. As
+of December 2006 the <code>tgpsd</a> project page has dropped off the 
+net.</p>
 
 <p>In August 2004, Eric Raymond (yes, <em><a
 href='http://www.catb.org/~esr/'>that</a></em> Eric Raymond) tripped
@@ -121,13 +122,17 @@ cooperation of all three of the 1.x maintainers.  (The main reason
 for that choice of hosting site was that it offered Subversion, which
 Eric and the 1.x developers were all interested in experimenting with.)</p>
 
-<p>Fritz Ganter agreed to unfork the gpsdrive version of gpsd in early
-2005, but as of December 2006 this hasn't actually happened yet. </p>
+<p>Fritz Ganter agreed to unfork the gpsdrive version of
+<code>gpsd</code> in early 2005, but as of December 2006 this hasn't
+actually happened yet. This may have something to do with the fact
+that gpsdrive releases have been very infrequent since; the last
+stable one was issued in March 2004.</p>
 
-<p>In the year between June 2005 and June 2006 the project went from
-being mostly a solo effort by Eric to attracting a flourishing
-community of developers. Prominent among them are Chris Kuethe and
-Gary Miller, who were given release authority in October 2006.</p>
+<p>In the year between June 2005 and June 2006 the <code>gpsd</code>
+project went from being mostly a solo effort by Eric to attracting a
+flourishing community of developers. Prominent among them are Chris
+Kuethe and Gary Miller, who were given release authority in October
+2006.</p>
 
 <p>As 2006 draws to a close, <code>gpsd</code> now supports several
 vendor binary protocols as well as the original NMEA and Zodiac.  The
@@ -135,6 +140,11 @@ suite of GPS test tools has greatly expanded, and we have implemented
 a rigorous regression-test framework for the daemon itself.  The
 daemon has acquired new features like multi-device capability and
 hotplug autoconfiguration.</p>
+
+<p>Further forks of <code>gpsd</code> seem unlikely, as the project is
+now sufficiently large and visible to co-opt developers who might
+otherwise have forked the old 1.x sources or written a competing
+daemon.</p>
 
 </div>
 <hr/>
