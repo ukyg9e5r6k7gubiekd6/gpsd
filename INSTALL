@@ -12,7 +12,7 @@ X windows + lesstif    -> two test clients depend on this
 ncurses                -> two more test clients depend on this
 Python                 -> most of the test and profiling tools are in Python
 
-The build degrades gracefully in the absence of any of these; you should
+The build degrades gracefully in the absence of any of these. You should
 be able to tell from configure messages which extensions you will get.
 
 1. Start by making sure you can get data from your GPS, otherwise the later
@@ -27,22 +27,28 @@ a short initial burst of binary garbage).  If you don't see this, you
 may have OS-level problems with your serial support, but more likely
 have the wrong device.  Look again.
 
-2. Ensure that device permissions will enable gpsd to read GPS devices
-even after it drops root privileges.  If you are running Fedora you
-can skip this step, as the stock configuration has the right properties.
+2. Ensure that device permissions will enable gpsd to read from and
+write to GPS devices even after it drops root privileges.  If you are
+running Fedora Core you can skip this step, as the stock configuration
+has the right properties.
 
-gpsd requires two things: (1) that GPS devices have group write
-enabled, and (2) all of them are owned by the same group.  It does
-not actually matter what group this is, as gpsd will determine that
-on startup by looking at a prototypical device (probably /dev/ttyS0).
+gpsd requires two things: (1) that GPS devices have group read and
+write enabled, and (2) all of them are have the same group ID as a 
+prototypical device, typically /dev/ttyS0. It does not actually
+matter what the owning group is, as gpsd will look it up on startup.
+
+Before dropping privileges, gpsd will ensure that it has access to
+devices given to it on the command line by forcing their group read
+and write permissions on.
 
 On a Linux with udev, check the files in /etc/udev/permissions.d to
 ensure that /dev/tty* devices are all created with the same group 
 and with 0660 permissions.
 
-When gpsd drops privileges, its default is to set uid to 'nobody'
-and group to the owning group of the prototype device.  There 
-is a configure option to change from 'nobody' to a specfied username.
+When gpsd drops privileges, its default is to set uid to 'nobody' and
+group to the owning group of the prototype device (the configure
+option --enable-gpsd-user=foo will cause gpsd to change to 'foo'
+instead).
 
 If your system has the Linux hotplug facility installed you can skip
 the permission-setting part; the hotplug scripts will force the
