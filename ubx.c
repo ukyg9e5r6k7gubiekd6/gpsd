@@ -75,12 +75,8 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
     data_len = getsw(buf, 4);
     switch (msgid)
     {
-	case UBX_NAV_X:
-	    gpsd_report(LOG_PROG, "UBX_NAV_X\n");
-	    break;
-	case UBX_NAV_SOL:
-	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
-            ubx_package_nav_sol(session, &buf[6], data_len);
+	case UBX_NAV_POSECEF:
+	    gpsd_report(LOG_PROG, "UBX_NAV_POSECEF\n");
 	    break;
 	case UBX_NAV_POSLLH:
 	    gpsd_report(LOG_PROG, "UBX_NAV_POSLLH\n");
@@ -88,18 +84,94 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	case UBX_NAV_STATUS:
 	    gpsd_report(LOG_PROG, "UBX_NAV_STATUS\n");
 	    break;
+	case UBX_NAV_DOP:
+	    gpsd_report(LOG_PROG, "UBX_NAV_DOP\n");
+	    break;
+	case UBX_NAV_SOL:
+	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
+            ubx_package_nav_sol(session, &buf[6], data_len);
+	    break;
+	case UBX_NAV_POSUTM:
+	    gpsd_report(LOG_PROG, "UBX_NAV_POSUTM\n");
+	    break;
+	case UBX_NAV_VELECEF:
+	    gpsd_report(LOG_PROG, "UBX_NAV_VELECEF\n");
+	    break;
+	case UBX_NAV_VELNED:
+	    gpsd_report(LOG_PROG, "UBX_NAV_VELNED\n");
+	    break;
+	case UBX_NAV_TIMEGPS:
+	    gpsd_report(LOG_PROG, "UBX_NAV_TIMEGPS\n");
+	    break;
+	case UBX_NAV_TIMEUTC:
+	    gpsd_report(LOG_PROG, "UBX_NAV_TIMEUTC\n");
+	    break;
+	case UBX_NAV_CLOCK:
+	    gpsd_report(LOG_PROG, "UBX_NAV_CLOCK\n");
+	    break;
 	case UBX_NAV_SVINFO:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SVINFO\n");
 	    break;
+	case UBX_NAV_DGPS:
+	    gpsd_report(LOG_PROG, "UBX_NAV_DGPS\n");
+	    break;
+	case UBX_NAV_SBAS:
+	    gpsd_report(LOG_PROG, "UBX_NAV_SBAS\n");
+	    break;
+	case UBX_NAV_EKFSTATUS:
+	    gpsd_report(LOG_PROG, "UBX_NAV_EKFSTATUS\n");
+	    break;
+
+	case UBX_RXM_RAW:
+	    gpsd_report(LOG_PROG, "UBX_RXM_RAW\n");
+	    break;
+	case UBX_RXM_SFRB:
+	    gpsd_report(LOG_PROG, "UBX_RXM_SFRB\n");
+	    break;
+	case UBX_RXM_SVSI:
+	    gpsd_report(LOG_PROG, "UBX_RXM_SVSI\n");
+	    break;
+	case UBX_RXM_ALM:
+	    gpsd_report(LOG_PROG, "UBX_RXM_ALM\n");
+	    break;
+	case UBX_RXM_EPH:
+	    gpsd_report(LOG_PROG, "UBX_RXM_EPH\n");
+	    break;
+	case UBX_RXM_POSREQ:
+	    gpsd_report(LOG_PROG, "UBX_RXM_POSREQ\n");
+	    break;
+
 	case UBX_MON_SCHED:
 	    gpsd_report(LOG_PROG, "UBX_MON_SCHED\n");
 	    break;
 	case UBX_MON_IO:
 	    gpsd_report(LOG_PROG, "UBX_MON_IO\n");
 	    break;
+	case UBX_MON_IPC:
+	    gpsd_report(LOG_PROG, "UBX_MON_IPC\n");
+	    break;
+	case UBX_MON_VER:
+	    gpsd_report(LOG_PROG, "UBX_MON_VER\n");
+	    break;
+	case UBX_MON_EXCEPT:
+	    gpsd_report(LOG_PROG, "UBX_MON_EXCEPT\n");
+	    break;
+	case UBX_MON_MSGPP:
+	    gpsd_report(LOG_PROG, "UBX_MON_MSGPP\n");
+	    break;
+	case UBX_MON_RXBUF:
+	    gpsd_report(LOG_PROG, "UBX_MON_RXBUF\n");
+	    break;
 	case UBX_MON_TXBUF:
 	    gpsd_report(LOG_PROG, "UBX_MON_TXBUF\n");
 	    break;
+	case UBX_MON_HW:
+	    gpsd_report(LOG_PROG, "UBX_MON_HW\n");
+	    break;
+	case UBX_MON_USB:
+	    gpsd_report(LOG_PROG, "UBX_MON_USB\n");
+	    break;
+
 	case UBX_INF_NOTICE:
 	    gpsd_report(LOG_PROG, "UBX_INF_NOTICE\n");
 	    break;
@@ -107,7 +179,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    gpsd_report(LOG_PROG, "UBX_INF_WARNING\n");
 	    break;
     default:
-	gpsd_report(LOG_WARN, "UBX: unknown packet id %04hx (length: %d)\n", 
+	gpsd_report(LOG_WARN, "UBX: unknown packet id 0x%04hx (length: %d)\n", 
 		    msgid, len);
     }
     return 0;
