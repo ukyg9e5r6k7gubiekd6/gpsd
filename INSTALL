@@ -34,8 +34,9 @@ has the right properties.
 
 gpsd requires two things: (1) that GPS devices have group read and
 write enabled, and (2) all of them are have the same group ID as a 
-prototypical device, typically /dev/ttyS0. It does not actually
-matter what the owning group is, as gpsd will look it up on startup.
+prototypical device, typically /dev/ttyS0 under Linux or /dev/tty00
+under *BSD. It does not actually matter what the owning group is, 
+as gpsd will look this up on startup.
 
 Before dropping privileges, gpsd will ensure that it has access to
 devices given to it on the command line by forcing their group read

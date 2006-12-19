@@ -45,6 +45,17 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+/*
+ * The name of a tty device from which to pick up whatever the local
+ * owning group for tty devices is.  Used when we drop privileges.
+ */
+#if defined(__FreeBSD_) || defined(__NetBSD__) || defined(__OpenBSD__)
+#define PROTO_TTY "/dev/tty00"  /* correct for *BSD */
+#else
+#define PROTO_TTY "/dev/ttyS0"	/* correct for Linux */
+#endif
+
+/* Name of (unprivileged) user to change to when we drop privileges. */
 #ifndef GPSD_USER
 #define GPSD_USER	"nobody"
 #endif
@@ -65,16 +76,6 @@
 #define NOREAD_TIMEOUT		60*3
 
 #define QLEN			5
-
-/*
- * The name of a tty device from which to pick up whatever the local
- * owning group for tty devices is.  Used when we drop privileges.
- */
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#define PROTO_TTY "/dev/tty00"
-#else
-#define PROTO_TTY "/dev/ttyS0"
-#endif
 
 #define sub_index(s) (s - subscribers)
 
