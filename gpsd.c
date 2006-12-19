@@ -49,7 +49,7 @@
  * The name of a tty device from which to pick up whatever the local
  * owning group for tty devices is.  Used when we drop privileges.
  */
-#if defined(__FreeBSD_) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #define PROTO_TTY "/dev/tty00"  /* correct for *BSD */
 #else
 #define PROTO_TTY "/dev/ttyS0"	/* correct for Linux */
