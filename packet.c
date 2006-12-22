@@ -932,27 +932,31 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		    goto not_tsip;
 		}
 		/*@ -ifempty */
-		if ((0x41 == pkt_id) && (0x0c == packetlen))
+		if ((0x41 == pkt_id) && (0x0e == packetlen))
 		    /* pass */;
-		else if ((0x42 == pkt_id) && (0x12 == packetlen ))
+		else if ((0x42 == pkt_id) && (0x14 == packetlen ))
 		    /* pass */;
-		else if ((0x43 == pkt_id) && (0x16 == packetlen))
+		else if ((0x43 == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
-		else if ((0x45 == pkt_id) && (0x0c == packetlen))
+		else if ((0x45 == pkt_id) && (0x0e == packetlen))
 		    /* pass */;
-		else if ((0x46 == pkt_id) && (0x04 == packetlen))
+		else if ((0x46 == pkt_id) && (0x06 == packetlen))
 		    /* pass */;
-		else if ((0x4a == pkt_id) && (0x16 == packetlen))
+		else if ((0x4a == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
-		else if ((0x4b == pkt_id) && (0x05 == packetlen))
+		else if ((0x4b == pkt_id) && (0x07 == packetlen))
 		    /* pass */;
-		else if ((0x56 == pkt_id) && (0x16 == packetlen))
+		else if ((0x55 == pkt_id) && (0x08 == packetlen))
 		    /* pass */;
-		else if ((0x5c == pkt_id) && (0x1a == packetlen))
+		else if ((0x56 == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
-		else if ((0x6d == pkt_id) && ((0x12 <= packetlen) && (0x1e >= packetlen) ))
+		else if ((0x5c == pkt_id) && ((0x1c <= packetlen) && (0x1e >= packetlen)))
 		    /* pass */;
-		else if ((0x82 == pkt_id) && (0x03 == packetlen))
+		else if ((0x6d == pkt_id) && ((0x14 <= packetlen) && (0x20 >= packetlen)))
+		    /* pass */;
+		else if ((0x82 == pkt_id) && (0x05 == packetlen))
+		    /* pass */;
+		else if ((0x84 == pkt_id) && ((0x28 <= packetlen) && (0x29 >= packetlen)))
 		    /* pass */;
 		else if ((0x8f == pkt_id))
 		    /* pass */;
