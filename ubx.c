@@ -298,6 +298,11 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	gpsd_report(LOG_WARN, "UBX: unknown packet id 0x%04hx (length: %d)\n", 
 		    msgid, len);
     }
+
+    if (mask)
+	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
+	   "msg%04x",(int)getuw(buf,2));
+
     return mask;
 }
 /*@ -charint @*/
