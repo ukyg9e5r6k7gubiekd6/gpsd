@@ -206,9 +206,7 @@ that hasn't been tested.  It's not compiled in by default.
 *** Navcom support
 
 Initial support for the Navcom binary protocol has been committed to
-allow for in-tree development. It seems to interfere with TSIP, which
-means we need to revisit the way TSIP and NCT messages are detected.
-It's not compiled in by default.
+allow for in-tree development. It is compiled in by default.
 
 *** UBX support
 

@@ -273,9 +273,9 @@ fi
 
 dnl check for Navcom support
 AC_ARG_ENABLE(navcom,
-  AC_HELP_STRING([--enable-navcom],
-                 [enable Navcom support]),
-  [ac_navcom=$enableval], [ac_navcom=no])
+  AC_HELP_STRING([--disable-navcom],
+                 [disable Navcom support]),
+  [ac_navcom=$enableval], [ac_navcom=yes])
 AC_MSG_CHECKING([for Navcom support])
 if test x"$ac_navcom" = "xyes"; then
     AC_MSG_RESULT([yes])
