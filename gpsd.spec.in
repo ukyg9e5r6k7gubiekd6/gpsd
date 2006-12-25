@@ -1,10 +1,9 @@
 Name: gpsd
-Summary: service daemon for mediating access to a GPS
+Summary: Service daemon for mediating access to a GPS
 Version: @VERSION@
 Release: 1
 License: BSD
 Group: System Environment/Daemons
-Provides: gpsd
 URL: http://developer.berlios.de/projects/gpsd/
 Source0: %{name}-%{version}.tar.gz
 BuildRequires: ncurses-devel gcc libxslt python
@@ -30,7 +29,7 @@ clients asking for location information, and copes gracefully when the
 GPS is unplugged and replugged.
 
 %package -n gpsd-devel
-Summary: Client libraries in C and Python for talking to a running gpsd or GPS.
+Summary: Client libraries in C and Python for talking to a running gpsd or GPS
 Group: Development/Libraries
 Requires: gpsd
 
@@ -40,7 +39,7 @@ that manage access to a GPS for applications; also Python modules.
 You will need to have gpsd installed for it to work.
 
 %package -n gpsd-clients
-Summary: Clients for gpsd with an X interface.
+Summary: Clients for gpsd with an X interface
 Group: Applications/System
 BuildRequires: lesstif-devel
 #############################################################################
@@ -72,8 +71,8 @@ can run on a serial terminal or terminal emulator.
 #      ./autogen.sh --disable-reconfigure                                 #
 #                                                                         #
 ###########################################################################
-./autogen.sh
-make -e CFLAGS=-D_GNU_SOURCE %{?_smp_mflags}
+./autogen.sh LDFLAGS=-s
+make %{?_smp_mflags}
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
@@ -114,7 +113,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man1/gpsctl.1*
 %{_sysconfdir}/hotplug/usb/gpsd.hotplug
 %{_sysconfdir}/hotplug/usb/gpsd.usermap
-/usr/lib/python*/site-packages/gps.py*
+%attr(755, root, root) /usr/lib/python*/site-packages/gps.py*
 #%{_datadir}/gpsd/dgpsip-servers
 
 %files -n gpsd-devel
@@ -156,6 +155,9 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Mon Dec 25 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35dev-1
+- Navcom driver merged.
+
 * Thu Dec 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.34-1
 - Fix for byte-swapping of Zodiac control messages on big-endian hardware.  
   Disable iTalk by default and note that it needs to be tested.  Command line
