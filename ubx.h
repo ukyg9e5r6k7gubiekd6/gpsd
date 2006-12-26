@@ -84,6 +84,7 @@ typedef enum {
     UBX_MODE_2D	    = 0x02,	/* 2D fix */
     UBX_MODE_3D	    = 0x03,	/* 3D fix */
     UBX_MODE_GPSDR  = 0x04,	/* GPS + dead reckoning */
+    UBX_MODE_TMONLY = 0x05,	/* Time-only fix */
 } ubx_mode_t;
 
 #define UBX_SOL_FLAG_GPS_FIX_OK 0x01
