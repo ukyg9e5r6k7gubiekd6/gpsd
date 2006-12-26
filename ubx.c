@@ -48,12 +48,9 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (gw > gps_week)
 	gps_week = gw;
 
-    t = gpstime_to_unix(gps_week, tow) - session->context->leap_seconds;
-    if (t > session->gpsdata.online){
-	session->gpsdata.online = t;
-	session->gpsdata.sentence_time = t;
-	session->gpsdata.fix.time = t;
-    }
+    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    session->gpsdata.sentence_time = t;
+    session->gpsdata.fix.time = t;
     mask |= TIME_SET | ONLINE_SET;
 
     epx = (double)(getsl(buf, 12)/100.0);
@@ -121,12 +118,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (flags & 0x7)
     	session->context->leap_seconds = getub(buf, 10);
 
-    t = gpstime_to_unix(gps_week, tow) - session->context->leap_seconds;
-    if (t > session->gpsdata.online){
-	session->gpsdata.online = t;
-	session->gpsdata.sentence_time = t;
-	session->gpsdata.fix.time = t;
-    }
+    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     return TIME_SET | ONLINE_SET;
 }
