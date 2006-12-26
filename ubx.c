@@ -37,21 +37,24 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     unsigned int tow;
     double epx, epy, epz, evx, evy, evz;
     unsigned char navmode, flags;
-    gps_mask_t mask = 0;
+    gps_mask_t mask;
     double t;
 
     if (data_len != 52)
 	return 0;
 
-    tow = getul(buf, 0);
-    gw = getsw(buf, 8);
-    if (gw > gps_week)
+    flags = getub(buf, 11);
+    mask =  ONLINE_SET;
+    if (flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)){
+	tow = getul(buf, 0);
+	gw = getsw(buf, 8);
 	gps_week = gw;
 
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
-    session->gpsdata.sentence_time = t;
-    session->gpsdata.fix.time = t;
-    mask |= TIME_SET | ONLINE_SET;
+	t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+	session->gpsdata.sentence_time = t;
+	session->gpsdata.fix.time = t;
+	mask |= TIME_SET;
+    }
 
     epx = (double)(getsl(buf, 12)/100.0);
     epy = (double)(getsl(buf, 16)/100.0);
@@ -71,7 +74,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 #endif
 
     navmode = getub(buf, 10);
-    flags = getub(buf, 11);
     switch (navmode){
     case UBX_MODE_3D:
 	session->gpsdata.fix.mode = MODE_3D;
