@@ -175,10 +175,6 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
     if (len < 6)    /* the packet at least contains a head of six bytes */
 	return 0;
 
-    /* we may need to dump the raw packet */
-    gpsd_report(LOG_IO, "UBX packet type %02hhx:%02hhx length %d: %s\n", 
-		buf[2], buf[3], len, gpsd_hexdump(buf, len));
-
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
     data_len = getsw(buf, 4);
@@ -290,8 +286,8 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    gpsd_report(LOG_IO, "UBX_INF_WARNING\n");
 	    break;
     default:
-	gpsd_report(LOG_WARN, "UBX: unknown packet id 0x%04hx (length: %d)\n", 
-		    msgid, len);
+	gpsd_report(LOG_WARN, "UBX: unknown packet id 0x%04hx (length %d) %s\n", 
+	    msgid, len, gpsd_hexdump(buf, len));
     }
 
     if (mask)
