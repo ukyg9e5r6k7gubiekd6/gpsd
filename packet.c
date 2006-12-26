@@ -1024,12 +1024,14 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    else {
 		gpsd_report(LOG_IO,
 		    "UBX checksum 0x%02hhx%02hhx over length %hd,"\
-		    " expecting 0x%02hhx%02hhx\n",
+		    " expecting 0x%02hhx%02hhx (type 0x%02hhx%02hhx)\n",
 			ck_a, 
 			ck_b, 
 			len, 
 			lexer->inbuffer[len-2], 
-			lexer->inbuffer[len-1]);
+			lexer->inbuffer[len-1],
+			lexer->inbuffer[2],
+			lexer->inbuffer[3]);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
