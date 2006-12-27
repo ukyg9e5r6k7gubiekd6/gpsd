@@ -292,7 +292,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 
     if (mask)
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	   "msg%04x",(int)getuw(buf,2));
+	   "0x%04hx", msgid);
 
     return mask | ONLINE_SET;
 }
