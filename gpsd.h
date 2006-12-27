@@ -42,10 +42,10 @@ enum isgpsstat_t {
  * The packet buffers need to be as long than the longest packet we
  * expect to see in any protocol, because we have to be able to hold
  * an entire packet for checksumming.  Thus, in particular, they need
- * to be as long as a SiRF MID 4 packet, 188 bytes payload plus eight bytes 
- * of header/length/checksum/trailer. 
+ * to be as long as a UBX SVINFO packet, up to 200 bytes payload and 6
+ * bytes of header/length/checksum/trailer.
  */
-#define MAX_PACKET_LENGTH	196	/* 188 + 8 */
+#define MAX_PACKET_LENGTH	206	/* 6 + 8 + 192 */
 
 /*
  * We used to define the input buffer length as MAX_PACKET_LENGTH*2+1.
