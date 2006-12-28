@@ -144,12 +144,12 @@ static void nextstate(struct gps_packet_t *lexer,
             break;
         }
 #endif /* UBX_ENABLE */
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
 	if (c == '<') {
 	    lexer->state = ITALK_LEADER_1;
 	    break;
 	}
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 #ifdef NAVCOM_ENABLE
 	if (c == 0x02) {
 	    lexer->state = NAVCOM_LEADER_1;
@@ -624,7 +624,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* EVERMORE_ENABLE */
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
     case ITALK_LEADER_1:
         if (c == '!')
 	    lexer->state = ITALK_LEADER_2;
@@ -632,19 +632,24 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case ITALK_LEADER_2:
-	lexer->length = (size_t)(c & 0xff);
+	lexer->length = (size_t)(lexer->inbuffer[6] & 0xff);
+	gpsd_report(LOG_PROG, "ITALK: i think length is 0x%02x (%s)\n",
+	lexer->length, gpsd_hexdump(lexer->inbuffer, lexer->length*2+10));
 	lexer->state = ITALK_LENGTH;
 	break;
     case ITALK_LENGTH:
 	lexer->length += 1;	/* fix number of words in payload */
 	lexer->length *= 2;	/* convert to number of bytes */
+	lexer->length += 3;	/* add trailer length */
 	lexer->state = ITALK_PAYLOAD;
 	break;
     case ITALK_PAYLOAD:
 	/* lookahead for "<!" because sometimes packets are short but valid */
-	if ((c == '>') && (lexer->inbufptr[0] == '<') && (lexer->inbufptr[1] == '!'))
+	if ((c == '>') && (lexer->inbufptr[0] == '<') && (lexer->inbufptr[1] == '!')){
 	    lexer->state = ITALK_RECOGNIZED;
-	else if (--lexer->length == 0)
+	    gpsd_report(LOG_PROG, "ITALK: trying to process runt packet\n");
+	    break;
+	} else if (--lexer->length == 0)
 	    lexer->state = ITALK_DELIVERED;
 	break;
     case ITALK_DELIVERED:
@@ -659,7 +664,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	else
 	    lexer->state = GROUND_STATE;
 	break;
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
         /* unused case */
@@ -1087,27 +1092,40 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
             break;
 	}
 #endif /* EVERMORE_ENABLE */
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
 	else if (lexer->state == ITALK_RECOGNIZED) {
-	    u_int16_t len, n, sum;
-	    len = (unsigned short)(lexer->length / 2 - 1);
-	    /*
-	     * Skip first 9 words so we compute checksum only over data
-	     * portion of packet.
-	     */
-	    for (n = sum = 0; n < (unsigned short)(len - 9); n++)
-		sum += getword(9 + n);
-	    if (len == 0 || sum == (u_int16_t)getword(len+1)) {
-		gpsd_report(LOG_RAW, "italk checksum ok\n");
+	    u_int16_t len, n, csum, xsum, tmpw;
+	    u_int32_t tmpdw;
+
+	    /* number of words */
+	    len = (unsigned short)(lexer->length - 10) &0xff;
+
+	    /* initialize all my registers */
+	    csum = tmpw = tmpdw = 0;
+	    /* expected checksum */
+	    xsum = getword(7+len);
+
+	    for (n = 0; n < (len/2); n++){
+		gpsd_report(LOG_PROG, "ITALK: checksumming word 0x%02x\n", n);
+		tmpw = getword(7 + 2*n);
+		tmpdw = (csum + 1) * (tmpw + n);
+		csum = (tmpdw & 0xffff) ^ ((tmpdw >>16) & 0xffff) ^ csum;
+	    }
+	    if (len == 0 || csum == xsum) {
+		gpsd_report(LOG_PROG, "ITALK: checksum ok\n");
 		packet_accept(lexer, ITALK_PACKET);
 	    } else {
-		gpsd_report(LOG_RAW, "italk checksum failed\n");
+		gpsd_report(LOG_PROG,
+		    "ITALK: checksum failed - "
+		    "type 0x%02hx expected 0x%04hhx got 0x%04hhx: %s\n",
+		    lexer->inbuffer[4], xsum, csum,
+		    gpsd_hexdump(lexer->inbuffer, lexer->length));
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
             break;
 	}
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 #ifdef NAVCOM_ENABLE
 	else if (lexer->state == NAVCOM_RECOGNIZED) {
 	    /* By the time we got here we know checksum is OK */
