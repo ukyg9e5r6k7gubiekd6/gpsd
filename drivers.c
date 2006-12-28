@@ -21,7 +21,7 @@ ssize_t generic_get(struct gps_device_t *session)
     return packet_get(session->gpsdata.gps_fd, &session->packet);
 }
 
-#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITALK_ENABLE)  || defined(NAVCOM_ENABLE) 
+#if defined(NMEA_ENABLE) || defined(SIRF_ENABLE) || defined(EVERMORE_ENABLE)  || defined(ITRAX_ENABLE)  || defined(NAVCOM_ENABLE) 
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
@@ -880,9 +880,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef EVERMORE_ENABLE
     &evermore_binary, 
 #endif /* EVERMORE_ENABLE */
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
     &italk_binary, 
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 #ifdef RTCM104_ENABLE
     &rtcm104, 
 #endif /* RTCM104_ENABLE */

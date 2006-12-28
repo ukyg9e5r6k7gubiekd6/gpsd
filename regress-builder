@@ -21,9 +21,8 @@ driver_names = (
     "evermore",
     "fv18",
     "garmin",
-#   "italk",
-#   "itrax",
-#   "navcom",
+    "itrax",
+    "navcom",
     "nmea",
     "ntrip",
     "rtcm104",
@@ -31,7 +30,7 @@ driver_names = (
 #   "tnt",
     "tripmate",
     "tsip",
-#   "ubx",
+    "ubx",
 }
 cyclesize = 2 ** len(driver_names)
 

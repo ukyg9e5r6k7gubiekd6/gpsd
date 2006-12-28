@@ -673,11 +673,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "EverMore binary");
 		break;
 #endif /* EVERMORE_ENABLE */
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
 	    case ITALK_PACKET:
 		(void)gpsd_switch_driver(session, "iTalk binary");
 		break;
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 #ifdef RTCM104_ENABLE
 	    case RTCM_PACKET:
 		(void)gpsd_switch_driver(session, "RTCM104");

@@ -258,19 +258,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for iTalk support
-AC_ARG_ENABLE(italk,
-  AC_HELP_STRING([--enable-italk],
-                 [enable iTalk protocol support]),
-  [ac_italk=$enableval], [ac_italk=no])
-AC_MSG_CHECKING([for iTalk support])
-if test x"$ac_italk" = "xyes"; then
-    AC_MSG_RESULT([yes])
-	AC_DEFINE([ITALK_ENABLE], 1, [iTalk binary support])
-else
-  AC_MSG_RESULT([no])
-fi
-
 dnl check for Navcom support
 AC_ARG_ENABLE(navcom,
   AC_HELP_STRING([--disable-navcom],
@@ -344,7 +331,7 @@ AC_ARG_ENABLE(rtcm104,
                  [disable rtcm104 support]),
   [ac_rtcm104=$enableval], [ac_rtcm104=yes])
 AC_MSG_CHECKING([for rtcm104 support])
-if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_italk" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
+if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
     ac_rtcm104=no
 fi
 if test x"$ac_rtcm104" = "xyes"; then
@@ -607,7 +594,6 @@ echo "Earthmate               : $ac_earthmate"
 echo "EverMore                : $ac_evermore"
 echo "FV-18                   : $ac_fv18"
 echo "Garmin                  : $ac_garmin"
-echo "iTalk                   : $ac_italk"
 echo "iTrax                   : $ac_itrax"
 echo "NMEA                    : $ac_nmea"
 echo "NTRIP support           : $ac_ntrip"
@@ -640,7 +626,6 @@ if test "xdummy" = "xdummy" -a \
     x"$evermore" = "xno" -a \
     x"$fv18" = "xno" -a \
     x"$garmin" = "xno" -a \
-    x"$italk" = "xno" -a \
     x"$itrax" = "xno" -a \
     x"$navcom" = "xno" -a \
     x"$nmea" = "xno" -a \

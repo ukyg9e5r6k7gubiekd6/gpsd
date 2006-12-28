@@ -72,7 +72,7 @@
    EVERMORE_RECOGNIZED,	/* found end of EverMore packet */
 #endif /* EVERMORE_ENABLE */
 
-#ifdef ITALK_ENABLE
+#ifdef ITRAX_ENABLE
    ITALK_LEADER_1,	/* saw leading < of iTalk packet */
    ITALK_LEADER_2,	/* saw leading ! of iTalk packet */
    ITALK_LENGTH,	/* saw packet length */
@@ -80,7 +80,7 @@
    ITALK_DELIVERED,	/* seen end of payload */
    ITALK_TRAILER,	/* saw iTalk trailer byte */
    ITALK_RECOGNIZED,	/* found end of the iTalk packet */
-#endif /* ITALK_ENABLE */
+#endif /* ITRAX_ENABLE */
 
 #ifdef NAVCOM_ENABLE
    NAVCOM_EXPECTED,	/* expecting Navcom packet */

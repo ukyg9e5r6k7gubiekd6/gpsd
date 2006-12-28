@@ -14,8 +14,9 @@
 
 #include "gpsd_config.h"
 #include "gpsd.h"
-#if defined(ITALK_ENABLE) && defined(BINARY_ENABLE)
+#if defined(ITRAX_ENABLE) && defined(BINARY_ENABLE)
 
+#define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
 /*@ +charint -usedef -compdef @*/
@@ -65,12 +66,12 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
     gps_mask_t st;
 
     if (session->packet.type == ITALK_PACKET){
-	st = italk_parse(session, session->outbuffer, session->outbuflen);
+	st = italk_parse(session, session->packet.outbuffer, session->packet.outbuflen);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
 #ifdef NMEA_ENABLE
-    } else if (session->packet_type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->outbuffer, session);
+    } else if (session->packet.type == NMEA_PACKET) {
+	st = nmea_parse((char *)session->packet.outbuffer, session);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
 	return st;
 #endif /* NMEA_ENABLE */
@@ -108,7 +109,7 @@ static void italk_mode(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
 static void italk_configurator(struct gps_device_t *session, int seq)
 {
-    if (seq == 0 && session->packet_type == NMEA_PACKET)
+    if (seq == 0 && session->packet.type == NMEA_PACKET)
 	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -145,4 +146,4 @@ struct gps_type_t italk_binary =
     .wrapup         = NULL,		/* no close hook */
     .cycle          = 1,		/* updates every second */
 };
-#endif /* defined(ITALK_ENABLE) && defined(BINARY_ENABLE) */
+#endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
