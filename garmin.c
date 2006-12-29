@@ -327,7 +327,23 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	gpsd_report(LOG_PROG, "time_l: %ld\n", (long int)time_l);
 
 	session->gpsdata.fix.latitude = radtodeg(pvt->lat);
+	/* sanity check the lat */
+	if ( 90.0 < session->gpsdata.fix.latitude ) {
+		session->gpsdata.fix.latitude = 90.0;
+		gpsd_report(LOG_INF, "ERROR: Latitude overrange\n");
+	} else if ( -90.0 > session->gpsdata.fix.latitude ) {
+		session->gpsdata.fix.latitude = -90.0;
+		gpsd_report(LOG_INF, "ERROR: Latitude negative overrange\n");
+	}
 	session->gpsdata.fix.longitude = radtodeg(pvt->lon);
+	/* sanity check the lon */
+	if ( 180.0 < session->gpsdata.fix.longitude ) {
+		session->gpsdata.fix.longitude = 180.0;
+		gpsd_report(LOG_INF, "ERROR: Longitude overrange\n");
+	} else if ( -180.0 > session->gpsdata.fix.longitude ) {
+		session->gpsdata.fix.longitude = -180.0;
+		gpsd_report(LOG_INF, "ERROR: Longitude negative overrange\n");
+	}
 
 	// altitude over WGS84 converted to MSL
 	session->gpsdata.fix.altitude = pvt->alt + pvt->msl_hght;
