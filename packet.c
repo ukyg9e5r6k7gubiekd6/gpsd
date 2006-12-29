@@ -1018,7 +1018,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    unsigned char ck_a = 0;
 	    unsigned char ck_b = 0;
 	    len = lexer->inbufptr - lexer->inbuffer;
-	    gpsd_report(LOG_IO, "len: %d\n", len);
+	    gpsd_report(LOG_IO, "UBX: len %d\n", len);
 	    for (n = 2; n < (len-2); n++) {
 		ck_a += lexer->inbuffer[n];
 		ck_b += ck_a;
@@ -1092,39 +1092,42 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
             break;
 	}
 #endif /* EVERMORE_ENABLE */
+/* XXX CSK */
 #ifdef ITRAX_ENABLE
+#define getib(j) ((u_int8_t)lexer->inbuffer[(j)])
+#define getiw(i) ((u_int16_t)(((u_int16_t)getib((i)+1) << 8) | (u_int16_t)getib((i))))
+
 	else if (lexer->state == ITALK_RECOGNIZED) {
-	    u_int16_t len, n, csum, xsum, tmpw;
-	    u_int32_t tmpdw;
+	    volatile u_int16_t len, n, csum, xsum, tmpw;
+	    volatile u_int32_t tmpdw;
 
 	    /* number of words */
-	    len = (unsigned short)(lexer->length - 10) &0xff;
+	    len = (unsigned short)(lexer->inbuffer[6] &0xff);
 
 	    /* initialize all my registers */
 	    csum = tmpw = tmpdw = 0;
 	    /* expected checksum */
-	    xsum = getword(7+len);
+	    xsum = getiw(7+2*len);
 
-	    for (n = 0; n < (len/2); n++){
-		gpsd_report(LOG_PROG, "ITALK: checksumming word 0x%02x\n", n);
-		tmpw = getword(7 + 2*n);
+	    for (n = 0; n < len; n++){
+		tmpw = getiw(7 + 2*n);
 		tmpdw = (csum + 1) * (tmpw + n);
-		csum = (tmpdw & 0xffff) ^ ((tmpdw >>16) & 0xffff) ^ csum;
+		csum ^= (tmpdw & 0xffff) ^ ((tmpdw >>16) & 0xffff);
 	    }
-	    if (len == 0 || csum == xsum) {
-		gpsd_report(LOG_PROG, "ITALK: checksum ok\n");
+	    if (len == 0 || csum == xsum)
 		packet_accept(lexer, ITALK_PACKET);
-	    } else {
-		gpsd_report(LOG_PROG,
+	    else {
+		gpsd_report(LOG_IO,
 		    "ITALK: checksum failed - "
-		    "type 0x%02hx expected 0x%04hhx got 0x%04hhx: %s\n",
-		    lexer->inbuffer[4], xsum, csum,
-		    gpsd_hexdump(lexer->inbuffer, lexer->length));
+		    "type 0x%02x expected 0x%04x got 0x%04x\n",
+		    lexer->inbuffer[4], xsum, csum);
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
             break;
 	}
+#undef getiw
+#undef getib
 #endif /* ITRAX_ENABLE */
 #ifdef NAVCOM_ENABLE
 	else if (lexer->state == NAVCOM_RECOGNIZED) {
