@@ -633,8 +633,6 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
     case ITALK_LEADER_2:
 	lexer->length = (size_t)(lexer->inbuffer[6] & 0xff);
-	gpsd_report(LOG_PROG, "ITALK: i think length is 0x%02x (%s)\n",
-	lexer->length, gpsd_hexdump(lexer->inbuffer, lexer->length*2+10));
 	lexer->state = ITALK_LENGTH;
 	break;
     case ITALK_LENGTH:
