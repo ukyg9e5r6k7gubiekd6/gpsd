@@ -41,21 +41,23 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
 /*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
+    int type;
     if (len == 0)
 	return 0;
 
+    type = getub(buf, 4);
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n", type, len, gpsd_hexdump(buf, len));
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "ITALK%d",(int)buf[0]);
+		   "ITALK%d",type);
 
-    switch (getub(buf, 0))
+    switch (type)
     {
 	/* DISPATCH ON FIRST BYTE OF PAYLOAD */
 
     default:
-	gpsd_report(LOG_WARN, "unknown iTalk packet id %d length %d: %s\n", buf[0], len, gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "unknown iTalk packet id 0x%02x length %d\n", type, len, gpsd_hexdump(buf, len));
 	return 0;
     }
 }
