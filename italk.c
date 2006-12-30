@@ -26,7 +26,72 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *, unsigned char *
 
 static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-	return 0;
+    unsigned int tow;
+    unsigned short gps_week, flags, cflags, pflags;
+    gps_mask_t mask = 0;
+    double epx, epy, epz, evx, evy, evz;
+    double t;
+
+    if (len != 296){
+	gpsd_report(LOG_PROG, "ITALK: bad NAV_FIX (len %d, should be 296)\n", len);
+	return -1;
+    }
+
+    flags = getuw(buf, 7 + 4);
+    cflags = getuw(buf, 7 + 6);
+    pflags = getuw(buf, 7 + 8);
+
+    session->gpsdata.status = STATUS_NO_FIX;
+    session->gpsdata.fix.mode = MODE_NO_FIX;
+    mask =  ONLINE_SET | MODE_SET | STATUS_SET | CYCLE_START_SET;
+
+    /* just bail out if this fix is not marked valid */
+    if ((pflags & FIX_FLAG_MASK_INVALID) || 0 == (flags & FIXINFO_FLAG_VALID))
+	return mask;
+
+    gps_week = getsw(buf, 7 + 82);
+    tow = getul(buf, 7 + 84);
+    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    session->gpsdata.sentence_time = t;
+    session->gpsdata.fix.time = t;
+    mask |= TIME_SET;
+
+    epx = (double)(getsl(buf, 7 + 96)/100.0);
+    epy = (double)(getsl(buf, 7 + 100)/100.0);
+    epz = (double)(getsl(buf, 7 + 104)/100.0);
+    evx = (double)(getsl(buf, 7 + 186)/1000.0);
+    evy = (double)(getsl(buf, 7 + 190)/1000.0);
+    evz = (double)(getsl(buf, 7 + 194)/1000.0);
+    ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
+    session->gpsdata.fix.eph = (double)(getsl(buf, 7 + 252)/100.0);
+    session->gpsdata.fix.eps = (double)(getsl(buf, 7 + 254)/100.0);
+
+    session->gpsdata.satellites_used = 0xffff ^ getub(buf, 7 + 16);
+    mask |= USED_SET ;
+
+    if (flags & FIX_CONV_DOP_VALID){
+	session->gpsdata.hdop = (double)(getuw(buf, 7 + 56)/100.0);
+	session->gpsdata.gdop = (double)(getuw(buf, 7 + 58)/100.0);
+	session->gpsdata.pdop = (double)(getuw(buf, 7 + 60)/100.0);
+	session->gpsdata.vdop = (double)(getuw(buf, 7 + 62)/100.0);
+	session->gpsdata.tdop = (double)(getuw(buf, 7 + 64)/100.0);
+	mask |= HDOP_SET | GDOP_SET | PDOP_SET | VDOP_SET | TDOP_SET;
+    }
+
+    if (!(pflags & FIX_FLAG_MASK_INVALID) && (flags & FIXINFO_FLAG_VALID)){
+	if (pflags & FIX_FLAG_3DFIX)
+	    session->gpsdata.fix.mode = MODE_3D;
+	else
+	    session->gpsdata.fix.mode = MODE_2D;
+
+	if (pflags & FIX_FLAG_DGPS_CORRECTION)
+	    session->gpsdata.status = STATUS_DGPS_FIX;
+	else
+	    session->gpsdata.status = STATUS_FIX;
+    }
+
+    return mask;
 }
 
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -55,7 +120,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	unsigned short flags;
 	
 	flags = getuw(buf, off);
-	session->gpsdata.used[st] = ((flags & PRN_FLAG_USE_IN_NAV) ? 1 : 0)&0xff;
+	session->gpsdata.used[st] = ((flags & PRN_FLAG_USE_IN_NAV) ? 1:0)&0xff;
 	session->gpsdata.ss[st]		= (int)getuw(buf, off+2)&0xff;
 	session->gpsdata.PRN[st]	= (int)getuw(buf, off+4)&0xff;
 	session->gpsdata.elevation[st]	= (int)getsw(buf, off+6)&0xff;
@@ -68,7 +133,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     }
     session->gpsdata.satellites = st;
 
-    return SATELLITE_SET | TIME_SET;
+    return USED_SET | SATELLITE_SET | TIME_SET;
 }
 
 static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned char *buf, size_t len)
