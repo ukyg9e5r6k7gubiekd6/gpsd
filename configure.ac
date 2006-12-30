@@ -247,9 +247,9 @@ fi
 
 dnl check for iTrax support
 AC_ARG_ENABLE(itrax,
-  AC_HELP_STRING([--enable-itrax],
-                 [enable iTrax hardware support]),
-  [ac_itrax=$enableval], [ac_itrax=no])
+  AC_HELP_STRING([--disable-itrax],
+                 [disable iTrax hardware support]),
+  [ac_itrax=$enableval], [ac_itrax=yes])
 AC_MSG_CHECKING([for iTrax support])
 if test x"$ac_itrax" = "xyes"; then
     AC_MSG_RESULT([yes])

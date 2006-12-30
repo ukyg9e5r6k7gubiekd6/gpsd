@@ -201,10 +201,10 @@ an elevation test.
 *** iTalk support
 
 There is an experimental driver for the Fastrax iTalk3 protocol. It is
-still very much a work in progress. It's not compiled in by default.
-Version 3 of iTalk is not backwards compatible; we do not anticipate
-supporting previous versions unless someone requests it and is able to
-provide us hardware.
+still very much a work in progress. It is now compiled in by default so
+that we can collect bug reports. Version 3 of iTalk is not backwards
+compatible; we do not anticipate supporting previous versions unless
+someone requests it and is able to provide us hardware.
 
 *** Navcom support
 
