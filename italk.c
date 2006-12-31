@@ -343,7 +343,7 @@ struct gps_type_t italk_binary =
     .typename       = "iTalk binary",	/* full name of type */
     .trigger        = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
-    .probe_wakeup   = italk_ping,	/* no wakeup to be done before hunt */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */
 #ifdef ALLOW_RECONFIGURE
