@@ -4,7 +4,7 @@
  * Vendor website: http://www.navcomtech.com/
  * Technical references: http://www.navcomtech.com/support/docs.cfm
  *
- * Tested with an SF-2040G model
+ * Tested with two SF-2040G models
  *
  * At this stage, this driver implements the following commands:
  *
@@ -16,6 +16,7 @@
  *
  * 0xb1: PVT Block (pos., vel., time., DOPs)
  * 0x86: Channel Status (satellites visible + tracked)
+ * 0xae: Identification Block (type of receiver, options available, etc.)
  *
  * FIXME - Position errors theoretically are being reported at the one-sigma level.
  *         However, field tests suggest the values to be more consistent with
@@ -49,6 +50,7 @@
 
 /* Have data which is 24 bits long */
 #define getsl24(buf,off)  ((int32_t)((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
+#define getul24(buf,off) ((u_int32_t)((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
 
 #define NAVCOM_CHANNELS	26
 
@@ -130,9 +132,10 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
     if (!seq) {
         navcom_cmd_0x3f(session);
 	navcom_cmd_0x1c(session, 0x02);
-        navcom_cmd_0x20(session, 0xb1, 0x000a);
-        navcom_cmd_0x20(session, 0xb0, 0x000a);
-        navcom_cmd_0x20(session, 0x86, 0x000a);
+        navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
+        navcom_cmd_0x20(session, 0xb1, 0x000a); /* PVT Block */
+        navcom_cmd_0x20(session, 0xb0, 0x000a); /* Raw Meas Data Block */
+        navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
     }
 #ifdef __UNUSED__
     if ((seq % 20) == 0)
@@ -140,6 +143,12 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
     else if ((seq % 10) == 0)
 	navcom_cmd_0x1c(session, 0x02);
 #endif /* __UNUSED__ */
+}
+
+static void navcom_ping(struct gps_device_t *session)
+{
+    navcom_cmd_0x20(session, 0x06, 0x012c); /* Acknowledgment Block */
+    navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
 }
 
 /* PVT Block */
@@ -309,7 +318,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     u_int8_t pdop = getub(buf, 15);
 
     /* Timestamp and PDOP */
-    session-> gpsdata.fix.time = gpstime_to_unix(week, tow/1000.0) - session->context->leap_seconds;
+    session-> gpsdata.sentence_time = gpstime_to_unix(week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.pdop = pdop / 10.0;
 
     /* Satellite count */
@@ -357,9 +366,151 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	}
     }
 
-    return TIME_SET | PDOP_SET | SATELLITE_SET | STATUS_SET;
+    return PDOP_SET | SATELLITE_SET | STATUS_SET;
 }
 
+/* Identification Block */
+static gps_mask_t handle_0xae(struct gps_device_t *session)
+{
+    char *engconfstr, *asicstr;
+    unsigned char *buf = session->packet.outbuffer + 3;
+    size_t    msg_len = getuw(buf, 1);
+    u_int8_t  engconf = getub(buf, 3);
+    u_int8_t  asic    = getub(buf, 4);
+    u_int16_t softver = getuw(buf, 5);
+    u_int8_t  vermaj  = getub(buf, 7);
+    u_int8_t  vermin  = getub(buf, 8);
+    u_int32_t dcn     = getul24(buf, 9);
+    u_int16_t dcser   = getuw(buf, 12);
+    u_int8_t  dcclass = getub(buf, 14);
+    u_int32_t rfcn    = getul24(buf, 15);
+    u_int16_t rfcser  = getuw(buf, 18);
+    u_int8_t  rfcclass = getub(buf, 20);
+    u_int8_t  softtm[16] = "";
+    u_int8_t  bootstr[16] = "";
+    u_int16_t iopsoftver = 0x0000;
+    u_int8_t  iopvermaj  = 0x00;
+    u_int8_t  iopvermin  = 0x00;
+    u_int8_t  ioptm[16] = "";
+    u_int8_t  picver = 0x00;
+    u_int8_t  slsbn = 0x00;
+    u_int8_t  iopsbn = 0x00;
+
+    memcpy(softtm, &buf[21], 16);
+    memcpy(bootstr, &buf[37], 16);
+    if (msg_len == 0x0037) { /* No IOP */
+        slsbn = getub(buf, 53);
+    } else { /* IOP Present */
+        iopsoftver = getuw(buf, 53);
+        iopvermaj  = getub(buf, 55);
+        iopvermin  = getub(buf, 56);
+        memcpy(ioptm, &buf[57], 16);
+        picver     = getub(buf, 73);
+        slsbn      = getub(buf, 74);
+        iopsbn     = getub(buf, 75);
+    }
+
+    switch(engconf)
+    {
+    case 0x00:
+        engconfstr = "Unknown/Undefined";
+        break;
+    case 0x01:
+        engconfstr = "NCT 2000 S";
+        break;
+    case 0x02:
+        engconfstr = "NCT 2000 D";
+        break;
+    case 0x03:
+        engconfstr = "Startfire Single";
+        break;
+    case 0x04:
+        engconfstr = "Starfire Dual";
+        break;
+    case 0x05:
+        engconfstr = "Pole Mount RTK (Internal Radio Found)";
+        break;
+    case 0x06:
+        engconfstr = "Pole Mount GIS (LBM Available)";
+        break;
+    case 0x07:
+        engconfstr = "Black Box RTK (Internal Radio Found)";
+        break;
+    case 0x08:
+        engconfstr = "Black Box GIS (LBM Available)";
+        break;
+    case 0x80:
+        engconfstr = "R100";
+        break;
+    case 0x81:
+        engconfstr = "R200";
+        break;
+    case 0x82:
+        engconfstr = "R210";
+        break;
+    case 0x83:
+        engconfstr = "R300";
+        break;
+    case 0x84:
+        engconfstr = "R310";
+        break;
+    default:
+        engconfstr = "?";
+    }
+
+    switch(asic)
+    {
+    case 0x01:
+        asicstr = "A-ASIC (C/A, L1)";
+        break;
+    case 0x02:
+        asicstr = "B-ASIC (C/A, P1, P2, L1, L2)";
+        break;
+    case 0x03:
+        asicstr = "C-ASIC (C/A, P1, P2, L1, L2, WAAS)";
+        break;
+    case 0x04:
+        asicstr = "M-ASIC (C/A, L1, WAAS)";
+        break;
+    default:
+        asicstr = "?";
+    }
+
+    gpsd_report(LOG_RAW, "Navcom ID Data: "
+                "Engine type: %s (%x) - "
+                "ASIC type: %s (%x) - "
+                "Soft. Ver: %u - "
+                "Ver. Major: %u - "
+                "Ver. Minor: %u - "
+                "Digital Card Number: %lu - "
+                "Card Serial Number: %u - "
+                "Card Class: %u - "
+                "RF Card Number: %lu - "
+                "RF Card Serial Number: %u - "
+                "RF Card Class: %u - "
+                "Software Time Mark: %s - "
+                "Boot String: %s - "
+                "Starlight Software Build Number: %u\n",
+                engconfstr, engconf, asicstr, asic, softver, vermaj, vermin,
+                dcn, dcser, dcclass, rfcn, rfcser, rfcclass,
+                softtm, bootstr, slsbn);
+    if(iopsoftver) {
+        gpsd_report(LOG_RAW, "Navcom ID Data (IOP): "
+                    "IOP Soft. Ver: %u - "
+                    "Major: %u - "
+                    "Minor: %u - "
+                    "IOP Time Mark: %s - "
+                    "PIC Version: %u - "
+                    "IOP Software Build Number: %u\n",
+                    iopsoftver, iopvermaj, iopvermin, ioptm, picver, iopsbn);
+    }
+
+    snprintf(session->subtype, 64, "%s %s SBN: %u",
+             engconfstr, asicstr, slsbn);
+
+    return DEVICEID_SET;
+
+}
 
 /*@ +charint @*/
 gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
@@ -389,6 +540,8 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
 	return handle_0xb1(session);
     case 0x86:
 	return handle_0x86(session);
+    case 0xae:
+        return handle_0xae(session);
     default:
 	gpsd_report(LOG_IO, "Unknown or unimplemented Navcom packet id 0x%02x, length %d\n",
 		    cmd_id, msg_len);
@@ -419,10 +572,10 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t navcom_binary =
 {
-    .typename       = "Navcom binary",		/* full name of type */
+    .typename       = "Navcom binary",  	/* full name of type */
     .trigger        = "\x02\x99\x66",
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 L-Band */
-    .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
+    .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = navcom_probe_subtype,	/* subtype probing */
 #ifdef ALLOW_RECONFIGURE
