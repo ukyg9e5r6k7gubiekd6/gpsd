@@ -985,7 +985,7 @@ int main (int argc, char **argv)
     /*@ -boolops */
     if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
 	if (!server)
-	    server = "localhost";
+	    server = "127.0.0.1";
 	devicefd = netlib_connectsock(server, port, "tcp");
 	if (devicefd < 0) {
 	    (void)fprintf(stderr, 

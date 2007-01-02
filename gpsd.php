@@ -498,7 +498,7 @@ function write_config(){
 <?PHP
 \$title = 'My GPS Server';
 \$server = '127.0.0.1';
-#\$advertise = 'localhost';
+#\$advertise = '127.0.0.1';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
 \$googlemap = 0; # set to 1 if you want to have a google map

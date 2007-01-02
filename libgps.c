@@ -134,7 +134,7 @@ struct gps_data_t *gps_open(const char *host, const char *port)
     if (!gpsdata)
 	return NULL;
     if (!host)
-	host = "localhost";
+	host = "127.0.0.1";
     if (!port)
 	port = DEFAULT_GPSD_PORT;
 

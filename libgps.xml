@@ -67,7 +67,7 @@ Python:
 
 import gps
 
-session = gps.gps(host="localhost", port="2947")
+session = gps.gps(host="127.0.0.1", port="2947")
 
 session.set_raw_hook(raw_hook)
 

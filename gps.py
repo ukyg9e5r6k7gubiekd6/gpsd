@@ -185,7 +185,7 @@ class gpsdata:
 
 class gps(gpsdata):
     "Client interface to a running gpsd instance."
-    def __init__(self, host="localhost", port="2947", verbose=0):
+    def __init__(self, host="127.0.0.1", port="2947", verbose=0):
 	gpsdata.__init__(self)
 	self.sock = None	# in case we blow up in connect
         self.sockfile = None
