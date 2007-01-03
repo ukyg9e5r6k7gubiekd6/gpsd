@@ -107,6 +107,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 # endif /* PPS_ENABLE */
 #ifdef ALLOW_RECONFIGURE
     if (session->enable_reconfigure 
+	&& session->device_type != NULL &&
 	&& session->device_type->revert != NULL) {
 	session->device_type->revert(session);
 	session->enable_reconfigure = false;
