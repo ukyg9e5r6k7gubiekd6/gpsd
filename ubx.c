@@ -54,6 +54,11 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	session->gpsdata.sentence_time = t;
 	session->gpsdata.fix.time = t;
 	mask |= TIME_SET;
+#ifdef NTPSHM_ENABLE
+	/* TODO overhead */
+	if (session->context->enable_ntpshm)
+	    (void)ntpshm_put(session, session->gpsdata.sentence_time);
+#endif
     }
 
     epx = (double)(getsl(buf, 12)/100.0);
@@ -68,10 +73,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.fix.eps = (double)(getsl(buf, 40)/100.0);
     session->gpsdata.pdop = (double)(getuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = getub(buf, 47);
-#ifdef NTPSHM_ENABLE
-    if (session->context->enable_ntpshm)
-	(void)ntpshm_put(session, session->gpsdata.sentence_time); /* TODO overhead */
-#endif
 
     navmode = getub(buf, 10);
     switch (navmode){
@@ -142,8 +143,12 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     tow = getul(buf, 0);
 //    session->gpsdata.sentence_time = gpstime_to_unix(gps_week, tow) 
 //				- session->context->leap_seconds;
-    gpsd_zero_satellites(&session->gpsdata);
     nchan = getub(buf, 4);
+    if (nchan > 16){
+	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >16 reported");
+	return 0;
+    }
+    gpsd_zero_satellites(&session->gpsdata);
     st = nsv = 0;
     for (i = 0; i < nchan; i++) {
 	int off = 8 + 12 * i;
