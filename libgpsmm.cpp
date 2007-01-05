@@ -9,7 +9,7 @@
 #include "libgpsmm.h"
 
 struct gps_data_t* gpsmm::open(void) {
-	return open("localHost",DEFAULT_GPSD_PORT);
+	return open("127.0.0.1",DEFAULT_GPSD_PORT);
 }
 
 struct gps_data_t* gpsmm::open(const char *host, const char *port) {
