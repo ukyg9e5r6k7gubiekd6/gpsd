@@ -281,7 +281,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
 			/*@ -nullstate -mustfreefresh @*/
-			gpsdata->devicelist[i=0] = strdup(strtok_r(sp+2, " \r\n", &ns));
+			gpsdata->devicelist[i=0] = strdup(strtok_r(sp+1, " \r\n", &ns));
 			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
 			    gpsdata->devicelist[++i] = strdup(sp);
 			/*@ +nullstate +mustfreefresh @*/
