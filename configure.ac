@@ -301,9 +301,9 @@ fi
 
 dnl check for UBX support
 AC_ARG_ENABLE(ubx,
-  AC_HELP_STRING([--enable-ubx],
-                 [enable UBX Protocol support]),
-  [ac_ubx=$enableval], [ac_ubx=no])
+  AC_HELP_STRING([--disable-ubx],
+                 [disable UBX Protocol support]),
+  [ac_ubx=$enableval], [ac_ubx=yes])
 AC_MSG_CHECKING([for UBX support])
 if test x"$ac_ubx" = "xyes"; then
   AC_MSG_RESULT([yes])
