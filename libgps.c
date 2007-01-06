@@ -15,6 +15,10 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 
+#ifdef HAVE_SETLOCALE
+#include <locale.h>
+#endif
+
 #ifdef S_SPLINT_S
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
@@ -99,7 +103,10 @@ enum unit gpsd_units(void)
 {
 	char *envu = NULL;
 
- 	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
+#ifdef HAVE_SETLOCALE
+	setlocale(LC_NUMERIC, "C");
+#endif
+  	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
 		if (0 == strcasecmp(envu, "imperial")) {
 			return imperial;
 		}

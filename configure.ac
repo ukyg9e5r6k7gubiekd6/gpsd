@@ -40,6 +40,7 @@ AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(strlcat)
 AC_CHECK_FUNCS(strtonum)
+AC_CHECK_FUNCS(setlocale)
 
 AC_HEADER_TIME
 AC_STRUCT_TIMEZONE

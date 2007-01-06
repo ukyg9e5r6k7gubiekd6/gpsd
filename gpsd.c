@@ -37,6 +37,9 @@
 #if defined(HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
+#ifdef HAVE_SETLOCALE
+#include <locale.h>
+#endif
 
 #ifdef DBUS_ENABLE
 #include <gpsd_dbus.h>
@@ -1246,6 +1249,9 @@ int main(int argc, char *argv[])
     pthread_mutex_init(&report_mutex, NULL);
 #endif /* PPS_ENABLE */
 
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_NUMERIC, "C");
+#endif
     debuglevel = 0;
     while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
 #ifdef RTCM104_SERVICE
