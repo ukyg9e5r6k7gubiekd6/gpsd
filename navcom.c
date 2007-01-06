@@ -247,7 +247,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* vel_up = getsl24(buf, 37); */
     vel_up = getsl24(buf, 37);
     
-    track = atan2(vel_north, vel_east);
+    track = atan2(vel_east, vel_north);
     if (track < 0)
     	track += 2 * PI;
     session->gpsdata.fix.track = track * RAD_2_DEG;
