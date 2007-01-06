@@ -95,7 +95,7 @@ sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
 # Build rtcmdecode
 #
 rtcmdecode_SOURCES = rtcmdecode.c
-rtcmdecode_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+rtcmdecode_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build gpsflash
@@ -160,7 +160,7 @@ PYEXTENSIONS = gpspacket.so
 noinst_SCRIPTS = gpspacket.so setup.py
 
 gpspacket.so: gpspacket.c libgps.la
-	python setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace
 
 #
 # Build gpsmm_test

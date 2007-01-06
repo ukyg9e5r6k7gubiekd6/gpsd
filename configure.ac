@@ -1,7 +1,7 @@
 dnl $Id$
 AC_INIT
 AM_INIT_AUTOMAKE(gpsd, 2.35dev)
-AC_PREFIX_PROGRAM(gcc)
+dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
 
