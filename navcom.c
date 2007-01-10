@@ -18,9 +18,6 @@
  * 0x86: Channel Status (satellites visible + tracked)
  * 0xae: Identification Block (type of receiver, options available, etc.)
  *
- * FIXME - Position errors theoretically are being reported at the one-sigma level.
- *         However, field tests suggest the values to be more consistent with
- *         two-sigma. Need to clear this up.
  * FIXME - I'm not too sure of the way I have computed the vertical positional error
  *         I have used FOM as a scaling factor for VDOP, thusly VRMS = FOM/HDOP*VDOP
  * TODO - Read 0x83 blocks (Ionosphere and UTC data) for transforming GPS time to UTC
@@ -267,10 +264,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     vdop = getub(buf, 44);
     tdop = getub(buf, 45);
     
-    session->gpsdata.fix.eph = fom/100.0;
+    session->gpsdata.fix.eph = fom/100.0*1.96/*Two sigma*/;
     /* FIXME This cannot possibly be right */
     /* I cannot find where to get VRMS from in the Navcom output, though */
-    session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0;
+    session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
     
     if (gdop == DOP_UNDEFINED)
         session->gpsdata.gdop = NAN;
@@ -461,16 +458,16 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
     switch(asic)
     {
     case 0x01:
-        asicstr = "A-ASIC (C/A, L1)";
+        asicstr = "A-ASIC";
         break;
     case 0x02:
-        asicstr = "B-ASIC (C/A, P1, P2, L1, L2)";
+        asicstr = "B-ASIC";
         break;
     case 0x03:
-        asicstr = "C-ASIC (C/A, P1, P2, L1, L2, WAAS)";
+        asicstr = "C-ASIC";
         break;
     case 0x04:
-        asicstr = "M-ASIC (C/A, L1, WAAS)";
+        asicstr = "M-ASIC";
         break;
     default:
         asicstr = "?";
