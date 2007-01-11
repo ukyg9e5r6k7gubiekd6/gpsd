@@ -178,7 +178,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	if (c == 'G')
 	    lexer->state = NMEA_PUB_LEAD;
 	else if (c == 'P')	/* vendor sentence */
-	    lexer->state = NMEA_LEADER_END;
+	    lexer->state = NMEA_VENDOR_LEAD;
 	else if (c =='I')	/* Seatalk */
 	    lexer->state = SEATALK_LEAD_1;
 	else if (c =='A')	/* SiRF Ack */
@@ -188,6 +188,12 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
     case NMEA_PUB_LEAD:
 	if (c == 'P')
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case NMEA_VENDOR_LEAD:
+	if (isalpha(c))
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;

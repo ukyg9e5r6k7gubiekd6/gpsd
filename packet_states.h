@@ -7,6 +7,7 @@
 #ifdef NMEA_ENABLE
    NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
+   NMEA_VENDOR_LEAD,	/* seen second character of NMEA P leader */
    NMEA_LEADER_END,	/* seen end char of NMEA leader, in body */
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
