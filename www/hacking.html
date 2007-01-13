@@ -813,9 +813,11 @@ start").</p>
 
 <p>If the GPS-Week/TOW fields are required, as on the Evermore chip,
 don't just zero them.  GPSes do eventually converge on the correct
-time when they've exchanged handshakes with enough satellites, but the
-time required for convergence is proportional to how far off the
-initial value is.  So make a point of getting the GPS week right.</p>
+time when they've tracked the code from enough satellites, but the
+time required for convergence is related to how far off the initial
+value is. Most modern receivers can cold start in 45 seconds given
+good reception; under suboptimal conditions this can take upwards of
+ten minutes. So make a point of getting the time of week right.</p>
 
 <h2 id="invoked">How drivers are invoked</h2>
 
@@ -921,7 +923,7 @@ representative log for your GPS.  This will help ensure that support
 for your device is never broken in any gpsd release, because we will
 run the full regression before we ship.</p>
 
-<p>The correct format for a capture fiilr is described in the
+<p>The correct format for a capture file is described in the
 <a href='faq.html#logformat'>FAQ entry on reporting bugs</a>.</p>
 
 <p>See the header comment of the gpsfake.py module for more about the
