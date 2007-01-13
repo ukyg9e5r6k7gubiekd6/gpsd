@@ -564,20 +564,26 @@ works.</p>
    next baud rate).</li>
 
 <li>If it finds a SiRF packet, it queries the chip for firmware
-   version.  If the version is < 231.000 it drops back to SiRF NMEA.
+   version.  If the version is &lt; 231.000 it drops back to SiRF NMEA.
    We're done.</li>
 
 <li>If it finds a Zodiac binary packet (led with 0xff 0x81), it
    switches to the Zodiac driver.  We're done.</li>
 
-<li>If it finds an Evermore binary packet (led with DEL=0x10 followed
+<li>If it finds an Evermore binary packet (led with DLE=0x10 followed
    by STX=0x02) it switches to Evermore binary protocol.  We're done.</li>
+
+<li>If it finds a Navcom binary packet (led with 0x10 0x02 0x99 0x66)
+   it switches to Navcom driver.  We're done.</li>
 
 <li>If it finds a TSIP binary packet (led with 0x10=DLE), it
    switches to the TSIP driver.  We're done.</li>
 
-<li>If it finds an iTrax binary packet (led with &lt;! ), it
-   switches to the iTrax driver.  We're done.</li>
+<li>If it finds an iTalk v3 binary packet (led with &lt;! ), it
+   switches to the iTalk driver.  We're done.</li>
+
+<li>If it finds a UBX binary packet (led with  &mu;B ), it
+   switches to the UBX driver.  We're done.</li>
 
 <li>If it finds EARTHA, it selects the Earthmade driver, which then
    flips the connection to Zodiac binary mode.  We're done.</li>
