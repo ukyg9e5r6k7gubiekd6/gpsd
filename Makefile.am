@@ -337,51 +337,94 @@ svn-tag:
 #
 # Regression tests begin here
 #
+# Note that the *-makeregress targets re-create the *.log.chk source
+# files from the *.log source files.
 
 # Regression-test the daemon
 # This requires gcc4; use of the math coprocessor's on-board trig functions
 # apparently increases the accuracy of computation in a way that affects
 # the low-order digits of the track field in the O response.  Alas, it looks
 # like moving between 32- and 64-bit FPUs can also break regressions.
-gps-regress: gpsd
+#
+# When we have figured out the basic problem of these tests failing, we
+# can "exit 1" in the error case.
+gps-regress: gpsd 
 	@echo "Testing the daemon..."
-	@for f in test/*.log; do env PATH=".:${PATH}" $(PYTHON) gpsfake -s 38400 -1 -b -p $${f} | grep -v "^GPSD,X" >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+	@mkdir -p test
+	@errors=0; total=0; \
+	for f in $(srcdir)/test/*.log; do \
+		env PATH=".:${PATH}" $(PYTHON) \
+		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
+		| grep -v "^GPSD,X" > test/test.chk; \
+		if diff -ub $${f}.chk test/test.chk; then :; else \
+			errors=`expr $$errors + 1`; \
+		fi; \
+		total=`expr $$total + 1`; \
+	done; rm test/test.chk; \
+	if test $$errors -gt 0; then \
+		echo "Regression test FAILED: $$errors errors in $$total tests total."; \
+		exit 0; \
+	else \
+		echo "Regression test successful: $$errors errors in $$total tests total."; \
+		exit 0; \
+	fi
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
 	@echo "Testing super-raw mode..."
-	@for f in test/*.log; do env PATH=".:${PATH}" $(PYTHON) gpsfake -s 38400 -1 -b -p -r "r=2" $${f} | ./striplog -1 >test/test1.chk; ./striplog <$${f} >test/test2.chk; cmp test/test[12].chk; done; rm test/test[12].chk
+	@mkdir -p test
+	@for f in test/*.log; do \
+		env PATH=".:${PATH}" $(PYTHON) \
+		$(srcdir)/gpsfake -s 38400 -1 -b -p -r "r=2" $${f} \
+		| ./striplog -1 >test/test1.chk; \
+		./striplog <$${f} >test/test2.chk; \
+		cmp test/test[12].chk; \
+	done; rm test/test[12].chk
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	@for f in test/*.log; do env PATH=".:${PATH}" $(PYTHON) gpsfake -s 38400 -1 -b -p $${f} | grep -v "^GPSD,X" >$${f}.chk; done
+	@for f in $(srcdir)/test/*.log; do \
+		env PATH=".:${PATH}" $(PYTHON) \
+		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
+		| grep -v "^GPSD,X" >$${f}.chk; \
+	done
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
 	@echo "Testing RTCM decoding..."
-	@for f in test/*.rtcm; do ./rtcmdecode <$${f} >test/test.chk; diff -ub $${f}.chk test/test.chk; done; rm test/test.chk
+	@mkdir -p test
+	@for f in $(srcdir)/test/*.rtcm; do \
+		echo "Testing $${f}..."; \
+		./rtcmdecode <$${f} >test/test.chk; \
+		diff -ub $${f}.chk test/test.chk; \
+	done; \
+	rm test/test.chk
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: rtcmdecode
-	@for f in test/*.rtcm; do ./rtcmdecode <$${f} >$${f}.chk; done
+	@for f in $(srcdir)/test/*.rtcm; do \
+		./rtcmdecode < $${f} > $${f}.chk; \
+	done
 
 # Regression-test the packet getter.
 packet-regress: packet_test
 	@echo "Testing detection of invalid packets..."
-	@./packet_test | diff -u test/packet.test.chk -
+	@./packet_test | diff -u $(srcdir)/test/packet.test.chk -
 
 # Rebuild the packet-getter regression test
 packet-makeregress: packet_test
-	./packet_test >test/packet.test.chk
+	@mkdir -p test
+	./packet_test > test/packet.test.chk
 
 # Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
 	@echo "Testing RTCM encoding..."
-	@./rtcmdecode -p <test/undump.sample >/tmp/undump.test
-	@diff -u test/undump.sample /tmp/undump.test
-	@rm /tmp/undump.test
+	@mkdir -p test
+	@./rtcmdecode -p < $(srcdir)/test/undump.sample > test/undump.test
+	@diff -u $(srcdir)/test/undump.sample test/undump.test
+	@rm test/undump.test
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress packet-regress undump-regress
