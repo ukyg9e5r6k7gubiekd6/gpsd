@@ -26,7 +26,9 @@ AC_FUNC_ALLOCA
 AC_STDC_HEADERS
 AC_C_CONST
 
-eval "$CC $CFLAGS -o floattest floattest.c"
+dnl Note: This breaks cross-compiles.
+dnl Wasn't there a macro to do test compile and run?
+eval "$CC $CFLAGS -o floattest ${srcdir}/floattest.c"
 ./floattest
 
 if eval "test x$GCC = xyes"; then
