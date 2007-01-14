@@ -120,12 +120,14 @@ libgps_c_sources = \
 	tsip.c \
 	evermore.c \
 	italk.c \
+	italk.h \
 	navcom.c \
 	libgpsd_core.c \
 	subframe.c \
 	ntpshm.c \
 	libgps.c \
 	packet.c \
+	packet_names.h \
 	gpsutils.c \
 	geoid.c \
 	dgnss.c \
@@ -288,8 +290,7 @@ EXTRA_DIST = \
 	logextract \
 	striplog \
 	setup.py \
-	configure \
-	Makefile.in
+	packet_states.h
 
 CLEANFILES = packet_names.h floattest *.core $(PYEXTENSIONS)
 
