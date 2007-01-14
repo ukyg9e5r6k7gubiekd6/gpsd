@@ -555,7 +555,15 @@ if test "x$WITH_XSLTPROC" = "xyes"; then
     AC_MSG_CHECKING([whether xsltproc knows about docbook xsl])
     DOCBOOK_URI='http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
     cat >conftest.xml <<_EOF
-        <refentry id="foo.1"></refentry>
+        <refentry id="foo.1">
+          <refmeta>
+            <refentrytitle>foo</refentrytitle>
+            <manvolnum>1</manvolnum>
+            <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+          </refmeta>
+          <refnamediv id='name'>
+          <refname>foo</refname>
+        </refentry>
 _EOF
     if xsltproc --nonet --noout "$DOCBOOK_URI" conftest.xml >/dev/null 2>&1; then
         MANGENERATOR=xsltproc
