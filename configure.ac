@@ -26,10 +26,24 @@ AC_FUNC_ALLOCA
 AC_STDC_HEADERS
 AC_C_CONST
 
-dnl Note: This breaks cross-compiles.
-dnl Wasn't there a macro to do test compile and run?
-eval "$CC $CFLAGS -o floattest ${srcdir}/floattest.c"
-./floattest
+AC_MSG_CHECKING([for properly working floating point implementation])
+if test "x$build" = "x$host"; then
+	if eval "$CC $CFLAGS -o floattest ${srcdir}/floattest.c"; then
+		if ./floattest > /dev/null; then
+			AC_MSG_RESULT([yes])
+		else
+			AC_MSG_RESULT([no])
+			AC_MSG_WARN([We strongly recommend you manually examine the floattest results])
+		fi
+	else
+		AC_MSG_RESULT([failure compiling floattest])
+	fi
+else
+	AC_MSG_RESULT([skipped test (cross-compiling)])
+	AC_MSG_WARN([We are cross-compiling, and thus cannot run the floating point test now.
+We strongly recommend running floattest on the target platform.])
+fi
+
 
 if eval "test x$GCC = xyes"; then
 	CFLAGS="$CFLAGS -Wall -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE"
