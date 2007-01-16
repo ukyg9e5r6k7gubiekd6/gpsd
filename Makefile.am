@@ -32,7 +32,8 @@ sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
-python_PYTHON = gps.py gpsfake.py gpspacket.so
+python_PYTHON = gps.py gpsfake.py
+nodist_python_PYTHON = gpspacket.so
 PYTHONPAGES = gpsprof.1 gpsfake.1 gpscat.1
 endif
 
@@ -150,8 +151,8 @@ BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' <packet_states.h >packet_names.h
 
-libgps_la_SOURCES = $(libgps_c_sources) rtcm.h gpsd_config.h libgpsmm.cpp packet_states.h
-nodist_libgps_la_SOURCES = packet_names.h
+libgps_la_SOURCES = $(libgps_c_sources) rtcm.h libgpsmm.cpp packet_states.h
+nodist_libgps_la_SOURCES = gpsd_config.h packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
