@@ -149,7 +149,7 @@ libgps_c_sources = \
 
 BUILT_SOURCES = packet_names.h
 packet_names.h: packet_states.h
-	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' <packet_states.h >packet_names.h
+	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
 
 libgps_la_SOURCES = $(libgps_c_sources) rtcm.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = gpsd_config.h packet_names.h
@@ -163,7 +163,11 @@ PYEXTENSIONS = gpspacket.so
 noinst_SCRIPTS = gpspacket.so setup.py
 
 gpspacket.so: gpspacket.c libgps.la
-	$(PYTHON) setup.py build_ext --inplace
+	(pwd="`pwd`"; cd $(srcdir) && $(PYTHON) setup.py build_ext --build-lib "$$pwd" --build-temp "$$pwd/build" --include-dirs "$$pwd")
+
+# Clean up after Python
+clean-local:
+	rm -rf build
 
 #
 # Build gpsmm_test
