@@ -208,6 +208,9 @@ int main( int argc, char **argv)
 	exit(1);
     }
 
+    if (isatty(STDERR_FILENO) == 0)
+	vflag = 0;
+
     for(;;) {
 	int i = 0;
 	int j = 0;
