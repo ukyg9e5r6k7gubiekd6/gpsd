@@ -31,13 +31,14 @@ class Baton:
     def twirl(self, ch=None):
         if self.stream is None:
             return
-        if ch:
-            self.stream.write(ch)
-        elif os.isatty(self.stream.fileno()):
-            self.stream.write("-/|\\"[self.count % 4])
-            self.stream.write("\010")
+        if os.isatty(self.stream.fileno()):
+            if ch:
+                self.stream.write(ch)
+            else:
+                self.stream.write("-/|\\"[self.count % 4])
+                self.stream.write("\010")
+            self.stream.flush()
         self.count = self.count + 1
-        self.stream.flush()
         return
 
     def end(self, msg=None):
