@@ -608,14 +608,6 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     return 0; /* Raw measurements not yet implemented in gpsd */
 }
 
-/*
- * XXX we probably shouldn't be assuming this, but we don't have
- * XXX any alternate codepaths anywhere else in the daemon, and
- * XXX the *preprocessor* can't tell us either...
- */
-#define SIZEOF_DOUBLE 8
-#define SIZEOF_FLOAT 4
-
 /* Pseudorange Noise Statistics */
 #if (SIZEOF_DOUBLE == 8)
 static gps_mask_t handle_0xb5(struct gps_device_t *session)
