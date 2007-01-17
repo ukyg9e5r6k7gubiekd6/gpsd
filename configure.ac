@@ -41,10 +41,6 @@ if test x"$ac_cv_sizeof_int" != "x4" ; then
 	AC_MSG_WARN(gpsd requires sizeof(int)==4);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_long" != "x4" ; then 
-	AC_MSG_WARN(gpsd requires sizeof(long)==4);
-	type_error="yes"
-fi
 if test x"$ac_cv_sizeof_float" != "x4" ; then 
 	AC_MSG_WARN(gpsd requires sizeof(float)==4);
 	type_error="yes"
