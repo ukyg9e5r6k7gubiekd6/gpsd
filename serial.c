@@ -210,7 +210,7 @@ int gpsd_open(struct gps_device_t *session)
 
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, mode|O_NONBLOCK|O_NOCTTY)) < 0) {
 	gpsd_report(LOG_ERROR, "device open failed: %s - retrying read-only\n", strerror(errno));
-	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, mode|O_NONBLOCK|O_NOCTTY)) < 0) {
+	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) < 0) {
 	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n", strerror(errno));
 	    return -1;
 	}
