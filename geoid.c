@@ -11,6 +11,8 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 
+static double fix_minuz(double d);
+
 static double bilinear(double x1, double y1, double x2, double y2, double x, double y, double z11, double z12, double z21, double z22)
 {
  double delta;
@@ -112,11 +114,26 @@ void ecef_to_wgs84fix(struct gps_data_t *gpsdata,
     veast = -vx*sin(lambda)+vy*cos(lambda);
     gpsdata->fix.climb = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
     gpsdata->fix.speed = sqrt(pow(vnorth,2) + pow(veast,2));
-    heading = atan2(veast,vnorth);
+    heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
     /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * PI;
     gpsdata->fix.track = heading * RAD_2_DEG;
+}
+
+/*
+ * Some systems propagate the sign along with zero. This messes up
+ * certain trig functions, like atan2():
+ *    atan2(+0, +0) = 0
+ *    atan2(+0, -0) = PI
+ * Obviously that will break things. Luckily the "==" operator thinks
+ * that -0 == +0; we will use this to return an unambiguous value.
+ *
+ * I hereby decree that zero is not allowed to have a negative sign!
+ */
+static double fix_minuz(double d)
+{
+    return ((d == 0.0) ? 0.0 : d);
 }
 
 #ifdef TESTMAIN
