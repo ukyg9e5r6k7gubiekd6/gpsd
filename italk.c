@@ -330,12 +330,14 @@ static void italk_configurator(struct gps_device_t *session, int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+#ifdef __not_yet__
 static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
 {
     char *ping = "<?>";
     (void)italk_write(session->gpsdata.gps_fd, ping, 3);
 }
+#endif /* __not_yet__ */
 
 /* this is everything we export */
 struct gps_type_t italk_binary =
