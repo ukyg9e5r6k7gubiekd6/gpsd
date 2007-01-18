@@ -365,3 +365,143 @@ struct gps_type_t italk_binary =
     .cycle          = 1,		/* updates every second */
 };
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */
+
+#ifdef ANCIENT_ITRAX_ENABLE
+/**************************************************************************
+ *
+ * The NMEA mode of the iTrax chipset, as used in the FastTrax and others.
+ *
+ * As described by v1.31 of the NMEA Protocol Specification for the
+ * iTrax02 Evaluation Kit, 2003-06-12.
+ * v1.18 of the  manual, 2002-19-6, describes effectively
+ * the same protocol, but without ZDA.
+ *
+ **************************************************************************/
+
+/*
+ * Enable GGA=0x2000, RMC=0x8000, GSA=0x0002, GSV=0x0001, ZDA=0x0004.
+ * Disable GLL=0x1000, VTG=0x4000, FOM=0x0020, PPS=0x0010.
+ * This is 82+75+67+(3*60)+34 = 438 characters 
+ * 
+ * 1200   => at most 1 fix per 4 seconds
+ * 2400   => at most 1 fix per 2 seconds
+ * 4800   => at most 1 fix per 1 seconds
+ * 9600   => at most 2 fixes per second
+ * 19200  => at most 4 fixes per second
+ * 57600  => at most 13 fixes per second
+ * 115200 => at most 26 fixes per second
+ *
+ * We'd use FOM, but they don't specify a confidence interval.
+ */
+#define ITRAX_MODESTRING	"$PFST,NMEA,A007,%d\r\n"
+
+static int literal_send(int fd, const char *fmt, ... )
+/* ship a raw command to the GPS */
+{
+    int status;
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    status = (int)write(fd, buf, strlen(buf));
+    if (status == (int)strlen(buf)) {
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
+	return status;
+    } else {
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
+	return -1;
+    }
+}
+
+static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
+/* start it reporting */
+{
+    if (seq == 0) {
+	/* initialize GPS clock with current system time */ 
+	struct tm when;
+	double integral, fractional;
+	time_t intfixtime;
+	char buf[31], frac[6];
+	fractional = modf(timestamp(), &integral);
+	intfixtime = (time_t)integral;
+	(void)gmtime_r(&intfixtime, &when);
+	/* FIXME: so what if my local clock is wrong? */
+	(void)strftime(buf, sizeof(buf), "$PFST,INITAID,%H%M%S.XX,%d%m%y\r\n", &when);
+	(void)snprintf(frac, sizeof(frac), "%.2f", fractional);
+	buf[21] = frac[2]; buf[22] = frac[3];
+	(void)literal_send(session->gpsdata.gps_fd, buf);
+	/* maybe this should be considered a reconfiguration? */
+	(void)literal_send(session->gpsdata.gps_fd, "$PFST,START\r\n");
+    }
+}
+
+#ifdef ALLOW_RECONFIGURE
+static void itrax_configurator(struct gps_device_t *session, int seq)
+/* set synchronous mode */
+{
+    if (seq == 0) {
+	(void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
+	(void)literal_send(session->gpsdata.gps_fd, 
+		    ITRAX_MODESTRING, session->gpsdata.baudrate);
+    }
+}
+#endif /* ALLOW_RECONFIGURE */
+
+static bool itrax_speed(struct gps_device_t *session, speed_t speed)
+/* change the baud rate */
+{
+#ifdef ALLOW_RECONFIGURE
+    return literal_send(session->gpsdata.gps_fd, ITRAX_MODESTRING, speed) >= 0;
+#else
+    return false;
+#endif /* ALLOW_RECONFIGURE */
+}
+
+static bool itrax_rate(struct gps_device_t *session, double rate)
+/* change the sample rate of the GPS */
+{
+#ifdef ALLOW_RECONFIGURE
+    return literal_send(session->gpsdata.gps_fd, "$PSFT,FIXRATE,%d\r\n", rate) >= 0;
+#else
+    return false;
+#endif /* ALLOW_RECONFIGURE */
+}
+
+static void itrax_wrap(struct gps_device_t *session)
+/* stop navigation, this cuts the power drain */
+{
+#ifdef ALLOW_RECONFIGURE
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,0\r\n");
+#endif /* ALLOW_RECONFIGURE */
+    (void)literal_send(session->gpsdata.gps_fd, "$PFST,STOP\r\n");
+}
+
+/*@ -redef @*/
+static struct gps_type_t itrax = {
+    .typename      = "iTrax",		/* full name of type */
+    .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
+    .channels      = 12,		/* consumer-grade GPS */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = itrax_probe_subtype,	/* initialize */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = itrax_configurator,/* set synchronous mode */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet    = generic_get,	/* how to get a packet */
+    .parse_packet  = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer   = NULL,		/* iTrax doesn't support DGPS/WAAS/EGNOS */
+    .speed_switcher= itrax_speed,	/* no speed switcher */
+    .mode_switcher = NULL,		/* no mode switcher */
+    .rate_switcher = itrax_rate,	/* there's a sample-rate switcher */
+    .cycle_chars   = 438,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup         = itrax_wrap,	/* sleep the receiver */
+    .cycle          = 1,		/* updates every second */
+};
+/*@ -redef @*/
+#endif /* ITRAX_ENABLE */
+
