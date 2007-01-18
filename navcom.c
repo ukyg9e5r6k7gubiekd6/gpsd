@@ -26,7 +26,6 @@
  *
  * FIXME - I'm not too sure of the way I have computed the vertical positional error
  *         I have used FOM as a scaling factor for VDOP, thusly VRMS = FOM/HDOP*VDOP
- * TODO - Read 0x83 blocks (Ionosphere and UTC data) for transforming GPS time to UTC
  *
  * By Diego Berge. Contact via web form at http://www.nippur.net/survey/xuc/contact
  * (the form is in Catalan, but you'll figure it out)
@@ -73,6 +72,15 @@
                                     | (u_int32_t)getub((buf), (off)+2)<<8)>>8)
 
 #define NAVCOM_CHANNELS	12
+
+/* NOTE - This allows us to know into which of the unit's various
+          serial ports we are connected.
+          Its value gets updated every time we receive a 0x06 (Ack)
+          message.  Note that if commands are being fed into the
+          unit from more than one port (which is entirely possible
+          although not necessarily a bright idea), there is a good
+          chance that we might misidentify our port */
+static u_int8_t physical_port = 0xFF;
 
 static u_int8_t checksum(unsigned char *buf, size_t len)
 {
@@ -136,7 +144,7 @@ static void UNUSED navcom_cmd_0x3f(struct gps_device_t *session)
 }
 
 /* Test Support Block - Blinks the LEDs */
-static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode)
+static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode, u_int8_t length)
 {
     unsigned char msg[12];
     putbyte(msg, 0, 0x02);
@@ -144,24 +152,49 @@ static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode)
     putbyte(msg, 2, 0x66);
     putbyte(msg, 3, 0x1c);	/* Cmd ID */
     putword(msg, 4, 0x0008);
-    putbyte(msg, 6, 0x00);
+    putbyte(msg, 6, 0x04);      /* Use ACK/NAK */
     putbyte(msg, 7, mode);	/* 0x01 or 0x02 */
-    putbyte(msg, 8, mode);
+    putbyte(msg, 8, length);    /* Only if mode == 0x01 */
     putbyte(msg, 9, 0x00);
     putbyte(msg, 10, checksum(msg+3, 7));
     putbyte(msg, 11, 0x03);
     navcom_send_cmd(session, msg, 12);
     gpsd_report(LOG_PROG,
-                "Navcom: sent command 0x1c (Test Support Block) - mode = %02x\n",
-                mode);
+                "Navcom: sent command 0x1c (Test Support Block)\n");
+    gpsd_report(LOG_IO,
+                "Navcom: command 0x1c mode = %02x, length = %u\n",
+                mode, length);
 }
 
+/* Serial Port Configuration */
+static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selection)
+{
+    /* NOTE - We only allow changing one port at a time,
+       although the message supports doing both at once. */
+    unsigned char msg[12];
+    putbyte(msg, 0, 0x02);
+    putbyte(msg, 1, 0x99);
+    putbyte(msg, 2, 0x66);
+    putbyte(msg, 3, 0x11);	/* Cmd ID */
+    putword(msg, 4, 0x0008);    /* Length */
+    putbyte(msg, 6, 0x04);      /* Action - Use ACK/NAK) */
+    putbyte(msg, 7, port_selection);
+    putbyte(msg, 8, 0x00);      /* Reserved */
+    putbyte(msg, 9, 0x00);      /* Reserved */
+    putbyte(msg, 10, checksum(msg+3, 7));
+    putbyte(msg, 11, 0x03);
+    navcom_send_cmd(session, msg, 12);
+    gpsd_report(LOG_PROG,
+                "Navcom: sent command 0x11 (Serial Port Configuration)\n");
+    gpsd_report(LOG_IO,
+                "Navcom: serial port selection: 0x%02x\n", port_selection);
+}
 
 static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /* Request the following messages: */
     if (!seq) {
-        navcom_cmd_0x1c(session, 0x02);         /* Blink LEDs on receiver */
+        navcom_cmd_0x1c(session, 0x01, 5);      /* Blink LEDs on receiver */
         navcom_cmd_0x20(session, 0xae, 0x1770); /* Identification Block - send every 10 min*/
         navcom_cmd_0x20(session, 0xb1, 0x4000); /* PVT Block */
         navcom_cmd_0x20(session, 0xb5, 0x00c8); /* Pseudorange Noise Statistics - send every 20s */
@@ -176,8 +209,71 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
 
 static void navcom_ping(struct gps_device_t *session)
 {
+    navcom_cmd_0x1c(session, 0x02, 0);      /* Test Support Block */
     navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
     navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
+}
+
+static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
+{
+#ifdef ALLOW_RECONFIGURE
+    u_int8_t port_selection;
+    u_int8_t baud;
+    if (physical_port == 0xFF) {
+        /* We still don't know which port we're connected to */
+        return false;
+    }
+    switch (speed) {
+        /* NOTE - The spec says that certain baud combinations
+                  on ports A and B are not allowed, those are
+                  1200/115200, 2400/57600, and 2400/115200.
+                  To try and minimise the possibility of those
+                  occurring, we do not allow baud rates below
+                  4800.  We could also disallow 57600 and 115200
+                  to totally prevent this, but I do not consider
+                  that reasonable.  Finding which baud speed the
+                  other port is set at would also be too much
+                  trouble, so we do not do it. */
+        case   4800:
+            baud = 0x04;
+            break;
+        case   9600:
+            baud = 0x06;
+            break;
+        case  19200:
+            baud = 0x08;
+            break;
+        case  38400:
+            baud = 0x0a;
+            break;
+        case  57600:
+            baud = 0x0c;
+            break;
+        case 115200:
+            baud = 0x0e;
+            break;
+        default:
+            /* Unsupported speed */
+            return false;
+    }
+    
+    /* Proceed to construct our message */
+    port_selection = physical_port | baud;
+    
+    /* Send it off */
+    navcom_cmd_0x11(session, port_selection);
+    
+    /* And cheekily return true, even though we have
+       no way to know if the speed change succeeded
+       until and if we receive an ACK (message 0x06),
+       which will be at the new baud speed if the
+       command was successful.  Bottom line, the client
+       should requery gpsd to see if the new speed is
+       different than the old one */
+    return true;
+#else
+    return false;
+#endif /* ALLOW_RECONFIGURE */
 }
 
 /* Ionosphere and UTC Data */
@@ -287,6 +383,7 @@ static gps_mask_t handle_0x06(struct gps_device_t *session)
     unsigned char *buf = session->packet.outbuffer + 3;
     u_int8_t cmd_id = getub(buf, 3);
     u_int8_t port = getub(buf, 4);
+    physical_port = port; /* This tells us which serial port was used last */
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0x06 (Acknowledgement (without error))\n");
     gpsd_report(LOG_IO,
@@ -416,7 +513,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     if (track < 0)
     	track += 2 * PI;
     session->gpsdata.fix.track = track * RAD_2_DEG;
-    /* FIXME Confirm what the tech spec means by (2^-10 m/s) +/- 8192m/s */
     session->gpsdata.fix.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
     session->gpsdata.fix.climb = vel_up * VEL_RES;
 
@@ -434,7 +530,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
                which units does gpsd require? (docs don't say) */
     session->gpsdata.fix.ept = tfom*1.96/*Two sigma*/;
     /* FIXME This cannot possibly be right */
-    /* I cannot find where to get VRMS from in the Navcom output, though */
+    /* I cannot find where to get VRMS from in the Navcom output, though,
+       and this value seems to agree with the output from other software */
     session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
     
     if (gdop == DOP_UNDEFINED)
@@ -546,6 +643,8 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     u_int8_t cl2 = (getub(buf, 13)&0x30)>>4;
     u_int8_t ura = getub(buf, 13)&0x0f;
     u_int8_t svh = (getub(buf, 14)&0xfc)>>2;
+    /* We already have IODC from earlier in the message, so
+       we do not decode again */
 /*    u_int16_t iodc = (getub(buf, 14)&0x03)<<8;*/
     u_int8_t l2pd = (getub(buf, 15)&0x80)>>7;
     int8_t tgd = getsb(buf, 26);
@@ -564,7 +663,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int16_t cus = getsw_be(buf, 51);
     u_int32_t sqrt_a = getul_be(buf, 53);
     u_int16_t toe = getuw_be(buf, 57);
-    /* fit interval & AODO not collected */
+    /* NOTE - Fit interval & AODO not collected */
     /* Subframe 3, words 3 to 10 minus parity */
     int16_t cic = getsw_be(buf, 60);
     int32_t Omega0 = getsl_be(buf, 62);
@@ -730,13 +829,6 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 /* Raw Meas. Data Block */
 static gps_mask_t handle_0xb0(struct gps_device_t *session)
 {
-    /* FIXME - Assume the value of the CA pseudorange to be invalid.
-               I suspect a typo in my version of the tech spec, or
-               I am missing something completely */
-    /* NOTE  - The values in the variables are unshifted (where applicable)
-               and unscaled.  Consult the spec or the gpsd_report function
-               calls below for the appropiate masking, shifting, and
-               scaling */
     /* L1 wavelength (299792458m/s / 1575420000Hz) */
 #define LAMBDA_L1 (.190293672798364880476317426464)
     size_t n;
@@ -983,20 +1075,23 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     u_int32_t tow = getul(buf, 5);
     int8_t osc_temp = getsb(buf, 9);
     u_int8_t nav_status = getub(buf, 10);
-#if (SIZEOF_DOUBLE == 8)
     union long_double l_d;
-    double nav_clock_offset = getd(buf, 11);
-#else
-    double nav_clock_offset = NAN;
-#endif /* (SIZEOF_DOUBLE == 8) */
-#if (SIZEOF_FLOAT == 4)
+    double nav_clock_offset;
     union int_float i_f;
-    float nav_clock_drift = getf(buf, 19);
-    float osc_filter_drift_est = getf(buf, 23);
-#else
-    float nav_clock_drift = NAN;
-    float osc_filter_drift_est = NAN;
-#endif /* (SIZEOF_FLOAT == 4) */
+    float nav_clock_drift;
+    float osc_filter_drift_est;
+    if (sizeof(double) == 8) {
+        nav_clock_offset = getd(buf, 11);
+    } else {
+        nav_clock_offset = NAN;
+    }
+    if (sizeof(float) == 4) {    
+        nav_clock_drift = getf(buf, 19);
+        osc_filter_drift_est = getf(buf, 23);
+    } else {
+        nav_clock_drift = NAN;
+        osc_filter_drift_est = NAN;
+    }
     int32_t time_slew = getsl(buf, 27);
     
     session->gpsdata.sentence_time = gpstime_to_unix(week, tow/1000.0) 
@@ -1103,7 +1198,7 @@ struct gps_type_t navcom_binary =
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = navcom_parse_input,	/* parse message packets */
     .rtcm_writer    = pass_rtcm,		/* send RTCM data straight */
-    .speed_switcher = NULL,			/* we do not change baud rates */
+    .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */
     .cycle_chars    = -1,			/* ignore, no rate switch */
