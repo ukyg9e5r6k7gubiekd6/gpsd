@@ -81,7 +81,14 @@ if eval "test x$GCC = xyes"; then
 	dnl -Wcast-qual -W
 fi
 
-AC_CHECK_HEADERS(termios.h sys/termios.h sys/select.h strings.h ncurses.h sys/time.h getopt.h sys/modem.h sys/ipc.h sys/shm.h)
+AC_CHECK_HEADERS(sys/termios.h sys/select.h sys/time.h sys/modem.h sys/ipc.h sys/shm.h sys/socket.h)
+AC_CHECK_HEADERS(arpa/inet.h netinet/in_systm.h netinet/in.h netinet/tcp.h)
+AC_CHECK_HEADERS([netinet/ip.h], [], [],
+[[#if HAVE_NETINET_IN_SYSTM_H && HAVE_NETINET_IN_H
+#include netinet/ip.h
+#endif
+]])
+AC_CHECK_HEADERS(termios.h strings.h ncurses.h getopt.h netdb.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
