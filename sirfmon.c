@@ -1051,7 +1051,7 @@ int main (int argc, char **argv)
     (void)wmove(mid2win, 2,1);
     (void)wprintw(mid2win, "Vel:                            m/s                                  climb m/s");
     (void)wmove(mid2win, 3,1);
-    (void)wprintw(mid2win, "Time:                  UTC:                Heading:                  speed m/s");
+    (void)wprintw(mid2win, "Time:                  GPS:                Heading:                  speed m/s");
     (void)wmove(mid2win, 4,1);
     (void)wprintw(mid2win, "Skew:                   TZ:                HDOP:      M1:        M2:    ");
     (void)wmove(mid2win, 5,1);
