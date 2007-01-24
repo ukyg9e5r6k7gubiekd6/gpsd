@@ -64,9 +64,6 @@
    "standard" 80x24 screen. */
 #define SATELLITES_WIDTH 35
 
-/* This is the title to put at the top of the screen. */
-#define TITLE "GPSD Test Client"
-
 /* ================================================================
    You shouldn't have to modify any #define values below this line.
    ================================================================ */
@@ -118,7 +115,6 @@ static char *speedunits = "mph";
 
 static WINDOW *datawin, *satellites, *messages;
 
-static int title_flag=0;
 static int raw_flag=0;
 static int silent_flag=0;
 static int fixclear_flag=0;
@@ -633,12 +629,7 @@ int main(int argc, char *argv[])
      the satellite list is truncated, omit the satellites not used to
      obtain the current fix.)
 
-     3.  If the criteria in #2 is one line short of what is necessary
-     to display the 'datawin' data, drop the title at the top of the
-     screen and move everything up one line, also expanding the
-     satellite list by one.
-
-     4.  If the screen is large enough to display all possible
+     3.  If the screen is large enough to display all possible
      satellites (MAXCHANNELS - 2) with space still left at the bottom,
      add a window at the bottom in which to scroll raw gpsd data.
   */
@@ -646,15 +637,9 @@ int main(int argc, char *argv[])
 
   if(compass_flag==1) {
     if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
-      title_flag = 0;
       raw_flag = 0;
       window_length = MIN_COMPASS_DATAWIN_SIZE;
-    } else if(ysize == MIN_COMPASS_DATAWIN_SIZE + 1) {
-      title_flag = 1;
-      raw_flag = 0;
-      window_length = MIN_COMPASS_DATAWIN_SIZE;
-    } else if(ysize >= MIN_COMPASS_DATAWIN_SIZE + 2) {
-      title_flag = 1;
+    } else if(ysize > MIN_COMPASS_DATAWIN_SIZE) {
       raw_flag = 1;
       window_length = MIN_COMPASS_DATAWIN_SIZE;
     } else {
@@ -667,27 +652,22 @@ int main(int argc, char *argv[])
     }
   } else {
     if(ysize == MAX_SATWIN_SIZE) {
-      title_flag = 0;
       raw_flag = 0;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize == MAX_SATWIN_SIZE + 1) {
-      title_flag = 0;
       raw_flag = 1;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize > MAX_SATWIN_SIZE + 2) {
-      title_flag = 0;
       raw_flag = 1;
       window_length = MAX_SATWIN_SIZE;
       display_sats = MAX_POSSIBLE_SATS;
     } else if(ysize > MIN_GPS_DATAWIN_SIZE) {
-      title_flag = 1;
       raw_flag = 0;
-      window_length = ysize - title_flag - raw_flag;
-      display_sats = window_length - SATWIN_OVERHEAD - title_flag - raw_flag;
+      window_length = ysize - raw_flag;
+      display_sats = window_length - SATWIN_OVERHEAD - raw_flag;
     } else if(ysize == MIN_GPS_DATAWIN_SIZE) {
-      title_flag = 0;
       raw_flag = 0;
       window_length = MIN_GPS_DATAWIN_SIZE;
       display_sats = window_length - SATWIN_OVERHEAD - 1;
@@ -706,18 +686,14 @@ int main(int argc, char *argv[])
     /* We're a compass, set up accordingly. */
 
     /*@ -onlytrans @*/
-    datawin    = newwin(window_length, DATAWIN_WIDTH, title_flag, 0);
+    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
     (void)nodelay(datawin,(bool)TRUE);
     if(raw_flag==1) {
-      messages   = newwin(0, 0, title_flag + window_length, 0);
+      messages   = newwin(0, 0, window_length, 0);
 
       /*@ +onlytrans @*/
       (void)scrollok(messages, true);
-      (void)wsetscrreg(messages, 0, ysize - (window_length + title_flag));
-    }
-
-    if(title_flag==1) {
-	(void)mvprintw(0, (int)(((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2)), TITLE);
+      (void)wsetscrreg(messages, 0, ysize - (window_length));
     }
 
     /*@ -nullpass @*/
@@ -737,20 +713,17 @@ int main(int argc, char *argv[])
     /* We're a GPS, set up accordingly. */
 
     /*@ -onlytrans @*/
-    datawin    = newwin(window_length, DATAWIN_WIDTH, title_flag, 0);
-    satellites = newwin(window_length, SATELLITES_WIDTH, title_flag, DATAWIN_WIDTH);
+    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
+    satellites = newwin(window_length, SATELLITES_WIDTH, 0, DATAWIN_WIDTH);
     (void)nodelay(datawin,(bool)TRUE);
     if(raw_flag==1) {
-      messages   = newwin(ysize - (window_length + title_flag), xsize, title_flag + window_length, 0);
+      messages   = newwin(ysize - (window_length), xsize, window_length, 0);
 
       /*@ +onlytrans @*/
       (void)scrollok(messages, true);
-      (void)wsetscrreg(messages, 0, ysize - (window_length + title_flag));
+      (void)wsetscrreg(messages, 0, ysize - (window_length));
     }
 
-    if(title_flag==1) {
-	(void)mvprintw(0, (int)(((DATAWIN_WIDTH + SATELLITES_WIDTH) / 2) - (strlen(TITLE) / 2)), TITLE);
-    }
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
