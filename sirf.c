@@ -93,6 +93,7 @@ gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -458,6 +459,23 @@ gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, s
     return mask;
 }
 
+gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+{
+    /* save these to restore them in the revert method */
+    session->driver.sirf.nav_parameters_seen = true;
+    session->driver.sirf.altitude_hold_mode = getub(buf, 5);
+    session->driver.sirf.altitude_hold_source = getub(buf, 6);
+    session->driver.sirf.altitude_source_input = getsw(buf, 7);
+    session->driver.sirf.degraded_mode = getub(buf, 9);
+    session->driver.sirf.degraded_timeout = getub(buf, 10);
+    session->driver.sirf.dr_timeout = getub(buf, 11);
+    session->driver.sirf.track_smooth_mode = getub(buf, 12);
+    gpsd_report(LOG_PROG, "Setting Navigation Parameters\n");
+    (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
+    return 0;
+
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned short navtype;
@@ -558,18 +576,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
 #ifdef ALLOW_RECONFIGURE
     case 0x13:	/* Navigation Parameters */
-	/* save these to restore them in the revert method */
-	session->driver.sirf.nav_parameters_seen = true;
-	session->driver.sirf.altitude_hold_mode = getub(buf, 5);
-	session->driver.sirf.altitude_hold_source = getub(buf, 6);
-	session->driver.sirf.altitude_source_input = getsw(buf, 7);
-	session->driver.sirf.degraded_mode = getub(buf, 9);
-	session->driver.sirf.degraded_timeout = getub(buf, 10);
-	session->driver.sirf.dr_timeout = getub(buf, 11);
-	session->driver.sirf.track_smooth_mode = getub(buf, 12);
-	gpsd_report(LOG_PROG, "Setting Navigation Parameters\n");
-	(void)sirf_write(session->gpsdata.gps_fd, modecontrol);
-	break;
+	return sirf_msg_sysparam(session, buf, len);
 #endif /* ALLOW_RECONFIGURE */
 
     case 0x1b:		/* DGPS status (undocumented) */
