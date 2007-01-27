@@ -43,6 +43,8 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
+gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
+
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
    size_t    i, len;
@@ -120,12 +122,39 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
 }
 
+gps_mask_t sirf_msg_debug(struct gps_device_t *session UNUSED, unsigned char *buf, size_t len)
+{
+    char msgbuf[MAX_PACKET_LENGTH*3 + 2];
+    int i;
+
+    bzero(msgbuf, sizeof(msgbuf));
+
+    if (0xe1 == (unsigned char)buf[0]) {		/* Development statistics messages */
+	for (i = 2; i < (int)len; i++)
+		(void)snprintf(msgbuf+strlen(msgbuf), 
+			       sizeof(msgbuf)-strlen(msgbuf),
+			       "%c", buf[i]^0xff);
+	gpsd_report(LOG_PROG, "DEV 0xe1: %s\n", msgbuf);
+    } else if (0xff == (unsigned char)buf[0]) {		/* Debug messages */
+	for (i = 1; i < (int)len; i++)
+	    if (isprint(buf[i]))
+		(void)snprintf(msgbuf+strlen(msgbuf), 
+			       sizeof(msgbuf)-strlen(msgbuf),
+			       "%c", buf[i]);
+	    else
+		(void)snprintf(msgbuf+strlen(msgbuf), 
+			       sizeof(msgbuf)-strlen(msgbuf),
+			       "\\x%02x", (unsigned int)buf[i]);
+	gpsd_report(LOG_PROG, "DBG 0xff: %s\n", msgbuf);
+    }
+    return 0;
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
     unsigned short navtype;
     gps_mask_t mask;
-    char buf2[MAX_PACKET_LENGTH*3+2];
     double fv;
     /*@ +charint @*/
 #ifdef ALLOW_RECONFIGURE
@@ -681,26 +710,9 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0xe1:		/* Development statistics messages */
-	buf2[0] = '\0';
-	for (i = 2; i < (int)len; i++)
-		(void)snprintf(buf2+strlen(buf2), 
-			       sizeof(buf2)-strlen(buf2),
-			       "%c", buf[i]^0xff);
-	gpsd_report(LOG_PROG, "DEV 0xe1: %s\n", buf2);
-	return 0;
-
+	/* FALLTHROUGH */
     case 0xff:		/* Debug messages */
-	buf2[0] = '\0';
-	for (i = 1; i < (int)len; i++)
-	    if (isprint(buf[i]))
-		(void)snprintf(buf2+strlen(buf2), 
-			       sizeof(buf2)-strlen(buf2),
-			       "%c", buf[i]);
-	    else
-		(void)snprintf(buf2+strlen(buf2), 
-			       sizeof(buf2)-strlen(buf2),
-			       "\\x%02x", (unsigned int)buf[i]);
-	gpsd_report(LOG_PROG, "DBG 0xff: %s\n", buf2);
+	sirf_msg_debug(session, buf, len);
 	return 0;
 
     default:
