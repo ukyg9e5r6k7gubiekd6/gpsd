@@ -95,6 +95,7 @@ gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -540,9 +541,39 @@ gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size
     return mask;
 }
 
+gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+{
+    gps_mask_t mask = 0;
+    gpsd_report(LOG_PROG, "PPS 0x34: Status = 0x%02x\n", getub(buf, 14));
+    if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
+	struct tm unpacked_date;
+	unpacked_date.tm_hour = (int)getub(buf, 1);
+	unpacked_date.tm_min = (int)getub(buf, 2);
+	unpacked_date.tm_sec = (int)getub(buf, 3);
+	unpacked_date.tm_mday = (int)getub(buf, 4);
+	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
+	unpacked_date.tm_year = (int)getuw(buf, 6) - 1900;
+	/*@ -compdef */
+	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    (double)mktime(&unpacked_date);
+	/*@ +compdef */
+	session->context->leap_seconds = (int)getuw(buf, 8);
+	session->context->valid |= LEAP_SECOND_VALID;
+#ifdef NTPSHM_ENABLE
+	if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) == 0)
+	    gpsd_report(LOG_PROG, "valid time in message 0x34, seen=0x%02x\n",
+		session->driver.sirf.time_seen);
+	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
+	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_UTC_2))
+	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.3);
+#endif /* NTPSHM_ENABLE */
+	mask |= TIME_SET;
+    }
+    return mask;
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    gps_mask_t mask;
 
     if (len == 0)
 	return 0;
@@ -554,7 +585,6 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
 
-    mask = 0;
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
@@ -730,32 +760,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	 * PPS and always comes out right around the top of the
 	 * second."
 	 */
-	gpsd_report(LOG_PROG, "PPS 0x34: Status = 0x%02x\n", getub(buf, 14));
-	if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
-	    struct tm unpacked_date;
-	    unpacked_date.tm_hour = (int)getub(buf, 1);
-	    unpacked_date.tm_min = (int)getub(buf, 2);
-	    unpacked_date.tm_sec = (int)getub(buf, 3);
-	    unpacked_date.tm_mday = (int)getub(buf, 4);
-	    unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
-	    unpacked_date.tm_year = (int)getuw(buf, 6) - 1900;
-	    /*@ -compdef */
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= (double)mktime(&unpacked_date);
-	    /*@ +compdef */
-	    session->context->leap_seconds = (int)getuw(buf, 8);
-	    session->context->valid |= LEAP_SECOND_VALID;
-#ifdef NTPSHM_ENABLE
-	    if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) == 0)
-		gpsd_report(LOG_PROG, "valid time in message 0x34, seen=0x%02x\n",
-				session->driver.sirf.time_seen);
-	    session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-	    if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_UTC_2))
-		(void)ntpshm_put(session, session->gpsdata.fix.time + 0.3);
-#endif /* NTPSHM_ENABLE */
-	    mask |= TIME_SET;
-	}
-	return mask;
+	return sirf_msg_ppstime(session, buf, len);
 
     case 0x62:		/* uBlox Extended Measured Navigation Data */
 	return sirf_msg_ublox(session, buf, len);
