@@ -221,6 +221,7 @@ struct gps_data_t {
 				 */
 
     struct gps_fix_t	fix;		/* accumulated PVT data */
+    struct gps_fix_t	oldfix;		/* previous fix for error modelling */
 
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
