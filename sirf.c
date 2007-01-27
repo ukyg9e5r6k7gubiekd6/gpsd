@@ -87,7 +87,9 @@ static unsigned char enablemid52[] = {
 #endif /* ALLOW_RECONFIGURE */
 
 
-gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_debug(unsigned char *, size_t );
+gps_mask_t sirf_msg_errors(unsigned char *, size_t );
+
 gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
@@ -96,7 +98,6 @@ gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_errors(struct gps_device_t *, unsigned char *, size_t );
 
 
 bool sirf_write(int fd, unsigned char *msg) {
@@ -176,7 +177,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
 }
 
-gps_mask_t sirf_msg_debug(struct gps_device_t *session UNUSED, unsigned char *buf, size_t len)
+gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
 {
     char msgbuf[MAX_PACKET_LENGTH*3 + 2];
     int i;
@@ -200,6 +201,24 @@ gps_mask_t sirf_msg_debug(struct gps_device_t *session UNUSED, unsigned char *bu
 			       sizeof(msgbuf)-strlen(msgbuf),
 			       "\\x%02x", (unsigned int)buf[i]);
 	gpsd_report(LOG_PROG, "DBG 0xff: %s\n", msgbuf);
+    }
+    return 0;
+}
+
+gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
+{
+    switch (getuw(buf, 1)) {
+    case 2:
+	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %d error on PRN %ld\n", getul(buf, 9), getul(buf, 5));
+	break;
+
+    case 4107:
+	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n", getul(buf, 5));
+	break;
+
+    default:
+	gpsd_report(LOG_PROG, "EID 0x0a: Error ID type %d\n", getuw(buf, 1));
+	break;
     }
     return 0;
 }
@@ -574,24 +593,6 @@ gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, si
     return mask;
 }
 
-gps_mask_t sirf_msg_errors(struct gps_device_t *session UNUSED, unsigned char *buf, size_t len UNUSED)
-{
-    switch (getuw(buf, 1)) {
-    case 2:
-	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %d error on PRN %ld\n", getul(buf, 9), getul(buf, 5));
-	break;
-
-    case 4107:
-	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n", getul(buf, 5));
-	break;
-
-    default:
-	gpsd_report(LOG_PROG, "EID 0x0a: Error ID type %d\n", getuw(buf, 1));
-	break;
-    }
-    return 0;
-}
-
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
 
@@ -644,7 +645,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     	return 0;
 
     case 0x0a:		/* Error ID Data */
-	return sirf_msg_errors(session, buf, len);
+	return sirf_msg_errors(buf, len);
 
     case 0x0b:		/* Command Acknowledgement */
 	gpsd_report(LOG_PROG, "ACK 0x0b: %02x\n",getub(buf, 1));
@@ -779,7 +780,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0xe1:		/* Development statistics messages */
 	/* FALLTHROUGH */
     case 0xff:		/* Debug messages */
-	sirf_msg_debug(session, buf, len);
+	sirf_msg_debug(buf, len);
 	return 0;
 
     default:
