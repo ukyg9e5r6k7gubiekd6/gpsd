@@ -91,6 +91,7 @@ gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -312,9 +313,60 @@ gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, siz
 	return TIME_SET | SATELLITE_SET;
 }
 
+gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+{
+    int i;
+    unsigned short navtype;
+    gps_mask_t mask = 0;
+    session->gpsdata.satellites_used = (int)getub(buf, 28);
+    memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
+    for (i = 0; i < SIRF_CHANNELS; i++)
+	session->gpsdata.used[i] = (int)getub(buf, 29+i);
+    if ((session->driver.sirf.driverstate & (SIRF_GE_232 | UBLOX))==0) {
+	/* position/velocity is bytes 1-18 */
+	ecef_to_wgs84fix(&session->gpsdata, 
+	     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
+	     getsw(buf, 13)/8.0, getsw(buf, 15)/8.0, getsw(buf, 17)/8.0);
+	/* fix status is byte 19 */
+	navtype = (unsigned short)getub(buf, 19);
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->gpsdata.fix.mode = MODE_NO_FIX;
+	if ((navtype & 0x80) != 0)
+	    session->gpsdata.status = STATUS_DGPS_FIX;
+	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	    session->gpsdata.status = STATUS_FIX;
+	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	    session->gpsdata.fix.mode = MODE_3D;
+	else if (session->gpsdata.status != 0)
+	    session->gpsdata.fix.mode = MODE_2D;
+	if (session->gpsdata.fix.mode == MODE_3D)
+	    mask |= ALTITUDE_SET | CLIMB_SET;
+	gpsd_report(LOG_PROG, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+	    navtype,session->gpsdata.status,session->gpsdata.fix.mode);
+	/* byte 20 is HDOP, see below */
+	/* byte 21 is "mode 2", not clear how to interpret that */ 
+	session->gpsdata.fix.time = session->gpsdata.sentence_time =
+	    gpstime_to_unix(getsw(buf, 22), getul(buf, 24)*1e-2) -
+	    session->context->leap_seconds;
+#ifdef NTPSHM_ENABLE
+	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
+	    if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_2) == 0)
+		gpsd_report(LOG_PROG, "valid time in message 0x02, seen=0x%02x\n",
+		    session->driver.sirf.time_seen);
+		session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
+		if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_2))
+		    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
+	}
+#endif /* NTPSHM_ENABLE */
+	/* fix quality data */
+	session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
+	mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET | CYCLE_START_SET;
+    }
+    return mask;
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    int	i;
     unsigned short navtype;
     gps_mask_t mask;
 
@@ -332,50 +384,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     switch (buf[0])
     {
     case 0x02:		/* Measure Navigation Data Out */
-	session->gpsdata.satellites_used = (int)getub(buf, 28);
-	memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
-	for (i = 0; i < SIRF_CHANNELS; i++)
-	    session->gpsdata.used[i] = (int)getub(buf, 29+i);
-	if ((session->driver.sirf.driverstate & (SIRF_GE_232 | UBLOX))==0) {
-	    /* position/velocity is bytes 1-18 */
-	    ecef_to_wgs84fix(&session->gpsdata, 
-			     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
-			     getsw(buf, 13)/8.0, getsw(buf, 15)/8.0, getsw(buf, 17)/8.0);
-	    /* fix status is byte 19 */
-	    navtype = (unsigned short)getub(buf, 19);
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->gpsdata.fix.mode = MODE_NO_FIX;
-	    if ((navtype & 0x80) != 0)
-		session->gpsdata.status = STATUS_DGPS_FIX;
-	    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-		session->gpsdata.status = STATUS_FIX;
-	    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-		session->gpsdata.fix.mode = MODE_3D;
-	    else if (session->gpsdata.status != 0)
-		session->gpsdata.fix.mode = MODE_2D;
-	    if (session->gpsdata.fix.mode == MODE_3D)
-		mask |= ALTITUDE_SET | CLIMB_SET;
-	    gpsd_report(LOG_PROG, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
-			navtype,session->gpsdata.status,session->gpsdata.fix.mode);
-	    /* byte 20 is HDOP, see below */
-	    /* byte 21 is "mode 2", not clear how to interpret that */ 
-	    session->gpsdata.fix.time = session->gpsdata.sentence_time
-		= gpstime_to_unix(getsw(buf, 22), getul(buf, 24)*1e-2) - session->context->leap_seconds;
-#ifdef NTPSHM_ENABLE
-	    if (session->gpsdata.fix.mode > MODE_NO_FIX) {
-		if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_2) == 0)
-		    gpsd_report(LOG_PROG, "valid time in message 0x02, seen=0x%02x\n",
-				session->driver.sirf.time_seen);
-		session->driver.sirf.time_seen |= TIME_SEEN_GPS_2;
-		if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_2))
-		    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.8);
-	    }
-#endif /* NTPSHM_ENABLE */
-	    /* fix quality data */
-	    session->gpsdata.hdop = (double)getub(buf, 20)/5.0;
-	    mask |= TIME_SET | LATLON_SET | TRACK_SET | SPEED_SET | STATUS_SET | MODE_SET | HDOP_SET | USED_SET | CYCLE_START_SET;
-	}
-	return mask;
+	return sirf_msg_navsol(session, buf, len);
 
     case 0x04:		/* Measured tracker data out */
 	return sirf_msg_svinfo(session, buf, len);
