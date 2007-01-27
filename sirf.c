@@ -90,6 +90,7 @@ static unsigned char enablemid52[] = {
 gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -256,9 +257,64 @@ gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, si
     return 0;
 }
 
-gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
+gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
 {
     int	st, i, j, cn;
+    gpsd_zero_satellites(&session->gpsdata);
+    session->gpsdata.sentence_time
+	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
+    for (i = st = 0; i < SIRF_CHANNELS; i++) {
+	int off = 8 + 15 * i;
+	bool good;
+	session->gpsdata.PRN[st]       = (int)getub(buf, off);
+	session->gpsdata.azimuth[st]   = (int)(((unsigned)getub(buf, off+1)*3)/2.0);
+	session->gpsdata.elevation[st] = (int)((unsigned)getub(buf, off+2)/2.0);
+	cn = 0;
+	for (j = 0; j < 10; j++)
+	    cn += (int)getub(buf, off+5+j);
+
+	session->gpsdata.ss[st] = cn/10;
+	good = session->gpsdata.PRN[st]!=0 && 
+	session->gpsdata.azimuth[st]!=0 && 
+	session->gpsdata.elevation[st]!=0;
+#ifdef __UNUSED__
+	gpsd_report(LOG_PROG, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
+			getub(buf, off), 
+			getub(buf, off+2)/2.0, 
+			(getub(buf, off+1)*3)/2.0,
+			cn/10, 
+			getuw(buf, off+3),
+			good ? '*' : ' ');
+#endif /* UNUSED */
+	if (good!=0)
+	    st += 1;
+    }
+    session->gpsdata.satellites = st;
+#ifdef NTPSHM_ENABLE
+    if (st > 3) {
+	if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_1)==0)
+	    gpsd_report(LOG_PROG, "valid time in message 0x04, seen=0x%02x\n",
+		session->driver.sirf.time_seen);
+	session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
+	if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_1))
+	    (void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
+    }
+#endif /* NTPSHM_ENABLE */
+    /*
+     * The freaking brain-dead SiRF chip doesn't obey its own
+     * rate-control command for 04, at least at firmware rev. 231, 
+     * so we have to do our own rate-limiting here...
+     */
+    gpsd_report(LOG_PROG, "MTD 0x04: %d satellites\n", st);
+    if ((session->driver.sirf.satcounter++ % 5) != 0)
+	return 0;
+    else
+	return TIME_SET | SATELLITE_SET;
+}
+
+gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
+{
+    int	i;
     unsigned short navtype;
     gps_mask_t mask;
 
@@ -322,54 +378,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return mask;
 
     case 0x04:		/* Measured tracker data out */
-	gpsd_zero_satellites(&session->gpsdata);
-	session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
-	for (i = st = 0; i < SIRF_CHANNELS; i++) {
-	    int off = 8 + 15 * i;
-	    bool good;
-	    session->gpsdata.PRN[st]       = (int)getub(buf, off);
-	    session->gpsdata.azimuth[st]   = (int)(((unsigned)getub(buf, off+1)*3)/2.0);
-	    session->gpsdata.elevation[st] = (int)((unsigned)getub(buf, off+2)/2.0);
-	    cn = 0;
-	    for (j = 0; j < 10; j++)
-		cn += (int)getub(buf, off+5+j);
-	    session->gpsdata.ss[st] = cn/10;
-	    good = session->gpsdata.PRN[st]!=0 && 
-		session->gpsdata.azimuth[st]!=0 && 
-		session->gpsdata.elevation[st]!=0;
-#ifdef __UNUSED__
-	    gpsd_report(LOG_PROG, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
-			getub(buf, off), 
-			getub(buf, off+2)/2.0, 
-			(getub(buf, off+1)*3)/2.0,
-			cn/10, 
-			getuw(buf, off+3),
-			good ? '*' : ' ');
-#endif /* UNUSED */
-	    if (good!=0)
-		st += 1;
-	}
-	session->gpsdata.satellites = st;
-#ifdef NTPSHM_ENABLE
-	if (st > 3) {
-	    if ((session->driver.sirf.time_seen & TIME_SEEN_GPS_1)==0)
-		gpsd_report(LOG_PROG, "valid time in message 0x04, seen=0x%02x\n",
-			    session->driver.sirf.time_seen);
-	    session->driver.sirf.time_seen |= TIME_SEEN_GPS_1;
-	    if (session->context->enable_ntpshm && IS_HIGHEST_BIT(session->driver.sirf.time_seen,TIME_SEEN_GPS_1))
-		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
-	}
-#endif /* NTPSHM_ENABLE */
-	/*
-	 * The freaking brain-dead SiRF chip doesn't obey its own
-	 * rate-control command for 04, at least at firmware rev. 231, 
-	 * so we have to do our own rate-limiting here...
-	 */
-	if ((session->driver.sirf.satcounter++ % 5) != 0)
-	    break;
-	gpsd_report(LOG_PROG, "MTD 0x04: %d satellites\n", st);
-	return TIME_SET | SATELLITE_SET;
+	return sirf_msg_svinfo(session, buf, len);
 
     case 0x05:		/* Raw Tracker Data Out */
 	return 0;
