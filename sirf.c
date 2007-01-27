@@ -43,7 +43,52 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
+#ifdef ALLOW_RECONFIGURE
+/*@ +charint @*/
+static unsigned char enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+				 0x80, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x00,
+				 0x00, 0x00, 0x00, 0x0C,
+				 0x10,
+				 0x00, 0x00, 0xb0, 0xb3};
+
+static unsigned char disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
+				  0x80, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x00,
+				  0x00, 0x00, 0x00, 0x0C,
+				  0x00,
+				  0x00, 0x00, 0xb0, 0xb3};
+
+static unsigned char modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
+			      0x88, 
+			      0x00, 0x00,	/* pad bytes */
+			      0x00,		/* degraded mode off */
+			      0x00, 0x00,	/* pad bytes */
+			      0x00, 0x00,	/* altitude */
+			      0x00,		/* altitude hold auto */
+			      0x00,		/* use last computed alt */
+			      0x00,		/* reserved */
+			      0x00,		/* disable degraded mode */
+			      0x00,		/* disable dead reckoning */
+			      0x01,		/* enable track smoothing */
+			      0x00, 0x00, 0xb0, 0xb3};
+
+static unsigned char enablemid52[] = {
+	    0xa0, 0xa2, 0x00, 0x08, 
+	    0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
+	    0x00, 0xdb, 0xb0, 0xb3};
+/*@ -charint @*/
+#endif /* ALLOW_RECONFIGURE */
+
+
 gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -150,48 +195,45 @@ gps_mask_t sirf_msg_debug(struct gps_device_t *session UNUSED, unsigned char *bu
     return 0;
 }
 
+gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+{
+    double fv;
+    gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
+    (void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
+    fv = atof((char *)(buf+1));
+    if (fv < 231) {
+	session->driver.sirf.driverstate |= SIRF_LT_231;
+	if (fv > 200)
+	    sirfbin_mode(session, 0);
+    } else if (fv < 232) {
+	session->driver.sirf.driverstate |= SIRF_EQ_231;
+    } else {
+#ifdef ALLOW_RECONFIGURE
+	gpsd_report(LOG_PROG, "Enabling PPS message...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, enablemid52);
+#endif /* ALLOW_RECONFIGURE */
+	session->driver.sirf.driverstate |= SIRF_GE_232;
+	session->context->valid |= LEAP_SECOND_VALID;
+    }
+    if (strstr((char *)(buf+1), "ES"))
+	gpsd_report(LOG_INF, "Firmware has XTrac capability\n");
+    gpsd_report(LOG_PROG, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
+    session->driver.sirf.time_seen = 0;
+#ifdef ALLOW_RECONFIGURE
+    if (session->gpsdata.baudrate >= 38400){
+	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
+    }
+#endif /* ALLOW_RECONFIGURE */
+    return DEVICEID_SET;
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
     unsigned short navtype;
     gps_mask_t mask;
-    double fv;
-    /*@ +charint @*/
-#ifdef ALLOW_RECONFIGURE
-    static unsigned char enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
-				 0x80, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x00,
-				 0x00, 0x00, 0x00, 0x0C,
-				 0x10,
-				 0x00, 0x00, 0xb0, 0xb3};
-    static unsigned char disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
-				  0x80, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x00,
-				  0x00, 0x00, 0x00, 0x0C,
-				  0x00,
-				  0x00, 0x00, 0xb0, 0xb3};
-    static unsigned char modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
-			      0x88, 
-			      0x00, 0x00,	/* pad bytes */
-			      0x00,		/* degraded mode off */
-			      0x00, 0x00,	/* pad bytes */
-			      0x00, 0x00,	/* altitude */
-			      0x00,		/* altitude hold auto */
-			      0x00,		/* use last computed alt */
-			      0x00,		/* reserved */
-			      0x00,		/* disable degraded mode */
-			      0x00,		/* disable dead reckoning */
-			      0x01,		/* enable track smoothing */
-			      0x00, 0x00, 0xb0, 0xb3};
-#endif /* ALLOW_RECONFIGURE */
 
-    /*@ -charint @*/
     if (len == 0)
 	return 0;
 
@@ -305,38 +347,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x06:		/* Software Version String */
-	gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
-	(void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
-	fv = atof((char *)(buf+1));
-	if (fv < 231) {
-	    session->driver.sirf.driverstate |= SIRF_LT_231;
-	    if (fv > 200)
-		sirfbin_mode(session, 0);
-	} else if (fv < 232) 
-	    session->driver.sirf.driverstate |= SIRF_EQ_231;
-	else {
-	    /*@ +charint @*/
-	    unsigned char enablemid52[] = {
-		0xa0, 0xa2, 0x00, 0x08, 
-		0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
-		0x00, 0xdb, 0xb0, 0xb3};
-	    /*@ -charint @*/
-	    gpsd_report(LOG_PROG, "Enabling PPS message...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, enablemid52);
-	    session->driver.sirf.driverstate |= SIRF_GE_232;
-	    session->context->valid |= LEAP_SECOND_VALID;
-	}
-	if (strstr((char *)(buf+1), "ES"))
-	    gpsd_report(LOG_INF, "Firmware has XTrac capability\n");
-	gpsd_report(LOG_PROG, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
-	session->driver.sirf.time_seen = 0;
-#ifdef ALLOW_RECONFIGURE
-	if (session->gpsdata.baudrate >= 38400){
-	    gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");
-	    (void)sirf_write(session->gpsdata.gps_fd, enablesubframe);
-	}
-#endif /* ALLOW_RECONFIGURE */
-	return DEVICEID_SET;
+	return sirf_msg_swversion(session, buf, len);
 
     case 0x07:		/* Clock Status Data */
 	gpsd_report(LOG_PROG, "CLK 0x07\n");
