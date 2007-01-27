@@ -223,9 +223,13 @@ gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
     return 0;
 }
 
-gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     double fv;
+
+    if (len < 21)
+	return 0; 
+
     gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
     (void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
     fv = atof((char *)(buf+1));
@@ -256,9 +260,13 @@ gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, 
     return DEVICEID_SET;
 }
 
-gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned int words[10];
+
+    if (len != 43)
+	return 0;
+
     //unsigned int chan = (unsigned int)getub(buf, 1);
     //unsigned int svid = (unsigned int)getub(buf, 2);
     words[0] = (unsigned int)getul(buf, 3);
@@ -283,9 +291,13 @@ gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, si
     return 0;
 }
 
-gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
+
+    if (len != 188)
+	return 0;
+
     gpsd_zero_satellites(&session->gpsdata);
     session->gpsdata.sentence_time
 	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
@@ -338,10 +350,14 @@ gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, siz
 	return TIME_SET | SATELLITE_SET;
 }
 
-gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int i;
     unsigned short navtype;
+
+    if (len != 41)
+	return 0;
+
     gps_mask_t mask = 0;
     session->gpsdata.satellites_used = (int)getub(buf, 28);
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
@@ -390,10 +406,14 @@ gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, siz
     return mask;
 }
 
-gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned short navtype;
     gps_mask_t mask = 0;
+
+    if (len != 91)
+	return 0;
+
     if (session->driver.sirf.driverstate & SIRF_GE_232) {
 	struct tm unpacked_date;
 	double subseconds;
@@ -482,8 +502,12 @@ gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, s
     return mask;
 }
 
-gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
+
+    if (len != 65)
+	return 0;
+
     /* save these to restore them in the revert method */
     session->driver.sirf.nav_parameters_seen = true;
     session->driver.sirf.altitude_hold_mode = getub(buf, 5);
@@ -502,6 +526,10 @@ gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size
 {
     gps_mask_t mask;
     unsigned short navtype;
+
+    if (len != 39)
+	return 0;
+
     /* this packet is only sent by uBlox firmware from version 1.32 */
     mask = LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
 	STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
@@ -562,9 +590,13 @@ gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size
     return mask;
 }
 
-gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     gps_mask_t mask = 0;
+
+    if (len != 19)
+	return 0;
+
     gpsd_report(LOG_PROG, "PPS 0x34: Status = 0x%02x\n", getub(buf, 14));
     if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
 	struct tm unpacked_date;
