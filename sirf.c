@@ -89,6 +89,7 @@ static unsigned char enablemid52[] = {
 
 gps_mask_t sirf_msg_debug(struct gps_device_t *, unsigned char *, size_t );
 gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
+gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
 
 bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
@@ -228,6 +229,33 @@ gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, 
     return DEVICEID_SET;
 }
 
+gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+{
+    unsigned int words[10];
+    //unsigned int chan = (unsigned int)getub(buf, 1);
+    //unsigned int svid = (unsigned int)getub(buf, 2);
+    words[0] = (unsigned int)getul(buf, 3);
+    words[1] = (unsigned int)getul(buf, 7);
+    words[2] = (unsigned int)getul(buf, 11);
+    words[3] = (unsigned int)getul(buf, 15);
+    words[4] = (unsigned int)getul(buf, 19);
+    words[5] = (unsigned int)getul(buf, 23);
+    words[6] = (unsigned int)getul(buf, 27);
+    words[7] = (unsigned int)getul(buf, 31);
+    words[8] = (unsigned int)getul(buf, 35);
+    words[9] = (unsigned int)getul(buf, 39);
+    gpsd_report(LOG_PROG, "50B 0x08\n");
+    gpsd_interpret_subframe(session, words);
+
+#ifdef ALLOW_RECONFIGURE
+    if (session->gpsdata.baudrate < 38400){
+	gpsd_report(LOG_PROG, "Disabling subframe transmission...\n");
+	(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
+    }
+#endif /* ALLOW_RECONFIGURE */
+    return 0;
+}
+
 gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
@@ -364,30 +392,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	 * stored, which is really lame, as the UTC-GPS correction
 	 * changes 1 second every few years. Maybe."
 	 */
-       {
-	    unsigned int words[10];
-	    //unsigned int chan = (unsigned int)getub(buf, 1);
-	    //unsigned int svid = (unsigned int)getub(buf, 2);
-	    words[0] = (unsigned int)getul(buf, 3);
-	    words[1] = (unsigned int)getul(buf, 7);
-	    words[2] = (unsigned int)getul(buf, 11);
-	    words[3] = (unsigned int)getul(buf, 15);
-	    words[4] = (unsigned int)getul(buf, 19);
-	    words[5] = (unsigned int)getul(buf, 23);
-	    words[6] = (unsigned int)getul(buf, 27);
-	    words[7] = (unsigned int)getul(buf, 31);
-	    words[8] = (unsigned int)getul(buf, 35);
-	    words[9] = (unsigned int)getul(buf, 39);
-	    gpsd_interpret_subframe(session, words);
-
-#ifdef ALLOW_RECONFIGURE
-	    if (session->gpsdata.baudrate < 38400){
-		gpsd_report(LOG_PROG, "Disabling subframe transmission...\n");
-		(void)sirf_write(session->gpsdata.gps_fd, disablesubframe);
-	    }
-#endif /* ALLOW_RECONFIGURE */
-	}
-	break;
+	return sirf_msg_navdata(session, buf, len);
     case 0x09:		/* CPU Throughput */
 	gpsd_report(LOG_PROG, 
 		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
