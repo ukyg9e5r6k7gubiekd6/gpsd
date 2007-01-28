@@ -323,7 +323,7 @@ static void italk_mode(struct gps_device_t *session, int mode)
 }
 
 #ifdef ALLOW_RECONFIGURE
-static void italk_configurator(struct gps_device_t *session, int seq)
+static void italk_configurator(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0 && session->packet.type == NMEA_PACKET)
 	(void)italk_set_mode(session, session->gpsdata.baudrate, true);
