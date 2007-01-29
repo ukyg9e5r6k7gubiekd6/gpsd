@@ -113,9 +113,9 @@ before each release.</p>
 Our main focus is open-source Unixes &mdash; Linux, and the *BSD
 family.  Presently Linux and OpenBSD are directly supported.  We'll
 support proprietary Unixes if it's not too much work (and it usually
-isn't).  Mac OS/X is explicitly not supported, because of an <a
-href='http://lists.apple.com/archives/darwin-development/2001/Oct/msg00867.html'>unfixed
-bug dating from 1997</a>; shame on Apple!</p>
+isn't). Apple's OS X is back in our good books, but it is criticial
+that you have all your USB drivers updated. Older drivers are buggy
+and prevent gpsd from being able to read from usb-serial devices.</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your 
 device for use with Linux and other open-source operating systems, 
