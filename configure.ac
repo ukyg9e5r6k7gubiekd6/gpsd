@@ -691,20 +691,20 @@ echo "Build ncurses programs  : $ac_ncurses"
 echo "------------------------------------------"
 
 if test "xdummy" = "xdummy" -a \
-    x"$earthmate" = "xno" -a \
-    x"$evermore" = "xno" -a \
-    x"$fv18" = "xno" -a \
-    x"$garmin" = "xno" -a \
-    x"$itrax" = "xno" -a \
-    x"$navcom" = "xno" -a \
-    x"$nmea" = "xno" -a \
-    x"$ntrip" = "xno" -a \
-    x"$rtcm104" = "xno" -a \
-    x"$sirf" = "xno" -a \
-    x"$tnt" = "xno" -a \
-    x"$tripmate" = "xno" -a \
-    x"$tsip" = "xno" -a \
-    x"$ubx" = "xno"; then
+    x"$ac_earthmate" = "xno" -a \
+    x"$ac_evermore" = "xno" -a \
+    x"$ac_fv18" = "xno" -a \
+    x"$ac_garmin" = "xno" -a \
+    x"$ac_itrax" = "xno" -a \
+    x"$ac_navcom" = "xno" -a \
+    x"$ac_nmea" = "xno" -a \
+    x"$ac_ntrip" = "xno" -a \
+    x"$ac_rtcm104" = "xno" -a \
+    x"$ac_sirf" = "xno" -a \
+    x"$ac_tnt" = "xno" -a \
+    x"$ac_tripmate" = "xno" -a \
+    x"$ac_tsip" = "xno" -a \
+    x"$ac_ubx" = "xno"; then
     AC_MSG_ERROR(Can't build gpsd with no protocols enabled)
 fi
 AC_OUTPUT(Makefile gpsd.spec)
