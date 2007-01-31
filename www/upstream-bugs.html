@@ -78,15 +78,9 @@ USB devices.</p>
 sockets), select(2) can return 0 and shows no fd with input waiting
 even when data is in fact ready to be read from some of the devices.</p>
 
-<p>This happens reliably and makes gpsd unusable. Apple has known about
-this for some time now: see <a
-href='http://lists.apple.com/archives/darwin-development/2001/Oct/msg00716.html'>
-http://lists.apple.com/archives/darwin-development/2001/Oct/msg00716.html</a>
-</a>  The obvious workaround is also broken; see
-<a href='http://lists.apple.com/archives/darwin-dev/2006/Apr/msg00066.html'>
-http://lists.apple.com/archives/darwin-dev/2006/Apr/msg00066.html</a>.</p>
-
-<p>Observed by Chris Kuethe under Darwin kernel 8.8.1 on an x86 Mac mini.</p>
+<p>The most recent incarnation of this problem was due to a buggy USB
+to serial driver. OS X users should ensure that all their drivers are
+up to date.</p>
 
 <h2>Python socket library barfs on IPV6 notation in the /etc/hosts file</h2>
 
