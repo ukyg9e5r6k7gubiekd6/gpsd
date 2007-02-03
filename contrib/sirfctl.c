@@ -66,7 +66,7 @@ sirfSetProto(int pfd, struct termios *term, unsigned int speed, unsigned int pro
 	sirf_write(pfd, sirf);
 	tcdrain(pfd);
 	usleep(200000);
-	nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
+	nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", proto, speed);
 	tcdrain(pfd);
 	usleep(200000);
 
