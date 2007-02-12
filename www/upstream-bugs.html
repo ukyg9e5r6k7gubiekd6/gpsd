@@ -68,12 +68,14 @@ well.</p>
 <p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
 firmware bug on some some Bluetooth devices, notably those shipped by
 Holux and including the GPSlim-236.  This bug may render these GPSes
-catatonic.  The problem seems to be that buggy firmare inside these receivers
-doesn't necessarily keep the Bluetooth serial-port emulation and the GPS 
-chip talking at the same baud rate.</p>
+catatonic.  The problem seems to be that buggy firmware inside these
+receivers doesn't necessarily keep the Bluetooth serial-port emulation
+and the GPS chip talking at the same baud rate. This problem is not
+unique to <code>gpsd</code> - windows users are warned against using
+SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
 
 <p>If this happens, you can sometimes recover by repeatedly sending 
-reset messages using <code>gpsctl</p>.  The only guarantted fix is
+reset messages using <code>gpsctl</p>.  The only guaranteed fix is
 to open the case and unsolder the backup battery so the chip forgets
 its configuration settings.</p>
 
