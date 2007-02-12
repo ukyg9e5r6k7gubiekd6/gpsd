@@ -55,7 +55,7 @@ maintainer, we've tried to kick these upstream.</p>
 
 <h1>User-Visible Problems</h1>
 
-<h2>Distro-dependent problems with gpsd startup.</h2>
+<h2>Distro-dependent problems with gpsd startup</h2>
 
 <p>See <a href='http://bugs.gentoo.org/show_bug.cgi?id=132288'>this
 Gentoo bug</a>.  This shows up on other distributions as well, but
@@ -63,7 +63,21 @@ not under Fedora Core.  The Gentoo problem can be fixed by creating a
 /var/run/usb directory; this fix may apply to other distributions as
 well.</p>
 
-</h2>Linux pl2303 driver can hang when device is read at unexpected speed</h2>
+<h2>Firmware problems in some Bluetooth devices can hang them</h2>
+
+<p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
+firmware bug on some some Bluetooth devices, notably those shipped by
+Holux and including the GPSlim-236.  This bug may render these GPSes
+catatonic.  The problem seems to be that buggy firmare inside these receivers
+doesn't necessarily keep the Bluetooth serial-port emulation and the GPS 
+chip talking at the same baud rate.</p>
+
+<p>If this happens, you can sometimes recover by repeatedly sending 
+reset messages using <code>gpsctl</p>.  The only guarantted fix is
+to open the case and unsolder the backup battery so the chip forgets
+its configuration settings.</p>
+
+<h2>Linux pl2303 driver can hang when device is read at unexpected speed</h2>
 
 <p>Michael R. Davis reports "If you read from the device at the wrong
 rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
@@ -78,8 +92,8 @@ USB devices.</p>
 sockets), select(2) can return 0 and shows no fd with input waiting
 even when data is in fact ready to be read from some of the devices.</p>
 
-<p>The most recent incarnation of this problem was due to a buggy USB
-to serial driver. OS X users should ensure that all their drivers are
+<p>The most recent incarnation of this problem was due to a buggy pl2303
+USB-to-serial driver. OS X users should ensure that all their drivers are
 up to date.</p>
 
 <h2>Python socket library barfs on IPV6 notation in the /etc/hosts file</h2>

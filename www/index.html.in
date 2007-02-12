@@ -277,8 +277,12 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 
 <h1 id='recipes'>Recipes and related resources</h1>
 
-<p><code>gpsd</code> also works with <a href="bt.html">bluetooth
-GPS</a> receivers.</p>
+<p><code>gpsd</code> also works with some <a href="bt.html">bluetooth
+GPS</a> receivers.  Warning: there are serious problems with the 
+firmware in at least one family of Bluetooth implementations shipped
+by Holux that may result in <code>gpsd</code> bricking your GPS.  See this 
+<a href="upstream-bugs.html#bluetooth">bug warning</a> for a description 
+of the problem.</p>
 
 <p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
 

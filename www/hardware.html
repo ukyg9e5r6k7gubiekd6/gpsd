@@ -109,6 +109,13 @@ The "Works with" column is the last <code>gpsd</code> version with
 which this GPS is known to have been successfully tested. Vendors are
 listed in alphabetical order.</p>
 
+<p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
+tickles a serious firmware bug on some some Bluetooth devices, notably
+those shipped by Holux and including the GPSlim-236.  This bug may send
+these GPSes catatonic.  See this <a
+href="upstream-bugs.html#bluetooth">bug warning</a> for a description
+of the problem.</p>
+
 <div>&nbsp;</div>
 
 <table border='1' style="font-size:small;">
