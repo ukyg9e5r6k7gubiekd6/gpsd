@@ -106,15 +106,15 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 {
     /*
         RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
-           225446.33    Time of fix 22:54:46 UTC
-           A            Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
-           4916.45,N    Latitude 49 deg. 16.45 min North
-           12311.12,W   Longitude 123 deg. 11.12 min West
-           000.5        Speed over ground, Knots
-           054.7        Course Made Good, True north
-           191194       Date of fix  19 November 1994
-           020.3,E      Magnetic variation 20.3 deg East
-	   A            FAA mode indicator (NMEA 2.3 and later)
+     1     225446.33    Time of fix 22:54:46 UTC
+     2     A            Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
+     3,4   4916.45,N    Latitude 49 deg. 16.45 min North
+     5,6   12311.12,W   Longitude 123 deg. 11.12 min West
+     7     000.5        Speed over ground, Knots
+     8     054.7        Course Made Good, True north
+     9     191194       Date of fix  19 November 1994
+     10,11 020.3,E      Magnetic variation 20.3 deg East
+     12    A            FAA mode indicator (NMEA 2.3 and later)
                         A=autonomous, D=differential, E=Estimated,
                         N=not valid, S=Simulator, M=Manual input mode
            *68          mandatory nmea_checksum
@@ -402,8 +402,16 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     int n, fldnum;
     if (count <= 3) {
 	gpsd_zero_satellites(&session->gpsdata);
+	session->gpsdata.satellites = 0;
         return ERROR_SET;
     }
+    if (count % 4 != 3){
+	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 3\n", count);
+	gpsd_zero_satellites(&session->gpsdata);
+	session->gpsdata.satellites = 0;
+	return ERROR_SET;
+    }
+
     session->driver.nmea.await = atoi(field[1]);
     if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
 	gpsd_zero_satellites(&session->gpsdata);
@@ -623,7 +631,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     int count;
     gps_mask_t retval = 0;
     unsigned int i;
-    char *p, *field[NMEA_MAX], *s;
+    char *p, *field[NMEA_MAX], *s, *t;
 #ifdef __UNUSED__
     unsigned char sum;
 
@@ -647,6 +655,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	return ONLINE_SET;
     }
 
+    /* trim trailing CR/LF */
+    for (i = 0; i < strlen(sentence); i++)
+    	if ((sentence[i] == '\r') || (sentence[i] == '\n')){
+    	    sentence[i] = '\0';
+	    break;
+	}
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
     strncpy((char *)buf, sentence, NMEA_MAX);
@@ -654,10 +668,25 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     for (p = (char *)buf; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
     /* split sentence copy on commas, filling the field array */
+#ifdef USE_OLD_SPLIT
     for (count = 0, p = (char *)buf; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
 	*p = '\0';
 	field[count] = ++p;
     }
+#else
+    count = 0;
+    p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */ 
+    t = p + strlen(buf); /* address of last valid char of sentence */
+    /* while there is a search string and we haven't run off the buffer... */
+    while((p != NULL) && strlen(p) && (p < t)){
+	field[count] = p; /* we have a field. record it */
+	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
+	    *p = '\0'; /* replace it with a NUL */
+	    count++; /* bump the counters and continue */
+	    p++;
+	}
+    }
+#endif
     /* dispatch on field zero, the sentence tag */
     for (i = 0; i < (unsigned)(sizeof(nmea_phrase)/sizeof(nmea_phrase[0])); ++i) {
 	s = field[0];
