@@ -152,7 +152,7 @@ packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
 
 libgps_la_SOURCES = $(libgps_c_sources) rtcm.h libgpsmm.cpp packet_states.h
-nodist_libgps_la_SOURCES = gpsd_config.h packet_names.h
+nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
 #
@@ -255,6 +255,7 @@ gpsflash.1: gpsflash.xml
 endif
 
 noinst_HEADERS = ubx.h
+nodist_include_HEADERS = gpsd_config.h
 include_HEADERS = gps.h gpsd.h libgpsmm.h
 
 EXTRA_DIST = \
