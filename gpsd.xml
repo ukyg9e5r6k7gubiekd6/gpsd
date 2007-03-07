@@ -23,6 +23,7 @@
       <!-- arg choice='opt'>-R
       <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
+      <arg choice='opt'>-b </arg>
       <arg choice='opt'>-n </arg>      
       <arg choice='opt'>-N </arg>      
       <arg choice='opt'>-h </arg>
@@ -115,6 +116,17 @@ clients.</para></listitem>
 <listitem><para>This is a deprecated option which takes a differential-GPS 
 source as argument.  See the description of argument interpretation
 below.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-b</term>
+<listitem><para>Bluetooth-safety, otherwise known as read-only mode. Some
+popular bluetooth receivers lock up or become totally inaccessible when
+probed or reconfigured. This switch prevents gpsd from writing to a receiver.
+This means that gpsd cannot configure the receiver for optimal performance,
+but it also means that gpsd cannot break the receiver. A better solution
+would be for bluetooth to not be so fragile. A platform independent method
+to identify serial-over-bluetooth devices would also be nice.</para>
+</listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>

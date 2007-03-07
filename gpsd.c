@@ -86,6 +86,7 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
+extern bool readonly;
 static bool nowait = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
@@ -193,8 +194,9 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 
 static void usage(void)
 {
-    (void)printf("usage: gpsd [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
+    (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
+  -b                     	= bluetooth-safe: open data sources read-only\n\
   -n                            = don't wait for client connects to poll GPS\n\
   -N                            = don't go into background\n\
   -F sockfile                   = specify control socket location\n\
@@ -1253,7 +1255,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:V"
+    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:rV"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1267,6 +1269,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'N':
 	    go_background = false;
+	    break;
+	case 'r':
+	    readonly = true;
 	    break;
 #ifdef RTCM104_SERVICE
 	case 'R':
