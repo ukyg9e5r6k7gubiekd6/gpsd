@@ -508,6 +508,7 @@ gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, s
     if (len != 65)
 	return 0;
 
+#ifdef ALLOW_RECONFIGURE
     /* save these to restore them in the revert method */
     session->driver.sirf.nav_parameters_seen = true;
     session->driver.sirf.altitude_hold_mode = getub(buf, 5);
@@ -519,6 +520,7 @@ gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, s
     session->driver.sirf.track_smooth_mode = getub(buf, 12);
     gpsd_report(LOG_PROG, "Setting Navigation Parameters\n");
     (void)sirf_write(session->gpsdata.gps_fd, modecontrol);
+#endif /* ALLOW_RECONFIGURE */
     return 0;
 }
 
