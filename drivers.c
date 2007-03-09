@@ -111,7 +111,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    if (seteuid(0) == -1)
 		gpsd_report(LOG_WARN, "can't seteuid(0) - %s", strerror(errno));
 	    else
-		gpsd_report(LOG_WARN, "seteuid(0) to enable timestamping");
+		gpsd_report(LOG_WARN, "seteuid(0) to enable timestamping\n");
 	    if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
 		gpsd_report(LOG_WARN, "can't set kernel timestamping: %s\n",
 		    strerror(errno));
@@ -127,7 +127,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	session->gpsdata.ldisc = NMEADISC;
 
 	if (old){
-	    gpsd_report(LOG_WARN, "giving up euid 0");
+	    gpsd_report(LOG_WARN, "giving up euid 0\n");
 	    (void)seteuid(old);
 	}
 	gpsd_report(LOG_WARN, "running with effective user ID %d\n", geteuid());
