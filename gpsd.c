@@ -1255,7 +1255,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:dfhNnpP:rV"
+    while ((option = getopt(argc, argv, "F:D:S:bdfhNnpP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1270,7 +1270,7 @@ int main(int argc, char *argv[])
 	case 'N':
 	    go_background = false;
 	    break;
-	case 'r':
+	case 'b':
 	    readonly = true;
 	    break;
 #ifdef RTCM104_SERVICE

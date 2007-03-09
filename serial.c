@@ -201,13 +201,13 @@ void gpsd_set_speed(struct gps_device_t *session,
 int gpsd_open(struct gps_device_t *session)
 {
     struct stat sb;
-    mode_t mode = O_RDONLY;
+    mode_t mode = O_RDWR;
 
     if (readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) == S_IFCHR))){
-	mode = O_RDWR;
-	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
-    } else {
+	mode = O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
+    } else {
+	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     }
 
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, mode|O_NONBLOCK|O_NOCTTY)) < 0) {
