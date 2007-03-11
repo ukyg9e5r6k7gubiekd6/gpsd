@@ -89,6 +89,10 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = NMEA_DOLLAR;
 	    break;
 	}
+	if (c == '!') {
+	    lexer->state = NMEA_BANG;
+	    break;
+	}
 #endif /* NMEA_ENABLE */
 #ifdef TNT_ENABLE
         if (c == '@') {
@@ -198,6 +202,24 @@ static void nextstate(struct gps_packet_t *lexer,
 	else
 	    lexer->state = GROUND_STATE;
 	break;
+    case NMEA_BANG:
+	if (c == 'A')
+	    lexer->state = AIS_LEAD_1;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_1:
+	if (c == 'I')
+	    lexer->state = AIS_LEAD_2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_2:
+	if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
 #ifdef TNT_ENABLE
     case TNT_LEADER:
           lexer->state = NMEA_LEADER_END;
@@ -224,6 +246,8 @@ static void nextstate(struct gps_packet_t *lexer,
     case NMEA_RECOGNIZED:
 	if (c == '$')
 	    lexer->state = NMEA_DOLLAR;
+	else if (c == '!')
+	    lexer->state = NMEA_BANG;
 	else
 	    lexer->state = GROUND_STATE;
 	break;
@@ -360,6 +384,8 @@ static void nextstate(struct gps_packet_t *lexer,
     case SIRF_ACK_LEAD_1:
 	if (c == 'c')
 	    lexer->state = SIRF_ACK_LEAD_2;
+	else if (c == 'I')
+	    lexer->state = AIS_LEAD_2;
 	else
 	    lexer->state = GROUND_STATE;
 	break;
