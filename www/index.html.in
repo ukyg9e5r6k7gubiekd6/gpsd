@@ -169,10 +169,10 @@ href="https://lists.berlios.de/mailman/listinfo/gpsd-commit-watch">gpsd-commit-w
 sends automatic broadcast notifications of commits to the <code>gpsd</code>
 repository.</li>
 
-<li>We also have archives at <a href="http://marc.theaimsgroup.com">MARC</a>:
-<a href="http://marc.theaimsgroup.com/?l=gpsd-users">gpsd-users</a>,
-<a href="http://marc.theaimsgroup.com/?l=gpsd-dev">gpsd-dev</a> and 
-<a href="http://marc.theaimsgroup.com/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
+<li>We also have archives at <a href="http://marc.info">MARC</a>:
+<a href="http://marc.info/?l=gpsd-users">gpsd-users</a>,
+<a href="http://marc.info/?l=gpsd-dev">gpsd-dev</a> and 
+<a href="http://marc.info/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
 </ul>
 
 <h1 id='documentation'>Documentation</h1>
