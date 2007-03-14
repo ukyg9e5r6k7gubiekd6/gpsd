@@ -27,7 +27,7 @@
 
 /* First, declarations for the packet layer... */
 
-#define NMEA_MAX	82		/* max length of NMEA sentence */
+#define NMEA_MAX	86		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
 /* a few bits of ISGPS magic */

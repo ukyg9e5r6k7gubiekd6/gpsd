@@ -5,7 +5,7 @@
 import os, sys, termios, select, getopt, curses.ascii
 import gpspacket
 
-NMEA_MAX = 82
+NMEA_MAX = 86
 
 def hexdump(str):
     dmp = ""
