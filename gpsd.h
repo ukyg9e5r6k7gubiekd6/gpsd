@@ -27,6 +27,7 @@
 
 /* First, declarations for the packet layer... */
 
+/* XXX Some receivers (TN-200, GSW 2.3.2) emit oversized sentences (>82) */
 #define NMEA_MAX	86		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 

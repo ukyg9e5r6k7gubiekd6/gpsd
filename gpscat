@@ -5,6 +5,7 @@
 import os, sys, termios, select, getopt, curses.ascii
 import gpspacket
 
+# The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 NMEA_MAX = 86
 
 def hexdump(str):

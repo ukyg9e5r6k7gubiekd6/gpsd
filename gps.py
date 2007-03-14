@@ -57,6 +57,7 @@ MODE_3D = 3
 MAXCHANNELS = 12
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
+# The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 NMEA_MAX = 86
 
 GPSD_PORT = 2947
