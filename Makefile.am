@@ -107,7 +107,7 @@ gpsflash_LDADD = $(LIBM) libgps.la -lm
 #
 # Build shared libraries
 #
-libgps_la_LDFLAGS = -version-number 16:0:0
+libgps_la_LDFLAGS = -version-number 17:0:0
 lib_LTLIBRARIES = libgps.la
 
 libgps_c_sources = \

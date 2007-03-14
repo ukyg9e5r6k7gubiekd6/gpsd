@@ -86,7 +86,7 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
-extern bool readonly;
+extern int device_readonly;
 static bool nowait = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
@@ -1255,6 +1255,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
+    device_readonly = false;
     while ((option = getopt(argc, argv, "F:D:S:bdfhNnpP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
@@ -1271,7 +1272,7 @@ int main(int argc, char *argv[])
 	    go_background = false;
 	    break;
 	case 'b':
-	    readonly = true;
+	    device_readonly = true;
 	    break;
 #ifdef RTCM104_SERVICE
 	case 'R':

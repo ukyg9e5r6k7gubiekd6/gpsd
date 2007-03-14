@@ -21,7 +21,7 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
-bool readonly = false;
+int device_readonly;
 
 void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
@@ -203,7 +203,7 @@ int gpsd_open(struct gps_device_t *session)
     struct stat sb;
     mode_t mode = O_RDWR;
 
-    if (readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) == S_IFCHR))){
+    if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) == S_IFCHR))){
 	mode = O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
     } else {
