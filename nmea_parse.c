@@ -458,11 +458,11 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     for (n = 0; n < session->gpsdata.satellites; n++)
 	if (session->gpsdata.azimuth[n] != 0)
 	    goto sane;
-    gpsd_report(LOG_WARN, "Satellite data no good.\n");
+    gpsd_report(LOG_WARN, "Satellite data no good (%d of %d).\n", session->driver.nmea.part, session->driver.nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
     return ERROR_SET;
   sane:
-    gpsd_report(LOG_PROG, "Satellite data OK.\n");
+    gpsd_report(LOG_PROG, "Satellite data OK (%d of %d).\n", session->driver.nmea.part, session->driver.nmea.await);
     return SATELLITE_SET;
     }
 
@@ -626,12 +626,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"PTNTHTM", 9,	processTNTHTM},
 #endif /* TNT_ENABLE */
     };
-    unsigned char buf[NMEA_MAX+1];
+    volatile unsigned char buf[NMEA_MAX+1];
 
     int count;
     gps_mask_t retval = 0;
     unsigned int i;
-    char *p, *field[NMEA_MAX], *s, *t;
+    char *p, *field[NMEA_MAX], *s;
+    volatile char *t;
 #ifdef __UNUSED__
     unsigned char sum;
 
@@ -667,6 +668,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     /* discard the checksum part */
     for (p = (char *)buf; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
+    t = p;  /* end of sentence */
     /* split sentence copy on commas, filling the field array */
 #ifdef USE_OLD_SPLIT
     for (count = 0, p = (char *)buf; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
@@ -676,9 +678,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #else
     count = 0;
     p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */ 
-    t = p + strlen(buf); /* address of last valid char of sentence */
     /* while there is a search string and we haven't run off the buffer... */
-    while((p != NULL) && strlen(p) && (p < t)){
+    while((p != NULL) && strlen(p) && (p <= t)){
 	field[count] = p; /* we have a field. record it */
 	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
 	    *p = '\0'; /* replace it with a NUL */
