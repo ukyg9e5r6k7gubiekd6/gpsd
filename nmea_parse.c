@@ -679,7 +679,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     count = 0;
     p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */ 
     /* while there is a search string and we haven't run off the buffer... */
-    while((p != NULL) && strlen(p) && (p <= t)){
+    while((p != NULL) && (p <= t)){
 	field[count] = p; /* we have a field. record it */
 	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
 	    *p = '\0'; /* replace it with a NUL */
