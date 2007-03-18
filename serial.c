@@ -203,7 +203,7 @@ int gpsd_open(struct gps_device_t *session)
     struct stat sb;
     mode_t mode = O_RDWR;
 
-    if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) == S_IFCHR))){
+    if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
 	mode = O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
     } else {
