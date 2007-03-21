@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE article PUBLIC 
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "docbook/docbookx.dtd" [
+<!ENTITY homepage        "http://gpsd.berlios.de">
+<!ENTITY bits.h          SYSTEM "explan_bits.h.xml">
+<!ENTITY dgnss.c         SYSTEM "explan_dgnss.c.xml">
+<!ENTITY dgpsip.c        SYSTEM "explan_dgpsip.c.xml">
+<!ENTITY driver_proto.c  SYSTEM "explan_driver_proto.c.xml">
+<!ENTITY drivers.c       SYSTEM "explan_drivers.c.xml">
+<!ENTITY geoid.c         SYSTEM "explan_geoid.c.xml">
+<!ENTITY gpsd.c          SYSTEM "explan_gpsd.c.xml">
+<!ENTITY gpsd.h          SYSTEM "explan_gpsd.h.xml">
+<!ENTITY gpsd_dbus.c     SYSTEM "explan_gpsd_dbus.c.xml">
+<!ENTITY gps.h           SYSTEM "explan_gps.h.xml">
+<!ENTITY gpsutils.c      SYSTEM "explan_gpsutils.c.xml">
+<!ENTITY isgps.c         SYSTEM "explan_isgps.c.xml">
+<!ENTITY libgps.c        SYSTEM "explan_libgps.c.xml">
+<!ENTITY libgpsd_core.c  SYSTEM "explan_libgpsd_core.c.xml">
+<!ENTITY libgpsmm.cpp    SYSTEM "explan_libgpsmm.cpp.xml">
+<!ENTITY libgpsmm.h      SYSTEM "explan_libgpsmm.h.xml">
+<!ENTITY netlib.c        SYSTEM "explan_netlib.c.xml">
+<!ENTITY nmea_parse.c    SYSTEM "explan_nmea_parse.c.xml">
+<!ENTITY ntpshm.c        SYSTEM "explan_ntpshm.c.xml">
+<!ENTITY ntrip.c         SYSTEM "explan_ntrip.c.xml">
+<!ENTITY packet.c        SYSTEM "explan_packet.c.xml">
+<!ENTITY packet_names.h  SYSTEM "explan_packet_names.h.xml">
+<!ENTITY packet_states.h SYSTEM "explan_packet_states.h.xml">
+<!ENTITY report.c        SYSTEM "explan_report.c.xml">
+<!ENTITY rtcm.c          SYSTEM "explan_rtcm.c.xml">
+<!ENTITY serial.c        SYSTEM "explan_serial.c.xml">
+<!ENTITY subframe.c      SYSTEM "explan_subframe.c.xml">
+<!ENTITY timebase.h      SYSTEM "explan_timebase.h.xml">
+<!ENTITY wrapup          SYSTEM "explan_wrapup.xml">
+]>
+<article>
+<title>Notes on the structure of the code in the GPSD Driver</title>
+<articleinfo>
+<author>
+  <firstname>Mick</firstname>
+  <surname>Durkin</surname>
+</author>
+<revhistory>
+   <revision>
+      <revnumber>1.0</revnumber>
+      <date>20 March 2007</date>
+      <authorinitials>md</authorinitials>
+      <revremark>Initial draft</revremark>
+   </revision>
+</revhistory>
+
+<abstract>
+<para>These notes are meant as an aid to reading and understanding some of the main code files forming the <application>gpsd</application> daemon and its support libraries. They are not a line-by-line explanation but only pick out the important (or unusual) aspects of the code.</para><para>They do not address the many programs that are used for test purposes, the individual device driver files or any of the supplied applications that use <application>gpsd</application>.</para>
+</abstract>
+
+</articleinfo>
+
+&bits.h;
+&dgnss.c;
+&dgpsip.c;
+&driver_proto.c;
+&drivers.c;
+&geoid.c;
+&gpsd.c;
+&gpsd.h;
+&gpsd_dbus.c;
+&gps.h;
+&gpsutils.c;
+&isgps.c;
+&libgps.c;
+&libgpsd_core.c;
+&libgpsmm.cpp;
+&libgpsmm.h;
+&netlib.c;
+&nmea_parse.c;
+&ntpshm.c;
+&ntrip.c;
+&packet.c;
+&packet_names.h;
+&packet_states.h;
+&report.c;
+&rtcm.c;
+&serial.c;
+&subframe.c;
+&timebase.h;
+&wrapup;
+</article>

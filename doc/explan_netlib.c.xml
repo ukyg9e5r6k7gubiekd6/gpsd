@@ -1,0 +1,29 @@
+<sect1 id="netlib.c"><title><filename>netlib.c</filename></title>
+<informaltable frame='all' pgwide='1'>
+<tgroup cols='2'>
+<colspec colname='c1'></colspec>
+<colspec colname='c2'></colspec>
+<spanspec spanname='s1' namest='c1' nameend='c2'></spanspec>
+
+<thead>
+<row>
+  <entry>Functions:-</entry><entry>This provides socket connectivity.</entry>
+</row>
+</thead>
+
+<tbody>
+<row>
+  <entry><function>int netlib_connectsock(const char *host, const char *service, const char *protocol)</function></entry>
+  <entry><para>This attempts to connect the to nominated service on the nominated host using the nominated protocol. On success, the return value is the socket number. On error, an appropriate system defined error code is returned.</para></entry>
+</row>
+</tbody>
+
+<tfoot>
+<row>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4264 2007-01-22 15:53:33Z ckuethe $</function></entry>
+</row>
+</tfoot>
+
+</tgroup>
+</informaltable>
+</sect1>
