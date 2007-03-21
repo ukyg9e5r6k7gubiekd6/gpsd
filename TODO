@@ -29,14 +29,6 @@ SiRF support; it works OK in NMEA mode.  The Royaltek died in an
 accident, so we're stuck until someone else can test this.  We think
 it is very likely that changes since 2.28 have fixed this bug.
 
-*** gps_unpack() can be confused by a changed locale
-
-gps_poll() uses gps_unpack(), which uses sscanf().  The behavior
-of sscanf() can be changed so this instance doesn't work any more
-by changing the system locale.  The workaround is to do
-setlocale(LC_NUMERIC, "C"); the fix would be to use a parsing
-method that is independent of locale.
-
 ** To do:
 
 *** Fix endian/word-size sensitive code
