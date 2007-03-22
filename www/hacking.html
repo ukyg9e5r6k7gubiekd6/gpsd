@@ -1259,13 +1259,13 @@ protocol is about out of namespace.</p>
 <p>There are almost no more letters left in the namespace of the GPSD
 version 3 protocol.  At time of writing in late 2006 we can have one
 more command, 'h', and that's it.  After that, extending the set will
-require a new command/response syntax.  Some posts in thew dev-list
+require a new command/response syntax.  Some posts in the dev-list
 arcvhive refer to this as "Version 4", but that is a rev level we may
 or may not reach before GPSD-NG has to be implemented.</p>
 
 <p>Steps towards defining a new syntax have been taken.  The senior
 developers have agreed on a new protocol with a basic sentence syntax 
-something like this:
+like this:
 
 <pre>
 &lt;request&gt; ::= &lt;introducer&gt; &lt;commands&gt; &lt;newline&gt;
@@ -1273,7 +1273,7 @@ something like this:
 &lt;command&gt; ::= &lt;command-id&gt;:&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
 </pre>
 
-<p>Each request shall begin with an introducer chararacter.  This is
+<p>Each request shall begin with an introducer character.  This is
 given as '!' here but that could change.  The purpose of the
 introducer is to inform the command parser that extended commands
 follow.  Each request shall end with a newline indication, which 
@@ -1288,21 +1288,61 @@ commands. </p>
 identifier shall begin with an alphabetic character and consist of
 alphanumeric characters.  It shall be followed by a colon. The 
 52 command identifiers consisting of a single alphabetic are
-reserved equivalents of the Version 3 commands.</p>
+reserved equivalents of the existing GPSD commands.</p>
 
 <p>The colon may be followed by zero or more comma-separated
 arguments.  Arguments may contain any US-ASCII character other
 than the introducer character, the colon, the comma, the semicolon,
 or the hash '#' character (reserved for comments).  Trailing
 zero-length arguments will be ignored; thus, in particular,
-machine-generated requests may terminate the final argument 
+machine-generated requests may semicolon-terminate the final argument 
 with a comma without confusing gpsd's parser.</p>
 
-<p>Responses shall have the same format as requests.  The response
-to a command shall have the same identifier as the command.  As an
-exception, commands may have multi-line responses in an SMTP-like
-format not yet decided; this is to retain the 78-character line
-limit while allowing the damon to pass back more data than can
+<p>If the final argument of a command has a newline immediately after
+a leader colon or separator comma, the content of the argument is a
+multiline continuation.  If a continuation line begins with a ';',
+that ';' is removed before interpretation.  The content of the
+argument consists of all following lines until a line which is empty
+after ';' (e.g. a line consisting solely of the argument terminator
+';' and a newline).</p>
+
+<p>Responses shall have the same format as requests, except that
+responses do not have an introducer. The response to a command shall
+have the same identifier as the command.</p>
+
+<p>Examples:</p>
+
+<pre>
+# GPSD-NG equivalent of X query request; no arguments 
+!X;
+X:0;
+#
+# GPSD-NG equivalent of B request to set baud rate
+!B:9600;
+B=9600;
+#
+# GPSD-NG command illustrating multiple commands per request line
+!P;A;
+P:75,80;A:1435;
+#
+# Hypothetical extended command with a multiline response
+!HARDWAREID;
+HARDWAREID
+This is a Foobar 2317 GPS
+Firmware revision 555.55
+;
+</pre>
+
+<p>Rationale:</p>
+
+<p>The purpose of the introducer is to permit old-style and new-style
+commands to be mixed in the same session. Most of the rest of the NG
+dessign is a minimal adaptation to permit command names of more than
+one letter.</p>
+
+<p>We need a format that supports multiline data, not so much for
+requests as for responses.  This is so we can keep the 78-character
+line limit while allowing the daemon to pass back more data than can
 fit on a line.</p>
 
 <h1 id="blindalleys">Blind alleys</h1>
