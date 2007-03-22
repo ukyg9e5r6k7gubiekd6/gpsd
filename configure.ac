@@ -217,8 +217,13 @@ AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
 fi
 dnl End of X11 checks
 
-AC_CHECK_LIB(ncurses, initscr, ac_ncurses='yes', ac_ncurses='no')
+AC_CHECK_HEADER(ncurses.h, ac_ncurses='yes', ac_ncurses='no')
 AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = xyes])
+AC_CHECK_LIB(ncurses, initscr, ac_ncurses_lib='yes', ac_ncurses_lib='no')
+if [ x"$ac_ncurses_lib" = xyes && x"$ac_ncurses" = xno ]
+then
+    AC_MSG_ERROR(I see an ncurses library but no header; you should install the development package);
+fi
 
 dnl check for NMEA support
 AC_ARG_ENABLE(nmea,
