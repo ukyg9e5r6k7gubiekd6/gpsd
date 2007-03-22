@@ -1286,20 +1286,20 @@ commands. </p>
 
 <p>Each command shall begin with a command identifier.  The command
 identifier shall begin with an alphabetic character and consist of
-alphanumeric characters.  It shall be followed by a colon. The 
+alphanumeric characters.  It shall be followed by a equal sign. The 
 52 command identifiers consisting of a single alphabetic are
 reserved equivalents of the existing GPSD commands.</p>
 
-<p>The colon may be followed by zero or more comma-separated
+<p>The equal sign may be followed by zero or more comma-separated
 arguments.  Arguments may contain any US-ASCII character other
-than the introducer character, the colon, the comma, the semicolon,
+than the introducer character, the equal sign, the comma, the semicolon,
 or the hash '#' character (reserved for comments).  Trailing
 zero-length arguments will be ignored; thus, in particular,
 machine-generated requests may semicolon-terminate the final argument 
 with a comma without confusing gpsd's parser.</p>
 
 <p>If the final argument of a command has a newline immediately after
-a leader colon or separator comma, the content of the argument is a
+a leader equal-sign or separator comma, the content of the argument is a
 multiline continuation.  If a continuation line begins with a ';',
 that ';' is removed before interpretation.  The content of the
 argument consists of all following lines until a line which is empty
@@ -1315,19 +1315,19 @@ have the same identifier as the command.</p>
 <pre>
 # GPSD-NG equivalent of X query request; no arguments 
 !X;
-X:0;
+GPSD!X=0;
 #
 # GPSD-NG equivalent of B request to set baud rate
-!B:9600;
-B=9600;
+!B=9600;
+GPSD!B=9600;
 #
 # GPSD-NG command illustrating multiple commands per request line
 !P;A;
-P:75,80;A:1435;
+GPSD!P=75,80;A=1435;
 #
 # Hypothetical extended command with a multiline response
 !HARDWAREID;
-HARDWAREID
+GPSD!HARDWAREID
 This is a Foobar 2317 GPS
 Firmware revision 555.55
 ;
@@ -1501,3 +1501,8 @@ the mailing lists.</dd>
 type='text/javascript'></script>
 </body>
 </html>
+<!--
+Local Variables:
+compile-command: "./upload hacking.html"
+End:
+-->
