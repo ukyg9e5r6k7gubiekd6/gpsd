@@ -31,16 +31,6 @@ it is very likely that changes since 2.28 have fixed this bug.
 
 ** To do:
 
-*** Fix endian/word-size sensitive code
-
-Gpsd 2.34 shows regression test failures under certain circumstances when
-tests are run on a {32,64} bit machine and compared against check values
-generated on a {64,32} bit machine. These errors usually show up in the
-least significant digits of position or an incorrect sign. This may be due
-to round-off error, word size, trigonometric functions. Whatever the cause
-it would be great if gpsd 2.35 could take a known test input and produce
-the same output on any given platform.
-
 *** Change O output precision to %.9f for degrees and %.3f for meters
 
 This corresponds to 1mm accuracy, which is better than the horizontal
