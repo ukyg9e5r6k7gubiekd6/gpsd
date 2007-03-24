@@ -81,7 +81,7 @@ static void open_serial(char* device)
 
 static void usage(void)
 {
-    (void)fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port]]\n\n"
+    (void)fprintf(stderr, "Usage: gpspipe [OPTIONS] [server[:port[:device]]]\n\n"
 		  "SVN ID: $Id$ \n"
 		  "-h Show this help.\n"
 		  "-r Dump raw NMEA.\n"
@@ -180,6 +180,7 @@ int main( int argc, char **argv)
 		    *colon2 = '\0';
 		}
 		device = colon2 + 1;
+		(void)snprintf(buf, sizeof(buf), "%sF=%s\n", buf, device);
 	    }
 	}
 	colon1 = colon2 = NULL;

@@ -26,7 +26,9 @@
       <arg choice='opt'>-v</arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group><replaceable>:port</replaceable></group>
+	  <group><replaceable>:port</replaceable>
+	    <group><replaceable>:device</replaceable></group>
+	</group>
       </group>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -47,9 +49,10 @@ to the local <application>gpsd</application> without causing problems.</para>
 time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
 
-<para>An optional argument may specify a server to get data from; a
-colon-separated suffix is taken as a port number. If omitted, it
-connects to 127.0.0.1 on the default port (2947).</para>
+<para>Optionally a server, tcp port number and remote device can be given.
+If omitted, <application>gpspipe</application> connects to 127.0.0.1 on
+the default port (2947) and uses the first device opened by 
+<application>gpsd</application>.</para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
