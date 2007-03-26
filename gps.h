@@ -296,9 +296,6 @@ struct gps_data_t {
 
     /* these members are private */
     int gps_fd;			/* socket or file descriptor to GPS */
-#ifdef NMEADISC
-    int ldisc;			/* current line discipline */
-#endif
     void (*raw_hook)(struct gps_data_t *, char *, size_t len, int level);/* Raw-mode hook for GPS data. */
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
 };

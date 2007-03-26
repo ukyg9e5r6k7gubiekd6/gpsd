@@ -94,7 +94,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 #ifdef NMEADISC
-	if (session->gpsdata.ldisc == 0) {
+d	if (session->ldisc == 0) {
 	    uid_t old;
 	    int ldisc = NMEADISC;
 
@@ -124,7 +124,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    else
 		gpsd_report(LOG_WARN, "activated nmea discipline\n");
 	/* this is a flag that shows if we've tried the setup */
-	session->gpsdata.ldisc = NMEADISC;
+	session->ldisc = NMEADISC;
 
 	if (old){
 	    gpsd_report(LOG_WARN, "giving up euid 0\n");

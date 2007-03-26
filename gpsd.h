@@ -230,6 +230,9 @@ struct gps_device_t {
 #endif /* NTPSHM_ENABLE */
     double mag_var;		/* Magnetic variation in degrees */  
     bool back_to_nmea;		/* back to NMEA on revert? */
+#ifdef NMEADISC
+    int ldisc;			/* current line discipline */
+#endif
     /*
      * The rest of this structure is driver-specific private storage.
      * Because the Garmin driver uses a long buffer, you can have
