@@ -147,9 +147,16 @@ libgps_c_sources = \
 	strl.c \
 	hex.c
 
-BUILT_SOURCES = packet_names.h
+BUILT_SOURCES = packet_names.h gpsd.h
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
+
+gpsd.h: gpsd.h-tail
+	echo "/* This file is generated.  Do not hand-hack it! */" >gpsd.h
+	grep gpsd_config.h VERSION >>gpsd.h
+	grep gpsd_config.h ENABLE >>gpsd.h
+	grep gpsd_config.h NMEADISC >>gpsd.h
+	cat gpsd.h-tail >>gpsd.h
 
 libgps_la_SOURCES = $(libgps_c_sources) rtcm.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
@@ -255,8 +262,8 @@ gpsflash.1: gpsflash.xml
 endif
 
 noinst_HEADERS = ubx.h
-nodist_include_HEADERS = gpsd_config.h
-include_HEADERS = gps.h gpsd.h libgpsmm.h
+nodist_include_HEADERS = gpsd.h
+include_HEADERS = gps.h libgpsmm.h
 
 EXTRA_DIST = \
 	autogen.sh \
