@@ -1,0 +1,6 @@
+/* This file is generated.  Do not hand-hack it! */
+
+#ifndef _gpsd_h_
+#define _gpsd_h_
+
+/* gpsd.h -- fundamental types and structures for the gpsd library */
