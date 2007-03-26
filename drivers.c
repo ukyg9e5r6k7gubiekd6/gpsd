@@ -94,7 +94,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
 #ifdef NMEADISC
-d	if (session->ldisc == 0) {
+	if (session->ldisc == 0) {
 	    uid_t old;
 	    int ldisc = NMEADISC;
 
