@@ -1262,7 +1262,7 @@ int main(int argc, char *argv[])
 #endif
     debuglevel = 0;
     device_readonly = false;
-    while ((option = getopt(argc, argv, "F:D:S:bdfhNnpP:V"
+    while ((option = getopt(argc, argv, "F:D:S:bhNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1290,11 +1290,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'n':
 	    nowait = true;
-	    break;
-	case 'd':
-	case 'f':
-	case 'p':
-	    /* skip this option, treat following as argument */ 
 	    break;
 	case 'P':
 	    pid_file = optarg;
