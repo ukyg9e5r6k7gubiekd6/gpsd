@@ -4,3 +4,15 @@
 #define _gpsd_h_
 
 /* gpsd.h -- fundamental types and structures for the gpsd library */
+
+#include <stdbool.h>
+#include <stdio.h>
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif
+#ifdef HAVE_SYS_TERMIOS_H
+#include <sys/termios.h>
+#endif
+#include "gps.h"
+
+/* Feature configuration switches begin here */
