@@ -54,18 +54,18 @@ int hex2bin(char *s)
     a = s[0] & 0xff;
     b = s[1] & 0xff;
 
-    if ((a >= 'a') && (a <= 'z'))
+    if ((a >= 'a') && (a <= 'f'))
 	a = a + 10 - 'a';
-    else if ((a >= 'A') && (a <= 'Z'))
+    else if ((a >= 'A') && (a <= 'F'))
 	a = a + 10 - 'A';
     else if ((a >= '0') && (a <= '9'))
 	a -= '0';
     else
 	return -1;
 
-    if ((b >= 'a') && (b <= 'z'))
+    if ((b >= 'a') && (b <= 'f'))
 	b = b + 10 - 'a';
-    else if ((b >= 'A') && (b <= 'Z'))
+    else if ((b >= 'A') && (b <= 'F'))
 	b = b + 10 - 'A';
     else if ((b >= '0') && (b <= '9'))
 	b -= '0';
