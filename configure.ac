@@ -166,7 +166,14 @@ ac_x="no"
 if test x"$with_x" != xno && test x"$have_x" != xdisabled
 then
 AC_CHECK_HEADERS(X11/xpm.h xpm.h)
+if test x"$ac_cv_header_X11_xpm_h" = "xno" &&
+   test x"$ac_cv_header_xpm_h" = "xno"; then
+  AC_MSG_WARN([xpm.h problem - xgps won't be built.])
+fi
 AC_PATH_XTRA
+if test x"$ac_cv_have_x" = "xno"; then
+  AC_MSG_WARN([X problem - xgps won't be built.])
+fi
 LIBS="$LIBS $X_EXTRA_LIBS"
 CFLAGS="$CFLAGS $X_CFLAGS"
 CPPFLAGS="$CPPFLAGS $X_CFLAGS"
@@ -179,17 +186,29 @@ dnl Check for some auxiliary X libraries we'll need
 AC_CHECK_LIB(Xt, XtToolkitInitialize, XT_LIBS="-lXt",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XT_LIBS)
+if test x"$ac_cv_lib_Xt_XtToolkitInitialize" = "xno"; then
+  AC_MSG_WARN([libXt problem - xgps won't be built.])
+fi
 AC_CHECK_HEADER([X11/Xaw/Label.h],, motif_includes="no")
 AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XAW_LIBS)
+if test x"$ac_cv_lib_Xaw_XawInitializeWidgetSet" = "xno"; then
+  AC_MSG_WARN([libXaw problem - xgps won't be built.])
+fi
 AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
 	${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XEXT_LIBS)
+if test x"$ac_cv_lib_Xext_XShapeQueryVersion" = "xno"; then
+  AC_MSG_WARN([libXext problem - xgps won't be built.])
+fi
 AC_CHECK_LIB(Xpm, XpmCreatePixmapFromXpmImage,
 	XPM_LIBS="-lXpm"
 	AC_DEFINE([HAVE_XPM],1,[Xpm available]),,${X_PRE_LIBS} ${X11_LIBS})
 AC_SUBST(XPM_LIBS)
+if test x"$ac_cv_lib_Xpm_XpmCreatePixmapFromXpmImage" = "xno"; then
+  AC_MSG_WARN([libXpm problem - xgps won't be built.])
+fi
 
 dnl Check for Motif widget libraries
 XM_LIBS=""
@@ -212,8 +231,9 @@ AC_SUBST(XM_LIBS)
 AM_CONDITIONAL([HAVE_MOTIF], [test "$XM_LIBS" != "" -a "$motif_includes" != "no"])
 ac_x="yes"
 else
-dnl X11 disabled
-AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
+  dnl X11 disabled
+  AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
+  AC_MSG_WARN([general X problem - xgps won't be built.])
 fi
 dnl End of X11 checks
 
