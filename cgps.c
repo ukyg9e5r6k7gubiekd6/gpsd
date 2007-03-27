@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
      satellites (MAXCHANNELS - 2) with space still left at the bottom,
      add a window at the bottom in which to scroll raw gpsd data.
   */
-  (void)getmaxyx(stdscr,ysize,xsize);
+  getmaxyx(stdscr,ysize,xsize);
 
   if(compass_flag==1) {
     if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
