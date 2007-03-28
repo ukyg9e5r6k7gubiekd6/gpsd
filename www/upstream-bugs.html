@@ -63,6 +63,12 @@ not under Fedora Core.  The Gentoo problem can be fixed by creating a
 /var/run/usb directory; this fix may apply to other distributions as
 well.</p>
 
+<h2>Defective Python installation in SuSE 10.3rc</h2>
+
+<p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
+Makefile.  This prevents the <code>gpsd</code> Python components from
+building correctly.</p>
+
 <h2>Firmware problems in some Bluetooth devices can hang them</h2>
 
 <p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
@@ -78,6 +84,9 @@ SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
 reset messages using <code>gpsctl</p>.  The only guaranteed fix is
 to open the case and unsolder the backup battery so the chip forgets
 its configuration settings.</p>
+
+<p>Use the -b option of gpsd to prevent it from trying to reconfigure
+your GPS; this will avoid the bug.</p>
 
 <h2>Linux pl2303 driver can hang when device is read at unexpected speed</h2>
 

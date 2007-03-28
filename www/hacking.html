@@ -1310,7 +1310,7 @@ after ';' (e.g. a line consisting solely of the argument terminator
 responses do not have an introducer. The response to a command shall
 have the same identifier as the command.</p>
 
-<p>Examples:</p>
+<h3>Syntax Examples:</h3>
 
 <pre>
 # GPSD-NG equivalent of X query request; no arguments 
@@ -1333,7 +1333,9 @@ Firmware revision 555.55
 ;
 </pre>
 
-<p>Rationale:</p>
+<p>
+
+<h3>Rationale:</h3>
 
 <p>The purpose of the introducer is to permit old-style and new-style
 commands to be mixed in the same session. Most of the rest of the NG
@@ -1344,6 +1346,23 @@ one letter.</p>
 requests as for responses.  This is so we can keep the 78-character
 line limit while allowing the daemon to pass back more data than can
 fit on a line.</p>
+
+<h3>Proposed sentences:</h3>
+
+<p>Chris Kuethe has floated the following list requests for
+discussion:</p>
+
+<pre>
+!A .. !Z -> map to the original A..Z gpsd commands
+!almanac -> poll the almanac from the receiver
+!ephemeris -> poll the ephemeris from the receiver
+!assist -> load assistance data (time, position, etc) into the receiver
+!raw -> get a full dump of the last measurement cycle... at least
+        clock, doppler, pseudorange and carrier phase.
+!readonly -> get/set read-only mode. no screwing up bluetooth devices
+!listen -> set the daemon's bind address. added privacy for laptop users.
+!port -> set the daemon's port. used by the regression tests, at least.
+</pre>
 
 <h1 id="blindalleys">Blind alleys</h1>
 
