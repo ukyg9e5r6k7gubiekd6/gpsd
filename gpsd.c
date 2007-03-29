@@ -434,7 +434,9 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 	    sub_index(sub));
     	detach_client(sub);
 	return status;
-    } else if (errno == EBADF)
+    } else if (errno == EAGAIN || errno == EINTR)
+	return 0; /* no data written, and errno says to retry */
+     else if (errno == EBADF)
 	gpsd_report(LOG_WARN, "client(%d) has vanished.\n", sub_index(sub));
     else if (errno == EWOULDBLOCK && timestamp() - sub->active > NOREAD_TIMEOUT)
 	gpsd_report(LOG_INF, "client(%d) timed out.\n", sub_index(sub));
