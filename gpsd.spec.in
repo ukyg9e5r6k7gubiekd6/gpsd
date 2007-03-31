@@ -157,7 +157,10 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %changelog
 * Mon Dec 25 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35dev-1
 - Navcom driver merged. Removed -d -f and -p options of gpsd; these 
-  have been undocumented for a while.
+  have been undocumented for a while.  Make gpsd play well with pkgconfig.
+  32-vs-64-bit problems in the regression tests have been solved.
+  Add -b (no-configuration) option as a sadly clumsy workaround for some
+  problems with Bluetooth receivers.
 
 * Thu Dec 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.34-1
 - Fix for byte-swapping of Zodiac control messages on big-endian hardware.  

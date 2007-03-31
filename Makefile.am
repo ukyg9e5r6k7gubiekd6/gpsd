@@ -304,9 +304,14 @@ EXTRA_DIST = \
 	logextract \
 	striplog \
 	setup.py \
-	packet_states.h
+	packet_states.h \
+	libgps.pc.in \
+	libgpsd.pc.in
 
 CLEANFILES = $(BUILT_SOURCES) floattest *.core $(PYEXTENSIONS)
+
+pkgconfig_DATA = libgps.pc libgpsd.pc
+pkgconfigdir = $(libdir)/pkgconfig
 
 # This is not distributed
 libgps: libgps.c .libs/libgps.a
