@@ -163,7 +163,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 dnl Check for X libraries
 ac_x="no"
-if test x"$with_x" != "xno" && test x"$have_x" != "xdisabled"
+if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
 then
 AC_CHECK_HEADERS(X11/xpm.h xpm.h)
 if test x"$ac_cv_header_X11_xpm_h" = "xno" &&
@@ -213,7 +213,7 @@ fi
 dnl Check for Motif widget libraries
 XM_LIBS=""
 XP_LIBS=""
-if test "$motif_includes" != "no" -a test "$motif_libraries" != "no"
+if test "$motif_includes" != "no" -a "$motif_libraries" != "no"
 then
 dnl Motif 2.1 wants '-lXp' (X11R6.3 print server)
 AC_CHECK_LIB(Xp, XpSelectInput,
@@ -233,7 +233,7 @@ ac_x="yes"
 else
   dnl X11 disabled
   AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
-  AC_MSG_WARN([general X problem - xgps won't be built.])
+  AC_MSG_WARN([Not including X11 support])
 fi
 dnl End of X11 checks
 
