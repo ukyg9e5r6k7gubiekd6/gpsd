@@ -1,6 +1,6 @@
 dnl $Id$
 AC_INIT
-AM_INIT_AUTOMAKE(gpsd, 2.35dev)
+AM_INIT_AUTOMAKE(gpsd, 2.35beta)
 dnl AC_PREFIX_PROGRAM(gcc)
 AM_CONFIG_HEADER(gpsd_config.h)
 AC_LANG([C])
@@ -163,7 +163,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 dnl Check for X libraries
 ac_x="no"
-if test x"$with_x" != xno && test x"$have_x" != xdisabled
+if test x"$with_x" != "xno" && test x"$have_x" != "xdisabled"
 then
 AC_CHECK_HEADERS(X11/xpm.h xpm.h)
 if test x"$ac_cv_header_X11_xpm_h" = "xno" &&
@@ -213,7 +213,7 @@ fi
 dnl Check for Motif widget libraries
 XM_LIBS=""
 XP_LIBS=""
-if test "$motif_includes" != "no" && test "$motif_libraries" != "no"
+if test "$motif_includes" != "no" -a test "$motif_libraries" != "no"
 then
 dnl Motif 2.1 wants '-lXp' (X11R6.3 print server)
 AC_CHECK_LIB(Xp, XpSelectInput,
@@ -238,10 +238,9 @@ fi
 dnl End of X11 checks
 
 AC_CHECK_HEADER(ncurses.h, ac_ncurses='yes', ac_ncurses='no')
-AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = xyes])
+AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = "xyes"])
 AC_CHECK_LIB(ncurses, initscr, ac_ncurses_lib='yes', ac_ncurses_lib='no')
-if [ x"$ac_ncurses_lib" = xyes && x"$ac_ncurses" = xno ]
-then
+if test x"$ac_ncurses_lib" = "xyes" -a x"$ac_ncurses" = "xno" ; then
     AC_MSG_ERROR(I see an ncurses library but no header; you should install the development package);
 fi
 
