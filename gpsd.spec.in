@@ -1,3 +1,5 @@
+%define pkgconfig_version 0.12
+
 Name: gpsd
 Summary: Service daemon for mediating access to a GPS
 Version: @VERSION@
@@ -31,6 +33,7 @@ GPS is unplugged and replugged.
 %package -n gpsd-devel
 Summary: Client libraries in C and Python for talking to a running gpsd or GPS
 Group: Development/Libraries
+BuildRequires: pkgconfig >= %{pkgconfig_version}
 Requires: gpsd
 
 %description -n gpsd-devel
@@ -137,6 +140,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_mandir}/man3/libgpsd.3*
 %{_mandir}/man5/rtcm-104.5*
 %{_mandir}/man5/srec.5*
+%{_libdir}/pkgconfig/*
 
 %files -n gpsd-clients
 %defattr(-,root,root,-)
