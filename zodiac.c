@@ -15,6 +15,7 @@
 #include "bits.h"
 
 #ifdef ZODIAC_ENABLE
+extern int device_readonly;
 
 struct header {
     unsigned short sync;
@@ -62,6 +63,9 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     struct header h;
     int i;
     char buf[BUFSIZ];
+
+    if (device_readonly)
+	return;
 
     h.sync = 0x81ff;
     h.id = (unsigned short)type;
