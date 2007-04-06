@@ -395,6 +395,7 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 
 static void detach_client(struct subscriber_t *sub)
 {
+    (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
     gpsd_report(LOG_PROG, "detaching %d in detach_client\n", sub_index(sub));
     FD_CLR(sub->fd, &all_fds);
@@ -427,13 +428,13 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
     }
 
     status = write(sub->fd, buf, (size_t)len);
-    if (status > 0)
+    if (status == len )
 	return status;
-    else if (status == 0) {
+    else if (status > -1) {
 	gpsd_report(LOG_INF, "short write disconnecting client(%d)\n",
 	    sub_index(sub));
     	detach_client(sub);
-	return status;
+	return 0;
     } else if (errno == EAGAIN || errno == EINTR)
 	return 0; /* no data written, and errno says to retry */
      else if (errno == EBADF)
