@@ -132,6 +132,7 @@
 #include "bits.h"
 
 #define EVERMORE_CHANNELS	12
+extern int device_readonly;
 
 /*@ +charint -usedef -compdef @*/
 static bool evermore_write(struct gps_device_t *session, unsigned char *msg, size_t msglen)
@@ -139,6 +140,9 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    unsigned int       crc;
    size_t    i, len;
    unsigned char stuffed[MAX_PACKET_LENGTH*2], *cp;
+
+   if (device_readonly)
+      return 0;
 
    /* prepare a DLE-stuffed copy of the message */
    cp = stuffed;
