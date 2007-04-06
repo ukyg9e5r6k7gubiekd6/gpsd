@@ -19,6 +19,9 @@
 #define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 #include "italk.h"
+
+extern int device_readonly;
+
 static gps_mask_t italk_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_navfix(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *, unsigned char *, size_t);
@@ -168,6 +171,9 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    bool      ok;
 
    /* CONSTRUCT THE MESSAGE */
+
+   if (device_readonly)
+	return 0;
 
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n", 
@@ -335,7 +341,7 @@ static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
 {
     char *ping = "<?>";
-    (void)italk_write(session->gpsdata.gps_fd, ping, 3);
+    (void)gpsd_write(session, ping, 3);
 }
 #endif /* __not_yet__ */
 
