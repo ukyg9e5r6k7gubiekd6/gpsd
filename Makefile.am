@@ -166,13 +166,14 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 # Build Python binding
 #
+if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so
 
 noinst_SCRIPTS = gpspacket.so setup.py
 
 gpspacket.so: gpspacket.c libgps.la
 	(pwd="`pwd`"; cd $(srcdir) && $(PYTHON) setup.py build_ext --build-lib "$$pwd" --build-temp "$$pwd/build" --include-dirs "$$pwd")
-
+endif
 # Clean up after Python
 clean-local:
 	rm -rf build
