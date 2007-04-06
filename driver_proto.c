@@ -42,6 +42,8 @@
 
 #include "bits.h"
 
+extern int device_readonly;
+
 /*
  * These routines are specific to this driver
  */
@@ -186,6 +188,8 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen)
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing proto control type %02x:%s\n", 
 	       msg[0], gpsd_hexdump(msg, msglen));
+   if (device_readonly)
+      return 0;
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
    return(ok);
