@@ -15,6 +15,7 @@
 
 extern struct gps_type_t zodiac_binary;
 extern struct gps_type_t ubx_binary;
+extern int device_readonly;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -25,7 +26,7 @@ ssize_t generic_get(struct gps_device_t *session)
 ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 /* most GPSes take their RTCM corrections straight up */
 {
-    return write(session->gpsdata.gps_fd, buf, rtcmbytes);
+    return gpsd_write(session, buf, rtcmbytes);
 }
 #endif
 
@@ -441,8 +442,11 @@ static void earthmate_close(struct gps_device_t *session)
 
 static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
+    if (device_readonly)
+	return;
+
     if (seq == 0) {
-	(void)write(session->gpsdata.gps_fd, "EARTHA\r\n", 8);
+	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
 	/*@i@*/session->device_type = &zodiac_binary;
 	zodiac_binary.wrapup = earthmate_close;
@@ -520,6 +524,9 @@ static int tnt_send(int fd, const char *fmt, ... )
     int status;
     char buf[BUFSIZ];
     va_list ap;
+
+    if (device_readonly)
+	return 0;
 
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
