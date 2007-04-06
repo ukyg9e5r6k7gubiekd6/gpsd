@@ -643,22 +643,21 @@ static void Build_Send_USB_Packet( struct gps_device_t *session,
 #endif
         (void)PrintUSBPacket ( session,  thePacket);
 
-	theBytesReturned = write( session->gpsdata.gps_fd
-				  , thePacket, (size_t)theBytesToWrite);
+	theBytesReturned = gpsd_write( session , thePacket,
+	    (size_t)theBytesToWrite);
 	gpsd_report(LOG_IO, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
 	// Garmin says:
 	// If the packet size was an exact multiple of the USB packet
 	// size, we must make a final write call with no data
 
-	// as a practical matter no known pckets are 64 bytes long so
+	// as a practical matter no known packets are 64 bytes long so
         // this is untested
 
 	// So here goes just in case
 	if( 0 == (theBytesToWrite % ASYNC_DATA_SIZE) ) {
 		char *n = "";
-		theBytesReturned = write( session->gpsdata.gps_fd
-		    , &n, 0);
+		theBytesReturned = gpsd_write( session , &n, 0);
 	}
 }
 /* build and send a packet in serial protocol */
@@ -714,8 +713,8 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 			       (int)buffer0[2], 
 			       (unsigned char *)(buffer0 + 3));
 
-	theBytesReturned = write( session->gpsdata.gps_fd
-				  , thePacket, (size_t)theBytesToWrite);
+	theBytesReturned = gpsd_write( session, thePacket,
+	    (size_t)theBytesToWrite);
 	gpsd_report(LOG_IO, "SendPacket(), wrote %d bytes\n", theBytesReturned);
 
 }
@@ -994,8 +993,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 #ifdef ALLOW_RECONFIGURE
     if (mode == 0) {
 	const char *switcher = "\x10\x0A\x02\x26\x00\xCE\x10\x03";
-	int status = (int)write(session->gpsdata.gps_fd, 
-				switcher, strlen(switcher));
+	int status = (int)gpsd_write(session, switcher, strlen(switcher));
 	if (status == (int)strlen(switcher)) {
 	    gpsd_report(LOG_IO, "=> GPS: turn off binary %02x %02x %02x... \n"
 			, switcher[0], switcher[1], switcher[2]);
