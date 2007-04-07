@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -1521,7 +1522,8 @@ int main(int argc, char *argv[])
 
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		gpsd_report(LOG_INF, "client connect on %d\n", ssock);
+		gpsd_report(LOG_INF, "client %s connect on fd %d\n",
+		    inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr), ssock);
 
 		client = allocate_client();
 		if (client == NULL) {
@@ -1553,7 +1555,8 @@ int main(int argc, char *argv[])
 
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		gpsd_report(LOG_INF, "client connect on %d\n", ssock);
+		gpsd_report(LOG_INF, "client %s connect on fd %d\n",
+		    inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr), ssock);
 		client = allocate_client();
 		if (client == NULL) {
 		    gpsd_report(LOG_ERROR, "No client subscriber slots available!\n");
