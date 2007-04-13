@@ -396,9 +396,15 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 
 static void detach_client(struct subscriber_t *sub)
 {
+    struct sockaddr fsin;
+    socklen_t alen = (socklen_t)sizeof(fsin);
+
+    (void)getpeername(sub->fd, (struct sockaddr *) &fsin, &alen);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
-    gpsd_report(LOG_PROG, "detaching %d in detach_client\n", sub_index(sub));
+    gpsd_report(LOG_INF, "detaching %s (%d) in detach_client\n",
+	inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr),
+	sub_index(sub));
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
@@ -1511,6 +1517,7 @@ int main(int argc, char *argv[])
 
 	/* always be open to new client connections */
 	if (FD_ISSET(msock, &rfds)) {
+	    char *c_ip;
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
@@ -1522,20 +1529,22 @@ int main(int argc, char *argv[])
 
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		gpsd_report(LOG_INF, "client %s connect on fd %d\n",
-		    inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr), ssock);
 
+		c_ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
 		client = allocate_client();
 		if (client == NULL) {
-		    gpsd_report(LOG_ERROR, "No client subscriber slots available!\n");
+		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
+			"no subscriber slots available\n", c_ip, ssock);
 		    (void)close(ssock);
 		} else {
-			FD_SET(ssock, &all_fds);
-			adjust_max_fd(ssock, true);
-			client->fd = ssock;
-			client->active = timestamp();
-			client->tied = false;
-			client->requires = ANY;
+		    FD_SET(ssock, &all_fds);
+		    adjust_max_fd(ssock, true);
+		    client->fd = ssock;
+		    client->active = timestamp();
+		    client->tied = false;
+		    client->requires = ANY;
+		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
+			c_ip, sub_index(client), ssock);
 		}
 	    }
 	    FD_CLR(msock, &rfds);
@@ -1544,6 +1553,7 @@ int main(int argc, char *argv[])
 #ifdef RTCM104_SERVICE
 	/* also to RTCM client connections */
 	if (FD_ISSET(nsock, &rfds)) {
+	    char *c_ip;
 	    socklen_t alen = (socklen_t)sizeof(fsin);
 	    /*@i1@*/int ssock = accept(nsock, (struct sockaddr *)&fsin, &alen);
 
@@ -1555,11 +1565,11 @@ int main(int argc, char *argv[])
 
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		gpsd_report(LOG_INF, "client %s connect on fd %d\n",
-		    inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr), ssock);
+		c_ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
 		client = allocate_client();
 		if (client == NULL) {
-		    gpsd_report(LOG_ERROR, "No client subscriber slots available!\n");
+		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
+			"no subscriber slots available\n", c_ip, ssock);
 		    close(ssock);
 		} else {
 		    FD_SET(ssock, &all_fds);
@@ -1568,6 +1578,8 @@ int main(int argc, char *argv[])
 		    client->tied = false;
 		    client->requires = RTCM104;
 		    client->fd = ssock;
+		    gpsd_report(LOG_INF, "client %s (%d) connect on fd %d\n",
+			c_ip, sub_index(client), ssock);
 		}
 	    }
 	    FD_CLR(nsock, &rfds);
