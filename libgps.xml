@@ -96,25 +96,25 @@ is probably the one you want.  The low-level interface is documented
 at
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.</para>
 
-<para>Calling <function>gpsd_open()</function> initializes a GPS-data
+<para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and returns a socket
 attached to
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>. 
-<function>gpsd_open()</function> returns NULL on errors.  errno is
+<function>gps_open()</function> returns NULL on errors.  errno is
 set depending on the error returned from the the socket layer; see
 <filename>gps.h</filename> for values and explanations.</para>
 
-<para><function>gpsd_close()</function> ends the session.</para>
+<para><function>gps_close()</function> ends the session.</para>
 
-<para><function>gpsd_poll()</function> accepts a response, or sequence
+<para><function>gps_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
 query response (the return value is as for a query).
-<function>gpsd_poll()</function> returns the validity mask of the
+<function>gps_poll()</function> returns the validity mask of the
 received structure.  This function does a blocking read waiting for
 data from the daemon; it returns 0 for success, or -1 on a Unix-level
 read error. </para>
 
-<para><function>gpsd_query()</function> writes a command to the
+<para><function>gps_query()</function> writes a command to the
 daemon, accepts a one-line response, and updates parts of the GPS-data
 structure that correspond to data changed since the last call.  The
 second argument must be a format string containing letters from the command
@@ -128,7 +128,7 @@ Unix-level read error.</para>
 
 <para><function>gps_set_raw_hook()</function> takes a function you
 specify and run it (synchronously) on the raw data pulled by a
-<function>gpsd_query()</function> or <function>gpsd_poll()</function>
+<function>gps_query()</function> or <function>gps_poll()</function>
 call.  The arguments passed to this hook will be a pointer to a
 structure containing parsed data, and a buffer containining the
 raw <application>gpsd</application> response.</para>
