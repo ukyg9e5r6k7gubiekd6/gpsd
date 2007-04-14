@@ -1646,10 +1646,8 @@ int main(int argc, char *argv[])
 		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
 		} else if ((changed & ONLINE_SET) == 0) {
-/*
 		    gpsd_report(LOG_INF, "GPS is offline (%lf sec since data)\n", 
 				timestamp() - channel->gpsdata.online);
-*/
 		    FD_CLR(channel->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
