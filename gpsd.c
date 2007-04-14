@@ -396,15 +396,11 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 
 static void detach_client(struct subscriber_t *sub)
 {
-    struct sockaddr fsin;
-    socklen_t alen = (socklen_t)sizeof(fsin);
-
-    (void)getpeername(sub->fd, (struct sockaddr *) &fsin, &alen);
+    char *c_ip = sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (%d) in detach_client\n",
-	inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr),
-	sub_index(sub));
+	c_ip, sub_index(sub));
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
@@ -1517,8 +1513,8 @@ int main(int argc, char *argv[])
 
 	/* always be open to new client connections */
 	if (FD_ISSET(msock, &rfds)) {
-	    char *c_ip;
 	    socklen_t alen = (socklen_t)sizeof(fsin);
+	    char *c_ip;
 	    /*@i1@*/int ssock = accept(msock, (struct sockaddr *) &fsin, &alen);
 
 	    if (ssock < 0)
@@ -1530,7 +1526,7 @@ int main(int argc, char *argv[])
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
 
-		c_ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
+		c_ip = sock2ip(ssock);
 		client = allocate_client();
 		if (client == NULL) {
 		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"
@@ -1565,7 +1561,7 @@ int main(int argc, char *argv[])
 
 		if (opts >= 0)
 		    (void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-		c_ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
+		c_ip = sock2ip(ssock);
 		client = allocate_client();
 		if (client == NULL) {
 		    gpsd_report(LOG_ERROR, "Client %s connect on fd %d -"

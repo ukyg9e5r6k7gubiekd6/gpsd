@@ -15,6 +15,7 @@
 #endif
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -74,3 +75,19 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     /*@ +type +mustfreefresh @*/
 }
 
+char * sock2ip(int fd)
+{
+    struct sockaddr fsin;
+    socklen_t alen = (socklen_t)sizeof(fsin);
+    char *ip;
+    int r;
+
+    r = getpeername(fd, (struct sockaddr *) &fsin, &alen);
+    if (r == 0){
+    	ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
+    } else {
+	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r, strerror(errno), errno);
+	ip = "<unknown>";
+    }
+    return ip;
+}
