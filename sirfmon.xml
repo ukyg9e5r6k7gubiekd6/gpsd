@@ -121,7 +121,7 @@ set distance may vary with software versions.</quote></para>
 software, which often snaps the reported position to the nearest road
 within some uncertainty radius.  You probably want to turn static
 navigation off for pedestrian use, as it is likely to report speed
-zero and position changing in lsrge jumps.</para>
+zero and position changing in large jumps.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
