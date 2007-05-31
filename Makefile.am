@@ -146,8 +146,7 @@ libgps_c_sources = \
 	bsd-base64.h \
 	strl.c \
 	hex.c \
-	gpsd.h-head \
-	gpsd.h-tail
+	gpsd.h 
 
 BUILT_SOURCES = packet_names.h gpsd.h
 packet_names.h: packet_states.h

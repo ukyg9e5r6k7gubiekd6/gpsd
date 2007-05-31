@@ -780,7 +780,7 @@ static int readword(void)
 }
 
 /*@ -globstate @*/
-static int readpkt(unsigned char *buf, unsigned int buflen)
+static int readpkt(unsigned char *buf, size_t buflen)
 {
     int byte,len,csum,cnt;
     unsigned char *cp = buf;
@@ -795,7 +795,7 @@ static int readpkt(unsigned char *buf, unsigned int buflen)
 	return EOF;
 
     csum = 0;
-    assert(len < buflen);
+    assert(len < (int)buflen);
     cnt = len;
 
     while (cnt-- > 0) {

@@ -65,7 +65,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 
 #ifdef IPTOS_LOWDELAY
     opt = IPTOS_LOWDELAY;
-    setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
+    (void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
 #endif
 #ifdef TCP_NODELAY
     if (type == SOCK_STREAM)
@@ -75,7 +75,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     /*@ +type +mustfreefresh @*/
 }
 
-char * sock2ip(int fd)
+char *sock2ip(int fd)
 {
     struct sockaddr fsin;
     socklen_t alen = (socklen_t)sizeof(fsin);

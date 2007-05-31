@@ -1264,7 +1264,7 @@ int main(int argc, char *argv[])
 #endif /* PPS_ENABLE */
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_NUMERIC, "C");
+    (void)setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
     device_readonly = false;
