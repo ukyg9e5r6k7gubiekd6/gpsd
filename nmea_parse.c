@@ -634,7 +634,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     gps_mask_t retval = 0;
     unsigned int i;
     char *p, *field[NMEA_MAX], *s;
+#ifndef USE_OLD_SPLIT
     volatile char *t;
+#endif
 #ifdef __UNUSED__
     unsigned char sum;
 
@@ -658,19 +660,20 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	return ONLINE_SET;
     }
 
+#ifdef BREAK_REGRESSIONS
     /* trim trailing CR/LF */
     for (i = 0; i < strlen(sentence); i++)
     	if ((sentence[i] == '\r') || (sentence[i] == '\n')){
     	    sentence[i] = '\0';
 	    break;
 	}
+#endif
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
     strncpy((char *)buf, sentence, NMEA_MAX);
     /* discard the checksum part */
     for (p = (char *)buf; (*p != '*') && (*p >= ' '); ) ++p;
     *p = '\0';
-    t = p;  /* end of sentence */
     /* split sentence copy on commas, filling the field array */
 #ifdef USE_OLD_SPLIT
     for (count = 0, p = (char *)buf; p != NULL && *p != '\0'; ++count, p = strchr(p, ',')) {
@@ -679,6 +682,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     }
 #else
     count = 0;
+    t = p;  /* end of sentence */
     p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */ 
     /* while there is a search string and we haven't run off the buffer... */
     while((p != NULL) && (p <= t)){
