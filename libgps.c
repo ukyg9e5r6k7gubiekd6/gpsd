@@ -326,7 +326,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				tag, timestr, ept, lat, lon,
 			        alt, eph, epv, track, speed, climb,
 			        epd, eps, epc, mode);
-			if (st == 15) {
+			if (st >= 14) {
 #define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
 			    /*@ +floatdouble @*/
 			    nf.time = DEFAULT(timestr);

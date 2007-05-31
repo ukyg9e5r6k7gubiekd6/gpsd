@@ -66,6 +66,8 @@ Starlink's website.
 
 static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
+#define DIMENSION(a) (unsigned)(sizeof(a)/sizeof(a[0]))
+
 void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
 /* break out the raw bits into the content fields */
 {
@@ -695,18 +697,22 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 	//break;
 
     default:
-	for (n = 0; n < (unsigned)(sizeof(rtcmp->msg_data.words)/sizeof(rtcmp->msg_data.words[0])); n++)
+	for (n = 0; n < DIMENSION(rtcmp->msg_data.words); n++)
 	    if (rtcmp->msg_data.words[n] == 0)
 		break;
-	fldcount = sscanf(buf, "U\t0x%08x\n", &v);
-	if (fldcount != 1)
-	    return (int)(-rtcmp->type-1);
+	if (n >= DIMENSION(rtcmp->msg_data.words))
+	    return 0;
 	else {
-	    rtcmp->msg_data.words[n] = (isgps30bits_t)v;
-	    if (n == rtcmp->length-1)
-		return 0;
-	    else
-		return (int)(rtcmp->type+1);
+	    fldcount = sscanf(buf, "U\t0x%08x\n", &v);
+	    if (fldcount != 1)
+		return (int)(-rtcmp->type-1);
+	    else {
+		rtcmp->msg_data.words[n] = (isgps30bits_t)v;
+		if (n == rtcmp->length-1)
+		    return 0;
+		else
+		    return (int)(rtcmp->type+1);
+	    }
 	}
 	//break;
     }

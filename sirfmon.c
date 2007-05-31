@@ -780,7 +780,7 @@ static int readword(void)
 }
 
 /*@ -globstate @*/
-static int readpkt(unsigned char *buf)
+static int readpkt(unsigned char *buf, unsigned int buflen)
 {
     int byte,len,csum,cnt;
     unsigned char *cp = buf;
@@ -795,6 +795,7 @@ static int readpkt(unsigned char *buf)
 	return EOF;
 
     csum = 0;
+    assert(len < buflen);
     cnt = len;
 
     while (cnt-- > 0) {
@@ -1343,7 +1344,7 @@ int main (int argc, char **argv)
 	    (void)sendpkt(buf, 2, device);
 	}
 
-	if ((len = readpkt(buf)) != EOF) {
+	if ((len = readpkt(buf, sizeof(buf))) != EOF) {
 	    decode_sirf(buf,len);
 	}
     }
