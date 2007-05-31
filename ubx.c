@@ -119,7 +119,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 
     flags = getub(buf, 11);
     if (flags & 0x7)
-    	session->context->leap_seconds = getub(buf, 10);
+    	session->context->leap_seconds = (int)getub(buf, 10);
 
     t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
@@ -173,7 +173,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 /*@ +charint @*/
 gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned short data_len;
+    size_t data_len;
     unsigned short msgid;
     gps_mask_t mask = 0;
 
@@ -182,7 +182,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
-    data_len = getsw(buf, 4);
+    data_len = (size_t)getsw(buf, 4);
     switch (msgid)
     {
 	case UBX_NAV_POSECEF:

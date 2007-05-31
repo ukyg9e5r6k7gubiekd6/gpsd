@@ -116,7 +116,7 @@ static void navcom_cmd_0x20(struct gps_device_t *session, u_int8_t block_id, u_i
     putword(msg, 14, 0x0000);
     putbyte(msg, 16, checksum(msg+3, 13));
     putbyte(msg, 17, 0x03);
-    navcom_send_cmd(session, msg, 18);
+    (void)navcom_send_cmd(session, msg, 18);
     gpsd_report(LOG_PROG,
                 "Navcom: sent command 0x20 (Data Request) "
                 "- data block id = %02x at rate %02x\n",
@@ -138,7 +138,7 @@ static void UNUSED navcom_cmd_0x3f(struct gps_device_t *session)
     putbyte(msg, 9, 0x0a);	/* Battery LED setting */
     putbyte(msg, 10, checksum(msg+3, 7));
     putbyte(msg, 11, 0x03);
-    navcom_send_cmd(session, msg, 12);
+    (void)navcom_send_cmd(session, msg, 12);
     gpsd_report(LOG_PROG,
                 "Navcom: sent command 0x3f (LED Configuration Block)\n");
 }
@@ -158,7 +158,7 @@ static void navcom_cmd_0x1c(struct gps_device_t *session, u_int8_t mode, u_int8_
     putbyte(msg, 9, 0x00);
     putbyte(msg, 10, checksum(msg+3, 7));
     putbyte(msg, 11, 0x03);
-    navcom_send_cmd(session, msg, 12);
+    (void)navcom_send_cmd(session, msg, 12);
     gpsd_report(LOG_PROG,
                 "Navcom: sent command 0x1c (Test Support Block)\n");
     gpsd_report(LOG_IO,
@@ -183,7 +183,7 @@ static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selectio
     putbyte(msg, 9, 0x00);      /* Reserved */
     putbyte(msg, 10, checksum(msg+3, 7));
     putbyte(msg, 11, 0x03);
-    navcom_send_cmd(session, msg, 12);
+    (void)navcom_send_cmd(session, msg, 12);
     gpsd_report(LOG_PROG,
                 "Navcom: sent command 0x11 (Serial Port Configuration)\n");
     gpsd_report(LOG_IO,
@@ -193,7 +193,7 @@ static void navcom_cmd_0x11(struct gps_device_t *session, u_int8_t port_selectio
 static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /* Request the following messages: */
-    if (!seq) {
+    if (seq==0) {
         navcom_cmd_0x1c(session, 0x01, 5);      /* Blink LEDs on receiver */
         navcom_cmd_0x20(session, 0xae, 0x1770); /* Identification Block - send every 10 min*/
         navcom_cmd_0x20(session, 0xb1, 0x4000); /* PVT Block */
@@ -330,10 +330,10 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     /* Ref.: ICD-GPS-200C 20.3.3.5.2.4 */
     if ((week%256)*604800+tow/1000.0 < wnlsf*604800+dn*86400) {
         /* Effectivity time is in the future, use dtls */
-        session->context->leap_seconds = dtls;
+        session->context->leap_seconds = (int)dtls;
     } else {
         /* Effectivity time is not in the future, use dtlsf */
-        session->context->leap_seconds = dtlsf;
+        session->context->leap_seconds = (int)dtlsf;
     }
     
     session->gpsdata.sentence_time = gpstime_to_unix(week, tow/1000.0)
