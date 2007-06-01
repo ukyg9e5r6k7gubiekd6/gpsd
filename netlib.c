@@ -85,11 +85,13 @@ char *sock2ip(int fd)
     int r;
 
     r = getpeername(fd, (struct sockaddr *) &fsin, &alen);
+    /*@ -branchstate @*/
     if (r == 0){
     	ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
     } else {
 	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r, strerror(errno), errno);
 	ip = "<unknown>";
     }
+    /*@ +branchstate @*/
     return ip;
 }

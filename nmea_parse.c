@@ -687,11 +687,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     /* while there is a search string and we haven't run off the buffer... */
     while((p != NULL) && (p <= t)){
 	field[count] = p; /* we have a field. record it */
+	/*@ -compdef @*/
 	if ((p = strchr(p, ',')) != NULL){ /* search for the next delimiter */
 	    *p = '\0'; /* replace it with a NUL */
 	    count++; /* bump the counters and continue */
 	    p++;
 	}
+	/*@ +compdef @*/
     }
 #endif
     /* dispatch on field zero, the sentence tag */

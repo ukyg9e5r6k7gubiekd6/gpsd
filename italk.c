@@ -49,12 +49,12 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
     mask =  ONLINE_SET | MODE_SET | STATUS_SET | CYCLE_START_SET;
 
     /* just bail out if this fix is not marked valid */
-    if ((pflags & FIX_FLAG_MASK_INVALID) || 0 == (flags & FIXINFO_FLAG_VALID))
+    if (0 != (pflags & FIX_FLAG_MASK_INVALID) || 0 == (flags & FIXINFO_FLAG_VALID))
 	return mask;
 
-    gps_week = getsw(buf, 7 + 82);
+    gps_week = (ushort)getsw(buf, 7 + 82);
     tow = getul(buf, 7 + 84);
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = t;
     session->gpsdata.fix.time = t;
     mask |= TIME_SET;
@@ -82,7 +82,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 	mask |= HDOP_SET | GDOP_SET | PDOP_SET | VDOP_SET | TDOP_SET;
     }
 
-    if (!(pflags & FIX_FLAG_MASK_INVALID) && (flags & FIXINFO_FLAG_VALID)){
+    if ((pflags & FIX_FLAG_MASK_INVALID) == 0 && (flags & FIXINFO_FLAG_VALID) != 0){
 	if (pflags & FIX_FLAG_3DFIX)
 	    session->gpsdata.fix.mode = MODE_3D;
 	else
@@ -99,23 +99,22 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned int tow;
-    unsigned char i, st, nchan, nsv;
+    unsigned int i, nsv, tow, st, nchan;
     unsigned short gps_week;
     double t;
 
     if (len < 62){
 	gpsd_report(LOG_PROG, "ITALK: runt PRN_STATUS (len=%d)\n", len);
-	return -1;
+	return ERROR_SET;
     }
 
     gps_week = getuw(buf, 7 + 4);
     tow = getul(buf, 7 + 6);
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     gpsd_zero_satellites(&session->gpsdata);
-    nchan = (len - 10 - 52) / 20; 
+    nchan = (unsigned int)((len - 10 - 52) / 20); 
     st = nsv = 0;
     for (i = 0; i < nchan; i++) {
 	int off = 7+ 52 + 20 * i;
@@ -134,7 +133,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	if (good!=0)
 	    st++;
     }
-    session->gpsdata.satellites = st;
+    session->gpsdata.satellites = (int)st;
 
     return USED_SET | SATELLITE_SET | TIME_SET;
 }
@@ -142,25 +141,26 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned int tow;
-    unsigned short gps_week, flags, leap;
+    int leap;
+    unsigned short gps_week, flags;
     double t;
 
     if (len != 64){
 	gpsd_report(LOG_PROG, "ITALK: bad UTC_IONO_MODEL (len %d, should be 64)\n", len);
-	return -1;
+	return ERROR_SET;
     }
 
     flags = getuw(buf, 7);
     if (0 == (flags & UTC_IONO_MODEL_UTCVALID))
 	return 0;
 
-    leap = getuw(buf, 7 + 24);
+    leap = (int)getuw(buf, 7 + 24);
     if (session->context->leap_seconds < leap)
     	session->context->leap_seconds = leap;
 
     gps_week = getuw(buf, 7 + 36);
     tow = getul(buf, 7 + 38);
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    t = gpstime_to_unix((int)gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     return TIME_SET;
@@ -191,12 +191,13 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
 /*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    int mask = 0, type;
+    unsigned int type;
+    gps_mask_t mask = 0;
 
     if (len == 0)
 	return 0;
 
-    type = getub(buf, 4);
+    type = (uint)getub(buf, 4);
     /* we may need to dump the raw packet */
     gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n", type, len, gpsd_hexdump(buf, len));
 
@@ -273,7 +274,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
     default:
 	gpsd_report(LOG_IO, "iTalk unknown packet: id 0x%02x length %d\n", type, len);
     }
-    if (mask == -1)
+    if (mask == ERROR_SET)
 	mask = 0;
     else
 	(void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),

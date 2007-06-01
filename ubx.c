@@ -26,7 +26,6 @@ gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, siz
 gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 
-static unsigned short gps_week = 0;
 /**
  * Navigation solution message
  */
@@ -34,23 +33,23 @@ gps_mask_t
 ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned short gw;
-    unsigned int tow;
+    unsigned int tow, flags;
     double epx, epy, epz, evx, evy, evz;
-    unsigned char navmode, flags;
+    unsigned char navmode;
     gps_mask_t mask;
     double t;
 
     if (data_len != 52)
 	return 0;
 
-    flags = getub(buf, 11);
+    flags = (unsigned int)getub(buf, 11);
     mask =  ONLINE_SET;
     if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
 	tow = getul(buf, 0);
 	gw = (unsigned short)getsw(buf, 8);
-	gps_week = gw;
+	session->driver.ubx.gps_week = gw;
 
-	t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+	t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
 	session->gpsdata.sentence_time = t;
 	session->gpsdata.fix.time = t;
 	mask |= TIME_SET;
@@ -72,7 +71,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.fix.eph = (double)(getsl(buf, 24)/100.0);
     session->gpsdata.fix.eps = (double)(getsl(buf, 40)/100.0);
     session->gpsdata.pdop = (double)(getuw(buf, 44)/100.0);
-    session->gpsdata.satellites_used = getub(buf, 47);
+    session->gpsdata.satellites_used = (int)getub(buf, 47);
 
     navmode = getub(buf, 10);
     switch (navmode){
@@ -88,7 +87,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	session->gpsdata.fix.mode = MODE_NO_FIX;
     }
 
-    if (flags & UBX_SOL_FLAG_DGPS)
+    if ((flags & UBX_SOL_FLAG_DGPS) != 0)
 	session->gpsdata.status = STATUS_DGPS_FIX;
     else if (session->gpsdata.fix.mode != MODE_NO_FIX)
 	session->gpsdata.status = STATUS_FIX;
@@ -104,24 +103,22 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 gps_mask_t
 ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-    unsigned int tow;
-    unsigned short gw;
-    unsigned char flags;
+    unsigned int gw, tow, flags;
     double t;
 
     if (data_len != 16)
 	return 0;
 
     tow = getul(buf, 0);
-    gw = getsw(buf, 8);
-    if (gw > gps_week)
-	gps_week = gw;
+    gw = (uint)getsw(buf, 8);
+    if (gw > session->driver.ubx.gps_week)
+	session->driver.ubx.gps_week = gw;
 
-    flags = getub(buf, 11);
-    if (flags & 0x7)
+    flags = (unsigned int)getub(buf, 11);
+    if ((flags & 0x7) != 0)
     	session->context->leap_seconds = (int)getub(buf, 10);
 
-    t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;
+    t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     return TIME_SET | ONLINE_SET;
@@ -133,8 +130,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-    unsigned char i, st, nchan, nsv;
-    unsigned int tow;
+    unsigned int i, tow, st, nchan, nsv;;
 
     if (data_len < 152 ) {
 	gpsd_report(LOG_PROG, "runt svinfo (datalen=%d)\n", data_len);
@@ -143,20 +139,24 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     tow = getul(buf, 0);
 //    session->gpsdata.sentence_time = gpstime_to_unix(gps_week, tow) 
 //				- session->context->leap_seconds;
+    /*@ +charint @*/
     nchan = getub(buf, 4);
     if (nchan > 16){
 	gpsd_report(LOG_WARN, "Invalid NAV SVINFO message, >16 reported");
 	return 0;
     }
+    /*@ -charint @*/
     gpsd_zero_satellites(&session->gpsdata);
     st = nsv = 0;
     for (i = 0; i < nchan; i++) {
 	int off = 8 + 12 * i;
 	bool good;
 	session->gpsdata.PRN[st]	= (int)getub(buf, off+1);
+	/*@ -predboolothers */
 	if (getub(buf, off+2) & 0x01)
 	    session->gpsdata.used[st] = session->gpsdata.PRN[st];
 
+	/*@ +predboolothers */
 	session->gpsdata.ss[st]		= (int)getub(buf, off+4);
 	session->gpsdata.elevation[st]	= (int)getsb(buf, off+5);
 	session->gpsdata.azimuth[st]	= (int)getsw(buf, off+6);
@@ -166,7 +166,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	if (good!=0)
 	    st++;
     }
-    session->gpsdata.satellites = st;
+    session->gpsdata.satellites = (int)st;
     return SATELLITE_SET;
 }
 

@@ -203,12 +203,14 @@ int gpsd_open(struct gps_device_t *session)
     struct stat sb;
     mode_t mode = (mode_t)O_RDWR;
 
+    /*@ -boolops @*/
     if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
 	mode = (mode_t)O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
     } else {
 	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     }
+    /*@ +boolops @*/
 
     if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, (int)(mode|O_NONBLOCK|O_NOCTTY))) < 0) {
 	gpsd_report(LOG_ERROR, "device open failed: %s - retrying read-only\n", strerror(errno));
