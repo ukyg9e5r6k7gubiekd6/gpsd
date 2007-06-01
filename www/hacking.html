@@ -76,6 +76,7 @@ file in the source distribution.</p>
 <li><a href="#patches">Send patches in diff -u or -c format</a></li>
 <li><a href="#license">The license on contributions</a></li>
 <li><a href="#options">Don't add invocation options!</a></li>
+<li><a href="#statics">Don't create static variables in the libraries!</li>
 <li><a href="#malloc">Don't use malloc!</a></li>
 </ol>
 <li><a href="#understanding">Understanding the code</a></li>
@@ -333,6 +334,11 @@ on these to catch damaging side-effects of seemingly innocent but
 ill-thought-out changes, and to nail problems before they become
 user-visible.</p>
 
+<p>The reason we use splint is twofold: (1) it's good at catching
+static buffer overruns, and (2) gpsd does a lot of low-level
+bit-bashing that can be sensitive to 32-vs.-64-bit problems. Getting
+the code splint-clean tends to prevent these.</p>
+
 <p>If you are contributing a driver for a new GPS, please also do the
 following things:</p>
 
@@ -405,6 +411,20 @@ mind afterwards?  Stupid design...</p>
 be changed by modifying the hotplug script.  Requiring end-users to
 modify hotplug scripts (or anything else in admin space) is a crash
 landing.</p>
+
+<h2 id="statics">Don't create static variables in the libraries!</h2>
+
+<p>Don't create static variables in library files; it makes them
+non-reentrant <s>and hard to light</s>.  In practice, this means
+you shouldn't declare a static in any file that doesn't have a
+main() function of its own, and silly little test mains cordoned
+off by a preprocessor conditional don't count.</p>
+
+<p>Instead, use the 'driver' union in gps_device_t and the gps_context_t
+storage area that's passed in common in a lot of the calls.
+These are intended as places to stash stuff that needs to be shared
+within a session, but would be thread-local if the code were 
+running in a thread.</p>
 
 <h2 id="malloc">Don't use malloc!</h2>
 
