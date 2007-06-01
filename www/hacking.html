@@ -72,6 +72,7 @@ file in the source distribution.</p>
 </ol>
 <li><a href="#contribution">Contribution guidelines</a></li>
 <ol>
+<li><a href="#verify">Verify your patch or commit</a></li>
 <li><a href="#patches">Send patches in diff -u or -c format</a></li>
 <li><a href="#license">The license on contributions</a></li>
 <li><a href="#options">Don't add invocation options!</a></li>
@@ -279,35 +280,58 @@ whole classes of potential C bugs that simply don't exist in Python,
 and Python programs have a drastically lower line count for equivalent
 capability.</p>
 
-<h2 id="patches">Send patches in diff -u or -c format</h2>
+<h2 id="verify">Verify your patch or commit</h2>
 
-<p>We prefer diff -u format, but diff -c is acceptable.  Do not send
-patches in the default (-e or ed) mode, as they are too brittle.</p>
+<p>GPSD is written to a high quality standard, and has a defect rate
+that is remarkably low for a project of this size and complexity.  Our
+first <a href='http://www.coverity.com/'>Coverity</a> scan, in March
+2007, flagged only 4 potential problems in 22,397 LOC &mdash; and two
+of those were false positives.  This is <a
+href='http://lwn.net/Articles/115530/'>three orders of magnitude
+cleaner</a> than typical commercial software, and about half the
+defect density of the Linux kernel itself.</p>
 
-<p>Before shipping a patch, you should go through the following checklist:</p>
+<p>This did not happen by accident.  We put a lot of effort into test
+tools and regression tests so we can avoid committing bad code. For
+committers, using those tests isn't just a good idea, it's the law
+&mdash; which is to say that if make a habit of <em>not</em> using
+them when you should, your commit access <em>will</em> be yanked.</p>
+
+<p>Before shipping a patch or committing to the repository, you should
+go through the following checklist:</p>
 
 <ol>
-<li>If you are introducing a new feature or driver, include a
-    documentation patch.</li>
+<li>If you are introducing a new feature or driver, include
+    documentation.</li>
 
-<li>Use the regression-test suite &mdash; "make testregress" &mdash; to check
-    that your patch doesn't break the handling of any
-    already-supported 
-    GPS.</li>
+<li>If your patch changes executable code in any way that is more than
+    trivial, use the regression-test suite &mdash; "make testregress"
+    &mdash; to check that your patch doesn't break the handling of any
+    already-supported GPS.</li>
 
-<li>If you have valgrind(1) on your development system, run
-    valgrind-audit and look out for reports of memory leaks and
-    other dynamic-allocation problems (see <a
-    href="http://valgrind.org">the Valgrind website</a> for
-    a description of this tool if you don't already know about it).  
-    If you can't run valgrind. tell us that you couldn't do it.</li>
+<li>In the rare case where your patch or commit breaks the
+    regression test and it's for a good reason, part of your 
+    responsibility is to (a) rebuild the regression tests, (b)
+    include the test changes in your patch, and (c) <b>explain 
+    in detail why the regression broke</b> in your change comment.</li>
 
-<li>If you have splint(1) on your development system, make sure the
-    patched code displays no warnings when you run 'make splint' (see
-    <a href="http://www.splint.org">the Splint website</a> for further
-    description of this tool if you don't already know about it). If
-    you can't run splint, tell us that you couldn't do it.</li>
+<li>Check that the patched code displays no warnings when you run 'make
+    splint' (see <a href="http://www.splint.org">the Splint
+    website</a> for further description of this tool if you don't
+    already know about it). Yes, tweaking your code to be splint-clean is
+    a pain in the ass.  Experience shows it's worth it.</li>
+
+<li>After code changes that do anything to the storage handling, run
+    valgrind-audit and look out for reports of memory leaks and other
+    dynamic-allocation problems (see <a href="http://valgrind.org">the
+    Valgrind website</a> for a description of this tool if you don't
+    already know about it).</li>
 </ol>
+
+<p>Not breaking the regression tests is especially important.  We rely
+on these to catch damaging side-effects of seemingly innocent but
+ill-thought-out changes, and to nail problems before they become
+user-visible.</p>
 
 <p>If you are contributing a driver for a new GPS, please also do the
 following things:</p>
@@ -321,6 +345,16 @@ href="hardware.html">hardware page</a>.</li>
 
 <p>There's a whole section on adding new drivers later in this document.</p>
 </ol>
+
+<h2 id="patches">Send patches in diff -u or -c format</h2>
+
+<p>We prefer diff -u format, but diff -c is acceptable.  Do not send
+patches in the default (-e or ed) mode, as they are too brittle.</p>
+
+<p>When you send a patch, we expect you to do at least the first three
+of the same verification steps we <a href='#verify'>require</a> from
+our project committers.  Doing all of them is better, and makes it
+far more likely your patch will be expected.</p>
 
 <h2 id="license">The license on contributions</h2>
 
@@ -1113,7 +1147,7 @@ of cycle clears the buffer; a GPRMC arrives with no altitude in it.
 The altitude value in the client display flickers to "not available",
 and won't be restored until the following GGA.</p>
 
-This is the policy gpsd currently follows.
+<p>This is the policy gpsd currently follows.</p>
 
 <h3 id="baroencd">Buffer all, report on every packet, never clear data</h3>
 
