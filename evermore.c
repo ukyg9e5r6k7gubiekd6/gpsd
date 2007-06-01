@@ -176,7 +176,7 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	       gpsd_hexdump(stuffed, len));
 #ifdef ALLOW_RECONFIGURE
-   return gpsd_write(session, stuffed, len);
+   return (gpsd_write(session, stuffed, len) == len);
 #else
    return 0;
 #endif /* ALLOW_RECONFIGURE */

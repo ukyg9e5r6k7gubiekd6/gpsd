@@ -45,9 +45,9 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 
     flags = getub(buf, 11);
     mask =  ONLINE_SET;
-    if (flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)){
+    if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
 	tow = getul(buf, 0);
-	gw = getsw(buf, 8);
+	gw = (unsigned short)getsw(buf, 8);
 	gps_week = gw;
 
 	t = gpstime_to_unix(gps_week, tow/1000.0) - session->context->leap_seconds;

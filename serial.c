@@ -201,16 +201,16 @@ void gpsd_set_speed(struct gps_device_t *session,
 int gpsd_open(struct gps_device_t *session)
 {
     struct stat sb;
-    mode_t mode = O_RDWR;
+    mode_t mode = (mode_t)O_RDWR;
 
     if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
-	mode = O_RDONLY;
+	mode = (mode_t)O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
     } else {
 	gpsd_report(LOG_INF, "opening GPS data source at '%s'\n", session->gpsdata.gps_device);
     }
 
-    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, mode|O_NONBLOCK|O_NOCTTY)) < 0) {
+    if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, (int)(mode|O_NONBLOCK|O_NOCTTY))) < 0) {
 	gpsd_report(LOG_ERROR, "device open failed: %s - retrying read-only\n", strerror(errno));
 	if ((session->gpsdata.gps_fd = open(session->gpsdata.gps_device, O_RDONLY|O_NONBLOCK|O_NOCTTY)) < 0) {
 	    gpsd_report(LOG_ERROR, "read-only device open failed: %s\n", strerror(errno));
@@ -260,7 +260,7 @@ int gpsd_open(struct gps_device_t *session)
     return session->gpsdata.gps_fd;
 }
 
-bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
+ssize_t gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
 {
      ssize_t status;
      bool ok;
@@ -271,7 +271,7 @@ bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
      (void)tcdrain(session->gpsdata.gps_fd);
      /* no test here now, always print as hex */
      gpsd_report(LOG_IO, "=> GPS: %s%s\n", gpsd_hexdump(buf, len), ok?"":" FAILED");
-     return ok;
+     return status;
 }
 
 /*

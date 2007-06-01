@@ -76,7 +76,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context, char
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
     gps_clear_fix(&session->gpsdata.fix);
-    gps_clear_fix(&session->gpsdata.oldfix);
     session->gpsdata.set &=~ (FIX_SET | DOP_SET);
     session->gpsdata.hdop = NAN;
     session->gpsdata.vdop = NAN;
@@ -513,8 +512,9 @@ static void gpsd_binary_dump(struct gps_device_t *session,
 #endif /* BINARY_ENABLE */
 
 
-void gpsd_error_model_fixup(struct gps_device_t *session)
-/* compute missing errors and derived quantities */
+void gpsd_error_model(struct gps_device_t *session, 
+		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
+/* compute errors and derived quantities */
 {
     /*
      * Now we compute derived quantities.  This is where the tricky error-
@@ -534,37 +534,42 @@ void gpsd_error_model_fixup(struct gps_device_t *session)
      * the GPS clock, so we put the bound of the error
      * in as a constant pending getting it from each driver.
      */
-    if (isnan(session->gpsdata.fix.ept))
-	session->gpsdata.fix.ept = 0.005;
-
+    if (isnan(fix->ept)!=0)
+	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
-    if (session->gpsdata.fix.mode >= MODE_2D) {
-	if (isnan(session->gpsdata.fix.eph) && finite(session->gpsdata.hdop))
-	    session->gpsdata.fix.eph = session->gpsdata.hdop * uere;
-	if ((session->gpsdata.fix.mode >= MODE_3D) 
-	    	&& isnan(session->gpsdata.fix.epv) && finite(session->gpsdata.vdop))
-	    session->gpsdata.fix.epv = session->gpsdata.vdop * uere;
-	if (isnan(session->gpsdata.epe) && finite(session->gpsdata.vdop))
+    if (fix->mode >= MODE_2D) {
+	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
+	    fix->eph = session->gpsdata.hdop * uere;
+	else
+	    fix->eph = NAN;
+	if ((fix->mode >= MODE_3D) 
+	    	&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
+	    fix->epv = session->gpsdata.vdop * uere;
+	else
+	    fix->epv = NAN;
+	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.vdop)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
+	else
+	    session->gpsdata.epe = NAN;
 	/*
 	 * If we have a current fix and an old fix, and the packet handler 
 	 * didn't set the speed error and climb error members itself, 
 	 * try to compute them now.
 	 */
-	if (isnan(session->gpsdata.fix.eps) && session->gpsdata.fix.time > session->gpsdata.oldfix.time) {
-	    if (session->gpsdata.oldfix.mode > MODE_NO_FIX && session->gpsdata.fix.mode > MODE_NO_FIX) {
-		double t = session->gpsdata.fix.time-session->gpsdata.oldfix.time;
-		double e = session->gpsdata.oldfix.eph + session->gpsdata.fix.eph;
-		session->gpsdata.fix.eps = e/t;
+	if (isnan(fix->eps)!=0 && fix->time > oldfix->time) {
+	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX) {
+		double t = fix->time-oldfix->time;
+		double e = oldfix->eph + fix->eph;
+		fix->eps = e/t;
 	    }
 	}
-	if ((session->gpsdata.fix.mode >= MODE_3D) 
-	    	&& isnan(session->gpsdata.fix.epc) && session->gpsdata.fix.time > session->gpsdata.oldfix.time) {
-	    if (session->gpsdata.oldfix.mode >= MODE_3D && session->gpsdata.fix.mode >= MODE_3D) {
-		double t = session->gpsdata.fix.time-session->gpsdata.oldfix.time;
-		double e = session->gpsdata.oldfix.epv + session->gpsdata.fix.epv;
+	if ((fix->mode >= MODE_3D) 
+	    	&& isnan(fix->epc)!=0 && fix->time > oldfix->time) {
+	    if (oldfix->mode > MODE_3D && fix->mode > MODE_3D) {
+		double t = fix->time-oldfix->time;
+		double e = oldfix->epv + fix->epv;
 		/* if vertical uncertainties are zero this will be too */
-		session->gpsdata.fix.epc = e/t;
+		fix->epc = e/t;
 	    }
 	    /*
 	     * We compute a track error estinate solely from the
@@ -582,26 +587,24 @@ void gpsd_error_model_fixup(struct gps_device_t *session)
 	     * garbage, throw back NaN if the distance from the previous
 	     * fix is less than the error estimate.
 	     */
-	    if (isnan(session->gpsdata.fix.epd)) {
-                if (session->gpsdata.oldfix.mode >= MODE_2D) {
-                    double adj = earth_distance(
-                        session->gpsdata.oldfix.latitude, session->gpsdata.oldfix.longitude, 
-                        session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-                    if (isnan(adj)==0 && adj > session->gpsdata.fix.eph) {
-                        double opp = session->gpsdata.fix.eph;
-                        double hyp = sqrt(adj*adj + opp*opp);
-                        session->gpsdata.fix.epd = RAD_2_DEG * 2 * asin(opp / hyp);
-                    }
-                }
+	    fix->epd = NAN;
+	    if (oldfix->mode >= MODE_2D) {
+		double adj = earth_distance(
+		    oldfix->latitude, oldfix->longitude, 
+		    fix->latitude, fix->longitude);
+		if (isnan(adj)==0 && adj > fix->eph) {
+		    double opp = fix->eph;
+		    double hyp = sqrt(adj*adj + opp*opp);
+		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
+		}
 	    }
 	}
     }
 
-    session->gpsdata.set |= ERR_SET | SPEEDERR_SET | TRACKERR_SET | CLIMBERR_SET ;
     /* save old fix for later error computations */
     /*@ -mayaliasunique @*/
-    if (session->gpsdata.fix.mode >= MODE_2D)
-	(void)memcpy(&(session->gpsdata.oldfix), &(session->gpsdata.fix), sizeof(struct gps_fix_t));
+    if (fix->mode >= MODE_2D)
+	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
     /*@ +mayaliasunique @*/
 }
 
@@ -718,10 +721,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* Get data from current packet into the fix structure */
 	received = 0;
 	if (session->packet.type != COMMENT_PACKET)
-	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL) {
+	    if (session->device_type != NULL && session->device_type->parse_packet!=NULL)
 		received = session->device_type->parse_packet(session);
-		gpsd_error_model_fixup(session);
-	    }
 
 	/*
 	 * Compute fix-quality data from the satellite positions.

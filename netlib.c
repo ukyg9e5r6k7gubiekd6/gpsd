@@ -65,7 +65,9 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 
 #ifdef IPTOS_LOWDELAY
     opt = IPTOS_LOWDELAY;
+    /*@ -unrecog @*/
     (void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
+    /*@ +unrecog @*/
 #endif
 #ifdef TCP_NODELAY
     if (type == SOCK_STREAM)

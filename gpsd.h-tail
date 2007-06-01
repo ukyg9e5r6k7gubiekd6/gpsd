@@ -363,7 +363,7 @@ extern void ntrip_report(struct gps_device_t *);
 extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
 extern bool gpsd_set_raw(struct gps_device_t *);
-extern bool gpsd_write(struct gps_device_t *, void const *, size_t);
+extern ssize_t gpsd_write(struct gps_device_t *, void const *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, unsigned char, unsigned int);

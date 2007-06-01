@@ -914,16 +914,16 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				   sub->fixbuffer.altitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->device->gpsdata.fix.eph)==0)
+		if (isnan(sub->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				  " %.2f",  sub->device->gpsdata.fix.eph);
+				  " %.2f",  sub->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->device->gpsdata.fix.epv)==0)
+		if (isnan(sub->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",  sub->device->gpsdata.fix.epv);
+				   " %.2f",  sub->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.track)==0)
@@ -941,23 +941,23 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 				   sub->fixbuffer.climb);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->device->gpsdata.fix.epd)==0)
+		if (isnan(sub->fixbuffer.epd)==0)
 		    (void)snprintf(phrase+strlen(phrase), 
 				   sizeof(phrase)-strlen(phrase),
 				   " %.4f",
-				   sub->device->gpsdata.fix.epd);
+				   sub->fixbuffer.epd);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->device->gpsdata.fix.eps)==0)
+		if (isnan(sub->fixbuffer.eps)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %.2f", sub->device->gpsdata.fix.eps);		    
+			     " %.2f", sub->fixbuffer.eps);		    
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
-		if (isnan(sub->device->gpsdata.fix.epc)==0)
+		if (isnan(sub->fixbuffer.epc)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 			     sizeof(phrase)-strlen(phrase),
-			     " %.2f", sub->device->gpsdata.fix.epc);		    
+			     " %.2f", sub->fixbuffer.epc);		    
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (sub->fixbuffer.mode > 0)
@@ -1676,6 +1676,8 @@ int main(int argc, char *argv[])
 			    gps_merge_fix(&sub->fixbuffer, 
 					  changed,
 					  &sub->device->gpsdata.fix);
+			    gpsd_error_model(sub->device, 
+					     &sub->fixbuffer, &sub->oldfix);
 			}
 		    }
 		}

@@ -94,7 +94,7 @@ static u_int8_t checksum(unsigned char *buf, size_t len)
 static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, size_t len)
 {
     gpsd_report(LOG_RAW, "Navcom: command dump: %s\n", gpsd_hexdump(cmd, len));
-    return gpsd_write(session, cmd, len);
+    return (gpsd_write(session, cmd, len) == (ssize_t)len);
 }
 
 /* Data Request */
@@ -194,6 +194,7 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
     /* Request the following messages: */
     if (seq==0) {
+	/*@ +charint @*/
         navcom_cmd_0x1c(session, 0x01, 5);      /* Blink LEDs on receiver */
         navcom_cmd_0x20(session, 0xae, 0x1770); /* Identification Block - send every 10 min*/
         navcom_cmd_0x20(session, 0xb1, 0x4000); /* PVT Block */
@@ -204,6 +205,7 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
         navcom_cmd_0x20(session, 0x86, 0x4000); /* Channel Status */
         navcom_cmd_0x20(session, 0x83, 0x4000); /* Ionosphere and UTC Data */
         navcom_cmd_0x20(session, 0xef, 0x0bb8); /* Clock Drift - send every 5 min */
+	/*@ -charint @*/
     }
 }
 
@@ -223,6 +225,7 @@ static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
         /* We still don't know which port we're connected to */
         return false;
     }
+    /*@ +charint @*/
     switch (speed) {
         /* NOTE - The spec says that certain baud combinations
                   on ports A and B are not allowed, those are
@@ -256,6 +259,7 @@ static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
             /* Unsupported speed */
             return false;
     }
+    /*@ -charint @*/
     
     /* Proceed to construct our message */
     port_selection = physical_port | baud;
