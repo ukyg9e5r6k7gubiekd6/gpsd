@@ -298,6 +298,11 @@ struct gps_device_t {
             unsigned int gps_week;
     	} ubx;
 #endif /* UBX_ENABLE */
+#ifdef NAVCOM_ENABLE
+	struct {
+	    u_int8_t physical_port;
+	} navcom;
+#endif /* NAVCOM_ENABLE */
 	/*
 	 * This is not conditionalized on RTCM104_ENABLE because we need to
 	 * be able to build rtcmdecode even when RTCM support is not

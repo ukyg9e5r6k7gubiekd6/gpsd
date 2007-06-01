@@ -73,19 +73,10 @@
 
 #define NAVCOM_CHANNELS	12
 
-/* NOTE - This allows us to know into which of the unit's various
-          serial ports we are connected.
-          Its value gets updated every time we receive a 0x06 (Ack)
-          message.  Note that if commands are being fed into the
-          unit from more than one port (which is entirely possible
-          although not necessarily a bright idea), there is a good
-          chance that we might misidentify our port */
-static u_int8_t physical_port = 0xFF;
-
 static u_int8_t checksum(unsigned char *buf, size_t len)
 {
     size_t n;
-    u_int8_t csum = 0x00;
+    u_int8_t csum = (u_int8_t)0x00;
     for(n = 0; n < len; n++)
       csum ^= buf[n];
     return csum;
@@ -211,9 +202,20 @@ static void navcom_probe_subtype(struct gps_device_t *session, unsigned int seq)
 
 static void navcom_ping(struct gps_device_t *session)
 {
+/* NOTE - This allows us to know into which of the unit's various
+          serial ports we are connected.
+          Its value gets updated every time we receive a 0x06 (Ack)
+          message.  Note that if commands are being fed into the
+          unit from more than one port (which is entirely possible
+          although not necessarily a bright idea), there is a good
+          chance that we might misidentify our port */
+    /*@ -type @*/
+    session->driver.navcom.physical_port = 0xFF;
+
     navcom_cmd_0x1c(session, 0x02, 0);      /* Test Support Block */
     navcom_cmd_0x20(session, 0xae, 0x0000); /* Identification Block */
     navcom_cmd_0x20(session, 0x86, 0x000a); /* Channel Status */
+    /*@ +type @*/
 }
 
 static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
@@ -221,7 +223,7 @@ static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
 #ifdef ALLOW_RECONFIGURE
     u_int8_t port_selection;
     u_int8_t baud;
-    if (physical_port == 0xFF) {
+    if (session->driver.navcom.physical_port == (unsigned char)0xFF) {
         /* We still don't know which port we're connected to */
         return false;
     }
@@ -262,7 +264,7 @@ static bool navcom_speed(struct gps_device_t *session, unsigned int speed)
     /*@ -charint @*/
     
     /* Proceed to construct our message */
-    port_selection = physical_port | baud;
+    port_selection = session->driver.navcom.physical_port | baud;
     
     /* Send it off */
     navcom_cmd_0x11(session, port_selection);
@@ -330,7 +332,8 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     u_int8_t wnlsf = getub(buf, 28);
     u_int8_t dn = getub(buf, 29);
     int8_t dtlsf = getsb(buf, 30);
-    
+
+    /*@ +relaxtypes @*/
     /* Ref.: ICD-GPS-200C 20.3.3.5.2.4 */
     if ((week%256)*604800+tow/1000.0 < wnlsf*604800+dn*86400) {
         /* Effectivity time is in the future, use dtls */
@@ -339,8 +342,9 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
         /* Effectivity time is not in the future, use dtlsf */
         session->context->leap_seconds = (int)dtlsf;
     }
+    /*@ -relaxtypes @*/
     
-    session->gpsdata.sentence_time = gpstime_to_unix(week, tow/1000.0)
+    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
             - session->context->leap_seconds;
     
     gpsd_report(LOG_PROG,
@@ -387,7 +391,7 @@ static gps_mask_t handle_0x06(struct gps_device_t *session)
     unsigned char *buf = session->packet.outbuffer + 3;
     u_int8_t cmd_id = getub(buf, 3);
     u_int8_t port = getub(buf, 4);
-    physical_port = port; /* This tells us which serial port was used last */
+    session->driver.navcom.physical_port = port; /* This tells us which serial port was used last */
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0x06 (Acknowledgement (without error))\n");
     gpsd_report(LOG_IO,
