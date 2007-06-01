@@ -87,12 +87,12 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
-extern int device_readonly;
 static bool nowait = false;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
     .valid              = 0, 
+    .readonly           = false, 
     .sentdgps           = false, 
     .dgnss_service      = dgnss_none,
     .fixcnt             = 0, 
@@ -678,7 +678,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    break;
 	case 'B':		/* change baud rate (SiRF/Zodiac only) */
 #ifndef FIXED_PORT_SPEED
-	    if (assign_channel(sub) && sub->device->device_type!=NULL && *p=='=' && privileged_user(sub)) {
+	    if (assign_channel(sub) && sub->device->device_type!=NULL && *p=='=' && privileged_user(sub) && !context.readonly) {
 		i = atoi(++p);
 		while (isdigit(*p)) p++;
 #ifdef ALLOW_RECONFIGURE
@@ -857,7 +857,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    else if (!sub->device->device_type->mode_switcher)
 		(void)strlcpy(phrase, ",N=0", BUFSIZ);
 #ifdef ALLOW_RECONFIGURE
-	    else if (privileged_user(sub)) {
+	    else if (privileged_user(sub) && !context.readonly) {
 		if (*p == '=') ++p;
 		if (*p == '1' || *p == '+') {
 		    sub->device->device_type->mode_switcher(sub->device, 1);
@@ -1267,7 +1267,6 @@ int main(int argc, char *argv[])
     (void)setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
-    device_readonly = false;
     while ((option = getopt(argc, argv, "F:D:S:bhNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
@@ -1284,7 +1283,7 @@ int main(int argc, char *argv[])
 	    go_background = false;
 	    break;
 	case 'b':
-	    device_readonly = true;
+	    context.readonly = true;
 	    break;
 #ifdef RTCM104_SERVICE
 	case 'R':

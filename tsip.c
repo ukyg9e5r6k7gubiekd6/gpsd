@@ -19,15 +19,10 @@
 #ifdef TSIP_ENABLE
 #define TSIP_CHANNELS	12
 
-extern int device_readonly;
-
 static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 {
 #ifdef ALLOW_RECONFIGURE
     char buf2[BUFSIZ];
-
-    if (device_readonly)
-	return 0;
 
     gpsd_report(LOG_IO, "Sent TSIP packet id 0x%02x: %s\n",id,gpsd_hexdump(buf,len));
 

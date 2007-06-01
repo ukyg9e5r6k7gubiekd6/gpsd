@@ -15,7 +15,6 @@
 
 extern struct gps_type_t zodiac_binary;
 extern struct gps_type_t ubx_binary;
-extern int device_readonly;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -442,9 +441,6 @@ static void earthmate_close(struct gps_device_t *session)
 
 static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
-    if (device_readonly)
-	return;
-
     if (seq == 0) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
@@ -525,9 +521,6 @@ static int tnt_send(int fd, const char *fmt, ... )
     char buf[BUFSIZ];
     va_list ap;
 
-    if (device_readonly)
-	return 0;
-
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
@@ -548,7 +541,7 @@ static int tnt_send(int fd, const char *fmt, ... )
 /*
  * The True North compass won't start talking
  * unless you ask it to. So to identify it we
- * need to query for it's ID string.
+ * need to query for its ID string.
  */
 static int tnt_packet_sniff(struct gps_device_t *session)
 {

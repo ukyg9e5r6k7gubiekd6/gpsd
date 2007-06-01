@@ -20,8 +20,6 @@
 #include "bits.h"
 #include "italk.h"
 
-extern int device_readonly;
-
 static gps_mask_t italk_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_navfix(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *, unsigned char *, size_t);
@@ -171,9 +169,6 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    bool      ok;
 
    /* CONSTRUCT THE MESSAGE */
-
-   if (device_readonly)
-	return 0;
 
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n", 

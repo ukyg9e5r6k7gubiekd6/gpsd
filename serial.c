@@ -21,8 +21,6 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
-int device_readonly;
-
 void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
 {
@@ -186,7 +184,7 @@ void gpsd_set_speed(struct gps_device_t *session,
      * If we don't know the device type, ship it every driver's wakeup
      * in hopes it will respond.
      */
-    if (isatty(session->gpsdata.gps_fd)!=0) {
+    if (isatty(session->gpsdata.gps_fd)!=0 && !session->context->readonly) {
 	struct gps_type_t **dp;
 	if (session->device_type == NULL) {
 	    for (dp = gpsd_drivers; *dp; dp++)
@@ -204,7 +202,7 @@ int gpsd_open(struct gps_device_t *session)
     mode_t mode = (mode_t)O_RDWR;
 
     /*@ -boolops @*/
-    if (device_readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
+    if (session->context->readonly || ((stat(session->gpsdata.gps_device, &sb) != -1) && ((sb.st_mode & S_IFCHR) != S_IFCHR))){
 	mode = (mode_t)O_RDONLY;
 	gpsd_report(LOG_INF, "opening read-only GPS data source at '%s'\n", session->gpsdata.gps_device);
     } else {
@@ -266,7 +264,7 @@ ssize_t gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
 {
      ssize_t status;
      bool ok;
-     if (device_readonly)
+     if (session->context->readonly)
 	return 0;
      status = write(session->gpsdata.gps_fd, buf, len);	
      ok = (status == (ssize_t)len);

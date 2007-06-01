@@ -45,7 +45,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->typename);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
-	    if (session->device_type->probe_subtype != NULL)
+	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (session->enable_reconfigure 

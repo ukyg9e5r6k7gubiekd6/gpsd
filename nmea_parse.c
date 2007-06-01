@@ -13,8 +13,6 @@
 #include "gpsd.h"
 #include "timebase.h"
 
-extern int device_readonly;
-
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
@@ -742,8 +740,6 @@ int nmea_send(int fd, const char *fmt, ... )
     char buf[BUFSIZ];
     va_list ap;
 
-    if (device_readonly)
-	return 0;
     va_start(ap, fmt) ;
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);

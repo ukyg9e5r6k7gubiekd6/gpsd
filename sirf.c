@@ -43,8 +43,6 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-extern int device_readonly;
-
 #ifdef ALLOW_RECONFIGURE
 /*@ +charint @*/
 static unsigned char enablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
@@ -106,9 +104,6 @@ bool sirf_write(int fd, unsigned char *msg) {
    unsigned int       crc;
    size_t    i, len;
    bool      ok;
-
-   if (device_readonly)
-	return 0;
 
    len = (size_t)((msg[2] << 8) | msg[3]);
 
