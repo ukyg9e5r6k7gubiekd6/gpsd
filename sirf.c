@@ -87,17 +87,17 @@ static unsigned char enablemid52[] = {
 #endif /* ALLOW_RECONFIGURE */
 
 
-gps_mask_t sirf_msg_debug(unsigned char *, size_t );
-gps_mask_t sirf_msg_errors(unsigned char *, size_t );
+static gps_mask_t sirf_msg_debug(unsigned char *, size_t );
+static gps_mask_t sirf_msg_errors(unsigned char *, size_t );
 
-gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t );
-gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_navdata(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_svinfo(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_navsol(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_geodetic(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *, size_t );
+static gps_mask_t sirf_msg_ppstime(struct gps_device_t *, unsigned char *, size_t );
 
 
 bool sirf_write(int fd, unsigned char *msg) {
@@ -177,14 +177,15 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
     }
 }
 
-gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
 {
     char msgbuf[MAX_PACKET_LENGTH*3 + 2];
     int i;
 
-    bzero(msgbuf, sizeof(msgbuf));
+    bzero(msgbuf, (int)sizeof(msgbuf));
 
-    if (0xe1 == (unsigned char)buf[0]) {		/* Development statistics messages */
+    /*@ +charint @*/
+    if (0xe1 == buf[0]) {		/* Development statistics messages */
 	for (i = 2; i < (int)len; i++)
 		(void)snprintf(msgbuf+strlen(msgbuf), 
 			       sizeof(msgbuf)-strlen(msgbuf),
@@ -202,10 +203,11 @@ gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
 			       "\\x%02x", (unsigned int)buf[i]);
 	gpsd_report(LOG_PROG, "DBG 0xff: %s\n", msgbuf);
     }
+    /*@ -charint @*/
     return 0;
 }
 
-gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
+static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
 {
     switch (getuw(buf, 1)) {
     case 2:
@@ -223,7 +225,7 @@ gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
     return 0;
 }
 
-gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     double fv;
 
@@ -260,7 +262,7 @@ gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char *buf, 
     return DEVICEID_SET;
 }
 
-gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned int words[10];
 
@@ -291,7 +293,7 @@ gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *buf, si
     return 0;
 }
 
-gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int	st, i, j, cn;
 
@@ -350,7 +352,7 @@ gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *buf, siz
 	return TIME_SET | SATELLITE_SET;
 }
 
-gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     int i;
     unsigned short navtype;
@@ -406,7 +408,7 @@ gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, siz
     return mask;
 }
 
-gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     unsigned short navtype;
     gps_mask_t mask = 0;
@@ -502,7 +504,7 @@ gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char *buf, s
     return mask;
 }
 
-gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
 
     if (len != 65)
@@ -524,7 +526,7 @@ gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char *buf, s
     return 0;
 }
 
-gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
+static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size_t len UNUSED)
 {
     gps_mask_t mask;
     unsigned short navtype;
@@ -592,7 +594,7 @@ gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *buf, size
     return mask;
 }
 
-gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     gps_mask_t mask = 0;
 
@@ -814,7 +816,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0xe1:		/* Development statistics messages */
 	/* FALLTHROUGH */
     case 0xff:		/* Debug messages */
-	sirf_msg_debug(buf, len);
+	(void)sirf_msg_debug(buf, len);
 	return 0;
 
     default:
@@ -822,8 +824,6 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 		    buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
-
-    return 0;
 }
 
 static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)

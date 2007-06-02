@@ -104,7 +104,7 @@ enum unit gpsd_units(void)
 	char *envu = NULL;
 
 #ifdef HAVE_SETLOCALE
-	setlocale(LC_NUMERIC, "C");
+	(void)setlocale(LC_NUMERIC, "C");
 #endif
   	if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
 		if (0 == strcasecmp(envu, "imperial")) {

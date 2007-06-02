@@ -21,15 +21,15 @@
 #define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
-gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
-gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
-gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
-gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
+static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 
 /**
  * Navigation solution message
  */
-gps_mask_t
+static gps_mask_t
 ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned short gw;
@@ -100,7 +100,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 /**
  * GPS Leap Seconds
  */
-gps_mask_t
+static gps_mask_t
 ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned int gw, tow, flags;
@@ -127,7 +127,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 /**
  * GPS Satellite Info
  */
-gps_mask_t
+static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned int i, tow, st, nchan, nsv;;
@@ -171,7 +171,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 }
 
 /*@ +charint @*/
-gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
+static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     size_t data_len;
     unsigned short msgid;

@@ -440,18 +440,15 @@ static void nextstate(struct gps_packet_t *lexer,
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
-	if (c == STX) {
+	if (c == STX)
 	    lexer->state = EVERMORE_LEADER_2;
-	    break;
-	}
 #endif /* EVERMORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE) || defined(NAVCOM_ENABLE)
 	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
-	if (c >= 0x13) {
+	if (c >= 0x13)
 	    lexer->state = TSIP_PAYLOAD;
-	    break;
-	}
+	break;
 #endif /* TSIP_ENABLE */
 #ifdef NAVCOM_ENABLE
     case NAVCOM_LEADER_1:
@@ -511,8 +508,6 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* NAVCOM_ENABLE */
-	    lexer->state = GROUND_STATE;
-	break;
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
@@ -1046,9 +1041,9 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #ifdef UBX_ENABLE
 	else if (lexer->state == UBX_RECOGNIZED) {
 	    /* UBX use a TCP like checksum */
-	    short n, len;
-	    unsigned char ck_a = 0;
-	    unsigned char ck_b = 0;
+	    int n, len;
+	    unsigned char ck_a = (unsigned char)0;
+	    unsigned char ck_b = (unsigned char)0;
 	    len = lexer->inbufptr - lexer->inbuffer;
 	    gpsd_report(LOG_IO, "UBX: len %d\n", len);
 	    for (n = 2; n < (len-2); n++) {
@@ -1136,6 +1131,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    /* number of words */
 	    len = (unsigned short)(lexer->inbuffer[6] &0xff);
 
+	    /*@ -type @*/
 	    /* initialize all my registers */
 	    csum = tmpw = tmpdw = 0;
 	    /* expected checksum */
@@ -1146,6 +1142,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		tmpdw = (csum + 1) * (tmpw + n);
 		csum ^= (tmpdw & 0xffff) ^ ((tmpdw >>16) & 0xffff);
 	    }
+	    /*@ +type @*/
 	    if (len == 0 || csum == xsum)
 		packet_accept(lexer, ITALK_PACKET);
 	    else {

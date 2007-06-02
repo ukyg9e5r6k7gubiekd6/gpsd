@@ -115,14 +115,6 @@ libgpsd_c_sources = \
 	netlib.c \
 	nmea_parse.c \
 	serial.c \
-	drivers.c \
-	zodiac.c \
-	ubx.c \
-	garmin.c \
-	tsip.c \
-	evermore.c \
-	italk.c \
-	navcom.c \
 	libgpsd_core.c \
 	subframe.c \
 	ntpshm.c \
@@ -141,7 +133,15 @@ libgpsd_c_sources = \
 	srecord.c \
 	bsd-base64.c \
 	strl.c \
-	hex.c
+	hex.c \
+	drivers.c \
+	zodiac.c \
+	ubx.c \
+	garmin.c \
+	tsip.c \
+	evermore.c \
+	italk.c \
+	navcom.c
 
 libgpsd_h_sources = \
 	italk.h \
