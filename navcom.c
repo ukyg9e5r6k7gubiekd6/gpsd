@@ -50,8 +50,8 @@
 #include "bits.h"
 
 /* Have data which is 24 bits long */
-#define getsl24(buf,off)  ((int32_t)((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
-#define getul24(buf,off) ((u_int32_t)((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
+#define getsl24(buf,off)  (int32_t)(((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
+#define getul24(buf,off) (u_int32_t)(((u_int32_t)getub((buf), (off)+2)<<24 | (u_int32_t)getub((buf), (off)+1)<<16 | (u_int32_t)getub((buf), (off))<<8)>>8)
 
 /* And just to be difficult, Navcom is little endian but the GPS data stream
    is big endian.  Some messages contain raw GPS data */
