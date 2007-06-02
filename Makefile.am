@@ -71,7 +71,8 @@ cgpxlogger_LDADD = $(LIBC) $(LIBNSL) $(LIBSOCKET) libgps.la -lm $(LIBPTHREAD)
 #
 # Build gpsd
 #
-gpsd_SOURCES = gpsd_dbus.h gpsd_dbus.c gpsd.c
+gpsd_c_sources = gpsd_dbus.c gpsd.c
+gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
 gpsd_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm $(LIBPTHREAD)
 
 #
@@ -110,7 +111,7 @@ gpsflash_LDADD = $(LIBM) libgps.la -lm
 libgps_la_LDFLAGS = -version-number 17:0:0
 lib_LTLIBRARIES = libgps.la
 
-libgps_c_sources = \
+libgpsd_c_sources = \
 	netlib.c \
 	nmea_parse.c \
 	serial.c \
@@ -121,14 +122,12 @@ libgps_c_sources = \
 	tsip.c \
 	evermore.c \
 	italk.c \
-	italk.h \
 	navcom.c \
 	libgpsd_core.c \
 	subframe.c \
 	ntpshm.c \
 	libgps.c \
 	packet.c \
-	packet_names.h \
 	gpsutils.c \
 	geoid.c \
 	dgnss.c \
@@ -140,12 +139,16 @@ libgps_c_sources = \
 	rtcm.c \
 	rtcm.h \
 	srecord.c \
-	bits.h \
-	timebase.h \
 	bsd-base64.c \
-	bsd-base64.h \
 	strl.c \
-	hex.c \
+	hex.c
+
+libgpsd_h_sources = \
+	italk.h \
+	bsd-base64.h \
+	timebase.h \
+	bits.h \
+	packet_names.h \
 	gpsd.h 
 
 BUILT_SOURCES = packet_names.h gpsd.h
@@ -158,7 +161,8 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	grep ENABLE gpsd_config.h >>gpsd.h
 	cat gpsd.h-tail >>gpsd.h
 
-libgps_la_SOURCES = $(libgps_c_sources) rtcm.h libgpsmm.cpp packet_states.h
+libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
+				rtcm.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
@@ -320,7 +324,7 @@ libgps: libgps.c .libs/libgps.a
 # Report splint warnings
 splint:
 	@echo "Running splint on daemon and libraries..."
-	-splint -redef $(gpsd_SOURCES) $(libgps_c_sources)
+	-splint -redef $(gpsd_c_sources) $(libgpsd_c_sources)
 	@echo "Running splint on xgps..."
 	-splint -exportlocal $(xgps_SOURCES)
 	@echo "Running splint on cgps..."
