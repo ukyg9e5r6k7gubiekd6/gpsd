@@ -934,7 +934,6 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
         return TIME_SET | PERR_SET;
     } else {
         /* Ignore this message block */
-        static bool warned = false; /* Do not spam the error log */
         if (!session->driver.navcom.warned) {
             gpsd_report(LOG_WARN,
                         "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics) ignored "
@@ -962,7 +961,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 {
     char *engconfstr, *asicstr;
     unsigned char *buf = session->packet.outbuffer + 3;
-    size_t    msg_len = getuw(buf, 1);
+    size_t    msg_len = (size_t)getuw(buf, 1);
     u_int8_t  engconf = getub(buf, 3);
     u_int8_t  asic    = getub(buf, 4);
     u_int8_t swvermaj = getub(buf, 5);
@@ -1077,10 +1076,12 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
                     picver, ioptm);
     }
 
+    /*@ -formattype @*/
     (void)snprintf(session->subtype, sizeof(session->subtype),
              "%s %s Ver. %u.%u.%u S/N %u.%u %u.%u",
              engconfstr, asicstr, swvermaj, swvermin, slsbn, dcser, dcclass,
              rfcser, rfcclass);
+    /*@ +formattype @*/
     return DEVICEID_SET;
 }
 
