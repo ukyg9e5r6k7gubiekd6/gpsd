@@ -10,8 +10,10 @@
 #ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
+#ifndef S_SPLINT_S
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/ip.h>
+#endif /* S_SPLINT_S */
 #endif
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -32,7 +34,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     struct servent *pse;
     struct protoent *ppe;
     struct sockaddr_in sin;
-    int s, type, opt, one = 1;
+    int s, type, one = 1;
 
     memset((char *) &sin, 0, sizeof(sin));
     /*@ -type -mustfreefresh @*/
@@ -64,7 +66,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     }
 
 #ifdef IPTOS_LOWDELAY
-    opt = IPTOS_LOWDELAY;
+    int opt = IPTOS_LOWDELAY;
     /*@ -unrecog @*/
     (void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
     /*@ +unrecog @*/

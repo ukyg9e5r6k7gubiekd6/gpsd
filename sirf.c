@@ -354,11 +354,11 @@ gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *buf, siz
 {
     int i;
     unsigned short navtype;
+    gps_mask_t mask = 0;
 
     if (len != 41)
 	return 0;
 
-    gps_mask_t mask = 0;
     session->gpsdata.satellites_used = (int)getub(buf, 28);
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     for (i = 0; i < SIRF_CHANNELS; i++)
