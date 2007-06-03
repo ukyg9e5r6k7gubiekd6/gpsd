@@ -383,7 +383,7 @@ extern int gpsd_hexpack(char *, char *, int);
 extern int hex2bin(char *);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
-extern void gpsd_error_model_fixup(struct gps_device_t *);
+extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct gps_fix_t *);
 extern void gpsd_clear_data(struct gps_device_t *);
 extern int netlib_connectsock(const char *, const char *, const char *);
 extern char /*@observer@*/ *sock2ip(int);
