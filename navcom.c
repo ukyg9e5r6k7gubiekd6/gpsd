@@ -55,19 +55,19 @@
 
 /* And just to be difficult, Navcom is little endian but the GPS data stream
    is big endian.  Some messages contain raw GPS data */
-#define getsw_be(buf, off)	((int16_t)(((u_int16_t)getub(buf, (off)) << 8) \
+#define getsw_be(buf, off)	(int16_t)((((u_int16_t)getub(buf, (off)) << 8) \
                                     | (u_int16_t)getub(buf, (off)+1)))
-#define getuw_be(buf, off)	((u_int16_t)(((u_int16_t)getub(buf, (off)) << 8) \
+#define getuw_be(buf, off)	(u_int16_t)((((u_int16_t)getub(buf, (off)) << 8) \
                                     | (u_int16_t)getub(buf, (off)+1)))
-#define getsl_be(buf, off)	((int32_t)(((u_int16_t)getuw_be(buf, (off)) << 16) \
+#define getsl_be(buf, off)	(int32_t)((((u_int16_t)getuw_be(buf, (off)) << 16) \
                                     | getuw_be(buf, (off)+2)))
-#define getul_be(buf, off)	((u_int32_t)(((u_int16_t)getuw_be(buf, (off)) << 16) \
+#define getul_be(buf, off)	(u_int32_t)((((u_int16_t)getuw_be(buf, (off)) << 16) \
                                     | getuw_be(buf, (off)+2)))
-#define getsL_be(buf, off)	((int64_t)(((u_int64_t)getul_be(buf, (off)) << 32) \
+#define getsL_be(buf, off)	(int64_t)((((u_int64_t)getul_be(buf, (off)) << 32) \
                                     | getul_be(buf, (off)+4)))
-#define getuL_be(buf, off)	((u_int64_t)(((u_int64_t)getul_be(buf, (off)) << 32) \
+#define getuL_be(buf, off)	(u_int64_t)((((u_int64_t)getul_be(buf, (off)) << 32) \
                                     | getul_be(buf, (off)+4)))
-#define getsl24_be(buf,off)     ((int32_t)((u_int32_t)getub((buf), (off))<<24 \
+#define getsl24_be(buf,off)     (int32_t)(((u_int32_t)getub((buf), (off))<<24 \
                                     | (u_int32_t)getub((buf), (off)+1)<<16 \
                                     | (u_int32_t)getub((buf), (off)+2)<<8)>>8)
 
@@ -542,7 +542,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     tfom = getub(buf, 46);
     /*@ +type @*/
 
-    /* splint apparently gets confused about C promotion rules */
+    /* splint apparently gets confused about C promotion rules. */
+    /* "Assignment of arbitrary unsigned integral type to double" on these */
+#ifndef S_SPLINT_S
     session->gpsdata.fix.eph = fom/100.0*1.96/*Two sigma*/;
     /* FIXME - Which units is tfom in (spec doesn't say) and
                which units does gpsd require? (docs don't say) */
@@ -572,7 +574,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
         session->gpsdata.tdop = NAN;
     else
         session->gpsdata.tdop = tdop/10.0;
-    
+#endif /* S_SPLINT_S */
+
     gpsd_report(LOG_PROG, "Navcom: received packet type 0xb1 (PVT Report)\n");
     gpsd_report(LOG_IO, "Navcom: navigation mode %s (0x%02x) - %s - %s\n",
                 (-nav_mode&0x80?"invalid":"valid"), nav_mode,
@@ -692,12 +695,13 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int16_t crc = getsw_be(buf, 72);
     int32_t omega = getsl_be(buf, 74);
     int32_t Omegadot = getsl24_be(buf, 78);
-    /* FIXME - What is the proper way of shifting a signed int 2 bits to the right,
-    preserving sign? */
-    int16_t idot = ((getsw_be(buf, 82)&0xfffc)>>2)|(getub(buf, 82)&80?0xc000:0x0000);
-    
+    /*@ -predboolothers @*/
+    /* Question: What is the proper way of shifting a signed int 2 bits to 
+     * the right, preserving sign? Answer: integer division by 4. */
+    int16_t idot = (int16_t)(((getsw_be(buf, 82)&0xfffc)/4)|(getub(buf, 82)&80?0xc000:0x0000));
+    /*@ +predboolothers @*/
     char time_str[24];
-    (void)unix_to_iso8601(gpstime_to_unix((int)wn, toc*SF_TOC), time_str, (int)sizeof(time_str));
+    (void)unix_to_iso8601(gpstime_to_unix((int)wn, (double)(toc*SF_TOC)), time_str, (int)sizeof(time_str));
     
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0x81 (Packed Ephemeris Data)\n");
@@ -773,7 +777,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Timestamp and PDOP */
     session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
             - session->context->leap_seconds;
-    session->gpsdata.pdop = pdop / 10.0;
+    session->gpsdata.pdop = (int)pdop / 10.0;
 
     /* Satellite count */
     session->gpsdata.satellites = (int)sats_visible;
@@ -792,14 +796,16 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	session->gpsdata.status = STATUS_NO_FIX;
     }
 
-   gpsd_report(LOG_PROG,
+    /*@ -predboolothers @*/
+    gpsd_report(LOG_PROG,
                "Navcom: received packet type 0x86 (Channel Status) "
                "- satellites: visible = %u, tracked = %u, used = %u\n",
 	       sats_visible, sats_tracked, sats_used);
-   gpsd_report(LOG_IO,
+    gpsd_report(LOG_IO,
                "Navcom: engine status = 0x%x, almanac = %s, time = 0x%x, pos = 0x%x\n",
                eng_status&0x07, (eng_status&0x08?"valid":"invalid"),
                eng_status&0x30>>4, eng_status&0xc0>>6);
+    /*@ +predboolothers @*/
 
     /* Satellite details */
     i = 0;
@@ -819,6 +825,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	p2_snr = getub(buf, n+10);
         dgps_age = getuw(buf, n+11);
 	hw_channel = getub(buf, n+13);
+	/*@ -predboolothers +charint @*/
         /* NOTE - In theory, I think one would check for hw channel number to
            see if one is dealing with a GPS or other satellite, but the
            channel numbers reported bear no resemblance to what the spec
@@ -841,6 +848,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
                     (sol_status&0x01?'Y':'N'), (sol_status&0x02?"stable":"unstable"),
                     (sol_status&0x04?"dgps":"unaided"), (sol_status&0x08?"solved":"constrained"),
                     (sol_status&0x01?0x00:sol_status&0x0f00>>8));
+	/*@ +predboolothers -charint @*/
     }
 
     return PDOP_SET | SATELLITE_SET | STATUS_SET;
@@ -860,26 +868,30 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     u_int8_t status = getub(buf, 10);
     
     char time_str[24];
-    (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow/1000.0), time_str, sizeof(time_str));
+    (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow/1000.0), time_str, (int)sizeof(time_str));
 
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0xb0 (Raw Meas. Data Block)\n");
+    /*@ -predboolothers @*/
     gpsd_report(LOG_IO,
                 "Navcom: Epoch = %s, time slew accumulator = %u (1/1023mS), status = 0x%02x "
                 "(%sclock %s - %u blocks follow)\n",
                 time_str,
                 tm_slew_acc, status, (status&0x80?"channel time set - ":""),
                 (status&0x40?"stable":"not stable"), status&0x0f);
+    /*@ +predboolothers @*/
     for (n=11; n<msg_len-1; n+=16) {
         u_int8_t sv_status = getub(buf, n);
         u_int8_t ch_status = getub(buf, n+1);
         u_int32_t ca_pseudorange = getul(buf, n+2);
-        int32_t l1_phase = getsl24(buf, n+6)>>4;
-        u_int8_t l1_slips = getsl24(buf, n+6)&0x0f;
+	/* integer division by 16 is a sign-preserving right shift of 4 bits */
+        int32_t l1_phase = getsl24(buf, n+6) / 16;
+        u_int8_t l1_slips = (u_int8_t)(getsl24(buf, n+6) & 0x0f);
         int16_t p1_ca_pseudorange = getsw(buf, n+9);
         int16_t p2_ca_pseudorange = getsw(buf, n+11);
-        int32_t l2_phase = getsl24(buf, n+13)>>4;
+        int32_t l2_phase = getsl24(buf, n+13) / 16;
         u_int8_t l2_slips = (u_int8_t)(getsl24(buf, n+13) & 0x0f);
+	/*@ -predboolothers +charint @*/
         double c1 = (sv_status&0x80? (double)ca_pseudorange/16.0*LAMBDA_L1 : NAN);
         double l1 = (sv_status&0x80? (double)ca_pseudorange/16.0 + (double)l1_phase/256.0 : NAN);
         double l2 = (sv_status&0x20? ((double)ca_pseudorange/16.0
@@ -898,6 +910,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
         gpsd_report(LOG_IO+1,
                     "Navcom: >>> C1: %14.3f, L1: %14.3f, L2: %14.3f, P1: %14.3f, P2: %14.3f\n",
                     c1, l1, l2, p1, p2);
+	/*@ +predboolothers -charint @*/
     }
 #undef LAMBDA_L1
     return 0; /* Raw measurements not yet implemented in gpsd */
@@ -975,16 +988,16 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
     u_int8_t  dcclass = getub(buf, 9);
     u_int16_t rfcser  = getuw(buf, 10);
     u_int8_t  rfcclass= getub(buf, 12);
-    /*@ -stringliteralnoroomfinalnull @*/
+    /*@ -stringliteralnoroomfinalnull -type @*/
     u_int8_t  softtm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     u_int8_t  bootstr[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     u_int8_t  ioptm[17] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-    /*@ +stringliteralnoroomfinalnull @*/
-    u_int8_t  iopvermaj  = 0x00;
-    u_int8_t  iopvermin  = 0x00;
-    u_int8_t  picver = 0x00;
-    u_int8_t  slsbn = 0x00;
-    u_int8_t  iopsbn = 0x00;
+    /*@ +stringliteralnoroomfinalnull +type @*/
+    u_int8_t  iopvermaj  = (u_int8_t)0x00;
+    u_int8_t  iopvermin  = (u_int8_t)0x00;
+    u_int8_t  picver = (u_int8_t)0x00;
+    u_int8_t  slsbn = (u_int8_t)0x00;
+    u_int8_t  iopsbn = (u_int8_t)0x00;
     memcpy(softtm, &buf[13], 16);
     memcpy(bootstr, &buf[29], 16);
     if (msg_len == 0x0037) { /* No IOP */
