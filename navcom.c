@@ -526,7 +526,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     if (track < 0)
     	track += 2 * PI;
     session->gpsdata.fix.track = track * RAD_2_DEG;
+    /*@ -evalorder @*/
     session->gpsdata.fix.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
+    /*@ +evalorder @*/
     session->gpsdata.fix.climb = vel_up * VEL_RES;
 
     /* Quality indicators */
@@ -539,7 +541,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     tdop = getub(buf, 45);
     tfom = getub(buf, 46);
     /*@ +type @*/
-    
+
+    /* splint apparently gets confused about C promotion rules */
     session->gpsdata.fix.eph = fom/100.0*1.96/*Two sigma*/;
     /* FIXME - Which units is tfom in (spec doesn't say) and
                which units does gpsd require? (docs don't say) */
@@ -548,7 +551,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* I cannot find where to get VRMS from in the Navcom output, though,
        and this value seems to agree with the output from other software */
     session->gpsdata.fix.epv = (double)fom/(double)hdop*(double)vdop/100.0*1.96/*Two sigma*/;
-    
+
     if (gdop == DOP_UNDEFINED)
         session->gpsdata.gdop = NAN;
     else
@@ -667,14 +670,16 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     u_int16_t toc = getuw_be(buf, 28);
     int8_t af2 = getsb(buf, 30);
     int16_t af1 = getsw_be(buf, 31);
+    /*@ -shiftimplementation @*/ 
     int32_t af0 = getsl24_be(buf, 33)>>2;
+    /*@ +shiftimplementation @*/ 
     /* Subframe 2, words 3 to 10 minus parity */
     u_int8_t iode = getub(buf, 36);
     int16_t crs = getsw_be(buf, 37);
     int16_t delta_n = getsw_be(buf, 39);
     int32_t m0 = getsl_be(buf, 41);
     int16_t cuc = getsw_be(buf, 45);
-    u_int32_t e = getsl_be(buf, 47);
+    u_int32_t e = getul_be(buf, 47);
     int16_t cus = getsw_be(buf, 51);
     u_int32_t sqrt_a = getul_be(buf, 53);
     u_int16_t toe = getuw_be(buf, 57);
@@ -874,7 +879,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
         int16_t p1_ca_pseudorange = getsw(buf, n+9);
         int16_t p2_ca_pseudorange = getsw(buf, n+11);
         int32_t l2_phase = getsl24(buf, n+13)>>4;
-        u_int8_t l2_slips = getsl24(buf, n+13)&0x0f;
+        u_int8_t l2_slips = (u_int8_t)(getsl24(buf, n+13) & 0x0f);
         double c1 = (sv_status&0x80? (double)ca_pseudorange/16.0*LAMBDA_L1 : NAN);
         double l1 = (sv_status&0x80? (double)ca_pseudorange/16.0 + (double)l1_phase/256.0 : NAN);
         double l2 = (sv_status&0x20? ((double)ca_pseudorange/16.0
