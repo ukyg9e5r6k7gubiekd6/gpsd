@@ -129,7 +129,6 @@ libgpsd_c_sources = \
 	report.c \
 	isgps.c \
 	rtcm.c \
-	rtcm.h \
 	srecord.c \
 	bsd-base64.c \
 	strl.c \
@@ -149,6 +148,7 @@ libgpsd_h_sources = \
 	timebase.h \
 	bits.h \
 	packet_names.h \
+	rtcm.h \
 	gpsd.h 
 
 BUILT_SOURCES = packet_names.h gpsd.h
