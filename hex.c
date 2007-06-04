@@ -17,8 +17,8 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     const char *ibuf = (const char *)binbuf;
     const char *hexchar = "0123456789abcdef";
 
-    if (NULL == binbuf)
-	return NULL;
+    if (NULL == binbuf || 0 == binbuflen) 
+	return "";
 
     /*@ -shiftimplementation @*/
     for (i = 0; i < len; i++) {
