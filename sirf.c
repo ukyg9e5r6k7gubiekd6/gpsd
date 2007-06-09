@@ -229,7 +229,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
 {
     double fv;
 
-    if (len < 21)
+    if (len < 20)
 	return 0; 
 
     gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
