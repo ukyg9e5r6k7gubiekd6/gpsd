@@ -290,6 +290,19 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	case UBX_INF_WARNING:
 	    gpsd_report(LOG_IO, "UBX_INF_WARNING\n");
 	    break;
+
+	case UBX_TIM_TP:
+	    gpsd_report(LOG_IO, "UBX_TIM_TP\n");
+	    break;
+	case UBX_TIM_TM:
+	    gpsd_report(LOG_IO, "UBX_TIM_TM\n");
+	    break;
+	case UBX_TIM_TM2:
+	    gpsd_report(LOG_IO, "UBX_TIM_TM2\n");
+	    break;
+	case UBX_TIM_SVIN:
+	    gpsd_report(LOG_IO, "UBX_TIM_SVIN\n");
+	    break;
     default:
 	gpsd_report(LOG_WARN, "UBX: unknown packet id 0x%04hx (length %d) %s\n", 
 	    msgid, len, gpsd_hexdump(buf, len));
