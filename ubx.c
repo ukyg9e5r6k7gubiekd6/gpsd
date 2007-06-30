@@ -73,6 +73,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     session->gpsdata.fix.eps = (double)(getsl(buf, 40)/100.0);
     session->gpsdata.pdop = (double)(getuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
+    mask |= PDOP_SET ;
 
     navmode = getub(buf, 10);
     switch (navmode){
