@@ -25,6 +25,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static void       ubx_msg_inf(unsigned char *buf, size_t data_len);
 
 /**
  * Navigation solution message
@@ -170,6 +171,39 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     return SATELLITE_SET;
 }
 
+static void
+ubx_msg_inf(unsigned char *buf, size_t data_len)
+{
+    unsigned short msgid;
+    static char txtbuf[MAX_PACKET_LENGTH];
+
+    msgid = (buf[2] << 8) | buf[3];
+    if (data_len > MAX_PACKET_LENGTH-1)
+	data_len = MAX_PACKET_LENGTH-1;
+
+    memcpy(txtbuf, buf+6, data_len); txtbuf[data_len] = '\0';
+    switch (msgid) {
+	case UBX_INF_DEBUG:
+	    gpsd_report(LOG_PROG, "UBX_INF_DEBUG: %s\n", txtbuf);
+	    break;
+	case UBX_INF_TEST:
+	    gpsd_report(LOG_PROG, "UBX_INF_TEST: %s\n", txtbuf);
+	    break;
+	case UBX_INF_NOTICE:
+	    gpsd_report(LOG_INF, "UBX_INF_NOTICE: %s\n", txtbuf);
+	    break;
+	case UBX_INF_WARNING:
+	    gpsd_report(LOG_WARN, "UBX_INF_WARNING: %s\n", txtbuf);
+	    break;
+	case UBX_INF_ERROR:
+	    gpsd_report(LOG_WARN, "UBX_INF_ERROR: %s\n", txtbuf);
+	    break;
+	default:
+	    break;
+    }
+    return ;
+}
+
 /*@ +charint @*/
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
@@ -284,11 +318,12 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    gpsd_report(LOG_IO, "UBX_MON_USB\n");
 	    break;
 
+	case UBX_INF_DEBUG:
+	case UBX_INF_TEST:
 	case UBX_INF_NOTICE:
-	    gpsd_report(LOG_IO, "UBX_INF_NOTICE\n");
-	    break;
 	case UBX_INF_WARNING:
-	    gpsd_report(LOG_IO, "UBX_INF_WARNING\n");
+	case UBX_INF_ERROR:
+	    ubx_msg_inf(buf, data_len);
 	    break;
 
 	case UBX_TIM_TP:
