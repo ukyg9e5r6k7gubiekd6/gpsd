@@ -181,7 +181,7 @@ ubx_msg_inf(unsigned char *buf, size_t data_len)
     if (data_len > MAX_PACKET_LENGTH-1)
 	data_len = MAX_PACKET_LENGTH-1;
 
-    memcpy(txtbuf, buf+6, data_len); txtbuf[data_len] = '\0';
+    strlcpy(txtbuf, buf+6, MAX_PACKET_LENGTH); txtbuf[data_len] = '\0';
     switch (msgid) {
 	case UBX_INF_DEBUG:
 	    gpsd_report(LOG_PROG, "UBX_INF_DEBUG: %s\n", txtbuf);
