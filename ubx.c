@@ -319,9 +319,13 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    break;
 
 	case UBX_INF_DEBUG:
+	    /* FALLTHROUGH */
 	case UBX_INF_TEST:
+	    /* FALLTHROUGH */
 	case UBX_INF_NOTICE:
+	    /* FALLTHROUGH */
 	case UBX_INF_WARNING:
+	    /* FALLTHROUGH */
 	case UBX_INF_ERROR:
 	    ubx_msg_inf(buf, data_len);
 	    break;
