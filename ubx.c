@@ -163,7 +163,8 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	session->gpsdata.azimuth[st]	= (int)getsw(buf, off+6);
 	good = session->gpsdata.PRN[st]!=0 && 
 	    session->gpsdata.azimuth[st]!=0 && 
-	    session->gpsdata.elevation[st]!=0;
+	    session->gpsdata.elevation[st]!=0 &&
+	    (int)getub(buf, off+11); /* quality indicator. 0 = channel idle */
 	if (good!=0)
 	    st++;
     }
