@@ -23,6 +23,7 @@
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
 static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static void       ubx_msg_inf(unsigned char *buf, size_t data_len);
@@ -97,6 +98,24 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     mask |= MODE_SET | STATUS_SET | CYCLE_START_SET | USED_SET ;
 
     return mask;
+}
+
+/**
+ * Dilution of precision message
+ */
+static gps_mask_t
+ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+{
+    if (data_len != 18)
+	return 0;
+
+    session->gpsdata.gdop = (double)(getuw(buf, 4)/100.0);
+    session->gpsdata.pdop = (double)(getuw(buf, 6)/100.0);
+    session->gpsdata.tdop = (double)(getuw(buf, 8)/100.0);
+    session->gpsdata.vdop = (double)(getuw(buf, 10)/100.0);
+    session->gpsdata.hdop = (double)(getuw(buf, 12)/100.0);
+
+    return DOP_SET;
 }
 
 /**
@@ -231,7 +250,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    gpsd_report(LOG_IO, "UBX_NAV_STATUS\n");
 	    break;
 	case UBX_NAV_DOP:
-	    gpsd_report(LOG_IO, "UBX_NAV_DOP\n");
+	    gpsd_report(LOG_PROG, "UBX_NAV_DOP\n");
 	    break;
 	case UBX_NAV_SOL:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
