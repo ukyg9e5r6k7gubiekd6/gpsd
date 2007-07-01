@@ -388,8 +388,10 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 {
     int cfd;
     for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++) {
-	if (subscribers[cfd].device == NULL) 
+	if (subscribers[cfd].fd <= 0 ) {
+	    subscribers[cfd].fd = cfd; /* mark subscriber as allocated */
 	    return &subscribers[cfd];
+	}
     }
     return NULL;
 }
@@ -399,8 +401,8 @@ static void detach_client(struct subscriber_t *sub)
     char *c_ip = sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
-    gpsd_report(LOG_INF, "detaching %s (%d) in detach_client\n",
-	c_ip, sub_index(sub));
+    gpsd_report(LOG_INF, "detaching %s (sub%d, fd %d) in detach_client\n",
+	c_ip, sub_index(sub), sub->fd);
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
     sub->raw = 0;
