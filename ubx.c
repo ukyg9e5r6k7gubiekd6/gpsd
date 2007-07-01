@@ -251,6 +251,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    break;
 	case UBX_NAV_DOP:
 	    gpsd_report(LOG_PROG, "UBX_NAV_DOP\n");
+            mask = ubx_msg_nav_dop(session, &buf[6], data_len);
 	    break;
 	case UBX_NAV_SOL:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
