@@ -186,9 +186,10 @@ any empty comment lines.</p>
 
 <h3>9. If it's a dual-mode GPS, see if the problem reproduces in NMEA mode</h3>
 
-<p>If you're using a SiRF, Evermore, or iTalk GPS in binary mode
+<p>If you're using a SiRF, Evermore, iTalk or u-blox GPS in binary mode
 (which you can tell from the -D 4 output), switch back to NMEA mode
-using the N command and see if the bug still reproduces.</p>
+using the N command (or a vendor-provided tool) and see if the bug is
+still reproduceable.</p>
 
 <h3>10. If your bug core-dumps gpsd, send us a stack trace.</h3>
 
