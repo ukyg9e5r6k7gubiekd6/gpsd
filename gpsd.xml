@@ -119,8 +119,8 @@ below.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-b</term>
-<listitem><para>Bluetooth-safety, otherwise known as read-only mode. Some
-popular bluetooth receivers lock up or become totally inaccessible when
+<listitem><para>Broken-device-safety, otherwise known as read-only mode. Some
+popular bluetooth and USB receivers lock up or become totally inaccessible when
 probed or reconfigured. This switch prevents gpsd from writing to a receiver.
 This means that gpsd cannot configure the receiver for optimal performance,
 but it also means that gpsd cannot break the receiver. A better solution
