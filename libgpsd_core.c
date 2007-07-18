@@ -261,11 +261,12 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
 		/*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 	}
-	session->subtype[0] = '\0';
-	memset(&session->driver, '\0', sizeof(session->driver));
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
 
+	/* clear driver subtype field and private data union */
+	session->subtype[0] = '\0';
+	memset(&session->driver, '\0', sizeof(session->driver));
 	/* if we know the device type, probe for subtype and configure it */
 	if (session->device_type != NULL) {
 	    if (session->device_type->probe_subtype !=NULL)
