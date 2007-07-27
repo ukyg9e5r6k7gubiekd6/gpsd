@@ -27,9 +27,11 @@ void gpsd_tty_init(struct gps_device_t *session)
     /* mark GPS fd closed and its baud rate unknown */
     session->gpsdata.gps_fd = -1;
     session->saved_baud = -1;
+#ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
     session->shmindex = -1;
     session->shmTimeP = -1;
+#endif /* NTPSHM_ENABLE */
 }
 
 #if defined(__CYGWIN__)
