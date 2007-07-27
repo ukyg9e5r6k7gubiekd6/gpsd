@@ -281,6 +281,8 @@ EXTRA_DIST = \
 	floattest.c \
 	gpsd.php \
 	gpsd.xml \
+	gpsd.h-head \
+	gpsd.h-tail \
 	gps.xml \
 	libgpsd.xml \
 	libgps.xml \
