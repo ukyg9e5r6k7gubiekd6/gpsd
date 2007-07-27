@@ -78,6 +78,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 
     navmode = getub(buf, 10);
     switch (navmode){
+    case UBX_MODE_TMONLY:
     case UBX_MODE_3D:
 	session->gpsdata.fix.mode = MODE_3D;
 	break;
