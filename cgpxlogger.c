@@ -165,6 +165,7 @@ main(int argc, char **argv){
 
 		if (data < 0) {
 			fprintf(stderr,"%s\n", strerror(errno));
+			footer();
 			exit(2);
 		}
 		else if (data)
