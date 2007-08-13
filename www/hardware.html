@@ -666,6 +666,29 @@ Reported by Jeff Francis &lt;jeff&#x40;gritch.org&gt;
 </tr>
 <!-- End Navisky NSA-U3 -->
 
+<tr><td style='text-align:center;' colspan="7"><a href="http://www.navilock.de/">NaviLock</a></tr>
+
+<!-- Begin NaviLock NL-209PU -->
+<tr>
+<td><a href="http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61371_NL-209PU.html?show=spec">NL-209P</a></td>
+<td>Good</td>
+<td>Sony CXD2951</td>
+<td>Serial. Inlcludes USB (PL2303) adapter</td>
+<td>2.35</td>
+<td>2.2</td>
+<td>When running, need to use the -b option, else the device will hang
+during GPSD's probing phase and it needs to be unplugged and reinserted.
+To use this device with NTPd, set the the "fudge" factor to 0.840. There
+is no known PPS signal associated with this device.
+
+While the technical information claims 1us accuracy on the clock, the
+interface is undocumented, so there is no way to know if there's a usable
+1PPS signal.
+Reported by Jason Curl &lt;jcurlnews&#x40;arcor.de&gt;
+</td>
+</tr>
+<!-- End NaviLock NL-209PU -->
+
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.navman.com/'>Navman</a></tr>
 
 <!-- Begin Navman Jupiter 20 -->
@@ -700,6 +723,24 @@ In-car hands-free bluetooth phone and gps device. Outputs NMEA
 that does not seem to be parsed by 2.33.</td>
 </tr>
 <!-- End Parrot CK3300 -->
+
+<tr><td style='text-align:center;' colspan="7"><a href="http://www.phonix.it/">Phonix</a></tr>
+
+<!-- Begin Phonix BGR6205 -->
+<tr>
+<td><a href="http://www.phonix.it/html/catalogo_dettaglio.cfm?idProducts=E09B5AB7-BCDF-DF66-24853E2B4680AB2C">BGR6205</a></td>
+<td>Good</td>
+<td>SiRFstarII</td>
+<td>Bluetooth</td>
+<td>2.34</td>
+<td>2.2</td>
+<td>Reported by Sebastiano Zabert &lt;s.zabert&#x40;bigfoot.com&gt;<br/>
+As this is a bluetooth device, gpsd must either be run with "-b" or must
+be compiled with fixed port speed, as the bluetooth interface does not
+tolerate port speed changes at all.
+</td>
+</tr>
+<!-- End Phonix BGR6205 -->
 
 <tr><td style='text-align:center;' colspan="7"><a href="http://www.pharosgps.com/">Pharos</a></tr>
 
