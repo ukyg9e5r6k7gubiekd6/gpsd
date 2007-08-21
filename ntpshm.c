@@ -41,7 +41,7 @@ struct shmTime {
     time_t clockTimeStampSec;
     int    clockTimeStampUSec;
     time_t receiveTimeStampSec;
-    long   receiveTimeStampUSec;
+    int    receiveTimeStampUSec;
     int    leap;
     int    precision;
     int    nsamples;
