@@ -541,19 +541,18 @@ void gpsd_error_model(struct gps_device_t *session,
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
-	    fix->eph = session->gpsdata.hdop * uere;
-	else
-	    fix->eph = NAN;
-	if ((fix->mode >= MODE_3D) 
-	    	&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
+	if (isnan(fix->eph) && finite(session->gpsdata.hdop))
+		fix->eph = session->gpsdata.hdop * uere;
+
+	if ((fix->mode >= MODE_3D)
+		&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
 	    fix->epv = session->gpsdata.vdop * uere;
-	else
-	    fix->epv = NAN;
+
 	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.vdop)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
 	else
 	    session->gpsdata.epe = NAN;
+
 	/*
 	 * If we have a current fix and an old fix, and the packet handler 
 	 * didn't set the speed error and climb error members itself, 
