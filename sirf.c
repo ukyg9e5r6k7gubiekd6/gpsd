@@ -66,7 +66,7 @@ static unsigned char disablesubframe[] = {0xa0, 0xa2, 0x00, 0x19,
 				  0x00, 0x00, 0xb0, 0xb3};
 
 static unsigned char modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
-			      0x88, 
+			      0x88,
 			      0x00, 0x00,	/* pad bytes */
 			      0x00,		/* degraded mode off */
 			      0x00, 0x00,	/* pad bytes */
@@ -80,7 +80,7 @@ static unsigned char modecontrol[] = {0xa0, 0xa2, 0x00, 0x0e,
 			      0x00, 0x00, 0xb0, 0xb3};
 
 static unsigned char enablemid52[] = {
-	    0xa0, 0xa2, 0x00, 0x08, 
+	    0xa0, 0xa2, 0x00, 0x08,
 	    0xa6, 0x00, 0x34, 0x01, 0x00, 0x00, 0x00, 0x00,
 	    0x00, 0xdb, 0xb0, 0xb3};
 /*@ -charint @*/
@@ -123,18 +123,18 @@ bool sirf_write(int fd, unsigned char *msg) {
    return(ok);
 }
 
-static bool sirf_speed(int ttyfd, speed_t speed) 
+static bool sirf_speed(int ttyfd, speed_t speed)
 /* change speed in binary mode */
 {
     /*@ +charint @*/
    static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x09,
-                     0x86, 
-                     0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
+		     0x86,
+		     0x0, 0x0, 0x12, 0xc0,	/* 4800 bps */
 		     0x08,			/* 8 data bits */
 		     0x01,			/* 1 stop bit */
 		     0x00,			/* no parity */
 		     0x00,			/* reserved */
-                     0x00, 0x00, 0xb0, 0xb3};
+		     0x00, 0x00, 0xb0, 0xb3};
    /*@ -charint @*/
 
    msg[7] = (unsigned char)HI(speed);
@@ -142,22 +142,22 @@ static bool sirf_speed(int ttyfd, speed_t speed)
    return (sirf_write(ttyfd, msg));
 }
 
-static bool sirf_to_nmea(int ttyfd, speed_t speed) 
+static bool sirf_to_nmea(int ttyfd, speed_t speed)
 /* switch from binary to NMEA at specified baud */
 {
     /*@ +charint @*/
    static unsigned char msg[] = {0xa0, 0xa2, 0x00, 0x18,
-                     0x81, 0x02,
-                     0x01, 0x01, /* GGA */
-                     0x00, 0x00, /* suppress GLL */
-                     0x01, 0x01, /* GSA */
-                     0x05, 0x01, /* GSV */
-                     0x01, 0x01, /* RMC */
-                     0x00, 0x00, /* suppress VTG */
-                     0x00, 0x01, 0x00, 0x01,
-                     0x00, 0x01, 0x00, 0x01,
-                     0x12, 0xc0, /* 4800 bps */
-                     0x00, 0x00, 0xb0, 0xb3};
+		     0x81, 0x02,
+		     0x01, 0x01, /* GGA */
+		     0x00, 0x00, /* suppress GLL */
+		     0x01, 0x01, /* GSA */
+		     0x05, 0x01, /* GSV */
+		     0x01, 0x01, /* RMC */
+		     0x00, 0x00, /* suppress VTG */
+		     0x00, 0x01, 0x00, 0x01,
+		     0x00, 0x01, 0x00, 0x01,
+		     0x12, 0xc0, /* 4800 bps */
+		     0x00, 0x00, 0xb0, 0xb3};
    /*@ -charint @*/
 
    msg[26] = (unsigned char)HI(speed);
@@ -187,18 +187,18 @@ static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
     /*@ +charint @*/
     if (0xe1 == buf[0]) {		/* Development statistics messages */
 	for (i = 2; i < (int)len; i++)
-		(void)snprintf(msgbuf+strlen(msgbuf), 
+		(void)snprintf(msgbuf+strlen(msgbuf),
 			       sizeof(msgbuf)-strlen(msgbuf),
 			       "%c", buf[i]^0xff);
 	gpsd_report(LOG_PROG, "DEV 0xe1: %s\n", msgbuf);
     } else if (0xff == (unsigned char)buf[0]) {		/* Debug messages */
 	for (i = 1; i < (int)len; i++)
 	    if (isprint(buf[i]))
-		(void)snprintf(msgbuf+strlen(msgbuf), 
+		(void)snprintf(msgbuf+strlen(msgbuf),
 			       sizeof(msgbuf)-strlen(msgbuf),
 			       "%c", buf[i]);
 	    else
-		(void)snprintf(msgbuf+strlen(msgbuf), 
+		(void)snprintf(msgbuf+strlen(msgbuf),
 			       sizeof(msgbuf)-strlen(msgbuf),
 			       "\\x%02x", (unsigned int)buf[i]);
 	gpsd_report(LOG_PROG, "DBG 0xff: %s\n", msgbuf);
@@ -230,7 +230,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
     double fv;
 
     if (len < 20)
-	return 0; 
+	return 0;
 
     gpsd_report(LOG_INF, "FV  0x06: Firmware version: %s\n", buf+1);
     (void)strlcpy(session->subtype, (char *)buf+1, sizeof(session->subtype));
@@ -314,15 +314,15 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    cn += (int)getub(buf, off+5+j);
 
 	session->gpsdata.ss[st] = cn/10;
-	good = session->gpsdata.PRN[st]!=0 && 
-	session->gpsdata.azimuth[st]!=0 && 
-	session->gpsdata.elevation[st]!=0;
+	good = session->gpsdata.PRN[st]!=0 &&
+	    session->gpsdata.azimuth[st]!=0 &&
+	    session->gpsdata.elevation[st]!=0;
 #ifdef __UNUSED__
 	gpsd_report(LOG_PROG, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
-			getub(buf, off), 
-			getub(buf, off+2)/2.0, 
+			getub(buf, off),
+			getub(buf, off+2)/2.0,
 			(getub(buf, off+1)*3)/2.0,
-			cn/10, 
+			cn/10,
 			getuw(buf, off+3),
 			good ? '*' : ' ');
 #endif /* UNUSED */
@@ -367,7 +367,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	session->gpsdata.used[i] = (int)getub(buf, 29+i);
     if ((session->driver.sirf.driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	/* position/velocity is bytes 1-18 */
-	ecef_to_wgs84fix(&session->gpsdata, 
+	ecef_to_wgs84fix(&session->gpsdata,
 	     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
 	     getsw(buf, 13)/8.0, getsw(buf, 15)/8.0, getsw(buf, 17)/8.0);
 	/* fix status is byte 19 */
@@ -384,10 +384,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	    session->gpsdata.fix.mode = MODE_2D;
 	if (session->gpsdata.fix.mode == MODE_3D)
 	    mask |= ALTITUDE_SET | CLIMB_SET;
-	gpsd_report(LOG_PROG, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+	gpsd_report(LOG_PROG, "MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n",
 	    navtype,session->gpsdata.status,session->gpsdata.fix.mode);
 	/* byte 20 is HDOP, see below */
-	/* byte 21 is "mode 2", not clear how to interpret that */ 
+	/* byte 21 is "mode 2", not clear how to interpret that */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    gpstime_to_unix(getsw(buf, 22), getul(buf, 24)*1e-2) -
 	    session->context->leap_seconds;
@@ -449,7 +449,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	    session->gpsdata.fix.mode = MODE_3D;
 	else if (session->gpsdata.status)
 	    session->gpsdata.fix.mode = MODE_2D;
-	gpsd_report(LOG_PROG, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+	gpsd_report(LOG_PROG, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n",
 	    navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 	/*
 	 * UTC is left all zeros in 231 and older firmware versions, 
@@ -463,7 +463,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * UTC second     2               2
 	 *                11              8
 	 */
-	unpacked_date.tm_year = (int)getuw(buf, 11);
+	unpacked_date.tm_year = (int)getuw(buf, 11)-1900;
 	unpacked_date.tm_mon = (int)getub(buf, 13)-1;
 	unpacked_date.tm_mday = (int)getub(buf, 14);
 	unpacked_date.tm_hour = (int)getub(buf, 15);
@@ -472,7 +472,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	subseconds = getuw(buf, 17)*1e-3;
 	/*@ -compdef */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
-	    (double)mktime(&unpacked_date)+subseconds;
+	    (double)timegm(&unpacked_date)+subseconds;
 	/*@ +compdef */
 	gpsd_report(LOG_PROG, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 #ifdef NTPSHM_ENABLE
@@ -497,7 +497,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	/* skip 2 bytes of magnetic variation */
 	session->gpsdata.fix.climb = getsw(buf, 42)*1e-2;
 	/* HDOP should be available at byte 89, but in 231 it's zero. */
-	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET; 
+	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET;
 	session->gpsdata.sentence_length = 91;
 	(void)strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
     }
@@ -537,7 +537,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
     /* this packet is only sent by uBlox firmware from version 1.32 */
     mask = LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
 	STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
-    session->gpsdata.fix.latitude = getsl(buf, 1) * RAD_2_DEG * 1e-8; 
+    session->gpsdata.fix.latitude = getsl(buf, 1) * RAD_2_DEG * 1e-8;
     session->gpsdata.fix.longitude = getsl(buf, 5) * RAD_2_DEG * 1e-8;
     session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
     session->gpsdata.fix.altitude = getsl(buf, 9) * 1e-3 - session->gpsdata.separation;
@@ -556,7 +556,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	session->gpsdata.fix.mode = MODE_3D;
     else if (session->gpsdata.status)
 	session->gpsdata.fix.mode = MODE_2D;
-    gpsd_report(LOG_PROG, "EMND 0x62: Navtype = 0x%0x, Status = %d, mode = %d\n", 
+    gpsd_report(LOG_PROG, "EMND 0x62: Navtype = 0x%0x, Status = %d, mode = %d\n",
 	 navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 
     if (navtype & 0x40) {		/* UTC corrected timestamp? */
@@ -674,22 +674,22 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return sirf_msg_navdata(session, buf, len);
 
     case 0x09:		/* CPU Throughput */
-	gpsd_report(LOG_PROG, 
-		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n", 
-		    (float)getuw(buf, 1)/186, (float)getuw(buf, 3)/186, 
+	gpsd_report(LOG_PROG,
+		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n",
+		    (float)getuw(buf, 1)/186, (float)getuw(buf, 3)/186,
 		    (float)getuw(buf, 5)/186, getuw(buf, 7));
-    	return 0;
+	return 0;
 
     case 0x0a:		/* Error ID Data */
 	return sirf_msg_errors(buf, len);
 
     case 0x0b:		/* Command Acknowledgement */
 	gpsd_report(LOG_PROG, "ACK 0x0b: %02x\n",getub(buf, 1));
-    	return 0;
+	return 0;
 
     case 0x0c:		/* Command NAcknowledgement */
 	gpsd_report(LOG_PROG, "NAK 0x0c: %02x\n",getub(buf, 1));
-    	return 0;
+	return 0;
 
     case 0x0d:		/* Visible List */
 	gpsd_report(LOG_PROG, "VIS 0x0d\n");
@@ -820,7 +820,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     default:
-	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %d: %s\n", 
+	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %d: %s\n",
 		    buf[0], len, gpsd_hexdump(buf, len));
 	return 0;
     }
@@ -831,7 +831,7 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
     gps_mask_t st;
 
     if (session->packet.type == SIRF_PACKET){
-	st = sirf_parse(session, session->packet.outbuffer, 
+	st = sirf_parse(session, session->packet.outbuffer,
 			session->packet.outbuflen);
 	session->gpsdata.driver_mode = 1;	/* binary */
 	return st;
@@ -852,7 +852,7 @@ static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
 	return;
     if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
-	(void)nmea_send(session->gpsdata.gps_fd, 
+	(void)nmea_send(session->gpsdata.gps_fd,
 		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
     }
     /* do this every time*/
@@ -876,7 +876,7 @@ static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
 				       0xa6, 0x00, 0x02, 0x01,
 				       0x00, 0x00, 0x00, 0x00,
 				       0x00, 0x00, 0xb0, 0xb3};
-	static unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08, 
+	static unsigned char requesttracker[] = {0xa0, 0xa2, 0x00, 0x08,
 					  0xa6, 0x00, 0x04, 0x03,
 					  0x00, 0x00, 0x00, 0x00,
 					  0x00, 0x00, 0xb0, 0xb3};
@@ -900,7 +900,7 @@ static void sirfbin_revert(struct gps_device_t *session)
 {
     /*@ +charint @*/
     static unsigned char moderevert[] = {0xa0, 0xa2, 0x00, 0x0e,
-			      0x88, 
+			      0x88,
 			      0x00, 0x00,	/* pad bytes */
 			      0x00,		/* degraded mode */
 			      0x00, 0x00,	/* pad bytes */
@@ -935,7 +935,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 struct gps_type_t sirf_binary =
 {
     .typename       = "SiRF binary",	/* full name of type */
-    .trigger        = NULL,		/* no trigger */
+    .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
@@ -951,9 +951,9 @@ struct gps_type_t sirf_binary =
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = sirfbin_revert,	/* no reversion code */
+    .revert	    = sirfbin_revert,	/* no reversion code */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* no close hook */
-    .cycle          = 1,		/* updates every second */
+    .wrapup	    = NULL,		/* no close hook */
+    .cycle	    = 1,		/* updates every second */
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */
