@@ -114,11 +114,11 @@ static struct gps_context_t context = {
 };
 /*@ +initallelements +nullassign +nullderef @*/
 
+volatile sig_atomic_t signalled;
 static void onsig(int sig)
 {
-    /* go back to the default signal action until we can reset properly */
-    (void)signal(sig, SIG_DFL);
-    longjmp(restartbuf, sig+1);
+    /* just set a variable, and deal with it in the main loop */
+    signalled = sig;
 }
 
 static int daemonize(void)
@@ -1433,19 +1433,11 @@ int main(int argc, char *argv[])
 	    if (allocated_channel(&channels[dfd]))
 		(void)gpsd_wrap(&channels[dfd]);
 	}
-	if (st == SIGHUP+1)
-	    gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
-	else if (st > 0) {
-	    gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",st-1);
-	    if (control_socket)
-		(void)unlink(control_socket);
-	    if (pid_file)
-		(void)unlink(pid_file);
-	    exit(10 + st);
-	}
+	gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
     }
 
     /* Handle some signals */
+    signalled = 0;
     (void)signal(SIGHUP, onsig);
     (void)signal(SIGINT, onsig);
     (void)signal(SIGTERM, onsig);
@@ -1471,7 +1463,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-    for (;;) {
+    while (0 == signalled) {
         (void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
 
 	gpsd_report(LOG_RAW+2, "select waits\n");
@@ -1805,6 +1797,17 @@ int main(int argc, char *argv[])
 		    }
 		}
 	    }
+    }
+    /* if we make it here, we got a signal... deal with it */
+    /* restart on SIGHUP, clean up and exit otherwise */
+    if (SIGHUP == signalled)
+	longjmp(restartbuf, 1);
+
+    gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",signalled);
+    /* try to undo all device configurations */
+    for (dfd = 0; dfd < MAXDEVICES; dfd++) {
+	if (allocated_channel(&channels[dfd]))
+	    (void)gpsd_wrap(&channels[dfd]);
     }
 
     if (control_socket)
