@@ -1142,6 +1142,108 @@ although it is not clear if the "consumer" firmware is capable of that.
 <!-- Oleg Gusev <oleg@crista.uni-wuppertal.de> -->
 </td>
 </table>
+
+<h2>PPS and GPSD:</h2>
+
+<p>Many GPS receivers offer a 1PPS (one pulse per second) output that
+  GPSD is capable of passing along to ntp for use as an extremely
+  accurate clock source.  The following information on 1PPS accuracy
+  are taken from manufacturers' data sheets, and have not been
+  independently verified.</p>
+
+<table border='1'>
+<tr>
+<th>Receiver</th>
+<th>Claimed<br>Accuracy</th>
+<th>1PPS Tested<br>with GPSD</th>
+<th>Notes</th>
+</tr>
+<tr>
+<td>Trimble Lassen iQ</td>
+<td><center>50ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Trimble Resolution-T</td>
+<td><center>15ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Garmin GPS18</td>
+<td><center>1usec</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>SiRFstar2</td>
+<td><center>1usec</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>SiRFstar3</td>
+<td><center>1usec</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ublox Antaris</td>
+<td><center>50ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ublox Antaris4</td>
+<td><center>50ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>ublox Antaris4T</td>
+<td><center>50ns<br>15ns compensated</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NavSync CW25-TIM</td>
+<td><center>25ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Rockwell Jupiter</td>
+<td><center>1usec</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>SigNav TM3-01</td>
+<td><center>10ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NavSync CW12-TIM</td>
+<td><center>30ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Motorola OnCore UT+</td>
+<td><center>50ns</center></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Motorola<br>iLotus<br>Synergy-GPS M12M</td>
+<td><center>20ns<br>6ns corrected</center></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
 </div>
 
 <hr/>
