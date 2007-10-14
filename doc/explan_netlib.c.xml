@@ -16,11 +16,15 @@
   <entry><function>int netlib_connectsock(const char *host, const char *service, const char *protocol)</function></entry>
   <entry><para>This attempts to connect the to nominated service on the nominated host using the nominated protocol. On success, the return value is the socket number. On error, an appropriate system defined error code is returned.</para></entry>
 </row>
+<row>
+  <entry><function>char *sock2ip(int fd)</function></entry>
+  <entry><para>This makes a call to <function>getpeername</function> using the spplied fd. On success, the returned string is the ip address in dotted notation. On error, "&lt;unknown&gt;" is returned.</para></entry>
+</row>
 </tbody>
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4264 2007-01-22 15:53:33Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: netlib.c 4376 2007-06-02 06:29:26Z esr $</function></entry>
 </row>
 </tfoot>
 

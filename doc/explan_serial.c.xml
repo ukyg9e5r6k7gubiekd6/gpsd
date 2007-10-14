@@ -14,7 +14,7 @@
 <tbody>
 <row>
   <entry><function>void gpsd_tty_init(struct gps_device_t *session)</function></entry>
-  <entry><para>To be called on allocating a device. Mark GPS fd closed and its baud rate unknown.</para></entry>
+  <entry><para>To be called on allocating a device. Mark GPS fd closed and its baud rate unknown.</para><para>If we are supporting <function>ntpd</function> shared memory segments, ensure they are initally unused.</para></entry>
 </row>
 <row>
   <entry><function>void cfmakeraw(struct termios *termios_p)</function></entry>
@@ -30,7 +30,7 @@
 </row>
 <row>
   <entry><function>void gpsd_set_speed(struct gps_device_t *session, speed_t speed, unsigned char parity, unsigned int stopbits)</function></entry>
-  <entry><para>Sets the speed, parity and stopbits.</para><para>Lots of black magic fiddling goes on to ensure the port is flushed on the baud rate change and wakeup strings are fired off just in case the device needs prodding into life.</para><para>READ THE CODE AND COMMENTS!!!</para></entry>
+  <entry><para>Sets the speed, parity and stopbits.</para><para>Lots of black magic fiddling goes on to ensure the port is flushed on the baud rate change and wakeup strings are fired off just in case the device needs prodding into life.</para><para>READ THE CODE AND COMMENTS!!!</para><para>Prior to exit, a call is made to <function>packet_reset()</function> to ensure the packet state machine is initialised.</para></entry>
 </row>
 <row>
   <entry><function>int gpsd_open(struct gps_device_t *session)</function></entry>
@@ -38,7 +38,7 @@
 </row>
 <row>
   <entry><function>bool gpsd_write(struct gps_device_t *session, void const *buf, size_t len)</function></entry>
-  <entry><para>Try to write <function>len</function> characters to the device. waiting until all data has been sent.</para><para>If the write was successful (number of bytes written = <function>len</function>), return <quote>true</quote>, othewise return <quote>false</quote>.</para></entry>
+  <entry><para>If the device is read-only, simply return 0.</para><para>If not, try to write <function>len</function> characters to the device. waiting until all data has been sent.</para><para>Return the number of bytes written.</para></entry>
 </row>
 <row>
   <entry><function>bool gpsd_next_hunt_setting(struct gps_device_t *session)</function></entry>
@@ -57,7 +57,7 @@ Set the HUPCL flag in the original data, write the old data to the port, close t
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: serial.c 4302 2007-03-14 02:27:45Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: serial.c 4405 2007-07-27 16:16:09Z ckuethe $</function></entry>
 </row>
 </tfoot>
 

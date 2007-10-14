@@ -26,11 +26,11 @@
 </row>
 <row>
   <entry><function>static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *session)</function></entry>
-  <entry><para>Handle a $GPRMC sentence stored in an array of strings, one member per field.</para><para>Check if the message is stamped valid or not.</para><para>If it is invalid, set the status and fix mode to NO_FIX and save the corresponding flags locally; also save the online flag so we know we have handled a known sentence.</para><para>If the fix is autonomous and valid, start to decode the fields.</para><para>First, test if there are enough fields available; then handle the date and time via <function>merge_ddmmyy()</function> and <function>merge_hhmmss()</function>, storing the TIME_SET flag and storing the fix time as a UNIX-epoch relative value.</para><para>If the sentence time and this fix time are different, we have started a new cycle of observation, so update the sentence time and the store the CYCLE_START_SET flag.</para><para>Whatever the number of fields, store the fix co-ordinates via <function>do_lat_lon()</function>, store the speed and the track and save the corresponding flags.</para><para>Return the local aggregated flags to allow the main copy in the session data to be updated.</para></entry>
+  <entry><para>Handle a $GPRMC sentence stored in an array of strings, one member per field.</para><para>Check if the message is stamped valid or not.</para><para>If it is invalid, set the status and fix mode to NO_FIX and save the corresponding flags locally; also save the online flag to indicate we have handled a known sentence.</para><para>If the fix is autonomous and valid, start to decode the fields.</para><para>First, test if there are enough fields available; then handle the date and time via <function>merge_ddmmyy()</function> and <function>merge_hhmmss()</function>, storing the TIME_SET flag and storing the fix time as a UNIX-epoch relative value.</para><para>If the sentence time and this fix time are different, we have started a new cycle of observation, so update the sentence time and the store the CYCLE_START_SET flag.</para><para>Whatever the number of fields, store the fix co-ordinates via <function>do_lat_lon()</function>, store the speed and the track and save the corresponding flags.</para><para>Return the local aggregated flags to allow the main copy in the session data to be updated.</para></entry>
 </row>
 <row>
   <entry><function>static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *session)</function></entry>
-  <entry><para>Preload the local flag with the ERROR_SET flag.</para><para>Check that the sentence is usable, exiting with the preset error flag if it is not.</para><para>If it is usable, clear the local flags and start processing the fields, updating any local flag fields on the way.</para><para>If the year is already known, update the time and check for the start of cycle (see <function>processGPRMC()</function> above).</para><para>Handle the fix location and, if the number of received fixes is more than 8 and the status is differential, stash the new status as STATUS_DGPS_FIX; otherwise stash STATUS_FIX.</para><para>If the present mode is less than 2D_FIX, update it to 2D_FIX.</para><para>Update the status to the stashed value of newstatus and return all the locally aggregated flags.</para></entry>
+  <entry><para>Preload the local flag with the ERROR_SET flag.</para><para>Check that the sentence is usable, exiting with the preset error flag if it is not.</para><para>If it is usable, clear the local flags and start processing the fields, updating any local flag fields on the way.</para><para>If the year is already known, update the time and check for the start of cycle (see <function>processGPRMC()</function> above).</para><para>Handle the fix location and, if the number of received fixes is more than 8 and the status is differential, stash the new status as STATUS_DGPS_FIX; otherwise stash STATUS_FIX.</para><para>If the present mode is less than 2D_FIX, update it to 2D_FIX.</para><para>Write the stashed value of newstatus into the session status and return all the locally aggregated flags.</para></entry>
 </row>
 <row>
   <entry><function>static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>
@@ -50,11 +50,11 @@
 </row>
 <row>
   <entry><function>static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>
-  <entry><para>Set the local flag variable to indicate that the time is available.</para><para>Store the actual time by a call to <function>merge_hhmmss()</function> and fill in the other fields from the sentence data.</para><para>If the sentence is not timestamped the same as the fixtime, update the fixtime and set the CYCLE_START_SET flag.</para><para>Finally, return all the locally aggregated flags.</para></entry>
+  <entry><para>Set the local flag variable to indicate that the time is available.</para><para>Store the actual time by a call to <function>merge_hhmmss()</function> and fill in the other fields from the sentence data.</para><para>If the sentence is not timestamped the same as the fixtime, set the CYCLE_START_SET flag.</para><para>Update the fixtime to the sentence timestamp.</para><para>Finally, return all the locally aggregated flags.</para></entry>
 </row>
 <row>
   <entry><function>static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t *session)</function></entry>
-  <entry><para>Set the local variable to indicate the the unit is on-line.</para><para>Fill all appropriate fields from the sentence and set the associated flags in the local flag variable.</para><para>Set the fix status and freturn all the locally aggregated flags.</para></entry>
+  <entry><para>Set the local variable to indicate the the unit is on-line.</para><para>Fill all appropriate fields from the sentence and set the associated flags in the local flag variable.</para><para>Set the fix status and return all the locally aggregated flags.</para></entry>
 </row>
 <row>
   <entry><function>static short nmea_checksum(char *sentence, unsigned char *correct_sum)</function></entry>
@@ -62,21 +62,21 @@
 </row>
 <row>
   <entry><function>gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)</function></entry>
-  <entry><para>Take an NMEA sentence and check the checksum with <function>nmea_checksum()</function> (note:- this is switched off at the moment).</para><para>Test the length is acceptable, retuning an on-line indication if it is too long to handle.</para><para>If it is within limits, make a local copy and split it on the commas into an array, one field per element.</para><para>Use the first element to match the command to the table of decodable commands.</para><para>If it is supported and the number of fields is reasonable, invoke the correct decoder and return the value from that call.</para><para>If it fails the testing, return an on-line status.</para></entry>
+  <entry><para>Take an NMEA sentence and check the checksum with <function>nmea_checksum()</function>, returning an empty flag mask if so (note:- this is switched off at the moment).</para><para>Test the length is acceptable, simply returning an on-line indication if it is too long to handle.</para><para>If it is within limits, make a local copy and split it on the commas into an array, one field per element.</para><para>Use the first element to match the command to the table of decodable commands.</para><para>Check if it is supported and the number of fields is reasonable, invoke the correct decoder and return the value from that call.</para><para>If it fails the check, simply return an on-line status.</para></entry>
 </row>
 <row>
   <entry><function>void nmea_add_checksum(char *sentence)</function></entry>
-  <entry><para>Calcluate the checksum then insert a '*', the checksum and CR+LF into the end of an NMEA Sentence, skipping any existing '*'.</para></entry>
+  <entry><para>Calcluate the checksum then append '*' + the checksum + CR/LF to the end of an NMEA sentence, skipping any existing '*'.</para></entry>
 </row>
 <row>
   <entry><function>int nmea_send(int fd, const char *fmt, ... )</function></entry>
-  <entry><para>Read the incoming data into a buffer, reserving the last 5 bytes (at least) for the terminating data.</para><para>If the buffer starts with a '$', asssume it is an NMEA sentence and call nmea_add_checksum; otherwise, just add a CR+LF.</para><para>Write the buffer to the device, stashing the byte count returned. Wait until all output is sent.</para><para>Check the returned value against the number of bytes in the buffer. If they are equal, return the stashed count. If not, return -1.</para></entry>
+  <entry><para>Read the incoming data into a buffer, reserving the last 5 bytes (at least) for the terminating data.</para><para>If the buffer starts with a '$', asssume it is an NMEA sentence and call <function>nmea_add_checksum</function>. Otherwise, just add a CR+LF.</para><para>Write the buffer to the device, stashing the byte count returned. Wait until all output is sent.</para><para>Check the returned value against the number of bytes in the buffer. If they are equal, return the stashed count. If not, return -1.</para></entry>
 </row>
 </tbody>
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: nmea_parse.c 4306 2007-03-15 06:33:17Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: nmea_parse.c 4373 2007-06-01 22:30:43Z esr $</function></entry>
 </row>
 </tfoot>
 

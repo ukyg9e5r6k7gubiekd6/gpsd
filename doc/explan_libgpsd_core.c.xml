@@ -22,7 +22,7 @@
 </row>
 <row>
   <entry><function>void gpsd_deactivate(struct gps_device_t *session)</function></entry>
-  <entry><para>Release the NTPD resources, including the 1PPS resourecs if they are active.</para><para>If the device has a revert function, trigger it.</para><para>If it has an NMEA mode switcher, invoke it.</para><para>If it has a wrapup routine, invoke it.</para><para>Finally, close the device.</para></entry>
+  <entry><para>All actions below, except the last one are conditional on the <function>ntpd</function> interface being compiled in.</para><para>Release the <function>ntpd</function> resources, including the 1PPS resourecs if they are active.</para><para>If the device has a revert function, trigger it.</para><para>If it has an NMEA mode switcher, invoke it.</para><para>If it has a wrapup routine, invoke it.</para><para>Finally, close the device.</para></entry>
 </row>
 <row>
   <entry><function>static void *gpsd_ppsmonitor(void *arg)</function></entry>

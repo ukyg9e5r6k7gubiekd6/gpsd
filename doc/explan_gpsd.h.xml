@@ -13,6 +13,9 @@
 
 <tbody>
 <row>
+  <entry spanname='s1' align='left'><para>This file is created at <function>configure</function> time by combining <function>gpsd.h-head</function>, certain configuration options from the auto-generated file <function>gpsd_configure.h</function> and <function>gpsd.h-tail</function>. This file (<function>gpsd.h</function>) should not be edited directly, neither should <function>gpsd.h-head</function>. You should only edit <function>gpsd.h-tail</function> as needed.</para></entry>
+</row>
+<row>
   <entry><function>struct gps_packet_t {}</function></entry>
   <entry><para>Provides the data structure used by <function>packet_getter()</function>. 1 per <application>gpsd</application> session.</para></entry>
 </row>
@@ -32,7 +35,7 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd.h 4304 2007-03-14 06:07:46Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: gpsd.h-tail 4383 2007-06-03 21:11:37Z ckuethe $</function></entry>
 </row>
 </tfoot>
 

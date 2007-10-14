@@ -18,7 +18,7 @@
 </row>
 <row>
   <entry><function>int dgnss_open(struct gps_context_t *context, char *dgnss_service)</function></entry>
-  <entry><para>Try to open a connection to the nominated service. If the service cannot be opened, the return is -1. The supported services are <emphasis>dgpsip</emphasis> (differential corrections via IP) and <emphasis>ntrip</emphasis> (differential corrections in http form).</para></entry>
+  <entry><para>Try to open a connection to the nominated service. If the service cannot be opened, the return is -1. The supported services are <function>dgpsip</function> (differential corrections via IP) and <function>ntrip</function> (differential corrections in http form).</para></entry>
 </row>
 <row>
   <entry><function>int dgnss_poll(struct gps_context_t *context)</function></entry>

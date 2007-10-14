@@ -30,11 +30,11 @@
 </row>
 <row>
   <entry><function>ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)</function></entry>
-  <entry><para>Call the <function>nextstate()</function> function to process the available data and set the recognition state correctly. Return the number of characters handled.</para></entry>
+  <entry><para>Call the <function>nextstate()</function> function to process the available data and set the recognition state correctly.<para>When a packet is matched to a driver, call <function>packet_accept()</function> and <function>packet_discard()</function> to handle the packet. If it is not matched, call <function>packet_discard()</function> and set the state to <quote>GROUND_STATE</quote></para> Return the number of characters handled.</para></entry>
 </row>
 <row>
   <entry><function>ssize_t packet_get(int fd, struct gps_packet_t *lexer)</function></entry>
-  <entry><para>Reads raw data from the input port. Returns the number of characters read (0 or more) or BAD_PACKET if there was an error in reading. Errors <errortype>EAGAIN</errortype> and <errortype>EINTR</errortype> are not classed as failures and cause a return of 0.</para></entry>
+  <entry><para>Reads raw data from the input port.</para><para>Returns the number of characters read (0 or more) or BAD_PACKET if there was an error in reading.</para><para>Errors <errortype>EAGAIN</errortype> and <errortype>EINTR</errortype> are not classed as failures and cause a return of 0.</para><para>In case of a good read of more than 0 characters, the return value is the output from a call to <function>packet_parse()</function>.</para></entry>
 </row>
 <row>
   <entry><function>void packet_reset(struct gps_packet_t *lexer)</function></entry>
@@ -48,7 +48,7 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on <function>$Id: packet.c 4299 2007-03-11 19:51:22Z ckuethe $</function></entry>
+  <entry spanname='s1' align='left'>Notes based on <function>$Id: packet.c 4377 2007-06-02 14:52:38Z esr $</function></entry>
 </row>
 </tfoot>
 
