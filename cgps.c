@@ -180,6 +180,155 @@ static void update_probe(struct gps_data_t *gpsdata,
 }
 
 
+static void windowsetup(void){
+  /* Set the window sizes per the following criteria:
+
+     1.  Set the window size to display the maximum number of
+     satellites possible, but not more than the size required to
+     display the maximum number of satellites gpsd is capable of
+     tracking (MAXCHANNELS - 2).
+
+     2.  If the screen size will not allow for the full complement of
+     satellites to be displayed, set the windows sizes smaller, but
+     not smaller than the number of lines necessary to display all of
+     the fields in the 'datawin'.  The list of displayed satellites
+     will be truncated to fit the available window size.  (TODO: If
+     the satellite list is truncated, omit the satellites not used to
+     obtain the current fix.)
+
+     3.  If the screen is large enough to display all possible
+     satellites (MAXCHANNELS - 2) with space still left at the bottom,
+     add a window at the bottom in which to scroll raw gpsd data.
+  */
+  int xsize, ysize;
+
+  getmaxyx(stdscr,ysize,xsize);
+
+  if(compass_flag==1) {
+    if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
+      raw_flag = 0;
+      window_length = MIN_COMPASS_DATAWIN_SIZE;
+    } else if(ysize > MIN_COMPASS_DATAWIN_SIZE) {
+      raw_flag = 1;
+      window_length = MIN_COMPASS_DATAWIN_SIZE;
+    } else {
+      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_COMPASS_DATAWIN_SIZE);
+      /*@ -nullpass @*/
+      (void)refresh();
+      /*@ +nullpass @*/
+      (void)sleep(5);
+      die(0);
+    }
+  } else {
+    if(ysize == MAX_SATWIN_SIZE) {
+      raw_flag = 0;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize == MAX_SATWIN_SIZE + 1) {
+      raw_flag = 1;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize > MAX_SATWIN_SIZE + 2) {
+      raw_flag = 1;
+      window_length = MAX_SATWIN_SIZE;
+      display_sats = MAX_POSSIBLE_SATS;
+    } else if(ysize > MIN_GPS_DATAWIN_SIZE) {
+      raw_flag = 0;
+      window_length = ysize - raw_flag;
+      display_sats = window_length - SATWIN_OVERHEAD - raw_flag;
+    } else if(ysize == MIN_GPS_DATAWIN_SIZE) {
+      raw_flag = 0;
+      window_length = MIN_GPS_DATAWIN_SIZE;
+      display_sats = window_length - SATWIN_OVERHEAD - 1;
+    } else {
+      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_GPS_DATAWIN_SIZE);
+      /*@ -nullpass @*/
+      (void)refresh();
+      /*@ +nullpass @*/
+      (void)sleep(5);
+      die(0);
+    }
+  }
+
+  /* Set up the screen for either a compass or a gps receiver. */
+  if(compass_flag==1) {
+    /* We're a compass, set up accordingly. */
+
+    /*@ -onlytrans @*/
+    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
+    (void)nodelay(datawin,(bool)TRUE);
+    if(raw_flag==1) {
+      messages   = newwin(0, 0, window_length, 0);
+
+      /*@ +onlytrans @*/
+      (void)scrollok(messages, true);
+      (void)wsetscrreg(messages, 0, ysize - (window_length));
+    }
+
+    /*@ -nullpass @*/
+    (void)refresh();
+    /*@ +nullpass @*/
+
+    /* Do the initial field label setup. */
+    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
+    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Heading:");
+    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Pitch:");
+    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Roll:");
+    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Dip:");
+    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Rcvr Type:");
+    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  } else {
+    /* We're a GPS, set up accordingly. */
+
+    /*@ -onlytrans @*/
+    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
+    satellites = newwin(window_length, SATELLITES_WIDTH, 0, DATAWIN_WIDTH);
+    (void)nodelay(datawin,(bool)TRUE);
+    if(raw_flag==1) {
+      messages   = newwin(ysize - (window_length), xsize, window_length, 0);
+
+      /*@ +onlytrans @*/
+      (void)scrollok(messages, true);
+      (void)wsetscrreg(messages, 0, ysize - (window_length));
+    }
+
+    /*@ -nullpass @*/
+    (void)refresh();
+    /*@ +nullpass @*/
+
+    /* Do the initial field label setup. */
+    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
+    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Latitude:");
+    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Longitude:");
+    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Altitude:");
+    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Speed:");
+    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Heading:");
+    (void)mvwprintw(datawin, 7, DATAWIN_DESC_OFFSET, "Climb:");
+    (void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
+    (void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
+
+    /* Note that the following four fields are exceptions to the
+       sizing rule.  The minimum window size does not include these
+       fields, if the window is too small, they get excluded.  This
+       may or may not change if/when the output for these fields is
+       fixed and/or people request their permanance.  They're only
+       there in the first place because I arbitrarily thought they
+       sounded interesting. ;^) */
+
+    if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
+      (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET, "Horizontal Err:");
+      (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET, "Vertical Err:");
+      (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
+      (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
+    }
+
+    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
+    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
+  }
+}
+
 /* This gets called once for each new compass sentence. */
 static void update_compass_panel(struct gps_data_t *gpsdata,
 			char *message,
@@ -462,8 +611,6 @@ int main(int argc, char *argv[])
   char *err_str = NULL;
   int c;
 
-  int xsize, ysize;
-
   struct timeval timeout;
   fd_set rfds;
   int data;
@@ -614,150 +761,7 @@ int main(int argc, char *argv[])
   (void)signal(SIGINT,die);
   (void)signal(SIGHUP,die);
 
-  /* Set the window sizes per the following criteria:
-
-     1.  Set the window size to display the maximum number of
-     satellites possible, but not more than the size required to
-     display the maximum number of satellites gpsd is capable of
-     tracking (MAXCHANNELS - 2).
-
-     2.  If the screen size will not allow for the full complement of
-     satellites to be displayed, set the windows sizes smaller, but
-     not smaller than the number of lines necessary to display all of
-     the fields in the 'datawin'.  The list of displayed satellites
-     will be truncated to fit the available window size.  (TODO: If
-     the satellite list is truncated, omit the satellites not used to
-     obtain the current fix.)
-
-     3.  If the screen is large enough to display all possible
-     satellites (MAXCHANNELS - 2) with space still left at the bottom,
-     add a window at the bottom in which to scroll raw gpsd data.
-  */
-  getmaxyx(stdscr,ysize,xsize);
-
-  if(compass_flag==1) {
-    if(ysize == MIN_COMPASS_DATAWIN_SIZE) {
-      raw_flag = 0;
-      window_length = MIN_COMPASS_DATAWIN_SIZE;
-    } else if(ysize > MIN_COMPASS_DATAWIN_SIZE) {
-      raw_flag = 1;
-      window_length = MIN_COMPASS_DATAWIN_SIZE;
-    } else {
-      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_COMPASS_DATAWIN_SIZE);
-      /*@ -nullpass @*/
-      (void)refresh();
-      /*@ +nullpass @*/
-      (void)sleep(5);
-      die(0);
-    }
-  } else {
-    if(ysize == MAX_SATWIN_SIZE) {
-      raw_flag = 0;
-      window_length = MAX_SATWIN_SIZE;
-      display_sats = MAX_POSSIBLE_SATS;
-    } else if(ysize == MAX_SATWIN_SIZE + 1) {
-      raw_flag = 1;
-      window_length = MAX_SATWIN_SIZE;
-      display_sats = MAX_POSSIBLE_SATS;
-    } else if(ysize > MAX_SATWIN_SIZE + 2) {
-      raw_flag = 1;
-      window_length = MAX_SATWIN_SIZE;
-      display_sats = MAX_POSSIBLE_SATS;
-    } else if(ysize > MIN_GPS_DATAWIN_SIZE) {
-      raw_flag = 0;
-      window_length = ysize - raw_flag;
-      display_sats = window_length - SATWIN_OVERHEAD - raw_flag;
-    } else if(ysize == MIN_GPS_DATAWIN_SIZE) {
-      raw_flag = 0;
-      window_length = MIN_GPS_DATAWIN_SIZE;
-      display_sats = window_length - SATWIN_OVERHEAD - 1;
-    } else {
-      (void)mvprintw(0, 0, "Your screen must be at least 80x%d to run cgps.",MIN_GPS_DATAWIN_SIZE);
-      /*@ -nullpass @*/
-      (void)refresh();
-      /*@ +nullpass @*/
-      (void)sleep(5);
-      die(0);
-    }
-  }
-
-  /* Set up the screen for either a compass or a gps receiver. */
-  if(compass_flag==1) {
-    /* We're a compass, set up accordingly. */
-
-    /*@ -onlytrans @*/
-    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
-    (void)nodelay(datawin,(bool)TRUE);
-    if(raw_flag==1) {
-      messages   = newwin(0, 0, window_length, 0);
-
-      /*@ +onlytrans @*/
-      (void)scrollok(messages, true);
-      (void)wsetscrreg(messages, 0, ysize - (window_length));
-    }
-
-    /*@ -nullpass @*/
-    (void)refresh();
-    /*@ +nullpass @*/
-
-    /* Do the initial field label setup. */
-    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
-    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Heading:");
-    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Pitch:");
-    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Roll:");
-    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Dip:");
-    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Rcvr Type:");
-    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
-
-  } else {
-    /* We're a GPS, set up accordingly. */
-
-    /*@ -onlytrans @*/
-    datawin    = newwin(window_length, DATAWIN_WIDTH, 0, 0);
-    satellites = newwin(window_length, SATELLITES_WIDTH, 0, DATAWIN_WIDTH);
-    (void)nodelay(datawin,(bool)TRUE);
-    if(raw_flag==1) {
-      messages   = newwin(ysize - (window_length), xsize, window_length, 0);
-
-      /*@ +onlytrans @*/
-      (void)scrollok(messages, true);
-      (void)wsetscrreg(messages, 0, ysize - (window_length));
-    }
-
-    /*@ -nullpass @*/
-    (void)refresh();
-    /*@ +nullpass @*/
-
-    /* Do the initial field label setup. */
-    (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
-    (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Latitude:");
-    (void)mvwprintw(datawin, 3, DATAWIN_DESC_OFFSET, "Longitude:");
-    (void)mvwprintw(datawin, 4, DATAWIN_DESC_OFFSET, "Altitude:");
-    (void)mvwprintw(datawin, 5, DATAWIN_DESC_OFFSET, "Speed:");
-    (void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Heading:");
-    (void)mvwprintw(datawin, 7, DATAWIN_DESC_OFFSET, "Climb:");
-    (void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
-    (void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
-
-    /* Note that the following four fields are exceptions to the
-       sizing rule.  The minimum window size does not include these
-       fields, if the window is too small, they get excluded.  This
-       may or may not change if/when the output for these fields is
-       fixed and/or people request their permanance.  They're only
-       there in the first place because I arbitrarily thought they
-       sounded interesting. ;^) */
-
-    if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
-      (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET, "Horizontal Err:");
-      (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET, "Vertical Err:");
-      (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
-      (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
-    }
-
-    (void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
-    (void)mvwprintw(satellites, 1,1, "PRN:   Elev:  Azim:  SNR:  Used:");
-    (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
-  }
+  windowsetup();
 
   /* Here's where updates go now that things are established. */
   if(compass_flag==1) {
