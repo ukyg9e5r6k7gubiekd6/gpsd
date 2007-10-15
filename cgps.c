@@ -125,7 +125,7 @@ static int window_length;
 static int display_sats;
 
 /* Function to call when we're all done.  Does a bit of clean-up. */
-static void die(int sig UNUSED) 
+static void die(int sig UNUSED)
 {
   /* Ignore signals. */
   (void)signal(SIGINT,SIG_IGN);
@@ -153,9 +153,9 @@ static enum deg_str_type deg_type = deg_dd;
 /* This gets called once for each new sentence until we figure out
    what's going on and switch to either update_gps_panel() or
    update_compass_panel(). */
-static void update_probe(struct gps_data_t *gpsdata, 
+static void update_probe(struct gps_data_t *gpsdata,
 		       char *message,
-		       size_t len UNUSED , 
+		       size_t len UNUSED ,
 		       int level UNUSED)
 {
   /* Send an 'i' once per second until we figure out what the GPS
@@ -181,10 +181,10 @@ static void update_probe(struct gps_data_t *gpsdata,
 
 
 /* This gets called once for each new compass sentence. */
-static void update_compass_panel(struct gps_data_t *gpsdata, 
-                         char *message,
-                         size_t len UNUSED , 
-                         int level UNUSED)
+static void update_compass_panel(struct gps_data_t *gpsdata,
+			char *message,
+			size_t len UNUSED ,
+			int level UNUSED)
 {
   char *s;
 
@@ -194,35 +194,35 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
     char scr[128];
     (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
   } else
-    (void)wprintw(datawin,"n/a                    ");
+    (void)wprintw(datawin,"n/a		    ");
 
   /* Fill in the heading. */
   (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.track)==0) {
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.track);
   } else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the pitch. */
   (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.climb)==0) {
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.climb);
   } else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the roll. */
   (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.speed)==0)
     (void)wprintw(datawin,"%.1f     ",gpsdata->fix.speed);
   else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the speed. */
   (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.altitude)==0)
     (void)wprintw(datawin,"%.1f     ", gpsdata->fix.altitude);
   else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in receiver type. */
   (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
@@ -245,10 +245,10 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 
 
 /* This gets called once for each new GPS sentence. */
-static void update_gps_panel(struct gps_data_t *gpsdata, 
-                         char *message,
-                         size_t len UNUSED , 
-                         int level UNUSED)
+static void update_gps_panel(struct gps_data_t *gpsdata,
+			char *message,
+			size_t len UNUSED ,
+			int level UNUSED)
 {
   int i,n,c;
   int newstate;
@@ -287,7 +287,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 	  }
 	}
       }
-      
+
       if(n < display_sats) {
 	for(i = n; i <= display_sats; i++) {
 	  (void)wmove(satellites, i+2, 1);
@@ -296,17 +296,17 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 	  }
 	}
       }
-      
+
     }
   }
-  
+
   /* Print time/date. */
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
     (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
   } else
-    (void)wprintw(datawin,"n/a                    ");
+    (void)wprintw(datawin,"n/a		    ");
 
   /* Fill in the latitude. */
   (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
@@ -314,7 +314,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
   } else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the longitude. */
   (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
@@ -322,43 +322,43 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
   } else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the altitude. */
   (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude)==0)
     (void)wprintw(datawin,"%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
   else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the speed. */
   (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
     (void)wprintw(datawin,"%.1f %s     ", gpsdata->fix.speed*speedfactor, speedunits);
   else
-    (void)wprintw(datawin,"n/a         ");
+    (void)wprintw(datawin,"n/a	 ");
 
   /* Fill in the heading. */
   (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
     (void)wprintw(datawin,"%.1f degrees     ", gpsdata->fix.track);
   else
-    (void)wprintw(datawin,"n/a          ");
+    (void)wprintw(datawin,"n/a	  ");
 
   /* Fill in the rate of climb. */
   (void)wmove(datawin, 7, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
-    (void)wprintw(datawin,"%.1f %s/min     "
-                  , gpsdata->fix.climb * altfactor * 60, altunits);
+    (void)wprintw(datawin,"%.1f %s/min     ",
+	gpsdata->fix.climb * altfactor * 60, altunits);
   else
-    (void)wprintw(datawin,"n/a         ");
-  
+    (void)wprintw(datawin,"n/a	 ");
+
   /* Fill in the GPS status and the time since the last state
      change. */
   (void)wmove(datawin, 8, DATAWIN_VALUE_OFFSET);
   if (gpsdata->online == 0) {
     newstate = 0;
-    (void)wprintw(datawin,"OFFLINE          ");
+    (void)wprintw(datawin,"OFFLINE	  ");
   } else {
     newstate = gpsdata->fix.mode;
     switch (gpsdata->fix.mode) {
@@ -397,28 +397,28 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
       if (isnan(gpsdata->fix.eph)==0)
 	(void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
       else
-	(void)wprintw(datawin,"n/a         ");
-      
+	(void)wprintw(datawin,"n/a	 ");
+
       /* Fill in the estimated vertical position error. */
       (void)wmove(datawin, 11, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.epv)==0)
 	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
       else
-	(void)wprintw(datawin,"n/a         ");
-      
+	(void)wprintw(datawin,"n/a	 ");
+
       /* Fill in the estimated track error. */
       (void)wmove(datawin, 12, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.epd)==0)
 	(void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
       else
-	(void)wprintw(datawin,"n/a          ");
-      
+	(void)wprintw(datawin,"n/a	  ");
+
       /* Fill in the estimated speed error. */
       (void)wmove(datawin, 13, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.eps)==0)
 	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
       else
-	(void)wprintw(datawin,"n/a            ");
+	(void)wprintw(datawin,"n/a	    ");
     }
 
   /* Be quiet if the user requests silence. */
@@ -439,18 +439,18 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   }
 }
 
-static void usage( char *prog) 
+static void usage( char *prog)
 {
-  (void)fprintf(stderr, 
-                "Usage: %s [-h] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
-                "  -h          Show this help, then exit\n"
-                "  -V          Show version, then exit\n"
-                "  -s          Be silent (don't print raw gpsd data)\n"
-                "  -l {d|m|s}  Select lat/lon format\n"
-                "                d = DD.dddddd\n"
-                "                m = DD MM.mmmm'\n"
-                "                s = DD MM' SS.sss\"\n"
-                , prog);
+  (void)fprintf(stderr,
+		"Usage: %s [-h] [-V] [-l {d|m|s}] [server[:port:[device]]]\n\n"
+		"  -h	  Show this help, then exit\n"
+		"  -V	  Show version, then exit\n"
+		"  -s	  Be silent (don't print raw gpsd data)\n"
+		"  -l {d|m|s}  Select lat/lon format\n"
+		"		d = DD.dddddd\n"
+		"		m = DD MM.mmmm'\n"
+		"		s = DD MM' SS.sss\"\n"
+		, prog);
 
   exit(1);
 }
@@ -483,17 +483,17 @@ int main(int argc, char *argv[])
     case 'l':
       switch ( optarg[0] ) {
       case 'd':
-        deg_type = deg_dd;
-        continue;
+	deg_type = deg_dd;
+	continue;
       case 'm':
-        deg_type = deg_ddmm;
-        continue;
+	deg_type = deg_ddmm;
+	continue;
       case 's':
-        deg_type = deg_ddmmss;
-        continue;
+	deg_type = deg_ddmmss;
+	continue;
       default:
-        (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-        /*@ -casebreak @*/
+	(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
+	/*@ -casebreak @*/
       }
     case 'h': default:
       usage(argv[0]);
@@ -509,17 +509,17 @@ int main(int argc, char *argv[])
     server = arg;
     if (colon1 != NULL) {
       if (colon1 == arg)
-        server = NULL;
+	server = NULL;
       else
-        *colon1 = '\0';
+	*colon1 = '\0';
       port = colon1 + 1;
       colon2 = strchr(port, ':');
       if (colon2 != NULL) {
-        if (colon2 == port)
-          port = NULL;
-        else
-          *colon2 = '\0';
-        device = colon2 + 1;
+	if (colon2 == port)
+	  port = NULL;
+	else
+	  *colon2 = '\0';
+	device = colon2 + 1;
       }
     }
     colon1 = colon2 = NULL;
@@ -563,11 +563,11 @@ int main(int argc, char *argv[])
     case NL_NOSOCK:     err_str = "can't create socket"; break;
     case NL_NOSOCKOPT:  err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
     case NL_NOCONNECT:  err_str = "can't connect to host"; break;
-    default:                    err_str = "Unknown"; break;
+    default:		    err_str = "Unknown"; break;
     }
-    (void)fprintf( stderr, 
-                   "cgps: no gpsd running or network error: %d, %s\n", 
-                   errno, err_str);
+    (void)fprintf( stderr,
+		   "cgps: no gpsd running or network error: %d, %s\n",
+		   errno, err_str);
     exit(2);
   }
 
@@ -699,7 +699,7 @@ int main(int argc, char *argv[])
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
-    
+
     /* Do the initial field label setup. */
     (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
     (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Heading:");
@@ -727,7 +727,7 @@ int main(int argc, char *argv[])
     /*@ -nullpass @*/
     (void)refresh();
     /*@ +nullpass @*/
-    
+
     /* Do the initial field label setup. */
     (void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
     (void)mvwprintw(datawin, 2, DATAWIN_DESC_OFFSET, "Latitude:");
@@ -771,7 +771,7 @@ int main(int argc, char *argv[])
 
   /* heart of the client */
   for (;;) {
-    
+
     /* watch to see when it has input */
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
@@ -782,7 +782,7 @@ int main(int argc, char *argv[])
 
     /* check if we have new information */
     data = select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &timeout);
-        
+
     if (data == -1) {
       fprintf( stderr, "cgps: socket error\n");
       exit(2);
@@ -790,7 +790,7 @@ int main(int argc, char *argv[])
     else if( data ) {
       /* code that calls gps_poll(gpsdata) */
       if (gps_poll(gpsdata) != 0)
-        die(1);
+	die(1);
     }
 
     /* Check for user input.
@@ -799,7 +799,7 @@ int main(int argc, char *argv[])
      makes no sense for a True North compass).  No doubt there will be
      other examples as cgps grows more bells and whistles. */
     c=wgetch(datawin);
-        
+
     switch ( c ) {
       /* Quit */
     case 'q':
@@ -809,20 +809,20 @@ int main(int argc, char *argv[])
       /* Toggle spewage of raw gpsd data. */
     case 's':
       if(silent_flag==0) {
-        silent_flag=1;
+	silent_flag=1;
       } else {
-        silent_flag=0;
+	silent_flag=0;
       }
       break;
 
       /* Toggle fix clear. */
     case 'j':
       if(fixclear_flag==0) {
-        fixclear_flag=1;
-        (void)gps_query(gpsdata, "j=1\n");
+	fixclear_flag=1;
+	(void)gps_query(gpsdata, "j=1\n");
       } else {
-        fixclear_flag=0;
-        (void)gps_query(gpsdata, "j=0\n");
+	fixclear_flag=0;
+	(void)gps_query(gpsdata, "j=0\n");
       }
       break;
 
@@ -836,5 +836,5 @@ int main(int argc, char *argv[])
     }
 
   }
- 
+
 }
