@@ -105,6 +105,8 @@ void gps_merge_fix(/*@ out @*/struct gps_fix_t *to,
 		   /*@ in @*/struct gps_fix_t *from)
 /* merge new data into an old fix */
 {
+    if ((NULL == to) || (NULL == from))
+	return;
     if ((transfer & TIME_SET)!=0)
 	to->time = from->time;
     if ((transfer & LATLON_SET)!=0) {
