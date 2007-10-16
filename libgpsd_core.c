@@ -529,7 +529,12 @@ void gpsd_error_model(struct gps_device_t *session,
      */
 #define UERE_NO_DGPS	8.0	/* meters, 95% confidence */
 #define UERE_WITH_DGPS	2.0	/* meters, 95% confidence */
-    double uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
+    double uere;
+
+    if (NULL == session)
+	return;
+
+    uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
 
     /*
      * Field reports match the theoretical prediction that
