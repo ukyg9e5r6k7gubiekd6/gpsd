@@ -774,7 +774,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 #endif /* RTCM104_ENABLE */
 	    if (buf2[0] != '\0') {
-		gpsd_report(LOG_IO, "<= GPS: %s", buf2);
+		if (session->context->testmode)
+		    gpsd_report(LOG_SHOUT, "TEST: %s", buf2);
+		else
+		    gpsd_report(LOG_IO, "<= GPS: %s", buf2);
+
 		if (session->gpsdata.raw_hook)
 		    session->gpsdata.raw_hook(&session->gpsdata, 
 					      buf2, strlen(buf2), 1);
