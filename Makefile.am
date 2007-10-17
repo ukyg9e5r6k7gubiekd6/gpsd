@@ -27,7 +27,7 @@ endif
 if HAVE_NCURSES
 CURSESPROGS = cgps sirfmon
 endif
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger 
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test
 if HAVE_PYTHON
@@ -149,7 +149,7 @@ libgpsd_h_sources = \
 	bits.h \
 	packet_names.h \
 	rtcm.h \
-	gpsd.h 
+	gpsd.h
 
 BUILT_SOURCES = packet_names.h gpsd.h
 packet_names.h: packet_states.h
@@ -169,6 +169,8 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 #
 # Build Python binding
 #
+# install may require --root depending on what you're doing.
+# python setup.py install --root=$DESTIR --prefix=$PREFIX
 if HAVE_PYTHON
 PYEXTENSIONS = gpspacket.so
 
