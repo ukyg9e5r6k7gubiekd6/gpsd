@@ -546,7 +546,7 @@ void gpsd_error_model(struct gps_device_t *session,
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->eph) && finite(session->gpsdata.hdop))
+	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
 		fix->eph = session->gpsdata.hdop * uere;
 
 	if ((fix->mode >= MODE_3D)

@@ -132,7 +132,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     shmTime->clockTimeStampSec = (time_t)seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->receiveTimeStampSec = (time_t)tv.tv_sec;
-    shmTime->receiveTimeStampUSec = tv.tv_usec;
+    shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
     /* setting the precision here does not seem to help anything, too
        hard to calculate properly anyway.  Let ntpd figure it out.
        Any NMEA will be about -1 or -2. 
@@ -195,7 +195,7 @@ int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = 0;
     shmTimeP->receiveTimeStampSec = (time_t)tv->tv_sec;
-    shmTimeP->receiveTimeStampUSec = tv->tv_usec;
+    shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     shmTimeP->precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     shmTimeP->count++;
     shmTimeP->valid = 1;
