@@ -963,7 +963,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1]; /* packet ID */
 		if ((0x41 > pkt_id) || (0x8f < pkt_id)) {
-		    gpsd_report(LOG_RAW+1, "Packet ID out of range for TSIP\n");
+		    gpsd_report(LOG_IO, "Packet ID 0x%02x out of range for TSIP\n", pkt_id);
 		    goto not_tsip;
 		}
 		/*@ -ifempty */
