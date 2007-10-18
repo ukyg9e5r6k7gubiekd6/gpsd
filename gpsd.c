@@ -235,10 +235,10 @@ static int passivesock(char *service, char *protocol, int qlen)
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
 	type = SOCK_DGRAM;
-    proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
     } else {
 	type = SOCK_STREAM;
-    proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
     if ((s = socket(PF_INET, type, /*@i1@*/proto)) < 0) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
