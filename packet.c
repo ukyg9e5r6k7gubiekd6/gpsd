@@ -8,19 +8,19 @@ DESCRIPTION:
 
 Initial conditions of the problem:
 
-1. We have a file descriptor open for (possibly non-blocking) read. The device 
-   on the other end is sending packets at us.  
+1. We have a file descriptor open for (possibly non-blocking) read. The device
+   on the other end is sending packets at us.
 
 2. It may require more than one read to gather a packet.  Reads may span packet
    boundaries.
-  
+
 3. There may be leading garbage before the first packet.  After the first
    start-of-packet, the input should be well-formed.
 
 The problem: how do we recognize which kind of packet we're getting?
 
-No need to handle Garmin USB binary, we know that type by the fact we're 
-connected to the Garmin kernel driver.  But we need to be able to tell the 
+No need to handle Garmin USB binary, we know that type by the fact we're
+connected to the Garmin kernel driver.  But we need to be able to tell the
 others apart and distinguish them from baud barf.
 
 ***************************************************************************/
@@ -33,7 +33,7 @@ others apart and distinguish them from baud barf.
 #include "gpsd_config.h"
 #include "gpsd.h"
 
-/* 
+/*
  * The packet-recognition state machine.  It can be fooled by garbage
  * that looks like the head of a binary packet followed by a NMEA
  * packet; in that case it won't reset until it notices that the
@@ -70,11 +70,11 @@ enum {
 #define STX	0x02
 #define ETX	0x03
 
-static void nextstate(struct gps_packet_t *lexer, 
+static void nextstate(struct gps_packet_t *lexer,
 		      unsigned char c)
 {
 #ifdef RTCM104_ENABLE
-    enum isgpsstat_t	isgpsstat;    
+    enum isgpsstat_t	isgpsstat;
 #endif /* RTCM104_ENABLE */
 /*@ +charint */
     switch(lexer->state)
@@ -95,25 +95,25 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 #endif /* NMEA_ENABLE */
 #ifdef TNT_ENABLE
-        if (c == '@') {
+	if (c == '@') {
 	    lexer->state = TNT_LEADER;
 	    break;
 	}
 #endif
 #ifdef SIRF_ENABLE
-        if (c == 0xa0) {
+	if (c == 0xa0) {
 	    lexer->state = SIRF_LEADER_1;
 	    break;
 	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
-        if (c == DLE) {
+	if (c == DLE) {
 	    lexer->state = DLE_LEADER;
 	    break;
 	}
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
-        if (c == 'A') {
+	if (c == 'A') {
 #ifdef RTCM104_ENABLE
 	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM_RECOGNIZED;
@@ -125,7 +125,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
-        if (c == 'E') {
+	if (c == 'E') {
 #ifdef RTCM104_ENABLE
 	    if (rtcm_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM_RECOGNIZED;
@@ -143,10 +143,10 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
-        if (c == 0xb5) {
-            lexer->state = UBX_LEADER_1;
-            break;
-        }
+	if (c == 0xb5) {
+	    lexer->state = UBX_LEADER_1;
+	    break;
+	}
 #endif /* UBX_ENABLE */
 #ifdef ITRAX_ENABLE
 	if (c == '<') {
@@ -176,7 +176,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = COMMENT_RECOGNIZED;
 	else if (!isprint(c))
 	    lexer->state = GROUND_STATE;
-	break;	    
+	break;
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
@@ -222,8 +222,8 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
 #ifdef TNT_ENABLE
     case TNT_LEADER:
-          lexer->state = NMEA_LEADER_END;
-        break;
+	  lexer->state = NMEA_LEADER_END;
+	break;
 #endif
     case NMEA_LEADER_END:
 	if (c == '\r')
@@ -379,7 +379,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = NMEA_RECOGNIZED;
 	} else
 	    lexer->state = GROUND_STATE;
-	break; 
+	break;
 #endif /* EARTHMATE_ENABLE */
     case SIRF_ACK_LEAD_1:
 	if (c == 'c')
@@ -431,7 +431,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case SIRF_RECOGNIZED:
-        if (c == 0xa0)
+	if (c == 0xa0)
 	    lexer->state = SIRF_LEADER_1;
 	else
 	    lexer->state = GROUND_STATE;
@@ -452,7 +452,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* TSIP_ENABLE */
 #ifdef NAVCOM_ENABLE
     case NAVCOM_LEADER_1:
-        if (c == 0x99)
+	if (c == 0x99)
 	    lexer->state = NAVCOM_LEADER_2;
 	else
 	    lexer->state = GROUND_STATE;
@@ -480,18 +480,18 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
     case NAVCOM_PAYLOAD:
 	{
-            unsigned int n;
-            unsigned char csum = lexer->inbuffer[3];
-            for(n=4; (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1; n++)
-            csum ^= lexer->inbuffer[n];
-            if(csum != c) {
-            gpsd_report(LOG_INF, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
-                    lexer->inbuffer[3], csum, c);
+	    unsigned int n;
+	    unsigned char csum = lexer->inbuffer[3];
+	    for(n=4; (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1; n++)
+	    csum ^= lexer->inbuffer[n];
+	    if(csum != c) {
+	    gpsd_report(LOG_INF, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
+		    lexer->inbuffer[3], csum, c);
 	    gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
-	                gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
-            lexer->state = GROUND_STATE;
-            break;
-            }
+			gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
+	    lexer->state = GROUND_STATE;
+	    break;
+	    }
 	}
 	lexer->state = NAVCOM_CSUM;
 	break;
@@ -552,13 +552,15 @@ static void nextstate(struct gps_packet_t *lexer,
 	    short sum = getword(0) + getword(1) + getword(2) + getword(3);
 	    sum *= -1;
 	    if (sum != getword(4)) {
-		gpsd_report(LOG_IO, "Zodiac Header checksum 0x%hx expecting 0x%hx\n", 
-		       sum, getword(4));
+		gpsd_report(LOG_IO,
+		    "Zodiac Header checksum 0x%hx expecting 0x%hx\n",
+		    sum, getword(4));
 		lexer->state = GROUND_STATE;
 		break;
 	    }
 	}
-	gpsd_report(LOG_RAW+1,"Zodiac header id=%hd len=%hd flags=%hx\n", getword(1), getword(2), getword(3));
+	gpsd_report(LOG_RAW+1,"Zodiac header id=%hd len=%hd flags=%hx\n",
+	    getword(1), getword(2), getword(3));
  #undef getword
 	if (lexer->length == 0) {
 	    lexer->state = ZODIAC_RECOGNIZED;
@@ -579,45 +581,45 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
     case UBX_LEADER_1:
-        if (c == 0x62)
-            lexer->state = UBX_LEADER_2;
-        else
-            lexer->state = GROUND_STATE;
-        break;
-    case UBX_LEADER_2:
-        lexer->state = UBX_CLASS_ID;
-        break;
-    case UBX_CLASS_ID:
-        lexer->state = UBX_MESSAGE_ID;
-        break;
-    case UBX_MESSAGE_ID:
-        lexer->length = (size_t)c;
-        lexer->state = UBX_LENGTH_1;
-        break;
-    case UBX_LENGTH_1:
-        lexer->length += (c << 8);
-	if (lexer->length <= MAX_PACKET_LENGTH)
-            lexer->state = UBX_LENGTH_2;
+	if (c == 0x62)
+	    lexer->state = UBX_LEADER_2;
 	else
 	    lexer->state = GROUND_STATE;
-        break;
+	break;
+    case UBX_LEADER_2:
+	lexer->state = UBX_CLASS_ID;
+	break;
+    case UBX_CLASS_ID:
+	lexer->state = UBX_MESSAGE_ID;
+	break;
+    case UBX_MESSAGE_ID:
+	lexer->length = (size_t)c;
+	lexer->state = UBX_LENGTH_1;
+	break;
+    case UBX_LENGTH_1:
+	lexer->length += (c << 8);
+	if (lexer->length <= MAX_PACKET_LENGTH)
+	    lexer->state = UBX_LENGTH_2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
     case UBX_LENGTH_2:
-        lexer->state = UBX_PAYLOAD;
-        break;
+	lexer->state = UBX_PAYLOAD;
+	break;
     case UBX_PAYLOAD:
 	if (--lexer->length == 0)
 	    lexer->state = UBX_CHECKSUM_A;
 	/* else stay in payload state */
-        break;
+	break;
     case UBX_CHECKSUM_A:
-        lexer->state = UBX_RECOGNIZED;
-        break;
+	lexer->state = UBX_RECOGNIZED;
+	break;
     case UBX_RECOGNIZED:
-        if (c == 0xb5)
-            lexer->state = UBX_LEADER_1;
-        else
-            lexer->state = GROUND_STATE;
-        break;
+	if (c == 0xb5)
+	    lexer->state = UBX_LEADER_1;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
 #endif /* UBX_ENABLE */
 #ifdef EVERMORE_ENABLE
     case EVERMORE_LEADER_1:
@@ -640,14 +642,14 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case EVERMORE_PAYLOAD_DLE:
-        switch (c) {
-           case DLE: lexer->state = EVERMORE_PAYLOAD; break;
-           case ETX: lexer->state = EVERMORE_RECOGNIZED; break;
-           default: lexer->state = GROUND_STATE;
-        }
+	switch (c) {
+	   case DLE: lexer->state = EVERMORE_PAYLOAD; break;
+	   case ETX: lexer->state = EVERMORE_RECOGNIZED; break;
+	   default: lexer->state = GROUND_STATE;
+	}
     break;
     case EVERMORE_RECOGNIZED:
-        if (c == DLE)
+	if (c == DLE)
 	    lexer->state = EVERMORE_LEADER_1;
 	else
 	    lexer->state = GROUND_STATE;
@@ -655,7 +657,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* EVERMORE_ENABLE */
 #ifdef ITRAX_ENABLE
     case ITALK_LEADER_1:
-        if (c == '!')
+	if (c == '!')
 	    lexer->state = ITALK_LEADER_2;
 	else
 	    lexer->state = GROUND_STATE;
@@ -672,7 +674,8 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
     case ITALK_PAYLOAD:
 	/* lookahead for "<!" because sometimes packets are short but valid */
-	if ((c == '>') && (lexer->inbufptr[0] == '<') && (lexer->inbufptr[1] == '!')){
+	if ((c == '>') && (lexer->inbufptr[0] == '<') &&
+	    (lexer->inbufptr[1] == '!')){
 	    lexer->state = ITALK_RECOGNIZED;
 	    gpsd_report(LOG_PROG, "ITALK: trying to process runt packet\n");
 	    break;
@@ -686,7 +689,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
     case ITALK_RECOGNIZED:
-        if (c == '<')
+	if (c == '<')
 	    lexer->state = ITALK_LEADER_1;
 	else
 	    lexer->state = GROUND_STATE;
@@ -694,7 +697,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* ITRAX_ENABLE */
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
-        /* unused case */
+	/* unused case */
 	if (c >= 0x13)
 	    lexer->state = TSIP_PAYLOAD;
 	else
@@ -719,12 +722,12 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 	break;
     case TSIP_RECOGNIZED:
-        if (c == DLE)
+	if (c == DLE)
 	    /*
 	     * Don't go to TSIP_LEADER state -- TSIP packets aren't
 	     * checksummed, so false positives are easy.  We might be
 	     * looking at another DLE-stuffed protocol like EverMore
-             * or Garmin streaming binary.
+	     * or Garmin streaming binary.
 	     */
 	    lexer->state = DLE_LEADER;
 	else
@@ -831,9 +834,9 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	};
 	nextstate(lexer, c);
 	gpsd_report(LOG_RAW+2, "%08ld: character '%c' [%02x], new state: %s\n",
-		    lexer->char_counter, 
-		    (isprint(c)?c:'.'), 
-		    c, 
+		    lexer->char_counter,
+		    (isprint(c)?c:'.'),
+		    c,
 		    state_table[lexer->state]);
 	lexer->char_counter++;
 
@@ -864,7 +867,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    else
 		lexer->state = GROUND_STATE;
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #endif /* NMEA_ENABLE */
 #ifdef SIRF_ENABLE
@@ -880,22 +883,22 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    else
 		lexer->state = GROUND_STATE;
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #endif /* SIRF_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE)
 	else if (lexer->state == TSIP_RECOGNIZED) {
-            size_t packetlen = lexer->inbufptr - lexer->inbuffer;
+	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;
 	    if ( packetlen < 5) {
 		lexer->state = GROUND_STATE;
-            } else {
+	    } else {
 		unsigned int pkt_id, len;
 		size_t n;
 #ifdef GARMIN_ENABLE
 		unsigned int ch, chksum;
 		n = 0;
 		/*@ +charint */
-		if (lexer->inbuffer[n++] != DLE) 
+		if (lexer->inbuffer[n++] != DLE)
 		    goto not_garmin;
 		pkt_id = lexer->inbuffer[n++]; /* packet ID */
 		len = lexer->inbuffer[n++];
@@ -920,7 +923,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		}
 		if (lexer->inbuffer[n++] != DLE)
 		    goto not_garmin;
-		if (lexer->inbuffer[n++] != ETX) 
+		if (lexer->inbuffer[n++] != ETX)
 		    goto not_garmin;
 		/*@ +charint */
 		chksum &= 0xff;
@@ -937,7 +940,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		packet_discard(lexer);
 		break;
 	    not_garmin:;
-	        gpsd_report(LOG_RAW+1,"Not a Garmin packet\n");
+		gpsd_report(LOG_RAW+1,"Not a Garmin packet\n");
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
 		/* check for some common TSIP packet types:
@@ -995,19 +998,19 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		else {
 		    gpsd_report(LOG_IO,
 			"TSIP REJECT pkt_id = %#02x, packetlen= %#02x\n",
-			pkt_id, packetlen); 
+			pkt_id, packetlen);
 		    goto not_tsip;
 		}
 		/* Debug */
 		gpsd_report(LOG_RAW,
 		    "TSIP pkt_id = %#02x, packetlen= %#02x\n",
-		    pkt_id, packetlen); 
+		    pkt_id, packetlen);
 		/*@ -charint +ifempty @*/
 		packet_accept(lexer, TSIP_PACKET);
 		packet_discard(lexer);
 		break;
 	    not_tsip:
-	        gpsd_report(LOG_RAW+1,"Not a TSIP packet\n");
+		gpsd_report(LOG_RAW+1,"Not a TSIP packet\n");
 		/*
 		 * More attempts to recognize ambiguous TSIP-like
 		 * packet types could go here.
@@ -1035,7 +1038,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
@@ -1057,10 +1060,10 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		gpsd_report(LOG_IO,
 		    "UBX checksum 0x%02hhx%02hhx over length %hd,"\
 		    " expecting 0x%02hhx%02hhx (type 0x%02hhx%02hhx)\n",
-			ck_a, 
-			ck_b, 
-			len, 
-			lexer->inbuffer[len-2], 
+			ck_a,
+			ck_b,
+			len,
+			lexer->inbuffer[len-2],
 			lexer->inbuffer[len-1],
 			lexer->inbuffer[2],
 			lexer->inbuffer[3]);
@@ -1075,7 +1078,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    unsigned int n, crc, checksum, len;
 	    n = 0;
 	    /*@ +charint */
-	    if (lexer->inbuffer[n++] != DLE) 
+	    if (lexer->inbuffer[n++] != DLE)
 		goto not_evermore;
 	    if (lexer->inbuffer[n++] != STX)
 		goto not_evermore;
@@ -1104,8 +1107,8 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		goto not_evermore;
 	    crc &= 0xff;
 	    if (crc != checksum) {
-		gpsd_report(LOG_IO, 
-			    "EverMore checksum failed: %02x != %02x\n", 
+		gpsd_report(LOG_IO,
+			    "EverMore checksum failed: %02x != %02x\n",
 			    crc, checksum);
 		goto not_evermore;
 	    }
@@ -1116,7 +1119,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	not_evermore:
 	    lexer->state = GROUND_STATE;
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #endif /* EVERMORE_ENABLE */
 /* XXX CSK */
@@ -1153,7 +1156,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		lexer->state = GROUND_STATE;
 	    }
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #undef getiw
 #undef getib
@@ -1169,13 +1172,13 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #ifdef RTCM104_ENABLE
 	else if (lexer->state == RTCM_RECOGNIZED) {
 	    /*
-	     * RTCM packets don't have checksums.  The six bits of parity 
+	     * RTCM packets don't have checksums.  The six bits of parity
 	     * per word and the preamble better be good enough.
 	     */
 	    packet_accept(lexer, RTCM_PACKET);
 	    lexer->state = RTCM_SYNC_STATE;
 	    packet_discard(lexer);
-            break;
+	    break;
 	}
 #endif /* RTCM104_ENABLE */
     } /* while */
@@ -1198,14 +1201,14 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 #endif /* STATEDEBUG */
     /*@ +modobserver @*/
     if (recvd == -1) {
-        if ((errno == EAGAIN) || (errno == EINTR)) {
+	if ((errno == EAGAIN) || (errno == EINTR)) {
 	    return 0;
-        } else {
+	} else {
 #ifdef STATEDEBUG
 	    gpsd_report(LOG_RAW+1, "errno: %s\n", strerror(errno));
 #endif /* STATEDEBUG */
 	    return BAD_PACKET;
-        }
+	}
     }
 
     if (recvd == 0)
