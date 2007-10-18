@@ -1269,6 +1269,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *gps;
 #endif /* RTCM104_SERVICE */
     struct subscriber_t *sub;
+    struct gps_device_t *testdevice = NULL;
 
 #ifdef PPS_ENABLE
     pthread_mutex_init(&report_mutex, NULL);
@@ -1474,8 +1475,11 @@ int main(int argc, char *argv[])
 	struct gps_device_t *device = open_device(argv[i]);
 	if (!device) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
-	}
+	} else if (context.testmode && testdevice == NULL)
+	    testdevice = device;
     }
+
+
 
     while (0 == signalled) {
 	(void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
@@ -1689,7 +1693,8 @@ int main(int argc, char *argv[])
 					     &sub->fixbuffer, &sub->oldfix);
 			}
 		    }
-		    if (context.testmode && sub->device){
+		    if (context.testmode) {
+			sub->device = testdevice;
 			gps_merge_fix(&sub->fixbuffer, changed,
 				      &sub->device->gpsdata.fix);
 			gpsd_error_model(sub->device, &sub->fixbuffer,
