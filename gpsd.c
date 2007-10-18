@@ -219,7 +219,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     struct servent *pse;
     struct protoent *ppe ;
     struct sockaddr_in sin;
-    int s, type, one = 1;
+    int s, type, proto, one = 1;
 
     /*@ -mustfreefresh @*/
     memset((char *) &sin, 0, sizeof(sin));
@@ -232,15 +232,15 @@ static int passivesock(char *service, char *protocol, int qlen)
 	gpsd_report(LOG_ERROR, "Can't get \"%s\" service entry.\n", service);
 	return -1;
     }
-    if ((ppe = getprotobyname(protocol)) == NULL) {
-	gpsd_report(LOG_ERROR, "Can't get \"%s\" protocol entry.\n", protocol);
-	return -1;
-    }
-    if (strcmp(protocol, "udp") == 0)
+    ppe = getprotobyname(protocol);
+    if (strcmp(protocol, "udp") == 0) {
 	type = SOCK_DGRAM;
-    else
+    proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
+    } else {
 	type = SOCK_STREAM;
-    if ((s = socket(PF_INET, type, /*@i1@*/ppe->p_proto)) < 0) {
+    proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
+    }
+    if ((s = socket(PF_INET, type, /*@i1@*/proto)) < 0) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
 	return -1;
     }

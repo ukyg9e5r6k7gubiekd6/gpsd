@@ -34,7 +34,7 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
     struct servent *pse;
     struct protoent *ppe;
     struct sockaddr_in sin;
-    int s, type, one = 1;
+    int s, type, proto, one = 1;
 
     memset((char *) &sin, 0, sizeof(sin));
     /*@ -type -mustfreefresh @*/
@@ -43,25 +43,29 @@ int netlib_connectsock(const char *host, const char *service, const char *protoc
 	sin.sin_port = htons(ntohs((unsigned short) pse->s_port));
     else if ((sin.sin_port = htons((unsigned short) atoi(service))) == 0)
 	return NL_NOSERVICE;
+
     if ((phe = gethostbyname(host)))
 	memcpy((char *) &sin.sin_addr, phe->h_addr, phe->h_length);
     else if ((sin.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE)
 	return NL_NOHOST;
-    if ((ppe = getprotobyname(protocol)) == 0)
-	return NL_NOPROTO;
-    if (strcmp(protocol, "udp") == 0)
-	type = SOCK_DGRAM;
-    else
-	type = SOCK_STREAM;
 
-    if ((s = socket(PF_INET, type, ppe->p_proto)) < 0)
+    ppe = getprotobyname(protocol);
+    if (strcmp(protocol, "udp") == 0) {
+	type = SOCK_DGRAM;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
+    } else {
+	type = SOCK_STREAM;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
+    }
+
+    if ((s = socket(PF_INET, type, proto)) < 0)
 	return NL_NOSOCK;
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one))==-1) {
-        (void)close(s);
+	(void)close(s);
 	return NL_NOSOCKOPT;
     }
     if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
-        (void)close(s);
+	(void)close(s);
 	return NL_NOCONNECT;
     }
 
@@ -89,7 +93,7 @@ char *sock2ip(int fd)
     r = getpeername(fd, (struct sockaddr *) &fsin, &alen);
     /*@ -branchstate @*/
     if (r == 0){
-    	ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
+	ip = inet_ntoa(((struct sockaddr_in *)(&fsin))->sin_addr);
     } else {
 	gpsd_report(LOG_INF, "getpeername() = %d, error = %s (%d)\n", r, strerror(errno), errno);
 	ip = "<unknown>";
