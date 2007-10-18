@@ -898,6 +898,11 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		unsigned int ch, chksum;
 		n = 0;
 		/*@ +charint */
+#ifdef TSIP_ENABLE
+		/* shortcut garmin */
+		if (TSIP_PACKET == lexer->type)
+			goto not_garmin;
+#endif /* TSIP_ENABLE */
 		if (lexer->inbuffer[n++] != DLE)
 		    goto not_garmin;
 		pkt_id = lexer->inbuffer[n++]; /* packet ID */
@@ -944,6 +949,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #endif /* GARMIN_ENABLE */
 #ifdef TSIP_ENABLE
 		/* check for some common TSIP packet types:
+		 * 0x13, TSIP Parsing Error Notification
 		 * 0x41, GPS time, data length 10
 		 * 0x42, Single Precision Fix, data length 16
 		 * 0x43, Velocity Fix, data length 20
@@ -957,17 +963,22 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		 * 0x82, Differential Position Fix Mode, data length 1
 		 * 0x83, Double Precision XYZ, data length 36
 		 * 0x84, Double Precision LLA, data length 36
+		 * 0xbb, GPS Navigation Configuration
+		 * 0xbc, Receiver Port Configuration
 		 *
 		 * <DLE>[pkt id] [data] <DLE><ETX>
 		 */
 		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1]; /* packet ID */
-		if ((0x41 > pkt_id) || (0x8f < pkt_id)) {
+		if (!((0x13 == pkt_id) || (0xbb == pkt_id) || (0xbc == pkt_id)) &&
+		    ((0x41 > pkt_id) || (0x8f < pkt_id))) {
 		    gpsd_report(LOG_IO, "Packet ID 0x%02x out of range for TSIP\n", pkt_id);
 		    goto not_tsip;
 		}
 		/*@ -ifempty */
-		if ((0x41 == pkt_id) && (0x0e == packetlen))
+		if ((0x13 == pkt_id) && (0x01 <= packetlen))
+		    /* pass */;
+		else if ((0x41 == pkt_id) && (0x0e == packetlen))
 		    /* pass */;
 		else if ((0x42 == pkt_id) && (0x14 == packetlen ))
 		    /* pass */;
@@ -993,7 +1004,11 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 		    /* pass */;
 		else if ((0x84 == pkt_id) && ((0x28 <= packetlen) && (0x29 >= packetlen)))
 		    /* pass */;
+		else if ((0x8e == pkt_id))
+		    /* pass */;
 		else if ((0x8f == pkt_id))
+		    /* pass */;
+		else if ((0xbb == pkt_id) && (0x2c == packetlen))
 		    /* pass */;
 		else {
 		    gpsd_report(LOG_IO,
