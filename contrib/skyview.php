@@ -42,7 +42,7 @@ foreach ($lines as $line_num => $line) {
 		$n = $m[1];	
 		$s = explode(':', $line);
 		for($i = 1; $i <= $n; $i++){
-			list($sv, $az, $el, $snr, $u) = explode(' ', $s[$i]);
+			list($sv, $el, $az, $snr, $u) = explode(' ', $s[$i]);
 			if ($cellmode){
 				$az = $cellsize * (int)($az/$cellsize);
 				$el = $cellsize * (int)($el/$cellsize);
@@ -60,7 +60,7 @@ foreach ($lines as $line_num => $line) {
 }
 foreach($sky as $az => $x){
 	foreach ($sky[$az] as $el => $y){
-		$e = array(-1, $az, $el, $sky[$az][$el]['avg'], -1);
+		$e = array(-1, $el, $az, $sky[$az][$el]['avg'], -1);
 		if ($cellmode)
 			cellplot($im, $sz, $C, $cellsize, $e);
 		else
