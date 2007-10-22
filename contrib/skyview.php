@@ -1,7 +1,7 @@
 #!/usr/local/bin/php
 <?php
 
-# Copyright (c) 2006 Chris Kuethe <chris.kuethe@gmail.com>
+# Copyright (c) 2006,2007 Chris Kuethe <chris.kuethe@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,18 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+$cellmode = 0;
 if ($argc != 3){
-	die("usage: ${argv[0]} logfile imagefile\n");
+	if (($argc != 4) || strcmp("cells", $argv[3])){
+		die("usage: ${argv[0]} logfile imagefile [cells]\n");
+	} else {
+		$cellmode = 1;
+	}
 }
 
 $sz = 640;
-$radius = 8;
+$cellsize = 5; # degrees
+$radius = 8; # pixels
 $filled = 0;
 
 $im = imageCreate($sz, $sz);
@@ -28,15 +34,37 @@ $C = colorsetup($im);
 skyview($im, $sz, $C);
 legend($im, $sz, $C);
 
+$sky = array();
+
 $lines = file($argv[1]);
 foreach ($lines as $line_num => $line) {
 	if (preg_match('/,Y=\S+ [0-9\.]+ (\d+):/', $line, $m)){
 		$n = $m[1];	
 		$s = explode(':', $line);
 		for($i = 1; $i <= $n; $i++){
-			$e = explode(' ', $s[$i]);
-			splot($im, $sz, $C, $radius, $filled, $e);
+			list($sv, $az, $el, $snr, $u) = explode(' ', $s[$i]);
+			if ($cellmode){
+				$az = $cellsize * (int)($az/$cellsize);
+				$el = $cellsize * (int)($el/$cellsize);
+			}
+			if (isset($sky[$az][$el]['avg'])){
+				$sky[$az][$el]['snr'] += $snr;
+				$sky[$az][$el]['num']++;
+			} else {
+				$sky[$az][$el]['snr'] = $snr;
+				$sky[$az][$el]['num'] = 1;
+			}
+			$sky[$az][$el]['avg'] = $sky[$az][$el]['snr'] / $sky[$az][$el]['num'];
 		}
+	}
+}
+foreach($sky as $az => $x){
+	foreach ($sky[$az] as $el => $y){
+		$e = array(-1, $az, $el, $sky[$az][$el]['avg'], -1);
+		if ($cellmode)
+			cellplot($im, $sz, $C, $cellsize, $e);
+		else
+			splot($im, $sz, $C, $radius, $filled, $e);
 	}
 }
 
@@ -115,6 +143,50 @@ function azel2xy($az, $el, $sz){
 	$x = $sz - $x;
 
 	return array($x, $y);
+}
+
+function cellplot($im, $sz, $C, $cellsize, $e){
+	list($sv, $el, $az, $snr, $u) = $e;
+
+	if ((0 == $sv) || (0 == $az + $el + $snr))
+		return;
+
+	$color = $C['brightgreen'];
+	if ($snr < 40)
+		$color = $C['darkgreen'];
+	if ($snr < 35)
+		$color = $C['yellow'];
+	if ($snr < 30)
+		$color = $C['red'];
+	if ($snr == 0)
+		$color = $C['black'];
+
+	#consider an N-degree cell plotted at (0,0). its top left corner
+	#will be (0,0) and its bottom right corner will be at (N,N). The
+	#sides are straight lines from (0,0)-(0,N) and (N,0)-(N,N). The
+	#top and bottom edges will be approximated by segments from
+	#(0,0):(0,1)..(0,N-1):(0,N) and (N,0):(N,1)...(N,N-1):(N,N).
+	#Plotting that unholy mess is the job of
+	# imagefilledpolygon ( $image, array $points, $num_points, $color )
+
+	$np = 0;
+	$points = array();
+	for($x = $az; $x <= $az+$cellsize; $x++){
+		list($px,$py) = azel2xy($x, $el, $sz);
+		array_push($points, $px, $py);
+		$np++;
+	}
+	for($x = $az+$cellsize; $x >= $az; $x--){
+		list($px,$py) = azel2xy($x, $el+$cellsize, $sz);
+		array_push($points, $px, $py);
+		$np++;
+	}
+	list($px,$py) = azel2xy($az, $el, $sz);
+	array_push($points, $px, $py);
+	$np++;
+
+	if ($snr > 0)
+		imageFilledPolygon($im, $points, $np, $color);
 }
 
 function splot($im, $sz, $C, $r, $filled, $e){
