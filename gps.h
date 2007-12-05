@@ -11,7 +11,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
-#include <inttypes.h>
+#include <inttypes.h>	/* stdint.h would be smaller but not all have it */ 
 #include <limits.h>
 #include <time.h>
 #include <signal.h>
