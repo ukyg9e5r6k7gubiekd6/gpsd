@@ -69,7 +69,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     evy = (double)(getsl(buf, 32)/100.0);
     evz = (double)(getsl(buf, 36)/100.0);
     ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
-    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET  ;
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
     session->gpsdata.fix.eph = (double)(getsl(buf, 24)/100.0);
     session->gpsdata.fix.eps = (double)(getsl(buf, 40)/100.0);
     session->gpsdata.pdop = (double)(getuw(buf, 44)/100.0);
@@ -396,59 +396,28 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-/* The methods in this code take parameters and have */
-/* return values that conform to the requirements AT */
-/* THE TIME THE CODE WAS WRITTEN.                    */
-/*                                                   */
-/* These values may well have changed by the time    */
-/* you read this and methods could have been added   */
-/* or deleted.                                       */
-/*                                                   */
-/* The latest situation can be found by inspecting   */
-/* the contents of struct gps_type_t in gpsd.h.      */
-/*                                                   */
-/* This always contains the correct definitions that */
-/* any driver must use to compile.                   */
-
 /* This is everything we export */
 struct gps_type_t ubx_binary = {
-    /* Full name of type */
-    .typename         = "uBlox UBX",
-    /* Response string that identifies device (not active) */
-    .trigger          = NULL,
-    /* Number of satellite channels supported by the device */
-    .channels         = 16,
-    /* Startup-time device detector */
-    .probe_detect     = /*probe_detect*/ NULL,
-    /* Wakeup to be done before each baud hunt */
-    .probe_wakeup     = /*probe_wakeup*/ NULL,
-    /* Initialize the device and get subtype */
-    .probe_subtype    = /*probe_subtype*/ NULL,
+    .typename         = "uBlox UBX",    /* Full name of type */
+    .trigger          = NULL,           /* Response string that identifies device (not active) */
+    .channels         = 16,             /* Number of satellite channels supported by the device */
+    .probe_detect     = NULL,           /* Startup-time device detector */
+    .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
+    .probe_subtype    = NULL,           /* Initialize the device and get subtype */
 #ifdef ALLOW_RECONFIGURE
-    /* Enable what reports we need */
-    .configurator     = /*configurator*/ NULL,
+    .configurator     = NULL,           /* Enable what reports we need */
 #endif /* ALLOW_RECONFIGURE */
-    /* Packet getter (using default routine) */
-    .get_packet       = generic_get,
-    /* Parse message packets */
-    .parse_packet     = parse_input,
-    /* RTCM handler (using default routine) */
-    .rtcm_writer      = /*pass_rtcm*/ NULL,
-    /* Speed (baudrate) switch */
-    .speed_switcher   = /*set_speed*/ NULL,
-    /* Switch to NMEA mode */
-    .mode_switcher    = /* set_mode */ NULL,
-    /* Message delivery rate switcher */
-    .rate_switcher    = NULL,
-    /* Number of chars per report cycle */
-    .cycle_chars      = -1,
+    .get_packet       = generic_get,    /* Packet getter (using default routine) */
+    .parse_packet     = parse_input,    /* Parse message packets */
+    .rtcm_writer      = NULL,           /* RTCM handler (using default routine) */
+    .speed_switcher   = NULL,           /* Speed (baudrate) switch */
+    .mode_switcher    = NULL,           /* Switch to NMEA mode */
+    .rate_switcher    = NULL,           /* Message delivery rate switcher */
+    .cycle_chars      = -1,             /* Number of chars per report cycle */
 #ifdef ALLOW_RECONFIGURE
-    /* Undo the actions of .configurator */
-    .revert           = /*ubx_revert*/ NULL,
+    .revert           = NULL,           /* Undo the actions of .configurator */
 #endif /* ALLOW_RECONFIGURE */
-    /* Puts device back to original settings */
-    .wrapup           = /*ubx_wrapup*/ NULL,
-    /* Number of updates per second */
-    .cycle            = 1
+    .wrapup           = NULL,           /* Puts device back to original settings */
+    .cycle            = 1               /* Number of updates per second */
 };
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */
