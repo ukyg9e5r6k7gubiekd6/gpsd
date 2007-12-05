@@ -10,7 +10,6 @@
 #define _GPSMM_H_
 
 #include <sys/types.h>
-#include "gpsd_config.h"
 #include "gps.h" //the C library we are going to wrap
 
 class gpsmm {
