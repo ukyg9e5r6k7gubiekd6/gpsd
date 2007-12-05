@@ -115,11 +115,12 @@ static struct gps_context_t context = {
 };
 /*@ +initallelements +nullassign +nullderef @*/
 
-volatile sig_atomic_t signalled;
+static volatile sig_atomic_t signalled;
+
 static void onsig(int sig)
 {
     /* just set a variable, and deal with it in the main loop */
-    signalled = sig;
+    signalled = (sig_atomic_t)sig;
 }
 
 static int daemonize(void)
@@ -217,7 +218,7 @@ in which case it specifies an input source for DGPS or ntrip data.\n",
 static int passivesock(char *service, char *protocol, int qlen)
 {
     struct servent *pse;
-    struct protoent *ppe ;
+    struct protoent *ppe ;	/* splint has a bug here */
     struct sockaddr_in sin;
     int s, type, proto, one = 1;
 
@@ -235,10 +236,10 @@ static int passivesock(char *service, char *protocol, int qlen)
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
 	type = SOCK_DGRAM;
-	proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
+	/*@i1@*/proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
     } else {
 	type = SOCK_STREAM;
-	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
+	/*@i1@*/proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
     if ((s = socket(PF_INET, type, /*@i1@*/proto)) < 0) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
@@ -1838,7 +1839,7 @@ int main(int argc, char *argv[])
     }
     /* if we make it here, we got a signal... deal with it */
     /* restart on SIGHUP, clean up and exit otherwise */
-    if (SIGHUP == signalled)
+    if (SIGHUP == (int)signalled)
 	longjmp(restartbuf, 1);
 
     gpsd_report(LOG_WARN, "Received terminating signal %d. Exiting...\n",signalled);

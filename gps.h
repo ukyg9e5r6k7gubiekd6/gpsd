@@ -11,13 +11,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#else
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-#endif
 #include <limits.h>
 #include <time.h>
 #include <signal.h>

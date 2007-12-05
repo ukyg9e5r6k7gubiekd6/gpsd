@@ -185,7 +185,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	good = session->gpsdata.PRN[st]!=0 && 
 	    session->gpsdata.azimuth[st]!=0 && 
 	    session->gpsdata.elevation[st]!=0 &&
-	    (int)getub(buf, off+11); /* quality indicator. 0 = channel idle */
+	    (int)getub(buf, off+11)!=0; /* quality indicator. 0 = channel idle */
 	if (good!=0)
 	    st++;
     }
@@ -199,11 +199,11 @@ ubx_msg_inf(unsigned char *buf, size_t data_len)
     unsigned short msgid;
     static char txtbuf[MAX_PACKET_LENGTH];
 
-    msgid = (buf[2] << 8) | buf[3];
+    msgid = (unsigned short)((buf[2] << 8) | buf[3]);
     if (data_len > MAX_PACKET_LENGTH-1)
 	data_len = MAX_PACKET_LENGTH-1;
 
-    strlcpy(txtbuf, buf+6, MAX_PACKET_LENGTH); txtbuf[data_len] = '\0';
+    (void)strlcpy(txtbuf, (char *)buf+6, MAX_PACKET_LENGTH); txtbuf[data_len] = '\0';
     switch (msgid) {
 	case UBX_INF_DEBUG:
 	    gpsd_report(LOG_PROG, "UBX_INF_DEBUG: %s\n", txtbuf);
