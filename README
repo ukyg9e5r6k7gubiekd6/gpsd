@@ -38,6 +38,8 @@ specfile as a model.
 
 Remco Treffkorn designed and originated the code.
 
+Russ Nelson maintained gpsd for a couple of years.
+
 Carsten Tschach's gpstrans-0.31b code was the original model for nmea_parse.c.
 
 Bob Lorenzini <hwm@netcom.com> provided testing and feedback.

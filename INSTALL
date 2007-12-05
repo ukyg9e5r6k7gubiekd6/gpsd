@@ -65,8 +65,8 @@ resembling "Xm/Xm.h: No such file or directory".  If you're on a Linux
 system, you may already have LessTif.  Source code is available
 from <http://www.lesstif.org/>.
 
-Under Ubuntu, you will require libmotif-dev and libxp-dev in addition to the
-standard build-support packages.
+Under Ubuntu, you will require libmotif-dev, libxp-dev and libxaw7-dev
+in addition to the standard build-support packages.
 
 To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Mac OS X users may
@@ -82,7 +82,8 @@ Then run make: libgps.so, gpsd, xgps, and xgpsspeed will be
 built. Copy the app-defaults files xgps.ad and xgpsspeed.ad to your
 home directory or to the system-wide X app-defaults directory.
 
-4. Start gpsd.  It should not need any options.
+4. Start gpsd.  You'll need to give it as an argument a path to 
+a serial or USB port with a GPS attached to it.
 
 5. Once gpsd is running, telnet to port 2947.  Type 'f' to see what
 device it will query.  If you need to change the device, use 'f='
@@ -107,7 +108,13 @@ thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-8. Check out the list of supported hardware at 
+8. Now that you've verified that the code is working, "make install" 
+will install it it in the system directories.  "make uninstall" will
+undo this.
+
+(You won't need to "make install" if you installed from a binary package.)
+
+9. Check out the list of supported hardware at 
 
    http://gpsd.berlios.de/hardware.html
 
@@ -117,15 +124,18 @@ line to the table.  Directions are included on that page.
 We can also use updates of the latest version number known to work with
 hardware already supported.
 
-9. Note for small embedded systems and those without threading.  It is
+10. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
+It's also possible to build without Python via --disable=python, in which 
+case you'd build won't make Python libraries and "make install" won't
+try to install Python tools.
 
-10. Note for systems using DBUS: gpsd includes support for shipping fixes
+11. Note for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
 with the option "--enable-dbus" to get it working.
 
-11. The distribution includes a PHP script that you can use to
+12. The distribution includes a PHP script that you can use to
 generate a PHP status page for your GPS.  You will need php and php-gd
 installed.  To install it, copy the file 'gpsd.php' to your HTTP
 document directory.  The first time it's invoked, it will generate a
