@@ -172,8 +172,8 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 # install may require --root depending on what you're doing.
 # python setup.py install --root=$DESTIR --prefix=$PREFIX
 if HAVE_PYTHON
-@HAVE_PYTHON_TRUE@PYEXTENSIONS = gpspacket.so
-@HAVE_PYTHON_TRUE@noinst_SCRIPTS = gpspacket.so setup.py
+PYEXTENSIONS = gpspacket.so
+noinst_SCRIPTS = gpspacket.so setup.py
 
 gpspacket.so: gpspacket.c libgps.la
 	(pwd="`pwd`"; cd $(srcdir) && $(PYTHON) setup.py build_ext --build-lib "$$pwd" --build-temp "$$pwd/build" --include-dirs "$$pwd")
