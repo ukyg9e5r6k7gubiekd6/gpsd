@@ -38,12 +38,12 @@ CPU time at -D0 or -D1. Possible solutions include a wrapper around
 gpsd_hexdump to only dump when the debug level is high enough, or
 modifying gpsd_report to handle the hexdump call. This may require (at
 worst) a library version number increment, or at least changing every
-invokation of gpsd_hexdump. Not something to be done lightly.
+invocation of gpsd_hexdump. Not something to be done lightly.
 
 *** Change O output precision to %.9f for degrees and %.3f for meters
 
 This corresponds to 1mm accuracy, which is better than the horizontal
-accuracy of RTK GPS. This will be revisted; receivers are commercially
+accuracy of RTK GPS. This will be revisited; receivers are commercially
 available that claim to have 0.1mm accuracy
 
 *** Full Python wrapper for libgpsd

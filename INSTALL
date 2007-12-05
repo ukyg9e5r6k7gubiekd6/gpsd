@@ -62,8 +62,11 @@ binary package).
 You will need to have either Motif or LessTif installed in order for
 xgps and xgpsspeed to build; if you don't, you'll get some error
 resembling "Xm/Xm.h: No such file or directory".  If you're on a Linux
-system, you probably already have LessTif.  Source code is available
+system, you may already have LessTif.  Source code is available
 from <http://www.lesstif.org/>.
+
+Under Ubuntu, you will require libmotif-dev and libxp-dev in addition to the
+standard build-support packages.
 
 To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Mac OS X users may
