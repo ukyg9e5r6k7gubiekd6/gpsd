@@ -470,10 +470,10 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	unpacked_date.tm_min = (int)getub(buf, 16);
 	unpacked_date.tm_sec = 0;
 	subseconds = getuw(buf, 17)*1e-3;
-	/*@ -compdef */
+	/*@ -compdef -unrecog */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    (double)timegm(&unpacked_date)+subseconds;
-	/*@ +compdef */
+	/*@ +compdef +unrecog */
 	gpsd_report(LOG_PROG, "MID 41 UTC: %lf\n", session->gpsdata.fix.time);
 #ifdef NTPSHM_ENABLE
 	if (session->gpsdata.fix.mode > MODE_NO_FIX && unpacked_date.tm_year != 0) {

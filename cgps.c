@@ -180,6 +180,7 @@ static void update_probe(struct gps_data_t *gpsdata,
 }
 
 
+/*@ -globstate @*/
 static void windowsetup(void){
   /* Set the window sizes per the following criteria:
 
@@ -328,6 +329,7 @@ static void windowsetup(void){
     (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 }
+/*@ +globstate @*/
 
 /* This gets called once for each new compass sentence. */
 static void update_compass_panel(struct gps_data_t *gpsdata,
