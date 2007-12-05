@@ -288,9 +288,13 @@ by Holux that may result in <code>gpsd</code> bricking your GPS.  See this
 <a href="upstream-bugs.html#bluetooth">bug warning</a> for a description 
 of the problem.</p>
 
+<p>Diego Berge has written a prototype <a
+href="http://www.nippur.net/survey/gpsd/">Qt-based client</a>,
+basically xgps with a more modern look and feel.
+
 <p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
 
-<p>You can find Debian-stable packages 
+<p>You can find Debian-ustable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
