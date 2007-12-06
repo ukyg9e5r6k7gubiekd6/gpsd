@@ -448,6 +448,8 @@ static void nextstate(struct gps_packet_t *lexer,
 	/* check last because there's no checksum */
 	if (c >= 0x13)
 	    lexer->state = TSIP_PAYLOAD;
+	if (c == DLE)
+	    lexer->state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
 #ifdef NAVCOM_ENABLE
