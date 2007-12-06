@@ -113,13 +113,15 @@ release.  This care has paid off in an exceptionally low defect rate;
 our first <a href='http://coverity.com'>Coverity</a> scan, in March
 2007, turned up only two errors in over 22,000 LLOC.</p>
 
-<p>No, we don't support Windows &mdash; get a better operating system.
-Our main focus is open-source Unixes &mdash; Linux, and the *BSD
-family.  Presently Linux and OpenBSD are directly supported.  We'll
-support proprietary Unixes if it's not too much work (and it usually
-isn't). Apple's OS X is back in our good books, but it is criticial
-that you have all your USB drivers updated. Older drivers are buggy
-and prevent gpsd from being able to read from usb-serial devices.</p>
+<p>Our development platforms are open-source Unixes &mdash; Linux, and
+the *BSD family.  Presently Linux and OpenBSD are directly supported.
+We'll support proprietary Unixes if it's not too much work (and it
+usually isn't). Apple's OS X is back in our good books, but it is
+criticial that you have all your USB drivers updated. Older drivers
+are buggy and prevent gpsd from being able to read from usb-serial
+devices.</p>
+
+<p>No, we don't support Windows &mdash; get a better operating system.</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your 
 device for use with Linux and other open-source operating systems, 
@@ -294,7 +296,7 @@ basically xgps with a more modern look and feel.
 
 <p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
 
-<p>You can find Debian-ustable packages 
+<p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
