@@ -48,7 +48,7 @@ if __name__ == '__main__':
                 typeflag = True
                 rawmode = False
             elif switch == '-h':
-                sys.stderr.write("usage: gpscat [-s] serial-port\n")
+                sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
                 raise SystemExit, 0
             elif switch == '-V':
                 sys.stderr.write("gpscat at svn revision $Rev$\n")
