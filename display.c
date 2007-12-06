@@ -25,6 +25,7 @@
 #include <X11/Intrinsic.h>
 #include <Xm/Xm.h>
 
+#include <gpsd_config.h>
 #include <gps.h>
 
 #include "display.h"
@@ -76,6 +77,19 @@ register_canvas(Widget w, GC gc)
 	set_color("White");
 	(void)XFillRectangle(XtDisplay(draww), pixmap, drawGC, 0,0, width, height);
 	diameter = min(width, height) - RM;
+}
+
+void
+set_title(char *title)
+{
+#if 0
+	XTextProperty windowProp;
+	if (XStringListToTextProperty(&title, 1, &windowProp )!=0)
+	{
+		XSetWMName(XtDisplay(draww), draww, &windowProp);
+		XFree(windowProp.value);
+	}
+#endif
 }
 
 static void
@@ -209,7 +223,6 @@ redraw(Widget widget, XtPointer client_data, XtPointer call_data)
 {
 	XmDrawingAreaCallbackStruct *cbs =
 	    (XmDrawingAreaCallbackStruct *)call_data;
-	Dimension w, h;
 	XEvent *event = cbs->event;
 	Display *dpy = event->xany.display;
 
@@ -220,12 +233,9 @@ redraw(Widget widget, XtPointer client_data, XtPointer call_data)
 }
 
 void
-resize(Widget widget, XtPointer client_data, XtPointer call_data)
+resize(Widget widget, XtPointer client_data, XtPointer call_data UNUSED)
 {
 	GC gc;
-	XmDrawingAreaCallbackStruct *cbs =
-	    (XmDrawingAreaCallbackStruct *)call_data;
-
 	XtVaGetValues(widget,
 	    XmNuserData, 	&gc,
 	    NULL);

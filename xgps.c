@@ -609,8 +609,7 @@ handle_input(XtPointer client_data, int *source, XtInputId *id)
 
 /* runs on each sentence */
 static void
-update_panel(struct gps_data_t *gpsdata, char *message, size_t len,
-    int level)
+update_panel(struct gps_data_t *gpsdata, char *message, size_t len, int level)
 {
 	unsigned int i;
 	int newstate;
@@ -708,12 +707,10 @@ update_panel(struct gps_data_t *gpsdata, char *message, size_t len,
 		XmTextFieldSetString(text_9, s);
 	} else
 		XmTextFieldSetString(text_9, "n/a");
-#if 0	/* XXX maybe set the window title */
 	if (gpsdata->set & DEVICEID_SET) {
 		strlcpy(s, gpsdata->gps_id, sizeof(s));
-		XmTextFieldSetString(text_11, s);
+		set_title(s);
 	}
-#endif
 	if (gpsdata->online == 0) {
 		newstate = 0;
 		strlcpy(s, "OFFLINE", sizeof(s));
