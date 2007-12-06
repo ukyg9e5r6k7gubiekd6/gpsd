@@ -749,9 +749,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * here, but that wasn't quite right.  That tells us whether
 	 * we think we have a valid fix for the current cycle, but remains
 	 * true while following non-fix packets are received.  What we
-	 * really want to know is whether the last packet received held a fix.
+	 * really want to know is whether the last packet received also held a fix.
 	 */
-	if ((session->gpsdata.set & LATLON_SET)!=0) 
+	if ((session->gpsdata.set & LATLON_SET )!=0 && session->gpsdata.status > STATUS_NO_FIX)
 	    session->context->fixcnt++;
 
 	session->gpsdata.d_decode_time = timestamp();
