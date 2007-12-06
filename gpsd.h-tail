@@ -137,7 +137,6 @@ extern void rtcm_output_magnavox(isgps30bits_t *, FILE *);
 struct gps_context_t {
     int valid;				/* member validity flags */
     bool readonly;			/* if true, never write to device */
-    bool testmode;
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
     /* DGPSIP status */
     bool sentdgps;			/* have we sent a DGPS report? */

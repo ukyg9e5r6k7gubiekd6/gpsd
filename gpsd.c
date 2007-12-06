@@ -93,7 +93,6 @@ static jmp_buf restartbuf;
 static struct gps_context_t context = {
     .valid	    = 0,
     .readonly	    = false,
-    .testmode       = false,
     .sentdgps	    = false,
     .dgnss_service  = dgnss_none,
     .fixcnt	    = 0,
@@ -401,8 +400,6 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 static void detach_client(struct subscriber_t *sub)
 {
     char *c_ip = sock2ip(sub->fd);
-    if (context.testmode)
-	return;
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (sub%d, fd %d) in detach_client\n",
@@ -421,11 +418,6 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
     ssize_t status;
-
-    if (context.testmode){
-	gpsd_report(LOG_SHOUT, "TEST: %s", buf);
-	return len;
-    }
 
     if (debuglevel >= 3) {
 	if (isprint(buf[0]))
@@ -456,8 +448,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
     else if (errno == EWOULDBLOCK && timestamp() - sub->active > NOREAD_TIMEOUT)
 	gpsd_report(LOG_INF, "client(%d) timed out.\n", sub_index(sub));
     else
-	gpsd_report(LOG_INF, "client(%d) write: %s\n", sub_index(sub),
-	    strerror(errno));
+	gpsd_report(LOG_INF, "client(%d) write: %s\n", sub_index(sub), strerror(errno));
     detach_client(sub);
     return status;
 }
@@ -1270,7 +1261,6 @@ int main(int argc, char *argv[])
     struct gps_device_t *gps;
 #endif /* RTCM104_SERVICE */
     struct subscriber_t *sub;
-    struct gps_device_t *testdevice = NULL;
 
 #ifdef PPS_ENABLE
     pthread_mutex_init(&report_mutex, NULL);
@@ -1280,7 +1270,7 @@ int main(int argc, char *argv[])
     (void)setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:bhNnP:VT"
+    while ((option = getopt(argc, argv, "F:D:S:bhNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1311,11 +1301,6 @@ int main(int argc, char *argv[])
 	    break;
 	case 'P':
 	    pid_file = optarg;
-	    break;
-	case 'T':
-	    nowait = true;
-	    go_background = false;
-	    context.testmode = true;
 	    break;
 	case 'V':
 	    (void)printf("gpsd %s\n", VERSION);
@@ -1476,11 +1461,8 @@ int main(int argc, char *argv[])
 	struct gps_device_t *device = open_device(argv[i]);
 	if (!device) {
 	    gpsd_report(LOG_ERROR, "GPS device %s nonexistent or can't be read\n", argv[i]);
-	} else if (context.testmode && testdevice == NULL)
-	    testdevice = device;
+	}
     }
-
-
 
     while (0 == signalled) {
 	(void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
@@ -1660,8 +1642,6 @@ int main(int argc, char *argv[])
 		    adjust_max_fd(channel->gpsdata.gps_fd, false);
 		    gpsd_deactivate(channel);
 		    notify_watchers(channel, "GPSD,X=0\r\n");
-		    if (context.testmode)
-			exit(0);
 		}
 		else {
 		    /* handle laggy response to a firmware version query*/
@@ -1694,13 +1674,6 @@ int main(int argc, char *argv[])
 					     &sub->fixbuffer, &sub->oldfix);
 			}
 		    }
-		    if (context.testmode) {
-			sub->device = testdevice;
-			gps_merge_fix(&sub->fixbuffer, changed,
-				      &sub->device->gpsdata.fix);
-			gpsd_error_model(sub->device, &sub->fixbuffer,
-					 &sub->oldfix);
-		    }
 		}
 #ifdef RTCM104_SERVICE
 		/* copy each RTCM-104 correction to all GPSes */
@@ -1728,17 +1701,6 @@ int main(int argc, char *argv[])
 		    if (cmds[0] != '\0')
 			(void)handle_gpsd_request(sub, cmds, (int)strlen(cmds));
 		}
-	    }
-	    if (context.testmode){
-		char cmds[4] = "";
-		if (changed &~ ONLINE_SET) {
-		    if (changed & (LATLON_SET | MODE_SET))
-			(void)strlcat(cmds, "o", 4);
-		    if (changed & SATELLITE_SET)
-			(void)strlcat(cmds, "y", 4);
-		}
-		if (cmds[0] != '\0')
-		    (void)handle_gpsd_request(sub, cmds, (int)strlen(cmds));
 	    }
 #ifdef DBUS_ENABLE
 	    if (changed &~ ONLINE_SET) {

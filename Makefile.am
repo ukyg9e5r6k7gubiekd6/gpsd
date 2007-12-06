@@ -455,22 +455,3 @@ undump-regress: rtcmdecode
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress packet-regress undump-regress
 	@echo "Regressions complete."
-
-quicktest: gpsd
-	@rm -f test/test.qtst
-	@for f in $(srcdir)/test/*.qtst ; do \
-		echo $${f%%.log.qtst}; \
-		./gpsd -S 12000 -T $${f%%.qtst} 2>&1 | \
-			grep GPSD, > test/test.qtst ; \
-		cmp $${f} test/test.qtst; \
-	done
-	@rm -f test/test.qtst
-
-update-quicktest: gpsd
-	@rm -f test/test.qtst
-	@for f in $(srcdir)/test/*.log ; do \
-		echo $${f}; \
-		./gpsd -S 12000 -T $${f} 2>&1 | \
-			grep GPSD, > $${f}.qtst 2>&1 ; \
-		true; \
-	done
