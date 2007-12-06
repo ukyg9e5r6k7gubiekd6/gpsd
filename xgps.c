@@ -47,6 +47,7 @@
 #include <Xm/Text.h>
 #include <X11/Shell.h>
 
+#include <gpsd_config.h>
 #include <gps.h>
 
 #include "display.h"
@@ -134,15 +135,14 @@ static void
 build_gui(Widget toplevel)
 {
 	Widget main_w, menubar, widget, sat_frame, sky_frame, gps_frame;
-	Widget gps_form, gps_data, gps_status, gps_statframe, gps_stat;
-	Widget gps_statform, sw, rc, frm;
+	Widget gps_form, gps_data, sw;
 
 	Arg args[100];
 	XGCValues gcv;
 	Atom delw;
 	int i;
 	XmString string;
-	XmString file, help, about, open, quit;
+	XmString file, help, about, quit;
 
 	/* the root application window */
 	XtSetArg(args[0], XmNwidth, LEFTSIDE_WIDTH + SATDIAG_SIZE + 26);
@@ -163,7 +163,7 @@ build_gui(Widget toplevel)
 	    NULL);
 	XmStringFree(file);
 
-	if (widget = XtNameToWidget(menubar, "button_1"))
+	if ((widget = XtNameToWidget(menubar, "button_1")))
 		XtVaSetValues(menubar, XmNmenuHelpWidget, widget, NULL);
 
 	quit = XmStringCreateLocalized("Quit");
@@ -870,8 +870,7 @@ dlg_callback(Widget dialog, XtPointer client_data, XtPointer call_data)
 void
 file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 {
-	static Widget dialog;
-	int item_no = (int)client_data;
+	int item_no = (uintptr_t)client_data;
 
 	if (item_no == 0)
 		exit(0);
@@ -882,7 +881,7 @@ help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 {
 	static Widget help, about;
 	Widget *dialog;
-	int item_no = (int)client_data;
+	int item_no = (uintptr_t)client_data;
 
 	if (item_no == 0 && !help) {
 		Arg args[5];
