@@ -254,6 +254,8 @@ build_gui(Widget toplevel)
 	    XmNleftAttachment,		XmATTACH_FORM,
 	    XmNrightAttachment,		XmATTACH_FORM,
 	    XmNbottomAttachment,	XmATTACH_FORM,
+	    XmNtopAttachment,           XmATTACH_WIDGET,
+	    XmNtopWidget,               status,
 	    XmNfractionBase,		3,
 	    NULL);
 
