@@ -82,14 +82,14 @@ register_canvas(Widget w, GC gc)
 void
 set_title(char *title)
 {
-#if 0
 	XTextProperty windowProp;
 	if (XStringListToTextProperty(&title, 1, &windowProp )!=0)
 	{
-		XSetWMName(XtDisplay(draww), draww, &windowProp);
+		/* Not working. */
+	    	/* Do we need to traverse up to the root window somehow? */
+		XSetWMName(XtDisplay(draww), XtWindow(draww), &windowProp);
 		XFree(windowProp.value);
 	}
-#endif
 }
 
 static void
