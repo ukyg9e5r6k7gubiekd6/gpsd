@@ -64,14 +64,14 @@ set_color(String color)
 void
 register_canvas(Widget w, GC gc)
 {
+	Display *dpy = XtDisplay(w);
 	draww = w;
 	drawGC = gc;
-	Display *dpy = XtDisplay(w);
 
 	XtVaGetValues(w, XmNwidth, &width, XmNheight, &height, NULL);
 
 	if (pixmap)
-		XFreePixmap(dpy, pixmap);
+	    (void)XFreePixmap(dpy, pixmap);
 	pixmap = XCreatePixmap(dpy, RootWindowOfScreen(XtScreen(w)),
 	    width, height, (unsigned int)DefaultDepthOfScreen(XtScreen(w)));
 	set_color("White");
@@ -93,7 +93,8 @@ set_title(char *title)
 }
 
 static void
-pol2cart(double azimuth, double elevation, int *xout, int *yout)
+pol2cart(double azimuth, double elevation,  
+	 /*@out@*/int *xout, /*@out@*/int *yout)
 {
 	azimuth *= DEG_2_RAD;
 #ifdef PCORRECT
@@ -208,7 +209,8 @@ draw_graphics(struct gps_data_t *gpsdata)
 					    y - IDIAM, 2 * IDIAM + 1,
 					    2 * IDIAM + 1, 0, 360 * 64);
 			}
-			snprintf(buf, sizeof(buf), "%-3d", gpsdata->PRN[i]);
+			(void)snprintf(buf, sizeof(buf), 
+				       "%-3d", gpsdata->PRN[i]);
 			set_color("Black");
 			(void)XDrawString(dpy, pixmap, drawGC, x, y+17, buf, 3);
 
@@ -226,12 +228,14 @@ redraw(Widget widget, XtPointer client_data, XtPointer call_data)
 	XEvent *event = cbs->event;
 	Display *dpy = event->xany.display;
 
-	XCopyArea(dpy, pixmap, XtWindow(draww), drawGC,
-	    cbs->event->xexpose.x, cbs->event->xexpose.y,
-	    cbs->event->xexpose.width, cbs->event->xexpose.height,
-	    cbs->event->xexpose.x, cbs->event->xexpose.y);
+	(void)XCopyArea(dpy, pixmap, XtWindow(draww), drawGC,
+			cbs->event->xexpose.x, cbs->event->xexpose.y,
+			(unsigned int)cbs->event->xexpose.width, 
+			(unsigned int)cbs->event->xexpose.height,
+			cbs->event->xexpose.x, cbs->event->xexpose.y);
 }
 
+/*@ -usedef @*/
 void
 resize(Widget widget, XtPointer client_data, XtPointer call_data UNUSED)
 {
@@ -241,3 +245,4 @@ resize(Widget widget, XtPointer client_data, XtPointer call_data UNUSED)
 	    NULL);
 	register_canvas(widget, gc);
 }
+/*@ +usedef +mustfreefresh @*/
