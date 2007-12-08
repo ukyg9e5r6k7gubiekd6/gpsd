@@ -376,6 +376,11 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 
     intfixtime = (time_t)session->gpsdata.fix.time;
     (void)gmtime_r(&intfixtime, &tm);
+    tm.tm_mon++;
+    tm.tm_year %= 100;
+    if ((tm.tm_mday < 1) || (tm.tm_mday > 31) || (tm.tm_mon < 1) ||
+	(tm.tm_mon > 12) || (tm.tm_year < 0)  || (tm.tm_year > 99))
+	    tm.tm_mday = tm.tm_mon = tm.tm_year = 0;
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
@@ -392,8 +397,8 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	    ZEROIZE(session->gpsdata.fix.track),
 #undef ZEROIZE
 	    tm.tm_mday,
-	    tm.tm_mon + 1,
-	    tm.tm_year % 100);
+	    tm.tm_mon,
+	    tm.tm_year);
     /*@ +usedef @*/
     nmea_add_checksum(bufp);
 }
