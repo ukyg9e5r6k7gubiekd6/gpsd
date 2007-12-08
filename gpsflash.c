@@ -21,6 +21,7 @@
  */
 #include <sys/types.h>
 #include <stdarg.h>
+#include <string.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gpsflash.h"
