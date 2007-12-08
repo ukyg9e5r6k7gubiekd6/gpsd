@@ -237,6 +237,10 @@ if more than one client is attached to the channel.</para></listitem>
 <varlistentry>
 <term>c</term>
 <listitem>
+<para>C with no following = asks the daemon to return the cycle time
+of the attached GPS, if any.  If there is no attached device it will
+return "C=?".</para>
+
 <para>If the driver has the capability to change sampling rate the
 command "C=%f" does so, setting a new cycle time in seconds. The "C="
 form is rejected if more than one client is attached to the
@@ -254,7 +258,7 @@ note that relatively few GPSes have the ability to set sub-second
 cycle times; consult your hardware protocol description to make sure
 this works.</para>
  
-<para>This command will return '?' at start of session, before the
+<para>This command will return "C=?" at start of session, before the
 first full packet has been received from the GPS, because the GPS type is
 not yet known. To set up conditions for a real answer, issue it after
 some command that reads position/velocity/time information from the
