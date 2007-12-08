@@ -718,7 +718,8 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 	} else
 		XmTextFieldSetString(text_9, "n/a");
 	if (gpsdata->set & DEVICEID_SET) {
-		(void)strlcpy(s, gpsdata->gps_id, sizeof(s));
+		(void)strlcpy(s, "xgps: ", sizeof(s));
+		(void)strlcpy(s+6, gpsdata->gps_id, sizeof(s)-6);
 		set_title(s);
 	}
 	if (gpsdata->online == 0) {
@@ -1036,6 +1037,7 @@ altunits_ok:
 	}
 	/*@ +branchstate @*/
 
+	register_shell(toplevel);
 	build_gui(toplevel);
 
 	gps_timeout = XtAppAddTimeOut(app, 200, handle_gps, app);

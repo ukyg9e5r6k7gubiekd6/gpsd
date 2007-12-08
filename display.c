@@ -36,7 +36,7 @@
 #undef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-static Widget draww;
+static Widget draww, appshell;
 static GC drawGC;
 static Dimension width, height;
 static int diameter;
@@ -60,6 +60,12 @@ set_color(String color)
 	(void)XSetForeground(dpy, drawGC, col.pixel);
 }
 /*@ +usedef @*/
+
+void 
+register_shell(Widget w)
+{
+	appshell = w;
+}
 
 void
 register_canvas(Widget w, GC gc)
@@ -87,7 +93,7 @@ set_title(char *title)
 	{
 		/* Not working. */
 	    	/* Do we need to traverse up to the root window somehow? */
-		XSetWMName(XtDisplay(draww), XtWindow(draww), &windowProp);
+		XSetWMName(XtDisplay(appshell), XtWindow(appshell), &windowProp);
 		XFree(windowProp.value);
 	}
 }
