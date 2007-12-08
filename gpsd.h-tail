@@ -381,6 +381,7 @@ extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
 extern /*@ observer @*/ char *gpsd_hexdump(const void *, size_t);
 extern int gpsd_hexpack(char *, char *, int);
 extern int hex2bin(char *);
+extern void ntpd_link_activate(struct gps_device_t *session);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void gpsd_error_model(struct gps_device_t *, struct gps_fix_t *, struct gps_fix_t *);

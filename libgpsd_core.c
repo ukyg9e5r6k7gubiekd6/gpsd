@@ -183,7 +183,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 	    if ( 800000 > duration) {
-		/* less then 800mS, duration too short for anything */
+		/* less than 800mS, duration too short for anything */
                 gpsd_report(LOG_RAW, 
                      "PPS pulse rejected too short. cycle: %d, duration: %d\n",
 		     cycle, duration);
@@ -213,10 +213,6 @@ static void *gpsd_ppsmonitor(void *arg)
 int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 /* acquire a connection to the GPS device */
 {
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-    pthread_t pt;
-#endif /* PPS_ENABLE */
-
     if (gpsd_open(session) < 0)
 	return -1;
     else {
@@ -229,6 +225,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
 		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
 		session->device_type = *dp;
+		gpsd_assert_sync(session);
 		goto foundit;
 	    }
  	}
@@ -253,17 +250,6 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	session->gpsdata.separation = NAN;
 	session->mag_var = NAN;
 
-#ifdef NTPSHM_ENABLE
-	if (session->context->enable_ntpshm)
-	    session->shmindex = ntpshm_alloc(session->context);
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-	if (session->shmindex >= 0 && session->context->shmTimePPS) {
-	    if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
-		/*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
-	}
-#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
-#endif /* NTPSHM_ENABLE */
-
 	/* clear driver subtype field and private data union */
 	session->subtype[0] = '\0';
 	memset(&session->driver, '\0', sizeof(session->driver));
@@ -283,6 +269,29 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
     return session->gpsdata.gps_fd;
 }
 /*@ +branchstate @*/
+
+void ntpd_link_activate(struct gps_device_t *session)
+{
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+    pthread_t pt;
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
+
+#ifdef NTPSHM_ENABLE
+    /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
+    if (session->context->enable_ntpshm)
+        session->shmindex = ntpshm_alloc(session->context);
+
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+    /* If we also have the 1pps capability, allocate a shared-memory segment for
+     * the 1pps time data and launch a thread to capture the 1pps transitions
+     */
+    if (session->shmindex >= 0 && session->context->shmTimePPS)
+        if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
+            /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
+#endif /* NTPSHM_ENABLE */
+}
 
 char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
@@ -756,7 +765,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * here, but that wasn't quite right.  That tells us whether
 	 * we think we have a valid fix for the current cycle, but remains
 	 * true while following non-fix packets are received.  What we
-	 * really want to know is whether the last packet received also held a fix.
+	 * really want to know is whether the last packet received was
+	 * fix package AND held a valid fix. We must ignore non-fix packages
+	 * AND packages which have fix data but are flagged as invalid. Some
+	 * devices output such fix packets on a regular basis, even when unable
+	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
 	if ((session->gpsdata.set & LATLON_SET )!=0 && session->gpsdata.status > STATUS_NO_FIX)
 	    session->context->fixcnt++;
