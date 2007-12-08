@@ -387,8 +387,10 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 	    degtodm(fabs(session->gpsdata.fix.longitude)),
 	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-	    session->gpsdata.fix.speed * MPS_TO_KNOTS,
-	    session->gpsdata.fix.track,
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
+	    ZEROIZE(session->gpsdata.fix.speed * MPS_TO_KNOTS),
+	    ZEROIZE(session->gpsdata.fix.track),
+#undef ZEROIZE
 	    tm.tm_mday,
 	    tm.tm_mon + 1,
 	    tm.tm_year % 100);
