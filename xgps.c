@@ -61,7 +61,8 @@
 #define SATDIAG_SIZE	400		/* size of satellite diagram */
 
 static Widget toplevel, form, left, right;
-static Widget satellite_list, satellite_diagram, status_form, status;
+static Widget satellite_list, satellite_diagram;
+static Widget status_form, status_frame, status;
 static Widget text_1, text_2, text_3, text_4, text_5;
 static Widget text_6, text_7, text_8, text_9, text_10;
 static GC gc;
@@ -249,6 +250,19 @@ build_gui(Widget toplevel)
 	    XmNtopAttachment,           XmATTACH_WIDGET,
 	    XmNtopWidget,               left,
 	    XmNfractionBase,		3,
+	    NULL);
+	status_frame = XtVaCreateWidget("status_frame",
+	    xmFrameWidgetClass,		status_form,
+	    XmNshadowType,		XmSHADOW_ETCHED_IN,
+	    XmNtopAttachment,		XmATTACH_FORM,
+	    XmNleftAttachment,		XmATTACH_FORM,
+	    XmNrightAttachment,		XmATTACH_FORM,
+	    XmNbottomAttachment,	XmATTACH_FORM,
+	    NULL);
+	(void)XtVaCreateManagedWidget("Message Data",
+	    xmLabelGadgetClass,		status_frame,
+	    XmNchildType,		XmFRAME_TITLE_CHILD,
+	    XmNchildVerticalAlignment,	XmALIGNMENT_CENTER,
 	    NULL);
 	status = XtVaCreateManagedWidget("status", 
 					 xmTextFieldWidgetClass, status_form,
