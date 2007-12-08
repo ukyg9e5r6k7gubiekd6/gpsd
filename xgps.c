@@ -61,7 +61,7 @@
 #define SATDIAG_SIZE	400		/* size of satellite diagram */
 
 static Widget toplevel, form, left, right;
-static Widget satellite_list, satellite_diagram, status;
+static Widget satellite_list, satellite_diagram, status_form, status;
 static Widget text_1, text_2, text_3, text_4, text_5;
 static Widget text_6, text_7, text_8, text_9, text_10;
 static GC gc;
@@ -240,7 +240,18 @@ build_gui(Widget toplevel)
 	    NULL);
 
 	/* the application status bar */
-	status = XtVaCreateManagedWidget("status", xmTextFieldWidgetClass, form,
+	status_form = XtVaCreateManagedWidget("status_form",
+	    xmFormWidgetClass,		form,
+	    XmNtopAttachment,		XmATTACH_POSITION,
+	    XmNtopPosition,		2,
+	    XmNleftAttachment,		XmATTACH_FORM,
+	    XmNrightAttachment,		XmATTACH_FORM,
+	    XmNtopAttachment,           XmATTACH_WIDGET,
+	    XmNtopWidget,               left,
+	    XmNfractionBase,		3,
+	    NULL);
+	status = XtVaCreateManagedWidget("status", 
+					 xmTextFieldWidgetClass, status_form,
 					 XmNcursorPositionVisible, False,
 					 XmNeditable, False,
 					 XmNmarginHeight, 1,
@@ -248,10 +259,11 @@ build_gui(Widget toplevel)
 					 XmNshadowThickness, 2,
 					 XmNleftAttachment, XmATTACH_FORM,
 					 XmNrightAttachment, XmATTACH_FORM,
-					 XmNtopAttachment, XmATTACH_WIDGET,
-					 XmNtopWidget, left,
+					 XmNtopAttachment, XmATTACH_FORM,
+					 XmNbottomAttachment, XmATTACH_FORM,
 					 NULL);
 
+	/* gps information frame */
 	gps_form = XtVaCreateManagedWidget("gps_form",
 	    xmFormWidgetClass,		form,
 	    XmNtopAttachment,		XmATTACH_POSITION,
@@ -260,11 +272,9 @@ build_gui(Widget toplevel)
 	    XmNrightAttachment,		XmATTACH_FORM,
 	    XmNbottomAttachment,	XmATTACH_FORM,
 	    XmNtopAttachment,           XmATTACH_WIDGET,
-	    XmNtopWidget,               status,
+	    XmNtopWidget,               status_form,
 	    XmNfractionBase,		3,
 	    NULL);
-
-	/* gps information frame */
 	gps_frame = XtVaCreateWidget("gps_frame",
 	    xmFrameWidgetClass,		gps_form,
 	    XmNshadowType,		XmSHADOW_ETCHED_IN,
@@ -278,12 +288,10 @@ build_gui(Widget toplevel)
 	    XmNchildType,		XmFRAME_TITLE_CHILD,
 	    XmNchildVerticalAlignment,	XmALIGNMENT_CENTER,
 	    NULL);
-
 	sw = XtVaCreateManagedWidget("scrolled_w",
 	    xmScrolledWindowWidgetClass,	gps_frame,
 	    XmNscrollingPolicy,			XmAUTOMATIC,
 	    NULL);
-
 	gps_data = XtVaCreateWidget("gps_data",
 	    xmFormWidgetClass,		sw,
 	    XmNfractionBase,		30,
