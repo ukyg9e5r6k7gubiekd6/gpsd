@@ -162,7 +162,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	cat gpsd.h-tail >>gpsd.h
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				rtcm.h libgpsmm.cpp packet_states.h
+				rtcm.h packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 
