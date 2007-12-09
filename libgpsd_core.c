@@ -175,7 +175,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
              *
-             * Some GPS instead output a square wave that is 2Hz and each
+             * Some GPS instead output a square wave that is 0.5 Hz and each
              * edge denotes the start of a second.
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
@@ -191,7 +191,7 @@ static void *gpsd_ppsmonitor(void *arg)
                 /* looks like PPS pulse */
 		(void)ntpshm_pps(session, &tv);
 	    } else if (cycle > 1999000 && cycle < 2001000) {
-		/* looks like 2Hz square wave */
+		/* looks like 0.5 Hz square wave */
 		(void)ntpshm_pps(session, &tv);
             } else {
                 gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
