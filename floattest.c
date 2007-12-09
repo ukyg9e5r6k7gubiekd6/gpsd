@@ -144,10 +144,11 @@ int test_single(){
 		printf("s10 ");
 		e++;
 	}
-	if (e)
+	if (e){
 		printf("\n");
-
-	return e;
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -247,8 +248,9 @@ int test_double(){
 		printf("d10 ");
 		e++;
 	}
-	if (e)
+	if (e){
 		printf("\n");
-
-	return e;
+		return 1;
+	}
+	return 0;
 }
