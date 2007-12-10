@@ -358,7 +358,7 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 	    (void)strlcat(bufp, ",", len);
 	else
 	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
-			   "%.1f,M,", session->gpsdata.fix.altitude);
+			   "%.2f,M,", session->gpsdata.fix.altitude);
 	if (isnan(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
