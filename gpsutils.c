@@ -296,7 +296,7 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from 
-a list of visible satellites...
+a list of visible satellites (some typos corrected)...
 
 For satellite n, let az(n) = azimuth angle from North and el(n) be elevation.
 Let:
@@ -324,7 +324,7 @@ Compute the covariance matrix (A~*A)^-1, which is guaranteed symmetric:
     | s(x)^2    s(x)*s(y)  s(x)*s(z)  s(x)*s(t) | 
     | s(x)*s(y) s(y)^2     s(y)*s(z)  s(y)*s(t) |
     | s(z)*s(t) s(y)*s(z)  s(z)^2     s(z)*s(t) |
-    | s(x)*s(t) s(y)*s(t)  s(z)*s(t)  s(z)^2    |
+    | s(x)*s(t) s(y)*s(t)  s(z)*s(t)  s(t)^2    |
 
 Then:
 
@@ -332,7 +332,7 @@ GDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2 + s(t)^2)
 TDOP = sqrt(s(t)^2)
 PDOP = sqrt(s(x)^2 + s(y)^2 + s(z)^2)
 HDOP = sqrt(s(x)^2 + s(y)^2)
-VDOP = sqrt(s(y)^2)
+VDOP = sqrt(s(z)^2)
 
 Here's how we implement it...
 
@@ -478,6 +478,8 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     double prod[4][4];
     double inv[4][4];
     double satpos[MAXCHANNELS][4];
+    double hdop, vdop, pdop, tdop, gdop;
+    gps_mask_t mask;
     int i, j, k, n;
 
 #ifdef __UNUSED__
@@ -545,13 +547,42 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
 	return 0;
     }
 
+    hdop = sqrt(inv[0][0] + inv[1][1]);
+    vdop = sqrt(inv[2][2]);
+    pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
+    tdop = sqrt(inv[3][3]);
+    gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
+    mask = 0;
+
+    gpsd_report(LOG_PROG, "DOPS reported/computed: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, T=%f/%f, G=%f/%f\n",
+		hdop, gpsdata->hdop,
+		vdop, gpsdata->vdop,
+		pdop, gpsdata->pdop,
+		tdop, gpsdata->tdop,
+		gdop, gpsdata->gdop);
+
     /*@ -usedef @*/
-    //gpsdata->hdop = sqrt(inv[0][0] + inv[1][1]);
-    gpsdata->vdop = sqrt(inv[1][1]);
-    gpsdata->pdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2]);
-    gpsdata->tdop = sqrt(inv[3][3]);
-    gpsdata->gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
+    if (isnan(gpsdata->hdop)!=0) {
+	gpsdata->hdop = hdop;
+	mask |= HDOP_SET;
+    }
+    if (isnan(gpsdata->vdop)!=0) {
+	gpsdata->vdop = vdop;
+	mask |= VDOP_SET;
+    }
+    if (isnan(gpsdata->pdop)!=0) {
+	gpsdata->pdop = pdop;
+	mask |= PDOP_SET;
+    }
+    if (isnan(gpsdata->tdop)!=0) {
+	gpsdata->tdop = tdop;
+	mask |= TDOP_SET;
+    }
+    if (isnan(gpsdata->gdop)!=0) {
+	gpsdata->gdop = gdop;
+	mask |= GDOP_SET;
+    }
     /*@ +usedef @*/
 
-    return VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET;
+    return mask;
 }
