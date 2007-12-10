@@ -1668,7 +1668,7 @@ int main(int argc, char *argv[])
 			    if (sub->fixbuffer.mode > sub->device->gpsdata.fix.mode)
 				changed &=~ MODE_SET;
 			    gpsd_report(LOG_PROG,
-					"transfer mask: %02x\n", changed);
+					"transfer mask on %s: %02x\n", sub->device->gpsdata.tag, changed);
 			    gps_merge_fix(&sub->fixbuffer,
 					  changed,
 					  &sub->device->gpsdata.fix);

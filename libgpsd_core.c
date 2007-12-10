@@ -595,7 +595,7 @@ void gpsd_error_model(struct gps_device_t *session,
 		fix->epc = e/t;
 	    }
 	    /*
-	     * We compute a track error estinate solely from the
+	     * We compute a track error estimate solely from the
 	     * position of this fix and the last one.  The maximum
 	     * track error, as seen from the position of last fix, is
 	     * the angle subtended by the two most extreme possible

@@ -151,8 +151,10 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	    merge_hhmmss(field[1], session);
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time))
+	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
 		mask |= CYCLE_START_SET;
+		gpsd_report(LOG_PROG, "GPRMC starts a reporting cycle.\n");
+	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[3], &session->gpsdata);
@@ -219,8 +221,10 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	else {
 	    mask = TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time))
+	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
 		mask |= CYCLE_START_SET;
+		gpsd_report(LOG_PROG, "GPGLL starts a reporting cycle.\n");
+	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[1], &session->gpsdata);
@@ -271,7 +275,6 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
     gps_mask_t mask;
 
     session->gpsdata.status = atoi(field[6]);
-    gpsd_report(LOG_PROG, "GPGGA sets status %d\n", session->gpsdata.status);
     mask = STATUS_SET;
     if (session->gpsdata.status > STATUS_NO_FIX) {
 	char *altitude;
@@ -283,8 +286,10 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	else {
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time))
+	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
 		mask |= CYCLE_START_SET;
+		gpsd_report(LOG_PROG, "GPGGA starts a reporting cycle.\n");
+	    }
 	    session->gpsdata.sentence_time = session->gpsdata.fix.time;
 	}
 	do_lat_lon(&field[2], &session->gpsdata);
@@ -337,7 +342,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	   session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude,session->gpsdata.fix.longitude);
 	}
     }
-    gpsd_report(LOG_PROG, "GPGGA sets mode %d\n", session->gpsdata.fix.mode);
+    gpsd_report(LOG_PROG, "GPGGA sets status %d and mode %d (%s)\n", session->gpsdata.status, session->gpsdata.fix.mode, ((mask&MODE_SET)!=0) ? "changed" : "unchanged");
     return mask;
 }
 
@@ -530,8 +535,10 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     session->driver.nmea.date.tm_mon = atoi(field[3])-1;
     session->driver.nmea.date.tm_mday = atoi(field[2]);
     session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
-    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time))
+    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
 	mask |= CYCLE_START_SET;
+        gpsd_report(LOG_PROG, "GPZDA starts a reporting cycle.\n");
+    }
     session->gpsdata.sentence_time = session->gpsdata. fix.time;
     return mask;
 }
