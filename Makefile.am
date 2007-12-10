@@ -373,17 +373,17 @@ svn-tag:
 
 # Regression-test the daemon
 gps-regress: gpsd 
-	regress-driver -t $(srcdir)/test/stable/*.log
+	$(srcdir)/regress-driver -t $(srcdir)/test/stable/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	./regress-driver -r 
+	$(srcdir)/regress-driver -r 
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	./regress-driver -b $(srcdir)/test/stable/*.log
+	$(srcdir)/regress-driver -b $(srcdir)/test/stable/*.log
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
@@ -391,7 +391,7 @@ rtcm-regress: rtcmdecode
 	@mkdir -p test
 	@for f in $(srcdir)/test/*.rtcm; do \
 		echo "Testing $${f}..."; \
-		./rtcmdecode <$${f} >test/test.chk; \
+		$(srcdir)/rtcmdecode <$${f} >test/test.chk; \
 		diff -ub $${f}.chk test/test.chk; \
 	done; \
 	rm test/test.chk
@@ -399,24 +399,24 @@ rtcm-regress: rtcmdecode
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: rtcmdecode
 	@for f in $(srcdir)/test/*.rtcm; do \
-		./rtcmdecode < $${f} > $${f}.chk; \
+		$(srcdir)/rtcmdecode < $${f} > $${f}.chk; \
 	done
 
 # Regression-test the packet getter.
 packet-regress: packet_test
 	@echo "Testing detection of invalid packets..."
-	@./packet_test | diff -u $(srcdir)/test/packet.test.chk -
+	@$(srcdir)/packet_test | diff -u $(srcdir)/test/packet.test.chk -
 
 # Rebuild the packet-getter regression test
 packet-makeregress: packet_test
 	@mkdir -p test
-	./packet_test >test/packet.test.chk
+	$(srcdir)/packet_test >test/packet.test.chk
 
 # Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
 	@echo "Testing RTCM encoding..."
 	@mkdir -p test
-	@./rtcmdecode -p < $(srcdir)/test/undump.sample > test/undump.test
+	@$(srcdir)/rtcmdecode -p < $(srcdir)/test/undump.sample > test/undump.test
 	@diff -u $(srcdir)/test/undump.sample test/undump.test
 	@rm test/undump.test
 
