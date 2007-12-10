@@ -103,7 +103,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
  *
  **************************************************************************/
 
-#define GPS_TIME_EQUAL(a, b) (abs((a) - (b)) < 0.01)
+#define GPS_TIME_EQUAL(a, b) (fabs((a) - (b)) < 0.01)
 
 /**************************************************************************
  *
