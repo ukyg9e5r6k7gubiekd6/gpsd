@@ -67,7 +67,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import sys, os, time, signal, pty, termios
+import sys, os, time, signal, pty, termios, fcntl, array, struct
 import string, exceptions, threading, socket, commands
 import gps
 
@@ -280,7 +280,16 @@ class FakeGPS:
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
     def read(self):
         "Discard control strings written by gpsd."
-        termios.tcflush(self.master_fd, termios.TCIFLUSH)
+        # A tcflush implementation works on Linux but fails on OpenBSD 4.
+        # termios.tcflush(self.master_fd, termios.TCIFLUSH)
+        try:
+            buf = array.array('i', [0])
+            fcntl.ioctl(self.master_fd, termios.FIONREAD, buf, True)
+            n = struct.unpack('i', buf)[0]
+            os.read(self.master_fd, n)
+        except IOError:
+            pass
+
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
