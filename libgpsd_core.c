@@ -749,7 +749,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/*
 	 * Compute fix-quality data from the satellite positions.
-	 * This may be overridden by DOPs reported from the packet we just got.
+	 * These will not overwrite DOPs reported from the packet we just got.
 	 */
 	if (session->gpsdata.fix.mode > MODE_NO_FIX 
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
