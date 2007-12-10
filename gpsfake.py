@@ -286,8 +286,12 @@ class FakeGPS:
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
         os.write(self.master_fd, line)
         # Delay so we won't spam the buffers in the pty layer or gpsd itself.
-        # Assumptions: 1 character is 10 bits (generous; at 8N1 it will be 9).
-        time.sleep((10.0 * len(line)) / self.speed)
+        # The magic number here has to be derived from observation.  If it's
+        # too high you'll slow the tests down a lot.  If it's too low you'll
+        # get random spurious regression failures that usually look like
+        # lines missing from the end of the test output relative to the
+        # check file.  It might have to be ajusted upward on faster machines.
+        time.sleep((12.0 * len(line)) / self.speed)
         self.index += 1
 
 class DaemonError(exceptions.Exception):
