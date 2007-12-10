@@ -71,6 +71,15 @@ import sys, os, time, signal, pty, termios # fcntl, array, struct
 import string, exceptions, threading, socket, commands
 import gps
 
+# Define a per-character delay on writes so we won't spam the buffers
+# in the pty layer or gpsd itself.  The magic number here has to be
+# derived from observation.  If it's too high you'll slow the tests
+# down a lot.  If it's too low you'll get random spurious regression
+# failures that usually look like lines missing from the end of the
+# test output relative to the check file.  This number might have to
+# be adusted upward on faster machines.
+WRITE_PAD = 15.0
+
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -295,13 +304,7 @@ class FakeGPS:
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
         os.write(self.master_fd, line)
-        # Delay so we won't spam the buffers in the pty layer or gpsd itself.
-        # The magic number here has to be derived from observation.  If it's
-        # too high you'll slow the tests down a lot.  If it's too low you'll
-        # get random spurious regression failures that usually look like
-        # lines missing from the end of the test output relative to the
-        # check file.  It might have to be ajusted upward on faster machines.
-        time.sleep((15.0 * len(line)) / self.speed)
+        time.sleep((WRITE_PAD * len(line)) / self.speed)
         self.index += 1
 
 class DaemonError(exceptions.Exception):
@@ -322,7 +325,7 @@ class DaemonInstance:
         "Spawn a daemon instance."
         # The -b option to suppress hanging on probe returns is needed to cope
         # with OpenBSD (and possibly other non-Linux systems) that don't support
-        # anything we can use to implement the feed method
+        # anything we can use to implement the FakeGPS.read() method
         self.spawncmd = "gpsd -b -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
         if prefix:
             self.spawncmd = prefix + " " + self.spawncmd.strip()

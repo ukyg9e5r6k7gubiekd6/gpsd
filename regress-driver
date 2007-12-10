@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # The regression-test driver script.  This used to be explicit in the
 # makefile before we regrouped the regression tests by stable and unstable 

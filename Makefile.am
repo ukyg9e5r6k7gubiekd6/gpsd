@@ -379,11 +379,11 @@ gps-regress: gpsd
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	regress-driver -r 
+	./regress-driver -r 
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	regress-driver -b $(srcdir)/test/stable/*.log
+	./regress-driver -b $(srcdir)/test/stable/*.log
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
@@ -429,8 +429,8 @@ testregress: gps-regress rtcm-regress packet-regress undump-regress
 #
 
 unstable-regress: gpsd 
-	regress-driver -t $(srcdir)/test/unstable/*.log
+	./regress-driver -t $(srcdir)/test/unstable/*.log
 
 unstable-makeregress: gpsd
-	regress-driver -b $(srcdir)/test/unstable/*.log
+	./regress-driver -b $(srcdir)/test/unstable/*.log
 
