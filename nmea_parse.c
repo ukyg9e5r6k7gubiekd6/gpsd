@@ -217,7 +217,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	mask = 0;
 	merge_hhmmss(field[5], session);
 	if (session->driver.nmea.date.tm_year == 0) 
-	    gpsd_report(LOG_WARN, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
@@ -282,7 +282,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 
 	merge_hhmmss(field[1], session);
 	if (session->driver.nmea.date.tm_year == 0) 
-	    gpsd_report(LOG_WARN, "can't use GGA/GGL time until after ZDA or RMC has supplied a year.\n");
+	    gpsd_report(LOG_WARN, "can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
