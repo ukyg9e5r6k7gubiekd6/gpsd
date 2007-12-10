@@ -67,7 +67,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import sys, os, time, signal, pty, termios, fcntl, array, struct
+import sys, os, time, signal, pty, termios # fcntl, array, struct
 import string, exceptions, threading, socket, commands
 import gps
 
@@ -281,14 +281,15 @@ class FakeGPS:
     def read(self):
         "Discard control strings written by gpsd."
         # A tcflush implementation works on Linux but fails on OpenBSD 4.
-        # termios.tcflush(self.master_fd, termios.TCIFLUSH)
-        try:
-            buf = array.array('i', [0])
-            fcntl.ioctl(self.master_fd, termios.FIONREAD, buf, True)
-            n = struct.unpack('i', buf)[0]
-            os.read(self.master_fd, n)
-        except IOError:
-            pass
+        termios.tcflush(self.master_fd, termios.TCIFLUSH)
+        # Alas, the FIONREAD version also works on Linux and fails on OpenBSD.
+        #try:
+        #    buf = array.array('i', [0])
+        #    fcntl.ioctl(self.master_fd, termios.FIONREAD, buf, True)
+        #    n = struct.unpack('i', buf)[0]
+        #    os.read(self.master_fd, n)
+        #except IOError:
+        #    pass
 
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
@@ -300,7 +301,7 @@ class FakeGPS:
         # get random spurious regression failures that usually look like
         # lines missing from the end of the test output relative to the
         # check file.  It might have to be ajusted upward on faster machines.
-        time.sleep((12.0 * len(line)) / self.speed)
+        time.sleep((15.0 * len(line)) / self.speed)
         self.index += 1
 
 class DaemonError(exceptions.Exception):
@@ -319,7 +320,10 @@ class DaemonInstance:
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
-        self.spawncmd = "gpsd -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
+        # The -b option to suppress hanging on probe returns is needed to cope
+        # with OpenBSD (and possibly other non-Linux systems) that don't support
+        # anything we can use to implement the feed method
+        self.spawncmd = "gpsd -b -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
         if prefix:
             self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
