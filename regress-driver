@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# The regression-test driver script.  This used to be explicit in the
+# makefile before we regrouped the regression tests by stable and unstable 
+# drivers.
+#
+PATH=.:$PATH
+export PATH
+
+case $1 in
+    -t)
+        shift
+        echo "Testing the daemon..."
+        mkdir -p test
+        errors=0; total=0;
+        for f in $*; do
+            dir=`dirname $f`
+            gpsfake -s 38400 -1 -b -p ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+            if diff -ub ${f}.chk $dir/test.chk; then :; else
+                errors=`expr $errors + 1`;
+            fi;
+            total=`expr $total + 1`;
+        done; rm $dir/test.chk;
+        if test $errors -gt 0; then
+            echo "Regression test FAILED: $errors errors in $total tests total.";
+            exit 1;
+        else
+            echo "Regression test successful: no errors in $total tests.";
+            exit 0;
+        fi
+        ;;
+    -r)
+        echo "Testing super-raw mode..."
+        mkdir -p test
+        for f in $*; do
+            dir=`dirname $f`
+            gpsfake -s 38400 -1 -b -p -r "r=2" ${f} \
+            | ./striplog -1 >$dir/test1.chk;
+            ./striplog <$${f} >$dir/test2.chk;
+            cmp $dir/test[12].chk;
+        done; rm $dir/test[12].chk
+        ;;
+    -b)
+        echo "Rebuilding regressions..."
+        shift
+        for f in $*; do
+            gpsfake -s 38400 -1 -b -p ${f} | grep -v "^GPSD,X" >${f}.chk;
+        done
+        exit 0
+        ;;
+esac
+
+

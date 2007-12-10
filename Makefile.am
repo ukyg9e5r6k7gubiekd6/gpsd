@@ -327,6 +327,7 @@ libgps: libgps.c .libs/libgps.a
 # Report splint warnings
 splint:
 	@echo "Running splint on daemon and libraries..."
+	@echo "Expect 'gpsd.c:230:39: Line expects to suppress 1 error, found 0 errors'"
 	-splint -redef $(gpsd_c_sources) $(libgpsd_c_sources)
 	@echo "Running splint on xgps..."
 	-splint -exportlocal $(xgps_SOURCES)
@@ -365,53 +366,24 @@ svn-tag:
 #
 # Note that the *-makeregress targets re-create the *.log.chk source
 # files from the *.log source files.
-
-# Regression-test the daemon
-# This requires gcc4; use of the math coprocessor's on-board trig functions
+#
+# These require gcc4; use of the math coprocessor's on-board trig functions
 # apparently increases the accuracy of computation in a way that affects
 # the low-order digits of the track field in the O response.
+
+# Regression-test the daemon
 gps-regress: gpsd 
-	@echo "Testing the daemon..."
-	@mkdir -p test
-	@errors=0; total=0; \
-	for f in $(srcdir)/test/stable/*.log; do \
-		env PATH=".:${PATH}" $(PYTHON) \
-		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
-		| grep -v "^GPSD,X" > test/stable/test.chk; \
-		if diff -ub $${f}.chk test/stable/test.chk; then :; else \
-			errors=`expr $$errors + 1`; \
-		fi; \
-		total=`expr $$total + 1`; \
-	done; rm test/stable/test.chk; \
-	if test $$errors -gt 0; then \
-		echo "Regression test FAILED: $$errors errors in $$total tests total."; \
-		exit 1; \
-	else \
-		echo "Regression test successful: $$errors errors in $$total tests total."; \
-		exit 0; \
-	fi
+	regress-driver -t $(srcdir)/test/stable/*.log
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	@echo "Testing super-raw mode..."
-	@mkdir -p test
-	@for f in test/stable/*.log; do \
-		env PATH=".:${PATH}" $(PYTHON) \
-		$(srcdir)/gpsfake -s 38400 -1 -b -p -r "r=2" $${f} \
-		| ./striplog -1 >test/stable/test1.chk; \
-		./striplog <$${f} >test/stable/test2.chk; \
-		cmp test/stable/test[12].chk; \
-	done; rm test/stable/test[12].chk
+	regress-driver -r 
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	@for f in $(srcdir)/test/stable/*.log; do \
-		env PATH=".:${PATH}" $(PYTHON) \
-		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
-		| grep -v "^GPSD,X" >$${f}.chk; \
-	done
+	regress-driver -b $(srcdir)/test/stable/*.log
 
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
@@ -451,3 +423,14 @@ undump-regress: rtcmdecode
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress packet-regress undump-regress
 	@echo "Regressions complete."
+
+#
+# Productions for testing unstable drivers.
+#
+
+unstable-regress: gpsd 
+	regress-driver -t $(srcdir)/test/unstable/*.log
+
+unstable-makeregress: gpsd
+	regress-driver -b $(srcdir)/test/unstable/*.log
+

@@ -12,6 +12,21 @@ The list of bugs exposed by gpsd in other software has moved to
 
 ** Bugs in gpsd and its clients:
 
+*** Support for the Trimble Lassen and other TSIP-based chips is flaky
+
+Regression tests have revealed some serious numerical instabilties in
+the TSIP driver; it should not be considered reliable.  It does not 
+currently have an active mmaintainer.  The TSIP-related regression
+tests have been moved to unstable.
+
+*** The Garmin binary driver will probably fail on big-endian machines
+
+The driver for the binary protocol used by Garmin USB GPSes has some
+serious endianness dependencies due to naive structure unpacking in
+the C code (a practice Garmin's incomplete and ancient technical 
+documentation  stupidly encourages).  It will probably fail on
+big-endian machines
+
 *** Support for the True North magnetic compass is currently broken
 
 Massimo Burcheri reported that it broke somewhere between rev 3654 and

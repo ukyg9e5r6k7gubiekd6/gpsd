@@ -159,13 +159,13 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Mon Dec 25 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35dev-1
+* Mon Dec 10 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35dev-1
 - Navcom driver merged. Removed -d -f and -p options of gpsd; these 
   have been undocumented for a while.  Make gpsd play well with pkgconfig.
   32-vs-64-bit problems in the regression tests have been solved.
   Add -b (no-configuration) option as a sadly clumsy workaround for some
-  problems with Bluetooth receivers.  Added test for Haicom-305N.  Fixed
-  a Makefile.am bug that prevented clean build when Python is not present.
+  problems with Bluetooth receivers.  Added tests for Haicom-305N and Pharos 
+  360; separated out the tests for the unstable Trimble drivers.
   We now install a .pc file for the freedesktop.org pkgconfig utility.
 
 * Thu Dec 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.34-1
