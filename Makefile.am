@@ -369,27 +369,23 @@ svn-tag:
 # Regression-test the daemon
 # This requires gcc4; use of the math coprocessor's on-board trig functions
 # apparently increases the accuracy of computation in a way that affects
-# the low-order digits of the track field in the O response.  Alas, it looks
-# like moving between 32- and 64-bit FPUs can also break regressions.
-#
-# When we have figured out the basic problem of these tests failing, we
-# can "exit 1" in the error case.
+# the low-order digits of the track field in the O response.
 gps-regress: gpsd 
 	@echo "Testing the daemon..."
 	@mkdir -p test
 	@errors=0; total=0; \
-	for f in $(srcdir)/test/*.log; do \
+	for f in $(srcdir)/test/stable/*.log; do \
 		env PATH=".:${PATH}" $(PYTHON) \
 		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
-		| grep -v "^GPSD,X" > test/test.chk; \
-		if diff -ub $${f}.chk test/test.chk; then :; else \
+		| grep -v "^GPSD,X" > test/stable/test.chk; \
+		if diff -ub $${f}.chk test/stable/test.chk; then :; else \
 			errors=`expr $$errors + 1`; \
 		fi; \
 		total=`expr $$total + 1`; \
-	done; rm test/test.chk; \
+	done; rm test/stable/test.chk; \
 	if test $$errors -gt 0; then \
 		echo "Regression test FAILED: $$errors errors in $$total tests total."; \
-		exit 0; \
+		exit 1; \
 	else \
 		echo "Regression test successful: $$errors errors in $$total tests total."; \
 		exit 0; \
@@ -401,17 +397,17 @@ gps-regress: gpsd
 raw-regress:
 	@echo "Testing super-raw mode..."
 	@mkdir -p test
-	@for f in test/*.log; do \
+	@for f in test/stable/*.log; do \
 		env PATH=".:${PATH}" $(PYTHON) \
 		$(srcdir)/gpsfake -s 38400 -1 -b -p -r "r=2" $${f} \
-		| ./striplog -1 >test/test1.chk; \
-		./striplog <$${f} >test/test2.chk; \
-		cmp test/test[12].chk; \
-	done; rm test/test[12].chk
+		| ./striplog -1 >test/stable/test1.chk; \
+		./striplog <$${f} >test/stable/test2.chk; \
+		cmp test/stable/test[12].chk; \
+	done; rm test/stable/test[12].chk
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
-	@for f in $(srcdir)/test/*.log; do \
+	@for f in $(srcdir)/test/stable/*.log; do \
 		env PATH=".:${PATH}" $(PYTHON) \
 		$(srcdir)/gpsfake -s 38400 -1 -b -p $${f} \
 		| grep -v "^GPSD,X" >$${f}.chk; \
@@ -442,7 +438,7 @@ packet-regress: packet_test
 # Rebuild the packet-getter regression test
 packet-makeregress: packet_test
 	@mkdir -p test
-	./packet_test > test/packet.test.chk
+	./packet_test >test/packet.test.chk
 
 # Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
