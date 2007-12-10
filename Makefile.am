@@ -373,7 +373,7 @@ svn-tag:
 # like moving between 32- and 64-bit FPUs can also break regressions.
 #
 # When we have figured out the basic problem of these tests failing, we
-# can "exit 1" in the error case.
+x# can "exit 1" in the error case.
 gps-regress: gpsd 
 	@echo "Testing the daemon..."
 	@mkdir -p test
