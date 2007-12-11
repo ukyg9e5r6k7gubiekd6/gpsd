@@ -343,7 +343,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(s)));
+    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
   } else
     (void)wprintw(datawin,"n/a		    ");
 
@@ -401,9 +401,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			size_t len UNUSED ,
 			int level UNUSED)
 {
-  int i,n,c;
+  int i,n;
   int newstate;
-  char *s;
+  char scr[128];
 
   /* This is for the satellite status display.  Originally lifted from
      xgps.c.  Note that the satellite list may be truncated based on
@@ -412,39 +412,34 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   if (gpsdata->satellites!=0) {
     if (display_sats >= MAX_POSSIBLE_SATS) {
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
-	(void)wmove(satellites, i+2, 1);
 	if (i < gpsdata->satellites) {
-	  (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
+	  (void)sprintf(scr ," %3d    %02d    %03d    %02d      %c",
 			gpsdata->PRN[i],
 			gpsdata->elevation[i], gpsdata->azimuth[i],
 			gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
 	} else {
-	  for(c = 0; c < SATELLITES_WIDTH - 3; c++) {
-	    (void)wprintw(satellites," ");
-	  }
+          (void)strlcat(scr, "", sizeof(scr));
 	}
+	(void)mvwprintw(satellites, i+2, 1, "%-*s", SATELLITES_WIDTH - 3, scr);
       }
     } else {
       n=0;
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (n < display_sats) {
-	  (void)wmove(satellites, n+2, 1);
 	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]!=0) || (gpsdata->satellites <= display_sats))) {
-	    n++;
-	    (void)wprintw(satellites," %3d    %02d    %03d    %02d      %c  ",
+	    (void)sprintf(scr ," %3d    %02d    %03d    %02d      %c",
 			  gpsdata->PRN[i],
 			  gpsdata->elevation[i], gpsdata->azimuth[i],
 			  gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
+	    (void)mvwprintw(satellites, n+2, 1, "%-*s", SATELLITES_WIDTH - 3, scr);
+	    n++;
 	  }
 	}
       }
 
       if(n < display_sats) {
-	for(i = n; i <= display_sats; i++) {
-	  (void)wmove(satellites, i+2, 1);
-	  for(c = 0; c < SATELLITES_WIDTH - 3; c++) {
-	    (void)wprintw(satellites," ");
-	  }
+	for (i = n; i <= display_sats; i++) {
+	  (void)mvwprintw(satellites, i+2, 1, "%-*s", SATELLITES_WIDTH - 3, "");
 	}
       }
 
@@ -544,32 +539,32 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     if(window_length >= (MIN_GPS_DATAWIN_SIZE + 4)) {
 
       /* Fill in the estimated horizontal position error. */
-      (void)wmove(datawin, 10, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.eph)==0)
-	(void)wprintw(datawin,"+/- %d %s     ", (int) (gpsdata->fix.eph * altfactor), altunits);
+	(void)sprintf(scr ,"+/- %d %s", (int) (gpsdata->fix.eph * altfactor), altunits);
       else
-	(void)wprintw(datawin,"n/a	 ");
+        (void)sprintf(scr, "n/a");
+      (void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated vertical position error. */
-      (void)wmove(datawin, 11, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.epv)==0)
-	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.epv * altfactor), altunits);
+	(void)sprintf(scr ,"+/- %d %s", (int)(gpsdata->fix.epv * altfactor), altunits);
       else
-	(void)wprintw(datawin,"n/a	 ");
+        (void)sprintf(scr, "n/a");
+      (void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated track error. */
-      (void)wmove(datawin, 12, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.epd)==0)
-	(void)wprintw(datawin,"+/- %.1f deg     ", (gpsdata->fix.epd));
+	(void)sprintf(scr ,"+/- %.1f deg", (gpsdata->fix.epd));
       else
-	(void)wprintw(datawin,"n/a	  ");
+        (void)sprintf(scr, "n/a");
+      (void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated speed error. */
-      (void)wmove(datawin, 13, DATAWIN_VALUE_OFFSET + 5);
       if (isnan(gpsdata->fix.eps)==0)
-	(void)wprintw(datawin,"+/- %d %s     ", (int)(gpsdata->fix.eps * speedfactor), speedunits);
+	(void)sprintf(scr ,"+/- %d %s", (int)(gpsdata->fix.eps * speedfactor), speedunits);
       else
-	(void)wprintw(datawin,"n/a	    ");
+        (void)sprintf(scr, "n/a");
+      (void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
     }
 
   /* Be quiet if the user requests silence. */
