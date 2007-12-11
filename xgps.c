@@ -678,7 +678,7 @@ update_panel(struct gps_data_t *gpsdata, char *message,
 
 	/* here are the value fields */
 	if (isnan(gpsdata->fix.time)==0) {
-	    (void)unix_to_iso8601(gpsdata->fix.time, s, (int)sizeof(s));
+	    (void)unix_to_iso8601(gpsdata->fix.time, s, sizeof(s));
 		XmTextFieldSetString(text_1, s);
 	} else
 		XmTextFieldSetString(text_1, "n/a");

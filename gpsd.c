@@ -750,7 +750,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    (void)strlcpy(phrase, ",D=", BUFSIZ);
 	    if (assign_channel(sub) && isnan(sub->fixbuffer.time)==0)
 		(void)unix_to_iso8601(sub->fixbuffer.time,
-				phrase+3, (int)(sizeof(phrase)-3));
+				phrase+3, sizeof(phrase)-3);
 	    else
 		(void)strlcat(phrase, "?", BUFSIZ);
 	    break;

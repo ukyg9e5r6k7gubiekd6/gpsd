@@ -343,7 +343,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
+    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(s)));
   } else
     (void)wprintw(datawin,"n/a		    ");
 
@@ -455,7 +455,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, (int)sizeof(s)));
+    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(s)));
   } else
     (void)wprintw(datawin,"n/a		    ");
 

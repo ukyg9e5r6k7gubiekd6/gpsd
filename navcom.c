@@ -701,7 +701,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int16_t idot = (int16_t)(((getsw_be(buf, 82)&0xfffc)/4)|(getub(buf, 82)&80?0xc000:0x0000));
     /*@ +predboolothers @*/
     char time_str[24];
-    (void)unix_to_iso8601(gpstime_to_unix((int)wn, (double)(toc*SF_TOC)), time_str, (int)sizeof(time_str));
+    (void)unix_to_iso8601(gpstime_to_unix((int)wn, (double)(toc*SF_TOC)), time_str, sizeof(time_str));
     
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0x81 (Packed Ephemeris Data)\n");
@@ -868,7 +868,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     u_int8_t status = getub(buf, 10);
     
     char time_str[24];
-    (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow/1000.0), time_str, (int)sizeof(time_str));
+    (void)unix_to_iso8601(gpstime_to_unix((int)week, (double)tow/1000.0), time_str, sizeof(time_str));
 
     gpsd_report(LOG_PROG,
                 "Navcom: received packet type 0xb0 (Raw Meas. Data Block)\n");

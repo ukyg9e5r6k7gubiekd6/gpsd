@@ -182,25 +182,24 @@ double iso8601_to_unix(/*@in@*/char *isotime)
     return (double)mkgmtime(&tm) + usec;
 }
 
-/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], int len)
+/*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 {
     struct tm when;
     double integral, fractional;
     time_t intfixtime;
     size_t slen;
+    char fractstr[20];
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t)integral;
     (void)gmtime_r(&intfixtime, &when);
 
-    (void)strftime(isotime, 28, "%Y-%m-%dT%H:%M:%S", &when);
+    (void)strftime(isotime, len, "%Y-%m-%dT%H:%M:%S", &when);
     slen = strlen(isotime);
-    (void)snprintf(isotime + slen, (size_t)len, "%.1f", fractional);
-    /*@ -aliasunique @*/
-    (void)memcpy(isotime+slen, isotime+slen+1, strlen(isotime+slen+1));
-    /*@ -aliasunique @*/
-    (void)strlcat(isotime, "Z", 28);
+    (void)snprintf(fractstr, sizeof(fractstr), "%.1f", fractional);
+    /* add fractional part, ignore leading 0; "0.2" -> ".2" */ 
+    (void)snprintf(isotime + slen, (size_t)(len - slen), "%sZ", fractstr+1);
     return isotime;
 }
 
