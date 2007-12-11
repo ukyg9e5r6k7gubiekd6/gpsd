@@ -89,7 +89,7 @@
 current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.</para>
 
-<para>In the sky view, salleties are color-coded to indicate quality
+<para>In the sky view, satellites are color-coded to indicate quality
 of signal; consult the data display to the left for exact figures in
 dB. Diamond icons indicate WAAS/EGNOS satellites, circles indicate
 ordinary GPS satellites.  Filled icons were used in the last fix, 
@@ -115,9 +115,12 @@ altitude units for display; follow the keyword with 'meters' or
 'feet'.  The default is feet.  This option can also be set as the X
 resource 'altunits'.</para>
 
-<para>The <option>-j</option> option tells the daemon to hold fix
-data across cycles, eliminating jitter from NMEA devices that emit
-several partial reports.</para>
+<para>The <option>-j</option> option tells the daemon to hold fix data
+across cycles, eliminating jitter from NMEA devices that emit several
+partial reports.  The downside is that with this switch on the client
+will occasionally report stale or invalid data held over from a
+previous cycle.  This option is ineffective, and not needed, on
+SiRFs and most other non-NMEA GPSes.</para>
 
 <para> The <option>-l</option> option sets the format of latitude and 
 longitude reports.  The value 'd' produces decimal degrees and is the
@@ -156,9 +159,7 @@ terminal emulator.</para>
 from printing the raw data. This display can also be toggled with the s
 command.</para>
 
-<para>The <option>-j</option> option tells the daemon not to clear
-data at start of cycle, eliminating jitter from NMEA devices that emit
-several partial reports per cycle.</para>
+<para>The <option>-j</option> option is as described for xgps above.</para>
 
 <para>Rather than use X resources to determine which units to use, 
 <application>cgps</application> looks at variables in its environment.
@@ -195,6 +196,17 @@ for discussion.</para>
 
 <para>This program connects to gpsd, polls for location, and logs
 each fix to standard output in GPX (XML) format.</para>
+
+<para>The <option>-s</option> and <option>-p</option> options can be
+used to specify a server and port to query.</para>
+
+<para>The <option>-i</option> option sets the poll interval at which
+the logger will collect samples.</para>
+
+<para>The <option>-j</option> option is as described for xgps above.</para>
+
+<para>The <option>-h</option> option causes the program to emit a summary of its
+options and then exit.</para>
 
 <para>The program also writes start and end messages to syslog.</para>
 
