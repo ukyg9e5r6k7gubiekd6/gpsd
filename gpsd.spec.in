@@ -159,7 +159,7 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Mon Dec 10 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35dev-1
+* Mon Dec 10 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35-1
 - Navcom driver merged. Removed -d -f and -p options of gpsd; these 
   have been undocumented for a while.  Make gpsd play well with pkgconfig.
   Incorrect computation of VDOP when GPSes didn't supply it has been fixed.
