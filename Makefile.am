@@ -352,14 +352,6 @@ splint:
 
 version:
 	@echo $(VERSION)
-#
-# This is how to tag a release for the SVN repository.
-# It requires developer access verified via ssh.
-#
-REPO=http://svn.berlios.de/svnroot/repos/gpsd
-svn-tag:
-	svn copy $(REPO)/trunk $(REPO)/tags/release-$(VERSION) \
-		-m "Tagged for external release $(VERSION)"
 
 #
 # Regression tests begin here
@@ -434,3 +426,25 @@ unstable-regress: gpsd
 unstable-makeregress: gpsd
 	./regress-driver -b $(srcdir)/test/unstable/*.log
 
+
+# Release machinery begins here
+#
+# This is how to ship a release to Berlios incomoing.
+# It requires developer access verified via ssh.
+#
+upload-ftp:
+	sha1 gpsd-$(VERSION).tar.gz >SHA1
+	lftp -c "put gpsd-$(VERSION).tar.gz SHA1" ftp://ftp.berlios.de/incoming
+
+#
+# This is how to tag a release for the SVN repository.
+# It requires developer access verified via ssh.
+#
+REPO=http://svn.berlios.de/svnroot/repos/gpsd
+svn-tag:
+	svn copy $(REPO)/trunk $(REPO)/tags/release-$(VERSION) \
+		-m "Tagged for external release $(VERSION)"
+#
+# Ship a release, providing all regression tests pass.
+#
+ship: testregress dist upload-ftp svn-tag
