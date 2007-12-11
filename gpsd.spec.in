@@ -159,6 +159,9 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
+* Tue Dec 11 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.36dev-1
+- Integrated Garmin Simple Text Protocol driver from Peter Slanky.
+
 * Mon Dec 10 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35-1
 - Navcom driver merged. Removed -d -f and -p options of gpsd; these 
   have been undocumented for a while.  Make gpsd play well with pkgconfig.

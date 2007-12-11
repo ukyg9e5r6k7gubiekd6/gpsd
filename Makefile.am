@@ -137,6 +137,7 @@ libgpsd_c_sources = \
 	zodiac.c \
 	ubx.c \
 	garmin.c \
+	garmin_txt.c \
 	tsip.c \
 	evermore.c \
 	italk.c \

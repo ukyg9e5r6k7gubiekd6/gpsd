@@ -63,6 +63,7 @@ struct gps_packet_t {
 #define GARMIN_PACKET	8
 #define NAVCOM_PACKET	9
 #define UBX_PACKET	10
+#define GARMINTXT_PACKET	11
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -348,6 +349,7 @@ extern gps_mask_t sirf_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t evermore_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t navcom_parse(struct gps_device_t *, unsigned char *, size_t);
 extern gps_mask_t garmin_ser_parse(struct gps_device_t *);
+extern gps_mask_t garmintxt_parse(struct gps_device_t *);
 
 extern bool dgnss_url(char *);
 extern int dgnss_open(struct gps_context_t *, char *);

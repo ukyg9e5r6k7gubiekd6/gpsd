@@ -64,8 +64,9 @@
    ZODIAC_RECOGNIZED,	/* found end of the Zodiac packet */
 #endif /* ZODIAC_ENABLE */
 
-#ifdef TNT_ENABLE
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
    TNT_LEADER,          /* saw True North status leader '@' */
+                        /* Garmin Simple Text starts with @ leader */
 #endif
 
 #ifdef EVERMORE_ENABLE
@@ -130,6 +131,5 @@
    RTCM_SKIP_STATE,	/* we have sync lock, but this character is bad */
    RTCM_RECOGNIZED,	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
-
 
 /* end of packet_states.h */

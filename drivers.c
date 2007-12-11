@@ -75,6 +75,15 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #endif /* GARMIN_ENABLE */
     } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;
+#ifdef GARMINTXT_ENABLE
+	if (session->packet.outbuflen >= 56) {
+		if ((char) *session->packet.outbuffer == '@') {
+                /* Garmin Simple Text packet received; it starts with '@' is terminated with \r\n and has length 57 bytes */
+                        (void)gpsd_switch_driver(session, "Garmin Simple Text");
+			return garmintxt_parse(session);
+		}
+	}
+#endif /* GARMINTXT_ENABLE */
 	gpsd_report(LOG_IO, "<= GPS: %s", session->packet.outbuffer);
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
@@ -690,6 +699,45 @@ static struct gps_type_t rtcm104 = {
 };
 #endif /* RTCM104_ENABLE */
 
+#ifdef GARMINTXT_ENABLE
+/**************************************************************************
+ *
+ * Garmin Simple Text protocol
+ *
+ **************************************************************************/
+
+static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
+{
+    //gpsd_report(LOG_PROG, "Garmin Simple Text packet\n");
+    return garmintxt_parse(session);
+}
+
+
+static struct gps_type_t garmintxt = {
+    .typename      = "Garmin Simple Text",		/* full name of type */
+    .trigger       = NULL,		/* no recognition string */
+    .channels      = 0,			/* not used */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = NULL,		/* no subtypes */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,		/* no configurator */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet    = generic_get,	/* how to get a packet */
+    .parse_packet  = garmintxt_parse_input,	/*  */
+    .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .speed_switcher= NULL,		/* no speed switcher */
+    .mode_switcher = NULL,		/* no mode switcher */
+    .rate_switcher = NULL,		/* no sample-rate switcher */
+    .cycle_chars   = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup         = NULL,		/* no wrapup code */
+    .cycle          = 1,		/* updates every second */
+};
+#endif /* GARMINTXT_ENABLE */
+
 extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary;
@@ -744,6 +792,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef RTCM104_ENABLE
     &rtcm104, 
 #endif /* RTCM104_ENABLE */
+#ifdef GARMINTXT_ENABLE
+    &garmintxt, 
+#endif /* GARMINTXT_ENABLE */
     NULL,
 };
 /*@ +nullassign @*/

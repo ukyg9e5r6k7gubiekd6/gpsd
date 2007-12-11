@@ -94,7 +94,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* NMEA_ENABLE */
-#ifdef TNT_ENABLE
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
 	if (c == '@') {
 	    lexer->state = TNT_LEADER;
 	    break;
@@ -220,7 +220,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	else
 	    lexer->state = GROUND_STATE;
 	break;
-#ifdef TNT_ENABLE
+#if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
     case TNT_LEADER:
 	  lexer->state = NMEA_LEADER_END;
 	break;

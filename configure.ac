@@ -363,6 +363,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Garmin Simple Text support
+AC_ARG_ENABLE(garmintxt,
+  AC_HELP_STRING([--disable-garmintxt],
+                 [disable Garmin Simple Text support]),
+  [ac_garmintxt=$enableval], [ac_garmintxt=yes])
+AC_MSG_CHECKING([for Garmin Simple Text support])
+if test x"$ac_garmintxt" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([GARMINTXT_ENABLE], 1, [Garmin Simple Text support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for True North support
 AC_ARG_ENABLE(tnt,
   AC_HELP_STRING([--enable-tnt],
@@ -685,6 +698,7 @@ echo "Earthmate               : $ac_earthmate"
 echo "EverMore                : $ac_evermore"
 echo "FV-18                   : $ac_fv18"
 echo "Garmin                  : $ac_garmin"
+echo "Garmin Simple Text      : $ac_garmintxt"
 echo "iTrax                   : $ac_itrax"
 echo "NMEA                    : $ac_nmea"
 echo "NTRIP                   : $ac_ntrip"
@@ -719,6 +733,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_evermore" = "xno" -a \
     x"$ac_fv18" = "xno" -a \
     x"$ac_garmin" = "xno" -a \
+    x"$ac_garmintxt" = "xno" -a \
     x"$ac_itrax" = "xno" -a \
     x"$ac_navcom" = "xno" -a \
     x"$ac_nmea" = "xno" -a \
