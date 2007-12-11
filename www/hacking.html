@@ -1548,22 +1548,18 @@ the release has been shipped and tagged.</dd>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>6. Call getrpms as needed</dt>
-<dd>Do this to generate RPMS for whatever architectures and distros 
-we're supporting directly.</dd>
+<dt>6. Ship to Berlios</dt>
+<dd>Upload the tarball to berlios.de</dd>
 
-<dt>7. Ship to Berlios</dt>
-<dd>Upload the tarball and RPMs to berlios.de</dd>
-
-<dt>8. Tag the release in SVN</dt>
+<dt>7. Tag the release in SVN</dt>
 <dd>Doing 'make svn-tag' should accomplish this</dd>
 
-<dt>9. Bump the release number</dt>
+<dt>8. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>10. Announce the release</dt>
+<dt>9. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the mailing lists.</dd>
 
