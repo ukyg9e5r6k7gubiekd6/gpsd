@@ -187,7 +187,8 @@ SIGHUP or SIGINT; given default terminal settings this will happen
 when you type Ctl-C at it.  It will also terminate on 'q'</para>
 
 <para>The 'j' command toggles whether or not fix data is cleared at
-start of cycle; see
+start of cycle; see the description of the <option>-j</option> of 
+xgps (above) and
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 for discussion.</para>
 
