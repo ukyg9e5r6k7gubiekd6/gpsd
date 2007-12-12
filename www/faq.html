@@ -227,11 +227,11 @@ release dates from gpsd.spec in the log output. Note: pick the
 <em>first</em> revision matching the known-good date and the <em>last</em>
 revision matching the known-bad date.</p></li>
 
-<li><p>Use the -r option of svn up to check out the revision level in
-the middle of that range.  Thus, if the last known good release was
-2502 and the known bad one is 2760, check out release (2760 + 2502) /
-2 = 2631.  The command you want would be "svn -r 2631 up" in this
-case.</p></li>
+<li><p>Use the <code>-r</code> option of <code>svn up</code> to check
+out the revision level in the middle of that range.  Thus, if the last
+known good release was 2502 and the known bad one is 2760, check out
+release (2760 + 2502) / 2 = 2631.  The command you want would be "svn
+-r 2631 up" in this case.</p></li>
 
 <li><p>Build and test the revision.  Whether it works or not, you will
 eliminate half the range.  If it works, you know the bug was introduced
@@ -242,7 +242,7 @@ in the lower half.</p></li>
 e.g. check out the middle version, test that, and narrow the range by another
 factor of 2.</p></li>
 
-<li><p>Repeat this procedure until you know the exact revision that
+<li><p>Repeat this bisection search until you know the exact revision that
 introduced your bug.  This will happen very quickly, as the number of
 tests required will be the log to the base 2 of the number of
 revisions in your original span.  Even if there are (say) 500
@@ -254,10 +254,11 @@ exact change in question.</p></li>
 
 <p>Always include with your bug report the GPS vendor and model.  Try
 to include the firmware version as well.  This should be in your xgps
-display if your GPS device makes it available; if the ID string is too
-long to fit in that window, let the daemon run for a few minutes and
-issue an "I" command to it.  Alternatively, running the daemon at -D
-4 may reveal the version.</p>
+display if your GPS device makes it available; in a form field before
+2.35, or as the window title in 2.35 and later.  If the ID string is
+too long to fit, let the daemon run for a few minutes and issue an "I"
+command to it.  Alternatively, running the daemon at -D 4 may reveal
+the version.</p>
 </blockquote>
 
 <h1>Why does the first A,E,O,P,T,U, or V command to a device always return "?"</h1>
@@ -287,11 +288,12 @@ ever notice this behavior.  <code>gpsd</code>-using applications poll the
 daemon repeatedly; the delay before the second response comes in
 normally is not noticeable.</p>
 
-<p>We haven't fixed this because the test clients all use watcher mode.  In
-watcher mode, you get 'O' updates whenever the GPS ships a recognized
-sentence.  The old-style individual requests are obsolete, really.
-You should fix your application to use watcher mode &mdash; or better
-yet, the libgps client library.</p>
+<p>We haven't fixed this because the test clients and libgps all use
+watcher mode.  In watcher mode, you get 'O' updates whenever the GPS
+ships a recognized sentence.  The old-style individual requests are
+obsolete, really; they were poorly thought out and are only retained
+for backward compatibility.  You should fix your application to use
+watcher mode &mdash; or better yet, the libgps client library.</p>
 
 <h1 id="singleshot">Why does my single-shot query fail to return fix data?</h1>
 
@@ -313,6 +315,10 @@ socket.  It is entirely possible that the rest of your commands
 will get processed before the daemon reads and processes enough GPS 
 sentences to get a fix &mdash; especially if the serial device is 
 slow and the GPS has a long initialization sequence.</p>
+
+<p>(A similar race existed in <code>gpsd</code> versions before
+multi-device support was added in 2.21; if you issued a query too
+soon after device open it would fail in exactly this way.)</p>
 
 <p>The right way to code your client is to set watcher mode and
 read a couple of O responses before trying to parse one.  That way
@@ -338,19 +344,20 @@ of samples.</p>
 
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
-<p>If your problem is wildly fluctuating speed reports on a SiRF, switching
-on static navigation mode using the 'c' command in sirfmon. Static navigation
-mode will freeze your position if your speed is below 1.2 m/s for three
-seconds, and will begin updating your position again when speed exceeds 1.4
-m/s. This prevents multipath, weak signals, or poor constellation geometry from
-dragging your solutions around too much. Other receivers may suffer the same
+<p>If your problem is wildly fluctuating speed reports on a SiRF,
+switching on static navigation mode using the 'c' command in
+<code>sirfmon</code>. Static navigation mode will freeze your position
+if your speed is below 1.2 m/s for three seconds, and will begin
+updating your position again when speed exceeds 1.4 m/s. This prevents
+multipath, weak signals, or poor constellation geometry from dragging
+your solutions around too much. Other receivers may suffer the same
 problem and may have a similar solution.</p>
 
 <h1 id='gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</h1>
 
 <p>This is a gpsdrive bug, as you can verify by running xgps alongside it.</p>
 
-<h1 id='flicker'>Why do the date and other fields in <code>xgps</code> flicker 
+<h1 id='flicker'>Why does the date field n <code>xgps</code> flicker 
 to "n/a" part of the time even when there's a fix?</h1>
 
 <p>The sentence or packet your GPS uses to report satellite
@@ -368,19 +375,20 @@ no date. That's its job.  The libgps library is doing its bit by
 passing everything from <code>gpsd</code> on to the client application
 as it arrives, including the lack of date.</p>
 
-<p>Other fields may flicker as well; latitude is prone to this on NMEA
-devices.  It's the same problem.  In theory, a client could accumulate
-data through an entire send cycle from the GPS, and change the display
-only once at end of cycle.  The problem with this is that there is
-so much variation in the order GPSes send sentences that there is no
-no way to spot end-of-cycle &mdash; the best you could do would be
-to wait until a sentence-timestamp change signals the start of a new
-cycle, at which time the buffered data is by definition obsolete.</p>
+<p>The -j option of xgps will work around this problem.  It sends 
+<code>gpsd</code> an initialization command that causes it not to
+clear fix data at the beginning of each reporting cycle.  This will
+eliminate the flicker, but means that you may occasionally see 
+stale and invalid data.</p>
 
-<p>It's the <em>client's</em> job to interpret/interpolate/fill in
-gaps, to do policy.  What you're seeing as a bug only looks like one
-because <code>xgps</code>, as is proper for a test client, has as
-little policy as possible.</p>
+<h1 id='flicker'>Why does <code>xgps</code>flicker between displaying FIX
+and NOFIX about once a second?</h1>
+
+<p>It's the same problem as the previous entry, and can be banished
+with the -j option.</p>
+
+<p>Other fields may flicker as well; latitude is especially prone to
+this.</p>
 
 <h1 id='kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</h1>
 
