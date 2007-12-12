@@ -6,6 +6,8 @@
 
 #include <dbus/dbus.h>
 
+#include "gpsd.h"
+
 int initialize_dbus_connection (void);
 void send_dbus_fix (struct gps_device_t* channel);
 
