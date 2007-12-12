@@ -168,16 +168,18 @@ mice.</p>
 time-and-location service for users and their geographically-aware
 applications.</p>
 
-<p>A GPS is a device for delivering fourteen numbers: x, y, z, t, vx, vy, vz,
-and error estimates for each of these seven coordinates.  The gpsd daemon's
-job is to deliver these numbers to user applications with minimum fuss.</p>
+<p>A GPS is a device for delivering fourteen numbers: x, y, z, t, vx,
+vy, vz, and error estimates for each of these seven coordinates.  The
+<code>gpsd</code> daemon's job is to deliver these numbers to user
+applications with minimum fuss.</p>
 
-<p>'Minimum fuss' means that the only action the user should have to take
-to enable location service is to plug in a GPS.  The gpsd daemon, and its
-associated hotplug scripts or local equivalent, is responsible for
-automatically configuring itself. That includes autobauding,
-handshaking with the device, determining the correct mode or protocol
-to use, and issuing any device-specific initializations required.</p>
+<p>'Minimum fuss' means that the only action the user should have to
+take to enable location service is to plug in a GPS.  The
+<code>gpsd</code> daemon, and its associated hotplug scripts or local
+equivalent, is responsible for automatically configuring itself. That
+includes autobauding, handshaking with the device, determining the
+correct mode or protocol to use, and issuing any device-specific
+initializations required.</p>
 
 <p>Features (such as GPS type or serial-parameter switches) that would
 require the user to perform administrative actions to enable location
@@ -192,11 +194,11 @@ coverage.</p>
 one very low-end GPS chipset (the San Jose Navigation GM-38) does not
 deliver correct checksums on the packets it ships to a host unless it
 has a fix.  Typically, GPSes do not have a fix when they are plugged
-in, at the time gpsd must recognize and autoconfigure the device.
-Thus, supporting this chipset would require that we either (a) disable
-packet integrity checking in the autoconfiguration code, making
-detection of other more well-behaved devices unreliable, or (b) add an
-invocation switch to disable packet integrity checking for that
+in, at the time <code>gpsd</code> must recognize and autoconfigure the
+device.  Thus, supporting this chipset would require that we either
+(a) disable packet integrity checking in the autoconfiguration code,
+making detection of other more well-behaved devices unreliable, or (b)
+add an invocation switch to disable packet integrity checking for that
 chipset alone.  We refuse to do either, and do not support this
 chipset.</p>
 
@@ -207,19 +209,21 @@ demonstrate its own correctness, give technical users good tools for
 measuring GPS accuracy and diagnosis of GPS idiosyncrasies, and
 provide a test framework for gpsd-using applications.</p>
 
-<p>Accordingly, we support the gpsfake tool that simulates a GPS using
-recorded or synthetic log data.  We support gpsprof, which collects
-accuracy and latency statistics on GPSes and the GPS+gpsd combination.
-And we include a comprehensive regression-test suite with the package.
-These tools are not accidents, they are essential to ensure that the
-basic GPS-monitoring code is not merely correct but <em>demonstrably</em>
+<p>Accordingly, we support the <code>gpsfake</code> tool that
+simulates a GPS using recorded or synthetic log data.  We support
+<code>gpsprof</code>, which collects accuracy and latency statistics
+on GPSes and the GPS+<code>gpsd</code> combination.  And we include a
+comprehensive regression-test suite with the package.  These tools are
+not accidents, they are essential to ensure that the basic
+GPS-monitoring code is not merely correct but <em>demonstrably</em>
 correct.</p>
 
-<p>We support a tool, sirfmon, which is a low-level packet monitor and
-diagnostic tool for the chipset with 80% market share.  sirfmon is
-capable of tuning some device-specific control settings such as the
-SiRF static-navigation mode.  A future direction of the project is to
-support diagnostic monitoring and tuning for other chipsets.</p>
+<p>We support a tool, <code>sirfmon</code>, which is a low-level
+packet monitor and diagnostic tool for the chipset with 80% market
+share.  sirfmon is capable of tuning some device-specific control
+settings such as the SiRF static-navigation mode.  A future direction
+of the project is to support diagnostic monitoring and tuning for
+other chipsets.</p>
 
 <h2 id="upgrading">The upgrading tools</h2>
 
@@ -316,8 +320,8 @@ go through the following checklist:</p>
     include the test changes in your patch, and (c) <b>explain 
     in detail why the regression broke</b> in your change comment.</li>
 
-<li>Check that the patched code displays no warnings when you run 'make
-    splint' (see <a href="http://www.splint.org">the Splint
+<li>Check that the patched code displays no warnings when you run '<code>make
+    splint</code>' (see <a href="http://www.splint.org">the Splint
     website</a> for further description of this tool if you don't
     already know about it). Yes, tweaking your code to be splint-clean is
     a pain in the ass.  Experience shows it's worth it.</li>
@@ -335,9 +339,9 @@ ill-thought-out changes, and to nail problems before they become
 user-visible.</p>
 
 <p>The reason we use splint is twofold: (1) it's good at catching
-static buffer overruns, and (2) gpsd does a lot of low-level
-bit-bashing that can be sensitive to 32-vs.-64-bit problems. Getting
-the code splint-clean tends to prevent these.</p>
+static buffer overruns, and (2) <code>gpsd</code> does a lot of
+low-level bit-bashing that can be sensitive to 32-vs.-64-bit
+problems. Getting the code splint-clean tends to prevent these.</p>
 
 <p>If you are contributing a driver for a new GPS, please also do the
 following things:</p>
@@ -360,7 +364,7 @@ patches in the default (-e or ed) mode, as they are too brittle.</p>
 <p>When you send a patch, we expect you to do at least the first three
 of the same verification steps we <a href='#verify'>require</a> from
 our project committers.  Doing all of them is better, and makes it
-far more likely your patch will be expected.</p>
+far more likely your patch will be accepted.</p>
 
 <h2 id="license">The license on contributions</h2>
 
@@ -375,14 +379,14 @@ licenses (such as MIT, BSD, AFL, etc.).</p>
 
 <p>If you send a patch that adds a command-line option to the daemon, it
 will almost certainly be refused.  Ditto for any patch that requires
-gpsd to parse a dotfile.</p>
+<code>gpsd</code> to parse a dotfile.</p>
 
-<p>One of the major objectives of this project is for gpsd <em>not to
-require administration</em> &mdash; under Linux, at least.  It autobauds,
-it does protocol discovery, and it's activated by the hotplug
-system.  Arranging these things involved quite a lot of work, 
-and we're not willing to lose the zero-configuration property
-that work gained us.</p>
+<p>One of the major objectives of this project is for
+<code>gpsd</code> <em>not to require administration</em> &mdash; under
+Linux, at least.  It autobauds, it does protocol discovery, and it's
+activated by the hotplug system.  Arranging these things involved
+quite a lot of work, and we're not willing to lose the
+zero-configuration property that work gained us.</p>
 
 <p>Instead of adding a command-line option to support whatever feature
 you had in mind, try to figure out a way that the feature can
@@ -407,10 +411,10 @@ pin the daemon's behavior for its entire lifespan. Why should the user
 have to fix a policy at startup time and never get to change his/her 
 mind afterwards?  Stupid design...</p>
 
-<p>(3) The command-line switches used for a normal gpsd startup can only
-be changed by modifying the hotplug script.  Requiring end-users to
-modify hotplug scripts (or anything else in admin space) is a crash
-landing.</p>
+<p>(3) The command-line switches used for a normal <code>gpsd</code>
+startup can only be changed by modifying the hotplug script.
+Requiring end-users to modify hotplug scripts (or anything else in
+admin space) is a crash landing.</p>
 
 <h2 id="statics">Don't create static variables in the libraries!</h2>
 
@@ -429,10 +433,10 @@ running in a thread.</p>
 <h2 id="malloc">Don't use malloc!</h2>
 
 <p>The best way to avoid having dynamic-memory allocation problems is
-not to use malloc/free at all.  The gpsd daemon doesn't (though the
-client-side code does).  Thus, even the longest-running instance 
-can't have memory leaks.  The only cost for this turned out to be
-embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
+not to use malloc/free at all.  The <code>gpsd</code> daemon doesn't
+(though the client-side code does).  Thus, even the longest-running
+instance can't have memory leaks.  The only cost for this turned out
+to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 
 <p>Don't undo this by using malloc/free in a driver or anywhere else.</p>
 
@@ -444,14 +448,15 @@ embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 --disable-shared.  This turns off all the shared-library crud, making
 it somewhat easier to use gdb.</p>
 
-<p>There is a script called logextract in the distribution that you can use
-to strip clean NMEA out of the log files produced by gpsd.  This can be
-useful if someone ships you a log that they allege caused gpsd to 
-misbehave.</p>
+<p>There is a script called <code>logextract</code> in the
+distribution that you can use to strip clean NMEA out of the log files
+produced by <code>gpsd</code>.  This can be useful if someone ships
+you a log that they allege caused <code>gpsd</code> to misbehave.</p>
 
-<p>gpsfake enables you to repeatedly feed a packet sequence to a gpsd
-instance running as non-root.  Watching such a session with gdb should
-smoke out any repeatable bug pretty quickly.</p>
+<p><code>gpsfake</code> enables you to repeatedly feed a packet
+sequence to a <code>gpsd</code> instance running as non-root.
+Watching such a session with <code>gdb(1)</code> should smoke out any
+repeatable bug pretty quickly.</p>
 
 <p>The parsing of GPGSV sentences in the NMEA driver has been a
 persistent and nasty trouble spot, causing more buffer overruns and
@@ -481,37 +486,39 @@ space-separated fields:</p>
     the sentence timestamp was zero, this offset is a full timestamp 
     and the base time of the packet.</li>
 
-<li>An offset from the base time telling when gpsd received the last
-    bytes of the packet.</li>
+<li>An offset from the base time telling when <code>gpsd</code>
+    received the last bytes of the packet.</li>
 
 <li>An offset from the base time telling when gpsd decoded the data.</li>
 
 <li>An offset from the base time taken just before encoding the
-    response &mdash; effectively, when gpsd was polled to transmit the data.</li>
+    response &mdash; effectively, when gpsd was polled to transmit the 
+    data.</li>
 
-<li>An offset from the base time telling when gpsd transmitted 
+<li>An offset from the base time telling when <code>gpsd</code> transmitted 
     the data.</li>
 </ol>
 
-<p>The Z figures measure components of the latency between the GPS's time
-measurement and when the sentence data became available to the
+<p>The Z figures measure components of the latency between the GPS's
+time measurement and when the sentence data became available to the
 client. For it to be meaningful, the GPS has to ship timestamps with
 sub-second precision. SiRF-II and Evermore chipsets ship times with
 millisecond resolution.  Your machine's time reference must also be
-accurate to subsecond precision; I recommend using ntpd, which will
-normally give you about 15 microseconds precision (two orders of
-magnitude better than GPSes report).</p>
+accurate to subsecond precision; I recommend using <code>ntpd</code>,
+which will normally give you about 15 microseconds precision (two
+orders of magnitude better than GPSes report).</p>
 
 <p>Note, some inaccuracy is introduced into the start- and end-of-packet
 timestamps by the fact that the last read of a packet may grab a few
 bytes of the next one.</p>
 
-<p>The distribution lincludes a Python script, gpsprof, that uses the 
-Z command to collect profiling information from a running GPS instance.
-You can use this to measure the latency at each stage &mdash; GPS to daemon,
-daemon to client library &mdash; and to estimate the portion of the latency 
-induced by serial transmit time.  The gpsprof script creates latency
-plots using gnuplot(1).  It can also report the raw data.</p>
+<p>The distribution lincludes a Python script, <code>gpsprof</code>,
+that uses the Z command to collect profiling information from a
+running GPS instance.  You can use this to measure the latency at each
+stage &mdash; GPS to daemon, daemon to client library &mdash; and to
+estimate the portion of the latency induced by serial transmit time.
+The <code>gpsprof</code> script creates latency plots using
+<code>gnuplot(1)</code>.  It can also report the raw data.</p>
 
 <h2 id="porting">Porting to weird machines: endianness, width, and signedness issues.</h2>
 
@@ -537,8 +544,9 @@ typedefs.</p>
 
 <h2 id="architecture">Architecture and how to hack it</h2>
 
-<p>gpsd is not a complicated piece of code.  Essentially, it spins in a loop 
-polling for input from one of three sources:</p>
+<p><code>gpsd</code> is not a hugely complicated piece of code.
+Essentially, it spins in a loop polling for input from one of three
+sources:</p>
 
 <ol>
 <li>A client making requests over a TCP/IP port.</li>
