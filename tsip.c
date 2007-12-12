@@ -298,7 +298,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f2) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
-	gpsd_report(LOG_PROG, "GPS LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
+	gpsd_report(LOG_PROG, "GPS LLA %f %f %f %f\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.fix.latitude,
+		    session->gpsdata.fix.longitude,
+		    session->gpsdata.fix.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
 	break;
     case 0x4b:		/* Machine/Code ID and Additional Status */
@@ -513,7 +517,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		gpstime_to_unix((int)session->driver.tsip.gps_week, f1) - session->context->leap_seconds;
 	    mask |= TIME_SET;
 	}
-	gpsd_report(LOG_INF, "GPS DP LLA %f %f %f\n",session->gpsdata.fix.latitude,session->gpsdata.fix.longitude,session->gpsdata.fix.altitude);
+	gpsd_report(LOG_INF, "GPS DP LLA %f %f %f %f\n",
+		    session->gpsdata.fix.time,
+		    session->gpsdata.fix.latitude,
+		    session->gpsdata.fix.longitude,
+		    session->gpsdata.fix.altitude);
 	mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET;
 	break;
     case 0x8f:		/* Super Packet.  Well...  */
