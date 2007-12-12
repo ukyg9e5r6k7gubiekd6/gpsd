@@ -337,49 +337,48 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 			size_t len UNUSED ,
 			int level UNUSED)
 {
+  char scr[128];
   /* Print time/date. */
-  (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
-    char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+    (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
   } else
-    (void)wprintw(datawin,"n/a		    ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the heading. */
-  (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.track)==0) {
-    (void)wprintw(datawin,"%.1f     ", gpsdata->fix.track);
+    (void)sprintf(scr, "%.1f", gpsdata->fix.track);
   } else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the pitch. */
-  (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.climb)==0) {
-    (void)wprintw(datawin,"%.1f     ", gpsdata->fix.climb);
+    (void)sprintf(scr, "%.1f", gpsdata->fix.climb);
   } else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the roll. */
-  (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.speed)==0)
-    (void)wprintw(datawin,"%.1f     ",gpsdata->fix.speed);
+    (void)sprintf(scr, "%.1f",gpsdata->fix.speed);
   else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the speed. */
-  (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.altitude)==0)
-    (void)wprintw(datawin,"%.1f     ", gpsdata->fix.altitude);
+    (void)sprintf(scr, "%.1f", gpsdata->fix.altitude);
   else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in receiver type. */
-  (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
-  if(got_gps_type==1) {
-    (void)wprintw(datawin,"%s",gps_type);
-  } else {
-    (void)wprintw(datawin,"unknown     ");
-  }
+  if(got_gps_type==1)
+    (void)sprintf(scr ,"%s",gps_type);
+  else
+    (void)sprintf(scr, "unknown");
+  (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Be quiet if the user requests silence. */
   if(silent_flag==0 && raw_flag==1) {
@@ -416,7 +415,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 			gpsdata->elevation[i], gpsdata->azimuth[i],
 			gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
 	} else {
-          (void)strlcat(scr, "", sizeof(scr));
+          (void)strlcpy(scr, "", sizeof(scr));
 	}
 	(void)mvwprintw(satellites, i+2, 1, "%-*s", SATELLITES_WIDTH - 3, scr);
       }
@@ -445,86 +444,88 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   }
 
   /* Print time/date. */
-  (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
-    char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
+    (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
   } else
-    (void)wprintw(datawin,"n/a		    ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+
 
   /* Fill in the latitude. */
-  (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.latitude)==0) {
-    char *s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
-    (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    (void)sprintf(scr ,"%s %c", 
+         deg_to_str(deg_type,  fabs(gpsdata->fix.latitude)), 
+         (gpsdata->fix.latitude < 0) ? 'S' : 'N');
   } else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the longitude. */
-  (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.longitude)==0) {
-    char *s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
-    (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    (void)sprintf(scr ,"%s %c", 
+         deg_to_str(deg_type,  fabs(gpsdata->fix.longitude)), 
+         (gpsdata->fix.longitude < 0) ? 'W' : 'E');
   } else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the altitude. */
-  (void)wmove(datawin, 4, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude)==0)
-    (void)wprintw(datawin,"%.1f %s     ",gpsdata->fix.altitude*altfactor, altunits);
+    (void)sprintf(scr, "%.1f %s",gpsdata->fix.altitude*altfactor, altunits);
   else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the speed. */
-  (void)wmove(datawin, 5, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-    (void)wprintw(datawin,"%.1f %s     ", gpsdata->fix.speed*speedfactor, speedunits);
+    (void)sprintf(scr ,"%.1f %s", gpsdata->fix.speed*speedfactor, speedunits);
   else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the heading. */
-  (void)wmove(datawin, 6, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-    (void)wprintw(datawin,"%.1f degrees     ", gpsdata->fix.track);
+    (void)sprintf(scr ,"%.1f degrees", gpsdata->fix.track);
   else
-    (void)wprintw(datawin,"n/a	  ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the rate of climb. */
-  (void)wmove(datawin, 7, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
-    (void)wprintw(datawin,"%.1f %s/min     ",
+    (void)sprintf(scr ,"%.1f %s/min",
 	gpsdata->fix.climb * altfactor * 60, altunits);
   else
-    (void)wprintw(datawin,"n/a	 ");
+    (void)sprintf(scr, "n/a");
+  (void)mvwprintw(datawin, 7, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the GPS status and the time since the last state
      change. */
-  (void)wmove(datawin, 8, DATAWIN_VALUE_OFFSET);
   if (gpsdata->online == 0) {
     newstate = 0;
-    (void)wprintw(datawin,"OFFLINE	  ");
+    (void)sprintf(scr ,"OFFLINE");
   } else {
     newstate = gpsdata->fix.mode;
     switch (gpsdata->fix.mode) {
     case MODE_2D:
-      (void)wprintw(datawin,"2D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      (void)sprintf(scr ,"2D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
       break;
     case MODE_3D:
-      (void)wprintw(datawin,"3D %sFIX (%d secs)   ",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      (void)sprintf(scr ,"3D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
       break;
     default:
-      (void)wprintw(datawin,"NO FIX (%d secs)     ", (int) (time(NULL) - status_timer));
+      (void)sprintf(scr ,"NO FIX (%d secs)", (int) (time(NULL) - status_timer));
       break;
     }
   }
+  (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the receiver type. */
-  (void)wmove(datawin, 9, DATAWIN_VALUE_OFFSET);
   if(got_gps_type==1) {
-    (void)wprintw(datawin,"%s",gps_type);
+    (void)sprintf(scr ,"%s",gps_type);
   } else {
-    (void)wprintw(datawin,"unknown     ");
+    (void)sprintf(scr ,"unknown");
   }
+  (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Note that the following four fields are exceptions to the
        sizing rule.  The minimum window size does not include these
