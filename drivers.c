@@ -147,12 +147,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	if (session->context->enable_ntpshm &&
 	    (st & TIME_SET) != 0 &&
 	    (session->gpsdata.fix.time!=session->last_fixtime)) {
-	    /* this magic number is derived from observation */
-	    /* GPS-18/USB -> 0.100 */
-	    /* GPS-18/LVC at 19200 -> 0.125 */
-	    /* GPS-18/LVC at 4800 -> 0.525*/
-	    /* Rob Jensen reports 0.675 */
-	    (void)ntpshm_put(session, session->gpsdata.fix.time + 0.400);
+	    (void)ntpshm_put(session, session->gpsdata.fix.time);
 	    session->last_fixtime = session->gpsdata.fix.time;
 	}
 #endif /* NTPSHM_ENABLE */

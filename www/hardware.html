@@ -1177,24 +1177,28 @@ although it is not clear if the "consumer" firmware is capable of that.
 <h2>PPS and GPSD:</h2>
 
 <p>Many GPS receivers offer a 1PPS (one pulse per second) output that
-  GPSD is capable of passing along to ntp for use as an extremely
-  accurate clock source.  The following information on 1PPS accuracy
-  are taken from manufacturers' data sheets, and have not been
-  independently verified.</p>
+  GPSD is capable of passing along to <code>ntpd</code> for use as an
+  extremely accurate clock source.  The "Claimed Accuracy" are taken
+  from manufacturers' data sheets, and have not been independently
+  verified.</p> 
+
+  <p>Where specified, NTP time offsets have been measured by
+  comparison with the NTP time service and reported by
+  <code>gpsd</code>.</p>
 
 <div>&nbsp;</div>
 
 <table border='1'>
 <tr>
 <th>Receiver</th>
-<th>Claimed<br>Accuracy</th>
-<th>1PPS Tested<br>with GPSD</th>
+<th>Claimed<br/>Accuracy</th>
+<th>NTP time offset</th>
 <th>Notes</th>
 </tr>
 <tr>
 <td>Trimble Lassen iQ</td>
 <td align="center">50ns</td>
-<td align="center">-</td>
+<td align="center">0.675sec</td>
 <td align="center">-</td>
 </tr>
 <tr>
@@ -1204,10 +1208,16 @@ although it is not clear if the "consumer" firmware is capable of that.
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Garmin GPS18</td>
+<td>Garmin GPS18/USB</td>
 <td align="center">1usec</td>
+<td align="center">0.100sec</td>
 <td align="center">-</td>
-<td align="center">-</td>
+</tr>
+<tr>
+<td>Garmin GPS18/LVC</td>
+<td align="center">1usec</td>
+<td align="center">0.125sec</td>
+<td align="center">At 19200bps; drops to 0.525 at 4800bps</td>
 </tr>
 <tr>
 <td>SiRFstar2</td>
@@ -1270,8 +1280,8 @@ although it is not clear if the "consumer" firmware is capable of that.
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Motorola<br>iLotus<br>Synergy-GPS M12M</td>
-<td align="center">20ns<br>6ns corrected</td>
+<td>Motorola<br>iLotus<br/>Synergy-GPS M12M</td>
+<td align="center">20ns<br/>6ns corrected</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
