@@ -127,7 +127,7 @@ hardware already supported.
 10. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 --disable-pps.  You'll lose support for updating the clock from PPS pulses.
-It's also possible to build without Python via --disable=python, in which 
+It's also possible to build without Python via --disable-python, in which 
 case you'd build won't make Python libraries and "make install" won't
 try to install Python tools.
 
