@@ -14,6 +14,7 @@
 
 #include <glib/gprintf.h>
 #include "gpsd_config.h"
+#include "gps.h"
 
 DBusConnection* connection;
 
