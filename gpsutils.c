@@ -320,10 +320,10 @@ And its transpose A~:
 
 Compute the covariance matrix (A~*A)^-1, which is guaranteed symmetric:
 
-    | s(x)^2    s(x)*s(y)  s(x)*s(z)  s(x)*s(t) | 
-    | s(x)*s(y) s(y)^2     s(y)*s(z)  s(y)*s(t) |
-    | s(z)*s(t) s(y)*s(z)  s(z)^2     s(z)*s(t) |
-    | s(x)*s(t) s(y)*s(t)  s(z)*s(t)  s(t)^2    |
+    | s(x)^2    s(x)*s(y)  s(x)*s(z)  s(x)*s(t) |
+    | s(y)*s(x) s(y)^2     s(y)*s(z)  s(y)*s(t) |
+    | s(z)*s(x) s(z)*s(y)  s(z)^2     s(z)*s(t) |
+    | s(t)*s(x) s(t)*s(y)  s(t)*s(z)  s(t)^2    |
 
 Then:
 
@@ -553,7 +553,7 @@ gps_mask_t dop(struct gps_data_t *gpsdata)
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
     mask = 0;
 
-    gpsd_report(LOG_PROG, "DOPS reported/computed: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, T=%f/%f, G=%f/%f\n",
+    gpsd_report(LOG_PROG, "DOPS computed/reported: H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
 		hdop, gpsdata->hdop,
 		vdop, gpsdata->vdop,
 		pdop, gpsdata->pdop,
