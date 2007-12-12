@@ -569,7 +569,7 @@ void gpsd_error_model(struct gps_device_t *session,
 		&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
 	    fix->epv = session->gpsdata.vdop * uere;
 
-	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.vdop)!=0)
+	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.pdop)!=0)
 	    session->gpsdata.epe = session->gpsdata.pdop * uere;
 	else
 	    session->gpsdata.epe = NAN;
