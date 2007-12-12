@@ -375,20 +375,30 @@ no date. That's its job.  The libgps library is doing its bit by
 passing everything from <code>gpsd</code> on to the client application
 as it arrives, including the lack of date.</p>
 
-<p>The -j option of xgps will work around this problem.  It sends 
-<code>gpsd</code> an initialization command that causes it not to
-clear fix data at the beginning of each reporting cycle.  This will
-eliminate the flicker, but means that you may occasionally see 
+<p>The -j option of <code>xgps</code> will work around this problem.
+It sends <code>gpsd</code> an initialization command that causes it
+not to clear fix data at the beginning of each reporting cycle.  This
+will eliminate the flicker, but means that you may occasionally see
 stale and invalid data.</p>
 
-<h1 id='flicker'>Why does <code>xgps</code>flicker between displaying FIX
+<h1 id='flicker'>Why does <code>xgps</code> flicker between displaying FIX
 and NOFIX about once a second?</h1>
 
 <p>It's the same problem as the previous entry, and can be banished
 with the -j option.</p>
 
 <p>Other fields may flicker as well; latitude is especially prone to
-this.</p>
+this.  Usually the problem only affects NMEA devices, so if you are
+using something wuith a SiRF or other chipset that reports in a
+non-NMEA format you will never see it.</p>
+
+<h1 id='flicker'>Why doesn't <code>gpsd</code> set its J=1 option by
+default and avoid the flicker problem?</h1>
+
+<p>Because that's policy, and policy is really the client's job.  We
+choose to make <code>gpsd</code> report what the GPS tells it as
+faithfully as it can without making assumptions about how the client
+wants to use the data.</p>
 
 <h1 id='kismet'>Why do I get flaky results when I try to use <code>gpsd</code> with Kismet?</h1>
 
