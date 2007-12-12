@@ -612,7 +612,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	unpacked_date.tm_year = (int)getuw(buf, 6) - 1900;
 	/*@ -compdef */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
-	    (double)mktime(&unpacked_date);
+	    (double)mkgmtime(&unpacked_date);
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getuw(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
