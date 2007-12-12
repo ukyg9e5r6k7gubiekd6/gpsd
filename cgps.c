@@ -337,8 +337,6 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
 			size_t len UNUSED ,
 			int level UNUSED)
 {
-  char *s;
-
   /* Print time/date. */
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
@@ -450,14 +448,14 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   (void)wmove(datawin, 1, DATAWIN_VALUE_OFFSET);
   if (isnan(gpsdata->fix.time)==0) {
     char scr[128];
-    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(s)));
+    (void)wprintw(datawin,"%s",unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
   } else
     (void)wprintw(datawin,"n/a		    ");
 
   /* Fill in the latitude. */
   (void)wmove(datawin, 2, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.latitude)==0) {
-    s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
+    char *s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
   } else
     (void)wprintw(datawin,"n/a	 ");
@@ -465,7 +463,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   /* Fill in the longitude. */
   (void)wmove(datawin, 3, DATAWIN_VALUE_OFFSET);
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.longitude)==0) {
-    s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
+    char *s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
     (void)wprintw(datawin,"%s %c     ", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
   } else
     (void)wprintw(datawin,"n/a	 ");
