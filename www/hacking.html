@@ -1096,13 +1096,13 @@ for time of retrieval.  Buffering makes life easier for applications that
 just want to display a position indicator, and harder for
 perfectionists that worry about precise location of moving GPSes.</p>
 
-The policy decision about whether you want to be a "perfectionist" or
-not fundamentally belongs in the client.  This isn't to say gpsd could
-not have different buffering modes to help the client implement its
-decision, but the modes and their controls would have to be
-implemented <em>very</em> carefully.  Otherwise we'd risk imposing the wrong
-policy (or, worse, a <em>broken version</em> of a wrong policy) on half the
-client applications out there.
+<p>The policy decision about whether you want to be a "perfectionist"
+or not fundamentally belongs in the client.  This isn't to say
+<code>gpsd</code> could not have different buffering modes to help the
+client implement its decision, but the modes and their controls would
+have to be implemented <em>very</em> carefully.  Otherwise we'd risk
+imposing the wrong policy (or, worse, a <em>broken version</em> of a
+wrong policy) on half the client applications out there.
 
 <p>There are hundreds, even thousands of possible sets of action-to-event
 bindings.  The "right" binding for a particular device depends not
@@ -1155,7 +1155,7 @@ of a sentence or packet differs from the last timestamp recorded
 start-of-cycle to report data from the last one is the worst possible
 latency hit.</p>
 
-<h3 id="#baroepcasoc">Buffer all, report on every packet, clear at start-of-cycle</h3>
+<h3 id="baroepcasoc">Buffer all, report on every packet, clear at start-of-cycle</h3>
 
 <p>Another possible policy is "buffer all, report on every packet, clear
 at start-of-cycle".  This is simple and adds minimum reporting
@@ -1175,7 +1175,7 @@ of cycle clears the buffer; a GPRMC arrives with no altitude in it.
 The altitude value in the client display flickers to "not available",
 and won't be restored until the following GGA.</p>
 
-<p>This is the policy gpsd currently follows.</p>
+<p>This is the policy gpsd currently follows when J=0 (the default).</p>
 
 <h3 id="baroencd">Buffer all, report on every packet, never clear data</h3>
 
@@ -1194,13 +1194,15 @@ guess good enough for it to deliver a 2D fix with confidence.  But
 just because GPSes fudge is no good reason for gpsd to add a layer of
 prevarication on top of that.</p>
 
-<p>But the conclusive argument against this policy is that, while it can be
-simulated by buffering data delivered according to a clear-every-cycle 
-policy, the reverse is not true.  Under this policy there would be
-no way to distinguish in gpsd's reports between data valid now and
-data held over from a previous cycle; on the other hand, under
-a clear-at-start-of-cycle policy the client can still do whatever
-buffering and smoothing it wants to.</p>
+<p>But the conclusive argument against wiring in this policy is that,
+while it can be simulated by buffering data delivered according to a
+clear-every-cycle policy, the reverse is not true.  Under this policy
+there would be no way to distinguish in gpsd's reports between data
+valid now and data held over from a previous cycle; on the other hand,
+under a clear-at-start-of-cycle policy the client can still do
+whatever buffering and smoothing it wants to.</p>
+
+<p>This is the policy gpsd currently follows when J=1 (not the default).</p>
 
 <h3 id="baroeptood">Buffer all, report on every packet, time out old data</h3>
 
@@ -1273,7 +1275,7 @@ NOW.
 onboard clock far more accurate than the GPS's once-per-second 
 reports.  This is a problem; in general, we can't assume that 
 a gpsd instance running in a car or boat will have access to
-ntpd or NIST radio time signals.</p>
+<code>ntpd</code> or NIST radio time signals.</p>
 
 <h1 id="designahead">Designing Ahead</h1>
 
@@ -1535,39 +1537,42 @@ not worth doing.</p>
 the following order:</p>
 
 <dl>
-<dt>1. Run the stable regression tests and other checks</dt>
+<dt>1. Check the <a href="">Berlios bug tracker</a> for release blockers.</dt>
+<dd></dd>
+
+<dt>2. Run the stable regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship. This is
 the time to run valgrind-audit and 'make splint' as well and check
 that those reports are clean.</dd>
 
-<dt>2. Issue the pre-release heads-up</dt>
+<dt>3. Issue the pre-release heads-up</dt>
 <dd>About 48 hours before release, announce that it's coming so people
 will have a day or so to get their urgent fixes in.</dd>
 
-<dt>3. Check that the version number is correct</dt>
+<dt>4. Check that the version number is correct</dt>
 <dd>It may need to be modified in configure.ac, and another autogen.sh
 done.  Make sure the 'dev' suffix is gone.</dd>
 
-<dt>4. Announce on gpsd-dev</dt>
+<dt>5. Announce on gpsd-dev</dt>
 <dd>Announce that release is imminent and commits should be held off until
 the release has been shipped and tagged.</dd>
 
-<dt>5. Update the specfile changelog</dt>
+<dt>6. Update the specfile changelog</dt>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>6. Ship to Berlios</dt>
+<dt>7. Ship to Berlios</dt>
 <dd>Upload the tarball to berlios.de</dd>
 
-<dt>7. Tag the release in SVN</dt>
+<dt>8. Tag the release in SVN</dt>
 <dd>Doing 'make svn-tag' should accomplish this</dd>
 
-<dt>8. Bump the release number</dt>
+<dt>9. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>9. Announce the release</dt>
+<dt>10. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the mailing lists.</dd>
 
