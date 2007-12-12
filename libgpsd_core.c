@@ -383,7 +383,7 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     struct tm tm;
     time_t intfixtime;
 
-    tm.tm_mday = tm.tm_mon = tm.tm_year = 0;
+    tm.tm_mday = tm.tm_mon = tm.tm_year = tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
     if (isnan(session->gpsdata.fix.time)==0) {
 	intfixtime = (time_t)session->gpsdata.fix.time;
 	(void)gmtime_r(&intfixtime, &tm);
