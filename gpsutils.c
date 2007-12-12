@@ -184,22 +184,22 @@ double iso8601_to_unix(/*@in@*/char *isotime)
 
 /*@observer@*/char *unix_to_iso8601(double fixtime, /*@ out @*/char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
+/* example: 2007-12-11T23:38:51.0Z */
 {
     struct tm when;
     double integral, fractional;
     time_t intfixtime;
-    size_t slen;
-    char fractstr[20];
+    char timestr[30];
+    char fractstr[10];
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t)integral;
     (void)gmtime_r(&intfixtime, &when);
 
-    (void)strftime(isotime, len, "%Y-%m-%dT%H:%M:%S", &when);
-    slen = strlen(isotime);
+    (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     (void)snprintf(fractstr, sizeof(fractstr), "%.1f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */ 
-    (void)snprintf(isotime + slen, (size_t)(len - slen), "%sZ", fractstr+1);
+    (void)snprintf(isotime, len, "%s%sZ", timestr, fractstr+1);
     return isotime;
 }
 
