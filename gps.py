@@ -434,9 +434,6 @@ class gps(gpsdata):
         self.send(commands)
 	return self.poll()
 
-    def __repr__(self):
-        return "<gps.gps object with id %s>" % id(self)
-
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399
 METERS_TO_MILES	= 0.00062137119
