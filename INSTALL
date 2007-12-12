@@ -66,7 +66,8 @@ system, you may already have LessTif.  Source code is available
 from <http://www.lesstif.org/>.
 
 Under Ubuntu, you will require libmotif-dev, libxp-dev and libxaw7-dev
-in addition to the standard build-support packages.
+in addition to the standard build-support packages.  You can get
+all the build prerequisites intalled with "apt-get build-dep gpsd".
 
 To build from source, run ./autogen.sh (or sh autogen.sh if the
 script does not have execute permission).  Mac OS X users may

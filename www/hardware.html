@@ -109,6 +109,13 @@ The "Works with" column is the last <code>gpsd</code> version with
 which this GPS is known to have been successfully tested. Vendors are
 listed in alphabetical order.</p>
 
+<p>Please mail your success (or failure) reports to 
+<a
+href="http://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
+using the format described <a href="#report_format">further down this
+page</a>. Don't forget to include an annotated log so we can include 
+your device in our regression tests.</p>
+
 <p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
 tickles a serious firmware bug on some some Bluetooth devices, notably
 those shipped by Holux and including the GPSlim-236.  This bug may send
@@ -689,7 +696,7 @@ Reported by Jeff Francis &lt;jeff&#x40;gritch.org&gt;
 <td><a href="http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61371_NL-209PU.html?show=spec">NL-209P</a></td>
 <td>Good</td>
 <td>Sony CXD2951</td>
-<td>Serial. Inlcludes USB (PL2303) adapter</td>
+<td>Serial. Includes USB (PL2303) adapter</td>
 <td>2.35</td>
 <td>2.2</td>
 <td>When running, need to use the -b option, else the device will hang
@@ -704,6 +711,22 @@ Reported by Jason Curl &lt;jcurlnews&#x40;arcor.de&gt;
 </td>
 </tr>
 <!-- End NaviLock NL-209PU -->
+
+<!-- Begin NaviLock NL-302U -->
+<tr>
+<td><a href="http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61422_NL-302U.html?show=spec">NL-302U</a></td>
+<td>Good</td>
+<td>SirfStar III (GSW3.2.4_3.1.00.12-SDK003P1.00a)
+</td>
+<td>USB (PL2303)</td>
+<td>2.34</td>
+<td>?</td>
+<td>
+<code>gpsprof</code> output can be found <a href="http://www.drbeat.li/album/-Diverses/GPS/Navilock+NL-302U">here</a>.
+Reported by Beat Bolli &lt;me+gpsd&#x40;drbeat.li&gt;
+</td>
+</tr>
+<!-- End NaviLock NL-302U -->
 
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.navman.com/'>Navman</a></tr>
 
@@ -1028,8 +1051,10 @@ gpsd. Reported by Ian Darwin &lt;ian&#x40;darwinsys.com&gt;
 
 </table>
 
-<p>We want to extend this table.  To report on a GPS, please
-tell us the following:</p>
+<h2 id="report_format">Extending this table</h2>
+
+<p>We want to extend this table.  To report on a
+GPS, please tell us the following:</p>
 
 <ol>
 <li>The GPS model name.</li>
@@ -1048,6 +1073,10 @@ gives a vendor and product ID, send us those numbers.)</li>
 <p>You should be able to determine many of these things by running
 <code>gpsprof -f cycle</code> against the device and looking at the output.</p>
 
+<p>Don't forget to enclose a <a
+href='faq.html#logformat'>properly-annotated log</a> so we can include
+your device in our regression tests.</p>
+
 <h2>Notes on chipset support:</h2>
 
 <p>For vendor protocol protocol manuals see our
@@ -1063,13 +1092,15 @@ and +5v to +12 volts for the signal (IIRC). These are not compatible,
 and attempting to combine them can zorch your GPS.  Converters do
 exist, see Google.</p>
 
-<h2>Untested Hardware:</h2>
+<h2>Untested hardware:</h2>
 
-<p>Here is a list of the vendors we don't yet have test hardware from.
-An annoyingly large percentage of these outfits do not advertise
-email contact addresses on their websites.  If you have test results 
-for any of this hardware, please tell us.  Most are straight NMEA and
-will probably work fine.</p>
+<p>Here is a list of the vendors we know of but don't yet have test
+hardware from.  An annoyingly large percentage of these outfits do not
+advertise email contact addresses on their websites.  If you have test
+results for any of this hardware, please tell us.  Most are straight
+NMEA and will probably work fine.</p>
+
+<div>&nbsp;</div>
 
 <table border='1'>
 <tr>
@@ -1151,6 +1182,8 @@ although it is not clear if the "consumer" firmware is capable of that.
   are taken from manufacturers' data sheets, and have not been
   independently verified.</p>
 
+<div>&nbsp;</div>
+
 <table border='1'>
 <tr>
 <th>Receiver</th>
@@ -1160,87 +1193,87 @@ although it is not clear if the "consumer" firmware is capable of that.
 </tr>
 <tr>
 <td>Trimble Lassen iQ</td>
-<td><center>50ns</center></td>
-<td></td>
-<td></td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>Trimble Resolution-T</td>
-<td><center>15ns</center></td>
-<td></td>
-<td></td>
+<td align="center">15ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>Garmin GPS18</td>
-<td><center>1usec</center></td>
-<td></td>
-<td></td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>SiRFstar2</td>
-<td><center>1usec</center></td>
-<td></td>
-<td></td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>SiRFstar3</td>
-<td><center>1usec</center></td>
-<td></td>
-<td></td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>ublox Antaris</td>
-<td><center>50ns</center></td>
-<td></td>
-<td></td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>ublox Antaris4</td>
-<td><center>50ns</center></td>
-<td></td>
-<td></td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>ublox Antaris4T</td>
-<td><center>50ns<br>15ns compensated</center></td>
-<td></td>
-<td></td>
+<td align="center">50ns<br>15ns compensated</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>NavSync CW25-TIM</td>
-<td><center>25ns</center></td>
-<td></td>
-<td></td>
+<td align="center">25ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>Rockwell Jupiter</td>
-<td><center>1usec</center></td>
-<td></td>
-<td></td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>SigNav TM3-01</td>
-<td><center>10ns</center></td>
-<td></td>
-<td></td>
+<td align="center">10ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>NavSync CW12-TIM</td>
-<td><center>30ns</center></td>
-<td></td>
-<td></td>
+<td align="center">30ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>Motorola OnCore UT+</td>
-<td><center>50ns</center></td>
-<td></td>
-<td></td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 <tr>
 <td>Motorola<br>iLotus<br>Synergy-GPS M12M</td>
-<td><center>20ns<br>6ns corrected</center></td>
-<td></td>
-<td></td>
+<td align="center">20ns<br>6ns corrected</td>
+<td align="center">-</td>
+<td align="center">-</td>
 </tr>
 </table>
 
