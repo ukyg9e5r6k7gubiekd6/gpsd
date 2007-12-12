@@ -142,7 +142,7 @@ class gpsdata:
 	self.utc = ""
 
 	self.satellites_used = 0		# Satellites used in last fix
-	self.pdop = self.hdop = self.vdop = 0.0
+	self.pdop = self.hdop = self.vdop = self.tdop = self.gdop = 0.0
 
 	self.epe = 0.0
 
@@ -178,7 +178,7 @@ class gpsdata:
 	st += "Status:   STATUS_%s\n" %("NO_FIX","FIX","DGPS_FIX")[self.status]
 	st += "Mode:     MODE_"+("ZERO", "NO_FIX", "2D","3D")[self.fix.mode]+"\n"
 	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f\n" % \
-	      (self.satellites_used, self.pdop, self.hdop, self.vdop)
+	      (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
 	for sat in self.satellites:
 	  st += "    " + repr(sat) + "\n"
@@ -356,8 +356,8 @@ class gps(gpsdata):
 	    elif cmd in ('Q', 'q'):
 		parts = data.split()
 		self.satellites_used = int(parts[0])
-		(self.pdop, self.hdop, self.vdop) = map(float, parts[1:])
-		self.valid |= HDOP_SET | VDOP_SET | PDOP_SET
+		(self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
+		self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
 	    elif cmd in ('S', 's'):
 		self.status = int(data)
 		self.valid |= STATUS_SET
