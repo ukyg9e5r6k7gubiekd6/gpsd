@@ -29,15 +29,40 @@ fix the driver yourself and send us the patch, contact Bill Powell
 <bpowell@tntc.com> at True North Technologies and tell him he needs
 to reverse his refusal to send us an eval unit.
 
-*** There's a report that RoyalTek support broke between 2.25 and 2.28 
-
-There's a report that RoyalTek support broke between 2.25 and 2.28 by
-David Mandala <davidm@them.com>.  His workaround is to condition out
-SiRF support; it works OK in NMEA mode.  The Royaltek died in an
-accident, so we're stuck until someone else can test this.  We think
-it is very likely that changes since 2.28 have fixed this bug.
-
 ** To do:
+
+*** libgps should try to automatically try to reconnect when a poll fails
+
+Petter Reinholdtsen suggests:
+
+At the moment, when a gpsd client using libgps is connected to the
+gpsd server, and the server is restarted, the client looses the
+connection and do not update any more.
+
+It would be nice if the gps_poll() and gps_query() would try to
+reconnect to the server if the read() and write() calls on the tcp
+socket fail.
+
+To test this, start gpsd first (/etc/init.d/gpsd start), xgps second,
+and then restart gpsd (/etc/init.d/gpsd restart).  The xgps client
+will fail to update any more.
+
+I realised how nice this feature would be while comparing the xgps
+client to the roadgps client (part of the roadmap package).  The
+roadgps client would reconnect to the new server and keep updating as
+soon as the server was available. :)
+
+On second thought, and after discussing this on the gpsd mailing list,
+I believe the reconnect need to be handled by the applications in
+addition to the library.  Applications will commonly use the file
+descriptor to detect incoming data, and this file descriptor will
+change on reconnect.
+
+So I rephrase my wish, and ask for reconnect funcionallity in xgps
+instead.  It will make sure the library support reconnects, and also
+provide an example for other clients using the library.
+
+This is Berlios FR #3789.
 
 *** Optimize the use of gpsd_hexdump and gpsd_report
 
