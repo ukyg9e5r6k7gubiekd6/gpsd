@@ -1,4 +1,5 @@
 # Name: Garmin 25LP
+# Chipset: Garmin proprietary, emits NMEA 2.0
 # Cycle-time: 1-second
 # Start-of-cycle: GPRMC
 # Pause-noted: ?

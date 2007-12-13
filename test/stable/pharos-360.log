@@ -1,4 +1,5 @@
 # Name: Pharos GPS-360
+# Chipset: Sirf-II
 # Cycle time: 1 second
 # Start-of-cycle: GGA
 # Pause-noted: N

@@ -5,9 +5,10 @@ regression-test loads for gpsfake -p.
 Structured headers are as follows:
 
 # Name: Product name
+# Chipset: chipset name and (if possible) firmware revision level.
 # Description: product description (optional)
-# Cycle time: Time to repeat a sentence in seconds
-# Start-of-cycle: sentence that begins cycle
+# Cycle time: time to repeat a sentence in seconds
+# Start-of-cycle: sentence that begins each cycle
 # Pause-noted: did submitter note the intercycle pause? (Y/N)
 # Well-behaved: Timestamps are constant across cycle (Y/N)
 # Submitted-by: who sent it

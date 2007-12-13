@@ -326,30 +326,31 @@ libgps: libgps.c .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
 
 # Report splint warnings
+SPLINTOPTS = -I/usr/include/dbus-1.0/
 splint:
 	@echo "Running splint on daemon and libraries..."
 	@echo "Expect 'gpsd.c:230:39: Line expects to suppress 1 error, found 0 errors'"
-	-splint -redef $(gpsd_c_sources) $(libgpsd_c_sources)
+	-splint $(SPLINTOPTS) -redef $(gpsd_c_sources) $(libgpsd_c_sources)
 	@echo "Running splint on xgps..."
-	-splint -exportlocal $(xgps_SOURCES)
+	-splint $(SPLINTOPTS) -exportlocal $(xgps_SOURCES)
 	@echo "Running splint on cgps..."
-	-splint -exportlocal $(cgps_SOURCES)
+	-splint $(SPLINTOPTS) -exportlocal $(cgps_SOURCES)
 	@echo "Running splint on xgpsspeed..."
-	-splint -exportlocal $(xgpsspeed_c_sources)
+	-splint $(SPLINTOPTS) -exportlocal $(xgpsspeed_c_sources)
 	@echo "Running splint on gpsctl..."
-	-splint $(gpsctl_SOURCES)
+	-splint $(SPLINTOPTS) $(gpsctl_SOURCES)
 	@echo "Running splint on sirfmon..."
-	-splint $(sirfmon_SOURCES)
+	-splint $(SPLINTOPTS) $(sirfmon_SOURCES)
 	@echo "Running splint on gpspipe..."
-	-splint $(gpspipe_SOURCES)
+	-splint $(SPLINTOPTS) $(gpspipe_SOURCES)
 	@echo "Running splint on rtcmdecode..."
-	-splint -exportlocal rtcmdecode.c
+	-splint $(SPLINTOPTS) -exportlocal rtcmdecode.c
 	@echo "Running splint on gpsflash..."
-	-splint $(gpsflash_SOURCES)
+	-splint $(SPLINTOPTS) $(gpsflash_SOURCES)
 	@echo "Running splint on bits_test test harness..."
-	-splint $(bits_test_SOURCES)
+	-splint $(SPLINTOPTS) $(bits_test_SOURCES)
 	@echo "Running splint on packet_test test harness..."
-	-splint $(packet_test_SOURCES)
+	-splint $(SPLINTOPTS) $(packet_test_SOURCES)
 
 version:
 	@echo $(VERSION)

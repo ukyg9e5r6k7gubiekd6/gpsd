@@ -1,4 +1,5 @@
 # Name: Garmin 48
+# Chipset: Garmin propritary
 # Description: a handheld from about 2000.
 # Cycle-time: 2 seconds
 # Start-of-cycle: GPRMC

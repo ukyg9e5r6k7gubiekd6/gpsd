@@ -1,8 +1,9 @@
 # Name: Haicom HI-305N
+# Chipset: SiRF-UU
 # Cycle-time: 1 second
 # Start of Cycle: GPGSV I think
 # Pause-noted: Y
-# Well-behaved: not sure
+# Well-behaved: Y
 # Date: 8th of April 2007 around 1955 in GMT+10 timezone
 # Location: Around E153S27
 # Submitted by: "David Findlay" <david@davsoft.com.au>

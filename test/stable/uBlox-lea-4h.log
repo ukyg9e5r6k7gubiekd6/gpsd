@@ -1,4 +1,5 @@
 # Name: uBlox LEA-4H module
+# Chipset: ANTARIS
 # Description: uBlox LEA-4H module
 # Cycle-time: 1 Sec
 # Start-of-cycle: GPRMC

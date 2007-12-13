@@ -1,4 +1,5 @@
 # Name: Garmin Geko 201
+# Chipset: Garmin proprietary
 # Cycle-time: 1-second
 # Start-of-cycle: GPRMC
 # Pause-noted: Y

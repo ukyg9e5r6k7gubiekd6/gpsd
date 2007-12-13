@@ -106,8 +106,10 @@
 interface that advertises NMEA-0183 compliance.  Here are some notes
 on hardware we have tested.  Hyperlinks lead to technical information.
 The "Works with" column is the last <code>gpsd</code> version with
-which this GPS is known to have been successfully tested. Vendors are
-listed in alphabetical order.</p>
+which this GPS is known to have been successfully tested; A "*" in
+this column means we have a regression test load for the device that
+is checked before each release. Vendors are listed in alphabetical
+order.</p>
 
 <p>Please mail your success (or failure) reports to 
 <a
@@ -308,6 +310,22 @@ and Amaury Jacquot &lt;sxpert@esitcom.org&gt;.
 </tr>
 <!-- End Garmin GPS-16 -->
 
+<!-- Begin Garmin GPS-17N -->
+<tr>
+<td><a href='http://www.garmin.com/products/gps17/spec.html'>Garmin GPS-17N</a></td>
+<td>Good</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td>*</td>
+<td>2.0 or 3.0</td>
+<td>
+The 17N has been discontinued and replaced by the 17HVS.
+The interface was RS-232 but used a custom RJ-45 jack.
+Reported by Wojciech Kazubski &lt;wk&#x40;ire.pw.edu.pl&gt;.
+</td>
+</tr>
+<!-- End Garmin GPS-16 -->
+
 <!-- Begin Garmin GPS-18 USB -->
 <tr>
 <td><a href='http://www.garmin.com/manuals/GPS18_TechnicalSpecification.pdf'>Garmin GPS-18 USB</a></td>
@@ -337,13 +355,37 @@ GPS-18 LVC and GPS-18 LVC/5m have PPS outputs. WAAS is supported.</td>
 </tr>
 <!-- End Garmin GPS-18 Non-USB -->
 
+<!-- Begin Garmin GPS-25 Non-USB -->
+<tr>
+<td><a href='http://www8.garmin.com/products/gps25/spec.html'>GPS-25LP</a></td>
+<td>Good</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td>*</td>
+<td>2.0</td>
+<td>Discontinued embedded module.
+Reported by Daniele Giangrazi &t;daniele.giangrazi&#x40;elital.net&gt;</td>
+</tr>
+<!-- End Garmin GPS-25LO -->
+
+<!-- Begin Garmin 38 -->
+<tr>
+<td>Garmin 38</td>
+<td>Excellent</td>
+<td>Garmin</td>
+<td>RS-232</td>
+<td>*</td>
+<td>?</td>
+<td>Discontinued.  Reported by Pascal F. Martin &lt;pascal.martin&#x40;cox.net&gt;</tr>
+<!-- End Garmin 48 -->
+
 <!-- Begin Garmin 48 -->
 <tr>
 <td>Garmin 48</td>
 <td>Excellent</td>
 <td>Garmin</td>
 <td>RS-232</td>
-<td>2.3</td>
+<td>*</td>
 <td>2.0</td>
 <td>Garmin 12XL and 45 are nearly identical and should work as well. Details
 on Garmin's proprietary protocol can be found
@@ -385,7 +427,7 @@ He says it's "Software Version 3.70".
 <td>Good</td>
 <td>Garmin</td>
 <td>RS-232</td>
-<td>2.13</td>
+<td>*</td>
 <td>3.0</td>
 <td>Reported by Jose Luis Domingo Lopez &lt;jdomingo&#x40;24x7linux.com&gt;</td>
 </tr>
@@ -447,7 +489,7 @@ Reported by Michal Panczyk &lt;mpanczyk&#x40;gmail.com&gt;
 <!-- Begin GlobalSat BU-303 -->
 <tr>
 <td><a href='http://www.usglobalsat.com/item.asp?itemid=11&catid=13'>BU-303</a></td>
-<td>Excellent</d>
+<td>Excellent *</d>
 <td>SiRFstarII</td>
 <td>USB (PL2303)</td>
 <td>2.24</td>
@@ -483,7 +525,7 @@ Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;.</td>
 <td>Excellent</d>
 <td>SiRFstarII</td>
 <td>USB (FTDI FT232)</td>
-<td>2.16</td>
+<td>*</td>
 <td>2.2</td>
 <td> We tested a version with SiRF Firmware level 231ES. The <a
 href='http://ftdi-usb-sio.sourceforge.net/'>FTDI USB-to-serial chip</a> is
@@ -537,6 +579,19 @@ with XTrac Firmware.</td>
 </tr>
 <!-- End Haicom HI-303S -->
 
+<!-- Begin Haicom HI-305N -->
+<tr>
+<td><a href="http://www.haicom.com.tw/gps303s.shtml">HI-303S</a></td>
+<td>Good</td>
+<td>SiRF-UU</td>
+<td>CF</td>
+<td>*</td>
+<td>?</td>
+<td>Adaptors for RS-232, USB, and Bluetooth operation are available.
+Reported by David Findlay &lt;dave&#x40;davsoft.com.au&gt;</td>
+</tr>
+<!-- End Haicom HI-3035N -->
+
 <tr><td style='text-align:center;' colspan="7"><a href="http://www.holux.com.tw">Holux</a></td></tr>
 
 <!-- Begin Holux GM-210 -->
@@ -545,7 +600,7 @@ with XTrac Firmware.</td>
 <td>Good</td>
 <td>SiRFstarII</td>
 <td>RS232</td>
-<td>2.24</td>
+<td>*</td>
 <td>2.2</td>
 <td> Reported by  Patrick L. McGillan &lt;pmcgillan&#x40;pateri.com&gt;.</td>
 </tr>
@@ -571,7 +626,7 @@ through serial interface. Water resistant.</td>
 <td>Poor</td>
 <td>SiRFstarIII</td>
 <td>Bluetooth</td>
-<td>2.30</td>
+<td>*</td>
 <td>2.2</td>
 <td>
 Doesn't report altitude reliably.
@@ -789,7 +844,7 @@ tolerate port speed changes at all.
 <td>Good</td>
 <td>SiRFstarII</td>
 <td>USB (PL2303)</td>
-<td>2.23</td>
+<td>*</td>
 <td>2.3</td>
 <td>Reported by Robert Pouliot &lt;krynos&#x40;saturnus.com&gt;<br/>
 The Pharos comes with adaptors for SDIO, CF, USB and plain RS232. Usually
@@ -941,7 +996,7 @@ Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.</td>
 <td>Good</td>
 <td>ANTARIS</td>
 <td>RS-232</td>
-<td>2.33</td>
+<td>*</td>
 <td>2.3</td>
 <td>
 Sends 'E' in second field of GSA record, not an NMEA value.
@@ -957,7 +1012,7 @@ Reported by Andreas Stricker &lt;andreas.stricker@fela.ch&gt;
 <td>Good</td>
 <td>ANTARIS</td>
 <td>1USB+2UART</td>
-<td>2.33</td>
+<td>*</td>
 <td>2.3</td>
 <td>
 Reported by Ali Utku Selen &lt;selenau&#x40;kentkart.com.tr&gt;
