@@ -600,12 +600,12 @@ build_gui(Widget toplevel)
 	    NULL);
 
 	XtRealizeWidget(toplevel);
+	/*@ -type -nullpass @*/
 	delw = XmInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW",
 	    (Boolean)False);
-	/*@ -nullpass @*/
 	(void)XmAddWMProtocolCallback(toplevel, delw, 
 		(XtCallbackProc)quit_cb, NULL);
-	/*@ +onlytrans @*/
+	/*@ +type +onlytrans @*/
 
 	/* create empty list items to be replaced on update */
 	string = XmStringCreateSimple(" ");

@@ -342,42 +342,42 @@ static void update_compass_panel(struct gps_data_t *gpsdata,
   if (isnan(gpsdata->fix.time)==0) {
     (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the heading. */
   if (isnan(gpsdata->fix.track)==0) {
-    (void)sprintf(scr, "%.1f", gpsdata->fix.track);
+    (void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.track);
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the pitch. */
   if (isnan(gpsdata->fix.climb)==0) {
-    (void)sprintf(scr, "%.1f", gpsdata->fix.climb);
+    (void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.climb);
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the roll. */
   if (isnan(gpsdata->fix.speed)==0)
-    (void)sprintf(scr, "%.1f",gpsdata->fix.speed);
+    (void)snprintf(scr, sizeof(scr), "%.1f",gpsdata->fix.speed);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the speed. */
   if (isnan(gpsdata->fix.altitude)==0)
-    (void)sprintf(scr, "%.1f", gpsdata->fix.altitude);
+    (void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.altitude);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in receiver type. */
   if(got_gps_type==1)
-    (void)sprintf(scr ,"%s",gps_type);
+    (void)snprintf(scr, sizeof(scr), "%s",gps_type);
   else
-    (void)sprintf(scr, "unknown");
+    (void)snprintf(scr, sizeof(scr), "unknown");
   (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Be quiet if the user requests silence. */
@@ -410,7 +410,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
     if (display_sats >= MAX_POSSIBLE_SATS) {
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (i < gpsdata->satellites) {
-	  (void)sprintf(scr ," %3d    %02d    %03d    %02d      %c",
+	    (void)snprintf(scr, sizeof(scr), 
+			 " %3d    %02d    %03d    %02d      %c",
 			gpsdata->PRN[i],
 			gpsdata->elevation[i], gpsdata->azimuth[i],
 			gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
@@ -424,7 +425,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
       for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 	if (n < display_sats) {
 	  if ((i < gpsdata->satellites) && ((gpsdata->used[i]!=0) || (gpsdata->satellites <= display_sats))) {
-	    (void)sprintf(scr ," %3d    %02d    %03d    %02d      %c",
+	      (void)snprintf(scr, sizeof(scr),
+			  " %3d    %02d    %03d    %02d      %c",
 			  gpsdata->PRN[i],
 			  gpsdata->elevation[i], gpsdata->azimuth[i],
 			  gpsdata->ss[i], gpsdata->used[i] ? 'Y' : 'N');
@@ -447,73 +449,73 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
   if (isnan(gpsdata->fix.time)==0) {
     (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
 
   /* Fill in the latitude. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.latitude)==0) {
-    (void)sprintf(scr ,"%s %c", 
+    (void)snprintf(scr, sizeof(scr), "%s %c", 
          deg_to_str(deg_type,  fabs(gpsdata->fix.latitude)), 
          (gpsdata->fix.latitude < 0) ? 'S' : 'N');
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the longitude. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.longitude)==0) {
-    (void)sprintf(scr ,"%s %c", 
+    (void)snprintf(scr, sizeof(scr), "%s %c", 
          deg_to_str(deg_type,  fabs(gpsdata->fix.longitude)), 
          (gpsdata->fix.longitude < 0) ? 'W' : 'E');
   } else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the altitude. */
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude)==0)
-    (void)sprintf(scr, "%.1f %s",gpsdata->fix.altitude*altfactor, altunits);
+    (void)snprintf(scr, sizeof(scr), "%.1f %s",gpsdata->fix.altitude*altfactor, altunits);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the speed. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-    (void)sprintf(scr ,"%.1f %s", gpsdata->fix.speed*speedfactor, speedunits);
+    (void)snprintf(scr, sizeof(scr), "%.1f %s", gpsdata->fix.speed*speedfactor, speedunits);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the heading. */
   if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track)==0)
-    (void)sprintf(scr ,"%.1f degrees", gpsdata->fix.track);
+    (void)snprintf(scr, sizeof(scr), "%.1f degrees", gpsdata->fix.track);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the rate of climb. */
   if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb)==0)
-    (void)sprintf(scr ,"%.1f %s/min",
+    (void)snprintf(scr, sizeof(scr), "%.1f %s/min",
 	gpsdata->fix.climb * altfactor * 60, altunits);
   else
-    (void)sprintf(scr, "n/a");
+    (void)snprintf(scr, sizeof(scr), "n/a");
   (void)mvwprintw(datawin, 7, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
   /* Fill in the GPS status and the time since the last state
      change. */
   if (gpsdata->online == 0) {
     newstate = 0;
-    (void)sprintf(scr ,"OFFLINE");
+    (void)snprintf(scr, sizeof(scr), "OFFLINE");
   } else {
     newstate = gpsdata->fix.mode;
     switch (gpsdata->fix.mode) {
     case MODE_2D:
-      (void)sprintf(scr ,"2D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      (void)snprintf(scr, sizeof(scr), "2D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
       break;
     case MODE_3D:
-      (void)sprintf(scr ,"3D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
+      (void)snprintf(scr, sizeof(scr), "3D %sFIX (%d secs)",(gpsdata->status==STATUS_DGPS_FIX)?"DIFF ":"", (int) (time(NULL) - status_timer));
       break;
     default:
-      (void)sprintf(scr ,"NO FIX (%d secs)", (int) (time(NULL) - status_timer));
+      (void)snprintf(scr, sizeof(scr), "NO FIX (%d secs)", (int) (time(NULL) - status_timer));
       break;
     }
   }
@@ -521,9 +523,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
   /* Fill in the receiver type. */
   if(got_gps_type==1) {
-    (void)sprintf(scr ,"%s",gps_type);
+    (void)snprintf(scr, sizeof(scr), "%s",gps_type);
   } else {
-    (void)sprintf(scr ,"unknown");
+    (void)snprintf(scr, sizeof(scr), "unknown");
   }
   (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
@@ -539,30 +541,30 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
       /* Fill in the estimated horizontal position error. */
       if (isnan(gpsdata->fix.eph)==0)
-	(void)sprintf(scr ,"+/- %d %s", (int) (gpsdata->fix.eph * altfactor), altunits);
+	(void)snprintf(scr, sizeof(scr), "+/- %d %s", (int) (gpsdata->fix.eph * altfactor), altunits);
       else
-        (void)sprintf(scr, "n/a");
+        (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated vertical position error. */
       if (isnan(gpsdata->fix.epv)==0)
-	(void)sprintf(scr ,"+/- %d %s", (int)(gpsdata->fix.epv * altfactor), altunits);
+	(void)snprintf(scr, sizeof(scr), "+/- %d %s", (int)(gpsdata->fix.epv * altfactor), altunits);
       else
-        (void)sprintf(scr, "n/a");
+        (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated track error. */
       if (isnan(gpsdata->fix.epd)==0)
-	(void)sprintf(scr ,"+/- %.1f deg", (gpsdata->fix.epd));
+	(void)snprintf(scr, sizeof(scr), "+/- %.1f deg", (gpsdata->fix.epd));
       else
-        (void)sprintf(scr, "n/a");
+        (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
 
       /* Fill in the estimated speed error. */
       if (isnan(gpsdata->fix.eps)==0)
-	(void)sprintf(scr ,"+/- %d %s", (int)(gpsdata->fix.eps * speedfactor), speedunits);
+	(void)snprintf(scr, sizeof(scr), "+/- %d %s", (int)(gpsdata->fix.eps * speedfactor), speedunits);
       else
-        (void)sprintf(scr, "n/a");
+        (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
     }
 
