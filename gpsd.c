@@ -298,11 +298,6 @@ static int filesock(char *filename)
 #define MAXDEVICES	4
 #endif
 
-/*
- * Note: stdin/stdout, logging, and the control socket may eat several
- * file descriptors, so don't set this too low. 16 should probably be
- * the minimum.
- */
 #ifdef LIMITED_MAX_CLIENTS
 #define MAXSUBSCRIBERS LIMITED_MAX_CLIENTS
 #else
@@ -323,8 +318,8 @@ static struct gps_device_t channels[MAXDEVICES];
 #define syncing(chp)	(chp->gpsdata.gps_fd>-1&& chp->packet_type==BAD_PACKET)
 
 static struct subscriber_t {
-    int fd;				/* client file descriptor. -1 if unused */
-    double active;			/* when subscriber last polled for data */
+    int fd;			/* client file descriptor. -1 if unused */
+    double active;		/* when subscriber last polled for data */
     bool tied;				/* client set device with F */
     bool watcher;			/* is client in watcher mode? */
     int raw;				/* is client in raw mode? */
