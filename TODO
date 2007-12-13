@@ -18,7 +18,7 @@ The driver for the binary protocol used by Garmin USB GPSes has some
 serious endianness dependencies due to naive structure unpacking in
 the C code (a practice Garmin's incomplete and ancient technical 
 documentation  stupidly encourages).  It will probably fail on
-big-endian machines
+big-endian machines.
 
 *** Support for the True North magnetic compass is currently broken
 
@@ -91,14 +91,6 @@ The iTrax02 driver sets SYNCMODE to start navigation messages without
 checking to see if it's already on, and stops navigation methods on
 wrapup.  It also forces the set of sentences issued.  There doesn't
 seem to be any way to query these settings.
-
-*** Integrate udev support in the RPM installation
-
-Currently gpsd includes udev support that seems to work in the source
-build, but the RPM still installs the old-style hotplug support.
-Fixing this is not urgent, as the old-style support will likely
-be retained for compatibility for a long time, but it should
-get done someday.
 
 *** Merge cgps and xgps
 
