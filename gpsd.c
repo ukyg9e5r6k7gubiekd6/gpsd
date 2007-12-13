@@ -198,14 +198,14 @@ static void usage(void)
 {
     (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
-  -b		     	= bluetooth-safe: open data sources read-only\n\
+  -b		     	    = bluetooth-safe: open data sources read-only\n\
   -n			    = don't wait for client connects to poll GPS\n\
   -N			    = don't go into background\n\
-  -F sockfile		   = specify control socket location\n\
-  -P pidfile	      	= set file to record process ID \n\
-  -D integer (default 0)  	= set debug level \n\
-  -S integer (default %s)	= set port for daemon \n\
-  -h		     	= help message \n\
+  -F sockfile		    = specify control socket location\n\
+  -P pidfile	      	    = set file to record process ID \n\
+  -D integer (default 0)    = set debug level \n\
+  -S integer (default %s) = set port for daemon \n\
+  -h		     	    = help message \n\
   -V			    = emit version and exit.\n\
 A device may be a local serial device for GPS input, or a URL of the form:\n\
      [{dgpsip|ntrip}://][user:passwd@]host[:port][/stream]\n\
