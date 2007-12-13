@@ -58,9 +58,15 @@ addition to the library.  Applications will commonly use the file
 descriptor to detect incoming data, and this file descriptor will
 change on reconnect.
 
-So I rephrase my wish, and ask for reconnect funcionallity in xgps
+So I rephrase my wish, and ask for reconnect funcionality in xgps
 instead.  It will make sure the library support reconnects, and also
 provide an example for other clients using the library.
+
+(ESR thinks maybe this ought to be done at library level anyway, with
+users warned that the gps_fd member of the gps_data_t structure may
+change on reconnect and shouldn't be cached.  This wouldn't be hard to
+implement, but it would change gps_data_t and require a library
+version bump.)
 
 This is Berlios FR #3789.
 
