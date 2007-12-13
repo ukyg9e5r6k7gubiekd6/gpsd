@@ -7,18 +7,30 @@
 PATH=.:$PATH
 export PATH
 
-case $1 in
-    -t)
-        shift
+mode=regress
+while getopts trbvo:n opt
+do
+    case $opt in
+	t) mode=regress ;;	# Run regression tests
+	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
+	b) mode=build ;;	# Rebuild regression check files
+	v) mode=view ;;		# View result of generating a check file
+	o) opts="$OPTARG" ;;	# Pass options to gpsfake
+	n) do=echo ;;		# Just echo commands, don't do them
+    esac
+done
+shift $(($OPTIND - 1))
+
+case $mode in
+    regress)
         echo "Testing the daemon..."
-        mkdir -p test
         errors=0; total=0; notfound=0;
         for f in $*; do
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		gpsfake -s 38400 -1 -b -p ${f} | grep -v "^GPSD,X" >$dir/test.chk;
-		if diff -ub ${f}.chk $dir/test.chk; then :; else
+		$do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
 	    else
@@ -26,7 +38,8 @@ case $1 in
 		notfound=`expr $notfound + 1`;
 	    fi
 	    total=`expr $total + 1`;
-        done; rm $dir/test.chk;
+        done; 
+	$do rm -f $dir/test.chk;
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
@@ -35,25 +48,28 @@ case $1 in
             exit 0;
         fi
         ;;
-    -r)
+    superraw)
         echo "Testing super-raw mode..."
-        mkdir -p test
         for f in $*; do
             dir=`dirname $f`
-            gpsfake -s 38400 -1 -b -p -r "r=2" ${f} \
+            $do gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
             | ./striplog -1 >$dir/test1.chk;
-            ./striplog <$${f} >$dir/test2.chk;
-            cmp $dir/test[12].chk;
+            $do ./striplog <$${f} >$dir/test2.chk;
+            $do cmp $dir/test[12].chk;
         done; rm $dir/test[12].chk
         ;;
-    -b)
-        echo "Rebuilding regressions..."
-        shift
+    build)
+	echo "Rebuilding regressions..."
         for f in $*; do
-            gpsfake -s 38400 -1 -b -p ${f} | grep -v "^GPSD,X" >${f}.chk;
+            $do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
+        done
+        exit 0
+        ;;
+    view)
+        echo "Viewing..."
+        for f in $*; do
+            $do gpsfake -s 38400 -1 -b -p $opts ${f}
         done
         exit 0
         ;;
 esac
-
-
