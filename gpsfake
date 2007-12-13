@@ -49,7 +49,7 @@ class Baton:
         return
 
 try:
-    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:o:pr:s:v")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pr:s:vx")
 except getopt.GetoptError, msg:
     print "gpsfake: " + str(msg)
     raise SystemExit, 1
@@ -60,6 +60,7 @@ cycle = 0
 monitor = ""
 speed = 4800
 linedump = False
+predump = False
 pipe = False
 singleshot = False
 flicker = False
@@ -77,11 +78,6 @@ for (switch, val) in options:
         cycle = float(val)
     elif (switch == '-D'):
         doptions += " -D " + val
-    elif (switch == '-f'):	# Undocumented option for flicker checking
-        flicker = pipe = singleshot = True
-        port = fakeport
-        cycle = 0.05
-        init = "w+"
     elif (switch == '-g'):
         monitor = "xterm -e gdb -tui --args "
     elif (switch == '-i'):
@@ -90,6 +86,10 @@ for (switch, val) in options:
         linedump = True
     elif (switch == '-m'):
         monitor = val + " "
+    elif (switch == '-n'):
+        doptions += " -n"
+    elif (switch == '-x'):
+        predump = True
     elif (switch == '-o'):
         doptions = val
     elif (switch == '-p'):
@@ -143,23 +143,9 @@ def fakehook(linenumber, fakegps):
 if progress:
     baton = Baton("Processing %s" % logfile, "done")
 
-test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose)
+test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
 
-def flickerdigest(line):
-    if line.startswith("GPSD,Y="):
-        return
-    elif line.startswith("GPSD,O="):
-        fields = line.split()
-        (sentence, time, altitude, mode) = (fields[0],fields[1],fields[5],fields[14])
-        sentence=sentence[7:]
-        sys.stdout.write("sentence=%s, time=%s, altitude=%s, mode=%s\n" \
-                         % (sentence, time, altitude, mode))
-    else:
-        sys.stdout.write(line)
-
-if flicker:
-    test.reporter = flickerdigest
-elif pipe:
+if pipe:
     test.reporter = sys.stdout.write
     #test.progress = sys.stdout.write
 

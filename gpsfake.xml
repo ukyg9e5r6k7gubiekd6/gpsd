@@ -87,8 +87,9 @@ daemon should be run.  This option is intended to be used with
 <citerefentry><refentrytitle>gdb</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 and similar programs.</para>
 
-<para>The -g option uses the monitor facility to run the gpsd within
-gpsfake under control of gdb.</para>
+<para>The -g option uses the monitor facility to run the
+<application>gpsd</application> instance within gpsfake under control
+of gdb.</para>
 
 <para>The -o option specifies options to pass to the daemon.  The -n
 option passes -n to start the daemon reading the GPS without waiting
@@ -106,6 +107,10 @@ default is 4800.</para>
 
 <para>The -v option enables verbose progress reports to stderr.  It
 is mainly useful for debugging <application>gpsfake</application> itself.</para>
+
+<para>The -x option dumps packets as
+<application>gpsfake</application> gathers them.  It is mainly useful
+for debugging <application>gpsfake</application> itself.</para>
 
 <para>The -h option makes <application>gpsfake</application> print 
 a usage message and exit.</para>

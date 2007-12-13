@@ -86,9 +86,10 @@ class TestLoadError(exceptions.Exception):
 
 class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
-    def __init__(self, logfp):
+    def __init__(self, logfp, predump=False):
         self.sentences = []	# This and .packtype are the interesting bits
         self.logfp = logfp
+        self.predump = predump
         self.logfile = logfp.name
         self.type = None
         self.serial = None
@@ -128,7 +129,8 @@ class TestLoad:
         # Grab the packets
         while True:
             packet = self.packet_get()
-            #print "I see: %s, length %d" % (`packet`, len(packet))
+            if self.predump:
+                print `packet`
             if not packet:
                 break
             else:
@@ -218,7 +220,7 @@ class TestLoad:
                     delcnt = 0
             return packet
         else:
-            raise PacketError("unknown packet type, leader %s, (0x%x)" % (first, ord(first)))
+            raise PacketError("unknown packet type, leader %s (0x%x)" % (`first`, ord(first)))
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
@@ -228,7 +230,7 @@ class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp,
                  speed=4800, databits=8, parity='N', stopbits=1,
-                 verbose=False):
+                 verbose=False, predump=False):
         self.verbose = verbose
         self.go_predicate = lambda: True
         self.readers = 0
@@ -258,7 +260,7 @@ class FakeGPS:
         speed = baudrates[speed]	# Throw an error if the speed isn't legal
         if type(logfp) == type(""):
             logfp = open(logfp, "r");            
-        self.testload = TestLoad(logfp)
+        self.testload = TestLoad(logfp, predump)
         # FIXME: explicit arguments should probably override this
         #if self.testload.serial:
         #    (speed, databits, parity, stopbits) = self.testload.serial
@@ -399,9 +401,10 @@ class TestSessionError(exceptions.Exception):
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
     CLOSE_DELAY = 1
-    def __init__(self, prefix=None, port=None, options=None, verbose=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=False, predump=False):
         "Initialize the test session by launching the daemon."
         self.verbose = verbose
+        self.predump = predump
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.client_id = 0
@@ -429,7 +432,7 @@ class TestSession:
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
-            newgps = FakeGPS(logfile, speed=speed, verbose=self.verbose)
+            newgps = FakeGPS(logfile, speed=speed, verbose=self.verbose, predump=self.predump)
             if pred:
                 newgps.go_predicate = pred
             elif self.default_predicate:
