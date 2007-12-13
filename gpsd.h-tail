@@ -436,7 +436,7 @@ extern float roundf(float x);
 /* some OSes don't have round(). fake it if need be */
 #ifndef HAVE_ROUND
 #define	round(x) ((double)rint(x))
-#define roundf(x) ((float)rintf(x))
+#define roundf(x) ((float)rintf((double)x))
 #endif /* !HAVE_ROUND */
 
 /* OpenBSD and FreeBSD and Cygwin don't seem to have NAN, NetBSD does, others? */

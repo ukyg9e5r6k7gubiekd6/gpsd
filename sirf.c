@@ -252,7 +252,9 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session, unsigned char
     if (strstr((char *)(buf+1), "ES"))
 	gpsd_report(LOG_INF, "Firmware has XTrac capability\n");
     gpsd_report(LOG_PROG, "Driver state flags are: %0x\n", session->driver.sirf.driverstate);
+#ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
+#endif /* NTPSHM_ENABLE */
 #ifdef ALLOW_RECONFIGURE
     if (session->gpsdata.baudrate >= 38400){
 	gpsd_report(LOG_PROG, "Enabling subframe transmission...\n");

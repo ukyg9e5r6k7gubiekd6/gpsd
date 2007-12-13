@@ -307,7 +307,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	}
 	gpsd_set_speed(session, 
 		       rates[session->baudindex],
-		       'N', session->gpsdata.stopbits);
+		       session->gpsdata.parity, session->gpsdata.stopbits);
     }
 
     return true;	/* keep hunting */
