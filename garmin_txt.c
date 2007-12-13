@@ -151,20 +151,22 @@ invalid data.
  *  123 -> +12.3
 
 **************************************************************************/
-static int gar_decode(const char *data, const unsigned int length, const char *prefix, const double dividor, double *result)
+static int gar_decode(const char *data, const size_t length, const char *prefix, const double dividor, /*@out@*/double *result)
 {
     char buf[10];
     float sign = 1.0;
-    int preflen = strlen(prefix);
+    int preflen = (int)strlen(prefix);
     int offset = 1;    /* assume one character prefix (E,W,S,N,U, D, etc) */
     int intresult;
 
+    /* splint is buggy here, thinks buf can be a null pointer */
+    /*@ -mustdefine -nullderef -nullpass @*/
     if (length >= sizeof(buf)) {
         gpsd_report(LOG_ERROR, "internal buffer too small\n");
         return -1;
     }
 
-    bzero(buf, sizeof(buf));
+    bzero(buf, (int)sizeof(buf));
     (void) strncpy(buf, data, length);
     gpsd_report(LOG_RAW, "Decoded string: %s\n", buf);
 
@@ -201,6 +203,7 @@ static int gar_decode(const char *data, const unsigned int length, const char *p
         gpsd_report(LOG_WARN, "Invalid value %s\n", buf);
         return -1;
     }
+    /*@ +mustdefine +nullderef +nullpass @*/
 
     intresult = atoi(buf+offset);
     if (intresult == 0) sign = 0.0; /*  don't create negatove zero */
@@ -215,17 +218,18 @@ static int gar_decode(const char *data, const unsigned int length, const char *p
  *       -1: data error
  *       -2: data not valid
 **************************************************************************/
-static int gar_int_decode(const char *data, const unsigned int length, const int min, const int max, int *result)
+static int gar_int_decode(const char *data, const size_t length, const int min, const int max, /*@out@*/int *result)
 {
     char buf[3];
     int res;
 
+    /*@ -mustdefine @*/
     if (length >= sizeof(buf)) {
         gpsd_report(LOG_ERROR, "internal buffer too small\n");
         return -1;
     }
 
-    bzero(buf, sizeof(buf));
+    bzero(buf, (int)sizeof(buf));
     (void) strncpy(buf, data, length);
     gpsd_report(LOG_RAW, "Decoded string: %s\n", buf);
 
@@ -234,6 +238,7 @@ static int gar_int_decode(const char *data, const unsigned int length, const int
         return -2;
     }
 
+    /*@ -nullpass @*/	/* splint bug */
     if (strspn(buf, "0123456789") != length) {
         gpsd_report(LOG_WARN, "Invalid value %s\n", buf);
         return -1;
@@ -247,6 +252,7 @@ static int gar_int_decode(const char *data, const unsigned int length, const int
         gpsd_report(LOG_WARN, "Value %d out of range <%d, %d>\n", res, min, max);
         return -1;
    }
+   /*@ +mustdefine +nullpass @*/
 }
 
 
@@ -321,7 +327,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
 
     /* fix mode, GPS status, [gGdDS_] */
     do {
-       char status = session->packet.outbuffer[30];
+       char status = (char)session->packet.outbuffer[30];
        gpsd_report(LOG_PROG, "GPS fix mode: %c\n", status);
 
         switch (status) {
