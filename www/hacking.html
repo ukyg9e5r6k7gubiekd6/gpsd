@@ -258,12 +258,14 @@ to support an RTCM104 encoder.</p>
 
 <h1 id="contributions">Contribution guidelines</h1>
 
-<h2 id="languages">Our languages are C and Python</h2>
+<h2 id="languages">Our languages are C, Python, and sh</h2>
 
 <p>The project implementation languages are C and Python.  The core
 libgpsd libraries (and the daemon, which is a thin wrapper around
 them) are written in C; the test and profiling tools are written in
-Python.  Code in other languages will, in general, be accepted only if
+Python, with a limited amount of glue in POSIX-conformant sh.</p>
+
+<p>Code in other languages will, in general, be accepted only if
 it supplies a language binding for the libgps or libgpsd libraries
 that we don't already have.  This restriction is an attempt to keep
 our long-term maintenance problem as tractable as possible.</p>
@@ -284,6 +286,28 @@ scripts.  Again, this is a long-term maintainability issue; there are
 whole classes of potential C bugs that simply don't exist in Python,
 and Python programs have a drastically lower line count for equivalent
 capability.</p>
+
+<p>Shell scripts are acceptable for test and build code that only has
+to run in our development and test environments, as opposed to target
+or production environments.  Note that shell scripts should not assume
+<code>bash</code> is available but rather stick to POSIX
+<code>sh</code>; among other benefits, this helps portability to BSD
+systems.  Generally code that will run in the Ubuntu/Debian
+<code>dash</code> can be considered safe.</p>
+
+<p>Here are two related rules:</p>
+
+<p>Any complexity that can be moved out of the <code>gpsd</code>
+daemon to external test or framework code doesn't belong in the
+daemon.</p>
+
+<p>Any complexity that can be moved out of C and into a higher-level
+language (Python, in particular) doesn't belong in C.</p>
+
+<p>Both rules have the same purpose: to move complexity and resource
+costs from the places in the codebase where we can least afford it
+to the places where it is most manageable and inflicts the least
+long-term maintenance burden.</p>
 
 <h2 id="verify">Verify your patch or commit</h2>
 
