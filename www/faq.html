@@ -142,25 +142,48 @@ header should consist of text lines beginning with # and ending with LF.
 Here is the beginning of one log file I already have:</p>
 
 <pre>
-# Name: Holux GM-210
-# Chipset: SiRF-II
+# Name: Magellan eXplorist 210
+# Chipset: unknown
 # Cycle-time: 1-second
-# Start-of-cycle: ?
-# Pause-noted: ?
+# Start-of-cycle: $GPGLL
+# Pause-noted: Y
 # Well-behaved: N
-# Submitted-by: "Patrick L. McGillan" &lt;pmcgillan&#x40;pateri.com&gt;
-# Date: 4 Apr 2005
-# Location: Osceola, Iowa, US, 41N93W
-$GPGGA,012519.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*7D
-$GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
-$GPRMC,012519.563,V,4131.7353,N,09336.8150,W,0.00,,050405,,*14
-$GPGGA,012520.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*77
-$GPGSA,A,1,,,,,,,,,,,,,50.0,50.0,50.0*05
-$GPGSV,3,1,09,14,65,034,00,01,55,291,43,25,53,210,37,22,45,125,00*7E
-$GPGSV,3,2,09,30,29,096,00,11,25,294,32,05,20,056,00,18,14,127,00*73
-$GPGSV,3,3,09,15,08,176,00*4C
-$GPRMC,012520.563,V,4131.7353,N,09336.8150,W,0.00,,050405,,*1E
-$GPGGA,012521.563,4131.7353,N,09336.8150,W,0,00,50.0,280.2,M,-31.6,M,0.0,0000*76
+# Submitted-by: "Paul B van den Berg" <paulberg@wanadoo.nl>
+# Date: 20 May 2006
+# Location: Groningen, NL, 53.2N6.6E
+#
+# mode V2.1 GSA
+# Lines up to but not including the first GPGLL are
+# `cat /dev/ttyACM0` at startup 
+# Following lines are
+# `cat /dev/ttyACM0` stationary
+$GPGSV,3,1,00,,,,,,,,,,,,,,,,*7B
+$GPGSV,3,2,00,,,,,,,,,,,,,,,,*78
+$GPGSV,3,3,00,,,,,,,,,,,,,,,,*79
+$PMGNST,01.75,3,F,816,11.1,+00000,20*5E
+$GPGSV,3,1,00,,,,,,,,,,,,,,,,*7B
+$GPGSV,3,2,00,,,,,,,,,,,,,,,,*78
+$GPGSV,3,3,00,,,,,,,,,,,,,,,,*79
+$PMGNST,01.75,3,F,816,11.1,+00000,20*5E
+$GPGSV,3,1,00,,,,,,,,,,,,,,,,*7B
+$GPGSV,3,2,00,,,,,,,,,,,,,,,,*78
+$GPGSV,3,3,00,,,,,,,,,,,,,,,,*79
+$PMGNST,01.75,3,F,822,11.2,+00000,20*5A
+$GPGSV,3,1,00,,,,,,,,,,,,,,,,*7B
+$GPGSV,3,2,00,,,,,,,,,,,,,,,,*78
+$GPGSV,3,3,00,,,,,,,,,,,,,,,,*79
+$PMGNST,01.75,3,F,822,11.2,+00000,20*5A
+$GPGSV,3,1,12,09,76,287,,17,38,073,36,26,34,163,,05,33,230,*72
+$GPGSV,3,2,12,29,27,161,,18,24,256,,22,24,299,,28,11,055,*73
+$GPGSV,3,3,12,14,08,319,,11,03,017,,30,02,232,,24,00,084,*71
+$PMGNST,01.75,3,F,822,11.2,-00673,20*5E
+$GPGLL,5313.2228,N,00634.4228,E,200619.295,A*35
+$GPGGA,200619.30,5313.2228,N,00634.4228,E,1,05,2.6,00000,M,,,,*2C
+$GPRMC,200619.30,A,5313.2228,N,00634.4228,E,00.0,000.0,200506,00,W*59
+$GPGSA,A,3,26,05,22,09,18,,,,,,,,05.1,02.6,04.4*03
+$GPGSV,3,1,10,09,78,288,39,17,38,071,,05,34,230,45,26,33,163,39*77
+$GPGSV,3,2,10,29,26,162,,18,24,255,42,22,24,298,44,28,10,056,*75
+$GPGSV,3,3,10,14,09,319,,11,03,016,,136,27,157,,124,28,162,*71
 </pre>
 
 <p>The way to fill in the Name, Cycle-Time, Submitted-by, and Date
@@ -181,6 +204,11 @@ same timestamp, N otherwise.</p>
 
 <p>Please also include a Location header giving your city,
 state/province, country code, and a rough latitude/longitude.</p>
+
+<p>A log file is most useful when it contains (a) some sentences 
+generated when the GPS has no fix, (b) some sentences representing
+a fix with the GPS stationary, and (c) some sentences representing
+a fix with the GPS moving.</p>
 
 <p>If you have notes or comments on the logfile or the GPS, or any
 additional information you think might be helpful, add them as
