@@ -17,7 +17,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
-global $GPS, $server, $advertise, $port, $magic, $swap_ew;
+global $GPS, $server, $advertise, $port, $magic, $swap_ew, $magic;
 $magic = 1; # leave this set to 1
 
 if (!file_exists("gpsd_config.inc"))
@@ -351,6 +351,7 @@ function parse_pvt($resp){
 function write_html($resp){
 	global $GPS, $sock, $errstr, $errno, $server, $port, $head, $body;
 	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
+	global $magic;
 
 	header("Content-type: text/html; charset=UTF-8");
 
