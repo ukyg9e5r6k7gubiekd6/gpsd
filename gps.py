@@ -89,17 +89,17 @@ class gpstimings:
         self.poll_time = float(poll_time)
         self.emit_time = float(emit_time)
     def __str__(self):
-        return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
-               % (timings.sentence_tag,
-                 timings.sentence_length,
-                 timings.sentence_time,
-                 timings.d_xmit_time, 
-                 timings.d_recv_time,
-                 timings.d_decode_time,
-                 timings.poll_time,
-                 timings.emit_time,
-                 timings.c_recv_time,
-                 timings.c_decode_time)
+        return "%s\t%2d\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\t%2.6f\n" \
+               % (self.sentence_tag,
+                 self.sentence_length,
+                 self.sentence_time,
+                 self.d_xmit_time, 
+                 self.d_recv_time,
+                 self.d_decode_time,
+                 self.poll_time,
+                 self.emit_time,
+                 self.c_recv_time,
+                 self.c_decode_time)
         
 
 class gpsfix:
@@ -177,7 +177,7 @@ class gpsdata:
 	    st += "Track:    %f\n" % (self.fix.track)
 	st += "Status:   STATUS_%s\n" %("NO_FIX","FIX","DGPS_FIX")[self.status]
 	st += "Mode:     MODE_"+("ZERO", "NO_FIX", "2D","3D")[self.fix.mode]+"\n"
-	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f\n" % \
+	st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
 	      (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
 	st += "Y: %s satellites in view:\n" % len(self.satellites)
 	for sat in self.satellites:
@@ -402,8 +402,8 @@ class gps(gpsdata):
         if self.sockfile._rbuf:	# Ugh...relies on socket library internals.
             return True
         else:
-            (input, output, exceptions) = select.select((self.sock,), (),(), 0)
-            return input != []
+            (winput,woutput,wexceptions) = select.select((self.sock,), (),(), 0)
+            return winput != []
 
     def poll(self):
 	"Wait for and read data being streamed from gpsd."
@@ -519,7 +519,7 @@ def isotime(s):
 	raise TypeError
 
 if __name__ == '__main__':
-    import sys,readline
+    import readline
     print "This is the exerciser for the Python gps interface."
     session = gps()
     session.set_raw_hook(lambda s: sys.stdout.write(s + "\n"))

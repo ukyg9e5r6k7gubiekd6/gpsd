@@ -352,6 +352,10 @@ splint:
 	@echo "Running splint on packet_test test harness..."
 	-splint $(SPLINTOPTS) $(packet_test_SOURCES)
 
+# Bogon-checking the Python tools
+pychecker:
+	for f in gps.py gpsfake.py; do pychecker $$f; done
+
 version:
 	@echo $(VERSION)
 

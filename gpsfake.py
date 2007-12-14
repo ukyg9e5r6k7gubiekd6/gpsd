@@ -68,7 +68,7 @@ run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
 import sys, os, time, signal, pty, termios # fcntl, array, struct
-import string, exceptions, threading, socket, commands
+import exceptions, threading, socket
 import gps
 
 # Define a per-character delay on writes so we won't spam the buffers
@@ -119,7 +119,7 @@ class TestLoad:
                             stopbits = int(params[2])
                         else:
                             raise ValueError
-                    except ValueError, IndexError:
+                    except (ValueError, IndexError):
                         raise TestLoadError("bad serial-parameter spec in %s"%\
                                             logfp.name)
                     
@@ -192,7 +192,7 @@ class TestLoad:
             fourth = self.logfp.read(1)
             fifth = self.logfp.read(1)
             sixth = self.logfp.read(1)
-            id = ord(third) | (ord(fourth) << 8)
+            #id = ord(third) | (ord(fourth) << 8)
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\xff\x81" + third + fourth + fifth + sixth + self.logfp.read(2*ndata+6)
         elif first == '\x02' and second == '\x99':		# Navcom
@@ -200,7 +200,7 @@ class TestLoad:
 	    fourth = self.logfp.read(1)
             fifth = self.logfp.read(1)
             sixth = self.logfp.read(1)
-            id = ord(fourth)
+            #id = ord(fourth)
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\x02\x99\x66" + fourth + fifth + sixth + self.logfp.read(ndata-2)
         elif first == '\x10':					# TSIP
@@ -368,7 +368,7 @@ class DaemonInstance:
     def is_alive(self):
         "Is the daemon still alive?"
         try:
-            st = os.kill(self.pid, 0)
+            os.kill(self.pid, 0)
             return True
         except OSError:
             return False
@@ -457,22 +457,22 @@ class TestSession:
         self.client_id += 1
         self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
         if commands:
-            self.initialize(newclient, commands), 
-        return newclient.id
+            self.initialize(newclient, commands) 
+        return self.client_id
     def client_query(self, id, commands):
         "Ship a command to a client channel, get a response (threaded mode only)."
         self.progress("gpsfake: client_query(%d, %s)\n" % (id, `commands`))
-        for object in self.runqueue:
-            if isinstance(object, gps.gps) and object.id == id:
-                client.query(commands)
-                return client.response
+        for obj in self.runqueue:
+            if isinstance(obj, gps.gps) and obj.id == id:
+                obj.query(commands)
+                return obj.response
         return None
-    def client_remove(self, id):
+    def client_remove(self, cid):
         "Terminate a client session."
-        self.progress("gpsfake: client_remove(%d)\n" % id)
-        for object in self.runqueue:
-            if isinstance(object, gps.gps) and object.id == id:
-                self.remove(object)
+        self.progress("gpsfake: client_remove(%d)\n" % cid)
+        for obj in self.runqueue:
+            if isinstance(obj, gps.gps) and obj.id == cid:
+                self.remove(obj)
                 return True
         else:
             return False
