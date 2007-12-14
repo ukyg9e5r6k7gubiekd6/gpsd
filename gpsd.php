@@ -418,7 +418,7 @@ EOF;
 	if (!strlen($advertise))
 		$advertise = $server;
 
-	if (!$sock)
+	if ($magic && !$sock)
 		$part2 = "";
 	else
 		$part2 = <<<EOF
@@ -450,7 +450,7 @@ Use a different server:<br/>
 </tr>
 EOF;
 
-	if (!$sock)
+	if ($magic && !$sock)
 		$part4 = "<tr><td><font color='red'>The gpsd instance that this page monitors is not running.</font></td></tr>";
 	else
 		$part4 = <<<EOF
