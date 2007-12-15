@@ -381,7 +381,7 @@ driver.
 ******************************************************************************/
 
 /*@ -fixedformalarray -mustdefine @*/
-static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
+static bool invert(double mat[4][4], /*@out@*/double inverse[4][4])
 {
   // Find all NECESSARY 2x2 subdeterminants
   double Det2_12_01 = mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0];
@@ -445,8 +445,8 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
 		- mat[0][3]*Det3_123_012;
 
   // Very small determinants probably reflect floating-point fuzz near zero
-  if (fabs(det) == 0.0)
-      return 0;
+  if (fabs(det) < 0.0001)
+      return false;
 
   inverse[0][0] =  Det3_123_123 / det;
   //inverse[0][1] = -Det3_023_123 / det;
@@ -468,7 +468,7 @@ static int invert(double mat[4][4], /*@out@*/double inverse[4][4])
   //inverse[3][2] = -Det3_013_012 / det;
   inverse[3][3] =  Det3_012_012 / det;
 
-  return 1;
+  return true;
 }  
 /*@ +fixedformalarray +mustdefine @*/
 
