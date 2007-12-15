@@ -133,6 +133,10 @@ daemon instance with data from specified sentence logs.</para>
 torture-test either <application>gpsd</application> itself or any
 <application>gpsd</application>-aware client application.</para>
 
+<para>Logfiles for the use with <application>gpsfake</application> can be
+retrieved using <application>gpspipe</application> and
+<application>sirfmon</application> from the gpsd distribution, or any other
+application which is able to create a compatible output.</para>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
@@ -141,8 +145,9 @@ torture-test either <application>gpsd</application> itself or any
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpscat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpspipe</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>sirfmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
