@@ -1562,7 +1562,101 @@ second. Foo!"</p>
 and all NMEA devices. That's well over 90% of cases and renders it
 not worth doing.</p>
 
-<h1 id='release'>Release Checklist</h1>
+<h1 id='release'>Release Procedure</h1>
+
+<p>First, defining some terms.  There are three tiers of code in our tarballs.
+Each has a different risk profile.</p>
+
+<h3>1) Exterior code</h3>
+
+<p>Test clients and test tools: <code>xgps</code>, <code>cgps</code>,
+<code>gpsfake</code>, <code>gpsprof</code>, <code>sirfmon</code>, etc.
+These are at low risk of breakage and are easy to eyeball-check for
+correctness -- when they go wrong they tend to do so in obvious ways.
+Point errors in a tool don't compromise the other tools or the
+daemon.</p>
+
+<h3>2) Device drivers</h3>
+
+<p>Drivers for the individual GPS device types.  Errors in a driver can
+be subtle and hard to detect, but they generally break support for one
+class of device without affecting others.  Driver maintainers can test
+their drivers with high confidence.</p>
+
+<h3>3) Core code</h3>
+
+<p>Core code is shared among all device types; most notably, it includes
+the packet-getter state machine, the channel-management logic, and
+the error-modeling code.  Historically these are the three most 
+bug-prone areas in the code.</p>
+
+<p>We also need to notice that there are two different kinds of devices
+with very different risk profiles:</p>
+
+<p>A) Static-testable: These are devices like NMEA and SiRF chipsets that
+can be effectively simulated with a test-load file using gpsfake.  We
+can verify these with high confidence using a mechanical regression test.</p>
+
+<p>B) The problem children:  Garmins and other devices that aren't 
+static-testable. When the correctness of drivers and core code in
+handling is suspect, they have to be live-tested by someone with
+acess to the actual device.</p>
+
+<p>The goal of our release procedure is simple: prevent functional progressions.
+No device that worked in release N should break in release N+1.  Of course
+we also want to prevent shipping broken core code.</p>
+
+<p>For static-testable devices this is fairly easy to ensure.  Now that
+we've fixed the problems with ill-conditioned floating-point, the
+regression-test suite does a pretty good job of exercising those
+drivers and the related core code and producing repeatable results.
+Accordingly, I'm fairly sure we will never again ship a release with
+serious breakage on NMEA or SiRF devices.</p>
+
+<p>The problem children are another matter.  Right now our big exposure
+here is Garmins, but we need to have good procedure in case we get
+our TnT support unbroken and for other ill-behaved devices we might
+encounter in the future.</p>
+
+<p>Here are the new release-readiness states:</p>
+
+<p>State 0 (red): There are known blocker bugs,  Blocker bugs include functional
+regressions in core or driver code.  </p>
+
+<p>State 1 (blue): There are no known blocker bugs.  'make
+testregress' passes, but problem-children have not been
+live-tested. </p>
+
+<p>State 2 (yellow): There are no known blocker bugs.  'make testregress'
+passes.  Problem children have been live-tested.  From this state, we
+drop back to state 1 if anyone commits a logic change to core code or
+the driver for a problem child.  In state 2, devs with release
+authority (presently myself, Chris, and Gary) may ship a release
+candidate at any time.</p>
+
+<p>State 3 (green): We've been in state 2 for 7 days.  In state 3, a dev 
+with release authority can call a freeze for release.</p>
+
+<p>State 4: (freeze): No new features that could destabilize existing code.  
+Release drops us to state 3.</p>
+
+<p>When you do something that changes our release state -- in particular,
+when you commit a patch that touches core or a problem-child driver
+at state 2 -- you must notify the dev list.</p>
+
+<p>Anyone notifying the list of a blocker bug drops us back to state 0.</p>
+
+<p>When you announce a state change on the dev list, do it like this:</p>
+
+<pre>
+     Red light: total breakage in Garmin USB, partial breakage in Garmin serial
+     Blue light: no known blockers, cosmetic problems in xgps
+     Yellow light: Garmins tested successfylly 20 Dec 2007
+     Green light: I'm expecting to call freeze in about 10 days
+     Freeze: Scheduled release date 1 Feb 2008
+</pre>
+
+<h2>Release Checklist</h2>
 
 <p>This is a reminder for release engineers preparing to ship a public
 <code>gpsd</code> version.  Release requires the following steps in
@@ -1607,8 +1701,13 @@ distinguishable from the next public release.</dd>
 <dt>10. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the mailing lists.</dd>
-
 </dl>
+
+<h2>Packaging links</h2>
+
+<p><a
+href='https://ssl.recluse.de/svn/debian/packages/gpsd/trunk/debian/'>Debian
+build controls</a></p>
 
 
 </div>
