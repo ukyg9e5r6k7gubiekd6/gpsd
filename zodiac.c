@@ -176,7 +176,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
     if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
-	(void)ntpshm_put(session, session->gpsdata.fix.time + 1.1);
+	(void)ntpshm_put(session, session->gpsdata.fix.time);
 #endif
     /*@ -type @*/
     session->gpsdata.fix.latitude  = ((long)getlong(27)) * RAD_2_DEG * 1e-8;
