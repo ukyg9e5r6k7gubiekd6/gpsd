@@ -579,12 +579,17 @@ void gpsd_error_model(struct gps_device_t *session,
 	 * didn't set the speed error and climb error members itself, 
 	 * try to compute them now.
 	 */
-	if (isnan(fix->eps)!=0 && fix->time > oldfix->time) {
-	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX) {
+	if (isnan(fix->eps)!=0)
+	{
+	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
+			&& isnan(oldfix->eph)==0 && isnan(oldfix->eph)==0 
+			&& isnan(oldfix->time)==0 && isnan(oldfix->time)==0 
+			&& fix->time > oldfix->time) {
 		double t = fix->time-oldfix->time;
 		double e = oldfix->eph + fix->eph;
 		fix->eps = e/t;
-	    }
+	    } else
+		fix->eps = NAN;
 	}
 	if ((fix->mode >= MODE_3D) 
 	    	&& isnan(fix->epc)!=0 && fix->time > oldfix->time) {
