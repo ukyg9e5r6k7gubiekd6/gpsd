@@ -417,6 +417,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for GPSClock support
+AC_ARG_ENABLE(gpsclock,
+  AC_HELP_STRING([--disable-gpsclock],
+                 [disable GPSClock support]),
+  [ac_gpsclock=$enableval], [ac_gpsclock=yes])
+AC_MSG_CHECKING([for GPSClock support])
+if test x"$ac_gpsclock" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([GPSCLOCK_ENABLE], 1, [GPSclock chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for RTCM104 support
 AC_ARG_ENABLE(rtcm104,
   AC_HELP_STRING([--disable-rtcm104],
@@ -709,6 +722,7 @@ echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "True North              : $ac_tnt"
 echo "UBX                     : $ac_ubx"
+echo "GPSclock                : $ac_gpsclock"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"

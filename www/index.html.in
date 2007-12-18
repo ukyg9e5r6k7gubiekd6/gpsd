@@ -155,7 +155,7 @@ href='http://developer.berlios.de/projects/gpsd/'>here on berlios.de</a>.</p>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package
-manager or by tying <code>"sudo aspt-get gpsd"</code> at the command
+manager or by tying <code>"sudo apt-get gpsd"</code> at the command
 line.</p>
 
 <h1 id='mailing-lists'>Mailing Lists</h1>

@@ -217,6 +217,11 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
 	break;
 #endif /* ITRAX_ENABLE */
+#ifdef GPSCLOCK_ENABLE
+    case 5:
+	/* probe for Furuno Electric GH-79L4-N (GPSClock) */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPsrq");
+#endif /* GPSCLOCK_ENABLE */
     default:
 	break;
     }
@@ -258,7 +263,8 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 {
 #if defined(NMEA_ENABLE)
     /*
-     * Receivers like the Garmin GPS-10 don't handle having a lot of 
+     * Receivers like the Garmin GPS-10 don't handle having having a lot of 
+     * probes shoved at them very well.
      */
     switch (seq) {
     case 0:
@@ -346,7 +352,7 @@ static struct gps_type_t fv18 = {
     .trigger        = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
-    .probe_detect   = NULL,		/* mo probe */
+    .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = fv18_configure,	/* change its sentence set */
@@ -365,6 +371,54 @@ static struct gps_type_t fv18 = {
     .cycle          = 1,		/* updates every second */
 };
 #endif /* FV18_ENABLE */
+
+#ifdef GPSCLOCK_ENABLE
+/**************************************************************************
+ *
+ * Furuno Electric GPSClock (GH-79L4)
+ *
+ **************************************************************************/
+
+/*
+ * Based on http://www.tecsys.de/fileadmin/user_upload/pdf/gh79_1an_intant.pdf
+ */
+
+static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int seq)
+{
+    /*
+     * Michael St. Laurent <mikes@hartwellcorp.com> reports that you have to
+     * ignore the trailing PPS edge when extracting time from this chip.
+     */
+    if (seq == 0) {
+	gpsd_report(LOG_INF, "PPS trailing edge will be ignored");
+	session->driver.nmea.ignore_trailing_edge = true;
+    }
+}
+
+static struct gps_type_t gpsclock = {
+    .typename       = "Furuno Electric GH-79L4",	/* full name of type */
+    .trigger        = "$PFEC,GPssd",	/* FV18s should echo the probe */
+    .channels       = 12,		/* not used by this driver */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = gpsclock_probe_subtype,	/* to be sent unconditionally */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = NULL,		/* change its sentence set */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* sample rate is fixed */
+    .cycle_chars    = -1,		/* sample rate is fixed */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
+};
+#endif /* GPSCLOCK_ENABLE */
 
 #ifdef TRIPMATE_ENABLE
 /**************************************************************************
@@ -746,6 +800,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
+#ifdef GPSCLOCK_ENABLE
+    &gpsclock,
+#endif /* GPSCLOCK_ENABLE */
 #ifdef GARMIN_ENABLE
     &garmin,
 #endif /* GARMIN_ENABLE */
