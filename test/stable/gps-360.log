@@ -1,6 +1,6 @@
 # Name: Pharos GPS-360
 # Chipset: SiRfII
-# Cycle time: 1sec
+# Cycle-time: 1s
 # Start-of-cycle: GPGGA
 # Submitted-by: "Jeff Fisher" <guppy@techmonkeys.org>
 # Date: 27 July 2006
