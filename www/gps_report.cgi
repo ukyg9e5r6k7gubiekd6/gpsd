@@ -21,7 +21,7 @@ things we might be able to find out ourselves, but which are easier
 for you to determine.  Every bit of information you can give us about
 your GPS will help make the support for it more reliable.</p>
 
-<form action="env.cgi" method="GET">  
+<form action="gps_report.cgi" method="GET">  
 
 <hr/>
 <h2>Contact information</h2>
@@ -62,7 +62,7 @@ main page. Example:
 
 <p>Please identify the GPS chipset and firmware version, if possible.  You
 may be able to get this from the display of <code>xgps</code>; look for
-a GPS Type field or the window title bar. Alternatively, you may find 
+a GPS Type field or at the window title bar. Alternatively, you may find 
 it in the technical manual.  Example:
 <code>SiRF-II (2.31ES)</code>.</p>
 
@@ -207,19 +207,35 @@ states, that too is a good thing to note.</p>
 
 <textarea name="samplenotes" rows="10" cols="72"></textarea>
 
+<div><input type="submit" name="preview" value="Preview"></div>
+EOF
+
+    $gps_trailer=<<EOF;
 <hr/>
 <p>Thanks for your help.  Click the <code>Send Report</code> button to
 send your report to the GPSD developers.  Eventually, your report is
 likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
 
-<input type="submit" value="Send Report">
+<div><input type="submit" name="send" value="Send Report"></div>
 </form>
 EOF
+
+# Actual execution begins here.
 
 header;
 print start_html(-title=>"GPS Reporting Form",  -background=>"../htdocs/paper.gif");
 
 print $gps_form;
+
+# Debugging
+my @params = param();
+      print '<TABLE border="1" cellspacing="0" cellpadding="0">' . "\n";
+      foreach my $parameter (sort @params) {
+        print "<tr><th>$parameter</th><td>" . param($parameter) . "</td></tr>\n";
+      }
+      print "</TABLE>\n";
+
+print $gps_trailer;
 
 end_html;
 
