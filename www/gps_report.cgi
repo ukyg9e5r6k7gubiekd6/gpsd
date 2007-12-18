@@ -22,11 +22,12 @@ failures with GPS units, and also to upload a sample of the GPS's
 output so we can add it to our regression tests and ensure continued
 support of the device.</p>
 
-<p>Fields marked <em style='color: #ff0000;'>Important!</em> have to
-be filled in for the report to be useful.  Other fields represent
-things we might be able to find out ourselves, but which are easier
-for you to determine.  Every bit of information you can give us about
-your GPS will help make the support for it more reliable.</p>
+<p>Fields marked <em style='color: #ff0000;'>Important!</em> have to be filled
+in for the report to be useful.  These are: submitter contact address, vendor,
+model, documentation URL, and output sample.  Other fields represent things we
+might be able to find out ourselves, but which are easier for you to determine.
+Every bit of information you can give us about your GPS will help make the
+support for it more reliable.</p>
 
 <hr/>
 <h2>Contact information</h2>
@@ -45,18 +46,21 @@ print <<EOF;
 be able to do it if we can find no other way of getting information
 about the device.  Expect to hear from us if your GPS is obsolescent or 
 exotic and the information you provide in the rest of this form turns
-out to be insufficient.)</p>
+out to be insufficient. Or if your browser is broken enough to botch 
+the output-sample upload.)</p>
 
 <hr/>
 <h2>GPS type identification</h2>
 
-<p><em style='color: #ff0000;'>Important!</em> Identify the vendor and model
-of your device.  Example: <code>Haicom-303S</code></p>
+<p><em style='color: #ff0000;'>Important!</em> Identify the vendor and model of
+your device.  Example: <code>Haicom</code> and <code>303S</code>.</p>
 
 EOF
 
-print "<em>GPS make and model:</em>",$query->textfield(-name=>"gpstype",
-							    -size=>72);
+print "<p><em>Vendor:</em>",$query->textfield(-name=>"vendor", -size=>72),"</p>";
+
+print "<p><em>Model:</em>",$query->textfield(-name=>"model", -size=>72),"</p>";
+
 print <<EOF;
 <p><em style='color: #ff0000;'>Important!</em> We need a URL pointing to a
 technical manual for the device.  You can usually find this on the
@@ -73,11 +77,14 @@ main page. Example:
 may be able to get this from the display of <code>xgps</code>; look for
 a GPS Type field or at the window title bar. Alternatively, you may find 
 it in the technical manual.  Example:
-<code>SiRF-II (2.31ES)</code>.</p>
+<code>SiRF-II</code> amd <code>2.31ES</code>.</p>
 EOF
 
-print "<em>Chipset (and firmware):</em>",$query->textfield(-name=>"chipset",
-							    -size=>72);
+print "<p><em>Chipset:</em>",
+    $query->textfield(-name=>"chipset", -size=>72),"</p>\n";
+print "<p><em>Firmware:</em>",
+    $query->textfield(-name=>"firmware", -size=>72),"</p>\n";
+
 print <<EOF;
 <p>Please identify, if possible, the NMEA version the GPS emits.
 You may be able to get this information from the technical manual.
@@ -129,7 +136,7 @@ like <code>r2331</code>.</p>
 
 EOF
 
-print "<em>Tested with?</em>",$query->textfield(-name=>"testversion",
+print "<em>Tested with:</em>",$query->textfield(-name=>"testversion",
 						-size=>6);
 
 print <<EOF;
@@ -246,7 +253,6 @@ print"<em>Sampling interval:</em>",$query->textfield(-name=>"interval",
 						     -size=>6); 
 
 print <<EOF;
-<em>Sampling interval?</em> <input type="text" name="interval" size="6"/>
 
 <p>First sentence in the GPS\'s reporting cycle.  Leave this blank for SiRF
 devices; it is mainly interesting for NMEA devices with unknown chipsets.
@@ -272,12 +278,8 @@ print $query->textarea(-name=>"sample_notes", -rows=>10, -cols=>72);
 print <<EOF;
 
 <hr/>
-<p>Thanks for your help.  Click the <code>Send Report</code> button to
-send your report to the GPSD developers.  Eventually, your report is
-likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
-
-<p>Here is a summary of the report you might send now.  To refresh this
-summary without sending, click <code>Preview</code>.</p>
+<p>Thanks for your help.  Here is a summary of the information you have
+entered so far:</p>
 
 EOF
 
@@ -288,20 +290,38 @@ if ($query->param("submitter")) {
 } else {
     print "<span style='color:#ff0000;'>No contact address.</span><br/>\n";
 }
-if ($query->param("gpstype")) {
-    print "GPS type is <code>".$query->param("gpstype")."</code><br/>\n";
+if ($query->param("vendor")) {
+    print "Vendor is <code>".$query->param("vendor")."</code><br/>\n";
 } else {
-    print "<span style='color:#ff0000;'>No GPS type.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No vendor.</span><br/>\n";
+}
+if ($query->param("model")) {
+    print "Model is <code>".$query->param("model")."</code><br/>\n";
+} else {
+    print "<span style='color:#ff0000;'>No model specified.</span><br/>\n";
 }
 if ($query->param("techdoc")) {
     print "<a href='".$query->param("techdoc")."'>Document URL specified.</a><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
 }
-if ($query->param("chipset")) {
-    print "Chipset/firmware is <code>".$query->param("chipset")."</code><br/>\n";
+if ($query->param("notes")) {
+    print "You have uploaded an output sample.";
 } else {
-    print "Chipset/firmware not specified.<br/>\n";
+    print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
+}
+
+print "</td><td align='center'>";
+
+if ($query->param("chipset")) {
+    print "Chipset is <code>".$query->param("chipset")."</code><br/>\n";
+} else {
+    print "Chipset not specified.<br/>\n";
+}
+if ($query->param("firmware")) {
+    print "Firmware is <code>".$query->param("firmware")."</code><br/>\n";
+} else {
+    print "Firmware not specified.<br/>\n";
 }
 if ($query->param("nmea")) {
     print "NMEA version is <code>".$query->param("nmea")."</code><br/>\n";
@@ -332,11 +352,7 @@ if ($query->param("notes")) {
 }
 
 print "</td><td align='center'>";
-if ($query->param("notes")) {
-    print "You have uploaded an output sample.";
-} else {
-    print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
-}
+
 if ($query->param("location")) {
     print "Sample location <code>".$query->param("location")."</code><br/>\n";
 } else {
@@ -368,20 +384,40 @@ if ($query->param("sample_notes")) {
 
 print "</td></tr></table>";
 
-# Must have all critical fields
-unless ($query->param("submitter") && $query->param("gpstype")
+print "<p>To refresh this summary, click <code>Review</code>\n";
+
+
+# Must have all critical fields to ship
+if ($query->param("submitter") && $query->param("gpstype")
 	&& $query->param("techdoc") && $query->param("output_sample")) {
-    print "<div>Critical fields are missing; no report would be sent.</div>"
+
+    print <<EOF;
+<p>Click the <code>Send Report</code> button to
+send your report to the GPSD developers.  Eventually, your report is
+likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
+
+<table width="100%" border="0">
+<tr>
+<td align='center'><input type="submit" name="action" value="Review"></td>
+<td align='center'><input type="submit" name="action" value="Send Report"></td>
+</tr>
+</table>
+EOF
+} else {
+    print <<EOF;
+<p style='color:#ff0000;'>Required fields are missing; please fill them in and click 
+<code>Review</code>.</p>
+
+<table width="100%" border="0">
+<tr>
+<td align='center'><input type="submit" name="action" value="Review"></td>
+</tr>
+</table>
+EOF
 }
 
 print <<EOF;
 <hr/>
-<table width="100%" border="0">
-<tr>
-<td align='center'><input type="submit" name="action" value="Preview"></td>
-<td align='center'><input type="submit" name="action" value="Send Report"></td>
-</tr>
-</table>
 EOF
 
 $query->end_html;
