@@ -187,10 +187,25 @@ hour/minute/second).  Example: <code>20 May 2006</code>.</p>
 
 <em>Date:</em> <input type="text" name="date" size="20"/>
 
-<p>The GPS's default sampling interval in seconds.  This will
-usually be 1.</p>
+<p>The GPS's default sampling interval in seconds.  This will usually be 1.
+For SiRF chips it's always 1 and you can leave it blank; it's mainly
+interesting for NMEA devices with unknown chipsets.</p>
 
 <em>Sampling interval?</em> <input type="text" name="interval" size="6"/>
+
+<p>First sentence in the GPS's reporting cycle.  Leave this blank for SiRF
+devices; it is mainly interesting for NMEA devices with unknown chipsets.
+You may be able to read it from the manual; if not, slowing the GPS to
+4800 will probably make the intercycle pause visible.</p>
+
+<em>First sentence in cycle?</em> <input type="text" name="leader" size="6"/>
+
+<p>Finally, add any notes you want to about how the sample was taken.  One
+good thing to put here would a description of how the GPS was moving while the
+log was being captured.  If the sentence mix changes between "fix" and "no fix"
+states, that too is a good thing to note.</p>
+
+<textarea name="samplenotes" rows="10" cols="72"></textarea>
 
 <hr/>
 <p>Thanks for your help.  Click the <code>Send Report</code> button to
