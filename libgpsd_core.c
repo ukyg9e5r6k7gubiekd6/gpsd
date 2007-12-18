@@ -27,7 +27,6 @@
 #define PLS_ONE_SEC  1000000 /* one second in microseconds */
 #define PLS_TWO_SEC  2000000 /* two seconds in microseconds */
 #define PLS_JITTER   50000   /* 50 usec allowance for jitter on the detection of an event */
-#define PLS_DELAY    110000 /* max delay for delviery of 1pps pulse microseconds */
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
@@ -201,12 +200,19 @@ static void *gpsd_ppsmonitor(void *arg)
 	    } else if (cycle > PLS_ONE_SEC - PLS_JITTER && cycle < PLS_ONE_SEC + PLS_JITTER ) {
 		/* frequency is 1 Hz , check if it is a pulse or square wave */
 		if (duration < PLS_HALF_SEC + PLS_JITTER) {
+#ifdef GPSCLOCK_ENABLE
 		    /* looks like 1 Hz square wave */
-		    if (PLS_ONE_SEC - tv.tv_usec < PLS_DELAY || tv.tv_usec < PLS_DELAY)
-			/* this edge is near to a second, so use it */
+		    /*
+		     * Ugly hack to cope with the Furuno GPSClock, which has the 
+		     * odd property that you have to ignore the trailing
+		     * edge of the PPS.  Someday we'll autoconfigure this.
+		     */
+		    if (state == 1)
+			/* this edge is active, so use it */
 			(void)ntpshm_pps(session, &tv);
 		    else
 			gpsd_report(LOG_RAW, "PPS 1 Hz signal ignoring inactive edge\n");
+#endif /* GPSCLOCK_ENABLE */
 		} else {
 		    /* looks like it might be a 1PPS pulse */
 		    if (duration > PLS_LONG_PLS - PLS_JITTER)
