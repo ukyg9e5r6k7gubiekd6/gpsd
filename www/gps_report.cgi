@@ -276,98 +276,102 @@ print <<EOF;
 send your report to the GPSD developers.  Eventually, your report is
 likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
 
-<p>Here is a summary of the report you would send now.  To refresh this
+<p>Here is a summary of the report you might send now.  To refresh this
 summary without sending, click <code>Preview</code>.</p>
 
 EOF
 
-if ($query->param()) {
-    print "<table border='0' width='100%'><tr><td align='center'>";
+print "<table border='0' width='100%'><tr><td align='center'>";
 
-    if ($query->param("submitter")) {
-	print "Contact address is <code>".$query->param("submitter")."</code><br/>\n";
-    } else {
-	print "<span style='color:#ff0000;'>No contact address.</span><br/>\n";
-    }
-    if ($query->param("gpstype")) {
-	print "GPS type is <code>".$query->param("gpstype")."</code><br/>\n";
-    } else {
-	print "<span style='color:#ff0000;'>No GPS type.</span><br/>\n";
-    }
-    if ($query->param("techdoc")) {
-	print "Document URL is <code>".$query->param("techdoc")."</code><br/>\n";
-    } else {
-	print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
-    }
-    if ($query->param("chipset")) {
-	print "Chipset/firmware is <code>".$query->param("chipset")."</code><br/>\n";
-    } else {
-	print "Chipset/firmware not specified.<br/>\n";
-    }
-    if ($query->param("nmea")) {
-	print "NMEA version is <code>".$query->param("nmea")."</code><br/>\n";
-    } else {
-	print "NMEA version not specified.<br/>\n";
-    }
-    if ($query->param("interface")) {
-	print "Interface type is <code>".$query->param("interface")."</code><br/>\n";
-	if ($query->param("interface") == "USB") {
-	    if ($query->param("usbchip")) {
-		print "USB chip is <code>".$query->param("usbchip")."</code><br/>\n";
-	    } else {
-		print "No USB chip specified.<br/>\n";
-	    }
+if ($query->param("submitter")) {
+    print "Contact address is <code>".$query->param("submitter")."</code><br/>\n";
+} else {
+    print "<span style='color:#ff0000;'>No contact address.</span><br/>\n";
+}
+if ($query->param("gpstype")) {
+    print "GPS type is <code>".$query->param("gpstype")."</code><br/>\n";
+} else {
+    print "<span style='color:#ff0000;'>No GPS type.</span><br/>\n";
+}
+if ($query->param("techdoc")) {
+    print "<a href='".$query->param("techdoc")."'>Document URL specified.</a><br/>\n";
+} else {
+    print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
+}
+if ($query->param("chipset")) {
+    print "Chipset/firmware is <code>".$query->param("chipset")."</code><br/>\n";
+} else {
+    print "Chipset/firmware not specified.<br/>\n";
+}
+if ($query->param("nmea")) {
+    print "NMEA version is <code>".$query->param("nmea")."</code><br/>\n";
+} else {
+    print "NMEA version not specified.<br/>\n";
+}
+if ($query->param("interface")) {
+    print "Interface type is <code>".$query->param("interface")."</code><br/>\n";
+    if ($query->param("interface") == "USB") {
+	if ($query->param("usbchip")) {
+	    print "USB chip is <code>".$query->param("usbchip")."</code><br/>\n";
+	} else {
+	    print "No USB chip specified.<br/>\n";
 	}
-    } else {
-	print "No interface type specified.<br/>\n";
     }
-    if ($query->param("testversion")) {
-	print "Tested with GPSD version <code>".$query->param("testversion")."</code><br/>\n";
-    } else {
-	print "No GPSD version specified.<br/>\n";
-    }
-    if ($query->param("notes")) {
-	print "Technical notes have been entered.";
-    } else {
-	print "No technical notes.<br/>\n";
-    }
+} else {
+    print "No interface type specified.<br/>\n";
+}
+if ($query->param("testversion")) {
+    print "Tested with GPSD version <code>".$query->param("testversion")."</code><br/>\n";
+} else {
+    print "No GPSD version specified.<br/>\n";
+}
+if ($query->param("notes")) {
+    print "Technical notes have been entered.";
+} else {
+    print "No technical notes.<br/>\n";
+}
 
-    print "</td><td align='center'>";
-    if ($query->param("notes")) {
-	print "You have uploaded an output sample.";
-    } else {
-	print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
-    }
-    if ($query->param("location")) {
-	print "Sample location <code>".$query->param("location")."</code><br/>\n";
-    } else {
-	print "No sample location specified.<br/>\n";
-    }
-    if ($query->param("date")) {
-	print "Sample date <code>".$query->param("date")."</code><br/>\n";
-    } else {
-	print "No sample date specified.<br/>\n";
-    }
+print "</td><td align='center'>";
+if ($query->param("notes")) {
+    print "You have uploaded an output sample.";
+} else {
+    print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
+}
+if ($query->param("location")) {
+    print "Sample location <code>".$query->param("location")."</code><br/>\n";
+} else {
+    print "No sample location specified.<br/>\n";
+}
+if ($query->param("date")) {
+    print "Sample date <code>".$query->param("date")."</code><br/>\n";
+} else {
+    print "No sample date specified.<br/>\n";
+}
 
-    if ($query->param("interval")) {
-	print "Sampling interval <code>".$query->param("interval")."</code><br/>\n";
-    } else {
-	print "No sampling interval specified.<br/>\n";
-    }
-    if ($query->param("leader")) {
-	print "Leading sentence <code>".$query->param("leader")."</code><br/>\n";
-    } else {
-	print "No leading sentence specified.<br/>\n";
-    }
+if ($query->param("interval")) {
+    print "Sampling interval <code>".$query->param("interval")."</code><br/>\n";
+} else {
+    print "No sampling interval specified.<br/>\n";
+}
+if ($query->param("leader")) {
+    print "Leading sentence <code>".$query->param("leader")."</code><br/>\n";
+} else {
+    print "No leading sentence specified.<br/>\n";
+}
 
 
-    if ($query->param("sample_notes")) {
-	print "Notes on the sample have been entered.";
-    } else {
-	print "No notes on the sample.<br/>\n";
-    }
+if ($query->param("sample_notes")) {
+    print "Notes on the sample have been entered.";
+} else {
+    print "No notes on the sample.<br/>\n";
+}
 
-    print "</td></tr></table>";
+print "</td></tr></table>";
+
+# Must have all critical fields
+unless ($query->param("submitter") && $query->param("gpstype")
+	&& $query->param("techdoc") && $query->param("output_sample")) {
+    print "<div>Critical fields are missing; no report would be sent.</div>"
 }
 
 print <<EOF;
