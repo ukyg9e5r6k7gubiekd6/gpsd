@@ -1,0 +1,215 @@
+#!/usr/bin/perl -wT
+#
+# This is the CGI that processes the form return from newuser.html
+# It's in Perl rather than Python because Berlios doesn't support
+# Python CGIs.
+#
+use CGI qw(:standard);
+use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+
+$gps_form=<<EOF;
+<h1>GPS Reporting Form</h1>
+
+<p>Please use this form to report <code>gpsd</code> successes or
+failures with GPS units, and also to upload a sample of the GPS's
+output so we can add it to our regression tests and ensure continued
+support of the device.</p>
+
+<p>Fields marked <em style='color: #ff0000;'>Important!</em> have to
+be filled in for the report to be useful.  Other fields represent
+things we might be able to find out ourselves, but which are easier
+for you to determine.  Every bit of information you can give us about
+your GPS will help make the support for it more reliable.</p>
+
+<form action="env.cgi" method="GET">  
+
+<hr/>
+<h2>Contact information</h2>
+
+<p><em style='color: #ff0000;'>Important!</em> We need a valid email
+address for you in case we need to ask you followup questions about
+the device.  We won't give your address to anyone.  Example:
+<code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
+
+<em>Name and email address:</em> 
+<input type="text" name="submitter" size="72"/>
+
+<p>(It is not actually very likely we will contact you, but we need to
+be able to do it if we can find no other way of getting information
+about the device.  Expect to hear from us if your GPS is obsolescent or 
+exotic and the information you provide in the rest of this form turns
+out to be insufficient.)</p>
+
+<hr/>
+<h2>GPS type identification</h2>
+
+<p><em style='color: #ff0000;'>Important!</em> Identify the vendor and model
+of your device.  Example: <code>Haicom-303S</code></p>
+
+<em>GPS make and model:</em> 
+<input type="text" name="gpstype" size="72"/>
+
+<p><em style='color: #ff0000;'>Important!</em> We need a URL pointing to a
+technical manual for the device.  You can usually find this on the
+vendor's website by giving a search engine the product name.  If it's
+not linked directly from the vendor's page for the individual product,
+look under "Technical Support" or "Product support" on the vendor's
+main page. Example:
+<code>http://www.haicom.com.tw/gps303s.shtml</code></p>
+
+<p><em>URL of a technical manual:</em>  
+<input type="text" name="techdoc" size="72"/>
+
+<p>Please identify the GPS chipset and firmware version, if possible.  You
+may be able to get this from the display of <code>xgps</code>; look for
+a GPS Type field or the window title bar. Alternatively, you may find 
+it in the technical manual.  Example:
+<code>SiRF-II (2.31ES)</code>.</p>
+
+<em>Chipset (and firmware):</em>
+<input type="text" name="chipset" size="72"/>
+
+<p>Please identify, if possible, the NMEA version the GPS emits.
+You may be able to get this information from the technical manual.
+Likely values are <code>2.0</code>, <code>2.2</code>, and <code>3.0</code>. 
+If the GPS emits only a vendor binary protocol, leave this field blank.</p>
+
+<em>NMEA 0183 version emitted:</em>
+<input type="text" name="nmea" size="6"/>
+
+<hr/>
+<h2>Interfaces</h2>
+
+<p>Please identify the GPS's interface type (USB, RS-232, Compact Flash, 
+etc.). If the GPS has adapters that support other interfaces, tell us 
+the one you have and mention the adapters in the "Technical Notes" box.
+If it has an exotic interface not listed here, select "Other" and tell us
+about it in "Technical Notes".</p>
+
+<input type="radio" name="interface" value="usb"> USB
+<input type="radio" name="interface" value="serial"> RS-232 serial
+<input type="radio" name="interface" value="bluetooth"> Bluetooth
+<input type="radio" name="interface" value="cf"> Compact Flash
+<input type="radio" name="interface" value="ttl"> TTL
+<input type="radio" name="interface" value="other" checked> Other
+
+<p>If your device is USB, it probably uses a USB-to-serial adapter
+chip.  Try to find out what this is by looking at the output of
+<code>lsusb(1)</code>.  Likely values are <code>PL2303</code>,
+<code>UC-232A</code>, <code>FTDI 8U232AM</code>, or <code>Cypress
+M8</code>.</p>
+
+USB-to-serial chip: <input type="text" name="usbchip" size="72"/>
+
+<hr/>
+<h2>GPSD compatibility</h2>
+
+<p>Please tell us what version you tested with.  If you used us a release,
+give us the full replease numberr, like <code>2.35</code>.  If you built 
+your code from our development repostory please give the revision number,
+like <code>r2331</code>.</p>
+
+<em>Tested with?</em> <input type="text" name="gpsdversion" size="6"/>
+
+<p>Please rate how well this GPS functions with GPSD:</p>
+
+<input type="radio" name="rating" value="excellent">
+Excellent -- <code>gpsd</code> recognizing the GPS rapidly and reliably, 
+reports are complete and correct.<br/>
+<input type="radio" name="rating" value="good">
+Good -- <code>gpsd</code> has minor problems or lag recognizing the device,
+but reports are complete and correct.<br/>
+<input type="radio" name="rating" value="fair">
+Fair -- Reports have minor dropouts or problems, including occasional
+transient nonsense values.<br/>
+<input type="radio" name="rating" value="poor">
+Poor -- Reports frequently have values that are wrong or nonsense.<br/>
+<input type="radio" name="rating" value="broken">
+Broken -- gpsd frequently, or always, fails to recognize the device at all.<br/>
+<input type="radio" name="rating" value="other">
+Other -- See Technical Notes.<br/>
+
+<hr/>
+<h2>Technical notes</h2>
+
+<p>Now tell us the things that didn't fit in the rest of the form.
+Appropriate things to put here include how to read any LEDs or other
+unlabeled indicators on the device, a warning that the product has
+been discontinued, a list of alternate interfaces, descriptions of
+errors in the documentation, applicable PPS offsets, descriptions of
+special abilities such as the ability to vary the sampling interval,
+and a note if it's an OEM module rather than a retail product.
+Anything else you think we need to know should go here too.</p>
+
+<textarea name="notes" rows="10" cols="72"></textarea>
+
+<hr/>
+<h2>Output sample</h2>
+
+<p><em style='color: #ff0000;'>Important!</em> We need a sample of the
+output from your GPS.  We'll use this for mechanical regression testing,
+which is your best guarantee that support for your device won't get 
+broken in a future release.</p>
+
+<p>All SiRF-based and almost all NMEA GPSes will simply start throwing
+data to your port immediately when they're plugged in. You should
+normally be able to capture this output to a file with the
+<code>gpscat</code> utility.</p>
+
+<p>There will be some unusual cases in which this isn't possible,
+because the device needs some kind of activation sequence written to
+it before it will start reporting.  Some Garmin GPSes (the ones that
+speak Garmin binary protocol rather than NMEA) are like this.  If you
+think you have one of these, ask the <a
+href="mailto:gpsd-dev@lists.berlios.de">GPSD developers</a> for
+help.</p>
+
+<p>A log file is most useful when it contains (a) some sentences 
+generated when the GPS has no fix, (b) some sentences representing
+a fix with the GPS stationary, and (c) some sentences representing
+a fix with the GPS moving.</p>
+
+<input type="file" name="sample" size="72"/>
+
+<p>There is some auxiliary data we like to have in our regression-test
+files.</p>
+
+<p>Location of the log capture. A good format would include your
+nearest city or other landmark, state/province, country code, and a
+rough latitude/longitude.  The GPS will give an exact location; we
+want this as a sanity check. Example: <code>Groningen, NL,
+53.2N 6.6E</code></p>
+
+<em>Location:</em> <input type="text" name="location" size="72"/>
+
+<p>Day/month/year of the log capture (the GPS will give us
+hour/minute/second).  Example: <code>20 May 2006</code>.</p>
+
+<em>Date:</em> <input type="text" name="date" size="20"/>
+
+<p>The GPS's default sampling interval in seconds.  This will
+usually be 1.</p>
+
+<em>Sampling interval?</em> <input type="text" name="interval" size="6"/>
+
+<hr/>
+<p>Thanks for your help.  Click the <code>Send Report</code> button to
+send your report to the GPSD developers.  Eventually, your report is
+likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
+
+<input type="submit" value="Send Report">
+</form>
+EOF
+
+header;
+print start_html(-title=>"GPS Reporting Form",  -background=>"../htdocs/paper.gif");
+
+print $gps_form;
+
+end_html;
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# fill-column:79
+# End:
+

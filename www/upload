@@ -3,6 +3,7 @@
 # Upload gpsd docs
 #
 webdir=shell.berlios.de:/home/groups/gpsd/htdocs
+cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
 make html CHANGES	# Ensure all derived HTML is up to date.
 
@@ -13,8 +14,9 @@ else
     (cd performance; xmlto xhtml-nochunks performance.xml)
     scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt \
 	performance/{*.html,*.txt,*.png} \
-	../TODO CHANGES\
+	../TODO CHANGES \
 	$webdir
+    scp gps_report.cgi $cgidir
 fi
 
 # To refresh the vendor-docs directory just do this:
