@@ -2,8 +2,6 @@
 # Chipset: 
 # Cycle-time: 1-second
 # Start-of-cycle: GPRMC
-# Pause-noted: Y
-# Well-behaved: Y
 # Submitted-by: Wojciech Kazubski <wk@ire.pw.edu.pl>
 # Comment: Only emits GPRMC when it has a fix.
 # Date: 12 Mar 2005
