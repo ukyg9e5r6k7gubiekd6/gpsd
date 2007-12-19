@@ -22,11 +22,6 @@
 #endif
 #endif
 
-#define PLS_HALF_SEC 500000  /* half a second in microseconds */
-#define PLS_LONG_PLS 800000  /* duration of minimum idle time in a "real" pps pulse */
-#define PLS_ONE_SEC  1000000 /* one second in microseconds */
-#define PLS_TWO_SEC  2000000 /* two seconds in microseconds */
-#define PLS_JITTER   50000   /* 50 usec allowance for jitter on the detection of an event */
 
 int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 {
@@ -143,6 +138,7 @@ static void *gpsd_ppsmonitor(void *arg)
     pps_device = TIOCM_CTS;
 #endif
 
+
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
 	(void)gettimeofday(&tv,NULL);
@@ -181,52 +177,32 @@ static void *gpsd_ppsmonitor(void *arg)
 	     *
 	     * Some GPS instead output a square wave that is 0.5 Hz and each
 	     * edge denotes the start of a second.
-	     *
-	     * At least one gps (Furuno Electronics GH-79L4 GPSClock-200)
-	     * outputs a square wave that is 1 Hz and only the rising edge
-	     * is significant. This complicates things since the code is
-	     * otherwise insensitive to the direction of the transitions,
-	     * as it works by measuring the relative timing of the transitions.
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 
-	    if (duration < PLS_HALF_SEC - PLS_JITTER) {
-		/* duration too short for anything */
-		gpsd_report(LOG_RAW, "PPS pulse rejected too short. cycle: %d, duration: %d\n",
+	    if (800000 > duration) {
+		/* less than 800mS, duration too short for anything */
+		gpsd_report(LOG_RAW, 
+		    "PPS pulse rejected too short. cycle: %d, duration: %d\n",
 		    cycle, duration);
-	    } else if (cycle > PLS_ONE_SEC - PLS_JITTER && cycle < PLS_ONE_SEC + PLS_JITTER ) {
-		/* frequency is 1 Hz , check if it is a pulse or square wave */
-		if (duration < PLS_HALF_SEC + PLS_JITTER) {
 #ifdef GPSCLOCK_ENABLE
-		    /* looks like 1 Hz square wave */
 		    /*
 		     * Ugly hack to cope with the Furuno GPSClock, which has the 
 		     * odd property that you have to ignore the trailing
 		     * edge of the PPS.  Someday we'll autoconfigure this.
 		     */
-		    if (state == 1)
-			/* this edge is active, so use it */
-			(void)ntpshm_pps(session, &tv);
-		    else
-			gpsd_report(LOG_RAW, "PPS 1 Hz signal ignoring inactive edge\n");
+		    if (state == 1) (void)ntpshm_pps(session, &tv);
 #endif /* GPSCLOCK_ENABLE */
-		} else {
-		    /* looks like it might be a 1PPS pulse */
-		    if (duration > PLS_LONG_PLS - PLS_JITTER)
-			/* looks like conventional PPS pulse */
-			(void)ntpshm_pps(session, &tv);
-		    else
-			gpsd_report(LOG_RAW, "PPS pulse rejected invalid length.  cycle: %d, duration: %d\n",
-			    cycle, duration);
-	        }
-	    } else if (cycle > PLS_TWO_SEC - PLS_JITTER && cycle < PLS_TWO_SEC + PLS_JITTER ) {
+	    } else if (cycle > 999000 && cycle < 1001000 ) {
+		/* looks like PPS pulse */
+		(void)ntpshm_pps(session, &tv);
+	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		(void)ntpshm_pps(session, &tv);
 	    } else {
-		/* general failure */
 		    gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 			cycle, duration);
 	    }
@@ -240,7 +216,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
     return NULL;
 }
-#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
+#endif /* PPS_ENABLE */
 
 /*@ -branchstate @*/
 int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
