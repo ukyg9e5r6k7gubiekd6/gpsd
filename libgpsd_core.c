@@ -190,11 +190,12 @@ static void *gpsd_ppsmonitor(void *arg)
 		    cycle, duration);
 #ifdef GPSCLOCK_ENABLE
 		    /*
-		     * Ugly hack to cope with the Furuno GPSClock, which has the 
-		     * odd property that you have to ignore the trailing
-		     * edge of the PPS.  Someday we'll autoconfigure this.
+		     * Ugly hack to cope with things like the Furuno GPSClock,
+		     * which has the odd property that you have to
+		     * ignore the trailing edge of the PPS.
 		     */
-		    if (state == 1) (void)ntpshm_pps(session, &tv);
+		    if (state==1 && session->driver.nmea.ignore_trailing_edge) 
+			(void)ntpshm_pps(session, &tv);
 #endif /* GPSCLOCK_ENABLE */
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse */
