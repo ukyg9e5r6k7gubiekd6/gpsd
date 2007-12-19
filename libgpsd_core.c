@@ -166,18 +166,18 @@ static void *gpsd_ppsmonitor(void *arg)
 	if ( session->context->fixcnt > 3 ) {
 	    /* Garmin doc says PPS is valid after four good fixes. */
 	    /*
-	     * The PPS pulse is normally a short pulse with a frequency of
-	     * 1 Hz, and the UTC second is defined by the front edge. But we
-	     * don't know the polarity of the pulse (different receivers
-	     * emit different polarities).  The duration variable is used to
-	     * determine which way the pulse is going.  The code assumes
-	     * that the UTC second is changing when the signal has not
-	     * been changing for at least 800ms, i.e. it assumes the duty
+	     * The PPS pulse is normally a short pulse with a frequency of
+	     * 1 Hz, and the UTC second is defined by the front edge. But we
+	     * don't know the polarity of the pulse (different receivers
+	     * emit different polarities). The duration variable is used to
+	     * determine which way the pulse is going. The code assumes
+	     * that the UTC second is changing when the signal has not
+	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
-	     *
-	     * Some GPS instead output a square wave that is 0.5 Hz and each
-	     * edge denotes the start of a second.
-	     */
+	     *
+	     * Some GPS instead output a square wave that is 0.5 Hz and each
+	     * edge denotes the start of a second.
+	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
