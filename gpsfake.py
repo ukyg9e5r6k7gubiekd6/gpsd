@@ -312,6 +312,8 @@ class FakeGPS:
 class DaemonError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
+    def __str__(self):
+        return repr(self.msg)
 
 class DaemonInstance:
     "Control a gpsd instance."
@@ -325,10 +327,21 @@ class DaemonInstance:
         self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
     def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
+        self.spawncmd = None
+        if not '/usr/sbin' in os.environ['PATH']:
+            os.environ['PATH']=os.environ['PATH'] + ":/usr/sbin"
+        for path in os.environ['PATH'].split(':'):
+            _spawncmd = "%s/gpsd" % path
+            if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
+                self.spawncmd = _spawncmd
+                break
+
+        if not self.spawncmd:
+            raise DaemonError("Cannot execute gpsd: executeable not found.")
         # The -b option to suppress hanging on probe returns is needed to cope
         # with OpenBSD (and possibly other non-Linux systems) that don't support
         # anything we can use to implement the FakeGPS.read() method
-        self.spawncmd = "gpsd -b -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
+        self.spawncmd += " -b -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
         if prefix:
             self.spawncmd = prefix + " " + self.spawncmd.strip()
         if background:
