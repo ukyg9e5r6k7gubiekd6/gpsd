@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	cfsetispeed(&term, speed);
 	if (tcsetattr(fd, TCSANOW | TCSAFLUSH, &term) == -1)
 		err(1, "tcsetattr");
-	
+
 	tcflush(fd, TCIOFLUSH);
 	nmea_send(fd, "$%s", argv[3]);
 	tcdrain(fd);
@@ -96,7 +96,7 @@ static int nmea_send(int fd, const char *fmt, ... )
     (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
     va_end(ap);
     (void)strlcat(buf, "*", BUFSIZ);
-//    nmea_add_checksum(buf);
+    nmea_add_checksum(buf);
     (void)fputs(buf, stderr);
     status = (size_t)write(fd, buf, strlen(buf));
     if (status == strlen(buf)) {
