@@ -337,7 +337,7 @@ class DaemonInstance:
                 break
 
         if not self.spawncmd:
-            raise DaemonError("Cannot execute gpsd: executeable not found.")
+            raise DaemonError("Cannot execute gpsd: executable not found.")
         # The -b option to suppress hanging on probe returns is needed to cope
         # with OpenBSD (and possibly other non-Linux systems) that don't support
         # anything we can use to implement the FakeGPS.read() method
