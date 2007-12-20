@@ -337,6 +337,19 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for Ashtech support
+AC_ARG_ENABLE(ashtech,
+  AC_HELP_STRING([--disable-ashtech],
+                 [disable Ashtech support]),
+  [ac_ashtech=$enableval], [ac_ashtech=yes])
+AC_MSG_CHECKING([for Ashtech support])
+if test x"$ac_ashtech" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([ASHTECH_ENABLE], 1, [Ashtech chipset support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for Navcom support
 AC_ARG_ENABLE(navcom,
   AC_HELP_STRING([--disable-navcom],
@@ -707,6 +720,7 @@ echo "------------------------------------------"
 dnl When you add a protocol here, don't forget the null-set check below
 echo "	Protocols"
 echo "	---------"
+echo "Ashtech                 : $ac_ashtech"
 echo "Earthmate               : $ac_earthmate"
 echo "EverMore                : $ac_evermore"
 echo "FV-18                   : $ac_fv18"

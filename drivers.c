@@ -222,6 +222,12 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	/* probe for Furuno Electric GH-79L4-N (GPSClock) */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPsrq");
 #endif /* GPSCLOCK_ENABLE */
+#ifdef ASHTECH_ENABLE
+    case 6:
+	/* probe for Ashtech -- expect $PASHR */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHQ,RID");
+	break;
+#endif /* ASHTECH_ENABLE */
     default:
 	break;
     }
@@ -326,6 +332,60 @@ static struct gps_type_t garmin = {
     .cycle          = 1,		/* updates every second */
 };
 #endif /* GARMIN_ENABLE */
+
+#ifdef ASHTECH_ENABLE
+/**************************************************************************
+ *
+ * Ashtech (then Thales, now Magellan Professional) Receivers
+ *
+ **************************************************************************/
+
+#ifdef ALLOW_RECONFIGURE
+static void ashtech_configure(struct gps_device_t *session, unsigned int seq)
+{
+    if (seq == 0){
+	/* turn WAAS on. can't hurt... */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,WAS,ON");
+	/* reset to known output state */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ALL,A,OFF");
+	/* then turn on some useful sentences */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GGA,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSA,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSV,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,RMC,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ZDA,A,ON");
+#ifdef ASHTECH_NOTYET /* could be fun, when implemented */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,POS,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,SAT,A,ON");
+#endif
+    }
+}
+#endif /* ALLOW_RECONFIGURE */
+
+static struct gps_type_t ashtech = {
+    .typename       = "Ashtech",	/* full name of type */
+    .trigger        = "$PASHR,RID,",	/* Ashtech receivers respond thus */
+    .channels       = 16,		/* not used by this driver */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = NULL,		/* to be sent unconditionally */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = ashtech_configure, /* change its sentence set */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert         = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup         = NULL,		/* no wrapup */
+    .cycle          = 1,		/* updates every second */
+};
+#endif /* ASHTECH_ENABLE */
 
 #ifdef FV18_ENABLE
 /**************************************************************************
@@ -797,6 +857,9 @@ extern struct gps_type_t navcom_binary;
 static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef NMEA_ENABLE
     &nmea, 
+#ifdef ASHTECH_ENABLE
+    &ashtech,
+#endif /* ASHTECHV18_ENABLE */
 #ifdef FV18_ENABLE
     &fv18,
 #endif /* FV18_ENABLE */
