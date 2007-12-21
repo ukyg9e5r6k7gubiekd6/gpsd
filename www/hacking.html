@@ -1679,26 +1679,30 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It may need to be modified in configure.ac, and another autogen.sh
 done.  Make sure the 'dev' suffix is gone.</dd>
 
-<dt>5. Announce on gpsd-dev</dt>
+<dt>5. Check timebase.h.</dt>
+<dd>The values for leap-second offset and the start-subframe time
+may need to be adusted.</dd>
+
+<dt>6. Announce on gpsd-dev</dt>
 <dd>Announce that release is imminent and commits should be held off until
 the release has been shipped and tagged.</dd>
 
-<dt>6. Update the specfile changelog</dt>
+<dt>7. Update the specfile changelog</dt>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>7. Ship to Berlios</dt>
+<dt>8. Ship to Berlios</dt>
 <dd>Upload the tarball to berlios.de</dd>
 
-<dt>8. Tag the release in SVN</dt>
+<dt>9. Tag the release in SVN</dt>
 <dd>Doing 'make svn-tag' should accomplish this</dd>
 
-<dt>9. Bump the release number</dt>
+<dt>10. Bump the release number</dt>
 <dd>Bump the release number in configure.ac, adding a 'dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>10. Announce the release</dt>
+<dt>11. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the mailing lists.</dd>
 </dl>

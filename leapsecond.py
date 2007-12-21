@@ -24,7 +24,7 @@ __locations = [
     ),
 ]
 
-# File contasining cached offset data.
+# File containing cached offset data.
 # Two fields: the offset, and the start of the current six-month span
 # between times it might change, in seconds since Unix epoch GMT.
 __cachepath = "/var/run/leapsecond"
@@ -89,4 +89,4 @@ def get():
         return current_offset
 
 if __name__ == '__main__':
-    print retrieve()
+    print "Current leap second:" retrieve()

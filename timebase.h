@@ -19,9 +19,9 @@
 #define LEAP_SECONDS	14
 
 /* IERS says "NO positive leap second will be introduced at the end of 
- * December 2006, so start subframe checking at the *next* 6-month boundary.
+ * December 2007, so start subframe checking at the *next* 6-month boundary.
  */
-#define START_SUBFRAME	1183262400	/* 1 Jun 2007 00:00:00 */
+#define START_SUBFRAME	1212292800	/* 1 Jun 2008 00:00:00 */
 
 /*
  * This is used only when an NMEA device issues a two-digit year in a GPRMC
