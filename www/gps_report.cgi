@@ -10,7 +10,7 @@ use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 $query = new CGI;
 
 print $query->header;
-print $query->start_html(-title=>"GPS Reporting Form",  
+print $query->start_html(-title=>"GPS Reporting Form",
 			 -background=>"../htdocs/paper.gif");
 print $query->startform;
 
@@ -34,26 +34,28 @@ support for it more reliable.</p>
 
 <p><em style='color: #ff0000;'>Important!</em> We need a valid email
 address for you in case we need to ask you followup questions about
-the device.  We won\'t give your address to anyone.  Example:
-<code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
+the device.  We won't give your address to anyone.
+<br/>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
 
 EOF
+
 print "<em>Name and email address:</em>",$query->textfield(-name=>"submitter",
 							    -size=>72);
 print <<EOF;
 
 <p>(It is not actually very likely we will contact you, but we need to
 be able to do it if we can find no other way of getting information
-about the device.  Expect to hear from us if your GPS is obsolescent or 
+about the device.  Expect to hear from us if your GPS is obsolescent or
 exotic and the information you provide in the rest of this form turns
-out to be insufficient. Or if your browser is broken enough to botch 
+out to be insufficient. Or if your browser is broken enough to botch
 the output-sample upload.)</p>
 
 <hr/>
 <h2>GPS type identification</h2>
 
 <p><em style='color: #ff0000;'>Important!</em> Identify the vendor and model of
-your device.  Example: <code>Haicom</code> and <code>303S</code>.</p>
+your device.
+<br/>Example: <code>Haicom</code> and <code>303S</code>.</p>
 
 EOF
 
@@ -67,17 +69,17 @@ technical manual for the device.  You can usually find this on the
 vendor's website by giving a search engine the product name.  If it's
 not linked directly from the vendor's page for the individual product,
 look under "Technical Support" or "Product support" on the vendor's
-main page. Example:
-<code>http://www.haicom.com.tw/gps303s.shtml</code></p>
+main page.
+<br/>Example: <code>http://www.haicom.com.tw/gps303s.shtml</code></p>
 
-<p><em>URL of a technical manual:</em>  
+<p><em>URL of a technical manual:</em>
 <input type="text" name="techdoc" size="72"/>
 
 <p>Please identify the GPS chipset and firmware version, if possible.  You
 may be able to get this from the display of <code>xgps</code>; look for
-a GPS Type field or at the window title bar. Alternatively, you may find 
-it in the technical manual.  Example:
-<code>SiRF-II</code> amd <code>2.31ES</code>.</p>
+a GPS Type field or at the window title bar. Alternatively, you may find
+it in the technical manual.
+<br/>Example: <code>SiRF-II</code> amd <code>2.31ES</code>.</p>
 EOF
 
 print "<p><em>Chipset:</em>",
@@ -88,9 +90,10 @@ print "<p><em>Firmware:</em>",
 print <<EOF;
 <p>Please identify, if possible, the NMEA version the GPS emits.
 You may be able to get this information from the technical manual.
-Likely values are <code>2.0</code>, <code>2.2</code>, and <code>3.0</code>. 
+Likely values are <code>2.0</code>, <code>2.2</code>, and <code>3.0</code>.
 If the GPS emits only a vendor binary protocol, leave this field blank.</p>
 EOF
+
 
 print "<em>NMEA 0183 version emitted:</em>",$query->textfield(-name=>"nmea",
 							    -size=>6);
@@ -99,40 +102,41 @@ print <<EOF;
 <hr/>
 <h2>Interfaces</h2>
 
-<p>Please identify the GPS\'s interface type (USB, RS-232, Compact Flash, 
-etc.). If the GPS has adapters that support other interfaces, tell us 
+<p>Please identify the GPS's interface type (USB, RS-232, Compact Flash,
+etc.). If the GPS has adapters that support other interfaces, tell us
 the one you have and mention the adapters in the "Technical Notes" box.
 If it has an exotic interface not listed here, select "Other" and tell us
 about it in "Technical Notes".</p>
 
 EOF
 
+
 print $query->radio_group(-name=>'interface',
-			  -values=>['USB', 'Serial', 'Bluetooth', 
+			  -values=>['USB', 'Serial', 'Bluetooth',
 				    'Compact Flash', 'TTL', 'Other'],
 			  -default=>"-",
-			  -linebreak=>false);
+			  -linebreak=>'false');
 
 print <<EOF;
 <p>If your device is USB, it probably uses a USB-to-serial adapter
 chip.  Try to find out what this is by looking at the output of
 <code>lsusb(1)</code>.  Likely values are <code>PL2303</code>,
-<code>UC-232A</code>, <code>FTDI 8U232AM</code>, or <code>Cypress
-M8</code>.</p>
+<code>UC-232A</code>, <code>FTDI 8U232AM</code>, <code>Cypress
+M8</code> or <code>Silicon Labs CP2102</code>.</p>
 
 EOF
 
 print"<em>USB-to-serial chip:</em>",$query->textfield(-name=>"usbchip",
-							    -size=>72); 
+							    -size=>72);
 
 print <<EOF;
 <hr/>
 <h2>GPSD compatibility</h2>
 
 <p>Please tell us what version you tested with.  If you used us a release,
-give us the full replease numberr, like <code>2.35</code>.  If you built 
-your code from our development repostory please give the revision number,
-like <code>r2331</code>.</p>
+give us the full release number, like <code>2.35</code>.  If you built
+your code from our development repository please give the revision number,
+like <code>r4595</code>.</p>
 
 EOF
 
@@ -159,23 +163,23 @@ EOF
     "Other -- See Technical Notes.",
     );
 print $query->radio_group(-name=>'rating',
-			  -values=>['excellent', 'good', 'fair', 
+			  -values=>['excellent', 'good', 'fair',
 				    'poor', 'broken', 'other'],
 			  -default=>"-",
 			  -labels=>\%labels,
-			  -linebreak=>true);
+			  -linebreak=>'true');
 
 print <<EOF;
 <hr/>
 <h2>Technical notes</h2>
 
-<p>Now tell us the things that didn\'t fit in the rest of the form.
+<p>Now tell us the things that didn't fit in the rest of the form.
 Appropriate things to put here include how to read any LEDs or other
 unlabeled indicators on the device, a warning that the product has
 been discontinued, a list of alternate interfaces, descriptions of
 errors in the documentation, applicable PPS offsets, descriptions of
 special abilities such as the ability to vary the sampling interval,
-and a note if it\'s an OEM module rather than a retail product.
+and a note if it's an OEM module rather than a retail product.
 Anything else you think we need to know should go here too.</p>
 
 EOF
@@ -188,7 +192,7 @@ print <<EOF;
 
 <p><em style='color: #ff0000;'>Important!</em> We need a sample of the
 output from your GPS.  We'll use this for mechanical regression testing,
-which is your best guarantee that support for your device won't get 
+which is your best guarantee that support for your device won't get
 broken in a future release.</p>
 
 <p>All SiRF-based and almost all NMEA GPSes will simply start throwing
@@ -201,10 +205,10 @@ because the device needs some kind of activation sequence written to
 it before it will start reporting.  Some Garmin GPSes (the ones that
 speak Garmin binary protocol rather than NMEA) are like this.  If you
 think you have one of these, ask the <a
-href="mailto:gpsd-dev@lists.berlios.de">GPSD developers</a> for
+href="mailto:gpsd-dev\@lists.berlios.de">GPSD developers</a> for
 help.</p>
 
-<p>A log file is most useful when it contains (a) some sentences 
+<p>A log file is most useful when it contains (a) some sentences
 generated when the GPS has no fix, (b) some sentences representing
 a fix with the GPS stationary, and (c) some sentences representing
 a fix with the GPS moving.</p>
@@ -212,8 +216,8 @@ a fix with the GPS moving.</p>
 EOF
 
 print $query->filefield(-name=>'output_sample',
-	                    -size=>72,
-	 		    -maxlength=>256);
+			-size=>72,
+			-maxlength=>256);
 
 print <<EOF;
 
@@ -223,46 +227,47 @@ files.</p>
 <p>Location of the log capture. A good format would include your
 nearest city or other landmark, state/province, country code, and a
 rough latitude/longitude.  The GPS will give an exact location; we
-want this as a sanity check. Example: <code>Groningen, NL,
-53.2N 6.6E</code></p>
+want this as a sanity check.
+<br/>Example: <code>Groningen, NL, 53.2N 6.6E</code></p>
 
 EOF
 
 print"<em>Location:</em>",$query->textfield(-name=>"location",
-					    -size=>72); 
+					    -size=>72);
 
 print <<EOF;
 
 <p>Day/month/year of the log capture (the GPS will give us
-hour/minute/second).  Example: <code>20 May 2006</code>.</p>
+hour/minute/second).
+<br/>Example: <code>20 May 2006</code>.</p>
 
 
 EOF
 
-print"<em>Date:</em>",$query->textfield(-name=>"date", -size=>72); 
+print"<em>Date:</em>",$query->textfield(-name=>"date", -size=>72);
 
 print <<EOF;
 
 <p>The GPS's default sampling interval in seconds.  This will usually be 1.
-For SiRF chips it\'s always 1 and you can leave it blank; it's mainly
+For SiRF chips it's always 1 and you can leave it blank; it's mainly
 interesting for NMEA devices with unknown chipsets.</p>
 
 EOF
 
-print"<em>Sampling interval:</em>",$query->textfield(-name=>"interval", 
-						     -size=>6); 
+print"<em>Sampling interval:</em>",$query->textfield(-name=>"interval",
+						     -size=>6);
 
 print <<EOF;
 
-<p>First sentence in the GPS\'s reporting cycle.  Leave this blank for SiRF
+<p>First sentence in the GPS's reporting cycle.  Leave this blank for SiRF
 devices; it is mainly interesting for NMEA devices with unknown chipsets.
 You may be able to read it from the manual; if not, slowing the GPS to
 4800 will probably make the intercycle pause visible.</p>
 
 EOF
 
-print"<em>First sentence:</em>",$query->textfield(-name=>"leader", 
-						  -size=>20); 
+print"<em>First sentence:</em>",$query->textfield(-name=>"leader",
+						  -size=>20);
 
 print <<EOF;
 
@@ -403,9 +408,10 @@ likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
 </tr>
 </table>
 EOF
+
 } else {
     print <<EOF;
-<p style='color:#ff0000;'>Required fields are missing; please fill them in and click 
+<p style='color:#ff0000;'>Required fields are missing; please fill them in and click
 <code>Review</code>.</p>
 
 <table width="100%" border="0">
@@ -416,9 +422,7 @@ EOF
 EOF
 }
 
-print <<EOF;
-<hr/>
-EOF
+print "<hr/>\n";
 
 $query->end_html;
 
