@@ -175,6 +175,10 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 	(double)mkgmtime(&unpacked_date) + subseconds;
     /*@ +compdef */
 #ifdef NTPSHM_ENABLE
+    /* Removing/changing the magic number below is likely to disturb
+     * the handling of the 1pps signal from the gps device. The regression
+     * tests and simple gps applications do not detect this. A live test
+     * with the 1pps signal active is required. */
     if (session->context->enable_ntpshm && session->gpsdata.fix.mode > MODE_NO_FIX)
 	(void)ntpshm_put(session, session->gpsdata.fix.time + 1.1);
 #endif
