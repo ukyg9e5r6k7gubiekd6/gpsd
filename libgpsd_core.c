@@ -532,7 +532,7 @@ static void gpsd_binary_dump(struct gps_device_t *session,
 {
     if ((session->gpsdata.set & LATLON_SET) != 0)
 	gpsd_binary_fix_dump(session, bufp+strlen(bufp), len-strlen(bufp));
-    if ((session->gpsdata.set & HDOP_SET) != 0)
+    if ((session->gpsdata.set & (DOP_SET | ERR_SET)) != 0)
 	gpsd_binary_quality_dump(session, bufp+strlen(bufp), len-strlen(bufp));
     if ((session->gpsdata.set & SATELLITE_SET) != 0)
 	gpsd_binary_satellite_dump(session,bufp+strlen(bufp),len-strlen(bufp));
