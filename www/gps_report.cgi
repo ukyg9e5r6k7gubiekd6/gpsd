@@ -9,6 +9,11 @@ use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
 
 $query = new CGI;
 
+if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
+	# handle successful upload...
+	exit(0);
+}
+
 print $query->header;
 print $query->start_html(-title=>"GPS Reporting Form",
 			 -background=>"../htdocs/paper.gif");
@@ -294,22 +299,22 @@ EOF
 print "<table border='0' width='100%'><tr><td align='center'>";
 
 if ($query->param("submitter")) {
-    print "Contact address is <code>".$query->param("submitter")."</code><br/>\n";
+    print "Contact address is <code>". escapeHTML($query->param("submitter")) ."</code><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No contact address.</span><br/>\n";
 }
 if ($query->param("vendor")) {
-    print "Vendor is <code>".$query->param("vendor")."</code><br/>\n";
+    print "Vendor is <code>". escapeHTML($query->param("vendor")) ."</code><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No vendor.</span><br/>\n";
 }
 if ($query->param("model")) {
-    print "Model is <code>".$query->param("model")."</code><br/>\n";
+    print "Model is <code>". escapeHTML($query->param("model")) ."</code><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No model specified.</span><br/>\n";
 }
 if ($query->param("techdoc")) {
-    print "<a href='".$query->param("techdoc")."'>Document URL specified.</a><br/>\n";
+    print "<a href='". escapeHTML($query->param("techdoc")) ."'>Document URL specified.</a><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
 }
@@ -322,25 +327,25 @@ if ($query->param("notes")) {
 print "</td><td align='center'>";
 
 if ($query->param("chipset")) {
-    print "Chipset is <code>".$query->param("chipset")."</code><br/>\n";
+    print "Chipset is <code>". escapeHTML($query->param("chipset")) ."</code><br/>\n";
 } else {
     print "Chipset not specified.<br/>\n";
 }
 if ($query->param("firmware")) {
-    print "Firmware is <code>".$query->param("firmware")."</code><br/>\n";
+    print "Firmware is <code>". escapeHTML($query->param("firmware")) ."</code><br/>\n";
 } else {
     print "Firmware not specified.<br/>\n";
 }
 if ($query->param("nmea")) {
-    print "NMEA version is <code>".$query->param("nmea")."</code><br/>\n";
+    print "NMEA version is <code>". escapeHTML($query->param("nmea")) ."</code><br/>\n";
 } else {
     print "NMEA version not specified.<br/>\n";
 }
 if ($query->param("interface")) {
-    print "Interface type is <code>".$query->param("interface")."</code><br/>\n";
+    print "Interface type is <code>". escapeHTML($query->param("interface")) ."</code><br/>\n";
     if ($query->param("interface") == "USB") {
 	if ($query->param("usbchip")) {
-	    print "USB chip is <code>".$query->param("usbchip")."</code><br/>\n";
+	    print "USB chip is <code>". escapeHTML($query->param("usbchip")) ."</code><br/>\n";
 	} else {
 	    print "No USB chip specified.<br/>\n";
 	}
@@ -349,7 +354,7 @@ if ($query->param("interface")) {
     print "No interface type specified.<br/>\n";
 }
 if ($query->param("testversion")) {
-    print "Tested with GPSD version <code>".$query->param("testversion")."</code><br/>\n";
+    print "Tested with GPSD version <code>". escapeHTML($query->param("testversion")) ."</code><br/>\n";
 } else {
     print "No GPSD version specified.<br/>\n";
 }
@@ -362,23 +367,23 @@ if ($query->param("notes")) {
 print "</td><td align='center'>";
 
 if ($query->param("location")) {
-    print "Sample location <code>".$query->param("location")."</code><br/>\n";
+    print "Sample location <code>". escapeHTML($query->param("location")) ."</code><br/>\n";
 } else {
     print "No sample location specified.<br/>\n";
 }
 if ($query->param("date")) {
-    print "Sample date <code>".$query->param("date")."</code><br/>\n";
+    print "Sample date <code>". escapeHTML($query->param("date")) ."</code><br/>\n";
 } else {
     print "No sample date specified.<br/>\n";
 }
 
 if ($query->param("interval")) {
-    print "Sampling interval <code>".$query->param("interval")."</code><br/>\n";
+    print "Sampling interval <code>". escapeHTML($query->param("interval")) ."</code><br/>\n";
 } else {
     print "No sampling interval specified.<br/>\n";
 }
 if ($query->param("leader")) {
-    print "Leading sentence <code>".$query->param("leader")."</code><br/>\n";
+    print "Leading sentence <code>". escapeHTML($query->param("leader")) ."</code><br/>\n";
 } else {
     print "No leading sentence specified.<br/>\n";
 }
@@ -396,8 +401,7 @@ print "<p>To refresh this summary, click <code>Review</code>\n";
 
 
 # Must have all critical fields to ship
-if ($query->param("submitter") && $query->param("gpstype")
-	&& $query->param("techdoc") && $query->param("output_sample")) {
+if (hasNeededElements($query)){
 
     print <<EOF;
 <p>Click the <code>Send Report</code> button to
@@ -432,9 +436,18 @@ EOF
 }
 
 print "<hr/>\n";
-print '$Id$';
+print '<code>$Id$</code>';
 
 $query->end_html;
+
+sub hasNeededElements{
+	my $query = $_[0];
+	return 1 if ($query->param("submitter") &&
+			$query->param("gpstype") &&
+			$query->param("techdoc") &&
+			$query->param("output_sample"));
+	return 0;
+}
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
