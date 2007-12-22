@@ -73,8 +73,11 @@ main page.
 <br/>Example: <code>http://www.haicom.com.tw/gps303s.shtml</code></p>
 
 <p><em>URL of a technical manual:</em>
-<input type="text" name="techdoc" size="72"/>
+EOF
 
+print $query->textfield(-name=>"techdoc", -size=>72);
+
+print <<EOF;
 <p>Please identify the GPS chipset and firmware version, if possible.  You
 may be able to get this from the display of <code>xgps</code>; look for
 a GPS Type field or at the window title bar. Alternatively, you may find
@@ -112,8 +115,8 @@ EOF
 
 
 print $query->radio_group(-name=>'interface',
-			  -values=>['USB', 'Serial', 'Bluetooth',
-				    'Compact Flash', 'TTL', 'Other'],
+			  -values=>['USB', 'Serial', 'Bluetooth', 'TTL',
+				    'Compact Flash', 'RS-232', 'Other'],
 			  -default=>"-",
 			  -linebreak=>'false');
 
@@ -403,8 +406,11 @@ likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
 
 <table width="100%" border="0">
 <tr>
-<td align='center'><input type="submit" name="action" value="Review"></td>
-<td align='center'><input type="submit" name="action" value="Send Report"></td>
+<td align='center'>
+<input type="reset" value="Reset Form">
+<input type="submit" name="action" value="Review">
+<input type="submit" name="action" value="Send Report">
+</td>
 </tr>
 </table>
 EOF
@@ -416,13 +422,17 @@ EOF
 
 <table width="100%" border="0">
 <tr>
-<td align='center'><input type="submit" name="action" value="Review"></td>
+<td align='center'>
+	<input type="reset" value="Reset Form">
+	<input type="submit" name="action" value="Review">
+</td>
 </tr>
 </table>
 EOF
 }
 
 print "<hr/>\n";
+print '$Id$';
 
 $query->end_html;
 
