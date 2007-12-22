@@ -17,7 +17,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 print $query->header;
 print $query->start_html(-title=>"GPS Reporting Form",
 			 -background=>"../htdocs/paper.gif");
-print $query->startform;
+print $query->start_multipart_form;
 
 print <<EOF;
 <h1>GPS Behavior Reporting Form</h1>
