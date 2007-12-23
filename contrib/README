@@ -30,3 +30,7 @@ some purpose. This tool requires about 24hrs worth of "Y" messages and
 outputs an image of accumulated SV position and signal strength. It is
 sometimes entertaining to "see" occulted SVs using multipath. You must
 have the PHP-GD installed to use this script.
+
+ashctl is like nmeasend or sirfctl, but for Ashtech receivers.
+
+ubxsend is like nmeasend or sirfctl, but for u-blox receivers.
