@@ -111,11 +111,11 @@ this column means we have a regression test load for the device that
 is checked before each release. Vendors are listed in alphabetical
 order.</p>
 
-<p>Please mail your success (or failure) reports to 
+<p>Please mail your success (or failure) reports to
 <a
 href="http://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
 using the format described <a href="#report_format">further down this
-page</a>. Don't forget to include an annotated log so we can include 
+page</a>. Don't forget to include an annotated log so we can include
 your device in our regression tests.</p>
 
 <p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
@@ -137,6 +137,25 @@ of the problem.</p>
 <th>NMEA version</th>
 <th width="50%">Notes</th>
 </tr>
+
+<tr><td style='text-align:center;' colspan="7"><a
+href='http://www.altina.com'>Altina</a></td></tr>
+
+<!-- Begin Altina GBT709 -->
+<tr>
+<td><a href='http://www.altina.com/produkty.php?destCatId=&mainCatId=13&subCatId=&prId=19'>GBT709</a></td>
+<td>Good</td>
+<td>SiRFstar 3</td>
+<td>Bluetooth</td>
+<td>2.35</td>
+<td>2.3?</td>
+<td>
+Requires the "-b" flag to prevent mode switching. If the receiver locks
+up due to a mode switch, remove the battery for 5 to 10 minutes.
+Reported by Benoit Panizzon &lt;panizzon&#x40;woody.ch&gt;
+</td>
+</tr>
+<!-- End Altina GBT709 -->
 
 <tr><td style='text-align:center;' colspan="7"><a
 href='http://www.adapt-mobile.com'>Adapt Mobile</a></td></tr>
