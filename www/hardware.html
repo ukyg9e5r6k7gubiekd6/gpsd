@@ -353,8 +353,10 @@ Reported by Wojciech Kazubski &lt;wk&#x40;ire.pw.edu.pl&gt;.
 <td>USB</td>
 <td>2.5</td>
 <td>N/A</td>
-<td>The USB version requires the Linux kernel garmin_usb driver; DOP
-(Dilution of Precision) information is not available (Garmin protocol
+<td>The USB version requires the Linux kernel garmin_usb driver and requires
+that usbfs is mounted: <code>mount -t usbfs none /proc/bus/usb/</code><br>
+<br>
+DOP (Dilution of Precision) information is not available (Garmin protocol
 includes EPE only); gpsd uses EPE to approximate DOP. Magnetic variation
 information is not available. Garmin uses a nonstandard 16-bit SNR scale.
 WAAS is supported.</td>
@@ -738,11 +740,13 @@ under &lt;NMEA Data Comm&gt;.  Reported by paul van den berg
 <td><a href='http://pro.magellangps.com/en/products/product.asp?PRODID=1003'>AC12</a></td>
 <td>Good</td>
 <td><a href='ftp://ftp.magellangps.com/OEM,%20Sensor%20&%20ADU/A12,%20%20B12,%20&%20AC12/Reference%20Material/A12,%20B12%20&%20AC12%20RM%20rev%20E.pdf'>AC12</a></td>
+
 <td>TTL</td>
 <td>*</td>
 <td>3.0</td>
 <td>Receiver comes up in silent mode, you may need to use ashctl to turn
-on a default set of messages. Reported by Chris Kuethe
+on a default set of messages. Tested with firmware BQ00 and BQ04.
+Reported by Chris Kuethe
 &lt;chris.kuethe&#x40;gmail.com&gt;.</td>
 </tr>
 <!-- End Thales AC12 -->
