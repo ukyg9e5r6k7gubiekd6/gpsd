@@ -6,17 +6,29 @@
 #
 use CGI qw(:standard);
 use CGI::Carp qw(warningsToBrowser fatalsToBrowser);
+use MIME::Base64;
 
 $query = new CGI;
-
-if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
-	# handle successful upload...
-	exit(0);
-}
-
 print $query->header;
 print $query->start_html(-title=>"GPS Reporting Form",
 			 -background=>"../htdocs/paper.gif");
+
+$output_sample_file = $query->param('output_sample');
+$output_sample_body = $query->param('output_sample_body');
+$output_sample_body = '' unless ($output_sample_body);
+
+do {
+	local $/ = undef;
+	local $x = <$output_sample_file>;
+	$output_sample_body = encode_base64($x, "") if ($x);
+};
+
+if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
+	# handle successful upload...
+	print "this is how we do it...\n";
+	exit(0);
+}
+
 print $query->start_multipart_form;
 
 print <<EOF;
@@ -224,8 +236,8 @@ a fix with the GPS moving.</p>
 EOF
 
 print $query->filefield(-name=>'output_sample',
-			-size=>72,
-			-maxlength=>256);
+			-size=>72);
+printf("\n<input type='hidden' name='output_sample_body' value='%s'>\n", $output_sample_body);
 
 print <<EOF;
 
@@ -318,8 +330,8 @@ if ($query->param("techdoc")) {
 } else {
     print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
 }
-if ($query->param("notes")) {
-    print "You have uploaded an output sample.";
+if ($output_sample_body) {
+    print "Output sample uploaded";
 } else {
     print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
 }
@@ -343,7 +355,7 @@ if ($query->param("nmea")) {
 }
 if ($query->param("interface")) {
     print "Interface type is <code>". escapeHTML($query->param("interface")) ."</code><br/>\n";
-    if ($query->param("interface") == "USB") {
+    if ($query->param("interface") eq "USB") {
 	if ($query->param("usbchip")) {
 	    print "USB chip is <code>". escapeHTML($query->param("usbchip")) ."</code><br/>\n";
 	} else {
@@ -406,12 +418,12 @@ if (hasNeededElements($query)){
     print <<EOF;
 <p>Click the <code>Send Report</code> button to
 send your report to the GPSD developers.  Eventually, your report is
-likely to appear on our <a href="hardware.html">Hardware</a> page.</p>
+likely to appear on our <a href="/hardware.html">Hardware</a> page.</p>
 
 <table width="100%" border="0">
 <tr>
 <td align='center'>
-<input type="reset" value="Reset Form">
+<a href="${ENV{'REQUEST_URI'}}">Reset Form</a>
 <input type="submit" name="action" value="Review">
 <input type="submit" name="action" value="Send Report">
 </td>
@@ -427,7 +439,7 @@ EOF
 <table width="100%" border="0">
 <tr>
 <td align='center'>
-	<input type="reset" value="Reset Form">
+	<a href="${ENV{'REQUEST_URI'}}">Reset Form</a>
 	<input type="submit" name="action" value="Review">
 </td>
 </tr>
@@ -435,17 +447,19 @@ EOF
 EOF
 }
 
-print "<hr/>\n";
+print "</form>\n<hr/>\n";
 print '<code>$Id$</code>';
 
-$query->end_html;
+
+print $query->end_html;
 
 sub hasNeededElements{
 	my $query = $_[0];
 	return 1 if ($query->param("submitter") &&
-			$query->param("gpstype") &&
+			$query->param("vendor") &&
+			$query->param("model") &&
 			$query->param("techdoc") &&
-			$query->param("output_sample"));
+			$output_sample_body);
 	return 0;
 }
 
