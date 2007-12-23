@@ -25,7 +25,20 @@ do {
 
 if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
-	print "this is how we do it...\n";
+	$ENV{'PATH'} = '/usr/bin:/bin';
+	open(M, '|mail -s "new gps report" ckuethe') ||
+		die "can't run mail: $!\n";
+	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n";
+	foreach $var ( qw(submitter vendor model techdoc chipset firmware nmea
+			interface testversion rating notes location date
+			interval leader sample_notes)){
+		$val = $query->param($var);
+		printf M ("%s: %s\n", $var, $val) if (defined($val) && $val);
+	}
+	$output = encode_base64(decode_base64($output_sample_body));
+	printf M ("output_sample (base64 encoded):\n%s\n", $output);
+	close(M);
+	print "new gps report accepted...\n";
 	exit(0);
 }
 
