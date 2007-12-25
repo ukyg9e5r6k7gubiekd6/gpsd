@@ -602,13 +602,60 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 #ifdef ASHTECH_ENABLE
 static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t *session)
 {
-	gpsd_report(LOG_WARN, "processPASHR got message type: %s\n", field[1]);
-	if (0 == strcmp("RID", field[1]))
+	gps_mask_t mask;
+	mask = ONLINE_SET;
+
+	if (0 == strcmp("RID", field[1])){ /* Receiver ID */
 		(void)snprintf(session->subtype, 63 - strlen(session->subtype),
 			       "%s ver %s", field[2], field[3]);
-	return 0;
+	} else if (0 == strcmp("POS", field[1])){ /* 3D Position */
+		mask |= MODE_SET | STATUS_SET | CYCLE_START_SET;
+		if (0 == strlen(field[2])){
+			/* empty first field means no 3D fix is available */
+			session->gpsdata.status = STATUS_NO_FIX;
+			session->gpsdata.fix.mode = MODE_NO_FIX;
+			return mask;
+		}
+
+		/* if we make it this far, we at least have a 3D fix */
+		session->gpsdata.fix.mode = MODE_3D;
+		if (1 == atoi(field[2]))
+			session->gpsdata.status = STATUS_DGPS_FIX;
+		else
+			session->gpsdata.status = STATUS_FIX;
+
+		session->gpsdata.satellites_used = atoi(field[3]);
+		merge_hhmmss(field[4], session);
+		do_lat_lon(&field[5], &session->gpsdata);
+		session->gpsdata.fix.altitude = atof(field[9]);
+		session->gpsdata.fix.track = atof(field[11]);
+		session->gpsdata.fix.speed = atof(field[12]) / MPS_TO_KPH;
+		session->gpsdata.fix.climb = atof(field[13]);
+		session->gpsdata.pdop = atof(field[14]);
+		session->gpsdata.hdop = atof(field[15]);
+		session->gpsdata.vdop = atof(field[16]);
+		session->gpsdata.tdop = atof(field[17]);
+		mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
+		mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
+		mask |= (PDOP_SET | HDOP_SET | VDOP_SET | TDOP_SET);
+	} else if (0 == strcmp("SAT", field[1])){ /* Satellite Status */
+		int i, n, p, u;
+		n = session->gpsdata.satellites = atoi(field[2]);
+		u = 0;
+		for (i = 0; i < n; i++){
+			session->gpsdata.PRN[i] = p = atoi(field[3+i*5+0]);
+			session->gpsdata.azimuth[i] = atoi(field[3+i*5+1]);
+			session->gpsdata.elevation[i] = atoi(field[3+i*5+2]);
+			session->gpsdata.ss[i] = atoi(field[3+i*5+3]);
+			if (field[3+i*5+4][0] == 'U')
+				session->gpsdata.used[u++] = p;
+		}
+		session->gpsdata.satellites_used = u;
+		mask |= SATELLITE_SET | USED_SET;
+	}
+	return mask;
 }
-#endif /* TNT_ENABLE */
+#endif /* ASHTECH_ENABLE */
 
 #ifdef __UNUSED__
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
