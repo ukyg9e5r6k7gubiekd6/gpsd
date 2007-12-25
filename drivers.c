@@ -349,15 +349,17 @@ static void ashtech_configure(struct gps_device_t *session, unsigned int seq)
 	/* reset to known output state */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ALL,A,OFF");
 	/* then turn on some useful sentences */
+#ifdef ASHTECH_NOTYET
+	/* we could parse these, but they're oversize so they get dropped */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,POS,A,ON");
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,SAT,A,ON");
+#else
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GGA,A,ON");
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSA,A,ON");
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSV,A,ON");
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,RMC,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ZDA,A,ON");
-#ifdef ASHTECH_NOTYET /* could be fun, when implemented */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,POS,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,SAT,A,ON");
 #endif
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ZDA,A,ON");
     }
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -370,7 +372,7 @@ static void ashtech_ping(struct gps_device_t *session)
 static struct gps_type_t ashtech = {
     .typename       = "Ashtech",	/* full name of type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
-    .channels       = 16,		/* not used by this driver */
+    .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_wakeup   = ashtech_ping,	/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
