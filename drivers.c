@@ -362,11 +362,16 @@ static void ashtech_configure(struct gps_device_t *session, unsigned int seq)
 }
 #endif /* ALLOW_RECONFIGURE */
 
+static void ashtech_ping(struct gps_device_t *session)
+{
+	(void)nmea_send(session->gpsdata.gps_fd, "$PASHQ,RID");
+}
+
 static struct gps_type_t ashtech = {
     .typename       = "Ashtech",	/* full name of type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 16,		/* not used by this driver */
-    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_wakeup   = ashtech_ping,	/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
 #ifdef ALLOW_RECONFIGURE

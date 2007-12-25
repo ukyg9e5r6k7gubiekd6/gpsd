@@ -599,6 +599,17 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 }
 #endif /* TNT_ENABLE */
 
+#ifdef ASHTECH_ENABLE
+static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t *session)
+{
+	gpsd_report(LOG_WARN, "processPASHR got message type: %s\n", field[1]);
+	if (0 == strcmp("RID", field[1]))
+		(void)snprintf(session->subtype, 63 - strlen(session->subtype),
+			       "%s ver %s", field[2], field[3]);
+	return 0;
+}
+#endif /* TNT_ENABLE */
+
 #ifdef __UNUSED__
 static short nmea_checksum(char *sentence, unsigned char *correct_sum)
 /* is the checksum on the specified sentence good? */
@@ -643,6 +654,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	{"PGRMO", 0,	NULL},		/* ignore Garmin Sentence Enable */
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9,	processTNTHTM},
+#endif /* TNT_ENABLE */
+#ifdef ASHTECH_ENABLE
+	{"PASHR", 3,	processPASHR},	/* general handler for Ashtech */
 #endif /* TNT_ENABLE */
     };
     volatile unsigned char buf[NMEA_MAX+1];
