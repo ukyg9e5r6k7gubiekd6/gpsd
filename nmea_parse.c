@@ -606,8 +606,9 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t 
 	mask = ONLINE_SET;
 
 	if (0 == strcmp("RID", field[1])){ /* Receiver ID */
-		(void)snprintf(session->subtype, 63 - strlen(session->subtype),
+		(void)snprintf(session->subtype, sizeof(session->subtype)-1,
 			       "%s ver %s", field[2], field[3]);
+		return 0;
 	} else if (0 == strcmp("POS", field[1])){ /* 3D Position */
 		mask |= MODE_SET | STATUS_SET | CYCLE_START_SET;
 		if (0 == strlen(field[2])){
