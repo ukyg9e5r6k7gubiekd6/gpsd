@@ -64,7 +64,7 @@ static void do_lat_lon(char *field[], struct gps_data_t *out)
  * separate fields for day/month/year, with a 4-digit year.  This
  * means that for RMC we must supply a century and for GGA and GLL we
  * must supply a century, year, and day.  We get the missing data from
- * a previous RMC or ZDA; century in RMC is supplied by a constant if 
+ * a previous RMC or ZDA; century in RMC is supplied by a constant if
  * there has been no previous RMC.
  *
  **************************************************************************/
@@ -86,7 +86,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     int old_hour = session->driver.nmea.date.tm_hour;
 
     session->driver.nmea.date.tm_hour = DD(hhmmss);
-	if (session->driver.nmea.date.tm_hour < old_hour)	/* midnight wrap */ 
+	if (session->driver.nmea.date.tm_hour < old_hour)	/* midnight wrap */
 	session->driver.nmea.date.tm_mday++;
     session->driver.nmea.date.tm_min = DD(hhmmss+2);
     session->driver.nmea.date.tm_sec = DD(hhmmss+4);
@@ -96,9 +96,9 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 #undef DD
 
 /**************************************************************************
- * 
+ *
  * Compare GPS timestamps for equality.  Depends on the fact that the
- * timestamp granularity of GPS is 1/100th of a second.  Use this to avoid 
+ * timestamp granularity of GPS is 1/100th of a second.  Use this to avoid
  * naive float comparisons.
  *
  **************************************************************************/
@@ -115,19 +115,19 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 /* Recommend Minimum Course Specific GPS/TRANSIT Data */
 {
     /*
-        RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
+	RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
      1     225446.33    Time of fix 22:54:46 UTC
-     2     A            Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
+     2     A	    Status of Fix A = Autonomous, valid; D = Differential, valid; V = invalid
      3,4   4916.45,N    Latitude 49 deg. 16.45 min North
      5,6   12311.12,W   Longitude 123 deg. 11.12 min West
-     7     000.5        Speed over ground, Knots
-     8     054.7        Course Made Good, True north
+     7     000.5	Speed over ground, Knots
+     8     054.7	Course Made Good, True north
      9     191194       Date of fix  19 November 1994
      10,11 020.3,E      Magnetic variation 20.3 deg East
-     12    A            FAA mode indicator (NMEA 2.3 and later)
-                        A=autonomous, D=differential, E=Estimated,
-                        N=not valid, S=Simulator, M=Manual input mode
-           *68          mandatory nmea_checksum
+     12    A	    FAA mode indicator (NMEA 2.3 and later)
+			A=autonomous, D=differential, E=Estimated,
+			N=not valid, S=Simulator, M=Manual input mode
+	   *68	  mandatory nmea_checksum
 
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
@@ -203,7 +203,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
      * indicating that the Garmin 65 does not return time and status.
      * SiRF chipsets don't return the Mode Indicator.
      * This code copes gracefully with both quirks.
-     * 
+     *
      * Unless you care about the FAA indicator, this sentence supplies nothing
      * that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
      * actually ships updates in GPLL that aren't redundant.
@@ -216,7 +216,7 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 
 	mask = 0;
 	merge_hhmmss(field[5], session);
-	if (session->driver.nmea.date.tm_year == 0) 
+	if (session->driver.nmea.date.tm_year == 0)
 	    gpsd_report(LOG_WARN, "can't use GGL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
@@ -234,10 +234,10 @@ static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *se
 	else
 	    newstatus = STATUS_FIX;
 	/*
-	 * This is a bit dodgy.  Technically we shouldn't set the mode 
+	 * This is a bit dodgy.  Technically we shouldn't set the mode
 	 * bit until we see GSA.  But it may be later in the cycle,
-	 * some devices like the FV-18 don't send it by default, and 
-	 * elsewhere in the code we want to be able to test for the 
+	 * some devices like the FV-18 don't send it by default, and
+	 * elsewhere in the code we want to be able to test for the
 	 * presence of a valid fix with mode > MODE_NO_FIX.
 	 */
 	if (session->gpsdata.fix.mode < MODE_2D) {
@@ -256,21 +256,21 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 /* Global Positioning System Fix Data */
 {
     /*
-        GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
-           123519       Fix taken at 12:35:19 UTC
-           4807.038,N   Latitude 48 deg 07.038' N
-           01131.324,E  Longitude 11 deg 31.324' E
-           1            Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
+	GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
+	   123519       Fix taken at 12:35:19 UTC
+	   4807.038,N   Latitude 48 deg 07.038' N
+	   01131.324,E  Longitude 11 deg 31.324' E
+	   1	    Fix quality: 0 = invalid, 1 = GPS fix, 2 = DGPS fix,
 	   		3=PPS (Precise Position Service),
 			4=RTK (Real Time Kinematic) with fixed integers,
 			5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
-           08           Number of satellites being tracked
-           0.9          Horizontal dilution of position
-           545.4,M      Altitude, Metres above mean sea level
-           46.9,M       Height of geoid (mean sea level) above WGS84
-                        ellipsoid, in Meters
-           (empty field) time in seconds since last DGPS update
-           (empty field) DGPS station ID number (0000-1023)
+	   08	   Number of satellites being tracked
+	   0.9	  Horizontal dilution of position
+	   545.4,M      Altitude, Metres above mean sea level
+	   46.9,M       Height of geoid (mean sea level) above WGS84
+			ellipsoid, in Meters
+	   (empty field) time in seconds since last DGPS update
+	   (empty field) DGPS station ID number (0000-1023)
     */
     gps_mask_t mask;
 
@@ -281,7 +281,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	double oldfixtime = session->gpsdata.fix.time;
 
 	merge_hhmmss(field[1], session);
-	if (session->driver.nmea.date.tm_year == 0) 
+	if (session->driver.nmea.date.tm_year == 0)
 	    gpsd_report(LOG_WARN, "can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
@@ -294,7 +294,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	}
 	do_lat_lon(&field[2], &session->gpsdata);
 	mask |= LATLON_SET;
-        session->gpsdata.satellites_used = atoi(field[7]);
+	session->gpsdata.satellites_used = atoi(field[7]);
 	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
@@ -303,7 +303,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	 */
 	if (altitude[0] == '\0') {
 	    if (session->gpsdata.fix.mode == MODE_3D) {
-		session->gpsdata.fix.mode = session->gpsdata.status ? MODE_2D : MODE_NO_FIX; 
+		session->gpsdata.fix.mode = session->gpsdata.status ? MODE_2D : MODE_NO_FIX;
 		mask |= MODE_SET;
 	    }
 	} else {
@@ -312,10 +312,10 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[], struct gps_device_t 
 	    session->gpsdata.fix.altitude = atof(altitude);
 	    mask |= ALTITUDE_SET;
 	    /*
-	     * This is a bit dodgy.  Technically we shouldn't set the mode 
+	     * This is a bit dodgy.  Technically we shouldn't set the mode
 	     * bit until we see GSA.  But it may be later in the cycle,
-	     * some devices like the FV-18 don't send it by default, and 
-	     * elsewhere in the code we want to be able to test for the 
+	     * some devices like the FV-18 don't send it by default, and
+	     * elsewhere in the code we want to be able to test for the
 	     * presence of a valid fix with mode > MODE_NO_FIX.
 	     */
 	    if (session->gpsdata.fix.mode < MODE_3D) {
@@ -381,9 +381,9 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
      * for a dead-reckoning estimate.  Fix by Andreas Stricker.
      */
     if (session->gpsdata.fix.mode == 0 && field[2][0] == 'E')
-        mask = 0;
+	mask = 0;
     else
-        mask = MODE_SET;
+	mask = MODE_SET;
     gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->gpsdata.fix.mode);
     session->gpsdata.pdop = atof(field[count-3]);
     session->gpsdata.hdop = atof(field[count-2]);
@@ -392,8 +392,8 @@ static gps_mask_t processGPGSA(int count, char *field[], struct gps_device_t *se
     memset(session->gpsdata.used,0,sizeof(session->gpsdata.used));
     /* the magic 6 here counts the tag, two mode fields, and the DOP fields */
     for (i = 0; i < count - 6; i++) {
-        int prn = atoi(field[i+3]);
-        if (prn > 0)
+	int prn = atoi(field[i+3]);
+	if (prn > 0)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
     }
     mask |= HDOP_SET | VDOP_SET | PDOP_SET | USED_SET;
@@ -405,22 +405,22 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 /* GPS Satellites in View */
 {
     /*
-        GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
-           2            Number of sentences for full data
-           1            sentence 1 of 2
-           08           Total number of satellites in view
-           01           Satellite PRN number
-           40           Elevation, degrees
-           083          Azimuth, degrees
-           46           Signal-to-noise ratio in decibels
-           <repeat for up to 4 satellites per sentence>
-                There my be up to three GSV sentences in a data packet
+	GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
+	   2	    Number of sentences for full data
+	   1	    sentence 1 of 2
+	   08	   Total number of satellites in view
+	   01	   Satellite PRN number
+	   40	   Elevation, degrees
+	   083	  Azimuth, degrees
+	   46	   Signal-to-noise ratio in decibels
+	   <repeat for up to 4 satellites per sentence>
+		There my be up to three GSV sentences in a data packet
      */
     int n, fldnum;
     if (count <= 3) {
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites = 0;
-        return ERROR_SET;
+	return ERROR_SET;
     }
     if (count % 4 != 3){
 	gpsd_report(LOG_WARN, "malformed GPGSV - fieldcount %d %% 4 != 3\n", count);
@@ -432,7 +432,7 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
     session->driver.nmea.await = atoi(field[1]);
     if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
 	gpsd_zero_satellites(&session->gpsdata);
-        return ERROR_SET;
+	return ERROR_SET;
     } else if (session->driver.nmea.part == 1)
 	gpsd_zero_satellites(&session->gpsdata);
 
@@ -445,9 +445,9 @@ static gps_mask_t processGPGSV(int count, char *field[], struct gps_device_t *se
 	session->gpsdata.PRN[session->gpsdata.satellites]       = atoi(field[fldnum++]);
 	session->gpsdata.elevation[session->gpsdata.satellites] = atoi(field[fldnum++]);
 	session->gpsdata.azimuth[session->gpsdata.satellites]   = atoi(field[fldnum++]);
-	session->gpsdata.ss[session->gpsdata.satellites]        = atoi(field[fldnum++]);
+	session->gpsdata.ss[session->gpsdata.satellites]	= atoi(field[fldnum++]);
 	/*
-	 * Incrementing this unconditionally falls afoul of chipsets like 
+	 * Incrementing this unconditionally falls afoul of chipsets like
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the
 	 * last sentence in a GPGSV set if the number of satellites is not
 	 * a multiple of 4.
@@ -489,11 +489,11 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[], struct gps_device_t 
     /*
        $PGRME,15.0,M,45.0,M,25.0,M*22
 	1    = horizontal error estimate
-        2    = units
+	2    = units
 	3    = vertical error estimate
-        4    = units
+	4    = units
 	5    = spherical error estimate
-        6    = units
+	6    = units
      *
      * Garmin won't say, but the general belief is that these are 50% CEP.
      * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
@@ -537,7 +537,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[], struct gps_device_t 
     session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
     if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
 	mask |= CYCLE_START_SET;
-        gpsd_report(LOG_PROG, "GPZDA starts a reporting cycle.\n");
+	gpsd_report(LOG_PROG, "GPZDA starts a reporting cycle.\n");
     }
     session->gpsdata.sentence_time = session->gpsdata. fix.time;
     return mask;
@@ -551,7 +551,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
      * This may also apply to some Honeywell units since they may have been
      * designed by True North.
 
-        HTM,x.x,a,x.x,a,x.x,a,x.x,x.x*hh<cr><lf>
+	HTM,x.x,a,x.x,a,x.x,a,x.x,x.x*hh<cr><lf>
 	Fields in order:
 	1. True heading in degrees
 	2. magnetometer status character:
@@ -568,7 +568,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 	6. roll status character - see field 2 above
 	7. dip angle
 	8. relative magnitude horizontal component of earth's magnetic field
-	*hh          mandatory nmea_checksum
+	*hh	  mandatory nmea_checksum
      */
     gps_mask_t mask;
     mask = ONLINE_SET;
@@ -576,8 +576,8 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
     //gpsd_zero_satellites(&session->gpsdata);
 
     /*
-     * Heading maps to track.  
-     * Pitch maps to climb.  
+     * Heading maps to track.
+     * Pitch maps to climb.
      * Roll maps to speed.
      * Dip maps to altitude.
      */
@@ -668,7 +668,7 @@ static short nmea_checksum(char *sentence, unsigned char *correct_sum)
     while ((c = *p++) != '*' && c != '\0')
 	sum ^= c;
     if (correct_sum)
-        *correct_sum = sum;
+	*correct_sum = sum;
     (void)snprintf(csum, sizeof(csum), "%02X", sum);
     return(csum[0]==toupper(p[0])) && (csum[1]==toupper(p[1]));
 }
@@ -720,16 +720,16 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     unsigned char sum;
 
     if (!nmea_checksum(sentence+1, &sum)) {
-        gpsd_report(LOG_ERROR, "Bad NMEA checksum: '%s' should be %02X\n",
-                   sentence, sum);
-        return 0;
+	gpsd_report(LOG_ERROR, "Bad NMEA checksum: '%s' should be %02X\n",
+		   sentence, sum);
+	return 0;
     }
 #endif /* __ UNUSED__ */
 
     /*
-     * We've had reports that on the Garmin GPS-10 the device sometimes 
-     * (1:1000 or so) sends garbage packets that have a valid checksum 
-     * but are like 2 successive NMEA packets merged together in one 
+     * We've had reports that on the Garmin GPS-10 the device sometimes
+     * (1:1000 or so) sends garbage packets that have a valid checksum
+     * but are like 2 successive NMEA packets merged together in one
      * with some fields lost.  Usually these are much longer than the
      * legal limit for NMEA, so we can cope by just tossing out overlong
      * packets.  This may be a generic bug of all Garmin chipsets.
@@ -742,8 +742,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #ifdef BREAK_REGRESSIONS
     /* trim trailing CR/LF */
     for (i = 0; i < strlen(sentence); i++)
-    	if ((sentence[i] == '\r') || (sentence[i] == '\n')){
-    	    sentence[i] = '\0';
+	if ((sentence[i] == '\r') || (sentence[i] == '\n')){
+	    sentence[i] = '\0';
 	    break;
 	}
 #endif
@@ -762,7 +762,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #else
     count = 0;
     t = p;  /* end of sentence */
-    p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */ 
+    p = (char *)buf + 1; /* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
     while((p != NULL) && (p <= t)){
 	field[count] = p; /* we have a field. record it */
@@ -780,7 +780,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	s = field[0];
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;	/* skip talker ID */
-        if (strcmp(nmea_phrase[i].name, s) == 0) {
+	if (strcmp(nmea_phrase[i].name, s) == 0) {
 	    if (nmea_phrase[i].decoder!=NULL && (count >= nmea_phrase[i].nf)) {
 		retval = (nmea_phrase[i].decoder)(count, field, session);
 		strncpy(session->gpsdata.tag, nmea_phrase[i].name, MAXTAGLEN);
@@ -804,7 +804,7 @@ void nmea_add_checksum(char *sentence)
     if (*p == '$') {
 	p++;
     } else {
-        gpsd_report(LOG_ERROR, "Bad NMEA sentence: '%s'\n", sentence);
+	gpsd_report(LOG_ERROR, "Bad NMEA sentence: '%s'\n", sentence);
     }
     while ( ((c = *p) != '*') && (c != '\0')) {
 	sum ^= c;
