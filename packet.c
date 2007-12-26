@@ -230,7 +230,8 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* TNT_ENABLE */
 #endif /* GARMINTXT_ENABLE */
 #ifdef TNT_ENABLE
-	if ((c == 'B') || (c == 'C') || (c == 'F') || (c == 'I') || (c == 'W') || (c == 'X'))
+	if ((c == 'B') || (c == 'C') || (c == 'F') ||
+	    (c == 'I') || (c == 'W') || (c == 'X'))
 	    lexer->state = TNT_CMDCHAR;
 	else
 	    lexer->state = GROUND_STATE;
