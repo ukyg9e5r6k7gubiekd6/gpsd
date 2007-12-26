@@ -150,27 +150,32 @@ proto_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t da
     if ((flags & PROTO_SVINFO_VALID) == 0)
 	return 0;
 
+    /*
+     * some protocols have a variable length message listing only visible
+     * satellites, even if there are less than the number of channels. others
+     * have a fixed length message and send empty records for idle channels
+     * that are not tracking or searching. whatever the case, nchan should
+     * be set to the number of satellites which might be visible.
+     */
     nchan = GET_NUMBER_OF_CHANNELS();
     gpsd_zero_satellites(&session->gpsdata);
-    st = nsv = 0;
+    nsv = 0; /* number of actually used satellites */
     for (i = 0; i < nchan; i++) {
+	/* get info for one channel/satellite */
 	int off = GET_CHANNEL_STATUS(i);
-	bool good;
-	session->gpsdata.PRN[st]	= PRN_THIS_CHANNEL_IS_TRACKING(i);
-	if (CHANNEL_USED_IN_SOLUTION(i))
-	    session->gpsdata.used[st] = session->gpsdata.PRN[st];
 
-	session->gpsdata.ss[st]		= SIGNAL_STRENGTH_FOR_CHANNEL(i);
-	session->gpsdata.elevation[st]	= SV_ELEVATION_FOR_CHANNEL(i);
-	session->gpsdata.azimuth[st]	= SV_AZIMUTH_FOR_CHANNEL(i);
-	good = session->gpsdata.PRN[st]!=0 && 
-	    session->gpsdata.azimuth[st]!=0 && 
-	    session->gpsdata.elevation[st]!=0;
-	if (good!=0)
-	    st++;
+	session->gpsdata.PRN[i]		= PRN_THIS_CHANNEL_IS_TRACKING(i);
+	session->gpsdata.ss[i]		= SIGNAL_STRENGTH_FOR_CHANNEL(i);
+	session->gpsdata.elevation[i]	= SV_ELEVATION_FOR_CHANNEL(i);
+	session->gpsdata.azimuth[i]	= SV_AZIMUTH_FOR_CHANNEL(i);
+
+	if (CHANNEL_USED_IN_SOLUTION(i))
+	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+
     }
-    session->gpsdata.satellites = st;
-    return SATELLITE_SET;
+    session->gpsdata.satellites_used = nsv;
+    session->gpsdata.satellites = nchan;
+    return SATELLITE_SET | USED_SET;
 }
 
 /**
