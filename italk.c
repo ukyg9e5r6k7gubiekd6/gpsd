@@ -97,7 +97,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned int i, nsv, tow, st, nchan;
+    unsigned int i, tow, nsv, nchan;
     unsigned short gps_week;
     double t;
 
@@ -112,26 +112,23 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
 
     gpsd_zero_satellites(&session->gpsdata);
-    nchan = (unsigned int)((len - 10 - 52) / 20); 
-    st = nsv = 0;
+    nchan = (unsigned int)((len - 10 - 52) / 20);
+    nsv = 0;
     for (i = 0; i < nchan; i++) {
 	int off = 7+ 52 + 20 * i;
-	bool good;
 	unsigned short flags;
-	
+
 	flags = getuw(buf, off);
-	session->gpsdata.used[st] = ((flags & PRN_FLAG_USE_IN_NAV) ? 1:0)&0xff;
-	session->gpsdata.ss[st]		= (int)getuw(buf, off+2)&0xff;
-	session->gpsdata.PRN[st]	= (int)getuw(buf, off+4)&0xff;
-	session->gpsdata.elevation[st]	= (int)getsw(buf, off+6)&0xff;
-	session->gpsdata.azimuth[st]	= (int)getsw(buf, off+8)&0xff;
-	good = session->gpsdata.PRN[st]!=0 && 
-	    session->gpsdata.azimuth[st]!=0 && 
-	    session->gpsdata.elevation[st]!=0;
-	if (good!=0)
-	    st++;
+	session->gpsdata.ss[i]		= (int)getuw(buf, off+2)&0xff;
+	session->gpsdata.PRN[i]		= (int)getuw(buf, off+4)&0xff;
+	session->gpsdata.elevation[i]	= (int)getsw(buf, off+6)&0xff;
+	session->gpsdata.azimuth[i]	= (int)getsw(buf, off+8)&0xff;
+	if (flags & PRN_FLAG_USE_IN_NAV){
+	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	}
     }
-    session->gpsdata.satellites = (int)st;
+    session->gpsdata.satellites = nchan;
+    session->gpsdata.satellites_used = nsv;
 
     return USED_SET | SATELLITE_SET | TIME_SET;
 }
@@ -154,7 +151,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
 
     leap = (int)getuw(buf, 7 + 24);
     if (session->context->leap_seconds < leap)
-    	session->context->leap_seconds = leap;
+	session->context->leap_seconds = leap;
 
     gps_week = getuw(buf, 7 + 36);
     tow = getul(buf, 7 + 38);
@@ -171,7 +168,7 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    /* CONSTRUCT THE MESSAGE */
 
    /* we may need to dump the message */
-   gpsd_report(LOG_IO, "writing italk control type %02x:%s\n", 
+   gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
 	       msg[0], gpsd_hexdump(msg, msglen));
 #ifdef ALLOW_RECONFIGURE
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
