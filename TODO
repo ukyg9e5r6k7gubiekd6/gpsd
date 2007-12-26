@@ -235,9 +235,9 @@ an elevation test.
 
 *** iTalk support
 
-There is an experimental driver for the Fastrax iTalk3 protocol. It is
-still very much a work in progress. It is now compiled in by default so
-that we can collect bug reports. Version 3 of iTalk is not backwards
+There is a minimally functional driver for the Fastrax iTalk3 protocol.
+It is still very much a work in progress. It is now compiled in by default
+so that we can collect bug reports. Version 3 of iTalk is not backwards
 compatible; we do not anticipate supporting previous versions unless
 someone requests it and is able to provide us hardware.
 
@@ -248,9 +248,9 @@ allow for in-tree development. It is compiled in by default.
 
 *** UBX support
 
-There is an experimental driver for the uBlox UBX protocol. It is not
-yet complete but has been committed to allow for in-tree development.
-It's not compiled in by default.
+There is a minimally functional driver for the uBlox UBX protocol. It is
+still very much a work in progress.  It is now compiled in by default so
+that we can collect bug reports.
 
 *** Support for more survey / professional / up-scale receivers.
 
