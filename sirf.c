@@ -307,29 +307,15 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
-	bool good;
-	session->gpsdata.PRN[st]       = (int)getub(buf, off);
-	session->gpsdata.azimuth[st]   = (int)(((unsigned)getub(buf, off+1)*3)/2.0);
-	session->gpsdata.elevation[st] = (int)((unsigned)getub(buf, off+2)/2.0);
+	session->gpsdata.PRN[i]       = (int)getub(buf, off);
+	session->gpsdata.azimuth[i]   = (int)(((unsigned)getub(buf, off+1)*3)/2.0);
+	session->gpsdata.elevation[i] = (int)((unsigned)getub(buf, off+2)/2.0);
 	cn = 0;
 	for (j = 0; j < 10; j++)
 	    cn += (int)getub(buf, off+5+j);
 
-	session->gpsdata.ss[st] = cn/10;
-	good = session->gpsdata.PRN[st]!=0 &&
-	    session->gpsdata.azimuth[st]!=0 &&
-	    session->gpsdata.elevation[st]!=0;
-#ifdef __UNUSED__
-	gpsd_report(LOG_PROG, "PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
-			getub(buf, off),
-			getub(buf, off+2)/2.0,
-			(getub(buf, off+1)*3)/2.0,
-			cn/10,
-			getuw(buf, off+3),
-			good ? '*' : ' ');
-#endif /* UNUSED */
-	if (good!=0)
-	    st += 1;
+	session->gpsdata.ss[i] = cn/10;
+	st++;
     }
     session->gpsdata.satellites = st;
 #ifdef NTPSHM_ENABLE
@@ -342,6 +328,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 	    (void)ntpshm_put(session,session->gpsdata.sentence_time+0.8);
     }
 #endif /* NTPSHM_ENABLE */
+#ifdef PLEASE_THROW_AWAY_USEFUL_DATA
     /*
      * The freaking brain-dead SiRF chip doesn't obey its own
      * rate-control command for 04, at least at firmware rev. 231, 
@@ -351,6 +338,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
     if ((session->driver.sirf.satcounter++ % 5) != 0)
 	return 0;
     else
+#endif
 	return TIME_SET | SATELLITE_SET;
 }
 
