@@ -160,7 +160,7 @@ proto_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t da
     nchan = GET_NUMBER_OF_CHANNELS();
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0; /* number of actually used satellites */
-    for (i = 0; i < nchan; i++) {
+    for (i = st = 0; i < nchan; i++) {
 	/* get info for one channel/satellite */
 	int off = GET_CHANNEL_STATUS(i);
 
@@ -172,9 +172,11 @@ proto_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t da
 	if (CHANNEL_USED_IN_SOLUTION(i))
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
 
+	if(session->gpsdata.PRN[i])
+		st++;
     }
     session->gpsdata.satellites_used = nsv;
-    session->gpsdata.satellites = nchan;
+    session->gpsdata.satellites = st;
     return SATELLITE_SET | USED_SET;
 }
 
