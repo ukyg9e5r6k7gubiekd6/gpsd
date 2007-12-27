@@ -152,7 +152,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
-    unsigned int i, tow, nchan, nsv;;
+    unsigned int i, tow, nchan, nsv, st;
 
     if (data_len < 152 ) {
 	gpsd_report(LOG_PROG, "runt svinfo (datalen=%d)\n", data_len);
@@ -170,18 +170,21 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     /*@ -charint @*/
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0;
-    for (i = 0; i < nchan; i++) {
+    for (i = st = 0; i < nchan; i++) {
 	int off = 8 + 12 * i;
 	session->gpsdata.PRN[i]		= (int)getub(buf, off+1);
 	session->gpsdata.ss[i]		= (int)getub(buf, off+4);
 	session->gpsdata.elevation[i]	= (int)getsb(buf, off+5);
 	session->gpsdata.azimuth[i]	= (int)getsw(buf, off+6);
+	if(session->gpsdata.PRN[i])
+		st++;
+
 	/*@ -predboolothers */
 	if (getub(buf, off+2) & 0x01)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
 	/*@ +predboolothers */
     }
-    session->gpsdata.satellites = (int)nchan;
+    session->gpsdata.satellites = st;
     session->gpsdata.satellites_used = nsv;
     return SATELLITE_SET | USED_SET;
 }
