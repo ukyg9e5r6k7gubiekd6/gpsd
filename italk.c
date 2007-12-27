@@ -97,7 +97,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session, unsigned char 
 
 static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
-    unsigned int i, tow, nsv, nchan;
+    unsigned int i, tow, nsv, nchan, st;
     unsigned short gps_week;
     double t;
 
@@ -114,7 +114,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     gpsd_zero_satellites(&session->gpsdata);
     nchan = (unsigned int)((len - 10 - 52) / 20);
     nsv = 0;
-    for (i = 0; i < nchan; i++) {
+    for (i = st = 0; i < nchan; i++) {
 	int off = 7+ 52 + 20 * i;
 	unsigned short flags;
 
@@ -123,11 +123,13 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 	session->gpsdata.PRN[i]		= (int)getuw(buf, off+4)&0xff;
 	session->gpsdata.elevation[i]	= (int)getsw(buf, off+6)&0xff;
 	session->gpsdata.azimuth[i]	= (int)getsw(buf, off+8)&0xff;
-	if (flags & PRN_FLAG_USE_IN_NAV){
-	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
+	if (session->gpsdata.PRN[i]){
+	    st++;
+	    if (flags & PRN_FLAG_USE_IN_NAV)
+		session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
 	}
     }
-    session->gpsdata.satellites = nchan;
+    session->gpsdata.satellites = st;
     session->gpsdata.satellites_used = nsv;
 
     return USED_SET | SATELLITE_SET | TIME_SET;
