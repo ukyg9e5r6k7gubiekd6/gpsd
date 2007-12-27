@@ -21,6 +21,18 @@
 #define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
+/*
+ * A ubx packet looks like this:
+ * leader: 0xb5 0x62
+ * message class: 1 byte
+ * message type: 1 byte
+ * length of payload: 2 bytes
+ * payload: variable length
+ * checksum: 2 bytes
+ *
+ * see also the FV25 and UBX documents on reference.html
+ */
+
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
 static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_len);
