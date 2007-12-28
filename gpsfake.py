@@ -131,7 +131,7 @@ class TestLoad:
             packet = self.packet_get()
             if self.predump:
                 print `packet`
-            if not packet:
+            if not packet or packet == "\n":
                 break
             else:
                 self.sentences.append(packet)
@@ -233,6 +233,8 @@ class TestLoad:
             # messageid = fourth
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\xb5\x62" + third + fourth + fifth + sixth + self.logfp.read(ndata+2)
+        elif first == "\n":	# Use this to ignore trailing EOF on logs
+            return "\n"
         else:
             raise PacketError("unknown packet type, leader %s (0x%x)" % (`first`, ord(first)))
 
