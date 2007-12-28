@@ -165,6 +165,11 @@ class TestLoad:
             self.legend = "gpsfake: packet %d: "
             self.idoffset = None
             self.textual = False
+        elif self.sentences[0][0] == '\x3c':
+            self.packtype = "iTrax"
+            self.legend = "gpsfake: packet %d: "
+            self.idoffset = None
+            self.textual = False
         elif self.type == "RTCM":
             self.packtype = "RTCM"
             self.legend = None
@@ -233,6 +238,18 @@ class TestLoad:
             # messageid = fourth
             ndata = ord(fifth) | (ord(sixth) << 8)
             return "\xb5\x62" + third + fourth + fifth + sixth + self.logfp.read(ndata+2)
+        elif first == '\x3c' and second == '\x21':		# italk
+            third = self.logfp.read(1)
+            fourth = self.logfp.read(1)
+            fifth = self.logfp.read(1)
+            sixth = self.logfp.read(1)
+            seventh = self.logfp.read(1)
+            # srcnode = third
+            # dstnode = fourth
+            # messageid = fifth
+            # transaction = sixth
+            ndata = (ord(seventh)+1)*2 + 1
+            return "\x3c\x21" + third + fourth + fifth + sixth + seventh + self.logfp.read(ndata)
         elif first == "\n":	# Use this to ignore trailing EOF on logs
             return "\n"
         else:
