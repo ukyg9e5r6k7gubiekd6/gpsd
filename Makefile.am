@@ -377,7 +377,7 @@ gps-regress: gpsd
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 raw-regress:
-	$(srcdir)/regress-driver -r 
+	$(srcdir)/regress-driver -r  $(srcdir)/test/stable/*.log
 
 # Build the regression tests for the daemon.
 gps-makeregress: gpsd
