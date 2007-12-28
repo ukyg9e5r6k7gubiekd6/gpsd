@@ -160,6 +160,11 @@ class TestLoad:
             self.legend = "gpsfake: packet %d: "
             self.idoffset = 1
             self.textual = False
+        elif self.sentences[0][0] == '\xb5':
+            self.packtype = "uBlox"
+            self.legend = "gpsfake: packet %d: "
+            self.idoffset = None
+            self.textual = False
         elif self.type == "RTCM":
             self.packtype = "RTCM"
             self.legend = None
@@ -219,6 +224,15 @@ class TestLoad:
                 else:
                     delcnt = 0
             return packet
+        elif first == '\xb5' and second == '\x62':		# ubx
+            third = self.logfp.read(1)
+            fourth = self.logfp.read(1)
+            fifth = self.logfp.read(1)
+            sixth = self.logfp.read(1)
+            # classid = third
+            # messageid = fourth
+            ndata = ord(fifth) | (ord(sixth) << 8)
+            return "\xb5\x62" + third + fourth + fifth + sixth + self.logfp.read(ndata+2)
         else:
             raise PacketError("unknown packet type, leader %s (0x%x)" % (`first`, ord(first)))
 
