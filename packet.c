@@ -96,7 +96,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* NMEA_ENABLE */
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
 	if (c == '@') {
-	    lexer->state = AT_LEADER;
+	    lexer->state = TNT_LEADER;
 	    break;
 	}
 #endif
@@ -221,72 +221,10 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-    case AT_LEADER:
-#ifdef GARMINTXT_ENABLE
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM1;
-#ifdef TNT_ENABLE
-	else
-#endif /* TNT_ENABLE */
-#endif /* GARMINTXT_ENABLE */
-#ifdef TNT_ENABLE
-	if ((c == 'B') || (c == 'C') || (c == 'F') ||
-	    (c == 'I') || (c == 'W') || (c == 'X'))
-	    lexer->state = TNT_CMDCHAR;
-	else
-	    lexer->state = GROUND_STATE;
-#endif /* TNT_ENABLE */
+    case TNT_LEADER:
+	  lexer->state = NMEA_LEADER_END;
 	break;
-#ifdef GARMINTXT_ENABLE
-    case GARMINTXT_NUM1:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM2;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-    case GARMINTXT_NUM2:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM3;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-    case GARMINTXT_NUM3:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM4;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-    case GARMINTXT_NUM4:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM5;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-    case GARMINTXT_NUM5:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_NUM6;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-    case GARMINTXT_NUM6:
-	if (isdigit(c))
-	    lexer->state = GARMINTXT_RECOGNIZED;
-	else
-	    lexer->state = GROUND_STATE;
-	break;
-#endif /* GARMINTXT_ENABLE */
-#ifdef TNT_ENABLE
-    case TNT_CMDCHAR:
-	lexer->state = NMEA_LEADER_END;
-	break;
-#endif /* TNT_ENABLE */
-#endif /* TNT_ENABLE || GARMINTXT_ENABLE */
-#ifdef GARMINTXT_ENABLE
-    case GARMINTXT_RECOGNIZED: /* FALLTHROUGH */
-#endif /* GARMINTXT_ENABLE */
-#ifdef TNT_ENABLE
-    case TNT_RECOGNIZED: /* FALLTHROUGH */
-#endif /* TNT_ENABLE */
+#endif
     case NMEA_LEADER_END:
 	if (c == '\r')
 	    lexer->state = NMEA_CR;

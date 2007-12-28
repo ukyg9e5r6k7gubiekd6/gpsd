@@ -65,25 +65,9 @@
 #endif /* ZODIAC_ENABLE */
 
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE)
-   AT_LEADER,		/* saw True North status leader '@' */
-			/* Garmin Simple Text starts with @ leader */
+   TNT_LEADER,          /* saw True North status leader '@' */
+                        /* Garmin Simple Text starts with @ leader */
 #endif
-
-#ifdef TNT_ENABLE
-   TNT_CMDCHAR,		/* one of: B C F I W X */
-   TNT_RECOGNIZED,
-#endif
-
-#ifdef GARMINTXT_ENABLE
-   GARMINTXT_NUM1,	/* Garmin Simple Text starts with a YYMMDD date */
-   GARMINTXT_NUM2,	/* Attempt to match that to reduce wrong sniffs */
-   GARMINTXT_NUM3,
-   GARMINTXT_NUM4,
-   GARMINTXT_NUM5,
-   GARMINTXT_NUM6,
-   GARMINTXT_RECOGNIZED,
-#endif
-
 
 #ifdef EVERMORE_ENABLE
    EVERMORE_LEADER_1,	/* a DLE after having seen EverMore data */
