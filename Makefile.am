@@ -439,8 +439,8 @@ unstable-makeregress: gpsd
 # It requires developer access verified via ssh.
 #
 upload-ftp:
-	sha1 gpsd-$(VERSION).tar.gz >SHA1
-	lftp -c "put gpsd-$(VERSION).tar.gz SHA1" ftp://ftp.berlios.de/incoming
+	sha1 gpsd-$(VERSION).tar.gz >gpsd.sum
+	lftp -c "mput gpsd-$(VERSION).tar.gz gpsd.sum" ftp://ftp.berlios.de/incoming
 
 #
 # This is how to tag a release for the SVN repository.
