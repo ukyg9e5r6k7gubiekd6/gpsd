@@ -142,29 +142,22 @@ double timestamp(void)
     /*@i1@*/return(tv.tv_sec + tv.tv_usec*1e-6);
 }
 
-time_t mkgmtime(register struct tm *t)
+time_t mkgmtime(register struct tm *tm)
 /* struct tm to seconds since Unix epoch */
 {
-    register int year;
-    register time_t result;
-    static const int cumdays[MONTHSPERYEAR] =
-    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+    time_t ret;
+    char *tz;
 
-    /*@ +matchanyintegral @*/
-    year = 1900 + t->tm_year + t->tm_mon / MONTHSPERYEAR;
-    result = (year - 1970) * 365 + cumdays[t->tm_mon % MONTHSPERYEAR];
-    result += (year - 1968) / 4;
-    result -= (year - 1900) / 100;
-    result += (year - 1600) / 400;
-    result += t->tm_mday - 1;
-    result *= 24;
-    result += t->tm_hour;
-    result *= 60;
-    result += t->tm_min;
-    result *= 60;
-    result += t->tm_sec;
-    /*@ -matchanyintegral @*/
-    return (result);
+    tz = getenv("TZ");
+    (void)setenv("TZ", "", 1);
+    tzset();
+    ret = mktime(tm);
+    if (tz)
+	(void)setenv("TZ", tz, 1);
+    else
+	unsetenv("TZ");
+    tzset();
+    return ret;
 }
 
 double iso8601_to_unix(/*@in@*/char *isotime)
