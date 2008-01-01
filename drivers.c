@@ -221,6 +221,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
     case 5:
 	/* probe for Furuno Electric GH-79L4-N (GPSClock) */
 	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPsrq");
+	break;
 #endif /* GPSCLOCK_ENABLE */
 #ifdef ASHTECH_ENABLE
     case 6:

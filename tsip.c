@@ -199,7 +199,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f2 = getf(buf,6);			/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->driver.tsip.gps_week = s1;
-	    session->context->leap_seconds = (int)roundf(f2);
+	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 
 	    session->gpsdata.sentence_time = gpstime_to_unix((int)s1, f1) - f2;
@@ -272,7 +272,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		f1 = 0.0;
 	    for (j = 0; j < TSIP_CHANNELS; j++)
 		if (session->gpsdata.PRN[j] == (int)u1) {
-		    session->gpsdata.ss[j] = (int)roundf(f1);
+		    session->gpsdata.ss[j] = (int)round(f1);
 		    break;
 		}
 	    (void)snprintf(buf2+strlen(buf2), sizeof(buf2)-strlen(buf2),
@@ -408,7 +408,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
 		session->gpsdata.PRN[i] = (int)u1;
-		session->gpsdata.ss[i] = (int)roundf(f1);
+		session->gpsdata.ss[i] = (int)round(f1);
 		session->gpsdata.elevation[i] = (int)round(d1);
 		session->gpsdata.azimuth[i] = (int)round(d2);
 	    } else {

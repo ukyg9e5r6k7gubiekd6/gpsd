@@ -196,8 +196,8 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
 	/*@ +predboolothers */
     }
-    session->gpsdata.satellites = st;
-    session->gpsdata.satellites_used = nsv;
+    session->gpsdata.satellites = (int)st;
+    session->gpsdata.satellites_used = (int)nsv;
     return SATELLITE_SET | USED_SET;
 }
 

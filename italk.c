@@ -129,8 +129,8 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
 		session->gpsdata.used[nsv++] = session->gpsdata.PRN[i];
 	}
     }
-    session->gpsdata.satellites = st;
-    session->gpsdata.satellites_used = nsv;
+    session->gpsdata.satellites = (int)st;
+    session->gpsdata.satellites_used = (int)nsv;
 
     return USED_SET | SATELLITE_SET | TIME_SET;
 }
