@@ -12,13 +12,11 @@ The list of bugs exposed by gpsd in other software has moved to
 
 ** Bugs in gpsd and its clients:
 
-*** The Garmin binary driver will probably fail on big-endian machines
+*** USB Garmin binary support is currently broken
 
-The driver for the binary protocol used by Garmin USB GPSes has some
-serious endianness dependencies due to naive structure unpacking in
-the C code (a practice Garmin's incomplete and ancient technical 
-documentation  stupidly encourages).  It will probably fail on
-big-endian machines.
+USB Garmin binary support is currently broken.  We have shipped
+in this state because we beeded to rush out a fix for the leap-year
+bug mentioned in the release notes.
 
 *** Support for the True North magnetic compass is currently broken
 

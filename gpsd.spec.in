@@ -159,8 +159,10 @@ cp gpsd.hotplug gpsd.usermap "$RPM_BUILD_ROOT"%{_sysconfdir}/hotplug/usb/
 %{_libdir}/X11/app-defaults/xgpsspeed
 
 %changelog
-* Tue Dec 11 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.36dev-1
-- Integrated Garmin Simple Text Protocol driver from Peter Slansky.
+* Tue Jan 1 2008 Eric S. Raymond <esr@snark.thyrsus.com> - 2.36
+- Urgent fix to leap-day calculation affecting dates from today to
+  28 Feb on generic NMEA GPSes, Zodiacs, and SirFs emitting message 0x62.
+  Integrated Garmin Simple Text Protocol driver from Peter Slansky.
   Minor fixes in error modeling and a better NaN guard stabilize the
   Trimble regression tests.  Remove the wired-in NTP time offset from the 
   NMEA driver, this could only have worked by accident and should be
