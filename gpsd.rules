@@ -34,6 +34,6 @@ SYSFS{idVendor}=="067b", SYSFS{idProduct}=="aaa0", SYMLINK="gps%n", RUN+="/lib/u
 # Garmin International GPSmap, various models (tested with Garmin GPS 18 USB)
 SYSFS{idVendor}=="091e", SYSFS{idProduct}=="0003", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
-ACTION=="remove", DEVLINKS=="/dev/gps*", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 LABEL="gpsd_rules_end"
