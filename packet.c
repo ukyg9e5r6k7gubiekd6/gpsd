@@ -440,17 +440,23 @@ static void nextstate(struct gps_packet_t *lexer,
 #if defined(TSIP_ENABLE) || defined(EVERMORE_ENABLE) || defined(GARMIN_ENABLE)
     case DLE_LEADER:
 #ifdef EVERMORE_ENABLE
-	if (c == STX)
+	if (c == STX) {
 	    lexer->state = EVERMORE_LEADER_2;
+	    break;
+	}
 #endif /* EVERMORE_ENABLE */
 #if defined(TSIP_ENABLE) || defined(GARMIN_ENABLE) || defined(NAVCOM_ENABLE)
 	/* garmin is special case of TSIP */
 	/* check last because there's no checksum */
-	if (c >= 0x13)
+	if (c >= 0x13) {
 	    lexer->state = TSIP_PAYLOAD;
-	if (c == DLE)
+	    break;
+	}
+	if (c == DLE) {
 	    lexer->state = GROUND_STATE;
-	break;
+	    break;
+	}
+	// FALL-THRU!!!!! no break here
 #endif /* TSIP_ENABLE */
 #ifdef NAVCOM_ENABLE
     case NAVCOM_LEADER_1:
