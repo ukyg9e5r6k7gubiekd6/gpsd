@@ -177,29 +177,35 @@ static void *gpsd_ppsmonitor(void *arg)
 	     *
 	     * Some GPS instead output a square wave that is 0.5 Hz and each
 	     * edge denotes the start of a second.
+	     *
+             * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
+             * square wave where the leading edge is the start of a second
+             *
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 
-	    if (800000 > duration) {
+	    if (800000 > duration 
+	      && !session->driver.nmea.ignore_trailing_edge) {
 		/* less than 800mS, duration too short for anything */
 		gpsd_report(LOG_RAW, 
 		    "PPS pulse rejected too short. cycle: %d, duration: %d\n",
 		    cycle, duration);
-#ifdef GPSCLOCK_ENABLE
-		    /*
-		     * Ugly hack to cope with things like the Furuno GPSClock,
-		     * which has the odd property that you have to
-		     * ignore the trailing edge of the PPS.
-		     */
-		    if (state==1 && session->driver.nmea.ignore_trailing_edge) 
-			(void)ntpshm_pps(session, &tv);
-#endif /* GPSCLOCK_ENABLE */
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
-		/* looks like PPS pulse */
-		(void)ntpshm_pps(session, &tv);
+		/* looks like PPS pulse or square wave */
+               if (duration > 499000 && duration < 501000 
+		  && session->driver.nmea.ignore_trailing_edge) {
+                    /* looks like 1.0 Hz square wave, ignore trailing edge */
+                    if (state == 1) {
+                         (void)ntpshm_pps(session, &tv);
+                    }
+               } else {
+                    /* looks like PPS pulse */
+                    (void)ntpshm_pps(session, &tv);
+               }
+
 	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		(void)ntpshm_pps(session, &tv);
