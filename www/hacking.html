@@ -1597,10 +1597,11 @@ with very different risk profiles:</p>
 can be effectively simulated with a test-load file using gpsfake.  We
 can verify these with high confidence using a mechanical regression test.</p>
 
-<p>B) The problem children:  Garmins and other devices that aren't 
-static-testable. When the correctness of drivers and core code in
-handling is suspect, they have to be live-tested by someone with
-acess to the actual device.</p>
+<p>B) The problem children: Currently this includes Garmin USB and the
+PPS support.  In the future it must include any other other devices
+that aren't static-testable.  When the correctness of drivers and core
+code in handling is suspect, they have to be live-tested by someone
+with acess to the actual device.</p>
 
 <p>The goal of our release procedure is simple: prevent functional progressions.
 No device that worked in release N should break in release N+1.  Of course
@@ -1624,8 +1625,8 @@ encounter in the future.</p>
 regressions in core or driver code.  </p>
 
 <p>State 1 (blue): There are no known blocker bugs.  'make
-testregress' passes, but problem-children have not been
-live-tested. </p>
+testregress' passes, but problem-children (USB Garmin and serial PPS)
+have not been live-tested.</p>
 
 <p>State 2 (yellow): There are no known blocker bugs.  'make testregress'
 passes.  Problem children have been live-tested.  From this state, we
