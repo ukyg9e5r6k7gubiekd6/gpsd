@@ -76,7 +76,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef RTCM104_ENABLE
     enum isgpsstat_t	isgpsstat;
 #endif /* RTCM104_ENABLE */
-/*@ +charint */
+/*@ +charint -casebreak @*/
     switch(lexer->state)
     {
     case GROUND_STATE:
@@ -170,7 +170,6 @@ static void nextstate(struct gps_packet_t *lexer,
 	}
 #endif /* RTCM104_ENABLE */
 	break;
-	/*@ +casebreak @*/
     case COMMENT_BODY:
 	if (c == '\n')
 	    lexer->state = COMMENT_RECOGNIZED;
@@ -761,7 +760,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
 #endif /* RTCM104_ENABLE */
     }
-/*@ -charint */
+/*@ -charint +casebreak @*/
 }
 
 #define STATE_DEBUG
