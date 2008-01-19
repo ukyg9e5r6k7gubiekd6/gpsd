@@ -366,7 +366,7 @@ static void proto_wrapup(struct gps_device_t *session)
 /* This is everything we export */
 struct gps_type_t proto_binary = {
     /* Full name of type */
-    .typename         = "Prototype driver",
+    .type_name        = "Prototype driver",
     /* Response string that identifies device (not active) */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */

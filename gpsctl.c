@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	    break;
         case 'l':
 	    for (dp = gpsd_drivers; *dp; dp++)
-		(void)puts((*dp)->typename);
+		(void)puts((*dp)->type_name);
 	    exit(0);
 	case 'n':
 	    to_nmea = true;
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     if (devtype != NULL) {
 	int matchcount = 0;
 	for (dp = gpsd_drivers; *dp; dp++) {
-	    if (strstr((*dp)->typename, devtype) != NULL) {
+	    if (strstr((*dp)->type_name, devtype) != NULL) {
 		forcetype = *dp;
 		matchcount++;
 	    }
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_ERROR, "gpsd: no driver name matches '%s'.\n", devtype);
 	else if (matchcount == 1) {
 	    assert(forcetype != NULL);
-	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->typename);
+	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->type_name);
 	} else {
 	    forcetype = NULL;
 	    gpsd_report(LOG_ERROR, "gpsd: %d driver names match '%s'.\n",
@@ -234,8 +234,8 @@ int main(int argc, char **argv)
 	gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
 		    device, gpsd_id(&session), session.gpsdata.baudrate);
 
-	if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->typename) !=0 && strcmp(forcetype->typename, session.device_type->typename)!=0) {
-	    gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->typename, session.device_type->typename);
+	if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
+	    gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
 	}
 
 
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 	 * lower increases the risk that we'll miss a reply to a probe.
 	 * Setting it higher makes this tool slower and more annoying.
 	 */
-	if (strcmp(session.device_type->typename, "Generic NMEA") == 0) {
+	if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
 	    int dummy;
 	    for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
 		if ((get_packet(&session) & DEVICEID_SET)!=0)
@@ -268,7 +268,7 @@ int main(int argc, char **argv)
 
 	/* control op specified; maybe we forced the type */
 	if (forcetype != NULL)
-	    (void)gpsd_switch_driver(&session, forcetype->typename);
+	    (void)gpsd_switch_driver(&session, forcetype->type_name);
 
 	/* now perform the actual control function */
 	status = 0;
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
 	    if (session.device_type->mode_switcher == NULL) {
 		(void)fprintf(stderr, 
 			  "gpsctl: %s devices have no mode switch.\n",
-			  session.device_type->typename);
+			  session.device_type->type_name);
 		status = 1;
 	    }
 	    else if (to_nmea) {
@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 	    if (session.device_type->speed_switcher == NULL) {
 		(void)fprintf(stderr, 
 			      "gpsctl: %s devices have no speed switch.\n",
-			      session.device_type->typename);
+			      session.device_type->type_name);
 		status = 1;
 	    }
 	    else if (!session.device_type->speed_switcher(&session, 

@@ -95,7 +95,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
-		    (void)gpsd_switch_driver(session, (*dp)->typename);
+		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    return 1;
 		}
 	    }
@@ -235,7 +235,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 }
 
 static struct gps_type_t nmea = {
-    .typename       = "Generic NMEA",	/* full name of type */
+    .type_name      = "Generic NMEA",	/* full name of type */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -310,7 +310,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 #endif /* ALLOW_RECONFIGURE */
 
 static struct gps_type_t garmin = {
-    .typename       = "Garmin Serial",	/* full name of type */
+    .type_name      = "Garmin Serial",	/* full name of type */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -371,7 +371,7 @@ static void ashtech_ping(struct gps_device_t *session)
 }
 
 static struct gps_type_t ashtech = {
-    .typename       = "Ashtech",	/* full name of type */
+    .type_name      = "Ashtech",	/* full name of type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_wakeup   = ashtech_ping,	/* no wakeup to be done before hunt */
@@ -416,7 +416,7 @@ static void fv18_configure(struct gps_device_t *session, unsigned int seq)
 #endif /* ALLOW_RECONFIGURE */
 
 static struct gps_type_t fv18 = {
-    .typename       = "San Jose Navigation FV18",	/* full name of type */
+    .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -464,7 +464,7 @@ static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int se
 }
 
 static struct gps_type_t gpsclock = {
-    .typename       = "Furuno Electric GH-79L4",	/* full name of type */
+    .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -520,7 +520,7 @@ static void tripmate_configurator(struct gps_device_t *session, unsigned int seq
 #endif /* ALLOW_RECONFIGURE */
 
 static struct gps_type_t tripmate = {
-    .typename      = "Delorme TripMate",	/* full name of type */
+    .type_name     = "Delorme TripMate",	/* full name of type */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
     .probe_wakeup  = NULL,			/* no wakeup before hunt */
@@ -578,7 +578,7 @@ static void earthmate_probe_subtype(struct gps_device_t *session, unsigned int s
 
 /*@ -redef @*/
 static struct gps_type_t earthmate = {
-    .typename      = "Delorme EarthMate (pre-2003, Zodiac chipset)",
+    .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
     .probe_wakeup  = NULL,			/* no wakeup to be done before hunt */
@@ -751,7 +751,7 @@ static bool tnt_probe(struct gps_device_t *session)
 }
 
 struct gps_type_t trueNorth = {
-    .typename       = "True North",	/* full name of type */
+    .type_name      = "True North",	/* full name of type */
     .trigger	    = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
     .probe_wakeup   = NULL,		/* this will become a real method */
@@ -792,7 +792,7 @@ static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
 }
 
 static struct gps_type_t rtcm104 = {
-    .typename      = "RTCM104",		/* full name of type */
+    .type_name     = "RTCM104",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
@@ -831,7 +831,7 @@ static gps_mask_t garmintxt_parse_input(struct gps_device_t *session)
 
 
 static struct gps_type_t garmintxt = {
-    .typename      = "Garmin Simple Text",		/* full name of type */
+    .type_name     = "Garmin Simple Text",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */

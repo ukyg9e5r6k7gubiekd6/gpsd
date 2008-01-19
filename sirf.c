@@ -936,7 +936,7 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed)
 /* this is everything we export */
 struct gps_type_t sirf_binary =
 {
-    .typename       = "SiRF binary",	/* full name of type */
+    .type_name      = "SiRF binary",	/* full name of type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */

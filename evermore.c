@@ -483,7 +483,7 @@ static void evermore_wrap(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t evermore_binary =
 {
-    .typename       = "EverMore binary",	/* full name of type */
+    .type_name      = "EverMore binary",	/* full name of type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */

@@ -406,7 +406,7 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 
 /* This is everything we export */
 struct gps_type_t ubx_binary = {
-    .typename         = "uBlox UBX",    /* Full name of type */
+    .type_name        = "uBlox UBX",    /* Full name of type */
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 16,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */

@@ -216,7 +216,7 @@ in which case it specifies an input source for DGPS or ntrip data.\n\
 The following driver types are compiled into this gpsd instance:\n",
 	   DEFAULT_GPSD_PORT);
     for (dp = gpsd_drivers; *dp; dp++) {
-	(void)printf("    %s\n", (*dp)->typename);
+	(void)printf("    %s\n", (*dp)->type_name);
     }
 }
 
@@ -1650,7 +1650,7 @@ int main(int argc, char *argv[])
 			char id[NMEA_MAX];
 			assert(channel->device_type != NULL);
 			(void)snprintf(id, sizeof(id), "GPSD,I=%s",
-				       channel->device_type->typename);
+				       channel->device_type->type_name);
 			if (channel->subtype[0] != '\0') {
 			    (void)strlcat(id, " ", sizeof(id));
 			    (void)strlcat(id,channel->subtype,sizeof(id));

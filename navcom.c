@@ -1222,7 +1222,7 @@ static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t navcom_binary =
 {
-    .typename       = "Navcom binary",  	/* full name of type */
+    .type_name      = "Navcom binary",  	/* full name of type */
     .trigger        = "\x02\x99\x66",           /* Every packet begins with this */
     .channels       = NAVCOM_CHANNELS,		/* 12 L1 + 12 L2 + 2 Inmarsat L-Band */
     .probe_wakeup   = navcom_ping,		/* wakeup to be done before hunt */

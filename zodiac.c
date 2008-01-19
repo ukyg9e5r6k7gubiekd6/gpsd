@@ -386,7 +386,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	    if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    
-		(void)gpsd_switch_driver(session, (*dp)->typename);
+		(void)gpsd_switch_driver(session, (*dp)->type_name);
 		return 0;
 	    }
    	}
@@ -430,7 +430,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t zodiac_binary =
 {
-    .typename       = "Zodiac binary",	/* full name of type */
+    .type_name      = "Zodiac binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */

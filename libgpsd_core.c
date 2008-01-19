@@ -23,15 +23,15 @@
 #endif
 
 
-int gpsd_switch_driver(struct gps_device_t *session, char* typename)
+int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 {
     struct gps_type_t **dp;
 
-    gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", typename);
+    gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
     if (session->device_type != NULL && 
-	strcmp(session->device_type->typename, typename) == 0) {
+	strcmp(session->device_type->type_name, type_name) == 0) {
 #ifdef ALLOW_RECONFIGURE
-	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->typename);
+	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->type_name);
 	if (session->enable_reconfigure 
 	    	&& session->device_type->configurator != NULL)
 	    session->device_type->configurator(session, 0);
@@ -41,8 +41,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
-	if (strcmp((*dp)->typename, typename) == 0) {
-	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->typename);
+	if (strcmp((*dp)->type_name, type_name) == 0) {
+	    gpsd_report(LOG_PROG, "selecting %s driver...\n", (*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/session->device_type = *dp;
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
@@ -50,13 +50,13 @@ int gpsd_switch_driver(struct gps_device_t *session, char* typename)
 #ifdef ALLOW_RECONFIGURE
 	    if (session->enable_reconfigure 
 			&& session->device_type->configurator != NULL) {
-		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->typename);
+		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->type_name);
 		session->device_type->configurator(session, 0);
 	    }
 #endif /* ALLOW_RECONFIGURE */
 	    return 1;
 	}
-    gpsd_report(LOG_ERROR, "invalid GPS type \"%s\".\n", typename);
+    gpsd_report(LOG_ERROR, "invalid GPS type \"%s\".\n", type_name);
     return 0;
     /*@ +compmempass @*/
 }
@@ -239,7 +239,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
 	    if ((*dp)->probe_detect!=NULL && (*dp)->probe_detect(session)!=0) {
-		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->typename);
+		gpsd_report(LOG_PROG, "probe found %s driver...\n", (*dp)->type_name);
 		session->device_type = *dp;
 		gpsd_assert_sync(session);
 		goto foundit;
@@ -314,9 +314,9 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 {
     static char buf[128];
     if ((session == NULL) || (session->device_type == NULL) || 
-	(session->device_type->typename == NULL))
+	(session->device_type->type_name == NULL))
 	return "unknown,";
-    (void)strlcpy(buf, session->device_type->typename, sizeof(buf));
+    (void)strlcpy(buf, session->device_type->type_name, sizeof(buf));
     if (session->subtype[0] != '\0') {
 	(void)strlcat(buf, " ", sizeof(buf));
 	(void)strlcat(buf, session->subtype, sizeof(buf));

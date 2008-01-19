@@ -1139,7 +1139,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
 
 struct gps_type_t garmin_usb_binary_old =
 {
-    .typename       = "Garmin USB binary",	/* full name of type */
+    .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -1165,7 +1165,7 @@ struct gps_type_t garmin_usb_binary_old =
 
 struct gps_type_t garmin_usb_binary =
 {
-    .typename       = "Garmin USB binary",	/* full name of type */
+    .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
@@ -1190,7 +1190,7 @@ struct gps_type_t garmin_usb_binary =
 
 struct gps_type_t garmin_ser_binary =
 {
-    .typename       = "Garmin Serial binary",	/* full name of type */
+    .type_name      = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */

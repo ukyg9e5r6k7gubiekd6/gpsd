@@ -729,7 +729,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 /* this is everything we export */
 struct gps_type_t tsip_binary =
 {
-    .typename       = "Trimble TSIP",	/* full name of type */
+    .type_name      = "Trimble TSIP",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
