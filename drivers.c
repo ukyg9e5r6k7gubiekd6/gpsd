@@ -258,7 +258,7 @@ static struct gps_type_t nmea = {
     .cycle	    = 1,		/* updates every second */
 };
 
-#ifdef GARMIN_ENABLE
+#if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
 /**************************************************************************
  *
  * Garmin NMEA
@@ -268,7 +268,6 @@ static struct gps_type_t nmea = {
 #ifdef ALLOW_RECONFIGURE
 static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int seq)
 {
-#if defined(NMEA_ENABLE)
     /*
      * Receivers like the Garmin GPS-10 don't handle having having a lot of
      * probes shoved at them very well.
@@ -310,7 +309,6 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 	break;
     }
 }
-#endif /* NMEA_ENABLE */
 #endif /* ALLOW_RECONFIGURE */
 
 static struct gps_type_t garmin = {
@@ -336,7 +334,7 @@ static struct gps_type_t garmin = {
     .wrapup	    = NULL,		/* no wrapup */
     .cycle	    = 1,		/* updates every second */
 };
-#endif /* GARMIN_ENABLE */
+#endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
 #ifdef ASHTECH_ENABLE
 /**************************************************************************
