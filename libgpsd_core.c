@@ -180,6 +180,9 @@ static void *gpsd_ppsmonitor(void *arg)
 	     *
              * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
              * square wave where the leading edge is the start of a second
+	     *
+	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to 
+	     * 40ms which gives a 160ms pulse before going high.
              *
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
@@ -187,30 +190,35 @@ static void *gpsd_ppsmonitor(void *arg)
 	    duration = timediff(tv, pulse[state == 0]);
 #undef timediff
 
-	    if (800000 > duration 
-	      && !session->driver.nmea.ignore_trailing_edge) {
-		/* less than 800mS, duration too short for anything */
-		gpsd_report(LOG_RAW, 
-		    "PPS pulse rejected too short. cycle: %d, duration: %d\n",
-		    cycle, duration);
+	    if (cycle > 199000 && cycle < 201000 ) {
+		/* 5Hz cycle */
+		/* looks like 5hz PPS pulse */
+	        if (duration > 45000)
+		    (void)ntpshm_pps(session, &tv);
+		gpsd_report(LOG_RAW, "5Hz PPS pulse. cycle: %d, duration: %d\n",
+			cycle, duration);
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
-               if (duration > 499000 && duration < 501000 
+                if (duration > 499000 && duration < 501000 
 		  && session->driver.nmea.ignore_trailing_edge) {
                     /* looks like 1.0 Hz square wave, ignore trailing edge */
                     if (state == 1) {
                          (void)ntpshm_pps(session, &tv);
                     }
-               } else {
+                } else {
                     /* looks like PPS pulse */
                     (void)ntpshm_pps(session, &tv);
-               }
+		}
+		gpsd_report(LOG_RAW, "PPS pulse. cycle: %d, duration: %d\n",
+			cycle, duration);
 
 	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		(void)ntpshm_pps(session, &tv);
+                gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
+			cycle, duration);
 	    } else {
-		    gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
+                gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 			cycle, duration);
 	    }
 	} else {

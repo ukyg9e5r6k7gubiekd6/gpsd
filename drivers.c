@@ -275,8 +275,12 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
      */
     switch (seq) {
     case 0:
-	/* reset some config, AutoFix, WGS84, PPS */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,4,30");
+	/* reset some config, AutoFix, WGS84, PPS 
+	 * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz 
+         * with a 160ms low state.
+         * NOTE: new PPS only takes effect after next power cycle
+         */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,1,30");
 	break;
     case 1:
 	/* once a sec, no averaging, NMEA 2.3, WAAS */
