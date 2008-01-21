@@ -202,6 +202,19 @@ compatible drop-in replacement.</p>
 being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
 binutils 2.16.1 or later avoids it.</p>
 
+<h2>pthread_create() fails to return when called in background</h2>
+
+There is a call to pthread create in libgpsd_core.c::link_activate():
+
+<listing>
+    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+</listing>
+
+<p>If this is called when gpsd is in the foreground then the thread is
+created fine and pthread_create() returns right away.  If this is
+called when gpsd is in the background then the thread is created fine,
+but it never returns!  That freezes the main loop of gpsd.</p>
+
 <p>&nbsp;</p>
 
 <div style="text-align: center;">
