@@ -30,7 +30,9 @@ void gpsd_tty_init(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
     session->shmindex = -1;
+# ifdef PPS_ENABLE
     session->shmTimeP = -1;
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 }
 
