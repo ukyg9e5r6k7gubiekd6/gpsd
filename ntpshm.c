@@ -141,6 +141,10 @@ int ntpshm_put(struct gps_device_t *session, double fixtime)
     shmTime->count++;
     shmTime->valid = 1;
 
+    gpsd_report(LOG_RAW, "ntpshm_put: Clock: %lu @ %lu.%06lu\n"
+	, (unsigned long)seconds, (unsigned long)tv.tv_sec
+        , (unsigned long)tv.tv_usec);
+
     return 1;
 }
 

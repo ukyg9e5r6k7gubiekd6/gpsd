@@ -138,6 +138,7 @@ static void *gpsd_ppsmonitor(void *arg)
     pps_device = TIOCM_CTS;
 #endif
 
+    gpsd_report(LOG_PROG, "Create Thread gpsd_ppsmonitor\n");
 
     /* wait for status change on the device's carrier-detect line */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
@@ -218,11 +219,11 @@ static void *gpsd_ppsmonitor(void *arg)
                 gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
 			cycle, duration);
 	    } else {
-                gpsd_report(LOG_RAW, "PPS pulse rejected.  cycle: %d, duration: %d\n",
+                gpsd_report(LOG_INF, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 			cycle, duration);
 	    }
 	} else {
-                gpsd_report(LOG_RAW, "PPS pulse rejected. No fix.\n");
+                gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
 	}
 	/*@ -boolint @*/
 

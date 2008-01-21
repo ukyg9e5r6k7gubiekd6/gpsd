@@ -332,7 +332,6 @@ void gpsd_assert_sync(struct gps_device_t *session)
      * to communicate the navigation message derived and (possibly)
      * 1pps derived time data to ntpd.
      */
-    ntpd_link_activate(session);
 
     gpsd_report(LOG_INF, "ntpd_link_activate: %d\n",
       (int)session->shmindex >=0 );
