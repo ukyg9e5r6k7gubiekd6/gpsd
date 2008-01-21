@@ -29,7 +29,7 @@ CURSESPROGS = cgps sirfmon
 endif
 bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = bits_test gpsmm_test packet_test
+check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py
@@ -200,6 +200,12 @@ bits_test_LDADD = $(LIBC) libgps.la
 #
 packet_test_SOURCES = packet_test.c
 packet_test_LDADD = $(LIBC) libgps.la -lm
+
+#
+# Build packets tester
+#
+mkgmtime_test_SOURCES = mkgmtime_test.c
+mkgmtime_test_LDADD = $(LIBC) libgps.la -lm
 
 if HAVE_XSLT_PROCESSOR
 #
@@ -418,8 +424,12 @@ undump-regress: rtcmdecode
 	@diff -u $(srcdir)/test/undump.sample test/undump.test
 	@rm test/undump.test
 
+# Regression-test the calendar functions
+time_regress: mkgmtime_test
+	mkgmtime_test
+
 # Do all normal regression tests
-testregress: gps-regress rtcm-regress packet-regress undump-regress
+testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
 	@echo "Regressions complete."
 
 #
