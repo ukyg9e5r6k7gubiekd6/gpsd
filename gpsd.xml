@@ -160,7 +160,8 @@ Its meaning may change in future versions.</para>
 <listitem>
 <para>Set debug level. At debug levels 2 and above,
 <application>gpsd</application> reports incoming sentence and actions
-to standard error.</para>
+to standard error if <application>gpsd</application> is in the foreground
+(-N) or to syslog if in the background.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
