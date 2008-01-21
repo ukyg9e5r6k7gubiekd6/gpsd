@@ -1,6 +1,13 @@
 #! /bin/sh
 # $Id$
 
+if [ "$ACTION" == "remove" ] ; then
+  if [ $(echo $DEVLINKS | grep -q /dev/gps) ] ; then
+    exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
+  fi
+  exit 0
+fi
+
 . /lib/udev/hotplug.functions
 
 # wait for /usr & /var to be mounted
