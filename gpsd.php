@@ -147,7 +147,8 @@ function azel2xy($az, $el, $sz){
 function splot($im, $sz, $C, $e){
 	list($sv, $az, $el, $snr, $u) = $e;
 
-	if ((0 == $sv) || (0 == $az + $el + $snr))
+	if ((0 == $sv) || (0 == $az + $el + $snr) ||
+	    ($az < 0) || ($el < 0))
 		return;
 
 	$color = $C['brightgreen'];
@@ -159,6 +160,8 @@ function splot($im, $sz, $C, $e){
 		$color = $C['red'];
 	if ($el<10)
 		$color = $C['blue'];
+	if ($snr < 10)
+		$color = $C['black'];
 
 	list($x, $y) = azel2xy($el, $az, $sz);
 
