@@ -148,7 +148,8 @@ function azel2xy($az, $el, $sz){
 function cellplot($im, $sz, $C, $cellsize, $e){
 	list($sv, $el, $az, $snr, $u) = $e;
 
-	if ((0 == $sv) || (0 == $az + $el + $snr))
+	if ((0 == $sv) || (0 == $az + $el + $snr) ||
+	    ($az < 0) || ($el < 0))
 		return;
 
 	$color = $C['brightgreen'];
