@@ -36,8 +36,9 @@ legend($im, $sz, $C);
 
 $sky = array();
 
-$lines = file($argv[1]);
-foreach ($lines as $line_num => $line) {
+$fd = @fopen($argv[1], 'r');
+while (!feof($fd)){
+	$line = fgets($fd);
 	if (preg_match('/,Y=\S+ [0-9\.]+ (\d+):/', $line, $m)){
 		$n = $m[1];	
 		$s = explode(':', $line);
@@ -159,8 +160,8 @@ function cellplot($im, $sz, $C, $cellsize, $e){
 		$color = $C['yellow'];
 	if ($snr < 30)
 		$color = $C['red'];
-	if ($snr == 0)
-		$color = $C['black'];
+	if ($snr < 15)
+		$color = $C['dkgray'];
 
 	#consider an N-degree cell plotted at (0,0). its top left corner
 	#will be (0,0) and its bottom right corner will be at (N,N). The
