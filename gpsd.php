@@ -54,7 +54,7 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 		} while ((strncmp($resp, 'GPSD,O=', 7) || (
 			strncmp($resp, 'GPSD,O=', 7) == 0 &&
 			strlen($resp) <= 8)) &&
-			$z < 4);
+			$z < 6);
 		fwrite($sock, "SPAMQY\n");	# Query what we actually want
 		# the O report doesn't give us satellite usage or DOP
 		$resp = fread($sock, 384);
@@ -448,7 +448,7 @@ EOF;
 <span class="fixed">telnet://{$advertise}:{$port}/</span> and type "R".<br/>
 Use a different server:<br/>
 <form method=GET action="${_SERVER['SCRIPT_NAME']}">
-<input name="host" value="{$server}">:
+<input name="host" value="{$advertise}">:
 <input name="port" value="{$port}" size="5" maxlength="5">
 <input type=submit value="Get Position"><input type=reset></form>
 <br/>
