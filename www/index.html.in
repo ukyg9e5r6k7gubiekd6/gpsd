@@ -263,8 +263,8 @@ href="irc://irc.freenode.net#gpsd">channel #gpsd at irc.freenode.net</a>.</p>
 
 <p>Some GPSD data streams that you can look at are 
 <a href="http://gpsd.rellim.com">http://gpsd.rellim.com</a><!--/*The following two not available as of 2007-12-23*/, 
-<a href="http://gpsd.gritch.org">http://gpsd.gritch.org</a>,
-and <a href="http://gpsd.mainframe.cx">http://gpsd.mainframe.cx</a>-->.  You can
+<a href="http://gpsd.gritch.org">http://gpsd.gritch.org</a>,-->
+and <a href="http://gpsd.mainframe.cx">http://gpsd.mainframe.cx</a>.  You can
 also point our test clients at these hostnames to see what the clients
 do, even if you don't yet have a local GPS.</p>
 
