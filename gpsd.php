@@ -46,18 +46,18 @@ if (isset($_GET['imgdata']) && isset($_GET['op']) && ($_GET['op'] == 'view')){
 
 	if ($magic){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
-		fwrite($sock, "J=1,W=1\n");	# watcher mode and buffering
+		@fwrite($sock, "J=1,W=1\n");	# watcher mode and buffering
 		$z = 0;
 		do {
-			$resp = fread($sock, 384);
+			$resp = @fread($sock, 384);
 			$z++;
 		} while ((strncmp($resp, 'GPSD,O=', 7) || (
 			strncmp($resp, 'GPSD,O=', 7) == 0 &&
 			strlen($resp) <= 8)) &&
 			$z < 6);
-		fwrite($sock, "SPAMQY\n");	# Query what we actually want
+		@fwrite($sock, "SPAMQY\n");	# Query what we actually want
 		# the O report doesn't give us satellite usage or DOP
-		$resp = fread($sock, 384);
+		$resp = @fread($sock, 384);
 		@fclose($sock);
 	}
 }
