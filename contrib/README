@@ -34,3 +34,8 @@ have the PHP-GD installed to use this script.
 ashctl is like nmeasend or sirfctl, but for Ashtech receivers.
 
 ubxsend is like nmeasend or sirfctl, but for u-blox receivers.
+
+maxsats.pl analyzes a collection of "Y" messages and outputs records
+describing periods of excellent visibility (ie. 10 or more PRNs tracked).
+With over 30 SVs on orbit, there are periods where 14 PRNs are above the
+horizon, 13 are tracking, and at least 12 are actually used in a solution.
