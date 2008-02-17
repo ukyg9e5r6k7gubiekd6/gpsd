@@ -203,8 +203,8 @@ void process(struct gps_data_t *gpsdata,
 
 void write_record(struct gps_data_t *gpsdata){
 	track_start();
-	printf("      <trkpt lat=\"%.6f\" ", gpsdata->fix.latitude );
-	printf("lon=\"%.6f\">\n", gpsdata->fix.longitude );
+	printf("      <trkpt lat=\"%.7f\" ", gpsdata->fix.latitude );
+	printf("lon=\"%.7f\">\n", gpsdata->fix.longitude );
 
 	if ((gpsdata->status >= 2) && (gpsdata->fix.mode >= 3)){
 		/* dgps or pps */
@@ -233,7 +233,7 @@ void write_record(struct gps_data_t *gpsdata){
 		printf("        <sat>%d</sat>\n", gpsdata->satellites_used);
 	}
 
-	if (gpsdata->satellites_used) { /* plausible timestamp */
+	if (gpsdata->status >= 1) { /* plausible timestamp */
 		char scr[128];
 		printf("        <time>%s</time>\n",
 		    unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr)));
