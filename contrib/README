@@ -35,6 +35,10 @@ ashctl is like nmeasend or sirfctl, but for Ashtech receivers.
 
 ubxsend is like nmeasend or sirfctl, but for u-blox receivers.
 
+motosend is like nmeasend or sirfctl, but for receivers that use the motorola
+protocol (like motorola oncore or rockwell jupiter). it's a little buggy with
+syncing up to the start of a packet, but it'll send control strings OK.
+
 maxsats.pl analyzes a collection of "Y" messages and outputs records
 describing periods of excellent visibility (ie. 10 or more PRNs tracked).
 With over 30 SVs on orbit, there are periods where 14 PRNs are above the
