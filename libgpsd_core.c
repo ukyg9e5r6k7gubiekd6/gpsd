@@ -415,6 +415,7 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	tm.tm_mon++;
 	tm.tm_year %= 100;
     }
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
@@ -426,14 +427,13 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	    ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 	    degtodm(fabs(session->gpsdata.fix.longitude)),
 	    ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
 	    ZEROIZE(session->gpsdata.fix.speed * MPS_TO_KNOTS),
 	    ZEROIZE(session->gpsdata.fix.track),
-#undef ZEROIZE
 	    tm.tm_mday,
 	    tm.tm_mon,
 	    tm.tm_year);
     /*@ +usedef @*/
+#undef ZEROIZE
     nmea_add_checksum(bufp);
 }
 
