@@ -109,7 +109,8 @@ The "Works with" column is the last <code>gpsd</code> version with
 which this GPS is known to have been successfully tested; A "*" in
 this column means we have a regression test load for the device that
 is checked before each release. Vendors are listed in alphabetical
-order.</p>
+order. There is also a <a href="#timing">table of receivers</a> which
+may be appropriate for timing use.</p>
 
 <p>Please mail your success (or failure) reports to
 <a
@@ -1295,6 +1296,7 @@ although it is not clear if the "consumer" firmware is capable of that.
 </td>
 </table>
 
+<a name="timing"></a>
 <h2>PPS and GPSD:</h2>
 
 <p>Many GPS receivers offer a 1PPS (one pulse per second) output that
@@ -1317,9 +1319,15 @@ although it is not clear if the "consumer" firmware is capable of that.
 <th>Notes</th>
 </tr>
 <tr>
-<td>Trimble Lassen iQ</td>
-<td align="center">50ns</td>
-<td align="center">0.675sec</td>
+<td>SigNav TM3-01</td>
+<td align="center">10ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Thunderbolt E</td>
+<td align="center">15ns</td>
+<td align="center">-</td>
 <td align="center">-</td>
 </tr>
 <tr>
@@ -1329,26 +1337,38 @@ although it is not clear if the "consumer" firmware is capable of that.
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Garmin GPS18/USB</td>
-<td align="center">1usec</td>
-<td align="center">0.100sec</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Garmin GPS18/LVC</td>
-<td align="center">1usec</td>
-<td align="center">0.125sec</td>
-<td align="center">At 19200bps; drops to 0.525 at 4800bps</td>
-</tr>
-<tr>
-<td>SiRFstar2</td>
-<td align="center">1usec</td>
+<td>Motorola<br>iLotus<br/>Synergy-GPS M12M</td>
+<td align="center">20ns<br/>6ns corrected</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
 <tr>
-<td>SiRFstar3</td>
-<td align="center">1usec</td>
+<td>NavSync CW25-TIM</td>
+<td align="center">25ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>NavSync CW12-TIM</td>
+<td align="center">30ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Motorola OnCore UT+</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Lassen iQ</td>
+<td align="center">50ns</td>
+<td align="center">0.675sec</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Copernicus</td>
+<td align="center">50ns</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
@@ -1371,10 +1391,28 @@ although it is not clear if the "consumer" firmware is capable of that.
 <td align="center">-</td>
 </tr>
 <tr>
-<td>NavSync CW25-TIM</td>
-<td align="center">25ns</td>
+<td>Novatel SuperStarII</td>
+<td align="center">200ns</td>
 <td align="center">-</td>
 <td align="center">-</td>
+</tr>
+<tr>
+<td>Thales AC12</td>
+<td align="center">250ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Garmin GPS18/USB</td>
+<td align="center">1usec</td>
+<td align="center">0.100sec</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Garmin GPS18/LVC</td>
+<td align="center">1usec</td>
+<td align="center">0.125sec</td>
+<td align="center">At 19200bps; drops to 0.525 at 4800bps</td>
 </tr>
 <tr>
 <td>Rockwell Jupiter</td>
@@ -1383,26 +1421,14 @@ although it is not clear if the "consumer" firmware is capable of that.
 <td align="center">-</td>
 </tr>
 <tr>
-<td>SigNav TM3-01</td>
-<td align="center">10ns</td>
+<td>SiRFstar2</td>
+<td align="center">1usec</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
 <tr>
-<td>NavSync CW12-TIM</td>
-<td align="center">30ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Motorola OnCore UT+</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Motorola<br>iLotus<br/>Synergy-GPS M12M</td>
-<td align="center">20ns<br/>6ns corrected</td>
+<td>SiRFstar3</td>
+<td align="center">1usec</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
