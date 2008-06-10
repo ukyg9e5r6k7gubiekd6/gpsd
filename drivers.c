@@ -102,46 +102,6 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #endif /* NON_NMEA_ENABLE */
 	    gpsd_report(LOG_WARN, "unknown sentence: \"%s\"\n", session->packet.outbuffer);
 	}
-#ifdef NMEADISC
-	if (session->ldisc == 0) {
-	    uid_t old;
-	    int ldisc = NMEADISC;
-
-#ifdef TIOCSTSTAMP
-	    struct tstamps tstamps;
-#ifdef PPS_ON_CTS
-	    tstamps.ts_set |= TIOCM_CTS;
-#else /*!PPS_ON_CTS */
-	    tstamps.ts_set |= TIOCM_CAR;
-#endif /* PPS_ON_CTS */
-	    tstamps.ts_clr = 0;
-
-	    old = geteuid();
-	    if (seteuid(0) == -1)
-		gpsd_report(LOG_WARN, "can't seteuid(0) - %s", strerror(errno));
-	    else
-		gpsd_report(LOG_WARN, "seteuid(0) to enable timestamping\n");
-	    if (ioctl(session->gpsdata.gps_fd, TIOCSTSTAMP, &tstamps) < 0)
-		gpsd_report(LOG_WARN, "can't set kernel timestamping: %s\n",
-		    strerror(errno));
-	    else
-		gpsd_report(LOG_WARN, "activated kernel timestamping\n");
-#endif /* TIOCSTSTAMP */
-	    if (ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc) == -1)
-		gpsd_report(LOG_WARN, "can't set nmea discipline: %s\n",
-		    strerror(errno));
-	    else
-		gpsd_report(LOG_WARN, "activated nmea discipline\n");
-	/* this is a flag that shows if we've tried the setup */
-	session->ldisc = NMEADISC;
-
-	if (old){
-	    gpsd_report(LOG_WARN, "giving up euid 0\n");
-	    (void)seteuid(old);
-	}
-	gpsd_report(LOG_WARN, "running with effective user ID %d\n", geteuid());
-	}
-#endif /*NMEADISC */
 #ifdef NTPSHM_ENABLE
 	/* this magic number is derived from observation */
 	if (session->context->enable_ntpshm &&
