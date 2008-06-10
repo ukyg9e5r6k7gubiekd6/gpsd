@@ -37,6 +37,8 @@ int main(int argc, char **argv) {
 	case 14400:
 	case 9600:
 	case 4800:
+	case 2400:
+	case 1200:
 		break;
 	default:
 		fprintf(stderr, "invalid speed\n");
