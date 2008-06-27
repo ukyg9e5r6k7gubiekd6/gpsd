@@ -255,6 +255,6 @@ initgpspacket(void)
     PyModule_AddIntConstant(m, "TSIP_PACKET", TSIP_PACKET);
     PyModule_AddIntConstant(m, "EVERMORE_PACKET", EVERMORE_PACKET);
     PyModule_AddIntConstant(m, "ITALK_PACKET", ITALK_PACKET);
-    PyModule_AddIntConstant(m, "RTCM_PACKET", RTCM_PACKET);
+    PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
     PyModule_AddIntConstant(m, "GARMIN_PACKET", GARMIN_PACKET);
 }

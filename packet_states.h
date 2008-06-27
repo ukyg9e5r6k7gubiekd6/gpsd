@@ -127,9 +127,9 @@
 #endif /* TSIP_ENABLE GARMIN_ENABLE */
 
 #ifdef RTCM104_ENABLE
-   RTCM_SYNC_STATE,	/* we have sync lock */
-   RTCM_SKIP_STATE,	/* we have sync lock, but this character is bad */
-   RTCM_RECOGNIZED,	/* we have an RTCM packet */
+   RTCM2_SYNC_STATE,	/* we have sync lock */
+   RTCM2_SKIP_STATE,	/* we have sync lock, but this character is bad */
+   RTCM2_RECOGNIZED,	/* we have an RTCM packet */
 #endif /* RTCM104_ENABLE */
 
 /* end of packet_states.h */
