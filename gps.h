@@ -72,7 +72,7 @@ struct gps_fix_t {
 };
 
 /*  
- * From the RCTM104 standard:
+ * From the RCTM104 2.x standard:
  *
  * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
  * transmission rate provides a convenient timing capability where the
@@ -99,13 +99,15 @@ struct gps_fix_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
+typedef enum {unknown, gps, glonass, galileo} navsystem;
+
 struct rtcm2_t {
     /* header contents */
     unsigned type;	/* RTCM message type */
     unsigned length;	/* length (words) */
     double   zcount;	/* time within hour: GPS time, no leap secs */
     unsigned refstaid;	/* reference station ID */
-    unsigned seqnum;	/* nessage sequence number (modulo 8) */
+    unsigned seqnum;	/* message sequence number (modulo 8) */
     unsigned stathlth;	/* station health */
 
     /* message data in decoded form */
@@ -126,7 +128,7 @@ struct rtcm2_t {
 	} ecef;
 	struct {		/* data from type 4 messages */
 	    bool valid;		/* is message well-formed? */
-	    enum {gps, glonass, unknown} system;
+	    navsystem system;
 	    enum {local, global, invalid} sense;
 	    char datum[6];
 	    double dx, dy, dz;
