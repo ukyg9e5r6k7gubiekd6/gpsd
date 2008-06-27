@@ -1,7 +1,7 @@
 /* $Id$ */
 /*****************************************************************************
 
-This is a decoder for RTCM-104, an obscure and complicated serial
+This is a decoder for RTCM-104 2.x, an obscure and complicated serial
 protocol used for broadcasting pseudorange corrections from
 differential-GPS reference stations.  The applicable
 standard is
@@ -11,6 +11,8 @@ RTCM PAPER 194-93/SC 104-STD
 
 Ordering instructions are accessible from <http://www.rtcm.org/>
 under "Publications".  This describes version 2.1 of the RTCM specification.
+RTCM-104 was later incrementally revised up to a 2.3 level before being 
+completely redesigned as level 3.0.
 
 Also applicable is ITU-R M.823: "Technical characteristics of
 differential transmissions for global navigation satellite systems
@@ -28,7 +30,7 @@ takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
 are used to extract pieces of it.  Those pieces are copied and (where
 necessary) reassembled into a struct rtcm_t.
 
-This code and the contents of isgps.c are evolved from code by Wolgang
+This code and the contents of isgps.c are evolved from code by Wolfgang
 Rupprecht.  Wolfgang's decoder was loosely based on one written by
 John Sager in 1999 (in particular the dump function emits a close
 descendant of Sager's dump format).  Here are John Sager's original
@@ -49,10 +51,10 @@ Starlink's website.
 *****************************************************************************/
 
 /*
- * Structures for interpreting words in an RTCM-104 message (after
+ * Structures for interpreting words in an RTCM-104 2.x message (after
  * parity checking and removing inversion).
  *
- * The RTCM standard is less explicit than it should be about signed-integer
+ * The RTCM 2.1 standard is less explicit than it should be about signed-integer
  * representations.  Two's compliment is specified for prc and rrc (msg1wX),
  * but not everywhere.
  */
