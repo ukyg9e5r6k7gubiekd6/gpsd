@@ -128,7 +128,7 @@ libgpsd_c_sources = \
 	sirf.c \
 	report.c \
 	isgps.c \
-	rtcm.c \
+	rtcm2.c \
 	srecord.c \
 	bsd-base64.c \
 	strl.c \
@@ -149,7 +149,7 @@ libgpsd_h_sources = \
 	timebase.h \
 	bits.h \
 	packet_names.h \
-	rtcm.h \
+	rtcm2.h \
 	gpsd.h
 
 BUILT_SOURCES = packet_names.h gpsd.h
@@ -163,7 +163,7 @@ gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
 	cat gpsd.h-tail >>gpsd.h
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
-				rtcm.h libgpsmm.cpp packet_states.h
+				rtcm2.h libgpsmm.cpp packet_states.h
 nodist_libgps_la_SOURCES = packet_names.h
 libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 

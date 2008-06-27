@@ -60,7 +60,7 @@ Starlink's website.
 
 #include "gpsd_config.h"
 #include "gpsd.h"
-#include "rtcm.h"
+#include "rtcm2.h"
 
 #ifdef RTCM104_ENABLE
 
