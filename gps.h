@@ -84,11 +84,11 @@ struct gps_fix_t {
  * maximum number of data words allowed by the format is 31, so that
  * the longest possible message will have a total of 33 words."
  */
-#define RTCM_WORDS_MAX	33
+#define RTCM2_WORDS_MAX	33
 #define MAXCORRECTIONS	18	/* max correction count in type 1 or 9 */
 #define MAXSTATIONS	10	/* maximum stations in almanac, type 5 */
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
-#define MAXHEALTH	(RTCM_WORDS_MAX-2)	
+#define MAXHEALTH	(RTCM2_WORDS_MAX-2)	
 
 #ifndef S_SPLINT_S 
 /*
@@ -99,7 +99,7 @@ struct gps_fix_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
-struct rtcm_t {
+struct rtcm2_t {
     /* header contents */
     unsigned type;	/* RTCM message type */
     unsigned length;	/* length (words) */
@@ -161,9 +161,9 @@ struct rtcm_t {
 	    } station[MAXSTATIONS];
 	} almanac;
 	/* data from type 16 messages */
-	char message[(RTCM_WORDS_MAX-2) * sizeof(isgps30bits_t)];
+	char message[(RTCM2_WORDS_MAX-2) * sizeof(isgps30bits_t)];
 	/* data from messages of unknown type */
-	isgps30bits_t	words[RTCM_WORDS_MAX-2];
+	isgps30bits_t	words[RTCM2_WORDS_MAX-2];
     } msg_data;
 };
 
@@ -202,7 +202,7 @@ struct gps_data_t {
 #define DEVICEID_SET	0x04000000u
 #define ERROR_SET	0x08000000u
 #define CYCLE_START_SET	0x10000000u
-#define RTCM_SET	0x20000000u
+#define RTCM2_SET	0x20000000u
 #define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
@@ -267,7 +267,7 @@ struct gps_data_t {
     unsigned int driver_mode;	/* whether driver is in native mode or not */
 
     /* RTCM-104 data */
-    struct rtcm_t	rtcm;
+    struct rtcm2_t	rtcm;
     
     /* device list */
     int ndevices;		/* count of available devices */

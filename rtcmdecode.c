@@ -35,7 +35,7 @@ static void decode(FILE *fpin, FILE *fpout)
 {
     int             c;
     struct gps_packet_t lexer;
-    struct rtcm_t rtcm;
+    struct rtcm2_t rtcm;
     enum isgpsstat_t res;
     off_t count;
     char buf[BUFSIZ];
@@ -44,13 +44,13 @@ static void decode(FILE *fpin, FILE *fpout)
 
     count = 0;
     while ((c = fgetc(fpin)) != EOF) {
-	res = rtcm_decode(&lexer, (unsigned int)c);
+	res = rtcm2_decode(&lexer, (unsigned int)c);
 	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
 	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
 		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
 	if (res == ISGPS_MESSAGE) {
-	    rtcm_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    rtcm_dump(&rtcm, buf, sizeof(buf));
+	    rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
+	    rtcm2_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
     }
@@ -63,7 +63,7 @@ static void pass(FILE *fpin, FILE *fpout)
 {
     char buf[BUFSIZ];
     struct gps_packet_t lexer;
-    struct rtcm_t rtcm;
+    struct rtcm2_t rtcm;
 
     memset(&lexer, 0, sizeof(lexer));
     memset(&rtcm, 0, sizeof(rtcm));
@@ -75,13 +75,13 @@ static void pass(FILE *fpin, FILE *fpout)
 	    (void)fputs(buf, fpout);
 	    continue;
 	} 
-	status = rtcm_undump(&rtcm, buf);
+	status = rtcm2_undump(&rtcm, buf);
 
 	if (status == 0) {
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm_repack(&rtcm, lexer.isgps.buf);
-	    (void)rtcm_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    (void)rtcm_dump(&rtcm, buf, sizeof(buf));
+	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
+	    (void)rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
+	    (void)rtcm2_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	    memset(&lexer, 0, sizeof(lexer));
 	    memset(&rtcm, 0, sizeof(rtcm));
@@ -99,17 +99,17 @@ static void encode(FILE *fpin, FILE *fpout)
 {
     char buf[BUFSIZ];
     struct gps_packet_t lexer;
-    struct rtcm_t rtcm;
+    struct rtcm2_t rtcm;
 
     memset(&lexer, 0, sizeof(lexer));
     while (fgets(buf, (int)sizeof(buf), fpin) != NULL) {
 	int status;
 
-	status = rtcm_undump(&rtcm, buf);
+	status = rtcm2_undump(&rtcm, buf);
 
 	if (status == 0) {
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
-	    (void)rtcm_repack(&rtcm, lexer.isgps.buf);
+	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
 	    (void)fwrite(lexer.isgps.buf, 
 			 sizeof(isgps30bits_t), 
 			 (size_t)rtcm.length, fpout);

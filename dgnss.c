@@ -81,7 +81,7 @@ void dgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
     }
 }
 
-void rtcm_relay(struct gps_device_t *session)
+void rtcm2_relay(struct gps_device_t *session)
 /* pass a DGNSS connection report to a session */
 {
     if (session->gpsdata.gps_fd !=-1 

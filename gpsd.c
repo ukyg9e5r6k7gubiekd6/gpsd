@@ -555,10 +555,10 @@ static bool allocation_policy(struct gps_device_t *channel,
     /* we might have type constraints */
     if (user->requires == ANY)
 	return true;
-    else if (user->requires==RTCM104 && (channel->packet.type==RTCM_PACKET))
+    else if (user->requires==RTCM104 && (channel->packet.type==RTCM2_PACKET))
 	return true;
     else if (user->requires == GPS
-	     && (channel->packet.type!=RTCM_PACKET) && (channel->packet.type!=BAD_PACKET))
+	     && (channel->packet.type!=RTCM2_PACKET) && (channel->packet.type!=BAD_PACKET))
 	return true;
     else
 	return false;
@@ -810,7 +810,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    (void)assign_channel(sub);
 	    if (sub->device==NULL||sub->device->packet.type==BAD_PACKET)
 		(void)strlcpy(phrase, ",G=?", BUFSIZ);
-	    else if (sub->device->packet.type == RTCM_PACKET)
+	    else if (sub->device->packet.type == RTCM2_PACKET)
 		(void)snprintf(phrase, sizeof(phrase), ",G=RTCM104");
 	    else
 		(void)snprintf(phrase, sizeof(phrase), ",G=GPS");
@@ -1623,7 +1623,7 @@ int main(int argc, char *argv[])
 
 	    /* pass the current RTCM correction to the GPS if new */
 	    if (channel->device_type)
-		rtcm_relay(channel);
+		rtcm2_relay(channel);
 
 	    /* get data from the device */
 	    changed = 0;

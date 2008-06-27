@@ -19,16 +19,16 @@ differential transmissions for global navigation satellite systems
 from maritime radio beacons in the frequency band 283.5 - 315 kHz in
 region 1 and 285 - 325 kHz in regions 2 & 3."
 
-The RTCM protocol uses as a transport layer the GPS satellite downlink
+The RTCM 2.x protocol uses as a transport layer the GPS satellite downlink
 protocol described in IS-GPS-200, the Navstar GPS Interface
 Specification.  This code relies on the lower-level packet-assembly
 code for that protocol in isgps.c.
 
 The lower layer's job is done when it has assembled a message of up to
 33 words of clean parity-checked data.  At this point this upper layer
-takes over.  struct rtcm_msg_t is overlaid on the buffer and the bitfields
+takes over.  struct rtcm2_msg_t is overlaid on the buffer and the bitfields
 are used to extract pieces of it.  Those pieces are copied and (where
-necessary) reassembled into a struct rtcm_t.
+necessary) reassembled into a struct rtcm2_t.
 
 This code and the contents of isgps.c are evolved from code by Wolfgang
 Rupprecht.  Wolfgang's decoder was loosely based on one written by
@@ -70,12 +70,12 @@ static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 #define DIMENSION(a) (unsigned)(sizeof(a)/sizeof(a[0]))
 
-void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
+void rtcm2_unpack(/*@out@*/struct rtcm2_t *tp, char *buf)
 /* break out the raw bits into the content fields */
 {
     int len;
     unsigned int n, w;
-    struct rtcm_msg_t *msg = (struct rtcm_msg_t *)buf;
+    struct rtcm2_msg_t *msg = (struct rtcm2_msg_t *)buf;
 
     tp->type = msg->w1.msgtype;
     tp->length = msg->w2.frmlen;
@@ -133,7 +133,7 @@ void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
 	break;
     case 3:
         {
-	    struct rtcm_msg3    *m = &msg->msg_type.type3;
+	    struct rtcm2_msg3    *m = &msg->msg_type.type3;
 
 	    if ((tp->msg_data.ecef.valid = len >= 4)) {
 		tp->msg_data.ecef.x = ((m->w3.x_h<<8)|(m->w4.x_l))*XYZ_SCALE;
@@ -144,7 +144,7 @@ void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
 	break;
     case 4:
 	if ((tp->msg_data.reference.valid = len >= 2)){
-	    struct rtcm_msg4    *m = &msg->msg_type.type4;
+	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
 	    tp->msg_data.reference.system =
 		    (m->w3.dgnss==0) ? gps :
@@ -227,18 +227,18 @@ void rtcm_unpack(/*@out@*/struct rtcm_t *tp, char *buf)
 	break;
 
     default:
-	memcpy(tp->msg_data.words, msg->msg_type.rtcm_msgunk, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
+	memcpy(tp->msg_data.words, msg->msg_type.rtcm2_msgunk, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 }
 
-bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
+bool rtcm2_repack(struct rtcm2_t *tp, isgps30bits_t *buf)
 /* repack the content fields into the raw bits */
 {
     int len, sval;
     unsigned int n, w, uval;
-    struct rtcm_msg_t  *msg = (struct rtcm_msg_t *)buf;
-    struct rtcm_msghw1 *wp  = (struct rtcm_msghw1 *)buf;
+    struct rtcm2_msg_t  *msg = (struct rtcm2_msg_t *)buf;
+    struct rtcm2_msghw1 *wp  = (struct rtcm2_msghw1 *)buf;
 
     msg->w1.msgtype = tp->type;
     msg->w2.frmlen = tp->length;
@@ -307,7 +307,7 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 	break;
     case 3:	/* R */
 	if (tp->msg_data.ecef.valid) {
-	    struct rtcm_msg3    *m = &msg->msg_type.type3;
+	    struct rtcm2_msg3    *m = &msg->msg_type.type3;
 	    unsigned x = (unsigned) round(tp->msg_data.ecef.x / XYZ_SCALE);
 	    unsigned y = (unsigned) round(tp->msg_data.ecef.y / XYZ_SCALE);
 	    unsigned z = (unsigned) round(tp->msg_data.ecef.z / XYZ_SCALE);
@@ -322,7 +322,7 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 	break;
     case 4:	/* D */
 	if (tp->msg_data.reference.valid) {
-	    struct rtcm_msg4    *m = &msg->msg_type.type4;
+	    struct rtcm2_msg4    *m = &msg->msg_type.type4;
 
 	    m->w3.dgnss = tp->msg_data.reference.system;
 	    m->w3.dat = (unsigned)(tp->msg_data.reference.sense == global);
@@ -373,7 +373,7 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 	}
 	break;
     case 7:	/* A */
-	for (w = 0; w < (RTCM_WORDS_MAX - 2)/ 3; w++) {
+	for (w = 0; w < (RTCM2_WORDS_MAX - 2)/ 3; w++) {
 	    struct station_t *np = &tp->msg_data.almanac.station[n++];
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
@@ -402,7 +402,7 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 	break;
     case 16:	/* T */
 	/*@ -boolops @*/
-	for (w = 0; w < RTCM_WORDS_MAX - 2; w++){
+	for (w = 0; w < RTCM2_WORDS_MAX - 2; w++){
 	    if (!tp->msg_data.message[n]) {
 		break;
 	    }
@@ -421,7 +421,7 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 	break;
 
     default:	/* U */
-	memcpy(msg->msg_type.rtcm_msgunk, tp->msg_data.words, (RTCM_WORDS_MAX-2)*sizeof(isgps30bits_t));
+	memcpy(msg->msg_type.rtcm2_msgunk, tp->msg_data.words, (RTCM2_WORDS_MAX-2)*sizeof(isgps30bits_t));
 	break;
     }
 
@@ -435,25 +435,25 @@ bool rtcm_repack(struct rtcm_t *tp, isgps30bits_t *buf)
 
 static bool preamble_match(isgps30bits_t *w)
 {
-    return (((struct rtcm_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
+    return (((struct rtcm2_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
 }
 
 static bool length_check(struct gps_packet_t *lexer)
 {
     return lexer->isgps.bufindex >= 2 
-	&& lexer->isgps.bufindex >= ((struct rtcm_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
+	&& lexer->isgps.bufindex >= ((struct rtcm2_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
 }
 
-enum isgpsstat_t rtcm_decode(struct gps_packet_t *lexer, unsigned int c)
+enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
 {
     return isgps_decode(lexer, 
 			preamble_match, 
 			length_check, 
-			RTCM_WORDS_MAX, 
+			RTCM2_WORDS_MAX, 
 			c);
 }
 
-void rtcm_dump(struct rtcm_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm2_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
     unsigned int n;
@@ -553,7 +553,7 @@ void rtcm_dump(struct rtcm_t *rtcm, /*@out@*/char buf[], size_t buflen)
 
 }
 
-int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
+int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 /* merge a line of data into an RTCM structure, return 0 if done */
 {
     int fldcount, v;
@@ -722,15 +722,15 @@ int rtcm_undump(/*@out@*/struct rtcm_t *rtcmp, char *buf)
 }
 
 #ifdef __UNUSED__
-void rtcm_output_magnavox(isgps30bits_t *ip, FILE *fp)
+void rtcm2_output_magnavox(isgps30bits_t *ip, FILE *fp)
 /* ship an RTCM message in the format emitted by Magnavox DGPS receivers */
 {
     static uint     sqnum = 0;
 
-    ((struct rtcm_msg_t *) ip)->w2.sqnum = sqnum++;
+    ((struct rtcm2_msg_t *) ip)->w2.sqnum = sqnum++;
     sqnum &= 0x7;
 
-    isgps_output_magnavox(ip, ((struct rtcm_msg_t *) ip)->w2.frmlen + 2, fp);
+    isgps_output_magnavox(ip, ((struct rtcm2_msg_t *) ip)->w2.frmlen + 2, fp);
 }
 #endif /* __UNUSED__ */
 

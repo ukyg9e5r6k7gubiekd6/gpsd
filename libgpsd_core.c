@@ -733,7 +733,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		break;
 #endif /* ITRAX_ENABLE */
 #ifdef RTCM104_ENABLE
-	    case RTCM_PACKET:
+	    case RTCM2_PACKET:
 		(void)gpsd_switch_driver(session, "RTCM104");
 		break;
 #endif /* RTCM104_ENABLE */
@@ -818,8 +818,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	    buf2[0] = '\0';
 #ifdef RTCM104_ENABLE
-	    if ((session->gpsdata.set & RTCM_SET) != 0)
-		rtcm_dump(&session->gpsdata.rtcm, 
+	    if ((session->gpsdata.set & RTCM2_SET) != 0)
+		rtcm2_dump(&session->gpsdata.rtcm, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
 	    else {
