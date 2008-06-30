@@ -15,21 +15,26 @@
 
 <refsect1 id='overview'><title>OVERVIEW</title>
 
-<para>RTCM-104 is a serial protocol used for broadcasting pseudorange
+<para>RTCM-104 is a family of serial protocols used for broadcasting pseudorange
 corrections from differential-GPS reference stations.  This manual
 page describes some aspects of the RTCM protocol, mainly in order to
 explain the RTCM-104 dump format emitted by
 <citerefentry><refentrytitle>rtcmdecode</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 It describes that dump format completely.</para>
 
-<para>The applicable standard is <citetitle>RTCM Recommended
-Standards for Differential NAVSTAR GPS Service</citetitle> RTCM Paper
-194-93/SC 104-STD. Ordering instructions are accessible from the
-website of the <ulink url='http://www.rtcm.org/'>Radio Technical
-Commission for Maritime Services</ulink> under "Publications".</para>
+<para>RTCM-104 comes in two major and incompatible flavors, 2.x and
+3.x.  Each major flavor has minor (compatible) revisions.</para>
+
+<para>The applicable standard for RTCM Version 2.x is <citetitle>RTCM
+Recommended Standards for Differential NAVSTAR GPS Service</citetitle>
+RTCM Paper 194-93/SC 104-STD. For RTCM 3.1 it is <citetitle>RTCM Paper
+177-2006-SC104-STD</citetitle>.  Ordering instructions for both
+standards are accessible from the website of the <ulink
+url='http://www.rtcm.org/'>Radio Technical Commission for Maritime
+Services</ulink> under "Publications".</para>
 
 </refsect1>
-<refsect1 id='wire-format'><title>RTCM WIRE FORMAT</title>
+<refsect1 id='wire-format'><title>RTCM WIRE TRANSMISSIONS</title>
 
 <para>Differential-GPS correction stations consist of a GPS reference
 receiver coupled to a low frequency (LF) transmitter.  The GPS
@@ -48,16 +53,24 @@ remote radio receiver to receive with a good signal-to-noise ration.
 (Higher data rate signals can't be averaged over as long a time frame,
 hence they appear noisier.)</para>
 
-<para>An RTCM message consists of a sequence of up to 33 30-bit
+</refsect1>
+<refsect1 id='rtcm-wire-format'><title>RTCM WIRE FORMATS</title>
+
+<para>An RTCM 2.x message consists of a sequence of up to 33 30-bit
 words. The 24 most significant bits of each word are data and the six
 least significant bits are parity. The parity algorithm used is the
-same as that used on GPS satellite downlinks.</para>
+same ISGPS-2000 as that used on GPS satellite downlinks.  Each RTCM
+2.x message consists of two header words followed by zero or more data
+words, depending upon message type.</para>
 
-<para>Each message consists of two header words followed by zero or
-more data words, depending upon message type.</para>
+<para>An RTCM 3.x message begins with a fixed leader byte 0xD3.  That
+is followed by six bits of version information and 10 bits of payload
+length information.  Following that is the payload; following the 
+payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
+algorithm.</para>
 
 </refsect1>
-<refsect1 id='dump-format'><title>RTCM DUMP FORMAT</title>
+<refsect1 id='dump-format'><title>RTCM2 DUMP FORMAT</title>
 
 <para>For each message, the header is listed first, followed by zero
 or more lines containing the specific data for that message. The
@@ -131,10 +144,12 @@ operator.</para></listitem>
 <para>&lt;reference station id&gt; is the id of the GPS reference receiver. The
 LF transmitters also have (different) id numbers.</para>
 
-<para>&lt;modified z_count&gt; is the reference time of the corrections in the
-message in seconds within the current hour. Note that it is
-the current hour in GPS time, which is several seconds ahead of
-UTC (14 as of January 2006).</para>
+<para>&lt;modified z_count&gt; is the reference time of the
+corrections in the message in seconds within the current hour. Note
+that it is in GPS time, which is some seconds ahead of UTC (see the
+U.S. Naval Observatory's <ulink
+url="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">table of leap second
+corrections</ulink>).</para>
 
 <para>&lt;sequence no&gt; is a number which increments, modulo 8, for each
 message transmitted.</para>
@@ -243,7 +258,7 @@ parts of the world.</para>
 D &lt;dgnss type&gt; &lt;dat&gt; &lt;datum name&gt; [ &lt;dx&gt; &lt;dy&gt; &lt;dz&gt; ]
 </literallayout>
 
-<para>Here is an (ertificial) example:</para>
+<para>Here is an (artificial) example:</para>
 
 <informalexample><literallayout>
 D	GPS	0	ABC12	25.8	30.5	33.0
@@ -446,11 +461,11 @@ serial data stream which is a word boundary.
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Much of this text was originally written by John Sager
-<email>john.sager@btinternet.com</email> in association with his RTCM
-decoder. Other material comes from the GPSD project.  There is a
-project page for <application>gpsd</application> <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+<para>Much of the portion of this text describing RTCM2 was originally
+written by John Sager <email>john.sager@btinternet.com</email> in
+association with his RTCM decoder. Other material comes from the GPSD
+project.  There is a project page for <application>gpsd</application>
+<ulink url="http://gpsd.berlios.de/">here</ulink>.</para>
 
 </refsect1>
 
