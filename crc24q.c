@@ -15,12 +15,60 @@
  * 5) It detects most large error bursts with length greater than 24 bits;
  *    the odds of a false positive are at most 2^-23.
  *
+ * Note that this version has a seed of 0 wired in.  The RTCM104V3 standard
+ * requires this.
+ *
  * This implementation by Eric Steven Raymond is Copyright (c) 2008
  * for the GPSD project, and is released under BSD terms.
+ *
  */
 #include <stdbool.h>
 
 #include "crc24q.h"
+
+#if 0
+/*
+ * The crc24q code table below can be regenerated with the following code:
+ */
+#include <stdio.h>
+#include <stdlib.h>
+
+unsigned table[25];
+
+#define CRCPOLY	0x1864CFB
+
+static void
+crc_init(unsigned table[256])
+{
+    unsigned i, j;
+    unsigned h;
+
+    table[0] = 0;
+    table[1] = h = CRCPOLY;
+
+    for (i = 2; i < 256; i *= 2) {
+	if ((h <<= 1) & 0x1000000)
+	    h ^= CRCPOLY;
+	for (j = 0; j < i; j++)
+	    table[i+j] = table[j] ^ h;
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    int i;
+
+    crc_init(table);
+
+    for (i = 0; i < 256; i++) {
+	printf("0x%08X, ", table[i]);
+	if ((i % 4) == 3)
+	    putchar('\n');
+    }
+
+    exit(0);
+}
+#endif
 
 static const unsigned crc24q[256] = {
     0x00000000, 0x01864CFB, 0x028AD50D, 0x030C99F6, 
@@ -114,8 +162,6 @@ void crc24q_sign(unsigned char *data, int len)
     data[len]   = HI(crc);
     data[len+1] = MID(crc);
     data[len+2] = LO(crc);
-
-    return crc;
 }
 
 bool crc24q_check(unsigned char *data, int len)
