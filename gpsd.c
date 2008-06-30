@@ -1623,7 +1623,7 @@ int main(int argc, char *argv[])
 
 	    /* pass the current RTCM correction to the GPS if new */
 	    if (channel->device_type)
-		rtcm2_relay(channel);
+		rtcm_relay(channel);
 
 	    /* get data from the device */
 	    changed = 0;

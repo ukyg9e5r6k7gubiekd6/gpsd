@@ -73,9 +73,9 @@ enum {
 static void nextstate(struct gps_packet_t *lexer,
 		      unsigned char c)
 {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
     enum isgpsstat_t	isgpsstat;
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 /*@ +charint -casebreak @*/
     switch(lexer->state)
     {
@@ -114,24 +114,24 @@ static void nextstate(struct gps_packet_t *lexer,
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
 #ifdef TRIPMATE_ENABLE
 	if (c == 'A') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = ASTRAL_1;
 	    break;
 	}
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
 	if (c == 'E') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = EARTHA_1;
 	    break;
 	}
@@ -160,7 +160,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    break;
 	}
 #endif /* NAVCOM_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_SYNC) {
 	    lexer->state = RTCM2_SYNC_STATE;
 	    break;
@@ -168,7 +168,13 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = RTCM2_RECOGNIZED;
 	    break;
 	}
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
+#ifdef RTCM104V3_ENABLE
+	if (c == 0xD3) {
+	    lexer->state = RTCM3_LEADER_1;
+	    break;
+	}
+#endif /* RTCM104V3_ENABLE */
 	break;
     case COMMENT_BODY:
 	if (c == '\n')
@@ -259,60 +265,60 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef TRIPMATE_ENABLE
     case ASTRAL_1:
 	if (c == 'S') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = ASTRAL_2;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case ASTRAL_2:
 	if (c == 'T') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = ASTRAL_3;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case ASTRAL_3:
 	if (c == 'R') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = ASTRAL_5;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case ASTRAL_4:
 	if (c == 'A') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = ASTRAL_2;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case ASTRAL_5:
 	if (c == 'L') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = NMEA_RECOGNIZED;
 	} else
 	    lexer->state = GROUND_STATE;
@@ -321,60 +327,60 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef EARTHMATE_ENABLE
     case EARTHA_1:
 	if (c == 'A') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = EARTHA_2;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case EARTHA_2:
 	if (c == 'R') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = EARTHA_3;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case EARTHA_3:
 	if (c == 'T') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = EARTHA_4;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case EARTHA_4:
 	if (c == 'H') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = EARTHA_5;
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case EARTHA_5:
 	if (c == 'A') {
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
 		lexer->state = RTCM2_RECOGNIZED;
 		break;
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = NMEA_RECOGNIZED;
 	} else
 	    lexer->state = GROUND_STATE;
@@ -516,6 +522,21 @@ static void nextstate(struct gps_packet_t *lexer,
 	break;
 #endif /* NAVCOM_ENABLE */
 #endif /* TSIP_ENABLE || EVERMORE_ENABLE || GARMIN_ENABLE */
+#ifdef RTCM104V3_ENABLE
+    case RTCM3_LEADER_1:
+	if ((c & 0xFC) == 0) {
+	    lexer->length = (c << 8);
+	    lexer->state = RTCM3_LEADER_2;
+	    break;
+	} else
+	    lexer->state = GROUND_STATE;
+	break;
+    case RTCM3_LEADER_2:
+	lexer->length |= c;
+	lexer->length += 3;	/* to get the three checksum bytes */
+	lexer->state = RTCM3_RECOGNIZED;
+	break;
+#endif /* RTCM104V3_ENABLE */
 #ifdef ZODIAC_ENABLE
     case ZODIAC_EXPECTED:
     case ZODIAC_RECOGNIZED:
@@ -741,7 +762,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* TSIP_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
     case RTCM2_SYNC_STATE:
     case RTCM2_SKIP_STATE:
 	if ((isgpsstat = rtcm2_decode(lexer, c)) == ISGPS_MESSAGE) {
@@ -758,7 +779,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	} else
 	    lexer->state = GROUND_STATE;
 	break;
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
     }
 /*@ -charint +casebreak @*/
 }
@@ -1044,6 +1065,14 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    }
 	}
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
+#ifdef RTCM104V3_ENABLE
+	else if (lexer->state == RTCM3_RECOGNIZED) {
+	    // FIXME: Do the "Qualcomm CRC" check against the last three bytes
+	    packet_accept(lexer, RTCM3_PACKET);
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* RTCM104V3_ENABLE */
 #ifdef ZODIAC_ENABLE
 	else if (lexer->state == ZODIAC_RECOGNIZED) {
 	    short len, n, sum;
@@ -1191,7 +1220,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    break;
 	}
 #endif /* NAVCOM_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	else if (lexer->state == RTCM2_RECOGNIZED) {
 	    /*
 	     * RTCM packets don't have checksums.  The six bits of parity
@@ -1202,7 +1231,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 	    packet_discard(lexer);
 	    break;
 	}
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
     } /* while */
 
     return (ssize_t)fix;

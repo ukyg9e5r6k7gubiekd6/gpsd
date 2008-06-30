@@ -443,23 +443,41 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl check for RTCM104 support
-AC_ARG_ENABLE(rtcm104,
-  AC_HELP_STRING([--disable-rtcm104],
-                 [disable rtcm104 support]),
-  [ac_rtcm104=$enableval], [ac_rtcm104=yes])
-AC_MSG_CHECKING([for rtcm104 support])
+dnl check for RTCM104V2 support
+AC_ARG_ENABLE(rtcm104v2,
+  AC_HELP_STRING([--disable-rtcm104v2],
+                 [disable rtcm104v2 support]),
+  [ac_rtcm104v2=$enableval], [ac_rtcm104v2=yes])
+AC_MSG_CHECKING([for rtcm104v2 support])
 if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
-    ac_rtcm104=no
+    ac_rtcm104v2=no
 fi
-if test x"$ac_rtcm104" = "xyes"; then
+if test x"$ac_rtcm104v2" = "xyes"; then
     AC_MSG_RESULT([yes])
-	AC_DEFINE([RTCM104_ENABLE], 1, [rtcm104 binary support])
+	AC_DEFINE([RTCM104V2_ENABLE], 1, [rtcm104v2 binary support])
 else
   AC_MSG_RESULT([no])
 fi
 
-AM_CONDITIONAL([HAVE_RTCM104], [test "$ac_rtcm104" = "yes"])
+AM_CONDITIONAL([HAVE_RTCM104V2], [test "$ac_rtcm104v2" = "yes"])
+
+dnl check for RTCM104V3 support
+AC_ARG_ENABLE(rtcm104v2,
+  AC_HELP_STRING([--disable-rtcm104v3],
+                 [disable rtcm104v3 support]),
+  [ac_rtcm104v3=$enableval], [ac_rtcm104v3=yes])
+AC_MSG_CHECKING([for rtcm104v3 support])
+if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
+    ac_rtcm104v3=no
+fi
+if test x"$ac_rtcm104v3" = "xyes"; then
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([RTCM104V3_ENABLE], 1, [rtcm104v3 binary support])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL([HAVE_RTCM104V3], [test "$ac_rtcm104v3" = "yes"])
 
 dnl check for NTRIP support
 AC_ARG_ENABLE(ntrip,
@@ -730,7 +748,8 @@ echo "iTrax                   : $ac_itrax"
 echo "NMEA                    : $ac_nmea"
 echo "NTRIP                   : $ac_ntrip"
 echo "Navcom                  : $ac_navcom"
-echo "RTCM104                 : $ac_rtcm104"
+echo "RTCM104V2               : $ac_rtcm104v2"
+echo "RTCM104V3               : $ac_rtcm104v3"
 echo "SiRF                    : $ac_sirf"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
@@ -766,7 +785,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_navcom" = "xno" -a \
     x"$ac_nmea" = "xno" -a \
     x"$ac_ntrip" = "xno" -a \
-    x"$ac_rtcm104" = "xno" -a \
+    x"$ac_rtcm104v2" = "xno" -a \
     x"$ac_sirf" = "xno" -a \
     x"$ac_tnt" = "xno" -a \
     x"$ac_tripmate" = "xno" -a \

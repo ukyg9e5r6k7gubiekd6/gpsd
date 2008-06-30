@@ -25,7 +25,7 @@ enum isgpsstat_t {
 };
 #define ISGPS_ERRLEVEL_BASE	5
 
-#define RTCM_MAX	(RTCM_WORDS_MAX * sizeof(isgps30bits_t))
+#define RTCM_MAX	(RTCM2_WORDS_MAX * sizeof(isgps30bits_t))
 
 /*
  * The packet buffers need to be as long than the longest packet we
@@ -62,8 +62,10 @@ struct gps_packet_t {
 #define RTCM_PACKET	7
 #define GARMIN_PACKET	8
 #define NAVCOM_PACKET	9
-#define UBX_PACKET	10
-#define GARMINTXT_PACKET	11
+#define RTCM2_PACKET	10
+#define RTCM3_PACKET	11
+#define UBX_PACKET	12
+#define GARMINTXT_PACKET	13
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -85,7 +87,7 @@ struct gps_packet_t {
 	bool            locked;
 	int             curr_offset;
 	isgps30bits_t   curr_word;
-	isgps30bits_t   buf[RTCM_WORDS_MAX];
+	isgps30bits_t   buf[RTCM2_WORDS_MAX];
 	unsigned int    bufindex;
     } isgps;
 };
@@ -105,12 +107,12 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *,
 extern unsigned int isgps_parity(isgps30bits_t);
 extern void isgps_output_magnavox(isgps30bits_t *, unsigned int, FILE *);
 
-extern enum isgpsstat_t rtcm_decode(struct gps_packet_t *, unsigned int);
-extern void rtcm_dump(struct rtcm_t *, /*@out@*/char[], size_t);
-extern int rtcm_undump(/*@out@*/struct rtcm_t *, char *);
-extern void rtcm_unpack(/*@out@*/struct rtcm_t *, char *);
-extern bool rtcm_repack(struct rtcm_t *, isgps30bits_t *);
-extern void rtcm_output_magnavox(isgps30bits_t *, FILE *);
+extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
+extern void rtcm2_dump(struct rtcm2_t *, /*@out@*/char[], size_t);
+extern int rtcm2_undump(/*@out@*/struct rtcm2_t *, char *);
+extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
+extern bool rtcm2_repack(struct rtcm2_t *, isgps30bits_t *);
+extern void rtcm2_output_magnavox(isgps30bits_t *, FILE *);
 
 /* Next, declarations for the core library... */
 
@@ -318,7 +320,7 @@ struct gps_device_t {
 	    bool            locked;
 	    int             curr_offset;
 	    isgps30bits_t   curr_word;
-	    isgps30bits_t   buf[RTCM_WORDS_MAX];
+	    isgps30bits_t   buf[RTCM2_WORDS_MAX];
 	    unsigned int    bufindex;
 	} isgps;
 #endif /* BINARY_ENABLE */
@@ -361,7 +363,7 @@ extern void dgnss_report(struct gps_device_t *);
 extern void dgnss_autoconnect(struct gps_context_t *, double, double);
 
 extern void rtcm_relay(struct gps_device_t *);
-extern void rtcm_output_mag(isgps30bits_t *, FILE *);
+extern void rtcm2_output_mag(isgps30bits_t *, FILE *);
 
 extern int dgpsip_open(struct gps_context_t *, const char *);
 extern void dgpsip_report(struct gps_device_t *);

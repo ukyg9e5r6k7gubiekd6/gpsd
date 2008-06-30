@@ -99,7 +99,7 @@ struct gps_fix_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
-typedef enum {unknown, gps, glonass, galileo} navsystem;
+    typedef enum {gps, glonass, galileo, unknown} navsystem;
 
 struct rtcm2_t {
     /* header contents */

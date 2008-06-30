@@ -62,7 +62,7 @@ Starlink's website.
 #include "gpsd.h"
 #include "rtcm2.h"
 
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 
 #define PREAMBLE_PATTERN 0x66
 
@@ -734,4 +734,4 @@ void rtcm2_output_magnavox(isgps30bits_t *ip, FILE *fp)
 }
 #endif /* __UNUSED__ */
 
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */

@@ -736,7 +736,7 @@ struct gps_type_t trueNorth = {
     .cycle	    = 20,		/* updates per second */
 };
 #endif
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
  * RTCM-104, used for broadcasting DGPS corrections and by DGPS radios
@@ -776,7 +776,7 @@ static struct gps_type_t rtcm104 = {
     .wrapup	   = NULL,		/* no wrapup code */
     .cycle	   = 1,			/* updates every second */
 };
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 
 #ifdef GARMINTXT_ENABLE
 /**************************************************************************
@@ -874,9 +874,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ITRAX_ENABLE
     &italk_binary,
 #endif /* ITRAX_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
     &rtcm104,
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 #ifdef GARMINTXT_ENABLE
     &garmintxt,
 #endif /* GARMINTXT_ENABLE */

@@ -197,6 +197,25 @@ static struct map tests[] = {
 	.garbage_offset = 3,
 	.type = EVERMORE_PACKET,                         
     },
+    {
+	.legend = "RTCM104V3 type 1005 packet",
+	/*
+	 * Reference Station Id = 2003
+	 * GPS Service supported, but not GLONASS or Galileo
+	 * ARP ECEF-X = 1114104.5999 meters
+	 * ARP ECEF-Y = -4850729.7108 meters
+	 * ARP ECEF-Z = 3975521.4643 meters
+	 */
+	.test = {
+	    0xD3, 0x00, 0x13, 0x3E, 0xD7, 0xD3, 0x02, 0x02, 
+	    0x98, 0x0E, 0xDE, 0xEF, 0x34, 0xB4, 0xBD, 0x62,
+	    0xAC, 0x09, 0x41, 0x98, 0x6F, 0x33, 0x36, 0x0B, 
+	    0x98,
+	    },
+	.testlen = 25,
+	.garbage_offset = 0,
+	.type = RTCM3_PACKET,                         
+    },
 };
 /*@ +initallelements -charint +usedef @*/
 

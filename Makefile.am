@@ -18,7 +18,7 @@ DBUSPROGS = gpxlogger
 gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la  -lm
 endif
 
-if HAVE_RTCM104
+if HAVE_RTCM104V2
 RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif

@@ -333,7 +333,7 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
     return(buf);
 }
 
-#if defined(BINARY_ENABLE) || defined(RTCM2_ENABLE) || defined(NTRIP_ENABLE)
+#if defined(BINARY_ENABLE) || defined(RTCM104V2_ENABLE) || defined(NTRIP_ENABLE)
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
  * to the client in raw mode.  They assume that (a) the public gps.h structure 
@@ -732,11 +732,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		(void)gpsd_switch_driver(session, "iTalk binary");
 		break;
 #endif /* ITRAX_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    case RTCM2_PACKET:
 		(void)gpsd_switch_driver(session, "RTCM104");
 		break;
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    }
 	} else if (!gpsd_next_hunt_setting(session))
 	    return ERROR_SET;
@@ -817,19 +817,19 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
 		rtcm2_dump(&session->gpsdata.rtcm, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
 	    else {
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 #ifdef BINARY_ENABLE
 		gpsd_binary_dump(session, buf2, sizeof(buf2));
 #endif /* BINARY_ENABLE */
-#ifdef RTCM104_ENABLE
+#ifdef RTCM104V2_ENABLE
 	    }
-#endif /* RTCM104_ENABLE */
+#endif /* RTCM104V2_ENABLE */
 	    if (buf2[0] != '\0') {
 		gpsd_report(LOG_IO, "<= GPS: %s", buf2);
 		if (session->gpsdata.raw_hook)
