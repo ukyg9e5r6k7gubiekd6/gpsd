@@ -1073,12 +1073,15 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #ifdef RTCM104V3_ENABLE
 	else if (lexer->state == RTCM3_RECOGNIZED) {
 	    if (crc24q_check(lexer->inbuffer, 
-			     lexer->inbufptr-lexer->inbuffer - 3))
+			     lexer->inbufptr-lexer->inbuffer))
 		packet_accept(lexer, RTCM3_PACKET);
 	    else {
-		gpsd_report(LOG_IO, "RTCM3 data checksum failure, %0x\n", 
+		gpsd_report(LOG_IO, "RTCM3 data checksum failure, %0x against %02x %02x %02x\n", 
 			    crc24q_hash(lexer->inbuffer, 
-					 lexer->inbufptr-lexer->inbuffer - 3));
+					lexer->inbufptr-lexer->inbuffer - 3),
+			    lexer->inbufptr[-3], 
+			    lexer->inbufptr[-2],
+			    lexer->inbufptr[-1]);
 		packet_discard(lexer);
 		lexer->state = GROUND_STATE;
 	    }
