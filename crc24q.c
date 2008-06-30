@@ -1,7 +1,11 @@
 /*
  * This is an implementation of the CRC-24Q cyclic redundancy checksum
- * used by Qualcomm, Nokia, and RTCM104V3. According to the RTCM104V3
- * standard,
+ * used by Qualcomm, RTCM104V3, and PGP 6.5.1. According to the RTCM104V3
+ * standard, it uses the error polynomial
+ *
+ *    x^24+ x^23+ x^18+ x^17+ x^14+ x^11+ x^10+ x^7+ x^6+ x^5+ x^4+ x^3+ x+1
+ *
+ * This corresponds to a mask of 0x1864CFB.  
  *
  * 1) It detects all single bit errors per 24-bit code word.
  * 2) It detects all double bit error combinations in a code word.
