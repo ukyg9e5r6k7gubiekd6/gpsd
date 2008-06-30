@@ -734,7 +734,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* ITRAX_ENABLE */
 #ifdef RTCM104V2_ENABLE
 	    case RTCM2_PACKET:
-		(void)gpsd_switch_driver(session, "RTCM104");
+		(void)gpsd_switch_driver(session, "RTCM104V2");
+		break;
+#endif /* RTCM104V2_ENABLE */
+#ifdef RTCM104V3_ENABLE
+	    case RTCM3_PACKET:
+		(void)gpsd_switch_driver(session, "RTCM104V3");
 		break;
 #endif /* RTCM104V2_ENABLE */
 	    }
@@ -817,9 +822,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    char buf2[MAX_PACKET_LENGTH*3+2];
 
 	    buf2[0] = '\0';
+	    // FIXME: Add RTCMV3 handking as well.
 #ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
-		rtcm2_dump(&session->gpsdata.rtcm, 
+		rtcm2_dump(&session->gpsdata.rtcm2, 
 			  buf2+strlen(buf2), 
 			  (sizeof(buf2)-strlen(buf2)));
 	    else {

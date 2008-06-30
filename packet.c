@@ -32,6 +32,7 @@ others apart and distinguish them from baud barf.
 #include <errno.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
+#include "crc24q.h"
 
 /*
  * The packet-recognition state machine.  It can be fooled by garbage
@@ -534,7 +535,11 @@ static void nextstate(struct gps_packet_t *lexer,
     case RTCM3_LEADER_2:
 	lexer->length |= c;
 	lexer->length += 3;	/* to get the three checksum bytes */
-	lexer->state = RTCM3_RECOGNIZED;
+	lexer->state = RTCM3_PAYLOAD;
+	break;
+    case RTCM3_PAYLOAD:
+	if (--lexer->length == 0)
+	    lexer->state = RTCM3_RECOGNIZED;
 	break;
 #endif /* RTCM104V3_ENABLE */
 #ifdef ZODIAC_ENABLE
@@ -1067,9 +1072,16 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef RTCM104V3_ENABLE
 	else if (lexer->state == RTCM3_RECOGNIZED) {
-	    // FIXME: Do the "Qualcomm CRC" check against the last three bytes
-	    packet_accept(lexer, RTCM3_PACKET);
-	    packet_discard(lexer);
+	    if (crc24q_check(lexer->inbuffer, 
+			     lexer->inbufptr-lexer->inbuffer - 3))
+		packet_accept(lexer, RTCM3_PACKET);
+	    else {
+		gpsd_report(LOG_IO, "RTCM3 data checksum failure, %0x\n", 
+			    crc24q_hash(lexer->inbuffer, 
+					 lexer->inbufptr-lexer->inbuffer - 3));
+		packet_discard(lexer);
+		lexer->state = GROUND_STATE;
+	    }
 	    break;
 	}
 #endif /* RTCM104V3_ENABLE */

@@ -739,22 +739,22 @@ struct gps_type_t trueNorth = {
 #ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
- * RTCM-104, used for broadcasting DGPS corrections and by DGPS radios
+ * RTCM-104 (v2), used for broadcasting DGPS corrections and by DGPS radios
  *
  **************************************************************************/
 
-static gps_mask_t rtcm104_analyze(struct gps_device_t *session)
+static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 {
-    rtcm2_unpack(&session->gpsdata.rtcm, (char *)session->packet.isgps.buf);
-    gpsd_report(LOG_RAW, "RTCM packet type 0x%02x length %d words: %s\n",
-		session->gpsdata.rtcm.type,
-		session->gpsdata.rtcm.length+2,
-		gpsd_hexdump(session->packet.isgps.buf, (session->gpsdata.rtcm.length+2)*sizeof(isgps30bits_t)));
+    rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->packet.isgps.buf);
+    gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words: %s\n",
+		session->gpsdata.rtcm2.type,
+		session->gpsdata.rtcm2.length+2,
+		gpsd_hexdump(session->packet.isgps.buf, (session->gpsdata.rtcm2.length+2)*sizeof(isgps30bits_t)));
     return RTCM2_SET;
 }
 
-static struct gps_type_t rtcm104 = {
-    .type_name     = "RTCM104",		/* full name of type */
+static struct gps_type_t rtcm104v2 = {
+    .type_name     = "RTCM104V2",	/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
@@ -764,7 +764,7 @@ static struct gps_type_t rtcm104 = {
     .configurator  = NULL,		/* no configurator */
 #endif /* ALLOW_RECONFIGURE */
     .get_packet    = generic_get,	/* how to get a packet */
-    .parse_packet  = rtcm104_analyze,	/*  */
+    .parse_packet  = rtcm104v2_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
@@ -777,6 +777,47 @@ static struct gps_type_t rtcm104 = {
     .cycle	   = 1,			/* updates every second */
 };
 #endif /* RTCM104V2_ENABLE */
+#ifdef RTCM104V3_ENABLE
+/**************************************************************************
+ *
+ * RTCM-104 (v3), used for broadcasting DGPS corrections and by DGPS radios
+ *
+ **************************************************************************/
+
+static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
+{
+    // FIXME: Add a real unpacking function
+    gpsd_report(LOG_RAW, "RTCM 3.x packet type 0x%02x length %d words: %s\n",
+		session->gpsdata.rtcm3.type,
+		session->gpsdata.rtcm3.length,
+		gpsd_hexdump(session->packet.inbuffer, (session->gpsdata.rtcm3.length)));
+    return RTCM3_SET;
+}
+
+static struct gps_type_t rtcm104v3 = {
+    .type_name     = "RTCM104V3",	/* full name of type */
+    .trigger       = NULL,		/* no recognition string */
+    .channels      = 0,			/* not used */
+    .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect  = NULL,		/* no probe */
+    .probe_subtype = NULL,		/* no subtypes */
+#ifdef ALLOW_RECONFIGURE
+    .configurator  = NULL,		/* no configurator */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet    = generic_get,	/* how to get a packet */
+    .parse_packet  = rtcm104v3_analyze,	/*  */
+    .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .speed_switcher= NULL,		/* no speed switcher */
+    .mode_switcher = NULL,		/* no mode switcher */
+    .rate_switcher = NULL,		/* no sample-rate switcher */
+    .cycle_chars   = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert	   = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup	   = NULL,		/* no wrapup code */
+    .cycle	   = 1,			/* updates every second */
+};
+#endif /* RTCM104V3_ENABLE */
 
 #ifdef GARMINTXT_ENABLE
 /**************************************************************************
@@ -875,8 +916,11 @@ static struct gps_type_t *gpsd_driver_array[] = {
     &italk_binary,
 #endif /* ITRAX_ENABLE */
 #ifdef RTCM104V2_ENABLE
-    &rtcm104,
+    &rtcm104v2,
 #endif /* RTCM104V2_ENABLE */
+#ifdef RTCM104V3_ENABLE
+    &rtcm104v3,
+#endif /* RTCM104V3_ENABLE */
 #ifdef GARMINTXT_ENABLE
     &garmintxt,
 #endif /* GARMINTXT_ENABLE */

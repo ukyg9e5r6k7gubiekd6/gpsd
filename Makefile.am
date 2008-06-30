@@ -141,7 +141,8 @@ libgpsd_c_sources = \
 	tsip.c \
 	evermore.c \
 	italk.c \
-	navcom.c
+	navcom.c \
+	crc24q.c
 
 libgpsd_h_sources = \
 	italk.h \
@@ -150,6 +151,7 @@ libgpsd_h_sources = \
 	bits.h \
 	packet_names.h \
 	rtcm2.h \
+	crc24q.h \
 	gpsd.h
 
 BUILT_SOURCES = packet_names.h gpsd.h

@@ -94,7 +94,7 @@ struct gps_fix_t {
 /*
  * A nominally 30-bit word (24 bits of data, 6 bits of parity)
  * used both in the GPS downlink protocol described in IS-GPS-200
- * and in the format for DGPS corrections used in RTCM-104.
+ * and in the format for DGPS corrections used in RTCM-104v2.
  */
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
@@ -208,7 +208,8 @@ struct rtcm3_extended_rtk {
 
 struct rtcm3_t {
     /* header contents */
-    unsigned type;	/* RTCM message type */
+    unsigned type;	/* RTCM 3.x message type */
+    unsigned length;	/* payload length, exclusive of checksum */
 
     /* message data in decoded form */
     union {
@@ -346,6 +347,7 @@ struct gps_data_t {
 #define ERROR_SET	0x08000000u
 #define CYCLE_START_SET	0x10000000u
 #define RTCM2_SET	0x20000000u
+#define RTCM3_SET	0x40000000u
 #define FIX_SET		(TIME_SET|MODE_SET|TIMERR_SET|LATLON_SET|HERR_SET|ALTITUDE_SET|VERR_SET|TRACK_SET|TRACKERR_SET|SPEED_SET|SPEEDERR_SET|CLIMB_SET|CLIMBERR_SET)
     double online;		/* NZ if GPS is on line, 0 if not.
 				 *
@@ -410,7 +412,8 @@ struct gps_data_t {
     unsigned int driver_mode;	/* whether driver is in native mode or not */
 
     /* RTCM-104 data */
-    struct rtcm2_t	rtcm;
+    struct rtcm2_t	rtcm2;
+    struct rtcm3_t	rtcm3;
     
     /* device list */
     int ndevices;		/* count of available devices */
