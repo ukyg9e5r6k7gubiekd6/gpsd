@@ -175,10 +175,20 @@ struct rtcm2_t {
 #define RTCM3_MAX_DESCRIPTOR	31
 #define RTCM3_MAX_ANNOUNCEMENTS	32
 
+/* scaling constants for RTCM3 real number types */
+#define PSEUDORANGE_RESOLUTION		0.2	/* DF011 */
+#define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012 */
+#define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
+#define ANTENNA_HEIGHT_RESOLUTION	0.0001	/* DF025-027 */
+#define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
+#define GPS_EPOCH_TIME_RESOLTIION	0.1	/* DF065 */
+#define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
+
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
     unsigned int station_id;	/* Reference Station ID */
-    time_t time;		/* GPS Epoch Time (TOW) or GLONASS Epoch Time */
+    time_t time;		/* GPS Epoch Time (TOW) in ms, 
+				   or GLONASS Epoch Time in ms */
     bool sync;			/* Synchronous GNSS Message Flag */
     ushort satcount;		/* # Satellite Signals Processed */
     bool smoothing;		/* Divergence-free Smoothing Indicator */
@@ -189,8 +199,8 @@ struct rtcm3_basic_rtk {
     bool indicator;		/* Indicator */
     unsigned char channel;	/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
-    unsigned pseudorange;	/* Pseudorange */
-    unsigned rangediff;		/* PhaseRange – L1 Pseudorange */
+    double pseudorange;		/* Pseudorange */
+    double rangediff;		/* PhaseRange – Pseudorange in meters */
     unsigned char locktime;	/* Lock time Indicator */
 };
 
@@ -198,21 +208,43 @@ struct rtcm3_extended_rtk {
     bool indicator;		/* Indicator */
     unsigned char channel;	/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
-    unsigned pseudorange;	/* Pseudorange */
-    unsigned rangediff;		/* PhaseRange – L1 Pseudorange */
+    double pseudorange;		/* Pseudorange */
+    double rangediff;		/* PhaseRange – L1 Pseudorange */
     unsigned char locktime;	/* Lock time Indicator */
     unsigned char ambiguity;	/* Integer Pseudorange 
 					   Modulus Ambiguity */
-    unsigned char CNR;		/* Carrier-to-Noise Ratio */
+    double CNR;		/* Carrier-to-Noise Ratio */
+};
+
+struct rtcm3_network_rtk_header {
+    unsigned int msgnum;	/* Message number */
+    unsigned int network_id;	/* Network ID */
+    unsigned int subnetwork_id;	/* Network ID */
+    time_t time;		/* GPS Epoch Time (TOW) in ms */
+    bool multimesg;		/* GPS Multiple Message Indicator */
+    unsigned master_id;		/* Master Reference Station ID */
+    unsigned aux_id;		/* Auxilary Reference Station ID */
+    unsigned char satcount;	/* count of GPS satellites */
+};
+
+struct rtcm3_correction_diff {
+    unsigned char ident;	/* satellite ID */
+    enum {reserved, correct, widelane, uncertain} ambiguity;
+    unsigned char nonsync;
+    double geometric_diff;	/* Geometric Carrier Phase 
+				   Correction Difference (1016, 1017) */
+    unsigned char iode;		/* GPS IODE (1016, 1017) */
+    double ionospheric_diff;	/* Ionospheric Carrier Phase 
+				   Correction Difference (1015, 1017) */
 };
 
 struct rtcm3_t {
     /* header contents */
     unsigned type;	/* RTCM 3.x message type */
-    unsigned length;	/* payload length, exclusive of checksum */
+    unsigned length;	/* payload length, inclusive of checksum */
 
-    /* message data in decoded form */
     union {
+	/* 1001-1013 were present in the 3.0 version */
 	struct {
 	    struct rtcm3_rtk_hdr	header;
 	    struct {
@@ -308,6 +340,109 @@ struct rtcm3_t {
 		unsigned short interval;
 	    } announcements[RTCM3_MAX_ANNOUNCEMENTS];
 	} rtcm3_1013;
+	/* 1014-1017 were added in the 3.1 version */
+	struct {
+	    unsigned int msgnum;	/* Message number */
+	    unsigned int network_id;	/* Network ID */
+	    unsigned int subnetwork_id;	/* Network ID */
+	    unsigned char stationcount;	/* # auxiliary stations transmitted */
+	    unsigned master_id;		/* Master Reference Station ID */
+	    unsigned aux_id;		/* Auxilary Reference Station ID */
+	    double d_lat, d_lon, d_alt;	/* Aux-master location delta */
+	} rtcm3_1014;
+	struct {
+	    struct rtcm3_network_rtk_header	header;
+	    struct rtcm3_correction_diff corrections[RTCM3_MAX_SATELLITES];
+	} rtcm3_1015;
+	struct {
+	    struct rtcm3_network_rtk_header	header;
+	    struct rtcm3_correction_diff corrections[RTCM3_MAX_SATELLITES];
+	} rtcm3_1016;
+	struct {
+	    struct rtcm3_network_rtk_header	header;
+	    struct rtcm3_correction_diff corrections[RTCM3_MAX_SATELLITES];
+	} rtcm3_1017;
+	struct {
+	    unsigned int msgnum;	/* Message number */
+	    unsigned int ident;		/* Satellite ID */
+	    unsigned int week;		/* GPS Week Number */
+	    unsigned char sv_accuracy;	/* GPS SV ACCURACY */
+	    enum {reserved_code, p, ca, l2c} code;
+	    double idot;
+	    unsigned char iode;
+	    /* ephemeris fields, not scaled */
+	    unsigned int t_sub_oc;
+	    unsigned char a_sub_f2;
+	    signed int a_sub_f0;
+	    unsigned int iodc;
+	    signed int C_sub_rs;
+	    signed int delta_sub_n;
+	    signed int M_sub_0;
+	    signed int C_sub_uc;
+	    unsigned int e;
+	    signed int C_sub_us;
+	    unsigned int sqrt_sub_A;
+	    unsigned int t_sub_oe;
+	    signed int C_sub_ic;
+	    signed int OMEGA_sub_0;
+	    signed int C_sub_is;
+	    signed int i_sub_0;
+	    signed int C_sub_rc;
+	    signed int argument_of_perigee;
+	    signed int omegadot;
+	    signed int t_sub_GD;
+	    unsigned char sv_health;
+	    bool p_data;
+	    bool fit_interval;
+	} rtcm3_1019;
+	struct {
+	    unsigned int msgnum;	/* Message number */
+	    unsigned int ident;		/* Satellite ID */
+	    unsigned short channel;	/* Satellite Frequency Channel Number */
+	    /* ephemeris fields, not scaled */
+	    bool C_sub_n;
+	    bool health_avAilability_indicator;
+	    unsigned char P1;
+	    unsigned short t_sub_k;
+	    bool msb_of_B_sub_n;
+	    bool P2;
+	    bool t_sub_b;
+	    signed int x_sub_n_t_of_t_sub_b_prime;
+	    signed int x_sub_n_t_of_t_sub_b;
+	    signed int x_sub_n_t_of_t_sub_b_prime_prime;
+	    signed int y_sub_n_t_of_t_sub_b_prime;
+	    signed int y_sub_n_t_of_t_sub_b;
+	    signed int y_sub_n_t_of_t_sub_b_prime_prime;
+	    signed int z_sub_n_t_of_t_sub_b_prime;
+	    signed int z_sub_n_t_of_t_sub_b;
+	    signed int z_sub_n_t_of_t_sub_b_prime_prime;
+	    bool P3;
+	    signed int gamma_sub_n_of_t_sub_b;
+	    unsigned char MP;
+	    bool Ml_n;
+	    signed int tau_n_of_t_sub_b;
+	    signed int M_delta_tau_sub_n;
+	    unsigned int E_sub_n;
+	    bool MP4;
+	    unsigned char MF_sub_T;
+	    unsigned char MN_sub_T;
+	    unsigned char MM;
+	    bool additioinal_data_availability;
+	    unsigned int N_sup_A;
+	    unsigned int tau_sub_c;
+	    unsigned int M_N_sub_4;
+	    signed int M_tau_sub_GPS;
+	    bool M_l_sub_n;
+	} rtcm3_1020;
+	struct {
+	    unsigned int msgnum;	/* Message number */
+	    unsigned int station_id;	/* Reference Station ID */
+	    unsigned short mjd;		/* Modified Julian Day (MJD) Number */
+	    unsigned int sod;		/* Seconds of Day (UTC) */
+	    unsigned char len;		/* # Chars to follow */
+	    unsigned char unicode_units;
+	    unsigned char text[128];
+	} rtcm3_1029;
     };
 };
 
