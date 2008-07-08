@@ -52,10 +52,13 @@ Starlink's website.
 
 /*
  * Structures for interpreting words in an RTCM-104 2.x message (after
- * parity checking and removing inversion).
+ * parity checking and removing inversion).  Note, these structures
+ * are overlayed on the raw data in order to decode them into
+ * bitfields; this will fail horribly if your C compiler ever introduces
+ * padding between or before bit fields.
  *
  * The RTCM 2.1 standard is less explicit than it should be about signed-integer
- * representations.  Two's compliment is specified for prc and rrc (msg1wX),
+ * representations.  Two's complement is specified for prc and rrc (msg1wX),
  * but not everywhere.
  */
 
