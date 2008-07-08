@@ -18,7 +18,6 @@
 
 <cmdsynopsis>
   <command>gpsd</command>  
-      <arg choice='opt'>-f <replaceable>GPS-devicename</replaceable></arg>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <!-- arg choice='opt'>-R
       <replaceable>rtcm-listener-port</replaceable></arg -->
@@ -81,16 +80,6 @@ from an attached RTCM-104 source to other instances of
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
-<varlistentry>
-<term>-f</term>
-<listitem>
-<para>Set a GPS device name.  This option is deprecated and may be
-removed in a future version.  Each command-line argument will be
-treated as a device to be probed for the presence of a GPS; that,
-rather than the -f option, is the preferred way of specifying GPS
-devices at startup.</para>
-</listitem>
-</varlistentry>
 <varlistentry>
 <term>-F</term>
 <listitem>
