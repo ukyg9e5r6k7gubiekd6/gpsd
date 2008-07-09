@@ -59,9 +59,9 @@ by iTrax. <application>gpsd</application> effectively hides the
 differences among these. It also knows about and uses commands that
 tune the GPS for lower latency, decreased bandwidth usage, or
 increased accuracy on the San Jose Navigation FV18, the Sony CXD2951,
-the uBlox, and the Motorola OnCore GT+.  It can read heading and
+the uBlox, and the Motorola OnCore GT+. <!-- It can read heading and
 attitude information from the True North Technologies Revolution 2X
-Digital compass.</para>
+Digital compass. --></para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
