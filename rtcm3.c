@@ -186,15 +186,15 @@ struct rtcm3_msg_t {
 					   (DF024) */
 	    uint reference_station:1;	/* Reference Station Indicator
 					   (DF141) */
-	    long int ecef_x:38;		/* Antenna Reference point ECEF-X
+	    long long int ecef_x:38;	/* Antenna Reference point ECEF-X
 					   (DF025) */
 	    uint single_receiver:1;	/* Single Receiver Oscillator Indicator
 					   (DF142) */
 	    uint reserved2:1;		/* Reserved (DF001) */
-	    long int ecef_y:38;		/* Antenna Reference point ECEF-X
+	    long long int ecef_y:38;	/* Antenna Reference point ECEF-X
 					   (DF026) */
 	    uint reserved3:1;		/* Reserved (DF001) */
-	    long int ecef_z:38;		/* Antenna Reference point ECEF-Z
+	    long long int ecef_z:38;	/* Antenna Reference point ECEF-Z
 					   (DF026) */
 	} rtcm3_msg_t_1005;
 	struct {
@@ -207,15 +207,15 @@ struct rtcm3_msg_t {
 					   (DF024) */
 	    uint reference_station:1;	/* Reference Station Indicator
 					   (DF141) */
-	    long int ecef_x:38;		/* Antenna Reference point ECEF-X
+	    long long int ecef_x:38;	/* Antenna Reference point ECEF-X
 					   (DF025) */
 	    uint single_receiver:1;	/* Single Receiver Oscillator Indicator
 					   (DF142) */
 	    uint reserved2:1;		/* Reserved (DF001) */
-	    long int ecef_y:38;		/* Antenna Reference point ECEF-X
+	    long long int ecef_y:38;	/* Antenna Reference point ECEF-X
 					   (DF026) */
 	    uint reserved3:1;		/* Reserved (DF001) */
-	    long int ecef_z:38;		/* Antenna Reference point ECEF-Z
+	    long long int ecef_z:38;	/* Antenna Reference point ECEF-Z
 					   (DF026) */
 	    uint height:16;		/* Antenna height (DF028) */
 	} rtcm3_msg_t_1006;

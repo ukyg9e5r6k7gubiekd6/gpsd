@@ -27,6 +27,7 @@ AC_CHECK_SIZEOF([char])
 AC_CHECK_SIZEOF([short])
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long])
+AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 if test x"$ac_cv_sizeof_char" != "x1" ; then 
@@ -38,6 +39,10 @@ if test x"$ac_cv_sizeof_short" != "x2" ; then
 	type_error="yes"
 fi
 if test x"$ac_cv_sizeof_int" != "x4" ; then 
+	AC_MSG_WARN(gpsd requires sizeof(int)==4);
+	type_error="yes"
+fi
+if test x"$ac_cv_sizeof_long_long" != "x8" ; then 
 	AC_MSG_WARN(gpsd requires sizeof(int)==4);
 	type_error="yes"
 fi
