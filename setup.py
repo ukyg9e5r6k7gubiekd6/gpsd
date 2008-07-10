@@ -24,7 +24,7 @@ if not 'clean' in sys.argv:
 	    created_files.append(f_name)
 
 extension_source = ["gpspacket.c", "packet.c", "isgps.c",
-	    "rtcm2.c", "strl.c", "hex.c"]
+	    "rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
 
 setup( name="gpspacket",
        version="1.0",
