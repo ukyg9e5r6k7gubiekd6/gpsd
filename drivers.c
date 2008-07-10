@@ -790,7 +790,8 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     gpsd_report(LOG_RAW, "RTCM 3.x packet type 0x%02x length %d words: %s\n",
 		session->gpsdata.rtcm3.type,
 		session->gpsdata.rtcm3.length,
-		gpsd_hexdump(session->packet.inbuffer, (session->gpsdata.rtcm3.length)));
+		gpsd_hexdump(session->packet.inbuffer, 
+			     (size_t)(session->gpsdata.rtcm3.length)));
     return RTCM3_SET;
 }
 

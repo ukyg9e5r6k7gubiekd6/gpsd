@@ -151,9 +151,9 @@ unsigned crc24q_hash(unsigned char *data, int len)
     return crc;
 }
 
-#define LO(x)	((x) & 0xff)
-#define MID(x)	(((x) >> 8) & 0xff)
-#define HI(x)	(((x) >> 16) & 0xff)
+#define LO(x)	(unsigned char)((x) & 0xff)
+#define MID(x)	(unsigned char)(((x) >> 8) & 0xff)
+#define HI(x)	(unsigned char)(((x) >> 16) & 0xff)
 
 void crc24q_sign(unsigned char *data, int len)
 {
