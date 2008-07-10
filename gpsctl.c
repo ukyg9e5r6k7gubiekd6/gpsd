@@ -38,7 +38,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 
     for (;;) {
 	int waiting = 0;
-	/*@i1@*/(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
+	(void)ioctl(session->gpsdata.gps_fd, FIONREAD, &waiting);
 	if (waiting == 0) {
 	    (void)usleep(300);
 	    continue;
