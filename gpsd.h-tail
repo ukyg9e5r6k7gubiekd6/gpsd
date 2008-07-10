@@ -114,6 +114,8 @@ extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
 extern bool rtcm2_repack(struct rtcm2_t *, isgps30bits_t *);
 extern void rtcm2_output_magnavox(isgps30bits_t *, FILE *);
 
+extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
+
 /* Next, declarations for the core library... */
 
 /* factors for converting among confidence interval units */

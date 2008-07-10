@@ -365,7 +365,8 @@ struct rtcm3_t {
 	    unsigned char iode;
 	    /* ephemeris fields, not scaled */
 	    unsigned int t_sub_oc;
-	    unsigned char a_sub_f2;
+	    signed int a_sub_f2;
+	    signed int a_sub_f1;
 	    signed int a_sub_f0;
 	    unsigned int iodc;
 	    signed int C_sub_rs;

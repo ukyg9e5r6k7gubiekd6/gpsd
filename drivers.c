@@ -786,7 +786,7 @@ static struct gps_type_t rtcm104v2 = {
 
 static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
-    // FIXME: Add a real unpacking function
+    rtcm3_unpack(&session->gpsdata.rtcm3, (char *)session->packet.inbuffer);
     gpsd_report(LOG_RAW, "RTCM 3.x packet type 0x%02x length %d words: %s\n",
 		session->gpsdata.rtcm3.type,
 		session->gpsdata.rtcm3.length,

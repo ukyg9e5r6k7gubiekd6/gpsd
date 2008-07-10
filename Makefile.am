@@ -129,6 +129,7 @@ libgpsd_c_sources = \
 	report.c \
 	isgps.c \
 	rtcm2.c \
+	rtcm3.c \
 	srecord.c \
 	bsd-base64.c \
 	strl.c \
