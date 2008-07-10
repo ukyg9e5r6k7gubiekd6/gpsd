@@ -749,6 +749,16 @@ for vehicles in motion; at 50km/h (31mi/h) of speed over ground, 1
 second of lag corresponds to 13.8 meters change in position between
 updates.</para>
 
+<para>The time reporting of the GPS system itself has an intrinsic
+accuracy limit of 0.000,000,340 = 3.4x10e-7 seconds.  A more important
+limit is the GPS tick rate.  While the one-per-second PPS pulses
+emitted by serial GPS units are timed to the GPS system's intrinsic
+accuracy limit,the satellites only emit navigation messages at
+0.01-second intervals, and the timestamps in them only carry
+0.01-second precision. Thus, the timestamps that
+<application>gpsd</application> reports in time/position/velocity
+messages are normally accurate only to 1/100th of a second.</para>
+
 </refsect1>
 <refsect1 id='ntp'><title>USE WITH NTP</title> 
 
