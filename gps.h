@@ -175,15 +175,6 @@ struct rtcm2_t {
 #define RTCM3_MAX_DESCRIPTOR	31
 #define RTCM3_MAX_ANNOUNCEMENTS	32
 
-/* scaling constants for RTCM3 real number types */
-#define PSEUDORANGE_RESOLUTION		0.2	/* DF011 */
-#define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012 */
-#define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
-#define ANTENNA_HEIGHT_RESOLUTION	0.0001	/* DF025-027 */
-#define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
-#define GPS_EPOCH_TIME_RESOLTIION	0.1	/* DF065 */
-#define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
-
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
     unsigned int station_id;	/* Reference Station ID */
@@ -219,7 +210,7 @@ struct rtcm3_extended_rtk {
 struct rtcm3_network_rtk_header {
     unsigned int msgnum;	/* Message number */
     unsigned int network_id;	/* Network ID */
-    unsigned int subnetwork_id;	/* Network ID */
+    unsigned int subnetwork_id;	/* Subnetwork ID */
     time_t time;		/* GPS Epoch Time (TOW) in ms */
     bool multimesg;		/* GPS Multiple Message Indicator */
     unsigned master_id;		/* Master Reference Station ID */
@@ -277,12 +268,14 @@ struct rtcm3_t {
 	} rtcm3_1004;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
-	    // navsystem system;		/* Which system is it? */
+	    navsystem system;		/* Which system is it? */
+	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */
 	} rtcm3_1005;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
-	    // navsystem system;		/* Which system is it? */
+	    navsystem system;		/* Which system is it? */
+	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */
 	    short height;			/* Antenna height */
 	} rtcm3_1006;
@@ -344,10 +337,10 @@ struct rtcm3_t {
 	struct {
 	    unsigned int msgnum;	/* Message number */
 	    unsigned int network_id;	/* Network ID */
-	    unsigned int subnetwork_id;	/* Network ID */
+	    unsigned int subnetwork_id;	/* Subnetwork ID */
 	    unsigned char stationcount;	/* # auxiliary stations transmitted */
-	    unsigned master_id;		/* Master Reference Station ID */
-	    unsigned aux_id;		/* Auxilary Reference Station ID */
+	    unsigned int master_id;	/* Master Reference Station ID */
+	    unsigned int aux_id;	/* Auxilary Reference Station ID */
 	    double d_lat, d_lon, d_alt;	/* Aux-master location delta */
 	} rtcm3_1014;
 	struct {
