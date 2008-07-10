@@ -526,7 +526,7 @@ static void nextstate(struct gps_packet_t *lexer,
 #ifdef RTCM104V3_ENABLE
     case RTCM3_LEADER_1:
 	if ((c & 0xFC) == 0) {
-	    lexer->length = (c << 8);
+	    lexer->length = (size_t)(c << 8);
 	    lexer->state = RTCM3_LEADER_2;
 	    break;
 	} else

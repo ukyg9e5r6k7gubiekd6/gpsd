@@ -337,7 +337,6 @@ libgps: libgps.c .libs/libgps.a
 SPLINTOPTS = -I/usr/include/dbus-1.0/
 splint:
 	@echo "Running splint on daemon and libraries..."
-	@echo "Expect 'gpsd.c:230:39: Line expects to suppress 1 error, found 0 errors'"
 	-splint $(SPLINTOPTS) -redef $(gpsd_c_sources) $(libgpsd_c_sources)
 	@echo "Running splint on xgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(xgps_SOURCES)
