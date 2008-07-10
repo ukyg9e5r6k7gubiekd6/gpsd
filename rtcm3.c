@@ -48,6 +48,12 @@ firmware.
  * (In practice, the only class of machines on which this is likely
  * to fail are word-aligned architectures without barrel shifters.
  * Very few of these are left in 2008.)
+ *
+ * Another portability note: this decoding method requires us to be able
+ * to declare 38-bit bitfields in order to handle packed ECEF coordinate
+ * data.  This shouldn't be a problem on any machine with 64-bit registers,
+ * but if you're compiling on 32-bit hardware with a compiler that doesn't
+ * allow 'long long' bitfields, it's not going to be happy. 
  */
 #pragma pack(1)		/* try to tell the compiler not to pad at all */
 
