@@ -337,7 +337,7 @@ libgps: libgps.c .libs/libgps.a
 SPLINTOPTS = -I/usr/include/dbus-1.0/
 splint:
 	@echo "Running splint on daemon and libraries..."
-	-splint $(SPLINTOPTS) -redef $(gpsd_c_sources) $(libgpsd_c_sources)
+	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources) $(libgpsd_c_sources)
 	@echo "Running splint on xgps..."
 	-splint $(SPLINTOPTS) -exportlocal $(xgps_SOURCES)
 	@echo "Running splint on cgps..."
