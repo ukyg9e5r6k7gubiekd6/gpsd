@@ -43,7 +43,7 @@ if test x"$ac_cv_sizeof_int" != "x4" ; then
 	type_error="yes"
 fi
 if test x"$ac_cv_sizeof_long_long" != "x8" ; then 
-	AC_MSG_WARN(gpsd requires sizeof(int)==4);
+	AC_MSG_WARN(gpsd requires sizeof(long long)==8);
 	type_error="yes"
 fi
 if test x"$ac_cv_sizeof_float" != "x4" ; then 
