@@ -246,7 +246,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	type = SOCK_STREAM;
 	/*@i@*/proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
-    if ((s = socket(PF_INET, type, /*@i1@*/proto)) < 0) {
+    if ((s = socket(PF_INET, type, proto)) < 0) {
 	gpsd_report(LOG_ERROR, "Can't create socket\n");
 	return -1;
     }
