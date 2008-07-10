@@ -5,7 +5,9 @@
  *
  *    x^24+ x^23+ x^18+ x^17+ x^14+ x^11+ x^10+ x^7+ x^6+ x^5+ x^4+ x^3+ x+1
  *
- * This corresponds to a mask of 0x1864CFB.  
+ * This corresponds to a mask of 0x1864CFB.  For a primer on CRC theory, 
+ * including detailed discussion of how and why the error polynomial is
+ * expressed by this mask, see <http://www.ross.net/crc/>.
  *
  * 1) It detects all single bit errors per 24-bit code word.
  * 2) It detects all double bit error combinations in a code word.
@@ -14,6 +16,9 @@
  *    or equal to 24 bits.
  * 5) It detects most large error bursts with length greater than 24 bits;
  *    the odds of a false positive are at most 2^-23.
+ *
+ * This hash should not be considered cryptographically secure, but it
+ * is extremely good at detecting noise errors.
  *
  * Note that this version has a seed of 0 wired in.  The RTCM104V3 standard
  * requires this.
