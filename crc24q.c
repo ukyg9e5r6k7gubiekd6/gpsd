@@ -35,7 +35,8 @@
 
 unsigned table[25];
 
-#define CRCPOLY	0x1864CFB
+#define CRCSEED	0		/* could be NZ to detect leading zeros */
+#define CRCPOLY	0x1864CFB	/* encodes all info about the polynomial */ 
 
 static void
 crc_init(unsigned table[256])
@@ -43,7 +44,7 @@ crc_init(unsigned table[256])
     unsigned i, j;
     unsigned h;
 
-    table[0] = 0;
+    table[0] = CRCSEED;
     table[1] = h = CRCPOLY;
 
     for (i = 2; i < 256; i *= 2) {
