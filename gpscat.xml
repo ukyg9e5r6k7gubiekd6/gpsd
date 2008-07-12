@@ -19,6 +19,7 @@
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-t</arg>
+      <arg choice='opt'>-v <replaceable>debuglevel</replaceable></arg>
       <arg choice='plain'><replaceable>serial-port</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -81,6 +82,15 @@ Odd) and stop bits (1 or 2).</para>
 <listitem>
 <para>Invoke packetizer mode, with the packet type reported before 
 a colon on each line.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-v</term>
+<listitem>
+<para>In packetizer mode, enable progress messages from the packet
+getter.  Probably only of interest to developers testing packet
+getter changes.</para>
 </listitem>
 </varlistentry>
 

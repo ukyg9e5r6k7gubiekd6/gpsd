@@ -8,6 +8,9 @@ import gpspacket
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 NMEA_MAX = 86
 
+# Lowest debug level at which packet getter begins to emit messages, minus one
+BASELEVEL = 5
+
 def hexdump(str):
     dmp = ""
     for (i, ch) in enumerate(str):
@@ -21,11 +24,17 @@ def hexdump(str):
             dmp += "\\x%02x" % ord(ch)
     return dmp
 
+debuglevel = 0
+
+def reporter(errlevel, msg):
+    if errlevel <= debuglevel:
+        sys.stdout.write(msg)
+
 if __name__ == '__main__':
     buf = ""
     try:
         try:
-            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:V")
+            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:v:V")
         except getopt.GetoptError, msg:
             print "gpscat: " + str(msg)
             raise SystemExit, 1
@@ -47,6 +56,8 @@ if __name__ == '__main__':
             elif switch == 't':
                 typeflag = True
                 rawmode = False
+            elif switch == '-v':
+                debuglevel = BASELEVEL + int(val)
             elif switch == '-h':
                 sys.stderr.write("usage: gpscat [-s speed] serial-port\n")
                 raise SystemExit, 0
@@ -86,6 +97,7 @@ if __name__ == '__main__':
         buf = ""
         if not rawmode:
             getter = gpspacket.new()
+            gpspacket.register_report(reporter)
         while True:
             (fd, event) = poller.poll()[0]
             if fd == tty and event == select.POLLIN:
