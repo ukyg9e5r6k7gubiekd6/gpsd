@@ -845,19 +845,19 @@ static void character_discard(struct gps_packet_t *lexer)
 
 /* entry points begin here */
 
-ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
+ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
     gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
-		fix,
+		len,
 		lexer->inbuflen,
-		lexer->inbuflen+fix,
-		gpsd_hexdump(lexer->inbufptr, fix));
+		lexer->inbuflen+len,
+		gpsd_hexdump(lexer->inbufptr, len));
 #endif /* STATE_DEBUG */
 
     lexer->outbuflen = 0;
-    lexer->inbuflen += fix;
+    lexer->inbuflen += len;
     while (lexer->inbufptr < lexer->inbuffer + lexer->inbuflen) {
 	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
@@ -1249,7 +1249,10 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t fix)
 #endif /* RTCM104V2_ENABLE */
     } /* while */
 
-    return (ssize_t)fix;
+#ifdef STATE_DEBUG
+    gpsd_report(LOG_RAW+1, "Packet parse returns %d\n",	len);
+#endif /* STATE_DEBUG */
+    return (ssize_t)len;
 }
 #undef getword
 
@@ -1261,18 +1264,18 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     /*@ -modobserver @*/
     recvd = read(fd, lexer->inbuffer+lexer->inbuflen,
 			sizeof(lexer->inbuffer)-(lexer->inbuflen));
-#ifdef STATEDEBUG
+#ifdef STATE_DEBUG
     gpsd_report(LOG_RAW+1, "%d raw bytes read: %s\n",
 		recvd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, recvd));
-#endif /* STATEDEBUG */
+#endif /* STATE_DEBUG */
     /*@ +modobserver @*/
     if (recvd == -1) {
 	if ((errno == EAGAIN) || (errno == EINTR)) {
 	    return 0;
 	} else {
-#ifdef STATEDEBUG
+#ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+1, "errno: %s\n", strerror(errno));
-#endif /* STATEDEBUG */
+#endif /* STATE_DEBUG */
 	    return BAD_PACKET;
 	}
     }

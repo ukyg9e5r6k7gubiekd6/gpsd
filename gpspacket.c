@@ -81,9 +81,13 @@ Lexer_get(LexerObject *self, PyObject *args)
     if (len == 0) {
 	self->lexer.type = BAD_PACKET;
 	self->lexer.outbuffer[0] = '\0';
+	self->lexer.outbuflen = 0;
     }
 
-    return Py_BuildValue("(i, s)", self->lexer.type, self->lexer.outbuffer);
+    return Py_BuildValue("(i, s#)", 
+			 self->lexer.type, 
+			 self->lexer.outbuffer, 
+			 self->lexer.outbuflen);
 }
 
 static PyObject *

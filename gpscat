@@ -34,7 +34,7 @@ if __name__ == '__main__':
     buf = ""
     try:
         try:
-            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:v:V")
+            (options, arguments) = getopt.getopt(sys.argv[1:], "hps:tv:V")
         except getopt.GetoptError, msg:
             print "gpscat: " + str(msg)
             raise SystemExit, 1
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                     stopbits = int(val[-1])
                     val = val[:-2]
                 speed = int(val)
-            elif switch == 't':
+            elif switch == '-t':
                 typeflag = True
                 rawmode = False
             elif switch == '-v':
