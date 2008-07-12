@@ -109,7 +109,7 @@ unsigned int isgps_parity(isgps30bits_t th)
 #define	PARITY_28	0x5763e680u
 #define	PARITY_29	0x6bb1f340u
 #define	PARITY_30	0x8b7a89c0u
-    isgps30bits_t        t;
+    isgps30bits_t   t;
     unsigned int    p;
 
     /*
@@ -191,7 +191,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
 	gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
-		    "ISGPS word tag not correct, skipping\n");
+		    "ISGPS word tag not correct, skipping byte\n");
 	return ISGPS_SKIP;
     }
 
@@ -297,14 +297,14 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 	    }
 	}
 	session->isgps.curr_offset -= 6;
-	gpsd_report(ISGPS_ERRLEVEL_BASE+2, "residual %d\n", session->isgps.curr_offset);
+	gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS residual %d\n", session->isgps.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
 
     /* never achieved lock */
     gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
-		"lock never achieved\n");
+		"ISGPS lock never achieved\n");
     return ISGPS_NO_SYNC;
 }
 /*@ +usereleased +compdef @*/
