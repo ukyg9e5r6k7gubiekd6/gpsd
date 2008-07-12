@@ -80,8 +80,8 @@ Odd) and stop bits (1 or 2).</para>
 <varlistentry>
 <term>-t</term>
 <listitem>
-<para>Invoke packetizer mode, with the packet type reported before 
-a colon on each line.</para>
+<para>Invoke packetizer mode, with the packet type and length (in
+parentheses) reported before a colon and space on each line.</para>
 </listitem>
 </varlistentry>
 

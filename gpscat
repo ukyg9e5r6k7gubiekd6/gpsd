@@ -111,7 +111,7 @@ if __name__ == '__main__':
                     if packet == '':
                         break
                     if typeflag:
-                        sys.stdout.write(`type` + ": " + hexdump(packet) + "\n")
+                        sys.stdout.write(`type` + " (" + `len(packet)` + "): " + hexdump(packet) + "\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")
     except KeyboardInterrupt:
