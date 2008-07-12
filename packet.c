@@ -1073,9 +1073,10 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
 #ifdef RTCM104V3_ENABLE
 	else if (lexer->state == RTCM3_RECOGNIZED) {
 	    if (crc24q_check(lexer->inbuffer, 
-			     lexer->inbufptr-lexer->inbuffer))
+			     lexer->inbufptr-lexer->inbuffer)) {
 		packet_accept(lexer, RTCM3_PACKET);
-	    else {
+		packet_discard(lexer);
+	    } else {
 		gpsd_report(LOG_IO, "RTCM3 data checksum failure, %0x against %02x %02x %02x\n", 
 			    crc24q_hash(lexer->inbuffer, 
 					lexer->inbufptr-lexer->inbuffer - 3),
@@ -1265,8 +1266,8 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     recvd = read(fd, lexer->inbuffer+lexer->inbuflen,
 			sizeof(lexer->inbuffer)-(lexer->inbuflen));
 #ifdef STATE_DEBUG
-    gpsd_report(LOG_RAW+1, "%d raw bytes read: %s\n",
-		recvd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, recvd));
+    gpsd_report(LOG_RAW+1, "%d raw bytes read from %d: %s\n",
+		recvd, fd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, recvd));
 #endif /* STATE_DEBUG */
     /*@ +modobserver @*/
     if (recvd == -1) {
