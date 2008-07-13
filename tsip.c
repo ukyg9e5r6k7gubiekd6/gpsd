@@ -60,7 +60,9 @@ static void tsip_probe_subtype(struct gps_device_t *session, unsigned int seq)
     switch (seq) {
     case 0:
 	/* TSIP is ODD parity 1 stopbit, save original values and change it */
-	/* XXX this is not always a good idea; not all receivers are 8O1... */
+	/* XXX Thunderbolts and Copernicus use 8N1... which isn't exactly a */
+	/* XXX good idea due to the fragile wire format.   We must divine a */
+	/* XXX clever heuristic to decide if the parity change is required. */
 	session->driver.tsip.parity = session->gpsdata.parity;
 	session->driver.tsip.stopbits = session->gpsdata.stopbits;
 	gpsd_set_speed(session, session->gpsdata.baudrate, 'O', 1);
