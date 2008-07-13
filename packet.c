@@ -50,7 +50,7 @@ others apart and distinguish them from baud barf.
  *    bounaries; the recognizer has to run a separate state machine against 
  *    each byte just to achieve synchronization lock with the bitstream.
  *
- * Adding support for a new GPS protocol typically reqires adding stete
+ * Adding support for a new GPS protocol typically reqires adding state
  * transitions to support whatever binary packet structure it has.  The
  * goal is for the lexer to be able to cope with arbitrarily mixed packet
  * types on the input stream.  This is a requirement because (1) sometimes
