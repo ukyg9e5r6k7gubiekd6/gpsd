@@ -35,16 +35,34 @@ others apart and distinguish them from baud barf.
 #include "crc24q.h"
 
 /*
- * The packet-recognition state machine.  It can be fooled by garbage
- * that looks like the head of a binary packet followed by a NMEA
- * packet; in that case it won't reset until it notices that the
- * binary trailer is not where it should be, and the NMEA packet will
- * be lost.  The reverse scenario is not possible because none of the
- * binary leader characters can occur in an NMEA packet.  Caller should
- * consume a packet when it sees one of the *_RECOGNIZED states.
- * It's good practice to follow the _RECOGNIZED transition with one
- * that recognizes a leader of the same packet type rather than
- * dropping back to ground state -- this for example will prevent
+ * The packet-recognition state machine.  This takes an incoming byte stream
+ * and tries to segment it into packets.  There are three types of packets:
+ *
+ * 1) NMEA lines.  These begin with $, and with \r\n, and have a checksum.
+ *
+ * 2) Binary packets.  These begin with some fixed leader character(s),
+ *    have a length embedded in them, and end with a checksum (and possibly)
+ *    some fixed trailing bytes.  
+ *
+ * 3) ISGPS packets. The input may be a bitstream containing IS-GPS-200
+ *    packets.  Each includes a fixed leader byte, a length, and check bits.  
+ *    In this case, it is not guaranted that packet starts begin on byte 
+ *    bounaries; the recognizer has to run a separate state machine against 
+ *    each byte just to achie synchronization lock with the bitstream.
+ *
+ * Adding support for a new GPS protocol typically reqires adding stete
+ * transitions to support whatever binary packet structure it has.  The
+ * goal is for the lexer to be able to cope with arbitrarily mixed packet
+ * types on the input stream.  This is a requirement because (1) sometimes
+ * gpsd wants to switch a device that supports both NMEA and a binary
+ * packet protocol to the latter for more detailed reporting, and (b) in
+ * the presence of device hotplugging, the type of GPS report coming
+ * in is subject to change at any time.
+ *
+ * Caller should consume a packet when it sees one of the *_RECOGNIZED
+ * states.  It's good practice to follow the _RECOGNIZED transition
+ * with one that recognizes a leader of the same packet type rather
+ * than dropping back to ground state -- this for example will prevent
  * the state machine from hopping between recognizing TSIP and
  * EverMore packets that both start with a DLE.
  *
@@ -56,7 +74,7 @@ others apart and distinguish them from baud barf.
  * recognition beyond the headers would make no sense in this
  * application, they'd just add complexity.
  *
- * This state machine allows the following talker IDs:
+ * The NMEA portion of state machine allows the following talker IDs:
  *      GP -- Global Positioning System.
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *	IN -- Integrated Navigation (Garmin uses this).
