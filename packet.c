@@ -48,7 +48,7 @@ others apart and distinguish them from baud barf.
  *    packets.  Each includes a fixed leader byte, a length, and check bits.  
  *    In this case, it is not guaranted that packet starts begin on byte 
  *    bounaries; the recognizer has to run a separate state machine against 
- *    each byte just to achie synchronization lock with the bitstream.
+ *    each byte just to achieve synchronization lock with the bitstream.
  *
  * Adding support for a new GPS protocol typically reqires adding stete
  * transitions to support whatever binary packet structure it has.  The
