@@ -51,7 +51,8 @@ on standard output. This is the default behavior.</para>
 <para>The -e option option tells the program to encode a text dump in
 the format of
 <citerefentry><refentrytitle>rtcm-104</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-to standard output.</para>
+to standard output.  Encoding is supported only RTCM104v2, not for
+RTCM104v3.</para>
 
 <para>The -V option directs the program to emit its version number,
 then exit.</para>
@@ -62,9 +63,19 @@ to developers.</para>
 </refsect1>
 <refsect1 id='standard'><title>APPLICABLE STANDARDS</title>
 
-<para>The applicable standard is
-<citetitle>RTCM Recommended Standards for Differential NAVSTAR GPS
-Service</citetitle> RTCM Paper 194-93/SC 104-STD.</para>
+<para>The applicable standard for V2 is <citetitle>RTCM Recommended
+Standards for Differential NAVSTAR GPS Service</citetitle> RTCM Paper
+194-93/SC 104-STD.</para>
+
+>para>Note that <application>rtcmdecode</application> presently
+recognizes only the 2.1 level of RTCM; the protocol was revised up to
+a version 2.3 including additional messages relating to GLONASS and
+real-time kinematics before being deprecated in favor of V3. It is
+now obsolete.</para>
+
+<para>The applicable standard for V3 is <citetitle>RTCM Standard
+10403.1 for Differential GNSS Services - Version 3</citetitle> RTCM
+Paper 177-2006-SC104-STD.</para>
 
 <para>Ordering instructions are accessible from the website of the
 <ulink url='http://www.rtcm.org/'>Radio Technical Commission for
