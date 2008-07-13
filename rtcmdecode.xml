@@ -67,7 +67,7 @@ to developers.</para>
 Standards for Differential NAVSTAR GPS Service</citetitle> RTCM Paper
 194-93/SC 104-STD.</para>
 
->para>Note that <application>rtcmdecode</application> presently
+<para>Note that <application>rtcmdecode</application> presently
 recognizes only the 2.1 level of RTCM; the protocol was revised up to
 a version 2.3 including additional messages relating to GLONASS and
 real-time kinematics before being deprecated in favor of V3. It is
