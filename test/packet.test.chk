@@ -13,3 +13,5 @@
 13: EverMore packet 0x04 with 0x10 0x10 sequence, some noise before packet data test succeeded.
 14: EverMore packet 0x04, 0x10 and some other data at the beginning test succeeded.
 15: EverMore packet 0x04, 0x10 three times at the beginning test succeeded.
+16: RTCM104V3 type 1005 packet test succeeded.
+17: RTCM104V3 type 1005 packet with 4th byte garbled test succeeded.

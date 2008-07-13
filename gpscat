@@ -108,10 +108,13 @@ if __name__ == '__main__':
                         buf = ""
                 else:
                     (type, packet) = getter.get(tty)
-                    if packet == '':
+                    length = len(packet)
+                    if type == gpspacket.EOF_PACKET:
                         break
+                    elif type == gpspacket.BAD_PACKET or length == 0:
+                        continue
                     if typeflag:
-                        sys.stdout.write(`type` + " (" + `len(packet)` + "): " + hexdump(packet) + "\n")
+                        sys.stdout.write(`type` + " (" + `length` + "): " + hexdump(packet) + "\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")
     except KeyboardInterrupt:

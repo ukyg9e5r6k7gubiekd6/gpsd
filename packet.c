@@ -1083,8 +1083,8 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
 			    lexer->inbufptr[-3], 
 			    lexer->inbufptr[-2],
 			    lexer->inbufptr[-1]);
-		packet_discard(lexer);
 		lexer->state = GROUND_STATE;
+		packet_discard(lexer);
 	    }
 	    break;
 	}
@@ -1258,7 +1258,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
 #undef getword
 
 ssize_t packet_get(int fd, struct gps_packet_t *lexer)
-/* grab a packet; returns either BAD_PACKET or the length */
+/* grab a packet; returns either EOF_PACKET, BAD_PACKET or the length */
 {
     ssize_t recvd;
 
@@ -1277,7 +1277,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 #ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+1, "errno: %s\n", strerror(errno));
 #endif /* STATE_DEBUG */
-	    return BAD_PACKET;
+	    return EOF_PACKET;
 	}
     }
 
