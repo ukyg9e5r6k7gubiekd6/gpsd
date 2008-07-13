@@ -1264,22 +1264,25 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     /*@ -modobserver @*/
     recvd = read(fd, lexer->inbuffer+lexer->inbuflen,
 			sizeof(lexer->inbuffer)-(lexer->inbuflen));
-#ifdef STATE_DEBUG
-    gpsd_report(LOG_RAW+1, "%d raw bytes read from %d: %s\n",
-		recvd, fd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, recvd));
-#endif /* STATE_DEBUG */
     /*@ +modobserver @*/
     if (recvd == -1) {
 	if ((errno == EAGAIN) || (errno == EINTR)) {
+#ifdef STATE_DEBUG
+	    gpsd_report(LOG_RAW+2, "no bytes ready\n");
+#endif /* STATE_DEBUG */
 	    return 0;
 	} else {
 #ifdef STATE_DEBUG
-	    gpsd_report(LOG_RAW+1, "errno: %s\n", strerror(errno));
+	    gpsd_report(LOG_RAW+2, "errno: %s\n", strerror(errno));
 #endif /* STATE_DEBUG */
 	    return EOF_PACKET;
 	}
     }
 
+#ifdef STATE_DEBUG    
+    gpsd_report(LOG_RAW+2, "%d raw bytes read from %d: %s\n",
+		recvd, fd, gpsd_hexdump(lexer->inbuffer+lexer->inbuflen, (size_t)recvd));
+#endif /* STATE_DEBUG */
     if (recvd == 0)
 	return 0;
     return packet_parse(lexer, (size_t)recvd);
