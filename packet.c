@@ -845,19 +845,19 @@ static void character_discard(struct gps_packet_t *lexer)
 
 /* entry points begin here */
 
-ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
+ssize_t packet_parse(struct gps_packet_t *lexer, size_t plen)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
 #ifdef STATE_DEBUG
     gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
-		len,
+		plen,
 		lexer->inbuflen,
-		lexer->inbuflen+len,
-		gpsd_hexdump(lexer->inbufptr, len));
+		lexer->inbuflen+plen,
+		gpsd_hexdump(lexer->inbufptr, plen));
 #endif /* STATE_DEBUG */
 
     lexer->outbuflen = 0;
-    lexer->inbuflen += len;
+    lexer->inbuflen += plen;
     while (lexer->inbufptr < lexer->inbuffer + lexer->inbuflen) {
 	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
@@ -1251,10 +1251,9 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t len)
     } /* while */
 
 #ifdef STATE_DEBUG
-    gpsd_report(LOG_RAW+1, "Packet parse returns %d\n",	len);
+    gpsd_report(LOG_RAW+1, "Packet parse returns %d\n",	plen);
 #endif /* STATE_DEBUG */
-    return (ssize_t)len;
-}
+    return (ssize_t)plen;}
 #undef getword
 
 ssize_t packet_get(int fd, struct gps_packet_t *lexer)
