@@ -65,7 +65,7 @@ Digital compass. --></para>
 
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
-running a DGPSIP server or a Ntrip broadcaster that reports RTCM-S104
+running a DGPSIP server or a Ntrip broadcaster that reports RTCM-104
 data; this will shrink position errors by roughly a factor of four.  When
 <application>gpsd</application> opens a serial device emitting
 RTCM-104, it automatically recognizes this and uses the device as a
@@ -100,12 +100,6 @@ clients.</para></listitem>
 <term>-S</term>
 <listitem><para>Set TCP/IP port on which to listen for GPSD clients 
 (default is 2947).</para></listitem>
-</varlistentry>
-<varlistentry>
-<term>-d</term>
-<listitem><para>This is a deprecated option which takes a differential-GPS 
-source as argument.  See the description of argument interpretation
-below.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-b</term>
