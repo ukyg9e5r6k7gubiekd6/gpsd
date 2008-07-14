@@ -801,8 +801,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * we think we have a valid fix for the current cycle, but remains
 	 * true while following non-fix packets are received.  What we
 	 * really want to know is whether the last packet received was a
-	 * fix package AND held a valid fix. We must ignore non-fix packages
-	 * AND packages which have fix data but are flagged as invalid. Some
+	 * fix packet AND held a valid fix. We must ignore non-fix packets
+	 * AND packets which have fix data but are flagged as invalid. Some
 	 * devices output fix packets on a regular basis, even when unable
 	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
