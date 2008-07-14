@@ -19,7 +19,7 @@
 
 struct ntrip_stream_t {
     char mountpoint[101];
-    enum { fmt_rtcm2, fmt_rtcm2_0, fmt_rtcm2_1, fmt_rtcm2_2, fmt_rtcm2_3, fmt_unknown } format;
+    enum { fmt_rtcm2, fmt_rtcm2_0, fmt_rtcm2_1, fmt_rtcm2_2, fmt_rtcm2_3, fmt_rtcm3, fmt_unknown } format;
     int carrier;
     double latitude;
     double longitude;
@@ -96,6 +96,8 @@ static void ntrip_str_parse(char *str, size_t len,
 	    hold->format = fmt_rtcm2_2;
 	else if (strcasecmp("RTCM 2.3", s)==0)
 	    hold->format = fmt_rtcm2_3;
+	else if (strcasecmp("RTCM 3.0", s)==0)
+	    hold->format = fmt_rtcm3;
 	else
 	    hold->format = fmt_unknown;
     }
