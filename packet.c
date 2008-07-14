@@ -1275,7 +1275,7 @@ ssize_t packet_parse(struct gps_packet_t *lexer, size_t plen)
 #undef getword
 
 ssize_t packet_get(int fd, struct gps_packet_t *lexer)
-/* grab a packet; returns either EOF_PACKET, BAD_PACKET or the length */
+/* grab a packet; return -1=>I/O error, 0=>EOF, BAD_PACKET or a length */
 {
     ssize_t recvd;
 
@@ -1293,7 +1293,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 #ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+2, "errno: %s\n", strerror(errno));
 #endif /* STATE_DEBUG */
-	    return EOF_PACKET;
+	    return -1;
 	}
     }
 

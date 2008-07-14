@@ -79,7 +79,7 @@ Lexer_get(LexerObject *self, PyObject *args)
 	return NULL;
 
     if (len == 0) {
-	self->lexer.type = EOF_PACKET;
+	self->lexer.type = EMPTY_PACKET;
 	self->lexer.outbuffer[0] = '\0';
 	self->lexer.outbuflen = 0;
     }
@@ -252,7 +252,7 @@ initgpspacket(void)
     m = Py_InitModule3("gpspacket", gpspacket_methods, module_doc);
 
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
-    PyModule_AddIntConstant(m, "EOF_PACKET", EOF_PACKET);
+    PyModule_AddIntConstant(m, "EMPTY_PACKET", EMPTY_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
     PyModule_AddIntConstant(m, "NMEA_PACKET", NMEA_PACKET);
     PyModule_AddIntConstant(m, "SIRF_PACKET", SIRF_PACKET);

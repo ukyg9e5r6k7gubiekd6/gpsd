@@ -749,7 +749,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     /* update the scoreboard structure from the GPS */
     gpsd_report(LOG_RAW+2, "GPS sent %d new characters\n", newlen);
-    if (newlen == EOF_PACKET)	{		/* read error */
+    if (newlen == -1)	{		/* read error */
 	session->gpsdata.online = 0;
 	return 0;
     } else if (newlen == 0) {		/* no new data */

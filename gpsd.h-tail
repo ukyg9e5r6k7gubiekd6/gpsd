@@ -52,7 +52,7 @@ struct gps_packet_t {
     /* packet-getter internals */
     int	type;
 #define BAD_PACKET	-2
-#define EOF_PACKET	-1
+#define EMPTY_PACKET	-1
 #define COMMENT_PACKET	0
 #define NMEA_PACKET	1
 #define SIRF_PACKET	2
@@ -116,6 +116,7 @@ extern bool rtcm2_repack(struct rtcm2_t *, isgps30bits_t *);
 extern void rtcm2_output_magnavox(isgps30bits_t *, FILE *);
 
 extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
+extern void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen);
 
 /* Next, declarations for the core library... */
 

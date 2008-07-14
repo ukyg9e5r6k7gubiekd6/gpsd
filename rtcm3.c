@@ -454,4 +454,11 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
     // FIXME: Decoding of packet content goes here
 }
 
+void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen)
+/* dump the contents of a parsed RTCM104 message */
+{
+    (void)snprintf(buf, buflen, "%u (%u):\n", rtcm->type, rtcm->length);
+    // FIXME: More dumping of packet contents goes here */
+}
+
 #endif /* RTCM104V3_ENABLE */

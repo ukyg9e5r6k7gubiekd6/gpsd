@@ -70,7 +70,7 @@ payload is a 3-byte checksum of the payload using the Qualcomm CRC-24Q
 algorithm.</para>
 
 </refsect1>
-<refsect1 id='dump-format'><title>RTCM2 DUMP FORMAT</title>
+<refsect1 id='dump-format2'><title>RTCM2 DUMP FORMAT</title>
 
 <para>For each message, the header is listed first, followed by zero
 or more lines containing the specific data for that message. The
@@ -368,7 +368,7 @@ but this cannot be true unless the field is 3 bits wide.
 <para>&lt;station id&gt; is the id of the transmitter. This is not the same
 as the reference id in the header, the latter being the id of
 the reference receiver. 
-<!-- John Sanger noted: "However I know of at least one station
+<!-- John Sager noted: "However I know of at least one station
 that gets it wrong." --></para>
 
 <para>&lt;bitrate&gt; indicates the transmitted bitrate.</para>
@@ -446,6 +446,15 @@ of the incoming data.
 For &lt;type&gt; = sync_bit this indicates the bit position in the
 serial data stream which is a word boundary.
 -->
+
+</refsect1>
+<refsect1 id='dump-format3'><title>RTCM3 DUMP FORMAT</title>
+
+<para>RTCM104v3 messages are too complex to be dumped in a fully 
+invertible form without a structural markup at least as complex as
+XML or YAML.  Accordingly, the dump format has been designed to be
+its own documentation at the expense of reparsability, and is
+not described here.</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
