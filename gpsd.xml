@@ -66,13 +66,14 @@ Digital compass. --></para>
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
 running a DGPSIP server or a Ntrip broadcaster that reports RTCM-104
-data; this will shrink position errors by roughly a factor of four.  When
-<application>gpsd</application> opens a serial device emitting
+data; this will shrink position errors by roughly a factor of four.
+When <application>gpsd</application> opens a serial device emitting
 RTCM-104, it automatically recognizes this and uses the device as a
 correction source for all connected GPSes that accept RTCM corrections
-(this is dependent on the type of the GPS).  <!-- If no server is
-specified, <application>gpsd</application> will hunt for one.--> See
-<xref linkend='accuracy'/> and <xref linkend='files'/> for
+(this is dependent on the type of the GPS; not all GPSes have the
+firmware capability to accept RTCM correction packets).  <!-- If no
+server is specified, <application>gpsd</application> will hunt for
+one.--> See <xref linkend='accuracy'/> and <xref linkend='files'/> for
 discussion.</para>
 
 <!-- para><application>gpsd</application> may itself serve DGPSIP data
