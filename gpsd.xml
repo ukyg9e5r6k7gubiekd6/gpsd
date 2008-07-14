@@ -66,10 +66,11 @@ Digital compass. --></para>
 <para><application>gpsd</application> can use differential-GPS
 corrections from a DGPS radio or over the net, from a ground station
 running a DGPSIP server or a Ntrip broadcaster that reports RTCM-S104
-data; this will improve user error by roughly a factor of four.  When
+data; this will shrink position errors by roughly a factor of four.  When
 <application>gpsd</application> opens a serial device emitting
 RTCM-104, it automatically recognizes this and uses the device as a
-correction source for all connected GPSes.  <!-- If no server is
+correction source for all connected GPSes that accept RTCM corrections
+(this is dependent on the type of the GPS).  <!-- If no server is
 specified, <application>gpsd</application> will hunt for one.--> See
 <xref linkend='accuracy'/> and <xref linkend='files'/> for
 discussion.</para>
@@ -736,7 +737,7 @@ position error of its own.</para>
 
 <para>DGPS correction will reduce UERE from roughly 8 meters to
 roughly 2 meters, provided you are within about 100mi (160km) of a
-DGPS ground station.</para>
+DGPS ground station from which you are eceiving corrections.</para>
 
 <para>On a 4800bps connection, the time latency of fixes provided by
 <application>gpsd</application> will be one second or less 95% of the
@@ -750,7 +751,8 @@ second of lag corresponds to 13.8 meters change in position between
 updates.</para>
 
 <para>The time reporting of the GPS system itself has an intrinsic
-accuracy limit of 0.000,000,340 = 3.4x10e-7 seconds.  A more important
+accuracy limit of 0.000,000,340 =
+3.4&times;10<superscript>-7</superscript> seconds.  A more important
 limit is the GPS tick rate.  While the one-per-second PPS pulses
 emitted by serial GPS units are timed to the GPS system's intrinsic
 accuracy limit,the satellites only emit navigation messages at
