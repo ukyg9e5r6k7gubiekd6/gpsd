@@ -991,6 +991,13 @@ extension, the PGRME emitted by some Garmin GPS models.</para>
 degrees, not the hybrid degree/minute format described in the NMEA
 standard.</para>
 
+<para>Differential-GPS corrections are conveyed by the RTCM-104
+proocol. The applicable standard for RTCM-104 V2 is <citetitle>RTCM
+Recommended Standards for Differential NAVSTAR GPS Service</citetitle>
+RTCM Paper 194-93/SC 104-STD.  The applicable standard for RTCM-104 V3
+is <citetitle>RTCM Standard 10403.1 for Differential GNSS Services -
+Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
+
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
