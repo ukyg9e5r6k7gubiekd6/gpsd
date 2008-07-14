@@ -23,12 +23,19 @@ to reverse his refusal to send us an eval unit.
 
 ** To do:
 
+*** Command to ship RTCM corrections to a specified device
+
+At the moment, if a GPS accepts RTCM corrections and they are
+available, gpsd ships them to the device from which the GPS is
+reporting fix data.  Some GPSes have auxiliary ports for RTCM; 
+there should be a (privileged) command to redirect RTCM connections.
+
 *** libgps should try to automatically try to reconnect when a poll fails
 
 Petter Reinholdtsen suggests:
 
 At the moment, when a gpsd client using libgps is connected to the
-gpsd server, and the server is restarted, the client looses the
+gpsd server, and the server is restarted, the client loses the
 connection and do not update any more.
 
 It would be nice if the gps_poll() and gps_query() would try to
