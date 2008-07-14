@@ -39,9 +39,9 @@
 
 <para><application>gpsd</application> is a monitor daemon that watches
 a TCP/IP port (2947 by default), waiting for applications to request
-information from GPSes or differential-GPS radios attached to the host machine.
-Each GPS or radio is expected to be direct-connected to the host via a USB or
-RS232C serial port.  The port may be specified to
+information from GPSes or differential-GPS radios attached to the host
+machine.  Each GPS or radio is expected to be direct-connected to the
+host via a USB or RS232C serial port.  The port may be specified to
 <application>gpsd</application> at startup, or it may be set via a
 command shipped down a local control socket (e.g. by a USB hotplug
 script). Given a GPS device by either means,
@@ -109,14 +109,16 @@ below.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-b</term>
-<listitem><para>Broken-device-safety, otherwise known as read-only mode. Some
-popular bluetooth and USB receivers lock up or become totally inaccessible when
-probed or reconfigured. This switch prevents gpsd from writing to a receiver.
-This means that gpsd cannot configure the receiver for optimal performance,
-but it also means that gpsd cannot break the receiver. A better solution
-would be for bluetooth to not be so fragile. A platform independent method
-to identify serial-over-bluetooth devices would also be nice.</para>
-</listitem>
+<listitem><para>Broken-device-safety, otherwise known as read-only
+mode. Some popular bluetooth and USB receivers lock up or become
+totally inaccessible when probed or reconfigured. This switch prevents
+gpsd from writing to a receiver.  This means that
+<application>gpsd</application> cannot configure the receiver for
+optimal performance, but it also means that
+<application>gpsd</application> cannot break the receiver. A better
+solution would be for Bluetooth to not be so fragile. A platform
+independent method to identify serial-over-Bluetooth devices would
+also be nice.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
