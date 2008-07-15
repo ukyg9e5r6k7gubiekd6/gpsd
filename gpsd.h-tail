@@ -95,7 +95,7 @@ struct gps_packet_t {
 
 extern void packet_reset(struct gps_packet_t *);
 extern void packet_pushback(struct gps_packet_t *);
-extern ssize_t packet_parse(struct gps_packet_t *, size_t);
+extern void packet_parse(struct gps_packet_t *);
 extern ssize_t packet_get(int, struct gps_packet_t *);
 extern int packet_sniff(struct gps_packet_t *);
 

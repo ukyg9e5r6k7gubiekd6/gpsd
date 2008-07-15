@@ -234,15 +234,14 @@ static struct map tests[] = {
 static int packet_test(struct map *mp)
 {
     struct gps_packet_t packet;
-    ssize_t st;
     int failure = 0;
 
     packet.type = BAD_PACKET;
     packet.state = 0;
-    packet.inbuflen = 0;
     /*@i@*/memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
+    packet.inbuflen = mp->testlen;
     /*@ -compdef -uniondef -usedef -formatcode @*/
-    st = packet_parse(&packet, mp->testlen);
+    packet_parse(&packet);
     if (packet.type != mp->type)
 	printf("%2zi: %s test FAILED (packet type %d wrong).\n", mp-tests+1, mp->legend, packet.type);
     else if (memcmp(mp->test + mp->garbage_offset, packet.outbuffer, packet.outbuflen)) {
@@ -254,7 +253,7 @@ static int packet_test(struct map *mp)
     for (cp = packet.outbuffer; 
 	 cp < packet.outbuffer + packet.outbuflen; 
 	 cp++) {
-	if (st != NMEA_PACKET)
+	if (lexer->type != NMEA_PACKET)
 	    (void)printf(" 0x%02x", *cp);
 	else if (*cp == '\r')
 	    (void)fputs("\\r", stdout);
