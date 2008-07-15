@@ -45,16 +45,18 @@ union long_double {
 
 #ifdef LITTLE_ENDIAN_PROTOCOL
 
-#define getsw(buf, off)	((int16_t)(((u_int16_t)getub((buf),   (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
-#define getuw(buf, off)	((u_int16_t)(((u_int16_t)getub((buf), (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
-#define getsl(buf, off)	((int32_t)(((u_int16_t)getuw((buf),  (off)+2) << 16) | (u_int16_t)getuw((buf), (off))))
-#define getul(buf, off)	((u_int32_t)(((u_int16_t)getuw((buf),(off)+2) << 16) | (u_int16_t)getuw((buf), (off))))
+#define getlesw(buf, off)	((int16_t)(((u_int16_t)getub((buf),   (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
+#define getleuw(buf, off)	((u_int16_t)(((u_int16_t)getub((buf), (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
+#define getlesl(buf, off)	((int32_t)(((u_int16_t)getleuw((buf),  (off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
+#define getleul(buf, off)	((u_int32_t)(((u_int16_t)getleuw((buf),(off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
 
-#define putword(buf, off, w) do {putbyte(buf, (off)+1, (w) >> 8); putbyte(buf, (off), (w));} while (0)
-#define putlong(buf, off, l) do {putword(buf, (off)+2, (l) >> 16); putword(buf, (off), (l));} while (0)
-#define getsL(buf, off)	((int64_t)(((u_int64_t)getul(buf, (off)+4) << 32) | getul(buf, (off))))
-#define getuL(buf, off)	((u_int64_t)(((u_int64_t)getul(buf, (off)+4) << 32) | getul(buf, (off))))
+#define putleword(buf, off, w) do {putbyte(buf, (off)+1, (w) >> 8); putbyte(buf, (off), (w));} while (0)
+#define putlelong(buf, off, l) do {putleword(buf, (off)+2, (l) >> 16); putleword(buf, (off), (l));} while (0)
+#define getlesL(buf, off)	((int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
+#define getleuL(buf, off)	((u_int64_t)(((u_int64_t)getleul(buf, (off)+4) << 32) | getleul(buf, (off))))
 
+#define getlef(buf, off)	(i_f.i = getlesl(buf, off), i_f.f)
+#define getled(buf, off)	(l_d.l = getlesL(buf, off), l_d.d)
 #else
 
 /* SiRF and most other GPS protocols use big-endian (network byte order) */
@@ -68,10 +70,10 @@ union long_double {
 #define putword(buf,off,w) do {putbyte(buf, (off) ,(w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
 #define putlong(buf,off,l) do {putword(buf, (off) ,(l) >> 16); putword(buf, (off)+2, (l));} while (0)
 
-#endif
-
 #define getf(buf, off)	(i_f.i = getsl(buf, off), i_f.f)
 #define getd(buf, off)	(l_d.l = getsL(buf, off), l_d.d)
+#endif
+
 
 
 /* Zodiac protocol description uses 1-origin indexing by little-endian word */

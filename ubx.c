@@ -59,8 +59,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
     flags = (unsigned int)getub(buf, 11);
     mask =  ONLINE_SET;
     if ((flags & (UBX_SOL_VALID_WEEK |UBX_SOL_VALID_TIME)) != 0){
-	tow = getul(buf, 0);
-	gw = (unsigned short)getsw(buf, 8);
+	tow = getleul(buf, 0);
+	gw = (unsigned short)getlesw(buf, 8);
 	session->driver.ubx.gps_week = gw;
 
 	t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
@@ -74,17 +74,17 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_le
 #endif
     }
 
-    epx = (double)(getsl(buf, 12)/100.0);
-    epy = (double)(getsl(buf, 16)/100.0);
-    epz = (double)(getsl(buf, 20)/100.0);
-    evx = (double)(getsl(buf, 28)/100.0);
-    evy = (double)(getsl(buf, 32)/100.0);
-    evz = (double)(getsl(buf, 36)/100.0);
+    epx = (double)(getlesl(buf, 12)/100.0);
+    epy = (double)(getlesl(buf, 16)/100.0);
+    epz = (double)(getlesl(buf, 20)/100.0);
+    evx = (double)(getlesl(buf, 28)/100.0);
+    evy = (double)(getlesl(buf, 32)/100.0);
+    evz = (double)(getlesl(buf, 36)/100.0);
     ecef_to_wgs84fix(&session->gpsdata, epx, epy, epz, evx, evy, evz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
-    session->gpsdata.fix.eph = (double)(getsl(buf, 24)/100.0);
-    session->gpsdata.fix.eps = (double)(getsl(buf, 40)/100.0);
-    session->gpsdata.pdop = (double)(getuw(buf, 44)/100.0);
+    session->gpsdata.fix.eph = (double)(getlesl(buf, 24)/100.0);
+    session->gpsdata.fix.eps = (double)(getlesl(buf, 40)/100.0);
+    session->gpsdata.pdop = (double)(getleuw(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
     mask |= PDOP_SET ;
 
@@ -122,11 +122,11 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (data_len != 18)
 	return 0;
 
-    session->gpsdata.gdop = (double)(getuw(buf, 4)/100.0);
-    session->gpsdata.pdop = (double)(getuw(buf, 6)/100.0);
-    session->gpsdata.tdop = (double)(getuw(buf, 8)/100.0);
-    session->gpsdata.vdop = (double)(getuw(buf, 10)/100.0);
-    session->gpsdata.hdop = (double)(getuw(buf, 12)/100.0);
+    session->gpsdata.gdop = (double)(getleuw(buf, 4)/100.0);
+    session->gpsdata.pdop = (double)(getleuw(buf, 6)/100.0);
+    session->gpsdata.tdop = (double)(getleuw(buf, 8)/100.0);
+    session->gpsdata.vdop = (double)(getleuw(buf, 10)/100.0);
+    session->gpsdata.hdop = (double)(getleuw(buf, 12)/100.0);
 
     return DOP_SET;
 }
@@ -143,8 +143,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (data_len != 16)
 	return 0;
 
-    tow = getul(buf, 0);
-    gw = (uint)getsw(buf, 8);
+    tow = getleul(buf, 0);
+    gw = (uint)getlesw(buf, 8);
     if (gw > session->driver.ubx.gps_week)
 	session->driver.ubx.gps_week = gw;
 
@@ -170,7 +170,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	gpsd_report(LOG_PROG, "runt svinfo (datalen=%d)\n", data_len);
 	return 0;
     }
-    tow = getul(buf, 0);
+    tow = getleul(buf, 0);
 //    session->gpsdata.sentence_time = gpstime_to_unix(gps_week, tow) 
 //				- session->context->leap_seconds;
     /*@ +charint @*/
@@ -187,7 +187,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	session->gpsdata.PRN[i]		= (int)getub(buf, off+1);
 	session->gpsdata.ss[i]		= (int)getub(buf, off+4);
 	session->gpsdata.elevation[i]	= (int)getsb(buf, off+5);
-	session->gpsdata.azimuth[i]	= (int)getsw(buf, off+6);
+	session->gpsdata.azimuth[i]	= (int)getlesw(buf, off+6);
 	if(session->gpsdata.PRN[i])
 		st++;
 
@@ -246,7 +246,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
-    data_len = (size_t)getsw(buf, 4);
+    data_len = (size_t)getlesw(buf, 4);
     switch (msgid)
     {
 	case UBX_NAV_POSECEF:

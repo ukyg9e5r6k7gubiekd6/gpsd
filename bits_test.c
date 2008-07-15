@@ -100,24 +100,24 @@ int main(void)
 #define LITTLE_ENDIAN_PROTOCOL
     printf("Little-endian\n");
 #include "bits.h"
-    sb1 = getsb(buf, 0);
-    sb2 = getsb(buf, 8);
-    ub1 = getub(buf, 0);
-    ub2 = getub(buf, 8);
-    sw1 = getsw(buf, 0);
-    sw2 = getsw(buf, 8);
-    uw1 = getuw(buf, 0);
-    uw2 = getuw(buf, 8);
-    sl1 = getsl(buf, 0);
-    sl2 = getsl(buf, 8);
-    ul1 = getul(buf, 0);
-    ul2 = getul(buf, 8);
-    sL1 = getsL(buf, 0);
-    sL2 = getsL(buf, 8);
-    uL1 = getuL(buf, 0);
-    uL2 = getuL(buf, 8);
-    f1 = getf(buf, 24);
-    d1 = getd(buf, 16);
+    sb1 = getlesb(buf, 0);
+    sb2 = getlesb(buf, 8);
+    ub1 = getleub(buf, 0);
+    ub2 = getleub(buf, 8);
+    sw1 = getlesw(buf, 0);
+    sw2 = getlesw(buf, 8);
+    uw1 = getleuw(buf, 0);
+    uw2 = getleuw(buf, 8);
+    sl1 = getlesl(buf, 0);
+    sl2 = getlesl(buf, 8);
+    ul1 = getleul(buf, 0);
+    ul2 = getleul(buf, 8);
+    sL1 = getlesL(buf, 0);
+    sL2 = getlesL(buf, 8);
+    uL1 = getleuL(buf, 0);
+    uL2 = getleuL(buf, 8);
+    f1 = getlef(buf, 24);
+    d1 = getled(buf, 16);
     dumpall();
 
     exit(0);
