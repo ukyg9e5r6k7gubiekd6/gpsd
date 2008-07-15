@@ -35,6 +35,7 @@ firmware.
 
 #include "gpsd_config.h"
 #include "gpsd.h"
+#include "bits.h"
 
 #ifdef RTCM104V3_ENABLE
 
@@ -445,11 +446,15 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
     struct rtcm3_msg_t *msg = (struct rtcm3_msg_t *)buf;
-
+    
     assert(msg->preamble == 0xD3);
     assert(msg->version == 0x00);
-    tp->type = msg->type;
-    tp->length = msg->length;
+
+    // FIXME: bitfield extraction of the type field seems to fail.
+    (void)printf("%s: type=%d length=%d, computed length %d, computed type %d\n", 
+		 gpsd_hexdump(buf, 6), 
+		 msg->type, msg->length, 
+	         getuw(buf, 1), getuw(buf, 3) >> 4);
 
     // FIXME: Decoding of packet content goes here
 }
@@ -457,7 +462,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
 void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
-    (void)snprintf(buf, buflen, "%u (%u):\n", rtcm->type, rtcm->length);
+    // (void)snprintf(buf, buflen, "%u (%u):\n", rtcm->type, rtcm->length);
     // FIXME: More dumping of packet contents goes here */
 }
 
