@@ -857,6 +857,7 @@ static void character_discard(struct gps_packet_t *lexer)
 #endif /* STATE_DEBUG */
 }
 
+#define input_buffered() (lexer->inbufptr < lexer->inbuffer + lexer->inbuflen)
 
 /* get 0-origin big-endian words relative to start of packet buffer */
 #define getword(i) (short)(lexer->inbuffer[2*(i)] | (lexer->inbuffer[2*(i)+1] << 8))
@@ -867,7 +868,7 @@ void packet_parse(struct gps_packet_t *lexer)
 /* grab a packet; returns either BAD_PACKET or the length */
 {
     lexer->outbuflen = 0;
-    while (lexer->inbufptr < lexer->inbuffer + lexer->inbuflen) {
+    while (input_buffered()) {
 	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
 	/*@ +modobserver @*/
@@ -1274,8 +1275,8 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	if ((errno == EAGAIN) || (errno == EINTR)) {
 #ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+2, "no bytes ready\n");
+	    /* Fall through, input buffer may be nonempty */
 #endif /* STATE_DEBUG */
-	    return 0;
 	} else {
 #ifdef STATE_DEBUG
 	    gpsd_report(LOG_RAW+2, "errno: %s\n", strerror(errno));
@@ -1283,17 +1284,22 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	    return -1;
 	}
     }
-
-    if (recvd == 0)
-	return 0;
-
 #ifdef STATE_DEBUG
-    gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
-		recvd,
-		lexer->inbuflen,
-		lexer->inbuflen+recvd,
-		gpsd_hexdump(lexer->inbufptr, recvd));
+    else
+	gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
+		    recvd,
+		    lexer->inbuflen,
+		    lexer->inbuflen+recvd,
+		    gpsd_hexdump(lexer->inbufptr, recvd));
 #endif /* STATE_DEBUG */
+
+    /*
+     * Return zero, indicating no more input, only if we just received
+     * nothing from the device and there is nothing waiting in the 
+     * packet input buffer.  Otherwise, consume from the packet input buffer
+     */
+    if (recvd <= 0 && !input_buffered())
+	return 0;
 
     lexer->inbuflen += recvd;
     packet_parse(lexer);
