@@ -1283,26 +1283,32 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 #endif /* STATE_DEBUG */
 	    return -1;
 	}
-    }
+    } else {
 #ifdef STATE_DEBUG
-    else
 	gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
 		    recvd,
 		    lexer->inbuflen,
 		    lexer->inbuflen+recvd,
 		    gpsd_hexdump(lexer->inbufptr, recvd));
 #endif /* STATE_DEBUG */
+	lexer->inbuflen += recvd;
+    }
 
     /*
-     * Return zero, indicating no more input, only if we just received
+     * Bail out, indicating no more input, only if we just received
      * nothing from the device and there is nothing waiting in the 
-     * packet input buffer.  Otherwise, consume from the packet input buffer
+     * packet input buffer.  
      */
     if (recvd <= 0 && !input_buffered())
 	return 0;
 
-    lexer->inbuflen += recvd;
+    /* Otherwise, consume from the packet input buffer */
     packet_parse(lexer);
+
+    /*
+     * recvd can still be 0 or -1 at this point even if buffer data 
+     * was consumed.  It could be -1 on a transient read error.
+     */
     return recvd;
 }
 
