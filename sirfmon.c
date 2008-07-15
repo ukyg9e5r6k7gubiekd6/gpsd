@@ -245,13 +245,13 @@ static void decode_sirf(unsigned char buf[], int len)
     {
     case 0x02:		/* Measured Navigation Data */
 	(void)wmove(mid2win, 1,6);	/* ECEF position */
-	(void)wprintw(mid2win, "%8d %8d %8d",getsl(buf, 1),getsl(buf, 5),getsl(buf, 9));
+	(void)wprintw(mid2win, "%8d %8d %8d",getbesl(buf, 1),getbesl(buf, 5),getbesl(buf, 9));
 	(void)wmove(mid2win, 2,6);	/* ECEF velocity */
 	(void)wprintw(mid2win, "%8.1f %8.1f %8.1f",
-		(double)getsw(buf, 13)/8,(double)getsw(buf, 15)/8,(double)getsw(buf, 17)/8);
-	decode_ecef((double)getsl(buf, 1),(double)getsl(buf, 5),(double)getsl(buf, 9),
-		(double)getsw(buf, 13)/8,(double)getsw(buf, 15)/8,(double)getsw(buf, 17)/8);
-	decode_time((int)getuw(buf, 22),getsl(buf, 24));
+		(double)getbesw(buf, 13)/8,(double)getbesw(buf, 15)/8,(double)getbesw(buf, 17)/8);
+	decode_ecef((double)getbesl(buf, 1),(double)getbesl(buf, 5),(double)getbesl(buf, 9),
+		(double)getbesw(buf, 13)/8,(double)getbesw(buf, 15)/8,(double)getbesw(buf, 17)/8);
+	decode_time((int)getbeuw(buf, 22),getbesl(buf, 24));
 	/* line 4 */
 	(void)wmove(mid2win, 4,49);
 	(void)wprintw(mid2win, "%4.1f",(double)getub(buf, 20)/5);	/* HDOP */
@@ -272,7 +272,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	break;
 
     case 0x04:		/* Measured Tracking Data */
-	decode_time((int)getuw(buf, 1),getsl(buf, 3));
+	decode_time((int)getbeuw(buf, 1),getbesl(buf, 3));
 	ch = (int)getub(buf, 7);
 	for (i = 0; i < ch; i++) {
 	    int sv,st;
@@ -282,10 +282,10 @@ static void decode_sirf(unsigned char buf[], int len)
 	    sv = (int)getub(buf, off);
 	    (void)wprintw(mid4win, " %3d",sv);
 
-	    (void)wprintw(mid4win, " %3d%3d %04x",((int)getub(buf, off+1)*3)/2,(int)getub(buf, off+2)/2,(int)getsw(buf, off+3));
+	    (void)wprintw(mid4win, " %3d%3d %04x",((int)getub(buf, off+1)*3)/2,(int)getub(buf, off+2)/2,(int)getbesw(buf, off+3));
 
 	    st = ' ';
-	    if ((int)getuw(buf, off+3) == 0xbf)
+	    if ((int)getbeuw(buf, off+3) == 0xbf)
 		st = 'T';
 	    for (j = 0; j < nfix; j++)
 		if (sv == fix[j]) {
@@ -309,7 +309,7 @@ static void decode_sirf(unsigned char buf[], int len)
 #ifdef __UNUSED__
     case 0x05:		/* raw track data */
 	for (off = 1; off < len; off += 51) {
-	    ch = getul(buf, off);
+	    ch = getbeul(buf, off);
 	    (void)wmove(mid4win, ch+2, 19);
 	    cn = 0;
 
@@ -318,9 +318,9 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	    printw("%5.1f",(double)cn/10);
 
-	    printw("%9d%3d%5d",getul(buf, off+8),(int)getuw(buf, off+12),(int)getuw(buf, off+14));
+	    printw("%9d%3d%5d",getbeul(buf, off+8),(int)getbeuw(buf, off+12),(int)getbeuw(buf, off+14));
 	    printw("%8.5f %10.5f",
-	    	(double)getul(buf, off+16)/65536,(double)getul(buf, off+20)/1024);
+	    	(double)getbeul(buf, off+16)/65536,(double)getbeul(buf, off+20)/1024);
 	}
 	(void)wprintw(debugwin, "RTD 0x05=");
     	break;
@@ -332,11 +332,11 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x07:		/* Response - Clock Status Data */
-	decode_time((int)getuw(buf, 1),getsl(buf, 3));
+	decode_time((int)getbeuw(buf, 1),getbesl(buf, 3));
 	display(mid7win, 1, 5,  "%2d", getub(buf, 7));	/* SVs */
-	display(mid7win, 1, 16, "%lu", getul(buf, 8));	/* Clock drift */
-	display(mid7win, 1, 29, "%lu", getul(buf, 12));	/* Clock Bias */
-	display(mid7win, 2, 21, "%lu", getul(buf, 16));	/* Estimated Time */
+	display(mid7win, 1, 16, "%lu", getbeul(buf, 8));	/* Clock drift */
+	display(mid7win, 1, 29, "%lu", getbeul(buf, 12));	/* Clock Bias */
+	display(mid7win, 2, 21, "%lu", getbeul(buf, 16));	/* Estimated Time */
 	(void)wprintw(debugwin, "CSD 0x07=");
 	break;
 
@@ -348,10 +348,10 @@ static void decode_sirf(unsigned char buf[], int len)
     	break;
 
     case 0x09:		/* Throughput */
-	display(mid9win, 1, 6,  "%.3f",(double)getuw(buf, 1)/186);	/*SegStatMax*/
-	display(mid9win, 1, 18, "%.3f",(double)getuw(buf, 3)/186);	/*SegStatLat*/
-	display(mid9win, 1, 31, "%.3f",(double)getuw(buf, 5)/186);	/*SegStatTime*/
-	display(mid9win, 1, 42, "%3d",(int)getuw(buf, 7));	/* Last Millisecond */
+	display(mid9win, 1, 6,  "%.3f",(double)getbeuw(buf, 1)/186);	/*SegStatMax*/
+	display(mid9win, 1, 18, "%.3f",(double)getbeuw(buf, 3)/186);	/*SegStatLat*/
+	display(mid9win, 1, 31, "%.3f",(double)getbeuw(buf, 5)/186);	/*SegStatTime*/
+	display(mid9win, 1, 42, "%3d",(int)getbeuw(buf, 7));	/* Last Millisecond */
 	(void)wprintw(debugwin, "THR 0x09=");
     	break;
 
@@ -380,7 +380,7 @@ static void decode_sirf(unsigned char buf[], int len)
 #define YESNO(n)	(((int)getub(buf, n) != 0)?'Y':'N')
 	display(mid19win, 1, 20, "%d", getub(buf, 5));	/* Alt. hold mode */
 	display(mid19win, 2, 20, "%d", getub(buf, 6));	/* Alt. hold source*/
-	display(mid19win, 3, 20, "%dm", (int)getuw(buf, 7));	/* Alt. source input */
+	display(mid19win, 3, 20, "%dm", (int)getbeuw(buf, 7));	/* Alt. source input */
 	display(mid19win, 4, 20, "%d", getub(buf, 9));	/* Degraded mode*/
 	display(mid19win, 5, 20, "%dsec", getub(buf, 10));	/* Degraded timeout*/
 	display(mid19win, 6, 20, "%dsec",getub(buf, 11));	/* DR timeout*/
@@ -388,22 +388,22 @@ static void decode_sirf(unsigned char buf[], int len)
 	display(mid19win, 8, 20, "%c", YESNO(13)); /* Static Nav.*/
 	display(mid19win, 9, 20, "0x%x", getub(buf, 14));	/* 3SV Least Squares*/
 	display(mid19win, 10,20, "0x%x", getub(buf, 19));	/* DOP Mask mode*/
-	display(mid19win, 11,20, "0x%x", (int)getuw(buf, 20));	/* Nav. Elev. mask*/
+	display(mid19win, 11,20, "0x%x", (int)getbeuw(buf, 20));	/* Nav. Elev. mask*/
 	display(mid19win, 12,20, "0x%x", getub(buf, 22));	/* Nav. Power mask*/
 	display(mid19win, 13,20, "0x%x", getub(buf, 27));	/* DGPS Source*/
 	display(mid19win, 14,20, "0x%x", getub(buf, 28));	/* DGPS Mode*/
 	display(mid19win, 15,20, "%dsec",getub(buf, 29));	/* DGPS Timeout*/
 	display(mid19win, 1, 42, "%c", YESNO(34));/* LP Push-to-Fix */
-	display(mid19win, 2, 42, "%dms", getul(buf, 35));	/* LP On Time */
-	display(mid19win, 3, 42, "%d", getul(buf, 39));	/* LP Interval */
+	display(mid19win, 2, 42, "%dms", getbeul(buf, 35));	/* LP On Time */
+	display(mid19win, 3, 42, "%d", getbeul(buf, 39));	/* LP Interval */
 	display(mid19win, 4, 42, "%c", YESNO(43));/* User Tasks enabled */
-	display(mid19win, 5, 42, "%d", getul(buf, 44));	/* User Task Interval */
+	display(mid19win, 5, 42, "%d", getbeul(buf, 44));	/* User Task Interval */
 	display(mid19win, 6, 42, "%c", YESNO(48));/* LP Power Cycling Enabled */
-	display(mid19win, 7, 42, "%d", getul(buf, 49));/* LP Max Acq Search Time */
-	display(mid19win, 8, 42, "%d", getul(buf, 53));/* LP Max Off Time */
+	display(mid19win, 7, 42, "%d", getbeul(buf, 49));/* LP Max Acq Search Time */
+	display(mid19win, 8, 42, "%d", getbeul(buf, 53));/* LP Max Off Time */
 	display(mid19win, 9, 42, "%c", YESNO(57));/* APM Enabled */
-	display(mid19win,10, 42, "%d", (int)getuw(buf, 58));/* # of fixes */
-	display(mid19win,11, 42, "%d", (int)getuw(buf, 60));/* Time Between fixes */
+	display(mid19win,10, 42, "%d", (int)getbeuw(buf, 58));/* # of fixes */
+	display(mid19win,11, 42, "%d", (int)getbeuw(buf, 60));/* Time Between fixes */
 	display(mid19win,12, 42, "%d", getub(buf, 62));/* H/V Error Max */
 	display(mid19win,13, 42, "%d", getub(buf, 63));/* Response Time Max */
 	display(mid19win,14, 42, "%d", getub(buf, 64));/* Time/Accu & Duty Cycle Priority */
@@ -458,7 +458,7 @@ static void decode_sirf(unsigned char buf[], int len)
 	for (i = j = 0; i < 12; i++) {
 	    (void)touchwin(mid27win);
 	    if (/*@i1@*/getub(buf, 16+3*i) != '\0') {
-		(void)wprintw(mid27win, "  %d=%d", getub(buf, 16+3*i), getsw(buf, 16+3*i+1));
+		(void)wprintw(mid27win, "  %d=%d", getub(buf, 16+3*i), getbesw(buf, 16+3*i+1));
 		j++;
 	    }
 	}
@@ -486,18 +486,18 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x62:
 	attrset(A_BOLD);
 	move(2,40);
-	printw("%9.5f %9.5f",(double)(RAD2DEG*1e8*getsl(buf, 1)),
-			     (double)(RAD2DEG*1e8*getsl(buf, 5)));
+	printw("%9.5f %9.5f",(double)(RAD2DEG*1e8*getbesl(buf, 1)),
+			     (double)(RAD2DEG*1e8*getbesl(buf, 5)));
 	move(2,63);
-	printw("%8d",getsl(buf, 9)/1000);
+	printw("%8d",getbesl(buf, 9)/1000);
 
 	move(3,63);
 
-	printw("%8.1f",(double)getsl(buf, 17)/1000);
+	printw("%8.1f",(double)getbesl(buf, 17)/1000);
 
 	move(4,54);
-	if (getul(buf, 13) > 50) {
-	    double heading = RAD2DEG*1e8*getsl(buf, 21);
+	if (getbeul(buf, 13) > 50) {
+	    double heading = RAD2DEG*1e8*getbesl(buf, 21);
 	    if (heading < 0)
 		heading += 360;
 	    printw("%5.1f",heading);
@@ -505,14 +505,14 @@ static void decode_sirf(unsigned char buf[], int len)
 	    printw("  0.0");
 
 	move(4,63);
-	printw("%8.1f",(double)getsl(buf, 13)/1000);
+	printw("%8.1f",(double)getbesl(buf, 13)/1000);
 	attrset(A_NORMAL);
 
 	move(5,13);
 	printw("%04d-%02d-%02d %02d:%02d:%02d.%02d",
-		(int)getuw(buf, 26),getub(buf, 28),getub(buf, 29),getub(buf, 30),getub(buf, 31),
-		(unsigned short)getuw(buf, 32)/1000,
-		((unsigned short)getuw(buf, 32)%1000)/10);
+		(int)getbeuw(buf, 26),getub(buf, 28),getub(buf, 29),getub(buf, 30),getub(buf, 31),
+		(unsigned short)getbeuw(buf, 32)/1000,
+		((unsigned short)getbeuw(buf, 32)%1000)/10);
 	{
 	    struct timeval clk,gps;
 	    struct tm tm;
@@ -520,15 +520,15 @@ static void decode_sirf(unsigned char buf[], int len)
 	    gettimeofday(&clk,NULL);
 
 	    memset(&tm,0,sizeof(tm));
-	    tm.tm_sec = (unsigned short)getuw(buf, 32)/1000;
+	    tm.tm_sec = (unsigned short)getbeuw(buf, 32)/1000;
 	    tm.tm_min = (int)getub(buf, 31);
 	    tm.tm_hour = (int)getub(buf, 30);
 	    tm.tm_mday = (int)getub(buf, 29);
 	    tm.tm_mon = (int)getub(buf, 28) - 1;
-	    tm.tm_year = (int)getuw(buf, 26) - 1900;
+	    tm.tm_year = (int)getbeuw(buf, 26) - 1900;
 
 	    gps.tv_sec = mkgmtime(&tm);
-	    gps.tv_usec = (((unsigned short)getuw(buf, 32)%1000)/10) * 10000;
+	    gps.tv_usec = (((unsigned short)getbeuw(buf, 32)%1000)/10) * 10000;
 
 	    move(5,2);
 	    printw("           ");
@@ -836,14 +836,14 @@ static bool sendpkt(unsigned char *buf, size_t len, char *device)
 
     putbyte(buf, -4, START1);			/* start of packet */
     putbyte(buf, -3, START2);
-    putword(buf, -2, len);			/* length */
+    putbeword(buf, -2, len);			/* length */
 
     csum = 0;
     for (i = 0; i < len; i++)
 	csum += (int)buf[4 + i];
 
     csum &= 0x7fff;
-    putword(buf, len, csum);			/* checksum */
+    putbeword(buf, len, csum);			/* checksum */
     putbyte(buf, len + 2,END1);			/* end of packet */
     putbyte(buf, len + 3,END2);
     len += 8;
@@ -1239,7 +1239,7 @@ int main (int argc, char **argv)
 		    break;
 		goodspeed:
 		    putbyte(buf, 0, 0x86);
-		    putlong(buf, 1, v);		/* new baud rate */
+		    putbelong(buf, 1, v);		/* new baud rate */
 		    putbyte(buf, 5, 8);		/* 8 data bits */
 		    putbyte(buf, 6, stopbits);	/* 1 stop bit */
 		    putbyte(buf, 7, 0);		/* no parity */
@@ -1309,7 +1309,7 @@ int main (int argc, char **argv)
 		putbyte(buf, 19,0x01);
 		putbyte(buf, 20,0x00);
 		putbyte(buf, 21,0x01);
-		putword(buf, 22,bps);
+		putbeword(buf, 22,bps);
 		(void)sendpkt(buf, 24, device);
 		goto quit;
 

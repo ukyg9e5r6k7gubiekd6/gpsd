@@ -23,7 +23,7 @@ static unsigned long long uL1,uL2;
 static float f1;
 static double d1;
 
-static void dumpall(void)
+static void bedumpall(void)
 {
     (void)printf("getsb: %016llx %016llx %016llx %016llx\n",
 		(ubig)sb1, (ubig)sb2,
@@ -31,26 +31,56 @@ static void dumpall(void)
     (void)printf("getub: %016llx %016llx %016llx %016llx\n",
 		(ubig)ub1, (ubig)ub2,
 		(ubig)getub(buf, 0), (ubig)getub(buf, 8));
-    (void)printf("getsw: %016llx %016llx %016llx %016llx\n",
+    (void)printf("getbesw: %016llx %016llx %016llx %016llx\n",
 		(ubig)sw1, (ubig)sw2,
-		(ubig)getsw(buf, 0), (ubig)getsw(buf, 8));
-    (void)printf("getuw: %016llx %016llx %016llx %016llx\n",
+		(ubig)getbesw(buf, 0), (ubig)getbesw(buf, 8));
+    (void)printf("getbeuw: %016llx %016llx %016llx %016llx\n",
 		(ubig)uw1, (ubig)uw2,
-		(ubig)getuw(buf, 0), (ubig)getuw(buf, 8));
-    (void)printf("getsl: %016llx %016llx %016llx %016llx\n",
+		(ubig)getbeuw(buf, 0), (ubig)getbeuw(buf, 8));
+    (void)printf("getbesl: %016llx %016llx %016llx %016llx\n",
 		(ubig)sl1, (ubig)sl2,
-		(ubig)getsl(buf, 0), (ubig)getsl(buf, 8));
-    (void)printf("getul: %016llx %016llx %016llx %016llx\n",
+		(ubig)getbesl(buf, 0), (ubig)getbesl(buf, 8));
+    (void)printf("getbeul: %016llx %016llx %016llx %016llx\n",
 		(ubig)ul1, (ubig)ul2,
-		(ubig)getul(buf, 0), (ubig)getul(buf, 8));
-    (void)printf("getsL: %016llx %016llx %016llx %016llx\n",
+		(ubig)getbeul(buf, 0), (ubig)getbeul(buf, 8));
+    (void)printf("getbesL: %016llx %016llx %016llx %016llx\n",
 		(ubig)sL1, (ubig)sL2,
-		(ubig)getsL(buf, 0), (ubig)getsL(buf, 8));
-    (void)printf("getuL: %016llx %016llx %016llx %016llx\n",
+		(ubig)getbesL(buf, 0), (ubig)getbesL(buf, 8));
+    (void)printf("getbeuL: %016llx %016llx %016llx %016llx\n",
 		(ubig)uL1, (ubig)uL2,
-		(ubig)getuL(buf, 0), (ubig)getuL(buf, 8));
-    (void)printf("getf: %f %f\n", f1, getf(buf, 24));
-    (void)printf("getd: %.16f %.16f\n", d1, getd(buf, 16));
+		(ubig)getbeuL(buf, 0), (ubig)getbeuL(buf, 8));
+    (void)printf("getbef: %f %f\n", f1, getbef(buf, 24));
+    (void)printf("getbed: %.16f %.16f\n", d1, getbed(buf, 16));
+}
+
+static void ledumpall(void)
+{
+    (void)printf("getsb: %016llx %016llx %016llx %016llx\n",
+		(ubig)sb1, (ubig)sb2,
+		(ubig)getsb(buf, 0), (ubig)getsb(buf, 8));
+    (void)printf("getub: %016llx %016llx %016llx %016llx\n",
+		(ubig)ub1, (ubig)ub2,
+		(ubig)getub(buf, 0), (ubig)getub(buf, 8));
+    (void)printf("getlesw: %016llx %016llx %016llx %016llx\n",
+		(ubig)sw1, (ubig)sw2,
+		(ubig)getlesw(buf, 0), (ubig)getlesw(buf, 8));
+    (void)printf("getleuw: %016llx %016llx %016llx %016llx\n",
+		(ubig)uw1, (ubig)uw2,
+		(ubig)getleuw(buf, 0), (ubig)getleuw(buf, 8));
+    (void)printf("getlesl: %016llx %016llx %016llx %016llx\n",
+		(ubig)sl1, (ubig)sl2,
+		(ubig)getlesl(buf, 0), (ubig)getlesl(buf, 8));
+    (void)printf("getleul: %016llx %016llx %016llx %016llx\n",
+		(ubig)ul1, (ubig)ul2,
+		(ubig)getleul(buf, 0), (ubig)getleul(buf, 8));
+    (void)printf("getlesL: %016llx %016llx %016llx %016llx\n",
+		(ubig)sL1, (ubig)sL2,
+		(ubig)getlesL(buf, 0), (ubig)getlesL(buf, 8));
+    (void)printf("getleuL: %016llx %016llx %016llx %016llx\n",
+		(ubig)uL1, (ubig)uL2,
+		(ubig)getleuL(buf, 0), (ubig)getleuL(buf, 8));
+    (void)printf("getlef: %f %f\n", f1, getlef(buf, 24));
+    (void)printf("getled: %.16f %.16f\n", d1, getled(buf, 16));
 }
 
 /*@ -duplicatequals +ignorequals @*/
@@ -63,47 +93,32 @@ int main(void)
 
     /* big-endian test */
     printf("Big-endian\n");
-#include "bits.h"
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
-    sw1 = getsw(buf, 0);
-    sw2 = getsw(buf, 8);
-    uw1 = getuw(buf, 0);
-    uw2 = getuw(buf, 8);
-    sl1 = getsl(buf, 0);
-    sl2 = getsl(buf, 8);
-    ul1 = getul(buf, 0);
-    ul2 = getul(buf, 8);
-    sL1 = getsL(buf, 0);
-    sL2 = getsL(buf, 8);
-    uL1 = getuL(buf, 0);
-    uL2 = getuL(buf, 8);
-    f1 = getf(buf, 24);
-    d1 = getd(buf, 16);
-
-    dumpall();
-
-#undef getub
-#undef getsb
-#undef getuw
-#undef getsw
-#undef getul
-#undef getsl
-#undef getuL
-#undef getsL
-#undef putword
-#undef putlong
+    sw1 = getbesw(buf, 0);
+    sw2 = getbesw(buf, 8);
+    uw1 = getbeuw(buf, 0);
+    uw2 = getbeuw(buf, 8);
+    sl1 = getbesl(buf, 0);
+    sl2 = getbesl(buf, 8);
+    ul1 = getbeul(buf, 0);
+    ul2 = getbeul(buf, 8);
+    sL1 = getbesL(buf, 0);
+    sL2 = getbesL(buf, 8);
+    uL1 = getbeuL(buf, 0);
+    uL2 = getbeuL(buf, 8);
+    f1 = getbef(buf, 24);
+    d1 = getbed(buf, 16);
+    bedumpall();
 
     /* little-endian test */
-#define LITTLE_ENDIAN_PROTOCOL
     printf("Little-endian\n");
-#include "bits.h"
-    sb1 = getlesb(buf, 0);
-    sb2 = getlesb(buf, 8);
-    ub1 = getleub(buf, 0);
-    ub2 = getleub(buf, 8);
+    sb1 = getsb(buf, 0);
+    sb2 = getsb(buf, 8);
+    ub1 = getub(buf, 0);
+    ub2 = getub(buf, 8);
     sw1 = getlesw(buf, 0);
     sw2 = getlesw(buf, 8);
     uw1 = getleuw(buf, 0);
@@ -118,7 +133,7 @@ int main(void)
     uL2 = getleuL(buf, 8);
     f1 = getlef(buf, 24);
     d1 = getled(buf, 16);
-    dumpall();
+    ledumpall();
 
     exit(0);
 }

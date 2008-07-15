@@ -43,8 +43,7 @@ union long_double {
 #define getub(buf, off)	((u_int8_t)buf[(off)-(GET_ORIGIN)])
 #define putbyte(buf,off,b) do {buf[(off)-(PUT_ORIGIN)] = (unsigned char)(b);} while (0)
 
-#ifdef LITTLE_ENDIAN_PROTOCOL
-
+/* little-endian access */
 #define getlesw(buf, off)	((int16_t)(((u_int16_t)getub((buf),   (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
 #define getleuw(buf, off)	((u_int16_t)(((u_int16_t)getub((buf), (off)+1) << 8) | (u_int16_t)getub((buf), (off))))
 #define getlesl(buf, off)	((int32_t)(((u_int16_t)getleuw((buf),  (off)+2) << 16) | (u_int16_t)getleuw((buf), (off))))
@@ -57,23 +56,20 @@ union long_double {
 
 #define getlef(buf, off)	(i_f.i = getlesl(buf, off), i_f.f)
 #define getled(buf, off)	(l_d.l = getlesL(buf, off), l_d.d)
-#else
 
 /* SiRF and most other GPS protocols use big-endian (network byte order) */
-#define getsw(buf, off)	((int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
-#define getuw(buf, off)	((u_int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
-#define getsl(buf, off)	((int32_t)(((u_int16_t)getuw(buf, (off)) << 16) | getuw(buf, (off)+2)))
-#define getul(buf, off)	((u_int32_t)(((u_int16_t)getuw(buf, (off)) << 16) | getuw(buf, (off)+2)))
-#define getsL(buf, off)	((int64_t)(((u_int64_t)getul(buf, (off)) << 32) | getul(buf, (off)+4)))
-#define getuL(buf, off)	((u_int64_t)(((u_int64_t)getul(buf, (off)) << 32) | getul(buf, (off)+4)))
+#define getbesw(buf, off)	((int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
+#define getbeuw(buf, off)	((u_int16_t)(((u_int16_t)getub(buf, (off)) << 8) | (u_int16_t)getub(buf, (off)+1)))
+#define getbesl(buf, off)	((int32_t)(((u_int16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
+#define getbeul(buf, off)	((u_int32_t)(((u_int16_t)getbeuw(buf, (off)) << 16) | getbeuw(buf, (off)+2)))
+#define getbesL(buf, off)	((int64_t)(((u_int64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
+#define getbeuL(buf, off)	((u_int64_t)(((u_int64_t)getbeul(buf, (off)) << 32) | getbeul(buf, (off)+4)))
 
-#define putword(buf,off,w) do {putbyte(buf, (off) ,(w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
-#define putlong(buf,off,l) do {putword(buf, (off) ,(l) >> 16); putword(buf, (off)+2, (l));} while (0)
+#define putbeword(buf,off,w) do {putbyte(buf, (off) ,(w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
+#define putbelong(buf,off,l) do {putbeword(buf, (off) ,(l) >> 16); putbeword(buf, (off)+2, (l));} while (0)
 
-#define getf(buf, off)	(i_f.i = getsl(buf, off), i_f.f)
-#define getd(buf, off)	(l_d.l = getsL(buf, off), l_d.d)
-#endif
-
+#define getbef(buf, off)	(i_f.i = getbesl(buf, off), i_f.f)
+#define getbed(buf, off)	(l_d.l = getbesL(buf, off), l_d.d)
 
 
 /* Zodiac protocol description uses 1-origin indexing by little-endian word */

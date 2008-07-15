@@ -209,17 +209,17 @@ static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
 
 static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
 {
-    switch (getuw(buf, 1)) {
+    switch (getbeuw(buf, 1)) {
     case 2:
-	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %d error on PRN %ld\n", getul(buf, 9), getul(buf, 5));
+	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %d error on PRN %ld\n", getbeul(buf, 9), getbeul(buf, 5));
 	break;
 
     case 4107:
-	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n", getul(buf, 5));
+	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n", getbeul(buf, 5));
 	break;
 
     default:
-	gpsd_report(LOG_PROG, "EID 0x0a: Error ID type %d\n", getuw(buf, 1));
+	gpsd_report(LOG_PROG, "EID 0x0a: Error ID type %d\n", getbeuw(buf, 1));
 	break;
     }
     return 0;
@@ -273,16 +273,16 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session, unsigned char *
 
     //unsigned int chan = (unsigned int)getub(buf, 1);
     //unsigned int svid = (unsigned int)getub(buf, 2);
-    words[0] = (unsigned int)getul(buf, 3);
-    words[1] = (unsigned int)getul(buf, 7);
-    words[2] = (unsigned int)getul(buf, 11);
-    words[3] = (unsigned int)getul(buf, 15);
-    words[4] = (unsigned int)getul(buf, 19);
-    words[5] = (unsigned int)getul(buf, 23);
-    words[6] = (unsigned int)getul(buf, 27);
-    words[7] = (unsigned int)getul(buf, 31);
-    words[8] = (unsigned int)getul(buf, 35);
-    words[9] = (unsigned int)getul(buf, 39);
+    words[0] = (unsigned int)getbeul(buf, 3);
+    words[1] = (unsigned int)getbeul(buf, 7);
+    words[2] = (unsigned int)getbeul(buf, 11);
+    words[3] = (unsigned int)getbeul(buf, 15);
+    words[4] = (unsigned int)getbeul(buf, 19);
+    words[5] = (unsigned int)getbeul(buf, 23);
+    words[6] = (unsigned int)getbeul(buf, 27);
+    words[7] = (unsigned int)getbeul(buf, 31);
+    words[8] = (unsigned int)getbeul(buf, 35);
+    words[9] = (unsigned int)getbeul(buf, 39);
     gpsd_report(LOG_PROG, "50B 0x08\n");
     gpsd_interpret_subframe(session, words);
 
@@ -304,7 +304,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 
     gpsd_zero_satellites(&session->gpsdata);
     session->gpsdata.sentence_time
-	    = gpstime_to_unix(getsw(buf, 1), getul(buf, 3)*1e-2) - session->context->leap_seconds;
+	    = gpstime_to_unix(getbesw(buf, 1), getbeul(buf, 3)*1e-2) - session->context->leap_seconds;
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
 	int off = 8 + 15 * i;
 	bool good;
@@ -325,7 +325,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session, unsigned char *b
 			getub(buf, off+2)/2.0,
 			(getub(buf, off+1)*3)/2.0,
 			cn/10,
-			getuw(buf, off+3),
+			getbeuw(buf, off+3),
 			good ? '*' : ' ');
 #endif /* UNUSED */
 	if (good!=0)
@@ -370,8 +370,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
     if ((session->driver.sirf.driverstate & (SIRF_GE_232 | UBLOX))==0) {
 	/* position/velocity is bytes 1-18 */
 	ecef_to_wgs84fix(&session->gpsdata,
-	     getsl(buf, 1)*1.0, getsl(buf, 5)*1.0, getsl(buf, 9)*1.0,
-	     getsw(buf, 13)/8.0, getsw(buf, 15)/8.0, getsw(buf, 17)/8.0);
+	     getbesl(buf, 1)*1.0, getbesl(buf, 5)*1.0, getbesl(buf, 9)*1.0,
+	     getbesw(buf, 13)/8.0, getbesw(buf, 15)/8.0, getbesw(buf, 17)/8.0);
 	/* fix status is byte 19 */
 	navtype = (unsigned short)getub(buf, 19);
 	session->gpsdata.status = STATUS_NO_FIX;
@@ -391,7 +391,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session, unsigned char *b
 	/* byte 20 is HDOP, see below */
 	/* byte 21 is "mode 2", not clear how to interpret that */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
-	    gpstime_to_unix(getsw(buf, 22), getul(buf, 24)*1e-2) -
+	    gpstime_to_unix(getbesw(buf, 22), getbeul(buf, 24)*1e-2) -
 	    session->context->leap_seconds;
 #ifdef NTPSHM_ENABLE
 	if (session->gpsdata.fix.mode > MODE_NO_FIX) {
@@ -439,7 +439,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * seem to be the case.  Instead, we do our own computation 
 	 * of geoid separation now.
 	 */
-	navtype = (unsigned short)getuw(buf, 3);
+	navtype = (unsigned short)getbeuw(buf, 3);
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->gpsdata.fix.mode = MODE_NO_FIX;
 	if (navtype & 0x80)
@@ -465,13 +465,13 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * UTC second     2               2
 	 *                11              8
 	 */
-	unpacked_date.tm_year = (int)getuw(buf, 11)-1900;
+	unpacked_date.tm_year = (int)getbeuw(buf, 11)-1900;
 	unpacked_date.tm_mon = (int)getub(buf, 13)-1;
 	unpacked_date.tm_mday = (int)getub(buf, 14);
 	unpacked_date.tm_hour = (int)getub(buf, 15);
 	unpacked_date.tm_min = (int)getub(buf, 16);
 	unpacked_date.tm_sec = 0;
-	subseconds = getuw(buf, 17)*1e-3;
+	subseconds = getbeuw(buf, 17)*1e-3;
 	/*@ -compdef -unrecog */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    (double)timegm(&unpacked_date)+subseconds;
@@ -488,16 +488,16 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	}
 #endif /* NTPSHM_ENABLE */
 	/* skip 4 bytes of satellite map */
-	session->gpsdata.fix.latitude = getsl(buf, 23)*1e-7;
-	session->gpsdata.fix.longitude = getsl(buf, 27)*1e-7;
+	session->gpsdata.fix.latitude = getbesl(buf, 23)*1e-7;
+	session->gpsdata.fix.longitude = getbesl(buf, 27)*1e-7;
 	/* skip 4 bytes of altitude from ellipsoid */
 	mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
-	session->gpsdata.fix.altitude = getsl(buf, 31)*1e-2;
+	session->gpsdata.fix.altitude = getbesl(buf, 31)*1e-2;
 	/* skip 1 byte of map datum */
-	session->gpsdata.fix.speed = getsw(buf, 36)*1e-2;
-	session->gpsdata.fix.track = getsw(buf, 38)*1e-2;
+	session->gpsdata.fix.speed = getbesw(buf, 36)*1e-2;
+	session->gpsdata.fix.track = getbesw(buf, 38)*1e-2;
 	/* skip 2 bytes of magnetic variation */
-	session->gpsdata.fix.climb = getsw(buf, 42)*1e-2;
+	session->gpsdata.fix.climb = getbesw(buf, 42)*1e-2;
 	/* HDOP should be available at byte 89, but in 231 it's zero. */
 	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET;
 	session->gpsdata.sentence_length = 91;
@@ -517,7 +517,7 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session, unsigned char 
     session->driver.sirf.nav_parameters_seen = true;
     session->driver.sirf.altitude_hold_mode = getub(buf, 5);
     session->driver.sirf.altitude_hold_source = getub(buf, 6);
-    session->driver.sirf.altitude_source_input = getsw(buf, 7);
+    session->driver.sirf.altitude_source_input = getbesw(buf, 7);
     session->driver.sirf.degraded_mode = getub(buf, 9);
     session->driver.sirf.degraded_timeout = getub(buf, 10);
     session->driver.sirf.dr_timeout = getub(buf, 11);
@@ -539,13 +539,13 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
     /* this packet is only sent by uBlox firmware from version 1.32 */
     mask = LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
 	STATUS_SET | MODE_SET | HDOP_SET | VDOP_SET | PDOP_SET;
-    session->gpsdata.fix.latitude = getsl(buf, 1) * RAD_2_DEG * 1e-8;
-    session->gpsdata.fix.longitude = getsl(buf, 5) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.latitude = getbesl(buf, 1) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.longitude = getbesl(buf, 5) * RAD_2_DEG * 1e-8;
     session->gpsdata.separation = wgs84_separation(session->gpsdata.fix.latitude, session->gpsdata.fix.longitude);
-    session->gpsdata.fix.altitude = getsl(buf, 9) * 1e-3 - session->gpsdata.separation;
-    session->gpsdata.fix.speed = getsl(buf, 13) * 1e-3;
-    session->gpsdata.fix.climb = getsl(buf, 17) * 1e-3;
-    session->gpsdata.fix.track = getsl(buf, 21) * RAD_2_DEG * 1e-8;
+    session->gpsdata.fix.altitude = getbesl(buf, 9) * 1e-3 - session->gpsdata.separation;
+    session->gpsdata.fix.speed = getbesl(buf, 13) * 1e-3;
+    session->gpsdata.fix.climb = getbesl(buf, 17) * 1e-3;
+    session->gpsdata.fix.track = getbesl(buf, 21) * RAD_2_DEG * 1e-8;
 
     navtype = (unsigned short)getub(buf, 25);
     session->gpsdata.status = STATUS_NO_FIX;
@@ -565,13 +565,13 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session, unsigned char *bu
 	struct tm unpacked_date;
 	double subseconds;
 	mask |= TIME_SET;
-	unpacked_date.tm_year = (int)getuw(buf, 26) - 1900;
+	unpacked_date.tm_year = (int)getbeuw(buf, 26) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 29);
 	unpacked_date.tm_hour = (int)getub(buf, 30);
 	unpacked_date.tm_min = (int)getub(buf, 31);
 	unpacked_date.tm_sec = 0;
-	subseconds = ((unsigned short)getuw(buf, 32))*1e-3;
+	subseconds = ((unsigned short)getbeuw(buf, 32))*1e-3;
 	/*@ -compdef */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    (double)mkgmtime(&unpacked_date)+subseconds;
@@ -611,12 +611,12 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session, unsigned char *
 	unpacked_date.tm_sec = (int)getub(buf, 3);
 	unpacked_date.tm_mday = (int)getub(buf, 4);
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
-	unpacked_date.tm_year = (int)getuw(buf, 6) - 1900;
+	unpacked_date.tm_year = (int)getbeuw(buf, 6) - 1900;
 	/*@ -compdef */
 	session->gpsdata.fix.time = session->gpsdata.sentence_time =
 	    (double)mkgmtime(&unpacked_date);
 	/*@ +compdef */
-	session->context->leap_seconds = (int)getuw(buf, 8);
+	session->context->leap_seconds = (int)getbeuw(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
 #ifdef NTPSHM_ENABLE
 	if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) == 0)
@@ -678,8 +678,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
     case 0x09:		/* CPU Throughput */
 	gpsd_report(LOG_PROG,
 		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n",
-		    (float)getuw(buf, 1)/186, (float)getuw(buf, 3)/186,
-		    (float)getuw(buf, 5)/186, getuw(buf, 7));
+		    (float)getbeuw(buf, 1)/186, (float)getbeuw(buf, 3)/186,
+		    (float)getbeuw(buf, 5)/186, getbeuw(buf, 7));
 	return 0;
 
     case 0x0a:		/* Error ID Data */
@@ -916,7 +916,7 @@ static void sirfbin_revert(struct gps_device_t *session)
 			      0x00, 0x00, 0xb0, 0xb3};
     /*@ -charint -shiftimplementation @*/
     putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
-    putword(moderevert, 10, session->driver.sirf.altitude_source_input);
+    putbeword(moderevert, 10, session->driver.sirf.altitude_source_input);
     putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
     putbyte(moderevert, 13, session->driver.sirf.altitude_hold_source);
     putbyte(moderevert, 15, session->driver.sirf.degraded_timeout);

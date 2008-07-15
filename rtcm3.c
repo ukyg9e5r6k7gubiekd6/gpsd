@@ -454,7 +454,7 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
     (void)printf("%s: type=%d length=%d, computed length %d, computed type %d\n", 
 		 gpsd_hexdump(buf, 6), 
 		 msg->type, msg->length, 
-	         getuw(buf, 1), getuw(buf, 3) >> 4);
+	         getbeuw(buf, 1), getbeuw(buf, 3) >> 4);
 
     // FIXME: Decoding of packet content goes here
 }
