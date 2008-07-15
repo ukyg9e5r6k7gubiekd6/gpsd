@@ -126,7 +126,6 @@
 #include "gpsd.h"
 #if defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE)
 
-#define LITTLE_ENDIAN_PROTOCOL
 #define GET_ORIGIN 1
 #define PUT_ORIGIN 0
 #include "bits.h"

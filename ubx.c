@@ -18,7 +18,6 @@
 #if defined(UBX_ENABLE) && defined(BINARY_ENABLE)
 #include "ubx.h"
 
-#define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
 /*

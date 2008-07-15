@@ -46,7 +46,6 @@
 #include "gpsd.h"
 
 #if defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE)
-#define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 
 /* Have data which is 24 bits long */

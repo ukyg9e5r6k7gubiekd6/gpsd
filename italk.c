@@ -16,7 +16,6 @@
 #include "gpsd.h"
 #if defined(ITRAX_ENABLE) && defined(BINARY_ENABLE)
 
-#define LITTLE_ENDIAN_PROTOCOL
 #include "bits.h"
 #include "italk.h"
 
