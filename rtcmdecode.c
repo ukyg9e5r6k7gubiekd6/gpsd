@@ -33,22 +33,16 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
-    int             c;
     struct gps_packet_t lexer;
     struct rtcm2_t rtcm;
-    enum isgpsstat_t res;
-    off_t count;
     char buf[BUFSIZ];
 
-    isgps_init(&lexer);
+    packet_reset(&lexer);
 
-    count = 0;
-    while ((c = fgetc(fpin)) != EOF) {
-	res = rtcm2_decode(&lexer, (unsigned int)c);
-	if (verbose >= ISGPS_ERRLEVEL_BASE + 3) 
-	    fprintf(fpout, "%08lu: '%c' [%02x] -> %d\n", 
-		   (unsigned long)count++, (isprint(c)?c:'.'), (unsigned)(c & 0xff), res);
-	if (res == ISGPS_MESSAGE) {
+    for (;;) {
+	if (packet_get(fileno(fpin), &lexer) <= 0 && packet_buffered_input(&lexer) <= 0)
+	    break;
+	else if (lexer.type == RTCM2_PACKET) {
 	    rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
 	    rtcm2_dump(&rtcm, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);

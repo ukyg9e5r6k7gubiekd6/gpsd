@@ -98,6 +98,7 @@ extern void packet_pushback(struct gps_packet_t *);
 extern void packet_parse(struct gps_packet_t *);
 extern ssize_t packet_get(int, struct gps_packet_t *);
 extern int packet_sniff(struct gps_packet_t *);
+#define packet_buffered_input(lexer) ((lexer)->inbuffer + (lexer)->inbuflen - (lexer)->inbufptr)
 
 extern void isgps_init(/*@out@*/struct gps_packet_t *);
 enum isgpsstat_t isgps_decode(struct gps_packet_t *, 
