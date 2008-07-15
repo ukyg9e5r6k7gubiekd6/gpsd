@@ -12,7 +12,7 @@
 #include "gpsd_config.h"
 #include "gpsd.h"
 
-static int verbose = ISGPS_ERRLEVEL_BASE;
+static int verbose = 0;
 
 void gpsd_report(int errlevel, const char *fmt, ... )
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -34,7 +34,8 @@ static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
     struct gps_packet_t lexer;
-    struct rtcm2_t rtcm;
+    struct rtcm2_t rtcm2;
+    struct rtcm3_t rtcm3;
     char buf[BUFSIZ];
 
     packet_reset(&lexer);
@@ -43,8 +44,13 @@ static void decode(FILE *fpin, FILE *fpout)
 	if (packet_get(fileno(fpin), &lexer) <= 0 && packet_buffered_input(&lexer) <= 0)
 	    break;
 	else if (lexer.type == RTCM2_PACKET) {
-	    rtcm2_unpack(&rtcm, (char *)lexer.isgps.buf);
-	    rtcm2_dump(&rtcm, buf, sizeof(buf));
+	    rtcm2_unpack(&rtcm2, (char *)lexer.isgps.buf);
+	    rtcm2_dump(&rtcm2, buf, sizeof(buf));
+	    (void)fputs(buf, fpout);
+	}
+	else if (lexer.type == RTCM3_PACKET) {
+	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
+	    rtcm3_dump(&rtcm3, buf, sizeof(buf));
 	    (void)fputs(buf, fpout);
 	}
     }
@@ -142,7 +148,7 @@ int main(int argc, char **argv)
 	    break;
 
 	case 'v':
-	    verbose = ISGPS_ERRLEVEL_BASE + atoi(optarg);
+	    verbose = atoi(optarg);
 	    break;
 
 	case 'V':
