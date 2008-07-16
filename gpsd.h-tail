@@ -117,7 +117,7 @@ extern bool rtcm2_repack(struct rtcm2_t *, isgps30bits_t *);
 extern void rtcm2_output_magnavox(isgps30bits_t *, FILE *);
 
 extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
-extern void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen);
+extern void rtcm3_dump(struct rtcm3_t *rtcm, FILE *);
 
 /* Next, declarations for the core library... */
 

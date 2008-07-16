@@ -52,7 +52,7 @@ firmware.
 #define INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
 static unsigned long long ufld(char buf[], unsigned int start, unsigned int width)
-/* extract an bitfield from the buffer as an unsigned big-endian long */
+/* extract a bitfield from the buffer as an unsigned big-endian long */
 {
     unsigned long long fld = 0;
     unsigned int i;;
@@ -67,6 +67,20 @@ static unsigned long long ufld(char buf[], unsigned int start, unsigned int widt
     fld &= (0xffffffff >> (start % 8));
     //printf("After masking: 0x%llx = %lld\n", fld, fld);
     fld >>= (start + width) % 8;
+
+    return fld;
+}
+
+static signed long long sfld(char buf[], unsigned int start, unsigned int width)
+/* extract a bitfield from the buffer as a signed big-endian long */
+{
+    unsigned long long un = ufld(buf, start, width);
+    signed long long fld;
+
+    if (un & (1 << width))
+	fld = -(un & ~(1 << width));
+    else
+	fld = (signed long long)un;
     
     return fld;
 }
@@ -75,9 +89,12 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
     unsigned int bitcount = 0;
+    unsigned i;
+    signed long temp;
 
     /*@ -evalorder -sefparams @*/    
 #define ugrab(width)	(bitcount += width, ufld(buf, bitcount-width, width))
+#define sgrab(width)	(bitcount += width, sfld(buf, bitcount-width, width))
     assert(ugrab(8) == 0xD3);
     assert(ugrab(6) == 0x00);
 
@@ -86,39 +103,127 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 
     switch(rtcm->type) {
 	case 1001:
+	    rtcm->rtcm3_1001.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcm3_1001.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcm3_1001.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcm3_1001.header.sync       = (bool)ugrab(1);
 	    rtcm->rtcm3_1001.header.satcount   = (ushort)ugrab(5);
 	    rtcm->rtcm3_1001.header.smoothing  = (bool)ugrab(1);
 	    rtcm->rtcm3_1001.header.interval   = (ushort)ugrab(3);
+	    for (i = 0; i < rtcm->rtcm3_1001.header.satcount; i++) {
+		rtcm->rtcm3_1001.rtk_data[i].ident = (ushort)ugrab(6);
+		rtcm->rtcm3_1001.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1001.rtk_data[i].L1.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1001.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1001.rtk_data[i].L1.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1001.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1001.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+	    }
 	    break;
 
 	case 1002:
+	    rtcm->rtcm3_1002.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcm3_1002.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcm3_1002.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcm3_1002.header.sync       = (bool)ugrab(1);
 	    rtcm->rtcm3_1002.header.satcount   = (ushort)ugrab(5);
 	    rtcm->rtcm3_1002.header.smoothing  = (bool)ugrab(1);
 	    rtcm->rtcm3_1002.header.interval   = (ushort)ugrab(3);
+	    for (i = 0; i < rtcm->rtcm3_1001.header.satcount; i++) {
+		rtcm->rtcm3_1002.rtk_data[i].ident = (ushort)ugrab(6);
+		rtcm->rtcm3_1002.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1002.rtk_data[i].L1.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1002.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1002.rtk_data[i].L1.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1002.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1002.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+		rtcm->rtcm3_1002.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
+		rtcm->rtcm3_1002.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	    }
 	    break;
 
 	case 1003:
+	    rtcm->rtcm3_1003.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcm3_1003.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcm3_1003.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcm3_1003.header.sync       = (bool)ugrab(1);
 	    rtcm->rtcm3_1003.header.satcount   = (ushort)ugrab(5);
 	    rtcm->rtcm3_1003.header.smoothing  = (bool)ugrab(1);
 	    rtcm->rtcm3_1003.header.interval   = (ushort)ugrab(3);
+	    for (i = 0; i < rtcm->rtcm3_1001.header.satcount; i++) {
+		rtcm->rtcm3_1003.rtk_data[i].ident = (ushort)ugrab(6);
+		rtcm->rtcm3_1003.rtk_data[i].L1.indicator = (unsigned char)ugrab(1);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1003.rtk_data[i].L1.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1003.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1003.rtk_data[i].L1.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1003.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1003.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+		rtcm->rtcm3_1003.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1003.rtk_data[i].L2.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1003.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1003.rtk_data[i].L2.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1003.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1003.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
+	    }
 	    break;
 
 	case 1004:
+	    rtcm->rtcm3_1004.header.msgnum     = (uint)ugrab(12);
 	    rtcm->rtcm3_1004.header.station_id = (uint)ugrab(12);
 	    rtcm->rtcm3_1004.header.tow        = (time_t)ugrab(30);
 	    rtcm->rtcm3_1004.header.sync       = (bool)ugrab(1);
 	    rtcm->rtcm3_1004.header.satcount   = (ushort)ugrab(5);
 	    rtcm->rtcm3_1004.header.smoothing  = (bool)ugrab(1);
 	    rtcm->rtcm3_1004.header.interval   = (ushort)ugrab(3);
+	    for (i = 0; i < rtcm->rtcm3_1001.header.satcount; i++) {
+		rtcm->rtcm3_1004.rtk_data[i].ident = (ushort)ugrab(6);
+		rtcm->rtcm3_1004.rtk_data[i].L1.indicator = (bool)ugrab(1);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1004.rtk_data[i].L1.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1004.rtk_data[i].L1.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1004.rtk_data[i].L1.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1004.rtk_data[i].L1.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1004.rtk_data[i].L1.locktime = (unsigned char)sgrab(7);
+		rtcm->rtcm3_1004.rtk_data[i].L1.ambiguity = (bool)ugrab(8);
+		rtcm->rtcm3_1004.rtk_data[i].L1.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+		rtcm->rtcm3_1004.rtk_data[i].L2.indicator = (unsigned char)ugrab(2);
+		temp = (long)sgrab(24);
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1004.rtk_data[i].L2.pseudorange  = 0;
+		else
+		    rtcm->rtcm3_1004.rtk_data[i].L2.pseudorange  = temp * PSEUDORANGE_RESOLUTION;
+		if (temp == INVALID_PSEUDORANGE)
+		    rtcm->rtcm3_1004.rtk_data[i].L2.rangediff  = 0;
+		else
+		    rtcm->rtcm3_1004.rtk_data[i].L2.rangediff  = temp * PSEUDORANGE_DIFF_RESOLUTION;
+		rtcm->rtcm3_1004.rtk_data[i].L2.locktime = (unsigned char)sgrab(7);
+		rtcm->rtcm3_1004.rtk_data[i].L2.ambiguity = (bool)ugrab(8);
+		rtcm->rtcm3_1004.rtk_data[i].L2.CNR = (bool)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
+	    }
 	    break;
 
 	case 1005:
@@ -172,36 +277,117 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	case 1029:
 	    break;
     }
+#undef sgrab
 #undef ugrab
     /*@ +evalorder +sefparams @*/    
 }
 
-void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen)
+void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 /* dump the contents of a parsed RTCM104 message */
 {
-    size_t partlen;
-    char partbuf[BUFSIZ];
+    int i;
 
-    (void)snprintf(buf, buflen, "%u (%u):\n", rtcm->type, rtcm->length);
-    partlen = strlen(buf); buf += partlen; buflen -= partlen;
+    (void)fprintf(fp, "%u (%u):\n", rtcm->type, rtcm->length);
 
-#define CONC	partlen = strlen(partbuf); \
-    		if (partlen < buflen) { \
-		    (void)strcat(buf, partbuf); \
-		    buf += partlen; \
-		    buflen -= partlen; \
-		}
+#define BOOL(c)	(c!=0 ? 't' : 'f')
+#define CODE(x) (x)
     switch(rtcm->type) {
 	case 1001:
+	    (void)fprintf(fp, 
+			  "  #%d station_id=%d, tow=%d sync=%c smoothing=%c interval=%d satcount=%d", 
+			  rtcm->rtcm3_1001.header.msgnum,
+			  rtcm->rtcm3_1001.header.station_id,
+			  (int)rtcm->rtcm3_1001.header.tow,
+			  BOOL(rtcm->rtcm3_1001.header.sync),
+			  BOOL(rtcm->rtcm3_1001.header.smoothing),
+			  rtcm->rtcm3_1001.header.interval,
+			  rtcm->rtcm3_1001.header.satcount);
+	    for (i = 0; i < rtcm->rtcm3_1001.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%d\n      L1: ind=%d prange=%8.1f delta=%6.4f lockt=%d\n", 
+			      rtcm->rtcm3_1001.rtk_data[i].ident,
+			      CODE(rtcm->rtcm3_1003.rtk_data[i].L1.indicator),
+			      rtcm->rtcm3_1001.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcm3_1001.rtk_data[i].L1.rangediff,
+			      rtcm->rtcm3_1001.rtk_data[i].L1.locktime);
+	    }		
 	    break;
 
 	case 1002:
+	    (void)fprintf(fp, 
+			  "  #%d station_id=%d, tow=%d sync=%c smoothing=%c interval=%d satcount=%d", 
+			  rtcm->rtcm3_1002.header.msgnum,
+			  rtcm->rtcm3_1002.header.station_id,
+			  (int)rtcm->rtcm3_1002.header.tow,
+			  BOOL(rtcm->rtcm3_1002.header.sync),
+			  BOOL(rtcm->rtcm3_1002.header.smoothing),
+			  rtcm->rtcm3_1002.header.interval,
+			  rtcm->rtcm3_1002.header.satcount);	    
+	    for (i = 0; i < rtcm->rtcm3_1002.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%d\n      L1: ind=%d prange=%8.1f delta=%6.4f lockt=%d amb=%d CNR=%.2f\n",
+			      rtcm->rtcm3_1002.rtk_data[i].ident,
+			      CODE(rtcm->rtcm3_1003.rtk_data[i].L1.indicator),
+			      rtcm->rtcm3_1002.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.rangediff,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.locktime,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.ambiguity,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.CNR);
+	    }		
 	    break;
 
 	case 1003:
+	    (void)fprintf(fp,
+			  "  #%d station_id=%d, tow=%d sync=%c smoothing=%c interval=%d satcount=%d", 
+			  rtcm->rtcm3_1003.header.msgnum,
+			  rtcm->rtcm3_1003.header.station_id,
+			  (int)rtcm->rtcm3_1003.header.tow,
+			  BOOL(rtcm->rtcm3_1003.header.sync),
+			  BOOL(rtcm->rtcm3_1003.header.smoothing),
+			  rtcm->rtcm3_1003.header.interval,
+			  rtcm->rtcm3_1003.header.satcount);	    
+	    for (i = 0; i < rtcm->rtcm3_1003.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%d\n      L1: ind=%d prange=%8.1f delta=%6.4f lockt=%d\n      L2: ind=%d prange=%8.1f delta=%6.4f lockt=%d\n", 
+			      rtcm->rtcm3_1003.rtk_data[i].ident,
+			      CODE(rtcm->rtcm3_1003.rtk_data[i].L1.indicator),
+			      rtcm->rtcm3_1003.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcm3_1003.rtk_data[i].L1.rangediff,
+			      rtcm->rtcm3_1003.rtk_data[i].L1.locktime,
+			      CODE(rtcm->rtcm3_1003.rtk_data[i].L2.indicator),
+			      rtcm->rtcm3_1003.rtk_data[i].L2.pseudorange,
+			      rtcm->rtcm3_1003.rtk_data[i].L2.rangediff,
+			      rtcm->rtcm3_1003.rtk_data[i].L2.locktime);
+	    }		
 	    break;
 
 	case 1004:
+	    (void)fprintf(fp, 
+			  "  #%d station_id=%d, tow=%d sync=%c smoothing=%c interval=%d satcount=%d\n", 
+			  rtcm->rtcm3_1004.header.msgnum,
+			  rtcm->rtcm3_1004.header.station_id,
+			  (int)rtcm->rtcm3_1004.header.tow,
+			  BOOL(rtcm->rtcm3_1004.header.sync),
+			  BOOL(rtcm->rtcm3_1004.header.smoothing),
+			  rtcm->rtcm3_1004.header.interval,
+			  rtcm->rtcm3_1004.header.satcount);
+	    for (i = 0; i < rtcm->rtcm3_1004.header.satcount; i++) {
+		(void)fprintf(fp, 
+			      "    ident=%d\n      L1: ind=%d prange=%8.1f delta=%6.4f lockt=%d amb=%d CNR=%.2f\n      L2: ind=%d prange=%8.1f delta=%6.4f lockt=%d amb=%d CNR=%.2f\n", 
+			      rtcm->rtcm3_1004.rtk_data[i].ident,
+			      CODE(rtcm->rtcm3_1004.rtk_data[i].L1.indicator),
+			      rtcm->rtcm3_1004.rtk_data[i].L1.pseudorange,
+			      rtcm->rtcm3_1004.rtk_data[i].L1.rangediff,
+			      rtcm->rtcm3_1004.rtk_data[i].L1.locktime,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.ambiguity,
+			      rtcm->rtcm3_1002.rtk_data[i].L1.CNR,
+			      CODE(rtcm->rtcm3_1004.rtk_data[i].L2.indicator),
+			      rtcm->rtcm3_1004.rtk_data[i].L2.pseudorange,
+			      rtcm->rtcm3_1004.rtk_data[i].L2.rangediff,
+			      rtcm->rtcm3_1004.rtk_data[i].L2.locktime,
+			      rtcm->rtcm3_1004.rtk_data[i].L2.ambiguity,
+			      rtcm->rtcm3_1004.rtk_data[i].L2.CNR);
+	    }		
 	    break;
 
 	case 1005:
@@ -253,11 +439,11 @@ void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	    break;
 
 	case 1029:
-	    (void)snprintf(partbuf, sizeof(partbuf), "    Unknown content\n"); 
-	    CONC;
+	    (void)fprintf(fp, "    Unknown content\n"); 
 	    break;
     }
-#undef CONC
+#undef CODE
+#undef BOOL
 }
 
 #endif /* RTCM104V3_ENABLE */

@@ -84,6 +84,8 @@ Maritime Services</ulink> under "Publications".</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title> 
 
+<para>RTCM3 decoding is buggy and incomplete.</para>
+
 <para>RTCM-104 represents floating-point quantities as an integer
 multiple of a fixed scale factor.  Editing an RTCM-104 dump can
 produce numbers that are not an integer multiple of the scale factor

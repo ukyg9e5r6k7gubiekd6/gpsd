@@ -177,6 +177,7 @@ struct rtcm2_t {
 
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
+    unsigned int msgnum;	/* Message number */
     unsigned int station_id;	/* Reference Station ID */
     time_t tow;			/* GPS Epoch Time (TOW) in ms, 
 				   or GLONASS Epoch Time in ms */
@@ -187,7 +188,7 @@ struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
 };
 
 struct rtcm3_basic_rtk {
-    bool indicator;		/* Indicator */
+    unsigned char indicator;	/* Indicator */
     unsigned char channel;	/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
@@ -196,7 +197,7 @@ struct rtcm3_basic_rtk {
 };
 
 struct rtcm3_extended_rtk {
-    bool indicator;		/* Indicator */
+    unsigned char indicator;		/* Indicator */
     unsigned char channel;	/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */

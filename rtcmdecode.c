@@ -50,8 +50,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
 	else if (lexer.type == RTCM3_PACKET) {
 	    rtcm3_unpack(&rtcm3, (char *)lexer.outbuffer);
-	    rtcm3_dump(&rtcm3, buf, sizeof(buf));
-	    (void)fputs(buf, fpout);
+	    rtcm3_dump(&rtcm3, stdout);
 	}
     }
 }
