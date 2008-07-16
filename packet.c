@@ -1287,7 +1287,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 		    recvd,
 		    lexer->inbuflen,
 		    lexer->inbuflen+recvd,
-		    gpsd_hexdump(lexer->inbufptr, recvd));
+		    gpsd_hexdump(lexer->inbufptr, (size_t)recvd));
 #endif /* STATE_DEBUG */
 	lexer->inbuflen += recvd;
     }
