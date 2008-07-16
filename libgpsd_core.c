@@ -681,7 +681,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	newlen = generic_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
 	gpsd_report(LOG_RAW, 
-		    "packet sniff finds type %d\n", 
+		    "packet sniff on %s finds type %d\n", 
+		    session->gpsdata.gps_device,
 		    session->packet.type);
 	if (session->packet.type != BAD_PACKET) {
 	    switch (session->packet.type) {
@@ -754,19 +755,23 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	return 0;
     } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-		gpsd_report(LOG_PROG, "GPS is offline (%lf sec since data)\n", 
-			timestamp() - session->gpsdata.online);
+		gpsd_report(LOG_PROG, "GPS on %s is offline (%lf sec since data)\n", 
+			    session->gpsdata.gps_device,
+			    timestamp() - session->gpsdata.online);
 	    session->gpsdata.online = 0;
 	    return 0;
 	} else
 	    return ONLINE_SET;
     } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
-	    gpsd_report(LOG_RAW+3, "New data, not yet a packet\n");
-	    return ONLINE_SET;
+	gpsd_report(LOG_RAW+3, "New data on %s, not yet a packet\n",
+	    		    session->gpsdata.gps_device);
+	return ONLINE_SET;
     } else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
+	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
+	    		    session->gpsdata.gps_device);
 	/*@ -nullstate @*/
 	if (session->gpsdata.raw_hook)
 	    session->gpsdata.raw_hook(&session->gpsdata, 
@@ -837,7 +842,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 #endif /* RTCM104V2_ENABLE */
 	    if (buf2[0] != '\0') {
-		gpsd_report(LOG_IO, "<= GPS: %s", buf2);
+		gpsd_report(LOG_IO, "<= GPS %s: %s", 
+	    		    session->gpsdata.gps_device, buf2);
 		if (session->gpsdata.raw_hook)
 		    session->gpsdata.raw_hook(&session->gpsdata, 
 					      buf2, strlen(buf2), 1);
