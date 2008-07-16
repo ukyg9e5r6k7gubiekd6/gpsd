@@ -442,6 +442,26 @@ struct rtcm3_msg_t {
 /* Other magic values */
 #define INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
+static unsigned long long ufld(char buf[], int start, int width)
+/* extract an bitfield from the buffer as an unsigned big-endian long */
+{
+    unsigned long long fld = 0;
+    int i;;
+
+    assert(width <= 64);
+    for (i = 0; i < (width + 7) / 8; i++) {
+	fld <<= 8;
+	fld |= (unsigned char)buf[start / 8 + i];
+    }
+    //printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width, gpsd_hexdump(buf, 12), fld, fld);
+
+    fld &= (0xffffffff >> (start % 8));
+    //printf("After masking: 0x%llx = %lld\n", fld, fld);
+    fld >>= (start + width) % 8;
+    
+    return fld;
+}
+
 void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
@@ -449,8 +469,10 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
     
     assert(msg->preamble == 0xD3);
     assert(msg->version == 0x00);
-    tp->length = getbeuw(buf, 1) & ~0xCF00;
-    tp->type = getbeuw(buf, 3) >> 4;
+    //tp->length = getbeuw(buf, 1) & ~0xCF00;
+    //tp->type = getbeuw(buf, 3) >> 4;
+    tp->length = ufld(buf, 14, 10);
+    tp->type = ufld(buf, 24, 12);
 
     // FIXME: More decoding of packet content goes here
 }
@@ -458,7 +480,11 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *tp, char *buf)
 void rtcm3_dump(struct rtcm3_t *rtcm, /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message */
 {
+    ssize_t part;
+
     (void)snprintf(buf, buflen, "%u (%u):\n", rtcm->type, rtcm->length);
+    part = strlen(buf); buf += part; buflen -= part;
+
     // FIXME: More dumping of packet contents goes here */
 }
 
