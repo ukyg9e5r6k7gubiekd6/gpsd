@@ -178,7 +178,7 @@ struct rtcm2_t {
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
     unsigned int station_id;	/* Reference Station ID */
-    time_t time;		/* GPS Epoch Time (TOW) in ms, 
+    time_t tow;			/* GPS Epoch Time (TOW) in ms, 
 				   or GLONASS Epoch Time in ms */
     bool sync;			/* Synchronous GNSS Message Flag */
     ushort satcount;		/* # Satellite Signals Processed */
