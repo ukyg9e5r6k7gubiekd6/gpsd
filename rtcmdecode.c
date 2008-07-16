@@ -29,7 +29,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     }
 }
 
-/*@ -compdestroy @*/
+/*@ -compdestroy -compdef -usedef @*/
 static void decode(FILE *fpin, FILE *fpout)
 /* RTCM-104 bits on fpin to dump format on fpout */
 {
@@ -55,7 +55,7 @@ static void decode(FILE *fpin, FILE *fpout)
 	}
     }
 }
-/*@ +compdestroy @*/
+/*@ +compdestroy +compdef +usedef @*/
 
 /*@ -compdestroy @*/
 static void pass(FILE *fpin, FILE *fpout)
