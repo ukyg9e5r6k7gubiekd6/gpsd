@@ -143,6 +143,7 @@ libgpsd_c_sources = \
 	evermore.c \
 	italk.c \
 	navcom.c \
+	bits.c \
 	crc24q.c
 
 libgpsd_h_sources = \

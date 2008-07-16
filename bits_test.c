@@ -83,16 +83,33 @@ static void ledumpall(void)
     (void)printf("getled: %.16f %.16f\n", d1, getled(buf, 16));
 }
 
+struct unsigned_test {
+    unsigned int start, width;
+    unsigned long long expected;
+};
+
 /*@ -duplicatequals +ignorequals @*/
 int main(void)
 {
+    struct unsigned_test *up, unsigned_tests[] = {
+	{0, 1, 0},	/* first bit of first byte */
+	{0, 7, 1},	/* third bit of first byte */
+    };
+
+    unsigned char *sp;
+
     memcpy(buf,"\x01\x02\x03\x04\x05\x06\x07\x08",8);
     memcpy(buf+8,"\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8",8);
     memcpy(buf+16,"\x40\x09\x21\xfb\x54\x44\x2d\x18",8);
     memcpy(buf+24,"\x40\x49\x0f\xdb",4);
 
+    (void)fputs("Test data:", stdout);
+    for (sp = buf; sp < buf + 28; sp++)
+	printf(" %02x", *sp);
+    putc('\n', stdout);
+
     /* big-endian test */
-    printf("Big-endian\n");
+    printf("Big-endian:\n");
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
@@ -114,7 +131,7 @@ int main(void)
     bedumpall();
 
     /* little-endian test */
-    printf("Little-endian\n");
+    printf("Little-endian:\n");
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
@@ -134,6 +151,17 @@ int main(void)
     f1 = getlef(buf, 24);
     d1 = getled(buf, 16);
     ledumpall();
+
+
+    (void)printf("Testing bitfield extraction:\n");
+    for (up = unsigned_tests; 
+	 up < unsigned_tests+sizeof(unsigned_tests)/sizeof(unsigned_tests[0]); 
+	 up++) {
+	unsigned long long res = ubits((char *)buf, up->start, up->width); 
+	(void)printf("ubits(..., %d, %d) should be %llu, is %llu: %s\n",
+		     up->start, up->width, up->expected, res,
+		     res == up->expected ? "succeeded" : "FAILED");
+    }
 
     exit(0);
 }

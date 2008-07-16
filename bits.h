@@ -2,9 +2,9 @@
 /*
  * bits.h - extract binary data from message buffer
  *
- * These macros extract bytes, words, longwords, floats or doubles from
- * a message that contains these items in either MSB-first or LSB-first 
- * byte order.
+ * These macros extract bytes, words, longwords, floats, doubles, or
+ * bitfields of arbitrary length and size from a message that contains
+ * these items in either MSB-first or LSB-first byte order.
  * 
  * By defining the GET_ORIGIN and PUT_ORIGIN macros before including
  * this header, it's possible to change the origin of the indexing.
@@ -16,6 +16,7 @@
  * The use of fixed-length types in the casts enforces these.
  * Both 32- and 64-bit systems with gcc are OK with this set.
  */
+#include <stdint.h>
 
 #ifndef BITS_H
 #define BITS_H
@@ -80,3 +81,7 @@ union long_double {
 		| (buf[2*(n)+1] << 24))
 #define getstringz(to, from, s, e)			\
     (void)memcpy(to, from+2*(s)-2, 2*((e)-(s)+1))
+
+/* bitfield extraction */
+extern unsigned long long ubits(char buf[], unsigned int, unsigned int);
+extern signed long long sbits(char buf[], unsigned int, unsigned int);

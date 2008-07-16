@@ -51,40 +51,6 @@ firmware.
 /* Other magic values */
 #define INVALID_PSEUDORANGE		0x80000	/* DF012 */
 
-static unsigned long long ufld(char buf[], unsigned int start, unsigned int width)
-/* extract a bitfield from the buffer as an unsigned big-endian long */
-{
-    unsigned long long fld = 0;
-    unsigned int i;;
-
-    assert(width <= 64);
-    for (i = 0; i < (width + 7) / 8; i++) {
-	fld <<= 8;
-	fld |= (unsigned char)buf[start / 8 + i];
-    }
-    //printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width, gpsd_hexdump(buf, 12), fld, fld);
-
-    fld &= (0xffffffff >> (start % 8));
-    //printf("After masking: 0x%llx = %lld\n", fld, fld);
-    fld >>= (start + width) % 8;
-
-    return fld;
-}
-
-static signed long long sfld(char buf[], unsigned int start, unsigned int width)
-/* extract a bitfield from the buffer as a signed big-endian long */
-{
-    unsigned long long un = ufld(buf, start, width);
-    signed long long fld;
-
-    if (un & (1 << width))
-	fld = -(un & ~(1 << width));
-    else
-	fld = (signed long long)un;
-    
-    return fld;
-}
-
 void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
@@ -93,8 +59,8 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
     signed long temp;
 
     /*@ -evalorder -sefparams @*/    
-#define ugrab(width)	(bitcount += width, ufld(buf, bitcount-width, width))
-#define sgrab(width)	(bitcount += width, sfld(buf, bitcount-width, width))
+#define ugrab(width)	(bitcount += width, ubits(buf, bitcount-width, width))
+#define sgrab(width)	(bitcount += width, sbits(buf, bitcount-width, width))
     assert(ugrab(8) == 0xD3);
     assert(ugrab(6) == 0x00);
 
