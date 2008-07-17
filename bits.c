@@ -25,21 +25,25 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     unsigned int i;;
 
     assert(width <= sizeof(long long) * BITS_PER_BYTE);
-    for (i = 0; i < (width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
+    for (i = start / BITS_PER_BYTE; i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
 	fld <<= BITS_PER_BYTE;
-	fld |= (unsigned char)buf[start / BITS_PER_BYTE + i];
+	fld |= (unsigned char)buf[i];
     }
 #ifdef DEBUG
     printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width, gpsd_hexdump(buf, 12), fld, fld);
 #endif /* DEBUG */
 
-    fld &= (0xffffffff >> (start % BITS_PER_BYTE));
+    fld >>= (BITS_PER_BYTE - ((start + width) % BITS_PER_BYTE));
 #ifdef DEBUG
-    printf("After masking: 0x%llx = %lld\n", fld, fld);
+    printf("After downshifting by %d bits: 0x%llx = %lld\n", 
+	   (BITS_PER_BYTE - ((start + width) % BITS_PER_BYTE)),
+	   fld, fld);
 #endif /* DEBUG */
-    fld >>= (BITS_PER_BYTE - 1) - ((start + width) % BITS_PER_BYTE);
+
+    fld &= ~(0xffffffff << width);
 #ifdef DEBUG
-    printf("After downshifting: 0x%llx = %lld\n", fld, fld);
+    printf("After selecting out the bottom %u bits: 0x%llx = %lld\n", 
+	   width, fld, fld);
 #endif /* DEBUG */
 
     return fld;

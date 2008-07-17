@@ -86,14 +86,17 @@ static void ledumpall(void)
 struct unsigned_test {
     unsigned int start, width;
     unsigned long long expected;
+    char *description;
 };
 
 /*@ -duplicatequals +ignorequals @*/
 int main(void)
 {
     struct unsigned_test *up, unsigned_tests[] = {
-	{0, 1, 0},	/* first bit of first byte */
-	{0, 7, 1},	/* third bit of first byte */
+	{0,  1,  0,    "first bit of first byte"},
+	{32, 7,  2,    "first seven bits of fifth byte"},
+	{56, 12, 0x8f, "12 bits crossing 7th to 8th bytes (08ff)"},
+	{78, 4,  11,    "2 bits crossing 8th to 9th byte (fefd)"},
     };
 
     unsigned char *sp;
@@ -158,8 +161,8 @@ int main(void)
 	 up < unsigned_tests+sizeof(unsigned_tests)/sizeof(unsigned_tests[0]); 
 	 up++) {
 	unsigned long long res = ubits((char *)buf, up->start, up->width); 
-	(void)printf("ubits(..., %d, %d) should be %llu, is %llu: %s\n",
-		     up->start, up->width, up->expected, res,
+	(void)printf("ubits(..., %d, %d) %s should be %llu, is %llu: %s\n",
+		     up->start, up->width, up->description, up->expected, res,
 		     res == up->expected ? "succeeded" : "FAILED");
     }
 
