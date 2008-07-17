@@ -94,6 +94,7 @@ int main(void)
 {
     struct unsigned_test *up, unsigned_tests[] = {
 	{0,  1,  0,    "first bit of first byte"},
+	{0,  8,  0x01,"first 8 bits"},
 	{32, 7,  2,    "first seven bits of fifth byte"},
 	{56, 12, 0x8f, "12 bits crossing 7th to 8th bytes (08ff)"},
 	{78, 4,  11,    "2 bits crossing 8th to 9th byte (fefd)"},

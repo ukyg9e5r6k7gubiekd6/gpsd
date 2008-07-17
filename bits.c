@@ -1,4 +1,3 @@
-#define DEBUG
 /*
  * Bitfield extraction functions.  In each, start is a bit index (not a byte
  * index) and width is a bit width (bounded above by the bit width of long 
@@ -16,13 +15,15 @@
 #endif /* DEBUG */
 
 
+
 #define BITS_PER_BYTE	8
 
 unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
 /* extract a bitfield from the buffer as an unsigned big-endian long */
 {
     unsigned long long fld = 0;
-    unsigned int i;;
+    unsigned int i;
+    unsigned end;
 
     assert(width <= sizeof(long long) * BITS_PER_BYTE);
     for (i = start / BITS_PER_BYTE; i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
@@ -33,12 +34,14 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width, gpsd_hexdump(buf, 12), fld, fld);
 #endif /* DEBUG */
 
-    fld >>= (BITS_PER_BYTE - ((start + width) % BITS_PER_BYTE));
+    end = (start + width) % BITS_PER_BYTE;
+    if (end != 0) {
+	fld >>= (BITS_PER_BYTE - end);
 #ifdef DEBUG
-    printf("After downshifting by %d bits: 0x%llx = %lld\n", 
-	   (BITS_PER_BYTE - ((start + width) % BITS_PER_BYTE)),
-	   fld, fld);
+	printf("After downshifting by %d bits: 0x%llx = %lld\n", 
+	       BITS_PER_BYTE - end, fld, fld);
 #endif /* DEBUG */
+    }
 
     fld &= ~(0xffffffff << width);
 #ifdef DEBUG
