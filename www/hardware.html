@@ -690,6 +690,23 @@ Reported by "K&eacute;vin Redon" &lt;kevredon&#x40;gmail.com&gt;
 </tr>
 <!-- End Holux GPSlim 236 -->
 
+<!-- Begin Holux M-241 -->
+<tr>
+<td><a href='http://www.holux.com/JCore/en/products/products_content.jsp?pno=341'>M-241</a></td>
+<td>Fair</td>
+<td>MTK</td>
+<td>Bluetooth and USB (CP2101)</td>
+<td>2.37</td>
+<td>3.01</td>
+<td>gpsd crashes the device when autoprobing @ baud rate 9600 (unless
+'-b'/broken-device-safety is enabled - need to unplug/reset the device).
+'stty -F /dev/ttyUSB1 ispeed 38400' helps avoiding too much autoprobing -
+though stty complains about not being able to perform all requested
+operations. Reported by Roland Ager &lt;roland.ager&#x40;gmx.de&gt;</td>
+</tr>
+<!-- End Holux M-241 -->
+
+
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.i-trek.jp'>i.Trek</a></tr>
 
 <!-- Begin i.Trek M3 -->
