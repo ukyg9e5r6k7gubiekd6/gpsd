@@ -523,7 +523,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     
     track = atan2(vel_east, vel_north);
     if (track < 0)
-    	track += 2 * PI;
+    	track += 2 * GPS_PI;
     session->gpsdata.fix.track = track * RAD_2_DEG;
     /*@ -evalorder @*/
     session->gpsdata.fix.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
@@ -709,21 +709,21 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
                 prn, toc*SF_TOC, time_str, ((double)af0)*SF_AF0, ((double)af1)*SF_AF1, ((double)af2)*SF_AF2);
     gpsd_report(LOG_IO,
                 "Navcom: IODE (!AODE): %u Crs: %19.12e, Delta n: %19.12e, M0: %19.12e\n",
-                iode, (double)crs*SF_CRS, (double)delta_n*SF_DELTA_N*M_PI, (double)m0*SF_M0*M_PI);
+                iode, (double)crs*SF_CRS, (double)delta_n*SF_DELTA_N*GPS_PI, (double)m0*SF_M0*GPS_PI);
     gpsd_report(LOG_IO,
                 "Navcom: Cuc: %19.12e, Eccentricity: %19.12e, Cus: %19.12e, A^1/2: %19.12e\n",
                 (double)cuc*SF_CUC, (double)e*SF_E, (double)cus*SF_CUS, (double)sqrt_a*SF_SQRT_A);
     gpsd_report(LOG_IO,
                 "Navcom: TOE: %u, Cic: %19.12e, Omega %19.12e, Cis: %19.12e\n",
-                toe*SF_TOE, (double)cic*SF_CIC, (double)Omega0*SF_OMEGA0*M_PI,
+                toe*SF_TOE, (double)cic*SF_CIC, (double)Omega0*SF_OMEGA0*GPS_PI,
                 (double)cis*SF_CIS);
     gpsd_report(LOG_IO,
                 "Navcom: i0: %19.12e, Crc: %19.12e, omega: %19.12e, Omega dot: %19.12e\n",
-                (double)i0*SF_I0*M_PI, (double)crc*SF_CRC, (double)omega*SF_OMEGA*M_PI,
-                (double)Omegadot*SF_OMEGADOT*M_PI);
+                (double)i0*SF_I0*GPS_PI, (double)crc*SF_CRC, (double)omega*SF_OMEGA*GPS_PI,
+                (double)Omegadot*SF_OMEGADOT*GPS_PI);
     gpsd_report(LOG_IO,
                 "Navcom: IDOT: %19.12e, Codes on L2: 0x%x, GPS Week: %u, L2 P data flag: %x\n",
-                (double)idot*SF_IDOT*M_PI, cl2, week-(week%1024)+wn, l2pd);
+                (double)idot*SF_IDOT*GPS_PI, cl2, week-(week%1024)+wn, l2pd);
     gpsd_report(LOG_IO,
                 "Navcom: SV accuracy: 0x%x, SV health: 0x%x, TGD: %f, IODC (!AODC): %u\n",
                 ura, svh, (double)tgd*SF_TGD, iodc);

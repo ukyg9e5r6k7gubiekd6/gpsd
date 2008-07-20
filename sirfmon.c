@@ -47,7 +47,7 @@
 #else
 #include <curses.h>
 #endif /* HAVE_NCURSES_H */
-#include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in PI as well */
+#include "gps.h"	/* for DEFAULT_GPSD_PORT; brings in GPS_PI as well */
 
 #define PUT_ORIGIN	-4
 #include "bits.h"
@@ -71,8 +71,6 @@ extern int netlib_connectsock(const char *, const char *, const char *);
 #define START2		0xa2
 #define END1		0xb0
 #define END2		0xb3
-
-#define RAD2DEG (180.0/PI)
 
 /* how many characters to look at when trying to find baud rate lock */
 #define SNIFF_RETRIES	1200
@@ -200,13 +198,13 @@ static void decode_ecef(double x, double y, double z,
     double lambda,p,theta,phi,n,h,vnorth,veast,vup,speed,heading;
 
     lambda = atan2(y,x);
-    /*@ -evalorder @*/ 
+    /*@ -evalorder @*/
     p = sqrt(pow(x,2) + pow(y,2));
     theta = atan2(z*a,p*b);
     phi = atan2(z + e_2*b*pow(sin(theta),3),p - e2*a*pow(cos(theta),3));
     n = a / sqrt(1.0 - e2*pow(sin(phi),2));
     h = p / cos(phi) - n;
-    h -= wgs84_separation((double)(RAD2DEG*phi),(double)(RAD2DEG*lambda));
+    h -= wgs84_separation((double)(RAD_2_DEG*phi),(double)(RAD_2_DEG*lambda));
     vnorth = -vx*sin(phi)*cos(lambda)-vy*sin(phi)*sin(lambda)+vz*cos(phi);
     veast = -vx*sin(lambda)+vy*cos(lambda);
     vup = vx*cos(phi)*cos(lambda)+vy*cos(phi)*sin(lambda)+vz*sin(phi);
@@ -214,11 +212,11 @@ static void decode_ecef(double x, double y, double z,
     heading = atan2(veast,vnorth);
     /*@ +evalorder @*/
     if (heading < 0)
-	heading += 2 * PI;
+	heading += 2 * GPS_PI;
 
     (void)wmove(mid2win, 1,40);
-    (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD2DEG*phi),
-				   (double)(RAD2DEG*lambda));
+    (void)wprintw(mid2win, "%9.5f %9.5f",(double)(RAD_2_DEG*phi),
+				   (double)(RAD_2_DEG*lambda));
     (void)mvwaddch(mid2win, 1, 49, ACS_DEGREE);
     (void)mvwaddch(mid2win, 1, 59, ACS_DEGREE);
     (void)wmove(mid2win, 1,61);
@@ -230,7 +228,7 @@ static void decode_ecef(double x, double y, double z,
     (void)wprintw(mid2win, "%8.1f",vup);
 
     (void)wmove(mid2win, 3,54);
-    (void)wprintw(mid2win, "%5.1f",(double)(RAD2DEG*heading));
+    (void)wprintw(mid2win, "%5.1f",(double)(RAD_2_DEG*heading));
     (void)mvwaddch(mid2win, 3, 59, ACS_DEGREE);
     (void)wmove(mid2win, 3,61);
     (void)wprintw(mid2win, "%8.1f",speed);
@@ -486,8 +484,8 @@ static void decode_sirf(unsigned char buf[], int len)
     case 0x62:
 	attrset(A_BOLD);
 	move(2,40);
-	printw("%9.5f %9.5f",(double)(RAD2DEG*1e8*getbesl(buf, 1)),
-			     (double)(RAD2DEG*1e8*getbesl(buf, 5)));
+	printw("%9.5f %9.5f",(double)(RAD_2_DEG*1e8*getbesl(buf, 1)),
+			     (double)(RAD_2_DEG*1e8*getbesl(buf, 5)));
 	move(2,63);
 	printw("%8d",getbesl(buf, 9)/1000);
 
@@ -497,7 +495,7 @@ static void decode_sirf(unsigned char buf[], int len)
 
 	move(4,54);
 	if (getbeul(buf, 13) > 50) {
-	    double heading = RAD2DEG*1e8*getbesl(buf, 21);
+	    double heading = RAD_2_DEG*1e8*getbesl(buf, 21);
 	    if (heading < 0)
 		heading += 360;
 	    printw("%5.1f",heading);

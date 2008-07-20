@@ -117,7 +117,7 @@ void ecef_to_wgs84fix(struct gps_data_t *gpsdata,
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
     /*@ +evalorder @*/
     if (heading < 0)
-	heading += 2 * PI;
+	heading += 2 * GPS_PI;
     gpsdata->fix.track = heading * RAD_2_DEG;
 }
 

@@ -368,7 +368,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 
 	track = atan2(pvt->lon_vel, pvt->lat_vel);
 	if (track < 0) {
-	    track += 2 * PI;
+	    track += 2 * GPS_PI;
 	}
 	session->gpsdata.fix.track = radtodeg(track);
 

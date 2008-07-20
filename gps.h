@@ -610,7 +610,7 @@ extern double wgs84_separation(double, double);
 /* miles and knots are both the international standard versions of the units */
 
 /* angle conversion multipliers */
-#define PI      	3.1415926535897932384626433832795029
+#define GPS_PI      	3.1415926535897932384626433832795029
 #define RAD_2_DEG	57.2957795130823208767981548141051703
 #define DEG_2_RAD	0.0174532925199432957692369076848861271
 
