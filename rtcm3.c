@@ -43,7 +43,7 @@ firmware.
 #define PSEUDORANGE_RESOLUTION		0.2	/* DF011 */
 #define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012 */
 #define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
-#define ANTENNA_HEIGHT_RESOLUTION	0.0001	/* DF025-027 */
+#define ANTENNA_POSITION_RESOLUTION	0.0001	/* DF025-027 */
 #define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
 #define GPS_EPOCH_TIME_RESOLUTION	0.1	/* DF065 */
 #define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
@@ -193,9 +193,40 @@ void rtcm3_unpack(/*@out@*/struct rtcm3_t *rtcm, char *buf)
 	    break;
 
 	case 1005:
+	    rtcm->rtcm3_1005.station_id = (unsigned short)ugrab(12);
+	    ugrab(6);	/* reserved */
+	    if ((bool)ugrab(1))
+		rtcm->rtcm3_1005.system = gps;
+	    else if ((bool)ugrab(1))
+		rtcm->rtcm3_1005.system = glonass;
+	    else if ((bool)ugrab(1))
+		rtcm->rtcm3_1005.system = galileo;
+	    rtcm->rtcm3_1005.reference_station = (bool)ugrab(1);
+	    rtcm->rtcm3_1005.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	    rtcm->rtcm3_1005.single_receiver = ugrab(1);
+	    ugrab(1);
+	    rtcm->rtcm3_1005.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	    ugrab(2);
+	    rtcm->rtcm3_1005.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	    break;
 
 	case 1006:
+	    rtcm->rtcm3_1006.station_id = (unsigned short)ugrab(12);
+	    ugrab(6);	/* reserved */
+	    if ((bool)ugrab(1))
+		rtcm->rtcm3_1006.system = gps;
+	    else if ((bool)ugrab(1))
+		rtcm->rtcm3_1006.system = glonass;
+	    else if ((bool)ugrab(1))
+		rtcm->rtcm3_1006.system = galileo;
+	    rtcm->rtcm3_1006.reference_station = (bool)ugrab(1);
+	    rtcm->rtcm3_1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	    rtcm->rtcm3_1006.single_receiver = ugrab(1);
+	    ugrab(1);
+	    rtcm->rtcm3_1006.ecef_y = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	    ugrab(2);
+	    rtcm->rtcm3_1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
+	    rtcm->rtcm3_1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
 	    break;
 
 	case 1007:
@@ -252,6 +283,8 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 /* dump the contents of a parsed RTCM104 message */
 {
     int i;
+
+    char *systems[] = {"GPS", "Glonass", "Galileo", "unknown"};
 
     (void)fprintf(fp, "%u (%u):\n", rtcm->type, rtcm->length);
 
@@ -357,9 +390,28 @@ void rtcm3_dump(struct rtcm3_t *rtcm, FILE *fp)
 	    break;
 
 	case 1005:
+	    (void)fprintf(fp, 
+			  "  station_id=%d, %s refstation=%c sro=%c x=%f y=%f z=%f\n", 
+			  rtcm->rtcm3_1005.station_id,
+			  systems[rtcm->rtcm3_1005.system],
+			  BOOL(rtcm->rtcm3_1005.reference_station),
+			  BOOL(rtcm->rtcm3_1005.single_receiver),
+			  rtcm->rtcm3_1005.ecef_x,
+			  rtcm->rtcm3_1005.ecef_y,
+			  rtcm->rtcm3_1005.ecef_z);
 	    break;
 
 	case 1006:
+	    (void)fprintf(fp, 
+			  "  station_id=%d, %s refstation=%c sro=%c x=%f y=%f z=%f a=%f\n", 
+			  rtcm->rtcm3_1006.station_id,
+			  systems[rtcm->rtcm3_1006.system],
+			  BOOL(rtcm->rtcm3_1006.reference_station),
+			  BOOL(rtcm->rtcm3_1006.single_receiver),
+			  rtcm->rtcm3_1006.ecef_x,
+			  rtcm->rtcm3_1006.ecef_y,
+			  rtcm->rtcm3_1006.ecef_z,
+			  rtcm->rtcm3_1006.height);
 	    break;
 
 	case 1007:

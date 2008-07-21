@@ -270,15 +270,17 @@ struct rtcm3_t {
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
 	    navsystem system;		/* Which system is it? */
+	    bool reference_station;	/* Reference-station indicator */
 	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */
 	} rtcm3_1005;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
 	    navsystem system;		/* Which system is it? */
+	    bool reference_station;	/* Reference-station indicator */
 	    bool single_receiver;	/* Single Receiver Oscillator */
 	    double ecef_x, ecef_y, ecef_z;	/* ECEF antenna location */
-	    short height;			/* Antenna height */
+	    double height;			/* Antenna height */
 	} rtcm3_1006;
 	struct {
 	    unsigned int station_id;	/* Reference Station ID */
