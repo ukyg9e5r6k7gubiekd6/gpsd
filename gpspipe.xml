@@ -17,6 +17,9 @@
 <cmdsynopsis>
   <command>gpspipe</command>
       <arg choice='opt'>-h</arg>
+      <arg choice='opt'>-d</arg>
+      <arg choice='opt'>-l</arg>
+      <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
       <arg choice='opt'>-n <replaceable>count</replaceable></arg>
       <arg choice='opt'>-r</arg>
       <arg choice='opt'>-R</arg>
@@ -54,11 +57,21 @@ If omitted, <application>gpspipe</application> connects to 127.0.0.1 on
 the default port (2947) and uses the first device opened by 
 <application>gpsd</application>.</para>
 
+<para><application>gpspipe</application> may be run as a daemon, but
+requires the -f flag for writing the output to a file.</para>
+
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
 <para>-h makes <application>gpspipe</application> print
 a usage message and exit.</para>
+
+<para>-d causes <application>gpspipe</application> to run as a daemon.</para>
+
+<para>-l causes <application>gpspipe</application> to sleep for ten
+seconds before attempting to connect to gpsd.  This is very useful
+when running as a daemon, giving gpsd time to start before
+attempting a connection.</para>
 
 <para>-r causes raw NMEA sentences to be output.</para>
 
@@ -70,6 +83,10 @@ specified serial device with setttings 4800 8N1.  Thus
 <application>gpspipe</application> can be used with -s and -r options
 to emulate a serial port hardwired to a GPS that
 <application>gpsd</application> is managing.</para>
+
+<para>-f option causes the collected data to be written to the
+specified file.  Use of this option is mandatory
+if <application>gpspipe</application> is run as a daemon.</para>
 
 <para>-w causes native <application>gpsd</application>sentences to be
 output.</para>
