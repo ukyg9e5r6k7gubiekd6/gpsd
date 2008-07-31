@@ -247,13 +247,13 @@ int main( int argc, char **argv)
     }
     /*@ +branchstate @*/
 
-    /* Sleep for ten seconds if the user requested it. */
-    if (sleepy)
-      sleep(10);
-
     /* Daemonize if the user requested it. */
     if (daemon)
       daemonize();
+
+    /* Sleep for ten seconds if the user requested it. */
+    if (sleepy)
+      sleep(10);
 
     /* Open the output file if the user requested it.  If the user
        requested '-R', we use the 'b' flag in fopen() to "do the right
