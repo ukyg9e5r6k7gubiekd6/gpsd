@@ -996,9 +996,11 @@ void packet_parse(struct gps_packet_t *lexer)
 		 * 0x43, Velocity Fix, data length 20
 		 * 0x45, Software Version Information, data length 10
 		 * 0x46, Health of Receiver, data length 2
+		 * 0x48, GPS System Messages
 		 * 0x4a, LLA Position, data length 20
 		 * 0x4b, Machine Code Status, data length 3
 		 * 0x56, Velocity Fix (ENU), data length 20
+		 * 0x5a, Raw Measurements
 		 * 0x5c, Satellite Tracking Status, data length 24
 		 * 0x6d, All-In-View Satellite Selection, data length 16+numSV
 		 * 0x82, Differential Position Fix Mode, data length 1
@@ -1028,6 +1030,8 @@ void packet_parse(struct gps_packet_t *lexer)
 		else if ((0x45 == pkt_id) && (0x0e == packetlen))
 		    /* pass */;
 		else if ((0x46 == pkt_id) && (0x06 == packetlen))
+		    /* pass */;
+		else if ((0x48 == pkt_id) && (0x1a == packetlen))
 		    /* pass */;
 		else if ((0x4a == pkt_id) && (0x18 == packetlen))
 		    /* pass */;
