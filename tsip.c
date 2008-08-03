@@ -251,16 +251,16 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->driver.tsip.last_46 = now;
 	u1 = getub(buf,0);			/* Status code */
 	u2 = getub(buf,1);			/* Antenna/Battery */
-        if (u1 != (u_int8_t)0) {
-            session->gpsdata.status = STATUS_NO_FIX;
+	if (u1 != (u_int8_t)0) {
+	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
-        }
+	}
 	else {
 	    if (session->gpsdata.status < STATUS_FIX) {
-                session->gpsdata.status = STATUS_FIX;
-                mask |= STATUS_SET;
-            }
-        }
+		session->gpsdata.status = STATUS_FIX;
+		mask |= STATUS_SET;
+	    }
+	}
 	gpsd_report(LOG_PROG, "Receiver health %02x %02x\n",u1,u2);
 	break;
     case 0x47:		/* Signal Levels for all Satellites */
@@ -385,7 +385,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x59:		/* Status of Satellite Disable or Ignore Health */
 	break;
     case 0x5a:		/* Raw Measurement Data */
-	if (len != 25)
+	if (len != 29)
 	    break;
 	f1 = getbef(buf,5);			/* Signal Level */
 	f2 = getbef(buf,9);			/* Code phase */
@@ -468,7 +468,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->gpsdata.pdop, session->gpsdata.hdop,
 	    session->gpsdata.vdop, session->gpsdata.tdop,
 	    session->gpsdata.gdop);
-        mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET | USED_SET;
+	mask |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET | STATUS_SET | MODE_SET | USED_SET;
 	break;
     case 0x6e:		/* Synchronized Measurements */
 	break;
@@ -655,6 +655,83 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->gpsdata.fix.track += 360.0;
 	    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CYCLE_START_SET; 
 	    break;
+
+
+	case 0xab:		/* Thunderbolt Timing Superpacket */
+	  if (len != 17) {
+	    gpsd_report(4, "pkt 0xab len=%d\n", len);
+	    break;
+	  }
+	  session->driver.tsip.last_41 = now;	/* keep timestamp for request */
+	  f1 = getbeul(buf,1);			/* gpstime */
+	  s1 = getbeuw(buf,5);			/* week */
+	  u1 = getbesw(buf,7);			/* leap seconds */
+
+	  session->driver.tsip.gps_week = s1;
+	  if ((int)u1 > 10) {
+	    session->context->leap_seconds = (int)u1;
+	    session->context->valid |= LEAP_SECOND_VALID;
+
+	    session->gpsdata.fix.time =  session->gpsdata.sentence_time = 
+	      gpstime_to_unix((int)s1, f1) - (double)u1;
+	    mask |= TIME_SET;
+	  }
+
+	  gpsd_report(4, "GPS Time %f %d %d\n", f1, s1, u1);
+	  break;
+
+
+	case 0xac:		/* Thunderbolt Position Superpacket */
+	  if (len != 68) {
+	    gpsd_report(4, "pkt 0xac len=%d\n", len);
+
+	    break;
+	  }
+	  session->gpsdata.fix.latitude  = getbed(buf,36) * RAD_2_DEG;
+	  session->gpsdata.fix.longitude = getbed(buf,44) * RAD_2_DEG;
+	  session->gpsdata.fix.altitude  = getbed(buf,52);
+	  f1 = getbef(buf,16);			/* clock bias */
+
+	  u1 = getub(buf, 12);			/* GPS Decoding Status */
+	  u2 = getub(buf, 1);			/* Reciever Mode */
+	  if (u1 != (u_int8_t)0) {
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    mask |= STATUS_SET;
+	  }
+	  else {
+	    if (session->gpsdata.status < STATUS_FIX) {
+	      session->gpsdata.status = STATUS_FIX;
+	      mask |= STATUS_SET;
+	    }
+	  }
+
+	  /* Decode Fix modes */
+	  switch (u2 & 7) {
+	  case 6:		/* Clock Hold 2D */
+	  case 3:		/* 2D Position Fix */
+	    //session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.fix.mode = MODE_2D;
+	    break;
+	  case 7:		/* Thunderbolt overdetermined clock */
+	  case 4:		/* 3D position Fix */
+	    //session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.fix.mode = MODE_3D;
+	    break;
+	  default:
+	    //session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.fix.mode = MODE_NO_FIX;
+	    break;
+	  }
+
+	  gpsd_report(4, "GPS status=%u mode=%u\n", u1, u2);
+	  gpsd_report(4, "GPS DP LLA %f %f %f\n",session->gpsdata.fix.latitude,
+		      session->gpsdata.fix.longitude,
+		      session->gpsdata.fix.altitude);
+
+	  mask |= LATLON_SET | ALTITUDE_SET | CYCLE_START_SET | STATUS_SET | MODE_SET;
+	  break;
+
+
 	default:
 	    gpsd_report(LOG_WARN,"Unhandled TSIP superpacket type 0x%02x\n",u1);
 	}
@@ -701,9 +778,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     }
 
     if ((now - session->driver.tsip.last_46) > 5) {
-        /* Request Health of Receiver */
-        (void)tsip_write(session->gpsdata.gps_fd, 0x26, buf, 0);
-        session->driver.tsip.last_46 = now;
+	/* Request Health of Receiver */
+	(void)tsip_write(session->gpsdata.gps_fd, 0x26, buf, 0);
+	session->driver.tsip.last_46 = now;
     }
 
     return mask;
