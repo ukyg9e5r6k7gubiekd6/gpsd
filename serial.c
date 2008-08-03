@@ -70,15 +70,15 @@ bool gpsd_set_raw(struct gps_device_t *session)
 {
     (void)cfmakeraw(&session->ttyset);
     if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) < 0) {
- 	gpsd_report(LOG_ERROR,
+	gpsd_report(LOG_ERROR,
 		    "error changing port attributes: %s\n",strerror(errno));
- 	return false;
+	return false;
     }
 
     return true;
 }
 
-void gpsd_set_speed(struct gps_device_t *session, 
+void gpsd_set_speed(struct gps_device_t *session,
 		   speed_t speed, unsigned char parity, unsigned int stopbits)
 {
     speed_t	rate;
@@ -110,43 +110,43 @@ void gpsd_set_speed(struct gps_device_t *session,
 	(void)cfsetispeed(&session->ttyset, rate);
 	(void)cfsetospeed(&session->ttyset, rate);
 	/*@end@*/
- 	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
- 	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
- 	session->ttyset.c_cflag |= (stopbits==2 ? CS7|CSTOPB : CS8);
- 	switch (parity)
- 	{
- 	case 'E':
- 	    session->ttyset.c_iflag |= INPCK;
- 	    session->ttyset.c_cflag |= PARENB;
- 	    break;
- 	case 'O':
- 	    session->ttyset.c_iflag |= INPCK;
- 	    session->ttyset.c_cflag |= PARENB | PARODD;
- 	    break;
- 	}
+	session->ttyset.c_iflag &=~ (PARMRK | INPCK);
+	session->ttyset.c_cflag &=~ (CSIZE | CSTOPB | PARENB | PARODD);
+	session->ttyset.c_cflag |= (stopbits==2 ? CS7|CSTOPB : CS8);
+	switch (parity)
+	{
+	case 'E':
+	    session->ttyset.c_iflag |= INPCK;
+	    session->ttyset.c_cflag |= PARENB;
+	    break;
+	case 'O':
+	    session->ttyset.c_iflag |= INPCK;
+	    session->ttyset.c_cflag |= PARENB | PARODD;
+	    break;
+	}
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
 	    return;
 
 	/*
 	 * Serious black magic begins here.  Getting this code wrong can cause
-	 * failures to lock to a correct speed, and not clean reproducible 
+	 * failures to lock to a correct speed, and not clean reproducible
 	 * failures but flukey hardware- and timing-dependent ones.  So
 	 * be very sure you know what you're doing before hacking it, and
 	 * test thoroughly.
 	 *
-	 * The fundamental problem here is that serial devices take time 
+	 * The fundamental problem here is that serial devices take time
 	 * to settle into a new baud rate after tcsetattr() is issued. Until
 	 * they do so, input will be arbitarily garbled.  Normally this
-	 * is not a big problem, but in our hunt loop the garbling can trash 
-	 * a long enough prefix of each sample to prevent detection of a 
+	 * is not a big problem, but in our hunt loop the garbling can trash
+	 * a long enough prefix of each sample to prevent detection of a
 	 * packet header.  We could address the symptom by making the sample
 	 * size enough larger that subtracting the maximum length of garble
-	 * would still leave a sample longer than the maximum packet size.  
+	 * would still leave a sample longer than the maximum packet size.
 	 * But it's better (and more efficient) to address the disease.
 	 *
-	 * In theory, one might think that not even a tcflush() call would 
+	 * In theory, one might think that not even a tcflush() call would
 	 * be needed, with tcsetattr() delaying its return until the device
-	 * is in a good state.  For simple devices like a 14550 UART that 
+	 * is in a good state.  For simple devices like a 14550 UART that
 	 * have fixed response timings this may even work, if the driver
 	 * writer was smart enough to delay the return by the right number
 	 * of milliseconds after poking the device port(s).
@@ -154,14 +154,14 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * Problems may arise if the driver's timings are off.  Or we may
          * be talking to a USB device like the pl2303 commonly used in GPS
 	 * mice; on these, the change will not happen immediately because
-	 * it has to be sent as a message to the external processor that 
-	 * has to act upon it, and that processor may still have buffered 
+	 * it has to be sent as a message to the external processor that
+	 * has to act upon it, and that processor may still have buffered
 	 * data in its own FIFO.  In this case the expected delay may be
 	 * too large and too variable (depending on the details of how the
 	 * USB device is integrated with its symbiont hardware) to be put
 	 * in the driver.
 	 *
-	 * So, somehow, we have to introduce a delay after tcsatattr() 
+	 * So, somehow, we have to introduce a delay after tcsatattr()
 	 * returns sufficient to allow *any* device to settle.  On the other
 	 * hand, a really long delay will make gpsd device registration
 	 * unpleasantly laggy.
@@ -230,8 +230,8 @@ int gpsd_open(struct gps_device_t *session)
 #endif
 
     if (session->saved_baud != -1) {
-        /*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
-        /*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
+	/*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
+	/*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
@@ -261,7 +261,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag = session->ttyset.c_lflag = (tcflag_t) 0;
 
 	session->baudindex = 0;
-	gpsd_set_speed(session, 
+	gpsd_set_speed(session,
 		       gpsd_get_speed(&session->ttyset_old), 'N', 1);
     }
     return session->gpsdata.gps_fd;
@@ -273,7 +273,7 @@ ssize_t gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
      bool ok;
      if (session->context->readonly)
 	return 0;
-     status = write(session->gpsdata.gps_fd, buf, len);	
+     status = write(session->gpsdata.gps_fd, buf, len);
      ok = (status == (ssize_t)len);
      (void)tcdrain(session->gpsdata.gps_fd);
      /* no test here now, always print as hex */
@@ -307,9 +307,9 @@ bool gpsd_next_hunt_setting(struct gps_device_t *session)
 	    if (session->gpsdata.stopbits++ >= 2)
 		return false;			/* hunt is over, no sync */
 	}
-	gpsd_set_speed(session, 
+	gpsd_set_speed(session,
 		       rates[session->baudindex],
-		       (unsigned char)session->gpsdata.parity, 
+		       (unsigned char)session->gpsdata.parity,
 		       session->gpsdata.stopbits);
     }
 

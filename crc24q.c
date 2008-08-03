@@ -149,7 +149,7 @@ unsigned crc24q_hash(unsigned char *data, int len)
     unsigned crc = 0;
 
     for (i = 0; i < len; i++) {
-	crc = (crc << 8) ^ crc24q[data[i] ^ (unsigned char)(crc>>16)];    
+	crc = (crc << 8) ^ crc24q[data[i] ^ (unsigned char)(crc>>16)];
     }
 
     crc = (crc & 0x00ffffff);

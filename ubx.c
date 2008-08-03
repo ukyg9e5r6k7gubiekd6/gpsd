@@ -149,7 +149,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf, size_t dat
 
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
-    	session->context->leap_seconds = (int)getub(buf, 10);
+	session->context->leap_seconds = (int)getub(buf, 10);
 
     t = gpstime_to_unix((int)session->driver.ubx.gps_week, tow/1000.0) - session->context->leap_seconds;
     session->gpsdata.sentence_time = session->gpsdata.fix.time = t;
@@ -259,11 +259,11 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    break;
 	case UBX_NAV_DOP:
 	    gpsd_report(LOG_PROG, "UBX_NAV_DOP\n");
-            mask = ubx_msg_nav_dop(session, &buf[6], data_len);
+	    mask = ubx_msg_nav_dop(session, &buf[6], data_len);
 	    break;
 	case UBX_NAV_SOL:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
-            mask = ubx_msg_nav_sol(session, &buf[6], data_len);
+	    mask = ubx_msg_nav_sol(session, &buf[6], data_len);
 	    break;
 	case UBX_NAV_POSUTM:
 	    gpsd_report(LOG_IO, "UBX_NAV_POSUTM\n");
@@ -276,7 +276,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    break;
 	case UBX_NAV_TIMEGPS:
 	    gpsd_report(LOG_PROG, "UBX_NAV_TIMEGPS\n");
-            mask = ubx_msg_nav_timegps(session, &buf[6], data_len);
+	    mask = ubx_msg_nav_timegps(session, &buf[6], data_len);
 	    break;
 	case UBX_NAV_TIMEUTC:
 	    gpsd_report(LOG_IO, "UBX_NAV_TIMEUTC\n");
@@ -286,7 +286,7 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, si
 	    break;
 	case UBX_NAV_SVINFO:
 	    gpsd_report(LOG_PROG, "UBX_NAV_SVINFO\n");
-            mask = ubx_msg_nav_svinfo(session, &buf[6], data_len);
+	    mask = ubx_msg_nav_svinfo(session, &buf[6], data_len);
 	    break;
 	case UBX_NAV_DGPS:
 	    gpsd_report(LOG_IO, "UBX_NAV_DGPS\n");

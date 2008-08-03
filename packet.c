@@ -1086,15 +1086,16 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif /* TSIP_ENABLE || GARMIN_ENABLE */
 #ifdef RTCM104V3_ENABLE
 	else if (lexer->state == RTCM3_RECOGNIZED) {
-	    if (crc24q_check(lexer->inbuffer, 
+	    if (crc24q_check(lexer->inbuffer,
 			     lexer->inbufptr-lexer->inbuffer)) {
 		packet_accept(lexer, RTCM3_PACKET);
 		packet_discard(lexer);
 	    } else {
-		gpsd_report(LOG_IO, "RTCM3 data checksum failure, %0x against %02x %02x %02x\n", 
-			    crc24q_hash(lexer->inbuffer, 
+		gpsd_report(LOG_IO, "RTCM3 data checksum failure, "
+			    "%0x against %02x %02x %02x\n",
+			    crc24q_hash(lexer->inbuffer,
 					lexer->inbufptr-lexer->inbuffer - 3),
-			    lexer->inbufptr[-3], 
+			    lexer->inbufptr[-3],
 			    lexer->inbufptr[-2],
 			    lexer->inbufptr[-1]);
 		lexer->state = GROUND_STATE;

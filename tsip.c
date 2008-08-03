@@ -104,9 +104,9 @@ static void tsip_configurator(struct gps_device_t *session, unsigned int seq)
 static void tsip_wrapup(struct gps_device_t *session)
 {
     /* restore saved parity and stopbits when leaving TSIP mode */
-    gpsd_set_speed(session, 
+    gpsd_set_speed(session,
 		   session->gpsdata.baudrate,
-		   (unsigned char)session->driver.tsip.parity, 
+		   (unsigned char)session->driver.tsip.parity,
 		   session->driver.tsip.stopbits);
 }
 
@@ -164,13 +164,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    if (session->packet.outbuffer[++i] == 0x03)
 		break;
 
-	(void)snprintf(buf2+strlen(buf2), 
+	(void)snprintf(buf2+strlen(buf2),
 		      sizeof(buf2)-strlen(buf2),
 		      "%02x", buf[len++] = session->packet.outbuffer[i]);
     }
     /*@ -charint @*/
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "ID%02x", id = (unsigned)session->packet.outbuffer[1]);
 
     gpsd_report(LOG_IO, "TSIP packet id 0x%02x length %d: %s\n",id,len,buf2);
@@ -237,7 +237,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (len != 10)
 	    break;
 	/*@ -formattype @*/
-	(void)snprintf(session->subtype, sizeof(session->subtype), 
+	(void)snprintf(session->subtype, sizeof(session->subtype),
 		       "%d.%d %02d%02d%02d %d.%d %02d%02d%02d",
 		       getub(buf,0),getub(buf,1),getub(buf,4),getub(buf,2),getub(buf,3),
 		       getub(buf,5),getub(buf,6),getub(buf,9),getub(buf,7),getub(buf,8));
@@ -365,7 +365,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if ((session->gpsdata.fix.track = atan2(f1,f2) * RAD_2_DEG) < 0)
 	    session->gpsdata.fix.track += 360.0;
 	gpsd_report(LOG_INF, "GPS Velocity ENU %f %f %f %f %f\n",f1,f2,f3,f4,f5);
-	mask |= SPEED_SET | TRACK_SET | CLIMB_SET; 
+	mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
 	break;
     case 0x57:		/* Information About Last Computed Fix */
 	if (len != 8)
@@ -529,7 +529,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x8f:		/* Super Packet.  Well...  */
 	/*@ +charint @*/
 	(void)snprintf(session->gpsdata.tag+strlen(session->gpsdata.tag),
-		       sizeof(session->gpsdata.tag)-strlen(session->gpsdata.tag), 
+		       sizeof(session->gpsdata.tag)-strlen(session->gpsdata.tag),
 		       "%02x", u1 = getub(buf,0));
 	/*@ -charint @*/
 	switch (u1)				/* sub-packet ID */
@@ -672,7 +672,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->context->leap_seconds = (int)u1;
 	    session->context->valid |= LEAP_SECOND_VALID;
 
-	    session->gpsdata.fix.time =  session->gpsdata.sentence_time = 
+	    session->gpsdata.fix.time =  session->gpsdata.sentence_time =
 	      gpstime_to_unix((int)s1, f1) - (double)u1;
 	    mask |= TIME_SET;
 	  }

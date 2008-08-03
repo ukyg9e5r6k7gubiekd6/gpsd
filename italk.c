@@ -343,11 +343,11 @@ static void italk_ping(struct gps_device_t *session)
 struct gps_type_t italk_binary =
 {
     .type_name      = "iTalk binary",	/* full name of type */
-    .trigger        = NULL,		/* recognize the type */
+    .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
-    .probe_detect   = NULL,        	/* how to detect at startup time */
-    .probe_subtype  = NULL,        	/* initialize the device */
+    .probe_detect   = NULL,		/* how to detect at startup time */
+    .probe_subtype  = NULL,		/* initialize the device */
 #ifdef ALLOW_RECONFIGURE
     .configurator   = italk_configurator,/* configure the device */
 #endif /* ALLOW_RECONFIGURE */
@@ -419,7 +419,7 @@ static void itrax_probe_subtype(struct gps_device_t *session, unsigned int seq)
 /* start it reporting */
 {
     if (seq == 0) {
-	/* initialize GPS clock with current system time */ 
+	/* initialize GPS clock with current system time */
 	struct tm when;
 	double integral, fractional;
 	time_t intfixtime;
@@ -443,7 +443,7 @@ static void itrax_configurator(struct gps_device_t *session, int seq)
 {
     if (seq == 0) {
 	(void)literal_send(session->gpsdata.gps_fd, "$PFST,SYNCMODE,1\r\n");
-	(void)literal_send(session->gpsdata.gps_fd, 
+	(void)literal_send(session->gpsdata.gps_fd,
 		    ITRAX_MODESTRING, session->gpsdata.baudrate);
     }
 }
