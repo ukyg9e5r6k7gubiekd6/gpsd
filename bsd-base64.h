@@ -12,4 +12,4 @@ int b64_pton(char const *src, u_char *target, size_t targsize);
 # define __b64_pton b64_pton
 #endif /* HAVE___B64_NTOP */
 
-#endif /* _BSD_BINRESVPORT_H */
+#endif /* _BSD_BASE64_H */

@@ -1,6 +1,8 @@
 /* $Id$ */
-/* timebase.h -- constants that will require patching over time */
+#ifndef _GPSD_TIMEBASE_H_
+#define _GPSD_TIMEBASE_H_
 
+/* timebase.h -- constants that will require patching over time */
 /*
  * The current (fixed) leap-second correction, and the future Unix
  * time after which to start hunting leap-second corrections from GPS
@@ -31,3 +33,4 @@
 #define CENTURY_BASE	2000
 
 /* timebase.h ends here */
+#endif /* _GPSD_TIMEBASE_H_ */

@@ -1,4 +1,7 @@
 /* $Id$ */
+#ifndef _GPSD_GPSMM_H_
+#define _GPSD_GPSMM_H_
+
 /*
  * Copyright (C) 2005 Alfredo Pironti
  *
@@ -6,9 +9,6 @@
  * file "COPYING" for more information.
  *
  */
-#ifndef _GPSMM_H_
-#define _GPSMM_H_
-
 #include <sys/types.h>
 #include "gps.h" //the C library we are going to wrap
 
@@ -31,4 +31,4 @@ class gpsmm {
 		struct gps_data_t* backup(void) { *to_user=*gps_data; return to_user;}; //return the backup copy
 		pthread_t *handler; //needed to handle the callback registration/deletion
 };
-#endif // _GPSMM_H_
+#endif // _GPSD_GPSMM_H_

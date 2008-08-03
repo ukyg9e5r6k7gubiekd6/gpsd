@@ -1,4 +1,7 @@
 /* $Id$ */
+#ifndef _GPSD_GPSFLASH_H_
+#define _GPSD_GPSFLASH_H_
+
 /*
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  *
@@ -14,9 +17,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-
-#ifndef _GPSFLASH_H_
-#define _GPSFLASH_H_
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -61,4 +61,4 @@ int srecord_send(int pfd, char *fw, size_t len);
 int binary_send(int pfd, char *data, size_t ls);
 bool expect(int pfd, const char *str, size_t len, time_t timeout);
 
-#endif /* _GPSFLASH_H_ */
+#endif /* _GPSD_GPSFLASH_H_ */

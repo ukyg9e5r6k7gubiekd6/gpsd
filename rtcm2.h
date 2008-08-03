@@ -1,4 +1,7 @@
 /* $Id$ */
+#ifndef _GPSD_RTCM2_H_
+#define _GPSD_RTCM2_H_
+
 /*****************************************************************************
 
 This is a decoder for RTCM-104 2.x, an obscure and complicated serial
@@ -491,3 +494,4 @@ struct rtcm2_msg_t {
 
 #endif /* S_SPLINT_S */
 #endif /* BIG ENDIAN */
+#endif /* _GPSD_RTCM2_H_ */

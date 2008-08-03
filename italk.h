@@ -1,4 +1,6 @@
 /* $Id$ */
+#ifndef _GPSD_ITALK_H_
+#define _GPSD_ITALK_H_
 
 /* 0 and 1 are responses to the <?> ping for iTalk and NMEA respectively */
 #define PROTO_ITALK 0
@@ -493,3 +495,4 @@
 #define SACQ_RESERVE			0x0f36
 #define SACQ_SEARCH_CH_NUM_VALID	0x0f96
 
+#endif /* _GPSD_ITALK_H_ */

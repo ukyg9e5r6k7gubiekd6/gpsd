@@ -1,4 +1,7 @@
 /* $Id$ */
+#ifndef _GPSD_BITS_H_
+#define _GPSD_BITS_H_
+
 /*
  * bits.h - extract binary data from message buffer
  *
@@ -16,10 +19,9 @@
  * The use of fixed-length types in the casts enforces these.
  * Both 32- and 64-bit systems with gcc are OK with this set.
  */
+
 #include <stdint.h>
 
-#ifndef BITS_H
-#define BITS_H
 union int_float {
     int32_t i;
     float f;
@@ -29,7 +31,6 @@ union long_double {
     int64_t l;
     double d;
 };
-#endif /* BITS_H */
 
 #ifndef GET_ORIGIN
 #define GET_ORIGIN	0
@@ -85,3 +86,5 @@ union long_double {
 /* bitfield extraction */
 extern unsigned long long ubits(char buf[], unsigned int, unsigned int);
 extern signed long long sbits(char buf[], unsigned int, unsigned int);
+
+#endif /* _GPSD_BITS_H_ */

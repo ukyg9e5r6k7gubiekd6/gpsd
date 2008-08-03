@@ -1,8 +1,8 @@
 /* $Id$ */
-/* gps.h -- interface of the libgps library */
+#ifndef _GPSD_GPS_H_
+#define _GPSD_GPS_H_
 
-#ifndef gps_h
-#define gps_h 1
+/* gps.h -- interface of the libgps library */
 
 #ifdef __cplusplus
 extern "C" {
@@ -631,6 +631,5 @@ extern double wgs84_separation(double, double);
 }  /* End of the 'extern "C"' block */
 #endif
 
-#endif /* gps_h */
 /* gps.h ends here */
-
+#endif /* _GPSD_GPS_H_ */

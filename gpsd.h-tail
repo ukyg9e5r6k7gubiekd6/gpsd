@@ -462,8 +462,7 @@ extern float roundf(float x);
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 
-#endif /* _gpsd_h_ */
-
+#endif /* _GPSD_H_ */
 // Local variables:
 // mode: c
 // end:
