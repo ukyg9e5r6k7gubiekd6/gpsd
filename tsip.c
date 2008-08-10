@@ -674,6 +674,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 	    session->gpsdata.fix.time =  session->gpsdata.sentence_time =
 	      gpstime_to_unix((int)s1, f1) - (double)u1;
+#ifdef NTPSHM_ENABLE
+	    if (session->context->enable_ntpshm)
+		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.075);
+#endif
 	    mask |= TIME_SET;
 	  }
 
