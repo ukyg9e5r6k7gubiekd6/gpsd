@@ -68,7 +68,7 @@ static void daemonize(void) {
   dup(i); /* STDERR */
 
   /* Know thy mask. */
-  umask(027);
+  umask(0x033);
 
   /* Run from a known spot. */
   chdir("/");
