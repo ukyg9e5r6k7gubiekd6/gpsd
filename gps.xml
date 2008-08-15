@@ -60,6 +60,7 @@
       <arg choice='opt'>-speedunits <group choice='req'><arg>mph</arg><arg>kph</arg><arg>knots</arg></group></arg>
       <arg choice='opt'>-altunits <group choice='req'><arg>feet</arg><arg>meters</arg></group></arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
+      <arg choice='opt'>-m </arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group> 
@@ -160,6 +161,14 @@ from printing the raw data. This display can also be toggled with the s
 command.</para>
 
 <para>The <option>-j</option> option is as described for xgps above.</para>
+
+<para>The <option>-m</option> option will display your magnetic
+  heading (as opposed to your true heading).  This is a calculated
+  value, not a measured value, and is subject to a potential error of
+  up to two degrees in the areas for which the calculation is valid
+  (currently Western Europe, Alaska, and Lower 48 in the USA).  The
+  formulas used are those found in the Aviation Formulary
+  v1.43.</para>
 
 <para>Rather than use X resources to determine which units to use, 
 <application>cgps</application> looks at variables in its environment.
