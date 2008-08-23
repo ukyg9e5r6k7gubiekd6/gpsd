@@ -440,7 +440,7 @@ struct rtcm3_t {
 	    unsigned char unicode_units;
 	    unsigned char text[128];
 	} rtcm3_1029;
-    };
+    } rtcmtypes;
 };
 
 typedef /*@unsignedintegraltype@*/ unsigned int gps_mask_t;
