@@ -83,7 +83,7 @@ static void daemonize(void) {
 }
 
 /* open the serial port and set it up */
-static void open_serial(char* device) 
+static void open_serial(char* device)
 {
     /* 
      * Open modem device for reading and writing and not as controlling
@@ -107,7 +107,7 @@ static void open_serial(char* device)
     (void)cfmakeraw(&newtio);
     /* set speed */
     /*@i@*/(void)cfsetospeed(&newtio, BAUDRATE);
-	 
+
     /* Clear the modem line and activate the settings for the port. */
     (void)tcflush(fd_out,TCIFLUSH);
     if (tcsetattr(fd_out,TCSANOW,&newtio) != 0) {
@@ -138,7 +138,7 @@ static void usage(void)
 	);
 }
 
-int main( int argc, char **argv) 
+int main( int argc, char **argv)
 {
     int sock = 0;
     char buf[4096];
@@ -151,9 +151,9 @@ int main( int argc, char **argv)
     long count = -1;
     int option;
     unsigned int vflag = 0, l = 0;
-    FILE * fd;
+    FILE * fp;
 
-    char *arg = NULL, *colon1, *colon2, *device = NULL; 
+    char *arg = NULL, *colon1, *colon2, *device = NULL;
     char *port = DEFAULT_GPSD_PORT, *server = "127.0.0.1";
     char *serialport = NULL;
     char *filename = NULL;
@@ -168,7 +168,7 @@ int main( int argc, char **argv)
 	    (void)strlcat(buf, "r=1;", sizeof(buf));
 	    break;
 	case 'R':
- 	    binary=true;
+	    binary=true;
 	    (void)strlcat(buf, "r=2;", sizeof(buf));
 	    break;
 	case 'd':
@@ -260,15 +260,15 @@ int main( int argc, char **argv)
        requested '-R', we use the 'b' flag in fopen() to "do the right
        thing" in non-linux/unix OSes. */
     if (filename==NULL) {
-      fd = stdout;
+      fp = stdout;
     } else {
       if (binary)
-	fd = fopen(filename,"wb");
+	fp = fopen(filename,"wb");
       else
-	fd = fopen(filename,"w");
+	fp = fopen(filename,"w");
 
-      if (fd < 0) {
-	(void)fprintf(stderr, 
+      if (fp == NULL) {
+	(void)fprintf(stderr,
 		      "gpspipe: unable to open output file:  %s\n",
 		      filename);
 	exit(1);
@@ -282,7 +282,7 @@ int main( int argc, char **argv)
     /*@ -nullpass @*/
     sock = netlib_connectsock( server, port, "tcp");
     if (sock < 0) {
-	(void)fprintf(stderr, 
+	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      server, port, strerror(errno), errno);
 	exit(1);
@@ -292,7 +292,7 @@ int main( int argc, char **argv)
     /* ship the assembled options */
     wrote = write(sock, buf, strlen(buf));
     if ((ssize_t)strlen(buf) != wrote) {
-	(void)fprintf(stderr, "gpspipe: write error, %s(%d)\n", 
+	(void)fprintf(stderr, "gpspipe: write error, %s(%d)\n",
 		      strerror(errno), errno);
 	exit(1);
     }
@@ -318,14 +318,14 @@ int main( int argc, char **argv)
 		    time_t now = time(NULL);
 
 		    new_line = 0;
-		    if (fprintf(fd, "%.24s :", ctime(&now)) <= 0) {
+		    if (fprintf(fp, "%.24s :", ctime(&now)) <= 0) {
 			(void)fprintf(stderr,
 				      "gpspipe: write error, %s(%d)\n",
 				      strerror(errno), errno);
 			exit(1);
 		    }
 		}
-		if (fputc(c, fd) == EOF) {
+		if (fputc(c, fp) == EOF) {
 		    fprintf( stderr, "gpspipe: Write Error, %s(%d)\n",
 			     strerror(errno), errno);
 		    exit(1);
@@ -334,7 +334,7 @@ int main( int argc, char **argv)
 		if (c == '\n') {
 		    if (serialport != NULL) {
 			if (write(fd_out, serbuf, (size_t)j) == -1) {
-			    fprintf(stderr, 
+			    fprintf(stderr,
 				    "gpspipe: Serial port write Error, %s(%d)\n",
 				     strerror(errno), errno);
 			    exit(1);
@@ -344,7 +344,7 @@ int main( int argc, char **argv)
 
 		    new_line = true;
 		    /* flush after every good line */
-		    if (fflush(fd)) {
+		    if (fflush(fp)) {
 			(void)fprintf(stderr, "gpspipe: fflush Error, %s(%d)\n",
 				strerror(errno), errno);
 			exit(1);
@@ -367,14 +367,14 @@ int main( int argc, char **argv)
 #ifdef __UNUSED__
     if (serialport != NULL) {
 	/* Restore the old serial port settings. */
-	if (tcsetattr(fd, TCSANOW, &oldtio) != 0) {
+	if (tcsetattr(fd_out, TCSANOW, &oldtio) != 0) {
 	    (void)fprintf(stderr, "Error restoring serial port settings\n");
 	    exit(1);
 	}
     }
 
     exit(0);
-#endif /* __UNUSED__ */  
+#endif /* __UNUSED__ */
 }
 
 static void spinner (unsigned int v, unsigned int num) {
