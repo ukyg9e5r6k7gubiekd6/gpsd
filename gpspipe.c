@@ -111,7 +111,7 @@ static void open_serial(char* device)
     /* Clear the modem line and activate the settings for the port. */
     (void)tcflush(fd_out,TCIFLUSH);
     if (tcsetattr(fd_out,TCSANOW,&newtio) != 0) {
-	(void)fprintf(stderr, "gspipe: error configuring serial port\n");
+	(void)fprintf(stderr, "gpspipe: error configuring serial port\n");
 	exit(1);
     }
 }
