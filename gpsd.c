@@ -400,7 +400,10 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
 
 static void detach_client(struct subscriber_t *sub)
 {
-    char *c_ip = sock2ip(sub->fd);
+    char *c_ip;
+    if (-1 == sub->fd)
+	return;
+    c_ip = sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (sub%d, fd %d) in detach_client\n",
