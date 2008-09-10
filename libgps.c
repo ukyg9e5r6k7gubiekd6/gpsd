@@ -603,6 +603,7 @@ int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 {
     int res;
     /*@i@*/res = pthread_cancel(*handler);	/* we cancel the whole thread */
+    pthread_join(*handler, NULL);	/* wait for thread to actually terminate */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
 	(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
