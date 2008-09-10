@@ -606,7 +606,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata,
 
       /* Fill in the estimated track error. */
       if (isnan(gpsdata->fix.epd)==0)
-	(void)snprintf(scr, sizeof(scr), "+/- %d deg", (gpsdata->fix.epd));
+	(void)snprintf(scr, sizeof(scr), "+/- %d deg", (int)(gpsdata->fix.epd));
       else
         (void)snprintf(scr, sizeof(scr), "n/a");
       (void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, scr);
