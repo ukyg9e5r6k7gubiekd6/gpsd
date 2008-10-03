@@ -93,7 +93,7 @@ AC_CHECK_HEADERS([netinet/ip.h], [], [],
 #include netinet/ip.h
 #endif
 ]])
-AC_CHECK_HEADERS(termios.h strings.h ncurses.h getopt.h netdb.h)
+AC_CHECK_HEADERS(termios.h strings.h getopt.h netdb.h)
 
 AC_CHECK_FUNCS(round, roundf)
 AC_CHECK_FUNCS(strlcpy)
@@ -245,8 +245,8 @@ dnl End of X11 checks
 AC_CHECK_HEADER(ncurses.h, ac_ncurses='yes', ac_ncurses='no')
 AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = "xyes"])
 AC_CHECK_LIB(ncurses, initscr, ac_ncurses_lib='yes', ac_ncurses_lib='no')
-if test x"$ac_ncurses_lib" = "xyes" -a x"$ac_ncurses" = "xno" ; then
-    AC_MSG_ERROR(I see an ncurses library but no header; you should install the development package);
+if test x"$ac_ncurses_lib" = "xno" -o x"$ac_ncurses" = "xno" ; then
+  AC_MSG_WARN([Not including curses support])
 fi
 
 dnl check for NMEA support
