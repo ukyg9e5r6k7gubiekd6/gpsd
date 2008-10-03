@@ -230,7 +230,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     /*@ -mustfreefresh @*/
     memset((char *) &sin, 0, sizeof(sin));
     sin.sin_family = (sa_family_t)AF_INET;
-    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((in_port_t)pse->s_port));
