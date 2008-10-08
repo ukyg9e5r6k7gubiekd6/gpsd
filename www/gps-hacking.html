@@ -340,6 +340,48 @@ run <code>gpsd</code> in a mode something like this:</p>
 <p>Watching the output for thirty seconds or so will give you a good
 feel for what your GPS has to say, and how often it says it.</p>
 
+<h1>Locking and Loading</h1>
+
+<p>The time required for a GPS to get a fix can vary from under 15
+seconds up to just under 15 minutes (actually, 12.5 plus calculation
+time).  The main factors affecting this latency are (a) whether it has
+an almanac available, (b) whether it has satellite ephemerides
+available, and (c) whether it has recent fix available.  Of course the
+quality of signal at your location matters as well.</p>
+
+<p>If a GPS has not been on for several months, then it has no current
+almanac available.  It was to wait to download one before it can
+generate a fix.  This can take just under 15 mins.  This is sometimes
+called an 'autonomous start', notably in Garmin's documentation.</p>
+
+<p>If a GPS has not been on for a day (four to six hours) then it has no
+valid ephemerides and it must download some before it can generate an
+accurate fix.  This is sometimes called a cold start.  Each satellite
+has its own ephemeris that must be downloaded if a current copy is not
+fresh.  It takes about a minute per sat to get the emphemeris, or a
+minute total if your GPS has multiple receivers as most do now.</p>
+
+<p>GPSes store ephemerides is non-volatile memory, either internal
+flash storage or battery-backed SRAM.  Thus, a GPS does not need to
+have been on continuously to have ephemerides available, but it will
+consider old data to be invalid after a while.  In normal operation
+the GPS accasionally gets refreshes of ephemeris and almanac data
+from the satellites it's listening to.</p>
+
+<p>For both an autonomous start and a cold start if the sat signal is
+momentarily lost, the process will have to restart and yoou'll get
+more delay.</p>
+
+<p>If a GPS has been on recently, in the current location, then this
+is sometimes called 'warm start' or 'hot start' and an accurate fix
+can be generated quite quickly.  This will usually be under a minute
+for a modern GPS, perhaps as low as 15 seconds.</p>
+
+<p>Here's <a href="http://gpsinformation.net/main/warmcold.htm">more
+on this issue</a>.  Details about the satellite signals and there
+timing are <a
+href="http://www.kowoma.de/en/gps/data_composition.htm">here</a>.</p>
+
 <h1>GPSs and Power Management</h1>
 
 <p>Many GPSes are designed to power down or go to standby mode when
