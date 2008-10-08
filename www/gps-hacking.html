@@ -343,7 +343,7 @@ feel for what your GPS has to say, and how often it says it.</p>
 <h1>Locking and Loading</h1>
 
 <p>The time required for a GPS to get a fix can vary from under 15
-seconds up to just under 15 minutes (actually, 12.5 plus calculation
+seconds up to just under 30 minutes (actually, 29 plus calculation
 time).  The main factors affecting this latency are (a) whether it has
 an almanac available, (b) whether it has satellite ephemerides
 available, and (c) whether it has recent fix available.  Of course the
@@ -352,14 +352,20 @@ quality of signal at your location matters as well.</p>
 <p>If a GPS has not been on for several months, then it has no current
 almanac available.  It was to wait to download one before it can
 generate a fix.  This can take just under 15 mins.  This is sometimes
-called an 'autonomous start', notably in Garmin's documentation.</p>
+called an <dfn>autonomous start</dfn>, notably in Garmin's documentation.</p>
 
-<p>If a GPS has not been on for a day (four to six hours) then it has no
-valid ephemerides and it must download some before it can generate an
-accurate fix.  This is sometimes called a cold start.  Each satellite
-has its own ephemeris that must be downloaded if a current copy is not
-fresh.  It takes about a minute per sat to get the emphemeris, or a
-minute total if your GPS has multiple receivers as most do now.</p>
+<p>While the almanac download takes 15 minutes, you have to be there for the
+start of it, otherwise you have to wait for the next cycle. So if you are
+unlucky and just miss the start of one, it could take just under 29 minutes
+to obtain, and on average closer to 22 min.</p>
+
+<p>If a GPS has not been on for a day (four to six hours) then it has
+an almanac but no valid satellite ephemerides, and must download at
+least three before it can generate an accurate fix.  This is sometimes
+called a <dfn>cold start</dfn>.  Each satellite has its own ephemeris that must
+be downloaded if a current copy is not fresh.  It takes about a minute
+per sat to get the emphemeris, or a minute total if your GPS has
+multiple receivers as most do now.</p>
 
 <p>GPSes store ephemerides is non-volatile memory, either internal
 flash storage or battery-backed SRAM.  Thus, a GPS does not need to
@@ -369,13 +375,13 @@ the GPS accasionally gets refreshes of ephemeris and almanac data
 from the satellites it's listening to.</p>
 
 <p>For both an autonomous start and a cold start if the sat signal is
-momentarily lost, the process will have to restart and yoou'll get
+momentarily lost, the process will have to restart and you'll get
 more delay.</p>
 
 <p>If a GPS has been on recently, in the current location, then this
-is sometimes called 'warm start' or 'hot start' and an accurate fix
-can be generated quite quickly.  This will usually be under a minute
-for a modern GPS, perhaps as low as 15 seconds.</p>
+is sometimes called <dfn>warm start</dfn> or <dfn>hot start</dfn> and
+an accurate fix can be generated quite quickly.  This will usually be
+under a minute for a modern GPS, perhaps as low as 15 seconds.</p>
 
 <p>Here's <a href="http://gpsinformation.net/main/warmcold.htm">more
 on this issue</a>.  Details about the satellite signals and there
