@@ -87,7 +87,7 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
-static bool nowait = false;
+static bool nowait = true;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
 static struct gps_context_t context = {
@@ -1301,7 +1301,7 @@ int main(int argc, char *argv[])
 	    gpsd_service = optarg;
 	    break;
 	case 'n':
-	    nowait = true;
+	    nowait = false;
 	    break;
 	case 'P':
 	    pid_file = optarg;

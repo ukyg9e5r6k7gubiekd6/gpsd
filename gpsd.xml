@@ -117,12 +117,11 @@ also be nice.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
-<listitem><para>Don't wait for a client to connect before polling
-whatever GPS is associated with it.  The wait is a feature; many
-serial GPSes go to a standby mode (not drawing power) before the host
-machine asserts DTR, so waiting for the first actual request can save
-valuable battery power on portable equipment.  This option combines
-well with -D2 to enable monitoring of the GPS data stream.</para>
+<listitem><para>Wait for a client to connect before polling whatever
+GPS is associated with it. Some GPSes go to a standby mode (drawing
+less power) before the host machine asserts DTR, so waiting for the
+first actual request can save valuable battery power on portable
+equipment.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
