@@ -1301,7 +1301,7 @@ int main(int argc, char *argv[])
 	    gpsd_service = optarg;
 	    break;
 	case 'n':
-	    nowait = false;
+	    nowait = true;
 	    break;
 	case 'P':
 	    pid_file = optarg;

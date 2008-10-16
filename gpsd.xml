@@ -117,11 +117,13 @@ also be nice.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
-<listitem><para>Wait for a client to connect before polling whatever
-GPS is associated with it. Some GPSes go to a standby mode (drawing
-less power) before the host machine asserts DTR, so waiting for the
-first actual request can save valuable battery power on portable
-equipment.</para>
+<listitem><para>Don't wait for a client to connect before polling
+whatever GPS is associated with it. It is thought that some GPSes
+go to a standby mode (drawing less power) before the host machine
+asserts DTR, so waiting for the first actual request might save
+battery power on portable equipment. This option is deprecated as
+it was found to be confusing; gpsd will now always remain connected
+to the configured receivers.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
