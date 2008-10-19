@@ -147,8 +147,8 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 	mask |= ONLINE_SET;
     } else if (strcmp(field[2], "A")==0) {
 	if (count > 9) {
-	    merge_ddmmyy(field[9], session);
 	    merge_hhmmss(field[1], session);
+	    merge_ddmmyy(field[9], session);
 	    mask |= TIME_SET;
 	    session->gpsdata.fix.time = (double)mkgmtime(&session->driver.nmea.date)+session->driver.nmea.subseconds;
 	    if (!GPS_TIME_EQUAL(session->gpsdata.sentence_time, session->gpsdata.fix.time)) {
