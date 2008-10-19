@@ -90,7 +90,7 @@ file in the source distribution.</p>
 </ol>
 <li><a href="#trouble">Known trouble spots</a></li>
 <ol>
-<li><a href="#y2k">The Y2.1K problem and other calendar issues</a></li>
+<li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
 <li><a href="#hotplug">Hotplug interface problems</a></li>
 <li><a href="#security">Security Issues</a></li>
 </ol>
@@ -234,7 +234,7 @@ systems.</p>
 
 <p>We have made a first step in that direction with the initial pre-alpha
 version of gpsflash, currently supporting SiRF chips only.  A future
-direction of the project is to have gpsflash support firmare upgrades 
+direction of the project is to have gpsflash support firmware upgrades 
 for other chipsets.</p>
 
 <h2 id="monitoring">The GPS/GNSS monitoring tools</h2>
@@ -256,7 +256,7 @@ health, almanacs, and pseudorange information from differential-GPS
 radios and reference stations.  A future direction of the project is
 to support an RTCM104 encoder.</p>
 
-<h1 id="contributions">Contribution guidelines</h1>
+<h1 id="contribution">Contribution guidelines</h1>
 
 <h2 id="languages">Our languages are C, Python, and sh</h2>
 
@@ -279,7 +279,7 @@ may be about to change with the advent of the ctypes module in Python
 2.6 and will keep an open mind, especially to anyone who actually 
 supplies a ctypes Python wrapper for libgpsd.)</p>
 
-<p>We prefer Python anywhere we aren't required to to use C by
+<p>We prefer Python anywhere we aren't required to use C by
 technical constraints &mdash; in particular, for
 test/profiling/logging tools, hotplug agents, and miscellaneous
 scripts.  Again, this is a long-term maintainability issue; there are
@@ -536,7 +536,7 @@ orders of magnitude better than GPSes report).</p>
 timestamps by the fact that the last read of a packet may grab a few
 bytes of the next one.</p>
 
-<p>The distribution lincludes a Python script, <code>gpsprof</code>,
+<p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the Z command to collect profiling information from a
 running GPS instance.  You can use this to measure the latency at each
 stage &mdash; GPS to daemon, daemon to client library &mdash; and to
@@ -552,7 +552,7 @@ and either big-endian or little-endian representation with IEE754
 floating point.</p>
 
 <p>Handling of NMEA devices should not be sensitive to the machine's
-internal numeric representations, However, because the binary-protocol
+internal numeric representations, however, because the binary-protocol
 drivers have to mine bytes out of the incoming packets and mung them
 into fixed-width integer quantities, there could potentially be issues
 on weird machines.  The regression test should spot these.</p>
@@ -630,7 +630,7 @@ disconnected).  This is why <code>gpsd_deactivate()</code> and
 it recognizes them; <code>gpsd_activate()</code> does this by calling
 the <code>.configurator</code> method each time the device is activated.
 <code>gpsd</code> tries to clean up after itself, restoring settings
-that were chaged by the configurator method; this is done by 
+that were changed by the configurator method; this is done by 
 <code>gpsd_deactivate()</code>, which calls the <code>.revert</code>
 method of the driver.</p>
 
@@ -779,7 +779,7 @@ a non-DGPS UERE estimate of 8 (95% confidence).  That's what we use.</p>
 
 <h1 id="trouble">Known trouble spots</h1>
 
-<h2 id="y21k">The Y2.1K problem and other calendar issues</h2>
+<h2 id="y2k1">The Y2.1K problem and other calendar issues</h2>
 
 <p>Because of limitations in various GPS protocols (e.g., they were
 designed by fools who weren't looking past the ends of their noses) 
@@ -796,7 +796,7 @@ not leap-second-corrected UTC.</li>
 </ol>
 
 <p>See the timebase.h file for various constants that will need to
-be tweaked accasionally to cope with these problems.</p>
+be tweaked occasionally to cope with these problems.</p>
 
 <p>Note that gpsd does not rely on the system clock in any way.  This
 is so you can use it to set the system clock.</p>
@@ -916,7 +916,7 @@ value is. Most modern receivers can cold start in 45 seconds given
 good reception; under suboptimal conditions this can take upwards of
 ten minutes. So make a point of getting the time of week right.</p>
 
-<h2 id="invoked">How drivers are invoked</h2>
+<h2 id="invocation">How drivers are invoked</h2>
 
 <p>Drivers are invoked in one of three ways: (1) when the NMEA driver
 notices a trigger string associated with another driver. (2) when the
@@ -943,7 +943,7 @@ to match, but the checksum algorithm would have to be identical.</p>
 
 <p>Incoming characters from the GPS device are gathered into packets
 by an elaborate state machine in packet.c.  The purpose of this 
-state machine is so gpsd can autobaud and recignize GPS types
+state machine is so gpsd can autobaud and recognize GPS types
 automatically. The other way for a driver to be invoked is for 
 the state machine to recognize a special packet type associated
 with the driver.<p>
@@ -968,7 +968,7 @@ to not-a-number. as well).  There is driver-independent code
 that will be responsible for merging that new data into the existing
 fix.  To assist this, the CYCLE_START_SET flag is special.  Set this
 when the driver returns the first timestamped message containing fix
-data in in an update cycle.  (This excludes satellite-picture messages
+data in an update cycle.  (This excludes satellite-picture messages
 and messages about GPS status that don't contain fix data.)</p>
 
 <p>Your packet parser must return field-validity mask bits (using the
@@ -1087,7 +1087,7 @@ the normal 1-second send cycle.</p>
 
 <h2 id="mapping">Mapping the design space</h2>
 
-<p>For NMEA devices, then (and for devices speaking similary mal-designed
+<p>For NMEA devices, then (and for devices speaking similarly mal-designed
 vendor binary protocols) accumulating a complete PVT thus requires
 decisions about the following sorts of actions:</p>
 
@@ -1199,7 +1199,7 @@ report on the last one.</p>
 a SiRF-II or Zodiac chipset that ships only one PVT packet per cycle,
 it collapses to "report then clear per packet".</p>
 
-<p>Here's a disadvantage: the client display, unless its does its own
+<p>Here's a disadvantage: the client display, unless it does its own
 buffering, may flicker annoyingly.  The problem is this: suppose we
 get an altitude in a GGA packet, throw an O response at the client,
 and display it.  This happens to be late in the report cycle.  Start
@@ -1340,7 +1340,7 @@ which are always '?' and some of which are the moral equivalent of
 
 <p>There's a slightly more civilized possibility.  We could add
 optional private-use fields to the O report, the semantics of which
-would be allowed to vary by device.  So, for example, the Humminbird
+would be allowed to vary by device.  So, for example, the Hummingbird
 would return water depth in the first private-use field, while the TNT
 would return heading.  Clients would have to know, based on the device
 type as revealed by I, how to interpret and label the data in the
@@ -1356,7 +1356,7 @@ protocol is about out of namespace.</p>
 version 3 protocol.  At time of writing in late 2006 we can have one
 more command, 'h', and that's it.  After that, extending the set will
 require a new command/response syntax.  Some posts in the dev-list
-arcvhive refer to this as "Version 4", but that is a rev level we may
+archive refer to this as "Version 4", but that is a rev level we may
 or may not reach before GPSD-NG has to be implemented.</p>
 
 <p>Steps towards defining a new syntax have been taken.  The senior
@@ -1366,7 +1366,7 @@ like this:
 <pre>
 &lt;request&gt; ::= &lt;introducer&gt; &lt;commands&gt; &lt;newline&gt;
 
-&lt;command&gt; ::= &lt;command-id&gt;:&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
+&lt;command&gt; ::= &lt;command-id&gt;=&lt;arg1&gt;,&lt;arg2&gt;,&lt;arg3&gt;,...&lt;argn&gt;;
 </pre>
 
 <p>Each request shall begin with an introducer character.  This is
@@ -1382,7 +1382,7 @@ commands. </p>
 
 <p>Each command shall begin with a command identifier.  The command
 identifier shall begin with an alphabetic character and consist of
-alphanumeric characters.  It shall be followed by a equal sign. The 
+alphanumeric characters.  It shall be followed by an equal sign. The 
 52 command identifiers consisting of a single alphabetic are
 reserved equivalents of the existing GPSD commands.</p>
 
@@ -1435,7 +1435,7 @@ Firmware revision 555.55
 
 <p>The purpose of the introducer is to permit old-style and new-style
 commands to be mixed in the same session. Most of the rest of the NG
-dessign is a minimal adaptation to permit command names of more than
+design is a minimal adaptation to permit command names of more than
 one letter.</p>
 
 <p>We need a format that supports multiline data, not so much for
@@ -1512,7 +1512,7 @@ expert, reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.</p>
 
-<h2 id="tai-utc">Stop using a compiled-in UTC-TAI offset</h2>
+<h2 id="utc-tai">Stop using a compiled-in UTC-TAI offset</h2>
 
 <p>Instead, from the hotplug script, we could maintain a local offset file:</p>
 
@@ -1537,7 +1537,7 @@ it's not worth doing.</p>
 <h2 id='subsecond'>Subsecond polling</h2>
 
 <p>gpsd relies on the GPS to periodically send PVT reports to it.  A
-few GPSes have he capability to change their cycle time so they can
+few GPSes have the capability to change their cycle time so they can
 ship reports more often (gpsd 'c' command). These all send in some
 vendor-binary format; no NMEA GPS I've ever seen allows you to set a
 cycle time of less than a second, if only because at 4800bps, a full
@@ -1598,10 +1598,10 @@ can be effectively simulated with a test-load file using gpsfake.  We
 can verify these with high confidence using a mechanical regression test.</p>
 
 <p>B) The problem children: Currently this includes Garmin USB and the
-PPS support.  In the future it must include any other other devices
+PPS support.  In the future it must include any other devices
 that aren't static-testable.  When the correctness of drivers and core
 code in handling is suspect, they have to be live-tested by someone
-with acess to the actual device.</p>
+with access to the actual device.</p>
 
 <p>The goal of our release procedure is simple: prevent functional progressions.
 No device that worked in release N should break in release N+1.  Of course
@@ -1652,7 +1652,7 @@ at state 2 -- you must notify the dev list.</p>
 <pre>
      Red light: total breakage in Garmin USB, partial breakage in Garmin serial
      Blue light: no known blockers, cosmetic problems in xgps
-     Yellow light: Garmins tested successfylly 20 Dec 2007
+     Yellow light: Garmins tested successfully 20 Dec 2007
      Green light: I'm expecting to call freeze in about 10 days
      Freeze: Scheduled release date 1 Feb 2008
 </pre>
@@ -1682,7 +1682,7 @@ done.  Make sure the 'dev' suffix is gone.</dd>
 
 <dt>5. Check timebase.h.</dt>
 <dd>The values for leap-second offset and the start-subframe time
-may need to be adusted.</dd>
+may need to be adjusted.</dd>
 
 <dt>6. Announce on gpsd-dev</dt>
 <dd>Announce that release is imminent and commits should be held off until
