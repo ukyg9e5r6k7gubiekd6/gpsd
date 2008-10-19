@@ -1228,7 +1228,7 @@ static void handle_control(int sfd, char *buf)
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
-	    (void)write(sfd, "ERROR\n", 3);
+	    (void)write(sfd, "ERROR\n", 6);
 	} else {
 	    *eq++ = '\0';
 	    if ((chp = find_device(stash))) {
