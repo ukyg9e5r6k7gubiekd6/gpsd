@@ -272,6 +272,10 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = NMEA_DOLLAR;
 	else if (c == '!')
 	    lexer->state = NMEA_BANG;
+#ifdef UBX_ENABLE
+	else if (c == 0xb5) /* LEA-5H can and will output NMEA and UBX back to back */
+	    lexer->state = UBX_LEADER_1;
+#endif
 	else
 	    lexer->state = GROUND_STATE;
 	break;
@@ -668,6 +672,8 @@ static void nextstate(struct gps_packet_t *lexer,
     case UBX_RECOGNIZED:
 	if (c == 0xb5)
 	    lexer->state = UBX_LEADER_1;
+	else if (c == '$') /* LEA-5H can and will output NMEA and UBX back to back */
+	    lexer->state = NMEA_DOLLAR;
 	else
 	    lexer->state = GROUND_STATE;
 	break;

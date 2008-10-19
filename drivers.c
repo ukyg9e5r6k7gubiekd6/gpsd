@@ -30,6 +30,12 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 }
 #endif
 
+#ifdef UBX_ENABLE
+    extern gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
+    extern bool ubx_write(int fd, unsigned char msg_class, unsigned char msg_id, unsigned char *msg, unsigned short data_len);
+    extern void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
+#endif /* UBX_ENABLE */
+
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
@@ -74,6 +80,14 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 #else
 	return 0;
 #endif /* GARMIN_ENABLE */
+    } else if (session->packet.type == UBX_PACKET) {
+	gpsd_report(LOG_WARN, "UBX packet seen when NMEA expected.\n");
+#ifdef UBX_ENABLE
+	(void)gpsd_switch_driver(session, "uBlox UBX");
+	return ubx_parse(session, session->packet.outbuffer, session->packet.outbuflen);
+#else
+	return 0;
+#endif /* UBX_ENABLE */
     } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;
 #ifdef GARMINTXT_ENABLE
@@ -91,6 +105,13 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	    struct gps_type_t **dp;
 
 	    /* maybe this is a trigger string for a driver we know about? */
+#ifdef UBX_ENABLE
+	    if(strncmp((char *)session->packet.outbuffer, "$GPTXT,01,01,02,MOD", 19)==0) {
+		ubx_catch_model(session, session->packet.outbuffer, session->packet.outbuflen);
+		(void)gpsd_switch_driver(session, "uBlox UBX");
+		return 0;
+	    }
+#endif /* UBX_ENABLE */
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		char	*trigger = (*dp)->trigger;
 
@@ -190,6 +211,12 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	(void)nmea_send(session->gpsdata.gps_fd, "$PASHQ,RID");
 	break;
 #endif /* ASHTECH_ENABLE */
+#ifdef UBX_ENABLE
+    case 7:
+	/* probe for UBX -- query software version */
+	ubx_write(session->gpsdata.gps_fd, 0x0a, 0x04, NULL, 0);
+	break;
+#endif /* UBX_ENABLE */
     default:
 	break;
     }
