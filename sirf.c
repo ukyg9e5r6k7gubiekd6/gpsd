@@ -492,14 +492,16 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	session->gpsdata.fix.longitude = getbesl(buf, 27)*1e-7;
 	/* skip 4 bytes of altitude from ellipsoid */
 	mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
-	session->gpsdata.fix.altitude = getbesl(buf, 31)*1e-2;
+	session->gpsdata.fix.altitude = getbesl(buf, 35)*1e-2;
 	/* skip 1 byte of map datum */
-	session->gpsdata.fix.speed = getbesw(buf, 36)*1e-2;
-	session->gpsdata.fix.track = getbesw(buf, 38)*1e-2;
+	session->gpsdata.fix.speed = getbesw(buf, 40)*1e-2;
+	session->gpsdata.fix.track = getbesw(buf, 42)*1e-2;
 	/* skip 2 bytes of magnetic variation */
-	session->gpsdata.fix.climb = getbesw(buf, 42)*1e-2;
+	session->gpsdata.fix.climb = getbesw(buf, 46)*1e-2;
 	/* HDOP should be available at byte 89, but in 231 it's zero. */
-	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | CYCLE_START_SET;
+	mask |= SPEED_SET | TRACK_SET | CYCLE_START_SET;
+	if (session->gpsdata.fix.mode == MODE_3D)
+	    mask |= ALTITUDE_SET | CLIMB_SET;
 	session->gpsdata.sentence_length = 91;
 	(void)strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
     }
