@@ -414,6 +414,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 {
     unsigned short navtype;
     gps_mask_t mask = 0;
+    unsigned char h;
 
     if (len != 91)
 	return 0;
@@ -451,7 +452,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	    session->gpsdata.fix.mode = MODE_3D;
 	else if (session->gpsdata.status)
 	    session->gpsdata.fix.mode = MODE_2D;
-	gpsd_report(LOG_PROG, "GNI 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n",
+	gpsd_report(LOG_PROG, "GND 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n",
 	    navtype, session->gpsdata.status, session->gpsdata.fix.mode);
 	/*
 	 * UTC is left all zeros in 231 and older firmware versions, 
@@ -499,6 +500,11 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	/* skip 2 bytes of magnetic variation */
 	session->gpsdata.fix.climb = getbesw(buf, 46)*1e-2;
 	/* HDOP should be available at byte 89, but in 231 it's zero. */
+	h = getub(buf, 89);
+	if (h > 0){
+	    session->gpsdata.hdop = h * 0.2;
+	    mask |= HDOP_SET;
+	}
 	mask |= SPEED_SET | TRACK_SET | CYCLE_START_SET;
 	if (session->gpsdata.fix.mode == MODE_3D)
 	    mask |= ALTITUDE_SET | CLIMB_SET;
