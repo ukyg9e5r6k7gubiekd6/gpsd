@@ -87,6 +87,7 @@ static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
 static bool in_background = false;
+static bool listen_global = false;
 static bool nowait = true;
 static jmp_buf restartbuf;
 /*@ -initallelements -nullassign -nullderef @*/
@@ -230,7 +231,10 @@ static int passivesock(char *service, char *protocol, int qlen)
     /*@ -mustfreefresh @*/
     memset((char *) &sin, 0, sizeof(sin));
     sin.sin_family = (sa_family_t)AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (listen_global)
+	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    else
+	sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     if ((pse = getservbyname(service, protocol)))
 	sin.sin_port = htons(ntohs((in_port_t)pse->s_port));
@@ -1274,7 +1278,7 @@ int main(int argc, char *argv[])
     (void)setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
-    while ((option = getopt(argc, argv, "F:D:S:bhNnP:V"
+    while ((option = getopt(argc, argv, "F:D:S:bGhNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
 #endif /* RTCM104_SERVICE */
@@ -1291,6 +1295,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'b':
 	    context.readonly = true;
+	    break;
+	case 'G':
+	    listen_global = true;
 	    break;
 #ifdef RTCM104_SERVICE
 	case 'R':

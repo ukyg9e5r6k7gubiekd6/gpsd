@@ -23,6 +23,7 @@
       <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-b </arg>
+      <arg choice='opt'>-G </arg>
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-N </arg>
       <arg choice='opt'>-h </arg>
@@ -114,6 +115,13 @@ optimal performance, but it also means that
 solution would be for Bluetooth to not be so fragile. A platform
 independent method to identify serial-over-Bluetooth devices would
 also be nice.</para></listitem>
+</varlistentry><term>-G</term>
+<listitem><para>This flag causes <application>gpsd</application> to
+listen on all addresses (INADDR_ANY) rather than just the loopback
+(INADDR_LOOPBACK) address. For the sake of privacy and security, PVT
+information is now private to the local machine until the user makes
+an effort to expose this to the world. Listening on the loopback by
+default is a change from previous behaviour.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-n</term>
@@ -863,6 +871,12 @@ will not attempt to document this interface here.  Read the
 
 </refsect1>
 <refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title>
+
+<para><application>gpsd</application>, if given the -G flag, will
+listen for connections from any reachable host, and then disclose the
+current position.  Before using the -G flag, consider whether you
+consider your computer's location to be sensitive data to be kept
+private or something that you wish to publish.</para>
 
 <para><application>gpsd</application> must start up as root in order
 to open the NTPD shared-memory segment, open its logfile, and create
