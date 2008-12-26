@@ -28,12 +28,12 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
     struct gps_type_t **dp;
 
     gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
-    if (session->device_type != NULL && 
+    if (session->device_type != NULL &&
 	strcmp(session->device_type->type_name, type_name) == 0) {
 #ifdef ALLOW_RECONFIGURE
 	gpsd_report(LOG_PROG, "Reconfiguring for %s...\n", session->device_type->type_name);
-	if (session->enable_reconfigure 
-	    	&& session->device_type->configurator != NULL)
+	if (session->enable_reconfigure
+		&& session->device_type->configurator != NULL)
 	    session->device_type->configurator(session, 0);
 #endif /* ALLOW_RECONFIGURE */
 	return 0;
@@ -48,7 +48,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char* type_name)
 	    if (!session->context->readonly && session->device_type->probe_subtype != NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
-	    if (session->enable_reconfigure 
+	    if (session->enable_reconfigure
 			&& session->device_type->configurator != NULL) {
 		gpsd_report(LOG_PROG, "configuring for %s...\n", session->device_type->type_name);
 		session->device_type->configurator(session, 0);
@@ -106,7 +106,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->shmTimeP = -1;
 # endif /* PPS_ENABLE */
 #ifdef ALLOW_RECONFIGURE
-    if (session->enable_reconfigure 
+    if (session->enable_reconfigure
 	&& session->device_type != NULL
 	&& session->device_type->revert != NULL) {
 	session->device_type->revert(session);
@@ -120,7 +120,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 	    session->device_type->wrapup(session);
     }
 #endif /* NTPSHM_ENABLE */
-    gpsd_report(LOG_INF, "closing GPS=%s (%d)\n", 
+    gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
 		session->gpsdata.gps_device, session->gpsdata.gps_fd);
     (void)gpsd_close(session);
 }
@@ -156,9 +156,9 @@ static void *gpsd_ppsmonitor(void *arg)
 		break;
 	    }
 	} else {
-            gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
-                        ((pps_device==TIOCM_CAR) ? "DCD" : "CTS"), 
-                          session->gpsdata.gps_device, state);
+	    gpsd_report(LOG_RAW, "pps-detect (%s) on %s changed to %d\n",
+			((pps_device==TIOCM_CAR) ? "DCD" : "CTS"),
+			  session->gpsdata.gps_device, state);
 	    laststate = state;
 	    unchanged = 0;
 	}
@@ -179,12 +179,12 @@ static void *gpsd_ppsmonitor(void *arg)
 	     * Some GPS instead output a square wave that is 0.5 Hz and each
 	     * edge denotes the start of a second.
 	     *
-             * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
-             * square wave where the leading edge is the start of a second
+	     * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz 
+	     * square wave where the leading edge is the start of a second
 	     *
 	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to 
 	     * 40ms which gives a 160ms pulse before going high.
-             *
+	     *
 	     */
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	    cycle = timediff(tv, pulse[state]);
@@ -194,21 +194,21 @@ static void *gpsd_ppsmonitor(void *arg)
 	    if (cycle > 199000 && cycle < 201000 ) {
 		/* 5Hz cycle */
 		/* looks like 5hz PPS pulse */
-	        if (duration > 45000)
+		if (duration > 45000)
 		    (void)ntpshm_pps(session, &tv);
 		gpsd_report(LOG_RAW, "5Hz PPS pulse. cycle: %d, duration: %d\n",
 			cycle, duration);
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
-                if (duration > 499000 && duration < 501000 
+		if (duration > 499000 && duration < 501000
 		  && session->driver.nmea.ignore_trailing_edge) {
-                    /* looks like 1.0 Hz square wave, ignore trailing edge */
-                    if (state == 1) {
-                         (void)ntpshm_pps(session, &tv);
-                    }
-                } else {
-                    /* looks like PPS pulse */
-                    (void)ntpshm_pps(session, &tv);
+		    /* looks like 1.0 Hz square wave, ignore trailing edge */
+		    if (state == 1) {
+			 (void)ntpshm_pps(session, &tv);
+		    }
+		} else {
+		    /* looks like PPS pulse */
+		    (void)ntpshm_pps(session, &tv);
 		}
 		gpsd_report(LOG_RAW, "PPS pulse. cycle: %d, duration: %d\n",
 			cycle, duration);
@@ -216,14 +216,14 @@ static void *gpsd_ppsmonitor(void *arg)
 	    } else if (cycle > 1999000 && cycle < 2001000) {
 		/* looks like 0.5 Hz square wave */
 		(void)ntpshm_pps(session, &tv);
-                gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
+		gpsd_report(LOG_RAW, "PPS square wave. cycle: %d, duration: %d\n",
 			cycle, duration);
 	    } else {
-                gpsd_report(LOG_INF, "PPS pulse rejected.  cycle: %d, duration: %d\n",
+		gpsd_report(LOG_INF, "PPS pulse rejected.  cycle: %d, duration: %d\n",
 			cycle, duration);
 	    }
 	} else {
-                gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
+		gpsd_report(LOG_INF, "PPS pulse rejected. No fix.\n");
 	}
 	/*@ -boolint @*/
 
@@ -304,15 +304,15 @@ void ntpd_link_activate(struct gps_device_t *session)
 #ifdef NTPSHM_ENABLE
     /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
     if (session->context->enable_ntpshm)
-        session->shmindex = ntpshm_alloc(session->context);
+	session->shmindex = ntpshm_alloc(session->context);
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     /* If we also have the 1pps capability, allocate a shared-memory segment for
      * the 1pps time data and launch a thread to capture the 1pps transitions
      */
     if (session->shmindex >= 0 && session->context->shmTimePPS)
-        if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
-            /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0)
+	    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
 
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #endif /* NTPSHM_ENABLE */
@@ -322,7 +322,7 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
 {
     static char buf[128];
-    if ((session == NULL) || (session->device_type == NULL) || 
+    if ((session == NULL) || (session->device_type == NULL) ||
 	(session->device_type->type_name == NULL))
 	return "unknown,";
     (void)strlcpy(buf, session->device_type->type_name, sizeof(buf));
@@ -382,14 +382,14 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 	if (isnan(session->gpsdata.fix.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
+	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
 			   "%.2f,M,", session->gpsdata.fix.altitude);
 	if (isnan(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp), 
+	    (void)snprintf(bufp+strlen(bufp), len-strlen(bufp),
 			   "%.3f,M,", session->gpsdata.separation);
-	if (isnan(session->mag_var)) 
+	if (isnan(session->mag_var))
 	    (void)strlcat(bufp, ",", len);
 	else {
 	    (void)snprintf(bufp+strlen(bufp),
@@ -415,12 +415,12 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	tm.tm_mon++;
 	tm.tm_year %= 100;
     }
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
     /*@ -usedef @*/
     (void)snprintf(bufp, len,
 	    "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
-	    tm.tm_hour, 
-	    tm.tm_min, 
+	    tm.tm_hour,
+	    tm.tm_min,
 	    tm.tm_sec,
 	    session->gpsdata.status ? 'A' : 'V',
 	    degtodm(fabs(session->gpsdata.fix.latitude)),
@@ -444,7 +444,7 @@ static void gpsd_binary_fix_dump(struct gps_device_t *session,
     gpsd_transit_fix_dump(session, bufp + strlen(bufp), len - strlen(bufp));
 }
 
-static void gpsd_binary_satellite_dump(struct gps_device_t *session, 
+static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 				char bufp[], size_t len)
 {
     int i;
@@ -454,20 +454,20 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     for( i = 0 ; i < session->gpsdata.satellites; i++ ) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
-            bufp2 = bufp;
+	    bufp2 = bufp;
 	    len -= snprintf(bufp, len,
-		    "$GPGSV,%d,%d,%02d", 
-		    ((session->gpsdata.satellites-1) / 4) + 1, 
+		    "$GPGSV,%d,%d,%02d",
+		    ((session->gpsdata.satellites-1) / 4) + 1,
 		    (i / 4) + 1,
 		    session->gpsdata.satellites);
 	}
 	bufp += strlen(bufp);
 	if (i < session->gpsdata.satellites)
-	    len -= snprintf(bufp, len, 
-		    ",%02d,%02d,%03d,%02d", 
+	    len -= snprintf(bufp, len,
+		    ",%02d,%02d,%03d,%02d",
 		    session->gpsdata.PRN[i],
-		    session->gpsdata.elevation[i], 
-		    session->gpsdata.azimuth[i], 
+		    session->gpsdata.elevation[i],
+		    session->gpsdata.azimuth[i],
 		    session->gpsdata.ss[i]);
 	if (i % 4 == 3 || i == session->gpsdata.satellites-1) {
 	    nmea_add_checksum(bufp2);
@@ -482,8 +482,8 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	(void)strlcpy(bufp, "$PRWIZCH", len);
 	for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	    len -= snprintf(bufp+strlen(bufp), len,
-			  ",%02u,%X", 
-			    session->driver.zodiac.Zs[i], 
+			  ",%02u,%X",
+			    session->driver.zodiac.Zs[i],
 			    session->driver.zodiac.Zv[i] & 0x0f);
 	}
 	nmea_add_checksum(bufp2);
@@ -491,7 +491,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 #endif /* ZODIAC_ENABLE */
 }
 
-static void gpsd_binary_quality_dump(struct gps_device_t *session, 
+static void gpsd_binary_quality_dump(struct gps_device_t *session,
 			      char bufp[], size_t len)
 {
     int	i, j;
@@ -513,13 +513,13 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	(void)strlcpy(bufp, ",", len);
     }
     bufp += strlen(bufp);
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)  
+#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
     if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	(void)strlcat(bufp, ",,,", len);
     else
 	(void)snprintf(bufp, len-strlen(bufp),
-		       "%.1f,%.1f,%.1f*", 
-		       ZEROIZE(session->gpsdata.pdop), 
+		       "%.1f,%.1f,%.1f*",
+		       ZEROIZE(session->gpsdata.pdop),
 		       ZEROIZE(session->gpsdata.hdop),
 		       ZEROIZE(session->gpsdata.vdop));
     nmea_add_checksum(bufp2);
@@ -527,22 +527,22 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     if (finite(session->gpsdata.fix.eph)
 	|| finite(session->gpsdata.fix.epv)
 	|| finite(session->gpsdata.epe)) {
-        /*
+	/*
 	 * Output PGRME only if realistic.  Note: we're converting back to
 	 * our guess about Garmin's confidence units here, make sure this
 	 * stays consistent with the in-conversion in nmea_parse.c!
 	 */
-        (void)snprintf(bufp, len-strlen(bufp),
+	(void)snprintf(bufp, len-strlen(bufp),
 	    "$PGRME,%.2f,M,%.2f,M,%.2f,M",
-	    ZEROIZE(session->gpsdata.fix.eph * (CEP50_SIGMA/GPSD_CONFIDENCE)), 
-	    ZEROIZE(session->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE)), 
+	    ZEROIZE(session->gpsdata.fix.eph * (CEP50_SIGMA/GPSD_CONFIDENCE)),
+	    ZEROIZE(session->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE)),
 	    ZEROIZE(session->gpsdata.epe * (CEP50_SIGMA/GPSD_CONFIDENCE)));
-        nmea_add_checksum(bufp);
+	nmea_add_checksum(bufp);
      }
 #undef ZEROIZE
 }
 
-static void gpsd_binary_dump(struct gps_device_t *session, 
+static void gpsd_binary_dump(struct gps_device_t *session,
 			      char bufp[], size_t len)
 {
     if ((session->gpsdata.set & LATLON_SET) != 0)
@@ -556,16 +556,16 @@ static void gpsd_binary_dump(struct gps_device_t *session,
 #endif /* BINARY_ENABLE */
 
 
-void gpsd_error_model(struct gps_device_t *session, 
+void gpsd_error_model(struct gps_device_t *session,
 		      struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
 {
     /*
      * Now we compute derived quantities.  This is where the tricky error-
-     * modeling stuff goes. Presently we don't know how to derive 
+     * modeling stuff goes. Presently we don't know how to derive
      * time error.
      *
-     * Some drivers set the position-error fields.  Only the Zodiacs 
+     * Some drivers set the position-error fields.  Only the Zodiacs
      * report speed error.  Nobody reports track error or climb error.
      */
 #define UERE_NO_DGPS	8.0	/* meters, 95% confidence */
@@ -607,8 +607,8 @@ void gpsd_error_model(struct gps_device_t *session,
 	if (isnan(fix->eps)!=0)
 	{
 	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
-			&& isnan(oldfix->eph)==0 && isnan(oldfix->eph)==0 
-			&& isnan(oldfix->time)==0 && isnan(oldfix->time)==0 
+			&& isnan(oldfix->eph)==0 && isnan(oldfix->eph)==0
+			&& isnan(oldfix->time)==0 && isnan(oldfix->time)==0
 			&& fix->time > oldfix->time) {
 		double t = fix->time-oldfix->time;
 		double e = oldfix->eph + fix->eph;
@@ -616,8 +616,8 @@ void gpsd_error_model(struct gps_device_t *session,
 	    } else
 		fix->eps = NAN;
 	}
-	if ((fix->mode >= MODE_3D) 
-	    	&& isnan(fix->epc)!=0 && fix->time > oldfix->time) {
+	if ((fix->mode >= MODE_3D)
+		&& isnan(fix->epc)!=0 && fix->time > oldfix->time) {
 	    if (oldfix->mode > MODE_3D && fix->mode > MODE_3D) {
 		double t = fix->time-oldfix->time;
 		double e = oldfix->epv + fix->epv;
@@ -643,7 +643,7 @@ void gpsd_error_model(struct gps_device_t *session,
 	    fix->epd = NAN;
 	    if (oldfix->mode >= MODE_2D) {
 		double adj = earth_distance(
-		    oldfix->latitude, oldfix->longitude, 
+		    oldfix->latitude, oldfix->longitude,
 		    fix->latitude, fix->longitude);
 		if (isnan(adj)==0 && adj > fix->eph) {
 		    double opp = fix->eph;
@@ -680,8 +680,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {
 	newlen = generic_get(session);
 	session->gpsdata.d_xmit_time = timestamp();
-	gpsd_report(LOG_RAW, 
-		    "packet sniff on %s finds type %d\n", 
+	gpsd_report(LOG_RAW,
+		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.gps_device,
 		    session->packet.type);
 	if (session->packet.type > COMMENT_PACKET) {
@@ -720,8 +720,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
  	    case NAVCOM_PACKET:
-         	(void)gpsd_switch_driver(session, "Navcom binary");
-         	break;
+	 	(void)gpsd_switch_driver(session, "Navcom binary");
+	 	break;
 #endif /* NAVCOM_ENABLE */
 #ifdef EVERMORE_ENABLE
 	    case EVERMORE_PACKET:
@@ -755,7 +755,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	return 0;
     } else if (newlen == 0) {		/* no new data */
 	if (session->device_type != NULL && timestamp()>session->gpsdata.online+session->device_type->cycle+1){
-		gpsd_report(LOG_PROG, "GPS on %s is offline (%lf sec since data)\n", 
+		gpsd_report(LOG_PROG, "GPS on %s is offline (%lf sec since data)\n",
 			    session->gpsdata.gps_device,
 			    timestamp() - session->gpsdata.online);
 	    session->gpsdata.online = 0;
@@ -764,17 +764,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    return ONLINE_SET;
     } else if (session->packet.outbuflen == 0) {   /* got new data, but no packet */
 	gpsd_report(LOG_RAW+3, "New data on %s, not yet a packet\n",
-	    		    session->gpsdata.gps_device);
+			    session->gpsdata.gps_device);
 	return ONLINE_SET;
     } else {
 	gps_mask_t received, dopmask = 0;
 	session->gpsdata.online = timestamp();
 
 	gpsd_report(LOG_RAW+3, "Accepted packet on %s.\n",
-	    		    session->gpsdata.gps_device);
+			    session->gpsdata.gps_device);
 	/*@ -nullstate @*/
 	if (session->gpsdata.raw_hook)
-	    session->gpsdata.raw_hook(&session->gpsdata, 
+	    session->gpsdata.raw_hook(&session->gpsdata,
 				      (char *)session->packet.outbuffer,
 				      (size_t)session->packet.outbuflen, 2);
 	/*@ -nullstate @*/
@@ -791,7 +791,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite DOPs reported from the packet we just got.
 	 */
-	if (session->gpsdata.fix.mode > MODE_NO_FIX 
+	if (session->gpsdata.fix.mode > MODE_NO_FIX
 		    && (session->gpsdata.set & SATELLITE_SET) != 0
 		    && session->gpsdata.satellites > 0) {
 	    dopmask = dop(&session->gpsdata);
@@ -830,8 +830,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    // FIXME: Add RTCMV3 handking as well.
 #ifdef RTCM104V2_ENABLE
 	    if ((session->gpsdata.set & RTCM2_SET) != 0)
-		rtcm2_dump(&session->gpsdata.rtcm2, 
-			  buf2+strlen(buf2), 
+		rtcm2_dump(&session->gpsdata.rtcm2,
+			  buf2+strlen(buf2),
 			  (sizeof(buf2)-strlen(buf2)));
 	    else {
 #endif /* RTCM104V2_ENABLE */
@@ -842,10 +842,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 #endif /* RTCM104V2_ENABLE */
 	    if (buf2[0] != '\0') {
-		gpsd_report(LOG_IO, "<= GPS %s: %s", 
-	    		    session->gpsdata.gps_device, buf2);
+		gpsd_report(LOG_IO, "<= GPS %s: %s",
+			    session->gpsdata.gps_device, buf2);
 		if (session->gpsdata.raw_hook)
-		    session->gpsdata.raw_hook(&session->gpsdata, 
+		    session->gpsdata.raw_hook(&session->gpsdata,
 					      buf2, strlen(buf2), 1);
 	    }
 	}
@@ -866,10 +866,10 @@ void gpsd_wrap(struct gps_device_t *session)
 
 void gpsd_zero_satellites(/*@out@*/struct gps_data_t *out)
 {
-    (void)memset(out->PRN,       0, sizeof(out->PRN));
+    (void)memset(out->PRN,	 0, sizeof(out->PRN));
     (void)memset(out->elevation, 0, sizeof(out->elevation));
-    (void)memset(out->azimuth,   0, sizeof(out->azimuth));
-    (void)memset(out->ss,        0, sizeof(out->ss));
+    (void)memset(out->azimuth,	 0, sizeof(out->azimuth));
+    (void)memset(out->ss,	 0, sizeof(out->ss));
     out->satellites = 0;
 }
 
