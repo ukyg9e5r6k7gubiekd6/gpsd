@@ -684,7 +684,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    "packet sniff on %s finds type %d\n", 
 		    session->gpsdata.gps_device,
 		    session->packet.type);
-	if (session->packet.type != BAD_PACKET) {
+	if (session->packet.type > COMMENT_PACKET) {
 	    switch (session->packet.type) {
 	    case COMMENT_PACKET:
 		break;
