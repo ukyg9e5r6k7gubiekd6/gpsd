@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd" [
-<!ENTITY gpsdsock         "/var/run/gpsd.sock">
+<!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd.8'>
 <refmeta>
@@ -17,20 +17,20 @@
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsd</command>  
+  <command>gpsd</command>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
       <!-- arg choice='opt'>-R
       <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-b </arg>
-      <arg choice='opt'>-n </arg>      
-      <arg choice='opt'>-N </arg>      
+      <arg choice='opt'>-n </arg>
+      <arg choice='opt'>-N </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg rep='repeat'>
-           <group><replaceable>source-name</replaceable></group>
+	   <group><replaceable>source-name</replaceable></group>
       </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -86,7 +86,7 @@ from an attached RTCM-104 source to other instances of
 <term>-F</term>
 <listitem>
 <para>Create a control socket for device addition and removal
-commands.  You must specify a valid pathname on your local filesystem; 
+commands.  You must specify a valid pathname on your local filesystem;
 this will be created as a Unix-domain socket to which you can write
 commands that edit the daemon's internal device list.</para>
 </listitem>
@@ -99,7 +99,7 @@ clients.</para></listitem>
 </varlistentry -->
 <varlistentry>
 <term>-S</term>
-<listitem><para>Set TCP/IP port on which to listen for GPSD clients 
+<listitem><para>Set TCP/IP port on which to listen for GPSD clients
 (default is 2947).</para></listitem>
 </varlistentry>
 <varlistentry>
@@ -128,7 +128,7 @@ to the configured receivers.</para>
 </varlistentry>
 <varlistentry>
 <term>-N</term>
-<listitem><para>Don't daemonize; run in foreground.  Also suppresses 
+<listitem><para>Don't daemonize; run in foreground.  Also suppresses
 privilege-dropping.  This switch is mainly useful for debugging.
 Its meaning may change in future versions.</para>
 </listitem>
@@ -160,7 +160,7 @@ to standard error if <application>gpsd</application> is in the foreground
 </varlistentry>
 </variablelist>
 
-<para>Arguments are interpreted as the names of data sources.  
+<para>Arguments are interpreted as the names of data sources.
 Normally, a data source is the name of a local serial device from
 which the daemon may expect GPS data.</para>
 
@@ -246,7 +246,7 @@ than a second; however, if >1 the cycle time must be a whole number. Also
 note that relatively few GPSes have the ability to set sub-second
 cycle times; consult your hardware protocol description to make sure
 this works.</para>
- 
+
 <para>This command will return "C=?" at start of session, before the
 first full packet has been received from the GPS, because the GPS type is
 not yet known. To set up conditions for a real answer, issue it after
@@ -269,7 +269,7 @@ part will vary and may be absent.</para></listitem>
 &mdash; total, horizontal, and vertical (95% confidence
 level).  Note: many GPSes do not supply these numbers.  When the
 GPS does not supply them, <application>gpsd</application> computes
-them from satellite DOP using fixed figures for expected non-DGPS 
+them from satellite DOP using fixed figures for expected non-DGPS
 and DGPS range errors in meters.  A value of '?' for any of these
 numbers should be taken to mean that component of DOP is not available.
 See also the 'q' command.</para>
@@ -309,8 +309,8 @@ client was attached, and multiple devices were not supported.)</para>
 <term>g</term>
 <listitem>
 <para>With =, accepts a single argument which may have either of the
-values 'gps' or 'rtcm104', with case ignored.  This specifies the 
-type of information the client wants and forces a device assignment.  
+values 'gps' or 'rtcm104', with case ignored.  This specifies the
+type of information the client wants and forces a device assignment.
 Without =, forces a device assignment but doesn't force the type.
 This command is optional; if it is not given, the client will be
 bound to whatever available device the daemon finds first.</para>
@@ -354,7 +354,7 @@ displays stale data, but may produce a jittery display; the j=1 setting
 allows stale data but smooths the display.</para>
 
 <para>(At protocol level below 3, there was no J command.  Note, this
-command is experimental and its semantics are subject to change.)</para> 
+command is experimental and its semantics are subject to change.)</para>
 </listitem>
 </varlistentry>
 
@@ -369,7 +369,7 @@ add command via its control socket, and has successfully recognized as
 GPSes.  Because GPSes might be unplugged at any time, the presence of
 a name in this list does not guarantee that the device is available.</para>
 
-<para>(At protocol level 1, there was no K command.)</para> 
+<para>(At protocol level 1, there was no K command.)</para>
 </listitem>
 </varlistentry>
 
@@ -381,7 +381,7 @@ the gpsd version, and a list of accepted request letters.</para></listitem>
 
 <varlistentry>
 <term>m</term>
-<listitem><para>The NMEA mode as "M=%d". 0=no mode value yet seen, 
+<listitem><para>The NMEA mode as "M=%d". 0=no mode value yet seen,
 1=no fix, 2=2D (no altitude), 3=3D (with altitude).</para></listitem>
 </varlistentry>
 
@@ -419,7 +419,7 @@ fractional part of up to .01sec precision.</para></listitem>
 
 <varlistentry>
 <term>time error</term>
-<listitem><para>Estimated timestamp error (%f, seconds, 
+<listitem><para>Estimated timestamp error (%f, seconds,
 95% confidence).</para></listitem>
 </varlistentry>
 
@@ -442,13 +442,13 @@ unreliable.</para></listitem>
 
 <varlistentry>
 <term>horizontal error estimate</term>
-<listitem><para>Horizontal error estimate as in the E report 
+<listitem><para>Horizontal error estimate as in the E report
 (%f, meters).</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>vertical error estimate</term>
-<listitem><para>Vertical error estimate as in the E report 
+<listitem><para>Vertical error estimate as in the E report
 (%f, meters).</para></listitem>
 </varlistentry>
 
@@ -459,13 +459,13 @@ unreliable.</para></listitem>
 
 <varlistentry>
 <term>speed over ground</term>
-<listitem><para>Speed (%f, meters/sec). Note: older versions 
+<listitem><para>Speed (%f, meters/sec). Note: older versions
 of the O command reported this field in knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>climb/sink</term>
-<listitem><para>Vertical velocity as in the U report 
+<listitem><para>Vertical velocity as in the U report
 (%f, meters/sec).</para></listitem>
 </varlistentry>
 
@@ -476,20 +476,20 @@ of the O command reported this field in knots.</para></listitem>
 
 <varlistentry>
 <term>estimated error in speed over ground</term>
-<listitem><para>Error estimate for speed (%f, meters/sec, 95% 
-confidence). Note: older experimental versions of the O command 
+<listitem><para>Error estimate for speed (%f, meters/sec, 95%
+confidence). Note: older experimental versions of the O command
 reported this field in knots.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>estimated error in climb/sink</term>
-<listitem><para>Estimated error for climb/sink 
+<listitem><para>Estimated error for climb/sink
 (%f, meters/sec, 95% confidence).</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term>mode</term>
-<listitem><para>The NMEA mode (%d, ?=no mode value yet seen, 
+<listitem><para>The NMEA mode (%d, ?=no mode value yet seen,
 1=no fix, 2=2D, 3=3D). (This field was not reported at protocol
 levels 2 and lower.)</para></listitem>
 </varlistentry>
@@ -561,7 +561,7 @@ support super-raw mode.</para>
 <varlistentry>
 <term>u</term>
 <listitem><para>Current rate of climb as "U=%f" in meters per second.
-Some GPSes (not SiRF-based) do not report this, in that case 
+Some GPSes (not SiRF-based) do not report this, in that case
 <application>gpsd</application> computes it using the altitude from
 the last fix (if available).</para></listitem>
 </varlistentry>
@@ -583,16 +583,16 @@ mode.</para></listitem>
 
 <varlistentry>
 <term>x</term>
-<listitem><para>Returns "X=0" if the GPS is offline, "X=%f" if 
-online; in the latter case, %f is a timestamp from when the 
+<listitem><para>Returns "X=0" if the GPS is offline, "X=%f" if
+online; in the latter case, %f is a timestamp from when the
 last sentence was received.</para>
 
-<para>(At protocol level 1, the nonzero response was always 1.)</para> 
+<para>(At protocol level 1, the nonzero response was always 1.)</para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term>y</term> 
+<term>y</term>
 <listitem>
 <para>Returns Y=, followed by a sentence tag, followed by a timestamp
 (seconds since the Unix epoch, UTC) and a count not more than 12,
@@ -602,7 +602,7 @@ integer formatted as %d in range 0-359), signal strengths in decibels,
 and 1 or 0 according as the satellite was or was not used in the last
 fix. Each number is followed by one space.</para>
 
-<para>(At protocol level 1, this response had no tag or timestamp.)</para> 
+<para>(At protocol level 1, this response had no tag or timestamp.)</para>
 </listitem>
 </varlistentry>
 
@@ -650,7 +650,7 @@ string "GPSD" followed by the replies. Examples:</para>
 device once per second.  Thus, it can be left running in background
 and survive having a GPS repeatedly unplugged and plugged back
 in.  When it is properly installed along with hotplug notifier
-scripts feeding it device-add commands, <application>gpsd</application> 
+scripts feeding it device-add commands, <application>gpsd</application>
 should require no configuration or user action to find devices.</para>
 
 <para>The recommended mode for clients is watcher mode.  In watcher
@@ -659,7 +659,7 @@ client each time the GPS gets either a fix update or a satellite
 picture, but rather than being raw NMEA the line is a gpsd 'o' or 'y'
 response.  Additionally, watching clients get notifications in the
 form X=0 or X=%f when the online/offline status of the GPS
-changes, and an I response giving the device type when the 
+changes, and an I response giving the device type when the
 user is assigned a device.</para>
 
 <para>Clients should be prepared for the possibility that additional
@@ -676,7 +676,7 @@ enters a wedged or confused state but can be soft-reset by pulling
 down DTR.</para>
 
 </refsect1>
-<refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title> 
+<refsect1 id='devices'><title>GPS DEVICE MANAGEMENT</title>
 
 <para><application>gpsd</application> maintains an internal list of
 GPS devices.  If you specify devices on the command line, the list is
@@ -695,7 +695,7 @@ minus sign ('-') followed by the device name followed by LF or
 CR-LF. Thus, to remove <filename>/dev/foo</filename> from the search
 list. send "-/dev/foo\n".</para>
 
-<para>To send a control string to a specified device, write to the 
+<para>To send a control string to a specified device, write to the
 control socket a '!', followed by the device name, followed by '=',
 followed by the control string.</para>
 
@@ -707,14 +707,14 @@ response to a remove command means the specified device was not in
 ! command means the daemon did not recognize the devicename
 specified.</para>
 
-<para>The control socket is intended for use by hotplug scripts and 
-other device-discovery services.  This control channel is separate 
+<para>The control socket is intended for use by hotplug scripts and
+other device-discovery services.  This control channel is separate
 from the public <application>gpsd</application> service port, and only
 locally accessible, in order to prevent remote denial-of-service and
 spoofing attacks.</para>
 
 </refsect1>
-<refsect1 id='accuracy'><title>ACCURACY</title> 
+<refsect1 id='accuracy'><title>ACCURACY</title>
 
 <para>The base user error (UERE) of GPSes is 8 meters or less at 66%
 confidence, 15 meters or less at 95% confidence.  Actual horizontal
@@ -760,7 +760,7 @@ accuracy limit,the satellites only emit navigation messages at
 messages are normally accurate only to 1/100th of a second.</para>
 
 </refsect1>
-<refsect1 id='ntp'><title>USE WITH NTP</title> 
+<refsect1 id='ntp'><title>USE WITH NTP</title>
 
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
@@ -820,19 +820,19 @@ Garmin GPS-18/USB, 0.420 for the Garmin GPS-18/LVC.</para>
 appear in the output of the command "ntpq -p" (after allowing a couple
 of minutes):</para>
 
-<screen> 
-remote           refid      st t when poll reach  delay    offset  jitter
+<screen>
+remote	   refid      st t when poll reach  delay    offset  jitter
 =========================================================================
-+SHM(0)          .GPS.      0 l   13   16  377    0.000    0.885   0.882
++SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
 </screen>
 
 <para>If you are running PPS then it will look like this:</para>
 
-<screen> 
-remote           refid      st t when poll reach  delay    offset  jitter
+<screen>
+remote	   refid      st t when poll reach  delay    offset  jitter
 =========================================================================
--SHM(0)          .GPS.      0 l   13   16  377    0.000    0.885   0.882
-*SHM(1)          .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
+-SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
+*SHM(1)	  .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
 </screen>
 
 <para>When the value under "reach" remains zero, check that gpsd is
@@ -853,7 +853,7 @@ type of receiver.  Please send us the output of the "ntpq -p" command
 and the make and type of receiver.</para>
 
 </refsect1>
-<refsect1 id='dbus'><title>USE WITH D-BUS</title> 
+<refsect1 id='dbus'><title>USE WITH D-BUS</title>
 
 <para>On operating systems that support D-BUS,
 <application>gpsd</application> can be built to broadcast GPS fixes to
@@ -862,7 +862,7 @@ will not attempt to document this interface here.  Read the
 <application>gpsd</application> source code to learn more.</para>
 
 </refsect1>
-<refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title> 
+<refsect1 id='security'><title>SECURITY AND PERMISSIONS ISSUES</title>
 
 <para><application>gpsd</application> must start up as root in order
 to open the NTPD shared-memory segment, open its logfile, and create
@@ -899,7 +899,7 @@ Clients with an assigned device in polling mode are subject to a
 longer timeout (15 minutes).</para>
 
 </refsect1>
-<refsect1 id='limitations'><title>LIMITATIONS</title> 
+<refsect1 id='limitations'><title>LIMITATIONS</title>
 
 <para>If multiple NMEA talkers are feeding RMC, GLL, and GGA sentences
 to the same serial device (possible with an RS422 adapter hooked up to
@@ -957,8 +957,8 @@ exist.</para>
 <listitem>
 <para>A text file listing DGPSIP servers worldwide.  If no DGPSIP
 server is specified at startup (via the -d option)
-<application>gpsd</application> will look here to find the 
-nearest one.  Each line has three space-separated fields: 
+<application>gpsd</application> will look here to find the
+nearest one.  Each line has three space-separated fields:
 latitude (decimal degrees), longitude (decimal degrees) and
 a server name (optionally followed by a colon and a port number).
 Text following # on a line is ignored.  Blank lines are ignored.</para>
@@ -968,7 +968,7 @@ Text following # on a line is ignored.  Blank lines are ignored.</para>
 </variablelist>
 
 </refsect1>
-<refsect1 id='standards'><title>APPLICABLE STANDARDS</title> 
+<refsect1 id='standards'><title>APPLICABLE STANDARDS</title>
 
 <para>The official NMEA protocol standard is available on paper from
 the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
@@ -1010,7 +1010,7 @@ Version 3</citetitle> RTCM Paper 177-2006-SC104-STD.</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHORS</title> 
+<refsect1 id='maintainer'><title>AUTHORS</title>
 
 <para>Remco Treffcorn, Derrick Brashear, Russ Nelson, Eric S. Raymond,
 Chris Kuethe.  This manual page by Eric S. Raymond
