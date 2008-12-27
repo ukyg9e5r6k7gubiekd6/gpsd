@@ -115,7 +115,9 @@ optimal performance, but it also means that
 solution would be for Bluetooth to not be so fragile. A platform
 independent method to identify serial-over-Bluetooth devices would
 also be nice.</para></listitem>
-</varlistentry><term>-G</term>
+</varlistentry>
+<varlistentry>
+<term>-G</term>
 <listitem><para>This flag causes <application>gpsd</application> to
 listen on all addresses (INADDR_ANY) rather than just the loopback
 (INADDR_LOOPBACK) address. For the sake of privacy and security, PVT
