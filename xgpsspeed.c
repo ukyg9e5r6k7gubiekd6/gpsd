@@ -9,10 +9,9 @@
 #include <math.h>
 #include <X11/Intrinsic.h>
 #include <X11/Shell.h>
+#include <X11/StringDefs.h>
 #include <X11/Xaw/Label.h>
 #include <X11/Xaw/Paned.h>
-#include <Xm/Xm.h>
-#include <Xm/XmStrDefs.h>
 #include <Tachometer.h>
 
 #include "gpsd_config.h"
@@ -63,10 +62,10 @@ static char *get_resource(Widget w, char *name, char *default_value)
   /*@ -observertrans -statictrans -immediatetrans -compdestroy -nullpass @*/
   xtr.resource_name = name;
   xtr.resource_class = "AnyClass";
-  xtr.resource_type = XmRString;
+  xtr.resource_type = XtRString;
   xtr.resource_size = (Cardinal)sizeof(String);
   xtr.resource_offset = 0;
-  xtr.default_type = XmRImmediate;
+  xtr.default_type = XtRImmediate;
   xtr.default_addr = default_value;
   XtGetApplicationResources(w, &value, &xtr, 1, NULL, 0);
   if (value) return value;
