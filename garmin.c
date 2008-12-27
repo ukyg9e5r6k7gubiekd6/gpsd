@@ -503,12 +503,13 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id
 	}
 	break;
     default:
-	gpsd_report(LOG_WARN, "Unknown packet id: %#02x, Sz: %#02x, pkt:%s\n"
-		    , pkt_id, pkt_len, gpsd_hexdump(buf, (size_t)pkt_len));
+	gpsd_report(LOG_WARN, "Unknown packet id: %#02x, Sz: %#02x, pkt:%s\n",
+	    pkt_id, pkt_len,
+	    gpsd_hexdump_wrapper(buf, (size_t)pkt_len, LOG_WARN));
 	break;
     }
-    gpsd_report(LOG_IO, "PrintSERPacket(, %#02x, %#02x, ) = %#02x\n"
-	, pkt_id, pkt_len, mask);
+    gpsd_report(LOG_IO, "PrintSERPacket(, %#02x, %#02x, ) = %#02x\n",
+	pkt_id, pkt_len, mask);
     return mask;
 }
 
@@ -638,8 +639,9 @@ static void Build_Send_USB_Packet( struct gps_device_t *session,
 	}
 
 #if 0
-        gpsd_report(LOG_IO, "SendPacket(), writing %d bytes: %s\n"
-		, theBytesToWrite, gpsd_hexdump(thePacket, theBytesToWrite));
+        gpsd_report(LOG_IO, "SendPacket(), writing %d bytes: %s\n",
+	    theBytesToWrite,
+	    gpsd_hexdump_wrapper(thePacket, theBytesToWrite, LOG_IO));
 #endif
         (void)PrintUSBPacket ( session,  thePacket);
 
@@ -705,8 +707,9 @@ static void Build_Send_SER_Packet( struct gps_device_t *session,
 	*buffer++ = (uint8_t)ETX;
 
 #if 1
-        gpsd_report(LOG_IO, "SendPacket(), writing %d bytes: %s\n"
-		    , theBytesToWrite, gpsd_hexdump(thePacket, (size_t)theBytesToWrite));
+        gpsd_report(LOG_IO, "SendPacket(), writing %d bytes: %s\n",
+	    theBytesToWrite,
+	    gpsd_hexdump_wrapper(thePacket, (size_t)theBytesToWrite, LOG_IO));
 #endif
         (void)PrintSERPacket ( session,  
 			       (unsigned char)buffer0[1], 
@@ -1075,8 +1078,9 @@ static int GetPacket (struct gps_device_t *session )
 	}
 	gpsd_report(LOG_RAW, "got %d bytes\n", theBytesReturned);
 #if 1
-        gpsd_report(LOG_IO, "getPacket(), got %d bytes: %s\n"
-		, theBytesReturned, gpsd_hexdump(thePacket, theBytesReturned));
+        gpsd_report(LOG_IO, "getPacket(), got %d bytes: %s\n",
+	    theBytesReturned,
+	    gpsd_hexdump_wrapper(thePacket, theBytesReturned, LOG_IO));
 #endif
 
 	session->driver.garmin.BufferLen += theBytesReturned;

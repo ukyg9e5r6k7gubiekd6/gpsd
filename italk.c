@@ -170,7 +170,7 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
 
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
-	       msg[0], gpsd_hexdump(msg, msglen));
+	msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
@@ -192,7 +192,8 @@ static gps_mask_t italk_parse(struct gps_device_t *session, unsigned char *buf, 
 
     type = (uint)getub(buf, 4);
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n", type, len, gpsd_hexdump(buf, len));
+    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %d: %s\n",
+	type, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
 
     switch (type)
     {

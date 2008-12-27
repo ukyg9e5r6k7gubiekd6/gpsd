@@ -86,6 +86,7 @@
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
+extern int gpsd_hexdump_level;
 static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = true;
@@ -1278,6 +1279,7 @@ int main(int argc, char *argv[])
     (void)setlocale(LC_NUMERIC, "C");
 #endif
     debuglevel = 0;
+    gpsd_hexdump_level = 0;
     while ((option = getopt(argc, argv, "F:D:S:bGhNnP:V"
 #ifdef RTCM104_SERVICE
 			    "R:"
@@ -1286,6 +1288,7 @@ int main(int argc, char *argv[])
 	switch (option) {
 	case 'D':
 	    debuglevel = (int) strtol(optarg, 0, 0);
+	    gpsd_hexdump_level = debuglevel;
 	    break;
 	case 'F':
 	    control_socket = optarg;

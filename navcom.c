@@ -83,7 +83,8 @@ static u_int8_t checksum(unsigned char *buf, size_t len)
 
 static bool navcom_send_cmd(struct gps_device_t *session, unsigned char *cmd, size_t len)
 {
-    gpsd_report(LOG_RAW, "Navcom: command dump: %s\n", gpsd_hexdump(cmd, len));
+    gpsd_report(LOG_RAW, "Navcom: command dump: %s\n",
+	gpsd_hexdump_wrapper(cmd, len, LOG_RAW));
     return (gpsd_write(session, cmd, len) == (ssize_t)len);
 }
 
@@ -1160,7 +1161,7 @@ gps_mask_t navcom_parse(struct gps_device_t *session, unsigned char *buf, size_t
    
     /*@ -usedef -compdef @*/
     gpsd_report(LOG_RAW, "Navcom: packet type 0x%02x, length %d: %s\n",
-        cmd_id, msg_len, gpsd_hexdump(buf, len));
+	cmd_id, msg_len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),

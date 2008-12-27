@@ -775,9 +775,9 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 {
     rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->packet.isgps.buf);
     gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words: %s\n",
-		session->gpsdata.rtcm2.type,
-		session->gpsdata.rtcm2.length+2,
-		gpsd_hexdump(session->packet.isgps.buf, (session->gpsdata.rtcm2.length+2)*sizeof(isgps30bits_t)));
+	session->gpsdata.rtcm2.type, session->gpsdata.rtcm2.length+2,
+	gpsd_hexdump_wrapper(session->packet.isgps.buf,
+	    (session->gpsdata.rtcm2.length+2)*sizeof(isgps30bits_t), LOG_RAW));
     return RTCM2_SET;
 }
 
@@ -818,9 +818,8 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
     uint type = getbeuw(session->packet.inbuffer, 3) >> 4;
 
     gpsd_report(LOG_RAW, "RTCM 3.x packet type %d length %d words: %s\n",
-		type, length,
-		gpsd_hexdump(session->packet.inbuffer, 
-			     (size_t)(session->gpsdata.rtcm3.length)));
+	type, length, gpsd_hexdump_wrapper(session->packet.inbuffer,
+	    (size_t)(session->gpsdata.rtcm3.length), LOG_RAW));
     return RTCM3_SET;
 }
 

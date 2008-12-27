@@ -117,7 +117,8 @@ bool sirf_write(int fd, unsigned char *msg) {
    msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
    msg[len + 5] = (unsigned char)( crc & 0x00ff);
 
-   gpsd_report(LOG_IO, "Writing SiRF control type %02x:%s\n", msg[4], gpsd_hexdump(msg, len+8));
+   gpsd_report(LOG_IO, "Writing SiRF control type %02x:%s\n", msg[4],
+       gpsd_hexdump_wrapper(msg, len+8, LOG_IO));
    ok = (write(fd, msg, len+8) == (ssize_t)(len+8));
    (void)tcdrain(fd);
    return(ok);
@@ -647,8 +648,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     buf += 4;
     len -= 8;
-    gpsd_report(LOG_RAW, "Raw SiRF packet type 0x%02x length %d: %s\n", buf[0],len,
-		gpsd_hexdump(buf, len));
+    gpsd_report(LOG_RAW, "Raw SiRF packet type 0x%02x length %d: %s\n",
+	buf[0],len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
 
@@ -706,15 +707,18 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x0e:		/* Almanac Data */
-	gpsd_report(LOG_PROG, "ALM  0x0e: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "ALM  0x0e: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x0f:		/* Ephemeris Data */
-	gpsd_report(LOG_PROG, "EPH  0x0f: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "EPH  0x0f: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x11:		/* Differential Corrections */
-	gpsd_report(LOG_PROG, "DIFF 0x11: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "DIFF 0x11: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x12:		/* OK To Send */
@@ -771,19 +775,23 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     case 0x1c:		/* Navigation Library Measurement Data */
-	gpsd_report(LOG_PROG, "NLMD 0x1c: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "NLMD 0x1c: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x1d:		/* Navigation Library DGPS Data */
-	gpsd_report(LOG_PROG, "NLDG 0x1d: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "NLDG 0x1d: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x1e:		/* Navigation Library SV State Data */
-	gpsd_report(LOG_PROG, "NLSV 0x1e: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "NLSV 0x1e: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x1f:		/* Navigation Library Initialization Data */
-	gpsd_report(LOG_PROG, "NLID 0x1f: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "NLID 0x1f: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0x29:		/* Geodetic Navigation Information */
@@ -820,7 +828,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return sirf_msg_ublox(session, buf, len);
 
     case 0x80:		/* Initialize Data Source */
-	gpsd_report(LOG_PROG, "INIT 0x80: %s\n", gpsd_hexdump(buf, len));
+	gpsd_report(LOG_PROG, "INIT 0x80: %s\n",
+	    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
 	return 0;
 
     case 0xe1:		/* Development statistics messages */
@@ -831,7 +840,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     default:
 	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %d: %s\n",
-		    buf[0], len, gpsd_hexdump(buf, len));
+	    buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;
     }
 }

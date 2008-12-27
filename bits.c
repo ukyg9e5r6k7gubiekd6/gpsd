@@ -31,7 +31,8 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
 	fld |= (unsigned char)buf[i];
     }
 #ifdef DEBUG
-    printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width, gpsd_hexdump(buf, 12), fld, fld);
+    printf("Extracting %d:%d from %s: segment 0x%llx = %lld\n", start, width,
+	   gpsd_hexdump(buf, 12), fld, fld);
 #endif /* DEBUG */
 
     end = (start + width) % BITS_PER_BYTE;

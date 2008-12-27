@@ -277,7 +277,8 @@ ssize_t gpsd_write(struct gps_device_t *session, void const *buf, size_t len)
      ok = (status == (ssize_t)len);
      (void)tcdrain(session->gpsdata.gps_fd);
      /* no test here now, always print as hex */
-     gpsd_report(LOG_IO, "=> GPS: %s%s\n", gpsd_hexdump(buf, len), ok?"":" FAILED");
+     gpsd_report(LOG_IO, "=> GPS: %s%s\n",
+	 gpsd_hexdump_wrapper(buf, len, LOG_IO), ok?"":" FAILED");
      return status;
 }
 

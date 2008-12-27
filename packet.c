@@ -524,7 +524,8 @@ static void nextstate(struct gps_packet_t *lexer,
 	    gpsd_report(LOG_INF, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
 		    lexer->inbuffer[3], csum, c);
 	    gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
-			gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
+		gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
+		     LOG_RAW));
 	    lexer->state = GROUND_STATE;
 	    break;
 	    }
@@ -826,8 +827,8 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 	lexer->type = packet_type;
 #ifdef STATE_DEBUG
 	gpsd_report(LOG_RAW+1, "Packet type %d accepted %d = %s\n",
-		packet_type, packetlen,
-		gpsd_hexdump(lexer->outbuffer, lexer->outbuflen));
+	    packet_type, packetlen,
+	    gpsd_hexdump_wrapper(lexer->outbuffer, lexer->outbuflen, LOG_RAW));
 #endif /* STATE_DEBUG */
     } else {
 	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %d\n",
@@ -846,8 +847,8 @@ static void packet_discard(struct gps_packet_t *lexer)
     lexer->inbuflen = remaining;
 #ifdef STATE_DEBUG
     gpsd_report(LOG_RAW+1, "Packet discard of %d, chars remaining is %d = %s\n",
-		discard, remaining,
-		gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
+	discard, remaining,
+	gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen, LOG_RAW));
 #endif /* STATE_DEBUG */
 }
 
@@ -858,8 +859,8 @@ static void character_discard(struct gps_packet_t *lexer)
     lexer->inbufptr = lexer->inbuffer;
 #ifdef STATE_DEBUG
     gpsd_report(LOG_RAW+1, "Character discarded, buffer %d chars = %s\n",
-		lexer->inbuflen,
-		gpsd_hexdump(lexer->inbuffer, lexer->inbuflen));
+	lexer->inbuflen,
+	gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen, LOG_RAW));
 #endif /* STATE_DEBUG */
 }
 
@@ -986,7 +987,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		}
 		/* Debug
 		   gpsd_report(LOG_IO, "Garmin n= %#02x\n %s\n", n,
-		   gpsd_hexdump(lexer->inbuffer, packetlen));
+		   gpsd_hexdump_wrapper(lexer->inbuffer, packetlen, LOG_IO));
 		*/
 		packet_accept(lexer, GARMIN_PACKET);
 		packet_discard(lexer);
@@ -1296,11 +1297,10 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	}
     } else {
 #ifdef STATE_DEBUG
-	gpsd_report(LOG_RAW+1, "Read %d chars to buffer offset %d (total %d): %s\n",
-		    recvd,
-		    lexer->inbuflen,
-		    lexer->inbuflen+recvd,
-		    gpsd_hexdump(lexer->inbufptr, (size_t)recvd));
+	gpsd_report(LOG_RAW+1,
+	    "Read %d chars to buffer offset %d (total %d): %s\n",
+	    recvd, lexer->inbuflen, lexer->inbuflen+recvd,
+	    gpsd_hexdump_wrapper(lexer->inbufptr, (size_t)recvd, LOG_RAW+1));
 #endif /* STATE_DEBUG */
 	lexer->inbuflen += recvd;
     }

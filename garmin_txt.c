@@ -268,8 +268,11 @@ gps_mask_t garmintxt_parse(struct gps_device_t *session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %d\n", session->packet.outbuflen);
-    gpsd_report(LOG_RAW, "%s\n", gpsd_hexdump(session->packet.outbuffer, session->packet.outbuflen));
+    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %d\n",
+	session->packet.outbuflen);
+    gpsd_report(LOG_RAW, "%s\n",
+	gpsd_hexdump_wrapper(session->packet.outbuffer,
+	    session->packet.outbuflen, LOG_RAW));
 
     if (session->packet.outbuflen < 56) {
         gpsd_report(LOG_WARN, "Message too short, rejected.\n");

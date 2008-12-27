@@ -192,7 +192,7 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen)
 
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing proto control type %02x:%s\n", 
-	       msg[0], gpsd_hexdump(msg, msglen));
+	       msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
    ok = (write(fd, msg, msglen) == (ssize_t)msglen);
    (void)tcdrain(fd);
    return(ok);
@@ -232,7 +232,7 @@ gps_mask_t proto_dispatch(struct gps_device_t *session, unsigned char *buf, size
     default:
 	/* XXX This gets noisy in a hurry. Change once your driver works */
 	gpsd_report(LOG_WARN, "unknown packet id %d length %d: %s\n",
-	    type, len, gpsd_hexdump(buf, len));
+	    type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;
     }
 }
