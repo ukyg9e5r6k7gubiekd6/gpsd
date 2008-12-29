@@ -47,3 +47,7 @@ horizon, 13 are tracking, and at least 12 are actually used in a solution.
 gpsdlcdd.c is a lcdproc client for gpsd that turns your car computer
 into a rudimentary GPS receiver (provided you have at least a 4x40 LCD
 screen plugged in and configured to work with lcdproc).
+
+lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
+tangential plane) coordinates into the earth-centered-earth-fixed frame. If
+invoked as "ecef2lla" it will transform coordinates in the opposite manner.
