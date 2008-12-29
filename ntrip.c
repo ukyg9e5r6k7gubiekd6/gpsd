@@ -283,7 +283,7 @@ static int ntrip_stream_probe(const char *caster,
     char buf[BUFSIZ];
 
     if ((dsock = netlib_connectsock(caster, port, "tcp")) < 0) {
-	    printf("error %d\n", dsock);
+	    printf("ntrip stream connect error %d\n", dsock);
 	    return -1;
     }
     (void)snprintf(buf, sizeof(buf),
@@ -292,7 +292,10 @@ static int ntrip_stream_probe(const char *caster,
 		   "Connection: close\r\n"
 		   "\r\n",
 		   VERSION);
-    (void)write(dsock, buf, strlen(buf));
+    if (write(dsock, buf, strlen(buf)) != strlen(buf)) {
+	    printf("ntrip stream write error %d\n", dsock);
+	    return -1;
+    }
     ret = ntrip_sourcetable_parse(dsock, buf, (ssize_t)sizeof(buf), stream, keep);
     (void)close(dsock);
     return ret;
@@ -347,7 +350,10 @@ static int ntrip_stream_open(const char *caster,
 		   "Connection: close\r\n"
 		   "\r\n",
 		   stream->mountpoint, VERSION, authstr);
-    (void)write(context->dsock, buf, strlen(buf));
+    if (write(context->dsock, buf, strlen(buf)) != strlen(buf)) {
+	    printf("ntrip stream write error on %d\n", context->dsock);
+	    return -1;
+    }
 
     memset(buf, 0, sizeof(buf));
     if (read(context->dsock, buf, sizeof(buf) - 1) < 0)
@@ -457,8 +463,10 @@ void ntrip_report(struct gps_device_t *session)
 	if (session->context->dsock > -1) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(session, buf, sizeof(buf));
-	    (void)write(session->context->dsock, buf, strlen(buf));
-	    gpsd_report(LOG_IO, "=> dgps %s", buf);
+	    if (write(session->context->dsock, buf, strlen(buf)) == strlen(buf))
+		gpsd_report(LOG_IO, "=> dgps %s", buf);
+	    else
+		gpsd_report(LOG_IO, "ntrip report write failed", buf);
 	}
     }
 }

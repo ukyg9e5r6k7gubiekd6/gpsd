@@ -69,8 +69,9 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
 
     if (session->gpsdata.gps_fd != -1) {
 #ifdef ALLOW_RECONFIGURE
-	(void)end_write(session->gpsdata.gps_fd, &h, sizeof(h));
-	(void)end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen);
+	if (end_write(session->gpsdata.gps_fd, &h, sizeof(h)) != sizeof(h)
+	    && end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen) == sizeof(unsigned short) * dlen)
+	    gpsd_report(LOG_RAW, "Reconfigure write failed\n");
 #endif /* ALLOW_RECONFIGURE */
     }
 

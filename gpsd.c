@@ -81,6 +81,12 @@
 
 #define QLEN			5
 
+/* 
+ * If ntpshm is enabled, we renice the process to this priority level.
+ * For precise timekeeping increase priority.
+ */
+#define NICEVAL	-10
+
 #define sub_index(s) (s - subscribers)
 
 static fd_set all_fds;
@@ -140,7 +146,8 @@ static int daemonize(void)
 
     if (setsid() == -1)
 	return -1;
-    (void)chdir("/");
+    if (chdir("/") == -1)
+	return -1;
     /*@ -nullpass @*/
     if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
 	(void)dup2(fd, STDIN_FILENO);
@@ -1392,7 +1399,9 @@ int main(int argc, char *argv[])
 
 #ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
-	(void)nice(-10);		/* for precise timekeeping increase priority */
+	errno = 0;
+	if (nice(NICEVAL) != -1 || errno == 0)
+	    gpsd_report (2, "Priority sertting failed.\n");
 	(void)ntpshm_init(&context, nowait);
     } else {
 	gpsd_report (2, "Unable to start ntpshm.  gpsd must run as root.\n");

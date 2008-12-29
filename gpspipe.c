@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <assert.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
 
@@ -63,15 +64,15 @@ static void daemonize(void) {
     close(i);
 
   /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
-  i=open("/dev/null",O_RDWR); /* STDIN */
-  dup(i); /* STDOUT */
-  dup(i); /* STDERR */
+  i=open("/dev/null",O_RDWR);	/* STDIN */
+  assert(dup(i) != -1); 	/* STDOUT */
+  assert(dup(i) != -1);		/* STDERR */
 
   /* Know thy mask. */
   umask(0x033);
 
   /* Run from a known spot. */
-  chdir("/");
+  assert(chdir("/") != -1);
 
   /* Catch child sig */
   signal(SIGCHLD,SIG_IGN);

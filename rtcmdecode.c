@@ -109,9 +109,10 @@ static void encode(FILE *fpin, FILE *fpout)
 	if (status == 0) {
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
 	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
-	    (void)fwrite(lexer.isgps.buf, 
+	    if (fwrite(lexer.isgps.buf, 
 			 sizeof(isgps30bits_t), 
-			 (size_t)rtcm.length, fpout);
+		       (size_t)rtcm.length, fpout) <= 0)
+		(void) fprintf(stderr, "rtcmdecode: report write failed.\n");
 	    memset(&lexer, 0, sizeof(lexer));
 	} else if (status < 0) {
 	    (void) fprintf(stderr, "rtcmdecode: bailing out with status %d\n", status);
@@ -166,7 +167,8 @@ int main(int argc, char **argv)
     /* strip lines with leading # */
     if (striphdr) {
 	while ((c = getchar()) == '#')
-	    (void)fgets(buf, (int)sizeof(buf), stdin);
+	    if (fgets(buf, (int)sizeof(buf), stdin) == NULL)
+		(void)fputs("rtcmdecode: read failed\n", stderr);
 	(void)ungetc(c, stdin);
     }
 
