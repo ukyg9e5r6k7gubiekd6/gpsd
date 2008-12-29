@@ -51,3 +51,6 @@ screen plugged in and configured to work with lcdproc).
 lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If
 invoked as "ecef2lla" it will transform coordinates in the opposite manner.
+
+garreset attempts to force a garmin receiver back to NMEA mode - useful for
+recovering a receiver after sending the wrong configuration message.
