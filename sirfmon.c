@@ -936,7 +936,7 @@ static void command(char buf[], size_t len, const char *fmt, ... )
 
 static jmp_buf assertbuf;
 
-static void onsig(int sig)
+static void onsig(int sig UNUSED)
 {
     longjmp(assertbuf, 1);
 }
