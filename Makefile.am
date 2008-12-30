@@ -429,7 +429,7 @@ undump-regress: rtcmdecode
 
 # Regression-test the calendar functions
 time_regress: mkgmtime_test
-	mkgmtime_test
+	./mkgmtime_test
 
 # Do all normal regression tests
 testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
