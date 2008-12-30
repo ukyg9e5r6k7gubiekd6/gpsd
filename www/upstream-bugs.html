@@ -166,15 +166,17 @@ making it generate incorrect code.  Removing -O2 from the
 compilation flags works around the problem.  Details are in the
 isgps.c source file.</p>
 
-<p>Compiling with --enable-max-devices=1 may trigger a gcc optimizer bug</p>
+<p>Compiling with &x2D;&x2D;enable-max-devices=1 may trigger a gcc
+optimizer bug</p>
 
-<p>At gpsd revision level 3365, compiling with --enable-max-devices=1 has
-been observed to trigger an optimizer bug in gcc 4.1.0 20060304 (Red
-Hat 4.1.0-3).  The symptom is a for-loop termination condition not
-causing an exit, leading to a core dump.  Removing -O2 from the
-compilation flags works around the problem; upgrading to gcc 4.1.1
-20060525 (Red Hat 4.1.1-1) solves it.  Other reports indicate this
-bug was introduced sometime after gcc 4.0.2 20051125 (Red Hat 4.0.2-8).</p>
+<p>At gpsd revision level 3365, compiling with
+&x2D;&x2D;enable-max-devices=1 has been observed to trigger an
+optimizer bug in gcc 4.1.0 20060304 (Red Hat 4.1.0-3).  The symptom is
+a for-loop termination condition not causing an exit, leading to a
+core dump.  Removing -O2 from the compilation flags works around the
+problem; upgrading to gcc 4.1.1 20060525 (Red Hat 4.1.1-1) solves it.
+Other reports indicate this bug was introduced sometime after gcc
+4.0.2 20051125 (Red Hat 4.0.2-8).</p>
 
 <h2>Multiple definitions of symbol _gpsd_report due to libtool bug</h2>
 
@@ -214,6 +216,104 @@ There is a call to pthread create in libgpsd_core.c::link_activate():
 created fine and pthread_create() returns right away.  If this is
 called when gpsd is in the background then the thread is created fine,
 but it never returns!  That freezes the main loop of gpsd.</p>
+
+<h2 id="gpsfake">gpsfake fails under mysterious circumstances</h2>
+
+<p>gpsfake hangs under mysterious circumstances.  The symptoms are
+very obvious, the twirling-baton progress indicator freezes after 
+the first read-write pair. We're trying to localize this bug.  
+Here's what we know:</p>
+
+<p>&nbsp;</p>
+
+<table border=1>
+<tr>
+<th>Distribution</th>
+<th>Kernel</th>
+<th>Python</th>
+<th>Compiler</th>
+<th>Libraries</th>
+<th>Reported-by</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>Ubuntu 8.04</td>
+<td>2.6.24-21</td>
+<td>2.5.2</td>
+<td>gcc 4.2.3</td>
+<td>glibc 2.7</td?
+<td>esr</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Ubuntu 8.10</td>
+<td>2.6.27-7</td>
+<td>2.5.2</td>
+<td>gcc 4.3.2</td>
+<td>glibc 2.8.90</td?
+<td>esr</td>
+<td>FAILS</td>
+</tr>
+<tr>
+<td>Ubuntu 8.10</td>
+<td>2.6.27-7</td>
+<td>2.4.5</td>
+<td>gcc 4.3.1</td>
+<td>glibc 2.8.90</td?
+<td>esr</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Debian unstable</td>
+<td>2.6.26, 2.6.27</td>
+<td>2.5.2</td>
+<td>gcc 4.3.2 </td>
+<td>glibc 2.7</td?
+<td>bzed</td>
+<td>FAILS</td>
+</tr>
+<tr>
+<td>Debian unstable</td>
+<td>2.6.27</td>
+<td>2.4.6</td>
+<td>gcc 4.3.2 </td>
+<td>glibc 2.7</td?
+<td>bzed</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Debian etch (chroot)</td>
+<td>2.6.27</td>
+<td>2.5 (maint) </td>
+<td>gcc 4.1.2 (prerelease)</td>
+<td>glibc 2.3.6</td?
+<td>bzed</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Debian etch (chroot)</td>
+<td>2.6.27</td>
+<td>2.4.4</td>
+<td>gcc 4.1.2 (prerelease)</td>
+<td>glibc 2.3.6</td?
+<td>bzed</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<tr>
+<td>OpenBSD</td>
+<td>current for 2008-12-30</td>
+<td>2.5.2</td>
+<td>?</td>
+<td>?</td?
+<td>ckuethe</td>
+<td>SUCCEEDS</td>
+</tr>
+</table>
+
+<p>&nbsp;</p>
+
+<p>The compiler is the one reported by Python as its build compiler.</p>
 
 <p>&nbsp;</p>
 
