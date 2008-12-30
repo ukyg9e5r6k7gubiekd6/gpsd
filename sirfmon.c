@@ -31,6 +31,8 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <assert.h>
+#include <signal.h>
+#include <setjmp.h>
 /* Cygwin has only _timezone and not timezone unless the following is set */
 #if defined(__CYGWIN__)
 #define timezonevar
@@ -813,13 +815,15 @@ static int readpkt(unsigned char *buf, size_t buflen)
 
     if (logfile != NULL) {
 	/*@ -shiftimplementation @*/
-	(void)fwrite("\xa0\xa2", (size_t)2,  sizeof(char), logfile);
-	(void)fputc(len >> 8, logfile);
-	(void)fputc(len & 0xff, logfile);
-	(void)fwrite(buf, (size_t)len, sizeof(char), logfile);
-	(void)fputc(csum >> 8, logfile);
-	(void)fputc(csum & 0xff, logfile);
-	(void)fwrite("\xb0\xb3", (size_t)2,  sizeof(char), logfile);
+	char outbuf[BUFSIZ];
+	(void)memcpy(outbuf, "\xa0\xa2", 2);
+	outbuf[2] = (len >> 8);
+	outbuf[3] = (len & 0xff);
+	(void)memcpy(outbuf+4, buf, (size_t)len);
+	outbuf[4+len] = (csum >> 8);
+	outbuf[5+len] = (csum & 0xff);
+	(void)memcpy(outbuf+6+len, "\xb0\xb3", 2);
+	assert(fwrite(outbuf, sizeof(char), len+8, logfile) >= 1);
 	/*@ +shiftimplementation @*/
     }
     return len;
@@ -855,13 +859,14 @@ static bool sendpkt(unsigned char *buf, size_t len, char *device)
 	return false;
     else {
 	if (!serial) {
-	    (void)write(controlfd, "!", 1);
-	    (void)write(controlfd, device, strlen(device));
-	    (void)write(controlfd, "=", 1);
+	    assert(write(controlfd, "!", 1) != -1);
+	    assert(write(controlfd, device, strlen(device)) != -1);
+	    assert(write(controlfd, "=", 1) != -1);
 	}
 	st = write(controlfd, buf,len);
 	if (!serial)
-	    (void)read(controlfd, buf, 8);	/* enough room for "ERROR\r\n\0" */
+	    /* enough room for "ERROR\r\n\0" */
+	    assert(read(controlfd, buf, 8) != -1);
 	return ((size_t)st == len);
     }
 }
@@ -920,13 +925,20 @@ static void command(char buf[], size_t len, const char *fmt, ... )
     (void)vsnprintf(buf, len, fmt, ap);
     va_end(ap);
 
-    (void)write(devicefd, buf, strlen(buf));
+    assert(write(devicefd, buf, strlen(buf)) != -1);
     n = read(devicefd, buf, len);
     if (n >= 0) {
 	buf[n] = '\0';
 	while (isspace(buf[strlen(buf)-1]))
 	    buf[strlen(buf)-1] = '\0';
     }
+}
+
+static jmp_buf assertbuf;
+
+static void onsig(int sig)
+{
+    longjmp(assertbuf, 1);
 }
 
 int main (int argc, char **argv)
@@ -1008,6 +1020,16 @@ int main (int argc, char **argv)
 	serial = true;
     }
     /*@ +boolops */
+
+    /* quit cleanly if an assertion fails */
+    (void)signal(SIGABRT, onsig);
+    if (setjmp(assertbuf) > 0) {
+	if (logfile)
+	    (void)fclose(logfile);
+	(void)endwin();
+	(void)fputs("sirfmon: assertion failure, probable I/O error\n", stderr);
+	exit(1);
+    }
 
     (void)initscr();
     (void)cbreak();
@@ -1248,8 +1270,9 @@ int main (int argc, char **argv)
 		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
-		    (void)write(devicefd, line, strlen(line));
-		    (void)read(devicefd, buf, sizeof(buf));	/* discard response */
+		    assert(write(devicefd, line, strlen(line)) != -1);
+		    /* discard response */
+		    assert(read(devicefd, buf, sizeof(buf)) != -1);
 		}
 		break;
 
