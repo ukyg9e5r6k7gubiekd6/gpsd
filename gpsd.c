@@ -620,11 +620,11 @@ static bool assign_channel(struct subscriber_t *user)
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
-		(void)write(user->fd, "GPSD,F=", 7);
-		(void)write(user->fd,
-			    user->device->gpsdata.gps_device,
-			    strlen(user->device->gpsdata.gps_device));
-		(void)write(user->fd, "\r\n", 2);
+		assert(write(user->fd, "GPSD,F=", 7) != -1);
+		assert(write(user->fd,
+			     user->device->gpsdata.gps_device,
+			     strlen(user->device->gpsdata.gps_device)) != -1);
+		assert(write(user->fd, "\r\n", 2) != -1);
 	    }
 	}
     }
@@ -633,7 +633,7 @@ static bool assign_channel(struct subscriber_t *user)
 	char buf[NMEA_MAX];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 		       timestamp(), gpsd_id(user->device));
-	(void)write(user->fd, buf, strlen(buf));
+	assert(write(user->fd, buf, strlen(buf)) == strlen(buf));
     }
     return true;
 }
@@ -1220,36 +1220,36 @@ static void handle_control(int sfd, char *buf)
 	    gpsd_wrap(chp);
 	    chp->gpsdata.gps_fd = -1;	/* device is already disconnected */
 	    /*@i@*/free_channel(chp);	/* modifying observer storage */
-	    (void)write(sfd, "OK\n", 3);
+	    assert(write(sfd, "OK\n", 3) != -1);
 	} else
-	    (void)write(sfd, "ERROR\n", 6);
+	    assert(write(sfd, "ERROR\n", 6) != -1);
     } else if (buf[0] == '+') {
 	p = snarfline(buf+1, &stash);
 	if (find_device(stash)) {
 	    gpsd_report(LOG_INF,"<= control(%d): %s already active \n", sfd, stash);
-		(void)write(sfd, "ERROR\n", 6);
+	    assert(write(sfd, "ERROR\n", 6) != -1);
 	} else {
 	    gpsd_report(LOG_INF,"<= control(%d): adding %s \n", sfd, stash);
 	    if (open_device(stash))
-		(void)write(sfd, "OK\n", 3);
+		assert(write(sfd, "OK\n", 3) != -1);
 	    else
-		(void)write(sfd, "ERROR\n", 6);
+		assert(write(sfd, "ERROR\n", 6) != -1);
 	}
     } else if (buf[0] == '!') {
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
-	    (void)write(sfd, "ERROR\n", 6);
+	    assert(write(sfd, "ERROR\n", 6) != -1);
 	} else {
 	    *eq++ = '\0';
 	    if ((chp = find_device(stash))) {
 		gpsd_report(LOG_INF,"<= control(%d): writing to %s \n", sfd, stash);
-		(void)write(chp->gpsdata.gps_fd, eq, strlen(eq));
-		(void)write(sfd, "OK\n", 3);
+		assert(write(chp->gpsdata.gps_fd, eq, strlen(eq)) != -1);
+		assert(write(sfd, "OK\n", 3) != -1);
 	    } else {
 		gpsd_report(LOG_INF,"<= control(%d): %s not active \n", sfd, stash);
-		(void)write(sfd, "ERROR\n", 6);
+		assert(write(sfd, "ERROR\n", 6) != -1);
 	    }
 	}
     }
