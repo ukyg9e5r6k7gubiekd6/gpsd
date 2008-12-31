@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # The regression-test driver script.  This used to be explicit in the
 # makefile before we regrouped the regression tests by stable and unstable 
@@ -6,6 +6,21 @@
 #
 PATH=.:$PATH
 export PATH
+
+# This works around an obscure bug in pty handling that we encounter
+# when using 2.5.x built with gcc 4.3.2 or later.  The symptom is simple:
+# gpsfake hangs.  For debugging purposes, you can force the version by
+# setting the nvironment variable GPSFAKE_PYTHON.
+python=python
+if [ "$GPSFAKE_PYTHON" ]
+then
+    python=$GPSFAKE_PYTHON
+    echo "Using $python."
+elif [ -x /usr/bin/python2.4 ]
+then
+    python=python2.4
+    echo "Using $python."
+fi
 
 mode=regress
 while getopts trbvo:n opt
@@ -29,7 +44,7 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+		$do $python gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
 		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
@@ -52,7 +67,7 @@ case $mode in
         echo "Testing super-raw mode..."
         for f in $*; do
             dir=`dirname $f`
-            $do gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
+            $do $python gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
             | ./striplog -1 >$dir/test1.chk;
             $do ./striplog <$${f} >$dir/test2.chk;
             $do cmp $dir/test[12].chk;
@@ -61,7 +76,7 @@ case $mode in
     build)
 	echo "Rebuilding regressions..."
         for f in $*; do
-            $do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
+            $do $python gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
         done
         exit 0
         ;;
