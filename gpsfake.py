@@ -209,7 +209,7 @@ class TestLoad:
             return "\xff\x81" + third + fourth + fifth + sixth + self.logfp.read(2*ndata+6)
         elif first == '\x02' and second == '\x99':		# Navcom
             third = self.logfp.read(1)
-	    fourth = self.logfp.read(1)
+            fourth = self.logfp.read(1)
             fifth = self.logfp.read(1)
             sixth = self.logfp.read(1)
             #id = ord(fourth)
@@ -304,23 +304,23 @@ class FakeGPS:
         ttyfp = open(self.slave, "rw")
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(ttyfp.fileno())
         cc[termios.VMIN] = 1
-	cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
-	cflag |= termios.CREAD | termios.CLOCAL
+        cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
+        cflag |= termios.CREAD | termios.CLOCAL
         iflag = oflag = lflag = 0
- 	iflag &=~ (termios.PARMRK | termios.INPCK)
- 	cflag &=~ (termios.CSIZE | termios.CSTOPB | termios.PARENB | termios.PARODD)
+        iflag &=~ (termios.PARMRK | termios.INPCK)
+        cflag &=~ (termios.CSIZE | termios.CSTOPB | termios.PARENB | termios.PARODD)
         if databits == 7:
             cflag |= termios.CS7
         else:
             cflag |= termios.CS8
         if stopbits == 2:
             cflag |= termios.CSTOPB
- 	if parity == 'E':
- 	    iflag |= termios.INPCK
- 	    cflag |= termios.PARENB
- 	elif parity == 'O':
- 	    iflag |= termios.INPCK
- 	    cflag |= termios.PARENB | termios.PARODD
+        if parity == 'E':
+            iflag |= termios.INPCK
+            cflag |= termios.PARENB
+        elif parity == 'O':
+            iflag |= termios.INPCK
+            cflag |= termios.PARENB | termios.PARODD
         ispeed = ospeed = speed
         termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW,
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
