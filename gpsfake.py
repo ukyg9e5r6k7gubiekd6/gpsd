@@ -133,7 +133,7 @@ class TestLoad:
                 print `packet`
             if not packet or packet == "\n":
                 break
-            else:
+            elif packet[0] != "#":
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
         if self.sentences[0][0] == '$':
@@ -189,6 +189,8 @@ class TestLoad:
             return None
         elif self.type == "RTCM":
             return first
+        elif first == '#':					# Comment
+            return "#" + self.logfp.readline()
         elif first == '$':					# NMEA packet
             return "$" + self.logfp.readline()
         second = self.logfp.read(1)
