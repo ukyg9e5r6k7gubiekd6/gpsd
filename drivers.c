@@ -100,6 +100,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 	}
 #endif /* GARMINTXT_ENABLE */
 	gpsd_report(LOG_IO, "<= GPS: %s", session->packet.outbuffer);
+
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
 #ifdef NON_NMEA_ENABLE
 	    struct gps_type_t **dp;
@@ -118,7 +119,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		    gpsd_report(LOG_PROG, "found %s.\n", trigger);
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    return 1;
+		    return DEVICEID_SET;
 		}
 	    }
 #endif /* NON_NMEA_ENABLE */
@@ -217,6 +218,12 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	ubx_write(session->gpsdata.gps_fd, 0x0a, 0x04, NULL, 0);
 	break;
 #endif /* UBX_ENABLE */
+#ifdef MKT3301_ENABLE
+    case 8:
+	/* probe for MKT-3301 -- expect $PMTK705 */
+	(void)nmea_send(session->gpsdata.gps_fd, "$PMTK605");
+	break;
+#endif /* MKT3301_ENABLE */
     default:
 	break;
     }
@@ -887,6 +894,99 @@ static struct gps_type_t garmintxt = {
 };
 #endif /* GARMINTXT_ENABLE */
 
+#ifdef MKT3301_ENABLE
+/**************************************************************************
+ *
+ * MKT-3301
+ *
+ **************************************************************************/
+const char* mkt_reasons[4] = {"Invalid", "Unsupported", "Valid but Failed", "Valid success"};
+
+gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session)
+{
+    int msg, reason;
+    gps_mask_t mask;
+    mask = 1; //ONLINE_SET;
+
+    switch(msg = atoi(&(field[0])[4]))
+    {
+	case 705: /*  */
+	    strlcat(session->subtype,field[1],64);
+	    strlcat(session->subtype,"-",64);
+	    strlcat(session->subtype,field[2],64);
+	    return 0; /* return a unknown sentence, which will cause the driver switch */
+	case 001: /* ACK / NACK */
+	    reason = atoi(field[2]);
+	    if(atoi(field[1]) == -1)
+		gpsd_report(LOG_WARN, "MKT NACK: unknown sentence\n");
+	    else if(reason < 3)
+		gpsd_report(LOG_WARN, "MKT NACK: %s, reason: %s\n", field[1], mkt_reasons[reason]);
+	    else
+		gpsd_report(LOG_WARN, "MKT ACK: %s\n", field[1]);
+	    break;
+	default:
+	    return 0; /* ignore */
+    }
+    return mask;
+}
+
+#ifdef ALLOW_RECONFIGURE
+static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
+{
+/*
+0  NMEA_SEN_GLL,  GPGLL   interval - Geographic Position - Latitude longitude
+1  NMEA_SEN_RMC,  GPRMC   interval - Recommended Minimum Specific GNSS Sentence
+2  NMEA_SEN_VTG,  GPVTG   interval - Course Over Ground and Ground Speed
+3  NMEA_SEN_GGA,  GPGGA   interval - GPS Fix Data
+4  NMEA_SEN_GSA,  GPGSA   interval - GNSS DOPS and Active Satellites
+5  NMEA_SEN_GSV,  GPGSV   interval - GNSS Satellites in View
+6  NMEA_SEN_GRS,  GPGRS   interval - GNSS Range Residuals
+7  NMEA_SEN_GST,  GPGST   interval - GNSS Pseudorange Errors Statistics
+13 NMEA_SEN_MALM, PMTKALM interval - GPS almanac information
+14 NMEA_SEN_MEPH, PMTKEPH interval - GPS ephmeris information
+15 NMEA_SEN_MDGP, PMTKDGP interval - GPS differential correction information
+16 NMEA_SEN_MDBG, PMTKDBG interval – MTK debug information
+17 NMEA_SEN_ZDA,  GPZDA   interval - Time & Date
+18 NMEA_SEN_MCHN, PMTKCHN interval – GPS channel status
+
+"$PMTK314,1,1,1,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0"
+
+*/
+    if(seq == 0) {
+	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK320,0"); /* power save off */
+	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK300,1000,0,0,0.0,0.0"); /* Fix interval */
+	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");
+	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK301,2"); /* DGPS is WAAS */
+	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK313,1"); /* SBAS enable */
+    }
+}
+#endif /* ALLOW_RECONFIGURE */
+
+static struct gps_type_t mkt3301 = {
+    .type_name      = "MKT-3301",	/* full name of type */
+    .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
+    .channels       = 12,		/* not used by this driver */
+    .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
+    .probe_detect   = NULL,		/* no probe */
+    .probe_subtype  = NULL,		/* to be sent unconditionally */
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = mkt3301_configure,	/* change its sentence set */
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = pass_rtcm,	/* write RTCM data straight */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert	    = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup	    = NULL,		/* no wrapup */
+    .cycle	    = 1,		/* updates every second */
+};
+#endif /* MKT3301_ENABLE */
+
 extern struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern struct gps_type_t sirf_binary, tsip_binary;
 extern struct gps_type_t evermore_binary, italk_binary;
@@ -953,6 +1053,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef GARMINTXT_ENABLE
     &garmintxt,
 #endif /* GARMINTXT_ENABLE */
+#ifdef MKT3301_ENABLE
+    &mkt3301,
+#endif /*  MKT3301_ENABLE */
     NULL,
 };
 /*@ +nullassign @*/

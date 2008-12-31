@@ -435,6 +435,21 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for MKT-3301 support
+AC_ARG_ENABLE(mkt3301,
+  AC_HELP_STRING([--disable-mkt3301],
+                 [disable MKT-3301 support]),
+  [ac_mkt3301=$enableval], [ac_mkt3301=yes])
+AC_MSG_CHECKING([for MKT-3301 support])
+if test x"$ac_mkt3301" = "xyes"; then
+    ac_nmea=yes
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([MKT3301_ENABLE], 1, [MKT-3301 support])
+	AC_DEFINE([NMEA_ENABLE], 1, [MKT-3301 requires NMEA support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for GPSClock support
 AC_ARG_ENABLE(gpsclock,
   AC_HELP_STRING([--disable-gpsclock],
@@ -761,6 +776,7 @@ echo "Tripmate                : $ac_tripmate"
 echo "True North              : $ac_tnt"
 echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
+echo "MKT-3301                : $ac_mkt3301"
 dnl Below this line are non-protocol switches
 echo "	Daemon Features"
 echo "	---------------"

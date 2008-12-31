@@ -13,6 +13,10 @@
 #include "gpsd.h"
 #include "timebase.h"
 
+#ifdef MKT3301_ENABLE
+extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
+#endif /* MKT3301_ENABLE */
+
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
@@ -705,7 +709,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #endif /* TNT_ENABLE */
 #ifdef ASHTECH_ENABLE
 	{"PASHR", 3,	processPASHR},	/* general handler for Ashtech */
-#endif /* TNT_ENABLE */
+#endif /* ASHTECH_ENABLE */
     };
     volatile unsigned char buf[NMEA_MAX+1];
 
@@ -790,6 +794,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 	    break;
 	}
     }
+#ifdef MKT3301_ENABLE
+    if (strncmp("PMTK", field[0], 4) == 0) /* general handler for MKT3301 vendor specifics */
+	retval = processMKT3301(count, field, session);	
+#endif /* MKT3301_ENABLE */
     /*@ +usedef @*/
     return retval;
 }
