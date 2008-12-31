@@ -220,9 +220,9 @@ but it never returns!  That freezes the main loop of gpsd.</p>
 <h2 id="gpsfake">gpsfake fails under mysterious circumstances</h2>
 
 <p>gpsfake hangs under mysterious circumstances.  The symptoms are
-very obvious, the twirling-baton progress indicator freezes after 
-the first read-write pair. We're trying to localize this bug.  
-Here's what we know:</p>
+very obvious, the twirling-baton progress indicator freezes after the
+first read-write interaction with the slave daemon. We're trying to
+localize this bug.  Here's what we know:</p>
 
 <p>&nbsp;</p>
 
@@ -262,6 +262,15 @@ Here's what we know:</p>
 <td>glibc 2.8.90</td?
 <td>esr</td>
 <td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Ubuntu 8.10</td>
+<td>2.6.27-7</td>
+<td>2.5.2-dbg</td>
+<td>gcc 4.3.2</td>
+<td>glibc 2.8.90</td?
+<td>esr</td>
+<td>FAILS</td>
 </tr>
 <tr>
 <td>Debian unstable</td>
@@ -322,9 +331,28 @@ Here's what we know:</p>
 
 <p>&nbsp;</p>
 
-<p>The compiler is the one reported by Python as its build compiler.</p>
+<p>The compiler is the one reported by Python in its initialization
+banner as its build compiler, not the stock compiler of the
+distribution.</p>
 
 <p>&nbsp;</p>
+
+<p>Analysis:</p>
+
+<ul>
+<li><p>The bug appears to require Python 2.5.  Backing down to 2.4
+avoids it in every environment we have tested.</p></li>
+
+<li><p>The bug appears to be dependent on GCC compiler version. Every
+failure case features a Python built with GCC 4.3.2.</p></li>
+
+<li><p>The bug appears not to be a compiler optimization problem. The 
+python-2.5-dbg interpreter is built with -O0.</p></li>
+
+<li><p>The bug appears not to be a problem with glibc. The 
+Ubuntu 8.10 tests all use glibc 2.8.90 but get different results.</p></li>
+</ul>
+
 
 <div style="text-align: center;">
 <span>Search for GPS-related information here:</span>
