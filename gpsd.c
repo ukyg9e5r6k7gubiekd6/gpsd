@@ -936,13 +936,13 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		if (isnan(sub->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				  " %.2f",  sub->fixbuffer.eph);
+				  " %.2f",  sub->fixbuffer.eph * (CEP50_SIGMA/GPSD_CONFIDENCE));
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",  sub->fixbuffer.epv);
+				   " %.2f",  sub->fixbuffer.epv * (CEP50_SIGMA/GPSD_CONFIDENCE));
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.track)==0)
