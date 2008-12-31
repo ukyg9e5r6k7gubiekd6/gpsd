@@ -290,10 +290,18 @@ localize this bug.  Here's what we know:</p>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
+<td>Debian unstable</td>
+<td>2.6.27</td>
+<td>2.5.3</td>
+<td>gcc 4.2.4 </td>
+<td>glibc 2.7</td?
+<td>bzed</td>
+<td>FAILS</td>
+</tr>
 <tr>
 <td>Debian etch (chroot)</td>
 <td>2.6.27</td>
-<td>2.5 (maint) </td>
+<td>2.5 (release25-maint) </td>
 <td>gcc 4.1.2 (prerelease)</td>
 <td>glibc 2.3.6</td?
 <td>bzed</td>
@@ -305,6 +313,15 @@ localize this bug.  Here's what we know:</p>
 <td>2.4.4</td>
 <td>gcc 4.1.2 (prerelease)</td>
 <td>glibc 2.3.6</td?
+<td>bzed</td>
+<td>SUCCEEDS</td>
+</tr>
+<tr>
+<td>Debian etch (chroot)</td>
+<td>2.6.27</td>
+<td>2.5 (release25-maint)</td>
+<td>gcc 4.1.2 (prerelease)</td>
+<td>glibc 2.7, but compiled against glibc 2.3.6</td>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -342,9 +359,6 @@ distribution.</p>
 <ul>
 <li><p>The bug appears to require Python 2.5.  Backing down to 2.4
 avoids it in every environment we have tested.</p></li>
-
-<li><p>The bug appears to be dependent on GCC compiler version. Every
-failure case features a Python built with GCC 4.3.2.</p></li>
 
 <li><p>The bug appears not to be a compiler optimization problem. The 
 python-2.5-dbg interpreter is built with -O0.</p></li>
