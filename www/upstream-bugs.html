@@ -166,11 +166,11 @@ making it generate incorrect code.  Removing -O2 from the
 compilation flags works around the problem.  Details are in the
 isgps.c source file.</p>
 
-<p>Compiling with &x2D;&x2D;enable-max-devices=1 may trigger a gcc
+<p>Compiling with &#x2D;&#x2D;enable-max-devices=1 may trigger a gcc
 optimizer bug</p>
 
 <p>At gpsd revision level 3365, compiling with
-&x2D;&x2D;enable-max-devices=1 has been observed to trigger an
+&#x2D;&#x2D;enable-max-devices=1 has been observed to trigger an
 optimizer bug in gcc 4.1.0 20060304 (Red Hat 4.1.0-3).  The symptom is
 a for-loop termination condition not causing an exit, leading to a
 core dump.  Removing -O2 from the compilation flags works around the
