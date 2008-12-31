@@ -7,7 +7,14 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
-#include <util.h>
+#ifndef __GLIBC__
+  #include <util.h>
+  #include <string.h>
+#else
+  #include <stdlib.h>
+  #include <pty.h>
+#endif
+
 
 #define WRLEN 64
 void spinner(int);
@@ -90,7 +97,7 @@ int main( int argc, char **argv){
 	if (fstat(ifd, &sb) == -1)
 		err(1, "fstat");
 
-	if ((buf = mmap(0, sb.st_size, PROT_READ, MAP_FILE, ifd, 0)) == MAP_FAILED)
+	if ((buf = mmap(0, sb.st_size, PROT_READ, MAP_FILE | MAP_PRIVATE, ifd, 0)) == MAP_FAILED)
 		err(1, "mmap");
 
 	if (dflag){
