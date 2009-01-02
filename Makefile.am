@@ -394,6 +394,10 @@ raw-regress:
 gps-makeregress: gpsd
 	$(srcdir)/regress-driver -b $(srcdir)/test/stable/*.log
 
+# To build an individual test for a load named foo.log, put it in
+# test/stable and do this:
+#	regress-driver -b test/stable/foo.log
+
 # Regression-test the RTCM decoder.
 rtcm-regress: rtcmdecode
 	@echo "Testing RTCM decoding..."

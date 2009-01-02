@@ -195,7 +195,7 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
     AC_MSG_WARN([libXt problem - xgps won't be built.])
   fi
   AC_CHECK_HEADER([X11/Xaw/Label.h],, motif_includes="no")
-  dnl We can't use AC_SEARCH_LIBS because it always modifes LIBS.
+  dnl We can't use AC_SEARCH_LIBS because it always modifies LIBS.
   dnl Instead, check for two common places (xorg way and the
   dnl traditional way) by hand.
   AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",

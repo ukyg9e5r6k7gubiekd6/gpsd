@@ -3,7 +3,8 @@
   error-estimate fields fixed to match E.  Listen on localhost only
   by default to avoid security problems; this can be overridden with 
   the -G command-line option. The packet-state machine can now recognize 
-  RTCM3 packets, though support is not yet complete. 
+  RTCM3 packets, though support is not yet complete. xgpsspeed no
+  lomger depends on Motif.
 
 * Sun Feb 17 2008 Chris Kuethe <ckuethe@mail.berlios.de> - 2.37
   The C++ bindings, Garmin USB support, and multiple instances of ntp
