@@ -195,11 +195,18 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
     AC_MSG_WARN([libXt problem - xgps won't be built.])
   fi
   AC_CHECK_HEADER([X11/Xaw/Label.h],, motif_includes="no")
-  AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",,
+  dnl We can't use AC_SEARCH_LIBS because it always modifes LIBS.
+  dnl Instead, check for two common places (xorg way and the
+  dnl traditional way) by hand.
+  AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",
+     AC_CHECK_LIB(Xaw8, XawInitializeWidgetSet, XAW_LIBS="-lXaw8",,${X_PRE_LIBS} ${X11_LIBS}),
 	  ${X_PRE_LIBS} ${X11_LIBS})
   AC_SUBST(XAW_LIBS)
-  if test x"$ac_cv_lib_Xaw_XawInitializeWidgetSet" = "xno"; then
-    AC_MSG_WARN([libXaw problem - xgps won't be built.])
+  if test x"$XAW_LIBS" = "x"; then
+    AC_MSG_WARN([libXaw problem - xgpsspeed won't be built.])
+    AM_CONDITIONAL([HAVE_XAW],false)
+  else
+    AM_CONDITIONAL([HAVE_XAW],true)
   fi
   AC_CHECK_LIB(Xext, XShapeQueryVersion, XEXT_LIBS="-lXext",,
 	  ${X_PRE_LIBS} ${X11_LIBS})
@@ -242,11 +249,20 @@ else
 fi
 dnl End of X11 checks
 
-AC_CHECK_HEADER(ncurses.h, ac_ncurses='yes', ac_ncurses='no')
-AM_CONDITIONAL([HAVE_NCURSES], [test x"$ac_ncurses" = "xyes"])
-AC_CHECK_LIB(ncurses, initscr, ac_ncurses_lib='yes', ac_ncurses_lib='no')
-if test x"$ac_ncurses_lib" = "xno" -o x"$ac_ncurses" = "xno" ; then
-  AC_MSG_WARN([Not including curses support])
+dnl Check for curses headers and libraries.  The presence of the
+dnl library is used to decide whether or not to build some programs.
+dnl Those programs use ncurses.h if found, and otherwise use curses.h.
+dnl TODO: give an example of what system uses curses.h with
+dnl libncurses.  We define our own variables to reduce the risk of
+dnl breaking if autoconf changes (private) variable names.
+AC_CHECK_HEADERS(ncurses.h)
+AC_CHECK_LIB(ncurses, initscr, NCURSES_LIBS="-lncurses")
+AC_SUBST(NCURSES_LIBS)
+if test x"$NCURSES_LIBS" = x"" ; then
+  AC_MSG_WARN([Not including curses support])		   
+  AM_CONDITIONAL([HAVE_NCURSES],false)
+else
+  AM_CONDITIONAL([HAVE_NCURSES],true)
 fi
 
 dnl check for NMEA support

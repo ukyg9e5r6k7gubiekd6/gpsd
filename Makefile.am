@@ -3,14 +3,20 @@
 
 #SUBDIRS = contrib
 
-#
-# Build stuff depending on Motif
-#
-if HAVE_MOTIF
-MOTIF_PROGS = xgps xgpsspeed
-endif
-
 XMLTO = xmlto
+
+#
+# Conditionally add programs depending on libraries that may or may not be present.
+#
+if HAVE_NCURSES
+CURSESPROGS = cgps sirfmon
+endif
+if HAVE_MOTIF
+MOTIF_PROGS = xgps
+endif
+if HAVE_XAW
+XAW_PROGS = xgpsspeed
+endif
 
 if HAVE_DBUS
 INCLUDES = $(DBUS_CFLAGS) $(DBUS_GLIB_CFLAGS) -DDBUS_API_SUBJECT_TO_CHANGE=1
@@ -23,11 +29,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-
-if HAVE_NCURSES
-CURSESPROGS = cgps sirfmon
-endif
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test
 if HAVE_PYTHON
@@ -54,13 +56,13 @@ xgpsspeed_c_sources = \
 xgpsspeed_SOURCES = \
 	$(xgpsspeed_c_sources) \
 	xgpsspeed.icon
-xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(XM_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
+xgpsspeed_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(XAW_LIBS) $(X_LIBS) $(X_PRE_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build cgps
 #
 cgps_SOURCES = cgps.c
-cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) -lncurses libgps.la -lm $(LIBPTHREAD)
+cgps_LDADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build cgpxlogger
@@ -91,7 +93,7 @@ gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
 # Build sirfmon
 #
 sirfmon_SOURCES = sirfmon.c
-sirfmon_LDADD = $(LIBM) -lncurses libgps.la -lm $(LIBPTHREAD)
+sirfmon_LDADD = $(LIBM) $(NCURSES_LIBS) libgps.la -lm $(LIBPTHREAD)
 
 #
 # Build rtcmdecode
