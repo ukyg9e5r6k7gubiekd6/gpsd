@@ -290,6 +290,7 @@ EXTRA_DIST = \
 	INSTALL \
 	COPYING \
 	TODO \
+	NEWS \
 	AUTHORS \
 	dgpsip-servers \
 	floattest.c \

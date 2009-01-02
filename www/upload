@@ -5,7 +5,7 @@
 webdir=shell.berlios.de:/home/groups/gpsd/htdocs
 cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
-make html CHANGES	# Ensure all derived HTML is up to date.
+make html	# Ensure all derived HTML is up to date.
 
 if [ $1 ]
 then
@@ -14,7 +14,7 @@ else
     (cd performance; xmlto xhtml-nochunks performance.xml)
     scp start-kismet *.html *.png *.pdf *.gif *.css *.js *.txt \
 	performance/{*.html,*.txt,*.png} \
-	../TODO CHANGES \
+	../TODO ../NEWS \
 	$webdir
     scp gps_report.cgi $cgidir
 fi
