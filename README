@@ -64,9 +64,7 @@ mailing list occasionally.
 
 Eric S. Raymond drastically rewrote this code to clean it up and extend it.
 The 2.X architecture has become significantly different and far more 
-modularized.
-
-His new features include:
+modularized. His new features include:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
    * Now understands the GLL (Geographic position - Latitude, Longitude)
