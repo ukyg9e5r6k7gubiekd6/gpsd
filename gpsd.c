@@ -776,19 +776,19 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		if (finite(sub->device->gpsdata.epe))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   "%.2f", sub->device->gpsdata.epe * (CEP50_SIGMA/GPSD_CONFIDENCE));
+				   "%.2f", sub->device->gpsdata.epe);
 		else
 		    (void)strlcat(phrase, "?", sizeof(phrase));
 		if (finite(sub->device->gpsdata.fix.eph))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f", sub->device->gpsdata.fix.eph * (CEP50_SIGMA/GPSD_CONFIDENCE));
+				   " %.2f", sub->device->gpsdata.fix.eph);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 		if (finite(sub->device->gpsdata.fix.epv))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f", sub->device->gpsdata.fix.epv * (CEP50_SIGMA/GPSD_CONFIDENCE));
+				   " %.2f", sub->device->gpsdata.fix.epv);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 	    } else
@@ -936,13 +936,13 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		if (isnan(sub->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				  " %.2f",  sub->fixbuffer.eph * (CEP50_SIGMA/GPSD_CONFIDENCE));
+				  " %.2f",  sub->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",  sub->fixbuffer.epv * (CEP50_SIGMA/GPSD_CONFIDENCE));
+				   " %.2f",  sub->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.track)==0)
