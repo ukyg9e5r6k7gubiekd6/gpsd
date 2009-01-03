@@ -298,7 +298,7 @@ by Holux that may result in <code>gpsd</code> bricking your GPS.  See this
 of the problem.</p>
 
 <p>Diego Berge has written a prototype <a
-href="http://www.nippur.net/survey/gpsd/">Qt-based client</a>,
+href="http://www.navlost.eu/survey/gpsd/">Qt-based client</a>,
 basically <code>xgps</code> with a more modern look and feel.
 
 <p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
