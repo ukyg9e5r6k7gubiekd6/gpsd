@@ -149,7 +149,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
-	gpsd_report(LOG_WARN, "=> PROBING SUBTYPE %d\n", seq);
+    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n", seq);
     /*
      * The reason for splitting these probes up by packet sequence
      * number, interleaving them with the first few packet receives,
@@ -780,6 +780,7 @@ struct gps_type_t trueNorth = {
     .cycle	    = 20,		/* updates per second */
 };
 #endif
+
 #ifdef OCEANSERVER_ENABLE
 /**************************************************************************
  * OceanServer - Digital Compass, OS5000 Series
@@ -818,17 +819,18 @@ static int oceanserver_send(int fd, const char *fmt, ... )
 #ifdef ALLOW_RECONFIGURE
 static void oceanserver_configure(struct gps_device_t *session, unsigned int seq)
 {
-	gpsd_report(LOG_WARN, "=> OCEAN CONFIGURE\n");
     if (seq == 0){
+	/* report in NMEA format */
 	(void)oceanserver_send(session->gpsdata.gps_fd, "2\n");
-	(void)oceanserver_send(session->gpsdata.gps_fd, "X4096 ");
+	/* ship all fields */
+	(void)oceanserver_send(session->gpsdata.gps_fd, "X2047");
     }
 }
 #endif /* ALLOW_RECONFIGURE */
 
 struct gps_type_t oceanServer = {
-    .type_name      = "OceanServer Digital Compas OS5000", /* full name of type */
-    .trigger	    = "$C",
+    .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
+    .trigger	    = "$C,",
     .channels       = 0,		/* not an actual GPS at all */
     .probe_wakeup   = NULL,
     .probe_detect   = NULL,
@@ -850,6 +852,7 @@ struct gps_type_t oceanServer = {
     .cycle	    = 20,		/* updates per second */
 };
 #endif
+
 #ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
