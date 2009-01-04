@@ -531,11 +531,27 @@ struct gps_data_t {
 #define SAT_FIX_USED	0x40		/* used for position fix */
 #endif
 
+#if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
     /* compass status -- TrueNorth (and any similar) devices only */
     char headingStatus;
     char pitchStatus;
     char rollStatus;
     double horzField;   /* Magnitude of horizontal magnetic field */
+#endif
+
+#ifdef OCEANSERVER_ENABLE
+    double magnetic_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double magnetic_field_x;
+    double magnetic_field_y;
+    double magnetic_field_z;
+    double acceleration_length; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double acceleration_field_x;
+    double acceleration_field_y;
+    double acceleration_field_z;
+    double gyro_output_x;
+    double gyro_output_y;
+    double temperature;
+#endif
 
     /* where and what gpsd thinks the device is */
     char	gps_device[PATH_MAX];	/* only valid if non-null. */

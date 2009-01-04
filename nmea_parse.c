@@ -604,6 +604,65 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[], struct gps_device_t
 }
 #endif /* TNT_ENABLE */
 
+#ifdef OCEANSERVER_ENABLE
+static gps_mask_t processOHPR(int c UNUSED, char *field[], struct gps_device_t *session)
+{
+    /*
+     * Proprietary sentence for OceanServer Magnetic Compass.
+
+	OHPR,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh<cr><lf>
+	Fields in order:
+	1. Azimuth
+	2. Pitch Angle
+	3. Roll Angle
+	4. Temperature
+	5. Depth (feet)
+	6. Magnetic Vector Length
+	7-9. 3 axis Magnetic Field readings x,y,z
+	10. Acceleration Vector Length
+	11-13. 3 axis Acceleration Readings x,y,z
+	14. Reserved
+	15-16. 2 axis Gyro Output, X,y
+	17. Reserved
+	18. Reserved
+	*hh	  mandatory nmea_checksum
+     */
+    gps_mask_t mask;
+    mask = ONLINE_SET;
+
+    //gpsd_zero_satellites(&session->gpsdata);
+
+    /*
+     * Heading maps to track.
+     * Pitch maps to climb.
+     * Roll maps to speed.
+     * Depth maps to altitude.
+     */
+    session->gpsdata.fix.time = timestamp();
+    session->gpsdata.fix.track = atof(field[1]);
+    session->gpsdata.fix.climb = atof(field[2]);
+    session->gpsdata.fix.speed = atof(field[3]);
+    session->gpsdata.temperature = atof(field[4]);
+    session->gpsdata.fix.altitude = atof(field[5]);
+    session->gpsdata.magnetic_length = atof(field[6]);
+    session->gpsdata.magnetic_field_x = atof(field[7]);
+    session->gpsdata.magnetic_field_y = atof(field[8]);
+    session->gpsdata.magnetic_field_z = atof(field[9]);
+    session->gpsdata.acceleration_length = atof(field[10]);
+    session->gpsdata.acceleration_field_x = atof(field[11]);
+    session->gpsdata.acceleration_field_y = atof(field[12]);
+    session->gpsdata.acceleration_field_z = atof(field[13]);
+    session->gpsdata.gyro_output_x = atof(field[15]);
+    session->gpsdata.gyro_output_y = atof(field[16]);
+    session->gpsdata.fix.mode = MODE_3D;
+    mask |= (STATUS_SET | MODE_SET | TRACK_SET | SPEED_SET | CLIMB_SET | ALTITUDE_SET);
+    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX */
+
+    gpsd_report(LOG_RAW, "Heading %lf.\n", session->gpsdata.fix.track);
+    return mask;
+}
+#endif /* OCEANSERVER_ENABLE */
+
 #ifdef ASHTECH_ENABLE
 static gps_mask_t processPASHR(int c UNUSED, char *field[], struct gps_device_t *session)
 {
@@ -711,6 +770,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #ifdef ASHTECH_ENABLE
 	{"PASHR", 3,	processPASHR},	/* general handler for Ashtech */
 #endif /* ASHTECH_ENABLE */
+#ifdef OCEANSERVER_ENABLE
+	{"OHPR", 18,	processOHPR},
+#endif /* OCEANSERVER_ENABLE */
     };
     volatile unsigned char buf[NMEA_MAX+1];
 

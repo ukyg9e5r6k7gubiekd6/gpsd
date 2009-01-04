@@ -99,6 +99,14 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 		}
 	}
 #endif /* GARMINTXT_ENABLE */
+
+#ifdef OCEANSERVER_ENABLE
+	if (strncmp((char *)session->packet.outbuffer, "$C", 2)==0 || strncmp((char *)session->packet.outbuffer, "$OHPR", 5)==0) {
+		(void)gpsd_switch_driver(session, "OceanServer Digital Compas OS5000");
+		return  1;
+	}
+#endif /* OCEANSERVER_ENABLE */
+
 	gpsd_report(LOG_IO, "<= GPS: %s", session->packet.outbuffer);
 
 	if ((st=nmea_parse((char *)session->packet.outbuffer, session))==0) {
@@ -141,6 +149,7 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
+	gpsd_report(LOG_WARN, "=> PROBING SUBTYPE %d\n", seq);
     /*
      * The reason for splitting these probes up by packet sequence
      * number, interleaving them with the first few packet receives,
@@ -771,6 +780,76 @@ struct gps_type_t trueNorth = {
     .cycle	    = 20,		/* updates per second */
 };
 #endif
+#ifdef OCEANSERVER_ENABLE
+/**************************************************************************
+ * OceanServer - Digital Compass, OS5000 Series
+ *
+ * More info: http://www.ocean-server.com/download/OS5000_Compass_Manual.pdf
+ *
+ * This is a digital compass which uses magnetometers to measure the
+ * strength of the earth's magnetic field. Based on these measurements
+ * it provides a compass heading using NMEA formatted output strings.
+ * This is useful to supplement the heading provided by another GPS
+ * unit. A GPS heading is unreliable at slow speed or no speed.
+ *
+ **************************************************************************/
+
+static int oceanserver_send(int fd, const char *fmt, ... )
+{
+    int status;
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    va_end(ap);
+    strlcat(buf, "", BUFSIZ);
+    status = (int)write(fd, buf, strlen(buf));
+    tcdrain(fd);
+    if (status == (int)strlen(buf)) {
+	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
+	return status;
+    } else {
+	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
+	return -1;
+    }
+}
+
+#ifdef ALLOW_RECONFIGURE
+static void oceanserver_configure(struct gps_device_t *session, unsigned int seq)
+{
+	gpsd_report(LOG_WARN, "=> OCEAN CONFIGURE\n");
+    if (seq == 0){
+	(void)oceanserver_send(session->gpsdata.gps_fd, "2\n");
+	(void)oceanserver_send(session->gpsdata.gps_fd, "X4096 ");
+    }
+}
+#endif /* ALLOW_RECONFIGURE */
+
+struct gps_type_t oceanServer = {
+    .type_name      = "OceanServer Digital Compas OS5000", /* full name of type */
+    .trigger	    = "$C",
+    .channels       = 0,		/* not an actual GPS at all */
+    .probe_wakeup   = NULL,
+    .probe_detect   = NULL,
+    .probe_subtype  = NULL,
+#ifdef ALLOW_RECONFIGURE
+    .configurator   = oceanserver_configure,
+#endif /* ALLOW_RECONFIGURE */
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = nmea_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* Don't send */
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no wrapup */
+    .cycle_chars    = -1,		/* not relevant, no rate switch */
+#ifdef ALLOW_RECONFIGURE
+    .revert	    = NULL,		/* no setting-reversion method */
+#endif /* ALLOW_RECONFIGURE */
+    .wrapup	    = NULL,		/* no wrapup */
+    .cycle	    = 20,		/* updates per second */
+};
+#endif
 #ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
@@ -1038,6 +1117,9 @@ static struct gps_type_t *gpsd_driver_array[] = {
 #ifdef TNT_ENABLE
     &trueNorth,
 #endif /* TSIP_ENABLE */
+#ifdef OCEANSERVER_ENABLE
+    &oceanServer,
+#endif /* OCEANSERVER_ENABLE */
 #ifdef EVERMORE_ENABLE
     &evermore_binary,
 #endif /* EVERMORE_ENABLE */

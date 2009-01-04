@@ -425,6 +425,21 @@ else
   AC_MSG_RESULT([no])
 fi
 
+dnl check for OceanServer support
+AC_ARG_ENABLE(oceanserver,
+  AC_HELP_STRING([--enable-oceanserver],
+                 [enable OceanServer support]),
+  [ac_oceanserver=$enableval], [ac_oceanserver=no])
+AC_MSG_CHECKING([for OceanServer support])
+if test x"$ac_oceanserver" = "xyes"; then
+    ac_nmea=yes
+    AC_MSG_RESULT([yes])
+	AC_DEFINE([OCEANSERVER_ENABLE], 1, [OceanServer support])
+	AC_DEFINE([NMEA_ENABLE], 1, [OceanServer requires NMEA support])
+else
+  AC_MSG_RESULT([no])
+fi
+
 dnl check for UBX support
 AC_ARG_ENABLE(ubx,
   AC_HELP_STRING([--disable-ubx],
@@ -790,6 +805,7 @@ echo "SiRF                    : $ac_sirf"
 echo "Trimble TSIP            : $ac_tsip"
 echo "Tripmate                : $ac_tripmate"
 echo "True North              : $ac_tnt"
+echo "OceanServer             : $ac_oceanserver"
 echo "UBX                     : $ac_ubx"
 echo "GPSclock                : $ac_gpsclock"
 echo "MKT-3301                : $ac_mkt3301"
@@ -825,6 +841,7 @@ if test "xdummy" = "xdummy" -a \
     x"$ac_rtcm104v2" = "xno" -a \
     x"$ac_sirf" = "xno" -a \
     x"$ac_tnt" = "xno" -a \
+    x"$ac_oceanserver" = "xno" -a \
     x"$ac_tripmate" = "xno" -a \
     x"$ac_tsip" = "xno" -a \
     x"$ac_ubx" = "xno"; then

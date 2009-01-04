@@ -207,10 +207,14 @@ static void nextstate(struct gps_packet_t *lexer,
 	    lexer->state = NMEA_PUB_LEAD;
 	else if (c == 'P')	/* vendor sentence */
 	    lexer->state = NMEA_VENDOR_LEAD;
-	else if (c =='I')	/* Seatalk */
+	else if (c == 'I')	/* Seatalk */
 	    lexer->state = SEATALK_LEAD_1;
-	else if (c =='A')	/* SiRF Ack */
+	else if (c == 'A')	/* SiRF Ack */
 	    lexer->state = SIRF_ACK_LEAD_1;
+#ifdef OCEANSERVER_ENABLE
+	else if (c == 'C')
+	    lexer->state = NMEA_LEADER_END;
+#endif /* OCEANSERVER_ENABLE */
 	else
 	    lexer->state = GROUND_STATE;
 	break;
