@@ -36,6 +36,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.1</revnumber>
+      <date>04 January 2005</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Corrected SGPS example, thanks to Kevin Niehage for the bug report.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.0</revnumber>
       <date>11 February 2005</date>
       <authorinitials>esr</authorinitials>
@@ -325,12 +333,12 @@ mode field is added to satisfy a U.S. regulator's requirement.</para>
 <para>Here is an example:</para>
 
 <programlisting>
-$GPTPV,2005-02-11T04:40:51.231Z,?,4916.45N,123.12W,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
+$GPTPV,2005-02-11T04:40:51.231Z,?,4916.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A
 
      2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005) 
      ?,                         Timestamp uncertainty will never be reported
-     -4916.45,                  Latitude (- sign indicates longitude west)
-     123.12,                    Longitude (- sign indicates latitude south)
+     4916.45,                  Latitude (- sign indicates latitude south)
+     -123.12,                    Longitude (- sign indicates longitude west)
      2.3,                       Meters of horizontal uncertainty of position
      70.1,                      Altitude, meters above sea level
      52,                        Uncertainty of altitude
