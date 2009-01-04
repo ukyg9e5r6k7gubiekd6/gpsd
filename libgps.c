@@ -280,8 +280,10 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->devicelist = NULL;
 			gpsdata->ndevices = -1;
 			gpsdata->set |= DEVICELIST_SET;
-		    }    
+		    }
 		    if (sp[2] != '?') {
+			char *rc = strdup(sp);
+			sp = rc;
 			/*@ -nullderef @*/
 			gpsdata->ndevices = (int)strtol(sp+2, &sp, 10);
 			gpsdata->devicelist = (char **)calloc(
@@ -293,6 +295,7 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->devicelist[++i] = strdup(sp);
 			/*@ +nullstate +mustfreefresh @*/
 			/*@ +nullderef @*/
+			free(rc);
 			gpsdata->set |= DEVICELIST_SET;
 		    }
 		    break;
