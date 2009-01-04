@@ -288,7 +288,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     /* NOTE - At the present moment this is only being used
 	      for determining the GPS-UTC time difference,
 	      for which the iono data is not needed as far
-	      as we are concerned.  However, I am still 
+	      as we are concerned.  However, I am still
 	      reporting it (if debuglevel >= LOG_IO) as a
 	      matter of interest */
 /* 2^-30 */
@@ -480,8 +480,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     sats_used = (uint32_t)getleul(buf, 9);
     session->gpsdata.satellites_used = 0;
     for (n = 0; n < 31; n++) {
-    	if ((sats_used & (0x01 << n)) != 0)
-    	  session->gpsdata.used[session->gpsdata.satellites_used++] = (int)(n+1);
+	if ((sats_used & (0x01 << n)) != 0)
+	  session->gpsdata.used[session->gpsdata.satellites_used++] = (int)(n+1);
     }
 
     /* Get latitude, longitude */
@@ -523,7 +523,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     track = atan2(vel_east, vel_north);
     if (track < 0)
-    	track += 2 * GPS_PI;
+	track += 2 * GPS_PI;
     session->gpsdata.fix.track = track * RAD_2_DEG;
     /*@ -evalorder @*/
     session->gpsdata.fix.speed = sqrt(pow(vel_east,2) + pow(vel_north,2)) * VEL_RES;
@@ -591,7 +591,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 		"hdop = %f, vdop = %f, tdop = %f\n",
 		session->gpsdata.fix.eph, session->gpsdata.fix.epv,
 		session->gpsdata.gdop, session->gpsdata.pdop,
-		session->gpsdata.hdop, session->gpsdata.vdop, session->gpsdata.tdop);
+		session->gpsdata.hdop, session->gpsdata.vdop,
+		session->gpsdata.tdop);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -599,9 +600,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    return LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET | TIME_SET
-	| STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET | TIMERR_SET | DOP_SET 
-	| CYCLE_START_SET;
+    return LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
+	| TIME_SET | STATUS_SET | MODE_SET | USED_SET | HERR_SET | VERR_SET
+	| TIMERR_SET | DOP_SET | CYCLE_START_SET;
 }
 
 /* Packed Ephemeris Data */
@@ -672,9 +673,9 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     u_int16_t toc = getleuw_be(buf, 28);
     int8_t af2 = getsb(buf, 30);
     int16_t af1 = getlesw_be(buf, 31);
-    /*@ -shiftimplementation @*/ 
+    /*@ -shiftimplementation @*/
     int32_t af0 = getlesl24_be(buf, 33)>>2;
-    /*@ +shiftimplementation @*/ 
+    /*@ +shiftimplementation @*/
     /* Subframe 2, words 3 to 10 minus parity */
     u_int8_t iode = getub(buf, 36);
     int16_t crs = getlesw_be(buf, 37);
@@ -695,7 +696,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int32_t omega = getlesl_be(buf, 74);
     int32_t Omegadot = getlesl24_be(buf, 78);
     /*@ -predboolothers @*/
-    /* Question: What is the proper way of shifting a signed int 2 bits to 
+    /* Question: What is the proper way of shifting a signed int 2 bits to
      * the right, preserving sign? Answer: integer division by 4. */
     int16_t idot = (int16_t)(((getlesw_be(buf, 82)&0xfffc)/4)|(getub(buf, 82)&80?0xc000:0x0000));
     /*@ +predboolothers @*/
@@ -828,7 +829,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	/* NOTE - In theory, I think one would check for hw channel number to
 	   see if one is dealing with a GPS or other satellite, but the
 	   channel numbers reported bear no resemblance to what the spec
-	   says should be.  So I check for the fact that if all three 
+	   says should be.  So I check for the fact that if all three
 	   values below are zero, one is not interested on this satellite */
 	if (!(ele == 0 && azm == 0 && dgps_age == 0)) {
 	    session->gpsdata.PRN[i] = (int)prn;
@@ -1121,7 +1122,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     } else {
 	nav_clock_offset = NAN;
     }
-    if (sizeof(float) == 4) {    
+    if (sizeof(float) == 4) {
 	nav_clock_drift = getlef(buf, 19);
 	osc_filter_drift_est = getlef(buf, 23);
     } else {
@@ -1129,7 +1130,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 	osc_filter_drift_est = NAN;
     }
 
-    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0) 
+    session->gpsdata.sentence_time = gpstime_to_unix((int)week, tow/1000.0)
 	    - session->context->leap_seconds;
 
     gpsd_report(LOG_PROG,
