@@ -667,17 +667,17 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 	  }
 	  session->driver.tsip.last_41 = now;	/* keep timestamp for request */
-	  f1 = getbeul(buf,1);			/* gpstime */
-	  s1 = getbeuw(buf,5);			/* week */
-	  u1 = getbesw(buf,7);			/* leap seconds */
+	  ul1 = getbeul(buf,1);			/* gpstime */
+	  s1 = (short)getbeuw(buf,5);			/* week */
+	  s2 = getbesw(buf,7);			/* leap seconds */
 
 	  session->driver.tsip.gps_week = s1;
 	  if ((int)u1 > 10) {
-	    session->context->leap_seconds = (int)u1;
+	    session->context->leap_seconds = (int)s2;
 	    session->context->valid |= LEAP_SECOND_VALID;
 
 	    session->gpsdata.fix.time =  session->gpsdata.sentence_time =
-	      gpstime_to_unix((int)s1, f1) - (double)u1;
+	      gpstime_to_unix((int)s1, ul1) - (double)s2;
 #ifdef NTPSHM_ENABLE
 	    if (session->context->enable_ntpshm)
 		(void)ntpshm_put(session,session->gpsdata.sentence_time+0.075);
@@ -685,7 +685,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    mask |= TIME_SET;
 	  }
 
-	  gpsd_report(4, "GPS Time %f %d %d\n", f1, s1, u1);
+	  gpsd_report(4, "GPS Time %u %d %d\n", ul1, s1, s2);
 	  break;
 
 
