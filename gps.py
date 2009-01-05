@@ -193,10 +193,10 @@ class gps(gpsdata):
         if not port and (host.find(':') == host.rfind(':')):
             i = host.rfind(':')
             if i >= 0:
-        	host, port = host[:i], host[i+1:]
-        	try: port = int(port)
-        	except ValueError:
-        	    raise socket.error, "nonnumeric port"
+                host, port = host[:i], host[i+1:]
+            try: port = int(port)
+            except ValueError:
+                raise socket.error, "nonnumeric port"
         if not port: port = GPSD_PORT
         #if self.debuglevel > 0: print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
@@ -205,14 +205,14 @@ class gps(gpsdata):
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
-        	self.sock = socket.socket(af, socktype, proto)
-        	#if self.debuglevel > 0: print 'connect:', (host, port)
-        	self.sock.connect(sa)
-        	self.sockfile = self.sock.makefile()
+                self.sock = socket.socket(af, socktype, proto)
+                #if self.debuglevel > 0: print 'connect:', (host, port)
+                self.sock.connect(sa)
+                self.sockfile = self.sock.makefile()
             except socket.error, msg:
-        	#if self.debuglevel > 0: print 'connect fail:', (host, port)
+                #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
-        	continue
+                continue
             break
         if not self.sock:
             raise socket.error, msg
@@ -242,26 +242,26 @@ class gps(gpsdata):
             cmd = field[0]
             data = field[2:]
             if data[0] == "?":
-        	continue
+              continue
             if cmd in ('A', 'a'):
               self.fix.altitude = float(data)
               self.valid |= ALTITUDE_SET
             elif cmd in ('B', 'b'):
               if data == '?':
-        	  self.baudrate = self.stopbits = 0
-        	  self.device = None
+                self.baudrate = self.stopbits = 0
+                self.device = None
               else:
-        	  (f1, f2, f3, f4) = data.split()
-        	  self.baudrate = int(f1)
-        	  self.stopbits = int(f4)
+                (f1, f2, f3, f4) = data.split()
+                self.baudrate = int(f1)
+                self.stopbits = int(f4)
             elif cmd in ('C', 'c'):
               if data == '?':
-        	  self.cycle = -1
-        	  self.device = None
+                self.cycle = -1
+                self.device = None
               elif len(data.split()) == 2:
-        	  (self.cycle, self.mincycle) = map(float, data)
+                (self.cycle, self.mincycle) = map(float, data)
               else:
-        	  self.mincycle = self.cycle = float(data)
+                self.mincycle = self.cycle = float(data)
             elif cmd in ('D', 'd'):
               self.utc = data
               self.fix.time = isotime(self.utc)
@@ -271,57 +271,57 @@ class gps(gpsdata):
               (self.epe, self.fix.eph, self.fix.epv) = map(float, parts)
               self.valid |= HERR_SET | VERR_SET | PERR_SET
             elif cmd in ('F', 'f'):
-        	if data == '?':
-        	    self.device = None
-        	else:
-        	    self.device = data
+              if data == '?':
+                  self.device = None
+              else:
+                  self.device = data
             elif cmd in ('I', 'i'):
               if data == '?':
-        	  self.cycle = -1
-        	  self.gps_id = None
+                self.cycle = -1
+                self.gps_id = None
               else:
-        	  self.gps_id = data
+                self.gps_id = data
             elif cmd in ('K', 'K'):
-        	if data == '?':
-        	    self.devices = None
-        	else:
-        	    self.devices = data[1:].split()
+              if data == '?':
+                  self.devices = None
+              else:
+                  self.devices = data[1:].split()
             elif cmd in ('M', 'm'):
               self.fix.mode = int(data)
               self.valid |= MODE_SET
             elif cmd in ('N', 'n'):
               if data == '?':
-        	  self.driver_mode = -1
-        	  self.device = None
+                self.driver_mode = -1
+                self.device = None
               else:
-        	  self.driver_mode = int(data)
+                self.driver_mode = int(data)
             elif cmd in ('O', 'o'):
-        	fields = data.split()
-        	if fields[0] == '?':
-        	    self.fix.mode = MODE_NO_FIX
-        	else:
-        	    self.timings.sentence_tag = fields[0]
-        	    def default(i, cnv=float):
-        		if fields[i] == '?':
-        		    return NaN
-        		else:
-        		    return cnv(fields[i])
+              fields = data.split()
+              if fields[0] == '?':
+                  self.fix.mode = MODE_NO_FIX
+              else:
+                  self.timings.sentence_tag = fields[0]
+                  def default(i, cnv=float):
+                    if fields[i] == '?':
+                        return NaN
+                    else:
+                        return cnv(fields[i])
                     self.utc = fields[1]
-        	    self.fix.time = default(1)
+                  self.fix.time = default(1)
                     if not isnan(self.fix.time):
                         self.utc = isotime(self.fix.time)
-        	    self.fix.ept = default(2)
-        	    self.fix.latitude = default(3)
-        	    self.fix.longitude = default(4)
-        	    self.fix.altitude = default(5)
-        	    self.fix.eph = default(6)
-        	    self.fix.epv = default(7)
-        	    self.fix.track = default(8)
-        	    self.fix.speed = default(9)
-        	    self.fix.climb = default(10)
-        	    self.fix.epd = default(11)
-        	    self.fix.eps = default(12)
-        	    self.fix.epc = default(13)
+                  self.fix.ept = default(2)
+                  self.fix.latitude = default(3)
+                  self.fix.longitude = default(4)
+                  self.fix.altitude = default(5)
+                  self.fix.eph = default(6)
+                  self.fix.epv = default(7)
+                  self.fix.track = default(8)
+                  self.fix.speed = default(9)
+                  self.fix.climb = default(10)
+                  self.fix.epd = default(11)
+                  self.fix.eps = default(12)
+                  self.fix.epc = default(13)
                     if len(fields) > 14:
                         self.fix.mode = default(14, int)
                     else:
@@ -329,46 +329,46 @@ class gps(gpsdata):
                             self.fix.mode = MODE_2D
                         else:
                             self.fix.mode = MODE_3D
-        	    self.valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
-        	    if self.fix.mode == MODE_3D:
-        		self.valid |= ALTITUDE_SET | CLIMB_SET
-        	    if not isnan(self.fix.eph):
-        		self.valid |= HERR_SET
-        	    if not isnan(self.fix.epv):
-        		self.valid |= VERR_SET
-        	    if not isnan(self.fix.track):
-        		self.valid |= TRACK_SET | SPEED_SET
-        	    if not isnan(self.fix.eps):
-        		self.valid |= SPEEDERR_SET
-        	    if not isnan(self.fix.epc):
-        		self.valid |= CLIMBERR_SET
+                  self.valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
+                  if self.fix.mode == MODE_3D:
+                    self.valid |= ALTITUDE_SET | CLIMB_SET
+                  if not isnan(self.fix.eph):
+                    self.valid |= HERR_SET
+                  if not isnan(self.fix.epv):
+                    self.valid |= VERR_SET
+                  if not isnan(self.fix.track):
+                    self.valid |= TRACK_SET | SPEED_SET
+                  if not isnan(self.fix.eps):
+                    self.valid |= SPEEDERR_SET
+                  if not isnan(self.fix.epc):
+                    self.valid |= CLIMBERR_SET
             elif cmd in ('P', 'p'):
-        	(self.fix.latitude, self.fix.longitude) = map(float, data.split())
-        	self.valid |= LATLON_SET
+              (self.fix.latitude, self.fix.longitude) = map(float, data.split())
+              self.valid |= LATLON_SET
             elif cmd in ('Q', 'q'):
-        	parts = data.split()
-        	self.satellites_used = int(parts[0])
-        	(self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
-        	self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
+              parts = data.split()
+              self.satellites_used = int(parts[0])
+              (self.pdop, self.hdop, self.vdop, self.tdop, self.gdop) = map(float, parts[1:])
+              self.valid |= HDOP_SET | VDOP_SET | PDOP_SET | TDOP_SET | GDOP_SET
             elif cmd in ('S', 's'):
-        	self.status = int(data)
-        	self.valid |= STATUS_SET
+              self.status = int(data)
+              self.valid |= STATUS_SET
             elif cmd in ('T', 't'):
-        	self.fix.track = float(data)
-        	self.valid |= TRACK_SET
+              self.fix.track = float(data)
+              self.valid |= TRACK_SET
             elif cmd in ('U', 'u'):
-        	self.fix.climb = float(data)
-        	self.valid |= CLIMB_SET
+              self.fix.climb = float(data)
+              self.valid |= CLIMB_SET
             elif cmd in ('V', 'v'):
-        	self.fix.speed = float(data)
-        	self.valid |= SPEED_SET
+              self.fix.speed = float(data)
+              self.valid |= SPEED_SET
             elif cmd in ('X', 'x'):
-        	if data == '?':
-        	    self.online = -1
-        	    self.device = None
-        	else:
-        	    self.online = float(data)
-        	    self.valid |= ONLINE_SET
+              if data == '?':
+                  self.online = -1
+                  self.device = None
+              else:
+                  self.online = float(data)
+                  self.valid |= ONLINE_SET
             elif cmd in ('Y', 'y'):
                 satellites = data.split(":")
                 prefix = satellites.pop(0).split()
@@ -383,9 +383,9 @@ class gps(gpsdata):
                 self.satellites = newsats
                 self.valid |= SATELLITE_SET
             elif cmd in ('Z', 'z'):
-        	self.profiling = (data[0] == '1')
+              self.profiling = (data[0] == '1')
             elif cmd == '$':
-        	self.timings.collect(*data.split())
+              self.timings.collect(*data.split())
         if self.raw_hook:
             self.raw_hook(buf);
 
@@ -408,9 +408,9 @@ class gps(gpsdata):
         self.__unpack(self.response)
         if self.profiling:
             if self.timings.sentence_time != '?':
-        	basetime = self.timings.sentence_time
+                basetime = self.timings.sentence_time
             else:
-        	basetime = self.timings.d_xmit_time
+                basetime = self.timings.d_xmit_time
             self.timings.c_decode_time = time.time() - basetime
             self.timings.c_recv_time -= basetime
         return 0
@@ -419,7 +419,7 @@ class gps(gpsdata):
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
- 	self.sock.send(commands)
+        self.sock.send(commands)
 
     def query(self, commands):
         "Send a command, get back a response."
