@@ -150,7 +150,7 @@ class gpsdata:
         self.devices = []
 
     def __repr__(self):
-        st = ""
+        st = "Time: %s (%s)" % (self.utc, self.fix.time)
         st += "Lat/lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
         if isnan(self.fix.altitude):
             st += "Altitude: ?\n"
@@ -233,7 +233,7 @@ class gps(gpsdata):
 
     def __unpack(self, buf):
         # unpack a daemon response into the instance members
-        self.gps_time = 0.0
+        self.fix.time = 0.0
         fields = buf.strip().split(",")
         if fields[0] == "GPSD":
           for field in fields[1:]:
@@ -264,7 +264,7 @@ class gps(gpsdata):
         	  self.mincycle = self.cycle = float(data)
             elif cmd in ('D', 'd'):
               self.utc = data
-              self.gps_time = isotime(self.utc)
+              self.fix.time = isotime(self.utc)
               self.valid |= TIME_SET
             elif cmd in ('E', 'e'):
               parts = data.split()
@@ -306,7 +306,8 @@ class gps(gpsdata):
         		    return NaN
         		else:
         		    return cnv(fields[i])
-        	    self.fix.time = default(1)
+                    self.utc = fields[1]
+        	    self.fix.time = isotime(self.utc)
         	    self.fix.ept = default(2)
         	    self.fix.latitude = default(3)
         	    self.fix.longitude = default(4)
