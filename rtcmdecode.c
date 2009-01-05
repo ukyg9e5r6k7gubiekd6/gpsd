@@ -110,8 +110,8 @@ static void encode(FILE *fpin, FILE *fpout)
 	    (void)memset(lexer.isgps.buf, 0, sizeof(lexer.isgps.buf));
 	    (void)rtcm2_repack(&rtcm, lexer.isgps.buf);
 	    if (fwrite(lexer.isgps.buf, 
-			 sizeof(isgps30bits_t), 
-		       (size_t)rtcm.length, fpout) <= 0)
+		       sizeof(isgps30bits_t), 
+		       (size_t)rtcm.length, fpout) != (size_t)rtcm.length)
 		(void) fprintf(stderr, "rtcmdecode: report write failed.\n");
 	    memset(&lexer, 0, sizeof(lexer));
 	} else if (status < 0) {

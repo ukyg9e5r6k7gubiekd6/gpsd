@@ -126,7 +126,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 }
 
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-static void *gpsd_ppsmonitor(void *arg)
+static /*@null@*/void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
     int cycle,duration, state = 0, laststate = -1, unchanged = 0;

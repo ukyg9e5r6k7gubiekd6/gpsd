@@ -639,7 +639,7 @@ static int set_speed(unsigned int speed, unsigned int stopbits)
 	return NO_PACKET;
     (void)tcflush(devicefd, TCIOFLUSH);
 
-    (void)fprintf(stderr, "Hunting at speed %u, %dN%u\n",
+    (void)fprintf(stderr, "Hunting at speed %u, %uN%u\n",
 	    get_speed(&ttyset), 9-stopbits, stopbits);
 
     /* sniff for NMEA or SiRF packet */
@@ -814,7 +814,7 @@ static int readpkt(unsigned char *buf, size_t buflen)
 	return EOF;
 
     if (logfile != NULL) {
-	/*@ -shiftimplementation @*/
+	/*@ -shiftimplementation -sefparams +charint @*/
 	char outbuf[BUFSIZ];
 	(void)memcpy(outbuf, "\xa0\xa2", 2);
 	outbuf[2] = (len >> 8);
@@ -823,8 +823,8 @@ static int readpkt(unsigned char *buf, size_t buflen)
 	outbuf[4+len] = (csum >> 8);
 	outbuf[5+len] = (csum & 0xff);
 	(void)memcpy(outbuf+6+len, "\xb0\xb3", 2);
-	assert(fwrite(outbuf, sizeof(char), len+8, logfile) >= 1);
-	/*@ +shiftimplementation @*/
+	assert(fwrite(outbuf, sizeof(char), (size_t)len+8, logfile) >= 1);
+	/*@ +shiftimplementation +sefparams -charint @*/
     }
     return len;
 }
@@ -859,14 +859,18 @@ static bool sendpkt(unsigned char *buf, size_t len, char *device)
 	return false;
     else {
 	if (!serial) {
+	    /*@ -sefparams @*/
 	    assert(write(controlfd, "!", 1) != -1);
 	    assert(write(controlfd, device, strlen(device)) != -1);
 	    assert(write(controlfd, "=", 1) != -1);
+	    /*@ +sefparams @*/
 	}
 	st = write(controlfd, buf,len);
 	if (!serial)
 	    /* enough room for "ERROR\r\n\0" */
+	    /*@ -sefparams @*/
 	    assert(read(controlfd, buf, 8) != -1);
+	    /*@ +sefparams @*/
 	return ((size_t)st == len);
     }
 }
@@ -925,7 +929,7 @@ static void command(char buf[], size_t len, const char *fmt, ... )
     (void)vsnprintf(buf, len, fmt, ap);
     va_end(ap);
 
-    assert(write(devicefd, buf, strlen(buf)) != -1);
+    /*@i1@*/assert(write(devicefd, buf, strlen(buf)) != -1);
     n = read(devicefd, buf, len);
     if (n >= 0) {
 	buf[n] = '\0';
@@ -991,12 +995,13 @@ int main (int argc, char **argv)
 	    }
 	}
     }
-    /*@ +nullpass +branchstate @*/
 
     /*@ -boolops */
     if (!arg || (arg && !slash) || (arg && colon1 && slash)) {	
 	if (!server)
 	    server = "127.0.0.1";
+	if (!port)
+	    port = DEFAULT_GPSD_PORT;
 	devicefd = netlib_connectsock(server, port, "tcp");
 	if (devicefd < 0) {
 	    (void)fprintf(stderr, 
@@ -1020,6 +1025,7 @@ int main (int argc, char **argv)
 	serial = true;
     }
     /*@ +boolops */
+    /*@ +nullpass +branchstate @*/
 
     /* quit cleanly if an assertion fails */
     (void)signal(SIGABRT, onsig);
@@ -1270,9 +1276,11 @@ int main (int argc, char **argv)
 		    display(cmdwin, 1, 0, "%s %d N %d", device,bps,stopbits);
 		} else {
 		    line[0] = 'b';
+		    /*@ -sefparams @*/
 		    assert(write(devicefd, line, strlen(line)) != -1);
 		    /* discard response */
 		    assert(read(devicefd, buf, sizeof(buf)) != -1);
+		    /*@ +sefparams @*/
 		}
 		break;
 

@@ -142,8 +142,10 @@ static int display_sats;
    desirable (in case the don't notice the subtle change from "(mag)"
    to "(true)" on their display).
  */
-static float true2magnetic(double lat, double lon, double heading) {
+static float true2magnetic(double lat, double lon, double heading)
+{
   /* Western Europe */
+  /*@ -evalorder +relaxtypes @*/
   if((lat > 36.0) && (lat < 68.0) &&
      (lon > -10.0) && (lon < 28.0)) {
     return( 10.4768771667158 - (0.507385322418858 * lon) + (0.00753170031703826 * pow(lon, 2))
@@ -169,6 +171,7 @@ static float true2magnetic(double lat, double lon, double heading) {
   }
   magnetic_flag=0;
   return(heading);
+  /*@ +evalorder -relaxtypes @*/
 }
 
 /* Function to call when we're all done.  Does a bit of clean-up. */

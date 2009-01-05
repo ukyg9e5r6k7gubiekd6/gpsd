@@ -282,20 +282,20 @@ static void gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			gpsdata->set |= DEVICELIST_SET;
 		    }
 		    if (sp[2] != '?') {
+			/*@ -nullderef -nullpass -mustfreeonly -dependenttrans @*/
 			char *rc = strdup(sp);
-			sp = rc;
-			/*@ -nullderef @*/
-			gpsdata->ndevices = (int)strtol(sp+2, &sp, 10);
+			char *sp2 = rc;
+			gpsdata->ndevices = (int)strtol(sp2+2, &sp2, 10);
 			gpsdata->devicelist = (char **)calloc(
 			    (size_t)gpsdata->ndevices,
 			    sizeof(char **));
 			/*@ -nullstate -mustfreefresh @*/
-			gpsdata->devicelist[i=0] = strdup(strtok_r(sp+1, " \r\n", &ns));
-			while ((sp = strtok_r(NULL, " \r\n",  &ns)))
-			    gpsdata->devicelist[++i] = strdup(sp);
-			/*@ +nullstate +mustfreefresh @*/
-			/*@ +nullderef @*/
+			gpsdata->devicelist[i=0] = strdup(strtok_r(sp2+1, " \r\n", &ns));
+			while ((sp2 = strtok_r(NULL, " \r\n",  &ns)))
+			    gpsdata->devicelist[++i] = strdup(sp2);
 			free(rc);
+			/*@ +nullstate +mustfreefresh @*/
+			/*@ +nullderef +nullpass +dependenttrans +mustfreeonly @*/
 			gpsdata->set |= DEVICELIST_SET;
 		    }
 		    break;
@@ -560,7 +560,7 @@ int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... )
 }
 
 #ifdef HAVE_LIBPTHREAD
-static void *poll_gpsd(void *args) 
+static /*@null@*/void *poll_gpsd(void *args) 
 /* helper for the thread launcher */
 {
     int oldtype, oldstate;
@@ -604,13 +604,16 @@ int gps_set_callback(struct gps_data_t *gpsdata,
 int gps_del_callback(struct gps_data_t *gpsdata, pthread_t *handler)
 /* delete asynchronous callback and kill its thread */
 {
+    /*@ -nullstate @*/
     int res;
+
     /*@i@*/res = pthread_cancel(*handler);	/* we cancel the whole thread */
-    pthread_join(*handler, NULL);	/* wait for thread to actually terminate */
+    /*@i1@*/pthread_join(*handler, NULL);	/* wait for thread to actually terminate */
     gpsdata->thread_hook = NULL;	/* finally we cancel the callback */
     if (res == 0) 			/* tell gpsd to stop sending data */
-	(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
+	/*@i1@*/(void)gps_query(gpsdata,"w-\n");	/* disable watcher mode */
     return res;
+    /*@ +nullstate @*/
 }
 #endif /* HAVE_LIBPTHREAD */
 

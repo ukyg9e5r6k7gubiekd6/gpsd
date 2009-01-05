@@ -43,7 +43,7 @@ struct ntrip_stream_t {
 static struct ntrip_stream_t ntrip_stream;
 
 /*@ -temptrans -mustfreefresh @*/
-static char *ntrip_field_iterate(char *start, /*@null@*/char *prev, const char *eol)
+static /*@null@*/char *ntrip_field_iterate(/*@null@*/char *start, /*@null@*/char *prev, const char *eol)
 {
     char *s, *t, *u;
 
@@ -292,7 +292,7 @@ static int ntrip_stream_probe(const char *caster,
 		   "Connection: close\r\n"
 		   "\r\n",
 		   VERSION);
-    if (write(dsock, buf, strlen(buf)) != strlen(buf)) {
+    if (write(dsock, buf, strlen(buf)) != (ssize_t)strlen(buf)) {
 	    printf("ntrip stream write error %d\n", dsock);
 	    return -1;
     }
@@ -326,7 +326,7 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
 /*@ -nullpass @*/ /* work around a splint bug */
 static int ntrip_stream_open(const char *caster,
 			     const char *port,
-			     const char *auth,
+			     /*@null@*/const char *auth,
 			     struct gps_context_t *context, 
 			     struct ntrip_stream_t *stream)
 {
@@ -350,7 +350,7 @@ static int ntrip_stream_open(const char *caster,
 		   "Connection: close\r\n"
 		   "\r\n",
 		   stream->mountpoint, VERSION, authstr);
-    if (write(context->dsock, buf, strlen(buf)) != strlen(buf)) {
+    if (write(context->dsock, buf, strlen(buf)) != (ssize_t)strlen(buf)) {
 	    printf("ntrip stream write error on %d\n", context->dsock);
 	    return -1;
     }
@@ -463,7 +463,7 @@ void ntrip_report(struct gps_device_t *session)
 	if (session->context->dsock > -1) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(session, buf, sizeof(buf));
-	    if (write(session->context->dsock, buf, strlen(buf)) == strlen(buf))
+	    if (write(session->context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s", buf);
 	    else
 		gpsd_report(LOG_IO, "ntrip report write failed", buf);

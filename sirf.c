@@ -440,7 +440,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 
     session->gpsdata.fix.latitude = getbesl(buf, 23)*1e-7;
     session->gpsdata.fix.longitude = getbesl(buf, 27)*1e-7;
-    if (session->gpsdata.fix.latitude && session->gpsdata.fix.latitude)
+    if (session->gpsdata.fix.latitude!=0 && session->gpsdata.fix.latitude!=0)
 	mask |= LATLON_SET;
 
     if ((session->gpsdata.fix.eph =  getbesl(buf, 50)*1e-2) > 0)
@@ -451,7 +451,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	mask |= SPEEDERR_SET;
 
     /* HDOP should be available at byte 89, but in 231 it's zero. */
-    if ((session->gpsdata.hdop = getub(buf, 89) * 0.2) > 0)
+    if ((session->gpsdata.hdop = (unsigned int)getub(buf, 89) * 0.2) > 0)
 	mask |= HDOP_SET;
 
     if (session->driver.sirf.driverstate & SIRF_GE_232) {

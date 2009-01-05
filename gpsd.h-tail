@@ -390,8 +390,8 @@ extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
 extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
-extern /*@ observer @*/ char *gpsd_hexdump(const void *, size_t);
-extern /*@ observer @*/ char *gpsd_hexdump_wrapper(const void *, size_t, int);
+extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);
+extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_t, int);
 extern int gpsd_hexpack(char *, char *, int);
 extern int hex2bin(char *);
 extern void ntpd_link_activate(struct gps_device_t *session);
@@ -436,7 +436,6 @@ void gpsd_report(int, const char *, ...);
 
 #ifdef S_SPLINT_S
 extern bool finite(double);
-extern int cfmakeraw(struct termios *);
 extern struct protoent *getprotobyname(const char *);
 extern /*@observer@*/char *strptime(const char *,const char *tp,/*@out@*/struct tm *)/*@modifies tp@*/;
 extern struct tm *gmtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies tp@*/;

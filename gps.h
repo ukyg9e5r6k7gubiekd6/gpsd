@@ -587,7 +587,7 @@ struct gps_data_t {
     void (*thread_hook)(struct gps_data_t *, char *, size_t len, int level);/* Thread-callback hook for GPS data. */
 };
 
-extern struct gps_data_t *gps_open(const char *host, const char *port);
+extern /*@null@*/ struct gps_data_t *gps_open(const char *host, const char *port);
 int gps_close(struct gps_data_t *);
 int gps_query(struct gps_data_t *gpsdata, const char *fmt, ... );
 int gps_poll(struct gps_data_t *gpsdata);

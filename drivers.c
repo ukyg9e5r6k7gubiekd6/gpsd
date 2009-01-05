@@ -32,7 +32,7 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 
 #ifdef UBX_ENABLE
     extern gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
-    extern bool ubx_write(int fd, unsigned char msg_class, unsigned char msg_id, unsigned char *msg, unsigned short data_len);
+    extern bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
     extern void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
 #endif /* UBX_ENABLE */
 
@@ -228,7 +228,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef UBX_ENABLE
     case 7:
 	/* probe for UBX -- query software version */
-	ubx_write(session->gpsdata.gps_fd, 0x0a, 0x04, NULL, 0);
+	(void)ubx_write(session->gpsdata.gps_fd, 0x0au, 0x04, NULL, 0);
 	break;
 #endif /* UBX_ENABLE */
 #ifdef MKT3301_ENABLE

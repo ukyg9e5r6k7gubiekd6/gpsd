@@ -35,7 +35,7 @@ int dgpsip_open(struct gps_context_t *context, const char *dgpsserver)
 	(void)gethostname(hn, sizeof(hn));
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf,sizeof(buf), "HELO %s gpsd %s\r\nR\r\n",hn,VERSION);
-	if (write(context->dsock, buf, strlen(buf)) == strlen(buf))
+	if (write(context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
 	    context->dgnss_service = dgnss_dgpsip;
 	else
 	    gpsd_report(LOG_ERROR, "hello to DGPS server %s failed\n", dgpsserver);
@@ -64,7 +64,7 @@ void dgpsip_report(struct gps_device_t *session)
 			   session->gpsdata.fix.latitude, 
 			   session->gpsdata.fix.longitude, 
 			   session->gpsdata.fix.altitude);
-	    if (write(session->context->dsock, buf, strlen(buf)) == strlen(buf))
+	    if (write(session->context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s", buf);
 	    else
 		gpsd_report(LOG_IO, "write to dgps FAILED");

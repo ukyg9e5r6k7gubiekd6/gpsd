@@ -750,9 +750,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
     typedef gps_mask_t (*nmea_decoder)(int count, char *f[], struct gps_device_t *session);
     static struct {
 	char *name;
-	int nf;		/* minimum number of fields required to parse */
+	int nf;			/* minimum number of fields required to parse */
 	nmea_decoder decoder;
     } nmea_phrase[] = {
+	/*@ -nullassign @*/
 	{"RMC", 8,	processGPRMC},
 	{"GGA", 13,	processGPGGA},
 	{"GLL", 7, 	processGPGLL},
@@ -773,6 +774,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t *session)
 #ifdef OCEANSERVER_ENABLE
 	{"OHPR", 18,	processOHPR},
 #endif /* OCEANSERVER_ENABLE */
+	/*@ +nullassign @*/
     };
     volatile unsigned char buf[NMEA_MAX+1];
 

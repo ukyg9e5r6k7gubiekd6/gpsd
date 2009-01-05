@@ -25,7 +25,7 @@ unsigned long long ubits(char buf[], unsigned int start, unsigned int width)
     unsigned int i;
     unsigned end;
 
-    assert(width <= sizeof(long long) * BITS_PER_BYTE);
+    /*@i1@*/assert(width <= sizeof(long long) * BITS_PER_BYTE);
     for (i = start / BITS_PER_BYTE; i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
 	fld <<= BITS_PER_BYTE;
 	fld |= (unsigned char)buf[i];
@@ -59,11 +59,13 @@ signed long long sbits(char buf[], unsigned int start, unsigned int width)
     unsigned long long un = ubits(buf, start, width);
     signed long long fld;
 
+    /*@ +relaxtypes */
     if (un & (1 << width))
 	fld = -(un & ~(1 << width));
     else
 	fld = (signed long long)un;
     
     return fld;
+    /*@ -relaxtypes */
 }
 

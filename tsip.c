@@ -19,7 +19,7 @@
 #ifdef TSIP_ENABLE
 #define TSIP_CHANNELS	12
 
-static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
+static int tsip_write(int fd, unsigned int id, /*@null@*/unsigned char *buf, size_t len)
 {
 #ifdef ALLOW_RECONFIGURE
     char buf2[BUFSIZ];
@@ -33,6 +33,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
     if (write(fd,buf2,2) != 2)
 	return -1;
 
+    /*@ -nullderef @*/
     while (len-- > 0) {
 	if (*buf == '\x10')
 	    if (write(fd,buf2,1) != 1)
@@ -41,6 +42,7 @@ static int tsip_write(int fd, unsigned int id, unsigned char *buf, size_t len)
 	if (write(fd,buf++,1) != 1)
 	    return -1;
     }
+    /*@ +nullderef @*/
 
     buf2[1] = '\x03';
     /*@ -charint @*/

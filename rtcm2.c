@@ -705,11 +705,12 @@ int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)
 	if (n >= DIMENSION(rtcmp->msg_data.words))
 	    return 0;
 	else {
-	    fldcount = sscanf(buf, "U\t0x%08x\n", &v);
+	    unsigned int u;
+	    fldcount = sscanf(buf, "U\t0x%08x\n", &u);
 	    if (fldcount != 1)
 		return (int)(-rtcmp->type-1);
 	    else {
-		rtcmp->msg_data.words[n] = (isgps30bits_t)v;
+		rtcmp->msg_data.words[n] = (isgps30bits_t)u;
 		if (n == rtcmp->length-1)
 		    return 0;
 		else

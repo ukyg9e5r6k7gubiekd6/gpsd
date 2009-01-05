@@ -109,8 +109,8 @@ int main(void)
 
     (void)fputs("Test data:", stdout);
     for (sp = buf; sp < buf + 28; sp++)
-	printf(" %02x", *sp);
-    putc('\n', stdout);
+	(void)printf(" %02x", *sp);
+    (void)putc('\n', stdout);
 
     /* big-endian test */
     printf("Big-endian:\n");

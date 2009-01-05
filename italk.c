@@ -114,7 +114,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session, unsigned ch
     nchan = (unsigned int)((len - 10 - 52) / 20);
     nsv = 0;
     for (i = st = 0; i < nchan; i++) {
-	int off = 7+ 52 + 20 * i;
+	unsigned int off = 7+ 52 + 20 * i;
 	unsigned short flags;
 
 	flags = getleuw(buf, off);

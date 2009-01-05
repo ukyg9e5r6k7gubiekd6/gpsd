@@ -57,30 +57,32 @@ static void daemonize(void) {
   if (i>0) exit(0); /* parent exits */
 
   /* Obtain a new process group. */
-  setsid();
+  (void)setsid();
 
   /* Close all open descriptors. */
   for(i=getdtablesize();i>=0;--i)
-    close(i);
+      (void)close(i);
 
   /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
   i=open("/dev/null",O_RDWR);	/* STDIN */
+  /*@ -sefparams @*/
   assert(dup(i) != -1); 	/* STDOUT */
   assert(dup(i) != -1);		/* STDERR */
 
   /* Know thy mask. */
-  umask(0x033);
+  (void)umask(0x033);
 
   /* Run from a known spot. */
   assert(chdir("/") != -1);
+  /*@ +sefparams @*/
 
   /* Catch child sig */
-  signal(SIGCHLD,SIG_IGN);
+  (void)signal(SIGCHLD,SIG_IGN);
 
- /* Ignore tty signals */
-  signal(SIGTSTP,SIG_IGN);
-  signal(SIGTTOU,SIG_IGN);
-  signal(SIGTTIN,SIG_IGN);
+  /* Ignore tty signals */
+  (void)signal(SIGTSTP,SIG_IGN);
+  (void)signal(SIGTTOU,SIG_IGN);
+  (void)signal(SIGTTIN,SIG_IGN);
 }
 
 /* open the serial port and set it up */
@@ -212,7 +214,7 @@ int main( int argc, char **argv)
 	exit(1);
     }
 
-    if (filename==NULL && daemon==true) {
+    if (filename==NULL && daemon) {
 	(void)fprintf(stderr, "gpsipipe: use of '-d' requires '-f'.\n");
 	exit(1);
     }
@@ -255,7 +257,7 @@ int main( int argc, char **argv)
 
     /* Sleep for ten seconds if the user requested it. */
     if (sleepy)
-      sleep(10);
+	(void)sleep(10);
 
     /* Open the output file if the user requested it.  If the user
        requested '-R', we use the 'b' flag in fopen() to "do the right
@@ -298,7 +300,7 @@ int main( int argc, char **argv)
 	exit(1);
     }
 
-    if ((isatty(STDERR_FILENO) == 0) || (daemon==true))
+    if ((isatty(STDERR_FILENO) == 0) || daemon)
 	vflag = 0;
 
     for(;;) {

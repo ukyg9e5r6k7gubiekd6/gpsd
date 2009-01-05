@@ -153,7 +153,7 @@ int main(int argc, char **argv)
     else 
         (void)XtSetArg(args[0], XtNlabel, "Knots");
 
-    /*@ +immediatetrans +usedef +observertrans +statictrans @*/
+    /*@ +immediatetrans +usedef +observertrans +statictrans -compmempass @*/
     (void)XtCreateManagedWidget("name", labelWidgetClass, base, args, 1);
     
     /**** Tachometer widget ****/

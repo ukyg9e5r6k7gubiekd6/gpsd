@@ -135,6 +135,7 @@ static int daemonize(void)
     int fd;
     pid_t pid;
 
+    /*@ -type @*/	/* weirdly, splint 3.1.2 is confused by fork() */
     switch (pid = fork()) {
     case -1:
 	return -1;
@@ -143,6 +144,7 @@ static int daemonize(void)
     default:	/* parent side */
 	exit(0);
     }
+    /*@ +type @*/
 
     if (setsid() == -1)
 	return -1;
@@ -236,7 +238,7 @@ static int passivesock(char *service, char *protocol, int qlen)
     struct sockaddr_in sin;
     int s, type, proto, one = 1;
 
-    /*@ -mustfreefresh @*/
+    /*@ -mustfreefresh +matchanyintegral @*/
     memset((char *) &sin, 0, sizeof(sin));
     sin.sin_family = (sa_family_t)AF_INET;
     if (listen_global)
@@ -278,7 +280,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     return s;
-    /*@ +mustfreefresh @*/
+    /*@ +mustfreefresh -matchanyintegral @*/
 }
 
 static int filesock(char *filename)
@@ -293,7 +295,7 @@ static int filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, 104); /* from sys/un.h */
     /*@i1@*/addr.sun_family = AF_UNIX;
-    (void)bind(sock, (struct sockaddr *) &addr,  (int)sizeof(addr));
+    (void)bind(sock, (struct sockaddr *) &addr,  (socklen_t)sizeof(addr));
     if (listen(sock, QLEN) < 0) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	return -1;
@@ -620,11 +622,13 @@ static bool assign_channel(struct subscriber_t *user)
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
+		/*@ -sefparams @*/
 		assert(write(user->fd, "GPSD,F=", 7) != -1);
 		assert(write(user->fd,
 			     user->device->gpsdata.gps_device,
 			     strlen(user->device->gpsdata.gps_device)) != -1);
 		assert(write(user->fd, "\r\n", 2) != -1);
+		/*@ +sefparams @*/
 	    }
 	}
     }
@@ -633,7 +637,10 @@ static bool assign_channel(struct subscriber_t *user)
 	char buf[NMEA_MAX];
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 		       timestamp(), gpsd_id(user->device));
+	/*@ -sefparams +matchanyintegral @*/
 	assert(write(user->fd, buf, strlen(buf)) == strlen(buf));
+	/*@ +sefparams -matchanyintegral @*/
+
     }
     return true;
 }
@@ -732,7 +739,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 			/* zero parity breaks the next snprintf */
 			sub->device->gpsdata.parity = (unsigned)'N';
 		}
-		(void)snprintf(phrase, sizeof(phrase), ",B=%d %d %c %u",
+		(void)snprintf(phrase, sizeof(phrase), ",B=%d %u %c %u",
 		    (int)gpsd_get_speed(&sub->device->ttyset),
 			9 - sub->device->gpsdata.stopbits,
 			(int)sub->device->gpsdata.parity,
@@ -1205,6 +1212,7 @@ static void handle_control(int sfd, char *buf)
     struct gps_device_t	*chp;
     int cfd;
 
+    /*@ -sefparams @*/
     if (buf[0] == '-') {
 	p = snarfline(buf+1, &stash);
 	gpsd_report(LOG_INF, "<= control(%d): removing %s\n", sfd, stash);
@@ -1253,6 +1261,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     }
+    /*@ +sefparams @*/
 }
 
 /*@ -mustfreefresh @*/

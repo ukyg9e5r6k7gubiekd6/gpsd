@@ -36,7 +36,7 @@ static bool have_port_configuration = false;
 static unsigned char original_port_settings[20];
 static unsigned char sbas_in_use;
 
-	bool 		ubx_write(int fd, unsigned char msg_class, unsigned char msg_id, unsigned char *msg, unsigned short data_len);
+	bool 		ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
 	gps_mask_t 	ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
 	void 		ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
 static	gps_mask_t 	ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf, size_t data_len);
@@ -413,7 +413,7 @@ gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t le
 	    for(i=6;i<26;i++)
 		original_port_settings[i-6] = buf[i];				/* copy the original port settings */
 	    buf[14+6] &= ~0x02;							/* turn off NMEA output on this port */
-	    ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+	    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 	    have_port_configuration = true;
 	    break;
 
@@ -472,7 +472,7 @@ void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t le
     }
 }
 
-bool ubx_write(int fd, unsigned char msg_class, unsigned char msg_id, unsigned char *msg, unsigned short data_len) {
+bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len) {
    unsigned char CK_A, CK_B;
    unsigned char head_tail[8];
    unsigned int i, count;
@@ -526,8 +526,9 @@ static void ubx_configure(struct gps_device_t *session, unsigned int seq)
 
     gpsd_report(LOG_IO, "UBX configure: %d\n",seq);
 
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, NULL, 0);	/* get This port's settings */
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
 
+    /*@ -type @*/
     msg[0] = 0x03; /* SBAS mode enabled, accept testbed mode */
     msg[1] = 0x07; /* SBAS usage: range, differential corrections and integrity */
     msg[2] = 0x03; /* use the maximun search range: 3 channels */
@@ -536,42 +537,45 @@ static void ubx_configure(struct gps_device_t *session, unsigned int seq)
     msg[5] = 0x00;
     msg[6] = 0x00;
     msg[7] = 0x00;
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x16, msg, 8);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x16, msg, 8);
 
     msg[0] = 0x01; /* class */
     msg[1] = 0x04; /* msg id  = UBX_NAV_DOP */
     msg[2] = 0x01; /* rate */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x01, msg, 3);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x06; /* msg id  = NAV-SOL */
     msg[2] = 0x01; /* rate */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x01, msg, 3);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x20; /* msg id  = UBX_NAV_TIMEGPS */
     msg[2] = 0x01; /* rate */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x01, msg, 3);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x30; /* msg id  = NAV-SVINFO */
     msg[2] = 0x0a; /* rate */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x01, msg, 3);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
     msg[0] = 0x01; /* class */
     msg[1] = 0x32; /* msg id  = NAV-SBAS */
     msg[2] = 0x0a; /* rate */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x01, msg, 3);
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x01, msg, 3);
+    /*@ +type @*/
 
 }
 
 static void ubx_revert(struct gps_device_t *session)
 {
+    /*@ -type @*/
     unsigned char msg[4] = {
 	0x00, 0x00,	/* hotstart */
 	0x01,		/* controlled software reset */
 	0x00};		/* reserved */
+    /*@ +type @*/
 
     gpsd_report(LOG_IO, "UBX revert\n");
 
-/* Reverting all in one fast and reliable reset */
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x04, msg, 4); /* CFG-RST */
+    /* Reverting all in one fast and reliable reset */
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x04, msg, 4); /* CFG-RST */
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -583,6 +587,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     if(!have_port_configuration)
 	return;
 
+    /*@ +charint @*/
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
@@ -595,7 +600,8 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 	buf[14] &= ~0x02;			/* turn off NMEA output on this port */
 	buf[14] |=  0x01;			/* turn on UBX output on this port */
     }
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    /*@ -charint @*/
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 }
 
 static bool ubx_speed(struct gps_device_t *session, speed_t speed)
@@ -609,7 +615,7 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     putlelong(buf, 8, speed);
-    ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
     return true;
 }
 
