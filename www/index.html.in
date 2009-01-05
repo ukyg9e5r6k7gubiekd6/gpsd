@@ -100,11 +100,11 @@ href="http://viking.sf.net">viking</a>,
 and <a href="http://gaia.serezhkin.com/">gaia</a>.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero
-configuration.  The RPM installs hotplug scripts that do the right
-thing when a USB device goes active, launching <code>gpsd</code> if
-needed and telling <code>gpsd</code> which device to read data from.
-Then, <code>gpsd</code> deduces a baud rate and GPS type by looking at
-the data stream.</p>
+configuration.  Binary packages for this program install hotplug
+scripts that do the right thing when a USB device goes active,
+launching <code>gpsd</code> if needed and telling <code>gpsd</code>
+which device to read data from.  Then, <code>gpsd</code> deduces a
+baud rate and GPS type by looking at the data stream.</p>
 
 <p><code>gpsd</code> is high-quality, carefully-audited code.  It is
 regularly checked with the standard mode of <a
