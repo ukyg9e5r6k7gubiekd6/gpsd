@@ -567,15 +567,24 @@ void gpsd_error_model(struct gps_device_t *session,
      *
      * Some drivers set the position-error fields.  Only the Zodiacs
      * report speed error.  Nobody reports track error or climb error.
+     *
+     * The UERE constants are our assumption about the base error of
+     * GPS fixes in different directions.
      */
-#define UERE_NO_DGPS	15.0	/* meters, 95% confidence */
-#define UERE_WITH_DGPS	3.75	/* meters, 95% confidence */
-    double uere;
+#define H_UERE_NO_DGPS		15.0	/* meters, 95% confidence */
+#define H_UERE_WITH_DGPS	3.75	/* meters, 95% confidence */
+#define V_UERE_NO_DGPS		23.0	/* meters, 95% confidence */
+#define V_UERE_WITH_DGPS	5.75	/* meters, 95% confidence */
+#define P_UERE_NO_DGPS		19.0	/* meters, 95% confidence */
+#define P_UERE_WITH_DGPS	4.75	/* meters, 95% confidence */
+    double h_uere, v_uere, p_uere;
 
     if (NULL == session)
 	return;
 
-    uere = (session->gpsdata.status == STATUS_DGPS_FIX ? UERE_WITH_DGPS : UERE_NO_DGPS);
+    h_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? H_UERE_WITH_DGPS : H+UERE_NO_DGPS);
+    v_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? V_UERE_WITH_DGPS : V_UERE_NO_DGPS);
+    p_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
     /*
      * Field reports match the theoretical prediction that
@@ -588,14 +597,14 @@ void gpsd_error_model(struct gps_device_t *session,
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
 	if (isnan(fix->eph)!=0 && finite(session->gpsdata.hdop)!=0)
-		fix->eph = session->gpsdata.hdop * uere;
+		fix->eph = session->gpsdata.hdop * h_uere;
 
 	if ((fix->mode >= MODE_3D)
 		&& isnan(fix->epv)!=0 && finite(session->gpsdata.vdop)!=0)
-	    fix->epv = session->gpsdata.vdop * uere;
+	    fix->epv = session->gpsdata.vdop * v_uere;
 
 	if (isnan(session->gpsdata.epe)!=0 && finite(session->gpsdata.pdop)!=0)
-	    session->gpsdata.epe = session->gpsdata.pdop * uere;
+	    session->gpsdata.epe = session->gpsdata.pdop * p_uere;
 	else
 	    session->gpsdata.epe = NAN;
 
