@@ -308,7 +308,8 @@ class gps(gpsdata):
         		    return cnv(fields[i])
                     self.utc = fields[1]
         	    self.fix.time = default(1)
-                    self.utc = isotime(self.fix.time)
+                    #if not isnan(self.fix.time):
+                    #    self.utc = isotime(self.fix.time)
         	    self.fix.ept = default(2)
         	    self.fix.latitude = default(3)
         	    self.fix.longitude = default(4)
