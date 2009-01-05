@@ -69,12 +69,6 @@ version bump.)
 
 This is Berlios FR #3789.
 
-*** Change O output precision to %.9f for degrees and %.3f for meters
-
-This corresponds to 1mm accuracy, which is better than the horizontal
-accuracy of RTK GPS. This will be revisited; receivers are commercially
-available that claim to have 0.1mm accuracy
-
 *** Full Python wrapper for libgpsd
 
 This would be useful for test code of all kinds.

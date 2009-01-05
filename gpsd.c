@@ -776,19 +776,19 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		if (finite(sub->device->gpsdata.epe))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   "%.2f", sub->device->gpsdata.epe);
+				   "%.3f", sub->device->gpsdata.epe);
 		else
 		    (void)strlcat(phrase, "?", sizeof(phrase));
 		if (finite(sub->device->gpsdata.fix.eph))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f", sub->device->gpsdata.fix.eph);
+				   " %.3f", sub->device->gpsdata.fix.eph);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 		if (finite(sub->device->gpsdata.fix.epv))
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f", sub->device->gpsdata.fix.epv);
+				   " %.3f", sub->device->gpsdata.fix.epv);
 		else
 		    (void)strlcat(phrase, " ?", sizeof(phrase));
 	    } else
@@ -915,34 +915,34 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 		if (isnan(sub->fixbuffer.latitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.6f",
+				   " %.9f",
 				   sub->fixbuffer.latitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.longitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.6f",
+				   " %.9f",
 				   sub->fixbuffer.longitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.altitude)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",
+				   " %.3f",
 				   sub->fixbuffer.altitude);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.eph)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				  " %.2f",  sub->fixbuffer.eph);
+				  " %.3f",  sub->fixbuffer.eph);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.epv)==0)
 		    (void)snprintf(phrase+strlen(phrase),
 				   sizeof(phrase)-strlen(phrase),
-				   " %.2f",  sub->fixbuffer.epv);
+				   " %.3f",  sub->fixbuffer.epv);
 		else
 		    (void)strlcat(phrase, " ?", BUFSIZ);
 		if (isnan(sub->fixbuffer.track)==0)
@@ -989,7 +989,7 @@ static int handle_gpsd_request(struct subscriber_t* sub, char *buf, int buflen)
 	    break;
 	case 'P':
 	    if (assign_channel(sub) && have_fix(sub))
-		(void)snprintf(phrase, sizeof(phrase), ",P=%.6f %.6f",
+		(void)snprintf(phrase, sizeof(phrase), ",P=%.9f %.9f",
 			sub->fixbuffer.latitude,
 			sub->fixbuffer.longitude);
 	    else
