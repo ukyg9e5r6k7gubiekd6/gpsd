@@ -36,6 +36,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.1</revnumber>
+      <date>4 January 2008</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Typo fixes and clarifications for issues raised by Bruce Sutherland.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.0</revnumber>
       <date>21 February 2005</date>
       <authorinitials>esr</authorinitials>
@@ -168,7 +176,7 @@ with faster hardware or a simpler GPSD format.</para>
 a better TCP/IP stack or a denser encoding can decrease this.</para>
 </listitem>
 <listitem>
-<para>D3 is decoding time required for the client library to update
+<para>D2 is decoding time required for the client library to update
 the session structure visible to the user application.  A simpler 
 GPSD format could decrease this</para>
 </listitem>
@@ -207,6 +215,12 @@ While this will measure E1+T1 accurately, it will underestimate
 the contribution of T1 to the whole because it doesn't measure
 RS232 activity taking place before the first character becomes
 visible at the receive end.</para>
+</listitem>
+<listitem>
+<para>Because we compare GPS sentence timestamps with local ones, 
+inaccuracy in the computer's clock fuzzes the measurements.  The test
+machine updated time from NTP, so the expected inaccuracy from this
+source should be not more than about ten milliseconds.</para>
 </listitem>
 <listitem>
 <para>The $ clause that the daemon uses to ship per-sentence profiling info to
@@ -391,10 +405,10 @@ gives us this:</para>
 for vertical scale &mdash; latency has been cut neatly in half.
 Transmission times for GPMRC go from about 0.15sec to 0.75sec. Oddly,
 average E1 is also cut almost in half.  I don't know how to explain
-this, unless a, lot of what looks like E1 is actually RS232
+this, unless a lot of what looks like E1 is actually RS232
 transmission time spent before the first character appears in the
 daemon's receive buffers.  You can also view the 
-<ulink url='profile4.txt'>raw data</ulink></para>
+<ulink url='profile4.txt'>raw data</ulink>.</para>
 
 <para>For comparison, here's the same plot made with a BU303b, a
 different USB GPS mouse using the same SiRF-II/PL2303 combination:</para>
