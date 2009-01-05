@@ -36,6 +36,10 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
     extern void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
 #endif /* UBX_ENABLE */
 
+#ifdef MKT3301_ENABLE
+    extern gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *session);
+#endif /* MKT3301_ENABLE */
+
 #ifdef NMEA_ENABLE
 /**************************************************************************
  *
