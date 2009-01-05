@@ -415,10 +415,44 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 {
     unsigned short navtype;
     gps_mask_t mask = 0;
-    unsigned char h;
 
     if (len != 91)
 	return 0;
+
+    session->gpsdata.sentence_length = 91;
+    (void)strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
+
+    navtype = (unsigned short)getbeuw(buf, 3);
+    session->gpsdata.status = STATUS_NO_FIX;
+    session->gpsdata.fix.mode = MODE_NO_FIX;
+    if (navtype & 0x80)
+	session->gpsdata.status = STATUS_DGPS_FIX;
+    else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
+	session->gpsdata.status = STATUS_FIX;
+    session->gpsdata.fix.mode = MODE_NO_FIX;
+    if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
+	session->gpsdata.fix.mode = MODE_3D;
+    else if (session->gpsdata.status)
+	session->gpsdata.fix.mode = MODE_2D;
+    gpsd_report(LOG_PROG, "GND 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n",
+	navtype, session->gpsdata.status, session->gpsdata.fix.mode);
+    mask |= STATUS_SET | MODE_SET;
+
+    session->gpsdata.fix.latitude = getbesl(buf, 23)*1e-7;
+    session->gpsdata.fix.longitude = getbesl(buf, 27)*1e-7;
+    if (session->gpsdata.fix.latitude && session->gpsdata.fix.latitude)
+	mask |= LATLON_SET;
+
+    if ((session->gpsdata.fix.eph =  getbesl(buf, 50)*1e-2) > 0)
+	mask |= HERR_SET;
+    if ((session->gpsdata.fix.epv =  getbesl(buf, 54)*1e-2) > 0)
+	mask |= VERR_SET;
+    if ((session->gpsdata.fix.eps =  getbesw(buf, 62)*1e-2) > 0)
+	mask |= SPEEDERR_SET;
+
+    /* HDOP should be available at byte 89, but in 231 it's zero. */
+    if ((session->gpsdata.hdop = getub(buf, 89) * 0.2) > 0)
+	mask |= HDOP_SET;
 
     if (session->driver.sirf.driverstate & SIRF_GE_232) {
 	struct tm unpacked_date;
@@ -440,22 +474,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	 * from this packet is valid.  But even this doesn't necessarily
 	 * seem to be the case.  Instead, we do our own computation 
 	 * of geoid separation now.
-	 */
-	navtype = (unsigned short)getbeuw(buf, 3);
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->gpsdata.fix.mode = MODE_NO_FIX;
-	if (navtype & 0x80)
-	    session->gpsdata.status = STATUS_DGPS_FIX;
-	else if ((navtype & 0x07) > 0 && (navtype & 0x07) < 7)
-	    session->gpsdata.status = STATUS_FIX;
-	session->gpsdata.fix.mode = MODE_NO_FIX;
-	if ((navtype & 0x07) == 4 || (navtype & 0x07) == 6)
-	    session->gpsdata.fix.mode = MODE_3D;
-	else if (session->gpsdata.status)
-	    session->gpsdata.fix.mode = MODE_2D;
-	gpsd_report(LOG_PROG, "GND 0x29: Navtype = 0x%0x, Status = %d, mode = %d\n",
-	    navtype, session->gpsdata.status, session->gpsdata.fix.mode);
-	/*
+	 *
 	 * UTC is left all zeros in 231 and older firmware versions, 
 	 * and misdocumented in the Protocol Reference (version 1.4).
 	 *            Documented:        Real:
@@ -490,27 +509,15 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session, unsigned char 
 	}
 #endif /* NTPSHM_ENABLE */
 	/* skip 4 bytes of satellite map */
-	session->gpsdata.fix.latitude = getbesl(buf, 23)*1e-7;
-	session->gpsdata.fix.longitude = getbesl(buf, 27)*1e-7;
-	/* skip 4 bytes of altitude from ellipsoid */
-	mask = TIME_SET | LATLON_SET | STATUS_SET | MODE_SET;
 	session->gpsdata.fix.altitude = getbesl(buf, 35)*1e-2;
 	/* skip 1 byte of map datum */
 	session->gpsdata.fix.speed = getbesw(buf, 40)*1e-2;
 	session->gpsdata.fix.track = getbesw(buf, 42)*1e-2;
 	/* skip 2 bytes of magnetic variation */
 	session->gpsdata.fix.climb = getbesw(buf, 46)*1e-2;
-	/* HDOP should be available at byte 89, but in 231 it's zero. */
-	h = getub(buf, 89);
-	if (h > 0){
-	    session->gpsdata.hdop = h * 0.2;
-	    mask |= HDOP_SET;
-	}
-	mask |= SPEED_SET | TRACK_SET | CYCLE_START_SET;
+	mask |= TIME_SET | SPEED_SET | TRACK_SET;
 	if (session->gpsdata.fix.mode == MODE_3D)
 	    mask |= ALTITUDE_SET | CLIMB_SET;
-	session->gpsdata.sentence_length = 91;
-	(void)strlcpy(session->gpsdata.tag, "GND",MAXTAGLEN+1);
     }
     return mask;
 }
