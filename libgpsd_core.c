@@ -201,7 +201,10 @@ static void *gpsd_ppsmonitor(void *arg)
 	    } else if (cycle > 999000 && cycle < 1001000 ) {
 		/* looks like PPS pulse or square wave */
 		if (duration > 499000 && duration < 501000
-		  && session->driver.nmea.ignore_trailing_edge) {
+#ifdef GPSCLOCK_ENABLE
+		  && session->driver.nmea.ignore_trailing_edge
+#endif /* GPSCLOCK_ENABLE */
+		  ) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
 			 (void)ntpshm_pps(session, &tv);
