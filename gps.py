@@ -322,22 +322,22 @@ class gps(gpsdata):
                     if len(fields) > 14:
                         self.fix.mode = default(14, int)
                     else:
-                        if not isnan(self.fix.altitude):
+                        if isnan(self.fix.altitude):
                             self.fix.mode = MODE_2D
                         else:
                             self.fix.mode = MODE_3D
-        	    self.valid |= TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
+        	    self.valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
         	    if self.fix.mode == MODE_3D:
         		self.valid |= ALTITUDE_SET | CLIMB_SET
-        	    if self.fix.eph:
+        	    if not isnan(self.fix.eph):
         		self.valid |= HERR_SET
-        	    if self.fix.epv:
+        	    if not isnan(self.fix.epv):
         		self.valid |= VERR_SET
         	    if not isnan(self.fix.track):
         		self.valid |= TRACK_SET | SPEED_SET
-        	    if self.fix.eps:
+        	    if not isnan(self.fix.eps):
         		self.valid |= SPEEDERR_SET
-        	    if self.fix.epc:
+        	    if not isnan(self.fix.epc):
         		self.valid |= CLIMBERR_SET
             elif cmd in ('P', 'p'):
         	(self.fix.latitude, self.fix.longitude) = map(float, data.split())
