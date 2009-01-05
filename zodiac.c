@@ -67,13 +67,16 @@ static void zodiac_spew(struct gps_device_t *session, int type, unsigned short *
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *) &h, 4);
 
-    if (session->gpsdata.gps_fd != -1) {
 #ifdef ALLOW_RECONFIGURE
-	if (end_write(session->gpsdata.gps_fd, &h, sizeof(h)) != sizeof(h)
-	    && end_write(session->gpsdata.gps_fd, dat, sizeof(unsigned short) * dlen) == sizeof(unsigned short) * dlen)
+    if (session->gpsdata.gps_fd != -1) {
+	ssize_t hlen, datlen;
+	hlen = sizeof(h);
+	datlen = sizeof(unsigned short) * dlen;
+	if (end_write(session->gpsdata.gps_fd, &h, hlen) != hlen ||
+	    end_write(session->gpsdata.gps_fd, dat, datlen) != datlen)
 	    gpsd_report(LOG_RAW, "Reconfigure write failed\n");
-#endif /* ALLOW_RECONFIGURE */
     }
+#endif /* ALLOW_RECONFIGURE */
 
     (void)snprintf(buf, sizeof(buf),
 		   "%04x %04x %04x %04x %04x",
@@ -91,7 +94,7 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 
     if (session->driver.zodiac.sn++ > 32767)
 	session->driver.zodiac.sn = 0;
-      
+
     memset(data, 0, sizeof(data));
     /* data is the part of the message starting at word 6 */
     data[0] = session->driver.zodiac.sn;	/* sequence number */
@@ -111,7 +114,7 @@ static bool zodiac_speed_switch(struct gps_device_t *session, speed_t speed)
 
 }
 
-static void send_rtcm(struct gps_device_t *session, 
+static void send_rtcm(struct gps_device_t *session,
 		      char *rtcmbuf, size_t rtcmbytes)
 {
     unsigned short data[34];
@@ -199,7 +202,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->gpsdata.fix.altitude -= session->gpsdata.separation;
     session->gpsdata.fix.speed     = (int)getzlong(34) * 1e-2;
     session->gpsdata.fix.track     = (int)getzword(36) * RAD_2_DEG * 1e-3;
-    session->mag_var               = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
+    session->mag_var		   = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
     session->gpsdata.fix.climb     = ((short)getzword(38)) * 1e-2;
     /* map_datum                   = getzword(39); */
     /* manual says these are 1-sigma */
@@ -252,10 +255,10 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* gps_seconds                = getzlong(11); */
     /* gps_nanoseconds            = getzlong(13); */
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
-	/*@ -type @*/ 
+	/*@ -type @*/
 	session->driver.zodiac.Zv[i] = status = (int)getzword(15 + (3 * i));
 	session->driver.zodiac.Zs[i] = prn = (int)getzword(16 + (3 * i));
-	/*@ +type @*/ 
+	/*@ +type @*/
 #if 0
 	gpsd_report(LOG_INF, "Sat%02d:\n", i);
 	gpsd_report(LOG_INF, " used:%d\n", (status & 1) ? 1 : 0);
@@ -350,7 +353,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
      * client querying of the ID with firmware version in 2006.
      * The Zodiac is supposed to send one of these messages on startup.
      */
-    getstringz(session->subtype, 
+    getstringz(session->subtype,
 	      session->packet.outbuffer,
 	      19, 28);	/* software version field */
     gpsd_report(LOG_INF, "Software version: %s\n", session->subtype);
@@ -381,7 +384,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     if (session->packet.type != ZODIAC_PACKET) {
 	struct gps_type_t **dp;
 	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",session->packet.type);
- 	// Wrong packet type ? 
+	// Wrong packet type ? 
 	// Maybe find a trigger just in case it's an Earthmate
 	gpsd_report(LOG_RAW+4, "Is this a trigger: %s ?\n", (char*)session->packet.outbuffer);
 
@@ -390,12 +393,12 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 
 	    if (trigger!=NULL && strncmp((char *)session->packet.outbuffer, trigger, strlen(trigger))==0 && isatty(session->gpsdata.gps_fd)!=0) {
 		gpsd_report(LOG_PROG, "found %s.\n", trigger);
-		    
+
 		(void)gpsd_switch_driver(session, (*dp)->type_name);
 		return 0;
 	    }
-   	}
-        return 0;
+	}
+	return 0;
     }
 
     buf[0] = '\0';
@@ -419,7 +422,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	return handle1003(session);
     case 1005:
 	handle1005(session);
-	return 0;	
+	return 0;
     case 1011:
 	return handle1011(session);
     case 1108:
@@ -436,7 +439,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 struct gps_type_t zodiac_binary =
 {
     .type_name      = "Zodiac binary",	/* full name of type */
-    .trigger        = NULL,		/* no trigger */
+    .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
@@ -452,10 +455,10 @@ struct gps_type_t zodiac_binary =
     .rate_switcher  = NULL,		/* no sample-rate switcher */
     .cycle_chars    = -1,		/* not relevant, no rate switch */
 #ifdef ALLOW_RECONFIGURE
-    .revert         = NULL,		/* no reversion hook */
+    .revert	    = NULL,		/* no reversion hook */
 #endif /* ALLOW_RECONFIGURE */
-    .wrapup         = NULL,		/* caller might supply a close hook */
-    .cycle          = 1,		/* updates every second */
+    .wrapup	    = NULL,		/* caller might supply a close hook */
+    .cycle	    = 1,		/* updates every second */
 };
 
 #endif /* ZODIAC_ENABLE */
