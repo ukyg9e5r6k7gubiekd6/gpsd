@@ -308,8 +308,8 @@ class gps(gpsdata):
                         return cnv(fields[i])
                     self.utc = fields[1]
                   self.fix.time = default(1)
-                    if not isnan(self.fix.time):
-                        self.utc = isotime(self.fix.time)
+                  if not isnan(self.fix.time):
+                    self.utc = isotime(self.fix.time)
                   self.fix.ept = default(2)
                   self.fix.latitude = default(3)
                   self.fix.longitude = default(4)
@@ -322,13 +322,13 @@ class gps(gpsdata):
                   self.fix.epd = default(11)
                   self.fix.eps = default(12)
                   self.fix.epc = default(13)
-                    if len(fields) > 14:
-                        self.fix.mode = default(14, int)
+                  if len(fields) > 14:
+                    self.fix.mode = default(14, int)
+                  else:
+                    if isnan(self.fix.altitude):
+                      self.fix.mode = MODE_2D
                     else:
-                        if isnan(self.fix.altitude):
-                            self.fix.mode = MODE_2D
-                        else:
-                            self.fix.mode = MODE_3D
+                       self.fix.mode = MODE_3D
                   self.valid = TIME_SET|TIMERR_SET|LATLON_SET|MODE_SET
                   if self.fix.mode == MODE_3D:
                     self.valid |= ALTITUDE_SET | CLIMB_SET
