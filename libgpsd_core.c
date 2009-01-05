@@ -582,7 +582,7 @@ void gpsd_error_model(struct gps_device_t *session,
     if (NULL == session)
 	return;
 
-    h_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? H_UERE_WITH_DGPS : H+UERE_NO_DGPS);
+    h_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? H_UERE_WITH_DGPS : H_UERE_NO_DGPS);
     v_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? V_UERE_WITH_DGPS : V_UERE_NO_DGPS);
     p_uere = (session->gpsdata.status == STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
