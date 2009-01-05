@@ -743,9 +743,9 @@ system.  <application>gpsd</application> does its internal
 computations at sufficient accuracy that it will add no measurable
 position error of its own.</para>
 
-<para>DGPS correction will reduce UERE from roughly 8 meters to
-roughly 2 meters, provided you are within about 100mi (160km) of a
-DGPS ground station from which you are eceiving corrections.</para>
+<para>DGPS correction will reduce UERE by a factor of 4, provided you
+are within about 100mi (160km) of a DGPS ground station from which you
+are eceiving corrections.</para>
 
 <para>On a 4800bps connection, the time latency of fixes provided by
 <application>gpsd</application> will be one second or less 95% of the

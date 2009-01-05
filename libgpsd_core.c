@@ -568,8 +568,8 @@ void gpsd_error_model(struct gps_device_t *session,
      * Some drivers set the position-error fields.  Only the Zodiacs
      * report speed error.  Nobody reports track error or climb error.
      */
-#define UERE_NO_DGPS	8.0	/* meters, 95% confidence */
-#define UERE_WITH_DGPS	2.0	/* meters, 95% confidence */
+#define UERE_NO_DGPS	15.0	/* meters, 95% confidence */
+#define UERE_WITH_DGPS	3.75	/* meters, 95% confidence */
     double uere;
 
     if (NULL == session)
