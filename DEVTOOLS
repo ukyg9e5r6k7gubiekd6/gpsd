@@ -37,11 +37,6 @@ Strip leading comment lines from NMEA sentence logs.  gpsfake can do
 this itself now, so this script has a lot of dust on it.  (This one
 goes in the tarball.)
 
-** upload
-
-Ship a release.  Not very useful unless you have ESR's shipper tool
-installed.
-
 ** www/upload
 
 Refresh the project website.  Doesn't require shipper.
