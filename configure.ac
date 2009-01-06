@@ -7,7 +7,7 @@ AC_LANG([C])
 
 AC_ARG_ENABLE(python,
   AC_HELP_STRING([--disable-python],
-                 [disable python scripts and library bindings]),
+		 [disable python scripts and library bindings]),
   [try_python="$enableval"], [try_python="yes"])
 ac_python="no"
 if test x"$try_python" = xyes ; then
@@ -30,27 +30,27 @@ AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
-if test x"$ac_cv_sizeof_char" != "x1" ; then 
+if test x"$ac_cv_sizeof_char" != "x1" ; then
 	AC_MSG_WARN(gpsd requires sizeof(char)==1);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_short" != "x2" ; then 
+if test x"$ac_cv_sizeof_short" != "x2" ; then
 	AC_MSG_WARN(gpsd requires sizeof(short)==2);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_int" != "x4" ; then 
+if test x"$ac_cv_sizeof_int" != "x4" ; then
 	AC_MSG_WARN(gpsd requires sizeof(int)==4);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_long_long" != "x8" ; then 
+if test x"$ac_cv_sizeof_long_long" != "x8" ; then
 	AC_MSG_WARN(gpsd requires sizeof(long long)==8);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_float" != "x4" ; then 
+if test x"$ac_cv_sizeof_float" != "x4" ; then
 	AC_MSG_WARN(gpsd requires sizeof(float)==4);
 	type_error="yes"
 fi
-if test x"$ac_cv_sizeof_double" != "x8" ; then 
+if test x"$ac_cv_sizeof_double" != "x8" ; then
 	AC_MSG_WARN(gpsd requires sizeof(double)==8);
 	type_error="yes"
 fi
@@ -105,28 +105,28 @@ AC_HEADER_TIME
 AC_STRUCT_TIMEZONE
 
 AC_CACHE_CHECK(for timezone variable, ac_cv_var_timezone,
-        AC_TRY_COMPILE([
+	AC_TRY_COMPILE([
 #include <time.h>
-        ], [
-                timezone = 1;
-        ], ac_cv_var_timezone=yes, ac_cv_var_timezone=no))
+	], [
+		timezone = 1;
+	], ac_cv_var_timezone=yes, ac_cv_var_timezone=no))
 if test $ac_cv_var_timezone = yes; then
-        AC_DEFINE(HAVE_TIMEZONE, [], [Have timezone variable])
+	AC_DEFINE(HAVE_TIMEZONE, [], [Have timezone variable])
 else
-        AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_struct_tm_gmtoff,
-                AC_TRY_COMPILE([
+	AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_struct_tm_gmtoff,
+		AC_TRY_COMPILE([
 #include <time.h>
-                        ], [
-                        struct tm tm;
-                        tm.tm_gmtoff = 1;
-                        ], ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no
+			], [
+			struct tm tm;
+			tm.tm_gmtoff = 1;
+			], ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no
 ))
-        if test $ac_cv_struct_tm_gmtoff = yes; then
-                AC_DEFINE(HAVE_TM_GMTOFF, [], [struct tm has tm_gmtoff])
-        else
-                AC_ERROR(unable to find a way to determine timezone)
-        fi
-fi            
+	if test $ac_cv_struct_tm_gmtoff = yes; then
+		AC_DEFINE(HAVE_TM_GMTOFF, [], [struct tm has tm_gmtoff])
+	else
+		AC_ERROR(unable to find a way to determine timezone)
+	fi
+fi
 AC_CACHE_CHECK(for daylight external, mb_cv_var_daylight,
 [  AC_TRY_LINK([#include <time.h>], [return (int)daylight;],
       mb_cv_var_daylight=yes,
@@ -134,7 +134,7 @@ AC_CACHE_CHECK(for daylight external, mb_cv_var_daylight,
 ])
 if test $mb_cv_var_daylight = yes; then
    AC_DEFINE([HAVE_DAYLIGHT], 1,
-           [Define if you have the external 'daylight' variable.])
+	   [Define if you have the external 'daylight' variable.])
 fi
 
 AC_CHECK_LIB(nsl, gethostbyname, LIBNSL="-lnsl")
@@ -145,13 +145,13 @@ AC_CHECK_LIB(m, rint, LIBM="-lm")
 AC_SUBST(LIBM)
 AC_CHECK_LIB(c, open, LIBC="-lc")
 AC_SUBST(LIBC)
-AC_CHECK_LIB(pthread, pthread_setcancelstate, 
+AC_CHECK_LIB(pthread, pthread_setcancelstate,
 	[LIBPTHREAD="-lpthread"
 	AC_DEFINE([HAVE_LIBPTHREAD], [], [pthread libraries are present])])
 AC_SUBST(LIBPTHREAD)
 
 AH_VERBATIM([_GNU_SOURCE],
-          [/* Macro for declaring function arguments unused. */
+	  [/* Macro for declaring function arguments unused. */
 #if defined(__GNUC__)
 #  define UNUSED __attribute__((unused)) /* Flag variable as unused */
 #else /* not __GNUC__ */
@@ -233,7 +233,7 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
 	  AC_DEFINE([HAVE_XP],1,[Xp available]),,
 	  ${X_PRE_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
   dnl
-  AC_CHECK_LIB(Xm, XmInternAtom, 
+  AC_CHECK_LIB(Xm, XmInternAtom,
 	  XM_LIBS="-lXm"
 	  AC_DEFINE([HAVE_MOTIF],1,[Motif available]),,
 	  ${X_PRE_LIBS} ${XP_LIBS} ${XPM_LIBS} ${XEXT_LIBS} ${XT_LIBS} ${XEXT_LIBS} ${X11_LIBS} ${LIBGEN})
@@ -259,16 +259,18 @@ AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, initscr, NCURSES_LIBS="-lncurses")
 AC_SUBST(NCURSES_LIBS)
 if test x"$NCURSES_LIBS" = x"" ; then
-  AC_MSG_WARN([Not including curses support])		   
+  AC_MSG_WARN([Not including curses support])
   AM_CONDITIONAL([HAVE_NCURSES],false)
+  ac_ncurses="no"
 else
   AM_CONDITIONAL([HAVE_NCURSES],true)
+  ac_ncurses="yes"
 fi
 
 dnl check for NMEA support
 AC_ARG_ENABLE(nmea,
   AC_HELP_STRING([--disable-nmea],
-                 [disable NMEA support]),
+		 [disable NMEA support]),
   [ac_nmea=$enableval], [ac_nmea=yes])
 AC_MSG_CHECKING([for NMEA support])
 if test x"$ac_nmea" = "xyes"; then
@@ -281,7 +283,7 @@ fi
 dnl check for SiRF support
 AC_ARG_ENABLE(sirf,
   AC_HELP_STRING([--disable-sirf],
-                 [disable SiRF chipset support]),
+		 [disable SiRF chipset support]),
   [ac_sirf=$enableval], [ac_sirf=yes])
 AC_MSG_CHECKING([for SiRF support])
 if test x"$ac_sirf" = "xyes"; then
@@ -294,7 +296,7 @@ fi
 dnl check for Trimble TSIP support
 AC_ARG_ENABLE(tsip,
   AC_HELP_STRING([--disable-tsip],
-                 [disable Trimble TSIP support]),
+		 [disable Trimble TSIP support]),
   [ac_tsip=$enableval], [ac_tsip=yes])
 AC_MSG_CHECKING([for Trimble TSIP support])
 if test x"$ac_tsip" = "xyes"; then
@@ -307,7 +309,7 @@ fi
 dnl check for FV-18 support
 AC_ARG_ENABLE(fv18,
   AC_HELP_STRING([--disable-fv18],
-                 [disable San Jose Navigation FV-18 support]),
+		 [disable San Jose Navigation FV-18 support]),
   [ac_fv18=$enableval], [ac_fv18=yes])
 AC_MSG_CHECKING([for FV-18 support])
 if test x"$ac_fv18" = "xyes"; then
@@ -322,7 +324,7 @@ fi
 dnl check for Tripmate support
 AC_ARG_ENABLE(tripmate,
   AC_HELP_STRING([--disable-tripmate],
-                 [disable DeLorme TripMate support]),
+		 [disable DeLorme TripMate support]),
   [ac_tripmate=$enableval], [ac_tripmate=yes])
 AC_MSG_CHECKING([for Tripmate support])
 if test x"$ac_tripmate" = "xyes"; then
@@ -335,7 +337,7 @@ fi
 dnl check for EarthMate support
 AC_ARG_ENABLE(earthmate,
   AC_HELP_STRING([--disable-earthmate],
-                 [disable DeLorme EarthMate Zodiac support]),
+		 [disable DeLorme EarthMate Zodiac support]),
   [ac_earthmate=$enableval], [ac_earthmate=yes])
 AC_MSG_CHECKING([for EarthMate support])
 if test x"$ac_earthmate" = "xyes"; then
@@ -348,7 +350,7 @@ fi
 dnl check for iTrax support
 AC_ARG_ENABLE(itrax,
   AC_HELP_STRING([--disable-itrax],
-                 [disable iTrax hardware support]),
+		 [disable iTrax hardware support]),
   [ac_itrax=$enableval], [ac_itrax=yes])
 AC_MSG_CHECKING([for iTrax support])
 if test x"$ac_itrax" = "xyes"; then
@@ -361,7 +363,7 @@ fi
 dnl check for Ashtech support
 AC_ARG_ENABLE(ashtech,
   AC_HELP_STRING([--disable-ashtech],
-                 [disable Ashtech support]),
+		 [disable Ashtech support]),
   [ac_ashtech=$enableval], [ac_ashtech=yes])
 AC_MSG_CHECKING([for Ashtech support])
 if test x"$ac_ashtech" = "xyes"; then
@@ -374,7 +376,7 @@ fi
 dnl check for Navcom support
 AC_ARG_ENABLE(navcom,
   AC_HELP_STRING([--disable-navcom],
-                 [disable Navcom support]),
+		 [disable Navcom support]),
   [ac_navcom=$enableval], [ac_navcom=yes])
 AC_MSG_CHECKING([for Navcom support])
 if test x"$ac_navcom" = "xyes"; then
@@ -387,7 +389,7 @@ fi
 dnl check for Garmin support
 AC_ARG_ENABLE(garmin,
   AC_HELP_STRING([--disable-garmin],
-                 [disable Garmin kernel driver support]),
+		 [disable Garmin kernel driver support]),
   [ac_garmin=$enableval], [ac_garmin=yes])
 AC_MSG_CHECKING([for Garmin support])
 if test x"$ac_garmin" = "xyes"; then
@@ -400,7 +402,7 @@ fi
 dnl check for Garmin Simple Text support
 AC_ARG_ENABLE(garmintxt,
   AC_HELP_STRING([--enable-garmintxt],
-                 [enable Garmin Simple Text support]),
+		 [enable Garmin Simple Text support]),
   [ac_garmintxt=$enableval], [ac_garmintxt=no])
 AC_MSG_CHECKING([for Garmin Simple Text support])
 if test x"$ac_garmintxt" = "xyes"; then
@@ -413,7 +415,7 @@ fi
 dnl check for True North support
 AC_ARG_ENABLE(tnt,
   AC_HELP_STRING([--enable-tnt],
-                 [enable True North Technologies support]),
+		 [enable True North Technologies support]),
   [ac_tnt=$enableval], [ac_tnt=no])
 AC_MSG_CHECKING([for True North support])
 if test x"$ac_tnt" = "xyes"; then
@@ -428,7 +430,7 @@ fi
 dnl check for OceanServer support
 AC_ARG_ENABLE(oceanserver,
   AC_HELP_STRING([--enable-oceanserver],
-                 [enable OceanServer support]),
+		 [enable OceanServer support]),
   [ac_oceanserver=$enableval], [ac_oceanserver=no])
 AC_MSG_CHECKING([for OceanServer support])
 if test x"$ac_oceanserver" = "xyes"; then
@@ -443,7 +445,7 @@ fi
 dnl check for UBX support
 AC_ARG_ENABLE(ubx,
   AC_HELP_STRING([--disable-ubx],
-                 [disable UBX Protocol support]),
+		 [disable UBX Protocol support]),
   [ac_ubx=$enableval], [ac_ubx=yes])
 AC_MSG_CHECKING([for UBX support])
 if test x"$ac_ubx" = "xyes"; then
@@ -456,7 +458,7 @@ fi
 dnl check for EverMore support
 AC_ARG_ENABLE(evermore,
   AC_HELP_STRING([--disable-evermore],
-                 [disable EverMore binary support]),
+		 [disable EverMore binary support]),
   [ac_evermore=$enableval], [ac_evermore=yes])
 AC_MSG_CHECKING([for EverMore support])
 if test x"$ac_evermore" = "xyes"; then
@@ -469,7 +471,7 @@ fi
 dnl check for MKT-3301 support
 AC_ARG_ENABLE(mkt3301,
   AC_HELP_STRING([--disable-mkt3301],
-                 [disable MKT-3301 support]),
+		 [disable MKT-3301 support]),
   [ac_mkt3301=$enableval], [ac_mkt3301=yes])
 AC_MSG_CHECKING([for MKT-3301 support])
 if test x"$ac_mkt3301" = "xyes"; then
@@ -484,7 +486,7 @@ fi
 dnl check for GPSClock support
 AC_ARG_ENABLE(gpsclock,
   AC_HELP_STRING([--disable-gpsclock],
-                 [disable GPSClock support]),
+		 [disable GPSClock support]),
   [ac_gpsclock=$enableval], [ac_gpsclock=yes])
 AC_MSG_CHECKING([for GPSClock support])
 if test x"$ac_gpsclock" = "xyes"; then
@@ -497,7 +499,7 @@ fi
 dnl check for RTCM104V2 support
 AC_ARG_ENABLE(rtcm104v2,
   AC_HELP_STRING([--disable-rtcm104v2],
-                 [disable rtcm104v2 support]),
+		 [disable rtcm104v2 support]),
   [ac_rtcm104v2=$enableval], [ac_rtcm104v2=yes])
 AC_MSG_CHECKING([for rtcm104v2 support])
 if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
@@ -513,9 +515,9 @@ fi
 AM_CONDITIONAL([HAVE_RTCM104V2], [test "$ac_rtcm104v2" = "yes"])
 
 dnl check for RTCM104V3 support
-AC_ARG_ENABLE(rtcm104v2,
+AC_ARG_ENABLE(rtcm104v3,
   AC_HELP_STRING([--disable-rtcm104v3],
-                 [disable rtcm104v3 support]),
+		 [disable rtcm104v3 support]),
   [ac_rtcm104v3=$enableval], [ac_rtcm104v3=yes])
 AC_MSG_CHECKING([for rtcm104v3 support])
 if test x"$ac_earthmate" = "xno" -a x"$ac_evermore" = "xno" -a x"$ac_garmin" = "xno" -a x"$ac_itrax" = "xno" -a x"$ac_sirf" = "xno" -a x"$ac_tsip" = "xno" -a x"$ac_navcom" = "xno"; then
@@ -533,7 +535,7 @@ AM_CONDITIONAL([HAVE_RTCM104V3], [test "$ac_rtcm104v3" = "yes"])
 dnl check for NTRIP support
 AC_ARG_ENABLE(ntrip,
   AC_HELP_STRING([--disable-ntrip],
-                 [disable NTRIP support]),
+		 [disable NTRIP support]),
   [ac_ntrip=$enableval], [ac_ntrip=yes])
 AC_MSG_CHECKING([for NTRIP support])
 if test x"$ac_ntrip" = "xyes"; then
@@ -548,7 +550,7 @@ AM_CONDITIONAL([HAVE_NTRIP], [test "$ac_ntrip" = "yes"])
 dnl check for profiling support
 AC_ARG_ENABLE(profiling,
   AC_HELP_STRING([--enable-profiling],
-                 [enable profiling support]),
+		 [enable profiling support]),
   [ac_profiling=$enableval], [ac_profiling=no])
 AC_MSG_CHECKING([for profiling support])
 if test x"$ac_profiling" = "xyes"; then
@@ -561,7 +563,7 @@ fi
 dnl check for NTP time hinting support
 AC_ARG_ENABLE(ntpshm,
   AC_HELP_STRING([--disable-ntpshm],
-                 [disable NTP time hinting support]),
+		 [disable NTP time hinting support]),
   [ac_ntpshm=$enableval], [ac_ntpshm=yes])
 AC_MSG_CHECKING([for NTP time hinting support])
 if test x"$ac_ntpshm" = "xyes"; then
@@ -574,7 +576,7 @@ fi
 dnl check for PPS time syncing support
 AC_ARG_ENABLE(pps,
   AC_HELP_STRING([--disable-pps],
-                 [disable PPS time syncing support]),
+		 [disable PPS time syncing support]),
   [ac_pps=$enableval], [ac_pps=yes])
 AC_MSG_CHECKING([for PPS time syncing support])
 if test x"$ac_pps" = "xyes"; then
@@ -587,7 +589,7 @@ fi
 dnl check for PPS input on CTS line
 AC_ARG_ENABLE(pps-on-cts,
   AC_HELP_STRING([--enable-pps-on-cts],
-                 [Enable PPS pulse on CTS rather than DCD]),
+		 [Enable PPS pulse on CTS rather than DCD]),
   [ac_ppsoncts=$enableval], [ac_ppsoncts=no])
 AC_MSG_CHECKING([for PPS pulse on CTS rather than DCD])
 if test x"$ac_ppsoncts" = "xyes"; then
@@ -600,7 +602,7 @@ fi
 dnl check for privilege revokation user at compile-time
 AC_ARG_ENABLE(gpsd-user,
   AC_HELP_STRING([--enable-gpsd-user=username],
-                 [GPSD privilege revokation user]),
+		 [GPSD privilege revokation user]),
   [ac_user=$enableval], [ac_user=nobody])
 AC_MSG_CHECKING([privilege revokation user])
 if test x"$ac_user" != "xnobody"; then
@@ -613,7 +615,7 @@ fi
 dnl check for port speed fixed at compile-time
 AC_ARG_ENABLE(fixed-port-speed,
   AC_HELP_STRING([--enable-fixed-port-speed=nnn],
-                 [compile with fixed serial port speed]),
+		 [compile with fixed serial port speed]),
   [ac_baud=$enableval], [ac_baud=no])
 AC_MSG_CHECKING([for fixed port speed])
 if test x"$ac_baud" != "xno"; then
@@ -624,11 +626,11 @@ else
   AC_MSG_RESULT([no])
 fi
 
-dnl Manually configure DBUS until we figure out a 
+dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
 AC_ARG_ENABLE(dbus,
     AC_HELP_STRING([--enable-dbus],
-                [enable DBUS support]),
+		[enable DBUS support]),
     [ac_dbus=$enableval], [ac_dbus=no])
 AC_MSG_CHECKING([for DBUS support])
 if test x"$ac_dbus" = "xyes"; then
@@ -651,7 +653,7 @@ fi
 dnl check for limited maximum clients
 AC_ARG_ENABLE(max-clients,
   AC_HELP_STRING([--enable-max-clients=nnn],
-                 [compile with limited maximum clients]),
+		 [compile with limited maximum clients]),
   [ac_maxclients=$enableval], [ac_maxclients=no])
 AC_MSG_CHECKING([for limited max clients])
 if test x"$ac_maxclients" != "xno"; then
@@ -665,7 +667,7 @@ fi
 dnl check for max number of GPS devices
 AC_ARG_ENABLE(max-devices,
   AC_HELP_STRING([--enable-max-devices=nnn],
-                 [compile with maximum allowed devices]),
+		 [compile with maximum allowed devices]),
   [ac_maxdevices=$enableval], [ac_maxdevices=no])
 AC_MSG_CHECKING([for max devices])
 if test x"$ac_maxdevices" != "xno"; then
@@ -679,7 +681,7 @@ fi
 dnl allow gpsd to reconfigure gps receiver
 AC_ARG_ENABLE(reconfigure,
   AC_HELP_STRING([--disable-reconfigure],
-                 [do not allow gpsd to change device settings]),
+		 [do not allow gpsd to change device settings]),
   [ac_reconfigure=$enableval], [ac_reconfigure=yes])
 AC_MSG_CHECKING([if device reconfiguration is allowed])
 if test x"$ac_reconfigure" != "xno"; then
@@ -693,26 +695,26 @@ dnl Automatic check for DBUS.
 dnl It's broken -- leads to bad compiles on systems with DBUS libraies
 dnl but no DBUS headers.
 dnl ac_dbus=no
-dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS 
+dnl AC_CHECK_LIB(dbus-1, dbus_bus_get, [true], [false]) # do not update $LIBS
 dnl if test x"yes" = x"$ac_cv_lib_dbus_1_dbus_bus_get" ; then
 dnl    # Found dbus library, check for required versions and enable it
-dnl 
+dnl
 dnl    AC_MSG_CHECKING([for DBUS support])
 dnl    PKG_CHECK_MODULES(DBUS, dbus-1 >= 0.23.4,
 dnl       [ac_dbus=yes],[ac_dbus=no])
 dnl    AC_MSG_RESULT([$ac_dbus])
 dnl    AC_SUBST(DBUS_CFLAGS)
 dnl    AC_SUBST(DBUS_LIBS)
-dnl 
+dnl
 dnl    if test x"ac_dbus" = x"yes" ; then
 dnl       AC_DEFINE([DBUS_ENABLE],1,[Found DBUS libraries])
 dnl    fi
-dnl 
+dnl
 dnl    # Check for glib and dbus-glib, used by gpxlogger
 dnl    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.2.0 )
 dnl    AC_SUBST(GLIB_CFLAGS)
 dnl    AC_SUBST(GLIB_LIBS)
-dnl 
+dnl
 dnl    PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1 >= 0.22)
 dnl    AC_SUBST(DBUS_GLIB_CFLAGS)
 dnl    AC_SUBST(DBUS_GLIB_LIBS)
@@ -722,7 +724,7 @@ AM_CONDITIONAL([HAVE_DBUS], [test x"$ac_dbus" = x"yes"])
 dnl mute logging functions?
 AC_ARG_ENABLE(squelch,
   AC_HELP_STRING([--enable-squelch],
-                 [squelch gpsd_report and gpsd_hexdump to save cpu]),
+		 [squelch gpsd_report and gpsd_hexdump to save cpu]),
   [ac_squelch=$enableval], [ac_squelch=no])
 AC_MSG_CHECKING([for disabled logging])
 if test x"$ac_squelch" = "xyes"; then
@@ -742,40 +744,40 @@ if test "x$WITH_XSLTPROC" = "xyes"; then
     DOCBOOK_URI='http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl'
     cat >conftest.xml <<_EOF
        <refentry id="foo.1">
-          <refmeta>
-            <refentrytitle>foo</refentrytitle>
-            <manvolnum>1</manvolnum>
-            <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
-          </refmeta>
-          <refnamediv id='name'>
-            <refname>foo</refname>
-            <refpurpose>check man page generation from docbook source</refpurpose>
-          </refnamediv>
-        </refentry>
+	  <refmeta>
+	    <refentrytitle>foo</refentrytitle>
+	    <manvolnum>1</manvolnum>
+	    <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+	  </refmeta>
+	  <refnamediv id='name'>
+	    <refname>foo</refname>
+	    <refpurpose>check man page generation from docbook source</refpurpose>
+	  </refnamediv>
+	</refentry>
 _EOF
     if xsltproc --nonet --noout "$DOCBOOK_URI" conftest.xml >/dev/null 2>&1; then
-        MANGENERATOR=xsltproc
-        MANTARGET="$DOCBOOK_URI"
-        MANFLAGS="--nonet"
-        AC_MSG_RESULT([yes])
+	MANGENERATOR=xsltproc
+	MANTARGET="$DOCBOOK_URI"
+	MANFLAGS="--nonet"
+	AC_MSG_RESULT([yes])
     else
-        AC_MSG_RESULT([no])
+	AC_MSG_RESULT([no])
     fi
     rm -f conftest.xml foo.1
 fi
 if test x"$MANGENERATOR" = x; then
     AC_CHECK_PROG(WITH_XMLTO,[xmlto],[yes],[no])
     if test "x$WITH_XMLTO" = "xyes"; then
-        MANGENERATOR=xmlto
-        MANTARGET=man
-        MANFLAGS=
+	MANGENERATOR=xmlto
+	MANTARGET=man
+	MANFLAGS=
     else
-        AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages.])
-        AC_MSG_WARN([To build man pages, install xsltproc/xsltlib or xmlto and run autogen.sh again.])
+	AC_MSG_WARN([Neither xsltproc nor xmlto works: I will not build man pages.])
+	AC_MSG_WARN([To build man pages, install xsltproc/xsltlib or xmlto and run autogen.sh again.])
     fi
 fi
 AM_CONDITIONAL([HAVE_XSLT_PROCESSOR],
-               [test x"$MANGENERATOR" != x])
+	       [test x"$MANGENERATOR" != x])
 AC_SUBST(MANGENERATOR)
 AC_SUBST(MANTARGET)
 AC_SUBST(MANFLAGS)
@@ -814,7 +816,7 @@ echo "	Daemon Features"
 echo "	---------------"
 echo "NTP SHM                 : $ac_ntpshm"
 echo "NTP PPS                 : $ac_pps"
-echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac  
+echo -n "PPS input on            : " ; case $ac_ppsoncts in yes) echo "CTS" ;; no) echo "DCD" ;; *) echo "Not defined" ;; esac
 echo "Fixed port speed        : $ac_baud"
 echo "Priv-drop user          : $ac_user"
 echo "Enable shared libraries : $enable_shared"
@@ -825,7 +827,7 @@ echo "Limited max clients     : $ac_maxclients"
 echo "Limited max devices     : $ac_maxdevices"
 echo "Allow device reconfig   : $ac_reconfigure"
 echo "Squelch logging/hexdump : $ac_squelch"
-echo "Build ncurses programs  : $ac_ncurses" 
+echo "Build ncurses programs  : $ac_ncurses"
 echo "------------------------------------------"
 
 if test "xdummy" = "xdummy" -a \
