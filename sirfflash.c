@@ -86,6 +86,7 @@ nmea_lowlevel_send(int fd, const char *fmt, ... )
 {
     char buf[BUFSIZ];
     va_list ap;
+    size_t l;
 
     va_start(ap, fmt) ;
 #ifdef HAVE_VSNPRINTF
@@ -94,9 +95,10 @@ nmea_lowlevel_send(int fd, const char *fmt, ... )
     vsprintf(buf + strlen(buf), fmt, ap);
 #endif
     va_end(ap);
-    strcat(buf, "*");
+    strncat(buf, "*", 1);
     nmea_add_checksum(buf + 1);
-    if (write(fd, buf, strlen(buf)) != strlen(buf))
+    l = strlen(buf);
+    if (write(fd, buf, l) != (ssize_t)l)
 	fputs("sirfflash: write to device failed\n", stderr);
 }
 
@@ -105,7 +107,7 @@ sirfSendUpdateCmd(int pfd){
 	bool status;
 	/*@ +charint @*/
 	static unsigned char msg[] =	{
-	    			0xa0,0xa2,	/* header */
+				0xa0,0xa2,	/* header */
 				0x00,0x01,	/* message length */
 				0x94,		/* 0x94: firmware update */
 				0x00,0x00,	/* checksum */
@@ -245,7 +247,7 @@ static int sirfProbe(int fd, char **version)
 	    if (status == -1)
 		return -1;
 	}
-	gpsd_report(LOG_PROG, "%d bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
+	gpsd_report(LOG_PROG, "%ld bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
 	*version = strdup(buf);
 	return 0;
     } else {
