@@ -352,7 +352,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     gpsd_report(LOG_IO,
 		"Navcom: Scaled parameters follow:\n");
     gpsd_report(LOG_IO,
-		"Navcom: GPS Week: %u, GPS Time of Week: %lu (GPS Time: %f)\n",
+		"Navcom: GPS Week: %u, GPS Time of Week: %u (GPS Time: %f)\n",
 		week, tow, week*604800+tow/1000.0);
     gpsd_report(LOG_IO,
 		"Navcom: a0: %12.4E, a1: %12.4E, a2: %12.4E, a3: %12.4E, "
@@ -364,7 +364,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
     gpsd_report(LOG_IO,
 		"Navcom: A0: %19.12E, A1: %19.12E\n", (double)a0*SF_A0, (double)a1*SF_A1);
     gpsd_report(LOG_IO,
-		"Navcom: UTC Ref. Time: %u, UTC Ref. Week: %u, dTls: %d\n",
+		"Navcom: UTC Ref. Time: %lu, UTC Ref. Week: %u, dTls: %d\n",
 		(unsigned long)tot*SF_TOT, wnt, dtls);
     gpsd_report(LOG_IO,
 	       "Navcom: Week of leap seconds: %u, Day number of leap seconds: %u, dTlsf: %d\n",
@@ -761,7 +761,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 static gps_mask_t handle_0x86(struct gps_device_t *session)
 {
     size_t n, i;
-    u_int8_t prn, tracking_status, ele, ca_snr, p2_snr, log_channel, hw_channel;
+    u_int8_t prn, tracking_status, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
     u_int16_t azm, dgps_age;
     unsigned char *buf = session->packet.outbuffer + 3;
     size_t msg_len = (size_t)getleuw(buf, 1);
@@ -825,6 +825,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	p2_snr = getub(buf, n+10);
 	dgps_age = getleuw(buf, n+11);
 	hw_channel = getub(buf, n+13);
+	s = 0;
 	/*@ -predboolothers +charint @*/
 	/* NOTE - In theory, I think one would check for hw channel number to
 	   see if one is dealing with a GPS or other satellite, but the
@@ -835,12 +836,12 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    session->gpsdata.PRN[i] = (int)prn;
 	    session->gpsdata.elevation[i] = (int)ele;
 	    session->gpsdata.azimuth[i] = (int)azm;
-	    session->gpsdata.ss[i++] = (p2_snr ? p2_snr : ca_snr) / 4;
+	    s = session->gpsdata.ss[i++] = (p2_snr ? p2_snr : ca_snr) / 4;
 	}
 	gpsd_report(LOG_IO,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "
 		    "dgps age = %.1fs, log ch = %d, hw ch = 0x%02x\n",
-		    prn, ele, azm, session->gpsdata.ss, (p2_snr?"P2":"C/A"),
+		    prn, ele, azm, s, (p2_snr?"P2":"C/A"),
 		    (double)dgps_age*0.1, log_channel&0x3f, hw_channel);
 	gpsd_report(LOG_IO,
 		    "Navcom:	    sol. valid = %c, clock = %s, pos. = %s, "
@@ -1138,7 +1139,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     gpsd_report(LOG_IO,
 		"Navcom: oscillator temp. = %d, nav. status = 0x%02x, "
 		"nav. clock offset = %f, nav. clock drift = %f, "
-		"osc. filter drift est. = %f, acc.time slew value = %f\n",
+		"osc. filter drift est. = %f, acc.time slew value = %d\n",
 		osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 		osc_filter_drift_est, time_slew);
     return TIME_SET;
