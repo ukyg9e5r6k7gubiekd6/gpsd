@@ -53,19 +53,23 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 int main(int argc, char **argv)
 {
     int option, status;
-    char *err_str, *device = NULL, *speed = NULL, *devtype = NULL;
+    char *err_str, *device = NULL, *speed = NULL, *devtype = NULL, *control = NULL;
     bool to_binary = false, to_nmea = false, lowlevel=false;
     struct gps_data_t *gpsdata = NULL;
     struct gps_type_t *forcetype = NULL;
     struct gps_type_t **dp;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n] [-D n] [-s speed] [-V] [-t devtype] <device>\n"
-    while ((option = getopt(argc, argv, "bfhlns:t:D:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n] [-D n] [-s speed] [-V] [-t devtype] [-c control] <device>\n"
+    while ((option = getopt(argc, argv, "bc:fhlns:t:D:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
 	    break;
-	case 'f':		/* force direct access to the evice */
+	case 'c':		/* ship specified control string */
+	    control = optarg;
+	    lowlevel = true;
+	    break;
+	case 'f':		/* force direct access to the device */
 	    lowlevel = true;
 	    break;
         case 'l':		/* list known device types */
@@ -316,6 +320,90 @@ int main(int argc, char **argv)
 		status = 1;
 	    }
 	}
+	/*@ -compdef @*/
+	if (control) {
+	    if (session.device_type->control_send == NULL) {
+		(void)fprintf(stderr, 
+			      "gpsctl: %s devices have no control sender.\n",
+			      session.device_type->type_name);
+		status = 1;
+	    } else {
+		char buf[BUFSIZ], *tp, c = '\0';
+		bool err = false;
+
+		/*@ +charint @*/
+		for (tp = buf; *control != '\0'; control++)
+		    if (*control != '\\')
+			*tp++ = *control;
+		    else {
+			switch(*control++) {
+			case 'b': *tp++ = '\b'; break;
+			case 'e': *tp++ = '\x1b'; break;
+			case 'f': *tp++ = '\f'; break;
+			case 'n': *tp++ = '\n'; break;
+			case 'r': *tp++ = '\r'; break;
+			case 't': *tp++ = '\r'; break;
+			case 'v': *tp++ = '\v'; break;
+			case 'x':
+			    switch(*control++) {
+			    case '0': c = 0x00; break;
+			    case '1': c = 0x10; break;
+			    case '2': c = 0x20; break;
+			    case '3': c = 0x30; break;
+			    case '4': c = 0x40; break;
+			    case '5': c = 0x50; break;
+			    case '6': c = 0x60; break;
+			    case '7': c = 0x70; break;
+			    case '8': c = 0x80; break;
+			    case '9': c = 0x90; break;
+			    case 'A': case 'a': c = 0xa0; break;
+			    case 'B': case 'b': c = 0xb0; break;
+			    case 'C': case 'c': c = 0xc0; break;
+			    case 'D': case 'd': c = 0xd0; break;
+			    case 'E': case 'e': c = 0xe0; break;
+			    case 'F': case 'f': c = 0xf0; break;
+			    default:
+				(void)fprintf(stderr, "gpsctl: invalid hex digit.\n");
+				err = true;
+			    }
+			    switch(*control++) {
+			    case '0': c += 0x00; break;
+			    case '1': c += 0x01; break;
+			    case '2': c += 0x02; break;
+			    case '3': c += 0x03; break;
+			    case '4': c += 0x04; break;
+			    case '5': c += 0x05; break;
+			    case '6': c += 0x06; break;
+			    case '7': c += 0x07; break;
+			    case '8': c += 0x08; break;
+			    case '9': c += 0x09; break;
+			    case 'A': case 'a': c += 0x0a; break;
+			    case 'B': case 'b': c += 0x0b; break;
+			    case 'C': case 'c': c += 0x0c; break;
+			    case 'D': case 'd': c += 0x0d; break;
+			    case 'E': case 'e': c += 0x0e; break;
+			    case 'F': case 'f': c += 0x0f; break;
+			    default:
+				(void)fprintf(stderr, "gpsctl: invalid hex digit.\n");
+				err = true;
+			    }
+			    *tp++ = c;
+			    break;
+			default:
+			    (void)fprintf(stderr, "gpsctl: invalid escape\n");
+			    err = true;
+			}
+		    }
+		/*@ +charint @*/
+		if (!err)
+		    if (session.device_type->control_send(&session, 
+							   buf, tp-buf) == -1) {
+			(void)fprintf(stderr, "gpsctl: control transmission failed.\n");
+			status = 1;
+		    }
+	    }
+	}
+	/*@ +compdef @*/
 
 	/*
 	 * Give the device time to settle before closing it.  Alas, this is

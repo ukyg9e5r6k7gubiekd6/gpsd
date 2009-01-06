@@ -183,7 +183,7 @@ struct gps_type_t {
     /*@observer@*/char *type_name;
     /*@observer@*//*@null@*/char *trigger;
     int channels;
-    ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
+    /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
     /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
