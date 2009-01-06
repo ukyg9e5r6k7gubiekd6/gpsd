@@ -124,6 +124,20 @@ bool sirf_write(int fd, unsigned char *msg) {
    return(ok);
 }
 
+static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t len) {
+    /*@ +charint +matchanyintegral -initallelements @*/
+    static unsigned char buf[MAX_PACKET_LENGTH] = {0xa0, 0xa2,};
+
+    buf[2] = (len >> 8) & 0xff;
+    buf[3] = len & 0xff;
+    memcpy(buf+4, msg, len);
+    buf[len + 6] = 0xb0;
+    buf[len + 7] = 0xb3;
+    
+    return sirf_write(session->gpsdata.gps_fd, buf) ? (len + 8) : -1;
+    /*@ -charint -matchanyintegral +initallelements @*/
+}
+
 static bool sirf_speed(int ttyfd, speed_t speed)
 /* change speed in binary mode */
 {
@@ -963,7 +977,7 @@ struct gps_type_t sirf_binary =
     .type_name      = "SiRF binary",	/* full name of type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
-    .control_send   = NULL,		/* no control sender yet */
+    .control_send   = sirf_control_send,/* how to send a control string */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
