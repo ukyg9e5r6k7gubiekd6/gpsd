@@ -281,7 +281,7 @@ srecord_send(int pfd, char *data, size_t len){
 	return 0;
 }
 
-bool 
+bool
 expect(int pfd, const char *str, size_t len, time_t timeout)
 /* keep reading till we see a specified expect string or time out */
 {
@@ -289,14 +289,14 @@ expect(int pfd, const char *str, size_t len, time_t timeout)
     char ch;
     double start = timestamp();
 
-    gpsd_report(LOG_PROG, "expect(%s, %d)\n", 
+    gpsd_report(LOG_PROG, "expect(%s, %d)\n",
 		gpsd_hexdump((char *)str, len),
 		timeout);
 
     for (;;) {
 	if (read(pfd, &ch, 1) != 1)
 	    return false;		/* I/O failed */
-	gpsd_report(LOG_RAW, "I see %d: %02x\n", got, (unsigned)(ch & 0xff));
+	gpsd_report(LOG_RAW, "I see %zd: %02x\n", got, (unsigned)(ch & 0xff));
 	if (timestamp() - start > (double)timeout)
 	    return false;		/* we're timed out */
 	else if (got == len)
@@ -449,7 +449,7 @@ main(int argc, char **argv){
 	/* minimal sanity check on loader size. also prevents bad malloc() */
 	ls = (size_t)sb.st_size;
 	if ((ls < gpstype->min_loader_size)||(ls > gpstype->max_loader_size)){
-	    gpsd_report(LOG_ERROR, "preposterous loader size: %d\n", ls);
+	    gpsd_report(LOG_ERROR, "preposterous loader size: %zd\n", ls);
 	    return 1;
 	}
 
@@ -457,13 +457,13 @@ main(int argc, char **argv){
 
 	/* malloc a loader buffer */
 	if ((loader = malloc(ls)) == NULL) {
-	    gpsd_report(LOG_ERROR, "malloc(%d)\n", ls);
+	    gpsd_report(LOG_ERROR, "malloc(%zd)\n", ls);
 	    return 1;
 	}
 
 	if (read(lfd, loader, ls) != (ssize_t)ls) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERROR, "read(%d)\n", ls);
+	    gpsd_report(LOG_ERROR, "read(%zd)\n", ls);
 	    return 1;
 	}
 
@@ -489,14 +489,14 @@ main(int argc, char **argv){
 	fs = (size_t)sb.st_size;
 	if ((fs < gpstype->min_firmware_size) || (fs > gpstype->max_firmware_size)){
 	    (void)free(loader);
-	    gpsd_report(LOG_ERROR, "preposterous firmware size: %d\n", fs);
+	    gpsd_report(LOG_ERROR, "preposterous firmware size: %zd\n", fs);
 	    return 1;
 	}
 
 	/* malloc an image buffer */
 	if ((firmware = malloc(fs+1)) == NULL) {
 	    (void)free(loader);
-	    gpsd_report(LOG_ERROR, "malloc(%u)\n", (unsigned)fs);
+	    gpsd_report(LOG_ERROR, "malloc(%zd)\n", fs);
 	    return 1;
 	}
 
@@ -504,7 +504,7 @@ main(int argc, char **argv){
 	if (read(ffd, firmware, fs) != (ssize_t)fs) {
 	    (void)free(loader);
 	    (void)free(firmware);
-	    gpsd_report(LOG_ERROR, "read(%u)\n", (unsigned)fs);
+	    gpsd_report(LOG_ERROR, "read(%zd)\n", fs);
 	    return 1;
 	}
 
