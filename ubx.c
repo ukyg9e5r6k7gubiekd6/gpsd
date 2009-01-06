@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "gpsd_config.h"
 #include "gpsd.h"
@@ -189,7 +190,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0;
     for (i = j = st = 0; i < nchan; i++) {
-	int off = 8 + 12 * i;
+	unsigned int off = 8 + 12 * i;
 	if((int)getub(buf, off+4) == 0) continue; /* LEA-5H seems to have a bug reporting sats it does not see or hear*/
 	session->gpsdata.PRN[j]		= (int)getub(buf, off+1);
 	session->gpsdata.ss[j]		= (int)getub(buf, off+4);
@@ -200,7 +201,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
 	/*@ -predboolothers */
 	if (getub(buf, off+2) & 0x01)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
-	if (session->gpsdata.PRN[j] == sbas_in_use)
+	if (session->gpsdata.PRN[j] == (int)sbas_in_use)
 	    session->gpsdata.used[nsv++] = session->gpsdata.PRN[j];
 	/*@ +predboolothers */
 	j++;
@@ -458,10 +459,11 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 
 void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
+    /*@ +charint */
     unsigned char *ip = &buf[19];
     unsigned char *op = (unsigned char *)session->subtype;
-    int end = ((len - 19) < 63)?(len - 19):63;
-    int i;
+    size_t end = ((len - 19) < 63)?(len - 19):63;
+    size_t i;
 
     for(i=0;i<end;i++) {
 	if((*ip == 0x00) || (*ip == '*')) {
@@ -470,14 +472,16 @@ void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t le
 	}
 	*(op++) = *(ip++);
     }
+    /*@ -charint */
 }
 
 bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len) {
    unsigned char CK_A, CK_B;
    unsigned char head_tail[8];
-   unsigned int i, count;
+   ssize_t i, count;
    bool      ok;
 
+   /*@ -type @*/
    head_tail[0] = 0xb5;
    head_tail[1] = 0x62;
 
@@ -493,6 +497,7 @@ bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned cha
 	CK_B += CK_A;
    }
 
+   /*@ -nullderef @*/
    for (i = 0; i < data_len; i++) {
 	CK_A += msg[i];
 	CK_B += CK_A;
@@ -500,22 +505,27 @@ bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned cha
 
    head_tail[6] = CK_A;
    head_tail[7] = CK_B;
+   /*@ +type @*/
 
    gpsd_report(LOG_IO,
        "=> GPS: UBX class: %02x, id: %02x, len: %d, data:%s, crc: %02x%02x\n",
        msg_class, msg_id, data_len,
-       gpsd_hexdump_wrapper(msg, data_len, LOG_IO),
+	       gpsd_hexdump_wrapper(msg, (size_t)data_len, LOG_IO),
        CK_A, CK_B);
 
+   assert(msg != NULL || data_len == 0);
    count = write(fd, head_tail, 6);
    (void)tcdrain(fd);
    if(data_len)
-	count += write(fd, msg, data_len);
+       /*@ -nullpass @*/
+       count += write(fd, msg, (size_t)data_len);
+       /*@ +nullpass @*/
    (void)tcdrain(fd);
    count += write(fd, &head_tail[6], 2);
 
-   ok = (count == ((unsigned int)data_len + 8));
+   ok = (count == ((ssize_t)data_len + 8));
    (void)tcdrain(fd);
+   /*@ +nullderef @*/
    return(0);
 }
 
@@ -587,7 +597,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
     if(!have_port_configuration)
 	return;
 
-    /*@ +charint @*/
+    /*@ +charint -usedef @*/
     for(i=0;i<22;i++)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     if(buf[0] == 0x01)				/* set baudrate on serial port only */
@@ -600,7 +610,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 	buf[14] &= ~0x02;			/* turn off NMEA output on this port */
 	buf[14] |=  0x01;			/* turn on UBX output on this port */
     }
-    /*@ -charint @*/
+    /*@ -charint +usedef @*/
     (void)ubx_write(session->gpsdata.gps_fd, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
 }
 
@@ -609,6 +619,7 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
     int i;
     unsigned char buf[20];
 
+    /*@ +charint -usedef -compdef */
     if((!have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
 	return false;
 
@@ -616,6 +627,7 @@ static bool ubx_speed(struct gps_device_t *session, speed_t speed)
 	buf[i] = original_port_settings[i];	/* copy the original port settings */
     putlelong(buf, 8, speed);
     (void)ubx_write(session->gpsdata.gps_fd, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    /*@ -charint +usedef +compdef */
     return true;
 }
 

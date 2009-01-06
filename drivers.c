@@ -32,7 +32,7 @@ ssize_t pass_rtcm(struct gps_device_t *session, char *buf, size_t rtcmbytes)
 
 #ifdef UBX_ENABLE
     extern gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf, size_t len);
-    extern bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, unsigned char *msg, unsigned short data_len);
+extern bool ubx_write(int fd, unsigned int msg_class, unsigned int msg_id, /*@null@*/unsigned char *msg, unsigned short data_len);
     extern void ubx_catch_model(struct gps_device_t *session, unsigned char *buf, size_t len);
 #endif /* UBX_ENABLE */
 
@@ -997,9 +997,9 @@ gps_mask_t processMKT3301(int c UNUSED, char *field[], struct gps_device_t *sess
     switch(msg = atoi(&(field[0])[4]))
     {
 	case 705: /*  */
-	    strlcat(session->subtype,field[1],64);
-	    strlcat(session->subtype,"-",64);
-	    strlcat(session->subtype,field[2],64);
+	    (void)strlcat(session->subtype,field[1],64);
+	    (void)strlcat(session->subtype,"-",64);
+	    (void)strlcat(session->subtype,field[2],64);
 	    return 0; /* return a unknown sentence, which will cause the driver switch */
 	case 001: /* ACK / NACK */
 	    reason = atoi(field[2]);
