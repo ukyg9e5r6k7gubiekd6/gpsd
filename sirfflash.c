@@ -84,22 +84,24 @@ static void
 nmea_lowlevel_send(int fd, const char *fmt, ... )
 /* ship a command to the GPS, adding * and correct checksum */
 {
+    /*@ -compdef @*/
     char buf[BUFSIZ];
     va_list ap;
     size_t l;
 
     va_start(ap, fmt) ;
 #ifdef HAVE_VSNPRINTF
-    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+    (void)vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
 #else
-    vsprintf(buf + strlen(buf), fmt, ap);
+    (void)vsprintf(buf + strlen(buf), fmt, ap);
 #endif
     va_end(ap);
     strncat(buf, "*", 1);
     nmea_add_checksum(buf + 1);
     l = strlen(buf);
     if (write(fd, buf, l) != (ssize_t)l)
-	fputs("sirfflash: write to device failed\n", stderr);
+	(void)fputs("sirfflash: write to device failed\n", stderr);
+    /*@ +compdef @*/
 }
 
 static int
