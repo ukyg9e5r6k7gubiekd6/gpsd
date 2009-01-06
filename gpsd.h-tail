@@ -183,6 +183,7 @@ struct gps_type_t {
     /*@observer@*/char *type_name;
     /*@observer@*//*@null@*/char *trigger;
     int channels;
+    ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
     /*@null@*/bool (*probe_detect)(struct gps_device_t *session);
     /*@null@*/void (*probe_wakeup)(struct gps_device_t *session);
     /*@null@*/void (*probe_subtype)(struct gps_device_t *session, unsigned int seq);
@@ -349,7 +350,8 @@ extern struct gps_type_t **gpsd_drivers;
 /* gpsd library internal prototypes */
 extern gps_mask_t nmea_parse_input(struct gps_device_t *);
 extern gps_mask_t nmea_parse(char *, struct gps_device_t *);
-extern int nmea_send(int, const char *, ... );
+extern ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len);
+extern ssize_t nmea_send(struct gps_device_t *session, const char *, ... );
 extern void nmea_add_checksum(char *);
 
 ssize_t generic_get(struct gps_device_t *);

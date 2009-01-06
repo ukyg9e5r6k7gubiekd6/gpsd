@@ -181,7 +181,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 	 * Thus the only reliable probe is to try to flip the SiRF into
 	 * binary mode, cluing in the library to revert it on close.
 	 */
-	(void)nmea_send(session->gpsdata.gps_fd,
+	(void)nmea_send(session,
 			"$PSRF100,0,%d,%d,%d,0",
 			session->gpsdata.baudrate,
 			9-session->gpsdata.stopbits,
@@ -192,11 +192,11 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef NMEA_ENABLE
     case 1:
 	/* probe for Garmin serial GPS -- expect $PGRMC followed by data*/
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMCE");
+	(void)nmea_send(session, "$PGRMCE");
 	break;
     case 2:
 	/* probe for the FV-18 -- expect $PFEC,GPint followed by data */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPint");
+	(void)nmea_send(session, "$PFEC,GPint");
 	break;
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
@@ -210,19 +210,19 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef ITRAX_ENABLE
     case 4:
 	/* probe for iTrax, looking for "$PFST,OK" */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PFST");
+	(void)nmea_send(session, "$PFST");
 	break;
 #endif /* ITRAX_ENABLE */
 #ifdef GPSCLOCK_ENABLE
     case 5:
 	/* probe for Furuno Electric GH-79L4-N (GPSClock) */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PFEC,GPsrq");
+	(void)nmea_send(session, "$PFEC,GPsrq");
 	break;
 #endif /* GPSCLOCK_ENABLE */
 #ifdef ASHTECH_ENABLE
     case 6:
 	/* probe for Ashtech -- expect $PASHR */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHQ,RID");
+	(void)nmea_send(session, "$PASHQ,RID");
 	break;
 #endif /* ASHTECH_ENABLE */
 #ifdef UBX_ENABLE
@@ -234,7 +234,7 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #ifdef MKT3301_ENABLE
     case 8:
 	/* probe for MKT-3301 -- expect $PMTK705 */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PMTK605");
+	(void)nmea_send(session, "$PMTK605");
 	break;
 #endif /* MKT3301_ENABLE */
     default:
@@ -246,6 +246,7 @@ static struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = nmea_probe_subtype, /* probe for special types */
@@ -285,35 +286,35 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 	/* reset some config, AutoFix, WGS84, PPS 
 	 * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz 
          * with a 160ms low state.
-         * NOTE: new PPS only takes effect after next power cycle
+        1 * NOTE: new PPS only takes effect after next power cycle
          */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC,A,,100,,,,,,A,,1,2,1,30");
+	(void)nmea_send(session, "$PGRMC,A,,100,,,,,,A,,1,2,1,30");
 	break;
     case 1:
 	/* once a sec, no averaging, NMEA 2.3, WAAS */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,1,1,,,,2,W,N");
+	(void)nmea_send(session, "$PGRMC1,1,1,1,,,,2,W,N");
 	break;
     case 2:
 	/* get some more config info */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1E");
+	(void)nmea_send(session, "$PGRMC1E");
 	break;
     case 3:
 	/* turn off all output except GGA */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,,2");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGGA,1");
+	(void)nmea_send(session, "$PGRMO,,2");
+	(void)nmea_send(session, "$PGRMO,GPGGA,1");
 	break;
     case 4:
 	/* enable GPGGA, GPGSA, GPGSV, GPRMC on Garmin serial GPS */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSA,1");
+	(void)nmea_send(session, "$PGRMO,GPGSA,1");
 	break;
     case 5:
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPGSV,1");
+	(void)nmea_send(session, "$PGRMO,GPGSV,1");
 	break;
     case 6:
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,GPRMC,1");
+	(void)nmea_send(session, "$PGRMO,GPRMC,1");
 	break;
     case 7:
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMO,PGRME,1");
+	(void)nmea_send(session, "$PGRMO,PGRME,1");
 	break;
     }
 }
@@ -323,6 +324,7 @@ static struct gps_type_t garmin = {
     .type_name      = "Garmin Serial",	/* full name of type */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no further querying */
@@ -356,34 +358,35 @@ static void ashtech_configure(struct gps_device_t *session, unsigned int seq)
 {
     if (seq == 0){
 	/* turn WAAS on. can't hurt... */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,WAS,ON");
+	(void)nmea_send(session, "$PASHS,WAS,ON");
 	/* reset to known output state */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ALL,A,OFF");
+	(void)nmea_send(session, "$PASHS,NME,ALL,A,OFF");
 	/* then turn on some useful sentences */
 #ifdef ASHTECH_NOTYET
 	/* we could parse these, but they're oversize so they get dropped */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,POS,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,SAT,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,POS,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,SAT,A,ON");
 #else
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GGA,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSA,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,GSV,A,ON");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,RMC,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,GGA,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,GSA,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,GSV,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,RMC,A,ON");
 #endif
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHS,NME,ZDA,A,ON");
+	(void)nmea_send(session, "$PASHS,NME,ZDA,A,ON");
     }
 }
 #endif /* ALLOW_RECONFIGURE */
 
 static void ashtech_ping(struct gps_device_t *session)
 {
-	(void)nmea_send(session->gpsdata.gps_fd, "$PASHQ,RID");
+	(void)nmea_send(session, "$PASHQ,RID");
 }
 
 static struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = ashtech_ping,	/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
@@ -420,7 +423,7 @@ static void fv18_configure(struct gps_device_t *session, unsigned int seq)
      * Suppress GLL and VTG.  Enable ZDA so dates will be accurate for replay.
      */
     if (seq == 0)
-	(void)nmea_send(session->gpsdata.gps_fd,
+	(void)nmea_send(session,
 		    "$PFEC,GPint,GSA01,DTM00,ZDA01,RMC01,GLL00,VTG00,GSV05");
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -429,6 +432,7 @@ static struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
@@ -477,6 +481,7 @@ static struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should echo the probe */
     .channels       = 12,		/* not used by this driver */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = gpsclock_probe_subtype, /* to be sent unconditionally */
@@ -517,7 +522,7 @@ static void tripmate_probe_subtype(struct gps_device_t *session, unsigned int se
 {
     /* TripMate requires this response to the ASTRAL it sends at boot time */
     if (seq == 0)
-	(void)nmea_send(session->gpsdata.gps_fd, "$IIGPQ,ASTRAL");
+	(void)nmea_send(session, "$IIGPQ,ASTRAL");
 }
 
 #ifdef ALLOW_RECONFIGURE
@@ -525,7 +530,7 @@ static void tripmate_configurator(struct gps_device_t *session, unsigned int seq
 {
     /* stop it sending PRWIZCH */
     if (seq == 0)
-	(void)nmea_send(session->gpsdata.gps_fd, "$PRWIILOG,ZCH,V,,");
+	(void)nmea_send(session, "$PRWIILOG,ZCH,V,,");
 }
 #endif /* ALLOW_RECONFIGURE */
 
@@ -533,6 +538,7 @@ static struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
+    .control_send  = nmea_write,		/* how to send control strings */
     .probe_wakeup  = NULL,			/* no wakeup before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = tripmate_probe_subtype,	/* send unconditionally */
@@ -591,6 +597,7 @@ static struct gps_type_t earthmate = {
     .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup  = NULL,			/* no wakeup to be done before hunt */
     .probe_detect  = NULL,			/* no probe */
     .probe_subtype = earthmate_probe_subtype,	/* switch us to Zodiac mode */
@@ -764,6 +771,7 @@ struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .trigger	    = " TNT1500",
     .channels       = 0,		/* not an actual GPS at all */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* this will become a real method */
     .probe_detect   = tnt_probe,	/* probe by sending ID query */
     .probe_subtype  = tnt_probe_subtype,/* probe for True North Digital Compass */
@@ -836,6 +844,7 @@ struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .trigger	    = "$C,",
     .channels       = 0,		/* not an actual GPS at all */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,
     .probe_detect   = NULL,
     .probe_subtype  = NULL,
@@ -878,6 +887,7 @@ static struct gps_type_t rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
+    .control_send  = NULL,		/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
@@ -920,6 +930,7 @@ static struct gps_type_t rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
+    .control_send  = NULL,		/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
@@ -959,6 +970,7 @@ static struct gps_type_t garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
     .trigger       = NULL,		/* no recognition string */
     .channels      = 0,			/* not used */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = NULL,		/* no subtypes */
@@ -1039,11 +1051,11 @@ static void mkt3301_configure(struct gps_device_t *session, unsigned int seq)
 
 */
     if(seq == 0) {
-	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK320,0"); /* power save off */
-	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK300,1000,0,0,0.0,0.0"); /* Fix interval */
-	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");
-	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK301,2"); /* DGPS is WAAS */
-	(void)nmea_send(session->gpsdata.gps_fd,"$PMTK313,1"); /* SBAS enable */
+	(void)nmea_send(session,"$PMTK320,0"); /* power save off */
+	(void)nmea_send(session,"$PMTK300,1000,0,0,0.0,0.0"); /* Fix interval */
+	(void)nmea_send(session,"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");
+	(void)nmea_send(session,"$PMTK301,2"); /* DGPS is WAAS */
+	(void)nmea_send(session,"$PMTK313,1"); /* SBAS enable */
     }
 }
 #endif /* ALLOW_RECONFIGURE */
@@ -1052,6 +1064,7 @@ static struct gps_type_t mkt3301 = {
     .type_name      = "MKT-3301",	/* full name of type */
     .trigger	    = "$PMTK705,",	/* MKT-3301s send firmware release name and version */
     .channels       = 12,		/* not used by this driver */
+    .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */

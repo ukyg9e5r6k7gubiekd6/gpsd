@@ -887,28 +887,33 @@ void nmea_add_checksum(char *sentence)
     (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
 }
 
-int nmea_send(int fd, const char *fmt, ... )
+ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len)
 /* ship a command to the GPS, adding * and correct checksum */
 {
-    int status;
-    char buf[BUFSIZ];
-    va_list ap;
-
-    va_start(ap, fmt) ;
-    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
-    va_end(ap);
-    if (fmt[0] == '$') {
+    ssize_t status;
+    if (buf[0] == '$') {
 	(void)strlcat(buf, "*", BUFSIZ);
 	nmea_add_checksum(buf);
     } else
 	(void)strlcat(buf, "\r\n", BUFSIZ);
-    status = (int)write(fd, buf, strlen(buf));
-    (void)tcdrain(fd);
-    if (status == (int)strlen(buf)) {
+    status = write(session->gpsdata.gps_fd, buf, strlen(buf));
+    (void)tcdrain(session->gpsdata.gps_fd);
+    if (status == (ssize_t)strlen(buf)) {
 	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;
     } else {
 	gpsd_report(LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
+}
+
+ssize_t nmea_send(struct gps_device_t *session, const char *fmt, ... )
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+    (void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
+    va_end(ap);
+    return nmea_write(session, buf, strlen(buf));
 }

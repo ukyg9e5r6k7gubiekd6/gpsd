@@ -163,8 +163,8 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session, unsigned
 }
 
 /*@ +charint -usedef -compdef @*/
-static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
-   bool      ok;
+static ssize_t italk_write(struct gps_device_t *session, char *msg, size_t msglen) {
+   ssize_t      status;
 
    /* CONSTRUCT THE MESSAGE */
 
@@ -172,12 +172,12 @@ static bool italk_write(int fd, unsigned char *msg, size_t msglen) {
    gpsd_report(LOG_IO, "writing italk control type %02x:%s\n",
 	msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
-   ok = (write(fd, msg, msglen) == (ssize_t)msglen);
-   (void)tcdrain(fd);
+   status = write(session->gpsdata.gps_fd, msg, msglen);
+   (void)tcdrain(session->gpsdata.gps_fd);
 #else
-   ok = 0;
+   status = -1;
 #endif /* ALLOW_RECONFIGURE */
-   return(ok);
+   return(status);
 }
 /*@ -charint +usedef +compdef @*/
 
@@ -300,11 +300,11 @@ static bool italk_set_mode(struct gps_device_t *session UNUSED,
 			      speed_t speed UNUSED, bool mode UNUSED)
 {
     /*@ +charint @*/
-    unsigned char msg[] = {0,};
+    char msg[] = {0,};
 
     /* HACK THE MESSAGE */
 
-    return italk_write(session->gpsdata.gps_fd, msg, sizeof(msg));
+    return (italk_write(session, msg, sizeof(msg)) != -1);
     /*@ +charint @*/
 }
 
@@ -346,6 +346,7 @@ struct gps_type_t italk_binary =
     .type_name      = "iTalk binary",	/* full name of type */
     .trigger	    = NULL,		/* recognize the type */
     .channels       = 12,		/* consumer-grade GPS */
+    .control_send   = italk_write,	/* how to send a control string */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* how to detect at startup time */
     .probe_subtype  = NULL,		/* initialize the device */
@@ -484,6 +485,7 @@ static struct gps_type_t itrax = {
     .type_name     = "iTrax",		/* full name of type */
     .trigger       = "$PFST,OK",	/* tells us to switch to Itrax */
     .channels      = 12,		/* consumer-grade GPS */
+    .control_send  = italk_write,	/* how to send a control string */
     .probe_wakeup  = NULL,		/* no wakeup to be done before hunt */
     .probe_detect  = NULL,		/* no probe */
     .probe_subtype = itrax_probe_subtype,	/* initialize */

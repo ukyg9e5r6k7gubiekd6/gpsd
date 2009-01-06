@@ -133,19 +133,20 @@
 #define EVERMORE_CHANNELS	12
 
 /*@ +charint -usedef -compdef @*/
-static bool evermore_write(struct gps_device_t *session, unsigned char *msg, size_t msglen)
+static ssize_t evermore_write(struct gps_device_t *session, char *msg, size_t msglen)
 {
    unsigned int       crc;
    size_t    i, len;
-   unsigned char stuffed[MAX_PACKET_LENGTH*2], *cp;
+   char stuffed[MAX_PACKET_LENGTH*2], *cp;
 
+   /*@ +charint +ignoresigns @*/
    /* prepare a DLE-stuffed copy of the message */
    cp = stuffed;
    *cp++ = 0x10;  /* message starts with DLE STX */
    *cp++ = 0x02;
 
    len = (size_t)(msglen + 2);   /* msglen < 254 !! */
-   *cp++ = (unsigned char)len;   /* message length */
+   *cp++ = (char)len;   /* message length */
    if (len == 0x10) *cp++ = 0x10;
    
    /* payload */
@@ -166,14 +167,15 @@ static bool evermore_write(struct gps_device_t *session, unsigned char *msg, siz
    *cp++ = 0x03;
 
    len = (size_t)(cp - stuffed);
+   /*@ -charint -ignoresigns @*/
 
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing EverMore control type 0x%02x: %s\n", msg[0], 
 	gpsd_hexdump_wrapper(stuffed, len, LOG_IO));
 #ifdef ALLOW_RECONFIGURE
-   return (gpsd_write(session, stuffed, len) == (ssize_t)len);
+   return gpsd_write(session, stuffed, len);
 #else
-   return 0;
+   return -1;
 #endif /* ALLOW_RECONFIGURE */
 }
 /*@ -charint +usedef +compdef @*/
@@ -381,7 +383,7 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 {
     /*@ -type @*/
     unsigned char tmp8;
-    unsigned char msg[] = {
+    char msg[] = {
 	    0x89,          /*  0: msg ID, Serial Port Configuration */
 	    0x01,          /*  1: bit 0 cfg for main serial, bit 1 cfg for DGPS port */
 	    0x00,          /*  2: baud rate for main serial; 4800(0), 9600(1), 19200(2), 38400(3) */
@@ -396,15 +398,15 @@ static bool evermore_speed(struct gps_device_t *session, speed_t speed)
 	    default: return false;
     }
     msg[2] = tmp8;
-    return evermore_write(session, msg, sizeof(msg));
+    return (evermore_write(session, msg, sizeof(msg)) != -1);
     /*@ +type @*/
 }
 
 static bool evermore_protocol(struct gps_device_t *session, int protocol)
 {
     /*@ +charint */
-    unsigned char tmp8;
-    unsigned char evrm_protocol_config[] = {
+    char tmp8;
+    char evrm_protocol_config[] = {
 	    0x84,    /* 0: msg ID, Protocol Configuration */
 	    0x00,    /* 1: mode; EverMore binary(0), NMEA(1) */
 	    0x00,    /* 2: reserved */
@@ -414,7 +416,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
     gpsd_report(LOG_PROG, "evermore_protocol(%d)\n", protocol);
     /*@i1@*/tmp8 = (protocol != 0) ? 1 : 0;   /* NMEA : binary */
     evrm_protocol_config[1] = tmp8;
-    return evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config));
+    return (evermore_write(session, evrm_protocol_config, sizeof(evrm_protocol_config)) != -1);
 }
 
 static bool evermore_nmea_config(struct gps_device_t *session, int mode)
@@ -422,9 +424,9 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 /* mode = 1 : gpsd best */
 /* mode = 2 : EverMore search, activate PEMT101 message */
 {
-    unsigned char tmp8;
+    char tmp8;
     /*@ +charint */
-    unsigned char evrm_nmeaout_config[] = {
+    char evrm_nmeaout_config[] = {
 	    0x8e,	/*  0: msg ID, NMEA Message Control */
 	    0xff,       /*  1: NMEA sentence bitmask, GGA(0), GLL(1), GSA(2), GSV(3), ... */
 	    0x01,       /*  2: nmea checksum no(0), yes(1) */
@@ -443,7 +445,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
     evrm_nmeaout_config[6] = tmp8;           /* GPGSV, 1s or 5s */
     /*@i1@*/tmp8 = (mode == 2) ? 1 : 0;   /* NMEA PEMT101 */
     evrm_nmeaout_config[9] = tmp8;           /* PEMT101, 1s or 0s */
-    return evermore_write(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config));
+    return (evermore_write(session, evrm_nmeaout_config, sizeof(evrm_nmeaout_config)) != -1);
 }
 
 static void evermore_mode(struct gps_device_t *session, int mode)
@@ -491,6 +493,7 @@ struct gps_type_t evermore_binary =
     .type_name      = "EverMore binary",	/* full name of type */
     .trigger        = "$PEMT,", 		/* recognize the type */
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = evermore_write,		/* how to send a control string */
     .probe_wakeup   = NULL,			/* no wakeup to be done before hunt */
     .probe_detect   = NULL,			/* no probe */
     .probe_subtype  = NULL,			/* no subtype probing */

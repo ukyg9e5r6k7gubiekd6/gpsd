@@ -441,6 +441,7 @@ struct gps_type_t zodiac_binary =
     .type_name      = "Zodiac binary",	/* full name of type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = 12,		/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no probe on baud rate change */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* no initialization */

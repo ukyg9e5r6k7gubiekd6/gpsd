@@ -64,6 +64,8 @@
  */
 
 #include <sys/types.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "gpsd_config.h"
 #include "gpsd.h"
 #include "gpsflash.h"
@@ -77,6 +79,26 @@
 #define BOOST_38400 0
 #define BOOST_57600 1
 #define BOOST_115200 2
+
+static void 
+nmea_lowlevel_send(int fd, const char *fmt, ... )
+/* ship a command to the GPS, adding * and correct checksum */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt) ;
+#ifdef HAVE_VSNPRINTF
+    vsnprintf(buf + strlen(buf), sizeof(buf)-strlen(buf), fmt, ap);
+#else
+    vsprintf(buf + strlen(buf), fmt, ap);
+#endif
+    va_end(ap);
+    strcat(buf, "*");
+    nmea_add_checksum(buf + 1);
+    if (write(fd, buf, strlen(buf)) != strlen(buf))
+	fputs("sirfflash: write to device failed\n", stderr);
+}
 
 static int
 sirfSendUpdateCmd(int pfd){
@@ -170,13 +192,13 @@ sirfSetProto(int pfd, struct termios *term, unsigned int speed, unsigned int pro
 
 	/* send at whatever baud we're currently using */
 	(void)sirf_write(pfd, sirf);
-	(void)nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
+	nmea_lowlevel_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
 
 	/* now spam the receiver with the config messages */
 	for(i = 0; i < (int)(sizeof(spd)/sizeof(spd[0])); i++) {
 		(void)serialSpeed(pfd, term, spd[i]);
 		(void)sirf_write(pfd, sirf);
-		(void)nmea_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
+		nmea_lowlevel_send(pfd, "$PSRF100,%u,%u,8,1,0", speed, proto);
 		(void)tcdrain(pfd);
 		(void)usleep(100000);
 	}

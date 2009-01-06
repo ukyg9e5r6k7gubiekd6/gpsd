@@ -55,7 +55,7 @@ static	gps_mask_t proto_msg_svinfo(struct gps_device_t *, unsigned char *, size_
 /*
  * These methods may be called elsewhere in gpsd
  */
-	bool proto_write(int , unsigned char *, size_t );
+	ssize_t proto_write(int , unsigned char *, size_t );
 	void proto_set_mode(struct gps_device_t *, speed_t ):
 static	bool proto_probe_detect(struct gps_device_t *)
 static	void proto_probe_wakeup(struct gps_device_t *)
@@ -184,7 +184,8 @@ proto_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf, size_t da
  * Write data to the device, doing any required padding or checksumming
  */
 /*@ +charint -usedef -compdef @*/
-static bool proto_write(int fd, unsigned char *msg, size_t msglen) 
+static ssize_t proto_write(struct gps_device_t *session, 
+			   unsigned char *msg, size_t msglen) 
 {
    bool ok;
 
@@ -193,9 +194,7 @@ static bool proto_write(int fd, unsigned char *msg, size_t msglen)
    /* we may need to dump the message */
    gpsd_report(LOG_IO, "writing proto control type %02x:%s\n", 
 	       msg[0], gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
-   ok = (write(fd, msg, msglen) == (ssize_t)msglen);
-   (void)tcdrain(fd);
-   return(ok);
+   return gpsd_write(session, msg, msglen);
 }
 /*@ -charint +usedef +compdef @*/
 
@@ -357,7 +356,7 @@ static void proto_wrapup(struct gps_device_t *session)
 /* you read this and methods could have been added   */
 /* or deleted. Unused methods can be set to NULL.    */
 /*                                                   */
-/* The latest situation can be found by inspecting   */
+/* The latest version can be found by inspecting   */
 /* the contents of struct gps_type_t in gpsd.h.      */
 /*                                                   */
 /* This always contains the correct definitions that */
@@ -371,6 +370,8 @@ struct gps_type_t proto_binary = {
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
     .channels         = 12,
+    /* Control string sender - should provide checksum and trailer */
+    .control_send     = proto_write,
     /* Startup-time device detector */
     .probe_detect     = proto_probe_detect,
     /* Wakeup to be done before each baud hunt */

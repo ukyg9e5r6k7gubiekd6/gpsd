@@ -819,6 +819,7 @@ struct gps_type_t tsip_binary =
     .type_name      = "Trimble TSIP",	/* full name of type */
     .trigger        = NULL,		/* no trigger */
     .channels       = TSIP_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = tsip_probe_subtype,	/* no more subtype discovery */

@@ -636,6 +636,7 @@ struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX",    /* Full name of type */
     .trigger          = NULL,           /* Response string that identifies device (not active) */
     .channels         = 50,             /* Number of satellite channels supported by the device */
+    .control_send     = NULL,		/* no control sender yet */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .probe_wakeup     = NULL,           /* Wakeup to be done before each baud hunt */
     .probe_subtype    = NULL,           /* Initialize the device and get subtype */

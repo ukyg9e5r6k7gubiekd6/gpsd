@@ -1006,13 +1006,13 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	settle(); // wait 333mS, essential!
 
 	/* once a sec, no binary, no averaging, NMEA 2.3, WAAS */
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,1");
+	(void)nmea_send(session, "$PGRMC1,1,1");
 	//(void)nmea_send(fd, "$PGRMC1,1,1,1,,,,2,W,N");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
+	(void)nmea_send(session, "$PGRMI,,,,,,,R");
 	settle();    // wait 333mS, essential!
     } else {
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMC1,1,2,1,,,,2,W,N");
-	(void)nmea_send(session->gpsdata.gps_fd, "$PGRMI,,,,,,,R");
+	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
+	(void)nmea_send(session, "$PGRMI,,,,,,,R");
 	// garmin serial binary is 9600 only!
 	gpsd_report(LOG_ERROR, "NOTE: Garmin binary is 9600 baud only!\n");
 	settle();	// wait 333mS, essential!
@@ -1146,6 +1146,7 @@ struct gps_type_t garmin_usb_binary_old =
     .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
@@ -1172,6 +1173,7 @@ struct gps_type_t garmin_usb_binary =
     .type_name      = "Garmin USB binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = garmin_detect,	/* how to detect at startup time */
     .probe_subtype  = garmin_probe_subtype,	/* get subtype info */
@@ -1197,6 +1199,7 @@ struct gps_type_t garmin_ser_binary =
     .type_name      = "Garmin Serial binary",	/* full name of type */
     .trigger        = NULL,		/* no trigger, it has a probe */
     .channels       = GARMIN_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,        	/* how to detect at startup time */
     .probe_subtype  = NULL,        	/* initialize the device */

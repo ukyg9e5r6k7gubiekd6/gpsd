@@ -878,7 +878,7 @@ static void sirfbin_configure(struct gps_device_t *session, unsigned int seq)
 	return;
     if (session->packet.type == NMEA_PACKET) {
 	gpsd_report(LOG_PROG, "Switching chip mode to SiRF binary.\n");
-	(void)nmea_send(session->gpsdata.gps_fd,
+	(void)nmea_send(session,
 		  "$PSRF100,0,%d,8,1,0", session->gpsdata.baudrate);
     }
     /* do this every time*/
@@ -963,6 +963,7 @@ struct gps_type_t sirf_binary =
     .type_name      = "SiRF binary",	/* full name of type */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
+    .control_send   = NULL,		/* no control sender yet */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* can't probe more in NMEA mode */
