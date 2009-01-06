@@ -186,8 +186,8 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	line = buf;
 	rlen = len += rlen;
 
-	gpsd_report(LOG_RAW, "Ntrip source table buffer %s\n", buf);	
-	
+	gpsd_report(LOG_RAW, "Ntrip source table buffer %s\n", buf);
+
 	if (!srctbl) {
 	    /* parse SOURCETABLE */
 	    if (strncmp(line,NTRIP_SOURCETABLE,strlen(NTRIP_SOURCETABLE))==0) {
@@ -211,7 +211,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	    if (!(eol = strstr(line, NTRIP_BR)))
 		break;
 
-	    gpsd_report(LOG_IO, "next Ntrip source table line %s\n", line);	
+	    gpsd_report(LOG_IO, "next Ntrip source table line %s\n", line);
 
 	    *eol = '\0';
 	    llen = (ssize_t)(eol - line);
@@ -226,22 +226,22 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 		    if (hold.format == fmt_unknown) {
 			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s format not supported\n",
-				    line);	
+				    line);
 			return -1;
 		    }
 		    /* todo: support encryption and compression algorithms */
 		    if (hold.compr_encryp != cmp_enc_none) {
 			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s compression/encryption algorithm not supported\n",
-				    line);	
+				    line);
 			return -1;
 		    }
 		    /* todo: support digest authentication */
-		    if (hold.authentication != auth_none 
+		    if (hold.authentication != auth_none
 			&& hold.authentication != auth_basic) {
 			gpsd_report(LOG_ERROR,
 				    "Ntrip stream %s authentication method not supported\n",
-				    line);	
+				    line);
 			return -1;
 		    }
 		    memcpy(keep, &hold, sizeof(hold));
@@ -259,7 +259,7 @@ static int ntrip_sourcetable_parse(int fd, char *buf, ssize_t blen,
 	    llen += strlen(NTRIP_BR);
 	    line += llen;
 	    len -= llen;
-	    gpsd_report(LOG_RAW, "Remaining Ntrip source table buffer %d %s\n", len, line);
+	    gpsd_report(LOG_RAW, "Remaining Ntrip source table buffer %zd %s\n", len, line);
 	}
 	/* message too big to fit into buffer */
 	if (len == blen - 1)
@@ -466,7 +466,7 @@ void ntrip_report(struct gps_device_t *session)
 	    if (write(session->context->dsock, buf, strlen(buf)) == (ssize_t)strlen(buf))
 		gpsd_report(LOG_IO, "=> dgps %s", buf);
 	    else
-		gpsd_report(LOG_IO, "ntrip report write failed", buf);
+		gpsd_report(LOG_IO, "ntrip report write failed");
 	}
     }
 }
