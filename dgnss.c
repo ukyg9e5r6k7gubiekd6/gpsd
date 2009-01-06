@@ -84,17 +84,17 @@ void dgnss_autoconnect(struct gps_context_t *context, double lat, double lon)
 void rtcm_relay(struct gps_device_t *session)
 /* pass a DGNSS connection report to a session */
 {
-    if (session->gpsdata.gps_fd !=-1 
+    if (session->gpsdata.gps_fd !=-1
 	&& session->context->rtcmbytes > -1
 	&& session->rtcmtime < session->context->rtcmtime
 	&& session->device_type->rtcm_writer != NULL) {
-	if (session->device_type->rtcm_writer(session, 
-					      session->context->rtcmbuf, 
+	if (session->device_type->rtcm_writer(session,
+					      session->context->rtcmbuf,
 					      (size_t)session->context->rtcmbytes) == 0)
 	    gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
-	else { 
+	else {
 	    session->rtcmtime = timestamp();
-	    gpsd_report(LOG_IO, "<= DGPS: %d bytes of RTCM relayed.\n", session->context->rtcmbytes);
+	    gpsd_report(LOG_IO, "<= DGPS: %ld bytes of RTCM relayed.\n", session->context->rtcmbytes);
 	}
     }
 }

@@ -731,9 +731,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		break;
 #endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
- 	    case NAVCOM_PACKET:
-	 	(void)gpsd_switch_driver(session, "Navcom binary");
-	 	break;
+	    case NAVCOM_PACKET:
+		(void)gpsd_switch_driver(session, "Navcom binary");
+		break;
 #endif /* NAVCOM_ENABLE */
 #ifdef EVERMORE_ENABLE
 	    case EVERMORE_PACKET:
@@ -761,7 +761,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(LOG_RAW+2, "GPS sent %d new characters\n", newlen);
+    gpsd_report(LOG_RAW+2, "GPS sent %d new characters\n", (int)newlen);
     if (newlen == -1)	{		/* read error */
 	session->gpsdata.online = 0;
 	return 0;
