@@ -87,7 +87,7 @@
  */
 #define NICEVAL	-10
 
-#define sub_index(s) (s - subscribers)
+#define sub_index(s) (int)(s - subscribers)
 
 static fd_set all_fds;
 static int maxfd;
@@ -276,7 +276,7 @@ static int passivesock(char *service, char *protocol, int qlen)
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) < 0) {
-	gpsd_report(LOG_ERROR, "Can't listen on %s port%s\n", service);
+	gpsd_report(LOG_ERROR, "Can't listen on port %s\n", service);
 	return -1;
     }
     return s;
@@ -420,7 +420,7 @@ static void detach_client(struct subscriber_t *sub)
     c_ip = sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     (void)close(sub->fd);
-    gpsd_report(LOG_INF, "detaching %s (sub%d, fd %d) in detach_client\n",
+    gpsd_report(LOG_INF, "detaching %s (sub %d, fd %d) in detach_client\n",
 	c_ip, sub_index(sub), sub->fd);
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
@@ -581,6 +581,7 @@ static bool allocation_policy(struct gps_device_t *channel,
 	return false;
 }
 
+#define USER_INDEX (int)(user - subscribers)
 /*@ -branchstate -usedef -globstate @*/
 static bool assign_channel(struct subscriber_t *user)
 {
@@ -590,7 +591,7 @@ static bool assign_channel(struct subscriber_t *user)
 	double most_recent = 0;
 	struct gps_device_t *channel;
 
-	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", user-subscribers);
+	gpsd_report(LOG_PROG, "client(%d): assigning channel...\n", USER_INDEX);
 	/* ...connect him to the most recently active device */
 	/*@ -mustfreeonly @*/
 	for(channel = channels; channel<channels+MAXDEVICES; channel++)
@@ -604,21 +605,24 @@ static bool assign_channel(struct subscriber_t *user)
     }
 
     if (user->device == NULL) {
-	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n", user-subscribers);
+	gpsd_report(LOG_ERROR, "client(%d): channel assignment failed.\n",
+		    USER_INDEX);
 	return false;
     }
 
     /* and open that device */
     if (user->device->gpsdata.gps_fd != -1)
 	gpsd_report(LOG_PROG,"client(%d): channel %d already active.\n",
-		    user-subscribers, user->device->gpsdata.gps_fd);
+		    USER_INDEX, user->device->gpsdata.gps_fd);
     else {
 	if (gpsd_activate(user->device, true) < 0) {
 
-	    gpsd_report(LOG_ERROR, "client(%d): channel activation failed.\n", user-subscribers);
+	    gpsd_report(LOG_ERROR, "client(%d): channel activation failed.\n",
+			USER_INDEX);
 	    return false;
 	} else {
-	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel\n", user->device->gpsdata.gps_fd);
+	    gpsd_report(LOG_RAW, "flagging descriptor %d in assign_channel\n",
+			user->device->gpsdata.gps_fd);
 	    FD_SET(user->device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
@@ -638,7 +642,7 @@ static bool assign_channel(struct subscriber_t *user)
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 		       timestamp(), gpsd_id(user->device));
 	/*@ -sefparams +matchanyintegral @*/
-	assert(write(user->fd, buf, strlen(buf)) == strlen(buf));
+	assert((size_t)write(user->fd, buf, strlen(buf)) == strlen(buf));
 	/*@ +sefparams -matchanyintegral @*/
 
     }
