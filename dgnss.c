@@ -19,7 +19,7 @@
 bool dgnss_url(char *name)
 /* is given string a valid URL for DGPS service? */
 {
-    return 
+    return
 	strncmp(name,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0
 	|| strncmp(name,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0;
 }
@@ -31,11 +31,11 @@ int dgnss_open(struct gps_context_t *context, char *dgnss_service)
 {
 #ifdef NTRIP_ENABLE
     if (strncmp(dgnss_service,DGNSS_PROTO_NTRIP,strlen(DGNSS_PROTO_NTRIP))==0)
-        return ntrip_open(context, dgnss_service + strlen(DGNSS_PROTO_NTRIP));
+	return ntrip_open(context, dgnss_service + strlen(DGNSS_PROTO_NTRIP));
 #endif
 
     if (strncmp(dgnss_service,DGNSS_PROTO_DGPSIP,strlen(DGNSS_PROTO_DGPSIP))==0)
-        return dgpsip_open(context, dgnss_service + strlen(DGNSS_PROTO_DGPSIP));
+	return dgpsip_open(context, dgnss_service + strlen(DGNSS_PROTO_DGPSIP));
 
 #ifndef REQUIRE_DGNSS_PROTO
     return dgpsip_open(context, dgnss_service);
@@ -94,7 +94,7 @@ void rtcm_relay(struct gps_device_t *session)
 	    gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
 	else {
 	    session->rtcmtime = timestamp();
-	    gpsd_report(LOG_IO, "<= DGPS: %ld bytes of RTCM relayed.\n", session->context->rtcmbytes);
+	    gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n", session->context->rtcmbytes);
 	}
     }
 }

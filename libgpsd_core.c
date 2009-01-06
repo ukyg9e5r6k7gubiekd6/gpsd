@@ -761,7 +761,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(LOG_RAW+2, "GPS sent %ld new characters\n", newlen);
+    gpsd_report(LOG_RAW+2, "GPS sent %zd new characters\n", newlen);
     if (newlen == -1)	{		/* read error */
 	session->gpsdata.online = 0;
 	return 0;

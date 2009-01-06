@@ -236,7 +236,7 @@ static int sirfProbe(int fd, char **version)
     want = 0;
     if (expect(fd,"\xa0\xa2\x00\x15\x06", 5, 1))
 	want = 21;
-    else if (expect(fd,"\xa0\xa2\x00\x51\x06", 5, 1)) 
+    else if (expect(fd,"\xa0\xa2\x00\x51\x06", 5, 1))
 	want = 81;
 
     if (want) {
@@ -247,7 +247,7 @@ static int sirfProbe(int fd, char **version)
 	    if (status == -1)
 		return -1;
 	}
-	gpsd_report(LOG_PROG, "%ld bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
+	gpsd_report(LOG_PROG, "%zd bytes = %s\n", len, gpsd_hexdump(buf, (size_t)len));
 	*version = strdup(buf);
 	return 0;
     } else {
