@@ -887,7 +887,7 @@ void nmea_add_checksum(char *sentence)
     (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
 }
 
-ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len)
+ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len UNUSED)
 /* ship a command to the GPS, adding * and correct checksum */
 {
     ssize_t status;
