@@ -52,7 +52,7 @@ running as root in order to have write access to the device.</para>
 <varlistentry>
 <term>-b</term>
 <listitem>
-<para>Put GPS into binary mode.  After the GPS resets itself autobaud to 
+<para>Put the GPS into binary mode.  After the GPS resets itself, autobaud to 
 the new speed.</para>
 </listitem>
 </varlistentry>
@@ -75,7 +75,7 @@ its new speed.</para>
 <varlistentry>
 <term>-l</term>
 <listitem>
-<para>List the known device types and exit..</para>
+<para>List the known device types and exit.</para>
 </listitem>
 </varlistentry>
 
@@ -120,7 +120,7 @@ string which should be contained in exactly one of the known driver
 names; for a list, do <command>gpsctl -l</command>.</para>
 
 <para>Forcing the device type behaves somewhat differently depending 
-on whether this tool, is going through the daemon or not. In high-level
+on whether this tool is going through the daemon or not. In high-level
 mode, if the device that daemon selects for you doesn't match the
 driver you specified, <application>gpsctl</application> exits with
 a warning.  (This may be useful in scripts.)</para>

@@ -62,26 +62,26 @@ int main(int argc, char **argv)
 #define USAGE	"usage: gpsctl [-l] [-b | -n] [-D n] [-s speed] [-V] [-t devtype] <device>\n"
     while ((option = getopt(argc, argv, "bfhlns:t:D:V")) != -1) {
 	switch (option) {
-	case 'b':
+	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
 	    break;
-	case 'f':
-	    lowlevel = true;	/* force direct access to the deamon */
+	case 'f':		/* force direct access to the evice */
+	    lowlevel = true;
 	    break;
-        case 'l':
+        case 'l':		/* list known device types */
 	    for (dp = gpsd_drivers; *dp; dp++)
 		(void)puts((*dp)->type_name);
 	    exit(0);
-	case 'n':
+	case 'n':		/* switch to NMEA mode */
 	    to_nmea = true;
 	    break;
-	case 's':
+	case 's':		/* change output baud rate */
 	    speed = optarg;
 	    break;
-	case 't':
+	case 't':		/* force the device type */
 	    devtype = optarg;
 	    break;
-	case 'D':
+	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
 	    break;
 	case 'V':
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_PROG, "gpsctl: %s driver selected.\n", forcetype->type_name);
 	} else {
 	    forcetype = NULL;
-	    gpsd_report(LOG_ERROR, "gpsd: %d driver names match '%s'.\n",
+	    gpsd_report(LOG_ERROR, "gpsctl: %d driver names match '%s'.\n",
 			matchcount, devtype);
 	}
     }
