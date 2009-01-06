@@ -209,17 +209,17 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 	    } else {
 		session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
 	    }
-	    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS syncing at byte %d: %0x%08x\n", session->char_counter, session->isgps.curr_word);
+	    gpsd_report(ISGPS_ERRLEVEL_BASE+2, "ISGPS syncing at byte %lu: 0x%08x\n", session->char_counter, session->isgps.curr_word);
 
 	    if (preamble_match(&session->isgps.curr_word)) {
 		if (isgps_parityok(session->isgps.curr_word)) {
-		    gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+		    gpsd_report(ISGPS_ERRLEVEL_BASE+1,
 				"ISGPS preamble ok, parity ok -- locked\n");
 		    session->isgps.locked = true;
 		    /* session->isgps.curr_offset;  XXX - testing */
 		    break;
 		}
-		gpsd_report(ISGPS_ERRLEVEL_BASE+1, 
+		gpsd_report(ISGPS_ERRLEVEL_BASE+1,
 			    "ISGPS preamble ok, parity fail\n");
 	    }
 	    session->isgps.curr_offset++;
