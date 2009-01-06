@@ -197,8 +197,8 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     tp = buf2;
     if (*cp == 0x10) cp++;
     datalen = (size_t)*cp++;
-   
-    gpsd_report(LOG_RAW, "raw EverMore packet type 0x%02x, length %d: %s\n",
+
+    gpsd_report(LOG_RAW, "raw EverMore packet type 0x%02x, length %zd: %s\n",
 	*cp, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
 
     datalen -= 2;
@@ -210,7 +210,7 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
     }
 
     /*@ -usedef -compdef @*/
-    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %d: %s\n",
+    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %zd: %s\n",
 	buf2[0], datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_RAW));
     /*@ +usedef +compdef @*/
 
@@ -339,24 +339,24 @@ gps_mask_t evermore_parse(struct gps_device_t *session, unsigned char *buf, size
 	/* gpsd_report(LOG_PROG, "MDO 0x04: visible=%d\n", visible); */
 	gpsd_report(LOG_PROG, "MDO 0x04:\n");
 	return TIME_SET;
-    
+
     case 0x20:	/* LogConfig Info, could be used as a probe for EverMore GPS */
-	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %d: %s\n",
+	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd: %s\n",
 	    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
 	return ONLINE_SET;
 
     case 0x22:	/* LogData */
-	gpsd_report(LOG_IO, "LogData EverMore packet, length %d: %s\n",
+	gpsd_report(LOG_IO, "LogData EverMore packet, length %zd: %s\n",
 	    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
 	return ONLINE_SET;
 
     case 0x38:	/* ACK */
 	gpsd_report(LOG_PROG, "EverMore command %02X ACK\n", getub(buf2, 2));
 	return ONLINE_SET;
-    
+
     default:
 	gpsd_report(LOG_WARN,
-	    "unknown EverMore packet id 0x%02x, length %d: %s\n", buf2[0],
+	    "unknown EverMore packet id 0x%02x, length %zd: %s\n", buf2[0],
 	    datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_IO));
 	return 0;
     }

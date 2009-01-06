@@ -133,8 +133,8 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg, size_t
     memcpy(buf+4, msg, len);
     buf[len + 6] = 0xb0;
     buf[len + 7] = 0xb3;
-    
-    return sirf_write(session->gpsdata.gps_fd, buf) ? (len + 8) : -1;
+
+    return sirf_write(session->gpsdata.gps_fd, buf) ? (ssize_t)(len + 8) : -1;
     /*@ -charint -matchanyintegral +initallelements @*/
 }
 
@@ -226,11 +226,11 @@ static gps_mask_t sirf_msg_errors(unsigned char *buf, size_t len UNUSED)
 {
     switch (getbeuw(buf, 1)) {
     case 2:
-	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %d error on PRN %ld\n", getbeul(buf, 9), getbeul(buf, 5));
+	gpsd_report(LOG_PROG, "EID 0x0a type 2: Subframe %u error on PRN %u\n", getbeul(buf, 9), getbeul(buf, 5));
 	break;
 
     case 4107:
-	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n", getbeul(buf, 5));
+	gpsd_report(LOG_PROG, "EID 0x0a type 4107: neither KF nor LSQ fix.\n");
 	break;
 
     default:
@@ -669,8 +669,8 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     buf += 4;
     len -= 8;
-    gpsd_report(LOG_RAW, "Raw SiRF packet type 0x%02x length %d: %s\n",
-	buf[0],len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
+    gpsd_report(LOG_RAW, "Raw SiRF packet type 0x%02x length %zd: %s\n",
+	buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d",(int)buf[0]);
 
@@ -707,7 +707,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 
     case 0x09:		/* CPU Throughput */
 	gpsd_report(LOG_PROG,
-		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%3.f\n",
+		    "THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%u\n",
 		    (float)getbeuw(buf, 1)/186, (float)getbeuw(buf, 3)/186,
 		    (float)getbeuw(buf, 5)/186, getbeuw(buf, 7));
 	return 0;
@@ -860,7 +860,7 @@ gps_mask_t sirf_parse(struct gps_device_t *session, unsigned char *buf, size_t l
 	return 0;
 
     default:
-	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %d: %s\n",
+	gpsd_report(LOG_WARN, "Unknown SiRF packet id %d length %zd: %s\n",
 	    buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
 	return 0;
     }
