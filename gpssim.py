@@ -38,6 +38,8 @@ class ksv:
         # to have a slight inaccuracy rising towards the poles.
         # The if/then avoids 0/0 indeterminacies on E-W courses.
         tc = gps.Deg2Rad(self.course)
+        lat = gps.Deg2Rad(self.lat)
+        lon = gps.Deg2Rad(self.lon)
         lat += distance * math.cos(tc)
         dphi = math.log(tan(lat/2+math.pi/4)/math.tan(self.lat/2+math.pi/4))
         if abs(lat-self.lat) < sqrt(1e-15):
@@ -212,6 +214,20 @@ class NMEA:
         gga += ","
         # DGPS station ID goes here
         return self.add_checksum(gga);
+    def GLL(self, sim):
+        "Emit GLL sentence describing the simulation state."
+        tm = time.gmtime(sim.ksv.time)
+        gll = \
+            "$GPLL,%09.4f,%c,%010.4f,%c,%02d%02d%02d,%s," % (
+            self.degtodm(abs(sim.ksv.lat)), "SN"[sim.ksv.lat > 0],
+            self.degtodm(abs(sim.ksv.lon)), "WE"[sim.ksv.lon > 0],
+            tm.tm_hour,
+            tm.tm_min,
+            tm.tm_sec,
+            sim.validity,
+            )
+            # FAA mode indicator could go after these fields.
+        return self.add_checksum(gll);
     def RMC(self, sim):
         "Emit RMC sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
