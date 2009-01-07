@@ -344,16 +344,15 @@ char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *session)
  * and seconds have also been filled in, (c) that if the private member
  * mag_var is not NAN it is a magnetic variation in degrees that should be
  * passed on, and (d) if the private member separation does not have the
- * value NAN, it is a valid WGS84 geoidal separation in 
- * meters for the fix.
+ * value NAN, it is a valid WGS84 geoidal separation in meters for the fix.
  */
 
-static double degtodm(double a)
+static double degtodm(double angle)
+/* decimal degrees to GPS-style, degrees first followed by minutes */
 {
-    double m, t;
-    m = modf(a, &t);
-    t = floor(a) * 100 + m * 60;
-    return t;
+    double fraction, integer;
+    fraction = modf(angle, &integer);
+    return floor(angle) * 100 + fraction * 60;
 }
 
 /*@ -mustdefine @*/
