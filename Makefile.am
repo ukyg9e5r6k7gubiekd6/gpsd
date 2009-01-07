@@ -366,7 +366,7 @@ splint: gpsd.h packet_names.h
 
 # Bogon-checking the Python tools
 pychecker:
-	for f in gps.py gpsfake.py; do pychecker $$f; done
+	for f in gps.py gpsfake.py leapsecond.py; do pychecker $$f; done
 
 version:
 	@echo $(VERSION)

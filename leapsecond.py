@@ -5,7 +5,7 @@
 # GPS time, which changes occasionally due to variations in the Earth's
 # rotation.
 #
-import os, urllib, re, random, time, calendar, stat
+import os, urllib, re, random, time, calendar
 
 __locations = [
     (
@@ -67,12 +67,15 @@ def get():
     if not os.path.exists(__cachepath):
         stale = True
     else:
-        cfp = open(__cachepath)
-        txt = cfp.read()
-        cfp.close()
-    (offset, valid_from) = map(int, txt.split())
-    if valid_from < last_insertion:
-        stale = True
+        try:
+            cfp = open(__cachepath)
+            txt = cfp.read()
+            cfp.close()
+            (offset, valid_from) = map(int, txt.split())
+            if valid_from < last_insertion:
+                stale = True
+        except (IOError, OSError, ValueError):
+            stale = True
     # We now know whether the cached data is stale
     if not stale:
         return offset
