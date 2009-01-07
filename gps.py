@@ -438,6 +438,10 @@ def Deg2Rad(x):
     "Degrees to radians."
     return x * (math.pi/180)
 
+def Rad2Deg(x):
+    "Radians to degress."
+    return x * (180/math.pi)
+
 def CalcRad(lat):
     "Radius of curvature in meters at specified latitude."
     a = 6378.137
