@@ -23,13 +23,13 @@ if not 'clean' in sys.argv:
             make_in.close()
             created_files.append(f_name)
 
-extension_source = ["gpspacket.c", "packet.c", "isgps.c",
+gpspacket_sources = ["gpspacket.c", "packet.c", "isgps.c",
             "rtcm2.c", "strl.c", "hex.c", "crc24q.c"]
 
-setup( name="gpspacket",
+setup( name="gpsd",
        version="1.0",
-       ext_modules=[Extension("gpspacket", extension_source)],
-       py_modules = ['gpsfake','gps'],
+       ext_modules=[Extension("gpspacket", gpspacket_sources)],
+       py_modules = ['gpsfake','gps', 'leapsecond'],
        data_files=[('bin', ['gpsfake','gpsprof']),
            ('share/man/man1', ['gpsfake.1','gpsprof.1'])]
      )
