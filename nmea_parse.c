@@ -126,7 +126,7 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
      5,6   12311.12,W   Longitude 123 deg. 11.12 min West
      7     000.5	Speed over ground, Knots
      8     054.7	Course Made Good, True north
-     9     191194       Date of fix  19 November 1994
+     9     181194       Date of fix  18 November 1994
      10,11 020.3,E      Magnetic variation 20.3 deg East
      12    A	    FAA mode indicator (NMEA 2.3 and later)
 			A=autonomous, D=differential, E=Estimated,
@@ -189,28 +189,37 @@ static gps_mask_t processGPRMC(int count, char *field[], struct gps_device_t *se
 static gps_mask_t processGPGLL(int count, char *field[], struct gps_device_t *session)
 /* Geographic position - Latitude, Longitude */
 {
-    /* Introduced in NMEA 3.0.  Here are the fields:
-     *
-     * 1,2 Latitude, N (North) or S (South)
-     * 3,4 Longitude, E (East) or W (West)
-     * 5 UTC of position
-     * 6 A=Active, V=Void
-     * 7 Mode Indicator
-     *   A = Autonomous mode
-     *   D = Differential Mode
-     *   E = Estimated (dead-reckoning) mode
-     *   M = Manual Input Mode
-     *   S = Simulated Mode
-     *   N = Data Not Valid
-     *
-     * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
-     * indicating that the Garmin 65 does not return time and status.
-     * SiRF chipsets don't return the Mode Indicator.
-     * This code copes gracefully with both quirks.
-     *
-     * Unless you care about the FAA indicator, this sentence supplies nothing
-     * that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
-     * actually ships updates in GPLL that aren't redundant.
+    /* Introduced in NMEA 3.0.
+
+       $GPGLL,4916.45,N,12311.12,W,225444,A,A*5C
+
+       1,2: 4916.46,N    Latitude 49 deg. 16.45 min. North
+       3,4: 12311.12,W   Longitude 123 deg. 11.12 min. West
+       5:   225444       Fix taken at 22:54:44 UTC
+       6:   A            Data valid
+       7:   A            Autonomous mode
+       8:   *5C          Mandatory NMEA checksum
+
+     1,2 Latitude, N (North) or S (South)
+     3,4 Longitude, E (East) or W (West)
+     5 UTC of position
+     6 A=Active, V=Void
+     7 Mode Indicator
+       A = Autonomous mode
+       D = Differential Mode
+       E = Estimated (dead-reckoning) mode
+       M = Manual Input Mode
+       S = Simulated Mode
+       N = Data Not Valid
+     
+     I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
+     indicating that the Garmin 65 does not return time and status.
+     SiRF chipsets don't return the Mode Indicator.
+     This code copes gracefully with both quirks.
+     
+     Unless you care about the FAA indicator, this sentence supplies nothing
+     that GPRMC doesn't already.  But at least one Garmin GPS -- the 48
+     actually ships updates in GPLL that aren't redundant.
      */
     char *status = field[7];
     gps_mask_t mask = ERROR_SET;
