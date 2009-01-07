@@ -3,8 +3,11 @@ A GPS simulator.
 
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
-import sys, math, random
+import sys, math, random, exceptions
 import gps
+
+# First, the mathematics.  We simulate a moving viewpoint on the Earth
+# and a satellite with specified orbital elements in the sky.
 
 class ksv:
     "Kinematic state vector."
@@ -58,9 +61,22 @@ class satellite:
         "Return right ascension and declination of satellite,"
         pass
 
-def simulator:
+# Next, the command interpreter.  This is an object that takes an
+# input source in the track description language, interprets it into
+# sammples that might be reported by a GPS, and calls a reporting
+# class to generate output.
+
+class gpssimException(exceptions.Exception):
+    def __init__(self, message, filename, lineno):
+        self.message = message
+        self.filename = filename
+        self.lineno = lineno
+    def __str__(self):
+        return '"%s", %d:' % (self.filename, self.lineno)
+
+class gpssim:
     "Simulate a moving sensor, with skyview."
-    active_PRNs = range(1, 24+1) + (134,) 
+    active_PRNs = range(1, 24+1) + [134,] 
     def __init__(self, gpstype):
         self.ksv = ksv()
         self.ephemeris = {}
@@ -72,53 +88,68 @@ def simulator:
         self.have_ephemeris = False
         self.channels = {}
         self.outfmt = outfmt
-        sim.status = gps.STATUS_NO_FIX
-        sim.mode = gps.MODE_NO_FIX
-        sim.validity = "V"
-        sim.satellites_used = 0
+        self.status = gps.STATUS_NO_FIX
+        self.mode = gps.MODE_NO_FIX
+        self.validity = "V"
+        self.satellites_used = 0
+        self.filename = None
+        self.lineno = 0
     def parse_tdl(self, line):
         "Interpret one TDL directive."
+        line = line.strip()
         if "#" in line:
             line = line[:line.find("#")]
-        if line = '':
+        if line == '':
             return
-        if line.startswith("set time"):
-            self.ksv.time = gps.isotime(line[9:].strip())
-        if line.startswith("set location"):
-            (self.lat, self.lon, self.alt) = map(float, line[:12].strip().aplit())
-        if line.startswith("set course"):
-            self.ksv.time = float(line[10:].strip())
-        if line.startswith("set speed"):
-            self.ksv.speed = float(line[9:].strip())
-        if line.startswith("set climb"):
-            self.ksv.climb = float(line[9:].strip())
-        if line.startswith("set h_acc"):
-            self.ksv.h_acc = float(line[9:].strip())
-        if line.startswith("set v_acc"):
-            self.ksv.h_acc = float(line[9:].strip())
-        if line.startswith("set snr"):
-            (prn, snr) = line[:7].strip().split()
-            self.channels[int(prn)] = float(snr)
-        if line.startswith("run"):
-            self.run(float(line[3:].strip()))
-        if line.startswith("set status"):
+        fields = line.split()
+        command = fields[0]
+        if command == "time":
+            self.ksv.time = gps.isotime(fields[1])
+        elif command == "location":
+            (self.lat, self.lon, self.alt) = map(float, fiels[1:])
+        elif command == "course":
+            self.ksv.time = float(fields[1])
+        elif command == "speed":
+            self.ksv.speed = float(fields[1])
+        elif command == "climb":
+            self.ksv.climb = float(fields[1])
+        elif command == "acceleration":
+            (self.ksv.h_acc, self.ksv.h_acc) = map(float, fields[1:])
+        elif command == "snr":
+            self.channels[int(fields[1])] = float(fields[2])
+        elif command == "go":
+            self.go(int(fields[1]))
+        elif command == "status":
             try:
-                code = line.strip().split()[2]
+                code = fields[1]
                 self.status = {"no_fix":0, "fix":1, "dgps_fix":2}[code.lower()]
             except KeyError:
-                print >>sys.stderr, "gpssim: invalid status code '%s'\n" % code
-        if line.startswith("set mode"):
+                raise gpssimException("invalid status code '%s'" % code,
+                                      self.filename, self.lineno)
+        elif command == "mode":
             try:
-                code = line.strip().split()[2]
+                code = fields[1]
                 self.status = {"no_fix":1, "2d":2, "3d":3}[code.lower()]
             except KeyError:
-                print >>sys.stderr, "gpssim: invalid mode code '%s'\n" % code
-        if line.startswith("set satellites"):
-            self.satellites_used = float(line[14:].strip())
-        if line.startswith("set validity"):
-            self.validity = line[13:].strip()
+                raise gpssimException("invalid mode code '%s'" % code,
+                                      self.filename, self.lineno)
+        elif command == "satellites":
+            self.satellites_used = int(fields[1])
+        elif command == "validity":
+            self.validity = fields[1]
+        else:
+            raise gpssimException("unknown command '%s'" % fields[1],
+                                  self.filename, self.lineno)
         # FIXME: add syntax for ephemeris elements
-    def run(self, seconds):
+        self.lineno += 1
+    def filter(self, input, output):
+        "Make this a filter for file-like objects."
+        self.filename = input.name
+        self.lineno = 1
+        self.output = output
+        for line in input:
+            self.execute(line)
+    def go(self, seconds):
         "Run the simulation for a specified number of seconds."
         for i in range(seconds):
             self.ksv.next()
@@ -126,13 +157,14 @@ def simulator:
                 self.skyview = {}
                 for (prn, satellite) in self.ephemeris.items():
                     self.skyview[prn] = satellite.position(time)
-            self.gpstype.report(ksv, self.skyview)
+            self.output.write(self.gpstype.report(self))
 
-#
-# Reporting classes need to have a report() mrthod returning a string
+# Reporting classes need to have a report() method returning a string
 # that is a sentence (or possibly several sentences) reporting the
-# state of the simulation
-#
+# state of the simulation.  Presently we have only one, for NMEA
+# devices, but the point of the architecture is so that we could simulate
+# others - SirF, Evermore, whatever.
+
 MPS_TO_KNOTS = 1.9438445	# Meters per second to knots
 
 class NMEA:
@@ -227,5 +259,13 @@ class NMEA:
             out += apply(getattr(self, sentence), [sim])
         self.counter += 1
         return out
+
+# The very simple main line.
+
+if __name__ == "__main__":
+    try:
+        gpssim(NMEA).filter(sys.stdin, sys.stdout)
+    except gpssimException, e:
+        print >>sys.stderr, e
 
 # gpssim.py ends here.
