@@ -65,6 +65,7 @@ Lexer_init(LexerObject *self)
     packet_reset(&self->lexer);
     return 0;
 }
+
 static PyObject *
 Lexer_get(LexerObject *self, PyObject *args)
 {
@@ -260,6 +261,10 @@ initgpspacket(void)
     PyModule_AddIntConstant(m, "TSIP_PACKET", TSIP_PACKET);
     PyModule_AddIntConstant(m, "EVERMORE_PACKET", EVERMORE_PACKET);
     PyModule_AddIntConstant(m, "ITALK_PACKET", ITALK_PACKET);
-    PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
     PyModule_AddIntConstant(m, "GARMIN_PACKET", GARMIN_PACKET);
+    PyModule_AddIntConstant(m, "NAVCOM_PACKET", NAVCOM_PACKET);
+    PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
+    PyModule_AddIntConstant(m, "RTCM3_PACKET", RTCM3_PACKET);
+    PyModule_AddIntConstant(m, "UBX_PACKET", UBX_PACKET);
+    PyModule_AddIntConstant(m, "GARMINTXT_PACKET", GARMINTXT_PACKET);
 }

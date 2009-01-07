@@ -60,13 +60,12 @@ struct gps_packet_t {
 #define TSIP_PACKET	4
 #define EVERMORE_PACKET	5
 #define ITALK_PACKET	6
-#define RTCM_PACKET	7
-#define GARMIN_PACKET	8
-#define NAVCOM_PACKET	9
-#define RTCM2_PACKET	10
-#define RTCM3_PACKET	11
-#define UBX_PACKET	12
-#define GARMINTXT_PACKET	13
+#define GARMIN_PACKET	7
+#define NAVCOM_PACKET	8
+#define RTCM2_PACKET	9
+#define RTCM3_PACKET	10
+#define UBX_PACKET	11
+#define GARMINTXT_PACKET	12
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
