@@ -22,6 +22,7 @@
 	<arg choice='plain'>-n</arg>
       </group>
       <arg choice='opt'>-c <replaceable>control</replaceable></arg>
+      <arg choice='opt'>-e </arg>
       <arg choice='opt'>-f </arg>
       <arg choice='opt'>-l </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
@@ -73,10 +74,15 @@ additionally, \e will be replaced with ESC. This switch implies
 </varlistentry>
 
 <varlistentry>
-<term>-n</term>
+<term>-e</term>
+
 <listitem>
-<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to 
-its new speed.</para>
+<para>Generate the packet from the <option>-c</option> argument and
+ship it to standard output. This switch can be used with the
+<option>-t</option> option without specifying a device. Note: the
+packet data for a binary prototype will be raw, not ASCII-ized in any
+way.</para>
+
 </listitem>
 </varlistentry>
 
@@ -91,6 +97,14 @@ its new speed.</para>
 <term>-l</term>
 <listitem>
 <para>List the known device types and exit.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-n</term>
+<listitem>
+<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to 
+its new speed.</para>
 </listitem>
 </varlistentry>
 
