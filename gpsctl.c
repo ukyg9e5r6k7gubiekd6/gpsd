@@ -336,7 +336,7 @@ int main(int argc, char **argv)
 		    if (*control != '\\')
 			*tp++ = *control;
 		    else {
-			switch(*control++) {
+			switch(*++control) {
 			case 'b': *tp++ = '\b'; break;
 			case 'e': *tp++ = '\x1b'; break;
 			case 'f': *tp++ = '\f'; break;
@@ -345,7 +345,7 @@ int main(int argc, char **argv)
 			case 't': *tp++ = '\r'; break;
 			case 'v': *tp++ = '\v'; break;
 			case 'x':
-			    switch(*control++) {
+			    switch(*++control) {
 			    case '0': c = 0x00; break;
 			    case '1': c = 0x10; break;
 			    case '2': c = 0x20; break;
@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 				(void)fprintf(stderr, "gpsctl: invalid hex digit.\n");
 				err = true;
 			    }
-			    switch(*control++) {
+			    switch(*++control) {
 			    case '0': c += 0x00; break;
 			    case '1': c += 0x01; break;
 			    case '2': c += 0x02; break;
@@ -389,6 +389,7 @@ int main(int argc, char **argv)
 			    }
 			    *tp++ = c;
 			    break;
+			case '\\': *tp++ = '\\'; break;
 			default:
 			    (void)fprintf(stderr, "gpsctl: invalid escape\n");
 			    err = true;
