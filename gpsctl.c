@@ -198,11 +198,6 @@ int main(int argc, char **argv)
 	exit(0);
     }
 
-    if (echo && control==NULL) {
-	(void)fprintf(stderr, "gpsctl: -e switch requires -c\n");
-	exit(0);
-    }
-
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
 	/*@i@*/gpsdata = gps_open(NULL, NULL);
@@ -288,69 +283,76 @@ int main(int argc, char **argv)
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
-    } else if (forcetype != NULL && echo) {
-	static struct gps_device_t	session;	/* zero this too */
-	session.gpsdata.gps_fd = fileno(stdout);
-	forcetype->control_send(&session, cooked, cookend-cooked);
-	exit(0);
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_context_t	context;	/* start it zeroed */
 	static struct gps_device_t	session;	/* zero this too */
+	session.context = &context;	/* in case gps_init isn't called */
+	context.readonly = true;
 
-	if (device == NULL) {
-	    (void)fprintf(stderr,  "gpsctl: device must be specified for low-level access.\n");
-	    exit(1);
-	}
-	gpsd_init(&session, &context, device);
-	gpsd_report(LOG_PROG, "gpsctl: initialization passed.\n");
-	if (gpsd_activate(&session, false) == -1) {
-	    (void)fprintf(stderr, 
-			  "gpsd: activation of device %s failed, errno=%d\n",
-			  device, errno);
-	    exit(2);
-	}
-	/* hunt for packet type and serial parameters */
-	while (session.device_type == NULL) {
-	    if (get_packet(&session) == ERROR_SET) {
-		(void)fprintf(stderr, "gpsctl: autodetection failed.\n");
+	/*
+	 * Unless the user has forced a type and only wants to see the string
+	 * (not send it) we now need to try to open the device and find out
+	 * what is actually there.
+	 */
+	if (forcetype == NULL || !echo) {
+	    if (device == NULL) {
+		(void)fprintf(stderr,  "gpsctl: device must be specified for low-level access.\n");
+		exit(1);
+	    }
+	    gpsd_init(&session, &context, device);
+	    gpsd_report(LOG_PROG, "gpsctl: initialization passed.\n");
+	    if (gpsd_activate(&session, false) == -1) {
+		(void)fprintf(stderr, 
+			      "gpsd: activation of device %s failed, errno=%d\n",
+			      device, errno);
 		exit(2);
 	    }
-	}
-	gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
-		    device, gpsd_id(&session), session.gpsdata.baudrate);
-
-	if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
-	    gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
-	}
-
-
-	/* 
-	 * If we've identified this as an NMEA device, we have to eat
-	 * packets for a while to see if one of our probes elicits an
-	 * ID response telling us that it's really a SiRF or
-	 * something.  If so, the libgpsd(3) layer will automatically
-	 * redispatch to the correct driver type.
-	 */
-#define REDIRECT_SNIFF	10
-	/*
-	 * This is the number of packets we'll look at.  Setting it
-	 * lower increases the risk that we'll miss a reply to a probe.
-	 * Setting it higher makes this tool slower and more annoying.
-	 */
-	if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
-	    int dummy;
-	    for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
-		if ((get_packet(&session) & DEVICEID_SET)!=0)
-		    break;
+	    /* hunt for packet type and serial parameters */
+	    while (session.device_type == NULL) {
+		if (get_packet(&session) == ERROR_SET) {
+		    (void)fprintf(stderr, "gpsctl: autodetection failed.\n");
+		    exit(2);
+		}
 	    }
+	    gpsd_report(LOG_PROG, "gpsctl: %s looks like a %s at %d.\n",
+			device, gpsd_id(&session), session.gpsdata.baudrate);
+
+	    if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
+		gpsd_report(LOG_ERROR, "gpsd: '%s' doesn't match non-generic type '%s' of selected device.", forcetype->type_name, session.device_type->type_name);
+	    }
+
+	    /* 
+	     * If we've identified this as an NMEA device, we have to eat
+	     * packets for a while to see if one of our probes elicits an
+	     * ID response telling us that it's really a SiRF or
+	     * something.  If so, the libgpsd(3) layer will automatically
+	     * redispatch to the correct driver type.
+	     */
+#define REDIRECT_SNIFF	10
+	    /*
+	     * This is the number of packets we'll look at.  Setting it
+	     * lower increases the risk that we'll miss a reply to a probe.
+	     * Setting it higher makes this tool slower and more annoying.
+	     */
+	    if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
+		int dummy;
+		for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
+		    if ((get_packet(&session) & DEVICEID_SET)!=0)
+			break;
+		}
+	    }
+	    gpsd_report(LOG_SHOUT, "gpsctl: %s identified as a %s at %d.\n",
+			device, gpsd_id(&session), session.gpsdata.baudrate);
 	}
-	gpsd_report(LOG_SHOUT, "gpsctl: %s identified as a %s at %d.\n",
-		    device, gpsd_id(&session), session.gpsdata.baudrate);
 
 	/* if no control operation was specified, we're done */
-	if (speed==NULL && !to_nmea && !to_binary)
+	if (speed==NULL && !to_nmea && !to_binary && control==NULL)
 	    exit(0);
+
+	/* maybe user wants to see the packet rather than send it */
+	if (echo)
+	    session.gpsdata.gps_fd = fileno(stdout);
 
 	/* control op specified; maybe we forced the type */
 	if (forcetype != NULL)
@@ -413,10 +415,10 @@ int main(int argc, char **argv)
 		bool err = false;
 
 		if (!err) {
-		    if (echo) {
-			if (fwrite(cooked, sizeof(char), cookend-cooked, stdout) == 0)
-			    (void)fprintf(stderr, "gpsctl: output write failed.\n");
-			    status = 1;
+		    if (session.device_type->control_send == NULL) {
+			(void)fprintf(stderr, "gpsctl: %s has no control-send mrthod.\n",
+				      session.device_type->type_name);
+			status = 1;
 		    } else {
 			if (session.device_type->control_send(&session, 
 							      cooked, cookend-cooked) == -1) {
@@ -429,14 +431,16 @@ int main(int argc, char **argv)
 	}
 	/*@ +compdef @*/
 
-	/*
-	 * Give the device time to settle before closing it.  Alas, this is
-	 * voodoo programming; we don't know it will have any effect, but
-	 * GPSes are notoriously prone to timing-dependent errors.
-	 */
-	(void)usleep(300000);
+	if (forcetype == NULL || !echo) {
+	    /*
+	     * Give the device time to settle before closing it.  Alas, this is
+	     * voodoo programming; we don't know it will have any effect, but
+	     * GPSes are notoriously prone to timing-dependent errors.
+	     */
+	    (void)usleep(300000);
 
-	gpsd_wrap(&session);
+	    gpsd_wrap(&session);
+	}
 	exit(status);
     }
 }

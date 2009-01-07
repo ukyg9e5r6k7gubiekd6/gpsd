@@ -75,14 +75,12 @@ additionally, \e will be replaced with ESC. This switch implies
 
 <varlistentry>
 <term>-e</term>
-
 <listitem>
-<para>Generate the packet from the <option>-c</option> argument and
-ship it to standard output. This switch can be used with the
-<option>-t</option> option without specifying a device. Note: the
-packet data for a binary prototype will be raw, not ASCII-ized in any
-way.</para>
-
+<para>Generate the packet from any other arguments specified and ship
+it to standard output instead of the device. This switch can be used
+with the <option>-t</option> option without specifying a device. Note:
+the packet data for a binary prototype will be raw, not ASCII-ized in
+any way.</para>
 </listitem>
 </varlistentry>
 
