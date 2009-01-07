@@ -89,4 +89,4 @@ def get():
         return current_offset
 
 if __name__ == '__main__':
-    print "Current leap second:" retrieve()
+    print "Current leap second:", retrieve()
