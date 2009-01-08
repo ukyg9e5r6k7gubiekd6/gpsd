@@ -246,6 +246,7 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
 else
   dnl X11 disabled
   AM_CONDITIONAL([HAVE_MOTIF], [test "motif" = "no"])
+  AM_CONDITIONAL([HAVE_XAW],false)
   AC_MSG_WARN([Not including X11 support])
 fi
 dnl End of X11 checks
