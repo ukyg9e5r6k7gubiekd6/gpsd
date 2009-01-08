@@ -433,7 +433,11 @@ extern gps_mask_t gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);
 
 /* caller should supply this */
+# if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+__attribute__((__format__(__printf__, 2, 3))) void gpsd_report(int, const char *, ...);
+# else /* not a new enough GCC, use the unprotected prototype */
 void gpsd_report(int, const char *, ...);
+#endif
 
 #ifdef S_SPLINT_S
 extern bool finite(double);
