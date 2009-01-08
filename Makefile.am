@@ -153,12 +153,11 @@ libgpsd_h_sources = \
 	bsd-base64.h \
 	timebase.h \
 	bits.h \
-	packet_names.h \
 	rtcm2.h \
-	crc24q.h \
-	gpsd.h
+	crc24q.h
 
 BUILT_SOURCES = packet_names.h gpsd.h
+
 packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
 
