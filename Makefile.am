@@ -31,11 +31,11 @@ endif
 
 bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test
+check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py
-nodist_python_PYTHON = gpspacket.so
+nodist_python_PYTHON = gpspacket.so gpslib.so
 PYTHONPAGES = gpsprof.1 gpsfake.1 gpscat.1
 endif
 
@@ -179,10 +179,10 @@ libgps_la_LIBADD = $(LIBM) $(LIBC) $(LIBNSL) $(LIBSOCKET) $(LIBPTHREAD)
 # install may require --root depending on what you're doing.
 # python setup.py install --root=$DESTIR --prefix=$PREFIX
 if HAVE_PYTHON
-PYEXTENSIONS = gpspacket.so
-noinst_SCRIPTS = gpspacket.so setup.py
+PYEXTENSIONS = gpspacket.so gpslib.so
+noinst_SCRIPTS = gpspacket.so gpslib.so setup.py
 
-gpspacket.so: gpspacket.c libgps.la
+gpspacket.so gpslib.so: gpspacket.c gpslib.c libgps.la
 	(pwd="`pwd`"; cd $(srcdir) && $(PYTHON) setup.py build_ext --build-lib "$$pwd" --build-temp "$$pwd/build" --include-dirs "$$pwd")
 endif
 # Clean up after Python
@@ -208,7 +208,7 @@ packet_test_SOURCES = packet_test.c
 packet_test_LDADD = $(LIBC) libgps.la -lm
 
 #
-# Build packets tester
+# Build time functions tester
 #
 mkgmtime_test_SOURCES = mkgmtime_test.c
 mkgmtime_test_LDADD = $(LIBC) libgps.la -lm
@@ -321,6 +321,7 @@ EXTRA_DIST = \
 	valgrind-audit \
 	valgrind-suppressions \
 	gpspacket.c \
+	gpslib.c \
 	driver_proto.c \
 	logextract \
 	striplog \
@@ -334,9 +335,11 @@ CLEANFILES = $(BUILT_SOURCES) floattest *.core $(PYEXTENSIONS)
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
-# This is not distributed
+# These are not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
+geoid: geoid.c
+	$(CC) $(CFLAGS) -o geoid -lm -DTESTMAIN -g geoid.c
 
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/
