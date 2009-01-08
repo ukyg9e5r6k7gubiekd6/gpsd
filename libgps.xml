@@ -104,7 +104,13 @@ attached to
 set depending on the error returned from the the socket layer; see
 <filename>gps.h</filename> for values and explanations.</para>
 
-<para><function>gps_close()</function> ends the session.</para>
+<para><function>gps_close()</function> ends the session.
+NB: ending the session does not destroy any threads created to handle
+callbacks.  You must delete all callbacks prior to
+calling <function>gps_close()</function>.  Failure to do so results in
+undefined behavior.  Currently it will leak a thread, and in the
+future might result in aborting the program.
+</para>
 
 <para><function>gps_poll()</function> accepts a response, or sequence
 of responses, from the daemon and interprets it as though it were a
@@ -142,7 +148,13 @@ by your <function>my_function()</function> each time new data are
 available.  <function>my_function()</function> could change some
 global variables in your program based on received data; it is your
 responsibility to ensure that your program uses mutexes or other
-mechanisms to avoid race conditions.</para>
+mechanisms to avoid race conditions.
+NB: <function>gps_set_callback()</function> will create a new thread,
+and contrary to what you might expect <function>gps_close()</function>
+will not destroy that thread.  You must therefore explicitly remove
+the callback with <function>gps_del_callback()</function> before
+calling <function>gps_close()</function>.
+</para>
 
 <para><function>gps_del_callback()</function> deregisters the callback
 function previously set with <function>gps_set_callback()</function>.
