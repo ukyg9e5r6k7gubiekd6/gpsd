@@ -352,8 +352,6 @@ localize this bug.  Here's what we know:</p>
 banner as its build compiler, not the stock compiler of the
 distribution.</p>
 
-<p>&nbsp;</p>
-
 <p>Analysis:</p>
 
 <ul>
@@ -367,6 +365,23 @@ python-2.5-dbg interpreter is built with -O0.</p></li>
 Ubuntu 8.10 tests all use glibc 2.8.90 but get different results.</p></li>
 </ul>
 
+<h2 id="gpsfake">Mac OS 10.5 X library packaging problem</h2>
+
+<p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
+because the X SDK libraries and include files are not installed to 
+the canonical places.  The workaround is to configure like this:</p>
+
+<pre>
+configure \
+    &#x2D;&#x2D;x-includes=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/include \
+    &#x2D;&#x2D;x-libraries=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/lib
+</pre>
+
+<p>We haven't attempted to embed this in our autotools build because
+it looks like the fix would have to change every time the OS version
+number is incremented.</p>
+
+<p>&nbsp;</p>
 
 <div style="text-align: center;">
 <span>Search for GPS-related information here:</span>
