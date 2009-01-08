@@ -31,7 +31,7 @@ endif
 
 bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
 sbin_PROGRAMS = gpsd
-check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid
+check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
 python_PYTHON = gps.py gpsfake.py
@@ -338,8 +338,8 @@ pkgconfigdir = $(libdir)/pkgconfig
 # These are not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
-geoid: geoid.c
-	$(CC) $(CFLAGS) -o geoid -lm -DTESTMAIN -g geoid.c
+geoid_test: geoid.c
+	$(CC) $(CFLAGS) -o geoid_test -lm -DTESTMAIN -g geoid.c
 
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/
