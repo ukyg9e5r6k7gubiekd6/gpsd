@@ -1,3 +1,4 @@
+# $Id$
 """
 A GPS simulator.
 

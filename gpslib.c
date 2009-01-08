@@ -14,7 +14,7 @@ gpslib_wgs84_separation(PyObject *self, PyObject *args)
     double sep;
 
     if (!PyArg_ParseTuple(args, "dd", &lat, &lon))
-        return NULL;
+	return NULL;
     sep = wgs84_separation(lat, lon);
     return Py_BuildValue("d", sep);
 }
