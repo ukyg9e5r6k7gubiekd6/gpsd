@@ -469,7 +469,7 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 <h2 id="debugging">Debugging</h2>
 
 <p>For debugging purposes, it may be helpful to configure with
---disable-shared.  This turns off all the shared-library crud, making
+&#x2D;&#x2D;disable-shared.  This turns off all the shared-library crud, making
 it somewhat easier to use gdb.</p>
 
 <p>There is a script called <code>logextract</code> in the
@@ -594,6 +594,28 @@ GPS data has a short shelf life.  If the client doesn't pick it up
 within a few minutes, it's probably not useful to that client.  So if
 data is backing up to a client, drop that client.  That's why we set
 the client socket to nonblocking.</p>
+
+<p>For similar reasons, we don't try to recover from short writes to
+the GPS, e.g. of DGPS corrections.  They're packetized, so the device
+will ignore a fragment, and there will generally be another correction
+coming along shortly.  Fixing this would require one of two
+strategies:</p>
+
+<ol>
+<li><p><b>Buffer any data not shipped by a short write for
+retransmission.</b> Would require us to use malloc and just be begging
+for memory leaks.</p></li>
+<li><p><b>Block till select indicates the hardware or lower layer is
+read for write.</b> Could introduce arbitrary delays for
+time-sensitive data.</p></li>
+</ol>
+
+<p>So far, as of early 2009, we've only seen short writes on Bluetooth
+devices under Linux.  It is not clear whether this is a problem
+with the Linux Bluetooth driver (it could be failing to coalesce
+and buffer adjacent writes properly) or with the underlying hardware
+(Bluetooth devices tend to be cheaply made and dodgy in other respects
+as well).</p>
 
 <p>GPS input updates an internal data structure which has slots in it for
 all the data you can get from a GPS.  Client commands mine that
