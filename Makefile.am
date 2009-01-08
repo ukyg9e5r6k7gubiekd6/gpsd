@@ -162,10 +162,10 @@ packet_names.h: packet_states.h
 	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   "\1",/' -e '/_states/s//_names/' < `test -f 'packet_states.h' || echo '$(srcdir)/'`packet_states.h > packet_names.h
 
 gpsd.h: gpsd.h-head gpsd.h-tail gpsd_config.h
-	cp gpsd.h-head gpsd.h
+	cat $(srcdir)/gpsd.h-head >gpsd.h
 	grep VERSION  gpsd_config.h >>gpsd.h
 	grep ENABLE gpsd_config.h >>gpsd.h
-	cat gpsd.h-tail >>gpsd.h
+	cat $(srcdir)/gpsd.h-tail >>gpsd.h
 
 libgps_la_SOURCES = $(libgpsd_c_sources) $(libgpsd_h_sources) \
 				rtcm2.h libgpsmm.cpp packet_states.h
