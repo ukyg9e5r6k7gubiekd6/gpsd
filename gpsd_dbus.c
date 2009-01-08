@@ -31,21 +31,20 @@ void send_dbus_fix(struct gps_device_t* channel) {
     DBusMessage*	message;
     /*DBusMessageIter	iter;*/
     dbus_uint32_t	serial; /* collected, but not used */
+    char*		devname;
 
     /* if the connection is non existent, return without doing anything */
     if (connection == NULL) return;
 
     gpsdata = &(channel->gpsdata);
     gpsfix = &(gpsdata->fix);
+    devname = gpsdata->gps_device;
 
-    message = dbus_message_new_signal(
-		    "/org/gpsd",
-		    "org.gpsd",
-		    "fix");
+    message = dbus_message_new_signal( "/org/gpsd", "org.gpsd", "fix");
 
-    /* add the interesting information to the message */
+    /* the old unnamed format - should be removed at some point */
     dbus_message_append_args (message,
-		    	      DBUS_TYPE_DOUBLE, &(gpsfix->time),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->time),
 			      DBUS_TYPE_INT32,	&(gpsfix->mode),
 			      DBUS_TYPE_DOUBLE,	&(gpsfix->ept),
 			      DBUS_TYPE_DOUBLE, &(gpsfix->latitude),
@@ -60,13 +59,35 @@ void send_dbus_fix(struct gps_device_t* channel) {
 			      DBUS_TYPE_DOUBLE, &(gpsfix->climb),
 			      DBUS_TYPE_DOUBLE, &(gpsfix->epc),
 			      DBUS_TYPE_INVALID);
-    
+
     dbus_message_set_no_reply(message, TRUE);
 
     /* message is complete time to send it */
     dbus_connection_send(connection, message, &serial);
     dbus_message_unref(message);
+
+    /* Send the named signel.  */
+    message = dbus_message_new_signal("/org/gpsd", "org.gpsd", "namedfix");
+    dbus_message_append_args (message,
+			      DBUS_TYPE_DOUBLE, &(gpsfix->time),
+			      DBUS_TYPE_INT32,	&(gpsfix->mode),
+			      DBUS_TYPE_DOUBLE,	&(gpsfix->ept),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->latitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->longitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->eph),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->altitude),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epv),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->track),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epd),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->speed),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->eps),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->climb),
+			      DBUS_TYPE_DOUBLE, &(gpsfix->epc),
+			      DBUS_TYPE_STRING, &devname,
+			      DBUS_TYPE_INVALID);
+    dbus_message_set_no_reply(message, TRUE);
+    dbus_connection_send(connection, message, &serial);
+    dbus_message_unref(message);
 }
 
 #endif /* DBUS_ENABLE */
-
