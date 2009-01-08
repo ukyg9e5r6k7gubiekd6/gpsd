@@ -116,7 +116,7 @@ know:</p>
 <td>2.6.24-21</td>
 <td>2.5.2</td>
 <td>gcc 4.2.3</td>
-<td>glibc 2.7</td?
+<td>glibc 2.7</td>
 <td>esr</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -125,7 +125,7 @@ know:</p>
 <td>2.6.27-7</td>
 <td>2.5.2</td>
 <td>gcc 4.3.2</td>
-<td>glibc 2.8.90</td?
+<td>glibc 2.8.90</td>
 <td>esr</td>
 <td>FAILS</td>
 </tr>
@@ -134,7 +134,7 @@ know:</p>
 <td>2.6.27-7</td>
 <td>2.4.5</td>
 <td>gcc 4.3.1</td>
-<td>glibc 2.8.90</td?
+<td>glibc 2.8.90</td>
 <td>esr</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -143,7 +143,7 @@ know:</p>
 <td>2.6.27-7</td>
 <td>2.4.6</td>
 <td>gcc 4.3.2</td>
-<td>glibc 2.8.90</td?
+<td>glibc 2.8.90</td>
 <td>klein.eric&#x40gmail.com</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -152,7 +152,7 @@ know:</p>
 <td>2.6.27-7</td>
 <td>2.5.2-dbg</td>
 <td>gcc 4.3.2</td>
-<td>glibc 2.8.90</td?
+<td>glibc 2.8.90</td>
 <td>esr</td>
 <td>FAILS</td>
 </tr>
@@ -161,7 +161,7 @@ know:</p>
 <td>2.6.26, 2.6.27</td>
 <td>2.5.2</td>
 <td>gcc 4.3.2 </td>
-<td>glibc 2.7</td?
+<td>glibc 2.7</td>
 <td>bzed</td>
 <td>FAILS</td>
 </tr>
@@ -170,7 +170,7 @@ know:</p>
 <td>2.6.27</td>
 <td>2.4.6</td>
 <td>gcc 4.3.2 </td>
-<td>glibc 2.7</td?
+<td>glibc 2.7</td>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -178,7 +178,7 @@ know:</p>
 <td>2.6.27</td>
 <td>2.5.3</td>
 <td>gcc 4.2.4 </td>
-<td>glibc 2.7</td?
+<td>glibc 2.7</td>
 <td>bzed</td>
 <td>FAILS</td>
 </tr>
@@ -187,7 +187,7 @@ know:</p>
 <td>2.6.27</td>
 <td>2.5 (release25-maint) </td>
 <td>gcc 4.1.2 (prerelease)</td>
-<td>glibc 2.3.6</td?
+<td>glibc 2.3.6</td>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -196,7 +196,7 @@ know:</p>
 <td>2.6.27</td>
 <td>2.4.4</td>
 <td>gcc 4.1.2 (prerelease)</td>
-<td>glibc 2.3.6</td?
+<td>glibc 2.3.6</td>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
@@ -214,7 +214,7 @@ know:</p>
 <td>2.6.27</td>
 <td>2.5.3</td>
 <td>gcc 4.3.2</td>
-<td>glibc 2.7</td?
+<td>glibc 2.7</td>
 <td>bzed</td>
 <td>FAILS</td>
 </tr>
@@ -242,11 +242,11 @@ distribution.</p>
 <li><p>The bug appears to require Python 2.5.  Backing down to 2.4
 avoids it in every environment we have tested.</p></li>
 
-<li><p>The bug appears not to be a compiler optimization problem. The 
+<li><p>The bug appears not to be a compiler optimization problem. The
 python-2.5-dbg interpreter is built with -O0.</p></li>
 
-<li><p>The bug appears not to be a problem with glibc. The 
-Ubuntu 8.10 tests all use glibc 2.8.90 but get different results.</p></li>
+<li><p>The bug appears not to be a problem with glibc. The Ubuntu 8.10
+tests all use glibc 2.8.90 but get different results.</p></li>
 </ul>
 
 <h2 id="bluetooth">Firmware problems in some Bluetooth devices can hang them</h2>
@@ -260,7 +260,7 @@ and the GPS chip talking at the same baud rate. This problem is not
 unique to <code>gpsd</code> - windows users are warned against using
 SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
 
-<p>If this happens, you can sometimes recover by repeatedly sending 
+<p>If this happens, you can sometimes recover by repeatedly sending
 reset messages using <code>gpsctl</p>.  The only guaranteed fix is
 to open the case and unsolder the backup battery so the chip forgets
 its configuration settings.</p>
@@ -282,20 +282,19 @@ been fixed.</p>
 There is a call to pthread create in libgpsd_core.c::link_activate():
 
 <listing>
-    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+    /*@i1@*/(void)pthread_create(&amp;pt,NULL,gpsd_ppsmonitor,(void *)session);
 </listing>
 
 <p>If this is called when gpsd is in the foreground then the thread is
 created fine and pthread_create() returns right away.  If this is
 called when gpsd is in the background then the thread is created fine,
-but it may returns!  That freezes the main loop of gpsd. There is 
-a <a
-href="http://marc.info/?l=gpsd-dev&m=120124952704634&w=2">workaround</a>, 
-but the nature of the wotkaround only makes ther bug more mysterious.</p>
+but it may return!  That freezes the main loop of gpsd. There is a <a
+href="http://marc.info/?l=gpsd-dev&m=120124952704634&w=2">workaround</a>,
+but the nature of the workaround only makes ther bug more mysterious.</p>
 
 <h1>Open Toolchain Bugs</h1>
 
-<p><code>gpsd</code> is distressingly good at tickling bugs in 
+<p><code>gpsd</code> is distressingly good at tickling bugs in
 development toolchains.  Most of these, thankfully, are non-issues
 if you keep your toolchain up to date.</p>
 
@@ -312,13 +311,13 @@ in.</p>
 <h2 id="macxlibs">Mac OS 10.5 X library packaging problem</h2>
 
 <p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
-because the X SDK libraries and include files are not installed to 
+because the X SDK libraries and include files are not installed to
 the canonical places.  The workaround is to configure like this:</p>
 
 <pre>
 configure \
-    &#x2D;&#x2D;x-includes=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/include \
-    &#x2D;&#x2D;x-libraries=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/lib
+    --x-includes=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/include \
+    --x-libraries=/Developer/SDKs/MacOSX10.5.sdk/usr/X11R6/lib
 </pre>
 
 <p>We haven't attempted to embed this in our autotools build because
@@ -397,9 +396,9 @@ socket.error: (111, 'Connection refused')
 gpsprof: gpsd unreachable.
 </pre>
 
-<p>This is with Python 2.4.4 under Red Hat Linux, kernel version
-2.6.18.  This was filed upstream as Python bug 1603527 on trheir old 
-tracker, and is no longer open on their new one.</p>
+<p>This is with Python 2.4.4 under Red Hat Linux, kernel version 2.6.18.
+This was filed upstream as Python bug 1603527 on trheir old tracker, and
+is no longer open on their new one.</p>
 
 <h2 id="isgps">isgps.c triggers an optimizer bug in older gcc versions</h2>
 
@@ -408,11 +407,11 @@ making it generate incorrect code.  Removing -O2 from the
 compilation flags works around the problem.  Details are in the
 isgps.c source file.</p>
 
-<p>Compiling with &#x2D;&#x2D;enable-max-devices=1 may trigger a gcc
+<p>Compiling with --enable-max-devices=1 may trigger a gcc
 optimizer bug</p>
 
 <p>At gpsd revision level 3365, compiling with
-&#x2D;&#x2D;enable-max-devices=1 has been observed to trigger an
+--enable-max-devices=1 has been observed to trigger an
 optimizer bug in gcc 4.1.0 20060304 (Red Hat 4.1.0-3).  The symptom is
 a for-loop termination condition not causing an exit, leading to a
 core dump.  Removing -O2 from the compilation flags works around the
