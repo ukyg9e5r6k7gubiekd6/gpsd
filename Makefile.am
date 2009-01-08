@@ -208,6 +208,12 @@ packet_test_SOURCES = packet_test.c
 packet_test_LDADD = $(LIBC) libgps.la -lm
 
 #
+# Build geoid model tester
+#
+geoid_test_SOURCES = geoid_test.c
+geoid_test_LDADD = $(LIBC) libgps.la -lm
+
+#
 # Build time functions tester
 #
 mkgmtime_test_SOURCES = mkgmtime_test.c
@@ -338,8 +344,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 # These are not distributed
 libgps: libgps.c .libs/libgps.a
 	$(CC) $(CFLAGS) -o libgps -lm -DTESTMAIN $(LIBPTHREAD) -g libgps.c .libs/libgps.a
-geoid_test: geoid.c
-	$(CC) $(CFLAGS) -o geoid_test -lm -DTESTMAIN -g geoid.c
 
 # Report splint warnings
 SPLINTOPTS = -I/usr/include/dbus-1.0/
@@ -366,6 +370,8 @@ splint: gpsd.h packet_names.h
 	-splint $(SPLINTOPTS) $(bits_test_SOURCES)
 	@echo "Running splint on packet_test test harness..."
 	-splint $(SPLINTOPTS) $(packet_test_SOURCES)
+	@echo "Running splint on geoid_test test harness..."
+	-splint $(SPLINTOPTS) $(geoid_test_SOURCES)
 
 # Bogon-checking the Python tools
 pychecker:
@@ -428,6 +434,16 @@ packet-regress: packet_test
 packet-makeregress: packet_test
 	@mkdir -p test
 	$(srcdir)/packet_test >test/packet.test.chk
+
+# Regression-test the geoid tester.
+geoid-regress: geoid_test
+	@echo "Testing the geoid model..."
+	@$(srcdir)/geoid_test 37.371192 122.014965 | diff -u $(srcdir)/test/geoid.test.chk -
+
+# Rebuild the packet-getter regression test
+geoid-makeregress: geoid_test
+	@mkdir -p test
+	$(srcdir)/geoid_test 37.371192 122.014965 >test/geoid.test.chk
 
 # Test RTCM encoding using passthrough mode.
 undump-regress: rtcmdecode
