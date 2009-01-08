@@ -53,169 +53,28 @@ distribution, until we realized it would be useful for the rest of the
 Web to see these bug reports.  Where we can identify a responsible
 maintainer, we've tried to kick these upstream.</p>
 
+<h1>Links to User-Visible Problems</h1>
+
+<a href="gpsfake">gpsfake fails under mysterious circumstances</a><br/>
+<a href="startup">Distro-dependent problems with gpsd startup</a><br/>
+<a href="bluetooth">Firmware problems in some Bluetooth devices can hang them</a><br/>
+<a href="pl2303">Linux pl2303 driver can hang when device is read at unexpected speed</a><br/>
+<a href="select">select(2) is broken when polling ttys under Mac OS/X</a><br/>
+<a href="pysocket">Python socket library barfs on IPV6 notation in the /etc/hosts file</a><br/>
+<a href="pthread_create">pthread_create() fails to return when called in background</a><br/>
+
+<h1>Links to Toolchain Bugs</h1>
+
+<a href="isgps">isgps.c triggers an optimizer bug in some versions of gcc</a><br/>
+<a href="libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</a><br/>
+<a href="openmotif">The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy</a><br/>
+<a href="fc5_64bit">gpsd build may break on 64-bit systems running Fedora Core 5</a><br/>
+<a href="macxlibs">Mac OS 10.5 X library packaging problem</a><br/>
+<a href="pyinstall">Defective Python installation in SuSE 10.3rc</a><br/>
+
+<hr/>
+
 <h1>User-Visible Problems</h1>
-
-<h2>Distro-dependent problems with gpsd startup</h2>
-
-<p>See <a href='http://bugs.gentoo.org/show_bug.cgi?id=132288'>this
-Gentoo bug</a>.  This shows up on other distributions as well, but
-not under Fedora Core.  The Gentoo problem can be fixed by creating a
-/var/run/usb directory; this fix may apply to other distributions as
-well.</p>
-
-<h2>Defective Python installation in SuSE 10.3rc</h2>
-
-<p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
-Makefile.  This prevents the <code>gpsd</code> Python components from
-building correctly.</p>
-
-<h2>Firmware problems in some Bluetooth devices can hang them</h2>
-
-<p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
-firmware bug on some some Bluetooth devices, notably those shipped by
-Holux and including the GPSlim-236.  This bug may render these GPSes
-catatonic.  The problem seems to be that buggy firmware inside these
-receivers doesn't necessarily keep the Bluetooth serial-port emulation
-and the GPS chip talking at the same baud rate. This problem is not
-unique to <code>gpsd</code> - windows users are warned against using
-SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
-
-<p>If this happens, you can sometimes recover by repeatedly sending 
-reset messages using <code>gpsctl</p>.  The only guaranteed fix is
-to open the case and unsolder the backup battery so the chip forgets
-its configuration settings.</p>
-
-<p>Use the -b option of gpsd to prevent it from trying to reconfigure
-your GPS; this will avoid the bug.</p>
-
-<h2>Linux pl2303 driver can hang when device is read at unexpected speed</h2>
-
-<p>Michael R. Davis reports "If you read from the device at the wrong
-rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
-hard reboot." Details <a
-href='http://gpsd.davisnetworks.com/bin/view/Main/FreezeBugPL2303'>here</a>.</p>
-<p>Related driver flakiness may explain some failures to hunt correctly on
-USB devices.</p>
-
-<h2>select(2) is broken when polling ttys under Mac OS/X</h2>
-
-<p>When the fd set being polled includes tty devices (as opposed to
-sockets), select(2) can return 0 and shows no fd with input waiting
-even when data is in fact ready to be read from some of the devices.</p>
-
-<p>The most recent incarnation of this problem was due to a buggy pl2303
-USB-to-serial driver. OS X users should ensure that all their drivers are
-up to date.</p>
-
-<h2>Python socket library barfs on IPV6 notation in the /etc/hosts file</h2>
-
-<p>Robert J.Berger <rberger@ibd.com> reports:
-Until I changed the line in /etc/hosts from:</p>
-
-<pre class='code'>
-::1    localhost.localdomain   localhost
-</pre>
-
-to:<br/>
-
-<pre class='code'>
-127.0.0.1       localhost.localdomain   localhost
-</pre>
-
-<p>gps.py would fail when trying to open the socket connection to the gpsd:</p>
-
-<pre class='code'>
-   File "/usr/local/bin/spGps.py", line 198, in __init__
-     self.connect(host, port)
-   File "/usr/local/bin/spGps.py", line 237, in connect
-     raise socket.error, msg
-socket.error: (111, 'Connection refused')
-</pre>
-
-<p>and gpsprof would fail with:</p>
-
-<pre class='code'>
-# gpsprof | gnuplot -persist
-gpsprof: gpsd unreachable.
-</pre>
-
-<p>This is with Python 2.4.4 under Red Hat Linux, kernel version
-2.6.18.  It has been filed upstream as Python bug <a
-href='https://sourceforge.net/tracker/index.php?func=detail&aid=1603527&group_id=5470&atid=105470'>1603527</a>.</p>
-
-<h1>Toolchain Bugs</h1>
-
-<p><code>gpsd</code> is distressingly good at tickling bugs in 
-development toolchains.  All these, thankfully, are non-issues
-if you keep your toolchain up to date.</p>
-
-<p>One problem area is errors in generation of floating-point code.  A
-number of trouble reports have been received indicating erroneous
-results on embedded platforms, most notably ARM systems. These have
-all been traced back to the toolchain; when appropriate corrective
-action was taken, <code>gpsd</code> functioned correctly. Source code
-for a simple test program (<code>floattest.c</code>) is in the
-Subversion repository; if <code>gpsd</code> seems to be producing
-incorrect output, please use this tool to validate your toolchain
-before filing a bug report.</p>
-
-<h2>isgps.c triggers an optimizer bug in some versions of gcc</h2>
-
-<p>The isgps.c file confuses the gcc-3.4.[23] optimizer at -O2 level,
-making it generate incorrect code.  Removing -O2 from the
-compilation flags works around the problem.  Details are in the
-isgps.c source file.</p>
-
-<p>Compiling with &#x2D;&#x2D;enable-max-devices=1 may trigger a gcc
-optimizer bug</p>
-
-<p>At gpsd revision level 3365, compiling with
-&#x2D;&#x2D;enable-max-devices=1 has been observed to trigger an
-optimizer bug in gcc 4.1.0 20060304 (Red Hat 4.1.0-3).  The symptom is
-a for-loop termination condition not causing an exit, leading to a
-core dump.  Removing -O2 from the compilation flags works around the
-problem; upgrading to gcc 4.1.1 20060525 (Red Hat 4.1.1-1) solves it.
-Other reports indicate this bug was introduced sometime after gcc
-4.0.2 20051125 (Red Hat 4.0.2-8).</p>
-
-<h2>Multiple definitions of symbol _gpsd_report due to libtool bug</h2>
-
-<p>Some people building gpsd get 'multiple definitions of symbol
-_gpsd_report' as a warning.  This seems to be a result of two bugs in
-libtool, one of which masks the other on i386. gpsd_report() is indeed
-multiply defined, the problem is that libtool generates libgps.o where
-it should generate -lgps and <em>all</em> instances (rather than just
-the first to be incorporated by other linkage demands) are linked
-in.</p>
-
-<h2>The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy</h2>
-
-<p>xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
-1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
-symptom is that the satellite-data window in xgps is too small.  Avoid
-by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
-stable version like 2.2.2.  Alternatively, remove OpenMotif and
-install lesstif. For gpsd's purposes, lesstif is a completely
-compatible drop-in replacement.</p>
-
-<h2>gpsd build may break on 64-bit systems running Fedora Core 5</h2>
-
-<p>The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)
-being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
-binutils 2.16.1 or later avoids it.</p>
-
-<h2>pthread_create() fails to return when called in background</h2>
-
-There is a call to pthread create in libgpsd_core.c::link_activate():
-
-<listing>
-    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
-</listing>
-
-<p>If this is called when gpsd is in the foreground then the thread is
-created fine and pthread_create() returns right away.  If this is
-called when gpsd is in the background then the thread is created fine,
-but it never returns!  That freezes the main loop of gpsd.</p>
 
 <h2 id="gpsfake">gpsfake fails under mysterious circumstances</h2>
 
@@ -365,7 +224,163 @@ python-2.5-dbg interpreter is built with -O0.</p></li>
 Ubuntu 8.10 tests all use glibc 2.8.90 but get different results.</p></li>
 </ul>
 
-<h2 id="gpsfake">Mac OS 10.5 X library packaging problem</h2>
+<h2 id="startup">Distro-dependent problems with gpsd startup</h2>
+
+<p>See <a href='http://bugs.gentoo.org/show_bug.cgi?id=132288'>this
+Gentoo bug</a>.  This shows up on other distributions as well, but
+not under Fedora Core.  The Gentoo problem can be fixed by creating a
+/var/run/usb directory; this fix may apply to other distributions as
+well.</p>
+
+<h2 id="bluetooth">Firmware problems in some Bluetooth devices can hang them</h2>
+
+<p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
+firmware bug on some some Bluetooth devices, notably those shipped by
+Holux and including the GPSlim-236.  This bug may render these GPSes
+catatonic.  The problem seems to be that buggy firmware inside these
+receivers doesn't necessarily keep the Bluetooth serial-port emulation
+and the GPS chip talking at the same baud rate. This problem is not
+unique to <code>gpsd</code> - windows users are warned against using
+SiRFdemo's "Synchronize Protocol/Baud Rate" option on bluetooth devices.</p>
+
+<p>If this happens, you can sometimes recover by repeatedly sending 
+reset messages using <code>gpsctl</p>.  The only guaranteed fix is
+to open the case and unsolder the backup battery so the chip forgets
+its configuration settings.</p>
+
+<p>Use the -b option of gpsd to prevent it from trying to reconfigure
+your GPS; this will avoid the bug.</p>
+
+<h2 id="pl2303">Linux pl2303 driver can hang when device is read at unexpected speed</h2>
+
+<p>Michael R. Davis reports "If you read from the device at the wrong
+rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
+hard reboot." Details <a
+href='http://gpsd.davisnetworks.com/bin/view/Main/FreezeBugPL2303'>here</a>.</p>
+<p>Related driver flakiness may explain some failures to hunt correctly on
+USB devices.</p>
+
+<h2 id="select">select(2) is broken when polling ttys under Mac OS/X</h2>
+
+<p>When the fd set being polled includes tty devices (as opposed to
+sockets), select(2) can return 0 and shows no fd with input waiting
+even when data is in fact ready to be read from some of the devices.</p>
+
+<p>The most recent incarnation of this problem was due to a buggy pl2303
+USB-to-serial driver. OS X users should ensure that all their drivers are
+up to date.</p>
+
+<h2 id="pysocket">Python socket library barfs on IPV6 notation in the /etc/hosts file</h2>
+
+<p>Robert J.Berger <rberger@ibd.com> reports:
+Until I changed the line in /etc/hosts from:</p>
+
+<pre class='code'>
+::1    localhost.localdomain   localhost
+</pre>
+
+to:<br/>
+
+<pre class='code'>
+127.0.0.1       localhost.localdomain   localhost
+</pre>
+
+<p>gps.py would fail when trying to open the socket connection to the gpsd:</p>
+
+<pre class='code'>
+   File "/usr/local/bin/spGps.py", line 198, in __init__
+     self.connect(host, port)
+   File "/usr/local/bin/spGps.py", line 237, in connect
+     raise socket.error, msg
+socket.error: (111, 'Connection refused')
+</pre>
+
+<p>and gpsprof would fail with:</p>
+
+<pre class='code'>
+# gpsprof | gnuplot -persist
+gpsprof: gpsd unreachable.
+</pre>
+
+<p>This is with Python 2.4.4 under Red Hat Linux, kernel version
+2.6.18.  It has been filed upstream as Python bug <a
+href='https://sourceforge.net/tracker/index.php?func=detail&aid=1603527&group_id=5470&atid=105470'>1603527</a>.</p>
+
+<h2 id="pthread_create">pthread_create() fails to return when called in background</h2>
+
+There is a call to pthread create in libgpsd_core.c::link_activate():
+
+<listing>
+    /*@i1@*/(void)pthread_create(&pt,NULL,gpsd_ppsmonitor,(void *)session);
+</listing>
+
+<p>If this is called when gpsd is in the foreground then the thread is
+created fine and pthread_create() returns right away.  If this is
+called when gpsd is in the background then the thread is created fine,
+but it never returns!  That freezes the main loop of gpsd.</p>
+
+<h1>Toolchain Bugs</h1>
+
+<p><code>gpsd</code> is distressingly good at tickling bugs in 
+development toolchains.  Most of these, thankfully, are non-issues
+if you keep your toolchain up to date.</p>
+
+<p>One problem area is errors in generation of floating-point code.  A
+number of trouble reports have been received indicating erroneous
+results on embedded platforms, most notably ARM systems. These have
+all been traced back to the toolchain; when appropriate corrective
+action was taken, <code>gpsd</code> functioned correctly. Source code
+for a simple test program (<code>floattest.c</code>) is in the
+Subversion repository; if <code>gpsd</code> seems to be producing
+incorrect output, please use this tool to validate your toolchain
+before filing a bug report.</p>
+
+<h2 id="isgps">isgps.c triggers an optimizer bug in some versions of gcc</h2>
+
+<p>The isgps.c file confuses the gcc-3.4.[23] optimizer at -O2 level,
+making it generate incorrect code.  Removing -O2 from the
+compilation flags works around the problem.  Details are in the
+isgps.c source file.</p>
+
+<p>Compiling with &#x2D;&#x2D;enable-max-devices=1 may trigger a gcc
+optimizer bug</p>
+
+<p>At gpsd revision level 3365, compiling with
+&#x2D;&#x2D;enable-max-devices=1 has been observed to trigger an
+optimizer bug in gcc 4.1.0 20060304 (Red Hat 4.1.0-3).  The symptom is
+a for-loop termination condition not causing an exit, leading to a
+core dump.  Removing -O2 from the compilation flags works around the
+problem; upgrading to gcc 4.1.1 20060525 (Red Hat 4.1.1-1) solves it.
+Other reports indicate this bug was introduced sometime after gcc
+4.0.2 20051125 (Red Hat 4.0.2-8).</p>
+
+<h2 id="libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</h2>
+
+<p>Some people building gpsd get 'multiple definitions of symbol
+_gpsd_report' as a warning.  This seems to be a result of two bugs in
+libtool, one of which masks the other on i386. gpsd_report() is indeed
+multiply defined, the problem is that libtool generates libgps.o where
+it should generate -lgps and <em>all</em> instances (rather than just
+the first to be incorporated by other linkage demands) are linked
+in.</p>
+
+<h2 id="openmotif">The 2.3.0-beta version of OpenMotif shipped with Fedora Care 5 is buggy</h2>
+
+<p>xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
+1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
+symptom is that the satellite-data window in xgps is too small.  Avoid
+by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
+stable version like 2.2.2.  Alternatively, remove OpenMotif and
+install lesstif. For gpsd's purposes, lesstif is a completely
+compatible drop-in replacement.</p>
+
+<h2 id="fc5_64bit">gpsd build may break on 64-bit systems running Fedora Core 5</h2>
+
+<p>The problem may be be caused by the old ld (binutils-2.15.92.0.2-18)
+being incompatible with gcc 4.1.0 on a 64-bit system. Updating to
+binutils 2.16.1 or later avoids it.</p>
+
+<h2 id="macxlibs">Mac OS 10.5 X library packaging problem</h2>
 
 <p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
 because the X SDK libraries and include files are not installed to 
@@ -380,6 +395,12 @@ configure \
 <p>We haven't attempted to embed this in our autotools build because
 it looks like the fix would have to change every time the OS version
 number is incremented.</p>
+
+<h2 id="pyinstall">Defective Python installation in SuSE 10.3rc</h2>
+
+<p>The Python 2.5 installed with SuSE 10.3rc is missing a needed
+Makefile.  This prevents the <code>gpsd</code> Python components from
+building correctly.</p>
 
 <p>&nbsp;</p>
 
