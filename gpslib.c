@@ -1,6 +1,6 @@
 /* $Id$ */
 /*
- * Python binding for the libgps library functions
+ * Python binding for selected libgps library functions
  */
 #include <Python.h>
 
@@ -23,12 +23,12 @@ gpslib_wgs84_separation(PyObject *self, PyObject *args)
 
 static PyMethodDef gpslib_methods[] = {
     {"wgs84_separation",	gpslib_wgs84_separation,	METH_VARARGS,
-     PyDoc_STR("Return WGS85 geidetic separation in meters.")},
+     PyDoc_STR("Return WGS84 geidetic separation in meters.")},
     {NULL,		NULL}		/* sentinel */
 };
 
 PyDoc_STRVAR(module_doc,
-"Python binding of selected libgps library routines.\n\
+"Python wrapper for selected libgps library routines.\n\
 ");
 
 PyMODINIT_FUNC

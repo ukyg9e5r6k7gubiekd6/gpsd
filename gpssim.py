@@ -4,7 +4,7 @@ A GPS simulator.
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
 import sys, math, random, exceptions
-import gps
+import gps, gpslib
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
 # and a satellite with specified orbital elements in the sky.
@@ -204,9 +204,7 @@ class NMEA:
         if sim.mode == gps.MODE_3D:
             gga += "%.1f,M" % self.ksv.lat
         gga += ","
-        # Geodetic separation goes her
-        # gga += "%.3f,M," % separation
-        gga += ","
+        gga += "%.3f,M," % gpslib.wg84_separation(sim.ksv.lat, sim.ksv.lon)
         # Magnetic variation goes here
         # gga += "%3.2f,M," % mag_var
         gga += ",,"
