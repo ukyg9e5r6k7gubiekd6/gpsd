@@ -1,9 +1,7 @@
-/* $Id: geoid.c 4785 2008-07-20 22:55:32Z ckuethe $ */
+/* $Id$ */
 /* 
- * geoid.c -- ECEF to WGS84 conversions, including ellipsoid-to-MSL height
+ * test driver for the ECEF to WGS84 conversions in geoid.c
  *
- * Geoid separation code by Oleg Gusev, from data by Peter Dana.
- * ECEF conversion by Rob Janssen.
  */
 
 #include <sys/types.h>
