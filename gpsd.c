@@ -405,6 +405,8 @@ static /*@null@*/ /*@observer@*/ struct subscriber_t* allocate_client(void)
     int cfd;
     for (cfd = 0; cfd < MAXSUBSCRIBERS; cfd++) {
 	if (subscribers[cfd].fd <= 0 ) {
+	    gps_clear_fix(&subscribers[cfd].fixbuffer);
+	    gps_clear_fix(&subscribers[cfd].oldfix);
 	    subscribers[cfd].fd = cfd; /* mark subscriber as allocated */
 	    return &subscribers[cfd];
 	}
