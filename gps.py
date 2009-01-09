@@ -391,11 +391,8 @@ class gps(gpsdata):
 
     def waiting(self):
         "Return True if data is ready for the client."
-        if self.sockfile._rbuf:	# Ugh...relies on socket library internals.
-            return True
-        else:
-            (winput,woutput,wexceptions) = select.select((self.sock,), (),(), 0)
-            return winput != []
+        (winput,woutput,wexceptions) = select.select((self.sock,), (),(), 0)
+        return winput != []
 
     def poll(self):
         "Wait for and read data being streamed from gpsd."
