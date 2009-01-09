@@ -311,7 +311,7 @@ int main(int argc, char **argv)
 
 	gpsd_tty_init(&session);
 	gpsd_set_raw(&session);
-	for(i = 0; i < sizeof(speeds) / sizeof(speeds[0]); i++) {
+	for(i = 0; i < (int)(sizeof(speeds) / sizeof(speeds[0])); i++) {
 	    gpsd_set_speed(&session, speeds[i], 'N', 1);
 	    session.device_type->speed_switcher(&session, 4800);
 	}
