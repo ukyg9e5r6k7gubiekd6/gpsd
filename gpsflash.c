@@ -291,7 +291,7 @@ expect(int pfd, const char *str, size_t len, time_t timeout)
 
     gpsd_report(LOG_PROG, "expect(%s, %d)\n",
 		gpsd_hexdump((char *)str, len),
-		timeout);
+		(int)timeout);
 
     for (;;) {
 	if (read(pfd, &ch, 1) != 1)
