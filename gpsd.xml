@@ -710,7 +710,7 @@ control socket a '!', followed by the device name, followed by '=',
 followed by the control string.</para>
 
 <para>To send a binary control string to a specified device, write to the
-control socket a '&', followed by the device name, followed by '=',
+control socket a '&amp;', followed by the device name, followed by '=',
 followed by the control string in paired hex digits.</para>
 
 <para>Your client may await a response, which will be a line beginning
@@ -730,9 +730,9 @@ spoofing attacks.</para>
 </refsect1>
 <refsect1 id='accuracy'><title>ACCURACY</title>
 
-<para>The base user error (UERE) of GPSes is 8 meters or less at 66%
-confidence, 15 meters or less at 95% confidence.  Actual horizontal
-error will be UERE times a dilution factor dependent on current
+<para>The base User Estimated Range Error (UERE) of GPSes is 8 meters
+or less at 66% confidence, 15 meters or less at 95% confidence. Actual
+horizontal error will be UERE times a dilution factor dependent on current
 satellite position.  Altitude determination is more sensitive to
 variability to atmospheric signal lag than latitude/longitude, and is
 also subject to errors in the estimation of local mean sea level; base
