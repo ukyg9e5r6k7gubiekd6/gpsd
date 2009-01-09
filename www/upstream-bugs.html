@@ -256,6 +256,10 @@ distribution.</p>
 <li><p>The bug appears to require Python 2.5.  Backing down to 2.4
 avoids it in every environment we have tested.</p></li>
 
+<li><p>The bug appears not to be a gpsd problem. The A2 vs. A3 results
+were run on the same machine with the same gpsd binary and instances
+of gsfake/gps.py, a few minutes apart.</p></li>
+
 <li><p>The bug appears not to be a compiler optimization problem. The
 python-2.5-dbg interpreter is built with -O0.</p></li>
 
