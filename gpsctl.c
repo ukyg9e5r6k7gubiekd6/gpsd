@@ -306,10 +306,12 @@ int main(int argc, char **argv)
 		exit(1);
 	    }
 
-	session.context = &context;	/* in case gps_init isn't called */
-	context.readonly = true;
-
+	session.context = &context;
+	//context.readonly = true;
 	gpsd_tty_init(&session);
+	(void)strlcpy(session.gpsdata.gps_device, device, sizeof(session.gpsdata.gps_device));
+	session.device_type = forcetype;
+	gpsd_open(&session);
 	gpsd_set_raw(&session);
 	for(i = 0; i < (int)(sizeof(speeds) / sizeof(speeds[0])); i++) {
 	    gpsd_set_speed(&session, speeds[i], 'N', 1);
@@ -317,7 +319,8 @@ int main(int argc, char **argv)
 	}
 	gpsd_set_speed(&session, 4800, 'N', 1);
 	for (i = 0; i < 3; i++)
-	    session.device_type->mode_switcher(&session, 0);
+	    if (session.device_type->mode_switcher)
+		session.device_type->mode_switcher(&session, 0);
 	gpsd_wrap(&session);
 	exit(0);
     } else {
