@@ -460,6 +460,12 @@ time_regress: mkgmtime_test
 testregress: gps-regress rtcm-regress packet-regress undump-regress time_regress
 	@echo "Regressions complete."
 
+# We would like "${MAKE} check" to run the regression tests.  automake
+# appears to have support for running programs, but not make targets.
+# Perhaps the tests should be moved into scripts, but then it's not
+# clear how to deal with $(srcdir).
+# TESTS=testregress
+
 #
 # Productions for testing unstable drivers.
 #
