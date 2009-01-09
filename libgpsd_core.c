@@ -283,7 +283,7 @@ int gpsd_activate(struct gps_device_t *session, bool reconfigurable)
 	memset(&session->driver, '\0', sizeof(session->driver));
 	/* if we know the device type, probe for subtype and configure it */
 	if (session->device_type != NULL) {
-	    if (session->device_type->probe_subtype !=NULL)
+	    if (!session->context->readonly && session->device_type->probe_subtype !=NULL)
 		session->device_type->probe_subtype(session, session->packet.counter = 0);
 #ifdef ALLOW_RECONFIGURE
 	    if (reconfigurable) {

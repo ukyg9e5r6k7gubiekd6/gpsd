@@ -307,7 +307,6 @@ int main(int argc, char **argv)
 	    }
 
 	session.context = &context;
-	//context.readonly = true;
 	gpsd_tty_init(&session);
 	(void)strlcpy(session.gpsdata.gps_device, device, sizeof(session.gpsdata.gps_device));
 	session.device_type = forcetype;
@@ -328,7 +327,6 @@ int main(int argc, char **argv)
 	static struct gps_context_t	context;	/* start it zeroed */
 	static struct gps_device_t	session;	/* zero this too */
 	session.context = &context;	/* in case gps_init isn't called */
-	context.readonly = true;
 
 	/*
 	 * Unless the user has forced a type and only wants to see the
