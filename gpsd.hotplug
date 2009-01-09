@@ -52,6 +52,9 @@ def gpsd_control(action, argument):
     elif action == 'remove':
         connect.sendall("-%s\r\n" % argument)
         connect.recv(12)
+    elif action == 'send':
+        connect.sendall("%s\r\n" % argument)
+        connect.recv(12)
     connect.close()
     #syslog.syslog("gpsd_control ends")
     return action

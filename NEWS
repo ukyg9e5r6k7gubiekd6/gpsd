@@ -8,7 +8,8 @@
   gpsd_hexdump to save CPU. Lots of little fixes to various packet
   parsers. Always keep the device open: "-n" is not optional any
   more. xgpsspeed no longer depends on Motif.  gpsctl can now ship
-  arbitrary payloads to a device.
+  arbitrary payloads to a device. It's possible to send binary through the
+  control channel with the new & command.
 
 * Sun Feb 17 2008 Chris Kuethe <ckuethe@mail.berlios.de> - 2.37
   The C++ bindings, Garmin USB support, and multiple instances of ntp

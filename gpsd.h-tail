@@ -393,7 +393,7 @@ extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*
 extern void gpsd_interpret_subframe(struct gps_device_t *, unsigned int[]);
 extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);
 extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_t, int);
-extern int gpsd_hexpack(char *, char *, int);
+extern int gpsd_hexpack(char *, char *, size_t);
 extern int hex2bin(char *);
 extern void ntpd_link_activate(struct gps_device_t *session);
 extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);

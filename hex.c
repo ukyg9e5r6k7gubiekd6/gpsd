@@ -52,7 +52,8 @@ char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
     return hexbuf;
 }
 
-int gpsd_hexpack(char *src, char *dst, int len){
+int gpsd_hexpack(char *src, char *dst, size_t len){
+/* hex2bin source string to destination - destination can be same as source */ 
     int i, k, l;
 
     l = (int)(strlen(src) / 2);

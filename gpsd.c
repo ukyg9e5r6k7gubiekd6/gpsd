@@ -1266,6 +1266,27 @@ static void handle_control(int sfd, char *buf)
 		assert(write(sfd, "ERROR\n", 6) != -1);
 	    }
 	}
+    } else if (buf[0] == '&') {
+	size_t len;
+	p = snarfline(buf+1, &stash);
+	eq = strchr(stash, '=');
+	if (eq == NULL) {
+	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
+	    assert(write(sfd, "ERROR\n", 6) != -1);
+	} else {
+	    *eq++ = '\0';
+	    len = strlen(eq)+5;
+	    if ((chp = find_device(stash)) != NULL) {
+		gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
+		/* NOTE: this destroys the original buffer contents */
+		len = gpsd_hexpack(eq, eq, len);
+		assert(write(chp->gpsdata.gps_fd, eq, len) != 1);
+		assert(write(sfd, "OK\n", 3) != -1);
+	    } else {
+		gpsd_report(LOG_INF,"<= control(%d): %s not active \n", sfd, stash);
+		assert(write(sfd, "ERROR\n", 6) != -1);
+	    }
+	}
     }
     /*@ +sefparams @*/
 }

@@ -709,6 +709,10 @@ list. send "-/dev/foo\n".</para>
 control socket a '!', followed by the device name, followed by '=',
 followed by the control string.</para>
 
+<para>To send a binary control string to a specified device, write to the
+control socket a '&', followed by the device name, followed by '=',
+followed by the control string in paired hex digits.</para>
+
 <para>Your client may await a response, which will be a line beginning
 with either "OK" or "ERROR".  An ERROR reponse to an add command means
 the device did not emit data recognizable as GPS packets; an ERROR
