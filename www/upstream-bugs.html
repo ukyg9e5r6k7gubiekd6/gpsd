@@ -103,6 +103,7 @@ know:</p>
 
 <table border=1>
 <tr>
+<th>Label</th>
 <th>Distribution</th>
 <th>Kernel</th>
 <th>Python</th>
@@ -112,6 +113,7 @@ know:</p>
 <th>Status</th>
 </tr>
 <tr>
+<td>A1</td>
 <td>Ubuntu 8.04</td>
 <td>2.6.24-21</td>
 <td>2.5.2</td>
@@ -121,6 +123,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>A2</td>
 <td>Ubuntu 8.10</td>
 <td>2.6.27-7</td>
 <td>2.5.2</td>
@@ -130,6 +133,7 @@ know:</p>
 <td>FAILS</td>
 </tr>
 <tr>
+<td>A3</td>
 <td>Ubuntu 8.10</td>
 <td>2.6.27-7</td>
 <td>2.4.5</td>
@@ -139,6 +143,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>A4</td>
 <td>Ubuntu 8.10</td>
 <td>2.6.27-7</td>
 <td>2.4.6</td>
@@ -148,6 +153,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>A5</td>
 <td>Ubuntu 8.10</td>
 <td>2.6.27-7</td>
 <td>2.5.2-dbg</td>
@@ -157,6 +163,7 @@ know:</p>
 <td>FAILS</td>
 </tr>
 <tr>
+<td>B1</td>
 <td>Debian unstable</td>
 <td>2.6.26, 2.6.27</td>
 <td>2.5.2</td>
@@ -166,6 +173,7 @@ know:</p>
 <td>FAILS</td>
 </tr>
 <tr>
+<td>B2</td>
 <td>Debian unstable</td>
 <td>2.6.27</td>
 <td>2.4.6</td>
@@ -174,6 +182,7 @@ know:</p>
 <td>bzed</td>
 <td>SUCCEEDS</td>
 </tr>
+<td>B3</td>
 <td>Debian unstable</td>
 <td>2.6.27</td>
 <td>2.5.3</td>
@@ -183,6 +192,7 @@ know:</p>
 <td>FAILS</td>
 </tr>
 <tr>
+<td>C1</td>
 <td>Debian etch (chroot)</td>
 <td>2.6.27</td>
 <td>2.5 (release25-maint) </td>
@@ -192,6 +202,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>C2</td>
 <td>Debian etch (chroot)</td>
 <td>2.6.27</td>
 <td>2.4.4</td>
@@ -201,6 +212,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>C3</td>
 <td>Debian etch (chroot)</td>
 <td>2.6.27</td>
 <td>2.5 (release25-maint)</td>
@@ -210,6 +222,7 @@ know:</p>
 <td>SUCCEEDS</td>
 </tr>
 <tr>
+<td>D</td>
 <td>Debian experimental</td>
 <td>2.6.27</td>
 <td>2.5.3</td>
@@ -220,6 +233,7 @@ know:</p>
 </tr>
 <tr>
 <tr>
+<td>E</td>
 <td>OpenBSD</td>
 <td>current for 2008-12-30</td>
 <td>2.5.2</td>
@@ -247,7 +261,14 @@ python-2.5-dbg interpreter is built with -O0.</p></li>
 
 <li><p>The bug appears not to be a problem with glibc. The Ubuntu 8.10
 tests all use glibc 2.8.90 but get different results.</p></li>
+
+<li><p>B1 vs B2 means GCC version can't be the key difference
+either. Furthermore, bzed has examined the Python source code and says
+the pty/tty code has not changed between 3.4.6 and 2.5.2 either.</p>
 </ul>
+
+<p>The finger seems to point at something in the core Python
+implementation, possibly having to do with the Global Interpreter Lock.</p>
 
 <h2 id="bluetooth">Firmware problems in some Bluetooth devices can hang them</h2>
 
