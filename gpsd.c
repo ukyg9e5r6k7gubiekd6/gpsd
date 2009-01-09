@@ -89,6 +89,9 @@
 
 #define sub_index(s) (int)(s - subscribers)
 
+/* Needed because 4.x versions of GCC are really annoying */
+#define ignore_return(funcall)	assert(funcall != -23)
+
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
@@ -629,11 +632,11 @@ static bool assign_channel(struct subscriber_t *user)
 	    adjust_max_fd(user->device->gpsdata.gps_fd, true);
 	    if (user->watcher && !user->tied) {
 		/*@ -sefparams @*/
-		assert(write(user->fd, "GPSD,F=", 7) != -1);
-		assert(write(user->fd,
+		ignore_return(write(user->fd, "GPSD,F=", 7));
+		ignore_return(write(user->fd,
 			     user->device->gpsdata.gps_device,
-			     strlen(user->device->gpsdata.gps_device)) != -1);
-		assert(write(user->fd, "\r\n", 2) != -1);
+				    strlen(user->device->gpsdata.gps_device)));
+		ignore_return(write(user->fd, "\r\n", 2));
 		/*@ +sefparams @*/
 	    }
 	}
@@ -644,7 +647,7 @@ static bool assign_channel(struct subscriber_t *user)
 	(void)snprintf(buf, sizeof(buf), "GPSD,X=%f,I=%s\r\n",
 		       timestamp(), gpsd_id(user->device));
 	/*@ -sefparams +matchanyintegral @*/
-	assert((size_t)write(user->fd, buf, strlen(buf)) == strlen(buf));
+	ignore_return(write(user->fd, buf, strlen(buf)));
 	/*@ +sefparams -matchanyintegral @*/
 
     }
@@ -1234,36 +1237,36 @@ static void handle_control(int sfd, char *buf)
 	    gpsd_wrap(chp);
 	    chp->gpsdata.gps_fd = -1;	/* device is already disconnected */
 	    /*@i@*/free_channel(chp);	/* modifying observer storage */
-	    assert(write(sfd, "OK\n", 3) != -1);
+	    ignore_return(write(sfd, "OK\n", 3));
 	} else
-	    assert(write(sfd, "ERROR\n", 6) != -1);
+	    ignore_return(write(sfd, "ERROR\n", 6));
     } else if (buf[0] == '+') {
 	p = snarfline(buf+1, &stash);
 	if (find_device(stash)) {
 	    gpsd_report(LOG_INF,"<= control(%d): %s already active \n", sfd, stash);
-	    assert(write(sfd, "ERROR\n", 6) != -1);
+	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF,"<= control(%d): adding %s \n", sfd, stash);
 	    if (open_device(stash))
-		assert(write(sfd, "OK\n", 3) != -1);
+		ignore_return(write(sfd, "OK\n", 3));
 	    else
-		assert(write(sfd, "ERROR\n", 6) != -1);
+		ignore_return(write(sfd, "ERROR\n", 6));
 	}
     } else if (buf[0] == '!') {
 	p = snarfline(buf+1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
-	    assert(write(sfd, "ERROR\n", 6) != -1);
+	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    *eq++ = '\0';
 	    if ((chp = find_device(stash))) {
 		gpsd_report(LOG_INF,"<= control(%d): writing to %s \n", sfd, stash);
-		assert(write(chp->gpsdata.gps_fd, eq, strlen(eq)) != -1);
-		assert(write(sfd, "OK\n", 3) != -1);
+		ignore_return(write(chp->gpsdata.gps_fd, eq, strlen(eq)));
+		ignore_return(write(sfd, "OK\n", 3));
 	    } else {
 		gpsd_report(LOG_INF,"<= control(%d): %s not active \n", sfd, stash);
-		assert(write(sfd, "ERROR\n", 6) != -1);
+		ignore_return(write(sfd, "ERROR\n", 6));
 	    }
 	}
     } else if (buf[0] == '&') {
@@ -1272,7 +1275,7 @@ static void handle_control(int sfd, char *buf)
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
 	    gpsd_report(LOG_WARN,"<= control(%d): ill-formed command \n", sfd);
-	    assert(write(sfd, "ERROR\n", 6) != -1);
+	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    *eq++ = '\0';
 	    len = strlen(eq)+5;
@@ -1280,11 +1283,11 @@ static void handle_control(int sfd, char *buf)
 		gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
 		/* NOTE: this destroys the original buffer contents */
 		len = gpsd_hexpack(eq, eq, len);
-		assert(write(chp->gpsdata.gps_fd, eq, len) != 1);
-		assert(write(sfd, "OK\n", 3) != -1);
+		ignore_return(write(chp->gpsdata.gps_fd, eq, len));
+		ignore_return(write(sfd, "OK\n", 3));
 	    } else {
 		gpsd_report(LOG_INF,"<= control(%d): %s not active \n", sfd, stash);
-		assert(write(sfd, "ERROR\n", 6) != -1);
+		ignore_return(write(sfd, "ERROR\n", 6));
 	    }
 	}
     }
