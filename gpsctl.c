@@ -54,15 +54,16 @@ int main(int argc, char **argv)
 {
     int option, status;
     char *err_str, *device = NULL, *speed = NULL, *devtype = NULL, *control = NULL;
-    bool to_binary = false, to_nmea = false, lowlevel=false, echo=false;
+    bool to_binary = false, to_nmea = false, reset = false; 
+    bool lowlevel=false, echo=false;
     struct gps_data_t *gpsdata = NULL;
     struct gps_type_t *forcetype = NULL;
     struct gps_type_t **dp;
     char cooked[BUFSIZ], c = '\0', *cookend = NULL;
     bool err = false;
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n] [-D n] [-s speed] [-V] [-t devtype] [-c control] [-e] <device>\n"
-    while ((option = getopt(argc, argv, "bc:efhlns:t:D:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-V] [-t devtype] [-c control] [-e] <device>\n"
+    while ((option = getopt(argc, argv, "bc:efhlnrs:t:D:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
@@ -151,6 +152,10 @@ int main(int argc, char **argv)
 	case 'n':		/* switch to NMEA mode */
 	    to_nmea = true;
 	    break;
+	case 'r':		/* force-switch to default mode */
+	    reset = true;
+	    lowlevel = false;	/* so we'll abort if the daemon is running */
+	    break;
 	case 's':		/* change output baud rate */
 	    speed = optarg;
 	    break;
@@ -193,7 +198,7 @@ int main(int argc, char **argv)
 	}
     }
 
-    if (to_nmea && to_binary) {
+    if ((int)to_nmea + (int)to_binary + (int)reset > 1) {
 	(void)fprintf(stderr, "gpsctl: make up your mind, would you?\n");
 	exit(0);
     }
@@ -248,7 +253,7 @@ int main(int argc, char **argv)
 	}
 
 	/* if no control operation was specified, just ID the device */
-	if (speed==NULL && !to_nmea && !to_binary) {
+	if (speed==NULL && !to_nmea && !to_binary && !reset) {
 	    /* the O is to force a device binding */
 	    (void)gps_query(gpsdata, "OFIB");
 	    gpsd_report(LOG_SHOUT, "gpsctl: %s identified as %s at %d\n",
@@ -256,33 +261,65 @@ int main(int argc, char **argv)
 	    exit(0);
 	}
 
+	if (reset)
+	{
+	    gpsd_report(LOG_PROG, "gpsctl: cabnnot reset with gpsd running.\n");
+	    exit(0);
+	}
+
 	status = 0;
 	if (to_nmea) {
 	    (void)gps_query(gpsdata, "N=0");
 	    if (gpsdata->driver_mode != 0) {
-		(void)fprintf(stderr, "gpsctl: mode change failed\n");
+		(void)fprintf(stderr, "gpsctl: %s mode change to NMEA failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: mode change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctl: %s mode change succeeded\n", gpsdata->gps_device);
 	}
 	else if (to_binary) {
 	    (void)gps_query(gpsdata, "N=1");
 	    if (gpsdata->driver_mode != 1) {
-		(void)fprintf( stderr, "gpsctl: mode change failed\n");
+		(void)fprintf(stderr, "gpsctl: %s mode change to native mode failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: mode change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctl: %s mode change succeeded\n", gpsdata->gps_device);
 	}
 	if (speed != NULL) {
 	    (void)gps_query(gpsdata, "B=%s", speed);
 	    if (atoi(speed) != (int)gpsdata->baudrate) {
-		(void)fprintf( stderr, "gpsctl: speed change failed\n");
+		(void)fprintf( stderr, "gpsctl: %s speed change failed\n", gpsdata->gps_device);
 		status = 1;
 	    } else
-		gpsd_report(LOG_PROG, "gpsctl: speed change on %s succeeded\n", gpsdata->gps_device);
+		gpsd_report(LOG_PROG, "gpsctl: %s speed change succeeded\n", gpsdata->gps_device);
 	}
 	(void)gps_close(gpsdata);
 	exit(status);
+    } else if (reset) {
+	/* hard reset will go through lower-level operations */
+	const int speeds[] = {2400, 4800, 9600, 19200, 38400, 57600, 115200};
+	static struct gps_context_t	context;	/* start it zeroed */
+	static struct gps_device_t	session;	/* zero this too */
+	int i;
+
+	if (device == NULL || forcetype == NULL) {
+		(void)fprintf(stderr,  "gpsctl: device and type must be specified for the reset operation.\n");
+		exit(1);
+	    }
+
+	session.context = &context;	/* in case gps_init isn't called */
+	context.readonly = true;
+
+	gpsd_tty_init(&session);
+	gpsd_set_raw(&session);
+	for(i = 0; i < sizeof(speeds) / sizeof(speeds[0]); i++) {
+	    gpsd_set_speed(&session, speeds[i], 'N', 1);
+	    session.device_type->speed_switcher(&session, 4800);
+	}
+	gpsd_set_speed(&session, 4800, 'N', 1);
+	for (i = 0; i < 3; i++)
+	    session.device_type->mode_switcher(&session, 0);
+	gpsd_wrap(&session);
+	exit(0);
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_context_t	context;	/* start it zeroed */
@@ -291,11 +328,11 @@ int main(int argc, char **argv)
 	context.readonly = true;
 
 	/*
-	 * Unless the user has forced a type and only wants to see the string
-	 * (not send it) we now need to try to open the device and find out
-	 * what is actually there.
+	 * Unless the user has forced a type and only wants to see the
+	 * string (not send it) we now need to try to open the device
+	 * and find out what is actually there.
 	 */
-	if (forcetype == NULL || !echo) {
+	if (!(forcetype != NULL && echo)) {
 	    if (device == NULL) {
 		(void)fprintf(stderr,  "gpsctl: device must be specified for low-level access.\n");
 		exit(1);
@@ -400,7 +437,7 @@ int main(int argc, char **argv)
 	    }
 	    else if (!session.device_type->speed_switcher(&session, 
 							  (speed_t)atoi(speed))) {
-		(void)fprintf(stderr, "gpsctl: mode change failed.\n");
+		(void)fprintf(stderr, "gpsctl: speed change failed.\n");
 		status = 1;
 	    }
 	}
