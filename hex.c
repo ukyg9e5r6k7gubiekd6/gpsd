@@ -57,7 +57,7 @@ int gpsd_hexpack(char *src, char *dst, size_t len){
     int i, k, l;
 
     l = (int)(strlen(src) / 2);
-    if ((l < 1) || (l > len))
+    if ((l < 1) || ((size_t)l > len))
 	return -1;
 
     bzero(dst, len);
