@@ -391,8 +391,13 @@ class gps(gpsdata):
 
     def waiting(self):
         "Return True if data is ready for the client."
-        (winput,woutput,wexceptions) = select.select((self.sock,), (),(), 0)
-        return winput != []
+        # Ugly magic seems to be necessary to deal with the
+        # file pseudo-object buffering in older Python versions.
+        if sys.version[:3] < "2.5" and self.sockfile._rbuf:
+            return True
+        else:
+            (winput,woutput,wexceptions) = select.select((self.sock,), (),(), 0)
+            return winput != []
 
     def poll(self):
         "Wait for and read data being streamed from gpsd."
