@@ -200,7 +200,10 @@ if test x"$with_x" != "xno" -a x"$have_x" != "xdisabled"
   dnl Instead, check for two common places (xorg way and the
   dnl traditional way) by hand.
   AC_CHECK_LIB(Xaw, XawInitializeWidgetSet, XAW_LIBS="-lXaw",
-     AC_CHECK_LIB(Xaw8, XawInitializeWidgetSet, XAW_LIBS="-lXaw8",,${X_PRE_LIBS} ${X11_LIBS}),
+     AC_CHECK_LIB(Xaw8, XawInitializeWidgetSet, XAW_LIBS="-lXaw8",
+        AC_CHECK_LIB(Xaw7, XawInitializeWidgetSet, XAW_LIBS="-lXaw7",
+     		     ,${X_PRE_LIBS} ${X11_LIBS}),
+		  ${X_PRE_LIBS} ${X11_LIBS}),
 	  ${X_PRE_LIBS} ${X11_LIBS})
   AC_SUBST(XAW_LIBS)
   if test x"$XAW_LIBS" = "x"; then
