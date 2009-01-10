@@ -301,8 +301,7 @@ class FakeGPS:
         #    (speed, databits, parity, stopbits) = self.testload.serial
         (self.master_fd, self.slave_fd) = pty.openpty()
         self.slave = os.ttyname(self.slave_fd)
-        ttyfp = open(self.slave, "rw")
-        (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(ttyfp.fileno())
+        (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(self.slave_fd)
         cc[termios.VMIN] = 1
         cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
         cflag |= termios.CREAD | termios.CLOCAL
@@ -322,7 +321,7 @@ class FakeGPS:
             iflag |= termios.INPCK
             cflag |= termios.PARENB | termios.PARODD
         ispeed = ospeed = speed
-        termios.tcsetattr(ttyfp.fileno(), termios.TCSANOW,
+        termios.tcsetattr(self.slave_fd, termios.TCSANOW,
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
     def read(self):
         "Discard control strings written by gpsd."
