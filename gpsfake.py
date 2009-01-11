@@ -543,6 +543,7 @@ class TestSession:
     def run(self):
         "Run the tests."
         try:
+            self.progress("gpsfake: test loop begins\n")
             while self.daemon:
                 # We have to read anything that gpsd might have tried
                 # to send to the GPS here -- under OpenBSD the
@@ -576,7 +577,9 @@ class TestSession:
                 else:
                     raise TestSessionError("test object of unknown type")
                 if not self.writers and not had_output:
+                    self.progress("gpsfake: no writers and no output\n")
                     break
+            self.progress("gpsfake: test loop ends\n")
         finally:
             self.cleanup()
 
