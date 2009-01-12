@@ -397,6 +397,12 @@ class gps(gpsdata):
     def poll(self):
         "Wait for and read data being streamed from gpsd."
         self.response = self.sockfile.readline()
+        if self.response.startswith("H") and "=" not in self.response:
+            while True:
+                frag = self.sockfile.readline()
+                self.response += frag
+                if frag.startswith("."):
+                    break
         if not self.response:
             return -1
         if self.verbose:

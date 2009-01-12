@@ -73,10 +73,11 @@ algorithm.</para>
 <refsect1 id='dump-format2'><title>RTCM2 DUMP FORMAT</title>
 
 <para>For each message, the header is listed first, followed by zero
-or more lines containing the specific data for that message. The
-general format is a line beginning with a capital letter, followed by
-a tab, followed by the fields of the message separated by tabs,
-terminated by a newline.</para>
+or more lines containing the specific data for that message, followed
+by a trailing sentinel line containing a single dot. The general format is a
+line beginning with a capital letter, followed by a tab, followed by
+the fields of the message separated by tabs, terminated by a
+newline.</para>
 
 <refsect2><title>Header message (H)</title>
 
@@ -88,7 +89,11 @@ H &lt;message type&gt; &lt;reference station id&gt; &lt;modified z_count&gt; &lt
 <para>Here is an example:</para>
 
 <informalexample><literallayout>
-H	9	687	337.2	4	5	0
+H	9	268	249.6	1	5	0
+S	13	0	3	249.6	-26.120	0.068
+S	2	0	73	249.6	1.220	-0.080
+S	8	0	22	249.6	23.760	0.030
+.
 </literallayout></informalexample>
 
 <para>&lt;message type&gt; is one of</para>
@@ -468,6 +473,12 @@ not described here.</para>
 </para>
 </refsect1>
 
+<refsect1 id='compatibility'><title>COMPATIBILITY NOTE</title> 
+
+<para>In versions of the RTCM2 dump format prior to gpsd 2.28, there was
+no trailing sentinel line after each stanza of the dump.</para>
+
+</refsect1>
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
 <para>Much of the portion of this text describing RTCM2 was originally

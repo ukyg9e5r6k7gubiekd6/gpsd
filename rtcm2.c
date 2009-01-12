@@ -551,6 +551,7 @@ void rtcm2_dump(struct rtcm2_t *rtcm, /*@out@*/char buf[], size_t buflen)
 	break;
     }
 
+    (void)strlcat(buf, ".\n", buflen);
 }
 
 int rtcm2_undump(/*@out@*/struct rtcm2_t *rtcmp, char *buf)

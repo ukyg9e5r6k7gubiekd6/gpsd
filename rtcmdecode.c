@@ -73,7 +73,11 @@ static void pass(FILE *fpin, FILE *fpout)
 	if (buf[0] == '#') {
 	    (void)fputs(buf, fpout);
 	    continue;
-	} 
+	}
+	/* ignore trailer lines as we'll regenerate these */
+	else if (buf[0] == '.')
+	    continue;
+
 	status = rtcm2_undump(&rtcm, buf);
 
 	if (status == 0) {
