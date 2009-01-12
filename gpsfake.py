@@ -78,7 +78,7 @@ import gps
 # failures that usually look like lines missing from the end of the
 # test output relative to the check file.  This number might have to
 # be adusted upward on faster machines.
-WRITE_PAD = 10.0
+WRITE_PAD = 3.0
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
