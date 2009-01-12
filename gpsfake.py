@@ -448,7 +448,7 @@ class TestSessionError(exceptions.Exception):
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
     CLOSE_DELAY = 1
-    def __init__(self, prefix=None, port=None, options=None, verbose=False, predump=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False):
         "Initialize the test session by launching the daemon."
         self.verbose = verbose
         self.predump = predump
@@ -498,7 +498,7 @@ class TestSession:
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
-        newclient = gps.gps(port=self.port)
+        newclient = gps.gps(port=self.port, verbose=self.verbose)
         self.append(newclient)
         newclient.id = self.client_id + 1 
         self.client_id += 1

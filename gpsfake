@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.4
 #
 # gpsfake -- test harness for gpsd
 #
@@ -67,7 +67,7 @@ flicker = False
 promptme = False
 init = "w+r+"
 doptions = ""
-verbose = False
+verbose = 0
 for (switch, val) in options:
     if (switch == '-1'):
         singleshot = True
@@ -102,7 +102,7 @@ for (switch, val) in options:
     elif (switch == '-s'):
         speed = int(val)
     elif (switch == '-v'):
-        verbose = True
+        verbose += 1
     elif (switch == '-h'):
         sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
         raise SystemExit,0
@@ -147,8 +147,9 @@ test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=
 
 if pipe:
     test.reporter = sys.stdout.write
-    #if verbose:
-    #    test.progress = sys.stdout.write
+    if verbose:
+        progress = False
+        test.progress = sys.stdout.write
 
 try:
     try:
