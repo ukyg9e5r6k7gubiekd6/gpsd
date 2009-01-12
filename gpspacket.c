@@ -18,6 +18,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     PyObject *args;
     va_list ap;
 
+    gpsd_hexdump_level = errlevel;
+
     if (!report_callback)   /* no callback defined, exit early */
 	return;	
     
@@ -267,4 +269,6 @@ initgpspacket(void)
     PyModule_AddIntConstant(m, "RTCM3_PACKET", RTCM3_PACKET);
     PyModule_AddIntConstant(m, "UBX_PACKET", UBX_PACKET);
     PyModule_AddIntConstant(m, "GARMINTXT_PACKET", GARMINTXT_PACKET);
+
+    PyModule_AddIntConstant(m, "LOG_IO", LOG_IO);
 }

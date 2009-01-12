@@ -9,7 +9,7 @@ import gpspacket
 NMEA_MAX = 86
 
 # Lowest debug level at which packet getter begins to emit messages, minus one
-BASELEVEL = 5
+BASELEVEL = gpspacket.LOG_IO
 
 def hexdump(str):
     dmp = ""
@@ -109,7 +109,13 @@ if __name__ == '__main__':
                 else:
                     (type, packet) = getter.get(tty)
                     length = len(packet)
-                    if type == gpspacket.BAD_PACKET or length == 0:
+                    if type == gpspacket.BAD_PACKET:
+                        if debuglevel >= BASELEVEL:
+                            sys.stdout.write("gpscat: terminating on bad packet\n") 
+                        break
+                    elif length == 0:
+                        if debuglevel >= BASELEVEL:
+                            sys.stdout.write("gpscat: terminating on zero-length packet\n")
                         break
                     if typeflag:
                         sys.stdout.write(`type` + " (" + `length` + "): " + hexdump(packet) + "\n")

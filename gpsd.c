@@ -95,7 +95,6 @@
 static fd_set all_fds;
 static int maxfd;
 static int debuglevel;
-extern int gpsd_hexdump_level;
 static bool in_background = false;
 static bool listen_global = false;
 static bool nowait = true;

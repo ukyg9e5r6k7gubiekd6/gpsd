@@ -525,11 +525,11 @@ static void nextstate(struct gps_packet_t *lexer,
 	    for(n=4; (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1; n++)
 	    csum ^= lexer->inbuffer[n];
 	    if(csum != c) {
-	    gpsd_report(LOG_INF, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
-		    lexer->inbuffer[3], csum, c);
-	    gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
-		gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
-		     LOG_RAW));
+		gpsd_report(LOG_IO, "Navcom packet type 0x%hx bad checksum 0x%hx, expecting 0x%hx\n",
+			    lexer->inbuffer[3], csum, c);
+		gpsd_report(LOG_RAW, "Navcom packet dump: %s\n",
+			    gpsd_hexdump_wrapper(lexer->inbuffer, lexer->inbuflen,
+						 LOG_RAW));
 	    lexer->state = GROUND_STATE;
 	    break;
 	    }
@@ -739,7 +739,7 @@ static void nextstate(struct gps_packet_t *lexer,
 	if ((c == '>') && (lexer->inbufptr[0] == '<') &&
 	    (lexer->inbufptr[1] == '!')){
 	    lexer->state = ITALK_RECOGNIZED;
-	    gpsd_report(LOG_PROG, "ITALK: trying to process runt packet\n");
+	    gpsd_report(LOG_IO, "ITALK: trying to process runt packet\n");
 	    break;
 	} else if (--lexer->length == 0)
 	    lexer->state = ITALK_DELIVERED;
@@ -832,7 +832,7 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 #ifdef STATE_DEBUG
 	gpsd_report(LOG_RAW+1, "Packet type %d accepted %zu = %s\n",
 	    packet_type, packetlen,
-	    gpsd_hexdump_wrapper(lexer->outbuffer, lexer->outbuflen, LOG_RAW));
+	    gpsd_hexdump_wrapper(lexer->outbuffer, lexer->outbuflen, LOG_IO));
 #endif /* STATE_DEBUG */
     } else {
 	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %zu\n",
