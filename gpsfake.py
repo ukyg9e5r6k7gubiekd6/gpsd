@@ -86,11 +86,10 @@ class TestLoadError(exceptions.Exception):
 
 class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
-    def __init__(self, logfp, predump=False, verbose=False):
+    def __init__(self, logfp, predump=False):
         self.sentences = []	# This and .packtype are the interesting bits
         self.logfp = logfp
         self.predump = predump
-        self.verbose = verbose
         self.logfile = logfp.name
         self.type = None
         self.serial = None
@@ -179,8 +178,6 @@ class TestLoad:
         else:
             sys.stderr.write("gpsfake: unknown log type (not NMEA or SiRF) can't handle it!\n")
             self.sentences = None
-        if self.verbose:
-            print self.sentences
     def packet_get(self):
         "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
         if self.first == '':
@@ -268,12 +265,13 @@ class FakeGPS:
     "A fake GPS is a pty with a test log ready to be cycled to it."
     def __init__(self, logfp,
                  speed=4800, databits=8, parity='N', stopbits=1,
-                 verbose=False, predump=False):
-        self.verbose = verbose
+                 predump=False, reporter=None):
+        self.reporter = reporter
         self.go_predicate = lambda: True
         self.readers = 0
         self.index = 0
         self.speed = speed
+        self.name = None
         baudrates = {
             0: termios.B0,
             50: termios.B50,
@@ -298,7 +296,8 @@ class FakeGPS:
         speed = baudrates[speed]	# Throw an error if the speed isn't legal
         if type(logfp) == type(""):
             logfp = open(logfp, "r");            
-        self.testload = TestLoad(logfp, predump, verbose=self.verbose>=2)
+        self.name = logfp.name
+        self.testload = TestLoad(logfp, predump)
         # FIXME: explicit arguments should probably override this
         #if self.testload.serial:
         #    (speed, databits, parity, stopbits) = self.testload.serial
@@ -343,6 +342,8 @@ class FakeGPS:
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
         os.write(self.master_fd, line)
+        if self.reporter:
+            self.reporter("%s feeds %d=%s\n" % (self.name, len(line), `line`))
         time.sleep((WRITE_PAD * len(line)) / self.speed)
         self.index += 1
 
@@ -482,7 +483,8 @@ class TestSession:
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
-            newgps = FakeGPS(logfile, speed=speed, verbose=self.verbose, predump=self.predump)
+            newgps = FakeGPS(logfile, speed=speed, predump=self.predump,
+                             reporter=self.reporter)
             if pred:
                 newgps.go_predicate = pred
             elif self.default_predicate:
