@@ -454,10 +454,11 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 	    chunklen = chunkend - chunk + 1;
 
 	if (debuglevel >= 3) {
-	    if (isprint(chunk[0]))
-		gpsd_report(LOG_IO, "=> client(%d): %s", sub_index(sub), chunk);
-	    else {
-		char *cp, chunk2[MAX_PACKET_LENGTH*3];
+	    char *cp, chunk2[MAX_PACKET_LENGTH*3];
+	    if (isprint(chunk[0])) {
+		(void)strlcpy(chunk2, chunk, chunklen);
+		gpsd_report(LOG_IO, "=> client(%d): %s", sub_index(sub), chunk2);
+	    } else {
 		chunk2[0] = '\0';
 		for (cp = chunk; cp < chunk + chunklen; cp++)
 		    (void)snprintf(chunk2 + strlen(chunk2),
