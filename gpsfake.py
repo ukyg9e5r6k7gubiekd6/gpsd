@@ -86,10 +86,11 @@ class TestLoadError(exceptions.Exception):
 
 class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
-    def __init__(self, logfp, predump=False):
+    def __init__(self, logfp, predump=False, verbose=False):
         self.sentences = []	# This and .packtype are the interesting bits
         self.logfp = logfp
         self.predump = predump
+        self.verbose = verbose
         self.logfile = logfp.name
         self.type = None
         self.serial = None
@@ -178,6 +179,8 @@ class TestLoad:
         else:
             sys.stderr.write("gpsfake: unknown log type (not NMEA or SiRF) can't handle it!\n")
             self.sentences = None
+        if self.verbose:
+            print self.sentences
     def packet_get(self):
         "Grab a packet.  Unlike the daemon's state machine, this assumes no noise."
         if self.first == '':
@@ -295,7 +298,7 @@ class FakeGPS:
         speed = baudrates[speed]	# Throw an error if the speed isn't legal
         if type(logfp) == type(""):
             logfp = open(logfp, "r");            
-        self.testload = TestLoad(logfp, predump)
+        self.testload = TestLoad(logfp, predump, verbose=self.verbose>=2)
         # FIXME: explicit arguments should probably override this
         #if self.testload.serial:
         #    (speed, databits, parity, stopbits) = self.testload.serial
