@@ -147,8 +147,8 @@ test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=
 
 if pipe:
     test.reporter = sys.stdout.write
-    if verbose:
-        test.progress = sys.stdout.write
+    #if verbose:
+    #    test.progress = sys.stdout.write
 
 try:
     try:
