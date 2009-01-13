@@ -468,7 +468,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 	}
 
 	status = write(sub->fd, chunk, chunklen);
-	if (status == chunklen) {
+	if ((size_t)status == chunklen) {
 	    continue;
 	}
 	else if (status > -1) {
