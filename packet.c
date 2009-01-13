@@ -875,7 +875,7 @@ static void character_discard(struct gps_packet_t *lexer)
 /* entry points begin here */
 
 void packet_parse(struct gps_packet_t *lexer)
-/* grab a packet; returns either BAD_PACKET or the length */
+/* grab a packet from the input buffer */
 {
     lexer->outbuflen = 0;
     while (packet_buffered_input(lexer) > 0) {
