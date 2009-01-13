@@ -70,7 +70,10 @@ if [ "$AC_ERROR" = "1" ]; then
 fi
 
 # Check libtool version
-LT_VERSION=`libtool --version | sed -n -e 's#[^0-9]* \([0-9]*\)\.\([0-9]*\).*$#\1 \2#p'`
+if [ -z "$LIBTOOL" ] ; then
+	LIBTOOL="libtool"
+fi
+LT_VERSION=`${LIBTOOL} --version | sed -n -e 's#[^0-9]* \([0-9]*\)\.\([0-9]*\).*$#\1 \2#p'`
 LT_V1=`echo $LT_VERSION | awk '{print $1}'`
 LT_V2=`echo $LT_VERSION | awk '{print $2}'`
 
@@ -93,9 +96,12 @@ if [ "$LT_ERROR" = "1" ]; then
 	tput sgr0
 fi
 
+if [ -z "$LIBTOOLIZE" ] ; then
+	LIBTOOLIZE="libtoolize"
+fi
 echo Configuring build environment for gpsd
 aclocal \
-  && libtoolize --force --copy \
+  && ${LIBTOOLIZE} --force --copy \
   && autoheader --force \
   && automake --add-missing --foreign --copy  --include-deps \
   && autoconf --force \
