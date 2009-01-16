@@ -126,11 +126,7 @@ def fakehook(linenumber, fakegps):
     if linedump and fakegps.testload.legend:
         ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
         if not fakegps.testload.textual:
-            if fakegps.testload.idoffset != None:
-                prefix = "type %02x " % ord(ml[fakegps.testload.idoffset])
-            else:
-                prefix = ''
-            ml = prefix + hexdump(ml)
+            ml = hexdump(ml)
         announce = fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
         if promptme:
             raw_input(announce + "? ")
