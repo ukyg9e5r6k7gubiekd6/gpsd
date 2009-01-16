@@ -230,6 +230,10 @@ class FakeGPS:
         time.sleep((WRITE_PAD * len(line)) / self.speed)
         self.index += 1
 
+    def drain(self):
+        "Wait for the associated device to drain (e.g. before closing)."
+        termios.tcdrain(self.master_fd)
+
 class DaemonError(exceptions.Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -380,6 +384,7 @@ class TestSession:
     def gps_remove(self, name):
         "Remove a simulated GPS from the daemon's search list."
         self.progress("gpsfake: gps_remove(%s)\n" % name)
+        self.fakegpslist[name].drain()
         self.remove(self.fakegpslist[name])
         self.daemon.remove_device(name)
         del self.fakegpslist[name]
