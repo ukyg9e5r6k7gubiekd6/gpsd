@@ -334,7 +334,7 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
-    CLOSE_DELAY = 1
+    CLOSE_DELAY = 3
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False):
         "Initialize the test session by launching the daemon."
         self.verbose = verbose
@@ -442,8 +442,8 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    # Delay a few seconds after a GPS source is exhauseted
-                    # to remove it.  This should give its subscribers time
+                    # Delay a few seconds after a GPS source is exhausted
+                    # before removing it.  This should give its subscribers time
                     # to get gpsd's response before we call cleanup()
                     if chosen.exhausted and (time.time() - chosen.exhausted > TestSession.CLOSE_DELAY):
                         self.remove(chosen)
