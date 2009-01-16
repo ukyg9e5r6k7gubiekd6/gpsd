@@ -29,7 +29,7 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do $python gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+		$do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
 		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
@@ -52,7 +52,7 @@ case $mode in
         echo "Testing super-raw mode..."
         for f in $*; do
             dir=`dirname $f`
-            $do $python gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
+            $do gpsfake -s 38400 -1 -b -p -r "r=2" $opts ${f} \
             | ./striplog -1 >$dir/test1.chk;
             $do ./striplog <$${f} >$dir/test2.chk;
             $do cmp $dir/test[12].chk;
@@ -61,7 +61,7 @@ case $mode in
     build)
 	echo "Rebuilding regressions..."
         for f in $*; do
-            $do $python gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
+            $do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
         done
         exit 0
         ;;
