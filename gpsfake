@@ -138,6 +138,8 @@ def fakehook(linenumber, fakegps):
 
 if progress:
     baton = Baton("Processing %s" % logfile, "done")
+else:
+    print >>sys.stderr, "Processing %s" % logfile
 
 test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, verbose=verbose, predump=predump)
 

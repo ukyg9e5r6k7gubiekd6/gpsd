@@ -8,10 +8,11 @@ PATH=.:$PATH
 export PATH
 
 mode=regress
-while getopts trbvo:n opt
+while getopts strbvo:n opt
 do
     case $opt in
-	t) mode=regress ;;	# Run regression tests
+	s) mode=regress ;;	# Run regression tests
+	t) opts="-b $opts" mode=regress ;;	# Run regression tests w/baton
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
 	b) mode=build ;;	# Rebuild regression check files
 	v) mode=view ;;		# View result of generating a check file
@@ -29,7 +30,7 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+		$do gpsfake -s 38400 -1 -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
 		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
