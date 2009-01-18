@@ -22,6 +22,9 @@ do
 done
 shift $(($OPTIND - 1))
 
+# Enables us to turn debugging up high without screwing up the diff checks
+GPSFILTER='^GPSD,X|^gpsd:|^gpsfake:|^GPS DATA'
+
 case $mode in
     regress)
         echo "Testing the daemon..."
@@ -30,7 +33,7 @@ case $mode in
             dir=`dirname $f`
 	    if [ -r $f.chk ]
 	    then
-		$do gpsfake -s 38400 -1 -p $opts ${f} | grep -v "^GPSD,X" >$dir/test.chk;
+		$do gpsfake -s 38400 -1 -p $opts ${f} | egrep -v "${GPSFILTER}" >$dir/test.chk;
 		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
@@ -62,7 +65,7 @@ case $mode in
     build)
 	echo "Rebuilding regressions..."
         for f in $*; do
-            $do gpsfake -s 38400 -1 -b -p $opts ${f} | grep -v "^GPSD,X" >${f}.chk;
+            $do gpsfake -s 38400 -1 -b -p $opts ${f} | egrep -v "${GPSFILTER}" >${f}.chk;
         done
         exit 0
         ;;
