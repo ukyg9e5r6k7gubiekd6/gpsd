@@ -45,10 +45,7 @@ run with -N, so the output will go to stderr (along with, for example,
 Valgrind notifications).
 
 Each FakeGPS instance tries to packetize the data from the logfile it
-is initialized with.  It looks for packet headers associated with common
-packet types such as NMEA, SiRF, TSIP, and Zodiac.  Additionally, the Type
-header in a logfile can be used to force the packet type, notably to RTCM
-which is fed to the daemon character by character,
+is initialized with. It uses the same packet-getter as the daeomon.
 
 The TestSession code maintains a run queue of FakeGPS and gps.gs (client-
 session) objects. It repeatedly cycles through the run queue.  For each
