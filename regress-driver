@@ -8,6 +8,7 @@ PATH=.:$PATH
 export PATH
 
 mode=regress
+opts=""
 while getopts strbvo:n opt
 do
     case $opt in
@@ -16,7 +17,7 @@ do
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
 	b) mode=build ;;	# Rebuild regression check files
 	v) mode=view ;;		# View result of generating a check file
-	o) opts="$OPTARG" ;;	# Pass options to gpsfake
+	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
 	n) do=echo ;;		# Just echo commands, don't do them
     esac
 done
@@ -34,7 +35,10 @@ case $mode in
 	    if [ -r $f.chk ]
 	    then
 		$do gpsfake -s 38400 -1 -p $opts ${f} | egrep -v "${GPSFILTER}" >$dir/test.chk;
-		if $do diff -ub ${f}.chk $dir/test.chk; then :; else
+		$do sed <$dir/test.chk >$dir/test-trunc.chk -e '$d'
+		diff -ub ${f}.chk $dir/test.chk >$dir/diff
+		diff -ub ${f}.chk $dir/test-trunc.chk >>$dir/diff
+		if test -s $dir/diff; then :; else
 		    errors=`expr $errors + 1`;
 		fi;
 	    else
@@ -65,7 +69,7 @@ case $mode in
     build)
 	echo "Rebuilding regressions..."
         for f in $*; do
-            $do gpsfake -s 38400 -1 -b -p $opts ${f} | egrep -v "${GPSFILTER}" >${f}.chk;
+            gpsfake -s 38400 -1 -b -p $opts ${f} | egrep -v "${GPSFILTER}" >${f}.chk;
         done
         exit 0
         ;;
