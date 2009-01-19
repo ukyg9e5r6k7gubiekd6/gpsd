@@ -182,7 +182,7 @@ static bool sirf_to_nmea(int ttyfd, speed_t speed)
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
-    if (mode == 0) {
+    if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate);
 	session->gpsdata.driver_mode = 0;	/* NMEA */
 	(void)gpsd_switch_driver(session, "Generic NMEA");

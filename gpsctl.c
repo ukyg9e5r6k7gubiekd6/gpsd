@@ -319,7 +319,7 @@ int main(int argc, char **argv)
 	gpsd_set_speed(&session, 4800, 'N', 1);
 	for (i = 0; i < 3; i++)
 	    if (session.device_type->mode_switcher)
-		session.device_type->mode_switcher(&session, 0);
+		session.device_type->mode_switcher(&session, MODE_NMEA);
 	gpsd_wrap(&session);
 	exit(0);
     } else {
@@ -409,7 +409,7 @@ int main(int argc, char **argv)
 		if (session.gpsdata.driver_mode == 0)
 		    (void)fprintf(stderr, "gpsctl: already in NMEA mode.\n");
 		else {
-		    session.device_type->mode_switcher(&session, 0);
+		    session.device_type->mode_switcher(&session, MODE_NMEA);
 		    if (session.gpsdata.driver_mode != 0) {
 			(void)fprintf(stderr, "gpsctl: mode change failed\n");
 			status = 1;
@@ -421,7 +421,7 @@ int main(int argc, char **argv)
 		    (void)fprintf(stderr, "gpsctl: already in native mode.\n");
 		    session.back_to_nmea = false;
 		} else {
-		    session.device_type->mode_switcher(&session, 1);
+		    session.device_type->mode_switcher(&session, MODE_BINARY);
 		    if (session.gpsdata.driver_mode != 1) {
 			(void)fprintf(stderr, "gpsctl: mode change failed\n");
 			status = 1;
