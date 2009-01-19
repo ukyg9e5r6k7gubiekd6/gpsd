@@ -508,7 +508,7 @@ He says it's "Software Version 3.70".
 <td>No</td>
 <td>SiRFstarIII</td>
 <td>USB</td>
-<td>*</td>
+<td></td>
 <td>3.0</td>
 <td>This device does not have real-time data output, and is incompatible with GPSD</td>
 </tr>
@@ -637,13 +637,14 @@ states incorrectly that VTG is off by default.</td>
 
 <!-- Begin Haicom HI-303S -->
 <tr>
-<td><a href="http://www.haicom.com.tw/gps303s.shtml">HI-303S</a></td>
+<td><a href='http://www.haicom.com.tw/gps303s.shtml'>HI-303S</a></td>
 <td>Good</td>
 <td>SiRFstarII</td>
 <td>RS232</td>
 <td>2.25</td>
 <td>2.2</td>
-<td>From Denis Perchine &lt;dyp&#x40;perchine.com&gt;<br/>
+<td>
+From Denis Perchine &lt;dyp&#x40;perchine.com&gt;<br/> Discontinued.
 NMEA works, but SiRF binary does not. This device seems to ignore the
 $PSRF100 mode switch command. (SiRF binary may be available on the
 auxiliary serial port, but this is unconfirmed.) This device ships
@@ -653,14 +654,16 @@ with XTrac Firmware.</td>
 
 <!-- Begin Haicom HI-305N -->
 <tr>
-<td><a href="http://www.haicom.com.tw/gps303s.shtml">HI-303S</a></td>
+<td><a href='http://www.haicom.com.tw/'>HI-305N</a></td>
 <td>Good</td>
-<td>SiRFstarII</td>
+<td>Nemerix</td>
 <td>CF</td>
 <td>*</td>
-<td>?</td>
-<td>Adaptors for RS232, USB, and Bluetooth operation are available.
-Reported by David Findlay &lt;dave&#x40;davsoft.com.au&gt;</td>
+<td>3.01</td>
+<td>
+Adaptors for RS232, USB, and Bluetooth operation are available.
+Reported by David Findlay &lt;dave&#x40;davsoft.com.au&gt;
+</td>
 </tr>
 <!-- End Haicom HI-3035N -->
 
@@ -674,7 +677,7 @@ Reported by David Findlay &lt;dave&#x40;davsoft.com.au&gt;</td>
 <td>RS232</td>
 <td>*</td>
 <td>2.2</td>
-<td> Reported by  Patrick L. McGillan &lt;pmcgillan&#x40;pateri.com&gt;.</td>
+<td> Discontinued. Reported by  Patrick L. McGillan &lt;pmcgillan&#x40;pateri.com&gt;.</td>
 </tr>
 <!-- End Holux GM-210 -->
 
@@ -688,7 +691,8 @@ Reported by David Findlay &lt;dave&#x40;davsoft.com.au&gt;</td>
 <td>2.2</td>
 <td>4 color LED showing: Bluetooth, Navigation Update and Battery and
 Charger Status Indication. FLASH based program memory. Firmware upgradeable
-through serial interface. Water resistant.</td>
+through serial interface. Water resistant.
+</td>
 </tr>
 <!-- End Holux GR-230 -->
 
@@ -716,7 +720,7 @@ Reported by "K&eacute;vin Redon" &lt;kevredon&#x40;gmail.com&gt;
 
 <!-- Begin Holux GR-239 -->
 <tr>
-<td>Holux GR-239</td>
+<td><a href='http://www.holux.com/JCore/en/support/DLF.jsp?DLU=http://www1.holux.com.tw:8080/JCore/UploadFile/79754.pdf'>Holux GR-239</a></td>
 <td>Poor</td>
 <td>SiRFstarIII</td>
 <td>Bluetooth</td>
@@ -736,11 +740,13 @@ Requires -b option.
 <td>Bluetooth and USB (CP2101)</td>
 <td>2.37</td>
 <td>3.01</td>
-<td>gpsd crashes the device when autoprobing @ baud rate 9600 (unless
+<td>
+gpsd crashes the device when autoprobing @ baud rate 9600 (unless
 '-b'/broken-device-safety is enabled - need to unplug/reset the device).
 'stty -F /dev/ttyUSB1 ispeed 38400' helps avoiding too much autoprobing -
 though stty complains about not being able to perform all requested
-operations. Reported by Roland Ager &lt;roland.ager&#x40;gmx.de&gt;</td>
+operations. Reported by Roland Ager &lt;roland.ager&#x40;gmx.de&gt;
+</td>
 </tr>
 <!-- End Holux M-241 -->
 
@@ -755,7 +761,8 @@ operations. Reported by Roland Ager &lt;roland.ager&#x40;gmx.de&gt;</td>
 <td>Bluetooth</td>
 <td>2.28</td>
 <td>?</td>
-<td>The product page points at a retail site carrying these because
+<td>
+The product page points at a retail site carrying these because
 the vendor site is in Japanese only.
 This GPS emits a weirdly broken GSA sentence that crashed gpsd versions prior
 to 2.28. Serial parameters default to 38400; 8, N, 1.
@@ -769,16 +776,17 @@ Reported by Lance Fetters &lt;ashikase&#x40;users.sourceforge.net&gt;
 
 <!-- Begin Magellan EC-10X -->
 <tr>
-<td>EC-10X</td>
+<td><a href='http://www.herman-nelson.com/itemInfo.cfm?itemID=205'>EC-10X</a></td>
 <td>Good</td>
 <td>Old Rockwell (Jupiter?)</td>
 <td>RS232</td>
-<td>2.24</td>
+<td>*</td>
 <td>?</td>
 <td>
-It was cool in its day, now it's a dinosaur mainly good for regression
-testing. NMEA time is accurate to about 500mS.
-Reported by Gary E. Miller &lt;gem&#x40;rellim.com&gt;.</td>
+Discontinued. It was cool in its day, now it's a dinosaur mainly good
+for regression testing. NMEA time is accurate to about 500mS.
+Reported by Gary E. Miller &lt;gem&#x40;rellim.com&gt;.
+</td>
 </tr>
 <!-- End Magellan EC-10X -->
 
@@ -790,14 +798,15 @@ Reported by Gary E. Miller &lt;gem&#x40;rellim.com&gt;.</td>
 <td>RS232</td>
 <td>2.21</td>
 <td>v1.5 APA, v1.5 XTE, v2.1 GSA</td>
-<td>Reported by Chris S. Newell &lt;chris&#x40;newellfamily.net&gt;</td>
+<td>
+Reported by Chris S. Newell &lt;chris&#x40;newellfamily.net&gt;
+</td>
 </tr>
 <!-- End Magellan Meridian Platinum -->
 
 <!--  Begin eXplorist 210 -->
 <tr>
-<td>
-<a href='http://www.magellangps.com/assets/manuals/newprod/eXplorist%20210_US.pdf'>eXplorist 210</a></td>
+<td><a href='http://www.magellangps.com/assets/manuals/newprod/eXplorist%20210_US.pdf'>eXplorist 210</a></td>
 <td>Good</td>
 <td>Unknown</td>
 <td>USB</td>
@@ -822,7 +831,6 @@ under &lt;NMEA Data Comm&gt;.  Reported by paul van den berg
 <td><a href='http://pro.magellangps.com/en/products/product.asp?PRODID=1003'>AC12</a></td>
 <td>Good</td>
 <td><a href='ftp://ftp.magellangps.com/OEM,%20Sensor%20&%20ADU/A12,%20%20B12,%20&%20AC12/Reference%20Material/A12,%20B12%20&%20AC12%20RM%20rev%20E.pdf'>AC12</a></td>
-
 <td>TTL</td>
 <td>*</td>
 <td>3.0</td>
@@ -837,16 +845,19 @@ Reported by Chris Kuethe
 
 <!-- Begin Motorola Oncore -->
 <tr>
-<td><a href='http://www.synergy-gps.com/Mot_Manuals.html'>Oncore GT+</a></td>
+<td><a href='http://www.tapr.org/gps_oncorevp.html'>Oncore GT+</a></td>
 <td>Good</td>
 <td>Motorola</td>
 <td>RS232 or TTL</td>
 <td>2.20</td>
 <td>2.2</td>
-<td>The Motorola Oncore product family has been discontinued.
+<td>
+The Motorola Oncore product family has been discontinued.
 RTCM input, no WAAS. In binary mode can deliver differential correction for
 another Oncore GT+. Similar Motorola Oncore UT timing receiver has less
-functions but better timing accuracy. Reported by Wojciech Kazubski &lt;wk&#x40;ire.pw.edu.pl&gt;.</td>
+functions but better timing accuracy. Reported by Wojciech Kazubski
+&lt;wk&#x40;ire.pw.edu.pl&gt;.
+</td>
 </tr>
 <!-- End Motorola Oncore -->
 
@@ -858,7 +869,9 @@ functions but better timing accuracy. Reported by Wojciech Kazubski &lt;wk&#x40;
 <td>Bluetooth</td>
 <td>2.35</td>
 <td>?</td>
-<td>Reported by Olivier Lahaye &lt;olivier.lahaye&#x40;free.fr&gt;.</td>
+<td>
+Reported by Olivier Lahaye &lt;olivier.lahaye&#x40;free.fr&gt;.
+</td>
 </tr>
 <!-- End Motorola T805 -->
 
@@ -872,7 +885,11 @@ functions but better timing accuracy. Reported by Wojciech Kazubski &lt;wk&#x40;
 <td>RS232, Bluetooth, Radio (untested)</td>
 <td>2.35</td>
 <td>?</td>
-<td>Reported by Diego Berge (<a href="http://www.nippur.net/survey/xuc/contact" title="Contact page for D. Berge" hreflang="ca">contact</a>)</td>
+<td>3.0</td>
+Reported by Diego Berge (<a
+href="http://www.nippur.net/survey/xuc/contact" title="Contact page
+for D. Berge" hreflang="ca">contact</a>)
+</td>
 </tr>
 <!-- End Navcom SF-2040G -->
 
@@ -880,13 +897,14 @@ functions but better timing accuracy. Reported by Wojciech Kazubski &lt;wk&#x40;
 
 <!-- Begin Navisky NSA-U3 -->
 <tr>
-<td><a href="http://www.navisky.com/nsa_u3.htm">NSA U3</a></td>
+<td><a href='http://www.navisky.com/nsa_u3.htm'>NSA U3</a></td>
 <td>Excellent</td>
 <td>SiRFstarII</td>
 <td>USB (PL2303)</td>
 <td>2.24</td>
 <td>2.x</td>
-<td>Included with Rand McNally's horrible Windows navigation software.
+<td>
+Included with Rand McNally's horrible Windows navigation software.
 Reported by Jeff Francis &lt;jeff&#x40;gritch.org&gt;
 </td>
 </tr>
@@ -896,13 +914,14 @@ Reported by Jeff Francis &lt;jeff&#x40;gritch.org&gt;
 
 <!-- Begin NaviLock NL-209PU -->
 <tr>
-<td><a href="http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61371_NL-209PU.html?show=spec">NL-209P</a></td>
+<td><a href='http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61371_NL-209PU.html?show=spec'>NL-209P</a></td>
 <td>Good</td>
 <td>Sony CXD2951</td>
 <td>Serial. Includes USB (PL2303) adapter</td>
 <td>2.35</td>
 <td>2.2</td>
-<td>When running, need to use the -b option, else the device will hang
+<td>
+When running, need to use the -b option, else the device will hang
 during GPSD's probing phase and it needs to be unplugged and reinserted.
 To use this device with NTPd, set the the "fudge" factor to 0.840. There
 is no known PPS signal associated with this device.
@@ -917,33 +936,31 @@ Reported by Jason Curl &lt;jcurlnews&#x40;arcor.de&gt;
 
 <!-- Begin NaviLock NL-302U -->
 <tr>
-<td><a href="http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61422_NL-302U.html?show=spec">NL-302U</a></td>
+<td><a href='http://www.navilock.de/produkte/gruppen/3/Kabel_Empfaenger/61422_NL-302U.html?show=spec'>NL-302U</a></td>
 <td>Good</td>
 <td>SirfStar III (GSW3.2.4_3.1.00.12-SDK003P1.00a)
 </td>
 <td>USB (PL2303)</td>
 <td>2.34</td>
 <td>?</td>
-<td>
 <code>gpsprof</code> output can be found <a href="http://www.drbeat.li/album/-Diverses/GPS/Navilock+NL-302U">here</a>.
 Reported by Beat Bolli &lt;me+gpsd&#x40;drbeat.li&gt;
 </td>
 </tr>
 <!-- End NaviLock NL-302U -->
 
-<tr><td style='text-align:center;' colspan="7"><a href='http://www.navman.com/'>Navman</a></tr>
+<tr><td style='text-align:center;' colspan="7"><a href='http://www.navman.com/w'>Navman</a></tr>
 
 <!-- Begin Navman Jupiter 20 -->
 <tr>
-<td>
-<a href='http://www.navman.com/Navman/Templates/productinformation____15665.aspx'>Jupiter 20</a>
-</td>
+<td><a href='http://www.navman.com/Navman/Templates/productinformation____15665.aspx'>Jupiter 20</a></td>
 <td>Good</td>
 <td>Jupiter 20 (SiRFstarII), Jupiter 21DR Firmware</td>
 <td>RS232</td>
 <td>2.32</td>
 <td>2.2</td>
-<td>Not a complete GPS, but a chipset. It's running with an external
+<td>
+Not a complete GPS, but a chipset. It's running with an external
 gyro on a our self-developed board. Reported by Andreas Stricker
 &lt;andreas.stricker&#x40;fela.ch&gt;
 </td>
