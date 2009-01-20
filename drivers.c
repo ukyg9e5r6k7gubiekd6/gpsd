@@ -286,7 +286,7 @@ static void garmin_nmea_configurator(struct gps_device_t *session, unsigned int 
 	/* reset some config, AutoFix, WGS84, PPS 
 	 * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz 
          * with a 160ms low state.
-        1 * NOTE: new PPS only takes effect after next power cycle
+         * NOTE: new PPS only takes effect after next power cycle
          */
 	(void)nmea_send(session, "$PGRMC,A,,100,,,,,,A,,1,2,1,30");
 	break;
