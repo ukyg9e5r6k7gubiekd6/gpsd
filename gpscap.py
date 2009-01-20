@@ -90,10 +90,15 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
                 ofp.write("<td>%s</td>\n" % dev)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
-                ofp.write("<td>%s</td>\n" % self.get(dev, "engine"))
+                engine = self.get(dev, "engine")
+                if self.has_option(engine, "reference"):
+                    engine = "<a href='%s'>%s</a>" % (self.get(engine, "reference"), engine)
+                if self.has_option(dev, "subtype"):
+                    engine += " (" + self.get(dev, "subtype") + ")"
+                ofp.write("<td>%s</td>\n" % engine)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "interfaces"))
                 tested = ""
-                if self.has_option(dev, "broken"):
+                if self.get(dev, "status") == "broken":
                     tested = "Broken"
                 elif self.get(dev, "tested") == "regression":
                     tested = "*"

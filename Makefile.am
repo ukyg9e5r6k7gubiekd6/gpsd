@@ -34,7 +34,7 @@ sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid_test
 if HAVE_PYTHON
 dist_bin_SCRIPTS = gpsprof gpsfake gpscat
-python_PYTHON = gps.py gpsfake.py
+python_PYTHON = gps.py gpsfake.py gpscap.py
 nodist_python_PYTHON = gpspacket.so gpslib.so
 PYTHONPAGES = gpsprof.1 gpsfake.1 gpscat.1
 endif
