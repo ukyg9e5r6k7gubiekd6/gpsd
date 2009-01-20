@@ -96,7 +96,10 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "subtype"):
                     engine += " (" + self.get(dev, "subtype") + ")"
                 ofp.write("<td>%s</td>\n" % engine)
-                ofp.write("<td>%s</td>\n" % self.get(dev, "interfaces"))
+                interfaces = self.get(dev, "interfaces")
+                if self.has_option(dev, "pps"):
+                    interfaces += ",PPS"
+                ofp.write("<td>%s</td>\n" % interfaces)
                 tested = ""
                 if self.get(dev, "status") == "broken":
                     tested = "Broken"
