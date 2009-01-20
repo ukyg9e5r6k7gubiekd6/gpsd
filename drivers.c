@@ -153,7 +153,9 @@ gps_mask_t nmea_parse_input(struct gps_device_t *session)
 
 static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 {
-    gpsd_report(LOG_WARN, "=> Probing device subtype %d\n", seq);
+    /* change this guard if the probe count goes up */ 
+    if (seq <= 8)
+	gpsd_report(LOG_WARN, "=> Probing device subtype %d\n", seq);
     /*
      * The reason for splitting these probes up by packet sequence
      * number, interleaving them with the first few packet receives,
@@ -215,13 +217,13 @@ static void nmea_probe_subtype(struct gps_device_t *session, unsigned int seq)
 #endif /* ITRAX_ENABLE */
 #ifdef GPSCLOCK_ENABLE
     case 5:
-	/* probe for Furuno Electric GH-79L4-N (GPSClock) */
+	/* probe for Furuno Electric GH-79L4-N (GPSClock); expect $PFEC,GPssd */
 	(void)nmea_send(session, "$PFEC,GPsrq");
 	break;
 #endif /* GPSCLOCK_ENABLE */
 #ifdef ASHTECH_ENABLE
     case 6:
-	/* probe for Ashtech -- expect $PASHR */
+	/* probe for Ashtech -- expect $PASHR,RID */
 	(void)nmea_send(session, "$PASHQ,RID");
 	break;
 #endif /* ASHTECH_ENABLE */
@@ -479,7 +481,7 @@ static void gpsclock_probe_subtype(struct gps_device_t *session, unsigned int se
 
 static struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
-    .trigger	    = "$PFEC,GPssd",	/* GPSclock should echo the probe */
+    .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
     .channels       = 12,		/* not used by this driver */
     .control_send   = nmea_write,	/* how to send control strings */
     .probe_wakeup   = NULL,		/* no wakeup to be done before hunt */
