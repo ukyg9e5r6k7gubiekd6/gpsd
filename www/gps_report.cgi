@@ -26,7 +26,7 @@ do {
 if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
 	$ENV{'PATH'} = '/usr/bin:/bin';
-	open(M, '|mail -s "new gps report" ckuethe') ||
+	open(M, '|mail -s "new gps report" chris.kuethe@gmail.com gpsd-dev@berlios.de') ||
 		die "can't run mail: $!\n";
 	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n";
 	foreach $var ( qw(submitter vendor packaging model techdoc chipset
