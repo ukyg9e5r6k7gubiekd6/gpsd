@@ -11,7 +11,7 @@ use MIME::Base64;
 $query = new CGI;
 print $query->header;
 print $query->start_html(-title=>"GPS Reporting Form",
-			 -background=>"../htdocs/paper.gif");
+			 -background=>"../paper.gif");
 
 $output_sample_file = $query->param('output_sample');
 $output_sample_body = $query->param('output_sample_body');
@@ -26,17 +26,20 @@ do {
 if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	# handle successful upload...
 	$ENV{'PATH'} = '/usr/bin:/bin';
+#	my $t = time();
+#	open(M, "|mail -s 'new gps report $t' chris.kuethe\@gmail.com") ||
 	open(M, '|mail -s "new gps report" chris.kuethe@gmail.com gpsd-dev@berlios.de') ||
 		die "can't run mail: $!\n";
-	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n";
-	foreach $var ( qw(submitter vendor packaging model techdoc chipset
-                        firmware nmea interface testversion rating notes 
+	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
+	printf M ("[%s]\n", $query->param('model'));
+	foreach $var ( sort qw(submitter vendor packaging techdoc chipset
+                        firmware nmea interface tested rating btglitch notes 
                         location date interval leader sample_notes)){
 		$val = $query->param($var);
-		printf M ("%s: %s\n", $var, $val) if (defined($val) && $val);
+		printf M ("\t%s = %s\n", $var, $val) if (defined($val) && $val);
 	}
 	$output = encode_base64(decode_base64($output_sample_body));
-	printf M ("output_sample (base64 encoded):\n%s\n", $output);
+	printf M ("\noutput_sample (base64 encoded):\n%s\n", $output);
 	close(M);
 	print "new gps report accepted...\n";
 	exit(0);
@@ -121,14 +124,12 @@ on a car windshield.</li>
 <li>"chipset" is a bare chip or chips packaged for surface mount.</li>
 </ul>
 
-<p><em>Packaging:</em>
+<p><em>Packaging:</em><br>
 EOF
 
 print $query->radio_group(-name=>'packaging',
-			  -values=>['GPS mouse', 
-				    'handset', 'car mount', 'survey',
-				    'OEM module', 'chipset', 
-				    'other'],
+			  -values=>['GPS mouse', 'handset', 'car mount',
+				'survey', 'OEM module', 'chipset', 'other'],
 			  -default=>"GPS mouse",
 			  -linebreak=>'false');
 
@@ -199,7 +200,7 @@ like <code>r4595</code>.</p>
 
 EOF
 
-print "<em>Tested with:</em>",$query->textfield(-name=>"testversion",
+print "<em>Tested with:</em>",$query->textfield(-name=>"tested",
 						-size=>6);
 
 print <<EOF;
@@ -227,6 +228,11 @@ print $query->radio_group(-name=>'rating',
 			  -default=>"-",
 			  -labels=>\%labels,
 			  -linebreak=>'true');
+
+print "Does the device break if probed or speed switched? " .
+	$query->checkbox_group(-name=>'btglitch',
+			     -values=>['yes'],
+			     -defaults=>[]);
 
 print <<EOF;
 <hr/>
@@ -409,19 +415,29 @@ if ($query->param("interface")) {
 } else {
     print "No interface type specified.<br/>\n";
 }
-if ($query->param("testversion")) {
-    print "Tested with GPSD version <code>". escapeHTML($query->param("testversion")) ."</code><br/>\n";
+if ($query->param("tested")) {
+    print "Tested with GPSD version <code>". escapeHTML($query->param("tested")) ."</code><br/>\n";
 } else {
     print "No GPSD version specified.<br/>\n";
 }
+if ($query->param("rating")) {
+    print "GPSD compatibility is <code>". escapeHTML($query->param("rating")) ."</code><br/>\n";
+} else {
+    print "No GPSD compatiblity specified.<br/>\n";
+}
+if ($query->param("btglitch")) {
+    print "Device needs the 'bluetooth hack'<br>\n";
+} else {
+    print "Device doesn't need the 'bluetooth hack'<br>\n";
+}
+
+print "</td><td align='center'>";
+
 if ($query->param("notes")) {
     print "Technical notes have been entered.";
 } else {
     print "No technical notes.<br/>\n";
 }
-
-print "</td><td align='center'>";
-
 if ($query->param("location")) {
     print "Sample location <code>". escapeHTML($query->param("location")) ."</code><br/>\n";
 } else {
