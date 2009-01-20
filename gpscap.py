@@ -54,7 +54,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     raise ConfigParser.Error("%s has invalid vendor" % section)
 
     def HTMLDump(self, ofp):
-        thead = """<table border='1' style='font-size:small;'>
+        thead = """<table border='1' style='font-size:small;' bgcolor='#CCCCCC'>
 <tr>
 <th>Name</th>
 <th>Packaging</th>
@@ -75,7 +75,19 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     relevant.append(dev)
             relevant.sort()
             for dev in relevant:
-                ofp.write("<tr>\n")
+                rowcolor = "#FFFFFF"
+                if self.has_option(dev, "broken"):
+                    rowcolor = "Pink"
+                elif self.get(dev, "packaging") == "OEM module":
+                    rowcolor = "LimeGreen"
+                elif self.get(dev, "packaging") == "chipset":
+                    rowcolor = "LightYellow"
+                elif self.get(dev, "packaging") == "handset":
+                    rowcolor = "Cyan"
+                elif self.get(dev, "packaging") == "car mount":
+                    rowcolor = "DarkCyan"
+
+                ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
                 ofp.write("<td>%s</td>\n" % dev)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
                 ofp.write("<td>%s</td>\n" % self.get(dev, "engine"))
