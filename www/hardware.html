@@ -971,14 +971,15 @@ gyro on a our self-developed board. Reported by Andreas Stricker
 
 <!-- Begin Parrot CK3300 -->
 <tr>
-<td><a href="http://www.parrot.biz/uk/products/ck3300gps">CK3300</a></td>
+<td><a href='http://www.parrot.biz/uk/products/ck3300gps'>CK3300</a></td>
 <td>Good</td>
-<td>?</td>
+<td>Unknown</td>
 <td>Bluetooth</td>
 <td>2.35</td>
 <td>2.?</td>
-<td>Reported by Andy Brown &lt;andy&#x40;thebmwz3.co.uk&gt;<br/>
-In-car hands-free bluetooth phone and gps device. Outputs NMEA
+<td>
+Reported by Andy Brown &lt;andy&#x40;thebmwz3.co.uk&gt;<br/>
+In-car hands-free bluetooth phone and GPS device. Outputs NMEA
 that does not seem to be parsed by 2.33.</td>
 </tr>
 <!-- End Parrot CK3300 -->
@@ -987,13 +988,14 @@ that does not seem to be parsed by 2.33.</td>
 
 <!-- Begin Phonix BGR6205 -->
 <tr>
-<td><a href="http://www.phonix.it/html/catalogo_dettaglio.cfm?idProducts=E09B5AB7-BCDF-DF66-24853E2B4680AB2C">BGR6205</a></td>
+<td><a href='http://www.phonix.it/html/catalogo_dettaglio.cfm?idProducts=E09B5AB7-BCDF-DF66-24853E2B4680AB2C'>BGR6205</a></td>
 <td>Good</td>
 <td>SiRFstarII</td>
 <td>Bluetooth</td>
 <td>2.34</td>
 <td>2.2</td>
-<td>Reported by Sebastiano Zabert<br/>
+<td>
+Reported by Sebastiano Zabert<br/>
 As this is a bluetooth device, gpsd must either be run with "-b" or must
 be compiled with fixed port speed, as the bluetooth interface does not
 tolerate port speed changes at all.
@@ -1005,19 +1007,35 @@ tolerate port speed changes at all.
 
 <!-- Begin Pharos iGPS360 -->
 <tr>
-<td><a href="http://www.pharosgps.com/support/igps360_spec.htm">GPS-360</a></td>
+<td><a href='http://www.pharosgps.com/support/igps360_spec.htm'>GPS-360</a></td>
 <td>Good</td>
 <td>SiRFstarII</td>
 <td>USB (PL2303)</td>
 <td>*</td>
 <td>2.3</td>
-<td>Reported by Robert Pouliot &lt;krynos&#x40;saturnus.com&gt;<br/>
+<td>
+Reported by Robert Pouliot &lt;krynos&#x40;saturnus.com&gt;<br/>
 The Pharos comes with adaptors for SDIO, CF, USB and plain RS232. Usually
 ships with XTrac firmware. It is strongly recommended that this device not be
 flashed with a different firmware as all reflashed receivers tested thus far
-fail to work afterward. May come bundled with Microsoft Streets and Trips.</td>
+fail to work afterward. May come bundled with Microsoft Streets and Trips.
+</td>
 </tr>
 <!-- End Pharos iGPS360 -->
+
+<!-- Begin iGPS-500 / GPS-500 SiRF III -->
+<tr>
+<td><a href='http://www.pharosgps.com/products/proddetail.asp?prod=006_PB010_1.00&cat=141'>iGPS-500 / GPS-500 SiRF III</a></td>
+<td>Good</td>
+<td>SiRFStarIII + PL2303</td>
+<td>USB</td>
+<td>2.37</td>
+<td>?</td>
+<td>
+Reported by Aurelian Maga &lt;aurelianmaga&#x40;yahoo.com&gt;
+</td>
+</tr>
+<!-- End iGPS-500 / GPS-500 SiRF III -->
 
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.rikaline.com/gps_receiver.htm'>Rikaline</a></tr>
 
@@ -1045,7 +1063,7 @@ Reported by Olli Salonen &lt;olli&#x40;cabbala.net&gt;.</td>
 <td>2.20</td>
 <td>2.2</td>
 <td>
-The usb cable is a separate item to order. you can also order an
+The USB cable is a separate item to order. you can also order an
 rs232 cable or a pda cable. Reported by Koos van den Hout,
 &lt;koos&#x40;kzdoos.xs4all.nl&gt;
 </td>
@@ -1062,7 +1080,9 @@ rs232 cable or a pda cable. Reported by Koos van den Hout,
 <td>USB</td>
 <td>1.97</td>
 <td>2.2</td>
-<td>There's an RS232 variant as well, not yet tested.</td>
+<td>
+There's an RS232 variant as well, not yet tested.
+</td>
 </tr>
 <!-- End Royaltek Sapphire USB -->
 
@@ -1072,11 +1092,11 @@ rs232 cable or a pda cable. Reported by Koos van den Hout,
 <td>Poor</td>
 <td>Sirf GSC3f/LP</td>
 <td>USB (PL2303)</td>
-<td>2.32</td>
+<td>*</td>
 <td>3.0</td>
 <td>
-This is a GPS data logger with gmouse functionality. Before it can be
-used with gpsd, the gmouse functionality has to be switched on. That
+This is a GPS data logger with GPS mouse functionality. Before it can be
+used with gpsd, the mouse functionality has to be switched on. That
 can be done with Karsten Petersen's rgm3800py utility. The author of
 said tool has been very helpful to me by describing how to do that on
 the <a href="http://code.google.com/p/rgm3800py/wiki/GPSd">
@@ -1097,8 +1117,10 @@ Philipp Klenze &gt;hq.ks&#x40;web.de&lt;
 <td>UART</td>
 <td>2.0</td>
 <td>2.3</td>
-<td>Special gpsd support uses 8N2 and requests sentences that gpsd requires.
-OEM module only, not a retail product.</td>
+<td>
+Special gpsd support uses 8N2 and requests sentences that gpsd requires.
+OEM module only, not a retail product.
+</td>
 </tr>
 <!-- End San Jose Navigation FV-18 -->
 
@@ -1110,7 +1132,8 @@ OEM module only, not a retail product.</td>
 <td>UART</td>
 <td>2.34</td>
 <td>2.3</td>
-<td>OEM module, available in small quantities from Tri-M systems. The
+<td>
+OEM module, available in small quantities from Tri-M systems. The
 ANTARIS chipset is End-of-Life. This module works in NMEA mode; gpsd also
 supports the UBX binary protocol. Firmware updates are available from uBlox;
 the update is strongly recommended as it fixes a number of UBX bugs, and
@@ -1143,7 +1166,9 @@ Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.</td>
 <td>USB (PL2303)</td>
 <td>2.3</td>
 <td>2.x</td>
-<td>Advertises that it's waterproof.</td>
+<td>
+Advertises that it's waterproof.
+</td>
 </tr>
 <!-- End Techway TP-051 -->
 
@@ -1151,39 +1176,47 @@ Reported by  Angus Ainslie &lt;angusa&#x40;deltatee.com&gt;.</td>
 
 <!-- Begin Trimble Lassen SK -->
 <tr>
-<td><a href="http://www.trimble.com/lassensk2.shtml">Trimble Lassen SK</a></td>
+<td><a href='http://www.trimble.com/lassensk2.shtml'>Trimble Lassen SK</a></td>
 <td>Good</td>
 <td>Colossus RF ASIC, Scorpion DSP</td>
 <td>UART</td>
 <td>2.26</td>
 <td>2.1</td>
-<td>Reported by Rob Janssen.</td>
+<td>
+Reported by Rob Janssen.
+</td>
 </tr>
 <!-- End Trimble Lassen SK -->
 
 <!-- Begin Trimble Lassen iQ -->
 <tr>
-<td><a href="http://www.trimble.com/lasseniq.shtml">Trimble</a>
-    <a href="http://www.sparkfun.com/commerce/product_info.php?products_id=165">Lassen iQ</a></td>
+<td><a href='http://www.trimble.com/lasseniq.shtml'>Trimble</a>
+    <a href='http://www.sparkfun.com/commerce/product_info.php?products_id=165'>Lassen iQ</a></td>
 <td>Good</td>
 <td>Colossus RF ASIC, IO-C33 (Epson C33 RISC)</td>
 <td>USB (Silicon Labs CP2102)</td>
 <td>*</td>
 <td>3.0</td>
-<td>Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;</td>
+<td>
+Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;
+</td>
 </tr>
 <!-- End Trimble Lassen iQ -->
 
 <tr><td style='text-align:center;' colspan="7"><a href='http://www.tomtom.com/'>TomTom</a></tr>
+
 <!-- Begin TomTom Go910 -->
 <tr>
-<td>TomTom Go910</td>
+<td><a href='http://www.tomtom.com/products/product.php?ID=475&Category=0&Lid=4'>TomTom Go910</a></td>
 <td>No</td>
 <td>SiRFstarIII</td>
 <td>USB</td>
-<td>*</td>
+<td>&nbsp;</td>
 <td>None</td>
-<td>This device does not have real-time data output, and is incompatible with GPSD</td>
+<td>
+This device does not have real-time data output, and is incompatible
+with GPSD
+</td>
 </tr>
 <!-- End TomTom Go910 -->
 
@@ -1241,7 +1274,7 @@ Reported by Eric &lt;erpo41&#x40;gmail.com&gt;
 
 <!-- Begin Wintec WBT-200 -->
 <tr>
-<td><a href="http://www.wintec.com.tw/en/product_detail.php?pro_id=57">WBT-200</a></td>
+<td><a href='http://www.wintec.com.tw/en/product_detail.php?pro_id=57'>WBT-200</a></td>
 <td>Good</td>
 <td>Fastrax itrax3 (uNav)</td>
 <td>Bluetooth and USB (Silicon Laboratories CP2101)</td>
@@ -1258,7 +1291,7 @@ Reported by Chris Kuethe &lt;chris.kuethe&#x40;gmail.com&gt;
 
 <!-- Begin Wintec WBT-201 -->
 <tr>
-<td><a href="http://www.wintec.com.tw/en/product_detail.php?pro_id=65">WBT-201</a></td>
+<td><a href='http://www.wintec.com.tw/en/product_detail.php?pro_id=65'>WBT-201</a></td>
 <td>Good</td>
 <td>ANTARIS4</td>
 <td>Bluetooth and USB (Silicon Laboratories CP2101)</td>
@@ -1275,7 +1308,7 @@ Reported by Espen Talberg &lt;espental&#x40;gmail.com&gt;
 
 <!-- Begin Wintec WGM-300U -->
 <tr>
-<td><a href="http://www.wintec.com.tw/en/support_detail.php?cate_id=11&support_id=14">WGM-300U</a></td>
+<td><a href='http://www.wintec.com.tw/en/support_detail.php?cate_id=11&support_id=14'>WGM-300U</a></td>
 <td>Fair</td>
 <td>Sony CXD2951</td>
 <td>USB (Silicon Laboratories CP2101)</td>
@@ -1289,20 +1322,6 @@ gpsd. Reported by Ian Darwin &lt;ian&#x40;darwinsys.com&gt;
 </td>
 </tr>
 <!-- End Wintec WGM-300U -->
-
-<!-- Begin iGPS-500 / GPS-500 SiRF III -->
-<tr>
-<td><a href='http://www.pharosgps.com/products/proddetail.asp?prod=006_PB010_1.00&cat=141'>iGPS-500 / GPS-500 SiRF III</a></td>
-<td>Good</td>
-<td>SiRFStarIII + PL2303</td>
-<td>USB</td>
-<td>2.37</td>
-<td>?</td>
-<td>
-Reported by Aurelian Maga &lt;aurelianmaga&#x40;yahoo.com&gt;
-</td>
-</tr>
-<!-- End iGPS-500 / GPS-500 SiRF III -->
 
 <!--
 <tr>
