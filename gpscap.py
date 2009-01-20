@@ -37,11 +37,14 @@ class GPSDictionary(ConfigParser.RawConfigParser):
             elif self.get(section, "type") not in ("engine", "vendor", "device"):
                 raise ConfigParser.Error("%s has invalid type" % section)
         # Sanity check: All devices must point at a vendor object.
-        # Side effect: build the list of vendors.
+        # Side effect: build the lists of vendors and devices.
         self.vendors = []
+        self.devices = []
         for section in self.sections():
             if self.get(section, "type") == "vendor":
                 self.vendors.append(section)
+            if self.get(section, "type") == "device":
+                self.devices.append(section)
         self.vendors.sort()
         for section in self.sections():
             if self.get(section, "type") == "device":
@@ -49,5 +52,52 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     raise ConfigParser.Error("%s has no vendor" % section)
                 if self.get(section, "vendor") not in self.vendors:
                     raise ConfigParser.Error("%s has invalid vendor" % section)
+
+    def HTMLDump(self, ofp):
+        thead = """<table border='1' style='font-size:small;'>
+<tr>
+<th>Name</th>
+<th>Packaging</th>
+<th>Engine</th>
+<th>Interface</th>
+<th>Tested with</th>
+<th>NMEA version</th>
+<th width='50%'>Notes</th>
+</tr>
+"""
+        vhead = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
+        ofp.write(thead)
+        for vendor in self.vendors:
+            ofp.write(vhead % (self.get(vendor, "vendor_site"), vendor))
+            relevant = []
+            for dev in self.devices:
+                if self.get(dev, "vendor") == vendor:
+                    relevant.append(dev)
+            relevant.sort()
+            for dev in relevant:
+                ofp.write("<tr>\n")
+                ofp.write("<td>%s</td>\n" % dev)
+                ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
+                ofp.write("<td>%s</td>\n" % self.get(dev, "engine"))
+                ofp.write("<td>%s</td>\n" % self.get(dev, "interfaces"))
+                tested = ""
+                if self.has_option(dev, "broken"):
+                    tested = "Broken"
+                elif self.get(dev, "tested") == "regression":
+                    tested = "*"
+                else:
+                    tested = self.get(dev, "tested")
+                ofp.write("<td>%s</td>\n" % tested)
+                nmea = "&nbsp;"
+                if self.has_option(dev, "nmea"):
+                    nmea = self.get(dev, "nmea")
+                ofp.write("<td>%s</td>\n" % nmea)
+                ofp.write("<td>%s</td>\n" % self.get(dev, "notes"))
+                ofp.write("</tr>\n")
+        ofp.write("</table>\n")
+
+
 if __name__ == "__main__":
+    import sys
     d = GPSDictionary()
+    d.HTMLDump(sys.stdout)

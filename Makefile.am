@@ -333,7 +333,8 @@ EXTRA_DIST = \
 	setup.py \
 	packet_states.h \
 	libgps.pc.in \
-	libgpsd.pc.in
+	libgpsd.pc.in \
+	gpscap.ini
 
 CLEANFILES = $(BUILT_SOURCES) floattest *.core $(PYEXTENSIONS)
 
