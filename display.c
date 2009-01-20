@@ -228,7 +228,7 @@ draw_graphics(struct gps_data_t *gpsdata)
 }
 
 void
-redraw(Widget widget, XtPointer client_data, XtPointer call_data)
+redraw(Widget widget UNUSED, XtPointer client_data UNUSED, XtPointer call_data)
 {
 	XmDrawingAreaCallbackStruct *cbs =
 	    (XmDrawingAreaCallbackStruct *)call_data;
@@ -244,7 +244,7 @@ redraw(Widget widget, XtPointer client_data, XtPointer call_data)
 
 /*@ -usedef @*/
 void
-resize(Widget widget, XtPointer client_data, XtPointer call_data UNUSED)
+resize(Widget widget, XtPointer client_data UNUSED, XtPointer call_data UNUSED)
 {
 	GC gc;
 	XtVaGetValues(widget,

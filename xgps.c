@@ -617,13 +617,13 @@ build_gui(Widget toplevel)
 
 /* runs when there is no data for a while */
 static void
-handle_time_out(XtPointer client_data, XtIntervalId *ignored)
+handle_time_out(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 {
 	XmTextFieldSetString(text_10, "UNKNOWN");
 }
 
 static void
-handle_input(XtPointer client_data, int *source, XtInputId *id)
+handle_input(XtPointer client_data UNUSED, int *source UNUSED, XtInputId *id UNUSED)
 {
 	if (gps_poll(gpsdata) < 0) {
 		XtRemoveInput(gps_input);
@@ -802,7 +802,7 @@ get_resource(Widget w, char *name, char *default_value)
 /* runs when gps needs attention */
 /*@ -globstate -branchstate @*/
 void
-handle_gps(XtPointer client_data, XtIntervalId *ignored)
+handle_gps(XtPointer client_data UNUSED, XtIntervalId *ignored UNUSED)
 {
 	char *err_str = NULL;
 	char error[128];
@@ -899,13 +899,13 @@ err_dialog(Widget widget, char *s)
 }
 
 void
-dlg_callback(Widget dialog, XtPointer client_data, XtPointer call_data)
+dlg_callback(Widget dialog, XtPointer client_data UNUSED, XtPointer call_data UNUSED)
 {
     /*@i1@*/XtPopdown(XtParent(dialog));
 }
 
 void
-file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
+file_cb(Widget widget UNUSED, XtPointer client_data, XtPointer call_data UNUSED)
 {
 	uintptr_t item_no = (uintptr_t)client_data;
 
@@ -914,7 +914,7 @@ file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 }
 
 void
-help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
+help_cb(Widget widget UNUSED, XtPointer client_data, XtPointer call_data UNUSED)
 {
 	static Widget help, about;
 	Widget *dialog;
