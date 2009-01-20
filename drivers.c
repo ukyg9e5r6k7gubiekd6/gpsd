@@ -387,7 +387,7 @@ static struct gps_type_t ashtech = {
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .control_send   = nmea_write,	/* how to send control strings */
-    .probe_wakeup   = ashtech_ping,	/* no wakeup to be done before hunt */
+    .probe_wakeup   = ashtech_ping,	/* wakeup to be done before hunt */
     .probe_detect   = NULL,		/* no probe */
     .probe_subtype  = NULL,		/* to be sent unconditionally */
 #ifdef ALLOW_RECONFIGURE
