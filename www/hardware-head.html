@@ -119,9 +119,40 @@ affected GPSes catatonic.  See this <a
 href="upstream-bugs.html#bluetooth">bug warning</a> for a description
 of the problem.</p>
 
-<p>Devices marked with a <img src="discontinued.png"/> have been
-discontinued by their manufacturers.</p>
+<p>Icons used in the table:
 
+<ul>
+<li><img src="star.png"><img src="star.png"><img src="star.png"><img
+src="star.png"> marks devices with <b>Excellent</b> performance: gpsd
+recognizes the GPS rapidly and reliably, reports are complete and
+correct.</li>
+
+<li><img src="star.png"><img src="star.png"><img src="star.png"> marks
+devices with <b>Good</b> performance: <tt>gpsd</tt> has minor problems
+or lag recognizing the device, but reports are complete and
+correct.</li>
+
+<li><img src="star.png"><img src="star.png"> marks devices with
+<b>Fair</b> performance: reports have minor dropouts or problems,
+including occasional transient nonsense values.</li>
+
+<li><img src="star.png"> marks devices with <b>Poor</b> performance:
+reports frequently have values that are wrong or nonsense.</li>
+
+<li><img src="bomb.png"> marks devices which are <b>Broken</b>;
+gpsd frequently fails to recognize the device at all.</li>
+
+<li><img src="discontinued.png"/> marks devices that have been
+discontinued by their manufacturers.</li>
+
+<li><img src="regression.png"/> marks devices for which we have a
+regression-test load. These are checked on every release.</li>
+</ul></p>
+
+<p>Note that in most cases, poor ratings reflect problems not in
+<tt>gpsd</tt> but rather in the device design and firmware.</p>
+
+<!-- Note: The CGI lives offsite because Berlios blocks outbound mail --> 
 <p>Please help us extend this table with new devices by filling out 
 <a href="https://www.mainframe.cx/cgi-bin/gps_report.cgi">this form</a>.</p>
 

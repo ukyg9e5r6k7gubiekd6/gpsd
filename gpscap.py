@@ -76,9 +76,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
             relevant.sort()
             for dev in relevant:
                 rowcolor = "#FFFFFF"
-                if self.has_option(dev, "broken"):
-                    rowcolor = "Pink"
-                elif self.get(dev, "packaging") == "OEM module":
+                if self.get(dev, "packaging") == "OEM module":
                     rowcolor = "LimeGreen"
                 elif self.get(dev, "packaging") == "chipset":
                     rowcolor = "LightYellow"
@@ -88,7 +86,10 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     rowcolor = "DarkCyan"
 
                 ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
-                ofp.write("<td>%s</td>\n" % dev)
+                namefield = dev
+                if self.has_option(dev, "discontinued"):
+                    namefield = dev + "&nbsp;<img title='Device discontinued' src='discontinued.png'/>"
+                ofp.write("<td>%s</td>\n" % namefield)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
                 engine = self.get(dev, "engine")
                 if self.has_option(engine, "reference"):
@@ -100,14 +101,24 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "pps"):
                     interfaces += ",PPS"
                 ofp.write("<td>%s</td>\n" % interfaces)
-                tested = ""
-                if self.get(dev, "status") == "broken":
-                    tested = "Broken"
-                elif self.get(dev, "tested") == "regression":
-                    tested = "*"
-                else:
+                testfield = ""
+                if self.has_option(dev, "tested"):
                     tested = self.get(dev, "tested")
-                ofp.write("<td>%s</td>\n" % tested)
+                    if tested == "regression":
+                        testfield += "<img title='Have regression test' src='regression.png'>"
+                    else:
+                        testfield += tested
+                if self.get(dev, "status") == "excellent":
+                    testfield += "<img src='star.png'><img src='star.png'><img src='star.png'><img src='star.png'>"
+                elif self.get(dev, "status") == "good":
+                    testfield += "<img src='star.png'><img src='star.png'><img src='star.png'>"
+                elif self.get(dev, "status") == "fair":
+                    testfield += "<img src='star.png'><img src='star.png'>"
+                elif self.get(dev, "status") == "poor":
+                    testfield += "<img src='star.png'>"
+                elif self.get(dev, "status") == "broken":
+                    testfield += "<img title='Device is broken' src='bomb.png'>"
+                ofp.write("<td>%s</td>\n" % testfield)
                 nmea = "&nbsp;"
                 if self.has_option(dev, "nmea"):
                     nmea = self.get(dev, "nmea")
