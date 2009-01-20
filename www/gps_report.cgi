@@ -29,9 +29,9 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	open(M, '|mail -s "new gps report" ckuethe') ||
 		die "can't run mail: $!\n";
 	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n";
-	foreach $var ( qw(submitter vendor model techdoc chipset firmware nmea
-			interface testversion rating notes location date
-			interval leader sample_notes)){
+	foreach $var ( qw(submitter vendor packaging model techdoc chipset
+                        firmware nmea interface testversion rating notes 
+                        location date interval leader sample_notes)){
 		$val = $query->param($var);
 		printf M ("%s: %s\n", $var, $val) if (defined($val) && $val);
 	}
@@ -106,6 +106,32 @@ main page.
 EOF
 
 print $query->textfield(-name=>"techdoc", -size=>72);
+
+print <<EOF;
+<p>It is useful to have an indication of how the GPS is packaged.
+
+<ul>
+<li>A "GPS mouse" is a standalone sensor in a display-less case designed 
+be used as an outbard peripheral to a computer.</li>
+<li>A "handset" is a standalone GPS with a display and human-usable controls.</li>
+<li>A "car mount" is a hands-free unit with display designed for mounting 
+on a car windshield.</li>
+<li>A "survey" GPS is packaged for field-survey use.</li> 
+<li>An "OEM module" is an un-cased circuit board with edge connectors.</li>
+<li>"chipset" is a bare chip or chips packaged for surface mount.</li>
+</ul>
+
+<p><em>Packaging:</em>
+EOF
+
+print $query->radio_group(-name=>'packaging',
+			  -values=>['GPS mouse', 
+				    'handset', 'car mount', 'survey',
+				    'OEM module', 'chipset', 
+				    'other'],
+			  -default=>"GPS mouse",
+			  -linebreak=>'false');
+
 
 print <<EOF;
 <p>Please identify the GPS chipset and firmware version, if possible.  You
@@ -332,6 +358,11 @@ if ($query->param("vendor")) {
     print "Vendor is <code>". escapeHTML($query->param("vendor")) ."</code><br/>\n";
 } else {
     print "<span style='color:#ff0000;'>No vendor.</span><br/>\n";
+}
+if ($query->param("packaging")) {
+    print "Packaging type is <code>". escapeHTML($query->param("packaging")) ."</code><br/>\n";
+} else {
+    print "No packaging type specified.<br/>\n";
 }
 if ($query->param("model")) {
     print "Model is <code>". escapeHTML($query->param("model")) ."</code><br/>\n";
