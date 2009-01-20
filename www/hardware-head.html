@@ -1,0 +1,131 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Eric Raymond">
+   <meta name="Description" content="Hardware known to work with GPSD.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <title>Compatible GPSes</title>
+   <link rel="stylesheet" href="main.css" type="text/css"/>
+</head>
+
+<div id="Header">Compatible Hardware</div>
+
+<div id="Menu">
+    <img src="gpsd-logo-small.png"/><br />
+    <a href="index.html">Home</a><br/>
+    <a href="index.html#news">News</a><br/>
+    <a href="index.html#downloads">Downloads</a><br/>
+    <a href="index.html#mailing-lists">Mailing lists</a><br/>
+    <a href="index.html#documentation">Documentation</a><br/>
+    <a href="faq.html">FAQ</a><br/>
+    <a href="xgps-sample.html">Screenshots</a><br/>
+    <a href="index.html#recipes">Recipes</a><br/>
+    <a href="index.html#others">Other GPSDs</a><br/>
+    Hardware</a><br/>
+    <a href="for-vendors.html">For GPS Vendors</a><br/>
+    <a href="wishlist.html">Wish List</a><br/>
+    <a href="hall-of-shame.html">Hall of Shame</a><br/>
+    <a href="hacking.html">Hacker's Guide</a><br/>
+    <a href="references.html">References</a><br/>
+    <a href="history.html">History</a><br/>
+
+    <div>&nbsp;</div>
+
+    <a href='http://www.catb.org/hacker-emblem/'><img
+    src='http://www.catb.org/hacker-emblem/glider.png'
+    alt='hacker emblem' /></a><br />
+
+    <hr/>
+    <script type="text/javascript"><!--
+    google_ad_client = "pub-1458586455084261";
+    google_ad_width = 160;
+    google_ad_height = 600;
+    google_ad_format = "160x600_as";
+    google_ad_type = "text";
+    google_ad_channel = "";
+    //--></script>
+    <script type="text/javascript"
+      src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+    <hr/>
+
+    <a href="http://validator.w3.org/check/referer"><img
+          src="http://www.w3.org/Icons/valid-xhtml10"
+          alt="Valid XHTML 1.0!" height="31" width="88" /></a>
+
+</div>
+<div id="Content">
+
+<div style="text-align: center;">
+<div style="text-align: left; margin: 1em auto; width: 50%;">
+<span>Search for hardware information here:</span>
+
+<!-- SiteSearch Google -->
+<form method="get" action="http://www.google.com/custom" target="_top">
+<table border="0" bgcolor="#ffffff">
+<tr><td nowrap="nowrap" valign="top" align="left" height="32">
+<a href="http://www.google.com/">
+<img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="middle"></img></a>
+</td>
+<td nowrap="nowrap">
+<input type="hidden" name="domains" value="gpsd.berlios.de"></input>
+<input type="text" name="q" size="31" maxlength="255" value=""></input>
+<input type="submit" name="sa" value="Search"></input>
+</td></tr>
+<tr>
+<td>&nbsp;</td>
+<td nowrap="nowrap">
+<table>
+<tr>
+<td>
+<input type="radio" name="sitesearch" value=""></input>
+<font size="-1" color="#000000">Web</font>
+</td>
+<td>
+<input type="radio" name="sitesearch" value="gpsd.berlios.de"  checked="checked"></input>
+<font size="-1" color="#000000">gpsd.berlios.de</font>
+</td>
+</tr>
+</table>
+<input type="hidden" name="client" value="pub-1458586455084261"></input>
+<input type="hidden" name="forid" value="1"></input>
+<input type="hidden" name="ie" value="ISO-8859-1"></input>
+<input type="hidden" name="oe" value="ISO-8859-1"></input>
+<input type="hidden" name="flav" value="0000"></input>
+<input type="hidden" name="sig" value="BCQudoNGuH3P6MJe"></input>
+<input type="hidden" name="cof" value="GALT:#008000;GL:1;DIV:#336699;VLC:663399;AH:center;BGC:FFFFFF;LBGC:336699;ALC:0000FF;LC:0000FF;T:000000;GFNT:0000FF;GIMP:0000FF;FORID:1"></input>
+<input type="hidden" name="hl" value="en"></input>
+</td></tr></table>
+</form>
+<!-- SiteSearch Google -->
+</div>
+</div>
+
+<p><code>gpsd</code> should work with any GPS using an RS232C or USB
+interface that advertises NMEA-0183 compliance.  Here are some notes
+on hardware we have tested.  Hyperlinks lead to technical information.
+The "Works with" column is the last <code>gpsd</code> version with
+which this GPS is known to have been successfully tested; A "*" in
+this column means we have a regression test load for the device that
+is checked before each release. Vendors are listed in alphabetical
+order. There is also a <a href="#timing">table of receivers</a> which
+may be appropriate for timing use.</p>
+
+<p>Please mail your success (or failure) reports to
+<a
+href="http://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
+using the format described <a href="#report_format">further down this
+page</a>. Don't forget to include an annotated log so we can include
+your device in our regression tests.</p>
+
+<p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
+tickles serious firmwares bug on some Bluetooth and USB devices, notably
+those shipped by Holux and including the GPSlim-236.  These bugs may send
+affected GPSes catatonic.  See this <a
+href="upstream-bugs.html#bluetooth">bug warning</a> for a description
+of the problem.</p>
+
+<div>&nbsp;</div>
+
+<!-- hardware-head.html ends here -->

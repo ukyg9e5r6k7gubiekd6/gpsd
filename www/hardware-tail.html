@@ -1,0 +1,152 @@
+<!-- hardware-tail.html begins here -->
+
+<a name="timing"></a>
+<h2>PPS and GPSD:</h2>
+
+<p>Many GPS receivers offer a 1PPS (one pulse per second) output that
+  GPSD is capable of passing along to <code>ntpd</code> for use as an
+  extremely accurate clock source.  The "Claimed Accuracy" are taken
+  from manufacturers' data sheets, and have not been independently
+  verified.</p> 
+
+  <p>Where specified, NTP time offsets have been measured by
+  comparison with the NTP time service and reported by
+  <code>gpsd</code>.</p>
+
+<div>&nbsp;</div>
+
+<table border='1'>
+<tr>
+<th>Receiver</th>
+<th>Claimed<br/>Accuracy</th>
+<th>NTP time offset</th>
+<th>Notes</th>
+</tr>
+<tr>
+<td>SigNav TM3-01</td>
+<td align="center">10ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Thunderbolt E</td>
+<td align="center">15ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Resolution-T</td>
+<td align="center">15ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Motorola<br>iLotus<br/>Synergy-GPS M12M</td>
+<td align="center">20ns<br/>6ns corrected</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>NavSync CW25-TIM</td>
+<td align="center">25ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>NavSync CW12-TIM</td>
+<td align="center">30ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Motorola OnCore UT+</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Lassen iQ</td>
+<td align="center">50ns</td>
+<td align="center">0.675sec</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Trimble Copernicus</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>ublox Antaris</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>ublox Antaris4</td>
+<td align="center">50ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>ublox Antaris4T</td>
+<td align="center">50ns<br>15ns compensated</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Novatel SuperStarII</td>
+<td align="center">200ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Thales AC12</td>
+<td align="center">250ns</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Garmin GPS18/USB</td>
+<td align="center">1usec</td>
+<td align="center">0.100sec</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Garmin GPS18/LVC</td>
+<td align="center">1usec</td>
+<td align="center">0.125sec</td>
+<td align="center">At 19200bps; drops to 0.525 at 4800bps</td>
+</tr>
+<tr>
+<td>Rockwell Jupiter</td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>SiRFstar2</td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>SiRFstar3</td>
+<td align="center">1usec</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+</table>
+
+</div>
+
+<hr/>
+<script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+</body>
+</html>
+
+<!--
+Local Variables:
+compile-command: "(scp hardware.html shell.berlios.de:/home/groups/gpsd/htdocs)"
+End:
+-->
