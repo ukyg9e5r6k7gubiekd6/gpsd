@@ -117,8 +117,8 @@ print <<EOF;
 <li>A "GPS mouse" is a standalone sensor in a display-less case designed 
 be used as an outbard peripheral to a computer.</li>
 <li>A "handset" is a standalone GPS with a display and human-usable controls.</li>
-<li>A "car mount" is a hands-free unit with display designed for mounting 
-on a car windshield.</li>
+<li>A "handsfree" is a hands-free unit with display designed for mounting 
+on a car windshield or boat dash.</li>
 <li>A "survey" GPS is packaged for field-survey use.</li> 
 <li>An "OEM module" is an un-cased circuit board with edge connectors.</li>
 <li>"chipset" is a bare chip or chips packaged for surface mount.</li>
@@ -128,7 +128,7 @@ on a car windshield.</li>
 EOF
 
 print $query->radio_group(-name=>'packaging',
-			  -values=>['GPS mouse', 'handset', 'car mount',
+			  -values=>['GPS mouse', 'handset', 'handsfree',
 				'survey', 'OEM module', 'chipset', 'other'],
 			  -default=>"GPS mouse",
 			  -linebreak=>'false');
