@@ -412,7 +412,7 @@ gps-makeregress: gpsd
 rtcm-regress: rtcmdecode
 	@echo "Testing RTCM decoding..."
 	@mkdir -p test
-	@for f in $(srcdir)/test/*.rtcm; do \
+	@for f in $(srcdir)/test/*.rtcm2; do \
 		echo "Testing $${f}..."; \
 		$(srcdir)/rtcmdecode <$${f} >test/test.chk; \
 		diff -ub $${f}.chk test/test.chk; \
@@ -421,7 +421,7 @@ rtcm-regress: rtcmdecode
 
 # Rebuild the RTCM regression tests.
 rtcm-makeregress: rtcmdecode
-	@for f in $(srcdir)/test/*.rtcm; do \
+	@for f in $(srcdir)/test/*.rtcm2; do \
 		$(srcdir)/rtcmdecode < $${f} > $${f}.chk; \
 	done
 
