@@ -149,26 +149,11 @@ protocol, flexible enough to handle all the quantities required, and it
 is actually in use in production reference networks. RT-IGS is also a
 packet-oriented format, rather than a file-oriented format like RINEX.
 
-*** RTCM support.
+*** RTCM3 support.
 
-We have an RTCM packet decoder, and untested scratch code to serve
-RTCM packets to port 2101.  Here's the plan for the rest of it:
-
-1) Inversion needs to be done somewhere in the encoding logic.
-
-2) Wolfgang's decoder-hardening patches.
-
-3) Test productions.  I have one that tests dumping and one that uses   
-   passthrough mode to test that pack() and repack() are inverse.  We
-   should have an undumping torture test.
-
-4) What about rtcm_output_magnavox() anyway?  Should that be made
-   available as an output mode of rtcmdecode and documented?
-
-5) Extend the test framework so we can verify RTCM service.
-
-6) Generate and broadcast RTCM corrections from an attached device?
-   Might not be possible -- appears to need nanosecond timing.
+Previous plans for more RTCM2 support seem to have been overtaken by
+events, e.g. the world moving to RTCM3.  There is an incomplete
+decoder which needs to be finished.
 
 *** Do the research to figure out just what is going on with status bits
 
