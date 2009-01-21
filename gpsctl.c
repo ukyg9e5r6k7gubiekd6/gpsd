@@ -306,17 +306,18 @@ int main(int argc, char **argv)
 		exit(1);
 	    }
 
+	/*@ -mustfreeonly -immediatetrans @*/
 	session.context = &context;
 	gpsd_tty_init(&session);
 	(void)strlcpy(session.gpsdata.gps_device, device, sizeof(session.gpsdata.gps_device));
 	session.device_type = forcetype;
-	gpsd_open(&session);
-	gpsd_set_raw(&session);
-	session.device_type->speed_switcher(&session, 4800);
+	(void)gpsd_open(&session);
+	(void)gpsd_set_raw(&session);
+	(void)session.device_type->speed_switcher(&session, 4800);
 	(void)tcdrain(session.gpsdata.gps_fd);
 	for(i = 0; i < (int)(sizeof(speeds) / sizeof(speeds[0])); i++) {
-	    gpsd_set_speed(&session, speeds[i], 'N', 1);
-	    session.device_type->speed_switcher(&session, 4800);
+	    (void)gpsd_set_speed(&session, speeds[i], 'N', 1);
+	    (void)session.device_type->speed_switcher(&session, 4800);
 	    (void)tcdrain(session.gpsdata.gps_fd);
 	}
 	gpsd_set_speed(&session, 4800, 'N', 1);
@@ -325,10 +326,12 @@ int main(int argc, char **argv)
 		session.device_type->mode_switcher(&session, MODE_NMEA);
 	gpsd_wrap(&session);
 	exit(0);
+	/*@ +mustfreeonly +immediatetrans @*/
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_context_t	context;	/* start it zeroed */
 	static struct gps_device_t	session;	/* zero this too */
+	/*@ -mustfreeonly -immediatetrans @*/
 	session.context = &context;	/* in case gps_init isn't called */
 
 	/*
@@ -401,6 +404,7 @@ int main(int argc, char **argv)
 
 	/* now perform the actual control function */
 	status = 0;
+	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
 	    if (session.device_type->mode_switcher == NULL) {
 		(void)fprintf(stderr, 
@@ -455,6 +459,7 @@ int main(int argc, char **argv)
 	     * assumed by the driver interface.
 	     */
 	    extern struct gps_type_t ubx_binary;
+	    /*@ -usedef @*/
 	    if (session.device_type == &ubx_binary) {
 		if (!ubx_write(session.gpsdata.gps_fd,
 			       (unsigned)cooked[0], (unsigned)cooked[1],
@@ -465,6 +470,7 @@ int main(int argc, char **argv)
 		}
       
 	    } 
+	    /*@ +usedef @*/
 	    else if (session.device_type->control_send == NULL) {
 		(void)fprintf(stderr, 
 			      "gpsctl: %s devices have no control sender.\n",
@@ -491,5 +497,7 @@ int main(int argc, char **argv)
 	    gpsd_wrap(&session);
 	}
 	exit(status);
+	/*@ +nullderef @*/
+	/*@ +mustfreeonly +immediatetrans @*/
     }
 }

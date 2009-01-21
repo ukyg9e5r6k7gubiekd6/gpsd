@@ -450,7 +450,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf, ssize_t len)
 	    chunklen = strlen(chunk);
 	    chunkend = chunk + chunklen;
 	} else
-	    chunklen = chunkend - chunk + 1;
+	    chunklen = (size_t)(chunkend - chunk + 1);
 
 	if (debuglevel >= 3) {
 	    char *cp, chunk2[MAX_PACKET_LENGTH*3];
@@ -1297,7 +1297,7 @@ static void handle_control(int sfd, char *buf)
 	    if ((chp = find_device(stash)) != NULL) {
 		gpsd_report(LOG_INF,"<= control(%d): writing fromhex(%s) to %s\n", sfd, eq, stash);
 		/* NOTE: this destroys the original buffer contents */
-		len = gpsd_hexpack(eq, eq, len);
+		len = (size_t)gpsd_hexpack(eq, eq, len);
 		ignore_return(write(chp->gpsdata.gps_fd, eq, len));
 		ignore_return(write(sfd, "OK\n", 3));
 	    } else {

@@ -825,7 +825,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	p2_snr = getub(buf, n+10);
 	dgps_age = getleuw(buf, n+11);
 	hw_channel = getub(buf, n+13);
-	s = 0;
+	s = (unsigned char)0;
 	/*@ -predboolothers +charint @*/
 	/* NOTE - In theory, I think one would check for hw channel number to
 	   see if one is dealing with a GPS or other satellite, but the
@@ -836,7 +836,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    session->gpsdata.PRN[i] = (int)prn;
 	    session->gpsdata.elevation[i] = (int)ele;
 	    session->gpsdata.azimuth[i] = (int)azm;
-	    s = session->gpsdata.ss[i++] = (p2_snr ? p2_snr : ca_snr) / 4;
+	    /*@i1@*/s = session->gpsdata.ss[i++] = (p2_snr ? p2_snr : ca_snr) / 4;
 	}
 	gpsd_report(LOG_IO,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "

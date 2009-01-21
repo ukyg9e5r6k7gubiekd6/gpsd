@@ -60,7 +60,7 @@ int gpsd_hexpack(char *src, char *dst, size_t len){
     if ((l < 1) || ((size_t)l > len))
 	return -1;
 
-    bzero(dst, len);
+    bzero(dst, (int)len);
     for (i = 0; i < l; i++)
 	if ((k = hex2bin(src+i*2)) != -1)
 	    dst[i] = (char)(k & 0xff);
