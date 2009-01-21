@@ -65,9 +65,12 @@ support for it more reliable.</p>
 <hr/>
 <h2>Contact information</h2>
 
-<p><em style='color: #ff0000;'>Important!</em> We need a valid email
+<p><em style='color: #ff0000;'>Important!</em> We prefer a valid email
 address for you in case we need to ask you followup questions about
-the device.  We won't give your address to anyone.
+the device.  While we won't use your address for anything other than
+asking you questions about your receiver, and maybe asking you to test
+specific changes, this gps report will be sent to the gpsd-dev list
+which is publicly archived.
 <br/>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
 
 EOF
@@ -258,12 +261,13 @@ print <<EOF;
 <p><em style='color: #ff0000;'>Important!</em> We need a sample of the
 output from your GPS.  We'll use this for mechanical regression testing,
 which is your best guarantee that support for your device won't get
-broken in a future release.</p>
+broken in a future release. Please be advised that these logs will be
+sent to a publicly archived mailing list, and will be available in the
+public SVN repository.</p>
 
-<p>All SiRF-based and almost all NMEA GPSes will simply start throwing
-data to your port immediately when they're plugged in. You should
-normally be able to capture this output to a file with the
-<code>gpscat</code> utility.</p>
+<p>Almost all GPS receivers will simply start throwing data to your port
+immediately when they're plugged in. You should normally be able to capture
+this output to a file with the <code>gpscat</code> utility.</p>
 
 <p>There will be some unusual cases in which this isn't possible,
 because the device needs some kind of activation sequence written to
