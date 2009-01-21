@@ -312,9 +312,12 @@ int main(int argc, char **argv)
 	session.device_type = forcetype;
 	gpsd_open(&session);
 	gpsd_set_raw(&session);
+	session.device_type->speed_switcher(&session, 4800);
+	(void)tcdrain(session.gpsdata.gps_fd);
 	for(i = 0; i < (int)(sizeof(speeds) / sizeof(speeds[0])); i++) {
 	    gpsd_set_speed(&session, speeds[i], 'N', 1);
 	    session.device_type->speed_switcher(&session, 4800);
+	    (void)tcdrain(session.gpsdata.gps_fd);
 	}
 	gpsd_set_speed(&session, 4800, 'N', 1);
 	for (i = 0; i < 3; i++)
