@@ -24,7 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <math.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -958,7 +960,7 @@ help_cb(Widget widget UNUSED, XtPointer client_data, XtPointer call_data UNUSED)
 		XtUnmanageChild(XmMessageBoxGetChild(about,
 		    XmDIALOG_HELP_BUTTON));
 	}
-	/*@ +usedef +immediatetrans +onlytrans +mustfreefresh +type -charint +ptrcompare @*/
+	/*@ +usedef +immediatetrans +onlytrans +type -charint +ptrcompare @*/
 
 	if (item_no == 0)
 		dialog = &help;
@@ -966,7 +968,8 @@ help_cb(Widget widget UNUSED, XtPointer client_data, XtPointer call_data UNUSED)
 		dialog = &about;
 
 	XtManageChild(*dialog);
-	/*@i1@*/XtPopup(XtParent(*dialog), XtGrabNone);
+	XtPopup(XtParent(*dialog), XtGrabNone);
+	/*@ +mustfreefresh @*/
 }
 
 /*@ -mustfreefresh @*/

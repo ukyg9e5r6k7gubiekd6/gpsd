@@ -676,7 +676,9 @@ static void dumpline(struct gps_data_t *ud UNUSED, char *buf,
     puts(buf);
 }
 
-#include <getopt.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 
 int main(int argc, char *argv[])
 {

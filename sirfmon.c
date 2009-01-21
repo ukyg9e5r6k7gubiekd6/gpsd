@@ -29,7 +29,9 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <assert.h>
 #include <signal.h>
 #include <setjmp.h>
@@ -455,13 +457,15 @@ static void decode_sirf(unsigned char buf[], int len)
 	(void)touchwin(mid27win);
 	display(mid27win, 1, 14, "                                                                                     ");
 	display(mid27win, 1, 14, "%s", dgpsvec[(int)getub(buf, 1)]);
+	/*@ -type @*/
 	for (i = j = 0; i < 12; i++) {
 	    (void)touchwin(mid27win);
-	    if (/*@i1@*/getub(buf, 16+3*i) != '\0') {
+	    if (getub(buf, 16+3*i) != '\0') {
 		(void)wprintw(mid27win, "  %d=%d", getub(buf, 16+3*i), getbesw(buf, 16+3*i+1));
 		j++;
 	    }
 	}
+	/*@ +type @*/
 	display(mid27win, 1, 44, "%d", j);
 	(void)wprintw(debugwin, "DST 0x1b=");
 	break;
@@ -1353,7 +1357,7 @@ int main (int argc, char **argv)
 		len = 0;
 		while (*p != '\0')
 		{
-		    /*@i1@*/(void)sscanf(p,"%x",&v);
+		    (void)sscanf(p,"%x",&v);
 		    putbyte(buf, len,v);
 		    len++;
 		    while (*p != '\0' && !isspace(*p))

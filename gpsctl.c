@@ -3,11 +3,12 @@
  * gpsctl.c -- tweak the control settings on a GPS
  */
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
-#include <getopt.h>
+#ifndef S_SPLINT_S
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>

@@ -26,10 +26,10 @@
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
+#include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <errno.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -52,11 +52,12 @@ static char serbuf[255];
 /* Daemonize me. */
 static void daemonize(void) {
   int i;
+  pid_t pid;
 
   /* Run as my child. */
-  i=fork();
-  if (i<0) exit(1); /* fork error */
-  if (i>0) exit(0); /* parent exits */
+  pid=fork();
+  if (pid<0) exit(1); /* fork error */
+  if (pid>0) exit(0); /* parent exits */
 
   /* Obtain a new process group. */
   (void)setsid();

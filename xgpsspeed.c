@@ -4,7 +4,9 @@
  */
 #include <sys/types.h>
 #include <stdlib.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdio.h>
 #include <math.h>
 #include <X11/Intrinsic.h>

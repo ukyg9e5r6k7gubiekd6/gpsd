@@ -63,7 +63,6 @@
  * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
  */
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "gpsd_config.h"
