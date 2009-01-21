@@ -143,19 +143,32 @@ reports frequently have values that are wrong or nonsense.</li>
 <li><img src="bomb.png"> marks devices which are <b>Broken</b>;
 gpsd frequently fails to recognize the device at all.</li>
 
-<li><img src="discontinued.png"/> marks devices that have been
-discontinued by their manufacturers.</li>
+<li><img src="noconfigure.png"/> marks devices that needed the
+<tt>gpsd -b</tt> option when tested. Usually these are Bluetooth
+devices with defective firmware that does not handle baud-rate changes
+properly.  Some poorly-designed USB devices choke if they are fed too
+many probe strings; these may wortk better with recent versions of
+<tt>gpsd</tt>, which interleaves probe writes with the first few 
+packet reads.</li>
 
 <li><img src="regression.png"/> marks devices for which we have a
 regression-test load. These are checked on every release.</li>
+
+<li><img src="discontinued.png"/> marks devices that have been
+discontinued by their manufacturers.</li>
 </ul></p>
 
-<p>Note that in most cases, poor ratings reflect problems not in
-<tt>gpsd</tt> but rather in the device design and firmware.</p>
+<p>Note that in most cases (including the <img src="noconfigure.png"/>
+bug), poor ratings reflect problems not in <tt>gpsd</tt> but rather in
+device design and firmware so badly botched that <tt>gpsd</tt> cannot
+compensate.</p>
 
 <!-- Note: The CGI lives offsite because Berlios blocks outbound mail --> 
-<p>Please help us extend this table with new devices by filling out 
-<a href="https://www.mainframe.cx/cgi-bin/gps_report.cgi">this form</a>.</p>
+<p>This table is generated from a capability database in the
+<code>gpsd</code> source tree. Please help us enrich the database with
+new devices by filling out <a
+href="https://www.mainframe.cx/cgi-bin/gps_report.cgi">this
+form</a>.</p>
 
 <div>&nbsp;</div>
 

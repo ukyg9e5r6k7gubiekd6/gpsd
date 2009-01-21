@@ -33,7 +33,7 @@ if (hasNeededElements($query) && $query->param("action") eq "Send Report"){
 	print M "Remote: ${ENV{'REMOTE_ADDR'}}:${ENV{'REMOTE_PORT'}}\n\n";
 	printf M ("[%s]\n", $query->param('model'));
 	foreach $var ( sort qw(submitter vendor packaging techdoc chipset
-                        firmware nmea interface tested rating btglitch notes 
+                        firmware nmea interface tested rating noconfigure notes 
                         location date interval leader sample_notes)){
 		$val = $query->param($var);
 		printf M ("\t%s = %s\n", $var, $val) if (defined($val) && $val);
@@ -233,7 +233,7 @@ print $query->radio_group(-name=>'rating',
 			  -linebreak=>'true');
 
 print "Does the device break if probed or speed switched? " .
-	$query->checkbox_group(-name=>'btglitch',
+	$query->checkbox_group(-name=>'noconfigure',
 			     -values=>['yes'],
 			     -defaults=>[]);
 
@@ -429,10 +429,10 @@ if ($query->param("rating")) {
 } else {
     print "No GPSD compatiblity specified.<br/>\n";
 }
-if ($query->param("btglitch")) {
-    print "Device needs the 'bluetooth hack'<br>\n";
+if ($query->param("noconfigure")) {
+    print "Device can be sent catatonic by baud-rate changes<br>\n";
 } else {
-    print "Device doesn't need the 'bluetooth hack'<br>\n";
+    print "Device handles baud-rate changes correctly<br>\n";
 }
 
 print "</td><td align='center'>";

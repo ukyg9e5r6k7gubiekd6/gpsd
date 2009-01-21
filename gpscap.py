@@ -109,6 +109,8 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                         testfield += "<img title='Have regression test' src='regression.png'>"
                     else:
                         testfield += tested
+                if self.has_option(dev, "noconfigure"):
+                    testfield += "<img title='Requires -b option' src='noconfigure.png'>"
                 if self.get(dev, "status") == "excellent":
                     testfield += "<img src='star.png'><img src='star.png'><img src='star.png'><img src='star.png'>"
                 elif self.get(dev, "status") == "good":
