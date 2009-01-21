@@ -114,15 +114,6 @@ GPSD_UNITS environment variable and chooses its UI mode depending on
 whether or not it's running under X.  There is controversy about this 
 proposal on the dev list.
 
-*** send/expect for the NMEA driver initializer
-
-We've had one report of a GPS, the Garmin GPS-10, which gpsd puts in a 
-bad state because the device chokes on having all of our NMEA probe strings
-shoved at it without having time to respond.  A simple send-expect
-function (ship given string, wait until specified reply arrives or time
-out) would solve this problem and might help avoid problems with other
-GPSes we haven't encountered yet.
-
 *** SiRF firmware uploader
 
 Chris Kuethe has shipped a 0.0 pre-alpha version.  It is not yet 
