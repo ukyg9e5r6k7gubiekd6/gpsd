@@ -22,23 +22,17 @@
   A client that passes gpsd data to lcdproc, turning your car computer
   into a very expensive feature-free GPS receiver ;^).  Currently
   assumes a 4x40 LCD and writes data formatted to fit that size
-  screen.  Plans to later support 2x40, 2x20, and maybe even 2x16 (if
-  I can squeeze the output down that much).  Also displays 6-character
-  Maidenhead grid square output, for the hams among us.
+  screen.  Also displays 4- or 6-character Maidenhead grid square
+  output for the hams among us.
 
   This program assumes that LCDd (lcdproc) is running locally on the
-  default (13666) port.  An option will be added later (in my copious
-  free time) to talk to a remote LCDd on an arbitrary port.  For now,
-  the #defines (LCDDHOST and LCDDPORT) can be changed, and the code
-  recompiled if something other than the default port on localhost is
-  required.
+  default (13666) port.  The #defines LCDDHOST and LCDDPORT can be
+  changed to talk to a different host and TCP port.
 */
 
 #define LCDDHOST "localhost"
 #define LCDDPORT 13666
 
-/* Not tested. */
-#undef CPUTEMP 1
 #define CLIMB 3
 
 #include <stdio.h>
@@ -72,6 +66,13 @@
 #  define UNUSED
 #endif
 
+/* Prototypes. */
+void latlon2maidenhead(char *st,float n,float e);
+static void daemonize(void);
+ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
+ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
+int send_lcd(char *buf);
+
 static struct gps_data_t *gpsdata;
 static float altfactor = METERS_TO_FEET;
 static float speedfactor = MPS_TO_MPH;
@@ -84,47 +85,6 @@ double avgclimb, climb[CLIMB];
 
 /* Global socket descriptor for LCDd. */
 int sd;
-
-#ifdef CPUTEMP
-/* Get the CPU temp from ACPI. */
-int cputemp()
-{
-  int res, file, from=0, to=0, len, i, temp;
-  char tempstring[255];
-  char numstring[255];
-
-  /* Open the input file. */
-  if((file=fopen("/proc/acpi/thermal_zone/THRM/temperature","r"))==NULL) {
-    return(0);
-  }
-
-  /* Grab the data. */
-  if((res=fgets(tempstring,255,file))==EOF) {
-    return(0);
-  }
-
-  /* Close the file. */
-  fclose(file);
-
-  /* How long is the string? */
-  len=strlen(tempstring);
-  if(len>255) len=255;
-
-  /* Copy the numeric digits out and terminate the string. */
-  for(i=0;i<len;i++) {
-    if(isdigit(tempstring[from++])) {
-      numstring[to++]=tempstring[from-1];
-    }
-  }
-  numstring[to]=(char)0;
-
-  /* Convert the string to a number and convert from C to F. */
-  temp=((atoi(numstring)*9)/5)+32;
-
-  /* Return the result. */
-  return(temp);
-}
-#endif
 
 /* Convert lat/lon to Maidenhead.  Lifted from QGrid -
    http://users.pandora.be/on4qz/qgrid/ */
@@ -156,7 +116,7 @@ void latlon2maidenhead(char *st,float n,float e)
 
 /* Daemonize me. */
 static void daemonize(void) {
-  int i;
+  int i, ignore;
 
   /* Run as my child. */
   i=fork();
@@ -172,19 +132,19 @@ static void daemonize(void) {
 
   /* Reopen STDIN, STDOUT, STDERR to /dev/null. */
   i=open("/dev/null",O_RDWR); /* STDIN */
-  dup(i); /* STDOUT */
-  dup(i); /* STDERR */
+  ignore=dup(i); /* STDOUT */
+  ignore=dup(i); /* STDERR */
 
   /* Know thy mask. */
   umask(027);
 
-  /* Run from a known spot. */
-  chdir("/");
+  /* Run from a known location. */
+  ignore=chdir("/");
 
   /* Catch child sig */
   signal(SIGCHLD,SIG_IGN);
 
- /* Ignore tty signals */
+  /* Ignore tty signals */
   signal(SIGTSTP,SIG_IGN);
   signal(SIGTTOU,SIG_IGN);
   signal(SIGTTIN,SIG_IGN);
@@ -202,17 +162,17 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
     if((rc=read(sockd,&c,1))==1) {
       *buffer++=c;
       if(c=='\n')
-	break;
+        break;
     }
     else if(rc==0) {
       if(n==1)
-	return(0);
+        return(0);
       else
-	break;
+        break;
     }
     else {
       if(errno==EINTR)
-	continue;
+        continue;
       return(-1);
     }
   }
@@ -233,9 +193,9 @@ ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
   while(nleft>0) {
     if((nwritten= write(sockd,buffer,nleft))<=0) {
       if(errno==EINTR)
-	nwritten=0;
+        nwritten=0;
       else
-	return(-1);
+        return(-1);
     }
     nleft-=nwritten;
     buffer+=nwritten;
@@ -284,18 +244,15 @@ static void reset_lcd(void) {
   send_lcd("widget_add gpsd two string\n");
   send_lcd("widget_add gpsd three string\n");
   send_lcd("widget_add gpsd four string\n");
-#ifdef CPUTEMP
-  send_lcd("widget_add gpsd five string\n");
-#endif
 }
 
 static enum deg_str_type deg_type = deg_dd;
 
 /* This gets called once for each new sentence. */
 static void update_lcd(struct gps_data_t *gpsdata,
-			 char *message,
-			 size_t len,
-			 int level UNUSED)
+                       char *message,
+                       size_t len,
+                       int level UNUSED)
 {
   char tmpbuf[255];
 #ifdef CLIMB
@@ -343,7 +300,7 @@ static void update_lcd(struct gps_data_t *gpsdata,
     for(n=0;n<CLIMB;n++) avgclimb+=climb[n];
     avgclimb/=CLIMB;
     sprintf(tmpbuf,"widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
-	    (int)(gpsdata->fix.altitude*altfactor), altunits, maidenhead, (int)(avgclimb * METERS_TO_FEET * 60));
+            (int)(gpsdata->fix.altitude*altfactor), altunits, maidenhead, (int)(avgclimb * METERS_TO_FEET * 60));
 #else
     sprintf(tmpbuf,"widget_set gpsd four 1 4 {%.1f %s  %s}\n",
             gpsdata->fix.altitude*altfactor, altunits, maidenhead);
@@ -352,36 +309,30 @@ static void update_lcd(struct gps_data_t *gpsdata,
     sprintf(tmpbuf,"widget_set gpsd four 1 4 {n/a}\n");
   }
   send_lcd(tmpbuf);
-
-#ifdef CPUTEMP
-  sprintf(tmpbuf,"widget_set gpsd five 35 4 {%d}\n",cputemp());
-  send_lcd(tmpbuf);
-#endif
 }
 
 static void usage( char *prog)
 {
   (void)fprintf(stderr,
-		"Usage: %s [-h] [-v] [-V] [-s] [-l {d|m|s}] [-u {i|m|n}] [server[:port:[device]]]\n\n"
-		"  -h          Show this help, then exit\n"
-		"  -v          Show version, then exit\n"
-		"  -V          Show version, then exit\n"
-		"  -s          Sleep for 10 seconds before starting\n"
-		"  -l {d|m|s}  Select lat/lon format\n"
-		"                d = DD.dddddd (default)\n"
-		"                m = DD MM.mmmm'\n"
-		"                s = DD MM' SS.sss\"\n"
-		"  -u {i|m|n}  Select Units\n"
-		"                i = Imperial (default)\n"
-		"                m = Metric'\n"
-		"                n = Nautical\"\n"
+                "Usage: %s [-h] [-v] [-V] [-s] [-l {d|m|s}] [-u {i|m|n}] [server[:port:[device]]]\n\n"
+                "  -h          Show this help, then exit\n"
+                "  -v          Show version, then exit\n"
+                "  -V          Show version, then exit\n"
+                "  -s          Sleep for 10 seconds before starting\n"
+                "  -l {d|m|s}  Select lat/lon format\n"
+                "                d = DD.dddddd (default)\n"
+                "                m = DD MM.mmmm'\n"
+                "                s = DD MM' SS.sss\"\n"
+                "  -u {i|m|n}  Select Units\n"
+                "                i = Imperial (default)\n"
+                "                m = Metric'\n"
+                "                n = Nautical\"\n"
                 , prog);
 
   exit(1);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int option;
   char *arg = NULL, *colon1, *colon2, *device = NULL, *server = NULL, *port = DEFAULT_GPSD_PORT;
   char *err_str = NULL;
@@ -402,55 +353,55 @@ int main(int argc, char *argv[])
   /* Process the options.  Print help if requested. */
   while ((option = getopt(argc, argv, "hvsl:u:")) != -1) {
     switch (option) {
-      case 'v':
-      case 'V':
-        (void)fprintf(stderr, "$Id:$\n");
-        exit(0);
-      case 's':
-        sleep(10);
+    case 'v':
+    case 'V':
+      (void)fprintf(stderr, "$Id:$\n");
+      exit(0);
+    case 's':
+      sleep(10);
+      continue;
+    case 'l':
+      switch ( optarg[0] ) {
+      case 'd':
+        deg_type = deg_dd;
         continue;
-      case 'l':
-        switch ( optarg[0] ) {
-          case 'd':
-            deg_type = deg_dd;
-            continue;
-          case 'm':
-            deg_type = deg_ddmm;
-            continue;
-          case 's':
-            deg_type = deg_ddmmss;
-            continue;
-          default:
-            (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-            /*@ -casebreak @*/
-        }
-      case 'u':
-        switch ( optarg[0] ) {
-          case 'i':
-            altfactor = METERS_TO_FEET;
-            altunits = "ft";
-            speedfactor = MPS_TO_MPH;
-            speedunits = "mph";
-            continue;
-          case 'n':
-            altfactor = METERS_TO_FEET;
-            altunits = "ft";
-            speedfactor = MPS_TO_KNOTS;
-            speedunits = "knots";
-            continue;
-          case 'm':
-            altfactor = 1;
-            altunits = "m";
-            speedfactor = MPS_TO_KPH;
-            speedunits = "kph";
-            continue;
-          default:
-            (void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
-            /*@ -casebreak @*/
-        }
-      case 'h': default:
-        usage(argv[0]);
-        break;
+      case 'm':
+        deg_type = deg_ddmm;
+        continue;
+      case 's':
+        deg_type = deg_ddmmss;
+        continue;
+      default:
+        (void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
+        /*@ -casebreak @*/
+      }
+    case 'u':
+      switch ( optarg[0] ) {
+      case 'i':
+        altfactor = METERS_TO_FEET;
+        altunits = "ft";
+        speedfactor = MPS_TO_MPH;
+        speedunits = "mph";
+        continue;
+      case 'n':
+        altfactor = METERS_TO_FEET;
+        altunits = "ft";
+        speedfactor = MPS_TO_KNOTS;
+        speedunits = "knots";
+        continue;
+      case 'm':
+        altfactor = 1;
+        altunits = "m";
+        speedfactor = MPS_TO_KPH;
+        speedunits = "kph";
+        continue;
+      default:
+        (void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
+        /*@ -casebreak @*/
+      }
+    case 'h': default:
+      usage(argv[0]);
+      break;
     }
   }
 
@@ -486,13 +437,13 @@ int main(int argc, char *argv[])
   /*@i@*/gpsdata = gps_open(server, port);
   if (!gpsdata) {
     switch ( errno ) {
-      case NL_NOSERVICE: 	err_str = "can't get service entry"; break;
-      case NL_NOHOST: 	err_str = "can't get host entry"; break;
-      case NL_NOPROTO: 	err_str = "can't get protocol entry"; break;
-      case NL_NOSOCK: 	err_str = "can't create socket"; break;
-      case NL_NOSOCKOPT: 	err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
-      case NL_NOCONNECT: 	err_str = "can't connect to host"; break;
-      default:             	err_str = "Unknown"; break;
+    case NL_NOSERVICE:        err_str = "can't get service entry"; break;
+    case NL_NOHOST:   err_str = "can't get host entry"; break;
+    case NL_NOPROTO:  err_str = "can't get protocol entry"; break;
+    case NL_NOSOCK:   err_str = "can't create socket"; break;
+    case NL_NOSOCKOPT:        err_str = "error SETSOCKOPT SO_REUSEADDR"; break;
+    case NL_NOCONNECT:        err_str = "can't connect to host"; break;
+    default:                  err_str = "Unknown"; break;
     }
     (void)fprintf( stderr,
                    "cgps: no gpsd running or network error: %d, %s\n",

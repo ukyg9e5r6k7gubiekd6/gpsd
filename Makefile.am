@@ -29,7 +29,7 @@ RTCM104PROGS = rtcmdecode
 RTCM104PAGES = rtcmdecode.1
 endif
 
-bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger
+bin_PROGRAMS = $(DBUSPROGS) $(MOTIF_PROGS) $(XAW_PROGS) $(RTCM104PROGS) $(CURSESPROGS) gpsctl gpspipe gpsflash cgpxlogger gpsdlcdd
 sbin_PROGRAMS = gpsd
 check_PROGRAMS = bits_test gpsmm_test packet_test mkgmtime_test geoid_test
 if HAVE_PYTHON
@@ -88,6 +88,12 @@ gpsctl_LDADD = $(LIBM) libgps.la -lm $(LIBPTHREAD)
 #
 gpspipe_SOURCES = gpspipe.c
 gpspipe_LDADD = $(DBUS_LIBS) $(LIBM) libgps.la -lm
+
+#
+# Build gpsdlcdd
+#
+gpsdlcdd_SOURCES = gpsdlcdd.c
+gpsdlcdd_LDADD = $(LIBM) libgps.la -lm
 
 #
 # Build sirfmon
