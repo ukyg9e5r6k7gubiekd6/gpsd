@@ -444,7 +444,25 @@ int main(int argc, char **argv)
 	}
 	/*@ -compdef @*/
 	if (control) {
-	    if (session.device_type->control_send == NULL) {
+	    /* 
+	     * First, handle exceptional cases.  These are GPS chips
+	     * like the Zodiac and UBX in which the packet payload is 
+	     * not contiguous,with class or type fields before the data
+	     * length.  This means they don't fit well in the model 
+	     * assumed by the driver interface.
+	     */
+	    extern struct gps_type_t ubx_binary;
+	    if (session.device_type == &ubx_binary) {
+		if (!ubx_write(session.gpsdata.gps_fd,
+			       (unsigned)cooked[0], (unsigned)cooked[1],
+			       (unsigned char *)cooked + 2, 
+			       cookend - cooked - 2)) {
+		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
+		    status = 1;
+		}
+      
+	    } 
+	    else if (session.device_type->control_send == NULL) {
 		(void)fprintf(stderr, 
 			      "gpsctl: %s devices have no control sender.\n",
 			      session.device_type->type_name);
