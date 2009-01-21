@@ -1,7 +1,9 @@
 /* $Id$ */
 /* ntrip.c -- gather and dispatch DGNSS data from Ntrip broadcasters */
 #include <sys/types.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>

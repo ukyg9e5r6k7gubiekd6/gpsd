@@ -1,6 +1,8 @@
 /* $Id$ */
 #include <sys/types.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

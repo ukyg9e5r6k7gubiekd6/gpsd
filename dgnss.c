@@ -2,7 +2,9 @@
 /* dgnss.c -- common interface to a number of Differential GNSS services */
 
 #include <sys/types.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>

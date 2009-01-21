@@ -1,7 +1,9 @@
 /* $Id$ */
 /* dgpsip.c -- gather and dispatch DGPS data from DGPSIP servers */
 #include <sys/types.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>

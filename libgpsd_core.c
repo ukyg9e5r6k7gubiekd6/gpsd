@@ -2,7 +2,9 @@
 /* libgpsd_core.c -- direct access to GPSes on serial or USB devices. */
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>
