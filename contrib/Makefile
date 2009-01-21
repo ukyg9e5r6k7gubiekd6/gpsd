@@ -3,8 +3,7 @@
 # won't get used on a daily basis, but someone might find them useful for
 # tinkering with their gear.
 
-PROGS=	ashctl binlog binreplay garreset lla2ecef \
-	motosend nmeasend sirfctl ubxsend
+PROGS=	ashctl binlog binreplay garreset lla2ecef motosend sirfctl
 
 ADDOBJS=../strl.o
 
@@ -28,14 +27,8 @@ lla2ecef: lla2ecef.c
 motosend: motosend.c
 	$(CC) $(CFLAGS) $(ADDOBJS) -o motosend motosend.c
 
-nmeasend: nmeasend.c
-	$(CC) $(CFLAGS) $(ADDOBJS) -o nmeasend nmeasend.c
-
 sirfctl: sirfctl.c
 	$(CC) $(CFLAGS) $(ADDOBJS) -o sirfctl sirfctl.c
-
-ubxsend: ubxsend.c
-	$(CC) $(CFLAGS) $(ADDOBJS) -o ubxsend ubxsend.c
 
 clean:
 	rm -f $(PROGS) *.o *.core
