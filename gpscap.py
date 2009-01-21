@@ -55,6 +55,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 
     def HTMLDump(self, ofp):
         thead = """<table border='1' style='font-size:small;' bgcolor='#CCCCCC'>
+<caption>Listing %s devices from %s vendors</caption>
 <tr>
 <th>Name</th>
 <th>Packaging</th>
@@ -62,11 +63,11 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 <th>Interface</th>
 <th>Tested with</th>
 <th>NMEA version</th>
-<th width='50%'>Notes</th>
+<th width='50%%'>Notes</th>
 </tr>
 """
         vhead = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
-        ofp.write(thead)
+        ofp.write(thead % (len(self.devices), len(self.vendors)))
         for vendor in self.vendors:
             ofp.write(vhead % (self.get(vendor, "vendor_site"), vendor))
             relevant = []
