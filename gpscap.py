@@ -82,7 +82,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     rowcolor = "LightYellow"
                 elif self.get(dev, "packaging") == "handset":
                     rowcolor = "Cyan"
-                elif self.get(dev, "packaging") == "car mount":
+                elif self.get(dev, "packaging") == "hansdfree":
                     rowcolor = "DarkCyan"
 
                 ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
