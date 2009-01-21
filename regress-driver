@@ -47,7 +47,7 @@ case $mode in
 	    fi
 	    total=`expr $total + 1`;
         done; 
-	$do rm -f $dir/test.chk;
+	$do rm -f $dir/test.chk $dir/test-trunc.chk $dir/diff; 
         if test $errors -gt 0; then
             echo "Regression test FAILED: $errors errors in $total tests total  ($notfound not found).";
             exit 1;
