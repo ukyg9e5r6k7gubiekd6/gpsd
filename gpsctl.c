@@ -450,20 +450,10 @@ int main(int argc, char **argv)
 			      session.device_type->type_name);
 		status = 1;
 	    } else {
-		bool err = false;
-
-		if (!err) {
-		    if (session.device_type->control_send == NULL) {
-			(void)fprintf(stderr, "gpsctl: %s has no control-send mrthod.\n",
-				      session.device_type->type_name);
-			status = 1;
-		    } else {
-			if (session.device_type->control_send(&session, 
-							      cooked, cookend-cooked) == -1) {
-			    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
-			    status = 1;
-			}
-		    }
+		if (session.device_type->control_send(&session, 
+						      cooked, cookend-cooked) == -1) {
+		    (void)fprintf(stderr, "gpsctl: control transmission failed.\n");
+		    status = 1;
 		}
 	    }
 	}
